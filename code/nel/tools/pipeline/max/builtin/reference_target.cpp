@@ -60,7 +60,7 @@ const TSClassId CReferenceTarget::SuperClassId = 0x00000200;
 const CReferenceTargetClassDesc ReferenceTargetClassDesc(&DllPluginDescBuiltin);
 const CReferenceTargetSuperClassDesc ReferenceTargetSuperClassDesc(&ReferenceTargetClassDesc);
 
-void CReferenceTarget::parse(uint16 version)
+void CReferenceTarget::parse(uint16 version, uint filter)
 {
 	CReferenceMaker::parse(version);
 }
@@ -70,7 +70,7 @@ void CReferenceTarget::clean()
 	CReferenceMaker::clean();
 }
 
-void CReferenceTarget::build(uint16 version)
+void CReferenceTarget::build(uint16 version, uint filter)
 {
 	CReferenceMaker::build(version);
 }

@@ -63,7 +63,7 @@ const NLMISC::CClassId CNodeImpl::ClassId = NLMISC::CClassId(0x00000001, 0x00000
 const TSClassId CNodeImpl::SuperClassId = INode::SuperClassId;
 const CNodeImplClassDesc NodeImplClassDesc(&DllPluginDescBuiltin);
 
-void CNodeImpl::parse(uint16 version)
+void CNodeImpl::parse(uint16 version, uint filter)
 {
 	INode::parse(version);
 	if (!m_ChunksOwnsPointers)
@@ -87,7 +87,7 @@ void CNodeImpl::clean()
 	INode::clean();
 }
 
-void CNodeImpl::build(uint16 version)
+void CNodeImpl::build(uint16 version, uint filter)
 {
 	INode::build(version);
 

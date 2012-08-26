@@ -65,7 +65,7 @@ const TSClassId CAnimatable::SuperClassId = 0x77a60fbd; /* Not official, please 
 const CAnimatableClassDesc AnimatableClassDesc(&DllPluginDescBuiltin);
 const CAnimatableSuperClassDesc AnimatableSuperClassDesc(&AnimatableClassDesc);
 
-void CAnimatable::parse(uint16 version)
+void CAnimatable::parse(uint16 version, uint filter)
 {
 	CSceneClass::parse(version);
 	if (!m_ChunksOwnsPointers)
@@ -83,7 +83,7 @@ void CAnimatable::clean()
 	}
 }
 
-void CAnimatable::build(uint16 version)
+void CAnimatable::build(uint16 version, uint filter)
 {
 	CSceneClass::build(version);
 	if (m_AppData)

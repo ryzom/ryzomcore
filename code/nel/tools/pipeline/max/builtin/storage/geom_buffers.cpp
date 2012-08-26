@@ -230,7 +230,7 @@ void CGeomBuffers::toString(std::ostream &ostream, const std::string &pad) const
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CGeomBuffers::parse(uint16 version)
+void CGeomBuffers::parse(uint16 version, uint filter)
 {
 #if PMBS_GEOM_BUFFERS_PARSE
 	CStorageContainer::parse(version);
@@ -244,7 +244,7 @@ void CGeomBuffers::clean()
 #endif
 }
 
-void CGeomBuffers::build(uint16 version)
+void CGeomBuffers::build(uint16 version, uint filter)
 {
 #if PMBS_GEOM_BUFFERS_PARSE
 	CStorageContainer::build(version);

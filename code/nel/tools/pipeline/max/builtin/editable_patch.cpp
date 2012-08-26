@@ -58,7 +58,7 @@ const NLMISC::CClassId CEditablePatch::ClassId = NLMISC::CClassId(0x00001030, 0x
 const TSClassId CEditablePatch::SuperClassId = CPatchObject::SuperClassId;
 const CEditablePatchClassDesc EditablePatchClassDesc(&DllPluginDescBuiltin);
 
-void CEditablePatch::parse(uint16 version)
+void CEditablePatch::parse(uint16 version, uint filter)
 {
 	CPatchObject::parse(version);
 }
@@ -68,7 +68,7 @@ void CEditablePatch::clean()
 	CPatchObject::clean();
 }
 
-void CEditablePatch::build(uint16 version)
+void CEditablePatch::build(uint16 version, uint filter)
 {
 	CPatchObject::build(version);
 }

@@ -112,11 +112,11 @@ public:
 
 	// virtual
 	// Parse this class with given version and parse level filter
-	virtual void parse(uint16 version);
+	virtual void parse(uint16 version, uint filter = 0);
 	// Clean up built data or duplicate unparsed source data, call after serializing build and after parse
 	virtual void clean();
 	// Build the storage structure needed to store the parsed data back
-	virtual void build(uint16 version);
+	virtual void build(uint16 version, uint filter = 0);
 	// Give ownership of the chunks back to the m_Chunks, must call build first, call instead of clean, reduces the parse level back to 0
 	virtual void disown();
 

@@ -56,9 +56,9 @@ public:
 	// inherited
 	virtual std::string className() const;
 	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version);
+	virtual void parse(uint16 version, uint filter = 0);
 	virtual void clean();
-	virtual void build(uint16 version);
+	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
 
 protected:
@@ -81,9 +81,9 @@ public:
 	// inherited
 	virtual std::string className() const;
 	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
-	virtual void parse(uint16 version);
+	virtual void parse(uint16 version, uint filter = 0);
 	virtual void clean();
-	virtual void build(uint16 version);
+	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
 
 protected:

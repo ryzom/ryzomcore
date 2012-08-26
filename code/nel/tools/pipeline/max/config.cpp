@@ -66,7 +66,7 @@ void CConfig::toString(std::ostream &ostream, const std::string &pad) const
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CConfig::parse(uint16 version)
+void CConfig::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -76,7 +76,7 @@ void CConfig::clean()
 	CStorageContainer::clean();
 }
 
-void CConfig::build(uint16 version)
+void CConfig::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }
@@ -133,7 +133,7 @@ void CConfig20a0::toString(std::ostream &ostream, const std::string &pad) const
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CConfig20a0::parse(uint16 version)
+void CConfig20a0::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -143,7 +143,7 @@ void CConfig20a0::clean()
 	CStorageContainer::clean();
 }
 
-void CConfig20a0::build(uint16 version)
+void CConfig20a0::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }
@@ -198,7 +198,7 @@ void CConfig20a0Entry::toString(std::ostream &ostream, const std::string &pad) c
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CConfig20a0Entry::parse(uint16 version)
+void CConfig20a0Entry::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -208,7 +208,7 @@ void CConfig20a0Entry::clean()
 	CStorageContainer::clean();
 }
 
-void CConfig20a0Entry::build(uint16 version)
+void CConfig20a0Entry::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }
@@ -290,7 +290,7 @@ void CConfigScript::toString(std::ostream &ostream, const std::string &pad) cons
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CConfigScript::parse(uint16 version)
+void CConfigScript::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -300,7 +300,7 @@ void CConfigScript::clean()
 	CStorageContainer::clean();
 }
 
-void CConfigScript::build(uint16 version)
+void CConfigScript::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }
@@ -347,7 +347,7 @@ void CConfigScriptEntry::toString(std::ostream &ostream, const std::string &pad)
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CConfigScriptEntry::parse(uint16 version)
+void CConfigScriptEntry::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -357,7 +357,7 @@ void CConfigScriptEntry::clean()
 	CStorageContainer::clean();
 }
 
-void CConfigScriptEntry::build(uint16 version)
+void CConfigScriptEntry::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }
@@ -445,7 +445,7 @@ void CConfigScriptMetaContainer::toString(std::ostream &ostream, const std::stri
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CConfigScriptMetaContainer::parse(uint16 version)
+void CConfigScriptMetaContainer::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -455,7 +455,7 @@ void CConfigScriptMetaContainer::clean()
 	CStorageContainer::clean();
 }
 
-void CConfigScriptMetaContainer::build(uint16 version)
+void CConfigScriptMetaContainer::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }

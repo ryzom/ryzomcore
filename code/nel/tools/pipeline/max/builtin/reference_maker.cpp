@@ -95,7 +95,7 @@ const TSClassId CReferenceMaker::SuperClassId = 0x00000100;
 const CReferenceMakerClassDesc ReferenceMakerClassDesc(&DllPluginDescBuiltin);
 const CReferenceMakerSuperClassDesc ReferenceMakerSuperClassDesc(&ReferenceMakerClassDesc);
 
-void CReferenceMaker::parse(uint16 version)
+void CReferenceMaker::parse(uint16 version, uint filter)
 {
 	CAnimatable::parse(version);
 	if (!m_ChunksOwnsPointers)
@@ -153,7 +153,7 @@ void CReferenceMaker::clean()
 	CAnimatable::clean(); // Nothing to do here, m_ArchivedChunks is cleaned (deleted) for us!
 }
 
-void CReferenceMaker::build(uint16 version)
+void CReferenceMaker::build(uint16 version, uint filter)
 {
 	CAnimatable::build(version);
 	// TODO: Build contents

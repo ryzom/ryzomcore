@@ -120,7 +120,7 @@ void CClassDirectory3::toString(std::ostream &ostream, const std::string &pad) c
 }
 
 // Parallel to CDllDirectory
-void CClassDirectory3::parse(uint16 version)
+void CClassDirectory3::parse(uint16 version, uint filter)
 {
 	// Ensure not yet parsed
 	nlassert(m_ChunkCache.empty());
@@ -189,7 +189,7 @@ void CClassDirectory3::clean()
 }
 
 // Parallel to CDllDirectory
-void CClassDirectory3::build(uint16 version)
+void CClassDirectory3::build(uint16 version, uint filter)
 {
 	// Ensure parsed
 	nlassert(!m_ChunksOwnsPointers);
@@ -334,7 +334,7 @@ void CClassEntry::toString(std::ostream &ostream, const std::string &pad) const
 	}
 }
 
-void CClassEntry::parse(uint16 version)
+void CClassEntry::parse(uint16 version, uint filter)
 {
 	// CStorageContainer::parse(version);
 	nlassert(m_ChunksOwnsPointers);
@@ -354,7 +354,7 @@ void CClassEntry::clean()
 	// CStorageContainer::clean();
 }
 
-void CClassEntry::build(uint16 version)
+void CClassEntry::build(uint16 version, uint filter)
 {
 	// Nothing to do here!
 	// CStorageContainer::build(version);

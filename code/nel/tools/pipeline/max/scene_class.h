@@ -82,11 +82,11 @@ public:
 	//! \name Inherited functions called through the storage loading and saving system
 	//@{
 	/// Override this to read a chunk from the chunks stream. Call the parent's parse function first. Get the necessary chunks implemented by your class using getChunk. See the getChunk function for further information. In case of failure, call disown. If m_ChunksOwnsPointers is true, the parsing has failed, warnings have already been printed, and nothing should happen. Chunks are already parsed when you get them from getChunk
-	virtual void parse(uint16 version);
+	virtual void parse(uint16 version, uint filter = 0);
 	/// Override this if the chunks you are using are not needed after they have been parsed. You may delete any chunks you own. Call the parent's clean first. You must call clean on any chunks you own if they implement this function
 	virtual void clean();
 	/// Override this to write a chunk to the chunks stream. If you create a new chunk, the creating class owns it, and should delete it when clean is called. You no longer own any created chunks when disown has been called. Use putChunk to add the chunk. Call the parent's build first. The putChunk function calls build on added chunks
-	virtual void build(uint16 version);
+	virtual void build(uint16 version, uint filter = 0);
 	/// Remove any references to chunks that are owned by the inheriting class (those that were acquired using getChunk during parse or created using putChunk during build). You no longer have ownership over these chunks, and should not use them anymore. This function may be called after build to disable any functionality from the loaded storage. Call the parent's disown after disowning your own chunks. Disown is called on the disowned child chunks for you
 	virtual void disown();
 	//@}

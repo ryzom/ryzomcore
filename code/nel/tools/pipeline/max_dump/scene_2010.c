@@ -65,351 +65,351 @@ Entries[0]: (ClassEntry) [2] PARSED {
 		DllIndex: -1
 		ClassId: (0x00000082, 0x00000000)
 		SuperClassId: 130 }
-	Name: ParamBlock2}
+	Name: ParamBlock2 }
 Entries[1]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 0
 		ClassId: (0x5a06293c, 0x30420c1e)
 		SuperClassId: 4448 }
-	Name: ViewportManager}
+	Name: ViewportManager }
 Entries[2]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 1
 		ClassId: (0x218ab459, 0x25dc8980)
 		SuperClassId: 4448 }
-	Name: mental ray: material custom attribute}
+	Name: mental ray: material custom attribute }
 Entries[3]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 2
 		ClassId: (0x5ddb3626, 0x23b708db)
 		SuperClassId: 256 }
-	Name: CustAttribContainer}
+	Name: CustAttribContainer }
 Entries[4]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 3
 		ClassId: (0x00001200, 0x00000000)
 		SuperClassId: 4224 }
-	Name: Texmaps}
+	Name: Texmaps }
 Entries[5]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 3
 		ClassId: (0x00000038, 0x00000000)
 		SuperClassId: 4272 }
-	Name: Blinn}
+	Name: Blinn }
 Entries[6]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00000008, 0x00000000)
 		SuperClassId: 8 }
-	Name: ParamBlock}
+	Name: ParamBlock }
 Entries[7]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 4
 		ClassId: (0x25773211, 0x00000000)
 		SuperClassId: 4368 }
-	Name: Max 2.5 Star}
+	Name: Max 2.5 Star }
 Entries[8]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 3
 		ClassId: (0x00000002, 0x00000000)
 		SuperClassId: 3072 }
-	Name: Standard}
+	Name: Standard }
 Entries[9]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00002007, 0x00000000)
 		SuperClassId: 36867 }
-	Name: Bezier Float}
+	Name: Bezier Float }
 Entries[10]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 5
 		ClassId: (0x00000100, 0x00000000)
 		SuperClassId: 3104 }
-	Name: Placement}
+	Name: Placement }
 Entries[11]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 5
 		ClassId: (0x00000100, 0x00000000)
 		SuperClassId: 3136 }
-	Name: Output}
+	Name: Output }
 Entries[12]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 3
 		ClassId: (0x00000240, 0x00000000)
 		SuperClassId: 3088 }
-	Name: Bitmap}
+	Name: Bitmap }
 Entries[13]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -2
 		ClassId: (0x64c75fec, 0x222b9eb9)
 		SuperClassId: 3072 }
-	Name: NeL Material}
+	Name: NeL Material }
 Entries[14]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00000c80, 0x00000000)
 		SuperClassId: 256 }
-	Name: Material Editor}
+	Name: Material Editor }
 Entries[15]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00003333, 0x00000000)
 		SuperClassId: 256 }
-	Name: MtlBaseLib}
+	Name: MtlBaseLib }
 Entries[16]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 6
 		ClassId: (0x476fa9de, 0x5b918e4e)
 		SuperClassId: 3328 }
-	Name: WaveMaster}
+	Name: WaveMaster }
 Entries[17]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 6
 		ClassId: (0x476fa9de, 0x5b918e4a)
 		SuperClassId: 3328 }
-	Name: ProSound}
+	Name: ProSound }
 Entries[18]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00000002, 0x00000000)
 		SuperClassId: 1 }
-	Name: RootNode}
+	Name: RootNode }
 Entries[19]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00002008, 0x00000000)
 		SuperClassId: 36875 }
-	Name: Bezier Position}
+	Name: Bezier Position }
 Entries[20]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00442313, 0x00000000)
 		SuperClassId: 36876 }
-	Name: TCB Rotation}
+	Name: TCB Rotation }
 Entries[21]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00002010, 0x00000000)
 		SuperClassId: 36877 }
-	Name: Bezier Scale}
+	Name: Bezier Scale }
 Entries[22]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00002005, 0x00000000)
 		SuperClassId: 36872 }
-	Name: Position/Rotation/Scale}
+	Name: Position/Rotation/Scale }
 Entries[23]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x0d9c20ff, 0x00000000)
 		SuperClassId: 36880 }
-	Name: Master Point Controller}
+	Name: Master Point Controller }
 Entries[24]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 7
 		ClassId: (0x1bf8338d, 0x192f6098)
 		SuperClassId: 16 }
-	Name: Editable Poly}
+	Name: Editable Poly }
 Entries[25]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x7e9858fe, 0x1dba1df0)
 		SuperClassId: 4336 }
-	Name: Base Layer}
+	Name: Base Layer }
 Entries[26]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00000001, 0x00000000)
 		SuperClassId: 1 }
-	Name: Node}
+	Name: Node }
 Entries[27]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 8
 		ClassId: (0x77912301, 0x00000000)
 		SuperClassId: 4256 }
-	Name: Area}
+	Name: Area }
 Entries[28]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 9
 		ClassId: (0x00000001, 0x00000000)
 		SuperClassId: 3840 }
-	Name: Default Scanline Renderer}
+	Name: Default Scanline Renderer }
 Entries[29]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x46576167, 0x06546546)
 		SuperClassId: 512 }
-	Name: RenderElementMgr}
+	Name: RenderElementMgr }
 Entries[30]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00002011, 0x00000000)
 		SuperClassId: 36869 }
-	Name: Bezier Color}
+	Name: Bezier Color }
 Entries[31]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0xee448b23, 0x00000000)
 		SuperClassId: 4112 }
-	Name: RenderEnvironment}
+	Name: RenderEnvironment }
 Entries[32]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00008d52, 0x00000000)
 		SuperClassId: 256 }
-	Name: NamedSelSetList}
+	Name: NamedSelSetList }
 Entries[33]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x8d73b8aa, 0x90f2ee71)
 		SuperClassId: 512 }
-	Name: TVNode}
+	Name: TVNode }
 Entries[34]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x4b4b1000, 0x00000000)
 		SuperClassId: 36867 }
-	Name: Float List}
+	Name: Float List }
 Entries[35]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x4b4b1001, 0x00000000)
 		SuperClassId: 36869 }
-	Name: Point3 List}
+	Name: Point3 List }
 Entries[36]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x4b4b1005, 0x00000000)
 		SuperClassId: 36882 }
-	Name: Point4 List}
+	Name: Point4 List }
 Entries[37]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x4b4b1002, 0x00000000)
 		SuperClassId: 36875 }
-	Name: Position List}
+	Name: Position List }
 Entries[38]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x4b4b1003, 0x00000000)
 		SuperClassId: 36876 }
-	Name: Rotation List}
+	Name: Rotation List }
 Entries[39]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x4b4b1004, 0x00000000)
 		SuperClassId: 36877 }
-	Name: Scale List}
+	Name: Scale List }
 Entries[40]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x4b4b1015, 0x00000000)
 		SuperClassId: 36881 }
-	Name: Block Control}
+	Name: Block Control }
 Entries[41]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 11
 		ClassId: (0x1f8c3646, 0x11793bed)
 		SuperClassId: 36867 }
-	Name: Block Manager Wrapper}
+	Name: Block Manager Wrapper }
 Entries[42]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 12
 		ClassId: (0x5a1b661e, 0x7620792b)
 		SuperClassId: 36867 }
-	Name: Propagation Manager Wrapper}
+	Name: Propagation Manager Wrapper }
 Entries[43]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 13
 		ClassId: (0x368d1139, 0xf4044794)
 		SuperClassId: 36867 }
-	Name: Scene Effect Loader}
+	Name: Scene Effect Loader }
 Entries[44]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 14
 		ClassId: (0x294a389c, 0x087906d7)
 		SuperClassId: 256 }
-	Name: Reaction Manager}
+	Name: Reaction Manager }
 Entries[45]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 15
 		ClassId: (0x28250b30, 0x265a2326)
 		SuperClassId: 4448 }
-	Name: ParameterCollectorCA}
+	Name: ParameterCollectorCA }
 Entries[46]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 16
 		ClassId: (0x4a0c66e1, 0x01513165)
 		SuperClassId: 2912 }
-	Name: }
+	Name:  }
 Entries[47]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x0c6f6387, 0x2c1a0a7b)
 		SuperClassId: 36879 }
-	Name: SceneAppData Latch}
+	Name: SceneAppData Latch }
 Entries[48]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 17
 		ClassId: (0x5bf94f11, 0x68c22d6f)
 		SuperClassId: 2912 }
-	Name: BitmapPagerData}
+	Name: BitmapPagerData }
 Entries[49]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 10
 		ClassId: (0x0f4871a5, 0x781f1430)
 		SuperClassId: 36879 }
-	Name: MasterLayerControlManager}
+	Name: MasterLayerControlManager }
 Entries[50]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 18
 		ClassId: (0x57a52b8c, 0x30935afc)
 		SuperClassId: 36879 }
-	Name: Max Mixer Clip}
+	Name: Max Mixer Clip }
 Entries[51]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00000001, 0x00000000)
 		SuperClassId: 4294966784 }
-	Name: Grid Reference}
+	Name: Grid Reference }
 Entries[52]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x17356912, 0x00000000)
 		SuperClassId: 4240 }
-	Name: RenderEffects}
+	Name: RenderEffects }
 Entries[53]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: 9
 		ClassId: (0x00000100, 0x00000000)
 		SuperClassId: 4304 }
-	Name: Shadow Map}
+	Name: Shadow Map }
 Entries[54]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x0d7374fc, 0x51ff028e)
 		SuperClassId: 512 }
-	Name: Layer Manager}
+	Name: Layer Manager }
 Entries[55]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x2cf03595, 0x00000000)
 		SuperClassId: 256 }
-	Name: TrackSetList}
+	Name: TrackSetList }
 Entries[56]: (ClassEntry) [2] PARSED {
 	Header: (ClassEntryHeader) {
 		DllIndex: -1
 		ClassId: (0x00002222, 0x00000000)
 		SuperClassId: 256 }
-	Name: Scene} }
+	Name: Scene } }
 
-DBG caa50940 main.cpp 163 main <Unknown> : BUILD
-DBG caa50940 main.cpp 165 main <Unknown> : DISOWN
-DBG caa50940 main.cpp 167 main <Unknown> : PARSE
-DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
+DBG 1f2ee940 main.cpp 161 main <Unknown> : BUILD
+DBG 1f2ee940 main.cpp 163 main <Unknown> : DISOWN
+DBG 1f2ee940 main.cpp 165 main <Unknown> : PARSE
+DBG 1f2ee940 main.cpp 167 main <Unknown> : CLEAN
 (Scene) [1] {
 0 0x2012: (SceneClassContainer) [452] {
-	0 0x0000: <ptr=0x0000000000d478f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	0 0x0000: <ptr=0x0000000000c1bad0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -434,7 +434,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	1 0x0001: <ptr=0x0000000000d479e0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	1 0x0001: <ptr=0x0000000000c1bbe0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -442,7 +442,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	2 0x0000: <ptr=0x0000000000d47b90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
+	2 0x0000: <ptr=0x0000000000c1bda0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
@@ -600,14 +600,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	3 0x0002: <ptr=0x0000000000d48c80> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
+	3 0x0002: <ptr=0x0000000000c1cee0> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d47b90> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c1bda0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	4 0x0003: <ptr=0x0000000000d49000> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	4 0x0003: <ptr=0x0000000000c1d280> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d479e0> (ViewportManager, (0x5a06293c, 0x30420c1e))
-			1: <ptr=0x0000000000d48c80> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
+			0: <ptr=0x0000000000c1bbe0> (ViewportManager, (0x5a06293c, 0x30420c1e))
+			1: <ptr=0x0000000000c1cee0> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -621,7 +621,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 02 00 00 00
 			Int: 2
 			Float: 2.8026e-45 } }
-	5 0x0004: <ptr=0x0000000000d49450> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	5 0x0004: <ptr=0x0000000000c1d6f0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -659,7 +659,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	6 0x0000: <ptr=0x0000000000d49a60> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	6 0x0000: <ptr=0x0000000000c1dd20> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -716,9 +716,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	7 0x0005: <ptr=0x0000000000d4a340> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	7 0x0005: <ptr=0x0000000000c1e620> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d49a60> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c1dd20> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -733,7 +733,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	8 0x0000: <ptr=0x0000000000d4a7b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	8 0x0000: <ptr=0x0000000000c1eab0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -766,7 +766,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	9 0x0000: <ptr=0x0000000000d4ad50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	9 0x0000: <ptr=0x0000000000c1f070> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -823,7 +823,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	10 0x0000: <ptr=0x0000000000d4b600> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	10 0x0000: <ptr=0x0000000000c1f940> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -876,7 +876,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	11 0x0000: <ptr=0x0000000000d4be20> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	11 0x0000: <ptr=0x0000000000c20180> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -905,7 +905,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	12 0x0000: <ptr=0x0000000000d4c870> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	12 0x0000: <ptr=0x0000000000c20bf0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -926,7 +926,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	13 0x0006: <ptr=0x0000000000d4cc90> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	13 0x0006: <ptr=0x0000000000c21030> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -976,9 +976,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	14 0x0007: <ptr=0x0000000000d4d350> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	14 0x0007: <ptr=0x0000000000c21710> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d4cc90> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c21030> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -991,25 +991,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 0
 				String:
 				Hex: } } }
-	15 0x0008: <ptr=0x0000000000d4d7a0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	15 0x0008: <ptr=0x0000000000c21b80> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d49450> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d4a340> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d4a7b0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d4ad50> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d4b600> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d4be20> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d4c870> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d4d350> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c1d6f0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c1e620> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c1eab0> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c1f070> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c1f940> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c20180> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c20bf0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c21710> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 04 00 00 00
-				Int: 4
-				Float: 5.60519e-45 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 04 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.9. .-. .D.e.f.a.u.l.t. }
@@ -1029,20 +1026,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	16 0x0000: <ptr=0x0000000000d4df70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	16 0x0000: <ptr=0x0000000000c22310> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -1067,9 +1064,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	17 0x0001: <ptr=0x0000000000d4e410> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	17 0x0001: <ptr=0x0000000000c227d0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d4df70> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c22310> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -1077,7 +1074,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	18 0x0000: <ptr=0x0000000000d4e7c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
+	18 0x0000: <ptr=0x0000000000c22ba0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
@@ -1235,14 +1232,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	19 0x0002: <ptr=0x0000000000d4fdb0> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
+	19 0x0002: <ptr=0x0000000000c241b0> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d4e7c0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c22ba0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	20 0x0003: <ptr=0x0000000000d50130> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	20 0x0003: <ptr=0x0000000000c24550> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d4e410> (ViewportManager, (0x5a06293c, 0x30420c1e))
-			1: <ptr=0x0000000000d4fdb0> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
+			0: <ptr=0x0000000000c227d0> (ViewportManager, (0x5a06293c, 0x30420c1e))
+			1: <ptr=0x0000000000c241b0> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -1256,7 +1253,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 02 00 00 00
 			Int: 2
 			Float: 2.8026e-45 } }
-	21 0x0004: <ptr=0x0000000000d50580> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	21 0x0004: <ptr=0x0000000000c249c0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -1294,7 +1291,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	22 0x0000: <ptr=0x0000000000d50b90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	22 0x0000: <ptr=0x0000000000c24ff0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1351,9 +1348,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	23 0x0005: <ptr=0x0000000000d51470> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	23 0x0005: <ptr=0x0000000000c258f0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d50b90> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c24ff0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -1368,7 +1365,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	24 0x0000: <ptr=0x0000000000d518e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	24 0x0000: <ptr=0x0000000000c25d80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1401,7 +1398,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	25 0x0000: <ptr=0x0000000000d51e80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	25 0x0000: <ptr=0x0000000000c26340> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1458,7 +1455,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	26 0x0000: <ptr=0x0000000000d52730> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	26 0x0000: <ptr=0x0000000000c26c10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1511,7 +1508,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	27 0x0000: <ptr=0x0000000000d52f50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	27 0x0000: <ptr=0x0000000000c27450> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1540,7 +1537,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	28 0x0000: <ptr=0x0000000000d539a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	28 0x0000: <ptr=0x0000000000c27ec0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -1561,7 +1558,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	29 0x0006: <ptr=0x0000000000d53dc0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	29 0x0006: <ptr=0x0000000000c28300> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -1611,9 +1608,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	30 0x0007: <ptr=0x0000000000d54480> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	30 0x0007: <ptr=0x0000000000c289e0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d53dc0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c28300> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -1626,25 +1623,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 0
 				String:
 				Hex: } } }
-	31 0x0008: <ptr=0x0000000000d548d0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	31 0x0008: <ptr=0x0000000000c28e50> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d50580> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d51470> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d518e0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d51e80> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d52730> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d52f50> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d539a0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d54480> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c249c0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c258f0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c25d80> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c26340> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c26c10> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c27450> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c27ec0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c289e0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 14 00 00 00
-				Int: 20
-				Float: 2.8026e-44 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 14 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.9. .-. .D.e.f.a.u.l.t. }
@@ -1664,20 +1658,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	32 0x0000: <ptr=0x0000000000d550a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	32 0x0000: <ptr=0x0000000000c295e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....!...
@@ -1702,9 +1696,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	33 0x0001: <ptr=0x0000000000d55540> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	33 0x0001: <ptr=0x0000000000c29aa0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d550a0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c295e0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -1712,7 +1706,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	34 0x0000: <ptr=0x0000000000d558f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
+	34 0x0000: <ptr=0x0000000000c29e70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
@@ -1870,14 +1864,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	35 0x0002: <ptr=0x0000000000d56ee0> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
+	35 0x0002: <ptr=0x0000000000c2b480> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d558f0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c29e70> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	36 0x0003: <ptr=0x0000000000d57260> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	36 0x0003: <ptr=0x0000000000c2b820> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d55540> (ViewportManager, (0x5a06293c, 0x30420c1e))
-			1: <ptr=0x0000000000d56ee0> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
+			0: <ptr=0x0000000000c29aa0> (ViewportManager, (0x5a06293c, 0x30420c1e))
+			1: <ptr=0x0000000000c2b480> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -1891,7 +1885,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 02 00 00 00
 			Int: 2
 			Float: 2.8026e-45 } }
-	37 0x0004: <ptr=0x0000000000d576b0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	37 0x0004: <ptr=0x0000000000c2bc90> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -1929,7 +1923,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	38 0x0000: <ptr=0x0000000000d57cc0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	38 0x0000: <ptr=0x0000000000c2c2c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....'...
@@ -1986,9 +1980,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	39 0x0005: <ptr=0x0000000000d585a0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	39 0x0005: <ptr=0x0000000000c2cbc0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d57cc0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c2c2c0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -2003,7 +1997,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	40 0x0000: <ptr=0x0000000000d58a10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	40 0x0000: <ptr=0x0000000000c2d050> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -2036,7 +2030,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	41 0x0000: <ptr=0x0000000000d58fb0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	41 0x0000: <ptr=0x0000000000c2d610> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -2093,7 +2087,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	42 0x0000: <ptr=0x0000000000d59860> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	42 0x0000: <ptr=0x0000000000c2dee0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -2146,7 +2140,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	43 0x0000: <ptr=0x0000000000d5a080> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	43 0x0000: <ptr=0x0000000000c2e720> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -2175,7 +2169,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	44 0x0000: <ptr=0x0000000000d5aad0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	44 0x0000: <ptr=0x0000000000c2f190> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!..../...
@@ -2196,7 +2190,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	45 0x0006: <ptr=0x0000000000d5aef0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	45 0x0006: <ptr=0x0000000000c2f5d0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -2246,9 +2240,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	46 0x0007: <ptr=0x0000000000d5b5b0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	46 0x0007: <ptr=0x0000000000c2fcb0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d5aef0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c2f5d0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -2261,25 +2255,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 0
 				String:
 				Hex: } } }
-	47 0x0008: <ptr=0x0000000000d5ba00> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	47 0x0008: <ptr=0x0000000000c30120> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d576b0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d585a0> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d58a10> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d58fb0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d59860> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d5a080> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d5aad0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d5b5b0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c2bc90> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c2cbc0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c2d050> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c2d610> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c2dee0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c2e720> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c2f190> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c2fcb0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: $...
-				Hex: 24 00 00 00
-				Int: 36
-				Float: 5.04467e-44 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....$...
+			Hex: 20 10 0a 00 00 00 24 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.9. .-. .D.e.f.a.u.l.t. }
@@ -2299,20 +2290,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	48 0x0000: <ptr=0x0000000000d5c1d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	48 0x0000: <ptr=0x0000000000c308b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....1...
@@ -2337,9 +2328,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	49 0x0001: <ptr=0x0000000000d5c670> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	49 0x0001: <ptr=0x0000000000c30d70> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d5c1d0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c308b0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -2347,9 +2338,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	50 0x0003: <ptr=0x0000000000d5ca20> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	50 0x0003: <ptr=0x0000000000c31140> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d5c670> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c30d70> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -2363,7 +2354,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	51 0x0004: <ptr=0x0000000000d5ce70> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	51 0x0004: <ptr=0x0000000000c315b0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -2401,7 +2392,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	52 0x0000: <ptr=0x0000000000d5d480> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	52 0x0000: <ptr=0x0000000000c31be0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....5...
@@ -2458,9 +2449,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	53 0x0005: <ptr=0x0000000000d5dd60> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	53 0x0005: <ptr=0x0000000000c324e0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d5d480> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c31be0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -2475,7 +2466,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	54 0x0000: <ptr=0x0000000000d5e1d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	54 0x0000: <ptr=0x0000000000c32970> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2508,7 +2499,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	55 0x0000: <ptr=0x0000000000d5e770> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	55 0x0000: <ptr=0x0000000000c32f30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2565,7 +2556,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	56 0x0000: <ptr=0x0000000000d5f020> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	56 0x0000: <ptr=0x0000000000c33800> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2618,7 +2609,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	57 0x0000: <ptr=0x0000000000d5f840> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	57 0x0000: <ptr=0x0000000000c34040> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2647,7 +2638,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	58 0x0000: <ptr=0x0000000000d60290> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	58 0x0000: <ptr=0x0000000000c34ab0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....=...
@@ -2668,7 +2659,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	59 0x0006: <ptr=0x0000000000d606b0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	59 0x0006: <ptr=0x0000000000c34ef0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -2718,9 +2709,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	60 0x0007: <ptr=0x0000000000d60d70> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	60 0x0007: <ptr=0x0000000000c355d0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d606b0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c34ef0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -2732,25 +2723,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	61 0x0008: <ptr=0x0000000000d611e0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	61 0x0008: <ptr=0x0000000000c35a60> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d5ce70> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d5dd60> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d5e1d0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d5e770> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d5f020> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d5f840> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d60290> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d60d70> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c315b0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c324e0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c32970> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c32f30> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c33800> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c34040> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c34ab0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c355d0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: 2...
-				Hex: 32 00 00 00
-				Int: 50
-				Float: 7.00649e-44 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....2...
+			Hex: 20 10 0a 00 00 00 32 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.4. .-. .D.e.f.a.u.l.t. }
@@ -2770,20 +2758,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	62 0x0000: <ptr=0x0000000000d619b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	62 0x0000: <ptr=0x0000000000c361f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....?...
@@ -2808,9 +2796,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	63 0x0001: <ptr=0x0000000000d61e50> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	63 0x0001: <ptr=0x0000000000c366b0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d619b0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c361f0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -2818,9 +2806,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	64 0x0003: <ptr=0x0000000000d62200> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	64 0x0003: <ptr=0x0000000000c36a80> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d61e50> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c366b0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -2834,7 +2822,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	65 0x0004: <ptr=0x0000000000d62650> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	65 0x0004: <ptr=0x0000000000c36ef0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -2872,7 +2860,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	66 0x0000: <ptr=0x0000000000d62c60> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	66 0x0000: <ptr=0x0000000000c37520> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....C...
@@ -2929,9 +2917,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	67 0x0005: <ptr=0x0000000000d63540> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	67 0x0005: <ptr=0x0000000000c37e20> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d62c60> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c37520> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -2946,7 +2934,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	68 0x0000: <ptr=0x0000000000d639b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	68 0x0000: <ptr=0x0000000000c382b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -2979,7 +2967,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	69 0x0000: <ptr=0x0000000000d63f50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	69 0x0000: <ptr=0x0000000000c38870> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -3036,7 +3024,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	70 0x0000: <ptr=0x0000000000d64800> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	70 0x0000: <ptr=0x0000000000c39140> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -3089,7 +3077,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	71 0x0000: <ptr=0x0000000000d65020> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	71 0x0000: <ptr=0x0000000000c39980> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -3118,7 +3106,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	72 0x0000: <ptr=0x0000000000d65a70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	72 0x0000: <ptr=0x0000000000c3a3f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....K...
@@ -3139,7 +3127,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	73 0x0006: <ptr=0x0000000000d65e90> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	73 0x0006: <ptr=0x0000000000c3a830> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -3189,9 +3177,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	74 0x0007: <ptr=0x0000000000d66550> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	74 0x0007: <ptr=0x0000000000c3af10> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d65e90> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c3a830> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -3203,25 +3191,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	75 0x0008: <ptr=0x0000000000d669c0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	75 0x0008: <ptr=0x0000000000c3b3a0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d62650> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d63540> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d639b0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d63f50> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d64800> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d65020> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d65a70> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d66550> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c36ef0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c37e20> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c382b0> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c38870> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c39140> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c39980> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c3a3f0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c3af10> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: @...
-				Hex: 40 00 00 00
-				Int: 64
-				Float: 8.96831e-44 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....@...
+			Hex: 20 10 0a 00 00 00 40 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.5. .-. .D.e.f.a.u.l.t. }
@@ -3241,20 +3226,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	76 0x0000: <ptr=0x0000000000d67190> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	76 0x0000: <ptr=0x0000000000c3bb30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....M...
@@ -3279,9 +3264,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	77 0x0001: <ptr=0x0000000000d67630> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	77 0x0001: <ptr=0x0000000000c3bff0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d67190> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c3bb30> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -3289,9 +3274,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	78 0x0003: <ptr=0x0000000000d679e0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	78 0x0003: <ptr=0x0000000000c3c3c0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d67630> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c3bff0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -3305,7 +3290,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	79 0x0004: <ptr=0x0000000000d67e30> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	79 0x0004: <ptr=0x0000000000c3c830> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -3343,7 +3328,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	80 0x0000: <ptr=0x0000000000d68440> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	80 0x0000: <ptr=0x0000000000c3ce60> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Q...
@@ -3400,9 +3385,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	81 0x0005: <ptr=0x0000000000d68d20> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	81 0x0005: <ptr=0x0000000000c3d760> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d68440> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c3ce60> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -3417,7 +3402,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	82 0x0000: <ptr=0x0000000000d69190> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	82 0x0000: <ptr=0x0000000000c3dbf0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3450,7 +3435,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	83 0x0000: <ptr=0x0000000000d69730> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	83 0x0000: <ptr=0x0000000000c3e1b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3507,7 +3492,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	84 0x0000: <ptr=0x0000000000d69fe0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	84 0x0000: <ptr=0x0000000000c3ea80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3560,7 +3545,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	85 0x0000: <ptr=0x0000000000d6a800> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	85 0x0000: <ptr=0x0000000000c3f2c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3589,7 +3574,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	86 0x0000: <ptr=0x0000000000d6b250> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	86 0x0000: <ptr=0x0000000000c3fd30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Y...
@@ -3610,7 +3595,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	87 0x0006: <ptr=0x0000000000d6b670> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	87 0x0006: <ptr=0x0000000000c40170> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -3660,9 +3645,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	88 0x0007: <ptr=0x0000000000d6bd30> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	88 0x0007: <ptr=0x0000000000c40850> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d6b670> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c40170> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -3674,25 +3659,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	89 0x0008: <ptr=0x0000000000d6c1a0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	89 0x0008: <ptr=0x0000000000c40ce0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d67e30> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d68d20> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d69190> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d69730> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d69fe0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d6a800> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d6b250> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d6bd30> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c3c830> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c3d760> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c3dbf0> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c3e1b0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c3ea80> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c3f2c0> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c3fd30> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c40850> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: N...
-				Hex: 4e 00 00 00
-				Int: 78
-				Float: 1.09301e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....N...
+			Hex: 20 10 0a 00 00 00 4e 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.6. .-. .D.e.f.a.u.l.t. }
@@ -3712,20 +3694,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	90 0x0000: <ptr=0x0000000000d6c970> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	90 0x0000: <ptr=0x0000000000c41470> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....[...
@@ -3750,9 +3732,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ........&.
 			Hex: 01 00 00 00 01 00 00 00 26 03 } }
-	91 0x0001: <ptr=0x0000000000d6ce10> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	91 0x0001: <ptr=0x0000000000c41930> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d6c970> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c41470> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -3760,7 +3742,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	92 0x0000: <ptr=0x0000000000d6d1c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
+	92 0x0000: <ptr=0x0000000000c41d00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
@@ -3918,14 +3900,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ........&.
 			Hex: 01 00 00 00 00 00 00 00 26 03 } }
-	93 0x0002: <ptr=0x0000000000d6e7b0> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
+	93 0x0002: <ptr=0x0000000000c43310> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d6d1c0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c41d00> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	94 0x0003: <ptr=0x0000000000d6eb30> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	94 0x0003: <ptr=0x0000000000c436b0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d6ce10> (ViewportManager, (0x5a06293c, 0x30420c1e))
-			1: <ptr=0x0000000000d6e7b0> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
+			0: <ptr=0x0000000000c41930> (ViewportManager, (0x5a06293c, 0x30420c1e))
+			1: <ptr=0x0000000000c43310> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -3939,7 +3921,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 02 00 00 00
 			Int: 2
 			Float: 2.8026e-45 } }
-	95 0x0009: <ptr=0x0000000000d6ef70> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
+	95 0x0009: <ptr=0x0000000000c43b10> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2501: (StorageRaw) {
 			Size: 4
@@ -3985,7 +3967,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	96 0x0003: <ptr=0x0000000000d6f600> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	96 0x0003: <ptr=0x0000000000c441c0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
 			String: g...
@@ -3998,7 +3980,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	97 0x0006: <ptr=0x0000000000d6f970> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [15] {
+	97 0x0006: <ptr=0x0000000000c44550> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [15] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -4230,7 +4212,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	98 0x000a: <ptr=0x0000000000d712d0> (UVGenSuperClassUnknown: Placement, (0x00000100, 0x00000000), 0x00000c20, Default Materials and Textures (Autodesk)) [6] {
+	98 0x000a: <ptr=0x0000000000c45ed0> (UVGenSuperClassUnknown: Placement, (0x00000100, 0x00000000), 0x00000c20, Default Materials and Textures (Autodesk)) [6] {
 		AppData: (AppData) [1] PARSED {
 			Entries[0]: (AppDataEntry) [2] PARSED {
 				Key: (AppDataEntryKey) {
@@ -4245,7 +4227,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 					Int: 0
 					Float: 0 } } }
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d6f970> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c44550> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x9002: (StorageRaw) {
 			Size: 4
@@ -4283,7 +4265,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	99 0x0000: <ptr=0x0000000000d71b30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [21] {
+	99 0x0000: <ptr=0x0000000000c46750> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [21] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....g...
@@ -4378,7 +4360,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	100 0x0006: <ptr=0x0000000000d729b0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [6] {
+	100 0x0006: <ptr=0x0000000000c475f0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [6] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -4457,9 +4439,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 80 3f
 				Int: 1065353216
 				Float: 1 } } }
-	101 0x000b: <ptr=0x0000000000d73350> (TextureOutputSuperClassUnknown: Output, (0x00000100, 0x00000000), 0x00000c40, Default Materials and Textures (Autodesk)) [1] {
+	101 0x000b: <ptr=0x0000000000c47fb0> (TextureOutputSuperClassUnknown: Output, (0x00000100, 0x00000000), 0x00000c40, Default Materials and Textures (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d729b0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c475f0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0002: (StorageRaw) {
 			Size: 4
@@ -4467,7 +4449,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	102 0x0000: <ptr=0x0000000000d736f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	102 0x0000: <ptr=0x0000000000c48370> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....g...
@@ -4492,21 +4474,18 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	103 0x000c: <ptr=0x0000000000d73b90> (TexmapSuperClassUnknown: Bitmap, (0x00000240, 0x00000000), 0x00000c10, Standard Materials and Textures (Autodesk)) [2] {
+	103 0x000c: <ptr=0x0000000000c48830> (TexmapSuperClassUnknown: Bitmap, (0x00000240, 0x00000000), 0x00000c10, Standard Materials and Textures (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d712d0> (Placement, (0x00000100, 0x00000000))
-			1: <ptr=0x0000000000d71b30> (ParamBlock2, (0x00000082, 0x00000000))
-			2: <ptr=0x0000000000d73350> (Output, (0x00000100, 0x00000000))
-			3: <ptr=0x0000000000d736f0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c45ed0> (Placement, (0x00000100, 0x00000000))
+			1: <ptr=0x0000000000c46750> (ParamBlock2, (0x00000082, 0x00000000))
+			2: <ptr=0x0000000000c47fb0> (Output, (0x00000100, 0x00000000))
+			3: <ptr=0x0000000000c48370> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: `...
-				Hex: 60 00 00 00
-				Int: 96
-				Float: 1.34525e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....`...
+			Hex: 20 10 0a 00 00 00 60 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 12
 				String: M.a.p. .#.0. }
@@ -4526,7 +4505,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } } }
-	104 0x0009: <ptr=0x0000000000d741e0> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
+	104 0x0009: <ptr=0x0000000000c48e40> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2501: (StorageRaw) {
 			Size: 4
@@ -4572,7 +4551,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	105 0x0009: <ptr=0x0000000000d74870> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
+	105 0x0009: <ptr=0x0000000000c494f0> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2501: (StorageRaw) {
 			Size: 4
@@ -4618,7 +4597,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	106 0x0003: <ptr=0x0000000000d74f00> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	106 0x0003: <ptr=0x0000000000c49ba0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
 			String: q...
@@ -4631,7 +4610,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	107 0x0006: <ptr=0x0000000000d75270> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [15] {
+	107 0x0006: <ptr=0x0000000000c49f30> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [15] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -4863,7 +4842,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	108 0x000a: <ptr=0x0000000000d76bd0> (UVGenSuperClassUnknown: Placement, (0x00000100, 0x00000000), 0x00000c20, Default Materials and Textures (Autodesk)) [6] {
+	108 0x000a: <ptr=0x0000000000c4b8b0> (UVGenSuperClassUnknown: Placement, (0x00000100, 0x00000000), 0x00000c20, Default Materials and Textures (Autodesk)) [6] {
 		AppData: (AppData) [1] PARSED {
 			Entries[0]: (AppDataEntry) [2] PARSED {
 				Key: (AppDataEntryKey) {
@@ -4878,7 +4857,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 					Int: 0
 					Float: 0 } } }
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d75270> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c49f30> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x9002: (StorageRaw) {
 			Size: 4
@@ -4916,7 +4895,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	109 0x0000: <ptr=0x0000000000d77430> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [21] {
+	109 0x0000: <ptr=0x0000000000c4c130> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [21] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....q...
@@ -5011,7 +4990,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	110 0x0006: <ptr=0x0000000000d782b0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [6] {
+	110 0x0006: <ptr=0x0000000000c4cfd0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [6] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -5090,9 +5069,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 80 3f
 				Int: 1065353216
 				Float: 1 } } }
-	111 0x000b: <ptr=0x0000000000d78c50> (TextureOutputSuperClassUnknown: Output, (0x00000100, 0x00000000), 0x00000c40, Default Materials and Textures (Autodesk)) [1] {
+	111 0x000b: <ptr=0x0000000000c4d990> (TextureOutputSuperClassUnknown: Output, (0x00000100, 0x00000000), 0x00000c40, Default Materials and Textures (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d782b0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c4cfd0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0002: (StorageRaw) {
 			Size: 4
@@ -5100,7 +5079,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	112 0x0000: <ptr=0x0000000000d78ff0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	112 0x0000: <ptr=0x0000000000c4dd50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....q...
@@ -5125,21 +5104,18 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	113 0x000c: <ptr=0x0000000000d79490> (TexmapSuperClassUnknown: Bitmap, (0x00000240, 0x00000000), 0x00000c10, Standard Materials and Textures (Autodesk)) [2] {
+	113 0x000c: <ptr=0x0000000000c4e210> (TexmapSuperClassUnknown: Bitmap, (0x00000240, 0x00000000), 0x00000c10, Standard Materials and Textures (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d76bd0> (Placement, (0x00000100, 0x00000000))
-			1: <ptr=0x0000000000d77430> (ParamBlock2, (0x00000082, 0x00000000))
-			2: <ptr=0x0000000000d78c50> (Output, (0x00000100, 0x00000000))
-			3: <ptr=0x0000000000d78ff0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c4b8b0> (Placement, (0x00000100, 0x00000000))
+			1: <ptr=0x0000000000c4c130> (ParamBlock2, (0x00000082, 0x00000000))
+			2: <ptr=0x0000000000c4d990> (Output, (0x00000100, 0x00000000))
+			3: <ptr=0x0000000000c4dd50> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: j...
-				Hex: 6a 00 00 00
-				Int: 106
-				Float: 1.48538e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....j...
+			Hex: 20 10 0a 00 00 00 6a 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 12
 				String: M.a.p. .#.1. }
@@ -5159,14 +5135,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } } }
-	114 0x0004: <ptr=0x0000000000d79af0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	114 0x0004: <ptr=0x0000000000c4e830> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		References 0x2035: PARSED {
-			0: <ptr=0x0000000000d6ef70> (Bezier Float, (0x00002007, 0x00000000))
-			1: <ptr=0x0000000000d73b90> (Bitmap, (0x00000240, 0x00000000))
-			2: <ptr=0x0000000000d741e0> (Bezier Float, (0x00002007, 0x00000000))
-			3: <ptr=0x0000000000d73b90> (Bitmap, (0x00000240, 0x00000000))
-			4: <ptr=0x0000000000d74870> (Bezier Float, (0x00002007, 0x00000000))
-			5: <ptr=0x0000000000d79490> (Bitmap, (0x00000240, 0x00000000)) }
+			0: <ptr=0x0000000000c43b10> (Bezier Float, (0x00002007, 0x00000000))
+			1: <ptr=0x0000000000c48830> (Bitmap, (0x00000240, 0x00000000))
+			2: <ptr=0x0000000000c48e40> (Bezier Float, (0x00002007, 0x00000000))
+			3: <ptr=0x0000000000c48830> (Bitmap, (0x00000240, 0x00000000))
+			4: <ptr=0x0000000000c494f0> (Bezier Float, (0x00002007, 0x00000000))
+			5: <ptr=0x0000000000c4e210> (Bitmap, (0x00000240, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -5204,7 +5180,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	115 0x0000: <ptr=0x0000000000d7a120> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	115 0x0000: <ptr=0x0000000000c4ee80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....t...
@@ -5261,9 +5237,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	116 0x0005: <ptr=0x0000000000d7aa00> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	116 0x0005: <ptr=0x0000000000c4f780> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d7a120> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c4ee80> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -5278,7 +5254,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	117 0x0000: <ptr=0x0000000000d7ae70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	117 0x0000: <ptr=0x0000000000c4fc10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -5311,7 +5287,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	118 0x0000: <ptr=0x0000000000d7b410> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	118 0x0000: <ptr=0x0000000000c501d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -5368,7 +5344,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	119 0x0000: <ptr=0x0000000000d7bcc0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	119 0x0000: <ptr=0x0000000000c50aa0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -5421,7 +5397,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	120 0x0000: <ptr=0x0000000000d7c4e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	120 0x0000: <ptr=0x0000000000c512e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -5450,7 +5426,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	121 0x0000: <ptr=0x0000000000d7cf30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	121 0x0000: <ptr=0x0000000000c51d50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....|...
@@ -5471,7 +5447,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	122 0x0006: <ptr=0x0000000000d7d350> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	122 0x0006: <ptr=0x0000000000c52190> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -5521,9 +5497,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	123 0x0007: <ptr=0x0000000000d7da10> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	123 0x0007: <ptr=0x0000000000c52870> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d7d350> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c52190> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -5535,16 +5511,16 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	124 0x0008: <ptr=0x0000000000d7de80> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
+	124 0x0008: <ptr=0x0000000000c52d00> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d79af0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d7aa00> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d7ae70> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d7b410> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d7bcc0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d7c4e0> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d7cf30> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d7da10> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c4e830> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c4f780> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c4fc10> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c501d0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c50aa0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c512e0> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c51d50> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c52870> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
@@ -5580,7 +5556,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	125 0x0000: <ptr=0x0000000000d7e550> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	125 0x0000: <ptr=0x0000000000c533f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5633,7 +5609,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	126 0x0000: <ptr=0x0000000000d7ed90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [40] {
+	126 0x0000: <ptr=0x0000000000c53c50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [40] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5794,10 +5770,10 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	127 0x0000: <ptr=0x0000000000d80320> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [27] {
+	127 0x0000: <ptr=0x0000000000c55200> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [27] {
 		References 0x2035: PARSED {
-			0: <ptr=0x0000000000d73b90> (Bitmap, (0x00000240, 0x00000000))
-			1: <ptr=0x0000000000d79490> (Bitmap, (0x00000240, 0x00000000)) }
+			0: <ptr=0x0000000000c48830> (Bitmap, (0x00000240, 0x00000000))
+			1: <ptr=0x0000000000c4e210> (Bitmap, (0x00000240, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
@@ -5907,7 +5883,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	128 0x0000: <ptr=0x0000000000d812f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
+	128 0x0000: <ptr=0x0000000000c561f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -5996,7 +5972,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	129 0x0000: <ptr=0x0000000000d81f80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
+	129 0x0000: <ptr=0x0000000000c56ea0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -6085,7 +6061,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	130 0x0000: <ptr=0x0000000000d82c10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
+	130 0x0000: <ptr=0x0000000000c57b50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -6174,7 +6150,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	131 0x0000: <ptr=0x0000000000d838a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
+	131 0x0000: <ptr=0x0000000000c58800> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [22] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -6263,7 +6239,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	132 0x0000: <ptr=0x0000000000d84530> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
+	132 0x0000: <ptr=0x0000000000c594b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -6276,7 +6252,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	133 0x0000: <ptr=0x0000000000d84830> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
+	133 0x0000: <ptr=0x0000000000c597d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
 		Orphan[0] 0x0007: (StorageRaw) {
 			Size: 0
 			String:
@@ -6289,50 +6265,47 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	134 0x000d: <ptr=0x0000000000d84b30> (MtlSuperClassUnknown: NeL Material, (0x64c75fec, 0x222b9eb9), 0x00000c00, Script) [6] {
+	134 0x000d: <ptr=0x0000000000c59af0> (MtlSuperClassUnknown: NeL Material, (0x64c75fec, 0x222b9eb9), 0x00000c00, Script) [5] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d7de80> (Standard, (0x00000002, 0x00000000))
-			1: <ptr=0x0000000000d7e550> (ParamBlock2, (0x00000082, 0x00000000))
-			2: <ptr=0x0000000000d7ed90> (ParamBlock2, (0x00000082, 0x00000000))
-			3: <ptr=0x0000000000d80320> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d812f0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d81f80> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d82c10> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d838a0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d84530> (ParamBlock2, (0x00000082, 0x00000000))
-			9: <ptr=0x0000000000d84830> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c52d00> (Standard, (0x00000002, 0x00000000))
+			1: <ptr=0x0000000000c533f0> (ParamBlock2, (0x00000082, 0x00000000))
+			2: <ptr=0x0000000000c53c50> (ParamBlock2, (0x00000082, 0x00000000))
+			3: <ptr=0x0000000000c55200> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c561f0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c56ea0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c57b50> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c58800> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c594b0> (ParamBlock2, (0x00000082, 0x00000000))
+			9: <ptr=0x0000000000c597d0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ^...
-				Hex: 5e 00 00 00
-				Int: 94
-				Float: 1.31722e-43 } }
-		Orphan[1] 0x0010: (StorageRaw) {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....^...
+			Hex: 20 10 0a 00 00 00 5e 00 00 00 }
+		Orphan[0] 0x0010: (StorageRaw) {
 			Size: 8
 			String: ........
 			Hex: 0e 00 00 00 09 00 00 00 }
-		Orphan[2] 0x4001: (StorageRaw) {
+		Orphan[1] 0x4001: (StorageRaw) {
 			Size: 50
 			String: M.T.R.L._.G.E._.A.c.c._.M.i.k.o.t.o.B.a.n.i.e.r.e. }
-		Orphan[3] 0x4003: (StorageRaw) {
+		Orphan[2] 0x4003: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0a 02 00 00
 			Int: 522
 			Float: 7.31478e-43 }
-		Orphan[4] 0x4020: (StorageRaw) {
+		Orphan[3] 0x4020: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 }
-		Orphan[5] 0x4030: (StorageRaw) {
+		Orphan[4] 0x4030: (StorageRaw) {
 			Size: 16
 			String: ...............?
 			Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-	135 0x0000: <ptr=0x0000000000d85130> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	135 0x0000: <ptr=0x0000000000c5a0b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -6357,9 +6330,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	136 0x0001: <ptr=0x0000000000d855d0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	136 0x0001: <ptr=0x0000000000c5a570> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d85130> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c5a0b0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -6367,7 +6340,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	137 0x0000: <ptr=0x0000000000d85980> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
+	137 0x0000: <ptr=0x0000000000c5a940> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [39] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
@@ -6525,14 +6498,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	138 0x0002: <ptr=0x0000000000d86f70> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
+	138 0x0002: <ptr=0x0000000000c5bf50> (CustAttribSuperClassUnknown: mental ray: material custom attribute, (0x218ab459, 0x25dc8980), 0x00001160, mental ray: Material Custom Attributes (Autodesk)) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d85980> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c5a940> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	139 0x0003: <ptr=0x0000000000d872f0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	139 0x0003: <ptr=0x0000000000c5c2f0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d855d0> (ViewportManager, (0x5a06293c, 0x30420c1e))
-			1: <ptr=0x0000000000d86f70> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
+			0: <ptr=0x0000000000c5a570> (ViewportManager, (0x5a06293c, 0x30420c1e))
+			1: <ptr=0x0000000000c5bf50> (mental ray: material custom attribute, (0x218ab459, 0x25dc8980)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -6546,7 +6519,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 02 00 00 00
 			Int: 2
 			Float: 2.8026e-45 } }
-	140 0x0004: <ptr=0x0000000000d87740> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	140 0x0004: <ptr=0x0000000000c5c760> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -6584,7 +6557,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	141 0x0000: <ptr=0x0000000000d87d50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	141 0x0000: <ptr=0x0000000000c5cd90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6641,9 +6614,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	142 0x0005: <ptr=0x0000000000d88630> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	142 0x0005: <ptr=0x0000000000c5d690> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d87d50> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c5cd90> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -6658,7 +6631,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	143 0x0000: <ptr=0x0000000000d88aa0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	143 0x0000: <ptr=0x0000000000c5db20> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6691,7 +6664,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	144 0x0000: <ptr=0x0000000000d89040> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	144 0x0000: <ptr=0x0000000000c5e0e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6748,7 +6721,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	145 0x0000: <ptr=0x0000000000d898f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	145 0x0000: <ptr=0x0000000000c5e9b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6801,7 +6774,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	146 0x0000: <ptr=0x0000000000d8a110> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	146 0x0000: <ptr=0x0000000000c5f1f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6830,7 +6803,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	147 0x0000: <ptr=0x0000000000d8ab60> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	147 0x0000: <ptr=0x0000000000c5fc60> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -6851,7 +6824,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	148 0x0006: <ptr=0x0000000000d8af80> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	148 0x0006: <ptr=0x0000000000c600a0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -6901,9 +6874,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	149 0x0007: <ptr=0x0000000000d8b640> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	149 0x0007: <ptr=0x0000000000c60780> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d8af80> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c600a0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -6916,25 +6889,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 0
 				String:
 				Hex: } } }
-	150 0x0008: <ptr=0x0000000000d8ba90> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	150 0x0008: <ptr=0x0000000000c60bf0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d87740> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d88630> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d88aa0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d89040> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d898f0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d8a110> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d8ab60> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d8b640> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c5c760> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c5d690> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c5db20> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c5e0e0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c5e9b0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c5f1f0> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c5fc60> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c60780> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 8b 00 00 00
-				Int: 139
-				Float: 1.9478e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 8b 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.9. .-. .D.e.f.a.u.l.t. }
@@ -6954,20 +6924,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	151 0x0000: <ptr=0x0000000000d8c260> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	151 0x0000: <ptr=0x0000000000c61380> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -6992,9 +6962,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	152 0x0001: <ptr=0x0000000000d8c700> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	152 0x0001: <ptr=0x0000000000c61840> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d8c260> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c61380> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -7002,9 +6972,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	153 0x0003: <ptr=0x0000000000d8cab0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	153 0x0003: <ptr=0x0000000000c61c10> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d8c700> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c61840> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -7018,7 +6988,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	154 0x0004: <ptr=0x0000000000d8cf00> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	154 0x0004: <ptr=0x0000000000c62080> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -7056,7 +7026,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	155 0x0000: <ptr=0x0000000000d8d510> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	155 0x0000: <ptr=0x0000000000c626b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7113,9 +7083,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	156 0x0005: <ptr=0x0000000000d8ddf0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	156 0x0005: <ptr=0x0000000000c62fb0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d8d510> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c626b0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -7130,7 +7100,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	157 0x0000: <ptr=0x0000000000d8e260> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	157 0x0000: <ptr=0x0000000000c63440> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7163,7 +7133,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	158 0x0000: <ptr=0x0000000000d8e800> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	158 0x0000: <ptr=0x0000000000c63a00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7220,7 +7190,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	159 0x0000: <ptr=0x0000000000d8f0b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	159 0x0000: <ptr=0x0000000000c642d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7273,7 +7243,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	160 0x0000: <ptr=0x0000000000d8f8d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	160 0x0000: <ptr=0x0000000000c64b10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7302,7 +7272,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	161 0x0000: <ptr=0x0000000000d90320> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	161 0x0000: <ptr=0x0000000000c65580> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7323,7 +7293,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	162 0x0006: <ptr=0x0000000000d90740> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	162 0x0006: <ptr=0x0000000000c659c0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -7373,9 +7343,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	163 0x0007: <ptr=0x0000000000d90e00> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	163 0x0007: <ptr=0x0000000000c660a0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d90740> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c659c0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -7387,25 +7357,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	164 0x0008: <ptr=0x0000000000d91270> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	164 0x0008: <ptr=0x0000000000c66530> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d8cf00> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d8ddf0> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d8e260> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d8e800> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d8f0b0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d8f8d0> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d90320> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d90e00> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c62080> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c62fb0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c63440> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c63a00> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c642d0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c64b10> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c65580> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c660a0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 99 00 00 00
-				Int: 153
-				Float: 2.14399e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 99 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 0.9. .-. .D.e.f.a.u.l.t. }
@@ -7425,20 +7392,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	165 0x0000: <ptr=0x0000000000d91a40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	165 0x0000: <ptr=0x0000000000c66cc0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -7463,9 +7430,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	166 0x0001: <ptr=0x0000000000d91ee0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	166 0x0001: <ptr=0x0000000000c67180> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d91a40> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c66cc0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -7473,9 +7440,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	167 0x0003: <ptr=0x0000000000d92290> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	167 0x0003: <ptr=0x0000000000c67550> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d91ee0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c67180> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -7489,7 +7456,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	168 0x0004: <ptr=0x0000000000d926e0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	168 0x0004: <ptr=0x0000000000c679c0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -7527,7 +7494,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	169 0x0000: <ptr=0x0000000000d92cf0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	169 0x0000: <ptr=0x0000000000c67ff0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7584,9 +7551,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	170 0x0005: <ptr=0x0000000000d935d0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	170 0x0005: <ptr=0x0000000000c688f0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d92cf0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c67ff0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -7601,7 +7568,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	171 0x0000: <ptr=0x0000000000d93a40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	171 0x0000: <ptr=0x0000000000c68d80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7634,7 +7601,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	172 0x0000: <ptr=0x0000000000d93fe0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	172 0x0000: <ptr=0x0000000000c69340> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7691,7 +7658,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	173 0x0000: <ptr=0x0000000000d94890> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	173 0x0000: <ptr=0x0000000000c69c10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7744,7 +7711,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	174 0x0000: <ptr=0x0000000000d950b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	174 0x0000: <ptr=0x0000000000c6a450> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7773,7 +7740,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	175 0x0000: <ptr=0x0000000000d95b00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	175 0x0000: <ptr=0x0000000000c6aec0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -7794,7 +7761,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	176 0x0006: <ptr=0x0000000000d95f20> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	176 0x0006: <ptr=0x0000000000c6b300> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -7844,9 +7811,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	177 0x0007: <ptr=0x0000000000d965e0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	177 0x0007: <ptr=0x0000000000c6b9e0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d95f20> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c6b300> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -7858,25 +7825,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	178 0x0008: <ptr=0x0000000000d96a50> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	178 0x0008: <ptr=0x0000000000c6be70> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d926e0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d935d0> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d93a40> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d93fe0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d94890> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d950b0> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d95b00> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d965e0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c679c0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c688f0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c68d80> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c69340> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c69c10> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c6a450> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c6aec0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c6b9e0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: a7 00 00 00
-				Int: 167
-				Float: 2.34017e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 a7 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.0. .-. .D.e.f.a.u.l.t. }
@@ -7896,20 +7860,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	179 0x0000: <ptr=0x0000000000d97220> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	179 0x0000: <ptr=0x0000000000c6c600> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -7934,9 +7898,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	180 0x0001: <ptr=0x0000000000d976c0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	180 0x0001: <ptr=0x0000000000c6cac0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d97220> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c6c600> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -7944,9 +7908,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	181 0x0003: <ptr=0x0000000000d97a70> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	181 0x0003: <ptr=0x0000000000c6ce90> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d976c0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c6cac0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -7960,7 +7924,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	182 0x0004: <ptr=0x0000000000d97ec0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	182 0x0004: <ptr=0x0000000000c6d300> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -7998,7 +7962,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	183 0x0000: <ptr=0x0000000000d984d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	183 0x0000: <ptr=0x0000000000c6d930> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8055,9 +8019,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	184 0x0005: <ptr=0x0000000000d98db0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	184 0x0005: <ptr=0x0000000000c6e230> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d984d0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c6d930> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -8072,7 +8036,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	185 0x0000: <ptr=0x0000000000d99220> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	185 0x0000: <ptr=0x0000000000c6e6c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8105,7 +8069,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	186 0x0000: <ptr=0x0000000000d997c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	186 0x0000: <ptr=0x0000000000c6ec80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8162,7 +8126,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	187 0x0000: <ptr=0x0000000000d9a070> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	187 0x0000: <ptr=0x0000000000c6f550> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8215,7 +8179,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	188 0x0000: <ptr=0x0000000000d9a890> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	188 0x0000: <ptr=0x0000000000c6fd90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8244,7 +8208,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	189 0x0000: <ptr=0x0000000000d9b2e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	189 0x0000: <ptr=0x0000000000c70800> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8265,7 +8229,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	190 0x0006: <ptr=0x0000000000d9b700> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	190 0x0006: <ptr=0x0000000000c70c40> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -8315,9 +8279,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	191 0x0007: <ptr=0x0000000000d9bdc0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	191 0x0007: <ptr=0x0000000000c71320> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d9b700> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c70c40> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -8329,25 +8293,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	192 0x0008: <ptr=0x0000000000d9c230> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	192 0x0008: <ptr=0x0000000000c717b0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d97ec0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d98db0> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d99220> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d997c0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d9a070> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000d9a890> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000d9b2e0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000d9bdc0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c6d300> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c6e230> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c6e6c0> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c6ec80> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c6f550> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c6fd90> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c70800> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c71320> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: b5 00 00 00
-				Int: 181
-				Float: 2.53635e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 b5 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.1. .-. .D.e.f.a.u.l.t. }
@@ -8367,20 +8328,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	193 0x0000: <ptr=0x0000000000d9ca00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	193 0x0000: <ptr=0x0000000000c71f40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -8405,9 +8366,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	194 0x0001: <ptr=0x0000000000d9cea0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	194 0x0001: <ptr=0x0000000000c72400> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d9ca00> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c71f40> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -8415,9 +8376,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	195 0x0003: <ptr=0x0000000000d9d250> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	195 0x0003: <ptr=0x0000000000c727d0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d9cea0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c72400> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -8431,7 +8392,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	196 0x0004: <ptr=0x0000000000d9d6a0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	196 0x0004: <ptr=0x0000000000c72c40> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -8469,7 +8430,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	197 0x0000: <ptr=0x0000000000d9dcb0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	197 0x0000: <ptr=0x0000000000c73270> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8526,9 +8487,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	198 0x0005: <ptr=0x0000000000d9e590> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	198 0x0005: <ptr=0x0000000000c73b70> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d9dcb0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c73270> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -8543,7 +8504,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	199 0x0000: <ptr=0x0000000000d9ea00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	199 0x0000: <ptr=0x0000000000c74000> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8576,7 +8537,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	200 0x0000: <ptr=0x0000000000d9efa0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	200 0x0000: <ptr=0x0000000000c745c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8633,7 +8594,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	201 0x0000: <ptr=0x0000000000d9f850> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	201 0x0000: <ptr=0x0000000000c74e90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8686,7 +8647,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	202 0x0000: <ptr=0x0000000000da0070> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	202 0x0000: <ptr=0x0000000000c756d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8715,7 +8676,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	203 0x0000: <ptr=0x0000000000da0ac0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	203 0x0000: <ptr=0x0000000000c76140> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8736,7 +8697,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	204 0x0006: <ptr=0x0000000000da0ee0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	204 0x0006: <ptr=0x0000000000c76580> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -8786,9 +8747,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	205 0x0007: <ptr=0x0000000000da15a0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	205 0x0007: <ptr=0x0000000000c76c60> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da0ee0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c76580> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -8800,25 +8761,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	206 0x0008: <ptr=0x0000000000da1a10> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	206 0x0008: <ptr=0x0000000000c770f0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d9d6a0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000d9e590> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000d9ea00> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000d9efa0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000d9f850> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000da0070> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000da0ac0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000da15a0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c72c40> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c73b70> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c74000> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c745c0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c74e90> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c756d0> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c76140> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c76c60> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: c3 00 00 00
-				Int: 195
-				Float: 2.73253e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 c3 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.2. .-. .D.e.f.a.u.l.t. }
@@ -8838,20 +8796,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	207 0x0000: <ptr=0x0000000000da21e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	207 0x0000: <ptr=0x0000000000c77880> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -8876,9 +8834,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	208 0x0001: <ptr=0x0000000000da2680> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	208 0x0001: <ptr=0x0000000000c77d40> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da21e0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c77880> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -8886,9 +8844,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	209 0x0003: <ptr=0x0000000000da2a30> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	209 0x0003: <ptr=0x0000000000c78110> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da2680> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c77d40> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -8902,7 +8860,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	210 0x0004: <ptr=0x0000000000da2e80> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	210 0x0004: <ptr=0x0000000000c78580> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -8940,7 +8898,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	211 0x0000: <ptr=0x0000000000da3490> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	211 0x0000: <ptr=0x0000000000c78bb0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -8997,9 +8955,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	212 0x0005: <ptr=0x0000000000da3d70> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	212 0x0005: <ptr=0x0000000000c794b0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da3490> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c78bb0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -9014,7 +8972,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	213 0x0000: <ptr=0x0000000000da41e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	213 0x0000: <ptr=0x0000000000c79940> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9047,7 +9005,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	214 0x0000: <ptr=0x0000000000da4780> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	214 0x0000: <ptr=0x0000000000c79f00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9104,7 +9062,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	215 0x0000: <ptr=0x0000000000da5030> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	215 0x0000: <ptr=0x0000000000c7a7d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9157,7 +9115,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	216 0x0000: <ptr=0x0000000000da5850> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	216 0x0000: <ptr=0x0000000000c7b010> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9186,7 +9144,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	217 0x0000: <ptr=0x0000000000da62a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	217 0x0000: <ptr=0x0000000000c7ba80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9207,7 +9165,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	218 0x0006: <ptr=0x0000000000da66c0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	218 0x0006: <ptr=0x0000000000c7bec0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -9257,9 +9215,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	219 0x0007: <ptr=0x0000000000da6d80> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	219 0x0007: <ptr=0x0000000000c7c5a0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da66c0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c7bec0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -9271,25 +9229,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	220 0x0008: <ptr=0x0000000000da71f0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	220 0x0008: <ptr=0x0000000000c7ca30> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000da2e80> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000da3d70> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000da41e0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000da4780> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000da5030> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000da5850> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000da62a0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000da6d80> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c78580> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c794b0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c79940> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c79f00> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c7a7d0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c7b010> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c7ba80> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c7c5a0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: d1 00 00 00
-				Int: 209
-				Float: 2.92871e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 d1 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.3. .-. .D.e.f.a.u.l.t. }
@@ -9309,20 +9264,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	221 0x0000: <ptr=0x0000000000da79c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	221 0x0000: <ptr=0x0000000000c7d1c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -9347,9 +9302,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	222 0x0001: <ptr=0x0000000000da7e60> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	222 0x0001: <ptr=0x0000000000c7d680> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da79c0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c7d1c0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -9357,9 +9312,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	223 0x0003: <ptr=0x0000000000da8210> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	223 0x0003: <ptr=0x0000000000c7da50> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da7e60> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c7d680> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -9373,7 +9328,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	224 0x0004: <ptr=0x0000000000da8660> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	224 0x0004: <ptr=0x0000000000c7dec0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -9411,7 +9366,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	225 0x0000: <ptr=0x0000000000da8c70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	225 0x0000: <ptr=0x0000000000c7e4f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9468,9 +9423,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	226 0x0005: <ptr=0x0000000000da9550> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	226 0x0005: <ptr=0x0000000000c7edf0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000da8c70> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c7e4f0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -9485,7 +9440,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	227 0x0000: <ptr=0x0000000000da99c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	227 0x0000: <ptr=0x0000000000c7f280> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9518,7 +9473,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	228 0x0000: <ptr=0x0000000000da9f60> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	228 0x0000: <ptr=0x0000000000c7f840> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9575,7 +9530,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	229 0x0000: <ptr=0x0000000000daa810> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	229 0x0000: <ptr=0x0000000000c80110> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9628,7 +9583,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	230 0x0000: <ptr=0x0000000000dab030> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	230 0x0000: <ptr=0x0000000000c80950> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9657,7 +9612,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	231 0x0000: <ptr=0x0000000000daba80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	231 0x0000: <ptr=0x0000000000c813c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9678,7 +9633,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	232 0x0006: <ptr=0x0000000000dabea0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	232 0x0006: <ptr=0x0000000000c81800> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -9728,9 +9683,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	233 0x0007: <ptr=0x0000000000dac560> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	233 0x0007: <ptr=0x0000000000c81ee0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dabea0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c81800> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -9742,25 +9697,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	234 0x0008: <ptr=0x0000000000dac9d0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	234 0x0008: <ptr=0x0000000000c82370> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000da8660> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000da9550> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000da99c0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000da9f60> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000daa810> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000dab030> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000daba80> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dac560> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c7dec0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c7edf0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c7f280> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c7f840> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c80110> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c80950> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c813c0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c81ee0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: df 00 00 00
-				Int: 223
-				Float: 3.1249e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 df 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.4. .-. .D.e.f.a.u.l.t. }
@@ -9780,20 +9732,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	235 0x0000: <ptr=0x0000000000dad1a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	235 0x0000: <ptr=0x0000000000c82b00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -9818,9 +9770,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	236 0x0001: <ptr=0x0000000000dad640> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	236 0x0001: <ptr=0x0000000000c82fc0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dad1a0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c82b00> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -9828,9 +9780,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	237 0x0003: <ptr=0x0000000000dad9f0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	237 0x0003: <ptr=0x0000000000c83390> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dad640> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c82fc0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -9844,7 +9796,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	238 0x0004: <ptr=0x0000000000dade40> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	238 0x0004: <ptr=0x0000000000c83800> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -9882,7 +9834,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	239 0x0000: <ptr=0x0000000000dae450> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	239 0x0000: <ptr=0x0000000000c83e30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9939,9 +9891,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	240 0x0005: <ptr=0x0000000000daed30> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	240 0x0005: <ptr=0x0000000000c84730> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dae450> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c83e30> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -9956,7 +9908,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	241 0x0000: <ptr=0x0000000000daf1a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	241 0x0000: <ptr=0x0000000000c84bc0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -9989,7 +9941,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	242 0x0000: <ptr=0x0000000000daf740> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	242 0x0000: <ptr=0x0000000000c85180> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10046,7 +9998,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	243 0x0000: <ptr=0x0000000000dafff0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	243 0x0000: <ptr=0x0000000000c85a50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10099,7 +10051,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	244 0x0000: <ptr=0x0000000000db0810> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	244 0x0000: <ptr=0x0000000000c86290> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10128,7 +10080,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	245 0x0000: <ptr=0x0000000000db1260> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	245 0x0000: <ptr=0x0000000000c86d00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10149,7 +10101,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	246 0x0006: <ptr=0x0000000000db1680> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	246 0x0006: <ptr=0x0000000000c87140> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -10199,9 +10151,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	247 0x0007: <ptr=0x0000000000db1d40> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	247 0x0007: <ptr=0x0000000000c87820> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db1680> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c87140> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -10213,25 +10165,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	248 0x0008: <ptr=0x0000000000db21b0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	248 0x0008: <ptr=0x0000000000c87cb0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000dade40> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000daed30> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000daf1a0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000daf740> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000dafff0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000db0810> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000db1260> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000db1d40> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c83800> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c84730> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c84bc0> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c85180> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c85a50> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c86290> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c86d00> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c87820> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: ed 00 00 00
-				Int: 237
-				Float: 3.32108e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 ed 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.5. .-. .D.e.f.a.u.l.t. }
@@ -10251,20 +10200,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	249 0x0000: <ptr=0x0000000000db2980> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	249 0x0000: <ptr=0x0000000000c88440> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -10289,9 +10238,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	250 0x0001: <ptr=0x0000000000db2e20> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	250 0x0001: <ptr=0x0000000000c88900> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db2980> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c88440> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -10299,9 +10248,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	251 0x0003: <ptr=0x0000000000db31d0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	251 0x0003: <ptr=0x0000000000c88cd0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db2e20> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c88900> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -10315,7 +10264,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	252 0x0004: <ptr=0x0000000000db3620> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	252 0x0004: <ptr=0x0000000000c89140> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -10353,7 +10302,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	253 0x0000: <ptr=0x0000000000db3c30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	253 0x0000: <ptr=0x0000000000c89770> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10410,9 +10359,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	254 0x0005: <ptr=0x0000000000db4510> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	254 0x0005: <ptr=0x0000000000c8a070> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db3c30> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c89770> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -10427,7 +10376,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	255 0x0000: <ptr=0x0000000000db4980> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	255 0x0000: <ptr=0x0000000000c8a500> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10460,7 +10409,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	256 0x0000: <ptr=0x0000000000db4f20> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	256 0x0000: <ptr=0x0000000000c8aac0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10517,7 +10466,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	257 0x0000: <ptr=0x0000000000db57d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	257 0x0000: <ptr=0x0000000000c8b390> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10570,7 +10519,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	258 0x0000: <ptr=0x0000000000db5ff0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	258 0x0000: <ptr=0x0000000000c8bbd0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10599,7 +10548,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	259 0x0000: <ptr=0x0000000000db6a40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	259 0x0000: <ptr=0x0000000000c8c640> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10620,7 +10569,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	260 0x0006: <ptr=0x0000000000db6e60> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	260 0x0006: <ptr=0x0000000000c8ca80> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -10670,9 +10619,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	261 0x0007: <ptr=0x0000000000db7520> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	261 0x0007: <ptr=0x0000000000c8d160> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db6e60> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c8ca80> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -10684,25 +10633,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	262 0x0008: <ptr=0x0000000000db7990> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	262 0x0008: <ptr=0x0000000000c8d5f0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000db3620> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000db4510> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000db4980> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000db4f20> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000db57d0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000db5ff0> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000db6a40> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000db7520> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c89140> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c8a070> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c8a500> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c8aac0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c8b390> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c8bbd0> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c8c640> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c8d160> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: fb 00 00 00
-				Int: 251
-				Float: 3.51726e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 fb 00 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.6. .-. .D.e.f.a.u.l.t. }
@@ -10722,20 +10668,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	263 0x0000: <ptr=0x0000000000db8160> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	263 0x0000: <ptr=0x0000000000c8dd80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -10760,9 +10706,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	264 0x0001: <ptr=0x0000000000db8600> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	264 0x0001: <ptr=0x0000000000c8e240> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db8160> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c8dd80> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -10770,9 +10716,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	265 0x0003: <ptr=0x0000000000db89b0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	265 0x0003: <ptr=0x0000000000c8e610> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db8600> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c8e240> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -10786,7 +10732,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	266 0x0004: <ptr=0x0000000000db8e00> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	266 0x0004: <ptr=0x0000000000c8ea80> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -10824,7 +10770,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	267 0x0000: <ptr=0x0000000000db9410> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	267 0x0000: <ptr=0x0000000000c8f0b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10881,9 +10827,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	268 0x0005: <ptr=0x0000000000db9cf0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	268 0x0005: <ptr=0x0000000000c8f9b0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000db9410> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c8f0b0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -10898,7 +10844,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	269 0x0000: <ptr=0x0000000000dba160> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	269 0x0000: <ptr=0x0000000000c8fe40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10931,7 +10877,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	270 0x0000: <ptr=0x0000000000dba700> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	270 0x0000: <ptr=0x0000000000c90400> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -10988,7 +10934,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	271 0x0000: <ptr=0x0000000000dbafb0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	271 0x0000: <ptr=0x0000000000c90cd0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -11041,7 +10987,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	272 0x0000: <ptr=0x0000000000dbb7d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	272 0x0000: <ptr=0x0000000000c91510> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -11070,7 +11016,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	273 0x0000: <ptr=0x0000000000dbc220> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	273 0x0000: <ptr=0x0000000000c91f80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -11091,7 +11037,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	274 0x0006: <ptr=0x0000000000dbc640> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	274 0x0006: <ptr=0x0000000000c923c0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -11141,9 +11087,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	275 0x0007: <ptr=0x0000000000dbcd00> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	275 0x0007: <ptr=0x0000000000c92aa0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dbc640> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c923c0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -11155,25 +11101,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	276 0x0008: <ptr=0x0000000000dbd170> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	276 0x0008: <ptr=0x0000000000c92f30> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000db8e00> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000db9cf0> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000dba160> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000dba700> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000dbafb0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000dbb7d0> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000dbc220> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dbcd00> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c8ea80> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c8f9b0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c8fe40> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c90400> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c90cd0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c91510> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c91f80> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c92aa0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 09 01 00 00
-				Int: 265
-				Float: 3.71344e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 09 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.7. .-. .D.e.f.a.u.l.t. }
@@ -11193,20 +11136,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	277 0x0000: <ptr=0x0000000000dbd940> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	277 0x0000: <ptr=0x0000000000c936c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!........
@@ -11231,9 +11174,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	278 0x0001: <ptr=0x0000000000dbdde0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	278 0x0001: <ptr=0x0000000000c93b80> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dbd940> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c936c0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -11241,9 +11184,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	279 0x0003: <ptr=0x0000000000dbe190> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	279 0x0003: <ptr=0x0000000000c93f50> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dbdde0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c93b80> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -11257,7 +11200,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	280 0x0004: <ptr=0x0000000000dbe5e0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	280 0x0004: <ptr=0x0000000000c943c0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -11295,7 +11238,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	281 0x0000: <ptr=0x0000000000dbebf0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	281 0x0000: <ptr=0x0000000000c949f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!........
@@ -11352,9 +11295,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	282 0x0005: <ptr=0x0000000000dbf4d0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	282 0x0005: <ptr=0x0000000000c952f0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dbebf0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c949f0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -11369,7 +11312,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	283 0x0000: <ptr=0x0000000000dbf940> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	283 0x0000: <ptr=0x0000000000c95780> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -11402,7 +11345,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	284 0x0000: <ptr=0x0000000000dbfee0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	284 0x0000: <ptr=0x0000000000c95d40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -11459,7 +11402,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	285 0x0000: <ptr=0x0000000000dc0790> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	285 0x0000: <ptr=0x0000000000c96610> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -11512,7 +11455,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	286 0x0000: <ptr=0x0000000000dc0fb0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	286 0x0000: <ptr=0x0000000000c96e50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -11541,7 +11484,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	287 0x0000: <ptr=0x0000000000dc1a00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	287 0x0000: <ptr=0x0000000000c978c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!...."...
@@ -11562,7 +11505,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	288 0x0006: <ptr=0x0000000000dc1e20> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	288 0x0006: <ptr=0x0000000000c97d00> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -11612,9 +11555,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	289 0x0007: <ptr=0x0000000000dc24e0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	289 0x0007: <ptr=0x0000000000c983e0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc1e20> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c97d00> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -11626,25 +11569,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	290 0x0008: <ptr=0x0000000000dc2950> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	290 0x0008: <ptr=0x0000000000c98870> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000dbe5e0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000dbf4d0> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000dbf940> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000dbfee0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000dc0790> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000dc0fb0> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000dc1a00> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dc24e0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c943c0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c952f0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c95780> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c95d40> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c96610> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c96e50> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c978c0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c983e0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: 17 01 00 00
-				Int: 279
-				Float: 3.90962e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 17 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.8. .-. .D.e.f.a.u.l.t. }
@@ -11664,20 +11604,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	291 0x0000: <ptr=0x0000000000dc3120> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	291 0x0000: <ptr=0x0000000000c99000> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....$...
@@ -11702,9 +11642,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	292 0x0001: <ptr=0x0000000000dc35c0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	292 0x0001: <ptr=0x0000000000c994c0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc3120> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c99000> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -11712,9 +11652,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	293 0x0003: <ptr=0x0000000000dc3970> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	293 0x0003: <ptr=0x0000000000c99890> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc35c0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c994c0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -11728,7 +11668,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	294 0x0004: <ptr=0x0000000000dc3dc0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	294 0x0004: <ptr=0x0000000000c99d00> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -11766,7 +11706,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	295 0x0000: <ptr=0x0000000000dc43d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	295 0x0000: <ptr=0x0000000000c9a330> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....(...
@@ -11823,9 +11763,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	296 0x0005: <ptr=0x0000000000dc4cb0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	296 0x0005: <ptr=0x0000000000c9ac30> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc43d0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c9a330> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -11840,7 +11780,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	297 0x0000: <ptr=0x0000000000dc5120> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	297 0x0000: <ptr=0x0000000000c9b0c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -11873,7 +11813,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	298 0x0000: <ptr=0x0000000000dc56c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	298 0x0000: <ptr=0x0000000000c9b680> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -11930,7 +11870,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	299 0x0000: <ptr=0x0000000000dc5f70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	299 0x0000: <ptr=0x0000000000c9bf50> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -11983,7 +11923,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	300 0x0000: <ptr=0x0000000000dc6790> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	300 0x0000: <ptr=0x0000000000c9c790> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -12012,7 +11952,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	301 0x0000: <ptr=0x0000000000dc71e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	301 0x0000: <ptr=0x0000000000c9d200> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....0...
@@ -12033,7 +11973,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	302 0x0006: <ptr=0x0000000000dc7600> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	302 0x0006: <ptr=0x0000000000c9d640> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -12083,9 +12023,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	303 0x0007: <ptr=0x0000000000dc7cc0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	303 0x0007: <ptr=0x0000000000c9dd20> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc7600> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000c9d640> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -12097,25 +12037,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	304 0x0008: <ptr=0x0000000000dc8130> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	304 0x0008: <ptr=0x0000000000c9e1b0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000dc3dc0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000dc4cb0> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000dc5120> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000dc56c0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000dc5f70> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000dc6790> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000dc71e0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dc7cc0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c99d00> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000c9ac30> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000c9b0c0> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000c9b680> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000c9bf50> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000c9c790> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000c9d200> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000c9dd20> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: %...
-				Hex: 25 01 00 00
-				Int: 293
-				Float: 4.1058e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....%...
+			Hex: 20 10 0a 00 00 00 25 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 1.9. .-. .D.e.f.a.u.l.t. }
@@ -12135,20 +12072,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	305 0x0000: <ptr=0x0000000000dc8900> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	305 0x0000: <ptr=0x0000000000c9e940> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....2...
@@ -12173,9 +12110,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	306 0x0001: <ptr=0x0000000000dc8da0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	306 0x0001: <ptr=0x0000000000c9ee00> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc8900> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c9e940> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -12183,9 +12120,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	307 0x0003: <ptr=0x0000000000dc9150> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	307 0x0003: <ptr=0x0000000000c9f1d0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc8da0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000c9ee00> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -12199,7 +12136,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	308 0x0004: <ptr=0x0000000000dc95a0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	308 0x0004: <ptr=0x0000000000c9f640> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -12237,7 +12174,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	309 0x0000: <ptr=0x0000000000dc9bb0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	309 0x0000: <ptr=0x0000000000c9fc70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....6...
@@ -12294,9 +12231,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	310 0x0005: <ptr=0x0000000000dca490> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	310 0x0005: <ptr=0x0000000000ca0570> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dc9bb0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000c9fc70> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -12311,7 +12248,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	311 0x0000: <ptr=0x0000000000dca900> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	311 0x0000: <ptr=0x0000000000ca0a00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -12344,7 +12281,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	312 0x0000: <ptr=0x0000000000dcaea0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	312 0x0000: <ptr=0x0000000000ca0fc0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -12401,7 +12338,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	313 0x0000: <ptr=0x0000000000dcb750> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	313 0x0000: <ptr=0x0000000000ca1890> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -12454,7 +12391,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	314 0x0000: <ptr=0x0000000000dcbf70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	314 0x0000: <ptr=0x0000000000ca20d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -12483,7 +12420,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	315 0x0000: <ptr=0x0000000000dcc9c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	315 0x0000: <ptr=0x0000000000ca2b40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....>...
@@ -12504,7 +12441,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	316 0x0006: <ptr=0x0000000000dccde0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	316 0x0006: <ptr=0x0000000000ca2f80> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -12554,9 +12491,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	317 0x0007: <ptr=0x0000000000dcd4a0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	317 0x0007: <ptr=0x0000000000ca3660> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dccde0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000ca2f80> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -12568,25 +12505,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	318 0x0008: <ptr=0x0000000000dcd910> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	318 0x0008: <ptr=0x0000000000ca3af0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000dc95a0> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000dca490> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000dca900> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000dcaea0> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000dcb750> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000dcbf70> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000dcc9c0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dcd4a0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000c9f640> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000ca0570> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000ca0a00> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000ca0fc0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000ca1890> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000ca20d0> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000ca2b40> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000ca3660> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: 3...
-				Hex: 33 01 00 00
-				Int: 307
-				Float: 4.30199e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....3...
+			Hex: 20 10 0a 00 00 00 33 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 2.0. .-. .D.e.f.a.u.l.t. }
@@ -12606,20 +12540,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	319 0x0000: <ptr=0x0000000000dce0e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	319 0x0000: <ptr=0x0000000000ca4280> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....@...
@@ -12644,9 +12578,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	320 0x0001: <ptr=0x0000000000dce580> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	320 0x0001: <ptr=0x0000000000ca4740> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dce0e0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000ca4280> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -12654,9 +12588,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	321 0x0003: <ptr=0x0000000000dce930> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	321 0x0003: <ptr=0x0000000000ca4b10> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dce580> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000ca4740> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -12670,7 +12604,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	322 0x0004: <ptr=0x0000000000dced80> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	322 0x0004: <ptr=0x0000000000ca4f80> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -12708,7 +12642,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	323 0x0000: <ptr=0x0000000000dcf390> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	323 0x0000: <ptr=0x0000000000ca55b0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....D...
@@ -12765,9 +12699,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	324 0x0005: <ptr=0x0000000000dcfc70> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	324 0x0005: <ptr=0x0000000000ca5eb0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dcf390> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000ca55b0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -12782,7 +12716,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	325 0x0000: <ptr=0x0000000000dd00e0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	325 0x0000: <ptr=0x0000000000ca6340> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -12815,7 +12749,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	326 0x0000: <ptr=0x0000000000dd0680> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	326 0x0000: <ptr=0x0000000000ca6900> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -12872,7 +12806,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	327 0x0000: <ptr=0x0000000000dd0f30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	327 0x0000: <ptr=0x0000000000ca71d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -12925,7 +12859,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	328 0x0000: <ptr=0x0000000000dd1750> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	328 0x0000: <ptr=0x0000000000ca7a10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -12954,7 +12888,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	329 0x0000: <ptr=0x0000000000dd21a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	329 0x0000: <ptr=0x0000000000ca8480> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....L...
@@ -12975,7 +12909,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	330 0x0006: <ptr=0x0000000000dd25c0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	330 0x0006: <ptr=0x0000000000ca88c0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -13025,9 +12959,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	331 0x0007: <ptr=0x0000000000dd2c80> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	331 0x0007: <ptr=0x0000000000ca8fa0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dd25c0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000ca88c0> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -13039,25 +12973,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	332 0x0008: <ptr=0x0000000000dd30f0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	332 0x0008: <ptr=0x0000000000ca9430> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000dced80> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000dcfc70> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000dd00e0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000dd0680> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000dd0f30> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000dd1750> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000dd21a0> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dd2c80> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000ca4f80> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000ca5eb0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000ca6340> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000ca6900> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000ca71d0> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000ca7a10> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000ca8480> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000ca8fa0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: A...
-				Hex: 41 01 00 00
-				Int: 321
-				Float: 4.49817e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....A...
+			Hex: 20 10 0a 00 00 00 41 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 2.1. .-. .D.e.f.a.u.l.t. }
@@ -13077,20 +13008,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	333 0x0000: <ptr=0x0000000000dd38c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	333 0x0000: <ptr=0x0000000000ca9bc0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....N...
@@ -13115,9 +13046,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	334 0x0001: <ptr=0x0000000000dd3d60> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	334 0x0001: <ptr=0x0000000000caa080> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dd38c0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000ca9bc0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -13125,9 +13056,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	335 0x0003: <ptr=0x0000000000dd4110> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	335 0x0003: <ptr=0x0000000000caa450> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dd3d60> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000caa080> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -13141,7 +13072,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	336 0x0004: <ptr=0x0000000000dd4560> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	336 0x0004: <ptr=0x0000000000caa8c0> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -13179,7 +13110,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	337 0x0000: <ptr=0x0000000000dd4b70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	337 0x0000: <ptr=0x0000000000caaef0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....R...
@@ -13236,9 +13167,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	338 0x0005: <ptr=0x0000000000dd5450> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	338 0x0005: <ptr=0x0000000000cab7f0> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dd4b70> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000caaef0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -13253,7 +13184,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	339 0x0000: <ptr=0x0000000000dd58c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	339 0x0000: <ptr=0x0000000000cabc80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -13286,7 +13217,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	340 0x0000: <ptr=0x0000000000dd5e60> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	340 0x0000: <ptr=0x0000000000cac240> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -13343,7 +13274,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	341 0x0000: <ptr=0x0000000000dd6710> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	341 0x0000: <ptr=0x0000000000cacb10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -13396,7 +13327,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	342 0x0000: <ptr=0x0000000000dd6f30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	342 0x0000: <ptr=0x0000000000cad350> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -13425,7 +13356,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	343 0x0000: <ptr=0x0000000000dd7980> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	343 0x0000: <ptr=0x0000000000caddc0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....Z...
@@ -13446,7 +13377,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	344 0x0006: <ptr=0x0000000000dd7da0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	344 0x0006: <ptr=0x0000000000cae200> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -13496,9 +13427,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	345 0x0007: <ptr=0x0000000000dd8460> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	345 0x0007: <ptr=0x0000000000cae8e0> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dd7da0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000cae200> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -13510,25 +13441,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	346 0x0008: <ptr=0x0000000000dd88d0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	346 0x0008: <ptr=0x0000000000caed70> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000dd4560> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000dd5450> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000dd58c0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000dd5e60> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000dd6710> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000dd6f30> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000dd7980> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dd8460> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000caa8c0> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000cab7f0> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000cabc80> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000cac240> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000cacb10> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000cad350> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000caddc0> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000cae8e0> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: O...
-				Hex: 4f 01 00 00
-				Int: 335
-				Float: 4.69435e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....O...
+			Hex: 20 10 0a 00 00 00 4f 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 2.2. .-. .D.e.f.a.u.l.t. }
@@ -13548,20 +13476,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	347 0x0000: <ptr=0x0000000000dd90a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	347 0x0000: <ptr=0x0000000000caf500> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....\...
@@ -13586,9 +13514,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	348 0x0001: <ptr=0x0000000000dd9540> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	348 0x0001: <ptr=0x0000000000caf9c0> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dd90a0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000caf500> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -13596,9 +13524,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	349 0x0003: <ptr=0x0000000000dd98f0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	349 0x0003: <ptr=0x0000000000cafd90> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dd9540> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000caf9c0> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -13612,7 +13540,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	350 0x0004: <ptr=0x0000000000dd9d40> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	350 0x0004: <ptr=0x0000000000cb0200> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -13650,7 +13578,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	351 0x0000: <ptr=0x0000000000dda350> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	351 0x0000: <ptr=0x0000000000cb0830> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....`...
@@ -13707,9 +13635,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	352 0x0005: <ptr=0x0000000000ddac30> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	352 0x0005: <ptr=0x0000000000cb1130> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dda350> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000cb0830> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -13724,7 +13652,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	353 0x0000: <ptr=0x0000000000ddb0a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	353 0x0000: <ptr=0x0000000000cb15c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -13757,7 +13685,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	354 0x0000: <ptr=0x0000000000ddb640> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	354 0x0000: <ptr=0x0000000000cb1b80> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -13814,7 +13742,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	355 0x0000: <ptr=0x0000000000ddbef0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	355 0x0000: <ptr=0x0000000000cb2450> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -13867,7 +13795,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	356 0x0000: <ptr=0x0000000000ddc710> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	356 0x0000: <ptr=0x0000000000cb2c90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -13896,7 +13824,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	357 0x0000: <ptr=0x0000000000ddd160> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	357 0x0000: <ptr=0x0000000000cb3700> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....h...
@@ -13917,7 +13845,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	358 0x0006: <ptr=0x0000000000ddd580> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	358 0x0006: <ptr=0x0000000000cb3b40> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -13967,9 +13895,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	359 0x0007: <ptr=0x0000000000dddc40> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	359 0x0007: <ptr=0x0000000000cb4220> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000ddd580> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000cb3b40> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -13981,25 +13909,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	360 0x0008: <ptr=0x0000000000dde0b0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	360 0x0008: <ptr=0x0000000000cb46b0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000dd9d40> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000ddac30> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000ddb0a0> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000ddb640> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000ddbef0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000ddc710> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000ddd160> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000dddc40> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000cb0200> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000cb1130> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000cb15c0> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000cb1b80> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000cb2450> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000cb2c90> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000cb3700> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000cb4220> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ]...
-				Hex: 5d 01 00 00
-				Int: 349
-				Float: 4.89053e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....]...
+			Hex: 20 10 0a 00 00 00 5d 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 2.3. .-. .D.e.f.a.u.l.t. }
@@ -14019,20 +13944,20 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	361 0x0000: <ptr=0x0000000000dde880> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
+	361 0x0000: <ptr=0x0000000000cb4e40> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [6] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: <).Z..B0`......!....j...
@@ -14057,9 +13982,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	362 0x0001: <ptr=0x0000000000dded20> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
+	362 0x0001: <ptr=0x0000000000cb5300> (CustAttribSuperClassUnknown: ViewportManager, (0x5a06293c, 0x30420c1e), 0x00001160, Viewport Manager for DirectX (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dde880> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000cb4e40> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
@@ -14067,9 +13992,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	363 0x0003: <ptr=0x0000000000ddf0d0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	363 0x0003: <ptr=0x0000000000cb56d0> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dded20> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
+			0: <ptr=0x0000000000cb5300> (ViewportManager, (0x5a06293c, 0x30420c1e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -14083,7 +14008,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	364 0x0004: <ptr=0x0000000000ddf520> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
+	364 0x0004: <ptr=0x0000000000cb5b40> (TexmapContainerSuperClassUnknown: Texmaps, (0x00001200, 0x00000000), 0x00001080, Standard Materials and Textures (Autodesk)) [6] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5003: (StorageRaw) {
 			Size: 4
@@ -14121,7 +14046,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	365 0x0000: <ptr=0x0000000000ddfb30> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	365 0x0000: <ptr=0x0000000000cb6170> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....n...
@@ -14178,9 +14103,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	366 0x0005: <ptr=0x0000000000de0410> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
+	366 0x0005: <ptr=0x0000000000cb6a70> (ShaderSuperClassUnknown: Blinn, (0x00000038, 0x00000000), 0x000010b0, Standard Materials and Textures (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000ddfb30> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000cb6170> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x5300: (StorageRaw) {
 			Size: 4
@@ -14195,7 +14120,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	367 0x0000: <ptr=0x0000000000de0880> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
+	367 0x0000: <ptr=0x0000000000cb6f00> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [8] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -14228,7 +14153,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	368 0x0000: <ptr=0x0000000000de0e20> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
+	368 0x0000: <ptr=0x0000000000cb74c0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [14] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -14285,7 +14210,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	369 0x0000: <ptr=0x0000000000de16d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
+	369 0x0000: <ptr=0x0000000000cb7d90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [13] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -14338,7 +14263,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	370 0x0000: <ptr=0x0000000000de1ef0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
+	370 0x0000: <ptr=0x0000000000cb85d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [7] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -14367,7 +14292,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	371 0x0000: <ptr=0x0000000000de2940> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+	371 0x0000: <ptr=0x0000000000cb9040> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: .......!....v...
@@ -14388,7 +14313,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 00 00 00 00 00 00 } }
-	372 0x0006: <ptr=0x0000000000de2d60> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
+	372 0x0006: <ptr=0x0000000000cb9480> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [5] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -14438,9 +14363,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	373 0x0007: <ptr=0x0000000000de3420> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
+	373 0x0007: <ptr=0x0000000000cb9b60> (SamplerSuperClassUnknown: Max 2.5 Star, (0x25773211, 0x00000000), 0x00001110, Standard Samplers (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000de2d60> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000cb9480> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0200: (StorageRaw) {
 			Size: 4
@@ -14452,25 +14377,22 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			0 0x0100: (StorageRaw) {
 				Size: 24
 				String: M.a.x. .2...5. .S.t.a.r. } } }
-	374 0x0008: <ptr=0x0000000000de3890> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [4] {
+	374 0x0008: <ptr=0x0000000000cb9ff0> (MtlSuperClassUnknown: Standard, (0x00000002, 0x00000000), 0x00000c00, Standard Materials and Textures (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000ddf520> (Texmaps, (0x00001200, 0x00000000))
-			2: <ptr=0x0000000000de0410> (Blinn, (0x00000038, 0x00000000))
-			3: <ptr=0x0000000000de0880> (ParamBlock2, (0x00000082, 0x00000000))
-			4: <ptr=0x0000000000de0e20> (ParamBlock2, (0x00000082, 0x00000000))
-			5: <ptr=0x0000000000de16d0> (ParamBlock2, (0x00000082, 0x00000000))
-			6: <ptr=0x0000000000de1ef0> (ParamBlock2, (0x00000082, 0x00000000))
-			7: <ptr=0x0000000000de2940> (ParamBlock2, (0x00000082, 0x00000000))
-			8: <ptr=0x0000000000de3420> (Max 2.5 Star, (0x25773211, 0x00000000)) }
+			1: <ptr=0x0000000000cb5b40> (Texmaps, (0x00001200, 0x00000000))
+			2: <ptr=0x0000000000cb6a70> (Blinn, (0x00000038, 0x00000000))
+			3: <ptr=0x0000000000cb6f00> (ParamBlock2, (0x00000082, 0x00000000))
+			4: <ptr=0x0000000000cb74c0> (ParamBlock2, (0x00000082, 0x00000000))
+			5: <ptr=0x0000000000cb7d90> (ParamBlock2, (0x00000082, 0x00000000))
+			6: <ptr=0x0000000000cb85d0> (ParamBlock2, (0x00000082, 0x00000000))
+			7: <ptr=0x0000000000cb9040> (ParamBlock2, (0x00000082, 0x00000000))
+			8: <ptr=0x0000000000cb9b60> (Max 2.5 Star, (0x25773211, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: k...
-				Hex: 6b 01 00 00
-				Int: 363
-				Float: 5.08671e-43 } }
-		Orphan[1] 0x4000: (StorageContainer) [4] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .....k...
+			Hex: 20 10 0a 00 00 00 6b 01 00 00 }
+		Orphan[0] 0x4000: (StorageContainer) [4] {
 			0 0x4001: (StorageRaw) {
 				Size: 24
 				String: 2.4. .-. .D.e.f.a.u.l.t. }
@@ -14490,46 +14412,46 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 16
 				String: ...............?
 				Hex: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f } }
-		Orphan[2] 0x5300: (StorageRaw) {
+		Orphan[1] 0x5300: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 0d 00 00 00
 			Int: 13
 			Float: 1.82169e-44 }
-		Orphan[3] 0x5600: (StorageContainer) [1] {
+		Orphan[2] 0x5600: (StorageContainer) [1] {
 			0 0x0322: (StorageRaw) {
 				Size: 4
 				String: ....
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	375 0x000e: <ptr=0x0000000000de4060> (ReferenceMakerUnknown: Material Editor, (0x00000c80, 0x00000000), 0x00000100, Builtin) [5] {
+	375 0x000e: <ptr=0x0000000000cba780> (ReferenceMakerUnknown: Material Editor, (0x00000c80, 0x00000000), 0x00000100, Builtin) [5] {
 		References 0x2034: PARSED {
-			1: <ptr=0x0000000000d4d7a0> (Standard, (0x00000002, 0x00000000))
-			2: <ptr=0x0000000000d548d0> (Standard, (0x00000002, 0x00000000))
-			3: <ptr=0x0000000000d5ba00> (Standard, (0x00000002, 0x00000000))
-			4: <ptr=0x0000000000d611e0> (Standard, (0x00000002, 0x00000000))
-			5: <ptr=0x0000000000d669c0> (Standard, (0x00000002, 0x00000000))
-			6: <ptr=0x0000000000d6c1a0> (Standard, (0x00000002, 0x00000000))
-			7: <ptr=0x0000000000d84b30> (NeL Material, (0x64c75fec, 0x222b9eb9))
-			8: <ptr=0x0000000000d8ba90> (Standard, (0x00000002, 0x00000000))
-			9: <ptr=0x0000000000d91270> (Standard, (0x00000002, 0x00000000))
-			10: <ptr=0x0000000000d96a50> (Standard, (0x00000002, 0x00000000))
-			11: <ptr=0x0000000000d9c230> (Standard, (0x00000002, 0x00000000))
-			12: <ptr=0x0000000000da1a10> (Standard, (0x00000002, 0x00000000))
-			13: <ptr=0x0000000000da71f0> (Standard, (0x00000002, 0x00000000))
-			14: <ptr=0x0000000000dac9d0> (Standard, (0x00000002, 0x00000000))
-			15: <ptr=0x0000000000db21b0> (Standard, (0x00000002, 0x00000000))
-			16: <ptr=0x0000000000db7990> (Standard, (0x00000002, 0x00000000))
-			17: <ptr=0x0000000000dbd170> (Standard, (0x00000002, 0x00000000))
-			18: <ptr=0x0000000000dc2950> (Standard, (0x00000002, 0x00000000))
-			19: <ptr=0x0000000000dc8130> (Standard, (0x00000002, 0x00000000))
-			20: <ptr=0x0000000000dcd910> (Standard, (0x00000002, 0x00000000))
-			21: <ptr=0x0000000000dd30f0> (Standard, (0x00000002, 0x00000000))
-			22: <ptr=0x0000000000dd88d0> (Standard, (0x00000002, 0x00000000))
-			23: <ptr=0x0000000000dde0b0> (Standard, (0x00000002, 0x00000000))
-			24: <ptr=0x0000000000de3890> (Standard, (0x00000002, 0x00000000))
-			25: <ptr=0x0000000000d84b30> (NeL Material, (0x64c75fec, 0x222b9eb9)) }
+			1: <ptr=0x0000000000c21b80> (Standard, (0x00000002, 0x00000000))
+			2: <ptr=0x0000000000c28e50> (Standard, (0x00000002, 0x00000000))
+			3: <ptr=0x0000000000c30120> (Standard, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000000c35a60> (Standard, (0x00000002, 0x00000000))
+			5: <ptr=0x0000000000c3b3a0> (Standard, (0x00000002, 0x00000000))
+			6: <ptr=0x0000000000c40ce0> (Standard, (0x00000002, 0x00000000))
+			7: <ptr=0x0000000000c59af0> (NeL Material, (0x64c75fec, 0x222b9eb9))
+			8: <ptr=0x0000000000c60bf0> (Standard, (0x00000002, 0x00000000))
+			9: <ptr=0x0000000000c66530> (Standard, (0x00000002, 0x00000000))
+			10: <ptr=0x0000000000c6be70> (Standard, (0x00000002, 0x00000000))
+			11: <ptr=0x0000000000c717b0> (Standard, (0x00000002, 0x00000000))
+			12: <ptr=0x0000000000c770f0> (Standard, (0x00000002, 0x00000000))
+			13: <ptr=0x0000000000c7ca30> (Standard, (0x00000002, 0x00000000))
+			14: <ptr=0x0000000000c82370> (Standard, (0x00000002, 0x00000000))
+			15: <ptr=0x0000000000c87cb0> (Standard, (0x00000002, 0x00000000))
+			16: <ptr=0x0000000000c8d5f0> (Standard, (0x00000002, 0x00000000))
+			17: <ptr=0x0000000000c92f30> (Standard, (0x00000002, 0x00000000))
+			18: <ptr=0x0000000000c98870> (Standard, (0x00000002, 0x00000000))
+			19: <ptr=0x0000000000c9e1b0> (Standard, (0x00000002, 0x00000000))
+			20: <ptr=0x0000000000ca3af0> (Standard, (0x00000002, 0x00000000))
+			21: <ptr=0x0000000000ca9430> (Standard, (0x00000002, 0x00000000))
+			22: <ptr=0x0000000000caed70> (Standard, (0x00000002, 0x00000000))
+			23: <ptr=0x0000000000cb46b0> (Standard, (0x00000002, 0x00000000))
+			24: <ptr=0x0000000000cb9ff0> (Standard, (0x00000002, 0x00000000))
+			25: <ptr=0x0000000000c59af0> (NeL Material, (0x64c75fec, 0x222b9eb9)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x9010: (StorageRaw) {
 			Size: 8
@@ -14557,9 +14479,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	376 0x000f: <ptr=0x0000000000de45f0> (ReferenceMakerUnknown: MtlBaseLib, (0x00003333, 0x00000000), 0x00000100, Builtin) [1] {
+	376 0x000f: <ptr=0x0000000000cbad30> (ReferenceMakerUnknown: MtlBaseLib, (0x00003333, 0x00000000), 0x00000100, Builtin) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000d84b30> (NeL Material, (0x64c75fec, 0x222b9eb9)) }
+			0: <ptr=0x0000000000c59af0> (NeL Material, (0x64c75fec, 0x222b9eb9)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x4110: (StorageRaw) {
 			Size: 4
@@ -14567,7 +14489,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	377 0x0006: <ptr=0x0000000000de48e0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [3] {
+	377 0x0006: <ptr=0x0000000000cbb040> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [3] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -14595,13 +14517,13 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 80 3f
 				Int: 1065353216
 				Float: 1 } } }
-	378 0x0010: <ptr=0x0000000000de4d40> (SoundObjSuperClassUnknown: WaveMaster, (0x476fa9de, 0x5b918e4e), 0x00000d00, ProSound - Multitrack Audio) [0] {
+	378 0x0010: <ptr=0x0000000000cbb4c0> (SoundObjSuperClassUnknown: WaveMaster, (0x476fa9de, 0x5b918e4e), 0x00000d00, ProSound - Multitrack Audio) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000de48e0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000cbb040> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	379 0x0011: <ptr=0x0000000000de5050> (SoundObjSuperClassUnknown: ProSound, (0x476fa9de, 0x5b918e4a), 0x00000d00, ProSound - Multitrack Audio) [29] {
+	379 0x0011: <ptr=0x0000000000cbb7f0> (SoundObjSuperClassUnknown: ProSound, (0x476fa9de, 0x5b918e4a), 0x00000d00, ProSound - Multitrack Audio) [29] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000de4d40> (WaveMaster, (0x476fa9de, 0x5b918e4e)) }
+			0: <ptr=0x0000000000cbb4c0> (WaveMaster, (0x476fa9de, 0x5b918e4e)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x4990: (StorageRaw) {
 			Size: 4
@@ -14773,13 +14695,15 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	380 0x0012: <ptr=0x0000000000de61b0> (NodeUnknown: RootNode, (0x00000002, 0x00000000), 0x00000001, Builtin) [1] {
+	380 0x0012: <ptr=0x0000000000cbc940> (RootNode: RootNode, (0x00000002, 0x00000000), 0x00000001, Builtin) [1] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
+		Children: IMPLICIT {
+			0: <ptr=0x0000000000ccbab0> (Node, (0x00000001, 0x00000000)) GE_Acc_MikotoBaniere }
 		Orphan[0] 0x0120: (StorageRaw) {
 			Size: 0
 			String:
 			Hex: } }
-	381 0x0013: <ptr=0x0000000000de6490> (ControlPositionSuperClassUnknown: Bezier Position, (0x00002008, 0x00000000), 0x0000900b, Builtin) [9] {
+	381 0x0013: <ptr=0x0000000000cbcbf0> (ControlPositionSuperClassUnknown: Bezier Position, (0x00002008, 0x00000000), 0x0000900b, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2503: (StorageRaw) {
 			Size: 12
@@ -14822,7 +14746,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	382 0x0014: <ptr=0x0000000000de6b30> (ControlRotationSuperClassUnknown: TCB Rotation, (0x00442313, 0x00000000), 0x0000900c, Builtin) [9] {
+	382 0x0014: <ptr=0x0000000000cbd2b0> (ControlRotationSuperClassUnknown: TCB Rotation, (0x00442313, 0x00000000), 0x0000900c, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2504: (StorageRaw) {
 			Size: 16
@@ -14865,7 +14789,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	383 0x0015: <ptr=0x0000000000de71c0> (ControlScaleSuperClassUnknown: Bezier Scale, (0x00002010, 0x00000000), 0x0000900d, Builtin) [9] {
+	383 0x0015: <ptr=0x0000000000cbd960> (ControlScaleSuperClassUnknown: Bezier Scale, (0x00002010, 0x00000000), 0x0000900d, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2505: (StorageRaw) {
 			Size: 28
@@ -14908,11 +14832,11 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	384 0x0016: <ptr=0x0000000000de7870> (ControlTransformSuperClassUnknown: Position/Rotation/Scale, (0x00002005, 0x00000000), 0x00009008, Builtin) [3] {
+	384 0x0016: <ptr=0x0000000000cbe030> (ControlTransformSuperClassUnknown: Position/Rotation/Scale, (0x00002005, 0x00000000), 0x00009008, Builtin) [3] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000de6490> (Bezier Position, (0x00002008, 0x00000000))
-			1: <ptr=0x0000000000de6b30> (TCB Rotation, (0x00442313, 0x00000000))
-			2: <ptr=0x0000000000de71c0> (Bezier Scale, (0x00002010, 0x00000000)) }
+			0: <ptr=0x0000000000cbcbf0> (Bezier Position, (0x00002008, 0x00000000))
+			1: <ptr=0x0000000000cbd2b0> (TCB Rotation, (0x00442313, 0x00000000))
+			2: <ptr=0x0000000000cbd960> (Bezier Scale, (0x00002010, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x7230: (StorageRaw) {
 			Size: 4
@@ -14932,7 +14856,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	385 0x0000: <ptr=0x0000000000de7c70> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [121] {
+	385 0x0000: <ptr=0x0000000000cbe450> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [121] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
@@ -15418,14 +15342,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 94
 			String: ..............................................................................................
 			Hex: 0f 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 } }
-	386 0x0017: <ptr=0x0000000000debc20> (MasterPointControllerSuperClassUnknown: Master Point Controller, (0x0d9c20ff, 0x00000000), 0x00009010, Builtin) [1] {
+	386 0x0017: <ptr=0x0000000000cc2420> (MasterPointControllerSuperClassUnknown: Master Point Controller, (0x0d9c20ff, 0x00000000), 0x00009010, Builtin) [1] {
 		Orphan[0] 0x2535: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	387 0x0018: <ptr=0x0000000000debe50> (GeomObjectSuperClassUnknown: Editable Poly, (0x1bf8338d, 0x192f6098), 0x00000010, Editable Poly Object (Autodesk)) [9] {
+	387 0x0018: <ptr=0x0000000000cc2670> (GeomObjectSuperClassUnknown: Editable Poly, (0x1bf8338d, 0x192f6098), 0x00000010, Editable Poly Object (Autodesk)) [9] {
 		AppData: (AppData) [2] PARSED {
 			Entries[0]: (AppDataEntry) [2] PARSED {
 				Key: (AppDataEntryKey) {
@@ -15450,8 +15374,8 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 					String: .
 					Hex: 00 } } }
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000de7c70> (ParamBlock2, (0x00000082, 0x00000000))
-			1: <ptr=0x0000000000debc20> (Master Point Controller, (0x0d9c20ff, 0x00000000)) }
+			0: <ptr=0x0000000000cbe450> (ParamBlock2, (0x00000082, 0x00000000))
+			1: <ptr=0x0000000000cc2420> (Master Point Controller, (0x0d9c20ff, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x4039: (StorageContainer) [2] {
 			0 0x0000: (StorageRaw) {
@@ -15656,7 +15580,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 1
 			String: .
 			Hex: 00 } }
-	388 0x0019: <ptr=0x0000000000df4c10> (LayerSuperClassUnknown: Base Layer, (0x7e9858fe, 0x1dba1df0), 0x000010f0, Builtin) [9] {
+	388 0x0019: <ptr=0x0000000000ccb450> (LayerSuperClassUnknown: Base Layer, (0x7e9858fe, 0x1dba1df0), 0x000010f0, Builtin) [9] {
 		Orphan[0] 0x1000: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -15706,7 +15630,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	389 0x001a: <ptr=0x0000000000df5250> (NodeImpl: Node, (0x00000001, 0x00000000), 0x00000001, Builtin) [22] {
+	389 0x001a: <ptr=0x0000000000ccbab0> (NodeImpl: Node, (0x00000001, 0x00000000), 0x00000001, Builtin) [19] {
 		AppData: (AppData) [83] PARSED {
 			Entries[0]: (AppDataEntry) [2] PARSED {
 				Key: (AppDataEntryKey) {
@@ -16534,83 +16458,75 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 					String: ..|r...=...>..@?
 					Hex: 01 86 7c 72 cd cc cc 3d 9a 99 99 3e 00 00 40 3f } } }
 		References 0x2035: PARSED {
-			0: <ptr=0x0000000000de7870> (Position/Rotation/Scale, (0x00002005, 0x00000000))
-			1: <ptr=0x0000000000debe50> (Editable Poly, (0x1bf8338d, 0x192f6098))
-			3: <ptr=0x0000000000d84b30> (NeL Material, (0x64c75fec, 0x222b9eb9))
-			6: <ptr=0x0000000000df4c10> (Base Layer, (0x7e9858fe, 0x1dba1df0)) }
+			0: <ptr=0x0000000000cbe030> (Position/Rotation/Scale, (0x00002005, 0x00000000))
+			1: <ptr=0x0000000000cc2670> (Editable Poly, (0x1bf8338d, 0x192f6098))
+			3: <ptr=0x0000000000c59af0> (NeL Material, (0x64c75fec, 0x222b9eb9))
+			6: <ptr=0x0000000000ccb450> (Base Layer, (0x7e9858fe, 0x1dba1df0)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x09ce: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: bc 02 00 00
-			Int: 700
-			Float: 9.80909e-43 }
-		Orphan[1] 0x0960: (StorageRaw) {
-			Size: 8
-			String: |.......
-			Hex: 7c 01 00 00 00 08 00 00 }
-		Orphan[2] 0x0962: (StorageRaw) {
-			Size: 40
-			String: G.E._.A.c.c._.M.i.k.o.t.o.B.a.n.i.e.r.e. }
-		Orphan[3] 0x09ba: (StorageRaw) {
+		Children: IMPLICIT { }
+		NodeVersion: 700
+		Parent: <ptr=0x0000000000cbc940> (RootNode, (0x00000002, 0x00000000)) Root Node
+		ParentFlags: 2048
+		UserName: GE_Acc_MikotoBaniere
+		Orphan[0] 0x09ba: (StorageRaw) {
 			Size: 0
 			String:
 			Hex: }
-		Orphan[4] 0x0963: (StorageRaw) {
+		Orphan[1] 0x0963: (StorageRaw) {
 			Size: 8
 			String: ........
 			Hex: 10 00 00 00 10 00 00 00 }
-		Orphan[5] 0x096a: (StorageRaw) {
+		Orphan[2] 0x096a: (StorageRaw) {
 			Size: 12
 			String: .*@2.*... ..
 			Hex: b2 2a 40 32 b0 2a c0 be 05 20 d0 b3 }
-		Orphan[6] 0x096b: (StorageRaw) {
+		Orphan[3] 0x096b: (StorageRaw) {
 			Size: 16
 			String: ..5?..52..5...5?
 			Hex: f1 04 35 3f f1 04 35 32 f6 04 35 b2 f4 04 35 3f }
-		Orphan[7] 0x096c: (StorageRaw) {
+		Orphan[4] 0x096c: (StorageRaw) {
 			Size: 28
 			String: ...?...?...?...............?
 			Hex: 00 00 80 3f 00 00 80 3f 00 00 80 3f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 80 3f }
-		Orphan[8] 0x0974: (StorageRaw) {
+		Orphan[5] 0x0974: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: e4 d6 99 00
 			Int: 10082020
 			Float: 1.41279e-38 }
-		Orphan[9] 0x099c: (StorageRaw) {
+		Orphan[6] 0x099c: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 00 d6 00 0b
 			Int: 184604160
 			Float: 2.48129e-32 }
-		Orphan[10] 0x0a28: (StorageRaw) {
+		Orphan[7] 0x0a28: (StorageRaw) {
 			Size: 8
 			String: ........ }
-		Orphan[11] 0x0a32: (StorageRaw) {
+		Orphan[8] 0x0a32: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 02 00 00 00
 			Int: 2
 			Float: 2.8026e-45 }
-		Orphan[12] 0x0abe: (StorageRaw) {
+		Orphan[9] 0x0abe: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 }
-		Orphan[13] 0x0ac3: (StorageRaw) {
+		Orphan[10] 0x0ac3: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 }
-		Orphan[14] 0x0ad2: (StorageContainer) [1] {
+		Orphan[11] 0x0ad2: (StorageContainer) [1] {
 			0 0x0006: (StorageRaw) {
 				Size: 21
 				String: .........?..........?
 				Hex: 00 00 01 00 00 01 00 00 80 3f 00 01 01 01 01 00 00 00 00 80 3f } }
-		Orphan[15] 0x0b22: (StorageContainer) [10] {
+		Orphan[12] 0x0b22: (StorageContainer) [10] {
 			0 0x0100: (StorageRaw) {
 				Size: 4
 				String: ....
@@ -16659,7 +16575,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 1
 				String: .
 				Hex: 00 } }
-		Orphan[16] 0x0adc: (StorageContainer) [2] {
+		Orphan[13] 0x0adc: (StorageContainer) [2] {
 			0 0x0001: (StorageRaw) {
 				Size: 2
 				String: ..
@@ -16668,7 +16584,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Size: 1
 				String: .
 				Hex: 01 } }
-		Orphan[17] 0x0af0: (StorageContainer) [8] {
+		Orphan[14] 0x0af0: (StorageContainer) [8] {
 			0 0x0001: (StorageRaw) {
 				Size: 4
 				String: ....
@@ -16715,7 +16631,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } }
-		Orphan[18] 0x0b0e: (StorageContainer) [1] {
+		Orphan[15] 0x0b0e: (StorageContainer) [1] {
 			0 0x0001: (StorageContainer) [24] {
 				0 0x0002: (StorageRaw) {
 					Size: 4
@@ -16857,11 +16773,11 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 					Hex: 01 00 00 00
 					Int: 1
 					Float: 1.4013e-45 } } }
-		Orphan[19] 0x0b4a: (StorageRaw) {
+		Orphan[16] 0x0b4a: (StorageRaw) {
 			Size: 1
 			String: .
 			Hex: 00 }
-		Orphan[20] 0x0b54: (StorageContainer) [1] {
+		Orphan[17] 0x0b54: (StorageContainer) [1] {
 			0 0x0001: (StorageContainer) [1] {
 				0 0x0002: (StorageRaw) {
 					Size: 4
@@ -16869,7 +16785,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 					Hex: 00 00 00 00
 					Int: 0
 					Float: 0 } } }
-		Orphan[21] 0x0b5e: (StorageContainer) [1] {
+		Orphan[18] 0x0b5e: (StorageContainer) [1] {
 			0 0x0001: (StorageContainer) [1] {
 				0 0x0005: (StorageRaw) {
 					Size: 4
@@ -16877,15 +16793,15 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 					Hex: 02 00 00 00
 					Int: 2
 					Float: 2.8026e-45 } } } }
-	390 0x001b: <ptr=0x0000000000dfe4c0> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
+	390 0x001b: <ptr=0x0000000000cd4db0> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
 		Orphan[0] 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	391 0x001c: <ptr=0x0000000000dfe7c0> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
+	391 0x001c: <ptr=0x0000000000cd50d0> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dfe4c0> (Area, (0x77912301, 0x00000000)) }
+			0: <ptr=0x0000000000cd4db0> (Area, (0x77912301, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0002: (StorageRaw) {
 			Size: 0
@@ -16983,121 +16899,15 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	392 0x001b: <ptr=0x0000000000dff360> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
+	392 0x001b: <ptr=0x0000000000cd5c90> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
 		Orphan[0] 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	393 0x001c: <ptr=0x0000000000dff660> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
+	393 0x001c: <ptr=0x0000000000cd5fb0> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dff360> (Area, (0x77912301, 0x00000000)) }
-		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0002: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[1] 0x0020: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[2] 0x0072: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[3] 0x1000: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[4] 0x0007: (StorageRaw) {
-			Size: 4
-			String: ...?
-			Hex: 00 00 80 3f
-			Int: 1065353216
-			Float: 1 }
-		Orphan[5] 0x0008: (StorageRaw) {
-			Size: 4
-			String: ...?
-			Hex: 00 00 80 3f
-			Int: 1065353216
-			Float: 1 }
-		Orphan[6] 0x0009: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 0a 00 00 00
-			Int: 10
-			Float: 1.4013e-44 }
-		Orphan[7] 0x000a: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 0a 00 00 00
-			Int: 10
-			Float: 1.4013e-44 }
-		Orphan[8] 0x000b: (StorageRaw) {
-			Size: 4
-			String: ...?
-			Hex: 00 00 00 3f
-			Int: 1056964608
-			Float: 0.5 }
-		Orphan[9] 0x0030: (StorageRaw) {
-			Size: 4
-			String: ...?
-			Hex: 00 00 00 3f
-			Int: 1056964608
-			Float: 0.5 }
-		Orphan[10] 0x000d: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[11] 0x0060: (StorageRaw) {
-			Size: 4
-			String: ...?
-			Hex: 00 00 c0 3f
-			Int: 1069547520
-			Float: 1.5 }
-		Orphan[12] 0x0077: (StorageRaw) {
-			Size: 8
-			String: .2w%....
-			Hex: 11 32 77 25 00 00 00 00 }
-		Orphan[13] 0x0074: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[14] 0x0075: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[15] 0x0071: (StorageRaw) {
-			Size: 4
-			String: ...?
-			Hex: 00 00 00 3f
-			Int: 1056964608
-			Float: 0.5 }
-		Orphan[16] 0x0076: (StorageRaw) {
-			Size: 4
-			String: ...=
-			Hex: cd cc cc 3d
-			Int: 1036831949
-			Float: 0.1 }
-		Orphan[17] 0x0080: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 } }
-	394 0x001b: <ptr=0x0000000000e00200> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
-		Orphan[0] 0x39bf: (StorageContainer) [1] {
-			0 0x0100: (StorageRaw) {
-				Size: 0
-				String:
-				Hex: } } }
-	395 0x001c: <ptr=0x0000000000e00500> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e00200> (Area, (0x77912301, 0x00000000)) }
+			0: <ptr=0x0000000000cd5c90> (Area, (0x77912301, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0002: (StorageRaw) {
 			Size: 0
@@ -17195,7 +17005,113 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	396 0x001d: <ptr=0x0000000000e010a0> (ReferenceTargetUnknown: RenderElementMgr, (0x46576167, 0x06546546), 0x00000200, Builtin) [8] {
+	394 0x001b: <ptr=0x0000000000cd6b70> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
+		Orphan[0] 0x39bf: (StorageContainer) [1] {
+			0 0x0100: (StorageRaw) {
+				Size: 0
+				String:
+				Hex: } } }
+	395 0x001c: <ptr=0x0000000000cd6e90> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
+		References 0x2034: PARSED {
+			0: <ptr=0x0000000000cd6b70> (Area, (0x77912301, 0x00000000)) }
+		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
+		Orphan[0] 0x0002: (StorageRaw) {
+			Size: 0
+			String:
+			Hex: }
+		Orphan[1] 0x0020: (StorageRaw) {
+			Size: 0
+			String:
+			Hex: }
+		Orphan[2] 0x0072: (StorageRaw) {
+			Size: 0
+			String:
+			Hex: }
+		Orphan[3] 0x1000: (StorageRaw) {
+			Size: 4
+			String: ....
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
+		Orphan[4] 0x0007: (StorageRaw) {
+			Size: 4
+			String: ...?
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
+		Orphan[5] 0x0008: (StorageRaw) {
+			Size: 4
+			String: ...?
+			Hex: 00 00 80 3f
+			Int: 1065353216
+			Float: 1 }
+		Orphan[6] 0x0009: (StorageRaw) {
+			Size: 4
+			String: ....
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
+		Orphan[7] 0x000a: (StorageRaw) {
+			Size: 4
+			String: ....
+			Hex: 0a 00 00 00
+			Int: 10
+			Float: 1.4013e-44 }
+		Orphan[8] 0x000b: (StorageRaw) {
+			Size: 4
+			String: ...?
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
+		Orphan[9] 0x0030: (StorageRaw) {
+			Size: 4
+			String: ...?
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
+		Orphan[10] 0x000d: (StorageRaw) {
+			Size: 4
+			String: ....
+			Hex: 01 00 00 00
+			Int: 1
+			Float: 1.4013e-45 }
+		Orphan[11] 0x0060: (StorageRaw) {
+			Size: 4
+			String: ...?
+			Hex: 00 00 c0 3f
+			Int: 1069547520
+			Float: 1.5 }
+		Orphan[12] 0x0077: (StorageRaw) {
+			Size: 8
+			String: .2w%....
+			Hex: 11 32 77 25 00 00 00 00 }
+		Orphan[13] 0x0074: (StorageRaw) {
+			Size: 0
+			String:
+			Hex: }
+		Orphan[14] 0x0075: (StorageRaw) {
+			Size: 0
+			String:
+			Hex: }
+		Orphan[15] 0x0071: (StorageRaw) {
+			Size: 4
+			String: ...?
+			Hex: 00 00 00 3f
+			Int: 1056964608
+			Float: 0.5 }
+		Orphan[16] 0x0076: (StorageRaw) {
+			Size: 4
+			String: ...=
+			Hex: cd cc cc 3d
+			Int: 1036831949
+			Float: 0.1 }
+		Orphan[17] 0x0080: (StorageRaw) {
+			Size: 4
+			String: ....
+			Hex: 00 00 00 00
+			Int: 0
+			Float: 0 } }
+	396 0x001d: <ptr=0x0000000000cd7a50> (ReferenceTargetUnknown: RenderElementMgr, (0x46576167, 0x06546546), 0x00000200, Builtin) [8] {
 		Orphan[0] 0x1200: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17236,7 +17152,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 1
 			String: .
 			Hex: 00 } }
-	397 0x001d: <ptr=0x0000000000e01650> (ReferenceTargetUnknown: RenderElementMgr, (0x46576167, 0x06546546), 0x00000200, Builtin) [8] {
+	397 0x001d: <ptr=0x0000000000cd8020> (ReferenceTargetUnknown: RenderElementMgr, (0x46576167, 0x06546546), 0x00000200, Builtin) [8] {
 		Orphan[0] 0x1200: (StorageRaw) {
 			Size: 1
 			String: .
@@ -17277,7 +17193,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 1
 			String: .
 			Hex: 00 } }
-	398 0x001e: <ptr=0x0000000000e01c00> (ControlPoint3SuperClassUnknown: Bezier Color, (0x00002011, 0x00000000), 0x00009005, Builtin) [9] {
+	398 0x001e: <ptr=0x0000000000cd85f0> (ControlPoint3SuperClassUnknown: Bezier Color, (0x00002011, 0x00000000), 0x00009005, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2501: (StorageRaw) {
 			Size: 12
@@ -17319,7 +17235,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	399 0x001e: <ptr=0x0000000000e02290> (ControlPoint3SuperClassUnknown: Bezier Color, (0x00002011, 0x00000000), 0x00009005, Builtin) [9] {
+	399 0x001e: <ptr=0x0000000000cd8ca0> (ControlPoint3SuperClassUnknown: Bezier Color, (0x00002011, 0x00000000), 0x00009005, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2501: (StorageRaw) {
 			Size: 12
@@ -17361,7 +17277,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	400 0x001e: <ptr=0x0000000000e02920> (ControlPoint3SuperClassUnknown: Bezier Color, (0x00002011, 0x00000000), 0x00009005, Builtin) [9] {
+	400 0x001e: <ptr=0x0000000000cd9350> (ControlPoint3SuperClassUnknown: Bezier Color, (0x00002011, 0x00000000), 0x00009005, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2501: (StorageRaw) {
 			Size: 12
@@ -17404,7 +17320,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	401 0x0009: <ptr=0x0000000000e02fb0> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
+	401 0x0009: <ptr=0x0000000000cd9a00> (ControlFloatSuperClassUnknown: Bezier Float, (0x00002007, 0x00000000), 0x00009003, Builtin) [9] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x2501: (StorageRaw) {
 			Size: 4
@@ -17449,15 +17365,15 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	402 0x001b: <ptr=0x0000000000e03640> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
+	402 0x001b: <ptr=0x0000000000cda0b0> (FilterKernelSuperClassUnknown: Area, (0x77912301, 0x00000000), 0x000010a0, Standard Pre-Filter Kernels (Autodesk)) [1] {
 		Orphan[0] 0x39bf: (StorageContainer) [1] {
 			0 0x0100: (StorageRaw) {
 				Size: 0
 				String:
 				Hex: } } }
-	403 0x001c: <ptr=0x0000000000e03940> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
+	403 0x001c: <ptr=0x0000000000cda3d0> (RendererSuperClassUnknown: Default Scanline Renderer, (0x00000001, 0x00000000), 0x00000f00, Default Scanline Renderer (Autodesk)) [18] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e03640> (Area, (0x77912301, 0x00000000)) }
+			0: <ptr=0x0000000000cda0b0> (Area, (0x77912301, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0002: (StorageRaw) {
 			Size: 0
@@ -17555,18 +17471,18 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	404 0x001f: <ptr=0x0000000000e044e0> (AtmosphericSuperClassUnknown: RenderEnvironment, (0xee448b23, 0x00000000), 0x00001010, Builtin) [5] {
+	404 0x001f: <ptr=0x0000000000cdaf90> (AtmosphericSuperClassUnknown: RenderEnvironment, (0xee448b23, 0x00000000), 0x00001010, Builtin) [5] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000dfe7c0> (Default Scanline Renderer, (0x00000001, 0x00000000))
-			1: <ptr=0x0000000000dff660> (Default Scanline Renderer, (0x00000001, 0x00000000))
-			2: <ptr=0x0000000000e00500> (Default Scanline Renderer, (0x00000001, 0x00000000))
-			3: <ptr=0x0000000000e010a0> (RenderElementMgr, (0x46576167, 0x06546546))
-			4: <ptr=0x0000000000e01650> (RenderElementMgr, (0x46576167, 0x06546546))
-			6: <ptr=0x0000000000e01c00> (Bezier Color, (0x00002011, 0x00000000))
-			7: <ptr=0x0000000000e02290> (Bezier Color, (0x00002011, 0x00000000))
-			8: <ptr=0x0000000000e02920> (Bezier Color, (0x00002011, 0x00000000))
-			9: <ptr=0x0000000000e02fb0> (Bezier Float, (0x00002007, 0x00000000))
-			12: <ptr=0x0000000000e03940> (Default Scanline Renderer, (0x00000001, 0x00000000)) }
+			0: <ptr=0x0000000000cd50d0> (Default Scanline Renderer, (0x00000001, 0x00000000))
+			1: <ptr=0x0000000000cd5fb0> (Default Scanline Renderer, (0x00000001, 0x00000000))
+			2: <ptr=0x0000000000cd6e90> (Default Scanline Renderer, (0x00000001, 0x00000000))
+			3: <ptr=0x0000000000cd7a50> (RenderElementMgr, (0x46576167, 0x06546546))
+			4: <ptr=0x0000000000cd8020> (RenderElementMgr, (0x46576167, 0x06546546))
+			6: <ptr=0x0000000000cd85f0> (Bezier Color, (0x00002011, 0x00000000))
+			7: <ptr=0x0000000000cd8ca0> (Bezier Color, (0x00002011, 0x00000000))
+			8: <ptr=0x0000000000cd9350> (Bezier Color, (0x00002011, 0x00000000))
+			9: <ptr=0x0000000000cd9a00> (Bezier Float, (0x00002007, 0x00000000))
+			12: <ptr=0x0000000000cda3d0> (Default Scanline Renderer, (0x00000001, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0100: (StorageRaw) {
 			Size: 4
@@ -18385,15 +18301,15 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 12
 			String: .......@...@
 			Hex: 00 00 00 00 cd cc 0c 40 cd cc 0c 40 } }
-	405 0x0020: <ptr=0x0000000000e09ee0> (ReferenceMakerUnknown: NamedSelSetList, (0x00008d52, 0x00000000), 0x00000100, Builtin) [1] {
+	405 0x0020: <ptr=0x0000000000ce09b0> (ReferenceMakerUnknown: NamedSelSetList, (0x00008d52, 0x00000000), 0x00000100, Builtin) [1] {
 		Orphan[0] 0x0100: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	406 0x0021: <ptr=0x0000000000e0a100> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] { }
-	407 0x0000: <ptr=0x0000000000e0a290> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
+	406 0x0021: <ptr=0x0000000000ce0bb0> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] { }
+	407 0x0000: <ptr=0x0000000000ce0d10> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: "......!........
@@ -18410,9 +18326,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	408 0x0022: <ptr=0x0000000000e0a630> (ControlFloatSuperClassUnknown: Float List, (0x4b4b1000, 0x00000000), 0x00009003, Standard Controllers (Autodesk)) [3] {
+	408 0x0022: <ptr=0x0000000000ce10d0> (ControlFloatSuperClassUnknown: Float List, (0x4b4b1000, 0x00000000), 0x00009003, Standard Controllers (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			2: <ptr=0x0000000000e0a290> (ParamBlock2, (0x00000082, 0x00000000)) }
+			2: <ptr=0x0000000000ce0d10> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1010: (StorageRaw) {
 			Size: 4
@@ -18432,7 +18348,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	409 0x0000: <ptr=0x0000000000e0aac0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
+	409 0x0000: <ptr=0x0000000000ce1580> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: #......!........
@@ -18449,9 +18365,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	410 0x0023: <ptr=0x0000000000e0ae60> (ControlPoint3SuperClassUnknown: Point3 List, (0x4b4b1001, 0x00000000), 0x00009005, Standard Controllers (Autodesk)) [3] {
+	410 0x0023: <ptr=0x0000000000ce1940> (ControlPoint3SuperClassUnknown: Point3 List, (0x4b4b1001, 0x00000000), 0x00009005, Standard Controllers (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			2: <ptr=0x0000000000e0aac0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			2: <ptr=0x0000000000ce1580> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1010: (StorageRaw) {
 			Size: 4
@@ -18471,7 +18387,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	411 0x0000: <ptr=0x0000000000e0b2f0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
+	411 0x0000: <ptr=0x0000000000ce1df0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: $......!........
@@ -18488,9 +18404,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	412 0x0024: <ptr=0x0000000000e0b690> (ControlPoint4SuperClassUnknown: Point4 List, (0x4b4b1005, 0x00000000), 0x00009012, Standard Controllers (Autodesk)) [3] {
+	412 0x0024: <ptr=0x0000000000ce21b0> (ControlPoint4SuperClassUnknown: Point4 List, (0x4b4b1005, 0x00000000), 0x00009012, Standard Controllers (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			2: <ptr=0x0000000000e0b2f0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			2: <ptr=0x0000000000ce1df0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1010: (StorageRaw) {
 			Size: 4
@@ -18510,7 +18426,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	413 0x0000: <ptr=0x0000000000e0bb20> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
+	413 0x0000: <ptr=0x0000000000ce2660> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: %......!........
@@ -18527,9 +18443,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	414 0x0025: <ptr=0x0000000000e0bed0> (ControlPositionSuperClassUnknown: Position List, (0x4b4b1002, 0x00000000), 0x0000900b, Standard Controllers (Autodesk)) [3] {
+	414 0x0025: <ptr=0x0000000000ce2a30> (ControlPositionSuperClassUnknown: Position List, (0x4b4b1002, 0x00000000), 0x0000900b, Standard Controllers (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			2: <ptr=0x0000000000e0bb20> (ParamBlock2, (0x00000082, 0x00000000)) }
+			2: <ptr=0x0000000000ce2660> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1010: (StorageRaw) {
 			Size: 4
@@ -18549,7 +18465,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	415 0x0000: <ptr=0x0000000000e0c360> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
+	415 0x0000: <ptr=0x0000000000ce2ee0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: &......!........
@@ -18566,9 +18482,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	416 0x0026: <ptr=0x0000000000e0c710> (ControlRotationSuperClassUnknown: Rotation List, (0x4b4b1003, 0x00000000), 0x0000900c, Standard Controllers (Autodesk)) [3] {
+	416 0x0026: <ptr=0x0000000000ce32b0> (ControlRotationSuperClassUnknown: Rotation List, (0x4b4b1003, 0x00000000), 0x0000900c, Standard Controllers (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			2: <ptr=0x0000000000e0c360> (ParamBlock2, (0x00000082, 0x00000000)) }
+			2: <ptr=0x0000000000ce2ee0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1010: (StorageRaw) {
 			Size: 4
@@ -18588,7 +18504,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	417 0x0000: <ptr=0x0000000000e0cba0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
+	417 0x0000: <ptr=0x0000000000ce3760> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: '......!........
@@ -18605,9 +18521,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	418 0x0027: <ptr=0x0000000000e0cf40> (ControlScaleSuperClassUnknown: Scale List, (0x4b4b1004, 0x00000000), 0x0000900d, Standard Controllers (Autodesk)) [3] {
+	418 0x0027: <ptr=0x0000000000ce3b20> (ControlScaleSuperClassUnknown: Scale List, (0x4b4b1004, 0x00000000), 0x0000900d, Standard Controllers (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			2: <ptr=0x0000000000e0cba0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			2: <ptr=0x0000000000ce3760> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1010: (StorageRaw) {
 			Size: 4
@@ -18627,7 +18543,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	419 0x0000: <ptr=0x0000000000e0d3d0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
+	419 0x0000: <ptr=0x0000000000ce3fd0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [4] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: (......!........
@@ -18644,9 +18560,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	420 0x0028: <ptr=0x0000000000e0d780> (ControlMasterBlockSuperClassUnknown: Block Control, (0x4b4b1015, 0x00000000), 0x00009011, Standard Controllers (Autodesk)) [3] {
+	420 0x0028: <ptr=0x0000000000ce43a0> (ControlMasterBlockSuperClassUnknown: Block Control, (0x4b4b1015, 0x00000000), 0x00009011, Standard Controllers (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			2: <ptr=0x0000000000e0d3d0> (ParamBlock2, (0x00000082, 0x00000000)) }
+			2: <ptr=0x0000000000ce3fd0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1010: (StorageRaw) {
 			Size: 4
@@ -18666,108 +18582,24 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	421 0x0021: <ptr=0x0000000000e0dc10> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [21] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e0a630> (Float List, (0x4b4b1000, 0x00000000))
-			1: <ptr=0x0000000000e0ae60> (Point3 List, (0x4b4b1001, 0x00000000))
-			2: <ptr=0x0000000000e0b690> (Point4 List, (0x4b4b1005, 0x00000000))
-			3: <ptr=0x0000000000e0bed0> (Position List, (0x4b4b1002, 0x00000000))
-			4: <ptr=0x0000000000e0c710> (Rotation List, (0x4b4b1003, 0x00000000))
-			5: <ptr=0x0000000000e0cf40> (Scale List, (0x4b4b1004, 0x00000000))
-			6: <ptr=0x0000000000e0d780> (Block Control, (0x4b4b1015, 0x00000000)) }
+	421 0x0021: <ptr=0x0000000000ce4810> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000ce10d0> (Float List, (0x4b4b1000, 0x00000000))
+			1: <ptr=0x0000000000ce1940> (Point3 List, (0x4b4b1001, 0x00000000))
+			2: <ptr=0x0000000000ce21b0> (Point4 List, (0x4b4b1005, 0x00000000))
+			3: <ptr=0x0000000000ce2a30> (Position List, (0x4b4b1002, 0x00000000))
+			4: <ptr=0x0000000000ce32b0> (Rotation List, (0x4b4b1003, 0x00000000))
+			5: <ptr=0x0000000000ce3b20> (Scale List, (0x4b4b1004, 0x00000000))
+			6: <ptr=0x0000000000ce43a0> (Block Control, (0x4b4b1015, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0110: (StorageRaw) {
-			Size: 10
-			String: F.l.o.a.t. }
-		Orphan[1] 0x0120: (StorageRaw) {
-			Size: 8
-			String: ..KK....
-			Hex: 00 10 4b 4b 00 00 00 00 }
-		Orphan[2] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[3] 0x0110: (StorageRaw) {
-			Size: 12
-			String: P.o.i.n.t.3. }
-		Orphan[4] 0x0120: (StorageRaw) {
-			Size: 8
-			String: ..KK....
-			Hex: 01 10 4b 4b 00 00 00 00 }
-		Orphan[5] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[6] 0x0110: (StorageRaw) {
-			Size: 12
-			String: P.o.i.n.t.4. }
-		Orphan[7] 0x0120: (StorageRaw) {
-			Size: 8
-			String: ..KK....
-			Hex: 05 10 4b 4b 00 00 00 00 }
-		Orphan[8] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[9] 0x0110: (StorageRaw) {
-			Size: 16
-			String: P.o.s.i.t.i.o.n. }
-		Orphan[10] 0x0120: (StorageRaw) {
-			Size: 8
-			String: ..KK....
-			Hex: 02 10 4b 4b 00 00 00 00 }
-		Orphan[11] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[12] 0x0110: (StorageRaw) {
-			Size: 16
-			String: R.o.t.a.t.i.o.n. }
-		Orphan[13] 0x0120: (StorageRaw) {
-			Size: 8
-			String: ..KK....
-			Hex: 03 10 4b 4b 00 00 00 00 }
-		Orphan[14] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[15] 0x0110: (StorageRaw) {
-			Size: 10
-			String: S.c.a.l.e. }
-		Orphan[16] 0x0120: (StorageRaw) {
-			Size: 8
-			String: ..KK....
-			Hex: 04 10 4b 4b 00 00 00 00 }
-		Orphan[17] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[18] 0x0110: (StorageRaw) {
-			Size: 26
-			String: B.l.o.c.k. .C.o.n.t.r.o.l. }
-		Orphan[19] 0x0120: (StorageRaw) {
-			Size: 8
-			String: ..KK....
-			Hex: 15 10 4b 4b 00 00 00 00 }
-		Orphan[20] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 } }
-	422 0x0029: <ptr=0x0000000000e0e910> (ControlFloatSuperClassUnknown: Block Manager Wrapper, (0x1f8c3646, 0x11793bed), 0x00009003, Block Manager Utility (Autodesk)) [1] {
+		0: <ptr=0x0000000000ce10d0> (Float List, (0x4b4b1000, 0x00000000)) (Float, (0x4b4b1000, 0x00000000), 1)
+		1: <ptr=0x0000000000ce1940> (Point3 List, (0x4b4b1001, 0x00000000)) (Point3, (0x4b4b1001, 0x00000000), 1)
+		2: <ptr=0x0000000000ce21b0> (Point4 List, (0x4b4b1005, 0x00000000)) (Point4, (0x4b4b1005, 0x00000000), 1)
+		3: <ptr=0x0000000000ce2a30> (Position List, (0x4b4b1002, 0x00000000)) (Position, (0x4b4b1002, 0x00000000), 1)
+		4: <ptr=0x0000000000ce32b0> (Rotation List, (0x4b4b1003, 0x00000000)) (Rotation, (0x4b4b1003, 0x00000000), 1)
+		5: <ptr=0x0000000000ce3b20> (Scale List, (0x4b4b1004, 0x00000000)) (Scale, (0x4b4b1004, 0x00000000), 1)
+		6: <ptr=0x0000000000ce43a0> (Block Control, (0x4b4b1015, 0x00000000)) (Block Control, (0x4b4b1015, 0x00000000), 1) }
+	422 0x0029: <ptr=0x0000000000ce5260> (ControlFloatSuperClassUnknown: Block Manager Wrapper, (0x1f8c3646, 0x11793bed), 0x00009003, Block Manager Utility (Autodesk)) [1] {
 		Orphan[0] 0x0001: (StorageContainer) [1] {
 			0 0x0010: (StorageRaw) {
 				Size: 4
@@ -18775,28 +18607,13 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	423 0x0021: <ptr=0x0000000000e0ec50> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [4] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e0e910> (Block Manager Wrapper, (0x1f8c3646, 0x11793bed)) }
+	423 0x0021: <ptr=0x0000000000ce5580> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000ce5260> (Block Manager Wrapper, (0x1f8c3646, 0x11793bed)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0140: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[1] 0x0110: (StorageRaw) {
-			Size: 42
-			String: B.l.o.c.k. .M.a.n.a.g.e.r. .W.r.a.p.p.e.r. }
-		Orphan[2] 0x0120: (StorageRaw) {
-			Size: 8
-			String: F6...;y.
-			Hex: 46 36 8c 1f ed 3b 79 11 }
-		Orphan[3] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 } }
-	424 0x002a: <ptr=0x0000000000e0f0b0> (ControlFloatSuperClassUnknown: Propagation Manager Wrapper, (0x5a1b661e, 0x7620792b), 0x00009003, Propagation Manager Utility (Autodesk)) [1] {
+		Empty 0x0140
+		0: <ptr=0x0000000000ce5260> (Block Manager Wrapper, (0x1f8c3646, 0x11793bed)) (Block Manager Wrapper, (0x1f8c3646, 0x11793bed), 1) }
+	424 0x002a: <ptr=0x0000000000ce5950> (ControlFloatSuperClassUnknown: Propagation Manager Wrapper, (0x5a1b661e, 0x7620792b), 0x00009003, Propagation Manager Utility (Autodesk)) [1] {
 		Orphan[0] 0x0001: (StorageContainer) [1] {
 			0 0x0010: (StorageRaw) {
 				Size: 4
@@ -18804,28 +18621,13 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 01 00 00 00
 				Int: 1
 				Float: 1.4013e-45 } } }
-	425 0x0021: <ptr=0x0000000000e0f400> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [4] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e0f0b0> (Propagation Manager Wrapper, (0x5a1b661e, 0x7620792b)) }
+	425 0x0021: <ptr=0x0000000000ce5c80> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000ce5950> (Propagation Manager Wrapper, (0x5a1b661e, 0x7620792b)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0140: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[1] 0x0110: (StorageRaw) {
-			Size: 54
-			String: P.r.o.p.a.g.a.t.i.o.n. .M.a.n.a.g.e.r. .W.r.a.p.p.e.r. }
-		Orphan[2] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .f.Z+y v
-			Hex: 1e 66 1b 5a 2b 79 20 76 }
-		Orphan[3] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 } }
-	426 0x0000: <ptr=0x0000000000e0f860> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
+		Empty 0x0140
+		0: <ptr=0x0000000000ce5950> (Propagation Manager Wrapper, (0x5a1b661e, 0x7620792b)) (Propagation Manager Wrapper, (0x5a1b661e, 0x7620792b), 1) }
+	426 0x0000: <ptr=0x0000000000ce6060> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [5] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: +......!........
@@ -18846,9 +18648,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	427 0x002b: <ptr=0x0000000000e0fc80> (ControlFloatSuperClassUnknown: Scene Effect Loader, (0x368d1139, 0xf4044794), 0x00009003, Scene Effect Manager (Autodesk)) [3] {
+	427 0x002b: <ptr=0x0000000000ce64a0> (ControlFloatSuperClassUnknown: Scene Effect Loader, (0x368d1139, 0xf4044794), 0x00009003, Scene Effect Manager (Autodesk)) [3] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e0f860> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000ce6060> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0400: (StorageRaw) {
 			Size: 4
@@ -18868,33 +18670,15 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	428 0x0021: <ptr=0x0000000000e10130> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [5] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e0fc80> (Scene Effect Loader, (0x368d1139, 0xf4044794)) }
+	428 0x0021: <ptr=0x0000000000ce6930> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000ce64a0> (Scene Effect Loader, (0x368d1139, 0xf4044794)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0140: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[1] 0x0150: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[2] 0x0110: (StorageRaw) {
-			Size: 38
-			String: S.c.e.n.e. .E.f.f.e.c.t. .L.o.a.d.e.r. }
-		Orphan[3] 0x0120: (StorageRaw) {
-			Size: 8
-			String: 9..6.G..
-			Hex: 39 11 8d 36 94 47 04 f4 }
-		Orphan[4] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 } }
-	429 0x002c: <ptr=0x0000000000e105e0> (ReferenceMakerUnknown: Reaction Manager, (0x294a389c, 0x087906d7), 0x00000100, Change Reaction Controller (Autodesk)) [0] { }
-	430 0x0000: <ptr=0x0000000000e10840> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [18] {
+		Empty 0x0140
+		Empty 0x0150
+		0: <ptr=0x0000000000ce64a0> (Scene Effect Loader, (0x368d1139, 0xf4044794)) (Scene Effect Loader, (0x368d1139, 0xf4044794), 1) }
+	429 0x002c: <ptr=0x0000000000ce6d60> (ReferenceMakerUnknown: Reaction Manager, (0x294a389c, 0x087906d7), 0x00000100, Change Reaction Controller (Autodesk)) [0] { }
+	430 0x0000: <ptr=0x0000000000ce6fe0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [18] {
 		Orphan[0] 0x000b: (StorageRaw) {
 			Size: 24
 			String: 0.%(&#Z&`......!........
@@ -18967,9 +18751,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	431 0x002d: <ptr=0x0000000000e112f0> (CustAttribSuperClassUnknown: ParameterCollectorCA, (0x28250b30, 0x265a2326), 0x00001160, ParameterEditor (Autodesk)) [1] {
+	431 0x002d: <ptr=0x0000000000ce7ab0> (CustAttribSuperClassUnknown: ParameterCollectorCA, (0x28250b30, 0x265a2326), 0x00001160, ParameterEditor (Autodesk)) [1] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e10840> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000ce6fe0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0100: (StorageContainer) [2] {
 			0 0x0110: (StorageRaw) {
@@ -18984,9 +18768,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	432 0x0003: <ptr=0x0000000000e11770> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
+	432 0x0003: <ptr=0x0000000000ce7f50> (ReferenceMakerUnknown: CustAttribContainer, (0x5ddb3626, 0x23b708db), 0x00000100, Custom Attribute Container (Autodesk)) [2] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e112f0> (ParameterCollectorCA, (0x28250b30, 0x265a2326)) }
+			0: <ptr=0x0000000000ce7ab0> (ParameterCollectorCA, (0x28250b30, 0x265a2326)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1030: (StorageRaw) {
 			Size: 4
@@ -19000,23 +18784,14 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	433 0x0021: <ptr=0x0000000000e11bb0> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [3] {
-		Orphan[0] 0x21b0: (StorageContainer) [1] {
-			0 0x1020: (StorageRaw) {
-				Size: 4
-				String: ....
-				Hex: b0 01 00 00
-				Int: 432
-				Float: 6.05361e-43 } }
-		Orphan[1] 0x0140: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[2] 0x0150: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: } }
-	434 0x002e: <ptr=0x0000000000e11ee0> (UserDataTypeSuperClassUnknown: , (0x4a0c66e1, 0x01513165), 0x00000b60, Bitmap Proxies (Autodesk)) [5] {
+	433 0x0021: <ptr=0x0000000000ce8370> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		Unknown 0x21B0: (StorageRaw) {
+			Size: 10
+			String:  .........
+			Hex: 20 10 0a 00 00 00 b0 01 00 00 }
+		Empty 0x0140
+		Empty 0x0150 }
+	434 0x002e: <ptr=0x0000000000ce8610> (UserDataTypeSuperClassUnknown: , (0x4a0c66e1, 0x01513165), 0x00000b60, Bitmap Proxies (Autodesk)) [5] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0110: (StorageRaw) {
 			Size: 4
@@ -19046,37 +18821,18 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 0
 			String:
 			Hex: } }
-	435 0x002f: <ptr=0x0000000000e12420> (UserTypeSuperClassUnknown: SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b), 0x0000900f, Builtin) [0] {
+	435 0x002f: <ptr=0x0000000000ce8b70> (UserTypeSuperClassUnknown: SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b), 0x0000900f, Builtin) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e11ee0> (, (0x4a0c66e1, 0x01513165)) }
+			0: <ptr=0x0000000000ce8610> (, (0x4a0c66e1, 0x01513165)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	436 0x0021: <ptr=0x0000000000e126a0> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [5] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e12420> (SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b)) }
+	436 0x0021: <ptr=0x0000000000ce8dd0> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000ce8b70> (SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0140: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[1] 0x0150: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[2] 0x0110: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[3] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .f.Je1Q.
-			Hex: e1 66 0c 4a 65 31 51 01 }
-		Orphan[4] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 } }
-	437 0x0030: <ptr=0x0000000000e12b20> (UserDataTypeSuperClassUnknown: BitmapPagerData, (0x5bf94f11, 0x68c22d6f), 0x00000b60, Standard Bitmap Storages and Filters (Autodesk)) [4] {
+		Empty 0x0140
+		Empty 0x0150
+		0: <ptr=0x0000000000ce8b70> (SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b)) (, (0x4a0c66e1, 0x01513165), 1) }
+	437 0x0030: <ptr=0x0000000000ce91b0> (UserDataTypeSuperClassUnknown: BitmapPagerData, (0x5bf94f11, 0x68c22d6f), 0x00000b60, Standard Bitmap Storages and Filters (Autodesk)) [4] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x0110: (StorageRaw) {
 			Size: 4
@@ -19102,36 +18858,18 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: cd cc cc 3d
 			Int: 1036831949
 			Float: 0.1 } }
-	438 0x002f: <ptr=0x0000000000e13060> (UserTypeSuperClassUnknown: SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b), 0x0000900f, Builtin) [0] {
+	438 0x002f: <ptr=0x0000000000ce9710> (UserTypeSuperClassUnknown: SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b), 0x0000900f, Builtin) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e12b20> (BitmapPagerData, (0x5bf94f11, 0x68c22d6f)) }
+			0: <ptr=0x0000000000ce91b0> (BitmapPagerData, (0x5bf94f11, 0x68c22d6f)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	439 0x0021: <ptr=0x0000000000e132e0> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [5] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e13060> (SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b)) }
+	439 0x0021: <ptr=0x0000000000ce9970> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000ce9710> (SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0140: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[1] 0x0150: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[2] 0x0110: (StorageRaw) {
-			Size: 30
-			String: B.i.t.m.a.p.P.a.g.e.r.D.a.t.a. }
-		Orphan[3] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .O.[o-.h
-			Hex: 11 4f f9 5b 6f 2d c2 68 }
-		Orphan[4] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 } }
-	440 0x0000: <ptr=0x0000000000e13790> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
+		Empty 0x0140
+		Empty 0x0150
+		0: <ptr=0x0000000000ce9710> (SceneAppData Latch, (0x0c6f6387, 0x2c1a0a7b)) (BitmapPagerData, (0x5bf94f11, 0x68c22d6f), 1) }
+	440 0x0000: <ptr=0x0000000000ce9d90> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: 1......!........
@@ -19144,9 +18882,9 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	441 0x0031: <ptr=0x0000000000e13ab0> (UserTypeSuperClassUnknown: MasterLayerControlManager, (0x0f4871a5, 0x781f1430), 0x0000900f, Standard Controllers (Autodesk)) [7] {
+	441 0x0031: <ptr=0x0000000000cea0d0> (UserTypeSuperClassUnknown: MasterLayerControlManager, (0x0f4871a5, 0x781f1430), 0x0000900f, Standard Controllers (Autodesk)) [7] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e13790> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000ce9d90> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1001: (StorageRaw) {
 			Size: 4
@@ -19190,7 +18928,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 64 00 00 00
 			Int: 100
 			Float: 1.4013e-43 } }
-	442 0x0000: <ptr=0x0000000000e14160> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
+	442 0x0000: <ptr=0x0000000000cea7a0> (ParamBlock2SuperClassUnknown: ParamBlock2, (0x00000082, 0x00000000), 0x00000082, Builtin) [3] {
 		Orphan[0] 0x0009: (StorageRaw) {
 			Size: 16
 			String: 2......!........
@@ -19203,175 +18941,39 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 10
 			String: ..........
 			Hex: 01 00 00 00 01 00 00 00 00 00 } }
-	443 0x0032: <ptr=0x0000000000e14480> (UserTypeSuperClassUnknown: Max Mixer Clip, (0x57a52b8c, 0x30935afc), 0x0000900f, Biped Controller (Autodesk)) [0] {
+	443 0x0032: <ptr=0x0000000000ceaae0> (UserTypeSuperClassUnknown: Max Mixer Clip, (0x57a52b8c, 0x30935afc), 0x0000900f, Biped Controller (Autodesk)) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e14160> (ParamBlock2, (0x00000082, 0x00000000)) }
+			0: <ptr=0x0000000000cea7a0> (ParamBlock2, (0x00000082, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	444 0x0021: <ptr=0x0000000000e14790> (ReferenceTargetUnknown: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [34] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e0a100> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			1: <ptr=0x0000000000e0dc10> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			2: <ptr=0x0000000000e0ec50> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			3: <ptr=0x0000000000e0f400> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			4: <ptr=0x0000000000e10130> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			5: <ptr=0x0000000000e105e0> (Reaction Manager, (0x294a389c, 0x087906d7))
-			6: <ptr=0x0000000000e11bb0> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			7: <ptr=0x0000000000e126a0> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			8: <ptr=0x0000000000e132e0> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			9: <ptr=0x0000000000e13ab0> (MasterLayerControlManager, (0x0f4871a5, 0x781f1430))
-			10: <ptr=0x0000000000e14480> (Max Mixer Clip, (0x57a52b8c, 0x30935afc)) }
+	444 0x0021: <ptr=0x0000000000ceadd0> (TrackViewNode: TVNode, (0x8d73b8aa, 0x90f2ee71), 0x00000200, Builtin) [0] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000ce0bb0> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			1: <ptr=0x0000000000ce4810> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			2: <ptr=0x0000000000ce5580> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			3: <ptr=0x0000000000ce5c80> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			4: <ptr=0x0000000000ce6930> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			5: <ptr=0x0000000000ce6d60> (Reaction Manager, (0x294a389c, 0x087906d7))
+			6: <ptr=0x0000000000ce8370> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000000ce8dd0> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			8: <ptr=0x0000000000ce9970> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			9: <ptr=0x0000000000cea0d0> (MasterLayerControlManager, (0x0f4871a5, 0x781f1430))
+			10: <ptr=0x0000000000ceaae0> (Max Mixer Clip, (0x57a52b8c, 0x30935afc)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
-		Orphan[0] 0x0140: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[1] 0x0110: (StorageRaw) {
-			Size: 20
-			String: V.i.d.e.o. .P.o.s.t. }
-		Orphan[2] 0x0120: (StorageRaw) {
-			Size: 8
-			String: 0.+H..,.
-			Hex: 30 8d 2b 48 11 85 2c b7 }
-		Orphan[3] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[4] 0x0110: (StorageRaw) {
-			Size: 26
-			String: G.l.o.b.a.l. .T.r.a.c.k.s. }
-		Orphan[5] 0x0120: (StorageRaw) {
-			Size: 8
-			String: *.~.p..s
-			Hex: 2a 9f 7e b2 70 d3 fa 73 }
-		Orphan[6] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[7] 0x0110: (StorageRaw) {
-			Size: 56
-			String: B.l.o.c.k. .M.a.n.a.g.e.r. .W.r.a.p.p.e.r. .T.V.N.o.d.e. }
-		Orphan[8] 0x0120: (StorageRaw) {
-			Size: 8
-			String: F6...;y.
-			Hex: 46 36 8c 1f ed 3b 79 11 }
-		Orphan[9] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[10] 0x0110: (StorageRaw) {
-			Size: 68
-			String: P.r.o.p.a.g.a.t.i.o.n. .M.a.n.a.g.e.r. .W.r.a.p.p.e.r. .T.V.N.o.d.e. }
-		Orphan[11] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .f.Z+y v
-			Hex: 1e 66 1b 5a 2b 79 20 76 }
-		Orphan[12] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[13] 0x0110: (StorageRaw) {
-			Size: 26
-			String: S.c.e.n.e. .E.f.f.e.c.t.s. }
-		Orphan[14] 0x0120: (StorageRaw) {
-			Size: 8
-			String: 9..6.G..
-			Hex: 39 11 8d 36 94 47 04 f4 }
-		Orphan[15] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[16] 0x0110: (StorageRaw) {
-			Size: 32
-			String: R.e.a.c.t.i.o.n. .M.a.n.a.g.e.r. }
-		Orphan[17] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .8J)..y.
-			Hex: 9c 38 4a 29 d7 06 79 08 }
-		Orphan[18] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[19] 0x0110: (StorageRaw) {
-			Size: 38
-			String: P.a.r.a.m.e.t.e.r. .C.o.l.l.e.c.t.o.r. }
-		Orphan[20] 0x0120: (StorageRaw) {
-			Size: 8
-			String: M[.9~..t
-			Hex: 4d 5b aa 39 7e 15 c1 74 }
-		Orphan[21] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[22] 0x0110: (StorageRaw) {
-			Size: 0
-			String:
-			Hex: }
-		Orphan[23] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .f.Je1Q.
-			Hex: e1 66 0c 4a 65 31 51 01 }
-		Orphan[24] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[25] 0x0110: (StorageRaw) {
-			Size: 30
-			String: B.i.t.m.a.p.P.a.g.e.r.D.a.t.a. }
-		Orphan[26] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .O.[o-.h
-			Hex: 11 4f f9 5b 6f 2d c2 68 }
-		Orphan[27] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 00 00 00 00
-			Int: 0
-			Float: 0 }
-		Orphan[28] 0x0110: (StorageRaw) {
-			Size: 52
-			String: A.n.i.m. .L.a.y.e.r. .C.o.n.t.r.o.l. .M.a.n.a.g.e.r. }
-		Orphan[29] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .qH.0..x
-			Hex: a5 71 48 0f 30 14 1f 78 }
-		Orphan[30] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 }
-		Orphan[31] 0x0110: (StorageRaw) {
-			Size: 44
-			String: M.a.x. .M.o.t.i.o.n.C.l.i.p. .M.a.n.a.g.e.r. }
-		Orphan[32] 0x0120: (StorageRaw) {
-			Size: 8
-			String: .+.W.Z.0
-			Hex: 8c 2b a5 57 fc 5a 93 30 }
-		Orphan[33] 0x0130: (StorageRaw) {
-			Size: 4
-			String: ....
-			Hex: 01 00 00 00
-			Int: 1
-			Float: 1.4013e-45 } }
-	445 0x0033: <ptr=0x0000000000e15bb0> (GridReferenceSuperClassUnknown: Grid Reference, (0x00000001, 0x00000000), 0xfffffe00, Builtin) [0] {
+		Empty 0x0140
+		0: <ptr=0x0000000000ce0bb0> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (Video Post, (0x482b8d30, 0xb72c8511), 0)
+		1: <ptr=0x0000000000ce4810> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (Global Tracks, (0xb27e9f2a, 0x73fad370), 0)
+		2: <ptr=0x0000000000ce5580> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (Block Manager Wrapper TVNode, (0x1f8c3646, 0x11793bed), 0)
+		3: <ptr=0x0000000000ce5c80> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (Propagation Manager Wrapper TVNode, (0x5a1b661e, 0x7620792b), 0)
+		4: <ptr=0x0000000000ce6930> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (Scene Effects, (0x368d1139, 0xf4044794), 0)
+		5: <ptr=0x0000000000ce6d60> (Reaction Manager, (0x294a389c, 0x087906d7)) (Reaction Manager, (0x294a389c, 0x087906d7), 1)
+		6: <ptr=0x0000000000ce8370> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (Parameter Collector, (0x39aa5b4d, 0x74c1157e), 0)
+		7: <ptr=0x0000000000ce8dd0> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (, (0x4a0c66e1, 0x01513165), 0)
+		8: <ptr=0x0000000000ce9970> (TVNode, (0x8d73b8aa, 0x90f2ee71)) (BitmapPagerData, (0x5bf94f11, 0x68c22d6f), 0)
+		9: <ptr=0x0000000000cea0d0> (MasterLayerControlManager, (0x0f4871a5, 0x781f1430)) (Anim Layer Control Manager, (0x0f4871a5, 0x781f1430), 1)
+		10: <ptr=0x0000000000ceaae0> (Max Mixer Clip, (0x57a52b8c, 0x30935afc)) (Max MotionClip Manager, (0x57a52b8c, 0x30935afc), 1) }
+	445 0x0033: <ptr=0x0000000000cebdf0> (GridReferenceSuperClassUnknown: Grid Reference, (0x00000001, 0x00000000), 0xfffffe00, Builtin) [0] {
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	446 0x0034: <ptr=0x0000000000e15e20> (RenderEffectSuperClassUnknown: RenderEffects, (0x17356912, 0x00000000), 0x00001090, Builtin) [2] {
+	446 0x0034: <ptr=0x0000000000cec080> (RenderEffectSuperClassUnknown: RenderEffects, (0x17356912, 0x00000000), 0x00001090, Builtin) [2] {
 		Orphan[0] 0x1100: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -19384,7 +18986,7 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Hex: 01 00 00 00
 			Int: 1
 			Float: 1.4013e-45 } }
-	447 0x0006: <ptr=0x0000000000e160c0> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [7] {
+	447 0x0006: <ptr=0x0000000000cec340> (ParamBlockSuperClassUnknown: ParamBlock, (0x00000008, 0x00000000), 0x00000008, Builtin) [7] {
 		Orphan[0] 0x0001: (StorageRaw) {
 			Size: 4
 			String: ....
@@ -19476,13 +19078,13 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 				Hex: 00 00 00 00
 				Int: 0
 				Float: 0 } } }
-	448 0x0035: <ptr=0x0000000000e16bc0> (ShadowTypeSuperClassUnknown: Shadow Map, (0x00000100, 0x00000000), 0x000010d0, Default Scanline Renderer (Autodesk)) [0] {
+	448 0x0035: <ptr=0x0000000000cece60> (ShadowTypeSuperClassUnknown: Shadow Map, (0x00000100, 0x00000000), 0x000010d0, Default Scanline Renderer (Autodesk)) [0] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000e160c0> (ParamBlock, (0x00000008, 0x00000000)) }
+			0: <ptr=0x0000000000cec340> (ParamBlock, (0x00000008, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 } }
-	449 0x0036: <ptr=0x0000000000e16ee0> (ReferenceTargetUnknown: Layer Manager, (0x0d7374fc, 0x51ff028e), 0x00000200, Builtin) [3] {
+	449 0x0036: <ptr=0x0000000000ced1a0> (ReferenceTargetUnknown: Layer Manager, (0x0d7374fc, 0x51ff028e), 0x00000200, Builtin) [3] {
 		References 0x2034: PARSED {
-			0: <ptr=0x0000000000df4c10> (Base Layer, (0x7e9858fe, 0x1dba1df0)) }
+			0: <ptr=0x0000000000ccb450> (Base Layer, (0x7e9858fe, 0x1dba1df0)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x1500: (StorageRaw) {
 			Size: 4
@@ -19500,27 +19102,27 @@ DBG caa50940 main.cpp 171 main <Unknown> : CLEAN
 			Size: 1
 			String: 0
 			Hex: 30 } }
-	450 0x0037: <ptr=0x0000000000e172d0> (ReferenceMakerUnknown: TrackSetList, (0x2cf03595, 0x00000000), 0x00000100, Builtin) [1] {
+	450 0x0037: <ptr=0x0000000000ced5b0> (ReferenceMakerUnknown: TrackSetList, (0x2cf03595, 0x00000000), 0x00000100, Builtin) [1] {
 		Orphan[0] 0x0100: (StorageRaw) {
 			Size: 4
 			String: ....
 			Hex: 00 00 00 00
 			Int: 0
 			Float: 0 } }
-	451 0x0038: <ptr=0x0000000000e174f0> (ReferenceMakerUnknown: Scene, (0x00002222, 0x00000000), 0x00000100, Builtin) [6] {
-		References 0x2034: PARSED {
-			0: <ptr=0x0000000000de4060> (Material Editor, (0x00000c80, 0x00000000))
-			1: <ptr=0x0000000000de45f0> (MtlBaseLib, (0x00003333, 0x00000000))
-			2: <ptr=0x0000000000de5050> (ProSound, (0x476fa9de, 0x5b918e4a))
-			3: <ptr=0x0000000000de61b0> (RootNode, (0x00000002, 0x00000000))
-			4: <ptr=0x0000000000e044e0> (RenderEnvironment, (0xee448b23, 0x00000000))
-			5: <ptr=0x0000000000e09ee0> (NamedSelSetList, (0x00008d52, 0x00000000))
-			6: <ptr=0x0000000000e14790> (TVNode, (0x8d73b8aa, 0x90f2ee71))
-			7: <ptr=0x0000000000e15bb0> (Grid Reference, (0x00000001, 0x00000000))
-			8: <ptr=0x0000000000e15e20> (RenderEffects, (0x17356912, 0x00000000))
-			9: <ptr=0x0000000000e16bc0> (Shadow Map, (0x00000100, 0x00000000))
-			10: <ptr=0x0000000000e16ee0> (Layer Manager, (0x0d7374fc, 0x51ff028e))
-			11: <ptr=0x0000000000e172d0> (TrackSetList, (0x2cf03595, 0x00000000)) }
+	451 0x0038: <ptr=0x0000000000ced7b0> (SceneImpl: Scene, (0x00002222, 0x00000000), 0x00000100, Builtin) [6] {
+		References 0x2034: PARSED VIRTUAL {
+			0: <ptr=0x0000000000cba780> (Material Editor, (0x00000c80, 0x00000000))
+			1: <ptr=0x0000000000cbad30> (MtlBaseLib, (0x00003333, 0x00000000))
+			2: <ptr=0x0000000000cbb7f0> (ProSound, (0x476fa9de, 0x5b918e4a))
+			3: <ptr=0x0000000000cbc940> (RootNode, (0x00000002, 0x00000000))
+			4: <ptr=0x0000000000cdaf90> (RenderEnvironment, (0xee448b23, 0x00000000))
+			5: <ptr=0x0000000000ce09b0> (NamedSelSetList, (0x00008d52, 0x00000000))
+			6: <ptr=0x0000000000ceadd0> (TVNode, (0x8d73b8aa, 0x90f2ee71))
+			7: <ptr=0x0000000000cebdf0> (Grid Reference, (0x00000001, 0x00000000))
+			8: <ptr=0x0000000000cec080> (RenderEffects, (0x17356912, 0x00000000))
+			9: <ptr=0x0000000000cece60> (Shadow Map, (0x00000100, 0x00000000))
+			10: <ptr=0x0000000000ced1a0> (Layer Manager, (0x0d7374fc, 0x51ff028e))
+			11: <ptr=0x0000000000ced5b0> (TrackSetList, (0x2cf03595, 0x00000000)) }
 		0x204B Equals 0x2E (46): (CStorageValue) { 46 }
 		Orphan[0] 0x8500: (StorageRaw) {
 			Size: 4

@@ -58,7 +58,7 @@ const NLMISC::CClassId CPolyObject::ClassId = NLMISC::CClassId(0x59772461, 0x6e1
 const TSClassId CPolyObject::SuperClassId = CGeomObject::SuperClassId;
 const CPolyObjectClassDesc PolyObjectClassDesc(&DllPluginDescBuiltin);
 
-void CPolyObject::parse(uint16 version)
+void CPolyObject::parse(uint16 version, uint filter)
 {
 	CGeomObject::parse(version);
 }
@@ -68,7 +68,7 @@ void CPolyObject::clean()
 	CGeomObject::clean();
 }
 
-void CPolyObject::build(uint16 version)
+void CPolyObject::build(uint16 version, uint filter)
 {
 	CGeomObject::build(version);
 }

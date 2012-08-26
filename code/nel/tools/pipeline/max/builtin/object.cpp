@@ -60,7 +60,7 @@ const TSClassId CObject::SuperClassId = 0x00000060;
 const CObjectClassDesc ObjectClassDesc(&DllPluginDescBuiltin);
 const CObjectSuperClassDesc ObjectSuperClassDesc(&ObjectClassDesc);
 
-void CObject::parse(uint16 version)
+void CObject::parse(uint16 version, uint filter)
 {
 	CBaseObject::parse(version);
 }
@@ -70,7 +70,7 @@ void CObject::clean()
 	CBaseObject::clean();
 }
 
-void CObject::build(uint16 version)
+void CObject::build(uint16 version, uint filter)
 {
 	CBaseObject::build(version);
 }

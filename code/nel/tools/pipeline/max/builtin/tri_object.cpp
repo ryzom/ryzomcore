@@ -58,7 +58,7 @@ const NLMISC::CClassId CTriObject::ClassId = NLMISC::CClassId(0x4553fa6, 0x30f84
 const TSClassId CTriObject::SuperClassId = CGeomObject::SuperClassId;
 const CTriObjectClassDesc TriObjectClassDesc(&DllPluginDescBuiltin);
 
-void CTriObject::parse(uint16 version)
+void CTriObject::parse(uint16 version, uint filter)
 {
 	CGeomObject::parse(version);
 }
@@ -68,7 +68,7 @@ void CTriObject::clean()
 	CGeomObject::clean();
 }
 
-void CTriObject::build(uint16 version)
+void CTriObject::build(uint16 version, uint filter)
 {
 	CGeomObject::build(version);
 }

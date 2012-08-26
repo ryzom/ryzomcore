@@ -58,7 +58,7 @@ const NLMISC::CClassId CSceneImpl::ClassId = NLMISC::CClassId(0x00002222, 0x0000
 const TSClassId CSceneImpl::SuperClassId = CReferenceMaker::SuperClassId;
 const CSceneImplClassDesc SceneImplClassDesc(&DllPluginDescBuiltin);
 
-void CSceneImpl::parse(uint16 version)
+void CSceneImpl::parse(uint16 version, uint filter)
 {
 	CReferenceMaker::parse(version);
 	nlassert(m_MaterialEditor);
@@ -80,7 +80,7 @@ void CSceneImpl::clean()
 	CReferenceMaker::clean();
 }
 
-void CSceneImpl::build(uint16 version)
+void CSceneImpl::build(uint16 version, uint filter)
 {
 	CReferenceMaker::build(version);
 }

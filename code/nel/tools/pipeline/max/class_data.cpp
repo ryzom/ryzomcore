@@ -65,7 +65,7 @@ void CClassData::toString(std::ostream &ostream, const std::string &pad) const
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CClassData::parse(uint16 version)
+void CClassData::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -75,7 +75,7 @@ void CClassData::clean()
 	CStorageContainer::clean();
 }
 
-void CClassData::build(uint16 version)
+void CClassData::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }
@@ -122,7 +122,7 @@ void CClassDataEntry::toString(std::ostream &ostream, const std::string &pad) co
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CClassDataEntry::parse(uint16 version)
+void CClassDataEntry::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 }
@@ -132,7 +132,7 @@ void CClassDataEntry::clean()
 	CStorageContainer::clean();
 }
 
-void CClassDataEntry::build(uint16 version)
+void CClassDataEntry::build(uint16 version, uint filter)
 {
 	CStorageContainer::build(version);
 }

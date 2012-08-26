@@ -61,7 +61,7 @@ const TSClassId INode::SuperClassId = 0x00000001;
 const CNodeClassDesc NodeClassDesc(&DllPluginDescBuiltin);
 const CNodeSuperClassDesc NodeSuperClassDesc(&NodeClassDesc);
 
-void INode::parse(uint16 version)
+void INode::parse(uint16 version, uint filter)
 {
 	CReferenceTarget::parse(version);
 }
@@ -71,7 +71,7 @@ void INode::clean()
 	CReferenceTarget::clean();
 }
 
-void INode::build(uint16 version)
+void INode::build(uint16 version, uint filter)
 {
 	CReferenceTarget::build(version);
 }

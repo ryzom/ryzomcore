@@ -72,7 +72,7 @@ void CScene::toString(std::ostream &ostream, const std::string &pad) const
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CScene::parse(uint16 version)
+void CScene::parse(uint16 version, uint filter)
 {
 	CStorageContainer::parse(version);
 	nlassert(m_Chunks.size() == 1);
@@ -83,7 +83,7 @@ void CScene::clean()
 	CStorageContainer::clean();
 }
 
-void CScene::build(uint16 version)
+void CScene::build(uint16 version, uint filter)
 {
 	nlassert(m_Chunks.size() == 1);
 	CStorageContainer::build(this->version());
@@ -140,7 +140,7 @@ void CSceneClassContainer::toString(std::ostream &ostream, const std::string &pa
 	CStorageContainer::toString(ostream, pad);
 }
 
-void CSceneClassContainer::parse(uint16 version)
+void CSceneClassContainer::parse(uint16 version, uint filter)
 {
 	// Temporary 'readonly' implementation, not modifying m_Chunks!
 	m_StorageObjectByIndex.resize(m_Chunks.size());
@@ -163,7 +163,7 @@ void CSceneClassContainer::clean()
 	CStorageContainer::clean();
 }
 
-void CSceneClassContainer::build(uint16 version)
+void CSceneClassContainer::build(uint16 version, uint filter)
 {
 	// Temporary 'readonly' implementation, not modifying m_Chunks!
 	for (std::vector<CSceneClass *>::size_type i = 0; i < m_StorageObjectByIndex.size(); ++i)

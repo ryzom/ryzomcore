@@ -60,7 +60,7 @@ const TSClassId CBaseObject::SuperClassId = CReferenceTarget::SuperClassId;
 const CBaseObjectClassDesc BaseObjectClassDesc(&DllPluginDescBuiltin);
 // const CBaseObjectSuperClassDesc BaseObjectSuperClassDesc(&BaseObjectClassDesc);
 
-void CBaseObject::parse(uint16 version)
+void CBaseObject::parse(uint16 version, uint filter)
 {
 	CReferenceTarget::parse(version);
 }
@@ -70,7 +70,7 @@ void CBaseObject::clean()
 	CReferenceTarget::clean();
 }
 
-void CBaseObject::build(uint16 version)
+void CBaseObject::build(uint16 version, uint filter)
 {
 	CReferenceTarget::build(version);
 }

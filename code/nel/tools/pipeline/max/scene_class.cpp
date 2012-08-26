@@ -125,7 +125,7 @@ void CSceneClass::toString(std::ostream &ostream, const std::string &pad) const
 	}
 }
 
-void CSceneClass::parse(uint16 version)
+void CSceneClass::parse(uint16 version, uint filter)
 {
 	// Cannot be parsed yet
 	if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; } // Already parsed, illegal to call twice
@@ -167,7 +167,7 @@ void CSceneClass::clean()
 	m_ArchivedChunks.clear();
 }
 
-void CSceneClass::build(uint16 version)
+void CSceneClass::build(uint16 version, uint filter)
 {
 	// Must be clean first
 	if (!m_ChunksOwnsPointers && m_Chunks.size() != 0) { nlerror("Not cleaned"); return; } // Cannot call twice, illegal call

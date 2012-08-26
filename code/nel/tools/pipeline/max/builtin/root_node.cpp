@@ -58,7 +58,7 @@ const NLMISC::CClassId CRootNode::ClassId = NLMISC::CClassId(0x00000002, 0x00000
 const TSClassId CRootNode::SuperClassId = INode::SuperClassId;
 const CRootNodeClassDesc RootNodeClassDesc(&DllPluginDescBuiltin);
 
-void CRootNode::parse(uint16 version)
+void CRootNode::parse(uint16 version, uint filter)
 {
 	INode::parse(version);
 }
@@ -68,7 +68,7 @@ void CRootNode::clean()
 	INode::clean();
 }
 
-void CRootNode::build(uint16 version)
+void CRootNode::build(uint16 version, uint filter)
 {
 	INode::build(version);
 }

@@ -66,7 +66,7 @@ const NLMISC::CClassId CTrackViewNode::ClassId = NLMISC::CClassId(0x8d73b8aa, 0x
 const TSClassId CTrackViewNode::SuperClassId = CReferenceTarget::SuperClassId;
 const CTrackViewNodeClassDesc TrackViewNodeClassDesc(&DllPluginDescBuiltin);
 
-void CTrackViewNode::parse(uint16 version)
+void CTrackViewNode::parse(uint16 version, uint filter)
 {
 	CReferenceTarget::parse(version);
 	if (!m_ChunksOwnsPointers)
@@ -92,7 +92,7 @@ void CTrackViewNode::clean()
 	CReferenceTarget::clean();
 }
 
-void CTrackViewNode::build(uint16 version)
+void CTrackViewNode::build(uint16 version, uint filter)
 {
 	CReferenceTarget::build(version);
 

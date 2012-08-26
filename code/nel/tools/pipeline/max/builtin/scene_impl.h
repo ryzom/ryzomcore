@@ -62,9 +62,9 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version);
+	virtual void parse(uint16 version, uint filter = 0);
 	virtual void clean();
-	virtual void build(uint16 version);
+	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
 	virtual void init();
 	virtual bool inherits(const NLMISC::CClassId classId) const;

@@ -63,7 +63,7 @@ const TSClassId CGeomObject::SuperClassId = 0x00000010;
 const CGeomObjectClassDesc GeomObjectClassDesc(&DllPluginDescBuiltin);
 const CGeomObjectSuperClassDesc GeomObjectSuperClassDesc(&GeomObjectClassDesc);
 
-void CGeomObject::parse(uint16 version)
+void CGeomObject::parse(uint16 version, uint filter)
 {
 	CObject::parse(version);
 }
@@ -73,7 +73,7 @@ void CGeomObject::clean()
 	CObject::clean();
 }
 
-void CGeomObject::build(uint16 version)
+void CGeomObject::build(uint16 version, uint filter)
 {
 	CObject::build(version);
 }

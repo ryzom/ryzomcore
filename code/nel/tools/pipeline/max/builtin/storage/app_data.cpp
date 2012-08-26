@@ -151,7 +151,7 @@ void CAppData::toString(std::ostream &ostream, const std::string &pad) const
 	}
 }
 
-void CAppData::parse(uint16 version)
+void CAppData::parse(uint16 version, uint filter)
 {
 #if PMBS_APP_DATA_PARSE
 	// Cannot be parsed yet
@@ -198,7 +198,7 @@ void CAppData::clean()
 #endif
 }
 
-void CAppData::build(uint16 version)
+void CAppData::build(uint16 version, uint filter)
 {
 #if PMBS_APP_DATA_PARSE
 	// Must be clean first
@@ -397,7 +397,7 @@ void CAppDataEntry::toString(std::ostream &ostream, const std::string &pad) cons
 	}
 }
 
-void CAppDataEntry::parse(uint16 version)
+void CAppDataEntry::parse(uint16 version, uint filter)
 {
 	// CStorageContainer::parse(version);
 	// if (!m_ChunksOwnsPointers) { nlwarning("Already parsed"); return; }
@@ -423,7 +423,7 @@ void CAppDataEntry::clean()
 	// Nothing to do here!
 }
 
-void CAppDataEntry::build(uint16 version)
+void CAppDataEntry::build(uint16 version, uint filter)
 {
 	nlassert(false);
 	// if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }

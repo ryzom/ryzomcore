@@ -58,7 +58,7 @@ const NLMISC::CClassId CPatchObject::ClassId = NLMISC::CClassId(0xd0a6b36, 0x7dc
 const TSClassId CPatchObject::SuperClassId = CGeomObject::SuperClassId;
 const CPatchObjectClassDesc PatchObjectClassDesc(&DllPluginDescBuiltin);
 
-void CPatchObject::parse(uint16 version)
+void CPatchObject::parse(uint16 version, uint filter)
 {
 	CGeomObject::parse(version);
 }
@@ -68,7 +68,7 @@ void CPatchObject::clean()
 	CGeomObject::clean();
 }
 
-void CPatchObject::build(uint16 version)
+void CPatchObject::build(uint16 version, uint filter)
 {
 	CGeomObject::build(version);
 }
