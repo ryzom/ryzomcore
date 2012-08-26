@@ -97,7 +97,7 @@ const ISceneClassDesc *INode::classDesc() const
 	return &NodeClassDesc;
 }
 
-void INode::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void INode::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CReferenceTarget::toStringLocal(ostream, pad);
 	// Print the implied connected children

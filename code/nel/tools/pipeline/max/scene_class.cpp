@@ -232,7 +232,7 @@ const ISceneClassDesc *CSceneClass::classDesc() const
 	return static_cast<const ISceneClassDesc *>(&SceneClassDesc);
 }
 
-void CSceneClass::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CSceneClass::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	// Nothing to do here...
 }

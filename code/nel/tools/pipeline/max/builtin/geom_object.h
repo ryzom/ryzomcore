@@ -36,9 +36,16 @@
 // Project includes
 #include "object.h"
 
+/// Must be passed to the parse and build functions by
+/// inheriting classes to parse the actual geom object.
+#define PMB_GEOM_OBJECT_PARSE_FILTER 0x432a4da6
+
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
+namespace STORAGE {
+	class CGeomBuffers;
+}
 
 /**
  * \brief CGeomGeomObject
@@ -67,11 +74,18 @@ public:
 	virtual void init();
 	virtual bool inherits(const NLMISC::CClassId classId) const;
 	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+
+	// read access
+	inline STORAGE::CGeomBuffers *geomBuffers() const { return m_GeomBuffers; }
 
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
+	IStorageObject *m_Unknown0900;
+	STORAGE::CGeomBuffers *m_GeomBuffers;
 
 }; /* class CGeomObject */
 

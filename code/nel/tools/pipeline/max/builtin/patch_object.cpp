@@ -94,7 +94,7 @@ const ISceneClassDesc *CPatchObject::classDesc() const
 	return &PatchObjectClassDesc;
 }
 
-void CPatchObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CPatchObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CGeomObject::toStringLocal(ostream, pad);
 }

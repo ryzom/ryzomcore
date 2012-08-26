@@ -112,7 +112,7 @@ public:
 	/// Return the class description of the inheriting class
 	virtual const ISceneClassDesc *classDesc() const;
 	/// Create a readable representation of this class
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
 	//@}
 
 public:

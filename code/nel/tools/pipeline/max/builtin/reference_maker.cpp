@@ -224,7 +224,7 @@ const ISceneClassDesc *CReferenceMaker::classDesc() const
 	return &ReferenceMakerClassDesc;
 }
 
-void CReferenceMaker::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CReferenceMaker::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CAnimatable::toStringLocal(ostream, pad);
 	uint nb = nbReferences();

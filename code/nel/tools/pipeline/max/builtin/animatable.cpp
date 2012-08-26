@@ -123,7 +123,7 @@ const ISceneClassDesc *CAnimatable::classDesc() const
 	return &AnimatableClassDesc;
 }
 
-void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CAnimatable::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CSceneClass::toStringLocal(ostream, pad);
 	if (m_AppData && m_AppData->entries().size() != 0)

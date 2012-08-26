@@ -106,7 +106,7 @@ const ISceneClassDesc *CSceneImpl::classDesc() const
 	return &SceneImplClassDesc;
 }
 
-void CSceneImpl::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CSceneImpl::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CReferenceMaker::toStringLocal(ostream, pad);
 }

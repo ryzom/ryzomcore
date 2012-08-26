@@ -43,16 +43,21 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
+#define PMB_GEOM_UNKNOWN0900_CHUNK_ID 0x0900
 #define PMB_GEOM_BUFFERS_CHUNK_ID 0x08fe
 
-CGeomObject::CGeomObject(CScene *scene) : CObject(scene)
+CGeomObject::CGeomObject(CScene *scene) : CObject(scene), m_Unknown0900(NULL), m_GeomBuffers(NULL)
 {
 
 }
 
 CGeomObject::~CGeomObject()
 {
-
+	if (!m_ChunksOwnsPointers)
+	{
+		m_Unknown0900 = NULL;
+		m_GeomBuffers = NULL;
+	}
 }
 
 const ucstring CGeomObject::DisplayName = ucstring("GeomObject");
@@ -65,7 +70,18 @@ const CGeomObjectSuperClassDesc GeomObjectSuperClassDesc(&GeomObjectClassDesc);
 
 void CGeomObject::parse(uint16 version, uint filter)
 {
-	CObject::parse(version);
+	if (filter == 0)
+	{
+		CObject::parse(version);
+	}
+	else if (filter == PMB_GEOM_OBJECT_PARSE_FILTER)
+	{
+		if (!m_ChunksOwnsPointers)
+		{
+			m_Unknown0900 = getChunk(PMB_GEOM_UNKNOWN0900_CHUNK_ID);
+			m_GeomBuffers = static_cast<STORAGE::CGeomBuffers *>(getChunk(PMB_GEOM_BUFFERS_CHUNK_ID));
+		}
+	}
 }
 
 void CGeomObject::clean()
@@ -75,11 +91,21 @@ void CGeomObject::clean()
 
 void CGeomObject::build(uint16 version, uint filter)
 {
-	CObject::build(version);
+	if (filter == 0)
+	{
+		CObject::build(version);
+	}
+	else if (filter == PMB_GEOM_OBJECT_PARSE_FILTER)
+	{
+		if (m_Unknown0900) putChunk(PMB_GEOM_UNKNOWN0900_CHUNK_ID, m_Unknown0900);
+		if (m_GeomBuffers) putChunk(PMB_GEOM_UNKNOWN0900_CHUNK_ID, m_GeomBuffers);
+	}
 }
 
 void CGeomObject::disown()
 {
+	m_Unknown0900 = NULL;
+	m_GeomBuffers = NULL;
 	CObject::disown();
 }
 
@@ -99,7 +125,7 @@ const ISceneClassDesc *CGeomObject::classDesc() const
 	return &GeomObjectClassDesc;
 }
 
-void CGeomObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CGeomObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CObject::toStringLocal(ostream, pad);
 }
@@ -108,6 +134,8 @@ IStorageObject *CGeomObject::createChunkById(uint16 id, bool container)
 {
 	switch (id)
 	{
+	case PMB_GEOM_UNKNOWN0900_CHUNK_ID:
+		return new CStorageArray<sint32>();
 	case PMB_GEOM_BUFFERS_CHUNK_ID:
 		return new STORAGE::CGeomBuffers();
 	}

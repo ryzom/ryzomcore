@@ -60,7 +60,17 @@ const CTriObjectClassDesc TriObjectClassDesc(&DllPluginDescBuiltin);
 
 void CTriObject::parse(uint16 version, uint filter)
 {
-	CGeomObject::parse(version);
+	if (filter == 0)
+	{
+		CGeomObject::parse(version);
+	}
+	else if (filter == PMB_TRI_OBJECT_PARSE_FILTER)
+	{
+		if (!m_ChunksOwnsPointers)
+		{
+
+		}
+	}
 }
 
 void CTriObject::clean()
@@ -70,7 +80,14 @@ void CTriObject::clean()
 
 void CTriObject::build(uint16 version, uint filter)
 {
-	CGeomObject::build(version);
+	if (filter == 0)
+	{
+		CGeomObject::build(version);
+	}
+	else if (filter == PMB_TRI_OBJECT_PARSE_FILTER)
+	{
+
+	}
 }
 
 void CTriObject::disown()
@@ -94,7 +111,7 @@ const ISceneClassDesc *CTriObject::classDesc() const
 	return &TriObjectClassDesc;
 }
 
-void CTriObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CTriObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CGeomObject::toStringLocal(ostream, pad);
 }

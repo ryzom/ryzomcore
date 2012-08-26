@@ -96,7 +96,7 @@ const ISceneClassDesc *CBaseObject::classDesc() const
 	return &BaseObjectClassDesc;
 }
 
-void CBaseObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CBaseObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CReferenceTarget::toStringLocal(ostream, pad);
 }

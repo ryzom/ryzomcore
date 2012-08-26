@@ -94,7 +94,7 @@ const ISceneClassDesc *CPolyObject::classDesc() const
 	return &PolyObjectClassDesc;
 }
 
-void CPolyObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CPolyObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CGeomObject::toStringLocal(ostream, pad);
 }

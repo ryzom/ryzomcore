@@ -36,6 +36,10 @@
 // Project includes
 #include "geom_object.h"
 
+/// Must be passed to the parse and build functions by
+/// inheriting classes to parse the actual tri object.
+#define PMB_TRI_OBJECT_PARSE_FILTER 0x38f55e43
+
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
@@ -66,7 +70,7 @@ public:
 	virtual void init();
 	virtual bool inherits(const NLMISC::CClassId classId) const;
 	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
 
 protected:
 	// inherited

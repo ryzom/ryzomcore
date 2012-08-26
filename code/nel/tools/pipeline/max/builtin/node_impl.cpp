@@ -129,7 +129,7 @@ const ISceneClassDesc *CNodeImpl::classDesc() const
 	return &NodeImplClassDesc;
 }
 
-void CNodeImpl::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CNodeImpl::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	INode::toStringLocal(ostream, pad);
 	ostream << "\n" << pad << "NodeVersion: " << m_NodeVersion;

@@ -131,7 +131,7 @@ const ISceneClassDesc *CTrackViewNode::classDesc() const
 	return &TrackViewNodeClassDesc;
 }
 
-void CTrackViewNode::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CTrackViewNode::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CReferenceTarget::toStringLocal(ostream, pad);
 	if (m_Empty0140) ostream << "\n" << pad << "Empty 0x0140 ";

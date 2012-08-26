@@ -96,7 +96,7 @@ const ISceneClassDesc *CReferenceTarget::classDesc() const
 	return &ReferenceTargetClassDesc;
 }
 
-void CReferenceTarget::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CReferenceTarget::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CReferenceMaker::toStringLocal(ostream, pad);
 }

@@ -94,7 +94,7 @@ const ISceneClassDesc *CEditablePatch::classDesc() const
 	return &EditablePatchClassDesc;
 }
 
-void CEditablePatch::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CEditablePatch::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CPatchObject::toStringLocal(ostream, pad);
 }

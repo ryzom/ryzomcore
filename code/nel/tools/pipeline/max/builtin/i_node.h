@@ -67,7 +67,7 @@ public:
 	virtual void init();
 	virtual bool inherits(const NLMISC::CClassId classId) const;
 	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
 
 	// node interface
 	virtual INode *parent();
