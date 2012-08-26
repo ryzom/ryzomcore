@@ -79,6 +79,26 @@ struct CGeomPolyEdgeInfo
 	std::string toString() const;
 };
 
+struct CGeomPolyFaceInfo
+{
+	CGeomPolyFaceInfo();
+	/// Vertex indices in the vertex buffer
+	std::vector<uint32> Vertices;
+	// Bitfield (implicitly stored)
+	/// Unknown 01 00 01 00
+	uint32 I1;
+	// Unknown?
+	// Unknown?
+	/// Material index in multi-submat
+	uint16 Material;
+	/// Bitfield with smoothing groups
+	uint32 SmoothingGroups;
+	/// Cuts at local vertex index to local vertex index
+	std::vector<std::pair<uint32, uint32> > Triangulation;
+	void serial(NLMISC::IStream &stream);
+	std::string toString() const;
+};
+
 /**
  * \brief CGeomBuffers
  * \date 2012-08-25 07:55GMT

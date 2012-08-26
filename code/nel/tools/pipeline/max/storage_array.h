@@ -42,6 +42,10 @@
 namespace PIPELINE {
 namespace MAX {
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
 /**
  * \brief CStorageArray
  * \date 2012-08-21 11:33GMT
@@ -115,6 +119,10 @@ bool CStorageArray<T>::getSize(sint32 &size) const
 	return true;
 }
 
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
 template <typename T>
 class CStorageArraySizePre : public CStorageArray<T>
 {
@@ -149,8 +157,57 @@ void CStorageArraySizePre<T>::setSize(sint32 size)
 template <typename T>
 bool CStorageArraySizePre<T>::getSize(sint32 &size) const
 {
-	return CStorageArray<T>::getSize(size) + sizeof(uint32);
+	size = CStorageArray<T>::getSize(size) + sizeof(uint32);
+	return true;
 }
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
+/// Same as CStorageArraySizePre but with no sizeof checks.
+/// Use when serializing variable sizes in type T.
+template <typename T>
+class CStorageArrayDynSize : public CStorageArray<T>
+{
+public:
+	virtual std::string className() const;
+	virtual void serial(NLMISC::IStream &stream);
+	virtual void setSize(sint32 size);
+	virtual bool getSize(sint32 &size) const;
+};
+
+template <typename T>
+std::string CStorageArrayDynSize<T>::className() const
+{
+	return "StorageArrayDynSize";
+}
+
+template <typename T>
+void CStorageArrayDynSize<T>::serial(NLMISC::IStream &stream)
+{
+	uint32 size = this->Value.size();
+	stream.serial(size);
+	this->Value.resize(size);
+	CStorageArray<T>::serial(stream);
+}
+
+template <typename T>
+void CStorageArrayDynSize<T>::setSize(sint32 size)
+{
+	// Nothing to do here!
+}
+
+template <typename T>
+bool CStorageArrayDynSize<T>::getSize(sint32 &size) const
+{
+	// Nothing to do here!
+	return false;
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
 
 } /* namespace MAX */
 } /* namespace PIPELINE */

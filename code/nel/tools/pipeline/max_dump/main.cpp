@@ -41,10 +41,10 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::BUILTIN::STORAGE;
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
-static const char *filename = "/home/kaetemi/3dsMax/scenes/testplane.max";
+//static const char *filename = "/home/kaetemi/3dsMax/scenes/testplane.max";
 static const char *streamname = "Scene";
 
 void exportObj(const std::string &fileName, const CReferenceMaker *triObject)
@@ -208,9 +208,9 @@ int main(int argc, char **argv)
 	//exportObj("tr_hof_civil01_gilet.obj", node->getReference(1)->getReference(1)); // => CDerivedObject::getBase(node->object())
 
 	//INode *node = scene.container()->scene()->rootNode()->find(ucstring("GE_Acc_MikotoBaniere")); nlassert(node);
-	INode *node = scene.container()->scene()->rootNode()->find(ucstring("testplane")); nlassert(node);
-	CReferenceMaker *object = node->getReference(1);
-	object->toString(std::cout);
+	//INode *node = scene.container()->scene()->rootNode()->find(ucstring("testplane")); nlassert(node);
+	//CReferenceMaker *object = node->getReference(1);
+	//object->toString(std::cout);
 
 
 	//GE_Acc_MikotoBaniere

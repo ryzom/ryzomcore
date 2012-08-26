@@ -66,7 +66,7 @@ namespace STORAGE {
 #define PMBS_GEOM_BUFFERS_TRI_C_INDEX_CHUNK_ID 0x0942
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
 #define PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID 0x010a
-#define PBMS_GEOM_BUFFERS_POLY_A_INDEX_B_CHUNK_ID 0x011a
+#define PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID 0x011a
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -145,6 +145,69 @@ std::string CGeomPolyEdgeInfo::toString() const
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+CGeomPolyFaceInfo::CGeomPolyFaceInfo() : I1(0), Material(0), SmoothingGroups(0)
+{
+
+}
+
+void CGeomPolyFaceInfo::serial(NLMISC::IStream &stream)
+{
+	nldebug("go");
+	stream.serialCont(Vertices);
+	nldebug("%i vertices", Vertices.size());
+	uint16 bitfield;
+	if (!stream.isReading())
+	{
+		nldebug("writing");
+		bitfield = 0x0000;
+		if (I1) bitfield |= 0x0001;
+		// bitfield |= 0x0002;
+		// bitfield |= 0x0004;
+		if (Material) bitfield |= 0x0008;
+		if (SmoothingGroups) bitfield |= 0x0010;
+		if (Triangulation.size()) bitfield |= 0x0020;
+		// bitfield |= 0x0040;
+		// bitfield |= 0x0080;
+	}
+	stream.serial(bitfield);
+	nldebug("bitfield 0x%x", (uint32)bitfield);
+	if (bitfield & 0x0001) { nldebug("i1"); stream.serial(I1); nlassert(I1); bitfield &= ~0x0001; }
+	else I1 = 0;
+	if (bitfield & 0x0008) { nldebug("material"); stream.serial(Material); nlassert(Material); bitfield &= ~0x0008; }
+	else Material = 0;
+	if (bitfield & 0x0010) { nldebug("smoothing"); stream.serial(SmoothingGroups); nlassert(SmoothingGroups); bitfield &= ~0x0010; }
+	else SmoothingGroups = 0;
+	if (bitfield & 0x0020)
+	{
+		nldebug("triangles");
+		if (stream.isReading()) Triangulation.resize(Vertices.size() - 3);
+		else nlassert(Triangulation.size() == Vertices.size() - 3);
+		for (std::vector<std::pair<uint32, uint32> >::size_type i = 0; i < Triangulation.size(); ++i)
+		{
+			stream.serial(Triangulation[i].first);
+			nldebug("cut from %i", Triangulation[i].first);
+			nlassert(Triangulation[i].first < Vertices.size());
+			stream.serial(Triangulation[i].second);
+			nldebug("to %i", Triangulation[i].second);
+			nlassert(Triangulation[i].second < Vertices.size());
+		}
+		nlassert(Triangulation.size());
+		bitfield &= ~0x0020;
+	}
+	if (bitfield) nlerror("Remaining bitfield value 0x%x", (uint32)bitfield);
+}
+
+std::string CGeomPolyFaceInfo::toString() const
+{
+	std::stringstream ss;
+	//ss << "0x" << NLMISC::toString("%x", i1) << ", " << a << " " << b;
+	return ss.str();
+}
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+
 CGeomBuffers::CGeomBuffers()
 {
 
@@ -200,6 +263,9 @@ IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)
 	case PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageArraySizePre<CGeomPolyEdgeInfo>();
+	case PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID:
+		nlassert(!container);
+		return new CStorageArrayDynSize<CGeomPolyFaceInfo>();
 	case PMBS_GEOM_BUFFERS_TRI_B_INDEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_C_INDEX_CHUNK_ID:
 		nlassert(!container);
