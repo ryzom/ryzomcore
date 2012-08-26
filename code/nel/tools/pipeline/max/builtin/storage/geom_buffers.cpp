@@ -252,12 +252,16 @@ void CGeomBuffers::parse(uint16 version, uint filter)
 {
 #if PMBS_GEOM_BUFFERS_PARSE
 	CStorageContainer::parse(version);
+#else
+	CStorageContainer::parse(version);
 #endif
 }
 
 void CGeomBuffers::clean()
 {
 #if PMBS_GEOM_BUFFERS_PARSE
+	CStorageContainer::clean();
+#else
 	CStorageContainer::clean();
 #endif
 }
@@ -266,12 +270,16 @@ void CGeomBuffers::build(uint16 version, uint filter)
 {
 #if PMBS_GEOM_BUFFERS_PARSE
 	CStorageContainer::build(version);
+#else
+	CStorageContainer::build(version);
 #endif
 }
 
 void CGeomBuffers::disown()
 {
 #if PMBS_GEOM_BUFFERS_PARSE
+	CStorageContainer::disown();
+#else
 	CStorageContainer::disown();
 #endif
 }

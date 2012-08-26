@@ -71,6 +71,8 @@ public:
 protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
+private:
 	TStorageObjectContainer m_EditableMeshUnknown;
 
 }; /* class CEditableMesh */

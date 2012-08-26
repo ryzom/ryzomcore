@@ -184,6 +184,8 @@ void CAppData::parse(uint16 version, uint filter)
 
 	// Take local ownership
 	m_ChunksOwnsPointers = false;
+#else
+	CStorageContainer::parse(version);
 #endif
 }
 
@@ -195,6 +197,8 @@ void CAppData::clean()
 	if (m_Chunks.begin()->first != PMBS_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)m_Chunks.begin()->first, PMBS_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
 	delete m_Chunks.begin()->second; // Delete the header chunk, since we own it
 	m_Chunks.clear(); // Clear the remaining chunks
+#else
+	CStorageContainer::clean();
 #endif
 }
 
@@ -213,6 +217,8 @@ void CAppData::build(uint16 version, uint filter)
 	// Set up the entries
 	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
 		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, it->second));
+#else
+	CStorageContainer::build(version);
 #endif
 }
 
@@ -230,6 +236,8 @@ void CAppData::disown()
 	m_ChunksOwnsPointers = true;
 
 	// Disown all the child chunks
+	CStorageContainer::disown();
+#else
 	CStorageContainer::disown();
 #endif
 }

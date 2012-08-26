@@ -72,6 +72,9 @@ protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
+private:
+	TStorageObjectContainer m_EditablePolyUnknown;
+
 }; /* class CEditablePoly */
 
 typedef CSceneClassDesc<CEditablePoly> CEditablePolyClassDesc;
