@@ -127,7 +127,24 @@ const ISceneClassDesc *CGeomObject::classDesc() const
 
 void CGeomObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
-	CObject::toStringLocal(ostream, pad);
+	if (filter == 0)
+	{
+		CObject::toStringLocal(ostream, pad);
+	}
+	else if (filter == PMB_GEOM_OBJECT_PARSE_FILTER)
+	{
+		std::string padpad = pad + "\t";
+		if (m_Unknown0900)
+		{
+			ostream << "\n" << pad << "GeomObject Unknown 0x0900: ";
+			m_Unknown0900->toString(ostream, padpad);
+		}
+		if (m_GeomBuffers)
+		{
+			ostream << "\n" << pad << "GeomBuffers: ";
+			m_GeomBuffers->toString(ostream, padpad);
+		}
+	}
 }
 
 IStorageObject *CGeomObject::createChunkById(uint16 id, bool container)

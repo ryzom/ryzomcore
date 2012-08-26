@@ -68,7 +68,11 @@ void CTriObject::parse(uint16 version, uint filter)
 	{
 		if (!m_ChunksOwnsPointers)
 		{
-
+			CGeomObject::parse(version, PMB_GEOM_OBJECT_PARSE_FILTER);
+			// 0x0901
+			// 0x0902
+			// 0x0904
+			// 0x0903
 		}
 	}
 }
@@ -86,7 +90,11 @@ void CTriObject::build(uint16 version, uint filter)
 	}
 	else if (filter == PMB_TRI_OBJECT_PARSE_FILTER)
 	{
-
+		CGeomObject::build(version, PMB_GEOM_OBJECT_PARSE_FILTER);
+		// 0x0901
+		// 0x0902
+		// 0x0904
+		// 0x0903
 	}
 }
 
@@ -113,7 +121,18 @@ const ISceneClassDesc *CTriObject::classDesc() const
 
 void CTriObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
-	CGeomObject::toStringLocal(ostream, pad);
+	if (filter == 0)
+	{
+		CGeomObject::toStringLocal(ostream, pad);
+	}
+	else if (filter == PMB_TRI_OBJECT_PARSE_FILTER)
+	{
+		CGeomObject::toStringLocal(ostream, pad, PMB_GEOM_OBJECT_PARSE_FILTER);
+		// 0x0901
+		// 0x0902
+		// 0x0904
+		// 0x0903
+	}
 }
 
 IStorageObject *CTriObject::createChunkById(uint16 id, bool container)

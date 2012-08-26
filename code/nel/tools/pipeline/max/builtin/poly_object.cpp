@@ -60,7 +60,21 @@ const CPolyObjectClassDesc PolyObjectClassDesc(&DllPluginDescBuiltin);
 
 void CPolyObject::parse(uint16 version, uint filter)
 {
-	CGeomObject::parse(version);
+	if (filter == 0)
+	{
+		CGeomObject::parse(version);
+	}
+	else if (filter == PMB_POLY_OBJECT_PARSE_FILTER)
+	{
+		if (!m_ChunksOwnsPointers)
+		{
+			CGeomObject::parse(version, PMB_GEOM_OBJECT_PARSE_FILTER);
+			// 0x0906
+			// 0x0908
+			// 0x090a
+			// 0x090c
+		}
+	}
 }
 
 void CPolyObject::clean()
@@ -70,7 +84,18 @@ void CPolyObject::clean()
 
 void CPolyObject::build(uint16 version, uint filter)
 {
-	CGeomObject::build(version);
+	if (filter == 0)
+	{
+		CGeomObject::build(version);
+	}
+	else if (filter == PMB_POLY_OBJECT_PARSE_FILTER)
+	{
+		CGeomObject::build(version, PMB_GEOM_OBJECT_PARSE_FILTER);
+		// 0x0906
+		// 0x0908
+		// 0x090a
+		// 0x090c
+	}
 }
 
 void CPolyObject::disown()
@@ -96,7 +121,18 @@ const ISceneClassDesc *CPolyObject::classDesc() const
 
 void CPolyObject::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
-	CGeomObject::toStringLocal(ostream, pad);
+	if (filter == 0)
+	{
+		CGeomObject::toStringLocal(ostream, pad);
+	}
+	else if (filter == PMB_POLY_OBJECT_PARSE_FILTER)
+	{
+		CGeomObject::toStringLocal(ostream, pad, PMB_GEOM_OBJECT_PARSE_FILTER);
+		// 0x0906
+		// 0x0908
+		// 0x090a
+		// 0x090c
+	}
 }
 
 IStorageObject *CPolyObject::createChunkById(uint16 id, bool container)
