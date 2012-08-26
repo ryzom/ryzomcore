@@ -49,12 +49,12 @@ class CSceneClassUnknownDllPluginDesc : public IDllPluginDescInternal
 {
 public:
 	CSceneClassUnknownDllPluginDesc(const ucstring &dllFilename, const ucstring &dllDescription);
-	virtual const ucchar *displayName() const;
 	virtual const ucchar *internalName() const;
+	virtual const ucchar *displayName() const;
 
 private:
-	ucstring m_DisplayName;
 	ucstring m_InternalName;
+	ucstring m_DisplayName;
 
 };
 

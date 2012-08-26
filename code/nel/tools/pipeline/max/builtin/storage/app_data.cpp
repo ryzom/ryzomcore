@@ -47,6 +47,8 @@ namespace STORAGE {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+#define PMBS_APP_DATA_PARSE 1
+
 // Elevate warnings to errors in this file for stricter reading
 #undef nlwarning
 #define nlwarning nlerror
@@ -151,52 +153,54 @@ void CAppData::toString(std::ostream &ostream, const std::string &pad) const
 
 void CAppData::parse(uint16 version)
 {
-	/*if (level & PARSE_BUILTIN)
-	{*/
-		// Cannot be parsed yet
-		if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; }
+#if PMBS_APP_DATA_PARSE
+	// Cannot be parsed yet
+	if (!m_ChunksOwnsPointers) { nlerror("Already parsed"); return; }
 
-		// First parse all the child nodes
-		CStorageContainer::parse(version);
+	// First parse all the child nodes
+	CStorageContainer::parse(version);
 
-		// Verify
-		if (m_Chunks.size() < 2) { nlwarning("Bad container size %i", m_Chunks.size()); disown(); return; }
+	// Verify
+	if (m_Chunks.size() < 2) { nlwarning("Bad container size %i", m_Chunks.size()); disown(); return; }
 
-		// Header
-		TStorageObjectContainer::iterator it = m_Chunks.begin();
-		if (it->first != PMBS_APP_DATA_HEADER_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_HEADER_CHUNK_ID); disown();  return; }
-		uint32 headerSize = static_cast<CStorageValue<uint32> *>(it->second)->Value;
-		++it;
+	// Header
+	TStorageObjectContainer::iterator it = m_Chunks.begin();
+	if (it->first != PMBS_APP_DATA_HEADER_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_HEADER_CHUNK_ID); disown();  return; }
+	uint32 headerSize = static_cast<CStorageValue<uint32> *>(it->second)->Value;
+	++it;
 
-		// Entries
-		for (TStorageObjectContainer::iterator end = m_Chunks.end(); it != end; ++it)
-		{
-			if (it->first != PMBS_APP_DATA_ENTRY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_ENTRY_CHUNK_ID); disown(); return; }
-			CAppDataEntry *entry = static_cast<CAppDataEntry *>(it->second);
-			TKey key(entry->key()->ClassId, entry->key()->SuperClassId, entry->key()->SubId);
-			if (m_Entries.find(key) != m_Entries.end()) { nlwarning("Duplicate entry"); disown(); return; }
-			m_Entries[key] = entry;
-		}
+	// Entries
+	for (TStorageObjectContainer::iterator end = m_Chunks.end(); it != end; ++it)
+	{
+		if (it->first != PMBS_APP_DATA_ENTRY_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_ENTRY_CHUNK_ID); disown(); return; }
+		CAppDataEntry *entry = static_cast<CAppDataEntry *>(it->second);
+		TKey key(entry->key()->ClassId, entry->key()->SuperClassId, entry->key()->SubId);
+		if (m_Entries.find(key) != m_Entries.end()) { nlwarning("Duplicate entry"); disown(); return; }
+		m_Entries[key] = entry;
+	}
 
-		// Verify or fail
-		if (m_Entries.size() != headerSize) { nlwarning("Entry count %i does not match header %i", m_Entries.size(), headerSize); disown(); return; }
+	// Verify or fail
+	if (m_Entries.size() != headerSize) { nlwarning("Entry count %i does not match header %i", m_Entries.size(), headerSize); disown(); return; }
 
-		// Take local ownership
-		m_ChunksOwnsPointers = false;
-	/*}*/
+	// Take local ownership
+	m_ChunksOwnsPointers = false;
+#endif
 }
 
 void CAppData::clean()
 {
+#if PMBS_APP_DATA_PARSE
 	if (m_ChunksOwnsPointers) { nldebug("Not parsed, or disowned"); return; } // Must have local ownership
 	if (m_Chunks.size() == 0) { nlwarning("Already cleaned (or did not build due to coding error)"); return; } // Already cleaned
 	if (m_Chunks.begin()->first != PMBS_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)m_Chunks.begin()->first, PMBS_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
 	delete m_Chunks.begin()->second; // Delete the header chunk, since we own it
 	m_Chunks.clear(); // Clear the remaining chunks
+#endif
 }
 
 void CAppData::build(uint16 version)
 {
+#if PMBS_APP_DATA_PARSE
 	// Must be clean first
 	if (!m_ChunksOwnsPointers && m_Chunks.size() != 0) { nlerror("Not cleaned"); return; }
 	if (m_Chunks.size() != 0) { nldebug("Not parsed, or disowned"); return; }
@@ -209,10 +213,12 @@ void CAppData::build(uint16 version)
 	// Set up the entries
 	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
 		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, it->second));
+#endif
 }
 
 void CAppData::disown()
 {
+#if PMBS_APP_DATA_PARSE
 	if (m_ChunksOwnsPointers) { nldebug("Not parsed"); }
 	if (!m_ChunksOwnsPointers && (m_Chunks.size() != (m_Entries.size() + 1))) { nlerror("Not built"); return; } // If chunks is not the owner, built chunks must match the parsed data
 	// NOTE: m_Chunks must be valid at this point!
@@ -225,6 +231,7 @@ void CAppData::disown()
 
 	// Disown all the child chunks
 	CStorageContainer::disown();
+#endif
 }
 
 void CAppData::init()

@@ -34,7 +34,7 @@
 // NeL includes
 
 // Project includes
-#include "object.h"
+#include "geom_object.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -46,13 +46,36 @@ namespace BUILTIN {
  * \author Jan Boon (Kaetemi)
  * CPolyObject
  */
-class CPolyObject : public CObject
+class CPolyObject : public CGeomObject
 {
 public:
 	CPolyObject(CScene *scene);
 	virtual ~CPolyObject();
 
+	// class desc
+	static const ucstring DisplayName;
+	static const char *InternalName;
+	static const NLMISC::CClassId ClassId;
+	static const TSClassId SuperClassId;
+
+	// inherited
+	virtual void parse(uint16 version);
+	virtual void clean();
+	virtual void build(uint16 version);
+	virtual void disown();
+	virtual void init();
+	virtual bool inherits(const NLMISC::CClassId classId) const;
+	virtual const ISceneClassDesc *classDesc() const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+
+protected:
+	// inherited
+	virtual IStorageObject *createChunkById(uint16 id, bool container);
+
 }; /* class CPolyObject */
+
+typedef CSceneClassDesc<CPolyObject> CPolyObjectClassDesc;
+extern const CPolyObjectClassDesc PolyObjectClassDesc;
 
 } /* namespace BUILTIN */
 } /* namespace MAX */

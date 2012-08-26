@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CTriObject::CTriObject(CScene *scene) : CObject(scene)
+CTriObject::CTriObject(CScene *scene) : CGeomObject(scene)
 {
 
 }
@@ -50,6 +50,58 @@ CTriObject::CTriObject(CScene *scene) : CObject(scene)
 CTriObject::~CTriObject()
 {
 
+}
+
+const ucstring CTriObject::DisplayName = ucstring("TriObject");
+const char *CTriObject::InternalName = "TriObject";
+const NLMISC::CClassId CTriObject::ClassId = NLMISC::CClassId(0x4553fa6, 0x30f8421e); /* Not official, please correct */
+const TSClassId CTriObject::SuperClassId = CGeomObject::SuperClassId;
+const CTriObjectClassDesc TriObjectClassDesc(&DllPluginDescBuiltin);
+
+void CTriObject::parse(uint16 version)
+{
+	CGeomObject::parse(version);
+}
+
+void CTriObject::clean()
+{
+	CGeomObject::clean();
+}
+
+void CTriObject::build(uint16 version)
+{
+	CGeomObject::build(version);
+}
+
+void CTriObject::disown()
+{
+	CGeomObject::disown();
+}
+
+void CTriObject::init()
+{
+	CGeomObject::init();
+}
+
+bool CTriObject::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CGeomObject::inherits(classId);
+}
+
+const ISceneClassDesc *CTriObject::classDesc() const
+{
+	return &TriObjectClassDesc;
+}
+
+void CTriObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+	CGeomObject::toStringLocal(ostream, pad);
+}
+
+IStorageObject *CTriObject::createChunkById(uint16 id, bool container)
+{
+	return CGeomObject::createChunkById(id, container);
 }
 
 } /* namespace BUILTIN */

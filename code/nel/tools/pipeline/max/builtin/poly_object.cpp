@@ -42,7 +42,7 @@ namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CPolyObject::CPolyObject(CScene *scene) : CObject(scene)
+CPolyObject::CPolyObject(CScene *scene) : CGeomObject(scene)
 {
 
 }
@@ -50,6 +50,58 @@ CPolyObject::CPolyObject(CScene *scene) : CObject(scene)
 CPolyObject::~CPolyObject()
 {
 
+}
+
+const ucstring CPolyObject::DisplayName = ucstring("PolyObject");
+const char *CPolyObject::InternalName = "PolyObject";
+const NLMISC::CClassId CPolyObject::ClassId = NLMISC::CClassId(0x59772461, 0x6e1141e8); /* Not official, please correct */
+const TSClassId CPolyObject::SuperClassId = CGeomObject::SuperClassId;
+const CPolyObjectClassDesc PolyObjectClassDesc(&DllPluginDescBuiltin);
+
+void CPolyObject::parse(uint16 version)
+{
+	CGeomObject::parse(version);
+}
+
+void CPolyObject::clean()
+{
+	CGeomObject::clean();
+}
+
+void CPolyObject::build(uint16 version)
+{
+	CGeomObject::build(version);
+}
+
+void CPolyObject::disown()
+{
+	CGeomObject::disown();
+}
+
+void CPolyObject::init()
+{
+	CGeomObject::init();
+}
+
+bool CPolyObject::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CGeomObject::inherits(classId);
+}
+
+const ISceneClassDesc *CPolyObject::classDesc() const
+{
+	return &PolyObjectClassDesc;
+}
+
+void CPolyObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+	CGeomObject::toStringLocal(ostream, pad);
+}
+
+IStorageObject *CPolyObject::createChunkById(uint16 id, bool container)
+{
+	return CGeomObject::createChunkById(id, container);
 }
 
 } /* namespace BUILTIN */

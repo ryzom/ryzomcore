@@ -30,21 +30,27 @@
 #include "../max/scene_class_registry.h"
 
 // Testing
+#include "../max/builtin/builtin.h"
+#include "../max/update1/update1.h"
+#include "../max/epoly/epoly.h"
+
 #include "../max/builtin/storage/app_data.h"
 #include "../max/builtin/storage/geom_buffers.h"
-#include "../max/builtin/builtin.h"
 #include "../max/builtin/scene_impl.h"
 #include "../max/builtin/i_node.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::BUILTIN::STORAGE;
+using namespace PIPELINE::MAX::UPDATE1;
+using namespace PIPELINE::MAX::EPOLY;
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/testplane.max";
+static const char *filename = "/home/kaetemi/3dsMax/scenes/geomobjects.max";
 static const char *streamname = "Scene";
 
 void exportObj(const std::string &fileName, const CReferenceMaker *triObject)
@@ -71,10 +77,11 @@ int main(int argc, char **argv)
 	g_set_prgname(me);
 	gsf_init();
 
-
-	PIPELINE::MAX::CSceneClassRegistry sceneClassRegistry;
-	PIPELINE::MAX::BUILTIN::CBuiltin::registerClasses(&sceneClassRegistry);
-
+	// Register all plugin classes
+	CSceneClassRegistry sceneClassRegistry;
+	CBuiltin::registerClasses(&sceneClassRegistry);
+	CUpdate1::registerClasses(&sceneClassRegistry);
+	CEPoly::registerClasses(&sceneClassRegistry);
 
 	GsfInfile *infile;
 	GError *error = NULL;
@@ -192,7 +199,7 @@ int main(int argc, char **argv)
 	nldebug("CLEAN");
 	//## scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
 	// <- TEST
-	//## scene.toString(std::cout);
+	scene.toString(std::cout);//##
 	std::cout << "\n";
 	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
 	//classDirectory3.disown();

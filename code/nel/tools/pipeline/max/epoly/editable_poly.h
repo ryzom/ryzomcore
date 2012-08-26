@@ -1,9 +1,9 @@
 /**
- * \file patch_object.h
- * \brief CPatchObject
- * \date 2012-08-22 08:58GMT
+ * \file editable_poly.h
+ * \brief CEditablePoly
+ * \date 2012-08-26 12:02GMT
  * \author Jan Boon (Kaetemi)
- * CPatchObject
+ * CEditablePoly
  */
 
 /*
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PATCH_OBJECT_H
-#define PIPELINE_PATCH_OBJECT_H
+#ifndef PIPELINE_EDITABLE_POLY_H
+#define PIPELINE_EDITABLE_POLY_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,23 +34,23 @@
 // NeL includes
 
 // Project includes
-#include "geom_object.h"
+#include "../builtin/poly_object.h"
 
 namespace PIPELINE {
 namespace MAX {
-namespace BUILTIN {
+namespace EPOLY {
 
 /**
- * \brief CPatchObject
- * \date 2012-08-22 08:58GMT
+ * \brief CEditablePoly
+ * \date 2012-08-26 12:02GMT
  * \author Jan Boon (Kaetemi)
- * CPatchObject
+ * CEditablePoly
  */
-class CPatchObject : public CGeomObject
+class CEditablePoly : public PIPELINE::MAX::BUILTIN::CPolyObject
 {
 public:
-	CPatchObject(CScene *scene);
-	virtual ~CPatchObject();
+	CEditablePoly(CScene *scene);
+	virtual ~CEditablePoly();
 
 	// class desc
 	static const ucstring DisplayName;
@@ -72,15 +72,15 @@ protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
-}; /* class CPatchObject */
+}; /* class CEditablePoly */
 
-typedef CSceneClassDesc<CPatchObject> CPatchObjectClassDesc;
-extern const CPatchObjectClassDesc PatchObjectClassDesc;
+typedef CSceneClassDesc<CEditablePoly> CEditablePolyClassDesc;
+extern const CEditablePolyClassDesc EditablePolyClassDesc;
 
-} /* namespace BUILTIN */
+} /* namespace EPOLY */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_PATCH_OBJECT_H */
+#endif /* #ifndef PIPELINE_EDITABLE_POLY_H */
 
 /* end of file */

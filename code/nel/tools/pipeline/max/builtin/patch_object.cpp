@@ -35,14 +35,14 @@
 
 // Project includes
 
-using namespace std;
+// using namespace std;
 // using namespace NLMISC;
 
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
 
-CPatchObject::CPatchObject(CScene *scene) : CObject(scene)
+CPatchObject::CPatchObject(CScene *scene) : CGeomObject(scene)
 {
 
 }
@@ -50,6 +50,58 @@ CPatchObject::CPatchObject(CScene *scene) : CObject(scene)
 CPatchObject::~CPatchObject()
 {
 
+}
+
+const ucstring CPatchObject::DisplayName = ucstring("PatchObject");
+const char *CPatchObject::InternalName = "PatchObject";
+const NLMISC::CClassId CPatchObject::ClassId = NLMISC::CClassId(0xd0a6b36, 0x7dce4b64); /* Not official, please correct */
+const TSClassId CPatchObject::SuperClassId = CGeomObject::SuperClassId;
+const CPatchObjectClassDesc PatchObjectClassDesc(&DllPluginDescBuiltin);
+
+void CPatchObject::parse(uint16 version)
+{
+	CGeomObject::parse(version);
+}
+
+void CPatchObject::clean()
+{
+	CGeomObject::clean();
+}
+
+void CPatchObject::build(uint16 version)
+{
+	CGeomObject::build(version);
+}
+
+void CPatchObject::disown()
+{
+	CGeomObject::disown();
+}
+
+void CPatchObject::init()
+{
+	CGeomObject::init();
+}
+
+bool CPatchObject::inherits(const NLMISC::CClassId classId) const
+{
+	if (classId == classDesc()->classId()) return true;
+	return CGeomObject::inherits(classId);
+}
+
+const ISceneClassDesc *CPatchObject::classDesc() const
+{
+	return &PatchObjectClassDesc;
+}
+
+void CPatchObject::toStringLocal(std::ostream &ostream, const std::string &pad) const
+{
+	CGeomObject::toStringLocal(ostream, pad);
+}
+
+IStorageObject *CPatchObject::createChunkById(uint16 id, bool container)
+{
+	return CGeomObject::createChunkById(id, container);
 }
 
 } /* namespace BUILTIN */

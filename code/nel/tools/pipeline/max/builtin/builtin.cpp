@@ -51,6 +51,10 @@
 #include "base_object.h"
 #include "object.h"
 #include "geom_object.h"
+#include "tri_object.h"
+#include "poly_object.h"
+#include "patch_object.h"
+#include "editable_patch.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -249,6 +253,14 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 		{
 			registry->add(&GeomObjectSuperClassDesc);
 			registry->add(&GeomObjectClassDesc);
+			{
+				registry->add(&TriObjectClassDesc);
+				registry->add(&PolyObjectClassDesc);
+				registry->add(&PatchObjectClassDesc);
+				{
+					registry->add(&EditablePatchClassDesc);
+				}
+			}
 		}
 	}
 

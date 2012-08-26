@@ -45,19 +45,19 @@ namespace MAX {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClassUnknownDllPluginDesc::CSceneClassUnknownDllPluginDesc(const ucstring &dllFilename, const ucstring &dllDescription) : m_DisplayName(dllFilename), m_InternalName(dllDescription)
+CSceneClassUnknownDllPluginDesc::CSceneClassUnknownDllPluginDesc(const ucstring &dllFilename, const ucstring &dllDescription) : m_InternalName(dllFilename), m_DisplayName(dllDescription)
 {
 
-}
-
-const ucchar *CSceneClassUnknownDllPluginDesc::displayName() const
-{
-	return m_DisplayName.c_str();
 }
 
 const ucchar *CSceneClassUnknownDllPluginDesc::internalName() const
 {
 	return m_InternalName.c_str();
+}
+
+const ucchar *CSceneClassUnknownDllPluginDesc::displayName() const
+{
+	return m_DisplayName.c_str();
 }
 
 ////////////////////////////////////////////////////////////////////////

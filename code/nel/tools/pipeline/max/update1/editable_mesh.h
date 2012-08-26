@@ -1,9 +1,9 @@
 /**
- * \file patch_object.h
- * \brief CPatchObject
- * \date 2012-08-22 08:58GMT
+ * \file editable_mesh.h
+ * \brief CEditableMesh
+ * \date 2012-08-26 12:11GMT
  * \author Jan Boon (Kaetemi)
- * CPatchObject
+ * CEditableMesh
  */
 
 /*
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIPELINE_PATCH_OBJECT_H
-#define PIPELINE_PATCH_OBJECT_H
+#ifndef PIPELINE_EDITABLE_MESH_H
+#define PIPELINE_EDITABLE_MESH_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -34,23 +34,23 @@
 // NeL includes
 
 // Project includes
-#include "geom_object.h"
+#include "../builtin/tri_object.h"
 
 namespace PIPELINE {
 namespace MAX {
-namespace BUILTIN {
+namespace UPDATE1 {
 
 /**
- * \brief CPatchObject
- * \date 2012-08-22 08:58GMT
+ * \brief CEditableMesh
+ * \date 2012-08-26 12:11GMT
  * \author Jan Boon (Kaetemi)
- * CPatchObject
+ * CEditableMesh
  */
-class CPatchObject : public CGeomObject
+class CEditableMesh : public PIPELINE::MAX::BUILTIN::CTriObject
 {
 public:
-	CPatchObject(CScene *scene);
-	virtual ~CPatchObject();
+	CEditableMesh(CScene *scene);
+	virtual ~CEditableMesh();
 
 	// class desc
 	static const ucstring DisplayName;
@@ -72,15 +72,15 @@ protected:
 	// inherited
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
-}; /* class CPatchObject */
+}; /* class CEditableMesh */
 
-typedef CSceneClassDesc<CPatchObject> CPatchObjectClassDesc;
-extern const CPatchObjectClassDesc PatchObjectClassDesc;
+typedef CSceneClassDesc<CEditableMesh> CEditableMeshClassDesc;
+extern const CEditableMeshClassDesc EditableMeshClassDesc;
 
-} /* namespace BUILTIN */
+} /* namespace UPDATE1 */
 } /* namespace MAX */
 } /* namespace PIPELINE */
 
-#endif /* #ifndef PIPELINE_PATCH_OBJECT_H */
+#endif /* #ifndef PIPELINE_EDITABLE_MESH_H */
 
 /* end of file */
