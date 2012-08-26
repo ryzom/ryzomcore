@@ -35,6 +35,7 @@
 
 // Project includes
 #include "object.h"
+#include "storage/geom_buffers.h"
 
 /// Must be passed to the parse and build functions by
 /// inheriting classes to parse the actual geom object.
@@ -43,9 +44,6 @@
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
-namespace STORAGE {
-	class CGeomBuffers;
-}
 
 /**
  * \brief CGeomGeomObject
@@ -75,6 +73,8 @@ public:
 	virtual bool inherits(const NLMISC::CClassId classId) const;
 	virtual const ISceneClassDesc *classDesc() const;
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+
+	static void triangulatePolyFace(std::vector<STORAGE::CGeomTriIndex> &triangles, const STORAGE::CGeomPolyFaceInfo &polyFace);
 
 	// read access
 	inline STORAGE::CGeomBuffers *geomBuffers() const { return m_GeomBuffers; }

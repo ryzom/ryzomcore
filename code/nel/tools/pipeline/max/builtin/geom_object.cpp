@@ -34,7 +34,6 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
-#include "storage/geom_buffers.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -145,6 +144,110 @@ void CGeomObject::toStringLocal(std::ostream &ostream, const std::string &pad, u
 			m_GeomBuffers->toString(ostream, padpad);
 		}
 	}
+}
+
+inline uint32 rrsub(uint32 v, uint32 size)
+{
+	if (v) return v - 1;
+	return size - 1;
+}
+
+inline uint32 rradd(uint32 v, uint32 size)
+{
+	uint32 vp = v + 1;
+	if (vp != size) return vp;
+	return 0;
+}
+
+void CGeomObject::triangulatePolyFace(std::vector<STORAGE::CGeomTriIndex> &triangles, const STORAGE::CGeomPolyFaceInfo &polyFace)
+{
+	nlassert(polyFace.Vertices.size() >= 3);
+	nlassert(polyFace.Triangulation.size() == polyFace.Vertices.size() - 3);
+	uint nbVert = polyFace.Vertices.size();
+	uint nbCuts = polyFace.Triangulation.size();
+	uint nbTriangles = 0;
+
+	// This code creates a matrix, aka a table, of all possible paths
+	// that can be traveled to get directly from one vertex to another
+	// over an egde.
+	// Outer edges of the polygon are one-way, backwards.
+	// Cut edges can be traveled both ways.
+	// Each edge direction can only be traveled by one triangle.
+	// Ingenious, if I may say so myself.
+	// Bad performance by std::vector, though.
+	std::vector<std::vector<bool> > from_to;
+	from_to.resize(nbVert);
+	for (uint i = 0; i < nbVert; ++i)
+	{
+		from_to[i].resize(nbVert);
+		for (uint j = 0; j < nbVert; ++j)
+		{
+			from_to[i][j] = false;
+		}
+		// Can travel backwards over the outer edge
+		from_to[i][rrsub(i, nbVert)] = true;
+	}
+	for (uint i = 0; i < nbCuts; ++i)
+	{
+		// Can travel both ways over cuts, but the first direction is handled directly!
+		// from_to[polyFace.Triangulation[i].first][polyFace.Triangulation[i].second] = true;
+		from_to[polyFace.Triangulation[i].second][polyFace.Triangulation[i].first] = true;
+	}
+	// Triangulate all cuts, this assumes cuts are in the direction
+	// of a triangle that is not already handled by another cut...
+	for (uint i = 0; i < nbCuts; ++i)
+	{
+		uint32 a = polyFace.Triangulation[i].first;
+		uint32 b = polyFace.Triangulation[i].second;
+		// from_to[polyFace.Triangulation[i].first][polyFace.Triangulation[i].second] = false; // handled!
+		// Try to find a path that works
+		for (uint c = 0; c < nbVert; ++c)
+		{
+			// Can we make a triangle
+			if (from_to[b][c] && from_to[c][a])
+			{
+				STORAGE::CGeomTriIndex tri;
+				tri.a = polyFace.Vertices[c];
+				tri.b = polyFace.Vertices[b];
+				tri.c = polyFace.Vertices[a];
+				triangles.push_back(tri);
+				++nbTriangles;
+				// nldebug("add tri from cut");
+				from_to[b][c] = false;
+				from_to[c][a] = false;
+				break;
+			}
+		}
+	}
+	// Find... The Last Triangle
+	for (uint a = 0; a < nbVert; ++a)
+	{
+		uint b = rrsub(a, nbVert);
+		// Can we still travel backwards over the outer edge?
+		if (from_to[a][b])
+		{
+			for (uint c = 0; c < nbVert; ++c)
+			{
+				// Can we make a triangle
+				if (from_to[b][c] && from_to[c][a])
+				{
+					STORAGE::CGeomTriIndex tri;
+					tri.a = polyFace.Vertices[c];
+					tri.b = polyFace.Vertices[b];
+					tri.c = polyFace.Vertices[a];
+					triangles.push_back(tri);
+					++nbTriangles;
+					// nldebug("add final tri");
+					from_to[b][c] = false;
+					from_to[c][a] = false;
+					break;
+				}
+			}
+		}
+	}
+	// nldebug("triangles: %i", nbTriangles);
+	// nldebug("cuts: %i", nbCuts);
+	nlassert(nbTriangles == nbCuts + 1);
 }
 
 IStorageObject *CGeomObject::createChunkById(uint16 id, bool container)

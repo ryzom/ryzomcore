@@ -38,6 +38,8 @@
 #include "../max/builtin/storage/geom_buffers.h"
 #include "../max/builtin/scene_impl.h"
 #include "../max/builtin/i_node.h"
+#include "../max/update1/editable_mesh.h"
+#include "../max/epoly/editable_poly.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -46,26 +48,68 @@ using namespace PIPELINE::MAX::UPDATE1;
 using namespace PIPELINE::MAX::EPOLY;
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/testplane.max";
-static const char *filename = "/home/kaetemi/3dsMax/scenes/geomobjects.max";
+//static const char *filename = "/home/kaetemi/3dsMax/scenes/geomobjects.max";
 static const char *streamname = "Scene";
 
-void exportObj(const std::string &fileName, const CReferenceMaker *triObject)
-{
-	IStorageObject *bufferBlock = triObject->findStorageObject(0x08fe);
-	nlassert(bufferBlock->isContainer());
-	CStorageContainer *buffers = static_cast<CStorageContainer *>(bufferBlock);
-	CStorageArraySizePre<NLMISC::CVector> *vertexBuffer = static_cast<CStorageArraySizePre<NLMISC::CVector> *>(buffers->findStorageObject(0x0914));
-	CStorageArraySizePre<CGeomTriIndexInfo> *indexBuffer = static_cast<CStorageArraySizePre<CGeomTriIndexInfo> *>(buffers->findStorageObject(0x0912));
+#define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
+#define PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID 0x010a
+#define PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID 0x011a
+// CStorageArraySizePre<CGeomPolyVertexInfo>
+// CStorageArraySizePre<CGeomPolyEdgeInfo>
+// CStorageArrayDynSize<CGeomPolyFaceInfo>
 
-	std::ofstream ofs(fileName.c_str());
-	for (uint i = 0; i < vertexBuffer->Value.size(); ++i)
-		ofs << "v " << vertexBuffer->Value[i].x << " " << vertexBuffer->Value[i].y << " " << vertexBuffer->Value[i].z << "\n";
-	for (uint i = 0; i < indexBuffer->Value.size(); ++i)
-		ofs << "f " << (indexBuffer->Value[i].a + 1) << " " << (indexBuffer->Value[i].b + 1) << " " << (indexBuffer->Value[i].c + 1) << "\n"; // + 1 as .obj indexes at 1...
+void exportObj(const std::string &fileName, const CReferenceMaker *geomObject)
+{
+	nlassert(dynamic_cast<const CGeomObject *>(geomObject));
+	const CEditableMesh *mesh = dynamic_cast<const CEditableMesh *>(geomObject);
+	if (mesh)
+	{
+		nlerror("Not implemented!");
+		/*
+		IStorageObject *bufferBlock = triObject->findStorageObject(0x08fe);
+		nlassert(bufferBlock->isContainer());
+		CStorageContainer *buffers = static_cast<CStorageContainer *>(bufferBlock);
+		CStorageArraySizePre<NLMISC::CVector> *vertexBuffer = static_cast<CStorageArraySizePre<NLMISC::CVector> *>(buffers->findStorageObject(0x0914));
+		CStorageArraySizePre<CGeomTriIndexInfo> *indexBuffer = static_cast<CStorageArraySizePre<CGeomTriIndexInfo> *>(buffers->findStorageObject(0x0912));
+
+		std::ofstream ofs(fileName.c_str());
+		for (uint i = 0; i < vertexBuffer->Value.size(); ++i)
+			ofs << "v " << vertexBuffer->Value[i].x << " " << vertexBuffer->Value[i].y << " " << vertexBuffer->Value[i].z << "\n";
+		for (uint i = 0; i < indexBuffer->Value.size(); ++i)
+			ofs << "f " << (indexBuffer->Value[i].a + 1) << " " << (indexBuffer->Value[i].b + 1) << " " << (indexBuffer->Value[i].c + 1) << "\n"; // + 1 as .obj indexes at 1...
+		*/
+		return;
+	}
+	const CEditablePoly *poly = dynamic_cast<const CEditablePoly *>(geomObject);
+	if (poly)
+	{
+		CGeomBuffers *geomBuffers = poly->geomBuffers();
+		CStorageArraySizePre<CGeomPolyVertexInfo> *vertexBuffer = static_cast<CStorageArraySizePre<CGeomPolyVertexInfo> *>(geomBuffers->findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID));
+		CStorageArraySizePre<CGeomPolyEdgeInfo> *edgeBuffer = static_cast<CStorageArraySizePre<CGeomPolyEdgeInfo> *>(geomBuffers->findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID));
+		CStorageArrayDynSize<CGeomPolyFaceInfo> *faceBuffer = static_cast<CStorageArrayDynSize<CGeomPolyFaceInfo> *>(geomBuffers->findStorageObject(PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID));
+		nlassert(vertexBuffer);
+		nlassert(edgeBuffer);
+		nlassert(faceBuffer);
+		std::ofstream ofs(fileName.c_str());
+		for (uint i = 0; i < vertexBuffer->Value.size(); ++i)
+			ofs << "v " << vertexBuffer->Value[i].v.x << " " << vertexBuffer->Value[i].v.y << " " << vertexBuffer->Value[i].v.z << "\n";
+		std::vector<CGeomTriIndex> triangles;
+		for (uint i = 0; i < faceBuffer->Value.size(); ++i)
+		{
+			CGeomObject::triangulatePolyFace(triangles, faceBuffer->Value[i]);
+			for (uint j = 0; j < triangles.size(); ++j)
+			{
+				ofs << "f " << (triangles[j].a + 1) << " " << (triangles[j].b + 1) << " " << (triangles[j].c + 1) << "\n"; // + 1 as .obj indexes at 1...
+			}
+			triangles.clear();
+		}
+		return;
+	}
+	nlerror("Not handled!");
 }
 
 // int __stdcall WinMain(void *, void *, void *, int)
@@ -197,9 +241,9 @@ int main(int argc, char **argv)
 	nldebug("PARSE");
 	scene.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	nldebug("CLEAN");
-	//## scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
+	scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
 	// <- TEST
-	scene.toString(std::cout);//##
+	//scene.toString(std::cout);//##
 	std::cout << "\n";
 	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
 	//classDirectory3.disown();
@@ -214,10 +258,11 @@ int main(int argc, char **argv)
 	//node->toString(std::cout);
 	//exportObj("tr_hof_civil01_gilet.obj", node->getReference(1)->getReference(1)); // => CDerivedObject::getBase(node->object())
 
-	//INode *node = scene.container()->scene()->rootNode()->find(ucstring("GE_Acc_MikotoBaniere")); nlassert(node);
+	INode *node = scene.container()->scene()->rootNode()->find(ucstring("GE_Acc_MikotoBaniere")); nlassert(node);
 	//INode *node = scene.container()->scene()->rootNode()->find(ucstring("testplane")); nlassert(node);
-	//CReferenceMaker *object = node->getReference(1);
-	//object->toString(std::cout);
+	CReferenceMaker *object = node->getReference(1);
+	object->toString(std::cout);
+	exportObj("ge_acc_mikotobaniere.obj", object);
 
 
 	//GE_Acc_MikotoBaniere

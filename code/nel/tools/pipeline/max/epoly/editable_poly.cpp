@@ -107,6 +107,7 @@ void CEditablePoly::build(uint16 version, uint filter)
 
 void CEditablePoly::disown()
 {
+	m_EditablePolyUnknown.clear();
 	CPolyObject::disown();
 }
 
