@@ -98,7 +98,7 @@ void CGeomObject::build(uint16 version, uint filter)
 	else if (filter == PMB_GEOM_OBJECT_PARSE_FILTER)
 	{
 		if (m_Unknown0900) putChunk(PMB_GEOM_UNKNOWN0900_CHUNK_ID, m_Unknown0900);
-		if (m_GeomBuffers) putChunk(PMB_GEOM_UNKNOWN0900_CHUNK_ID, m_GeomBuffers);
+		if (m_GeomBuffers) putChunk(PMB_GEOM_BUFFERS_CHUNK_ID, m_GeomBuffers);
 	}
 }
 

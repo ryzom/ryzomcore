@@ -29,6 +29,7 @@
 #include "editable_mesh.h"
 
 // STL includes
+#include <iomanip>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -50,7 +51,12 @@ CEditableMesh::CEditableMesh(CScene *scene) : CTriObject(scene)
 
 CEditableMesh::~CEditableMesh()
 {
-
+	if (!m_ChunksOwnsPointers)
+	{
+		for (TStorageObjectContainer::iterator it = m_EditableMeshUnknown.begin(), end = m_EditableMeshUnknown.end(); it != end; ++it)
+			delete it->second;
+		m_EditableMeshUnknown.clear();
+	}
 }
 
 const ucstring CEditableMesh::DisplayName = ucstring("EditableMesh");
@@ -59,9 +65,67 @@ const NLMISC::CClassId CEditableMesh::ClassId = NLMISC::CClassId(0xe44f10b3, 0x0
 const TSClassId CEditableMesh::SuperClassId = CTriObject::SuperClassId;
 const CEditableMeshClassDesc EditableMeshClassDesc(&DllPluginDescUpdate1);
 
-void CEditableMesh::parse(uint16 version)
+void CEditableMesh::parse(uint16 version, uint filter)
 {
 	CTriObject::parse(version);
+
+	IStorageObject *so;
+	so = getChunk(0x3001);
+	if (so)
+	{
+		m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x3001, so));
+		for (; ; )
+		{
+			if (peekChunk() == 0x2845)
+			{
+				so = getChunk(0x2845);
+				m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x2845, so));
+			}
+			else if (peekChunk() == 0x2846)
+			{
+				so = getChunk(0x2846);
+				m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x2846, so));
+			}
+			else if (peekChunk() == 0x2847)
+			{
+				so = getChunk(0x2847);
+				m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x2847, so));
+			}
+			else break;
+		}
+	}
+	for (; ; )
+	{
+		so = getChunk(0x3003);
+		if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x3003, so));
+		else break;
+		so = getChunk(0x3004);
+		if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x3004, so));
+	}
+	so = getChunk(0x3002);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x3002, so));
+	so = getChunk(0x4020);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x4020, so));
+	so = getChunk(0x4024);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x4024, so));
+	so = getChunk(0x4025);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x4025, so));
+	so = getChunk(0x4026);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x4026, so));
+	so = getChunk(0x402c);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x402c, so));
+	so = getChunk(0x402d);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x402d, so));
+	so = getChunk(0x4030);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x4030, so));
+	so = getChunk(0x4034);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x4034, so));
+	so = getChunk(0x4038);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x4038, so));
+	so = getChunk(0x403b);
+	if (so) m_EditableMeshUnknown.push_back(TStorageObjectWithId(0x403b, so));
+
+	CTriObject::parse(version, PMB_TRI_OBJECT_PARSE_FILTER);
 }
 
 void CEditableMesh::clean()
@@ -69,13 +133,19 @@ void CEditableMesh::clean()
 	CTriObject::clean();
 }
 
-void CEditableMesh::build(uint16 version)
+void CEditableMesh::build(uint16 version, uint filter)
 {
 	CTriObject::build(version);
+
+	for (TStorageObjectContainer::iterator it = m_EditableMeshUnknown.begin(), end = m_EditableMeshUnknown.end(); it != end; ++it)
+		putChunk(it->first, it->second);
+
+	CTriObject::build(version, PMB_TRI_OBJECT_PARSE_FILTER);
 }
 
 void CEditableMesh::disown()
 {
+	m_EditableMeshUnknown.clear();
 	CTriObject::disown();
 }
 
@@ -95,9 +165,23 @@ const ISceneClassDesc *CEditableMesh::classDesc() const
 	return &EditableMeshClassDesc;
 }
 
-void CEditableMesh::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CEditableMesh::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CTriObject::toStringLocal(ostream, pad);
+
+	std::string padpad = pad + "\t";
+	sint i = 0;
+	for (TStorageObjectContainer::const_iterator it = m_EditableMeshUnknown.begin(), end = m_EditableMeshUnknown.end(); it != end; ++it)
+	{
+		std::stringstream ss;
+		ss << std::hex << std::setfill('0');
+		ss << std::setw(4) << it->first;
+		ostream << "\n" << pad << "EditableMeshUnkown[" << i << "] 0x" << ss.str() << ": ";
+		it->second->toString(ostream, padpad);
+		++i;
+	}
+
+	CTriObject::toStringLocal(ostream, pad, PMB_TRI_OBJECT_PARSE_FILTER);
 }
 
 IStorageObject *CEditableMesh::createChunkById(uint16 id, bool container)

@@ -144,6 +144,8 @@ protected:
 	/// Same as putChunk but for lazy programmers, must use together with getChunkValue
 	template <typename T>
 	void putChunkValue(uint16 id, const T &value);
+	/// See the next chunk id
+	uint16 peekChunk();
 	//@}
 
 protected:

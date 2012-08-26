@@ -59,7 +59,7 @@ const NLMISC::CClassId CEditablePoly::ClassId = NLMISC::CClassId(0x1bf8338d, 0x1
 const TSClassId CEditablePoly::SuperClassId = CPolyObject::SuperClassId;
 const CEditablePolyClassDesc EditablePolyClassDesc(&DllPluginDescEPoly);
 
-void CEditablePoly::parse(uint16 version)
+void CEditablePoly::parse(uint16 version, uint filter)
 {
 	CPolyObject::parse(version);
 }
@@ -69,7 +69,7 @@ void CEditablePoly::clean()
 	CPolyObject::clean();
 }
 
-void CEditablePoly::build(uint16 version)
+void CEditablePoly::build(uint16 version, uint filter)
 {
 	CPolyObject::build(version);
 }
@@ -95,7 +95,7 @@ const ISceneClassDesc *CEditablePoly::classDesc() const
 	return &EditablePolyClassDesc;
 }
 
-void CEditablePoly::toStringLocal(std::ostream &ostream, const std::string &pad) const
+void CEditablePoly::toStringLocal(std::ostream &ostream, const std::string &pad, uint filter) const
 {
 	CPolyObject::toStringLocal(ostream, pad);
 }

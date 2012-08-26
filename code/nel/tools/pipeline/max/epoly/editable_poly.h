@@ -59,14 +59,14 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version);
+	virtual void parse(uint16 version, uint filter = 0);
 	virtual void clean();
-	virtual void build(uint16 version);
+	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
 	virtual void init();
 	virtual bool inherits(const NLMISC::CClassId classId) const;
 	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "") const;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
 
 protected:
 	// inherited
