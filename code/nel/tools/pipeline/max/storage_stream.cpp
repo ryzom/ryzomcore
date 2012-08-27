@@ -59,7 +59,10 @@ CStorageStream::CStorageStream(GsfOutput *output) : NLMISC::IStream(false), m_In
 
 CStorageStream::~CStorageStream()
 {
-
+	if (m_Output)
+	{
+		gsf_output_seek(m_Output, 0, G_SEEK_END);
+	}
 }
 
 bool CStorageStream::seek(sint32 offset, NLMISC::IStream::TSeekOrigin origin) const
@@ -131,9 +134,7 @@ void CStorageStream::serialBuffer(uint8 *buf, uint len)
 	{
 		if (!gsf_output_write(m_Output, len, buf))
 		{
-#ifdef NL_DEBUG_STORAGE
-			nldebug("Cannot write to output, throw exception");
-#endif
+			nlwarning("Cannot write %i bytes to output at pos %i, throw exception", len, getPos());
 			throw NLMISC::EStream();
 		}
 	}

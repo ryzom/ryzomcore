@@ -222,13 +222,15 @@ void CClassDirectory3::build(uint16 version, uint filter)
 // Parallel to CDllDirectory
 void CClassDirectory3::disown()
 {
-	CStorageContainer::disown();
 	m_ChunkCache.clear();
 	m_Entries.clear();
 	m_ClassIdToIndex.clear();
 
 	// Ownership goes back to m_Chunks
 	m_ChunksOwnsPointers = true;
+
+	// Disown child chunks
+	CStorageContainer::disown();
 }
 
 // Parallel to CDllDirectory

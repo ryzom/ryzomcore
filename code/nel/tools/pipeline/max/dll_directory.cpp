@@ -221,13 +221,15 @@ void CDllDirectory::build(uint16 version, uint filter)
 // Parallel to CClassDirectory3
 void CDllDirectory::disown()
 {
-	CStorageContainer::disown();
 	m_ChunkCache.clear();
 	m_Entries.clear();
 	m_InternalNameToIndex.clear();
 
 	// Ownership goes back to m_Chunks
 	m_ChunksOwnsPointers = true;
+
+	// Disown child chunks
+	CStorageContainer::disown();
 }
 
 // Parallel to CClassDirectory3
