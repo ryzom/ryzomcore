@@ -66,6 +66,8 @@ namespace PIPELINE
 
 		void slaveRefusedBuildTask_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
+		void slaveLoggedToolError_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
+
 		void slaveReloadedSheets_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void slaveBuildReadySuccess_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -94,6 +96,8 @@ namespace PIPELINE
 		virtual void slaveAbortedBuildTask(NLNET::IModuleProxy *sender) =0;
 		// 
 		virtual void slaveRefusedBuildTask(NLNET::IModuleProxy *sender) =0;
+		// 
+		virtual void slaveLoggedToolError(NLNET::IModuleProxy *sender, uint8 type, const std::string &macroPath, const std::string &time, const std::string &error) =0;
 		// 
 		virtual void slaveReloadedSheets(NLNET::IModuleProxy *sender) =0;
 		// 
@@ -162,6 +166,8 @@ namespace PIPELINE
 		// 
 		void slaveRefusedBuildTask(NLNET::IModule *sender);
 		// 
+		void slaveLoggedToolError(NLNET::IModule *sender, uint8 type, const std::string &macroPath, const std::string &time, const std::string &error);
+		// 
 		void slaveReloadedSheets(NLNET::IModule *sender);
 		// 
 		void slaveBuildReadySuccess(NLNET::IModule *sender);
@@ -182,6 +188,9 @@ namespace PIPELINE
 	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_slaveRefusedBuildTask(NLNET::CMessage &__message);
+	
+		// Message serializer. Return the message received in reference for easier integration
+		static const NLNET::CMessage &buildMessageFor_slaveLoggedToolError(NLNET::CMessage &__message, uint8 type, const std::string &macroPath, const std::string &time, const std::string &error);
 	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_slaveReloadedSheets(NLNET::CMessage &__message);

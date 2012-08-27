@@ -183,7 +183,10 @@ bool CPipelineProcessImpl::hasFileBeenAddedSince(const std::string &inputFile, u
 bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
+	{
+		++m_StatsInvalid;
 		return false; // Cannot continue on previous failure.
+	}
 
 	m_SubTaskResult = FINISH_NOT;
 
@@ -195,12 +198,14 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 		{
 			m_SubTaskResult = FINISH_ERROR;
 			m_SubTaskErrorMessage = std::string("Input file '") + path + "' cannot be a directory";
+			++m_StatsInvalid;
 			return false; // Error, cannot rebuild.
 		}
 		if (!isFileDependency(path))
 		{
 			m_SubTaskResult = FINISH_ERROR;
 			m_SubTaskErrorMessage = std::string("File '") + path + "' is not part of the dependencies";
+			++m_StatsInvalid;
 			return false; // Error, cannot rebuild.
 		}
 	}
@@ -233,6 +238,7 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 			{
 				nldebug("No output files were tampered with since last successful build, rebuild not needed");
 				m_SubTaskResult = FINISH_SUCCESS;
+				++m_StatsSkip;
 				return false; // No rebuild required.
 			}
 		}
@@ -262,6 +268,7 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 		{
 			nldebug("Not all input files have an .output files, rebuild");
 			m_SubTaskResult = FINISH_SUCCESS;
+			++m_StatsBuild;
 			return true; // Rebuild
 		}
 		else
@@ -277,7 +284,10 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 bool CPipelineProcessImpl::needsToBeRebuildSubByOutput(const std::vector<std::string> &inputPaths, bool inputChanged, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
+	{
+		++m_StatsInvalid;
 		return false; // Cannot continue on previous failure.
+	}
 	
 	m_SubTaskResult = FINISH_NOT;
 
@@ -311,6 +321,7 @@ bool CPipelineProcessImpl::needsToBeRebuildSubByOutput(const std::vector<std::st
 				// Require rebuild because we don't know if there's new output
 				nldebug("Input file '%s' has output file with no output files, state not known, so rebuild", path.c_str());
 				m_SubTaskResult = FINISH_SUCCESS;
+				++m_StatsBuild;
 				return true; // Rebuild.
 			}
 		}
@@ -331,7 +342,10 @@ bool CPipelineProcessImpl::needsToBeRebuildSubByOutput(const std::vector<std::st
 bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
+	{
+		++m_StatsInvalid;
 		return false; // Cannot continue on previous failure.
+	}
 	
 	m_SubTaskResult = FINISH_NOT;
 
@@ -348,6 +362,7 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 			{
 				m_SubTaskResult = FINISH_ERROR;
 				m_SubTaskErrorMessage = std::string("Directory '") + path + "' is not part of the dependencies";
+				++m_StatsInvalid;
 				return false; // Error, cannot rebuild.
 			}
 		}
@@ -358,6 +373,7 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 			{
 				m_SubTaskResult = FINISH_ERROR;
 				m_SubTaskErrorMessage = std::string("File '") + path + "' is not part of the dependencies";
+				++m_StatsInvalid;
 				return false; // Error, cannot rebuild.
 			}
 		}
@@ -407,6 +423,7 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 		{
 			nldebug("No output files were tampered with since last successful build, rebuild not needed");
 			m_SubTaskResult = FINISH_SUCCESS;
+			++m_StatsSkip;
 			return false; // No rebuild required.
 		}
 		else
@@ -421,7 +438,10 @@ bool CPipelineProcessImpl::needsToBeRebuilt(const std::vector<std::string> &inpu
 bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &inputPaths, const std::vector<std::string> &outputPaths, bool inputModified, bool inputDepends)
 {
 	if (m_SubTaskResult != FINISH_SUCCESS)
+	{
+		++m_StatsInvalid;
 		return false; // Cannot continue on previous failure.
+	}
 	
 	m_SubTaskResult = FINISH_NOT;
 
@@ -434,6 +454,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 		{
 			m_SubTaskResult = FINISH_ERROR;
 			m_SubTaskErrorMessage = std::string("Output file '") + path + "' cannot be a directory";
+			++m_StatsInvalid;
 			return false; // Error, cannot rebuild.
 		}
 	}
@@ -447,6 +468,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 			// If so, rebuild
 			nldebug("Output file '%s' has been removed, rebuild", path.c_str());
 			m_SubTaskResult = FINISH_SUCCESS;
+			++m_StatsBuild;
 			return true; // Rebuild.
 		}
 	}
@@ -461,6 +483,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 			// If so, rebuild
 			nldebug("Output file '%s' does not exist, rebuild", path.c_str());
 			m_SubTaskResult = FINISH_SUCCESS;
+			++m_StatsBuild;
 			return true; // Rebuild.
 		}
 	}
@@ -498,6 +521,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 		{
 			nlwarning("Depend file for existing output '%s' does not exist, this should not happen, rebuild", path.c_str());
 			m_SubTaskResult = FINISH_SUCCESS;
+			++m_StatsBuild;
 			return true; // Rebuild.
 		}
 		else
@@ -513,6 +537,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 					// FIXME: Is it really necessary to recalculate the crc32 if the status file is broken for an output file? Useful though for some rare cases.
 					m_SubTaskResult = FINISH_ERROR;
 					m_SubTaskErrorMessage = std::string("Could not get status for output file '") + path + "', this should never happen at all, coding error";
+					++m_StatsInvalid;
 					return false; // Error, cannot rebuild.
 				}
 				else
@@ -521,6 +546,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 					{
 						nlwarning("Status checksum %i for output file '%s' does match depend checksum %i, output file was modified, this should not happen, rebuild", metaStatus.CRC32, path.c_str(), metaDepend.CRC32);
 						m_SubTaskResult = FINISH_SUCCESS;
+						++m_StatsBuild;
 						return true; // Rebuild.
 					}
 				}
@@ -537,6 +563,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 					{
 						nlwarning("Output file '%s' depends on unknown file '%s', rebuild", path.c_str(), dependencyFile.c_str());
 						m_SubTaskResult = FINISH_SUCCESS;
+						++m_StatsBuild;
 						return true; // Rebuild.
 					}
 					else
@@ -545,6 +572,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 						{
 							nldebug("Status checksum %i for input file '%s' does match depend checksum %i, input file was modified, rebuild", metaStatus.CRC32, dependencyFile.c_str(), dependency.CRC32);
 							m_SubTaskResult = FINISH_SUCCESS;
+							++m_StatsBuild;
 							return true; // Rebuild.
 						}
 					}
@@ -574,6 +602,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 				{
 					nldebug("Found a file added after last build start in a dependency directory that is not known by the depend files, rebuild");
 					m_SubTaskResult = FINISH_SUCCESS;
+					++m_StatsBuild;
 					return true; // Rebuild.
 				}
 			}
@@ -585,6 +614,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 					{
 						nldebug("Found a dependency file added after last build start that is not known by the depend files, rebuild");
 						m_SubTaskResult = FINISH_SUCCESS;
+						++m_StatsBuild;
 						return true; // Rebuild.
 					}
 				}
@@ -595,6 +625,7 @@ bool CPipelineProcessImpl::needsToBeRebuiltSub(const std::vector<std::string> &i
 	// (if any checksum was different, require rebuild, if no checksums were different, no rebuild is needed)
 	nldebug("No differences found, no rebuild needed");
 	m_SubTaskResult = FINISH_SUCCESS;
+	++m_StatsSkip;
 	return false; // Rebuild not necessary.
 }
 

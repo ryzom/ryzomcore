@@ -33,6 +33,7 @@
 
 // NeL includes
 #include <vector>
+#include <nel/misc/tool_logger.h>
 
 // Project includes
 #include "workspace_storage.h"
@@ -76,11 +77,11 @@ public:
 struct CFileError
 {
 public:
-	uint32 Time; // The time when this error occured.
-	// TFileState Level; // Success, Warning, Error, Removal
+	uint32 MasterTime; // The time when this error occured.
+	TError Level;
 	std::string Project;
-	std::string Process;
-	// std::string Plugin;
+	std::string Plugin;
+	std::string Time;
 	std::string Message;
 
 	void serial(NLMISC::IStream &stream) throw (NLMISC::EStream);
@@ -179,6 +180,9 @@ public:
 	// static bool readRemove(CFileRemove &remove, const std::string & path);
 	// static void createRemove(const CFileRemove &remove, const std::string &path); // Remove cannot be modified after creation, only erased.
 	// static void eraseRemove(const std::string &path);
+
+	static std::string getErrorPath(const std::string &file) { return "[TODO]"; }
+	static void appendError(const CFileError &error, const std::string &metaPath) { /* TODO */ }
 
 	static std::string getDependPath(const std::string &file);
 	static bool readDepend(CFileDepend &depend, const std::string &metaPath);

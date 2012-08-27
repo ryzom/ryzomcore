@@ -19,6 +19,15 @@
 				<doc line=""/>
 			</method>
 
+			<method name="slaveLoggedToolError" msg="TL_ERR_LOG">
+				<doc line=""/>
+
+				<param type="uint8" name="type" />
+				<param type="std::string" name="macroPath" byref="true" />
+				<param type="std::string" name="time" byref="true" />
+				<param type="std::string" name="error" byref="true" />
+			</method>
+
 			<method name="slaveReloadedSheets" msg="RE_SHEETS_OK">
 				<doc line=""/>
 			</method>

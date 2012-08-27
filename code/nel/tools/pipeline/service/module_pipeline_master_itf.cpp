@@ -34,6 +34,10 @@ namespace PIPELINE
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
 			
+			res = handlers.insert(std::make_pair(std::string("TL_ERR_LOG"), &CModulePipelineMasterSkel::slaveLoggedToolError_skel));
+			// if this assert, you have a doubly message name in your interface definition !
+			nlassert(res.second);
+			
 			res = handlers.insert(std::make_pair(std::string("RE_SHEETS_OK"), &CModulePipelineMasterSkel::slaveReloadedSheets_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
@@ -101,6 +105,20 @@ namespace PIPELINE
 	{
 		H_AUTO(CModulePipelineMasterSkel_slaveRefusedBuildTask_RE_BT_REFUSED);
 		slaveRefusedBuildTask(sender);
+	}
+
+	void CModulePipelineMasterSkel::slaveLoggedToolError_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	{
+		H_AUTO(CModulePipelineMasterSkel_slaveLoggedToolError_TL_ERR_LOG);
+		uint8	type;
+			nlRead(__message, serial, type);
+		std::string	macroPath;
+			nlRead(__message, serial, macroPath);
+		std::string	time;
+			nlRead(__message, serial, time);
+		std::string	error;
+			nlRead(__message, serial, error);
+		slaveLoggedToolError(sender, type, macroPath, time, error);
 	}
 
 	void CModulePipelineMasterSkel::slaveReloadedSheets_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
@@ -192,6 +210,24 @@ namespace PIPELINE
 			NLNET::CMessage __message;
 
 			buildMessageFor_slaveRefusedBuildTask(__message);
+
+			_ModuleProxy->sendModuleMessage(sender, __message);
+		}
+	}
+		// 
+	void CModulePipelineMasterProxy::slaveLoggedToolError(NLNET::IModule *sender, uint8 type, const std::string &macroPath, const std::string &time, const std::string &error)
+	{
+		if (_LocalModuleSkel && _LocalModule->isImmediateDispatchingSupported())
+		{
+			// immediate local synchronous dispatching
+			_LocalModuleSkel->slaveLoggedToolError(_ModuleProxy->getModuleGateway()->getPluggedModuleProxy(sender), type, macroPath, time, error);
+		}
+		else
+		{
+			// send the message for remote dispatching and execution or local queing
+			NLNET::CMessage __message;
+
+			buildMessageFor_slaveLoggedToolError(__message, type, macroPath, time, error);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
 		}
@@ -329,6 +365,19 @@ namespace PIPELINE
 	const NLNET::CMessage &CModulePipelineMasterProxy::buildMessageFor_slaveRefusedBuildTask(NLNET::CMessage &__message)
 	{
 		__message.setType("RE_BT_REFUSED");
+
+
+		return __message;
+	}
+
+	// Message serializer. Return the message received in reference for easier integration
+	const NLNET::CMessage &CModulePipelineMasterProxy::buildMessageFor_slaveLoggedToolError(NLNET::CMessage &__message, uint8 type, const std::string &macroPath, const std::string &time, const std::string &error)
+	{
+		__message.setType("TL_ERR_LOG");
+			nlWrite(__message, serial, type);
+			nlWrite(__message, serial, const_cast < std::string& > (macroPath));
+			nlWrite(__message, serial, const_cast < std::string& > (time));
+			nlWrite(__message, serial, const_cast < std::string& > (error));
 
 
 		return __message;

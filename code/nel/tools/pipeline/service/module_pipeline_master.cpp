@@ -36,6 +36,7 @@
 #include <nel/misc/debug.h>
 #include <nel/net/service.h>
 #include <nel/misc/task_manager.h>
+#include <nel/misc/tool_logger.h>
 
 // Project includes
 #include "info_flags.h"
@@ -157,7 +158,7 @@ protected:
 	bool m_VerifyOnly;
 
 public:
-	CModulePipelineMaster() : m_BuildWorking(false), m_AbortRequested(false), m_TaskManager(NULL), m_WaitingCallbacks("WaitingCallbacks"), m_UpdateTasks("UpdateTasks")
+	CModulePipelineMaster() : m_BuildWorking(false), m_AbortRequested(false), m_TaskManager(NULL), m_WaitingCallbacks("WaitingCallbacks"), m_UpdateTasks("UpdateTasks"), m_MasterLog(NULL)
 	{
 		g_IsMaster = true;
 		m_TaskManager = new NLMISC::CTaskManager();
@@ -397,6 +398,7 @@ public:
 								CProcessPluginInfo pluginInfo;
 								g_PipelineWorkspace->getProcessPlugin(pluginInfo, taskInfo->ProcessPluginId);
 								nlinfo("Dispatching task '%i' ('%s': '%s') to slave '%s'", taskInfo->Id.Global, taskInfo->ProjectName.c_str(), pluginInfo.Handler.c_str(), it->second->Proxy.getModuleProxy()->getModuleName().c_str());
+								notifyTerminalTaskBegin(taskInfo->Id.Global);
 							}
 						}
 					}
@@ -430,6 +432,8 @@ public:
 				}
 
 				PIPELINE::endedBuildReadyMaster();
+
+				notifyTerminalBuildEnd();
 
 				nlinfo("#####################################");
 				nlinfo("#####################################");
@@ -503,6 +507,31 @@ public:
 		CInfoFlags::getInstance()->addFlag(PIPELINE_INFO_SLAVE_REJECTED);
 	}
 
+	virtual void slaveLoggedToolError(NLNET::IModuleProxy *sender, uint8 type, const std::string &macroPath, const std::string &time, const std::string &error)
+	{
+		TSlaveMap::iterator slaveIt = m_Slaves.find(sender);
+		if (slaveIt == m_Slaves.end()) { nlerror("Received 'slaveLoggedToolError' from unknown slave at '%s'", sender->getModuleName().c_str()); m_Slaves.erase(sender); /*m_SlavesMutex.unlock();*/ return; }
+		CSlave *slave = slaveIt->second;
+		
+		if (!macroPath.empty())
+		{
+			CBuildTaskInfo *task = m_BuildTaskQueue.getTaskInfo(slave->ActiveTaskId);
+			CProcessPluginInfo pluginInfo;
+			g_PipelineWorkspace->getProcessPlugin(pluginInfo, task->ProcessPluginId);
+			
+			CFileError fe;
+			fe.MasterTime = CTime::getSecondsSince1970();
+			fe.Level = (TError)type;
+			fe.Message = error;
+			fe.Time = time;
+			fe.Project = task->ProjectName;;
+			fe.Plugin = pluginInfo.Handler;
+			CMetadataStorage::appendError(fe, CMetadataStorage::getErrorPath(unMacroPath(macroPath)));
+		}
+
+		notifyTerminalTaskMessage(slave->ActiveTaskId, (TError)type, macroPath, time, error);
+	}
+
 	virtual void slaveReloadedSheets(NLNET::IModuleProxy *sender)
 	{
 		//m_SlavesMutex.lock();
@@ -550,11 +579,69 @@ public:
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
+	
+	FILE *m_MasterLog;
 
+	void notifyTerminalBuildStart()
+	{
+		nlinfo("");
+		// TODO NOTIFY TERMINAL
+		if (m_MasterLog)
+		{
+			fflush(m_MasterLog);
+			fclose(m_MasterLog);
+			m_MasterLog = NULL;
+		}
+		m_MasterLog = fopen(IService::getInstance()->ConfigFile.getVar("MasterLog").asString(0).c_str(), "at");
+		fprintf(m_MasterLog, "[BUILD_START]\n");
+		fflush(m_MasterLog);
+	}
+
+	// task info
+	void notifyTerminalTaskInfo(uint32 taskId, const std::string &projectName, const std::string &processHandler)
+	{
+		nlinfo("taskId: %i, projectName: %s, processHandler: %s", taskId, projectName.c_str(), processHandler.c_str());
+		// TODO NOTIFY TERMINAL
+		fprintf(m_MasterLog, "[TASK_INFO] taskId: %i, projectName: %s, processHandler: %s\n", taskId, projectName.c_str(), processHandler.c_str());
+		fflush(m_MasterLog);
+	}
+
+	// task begin
+	void notifyTerminalTaskBegin(uint32 taskId)
+	{
+		nlinfo("taskId: %i", taskId);
+		// TODO NOTIFY TERMINAL
+		fprintf(m_MasterLog, "[TASK_BEGIN] taskId: %i\n", taskId);
+		fflush(m_MasterLog);
+	}
+
+	// task issues
+	void notifyTerminalTaskMessage(uint32 taskId, TError type, const std::string &macroPath, const std::string &time, const std::string &error)
+	{
+		nlinfo("taskId: %i, type: %i, macroPath: %s, time: %s, error: %s", taskId, (uint32)type, macroPath.c_str(), time.c_str(), error.c_str());
+		// TODO NOTIFY TERMINAL (send type as uint8 as usual)
+		fprintf(m_MasterLog, "[TASK_MESSAGE] taskId: %i, type: %i, macroPath: %s, time: %s, error: %s\n", taskId, (uint32)type, macroPath.c_str(), time.c_str(), error.c_str());
+		fflush(m_MasterLog);
+	}
+
+	// task end
 	void notifyTerminalTaskState(uint32 taskId, TProcessResult errorLevel, const std::string &errorMessage)
 	{
 		nlinfo("taskId: %i, errorLevel: %i, errorMessage: %s", taskId, (uint32)errorLevel, errorMessage.c_str());
 		// TODO NOTIFY TERMINAL (send errorlevel as uint8 as usual)
+		fprintf(m_MasterLog, "[TASK_STATE] taskId: %i, errorLevel: %i, errorMessage: %s\n", taskId, (uint32)errorLevel, errorMessage.c_str());
+		fflush(m_MasterLog);
+	}
+
+	// build end (any remaining tasks are considered aborted)
+	void notifyTerminalBuildEnd()
+	{
+		nlinfo("");
+		// TODO NOTIFY TERMINAL
+		fprintf(m_MasterLog, "[BUILD_END]\n");
+		fflush(m_MasterLog);
+		fclose(m_MasterLog);
+		m_MasterLog = NULL;
 	}
 
 	///////////////////////////////////////////////////////////////////
@@ -711,11 +798,26 @@ public:
 	{
 		if (PIPELINE::tryBuildReadyMaster())
 		{
+			notifyTerminalBuildStart();
 			m_BuildWorking = true;
 			m_BypassErrors = bypassEros;
 			m_VerifyOnly = verifyOnly;
 			m_BuildTaskQueue.resetQueue();
 			m_BuildTaskQueue.loadQueue(g_PipelineWorkspace, bypassEros);
+
+			// notify terminal task info
+			{
+				std::vector<PIPELINE::CBuildTaskInfo *> tasks;
+				m_BuildTaskQueue.listTaskQueueByMostDependents(tasks);
+				for (std::vector<PIPELINE::CBuildTaskInfo *>::iterator it = tasks.begin(), end = tasks.end(); it != end; ++it)
+				{
+					PIPELINE::CBuildTaskInfo *task = *it;
+					PIPELINE::CProcessPluginInfo pluginInfo;
+					PIPELINE::g_PipelineWorkspace->getProcessPlugin(pluginInfo, task->ProcessPluginId);
+					notifyTerminalTaskInfo(task->Id.Global, task->ProjectName, pluginInfo.Handler);
+				}
+			}
+
 			return true;
 		}
 		return false;

@@ -114,8 +114,18 @@ public:
 	
 	bool m_PluginBuildDone;
 
+	struct CErrorLogData
+	{
+		TError Type;
+		std::string Path;
+		std::string Time;
+		std::string Error;
+	};
+
+	NLMISC::CSynchronized<std::vector<CErrorLogData> > m_ErrorLogWaiting;
+
 public:
-	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_PluginBuildDone(false)
+	CModulePipelineSlave() : m_Master(NULL), m_TestCommand(false), m_ReloadSheetsState(REQUEST_NONE), m_BuildReadyState(false), m_SlaveTaskState(IDLE_WAIT_MASTER), m_TaskManager(NULL), m_StatusUpdateMasterDone("StatusUpdateMasterDone"), m_StatusUpdateSlaveDone("StatusUpdateSlaveDone"), m_ActiveProject(NULL), m_ActiveProcess(NULL), m_AbortRequested(false), m_PluginBuildDone(false), m_ErrorLogWaiting("ErrorLogWaiting")
 	{
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateMasterDone).value() = false;
 		NLMISC::CSynchronized<bool>::CAccessor(&m_StatusUpdateSlaveDone).value() = false;
@@ -215,13 +225,35 @@ public:
 			abortBuildTask(NULL);
 			leaveBuildReadyState(NULL); // leave state if building
 
+			clearErrorLogQueue();
+
 			delete m_Master;
 			m_Master = NULL;
 		}
 	}
 
+	void clearErrorLogQueue()
+	{
+		NLMISC::CSynchronized<std::vector<CErrorLogData> >::CAccessor errorLogQueue(&m_ErrorLogWaiting);
+		errorLogQueue.value().clear();
+	}
+
+	void sendErrorLogQueue()
+	{
+		NLMISC::CSynchronized<std::vector<CErrorLogData> >::CAccessor errorLogQueue(&m_ErrorLogWaiting);
+		for (std::vector<CErrorLogData>::iterator it = errorLogQueue.value().begin(), end = errorLogQueue.value().end(); it != end; ++it)
+		{
+			const CErrorLogData &erdt = *it;
+			nlassert(m_Master);
+			m_Master->slaveLoggedToolError(this, (uint8)erdt.Type, macroPath(erdt.Path), erdt.Time, erdt.Error);
+		}
+		errorLogQueue.value().clear();
+	}
+
 	virtual void onModuleUpdate()
 	{
+		sendErrorLogQueue();
+
 		if (m_ReloadSheetsState == REQUEST_MADE)
 		{
 			if (PIPELINE::reloadSheets())
@@ -313,6 +345,7 @@ public:
 			{
 				m_SlaveTaskState = SOMEWHERE_INBETWEEN;
 				CInfoFlags::getInstance()->removeFlag(PIPELINE_INFO_PLUGIN_WORKING);
+				sendErrorLogQueue();
 				if (m_AbortRequested)
 				{
 					nlinfo("Aborted slave task while plugin was working");
@@ -525,6 +558,18 @@ public:
 	///////////////////////////////////////////////////////////////////
 	///////////////////////////////////////////////////////////////////
 
+	void notifyErrorLog(TError type, const std::string &path, const std::string &time, const std::string &error)
+	{
+		// Received an error log from a plugin tool
+		NLMISC::CSynchronized<std::vector<CErrorLogData> >::CAccessor errorLogQueue(&m_ErrorLogWaiting);
+		CErrorLogData erdt;
+		erdt.Type = type;
+		erdt.Path = path;
+		erdt.Time = time;
+		erdt.Error = error;
+		errorLogQueue.value().push_back(erdt);
+	}
+
 	class CPluginBuildTask : public IRunnable
 	{
 	public:
@@ -537,6 +582,7 @@ public:
 			case PIPELINE::PLUGIN_REGISTERED_CLASS:
 				{
 					PIPELINE::IProcessHandler *processHandler = static_cast<PIPELINE::IProcessHandler *>(NLMISC::CClassRegistry::create(m_Slave->m_ActiveProcess->m_ActivePlugin.Handler));
+					m_Slave->m_ActiveProcess->m_ErrorLogCallback = TErrorLogCallback(m_Slave, &CModulePipelineSlave::notifyErrorLog);
 					processHandler->setPipelineProcess(m_Slave->m_ActiveProcess);
 					m_Slave->m_ActiveProcess->m_SubTaskResult = FINISH_SUCCESS;
 					processHandler->build();
@@ -639,6 +685,14 @@ public:
 	void finishedTask(TProcessResult errorLevel, std::string errorMessage)
 	{
 		nlinfo("errorLevel: %i, errorMessage: %s", (uint32)errorLevel, errorMessage.c_str());
+		stringstream ss;
+		ss << "Build: " << m_ActiveProcess->m_StatsBuild << ", Skip: " << m_ActiveProcess->m_StatsSkip << ", Invalid: " << m_ActiveProcess->m_StatsInvalid << ", Total: "
+			<< (m_ActiveProcess->m_StatsBuild + m_ActiveProcess->m_StatsSkip + m_ActiveProcess->m_StatsInvalid);
+		nlinfo("%s", ss.str().c_str());
+		stringstream ss2;
+		ss2 << NLMISC::CTime::getSecondsSince1970();
+		if (m_Master) // TODO: Maybe send this as part of the finished build task message, would be cleaner ;)
+			m_Master->slaveLoggedToolError(this, (uint8)MESSAGE, "", ss2.str(), ss.str());
 		clearActiveProcess();
 		m_SlaveTaskState = IDLE_WAIT_MASTER;
 		if (m_Master) // else was disconnect
