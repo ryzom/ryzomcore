@@ -58,11 +58,12 @@ using namespace PIPELINE::MAX::EPOLY;
 CSceneClassRegistry SceneClassRegistry;
 
 // Never enable this
-bool DebugParser = true;
+bool DebugParser = false;
 
 bool DisplayStream = false;
 bool WriteModified = false;
 bool WriteDummy = true;
+bool ReplacePaths = true;
 
 const char *DatabaseDirectory = "w:\\database\\";
 const char *LinuxDatabaseDirectory = "/srv/work/database/";
@@ -70,6 +71,8 @@ bool RunningLinux = true;
 
 //const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
 const char *SrcDirectoryRecursive = "w:\\database\\";
+
+const char *FallbackTga = "w:\\database\\todo\\todo.tga";
 
 std::set<std::string> MissingFiles;
 std::map<std::string, std::string> KnownFileCache;
@@ -599,6 +602,91 @@ void serializeRaw(std::vector<uint8> &rawOutput, GsfOutfile *outfile, const char
 	g_object_unref(G_OBJECT(output));
 }
 
+std::string rewritePathFinal(const std::string &str)
+{
+	std::string result = rewritePath(str, DatabaseDirectory);
+	if (NLMISC::CFile::getFilename(result) != result && !NLMISC::CFile::fileExists(nativeDatabasePath(result)) &&
+		((result[result.size() - 3] == 't' && result[result.size() - 2] == 'g' && result[result.size() - 1] == 'a') || (result[result.size() - 3] == 'p' && result[result.size() - 2] == 'n' && result[result.size() - 1] == 'g'))
+		)
+	{
+		nlwarning("Replacing missing '%s' with '%s'", result.c_str(), FallbackTga);
+		return FallbackTga;
+	}
+	return result;
+}
+
+bool isImportantFilePath(const std::string &str)
+{
+	if (str.size() > 4)
+	{
+		std::string strlw = NLMISC::toLower(str);
+		return (strlw[strlw.size() - 3] == 'm' && strlw[strlw.size() - 2] == 'a' && strlw[strlw.size() - 1] == 'x')
+			|| (strlw[strlw.size() - 3] == 't' && strlw[strlw.size() - 2] == 'g' && strlw[strlw.size() - 1] == 'a')
+			|| (strlw[strlw.size() - 3] == 'p' && strlw[strlw.size() - 2] == 'n' && strlw[strlw.size() - 1] == 'g');
+	}
+	return false;
+}
+
+bool hasImportantFilePath(CStorageRaw *raw)
+{
+	if (raw->Value.size() > 8)
+	{
+		// Find any occurences of .max, .png or .tga in ascii or utf16
+	}
+	return false;
+}
+
+void fixChunk(uint16 id, IStorageObject *chunk)
+{
+	CStorageValue<std::string> *asString = dynamic_cast<CStorageValue<std::string> *>(chunk);
+	if (asString)
+	{
+		// nldebug("String: %s", asString->Value.c_str());
+		if (isImportantFilePath(asString->Value))
+			asString->Value = rewritePathFinal(asString->Value);
+		return;
+	}
+	CStorageValue<ucstring> *asUCString = dynamic_cast<CStorageValue<ucstring> *>(chunk);
+	if (asUCString)
+	{
+		// nldebug("UCString: %s", asUCString->Value.toUtf8().c_str());
+		if (isImportantFilePath(asUCString->Value.toUtf8()))
+			asUCString->Value.fromUtf8(rewritePathFinal(asUCString->Value.toUtf8()));
+		return;
+	}
+	CStorageRaw *asRaw = dynamic_cast<CStorageRaw *>(chunk);
+	if (asRaw)
+	{
+		switch (id)
+		{
+		default:
+			if (hasImportantFilePath(asRaw))
+			{
+				nlinfo("Id: %i", (uint32)id);
+				asRaw->toString(std::cout);
+				nlerror("Found important file path");
+				return;
+			}
+			break;
+		}
+	}
+}
+
+void fixChunks(CStorageContainer *container)
+{
+	for (CStorageContainer::TStorageObjectConstIt it = container->chunks().begin(), end = container->chunks().end(); it != end; ++it)
+	{
+		if (it->second->isContainer())
+		{
+			fixChunks(static_cast<CStorageContainer *>(it->second));
+		}
+		else
+		{
+			fixChunk(it->first, it->second);
+		}
+	}
+}
+
 void handleFile(const std::string &path)
 {
 	GError *err = NULL;
@@ -673,6 +761,11 @@ void handleFile(const std::string &path)
 
 	g_object_unref(infile);
 
+	if (ReplacePaths)
+	{
+		fixChunks(&scene);
+	}
+
 	dllDirectory.disown();
 	classDirectory3.disown();
 	if (WriteModified)
@@ -700,6 +793,13 @@ void handleFile(const std::string &path)
 
 		gsf_output_close(GSF_OUTPUT(outfile));
 		g_object_unref(G_OBJECT(outfile));
+
+		if (WriteDummy)
+		{
+			nlinfo("Dummy written, press key for next");
+			std::string x;
+			std::cin >> x;
+		}
 	}
 
 	g_object_unref(metadata);
