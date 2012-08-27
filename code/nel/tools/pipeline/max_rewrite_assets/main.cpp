@@ -75,8 +75,8 @@ const char *LinuxDatabaseDirectory = "/srv/work/database/";
 bool RunningLinux = true;
 
 //const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
-//const char *SrcDirectoryRecursive = "w:\\database\\";
-const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
+const char *SrcDirectoryRecursive = "w:\\database\\";
+//const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
 
 const char *FallbackTga = "w:\\database\\stuff\\generique\\agents\\_textures\\accessories\\lost_texture.tga";
 
@@ -785,14 +785,22 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 						uint i = 0;
 						while ((sint)mem.getPos() != (sint)mem.size())
 						{
-							nldebug("pos %i", mem.getPos());
-							nldebug("size %i", mem.size());
+							//nldebug("pos %i", mem.getPos());
+							//nldebug("size %i", mem.size());
 							char funny;
 							mem.serial(funny);
 							nlassert(funny == '@');
-							uint32 size;
+							sint32 size;
 							mem.serial(size);
-							nldebug("size %i", size);
+							//nldebug("size %i", size);
+							if (size == -1)
+							{
+								nldebug("size %i", size);
+								nlwarning("bad size");
+								std::string x;
+								std::cin >> x;
+								return;
+							}
 							std::string v;
 							v.resize(size);
 							mem.serialBuffer((uint8 *)&v[0], size);
@@ -807,10 +815,10 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 								return;
 							}
 							v.resize(v.size() - 1);
-							nldebug("%s", v.c_str());
+							// nldebug("%s", v.c_str());
 							strings.push_back(v);
 							++i;
-							nldebug("ok");
+							// nldebug("ok");
 						}
 						nlassert(strings.size() == counter);
 						asRaw->Value.resize(0);
@@ -826,13 +834,13 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					}
 					nlassert(foundone);
 					{
-						nldebug("go");
+						//nldebug("go");
 						NLMISC::CMemStream mem;
 						mem.serialBuffer(nonsense, 11);
 						mem.serial(counter);
 						for (uint i = 0; i < strings.size(); ++i)
 						{
-							nldebug("one");
+							//nldebug("one");
 							char funny = '@';
 							mem.serial(funny);
 							strings[i].resize(strings[i].size() + 1);
@@ -892,8 +900,11 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 				break;
 			}
 		case 9730:
-			// ignore
-			break;
+			if (asRaw->Value.size() > 0 && asRaw->Value[0] == 'I')
+			{
+				// ignore Init.max
+				break;
+			}
 		default:
 			if (hasImportantFilePath(asRaw))
 			{
