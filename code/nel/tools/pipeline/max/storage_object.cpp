@@ -129,45 +129,15 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 		}
 	}
 #ifdef NL_DEBUG_STORAGE
-	nldebug("Wrapping the container inside a stream with necessary size markers");
+	nldebug("Wrap the container inside a chunk, as the size is not known");
 #endif
 	{
-		const uint32 magic = 0xC0C01473;
-		stream.serialCheck(magic);
-		uint version = stream.serialVersion(1);
-		sint32 sizePos;
-		bool reading = stream.isReading();
-		if (!reading)
-		{
-			sizePos = stream.getPos();
-		}
-		sint64 size = 0;
-		stream.serial(size);
-		CStorageChunks chunks(stream, size);
+		// Use dummy size value so the system can at least read the header
+		CStorageChunks chunks(stream, stream.isReading() ? 0xFF : 0);
+		bool ok = chunks.enterChunk(0x4352, true);
+		nlassert(ok);
 		serial(chunks);
-		if (!reading)
-		{
-			sint32 returnPos = stream.getPos();
-#ifdef NL_DEBUG_STORAGE
-			nldebug("current (return) pos is %i", stream.getPos());
-#endif
-			size = returnPos - sizePos - 8;
-			stream.seek(sizePos, NLMISC::IStream::begin);
-#ifdef NL_DEBUG_STORAGE
-			nldebug("current (size) pos is %i", stream.getPos());
-#endif
-			stream.serial(size);
-			stream.seek(returnPos, NLMISC::IStream::begin);
-#ifdef NL_DEBUG_STORAGE
-			nldebug("sizePos is %i", sizePos);
-			nldebug("returnPos is %i", returnPos);
-			nldebug("current (return) pos is %i", stream.getPos());
-#endif
-		}
-#ifdef NL_DEBUG_STORAGE
-		nldebug("Chunk container wrapper size is %i", size);
-#endif
-		return;
+		chunks.leaveChunk();
 	}
 }
 

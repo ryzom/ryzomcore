@@ -33,6 +33,7 @@
 
 // NeL includes
 #include <nel/misc/class_id.h>
+#include <nel/misc/mem_stream.h>
 
 // Project includes
 #include "../../typedefs.h"
@@ -45,6 +46,7 @@ namespace BUILTIN {
 namespace STORAGE {
 
 #define PMBS_APP_DATA_CHUNK_ID 0x2150
+#define PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID 0x0130
 
 class CAppDataEntry;
 
@@ -86,7 +88,7 @@ public:
 	void init();
 
 	// public // TODO: Simplify using templates and returning a specialized storage object, auto-converted to the requested type.
-	/// Gets a pointer to an appdata chunk buffer. Returns NULL if it does not exist. Size is returned in the size parameter.
+	/*/// Gets a pointer to an appdata chunk buffer. Returns NULL if it does not exist. Size is returned in the size parameter.
 	const uint8 *read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const;
 	/// Locks a pointer to an appdata chunk buffer for writing to with specified capacity. May return NULL if this chunk is unparsable or no memory can be allocated.
 	uint8 *lock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 capacity);
@@ -94,6 +96,16 @@ public:
 	void unlock(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 size);
 	/// Fills an appdata chunk buffer with specified data, which will be copied.
 	void fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint8 *buffer, uint32 size);
+	/// Erases an appdata chunk.
+	void erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);*/
+
+	// public
+	/// Gets an appdata chunk storage object, returns NULL if it does not exist
+	template <typename T>
+	T *get(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
+	/// Gets or creates a chunk storage object
+	template <typename T>
+	T *getOrCreate(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
 	/// Erases an appdata chunk.
 	void erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId);
 
@@ -143,6 +155,9 @@ public:
 class CAppDataEntry : public CStorageContainer
 {
 public:
+	friend class CAppData;
+
+public:
 	CAppDataEntry();
 	virtual ~CAppDataEntry();
 
@@ -158,18 +173,97 @@ public:
 	// Initializes a new entry
 	void init();
 	// Returns the key
-	CAppDataEntryKey *key();
-	// Returns the blob
-	CStorageRaw *value();
+	inline CAppDataEntryKey *key() { return m_Key; }
+	// Returns the value
+	template <typename T>
+	T *value();
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 private:
 	CAppDataEntryKey *m_Key;
-	CStorageRaw *m_Value;
+	CStorageRaw *m_Raw;
+	IStorageObject *m_Value;
 
 }; /* class CAppDataEntry */
+
+template <typename T>
+T *CAppDataEntry::value()
+{
+	if (m_Value)
+	{
+		T *result = dynamic_cast<T *>(m_Value);
+		if (result)
+		{
+			return result;
+		}
+		else
+		{
+			nlwarning("AppData value has already been cast to another type, recasting, the previous chunk becomes invalid, this may not be intended");
+			NLMISC::CMemStream mem;
+			m_Value->serial(mem);
+			result = new T();
+			result->setSize(mem.getPos());
+			mem.invert();
+			delete m_Value;
+			m_Value = result;
+			result->serial(mem);
+			return result;
+		}
+	}
+	else
+	{
+		nlassert(!m_Value);
+		nlassert(m_Raw);
+		// nldebug("Casting raw to user type");
+		NLMISC::CMemStream mem;
+		m_Raw->serial(mem);
+		T *result = new T();
+		result->setSize(mem.getPos());
+		// nldebug("Read %i", mem.getPos());
+		mem.invert();
+		m_Raw->Value.resize(0);
+		m_Key->Size = 0xFFFFFFFF;
+		m_Value = result;
+		result->serial(mem);
+		// nldebug("Wrote %i", mem.getPos());
+		return result;
+	}
+}
+
+template <typename T>
+T *CAppData::get(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
+{
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	TKey key(classId, superClassId, subId);
+	TMap::const_iterator it = m_Entries.find(key);
+	if (it == m_Entries.end()) { nldebug("Trying to read non-existant key, this is allowed, returning NULL"); return NULL; }
+	return it->second->value<T>();
+}
+
+template <typename T>
+T *CAppData::getOrCreate(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
+{
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	TKey key(classId, superClassId, subId);
+	TMap::const_iterator it = m_Entries.find(key);
+	CAppDataEntry *appDataEntry;
+	if (it == m_Entries.end())
+	{
+		appDataEntry = new CAppDataEntry();
+		appDataEntry->init();
+		m_Entries[key] = appDataEntry;
+		appDataEntry->key()->ClassId = classId;
+		appDataEntry->key()->SuperClassId = superClassId;
+		appDataEntry->key()->SubId = subId;
+	}
+	else
+	{
+		appDataEntry = it->second;
+	}
+	return appDataEntry->value<T>();
+}
 
 } /* namespace STORAGE */
 } /* namespace BUILTIN */

@@ -241,7 +241,7 @@ int main(int argc, char **argv)
 	nldebug("PARSE");
 	scene.parse(PIPELINE::MAX::VersionUnknown); // parse the structure to readable data
 	nldebug("CLEAN");
-	scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
+	//scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
 	// <- TEST
 	//scene.toString(std::cout);//##
 	std::cout << "\n";
@@ -283,16 +283,47 @@ int main(int argc, char **argv)
 			PIPELINE::MAX::BUILTIN::STORAGE::CAppData *appData = dynamic_cast<PIPELINE::MAX::BUILTIN::STORAGE::CAppData *>(storageChunk);
 			if (appData)
 			{
+
 				nlinfo("Found AppData");
-				uint32 size;
-				const uint8 *buffer = appData->read(MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_ENV_FX, size);
-				if (buffer)
+				CStorageRaw *raw = appData->get<CStorageRaw>(MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_ENV_FX);
+				if (raw)
 				{
-					nlinfo("Found NEL3D_APPDATA_ENV_FX, size %i", size);
+					nlinfo("Found NEL3D_APPDATA_ENV_FX, size %i", raw->Value.size());
+					//raw->Value.resize(200);
 				}
+
 			}
 		}
 	}
+
+/*
+	scene.clean();
+	scene.build(PIPELINE::MAX::VersionUnknown);
+	scene.disown();
+	scene.parse(PIPELINE::MAX::VersionUnknown);
+
+	ssc = scene.container();
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(), end = ssc->chunks().end(); it != end; ++it)
+	{
+		PIPELINE::MAX::CStorageContainer *subc = static_cast<PIPELINE::MAX::CStorageContainer *>(it->second);
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt subit = subc->chunks().begin(), subend = subc->chunks().end(); subit != subend; ++subit)
+		{
+			PIPELINE::MAX::IStorageObject *storageChunk = subit->second;
+			PIPELINE::MAX::BUILTIN::STORAGE::CAppData *appData = dynamic_cast<PIPELINE::MAX::BUILTIN::STORAGE::CAppData *>(storageChunk);
+			if (appData)
+			{
+
+				nlinfo("Found AppData");
+				const CStorageRaw *raw = appData->get<CStorageRaw>(MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_ENV_FX);
+				if (raw)
+				{
+					nlinfo("Found NEL3D_APPDATA_ENV_FX, size %i", raw->Value.size());
+				}
+
+			}
+		}
+	}
+	*/
 
 /*
 	GsfInput *input = gsf_infile_child_by_name(infile, streamname);

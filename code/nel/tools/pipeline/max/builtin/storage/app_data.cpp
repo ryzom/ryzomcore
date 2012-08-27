@@ -61,7 +61,6 @@ namespace STORAGE {
 #define PMBS_APP_DATA_HEADER_CHUNK_ID 0x0100
 #define PMBS_APP_DATA_ENTRY_CHUNK_ID 0x0110
 #define PMBS_APP_DATA_ENTRY_KEY_CHUNK_ID 0x0120
-#define PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID 0x0130
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -122,7 +121,12 @@ CAppData::CAppData()
 
 CAppData::~CAppData()
 {
-
+	if (!m_ChunksOwnsPointers)
+	{
+		for (TMap::const_iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+			delete subit->second;
+		m_Entries.clear();
+	}
 }
 
 std::string CAppData::className() const
@@ -197,6 +201,11 @@ void CAppData::clean()
 	if (m_Chunks.begin()->first != PMBS_APP_DATA_HEADER_CHUNK_ID) { nlerror("Bad id %x, expected %x", (uint32)m_Chunks.begin()->first, PMBS_APP_DATA_HEADER_CHUNK_ID); return; } // Cannot happen, because we won't have local ownership if parsing failed
 	delete m_Chunks.begin()->second; // Delete the header chunk, since we own it
 	m_Chunks.clear(); // Clear the remaining chunks
+
+	// Clean raw storage
+	for (TMap::const_iterator subit = m_Entries.begin(), subend = m_Entries.end(); subit != subend; ++subit)
+		subit->second->clean();
+
 #else
 	CStorageContainer::clean();
 #endif
@@ -217,6 +226,9 @@ void CAppData::build(uint16 version, uint filter)
 	// Set up the entries
 	for (TMap::iterator it = m_Entries.begin(), end = m_Entries.end(); it != end; ++it)
 		m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_CHUNK_ID, it->second));
+
+	// Rebuild raw storage
+	CStorageContainer::build(version);
 #else
 	CStorageContainer::build(version);
 #endif
@@ -251,7 +263,7 @@ void CAppData::init()
 	// We own this
 	m_ChunksOwnsPointers = false;
 }
-
+/*
 const uint8 *CAppData::read(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId, uint32 &size) const
 {
 	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
@@ -305,7 +317,7 @@ void CAppData::fill(NLMISC::CClassId classId, TSClassId superClassId, uint32 sub
 	// Outside classes should unlock in case the implementation changes.
 	// unlock(classId, superClassId, subId, size);
 }
-
+*/
 void CAppData::erase(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
 {
 	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
@@ -372,14 +384,15 @@ void CAppDataEntryKey::toString(std::ostream &ostream, const std::string &pad) c
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CAppDataEntry::CAppDataEntry() : m_Key(NULL), m_Value(NULL)
+CAppDataEntry::CAppDataEntry() : m_Key(NULL), m_Raw(NULL), m_Value(NULL)
 {
 
 }
 
 CAppDataEntry::~CAppDataEntry()
 {
-
+	delete m_Value;
+	m_Value = NULL;
 }
 
 std::string CAppDataEntry::className() const
@@ -417,7 +430,7 @@ void CAppDataEntry::parse(uint16 version, uint filter)
 
 	++it;
 	if (it->first != PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID) { nlwarning("Bad id %x, expected %x", (uint32)it->first, PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID); disown(); return; }
-	m_Value = static_cast<CStorageRaw *>(it->second);
+	m_Raw = static_cast<CStorageRaw *>(it->second);
 
 	// m_ChunksOwnsPointers = false;
 	nlassert(m_ChunksOwnsPointers); // Never set false here
@@ -425,18 +438,28 @@ void CAppDataEntry::parse(uint16 version, uint filter)
 
 void CAppDataEntry::clean()
 {
-	nlassert(false);
 	// CStorageContainer::clean();
-	// if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
-	// Nothing to do here!
+	if (m_Value)
+	{
+		nlassert(m_Raw);
+		m_Raw->Value.resize(0);
+		m_Key->Size = 0xFFFFFFFF;
+	}
 }
 
 void CAppDataEntry::build(uint16 version, uint filter)
 {
-	nlassert(false);
-	// if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return; }
-	// Nothing to do here!
 	// CStorageContainer::build(version);
+	if (m_Value)
+	{
+		nlassert(m_Raw);
+		NLMISC::CMemStream mem;
+		m_Value->serial(mem);
+		m_Raw->setSize(mem.getPos());
+		mem.invert();
+		m_Raw->serial(mem);
+		m_Key->Size = m_Raw->Value.size();
+	}
 }
 
 void CAppDataEntry::disown()
@@ -444,6 +467,8 @@ void CAppDataEntry::disown()
 	// CStorageContainer::disown();
 	if (m_Chunks.size() != 2) { nlerror("Not built"); return; } // Built chunks must match the parsed data
 	m_Key = NULL;
+	m_Raw = NULL;
+	delete m_Value;
 	m_Value = NULL;
 }
 
@@ -452,18 +477,8 @@ void CAppDataEntry::init()
 	nlassert(m_Chunks.size() == 0);
 	m_Key = new CAppDataEntryKey();
 	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_KEY_CHUNK_ID, m_Key));
-	m_Value = new CStorageRaw();
-	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID, m_Value));
-}
-
-CAppDataEntryKey *CAppDataEntry::key()
-{
-	return m_Key;
-}
-
-CStorageRaw *CAppDataEntry::value()
-{
-	return m_Value;
+	m_Raw = new CStorageRaw();
+	m_Chunks.push_back(TStorageObjectWithId(PMBS_APP_DATA_ENTRY_VALUE_CHUNK_ID, m_Raw));
 }
 
 IStorageObject *CAppDataEntry::createChunkById(uint16 id, bool container)
