@@ -27,6 +27,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/algo.h"
 #include "nel/misc/file.h"
+#include "nel/misc/mem_stream.h"
 
 #include "../max/storage_stream.h"
 #include "../max/storage_object.h"
@@ -49,6 +50,10 @@
 #include "../max/update1/editable_mesh.h"
 #include "../max/epoly/editable_poly.h"
 
+#include <boost/algorithm/string.hpp>
+using namespace std;
+using namespace boost::algorithm;
+
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::BUILTIN::STORAGE;
@@ -70,9 +75,10 @@ const char *LinuxDatabaseDirectory = "/srv/work/database/";
 bool RunningLinux = true;
 
 //const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
-const char *SrcDirectoryRecursive = "w:\\database\\";
+//const char *SrcDirectoryRecursive = "w:\\database\\";
+const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
 
-const char *FallbackTga = "w:\\database\\todo\\todo.tga";
+const char *FallbackTga = "w:\\database\\stuff\\generique\\agents\\_textures\\accessories\\lost_texture.tga";
 
 std::set<std::string> MissingFiles;
 std::map<std::string, std::string> KnownFileCache;
@@ -144,13 +150,15 @@ std::string standardizePath(const std::string &path, bool addFinalSlash)
 	return newPath;
 }
 
-inline bool isCharacter(uint8 c)
+inline bool isCharacter(char c0)
 {
+	uint8 c = *(uint8 *)(void *)(&c0);
 	return (32 <= c /*&& c <= 127) || (161 <= c*/ /*&& c <= 255*/);
 }
 
-inline uint8 stripFrenchLocale(uint8 c)
+inline char stripFrenchLocale(char c0)
 {
+	uint8 c = *(uint8 *)(void *)(&c0);
 	if (192 <= c && c <= 197) return 'a';
 	if (200 <= c && c <= 203) return 'e';
 	if (204 <= c && c <= 207) return 'i';
@@ -163,7 +171,7 @@ inline uint8 stripFrenchLocale(uint8 c)
 	if (242 <= c && c <= 246) return 'o';
 	if (249 <= c && c <= 252) return 'u';
 	if (c == 253 || c == 255) return 'y';
-	return c;
+	return c0;
 }
 
 std::string rewritePath(const std::string &path, const std::string &databaseDirectory)
@@ -242,7 +250,7 @@ std::string rewritePath(const std::string &path, const std::string &databaseDire
 					if (fileNameCache.find(stdPath) != fileNameCache.end())
 						break;
 				}
-				nlwarning("File name not known: '%s' ('%s')", path.c_str(), stdPath.c_str());
+				//#nlwarning("File name not known: '%s' ('%s')", path.c_str(), stdPath.c_str());
 				// MissingFiles.insert(path);
 				return stdPath;
 			}
@@ -268,7 +276,7 @@ std::string rewritePath(const std::string &path, const std::string &databaseDire
 				if (KnownFileCache.find(NLMISC::CFile::getFilename(stdPath)) != KnownFileCache.end())
 					return KnownFileCache[NLMISC::CFile::getFilename(stdPath)];
 
-				nlwarning("Path not in database: '%s' ('%s')", path.c_str(), stdPath.c_str());
+				//#nlwarning("Path not in database: '%s' ('%s')", path.c_str(), stdPath.c_str());
 				MissingFiles.insert(path);
 				return stdPath;
 			}
@@ -340,7 +348,7 @@ std::string rewritePath(const std::string &path, const std::string &databaseDire
 				if (KnownFileCache.find(NLMISC::CFile::getFilename(stdPath)) != KnownFileCache.end())
 					return KnownFileCache[NLMISC::CFile::getFilename(stdPath)];
 
-				nlwarning("Path file does not exist: '%s' ('%s')", path.c_str(), stdPath.c_str());
+				//#nlwarning("Path file does not exist: '%s' ('%s')", path.c_str(), stdPath.c_str());
 				MissingFiles.insert(path);
 				return stdPath;
 			}
@@ -602,24 +610,45 @@ void serializeRaw(std::vector<uint8> &rawOutput, GsfOutfile *outfile, const char
 	g_object_unref(G_OBJECT(output));
 }
 
+std::string cleanString(const std::string &str)
+{
+	std::string res = str;
+	trim(res);
+	// \\Amiga\3D (10 chars)
+	if (res.size() > 10)
+	{
+		if (res.substr(res.size() - 10) == "\\\\Amiga\\3D")
+			res = res.substr(0, res.size() - 10);
+	}
+	if (res.size() > 1)
+	{
+		if (res.substr(res.size() - 1) == "0")
+			res = res.substr(0, res.size() - 1);
+	}
+	return res;
+}
+
 std::string rewritePathFinal(const std::string &str)
 {
-	std::string result = rewritePath(str, DatabaseDirectory);
+	std::string strtrimmed = cleanString(str);
+	std::string result = rewritePath(strtrimmed, DatabaseDirectory);
 	if (NLMISC::CFile::getFilename(result) != result && !NLMISC::CFile::fileExists(nativeDatabasePath(result)) &&
 		((result[result.size() - 3] == 't' && result[result.size() - 2] == 'g' && result[result.size() - 1] == 'a') || (result[result.size() - 3] == 'p' && result[result.size() - 2] == 'n' && result[result.size() - 1] == 'g'))
 		)
 	{
-		nlwarning("Replacing missing '%s' with '%s'", result.c_str(), FallbackTga);
+		// nlwarning("Replacing missing '%s' with '%s'", result.c_str(), FallbackTga);
 		return FallbackTga;
 	}
+	// nldebug("Replacing '%s' with '%s'", str.c_str(), result.c_str());
 	return result;
 }
 
 bool isImportantFilePath(const std::string &str)
 {
-	if (str.size() > 4)
+	std::string strtrimmed = cleanString(str);
+	if (strtrimmed.size() >= 4)
 	{
-		std::string strlw = NLMISC::toLower(str);
+		std::string strlw = NLMISC::toLower(strtrimmed);
 		return (strlw[strlw.size() - 3] == 'm' && strlw[strlw.size() - 2] == 'a' && strlw[strlw.size() - 1] == 'x')
 			|| (strlw[strlw.size() - 3] == 't' && strlw[strlw.size() - 2] == 'g' && strlw[strlw.size() - 1] == 'a')
 			|| (strlw[strlw.size() - 3] == 'p' && strlw[strlw.size() - 2] == 'n' && strlw[strlw.size() - 1] == 'g');
@@ -629,9 +658,48 @@ bool isImportantFilePath(const std::string &str)
 
 bool hasImportantFilePath(CStorageRaw *raw)
 {
-	if (raw->Value.size() > 8)
+	if (raw->Value.size() >= 4)
 	{
 		// Find any occurences of .max, .png or .tga in ascii or utf16
+		for (uint i = 0; i < raw->Value.size() - 3; ++i)
+		{
+			if (NLMISC::toLower(((char *)&raw->Value[0])[i]) == '.'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 1]) == 'm'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 2]) == 'a'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 3]) == 'x')
+				return true;
+			if (NLMISC::toLower(((char *)&raw->Value[0])[i]) == '.'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 1]) == 't'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 2]) == 'g'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 3]) == 'a')
+				return true;
+			if (NLMISC::toLower(((char *)&raw->Value[0])[i]) == '.'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 1]) == 'p'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 2]) == 'n'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 3]) == 'g')
+				return true;
+		}
+	}
+	if (raw->Value.size() >= 6)
+	{
+		for (uint i = 0; i < raw->Value.size() - 6; ++i)
+		{
+			if (NLMISC::toLower(((char *)&raw->Value[0])[i]) == '.'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 2]) == 'm'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 4]) == 'a'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 6]) == 'x')
+				return true;
+			if (NLMISC::toLower(((char *)&raw->Value[0])[i]) == '.'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 2]) == 't'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 4]) == 'g'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 6]) == 'a')
+				return true;
+			if (NLMISC::toLower(((char *)&raw->Value[0])[i]) == '.'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 2]) == 'p'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 4]) == 'n'
+				&& NLMISC::toLower(((char *)&raw->Value[0])[i + 6]) == 'g')
+				return true;
+		}
 	}
 	return false;
 }
@@ -650,8 +718,8 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 	if (asUCString)
 	{
 		// nldebug("UCString: %s", asUCString->Value.toUtf8().c_str());
-		if (isImportantFilePath(asUCString->Value.toUtf8()))
-			asUCString->Value.fromUtf8(rewritePathFinal(asUCString->Value.toUtf8()));
+		if (isImportantFilePath(asUCString->Value.toString()))
+			asUCString->Value.fromUtf8(rewritePathFinal(asUCString->Value.toString()));
 		return;
 	}
 	CStorageRaw *asRaw = dynamic_cast<CStorageRaw *>(chunk);
@@ -659,12 +727,181 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 	{
 		switch (id)
 		{
+		case 256:
+		case 4656:
+		case 16385:
+			if (hasImportantFilePath(asRaw))
+			{
+				// generic ucstring really
+				nlassert(asRaw->Value.size() % 2 == 0);
+				ucstring str;
+				str.resize(asRaw->Value.size() / 2);
+				memcpy(&str[0], &asRaw->Value[0], asRaw->Value.size());
+				nlassert(isImportantFilePath(str.toString()));
+				str.fromUtf8(rewritePathFinal(str.toString()));
+				asRaw->Value.resize(str.size() * 2);
+				memcpy(&asRaw->Value[0], &str[0], asRaw->Value.size());
+				break;
+			}
+		case 10:
+			if (hasImportantFilePath(asRaw))
+			{
+				// 10 00 08 00 00 00 02 00 80 00 40 // 11 bytes O_O
+				// 4d 00 00 00
+				// 57 3a 5c 44 61 74 61 62 61 73
+				// 65 5c 73 74 75 66 66 5c 74 72
+				// 79 6b 65 72 5c 61 67 65 6e 74
+				// 73 5c 5f 74 65 78 74 75 72 65
+				// 73 5c 61 63 74 6f 72 73 5c 54
+				// 52 5f 48 4f 46 5f 63 69 76 69
+				// 6c 30 31 5f 74 6f 72 73 6f 5f
+				// 43 31 2e 74 67 61 00
+				if (!(asRaw->Value[asRaw->Value.size() - 1] == 0))
+				{
+					nlinfo("Id: %i, size: %i", (uint32)id, asRaw->Value.size());
+					asRaw->toString(std::cout);
+					nldebug("x");
+					nlwarning("not null term");
+					std::string x;
+					std::cin >> x;
+					break;
+				}
+				uint32 size = ((uint32 *)&asRaw->Value[11])[0];
+				if (!(asRaw->Value.size() == size + 4 + 11))
+				{
+					nlinfo("Id: %i, size: %i", (uint32)id, asRaw->Value.size());
+					asRaw->toString(std::cout);
+					nldebug("x");
+					nlwarning("size does not match, use different algo :)");
+					uint8 nonsense[11];
+					uint32 counter;
+					std::vector<std::string> strings;
+					{
+						NLMISC::CMemStream mem;
+						asRaw->serial(mem);
+						mem.invert();
+						mem.serialBuffer(nonsense, 11);
+						mem.serial(counter);
+						uint i = 0;
+						while ((sint)mem.getPos() != (sint)mem.size())
+						{
+							nldebug("pos %i", mem.getPos());
+							nldebug("size %i", mem.size());
+							char funny;
+							mem.serial(funny);
+							nlassert(funny == '@');
+							uint32 size;
+							mem.serial(size);
+							nldebug("size %i", size);
+							std::string v;
+							v.resize(size);
+							mem.serialBuffer((uint8 *)&v[0], size);
+							if (!(v[v.size() - 1] == 0))
+							{
+								nlinfo("Id: %i, size: %i", (uint32)id, asRaw->Value.size());
+								asRaw->toString(std::cout);
+								nldebug("x");
+								nlwarning("not null term inside array stuff %i '%s'", i, v.c_str());
+								std::string x;
+								std::cin >> x;
+								return;
+							}
+							v.resize(v.size() - 1);
+							nldebug("%s", v.c_str());
+							strings.push_back(v);
+							++i;
+							nldebug("ok");
+						}
+						nlassert(strings.size() == counter);
+						asRaw->Value.resize(0);
+					}
+					bool foundone = false;
+					for (uint i = 0; i < strings.size(); ++i)
+					{
+						if (isImportantFilePath(strings[i]))
+						{
+							foundone = true;
+							strings[i] = rewritePathFinal(strings[i]);
+						}
+					}
+					nlassert(foundone);
+					{
+						nldebug("go");
+						NLMISC::CMemStream mem;
+						mem.serialBuffer(nonsense, 11);
+						mem.serial(counter);
+						for (uint i = 0; i < strings.size(); ++i)
+						{
+							nldebug("one");
+							char funny = '@';
+							mem.serial(funny);
+							strings[i].resize(strings[i].size() + 1);
+							strings[i][strings[i].size() - 1] = 0;
+							uint32 size = strings[i].size();
+							mem.serial(size);
+							mem.serialBuffer((uint8 *)&strings[i][0], size);
+						}
+						asRaw->setSize(mem.getPos());
+						mem.invert();
+						asRaw->serial(mem);
+					}
+					//std::string x;
+					//std::cin >> x;
+					return;
+				}
+				std::string str;
+				str.resize(size - 1);
+				memcpy(&str[0], &asRaw->Value[15], str.size());
+				// nldebug("test '%s'", str.c_str());
+				// asRaw->toString(std::cout);
+				if (!isImportantFilePath(str))
+				{
+					nlinfo("Id: %i, size: %i", (uint32)id, asRaw->Value.size());
+					asRaw->toString(std::cout);
+					nldebug("x");
+					nlwarning("not important");
+					std::string x;
+					std::cin >> x;
+					break;
+				}
+				str = rewritePathFinal(str);
+				asRaw->Value.resize(str.size() + 11 + 4 + 1);
+				memcpy(&asRaw->Value[15], &str[0], str.size());
+				((uint32 *)&asRaw->Value[11])[0] = str.size() + 1;
+				asRaw->Value[asRaw->Value.size() - 1] = 0;
+				break;
+			}
+		case 304:
+			if (hasImportantFilePath(asRaw))
+			{
+				// null term c string
+				nlassert(asRaw->Value[asRaw->Value.size() - 1] == 0);
+				std::string str;
+				str.resize(asRaw->Value.size() - 1);
+				memcpy(&str[0], &asRaw->Value[0], str.size());
+				if (!isImportantFilePath(str))
+				{
+					nlinfo("Id: %i", (uint32)id);
+					asRaw->toString(std::cout);
+					nlerror("not important");
+				}
+				str = rewritePathFinal(str);
+				asRaw->Value.resize(str.size() + 1);
+				memcpy(&asRaw->Value[0], &str[0], str.size());
+				asRaw->Value[asRaw->Value.size() - 1] = 0;
+				break;
+			}
+		case 9730:
+			// ignore
+			break;
 		default:
 			if (hasImportantFilePath(asRaw))
 			{
 				nlinfo("Id: %i", (uint32)id);
 				asRaw->toString(std::cout);
-				nlerror("Found important file path");
+				nlwarning("Found important file path");
+				std::string x;
+				std::cin >> x;
 				return;
 			}
 			break;
@@ -820,7 +1057,7 @@ int main(int argc, char **argv)
 	CEPoly::registerClasses(&SceneClassRegistry);
 
 	//handleFile("/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max");
-	//runInitialize();
+	runInitialize();
 	runHandler();
 	//runScanner();
 
