@@ -236,6 +236,7 @@ std::string rewritePath(const std::string &path, const std::string &databaseDire
 						break;
 				}
 				nlwarning("File name not known: '%s' ('%s')", path.c_str(), stdPath.c_str());
+				// MissingFiles.insert(path);
 				return stdPath;
 			}
 		}
@@ -386,6 +387,148 @@ void runInitialize()
 	nlinfo("DatabaseDirectory: '%s'", DatabaseDirectory);
 
 	doDirectoryInitialize(std::string(SrcDirectoryRecursive));
+}
+
+// Scary stuff
+void doFileScanner(const std::string &filePath)
+{
+	if (filePath[filePath.size() - 3] == 'm' && filePath[filePath.size() - 2] == 'a' && filePath[filePath.size() - 1] == 'x')
+	{
+		nldebug("File: '%s'", filePath.c_str());
+
+		std::vector<char> buffer;
+		buffer.resize(NLMISC::CFile::getFileSize(nativeDatabasePath(filePath)));
+
+		// read
+		{
+			NLMISC::CIFile ifile;
+			ifile.open(nativeDatabasePath(filePath), false);
+			ifile.serialBuffer((uint8 *)(&buffer[0]), buffer.size());
+			ifile.close();
+		}
+
+		// find paths
+		for (std::vector<char>::size_type i = 256; i < buffer.size(); ++i) // skip the first 256 lol :)
+		{
+			if (((NLMISC::toLower(buffer[i - 1]) == 'x' && NLMISC::toLower(buffer [i - 2]) == 'a' && NLMISC::toLower(buffer[i - 3]) == 'm')
+				|| (NLMISC::toLower(buffer[i - 1]) == 'a' && NLMISC::toLower(buffer [i - 2]) == 'g' && NLMISC::toLower(buffer[i - 3]) == 't')
+				|| (NLMISC::toLower(buffer[i - 1]) == 'g' && NLMISC::toLower(buffer [i - 2]) == 'n' && NLMISC::toLower(buffer[i - 3]) == 'p'))
+				&& (NLMISC::toLower(buffer[i - 4]) == '.'))
+			{
+				// buffer[i] is the character after the path! :)
+				std::vector<char>::size_type beginPath = 0;
+				for (std::vector<char>::size_type j = i - 4; j > 0; --j)
+				{
+					if (!isCharacter(buffer[j]))
+					{
+						if ((buffer[j + 1] == '\\' && buffer[j + 2] == '\\') || buffer[j] == 0)
+						{
+							beginPath = j + 1;
+							break;
+						}
+						// nlwarning("Invalid characters '%i' in path at %i, len %i!", (uint32)buffer[j], (uint32)j, (uint32)(i - j));
+						// beginPath = j + 1; // test
+						break;
+					}
+					if (buffer[j] == ':')
+					{
+						beginPath = j - 1;
+						break;
+					}
+				}
+				if (beginPath != 0)
+				{
+					std::vector<char>::size_type sizePath = i - beginPath;
+					std::string foundPath = std::string(&buffer[beginPath], sizePath); //std::string(buffer.at(beginPath), buffer.at(i));
+					//nldebug("Found path: '%s' from %i to %i", foundPath.c_str(), (uint32)beginPath, (uint32)i);
+					std::string fixedPath = rewritePath(foundPath, DatabaseDirectory);
+					//nldebug("Rewrite to: '%s'", fixedPath.c_str());
+				}
+			}
+		}
+
+		//NLMISC::CFile::re
+
+		// ...
+	}
+}
+
+void doDirectoryScanner(const std::string &directoryPath)
+{
+	nldebug("Directory: '%s'", directoryPath.c_str());
+
+	std::string dirPath = standardizePath(directoryPath, true);
+	std::vector<std::string> dirContents;
+
+	NLMISC::CPath::getPathContent(nativeDatabasePath(dirPath), false, true, true, dirContents);
+
+	for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
+	{
+		std::string subPath = standardizePath(unnativeDatabasePath(*it), false);
+
+		if (NLMISC::CFile::isDirectory(nativeDatabasePath(subPath)))
+		{
+			if (subPath.find("\\.") == std::string::npos)
+				doDirectoryScanner(subPath);
+		}
+		else
+			doFileScanner(subPath);
+	}
+}
+
+void runScanner()
+{
+	nlinfo("DatabaseDirectory: '%s'", DatabaseDirectory);
+
+	doDirectoryScanner(SrcDirectoryRecursive);
+
+	for (std::set<std::string>::iterator it = MissingFiles.begin(), end = MissingFiles.end(); it != end; ++it)
+		nlinfo("Missing: '%s'", (*it).c_str());
+}
+
+void handleFile(const std::string &path);
+
+void doFileHandler(const std::string &filePath)
+{
+	if (filePath[filePath.size() - 3] == 'm' && filePath[filePath.size() - 2] == 'a' && filePath[filePath.size() - 1] == 'x')
+	{
+		nldebug("File: '%s'", filePath.c_str());
+
+		handleFile(nativeDatabasePath(filePath));
+	}
+}
+
+void doDirectoryHandler(const std::string &directoryPath)
+{
+	nldebug("Directory: '%s'", directoryPath.c_str());
+
+	std::string dirPath = standardizePath(directoryPath, true);
+	std::vector<std::string> dirContents;
+
+	NLMISC::CPath::getPathContent(nativeDatabasePath(dirPath), false, true, true, dirContents);
+
+	for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
+	{
+		std::string subPath = standardizePath(unnativeDatabasePath(*it), false);
+
+		if (NLMISC::CFile::isDirectory(nativeDatabasePath(subPath)))
+		{
+			if (subPath.find("\\.") == std::string::npos)
+				doDirectoryHandler(subPath);
+		}
+		else
+			doFileHandler(subPath);
+	}
+}
+
+void runHandler()
+{
+	nlinfo("DatabaseDirectory: '%s'", DatabaseDirectory);
+
+	doDirectoryHandler(SrcDirectoryRecursive);
+
+	for (std::set<std::string>::iterator it = MissingFiles.begin(), end = MissingFiles.end(); it != end; ++it)
+		nlinfo("Missing: '%s'", (*it).c_str());
 }
 
 void serializeStorageContainer(PIPELINE::MAX::CStorageContainer *storageContainer, GsfInfile *infile, const char *streamName)
@@ -572,7 +715,9 @@ int main(int argc, char **argv)
 	CEPoly::registerClasses(&SceneClassRegistry);
 
 	//handleFile("/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max");
-	runInitialize();
+	//runInitialize();
+	runHandler();
+	//runScanner();
 
 	gsf_shutdown();
 
