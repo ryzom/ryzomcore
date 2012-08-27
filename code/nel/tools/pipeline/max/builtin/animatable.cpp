@@ -39,6 +39,8 @@
 using namespace std;
 // using namespace NLMISC;
 
+#define PBM_ANIMATABLE_UNKNOWN2140_CHUNK_ID 0x2140
+
 namespace PIPELINE {
 namespace MAX {
 namespace BUILTIN {
@@ -52,6 +54,8 @@ CAnimatable::~CAnimatable()
 {
 	if (!m_ChunksOwnsPointers)
 	{
+		delete m_Unknown2140;
+		m_Unknown2140 = NULL;
 		delete m_AppData;
 		m_AppData = NULL;
 	}
@@ -70,6 +74,12 @@ void CAnimatable::parse(uint16 version, uint filter)
 	CSceneClass::parse(version);
 	if (!m_ChunksOwnsPointers)
 	{
+		m_Unknown2140 = getChunk(PBM_ANIMATABLE_UNKNOWN2140_CHUNK_ID);
+		if (m_Unknown2140)
+		{
+			// nldebug("Found unknown 0x2140");
+			// TODO: Put std::cout code here
+		}
 		m_AppData = static_cast<STORAGE::CAppData *>(getChunk(PMBS_APP_DATA_CHUNK_ID));
 	}
 }
@@ -77,15 +87,16 @@ void CAnimatable::parse(uint16 version, uint filter)
 void CAnimatable::clean()
 {
 	CSceneClass::clean();
-	if (m_AppData)
-	{
-		m_AppData->clean();
-	}
+	if (m_AppData) m_AppData->clean();
 }
 
 void CAnimatable::build(uint16 version, uint filter)
 {
 	CSceneClass::build(version);
+	if (m_Unknown2140)
+	{
+		putChunk(PBM_ANIMATABLE_UNKNOWN2140_CHUNK_ID, m_Unknown2140);
+	}
 	if (m_AppData)
 	{
 		if (m_AppData->entries().size() == 0)
@@ -103,6 +114,7 @@ void CAnimatable::build(uint16 version, uint filter)
 
 void CAnimatable::disown()
 {
+	m_Unknown2140 = NULL;
 	m_AppData = NULL;
 	CSceneClass::disown();
 }

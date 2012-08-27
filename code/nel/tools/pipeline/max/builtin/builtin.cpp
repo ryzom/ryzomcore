@@ -205,13 +205,29 @@ const CUserDataTypeSuperClassDesc UserDataTypeSuperClassDesc(&ReferenceTargetCla
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900f> CUserTypeSuperClassDesc;
 const CUserTypeSuperClassDesc UserTypeSuperClassDesc(&ReferenceTargetClassDesc, "UserTypeSuperClassUnknown");
 
-// 0x40 - shape object
+// 0x40 - shape object (text, ...)
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000040> CShapeObjectSuperClassDesc;
 const CShapeObjectSuperClassDesc ShapeObjectSuperClassDesc(&GeomObjectClassDesc, "ShapeObjectSuperClassUnknown");
 
-// 0x30 - light object
+// 0x30 - light object (omni, ...)
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000030> CLightObjectSuperClassDesc;
 const CLightObjectSuperClassDesc LightObjectSuperClassDesc(&ObjectClassDesc, "LightObjectSuperClassUnknown");
+
+// 0x20 camera - (target, ...)
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000020> CCameraObjectSuperClassDesc;
+const CCameraObjectSuperClassDesc CameraObjectSuperClassDesc(&ObjectClassDesc, "CameraObjectSuperClassUnknown");
+
+// Creating superclass 0x820 (FFD Binding) (0xd6636ea2, 0x9aa42bf3) that does not exist = WSM, sub of modifier (under baseobj)
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000820> CWSModifierSuperClassDesc;
+const CWSModifierSuperClassDesc WSModifierSuperClassDesc(&BaseObjectClassDesc, "WSModifierSuperClassUnknown");
+
+// Creating superclass 0x830 (FFD(Cyl)) (0xfa4700be, 0xbbe85051) that does not exist = WSMObject, sub of object
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000830> CWSMObjectSuperClassDesc;
+const CWSMObjectSuperClassDesc WSMObjectSuperClassDesc(&ObjectClassDesc, "WSMObjectSuperClassUnknown");
+
+// Creating superclass 0xc30 (Placement) (0x00000100, 0x00000000) that does not exist | xyzgen, sub of mtlbase
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000c30> CXYZGenSuperClassDesc;
+const CXYZGenSuperClassDesc XYZGenSuperClassDesc(&ReferenceTargetClassDesc, "XYZGenSuperClassUnknown");
 
 } /* anonymous namespace */
 
@@ -309,6 +325,10 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&UserTypeSuperClassDesc);
 	registry->add(&ShapeObjectSuperClassDesc);
 	registry->add(&LightObjectSuperClassDesc);
+	registry->add(&CameraObjectSuperClassDesc);
+	registry->add(&WSModifierSuperClassDesc);
+	registry->add(&WSMObjectSuperClassDesc);
+	registry->add(&XYZGenSuperClassDesc);
 }
 
 } /* namespace BUILTIN */

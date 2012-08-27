@@ -84,6 +84,7 @@ protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
 
 private:
+	IStorageObject *m_Unknown2140;
 	STORAGE::CAppData *m_AppData;
 
 }; /* class CAnimatable */

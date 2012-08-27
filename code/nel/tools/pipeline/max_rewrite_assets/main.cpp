@@ -57,6 +57,9 @@ using namespace PIPELINE::MAX::EPOLY;
 
 CSceneClassRegistry SceneClassRegistry;
 
+// Never enable this
+bool DebugParser = true;
+
 bool DisplayStream = false;
 bool WriteModified = false;
 bool WriteDummy = true;
@@ -65,7 +68,8 @@ const char *DatabaseDirectory = "w:\\database\\";
 const char *LinuxDatabaseDirectory = "/srv/work/database/";
 bool RunningLinux = true;
 
-const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
+//const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
+const char *SrcDirectoryRecursive = "w:\\database\\";
 
 std::set<std::string> MissingFiles;
 std::map<std::string, std::string> KnownFileCache;
@@ -637,13 +641,14 @@ void handleFile(const std::string &path)
 	PIPELINE::MAX::CScene scene(&SceneClassRegistry, &dllDirectory, &classDirectory3);
 	serializeStorageContainer(&scene, infile, "Scene");
 
-	/*
-	// Not parsing the scene for this function.
-	scene.parse(VersionUnknown);
-	scene.clean();
-	scene.build(VersionUnknown);
-	scene.disown();
-	*/
+	if (DebugParser)
+	{
+		// Not parsing the scene for this function.
+		scene.parse(VersionUnknown);
+		scene.clean();
+		scene.build(VersionUnknown);
+		scene.disown();
+	}
 
 	/*
 	PIPELINE::MAX::CStorageContainer dllDirectory;
