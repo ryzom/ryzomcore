@@ -205,6 +205,14 @@ const CUserDataTypeSuperClassDesc UserDataTypeSuperClassDesc(&ReferenceTargetCla
 typedef CSuperClassDescUnknown<CReferenceTarget, 0x0000900f> CUserTypeSuperClassDesc;
 const CUserTypeSuperClassDesc UserTypeSuperClassDesc(&ReferenceTargetClassDesc, "UserTypeSuperClassUnknown");
 
+// 0x40 - shape object
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000040> CShapeObjectSuperClassDesc;
+const CShapeObjectSuperClassDesc ShapeObjectSuperClassDesc(&GeomObjectClassDesc, "ShapeObjectSuperClassUnknown");
+
+// 0x30 - light object
+typedef CSuperClassDescUnknown<CReferenceTarget, 0x00000030> CLightObjectSuperClassDesc;
+const CLightObjectSuperClassDesc LightObjectSuperClassDesc(&ObjectClassDesc, "LightObjectSuperClassUnknown");
+
 } /* anonymous namespace */
 
 CBuiltin::CBuiltin()
@@ -299,6 +307,8 @@ void CBuiltin::registerClasses(CSceneClassRegistry *registry)
 	registry->add(&ControlPoint4SuperClassDesc);
 	registry->add(&UserDataTypeSuperClassDesc);
 	registry->add(&UserTypeSuperClassDesc);
+	registry->add(&ShapeObjectSuperClassDesc);
+	registry->add(&LightObjectSuperClassDesc);
 }
 
 } /* namespace BUILTIN */
