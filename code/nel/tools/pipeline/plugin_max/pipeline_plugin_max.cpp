@@ -6,20 +6,20 @@
  * CPipelinePluginMax
  */
 
-/* 
+/*
  * Copyright (C) 2012  by authors
- * 
+ *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
  * and/or modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, either version 2 of
  * the License, or (at your option) any later version.
- * 
+ *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with RYZOM CORE PIPELINE; see the file COPYING.  If not, see
  * <http://www.gnu.org/licenses/>.
@@ -51,17 +51,17 @@ namespace PIPELINE {
 
 // ******************************************************************
 
-class CPipelinePluginMaxNelLibrary : public NLMISC::INelLibrary 
-{ 
-	void onLibraryLoaded(bool /* firstTime */) 
+class CPipelinePluginMaxNelLibrary : public NLMISC::INelLibrary
+{
+	void onLibraryLoaded(bool /* firstTime */)
 	{
 		nldebug("Library loaded: CPipelinePluginMax");
 		PIPELINE_REGISTER_CLASS(CProcessMaxShape);
-	} 
-	void onLibraryUnloaded(bool /* lastTime */) 
-	{ 
-		nldebug("Library unloaded: CPipelinePluginMax"); 
-	}  
+	}
+	void onLibraryUnloaded(bool /* lastTime */)
+	{
+		nldebug("Library unloaded: CPipelinePluginMax");
+	}
 };
 NLMISC_DECL_PURE_LIB(CPipelinePluginMaxNelLibrary)
 
@@ -78,12 +78,12 @@ BOOL WINAPI DllMain(HANDLE hModule, DWORD /* ul_reason_for_call */, LPVOID /* lp
 /*
 CPipelinePluginMax::CPipelinePluginMax()
 {
-	
+
 }
 
 CPipelinePluginMax::~CPipelinePluginMax()
 {
-	
+
 }*/
 
 namespace {
@@ -134,12 +134,12 @@ std::string standardizePath(const std::string &path, bool addFinalSlash)
 	return newPath;
 }
 
-inline bool isCharacter(char c)
+inline bool isCharacter(uint8 c)
 {
-	return (32 <= c /*&& c <= 127) || (161 <= c*/ && c <= 255);
+	return (32 <= c /*&& c <= 127) || (161 <= c*/ /*&& c <= 255*/);
 }
 
-inline char stripFrenchLocale(char c)
+inline uint8 stripFrenchLocale(uint8 c)
 {
 	if (192 <= c && c <= 197) return 'a';
 	if (200 <= c && c <= 203) return 'e';
@@ -349,7 +349,7 @@ public:
 	std::string SrcDirectoryRecursive;
 	std::string DatabaseDirectory;
 
-	virtual void getName(std::string &result) const 
+	virtual void getName(std::string &result) const
 	{ result = "CMaxRewritePathsCommand"; }
 
 	void doFile(const std::string &filePath)
@@ -383,7 +383,7 @@ public:
 					{
 						if (!isCharacter(buffer[j]))
 						{
-							if (buffer[j + 1] == '\\' && buffer[j + 2] == '\\' || buffer[j] == 0)
+							if ((buffer[j + 1] == '\\' && buffer[j + 2] == '\\') || buffer[j] == 0)
 							{
 								beginPath = j + 1;
 								break;
@@ -425,19 +425,19 @@ public:
 		std::vector<std::string> dirContents;
 
 		NLMISC::CPath::getPathContent(dirPath, false, true, true, dirContents);
-		
+
 		for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
 		{
 			const std::string &subPath = standardizePath(*it, false);
-			
+
 			if (NLMISC::CFile::isDirectory(subPath))
 			{
-				if (subPath.find("\\.") == std::string.npos)
+				if (subPath.find("\\.") == std::string::npos)
 					doDirectory(subPath);
 			}
 			else
 				doFile(subPath);
-			
+
 			if (PIPELINE::IPipelineInterface::getInstance()->isExiting())
 				return;
 		}
@@ -466,7 +466,7 @@ public:
 	std::string SrcDirectoryRecursive;
 	std::string DatabaseDirectory;
 
-	virtual void getName(std::string &result) const 
+	virtual void getName(std::string &result) const
 	{ result = "CMaxRewriteInitCacheCommand"; }
 
 	void doFile(const std::string &filePath)
@@ -484,19 +484,19 @@ public:
 		std::vector<std::string> dirContents;
 
 		NLMISC::CPath::getPathContent(dirPath, false, true, true, dirContents);
-		
+
 		for (std::vector<std::string>::iterator it = dirContents.begin(), end = dirContents.end(); it != end; ++it)
 		{
 			const std::string &subPath = standardizePath(*it, false);
-			
+
 			if (NLMISC::CFile::isDirectory(subPath))
 			{
-				if (subPath.find("\\.") == std::string.npos)
+				if (subPath.find("\\.") == std::string::npos)
 					doDirectory(subPath);
 			}
 			else
 				doFile(subPath);
-			
+
 			if (PIPELINE::IPipelineInterface::getInstance()->isExiting())
 				return;
 		}

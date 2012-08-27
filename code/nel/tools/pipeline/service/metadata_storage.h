@@ -30,17 +30,17 @@
 #include <nel/misc/types_nl.h>
 
 // STL includes
+#include <vector>
 
 // NeL includes
-#include <vector>
 #include <nel/misc/tool_logger.h>
+#include <nel/misc/stream.h>
 
 // Project includes
 #include "workspace_storage.h"
 
 namespace NLMISC {
 	class IStream;
-	struct EStream;
 }
 
 namespace PIPELINE {
