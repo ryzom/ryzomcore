@@ -141,6 +141,13 @@ void CStorageContainer::serial(NLMISC::IStream &stream)
 	}
 }
 
+void CStorageContainer::serial(NLMISC::IStream &stream, uint size)
+{
+	CStorageChunks chunks(stream, size);
+	serial(chunks);
+	return;
+}
+
 void CStorageContainer::toString(std::ostream &ostream, const std::string &pad) const
 {
 	// note: only use pad when multi-lining

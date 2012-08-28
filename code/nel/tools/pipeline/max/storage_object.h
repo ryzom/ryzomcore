@@ -110,6 +110,9 @@ public:
 	virtual void serial(NLMISC::IStream &stream); // only used to wrap a container inside another stream
 	virtual void toString(std::ostream &ostream, const std::string &pad = "") const;
 
+	// utility
+	void serial(NLMISC::IStream &stream, uint size); // without wrapping, known size
+
 	// virtual
 	// Parse this class with given version and parse level filter
 	virtual void parse(uint16 version, uint filter = 0);

@@ -71,7 +71,7 @@ bool ReplacePaths = true;
 bool ReplaceMapExt = true;
 
 bool WriteModified = true;
-bool WriteDummy = true;
+bool WriteDummy = false;
 
 bool HaltOnIssue = false;
 
@@ -1068,10 +1068,33 @@ void handleFile(const std::string &path)
 						mapExtenderIndex = i;
 						mapExtender = derivedObject->getReference(i);
 
+						bool deleteDerivedGeom = false;
 						CStorageContainer *derivedData = dynamic_cast<CStorageContainer *>(derivedObject->findStorageObject(0x2500, mapExtenderIndex));
 						nlassert(derivedData);
 						CStorageContainer *derivedGeom = dynamic_cast<CStorageContainer *>(derivedData->findStorageObject(0x2512));
-						nlassert(derivedGeom);
+						if (!derivedGeom)
+						{
+							CStorageRaw *derivedGeomRaw = dynamic_cast<CStorageRaw *>(derivedData->findStorageObject(0x2512));
+							if (derivedGeomRaw)
+							{
+								nlwarning("Derived geometry raw instead of as container");
+								NLMISC::CMemStream memGeom;
+								derivedGeomRaw->serial(memGeom);
+								uint size = memGeom.getPos();
+								memGeom.invert();
+								derivedGeom = new CStorageContainer();
+								deleteDerivedGeom = true;
+								derivedGeom->serial(memGeom, size);
+							}
+							else
+							{
+								derivedData->toString(std::cout);
+								nlwarning("derived geometry missing!!!");
+								std::string x;
+								std::cin >> x;
+								continue;
+							}
+						}
 						CStorageRaw *derivedVertices = dynamic_cast<CStorageRaw *>(derivedGeom->findStorageObject(0x03e9));
 						nlassert(derivedVertices);
 						CStorageRaw *derivedIndices = dynamic_cast<CStorageRaw *>(derivedGeom->findStorageObject(0x03eb));
@@ -1126,6 +1149,9 @@ void handleFile(const std::string &path)
 						memGeomPoints.invert();
 						chunkGeomPoints->serial(memGeomPoints);
 						mapChunks.push_back(CStorageContainer::TStorageObjectWithId(0x0330, chunkGeomPoints));
+
+						if (deleteDerivedGeom)
+							delete derivedGeom;
 
 						// /*break;*/
 						nldebug("Converted!");
@@ -1373,6 +1399,7 @@ int main(int argc, char **argv)
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_zo_wea_trib_masse1m.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_fy_wea_trib_grand_bouclier.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_entrepot.max"));
+	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\mesh_wip\\all_trib_weapons.max"));
 	//handleFile("/home/kaetemi/3dsMax/scenes/test_clear_add_uvw.max");
 	//runScanner();
 
