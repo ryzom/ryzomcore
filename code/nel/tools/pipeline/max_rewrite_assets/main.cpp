@@ -83,8 +83,10 @@ bool RunningLinux = true;
 //const char *SrcDirectoryRecursive = "w:\\database\\";
 //const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
 const char *SrcDirectoryRecursiveInit = "w:\\database\\";
-const char *SrcDirectoryRecursiveHandle = "w:\\database\\stuff\\generique\\agents\\accessories\\";
+//const char *SrcDirectoryRecursiveHandle = "w:\\database\\stuff\\generique\\agents\\accessories\\";
+const char *SrcDirectoryRecursiveHandle = "w:\\database\\";
 
+bool UseFallbackTga = false;
 const char *FallbackTga = "w:\\database\\stuff\\generique\\agents\\_textures\\accessories\\lost_texture.tga";
 
 std::set<std::string> MissingFiles;
@@ -644,7 +646,14 @@ std::string rewritePathFinal(const std::string &str)
 		)
 	{
 		// nlwarning("Replacing missing '%s' with '%s'", result.c_str(), FallbackTga);
-		return FallbackTga;
+		if (UseFallbackTga)
+		{
+			return FallbackTga;
+		}
+		else
+		{
+			return NLMISC::CFile::getFilename(result);
+		}
 	}
 	// nldebug("Replacing '%s' with '%s'", str.c_str(), result.c_str());
 	return result;
