@@ -123,7 +123,8 @@ public:
 public:
 	// read access
 	inline const TStorageObjectContainer &chunks() const { return m_Chunks; }
-	IStorageObject *findStorageObject(uint16 id) const;
+	IStorageObject *findStorageObject(uint16 id, uint nb = 0) const; // find storage object with given id, nb count in case there are more
+	IStorageObject *findLastStorageObject(uint16 id) const;
 
 public: // should be protected but that doesn't compile, nice c++!
 	// inherited

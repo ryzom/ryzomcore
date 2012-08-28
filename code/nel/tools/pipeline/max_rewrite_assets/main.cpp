@@ -66,17 +66,24 @@ CSceneClassRegistry SceneClassRegistry;
 bool DebugParser = false;
 
 bool DisplayStream = false;
-bool WriteModified = false;
-bool WriteDummy = true;
+
 bool ReplacePaths = true;
+bool ReplaceMapExt = true;
+
+bool WriteModified = true;
+bool WriteDummy = true;
+
+bool HaltOnIssue = false;
 
 const char *DatabaseDirectory = "w:\\database\\";
 const char *LinuxDatabaseDirectory = "/srv/work/database/";
 bool RunningLinux = true;
 
 //const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
-const char *SrcDirectoryRecursive = "w:\\database\\";
+//const char *SrcDirectoryRecursive = "w:\\database\\";
 //const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
+const char *SrcDirectoryRecursiveInit = "w:\\database\\";
+const char *SrcDirectoryRecursiveHandle = "w:\\database\\stuff\\generique\\agents\\accessories\\";
 
 const char *FallbackTga = "w:\\database\\stuff\\generique\\agents\\_textures\\accessories\\lost_texture.tga";
 
@@ -401,7 +408,7 @@ void runInitialize()
 {
 	nlinfo("DatabaseDirectory: '%s'", DatabaseDirectory);
 
-	doDirectoryInitialize(std::string(SrcDirectoryRecursive));
+	doDirectoryInitialize(std::string(SrcDirectoryRecursiveInit));
 }
 
 // Scary stuff
@@ -495,7 +502,7 @@ void runScanner()
 {
 	nlinfo("DatabaseDirectory: '%s'", DatabaseDirectory);
 
-	doDirectoryScanner(SrcDirectoryRecursive);
+	doDirectoryScanner(SrcDirectoryRecursiveHandle);
 
 	for (std::set<std::string>::iterator it = MissingFiles.begin(), end = MissingFiles.end(); it != end; ++it)
 		nlinfo("Missing: '%s'", (*it).c_str());
@@ -540,7 +547,7 @@ void runHandler()
 {
 	nlinfo("DatabaseDirectory: '%s'", DatabaseDirectory);
 
-	doDirectoryHandler(SrcDirectoryRecursive);
+	doDirectoryHandler(SrcDirectoryRecursiveHandle);
 
 	for (std::set<std::string>::iterator it = MissingFiles.begin(), end = MissingFiles.end(); it != end; ++it)
 		nlinfo("Missing: '%s'", (*it).c_str());
@@ -762,8 +769,11 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					asRaw->toString(std::cout);
 					nldebug("x");
 					nlwarning("not null term");
-					std::string x;
-					std::cin >> x;
+					if (HaltOnIssue)
+					{
+						std::string x;
+						std::cin >> x;
+					}
 					break;
 				}
 				uint32 size = ((uint32 *)&asRaw->Value[11])[0];
@@ -797,8 +807,11 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 							{
 								nldebug("size %i", size);
 								nlwarning("bad size");
-								std::string x;
-								std::cin >> x;
+								if (HaltOnIssue)
+								{
+									std::string x;
+									std::cin >> x;
+								}
 								return;
 							}
 							std::string v;
@@ -810,8 +823,11 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 								asRaw->toString(std::cout);
 								nldebug("x");
 								nlwarning("not null term inside array stuff %i '%s'", i, v.c_str());
-								std::string x;
-								std::cin >> x;
+								if (HaltOnIssue)
+								{
+									std::string x;
+									std::cin >> x;
+								}
 								return;
 							}
 							v.resize(v.size() - 1);
@@ -868,8 +884,11 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					asRaw->toString(std::cout);
 					nldebug("x");
 					nlwarning("not important");
-					std::string x;
-					std::cin >> x;
+					if (HaltOnIssue)
+					{
+						std::string x;
+						std::cin >> x;
+					}
 					break;
 				}
 				str = rewritePathFinal(str);
@@ -911,8 +930,11 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 				nlinfo("Id: %i", (uint32)id);
 				asRaw->toString(std::cout);
 				nlwarning("Found important file path");
-				std::string x;
-				std::cin >> x;
+				if (HaltOnIssue)
+				{
+					std::string x;
+					std::cin >> x;
+				}
 				return;
 			}
 			break;
@@ -982,8 +1004,6 @@ void handleFile(const std::string &path)
 		// Not parsing the scene for this function.
 		scene.parse(VersionUnknown);
 		scene.clean();
-		scene.build(VersionUnknown);
-		scene.disown();
 	}
 
 	/*
@@ -1007,11 +1027,289 @@ void handleFile(const std::string &path)
 		scene.toString(std::cout);
 	}
 
+	if (DebugParser)
+	{
+		// Not parsing the scene for this function.
+		scene.build(VersionUnknown);
+		scene.disown();
+	}
+
 	g_object_unref(infile);
 
 	if (ReplacePaths)
 	{
 		fixChunks(&scene);
+	}
+	if (ReplaceMapExt)
+	{
+		// Parse the scene
+		scene.parse(VersionUnknown);
+		NLMISC::CClassId editMeshClassId = NLMISC::CClassId(0x00000050, 0x00000000);
+		NLMISC::CClassId editableMeshClassId = NLMISC::CClassId(0xe44f10b3, 0x00000000);
+		// from: (0x2ec82081, 0x045a6271)
+		NLMISC::CClassId fromClassId = NLMISC::CClassId(0x2ec82081, 0x045a6271);
+		// Find all object space modifier derived containing map extender
+		for (CStorageContainer::TStorageObjectConstIt it = scene.container()->chunks().begin(), end = scene.container()->chunks().end(); it != end; ++it)
+		{
+			if (it->first == 0x2032) // Derived Object
+			{
+				nldebug("Found derived object");
+				CReferenceMaker *derivedObject = dynamic_cast<CReferenceMaker *>(it->second);
+				nlassert(derivedObject);
+
+				// Find map extender in the modifier stack
+				uint mapExtenderIndex = 0;
+				CReferenceMaker *mapExtender = NULL;
+				for (uint i = 0; i < derivedObject->nbReferences(); ++i)
+				{
+					if (derivedObject->getReference(i) && derivedObject->getReference(i)->classDesc()->classId() == fromClassId)
+					{
+						nldebug("Found map extender at '%i' / '%i'!", i, derivedObject->nbReferences());
+						mapExtenderIndex = i;
+						mapExtender = derivedObject->getReference(i);
+
+						CStorageContainer *derivedData = dynamic_cast<CStorageContainer *>(derivedObject->findStorageObject(0x2500, mapExtenderIndex));
+						nlassert(derivedData);
+						CStorageContainer *derivedGeom = dynamic_cast<CStorageContainer *>(derivedData->findStorageObject(0x2512));
+						nlassert(derivedGeom);
+						CStorageRaw *derivedVertices = dynamic_cast<CStorageRaw *>(derivedGeom->findStorageObject(0x03e9));
+						nlassert(derivedVertices);
+						CStorageRaw *derivedIndices = dynamic_cast<CStorageRaw *>(derivedGeom->findStorageObject(0x03eb));
+						nlassert(derivedIndices);
+
+						CStorageContainer::TStorageObjectContainer &mapChunks = const_cast<CStorageContainer::TStorageObjectContainer &>(mapExtender->chunks());
+
+						// CStorageContainer::TStorageObjectWithId
+
+						nlassert(derivedVertices->Value.size() % 12 == 0);
+						nlassert(derivedIndices->Value.size() % 12 == 0);
+						uint32 nbVertices = derivedVertices->Value.size() / 12;
+						uint32 nbFaces = derivedIndices->Value.size() / 12;
+						nldebug("Vertices: %i", nbVertices);
+						nldebug("Faces: %i", nbFaces);
+
+						// Write vertex chunks
+						CStorageValue<uint32> *chunkVertCount = new CStorageValue<uint32>();
+						chunkVertCount->Value = nbVertices;
+						mapChunks.push_back(CStorageContainer::TStorageObjectWithId(0x0100, chunkVertCount));
+
+						CStorageRaw *chunkVerts = new CStorageRaw();
+						NLMISC::CMemStream memVerts;
+						derivedVertices->serial(memVerts);
+						chunkVerts->setSize(memVerts.getPos());
+						memVerts.invert();
+						chunkVerts->serial(memVerts);
+						mapChunks.push_back(CStorageContainer::TStorageObjectWithId(0x0110, chunkVerts));
+
+						// Write face chunks
+						CStorageValue<uint32> *chunkFaceCount = new CStorageValue<uint32>();
+						chunkFaceCount->Value = nbFaces;
+						mapChunks.push_back(CStorageContainer::TStorageObjectWithId(0x0230, chunkFaceCount));
+
+						CStorageRaw *chunkFaces = new CStorageRaw();
+						NLMISC::CMemStream memFaces;
+						derivedIndices->serial(memFaces);
+						chunkFaces->setSize(memFaces.getPos());
+						memFaces.invert();
+						chunkFaces->serial(memFaces);
+						mapChunks.push_back(CStorageContainer::TStorageObjectWithId(0x0240, chunkFaces));
+
+						// Write geom points
+						CStorageValue<uint32> *chunkGeomPointCount = new CStorageValue<uint32>();
+						chunkGeomPointCount->Value = nbVertices; // derived vertices?
+						mapChunks.push_back(CStorageContainer::TStorageObjectWithId(0x0320, chunkGeomPointCount));
+
+						CStorageRaw *chunkGeomPoints = new CStorageRaw();
+						NLMISC::CMemStream memGeomPoints;
+						derivedVertices->serial(memGeomPoints); // derived vertices?
+						chunkGeomPoints->setSize(memGeomPoints.getPos());
+						memGeomPoints.invert();
+						chunkGeomPoints->serial(memGeomPoints);
+						mapChunks.push_back(CStorageContainer::TStorageObjectWithId(0x0330, chunkGeomPoints));
+
+						// /*break;*/
+						nldebug("Converted!");
+					}
+				}
+
+				if (mapExtender)
+				{
+					uint editMeshIndex;
+					CReferenceMaker *editMesh = NULL;
+					for (uint i = 0; i < derivedObject->nbReferences(); ++i)
+					{
+						if (derivedObject->getReference(i) && derivedObject->getReference(i)->classDesc()->classId() == editMeshClassId)
+						{
+							nldebug("Found edit mesh at '%i' / '%i'!", i, derivedObject->nbReferences());
+							editMeshIndex = i;
+							editMesh = derivedObject->getReference(i);
+
+							// Ensure no selection
+
+							CStorageContainer::TStorageObjectContainer &meshChunks = const_cast<CStorageContainer::TStorageObjectContainer &>(editMesh->chunks());
+
+							// Ensure no selection
+							for (CStorageContainer::TStorageObjectIterator it = meshChunks.begin(), end = meshChunks.end(); it != end; )
+							{
+								CStorageContainer::TStorageObjectIterator next = it; ++next;
+								switch (it->first)
+								{
+									case 0x2800:
+										nldebug("Override selection");
+										{
+											delete it->second;
+											CStorageValue<uint16> *v = new CStorageValue<uint16>();
+											v->Value = 0;
+											it->second = v;
+										}
+										break;
+								}
+								it = next;
+							}
+
+							// /*break;*/
+						}
+					}
+
+					uint editableMeshIndex;
+					CReferenceMaker *editableMesh = NULL;
+					for (uint i = 0; i < derivedObject->nbReferences(); ++i)
+					{
+						if (derivedObject->getReference(i) && derivedObject->getReference(i)->classDesc()->classId() == editableMeshClassId)
+						{
+							nldebug("Found editable mesh at '%i' / '%i'!", i, derivedObject->nbReferences());
+							editableMeshIndex = i;
+							editableMesh = derivedObject->getReference(i);
+
+							CStorageContainer::TStorageObjectContainer &meshChunks = const_cast<CStorageContainer::TStorageObjectContainer &>(editableMesh->chunks());
+
+							// Ensure no selection
+							for (CStorageContainer::TStorageObjectIterator it = meshChunks.begin(), end = meshChunks.end(); it != end; )
+							{
+								CStorageContainer::TStorageObjectIterator next = it; ++next;
+								switch (it->first)
+								{
+									case 0x2845:
+									case 0x2846:
+									case 0x2847:
+									case 0x2849:
+									case 0x2850:
+									case 0x3001:
+									case 0x3003:
+									case 0x3004:
+										nldebug("Erase selection");
+										meshChunks.erase(it);
+										break;
+									case 0x4038:
+										nldebug("Override selection");
+										{
+											delete it->second;
+											CStorageValue<uint32> *v = new CStorageValue<uint32>();
+											v->Value = 0;
+											it->second = v;
+										}
+										break;
+								}
+								it = next;
+							}
+
+							// /*break;*/
+						}
+					}
+
+					if (editableMesh && editableMeshIndex + 1 != derivedObject->nbReferences())
+					{
+						nlwarning("Editable mesh not at bottom of the stack, this is unpossible!");
+						std::string x;
+						std::cin >> x;
+						continue;
+					}
+/*
+					if (editableMesh == NULL || editMesh == NULL)
+					{
+						derivedObject->toString(std::cout);
+						nlwarning("editable mesh or edit mesh not found");
+						std::string x;
+						std::cin >> x;
+						continue;
+					}
+
+					//
+						//derivedObject->toString(std::cout);
+						//editableMesh->toString(std::cout);
+
+					// derivedObject -> 0x2500 -> 0x2512 -> 0x03e9 / 0x03eb
+					// editableMesh -> 0x08fe (geom) -> 0x0916 / 0x0918
+
+					CStorageContainer *editableMeshGeometry = dynamic_cast<CStorageContainer *>(editableMesh->findStorageObject(0x08fe));
+					// nlassert(editableMeshGeometry);
+					if (!editableMeshGeometry)
+					{
+						nlwarning("broken");
+						std::string x;
+						std::cin >> x;
+						continue;
+					}
+					CStorageRaw *editableVertices = dynamic_cast<CStorageRaw *>(editableMeshGeometry->findStorageObject(0x0916));
+					nlassert(editableVertices);
+					CStorageRaw *editableIndices = dynamic_cast<CStorageRaw *>(editableMeshGeometry->findStorageObject(0x0918));
+					nlassert(editableIndices);
+
+	//return new CStorageArraySizePre<NLMISC::CVector>();
+					if (derivedIndices->Value.size() != editableIndices->Value.size())
+					{
+						editableMesh->toString(std::cout);
+						derivedObject->toString(std::cout);
+						nlwarning("size mismatch");
+						std::string x;
+						std::cin >> x;
+						continue;
+					}
+
+					editableVertices->Value.clear();
+					editableIndices->Value.clear();
+
+					nlassert(derivedVertices->Value.size() % 12 == 0);
+					uint32 nbVertices = derivedVertices->Value.size() / 12;
+					NLMISC::CMemStream memVertices;
+					memVertices.serial(nbVertices);
+					derivedVertices->serial(memVertices);
+					memVertices.invert();
+					editableVertices->setSize(derivedVertices->Value.size() + 4);
+					editableVertices->serial(memVertices);
+
+					NLMISC::CMemStream memIndices;
+					derivedIndices->serial(memIndices);
+					memIndices.invert();
+					editableIndices->setSize(derivedIndices->Value.size());
+					editableIndices->serial(memIndices);
+					nldebug("ok!");*/
+				}
+			}
+		}
+		// to: (0x02df2e3a, 0x72ba4e1f)
+		NLMISC::CClassId toClassId = NLMISC::CClassId(0x02df2e3a, 0x72ba4e1f); // uvw unwrap
+		// NLMISC::CClassId toClassId = NLMISC::CClassId(0x5c5b50f7,0x60397ca1); // converttomesh :|
+		// NLMISC::CClassId toClassId = NLMISC::CClassId(0x31f9c666, 0x03b4a577); // uvw mapping add
+		// dllname to: uvwunwrap.dlm
+		for (CStorageContainer::TStorageObjectConstIt it = classDirectory3.chunks().begin(), end = classDirectory3.chunks().end(); it != end; ++it)
+		{
+			CClassEntry *classEntry = dynamic_cast<CClassEntry *>(it->second);
+			if (classEntry)
+			{
+				//nldebug("class entry %s", classEntry->classId().toString().c_str());
+				if (classEntry->classId() == fromClassId)
+				{
+					nldebug("Found class id to replace!");
+					classEntry->overrideClassId(toClassId);
+					CDllEntry *dllEntry = const_cast<CDllEntry *>(dllDirectory.get(classEntry->dllIndex()));
+					dllEntry->overrideDllFilename(ucstring("uvwunwrap.dlm"));
+				}
+			}
+			//else nldebug("not class entry");
+		}
+		// Disown the scene
+		scene.disown();
 	}
 
 	dllDirectory.disown();
@@ -1070,6 +1368,12 @@ int main(int argc, char **argv)
 	//handleFile("/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max");
 	runInitialize();
 	runHandler();
+	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_reward_karavan_bigshield.max"));
+	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_acc_pick_o.max"));
+	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_zo_wea_trib_masse1m.max"));
+	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_fy_wea_trib_grand_bouclier.max"));
+	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_entrepot.max"));
+	//handleFile("/home/kaetemi/3dsMax/scenes/test_clear_add_uvw.max");
 	//runScanner();
 
 	gsf_shutdown();

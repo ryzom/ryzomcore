@@ -62,8 +62,12 @@ public:
 	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
 
+	// read access
 	const ucstring &dllDescription() const { return m_DllDescription->Value; }
 	const ucstring &dllFilename() const { return m_DllFilename->Value; }
+
+	// debug
+	void overrideDllFilename(const ucstring &dllFilename) { m_DllFilename->Value = dllFilename; }
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);

@@ -211,9 +211,23 @@ void CStorageContainer::disown()
 	}
 }
 
-IStorageObject *CStorageContainer::findStorageObject(uint16 id) const
+IStorageObject *CStorageContainer::findStorageObject(uint16 id, uint nb) const
 {
+	uint c = 0;
 	for (TStorageObjectContainer::const_iterator it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
+	{
+		if (it->first == id)
+		{
+			if (c == nb) return it->second;
+			else ++c;
+		}
+	}
+	return NULL;
+}
+
+IStorageObject *CStorageContainer::findLastStorageObject(uint16 id) const
+{
+	for (TStorageObjectContainer::const_reverse_iterator it = m_Chunks.rbegin(), end = m_Chunks.rend(); it != end; ++it)
 	{
 		if (it->first == id)
 			return it->second;

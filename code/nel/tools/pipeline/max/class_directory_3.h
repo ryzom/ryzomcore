@@ -136,10 +136,14 @@ public:
 	virtual void build(uint16 version, uint filter = 0);
 	virtual void disown();
 
+	// read access
 	const ucstring &displayName() const { return m_Name->Value; }
 	sint32 dllIndex() const { return m_Header->DllIndex; }
 	NLMISC::CClassId classId() const { return m_Header->ClassId; }
 	uint32 superClassId() const { return m_Header->SuperClassId; }
+
+	// debug
+	void overrideClassId(NLMISC::CClassId classId) { m_Header->ClassId = classId; }
 
 protected:
 	virtual IStorageObject *createChunkById(uint16 id, bool container);
