@@ -226,6 +226,31 @@ std::string rewritePath(const std::string &path, const std::string &databaseDire
 	NLMISC::strFindReplace(stdPath, "fy_hom_armor00_pieds.", "fy_hom_armor00_pieds_c1.");
 	NLMISC::strFindReplace(stdPath, "fy_hom_armor00_torse.", "fy_hom_armor00_torse_c1.");
 
+	NLMISC::strFindReplace(stdPath, "fy-hof-gilet02-dos", "fy_hof_gilet02_arriere_n");
+	NLMISC::strFindReplace(stdPath, "fy-hof-pantalon02-arriere", "fy_hof_pantalon02_arriere_n");
+	NLMISC::strFindReplace(stdPath, "fy-hof-pantalon02-avant", "fy_hof_pantalon02_avant_n");
+	NLMISC::strFindReplace(stdPath, "fy-hom-blouson02-avantbras", "fy_hom_blouson02_avbras_n");
+	NLMISC::strFindReplace(stdPath, "fy-hom-blouson02-bras", "fy_hom_blouson02_bras_n");
+	NLMISC::strFindReplace(stdPath, "fy-hom-blouson02-dos", "fy_hom_blouson02_arriere_n");
+	NLMISC::strFindReplace(stdPath, "fy-hom-blouson02-torse", "fy_hom_blouson02_avant_n");
+	NLMISC::strFindReplace(stdPath, "fy-hom-pantalon02-mollet", "fy_hom_pantalon02_mollet_n");
+	NLMISC::strFindReplace(stdPath, "fy-hom-shoes02", "fy_hom_shoes02_shoes_n");
+	NLMISC::strFindReplace(stdPath, "fyhof-gilet02-torse", "fy_hof_gilet02_torse_n");
+
+	NLMISC::strFindReplace(stdPath, "ge_hom_armor02_armpad", "ge_hom_armor02_avbras");
+	NLMISC::strFindReplace(stdPath, "ge_hom_armor02_bottes", "ge_hom_armor02_pied");
+	NLMISC::strFindReplace(stdPath, "ge_hom_armor02_cuisse-arr", "ge_hom_armor02_cuisse_arr");
+	NLMISC::strFindReplace(stdPath, "ge_hom_armor02_cuisse-avt", "ge_hom_armor02_cuisse_avt");
+	NLMISC::strFindReplace(stdPath, "ge_hom_armor02_hand-down", "ge_hom_armor02_hand_down");
+	NLMISC::strFindReplace(stdPath, "ge_hom_armor02_hand-up", "ge_hom_armor02_hand_up");
+	NLMISC::strFindReplace(stdPath, "ge_hom_armor02_torse", "ge_hom_armor02_torso");
+
+	NLMISC::strFindReplace(stdPath, "fy_lovejail.", "fy_lovejail_su.");
+	NLMISC::strFindReplace(stdPath, "\\caissebonusaction.", "\\g_caissebonus.");
+	NLMISC::strFindReplace(stdPath, "\\sactoile.", "\\g_sactoile.");
+	NLMISC::strFindReplace(stdPath, "\\ge_mission_stele_kami0.", "\\ge_mission_stele_kami.");
+	NLMISC::strFindReplace(stdPath, "\\ge_mission_reward_karavan_bigshield.", "\\ge_mission_reward_karavan_bigshield_c1.");
+
 	NLMISC::strFindReplace(stdPath, "interfaces_visage", "visage_interface");
 
 	if (stdPath.find("\\trame.") != std::string::npos)
@@ -1062,7 +1087,7 @@ void handleFile(const std::string &path)
 		{
 			if (it->first == 0x2032) // Derived Object
 			{
-				nldebug("Found derived object");
+				// nldebug("Found derived object");
 				CReferenceMaker *derivedObject = dynamic_cast<CReferenceMaker *>(it->second);
 				nlassert(derivedObject);
 
@@ -1099,15 +1124,38 @@ void handleFile(const std::string &path)
 							{
 								derivedData->toString(std::cout);
 								nlwarning("derived geometry missing!!!");
-								std::string x;
-								std::cin >> x;
+								if (HaltOnIssue)
+								{
+									std::string x;
+									std::cin >> x;
+								}
 								continue;
 							}
 						}
 						CStorageRaw *derivedVertices = dynamic_cast<CStorageRaw *>(derivedGeom->findStorageObject(0x03e9));
-						nlassert(derivedVertices);
+						if (!derivedVertices)
+						{
+							derivedGeom->toString(std::cout);
+							nlwarning("derived vertices missing!!!");
+							if (HaltOnIssue)
+							{
+								std::string x;
+								std::cin >> x;
+							}
+							continue;
+						}
 						CStorageRaw *derivedIndices = dynamic_cast<CStorageRaw *>(derivedGeom->findStorageObject(0x03eb));
-						nlassert(derivedIndices);
+						if (!derivedIndices)
+						{
+							derivedGeom->toString(std::cout);
+							nlwarning("derived indices missing!!!");
+							if (HaltOnIssue)
+							{
+								std::string x;
+								std::cin >> x;
+							}
+							continue;
+						}
 
 						CStorageContainer::TStorageObjectContainer &mapChunks = const_cast<CStorageContainer::TStorageObjectContainer &>(mapExtender->chunks());
 
