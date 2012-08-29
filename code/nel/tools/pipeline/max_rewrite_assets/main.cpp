@@ -402,7 +402,7 @@ void doFileInitialize(const std::string &filePath)
 	// nldebug("File: '%s'", filePath.c_str());
 	// nldebug("Native: '%s'", nativeDatabasePath(filePath).c_str());
 
-	KnownFileCache[NLMISC::CFile::getFilename(filePath)] = standardizePath(filePath, true);
+	KnownFileCache[NLMISC::CFile::getFilename(filePath)] = standardizePath(filePath, false);
 }
 
 // maxRewritePaths W:/database/interfaces/anims_max
@@ -1466,7 +1466,8 @@ int main(int argc, char **argv)
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_fy_wea_trib_grand_bouclier.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_entrepot.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\mesh_wip\\all_trib_weapons.max"));
-	handleFile("/srv/work/database/landscape/ligo/jungle/max/zonematerial-foret-ruine_boss.max");
+	//handleFile("/srv/work/database/landscape/ligo/jungle/max/zonematerial-foret-ruine_boss.max");
+	handleFile("/srv/work/database/stuff/fyros/agents/actors/male/animation/anims_non_utilisees/fy_hom_assis_boire_verre.max");
 	//handleFile("/home/kaetemi/3dsMax/scenes/test_clear_add_uvw.max");
 	//runScanner();
 
