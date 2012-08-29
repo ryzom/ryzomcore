@@ -63,18 +63,18 @@ using namespace PIPELINE::MAX::EPOLY;
 CSceneClassRegistry SceneClassRegistry;
 
 // Never enable this
-bool DebugParser = true;
+bool DebugParser = false;
 
 bool DisplayStream = false;
-bool DisplayReplaces = true;
+bool DisplayReplaces = false;
 
 bool ReplacePaths = true;
 bool ReplaceMapExt = true;
 
-bool WriteModified = false;
-bool WriteDummy = true;
+bool WriteModified = true;
+bool WriteDummy = false;
 
-bool HaltOnIssue = true;
+bool HaltOnIssue = false;
 
 const char *DatabaseDirectory = "w:\\database\\";
 const char *LinuxDatabaseDirectory = "/srv/work/database/";
@@ -1459,7 +1459,7 @@ int main(int argc, char **argv)
 
 	//handleFile("/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max");
 	runInitialize();
-	//runHandler();
+	runHandler();
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_reward_karavan_bigshield.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_acc_pick_o.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_zo_wea_trib_masse1m.max"));
@@ -1467,7 +1467,7 @@ int main(int argc, char **argv)
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_entrepot.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\mesh_wip\\all_trib_weapons.max"));
 	//handleFile("/srv/work/database/landscape/ligo/jungle/max/zonematerial-foret-ruine_boss.max");
-	handleFile("/srv/work/database/stuff/fyros/agents/actors/male/animation/anims_non_utilisees/fy_hom_assis_boire_verre.max");
+	//handleFile("/srv/work/database/stuff/fyros/agents/actors/male/animation/anims_non_utilisees/fy_hom_assis_boire_verre.max");
 	//handleFile("/home/kaetemi/3dsMax/scenes/test_clear_add_uvw.max");
 	//runScanner();
 
