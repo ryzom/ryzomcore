@@ -63,17 +63,18 @@ using namespace PIPELINE::MAX::EPOLY;
 CSceneClassRegistry SceneClassRegistry;
 
 // Never enable this
-bool DebugParser = false;
+bool DebugParser = true;
 
 bool DisplayStream = false;
+bool DisplayReplaces = true;
 
 bool ReplacePaths = true;
 bool ReplaceMapExt = true;
 
-bool WriteModified = true;
-bool WriteDummy = false;
+bool WriteModified = false;
+bool WriteDummy = true;
 
-bool HaltOnIssue = false;
+bool HaltOnIssue = true;
 
 const char *DatabaseDirectory = "w:\\database\\";
 const char *LinuxDatabaseDirectory = "/srv/work/database/";
@@ -87,7 +88,7 @@ const char *SrcDirectoryRecursiveInit = "w:\\database\\";
 const char *SrcDirectoryRecursiveHandle = "w:\\database\\";
 
 bool UseFallbackTga = false;
-const char *FallbackTga = "w:\\database\\stuff\\generique\\agents\\_textures\\accessories\\lost_texture.tga";
+const char *FallbackTga = "w:\\database\\stuff\\lod_actors\\texture_lod\\trame.png";
 
 std::set<std::string> MissingFiles;
 std::map<std::string, std::string> KnownFileCache;
@@ -250,6 +251,9 @@ std::string rewritePath(const std::string &path, const std::string &databaseDire
 	NLMISC::strFindReplace(stdPath, "\\sactoile.", "\\g_sactoile.");
 	NLMISC::strFindReplace(stdPath, "\\ge_mission_stele_kami0.", "\\ge_mission_stele_kami.");
 	NLMISC::strFindReplace(stdPath, "\\ge_mission_reward_karavan_bigshield.", "\\ge_mission_reward_karavan_bigshield_c1.");
+
+	NLMISC::strFindReplace(stdPath, "\\tr_hom_underwear_cuisse_arr.", "\\tr_hom_underwear_cuisse-arr.");
+	NLMISC::strFindReplace(stdPath, "\\tr_hom_underwear_cuisse_avt.", "\\tr_hom_underwear_cuisse-avt.");
 
 	NLMISC::strFindReplace(stdPath, "interfaces_visage", "visage_interface");
 
@@ -680,7 +684,10 @@ std::string rewritePathFinal(const std::string &str)
 			return NLMISC::CFile::getFilename(result);
 		}
 	}
-	// nldebug("Replacing '%s' with '%s'", str.c_str(), result.c_str());
+	if (DisplayReplaces)
+	{
+		nldebug("Replacing '%s' with '%s'", str.c_str(), result.c_str());
+	}
 	return result;
 }
 
@@ -771,6 +778,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 		case 256:
 		case 4656:
 		case 16385:
+		case 288: // .max xref in classdata
 			if (hasImportantFilePath(asRaw))
 			{
 				// generic ucstring really
@@ -1072,6 +1080,7 @@ void handleFile(const std::string &path)
 
 	if (ReplacePaths)
 	{
+		fixChunks(&classData);
 		fixChunks(&scene);
 	}
 	if (ReplaceMapExt)
@@ -1450,13 +1459,14 @@ int main(int argc, char **argv)
 
 	//handleFile("/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max");
 	runInitialize();
-	runHandler();
+	//runHandler();
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_reward_karavan_bigshield.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_acc_pick_o.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_zo_wea_trib_masse1m.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_fy_wea_trib_grand_bouclier.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_entrepot.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\mesh_wip\\all_trib_weapons.max"));
+	handleFile("/srv/work/database/landscape/ligo/jungle/max/zonematerial-foret-ruine_boss.max");
 	//handleFile("/home/kaetemi/3dsMax/scenes/test_clear_add_uvw.max");
 	//runScanner();
 
