@@ -43,10 +43,16 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 	{		
 		DWORD dwRetVal = GetTempPathA(MAX_PATH, tempPathBuffer);
 		if (dwRetVal > MAX_PATH || (dwRetVal == 0))
+		{
+			ToolLogger.writeError(PIPELINE::ERROR, "*", "GetTempPath failed");
 			nlerror("GetTempPath failed");
+		}
 		UINT uRetVal = GetTempFileNameA(tempPathBuffer, TEXT("_nel_export_mesh_"), 0, tempFileName);
 		if (uRetVal == 0)
+		{
+			ToolLogger.writeError(PIPELINE::ERROR, "*", "GetTempFileName failed");
 			nlerror("GetTempFileName failed");
+		}
 
 		// Eval the object a time
 		ObjectState os = node.EvalWorldState(time);
@@ -118,6 +124,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					catch (...)
 					{
 						nlwarning("Shape serialization failed!");
+						ToolLogger.writeError(PIPELINE::ERROR, "*", "Shape serialization failed");
 						try
 						{
 							file.close();
@@ -132,6 +139,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				else
 				{
 					nlwarning("Failed to create file %s", tempFileName);
+					ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to create temporary shape file");
 					if (_TerminateOnFileOpenIssues)
 						nelExportTerminateProcess();
 				}
@@ -148,6 +156,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				catch (...)
 				{
 					nlwarning("Failed to delete pShape pointer! Something might be wrong.");
+					ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to delete pShape pointer");
 					remove(tempFileName);
 					bRet = false;
 				}
@@ -174,6 +183,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					else
 					{
 						nlwarning("Failed to open file: %s", tempFileName);
+						ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to open temp shape file");
 						if (_TerminateOnFileOpenIssues)
 							nelExportTerminateProcess();
 					}
@@ -181,6 +191,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				catch (...)
 				{
 					nlwarning("Failed to verify shape. Must crash now.");
+					ToolLogger.writeError(PIPELINE::ERROR, "*", "Failed to verify shape");
 					remove(tempFileName);
 					bRet = false;
 				}
@@ -191,11 +202,13 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 	catch (...)
 	{
 		nlwarning("Fatal exception at CNelExport::exportMesh.");
+		ToolLogger.writeError(PIPELINE::ERROR, "*", "Fatal exception at CNelExport::exportMesh");
 		bRet = false;
 	}
 
 	if (bRet)
 	{
+		ToolLogger.writeDepend(PIPELINE::BUILD, sPath, "*");
 		try
 		{
 			remove(sPath);

@@ -5,6 +5,7 @@
  * \author Jan Boon (Kaetemi)
  * Tool logger is fully implemented in header so small tools do not
  * need to link to this library unnecessarily.
+ * NOTE: Needs to be changed not to use time_nl and string_common.
  */
 
 /*
@@ -43,8 +44,6 @@
 
 namespace PIPELINE {
 
-namespace {
-
 #ifdef ERROR
 #undef ERROR
 #endif
@@ -78,17 +77,17 @@ private:
 	FILE *m_DependLog;
 
 public:
-	CToolLogger()
+	inline CToolLogger()
 	{
 
 	}
 
-	virtual ~CToolLogger()
+	inline ~CToolLogger()
 	{
 		release();
 	}
 
-	void initError(const std::string &errorLog)
+	inline void initError(const std::string &errorLog)
 	{
 		releaseError();
 
@@ -99,7 +98,7 @@ public:
 
 	}
 
-	void initDepend(const std::string &dependLog)
+	inline void initDepend(const std::string &dependLog)
 	{
 		releaseDepend();
 
@@ -109,7 +108,7 @@ public:
 		// fflush(m_DependLog);
 	}
 
-	void writeError(TError type, const std::string &path, const std::string &error)
+	inline void writeError(TError type, const std::string &path, const std::string &error)
 	{
 		if (m_ErrorLog)
 		{
@@ -138,7 +137,7 @@ public:
 	}
 
 	/// inputFile can only be file. [? May be not-yet-existing file for expected input for future build runs. ?] Directories are handled on process level. [? You should call this before calling writeError on inputFile, so the error is also linked from the outputFile. ?]
-	void writeDepend(TDepend type, const std::string &outputFile, const std::string &inputFile)
+	inline void writeDepend(TDepend type, const std::string &outputFile, const std::string &inputFile)
 	{
 		if (m_DependLog)
 		{
@@ -163,7 +162,7 @@ public:
 		}
 	}
 
-	void releaseError()
+	inline void releaseError()
 	{
 		if (m_ErrorLog)
 		{
@@ -173,7 +172,7 @@ public:
 		}
 	}
 
-	void releaseDepend()
+	inline void releaseDepend()
 	{
 		if (m_DependLog)
 		{
@@ -183,14 +182,12 @@ public:
 		}
 	}
 
-	void release()
+	inline void release()
 	{
 		releaseError();
 		releaseDepend();
 	}
 }; /* class CToolLogger */
-
-} /* anonymous namespace */
 
 } /* namespace PIPELINE */
 

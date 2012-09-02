@@ -63,6 +63,13 @@ def_visible_primitive ( set_file_modification_date, 	"NeLSetFileModificationDate
 def_visible_primitive ( force_quit_on_msg_displayer,		"NelForceQuitOnMsgDisplayer");
 def_visible_primitive ( force_quit_right_now,		"NelForceQuitRightNow");
 
+def_visible_primitive(tool_logger_init_error, "NelToolLoggerInitError");
+def_visible_primitive(tool_logger_init_depend, "NelToolLoggerInitDepend");
+def_visible_primitive(tool_logger_write_error, "NelToolLoggerWriteError");
+def_visible_primitive(tool_logger_write_depend, "NelToolLoggerWriteDepend");
+def_visible_primitive(tool_logger_release_error, "NelToolLoggerReleaseError");
+def_visible_primitive(tool_logger_release_depend, "NelToolLoggerReleaseDepend");
+
 char *sExportShapeErrorMsg = "NeLExportShape [Object] [Filename.shape]";
 char *sExportShapeExErrorMsg = "NeLExportShapeEx [Object] [Filename.shape] [bShadow] [bExportLighting] [sLightmapPath] [nLightingLimit] [fLumelSize] [nOverSampling] [bExcludeNonSelected] [bShowLumel]";
 char *sExportAnimationErrorMsg = "NelExportAnimation [node array] [Filename.anim] [bool_scene_animation]";
@@ -114,10 +121,12 @@ Value* export_shape_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
+		ToolLogger.writeError(PIPELINE::ERROR, "*", e.what());
 		nlwarning ("ERROR (NelExportShape) %s", e.what());
 	}
 	catch (...)
 	{
+		ToolLogger.writeError(PIPELINE::ERROR, "*", "Exception");
 		nlwarning ("ERROR (NelExportShape) catch (...)");
 	}
 	nlinfo("ret");
@@ -189,10 +198,12 @@ Value* export_shape_ex_cf (Value** arg_list, int count)
 	}
 	catch (Exception &e)
 	{
+		ToolLogger.writeError(PIPELINE::ERROR, "*", e.what());
 		nlwarning ("ERROR (NelExportShapeEx) %s", e.what());
 	}
 	catch (...)
 	{
+		ToolLogger.writeError(PIPELINE::ERROR, "*", "Exception");
 		nlwarning ("ERROR (NelExportShapeEx) catch (...)");
 	}
 	nlinfo("ret");
@@ -983,6 +994,68 @@ Value* force_quit_right_now_cf(Value** arg_list, int count)
 	// because quitMAX can fail
 	nlwarning("Force quit");
 	nelExportTerminateProcess();
+	return &true_value;
+}
+
+Value* tool_logger_init_error_cf(Value** arg_list, int count)
+{
+	check_arg_count(NelToolLoggerInitError, 1, count);
+	type_check(arg_list[0], String, "");
+
+	ToolLogger.initError(arg_list[0]->to_string());
+
+	return &true_value;
+}
+
+Value* tool_logger_init_depend_cf(Value** arg_list, int count)
+{
+	check_arg_count(NelToolLoggerInitDepend, 1, count);
+	type_check(arg_list[0], String, "");
+
+	ToolLogger.initDepend(arg_list[0]->to_string());
+
+	return &true_value;
+}
+
+Value* tool_logger_write_error_cf(Value** arg_list, int count)
+{
+	check_arg_count(NelToolLoggerWriteError, 3, count);
+	type_check(arg_list[0], String, "");
+	type_check(arg_list[1], String, "");
+	type_check(arg_list[2], String, "");
+
+	// TYPE, PATH, MESSAGE
+	std::string type = arg_list[0]->to_string();
+	ToolLogger.writeError(type == "MESSAGE" ? PIPELINE::MESSAGE : type == "WARNING" ? PIPELINE::WARNING : PIPELINE::ERROR, arg_list[1]->to_string(), arg_list[2]->to_string());
+	
+	return &true_value;
+}
+
+Value* tool_logger_write_depend_cf(Value** arg_list, int count)
+{
+	check_arg_count(NelToolLoggerWriteDepend, 3, count);
+	type_check(arg_list[0], String, "");
+	type_check(arg_list[1], String, "");
+	type_check(arg_list[2], String, "");
+
+	// TYPE, OUTPUT, INPUT
+	std::string type = arg_list[0]->to_string();
+	ToolLogger.writeDepend(type == "RUNTIME" ? PIPELINE::RUNTIME : type == "DIRECTORY" ? PIPELINE::DIRECTORY : PIPELINE::BUILD, arg_list[1]->to_string(), arg_list[2]->to_string());
+
+	return &true_value;
+}
+
+Value* tool_logger_release_error_cf(Value** arg_list, int count)
+{
+	ToolLogger.releaseError();
+
+	return &true_value;
+}
+
+Value* tool_logger_release_depend_cf(Value** arg_list, int count)
+{
+	ToolLogger.releaseDepend();
+
 	return &true_value;
 }
 

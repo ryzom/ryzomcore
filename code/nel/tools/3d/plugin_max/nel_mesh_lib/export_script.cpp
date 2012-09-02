@@ -25,6 +25,11 @@
 #endif
 #include "export_nel.h"
 #include "export_appdata.h"
+#include <nel/misc/tool_logger.h>
+
+// ***************************************************************************
+
+PIPELINE::CToolLogger ToolLogger;
 
 // ***************************************************************************
 
