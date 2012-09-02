@@ -74,6 +74,8 @@ private:
 											const NLLIGO::CPrimitiveClass::CParameter &parameter,
 											const NLLIGO::IPrimitive *primitive);
 
+	QStringList getComboValues(const NLLIGO::CPrimitiveClass::CParameter &parameter);
+
 	void blockSignalsOfProperties(bool block);
 
 	QtBoolPropertyManager *m_boolManager;
