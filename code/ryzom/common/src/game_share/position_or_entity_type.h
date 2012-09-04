@@ -20,6 +20,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/stream.h"
+#include "game_share/camera_anim_type_parser.h"
 
 //////////////////////////////////////////////////////////////////////////
 /************************************************************************/
@@ -28,26 +29,40 @@
 class TPositionOrEntity
 {
 public:
+	enum PositionOrEntityType
+	{
+		EUnknown = -1,
+		EPosition = 0,
+		EEntity,
+		EPreviousPos,
+		EReturnPos
+	};
+
 	TPositionOrEntity()
 	{
-		_isPosition = -1;
+		_type = EUnknown;
 	}
 
 	TPositionOrEntity(const NLMISC::CVector& position)
 	{
-		_isPosition = 1;
+		_type = EPosition;
 		Position = position;
 	}
 
 	TPositionOrEntity(const TDataSetIndex& eid)
 	{
-		_isPosition = 0;
+		_type = EEntity;
 		EntityId = eid;
+	}
+
+	TPositionOrEntity(PositionOrEntityType type)
+	{
+		_type = type;
 	}
 
 	TPositionOrEntity(const TPositionOrEntity& c)
 	{
-		_isPosition = c._isPosition;
+		_type = c._type;
 		if (c.isPosition())
 			Position = c.getPosition();
 		else
@@ -56,7 +71,7 @@ public:
 
 	TPositionOrEntity& operator=(const TPositionOrEntity& c)
 	{
-		_isPosition = c._isPosition;
+		_type = c._type;
 		if (c.isPosition())
 			Position = c.getPosition();
 		else if (c.isEntityId())
@@ -67,7 +82,7 @@ public:
 
 	bool operator==(const TPositionOrEntity& c)
 	{
-		if (_isPosition != c._isPosition)
+		if (_type != c._type)
 			return false;
 		if (isPosition())
 			return Position == c.getPosition();
@@ -78,29 +93,44 @@ public:
 
 	void setPosition(const NLMISC::CVector& position)
 	{
-		_isPosition = 1;
+		_type = EPosition;
 		Position = position;
 	}
 
 	void setEntityId(const TDataSetIndex& eid)
 	{
-		_isPosition = 0;
+		_type = EEntity;
 		EntityId = eid;
+	}
+
+	void setPreviousPos()
+	{
+		_type = EPreviousPos;
+	}
+
+	void setReturnPos()
+	{
+		_type = EReturnPos;
 	}
 
 	bool isPosition() const
 	{
-		return _isPosition == 1;
+		return _type == EPosition;
 	}
 
 	bool isEntityId() const
 	{
-		return _isPosition == 0;
+		return _type == EEntity;
 	}
 
 	bool isPreviousPos() const
 	{
-		return false;
+		return _type == EPreviousPos;
+	}
+
+	bool isReturnPos() const
+	{
+		return _type == EReturnPos;
 	}
 
 	NLMISC::CVector getPosition() const
@@ -108,6 +138,16 @@ public:
 		if (!isPosition())
 			return NLMISC::CVector();
 		return Position;
+	}
+
+	NLMISC::CVector getDiffPos() const
+	{
+		return Position;	// TODO => get the real position of the character
+	}
+
+	NLMISC::CVector setPositionFromDiffPos(const NLMISC::CVector& diffPos)
+	{
+		// TODO => set the position from the character's position and the diffpos
 	}
 
 	TDataSetIndex getEntityId() const
@@ -119,20 +159,42 @@ public:
 
 	bool isValid() const
 	{
-		return isPosition() || isEntityId();
+		return _type != EUnknown;
 	}
 
 	void serial(NLMISC::CBitMemStream &f)
 	{
-		f.serial(_isPosition);
+		if (f.isReading())
+		{
+			uint32 t = 0;
+			f.serial(t, 2);
+			_type = (PositionOrEntityType)t;
+		}
+		else
+		{
+			uint32 t = (uint32)_type;
+			f.serial(t, 2);
+		}
 		if (isPosition())
-			f.serial(Position);
+		{
+			if (f.isReading())
+			{
+				NLMISC::CVector diffPos = NLMISC::CVector();
+				NLMISC::serialPositionDifference(f, diffPos);
+				setPositionFromDiffPos(diffPos);
+			}
+			else
+			{
+				NLMISC::CVector diffPos = getDiffPos();
+				NLMISC::serialPositionDifference(f, diffPos);
+			}
+		}
 		else if (isEntityId())
 			f.serial(EntityId);
 	}
 
 private:
-	char _isPosition;
+	PositionOrEntityType _type;
 	NLMISC::CVector	Position;
 	TDataSetIndex EntityId;
 };

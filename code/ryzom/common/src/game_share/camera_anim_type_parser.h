@@ -27,7 +27,7 @@ namespace NLMISC
 /// Function that serializes durations (in seconds)
 /// Duration is converted to 1/100 second and cannot be greater than 2^12-1 = 4095
 /// Result is serialized in 12 bits
-void serialDuration(NLMISC::CBitMemStream &f, float& duration)
+inline void serialDuration(NLMISC::CBitMemStream &f, float& duration)
 {
 	static uint32 maxVal = (uint32)pow((float)2, 12) - 1;
 
@@ -52,7 +52,7 @@ void serialDuration(NLMISC::CBitMemStream &f, float& duration)
 /// Function that serializes distances (in meters)
 /// Distance is converted to centimeters and cannot be greater than 2^16-1 = 65535
 /// Result is serialized in 2 bytes
-void serialDistance(NLMISC::CBitMemStream &f, float& distance)
+inline void serialDistance(NLMISC::CBitMemStream &f, float& distance)
 {
 	static uint32 maxVal = (uint32)pow((float)2, 16) - 1;
 
@@ -77,7 +77,7 @@ void serialDistance(NLMISC::CBitMemStream &f, float& distance)
 /// Function that serializes speeds (in m/s)
 /// Speed is converted to cm/s and cannot be greater than 2^12-1 = 4095
 /// Result is serialized in 12 bits
-void serialSpeed(NLMISC::CBitMemStream &f, float& speed)
+inline void serialSpeed(NLMISC::CBitMemStream &f, float& speed)
 {
 	static uint32 maxVal = (uint32)pow((float)2, 12) - 1;
 
@@ -96,6 +96,37 @@ void serialSpeed(NLMISC::CBitMemStream &f, float& speed)
 			d = maxVal;
 
 		f.serial(d, 12);
+	}
+}
+
+/// Serializes the difference between 2 positions
+/// The difference is converted in cm and cannot be greater than 2^15-1 = 32767
+/// Result is serialized in 3 x 2 bytes = 6 bytes
+inline void serialPositionDifference(NLMISC::CBitMemStream &f, NLMISC::CVector& diffPos)
+{
+	if (f.isReading())
+	{
+		sint16 x = 0;
+		sint16 y = 0;
+		sint16 z = 0;
+
+		f.serial(x);
+		f.serial(y);
+		f.serial(z);
+
+		diffPos.x = (float)(x) / 100.f;
+		diffPos.y = (float)(y) / 100.f;
+		diffPos.z = (float)(z) / 100.f;
+	}
+	else
+	{
+		sint16 x = (sint16)(diffPos.x * 100.f);
+		sint16 y = (sint16)(diffPos.y * 100.f);
+		sint16 z = (sint16)(diffPos.z * 100.f);
+
+		f.serial(x);
+		f.serial(y);
+		f.serial(z);
 	}
 }
 
