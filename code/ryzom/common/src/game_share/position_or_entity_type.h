@@ -98,6 +98,11 @@ public:
 		return _isPosition == 0;
 	}
 
+	bool isPreviousPos() const
+	{
+		return false;
+	}
+
 	NLMISC::CVector getPosition() const
 	{
 		if (!isPosition())
@@ -117,7 +122,7 @@ public:
 		return isPosition() || isEntityId();
 	}
 
-	void serial(NLMISC::IStream &f)
+	void serial(NLMISC::CBitMemStream &f)
 	{
 		f.serial(_isPosition);
 		if (isPosition())

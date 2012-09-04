@@ -18,23 +18,34 @@
 #include "camera_animation_manager/camera_animation_step_factory.h"
 #include "game_share/position_or_entity_type.h"
 #include "camera_animation_manager/position_or_entity_type_helper.h"
+#include "game_share/camera_anim_type_parser.h"
 
 
 /// Basic camera animation step that has generic values
-/// - look_at_position
-/// - text
-/// - duration
-class CCameraAnimationStepBasic : public ICameraAnimationStep
+class CCameraAnimationStep : public ICameraAnimationStep
 {
 protected:
-	std::string LookAtPos;
+	std::string LookAtTarget;
+	float DirectionTransitionTime;
+	std::string PositionTarget;
+	float PositionTransitionTime;
+	float DistanceTo;
+	bool HasTurnAround;
+	float TurnAroundSpeed;
+
 	std::string Text;
 	float Duration;
 
 public:
-	CCameraAnimationStepBasic()
+	CCameraAnimationStep()
 	{
-		LookAtPos = "";
+		LookAtTarget = "";
+		DirectionTransitionTime = 0.f;
+		PositionTarget = "";
+		PositionTransitionTime = 0.f;
+		DistanceTo = 0.f;
+		HasTurnAround = false;
+		TurnAroundSpeed = 0.f;
 		Text = "";
 		Duration = 0.f;
 	}
@@ -43,13 +54,81 @@ public:
 	{
 		std::string value;
 
-		// We get the look at position
-		if (!prim->getPropertyByName("look_at_position", value))
+		// We get the look at target
+		if (!prim->getPropertyByName("look_at_target", value))
 		{
-			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the look_at_position property of the basic step in primitive : %s", filename.c_str());
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the look_at_target property of the basic step in primitive : %s", filename.c_str());
 			return false;
 		}
-		LookAtPos = value;
+		LookAtTarget = value;
+
+		// We get the direction_transition_time
+		if (!prim->getPropertyByName("direction_transition_time", value))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the direction_transition_time property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, DirectionTransitionTime))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to convert the string : %s, in float in the basic step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		// We get the position_target
+		if (!prim->getPropertyByName("position_target", value))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the position_target property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		PositionTarget = value;
+
+		// We get the position_transition_time
+		if (!prim->getPropertyByName("position_transition_time", value))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the position_transition_time property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, PositionTransitionTime))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to convert the string : %s, in float in the basic step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		// We get the distance_to
+		if (!prim->getPropertyByName("distance_to", value))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the distance_to property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, DistanceTo))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to convert the string : %s, in float in the basic step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		// We get the has_turn_around
+		if (!prim->getPropertyByName("has_turn_around", value))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the has_turn_around property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, HasTurnAround))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to convert the string : %s, in bool in the basic step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
+
+		// We get the turn_around_speed
+		if (!prim->getPropertyByName("turn_around_speed", value))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to get the turn_around_speed property of the basic step in primitive : %s", filename.c_str());
+			return false;
+		}
+		if (!NLMISC::fromString(value, TurnAroundSpeed))
+		{
+			nlwarning("<CCameraAnimationStepBasic parseStep> impossible to convert the string : %s, in float in the basic step in primitive : %s", value.c_str(), filename.c_str());
+			return false;
+		}
 
 		// We get the text
 		if (!prim->getPropertyByName("text", value))
@@ -76,298 +155,36 @@ public:
 
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
-		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(LookAtPos);
-		if (pos == CPositionOrEntityHelper::Invalid)
+		TPositionOrEntity posLookAtTarget = CPositionOrEntityHelper::fromString(LookAtTarget);
+		if (posLookAtTarget == CPositionOrEntityHelper::Invalid)
 		{
-			nlerror("<CCameraAnimationStepBasic parseStep> invalid lookatpos %s", LookAtPos.c_str());
+			nlerror("<CCameraAnimationStepBasic parseStep> invalid LookAtTarget %s", LookAtTarget.c_str());
 		}
 
-		bms.serial(const_cast<TPositionOrEntity&>(pos));
-		bms.serial(const_cast<std::string&>(Text));
-		bms.serial(const_cast<float&>(Duration));
-	}
-
-	virtual float getDuration() const
-	{
-		return Duration;
-	}
-}; // This class must not be registered because it's a base class
-
-/////////////////////////////////////////////////////////////////////////////
-/// Static camera animation step (that does not have specific variables)
-class CCameraAnimationStepStatic : public CCameraAnimationStepBasic
-{
-public:
-	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
-	{
-		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
+		bms.serial(const_cast<TPositionOrEntity&>(posLookAtTarget));
+		if (!posLookAtTarget.isPreviousPos())
 		{
-			nlwarning("<CCameraAnimationStepStatic parseStep> impossible to parse the basic part of the step in primitive : %s", filename.c_str());
-			return false;
-		}
-		return true;
-	}
-
-	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
-	{
-		CCameraAnimationStepBasic::sendAnimationStep(bms);
-
-		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
-	}
-
-	CAMERA_ANIMATION_STEP_NAME("camera_animation_static");
-};
-CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepStatic, "camera_animation_static");
-
-/////////////////////////////////////////////////////////////////////////////
-/// Go to camera animation step
-/// - end_position
-class CCameraAnimationStepGoTo: public CCameraAnimationStepBasic
-{
-protected:
-	std::string EndPos;
-
-public:
-	CCameraAnimationStepGoTo()
-	{
-		EndPos = "";
-	}
-
-	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
-	{
-		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
-		{
-			nlwarning("<CCameraAnimationStepGoTo parseStep> impossible to parse the basic part of the step in primitive : %s", filename.c_str());
-			return false;
+			NLMISC::serialDuration(bms, DirectionTransitionTime);
 		}
 
-		std::string value;
-
-		// We get the end position
-		if (!prim->getPropertyByName("end_position", value))
+		TPositionOrEntity posPosTarget = CPositionOrEntityHelper::fromString(PositionTarget);
+		if (posPosTarget == CPositionOrEntityHelper::Invalid)
 		{
-			nlwarning("<CCameraAnimationStepGoTo parseStep> impossible to get the end_position property of the basic step in primitive : %s", filename.c_str());
-			return false;
-		}
-		EndPos = value;
-
-		return true;
-	}
-
-	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
-	{
-		CCameraAnimationStepBasic::sendAnimationStep(bms);
-
-		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(EndPos);
-		if (pos == CPositionOrEntityHelper::Invalid)
-		{
-			nlerror("<CCameraAnimationStepGoTo parseStep> invalid endpos %s", EndPos.c_str());
+			nlerror("<CCameraAnimationStepBasic parseStep> invalid PositionTarget %s", PositionTarget.c_str());
 		}
 
-		bms.serial(const_cast<TPositionOrEntity&>(pos));
-
-		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
-	}
-
-	CAMERA_ANIMATION_STEP_NAME("camera_animation_go_to");
-};
-CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepGoTo, "camera_animation_go_to");
-
-/////////////////////////////////////////////////////////////////////////////
-/// Follow entity camera animation step
-/// - entity_to_follow
-/// - distance_to_entity
-class CCameraAnimationStepFollowEntity: public CCameraAnimationStepBasic
-{
-protected:
-	std::string EntityToFollow;
-	float DistanceToEntity;
-
-public:
-	CCameraAnimationStepFollowEntity()
-	{
-		EntityToFollow = "";
-		DistanceToEntity = 0.f;
-	}
-
-	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
-	{
-		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
+		bms.serial(const_cast<TPositionOrEntity&>(posPosTarget));
+		if (!posPosTarget.isPreviousPos())
 		{
-			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to parse the basic part of the step in primitive : %s", filename.c_str());
-			return false;
+			NLMISC::serialDistance(bms, DistanceTo);
+			NLMISC::serialDuration(bms, PositionTransitionTime);
+			bms.serialBit(const_cast<bool&>(HasTurnAround));
+
+			if (HasTurnAround)
+			{
+				NLMISC::serialSpeed(bms, TurnAroundSpeed);
+			}
 		}
-
-		std::string value;
-
-		// We get the entity to follow
-		if (!prim->getPropertyByName("entity_to_follow", value))
-		{
-			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to get the entity_to_follow property of the basic step in primitive : %s", filename.c_str());
-			return false;
-		}
-		EntityToFollow = value;
-
-		// We get the distance to the entity
-		if (!prim->getPropertyByName("distance_to_entity", value))
-		{
-			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to get the distance_to_entity property of the basic step in primitive : %s", filename.c_str());
-			return false;
-		}
-		if (!NLMISC::fromString(value, DistanceToEntity))
-		{
-			nlwarning("<CCameraAnimationStepFollowEntity parseStep> impossible to convert the string : %s, in float in the follow entity step in primitive : %s", value.c_str(), filename.c_str());
-			return false;
-		}
-
-		return true;
-	}
-
-	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
-	{
-		CCameraAnimationStepBasic::sendAnimationStep(bms);
-
-		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(EntityToFollow);
-		if (pos == CPositionOrEntityHelper::Invalid)
-		{
-			nlerror("<CCameraAnimationStepFollowEntity parseStep> invalid entitytofollow %s", EntityToFollow.c_str());
-		}
-
-		bms.serial(const_cast<TPositionOrEntity&>(pos));
-		bms.serial(const_cast<float&>(DistanceToEntity));
-
-		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
-	}
-
-	CAMERA_ANIMATION_STEP_NAME("camera_animation_follow_entity");
-};
-CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepFollowEntity, "camera_animation_follow_entity");
-
-/////////////////////////////////////////////////////////////////////////////
-/// Turn around camera animation step
-/// - point_to_turn_around
-/// - distance_to_point
-/// - speed
-class CCameraAnimationStepTurnAround: public CCameraAnimationStepBasic
-{
-protected:
-	std::string PointToTurnAround;
-	float DistanceToPoint;
-	float Speed;
-
-public:
-	CCameraAnimationStepTurnAround()
-	{
-		PointToTurnAround = "";
-		DistanceToPoint = 0.f;
-		Speed = 0.f;
-	}
-
-	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
-	{
-		if (!CCameraAnimationStepBasic::parseStep(prim, filename))
-		{
-			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to parse the basic part of the step in primitive : %s", filename.c_str());
-			return false;
-		}
-
-		std::string value;
-
-		// We get the point to turn around
-		if (!prim->getPropertyByName("point_to_turn_around", value))
-		{
-			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to get the point_to_turn_around property of the basic step in primitive : %s", filename.c_str());
-			return false;
-		}
-		PointToTurnAround = value;
-
-		// We get the distance to the point
-		if (!prim->getPropertyByName("distance_to_point", value))
-		{
-			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to get the distance_to_point property of the basic step in primitive : %s", filename.c_str());
-			return false;
-		}
-		if (!NLMISC::fromString(value, DistanceToPoint))
-		{
-			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to convert the string : %s, in float in the follow entity step in primitive : %s", value.c_str(), filename.c_str());
-			return false;
-		}
-
-		// We get the speed
-		if (!prim->getPropertyByName("speed", value))
-		{
-			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to get the speed property of the basic step in primitive : %s", filename.c_str());
-			return false;
-		}
-		if (!NLMISC::fromString(value, Speed))
-		{
-			nlwarning("<CCameraAnimationStepTurnAround parseStep> impossible to convert the string : %s, in float in the follow entity step in primitive : %s", value.c_str(), filename.c_str());
-			return false;
-		}
-
-		return true;
-	}
-
-	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
-	{
-		CCameraAnimationStepBasic::sendAnimationStep(bms);
-
-		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(PointToTurnAround);
-		if (pos == CPositionOrEntityHelper::Invalid)
-		{
-			nlerror("<CCameraAnimationStepTurnAround parseStep> invalidpointtoturnaround %s", PointToTurnAround.c_str());
-		}
-
-		bms.serial(const_cast<TPositionOrEntity&>(pos));
-		bms.serial(const_cast<float&>(DistanceToPoint));
-		bms.serial(const_cast<float&>(Speed));
-
-		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
-	}
-
-	CAMERA_ANIMATION_STEP_NAME("camera_animation_turn_around");
-};
-CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepTurnAround, "camera_animation_turn_around");
-
-/////////////////////////////////////////////////////////////////////////////
-/// Animation step that returns to the starting position. It directly inherits from the interface because it
-/// does not need all the parameters of a basic step
-/// - duration
-class CCameraAnimationStepReturn : public ICameraAnimationStep
-{
-protected:
-	float Duration;
-
-public:
-	CCameraAnimationStepReturn()
-	{
-		Duration = 0.f;
-	}
-
-	virtual bool parseStep(const NLLIGO::IPrimitive* prim, const std::string& filename)
-	{
-		std::string value;
-
-		// We get the duration
-		if (!prim->getPropertyByName("duration", value))
-		{
-			nlwarning("<CCameraAnimationStepReturn parseStep> impossible to get the duration property of the basic step in primitive : %s", filename.c_str());
-			return false;
-		}
-		if (!NLMISC::fromString(value, Duration))
-		{
-			nlwarning("<CCameraAnimationStepReturn parseStep> impossible to convert the string : %s, in float in the basic step in primitive : %s", value.c_str(), filename.c_str());
-			return false;
-		}
-
-		return true;
-	}
-
-	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
-	{
-		bms.serial(const_cast<float&>(Duration));
-
-		nldebug("CameraAnimation - step %s . Value: Duration: %f", getStepName().c_str(), Duration);
 	}
 
 	virtual float getDuration() const
@@ -375,6 +192,6 @@ public:
 		return Duration;
 	}
 
-	CAMERA_ANIMATION_STEP_NAME("camera_animation_return");
+	CAMERA_ANIMATION_STEP_NAME("camera_animation_step");
 };
-CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStepReturn, "camera_animation_return");
+CAMERA_ANIMATION_REGISTER_STEP(CCameraAnimationStep, "camera_animation_step");
