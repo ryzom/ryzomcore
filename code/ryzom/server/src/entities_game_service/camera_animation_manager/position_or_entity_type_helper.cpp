@@ -25,18 +25,31 @@
 #include "mission_manager/mission_parser.h"
 #include "egs_mirror.h"
 
+#define POS_OR_ENTITY_PREVIOUS_POS_VALUE "_PreviousPos_"
+#define POS_OR_ENTITY_RETURN_POS_VALUE "_ReturnPos_"
+
 const TPositionOrEntity CPositionOrEntityHelper::Invalid = TPositionOrEntity();
 
 TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 {
+	// If the string is empty it's a previous pos
 	if (s.empty())
 	{
-		nlerror("TPositionOrentityHelper : empty position or entity given to parse");
-		return TPositionOrEntity();
+		return TPositionOrEntity(TPositionOrEntity::EPreviousPos);
 	}
 
 	std::string str = s;
 	CMissionParser::removeBlanks(str);
+
+	// We already check if it's a special position or entity object
+	if (NLMISC::toLower(str) == POS_OR_ENTITY_PREVIOUS_POS_VALUE)
+	{
+		return TPositionOrEntity(TPositionOrEntity::EPreviousPos);
+	}
+	else if (NLMISC::toLower(str) == POS_OR_ENTITY_RETURN_POS_VALUE)
+	{
+		return TPositionOrEntity(TPositionOrEntity::EReturnPos);
+	}
 
 	std::vector<std::string> resS;
 	NLMISC::splitString(str, ";", resS);
