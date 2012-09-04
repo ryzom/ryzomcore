@@ -1168,7 +1168,7 @@
 	<leaf name="FINISHED"
 		  description="Tell the client the camera animation is finished" />
 	<leaf name="STEP"
-		  description="Sends a camera animation instruction to the client. The first parameter is the name of the animation. Next parameters depends on the animation type" />
+		  description="Sends a camera animation instruction to the client." />
   </branch>
 	<leaf name="SOUND_TRIGGER"
 		  description="Ask the client to play a sound at a given position or entity position. The parameters are the sound id and the position or the entity" />
