@@ -26,16 +26,43 @@
 /************************************************************************/
 /* Class that can contain either an entity id or a position             */
 /************************************************************************/ 
-class CPositionOrEntityHelper
+class CPositionOrEntityHelper: public CPositionOrEntity
 {
 public:
+
+	CPositionOrEntityHelper(): CPositionOrEntity()
+	{
+	}
+
+	CPositionOrEntityHelper(const NLMISC::CVector& position): CPositionOrEntity(position)
+	{
+	}
+
+	CPositionOrEntityHelper(const TDataSetIndex& eid): CPositionOrEntity(eid)
+	{
+	}
+
+	CPositionOrEntityHelper(PositionOrEntityType type): CPositionOrEntity(type)
+	{
+	}
+
+	CPositionOrEntityHelper(const CPositionOrEntity& c): CPositionOrEntity(c)
+	{
+	}
 	
 	/************************************************************************/
 	/* Creates a PositionOrEntity instance from a string                    */
 	/************************************************************************/
-	static TPositionOrEntity fromString(const std::string& s);
+	static CPositionOrEntityHelper fromString(const std::string& s);
 
-	static const TPositionOrEntity Invalid;
+	static const CPositionOrEntityHelper Invalid;
+
+	// Declares abstract methods
+	/// This function returns the difference between the player's position and the specified position
+	NLMISC::CVector getDiffPos(const NLMISC::CVector& targetPos) const;
+
+	/// This function returns the target position given the difference between the player's position and this target position
+	NLMISC::CVector setPositionFromDiffPos(const NLMISC::CVector& diffPos);
 
 };
 

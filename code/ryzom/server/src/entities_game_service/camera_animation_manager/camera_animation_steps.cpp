@@ -155,25 +155,25 @@ public:
 
 	virtual void sendAnimationStep(NLMISC::CBitMemStream& bms)
 	{
-		TPositionOrEntity posLookAtTarget = CPositionOrEntityHelper::fromString(LookAtTarget);
+		CPositionOrEntityHelper posLookAtTarget = CPositionOrEntityHelper::fromString(LookAtTarget);
 		if (posLookAtTarget == CPositionOrEntityHelper::Invalid)
 		{
 			nlerror("<CCameraAnimationStepBasic parseStep> invalid LookAtTarget %s", LookAtTarget.c_str());
 		}
 
-		bms.serial(const_cast<TPositionOrEntity&>(posLookAtTarget));
+		bms.serial(const_cast<CPositionOrEntityHelper&>(posLookAtTarget));
 		if (!posLookAtTarget.isPreviousPos())
 		{
 			NLMISC::serialDuration(bms, DirectionTransitionTime);
 		}
 
-		TPositionOrEntity posPosTarget = CPositionOrEntityHelper::fromString(PositionTarget);
+		CPositionOrEntityHelper posPosTarget = CPositionOrEntityHelper::fromString(PositionTarget);
 		if (posPosTarget == CPositionOrEntityHelper::Invalid)
 		{
 			nlerror("<CCameraAnimationStepBasic parseStep> invalid PositionTarget %s", PositionTarget.c_str());
 		}
 
-		bms.serial(const_cast<TPositionOrEntity&>(posPosTarget));
+		bms.serial(const_cast<CPositionOrEntityHelper&>(posPosTarget));
 		if (!posPosTarget.isPreviousPos())
 		{
 			NLMISC::serialDistance(bms, DistanceTo);

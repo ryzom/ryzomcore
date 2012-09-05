@@ -5484,7 +5484,7 @@ class CMissionActionSoundTrigger : public IMissionAction
 		instance->getEntities(entities);
 
 		// We get the position or entity
-		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(_SoundPosition);
+		CPositionOrEntityHelper pos = CPositionOrEntityHelper::fromString(_SoundPosition);
 		if (pos == CPositionOrEntityHelper::Invalid)
 		{
 			nlerror("<sound_trigger mission_action launch> invalid position or entity from %s", _SoundPosition.c_str());

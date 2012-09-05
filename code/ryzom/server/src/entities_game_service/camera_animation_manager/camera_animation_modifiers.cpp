@@ -110,13 +110,13 @@ public:
 
 	virtual void sendCameraModifier(NLMISC::CBitMemStream& bms)
 	{
-		TPositionOrEntity pos = CPositionOrEntityHelper::fromString(SoundPos);
+		CPositionOrEntityHelper pos = CPositionOrEntityHelper::fromString(SoundPos);
 		if (pos == CPositionOrEntityHelper::Invalid)
 		{
 			nlerror("<CCameraAnimationModifierSoundTrigger parseModifier> invalid soundpos %s", SoundPos.c_str());
 		}
 
-		bms.serial(const_cast<TPositionOrEntity&>(pos));
+		bms.serial(const_cast<CPositionOrEntityHelper&>(pos));
 		bms.serial(const_cast<NLMISC::CSheetId&>(SoundId));
 	}
 

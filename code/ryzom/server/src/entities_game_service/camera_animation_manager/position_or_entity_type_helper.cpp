@@ -28,14 +28,14 @@
 #define POS_OR_ENTITY_PREVIOUS_POS_VALUE "_PreviousPos_"
 #define POS_OR_ENTITY_RETURN_POS_VALUE "_ReturnPos_"
 
-const TPositionOrEntity CPositionOrEntityHelper::Invalid = TPositionOrEntity();
+const CPositionOrEntityHelper CPositionOrEntityHelper::Invalid = CPositionOrEntityHelper();
 
-TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
+CPositionOrEntityHelper CPositionOrEntityHelper::fromString(const std::string& s)
 {
 	// If the string is empty it's a previous pos
 	if (s.empty())
 	{
-		return TPositionOrEntity(TPositionOrEntity::EPreviousPos);
+		return CPositionOrEntityHelper(CPositionOrEntity::EPreviousPos);
 	}
 
 	std::string str = s;
@@ -44,11 +44,11 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 	// We already check if it's a special position or entity object
 	if (NLMISC::toLower(str) == POS_OR_ENTITY_PREVIOUS_POS_VALUE)
 	{
-		return TPositionOrEntity(TPositionOrEntity::EPreviousPos);
+		return CPositionOrEntityHelper(CPositionOrEntity::EPreviousPos);
 	}
 	else if (NLMISC::toLower(str) == POS_OR_ENTITY_RETURN_POS_VALUE)
 	{
-		return TPositionOrEntity(TPositionOrEntity::EReturnPos);
+		return CPositionOrEntityHelper(CPositionOrEntity::EReturnPos);
 	}
 
 	std::vector<std::string> resS;
@@ -61,23 +61,23 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 		if (res.size() != 1)
 		{
 			nlerror("TPositionOrentityHelper : no alias for entity name %s", str.c_str());
-			return TPositionOrEntity();
+			return CPositionOrEntityHelper();
 		}
 		TAIAlias alias = res[0];
 		if (alias == CAIAliasTranslator::Invalid)
 		{
 			nlerror("TPositionOrentityHelper : invalid alias for entity name %s", str.c_str());
-			return TPositionOrEntity();
+			return CPositionOrEntityHelper();
 		}
 		NLMISC::CEntityId eid = CAIAliasTranslator::getInstance()->getEntityId(alias);
 		if (eid == NLMISC::CEntityId::Unknown)
 		{
 			nlerror("TPositionOrentityHelper : invalid entity id from alias %d", alias);
-			return TPositionOrEntity();
+			return CPositionOrEntityHelper();
 		}
 		TDataSetIndex compressedId = TheDataset.getDataSetRow(eid).getCompressedIndex();
 
-		return TPositionOrEntity(compressedId);
+		return CPositionOrEntityHelper(compressedId);
 	}
 	else
 	{
@@ -97,21 +97,31 @@ TPositionOrEntity CPositionOrEntityHelper::fromString(const std::string& s)
 		if (!NLMISC::fromString(xStr, x))
 		{
 			nlerror("TPositionOrentityHelper : invalid x component from string %s", xStr.c_str());
-			return TPositionOrEntity();
+			return CPositionOrEntityHelper();
 		}
 		if (!NLMISC::fromString(yStr, y))
 		{
 			nlerror("TPositionOrentityHelper : invalid y component from string %s", yStr.c_str());
-			return TPositionOrEntity();
+			return CPositionOrEntityHelper();
 		}
 		if (!NLMISC::fromString(yStr, x))
 		{
 			nlerror("TPositionOrentityHelper : invalid z component from string %s", zStr.c_str());
-			return TPositionOrEntity();
+			return CPositionOrEntityHelper();
 		}
 
-		return TPositionOrEntity(NLMISC::CVector(x, y, z));
+		return CPositionOrEntityHelper(NLMISC::CVector(x, y, z));
 	}
 
-	return TPositionOrEntity();
+	return CPositionOrEntityHelper();
+}
+
+NLMISC::CVector CPositionOrEntityHelper::getDiffPos(const NLMISC::CVector& targetPos) const
+{
+	return Position;
+}
+
+NLMISC::CVector CPositionOrEntityHelper::setPositionFromDiffPos(const NLMISC::CVector& diffPos)
+{
+	return Position;
 }

@@ -26,7 +26,7 @@
 /************************************************************************/
 /* Class that can contain either an entity id or a position             */
 /************************************************************************/ 
-class TPositionOrEntity
+class CPositionOrEntity
 {
 public:
 	enum PositionOrEntityType
@@ -38,29 +38,29 @@ public:
 		EReturnPos
 	};
 
-	TPositionOrEntity()
+	CPositionOrEntity()
 	{
 		_type = EUnknown;
 	}
 
-	TPositionOrEntity(const NLMISC::CVector& position)
+	CPositionOrEntity(const NLMISC::CVector& position)
 	{
 		_type = EPosition;
 		Position = position;
 	}
 
-	TPositionOrEntity(const TDataSetIndex& eid)
+	CPositionOrEntity(const TDataSetIndex& eid)
 	{
 		_type = EEntity;
 		EntityId = eid;
 	}
 
-	TPositionOrEntity(PositionOrEntityType type)
+	CPositionOrEntity(PositionOrEntityType type)
 	{
 		_type = type;
 	}
 
-	TPositionOrEntity(const TPositionOrEntity& c)
+	CPositionOrEntity(const CPositionOrEntity& c)
 	{
 		_type = c._type;
 		if (c.isPosition())
@@ -69,7 +69,7 @@ public:
 			EntityId = c.getEntityId();
 	}
 
-	TPositionOrEntity& operator=(const TPositionOrEntity& c)
+	CPositionOrEntity& operator=(const CPositionOrEntity& c)
 	{
 		_type = c._type;
 		if (c.isPosition())
@@ -80,7 +80,7 @@ public:
 		return *this;
 	}
 
-	bool operator==(const TPositionOrEntity& c)
+	bool operator==(const CPositionOrEntity& c)
 	{
 		if (_type != c._type)
 			return false;
@@ -140,15 +140,11 @@ public:
 		return Position;
 	}
 
-	NLMISC::CVector getDiffPos() const
-	{
-		return Position;	// TODO => get the real position of the character
-	}
+	/// This function returns the difference between the player's position and the specified position
+	virtual NLMISC::CVector getDiffPos(const NLMISC::CVector& targetPos) const = 0;
 
-	NLMISC::CVector setPositionFromDiffPos(const NLMISC::CVector& diffPos)
-	{
-		// TODO => set the position from the character's position and the diffpos
-	}
+	/// This function returns the target position given the difference between the player's position and this target position
+	virtual NLMISC::CVector setPositionFromDiffPos(const NLMISC::CVector& diffPos) = 0;
 
 	TDataSetIndex getEntityId() const
 	{
@@ -185,7 +181,7 @@ public:
 			}
 			else
 			{
-				NLMISC::CVector diffPos = getDiffPos();
+				NLMISC::CVector diffPos = getDiffPos(getPosition());
 				NLMISC::serialPositionDifference(f, diffPos);
 			}
 		}
@@ -193,7 +189,7 @@ public:
 			f.serial(EntityId);
 	}
 
-private:
+protected:
 	PositionOrEntityType _type;
 	NLMISC::CVector	Position;
 	TDataSetIndex EntityId;
