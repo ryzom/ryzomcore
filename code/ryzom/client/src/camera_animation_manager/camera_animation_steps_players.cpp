@@ -76,16 +76,78 @@ public:
 	{
 		TCameraAnimationOutputInfo camInfo;
 
-		/*// We don't change the position
-		camInfo.CamPos = currCamInfo.StartCamPos;
+		NLMISC::CVector targetPos = resolvePositionOrEntityPosition(PositionTarget, currCamInfo);
 
-		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
+		//////////////////////////////////////////////////////////////////////////
+		// Position
+		{
+			float ratio = 1.f;
+			if (PositionTransitionTime > 0.f)
+				ratio = currCamInfo.ElapsedTimeSinceStartStep / PositionTransitionTime;
+			if (ratio > 1.f)
+				ratio = 1.f;
 
-		// We compute the final look at direction
-		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
+			// We compute the current position between the starting position and the final position
+			NLMISC::CVector movementVector = targetPos - currCamInfo.StartCamPos;
 
-		// We get the current look at direction
-		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);*/
+			// We substract the distance
+			float currDist = movementVector.norm();
+			float substractRatio = 0.f;
+			if (currDist > 0.f)
+				substractRatio = (currDist - DistanceTo) / currDist;
+			if ((currDist - DistanceTo) < 0.f)
+				substractRatio = 0.f;
+			movementVector = movementVector * substractRatio;
+
+			// We current position is computed using the ratio and the starting position
+			NLMISC::CVector offset = movementVector * ratio;
+			camInfo.CamPos = currCamInfo.StartCamPos + offset;
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		// Turn around
+		if (HasTurnAround)
+		{
+			// Now we compute the current angle between our position and the target's position
+			NLMISC::CVector2f currTopVector(camInfo.CamPos.x - targetPos.x, camInfo.CamPos.y - targetPos.y);
+			float distance2D = currTopVector.norm();
+			currTopVector.normalize();
+
+			float angle = acosf(currTopVector.x);
+			if (currTopVector.y < 0)
+				angle *= -1.f;
+
+			// We compute an angle to travail in function of the speed
+			float angleOffset = DT * TurnAroundSpeed;
+
+			float newAngle = angle + angleOffset;
+
+			// We compute the new position for this angle
+			NLMISC::CVector2f new2DPos(cosf(newAngle), sinf(newAngle));
+			new2DPos = new2DPos * distance2D;
+
+			// We integrate this new position in the world
+			NLMISC::CVector newDir(new2DPos.x, new2DPos.y, camInfo.CamPos.z - targetPos.z);
+
+			camInfo.CamPos = targetPos + newDir;
+		}
+
+		//////////////////////////////////////////////////////////////////////////
+		// Look at target
+		{
+			float ratio = 1.f;
+			if (DirectionTransitionTime > 0.f)
+				ratio = currCamInfo.ElapsedTimeSinceStartStep / DirectionTransitionTime;
+			if (ratio > 1.f)
+				ratio = 1.f;
+
+			// We compute the final look at direction
+			NLMISC::CVector finalDir = resolvePositionOrEntityTargetDir(LookAtTarget, currCamInfo, camInfo.CamPos);
+
+			// We get the current look at direction
+			camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);
+		}
+		//////////////////////////////////////////////////////////////////////////
 
 		return camInfo;
 	}

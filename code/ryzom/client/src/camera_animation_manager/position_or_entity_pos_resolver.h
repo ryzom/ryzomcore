@@ -21,11 +21,16 @@
 #include "nel/misc/vector.h"
 #include "game_share/position_or_entity_type.h"
 #include "camera_animation_manager/position_or_entity_helper.h"
+#include "camera_animation_manager/camera_animation_info.h"
 
 
 /// Function that returns the stored position if it contains a position
 /// Or the current entity's position if it contains an entity
+NLMISC::CVector resolvePositionOrEntityPosition(const CPositionOrEntity& posOrEntity, const TCameraAnimationInputInfo& currCamInfo);
 NLMISC::CVector resolvePositionOrEntityPosition(const CPositionOrEntity& posOrEntity);
 
+/// Functions that returns the stored look at target as a normalized direction vector
+NLMISC::CVector resolvePositionOrEntityTargetDir(const CPositionOrEntity& posOrEntity, const TCameraAnimationInputInfo& currCamInfo,
+	const NLMISC::CVector& currCamPos);
 
 #endif /* RY_POSITIONORENTITYPOSRESOLVER_H */
