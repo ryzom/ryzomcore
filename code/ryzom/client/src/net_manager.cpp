@@ -3565,7 +3565,7 @@ void impulseSetNpcIconTimer(NLMISC::CBitMemStream &impulse)
 void impulsePlaySoundTrigger(NLMISC::CBitMemStream& impulse)
 {
 	NLMISC::CSheetId SoundId;
-	TPositionOrEntity SoundPosition;
+	CPositionOrEntity SoundPosition;
 	
 	impulse.serial(SoundId);
 	impulse.serial(SoundPosition);
@@ -3590,8 +3590,8 @@ void impulseCameraAnimationStep(NLMISC::CBitMemStream& impulse)
 {
 	// We got a new step
 	// We first get its name
-	std::string stepName = "";
-	impulse.serial(stepName);
+	std::string stepName = "camera_animation_step";
+	//impulse.serial(stepName);
 
 	// We tell the camera animation player to load and play this instruction
 	CCameraAnimationPlayer::getInstance()->playStep(stepName, impulse);

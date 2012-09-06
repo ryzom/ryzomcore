@@ -45,9 +45,6 @@ public:
 	/// Function called when the step stops
 	virtual void stopStep() = 0;
 
-	/// Gets the duration in seconds of this step
-	virtual float getDuration() const = 0;
-
 	/// Function that adds a camera animation modifier to this step
 	void addModifier(ICameraAnimationModifierPlayer* modifier);
 

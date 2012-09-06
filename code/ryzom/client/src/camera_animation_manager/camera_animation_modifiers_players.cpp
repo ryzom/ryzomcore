@@ -104,7 +104,7 @@ CAMERA_ANIMATION_REGISTER_MODIFIER_PLAYER(CCameraAnimationModifierPlayerShake, "
 class CCameraAnimationModifierPlayerSoundTrigger : public ICameraAnimationModifierPlayer
 {
 protected:
-	TPositionOrEntity SoundPos;
+	CPositionOrEntity SoundPos;
 	NLMISC::CSheetId SoundId;
 
 public:
@@ -116,7 +116,7 @@ public:
 	/// This function is called when it's time to init the modifier from an impulse
 	virtual bool initModifier(NLMISC::CBitMemStream& impulse)
 	{
-		impulse.serial(const_cast<TPositionOrEntity&>(SoundPos));
+		impulse.serial(const_cast<CPositionOrEntity&>(SoundPos));
 		impulse.serial(const_cast<NLMISC::CSheetId&>(SoundId));
 
 		// We play the sound once here

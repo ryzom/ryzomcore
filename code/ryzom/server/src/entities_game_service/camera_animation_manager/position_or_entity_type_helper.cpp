@@ -116,7 +116,7 @@ CPositionOrEntityHelper CPositionOrEntityHelper::fromString(const std::string& s
 	return CPositionOrEntityHelper();
 }
 
-NLMISC::CVector CPositionOrEntityHelper::getDiffPos(const NLMISC::CVector& targetPos) const
+/*NLMISC::CVector CPositionOrEntityHelper::getDiffPos(const NLMISC::CVector& targetPos) const
 {
 	return Position;
 }
@@ -124,4 +124,4 @@ NLMISC::CVector CPositionOrEntityHelper::getDiffPos(const NLMISC::CVector& targe
 NLMISC::CVector CPositionOrEntityHelper::setPositionFromDiffPos(const NLMISC::CVector& diffPos)
 {
 	return Position;
-}
+}*/

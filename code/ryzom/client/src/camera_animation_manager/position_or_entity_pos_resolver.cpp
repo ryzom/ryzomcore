@@ -19,7 +19,7 @@
 #include "game_share/position_or_entity_type.h"
 #include "entities.h"
 
-NLMISC::CVector resolvePositionOrEntityPosition(const TPositionOrEntity& posOrEntity)
+NLMISC::CVector resolvePositionOrEntityPosition(const CPositionOrEntity& posOrEntity)
 {
 	if (!posOrEntity.isValid())
 	{

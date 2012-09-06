@@ -141,10 +141,10 @@ public:
 	}
 
 	/// This function returns the difference between the player's position and the specified position
-	virtual NLMISC::CVector getDiffPos(const NLMISC::CVector& targetPos) const = 0;
+	/*virtual NLMISC::CVector getDiffPos(const NLMISC::CVector& targetPos) const = 0;
 
 	/// This function returns the target position given the difference between the player's position and this target position
-	virtual NLMISC::CVector setPositionFromDiffPos(const NLMISC::CVector& diffPos) = 0;
+	virtual NLMISC::CVector setPositionFromDiffPos(const NLMISC::CVector& diffPos) = 0;*/
 
 	TDataSetIndex getEntityId() const
 	{
@@ -175,14 +175,16 @@ public:
 		{
 			if (f.isReading())
 			{
-				NLMISC::CVector diffPos = NLMISC::CVector();
+				/*NLMISC::CVector diffPos = NLMISC::CVector();
 				NLMISC::serialPositionDifference(f, diffPos);
-				setPositionFromDiffPos(diffPos);
+				setPositionFromDiffPos(diffPos);*/
+				f.serial(Position);
 			}
 			else
 			{
-				NLMISC::CVector diffPos = getDiffPos(getPosition());
-				NLMISC::serialPositionDifference(f, diffPos);
+				/*NLMISC::CVector diffPos = getDiffPos(getPosition());
+				NLMISC::serialPositionDifference(f, diffPos);*/
+				f.serial(Position);
 			}
 		}
 		else if (isEntityId())

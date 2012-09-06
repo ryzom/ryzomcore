@@ -49,13 +49,6 @@ public:
 	CPositionOrEntityHelper(const CPositionOrEntity& c): CPositionOrEntity(c)
 	{
 	}
-	
-	/************************************************************************/
-	/* Creates a PositionOrEntity instance from a string                    */
-	/************************************************************************/
-	static CPositionOrEntityHelper fromString(const std::string& s);
-
-	static const CPositionOrEntityHelper Invalid;
 
 	// Declares abstract methods
 	/// This function returns the difference between the player's position and the specified position

@@ -13,19 +13,23 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// 
 
-#ifndef RY_POSITIONORENTITYPOSRESOLVER_H
-#define RY_POSITIONORENTITYPOSRESOLVER_H
 
-#include "nel/misc/entity_id.h"
-#include "nel/misc/vector.h"
-#include "game_share/position_or_entity_type.h"
 #include "camera_animation_manager/position_or_entity_helper.h"
+#include "game_share/mirror.h"
+#include "game_share/mirrored_data_set.h"
+#include "game_share/base_types.h"
+#include "user_entity.h"
 
 
-/// Function that returns the stored position if it contains a position
-/// Or the current entity's position if it contains an entity
-NLMISC::CVector resolvePositionOrEntityPosition(const CPositionOrEntity& posOrEntity);
+/*NLMISC::CVector CPositionOrEntityHelper::getDiffPos(const NLMISC::CVector& targetPos) const
+{
+	return Position;
+}
 
-
-#endif /* RY_POSITIONORENTITYPOSRESOLVER_H */
+NLMISC::CVector CPositionOrEntityHelper::setPositionFromDiffPos(const NLMISC::CVector& diffPos)
+{
+	return Position;
+}
+*/

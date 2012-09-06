@@ -17,13 +17,86 @@
 
 #include "camera_animation_manager/camera_animation_step_player_factory.h"
 #include "game_share/position_or_entity_type.h"
+#include "camera_animation_manager/position_or_entity_helper.h"
 #include "camera_animation_manager/camera_animation_info.h"
 #include "camera_animation_manager/position_or_entity_pos_resolver.h"
 #include "client_cfg.h"
 #include "time_client.h"
+#include "game_share/camera_anim_type_parser.h"
 
+/// Magic camera animation step
+class CCameraAnimationStepPlayerStep: public ICameraAnimationStepPlayer
+{
+protected:
+	CPositionOrEntityHelper LookAtTarget;
+	float DirectionTransitionTime;
+	CPositionOrEntityHelper PositionTarget;
+	float PositionTransitionTime;
+	float DistanceTo;
+	bool HasTurnAround;
+	float TurnAroundSpeed;
 
-/// Basic camera animation step that has generic values
+public:
+	CCameraAnimationStepPlayerStep()
+	{
+		DirectionTransitionTime = 0.f;
+		PositionTransitionTime = 0.f;
+		DistanceTo = 0.f;
+		HasTurnAround = false;
+		TurnAroundSpeed = 0.f;
+	}
+
+	/// This function is called when it's time to init the step from an impulse
+	virtual bool initStep(NLMISC::CBitMemStream& bms)
+	{
+		bms.serial(const_cast<CPositionOrEntityHelper&>(LookAtTarget));
+		if (!LookAtTarget.isPreviousPos())
+		{
+			NLMISC::serialDuration(bms, DirectionTransitionTime);
+		}
+
+		bms.serial(const_cast<CPositionOrEntityHelper&>(PositionTarget));
+		if (!PositionTarget.isPreviousPos())
+		{
+			NLMISC::serialDistance(bms, DistanceTo);
+			NLMISC::serialDuration(bms, PositionTransitionTime);
+			bms.serialBit(const_cast<bool&>(HasTurnAround));
+
+			if (HasTurnAround)
+			{
+				NLMISC::serialSpeed(bms, TurnAroundSpeed);
+			}
+		}
+
+		return true;
+	}
+
+	/// Function that plays the step
+	virtual TCameraAnimationOutputInfo updateStep(const TCameraAnimationInputInfo& currCamInfo)
+	{
+		TCameraAnimationOutputInfo camInfo;
+
+		/*// We don't change the position
+		camInfo.CamPos = currCamInfo.StartCamPos;
+
+		float ratio = currCamInfo.ElapsedTimeSinceStartStep / getDuration();
+
+		// We compute the final look at direction
+		NLMISC::CVector finalDir = resolvePositionOrEntityPosition(LookAtPos) - camInfo.CamPos;
+
+		// We get the current look at direction
+		camInfo.CamLookAtDir = computeCurrentLookAtDir(ratio, currCamInfo.StartCamLookAtDir, finalDir);*/
+
+		return camInfo;
+	}
+
+	virtual void stopStep()
+	{
+	}
+};
+CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerStep, "camera_animation_step");
+
+/*/// Basic camera animation step that has generic values
 /// - look_at_position
 /// - text
 /// - duration
@@ -384,4 +457,4 @@ public:
 	{
 	}
 };
-CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerReturn, "camera_animation_return");
+CAMERA_ANIMATION_REGISTER_STEP_PLAYER(CCameraAnimationStepPlayerReturn, "camera_animation_return");*/
