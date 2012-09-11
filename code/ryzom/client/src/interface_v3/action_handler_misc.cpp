@@ -884,11 +884,21 @@ NLMISC_COMMAND(slsn, "Temp : set the name of the last sender.", "<name>")
 bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 {
 	// extract the replacement id
-	std::string strNewTitle = CEntityCL::getTitleFromName(inOut);
+	ucstring strNewTitle = CEntityCL::getTitleFromName(inOut);
 
 	// retrieve the translated string
 	if (!strNewTitle.empty())
-		inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle,Woman);
+	{
+		inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle, Woman);
+		{
+			// Sometimes translation contains another title
+			ucstring::size_type pos = inOut.find('$');
+			if (pos != ucstring::npos)
+			{
+				inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(inOut), Woman);
+			}
+		}
+	}
 	else
 		inOut = "";
 

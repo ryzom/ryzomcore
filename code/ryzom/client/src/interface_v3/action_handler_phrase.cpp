@@ -1119,7 +1119,7 @@ public:
 		if (pCSDst->isShortCut())
 			memoryLine = pPM->getSelectedMemoryLineDB();
 		else
-			memoryLine = 0;
+			memoryLine = pPM->getSelectedMemoryAltLineDB();
 		if(memoryLine<0)
 			return;
 
@@ -1577,6 +1577,32 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerPhraseSelectMemory, "phrase_select_memory");
 
+class CHandlerPhraseSelectMemory2 : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	{
+		string expr = getParam (Params, "value");
+		CInterfaceExprValue value;
+		if (CInterfaceExpr::eval(expr, value, NULL))
+		{
+			if (!value.toInteger())
+			{
+				nlwarning("<CHandlerPhraseSelectMemory:execute> expression doesn't evaluate to a numerical value");
+			}
+			else
+			{
+				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
+				sint	val= (sint32)value.getInteger();
+				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				pPM->selectMemoryLineDBalt(val);
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerPhraseSelectMemory2, "phrase_select_memory_2");
+
+
 
 // ***************************************************************************
 class CHandlerPhraseSelectShortcutBar : public IActionHandler
@@ -1585,7 +1611,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:PHRASE:SELECT_MEMORY", false);
+		CCDBNodeLeaf	*node= pIM->getDbProp("UI:PHRASE:SELECT_MEMORY_", false);
 		if(node)
 		{
 			sint32 val;
@@ -1594,6 +1620,7 @@ public:
 		}
 	}
 };
+
 REGISTER_ACTION_HANDLER(CHandlerPhraseSelectShortcutBar, "select_shortcut_bar");
 
 

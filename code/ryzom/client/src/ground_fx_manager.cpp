@@ -64,7 +64,7 @@ CGroundFXManager::CGroundFXManager() :
 					   _MinSpeed(1.5f),
 					   _MaxSpeed(6.f),
 					   _SpeedWaterWalkFast(3.f),
-					   _SpeedWaterSwimFast(2.f),
+					   _SpeedWaterSwimFast(3.f),
 					   _MaxDist(50.f),
 					   _MaxNumFX(10),
 					   _NumFX(0),
@@ -495,7 +495,7 @@ void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 			break;
 			case CInstance::Swim:
 				if (speed == 0.f) fxName = "StepSwimIdle.ps";
-				else if (speed > _SpeedWaterSwimFast)
+				else if (speed > _SpeedWaterWalkFast)
 				{
 					fxName = "StepSwimSpeed.ps";
 					fxNameUnderWater = "StepSwimSpeedUnderWater.ps";

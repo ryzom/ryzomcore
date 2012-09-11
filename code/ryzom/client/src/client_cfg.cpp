@@ -1040,7 +1040,7 @@ void CClientConfig::setValues()
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
-	READ_BOOL_DEV(PatchWanted)
+	READ_BOOL_FV(PatchWanted)
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)

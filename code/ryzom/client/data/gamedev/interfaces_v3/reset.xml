@@ -175,6 +175,8 @@
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:FOCUS|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MESSAGES|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:PVP_LOGO|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:NPCNAME|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:NPCTITLE|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MISSION_ICON|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:GUILD_SYMBOL|value=1" />

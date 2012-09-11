@@ -686,7 +686,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 								woman = pChar->getGender() == GSGENDER::female;
 
 							// extract the replacement id
-							string strNewTitle = CEntityCL::getTitleFromName(copyName);
+							ucstring strNewTitle = CEntityCL::getTitleFromName(copyName);
 
 							// retrieve the translated string
 							if (!strNewTitle.empty())

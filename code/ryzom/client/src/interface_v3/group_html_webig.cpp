@@ -258,7 +258,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		nlSleep(1*60*1000);
 		while (true)
 		{
-			string url = "http://"+ClientCfg.WebIgMainDomain+"/start/index.php?app=notif&rnd="+randomString();
+			string url = "http://"+ClientCfg.WebIgMainDomain+"/index.php?app=notif&rnd="+randomString();
 			addWebIGParams(url, true);
 			get(url);
 			nlSleep(10*60*1000);

@@ -15,8 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "http_client.h"
-#include "client_cfg.h"
+#include "game_share/http_client.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -193,15 +192,30 @@ void CHttpClient::disconnect()
 }
 
 
-#ifndef RY_BG_DOWNLOADER
-
 // ***************************************************************************
-bool CStartupHttpClient::connectToLogin()
+CHttpPostTask::CHttpPostTask(const std::string &host, const std::string &page, const std::string &params)
+	: _Host(host)
+	, _Page(page)
+	, _Params(params)
 {
-	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
 }
 
-CStartupHttpClient HttpClient;
+// ***************************************************************************
+void CHttpPostTask::run(void)
+{
+	CHttpClient httpClient;
+	std::string ret;
 
-
-#endif
+	if ( ! httpClient.connect(_Host))
+	{
+		return;
+	}
+	
+	if ( ! httpClient.sendPost(_Host + _Page, _Params))
+	{
+		return;
+	}
+	
+	httpClient.receive(ret);
+	httpClient.disconnect();
+}

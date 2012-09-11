@@ -580,13 +580,9 @@
 					onclick_l="proc" params_l="proc_charsel_play"/>
 	-->
 
-	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="76" hardtext="uiCharSel_Play"
+	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="56" hardtext="uiCharSel_Play"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="lua" params_l="outgame:launchGame()"/>
-
-	<ctrl style="valid_txt_button" id="edit_session_but" posref="BR BM" x="-112" y="36" hardtext="uiLaunchEditor"
-					onover="play_sound" params_over="name=specie_but_over"
-					onclick_l="proc" params_l="proc_charsel_edit_menu"/>
 
 	<ctrl style="valid_txt_button" id="del_but" posref="BR BL" x="-794" y="56" hardtext="uiCharSel_Del"
 					onover="play_sound" params_over="name=specie_but_over"
