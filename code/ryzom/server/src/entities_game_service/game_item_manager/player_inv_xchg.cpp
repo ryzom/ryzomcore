@@ -88,6 +88,13 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 	if (item->getLockedByOwner())
 		return false;
 
+	// You cannot exchange genesis named items
+	if (item->getPhraseId().find("genesis_") == 0)
+	{
+		nlwarning("Character %s tries to sell '%s'", getCharacter()->getId().toString().c_str(), item->getPhraseId().c_str() );
+		return false;
+	}
+
 	if( getCharacter()->isAnActiveXpCatalyser(item) )
 		return false;
 

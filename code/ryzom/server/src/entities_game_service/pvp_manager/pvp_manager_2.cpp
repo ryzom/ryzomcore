@@ -393,9 +393,10 @@ void CPVPManager2::sendChannelUsers(TChanID channel, CCharacter * user, bool out
 		TDataSetRow senderRow = TheDataset.getDataSetRow(user->getId());
 		if (outputToSys)
 		{
-			CCharacter::sendDynamicSystemMessage( user->getId(), "WHO_CHANNEL_INTRO" );
-			//players = "Players in channel \"" + getUserDynChannel(channel) + "\": " + players;
+			string channelName = DynChatEGS.getChanNameFromID(channel);
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal = channelName;
+			CCharacter::sendDynamicSystemMessage( user->getId(), "WHO_CHANNEL_INTRO" );
 			params[0].Literal = players;
 			CCharacter::sendDynamicSystemMessage( user->getId(), "LITERAL", params );
 		}
@@ -522,14 +523,14 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 					_CharacterUserChannels.insert(make_pair(user->getId(), currentChannels));
 				}
 			}
+		}
 
-			TChannelsCharacter::iterator cit = _UserChannelCharacters.find(channel);
-			if (cit != _UserChannelCharacters.end())
-			{
-				std::vector<NLMISC::CEntityId> lst = _UserChannelCharacters[channel];
-				lst.erase(find(lst.begin(), lst.end(), user->getId()));
-				_UserChannelCharacters[channel] = lst;
-			}
+		TChannelsCharacter::iterator cit = _UserChannelCharacters.find(channel);
+		if (cit != _UserChannelCharacters.end())
+		{
+			std::vector<NLMISC::CEntityId> lst = _UserChannelCharacters[channel];
+			lst.erase(find(lst.begin(), lst.end(), user->getId()));
+			_UserChannelCharacters[channel] = lst;
 		}
 	}
 }
@@ -642,13 +643,11 @@ void CPVPManager2::setPVPModeInMirror( const CCharacter * user ) const
 		}
 	}
 
-	CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyPVP_MODE );
-	CMirrorPropValue<TYPE_EVENT_FACTION_ID> propPvpMode2( TheDataset, user->getEntityRowId(), DSPropertyEVENT_FACTION_ID );
+	//CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyPVP_MODE );
+	CMirrorPropValue<TYPE_EVENT_FACTION_ID> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyEVENT_FACTION_ID );
 	if (propPvpMode.getValue() != pvpMode)
 	{
-		nlinfo("New pvp Mode : %d", pvpMode);
 		propPvpMode = pvpMode;
-		propPvpMode2 = pvpMode;
 	}
 }
 
@@ -775,7 +774,6 @@ bool CPVPManager2::isCurativeActionValid( CCharacter * actor, CEntityBase * targ
 
 	PVP_RELATION::TPVPRelation pvpRelation = getPVPRelation( actor, target, true );
 	bool actionValid;
-	nlinfo("Pvp relation = %d", pvpRelation);
 	switch( pvpRelation )
 	{
 		case PVP_RELATION::Ally :
