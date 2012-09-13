@@ -6183,8 +6183,7 @@ void CCharacterCL::updateVisiblePostPos(const NLMISC::TTime &currentTimeInMs, CE
 		if (_InSceneUserInterface)
 		{
 			// Activate
-			if (_InSceneUserInterface->getActive() != showIS)
-				_InSceneUserInterface->setActive (showIS);
+			_InSceneUserInterface->setActive (showIS);
 
 			if (showIS)
 			{

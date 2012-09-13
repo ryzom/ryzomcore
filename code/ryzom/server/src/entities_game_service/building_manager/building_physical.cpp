@@ -336,6 +336,10 @@ bool CBuildingPhysicalGuild::isUserAllowed(CCharacter * user, uint16 ownerId, ui
 	nlassert( user );
 	nlassert( ownerId < _Guilds.size() );
 	nlassert( roomIdx < _Template->Rooms.size() );
+
+	if (user->isDead())
+		return false;
+
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 	if ( !guild )
 		return false;
@@ -529,6 +533,9 @@ bool CBuildingPhysicalPlayer::isUserAllowed(CCharacter * user, uint16 ownerId, u
 {
 	nlassert(user);
 	nlassert(ownerId < _Players.size() );
+
+	if (user->isDead())
+		return false;
 
 	CCharacter * owner = PlayerManager.getChar( _Players[ownerId] );
 	if (owner)

@@ -39,7 +39,7 @@ namespace PATCHMAN
 	{
 	public:
 		virtual ~CPatchmanTester() {}
-	
+
 		// this is a singleton so it has a getInstance() method to get to the singleton instance
 		static CPatchmanTester& getInstance();
 

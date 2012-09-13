@@ -124,6 +124,51 @@ void setFactionProp_ss_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+void setOupostMode_ss_(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string sideStr = stack.top(); stack.pop();
+	std::string aliasStr = stack.top();
+	CGroupNpc* const npcGroup = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if ( ! npcGroup)
+	{
+		nlwarning("setOutpostMode on a non Npc Group, doesnt work");
+		return;
+	}
+
+	OUTPOSTENUMS::TPVPSide side;
+	if (sideStr == "attacker")
+	{
+		side = OUTPOSTENUMS::OutpostAttacker;
+	}
+	else if (sideStr == "owner")
+	{
+		side = OUTPOSTENUMS::OutpostOwner;
+	}
+	else
+	{
+		nlwarning("setOutpostMode: invalid side");
+	}
+	
+	npcGroup->setOutpostSide(side);
+	npcGroup->setOutpostFactions(side);
+	FOREACH(botIt, CCont<CBot>, npcGroup->bots())
+	{
+		CBot* bot = *botIt;
+		CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+		if (botNpc)
+		{
+			CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
+			if (spawnBotNpc)
+			{
+				spawnBotNpc->setOutpostSide(side);
+				spawnBotNpc->setOutpostAlias(LigoConfig.aliasFromString(aliasStr));
+			}
+		}
+	}
+	if (npcGroup->isSpawned())
+		npcGroup->getSpawnObj()->sendInfoToEGS();
+}
+
 //----------------------------------------------------------------------------
 /** @page code
 
@@ -2749,6 +2794,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
 
 	REGISTER_NATIVE_FUNC(functions, setFactionProp_ss_);
+	REGISTER_NATIVE_FUNC(functions, setOupostMode_ss_);
 	REGISTER_NATIVE_FUNC(functions, moveToZone_ss_);
 	REGISTER_NATIVE_FUNC(functions, setActivity_s_);
 	REGISTER_NATIVE_FUNC(functions, startWander_f_);

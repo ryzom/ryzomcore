@@ -2060,9 +2060,9 @@ uint32 CCreature::tickUpdate()
 		setBars();
 	}
 
-   	// test again as effects can kill the entity (dots...)
-   	if (isDead())
-   	{
+	// test again as effects can kill the entity (dots...)
+	if (isDead())
+	{
 		deathOccurs();
 	}
 

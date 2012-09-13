@@ -87,12 +87,6 @@
 	<action handler="leave_modal" />
 </proc>
 
-<proc id="quit_dialog_launch_editor" >
-	<action handler="leave_modal" /> <!-- must leave modal first because 'launch game' may pop a message box in some cases if patching was uncomplete -->
-	<action handler="launch_game" params="slot=ingame_auto|edit_mode=1" />	
-</proc>
-
-
 <!-- the modal (formerly: h="60") -->
 <define id="quit_button_delta_y" value="-4" />
 <group type="modal" id="quit_dialog" exit_click_out="false" mouse_pos="false" posref="MM MM" child_resize_w="true" child_resize_wmargin="16" child_resize_h="true" child_resize_hmargin="16" win_priority="%win_priority_highest"
@@ -112,10 +106,7 @@
 			color="180 250 180 255" col_over="180 250 180 255" col_pushed="180 250 180 255" text_color_normal="180 250 180 160" />
 		<ctrl style="quit_button" id="return_mainland" posparent="cancel" posref="BL TL" y="%quit_button_delta_y" hardtext="uittReturnToMainland" onclick_l="proc" params_l="quit_dialog_mainland"
 			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
-		<ctrl style="quit_button" id="launch_editor" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittLaunchEditor" onclick_l="proc" params_l="quit_dialog_launch_editor"
-			color="180 250 180 255" col_over="110 250 125 255" col_pushed="110 250 125 255" text_color_normal="110 250 125 160" />
-
-		<ctrl style="quit_button" id="reselect_char" posparent="launch_editor" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
+		<ctrl style="quit_button" id="reselect_char" posparent="return_mainland" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_reselect_char"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />
 		<!--<ctrl style="quit_button" id="game" posparent="reselect_char" posref="BL TL" y="%quit_button_delta_y" hardtext="uittQuitGame" onclick_l="proc" params_l="quit_dialog_game"
 			color="240 212 110 255" col_over="240 212 110 255" col_pushed="240 212 110 255" text_color_normal="240 212 110 160" />-->
@@ -313,6 +304,11 @@
 	
 </template>
 
+<proc id="mk_proc_active">
+	<action handler="set" params="dblink=UI:VARIABLES:ISACTIVE:MILKO_PAD|value=1"/>
+	<action handler="proc" params="mk_proc_mode" />
+</proc>
+
 <proc id="mk_proc_mode">
 	<action handler="set" params="target='ui:interface:milko_pad:content:mode1:active'|value=0"/>
 	<action handler="set" params="target='ui:interface:milko_pad:content:mode2:active'|value=0"/>
@@ -355,12 +351,29 @@
 </template>
 
 <!-- milko_pad -->
-<group type="container" id="milko_pad" header_active="false" right_button="false" options="layer0_pad" 
-	global_color="false" opened="true" openable="false" resizer="false" locked="false"
-	movable="true" active="true" header_color="UI:SAVE:WIN:COLORS:HELP" savable="true"
-	group_onclick_r="active_menu" group_params_r="menu=ui:interface:milko_menu"
-	w="142" h="200" pop_max_h="400"
-	on_active="proc" on_active_params="mk_proc_mode" >
+<group type="container"
+	id="milko_pad" 
+	header_active="false" 
+	right_button="false" 
+	options="layer0_pad" 
+	global_color="false" 
+	opened="true" 
+	openable="false" 
+	resizer="false" 
+	locked="false"
+	movable="true" 
+	active="true" 
+	header_color="UI:SAVE:WIN:COLORS:HELP" 
+	savable="true"
+	group_onclick_r="active_menu" 
+	group_params_r="menu=ui:interface:milko_menu"
+	w="142" 
+	h="200" 
+	pop_max_h="400"
+	on_active="proc" 
+	on_active_params="mk_proc_active"
+	on_deactive="set"
+	on_deactive_params="dblink=UI:VARIABLES:ISACTIVE:MILKO_PAD|value=0" >
 
 		<group id="header_closed" x="0" y="0" h="0" posref="TL TL" >
 		</group>
@@ -1143,6 +1156,9 @@
 		<instance template="win_button" id="mp3" color="UI:SAVE:WIN:COLORS:OPT" text="uimwMP3Player" posparent="connection" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:MP3PLAYER" win_name="mp3_player" />
 
+		<instance template="win_button" id="mp" color="UI:SAVE:WIN:COLORS:OPT" text="uimwTaskBar" posparent="mp3" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:MILKO_PAD" win_name="milko_pad" />
+
 <!--		<instance template="win_button" id="bg_downloader" color="UI:SAVE:WIN:COLORS:OPT" text="uimwBGDownloader" posparent="mp3" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" win_name="bg_downloader" /> -->
 		
@@ -1218,6 +1234,7 @@
 	<param value="options:macros|macros" />
 	<param value="options:connection|connection" />
 	<param value="options:mp3|mp3_player" />
+	<param value="options:mp|milko_pad" />
 
 </options>
 

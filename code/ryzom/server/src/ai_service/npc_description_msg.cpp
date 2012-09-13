@@ -831,10 +831,9 @@ void	TGenNpcDescMsgImp::setChat(const CNpcChatProfileImp& chatProfile)
 	_ContextOptions			=	chatProfile.getContextOptions();
 //	ContextOptionsTitles	=	chatProfile.getContextOptionsTitles();
 //	ContextOptionsDetails	=	chatProfile.getContextOptionsDetails();
-	// As I don't remembre why I did an insert instead of an affectation I let it commented here.
-//	vector<string> const& chatOptionalProperties = chatProfile.getOptionalProperties();
-//	OptionalProperties.insert(OptionalProperties.end(), chatOptionalProperties.begin(), chatOptionalProperties.end());
-	_OptionalProperties		= chatProfile.getOptionalProperties();
+
+	vector<string> const& chatOptionalProperties = chatProfile.getOptionalProperties();
+	_OptionalProperties.insert(_OptionalProperties.end(), chatOptionalProperties.begin(), chatOptionalProperties.end());
 
 	_Outpost					=	chatProfile.getOutpost();
 	_Organization					=	chatProfile.getOrganization();

@@ -953,6 +953,14 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 		return;
 	}
 
+	// You cannot exchange genesis named items
+	if (item->getPhraseId().find("genesis_") == 0)
+	{
+		nlwarning("Character %s tries to put in guild '%s'", user->getId().toString().c_str(), item->getPhraseId().c_str() );
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_CANT_BE_PUT" );
+		return;
+	}
+
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(
 		user->getInventory(INVENTORIES::bag), slot,

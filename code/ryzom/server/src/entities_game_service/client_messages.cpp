@@ -1114,9 +1114,8 @@ void cbClientMoveInContactLists( NLNET::CMessage& msgin, const std::string &serv
 		if (listOrigin == 0)
 		{
 			NLMISC::CEntityId	eid= c->getFriendByContactId(contactIdOrigin);
-			// allows the whole operation or nothing if player is not present
-			CCharacter * other = PlayerManager.getChar( eid );
-			if(other)
+			// allows the whole operation or nothing if player does not exist
+			if (eid != CEntityId::Unknown)
 			{
 				c->removePlayerFromFriendListByEntityId(eid);
 				c->addPlayerToIgnoreList(eid);
@@ -1124,15 +1123,14 @@ void cbClientMoveInContactLists( NLNET::CMessage& msgin, const std::string &serv
 			else
 			{
 				// player not found => message
-				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_OFFLINE");
+				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_NOTEXIST");
 			}
 		}
 		else
 		{
 			NLMISC::CEntityId	eid= c->getIgnoreByContactId(contactIdOrigin);
 			// allows the whole operation or nothing if player is not present
-			CCharacter * other = PlayerManager.getChar( eid );
-			if(other)
+			if(eid != CEntityId::Unknown)
 			{
 				c->removePlayerFromIgnoreListByEntityId(eid);
 				c->addPlayerToFriendList(eid);
@@ -1140,7 +1138,7 @@ void cbClientMoveInContactLists( NLNET::CMessage& msgin, const std::string &serv
 			else
 			{
 				// player not found => message
-				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_OFFLINE");
+				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_NOTEXIST");
 			}
 		}
 	}
@@ -2544,7 +2542,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 			return;
 		}
 
-		bool havePriv = p->havePriv(":DEV:SGM:GM:");
+		bool havePriv = p->havePriv(":DEV:SGM:GM:EM:");
 		bool hasChannel = false;
 		nbAnswers = 0;
 
@@ -2578,9 +2576,10 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 
 		if (!playerNames.empty())
 		{
-			CCharacter::sendDynamicSystemMessage( id, "WHO_CHANNEL_INTRO" );
-			//playerNames = "Players in channel \"" + opt + "\":" + playerNames;
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal = opt;
+			CCharacter::sendDynamicSystemMessage( id, "WHO_CHANNEL_INTRO", params);
+			//playerNames = "Players in channel \"" + opt + "\":" + playerNames;
 			params[0].Literal = playerNames;
 			CCharacter::sendDynamicSystemMessage( id, "LITERAL", params );
 			return;

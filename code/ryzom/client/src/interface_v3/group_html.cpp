@@ -621,8 +621,6 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 				_Link.push_back("");
 				_LinkTitle.push_back("");
 			}
-
-
 		}
 	}
 }
@@ -1048,7 +1046,6 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 				string style;
 				if (present[HTML_BODY_STYLE] && value[HTML_BODY_STYLE])
 					style = value[HTML_BODY_STYLE];
-
 
 				if (!style.empty())
 				{
@@ -2470,7 +2467,6 @@ void CGroupHTML::addString(const ucstring &str)
 					getParagraph()->addChild (buttonGroup);
 					paragraphChange ();
 				}
-
 			}
 			else
 			{

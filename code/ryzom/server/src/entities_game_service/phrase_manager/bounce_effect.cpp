@@ -28,8 +28,12 @@
 #include "player_manager/character.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
+#include "creature_manager/creature_manager.h"
+#include "creature_manager/creature.h"
 #include "range_selector.h"
 #include "phrase_manager/effect_factory.h"
+
+extern CCreatureManager		CreatureManager;
 
 using namespace std;
 using namespace NLMISC;
@@ -76,7 +80,7 @@ void CBounceEffect::removed()
 //--------------------------------------------------------------
 //		CBounceEffect::getTargetForBounce()
 //--------------------------------------------------------------
-CEntityBase *CBounceEffect::getTargetForBounce() const
+CEntityBase *CBounceEffect::getTargetForBounce(CEntityBase *actor) const
 {
 	// get entities around
 	if (!_AffectedEntity)
@@ -99,7 +103,7 @@ CEntityBase *CBounceEffect::getTargetForBounce() const
 
 	for (uint i = 0; i < entities.size() ; ++i)
 	{
-		if ( entities[i] && ( entities[i] != (CEntityBase*)(_AffectedEntity) ) && isEntityValidTarget(entities[i]) )
+		if ( entities[i] && ( entities[i] != (CEntityBase*)(_AffectedEntity) ) && isEntityValidTarget(entities[i], actor) )
 		{
 			selectedEntities.push_back(entities[i]);
 		}
@@ -118,17 +122,29 @@ CEntityBase *CBounceEffect::getTargetForBounce() const
 //--------------------------------------------------------------
 //		CBounceEffect::isEntityValidTarget()
 //--------------------------------------------------------------
-bool CBounceEffect::isEntityValidTarget(CEntityBase *entity) const
+bool CBounceEffect::isEntityValidTarget(CEntityBase *entity, CEntityBase *actor) const
 {
 #ifdef NL_DEBUG
 	nlassert(entity);
 #endif
+
+	if (entity->isDead())
+		return false;
 
 	if (entity->getId().getType() == RYZOMID::player)
 		return true;
 
 	if ( entity->getContextualProperty().getValue().attackable() )
 		return true;
+
+	CCreature * creature = CreatureManager.getCreature( entity->getId() );
+	if (creature && actor)
+	{
+		if (creature->checkFactionAttackable( actor->getId() ))
+		{
+			return true;
+		}
+	}
 	
 	return false;
 } // checkTargetValidity //

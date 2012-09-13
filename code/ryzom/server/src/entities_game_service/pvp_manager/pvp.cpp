@@ -231,7 +231,7 @@ void CPVPInterface::setPVPModeInMirror() const
 	if ( !TheDataset.isAccessible(_Owner->getEntityRowId()) )
 		return;
 
-	CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, _Owner->getEntityRowId(), DSPropertyPVP_MODE );
+	CMirrorPropValue<TYPE_EVENT_FACTION_ID> propPvpMode( TheDataset, _Owner->getEntityRowId(), DSPropertyEVENT_FACTION_ID );
 
 	if (_PVPSession)
 	{

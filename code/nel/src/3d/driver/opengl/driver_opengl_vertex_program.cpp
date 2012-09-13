@@ -43,7 +43,8 @@ namespace NLDRIVERGL {
 // ***************************************************************************
 CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it) : IVertexProgramDrvInfos (drv, it)
 {
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL)
+	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
+
 	// Extension must exist
 	nlassert (drv->_Extensions.NVVertexProgram
 		      || drv->_Extensions.EXTVertexShader
@@ -87,7 +88,7 @@ bool CDriverGL::isVertexProgramEmulated () const
 // ***************************************************************************
 bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 {
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_activeNVVertexProgram)
+	H_AUTO_OGL(CVertexProgamDrvInfosGL_activeNVVertexProgram);
 
 #ifndef USE_OPENGLES
 	// Setup or unsetup ?
@@ -209,7 +210,8 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 static
 inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 {
-	H_AUTO_OGL(convSwizzleToGLFormat)
+	H_AUTO_OGL(convSwizzleToGLFormat);
+
 	if (!negate)
 	{
 		switch(comp)
@@ -1348,12 +1350,10 @@ static void ARBVertexProgramDumpInstr(const CVPInstruction &instr, std::string &
 
 }
 
-
-
 // ***************************************************************************
 bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgram, GLuint id, bool &specularWritten)
 {
-	H_AUTO_OGL(CDriverGL_setupARBVertexProgram)
+	H_AUTO_OGL(CDriverGL_setupARBVertexProgram);
 
 #ifndef USE_OPENGLES
 	// tmp
@@ -1570,7 +1570,6 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 	return false;
 #endif
 }
-
 
 // ***************************************************************************
 bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)

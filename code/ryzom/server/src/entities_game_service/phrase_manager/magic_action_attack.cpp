@@ -704,7 +704,7 @@ void CMagicActionBasicDamage::launch(
 			{
 				CBounceEffect *bounceEffect = safe_cast<CBounceEffect *> (& (*effect));
 				bool bounce = false;
-				CEntityBase *bounceTarget = bounceEffect->getTargetForBounce();
+				CEntityBase *bounceTarget = bounceEffect->getTargetForBounce(actor);
 				if (bounceTarget)
 				{
 					bounce = true;

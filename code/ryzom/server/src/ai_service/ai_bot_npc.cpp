@@ -62,6 +62,8 @@ void CSpawnBotNpc::sendInfoToEGS() const
 	if (!EGSHasMirrorReady)
 		return;
 	
+	CSpawnBot::sendInfoToEGS();
+
 	TGenNpcDescMsgImp msg;
 	msg.setEntityIndex(dataSetRow());
 	

@@ -235,9 +235,10 @@ public:
 
 	/// Only one memory line is displayed in the Memory DB. if -1, erased.
 	void				selectMemoryLineDB(sint32 memoryLine);
+	void				selectMemoryLineDBalt(sint32 memoryLine);
 	/// get the selected memory line.
 	sint32				getSelectedMemoryLineDB() const {return _SelectedMemoryDB;}
-
+	sint32				getSelectedMemoryAltLineDB() const {return _SelectedMemoryDBalt;}
 	/// Common Method to send the Memorize msg to server
 	void				sendMemorizeToServer(uint32 memoryLine, uint32 memorySlot, uint32 phraseId);
 	/// Common Method to send the Forget msg to server
@@ -518,6 +519,7 @@ private:
 	};
 	std::vector<CMemoryLine>	_Memories;
 	sint32						_SelectedMemoryDB;
+	sint32						_SelectedMemoryDBalt;
 
 	void		updateMemoryDBAll();
 	void		updateMemoryDBSlot(uint32 memorySlot);

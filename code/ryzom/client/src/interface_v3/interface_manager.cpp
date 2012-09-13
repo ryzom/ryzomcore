@@ -66,6 +66,7 @@
 #include "group_in_scene_bubble.h"
 #include "group_skills.h"
 #include "group_compas.h"
+#include "group_html.h"
 
 // Misc
 #include "../input.h"
@@ -583,6 +584,17 @@ void CInterfaceManager::initOutGame()
 		initActions();
 	}
 	//NLMEMORY::CheckHeap (true);
+
+	// Initialize the web browser
+	{
+		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(this->getElementFromId(GROUP_BROWSER));
+
+		if (pGH)
+		{
+			pGH->setActive(true);
+			pGH->browse(ClientCfg.PatchletUrl.c_str());
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
