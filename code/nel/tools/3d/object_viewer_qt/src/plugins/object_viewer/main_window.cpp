@@ -66,7 +66,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	  _isGraphicsInitialized(false),
 	  _isGraphicsEnabled(false),
 	  _isSoundInitialized(false),
-	  _isSoundEnabled(true),
+	  _isSoundEnabled(false), // MTR workaround for sheet id nonsense
 	  _GraphicsViewport(NULL),
 	  _lastDir("."),
 	  _mouseMode(NL3D::U3dMouseListener::edit3d)

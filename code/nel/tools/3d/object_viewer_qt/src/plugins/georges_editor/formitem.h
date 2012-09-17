@@ -33,11 +33,13 @@ namespace GeorgesQt
 	public:
 		CFormItem(NLGEORGES::UFormElm *elm, const QList<QVariant> &data, 
 			CFormItem *parent = 0,
-			NLGEORGES::UFormElm::TWhereIsValue = NLGEORGES::UFormElm::ValueForm, 
-			NLGEORGES::UFormElm::TWhereIsNode = NLGEORGES::UFormElm::NodeForm);
+            NLGEORGES::UFormElm::TWhereIsValue wV = NLGEORGES::UFormElm::ValueForm,
+            NLGEORGES::UFormElm::TWhereIsNode wN = NLGEORGES::UFormElm::NodeForm);
 		~CFormItem();
 
 		void appendChild(CFormItem *child);
+        //CFormItem *add (/*TSub type,*/ const char *name, uint structId, const char *formName, uint slot);
+        CFormItem *add(NLGEORGES::UFormElm* root, std::string elmName);
 
 		CFormItem *child(int row);
 		int childCount() const;
@@ -56,13 +58,18 @@ namespace GeorgesQt
 			return whereN;
 		}
 
-	private:
+        void setValueFrom(NLGEORGES::UFormElm::TWhereIsValue wV) { whereV = wV; }
+        void setNodeFrom(NLGEORGES::UFormElm::TWhereIsNode wN) { whereN = wN; }
+
+
+    private:
+        //CFormItem() { whereV = NLGEORGES::UFormElm::ValueForm; whereN = NLGEORGES::UFormElm::NodeForm; }
 		QList<CFormItem*> childItems;
 		QList<QVariant> itemData;
 		CFormItem *parentItem;
 		NLGEORGES::UFormElm* formElm;
-		NLGEORGES::UFormElm::TWhereIsValue whereV;
-		NLGEORGES::UFormElm::TWhereIsNode whereN;
+        NLGEORGES::UFormElm::TWhereIsValue whereV;
+        NLGEORGES::UFormElm::TWhereIsNode whereN;
 	}; // CFormItem
 
 }

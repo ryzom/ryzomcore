@@ -27,6 +27,10 @@
 
 namespace NLGEORGES {
 	class UFormElm;
+	class UForm;
+    class CFormElmStruct;
+    class CFormDfn;
+    class CFormElmArray;
 }
 
 namespace GeorgesQt 
@@ -38,7 +42,7 @@ namespace GeorgesQt
 	{
 		
 	public:
-		CGeorgesFormModel(NLGEORGES::UFormElm *root, QMap< QString, QStringList> deps,
+		CGeorgesFormModel(NLGEORGES::UForm *form, QMap< QString, QStringList> deps,
 			QString comment, QStringList parents, bool* expanded, QObject *parent = 0);
 		~CGeorgesFormModel();
 
@@ -58,15 +62,22 @@ namespace GeorgesQt
 		void setShowDefaults( bool show );
 		void addParentForm(QString parentForm);
 		void removeParentForm(QString parentForm);
-		NLGEORGES::UFormElm *getRootForm() { return m_rootElm; }
+        NLGEORGES::UFormElm *getRootForm() { return m_rootElm; }
+
+        CFormItem *addStruct (CFormItem *parent, NLGEORGES::CFormElmStruct *_struct, NLGEORGES::CFormDfn *parentDfn,
+                              const char *name, uint structId, const char *formName, uint slot);
+
+        CFormItem *addArray(CFormItem *parent, NLGEORGES::CFormElmArray *array, NLGEORGES::CFormDfn *rootDfn,
+                            const char *name, uint structId, const char *formName, uint slot);
 
 	private:
 		void setupModelData();
 		void loadFormData(NLGEORGES::UFormElm *rootElm, CFormItem *parent);
 		void loadFormHeader();
 
+		NLGEORGES::UForm*		m_form;
 		CFormItem*                  m_rootItem;
-		NLGEORGES::UFormElm*        m_rootElm;
+        NLGEORGES::UFormElm*        m_rootElm;
 		QList<QVariant>				m_rootData;
 		QMap< QString, QStringList> m_dependencies;
 		QString                     m_comments;
