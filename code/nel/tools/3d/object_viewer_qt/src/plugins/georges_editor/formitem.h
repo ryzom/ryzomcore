@@ -18,6 +18,7 @@
 #define FORMITEM_H
 
 // NeL includes
+#include <nel/georges/u_form.h>
 #include <nel/georges/u_form_elm.h>
 
 // Qt includes
@@ -28,18 +29,24 @@ namespace GeorgesQt
 {
 
 	class CFormItem
-
 	{
 	public:
-		CFormItem(NLGEORGES::UFormElm *elm, const QList<QVariant> &data, 
-			CFormItem *parent = 0,
-            NLGEORGES::UFormElm::TWhereIsValue wV = NLGEORGES::UFormElm::ValueForm,
-            NLGEORGES::UFormElm::TWhereIsNode wN = NLGEORGES::UFormElm::NodeForm);
+		// What is the sub object ?
+        enum TSub
+        {
+                Null,           // Nothing in this node (root ?)
+                Header,         // Header node
+                Type,           // This node is a type
+                Dfn,            // This node is a dfn
+                Form,           // This node is a form
+        };
+
+		CFormItem();
 		~CFormItem();
 
 		void appendChild(CFormItem *child);
-        //CFormItem *add (/*TSub type,*/ const char *name, uint structId, const char *formName, uint slot);
-        CFormItem *add(NLGEORGES::UFormElm* root, std::string elmName);
+
+        CFormItem *add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr);
 
 		CFormItem *child(int row);
 		int childCount() const;
@@ -48,28 +55,29 @@ namespace GeorgesQt
 		int row() const;
 		CFormItem *parent();
 		bool setData(int column, const QVariant &value);
-		NLGEORGES::UFormElm* getFormElm() {return formElm;}
-		NLGEORGES::UFormElm::TWhereIsValue valueFrom() 
-		{
-			return whereV;
-		}
-		NLGEORGES::UFormElm::TWhereIsNode nodeFrom() 
-		{
-			return whereN;
-		}
 
-        void setValueFrom(NLGEORGES::UFormElm::TWhereIsValue wV) { whereV = wV; }
-        void setNodeFrom(NLGEORGES::UFormElm::TWhereIsNode wN) { whereN = wN; }
+		TSub nodeType() { return _Type; }
+		std::string formName() { return _FormName; }
+		std::string name() { return _Name; }
+		uint structId() { return _StructId; }
 
+		bool isEditable(int column);
+
+		QIcon getItemImage(CFormItem *rootItem);
 
     private:
-        //CFormItem() { whereV = NLGEORGES::UFormElm::ValueForm; whereN = NLGEORGES::UFormElm::NodeForm; }
 		QList<CFormItem*> childItems;
 		QList<QVariant> itemData;
 		CFormItem *parentItem;
 		NLGEORGES::UFormElm* formElm;
-        NLGEORGES::UFormElm::TWhereIsValue whereV;
-        NLGEORGES::UFormElm::TWhereIsNode whereN;
+		NLGEORGES::UForm *m_form;
+
+		uint                                                            _StructId;
+        std::string                                                     _Name;
+        std::string                                                     _FormName;
+        TSub                                                            _Type;
+        uint                                                            _Slot;
+
 	}; // CFormItem
 
 }

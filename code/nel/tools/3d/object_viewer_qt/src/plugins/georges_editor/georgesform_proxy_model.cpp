@@ -23,6 +23,8 @@
 #include "georgesform_proxy_model.h"
 #include "georgesform_model.h"
 
+#if 0
+
 namespace GeorgesQt 
 {
 
@@ -78,4 +80,5 @@ namespace GeorgesQt
 	}
 } /* namespace GeorgesQt */
 
+#endif // 0
 /* end of file */

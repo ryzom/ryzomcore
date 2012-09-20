@@ -17,9 +17,11 @@
 #include "formitem.h"
 
 // Qt includes
+#include <QIcon>
 
 // NeL includes
 #include <nel/misc/o_xml.h>
+#include <nel/misc/debug.h>
 #include <nel/georges/u_type.h>
 #include <nel/georges/form.h>
 
@@ -27,15 +29,8 @@ using namespace NLGEORGES;
 
 namespace GeorgesQt 
 {
-
-	CFormItem::CFormItem(NLGEORGES::UFormElm* elm, const QList<QVariant> &data, CFormItem *parent,
-        NLGEORGES::UFormElm::TWhereIsValue wV, NLGEORGES::UFormElm::TWhereIsNode wN)
+	CFormItem::CFormItem()
 	{
-		parentItem = parent;
-		itemData = data;
-		formElm = elm;
-		whereV = wV;
-		whereN = wN;
 	}
 
 	CFormItem::~CFormItem() 
@@ -61,12 +56,14 @@ namespace GeorgesQt
 	int CFormItem::columnCount() const 
 	{
 		//nlinfo("columnCount %d",itemData.count());
-		return itemData.count();
+		//return itemData.count();
+		return 1;
 	}
 
 	QVariant CFormItem::data(int column) const 
 	{
-		return itemData.value(column);
+		//return itemData.value(column);
+		return QVariant(_Name.c_str());
 	}
 
 	CFormItem *CFormItem::parent()
@@ -84,275 +81,146 @@ namespace GeorgesQt
 
 	bool CFormItem::setData(int column, const QVariant &value) 
 	{
-		if (column < 0 || column >= itemData.size())
+		if (column != 0)
 			return false;
 
-		// TODO: default values
-		if (!formElm)
-			return false;
+		bool deleteInsert = false;
 
-		itemData[column] = value;
-		if (formElm->isAtom()) 
-		{
-			const NLGEORGES::UType *type = formElm->getType();
-			if (type) 
-			{
-				switch (type->getType()) 
-				{
-				case NLGEORGES::UType::UnsignedInt:
-				case NLGEORGES::UType::SignedInt:
-				case NLGEORGES::UType::Double:
-				case NLGEORGES::UType::String:
-					if (parentItem->formElm->isArray())
-					{
-						//((NLGEORGES::CFormElm*)parentItem->formElm);//->arrayInsertNodeByName(
-						//if(parentItem->formElm->getArrayNode(elmName, num))
-						//{
-						//}
+		
 
-						bool ok;
-						// TODO: the node can be renamed from eg "#0" to "foobar"
-						int arrayIndex = itemData[0].toString().remove("#").toInt(&ok);
-						if(ok)
-						{
-							NLGEORGES::UFormElm *elmt = 0;
-							if(parentItem->formElm->getArrayNode(&elmt, arrayIndex) && elmt)
-							{
-								if (elmt->isAtom()) 
-								{
-									((NLGEORGES::CFormElmAtom*)elmt)->setValue(value.toString().toStdString().c_str());
-									nldebug(QString("array element string %1 %2")
-									.arg(itemData[0].toString()).arg(value.toString())
-									.toStdString().c_str());
-								}
-							}
-						}
-					}
-					else
-					{
-						if(parentItem->formElm->setValueByName(
-							value.toString().toStdString().c_str(),
-							itemData[0].toString().toStdString().c_str()))
-						{
-							nldebug(QString("string %1 %2")
-							.arg(itemData[0].toString()).arg(value.toString())
-							.toStdString().c_str());
-						}
-						else
-						{
-							nldebug(QString("FAILED string %1 %2")
-							.arg(itemData[0].toString()).arg(value.toString())
-							.toStdString().c_str());
-						}
-					}
-					break;
-				case NLGEORGES::UType::Color:
-					nldebug("Color is TODO");
-					break;
-				default:
-					break;
-				}
-			}
-		}
-		else
+		// Get the parent node
+		const NLGEORGES::CFormDfn *parentDfn;
+		uint indexDfn;
+		const NLGEORGES::CFormDfn *nodeDfn;
+		const NLGEORGES::CType *nodeType;
+		NLGEORGES::CFormElm *parentNode;
+		NLGEORGES::UFormDfn::TEntryType type;
+		bool array;
+		bool parentVDfnArray;
+		NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(m_form);
+		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
+		nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+		if (parentItem && parentItem->nodeType () == CFormItem::Form)
 		{
-			nldebug("setting sth other than Atom");
+			std::string newName = value.toString().toStdString();
+			_Name = newName;
+
+			// Create an action to update the form.
 		}
-		//formElm->setValueByName();
 		return true;
 	}
 
-//    CFormItem *CFormItem::add (/*TSub type,*/ const char *name, uint structId, const char *formName, uint slot)
-//    {
-            // Add at the end
-//            uint index = _Children.size();
-//            _Children.push_back (new CGeorgesEditDocSub);
+	bool CFormItem::isEditable(int column)
+	{
+		// Ensure only valid types can be edited.
+		if(_Type == Null)
+			return false;
 
-//            _Children[index]->_Type = type;
-//            _Children[index]->_Name = name;
-//            _Children[index]->_Parent = this;
-//            _Children[index]->_StructId = structId;
-//            _Children[index]->_FormName = formName;
-//            _Children[index]->_Slot  = slot;
-//            return _Children[index];
-//        CFormItem *newNode = new CFormItem();
-//        appendChild(newNode);
-//        return NULL;
-//    }
+		// Make sure only the first column (name) can be editted.
+		if (column != 0)
+			return false;
 
-    CFormItem *CFormItem::add(NLGEORGES::UFormElm* root, std::string elmName)
+		CFormItem *parent = this->parent();
+
+		// If it wasn't a root node then lets check the node type.
+		const NLGEORGES::CFormDfn *parentDfn;
+		uint indexDfn;
+		const NLGEORGES::CFormDfn *nodeDfn;
+		const NLGEORGES::CType *nodeType;
+		NLGEORGES::CFormElm *parentNode;
+		NLGEORGES::UFormDfn::TEntryType type;
+		bool array;
+		bool parentVDfnArray;
+		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
+		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
+		nlverify ( elm->getNodeByName (parent->formName ().c_str (), &parentDfn, indexDfn,
+                   &nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+		if(array && parentNode)
+			return true;
+
+		return false;
+
+	}
+
+	QIcon CFormItem::getItemImage(CFormItem *rootItem)
+	{
+		if(_Type == CFormItem::Null)
+		{
+				return QIcon(":/images/root.ico");
+		}
+		else if(_Type == CFormItem::Form)
+		{
+			// If the parent is the root item then this is the content.
+			if(parentItem == rootItem)
+				return QIcon(":/images/root.ico");
+
+			// If it wasn't a root node then lets check the node type.
+			const NLGEORGES::CFormDfn *parentDfn;
+			uint indexDfn;
+			const NLGEORGES::CFormDfn *nodeDfn;
+			const NLGEORGES::CType *nodeType;
+			NLGEORGES::CFormElm *node;
+			NLGEORGES::UFormDfn::TEntryType type;
+			bool array;
+			bool parentVDfnArray;
+			NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
+			NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
+			nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+			if(array)
+			{
+				return QIcon(":/images/array.ico");
+			}
+			else
+			{
+				if(type == NLGEORGES::UFormDfn::EntryType)
+				{
+					if(parentDfn)
+					{
+						// Not sure what the hell to do with this. Gets filename from parent dfn?
+					}
+					return QIcon(":/images/zfee51.ico");
+				}
+				else if(type == NLGEORGES::UFormDfn::EntryDfn)
+				{
+					if(parentDfn)
+					{
+						// Not sure what the hell to do with this. Gets filename from parent dfn?
+					}
+					return QIcon(":/images/struct.ico");
+				}
+				else if(type == NLGEORGES::UFormDfn::EntryVirtualDfn)
+				{
+					if(node)
+					{
+						// Not sure what the hell to do with this. Gets filename from parent dfn?
+						std::string dfnName;
+						NLMISC::safe_cast<NLGEORGES::CFormElmVirtualStruct*>(node)->getDfnName(dfnName);
+						// return dfnName.c_str() ?
+					}
+					return QIcon(":/images/vstruct.ico");
+				}
+			}
+			//return QIcon(":/images/struct.ico");
+		}
+		return QIcon();
+	}
+
+	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr)
     {
-        CFormItem *newItem = NULL;
-        UFormElm::TWhereIsNode *whereN = new UFormElm::TWhereIsNode;
-        UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue;
-        // Append a new item to the current parent's list of children.
-//        std::string elmName;
-//        if(root->getStructNodeName(num, elmName))
-//        {
-            QList<QVariant> columnData;
-            //QVariant value;
-            std::string value;
-            //NLMISC::CRGBA value_color;
-            //uint value_uint;
-            //sint value_sint;
-            //double value_double;
-            QString elmtType = "";
-            UFormElm *elmt = 0;
-            if(root->getNodeByName(&elmt, elmName.c_str(),  whereN, true))
-            {
-                if (elmt)
-                {
-                    if (elmt->isArray())
-                        elmtType = "Array";
-                    if (elmt->isStruct())
-                        elmtType = "Struct";
-                    if (elmt->isAtom())
-                    {
-                        elmtType = "Atom";
-                        uint numDefinitions = 0;
-                        const UType *type = elmt->getType();
-                        if (type)
-                        {
-                            numDefinitions = type->getNumDefinition();
-                            root->getValueByName(value, elmName.c_str(),UFormElm::Eval,whereV);
-                            switch (type->getType())
-                            {
-                            case UType::UnsignedInt:
-                                value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toStdString();
-                                elmtType.append("_uint");break;
-                            case UType::SignedInt:
-                                value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toStdString();
-                                elmtType.append("_sint");break;
-                            case UType::Double:
-                                value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble(),0,'f',1).toStdString();
-                                elmtType.append("_double");break;
-                            case UType::String:
-                                elmtType.append("_string");break;
-                            case UType::Color:
-                                elmtType.append("_color");break;
-                            default:
-                                elmtType.append("_unknownType");
-                            }
-                        }
-                        else
-                        {
-                            elmtType.append("_noType");
-                        }
+		CFormItem *newNode = new CFormItem();
+        newNode->_Type = type;
+        newNode->_Name = name;
+        newNode->parentItem = this;
+        newNode->_StructId = structId;
+        newNode->_FormName = formName;
+        newNode->_Slot  = slot;		
+		newNode->m_form = formPtr;
 
-                        if (numDefinitions)
-                        {
-                            std::string l, v;
-                            QString tmpLabel, tmpValue;
-                            for (uint i = 0; i < numDefinitions; i++)
-                            {
-                                type->getDefinition(i,l,v);
-                                tmpLabel = l.c_str();
-                                tmpValue = v.c_str();
-                                if (type->getType() == UType::SignedInt)
-                                {
-                                    if (QString("%1").arg(value.c_str()).toDouble() == tmpValue.toDouble()) {
-                                        value = l;
-                                        break;
-                                    }
-                                }
-                                if (type->getType() == UType::String)
-                                {
-                                    if (QString(value.c_str()) == tmpValue)
-                                    {
-                                        value = l;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (elmt->isVirtualStruct())
-                    {
-                        root->getValueByName(value, elmName.c_str(),UFormElm::Eval,whereV);
-                        elmtType = "VirtualStruct";
-                    }
-                    switch (*whereN)
-                    {
-                    case UFormElm::NodeForm:
-                        elmtType.append("_fromForm");	   break;
-                    case UFormElm::NodeParentForm:
-                        elmtType.append("_fromParentForm"); break;
-                    case UFormElm::NodeDfn:
-                        elmtType.append("_isDFN");		  break;
-                    case UFormElm::NodeType:
-                        elmtType.append("_isType");		 break;
-                    default:
-                        elmtType.append("_noNode");
-                    }
-                    switch (*whereV)
-                    {
-                    case UFormElm::ValueForm:
-                        elmtType.append("_formValue");   break;
-                    case UFormElm::ValueParentForm:
-                        elmtType.append("_parentValue"); break;
-                    case UFormElm::ValueDefaultDfn:
-                        elmtType.append("_dfnValue");	break;
-                    case UFormElm::ValueDefaultType:
-                        elmtType.append("_typeValue");   break;
-                    default:
-                        elmtType.append("_noValue");
-                    }
-                    columnData << QString(elmName.c_str()) << QString(value.c_str()) << "";// << elmtType;
-
-                    newItem = new CFormItem(elmt, columnData, this, *whereV, *whereN);
-                    this->appendChild(newItem);
-
-                    return newItem;
-                    //if (parents.last()->childCount() > 0) {
-                    //	parents << parents.last()->child(parents.last()->childCount()-1);
-                    //}
-
-                    // The building of the tree should be haoppening in the mode,.
-                    //loadFormData(elmt, parent->child(parent->childCount()-1));
-                }
-                else
-                {
-                    // add Defaults
-                    // TODO: spams warnings for non ATOM values but i dont get type of non existing nodes
-                    bool success = root->getValueByName(value, elmName.c_str(),UFormElm::Eval,whereV);
-                    switch (*whereN)
-                    {
-                    case UFormElm::NodeForm:
-                        elmtType.append("_fromForm");	   break;
-                    case UFormElm::NodeParentForm:
-                        elmtType.append("_fromParentForm"); break;
-                    case UFormElm::NodeDfn:
-                        elmtType.append("_isDFN");		  break;
-                    case UFormElm::NodeType:
-                        elmtType.append("_isType");		 break;
-                    default:
-                        elmtType.append("_noNode");
-                    }
-                    switch (*whereV)
-                    {
-                    case UFormElm::ValueForm:
-                        elmtType.append("_formValue");   break;
-                    case UFormElm::ValueParentForm:
-                        elmtType.append("_parentValue"); break;
-                    case UFormElm::ValueDefaultDfn:
-                        elmtType.append("_dfnValue");	break;
-                    case UFormElm::ValueDefaultType:
-                        elmtType.append("_typeValue");   break;
-                    default:
-                        elmtType.append("_noValue");
-                    }
-
-                    columnData << QString(elmName.c_str()) << QString(value.c_str()) << "";// << elmtType;
-                    newItem = new CFormItem(elmt, columnData, this, *whereV, *whereN);
-                    this->appendChild(newItem);
-                    return newItem;
-                }
-//            }
-//            else
-//            {
-//                nlinfo("getNodeByName returned false");
-//            }
-        }
+        appendChild(newNode);
+        return newNode;
     }
 
 }

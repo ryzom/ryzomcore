@@ -14,32 +14,4 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef FORMDELEGATE_H
-#define FORMDELEGATE_H
-
-#include <QStyledItemDelegate>
-
-#if 0 
-
-namespace GeorgesQt 
-{
-
-	class FormDelegate : public QStyledItemDelegate
-	{
-
-	public:
-		FormDelegate(QObject *parent = 0);
-
-		QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-			const QModelIndex &index) const;
-		void setEditorData(QWidget *editor, const QModelIndex &index) const;
-		void setModelData(QWidget *editor, QAbstractItemModel *model,
-			const QModelIndex &index) const;
-		void updateEditorGeometry(QWidget *editor,
-			const QStyleOptionViewItem &option, const QModelIndex &index) const;
-	};
-
-}
-#endif // 0
-
-#endif // FORMDELEGATE_H
+#include "actions.h"

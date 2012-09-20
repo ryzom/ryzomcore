@@ -72,23 +72,10 @@ namespace GeorgesQt
 		m_ui.treeView->header()->setStretchLastSection(true);
 		m_ui.treeViewTabWidget->setTabEnabled (2,false);
 
-		m_ui.checkBoxParent->setStyleSheet("background-color: rgba(0,255,0,30)");
-		m_ui.checkBoxDefaults->setStyleSheet("background-color: rgba(255,0,0,30)");
 		m_form = 0;
-
-		FormDelegate *formdelegate = new FormDelegate(this);
-		m_ui.treeView->setItemDelegateForColumn(1, formdelegate);
-
-		// Set up custom context menu.
-		setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
 		connect(m_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
 			this, SLOT(doubleClicked (QModelIndex)));
-		connect(m_ui.checkBoxParent, SIGNAL(toggled(bool)),
-			this, SLOT(filterRows()));
-		connect(m_ui.checkBoxDefaults, SIGNAL(toggled(bool)),
-			this, SLOT(filterRows()));
 		connect(m_header, SIGNAL(headerClicked(int)),
 			this, SLOT(headerClicked(int)));
 	}
@@ -258,16 +245,9 @@ namespace GeorgesQt
 			loadedForm = m_form->getFilename().c_str();
 
 			CGeorgesFormModel *model = new CGeorgesFormModel(m_form,deps,comments,parents,m_header->expanded());
-			CGeorgesFormProxyModel *proxyModel = new CGeorgesFormProxyModel();
-			proxyModel->setSourceModel(model);
-			m_ui.treeView->setModel(proxyModel);
+			m_ui.treeView->setModel(model);
 			m_ui.treeView->expandAll();
-			// this is a debug output row
-			m_ui.treeView->hideColumn(3);
 
-			filterRows();
-
-		//		//_ui.treeView->setRowHidden(0,QModelIndex(),true);
 			connect(model, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
 				this, SLOT(modifiedFile()));
 
@@ -283,8 +263,7 @@ namespace GeorgesQt
 		NLGEORGES::CForm *parentForm = dynamic_cast<NLGEORGES::CForm*>(uParentForm);
 		NLGEORGES::CForm *mainForm = static_cast<NLGEORGES::CForm*>(m_form);
 
-		CGeorgesFormProxyModel * proxyModel = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
-		CGeorgesFormModel *model = dynamic_cast<CGeorgesFormModel *>(proxyModel->sourceModel());
+		CGeorgesFormModel *model = dynamic_cast<CGeorgesFormModel *>(m_ui.treeView->model());
 
 		if(parentForm)
 		{
@@ -397,19 +376,15 @@ namespace GeorgesQt
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
 	{
-		// TODO: this is messy :( perhaps this can be done better
-		CGeorgesFormProxyModel * proxyModel = 
-			dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
-		CGeorgesFormModel *model = 
-			dynamic_cast<CGeorgesFormModel *>(proxyModel->sourceModel());
-		QModelIndex sourceIndex = proxyModel->mapToSource(index);
+		//CGeorgesFormModel *model = 
+		//	dynamic_cast<CGeorgesFormModel *>((m_ui.treeView->model());
 
-		CFormItem *item = model->getItem(sourceIndex);
+		//CFormItem *item = model->getItem(index);
 
-		if (item->parent() && item->parent()->data(0) == "parents")
-		{
-			Q_EMIT changeFile(CPath::lookup(item->data(0).toString().toStdString(),false).c_str());
-		}
+		//if (item->parent() && item->parent()->data(0) == "parents")
+		//{
+		//	Q_EMIT changeFile(CPath::lookup(item->data(0).toString().toStdString(),false).c_str());
+		//}
 
 		//// col containing additional stuff like icons
 		//if (index.column() == 2) 
@@ -475,129 +450,129 @@ namespace GeorgesQt
 
 	void CGeorgesTreeViewDialog::filterRows()
 	{
-		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
-		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
-		if (m) {
-			m->setShowParents(m_ui.checkBoxParent->isChecked());
-			m->setShowDefaults(m_ui.checkBoxDefaults->isChecked());
-		}
+		//CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
+		//CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
+		//if (m) {
+		//	m->setShowParents(m_ui.checkBoxParent->isChecked());
+		//	m->setShowDefaults(m_ui.checkBoxDefaults->isChecked());
+		//}
 	}
 
 	void CGeorgesTreeViewDialog::showContextMenu(const QPoint &pos)
 	{
-		QMenu contextMenu;
-		QMenu *structContext = NULL;
-		QPoint globalPos = this->mapToGlobal(pos);
-		
-		// Fisrt we're going to see if we've right clicked on a new item and select it.
-		const QModelIndex &index = this->m_ui.treeView->currentIndex();
+		//QMenu contextMenu;
+		//QMenu *structContext = NULL;
+		//QPoint globalPos = this->mapToGlobal(pos);
+		//
+		//// Fisrt we're going to see if we've right clicked on a new item and select it.
+		//const QModelIndex &index = this->m_ui.treeView->currentIndex();
 
-		if(!index.isValid())
-			return;
+		//if(!index.isValid())
+		//	return;
 
-		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
-		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
-		QModelIndex sourceIndex = mp->mapToSource(index);
+		//CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
+		//CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
+		//QModelIndex sourceIndex = mp->mapToSource(index);
 
-		if (m) 
-		{
-			
-			CFormItem *item = m->getItem(sourceIndex);
+		//if (m) 
+		//{
+		//	
+		//	CFormItem *item = m->getItem(sourceIndex);
 
-			// Right click on the "parents" item
-			if (item->data(0) == "parents")
-				contextMenu.addAction("Add parent...");
-			// Right click on a parent item
-			else if(item->parent() && item->parent()->data(0) == "parents")
-			{
-				contextMenu.addAction("Add parent...");
-				contextMenu.addAction("Remove parent");
-			}
-			else if(item->getFormElm()->isArray())
-				contextMenu.addAction("Add array entry...");
-			else if(item->getFormElm()->isStruct())
-			{
-				QMenu *structContext = new QMenu("Add struct element...", this);
-				contextMenu.addMenu(structContext);
+		//	// Right click on the "parents" item
+		//	if (item->data(0) == "parents")
+		//		contextMenu.addAction("Add parent...");
+		//	// Right click on a parent item
+		//	else if(item->parent() && item->parent()->data(0) == "parents")
+		//	{
+		//		contextMenu.addAction("Add parent...");
+		//		contextMenu.addAction("Remove parent");
+		//	}
+		//	else if(item->getFormElm()->isArray())
+		//		contextMenu.addAction("Add array entry...");
+		//	else if(item->getFormElm()->isStruct())
+		//	{
+		//		QMenu *structContext = new QMenu("Add struct element...", this);
+		//		contextMenu.addMenu(structContext);
 
-				NLGEORGES::UFormDfn *defn = item->getFormElm()->getStructDfn();
-				if(defn)
-				{
-					for(uint defnNum=0; defnNum < defn->getNumEntry(); defnNum++)
-					{
-						std::string entryName;
-						std::string dummy;
-						UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue;
-						bool result = defn->getEntryName(defnNum, entryName);
-						bool result2 = item->getFormElm()->getValueByName(dummy, entryName.c_str(), NLGEORGES::UFormElm::Eval, whereV);
+		//		NLGEORGES::UFormDfn *defn = item->getFormElm()->getStructDfn();
+		//		if(defn)
+		//		{
+		//			for(uint defnNum=0; defnNum < defn->getNumEntry(); defnNum++)
+		//			{
+		//				std::string entryName;
+		//				std::string dummy;
+		//				UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue;
+		//				bool result = defn->getEntryName(defnNum, entryName);
+		//				bool result2 = item->getFormElm()->getValueByName(dummy, entryName.c_str(), NLGEORGES::UFormElm::Eval, whereV);
 
-						
-						if(result2 && *whereV != UFormElm::ValueForm)
-						{
-							structContext->addAction(entryName.c_str());
-						}
-						delete whereV;
-					}
-				}
-			}
-			else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
-				contextMenu.addAction("Revert to parent/default...");
+		//				
+		//				if(result2 && *whereV != UFormElm::ValueForm)
+		//				{
+		//					structContext->addAction(entryName.c_str());
+		//				}
+		//				delete whereV;
+		//			}
+		//		}
+		//	}
+		//	else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
+		//		contextMenu.addAction("Revert to parent/default...");
 
-			QAction *selectedItem = contextMenu.exec(globalPos);
-			if(selectedItem)
-			{
-				if(selectedItem->text() == "Add parent...")
-				{
-					// Get the file extension of the form so we can build a dialog pattern.
-					QString file = m_form->getFilename().c_str();
-					file = file.remove(0,file.indexOf(".")+1);
-					QString filePattern = "Parent Sheets (*."+file+")";
-					
-					nlinfo("parent defn name '%s'", file.toStdString().c_str());
-					QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select parent sheets..."), m_lastSheetDir, filePattern);
-					if(!fileNames.isEmpty())
-					{
-						Q_FOREACH(QString fileToParent, fileNames)
-						{
-							// Get just the filename. Georges doesn't want the path.
-							QFileInfo pathInfo( fileToParent );
-							QString tmpFileName( pathInfo.fileName() );
+		//	QAction *selectedItem = contextMenu.exec(globalPos);
+		//	if(selectedItem)
+		//	{
+		//		if(selectedItem->text() == "Add parent...")
+		//		{
+		//			// Get the file extension of the form so we can build a dialog pattern.
+		//			QString file = m_form->getFilename().c_str();
+		//			file = file.remove(0,file.indexOf(".")+1);
+		//			QString filePattern = "Parent Sheets (*."+file+")";
+		//			
+		//			nlinfo("parent defn name '%s'", file.toStdString().c_str());
+		//			QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select parent sheets..."), m_lastSheetDir, filePattern);
+		//			if(!fileNames.isEmpty())
+		//			{
+		//				Q_FOREACH(QString fileToParent, fileNames)
+		//				{
+		//					// Get just the filename. Georges doesn't want the path.
+		//					QFileInfo pathInfo( fileToParent );
+		//					QString tmpFileName( pathInfo.fileName() );
 
-							nlinfo("requesting to add parent form '%s'", tmpFileName.toStdString().c_str());
-							
-							// Call to add the form and load it into the Georges form.
-							addParentForm(tmpFileName);
+		//					nlinfo("requesting to add parent form '%s'", tmpFileName.toStdString().c_str());
+		//					
+		//					// Call to add the form and load it into the Georges form.
+		//					addParentForm(tmpFileName);
 
-							// Save the file lookup path for future dialog boxes.
-							m_lastSheetDir = pathInfo.absolutePath();
-						}						
-					}
-					m_ui.treeView->expandAll();
-				}
-				else if(selectedItem->text() == "Remove parent")
-				{
-					NLGEORGES::CForm *form = static_cast<NLGEORGES::CForm *>(m_form);
-					QString parentFileName = item->data(0).toString();
+		//					// Save the file lookup path for future dialog boxes.
+		//					m_lastSheetDir = pathInfo.absolutePath();
+		//				}						
+		//			}
+		//			m_ui.treeView->expandAll();
+		//		}
+		//		else if(selectedItem->text() == "Remove parent")
+		//		{
+		//			NLGEORGES::CForm *form = static_cast<NLGEORGES::CForm *>(m_form);
+		//			QString parentFileName = item->data(0).toString();
 
-					for(uint num = 0; num < form->getParentCount(); num++)
-					{
-						QString curParentName = form->getParent(num)->getFilename().c_str();
-						if(parentFileName == curParentName)
-						{
-							form->removeParent(num);
-							m->removeParentForm(parentFileName);
-							break;
-						}
-					}
+		//			for(uint num = 0; num < form->getParentCount(); num++)
+		//			{
+		//				QString curParentName = form->getParent(num)->getFilename().c_str();
+		//				if(parentFileName == curParentName)
+		//				{
+		//					form->removeParent(num);
+		//					m->removeParentForm(parentFileName);
+		//					break;
+		//				}
+		//			}
 
-					m_ui.treeView->expandAll();
-				}
+		//			m_ui.treeView->expandAll();
+		//		}
 
-			} // if selected context menu item is valid.
-		} // if 'm' model valid.
+		//	} // if selected context menu item is valid.
+		//} // if 'm' model valid.
 
-		if(structContext)
-			delete structContext;
+		//if(structContext)
+		//	delete structContext;
 	}
 
 } /* namespace GeorgesQt */

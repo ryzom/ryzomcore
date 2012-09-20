@@ -20,6 +20,7 @@
 // Qt includes
 #include <QSortFilterProxyModel>
 
+#if 0
 namespace GeorgesQt 
 {
 
@@ -41,5 +42,5 @@ namespace GeorgesQt
 	};/* class CGeorgesFormProxyModel */
 
 } /* namespace GeorgesQt */
-
+#endif // 0
 #endif // GEORGESFORM_PROXY_MODEL_H

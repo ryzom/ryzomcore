@@ -37,6 +37,8 @@
 #include "georgesform_proxy_model.h"
 #include "formitem.h"
 
+#if 0
+
 namespace GeorgesQt 
 {
 
@@ -276,3 +278,5 @@ namespace GeorgesQt
 		editor->setGeometry(r);
 	}
 } /* namespace GeorgesQt */
+
+#endif // 0
