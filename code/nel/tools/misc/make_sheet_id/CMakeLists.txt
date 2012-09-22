@@ -9,4 +9,4 @@ NL_DEFAULT_PROPS(make_sheet_id "NeL, Tools, Misc: make_sheet_id")
 NL_ADD_RUNTIME_FLAGS(make_sheet_id)
 
 INSTALL(TARGETS make_sheet_id RUNTIME DESTINATION bin COMPONENT toolsmisc)
-INSTALL(FILES make_sheet_id.cfg DESTINATION etc/nel COMPONENT toolsmisc)
+INSTALL(FILES make_sheet_id.cfg DESTINATION ${NL_ETC_PREFIX} COMPONENT toolsmisc)

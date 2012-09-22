@@ -6,7 +6,7 @@
 #-----------------------------------------------------------------------------
 
 # This tells the application(s) where to fidn the installed data.
-ADD_DEFINITIONS(-DDATA_DIR="\\"${NL_SHARE_PREFIX}/object_viewer_qt/\\"")
+ADD_DEFINITIONS(-DDATA_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/object_viewer_qt/\\"")
 
 IF(UNIX AND WITH_STATIC)
 	MESSAGE(FATAL_ERROR "OVQT does not work with static NeL builds on Unix atm.")

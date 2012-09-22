@@ -14,7 +14,7 @@ NL_DEFAULT_PROPS(ryzom_mission_compiler_lib "Ryzom, Library: Mission Compiler")
 NL_ADD_RUNTIME_FLAGS(ryzom_mission_compiler_lib)
 NL_ADD_LIB_SUFFIX(ryzom_mission_compiler_lib)
 
-INSTALL(TARGETS ryzom_mission_compiler_lib LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
+INSTALL(TARGETS ryzom_mission_compiler_lib LIBRARY DESTINATION ${RYZOM_LIB_PREFIX} ARCHIVE DESTINATION ${RYZOM_LIB_PREFIX} COMPONENT libraries)
 
 FILE(GLOB EXESRC main.cpp)
   

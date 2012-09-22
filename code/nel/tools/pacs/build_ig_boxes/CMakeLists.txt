@@ -9,4 +9,4 @@ NL_DEFAULT_PROPS(build_ig_boxes "NeL, Tools, PACS: build_ig_boxes")
 NL_ADD_RUNTIME_FLAGS(build_ig_boxes)
 
 INSTALL(TARGETS build_ig_boxes RUNTIME DESTINATION bin COMPONENT toolspacs)
-INSTALL(FILES build_ig_boxes.cfg DESTINATION etc/nel COMPONENT toolspacs)
+INSTALL(FILES build_ig_boxes.cfg DESTINATION ${NL_ETC_PREFIX} COMPONENT toolspacs)
