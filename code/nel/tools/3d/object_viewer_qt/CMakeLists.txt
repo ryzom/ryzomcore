@@ -15,7 +15,7 @@ ENDIF()
 ADD_SUBDIRECTORY(src)
 
 INSTALL(DIRECTORY data/
-        DESTINATION share/object_viewer_qt/data
+        DESTINATION ${NL_SHARE_PREFIX}/object_viewer_qt/data
         COMPONENT data
         PATTERN "CVS" EXCLUDE
         PATTERN ".svn" EXCLUDE

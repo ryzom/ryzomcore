@@ -23,7 +23,7 @@ INSTALL(DIRECTORY fonts/
 	PATTERN ".svn" EXCLUDE
 	PATTERN "Makefile*" EXCLUDE)
 INSTALL(DIRECTORY max/
-	DESTINATION ${NL_SHARE_PREFIX}/nel/nl_sample_clusterview/max
+	DESTINATION ${NL_SHARE_PREFIX}/nl_sample_clusterview/max
 	COMPONENT samples3d
 	PATTERN "CVS" EXCLUDE
 	PATTERN ".svn" EXCLUDE
