@@ -422,8 +422,9 @@ MACRO(NL_SETUP_BUILD)
   SET(PLATFORM_CFLAGS "$ENV{CFLAGS} ${PLATFORM_CFLAGS}")
   SET(PLATFORM_LINKFLAGS "$ENV{LDFLAGS} ${PLATFORM_LINKFLAGS}")
 
-  # Remove -g flag because we are managing it ourself
+  # Remove -g and -O flag because we are managing them ourself
   STRING(REPLACE "-g" "" PLATFORM_CFLAGS ${PLATFORM_CFLAGS})
+  STRING(REGEX REPLACE "-O[0-9s]" "" PLATFORM_CFLAGS ${PLATFORM_CFLAGS})
 
   # Strip spaces
   STRING(STRIP ${PLATFORM_CFLAGS} PLATFORM_CFLAGS)
