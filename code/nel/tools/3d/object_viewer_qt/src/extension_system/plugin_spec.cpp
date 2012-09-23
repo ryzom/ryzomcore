@@ -71,6 +71,7 @@ PluginSpec::PluginSpec()
 #		error "Unknown compilation mode, can't build suffix"
 #	endif
 #elif defined (NL_OS_UNIX)
+	m_prefix = "lib";
 	m_suffix = ".so";
 #else
 #	error "You must define the lib suffix for your platform"
@@ -139,7 +140,7 @@ QList<PluginSpec *> PluginSpec::dependencySpecs() const
 
 bool PluginSpec::setFileName(const QString &fileName)
 {
-	m_fileName = fileName + m_suffix;
+	m_fileName = m_prefix + fileName + m_suffix;
 	m_filePath = m_location + "/" + m_fileName;
 
 	nlinfo(m_filePath.toStdString().c_str());
