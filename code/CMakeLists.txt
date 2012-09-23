@@ -48,9 +48,6 @@ SET(NL_VERSION_MINOR 8)
 SET(NL_VERSION_PATCH 0)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 
-NL_SETUP_BUILD()
-NL_SETUP_BUILD_FLAGS()
-
 #-----------------------------------------------------------------------------
 # Redirect output files
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -86,6 +83,9 @@ NL_SETUP_PREFIX_PATHS()
 RYZOM_SETUP_PREFIX_PATHS()
 
 NL_CONFIGURE_CHECKS()
+
+NL_SETUP_BUILD()
+NL_SETUP_BUILD_FLAGS()
 
 #-----------------------------------------------------------------------------
 #Platform specifics
