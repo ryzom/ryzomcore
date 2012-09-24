@@ -7,13 +7,20 @@
 
 # This tells the application(s) where to find the installed data.
 IF(WIN32)
+  SET(OVQT_PLUGIN_SPECS_DIR "plugins")
   SET(OVQT_PLUGIN_DIR "plugins")
 ELSEIF(APPLE)
   # TODO: under Mac OS X, don't install but copy files in application package
+  SET(OVQT_PLUGIN_SPECS_DIR "plugins")
   SET(OVQT_PLUGIN_DIR "plugins")
 ELSE(WIN32)
-  SET(OVQT_PLUGIN_DIR ${NL_SHARE_PREFIX}/object_viewer_qt/plugins)
-  ADD_DEFINITIONS(-DDATA_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/object_viewer_qt\\"" -DPLUGINS_DIR="\\"${NL_LIB_ABSOLUTE_PREFIX}/object_viewer_qt\\"")
+  SET(OVQT_PLUGIN_SPECS_DIR ${NL_SHARE_PREFIX}/object_viewer_qt/plugins)
+  SET(OVQT_PLUGIN_DIR ${NL_LIB_PREFIX}/object_viewer_qt)
+
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ovqt_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/ovqt_config.h)
+  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+  ADD_DEFINITIONS(-DHAVE_OVQT_CONFIG_H)
 ENDIF(WIN32)
 
 IF(UNIX AND WITH_STATIC)

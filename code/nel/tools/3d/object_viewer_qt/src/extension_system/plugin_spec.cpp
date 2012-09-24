@@ -35,6 +35,10 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_OVQT_CONFIG_H
+#include "ovqt_config.h"
+#endif
+
 namespace ExtensionSystem
 {
 const char *const PLUGIN_SPEC_NAME = "name";

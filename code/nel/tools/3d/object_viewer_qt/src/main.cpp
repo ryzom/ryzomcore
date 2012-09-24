@@ -41,6 +41,10 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
 
+#ifdef HAVE_OVQT_CONFIG_H
+#include "ovqt_config.h"
+#endif
+
 static const char *appNameC = "ObjectViewerQt";
 
 // nel_qt log file name
