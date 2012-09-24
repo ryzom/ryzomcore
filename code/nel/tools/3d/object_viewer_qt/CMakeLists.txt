@@ -5,8 +5,16 @@
 #
 #-----------------------------------------------------------------------------
 
-# This tells the application(s) where to fidn the installed data.
-ADD_DEFINITIONS(-DDATA_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/object_viewer_qt/\\"")
+# This tells the application(s) where to find the installed data.
+IF(WIN32)
+  SET(OVQT_PLUGIN_DIR "plugins")
+ELSEIF(APPLE)
+  # TODO: under Mac OS X, don't install but copy files in application package
+  SET(OVQT_PLUGIN_DIR "plugins")
+ELSE(WIN32)
+  SET(OVQT_PLUGIN_DIR ${NL_SHARE_PREFIX}/object_viewer_qt/plugins)
+  ADD_DEFINITIONS(-DDATA_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/object_viewer_qt/\\"")
+ENDIF(WIN32)
 
 IF(UNIX AND WITH_STATIC)
 	MESSAGE(FATAL_ERROR "OVQT does not work with static NeL builds on Unix atm.")
