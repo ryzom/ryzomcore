@@ -51,6 +51,7 @@ IF(WITH_QT)
 ENDIF(WITH_QT)
 
 IF(SQUISH_FOUND)
+  ADD_SUBDIRECTORY(s3tc_compressor_lib)
   ADD_SUBDIRECTORY(panoply_maker)
   ADD_SUBDIRECTORY(tga_2_dds)
   ADD_SUBDIRECTORY(hls_bank_maker)

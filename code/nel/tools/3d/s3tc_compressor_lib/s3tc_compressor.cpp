@@ -60,8 +60,12 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 	dest.dwLinearSize = squish::GetStorageRequirements(width, height, flags);
 	compdata.resize(dest.dwLinearSize);
 	// Go!
+#ifdef SQUISH_COMPRESS_HAS_METRIC
 	float weight[3] = {0.3086f, 0.6094f, 0.0820f};
 	squish::CompressImage(pixSrc, width, height, &(*compdata.begin()), flags, weight);
+#else
+	squish::CompressImage(pixSrc, width, height, &(*compdata.begin()), flags);
+#endif
 
 	/* S3TC is a very good compressor, but make BIG mistakes in some case with  DXTC5 and DXTC3
 	*/
