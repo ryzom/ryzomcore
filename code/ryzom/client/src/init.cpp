@@ -787,7 +787,6 @@ void prelogInit()
 		CPath::remapExtension ("png", "tga", true);
 		FPU_CHECKER_ONCE
 
-		uint i;
 		addPreDataPaths(ProgressBar);
 
 		FPU_CHECKER_ONCE
@@ -1045,7 +1044,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for (i=0; i<3; i++)
+		for (uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;

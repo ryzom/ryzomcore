@@ -507,7 +507,7 @@ int extractBotNames(int argc, char *argv[])
 		map<string, TEntryInfo>::iterator first(SimpleNames.begin()), last(SimpleNames.end());
 		for (; first != last; ++first)
 		{
-			uint rowIdx;
+			uint rowIdx = 0;
 			if (!botNames.findRow(botIdCol, first->first, rowIdx))
 			{
 				// we need to add the entry
@@ -524,7 +524,7 @@ int extractBotNames(int argc, char *argv[])
 			{
 				// set/update the sheet name info
 				// try to restore the existing translation
-				uint transRowIdx;
+				uint transRowIdx = 0;
 				if (transBotNames.findRow(transIdCol, first->first, transRowIdx))
 				{
 					ucstring wkBotName = botNames.getData(rowIdx, ucstring("bot name"));

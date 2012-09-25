@@ -4522,7 +4522,7 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 	{
 		if(behaviour.DeltaHP != 0)
 		{
-			CRGBA deltaHPColor;
+			CRGBA deltaHPColor(0, 0, 0);
 			// if it's a hit
 			if( behaviour.DeltaHP < 0 )
 			{

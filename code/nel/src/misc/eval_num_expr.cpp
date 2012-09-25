@@ -1309,7 +1309,7 @@ const int CEvalNumExpr::_OperatorPrecedence[]=
 	9,	// LogicalAnd
 	10,	// LogicalOr
 	11,	// LogicalXor
-	0xffffffff,	// OperatorCount
+	-1,	// OperatorCount
 	20,	// NotOperator
 };
 

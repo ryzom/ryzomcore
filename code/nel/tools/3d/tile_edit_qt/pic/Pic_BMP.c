@@ -31,7 +31,7 @@ typedef struct BMP_HEADER
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 
-unsigned long Pic_BMP_Write(	unsigned char *FileName, 
+unsigned long Pic_BMP_Write(	const char *FileName, 
 								unsigned char *pPal,unsigned char *pDatas, 
 								unsigned long w, unsigned long h, unsigned long d)
 

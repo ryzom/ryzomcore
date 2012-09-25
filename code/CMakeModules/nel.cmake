@@ -527,7 +527,7 @@ MACRO(NL_SETUP_BUILD)
       ENDIF(HOST_CPU STREQUAL "x86" AND TARGET_CPU STREQUAL "x86_64")
     ENDIF(APPLE)
 
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -D_REENTRANT -pipe -ftemplate-depth-48 -Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused -fno-strict-aliasing")
+    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -D_REENTRANT -pipe -Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused -fno-strict-aliasing")
 
     IF(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
       SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -ansi")
@@ -581,7 +581,7 @@ MACRO(NL_SETUP_BUILD)
       SET(PLATFORM_CFLAGS "-fPIC ${PLATFORM_CFLAGS}")
     ENDIF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
 
-    SET(PLATFORM_CXXFLAGS ${PLATFORM_CFLAGS})
+    SET(PLATFORM_CXXFLAGS "${PLATFORM_CFLAGS} -ftemplate-depth-48")
 
     IF(NOT APPLE)
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,--no-undefined -Wl,--as-needed")

@@ -126,6 +126,8 @@ namespace NLQT
 							} // end default
 						} // end switch valueFrom
 					} // end case nodeForm
+				default:
+					break;
 				} // end switch nodeFrom
 				return QVariant();
 			}

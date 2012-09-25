@@ -504,7 +504,7 @@ static char* ConvPic(PIC_PICTURE *pic, unsigned long type, char* pErr)
 
 /* ---------------------------------------- */
 
-unsigned long PIC_Save(unsigned long id, char* FileName, unsigned long type, unsigned long qual)
+unsigned long PIC_Save(unsigned long id, const char* FileName, unsigned long type, unsigned long qual)
 {
 	PIC_PICTURE		*pic;
 	unsigned char	err;

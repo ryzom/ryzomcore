@@ -1827,7 +1827,7 @@ void	getSkillModVsType(CDBCtrlSheet	*item, const CItemSheet*pIS, ucstring &itemT
 void getArmorBonus(CDBCtrlSheet *item, ucstring &itemText, const CItemSheet*pIS)
 {
 	ucstring armor_bonus("");
-	sint32 level;
+	sint32 level = 0;
 
 	if (pIS->Armor.ArmorType == ARMORTYPE::HEAVY)
 		level = item->getQuality();
@@ -3613,7 +3613,7 @@ public:
 		uint8 index;
 		fromString(Params, index);
 		--index; // Param is 1-based so subtract 1
-		if (index < 0 || index >= MAX_INVENTORY_ANIMAL)
+		if (index >= MAX_INVENTORY_ANIMAL)
 		{
 			return;
 		}
