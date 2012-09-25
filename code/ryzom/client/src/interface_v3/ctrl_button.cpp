@@ -50,24 +50,21 @@ bool CCtrlButton::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	if (prop)
 	{
 		string TxName = (const char *) prop;
-		TxName = strlwr(TxName);
-		_TextureIdNormal.setTexture(TxName.c_str());
+		setTexture(toLower(TxName));
 	}
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_pushed" );
 	if (prop)
 	{
 		string TxName = (const char *) prop;
-		TxName = strlwr(TxName);
-		_TextureIdPushed.setTexture(TxName.c_str());
+		setTexturePushed(toLower(TxName));
 	}
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_over" );
 	if (prop)
 	{
 		string TxName = (const char *) prop;
-		TxName = strlwr(TxName);
-		_TextureIdOver.setTexture(TxName.c_str());
+		setTextureOver(toLower(TxName));
 	}
 
 	// *** Misc.
@@ -261,25 +258,19 @@ void CCtrlButton::updateCoords()
 // ----------------------------------------------------------------------------
 void CCtrlButton::setTexture(const std::string&name)
 {
-//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = pIM->getViewRenderer();
-	_TextureIdNormal.setTexture(name.c_str());
+	_TextureIdNormal.setTexture(name.c_str (), 0, 0, 0, 0, false);
 }
 
 // ----------------------------------------------------------------------------
 void CCtrlButton::setTexturePushed(const std::string&name)
 {
-//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = pIM->getViewRenderer();
-	_TextureIdPushed.setTexture(name.c_str());
+	_TextureIdPushed.setTexture(name.c_str (), 0, 0, 0, 0, false);
 }
 
 // ----------------------------------------------------------------------------
 void CCtrlButton::setTextureOver(const std::string&name)
 {
-//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	CViewRenderer &rVR = pIM->getViewRenderer();
-	_TextureIdOver.setTexture(name.c_str());
+	_TextureIdOver.setTexture(name.c_str (), 0, 0, 0, 0, false);
 }
 
 // ----------------------------------------------------------------------------
