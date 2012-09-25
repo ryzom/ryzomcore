@@ -78,11 +78,11 @@ CInterfaceExprNode *CInterfaceExpr::buildExprTree(const std::string &expr)
 	{
 		std::string	tempStr;
 		formatLuaCall(expr, tempStr);
-		if (buildExprTree(tempStr.c_str(), node) == NULL) return false;
+		if (buildExprTree(tempStr.c_str(), node) == NULL) return NULL;
 	}
 	else
 	{
-		if (buildExprTree(expr.c_str(), node) == NULL) return false;
+		if (buildExprTree(expr.c_str(), node) == NULL) return NULL;
 	}
 
 	return node;
