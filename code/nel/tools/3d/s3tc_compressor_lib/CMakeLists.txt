@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${SQUISH_INCLUDE_DIR})
 
 NL_TARGET_LIB(s3tc_compressor ${SRC} ${HEADER})
 
-TARGET_LINK_LIBRARIES(s3tc_compressor ${SQUISH_LIBRARIES})
+TARGET_LINK_LIBRARIES(s3tc_compressor ${SQUISH_LIBRARIES} nelmisc nel3d)
 NL_DEFAULT_PROPS(s3tc_compressor "NeL, Tools, 3D: S3TC Compressor Library")
 NL_ADD_RUNTIME_FLAGS(s3tc_compressor)
 
