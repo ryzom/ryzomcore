@@ -258,19 +258,19 @@ void CCtrlButton::updateCoords()
 // ----------------------------------------------------------------------------
 void CCtrlButton::setTexture(const std::string&name)
 {
-	_TextureIdNormal.setTexture(name.c_str (), 0, 0, 0, 0, false);
+	_TextureIdNormal.setTexture(name.c_str (), 0, 0, -1, -1, false);
 }
 
 // ----------------------------------------------------------------------------
 void CCtrlButton::setTexturePushed(const std::string&name)
 {
-	_TextureIdPushed.setTexture(name.c_str (), 0, 0, 0, 0, false);
+	_TextureIdPushed.setTexture(name.c_str (), 0, 0, -1, -1, false);
 }
 
 // ----------------------------------------------------------------------------
 void CCtrlButton::setTextureOver(const std::string&name)
 {
-	_TextureIdOver.setTexture(name.c_str (), 0, 0, 0, 0, false);
+	_TextureIdOver.setTexture(name.c_str (), 0, 0, -1, -1, false);
 }
 
 // ----------------------------------------------------------------------------
