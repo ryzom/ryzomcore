@@ -9,13 +9,16 @@
 IF(WIN32)
   SET(OVQT_PLUGIN_SPECS_DIR "plugins")
   SET(OVQT_PLUGIN_DIR "plugins")
+  SET(OVQT_DATA_DIR ".")
 ELSEIF(APPLE)
   # TODO: under Mac OS X, don't install but copy files in application package
   SET(OVQT_PLUGIN_SPECS_DIR "plugins")
   SET(OVQT_PLUGIN_DIR "plugins")
+  SET(OVQT_DATA_DIR ".")
 ELSE(WIN32)
   SET(OVQT_PLUGIN_SPECS_DIR ${NL_SHARE_PREFIX}/object_viewer_qt/plugins)
   SET(OVQT_PLUGIN_DIR ${NL_LIB_PREFIX}/object_viewer_qt)
+  SET(OVQT_DATA_DIR ${NL_SHARE_PREFIX}/object_viewer_qt/data)
 
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/ovqt_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/ovqt_config.h)
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
@@ -30,7 +33,7 @@ ENDIF()
 ADD_SUBDIRECTORY(src)
 
 INSTALL(DIRECTORY data/
-        DESTINATION ${NL_SHARE_PREFIX}/object_viewer_qt/data
+        DESTINATION ${OVQT_DATA_DIR}
         COMPONENT data
         PATTERN "CVS" EXCLUDE
         PATTERN ".svn" EXCLUDE

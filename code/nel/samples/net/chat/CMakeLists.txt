@@ -12,5 +12,5 @@ TARGET_LINK_LIBRARIES(nl_sample_chatserver nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_chatserver "NeL, Samples, Net, Chat: Chat Server")
 NL_ADD_RUNTIME_FLAGS(nl_sample_chatserver)
 
-INSTALL(TARGETS nl_sample_chatclient nl_sample_chatserver RUNTIME DESTINATION bin COMPONENT samplesnet)
+INSTALL(TARGETS nl_sample_chatclient nl_sample_chatserver RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samplesnet)
 INSTALL(FILES chat_service.cfg client.cfg DESTINATION ${NL_SHARE_PREFIX}/nl_sample_chat COMPONENT samplesnet)

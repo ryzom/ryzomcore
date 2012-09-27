@@ -17,7 +17,7 @@ NL_DEFAULT_PROPS(nl_sample_udpserver "NeL, Samples, Net, UDP: UDP Server")
 NL_ADD_RUNTIME_FLAGS(nl_sample_udpclient)
 NL_ADD_RUNTIME_FLAGS(nl_sample_udpserver)
 
-INSTALL(TARGETS nl_sample_udpclient nl_sample_udpserver RUNTIME DESTINATION bin COMPONENT samplesnet)
+INSTALL(TARGETS nl_sample_udpclient nl_sample_udpserver RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samplesnet)
 INSTALL(FILES bench_service.cfg client.cfg readme.txt DESTINATION ${NL_SHARE_PREFIX}/nl_sample_udp COMPONENT samplesnet)
 
 IF(WITH_3D)

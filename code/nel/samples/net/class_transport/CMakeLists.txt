@@ -12,5 +12,5 @@ TARGET_LINK_LIBRARIES(nl_sample_ct_gd_service nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_ct_gd_service "NeL, Samples, Net, Class Transport: GD Service")
 NL_ADD_RUNTIME_FLAGS(nl_sample_ct_gd_service)
 
-INSTALL(TARGETS nl_sample_ct_ai_service nl_sample_ct_gd_service RUNTIME DESTINATION bin COMPONENT samplesnet)
+INSTALL(TARGETS nl_sample_ct_ai_service nl_sample_ct_gd_service RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samplesnet)
 INSTALL(FILES ai_service.cfg gd_service.cfg DESTINATION ${NL_SHARE_PREFIX}/nl_sample_class_transport COMPONENT samplesnet)

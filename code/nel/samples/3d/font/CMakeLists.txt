@@ -8,5 +8,5 @@ TARGET_LINK_LIBRARIES(nl_sample_font nelmisc nel3d)
 NL_DEFAULT_PROPS(nl_sample_font "NeL, Samples, 3D: Font")
 NL_ADD_RUNTIME_FLAGS(nl_sample_font)
 
-INSTALL(TARGETS nl_sample_font RUNTIME DESTINATION bin COMPONENT samples3d)
+INSTALL(TARGETS nl_sample_font RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samples3d)
 INSTALL(FILES beteckna.ttf DESTINATION ${NL_SHARE_PREFIX}/nl_sample_font COMPONENT samples3d)
