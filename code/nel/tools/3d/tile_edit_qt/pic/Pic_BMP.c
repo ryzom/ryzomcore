@@ -117,7 +117,7 @@ unsigned long Pic_BMP_Write(	const char *FileName,
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 
-unsigned long Pic_BMP_Read(	unsigned char *FileName,
+unsigned long Pic_BMP_Read(	const char *FileName,
 							unsigned char **ppPal, unsigned char **ppDatas,
 							unsigned long *pWidth, unsigned long *pHeight, 
 							unsigned long *pDepth)
