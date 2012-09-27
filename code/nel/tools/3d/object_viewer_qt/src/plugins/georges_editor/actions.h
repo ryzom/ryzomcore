@@ -17,4 +17,27 @@
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
+#include <QtGui/QUndoCommand>
+
+namespace GeorgesQt 
+{
+	class CFormItem;
+
+	class CUndoFormArrayRenameCommand : public QUndoCommand
+	{
+	public:
+		CUndoFormArrayRenameCommand(CFormItem *item, QString newValue, uint elementId, QUndoCommand *parent = 0);
+		~CUndoFormArrayRenameCommand() {}
+
+		void redo();
+		void undo();
+
+	protected:
+		CFormItem *m_item;
+		QString m_newValue;
+		QString m_oldValue;
+		uint m_elementId;
+	};
+}
+
 #endif // ACTIONS_H

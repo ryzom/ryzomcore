@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Project includes
 #include "formitem.h"
+#include "actions.h"
+#include "georges_editor_form.h"
 
 // Qt includes
 #include <QIcon>
@@ -81,34 +84,39 @@ namespace GeorgesQt
 
 	bool CFormItem::setData(int column, const QVariant &value) 
 	{
-		if (column != 0)
-			return false;
-
-		bool deleteInsert = false;
-
-		
-
-		// Get the parent node
-		const NLGEORGES::CFormDfn *parentDfn;
-		uint indexDfn;
-		const NLGEORGES::CFormDfn *nodeDfn;
-		const NLGEORGES::CType *nodeType;
-		NLGEORGES::CFormElm *parentNode;
-		NLGEORGES::UFormDfn::TEntryType type;
-		bool array;
-		bool parentVDfnArray;
-		NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(m_form);
-		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
-		nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
-
-		if (parentItem && parentItem->nodeType () == CFormItem::Form)
+		if(isEditable(column))
 		{
-			std::string newName = value.toString().toStdString();
-			_Name = newName;
+			nlinfo("form item is editable.");
+			// Ensure that it is a child.
+			if (parentItem && parentItem->nodeType () == CFormItem::Form)
+			{
+				nlinfo("retrieving node information for data change.");
+				// Get the parent node
+				const NLGEORGES::CFormDfn *parentDfn;
+				uint indexDfn;
+				const NLGEORGES::CFormDfn *nodeDfn;
+				const NLGEORGES::CType *nodeType;
+				NLGEORGES::CFormElm *parentNode;
+				NLGEORGES::UFormDfn::TEntryType type;
+				bool isArray;
+				bool parentVDfnArray;
+				NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(m_form);
+				NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
 
-			// Create an action to update the form.
+				// Lets check the parent first, for arrays.
+				nlverify ( elm->getNodeByName (parentItem->formName().c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &parentNode, type, isArray, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+				if(isArray && parentNode)
+				{
+					nlinfo( "is array and a child, generate rename command");
+					CUndoFormArrayRenameCommand *cmd = new CUndoFormArrayRenameCommand(this,value.toString(), _StructId);
+					GeorgesEditorForm::UndoStack->push(cmd);
+					return true;
+				}
+			}
 		}
-		return true;
+
+		return false;
 	}
 
 	bool CFormItem::isEditable(int column)

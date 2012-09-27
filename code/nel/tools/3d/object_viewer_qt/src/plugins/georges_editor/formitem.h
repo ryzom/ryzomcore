@@ -58,8 +58,13 @@ namespace GeorgesQt
 
 		TSub nodeType() { return _Type; }
 		std::string formName() { return _FormName; }
+		
 		std::string name() { return _Name; }
+		void setName(std::string name) { _Name = name; }
+
 		uint structId() { return _StructId; }
+
+		NLGEORGES::UForm *form() { return m_form; }
 
 		bool isEditable(int column);
 

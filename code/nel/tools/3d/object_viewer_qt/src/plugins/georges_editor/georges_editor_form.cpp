@@ -35,6 +35,7 @@
 
 namespace GeorgesQt
 {
+	QUndoStack *GeorgesEditorForm::UndoStack = NULL;
 
 	GeorgesEditorForm::GeorgesEditorForm(QWidget *parent)
 		: QMainWindow(parent),
@@ -61,7 +62,7 @@ namespace GeorgesQt
 		m_mainDock->setDockNestingEnabled(true);
 		layout->addWidget(m_mainDock);
 
-		m_undoStack = new QUndoStack(this);
+		UndoStack = new QUndoStack(this);
 
 		Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 		m_openAction = menuManager->action(Core::Constants::OPEN);
@@ -114,7 +115,7 @@ namespace GeorgesQt
 
 	QUndoStack *GeorgesEditorForm::undoStack() const
 	{
-		return m_undoStack;
+		return UndoStack;
 	}
 
 	void GeorgesEditorForm::open()
@@ -211,7 +212,7 @@ namespace GeorgesQt
         }
 
         CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
-        dock->setUndoStack(m_undoStack);
+        dock->setUndoStack(UndoStack);
         m_lastActiveDock = dock;
         m_dockedWidgets.append(dock);
 
