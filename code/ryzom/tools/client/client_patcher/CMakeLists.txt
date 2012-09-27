@@ -36,4 +36,4 @@ IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client_patcher ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.cpp)
 ENDIF(WITH_PCH)
 
-INSTALL(TARGETS ryzom_client_patcher RUNTIME DESTINATION games COMPONENT client BUNDLE DESTINATION /Applications)
+INSTALL(TARGETS ryzom_client_patcher RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)
