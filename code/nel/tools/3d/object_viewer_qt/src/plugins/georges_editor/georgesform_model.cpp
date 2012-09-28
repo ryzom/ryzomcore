@@ -119,9 +119,8 @@ namespace GeorgesQt
 
 		if(!item->isEditable(index.column()))
 			return false;
-		        
-        //bool result = item->setData(index.column(), value);
-		GeorgesEditorForm::UndoStack->push(new CUndoFormArrayRenameCommand(this,index,value,item->structId()));
+
+		GeorgesEditorForm::UndoStack->push(new CUndoFormArrayRenameCommand(this,item,value));
 
         Q_EMIT dataChanged(index, index);
 
@@ -214,6 +213,14 @@ namespace GeorgesQt
             return QModelIndex();
     }
 
+	QModelIndex CGeorgesFormModel::index(int row, int column, CFormItem *item) const
+	{
+		if(item == m_rootItem)
+			return QModelIndex();
+
+		return createIndex(row, 0, item);
+	}
+
     /******************************************************************************/
 
     QModelIndex CGeorgesFormModel::parent(const QModelIndex &index) const
@@ -277,8 +284,6 @@ namespace GeorgesQt
 
         // Add the new node
         CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form);
-
-		nlinfo("Added form %s : %s", name, formName);
 
         // Can be NULL in virtual DFN
         if (parentDfn)

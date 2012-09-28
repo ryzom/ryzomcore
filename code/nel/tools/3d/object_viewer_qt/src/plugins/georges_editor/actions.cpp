@@ -34,12 +34,9 @@
 namespace GeorgesQt 
 {
 
-	CUndoFormArrayRenameCommand::CUndoFormArrayRenameCommand(CGeorgesFormModel *model, const QModelIndex &index, const QVariant &value, uint elementId, QUndoCommand *parent)
-		: QUndoCommand(parent), m_model(model), m_elementId(elementId)	
+	CUndoFormArrayRenameCommand::CUndoFormArrayRenameCommand(CGeorgesFormModel *model, CFormItem *item, const QVariant &value, QUndoCommand *parent)
+		: QUndoCommand("Rename Form Array Member", parent), m_model(model), m_item(item)
 	{
-		m_row = index.row();
-		m_col = index.column();
-
 		m_newValue = value.toString();
 	}
 
@@ -55,9 +52,6 @@ namespace GeorgesQt
 
 	void CUndoFormArrayRenameCommand::update(bool redo) 
 	{
-		QModelIndex index = m_model->index(m_row, m_col);
-		CFormItem *item = m_model->getItem(index);
-
 		// Get the parent node
 		const NLGEORGES::CFormDfn *parentDfn;
 		uint indexDfn;
@@ -67,41 +61,29 @@ namespace GeorgesQt
 		NLGEORGES::UFormDfn::TEntryType type;
 		bool isArray;
 		bool vdfnArray;
-		NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(item->form());
-		if(!form)
-		{
-			nlinfo("failed to convert form.");
-			return;
-		}
-
+		NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(m_item->form());
 		NLGEORGES::CFormElm *elm = static_cast<NLGEORGES::CFormElm*>(&form->Elements);
 
-		if(!elm)
-			nlwarning("Failed to convert elm!");
-
-		nlverify ( elm->getNodeByName (item->formName().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, isArray, vdfnArray, true, NLGEORGES_FIRST_ROUND) );
+		nlverify ( elm->getNodeByName (m_item->formName().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, isArray, vdfnArray, true, NLGEORGES_FIRST_ROUND) );
 		if (node)
 		{
 			std::string tmpName;
 			node->getFormName(tmpName);
-			nlinfo("doing array rename on '%s'", tmpName.c_str());
 
 			NLGEORGES::CFormElmArray* array = static_cast<NLGEORGES::CFormElmArray*> (node->getParent ());
-			if(!array)
-				nlwarning("the array is invalid.");
 
 			// In the redo stage save the old value, just in case.
 			if(redo)
 			{
 				// If the name of the element is empty then give it a nice default.
-				if(array->Elements[m_elementId].Name.empty())
+				if(array->Elements[m_item->structId()].Name.empty())
 				{
 					m_oldValue.append("#");
-					m_oldValue.append(QString("%1").arg(m_elementId));
+					m_oldValue.append(QString("%1").arg(m_item->structId()));
 				}
 				else
 				{
-					m_oldValue = QString::fromStdString(array->Elements[m_elementId].Name);
+					m_oldValue = QString::fromStdString(array->Elements[m_item->structId()].Name);
 				}
 			}
 
@@ -112,10 +94,10 @@ namespace GeorgesQt
 				value = m_oldValue;
 
 
-			array->Elements[m_elementId].Name = value.toStdString();
-			item->setName(value.toStdString());
+			array->Elements[m_item->structId()].Name = value.toStdString();
+			m_item->setName(value.toStdString());
 
-			m_model->emitDataChanged(index);
+			m_model->emitDataChanged(m_model->index(m_item->row(), 0, m_item));
 		}
 	}
 }

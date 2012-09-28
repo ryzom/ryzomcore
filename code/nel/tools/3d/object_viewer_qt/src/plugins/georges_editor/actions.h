@@ -28,7 +28,7 @@ namespace GeorgesQt
 	class CUndoFormArrayRenameCommand : public QUndoCommand
 	{
 	public:
-		CUndoFormArrayRenameCommand(CGeorgesFormModel *model, const QModelIndex &index, const QVariant &value, uint elementId, QUndoCommand *parent = 0);
+		CUndoFormArrayRenameCommand(CGeorgesFormModel *model, CFormItem *item, const QVariant &value, QUndoCommand *parent = 0);
 		~CUndoFormArrayRenameCommand() {}
 
 		void redo();
@@ -37,12 +37,11 @@ namespace GeorgesQt
 		void update(bool redo);
 
 	protected:
-		int m_row, m_col;
+		CFormItem *m_item;
 		CGeorgesFormModel *m_model;
 		
 		QString m_newValue;
 		QString m_oldValue;
-		uint m_elementId;
 	};
 }
 
