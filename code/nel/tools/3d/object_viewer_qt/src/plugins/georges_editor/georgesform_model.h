@@ -40,7 +40,6 @@ namespace GeorgesQt
 
 	class CGeorgesFormModel : public QAbstractItemModel 
 	{
-		
 	public:
 		CGeorgesFormModel(NLGEORGES::UForm *form, QMap< QString, QStringList> deps,
 			QString comment, QStringList parents, bool* expanded, QObject *parent = 0);
@@ -70,6 +69,10 @@ namespace GeorgesQt
         CFormItem *addArray(CFormItem *parent, NLGEORGES::CFormElmArray *array, NLGEORGES::CFormDfn *rootDfn,
                             const char *name, uint structId, const char *formName, uint slot);
 
+		void emitDataChanged(const QModelIndex &index)
+		{ 
+			Q_EMIT dataChanged(index, index); 
+		}
 	private:
 		void setupModelData();
 		void loadFormData(NLGEORGES::UFormElm *rootElm, CFormItem *parent);

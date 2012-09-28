@@ -17,8 +17,10 @@
 // Project includes
 #include "actions.h"
 #include "formitem.h"
+#include "georgesform_model.h"
 
 // Qt includes
+
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -32,12 +34,30 @@
 namespace GeorgesQt 
 {
 
-	CUndoFormArrayRenameCommand::CUndoFormArrayRenameCommand(CFormItem *item, QString newValue, uint elementId, QUndoCommand *parent)
-		: QUndoCommand("Rename Form Array", parent), m_item(item), m_newValue(newValue), m_elementId(elementId)	
-	{ }
+	CUndoFormArrayRenameCommand::CUndoFormArrayRenameCommand(CGeorgesFormModel *model, const QModelIndex &index, const QVariant &value, uint elementId, QUndoCommand *parent)
+		: QUndoCommand(parent), m_model(model), m_elementId(elementId)	
+	{
+		m_row = index.row();
+		m_col = index.column();
+
+		m_newValue = value.toString();
+	}
 
 	void CUndoFormArrayRenameCommand::redo()
 	{
+		update(true);
+	}
+
+	void CUndoFormArrayRenameCommand::undo()
+	{
+		update(false);
+	}
+
+	void CUndoFormArrayRenameCommand::update(bool redo) 
+	{
+		QModelIndex index = m_model->index(m_row, m_col);
+		CFormItem *item = m_model->getItem(index);
+
 		// Get the parent node
 		const NLGEORGES::CFormDfn *parentDfn;
 		uint indexDfn;
@@ -47,13 +67,33 @@ namespace GeorgesQt
 		NLGEORGES::UFormDfn::TEntryType type;
 		bool isArray;
 		bool vdfnArray;
-		NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(m_item->form());
-		NLGEORGES::CFormElm *elm = static_cast<NLGEORGES::CFormElm*>(&form->getRootNode());
-		nlverify ( elm->getNodeByName (m_item->formName().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, isArray, vdfnArray, true, NLGEORGES_FIRST_ROUND) );
+		NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(item->form());
+		if(!form)
+		{
+			nlinfo("failed to convert form.");
+			return;
+		}
+
+		NLGEORGES::CFormElm *elm = static_cast<NLGEORGES::CFormElm*>(&form->Elements);
+
+		if(!elm)
+			nlwarning("Failed to convert elm!");
+
+		nlverify ( elm->getNodeByName (item->formName().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, isArray, vdfnArray, true, NLGEORGES_FIRST_ROUND) );
 		if (node)
 		{
-			nlinfo("doing array rename");
-				NLGEORGES::CFormElmArray* array = NLMISC::safe_cast<NLGEORGES::CFormElmArray*> (node->getParent ());
+			std::string tmpName;
+			node->getFormName(tmpName);
+			nlinfo("doing array rename on '%s'", tmpName.c_str());
+
+			NLGEORGES::CFormElmArray* array = static_cast<NLGEORGES::CFormElmArray*> (node->getParent ());
+			if(!array)
+				nlwarning("the array is invalid.");
+
+			// In the redo stage save the old value, just in case.
+			if(redo)
+			{
+				// If the name of the element is empty then give it a nice default.
 				if(array->Elements[m_elementId].Name.empty())
 				{
 					m_oldValue.append("#");
@@ -61,37 +101,21 @@ namespace GeorgesQt
 				}
 				else
 				{
-					m_oldValue = array->Elements[m_elementId].Name.c_str();
+					m_oldValue = QString::fromStdString(array->Elements[m_elementId].Name);
 				}
+			}
 
-				array->Elements[m_elementId].Name = m_newValue.toStdString();
-				m_item->setName(m_newValue.toStdString());
+			QString value;
+			if(redo)
+				value = m_newValue;
+			else
+				value = m_oldValue;
+
+
+			array->Elements[m_elementId].Name = value.toStdString();
+			item->setName(value.toStdString());
+
+			m_model->emitDataChanged(index);
 		}
-
 	}
-
-	void CUndoFormArrayRenameCommand::undo()
-	{
-		// Get the parent node
-		const NLGEORGES::CFormDfn *parentDfn;
-		uint indexDfn;
-		const NLGEORGES::CFormDfn *nodeDfn;
-		const NLGEORGES::CType *nodeType;
-		NLGEORGES::CFormElm *node;
-		NLGEORGES::UFormDfn::TEntryType type;
-		bool isArray;
-		bool vdfnArray;
-		NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(m_item->form());
-		NLGEORGES::CFormElm *elm = static_cast<NLGEORGES::CFormElm*>(&form->getRootNode());
-		nlverify ( elm->getNodeByName (m_item->formName().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, isArray, vdfnArray, true, NLGEORGES_FIRST_ROUND) );
-		if (node)
-		{
-				NLGEORGES::CFormElmArray* array = NLMISC::safe_cast<NLGEORGES::CFormElmArray*> (node->getParent ());
-				//m_oldValue = array->Elements[m_elementId].Name.c_str();
-				array->Elements[m_elementId].Name = m_oldValue.toStdString();
-				m_item->setName(m_oldValue.toStdString());
-		}
-
-	}
-
 }

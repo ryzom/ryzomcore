@@ -84,38 +84,7 @@ namespace GeorgesQt
 
 	bool CFormItem::setData(int column, const QVariant &value) 
 	{
-		if(isEditable(column))
-		{
-			nlinfo("form item is editable.");
-			// Ensure that it is a child.
-			if (parentItem && parentItem->nodeType () == CFormItem::Form)
-			{
-				nlinfo("retrieving node information for data change.");
-				// Get the parent node
-				const NLGEORGES::CFormDfn *parentDfn;
-				uint indexDfn;
-				const NLGEORGES::CFormDfn *nodeDfn;
-				const NLGEORGES::CType *nodeType;
-				NLGEORGES::CFormElm *parentNode;
-				NLGEORGES::UFormDfn::TEntryType type;
-				bool isArray;
-				bool parentVDfnArray;
-				NLGEORGES::CForm *form=static_cast<NLGEORGES::CForm*>(m_form);
-				NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
-
-				// Lets check the parent first, for arrays.
-				nlverify ( elm->getNodeByName (parentItem->formName().c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &parentNode, type, isArray, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
-
-				if(isArray && parentNode)
-				{
-					nlinfo( "is array and a child, generate rename command");
-					CUndoFormArrayRenameCommand *cmd = new CUndoFormArrayRenameCommand(this,value.toString(), _StructId);
-					GeorgesEditorForm::UndoStack->push(cmd);
-					return true;
-				}
-			}
-		}
-
+		nlwarning("This should not be called anymore.");
 		return false;
 	}
 

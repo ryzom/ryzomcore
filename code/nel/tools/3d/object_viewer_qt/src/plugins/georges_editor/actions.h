@@ -18,22 +18,28 @@
 #define ACTIONS_H
 
 #include <QtGui/QUndoCommand>
+#include <QModelIndex>
 
 namespace GeorgesQt 
 {
 	class CFormItem;
+	class CGeorgesFormModel;
 
 	class CUndoFormArrayRenameCommand : public QUndoCommand
 	{
 	public:
-		CUndoFormArrayRenameCommand(CFormItem *item, QString newValue, uint elementId, QUndoCommand *parent = 0);
+		CUndoFormArrayRenameCommand(CGeorgesFormModel *model, const QModelIndex &index, const QVariant &value, uint elementId, QUndoCommand *parent = 0);
 		~CUndoFormArrayRenameCommand() {}
 
 		void redo();
 		void undo();
 
+		void update(bool redo);
+
 	protected:
-		CFormItem *m_item;
+		int m_row, m_col;
+		CGeorgesFormModel *m_model;
+		
 		QString m_newValue;
 		QString m_oldValue;
 		uint m_elementId;

@@ -42,6 +42,8 @@
 
 // project includes
 #include "formitem.h"
+#include "georges_editor_form.h"
+#include "actions.h"
 
 using namespace NLGEORGES;
 
@@ -118,12 +120,13 @@ namespace GeorgesQt
 		if(!item->isEditable(index.column()))
 			return false;
 		        
-        bool result = item->setData(index.column(), value);
+        //bool result = item->setData(index.column(), value);
+		GeorgesEditorForm::UndoStack->push(new CUndoFormArrayRenameCommand(this,index,value,item->structId()));
 
         Q_EMIT dataChanged(index, index);
 
         //setupModelData();
-        return result;
+        return true;
     }
 
     /******************************************************************************/
