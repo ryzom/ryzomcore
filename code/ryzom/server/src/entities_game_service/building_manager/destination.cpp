@@ -307,6 +307,10 @@ bool CRoomDestination::isUserAllowed(CCharacter * user,uint16 ownerIdx)
 #ifdef NL_DEBUG
 	nlassert(user);
 #endif
+
+	if (user && user->isDead())
+		return false;
+
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	sint32 cell = mirrorCell;			
 	const IRoomInstance * room = CBuildingManager::getInstance()->getRoomInstanceFromCell( cell );
@@ -423,6 +427,9 @@ bool CExitDestination::build( const NLLIGO::IPrimitive* prim,const NLLIGO::IPrim
 //----------------------------------------------------------------------------
 bool CExitDestination::isUserAllowed(CCharacter * user, uint16 ownerIdx)
 {
+	if (user && user->isDead())
+		return false;
+
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, user->getEntityRowId(), DSPropertyCELL );
 	sint32 cell = mirrorCell;			
 	const IRoomInstance * room = CBuildingManager::getInstance()->getRoomInstanceFromCell( cell );

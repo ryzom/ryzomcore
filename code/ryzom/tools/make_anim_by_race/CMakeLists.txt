@@ -9,4 +9,4 @@ ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 NL_DEFAULT_PROPS(make_anim_by_race "Ryzom, Tools, Misc: Make Anim By Race")
 NL_ADD_RUNTIME_FLAGS(make_anim_by_race)
 
-INSTALL(TARGETS make_anim_by_race RUNTIME DESTINATION bin COMPONENT tools)
+INSTALL(TARGETS make_anim_by_race RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

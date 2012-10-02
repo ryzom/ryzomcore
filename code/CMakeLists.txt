@@ -48,9 +48,6 @@ SET(NL_VERSION_MINOR 8)
 SET(NL_VERSION_PATCH 0)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 
-NL_SETUP_BUILD()
-NL_SETUP_BUILD_FLAGS()
-
 #-----------------------------------------------------------------------------
 # Redirect output files
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -86,6 +83,9 @@ NL_SETUP_PREFIX_PATHS()
 RYZOM_SETUP_PREFIX_PATHS()
 
 NL_CONFIGURE_CHECKS()
+
+NL_SETUP_BUILD()
+NL_SETUP_BUILD_FLAGS()
 
 #-----------------------------------------------------------------------------
 #Platform specifics
@@ -230,7 +230,7 @@ IF(WIN32)
         "${QT_LIBRARY_DIR}/../bin/QtGuid4.dll"
         "${QT_LIBRARY_DIR}/../bin/QtXmld4.dll"
         "${QT_LIBRARY_DIR}/../bin/QtCored4.dll"
-        DESTINATION bin)
+        DESTINATION ${NL_BIN_PREFIX})
     ENDIF(WITH_QT)
   ELSE(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     IF(WITH_QT)
@@ -239,18 +239,18 @@ IF(WIN32)
         "${QT_LIBRARY_DIR}/../bin/QtGui4.dll"
         "${QT_LIBRARY_DIR}/../bin/QtXml4.dll"
         "${QT_LIBRARY_DIR}/../bin/QtCore4.dll"
-        DESTINATION bin)
+        DESTINATION ${NL_BIN_PREFIX})
     ENDIF(WITH_QT)
   ENDIF(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
 
   # Install CEGUI and its dependencies.
   IF(WITH_NEL_CEGUI)
-    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIBase.dll" DESTINATION bin)
-    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIDevilImageCodec.dll" DESTINATION bin)
-    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIExpatParser.dll" DESTINATION bin)
-    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIFalagardWRBase.dll" DESTINATION bin)
-    INSTALL(FILES "${CEGUI_LIB_DIR}/Devil.dll" DESTINATION bin)
-    INSTALL(FILES "${CEGUI_LIB_DIR}/ILU.dll" DESTINATION bin)
+    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIBase.dll" DESTINATION ${NL_BIN_PREFIX})
+    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIDevilImageCodec.dll" DESTINATION ${NL_BIN_PREFIX})
+    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIExpatParser.dll" DESTINATION ${NL_BIN_PREFIX})
+    INSTALL(FILES "${CEGUI_LIB_DIR}/CEGUIFalagardWRBase.dll" DESTINATION ${NL_BIN_PREFIX})
+    INSTALL(FILES "${CEGUI_LIB_DIR}/Devil.dll" DESTINATION ${NL_BIN_PREFIX})
+    INSTALL(FILES "${CEGUI_LIB_DIR}/ILU.dll" DESTINATION ${NL_BIN_PREFIX})
   ENDIF(WITH_NEL_CEGUI)
 
   # Only the tools require MFC.

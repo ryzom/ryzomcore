@@ -1522,11 +1522,14 @@ void setMaxHP_ff_(CStateInstance* entity, CScriptStack& stack)
 		if (!bot->isSpawned())
 			continue;
 		
-		CSpawnBot* const sbot = bot->getSpawnObj();
-		
-		msgList.Entities.push_back(sbot->dataSetRow());
-		msgList.MaxHp.push_back((uint32)(maxHp));
-		msgList.SetFull.push_back((uint8)(setFull?1:0));
+		if (maxHp > 0)
+		{
+			CSpawnBot* const sbot = bot->getSpawnObj();
+			msgList.Entities.push_back(sbot->dataSetRow());
+			msgList.MaxHp.push_back((uint32)(maxHp));
+			msgList.SetFull.push_back((uint8)(setFull?1:0));
+		}
+		bot->setCustomMaxHp((uint32)maxHp);
 	}
 }
 

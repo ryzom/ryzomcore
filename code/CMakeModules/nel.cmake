@@ -30,21 +30,28 @@ MACRO(NL_GEN_REVISION_H)
     ADD_DEFINITIONS(-DHAVE_REVISION_H)
     SET(HAVE_REVISION_H ON)
 
-    # a custom target that is always built
-    ADD_CUSTOM_TARGET(revision ALL
-      DEPENDS ${CMAKE_BINARY_DIR}/revision.h)
+    # if already generated
+    IF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h)
+      # copy it
+      MESSAGE(STATUS "Copying provided revision.h...")
+      FILE(COPY ${CMAKE_SOURCE_DIR}/revision.h DESTINATION ${CMAKE_BINARY_DIR})
+    ELSE(EXISTS ${CMAKE_SOURCE_DIR}/revision.h)
+      # a custom target that is always built
+      ADD_CUSTOM_TARGET(revision ALL
+        DEPENDS ${CMAKE_BINARY_DIR}/revision.h)
 
-    # creates revision.h using cmake script
-    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/revision.h
-      COMMAND ${CMAKE_COMMAND}
-      -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-      -DROOT_DIR=${CMAKE_SOURCE_DIR}/..
-      -P ${CMAKE_SOURCE_DIR}/CMakeModules/GetRevision.cmake)
+      # creates revision.h using cmake script
+      ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/revision.h
+        COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -DROOT_DIR=${CMAKE_SOURCE_DIR}/..
+        -P ${CMAKE_SOURCE_DIR}/CMakeModules/GetRevision.cmake)
 
-    # revision.h is a generated file
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/revision.h
-      PROPERTIES GENERATED TRUE
-      HEADER_FILE_ONLY TRUE)
+      # revision.h is a generated file
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/revision.h
+        PROPERTIES GENERATED TRUE
+        HEADER_FILE_ONLY TRUE)
+    ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h)
   ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h.in)
 ENDMACRO(NL_GEN_REVISION_H)
 
@@ -419,6 +426,18 @@ MACRO(NL_SETUP_BUILD)
     MESSAGE(STATUS "Compiling on ${HOST_CPU} for ${TARGET_CPU}")
   ENDIF("${HOST_CPU}" STREQUAL "${TARGET_CPU}")
 
+  # Use values from environment variables
+  SET(PLATFORM_CFLAGS "$ENV{CFLAGS} ${PLATFORM_CFLAGS}")
+  SET(PLATFORM_LINKFLAGS "$ENV{LDFLAGS} ${PLATFORM_LINKFLAGS}")
+
+  # Remove -g and -O flag because we are managing them ourself
+  STRING(REPLACE "-g" "" PLATFORM_CFLAGS ${PLATFORM_CFLAGS})
+  STRING(REGEX REPLACE "-O[0-9s]" "" PLATFORM_CFLAGS ${PLATFORM_CFLAGS})
+
+  # Strip spaces
+  STRING(STRIP ${PLATFORM_CFLAGS} PLATFORM_CFLAGS)
+  STRING(STRIP ${PLATFORM_LINKFLAGS} PLATFORM_LINKFLAGS)
+
   IF(TARGET_CPU STREQUAL "x86_64")
     SET(TARGET_X64 1)
     SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -DHAVE_X86_64")
@@ -469,9 +488,6 @@ MACRO(NL_SETUP_BUILD)
 
     SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zm1000 /MP /Gy-")
 
-    # Common link flags
-    SET(PLATFORM_LINKFLAGS "")
-
     IF(TARGET_X64)
       # Fix a bug with Intellisense
       SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_WIN64")
@@ -519,7 +535,7 @@ MACRO(NL_SETUP_BUILD)
       ENDIF(HOST_CPU STREQUAL "x86" AND TARGET_CPU STREQUAL "x86_64")
     ENDIF(APPLE)
 
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -D_REENTRANT -pipe -ftemplate-depth-48 -Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused -fno-strict-aliasing")
+    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -D_REENTRANT -pipe -Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused -fno-strict-aliasing")
 
     IF(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
       SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -ansi")
@@ -534,7 +550,7 @@ MACRO(NL_SETUP_BUILD)
     ENDIF(APPLE)
 
     IF(APPLE AND XCODE)
-      SET(CMAKE_OSX_SYSROOT "macosx" CACHE PATH "" FORCE)
+#      SET(CMAKE_OSX_SYSROOT "macosx" CACHE PATH "" FORCE)
     ELSEIF(APPLE AND NOT XCODE)
       IF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
         SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
@@ -573,7 +589,7 @@ MACRO(NL_SETUP_BUILD)
       SET(PLATFORM_CFLAGS "-fPIC ${PLATFORM_CFLAGS}")
     ENDIF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
 
-    SET(PLATFORM_CXXFLAGS ${PLATFORM_CFLAGS})
+    SET(PLATFORM_CXXFLAGS "${PLATFORM_CFLAGS} -ftemplate-depth-48")
 
     IF(NOT APPLE)
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,--no-undefined -Wl,--as-needed")
@@ -613,125 +629,146 @@ MACRO(NL_SETUP_BUILD_FLAGS)
   SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${PLATFORM_LINKFLAGS} ${NL_RELEASE_LINKFLAGS}" CACHE STRING "" FORCE)
 ENDMACRO(NL_SETUP_BUILD_FLAGS)
 
+# Macro to create x_ABSOLUTE_PREFIX from x_PREFIX
+MACRO(NL_MAKE_ABSOLUTE_PREFIX NAME_RELATIVE NAME_ABSOLUTE)
+  IF(IS_ABSOLUTE "${${NAME_RELATIVE}}")
+    SET(${NAME_ABSOLUTE} ${${NAME_RELATIVE}})
+  ELSE(IS_ABSOLUTE "${${{NAME_RELATIVE}}")
+    IF(WIN32)
+      SET(${NAME_ABSOLUTE} ${${NAME_RELATIVE}})
+    ELSE(WIN32)
+      SET(${NAME_ABSOLUTE} ${CMAKE_INSTALL_PREFIX}/${${NAME_RELATIVE}})
+    ENDIF(WIN32)
+  ENDIF(IS_ABSOLUTE "${${NAME_RELATIVE}}")
+ENDMACRO(NL_MAKE_ABSOLUTE_PREFIX)
+
 MACRO(NL_SETUP_PREFIX_PATHS)
   ## Allow override of install_prefix/etc path.
   IF(NOT NL_ETC_PREFIX)
     IF(WIN32)
-      SET(NL_ETC_PREFIX "../etc/nel" CACHE PATH "Installation path for configurations")
+      SET(NL_ETC_PREFIX "." CACHE PATH "Installation path for configurations")
     ELSE(WIN32)
-      SET(NL_ETC_PREFIX "${CMAKE_INSTALL_PREFIX}/etc/nel" CACHE PATH "Installation path for configurations")
+      SET(NL_ETC_PREFIX "etc/nel" CACHE PATH "Installation path for configurations")
     ENDIF(WIN32)
   ENDIF(NOT NL_ETC_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_ETC_PREFIX NL_ETC_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/share path.
   IF(NOT NL_SHARE_PREFIX)
     IF(WIN32)
-      SET(NL_SHARE_PREFIX "../share/nel" CACHE PATH "Installation path for data.")
+      SET(NL_SHARE_PREFIX "." CACHE PATH "Installation path for data.")
     ELSE(WIN32)
-      SET(NL_SHARE_PREFIX "${CMAKE_INSTALL_PREFIX}/share/nel" CACHE PATH "Installation path for data.")
+      SET(NL_SHARE_PREFIX "share/nel" CACHE PATH "Installation path for data.")
     ENDIF(WIN32)
   ENDIF(NOT NL_SHARE_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_SHARE_PREFIX NL_SHARE_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/sbin path.
   IF(NOT NL_SBIN_PREFIX)
     IF(WIN32)
-      SET(NL_SBIN_PREFIX "../sbin" CACHE PATH "Installation path for admin tools and services.")
+      SET(NL_SBIN_PREFIX "." CACHE PATH "Installation path for admin tools and services.")
     ELSE(WIN32)
-      SET(NL_SBIN_PREFIX "${CMAKE_INSTALL_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
+      SET(NL_SBIN_PREFIX "sbin" CACHE PATH "Installation path for admin tools and services.")
     ENDIF(WIN32)
   ENDIF(NOT NL_SBIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_SBIN_PREFIX NL_SBIN_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/bin path.
   IF(NOT NL_BIN_PREFIX)
     IF(WIN32)
-      SET(NL_BIN_PREFIX "../bin" CACHE PATH "Installation path for tools and applications.")
+      SET(NL_BIN_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-      SET(NL_BIN_PREFIX "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation path for tools and applications.")
+      SET(NL_BIN_PREFIX "bin" CACHE PATH "Installation path for tools and applications.")
     ENDIF(WIN32)
   ENDIF(NOT NL_BIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_BIN_PREFIX NL_BIN_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/lib path.
   IF(NOT NL_LIB_PREFIX)
-    IF(WIN32)
-      SET(NL_LIB_PREFIX "../lib" CACHE PATH "Installation path for libraries.")
-    ELSE(WIN32)
-      IF(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
-      ELSE(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation path for libraries.")
-      ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
-    ENDIF(WIN32)
+    IF(CMAKE_LIBRARY_ARCHITECTURE)
+      SET(NL_LIB_PREFIX "lib/${CMAKE_LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
+    ELSE(CMAKE_LIBRARY_ARCHITECTURE)
+      SET(NL_LIB_PREFIX "lib" CACHE PATH "Installation path for libraries.")
+    ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
   ENDIF(NOT NL_LIB_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_LIB_PREFIX NL_LIB_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/lib path.
   IF(NOT NL_DRIVER_PREFIX)
     IF(WIN32)
-      SET(NL_DRIVER_PREFIX "../lib" CACHE PATH "Installation path for drivers.")
+      SET(NL_DRIVER_PREFIX "." CACHE PATH "Installation path for drivers.")
     ELSE(WIN32)
       IF(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_DRIVER_PREFIX "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/nel" CACHE PATH "Installation path for drivers.")
+        SET(NL_DRIVER_PREFIX "lib/${CMAKE_LIBRARY_ARCHITECTURE}/nel" CACHE PATH "Installation path for drivers.")
       ELSE(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_DRIVER_PREFIX "${CMAKE_INSTALL_PREFIX}/lib/nel" CACHE PATH "Installation path for drivers.")
+        SET(NL_DRIVER_PREFIX "lib/nel" CACHE PATH "Installation path for drivers.")
       ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
     ENDIF(WIN32)
   ENDIF(NOT NL_DRIVER_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_DRIVER_PREFIX NL_DRIVER_ABSOLUTE_PREFIX)
 
 ENDMACRO(NL_SETUP_PREFIX_PATHS)
 
 MACRO(RYZOM_SETUP_PREFIX_PATHS)
-  ## Allow override of install_prefix path.
-  IF(NOT RYZOM_PREFIX)
-    IF(WIN32)
-      SET(RYZOM_PREFIX "." CACHE PATH "Installation path")
-    ELSE(WIN32)
-      SET(RYZOM_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Installation path")
-    ENDIF(WIN32)
-  ENDIF(NOT RYZOM_PREFIX)
-
   ## Allow override of install_prefix/etc path.
   IF(NOT RYZOM_ETC_PREFIX)
     IF(WIN32)
       SET(RYZOM_ETC_PREFIX "." CACHE PATH "Installation path for configurations")
     ELSE(WIN32)
-      SET(RYZOM_ETC_PREFIX "${RYZOM_PREFIX}/etc/ryzom" CACHE PATH "Installation path for configurations")
+      SET(RYZOM_ETC_PREFIX "etc/ryzom" CACHE PATH "Installation path for configurations")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_ETC_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_ETC_PREFIX RYZOM_ETC_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/share path.
   IF(NOT RYZOM_SHARE_PREFIX)
     IF(WIN32)
       SET(RYZOM_SHARE_PREFIX "." CACHE PATH "Installation path for data.")
     ELSE(WIN32)
-      SET(RYZOM_SHARE_PREFIX "${RYZOM_PREFIX}/share/ryzom" CACHE PATH "Installation path for data.")
+      SET(RYZOM_SHARE_PREFIX "share/ryzom" CACHE PATH "Installation path for data.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_SHARE_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_SHARE_PREFIX RYZOM_SHARE_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/sbin path.
   IF(NOT RYZOM_SBIN_PREFIX)
     IF(WIN32)
       SET(RYZOM_SBIN_PREFIX "." CACHE PATH "Installation path for admin tools and services.")
     ELSE(WIN32)
-      SET(RYZOM_SBIN_PREFIX "${RYZOM_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
+      SET(RYZOM_SBIN_PREFIX "sbin" CACHE PATH "Installation path for admin tools and services.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_SBIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_SBIN_PREFIX RYZOM_SBIN_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/bin path.
   IF(NOT RYZOM_BIN_PREFIX)
     IF(WIN32)
       SET(RYZOM_BIN_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-      SET(RYZOM_BIN_PREFIX "${RYZOM_PREFIX}/bin" CACHE PATH "Installation path for tools.")
+      SET(RYZOM_BIN_PREFIX "bin" CACHE PATH "Installation path for tools.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_BIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_BIN_PREFIX RYZOM_BIN_ABSOLUTE_PREFIX)
+
+  ## Allow override of install_prefix/lib path.
+  IF(NOT RYZOM_LIB_PREFIX)
+    IF(CMAKE_LIBRARY_ARCHITECTURE)
+      SET(RYZOM_LIB_PREFIX "lib/${CMAKE_LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
+    ELSE(CMAKE_LIBRARY_ARCHITECTURE)
+      SET(RYZOM_LIB_PREFIX "lib" CACHE PATH "Installation path for libraries.")
+    ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
+  ENDIF(NOT RYZOM_LIB_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_LIB_PREFIX RYZOM_LIB_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/games path.
   IF(NOT RYZOM_GAMES_PREFIX)
     IF(WIN32)
       SET(RYZOM_GAMES_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-      SET(RYZOM_GAMES_PREFIX "${RYZOM_PREFIX}/games" CACHE PATH "Installation path for client.")
+      SET(RYZOM_GAMES_PREFIX "games" CACHE PATH "Installation path for client.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_GAMES_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_GAMES_PREFIX RYZOM_GAMES_ABSOLUTE_PREFIX)
 
 ENDMACRO(RYZOM_SETUP_PREFIX_PATHS)
 

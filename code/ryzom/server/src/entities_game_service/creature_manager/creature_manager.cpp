@@ -253,7 +253,7 @@ void CChangeCreatureHPImp::callback(const string &, NLNET::TServiceId sid)
 
 
 //--------------------------------------------------------------
-//				CChangeCreatureMaxHPImp ::callback()  
+//				CCreatureSetUrlImp ::callback()  
 //--------------------------------------------------------------
 void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 {

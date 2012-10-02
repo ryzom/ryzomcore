@@ -98,16 +98,35 @@ class CMissionStepTalk : public IMissionStepTemplate
 
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
+		string webAppUrl;
+
 		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
+
+		if (_IsDynamic && _User != NULL)
+		{
+			vector<string> params = _User->getCustomMissionParams(_Dynamic);
+			if (params.size() < 2)
+			{
+				LOGMISSIONSTEPERROR("talk_to : invalid npc name");
+				return 0;
+			}
+			else
+			{
+				webAppUrl = params[0];
+			}
+		}
+		
 		// not check here : they are done befor. If a talk event comes here, the step is complete
 		if( event.Type == CMissionEvent::Talk )		
 		{
+			if (!webAppUrl.empty() && _User != NULL)
+				_User->validateDynamicMissionStep(webAppUrl);
 			LOGMISSIONSTEPSUCCESS("talk_to");
 			return 1;
 		}
 		return 0;
 	}
-	
+
 	void getInitState( std::vector<uint32>& ret )
 	{
 		ret.clear();

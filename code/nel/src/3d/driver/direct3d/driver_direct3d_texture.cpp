@@ -442,7 +442,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 	if (d3dtext->Texture == NULL)
 	{
 		// profiling: count TextureMemory usage.
-		uint32 textureMeory = computeTextureMemoryUsage (width, height, levels, destFormat, cube);
+		uint32 textureMemory = computeTextureMemoryUsage (width, height, levels, destFormat, cube);
 
 		// Create the texture
 		bool createSuccess;
@@ -465,7 +465,14 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 				_DeviceInterface->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 			}
 
-			createSuccess = _DeviceInterface->CreateTexture (width, height, levels, renderTarget?D3DUSAGE_RENDERTARGET:0, destFormat, renderTarget?D3DPOOL_DEFAULT:D3DPOOL_MANAGED, &(d3dtext->Texture2d), NULL) == D3D_OK;
+			HRESULT hr = _DeviceInterface->CreateTexture (width, height, levels, renderTarget?D3DUSAGE_RENDERTARGET:0, destFormat, renderTarget?D3DPOOL_DEFAULT:D3DPOOL_MANAGED, &(d3dtext->Texture2d), NULL);
+
+			if (hr != D3D_OK)
+			{
+				nlwarning("CreateTexture failed with code 0x%x for texture %s in %ux%u", hr, tex.getShareName().c_str(), width, height);
+			}
+
+			createSuccess = hr == D3D_OK;
 			d3dtext->Texture = d3dtext->Texture2d;
 		}
 
@@ -473,7 +480,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 			return false;
 
 		// Stats
-		d3dtext->TextureMemory = textureMeory;
+		d3dtext->TextureMemory = textureMemory;
 		_AllocatedTextureMemory += d3dtext->TextureMemory;
 
 		// Copy parameters

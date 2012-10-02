@@ -84,6 +84,7 @@ private:
 	QString m_description;
 
 	QString m_nameSpecFile;
+	QString m_prefix;
 	QString m_suffix;
 	int m_state;
 	bool m_enabled, m_enabledStartup;

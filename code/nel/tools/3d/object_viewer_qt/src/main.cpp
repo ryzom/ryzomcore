@@ -41,6 +41,10 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
 
+#ifdef HAVE_OVQT_CONFIG_H
+#include "ovqt_config.h"
+#endif
+
 static const char *appNameC = "ObjectViewerQt";
 
 // nel_qt log file name
@@ -151,10 +155,10 @@ sint main(int argc, char **argv)
 	ExtensionSystem::PluginManager pluginManager;
 	pluginManager.setSettings(settings);
 	QStringList pluginPaths;
-#if !defined(NL_OS_MAC)
-	pluginPaths << settings->value("PluginPath", "./plugins").toString();
-#else
+#if defined(NL_OS_MAC)
 	pluginPaths << settings->value("PluginPath", qApp->applicationDirPath() + QString("/../PlugIns/ovqt")).toString();
+#else
+	pluginPaths << settings->value("PluginPath", QString("%1/plugins").arg(DATA_DIR)).toString();
 #endif
 
 	pluginManager.setPluginPaths(pluginPaths);

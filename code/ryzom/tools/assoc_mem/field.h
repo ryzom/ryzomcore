@@ -32,7 +32,7 @@ class CField {
 	public:
 		CField();
 		CField(std::string);
-		~CField();
+		virtual ~CField();
 		virtual const std::vector<IValue *> &getPossibleValues() const;
 		virtual void addPossibleValue(IValue *);
 		virtual ICondNode *createNode(int, int, std::vector<CRecord *> &) = 0;

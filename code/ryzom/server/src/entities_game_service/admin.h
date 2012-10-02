@@ -34,6 +34,7 @@ struct CAdminCommand
 	bool		AddEId;
 	std::string	Priv;
 	std::string ForwardToservice;
+	bool		Audit;
 };
 
 //

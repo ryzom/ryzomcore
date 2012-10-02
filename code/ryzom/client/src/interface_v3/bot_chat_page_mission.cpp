@@ -156,8 +156,8 @@ void CBotChatPageMission::acceptMission()
 	}
 	// close the selection box
 	activateWindow(WIN_BOT_CHAT_ACCEPT_MISSION, false);
-	// close the botchat
-	CBotChatManager::getInstance()->setCurrPage(NULL);
+	//// close the botchat
+	//CBotChatManager::getInstance()->setCurrPage(NULL);
 	_CurrSel = NULL;
 }
 

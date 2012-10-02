@@ -504,6 +504,7 @@ void cbClientReady( CMessage& msgin, const std::string &serviceName, NLNET::TSer
 	if (!IsRingShard && player->havePriv(AlwaysInvisiblePriv))
 	{
 		c->setWhoSeesMe(uint64(0));
+		c->setInvisibility(true);
 	}
 
 	TheDataset.declareEntity( entityIndex ); // after the writing of properties to mirror
@@ -676,8 +677,26 @@ void finalizeClientReady( uint32 userId, uint32 index )
 
 	// for GM player, trigger a 'infos' command to remember their persistent state
 	if (!PlayerManager.getPlayer(uint32(c->getId().getShortId())>>4)->getUserPriv().empty())
-		CCommandRegistry::getInstance().execute(toString("infos %s", c->getId().toString().c_str()).c_str(), InfoLog(), true);
-	
+	{
+		string res = toString("infos %s", c->getId().toString().c_str()).c_str();
+		CLightMemDisplayer *CmdDisplayer = new CLightMemDisplayer("CmdDisplayer");
+		CLog *CmdLogger = new CLog( CLog::LOG_NO );
+		CmdLogger->addDisplayer( CmdDisplayer );
+		NLMISC::ICommand::execute(res, *CmdLogger, true);
+		const std::deque<std::string>	&strs = CmdDisplayer->lockStrings ();
+		for (uint i = 0; i < strs.size(); i++)
+		{
+			InfoLog->displayNL("%s", trim(strs[i]).c_str());
+
+			SM_STATIC_PARAMS_1(params,STRING_MANAGER::literal);
+			params[0].Literal = trim(strs[i]);
+			CCharacter::sendDynamicSystemMessage( c->getId(), "LITERAL", params );
+		}
+		CmdDisplayer->unlockStrings();
+		CmdLogger->removeDisplayer (CmdDisplayer);
+		delete CmdDisplayer;
+		delete CmdLogger;
+	}
 	c->setFinalized(true);
 
 } // finalizeClientReady //

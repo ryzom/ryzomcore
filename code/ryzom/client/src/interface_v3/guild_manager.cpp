@@ -362,44 +362,47 @@ void CGuildManager::update()
 			if (node && node->getValueBool())
 			{
 				// See if we need to show any online/offline messages
-				static vector<SGuildMember> CachedGuildMembers;
+				static map<ucstring, SGuildMember> CachedGuildMembers;
 				ucstring onlineMessage = CI18N::get("uiPlayerOnline");
 				ucstring offlineMessage = CI18N::get("uiPlayerOffline");
 
 				for (uint i = 0; i < _GuildMembers.size(); ++i)
 				{
-					for (uint j = 0; j < CachedGuildMembers.size(); ++j)
+					map<ucstring, SGuildMember>::const_iterator it = CachedGuildMembers.find(_GuildMembers[i].Name);
+					if ( it != CachedGuildMembers.end() )
 					{
-						// Status change is from offline to online/abroad online or vice versa. 
-						TCharConnectionState prevState = CachedGuildMembers[j].Online;
-						TCharConnectionState curState = _GuildMembers[i].Online;
-						bool showMsg = (prevState != curState) && 
-									   (CachedGuildMembers[j].Name == _GuildMembers[i].Name) &&
-									   (prevState == ccs_offline || curState == ccs_offline);
-
-						if (showMsg)
+						if ( (*it).second.Online == _GuildMembers[i].Online)
 						{
-							ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
-							strFindReplace(msg, "%s", _GuildMembers[i].Name);
-							string cat = getStringCategory(msg, msg);
-							map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-							NLMISC::CRGBA col = CRGBA::Yellow;
-							it = ClientCfg.SystemInfoParams.find(toLower(cat));
-							if (it != ClientCfg.SystemInfoParams.end())
-							{
-								col = it->second.Color;
-							}
-							bool dummy;
-							PeopleInterraction.ChatInput.Guild.displayMessage(msg, col, 2, &dummy);
-							break;
+							// Online status not changed for this member
+							continue;
 						}
+
+						if ( (*it).second.Online != ccs_offline && _GuildMembers[i].Online != ccs_offline)
+						{
+							// Not from offline, or to offline, so don't show anything
+							continue;
+						}
+
+						ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
+						strFindReplace(msg, "%s", _GuildMembers[i].Name);
+						string cat = getStringCategory(msg, msg);
+						map<string, CClientConfig::SSysInfoParam>::const_iterator it;
+						NLMISC::CRGBA col = CRGBA::Yellow;
+						it = ClientCfg.SystemInfoParams.find(toLower(cat));
+						if (it != ClientCfg.SystemInfoParams.end())
+						{
+							col = it->second.Color;
+						}
+						bool dummy;
+						PeopleInterraction.ChatInput.Guild.displayMessage(msg, col, 2, &dummy);
+						break;
 					}
 				}
 
 				CachedGuildMembers.clear();
 				for (uint i = 0; i < _GuildMembers.size(); ++i)
 				{
-					CachedGuildMembers.push_back(_GuildMembers[i]);
+					CachedGuildMembers.insert(make_pair(_GuildMembers[i].Name, _GuildMembers[i]));
 				}
 			}
 

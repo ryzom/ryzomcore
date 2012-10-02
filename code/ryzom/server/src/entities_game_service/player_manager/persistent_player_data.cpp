@@ -570,6 +570,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP2(Invisible, bool, getInvisibility(), setInvisibility(val)) \
 	PROP2(Aggroable, sint8, getAggroableSave(), setAggroableSave(val)) \
 	PROP2(GodMode, bool, getGodModeSave(), setGodModeSave(val)) \
+	PROP2(FriendVisibility, uint8, getFriendVisibilitySave(), setFriendVisibilitySave(val)) \
 
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )

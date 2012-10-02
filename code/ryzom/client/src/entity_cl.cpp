@@ -2287,24 +2287,39 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 			// retrieve the translated string
 			_TitleRaw = id.toString();
 //			ucstring replacement = CI18N::get(strNewTitle);
-			bool womenTitle = false;
+			bool womanTitle = false;
 			CCharacterCL * c = dynamic_cast<CCharacterCL*>(this);
 			if(c)
 			{
-				if( c->getGender() == GSGENDER::female )
-					womenTitle = true;
+				womanTitle = ( c->getGender() == GSGENDER::female );
 			}
-			const ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw,womenTitle));
-			_Tags = STRING_MANAGER::CStringManagerClient::getTitleInfos(_TitleRaw,womenTitle);
+			
+			ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle));
+
+			// Sometimes translation contains another title
+			{
+				ucstring::size_type pos = replacement.find('$');
+				if (pos != ucstring::npos)
+				{
+					ucstring sn = replacement;
+					_EntityName = sn.substr(0, pos);
+					ucstring::size_type pos2 = sn.find('$', pos + 1);
+					_TitleRaw = sn.substr(pos+1, pos2 - pos - 1);
+					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
+				}
+			}
+
+			_Tags = STRING_MANAGER::CStringManagerClient::getTitleInfos(_TitleRaw, womanTitle);
 			if (!replacement.empty() || !ClientCfg.DebugStringManager)
 			{
 				// build the final name
+				p1 = _EntityName.find('$');
 				_EntityName   = _EntityName.substr(0, p1);	// + _Name.substr(p2+1)
 				// Get extended name
 				_NameEx = replacement;
 				newtitle = _NameEx;
 			}
-			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw );
+			CHARACTER_TITLE::ECharacterTitle titleEnum = CHARACTER_TITLE::toCharacterTitle( _TitleRaw.toString() );
 			if ( titleEnum >= CHARACTER_TITLE::BeginGmTitle && titleEnum <= CHARACTER_TITLE::EndGmTitle )
 			{
 				_GMTitle = titleEnum - CHARACTER_TITLE::BeginGmTitle;
@@ -2338,7 +2353,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 		if (pGC != NULL) pGC->setUCTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();
-		pSM->setPlayerTitle(_TitleRaw);
+		pSM->setPlayerTitle(_TitleRaw.toString());
 	}
 
 	// Must rebuild the in scene interface 'cause name has changed
@@ -2349,17 +2364,17 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 //-----------------------------------------------
 // getTitleFromName
 //-----------------------------------------------
-string CEntityCL::getTitleFromName(const ucstring &name)
+ucstring CEntityCL::getTitleFromName(const ucstring &name)
 {
 	ucstring::size_type p1 = name.find('$');
 	if (p1 != ucstring::npos)
 	{
 		ucstring::size_type p2 = name.find('$', p1 + 1);
 		if (p2 != ucstring::npos)
-			return name.toString().substr(p1+1, p2-p1-1);
+			return name.substr(p1+1, p2-p1-1);
 	}
 
-	return "";
+	return ucstring("");
 }// getTitleFromName //
 
 //-----------------------------------------------

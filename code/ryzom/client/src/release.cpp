@@ -69,7 +69,7 @@
 #include "string_manager_client.h"
 #include "precipitation_clip_grid.h"
 #include "interface_v3/music_player.h"
-#include "http_client.h"
+#include "login.h"
 #include "actions_client.h"
 #include "login_progress_post_thread.h"
 //

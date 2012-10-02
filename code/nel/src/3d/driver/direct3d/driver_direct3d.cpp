@@ -2715,6 +2715,8 @@ bool CDriverD3D::fillPresentParameter (D3DPRESENT_PARAMETERS &parameters, D3DFOR
 	// Choose a zbuffer format
 	D3DFORMAT zbufferFormats[]=
 	{
+		//uncomment to save zbuffer D3DFMT_D32F_LOCKABLE,
+		//uncomment to save zbuffer D3DFMT_D16_LOCKABLE,
 		/*D3DFMT_D32,
 		D3DFMT_D24X8,*/
 		D3DFMT_D24S8,

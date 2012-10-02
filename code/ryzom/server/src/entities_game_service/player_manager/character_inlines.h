@@ -902,6 +902,12 @@ inline uint32 CCharacter::getOrganization() const
 }
 
 
+inline uint32 CCharacter::getOrganizationStatus() const
+{
+	return _OrganizationStatus; 
+}
+
+
 //------------------------------------------------------------------------------
 
 inline const std::list<TCharacterLogTime>& CCharacter::getLastLogStats() const

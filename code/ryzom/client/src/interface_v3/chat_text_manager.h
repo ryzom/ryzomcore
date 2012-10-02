@@ -59,10 +59,13 @@ private:
 	mutable class CCDBNodeLeaf    *_TextFontSize;
 	mutable CCDBNodeLeaf    *_TextMultilineSpace;
 	mutable CCDBNodeLeaf    *_TextShadowed;
+	mutable CCDBNodeLeaf    *_ShowTimestamps;
 
 	// ctor, private because of singleton
 	CChatTextManager();
 	~CChatTextManager();
+
+	bool showTimestamps() const;
 };
 
 // shortcut to get text manager instance

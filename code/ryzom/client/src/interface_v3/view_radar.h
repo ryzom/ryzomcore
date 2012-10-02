@@ -45,9 +45,7 @@ public:
 	};
 
 	/// Constructor
-	CViewRadar(const TCtorParam &param) : CViewBase(param)
-	{
-	}
+	CViewRadar(const TCtorParam &param);
 
 	bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
 
@@ -79,7 +77,24 @@ protected:
 		sint32 MTxH;
 	};
 
+private:
 	CRadarSpotDesc		_SpotDescriptions[NbRadarSpotIds];
+
+	class CDBMissionIconqObs : public ICDBNode::IPropertyObserver
+	{
+	public:
+		virtual void update(ICDBNode *node);
+		bool _displayMissionSpots;
+	};
+	CDBMissionIconqObs _MissionIconsObs;
+	
+	class CDBMiniMissionSpotsObs : public ICDBNode::IPropertyObserver
+	{
+	public:
+		virtual void update(ICDBNode *node);
+		bool _displayMiniMissionSpots;
+	};
+	CDBMiniMissionSpotsObs _MiniMissionSpotsObs;
 };
 
 #endif // RY_VIEW_RADAR_H

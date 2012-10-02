@@ -148,7 +148,7 @@ namespace R2
 	public:
 		CDynamicMapService(	NLMISC::CConfigFile& confFile, NLNET::IModuleSocket * gateway);
 
-		~CDynamicMapService();
+		virtual ~CDynamicMapService();
 
 		static CDynamicMapService* getInstance();
 

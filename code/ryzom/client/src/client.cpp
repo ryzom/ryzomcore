@@ -343,8 +343,9 @@ void initCrashReport ()
 		send("/?crashtype=DURING_RELEASE");
 	else if (crashed)
 	{
-		DialogBox (HInstance, MAKEINTRESOURCE(IDD_CRASH_INFORMATION), NULL, ReportDialogProc);
-		send("/?crashtype="+CrashFeedback);
+		//DialogBox (HInstance, MAKEINTRESOURCE(IDD_CRASH_INFORMATION), NULL, ReportDialogProc);
+		//send("/?crashtype="+CrashFeedback);
+		send("/?crashtype=CRASHED");
 	}
 	else
 		send("/?crashtype=NOT_CRASHED");

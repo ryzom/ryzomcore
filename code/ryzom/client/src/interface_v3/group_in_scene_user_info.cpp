@@ -138,6 +138,14 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 	ucstring entityName = entity->getDisplayName();
 	ucstring entityTitle = entity->getTitle();
 
+	// For some NPC's the name is empty and only a title is given,
+	// in that case, treat the title as the name.
+	if (entityName.empty())
+	{
+		entityName = entityTitle;
+		entityTitle.clear();
+	}
+
 	ucstring entityTag1 = entity->getTag(1);
 	ucstring entityTag2 = entity->getTag(2);
 	ucstring entityTag3 = entity->getTag(3);
@@ -172,9 +180,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 		// For RoleMasters, merchants etc... must display name and function, and nothing else
 		for(uint i=0;i<NumBars;i++)
 			bars[i]= false;
-		name= !entityName.empty();
+		name= !entityName.empty() && pIM->getDbProp(dbEntry+"NPCNAME")->getValueBool();
 		symbol= false;
-		title= true;
+		title= !entityTitle.empty() && pIM->getDbProp(dbEntry+"NPCTITLE")->getValueBool();
 		guildName= false;
 		templateName = "in_scene_user_info";
 		rpTags = (!entityTag1.empty()  ||  !entityTag2.empty()  || !entityTag3.empty()  || !entityTag4.empty() ) && pIM->getDbProp(dbEntry+"RPTAGS")->getValueBool();
@@ -281,10 +289,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			info->_Entity = entity;
 
 			// Some constants
-			sint barHeight, barSpace, textH;
+			sint barHeight, barSpace;
 			fromString(pIM->getDefine("in_scene_user_info_bar_h"), barHeight);
 			fromString(pIM->getDefine("in_scene_user_info_bar_space"), barSpace);
-			fromString(pIM->getDefine("in_scene_user_info_text_h"), textH);
 			fromString(pIM->getDefine("in_scene_user_bar_length"), CGroupInSceneUserInfo::_BatLength);
 
 			// Build the bars
@@ -309,10 +316,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 								bitmap->setColorRGBA (BarColor[i]);
 							}
 							info->_Bars[i] = bitmap;
+							barCount++;
 						}
 					}
-
-					barCount++;
 				}
 			}
 
@@ -345,21 +351,31 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			if (!barCount)
 			{
 				// Delete
-				if (win_jauge_mid)
-					win_jauge_mid->setActive(false);
-					// leftGroup->delView (win_jauge_mid);
-				CViewBase *view = leftGroup->getView ("win_jauge_top");
+				CViewBase *view = leftGroup->getView ("win_bot");
 				if (view)
-					view->setActive(false);
-					//leftGroup->delView (view);
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_mid");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_top");
+				if (view)
+					leftGroup->delView (view);
+
+				if (win_jauge_mid)
+					//win_jauge_mid->setActive(false);
+					leftGroup->delView (win_jauge_mid);
+				view = leftGroup->getView ("win_jauge_top");
+				if (view)
+					//view->setActive(false);
+					leftGroup->delView (view);
 				view = leftGroup->getView ("win_jauge_bot");
 				if (view)
-					view->setActive(false);
-					//leftGroup->delView (view);
+					//view->setActive(false);
+					leftGroup->delView (view);
 			}
 
 			// Strings
-			sint stringSpace = 0;
+			//sint stringSpace = 0;
 			sint stringCount = 0;
 			if (name)
 			{
@@ -368,8 +384,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 					info->_Name = dynamic_cast<CViewText*>(text);
 				stringCount++;
 			}
-			else
-				stringSpace += textH;
+			//else
+			//	stringSpace += textH;
 			if (title)
 			{
 				CViewBase *text = leftGroup->getView ("info"+toString(stringCount));
@@ -377,8 +393,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 					info->_Title = dynamic_cast<CViewText*>(text);
 				stringCount++;
 			}
-			else
-				stringSpace += textH;
+			//else
+			//	stringSpace += textH;
 
 			if (rpTags)
 			{
@@ -444,8 +460,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 					stringCount++;
 				}
 			}
-			else
-				stringSpace += textH;
+			//else
+			//	stringSpace += textH;
 
 			// Hide guild symbol / raw material source icon?
 			if ( isForageSource )
@@ -467,12 +483,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						if ( iconFilename )
 							bitmap->setTexture (*iconFilename);
 					}
-					leftGroup->setW( leftGroup->getW() + 42 );
 					leftGroup->invalidateCoords();
 				}
-
-				// Increase vertical size to let bars be seen
-				//leftGroup->setH( leftGroup->getH() + 42 ); // hide last bar, currently
 
 				// Set ZBias of forage interface
 				info->setZBias(ClientCfg.ForageInterfaceZBias);
@@ -508,7 +520,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 							info->delView(logoOver);
 						}
 						leftGroup->setW( leftGroup->getW() + 42 );
-						leftGroup->invalidateCoords();
 					}
 					else
 					{
@@ -516,6 +527,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						info->delView(logoOver);
 						leftGroup->setX(0);
 					}
+					leftGroup->invalidateCoords();
 				}
 			}
 			else
@@ -578,7 +590,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				if (pPlayer == NULL)
 					needPvPLogo = false;
 
-
 				if (pPlayer != NULL && needPvPLogo)
 				{
 					if (pvpFactionLogo) 
@@ -633,7 +644,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 							}
 						}
 					}
-									
+
 					if (pvpOutpostLogo)
 					{
 						if( pPlayer->getOutpostId() != 0 )
@@ -641,7 +652,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						else
 							pvpOutpostLogo->setActive(false);
 					}
-	
+
 					if (pvpDuelLogo)
 					{
 						if( pPlayer->getPvpMode()&PVP_MODE::PvpDuel )
@@ -653,36 +664,36 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				}
 				else
 				{
-					if (pvpFactionLogo)
-						pvpFactionLogo->setActive(false);
-					if (pvpOutpostLogo)
-						pvpOutpostLogo->setActive(false);
-					if (pvpDuelLogo)
-						pvpDuelLogo->setActive(false);
+					CInterfaceGroup* grp = info->getGroup("right_pvp");
+					if (grp)
+						info->delGroup(grp);
 				}
 			}
 
 			// No bar and no string ?
 			if (((stringCount == 1) && !barCount) || (stringCount == 0))
 			{
+
+				CViewBase *view = leftGroup->getView ("win_bot");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_mid");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_top");
+				if (view)
+					leftGroup->delView (view);
+
 				// Delete
-				CViewBase *bitmap = leftGroup->getView ("win_top");
-				if (bitmap)
-					//leftGroup->delView (bitmap);
-					bitmap->setAlpha(0);
-				bitmap = leftGroup->getView ("win_mid");
-				if (bitmap)
-					//leftGroup->delView (bitmap);
-					bitmap->setAlpha(0);
-				bitmap = leftGroup->getView ("win_bot");
-				if (bitmap)
-					//leftGroup->delView (bitmap);
-					bitmap->setAlpha(0);
-
-				// Anti-Bug, xmargin is not take into evaluate W
-				/*if (info->_Name)
-					info->_Name->setX(0);*/
-
+				view = leftGroup->getView ("win_jauge_top");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_jauge_mid");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_jauge_bot");
+				if (view)
+					leftGroup->delView (view);
 			}
 
 			// Delete remaining strings
@@ -690,23 +701,16 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			{
 				CViewBase *text = leftGroup->getView ("info"+toString(i));
 				if (text)
-					leftGroup->delView(text);
+					text->setActive(false);
 			}
 
 			// Adjust win_mid
 			CViewBase *win_mid = leftGroup->getView ("win_mid");
 			if (win_mid)
 			{
-				win_mid->setH (win_mid->getH() - spaceBar/2 - stringSpace);
+				win_mid->setH (win_mid->getH() - spaceBar/2);
+				
 			}
-
-			// Total height
-			sint totalHeight = info->getH ();
-			totalHeight -= spaceBar + stringSpace;
-			info->setH (totalHeight);
-			totalHeight = leftGroup->getH ();
-			totalHeight -= spaceBar + stringSpace;
-			leftGroup->setH (totalHeight);
 
 			// Set player name
 			if (info->_Name)
@@ -891,9 +895,11 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		_Name->setColor(entityColor);
 		_Name->setModulateGlobalColor(false);
 		ucstring entityName = _Entity->getDisplayName();
+		if (entityName.empty())
+			entityName = _Entity->getTitle();
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
-				entityName += CI18N::get("uiAFK");				
+				entityName += CI18N::get("uiAFK");
 		_Name->setText(entityName);
 
 		// Title color get the PVP color

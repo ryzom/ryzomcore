@@ -5770,7 +5770,7 @@ NLMISC_COMMAND(em, "emote command", "<emote phrase>")
 
 
 
-NLMISC_COMMAND(guildmotd, "Set the guild message of the day","<msg of the day>")
+NLMISC_COMMAND(guildmotd, "Set or see the guild message of the day","<msg of the day>")
 {
 	CBitMemStream out;
 	if (!GenericMsgHeaderMngr.pushNameToStream("COMMAND:GUILDMOTD", out))

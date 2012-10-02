@@ -621,8 +621,6 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 				_Link.push_back("");
 				_LinkTitle.push_back("");
 			}
-
-
 		}
 	}
 }
@@ -1048,7 +1046,6 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 				string style;
 				if (present[HTML_BODY_STYLE] && value[HTML_BODY_STYLE])
 					style = value[HTML_BODY_STYLE];
-
 
 				if (!style.empty())
 				{
@@ -2470,7 +2467,6 @@ void CGroupHTML::addString(const ucstring &str)
 					getParagraph()->addChild (buttonGroup);
 					paragraphChange ();
 				}
-
 			}
 			else
 			{
@@ -3225,7 +3221,7 @@ void CGroupHTML::handle ()
 				else
 				{
 					/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-					HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+					HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 					/* Set the timeout for long we are going to wait for a response */
 					HTHost_setEventTimeout(60000);
@@ -3371,7 +3367,7 @@ void CGroupHTML::handle ()
 				else
 				{
 					/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-					HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+					HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 					/* Start the first request */
 

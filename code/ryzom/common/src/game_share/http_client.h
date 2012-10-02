@@ -66,24 +66,21 @@ private:
 	NLNET::CTcpSock _Sock;
 };
 
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
 
-// TODO : nico : put this in an external file, this way it isn't included by the background downloader
-#ifndef RY_BG_DOWNLOADER
-
-/*
- * HTTP client preconfigured to connect to the startup login host
- */
-class CStartupHttpClient : public CHttpClient
+class CHttpPostTask : public NLMISC::IRunnable
 {
 public:
+	CHttpPostTask(const std::string &host, const std::string &page, const std::string &params);
+	void run(void);
 
-	bool connectToLogin();
+private:
+	std::string _Host;
+	std::string _Page;
+	std::string _Params;
 };
-
-extern CStartupHttpClient HttpClient;
-
-#endif
-
 
 #endif // NL_HTTP_CLIENT_H
 

@@ -280,11 +280,17 @@ void CTime::probeTimerInfo(CTime::CTimerInfo &result)
 		else result.RequiresSingleCore = false;
 
 		if (result.HighPrecisionResolution == 14318180)
+		{
 			nldebug("Detected known HPET era timer frequency");
+		}
 		if (result.HighPrecisionResolution == 3579545)
+		{
 			nldebug("Detected known AHCI era timer frequency");
+		}
 		if (result.HighPrecisionResolution == 1193182)
+		{
 			nldebug("Detected known i8253/i8254 era timer frequency");
+		}
 	}
 }
 

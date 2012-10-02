@@ -3555,8 +3555,8 @@ void CUserEntity::CSpeedFactor::update(ICDBNode *node) // virtual
 	if(_Value > 2.0f)
 	{
 		//nlwarning("HACK: you try to change the speed factor to %f", _Value);
-		nlstop;
-		_Value = 2.0f;
+		//nlstop;
+		//_Value = 2.0f;
 	}
 }// CSpeedFactor::update //
 
