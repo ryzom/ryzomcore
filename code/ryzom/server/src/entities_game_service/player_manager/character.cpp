@@ -675,6 +675,9 @@ CCharacter::CCharacter():	CEntityBase(false),
 
 	_FriendVisibility = VisibleToAll;
 
+	_LangChannel = "en";
+	_NewTitle = "Refugee";
+
 	initDatabase();
 } // CCharacter  //
 
@@ -699,6 +702,7 @@ void CCharacter::clear()
 	_ForbidAuraUseStartDate=0;
 	_ForbidAuraUseEndDate=0;
 	_Title= CHARACTER_TITLE::Refugee;
+	_NewTitle = "Refugee";
 
 	SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatModel,0);
 	SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatColor,0);
@@ -3851,9 +3855,9 @@ void CCharacter::sendBetaTesterStatus()
 
 	sendReservedTitleStatus( CHARACTER_TITLE::FBT, p->isBetaTester() );
 
-	if (!p->isBetaTester() && _Title == CHARACTER_TITLE::FBT)
+	if (!p->isBetaTester() && _NewTitle == "FBT")
 	{
-		_Title = CHARACTER_TITLE::Refugee;
+		_NewTitle = "Refugee";
 		registerName();
 	}
 }
@@ -3869,9 +3873,9 @@ void CCharacter::sendWindermeerStatus()
 
 	sendReservedTitleStatus( CHARACTER_TITLE::WIND, p->isWindermeerCommunity() );
 
-	if ( !p->isWindermeerCommunity() && _Title == CHARACTER_TITLE::WIND)
+	if ( !p->isWindermeerCommunity() && _NewTitle == "WIND")
 	{
-		_Title = CHARACTER_TITLE::Refugee;
+		_NewTitle = "Refugee";
 		registerName();
 	}
 }
@@ -6963,11 +6967,11 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 				CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setCount(_PropertyDatabase, checkedCast<uint16>(ringCatalyserCount) );
 			}
 		}
-	}
 
-	if (!p->isTrialPlayer())
-	{
-		xpBonus = XpGain;
+		if (!p->isTrialPlayer())
+		{
+			xpBonus = XpGain;
+		}
 	}
 
 	XpGain += xpBonus + ringXpBonus;
@@ -7081,7 +7085,7 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 			SM_STATIC_PARAMS_3(paramsP, STRING_MANAGER::skill, STRING_MANAGER::integer, STRING_MANAGER::integer);
 			paramsP[0].Enum = skillEnum;
 			paramsP[1].Int = max((sint32)1, sint32(100*XpGain) );
-			paramsP[2].Int = max((sint32)1, sint32(100*(XpGain - (xpBonus+ringXpBonus))) );
+			paramsP[2].Int = max((sint32)1, sint32(100*(XpGain - xpBonus - ringXpBonus)));
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "XP_CATALYSER_PROGRESS_NORMAL_GAIN", paramsP);
 
 			if( xpBonus > 0 )
@@ -7329,11 +7333,18 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 	return XpGainRemainder;
 }
 
-
 //-----------------------------------------------
 // CCharacter::setSkillTreeToMaxValue Set skill tree of character to max value of each skill
 //-----------------------------------------------
 void CCharacter::setSkillsToMaxValue()
+{
+	setSkillsToValue(-1);
+}
+
+//-----------------------------------------------
+// CCharacter::setSkillTreeToMaxValue Set skill tree of character to max value of each skill
+//-----------------------------------------------
+void CCharacter::setSkillsToValue(const sint32& value)
 {
 	// get pointer on static skills tree definition
 	CSheetId sheet("skills.skill_tree");
@@ -7342,15 +7353,30 @@ void CCharacter::setSkillsToMaxValue()
 
 	for( uint i = 0; i < SKILLS::NUM_SKILLS; ++i )
 	{
-		_Skills._Skills[ i ].Base = SkillsTree->SkillsTree[ i ].MaxSkillValue;
+		_Skills._Skills[ i ].Base = (value < 0) ? SkillsTree->SkillsTree[ i ].MaxSkillValue : min( value, (sint32)SkillsTree->SkillsTree[ i ].MaxSkillValue );
 		_Skills._Skills[ i ].Current = SkillsTree->SkillsTree[ i ].MaxSkillValue + _Skills._Skills[ i ].Modifier;
-//		_PropertyDatabase.setProp( _DataIndexReminder->CHARACTER_INFO.SKILLS.Skill[i], _Skills._Skills[ i ].Current );
-		CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setSKILL(_PropertyDatabase, checkedCast<uint16>(_Skills._Skills[ i ].Current) );
-//		_PropertyDatabase.setProp( _DataIndexReminder->CHARACTER_INFO.SKILLS.BaseSkill[i], _Skills._Skills[ i ].Base );
+		_Skills._Skills[ i ].MaxLvlReached = _Skills._Skills[ i ].Current;
+
 		CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setBaseSKILL(_PropertyDatabase, checkedCast<uint16>(_Skills._Skills[ i ].Base) );
+		CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setSKILL(_PropertyDatabase, checkedCast<uint16>(_Skills._Skills[ i ].Current) );
+
+		// update all parent skill with new max children
+		SKILLS::ESkills skillUpdated = (SKILLS::ESkills)i;
+		while( SkillsTree->SkillsTree[ skillUpdated ].ParentSkill != SKILLS::unknown )
+		{
+			if( _Skills._Skills[ i ].Base > _Skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxLvlReached )
+			{
+				_Skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxLvlReached = _Skills._Skills[ i ].Base;
+				_Skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].Base = min( _Skills._Skills[ skillUpdated ].Base, (sint32)SkillsTree->SkillsTree[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxSkillValue );
+				skillUpdated = SkillsTree->SkillsTree[ skillUpdated ].ParentSkill;
+			}
+			else
+			{
+				break;
+			}
+		}
 	}
 }
-
 
 //-----------------------------------------------
 // CCharacter::sendDynamicSystemMessage
@@ -7949,6 +7975,7 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	_Race				= (EGSPD::CPeople::TPeople) createCharMsg.People;
 	_Gender				= createCharMsg.Sex;
 	_Title				= CHARACTER_TITLE::Refugee;
+	_NewTitle			= "Refugee";
 
 	// fame information
 	// Players start out as Neutral in their declared clans
@@ -9787,7 +9814,7 @@ bool CCharacter::queryItemPrice( const CGameItemPtr item, uint32& price )
 	quality = theItem->quality();
 	if ( theItem->maxDurability() )
 		wornFactor = float(theItem->durability()) / float(theItem->maxDurability());
-	price = (uint32) ( CShopTypeManager::computeBasePrice( theItem, quality ) * wornFactor );
+	price = (uint32) ( CShopTypeManager::computeBasePrice( theItem, quality ) * wornFactor * 0.02 );
 	return true;
 }
 
@@ -10214,6 +10241,35 @@ void CCharacter::initPvpPointDb()
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(0).setVALUE(_PropertyDatabase, _PvpPoint );
 }
 
+//-----------------------------------------------------------------------------
+void CCharacter::setLangChannel(const string &lang) {
+	_LangChannel = lang;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setNewTitle(const string &title) {
+	_NewTitle = title;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagPvPA(const string &tag) {
+	_TagPvPA = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagPvPB(const string &tag) {
+	_TagPvPB = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagA(const string &tag) {
+	_TagA = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagB(const string &tag) {
+	_TagB = tag;
+}
 
 //-----------------------------------------------------------------------------
 void CCharacter::setOrganization(uint32 org)
@@ -12895,7 +12951,7 @@ void CCharacter::registerName(const ucstring &newName)
 	CMessage msgName("CHARACTER_NAME_LANG");
 	msgName.serial(_EntityRowId);
 
-	string sTitle = CHARACTER_TITLE::toString(_Title);
+	string sTitle = getFullTitle();
 	ucstring RegisteredName;
 	if (newName.empty())
 		RegisteredName = getName() + string("$") + sTitle + string("$");
@@ -16161,15 +16217,30 @@ void CCharacter::applyGooDamage( float gooDistance )
 						if (hpLost < 1) hpLost = 1;
 						if( hpLost > _PhysScores._PhysicalScores[ SCORES::hit_points ].Current )
 						{
-							_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = 0;
-							// send message to player for inform is dead by goo
-							sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_GOO");
+							_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = 0;	
+							
+							// send message to player for inform is dead by goo or other
+							if (_CurrentContinent == CONTINENT::FYROS)
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_FIRE");
+							else if (_CurrentContinent == CONTINENT::TRYKER)
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_STEAM");
+							else if (_CurrentContinent == CONTINENT::MATIS)
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_POISON");
+							else
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_GOO");
 						}
 						else
 						{
 							_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = _PhysScores._PhysicalScores[ SCORES::hit_points ].Current - hpLost;
 							// send message to player for inform is suffer goo damage
-							sendDynamicSystemMessage(_EntityRowId, "SUFFER_GOO_DAMAGE");
+							if (_CurrentContinent == CONTINENT::FYROS)
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_FIRE_DAMAGE");
+							else if (_CurrentContinent == CONTINENT::TRYKER)
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_STEAM_DAMAGE");
+							else if (_CurrentContinent == CONTINENT::MATIS)
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_POISON_DAMAGE");
+							else
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_GOO_DAMAGE");
 						}
 					}
 				}
@@ -19057,7 +19128,7 @@ void CCharacter::setStartupInstance(uint32 instanceId)
 
 void CCharacter::setTitle( CHARACTER_TITLE::ECharacterTitle title )
 {
-	_Title = title;
+	setNewTitle(CHARACTER_TITLE::toString(title));
 }
 
 

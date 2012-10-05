@@ -181,6 +181,7 @@ AdminCommandsInit[] =
 		"validateRespawnPoint",				true,
 		"summonPet",						true,
 		"connectUserChannel",				true,
+		"connectLangChannel",				true,
 		"updateTarget",						true,
 		"resetName",						true,
 		"showOnline",						true,
@@ -1126,6 +1127,8 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 	vector<string> res;
 
 	sint32 x = 0, y = 0, z = 0;
+	sint32 cell = 0;
+
 	if (get)
 	{
 		x = e->getState().X() / 1000;
@@ -1229,6 +1232,10 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 					x = entityBase->getState().X + sint32 (cos (entityBase->getState ().Heading) * 2000);
 					y = entityBase->getState().Y + sint32 (sin (entityBase->getState ().Heading) * 2000);
 					z = entityBase->getState().Z;
+
+					TDataSetRow dsr = entityBase->getEntityRowId();
+					CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, dsr, DSPropertyCELL );
+					cell = mirrorCell;
 				}
 			}
 		}
@@ -1258,11 +1265,11 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 				// season included
 				uint8 season;
 				NLMISC::fromString(res[3], season);
-				c->teleportCharacter(x,y,z,true, false, 0.f, 0xFF, 0, season);
+				c->teleportCharacter(x,y,z,true, false, 0.f, 0xFF, cell, season);
 			}
 			else
 			{
-				c->teleportCharacter(x,y,z,true);
+				c->teleportCharacter(x,y,z,true, false, 0.f, 0xFF, cell);
 			}
 
 			if ( cont )
@@ -3780,7 +3787,7 @@ NLMISC_COMMAND( monitorMissions, "monitor a player missions", "<CSR id><player n
 	CHECK_RIGHT( c,target );
 
 	// CSR must have no missions to monitor a player
-	if ( c->getMissionsBegin() ==  c->getMissionsEnd() )
+	if ( c->getMissionsBegin() !=  c->getMissionsEnd() )
 	{
 		CCharacter::sendDynamicSystemMessage( c->getEntityRowId() , "CSR_HAS_MISSION" );
 		return true;
@@ -4014,8 +4021,6 @@ NLMISC_COMMAND (unmuteUniverse, "unmute the univers chat", "<csr id><player name
 //----------------------------------------------------------------------------
 NLMISC_COMMAND (setGMGuild, "set the current GM guild", "")
 {
-	if ( args.size() != 1 )
-		return false;
 	GET_CHARACTER;
 	uint32 guildId = c->getGuildId();
 	CGuildManager::getInstance()->setGMGuild( guildId );
@@ -4450,8 +4455,8 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 	CPVPManager2 *inst = CPVPManager2::getInstance();
 
 	string pass;
-	string name = args[1];
-	TChanID channel = CPVPManager2::getInstance()->getUserDynChannel(name);
+	string name = toLower(args[1]);
+	TChanID channel = inst->getUserDynChannel(name);
 
 	if (args.size() < 3)
 		pass = toLower(name);
@@ -4497,6 +4502,38 @@ NLMISC_COMMAND (connectUserChannel, "Connect to user channels", "<user id> <chan
 	CCharacter::sendDynamicSystemMessage( eid, "EGS_CHANNEL_INVALID_NAME", params );
 	return false;
 
+}
+
+NLMISC_COMMAND (connectLangChannel, "Connect to lang channel", "<user id> <lang>")
+{
+	if ((args.size() < 2) || (args.size() > 3))
+		return false;
+	GET_CHARACTER
+
+	CPVPManager2 *inst = CPVPManager2::getInstance();
+
+	string action;
+	string lang = args[1];
+	if (lang != "en" && lang != "fr" && lang != "de" && lang != "ru" && lang != "es")
+		return false;
+
+	TChanID channel = inst->getFactionDynChannel(lang);
+
+	if (channel != DYN_CHAT_INVALID_CHAN)
+	{
+		if (!c->getLangChannel().empty()) {
+			TChanID current_channel = inst->getFactionDynChannel(c->getLangChannel());
+			inst->removeFactionChannelForCharacter(current_channel, c);
+		}
+		inst->addFactionChannelToCharacter(channel, c, true);
+		c->setLangChannel(lang);
+		return true;
+	}
+
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+	params[0].Literal = lang;
+	CCharacter::sendDynamicSystemMessage( eid, "EGS_CHANNEL_INVALID_NAME", params );
+	return false;
 }
 
 NLMISC_COMMAND (updateTarget, "Update current target", "<user id>")
@@ -4601,8 +4638,14 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 	GET_CHARACTER
 
 	bool new_check = false;
-	if (args.size() >= 6 && args[5] == "1")
+	bool new_separator = false;
+	// New check using HMagic
+	if (args.size() >= 6 && (args[5] == "1" || args[5] == "3"))
 		new_check = true;
+
+	// New separator "|"
+	if (args.size() >= 6 && (args[5] == "2" || args[5] == "3"))
+		new_separator = true;
 
 	bool next_step = false;
 	if (args.size() >= 7 && args[6] == "1")
@@ -4680,7 +4723,10 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 	}
 
 	std::vector<std::string> command_args;
-	NLMISC::splitString(command, "!", command_args);
+	if (new_separator)
+		NLMISC::splitString(command, "|", command_args);
+	else
+		NLMISC::splitString(command, "!", command_args);
 	if (command_args.empty())
 		return false;
 
@@ -5317,8 +5363,10 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 		uint32 value;
 		fromString(command_args[2], value);
-
-		target->setHairColor(value);
+		if (target)
+			target->setHairColor(value);
+		else
+			return false;
 	}
 
 	//*************************************************
@@ -5468,12 +5516,35 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 	//*************************************************
 	//***************** set_title
 	//*************************************************
-	
+	// /a webExecCommand debug 1 set_title!toto hmac 0
 	else if (command_args[0] == "set_title")
 	{
 		if (command_args.size () != 2) return false;
 		TDataSetRow row = c->getEntityRowId();
-		ucstring name = ucstring(c->getName().toString()+"$"+command_args[1]+"$");
+		c->setNewTitle(command_args[1]);
+		string fullname = c->getName().toString()+"$"+command_args[1]+"#"+c->getTagPvPA()+"#"+c->getTagPvPB()+"#"+c->getTagA()+"#"+c->getTagB()+"$";
+		ucstring name;
+		name.fromUtf8(fullname);
+		NLNET::CMessage	msgout("CHARACTER_NAME");
+		msgout.serial(row);
+		msgout.serial(name);
+		sendMessageViaMirror("IOS", msgout);
+	}
+
+	//*************************************************
+	//***************** set_tag
+	//*************************************************
+
+	else if (command_args[0] == "set_tag") {
+		if (command_args.size () != 3) return false;
+		TDataSetRow row = c->getEntityRowId();
+		if (command_args[1] == "pvpA") c->setTagPvPA(command_args[2]);
+		if (command_args[1] == "pvpB") c->setTagPvPB(command_args[2]);
+		if (command_args[1] == "A") c->setTagA(command_args[2]);
+		if (command_args[1] == "B") c->setTagB(command_args[2]);
+		string fullname = c->getName().toString()+"$"+c->getNewTitle()+"#"+c->getTagPvPA()+"#"+c->getTagPvPB()+"#"+c->getTagA()+"#"+c->getTagB()+"$";
+		ucstring name;
+		name.fromUtf8(fullname);
 		NLNET::CMessage	msgout("CHARACTER_NAME");
 		msgout.serial(row);
 		msgout.serial(name);
@@ -5500,6 +5571,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		vector<string> res;
 		sint32 x = 0, y = 0, z = 0;
 		float h = 0;
+		sint32 cell;
 		if ( value.find(',') != string::npos ) // Position x,y,z,a
 		{
 			explode (value, string(","), res);
@@ -5591,6 +5663,10 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 					y = entityBase->getState().Y + sint32 (sin (entityBase->getState ().Heading) * 2000);
 					z = entityBase->getState().Z;
 					h = entityBase->getState().Heading;
+
+					TDataSetRow dsr = entityBase->getEntityRowId();
+					CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, dsr, DSPropertyCELL );
+					cell = mirrorCell;
 				}
 			}
 		}
@@ -5620,7 +5696,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 			c->applyRespawnEffects();
 		}
 
-		c->teleportCharacter(x,y,z,allowPetTp,true,h);
+		c->teleportCharacter(x,y,z,allowPetTp,true,h,0xFF,cell);
 
 		if ( cont )
 		{
@@ -5903,6 +5979,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 			{
 				if (send_url)
 					c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=no_enough_faction_points", getSalt());
+				return true;
 			}
 		}
 		else if (action=="set")
@@ -5941,6 +6018,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 			{
 				if (send_url)
 					c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=no_enough_pvp_points", getSalt());
+				return true;
 			}
 		}
 		else if (action=="set")
@@ -5954,6 +6032,51 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		else if (action=="remove")
 		{
 			c->setPvpPoint(c->getPvpPoint()-value);
+		}
+	}
+
+	//*************************************************
+	//***************** ios
+	//*************************************************
+	
+	else if (command_args[0] == "ios")
+	{
+				
+		if (command_args.size() < 4)
+			return false;
+
+		string action = command_args[1]; // single_phrase
+		
+		if (action == "single_phrase")
+		{
+			string phraseName = command_args[2];
+			ucstring phraseContent = phraseName;
+			ucstring phraseText;
+			phraseText.fromUtf8(command_args[3]);
+			phraseContent += "(){[";
+			phraseContent += phraseText;
+			phraseContent += "]}";
+			
+			string msgname = "SET_PHRASE";
+			bool withLang = false;
+			string lang = "";
+			if (command_args.size() == 5)
+			{
+				lang = command_args[3];
+				if (lang != "all")
+				{
+					withLang = true;
+					msgname = "SET_PHRASE_LANG";
+				}
+			}
+
+			NLNET::CMessage	msgout(msgname);
+			msgout.serial(phraseName);
+			msgout.serial(phraseContent);
+			if (withLang)
+				msgout.serial(lang);
+			sendMessageViaMirror("IOS", msgout);
+			return true;
 		}
 	}
 
@@ -6921,7 +7044,7 @@ NLMISC_COMMAND(setChanHistoricSize, "Set size of the historic for a localized ch
 // add a client to a channel
 NLMISC_COMMAND(addChanClient, "add a client to a channel", "<client name or user id><string name of the channel localized name>[1=Read/Write,0=ReadOnly(default)]")
 {
-	if (args.size() != 2) return false;
+	if (args.size() < 2 || args.size() > 3) return false;
 	GET_CHARACTER
 	TChanID chanID = DynChatEGS.getChanIDFromName(args[1]);
 	if (chanID == DYN_CHAT_INVALID_CHAN)

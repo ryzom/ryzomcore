@@ -237,6 +237,16 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 			nlwarning("<CGuildMemberModule::setMOTD>%s invalid member id %s",eId.toString().c_str());
 			return;
 		}
+
+		if ( motd == "?" )
+		{
+			// Show the old MOTD
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal= _MessageOfTheDay;
+			CCharacter::sendDynamicMessageToChatGroup(user->getEntityRowId(), "GMOTD", CChatGroup::guild, params);
+			return;
+		}
+
 		EGSPD::CGuildGrade::TGuildGrade memberGrade = member->getGrade();
 		if( memberGrade >= EGSPD::CGuildGrade::Member)
 		{
@@ -255,9 +265,10 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 
 		if(!_MessageOfTheDay.empty())
 		{
+			// Show new MOTD to all members
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 			params[0].Literal= _MessageOfTheDay;
-			CCharacter::sendDynamicMessageToChatGroup(user->getEntityRowId(), "GMOTD", CChatGroup::guild, params);
+			sendMessageToGuildChat("GMOTD", params);
 		}
 	}
 	else
@@ -1406,6 +1417,25 @@ void CGuild::sendMessageToGuildMembers( const std::string &  msg, const TVectorP
 
 	// send the message to peer guild unifiers
 	IGuildUnifier::getInstance()->sendMessageToGuildMembers(this, msg, params);
+}
+
+//----------------------------------------------------------------------------
+void CGuild::sendMessageToGuildChat( const std::string &  msg, const TVectorParamCheck & params )const
+{
+	for ( std::map< EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::const_iterator it = getMembersBegin(); it != getMembersEnd(); ++it )
+	{
+		CGuildMember * member = EGS_PD_CAST<CGuildMember*>( (*it).second );
+		EGS_PD_AST( member );
+
+		// continue if the player is offline
+		CGuildMemberModule * module = NULL;
+		if ( member->getReferencingModule(module) )
+		{
+			CGuildCharProxy proxy;
+			module->getProxy(proxy);
+			proxy.sendDynamicMessageToChatGroup(msg, CChatGroup::guild, params);
+		}
+	}
 }
 
 //----------------------------------------------------------------------------
