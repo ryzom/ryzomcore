@@ -1611,7 +1611,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:PHRASE:SELECT_MEMORY_", false);
+		CCDBNodeLeaf	*node= pIM->getDbProp("UI:PHRASE:SELECT_MEMORY", false);
 		if(node)
 		{
 			sint32 val;
