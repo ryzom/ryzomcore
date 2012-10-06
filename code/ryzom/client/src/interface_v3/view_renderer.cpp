@@ -707,7 +707,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 	SGlobalTexture gt;
 	// Load texture file
 	string filename = CPath::lookup (textureFileName, false);
-	if (filename == "") return;
+	if (filename.empty()) return;
 	CIFile ifTmp;
 	if (ifTmp.open(filename))
 		CBitmap::loadSize (ifTmp, gt.Width, gt.Height);
@@ -724,7 +724,7 @@ void CViewRenderer::loadTextures (const std::string &textureFileName, const std:
 	// Load uv file
 	CIFile iFile;
 	filename = CPath::lookup (uvFileName, false);
-	if (filename == "") return;
+	if (filename.empty()) return;
 	if (!iFile.open(filename)) return;
 
 	_GlobalTextures.push_back (gt);
@@ -866,7 +866,7 @@ sint32 CViewRenderer::createTexture (const std::string &sGlobalTextureName,
 		SGlobalTexture gtTmp;
 		gtTmp.FromGlobaleTexture = false;
 		string filename = CPath::lookup (sLwrGTName, false);
-		if (filename == "") return -1;
+		if (filename.empty()) return -1;
 		CIFile ifTmp;
 		if (ifTmp.open(filename))
 		{

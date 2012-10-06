@@ -89,7 +89,7 @@ void CVarPath::decode ()
 
 	string val = getToken ();
 
-	if (val == "")
+	if (val.empty())
 		return;
 
 	if (val == "[" )
@@ -105,7 +105,7 @@ void CVarPath::decode ()
 					osbnb++;
 
 				// end of token
-				if (val == "")
+				if (val.empty())
 				{
 					nlwarning ("VP: Bad VarPath '%s', suppose it s an empty varpath", RawVarPath.c_str());
 					Destination.clear ();
