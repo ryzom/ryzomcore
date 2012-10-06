@@ -21,7 +21,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-std::string getAppBundlePath() 
+std::string getAppBundlePath()
 {
 	static std::string cachedPathToBundle;
 

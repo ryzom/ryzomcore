@@ -7501,7 +7501,6 @@ void CCharacter::sendUserChar( uint32 userId, uint8 scenarioSeason, const R2::TU
 	}
 }
 
-
 //-----------------------------------------------
 // Return the home mainland session id for a character
 TSessionId CCharacter::getHomeMainlandSessionId() const
