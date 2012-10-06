@@ -2967,7 +2967,7 @@ void audit(const CAdminCommand *cmd, const string &rawCommand, const CEntityId &
 	string host = varHost->asString();
 	string page = varPage->asString();
 
-	if (host == "" || page == "")
+	if (host.empty() || page.empty())
 		return;
 
 	char params[1024];

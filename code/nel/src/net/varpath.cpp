@@ -143,7 +143,7 @@ void CVarPath::decode ()
 		Destination.push_back (make_pair(RawVarPath, string("")));
 		return;
 	}
-	else if (val != "." && val != "" && val != "=")
+	else if (val != "." && !val.empty() && val != "=")
 	{
 		nlwarning ("VP: Malformated VarPath '%s' before position %d", RawVarPath.c_str (), TokenPos);
 		return;

@@ -602,7 +602,7 @@ bool CObjectString::set(const std::string& key,  const std::string & value)
 bool CObjectString::setObject(const std::string& key,  CObject* value)
 {
 	//H_AUTO(R2_CObjectString_setObject)
-	BOMB_IF( key != "" || ! (value->isString() || value->isNumber()) , "Try to set the a sub value of an object that does not allowed it", return false);
+	BOMB_IF( !key.empty() || ! (value->isString() || value->isNumber()) , "Try to set the a sub value of an object that does not allowed it", return false);
 	bool canSet = set(key, value->toString());
 	if (canSet)
 	{
