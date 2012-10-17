@@ -67,7 +67,7 @@ int verifItemsFile (const char *filename)
 		string s(buffer);
 
 		// null or comment
-		if (s == "" || s.find("//") == 0)
+		if (s.empty() || s.find("//") == 0)
 			continue;
 
 		if (s.find("_LocSlot") == string::npos)
@@ -113,7 +113,7 @@ int verifCsvFile (const char *filename)
 void processItemLine(const string &s)
 {
 	// null or comment
-	if (s == "" || s.find("//") == 0)
+	if (s.empty() || s.find("//") == 0)
 		return;
 
 	// other stuff
@@ -176,7 +176,7 @@ int getFieldsFromFile(const char *filename)
 		s = s.strtok("\n");
 
 		// skip null or comment
-		if (s == "" || s.find("//") == 0)
+		if (s.empty() || s.find("//") == 0)
 			continue;
 
 		// add the field
@@ -294,7 +294,7 @@ void getItemBounds(const CVectorSString &lines, uint num, uint &a, uint &b)
 
 	while (++i < lines.size() && !ok)
 	{
-		if (lines[i] == "" || lines[i].find("//") != string::npos)
+		if (lines[i].empty() || lines[i].find("//") != string::npos)
 			continue;
 
 		// get item number
@@ -404,7 +404,7 @@ void updateItemField(CVectorSString &lines, uint itemIndex, uint fieldIndex, uin
 	}
 
 	// param not found
-	if (!found && val != "" && val != "nul")
+	if (!found && !val.empty() && val != "nul")
 	{
 		// add it
 		if (field.find("_CraftParameters") == string::npos)
@@ -552,7 +552,7 @@ int main(int argc, char *argv[])
 
 		// load csv values
 		importCsv(csvFile.c_str());
-		if (itemsFile != "" && CFile::isExists(itemsFile.c_str()))
+		if (!itemsFile.empty() && CFile::isExists(itemsFile.c_str()))
 			updateItems(itemsFile.c_str());
 		else
 			nlerror("Can't find file : %s", itemsFile.c_str());

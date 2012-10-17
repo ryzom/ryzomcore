@@ -23,6 +23,14 @@
 
 namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
+
 static void convBlend(CMaterial::TBlend blend, GLenum& glenum)
 {
 	H_AUTO_OGL(convBlend)
@@ -2471,5 +2479,9 @@ void CDriverGL::endWaterMultiPass()
 	}
 #endif
 }
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

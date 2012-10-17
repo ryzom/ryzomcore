@@ -142,7 +142,7 @@ public:
 				for (i=0; i<num; ++i)
 				{
 					std::string	fname = NLMISC::CPath::lookup(_NamePrefix + "_" + NLMISC::toString(i) + ".lr", false, true);
-					if (fname == "")
+					if (fname.empty())
 						continue;
 
 					NLMISC::CIFile	f(fname);

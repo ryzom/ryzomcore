@@ -76,8 +76,6 @@
 #define	NL3D_DRV_MAX_LIGHTMAP		256
 
 
-void displayGLError(GLenum error);
-
 /*
 #define CHECK_GL_ERROR { \
 	GLenum error = glGetError(); \
@@ -91,16 +89,25 @@ void displayGLError(GLenum error);
 
 #define UNSUPPORTED_INDEX_OFFSET_MSG "Unsupported by driver, check IDriver::supportIndexOffset."
 
-namespace NL3D {
-
 using NLMISC::CMatrix;
 using NLMISC::CVector;
 
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 class	CDriverGL;
 class	IVertexArrayRange;
 class	IVertexBufferHardGL;
 class   COcclusionQueryGL;
+
+void displayGLError(GLenum error);
 
 #ifdef NL_OS_WINDOWS
 
@@ -672,13 +679,18 @@ public:
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass);
 	virtual void			stencilMask(uint mask);
 
+	GfxMode						_CurrentMode;
+	sint32						_WindowX;
+	sint32						_WindowY;
 
+#ifdef NL_OS_MAC
+	NLMISC::CCocoaEventEmitter _EventEmitter;
+#endif
 
 private:
 	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL;
 	friend class					CVertexProgamDrvInfosGL;
-
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
@@ -686,12 +698,9 @@ private:
 
 	// Windows
 	nlWindow					_win;
-	sint32						_WindowX;
-	sint32						_WindowY;
 	bool						_WindowVisible;
 	bool						_DestroyWindow;
 	bool						_Maximized;
-	GfxMode						_CurrentMode;
 	uint						_Interval;
 	bool						_Resizable;
 
@@ -783,11 +792,7 @@ private:
 #elif defined(NL_OS_MAC)
 
 	friend bool							GlWndProc(CDriverGL*, const void*);
-	friend void							windowDidMove(NSWindow*, CDriverGL*);
-	friend void							viewDidResize(NSView*, CDriverGL*);
-	friend NSApplicationTerminateReply	applicationShouldTerminate(CDriverGL*);
 
-	NLMISC::CCocoaEventEmitter _EventEmitter;
 	CocoaOpenGLView*           _glView;
 	NSAutoreleasePool*         _autoreleasePool;
 	uint16                     _backBufferHeight;
@@ -1509,6 +1514,10 @@ public:
 	// The gl id is auto created here.
 	CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it);
 };
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D
 

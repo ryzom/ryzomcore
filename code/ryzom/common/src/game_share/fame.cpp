@@ -320,9 +320,9 @@ CStaticFames::CStaticFames()
 //----------------------------------------------------------------------------
 CStaticFames::~CStaticFames()
 {
-	delete _FameTable;
+	delete[] _FameTable;
 	_FameTable = NULL;
-	delete _PropagationFactorTable;
+	delete[] _PropagationFactorTable;
 	_PropagationFactorTable = NULL;
 }
 

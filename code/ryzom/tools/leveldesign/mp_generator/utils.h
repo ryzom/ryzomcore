@@ -245,7 +245,7 @@ public:
 	}
 
 private:
-	
+
 	CLookup							_Indices [NC];
 
 	CItems							_Items;
@@ -280,7 +280,7 @@ public:
 		{
 			throw Exception("Could not open html: %s", filename.c_str());
 		}
-		fprintf( _File, ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>" + title + "</title>\n</head><body>\n").c_str() );
+		fprintf( _File, "<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>%s</title>\n</head><body>\n", title.c_str() );
 	}
 
 	///
@@ -289,7 +289,7 @@ public:
 		if ( ! _Enabled )
 			return;
 
-		fprintf( _File, htmlCode.c_str() );
+		fprintf( _File, "%s", htmlCode.c_str() );
 	}
 
 	///

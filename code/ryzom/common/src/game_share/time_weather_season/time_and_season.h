@@ -31,7 +31,7 @@ const uint		RYZOM_WEEK_IN_DAY		= 6;
 const uint		RYZOM_YEAR_IN_DAY		= RYZOM_MONTH_IN_DAY*RYZOM_YEAR_IN_MONTH;
 const uint		RYZOM_CYCLE_IN_MONTH	= 12;
 
-const uint		RYZOM_START_YEAR		= 2525;
+const uint		RYZOM_START_YEAR		= 2570-2;
 const uint		RYZOM_START_SPRING		= 61;
 const uint		RYZOM_START_DAY			= 1111111;
 const uint		RYZOM_START_HOUR		= 9;

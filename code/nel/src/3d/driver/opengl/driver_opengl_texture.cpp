@@ -41,9 +41,15 @@ using	namespace std;
 	#define NEL_MEASURE_UPLOAD_TIME_END
 #endif
 
-namespace NL3D
-{
+namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL *drvGl, bool isRectangleTexture) : ITextureDrvInfos(drv, it)
@@ -2410,5 +2416,9 @@ bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 }
 
 // ***************************************************************************
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

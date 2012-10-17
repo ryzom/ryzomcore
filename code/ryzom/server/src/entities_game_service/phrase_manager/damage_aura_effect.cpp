@@ -28,6 +28,8 @@
 #include "player_manager/character.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
+#include "creature_manager/creature_manager.h"
+#include "creature_manager/creature.h"
 #include "range_selector.h"
 #include "phrase_manager/effect_factory.h"
 
@@ -68,14 +70,15 @@ bool CDamageAuraEffect::update(CTimerEvent * event, bool applyEffect)
 	{
 		// get entities in surrouding area
 		CRangeSelector entitiesSelector;
-		entitiesSelector.buildDisc( CEntityBaseManager::getEntityBasePtr(getCreatorRowId()), _AffectedEntity->getX(), _AffectedEntity->getY(), _AuraRadius, EntityMatrix, true );
+		CEntityBase * actor = CEntityBaseManager::getEntityBasePtr(getCreatorRowId());
+		entitiesSelector.buildDisc( actor, _AffectedEntity->getX(), _AffectedEntity->getY(), _AuraRadius, EntityMatrix, true );
 		
 		// create or update effect on entities returned
 		const vector<CEntityBase*> &entities = entitiesSelector.getEntities();
 		const uint size = (uint)entities.size();
 		for (uint i = 0; i < size ; ++i)
 		{
-			if (entities[i] && (entities[i] != (CEntityBase*)_AffectedEntity) && isEntityValidTarget(entities[i]) )
+			if (entities[i] && (entities[i] != (CEntityBase*)_AffectedEntity) && isEntityValidTarget(entities[i], actor) )
 			{
 				CEntityBase *entity = entities[i];
 
@@ -133,7 +136,7 @@ void CDamageAuraEffect::removed()
 //--------------------------------------------------------------
 //		CDamageAuraEffect::removed()
 //--------------------------------------------------------------
-bool CDamageAuraEffect::isEntityValidTarget(CEntityBase *entity) const
+bool CDamageAuraEffect::isEntityValidTarget(CEntityBase *entity, CEntityBase *actor) const
 {
 #ifdef NL_DEBUG
 	nlassert(entity);
@@ -152,6 +155,15 @@ bool CDamageAuraEffect::isEntityValidTarget(CEntityBase *entity) const
 //		retValue = true;
 	else
 		retValue = false;
+
+	CCreature * creature = CreatureManager.getCreature( entity->getId() );
+	if (retValue == false && creature && actor)
+	{
+		if (creature->checkFactionAttackable( actor->getId() ))
+		{
+			retValue = true;
+		}
+	}
 
 	if (retValue)
 	{

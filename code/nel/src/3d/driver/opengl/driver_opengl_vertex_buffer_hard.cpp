@@ -24,11 +24,15 @@
 using	namespace std;
 using	namespace NLMISC;
 
-namespace NL3D
-{
+namespace NL3D {
 
-
-
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 // ***************************************************************************
@@ -1215,7 +1219,7 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 	nglGenBuffersARB(1, &vertexBufferID);
 #endif
 
-	if (glGetError() != GL_NO_ERROR) return false;
+	if (glGetError() != GL_NO_ERROR) return NULL;
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
 	switch(_VBType)
 	{
@@ -1252,7 +1256,7 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 		nglDeleteBuffersARB(1, &vertexBufferID);
 #endif
 
-		return false;
+		return NULL;
 	}
 	CVertexBufferHardARB *newVbHard= new CVertexBufferHardARB(_Driver, vb);
 	newVbHard->initGL(vertexBufferID, this, _VBType);
@@ -1662,6 +1666,8 @@ void CVertexBufferHardARB::invalidate()
 	}
 #endif
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
-}
-
+} // NL3D

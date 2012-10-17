@@ -126,18 +126,18 @@ void CSoundAnimDlg::updateSounds()
 {
 	if (_SelectedMarker != 0)
 	{
-		vector<NLMISC::TStringId> sounds;
+		vector<NLMISC::CSheetId> sounds;
 
 		_SelectedMarker->getSounds(sounds);
 
 		CListBox* list = (CListBox*) GetDlgItem(IDC_SOUND_ANIM_LIST);
 		list->ResetContent();
 
-		vector<NLMISC::TStringId>::iterator iter;
+		vector<NLMISC::CSheetId>::iterator iter;
 
 		for (iter = sounds.begin(); iter != sounds.end(); iter++)
 		{
-			list->AddString(CStringMapper::unmap(*iter).c_str());
+			list->AddString((*iter).toString().c_str());
 		}
 
 		list->UpdateData();
@@ -151,7 +151,7 @@ void CSoundAnimDlg::OnAddSound()
 	if (_SelectedMarker != 0)
 	{
 //		CPickSound::TNameVect names;
-		vector<NLMISC::TStringId>	names;
+		vector<NLMISC::CSheetId>	names;
 		
 
 		NLSOUND::UAudioMixer *audioMixer = CSoundSystem::getAudioMixer();
@@ -183,7 +183,7 @@ void CSoundAnimDlg::OnRemoveSound()
 		if (list->GetText(list->GetCurSel(), s) != LB_ERR)
 		{
 			string name(s);
-			_SelectedMarker->removeSound(CStringMapper::map(name));
+			_SelectedMarker->removeSound(NLMISC::CSheetId(name, "sound"));
 			updateSounds();	
 		}
 	}

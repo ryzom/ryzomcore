@@ -223,7 +223,7 @@ bool CGroupHTML::addBnpDownload(const string &url, const string &action, const s
 #ifdef LOG_DL
 	nlwarning("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
 #endif
-	
+
 	// erase the tmp file if exists
 	if (NLMISC::CFile::fileExists(tmpdest))
 		NLMISC::CFile::deleteFile(tmpdest);
@@ -580,7 +580,7 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 					// in ah: command we don't respect the uri standard so the HTAnchor_address doesn't work correctly
 					_Link.push_back (suri);
 				}
-				else if (_TrustedDomain && suri[0] == '#')
+				else if (_TrustedDomain && suri.find('#') == 0)
 				{
 					// Direct url (hack for lua beginElement)
 					_Link.push_back (suri.substr(1));
@@ -621,8 +621,6 @@ void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTCh
 				_Link.push_back("");
 				_LinkTitle.push_back("");
 			}
-
-			
 		}
 	}
 }
@@ -948,7 +946,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 
 				typedef pair<string, string> TTmplParam;
 				vector<TTmplParam> tmplParams;
-				
+
 				string templateName;
 				if (!style.empty())
 				{
@@ -1044,12 +1042,11 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 					CRGBA bgColor = getColor (value[HTML_BODY_BGCOLOR]);
 					setBackgroundColor (bgColor);
 				}
-				
+
 				string style;
 				if (present[HTML_BODY_STYLE] && value[HTML_BODY_STYLE])
 					style = value[HTML_BODY_STYLE];
-				
-				
+
 				if (!style.empty())
 				{
 					TStyle styles = parseStyle(style);
@@ -1057,7 +1054,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 
 					it = styles.find("background-repeat");
 					bool repeat = (it != styles.end() && it->second == "1");
-					
+
 					// Webig only
 					it = styles.find("background-scale");
 					bool scale = (it != styles.end() && it->second == "1");
@@ -1187,7 +1184,7 @@ void CGroupHTML::beginElement (uint element_number, const BOOL *present, const c
 							if (it != styles.end() && (*it).second == "1")
 								reloadImg = true;
 						}
-						
+
 						addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg);
 					}
 				}
@@ -1838,6 +1835,7 @@ CGroupHTML::CGroupHTML(const TCtorParam &param)
 	_GroupHtmlByUID[_GroupHtmlUID]= this;
 
 	// init
+	_TrustedDomain = false;
 	_ParsingLua = false;
 	_IgnoreText = false;
 	_BrowseNextTime = false;
@@ -2469,7 +2467,6 @@ void CGroupHTML::addString(const ucstring &str)
 					getParagraph()->addChild (buttonGroup);
 					paragraphChange ();
 				}
-	
 			}
 			else
 			{
@@ -3224,7 +3221,7 @@ void CGroupHTML::handle ()
 				else
 				{
 					/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-					HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+					HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 					/* Set the timeout for long we are going to wait for a response */
 					HTHost_setEventTimeout(60000);
@@ -3370,7 +3367,7 @@ void CGroupHTML::handle ()
 				else
 				{
 					/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-					HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+					HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 					/* Start the first request */
 
@@ -3706,14 +3703,14 @@ int CGroupHTML::luaRemoveContent(CLuaState &ls)
 }
 
 // ***************************************************************************
-int CGroupHTML::luaInsertText(CLuaState &ls)	
+int CGroupHTML::luaInsertText(CLuaState &ls)
 {
 	const char *funcName = "insertText";
 	CLuaIHM::checkArgCount(ls, funcName, 3);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TBOOLEAN);
-	
+
 	string name = ls.toString(1);
 
 	ucstring text;

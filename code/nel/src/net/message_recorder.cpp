@@ -80,7 +80,7 @@ CMessageRecorder::CMessageRecorder() : _RecordAll(true)
  */
 CMessageRecorder::~CMessageRecorder()
 {
-	if ( _Filename != "" )
+	if ( !_Filename.empty() )
 	{
 		nldebug( "MR:%s: End of recording", _Filename.c_str() );
 	}

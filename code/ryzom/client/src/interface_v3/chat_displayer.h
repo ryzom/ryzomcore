@@ -25,6 +25,11 @@
 
 #include "nel/misc/mutex.h"
 
+// to fix a conflict with syslog.h being included by libwww
+#ifdef LOG_WARNING
+#undef LOG_WARNING
+#endif
+
 /**
  * class used to display console text commands in the chat window
  * \author Nicolas Brigand

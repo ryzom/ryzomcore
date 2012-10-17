@@ -49,7 +49,6 @@
 #include "global.h"
 #include "input.h"
 #include "libwww.h"
-#include "http_client.h"
 #include "http_client_curl.h"
 #include "login_progress_post_thread.h"
 
@@ -140,6 +139,19 @@ CPatchManager::SPatchInfo InfoOnPatch;
 uint32 TotalPatchSize;
 
 CLoginStateMachine LoginSM;
+
+// TODO : nico : put this in an external file, this way it isn't included by the background downloader
+#ifndef RY_BG_DOWNLOADER
+
+bool CStartupHttpClient::connectToLogin()
+{
+	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
+}
+
+CStartupHttpClient HttpClient;
+
+#endif // RY_BG_DOWNLOADER
+
 
 
 // ***************************************************************************
@@ -2329,7 +2341,6 @@ bool initCreateAccount()
 		if(text)
 		{
 			text->setHardText(toString(CI18N::get("uiCreateAccountWelcome")));
-			text->setMultiLineSpace(20);
 			text->setColor(CRGBA(255, 255, 255, 255));
 
 			CInterfaceGroup * group = dynamic_cast<CInterfaceGroup*>(createAccountUI->findFromShortId("erros_txt"));
@@ -2525,9 +2536,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 				CViewText * text = dynamic_cast<CViewText*>(createAccountUI->findFromShortId("errors_list"));
 				if(text)
 				{
-					text->setMultiLineSpace(10);
 					text->setColor(CRGBA(250, 30, 30, 255));
-
 
 					std::vector< std::string > errors(5);
 					errors[0] = "id=\"comment-Username\"";

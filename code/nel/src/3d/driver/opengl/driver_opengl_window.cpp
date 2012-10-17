@@ -46,8 +46,15 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 #ifdef NL_OS_WINDOWS
 
@@ -339,8 +346,11 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 #elif defined(NL_OS_MAC)
 
 	// nothing to do
+	nlunreferenced(windowIcon);
 
 #elif defined (NL_OS_UNIX)
+
+	nlunreferenced(windowIcon);
 
 	_dpy = XOpenDisplay(NULL);
 
@@ -3013,6 +3023,10 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<l
 	return true;
 }
 
+#endif
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
 #endif
 
 } // NL3D

@@ -822,6 +822,13 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 	if ((!srcForm->DropOrSell && !canPutNonDropableItemInInventory(dstInvId)) || isAnActiveXpCatalyser(srcItem))
 		return;
 
+	// You cannot exchange genesis named items
+	if (srcItem->getPhraseId().find("genesis_") == 0 && !canPutNonDropableItemInInventory(dstInvId))
+	{
+		nlwarning("Character %s tries to move '%s' to inv %u", _Id.toString().c_str(), srcItem->getPhraseId().c_str(), dstInvId );
+		return;
+	}
+
 	// cannot move a pet animal ticket
 	if (srcForm->Family == ITEMFAMILY::PET_ANIMAL_TICKET)
 		return;
@@ -3035,12 +3042,16 @@ void CCharacter::stopUseItem( bool isRingCatalyser )
 	}
 	else
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "XP_CATALYSER_NO_MORE_ACTIVE");
-		_RingXpCatalyserSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
-//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Level", 0 );
-		CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setLevel(_PropertyDatabase, 0 );
-//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Count", 0 );
-		CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setCount(_PropertyDatabase, 0 );
+		CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( getId() ));
+		BOMB_IF(p == NULL,"Failed to find player record for character: "<<getId().toString(),return);
+		if (p->isTrialPlayer()) {		
+			PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "XP_CATALYSER_NO_MORE_ACTIVE");
+			_RingXpCatalyserSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
+	//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Level", 0 );
+			CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setLevel(_PropertyDatabase, 0 );
+	//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Count", 0 );
+			CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setCount(_PropertyDatabase, 0 );
+		}
 	}
 }
 

@@ -9,4 +9,4 @@ ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 NL_DEFAULT_PROPS(translation_tools "Ryzom, Tools, Misc: Translation Tools")
 NL_ADD_RUNTIME_FLAGS(translation_tools)
 
-INSTALL(TARGETS translation_tools RUNTIME DESTINATION bin COMPONENT tools)
+INSTALL(TARGETS translation_tools RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

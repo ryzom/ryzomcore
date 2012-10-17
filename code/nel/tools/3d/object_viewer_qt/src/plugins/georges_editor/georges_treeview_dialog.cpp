@@ -61,6 +61,7 @@ namespace GeorgesQt
 		// Set the default sheet dir dir to the level design path.
 		m_lastSheetDir = ".";
 		QSettings *settings = Core::ICore::instance()->settings();
+        settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 		m_lastSheetDir = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
 		settings->endGroup();
 
@@ -114,11 +115,12 @@ namespace GeorgesQt
 		m_form = (UForm*)form;
 	}
 
-	CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName) 
+    NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName)
 	{
 		if(NLMISC::CPath::exists(formName.toStdString()))
 		{
-			return (CForm*)m_georges->loadForm(formName.toStdString());
+            //NLGEORGES::CForm *form = dynamic_cast<NLGEORGES::CForm*>(m_georges->loadForm(formName.toStdString()));
+            return (NLGEORGES::CForm *)m_georges->loadForm(formName.toStdString());
 		}
 		//else
 		//{
@@ -154,8 +156,57 @@ namespace GeorgesQt
 		//	}
 		//	return form;
 		//}
+        nlinfo("File '%s' does not exist!", formName.toStdString().c_str());
 		return 0;
 	}
+
+    NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByDfnName(const QString dfnName)
+    {
+        if(NLMISC::CPath::exists(dfnName.toStdString()))
+        {
+            // Create a new form object.
+            NLGEORGES::CForm *form = new NLGEORGES::CForm();
+            m_form = form;
+
+            // Retrieve a copy of the root definition.
+            NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toStdString()));
+
+            // Next we'll use the root node to build a new form.
+            NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
+            fes->build(formDfn);
+
+            // And then initialize the held elements;
+            for(uint i = 0; i<NLGEORGES::CForm::HeldElementCount; i++)
+            {
+                fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(i+1));
+                fes->build(formDfn);
+            }
+
+            return form;
+        }
+        nlinfo("File '%s' does not exist!", dfnName.toStdString().c_str());
+        return NULL;
+    }
+
+    NLGEORGES::CFormElm *CGeorgesTreeViewDialog::getRootNode(uint slot)
+    {
+        NLGEORGES::CForm *form = getFormPtr();
+
+        if(slot == 0)
+        {
+            const NLGEORGES::UFormElm &formElm = form->getRootNode();
+            return (NLGEORGES::CFormElm *)&formElm;
+        }
+
+        // Make sure the slot value is valid and then return the corresponding element.
+        nlassert(slot < NLGEORGES::CForm::HeldElementCount+1);
+        return getFormPtr()->HeldElements[slot-1];
+    }
+
+    NLGEORGES::CForm *CGeorgesTreeViewDialog::getFormPtr()
+    {
+        return dynamic_cast<NLGEORGES::CForm *>(m_form);
+    }
 
 	void CGeorgesTreeViewDialog::loadFormIntoDialog(CForm *form) 
 	{
@@ -169,7 +220,8 @@ namespace GeorgesQt
 		root = &m_form->getRootNode();
 
 		QStringList parents;
-		for (uint i = 0; i < m_form->getNumParent(); i++) 
+        uint cnt = form->getParentCount();
+        for (uint i = 0; i < cnt /*form->getParentCount()*/; i++)
 		{
 			UForm *u = m_form->getParentForm(i);
 			parents << u->getFilename().c_str();

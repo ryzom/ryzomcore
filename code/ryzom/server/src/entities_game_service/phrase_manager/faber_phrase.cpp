@@ -54,7 +54,7 @@ CFaberPhrase::CFaberPhrase()
 	_CraftedItemStaticForm = 0;
 	_RootFaberBricks = false;
 	_RootFaberPlan = 0;
-	
+
 	// recommended skill level for using crafted item
 	_Recommended = 0;
 
@@ -67,13 +67,13 @@ CFaberPhrase::CFaberPhrase()
 	_MBORange = 0.0f;
 	_MBOProtection = 0.0f;
 	_MBOSapLoad = 0.0f;
-	
+
 	// energy buff on item
 	_MBOHitPoint = 0;
 	_MBOSap = 0;
 	_MBOStamina = 0;
 	_MBOFocus = 0;
-	
+
 	_IsStatic = true;
 	_PhraseType = BRICK_TYPE::FABER;
 }
@@ -85,7 +85,7 @@ CFaberPhrase::CFaberPhrase()
 bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute )
 {
 	H_AUTO(CFaberPhrase_build);
-	
+
 	// we are sure there is at least one brick and that there are non NULL;
 	nlassert( !bricks.empty() );
 
@@ -112,7 +112,7 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 				return false;
 			}
 		}
-		else*/ if( ( brick.Family >= BRICK_FAMILIES::BeginFaberOption && brick.Family <= BRICK_FAMILIES::EndFaberOption ) 
+		else*/ if( ( brick.Family >= BRICK_FAMILIES::BeginFaberOption && brick.Family <= BRICK_FAMILIES::EndFaberOption )
 			 ||  ( brick.Family >= BRICK_FAMILIES::BeginFaberCredit && brick.Family <= BRICK_FAMILIES::EndFaberCredit ) )
 		{
 			for ( uint j = 0 ; j < brick.Params.size() ; ++j)
@@ -120,7 +120,7 @@ bool CFaberPhrase::build( const TDataSetRow & actorRowId, const std::vector< con
 				const TBrickParam::IId* param = brick.Params[j];
 
 				switch(param->id())
-				{	
+				{
 					case TBrickParam::FOCUS:
 						INFOLOG("FOCUS: %i",((CSBrickParamCraftFocus *)param)->Focus);
 						_FocusCost += ((CSBrickParamCraftFocus *)param)->Focus;
@@ -217,10 +217,10 @@ bool CFaberPhrase::evaluate()
 bool CFaberPhrase::validate()
 {
 	H_AUTO(CFaberPhrase_validate);
-	
+
 	if ( !CraftSystemEnabled )
 		return false;
-	
+
 	CCharacter * c = (CCharacter *) CEntityBaseManager::getEntityBasePtr( _ActorRowId );
 	if( c == 0 )
 	{
@@ -234,7 +234,7 @@ bool CFaberPhrase::validate()
 		return false;
 	}
 
-	// check right hand item is a crafting tool 
+	// check right hand item is a crafting tool
 	CGameItemPtr rightHandItem = c->getRightHandItem();
 	if (rightHandItem == NULL || rightHandItem->getStaticForm() == NULL || rightHandItem->getStaticForm()->Family != ITEMFAMILY::CRAFTING_TOOL)
 	{
@@ -249,8 +249,16 @@ bool CFaberPhrase::validate()
 		return false;
 	}
 
+
+	// check quality of right hand item (need be >= Recommended (level of item))
+	if (rightHandItem->recommended()+49 < _Recommended)
+	{
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "CRAFT_NEED_RECOMMENDED_CRAFTING_TOOL");
+		return false;
+	}
+
 	// entities cant craft if in combat
-	/* commented as test of right hand item is now made... 
+	/* commented as test of right hand item is now made...
 	TDataSetRow entityRowId = CPhraseManager::getInstance().getEntityEngagedMeleeBy( _ActorRowId );
 	if (TheDataset.isAccessible(entityRowId))
 	{
@@ -258,7 +266,7 @@ bool CFaberPhrase::validate()
 		return false;
 	}
 	*/
-	
+
 	const sint32 focus = c->getScores()._PhysicalScores[ SCORES::focus ].Current;
 	if ( focus < _FocusCost  )
 	{
@@ -318,7 +326,7 @@ bool  CFaberPhrase::update()
 void  CFaberPhrase::execute()
 {
 	H_AUTO(CFaberPhrase_execute);
-	
+
 	CCharacter* player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
@@ -336,13 +344,13 @@ void  CFaberPhrase::execute()
 		_FaberTime = (NLMISC::TGameCycle)(plan->CraftingDuration * 10);
 	}
 	nldebug("CFaberPhrase::execute> _FaberTime = %d",_FaberTime);
-	
+
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	
+
 	_ExecutionEndDate  = time + _FaberTime ;
 
 	player->setCurrentAction(CLIENT_ACTION_TYPE::Faber,_ExecutionEndDate);
-	player->staticActionInProgress(true);	
+	player->staticActionInProgress(true);
 
 	// set behaviour
 	PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, MBEHAV::FABER );
@@ -366,7 +374,7 @@ bool CFaberPhrase::launch()
 void CFaberPhrase::apply()
 {
 	H_AUTO(CFaberPhrase_apply);
-	
+
 	CCharacter * c = dynamic_cast< CCharacter * > ( CEntityBaseManager::getEntityBasePtr( _ActorRowId ) );
 	if( c == 0 )
 	{
@@ -410,7 +418,7 @@ void CFaberPhrase::apply()
 	}
 
 	nbMp = (sint32)_MpsFormula.size();
-	
+
 	uint32 nbMpForumulaNeedeInPlan = 0;
 	neededMp = (uint32)_RootFaberPlan->Faber->NeededMpsFormula.size();
 	for( uint mp = 0; mp < neededMp; ++mp )
@@ -418,7 +426,7 @@ void CFaberPhrase::apply()
 		//for each type of Mp needed
 		nbMpForumulaNeedeInPlan += _RootFaberPlan->Faber->NeededMpsFormula[ mp ].Quantity;
 	}
-	
+
 	if( nbMpForumulaNeedeInPlan != _MpsFormula.size() )
 	{
 		nlwarning("<CFaberPhrase::apply> Craft plan %s need %d Raw Material Formula and client send %d Raw Material Formula", c->getCraftPlan().toString().c_str(), _RootFaberPlan->Faber->NeededMpsFormula.size(), _MpsFormula.size() );
@@ -453,7 +461,7 @@ void CFaberPhrase::apply()
 		stop();
 		return;
 	}
-	
+
 	neededMp = (uint32)_RootFaberPlan->Faber->NeededMps.size();
 	EGSPD::CPeople::TPeople civRestriction = _RootFaberPlan->CivRestriction;
 	uint32 usedMp=0;
@@ -469,7 +477,7 @@ void CFaberPhrase::apply()
 		   {
 			   // for each Mp of one type (we have Quantity by type)
 			   uint32 NumMpParameters = (uint32)usedMps[u_mp]->Mp->MpFaberParameters.size();
-				
+
 			   // for each Faber parameters in Mp
 			   for( uint j = 0; j < NumMpParameters; ++j )
 			   {
@@ -571,7 +579,7 @@ void CFaberPhrase::apply()
 CGameItemPtr CFaberPhrase::systemCraftItem( const NLMISC::CSheetId& sheet, const std::vector< NLMISC::CSheetId >& Mp, const std::vector< NLMISC::CSheetId >& MpFormula )
 {
 	H_AUTO(CFaberPhrase_systemCraftItem);
-	
+
 	std::vector< const CStaticBrick* > bricks;
 	_RootFaberPlan = CSheets::getSBrickForm( sheet );
 	const CStaticBrick * rootFaberBricks = CSheets::getSBrickForm( CSheetId("bcpa01.sbrick") );
@@ -586,7 +594,7 @@ CGameItemPtr CFaberPhrase::systemCraftItem( const NLMISC::CSheetId& sheet, const
 	}
 
 	CGameItemPtr craftedItem = 0;
-	
+
 	if( _RootFaberPlan && _RootFaberPlan->Faber )
 	{
 		_CraftedItemStaticForm = CSheets::getForm( _RootFaberPlan->Faber->CraftedItem );
@@ -597,7 +605,7 @@ CGameItemPtr CFaberPhrase::systemCraftItem( const NLMISC::CSheetId& sheet, const
 
 		bricks.push_back( rootFaberBricks );
 		bricks.push_back( _RootFaberPlan );
-		
+
 		for( vector< NLMISC::CSheetId >::const_iterator it = Mp.begin(); it != Mp.end(); ++it )
 		{
 			const CStaticItem * mp = CSheets::getForm( (*it) );
@@ -626,7 +634,7 @@ CGameItemPtr CFaberPhrase::systemCraftItem( const NLMISC::CSheetId& sheet, const
 			}
 			_MpsFormula.push_back( mp );
 		}
-		
+
 		// Check quantity of gived Mps formula
 		if( _RootFaberPlan->Faber->NeededMpsFormula.size() > _MpsFormula.size() )
 		{
@@ -658,7 +666,7 @@ CGameItemPtr CFaberPhrase::systemCraftItem( const NLMISC::CSheetId& sheet, const
 void CFaberPhrase::end()
 {
 	H_AUTO(CFaberPhrase_end);
-	
+
 	CCharacter* player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
@@ -679,7 +687,7 @@ void CFaberPhrase::end()
 void CFaberPhrase::stop()
 {
 	H_AUTO(CFaberPhrase_stop);
-	
+
 	CCharacter* player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
@@ -697,11 +705,11 @@ void CFaberPhrase::stop()
 } // stop //
 
 
-NLMISC_COMMAND(simuCraft, "Simulation de craft pour verifier les probabilités de reusir un item","<Nb simulations><level skill><item quality>")
+NLMISC_COMMAND(simuCraft, "Craft simulation to verify probabilities to succesfully craft an item","<Nb simulations><level skill><item quality>")
 {
 	if (args.size() != 3)
 		return false;
-	
+
 	uint32 nbSimu, skillLevel, itemQuality;
 	NLMISC::fromString(args[0], nbSimu);
 	NLMISC::fromString(args[1], skillLevel);
@@ -733,7 +741,7 @@ NLMISC_COMMAND(simuCraft, "Simulation de craft pour verifier les probabilités de
 		if(sf == 1.0f)
 		{
 			++nbFullSuccess;
-			XpGain += CStaticSuccessTable::getXPGain(SUCCESS_TABLE_TYPE::Craft, deltaLvlXp);		
+			XpGain += CStaticSuccessTable::getXPGain(SUCCESS_TABLE_TYPE::Craft, deltaLvlXp);
 		}
 		else if( sf > 0.0f)
 		{
@@ -747,7 +755,7 @@ NLMISC_COMMAND(simuCraft, "Simulation de craft pour verifier les probabilités de
 	nlinfo("FaberSimu: Results after %d roll: Sucess: %d (%.2f%%), partial sucess: %d (%.2f%%), Miss: %d (%.2f%%), Xp Gain %d",
 		nbSimu,
 		nbFullSuccess, 100.0f*nbFullSuccess/nbSimu,
-		nbPartialSuccess, 100.0f*nbPartialSuccess/nbSimu, 
+		nbPartialSuccess, 100.0f*nbPartialSuccess/nbSimu,
 		nbMiss, 100.0f*nbMiss/nbSimu,
 		uint32(1000.f*XpGain / (nbSimu-nbMiss/2) ) );
 

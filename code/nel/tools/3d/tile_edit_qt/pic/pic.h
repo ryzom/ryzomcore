@@ -22,7 +22,7 @@ extern unsigned long	PIC_Load(char* FileName, unsigned char Quantize);
 
 extern unsigned long	PIC_Create(unsigned char* pPal, unsigned char* pDatas, unsigned long w, unsigned long h, unsigned long d);
 
-extern unsigned long	PIC_Save(unsigned long id, char* FileName, unsigned long type, unsigned long qual);
+extern unsigned long	PIC_Save(unsigned long id, const char* FileName, unsigned long type, unsigned long qual);
 
 extern unsigned long	PIC_GetInfos(	unsigned long id, 
 										unsigned char* *ppPal, unsigned char* *ppDatas, 

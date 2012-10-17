@@ -519,8 +519,15 @@ NEL_PFNGLXGETSWAPINTERVALMESAPROC				nglXGetSwapIntervalMESA;
 // ***************************************************************************
 
 
-namespace	NL3D
-{
+namespace	NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 #define CHECK_EXT(ext_str) \
 	if(strstr(glext, ext_str)==NULL) { nlwarning("3D: OpengGL extension '%s' was not found", ext_str); return false; } else { nldebug("3D: OpengGL Extension '%s' found", ext_str); }
@@ -1843,4 +1850,8 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 }
 #endif // USE_OPENGLES
 
-}
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
+
+} // NL3D

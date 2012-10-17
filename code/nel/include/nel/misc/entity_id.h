@@ -470,12 +470,12 @@ public:
 	/// return a string in form "(a:b:c:d)" where a,b,c,d are components of entity id.
 	std::string toString() const
 	{
-		std::string id;
-		id.reserve(25);
-		id+='(';
-		getDebugString (id);
-		id+=')';
-		return id;
+		std::string ident;
+		ident.reserve(25);
+		ident+='(';
+		getDebugString (ident);
+		ident+=')';
+		return ident;
 	}
 
 	/// Read from a debug string, use the same format as toString() (id:type:creator:dynamic) in hexadecimal

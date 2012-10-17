@@ -317,6 +317,8 @@ bool TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitm
 				case CTile::alpha:
 					theList128[tile].alphaLoaded=0;
 					break;
+				default:
+					break;
 				}
 				Reload(tile, tile + 1, _128x128);
 			}
@@ -377,6 +379,8 @@ bool TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitm
 					break;
 				case CTile::alpha:
 					theList256[tile].alphaLoaded=0;
+					break;
+				default:
 					break;
 				}
 				Reload(tile, tile + 1, _256x256);
@@ -441,6 +445,8 @@ bool TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile
 					break;
 				case CTile::alpha:
 					theListTransition[tile].alphaLoaded=0;
+					break;
+				default:
 					break;
 				}
 				Reload(tile, tile + 1, Transition);
@@ -603,6 +609,8 @@ void TileList::clearTile128 (int index, CTile::TBitmap bitmap)
 		case CTile::alpha:
 			nlassert(0);
 			break;
+		default:
+			break;
 	}
 	tileBankBrowser.getTileSet (_tileSet)->clearTile128 (index, bitmap, tileBankBrowser);
 }
@@ -621,6 +629,8 @@ void TileList::clearTile256 (int index, CTile::TBitmap bitmap)
 			break;
 		case CTile::alpha:
 			nlassert(0);
+			break;
+		default:
 			break;
 	}
 	tileBankBrowser.getTileSet (_tileSet)->clearTile256 (index, bitmap, tileBankBrowser);
@@ -642,6 +652,8 @@ void TileList::clearTransition (int index, CTile::TBitmap bitmap)
 			theListTransition[index].alphaLoaded=0;
 			theListTransition[index].alphaBits.resize(0);
 			break;
+		default:
+			break;
 	}
 	tileBankBrowser.getTileSet (_tileSet)->clearTransition ((CTileSet::TTransition)index, bitmap, tileBankBrowser);
 }
@@ -659,6 +671,8 @@ void TileList::clearDisplacement (int index, CTile::TBitmap bitmap)
 			break;
 		case CTile::alpha:
 			nlassert(0);
+			break;
+		default:
 			break;
 	}
 
@@ -717,7 +731,8 @@ void TileList::Reload(int first, int last, TileType n) //recharge en memoire une
 					theList[n][i].Load (index, NULL);
 				break;
 			}
-
+			default:
+				break;
 		}
 	}
 }

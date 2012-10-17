@@ -100,7 +100,7 @@ CFixedSizeAllocator::CChunk::~CChunk()
 	nlassert(NumFreeObjs == 0);
 	nlassert(Allocator->_NumChunks > 0);
 	-- (Allocator->_NumChunks);
-	delete Mem;
+	delete[] Mem;
 }
 
 // *****************************************************************************************************************

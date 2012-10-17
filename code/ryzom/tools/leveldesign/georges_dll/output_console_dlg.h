@@ -37,7 +37,7 @@ public:
 
 	// From CDialog
 	void	OnOK () {}
-	void	OnCancel ()
+	void	OnCancel ();
 
 // Dialog Data
 	//{{AFX_DATA(COutputConsoleDlg)

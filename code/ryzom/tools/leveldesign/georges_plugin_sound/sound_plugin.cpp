@@ -68,6 +68,9 @@ CSoundPlugin::CSoundPlugin(IEdit *globalInterface)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	// Initialize without sheet id bin
+	NLMISC::CSheetId::initWithoutSheet();
+
 	CVector dir;
 
 	_GlobalInterface = globalInterface;
@@ -337,7 +340,7 @@ void CSoundPlugin::setActiveDocument(IEditDocument *pdoc)
 		_Dialog.setName(_Filename);
 
 		// 1st, try to found the sound in the preloaded sound bank.
-		_Sound = _Mixer->getSoundId(CStringMapper::map(_Filename));
+		_Sound = _Mixer->getSoundId(CSheetId(_Filename, "sound"));
 		if (_Sound == NULL)
 		{
 			// not found, create a new one.
@@ -537,7 +540,7 @@ void CSoundPlugin::play(std::string &filename)
 //				point.Name = string("simulation-")+_Sound->getName()+"-000";
 
 				region.VPoints.push_back(point);
-				string name = string("simulation-")+CStringMapper::unmap(_Sound->getName())+"-000";
+				string name = string("simulation-")+NLMISC::CFile::getFilenameWithoutExtension(_Sound->getName().toString())+"-000";
 				if (region.VPoints.back().checkProperty("name"))
 					region.VPoints.back().removePropertyByName("name");
 

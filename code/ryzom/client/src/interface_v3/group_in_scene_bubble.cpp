@@ -1003,7 +1003,7 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 	{
 		uint32 i = 0;
 		while (getDynBubble(i) != NULL) i++;
-		id = "in_scene_webig_bubble_" + toString(i);
+		id = "in_scene_webig_bubble_" + toString(nBotUID);
 		// Create the instance
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
@@ -1071,7 +1071,6 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 
 	for (j = 0; j < strs.size(); ++j)
 	{
-		string fullid = id+"opt"+toString(j);
 		pVT = dynamic_cast<CViewText*>(bubble->getElement(id+"opt"+toString(j)));
 		if (pVT != NULL)
 		{
@@ -1084,7 +1083,6 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 			{
 				pCL->setActionOnLeftClick("browse");
 				pCL->setParamsOnLeftClick("name=ui:interface:web_transactions:content:html|show=0|url="+links[j]);
-				//pCL->setActionOnLeftClickParams("name=ui:interface:web_transactions:content:html|url="+links[j]);
 				pCL->setActive(true);
 
 			}

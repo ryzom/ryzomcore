@@ -65,30 +65,27 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 
 #endif /* NL_OS_WINDOWS */
 
+#ifdef USE_OPENGLES
+
+class CDriverGLEsNelLibrary : public INelLibrary {
+	void onLibraryLoaded(bool firstTime) { }
+	void onLibraryUnloaded(bool lastTime) { }
+};
+NLMISC_DECL_PURE_LIB(CDriverGLEsNelLibrary)
+
+#else
+
 class CDriverGLNelLibrary : public INelLibrary {
 	void onLibraryLoaded(bool firstTime) { }
 	void onLibraryUnloaded(bool lastTime) { }
 };
 NLMISC_DECL_PURE_LIB(CDriverGLNelLibrary)
 
+#endif
+
 #endif /* #ifndef NL_STATIC */
 
-
-namespace NL3D
-{
-
-CMaterial::CTexEnv CDriverGL::_TexEnvReplace;
-
-
-#ifdef NL_OS_WINDOWS
-uint CDriverGL::_Registered=0;
-#endif // NL_OS_WINDOWS
-
-// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
-const uint32 CDriverGL::ReleaseVersion = 0x11;
-
-// Number of register to allocate for the EXTVertexShader extension
-const uint CDriverGL::_EVSNumConstant = 97;
+namespace NL3D {
 
 #ifdef NL_STATIC
 
@@ -96,14 +93,14 @@ const uint CDriverGL::_EVSNumConstant = 97;
 
 IDriver* createGlEsDriverInstance ()
 {
-	return new CDriverGL;
+	return new NLDRIVERGLES::CDriverGL;
 }
 
 #else
 
 IDriver* createGlDriverInstance ()
 {
-	return new CDriverGL;
+	return new NLDRIVERGL::CDriverGL;
 }
 
 #endif
@@ -140,6 +137,27 @@ extern "C"
 #endif // NL_OS_WINDOWS
 
 #endif // NL_STATIC
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
+
+CMaterial::CTexEnv CDriverGL::_TexEnvReplace;
+
+
+#ifdef NL_OS_WINDOWS
+uint CDriverGL::_Registered=0;
+#endif // NL_OS_WINDOWS
+
+// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
+const uint32 CDriverGL::ReleaseVersion = 0x11;
+
+// Number of register to allocate for the EXTVertexShader extension
+const uint CDriverGL::_EVSNumConstant = 97;
 
 GLenum CDriverGL::NLCubeFaceToGLCubeFace[6] =
 {
@@ -2916,8 +2934,6 @@ void CDriverGL::endDialogMode()
 {
 }
 
-} // NL3D
-
 // ***************************************************************************
 void displayGLError(GLenum error)
 {
@@ -2935,3 +2951,9 @@ void displayGLError(GLenum error)
 		break;
 	}
 }
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
+
+} // NL3D

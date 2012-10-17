@@ -165,7 +165,7 @@ void CSessionBrowser::run()
 		}
 
 disconnected:
-		// unconnected, waiting for message to send
+		// disconnected, waiting for message to send
 		while (adaptor->_SendQueue.empty())
 		{
 			nlSleep(100);

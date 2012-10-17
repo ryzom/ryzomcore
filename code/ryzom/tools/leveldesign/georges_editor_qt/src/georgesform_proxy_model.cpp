@@ -79,6 +79,8 @@ namespace NLQT
 					}
 				}
 			}
+		default:
+			break;
 		}
 		return true;
 	}
