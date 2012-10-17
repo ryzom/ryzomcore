@@ -44,6 +44,7 @@ namespace NLDRIVERGL {
 			- GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R
 			- GL_COLOR_MATERIAL
 			- GL_FOG
+			- GL_MULTISAMPLE_ARB
 		- glActiveTextureARB()
 		- glClientActiveTextureARB()
 		- glEnableClientState() glDisableClientState() with:
@@ -99,6 +100,9 @@ public:
 	/// enable/disable stencil test
 	void			enableStencilTest(bool enable);
 	bool			isStencilTestEnabled() const { return _CurStencilTest; }
+	/// enable/disable multisample
+	void			enableMultisample(bool enable);
+	bool			isMultisampleEnabled() const { return _CurMultisample; }
 	// @}
 
 	/// glBlendFunc.
@@ -197,6 +201,7 @@ private:
 	bool			_CurLighting;
 	bool			_CurZWrite;
 	bool			_CurStencilTest;
+	bool			_CurMultisample;
 
 	GLenum			_CurBlendSrc;
 	GLenum			_CurBlendDst;

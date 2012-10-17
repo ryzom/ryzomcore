@@ -94,6 +94,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	_CurLighting= false;
 	_CurZWrite= true;
 	_CurStencilTest=false;
+	_CurMultisample= false;
 
 	// setup GLStates.
 	glDisable(GL_FOG);
@@ -102,6 +103,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_LIGHTING);
 	glDepthMask(GL_TRUE);
+	glDisable(GL_MULTISAMPLE_ARB);
 
 	// Func.
 	_CurBlendSrc= GL_SRC_ALPHA;
@@ -379,6 +381,25 @@ void			CDriverGLStates::enableStencilTest(bool enable)
 	}
 }
 
+// ***************************************************************************
+void			CDriverGLStates::enableMultisample(bool enable)
+{
+	H_AUTO_OGL(CDriverGLStates_enableMultisample);
+
+	// If different from current setup, update.
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if( enable != _CurMultisample )
+#endif
+	{
+		// new state.
+		_CurMultisample= enable;
+		// Setup GLState.
+		if(_CurMultisample)
+			glEnable(GL_MULTISAMPLE_ARB);
+		else
+			glDisable(GL_MULTISAMPLE_ARB);
+	}
+}
 
 // ***************************************************************************
 void			CDriverGLStates::blendFunc(GLenum src, GLenum dst)
