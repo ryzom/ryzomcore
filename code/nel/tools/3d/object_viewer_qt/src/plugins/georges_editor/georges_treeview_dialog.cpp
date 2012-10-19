@@ -460,26 +460,23 @@ namespace GeorgesQt
 
 	void CGeorgesTreeViewDialog::showContextMenu(const QPoint &pos)
 	{
-		//QMenu contextMenu;
-		//QMenu *structContext = NULL;
-		//QPoint globalPos = this->mapToGlobal(pos);
-		//
-		//// Fisrt we're going to see if we've right clicked on a new item and select it.
-		//const QModelIndex &index = this->m_ui.treeView->currentIndex();
+		QMenu contextMenu;
+		QMenu *structContext = NULL;
+		QPoint globalPos = this->mapToGlobal(pos);
 
-		//if(!index.isValid())
-		//	return;
+		// Fisrt we're going to see if we've right clicked on a new item and select it.
+		const QModelIndex &index = this->m_ui.treeView->currentIndex();
 
-		//CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
-		//CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
-		//QModelIndex sourceIndex = mp->mapToSource(index);
+		if(!index.isValid())
+			return;
 
-		//if (m) 
-		//{
-		//	
-		//	CFormItem *item = m->getItem(sourceIndex);
+		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(m_ui.treeView->model());
 
-		//	// Right click on the "parents" item
+		if(m) 
+		{
+			CFormItem *item = m->getItem(index);
+
+			// Right click on the "parents" item
 		//	if (item->data(0) == "parents")
 		//		contextMenu.addAction("Add parent...");
 		//	// Right click on a parent item
@@ -488,8 +485,15 @@ namespace GeorgesQt
 		//		contextMenu.addAction("Add parent...");
 		//		contextMenu.addAction("Remove parent");
 		//	}
-		//	else if(item->getFormElm()->isArray())
-		//		contextMenu.addAction("Add array entry...");
+			if(item->isArray())
+			{
+				contextMenu.addAction("Append array entry...");
+			}
+			else if(item->isArrayMember())
+			{
+				contextMenu.addAction("Delete array entry...");
+				contextMenu.addAction("Insert after array entry...");
+			}
 		//	else if(item->getFormElm()->isStruct())
 		//	{
 		//		QMenu *structContext = new QMenu("Add struct element...", this);
@@ -569,7 +573,7 @@ namespace GeorgesQt
 		//		}
 
 		//	} // if selected context menu item is valid.
-		//} // if 'm' model valid.
+		} // if 'm' model valid.
 
 		//if(structContext)
 		//	delete structContext;

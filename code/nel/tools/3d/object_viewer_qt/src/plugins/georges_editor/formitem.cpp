@@ -98,6 +98,36 @@ namespace GeorgesQt
 		if (column != 0)
 			return false;
 
+		if(isArrayMember())
+			return true;
+
+		return false;
+	}
+
+	bool CFormItem::isArray()
+	{
+		// If it wasn't a root node then lets check the node type.
+		const NLGEORGES::CFormDfn *parentDfn;
+		uint indexDfn;
+		const NLGEORGES::CFormDfn *nodeDfn;
+		const NLGEORGES::CType *nodeType;
+		NLGEORGES::CFormElm *node;
+		NLGEORGES::UFormDfn::TEntryType type;
+		bool array;
+		bool parentVDfnArray;
+		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
+		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
+		nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn,
+                   &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+		if(array && node)
+			return true;
+
+		return false;
+	}
+
+	bool CFormItem::isArrayMember()
+	{
 		CFormItem *parent = this->parent();
 
 		// If it wasn't a root node then lets check the node type.
@@ -118,7 +148,6 @@ namespace GeorgesQt
 			return true;
 
 		return false;
-
 	}
 
 	QIcon CFormItem::getItemImage(CFormItem *rootItem)

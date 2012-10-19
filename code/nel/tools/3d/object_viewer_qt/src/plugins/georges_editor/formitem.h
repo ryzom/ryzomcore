@@ -67,6 +67,8 @@ namespace GeorgesQt
 		NLGEORGES::UForm *form() { return m_form; }
 
 		bool isEditable(int column);
+		bool isArray();
+		bool isArrayMember();
 
 		QIcon getItemImage(CFormItem *rootItem);
 
