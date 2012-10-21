@@ -74,6 +74,10 @@ namespace GeorgesQt
 
 		m_form = 0;
 
+        m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+        connect(m_ui.treeView, SIGNAL(customContextMenuRequested(const QPoint&)),
+                this, SLOT(showContextMenu(const QPoint&)));
 		connect(m_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
 			this, SLOT(doubleClicked (QModelIndex)));
 		connect(m_header, SIGNAL(headerClicked(int)),
@@ -522,7 +526,7 @@ namespace GeorgesQt
 		//	else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
 		//		contextMenu.addAction("Revert to parent/default...");
 
-		//	QAction *selectedItem = contextMenu.exec(globalPos);
+            QAction *selectedItem = contextMenu.exec(QCursor::pos());
 		//	if(selectedItem)
 		//	{
 		//		if(selectedItem->text() == "Add parent...")
