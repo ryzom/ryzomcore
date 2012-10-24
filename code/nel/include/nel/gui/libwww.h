@@ -22,7 +22,7 @@
 
 extern "C"
 {
-#include "WWWInit.h"
+#include "libwww/WWWInit.h"
 }
 
 namespace NLGUI

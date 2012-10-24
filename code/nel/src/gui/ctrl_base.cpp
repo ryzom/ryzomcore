@@ -468,7 +468,7 @@ namespace NLGUI
 		AHMap[ key ] = value;
 	}
 
-	std::string CCtrlBase::getAHString( const stlpx_std::string &key ) const
+	std::string CCtrlBase::getAHString( const std::string &key ) const
 	{
 		std::map< std::string, std::map< std::string, std::string > >::const_iterator itr = AHCache.find( getId() );
 		if( itr == AHCache.end() )

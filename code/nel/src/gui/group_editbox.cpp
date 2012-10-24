@@ -100,7 +100,7 @@ namespace NLGUI
 		}
 	}
 
-	std::string CGroupEditBox::getProperty( const stlpx_std::string &name ) const
+	std::string CGroupEditBox::getProperty( const std::string &name ) const
 	{
 		if( name == "onchange" )
 		{

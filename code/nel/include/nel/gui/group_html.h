@@ -31,7 +31,7 @@ typedef std::map<std::string, std::string>	TStyle;
 
 extern "C"
 {
-#include "WWWInit.h"
+#include "libwww/WWWInit.h"
 }
 
 namespace NLGUI

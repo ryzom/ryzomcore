@@ -21,16 +21,16 @@ extern "C"
 {
 
 	/* Library Includes */
-#include "wwwsys.h"
-#include "WWWUtil.h"
-#include "WWWCore.h"
-#include "WWWDir.h"
-#include "WWWTrans.h"
-#include "HTReqMan.h"
-#include "HTBind.h"
-#include "HTMulti.h"
-#include "HTNetMan.h"
-#include "HTChannl.h"
+#include "libwww/wwwsys.h"
+#include "libwww/WWWUtil.h"
+#include "libwww/WWWCore.h"
+#include "libwww/WWWDir.h"
+#include "libwww/WWWTrans.h"
+#include "libwww/HTReqMan.h"
+#include "libwww/HTBind.h"
+#include "libwww/HTMulti.h"
+#include "libwww/HTNetMan.h"
+#include "libwww/HTChannl.h"
 #include "nel/gui/libwww_nel_stream.h"		/* Implemented here */
 }
 

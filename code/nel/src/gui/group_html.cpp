@@ -18,12 +18,14 @@
 
 #define NOMINMAX
 
+#include "nel/gui/group_html.h"
+
 // LibWWW
 extern "C"
 {
-#include "WWWLib.h"			      /* Global Library Include file */
-#include "WWWApp.h"
-#include "WWWInit.h"
+#include "libwww/WWWLib.h"			      /* Global Library Include file */
+#include "libwww/WWWApp.h"
+#include "libwww/WWWInit.h"
 }
 
 #include <string>

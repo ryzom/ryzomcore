@@ -26,6 +26,8 @@
 #include "nel/gui/widget_manager.h"
 #include "nel/misc/algo.h"
 
+#include <iterator>
+
 using namespace std;
 using namespace NLMISC;
 
