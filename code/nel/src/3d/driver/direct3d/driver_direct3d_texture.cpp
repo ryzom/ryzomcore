@@ -454,6 +454,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 		}
 		else
 		{
+/*
 			// textures with mipmaps doesn't support not power of two sizes
 			// only DXTC formats are beginning with a 'D'
 			if (supportNonPowerOfTwoTextures() && (!isPowerOf2(width) || !isPowerOf2(height)) && levels == 1)
@@ -464,6 +465,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 				_DeviceInterface->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 				_DeviceInterface->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 			}
+*/
 
 			HRESULT hr = _DeviceInterface->CreateTexture (width, height, levels, renderTarget?D3DUSAGE_RENDERTARGET:0, destFormat, renderTarget?D3DPOOL_DEFAULT:D3DPOOL_MANAGED, &(d3dtext->Texture2d), NULL);
 
