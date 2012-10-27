@@ -157,7 +157,7 @@ public:
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
-		EXTTextureFilterAnisotropicMaximum = 1.f;
+		EXTTextureFilterAnisotropicMaximum = 0.f;
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;

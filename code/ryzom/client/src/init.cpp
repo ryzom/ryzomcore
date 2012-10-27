@@ -1067,6 +1067,9 @@ void prelogInit()
 		// Init the DXTCCompression.
 		Driver->forceDXTCCompression(ClientCfg.ForceDXTC);
 
+		// Set the anisotropic filter
+		Driver->setAnisotropicFilter(ClientCfg.AnisotropicFilter);
+
 		// Divide the texture size.
 		if (ClientCfg.DivideTextureSizeBy2)
 			Driver->forceTextureResize(2);

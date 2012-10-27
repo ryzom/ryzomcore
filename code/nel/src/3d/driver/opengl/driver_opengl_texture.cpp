@@ -823,6 +823,9 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 #endif
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+
+			if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+				glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 		}
 	}
 	else
@@ -831,6 +834,9 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_T, translateWrapToGl(gltext->WrapT, _Extensions));
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+
+		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+			glTexParameteri(gltext->TextureMode, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 	}
 	//
 	tex.clearFilterOrWrapModeTouched();
@@ -2182,6 +2188,25 @@ void		CDriverGL::forceDXTCCompression(bool dxtcComp)
 {
 	H_AUTO_OGL(CDriverGL_forceDXTCCompression)
 	_ForceDXTCCompression= dxtcComp;
+}
+
+// ***************************************************************************
+void		CDriverGL::setAnisotropicFilter(sint filtering)
+{
+	H_AUTO_OGL(CDriverGL_setAnisotropicFiltering);
+
+	if (!_Extensions.EXTTextureFilterAnisotropic) return;
+
+	if (filtering < 0 || filtering > _Extensions.EXTTextureFilterAnisotropicMaximum)
+	{
+		// set maximum value for anisotropic filter
+		_AnisotropicFilter = _Extensions.EXTTextureFilterAnisotropicMaximum;
+	}
+	else
+	{
+		// set specified value for anisotropic filter
+		_AnisotropicFilter = filtering;
+	}
 }
 
 // ***************************************************************************

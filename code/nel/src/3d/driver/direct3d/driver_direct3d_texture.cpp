@@ -506,6 +506,19 @@ inline void CDriverD3D::setupTextureWrapMode(ITexture& tex)
 	d3dtext->MagFilter = RemapMagTextureFilterTypeNeL2D3D[tex.getMagFilter()];
 	d3dtext->MinFilter = RemapMinTextureFilterTypeNeL2D3D[tex.getMinFilter()];
 	d3dtext->MipFilter = RemapMipTextureFilterTypeNeL2D3D[tex.getMinFilter()];
+
+	// only enable for min filter, because it's never supported for mag filter
+	if (_AnisotropicFilter > 1 && tex.getMinFilter() > ITexture::NearestMipMapLinear)
+	{
+		if (tex.isTextureCube())
+		{
+			if (_AnisotropicMinCubeSupported) d3dtext->MinFilter = D3DTEXF_ANISOTROPIC;
+		}
+		else
+		{
+			if (_AnisotropicMinSupported) d3dtext->MinFilter = D3DTEXF_ANISOTROPIC;
+		}
+	}
 }
 
 

@@ -305,6 +305,8 @@ CDriverGL::CDriverGL()
 
 	_NVTextureShaderEnabled = false;
 
+	_AnisotropicFilter = 0.f;
+
 	// Compute the Flag which say if one texture has been changed in CMaterial.
 	_MaterialAllTextureTouchedFlag= 0;
 	for(i=0; i < IDRV_MAT_MAXTEXTURES; i++)
