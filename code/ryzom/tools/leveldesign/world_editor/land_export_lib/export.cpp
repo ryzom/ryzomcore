@@ -34,7 +34,7 @@
 #include "nel/ligo/zone_region.h"
 #include "nel/ligo/zone_bank.h"
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
+#include "nel/pacs/collision_mesh_build.h"
 
 
 #include "../../../leveldesign/export/tools.h"
