@@ -119,7 +119,7 @@ void SheetBuilderDialog::buildSheet()
 
 	bool clean = chckClean->isChecked();
 
-	string outputFileName(outputFile.toStdString());
+	string outputFileName(outputFile.toUtf8());
 
 	if (outputFileName.empty())
 	{
@@ -129,11 +129,11 @@ void SheetBuilderDialog::buildSheet()
 
 	list<string> inputDirs;
 	Q_FOREACH (QString str, paths)
-	inputDirs.push_back(str.toStdString());
+	inputDirs.push_back(str.toUtf8().constData());
 
 	Q_FOREACH (QString str, extensions)
 	{
-		ExtensionsAllowed.insert(str.toStdString());
+		ExtensionsAllowed.insert(str.toUtf8().constData());
 	}
 
 	// get the current associations (read the sheet_id and fill the working structures)

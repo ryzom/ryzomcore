@@ -93,29 +93,29 @@ namespace NLQT
 
 	CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName) 
 	{
-		if(NLMISC::CPath::exists(formName.toStdString()))
+		if(NLMISC::CPath::exists(formName.toUtf8().constData()))
 		{
-			return (CForm*)_georges->loadForm(formName.toStdString());
+			return (CForm*)_georges->loadForm(formName.toUtf8().constData());
 		}
 		else
 		{
 			CForm *form = 0;
 			// Load the DFN
-			std::string extStr = NLMISC::CFile::getExtension( formName.toStdString() );
-			QString dfnName = QString("%1.dfn").arg(extStr.c_str());
+			std::string extStr = NLMISC::CFile::getExtension( formName.toUtf8().constData() );
+			std::string dfnName = extStr + ".dfn";
 			UFormDfn *formdfn;
-			if (NLMISC::CPath::exists(dfnName.toStdString()))
+			if (NLMISC::CPath::exists(dfnName))
 			{
-				formdfn = _georges->loadFormDfn (dfnName.toStdString());
+				formdfn = _georges->loadFormDfn (dfnName);
 				if (!formdfn)
 				{
-					nlwarning("Failed to load dfn: %s", dfnName.toStdString().c_str());
+					nlwarning("Failed to load dfn: %s", dfnName.c_str());
 					return 0;
 				}
 			}
 			else
 			{
-				nlwarning("Cannot find dfn: %s", dfnName.toStdString().c_str());
+				nlwarning("Cannot find dfn: %s", dfnName.c_str());
 				return 0;
 			}
 
@@ -175,7 +175,7 @@ namespace NLQT
 			nlinfo("typ's %d",deps["typ"].count());
 			nlinfo("dfn's %d",deps["dfn"].count());
 
-			//nlwarning(strList.join(";").toStdString().c_str());
+			//nlwarning(strList.join(";").toUtf8().constData());
 			if (root) 
 			{
 				loadedForm = _form->getFilename().c_str();
@@ -222,7 +222,7 @@ namespace NLQT
 	{
 
 		COFile file;
-		std::string s = CPath::lookup(loadedForm.toStdString(), false);
+		std::string s = CPath::lookup(loadedForm.toUtf8().constData(), false);
 		if (file.open (s)) 
 		{
 			try	
@@ -313,7 +313,7 @@ namespace NLQT
 			CFormItem *item = m->getItem(in2);
 			QString value = item->data(1).toString();
 
-			QString path = CPath::lookup(value.toStdString(),false).c_str();
+			QString path = CPath::lookup(value.toUtf8().constData(),false).c_str();
 
 			if(value.contains(".tga") || value.contains(".png")) 
 			{
@@ -341,7 +341,7 @@ namespace NLQT
 					{
 						Modules::objViewInt()->resetScene();
 						//Modules::config().configRemapExtensions();
-						Modules::objViewInt()->loadMesh(path.toStdString(),"");
+						Modules::objViewInt()->loadMesh(path.toUtf8().constData(),"");
 					}
 					return;
 				}

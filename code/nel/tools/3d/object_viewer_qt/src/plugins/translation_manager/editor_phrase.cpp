@@ -40,7 +40,7 @@ namespace TranslationManager
 void CEditorPhrase::open(QString filename)
 {
 	std::vector<STRING_MANAGER::TPhrase> phrases;
-	if(readPhraseFile(filename.toStdString(), phrases, false))
+	if(readPhraseFile(filename.toUtf8().constData(), phrases, false))
 	{
 		text_edit = new CTextEdit(this);
 		text_edit->setUndoStack(current_stack);

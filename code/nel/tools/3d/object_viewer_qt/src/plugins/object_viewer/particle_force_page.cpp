@@ -185,11 +185,11 @@ void CForcePage::setDir(const NLMISC::CVector &value)
 void CForcePage::setGlobalName(const QString &globalName)
 {
 	nlassert(_LBTarget);
-	dynamic_cast<NL3D::CPSDirection *>(_LBTarget)->enableGlobalVectorValue(globalName.toStdString());
+	dynamic_cast<NL3D::CPSDirection *>(_LBTarget)->enableGlobalVectorValue(globalName.toUtf8().constData());
 	if (!globalName.isEmpty())
 	{
 		// take a non NULL value for the direction
-		NL3D::CParticleSystem::setGlobalVectorValue(globalName.toStdString(), NLMISC::CVector::I);
+		NL3D::CParticleSystem::setGlobalVectorValue(globalName.toUtf8().constData(), NLMISC::CVector::I);
 	}
 	updateModifiedFlag();
 }

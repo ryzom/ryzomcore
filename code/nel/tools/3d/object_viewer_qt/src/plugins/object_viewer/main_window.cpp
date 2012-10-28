@@ -449,9 +449,9 @@ bool CMainWindow::loadFile(const QString &fileName, const QString &skelName)
 	QFileInfo fileInfo(fileName);
 	bool loaded;
 	if (fileInfo.suffix() == "ig")
-		loaded = Modules::objView().loadInstanceGroup(fileName.toStdString());
+		loaded = Modules::objView().loadInstanceGroup(fileName.toUtf8().constData());
 	else
-		loaded = Modules::objView().loadMesh(fileName.toStdString(), skelName.toStdString());
+		loaded = Modules::objView().loadMesh(fileName.toUtf8().constData(), skelName.toUtf8().constData());
 
 	if (!loaded)
 	{

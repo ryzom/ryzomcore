@@ -50,7 +50,7 @@ static void chooseGlobalUserParam(uint userParam, NL3D::CParticleSystem *ps, QWi
 										 QString(ps->getGlobalValueName(userParam).c_str()), &ok);
 
 	if (ok)
-		ps->bindGlobalValueToUserParam(text.toStdString(), userParam);
+		ps->bindGlobalValueToUserParam(text.toUtf8().constData(), userParam);
 }
 
 CParticleSystemPage::CParticleSystemPage(QWidget *parent)

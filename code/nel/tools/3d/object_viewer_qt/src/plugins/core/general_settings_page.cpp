@@ -99,10 +99,10 @@ void GeneralSettingsPage::applyGeneralSettings()
 	QString primitivePath = settings->value(Core::Constants::PRIMITIVES_PATH, QString("%1/primitives").arg(levelDesignPrefix)).toString();
 	QString ligoConfigFile = settings->value(Core::Constants::LIGOCONFIG_FILE, QString("%1/leveldesign/world_editor_files/world_editor_classes.xml").arg(levelDesignPrefix)).toString();
 	QString leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, QString("%1/leveldesign").arg(levelDesignPrefix)).toString();
-	NLMISC::CPath::addSearchPath(primitivePath.toStdString(), true, false);
+	NLMISC::CPath::addSearchPath(primitivePath.toUtf8().constData(), true, false);
 	NLMISC::CPath::display();
-	NLMISC::CPath::addSearchFile(ligoConfigFile.toStdString());
-	NLMISC::CPath::addSearchPath(leveldesignPath.toStdString(), true, false);
+	NLMISC::CPath::addSearchFile(ligoConfigFile.toUtf8().constData());
+	NLMISC::CPath::addSearchPath(leveldesignPath.toUtf8().constData(), true, false);
 	settings->endGroup();
 }
 

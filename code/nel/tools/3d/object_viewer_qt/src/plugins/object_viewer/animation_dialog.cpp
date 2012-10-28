@@ -90,7 +90,7 @@ void CAnimationDialog::setCurrentShape(const QString &name)
 {
 	if (name.isEmpty())
 		return;
-	CEntity &entity = Modules::objView().getEntity(name.toStdString());
+	CEntity &entity = Modules::objView().getEntity(name.toUtf8().constData());
 
 	_ui.inPlaceCheckBox->setChecked(entity.getInPlace());
 	_ui.incPosCheckBox->setChecked(entity.getIncPos());

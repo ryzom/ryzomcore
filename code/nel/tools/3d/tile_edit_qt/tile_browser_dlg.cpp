@@ -235,7 +235,7 @@ void CTile_browser_dlg::on_actionAddTile_triggered(bool checked)
 				{
 					tileId = browserModel.addTile128 ();
 					fileName = QDir::toNativeSeparators(fileNames.at(i));
-					if ( ! browserModel.setTile128 ( tileId, fileName.toStdString(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
+					if ( ! browserModel.setTile128 ( tileId, fileName.toUtf8().constData(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
 					{
 						browserModel.removeTile128 (tileId);
 						break;
@@ -247,7 +247,7 @@ void CTile_browser_dlg::on_actionAddTile_triggered(bool checked)
 				{
 					tileId = browserModel.addTile256 ();
 					fileName = QDir::toNativeSeparators(fileNames.at(i));
-					if ( ! browserModel.setTile256 ( tileId, fileName.toStdString(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
+					if ( ! browserModel.setTile256 ( tileId, fileName.toUtf8().constData(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
 					{
 						browserModel.removeTile256 (tileId);
 						break;
@@ -307,7 +307,7 @@ void CTile_browser_dlg::on_actionReplaceImage_triggered(bool checked)
 				{
 					int tileId = (ui.tileBrowserListView->selectionModel()->selectedRows().at(i).data(Qt::UserRole + 1)).toInt();
 					
-					if ( ! browserModel.setTile128 ( tileId, fileName.toStdString(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
+					if ( ! browserModel.setTile128 ( tileId, fileName.toUtf8().constData(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
 						break;
 				}
 				break;
@@ -315,7 +315,7 @@ void CTile_browser_dlg::on_actionReplaceImage_triggered(bool checked)
 				for (int i=0; i<ui.tileBrowserListView->selectionModel()->selectedRows().count(); i++)
 				{
 					int tileId = (ui.tileBrowserListView->selectionModel()->selectedRows().at(i).data(Qt::UserRole + 1)).toInt();
-					if ( ! browserModel.setTile256 (tileId, fileName.toStdString(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
+					if ( ! browserModel.setTile256 (tileId, fileName.toUtf8().constData(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
 						break;
 				}
 				break;
@@ -325,7 +325,7 @@ void CTile_browser_dlg::on_actionReplaceImage_triggered(bool checked)
 					int tileId = (ui.tileBrowserListView->selectionModel()->selectedRows().at(i).data(Qt::UserRole + 1)).toInt();
 					if ( tileTextureButtonGroup->checkedId() != Alpha )
 					{
-						if ( ! browserModel.setTileTransition (tileId, fileName.toStdString(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
+						if ( ! browserModel.setTileTransition (tileId, fileName.toUtf8().constData(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
 							break;
 					}
 					else
@@ -334,7 +334,7 @@ void CTile_browser_dlg::on_actionReplaceImage_triggered(bool checked)
 						int rot = CTile_rotation_dlg::getRotation(this, &rotationOk);
 						if (rotationOk)
 						{
-							if ( ! browserModel.setTileTransitionAlpha (tileId, fileName.toStdString(), rot) )
+							if ( ! browserModel.setTileTransitionAlpha (tileId, fileName.toUtf8().constData(), rot) )
 								break;
 						}
 					}
@@ -344,7 +344,7 @@ void CTile_browser_dlg::on_actionReplaceImage_triggered(bool checked)
 				for (int i=0; i<ui.tileBrowserListView->selectionModel()->selectedRows().count(); i++)
 				{
 					int tileId = (ui.tileBrowserListView->selectionModel()->selectedRows().at(i).data(Qt::UserRole + 1)).toInt();
-					if ( ! browserModel.setDisplacement (tileId, fileName.toStdString(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
+					if ( ! browserModel.setDisplacement (tileId, fileName.toUtf8().constData(), (CTile::TBitmap) tileTextureButtonGroup->checkedId()) )
 						break;
 				}
 				break;
@@ -444,13 +444,13 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 						QString batchNumber = transitionNumber.rightJustified(2, '0');
 						QString nextBaseName = baseName + batchNumber;
 						QString nextFileName = QDir::toNativeSeparators(fi.absolutePath()) + QDir::separator() + nextBaseName + QString(".") + fi.suffix();
-						FILE *pFile=fopen (nextFileName.toStdString().c_str(), "rb");
+						FILE *pFile=fopen (nextFileName.toUtf8().constData(), "rb");
 
 						// Close the file and add the tile if opened
 						if (pFile)
 						{
 							fclose (pFile);
-							ok=browserModel.setTileTransitionAlpha (i, nextFileName.toStdString().c_str(), (4-rot)%4);
+							ok=browserModel.setTileTransitionAlpha (i, nextFileName.toUtf8().constData(), (4-rot)%4);
 
 							// End
 							break;
@@ -545,7 +545,7 @@ void CTile_browser_dlg::on_exportBorderPushButton_clicked()
 			try
 			{
 				COFile file;
-				if (file.open (fileName.toStdString().c_str()))
+				if (file.open (fileName.toUtf8().constData()))
 				{
 					// Export
 					bitmap.writeTGA (file, 32);
@@ -594,7 +594,7 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 		try
 		{
 			CIFile file;
-			if (file.open (fileName.toStdString().c_str()))
+			if (file.open (fileName.toUtf8().constData()))
 			{
 				// Export
 				bitmap.load (file);

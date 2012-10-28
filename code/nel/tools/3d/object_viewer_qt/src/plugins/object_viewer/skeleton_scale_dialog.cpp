@@ -93,8 +93,8 @@ void CSkeletonScaleDialog::setCurrentShape(const QString &name)
 	if (name.isEmpty())
 		return;
 
-	_Skeleton = Modules::objView().getEntity(name.toStdString()).getSkeleton();
-	_SkeletonFileName = Modules::objView().getEntity(name.toStdString()).getFileNameSkeleton();
+	_Skeleton = Modules::objView().getEntity(name.toUtf8().constData()).getSkeleton();
+	_SkeletonFileName = Modules::objView().getEntity(name.toUtf8().constData()).getFileNameSkeleton();
 
 	// Setup Bone mirror
 	_Bones.clear();
@@ -290,7 +290,7 @@ void CSkeletonScaleDialog::clickSaveAsSkel()
 	{
 		NLMISC::COFile f;
 
-		if( f.open(fileName.toStdString()) )
+		if( f.open(fileName.toUtf8().constData()) )
 		{
 			if(saveCurrentInStream(f))
 			{
@@ -300,7 +300,7 @@ void CSkeletonScaleDialog::clickSaveAsSkel()
 			}
 
 			// bkup the valid fileName (new file edited)
-			_SkeletonFileName = fileName.toStdString();
+			_SkeletonFileName = fileName.toUtf8();
 		}
 		else
 		{
@@ -324,7 +324,7 @@ void CSkeletonScaleDialog::clickLoadScale()
 	if (!fileName.isEmpty())
 	{
 		NLMISC::CIFile f;
-		if( f.open(fileName.toStdString()) )
+		if( f.open(fileName.toUtf8().constData()) )
 			loadSkelScaleFromStream(f);
 		else
 			QMessageBox::critical(this, tr("Skeleton scale editor"), tr("Failed to open file for read!"), QMessageBox::Ok);
@@ -345,7 +345,7 @@ void CSkeletonScaleDialog::clickSaveScale()
 	if (!fileName.isEmpty())
 	{
 		NLMISC::COFile f;
-		if( f.open(fileName.toStdString()) )
+		if( f.open(fileName.toUtf8().constData()) )
 			saveSkelScaleInStream(f);
 		else
 			QMessageBox::critical(this, tr("Skeleton scale editor"), tr("Failed to open file for write!"), QMessageBox::Ok);
