@@ -117,7 +117,7 @@ bool CBufferAL::unlock(uint size)
 		_DataPtr = NULL;
 		_Capacity = 0;
 	}
-	
+
 	// Error handling
 	if (alGetError() == AL_NO_ERROR)
 		_IsLoaded = true;
@@ -159,7 +159,7 @@ bool CBufferAL::fill(const uint8 *src, uint size)
 	
 	// Fill buffer (OpenAL one)
 	alBufferData(_BufferName, _SampleFormat, src, size, _Frequency);
-	
+
 	// Error handling
 	if (alGetError() == AL_NO_ERROR)
 		_IsLoaded = true;

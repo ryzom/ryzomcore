@@ -1,4 +1,3 @@
-
 FILE(GLOB SRC *.cpp *.h)
 FILE(GLOB HEADERS ../../include/nel/sound/*.h)
 

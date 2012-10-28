@@ -25,7 +25,6 @@
 #include "nel/georges/form.h"
 #include "nel/georges/form_elm.h"
 #include "nel/georges/form_loader.h"
-
 #include "nel/georges/type.h"
 
 using namespace NLMISC;
