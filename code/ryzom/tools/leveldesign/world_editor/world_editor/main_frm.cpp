@@ -3304,7 +3304,7 @@ void CMainFrame::OnUpdateEditSelectChildren(CCmdUI* pCmdUI)
 
 // ***************************************************************************
 
-void CMainFrame::OnTimer(UINT nIDEvent) 
+void CMainFrame::OnTimer(UINT_PTR nIDEvent) 
 {
 	if (nIDEvent == TIMER_UPDATE_FILES)
 	{
