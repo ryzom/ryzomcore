@@ -354,10 +354,14 @@ ZoneRegionObject *ZoneBuilder::zoneRegion(int id) const
 	return result;
 }
 
-void ZoneBuilder::ligoData(LigoData &data, const ZonePosition &zonePos)
+bool ZoneBuilder::ligoData(LigoData &data, const ZonePosition &zonePos)
 {
 	if (m_landscapeMap.contains(zonePos.region))
+	{
 		m_landscapeMap.value(zonePos.region).zoneRegionObject->ligoData(data, zonePos.x, zonePos.y);
+		return true;
+	}
+	return false;
 }
 
 void ZoneBuilder::setLigoData(LigoData &data, const ZonePosition &zonePos)

@@ -111,7 +111,7 @@ public:
 	ZoneRegionObject *currentZoneRegion() const;
 	int countZoneRegion() const;
 	ZoneRegionObject *zoneRegion(int id) const;
-	void ligoData(LigoData &data, const ZonePosition &zonePos);
+	bool ligoData(LigoData &data, const ZonePosition &zonePos);
 	void setLigoData(LigoData &data, const ZonePosition &zonePos);
 	/// @}
 
