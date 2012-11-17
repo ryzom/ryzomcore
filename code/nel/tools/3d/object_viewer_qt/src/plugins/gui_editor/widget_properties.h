@@ -26,6 +26,8 @@
 
 namespace GUIEditor
 {
+	class CWidgetInfoTree;
+
 	class CWidgetProperties : public QWidget, public Ui::WidgetProperties
 	{
 		Q_OBJECT
@@ -33,14 +35,25 @@ namespace GUIEditor
 	public:
 		CWidgetProperties( QWidget *parent = NULL );
 		~CWidgetProperties();
-		void setupWidgetInfo( std::map< std::string, SWidgetInfo > *info );
+		void setupWidgetInfo( CWidgetInfoTree *tree );
 
 	private Q_SLOTS:
 		void onListSelectionChanged( int i );
+		
+		/// Removes widget from the list
+		void onRemoveWButtonClicked();
+
+		/// Removes widget property from the list
+		void onRemovePButtonClicked();
 
 	private:
+		/// Builds the widget list
+		void buildWidgetList();
+
+		/// Builds the property list for the currently selected widget
 		void setPropsOf( const char *name );
-		std::map< std::string, SWidgetInfo > *widgetInfo;
+
+		CWidgetInfoTree *tree;
 	};
 }
 

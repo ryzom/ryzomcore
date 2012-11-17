@@ -34,6 +34,7 @@ namespace NLGUI
 
 namespace GUIEditor
 {
+	class CWidgetInfoTree;
 
 	/// This class controls the Widget property browser widget.
 	/// It receives signals from the widget that draws/manages the Nel GUI widgets, and handles them.
@@ -45,7 +46,7 @@ namespace GUIEditor
 		CPropBrowserCtrl();
 		~CPropBrowserCtrl();
 		void setBrowser( QtTreePropertyBrowser *b );
-		void setupWidgetInfo( const std::map< std::string, SWidgetInfo > &info );
+		void setupWidgetInfo( CWidgetInfoTree *tree );
 		void clear();
 
 	public Q_SLOTS:
@@ -60,9 +61,8 @@ namespace GUIEditor
 
 		QtTreePropertyBrowser *browser;
 		QtVariantPropertyManager *propertyMgr;
-		std::map< std::string, SWidgetInfo > widgetInfo;
-
 		std::string currentElement;
+		std::map< std::string, SWidgetInfo > widgetInfo;
 	};
 
 }

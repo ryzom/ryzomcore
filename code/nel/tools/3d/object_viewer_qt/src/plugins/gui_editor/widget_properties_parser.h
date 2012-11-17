@@ -26,14 +26,18 @@
 
 namespace GUIEditor
 {
+	class CWidgetInfoTree;
+
 	/// Parser for the widget properties XML files
 	class CWidgetPropParser
 	{
 	public:
-		CWidgetPropParser(){}
-		~CWidgetPropParser(){}
-
+		CWidgetPropParser();
+		~CWidgetPropParser();
 		void setWidgetPropMap( std::map< std::string, SWidgetInfo > *info ){ widgetInfo = info; }
+		void setWidgetInfoTree( CWidgetInfoTree *tree ){ widgetInfoTree = tree; }
+
+		/// Parse the GUI widget template definitions
 		void parseGUIWidgets();
 
 	private:
@@ -41,10 +45,12 @@ namespace GUIEditor
 		void parseGUIWidgetXML( QFile &file );
 		QString parseGUIWidgetHeader( QXmlStreamReader &reader );
 		void parseGUIWidgetProperties( QXmlStreamReader &reader, const QString &widgetName );
-		void resolveInheritance();
-		void resolveInheritanceFor( const std::string name );
+
+		/// Build the widget info tree from the parsed data
+		void buildWidgetInfoTree();
 		
-		std::map< std::string, SWidgetInfo > *widgetInfo;
+		std::map< std::string, SWidgetInfo > *widgetInfo;		
+		CWidgetInfoTree *widgetInfoTree;
 	};
 }
 

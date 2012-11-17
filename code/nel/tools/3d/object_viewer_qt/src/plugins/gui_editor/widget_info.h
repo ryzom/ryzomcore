@@ -56,6 +56,25 @@ namespace GUIEditor
 			resolved = false;
 			isAbstract = true;
 		}
+
+		~SWidgetInfo()
+		{
+			resolved = false;
+			isAbstract = false;
+		}
+
+		/// Find a property by it's name
+		std::vector< SPropEntry >::iterator findProp( const std::string &name )
+		{
+			std::vector< SPropEntry >::iterator itr = props.begin();
+			while( itr != props.end() )
+			{
+				if( itr->propName == name )
+					break;
+				++itr;
+			}
+			return itr;
+		}
 	};
 }
 

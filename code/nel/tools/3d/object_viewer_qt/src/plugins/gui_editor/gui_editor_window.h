@@ -35,6 +35,7 @@ namespace GUIEditor
 	class ProcList;
 	class ProjectWindow;
 	class NelGUIWidget;
+	class CWidgetInfoTree;
 
 	class GUIEditorWindow: public QMainWindow
 	{
@@ -75,6 +76,8 @@ private:
 		ProcList *procList;
 		ProjectWindow *projectWindow;
 		NelGUIWidget *viewPort;
+
+		CWidgetInfoTree *widgetInfoTree;
 
 		CPropBrowserCtrl browserCtrl;
 		QString currentProject;

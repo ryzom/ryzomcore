@@ -31,6 +31,7 @@
 #include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"
 
 #include "widget_properties.h"
+#include "widget_info_tree.h"
 #include "widget_properties_parser.h"
 #include "widget_hierarchy.h"
 #include "widget_serializer.h"
@@ -61,14 +62,17 @@ namespace GUIEditor
 		viewPort      = new NelGUIWidget;
 		setCentralWidget( viewPort );
 
+		widgetInfoTree = new CWidgetInfoTree;
+
 		createMenus();
 		readSettings();
 
 		CWidgetPropParser parser;
 
 		parser.setWidgetPropMap( &widgetInfo );
+		parser.setWidgetInfoTree( widgetInfoTree );
 		parser.parseGUIWidgets();
-		widgetProps->setupWidgetInfo( &widgetInfo );
+		widgetProps->setupWidgetInfo( widgetInfoTree );
 
 		QDockWidget *dock = new QDockWidget( "Widget Hierarchy", this );
 		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
@@ -80,7 +84,7 @@ namespace GUIEditor
 		dock->setAllowedAreas(  Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
 
 		QtTreePropertyBrowser *propBrowser = new QtTreePropertyBrowser;
-		browserCtrl.setupWidgetInfo( widgetInfo );
+		browserCtrl.setupWidgetInfo( widgetInfoTree );
 		browserCtrl.setBrowser( propBrowser );
 		dock->setWidget( propBrowser );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
@@ -116,6 +120,9 @@ namespace GUIEditor
 		// no deletion needed for these, since dockwidget owns them
 		hierarchyView = NULL;
 		propBrowser   = NULL;
+
+		delete widgetInfoTree;
+		widgetInfoTree = NULL;
 	}
 	
 	QUndoStack *GUIEditorWindow::undoStack() const

@@ -21,6 +21,7 @@
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 #include <typeinfo>
+#include "widget_info_tree.h"
 
 namespace GUIEditor
 {
@@ -42,14 +43,18 @@ namespace GUIEditor
 		browser = b;
 	}
 
-	void CPropBrowserCtrl::setupWidgetInfo( const std::map< std::string, SWidgetInfo > &info )
+	void CPropBrowserCtrl::setupWidgetInfo( CWidgetInfoTree *tree )
 	{
 		widgetInfo.clear();
 
-		std::map< std::string, SWidgetInfo >::const_iterator itr;
-		for( itr = info.begin(); itr != info.end(); ++itr )
+		std::vector< std::string > names;
+		tree->getNames( names );		
+
+		std::vector< std::string >::const_iterator itr;
+		for( itr = names.begin(); itr != names.end(); ++itr )
 		{
-			const SWidgetInfo &w = itr->second;
+			CWidgetInfoTreeNode *node = tree->findNodeByName( *itr );
+			const SWidgetInfo &w = node->getInfo();
 			widgetInfo[ w.GUIName ] = w;
 		}
 	}

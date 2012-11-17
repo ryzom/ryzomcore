@@ -15,32 +15,34 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "widget_properties.h"
+#include "widget_info_tree.h"
+#include <qmessagebox.h>
 
 namespace GUIEditor{
 	CWidgetProperties::CWidgetProperties( QWidget *parent ) :
 	QWidget( parent )
 	{
 		setupUi( this );
-		connect( closeButton, SIGNAL( clicked(bool) ), this, SLOT( hide() ) );
+		connect( rmWButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveWButtonClicked() ) );
+		connect( rmPButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemovePButtonClicked() ) );
 	}
 
 	CWidgetProperties::~CWidgetProperties()
 	{
 	}
 
-	void CWidgetProperties::setupWidgetInfo( std::map< std::string, SWidgetInfo > *info )
+	void CWidgetProperties::setupWidgetInfo( CWidgetInfoTree *tree )
 	{
-		widgetInfo = info;
-		for( std::map< std::string, SWidgetInfo >::iterator itr = info->begin(); itr != info->end(); ++itr ){
-			widgetList->addItem( itr->first.c_str() );
-		}
-
+		this->tree = tree;
+		buildWidgetList();
 		onListSelectionChanged( 0 );
 		connect( widgetList, SIGNAL( currentRowChanged( int ) ), this, SLOT( onListSelectionChanged( int ) ) );
 	}
 
 	void CWidgetProperties::onListSelectionChanged( int i )
 	{
+		if( i < 0 )
+			return;
 		if( i >= widgetList->count() )
 			return;
 
@@ -48,18 +50,82 @@ namespace GUIEditor{
 		setPropsOf( item->text().toStdString().c_str() );
 	}
 
+
+	void CWidgetProperties::onRemoveWButtonClicked()
+	{
+		if( widgetList->count() == 0 )
+			return;
+
+		QString widgetName = widgetList->currentItem()->text();
+
+		int reply = QMessageBox::question( this,
+										tr( "Removing a widget" ),
+										tr( "Are you sure you want to remove %1?" ).arg( widgetName ),
+										QMessageBox::Yes | QMessageBox::Cancel
+										);
+
+		if( reply != QMessageBox::Yes )
+			return;
+
+		/*
+			Remove the damned thing here
+		*/
+
+		buildWidgetList();
+	}
+
+	void CWidgetProperties::onRemovePButtonClicked()
+	{
+		QTreeWidgetItem *item = widgetPropTree->currentItem();
+		CWidgetInfoTreeNode *node = tree->findNodeByName( widgetList->currentItem()->text().toStdString() );
+
+		if( ( item == NULL ) || ( node == NULL ) )
+			return;
+
+		std::string name = item->text( 0 ).toStdString();
+
+		std::vector< SPropEntry >::const_iterator itr = node->getInfo().findProp( name );
+		if( itr == node->getInfo().props.end() )
+			return;
+		
+		int reply = QMessageBox::question( this,
+											tr( "Removing a property" ),
+											tr( "Are you sure you want to remove" ).arg( QString( name.c_str() ) ),
+											QMessageBox::Yes | QMessageBox::Cancel 
+											);
+
+		if( reply != QMessageBox::Yes )
+			return;
+
+		/* 
+			Remove the damned thing here
+		*/
+
+		onListSelectionChanged( widgetList->currentRow() );
+	}
+
+
+	void CWidgetProperties::buildWidgetList()
+	{
+		widgetList->clear();
+		std::vector< std::string > widgetNames;
+		tree->getNames( widgetNames );
+		std::sort( widgetNames.begin(), widgetNames.end() );
+		for( std::vector< std::string >::const_iterator itr = widgetNames.begin(); itr != widgetNames.end(); ++itr )
+			widgetList->addItem( itr->c_str() );
+		widgetList->setCurrentRow( 0 );
+	}
+
 	void CWidgetProperties::setPropsOf( const char *name )
 	{
-		std::map< std::string, SWidgetInfo >::iterator itr =
-			widgetInfo->find( name );
-
-		if( itr == widgetInfo->end() )
+		CWidgetInfoTreeNode *node = tree->findNodeByName( name );
+		if( node == NULL )
 			return;
 
 		widgetPropTree->clear();
 
-		std::vector< SPropEntry > &v = itr->second.props;
-		for( std::vector< SPropEntry >::iterator itr2 = v.begin(); itr2 != v.end(); ++itr2 )
+		const std::vector< SPropEntry > &v = node->getInfo().props;
+		for( std::vector< SPropEntry >::const_iterator itr2 = v.begin(); itr2 != v.end(); ++itr2 )
 		{
 			SPropEntry e = *itr2;
 			QTreeWidgetItem *item = new QTreeWidgetItem;
@@ -69,6 +135,5 @@ namespace GUIEditor{
 			widgetPropTree->addTopLevelItem( item );
 		}
 	}
+
 }
-
-

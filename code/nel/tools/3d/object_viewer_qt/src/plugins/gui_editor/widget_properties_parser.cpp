@@ -19,11 +19,21 @@
 #include <QDir>
 #include <QStringList>
 #include "nel/misc/debug.h"
+#include "widget_info_tree.h"
 
 using namespace NLMISC;
 
 namespace GUIEditor
 {
+	CWidgetPropParser::CWidgetPropParser()
+	{
+	}
+
+	CWidgetPropParser::~CWidgetPropParser()
+	{
+		widgetInfoTree = NULL;
+	}
+
 	void CWidgetPropParser::parseGUIWidgets()
 	{
 		QDir d( "widgets" );
@@ -47,7 +57,7 @@ namespace GUIEditor
 		while( itr.hasNext() )
 			parseGUIWidget( "widgets/" + itr.next() );
 
-		resolveInheritance();
+		buildWidgetInfoTree();
 
 		widgetInfo = NULL;
 	}
@@ -209,61 +219,48 @@ namespace GUIEditor
 		}
 	}
 
-	bool propCompare( const SPropEntry &left, const SPropEntry &right )
+	void CWidgetPropParser::buildWidgetInfoTree()
 	{
-		return left.propName < right.propName;
-	}
-
-	void CWidgetPropParser::resolveInheritance()
-	{
+		// First find the root node
+		// It is the one which has no ancestor
+		SWidgetInfo *info = NULL;
 		for( std::map< std::string, SWidgetInfo >::iterator itr = widgetInfo->begin(); itr != widgetInfo->end(); ++itr )
 		{
-			resolveInheritanceFor( itr->first );
-			std::sort( itr->second.props.begin(), itr->second.props.end(), propCompare );
+			if( itr->second.ancestor.empty() )
+			{
+				info = &( itr->second );
+				break;
+			}
 		}
-		
-	}
 
-	void CWidgetPropParser::resolveInheritanceFor( const std::string name )
-	{
-		if( name.empty() )
+		// No root node, cannot continue!
+		if( info == NULL )
 			return;
 
-		std::map< std::string, SWidgetInfo >::iterator itr =
-			widgetInfo->find( name );
-		if( itr == widgetInfo->end() )
-			return;
+		widgetInfoTree->addRootNode( *info );
+		info->resolved = true;
 
-		SWidgetInfo *info = &(itr->second);
-		if( info->resolved )
-			return;
-
-		if( info->ancestor.empty() )
-			return;
-
-		std::vector< SPropEntry > &props = info->props;
-
-		SWidgetInfo *info2 = info;
-
+		// Now add the rest of the widgets
+		bool added = false;
 		do
 		{
-			if( info2->ancestor.empty() )
-				break;
-			
-			std::map< std::string, SWidgetInfo >::iterator itr2 =
-				widgetInfo->find( info2->ancestor );
-			if( itr2 == widgetInfo->end() )
-				break;
+			added = false;
 
-			info2 = &( itr2->second );
+			for( std::map< std::string, SWidgetInfo >::iterator itr = widgetInfo->begin(); itr != widgetInfo->end(); ++itr )
+			{
+				// Skip if already added
+				if( itr->second.resolved )
+					continue;
 
-			for( std::vector< SPropEntry >::iterator propItr = info2->props.begin(); propItr != info2->props.end(); ++propItr )
-				props.push_back( *propItr );
-
+				// Try to add it, if successful, mark it
+				if( widgetInfoTree->addNode( itr->second ) )
+				{
+					itr->second.resolved = true;
+					added = true;
+				}
+			}
 		}
-		while( !info2->resolved );
-
-		info->resolved = true;
+		while( added );
 	}
 }
 
