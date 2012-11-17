@@ -85,8 +85,8 @@ namespace GUIEditor
 			{
 				if( ( *itr )->getInfo().name == name )
 				{
-					children.erase( itr );
 					delete ( *itr );
+					children.erase( itr );
 					return true;
 				}
 			}

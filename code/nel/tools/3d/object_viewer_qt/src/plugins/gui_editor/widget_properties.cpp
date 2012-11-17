@@ -67,10 +67,8 @@ namespace GUIEditor{
 		if( reply != QMessageBox::Yes )
 			return;
 
-		/*
-			Remove the damned thing here
-		*/
-
+		tree->removeNode( widgetName.toStdString() );
+		widgetPropTree->clear();
 		buildWidgetList();
 	}
 

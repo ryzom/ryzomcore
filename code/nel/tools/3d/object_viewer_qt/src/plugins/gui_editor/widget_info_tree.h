@@ -62,10 +62,10 @@ namespace GUIEditor
 			return true;
 		}
 
-		/// Finds a node and removes it
-		bool removeNode( SWidgetInfo *info )
+		/// Finds a node by it's name and removes it
+		bool removeNode( const std::string &name )
 		{
-			CWidgetInfoTreeNode *node = findNodeByName( info->name );
+			CWidgetInfoTreeNode *node = findNodeByName( name );
 			if( node == NULL )
 				return false;
 
@@ -76,6 +76,12 @@ namespace GUIEditor
 			delete node;
 
 			return true;
+		}
+
+		/// Finds a node by it's info entry and removes it
+		bool removeNode( SWidgetInfo *info )
+		{
+			return removeNode( info->name );
 		}
 
 		/// Get the node names and put them into the vector
