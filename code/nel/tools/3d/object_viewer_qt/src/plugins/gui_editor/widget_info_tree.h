@@ -84,6 +84,14 @@ namespace GUIEditor
 			return removeNode( info->name );
 		}
 
+		/// Removes this property from all of the nodes
+		void removePropertyFromAll( const SPropEntry &prop )
+		{
+			if( root == NULL )
+				return;
+			root->removePropertyFromAll( prop );
+		}
+
 		/// Get the node names and put them into the vector
 		void getNames( std::vector< std::string > &v ) const
 		{

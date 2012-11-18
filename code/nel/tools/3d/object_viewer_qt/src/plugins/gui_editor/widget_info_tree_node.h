@@ -144,6 +144,33 @@ namespace GUIEditor
 			info.props.push_back( prop );
 		}
 
+		/// Removes this property from the node
+		void removeProperty( const SPropEntry &prop )
+		{
+			std::vector< SPropEntry >::const_iterator itr = info.props.begin();
+			while( itr != info.props.end() )
+			{
+				if( ( itr->propName    == prop.propName ) &&
+					( itr->propType    == prop.propType ) &&
+					( itr->propDefault == prop.propDefault ) )
+					break;
+				++itr;
+			}
+			if( itr != info.props.end() )
+				info.props.erase( itr );
+		}
+
+		/// Removes this property from all of the nodes recursively
+		void removePropertyFromAll( const SPropEntry &prop )
+		{
+			removeProperty( prop );
+			for( std::vector< CWidgetInfoTreeNode* >::iterator itr = children.begin(); itr != children.end(); ++itr )
+			{
+				( *itr )->removePropertyFromAll( prop );
+			}
+
+		}
+
 		/// Find the node by it's name and then return a pointer to it
 		CWidgetInfoTreeNode* findNodeByName( const std::string &name )
 		{
