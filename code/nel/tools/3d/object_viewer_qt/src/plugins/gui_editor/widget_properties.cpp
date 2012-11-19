@@ -16,19 +16,27 @@
 
 #include "widget_properties.h"
 #include "widget_info_tree.h"
+#include "new_property_widget.h"
 #include <qmessagebox.h>
 
 namespace GUIEditor{
 	CWidgetProperties::CWidgetProperties( QWidget *parent ) :
 	QWidget( parent )
 	{
+		newPropertyWidget = new NewPropertyWidget();
+
 		setupUi( this );
 		connect( rmWButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveWButtonClicked() ) );
 		connect( rmPButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemovePButtonClicked() ) );
+		connect( addPButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddPButtonClicked() ) );
+		connect( newPropertyWidget, SIGNAL( propertyAdded() ), this, SLOT( onPropertyAdded() ) );
 	}
 
 	CWidgetProperties::~CWidgetProperties()
 	{
+		delete newPropertyWidget;
+		newPropertyWidget = NULL;
+		tree = NULL;
 	}
 
 	void CWidgetProperties::setupWidgetInfo( CWidgetInfoTree *tree )
@@ -101,6 +109,31 @@ namespace GUIEditor{
 		onListSelectionChanged( widgetList->currentRow() );
 	}
 
+
+	void CWidgetProperties::onAddWButtonClicked()
+	{
+	}
+
+	void CWidgetProperties::onAddPButtonClicked()
+	{
+		if( widgetList->count() == 0 )
+			return;
+
+		if( ( widgetList->currentRow() >= widgetList->count() ) || ( widgetList->currentRow() < 0 ) )
+			return;
+
+		CWidgetInfoTreeNode *node = tree->findNodeByName( widgetList->currentItem()->text().toStdString() );
+		if( node == NULL )
+			return;
+
+		newPropertyWidget->setWidgetInfo( node  );
+		newPropertyWidget->show();
+	}
+
+	void CWidgetProperties::onPropertyAdded()
+	{
+		onListSelectionChanged( widgetList->currentRow() );
+	}
 
 	void CWidgetProperties::buildWidgetList()
 	{

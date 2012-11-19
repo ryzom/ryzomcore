@@ -138,10 +138,34 @@ namespace GUIEditor
 			children.clear();
 		}
 
+		/// Checks if this node has this property
+		bool hasProperty( const std::string &name )
+		{
+			std::vector< SPropEntry >::const_iterator itr = info.findProp( name );
+			if( itr != info.props.end() )
+				return true;
+			else
+				return false;
+		}
+
 		/// Add new property to the node
 		void addProperty( const SPropEntry &prop )
 		{
 			info.props.push_back( prop );
+		}
+
+		/// Add new property to the node and all children
+		void addPropertyToAll( const SPropEntry &prop )
+		{
+			addProperty( prop );
+
+			std::vector< CWidgetInfoTreeNode* >::iterator itr = children.begin();
+			while( itr != children.end() )
+			{
+				( *itr )->addPropertyToAll( prop );
+				++itr;
+			}
+
 		}
 
 		/// Removes this property from the node

@@ -27,7 +27,10 @@
 namespace GUIEditor
 {
 	class CWidgetInfoTree;
+	class NewPropertyWidget;
 
+	/// Widget that shows all available GUI widgets and their properties,
+	/// Also allows the user to add / remove widgets and properties
 	class CWidgetProperties : public QWidget, public Ui::WidgetProperties
 	{
 		Q_OBJECT
@@ -46,6 +49,14 @@ namespace GUIEditor
 		/// Removes widget property from the list
 		void onRemovePButtonClicked();
 
+		/// Adds a widget to the list
+		void onAddWButtonClicked();
+
+		/// Adds a widget property to the list
+		void onAddPButtonClicked();
+
+		void onPropertyAdded();
+
 	private:
 		/// Builds the widget list
 		void buildWidgetList();
@@ -54,6 +65,7 @@ namespace GUIEditor
 		void setPropsOf( const char *name );
 
 		CWidgetInfoTree *tree;
+		NewPropertyWidget *newPropertyWidget;
 	};
 }
 

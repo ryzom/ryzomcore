@@ -56,6 +56,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	project_window.h
 	nel3d_widget.h
 	nelgui_widget.h
+	new_property_widget.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
@@ -68,6 +69,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	proc_editor.ui
 	action_editor.ui
 	project_window.ui
+	new_property_widget.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)
