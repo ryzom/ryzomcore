@@ -28,6 +28,7 @@ namespace GUIEditor
 {
 	class CWidgetInfoTree;
 	class NewPropertyWidget;
+	class NewWidgetWidget;
 
 	/// Widget that shows all available GUI widgets and their properties,
 	/// Also allows the user to add / remove widgets and properties
@@ -56,6 +57,7 @@ namespace GUIEditor
 		void onAddPButtonClicked();
 
 		void onPropertyAdded();
+		void onWidgetAdded();
 
 	private:
 		/// Builds the widget list
@@ -64,8 +66,11 @@ namespace GUIEditor
 		/// Builds the property list for the currently selected widget
 		void setPropsOf( const char *name );
 
+		std::vector< std::string > widgetNames;
+
 		CWidgetInfoTree *tree;
 		NewPropertyWidget *newPropertyWidget;
+		NewWidgetWidget *newWidgetWidget;
 	};
 }
 

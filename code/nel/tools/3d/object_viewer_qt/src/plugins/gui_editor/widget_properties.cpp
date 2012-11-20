@@ -17,6 +17,7 @@
 #include "widget_properties.h"
 #include "widget_info_tree.h"
 #include "new_property_widget.h"
+#include "new_widget_widget.h"
 #include <qmessagebox.h>
 
 namespace GUIEditor{
@@ -24,18 +25,23 @@ namespace GUIEditor{
 	QWidget( parent )
 	{
 		newPropertyWidget = new NewPropertyWidget();
+		newWidgetWidget   = new NewWidgetWidget();
 
 		setupUi( this );
 		connect( rmWButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveWButtonClicked() ) );
 		connect( rmPButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemovePButtonClicked() ) );
 		connect( addPButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddPButtonClicked() ) );
+		connect( addWButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddWButtonClicked() ) );
 		connect( newPropertyWidget, SIGNAL( propertyAdded() ), this, SLOT( onPropertyAdded() ) );
+		connect( newWidgetWidget, SIGNAL( widgetAdded() ), this, SLOT( onWidgetAdded() ) );
 	}
 
 	CWidgetProperties::~CWidgetProperties()
 	{
 		delete newPropertyWidget;
 		newPropertyWidget = NULL;
+		delete newWidgetWidget;
+		newWidgetWidget = NULL;
 		tree = NULL;
 	}
 
@@ -112,6 +118,9 @@ namespace GUIEditor{
 
 	void CWidgetProperties::onAddWButtonClicked()
 	{
+		newWidgetWidget->setWidgetInfoTree( tree );
+		newWidgetWidget->fillWidgetList( widgetNames );
+		newWidgetWidget->show();
 	}
 
 	void CWidgetProperties::onAddPButtonClicked()
@@ -135,10 +144,15 @@ namespace GUIEditor{
 		onListSelectionChanged( widgetList->currentRow() );
 	}
 
+	void CWidgetProperties::onWidgetAdded()
+	{
+		buildWidgetList();
+	}
+
 	void CWidgetProperties::buildWidgetList()
 	{
 		widgetList->clear();
-		std::vector< std::string > widgetNames;
+		widgetNames.clear();
 		tree->getNames( widgetNames );
 		std::sort( widgetNames.begin(), widgetNames.end() );
 		for( std::vector< std::string >::const_iterator itr = widgetNames.begin(); itr != widgetNames.end(); ++itr )
