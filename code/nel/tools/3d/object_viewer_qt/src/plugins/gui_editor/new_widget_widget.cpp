@@ -16,6 +16,7 @@
 
 #include "new_widget_widget.h"
 #include "widget_info_tree.h"
+#include <qmessagebox.h>
 
 namespace GUIEditor
 {
@@ -50,11 +51,21 @@ namespace GUIEditor
 	{
 		if( !checkNameField() )
 		{
+			QMessageBox::warning( this,
+								tr( "Adding a new widget" ),
+								tr( "The new widget's name is invalid!" ),
+								QMessageBox::Ok 
+								);
 			return;
 		}
 
 		if( !checkNameDuplicate() )
 		{
+			QMessageBox::warning( this,
+								tr( "Adding a new widget" ),
+								tr( "That widget name already exists!" ),
+								QMessageBox::Ok 
+								);
 			return;
 		}
 
