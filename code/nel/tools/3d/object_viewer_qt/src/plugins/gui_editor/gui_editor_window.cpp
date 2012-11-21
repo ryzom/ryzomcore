@@ -138,19 +138,13 @@ namespace GUIEditor
 											tr( "All XML files (*.xml)" ) );
 		
 		setCursor( Qt::WaitCursor );
-		if( !fileName.isEmpty() )
+		if( fileName.isEmpty() )
 		{
-			_lastDir = QFileInfo( fileName ).absolutePath();
-		}
-		else
-		{
-			QMessageBox::critical( this,
-				tr( "Error opening project file" ),
-				tr( "Cannot open the specified project file!" ) );
-
 			setCursor( Qt::ArrowCursor );
 			return;
 		}
+		
+		_lastDir = QFileInfo( fileName ).absolutePath();
 
 		projectParser.clear();
 
