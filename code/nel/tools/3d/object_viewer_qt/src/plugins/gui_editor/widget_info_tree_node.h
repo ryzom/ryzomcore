@@ -18,6 +18,7 @@
 #define WIDGET_INFO_TREE_NODE
 
 #include "widget_info.h"
+#include "widget_info_tree_visitor.h"
 
 namespace GUIEditor
 {
@@ -219,6 +220,14 @@ namespace GUIEditor
 			v.push_back( info.name );
 			for( std::vector< CWidgetInfoTreeNode* >::const_iterator itr = children.begin(); itr != children.end(); ++itr )
 				( *itr )->getNames( v );
+		}
+
+		/// Accepts a visitor to itself and to the children nodes
+		void accept( CWidgetInfoTreeVisitor *visitor )
+		{
+			visitor->visit( this );
+			for( std::vector< CWidgetInfoTreeNode* >::iterator itr = children.begin(); itr != children.end(); ++itr )
+				( *itr )->accept( visitor );
 		}
 
 	private:

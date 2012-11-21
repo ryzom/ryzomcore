@@ -56,6 +56,9 @@ namespace GUIEditor
 		/// Adds a widget property to the list
 		void onAddPButtonClicked();
 
+		/// Saves the widgets
+		void onSaveButtonClicked();
+
 		void onPropertyAdded();
 		void onWidgetAdded();
 

@@ -100,6 +100,13 @@ namespace GUIEditor
 			root->getNames( v );
 		}
 
+
+		/// Accepts a visitor
+		void accept( CWidgetInfoTreeVisitor *visitor )
+		{
+			root->accept( visitor );
+		}
+
 	private:
 		CWidgetInfoTreeNode *root;
 	};

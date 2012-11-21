@@ -16,9 +16,10 @@
 
 #include "widget_properties.h"
 #include "widget_info_tree.h"
+#include "widget_info_serializer.h"
 #include "new_property_widget.h"
 #include "new_widget_widget.h"
-#include <qmessagebox.h>
+#include <qmessagebox>
 
 namespace GUIEditor{
 	CWidgetProperties::CWidgetProperties( QWidget *parent ) :
@@ -32,6 +33,7 @@ namespace GUIEditor{
 		connect( rmPButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemovePButtonClicked() ) );
 		connect( addPButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddPButtonClicked() ) );
 		connect( addWButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddWButtonClicked() ) );
+		connect( saveButton, SIGNAL( clicked( bool ) ), this, SLOT( onSaveButtonClicked() ) );
 		connect( newPropertyWidget, SIGNAL( propertyAdded() ), this, SLOT( onPropertyAdded() ) );
 		connect( newWidgetWidget, SIGNAL( widgetAdded() ), this, SLOT( onWidgetAdded() ) );
 	}
@@ -137,6 +139,13 @@ namespace GUIEditor{
 
 		newPropertyWidget->setWidgetInfo( node  );
 		newPropertyWidget->show();
+	}
+
+
+	void CWidgetProperties::onSaveButtonClicked()
+	{
+		CWidgetInfoSerializer serializer;
+		serializer.serialize( tree );
 	}
 
 	void CWidgetProperties::onPropertyAdded()
