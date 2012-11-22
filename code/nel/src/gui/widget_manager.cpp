@@ -3072,9 +3072,8 @@ namespace NLGUI
 
 	void CWidgetManager::updateAnims()
 	{
-		std::vector< CInterfaceAnim* >::iterator itr;
-		for( itr = activeAnims.begin(); itr != activeAnims.end(); ++itr )
-			(*itr)->update();
+		for( std::vector< CInterfaceAnim* >::size_type i = 0; i < activeAnims.size(); i++ )
+			activeAnims[ i ]->update();
 	}
 
 
