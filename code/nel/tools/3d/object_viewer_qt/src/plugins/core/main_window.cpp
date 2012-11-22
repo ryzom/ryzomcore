@@ -176,10 +176,11 @@ void MainWindow::saveAll()
 {
 }
 
-void MainWindow::close()
+void MainWindow::closeDocument()
 {
 	m_contextManager->currentContext()->close();
 }
+
 
 void MainWindow::cut()
 {
@@ -297,7 +298,7 @@ void MainWindow::createActions()
 	m_closeAction = new QAction(tr("Close"), this);
 	m_closeAction->setShortcut(QKeySequence::Close);
 	menuManager()->registerAction(m_closeAction, Constants::CLOSE);
-	connect(m_closeAction, SIGNAL(triggered()), this, SLOT(close()));
+	connect(m_closeAction, SIGNAL(triggered()), this, SLOT(closeDocument()));
 	m_closeAction->setEnabled(false);
 
 	m_exitAction = new QAction(tr("E&xit"), this);

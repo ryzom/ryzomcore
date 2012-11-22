@@ -45,6 +45,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	gui_editor_plugin.h
 	gui_editor_window.h
 	gui_editor_context.h
+	gui_editor_core_listener.h
 	widget_properties.h
 	widget_hierarchy.h
 	link_list.h

@@ -249,17 +249,17 @@ namespace GUIEditor
 
 	}
 
-	void GUIEditorWindow::close()
+	bool GUIEditorWindow::close()
 	{
 		if( currentProject.isEmpty() )
-			return;
+			return false;
 
 		QMessageBox::StandardButton reply = QMessageBox::question( this,
 											tr( "Closing project" ),
 											tr( "Are you sure you want to close this project?" ),
 											QMessageBox::Yes | QMessageBox::No );
 		if( reply != QMessageBox::Yes )
-			return;
+			return false;
 
 		projectFiles.clearAll();
 		projectWindow->clear();
@@ -271,6 +271,8 @@ namespace GUIEditor
 		currentProject = "";
 		currentProjectFile = "";
 		projectParser.clear();
+
+		return true;
 	}
 
 	void GUIEditorWindow::onProjectFilesChanged()

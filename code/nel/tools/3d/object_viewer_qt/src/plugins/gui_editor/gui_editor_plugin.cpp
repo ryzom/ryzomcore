@@ -17,6 +17,7 @@
 #include "gui_editor_plugin.h"
 #include "gui_editor_window.h"
 #include "gui_editor_context.h"
+#include "gui_editor_core_listener.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -42,7 +43,12 @@ namespace GUIEditor
 	{
 		Q_UNUSED(errorString);
 		m_plugMan = pluginManager;
-		addAutoReleasedObject(new GUIEditorContext(this));
+		GUIEditorContext *context = new GUIEditorContext( this );
+		GUIEditorWindow *window = static_cast< GUIEditorWindow* >( context->widget() );
+		
+		addAutoReleasedObject( context );
+		addAutoReleasedObject( new GUIEditorCoreListener( window, this ) );
+
 		return true;
 	}
 	

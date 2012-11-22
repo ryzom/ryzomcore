@@ -71,7 +71,7 @@ private Q_SLOTS:
 	void save();
 	void saveAs();
 	void saveAll();
-	void close();
+	void closeDocument();
 	void cut();
 	void copy();
 	void paste();

@@ -54,7 +54,7 @@ public Q_SLOTS:
 		void newDocument();
 		void save();
 		void saveAs();
-		void close();
+		bool close();
 
 private Q_SLOTS:
 		void onProjectFilesChanged();
