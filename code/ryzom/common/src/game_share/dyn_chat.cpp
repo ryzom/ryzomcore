@@ -142,7 +142,7 @@ CDynChatChan::CDynChatChan()
 		_ID(CEntityId::Unknown),
 		_DontBroadcastPlayerInputs(false),
 		_ForwardPlayerIntputToOwnerService(false),
-		_UnifyChannel(false)	
+		_UnifyChannel(false)
 {
 }
 
