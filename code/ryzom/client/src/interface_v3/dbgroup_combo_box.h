@@ -66,9 +66,12 @@ public:
 	void			setText(uint i, const ucstring &text);
 	void			insertText(uint i, const ucstring &text);
 	const ucstring	&getText(uint i) const;
+	const uint		&getTextId(uint i) const;
+	uint			getTextPos(uint nId) const;
 	const ucstring	&getTexture(uint i) const;
-	void			removeText(uint i);
+	void			removeText(uint nPos);
 	uint			getNumTexts() const {return (uint)_Texts.size();}
+	void			sortText();
 
 	// selection
 	void			setSelection(sint32 val);
@@ -125,32 +128,32 @@ public:
 protected:
 	friend class CHandlerComboBoxSelectStart;
 
-	bool					_LinkedToDB; // if not linked to db, then _NotLinkedToDBSelection is used instead
-	bool					_Setuped;
-	bool					_DirtySelection;
-	sint32					_CacheSelection;
+	bool						_LinkedToDB; // if not linked to db, then _NotLinkedToDBSelection is used instead
+	bool						_Setuped;
+	bool						_DirtySelection;
+	sint32						_CacheSelection;
 
 	// sint32
-	CInterfaceProperty		_Selection;
-	sint32					_NotLinkedToDBSelection;
-	std::vector<ucstring>	_Texts;
-	std::vector<ucstring>	_Textures;
+	CInterfaceProperty			_Selection;
+	sint32						_NotLinkedToDBSelection;
+	std::vector<std::pair<uint, ucstring>> _Texts;
+	std::vector<ucstring>		_Textures;
 
 	// Action Handler called on combo click
-	std::string				_AHOnSelectStart;
+	std::string					_AHOnSelectStart;
 
 	// Action handler called when the content is changed
-	std::string				_AHOnChange;
-	std::string				_AHOnChangeParams;
-	bool					_CallingOnChangeActionHandler; // avoid infinite loop here
+	std::string					_AHOnChange;
+	std::string					_AHOnChangeParams;
+	bool						_CallingOnChangeActionHandler; // avoid infinite loop here
 
 
 	// Children
-	CViewText				*_ViewText;
-	CCtrlBaseButton			*_SelectButton;
+	CViewText					*_ViewText;
+	CCtrlBaseButton				*_SelectButton;
 
-	bool					_IsExternViewText;
-	ucstring				_ExternViewText;
+	bool						_IsExternViewText;
+	ucstring					_ExternViewText;
 
 
 private:
