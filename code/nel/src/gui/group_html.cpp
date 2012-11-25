@@ -1814,6 +1814,7 @@ namespace NLGUI
 		_GroupHtmlByUID[_GroupHtmlUID]= this;
 
 		// init
+		_TrustedDomain = false;
 		_ParsingLua = false;
 		_IgnoreText = false;
 		_BrowseNextTime = false;
@@ -3857,7 +3858,7 @@ namespace NLGUI
 					else
 					{
 						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-						HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 						/* Set the timeout for long we are going to wait for a response */
 						HTHost_setEventTimeout(60000);
@@ -4003,7 +4004,7 @@ namespace NLGUI
 					else
 					{
 						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-						HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 						/* Start the first request */
 

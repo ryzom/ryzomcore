@@ -132,7 +132,7 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
  */
 void	CChatManager::resetChatLog()
 {
-	std::string	logPath = (LogChatDirectory.get() == "" ? Bsi.getLocalPath() : LogChatDirectory.get());
+	std::string	logPath = (LogChatDirectory.get().empty() ? Bsi.getLocalPath() : LogChatDirectory.get());
 	_Displayer.setParam(CPath::standardizePath(logPath) + "chat.log");
 }
 

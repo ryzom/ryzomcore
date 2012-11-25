@@ -68,7 +68,7 @@ void CVegetableDialog::loadVegetset()
 	{
 		NL3D::CTileVegetableDesc vegetSet;
 		// if succes to load the vegetSet
-		if(Modules::veget().loadVegetableSet(vegetSet, fileName.toStdString()))
+		if(Modules::veget().loadVegetableSet(vegetSet, fileName.toUtf8().constData()))
 		{
 			// Delete all vegetables.
 			Modules::veget().clearVegetables();
@@ -94,7 +94,7 @@ void CVegetableDialog::appendVegetset()
 	{
 		NL3D::CTileVegetableDesc	vegetSet;
 		// if succes to load the vegetSet
-		if(Modules::veget().loadVegetableSet(vegetSet, fileName.toStdString()))
+		if(Modules::veget().loadVegetableSet(vegetSet, fileName.toUtf8().constData()))
 		{
 			// Do not Delete any vegetables.
 			// build them from list.
@@ -124,7 +124,7 @@ void CVegetableDialog::saveVegetset()
 	{
 		NLMISC::COFile f;
 
-		if( f.open(fileName.toStdString()) )
+		if( f.open(fileName.toUtf8().constData()) )
 		{
 			try
 			{
@@ -226,7 +226,7 @@ void CVegetableDialog::loadVegetdesc()
 	{
 		NLMISC::CIFile f;
 
-		if( f.open(fileName.toStdString()) )
+		if( f.open(fileName.toUtf8().constData()) )
 		{
 			NL3D::CVegetable veget;
 			try
@@ -272,7 +272,7 @@ void CVegetableDialog::saveVegetdesc()
 	{
 		NLMISC::COFile	f;
 
-		if( f.open(fileName.toStdString()) )
+		if( f.open(fileName.toUtf8().constData()) )
 		{
 			try
 			{

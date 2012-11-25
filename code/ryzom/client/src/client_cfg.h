@@ -230,6 +230,8 @@ struct CClientConfig
 	float			FoV;
 	/// Force the DXTC Compression.
 	bool			ForceDXTC;
+	/// Set the anisotropic filter
+	sint			AnisotropicFilter;
 	/// Divide texture size by 2
 	bool			DivideTextureSizeBy2;
 	/// Disable Hardware Vertex Program.

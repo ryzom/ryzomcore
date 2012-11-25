@@ -66,10 +66,13 @@ private:
 	mutable NLMISC::CCDBNodeLeaf    *_TextFontSize;
 	mutable NLMISC::CCDBNodeLeaf    *_TextMultilineSpace;
 	mutable NLMISC::CCDBNodeLeaf    *_TextShadowed;
+	mutable NLMISC::CCDBNodeLeaf    *_ShowTimestamps;
 
 	// ctor, private because of singleton
 	CChatTextManager();
 	~CChatTextManager();
+
+	bool showTimestamps() const;
 };
 
 // shortcut to get text manager instance

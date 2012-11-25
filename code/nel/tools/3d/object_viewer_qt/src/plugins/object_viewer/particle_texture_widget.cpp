@@ -76,10 +76,10 @@ void CParticleTextureWidget::chooseTexture()
 	if (!fileName.isEmpty())
 	{
 		// Add search path for the texture
-		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(fileName.toStdString()));
+		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(fileName.toUtf8().constData()));
 		try
 		{
-			texName = NLMISC::CFile::getFilename(fileName.toStdString());
+			texName = NLMISC::CFile::getFilename(fileName.toUtf8().constData());
 			NL3D::CTextureFile *tf = new NL3D::CTextureFile(texName);
 			_Wrapper->setAndUpdateModifiedFlag(tf);
 			_Texture = tf;

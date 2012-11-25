@@ -65,7 +65,7 @@ namespace R2
 
 		void loadFeatures();
 
-		~CDynamicMapClient();
+		virtual ~CDynamicMapClient();
 
 		void loadDefaultPalette();
 

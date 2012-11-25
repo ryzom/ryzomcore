@@ -79,11 +79,11 @@ namespace NLGUI
 		{
 			std::string	tempStr;
 			formatLuaCall(expr, tempStr);
-			if (!buildExprTree(tempStr.c_str(), node)) return false;
+			if (!buildExprTree(tempStr.c_str(), node)) return NULL;
 		}
 		else
 		{
-			if (!buildExprTree(expr.c_str(), node)) return false;
+			if (!buildExprTree(expr.c_str(), node)) return NULL;
 		}
 
 		return node;

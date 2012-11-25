@@ -79,7 +79,7 @@ bool BnpFileListDialog::loadTable(const QString filePath)
 	int row = 0;
 
 	// read the header from the bnp file
-	if (!myBNPFileHandle.readHeader( filePath.toStdString()) )
+	if (!myBNPFileHandle.readHeader( filePath.toUtf8().constData()) )
 	{
 		return false;
 	}
@@ -125,7 +125,7 @@ void BnpFileListDialog::getSelections(TSelectionList& SelectionList)
 	{
 		QVariant data = model->data(index);
 		QString filename = data.toString();
-		SelectionList.push_back( filename.toStdString() );
+		SelectionList.push_back( filename.toUtf8().constData() );
 	}
 }
 

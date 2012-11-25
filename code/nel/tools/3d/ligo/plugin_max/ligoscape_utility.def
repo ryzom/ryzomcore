@@ -1,4 +1,4 @@
-LIBRARY nelligoscapeutility.dlx
+;LIBRARY nelligoscapeutility.dlx
 EXPORTS
 	LibDescription			@1
 	LibNumberClasses		@2

@@ -27,7 +27,7 @@ class CRecord {
 	public:
 		CRecord();
 		CRecord(std::vector<IValue *> &);
-		~CRecord();
+		virtual ~CRecord();
 		const std::vector<IValue *> &getValues();
 		void addValue(IValue *);
 		void addValue(std::string &);

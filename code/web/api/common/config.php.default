@@ -17,6 +17,8 @@
  * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+ define('RYAPI_MODE', 'client');
+ 
 // Url where the api is
 define('RYAPI_URL', 'http://');
 if (!defined('RYAPI_PATH'))
@@ -24,5 +26,6 @@ if (!defined('RYAPI_PATH'))
 // used by "home" link
 if (!defined('RYAPP_URL'))
 	define('RYAPP_URL', 'http://');
-
+if (!defined('RYAPI_AUTH_KEY'))
+	define('RYAPI_AUTH_KEY', ''); // key gived by AUTH_SERVER
 ?>

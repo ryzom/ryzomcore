@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.0
+Name=Ryzom
+Name[ru]=Ризом
+Type=Application
+GenericName=Game client
+Comment=Ryzom client
+Comment[fr_FR]=Client Ryzom
+TryExec=${RYZOM_GAMES_PREFIX}/ryzom_client
+Exec=${RYZOM_GAMES_PREFIX}/ryzom_client
+Icon=ryzom_client
+Terminal=false
+Hidden=false
+Categories=Game;RolePlaying;
+StartupWMClass=ryzom_client
+X-AppInstall-Package=ryzom-client

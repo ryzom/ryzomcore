@@ -19,4 +19,4 @@ NL_DEFAULT_PROPS(nel_vertex_tree_paint "MAX Plugin: NeL Vertex Tree Painter")
 NL_ADD_RUNTIME_FLAGS(nel_vertex_tree_paint)
 NL_ADD_LIB_SUFFIX(nel_vertex_tree_paint)
 
-INSTALL(TARGETS nel_vertex_tree_paint RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
+INSTALL(TARGETS nel_vertex_tree_paint RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

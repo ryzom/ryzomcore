@@ -60,7 +60,7 @@ QNLWidget::~QNLWidget()
 void QNLWidget::init()
 {
 	// create the driver
-	m_driver = NL3D::UDriver::createDriver(NULL, false, NULL);
+	m_driver = NL3D::UDriver::createDriver(0, false);
 	nlassert(m_driver);
 
 	// initialize the nel 3d viewport

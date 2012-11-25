@@ -111,8 +111,8 @@ void CSlotGroupBox::updateUi()
 void CSlotGroupBox::saveSlotInfo()
 {
 	CSlotInfo slotInfo;
-	slotInfo.Animation = _animName.toStdString();
-	slotInfo.Skeleton = _skelName.toStdString();
+	slotInfo.Animation = _animName.toUtf8();
+	slotInfo.Skeleton = _skelName.toUtf8();
 	slotInfo.EndBlend = _ui.endBlendSpinBox->value();
 	slotInfo.EndTime = float(_ui.endFrameSpinBox->value()) / Modules::mainWin().getFrameRate();
 	slotInfo.Offset = float(_ui.offsetSpinBox->value()) / Modules::mainWin().getFrameRate();
@@ -182,7 +182,7 @@ void CSlotGroupBox::selectAnim()
 		_animName = item;
 		QString title = tr("Slot %1 : ").arg(_numSlot) + _animName + " : " + _skelName;
 		this->setTitle(title);
-		_ui.endFrameSpinBox->setValue(int(entity.getAnimLength(_animName.toStdString()) * Modules::mainWin().getFrameRate()));
+		_ui.endFrameSpinBox->setValue(int(entity.getAnimLength(_animName.toUtf8().constData()) * Modules::mainWin().getFrameRate()));
 		saveSlotInfo();
 	}
 }

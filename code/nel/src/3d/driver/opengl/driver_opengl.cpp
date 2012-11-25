@@ -305,6 +305,8 @@ CDriverGL::CDriverGL()
 
 	_NVTextureShaderEnabled = false;
 
+	_AnisotropicFilter = 0.f;
+
 	// Compute the Flag which say if one texture has been changed in CMaterial.
 	_MaterialAllTextureTouchedFlag= 0;
 	for(i=0; i < IDRV_MAT_MAXTEXTURES; i++)
@@ -1337,11 +1339,7 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 	{
 		if(_Extensions.ARBTextureCubeMap)
 		{
-#ifdef USE_OPENGLES
-			glBindTexture(GL_TEXTURE_CUBE_MAP_OES, gltext->ID);
-#else
 			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
-#endif
 			glCopyTexSubImage2D(NLCubeFaceToGLCubeFace[cubeFace], level, offsetx, offsety, x, y, width, height);
 		}
 	}
@@ -2626,11 +2624,10 @@ void CDriverGL::checkTextureOn() const
 		GLboolean flagCM;
 		GLboolean flagTR;
 		glGetBooleanv(GL_TEXTURE_2D, &flag2D);
+		glGetBooleanv(GL_TEXTURE_CUBE_MAP_ARB, &flagCM);
 #ifdef USE_OPENGLES
-		glGetBooleanv(GL_TEXTURE_CUBE_MAP_OES, &flagCM);
 		flagTR = true; // always true in OpenGL ES
 #else
-		glGetBooleanv(GL_TEXTURE_CUBE_MAP_ARB, &flagCM);
 		glGetBooleanv(GL_TEXTURE_RECTANGLE_NV, &flagTR);
 #endif
 		switch(dgs.getTextureMode())

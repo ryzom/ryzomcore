@@ -86,12 +86,12 @@ void CSoundSystem::init()
 		QSettings *settings = Core::ICore::instance()->settings();
 		settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-		_PackedSheetPath = settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString().toStdString();
-		_SamplePath = settings->value(Constants::SOUND_SAMPLE_PATH, "").toString().toStdString();
+		_PackedSheetPath = settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString().toUtf8();
+		_SamplePath = settings->value(Constants::SOUND_SAMPLE_PATH, "").toString().toUtf8();
 		_AudioMixer->setSamplePath(_SamplePath);
 		_AudioMixer->setPackedSheetOption(_PackedSheetPath, true);
 		std::vector<std::string> devices;
-		_AudioMixer->initDriver(settings->value(Constants::SOUND_DRIVER, "Auto").toString().toStdString());
+		_AudioMixer->initDriver(settings->value(Constants::SOUND_DRIVER, "Auto").toString().toUtf8().constData());
 		_AudioMixer->getDevices(devices);
 		NLSOUND::UAudioMixer::CInitInfo audioInfo;
 		audioInfo.AutoLoadSample = settings->value(Constants::SOUND_AUTO_LOAD_SAMPLE, true).toBool();
@@ -101,7 +101,7 @@ void CSoundSystem::init()
 		audioInfo.ForceSoftware = settings->value(Constants::SOUND_FORCE_SOFTWARE, false).toBool();
 		audioInfo.MaxTrack = settings->value(Constants::SOUND_MAX_TRACK, 48).toInt();
 		audioInfo.UseADPCM = settings->value(Constants::SOUND_USE_ADCPM, false).toBool();
-		_AudioMixer->initDevice(settings->value(Constants::SOUND_DEVICE, "").toString().toStdString(), audioInfo, NULL);
+		_AudioMixer->initDevice(settings->value(Constants::SOUND_DEVICE, "").toString().toUtf8().constData(), audioInfo, NULL);
 		_AudioMixer->setLowWaterMark(1);
 
 		settings->endGroup();

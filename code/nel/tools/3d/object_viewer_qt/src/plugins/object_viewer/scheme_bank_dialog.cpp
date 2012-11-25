@@ -61,7 +61,7 @@ void CSchemeBankDialog::createScheme()
 	if (ok && !text.isEmpty())
 	{
 		NL3D::CPSAttribMakerBase *attribMakerBase = _attribWidget->getCurrentSchemePtr()->clone();
-		Modules::psEdit().getSchemeManager()->insertScheme(text.toStdString(), attribMakerBase);
+		Modules::psEdit().getSchemeManager()->insertScheme(text.toUtf8().constData(), attribMakerBase);
 
 		CSchemeItem *item = new CSchemeItem(text, _ui.listWidget);
 		item->setUserData(attribMakerBase);
@@ -108,7 +108,7 @@ void CSchemeBankDialog::saveBank()
 		try
 		{
 			NLMISC::COFile iF;
-			iF.open(fileName.toStdString());
+			iF.open(fileName.toUtf8().constData());
 			NLQT::CSchemeManager *schemeManager = Modules::psEdit().getSchemeManager();
 			iF.serial(*schemeManager);
 		}
@@ -132,7 +132,7 @@ void CSchemeBankDialog::loadBank()
 		try
 		{
 			NLMISC::CIFile iF;
-			iF.open(fileName.toStdString());
+			iF.open(fileName.toUtf8().constData());
 			iF.serial(sm);
 			Modules::psEdit().getSchemeManager()->swap(sm);
 		}
@@ -152,7 +152,7 @@ void CSchemeBankDialog::changeNameScheme(QListWidgetItem *item)
 	NL3D::CPSAttribMakerBase *attrib = schemeItem->getUserData();
 	nlassert(attrib);
 
-	Modules::psEdit().getSchemeManager()->rename(attrib, item->text().toStdString());
+	Modules::psEdit().getSchemeManager()->rename(attrib, item->text().toUtf8().constData());
 }
 
 void CSchemeBankDialog::enableButtons()

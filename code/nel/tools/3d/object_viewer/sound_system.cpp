@@ -168,7 +168,7 @@ void CSoundSystem::play(const string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(CStringMapper::map(soundName), true);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), true);
 		if (src)
 		{
 			src->setLooping(false);
@@ -187,7 +187,7 @@ USource *CSoundSystem::create(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(CStringMapper::map(soundName), false);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), false);
 		if (src)
 		{
 			src->setLooping(false);

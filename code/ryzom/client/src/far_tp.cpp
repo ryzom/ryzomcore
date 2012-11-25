@@ -34,7 +34,6 @@
 #include "sound_manager.h"
 #include "actions_client.h"
 #include "r2/editor.h"
-#include "http_client.h"
 #include "global.h"
 #include "release.h"
 #include "nel/misc/string_conversion.h"

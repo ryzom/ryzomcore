@@ -107,7 +107,7 @@ namespace NLGUI
 	{
 		OldShadowColor.A = OldColor.A = (uint8)a;
 		OldShadowColorOver.A = OldColorOver.A = (uint8)a;
-		OldShadowColorGrayed.A = OldShadowColorGrayed.A = (uint8)a;
+		OldShadowColorGrayed.A = OldColorGrayed.A = (uint8)a;
 	}
 
 	// ------------------------------------------------------------------------------------------------

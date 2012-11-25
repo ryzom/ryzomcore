@@ -54,7 +54,7 @@
 #include "nel/3d/ps_util.h"
 
 
-#include "nel/../../src/pacs/global_retriever.h"
+#include "nel/pacs/global_retriever.h"
 
 
 

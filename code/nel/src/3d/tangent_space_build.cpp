@@ -214,9 +214,9 @@ bool	BuildTangentSpace(CMesh::CMeshBuild &outMeshBuild, const CMesh::CMeshBuild 
 					if (!canShare) continue;
 
 					// Get indices of vertices of current tri
-					const uint indices[] = { f.Corner[0].Vertex,
-											 f.Corner[1].Vertex,
-											 f.Corner[2].Vertex };
+					const uint indices[] = { (uint)f.Corner[0].Vertex,
+											 (uint)f.Corner[1].Vertex,
+											 (uint)f.Corner[2].Vertex };
 					NLMISC::CTriangle tri;
 					// Build it
 					BuildTriFromMB(outMeshBuild, indices, tri);

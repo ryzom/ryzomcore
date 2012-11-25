@@ -688,9 +688,12 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-
-		setCPUMask();
-
+		
+		CTime::CTimerInfo timerInfo;
+		NLMISC::CTime::probeTimerInfo(timerInfo);
+		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
+			setCPUMask();
+		
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -786,7 +789,6 @@ void prelogInit()
 		CPath::remapExtension ("png", "tga", true);
 		FPU_CHECKER_ONCE
 
-		uint i;
 		addPreDataPaths(ProgressBar);
 
 		FPU_CHECKER_ONCE
@@ -1044,7 +1046,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for (i=0; i<3; i++)
+		for ( uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;
@@ -1066,6 +1068,9 @@ void prelogInit()
 
 		// Init the DXTCCompression.
 		Driver->forceDXTCCompression(ClientCfg.ForceDXTC);
+
+		// Set the anisotropic filter
+		Driver->setAnisotropicFilter(ClientCfg.AnisotropicFilter);
 
 		// Divide the texture size.
 		if (ClientCfg.DivideTextureSizeBy2)

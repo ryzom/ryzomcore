@@ -740,7 +740,7 @@ namespace NLGUI
 		SGlobalTexture gt;
 		// Load texture file
 		string filename = CPath::lookup (textureFileName, false);
-		if (filename == "")
+		if (filename.empty() )
 			return false;
 
 		CIFile ifTmp;
@@ -759,7 +759,7 @@ namespace NLGUI
 		// Load uv file
 		CIFile iFile;
 		filename = CPath::lookup (uvFileName, false);
-		if (filename == "")
+		if (filename.empty() )
 			return false;
 		if (!iFile.open(filename))
 			return false;
@@ -905,7 +905,7 @@ namespace NLGUI
 			SGlobalTexture gtTmp;
 			gtTmp.FromGlobaleTexture = false;
 			string filename = CPath::lookup (sLwrGTName, false);
-			if (filename == "") return -1;
+			if (filename.empty() ) return -1;
 			CIFile ifTmp;
 			if (ifTmp.open(filename))
 			{

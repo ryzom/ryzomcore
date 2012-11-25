@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: nel-georges
 Version: @NL_VERSION@
 Description: NeL @NL_VERSION@
-Reqiures:
+Requires:
 Libs: -L${libdir}
 Libs.private: @LIBS@ -lc
 Cflags: -I${includedir}

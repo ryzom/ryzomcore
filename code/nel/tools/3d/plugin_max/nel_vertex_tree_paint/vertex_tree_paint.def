@@ -1,4 +1,4 @@
-LIBRARY nel_vertex_tree_paint
+;LIBRARY nel_vertex_tree_paint
 EXPORTS
 	LibDescription			@1
 	LibNumberClasses		@2

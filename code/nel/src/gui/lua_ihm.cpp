@@ -1519,7 +1519,7 @@ namespace NLGUI
 		p = s.splitTo('.', true);
 		while (p.size() > 0)
 		{
-			if (path == "")
+			if (path.empty() )
 				path = p;
 			else
 				path += "." + p;

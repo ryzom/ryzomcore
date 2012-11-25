@@ -725,6 +725,15 @@ void CInterfaceManager::initOutGame()
 
 
 	//NLMEMORY::CheckHeap (true);
+	// Initialize the web browser
+	{
+		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>( CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
+		if (pGH)
+		{
+			pGH->setActive(true);
+			pGH->browse(ClientCfg.PatchletUrl.c_str());
+		}
+	}
 
 
 	if (ClientCfg.XMLOutGameInterfaceFiles.size()==0)
@@ -1604,7 +1613,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	CIFile f;
 	string sFileName;
 	sFileName = NLMISC::CPath::lookup (filename, false);
-	if (sFileName == "" || !f.open(sFileName))
+	if (sFileName.empty() || !f.open(sFileName))
 		return false;
 
 

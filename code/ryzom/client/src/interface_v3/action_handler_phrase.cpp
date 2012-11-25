@@ -777,7 +777,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	sint32 dstPhraseId= pCSDst->getSPhraseId();
 	sint32 dstMacroId= pCSDst->getMacroId();
 
-	if ((src == "") && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
+	if ((src.empty()) && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
 	{		
 		// get the slot ids from save
 		srcIsMacro= CHandlerPhraseMemoryCopy::isMacro;
@@ -1119,7 +1119,7 @@ public:
 		if (pCSDst->isShortCut())
 			memoryLine = pPM->getSelectedMemoryLineDB();
 		else
-			memoryLine = 0;
+			memoryLine = pPM->getSelectedMemoryAltLineDB();
 		if(memoryLine<0)
 			return;
 
@@ -1577,6 +1577,31 @@ public:
 };
 REGISTER_ACTION_HANDLER(CHandlerPhraseSelectMemory, "phrase_select_memory");
 
+class CHandlerPhraseSelectMemory2 : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	{
+		string expr = getParam (Params, "value");
+		CInterfaceExprValue value;
+		if (CInterfaceExpr::eval(expr, value, NULL))
+		{
+			if (!value.toInteger())
+			{
+				nlwarning("<CHandlerPhraseSelectMemory:execute> expression doesn't evaluate to a numerical value");
+			}
+			else
+			{
+				CSPhraseManager		*pPM= CSPhraseManager::getInstance();
+				sint	val= (sint32)value.getInteger();
+				clamp(val, 0, MEM_SET_TYPES::NumMemories-1);
+				pPM->selectMemoryLineDBalt(val);
+			}
+		}
+	}
+};
+
+REGISTER_ACTION_HANDLER(CHandlerPhraseSelectMemory2, "phrase_select_memory_2");
 
 // ***************************************************************************
 class CHandlerPhraseSelectShortcutBar : public IActionHandler

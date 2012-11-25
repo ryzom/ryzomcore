@@ -282,7 +282,7 @@ public:
 	
 	string genCode(CMissionData &md)
 	{
-		string ret = "";
+		string ret;
 		if (!_MissionName.empty())
 		{
 			ret =  "spawn_mission : " + _MissionName + " : " + _GiverName;

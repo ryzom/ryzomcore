@@ -37,7 +37,7 @@ namespace TranslationManager
 void CEditorWorksheet::open(QString filename)
 {
 	STRING_MANAGER::TWorksheet wk_file;
-	if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+	if(loadExcelSheet(filename.toUtf8().constData(), wk_file, true) == true)
 	{
 		bool hasHashValue = false;
 		table_editor = new QTableWidget();
@@ -149,7 +149,7 @@ void CEditorWorksheet::save()
 void CEditorWorksheet::saveAs(QString filename)
 {
 	STRING_MANAGER::TWorksheet new_file, wk_file;
-	loadExcelSheet(current_file.toStdString(), wk_file, true);
+	loadExcelSheet(current_file.toUtf8().constData(), wk_file, true);
 	// set columns
 	new_file.resize(new_file.size() + 1);
 	for(unsigned int i = 0; i < wk_file.ColCount; i++)
@@ -185,7 +185,7 @@ void CEditorWorksheet::saveAs(QString filename)
 		makeHashCode(wk_file, true);
 	}
 	ucstring s = prepareExcelSheet(new_file);
-	NLMISC::CI18N::writeTextFile(filename.toStdString(), s, false);
+	NLMISC::CI18N::writeTextFile(filename.toUtf8().constData(), s, false);
 	current_file = filename;
 	setCurrentFile(filename);
 }
@@ -299,29 +299,29 @@ void CEditorWorksheet::extractWords(QString filename, QString columnId, IWordLis
 	// **** Load the excel sheet
 	// load
 	STRING_MANAGER::TWorksheet workSheet;
-	if(!loadExcelSheet(filename.toStdString(), workSheet, true))
+	if(!loadExcelSheet(filename.toUtf8().constData(), workSheet, true))
 	{
-		nlwarning("Error reading '%s'. Aborted", filename.toStdString().c_str());
+		nlwarning("Error reading '%s'. Aborted", filename.toUtf8().constData());
 		return;
 	}
 	// get the key column index
 	uint keyColIndex = 0;
-	if(!workSheet.findCol(columnId.toStdString(), keyColIndex))
+	if(!workSheet.findCol(ucstring(columnId.toUtf8().constData()), keyColIndex))
 	{
-		nlwarning("Error: Don't find the column '%s'. '%s' Aborted", columnId.toStdString().c_str(), filename.toStdString().c_str());
+		nlwarning("Error: Don't find the column '%s'. '%s' Aborted", columnId.toUtf8().constData(), filename.toUtf8().constData());
 		return;
 	}
 	// get the name column index
 	uint nameColIndex;
 	if(!workSheet.findCol(ucstring("name"), nameColIndex))
 	{
-		nlwarning("Error: Don't find the column 'name'. '%s' Aborted", filename.toStdString().c_str());
+		nlwarning("Error: Don't find the column 'name'. '%s' Aborted", filename.toUtf8().constData());
 		return;
 	}
 
 	// **** List all words with the builder given
 	std::vector<std::string> allWords;
-	if(!wordListBuilder.buildWordList(allWords, filename.toStdString()))
+	if(!wordListBuilder.buildWordList(allWords, filename.toUtf8().constData()))
 	{
 		return;
 	}
@@ -380,7 +380,7 @@ bool CEditorWorksheet::compareWorksheetFile(QString filename)
 {
 	STRING_MANAGER::TWorksheet wk_file;
 	int colIndex = 0;
-	if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+	if(loadExcelSheet(filename.toUtf8().constData(), wk_file, true) == true)
 	{
 		if(wk_file.getData(0, 0) == ucstring("*HASH_VALUE"))
 		{
@@ -392,11 +392,12 @@ bool CEditorWorksheet::compareWorksheetFile(QString filename)
 		}
 		for(int i = 0; i < table_editor->columnCount(); i++)
 		{
-			QString item = table_editor->horizontalHeaderItem(i)->text();
+			ucstring item;
+			item.fromUtf8(table_editor->horizontalHeaderItem(i)->text().toUtf8().constData());
 			ucstring itemC = wk_file.getData(0, i+ colIndex);
-			if(item.toStdString() != itemC.toString())
+			if(item != itemC)
 			{
-				nlwarning(item.toStdString().c_str());
+				nlwarning(item.toString().c_str());
 				nlwarning(itemC.toString().c_str());
 				return false;
 			}
@@ -412,7 +413,7 @@ bool CEditorWorksheet::compareWorksheetFile(QString filename)
 void CEditorWorksheet::mergeWorksheetFile(QString filename)
 {
 	STRING_MANAGER::TWorksheet wk_file;
-	if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+	if(loadExcelSheet(filename.toUtf8().constData(), wk_file, true) == true)
 	{
 		bool hasHashValue = false;
 		int colIndex = 0;

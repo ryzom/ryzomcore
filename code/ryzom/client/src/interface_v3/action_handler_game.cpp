@@ -1941,12 +1941,21 @@ public:
 				CStringPostProcessRemoveTitle::cbIDStringReceived(inout);
 				if (inout.empty())
 				{
-					CStringPostProcessRemoveName spprn;
 					CEntityCL *entity = EntitiesMngr.entity(Slot);
 					CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
+					bool womanTitle = false;
 					if (pChar != NULL)
-						spprn.Woman = pChar->getGender() == GSGENDER::female;
-					spprn.cbIDStringReceived(copyInout);
+						womanTitle = pChar->getGender() == GSGENDER::female;
+					
+					STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
+					
+					// Sometimes translation contains another title
+					ucstring::size_type pos = copyInout.find('$');
+					if (pos != ucstring::npos)
+					{
+						copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
+					}
+					CStringPostProcessRemoveTitle::cbIDStringReceived(copyInout);
 					inout = copyInout;
 				}
 
@@ -2404,10 +2413,23 @@ class CAHTarget : public IActionHandler
 		// Get the entity name to target
 		ucstring entityName;
 		entityName.fromUtf8 (getParam (Params, "entity"));
+		bool preferCompleteMatch = (getParam (Params, "prefer_complete_match") != "0");
+
 		if (!entityName.empty())
 		{
-			// Get the entity
-			CEntityCL *entity = EntitiesMngr.getEntityByName (entityName, false, false);
+			CEntityCL *entity = NULL;
+			if (preferCompleteMatch)
+			{
+				// Try to get the entity with complete match first
+				entity = EntitiesMngr.getEntityByName (entityName, false, true);
+			}
+			
+			if (entity == NULL)
+			{
+				// Get the entity with a partial match
+				entity = EntitiesMngr.getEntityByName (entityName, false, false);
+			}
+			
 			if (entity)
 			{
 				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
@@ -2937,10 +2959,7 @@ public:
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 		if (pBut)
 		{
-			if (ClientCfg.Windowed)
-				pBut->setPushed(false);
-			else
-				pBut->setPushed(true);
+			pBut->setPushed(!ClientCfg.Windowed);
 		}
 		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen",NULL);
 
@@ -4040,7 +4059,7 @@ public:
 		{
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
 			if (pSel != NULL)
-				UserEntity->moveToTotemBuildingPhrase( UserEntity->selection(), 2.0f, ~0, ~0, true);
+				UserEntity->moveToTotemBuildingPhrase( UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
 	}
 };

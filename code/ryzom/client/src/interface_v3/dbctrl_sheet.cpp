@@ -1303,7 +1303,7 @@ void CDBCtrlSheet::setupMacro()
 	if (!_NeedSetup) return;
 
 	// compute from OptString
-	setupCharBitmaps(24, 4);
+	setupCharBitmaps(26, 4, 5);
 
 	_NeedSetup = false;
 
@@ -1569,8 +1569,8 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 		{
 			// recompute text
 			_OptString= iconName;
-			// compute from OptString. Allow only 1 line and 4 chars
-			setupCharBitmaps(24, 1, 4);
+			// compute from OptString. Allow only 1 line and 5 chars
+			setupCharBitmaps(26, 1, 5);
 		}
 	}
 }

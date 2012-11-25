@@ -29,6 +29,8 @@
 #include "team_manager/team_manager.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
+#include "creature_manager/creature_manager.h"
+#include "creature_manager/creature.h"
 #include "phrase_manager/area_effect.h"
 #include "aura_effect.h"
 
@@ -211,6 +213,15 @@ bool CAuraRootEffect::isEntityValidTarget(CEntityBase *entity, CEntityBase *crea
 	{
 		if (targetPlayer->getGuildId() != 0 && targetPlayer->getGuildId() == userPlayer->getGuildId())
 			return true;
+	}
+
+	CCreature * creature = CreatureManager.getCreature( entity->getId() );
+	if (creature && creator)
+	{
+		if (creature->checkFactionAttackable( creator->getId() ))
+		{
+			return true;
+		}
 	}
 
 	return false;

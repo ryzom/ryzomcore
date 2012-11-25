@@ -23,11 +23,11 @@
 #include "nel/misc/time_nl.h"
 #include "nel/misc/file.h"
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
-#include "nel/../../src/pacs/local_retriever.h"
-#include "nel/../../src/pacs/retriever_instance.h"
-#include "nel/../../src/pacs/global_retriever.h"
-#include "nel/../../src/pacs/retriever_bank.h"
+#include "nel/pacs/collision_mesh_build.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/retriever_instance.h"
+#include "nel/pacs/global_retriever.h"
+#include "nel/pacs/retriever_bank.h"
 
 #include "nel/pacs/u_global_position.h"
 

@@ -961,6 +961,16 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
 			name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
+			{
+				// Sometimes translation contains another title
+				ucstring::size_type pos = name.find('$');
+				if (pos != ucstring::npos)
+				{
+					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name), bWoman);
+				}
+			}
+
+
 		}
 		else
 		{
@@ -1034,6 +1044,16 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 			bool bWoman = entity && entity->getGender() == GSGENDER::female;
 
 			senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sender), bWoman);
+			{
+				// Sometimes translation contains another title
+				ucstring::size_type pos = senderName.find('$');
+				if (pos != ucstring::npos)
+				{
+					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName), bWoman);
+				}
+			}
+
+
 		}
 
 		switch(type)

@@ -13,11 +13,7 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 MACRO(NL_GEN_PC name)
   IF(NOT WIN32 AND WITH_INSTALL_LIBRARIES)
     CONFIGURE_FILE(${name}.in "${CMAKE_CURRENT_BINARY_DIR}/${name}")
-    IF(CMAKE_LIBRARY_ARCHITECTURE)
-      INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${name}" DESTINATION lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig)
-    ELSE(CMAKE_LIBRARY_ARCHITECTURE)
-      INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${name}" DESTINATION lib/pkgconfig)
-    ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
+    INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/${name}" DESTINATION ${NL_LIB_PREFIX}/pkgconfig)
   ENDIF(NOT WIN32 AND WITH_INSTALL_LIBRARIES)
 ENDMACRO(NL_GEN_PC)
 
@@ -26,25 +22,55 @@ ENDMACRO(NL_GEN_PC)
 ###
 MACRO(NL_GEN_REVISION_H)
   IF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h.in)
-    INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
-    ADD_DEFINITIONS(-DHAVE_REVISION_H)
-    SET(HAVE_REVISION_H ON)
+    SET(TOOL_FOUND OFF)
 
-    # a custom target that is always built
-    ADD_CUSTOM_TARGET(revision ALL
-      DEPENDS ${CMAKE_BINARY_DIR}/revision.h)
+    IF(EXISTS "${CMAKE_SOURCE_DIR}/../.svn/")
+      FIND_PACKAGE(Subversion)
 
-    # creates revision.h using cmake script
-    ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/revision.h
-      COMMAND ${CMAKE_COMMAND}
-      -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-      -DROOT_DIR=${CMAKE_SOURCE_DIR}/..
-      -P ${CMAKE_SOURCE_DIR}/CMakeModules/GetRevision.cmake)
+      IF(SUBVERSION_FOUND)
+        SET(TOOL_FOUND ON)
+      ENDIF(SUBVERSION_FOUND)
+    ENDIF(EXISTS "${CMAKE_SOURCE_DIR}/../.svn/")
 
-    # revision.h is a generated file
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/revision.h
-      PROPERTIES GENERATED TRUE
-      HEADER_FILE_ONLY TRUE)
+    IF(EXISTS "${CMAKE_SOURCE_DIR}/../.hg/")
+      FIND_PACKAGE(Mercurial)
+
+      IF(MERCURIAL_FOUND)
+        SET(TOOL_FOUND ON)
+      ENDIF(MERCURIAL_FOUND)
+    ENDIF(EXISTS "${CMAKE_SOURCE_DIR}/../.hg/")
+
+    # if already generated
+    IF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h)
+      # copy it
+      MESSAGE(STATUS "Copying provided revision.h...")
+      FILE(COPY ${CMAKE_SOURCE_DIR}/revision.h DESTINATION ${CMAKE_BINARY_DIR})
+      SET(HAVE_REVISION_H ON)
+    ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h)
+
+    IF(TOOL_FOUND)
+      # a custom target that is always built
+      ADD_CUSTOM_TARGET(revision ALL)
+
+      # creates revision.h using cmake script
+      ADD_CUSTOM_COMMAND(TARGET revision
+        PRE_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -DROOT_DIR=${CMAKE_SOURCE_DIR}/..
+        -P ${CMAKE_SOURCE_DIR}/CMakeModules/GetRevision.cmake)
+
+      # revision.h is a generated file
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/revision.h
+        PROPERTIES GENERATED TRUE
+        HEADER_FILE_ONLY TRUE)
+      SET(HAVE_REVISION_H ON)
+    ENDIF(TOOL_FOUND)
+
+    IF(HAVE_REVISION_H)
+      INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+      ADD_DEFINITIONS(-DHAVE_REVISION_H)
+    ENDIF(HAVE_REVISION_H)
   ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h.in)
 ENDMACRO(NL_GEN_REVISION_H)
 
@@ -243,16 +269,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   # Optional support
   ###
-
-  # Check if CMake is launched from a Debian packaging script
-  SET(DEB_HOST_GNU_CPU $ENV{DEB_HOST_GNU_CPU})
-
-  # Don't strip if generating a .deb
-  IF(DEB_HOST_GNU_CPU)
-    OPTION(WITH_SYMBOLS           "Keep debug symbols in binaries"                 ON )
-  ELSE(DEB_HOST_GNU_CPU)
-    OPTION(WITH_SYMBOLS           "Keep debug symbols in binaries"                 OFF)
-  ENDIF(DEB_HOST_GNU_CPU)
+  OPTION(WITH_SYMBOLS             "Keep debug symbols in binaries"                OFF)
 
   IF(WIN32)
     OPTION(WITH_STLPORT           "With STLport support."                         ON )
@@ -333,6 +350,11 @@ MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
   OPTION(WITH_SNOWBALLS_SERVER    "Build Snowballs Services"                      ON )
 ENDMACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
 
+MACRO(ADD_PLATFORM_FLAGS _FLAGS)
+  SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} ${_FLAGS}")
+  SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} ${_FLAGS}")
+ENDMACRO(ADD_PLATFORM_FLAGS)
+
 MACRO(NL_SETUP_BUILD)
 
   #-----------------------------------------------------------------------------
@@ -365,9 +387,6 @@ MACRO(NL_SETUP_BUILD)
   ENDIF(HOST_CPU MATCHES "amd64")
   
   # Determine target CPU
-  IF(NOT TARGET_CPU)
-    SET(TARGET_CPU $ENV{DEB_HOST_GNU_CPU})
-  ENDIF(NOT TARGET_CPU)
 
   # If not specified, use the same CPU as host
   IF(NOT TARGET_CPU)
@@ -379,9 +398,6 @@ MACRO(NL_SETUP_BUILD)
   ELSEIF(TARGET_CPU MATCHES "i.86")
     SET(TARGET_CPU "x86")
   ENDIF(TARGET_CPU MATCHES "amd64")
-
-  # DEB_HOST_ARCH_ENDIAN is 'little' or 'big'
-  # DEB_HOST_ARCH_BITS is '32' or '64'
 
   IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     SET(CLANG ON)
@@ -419,71 +435,121 @@ MACRO(NL_SETUP_BUILD)
     MESSAGE(STATUS "Compiling on ${HOST_CPU} for ${TARGET_CPU}")
   ENDIF("${HOST_CPU}" STREQUAL "${TARGET_CPU}")
 
-  IF(TARGET_CPU STREQUAL "x86_64")
-    SET(TARGET_X64 1)
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -DHAVE_X86_64")
-  ELSEIF(TARGET_CPU STREQUAL "x86")
-    SET(TARGET_X86 1)
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -DHAVE_X86")
-  ELSEIF(TARGET_CPU STREQUAL "arm")
-    SET(TARGET_ARM 1)
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -DHAVE_ARM")
-  ENDIF(TARGET_CPU STREQUAL "x86_64")
+  # Use values from environment variables
+  SET(PLATFORM_CFLAGS "$ENV{CFLAGS} $ENV{CPPFLAGS} ${PLATFORM_CFLAGS}")
+  SET(PLATFORM_CXXFLAGS "$ENV{CXXFLAGS} $ENV{CPPFLAGS} ${PLATFORM_CXXFLAGS}")
+  SET(PLATFORM_LINKFLAGS "$ENV{LDFLAGS} ${PLATFORM_LINKFLAGS}")
+
+  # Remove -g and -O flag because we are managing them ourself
+  STRING(REPLACE "-g" "" PLATFORM_CFLAGS ${PLATFORM_CFLAGS})
+  STRING(REPLACE "-g" "" PLATFORM_CXXFLAGS ${PLATFORM_CXXFLAGS})
+  STRING(REGEX REPLACE "-O[0-9s]" "" PLATFORM_CFLAGS ${PLATFORM_CFLAGS})
+  STRING(REGEX REPLACE "-O[0-9s]" "" PLATFORM_CXXFLAGS ${PLATFORM_CXXFLAGS})
+
+  # Strip spaces
+  STRING(STRIP ${PLATFORM_CFLAGS} PLATFORM_CFLAGS)
+  STRING(STRIP ${PLATFORM_CXXFLAGS} PLATFORM_CXXFLAGS)
+  STRING(STRIP ${PLATFORM_LINKFLAGS} PLATFORM_LINKFLAGS)
+
+  IF(NOT CMAKE_OSX_ARCHITECTURES)
+    IF(TARGET_CPU STREQUAL "x86_64")
+      SET(TARGET_X64 1)
+    ELSEIF(TARGET_CPU STREQUAL "x86")
+      SET(TARGET_X86 1)
+    ELSEIF(TARGET_CPU STREQUAL "armv7s")
+      SET(TARGET_ARM 1)
+      SET(TARGET_ARMV7S 1)
+    ELSEIF(TARGET_CPU STREQUAL "armv7")
+      SET(TARGET_ARM 1)
+      SET(TARGET_ARMV7 1)
+    ELSEIF(TARGET_CPU STREQUAL "armv6")
+      SET(TARGET_ARM 1)
+      SET(TARGET_ARMV6 1)
+    ELSEIF(TARGET_CPU STREQUAL "armv5")
+      SET(TARGET_ARM 1)
+      SET(TARGET_ARMV5 1)
+    ELSEIF(TARGET_CPU STREQUAL "arm")
+      SET(TARGET_ARM 1)
+    ENDIF(TARGET_CPU STREQUAL "x86_64")
+  ENDIF(NOT CMAKE_OSX_ARCHITECTURES)
 
   # Fix library paths suffixes for Debian MultiArch
-  SET(DEBIAN_MULTIARCH $ENV{DEB_HOST_MULTIARCH})
-
-  IF(DEBIAN_MULTIARCH)
-    SET(CMAKE_LIBRARY_ARCHITECTURE ${DEBIAN_MULTIARCH})
-  ENDIF(DEBIAN_MULTIARCH)
-
-  IF(CMAKE_LIBRARY_ARCHITECTURE)
-    SET(CMAKE_LIBRARY_PATH /lib/${CMAKE_LIBRARY_ARCHITECTURE} /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE} ${CMAKE_LIBRARY_PATH})
+  IF(LIBRARY_ARCHITECTURE)
+    SET(CMAKE_LIBRARY_PATH /lib/${LIBRARY_ARCHITECTURE} /usr/lib/${LIBRARY_ARCHITECTURE} ${CMAKE_LIBRARY_PATH})
     IF(TARGET_X64)
       SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /lib64 /usr/lib64)
     ENDIF(TARGET_X64)
     IF(TARGET_X86)
       SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /lib32 /usr/lib32)
     ENDIF(TARGET_X86)
-  ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
+  ENDIF(LIBRARY_ARCHITECTURE)
+
+  IF(APPLE AND NOT IOS)
+    SET(CMAKE_INCLUDE_PATH /opt/local/include ${CMAKE_INCLUDE_PATH})
+    SET(CMAKE_LIBRARY_PATH /opt/local/lib ${CMAKE_LIBRARY_PATH})
+  ENDIF(APPLE AND NOT IOS)
+
+  IF(TARGET_ARM)
+    IF(TARGET_ARMV7)
+      ADD_PLATFORM_FLAGS("-DHAVE_ARMV7")
+    ENDIF(TARGET_ARMV7)
+
+    IF(TARGET_ARMV6)
+      ADD_PLATFORM_FLAGS("-HAVE_ARMV6")
+    ENDIF(TARGET_ARMV6)
+
+    ADD_PLATFORM_FLAGS("-DHAVE_ARM")
+  ENDIF(TARGET_ARM)
+
+  IF(TARGET_X86)
+    ADD_PLATFORM_FLAGS("-DHAVE_X86")
+  ENDIF(TARGET_X86)
+
+  IF(TARGET_X64)
+    ADD_PLATFORM_FLAGS("-DHAVE_X64 -DHAVE_X86_64")
+  ENDIF(TARGET_X64)
+
+  IF(WITH_LOGGING)
+    ADD_PLATFORM_FLAGS("-DENABLE_LOGS")
+  ENDIF(WITH_LOGGING)
 
   IF(MSVC)
     IF(MSVC10)
+      ADD_PLATFORM_FLAGS("/Gy- /MP")
       # /Ox is working with VC++ 2010, but custom optimizations don't exist
-      SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
+      SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
-      SET(MIN_OPTIMIZATIONS "/Od /Ob1")
+      SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
     ELSEIF(MSVC90)
+      ADD_PLATFORM_FLAGS("/Gy- /MP")
       # don't use a /O[012x] flag if you want custom optimizations
-      SET(SPEED_OPTIMIZATIONS "/Ob2 /Oi /Ot /Oy /GT /GF /GS-")
+      SET(RELEASE_CFLAGS "/Ob2 /Oi /Ot /Oy /GT /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
-      SET(MIN_OPTIMIZATIONS "/Ob1")
+      SET(DEBUG_CFLAGS "/Ob1 /GF- ${DEBUG_CFLAGS}")
     ELSEIF(MSVC80)
+      ADD_PLATFORM_FLAGS("/Gy- /Wp64")
       # don't use a /O[012x] flag if you want custom optimizations
-      SET(SPEED_OPTIMIZATIONS "/Ox /GF /GS-")
+      SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
-      SET(MIN_OPTIMIZATIONS "/Od /Ob1")
+      SET(DEBUG_CFLAGS "/Od /Ob1 ${DEBUG_CFLAGS}")
     ELSE(MSVC10)
       MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")
     ENDIF(MSVC10)
 
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /W3 /Zm1000 /MP /Gy-")
-
-    # Common link flags
-    SET(PLATFORM_LINKFLAGS "")
+    ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /Zm1000 /wd4250")
 
     IF(TARGET_X64)
       # Fix a bug with Intellisense
-      SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} /D_WIN64")
+      ADD_PLATFORM_FLAGS("/D_WIN64")
       # Fix a compilation error for some big C++ files
-      SET(MIN_OPTIMIZATIONS "${MIN_OPTIMIZATIONS} /bigobj")
+      SET(RELEASE_CFLAGS "${RELEASE_CFLAGS} /bigobj")
     ELSE(TARGET_X64)
       # Allows 32 bits applications to use 3 GB of RAM
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} /LARGEADDRESSAWARE")
     ENDIF(TARGET_X64)
 
     # Exceptions are only set for C++
-    SET(PLATFORM_CXXFLAGS "${PLATFORM_CFLAGS} /EHa")
+    SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} /EHa")
 
     IF(WITH_SYMBOLS)
       SET(NL_RELEASE_CFLAGS "/Zi ${NL_RELEASE_CFLAGS}")
@@ -492,88 +558,204 @@ MACRO(NL_SETUP_BUILD)
       SET(NL_RELEASE_LINKFLAGS "/RELEASE ${NL_RELEASE_LINKFLAGS}")
     ENDIF(WITH_SYMBOLS)
 
-    SET(NL_DEBUG_CFLAGS "/Zi /MDd /RTC1 /D_DEBUG ${MIN_OPTIMIZATIONS} ${NL_DEBUG_CFLAGS}")
-    SET(NL_RELEASE_CFLAGS "/MD /DNDEBUG ${SPEED_OPTIMIZATIONS} ${NL_RELEASE_CFLAGS}")
+    SET(NL_DEBUG_CFLAGS "/Zi /MDd /RTC1 /D_DEBUG ${DEBUG_CFLAGS} ${NL_DEBUG_CFLAGS}")
+    SET(NL_RELEASE_CFLAGS "/MD /DNDEBUG ${RELEASE_CFLAGS} ${NL_RELEASE_CFLAGS}")
     SET(NL_DEBUG_LINKFLAGS "/DEBUG /OPT:NOREF /OPT:NOICF /NODEFAULTLIB:msvcrt /INCREMENTAL:YES ${NL_DEBUG_LINKFLAGS}")
     SET(NL_RELEASE_LINKFLAGS "/OPT:REF /OPT:ICF /INCREMENTAL:NO ${NL_RELEASE_LINKFLAGS}")
+
+    IF(WITH_WARNINGS)
+      SET(DEBUG_CFLAGS "/W4 ${DEBUG_CFLAGS}")
+    ELSE(WITH_WARNINGS)
+      SET(DEBUG_CFLAGS "/W3 ${DEBUG_CFLAGS}")
+    ENDIF(WITH_WARNINGS)
   ELSE(MSVC)
     IF(WIN32)
-      SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -DWIN32 -D_WIN32")
+      ADD_PLATFORM_FLAGS("-DWIN32 -D_WIN32")
+
+      IF(CLANG)
+        ADD_PLATFORM_FLAGS("-nobuiltininc")
+      ENDIF(CLANG)
     ENDIF(WIN32)
 
-    IF(APPLE)
-      IF(TARGET_CPU STREQUAL "x86")
-        SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -arch i386")
-      ENDIF(TARGET_CPU STREQUAL "x86")
+    IF(TARGET_ARM)
+      ADD_PLATFORM_FLAGS("-mthumb")
+    ENDIF(TARGET_ARM)
 
-      IF(TARGET_CPU STREQUAL "x86_64")
-        SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -arch x86_64")
-      ENDIF(TARGET_CPU STREQUAL "x86_64")
+    IF(APPLE)
+      IF(IOS)
+        SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.7" CACHE PATH "" FORCE)
+      ELSE(IOS)
+        IF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+          SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.6" CACHE PATH "" FORCE)
+        ENDIF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+      ENDIF(IOS)
+
+      IF(XCODE)
+        IF(IOS)
+          SET(CMAKE_OSX_SYSROOT "iphoneos" CACHE PATH "" FORCE)
+        ELSE(IOS)
+#          SET(CMAKE_OSX_SYSROOT "macosx" CACHE PATH "" FORCE)
+        ENDIF(IOS)
+      ELSE(XCODE)
+        IF(CMAKE_OSX_ARCHITECTURES)
+          SET(TARGETS_COUNT 0)
+          SET(_ARCHS)
+          FOREACH(_ARCH ${CMAKE_OSX_ARCHITECTURES})
+            IF(_ARCH STREQUAL "i386")
+              SET(_ARCHS "${_ARCHS} i386")
+              SET(TARGET_X86 1)
+              MATH(EXPR TARGETS_COUNT "${TARGETS_COUNT}+1")
+            ELSEIF(_ARCH STREQUAL "x86_64")
+              SET(_ARCHS "${_ARCHS} x86_64")
+              SET(TARGET_X64 1)
+              MATH(EXPR TARGETS_COUNT "${TARGETS_COUNT}+1")
+            ELSEIF(_ARCH STREQUAL "armv7")
+              SET(_ARCHS "${_ARCHS} armv7")
+              SET(TARGET_ARMV7 1)
+              SET(TARGET_ARM 1)
+              MATH(EXPR TARGETS_COUNT "${TARGETS_COUNT}+1")
+            ELSEIF(_ARCH STREQUAL "armv6")
+              SET(_ARCHS "${_ARCHS} armv6")
+              SET(TARGET_ARMV6 1)
+              SET(TARGET_ARM 1)
+              MATH(EXPR TARGETS_COUNT "${TARGETS_COUNT}+1")
+            ELSE(_ARCH STREQUAL "i386")
+              SET(_ARCHS "${_ARCHS} unknwon(${_ARCH})")
+            ENDIF(_ARCH STREQUAL "i386")
+          ENDFOREACH(_ARCH)
+          MESSAGE(STATUS "Compiling under Mac OS X for ${TARGETS_COUNT} architectures: ${_ARCHS}")
+        ELSE(CMAKE_OSX_ARCHITECTURES)
+          SET(TARGETS_COUNT 1)
+        ENDIF(CMAKE_OSX_ARCHITECTURES)
+
+        IF(TARGETS_COUNT EQUAL 1)
+          IF(TARGET_ARM)
+            IF(TARGET_ARMV7S)
+              ADD_PLATFORM_FLAGS("-arch armv7s")
+            ENDIF(TARGET_ARMV7S)
+
+            IF(TARGET_ARMV7)
+              ADD_PLATFORM_FLAGS("-arch armv7")
+            ENDIF(TARGET_ARMV7)
+
+            IF(TARGET_ARMV6)
+              ADD_PLATFORM_FLAGS("-arch armv6")
+            ENDIF(TARGET_ARMV6)
+
+            IF(TARGET_ARMV5)
+              ADD_PLATFORM_FLAGS("-arch armv5")
+            ENDIF(TARGET_ARMV5)
+          ENDIF(TARGET_ARM)
+
+          IF(TARGET_X86)
+            ADD_PLATFORM_FLAGS("-arch i386")
+          ENDIF(TARGET_X86)
+
+          IF(TARGET_X64)
+            ADD_PLATFORM_FLAGS("-arch x86_64")
+          ENDIF(TARGET_X64)
+        ELSE(TARGETS_COUNT EQUAL 1)
+          IF(TARGET_ARMV6)
+            ADD_PLATFORM_FLAGS("-Xarch_armv6 -mthumb -Xarch_armv6 -DHAVE_ARM -Xarch_armv6 -DHAVE_ARMV6")
+          ENDIF(TARGET_ARMV6)
+
+          IF(TARGET_ARMV7)
+            ADD_PLATFORM_FLAGS("-Xarch_armv7 -mthumb -Xarch_armv7 -DHAVE_ARM -Xarch_armv7 -DHAVE_ARMV7")
+          ENDIF(TARGET_ARMV7)
+
+          IF(TARGET_X86)
+            ADD_PLATFORM_FLAGS("-arch i386 -Xarch_i386 -DHAVE_X86")
+          ENDIF(TARGET_X86)
+
+          IF(TARGET_X64)
+            ADD_PLATFORM_FLAGS("-arch x86_64 -Xarch_x86_64 -DHAVE_X64 -Xarch_x86_64 -DHAVE_X86_64")
+          ENDIF(TARGET_X64)
+        ENDIF(TARGETS_COUNT EQUAL 1)
+
+        IF(IOS)
+          IF(IOS_VERSION)
+            PARSE_VERSION_STRING(${IOS_VERSION} IOS_VERSION_MAJOR IOS_VERSION_MINOR IOS_VERSION_PATCH)
+            CONVERT_VERSION_NUMBER(${IOS_VERSION_MAJOR} ${IOS_VERSION_MINOR} ${IOS_VERSION_PATCH} IOS_VERSION_NUMBER)
+
+            ADD_PLATFORM_FLAGS("-D__IPHONE_OS_VERSION_MIN_REQUIRED=${IOS_VERSION_NUMBER}")
+          ENDIF(IOS_VERSION)
+
+          IF(CMAKE_IOS_SYSROOT)
+            ADD_PLATFORM_FLAGS("-isysroot${CMAKE_IOS_SYSROOT}")
+            ADD_PLATFORM_FLAGS("-miphoneos-version-min=${IOS_VERSION}")
+            SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-iphoneos_version_min,${IOS_VERSION}")
+          ENDIF(CMAKE_IOS_SYSROOT)
+
+          IF(CMAKE_IOS_SIMULATOR_SYSROOT AND TARGET_X86)
+            IF(TARGETS_COUNT EQUAL 1)
+              ADD_PLATFORM_FLAGS("-arch i386")
+            ELSE(TARGETS_COUNT EQUAL 1)
+              SET(XARCH "-Xarch_i386 ")
+            ENDIF(TARGETS_COUNT EQUAL 1)
+
+            # Always force -mmacosx-version-min to override environement variable
+            ADD_PLATFORM_FLAGS("${XARCH}-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+            SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+          ENDIF(CMAKE_IOS_SIMULATOR_SYSROOT AND TARGET_X86)
+        ELSE(IOS)
+          FOREACH(_SDK ${_CMAKE_OSX_SDKS})
+            IF(${_SDK} MATCHES "MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET}\\.sdk")
+              SET(CMAKE_OSX_SYSROOT ${_SDK} CACHE PATH "" FORCE)
+            ENDIF(${_SDK} MATCHES "MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET}\\.sdk")
+          ENDFOREACH(_SDK)
+
+          IF(CMAKE_OSX_SYSROOT)
+            ADD_PLATFORM_FLAGS("-isysroot ${CMAKE_OSX_SYSROOT}")
+          ELSE(CMAKE_OSX_SYSROOT)
+            MESSAGE(FATAL_ERROR "CMAKE_OSX_SYSROOT can't be determinated")
+          ENDIF(CMAKE_OSX_SYSROOT)
+
+          # Always force -mmacosx-version-min to override environement variable
+          ADD_PLATFORM_FLAGS("-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
+          SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+        ENDIF(IOS)
+
+        SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-headerpad_max_install_names")
+
+        IF(HAVE_FLAG_SEARCH_PATHS_FIRST)
+          SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-search_paths_first")
+        ENDIF(HAVE_FLAG_SEARCH_PATHS_FIRST)
+      ENDIF(XCODE)
     ELSE(APPLE)
       IF(HOST_CPU STREQUAL "x86_64" AND TARGET_CPU STREQUAL "x86")
-        SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -m32 -march=i686")
+        ADD_PLATFORM_FLAGS("-m32 -march=i686")
       ENDIF(HOST_CPU STREQUAL "x86_64" AND TARGET_CPU STREQUAL "x86")
 
       IF(HOST_CPU STREQUAL "x86" AND TARGET_CPU STREQUAL "x86_64")
-        SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -m64")
+        ADD_PLATFORM_FLAGS("-m64")
       ENDIF(HOST_CPU STREQUAL "x86" AND TARGET_CPU STREQUAL "x86_64")
     ENDIF(APPLE)
 
-    SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -D_REENTRANT -pipe -ftemplate-depth-48 -Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused -fno-strict-aliasing")
-
-    IF(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-      SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -ansi")
-    ENDIF(NOT ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    ADD_PLATFORM_FLAGS("-D_REENTRANT -pipe -fno-strict-aliasing")
 
     IF(WITH_COVERAGE)
-      SET(PLATFORM_CFLAGS "-fprofile-arcs -ftest-coverage ${PLATFORM_CFLAGS}")
+      ADD_PLATFORM_FLAGS("-fprofile-arcs -ftest-coverage")
     ENDIF(WITH_COVERAGE)
 
+    IF(WITH_WARNINGS)
+      ADD_PLATFORM_FLAGS("-Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused")
+      IF(CLANG)
+        ADD_PLATFORM_FLAGS("-std=gnu99")
+      ELSE(CLANG)
+        ADD_PLATFORM_FLAGS("-ansi")
+      ENDIF(CLANG)
+    ENDIF(WITH_WARNINGS)
+
     IF(APPLE)
-      SET(PLATFORM_CFLAGS "-gdwarf-2 ${PLATFORM_CFLAGS}")
+      ADD_PLATFORM_FLAGS("-gdwarf-2")
     ENDIF(APPLE)
-
-    IF(APPLE AND XCODE)
-      SET(CMAKE_OSX_SYSROOT "macosx" CACHE PATH "" FORCE)
-    ELSEIF(APPLE AND NOT XCODE)
-      IF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-        SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
-      ENDIF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-
-      FOREACH(_SDK ${_CMAKE_OSX_SDKS})
-        IF(${_SDK} MATCHES "MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET}\\.sdk")
-          SET(CMAKE_OSX_SYSROOT ${_SDK} CACHE PATH "" FORCE)
-        ENDIF(${_SDK} MATCHES "MacOSX${CMAKE_OSX_DEPLOYMENT_TARGET}\\.sdk")
-      ENDFOREACH(_SDK)
-
-      IF(CMAKE_OSX_SYSROOT)
-        SET(PLATFORM_CFLAGS "-isysroot ${CMAKE_OSX_SYSROOT} ${PLATFORM_CFLAGS}")
-      ELSE(CMAKE_OSX_SYSROOT)
-        MESSAGE(FATAL_ERROR "CMAKE_OSX_SYSROOT can't be determinated")
-      ENDIF(CMAKE_OSX_SYSROOT)
-
-      IF(CMAKE_OSX_ARCHITECTURES)
-        FOREACH(_ARCH ${CMAKE_OSX_ARCHITECTURES})
-          SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -arch ${_ARCH}")
-        ENDFOREACH(_ARCH)
-      ENDIF(CMAKE_OSX_ARCHITECTURES)
-      IF(CMAKE_C_OSX_DEPLOYMENT_TARGET_FLAG)
-        SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} -mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
-      ENDIF(CMAKE_C_OSX_DEPLOYMENT_TARGET_FLAG)
-
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-headerpad_max_install_names")
-
-      IF(HAVE_FLAG_SEARCH_PATHS_FIRST)
-        SET(PLATFORM_LINKFLAGS "-Wl,-search_paths_first ${PLATFORM_LINKFLAGS}")
-      ENDIF(HAVE_FLAG_SEARCH_PATHS_FIRST)
-    ENDIF(APPLE AND XCODE)
 
     # Fix "relocation R_X86_64_32 against.." error on x64 platforms
     IF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
-      SET(PLATFORM_CFLAGS "-fPIC ${PLATFORM_CFLAGS}")
+      ADD_PLATFORM_FLAGS("-fPIC")
     ENDIF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
 
-    SET(PLATFORM_CXXFLAGS ${PLATFORM_CFLAGS})
+    SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -ftemplate-depth-48")
 
     IF(NOT APPLE)
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,--no-undefined -Wl,--as-needed")
@@ -613,125 +795,146 @@ MACRO(NL_SETUP_BUILD_FLAGS)
   SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${PLATFORM_LINKFLAGS} ${NL_RELEASE_LINKFLAGS}" CACHE STRING "" FORCE)
 ENDMACRO(NL_SETUP_BUILD_FLAGS)
 
+# Macro to create x_ABSOLUTE_PREFIX from x_PREFIX
+MACRO(NL_MAKE_ABSOLUTE_PREFIX NAME_RELATIVE NAME_ABSOLUTE)
+  IF(IS_ABSOLUTE "${${NAME_RELATIVE}}")
+    SET(${NAME_ABSOLUTE} ${${NAME_RELATIVE}})
+  ELSE(IS_ABSOLUTE "${${{NAME_RELATIVE}}")
+    IF(WIN32)
+      SET(${NAME_ABSOLUTE} ${${NAME_RELATIVE}})
+    ELSE(WIN32)
+      SET(${NAME_ABSOLUTE} ${CMAKE_INSTALL_PREFIX}/${${NAME_RELATIVE}})
+    ENDIF(WIN32)
+  ENDIF(IS_ABSOLUTE "${${NAME_RELATIVE}}")
+ENDMACRO(NL_MAKE_ABSOLUTE_PREFIX)
+
 MACRO(NL_SETUP_PREFIX_PATHS)
   ## Allow override of install_prefix/etc path.
   IF(NOT NL_ETC_PREFIX)
     IF(WIN32)
-      SET(NL_ETC_PREFIX "../etc/nel" CACHE PATH "Installation path for configurations")
+      SET(NL_ETC_PREFIX "." CACHE PATH "Installation path for configurations")
     ELSE(WIN32)
-      SET(NL_ETC_PREFIX "${CMAKE_INSTALL_PREFIX}/etc/nel" CACHE PATH "Installation path for configurations")
+      SET(NL_ETC_PREFIX "etc/nel" CACHE PATH "Installation path for configurations")
     ENDIF(WIN32)
   ENDIF(NOT NL_ETC_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_ETC_PREFIX NL_ETC_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/share path.
   IF(NOT NL_SHARE_PREFIX)
     IF(WIN32)
-      SET(NL_SHARE_PREFIX "../share/nel" CACHE PATH "Installation path for data.")
+      SET(NL_SHARE_PREFIX "." CACHE PATH "Installation path for data.")
     ELSE(WIN32)
-      SET(NL_SHARE_PREFIX "${CMAKE_INSTALL_PREFIX}/share/nel" CACHE PATH "Installation path for data.")
+      SET(NL_SHARE_PREFIX "share/nel" CACHE PATH "Installation path for data.")
     ENDIF(WIN32)
   ENDIF(NOT NL_SHARE_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_SHARE_PREFIX NL_SHARE_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/sbin path.
   IF(NOT NL_SBIN_PREFIX)
     IF(WIN32)
-      SET(NL_SBIN_PREFIX "../sbin" CACHE PATH "Installation path for admin tools and services.")
+      SET(NL_SBIN_PREFIX "." CACHE PATH "Installation path for admin tools and services.")
     ELSE(WIN32)
-      SET(NL_SBIN_PREFIX "${CMAKE_INSTALL_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
+      SET(NL_SBIN_PREFIX "sbin" CACHE PATH "Installation path for admin tools and services.")
     ENDIF(WIN32)
   ENDIF(NOT NL_SBIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_SBIN_PREFIX NL_SBIN_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/bin path.
   IF(NOT NL_BIN_PREFIX)
     IF(WIN32)
-      SET(NL_BIN_PREFIX "../bin" CACHE PATH "Installation path for tools and applications.")
+      SET(NL_BIN_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-      SET(NL_BIN_PREFIX "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation path for tools and applications.")
+      SET(NL_BIN_PREFIX "bin" CACHE PATH "Installation path for tools and applications.")
     ENDIF(WIN32)
   ENDIF(NOT NL_BIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_BIN_PREFIX NL_BIN_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/lib path.
   IF(NOT NL_LIB_PREFIX)
-    IF(WIN32)
-      SET(NL_LIB_PREFIX "../lib" CACHE PATH "Installation path for libraries.")
-    ELSE(WIN32)
-      IF(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
-      ELSE(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_LIB_PREFIX "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation path for libraries.")
-      ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
-    ENDIF(WIN32)
+    IF(LIBRARY_ARCHITECTURE)
+      SET(NL_LIB_PREFIX "lib/${LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
+    ELSE(LIBRARY_ARCHITECTURE)
+      SET(NL_LIB_PREFIX "lib" CACHE PATH "Installation path for libraries.")
+    ENDIF(LIBRARY_ARCHITECTURE)
   ENDIF(NOT NL_LIB_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_LIB_PREFIX NL_LIB_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/lib path.
   IF(NOT NL_DRIVER_PREFIX)
     IF(WIN32)
-      SET(NL_DRIVER_PREFIX "../lib" CACHE PATH "Installation path for drivers.")
+      SET(NL_DRIVER_PREFIX "." CACHE PATH "Installation path for drivers.")
     ELSE(WIN32)
-      IF(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_DRIVER_PREFIX "${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_LIBRARY_ARCHITECTURE}/nel" CACHE PATH "Installation path for drivers.")
-      ELSE(CMAKE_LIBRARY_ARCHITECTURE)
-        SET(NL_DRIVER_PREFIX "${CMAKE_INSTALL_PREFIX}/lib/nel" CACHE PATH "Installation path for drivers.")
-      ENDIF(CMAKE_LIBRARY_ARCHITECTURE)
+      IF(LIBRARY_ARCHITECTURE)
+        SET(NL_DRIVER_PREFIX "lib/${LIBRARY_ARCHITECTURE}/nel" CACHE PATH "Installation path for drivers.")
+      ELSE(LIBRARY_ARCHITECTURE)
+        SET(NL_DRIVER_PREFIX "lib/nel" CACHE PATH "Installation path for drivers.")
+      ENDIF(LIBRARY_ARCHITECTURE)
     ENDIF(WIN32)
   ENDIF(NOT NL_DRIVER_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(NL_DRIVER_PREFIX NL_DRIVER_ABSOLUTE_PREFIX)
 
 ENDMACRO(NL_SETUP_PREFIX_PATHS)
 
 MACRO(RYZOM_SETUP_PREFIX_PATHS)
-  ## Allow override of install_prefix path.
-  IF(NOT RYZOM_PREFIX)
-    IF(WIN32)
-      SET(RYZOM_PREFIX "." CACHE PATH "Installation path")
-    ELSE(WIN32)
-      SET(RYZOM_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Installation path")
-    ENDIF(WIN32)
-  ENDIF(NOT RYZOM_PREFIX)
-
   ## Allow override of install_prefix/etc path.
   IF(NOT RYZOM_ETC_PREFIX)
     IF(WIN32)
       SET(RYZOM_ETC_PREFIX "." CACHE PATH "Installation path for configurations")
     ELSE(WIN32)
-      SET(RYZOM_ETC_PREFIX "${RYZOM_PREFIX}/etc/ryzom" CACHE PATH "Installation path for configurations")
+      SET(RYZOM_ETC_PREFIX "etc/ryzom" CACHE PATH "Installation path for configurations")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_ETC_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_ETC_PREFIX RYZOM_ETC_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/share path.
   IF(NOT RYZOM_SHARE_PREFIX)
     IF(WIN32)
       SET(RYZOM_SHARE_PREFIX "." CACHE PATH "Installation path for data.")
     ELSE(WIN32)
-      SET(RYZOM_SHARE_PREFIX "${RYZOM_PREFIX}/share/ryzom" CACHE PATH "Installation path for data.")
+      SET(RYZOM_SHARE_PREFIX "share/ryzom" CACHE PATH "Installation path for data.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_SHARE_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_SHARE_PREFIX RYZOM_SHARE_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/sbin path.
   IF(NOT RYZOM_SBIN_PREFIX)
     IF(WIN32)
       SET(RYZOM_SBIN_PREFIX "." CACHE PATH "Installation path for admin tools and services.")
     ELSE(WIN32)
-      SET(RYZOM_SBIN_PREFIX "${RYZOM_PREFIX}/sbin" CACHE PATH "Installation path for admin tools and services.")
+      SET(RYZOM_SBIN_PREFIX "sbin" CACHE PATH "Installation path for admin tools and services.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_SBIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_SBIN_PREFIX RYZOM_SBIN_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/bin path.
   IF(NOT RYZOM_BIN_PREFIX)
     IF(WIN32)
       SET(RYZOM_BIN_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-      SET(RYZOM_BIN_PREFIX "${RYZOM_PREFIX}/bin" CACHE PATH "Installation path for tools.")
+      SET(RYZOM_BIN_PREFIX "bin" CACHE PATH "Installation path for tools.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_BIN_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_BIN_PREFIX RYZOM_BIN_ABSOLUTE_PREFIX)
+
+  ## Allow override of install_prefix/lib path.
+  IF(NOT RYZOM_LIB_PREFIX)
+    IF(LIBRARY_ARCHITECTURE)
+      SET(RYZOM_LIB_PREFIX "lib/${LIBRARY_ARCHITECTURE}" CACHE PATH "Installation path for libraries.")
+    ELSE(LIBRARY_ARCHITECTURE)
+      SET(RYZOM_LIB_PREFIX "lib" CACHE PATH "Installation path for libraries.")
+    ENDIF(LIBRARY_ARCHITECTURE)
+  ENDIF(NOT RYZOM_LIB_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_LIB_PREFIX RYZOM_LIB_ABSOLUTE_PREFIX)
 
   ## Allow override of install_prefix/games path.
   IF(NOT RYZOM_GAMES_PREFIX)
     IF(WIN32)
       SET(RYZOM_GAMES_PREFIX "." CACHE PATH "Installation path for tools and applications.")
     ELSE(WIN32)
-      SET(RYZOM_GAMES_PREFIX "${RYZOM_PREFIX}/games" CACHE PATH "Installation path for client.")
+      SET(RYZOM_GAMES_PREFIX "games" CACHE PATH "Installation path for client.")
     ENDIF(WIN32)
   ENDIF(NOT RYZOM_GAMES_PREFIX)
+  NL_MAKE_ABSOLUTE_PREFIX(RYZOM_GAMES_PREFIX RYZOM_GAMES_ABSOLUTE_PREFIX)
 
 ENDMACRO(RYZOM_SETUP_PREFIX_PATHS)
 
@@ -742,6 +945,10 @@ MACRO(SETUP_EXTERNAL)
 
   IF(WIN32)
     FIND_PACKAGE(External REQUIRED)
+
+    IF(NOT VC_DIR)
+      SET(VC_DIR $ENV{VC_DIR})
+    ENDIF(NOT VC_DIR)
 
     IF(MSVC10)
       IF(NOT MSVC10_REDIST_DIR)
@@ -756,7 +963,10 @@ MACRO(SETUP_EXTERNAL)
           IF(VC_ROOT_DIR MATCHES "registry")
             GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
             IF(VC_ROOT_DIR MATCHES "registry")
-              FILE(TO_CMAKE_PATH $ENV{VS100COMNTOOLS} VC_ROOT_DIR)
+              SET(VS100COMNTOOLS $ENV{VS100COMNTOOLS})
+              IF(VS100COMNTOOLS)
+                FILE(TO_CMAKE_PATH ${VS100COMNTOOLS} VC_ROOT_DIR)
+              ENDIF(VS100COMNTOOLS)
               IF(NOT VC_ROOT_DIR)
                 MESSAGE(FATAL_ERROR "Unable to find VC++ 2010 directory!")
               ENDIF(NOT VC_ROOT_DIR)

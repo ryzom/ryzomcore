@@ -98,7 +98,7 @@ namespace NLQT {
 	void CConfiguration::addLeveldesignPath()
 	{
 		std::vector<std::string> list;
-		list.push_back(Modules::config().getValue("LeveldesignPath", QString("").toStdString()));
+		list.push_back(Modules::config().getValue("LeveldesignPath", std::string()));
 		addSearchPaths(&list);
 	}
 

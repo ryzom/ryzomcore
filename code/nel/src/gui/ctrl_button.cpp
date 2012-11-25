@@ -399,7 +399,7 @@ namespace NLGUI
 	{
 	//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
-		_TextureIdNormal.setTexture(name.c_str());
+		_TextureIdNormal.setTexture(name.c_str (), 0, 0, -1, -1, false);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -407,7 +407,7 @@ namespace NLGUI
 	{
 	//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
-		_TextureIdPushed.setTexture(name.c_str());
+		_TextureIdPushed.setTexture(name.c_str (), 0, 0, -1, -1, false);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -415,7 +415,7 @@ namespace NLGUI
 	{
 	//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
-		_TextureIdOver.setTexture(name.c_str());
+		_TextureIdOver.setTexture(name.c_str (), 0, 0, -1, -1, false);
 	}
 
 	// ----------------------------------------------------------------------------

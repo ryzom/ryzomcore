@@ -17,9 +17,9 @@
 #include <map>
 #include <vector>
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
-#include "nel/../../src/pacs/local_retriever.h"
-#include "nel/../../src/pacs/exterior_mesh.h"
+#include "nel/pacs/collision_mesh_build.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/exterior_mesh.h"
 
 #include "mouline.h"
 #include "build_surfaces.h"

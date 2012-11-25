@@ -96,7 +96,7 @@ sint main(int argc, char **argv)
 #if defined(NL_OS_MAC)
 	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
 	CLibrary::addLibPath(
-		(qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
+		(qApp->applicationDirPath() + QString("/../PlugIns/nel")).toUtf8().constData());
 #endif
 
 	// go nel!

@@ -28,7 +28,7 @@ if ($authserver) {
 	die('0');
 }
 
-if (RYZOM_IG || ryzom_get_param('ig')) {
+if ((isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Ryzom')) || ryzom_get_param('ig')) {
 		echo 'ig';
 	if (ryzom_authenticate_ingame($cid, $name, $authkey)) {
 		echo 'ok';
@@ -38,7 +38,7 @@ if (RYZOM_IG || ryzom_get_param('ig')) {
 	}
 	die('0');
 } else  {
-	echo ryzom_authenticate_with_session($name, $cid, $_RYZOM_API_CONFIG['base_url'].'index.php');
+	echo ryzom_authenticate_with_session($name, $cid, $error_message);
 }
 
 ?>

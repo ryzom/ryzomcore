@@ -348,7 +348,7 @@ void CParticleWorkspaceDialog::saveAsPS()
 						   tr("ps files (*.ps)"));
 		// after check
 		if (!fileName.isEmpty())
-			node->savePSAs(fileName.toStdString());
+			node->savePSAs(fileName.toUtf8().constData());
 	}
 }
 
@@ -546,7 +546,7 @@ void CParticleWorkspaceDialog::bindNewLocatedBindable(int id)
 	std::string name = toCreate->getName();
 	if (_PSElementIdentifiers.count(name))
 	{
-		name += (QString("%1").arg(++_PSElementIdentifiers[name])).toStdString();
+		name += NLMISC::toString("%u", ++_PSElementIdentifiers[name]);
 		toCreate->setName(name);
 	}
 	else
@@ -771,7 +771,7 @@ NL3D::CPSLocated *CParticleWorkspaceDialog::createLocated(NL3D::CParticleSystem 
 	// build new name
 	std::string name;
 	if (_PSElementIdentifiers.count(std::string("located")))
-		name = (QString("located %1").arg(++_PSElementIdentifiers[std::string("located")])).toStdString();
+		name = (QString("located %1").arg(++_PSElementIdentifiers[std::string("located")])).toUtf8();
 
 	else
 	{

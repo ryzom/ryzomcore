@@ -33,10 +33,10 @@ extern void CancelEditPatchModes(IObjParam *ip);
 
 extern void LoadImages();
 
-BOOL CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static char string[64];
-	EditPatchMod *ep =(EditPatchMod *)GetWindowLong(hDlg, GWL_USERDATA);
+	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	ICustToolbar *iToolbar;
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
@@ -104,7 +104,7 @@ BOOL CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hSelectPanel = hDlg;
-			SetWindowLong(hDlg, GWL_USERDATA, (LONG)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 			// Set up the editing level selector
 			LoadImages();
 			iToolbar = GetICustToolbar(GetDlgItem(hDlg, IDC_SELTYPE));
@@ -349,9 +349,9 @@ void EditPatchMod::SetOpsDlgEnables()
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-BOOL CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	EditPatchMod *ep =(EditPatchMod *)GetWindowLong(hDlg, GWL_USERDATA);
+	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
 
@@ -367,7 +367,7 @@ BOOL CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		 	ep->hOpsPanel = hDlg;
 			for (int i = IDC_SMOOTH_GRP1; i < IDC_SMOOTH_GRP1 + 32; i++)
 				SendMessage(GetDlgItem(hDlg, i), CC_COMMAND, CC_CMD_SET_TYPE, CBT_CHECK);
-			SetWindowLong(hDlg, GWL_USERDATA, (LONG)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 			ICustButton *but = GetICustButton(GetDlgItem(hDlg, IDC_ATTACH));
 			but->SetHighlightColor(GREEN_WASH);
 			but->SetType(CBT_CHECK);

@@ -69,7 +69,7 @@ public:
 	
 	virtual void setTheta(CAngle theta);
 	
-	virtual void sendInfoToEGS() const = 0;
+	virtual void sendInfoToEGS() const;
 	
 	CBot& getPersistent() const;
 	
@@ -244,6 +244,9 @@ public:
 	const ucstring& getCustomName() const { return _CustomName; }
 	void setCustomName(const ucstring &name) { _CustomName = name; }
 
+	const uint32& getCustomMaxHp() const { return _CustomMaxHp; }
+	void setCustomMaxHp(const uint32 &maxHp) { _CustomMaxHp = maxHp; }
+
 	virtual void setClientSheet(const std::string & clientSheetName);  
 
 	// Can be redefine by NpcGroup in case of a BotNpc with a fauna sheet but that we don't want the name to ignore
@@ -273,6 +276,7 @@ private:
 	bool _Healer;
 	bool _BuildingBot;
 	ucstring _CustomName;
+	uint32 _CustomMaxHp;
 	CTimer					_SetSheetTimer;
 	struct CSetSheetData
 	{

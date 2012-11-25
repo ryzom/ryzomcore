@@ -134,24 +134,9 @@ void updateClientTime();
 // update smoothed time (useful for sky animation)
 void updateSmoothedTime();
 
-inline TTime ryzomGetLocalTime ()
+inline NLMISC::TTime ryzomGetLocalTime()
 {
-#ifdef NL_OS_WINDOWS
-	if (ClientCfg.TimerMode == 0)
-	{
-		return (TTime)(NLMISC::CTime::ticksToSecond (NLMISC::CTime::getPerformanceTime()) * 1000.0);
-	}
-	else // if (ClientCfg.TimerMode == 1)
-	{
-		// Use 1 ms timer precision
-		timeBeginPeriod(1);
- 		DWORD start = timeGetTime();
-		timeEndPeriod(1);
-		return (TTime)start;
-	}
-#else // NL_OS_WINDOWS
-	return (TTime)(NLMISC::CTime::ticksToSecond (NLMISC::CTime::getPerformanceTime()) * 1000.0);
-#endif // NL_OS_WINDOWS
+	return NLMISC::CTime::getLocalTime();
 }
 
 inline NLMISC::TTicks ryzomGetPerformanceTime()

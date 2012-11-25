@@ -142,11 +142,7 @@ namespace NLGUI
 
 		// Optional ucstring modifier
 		IOnReceiveTextId		*_StringModifier;
-
-		#if defined(NL_DEBUG)
 		std::string				_DBPath;
-		#endif
-
 		static IViewTextProvider* getTextProvider(){ return textProvider; }
 
 	private:

@@ -16,7 +16,7 @@
 
 #include "stdpacs.h"
 #include "nel/misc/i_xml.h"
-#include "primitive_block.h"
+#include "nel/pacs/primitive_block.h"
 
 
 namespace NLPACS

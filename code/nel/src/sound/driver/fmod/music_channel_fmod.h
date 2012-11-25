@@ -17,7 +17,7 @@
 #ifndef NL_MUSIC_CHANNEL_FMOD_H
 #define NL_MUSIC_CHANNEL_FMOD_H
 
-#include <nel/sound/driver/music_channel.h>
+#include "nel/sound/driver/music_channel.h"
 
 struct FSOUND_STREAM;
 

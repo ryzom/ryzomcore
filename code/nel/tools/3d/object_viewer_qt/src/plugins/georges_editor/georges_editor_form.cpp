@@ -253,7 +253,7 @@ namespace GeorgesQt
 		}
 		else
 		{
-            nlwarning("Failed to load form: %s", info.fileName().toStdString().c_str());
+            nlwarning("Failed to load form: %s", info.fileName().toUtf8().constData());
 			m_dockedWidgets.last()->close();
 		}
 	}

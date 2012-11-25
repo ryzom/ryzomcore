@@ -395,6 +395,15 @@ struct CXpProgressInfos
 	}
 };
 
+enum TFriendVisibility
+{
+	VisibleToAll = 0,			// Visible to all people who have me on their friends list, even if I am ignoring them.
+	VisibleToGuildAndFriends,	// Visible to people in my guild and those that have me on their friends list.
+	VisibleToGuildOnly,			// Only visible to people in my guild.
+	NB_FRIEND_VISIBILITY
+
+};
+
 
 /**
  * CCharacter
@@ -881,6 +890,9 @@ public:
 	// Set skill tree of character to max value of each skill
 	void setSkillsToMaxValue();
 
+	// Set skill tree of character to specified value
+	void setSkillsToValue(const sint32& value);
+
 	// for respawn management, need to modify _TimeDeath in cbTpAcknownledge callback
 	NLMISC::TGameTime& getTimeOfDeath();
 	void setTimeOfDeath( NLMISC::TGameTime t);
@@ -1023,14 +1035,14 @@ public:
 	// Same but nearly empty
 	void setDummyStartCharacteristics();
 
-    /**
-     * Eval Specialization for return Characteristics value
-     *
-     * \param value is the value to parse.
-     * \param result is the result to fill if the value has been succesfully parsed.
-     * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError 
-     * if it has been parsed.
-     */
+	/**
+	 * Eval Specialization for return Characteristics value
+	 *
+	 * \param value is the value to parse.
+	 * \param result is the result to fill if the value has been succesfully parsed.
+	 * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError 
+	 * if it has been parsed.
+	 */
 	virtual TReturnState evalValue (const char *value, double &result, uint32 userData);
 
 	/// Add a pact
@@ -2259,6 +2271,9 @@ public:
 	// return unclamped magic resistance of a character
 	uint32 getUnclampedMagicResistance( RESISTANCE_TYPE::TResistanceType magicResistanceType ) const;
 
+	// return clamped magic resistance of a character
+	uint32 getMagicResistance(RESISTANCE_TYPE::TResistanceType magicResistanceType) const;
+
 	/// return NbNonNullClassificationTypesSkillMod
 	uint8 getNbNonNullClassificationTypesSkillMod() const;
 	
@@ -2380,7 +2395,29 @@ public:
 	uint32 getLastConnectedTime() const;
 	uint32 getLastConnectedDate() const;
 	uint32 getPlayedTime() const;
+
+	const std::string& getLangChannel() const;
+	void setLangChannel(const std::string &lang);
+
+	const std::string& getNewTitle() const;
+	void setNewTitle(const std::string &title);
+
+	std::string getFullTitle() const;
+
+	std::string getTagA() const;
+	void setTagA(const std::string &tag);
+
+	std::string getTagB() const;
+	void setTagB(const std::string &tag);
+
+	std::string getTagPvPA() const;
+	void setTagPvPA(const std::string &tag);
+
+	std::string getTagPvPB() const;
+	void setTagPvPB(const std::string &tag);
+
 	uint32 getOrganization() const;
+	uint32 getOrganizationStatus() const;
 	const std::list<TCharacterLogTime>& getLastLogStats() const;
 	void updateConnexionStat();
 	void setDisconnexionTime();		
@@ -2692,6 +2729,10 @@ private:
 		
 	void contactListRefChange(const NLMISC::CEntityId &id, TConctactListAction actionType);
 	
+	/// return true if player is ignored by the given entity
+	bool isIgnoredBy(const NLMISC::CEntityId &id);
+	/// return true if given entity has player on friend list
+	bool isFriendOf(const NLMISC::CEntityId &id);
 	/// player is referenced as friend by the given entity
 	void referencedAsFriendBy( const NLMISC::CEntityId &id);
 	/// player is no longer referenced as friend by the given entity
@@ -2767,7 +2808,7 @@ private:
 	void removeExchangeItems(std::vector<CGameItemPtr>& itemRemoved, std::vector< CPetAnimal >& PlayerPetsRemoved);
 
 	// add the items gained during an exchange
-	void addExchangeItems(CCharacter* trader,std::vector<CGameItemPtr>& itemToAdd, std::vector< CPetAnimal >& PlayerPetsAdd);
+	void addExchangeItems(CCharacter* trader,std::vector<CGameItemPtr>& itemToAdd, std::vector< CPetAnimal >& PlayerPetsAdded);
 
 	/// get creator name dynamic string Id
 	uint32 getCreatorNameId( const NLMISC::CEntityId &creatorId);
@@ -2895,6 +2936,9 @@ private:
 	 */
 	double addXpToSkillInternal( double XpGain, const std::string& ContSkill, TAddXpToSkillMode addXpMode, std::map<SKILLS::ESkills,CXpProgressInfos> &gainBySkill );
 
+	/// Initialize the specified pet inventory, if it is valid
+	bool initPetInventory(uint8 index);
+
 	///////////////////
 	// Public members
 	///////////////////
@@ -2947,6 +2991,12 @@ public:
 
 	void setFinalized(bool isFinalized) { _LoadingFinish = isFinalized; };
 	bool isFinalized() const { return _LoadingFinish; };
+
+	void setFriendVisibility(TFriendVisibility val) { _FriendVisibility = val; }
+	const TFriendVisibility& getFriendVisibility() const { return _FriendVisibility; }
+
+	void setFriendVisibilitySave(uint8 val) { if (val < NB_FRIEND_VISIBILITY) _FriendVisibility = (TFriendVisibility)val; }
+	uint8 getFriendVisibilitySave() const { return (uint8)_FriendVisibility; }
 
 	//////////////////
 	// Private members
@@ -3005,6 +3055,14 @@ private:
 	uint32								_Organization;
 	uint32								_OrganizationStatus;
 	uint32								_OrganizationPoints;
+
+	std::string							_LangChannel;
+
+	std::string							_NewTitle;
+	std::string							_TagPvPA;
+	std::string							_TagPvPB;
+	std::string							_TagA;
+	std::string							_TagB;
 
 	/// SDB path where player wins HoF points in PvP (if not empty)
 	std::string							_SDBPvPPath;
@@ -3407,6 +3465,8 @@ private:
 	// current resistance for each type of magic resistance
 	uint32							_MagicResistance[RESISTANCE_TYPE::NB_RESISTANCE_TYPE];
 
+	sint32							_BaseResistance;
+
 	/// currently consumed item slot
 	sint32							_ConsumedItemSlot;
 	/// currently consumed item inventory
@@ -3515,6 +3575,8 @@ private:
 	CCharacter						* _DuelOpponent;
 
 	TAIAlias						_LastCreatedNpcGroup;
+
+	TFriendVisibility               _FriendVisibility;
 
 	// :KLUDGE: ICDBStructNode non-const 'coz getName and getParent are not
 	// const methods. See CCDBSynchronised::getICDBStructNodeFromName for more

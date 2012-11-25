@@ -450,8 +450,6 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CViewBitmap::setTexture(const std::string & TxName)
 	{
-	//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 	}

@@ -160,7 +160,7 @@ protected:
 	// ctor
 	CChatWindow();
 	// dtor
-	~CChatWindow();
+	virtual ~CChatWindow();
 protected:
 	IChatWindowListener *_Listener;
 	NLMISC::CRefPtr<NLGUI::CGroupContainer> _Chat;

@@ -39,6 +39,25 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewRadar, std::string, "radar");
 
 // ----------------------------------------------------------------------------
 
+CViewRadar::CViewRadar(const TCtorParam &param)
+	: CViewBase(param)
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeLeaf *pUIMI = CDBManager::getInstance()->getDbProp( "UI:SAVE:INSCENE:FRIEND:MISSION_ICON" );
+	if (pUIMI)
+	{
+		ICDBNode::CTextId textId;
+		pUIMI->addObserver( &_MissionIconsObs, textId);
+	}
+	
+	CCDBNodeLeaf *pUIMMI = CDBManager::getInstance()->getDbProp( "UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON" );	
+	if (pUIMMI)
+	{
+		ICDBNode::CTextId textId;
+		pUIMMI->addObserver( &_MiniMissionSpotsObs, textId);
+	}
+}
+
 bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 {
 	CXMLAutoPtr prop;
@@ -109,8 +128,9 @@ void CViewRadar::draw ()
 
 	CEntityCL *user = EntitiesMngr.entity(0);
 	if (user == NULL) return;
+
 	CVectorD xyzRef = user->pos();
-	CVector dir = user->front();
+	const CVector dir = user->front();
 
 	float angle = (float)(atan2(dir.y, dir.x) - (Pi / 2.0));
 	CMatrix mat;
@@ -123,9 +143,6 @@ void CViewRadar::draw ()
 	mat.translate(-xyzRef);
 
 	float	maxSqrRadius= (float)sqr(_WorldSize/2);
-
-	const bool displayMissionSpots = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool();
-	const bool displayMiniMissionSpots = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON")->getValueBool();
 
 	for (sint32 i = 1; i < 256; ++i)
 	{
@@ -161,7 +178,7 @@ void CViewRadar::draw ()
 		uint spotId = CNPCIconCache::getInstance().getNPCIcon(entity).getSpotId();
 		CRadarSpotDesc spotDesc = _SpotDescriptions[spotId];
 			
-		if (!displayMissionSpots)
+		if (!_MissionIconsObs._displayMissionSpots)
 			spotDesc = _SpotDescriptions[0];
 
 		if (spotDesc.isMissionSpot)
@@ -171,7 +188,7 @@ void CViewRadar::draw ()
 			spotId = 4; // to make it over other spots
 
 		// Draw it (and make sure mission icons are drawn over regular dot; caution: don't exceed the render layer range)
-		if (spotDesc.isMissionSpot && displayMiniMissionSpots)
+		if (spotDesc.isMissionSpot && _MiniMissionSpotsObs._displayMiniMissionSpots)
 			rVR.drawRotFlipBitmap (_RenderLayer+spotId, _XReal+x-(spotDesc.MTxW/2)+(_WReal/2), _YReal+y-(spotDesc.MTxH/2)+(_HReal/2),
 								spotDesc.MTxW, spotDesc.MTxH, 0, false, spotDesc.MiniTextureId, col );
 		else
@@ -184,4 +201,14 @@ void CViewRadar::draw ()
 void CViewRadar::updateCoords()
 {
 	CViewBase::updateCoords();
+}
+
+void CViewRadar::CDBMissionIconqObs::update(ICDBNode *node)
+{
+	_displayMissionSpots = ((CCDBNodeLeaf*)node)->getValueBool();
+}
+
+void CViewRadar::CDBMiniMissionSpotsObs::update(ICDBNode *node)
+{
+	_displayMiniMissionSpots = ((CCDBNodeLeaf*)node)->getValueBool();
 }

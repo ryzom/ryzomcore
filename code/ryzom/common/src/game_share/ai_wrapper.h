@@ -47,6 +47,10 @@ namespace R2
 class IAiWrapper
 {
 public:
+	virtual ~IAiWrapper()
+	{
+	}
+
 	virtual void init(NLLIGO::CLigoConfig *             ligoConfig)
 	{
 	}

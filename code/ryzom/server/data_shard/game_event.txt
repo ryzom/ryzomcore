@@ -1,5 +1,5 @@
 <xml>
-	<_Date type="UINT32" value="0"/>
+	<UTC__Date type="UINT32" value="0"/>
 	<_Name type="STRING" value=""/>
 	<_EventFaction1Name type="STRING" value=""/>
 	<_EventFaction2Name type="STRING" value=""/>

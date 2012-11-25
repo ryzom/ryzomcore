@@ -69,7 +69,7 @@ namespace SAVES
 	{
 	public:
 		virtual ~CRemoteSavesManager() {}
-	
+
 		static CRemoteSavesManager* getInstance();
 
 		// interface used by CRemoteSavesInterface objects in their ctor to declare themselves

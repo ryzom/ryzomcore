@@ -8,4 +8,4 @@ TARGET_LINK_LIBRARIES(csv_transform nelmisc)
 NL_DEFAULT_PROPS(csv_transform "Ryzom, Tools, Misc: CSV Transform")
 NL_ADD_RUNTIME_FLAGS(csv_transform)
 
-INSTALL(TARGETS csv_transform RUNTIME DESTINATION bin COMPONENT tools)
+INSTALL(TARGETS csv_transform RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

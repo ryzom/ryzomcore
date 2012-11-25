@@ -140,13 +140,13 @@ namespace GeorgesQt
 					CFormItem *item = getItem(in);
 
 					QString value = item->data(1).toString();
-					//QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+					//QString path = NLMISC::CPath::lookup(value.toUtf8().constData(),false).c_str();
 
 					/*if (value.contains(".shape")) 
 					{
 						if (Modules::objViewInt())
 						{
-							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toStdString());
+							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{
 								if(icon->isNull())
@@ -162,7 +162,7 @@ namespace GeorgesQt
 					}*/
 					if(value.contains(".tga") || value.contains(".png")) 
 					{
-						QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+						QString path = NLMISC::CPath::lookup(value.toUtf8().constData(),false).c_str();
 						if(path.isEmpty())
 						{
 							path = ":/images/pqrticles.png";
@@ -185,7 +185,7 @@ namespace GeorgesQt
 					{
 						if (Modules::objViewInt()) 
 						{
-							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toStdString());
+							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{
 								if(icon->isNull())
@@ -201,7 +201,7 @@ namespace GeorgesQt
 					}*/
 					if(value.contains(".tga") || value.contains(".png"))
 					{
-						QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+						QString path = NLMISC::CPath::lookup(value.toUtf8().constData(),false).c_str();
 						if(path.isEmpty())
 						{
 							path = ":/images/pqrticles.png";
@@ -428,13 +428,13 @@ namespace GeorgesQt
 									switch (type->getType()) 
 									{
 									case UType::UnsignedInt:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toStdString();
+										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toUtf8();
 										elmtType.append("_uint");break;
 									case UType::SignedInt:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toStdString();
+										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toUtf8();
 										elmtType.append("_sint");break;
 									case UType::Double:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble(),0,'f',1).toStdString();
+										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble(),0,'f',1).toUtf8();
 										elmtType.append("_double");break;
 									case UType::String:
 										elmtType.append("_string");break;
