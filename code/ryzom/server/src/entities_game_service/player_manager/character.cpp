@@ -13660,8 +13660,12 @@ void CCharacter::sendUrl(const string &url, const string &salt)
 	string control;
 	if (!salt.empty())
 	{
-		string checksum = salt+url;
 		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
+	}
+	else
+	{
+		string defaultSalt = toString(getLastConnectedDate());
+		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
 	}
 
 	nlinfo(url.c_str());
