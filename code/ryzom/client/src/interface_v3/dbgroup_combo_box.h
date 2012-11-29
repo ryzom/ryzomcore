@@ -136,7 +136,7 @@ protected:
 	// sint32
 	CInterfaceProperty			_Selection;
 	sint32						_NotLinkedToDBSelection;
-	std::vector<std::pair<uint, ucstring>> _Texts;
+	std::vector<std::pair<uint, ucstring> > _Texts;
 	std::vector<ucstring>		_Textures;
 
 	// Action Handler called on combo click
