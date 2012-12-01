@@ -55,8 +55,8 @@ using namespace NLGEORGES;
 // Sheet manager.
 CSheetManager	SheetMngr;
 UFormLoader		*CSheetManager::FormLoader = NULL;
-COFile			fItemAssoc;
-bool			ItemAssocFileOpen = false;
+//COFile			fItemAssoc;
+//bool			ItemAssocFileOpen = false;
 
 // there can be several instance of CSheetManager (for reload operations) -> ctruct the loader here rather than in CSheetManager ctor
 class CFormLoaderInit
@@ -598,17 +598,17 @@ void CSheetManager::release()
 void CSheetManager::load(NLMISC::IProgressCallback &callBack, bool updatePackedSheet, bool needComputeVS, bool dumpVSIndex)
 {
 	// Open The Item Association File
-	if(!fItemAssoc.open(getLogDirectory() + "item_association.dbg", false, true))
-		nlwarning("CSheetManager::load: Cannot Open the 'item_association.txt'.");
-	else
-		ItemAssocFileOpen = true;
+//	if(!fItemAssoc.open(getLogDirectory() + "item_association.dbg", false, true))
+//		nlwarning("CSheetManager::load: Cannot Open the 'item_association.txt'.");
+//	else
+//		ItemAssocFileOpen = true;
 
 	// Initialize the Sheet DB.
 	loadAllSheet(callBack, updatePackedSheet, needComputeVS, dumpVSIndex);
 
 	// Close the Item Association File.
-	fItemAssoc.close();
-	ItemAssocFileOpen = false;
+//	fItemAssoc.close();
+//	ItemAssocFileOpen = false;
 
 	// Optimize memory taken by all strings of all sheets
 	ClientSheetsStrings.memoryCompress();

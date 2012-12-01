@@ -160,6 +160,7 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 #define SM_END_EVENT_TABLE				\
 	}									\
 
+/*
 #define SM_EVENT(eventId, stateId)		\
 		if (ev == eventId)				\
 		{								\
@@ -175,6 +176,14 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 			} \
 			catch (const Exception &) \
 			{} \
+			_CurrentState = stateId;	\
+			break;						\
+		}								\
+*/
+
+#define SM_EVENT(eventId, stateId)		\
+		if (ev == eventId)				\
+		{								\
 			_CurrentState = stateId;	\
 			break;						\
 		}								\
@@ -898,7 +907,7 @@ retryJoinEdit:
 
 		// Save this error (regular log file is deleted at every startup)
 //		res = res + "\n\n";
-		try
+/*		try
 		{
 			COFile outputF;
 			if ( outputF.open( getLogDirectory() + "error_join.log", true, true ) )
@@ -913,7 +922,7 @@ retryJoinEdit:
 		}
 		catch (const Exception &)
 		{}
-
+*/
 		// If the session is not a permanent session and has vanished, pop the position
 		if ( requestRetToMainland )
 		{
