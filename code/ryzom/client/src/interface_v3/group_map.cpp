@@ -3209,10 +3209,14 @@ class CAHValidateUserLandMarkName : public IActionHandler
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("eb"));
 		if (!eb) return;
 		ig->setActive(false);
+		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_LANDMARK_NAME));
+		if (!gc) return;
+		// Retrieve ComboBox to get the position(ordered landmark type) of the selected item
+		CDBGroupComboBox *cb = dynamic_cast<CDBGroupComboBox *>(gc->getGroup("landmarktypes"));
 
 
 		CUserLandMark::EUserLandMarkType landMarkType = CUserLandMark::Misc;
-		sint8 nLandMarkType = im->getDbProp( "UI:TEMP:LANDMARKTYPE" )->getValue8();
+		sint8 nLandMarkType = cb->getTextId(im->getDbProp( "UI:TEMP:LANDMARKTYPE" )->getValue8());
 		if (nLandMarkType>=0 && nLandMarkType<=CUserLandMark::UserLandMarkTypeCount)
 		{
 			landMarkType = (CUserLandMark::EUserLandMarkType)nLandMarkType;
