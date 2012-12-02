@@ -37,6 +37,16 @@ namespace GUIEditor
 			entry.propDefault = propdefault;
 			return entry;
 		}
+
+		bool operator==( const SPropEntry &other ) const
+		{
+			if( ( propName == other.propName ) &&
+				( propType == other.propType ) &&
+				( propDefault == other.propDefault ) )
+				return true;
+			else
+				return false;
+		}
 	};
 
 	struct SWidgetInfo

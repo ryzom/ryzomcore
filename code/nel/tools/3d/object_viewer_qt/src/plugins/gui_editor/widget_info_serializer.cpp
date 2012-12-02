@@ -30,6 +30,27 @@ namespace GUIEditor
 		std::fstream f;
 		std::string filename = "widgets/" + node->getInfo().name + ".xml";
 		SWidgetInfo &info = node->getInfo();
+
+		// Make a copy of the properties, then remove all the parents' properties, since we only want to save the properties of this node
+		std::vector< SPropEntry > props;
+		props.resize( info.props.size() );
+		std::copy( info.props.begin(), info.props.end(), props.begin() );
+
+		CWidgetInfoTreeNode *parent = node->getParent();
+		if( parent != NULL )
+		{
+			SWidgetInfo &parentInfo = parent->getInfo();
+			std::vector< SPropEntry >::const_iterator itr = parentInfo.props.begin();
+			while( itr != parentInfo.props.end() )
+			{
+				std::vector< SPropEntry >::const_iterator fItr;
+				fItr = std::find( props.begin(), props.end(), *itr );
+				if( fItr == props.end() )
+					continue;
+				props.erase( fItr );
+				++itr;
+			}
+		}
 		
 		f.open( filename.c_str(), std::ios_base::out );
 		if( !f.is_open() )
@@ -55,7 +76,7 @@ namespace GUIEditor
 		f << "\t</header>" << std::endl;
 		f << "\t<properties>" << std::endl;
 
-		for( std::vector< SPropEntry >::const_iterator itr = info.props.begin(); itr != info.props.end(); ++itr )
+		for( std::vector< SPropEntry >::const_iterator itr = props.begin(); itr != props.end(); ++itr )
 		{
 			f << "\t\t<property>" << std::endl;
 			
