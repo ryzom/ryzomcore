@@ -252,7 +252,7 @@ namespace GUIEditor
 	bool GUIEditorWindow::close()
 	{
 		if( currentProject.isEmpty() )
-			return false;
+			return true;
 
 		QMessageBox::StandardButton reply = QMessageBox::question( this,
 											tr( "Closing project" ),
