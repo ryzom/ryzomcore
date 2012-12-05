@@ -24,6 +24,10 @@ void	dummyToAvoidStupidCompilerWarning_misc_vector_h_cpp()
 {
 }
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 
