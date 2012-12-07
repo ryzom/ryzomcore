@@ -50,14 +50,11 @@ MACRO(NL_GEN_REVISION_H)
 
     IF(TOOL_FOUND)
       # a custom target that is always built
-      ADD_CUSTOM_TARGET(revision ALL)
-
-      # creates revision.h using cmake script
-      ADD_CUSTOM_COMMAND(TARGET revision
-        PRE_BUILD
+      ADD_CUSTOM_TARGET(revision ALL
         COMMAND ${CMAKE_COMMAND}
         -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
         -DROOT_DIR=${CMAKE_SOURCE_DIR}/..
+        -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMakeModules
         -P ${CMAKE_SOURCE_DIR}/CMakeModules/GetRevision.cmake)
 
       # revision.h is a generated file
@@ -102,6 +99,11 @@ ENDMACRO(NL_TARGET_DRIVER)
 # Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
+  IF(HAVE_REVISION_H)
+    # explicitly say that the target depends on revision.h
+    ADD_DEPENDENCIES(${name} revision)
+  ENDIF(HAVE_REVISION_H)
+
   # Note: This is just a workaround for a CMake bug generating VS10 files with a colon in the project name.
   # CMake Bug ID: http://www.cmake.org/Bug/view.php?id=11819
   STRING(REGEX REPLACE "\\:" " -" proj_label ${label})
