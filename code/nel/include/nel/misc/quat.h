@@ -20,6 +20,7 @@
 #include "types_nl.h"
 #include "vector.h"
 #include "stream.h"
+
 #include <cmath>
 
 namespace	NLMISC

@@ -17,6 +17,7 @@
 #ifndef RY_INTER_WINDOW_MSG_QUEUE_H
 #define RY_INTER_WINDOW_MSG_QUEUE_H
 
+#include "types_nl.h"
 
 #ifdef NL_OS_WINDOWS
 
