@@ -20,7 +20,8 @@
 #ifndef NL_STDPCH_H
 #define NL_STDPCH_H
 
-#include <nel/misc/types_nl.h>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
 
 #include <map>
 #include <memory>
@@ -28,6 +29,7 @@
 #include <string>
 #include <vector>
 
+#include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
 
 #endif
