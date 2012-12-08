@@ -770,12 +770,13 @@ NL3D::CPSLocated *CParticleWorkspaceDialog::createLocated(NL3D::CParticleSystem 
 {
 	// build new name
 	std::string name;
-	if (_PSElementIdentifiers.count(std::string("located")))
-		name = (QString("located %1").arg(++_PSElementIdentifiers[std::string("located")])).toUtf8();
-
+	if (_PSElementIdentifiers.count("located"))
+	{
+		name = NLMISC::toString("located %u", ++_PSElementIdentifiers["located"]);
+	}
 	else
 	{
-		name = std::string("located 0");
+		name = "located 0";
 		_PSElementIdentifiers["located"] = 0;
 	}
 	NL3D::CPSLocated *loc = new NL3D::CPSLocated;

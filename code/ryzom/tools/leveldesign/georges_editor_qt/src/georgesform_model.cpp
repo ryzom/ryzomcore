@@ -380,7 +380,7 @@ namespace NLQT
 					//uint value_uint;
 					//sint value_sint;
 					//double value_double;
-					QString elmtType = "";
+					QString elmtType;
 					UFormElm *elmt = 0;
 					if(root->getNodeByName(&elmt, elmName.c_str(),  whereN, true)) 
 					{
@@ -542,7 +542,7 @@ namespace NLQT
 				{
 					QList<QVariant> columnData;
 					std::string value;
-					QString elmtType = "";
+					QString elmtType;
 
 					UFormElm *elmt = 0;
 					if(root->getArrayNode(&elmt,0) && elmt) 
