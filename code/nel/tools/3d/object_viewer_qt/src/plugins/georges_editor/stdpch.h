@@ -14,52 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
-#include "georges.h"
-#include "nel/misc/o_xml.h"
+#ifndef NL_STDPCH_H
+#define NL_STDPCH_H
 
-// STL includes
+#include <string>
 
-// NeL includes
-#include <nel/georges/u_form_loader.h>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+
+#include <nel/misc/types_nl.h>
+#include <nel/georges/form.h>
 #include <nel/georges/u_form.h>
+#include <nel/georges/u_form_dfn.h>
+#include <nel/georges/u_form_elm.h>
+#include <nel/georges/u_form_loader.h>
 #include <nel/georges/u_type.h>
+#include <nel/misc/app_context.h>
+#include <nel/misc/debug.h>
+#include <nel/misc/file.h>
+#include <nel/misc/o_xml.h>
+#include <nel/misc/path.h>
+#include <nel/misc/rgba.h>
 
-// Project includes
-
-using namespace NLGEORGES;
-
-namespace GeorgesQt 
-{
-
-	CGeorges::CGeorges(): FormLoader(0) 
-	{
-		FormLoader = UFormLoader::createLoader();
-	}
-
-	CGeorges::~CGeorges() 
-	{
-	}
-
-	UForm *CGeorges::loadForm(std::string formName) 
-	{
-		UForm *form = FormLoader->loadForm(formName.c_str());
-
-		return form;
-	}
-
-	UFormDfn *CGeorges::loadFormDfn(std::string formName) 
-	{
-		UFormDfn *formdfn = FormLoader->loadFormDfn(formName.c_str());
-
-		return formdfn;
-	}
-
-	UType *CGeorges::loadFormType(std::string formName) 
-	{
-		UType *type = FormLoader->loadFormType(formName.c_str());
-
-		return type;
-	}
-
-} /* namespace GeorgesQt */
+#endif

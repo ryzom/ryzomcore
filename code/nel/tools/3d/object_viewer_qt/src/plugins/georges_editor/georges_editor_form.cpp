@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
+#include "stdpch.h"
 #include "georges_editor_form.h"
 #include "georges_editor_constants.h"
 #include "georges_dirtree_dialog.h"

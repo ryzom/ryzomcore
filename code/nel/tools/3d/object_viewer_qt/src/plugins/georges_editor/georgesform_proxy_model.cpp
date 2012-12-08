@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
+#include "georgesform_proxy_model.h"
+#include "formitem.h"
+#include "georgesform_model.h"
+
 // NeL includes
 #include <nel/misc/debug.h>
 #include <nel/georges/u_form_elm.h>
-
-// project includes
-#include "formitem.h"
-#include "georgesform_proxy_model.h"
-#include "georgesform_model.h"
 
 namespace GeorgesQt 
 {
