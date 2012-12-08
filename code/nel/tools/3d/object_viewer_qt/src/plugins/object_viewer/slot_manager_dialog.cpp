@@ -111,8 +111,8 @@ void CSlotGroupBox::updateUi()
 void CSlotGroupBox::saveSlotInfo()
 {
 	CSlotInfo slotInfo;
-	slotInfo.Animation = _animName.toUtf8();
-	slotInfo.Skeleton = _skelName.toUtf8();
+	slotInfo.Animation = _animName.toUtf8().constData();
+	slotInfo.Skeleton = _skelName.toUtf8().constData();
 	slotInfo.EndBlend = _ui.endBlendSpinBox->value();
 	slotInfo.EndTime = float(_ui.endFrameSpinBox->value()) / Modules::mainWin().getFrameRate();
 	slotInfo.Offset = float(_ui.offsetSpinBox->value()) / Modules::mainWin().getFrameRate();

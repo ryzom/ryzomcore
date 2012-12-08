@@ -596,10 +596,10 @@ void CVegetableEditor::loadLandscapeSetup()
 	QSettings *settings = Core::ICore::instance()->settings();
 	settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-	_VegetableLandscapeTileBank = settings->value(Constants::VEGET_TILE_BANK, "").toString().toUtf8();
-	_VegetableLandscapeTileFarBank = settings->value(Constants::VEGET_TILE_FAR_BANK, "").toString().toUtf8();
-	_CoarseMeshTexture = settings->value(Constants::COARSE_MESH_TEXTURE, "").toString().toUtf8();
-	_VegetableTexture = settings->value(Constants::VEGET_TEXTURE, "").toString().toUtf8();
+	_VegetableLandscapeTileBank = settings->value(Constants::VEGET_TILE_BANK, "").toString().toUtf8().constData();
+	_VegetableLandscapeTileFarBank = settings->value(Constants::VEGET_TILE_FAR_BANK, "").toString().toUtf8().constData();
+	_CoarseMeshTexture = settings->value(Constants::COARSE_MESH_TEXTURE, "").toString().toUtf8().constData();
+	_VegetableTexture = settings->value(Constants::VEGET_TEXTURE, "").toString().toUtf8().constData();
 
 	QStringList list = settings->value(Constants::VEGET_LANDSCAPE_ZONES).toStringList();
 	_VegetableLandscapeZoneNames.clear();

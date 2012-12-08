@@ -300,7 +300,7 @@ void CSkeletonScaleDialog::clickSaveAsSkel()
 			}
 
 			// bkup the valid fileName (new file edited)
-			_SkeletonFileName = fileName.toUtf8();
+			_SkeletonFileName = fileName.toUtf8().constData();
 		}
 		else
 		{
