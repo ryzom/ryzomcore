@@ -266,6 +266,7 @@ bool CSourceAL::play()
 		{
 			nlwarning("AL: Trying to play stream with no buffers queued.");
 		}
+		return true;
 		/* OLD
 		alSourcePlay(_Source);
 		_IsPlaying = (alGetError() == AL_NO_ERROR);
