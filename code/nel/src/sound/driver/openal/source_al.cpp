@@ -249,11 +249,30 @@ bool CSourceAL::play()
 	else if (_IsStreaming)
 	{
 		_IsPaused = false;
+		/* NEW */
+		// called by user as well as by code to resume after buffer underrun
+		if (!_IsPlaying) // set start time if not playing yet
+			_StartTime = CTime::getLocalTime();
+		_IsPlaying = true; // this play always virtually succeed but may not actually be playing
+		if (_QueuedBuffers.size()) // ensure buffers have actually queued
+		{
+			alSourcePlay(_Source);
+			if (alGetError() != AL_NO_ERROR)
+			{
+				nlwarning("AL: Unknown error while trying to play streaming source.");
+			}
+		}
+		else
+		{
+			nlwarning("AL: Trying to play stream with no buffers queued.");
+		}
+		/* OLD
 		alSourcePlay(_Source);
 		_IsPlaying = (alGetError() == AL_NO_ERROR);
 		if (_IsPlaying)
 			_StartTime = CTime::getLocalTime(); // TODO: Played time should freeze when buffering fails, and be calculated based on the number of buffers played plus passed time. This is necessary for synchronizing animation with sound.
 		return _IsPlaying;
+		*/
 		// Streaming mode
 		//nlwarning("AL: Cannot play null buffer; streaming not implemented" );
 		//nlstop;
