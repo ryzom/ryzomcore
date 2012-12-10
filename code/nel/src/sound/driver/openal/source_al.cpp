@@ -165,7 +165,7 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 	
 	if (!bufferAL->isBufferLoaded())
 	{
-		nlwarning("AL: Streaming buffer was not loaded, skipping buffer. This should not happen.");
+		nlwarning("AL: MUSICBUG: Streaming buffer was not loaded, skipping buffer. This should not happen.");
 		return;
 	}
 	
@@ -259,12 +259,12 @@ bool CSourceAL::play()
 			alSourcePlay(_Source);
 			if (alGetError() != AL_NO_ERROR)
 			{
-				nlwarning("AL: Unknown error while trying to play streaming source.");
+				nlwarning("AL: MUSICBUG: Unknown error while trying to play streaming source.");
 			}
 		}
 		else
 		{
-			nlwarning("AL: Trying to play stream with no buffers queued.");
+			nlwarning("AL: MUSICBUG: Trying to play stream with no buffers queued.");
 		}
 		return true;
 		/* OLD
