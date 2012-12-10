@@ -101,7 +101,7 @@
 		function update() {
 			global $DBc;
 
-			$DBc->sqlQuery("UPDATE ach_achievement SET aa_category='".$this->getCategory()."',aa_parent=".mkn($this->getParentID()).",aa_tie_race=".mkn($this->getTieRace()).",aa_tie_cult=".mkn($this->getTieCult()).",aa_tie_civ=".mkn($this->getTieCiv()).",aa_image='".$DBc->sqlEscape($this->getImage())."',aa_dev='".$this->getDev()."',aa_sticky='".$DBc->sqlEscape($this->getSticky())."' WHERE aa_id='".$this->getID()."'");
+			$DBc->sqlQuery("UPDATE ach_achievement SET aa_category='".$this->getCategory()."',aa_parent=".mkn($this->getParentID()).",aa_image='".$DBc->sqlEscape($this->getImage())."',aa_dev='".$this->getDev()."',aa_sticky='".$DBc->sqlEscape($this->getSticky())."' WHERE aa_id='".$this->getID()."'");
 
 			#MISSING: update lang entry
 			$DBc->sqlQuery("INSERT INTO ach_achievement_lang (aal_achievement,aal_lang,aal_name,aal_template) VALUES ('".$this->getID()."','en','".$DBc->sqlEscape($this->getName())."',".mkn($this->getTemplate()).") ON DUPLICATE KEY UPDATE aal_name='".$DBc->sqlEscape($this->getName())."',aal_template=".mkn($this->getTemplate())."");
@@ -112,7 +112,7 @@
 
 			$this->dev = 1;
 
-			$DBc->sqlQuery("INSERT INTO ach_achievement (aa_category,aa_parent,aa_tie_race,aa_tie_cult,aa_tie_civ,aa_image,aa_dev,aa_sticky) VALUES ('".$this->getCategory()."',".mkn($this->getParentID()).",".mkn($this->getTieRace()).",".mkn($this->getTieCult()).",".mkn($this->getTieCiv()).",'".$DBc->sqlEscape($this->getImage())."','1','".$DBc->sqlEscape($this->getSticky())."')");
+			$DBc->sqlQuery("INSERT INTO ach_achievement (aa_category,aa_parent,aa_image,aa_dev,aa_sticky) VALUES ('".$this->getCategory()."',".mkn($this->getParentID()).",'".$DBc->sqlEscape($this->getImage())."','1','".$DBc->sqlEscape($this->getSticky())."')");
 			$id = $DBc->insertID();
 			$this->setID($id);
 

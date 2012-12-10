@@ -1,6 +1,6 @@
 <?php
 	function ach_render() {
-		global $user;
+		global $user,$_CONF;
 
 		$c = "<center><table>
 			<tr>
@@ -34,7 +34,8 @@
 			$cat = new AchCategory($open,null,$_REQUEST['cult'],$_REQUEST['civ']);
 		}
 		else {
-			$cat = new AchSummary($menu,8);
+			#die($_CONF['summary_size']);
+			$cat = new AchSummary($menu,$_CONF['summary_size']);
 			$c .= ach_render_summary_header();
 		}
 
@@ -133,6 +134,8 @@
 	}
 
 	function ach_render_facebook() {
+		return "";
+
 		return "<div id='auth-status'>
 			<div id='auth-loggedout'>
 				<a href='#' id='auth-loginlink'><img src='pic/f-connect.png' height='30px'></a>
@@ -164,6 +167,7 @@
 					border:1px solid #000000;
 					margin-bottom:2px;
 					color:#FFFFFF;
+					width:100%;
 				}
 				.ach_menu:hover {
 					color:orange;
@@ -192,7 +196,7 @@
 			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
 				<tr>";
 					if($sub == 0) {
-						$html .= "<td><img src='".$_CONF['image_url']."pic/menu/".$curr->getImage()."' /></td>";
+						$html .= "<td style='width:32px;'><img src='".$_CONF['image_url']."pic/menu/".$curr->getImage()."' /></td>";
 					}
 					$html .= "<td style='font-size:".(20-$sub)."px;font-weight:bold;";
 					if($curr->isOpen()) {
@@ -210,10 +214,11 @@
 	}
 
 	function ach_render_category(&$cat) {
+		global $_USER;
 		$html = "";
 
 		if($cat->isHeroic() && !$cat->hasDone()) {
-			return "<center style='font-size:24px;'>You haven't earned any Heroic Deeds so far.</center>";
+			return "<center style='font-size:24px;'>".get_translation('ach_no_heroic_deeds',$_USER->getLang())."</center>";
 		}
 
 		if($cat->isTiedCult() || $cat->isTiedCiv()) {
@@ -264,13 +269,16 @@
 									<td rowspan="2" valign="top"><img src="'.$_CONF['image_url'].'pic/icon/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#000000;">'.$ach->getName().'</span></center></td>
 									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#000000;padding-right:10px;">';
-									if(!$ach->isHeroic()) {
+									if((!$ach->isHeroic() && !$ach->isContest()) && $ach->getValueDone() > 0) {
 										$html .= $ach->getValueDone().'<br><img src="'.$_CONF['image_url'].'pic/yubo_done.png">';
 									}
+									else {
+										$html .= '<img src="'.$_CONF['image_url'].'pic/star_done.png"><br>&nbsp;';
+									}
 									$html .= '</td>
-								</tr><tr><td align="center" valign="top">';
+								</tr><tr><td align="center" valign="top"><table>';
 							$html .= ach_render_task_done($ach);
-							$html .= '</td></tr></tbody></table></center>
+							$html .= '</table></td></tr></tbody></table></center>
 						</td>
 						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_r.png);"></td>
 					</tr>
@@ -300,9 +308,14 @@
 								<tbody><tr>
 									<td rowspan="2" valign="top"><img src="'.$_CONF['image_url'].'pic/icon/grey/'.$ach->getImage().'"></td>
 									<td width="100%"><center><span style="font-weight:bold;font-size:24px;color:#FFFFFF;">'.$ach->getName().'</span></center></td>
-									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#FFFFFF;padding-right:10px;">
-										'.$ach->getValueOpen().'<br><img src="'.$_CONF['image_url'].'pic/yubo_pending.png">
-									</td>
+									<td rowspan="2" valign="top" style="font-weight: bold; text-align: center; font-size: 30px;color:#FFFFFF;padding-right:10px;">';
+									if(!$ach->isHeroic() && !$ach->isContest()) {
+										$html .= $ach->getValueOpen().'<br><img src="'.$_CONF['image_url'].'pic/yubo_pending.png">';
+									}
+									else {
+										$html .= '<img src="pic/star_pending.png">';
+									}
+								$html .= '</td>
 								</tr><tr><td align="center" valign="top">';
 							$html .= ach_render_task_open($ach);
 							$html .= '</td></tr></tbody></table></center>
@@ -350,7 +363,11 @@
 			if($task->inDev()) {
 				continue;
 			}
-			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$task->getDisplayName()."</span> ( ".date('d.m.Y',$task->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$task->getValue()."</div>";
+			$html .= "<tr><td><span style='color:#66CC00;font-weight:bold;'>".$task->getDisplayName()."</span></td><td>( ".date('d.m.Y',$task->getDone())." )</td>";
+			if($task->getValue() > 0) {
+				$html .= "<td><img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$task->getValue()."</td>";
+			}
+			$html .= "</tr>";
 		}
 
 		return $html;

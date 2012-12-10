@@ -83,7 +83,7 @@
 		}
 
 		function removeNode($id) { // remove a node
-			$this->avl->inorder();
+			#$this->avl->inorder();
 
 			$n = $this->findNode($id);
 			if($n != null) {

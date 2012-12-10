@@ -544,7 +544,7 @@
 									</tr>
 									<tr>
 										<td class='bw'>condition value:</td>
-										<td><input type='text' name='ap_condition_value' value='".htmlspecialchars($task->getConditionValue(),ENT_QUOTES)."' /></td>
+										<td><input type='text' name='at_condition_value' value='".htmlspecialchars($task->getConditionValue(),ENT_QUOTES)."' /></td>
 									</tr>
 									<tr>
 										<td colspan='2'><input type='submit' value='save' /></td>

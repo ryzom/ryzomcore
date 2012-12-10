@@ -83,7 +83,7 @@
 		function setLang($lang,$txt) { // write language
 			global $DBc,$_USER;
 
-			$DBc->sqlQuery("INSERT INTO ach_objective_lang (aol_task,aol_lang,aol_name) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."') ON DUPLICATE KEY UPDATE aol_name='".$DBc->sqlEscape($txt)."'");
+			$DBc->sqlQuery("INSERT INTO ach_objective_lang (aol_objective,aol_lang,aol_name) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."') ON DUPLICATE KEY UPDATE aol_name='".$DBc->sqlEscape($txt)."'");
 
 			if($_USER->getLang() == $lang) {
 				$this->name = $txt;

@@ -36,16 +36,16 @@
 
 		protected $parent_id;
 		protected $category;
-		protected $tie_race;
-		protected $tie_civ;
-		protected $tie_cult;
+		#protected $tie_race;
+		#protected $tie_civ;
+		#protected $tie_cult;
 		protected $image;
 		protected $name;
 		protected $template;
 		protected $sticky;
 
 		function AchAchievement($data,$parent) {
-			global $DBc,$_USER;
+			global $DBc,$_USER,$_CONF;
 
 			parent::__construct();
 			
@@ -53,14 +53,20 @@
 			$this->setID($data['aa_id']);
 			$this->parent_id = $data['aa_parent']; // id of parent
 			$this->category = $data['aa_category'];
-			$this->tie_race = $data['aa_tie_race'];
-			$this->tie_civ = $data['aa_tie_civ'];
-			$this->tie_cult = $data['aa_tie_cult'];
+			#$this->tie_race = $data['aa_tie_race'];
+			#$this->tie_civ = $data['aa_tie_civ'];
+			#$this->tie_cult = $data['aa_tie_cult'];
 			$this->image = $data['aa_image'];
 			$this->name = $data['aal_name'];
 			$this->template = $data['aal_template'];
 			$this->dev = $data['aa_dev'];
 			$this->sticky = $data['aa_sticky'];
+
+			if($this->name == null) {
+				$res = $DBc->sqlQuery("SELECT * FROM ach_achievement_lang WHERE aal_lang='".$_CONF['default_lang']."' AND aal_achievement='".$this->id."'");
+				$this->name = $res[0]['aal_name'];
+				$this->template = $res[0]['aal_template'];
+			}
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_task LEFT JOIN (ach_task_lang) ON (atl_lang='".$_USER->getLang()."' AND atl_task=at_id) LEFT JOIN (ach_player_task) ON (apt_task=at_id AND apt_player='".$_USER->getID()."') WHERE at_achievement='".$this->id."' ORDER by at_torder ASC");
 			
@@ -89,6 +95,9 @@
 			}
 			else {
 				$p = $this->parent->getChildDataByID($this->parent_id);
+				if($p == null) {
+					return true;
+				}
 
 				return ($p->hasOpen() == false);
 			}
@@ -104,15 +113,81 @@
 		}
 
 		function getTieRace() {
-			return $this->tie_race;
+			#return $this->tie_race;
+			$iter = $this->nodes->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieRace()) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		function getTieCiv() {
-			return $this->tie_civ;
+			#return $this->tie_civ;
+			$iter = $this->nodes->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieCiv()) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		function getTieCult() {
-			return $this->tie_cult;
+			#return $this->tie_cult;
+			$iter = $this->nodes->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieCult()) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function isTiedRace($r) {
+			#return $this->tie_race;
+			$iter = $this->nodes->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->isTiedRace($r)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function isTiedCiv($c) {
+			#return $this->tie_civ;
+			$iter = $this->nodes->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->isTiedCiv($c)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function isTiedCult($c) {
+			#return $this->tie_cult;
+			$iter = $this->nodes->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->isTiedCult($c)) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		function getImage() {
@@ -175,6 +250,10 @@
 
 		function isHeroic() { // check parent category if it is heroic
 			return $this->parent->isHeroic();
+		}
+
+		function isContest() {
+			return $this->parent->isContest();
 		}
 		
 	}

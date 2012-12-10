@@ -10,10 +10,14 @@
 
 			$this->menu = $menu;
 
+			#die("x:".$size);
+
 			//read all recent tasks of user
 			//make distinct achievement list
 
-			$res = $DBc->sqlQuery("SELECT DISTINCT aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name, (SELECT aal_template FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_template FROM ach_achievement as ach,ach_task,ach_player_task WHERE at_achievement=aa_id AND apt_player='".$_USER->getID()."' AND apt_task=at_id ORDER by apt_date DESC LIMIT 0,".($size-1));
+			$res = $DBc->sqlQuery("SELECT DISTINCT aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name, (SELECT aal_template FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_template FROM ach_achievement as ach,ach_task,ach_player_task WHERE at_achievement=aa_id AND apt_player='".$_USER->getID()."' AND apt_task=at_id ORDER by apt_date DESC LIMIT 0,".$size);
+
+			#echo var_export($res,true);
 
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
@@ -104,6 +108,10 @@
 		}
 
 		function isHeroic() {
+			return false;
+		}
+
+		function isContest() {
 			return false;
 		}
 	}

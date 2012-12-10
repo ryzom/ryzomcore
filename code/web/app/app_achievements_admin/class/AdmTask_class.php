@@ -83,7 +83,7 @@
 		function setLang($lang,$txt,$tpl) { // write language
 			global $DBc,$_USER;
 
-			$DBc->sqlQuery("INSERT INTO ach_task_lang (atl_task,atl_lang,atl_name,atl_template) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."',".mkn($tpl).") ON DUPLICATE KEY UPDATE apl_name='".$DBc->sqlEscape($txt)."',apl_template=".mkn($tpl)."");
+			$DBc->sqlQuery("INSERT INTO ach_task_lang (atl_task,atl_lang,atl_name,atl_template) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."',".mkn($tpl).") ON DUPLICATE KEY UPDATE atl_name='".$DBc->sqlEscape($txt)."',atl_template=".mkn($tpl)."");
 
 			if($_USER->getLang() == $lang) {
 				$this->name = $txt;

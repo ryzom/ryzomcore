@@ -13,9 +13,9 @@
 			$this->source[] = $src;
 		}
 
-		function drive($cid) { // tell the datasources to start reading data
+		function drive($cdata) { // tell the datasources to start reading data
 			foreach($this->source as $elem) {
-				$elem->drive($cid);
+				$elem->drive($cdata);
 			}
 		}
 

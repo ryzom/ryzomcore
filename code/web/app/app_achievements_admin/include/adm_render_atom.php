@@ -22,6 +22,8 @@
 
 	function adm_render_mnode(&$menu,$sub) {
 		global $_CONF;
+
+		$html = "";
 		
 		$iter = $menu->getIterator();
 		while($iter->hasNext()) {
@@ -182,7 +184,7 @@ function catchTab(item,e){
 		while($obj->hasNext()) {
 			$elem = $obj->getNext();
 
-			if($task->isInherited($elem->getID())) {
+			if($task->isInherited($elem->getID()) || $elem->getDisplay() == "meta") {
 				continue;
 			}
 

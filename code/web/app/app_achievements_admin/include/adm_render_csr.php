@@ -2,12 +2,20 @@
 	function is_user($id) {
 		global $DBc_char;
 
-		$res = $DBc_char->sendSQL("SELECT count(*) as anz FROM characters WHERE char_id='".mysql_real_escape_string($id)."'","ARRAY");
+		$res = $DBc_char->sqlQuery("SELECT count(*) as anz FROM players WHERE id='".$DBc_char->sqlEscape($id)."'");
 
 		if($res[0]['anz'] > 0) {
 			return true;
 		}
 		return false;
+	}
+
+	function user_get_name($id) {
+		global $DBc_char;
+
+		$res = $DBc_char->sqlQuery("SELECT name FROM players WHERE id='".$DBc_char->sqlEscape($id)."'");
+
+		return $res[0]['name'];
 	}
 
 	function csr_render_yubopoints() {
@@ -40,8 +48,8 @@
 
 		if($_REQUEST['pname'] != "") {
 			$html .= "<div style='display:block;color:#000000;background-color:#FFFFFF;margin-top:5px;'>";
-
-			$res = $DBc_char->sendSQL("SELECT char_id,char_name FROM characters WHERE char_name LIKE '".mysql_real_escape_string($_REQUEST['pname'])."%'","ARRAY");
+			
+			$res = $DBc_char->sqlQuery("SELECT * FROM players WHERE (name LIKE '".$DBc_char->sqlEscape(strtolower($_REQUEST['pname']))."%' OR id='".$DBc_char->sqlEscape(strtolower($_REQUEST['pname']))."') AND deleted='0' LIMIT 0,100");
 			$sz = sizeof($res);
 
 			if($sz == 0) {
@@ -60,7 +68,7 @@
 					$html .= "</tr><tr>";
 				}
 
-				$html .= "<td><a href='?mode=player&pid=".$res[$i]['char_id']."'><b>".$res[$i]['char_name']."</b></a></td>";
+				$html .= "<td><a href='?mode=player&pid=".$res[$i]['id']."'><b>".$res[$i]['name']."</b></a></td>";
 			}
 
 			$html .= "</tr></table>";
@@ -248,7 +256,7 @@
 		$html .= "<span style='color:#999999;font-weight:bold;display:block;'>";
 		
 		if($task->getName() != null) {
-			$html .= $task->getName();
+			$html .= $task->getDisplayName();
 		}
 		else {
 			$html .= "[untitled]";
@@ -273,7 +281,7 @@
 			if($task->inDev()) {
 				continue;
 			}
-			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$task->getName()."</span> ( ".date('d.m.Y',$task->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$task->getValue()." <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&deny=".$task->getPath()."'>Task: deny</a></div>";
+			$html .= "<div style='display:block;'><span style='color:#66CC00;font-weight:bold;'>".$task->getDisplayName()."</span> ( ".date('d.m.Y',$task->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done.png' width='15px' /> ".$task->getValue()." <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&deny=".$task->getPath()."'>Task: deny</a></div>";
 		}
 
 		return $html;
@@ -343,7 +351,7 @@
 			$html .= "<img src='".$_CONF['image_url']."pic/pending.png' height='10px' />&nbsp;<span style='color:#999999;'>";
 		}
 		
-		$html .= $obj->getName();
+		$html .= $obj->getDisplayName();
 		if($obj->isdone()) {
 			$html .= " <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&deny=".$obj->getPath()."'>Obj: deny</a>";
 		}
@@ -370,7 +378,7 @@
 		$html .= "<table cellspacing='0' cellpadding='0'>
 				<tr>
 					<td><img src='".$_CONF['image_url']."pic/icon/".$grey.$obj->getMetaImage()."' width='20px' /></td>
-					<td valign='middle'><span style='color:".$col.";'>&nbsp;".$obj->getName();
+					<td valign='middle'><span style='color:".$col.";'>&nbsp;".$obj->getDisplayName();
 					if($obj->isdone()) {
 						$html .= " <a href='?mode=player&pid=".$_REQUEST['pid']."&cat=".$_REQUEST['cat']."&deny=".$obj->getPath()."'>Obj: deny</a>";
 					}
@@ -393,7 +401,7 @@
 			else {
 				$col = "#999999";
 			}
-			$html .= "<div style='color:".$col.";display:block;'>".$obj->getName()."</div>";
+			$html .= "<div style='color:".$col.";display:block;'>".$obj->getDisplayName()."</div>";
 		}
 
 		$html .= "<table>

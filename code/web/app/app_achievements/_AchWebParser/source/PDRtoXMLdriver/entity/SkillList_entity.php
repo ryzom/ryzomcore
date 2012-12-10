@@ -4,6 +4,7 @@
 
 		function SkillList() {
 			$this->setName("skilllist");
+			$this->skills = array();
 		}
 	}
 ?>

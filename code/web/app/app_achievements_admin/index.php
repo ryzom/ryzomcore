@@ -8,22 +8,24 @@ ini_set("display_errors","1");
 
 define('APP_NAME', 'app_achievements_admin');
 
-require_once('../webig/config.php');
-include_once('../webig/lang.php');
+require_once('../config.php');
+include_once('../lang.php');
 include_once('lang.php');
 require_once('conf.php');
 
 // Ask to authenticate user (using ingame or session method) and fill $user with all information
-ryzom_app_authenticate($user, false);
+ryzom_app_authenticate($user, true);
 
-$user = array();
+#echo var_export($user,true);
+
+/*$user = array();
 $user['id'] = 1;
 $user['lang'] = 'en';
 $user['name'] = 'Talvela';
 $user['race'] = "r_matis";
 $user['civilization'] = "c_neutral";
 $user['cult'] = "c_neutral";
-$user['admin'] = true;
+$user['admin'] = true;*/
 
 require_once($_CONF['app_achievements_path']."class/RyzomUser_class.php");
 require_once("class/RyzomAdmin_class.php");
@@ -72,7 +74,7 @@ require_once("class/CSRTask_class.php");
 require_once("class/CSRObjective_class.php");
 require_once("class/CSRAtom_class.php");
 
-$DBc = ryDB::getInstance("app_achievements_test");
+$DBc = ryDB::getInstance("app_achievements");
 
 function mkn($x) { // make NULL function for SQL
 	global $DBc;
@@ -123,6 +125,7 @@ $c = "<script type='text/javascript'>
 				<li><a href='?mode=ach'>achievement settings</a></li>
 				<li><a href='?mode=atom'>trigger settings</a></li>
 				<li><a href='?mode=lang'>language editor</a></li>
+				<li><a href='?mode=stats'>statistics</a></li>
 			</ul><p />";
 		}
 		if($_ADMIN->isCSR()) {
@@ -172,6 +175,14 @@ $c .= "</div></td>
 			if($open != 0) {
 				$cat = new AdmCategory($open,'%','%','%');
 
+				if($_REQUEST['act'] == "cat_save") {
+					if(is_array($_REQUEST['c_name'])) {
+						foreach($_REQUEST['c_name'] as $key=>$elem) {
+							$cat->setLang($key,$_REQUEST['c_name'][$key]);
+						}
+					}
+				}
+
 				if($_REQUEST['act'] == "ach_save") {
 					$ach = $cat->getElementByPath($_REQUEST['id']);
 
@@ -219,7 +230,7 @@ $c .= "</div></td>
 		 */
 
 		if($_REQUEST['mode'] == "atom" && $_ADMIN->isAdmin()) {
-			$c .= "<h1>Tigger Settings</h1>";
+			$c .= "<h1>Trigger Settings</h1>";
 
 			$user = array();
 			$user['id'] = 0;
@@ -557,13 +568,27 @@ $c .= "</div></td>
 		}
 
 		/*
+		 * Statistics page
+		 */
+
+		if($_REQUEST['mode'] == "stats" && $_ADMIN->isCSR()) {
+			require_once("include/adm_render_stats.php");
+
+			$c .= "<h1>Statistics</h1>";
+
+			$c .= stats_render();
+		}
+
+		/*
 		 * CSR player manager
 		 */
 		if($_REQUEST['mode'] == "player" && $_ADMIN->isCSR()) {
 			$c .= "<h1>Player Administration</h1>";
 
-			$DBc_char = new mySQL($_CONF['mysql_error']);
-			$DBc_char->connect($_CONF['char_mysql_server'],$_CONF['char_mysql_user'],$_CONF['char_mysql_pass'],$_CONF['char_mysql_database']);
+			#$DBc_char = new mySQL($_CONF['mysql_error']);
+			#$DBc_char->connect($_CONF['char_mysql_server'],$_CONF['char_mysql_user'],$_CONF['char_mysql_pass'],$_CONF['char_mysql_database']);
+
+			$DBc_char = ryDB::getInstance("webig");
 			//menu
 			require_once("include/adm_render_csr.php");
 
@@ -574,7 +599,7 @@ $c .= "</div></td>
 				$user = array();
 				$user['id'] = $_REQUEST['pid'];
 				$user['lang'] = 'en';
-				$user['name'] = 'Talvela';
+				$user['char_name'] = user_get_name($_REQUEST['pid']);
 				$user['race'] = "r_matis";
 				$user['civilization'] = "c_neutral";
 				$user['cult'] = "c_neutral";
@@ -616,7 +641,7 @@ $c .= "</div></td>
 					$c .= csr_render_category($cat);
 				}
 				else {
-					$cat = new AchSummary($menu,8);
+					$cat = new AchSummary($menu,3);
 					$c .= ach_render_summary_header();
 				}
 

@@ -36,7 +36,7 @@
 		protected $order;
 
 		function AchMenuNode($data,$parent) {
-			global $DBc,$_USER;
+			global $DBc,$_USER,$_CONF;
 
 			parent::__construct();
 
@@ -48,6 +48,11 @@
 			$this->order = $data['ac_order'];
 			$this->open = ($this->id == $data['open']);
 			$this->dev = $data['ac_dev'];
+
+			if($this->name == null) {
+				$res = $DBc->sqlQuery("SELECT * FROM ach_category_lang WHERE acl_lang='".$_CONF['default_lang']."' AND acl_category='".$this->id."'");
+				$this->name = $res[0]['acl_name'];
+			}
 
 			$res = $DBc->sqlQuery("SELECT * FROM ach_category LEFT JOIN (ach_category_lang) ON (acl_lang='".$_USER->getLang()."' AND acl_category=ac_id) WHERE ac_parent='".$this->id."' ORDER by ac_order ASC, acl_name ASC");
 
