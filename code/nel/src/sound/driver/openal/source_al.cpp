@@ -162,6 +162,13 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 	CBufferAL *bufferAL = static_cast<CBufferAL *>(buffer);
 	ALuint bufferName = bufferAL->bufferName();
 	nlassert(bufferName);
+	
+	if (!bufferAL->isBufferLoaded())
+	{
+		nlwarning("AL: Streaming buffer was not loaded, skipping buffer. This should not happen.");
+		return;
+	}
+	
 	alSourceQueueBuffers(_Source, 1, &bufferName);
 	alTestError();
 	_QueuedBuffers.push(bufferAL);
