@@ -683,6 +683,11 @@
 
 			if(in_array($name,$this->ignore_block)) {
 				$this->lock = 0;
+				return null;
+			}
+
+			if($this->lock == 1) {
+				return null;
 			}
 
 			/* respawn points */
