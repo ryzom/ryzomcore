@@ -70,41 +70,24 @@ void LandscapeView::setVisibleText(bool visible)
 
 void LandscapeView::wheelEvent(QWheelEvent *event)
 {
-	//nlinfo(QString("%1").arg(transform().m11()).toStdString().c_str());
+	//How fast we zoom
+	float numSteps = (( event->delta() / 8 ) / 15) * 1.2; 
 
-	//Get the position of the mouse before scaling, in scene coords
-	QPointF pointBeforeScale(mapToScene(event->pos()));
+	QMatrix mat = matrix();
+	QPointF mousePosition = event->pos();
 
-	//Get the original screen centerpoint
-	QPointF screenCenter = getCenter(); //CurrentCenterPoint; //(visRect.center());
+	mat.translate((width() / 2) - mousePosition.x(), (height() / 2) - mousePosition.y());
 
-	//Scale the view ie. do the zoom
-	double scaleFactor = 1.15; //How fast we zoom
-	if(event->delta() > 0)
-	{
-		if (transform().m11() > m_minView )
-			return;
-		//Zoom in
-		scale(scaleFactor, scaleFactor);
-	}
+	if ( numSteps > 0 )
+		mat.scale(numSteps, numSteps);
 	else
-	{
-		if (transform().m11() < m_maxView )
-			return;
+		mat.scale(-1 / numSteps, -1 / numSteps);
 
-		//Zooming out
-		scale(1.0 / scaleFactor, 1.0 / scaleFactor);
-	}
-
-	//Get the position after scaling, in scene coords
-	QPointF pointAfterScale(mapToScene(event->pos()));
-
-	//Get the offset of how the screen moved
-	QPointF offset = pointBeforeScale - pointAfterScale;
-
+	mat.translate(mousePosition.x() - (width() / 2), mousePosition.y() - (height() / 2));
+	
 	//Adjust to the new center for correct zooming
-	QPointF newCenter = screenCenter + offset;
-	setCenter(newCenter);
+	setMatrix(mat);
+	event->accept();
 }
 
 void LandscapeView::mousePressEvent(QMouseEvent *event)
@@ -202,7 +185,8 @@ void LandscapeView::setCenter(const QPointF &centerPoint)
 
 QPointF LandscapeView::getCenter() const
 {
-	return m_currentCenterPoint;
+	//return m_currentCenterPoint;
+	return mapToScene(viewport()->rect().center());
 }
 
 void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
