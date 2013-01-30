@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/misc/types_nl.h>
+#ifndef CL_STDPCH_H
+#define CL_STDPCH_H
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -33,15 +34,21 @@
 #include <utility>
 #include <deque>
 
+#include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
 #include <nel/misc/debug.h>
-
 #include <nel/misc/stream.h>
 #include <nel/misc/time_nl.h>
 #include <nel/misc/vector.h>
 #include <nel/misc/matrix.h>
 #include <nel/misc/rgba.h>
 #include <nel/misc/sheet_id.h>
+#include <nel/misc/smart_ptr.h>
+#include <nel/misc/string_mapper.h>
 
-#include "client_sheets.h"
-#include "entity_sheet.h"
+#include <nel/georges/u_form_elm.h>
+#include <nel/georges/u_form.h>
+#include <nel/georges/u_form_loader.h>
+#include <nel/georges/u_form_dfn.h>
+
+#endif

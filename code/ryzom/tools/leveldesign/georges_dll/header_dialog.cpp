@@ -263,7 +263,7 @@ void CHeaderDialog::getFromDocument (const NLGEORGES::CFileHeader &header)
 				if (end)
 				{
 					// Build a string
-					int length = std::min (31, end-start);
+					int length = std::min (31, (int)(end-start));
 					memcpy (name, start, length);
 					name[length] = 0;
 

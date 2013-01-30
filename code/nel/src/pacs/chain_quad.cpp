@@ -16,7 +16,7 @@
 
 #include "stdpacs.h"
 
-#include "chain_quad.h"
+#include "nel/pacs/chain_quad.h"
 
 using	namespace std;
 using	namespace NLMISC;

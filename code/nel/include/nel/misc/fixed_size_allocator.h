@@ -17,6 +17,7 @@
 #ifndef NL_FIXED_SIZE_ALLOCATOR_H
 #define NL_FIXED_SIZE_ALLOCATOR_H
 
+#include "types_nl.h"
 
 namespace NLMISC
 {

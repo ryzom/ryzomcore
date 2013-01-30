@@ -239,11 +239,11 @@ void MissionCompilerMainWindow::compileMission(bool publish)
 		try
 		{
 			CMissionCompiler mc;
-			mc.compileMissions(primDoc.RootNode, filename.toStdString());
+			mc.compileMissions(primDoc.RootNode, filename.toUtf8().constData());
 			m_compileLog.append("Found "+QString::number(mc.getMissionsCount())+" valid missions\n");
 			updateCompileLog();
 
-			mc.installCompiledMission(m_ligoConfig, filename.toStdString());
+			mc.installCompiledMission(m_ligoConfig, filename.toUtf8().constData());
 			nbMission += mc.getMissionsCount();
 
 			// publish files to selected servers
@@ -296,7 +296,7 @@ void MissionCompilerMainWindow::compileMission(bool publish)
 							{
 								m_compileLog.append("   "+QString(NLMISC::CFile::getFilename(mc.getFileToPublish(j)).c_str())+"\n");
 							}
-							mc.publishFiles(primPath.toStdString(), textPath.toStdString(), localPath.toStdString());
+							mc.publishFiles(primPath.toUtf8().constData(), textPath.toUtf8().constData(), localPath.toUtf8().constData());
 						}
 						
 						column++;

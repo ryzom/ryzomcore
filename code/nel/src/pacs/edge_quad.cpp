@@ -16,8 +16,8 @@
 
 #include "stdpacs.h"
 
-#include "edge_quad.h"
-#include "global_retriever.h"
+#include "nel/pacs/edge_quad.h"
+#include "nel/pacs/global_retriever.h"
 
 using	namespace std;
 using	namespace NLMISC;

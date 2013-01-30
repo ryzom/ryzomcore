@@ -16,8 +16,8 @@
 
 #include "stdpacs.h"
 
-#include "global_retriever.h"
-#include "retriever_bank.h"
+#include "nel/pacs/global_retriever.h"
+#include "nel/pacs/retriever_bank.h"
 
 #include "nel/misc/async_file_manager.h"
 #include "nel/misc/common.h"

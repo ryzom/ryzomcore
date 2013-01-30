@@ -781,11 +781,7 @@ void CDriverGL::bindTextureWithMode(ITexture &tex)
 		{
 			_DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
 			// Bind this texture
-#ifdef USE_OPENGLES
-			glBindTexture(GL_TEXTURE_CUBE_MAP_OES, gltext->ID);
-#else
 			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
-#endif
 		}
 	}
 	else
@@ -820,19 +816,16 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 	{
 		if (_Extensions.ARBTextureCubeMap)
 		{
-#ifdef USE_OPENGLES
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_OES,GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_OES,GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
-//			glTexParameteri(GL_TEXTURE_CUBE_MAP_OES,GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_OES,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_OES,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
-#else
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
+#ifndef USE_OPENGLES
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
+#endif
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
-#endif
+
+			if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+				glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 		}
 	}
 	else
@@ -841,6 +834,9 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_T, translateWrapToGl(gltext->WrapT, _Extensions));
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+
+		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+			glTexParameteri(gltext->TextureMode, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 	}
 	//
 	tex.clearFilterOrWrapModeTouched();
@@ -1516,31 +1512,19 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 						_CurrentTextureInfoGL[stage]= gltext;
 
 						// setup this texture
-#ifdef USE_OPENGLES
-						glBindTexture(GL_TEXTURE_CUBE_MAP_OES, gltext->ID);
-#else
 						glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
-#endif
 
 						// Change parameters of texture, if necessary.
 						//============================================
 						if(gltext->MagFilter!= tex->getMagFilter())
 						{
 							gltext->MagFilter= tex->getMagFilter();
-#ifdef USE_OPENGLES
-							glTexParameteri(GL_TEXTURE_CUBE_MAP_OES,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
-#else
 							glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
-#endif
 						}
 						if(gltext->MinFilter!= tex->getMinFilter())
 						{
 							gltext->MinFilter= tex->getMinFilter();
-#ifdef USE_OPENGLES
-							glTexParameteri(GL_TEXTURE_CUBE_MAP_OES,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
-#else
 							glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
-#endif
 						}
 					}
 				}
@@ -1617,34 +1601,16 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 
 
 // This maps the CMaterial::TTexOperator
-static	const	GLenum	OperatorLUT[9]= { GL_REPLACE, GL_MODULATE, GL_ADD,
-#ifdef USE_OPENGLES
-											GL_ADD_SIGNED, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE, GL_INTERPOLATE
-#else
-											GL_ADD_SIGNED_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_BUMP_ENVMAP_ATI
-#endif
-};
+static	const	GLenum	OperatorLUT[9]= { GL_REPLACE, GL_MODULATE, GL_ADD, GL_ADD_SIGNED_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_BUMP_ENVMAP_ATI };
 
 // This maps the CMaterial::TTexSource
-static	const	GLenum	SourceLUT[4]= { GL_TEXTURE,
-#ifdef USE_OPENGLES
-										GL_PREVIOUS, GL_PRIMARY_COLOR, GL_CONSTANT
-#else
-										GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT
-#endif
-};
+static	const	GLenum	SourceLUT[4]= { GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
 
 // This maps the CMaterial::TTexOperand
 static	const	GLenum	OperandLUT[4]= { GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA };
 
 // This maps the CMaterial::TTexOperator, used for openGL Arg2 setup.
-static	const	GLenum	InterpolateSrcLUT[8]= { GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE,
-#ifdef USE_OPENGLES
-												GL_PREVIOUS, GL_PRIMARY_COLOR, GL_CONSTANT
-#else
-												GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT
-#endif
-};
+static	const	GLenum	InterpolateSrcLUT[8]= { GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
 
 #ifndef USE_OPENGLES
 
@@ -2222,6 +2188,25 @@ void		CDriverGL::forceDXTCCompression(bool dxtcComp)
 {
 	H_AUTO_OGL(CDriverGL_forceDXTCCompression)
 	_ForceDXTCCompression= dxtcComp;
+}
+
+// ***************************************************************************
+void		CDriverGL::setAnisotropicFilter(sint filtering)
+{
+	H_AUTO_OGL(CDriverGL_setAnisotropicFiltering);
+
+	if (!_Extensions.EXTTextureFilterAnisotropic) return;
+
+	if (filtering < 0 || filtering > _Extensions.EXTTextureFilterAnisotropicMaximum)
+	{
+		// set maximum value for anisotropic filter
+		_AnisotropicFilter = _Extensions.EXTTextureFilterAnisotropicMaximum;
+	}
+	else
+	{
+		// set specified value for anisotropic filter
+		_AnisotropicFilter = filtering;
+	}
 }
 
 // ***************************************************************************

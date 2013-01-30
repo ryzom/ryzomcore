@@ -116,11 +116,11 @@ void SearchPathsSettingsPage::applySearchPaths()
 	settings->endGroup();
 
 	for (int i = 1; i < remapExt.size(); i += 2)
-		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toStdString(), remapExt.at(i).toStdString(), true);
+		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toUtf8().constData(), remapExt.at(i).toUtf8().constData(), true);
 
 	Q_FOREACH(QString path, paths)
 	{
-		NLMISC::CPath::addSearchPath(path.toStdString(), m_recurse, false);
+		NLMISC::CPath::addSearchPath(path.toUtf8().constData(), m_recurse, false);
 	}
 }
 

@@ -282,7 +282,7 @@ public:
 	
 	string genCode(CMissionData &md)
 	{
-		string ret = "";
+		string ret;
 		if (!_MissionName.empty())
 		{
 			ret =  "spawn_mission : " + _MissionName + " : " + _GiverName;
@@ -1809,7 +1809,7 @@ string CContentObjective::genCode(CMissionData &md)
 // ---------------------------------------------------------------------------
 /*std::string CContentObjective::genNbGuildMembersNeededOption(CMissionData &md)
 {
-	string ret = "";
+	string ret;
 	// If we are in a guild mission we add the 'nb_guild_members_needed' option to the script
 	if (md.isGuildMission())
 	{

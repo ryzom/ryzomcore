@@ -16,9 +16,9 @@
 
 #include "stdpacs.h"
 
-#include "move_cell.h"
-#include "move_element.h"
-#include "move_primitive.h"
+#include "nel/pacs/move_cell.h"
+#include "nel/pacs/move_element.h"
+#include "nel/pacs/move_primitive.h"
 
 namespace NLPACS
 {

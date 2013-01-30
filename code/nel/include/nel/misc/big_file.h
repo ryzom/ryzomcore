@@ -19,6 +19,7 @@
 
 #include "types_nl.h"
 #include "tds.h"
+#include "singleton.h"
 
 
 namespace NLMISC {

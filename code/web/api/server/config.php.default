@@ -30,4 +30,6 @@ define('RYAPI_NELDB_NEL', 'nel');
 define('RYAPI_AUTH_SCRIPT', '');
 define('RYAPI_COOKIE_KEY', '');
 
+define('RYAPI_EGS_SALT', 'RyZoM'); // need be exactly same salt than egs
+
 ?>

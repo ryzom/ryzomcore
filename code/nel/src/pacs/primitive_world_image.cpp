@@ -18,9 +18,9 @@
 
 #include "nel/misc/hierarchical_timer.h"
 
-#include "primitive_world_image.h"
-#include "move_primitive.h"
-#include "move_element.h"
+#include "nel/pacs/primitive_world_image.h"
+#include "nel/pacs/move_primitive.h"
+#include "nel/pacs/move_element.h"
 
 using namespace NLMISC;
 

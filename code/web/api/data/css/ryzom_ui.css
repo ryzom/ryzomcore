@@ -33,14 +33,18 @@
 	color: white;
 }
 .ryzom-ui input, .ryzom-ui select {
-	border-top: 1px solid #030403;
-	border-right: 1px solid #6e7f57;
-	border-bottom: 1px solid #889e6c;
-	border-left: 1px solid #272d1f;
-	background-color: #37402b;
-	color: #ddd;
+	border-bottom: 1px solid #7B7E80;
+	border-left: 1px solid #7B7E80;
+	border-top: 1px solid #101010;
+	border-right: 1px solid #101010;
+	background-color: #1D1D1D;
+	border-radius: 3px;
+	color: #BBB;
+	-moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
 	font-size: 12px;
 	margin: 2px 0 5px 0;
+	padding: 1px;
 }
 .ryzom-ui input[type=text] {
 	width: 100%;
@@ -52,27 +56,43 @@
 
 /* input[type=submit] will make IE6 to ignore whole CSS rule, so cant combine this with .ryzom-ui-button below */
 input[type=submit] {
-	border-bottom: 1px solid #030403;
-	border-left: 1px solid #6e7f57;
-	border-top: 1px solid #889e6c;
-	border-right: 1px solid #272d1f;
-	background-color: #435120;
+	border-bottom: 1px solid #7B7E80;
+	border-left: 1px solid #7B7E80;
+	border-top: 1px solid #7B7E80;
+	border-right: 1px solid #7B7E80;
+	background-color: #232323;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+	color: #BBB;
+}
+input[type=submit]:hover {
+	border-bottom: 1px solid #FFFFFF;
+	border-left: 1px solid #FFFFFF;
+	border-top: 1px solid #FFFFFF;
+	border-right: 1px solid #FFFFFF;
+	color: #FFF;
 }
 input.ryzom-ui-button, .ryzom-ui-button {
-	border-bottom: 1px solid #030403;
-	border-left: 1px solid #6e7f57;
-	border-top: 1px solid #889e6c;
-	border-right: 1px solid #272d1f;
-	background-color: #435120;
+	border-bottom: 1px solid #7B7E80;
+	border-left: 1px solid #7B7E80;
+	border-top: 1px solid #7B7E80;
+	border-right: 1px solid #7B7E80;
+	background-color: #232323;
+	border-radius: 3px;
+	color: #BBB;
 }
 a.ryzom-ui-button, a.ryzom-ui-button:visited {
-	color: white;
-	padding: 0 .5em;
+	color: #DDD;
+	padding: .2em .5em;
 	text-decoration: none;
 }
 a.ryzom-ui-button:hover {
-	background: #536130;
-	color: #ddd;
+	border-bottom: 1px solid #FFFFFF;
+	border-left: 1px solid #FFFFFF;
+	border-top: 1px solid #FFFFFF;
+	border-right: 1px solid #FFFFFF;
+	color: #FFF;
 }
 /* window without title - just borders */
 .ryzom-ui-tl {

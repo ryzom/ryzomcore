@@ -28,6 +28,10 @@
 	#endif
 #endif
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 using namespace std;
 
 // Key in registry

@@ -165,11 +165,9 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 
 		if(_TextureCubeMapSupported)
 		{
-#ifdef USE_OPENGLES
-			glDisable(GL_TEXTURE_CUBE_MAP_OES);
-			glDisable(GL_TEXTURE_GEN_STR_OES);
-#else
 			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+#ifdef USE_OPENGLES
+			glDisable(GL_TEXTURE_GEN_STR_OES);
 #endif
 		}
 
@@ -393,6 +391,7 @@ void			CDriverGLStates::enableMultisample(bool enable)
 	{
 		// new state.
 		_CurMultisample= enable;
+
 		// Setup GLState.
 		if(_CurMultisample)
 			glEnable(GL_MULTISAMPLE_ARB);
@@ -686,7 +685,7 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 		else
 		{
 #ifdef USE_OPENGLES
-//			nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
+			nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
 #else
 			glTexGeni( GL_S, GL_TEXTURE_GEN_MODE, mode);
 			glTexGeni( GL_T, GL_TEXTURE_GEN_MODE, mode);
@@ -702,8 +701,8 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 #ifdef USE_OPENGLES
 //			if(mode==GL_OBJECT_LINEAR || mode==GL_EYE_LINEAR)
 //			{
-				nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
-				glEnable(GL_TEXTURE_GEN_STR_OES);
+//				nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
+//				glEnable(GL_TEXTURE_GEN_STR_OES);
 //			}
 //			else
 //			{
@@ -742,11 +741,7 @@ void			CDriverGLStates::resetTextureMode()
 
 	if (_TextureCubeMapSupported)
 	{
-#ifdef USE_OPENGLES
-		glDisable(GL_TEXTURE_CUBE_MAP_OES);
-#else
 		glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-#endif
 	}
 
 #ifndef USE_OPENGLES
@@ -789,11 +784,7 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		{
 			if(_TextureCubeMapSupported)
 			{
-#ifdef USE_OPENGLES
-				glDisable(GL_TEXTURE_CUBE_MAP_OES);
-#else
 				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-#endif
 			}
 			else
 			{
@@ -823,11 +814,7 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		{
 			if(_TextureCubeMapSupported)
 			{
-#ifdef USE_OPENGLES
-				glEnable(GL_TEXTURE_CUBE_MAP_OES);
-#else
 				glEnable(GL_TEXTURE_CUBE_MAP_ARB);
-#endif
 			}
 			else
 			{
@@ -872,11 +859,11 @@ void			CDriverGLStates::forceActiveTextureARB(uint stage)
 	_CurrentActiveTextureARB= stage;
 }
 
-
 // ***************************************************************************
 void			CDriverGLStates::enableVertexArray(bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableVertexArray)
+	H_AUTO_OGL(CDriverGLStates_enableVertexArray);
+
 	if(_VertexArrayEnabled != enable)
 	{
 		if(enable)
@@ -1038,7 +1025,7 @@ void CDriverGLStates::enableVertexAttribArrayARB(uint glIndex,bool enable)
 // ***************************************************************************
 void CDriverGLStates::enableVertexAttribArrayForEXTVertexShader(uint glIndex, bool enable, uint *variants)
 {
-	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArrayForEXTVertexShader)
+	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArrayForEXTVertexShader);
 
 	if(_VertexAttribArrayEnabled[glIndex] != enable)
 	{
