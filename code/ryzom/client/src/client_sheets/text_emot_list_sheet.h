@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef CL_TEXT_EMOT_LIST_SHEET_H
 #define CL_TEXT_EMOT_LIST_SHEET_H
 

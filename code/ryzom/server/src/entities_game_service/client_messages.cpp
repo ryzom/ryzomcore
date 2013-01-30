@@ -2078,7 +2078,7 @@ void cbClientSit( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 }
 
 
-// client send a command to chang guild motd
+// client send a command to change guild motd
 void cbClientGuildMotd( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
 	H_AUTO(cbClientGuildMotd);
@@ -2737,7 +2737,7 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 	}
 
 	// kxu: TODO: check validity of title chosen by player
-	c->setTitle( (CHARACTER_TITLE::ECharacterTitle) title );
+	c->setNewTitle(CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)title));
 	c->registerName();
 }
 

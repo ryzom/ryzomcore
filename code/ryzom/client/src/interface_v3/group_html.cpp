@@ -148,7 +148,7 @@ void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	nlwarning("add to download '%s' dest '%s' img %p", url.c_str(), dest.c_str(), img);
 #endif
 
-		// erase the tmp file if exists
+	// erase the tmp file if exists
 	if (NLMISC::CFile::fileExists(tmpdest))
 		NLMISC::CFile::deleteFile(tmpdest);
 
@@ -3221,7 +3221,7 @@ void CGroupHTML::handle ()
 				else
 				{
 					/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-					HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+					HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 					/* Set the timeout for long we are going to wait for a response */
 					HTHost_setEventTimeout(60000);
@@ -3367,7 +3367,7 @@ void CGroupHTML::handle ()
 				else
 				{
 					/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-					HTNet_addAfter(requestTerminater, NULL, (void*)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
+					HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 					/* Start the first request */
 

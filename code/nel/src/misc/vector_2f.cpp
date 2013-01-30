@@ -18,6 +18,9 @@
 
 #include "nel/misc/vector_2f.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

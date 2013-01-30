@@ -193,7 +193,7 @@ void SCloudTextureClamp::init (uint32 nWidth, uint32 nHeight, uint32 nDepth, con
 	Mem = new uint8[NbW*Width*NbH*Height];
 	uint32 i, j;
 
-	if (filename == "")
+	if (filename.empty())
 	{
 		// No filename so init with default
 		for (i = 0; i < NbW; ++i)

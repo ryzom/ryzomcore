@@ -28,6 +28,10 @@ using namespace std;
 
 #define NLMISC_READ_BUFFER_SIZE 1024
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 

@@ -17,11 +17,16 @@
 #include "stdmisc.h"
 
 #include "nel/misc/tds.h"
+#include "nel/misc/debug.h"
 
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

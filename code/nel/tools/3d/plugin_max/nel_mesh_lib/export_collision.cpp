@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <vector>
-#include <map>
-
 #include "stdafx.h"
 #include "export_nel.h"
 #include "export_appdata.h"
@@ -25,11 +22,11 @@
 #include "../nel_export/nel_export.h"
 #include "../nel_export/nel_export_scene.h"
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
-#include "nel/../../src/pacs/retriever_bank.h"
-#include "nel/../../src/pacs/global_retriever.h"
-#include "nel/../../src/pacs/build_indoor.h"
-#include "nel/../../src/pacs/primitive_block.h"
+#include "nel/pacs/collision_mesh_build.h"
+#include "nel/pacs/retriever_bank.h"
+#include "nel/pacs/global_retriever.h"
+#include "nel/pacs/build_indoor.h"
+#include "nel/pacs/primitive_block.h"
 
 #include "nel/3d/quad_grid.h"
 

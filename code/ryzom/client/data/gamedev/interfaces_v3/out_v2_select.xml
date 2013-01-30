@@ -682,8 +682,8 @@
 						onclick_l="leave_modal" />
 	</group>
 	
-	<group id="webstart" posref="MM MM" w="800" h="600" active="true" >
-		<group id="content" x="0" y="0" w="800" h="600" posref="MM MM" >
+	<group id="webstart" posref="BR BR" w="100" h="60" active="true" >
+		<group id="content" x="0" y="0" w="100" h="60" posref="MM MM" >
 			<group id="webstart_html" type="html" posref="MM MM" 
 				url="" 
 				title_prefix="uiQuickhelpTitle"

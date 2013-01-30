@@ -138,6 +138,14 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 	ucstring entityName = entity->getDisplayName();
 	ucstring entityTitle = entity->getTitle();
 
+	// For some NPC's the name is empty and only a title is given,
+	// in that case, treat the title as the name.
+	if (entityName.empty())
+	{
+		entityName = entityTitle;
+		entityTitle.clear();
+	}
+
 	ucstring entityTag1 = entity->getTag(1);
 	ucstring entityTag2 = entity->getTag(2);
 	ucstring entityTag3 = entity->getTag(3);
@@ -174,7 +182,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			bars[i]= false;
 		name= !entityName.empty() && pIM->getDbProp(dbEntry+"NPCNAME")->getValueBool();
 		symbol= false;
-		title= (entityName.empty() && pIM->getDbProp(dbEntry+"NPCNAME")->getValueBool()) || pIM->getDbProp(dbEntry+"NPCTITLE")->getValueBool();
+		title= !entityTitle.empty() && pIM->getDbProp(dbEntry+"NPCTITLE")->getValueBool();
 		guildName= false;
 		templateName = "in_scene_user_info";
 		rpTags = (!entityTag1.empty()  ||  !entityTag2.empty()  || !entityTag3.empty()  || !entityTag4.empty() ) && pIM->getDbProp(dbEntry+"RPTAGS")->getValueBool();
@@ -251,8 +259,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				if (strnicmp(sFame.c_str(),"tribe_",6)==0)
 				{
 					tribeName = true;
-					// always display title for tribe
-					title = true;
+					//// always display title for tribe
+					//title = true;
 					theTribeName = STRING_MANAGER::CStringManagerClient::getFactionLocalizedName(sFame);
 					// tribeName stuff disable any guild name
 					guildName= false;
@@ -511,13 +519,13 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 						{
 							info->delView(logoOver);
 						}
-						//leftGroup->setW( leftGroup->getW() + 42 );
+						leftGroup->setW( leftGroup->getW() + 42 );
 					}
 					else
 					{
 						info->delView(logo);
 						info->delView(logoOver);
-						//leftGroup->setX(0);
+						leftGroup->setX(0);
 					}
 					leftGroup->invalidateCoords();
 				}
@@ -887,6 +895,8 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		_Name->setColor(entityColor);
 		_Name->setModulateGlobalColor(false);
 		ucstring entityName = _Entity->getDisplayName();
+		if (entityName.empty())
+			entityName = _Entity->getTitle();
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");

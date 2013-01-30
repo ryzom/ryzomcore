@@ -22,6 +22,7 @@
 
 #include "nel/misc/mutex.h"
 #include "nel/misc/time_nl.h"
+#include "nel/misc/debug.h"
 
 using namespace std;
 
@@ -47,6 +48,9 @@ using namespace std;
 #define NOMINMAX
 #include <windows.h>
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 

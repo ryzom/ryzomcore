@@ -1,4 +1,6 @@
 #pragma warning (disable : 4786)
+
+#include <assert.h>
 #include <max.h>
 #include <decomp.h>
 #include <buildver.h>

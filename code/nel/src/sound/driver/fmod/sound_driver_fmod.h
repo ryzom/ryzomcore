@@ -17,7 +17,7 @@
 #ifndef NL_SOUND_DRIVER_FMOD_H
 #define NL_SOUND_DRIVER_FMOD_H
 
-#include <nel/sound/driver/sound_driver.h>
+#include "nel/sound/driver/sound_driver.h"
 
 namespace NLSOUND {
 	class IListener;

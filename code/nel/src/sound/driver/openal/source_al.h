@@ -17,7 +17,7 @@
 #ifndef NL_SOURCE_AL_H
 #define NL_SOURCE_AL_H
 
-#include <nel/sound/driver/source.h>
+#include "nel/sound/driver/source.h"
 
 namespace NLSOUND {
 	class IBuffer;

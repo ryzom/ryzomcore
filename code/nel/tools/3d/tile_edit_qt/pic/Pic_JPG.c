@@ -31,7 +31,7 @@ void my_error_exit(j_common_ptr cinfo)
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 
-unsigned long Pic_JPG_Read(unsigned char *FileName, unsigned char **ppPal, unsigned char **ppDatas, unsigned long *w, unsigned long *h)
+unsigned long Pic_JPG_Read(const char *FileName, unsigned char **ppPal, unsigned char **ppDatas, unsigned long *w, unsigned long *h)
 {
 	struct jpeg_decompress_struct	cinfo;
 	struct my_error_mgr				jerr;
@@ -114,7 +114,7 @@ unsigned long Pic_JPG_Read(unsigned char *FileName, unsigned char **ppPal, unsig
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 
-unsigned long Pic_JPG_Write(unsigned char *FileName, unsigned long Qual, unsigned char *pDatas, unsigned long w, unsigned long h)
+unsigned long Pic_JPG_Write(const char *FileName, unsigned long Qual, unsigned char *pDatas, unsigned long w, unsigned long h)
 {
 	struct jpeg_compress_struct	cinfo;
 	struct my_error_mgr			jerr;

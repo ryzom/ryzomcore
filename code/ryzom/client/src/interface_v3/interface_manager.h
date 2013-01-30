@@ -222,6 +222,7 @@ public:
 	class IStringProcess
 	{
 	public:
+		virtual ~IStringProcess() { }
 		virtual bool cbIDStringReceived(ucstring &inOut) = 0; // called when string or id is received (return true if valid the change)
 	};
 

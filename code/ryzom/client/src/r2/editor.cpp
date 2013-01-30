@@ -6603,7 +6603,7 @@ NLMISC::CVectorD getVectorD(const CObject *obj)
 CObject *buildVector(const NLMISC::CVectorD &vector, const std::string &instanceId /*= ""*/)
 {
 	CObject *table;
-	if (instanceId == "")
+	if (instanceId.empty())
 	{
 		table = getEditor().getDMC().newComponent("Position");
 		table->set("x", vector.x);

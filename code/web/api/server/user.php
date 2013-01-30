@@ -16,15 +16,18 @@
  * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function ryzom_user_get_info($cid) {
+include_once(RYAPI_PATH.'server/guilds.php');
+
+function ryzom_user_get_info($cid, $webprivs=false) {
 	// User information
 	global $_RYZOM_API_CONFIG;
+
 	$db = new ServerDatabase(RYAPI_NELDB_HOST, RYAPI_NELDB_LOGIN, RYAPI_NELDB_PASS, RYAPI_NELDB_RING);
 	$sql = "SELECT char_name, race, civilisation, cult, guild_id, creation_date, last_played_date FROM characters WHERE char_id = $cid";
 	$result = $db->query($sql) or die('Could not query on ryzom_user_get_info');
 	$found = $db->num_rows($result) >= 1;
 	if (!$found)
-		die('Could not found on ryzom_user_get_info');
+		return array('char_name' => _t('guest'), 'cid' => $cid, 'ERROR' => 'unknown_user', 'groups' => array('GUEST'));
 	$row = $db->fetch_assoc($result);
 	$db->free_result($result);
 	if ($row) {
@@ -32,8 +35,8 @@ function ryzom_user_get_info($cid) {
 		$row['cult'] = substr($row['cult'], 2);
 		$row['civ'] = substr($row['civilisation'], 2);
 		if ($row['guild_id'] != '0') {
-			//$xml = @simplexml_load_file(ryzom_guild($row['guild_id'], false));
-			$xml = false;
+		$xml = @simplexml_load_file(ryzom_guild($row['guild_id'], false));
+		//	$xml = false;
 			if ($xml !== false) {
 				$row['guild_icon'] = (string)$xml->icon;
 				$row['guild_name'] = (string)$xml->name;
@@ -45,16 +48,20 @@ function ryzom_user_get_info($cid) {
 			}
 		}
 	}
-	
+
 	$uid = intval($cid / 16);
 	$db = new ServerDatabase(RYAPI_NELDB_HOST, RYAPI_NELDB_LOGIN, RYAPI_NELDB_PASS, RYAPI_NELDB_NEL);
 	$sql = "SELECT Privilege FROM user WHERE UId = $uid";
 	$result = $db->query($sql) or die("Could not query.");
-	$priv_row = $db->fetch_row($result, MYSQL_NUM);
+	$priv_row = $db->fetch_row($result, MYSQLI_NUM);
 	$priv = $priv_row[0];
 	$db->free_result($result);
 	$groups = array();
-	
+
+	$row['uid'] = $uid;
+	$row['cid'] = $cid;
+	$row['slot'] = $cid%16;
+
 	if (strpos($priv, ':DEV:') !== false) {
 		$groups[] = 'DEV';
 		$groups[] = 'SGM';
@@ -64,14 +71,14 @@ function ryzom_user_get_info($cid) {
 		$groups[] = 'VG';
 		$groups[] = 'G';
 	}
-	
+
 	if (strpos($priv, ':SGM:') !== false) {
 		$groups[] = 'SGM';
 		$groups[] = 'GM';
 		$groups[] = 'VG';
 		$groups[] = 'G';
 	}
-	
+
 	if (strpos($priv, ':GM:') !== false) {
 		$groups[] = 'GM';
 		$groups[] = 'VG';
@@ -86,25 +93,36 @@ function ryzom_user_get_info($cid) {
 	if (strpos($priv, ':G:') !== false) {
 		$groups[] = 'G';
 	}
-	
+
 	if (strpos($priv, ':SEM:') !== false) {
 		$groups[] = 'SEM';
 		$groups[] = 'EM';
 		$groups[] = 'EG';
 	}
-	
+
 	if (strpos($priv, ':EM:') !== false) {
 		$groups[] = 'EM';
 		$groups[] = 'EG';
 	}
-	
+
 	if (strpos($priv, ':EG:') !== false) {
 		$groups[] = 'EG';
 	}
 
 	$groups[] = 'PLAYER';
+
+	if ($webprivs) {
+		$db = new ServerDatabase(RYAPI_WEBDB_HOST, RYAPI_WEBDB_LOGIN, RYAPI_WEBDB_PASS, 'webig');
+		$sql = 'SELECT web_privs FROM accounts WHERE uid = '.intval($cid/16);
+		$result = $db->query($sql) or die("Could not query.".$db->get_error());
+		if ($result->num_rows == 0)
+			$db->query('INSERT INTO accounts (`uid`, `web_privs`) VALUES ('.intval($cid/16).', \'\')') or die("Could not query.".$db->get_error());
+		$priv_row = $db->fetch_row($result, MYSQLI_NUM);
+		$privs = $priv_row[0];
+		$db->free_result($result);
+		$groups = array_merge($groups, explode(':', $privs));
+	}
 	$row['groups'] = $groups;
-	
 	return $row;
 }
 

@@ -1,4 +1,4 @@
-LIBRARY neleditpatch
+;LIBRARY neleditpatch
 EXPORTS
 	LibDescription			@1
 	LibNumberClasses		@2

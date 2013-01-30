@@ -19,7 +19,19 @@
 #pragma conform(forScope, push)
 #pragma conform(forScope, off)
 
+#ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
+#endif
+
+#include <string>
+
+#ifdef _STLPORT_VERSION
+namespace std
+{
+	float fabsf(float f);
+	double fabsl(double f);
+}
+#endif
 
 #include <assert.h>
 

@@ -777,7 +777,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	sint32 dstPhraseId= pCSDst->getSPhraseId();
 	sint32 dstMacroId= pCSDst->getMacroId();
 
-	if ((src == "") && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
+	if (src.empty() && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
 	{		
 		// get the slot ids from save
 		srcIsMacro= CHandlerPhraseMemoryCopy::isMacro;
@@ -1611,7 +1611,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:PHRASE:SELECT_MEMORY_", false);
+		CCDBNodeLeaf	*node= pIM->getDbProp("UI:PHRASE:SELECT_MEMORY", false);
 		if(node)
 		{
 			sint32 val;
@@ -1620,7 +1620,6 @@ public:
 		}
 	}
 };
-
 REGISTER_ACTION_HANDLER(CHandlerPhraseSelectShortcutBar, "select_shortcut_bar");
 
 

@@ -300,8 +300,8 @@ void CMainWindow::initializeSettings(bool georges = false)
 {
 	if(georges == true && initialize_settings["georges"] == false)
 	{
-		NLMISC::CPath::addSearchPath(level_design_path.toStdString() + "/DFN", true, false);
-		NLMISC::CPath::addSearchPath(level_design_path.toStdString() + "/Game_elem/Creature", true, false);
+		NLMISC::CPath::addSearchPath(std::string(level_design_path.toUtf8().constData()) + "/DFN", true, false);
+		NLMISC::CPath::addSearchPath(std::string(level_design_path.toUtf8().constData()) + "/Game_elem/Creature", true, false);
 		initialize_settings["georges"] = true;
 	}
 
@@ -357,34 +357,34 @@ void CMainWindow::extractWords(QString typeq)
 		{
 			column_name = "item ID";
 			builderS.SheetExt = "sitem";
-			builderS.SheetPath = level_design_path.append("/game_element/sitem").toStdString();
+			builderS.SheetPath = level_design_path.append("/game_element/sitem").toUtf8().constData();
 			isSheet = true;
 		}
 		else if(typeq.toAscii() == Constants::WK_CREATURE)
 		{
 			column_name = "creature ID";
 			builderS.SheetExt = "creature";
-			builderS.SheetPath = level_design_path.append("/Game_elem/Creature/fauna").toStdString();
+			builderS.SheetPath = level_design_path.append("/Game_elem/Creature/fauna").toUtf8().constData();
 			isSheet = true;
 		}
 		else if(typeq.toAscii() == Constants::WK_SBRICK)
 		{
 			column_name = "sbrick ID";
 			builderS.SheetExt = "sbrick";
-			builderS.SheetPath = level_design_path.append("/game_element/sbrick").toStdString();
+			builderS.SheetPath = level_design_path.append("/game_element/sbrick").toUtf8().constData();
 			isSheet = true;
 		}
 		else if(typeq.toAscii() == Constants::WK_SPHRASE)
 		{
 			column_name = "sphrase ID";
 			builderS.SheetExt = "sphrase";
-			builderS.SheetPath = level_design_path.append("/game_element/sphrase").toStdString();
+			builderS.SheetPath = level_design_path.append("/game_element/sphrase").toUtf8().constData();
 			isSheet = true;
 		}
 		else if(typeq.toAscii() == Constants::WK_PLACE)
 		{
 			column_name = "placeId";
-			builderP.PrimPath = primitives_path.toStdString();
+			builderP.PrimPath = primitives_path.toUtf8().constData();
 			builderP.PrimFilter.push_back("region_*.primitive");
 			builderP.PrimFilter.push_back("indoors_*.primitive");
 			isSheet = false;
@@ -428,7 +428,7 @@ void CMainWindow::extractBotNames()
 
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 		initializeSettings(true);
-		editor_window->extractBotNames(convertQStringList(filters), level_design_path.toStdString(), ligoConfig);
+		editor_window->extractBotNames(convertQStringList(filters), level_design_path.toUtf8().constData(), ligoConfig);
 		QApplication::restoreOverrideCursor();
 	}
 }
@@ -627,7 +627,7 @@ std::list<std::string> CMainWindow::convertQStringList(QStringList listq)
 
 	Q_FOREACH(QString text, listq)
 	{
-		stdlist.push_back(text.toStdString());
+		stdlist.push_back(text.toUtf8().constData());
 	}
 	return stdlist;
 }
@@ -635,7 +635,7 @@ std::list<std::string> CMainWindow::convertQStringList(QStringList listq)
 bool CMainWindow::isWorksheetEditor(QString filename)
 {
 	STRING_MANAGER::TWorksheet wk_file;
-	if(loadExcelSheet(filename.toStdString(), wk_file, true) == true)
+	if(loadExcelSheet(filename.toUtf8().constData(), wk_file, true) == true)
 	{
 		if(wk_file.ColCount > 1)
 			return true;
@@ -646,7 +646,7 @@ bool CMainWindow::isWorksheetEditor(QString filename)
 bool CMainWindow::isPhraseEditor(QString filename)
 {
 	vector<STRING_MANAGER::TPhrase> phrases;
-	return readPhraseFile(filename.toStdString(), phrases, false);
+	return readPhraseFile(filename.toUtf8().constData(), phrases, false);
 }
 
 } /* namespace TranslationManager */

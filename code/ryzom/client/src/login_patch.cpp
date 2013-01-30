@@ -254,7 +254,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	}
 
 	srand(NLMISC::CTime::getSecondsSince1970());
-	UsedServer = (sint)((float)(rand() / (RAND_MAX+1)) * (sint)PatchServers.size());
+	UsedServer = (sint)(((double)rand() / ((double)RAND_MAX+1.0)) * (double)PatchServers.size());
 
 	ServerPath = CPath::standardizePath (sServerPath);
 	ServerVersion = sServerVersion;

@@ -24,6 +24,10 @@
 #include <sched.h>
 #include <pwd.h>
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 /* Key for thread specific storage holding IThread pointer. */

@@ -380,6 +380,7 @@ CClientConfig::CClientConfig()
 	ScreenAspectRatio	= 0.f;						// Default commmon Screen Aspect Ratio (no relation with the resolution) - 0.f = auto
 	FoV					= 75.f;						// Default value for the FoV.
 	ForceDXTC			= false;					// Default is no DXTC Compression.
+	AnisotropicFilter	= 0;						// Default is disabled (-1 = maximum value, 0 = disabled, 1+ = enabled)
 	DivideTextureSizeBy2= false;					// Divide texture by 2
 	DisableVtxProgram	= false;					// Disable Hardware Vertex Program.
 	DisableVtxAGP		= false;					// Disable Hardware Vertex AGP.
@@ -979,6 +980,8 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(FoV)
 	// ForceDXTC
 	READ_BOOL_FV(ForceDXTC)
+	// AnisotropicFilter
+	READ_INT_FV(AnisotropicFilter)
 	// DivideTextureSizeBy2
 	READ_BOOL_FV(DivideTextureSizeBy2)
 	// DisableVtxProgram

@@ -27,6 +27,14 @@
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef _STLPORT_VERSION
+namespace std
+{
+	float fabsf(float f) { return ::fabsf(f); }
+	double fabsl(double f) { return ::fabsl(f); }
+}
+#endif
+
 // ***************************************************************************
 
 // --------------------------------------------------

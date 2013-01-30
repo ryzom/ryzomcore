@@ -105,7 +105,7 @@ CAnimatedSceneObject::CAnimatedSceneObject( const string& ObjectName, const stri
 	}
 
 	// load skeleton, bind mesh and init position, rotation, cluster
-	if(_SkeletonName != "" )
+	if(!_SkeletonName.empty())
 	{
 		_Skeleton = Scene->createSkeleton(_SkeletonName);
 		if( _Skeleton == NULL )
@@ -340,12 +340,12 @@ void CAnimatedSceneObject::resetInitialPos( void )
 // Destructor
 CAnimatedSceneObject::~CAnimatedSceneObject()
 {
-	if( _Instance != NULL && _MeshName != "" )
+	if( _Instance != NULL && !_MeshName.empty() )
 	{
 		Scene->deleteInstance( _Instance );
 	}
 
-	if( _Skeleton != NULL && _SkeletonName != "" )
+	if( _Skeleton != NULL && !_SkeletonName.empty() )
 	{
 		Scene->deleteSkeleton( _Skeleton );
 	}

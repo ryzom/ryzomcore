@@ -127,7 +127,7 @@ void			CZone::build(const CZoneInfo &zoneInfo, uint32 numVertices)
 	// Compute the bbox and the bias/scale.
 	//=====================================
 	CAABBox		bb;
-	if(patchs.size())
+	if(!patchs.empty())
 		bb.setCenter(patchs[0].Patch.Vertices[0]);
 	bb.setHalfSize(CVector::Null);
 	for(j=0;j<(sint)patchs.size();j++)

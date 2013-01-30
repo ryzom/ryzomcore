@@ -17,9 +17,10 @@
 #ifndef NL_P_THREAD_H
 #define NL_P_THREAD_H
 
+#include "types_nl.h"
+
 #ifdef NL_OS_UNIX
 
-#include "types_nl.h"
 #include "thread.h"
 #include <pthread.h>
 

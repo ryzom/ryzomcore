@@ -107,7 +107,7 @@ CFgExtractionPhrase::CFgExtractionPhrase()
 bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vector< const CStaticBrick* >& bricks, bool buildToExecute )
 {
 	H_AUTO(CFgExtractionPhrase_build);
-	
+
 	_ActorRowId = actorRowId;
 
 	// Check grammar
@@ -120,7 +120,7 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 	for (std::vector<const CStaticBrick*>::const_iterator ib=bricks.begin(); ib!=bricks.end(); ++ib )
 	{
 		const CStaticBrick& brick = *(*ib);
-		
+
 		// Compute Sabrina credit and cost)
 		if ( brick.SabrinaValue > 0 )
 			sabrinaCost += brick.SabrinaValue;
@@ -156,7 +156,7 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 				break;
 			case TBrickParam::FG_SRC_PRD:
 				INFOLOG("FG_SRC_PRD: %g",((CSBrickParamForagePeriod *)param)->Period);
-				if ( ((CSBrickParamForagePeriod *)param)->Period != 0 ) 
+				if ( ((CSBrickParamForagePeriod *)param)->Period != 0 )
 					_RequestedProps[CHarvestSource::S] = 1.0f / (((CSBrickParamForagePeriod *)param)->Period * 10.0f); // period converted from second to tick
 				else
 					_RequestedProps[CHarvestSource::S] = 1.0f;
@@ -231,7 +231,7 @@ bool CFgExtractionPhrase::build( const TDataSetRow & actorRowId, const std::vect
 
 		//nlerror( "TODO: Families" );
 		//if ( brick.Family >= BRICK_FAMILIES::BeginForage
-		
+
 		//insertProgressingSkill( brick.Skill, brick.SheetId );
 	}
 
@@ -432,7 +432,7 @@ bool CFgExtractionPhrase::evaluate()
 bool CFgExtractionPhrase::validate()
 {
 	H_AUTO(CFgExtractionPhrase_validate);
-	
+
 	if ( ! HarvestSystemEnabled )
 		return false;
 
@@ -544,6 +544,15 @@ bool CFgExtractionPhrase::validate()
 		return false; // has disappeared
 	}
 
+	// test if tool have enough quality
+	sint depositQ = (sint)harvestSource->forageSite()->deposit()->maxQuality();
+
+	if ((depositQ > 0) && (item->recommended()+49  < depositQ))
+	{
+		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "FORAGE_TOOL_QUALITY_TOO_LOW");
+		return false;
+	}
+
 	// Check the distance from the player to the source (ignoring Z because for tunnel case, player couldn't target the source)
 	const CEntityState& state = player->getState();
 	CVector2f playerPos( (float)state.X / 1000.0f, (float)state.Y / 1000.0f );
@@ -589,7 +598,7 @@ bool CFgExtractionPhrase::validate()
 bool CFgExtractionPhrase::update()
 {
 	H_AUTO(CFgExtractionPhrase_update);
-	
+
 	CCharacter* player = PlayerManager.getChar( _ActorRowId );
 	if ( ! player )
 		return false;
@@ -600,7 +609,7 @@ bool CFgExtractionPhrase::update()
 		if( idle() )
 		{
 			idle(false);
-		
+
 			// check if actor can use action
 			CBypassCheckFlags bypassCheckFlags = CBypassCheckFlags::NoFlags;
 			if (player->canEntityUseAction(bypassCheckFlags,false) == false)
@@ -633,7 +642,7 @@ bool CFgExtractionPhrase::update()
 void CFgExtractionPhrase::execute()
 {
 	H_AUTO(CFgExtractionPhrase_execute);
-	
+
 	// Get character
 	CCharacter* player = PlayerManager.getChar( _ActorRowId );
 	if (!player)
@@ -676,7 +685,7 @@ void CFgExtractionPhrase::execute()
 void CFgExtractionPhrase::end()
 {
 	H_AUTO(CFgExtractionPhrase_end);
-	
+
 	CCharacter* player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
@@ -694,7 +703,7 @@ void CFgExtractionPhrase::end()
 void CFgExtractionPhrase::stop()
 {
 	H_AUTO(CFgExtractionPhrase_stop);
-	
+
 	CCharacter* player = PlayerManager.getChar(_ActorRowId);
 	if (!player)
 		return;
@@ -742,7 +751,7 @@ bool CFgExtractionPhrase::launch()
 void CFgExtractionPhrase::apply()
 {
 	H_AUTO(CFgExtractionPhrase_apply);
-	
+
 	CCharacter* player = PlayerManager.getChar( _ActorRowId );
 	if (!player)
 		return;
@@ -778,7 +787,7 @@ void CFgExtractionPhrase::apply()
 void CFgExtractionPhrase::applyExtraction( CCharacter *player, float successFactor )
 {
 	H_AUTO(CFgExtractionPhrase_applyExtraction);
-	
+
 	nlassert( _Source );
 	if ( ! player->forageProgress() )
 		return;
@@ -801,7 +810,7 @@ void CFgExtractionPhrase::applyExtraction( CCharacter *player, float successFact
 			player->forageProgress()->fillFromExtraction( _Props.Extraction.ObtainedProps[CHarvestSource::A], _Props.Extraction.ObtainedProps[CHarvestSource::Q], player );
 		else
 			return;
-	
+
 		// Report result of action
 		if ( propDrop != CHarvestSource::NoDrop )
 		{
@@ -864,7 +873,7 @@ struct CNonNullGameItemPtrPred : std::unary_function<CGameItemPtr,bool>
 void CFgExtractionPhrase::doKamiOffering( CCharacter *player )
 {
 	H_AUTO(CFgExtractionPhrase_doKamiOffering);
-	
+
 	// Count the number of non empty slots
 //	const vector<CGameItemPtr> &theBag = player->getInventory()[INVENTORIES::bag]()->getChildren();
 	CInventoryPtr theBag = player->getInventory(INVENTORIES::bag);
@@ -912,7 +921,7 @@ void CFgExtractionPhrase::doKamiOffering( CCharacter *player )
 						(*ib)->getSheetId().toString().c_str());
 					*/
 //					EGSPD::forageKamiItemOffering(player->getId(), _Source->depositForK()->name(), _Source->depositForK()->kamiAnger(), _Props.Care.KamiAngerDec[CHarvestSource::KamiAngerDec], item->getSheetId().toString());
-					
+
 					// TODO: quantity, filter, etc.
 //					player->destroyItem( INVENTORIES::bag, ib-theBag.begin(), 1/*(*ib).quantity()*/, false );
 					theBag->deleteItem(i);

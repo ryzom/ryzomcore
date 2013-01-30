@@ -33,6 +33,7 @@
 
 #include "fe_receive_sub.h"
 #include "fe_send_sub.h"
+#include "fe_types.h"
 #include "history.h"
 #include "prio_sub.h"
 #include "client_id_lookup.h"

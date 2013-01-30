@@ -31,9 +31,12 @@
 #include <string>
 #include <list>
 
-#if defined (NL_OS_WINDOWS)
-#include <winsock.h>
+#ifdef NL_OS_WINDOWS
+#include <winsock2.h>
+#include <windows.h>
+typedef unsigned long ulong;
 #endif
+
 #include <mysql.h>
 #include <mysql_version.h>
 

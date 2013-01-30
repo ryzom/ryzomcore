@@ -1,129 +1,149 @@
 INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}
 			${LIBXML2_INCLUDE_DIR}
-			${QT_INCLUDES})
+			${QT_INCLUDES}
+			${CMAKE_CURRENT_SOURCE_DIR}/scene/
+			${CMAKE_CURRENT_SOURCE_DIR}/particle_system/
+			${CMAKE_CURRENT_SOURCE_DIR}/vegetable/
+			${CMAKE_CURRENT_SOURCE_DIR}/widgets/
+)
 
 FILE(GLOB SRC *.cpp *.h)
+
+FILE(GLOB OVQT_SCENE_SRC      scene/*.cpp scene/*.h)
+FILE(GLOB OVQT_PS_SRC         particle_system/*.h particle_system/*.cpp)
+FILE(GLOB OVQT_VEGETABLE_SRC  vegetable/*.h vegetable/*.cpp)
+FILE(GLOB OVQT_WIDGETS_SRC    widgets/*.h widgets/*.cpp)
 
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
-SET(OBJECT_VIEWER_PLUGIN_HDR 	object_viewer_plugin.h
-				main_window.h 
-				graphics_viewport.h 
-				animation_dialog.h 
-				animation_set_dialog.h 
-				setup_fog_dialog.h 
-				slot_manager_dialog.h 
-				particle_control_dialog.h 
-				particle_workspace_dialog.h
-				particle_tree_model.h 
-				particle_system_page.h 
-				particle_workspace_page.h 
-				edit_range_widget.h
-				emitter_page.h 
-				attrib_widget.h 
-				located_bindable_page.h 
-				located_page.h
-				particle_force_page.h 
-				particle_light_page.h 
-				particle_zone_page.h 
-				particle_sound_page.h
-				basic_edit_widget.h 
-				direction_widget.h 
-				color_edit_widget.h 
-				particle_property_dialog.h
-				ps_mover_page.h
-				value_blender_dialog.h 
-				value_gradient_dialog.h
-				value_from_emitter_dialog.h 
-				curve_dialog.h
-				bin_op_dialog.h
-				hoverpoints.h
-				mesh_widget.h
-				morph_mesh_dialog.h
-				constraint_mesh_widget.h
-				tail_particle_widget.h
-				auto_lod_dialog.h
-				particle_texture_widget.h
-				particle_texture_anim_widget.h
-				multi_tex_dialog.h
-				spinner_dialog.h
-				follow_path_dialog.h
-				water_pool_dialog.h
-				skeleton_scale_dialog.h 
-				skeleton_tree_model.h 
-				particle_link_skeleton_dialog.h
-				vegetable_dialog.h
-				global_wind_dialog.h
-				day_night_dialog.h
-				sun_color_dialog.h
-				vegetable_noise_value_widget.h
-				vegetable_density_page.h
-				vegetable_landscape_page.h
-				vegetable_scale_page.h
-				vegetable_appearance_page.h
-				vegetable_rotate_page.h
-				tune_mrm_dialog.h
-				tune_timer_dialog.h
-				camera_control.h
+SET(OBJECT_VIEWER_PLUGIN_QT_HDR object_viewer_plugin.h
+				main_window.h
+				graphics_viewport.h
 				graphics_settings_page.h
 				sound_settings_page.h
 				vegetable_settings_page.h
-				scheme_bank_dialog.h)
 
-SET(OBJECT_VIEWER_PLUGIN_UIS    animation_form.ui
-				animation_set_form.ui
-				setup_fog_form.ui
-				slot_form.ui
-				particle_control_form.ui
-				particle_workspace_form.ui
-				edit_range_float_form.ui
-				edit_range_uint_form.ui
-				particle_system_form.ui
-				workspace_form.ui
-				attrib_form.ui
-				emitter_form.ui
-				located_bindable_form.ui
-				located_form.ui
-				particle_force_form.ui
-				particle_light_form.ui
-				particle_zone_form.ui
-				particle_sound_form.ui
-				basic_edit_form.ui
-				direction_form.ui
-				color_edit_form.ui
-				ps_mover_form.ui
-				curve_form.ui
-				mesh_form.ui
-				morph_mesh_form.ui
-				constraint_mesh_form.ui
-				tail_form.ui
-				auto_lod_form.ui
-				particle_texture_form.ui
-				particle_texture_anim_form.ui
-				multi_tex_form.ui
-				skeleton_scale_form.ui
-				particle_link_skeleton_form.ui
-				water_pool_form.ui
-				vegetable_dialog_form.ui
-				vegetable_noise_value_form.ui
-				global_wind_form.ui
-				sun_color_form.ui
-				day_night_form.ui
-				vegetable_density_form.ui
-				vegetable_apperance_form.ui
-				vegetable_landscape_form.ui
-				vegetable_rotate_form.ui
-				vegetable_scale_form.ui
-				tune_mrm_form.ui
-				tune_timer_form.ui
+				scene/animation_dialog.h
+				scene/animation_set_dialog.h
+				scene/setup_fog_dialog.h
+				scene/slot_manager_dialog.h
+				scene/water_pool_dialog.h
+				scene/skeleton_scale_dialog.h 
+				scene/skeleton_tree_model.h 
+				scene/global_wind_dialog.h
+				scene/day_night_dialog.h
+				scene/sun_color_dialog.h
+				scene/tune_mrm_dialog.h
+				scene/tune_timer_dialog.h
+				scene/camera_control.h
+
+				particle_system/particle_control_dialog.h
+				particle_system/particle_workspace_dialog.h
+				particle_system/particle_tree_model.h
+				particle_system/particle_system_page.h
+				particle_system/particle_workspace_page.h
+				particle_system/emitter_page.h
+				particle_system/attrib_widget.h
+				particle_system/located_bindable_page.h
+				particle_system/located_page.h
+				particle_system/particle_force_page.h 
+				particle_system/particle_light_page.h 
+				particle_system/particle_zone_page.h 
+				particle_system/particle_sound_page.h
+				particle_system/basic_edit_widget.h 
+				particle_system/direction_widget.h 
+				particle_system/scheme_bank_dialog.h
+				particle_system/particle_property_dialog.h
+				particle_system/ps_mover_page.h
+				particle_system/value_blender_dialog.h 
+				particle_system/value_gradient_dialog.h
+				particle_system/value_from_emitter_dialog.h 
+				particle_system/curve_dialog.h
+				particle_system/bin_op_dialog.h
+				particle_system/mesh_widget.h
+				particle_system/morph_mesh_dialog.h
+				particle_system/constraint_mesh_widget.h
+				particle_system/tail_particle_widget.h
+				particle_system/auto_lod_dialog.h
+				particle_system/particle_texture_widget.h
+				particle_system/particle_texture_anim_widget.h
+				particle_system/multi_tex_dialog.h
+				particle_system/spinner_dialog.h
+				particle_system/follow_path_dialog.h
+				particle_system/particle_link_skeleton_dialog.h
+
+				vegetable/vegetable_dialog.h
+				vegetable/vegetable_noise_value_widget.h
+				vegetable/vegetable_density_page.h
+				vegetable/vegetable_landscape_page.h
+				vegetable/vegetable_scale_page.h
+				vegetable/vegetable_appearance_page.h
+				vegetable/vegetable_rotate_page.h
+
+				widgets/edit_range_widget.h
+				widgets/color_edit_widget.h
+				widgets/hoverpoints.h
+)
+
+SET(OBJECT_VIEWER_PLUGIN_UIS    scene/animation_form.ui
+				scene/animation_set_form.ui
+				scene/setup_fog_form.ui
+				scene/slot_form.ui
+				scene/skeleton_scale_form.ui
+				scene/water_pool_form.ui
+				scene/global_wind_form.ui
+				scene/sun_color_form.ui
+				scene/day_night_form.ui
+				scene/tune_mrm_form.ui
+				scene/tune_timer_form.ui
+				
+				particle_system/particle_control_form.ui
+				particle_system/particle_workspace_form.ui
+				particle_system/particle_system_form.ui
+				particle_system/workspace_form.ui
+				particle_system/attrib_form.ui
+				particle_system/emitter_form.ui
+				particle_system/located_bindable_form.ui
+				particle_system/located_form.ui
+				particle_system/particle_force_form.ui
+				particle_system/particle_light_form.ui
+				particle_system/particle_zone_form.ui
+				particle_system/particle_sound_form.ui
+				particle_system/basic_edit_form.ui
+				particle_system/direction_form.ui
+				particle_system/ps_mover_form.ui
+				particle_system/curve_form.ui
+				particle_system/mesh_form.ui
+				particle_system/morph_mesh_form.ui
+				particle_system/constraint_mesh_form.ui
+				particle_system/tail_form.ui
+				particle_system/auto_lod_form.ui
+				particle_system/particle_texture_form.ui
+				particle_system/particle_texture_anim_form.ui
+				particle_system/multi_tex_form.ui				
+				particle_system/particle_link_skeleton_form.ui
+				particle_system/scheme_bank_form.ui
+				particle_system/value_gradient_form.ui
+
+				vegetable/vegetable_dialog_form.ui
+				vegetable/vegetable_noise_value_form.ui
+				vegetable/vegetable_density_form.ui
+				vegetable/vegetable_apperance_form.ui
+				vegetable/vegetable_landscape_form.ui
+				vegetable/vegetable_rotate_form.ui
+				vegetable/vegetable_scale_form.ui
+
+				widgets/color_edit_form.ui
+				widgets/edit_range_float_form.ui
+				widgets/edit_range_uint_form.ui
+
 				graphics_settings_page.ui
 				sound_settings_page.ui
 				vegetable_settings_page.ui
-				scheme_bank_form.ui
-				value_gradient_form.ui)
+)
 
 SET(OBJECT_VIEWER_PLUGIN_RCS object_viewer.qrc)
 
@@ -131,16 +151,29 @@ SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
 QT4_ADD_RESOURCES(OBJECT_VIEWER_PLUGIN_RC_SRCS ${OBJECT_VIEWER_PLUGIN_RCS})
-QT4_WRAP_CPP(OBJECT_VIEWER_PLUGIN_MOC_SRC ${OBJECT_VIEWER_PLUGIN_HDR})
+QT4_WRAP_CPP(OBJECT_VIEWER_PLUGIN_MOC_SRC ${OBJECT_VIEWER_PLUGIN_QT_HDR})
 QT4_WRAP_UI(OBJECT_VIEWER_PLUGIN_UI_HDRS ${OBJECT_VIEWER_PLUGIN_UIS})
 
 SOURCE_GROUP(QtResources FILES ${OBJECT_VIEWER_PLUGIN_UIS})
 SOURCE_GROUP(QtGeneratedUiHdr FILES ${OBJECT_VIEWER_PLUGIN_UI_HDRS})
 SOURCE_GROUP(QtGeneratedMocSrc FILES ${OBJECT_VIEWER_PLUGIN_MOC_SRC})
-SOURCE_GROUP("Object Viewer Plugin" FILES ${SRC})
-SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(ovqt_plugin_object_viewer MODULE ${SRC} ${OBJECT_VIEWER_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OBJECT_VIEWER_PLUGIN_UI_HDRS} ${OBJECT_VIEWER_PLUGIN_RC_SRCS})
+SOURCE_GROUP("ovqt Extension System" FILES ${OVQT_EXT_SYS_SRC})
+SOURCE_GROUP("ovqt Plugin Src" FILES ${SRC})
+SOURCE_GROUP("ovqt Plugin Scene Src" FILES ${OVQT_SCENE_SRC})
+SOURCE_GROUP("ovqt Plugin PS Src" FILES ${OVQT_PS_SRC})
+SOURCE_GROUP("ovqt Plugin Vegetable Src" FILES ${OVQT_VEGETABLE_SRC})
+SOURCE_GROUP("ovqt Plugin Widgets Src" FILES ${OVQT_WIDGETS_SRC})
+
+ADD_LIBRARY(ovqt_plugin_object_viewer MODULE ${SRC} 
+                                             ${OVQT_SCENE_SRC}
+                                             ${OVQT_PS_SRC}
+                                             ${OVQT_VEGETABLE_SRC}
+                                             ${OVQT_WIDGETS_SRC}
+                                             ${OBJECT_VIEWER_PLUGIN_MOC_SRC}
+                                             ${OVQT_EXT_SYS_SRC}
+                                             ${OBJECT_VIEWER_PLUGIN_UI_HDRS}
+                                             ${OBJECT_VIEWER_PLUGIN_RC_SRCS})
 
 TARGET_LINK_LIBRARIES(ovqt_plugin_object_viewer 
 			ovqt_plugin_core 
@@ -154,13 +187,15 @@ TARGET_LINK_LIBRARIES(ovqt_plugin_object_viewer
 
 NL_DEFAULT_PROPS(ovqt_plugin_object_viewer "NeL, Tools, 3D: Object Viewer Qt Plugin: Object Viewer")
 
-IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ovqt_plugin_object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF(WITH_PCH)
-
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_object_viewer)
 NL_ADD_LIB_SUFFIX(ovqt_plugin_object_viewer)
 
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
-INSTALL(TARGETS ovqt_plugin_object_viewer LIBRARY DESTINATION lib RUNTIME DESTINATION bin ARCHIVE DESTINATION lib COMPONENT tools3d)
+IF(WITH_PCH)
+  ADD_NATIVE_PRECOMPILED_HEADER(ovqt_plugin_object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+ENDIF(WITH_PCH)
+
+INSTALL(TARGETS ovqt_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${NL_BIN_PREFIX} ARCHIVE DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ovqt_plugin_object_viewer.xml DESTINATION ${OVQT_PLUGIN_SPECS_DIR} COMPONENT tools3d)
+

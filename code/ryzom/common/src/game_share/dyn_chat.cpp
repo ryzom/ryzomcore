@@ -138,11 +138,12 @@ CDynChatSession *CDynChatClient::getSession(TChanID chan) const
 CDynChatChan::CDynChatChan()
 	:	HistoricSize(0),
 		HideBubble(false),
+		UniversalChannel(false),
 		_FirstSession(NULL),
 		_ID(CEntityId::Unknown),
 		_DontBroadcastPlayerInputs(false),
 		_ForwardPlayerIntputToOwnerService(false),
-		_UnifyChannel(false)	
+		_UnifyChannel(false)
 {
 }
 
@@ -151,6 +152,7 @@ CDynChatChan::CDynChatChan()
 CDynChatChan::CDynChatChan(TChanID id, bool noBroadcast, bool forwardInput, bool unified)
 	:	HistoricSize(0),
 		HideBubble(false),
+		UniversalChannel(false),
 		_FirstSession(NULL),
 		_ID(id),
 		_DontBroadcastPlayerInputs(noBroadcast),

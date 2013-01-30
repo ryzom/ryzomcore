@@ -158,7 +158,7 @@ public:
 
 
 // ***************************************************************************
-// Out of CLandscapeGlobals, because myabe used in __asm{}
+// Out of CLandscapeGlobals, because maybe used in __asm{}
 extern	uint					NL3D_LandscapeGlobals_PassNTri;
 extern	void					*NL3D_LandscapeGlobals_PassTriCurPtr;
 extern  CIndexBuffer::TFormat	NL3D_LandscapeGlobals_PassTriFormat;

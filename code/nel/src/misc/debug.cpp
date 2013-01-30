@@ -53,6 +53,8 @@
 #	include <errno.h>
 #endif
 
+#define NL_NO_DEBUG_FILES 1
+
 using namespace std;
 
 // If you don't want to add default displayer, put 0 instead of 1. In this case, you

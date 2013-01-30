@@ -29,6 +29,10 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 CSheetId::CChar CSheetId::_AllStrings;
@@ -157,7 +161,7 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 			{
 				_FileExtensions.push_back(sheetType);
 				_DevSheetIdToName.push_back(std::vector<std::string>());
-				typeId = _FileExtensions.size() - 1;
+				typeId = (uint32)_FileExtensions.size() - 1;
 				_DevTypeNameToId[sheetType] = typeId;
 				std::string unknownNewType = std::string("unknown." + sheetType);
 				_DevSheetIdToName[typeId].push_back(unknownNewType);

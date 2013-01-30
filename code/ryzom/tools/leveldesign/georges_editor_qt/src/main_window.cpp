@@ -63,7 +63,7 @@ namespace NLQT
 
 		// load and set leveldesign path from config
 		_leveldesignPath = Modules::config().
-			getValue("LeveldesignPath", QString("").toStdString()).c_str();
+			getValue("LeveldesignPath", std::string()).c_str();
 		QFileInfo info(_leveldesignPath);
 		if (!info.isDir()) 
 			_leveldesignPath = "";
@@ -229,7 +229,7 @@ namespace NLQT
 		setCursor(Qt::WaitCursor);
 
 		//TODO: if not exists open FileDialog SaveAs...
-		if(!CPath::exists(_currentView->loadedForm.toStdString()))
+		if(!CPath::exists(_currentView->loadedForm.toUtf8().constData()))
 		{
 			QString fileName = QFileDialog::getSaveFileName(
 				this,
@@ -239,7 +239,7 @@ namespace NLQT
 			QFile file(fileName);
 	        file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
 			file.close();
-			CPath::addSearchFile(fileName.toStdString());
+			CPath::addSearchFile(fileName.toUtf8().constData());
 				//QFileInfo info = QFileInfo(file);
 				//m->setData(in2, info.fileName());
 		}
@@ -417,7 +417,7 @@ namespace NLQT
 		//tabList = _mainWindow->findChildren<QTabBar *>();
 		//nlinfo(QString("%1 %2").arg(QString::number((int)this,16)).
 		//		arg(QString::number((int)_mainWindow,16)).
-		//		toStdString().c_str());
+		//		toUtf8().constData());
 		QTabBar *tb = 0;
 		Q_FOREACH(QTabBar *tabBar, tabList)
 		{
@@ -427,11 +427,11 @@ namespace NLQT
 			//	arg(QString::number((int)tabBar,16)).
 			//	arg(QString::number((int)tabBar->parentWidget(),16)).
 			//	arg(QString::number((int)tabBar->parent(),16)).
-			//	toStdString().c_str());
+			//	toUtf8().constData());
 			for (int i = 0; i < tabBar->count(); i++)
 			{
 				QString currentTab = tabBar->tabText(i);
-				//nlinfo(currentTab.toStdString().c_str());
+				//nlinfo(currentTab.toUtf8().constData());
 			}
 			tb = tabBar;
 		}
@@ -440,7 +440,7 @@ namespace NLQT
 
 	void CMainWindow::tabChanged(int index)
 	{
-		nlinfo(QString("%1").arg(index).toStdString().c_str());
+		nlinfo("%d", index);
 		if (index == -1) 
 		{
 			setWindowTitle("Qt Georges Editor");
@@ -448,7 +448,7 @@ namespace NLQT
 		}
 
 		QTabBar *tb = getTabBar();
-		//nlinfo(QString("%1").arg(index).toStdString().c_str());
+		//nlinfo(QString("%1").arg(index).toUtf8().constData());
 
 		Q_FOREACH(CGeorgesTreeViewDialog* dlg, _treeViewList) 
 		{
@@ -456,7 +456,7 @@ namespace NLQT
 			{
 				//nlinfo(QString("%1 modified %2").arg(tb->tabText(index)).
 				//	arg(dlg->modified()).
-				//	toStdString().c_str());
+				//	toUtf8().constData());
 				_currentView = dlg;
 				setWindowTitle("Qt Georges Editor - " + tb->tabText(index));
 				_saveAction->setEnabled(dlg->modified());

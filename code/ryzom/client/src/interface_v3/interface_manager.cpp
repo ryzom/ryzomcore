@@ -1563,7 +1563,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	CIFile f;
 	string sFileName;
 	sFileName = NLMISC::CPath::lookup (filename, false);
-	if (sFileName == "" || !f.open(sFileName))
+	if (sFileName.empty() || !f.open(sFileName))
 		return false;
 
 

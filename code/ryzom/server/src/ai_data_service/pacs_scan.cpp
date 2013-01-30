@@ -39,7 +39,7 @@
 #include "nel/pacs/u_retriever_bank.h"
 #include "nel/pacs/u_primitive_block.h"
 
-#include "nel/../../src/pacs/global_retriever.h"
+#include "nel/pacs/global_retriever.h"
 
 
 // Nel Ligo

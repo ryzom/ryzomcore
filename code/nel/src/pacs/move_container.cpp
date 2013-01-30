@@ -16,9 +16,9 @@
 
 #include "stdpacs.h"
 
-#include "move_primitive.h"
-#include "move_element.h"
-#include "primitive_block.h"
+#include "nel/pacs/move_primitive.h"
+#include "nel/pacs/move_element.h"
+#include "nel/pacs/primitive_block.h"
 
 #include "nel/misc/hierarchical_timer.h"
 

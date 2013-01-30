@@ -17,6 +17,7 @@
 #ifndef NL_OBJECT_ARENA_ALLOCATOR_H
 #define NL_OBJECT_ARENA_ALLOCATOR_H
 
+#include "types_nl.h"
 #include "singleton.h"
 
 namespace NLMISC

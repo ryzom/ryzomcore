@@ -153,7 +153,7 @@ protected:
 	// ctor
 	CChatWindow();
 	// dtor
-	~CChatWindow();
+	virtual ~CChatWindow();
 protected:
 	IChatWindowListener *_Listener;
 	NLMISC::CRefPtr<CGroupContainer> _Chat;

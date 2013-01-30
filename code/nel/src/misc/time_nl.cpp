@@ -16,6 +16,10 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/time_nl.h"
+#include "nel/misc/sstring.h"
+#include "nel/misc/thread.h"
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
@@ -29,10 +33,9 @@
 #include <mach/mach_time.h>
 #endif
 
-#include "nel/misc/time_nl.h"
-#include "nel/misc/sstring.h"
-
-#include <nel/misc/thread.h>
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -280,11 +283,17 @@ void CTime::probeTimerInfo(CTime::CTimerInfo &result)
 		else result.RequiresSingleCore = false;
 
 		if (result.HighPrecisionResolution == 14318180)
+		{
 			nldebug("Detected known HPET era timer frequency");
+		}
 		if (result.HighPrecisionResolution == 3579545)
+		{
 			nldebug("Detected known AHCI era timer frequency");
+		}
 		if (result.HighPrecisionResolution == 1193182)
+		{
 			nldebug("Detected known i8253/i8254 era timer frequency");
+		}
 	}
 }
 

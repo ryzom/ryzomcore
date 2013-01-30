@@ -126,6 +126,8 @@ namespace NLQT
 							} // end default
 						} // end switch valueFrom
 					} // end case nodeForm
+				default:
+					break;
 				} // end switch nodeFrom
 				return QVariant();
 			}
@@ -138,13 +140,13 @@ namespace NLQT
 					CFormItem *item = getItem(in);
 
 					QString value = item->data(1).toString();
-					//QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+					//QString path = NLMISC::CPath::lookup(value.toUtf8().constData(),false).c_str();
 
 					if (value.contains(".shape")) 
 					{
 						if (Modules::objViewInt())
 						{
-							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toStdString());
+							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{
 								if(icon->isNull())
@@ -160,7 +162,7 @@ namespace NLQT
 					}
 					else if(value.contains(".tga") || value.contains(".png")) 
 					{
-						QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+						QString path = NLMISC::CPath::lookup(value.toUtf8().constData(),false).c_str();
 						if(path.isEmpty())
 						{
 							path = ":/images/pqrticles.png";
@@ -183,7 +185,7 @@ namespace NLQT
 					{
 						if (Modules::objViewInt()) 
 						{
-							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toStdString());
+							QIcon *icon = Modules::objViewInt()->saveOneImage(value.toUtf8().constData());
 							if (icon)
 							{
 								if(icon->isNull())
@@ -199,7 +201,7 @@ namespace NLQT
 					}
 					else if(value.contains(".tga") || value.contains(".png")) 
 					{
-						QString path = NLMISC::CPath::lookup(value.toStdString(),false).c_str();
+						QString path = NLMISC::CPath::lookup(value.toUtf8().constData(),false).c_str();
 						if(path.isEmpty())
 						{
 							path = ":/images/pqrticles.png";
@@ -378,7 +380,7 @@ namespace NLQT
 					//uint value_uint;
 					//sint value_sint;
 					//double value_double;
-					QString elmtType = "";
+					QString elmtType;
 					UFormElm *elmt = 0;
 					if(root->getNodeByName(&elmt, elmName.c_str(),  whereN, true)) 
 					{
@@ -399,13 +401,13 @@ namespace NLQT
 									switch (type->getType()) 
 									{
 									case UType::UnsignedInt:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toStdString();
+										value = QString("%1").arg(QString(value.c_str()).toDouble()).toUtf8().constData();
 										elmtType.append("_uint");break;
 									case UType::SignedInt:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toStdString();
+										value = QString("%1").arg(QString(value.c_str()).toDouble()).toUtf8().constData();
 										elmtType.append("_sint");break;
 									case UType::Double:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble(),0,'f',1).toStdString();
+										value = QString("%1").arg(QString(value.c_str()).toDouble(),0,'f',1).toUtf8().constData();
 										elmtType.append("_double");break;
 									case UType::String:
 										elmtType.append("_string");break;
@@ -540,7 +542,7 @@ namespace NLQT
 				{
 					QList<QVariant> columnData;
 					std::string value;
-					QString elmtType = "";
+					QString elmtType;
 
 					UFormElm *elmt = 0;
 					if(root->getArrayNode(&elmt,0) && elmt) 

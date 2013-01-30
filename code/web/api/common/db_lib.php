@@ -43,79 +43,84 @@ class ServerDatabase
     	}
 
 		if (($this->hostname != '') && ($this->username != '') && ($this->database != ''))
-		{
-        	$this->_connection = mysql_connect($this->hostname, $this->username, $this->password)
-				or die("ERR1"); // ace . $this->get_error());
-        	$this->select_db($this->database);
-		}
+			$this->_connection = new mysqli($this->hostname, $this->username, $this->password, $this->database);
     }
 
     function close()
     {
-        @mysql_close($this->_connection);
+		$this->_connection->close();
     }
 
     function query($sql_statement)
     {
-        $result = mysql_query($sql_statement, $this->_connection);
+		$result = $this->_connection->query($sql_statement);
+		if (!$result)
+			alert('MYSQL', $this->get_error(), 2);
         return $result;
     }
 
 	function select_db($dbname) {
 		$this->database = $dbname;
-		mysql_select_db($this->database, $this->_connection) or die("Database selection error : " . $this->get_error());
+		$this->_connection->select_db($dbname);
 	}
 
 	function num_rows($result)
 	{
-		return @mysql_num_rows($result);
+		return $result->num_rows;
 	}
 
-    function fetch_row($result, $result_type=MYSQL_BOTH)
+    function fetch_row($result, $result_type=MYSQLI_BOTH)
     {
-        return @mysql_fetch_array($result, $result_type);
-    }
-    
-	function fetch_assoc($result)
-    {
-        return @mysql_fetch_array($result, MYSQL_ASSOC);
+		if (gettype($result) == "object")
+			return $result->fetch_array($result_type);
+		 return NULL;
     }
 
+	function fetch_assoc($result)
+    {
+		if (gettype($result) == "object")
+			return $result->fetch_assoc();
+		return NULL;
+    }
 
     function query_single_row($sql_statement)
     {
         $result = $this->query($sql_statement);
-        return @mysql_fetch_array($result);
+		if (gettype($result) == "object")
+			return $result->fetch_array();
+
+		return NULL;
     }
 
 	function free_result($result)
 	{
-		@mysql_free_result($result);
+		$result->free();
 	}
 
     function get_error()
     {
-        return mysql_errno($this->_connection) .": ". mysql_error($this->_connection);
+		return $this->_connection->errno.': '.$this->_connection->error;
     }
 
     function last_insert_id()
     {
-        return @mysql_insert_id();
+		return $this->_connection->insert_id;
+    }
+
+    function escape_string($escapestr) {
+		return $this->_connection->real_escape_string($escapestr);
     }
 
     function change_to($host,$user,$pass,$dbname)
     {
-    	$this->close();
+    	/*$this->close();
     	$this->hostname = $host;
     	$this->username = $user;
     	$this->password = $pass;
     	$this->database = $dbname;
-    	$this->ServerDatabase();
+    	$this->ServerDatabase();*/
     }
 }
-
-
-
 
 class ryDB {
 
@@ -123,11 +128,11 @@ class ryDB {
 	private $db;
 	private $defs = array();
 	private $errors = '';
-	
-		
+
+
 	private function __construct($db_name) {
 		global $_RYZOM_API_CONFIG;
-
+		$this->db_name = $db_name;
 		$this->db = new ServerDatabase(RYAPI_WEBDB_HOST, RYAPI_WEBDB_LOGIN, RYAPI_WEBDB_PASS, $db_name);
 		$this->db->query("SET NAMES utf8");
 	}
@@ -140,20 +145,41 @@ class ryDB {
 		return self::$_instances[$db_name];
 	}
 
-	function setDbDefs($table, $defs) {
+	function setDbDefs($table, $defs, $check=true) {
+		if ($check)
+		{
+			$result = $this->db->query('SHOW FIELDS FROM '.$table);
+			if (!$result)
+				die("Table $table not found in database");
+
+			$fields = array_keys($defs);
+			while ($row = $this->db->fetch_row($result)) {
+				if (in_array($row['Field'], $fields))
+					unset($fields[array_search($row['Field'], $fields)]);
+				else
+					alert('DbLib', 'Missing field '.$row['Field']." on DbDef of table [$table] of database [$this->db_name] !", 2);
+			}
+			if ($fields)
+				die('Missing fields ['.implode('] [', $fields)."] in table [$table] of database [$this->db_name] !");
+		}
 		$this->defs[$table] = $defs;
 	}
-	
+
 	function getDefs($table) {
-		if (!array_key_exists($table, $this->defs))
-			die("Please add tables defs using setDbDefs('$table', \$defs)");
-		return $this->defs[$table];
+		if ($this->hasDbDefs($table))
+			return $this->defs[$table];
+
+		alert('DBLIB', "Please add tables to '$this->db_name' defs using setDbDefs('$table', \$defs)", 2);
 	}
-	
+
+	function hasDbDefs($table) {
+		return array_key_exists($table, $this->defs);
+	}
+
 	function getErrors() {
 		return $this->db->get_error();
 	}
-	
+
 	function now() {
 		return date('Y-m-d H:i:s', time());
 	}
@@ -169,18 +195,43 @@ class ryDB {
 	function addDbTableProp($table, $props) {
 		$this->props[$table] = $props;
 	}
-	
+
+	function sqlEscape($escapestr) {
+		return $this->db->escape_string($escapestr);
+	}
+
+	function insertID() {
+		return $this->db->last_insert_id();
+	}
+
+
 	/// DIRECT QUERY
-	function sqlQuery($sql) {
+	function sqlQuery($sql, $index = false, $result_type = MYSQLI_BOTH) {
 		$result = $this->db->query($sql);
+		if (!$result)
+			return NULL;
+		if($index !== false && !is_array($index)){
+			$index = array($index);
+		}
 		$ret = array();
-		while ($row = $this->db->fetch_row($result)) {
-			$ret[] = $row;
+		while ($row = $this->db->fetch_row($result, $result_type)) {
+			if($index !== false) {
+				// if $index is ['id1', 'id2'], then this code executes as
+				// $ret[$row['id1']][$row['id2']] = $row
+				$current = &$ret;
+				foreach($index as $key){
+					if(!isset($row[$key]))
+						alert('DBLIB', "Requested index field ($key) was not selected from db");
+					$current = &$current[$row[$key]];
+				}
+				$current = $row;
+			} else
+				$ret[] = $row;
 		}
 		return $ret;
 	}
-	
-	
+
+
 	/// QUERY ///
 	function sqlSelect($table, $props, $values=array(), $extra='') {
 		if ($table) {
@@ -188,16 +239,16 @@ class ryDB {
 			$params = array();
 			$test = array();
 			if (!$props)
-				die("Bad Select on [$table] : missing props");
-			
+				alert('DBLIB', "Bad Select on [$table] : missing props");
+
 			foreach($props as $name => $type)
-				$params[] = '`'.addslashes($name).'`';
-				
+				$params[] = '`'.$this->sqlEscape($name).'`';
+
 			foreach($values as $name => $value) {
 				if ($name[0] == '=')
-					$test[] = '('.addslashes(substr($name, 1)).' LIKE '.var_export($value, true).')';
+					$test[] = '('.$this->sqlEscape(substr($name, 1)).' LIKE '.var_export($value, true).')';
 				else
-					$test[] = '('.addslashes($name).' = '.var_export($value, true).')';
+					$test[] = '('.$this->sqlEscape($name).' = '.var_export($value, true).')';
 			}
 			$sql .= implode(",\n\t", $params)."\nFROM\n\t".$table."\n";
 			if ($test)
@@ -209,38 +260,36 @@ class ryDB {
 		return $sql.';';
 
 	}
-	
+
 	function querySingle($table, $values=array(), $extra='') {
 		$sql = $this->sqlSelect($table, $this->getDefs($table), $values, $extra);
-		$result = $this->db->query($sql);
-		return $this->db->fetch_row($result);
+		$result = $this->sqlQuery($sql, false, MYSQLI_BOTH);
+		if(empty($result))
+			return NULL;
+		return $result[0];
 	}
-	
+
 	function querySingleAssoc($table, $values=array(), $extra='') {
 		$sql = $this->sqlSelect($table, $this->getDefs($table), $values, $extra);
-		$result = $this->db->query($sql);
-		return $this->db->fetch_row($result, MYSQL_ASSOC);
+		$result = $this->sqlQuery($sql, false, MYSQLI_ASSOC);
+		if(empty($result))
+			return NULL;
+		return $result[0];
 	}
-	
-	function query($table, $values=array(), $extra='') {
+
+	function query($table, $values=array(), $extra='', $index = false, $result_type = MYSQLI_BOTH) {
 		$sql = $this->sqlSelect($table, $this->getDefs($table), $values, $extra);
-		$result = $this->db->query($sql);
-		$ret = array();
-		while ($row = $this->db->fetch_row($result)) {
-			$ret[] = $row;
-		}
-		return $ret;
+		return $this->sqlQuery($sql, $index, $result_type);
 	}
-	
-	function queryAssoc($table, $values=array(), $extra='') {
-		$sql = $this->sqlSelect($table, $this->getDefs($table), $values, $extra);
-		$result = $this->db->query($sql);
-		$ret = array();
-		while ($row = $this->db->fetch_row($result, MYSQL_ASSOC)) {
-			$ret[] = $row;
-		}
-		return $ret;
+
+	function queryAssoc($table, $values=array(), $extra='', $index = false) {
+		return $this->query($table, $values, $extra, $index, MYSQLI_ASSOC);
 	}
+
+	function queryIndex($table, $index, $values=array(), $extra='') {
+		return $this->query($table, $values, $extra, $index, MYSQLI_ASSOC);
+	}
+
 
 	/// INSERT ///
 	function sqlInsert($table, $props, $vals) {
@@ -250,7 +299,7 @@ class ryDB {
 		foreach($props as $name => $type) {
 			if (!isset($vals[$name]))
 				continue;
-			$params[] = $name;
+			$params[] = '`'.$name.'`';
 			switch ($type) {
 				case SQL_DEF_BOOLEAN:
 					$values[] = $vals[$name]?1:0;
@@ -260,12 +309,12 @@ class ryDB {
 					break;
 				case SQL_DEF_DATE: // date
 					if (is_string($vals[$name]))
-						$values[] = "'".addslashes($vals[$name])."'";
+						$values[] = "'".$this->sqlEscape($vals[$name])."'";
 					else
 						$values[] = "'".$this->toDate($vals[$name])."'";
 					break;
 				default:
-					$values[] = "'".addslashes($vals[$name])."'";
+					$values[] = "'".$this->sqlEscape($vals[$name])."'";
 					break;
 			}
 		}
@@ -284,8 +333,8 @@ class ryDB {
 		$sql = "DELETE FROM\n\t".$table."\n";
 		$test = array();
 		foreach($values as $name => $value)
-			$test[] = '('.addslashes($name).' = '.var_export($value, true).')';
-		
+			$test[] = '('.$this->sqlEscape($name).' = '.var_export($value, true).')';
+
 		if ($test or $where)
 			$sql .= "WHERE\n\t";
 		if ($test)
@@ -294,7 +343,7 @@ class ryDB {
 			$sql .= "\n".$where;
 		return $sql.';';
 	}
-	
+
 	function delete($table, $values=array(), $where='') {
 		$sql = $this->sqlDelete($table, $values, $where);
 		$result = $this->db->query($sql);
@@ -316,23 +365,23 @@ class ryDB {
 					break;
 				case SQL_DEF_DATE:
 					if (is_string($vals[$name]))
-						$values[] = '`'.$name.'` = \''.addslashes($vals[$name]).'\'';
+						$values[] = '`'.$name.'` = \''.$this->sqlEscape($vals[$name]).'\'';
 					else
 						$values[] = '`'.$name.'` = \''.$this->toDate($vals[$name]).'\'';
 					break;
 				default:
-					$values[] = '`'.$name.'` = \''.addslashes($vals[$name]).'\'';
+					$values[] = '`'.$name.'` = \''.$this->sqlEscape($vals[$name]).'\'';
 					break;
 			}
 		}
 		$sql .= "\n\t".implode(",\n\t", $values)."\n";
 
 		foreach($tests as $name => $value) {
-			$test[] = '('.addslashes($name).' = '.var_export($value, true).')';
+			$test[] = '('.$this->sqlEscape($name).' = '.var_export($value, true).')';
 		}
 		if ($test)
 			$sql .= "WHERE\n\t".implode("\nAND\n\t", $test);
-		
+
 		$sql .= "\n".$extra;
 
 		return $sql;
@@ -363,17 +412,17 @@ class ryDB {
 			continue;
 			switch ($type) {
 			case 'trad':
-				$values[] = '`'.$name."` = '".addslashes($vals[$name])."'";
+				$values[] = '`'.$name."` = '".$this->sqlEscape($vals[$name])."'";
 				break;
 			case 'textarea':
 			case 'string':
 			case 'option':
-				$values[] =  '`'.$name."` = '".addslashes($vals[$name])."'";
+				$values[] =  '`'.$name."` = '".$this->sqlEscape($vals[$name])."'";
 				break;
 			case 'id':
 			case 'int':
 			case 'float':
-				$values[] =  '`'.$name.'` = '.addslashes($vals[$name]);
+				$values[] =  '`'.$name.'` = '.$this->sqlEscape($vals[$name]);
 				break;
 			case 'bool':
 				$values[] = '`'.$name.'` = '.($vals[$name]?'1':'0');
@@ -389,7 +438,7 @@ class ryDB {
 		return $result;
 	}
 
-	
+
 	/// Display
 	function getTableHtml($name, $params, $values, $order_by='')
 	{
@@ -417,6 +466,55 @@ class ryDB {
 		return $ret;
 	}
 
+	/// Update Database Structure
+
+	static function updateDatabaseStruct($defs)
+	{
+		if (file_exists(RYAPP_PATH.'database.versions'))
+			$versions = unserialize(file_get_contents(RYAPP_PATH.'database.versions'));
+		else
+			$versions = array();
+
+		$c = "Updating DB Structure...\n";
+		foreach ($defs as $dbname => $tables) {
+			$db = new ServerDatabase(RYAPI_WEBDB_HOST, RYAPI_WEBDB_LOGIN, RYAPI_WEBDB_PASS, $dbname);
+			$db->query("SET NAMES utf8");
+			$c .= "\n	Selected DB '$dbname'\n";
+			foreach ($tables as $table => $sql)
+			{
+				$version = count($sql);
+				if (array_key_exists($table, $versions))
+					$diff = $version - $versions[$table];
+				else {
+					$versions[$table] = 0;
+					$diff = $version;
+				}
+
+				$c .= "		Table '$table' need v$version (current v".strval($versions[$table].') => ');
+
+				if ($diff > 0) {
+					$sql_to_run = array_slice($sql, $versions[$table], $diff);
+					foreach($sql_to_run as $sql_run) {
+						if ($sql_run) {
+							$c .= "Run sql... ";
+							$result = $db->query($sql_run);
+						} else
+							$c .= "KO!!!";
+					}
+					if ($result) {
+						$c .= "OK";
+						$versions[$table] = $version;
+					}
+				} else
+					$c .= "OK";
+				$c .= "\n";
+			}
+			$c .= "\n";
+			$db->close();
+		}
+		file_put_contents(RYAPP_PATH.'database.versions', serialize($versions));
+		return '<pre>'.$c.'<pre>';
+	}
 }
 
 ?>
