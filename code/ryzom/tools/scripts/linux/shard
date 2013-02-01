@@ -1,3 +1,8 @@
 #!/bin/sh
+if [ -z "${RYZOM_PATH+xxx}" ]; 
+then 
+	echo "ERROR: The variable RYZOM_PATH must be set! (e.g. /home/username/ryzom/code/ryzom)";
+	exit 1;
+fi
 cd $RYZOM_PATH/server
 /bin/sh $RYZOM_PATH/tools/scripts/linux/ryzom_domain_screen_wrapper.sh $*
