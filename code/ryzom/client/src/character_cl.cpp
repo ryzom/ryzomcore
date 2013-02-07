@@ -488,7 +488,7 @@ void CCharacterCL::stopAttachedFXForCurrrentAnim(bool stopLoopingFX)
 			{
 				if(!(*tmpItAttached)->FX.empty())
 				{
-					if (!(*tmpItAttached)->FX.removeByID("STOP") && !(*tmpItAttached)->FX.removeByID("main"))
+					if (!(*tmpItAttached)->FX.removeByID('STOP') && !(*tmpItAttached)->FX.removeByID('main'))
 					{
 						(*tmpItAttached)->FX.activateEmitters(false);
 					}
