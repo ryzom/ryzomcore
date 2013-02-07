@@ -566,7 +566,8 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		}
 		else
 		{
-			k = XKeycodeToKeysym(_dpy, keyCode, 0);
+			int keysyms_per_keycode_return;
+			k = (KeySym)XGetKeyboardMapping(_dpy,keyCode,0,&keysyms_per_keycode_return);
 		}
 
 		// send CEventKeyDown event only if keyCode is defined
