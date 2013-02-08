@@ -1942,7 +1942,7 @@ yyreduce:
 
   case 58:
 #line 544 "ai_service/script_parser.yacc"
-    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the expression");;}
+    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the expression");;}
     break;
 
   case 59:
@@ -2010,7 +2010,7 @@ yyreduce:
 
   case 71:
 #line 566 "ai_service/script_parser.yacc"
-    {ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the if condition");;}
+    {ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the if condition");;}
     break;
 
   case 72:
@@ -2029,7 +2029,7 @@ yyreduce:
 
   case 74:
 #line 574 "ai_service/script_parser.yacc"
-    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the if condition");;}
+    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the if condition");;}
     break;
 
   case 75:
@@ -2048,7 +2048,7 @@ yyreduce:
 
   case 77:
 #line 582 "ai_service/script_parser.yacc"
-    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the while condition");;}
+    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the while condition");;}
     break;
 
   case 78:
@@ -2086,7 +2086,7 @@ yyreduce:
 
   case 83:
 #line 599 "ai_service/script_parser.yacc"
-    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the while condition");;}
+    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the while condition");;}
     break;
 
   case 84:
@@ -2176,7 +2176,7 @@ yyreduce:
 
   case 101:
 #line 619 "ai_service/script_parser.yacc"
-    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the expression");;}
+    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the expression");;}
     break;
 
   case 102:
@@ -2191,7 +2191,7 @@ yyreduce:
 
   case 104:
 #line 625 "ai_service/script_parser.yacc"
-    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the expression");;}
+    { ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the expression");;}
     break;
 
   case 105:
@@ -2361,12 +2361,12 @@ yyreduce:
 
   case 117:
 #line 754 "ai_service/script_parser.yacc"
-    {ERROR_DETECTED (yyval.ByteCode, "missing '(' at the begining of the switch expression");;}
+    {ERROR_DETECTED (yyval.ByteCode, "missing '(' at the beginning of the switch expression");;}
     break;
 
   case 118:
 #line 755 "ai_service/script_parser.yacc"
-    {ERROR_DETECTED (yyval.ByteCode, "missing '{' at the begining of the switch cases");;}
+    {ERROR_DETECTED (yyval.ByteCode, "missing '{' at the beginning of the switch cases");;}
     break;
 
   case 119:

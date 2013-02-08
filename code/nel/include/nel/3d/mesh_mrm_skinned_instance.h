@@ -49,7 +49,7 @@ const NLMISC::CClassId		MeshMRMSkinnedInstanceId=NLMISC::CClassId(0x6cfd2619, 0x
 class CMeshMRMSkinnedInstance : public CMeshBaseInstance
 {
 public:
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 protected:

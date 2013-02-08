@@ -898,7 +898,7 @@ CCompiler::CCompiler()
 		while (!file.eof())
 		{
 			file.getline(buffer, bufferSize);
-			if (buffer[0]=='#' || buffer[0]=='\0') // Skip lines begining with a # and empty lines
+			if (buffer[0]=='#' || buffer[0]=='\0') // Skip lines beginning with a # and empty lines
 				continue;
 			string line = buffer;
 			const string sep1 = ": ";

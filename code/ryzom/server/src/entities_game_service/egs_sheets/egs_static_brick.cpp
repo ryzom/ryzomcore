@@ -665,7 +665,7 @@ void addParam(const std::string &paramStr, std::vector<TBrickParam::IIdPtr> &Par
 	case TBrickParam::STA_WEIGHT_FACTOR:
 		// $*STRUCT CSBrickParamStaWeightFactor TBrickParam::STA_WEIGHT_FACTOR
 		// $*-i float StaFactor=0		// quantity of STA FACTOR of WEIGHT to use
-		// $*-i unsigned StaConst=0		// quantity of STA Constante to use, used STA = StaFactor * (weight of equiped weapons) + StaConst
+		// $*-i unsigned StaConst=0		// quantity of STA Constante to use, used STA = StaFactor * (weight of equipped weapons) + StaConst
 		Params.push_back(new CSBrickParamStaWeightFactor(tail)); 
 		break;
 

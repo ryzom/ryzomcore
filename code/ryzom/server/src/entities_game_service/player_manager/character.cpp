@@ -9938,7 +9938,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 
 		if (item->getRefInventory() == _Inventory[INVENTORIES::equipment])
 		{
-			nlwarning("<CCharacter sellItem> character %s try to sell an equiped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
+			nlwarning("<CCharacter sellItem> character %s try to sell an equipped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
 			return;
 		}
 

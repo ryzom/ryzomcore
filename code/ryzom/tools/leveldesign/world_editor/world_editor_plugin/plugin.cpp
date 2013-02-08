@@ -262,7 +262,7 @@ void CPlugin::onIdle()
 		}
 		else
 		{
-			// first, we receive the stack of messages, which is composed of players informations
+			// first, we receive the stack of messages, which is composed of players information
 			_Client->update();
 			// now, we insert the players into the GUI
 			for (uint i = 0; i < StackPlayers.size(); ++i)

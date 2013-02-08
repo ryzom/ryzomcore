@@ -1470,7 +1470,7 @@ bool CExportNel::mirrorPhysiqueSelection(INode &node, TimeValue tvTime, const st
 	}
 
 
-	// **** Build the ouput vertices
+	// **** Build the output vertices
 	std::vector<uint>	vertOut;
 	vertOut.reserve(tempVertex.size());
 

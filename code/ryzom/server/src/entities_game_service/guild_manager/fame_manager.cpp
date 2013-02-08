@@ -1657,7 +1657,7 @@ void CFameManager::tickUpdate()
 
 	if (!_LastUpdatedRow.isValid())
 	{
-		// not a valid row restart at begining
+		// not a valid row restart at beginning
 		if (!_FamesOwners.empty())
 		{
 			it = _FamesOwners.begin();

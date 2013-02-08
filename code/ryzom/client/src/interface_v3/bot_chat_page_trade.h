@@ -70,7 +70,7 @@ public:
 	void		 setBuyMean(TBuyMean buyMean) { _BuyMean = buyMean; }
 	// set the title of the window (actually applied when 'begin' is called)
 	void		 setTitle(const ucstring &title) { _Title = title; }
-	// update the 'buy' dialog window for the given sphrase sheet (the player has changed an equiped weapon => action stats change)
+	// update the 'buy' dialog window for the given sphrase sheet (the player has changed an equipped weapon => action stats change)
 	void		 updateSPhraseBuyDialog();
 	// invalidate window coords
 	void		 invalidateCoords();

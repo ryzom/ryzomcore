@@ -329,7 +329,7 @@ public:
 	float								Bulk;
 	/// Equip Time
 	uint32								EquipTime;
-	/// true if this item can be hidden when equiped
+	/// true if this item can be hidden when equipped
 	bool								NeverHideWhenEquiped;
 
 	// FX

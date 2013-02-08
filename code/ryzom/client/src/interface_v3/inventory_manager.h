@@ -242,7 +242,7 @@ public:
 		void equip(const std::string &bagPath, const std::string &invPath);
 		// UnEquip a part of the player (same format as equip method)
 		void unequip(const std::string &invPath);
-		// auto equip an item (given by index) from the bag (return true if equiped)
+		// auto equip an item (given by index) from the bag (return true if equipped)
 		bool autoEquip(sint bagEntryIndex, bool allowReplace);
 
 		void dropOrDestroyItem(CDBCtrlSheet *item, NLMISC::CBitMemStream &out, uint16 quantity);

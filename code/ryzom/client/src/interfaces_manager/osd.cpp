@@ -351,7 +351,7 @@ void COSD::drawBorders(float bSizeW, float bSizeH, float x0, float y0, float x1,
 
 //-----------------------------------------------
 // drawText :
-// Draw a text with all informations needed.
+// Draw a text with all information needed.
 //-----------------------------------------------
 void COSD::drawText(float x, float y, const ucstring &text, const CPen &pen)
 {

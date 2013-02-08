@@ -202,7 +202,7 @@ CTessFace::~CTessFace()
 // ***************************************************************************
 float			CTessFace::computeNearLimit()
 {
-	// General formula for Level, function of Size, treshold etc...:
+	// General formula for Level, function of Size, threshold etc...:
 	// WantedLevel= log2(BaseSize / sqrdist / RefineThreshold);
 	// <=> WantedLevel= log2( CurSize*2^Level / sqrdist / RefineThreshold).
 	// <=> WantedLevel= log2( ProjectedSize* 2^Level / RefineThreshold).

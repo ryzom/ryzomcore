@@ -1170,7 +1170,7 @@ static void getRegisteredServicesFromCfgFile()
 
 static void cbAESInfo(CMessage &msgin, const std::string &serviceName, TServiceId sid)
 {
-	nlinfo("Updating all informations for AES and hosted service");
+	nlinfo("Updating all information for AES and hosted service");
 
 	//
 	// setup the list of all registered services
