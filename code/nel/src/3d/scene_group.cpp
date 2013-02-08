@@ -405,7 +405,7 @@ void CInstanceGroup::serial (NLMISC::IStream& f)
 	 * ***********************************************/
 
 	// Serial a header
-	f.serialCheck ((uint32)"TPRG");
+	f.serialCheck ((uint32)'TPRG');
 
 	/*
 	Version 5:

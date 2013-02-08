@@ -185,9 +185,9 @@ void CAnimationSet::serial (NLMISC::IStream& f)
 	nlassert(!_AnimHeaderOptimisation);
 
 	// Serial an header
-	f.serialCheck ((uint32)"_LEN");
-	f.serialCheck ((uint32)"MINA");
-	f.serialCheck ((uint32)"TES_");
+	f.serialCheck ((uint32)'_LEN');
+	f.serialCheck ((uint32)'MINA');
+	f.serialCheck ((uint32)'TES_');
 
 	// Serial a version
 	uint	ver= f.serialVersion (1);
