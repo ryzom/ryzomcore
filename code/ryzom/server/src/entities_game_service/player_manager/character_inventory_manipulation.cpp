@@ -2127,8 +2127,8 @@ void CCharacter::clearTempInventory()
 
 		case TEMP_INV_MODE::Quarter:
 		case TEMP_INV_MODE::Harvest:
-			_DepositHarvestInformations.Sheet = CSheetId::Unknown;
-			_DepositHarvestInformations.EndCherchingTime = 0xffffffff;
+			_DepositHarvestInformation.Sheet = CSheetId::Unknown;
+			_DepositHarvestInformation.EndCherchingTime = 0xffffffff;
 			endHarvest();
 		break;
 

@@ -330,7 +330,7 @@ public:
 	/// Equip Time
 	uint32								EquipTime;
 	/// true if this item can be hidden when equipped
-	bool								NeverHideWhenEquiped;
+	bool								NeverHideWhenEquipped;
 
 	// FX
 	CItemFXSheet						FX;

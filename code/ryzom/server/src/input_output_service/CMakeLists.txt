@@ -25,7 +25,7 @@ TARGET_LINK_LIBRARIES(ryzom_ios_service
 					nelgeorges
 					nelligo)
 
-NL_DEFAULT_PROPS(ryzom_ios_service "Ryzom, Services: Input Ouput Service (IOS)")
+NL_DEFAULT_PROPS(ryzom_ios_service "Ryzom, Services: Input Output Service (IOS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_ios_service)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})

@@ -3201,7 +3201,7 @@ private:
 	/// if harvesting a deposit, the skill used
 	SKILLS::ESkills				_DepositSearchSkill;
 	/// Harvest deposit information
-	HARVEST_INFOS::CHarvestInfos _DepositHarvestInformations;		
+	HARVEST_INFOS::CHarvestInfos _DepositHarvestInformation;
 	//@}
 
 	/// the tick value of the nex decay of player items

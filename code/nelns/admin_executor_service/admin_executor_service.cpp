@@ -205,7 +205,7 @@ uint32 LastPing = 0;		// contains the date of the last ping sent to the services
 // Alarms
 //
 
-void sendInformations(TServiceId sid)
+void sendInformation(TServiceId sid)
 {
 	CMessage msgout("INFO");
 	msgout.serialCont(AllAdminAlarms);
@@ -1195,7 +1195,7 @@ static void cbAESInfo(CMessage &msgin, const std::string &serviceName, TServiceI
 	{
 		if (Services[j].Connected)
 		{
-			sendInformations(Services[j].ServiceId);
+			sendInformation(Services[j].ServiceId);
 		}
 	}
 }
@@ -1309,7 +1309,7 @@ void serviceConnection(const std::string &serviceName, TServiceId sid, void *arg
 
 	Services[sid.get()].init(serviceName, sid);
 
-	sendInformations(sid);
+	sendInformation(sid);
 
 	nlinfo("%s-%hu connected", Services[sid.get()].ShortName.c_str(), Services[sid.get()].ServiceId.get());
 

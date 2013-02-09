@@ -1344,7 +1344,7 @@ sint32 CFameManager::getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_
 		else
 		{
 			// get correct index in tribe list
-			initTribeTresholdIndex();
+			initTribeThresholdIndex();
 			uint32	ttIndex= ~0;
 			if(factionIndex<_FactionIndexToTribeThresholdIndex.size())
 				ttIndex= _FactionIndexToTribeThresholdIndex[factionIndex];
@@ -1395,7 +1395,7 @@ sint32 CFameManager::getMaxFameByFactionIndex(std::pair<PVP_CLAN::TPVPClan, PVP_
 	}
 }
 
-void CFameManager::doInitTribeTresholdIndex()
+void CFameManager::doInitTribeThresholdIndex()
 {
 	CStaticFames	&sf= CStaticFames::getInstance();
 	_FactionIndexToTribeThresholdIndex.clear();

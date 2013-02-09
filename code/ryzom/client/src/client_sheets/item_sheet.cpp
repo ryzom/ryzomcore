@@ -100,7 +100,7 @@ CItemSheet::CItemSheet()
 	Type = CEntitySheet::ITEM;
 	Bulk= 0.f;
 	EquipTime= 0;
-	NeverHideWhenEquiped = false;
+	NeverHideWhenEquipped = false;
 	RequiredCharac = CHARACTERISTICS::Unknown;
 	RequiredCharacLevel = 0;
 	RequiredSkill = SKILLS::unknown;
@@ -214,8 +214,8 @@ void CItemSheet::build(const NLGEORGES::UFormElm &item)
 	IconText = strlwr (IconText);
 	IdIconText = ClientSheetsStrings.add(IconText);
 
-	// See if this item can be hiden when equiped
-	if(!item.getValueByName (NeverHideWhenEquiped, "3d.never hide when equiped"))
+	// See if this item can be hiden when equipped
+	if(!item.getValueByName (NeverHideWhenEquipped, "3d.never hide when equiped"))
 		debug("key '3d.never hide when equiped.");
 
 	// Load the different slot in wicth the item can be equipped.
@@ -633,7 +633,7 @@ void CItemSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(HasFx);			// Serialize the has fx.
 	f.serial(DropOrSell);
 	f.serial(IsItemNoRent);
-	f.serial(NeverHideWhenEquiped);
+	f.serial(NeverHideWhenEquipped);
 	f.serial(Stackable);
 	f.serial(IsConsumable);
 	f.serial(Bulk);

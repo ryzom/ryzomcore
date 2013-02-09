@@ -64,8 +64,8 @@ CLocatedBindablePage::CLocatedBindablePage(QWidget *parent)
 	_ui.blurCoeffWidget->setWrapper(&_MotionBlurCoeffWrapper);
 
 	// Fake motion blur threshold
-	_ui.blurTresholdWidget->setRange(0.0, 5.0);
-	_ui.blurTresholdWidget->setWrapper(&_MotionBlurThresholdWrapper);
+	_ui.blurThresholdWidget->setRange(0.0, 5.0);
+	_ui.blurThresholdWidget->setWrapper(&_MotionBlurThresholdWrapper);
 
 	// Shock wave radius cut
 	_ui.radiusCutWidget->setRange(0, 1);
@@ -275,7 +275,7 @@ void CLocatedBindablePage::setEditedItem(CWorkspaceNode *ownerNode, NL3D::CPSLoc
 
 			_MotionBlurThresholdWrapper.P = fla;
 			_MotionBlurThresholdWrapper.OwnerNode = _Node;
-			_ui.blurTresholdWidget->updateUi();
+			_ui.blurThresholdWidget->updateUi();
 
 			_ui.zalignCheckBox->show();
 			_ui.alignCheckBox->show();
@@ -633,7 +633,7 @@ void CLocatedBindablePage::updateValidWidgetForAlignOnMotion(bool align)
 	_ui.blurCoeffLabel->setEnabled(align);
 	_ui.blurCoeffWidget->setEnabled(align);
 	_ui.blurTreshholdLabel->setEnabled(align);
-	_ui.blurTresholdWidget->setEnabled(align);
+	_ui.blurThresholdWidget->setEnabled(align);
 	_ui.zalignCheckBox->setEnabled(align);
 }
 
