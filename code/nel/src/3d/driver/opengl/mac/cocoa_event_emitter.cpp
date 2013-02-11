@@ -209,7 +209,7 @@ static bool isTextKeyEvent(NSEvent* event)
 
 	/*
 		TODO check why iswprint(character) does not solve it.
-			it always returns false, even for π, é, ...
+			it always returns false, even for non-ASCII characters
 	*/
 	// characters > 127 but not printable
 	if( nelKey == NLMISC::KeyF1    || nelKey == NLMISC::KeyF2    ||

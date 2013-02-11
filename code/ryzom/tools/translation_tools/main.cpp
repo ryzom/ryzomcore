@@ -3139,7 +3139,7 @@ int main(int argc, char *argv[])
 	{
 		uint64 hash = makeHash(ucstring("Bonjour le monde !"));
 		nldebug("%s", hashToString(hash).c_str());
-		hash = makeHash(ucstring("Une autre cléf"));
+		hash = makeHash(ucstring("Une autre clef"));
 		nldebug("%s", hashToString(hash).c_str());
 	}
 */
