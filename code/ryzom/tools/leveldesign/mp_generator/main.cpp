@@ -1530,7 +1530,7 @@ void LoadFamillesMP()
 
 	ligne = fileData.splitTo( "\n", true );
 
-	while ( !ligne.empty() )
+	while ( ligne != "" )
 	{
 		NewMP( ligne );	
 		ligne = fileData.splitTo( "\n", true );
