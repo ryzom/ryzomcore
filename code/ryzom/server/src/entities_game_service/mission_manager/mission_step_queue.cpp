@@ -250,8 +250,8 @@ void CMissionStepQueueEnd::onActivation(CMission* inst,uint32 stepIndex, std::li
 		inst->setCriticalPartEndDate(0);
 	}
 
-	// dès que ce step est actif il doit etre validé et on passe a la suite
-	//->genere un event qui valide ce step
+	// as soon as this step is activated, it must be validated and we go to the next
+	//->generate an event that validates this step
 	CMissionEventQueueExit *event = new CMissionEventQueueExit();
 	if (event != NULL)
 		eventList.push_back(event);

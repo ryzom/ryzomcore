@@ -318,7 +318,7 @@ void CStaticBrick::readStaticBrick( const NLGEORGES::UFormElm &root, const NLMIS
 		isAIBrick = true;
 	}
 
-	/// TODO : converti les strings de paramètres en minuscules à la lecture
+	/// TODO : convert parameters strings in lowercase when reading
 
 	// FamilyId
 	//if( root.getValueByName (value, "Basics.FamilyId") )

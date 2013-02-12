@@ -506,9 +506,9 @@ void	CFamilyBehavior::update(uint32 nbTicks)
 
 		const	EGSPD::CSeason::TSeason	season=CTimeInterface::season();
 
-		if	(	season<EGSPD::CSeason::Invalid	//	et si on est à une saison valide ..
+		if	(	season<EGSPD::CSeason::Invalid	//	if valid season
 			&&	gd->isValidForSeason(season)	)
-			break;												//	pas de raison de despawner.
+			break;												//	no reason to despawn
 
 		if	(!alreadyDespawned)
 			grp->getSpawnObj()->despawnBots(false);	//	not ok, despawn this group ..

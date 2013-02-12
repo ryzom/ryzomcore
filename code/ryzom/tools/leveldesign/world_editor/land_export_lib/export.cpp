@@ -1694,7 +1694,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 	//=============================
 
 	// Rotate all tile elements in CW (because zones are turned in CCW)
-	// If zone flipped rotate tile elements by 180°
+	// If zone flipped rotate tile elements by 180 degrees
 	set<string> allnames; // Debug
 	for (i = 0; i < PatchInfos.size(); ++i)
 	{

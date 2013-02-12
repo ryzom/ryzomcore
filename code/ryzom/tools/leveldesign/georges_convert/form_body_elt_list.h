@@ -25,8 +25,8 @@ namespace NLOLDGEORGES
 {
 
 
-// La classe CFormBodyEltList permet d'obtenir un ensemble de CFormBodyElt sous forme de liste. 
-// Dans l'opérateur +=, l'ensemble des anciens éléments sont éliminés. Les nouveaux les remplacent.
+// CFormBodyEltList provides a set of CFormBodyElt in a list form. 
+// In operator +=, set of old items are removed. New ones replace them.
 class CFormBodyEltList : public CFormBodyElt  
 {
 public:

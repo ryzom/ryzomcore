@@ -729,7 +729,7 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 //		{
 //			// In ring shard, it is possible that the client autologin and 
 //			// autochoose the character rapidly, and if a string need to be resolved 
-//			// to dîsplay the char summary, it is possible client receive the 
+//			// to display the char summary, it is possible client receive the 
 //			// dynamic string from IOS after the EGS has passed the frontend in 
 //			// entityId mode.
 //			// So, the IOS receive a stringId request with a Eid not registered yet.

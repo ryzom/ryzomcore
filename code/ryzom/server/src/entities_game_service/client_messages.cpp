@@ -2415,7 +2415,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 	msgin.serial( id,opt );
 	const std::vector<CEntityId> * gms = NULL;
 
-	// Make sure opt is not like "A(c)" for "é"
+	// Make sure opt is not like "A(c)" for e acute
 	ucstring ucopt;
 	ucopt.fromUtf8(opt);
 	opt = ucopt.toString();

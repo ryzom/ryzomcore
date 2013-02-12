@@ -44,16 +44,14 @@ enum
 								// You'll have to look deeper into code
 };
 
-// Contient la description d'une Craft Part
-// ainsi que les différentes caracteristiques
-// qu'elle concerne
+// Contains Craft Part description and different stats related
 struct CraftPart
 {
 	CSString Desc;
 	bool Carac[NumMPStats];
 };
 
-// Caractéristiques d'une MP relatives au craft
+// Raw mats stats for craft
 struct MPCraftStats
 {
 	CSString Craft;
@@ -72,7 +70,7 @@ struct MPCraftStats
 	}
 };
 
-// Permet de trier des chaines de caractères
+// Allows to sort strings
 struct ItemSort : public std::less<NLMISC::CSString> 
 { 
 	bool operator()( const NLMISC::CSString& x, const NLMISC::CSString& y ) const 
@@ -82,8 +80,7 @@ struct ItemSort : public std::less<NLMISC::CSString>
 };
 typedef set<CSString, ItemSort> CSortedStringSet;
 
-// Decrit un des items générés 
-// pour une MP de créature
+// Describe a item generated for a creature raw mat
 struct CreatureMPItem
 {
 	char eco;

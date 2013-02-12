@@ -1604,7 +1604,7 @@ void CSceneParser::updateParticlesActor(float difTime, CParticle &particle, UAni
 		return;
 	}
 
-	// Matrix 90°
+	// Matrix 90 degrees
 	CMatrix m90;
 	m90.identity();
 	m90.rotateZ((float)(Pi/2.0));

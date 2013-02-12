@@ -2420,7 +2420,7 @@ bool	pathFind(const	CNpcZone	*const	start, const	CNpcZone	*const	end, const	CPro
 
 			if (it == openList.end())
 			{
-				//If it isn’t on the open list, add it to the open list. 
+				// If it isn't on the open list, add it to the open list. 
 				// Make the current square the parent of this square. 
 				// Record the F, G, and H costs of the square. 
 

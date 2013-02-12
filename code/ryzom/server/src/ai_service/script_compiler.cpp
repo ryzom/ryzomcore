@@ -42,7 +42,7 @@ using namespace NLMISC;
 //////////////////////////////////////////////////////////////////////////
 // A Small Custom Compiler For AI.
 // (Token and Grammar are Upgradable, Error returns have to be upgraded).
-// Ask to Stéphane Le Dorze for Explanations.
+// Ask to Stephane Le Dorze for Explanations.
 //////////////////////////////////////////////////////////////////////////
 
 namespace AICOMP

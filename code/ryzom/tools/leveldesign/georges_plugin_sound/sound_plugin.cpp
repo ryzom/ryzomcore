@@ -300,7 +300,7 @@ void CSoundPlugin::updateDisplay()
 		}
 		else
 		{
-			setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m à max dist.
+			setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m to max dist.
 		}
 		_Dialog.setAngles(uint32(180 * _Sound->getConeInnerAngle() / Pi), uint32(180 * _Sound->getConeOuterAngle() / Pi)); 
 	}
@@ -433,7 +433,7 @@ void CSoundPlugin::setActiveDocument(IEditDocument *pdoc)
 			}
 			else
 			{
-				setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m à max dist.
+				setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m to max dist.
 			}
 			_Dialog.setAngles(uint32(180 * _Sound->getConeInnerAngle() / Pi), uint32(180 * _Sound->getConeOuterAngle() / Pi)); 
 			if (!_InvalidSound)

@@ -146,7 +146,7 @@ public:
 
 	/// Serialize entities.
 	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
-	/// Remove ¨Positions except for those with a mode.
+	/// Remove Positions except for those with a mode.
 	void removePosWithNoMode();
 };
 

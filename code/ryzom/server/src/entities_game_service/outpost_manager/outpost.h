@@ -35,7 +35,7 @@
  * \author Nicolas Brigand
  * \author Olivier Cado
  * \author Sebastien Guignot
- * \author Jérôme Vuarand
+ * \author Jerome Vuarand
  * \author Nevrax France
  * \date 2005
  */

@@ -17,16 +17,16 @@
 /*
 	Petite documentation sur le fonctionnement du plugin
 
-1) Le WorldEditor se connecte au plugin (config dans WorldEditorPlugin.cfg)
+1) WorldEditor connects to plugin (config in WorldEditorPlugin.cfg)
 
-2) Le plugin se connecte au World_Editor_Service
+2) Plugin connects to World_Editor_Service
 
-3) Le World_Editor_Service (config dans WorldEditorService.cfg) envoie des paquets contenant au maximum 100 joueurs.
-Ces joueurs sont soit nouveaux, soit leurs coordonnées ont changé.
+3) World_Editor_Service (config in WorldEditorService.cfg) sends packets containing up to 100 players.
+These players are new or their coordinates changed.
 
-4) Les informations des joueurs sont envoyées (voir onIdle) sous forme de primitives "player":
+4) Players information are sent (see onIdle) as "player" primitives:
 
-Voici la définition de la primitive "player", dans WORLD_EDITOR_SCRIPT.XML
+See "player" primitive definition in WORLD_EDITOR_SCRIPT.XML
 
 <PRIMITIVE CLASS_NAME="root" TYPE="node" AUTO_INIT="true" DELETABLE="true">
 		<DYNAMIC_CHILD CLASS_NAME="player"/>
