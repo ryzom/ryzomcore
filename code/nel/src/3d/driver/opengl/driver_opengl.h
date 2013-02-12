@@ -364,6 +364,7 @@ public:
 	virtual bool			uploadTextureCube (ITexture& tex, NLMISC::CRect& rect, uint8 nNumMipMap, uint8 nNumFace);
 
 	virtual void			forceDXTCCompression(bool dxtcComp);
+	virtual void			setAnisotropicFilter(sint filter);
 
 	virtual void			forceTextureResize(uint divisor);
 
@@ -955,6 +956,8 @@ private:
 	bool					_NVTextureShaderEnabled;
 	// Which stages support EMBM
 	bool					_StageSupportEMBM[IDRV_MAT_MAXTEXTURES];
+	// Anisotropic filtering value
+	float					_AnisotropicFilter;
 
 	// Prec settings for material.
 	CDriverGLStates			_DriverGLStates;

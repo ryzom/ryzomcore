@@ -96,7 +96,7 @@ namespace NLQT
 						//QString min = QString(type->getMin().c_str());
 						//QString max = QString(type->getMax().c_str());
 						//QString inc = QString(type->getIncrement().c_str());
-						//nldebug(QString("min %1 max %2 inc %3").arg(min).arg(max).arg(inc).toStdString().c_str());
+						//nldebug(QString("min %1 max %2 inc %3").arg(min).arg(max).arg(inc).toUtf8().constData());
 
 						// TODO: use saved min/max values
 						editor->setMinimum(-99999);
@@ -203,7 +203,7 @@ namespace NLQT
 			else 
 			{
 				nldebug(QString("setModelData from %1 to %2")
-					.arg(oldValue).arg(value).toStdString().c_str());
+					.arg(oldValue).arg(value).toUtf8().constData());
 				model->setData(index, value, Qt::EditRole);
 			}
 		}
@@ -224,7 +224,7 @@ namespace NLQT
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
-							.arg(oldValue).arg(value).toStdString().c_str());
+							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
 					break;
@@ -241,7 +241,7 @@ namespace NLQT
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
-							.arg(oldValue).arg(value).toStdString().c_str());
+							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
 					break;
@@ -262,7 +262,7 @@ namespace NLQT
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
-							.arg(oldValue).arg(value).toStdString().c_str());
+							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
 					break;

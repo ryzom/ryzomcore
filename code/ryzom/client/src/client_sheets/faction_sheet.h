@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 #ifndef RY_FACTION_SHEET_H
 #define RY_FACTION_SHEET_H
 
+#include "entity_sheet.h"
 
 /** Sheet of a faction
   *  NB : it doesn't derives from CEntitySheet, because its instances are aggragated in a CContinentSheet

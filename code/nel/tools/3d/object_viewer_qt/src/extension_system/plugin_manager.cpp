@@ -54,7 +54,7 @@ void PluginManager::addObject(QObject *obj)
 		nlwarning("trying to add duplicate object");
 		return;
 	}
-	nlinfo(QString("addObject: " + obj->objectName()).toStdString().c_str());
+	nlinfo("addObject: %s", obj->objectName().toUtf8().constData());
 
 	m_allObjects.append(obj);
 
@@ -71,10 +71,10 @@ void PluginManager::removeObject(QObject *obj)
 
 	if (!m_allObjects.contains(obj))
 	{
-		nlinfo(QString("object not in list: " + obj->objectName()).toStdString().c_str());
+		nlinfo("object not in list: %s", obj->objectName().toUtf8().constData());
 		return;
 	}
-	nlinfo(QString("removeObject: " + obj->objectName()).toStdString().c_str());
+	nlinfo("removeObject: %s", obj->objectName().toUtf8().constData());
 
 	Q_EMIT aboutToRemoveObject(obj);
 	QWriteLocker lock(&m_lock);

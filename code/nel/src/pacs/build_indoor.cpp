@@ -15,11 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpacs.h"
-#include "build_indoor.h"
+#include "nel/pacs/build_indoor.h"
 
-#include "collision_mesh_build.h"
-#include "local_retriever.h"
-#include "exterior_mesh.h"
+#include "nel/pacs/collision_mesh_build.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/exterior_mesh.h"
 
 using namespace std;
 using namespace NLMISC;

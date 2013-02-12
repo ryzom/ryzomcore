@@ -126,7 +126,7 @@ private:
 
 	// Generated message map functions
 	//{{AFX_MSG(CSoundDialog)
-	afx_msg void OnTimer(UINT id);
+	afx_msg void OnTimer(UINT_PTR id);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnControlPlayback();
 	afx_msg void OnZoom(NMHDR* pNMHDR, LRESULT* pResult);

@@ -2017,7 +2017,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		//first <=> actId
 		CPrimitives *primDoc = &primDocs[first];
 
-		std::string streamFileName = "";
+		std::string streamFileName;
 		if (first==0)
 		{
 			streamFileName= toString("r2.%04d.base.primitive", aiInstance);

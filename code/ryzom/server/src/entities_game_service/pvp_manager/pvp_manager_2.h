@@ -150,7 +150,7 @@ public:
 	// create a faction channel if not already exist
 	void createFactionChannel(PVP_CLAN::TPVPClan clan);
 	// create an extra faction channel if not already exist (for marauders, agnos, urasiens and hominits)
-	void createExtraFactionChannel(const std::string & channelName);
+	void createExtraFactionChannel(const std::string & channelName, bool universalChannel = false);
 	// create an user channel if not already exist
 	TChanID createUserChannel(const std::string & channelName, const std::string & pass);
 	// remove a user channel

@@ -104,8 +104,8 @@ static CTcpSock CrashCounterSock;
 
 void quitCrashReport ()
 {
-	if (NLMISC::CFile::fileExists(getLogDirectory() + "ryzom_started"))
-		CFile::deleteFile (getLogDirectory() + "ryzom_started");
+	//if (NLMISC::CFile::fileExists(getLogDirectory() + "ryzom_started"))
+		//CFile::deleteFile (getLogDirectory() + "ryzom_started");
 	// must disconnect now, else could crash at dtor time because nldebug -> access a new INelContext()
 	contReset(CrashCounterSock);
 }
@@ -148,7 +148,7 @@ INT_PTR CALLBACK MyDialogProc(
 
 HWND SlashScreen = NULL;
 HINSTANCE HInstance;
-
+/*
 static bool connect()
 {
 	string server = "crashcounter.nevrax.com";
@@ -354,7 +354,7 @@ void initCrashReport ()
 #ifdef TEST_CRASH_COUNTER
 	MessageBox (NULL, res.c_str(), res.c_str(), MB_OK);
 #endif // TEST_CRASH_COUNTER
-}
+}*/
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
 #else
@@ -430,12 +430,12 @@ int main(int argc, char **argv)
 	//		exit (0);
 	//}
 
-	initCrashReport ();
+	//initCrashReport ();
 #endif // FINAL_VERSION
 
 	// Set default email value for reporting error
 #ifdef TEST_CRASH_COUNTER
-	initCrashReport ();
+	//initCrashReport ();
 	setReportEmailFunction ((void*)sendEmail);
 	setDefaultEmailParams ("smtp.nevrax.com", "", "hulud@nevrax.com");
 
@@ -637,7 +637,7 @@ int main(int argc, char **argv)
 	//ICommand::execute("iFileAccessLogClear",*NLMISC::InfoLog);
 #endif
 
-	CFile::createEmptyFile(getLogDirectory() + "during_release");
+	//CFile::createEmptyFile(getLogDirectory() + "during_release");
 
 #ifdef TEST_CRASH_COUNTER
 	if (string(cmdline) == "/release")

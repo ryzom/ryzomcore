@@ -1542,7 +1542,7 @@ void CVertexBufferHardARB::unlock()
 	#ifdef NL_DEBUG
 		_Unmapping = true;
 	#endif
-	GLboolean unmapOk = false;
+	GLboolean unmapOk = GL_FALSE;
 
 #ifdef USE_OPENGLES
 	if (_Driver->_Extensions.OESMapBuffer)
@@ -1671,3 +1671,4 @@ void CVertexBufferHardARB::invalidate()
 #endif
 
 } // NL3D
+

@@ -16,7 +16,6 @@
 
 #include "stdsound.h"
 #include "nel/sound/background_sound_manager.h"
-
 #include "nel/sound/background_source.h"
 
 using namespace std;

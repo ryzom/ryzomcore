@@ -20,6 +20,9 @@
 #include "nel/misc/plane.h"
 #include "nel/misc/matrix.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

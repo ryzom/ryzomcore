@@ -68,8 +68,14 @@ public:
 	  * \return true if success	
 	  */
 	bool				setHideBubble(TChanID chan, bool hideBubble);
+
+	/** Change sessions in channel 'chan' so that chat is treated like universe channel
+	  * \return true if success	
+	  */
+	bool				setUniversalChannel(TChanID chan, bool universalChannel);
+
 	/** Stop session in channel 'chan' for the client 'client'.
-      * \return true if success
+	  * \return true if success
 	  */
 	bool				removeSession(TChanID chan, const TDataSetRow &client);
 	// Set 'write right' flag for a session.
@@ -92,6 +98,8 @@ public:
 	static void			cbServiceAddChan(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 	/// Message from a service that need to hide bubbble of player/npc speaking in that channel
 	static void			cbServiceSetHideBubble(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+	/// Message from a service that need to set channel to be like universe channel
+	static void			cbServiceSetUniversalChannel(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 	/// Message from a service: remove a channel.
 	static void			cbServiceRemoveChan(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 	/// Message from a service : set the channel history
@@ -116,7 +124,8 @@ private:
 private:
 	// ios msg
 	void			 iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerInputs, bool unify);
-	void			 iosSetHideBubble(TChanID chan, bool hiddeBubble);
+	void			 iosSetHideBubble(TChanID chan, bool hideBubble);
+	void			 iosSetUniversalChannel(TChanID chan, bool universalChannel);
 	void			 iosRemoveChan(TChanID chan);
 	void			 iosAddSession(TChanID chan, const TDataSetRow &client, bool readOnly);
 	void			 iosRemoveSession(TChanID chan, const TDataSetRow &client);

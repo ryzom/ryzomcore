@@ -72,8 +72,8 @@ void CNelLauncherDlg::clickedSignUp()
 
 void CNelLauncherDlg::clickedLogin()
 {
-	std::string username = leUsername->text().toStdString();
-	std::string password = lePassword->text().toStdString();
+	std::string username = leUsername->text().toUtf8();
+	std::string password = lePassword->text().toUtf8();
 
 	nlinfo("received login attempt for %s with %s", username.c_str(), password.c_str());
 

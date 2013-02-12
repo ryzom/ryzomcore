@@ -17,10 +17,11 @@
 #ifndef NL_SHA1_H
 #define NL_SHA1_H
 
-#include <string>
-
+#include "types_nl.h"
 #include "common.h"
 #include "stream.h"
+
+#include <string>
 
 struct CHashKey
 {

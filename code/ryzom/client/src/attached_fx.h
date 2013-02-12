@@ -65,14 +65,14 @@ public:
 	class CBuildInfo
 	{
 	public:
-		const CAnimationFX	  *Sheet;
-		const CFXStickMode	  *StickMode;			// NULL to use default stick mode of the sheet
-		NLMISC::CVector		  StickOffset;
-		const NLMISC::CMatrix *StaticMatrix;		// Useful if stick mode is "StaticMatrix"
-		uint				  MaxNumAnimCount;		// Number of frame on which the fx can  overlap when it is being shutdown
-		float				  TimeOut;
-		double				  StartTime;
-		float				  DelayBeforeStart;
+		const CAnimationFX*		Sheet;
+		const CFXStickMode*		StickMode;			// NULL to use default stick mode of the sheet
+		NLMISC::CVector			StickOffset;
+		const NLMISC::CMatrix*	StaticMatrix;		// Useful if stick mode is "StaticMatrix"
+		uint					MaxNumAnimCount;	// Number of frame on which the fx can  overlap when it is being shutdown
+		float					TimeOut;
+		double					StartTime;
+		float					DelayBeforeStart;
 	public:
 		CBuildInfo()
 		{

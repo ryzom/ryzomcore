@@ -35,8 +35,8 @@
 #include "nel/misc/geom_ext.h"
 #include "nel/misc/polygon.h"
 
-#include "nel/../../src/pacs/surface_quad.h"
-#include "nel/../../src/pacs/retrievable_surface.h"
+#include "nel/pacs/surface_quad.h"
+#include "nel/pacs/retrievable_surface.h"
 
 #include "prim_checker.h"
 

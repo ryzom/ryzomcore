@@ -55,12 +55,12 @@ struct	CGlExtensions
 	bool	NVTextureEnvCombine4;
 	bool	ARBTextureCubeMap;
 	bool	NVVertexProgram;
-	bool    EXTVertexShader;
+	bool	EXTVertexShader;
 	bool	NVTextureShader;
-	bool    NVOcclusionQuery;
+	bool	NVOcclusionQuery;
 	bool	NVTextureRectangle;
-	bool    EXTTextureRectangle;
-	bool    ARBTextureRectangle;
+	bool	EXTTextureRectangle;
+	bool	ARBTextureRectangle;
 	bool	FrameBufferObject;
 	bool	FrameBufferBlit;
 	bool	FrameBufferMultisample;
@@ -89,10 +89,10 @@ struct	CGlExtensions
 
 	// ATI Extensions.
 	bool	ATIVertexArrayObject;
-	bool    ATIMapObjectBuffer;
+	bool	ATIMapObjectBuffer;
 	bool	ATITextureEnvCombine3;
-	bool    ATIEnvMapBumpMap;
-	bool    ATIFragmentShader;
+	bool	ATIEnvMapBumpMap;
+	bool	ATIFragmentShader;
 	bool	ATIXTextureEnvRoute;
 	bool	ATIVertexAttribArrayObject;
 	// ARB Extensions
@@ -157,7 +157,7 @@ public:
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
-		EXTTextureFilterAnisotropicMaximum = 1.f;
+		EXTTextureFilterAnisotropicMaximum = 0.f;
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
@@ -781,3 +781,4 @@ extern NEL_PFNGLSAMPLECOVERAGEARBPROC			nglSampleCoverageARB;
 #endif // USE_OPENGLES
 
 #endif // NL_OPENGL_EXTENSION_H
+

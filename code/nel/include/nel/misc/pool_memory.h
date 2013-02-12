@@ -18,6 +18,7 @@
 #define NL_POOL_MEMORY_H
 
 #include "types_nl.h"
+
 #include <list>
 #include <vector>
 
