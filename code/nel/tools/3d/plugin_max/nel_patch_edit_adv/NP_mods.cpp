@@ -225,11 +225,11 @@ __declspec( dllexport ) ULONG CanAutoDefer()
 BOOL CALLBACK DefaultSOTProc(
 		HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	{
-	IObjParam *ip = (IObjParam*)GetWindowLong(hWnd,GWL_USERDATA);
+	IObjParam *ip = (IObjParam*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
 
 	switch (msg) {
 		case WM_INITDIALOG:
-			SetWindowLong(hWnd,GWL_USERDATA,lParam);
+			SetWindowLongPtr(hWnd,GWLP_USERDATA,lParam);
 			break;
 
 		case WM_LBUTTONDOWN:

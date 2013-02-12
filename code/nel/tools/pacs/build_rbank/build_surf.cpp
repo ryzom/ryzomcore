@@ -31,7 +31,7 @@
 #include "nel/3d/mesh.h"
 #include "nel/3d/quad_grid.h"
 
-#include "nel/../../src/pacs/vector_2s.h"
+#include "nel/pacs/vector_2s.h"
 
 #include "build_surf.h"
 

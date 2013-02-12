@@ -1620,7 +1620,6 @@ public:
 		}
 	}
 };
-
 REGISTER_ACTION_HANDLER(CHandlerPhraseSelectShortcutBar, "select_shortcut_bar");
 
 

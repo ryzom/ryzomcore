@@ -117,6 +117,7 @@ namespace STRING_MANAGER
 		case damage_type:
 		case power_type:
 		case classification_type:
+		case clan:
 			// enum
 			f.serial(const_cast<uint32&>(Enum));
 			break;
@@ -332,6 +333,7 @@ namespace STRING_MANAGER
 		NL_STRING_CONVERSION_TABLE_ENTRY( event_faction )
 		NL_STRING_CONVERSION_TABLE_ENTRY( classification_type )
 		NL_STRING_CONVERSION_TABLE_ENTRY( outpost )
+		NL_STRING_CONVERSION_TABLE_ENTRY( clan )
 	NL_END_STRING_CONVERSION_TABLE(TParamType, ParamTypeConversion, NB_PARAM_TYPES)
 
 	//-----------------------------------------------

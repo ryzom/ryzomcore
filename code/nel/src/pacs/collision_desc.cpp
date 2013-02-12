@@ -16,7 +16,7 @@
 
 #include "stdpacs.h"
 
-#include "collision_desc.h"
+#include "nel/pacs/collision_desc.h"
 
 
 namespace NLPACS

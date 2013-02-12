@@ -19,6 +19,9 @@
 
 #include "nel/misc/types_nl.h"
 
+// Include from libxml2
+#include <libxml/parser.h>
+
 namespace NLGEORGES
 {
 

@@ -664,7 +664,7 @@ int makeStringDiff(int argc, char *argv[])
 		}
 		else
 		{
-			LOG("Writting difference file for %s.\n", Languages[l].c_str());
+			LOG("Writing difference file for %s.\n", Languages[l].c_str());
 			// build the diff file for each language.
 			ucstring str = prepareStringFile(diff, false);
 
@@ -1669,7 +1669,7 @@ int makeWorksheetDiff(int argc, char *argv[], const std::string &additionFilenam
 	}
 	else
 	{
-		LOG("Writting difference file for %s.\n", referenceFilename.c_str());
+		LOG("Writing difference file for %s.\n", referenceFilename.c_str());
 		// build the diff file for each language.
 		ucstring str = prepareExcelSheet(diff);
 
@@ -3139,7 +3139,7 @@ int main(int argc, char *argv[])
 	{
 		uint64 hash = makeHash(ucstring("Bonjour le monde !"));
 		nldebug("%s", hashToString(hash).c_str());
-		hash = makeHash(ucstring("Une autre cléf"));
+		hash = makeHash(ucstring("Une autre clef"));
 		nldebug("%s", hashToString(hash).c_str());
 	}
 */

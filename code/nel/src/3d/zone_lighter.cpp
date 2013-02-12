@@ -2781,7 +2781,7 @@ void CZoneLighter::computeTileFlagsOnly (CLandscape &landscape, CZone& output, u
 
 	// can't copy tile flags
 	if(!ok)
-		throw Exception("The input zonew, and ouput zonel are too different: not same patchs!!");
+		throw Exception("The input zonew, and output zonel are too different: not same patchs!!");
 
 	/// copy the tiles flags from the zone to light to the output zone
 	copyTileFlags(output, zonew);

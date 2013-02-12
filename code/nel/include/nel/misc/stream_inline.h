@@ -17,9 +17,10 @@
 #ifndef NL_STREAM_INLINE_H
 #define NL_STREAM_INLINE_H
 
-#include <cstdio>
-
+#include "types_nl.h"
 #include "debug.h"
+
+#include <cstdio>
 
 
 namespace	NLMISC

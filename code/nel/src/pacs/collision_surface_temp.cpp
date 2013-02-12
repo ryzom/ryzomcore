@@ -16,7 +16,7 @@
 
 #include "stdpacs.h"
 
-#include "collision_surface_temp.h"
+#include "nel/pacs/collision_surface_temp.h"
 
 
 namespace NLPACS

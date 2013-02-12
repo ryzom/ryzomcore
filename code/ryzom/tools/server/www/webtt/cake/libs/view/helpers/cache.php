@@ -62,7 +62,7 @@ class CacheHelper extends AppHelper {
  * @param string $file File to cache
  * @param string $out output to cache
  * @param boolean $cache Whether or not a cache file should be written.
- * @return string view ouput
+ * @return string view output
  */
 	function cache($file, $out, $cache = false) {
 		$cacheTime = 0;

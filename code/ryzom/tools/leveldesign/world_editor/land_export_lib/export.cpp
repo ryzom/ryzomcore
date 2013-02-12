@@ -34,7 +34,7 @@
 #include "nel/ligo/zone_region.h"
 #include "nel/ligo/zone_bank.h"
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
+#include "nel/pacs/collision_mesh_build.h"
 
 
 #include "../../../leveldesign/export/tools.h"
@@ -777,7 +777,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 
 	// 4 - Cut the big zone into a set of unit zones
 
-	// - Build patch informations
+	// - Build patch information
 
 	// Retrieve source patches
 	vector<CPatchInfo>		SrcPI;

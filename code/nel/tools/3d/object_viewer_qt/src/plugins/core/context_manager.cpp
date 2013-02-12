@@ -160,7 +160,7 @@ int ContextManager::indexOf(const QString &id) const
 		if (d->m_contexts.at(i)->id() == id)
 			return i;
 	}
-	nlwarning(QString("Warning, no such context: %1").arg(id).toStdString().c_str());
+	nlwarning(QString("Warning, no such context: %1").arg(id).toUtf8().constData());
 	return -1;
 }
 

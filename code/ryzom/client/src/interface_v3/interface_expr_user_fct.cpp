@@ -447,7 +447,7 @@ REGISTER_INTERFACE_USER_FCT("switch", userFctSwitch)
 /////////////////////////////////
 static DECLARE_INTERFACE_USER_FCT(userFctMax)
 {
-	// compute type of ouput
+	// compute type of output
 	if (!promoteToNumericalBestType(args))
 	{
 		nlwarning("max : invalid entry");
@@ -479,7 +479,7 @@ REGISTER_INTERFACE_USER_FCT("max", userFctMax)
 /////////////////////////////////
 static DECLARE_INTERFACE_USER_FCT(userFctMin)
 {
-	// compute type of ouput
+	// compute type of output
 	if (!promoteToNumericalBestType(args))
 	{
 		nlwarning("max : invalid entry");

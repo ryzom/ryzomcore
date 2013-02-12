@@ -53,7 +53,7 @@ const NLMISC::CClassId		MeshBaseInstanceId=NLMISC::CClassId(0xef44331, 0x739f6bc
 class CMeshBaseInstance : public CTransformShape
 {
 public:
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 public:

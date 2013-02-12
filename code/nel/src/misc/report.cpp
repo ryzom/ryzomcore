@@ -29,7 +29,13 @@
 #	include <winuser.h>
 #endif // NL_OS_WINDOWS
 
+#define NL_NO_DEBUG_FILES 1
+
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

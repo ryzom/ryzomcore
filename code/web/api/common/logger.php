@@ -1,9 +1,26 @@
 <?php
 
+/* Copyright (C) 2009 Winch Gate Property Limited
+ *
+ * This file is part of ryzom_api.
+ * ryzom_api is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ryzom_api is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 class ryLogger {
 
 	public $enable = false;
-	private $logs;
+	private $logs = array();
 	private static $_instance = NULL;
 	
 	public static function getInstance() {
@@ -32,12 +49,16 @@ class ryLogger {
 
 	function getLogs() {
 		$ret = '';
-		if ($this->logs && $this->enable)
-			$ret = "<b>Debug</b>\n\n".implode("\n", $this->logs);
-		$this->logs = array();
+		if ($this->logs && $this->enable) {
+			$ret = '<b>Debug</b><br /><br /><pre style="overflow:auto; width:100%">'. implode('<br />', $this->logs).'</pre>';
+			$this->logs = array();
+		}
 		return $ret;
 	}
 }
 
+function _log() {
+	return ryLogger::getInstance();
+}
 
 ?>

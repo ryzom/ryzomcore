@@ -21,9 +21,7 @@
 #ifndef ENTITY_LOCATOR_ITF
 #define ENTITY_LOCATOR_ITF
 #include "nel/misc/types_nl.h"
-#ifdef NL_COMP_VC8
-  #include <memory>
-#endif
+#include <memory>
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/string_conversion.h"
 #include "nel/net/message.h"

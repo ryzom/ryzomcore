@@ -1469,12 +1469,21 @@ UDriver::TPolygonMode 	CDriverUser::getPolygonMode ()
 
 	return umode;
 }
+
 void			CDriverUser::forceDXTCCompression(bool dxtcComp)
 {
 	NL3D_HAUTO_UI_DRIVER;
 
 	_Driver->forceDXTCCompression(dxtcComp);
 }
+
+void			CDriverUser::setAnisotropicFilter(sint filter)
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->setAnisotropicFilter(filter);
+}
+
 void			CDriverUser::forceTextureResize(uint divisor)
 {
 	NL3D_HAUTO_UI_DRIVER;

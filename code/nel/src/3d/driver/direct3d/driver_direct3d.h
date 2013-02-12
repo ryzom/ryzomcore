@@ -640,7 +640,7 @@ public:
 	void	*lock (uint size, uint stride, uint &offset);
 	void	unlock ();
 
-	// Runtime reset (called at the begining of the frame rendering), blocking lock here.
+	// Runtime reset (called at the beginning of the frame rendering), blocking lock here.
 	void	reset ();
 };
 
@@ -670,7 +670,7 @@ public:
 	void	*lock (uint size, uint &offset);
 	void	unlock ();
 
-	// Runtime reset (called at the begining of the frame rendering), blocking lock here.
+	// Runtime reset (called at the beginning of the frame rendering), blocking lock here.
 	void	reset ();
 };
 
@@ -777,6 +777,7 @@ public:
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 	virtual void			forceDXTCCompression(bool dxtcComp);
+	virtual void			setAnisotropicFilter(sint filter);
 	virtual void			forceTextureResize(uint divisor);
 	virtual void			forceNativeFragmentPrograms(bool /* nativeOnly */) {} // ignored
 
@@ -1521,6 +1522,7 @@ public:
 		setSamplerState (stage, D3DSAMP_MAGFILTER, d3dtext->MagFilter);
 		setSamplerState (stage, D3DSAMP_MINFILTER, d3dtext->MinFilter);
 		setSamplerState (stage, D3DSAMP_MIPFILTER, d3dtext->MipFilter);
+		setSamplerState (stage, D3DSAMP_MAXANISOTROPY, _AnisotropicFilter);
 
 		// Profile, log the use of this texture
 		if (_SumTextureMemoryUsed)
@@ -2205,6 +2207,11 @@ private:
 	bool					_CubbedMipMapSupported;
 	bool					_IsGeforce;
 	bool					_NonPowerOfTwoTexturesSupported;
+	uint					_MaxAnisotropy;
+	bool					_AnisotropicMinSupported;
+	bool					_AnisotropicMagSupported;
+	bool					_AnisotropicMinCubeSupported;
+	bool					_AnisotropicMagCubeSupported;
 	uint					_NbNeLTextureStages;			// Number of texture stage for NeL (max IDRV_MAT_MAXTEXTURES)
 	uint					_MaxVerticesByVertexBufferHard;
 	uint					_MaxLight;
@@ -2411,6 +2418,7 @@ private:
 	bool						_MustRestoreLight;
 	D3DXMATRIX					_D3DMatrixIdentity;
 	DWORD						_FogColor;
+	uint						_AnisotropicFilter;
 
 	// stencil buffer
 	bool			_CurStencilTest;

@@ -66,6 +66,7 @@ namespace STRING_MANAGER
 		event_faction,
 		classification_type,
 		outpost,
+		clan,
 
 		invalid_value,
 		NB_PARAM_TYPES = invalid_value

@@ -17,7 +17,7 @@
 #ifndef NL_BUFFER_DSOUND_H
 #define NL_BUFFER_DSOUND_H
 
-#include <nel/sound/driver/buffer.h>
+#include "nel/sound/driver/buffer.h"
 
 namespace NLSOUND {
 

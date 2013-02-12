@@ -36,7 +36,6 @@
 #include "nel/sound/driver/effect.h"
 
 #include "nel/sound/background_sound_manager.h"
-#include "nel/sound/background_sound_manager.h"
 #include "nel/sound/music_sound_manager.h"
 #include "nel/sound/background_source.h"
 #include "nel/sound/clustered_sound.h"

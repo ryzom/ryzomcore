@@ -33,7 +33,7 @@ class IItemServiceProvider;
 
 /**
  * This class provides services associated to items (aka "item services")
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2005
  */

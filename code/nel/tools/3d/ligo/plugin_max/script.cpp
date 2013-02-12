@@ -18,6 +18,14 @@
 
 #include <assert.h>
 
+#ifdef _STLPORT_VERSION
+namespace std
+{
+	float fabsf(float f);
+	double fabsl(double f);
+}
+#endif
+
 // Various MAX and MXS includes
 #include <maxversion.h>
 #if MAX_VERSION_MAJOR >= 14

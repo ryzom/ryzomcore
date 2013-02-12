@@ -1018,7 +1018,7 @@ void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandS
 				}
 			}
 
-			// Detect change of wordFormat at the begining of the word
+			// Detect change of wordFormat at the beginning of the word
 			if(isFormatTagChange((uint)spaceEnd, formatTagIndex))
 			{
 				getFormatTagChange((uint)spaceEnd, formatTagIndex, wordFormat);

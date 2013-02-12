@@ -93,7 +93,7 @@ public:
 
 	/// \name Visible List mgt. Those visible models are updated each traverse().
 	//@{
-	// NB: list is cleared at begining of traverse().
+	// NB: list is cleared at beginning of traverse().
 	void				addVisibleModel(CTransform *model)
 	{
 		model->_IndexInVisibleList= _CurrentNumVisibleModels;

@@ -963,7 +963,6 @@ void impulseFarTell(NLMISC::CBitMemStream &impulse)
 	ChatMngr.processFarTellString(impulse, InterfaceChatDisplayer);
 }
 
-
 void impulseTell2(NLMISC::CBitMemStream &impulse)
 {
 	ChatMngr.processTellString2(impulse, InterfaceChatDisplayer);

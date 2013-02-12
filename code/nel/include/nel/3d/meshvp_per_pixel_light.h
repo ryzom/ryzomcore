@@ -29,7 +29,7 @@ namespace NL3D {
 
 
 /**
- * This vertex program is used to perform perpixel lighting with meshs. Its ouputs are :
+ * This vertex program is used to perform perpixel lighting with meshs. Its outputs are :
  *
  * Coord Tex 0 : duplicate the tex Coord 0 set from the v.b.
  * Coord Tex 1 : The light vector in tangent space.

@@ -16,7 +16,7 @@
 
 #include "stdpacs.h"
 
-#include "retrievable_surface.h"
+#include "nel/pacs/retrievable_surface.h"
 
 using namespace std;
 using namespace NLMISC;

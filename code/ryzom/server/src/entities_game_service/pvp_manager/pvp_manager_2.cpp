@@ -210,6 +210,21 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 	std::vector<TChanID> result;
 	result.clear();
 
+	// Add lang channel, should be first.
+	if (!user->getLangChannel().empty()) {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(user->getLangChannel());
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}
+	} else {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}		
+	}
+
 	PVP_CLAN::TPVPClan faction = user->getAllegiance().first;
 	if( faction != PVP_CLAN::Neutral )
 	{
@@ -228,21 +243,6 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 		{
 			result.push_back((*it).second);
 		}
-	}
-
-	// Add lang channel
-	if (!user->getLangChannel().empty()) {
-		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(user->getLangChannel());
-		if (it != _ExtraFactionChannel.end())
-		{
-			result.push_back((*it).second);
-		}
-	} else {
-		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
-		if (it != _ExtraFactionChannel.end())
-		{
-			result.push_back((*it).second);
-		}		
 	}
 
 	/*
@@ -1112,11 +1112,11 @@ void CPVPManager2::onIOSMirrorUp()
 	*/
 
 	// Community Channels
-	createExtraFactionChannel("en");
-	createExtraFactionChannel("fr");
-	createExtraFactionChannel("de");
-	createExtraFactionChannel("ru");
-	createExtraFactionChannel("es");
+	createExtraFactionChannel("en", true);
+	createExtraFactionChannel("fr", true);
+	createExtraFactionChannel("de", true);
+	createExtraFactionChannel("ru", true);
+	createExtraFactionChannel("es", true);
 
 	for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 	{
@@ -1161,7 +1161,7 @@ void CPVPManager2::createFactionChannel(PVP_CLAN::TPVPClan clan)
 	}
 }
 
-void CPVPManager2::createExtraFactionChannel(const std::string & channelName)
+void CPVPManager2::createExtraFactionChannel(const std::string & channelName, bool universalChannel)
 {
 
 	TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(channelName);
@@ -1171,6 +1171,7 @@ void CPVPManager2::createExtraFactionChannel(const std::string & channelName)
 		TChanID factionChannelId = DynChatEGS.addLocalizedChan(name);
 		// set historic size of the newly created channel
 		DynChatEGS.setHistoricSize( factionChannelId, FactionChannelHistoricSize );
+		DynChatEGS.setUniversalChannel( factionChannelId, universalChannel );
 
 		_ExtraFactionChannel.insert( make_pair(channelName, factionChannelId) );
 	}

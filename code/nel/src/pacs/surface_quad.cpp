@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpacs.h"
-#include "surface_quad.h"
+#include "nel/pacs/surface_quad.h"
 
 #include "nel/misc/file.h"
 

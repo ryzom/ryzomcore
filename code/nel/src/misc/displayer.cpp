@@ -16,6 +16,7 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
 #	include <io.h>
@@ -48,6 +49,10 @@
 #include "nel/misc/displayer.h"
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

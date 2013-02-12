@@ -18,9 +18,9 @@
 
 #include "nel/misc/plane.h"
 
-#include "local_retriever.h"
-#include "collision_desc.h"
-#include "retriever_instance.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/collision_desc.h"
+#include "nel/pacs/retriever_instance.h"
 
 #include "nel/misc/hierarchical_timer.h"
 

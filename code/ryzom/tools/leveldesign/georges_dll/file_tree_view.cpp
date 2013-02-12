@@ -54,7 +54,7 @@ bool CFileTreeCtrl::create( const RECT& rect, CWnd* pParentWnd, UINT nID )
 	if (CWnd::Create (className, "empty", WS_CHILD, rect, pParentWnd, nID ))
 
 
-#if defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 80
 		if (_TreeCtrl.CreateEx (WS_EX_CLIENTEDGE, /*_T("SysTreeView32"), "",*/ TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_EDITLABELS|WS_CHILD|WS_TABSTOP, rect, this, 0))
 #else		
 		if (_TreeCtrl.CreateEx (WS_EX_CLIENTEDGE, _T("SysTreeView32"), "", TVS_HASLINES|TVS_LINESATROOT|TVS_HASBUTTONS|TVS_EDITLABELS|WS_CHILD|WS_TABSTOP, rect, this, 0))

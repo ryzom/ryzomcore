@@ -49,6 +49,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "../nel_patch_lib/rpo.h"
 #include "nel/misc/time_nl.h"

@@ -16,6 +16,8 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/log.h"
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <process.h>
@@ -31,6 +33,9 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -430,7 +435,7 @@ void CLog::displayRawString (const char *str)
 			(*idi)->display( *args, disp );
 		}
 	}
-	TempString = "";
+	TempString.clear();
 	unsetPosition();
 }
 
