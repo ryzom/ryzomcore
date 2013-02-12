@@ -5,18 +5,20 @@ ini_set("display_errors","1");
 
 define('APP_NAME', 'app_achievements');
 
-require_once('../webig/config.php');
-include_once('../webig/lang.php');
+require_once('../config.php');
+include_once('../lang.php');
 include_once('lang.php');
 require_once('conf.php');
 
 // Ask to authenticate user (using ingame or session method) and fill $user with all information
-ryzom_app_authenticate($user, false);
+ryzom_app_authenticate($user, true);
+
+#echo var_export($user,true);
 
 #$user['id'] = $user['char_id'];
 #$user['name'] = $user['char_name'];
 
-$user = array();
+/*$user = array();
 $user['cid'] = 1;
 $user['lang'] = 'en';
 $user['name'] = 'Talvela';
@@ -24,7 +26,7 @@ $user['race'] = "r_matis";
 $user['civilization'] = "c_neutral";
 $user['cult'] = "c_neutral";
 $user['ig'] = ($_REQUEST['ig']==1);
-#$user['ig'] = true;
+#$user['ig'] = true;*/
 
 require_once("class/RyzomUser_class.php");
 $_USER = new RyzomUser($user);
@@ -55,15 +57,15 @@ require_once("class/AchAchievement_class.php");
 require_once("class/AchTask_class.php");
 require_once("class/AchObjective_class.php");
 
-require_once("fb/facebook.php");
+#require_once("fb/facebook.php");
 
 // Update user acces on Db
-$DBc = ryDB::getInstance(APP_NAME."_test");
-#$DBc = ryDB::getInstance(APP_NAME);
+#$DBc = ryDB::getInstance(APP_NAME."_test");
+$DBc = ryDB::getInstance(APP_NAME);
 
 $c = "";
 if(!$_USER->isIG()) {
-	$facebook = new Facebook(array(
+	/*$facebook = new Facebook(array(
         'appId' => $_CONF['fb_id'],
         'secret' => $_CONF['fb_secret'],
         'cookie' => true
@@ -87,7 +89,7 @@ if(!$_USER->isIG()) {
 	}
 	else {
 	 $DBc->sqlQuery("INSERT INTO ach_fb_token (aft_player,aft_token,aft_date,aft_allow) VALUES ('".$_USER->getID()."','".$DBc->sqlEscape($facebook->getAccessToken())."','".time()."','1') ON DUPLICATE KEY UPDATE aft_token='".$DBc->sqlEscape($facebook->getAccessToken())."', aft_date='".time()."'");
-  }
+  }*/
 	
 
 }

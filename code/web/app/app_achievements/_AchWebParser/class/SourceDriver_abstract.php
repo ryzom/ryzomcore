@@ -4,6 +4,6 @@
 	 */
 
 	abstract class SourceDriver {
-		abstract function drive($cid);
+		abstract function drive($cdata);
 	}
 ?>

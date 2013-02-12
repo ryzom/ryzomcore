@@ -312,9 +312,9 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 
 			#CACHE ([^ ]+) AS ([$][^ ]+);#
 			$match = array();
-			preg_match_all("#CACHE ([^ ]+) AS ([$][^ ]+);#",$this->ruleset,$match);
+			preg_match_all("#CACHE ([^ ]+) AS ([$][^;]+);#",$this->ruleset,$match);
 			foreach($match[0] as $key=>$elem) {
-				$tmp = $match[2][$key].' = $_CACHE->getData('.$match[1][$key].');';
+				$tmp = $match[2][$key].' = $_CACHE->getData(\''.$match[1][$key].'\');';
 
 				//replace
 				$res = str_replace($elem,$tmp,$res);
@@ -322,9 +322,9 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 
 			#CACHE ([^ ]+) SET ([$][^ ]+);#
 			$match = array();
-			preg_match_all("#CACHE ([^ ]+) SET ([$][^ ]+);#",$this->ruleset,$match);
+			preg_match_all("#CACHE ([^ ]+) SET ([$][^;]+);#",$this->ruleset,$match);
 			foreach($match[0] as $key=>$elem) {
-				$tmp = '$_CACHE->writeData('.$match[1][$key].','.$match[2][$key].');';
+				$tmp = '$_CACHE->writeData(\''.$match[1][$key].'\','.$match[2][$key].');';
 
 				//replace
 				$res = str_replace($elem,$tmp,$res);
@@ -332,7 +332,7 @@ function '.$func.'('.$match[2][$key].',$_P,$_CB) {
 
 			#SCRIPT ([^ ]+) AS ([$][^ ]+);#
 			$match = array();
-			preg_match_all("#SCRIPT ([^\(]+)\(([^\)]*)\) AS ([$][^ ]+);#",$this->ruleset,$match);
+			preg_match_all("#SCRIPT ([^\(]+)\(([^\)]*)\) AS ([$][^;]+);#",$this->ruleset,$match);
 			foreach($match[0] as $key=>$elem) {
 				$tmp = '@include_once("script/'.$match[1][$key].'_script.php");
 	'.$match[3][$key].' = '.$match[1][$key].'('.$match[2][$key].');';

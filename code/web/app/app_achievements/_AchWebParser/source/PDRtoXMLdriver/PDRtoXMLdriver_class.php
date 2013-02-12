@@ -15,12 +15,17 @@
 	require_once($BASE_PATH."/entity/PhysCharacs_entity.php");
 	require_once($BASE_PATH."/entity/PhysScores_entity.php");
 	require_once($BASE_PATH."/entity/SkillPoints_entity.php");
-	#require_once($BASE_PATH."/entity/Skills_entity.php");
+	require_once($BASE_PATH."/entity/Skill_entity.php");
 	require_once($BASE_PATH."/entity/SpentSkillPoints_entity.php");
 	require_once($BASE_PATH."/entity/Position_entity.php");
 	require_once($BASE_PATH."/entity/Gear_entity.php");
 	require_once($BASE_PATH."/entity/SkillList_entity.php");
 	require_once($BASE_PATH."/entity/MissionList_entity.php");
+	require_once($BASE_PATH."/entity/Friendlist_entity.php");
+	require_once($BASE_PATH."/entity/Friend_entity.php");
+	require_once($BASE_PATH."/entity/FriendOf_entity.php");
+	require_once($BASE_PATH."/entity/Title_entity.php");
+	require_once($BASE_PATH."/entity/RespawnPoints_entity.php");
 
 	class PDRtoXMLdriver extends SourceDriver {
 		private $ignore;
@@ -32,17 +37,29 @@
 		private $iblock;
 		private $gear;
 		private $skills;
+		private $petcount;
+		private $friendlist;
+		private $itemcount;
+
+		private $respawn_outer = 0; // needed to fetch respawn points due to nested tags with same name...
+
+		private $pathid = array();
 
 		function PDRtoXMLdriver() {
+
 			$this->lock = 0;
 			$this->open = null;
 			$this->entity = null;
 			$this->inv = null;
 			$this->iblock = false;
 
+			$this->petcount = 0;
+			$this->itemcount = 0;
+
 			$this->gear = new Gear();
 			$this->skills = new SkillList();
 			$this->mission = new MissionList();
+			$this->friendlist = new Friendlist();
 			
 			//these nodes are ignored, but children are processed
 			$this->ignore = array();
@@ -75,15 +92,16 @@
 			$this->ignore_block[] = "_ENCYCLOCHAR";
 			$this->ignore_block[] = "_GAMEEVENT";
 			$this->ignore_block[] = "_ENTITYPOSITION";
+			$this->ignore_block[] = "_MISSIONHISTORIES";
+			$this->ignore_block[] = "_KNOWNBRICKS";
+			$this->ignore_block[] = "_BOUGHTPHRASES";
+			$this->ignore_block[] = "SKILLPOINTS";
+			$this->ignore_block[] = "SPENTSKILLPOINTS";
+			$this->ignore_block[] = "_LASTLOGSTATS";
 		}
 
-		function drive($cid) {
-			global $_DISPATCHER;
-
-			echo "kk";
-
-			#$uid = floor($cid/16);
-			#$slot = ($cid%16);
+		function drive($cdata) {
+			global $_DISPATCHER,$MY_PATH,$log;
 
 			#$file = $this->conf['xml_dir']."account_".$uid."_".$slot."_pdr.xml";
 			$file = $_REQUEST['file'];
@@ -92,19 +110,36 @@
 			xml_set_object($xml_parser,$this);
 			xml_set_element_handler($xml_parser, "startElement", "endElement");
 
-			if(!xml_parse($xml_parser, file_get_contents($file))) {
-				#error
-				echo "error";
+			// temporary storage for xml files for debug purpose
+			$ftmp = fopen($MY_PATH."/log/xml_tmp/char_".$cdata['cid'].".xml","w");
+			$fcont = file_get_contents($file);
+			fwrite($ftmp,$fcont);
+			fclose($ftmp);
+			# end of temp xml store
+
+			if(!xml_parse($xml_parser, $fcont)) {
+				$log->logf("FATAL ERROR (PDRtoXMLdriver): unable to parse given XML!");
+				$log->close();
+				die();
 			}
+
 			xml_parser_free($xml_parser);
 
 			$_DISPATCHER->dispatchEntity($this->gear->getName(),$this->gear);
+			#echo var_export($this->gear,true);
 			$_DISPATCHER->dispatchEntity($this->skills->getName(),$this->skills);
-			$_DISPATCHER->dispatchEntity($this->skills->mission(),$this->mission);
+			$_DISPATCHER->dispatchEntity($this->friendlist->getName(),$this->friendlist);
+			#$_DISPATCHER->dispatchEntity($this->skills->mission(),$this->mission);
+			$_DISPATCHER->dispatchValue('petcount',$this->petcount);
+			$_DISPATCHER->dispatchValue('itemcount',$this->itemcount);
 		}
 
 		function startElement($parser, $name, $attrs) {
-			global $_DISPATCHER;
+			global $_DISPATCHER,$DBc,$XMLgenerator;
+
+			array_push($this->pathid,$name);
+
+			$XMLgenerator->xml_split(implode("/",$this->pathid),$name,$attrs,true);
 
 			if($this->lock == 1) {
 				return null;
@@ -117,6 +152,20 @@
 			if(in_array($name,$this->ignore_block)) {
 				$this->lock = 1;
 				return null;
+			}
+
+			/* spawn points */
+			if($name == "RESPAWNPOINTS" && !$attrs["VALUE"]) {
+				$this->open = "RESPAWNPOINTS";
+				$this->entity = new RespawnPoints();
+				return null;
+			}
+
+			if($this->open == "RESPAWNPOINTS") {
+				if($name == "RESPAWNPOINTS") {
+					$this->respawn_outer = 0;
+					$this->entity->spawns[] = $attrs["VALUE"];
+				}
 			}
 			
 			/* faction points */
@@ -220,6 +269,20 @@
 				return null;
 			}
 
+			if($name == "_FRIENDSLIST") {
+				$this->entity = new Friend();
+				$this->entity->id = $attrs["VALUE"];
+				$this->friendlist->friends[] = $this->entity;
+				$_DISPATCHER->dispatchEntity($this->entity->getName(),$this->entity);
+			}
+
+			if($name == "_ISFRIENDOF") {
+				$this->entity = new FriendOf();
+				$this->entity->id = $attrs["VALUE"];
+				$this->friendlist->friendof[] = $this->entity;
+				$_DISPATCHER->dispatchEntity($this->entity->getName(),$this->entity);
+			}
+
 			/* permanent mod */
 			if($name == "SCOREPERMANENTMODIFIERS") {
 				$this->open = "SCOREPERMANENTMODIFIERS";
@@ -262,6 +325,7 @@
 				}
 				if($name == "PETSHEETID") {
 					$this->entity->petsheetid = $attrs["VALUE"];
+					$this->petcount++;
 					return null;
 				}
 				if($name == "PRICE") {
@@ -434,7 +498,7 @@
 
 			if($this->open == "SKILLS") {
 				if($name == "__KEY__") {
-					$this->entity = new Skills();
+					$this->entity = new Skill();
 					$this->entity->skill = $attrs["VALUE"];
 					return null;
 				}
@@ -513,9 +577,11 @@
 			}
 
 			if($name == "_ITEMS" || $name == "_ITEM") {
+				#echo "i<br>";
 				$this->open = "_ITEM";
 				$this->entity = new Item();
 				$this->entity->inventory = $this->inv;
+				$this->itemcount++;
 				return null;
 			}
 
@@ -535,6 +601,11 @@
 					return null;
 				}
 				if($name == "_SHEETID") {
+					if($attrs["VALUE"]{0} == "#") {
+						$tmp = str_replace("#","",$attrs["VALUE"]);
+						$res = $DBc->sendSQL("SELECT * FROM ryzom_nimetu_sheets WHERE nsh_numid='".$tmp."'","ARRAY");
+						$attrs["VALUE"] = $res[0]['nsh_name']."".$res[0]['nsh_suffix'];
+					}
 					$this->entity->_sheetid = $attrs["VALUE"];
 					return null;
 				}
@@ -560,6 +631,9 @@
 				}
 				if($name == "_REFINVENTORYSLOT") {
 					$this->entity->_refinventoryslot = $attrs["VALUE"];
+					#if($this->entity->refinventoryid != null) {
+						$this->gear->items[] = $this->entity;
+					#}
 					return null;
 				}
 				if($name == "REFINVENTORYID") {
@@ -602,10 +676,30 @@
 		}
 
 		function endElement($parser, $name) {
-			global $_DISPATCHER;
+			global $_DISPATCHER,$XMLgenerator;
+
+			$XMLgenerator->xml_split(implode("/",$this->pathid),$name,null,false);
+			array_pop($this->pathid);
 
 			if(in_array($name,$this->ignore_block)) {
 				$this->lock = 0;
+				return null;
+			}
+
+			if($this->lock == 1) {
+				return null;
+			}
+
+			/* respawn points */
+			if($name == "RESPAWNPOINTS") {
+				$this->respawn_outer++;	// increment to track double close at end of block
+			}
+
+			if($name == "RESPAWNPOINTS" && $this->respawn_outer > 1) {
+				$this->open = null;
+				$_DISPATCHER->dispatchEntity($this->entity->getName(),$this->entity);
+				$this->entity = null;
+				return null;
 			}
 			
 			/* faction points */
@@ -710,18 +804,21 @@
 
 			/* position */
 			if($name == "POSSTATE") {
+				$this->entity->loadPlace();
 				$_DISPATCHER->dispatchEntity($this->entity->getName(),$this->entity);
 				$this->entity = null;
 				return null;
 			}
 
 			/* items */
-			if($name == "_ITEMS") {
-				$_DISPATCHER->dispatchEntity($this->entity->getName(),$this->entity);
-				if($this->entity->refinventoryid != null) {
-					$this->gear->items[] = $this->entity;
+			if($name == "_ITEMS" || $name == "_ITEM") {
+				#echo "c<br>";
+				if($this->open == "_ITEM") {
+					#echo var_export($this->entity,true);
+					$_DISPATCHER->dispatchEntity($this->entity->getName(),$this->entity);
+					$this->entity = null;
 				}
-				$this->entity = null;
+				$this->open = null;
 				return null;
 			}
 
@@ -730,10 +827,15 @@
 				return null;
 			}
 
-			if($name == "_ITEM" || $name == "_ITEMS") {
-				$this->open = null;
+			if($name == "_CRAFTPARAMETERS") {
+				$this->icraft = false;
 				return null;
 			}
+
+			/*if($name == "_ITEM" || $name == "_ITEMS") {
+				$this->open = null;
+				return null;
+			}*/
 
 			
 		}

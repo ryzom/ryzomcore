@@ -10,14 +10,14 @@
 			$this->char = false;
 		}
 
-		function setChar($c) { // select the character
-			$this->char = $c;
+		function setChar($cdata) { // select the character
+			$this->char = $cdata['cid'];
 		}
 
 		function writeData($key,$val) { // write to cache
 			global $DBc;
 
-			$DBc->sendSQL("INSERT INTO ach_player_valuecache (apv_name,apv_player,apv_value,apv_date) VALUES ('".$this->user."','".$DBc->mre($key)."','".$DBc->mre($val)."','".time()."') ON DUPLICATE KEY UPDATE apv_value='".$DBc->mre($val)."', apv_date='".time()."'","NONE");
+			$DBc->sendSQL("INSERT INTO ach_player_valuecache (apv_name,apv_player,apv_value,apv_date) VALUES ('".$DBc->mre($key)."','".$this->char."','".$DBc->mre($val)."','".time()."') ON DUPLICATE KEY UPDATE apv_value='".$DBc->mre($val)."', apv_date='".time()."'","NONE");
 		}
 
 		function getData($key) { // read from cache

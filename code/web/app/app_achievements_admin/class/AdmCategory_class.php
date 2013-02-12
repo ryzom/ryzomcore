@@ -65,5 +65,22 @@
 			$n->insert();
 			$this->addOpen($n);
 		}
+
+		function setLang($lang,$txt) {
+			global $DBc;
+
+			$DBc->sqlQuery("INSERT INTO ach_category_lang (acl_category,acl_lang,acl_name) VALUES ('".$this->getID()."','".$DBc->sqlEscape($lang)."','".$DBc->sqlEscape($txt)."') ON DUPLICATE KEY UPDATE acl_name='".$DBc->sqlEscape($txt)."'");
+		}
+
+		function getLang($lang) {
+			global $DBc;
+
+			$res = $DBc->sqlQuery("SELECT acl_name FROM ach_category_lang WHERE acl_category='".$this->getID()."' AND acl_lang='".$DBc->sqlEscape($lang)."'");
+			return $res[0]['acl_name'];
+		}
+
+		function update() {
+			global $DBc;
+		}
 	}
 ?>

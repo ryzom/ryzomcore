@@ -19,7 +19,7 @@
 			$tmp['ac_id'] = 0;
 			$tmp['ac_parent'] = null;
 			$tmp['acl_name'] = get_translation('ach_summary',$_USER->getLang());
-			$tmp['ac_image'] = "test.png";
+			$tmp['ac_image'] = "summary.png";
 			$tmp['ac_order'] = -1;
 			$tmp['open'] = $open;
 			$this->addChild(new AchMenuNode($tmp,$this));

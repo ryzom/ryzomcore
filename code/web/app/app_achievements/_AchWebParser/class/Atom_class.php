@@ -61,19 +61,19 @@
 		function grant($count = 1) { // grant an atom
 			global $DBc;
 
-			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state,apa_value) VALUES ('".$this->id."','".$this->user."','".time()."',null,'GRANT','".$count."')","NONE");
+			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state,apa_value) VALUES ('".$this->id."','".$this->user['cid']."','".time()."',null,'GRANT','".$count."')","NONE");
 		}
 
 		function deny() { // deny an atom
 			global $DBc;
 
-			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state) VALUES ('".$this->id."','".$this->user."','".time()."',null,'DENY','1')","NONE");
+			$DBc->sendSQL("INSERT INTO ach_player_atom (apa_atom,apa_player,apa_date,apa_expire,apa_state) VALUES ('".$this->id."','".$this->user['cid']."','".time()."',null,'DENY','1')","NONE");
 		}
 
 		function reset_() { // reset progress for this atom
 			global $DBc;
 
-			$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$this->id."' AND apa_player='".$this->user."'","NONE");
+			$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$this->id."' AND apa_player='".$this->user['cid']."'","NONE");
 		}
 
 		function reset_all() { // reset progress for all atoms of the same objective
@@ -82,14 +82,14 @@
 			$res = $DBc->sendSQL("SELECT atom_id FROM ach_atom WHERE atom_objective='".$this->objective."'","ARRAY");
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$res[$i]['atom_id']."' AND apa_player='".$this->user."'","NONE");
+				$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$res[$i]['atom_id']."' AND apa_player='".$this->user['cid']."'","NONE");
 			}
 		}
 
 		function unlock() { // unlock atom
 			global $DBc;
 
-			$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$this->id."' AND apa_player='".$this->user."' AND apa_state='DENY'","NONE");
+			$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$this->id."' AND apa_player='".$this->user['cid']."' AND apa_state='DENY'","NONE");
 		}
 
 		function unlock_all() { // unlock all atoms of the same objective
@@ -98,7 +98,7 @@
 			$res = $DBc->sendSQL("SELECT atom_id FROM ach_atom WHERE atom_objective='".$this->objective."'","ARRAY");
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
-				$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$res[$i]['atom_id']."' AND apa_player='".$this->user."' AND apa_state='DENY'","NONE");
+				$DBc->sendSQL("DELETE FROM ach_player_atom WHERE apa_atom='".$res[$i]['atom_id']."' AND apa_player='".$this->user['cid']."' AND apa_state='DENY'","NONE");
 			}
 		}
 

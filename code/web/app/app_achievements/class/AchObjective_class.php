@@ -11,7 +11,7 @@
 		protected $metalink;
 
 		function AchObjective($data,$parent) {
-			global $DBc,$_USER;
+			global $DBc,$_USER,$_CONF;
 
 			parent::__construct();
 			
@@ -28,6 +28,17 @@
 
 			if($this->metalink != null) {
 				$this->name = $data['aal_name'];
+
+				if($this->name == null) {
+					$res = $DBc->sqlQuery("SELECT * FROM ach_achievement_lang WHERE aal_lang='".$_CONF['default_lang']."' AND aal_achievement='".$this->metalink."'");
+					$this->name = $res[0]['aal_name'];
+				}
+			}
+			else {
+				if($this->name == null) {
+					$res = $DBc->sqlQuery("SELECT * FROM ach_objective_lang WHERE aol_lang='en' AND aol_objective='".$this->id."'");
+					$this->name = $res[0]['aol_name'];
+				}
 			}
 
 			$this->progress = $this->value;

@@ -38,9 +38,17 @@
 					if($curr->isOpen()) {
 						$html .= "color:orange;";
 					}
-					$html .= "'>".$curr->getName()."</td>
+					$html .= "'>";
+			if($curr->inDev()) {
+				$html .= "<s>".$curr->getName()."</s>";
+			}
+			else {
+				$html .= $curr->getName();
+			}
+			$html .= "</td>
 				</tr>
 			</table></a></span>";
+
 			if($curr->hasOpenCat() != 0) {
 				$html .= "<div style='display:block;margin-left:25px;'>".adm_render_mnode($curr,($sub+4))."</div>";
 			}
@@ -50,6 +58,8 @@
 	}
 
 	function atom_render_category(&$cat) {
+		global $_CONF;
+
 		$html = "<style>
 			.bar {
 				background-color:#FFFFFF;
@@ -64,6 +74,30 @@
 				text-decoration:none;
 			}
 		</style>";
+
+
+		$html .= "<div style='display: block; margin-bottom: 5px;'>
+			<div style='display:block;font-size:22px;' class='bar'>Category:<form method='post' action='?mode=lang&cat=".$_REQUEST['cat']."&act=cat_save&id=".$cat->getID()."'>
+				<table>
+					<tr>
+						<td>&nbsp;</td>
+						<td style='color:#454545;'>name</td>
+					</tr>";
+
+					foreach($_CONF['langs'] as $elem) {
+
+						$html .= "<tr>
+							<td style='color:#454545;'>".$elem."</td>
+							<td><input type='text' name='c_name[".$elem."]' style='width:270px;' value='".htmlspecialchars($cat->getLang($elem),ENT_QUOTES)."' /></td>
+						</tr>";
+					}
+
+				$html .= "<tr>
+						<td>&nbsp;</td>
+						<td colspan='2'><input type='submit' value='save' /></td>
+					</tr>
+					</table>
+					</form></div></div>";
 		
 		$iter = $cat->getOpen();
 		while($iter->hasNext()) {
@@ -86,10 +120,10 @@
 		}
 
 		$html = "<div style='display: block; margin-bottom: 5px;'>
-			<div style='display:block;font-size:22px;' class='bar'><a href='javascript:hs(\"ach_".$ach->getID()."\",\"block\");'>[+]</a> ".$ach->getName()." <span style='font-size:12px;'>(ties= race: ".$ach->getTieRace()."; civ: ".$ach->getTieCiv()."; cult: ".$ach->getTieCult().")</span>
+			<div style='display:block;font-size:22px;' class='bar'><a name='jach_".$ach->getID()."'></a><a href='javascript:hs(\"ach_".$ach->getID()."\",\"block\");'>[+]</a> ".$ach->getName()."</span>
 			
 			<div style='margin-left:35px;'>
-				<form method='post' action='?mode=lang&cat=".$_REQUEST['cat']."&act=ach_save&id=".$ach->getPathID()."'>
+				<form method='post' action='?mode=lang&cat=".$_REQUEST['cat']."&act=ach_save&id=".$ach->getPathID()."#jach_".$ach->getID()."'>
 				<table>
 					<tr>
 						<td>&nbsp;</td>
@@ -139,11 +173,15 @@
 				$o = "block";
 			}
 
+			$tmp = $task->getLang('en');
+
+			if($tmp[0] != "" || $tmp[1] != '') {
+
 			$html .= "<div style='display: block; margin-bottom: 5px;'>
-				<div style='display:block;font-size:16px;' class='bar'><a href='javascript:hs(\"task_".$task->getID()."\",\"block\");'>[+]</a> ".$task->getDisplayName()."
+				<div style='display:block;font-size:16px;' class='bar'><a name='jtask_".$task->getID()."'></a><a href='javascript:hs(\"task_".$task->getID()."\",\"block\");'>[+]</a> ".$task->getDisplayName()."
 				
 				<div style='margin-left:35px;'>
-				<form method='post' action='?mode=lang&cat=".$_REQUEST['cat']."&act=task_save&id=".$task->getPathID()."'>
+				<form method='post' action='?mode=lang&cat=".$_REQUEST['cat']."&act=task_save&id=".$task->getPathID()."#jtask_".$task->getID()."'>
 				<table>
 					<tr>
 						<td>&nbsp;</td>
@@ -172,6 +210,10 @@
 				</div>
 				<div style='margin-left:25px;display:".$o.";' id='task_".$task->getID()."'>".ach_render_obj_list($task->getIterator(),$task)."</div>
 			</div>";
+			}
+			else {
+				$html .= "<div style='display: block; margin-bottom: 5px;'><div style='margin-left:25px;display:block;' id='task_".$task->getID()."'>".ach_render_obj_list($task->getIterator(),$task)."</div></div>";
+			}
 		}
 
 		return $html;
@@ -186,17 +228,17 @@
 		while($obj->hasNext()) {
 			$elem = $obj->getNext();
 			
-			if($task->isInherited($elem->getID())) {
+			if($task->isInherited($elem->getID()) || $elem->getDisplay() == 'hidden' || $elem->getDisplay() == "meta" || $elem->getLang('en') == "") {
 				continue;
 			}
 
 
 			
 			$html .= "<div style='display: block; margin-bottom: 5px;'>
-				<div style='display:block;' class='bar'>&nbsp;&nbsp;".$elem->getDisplayName()."</span>
+				<div style='display:block;' class='bar'><a name='jobj_".$elem->getID()."'></a>&nbsp;&nbsp;".$elem->getDisplayName()."</span>
 				
 				<div style='margin-left:35px;'>
-				<form method='post' action='?mode=lang&cat=".$_REQUEST['cat']."&act=obj_save&id=".$elem->getPathID()."'>
+				<form method='post' action='?mode=lang&cat=".$_REQUEST['cat']."&act=obj_save&id=".$elem->getPathID()."#jobj_".$elem->getID()."'>
 						<table>
 					<tr>
 						<td>&nbsp;</td>
@@ -208,7 +250,7 @@
 
 						$html .= "<tr>
 							<td style='color:#454545;'>".$lang."</td>
-							<td><input type='text' name='' style='width:246px;' value='".htmlspecialchars($tmp,ENT_QUOTES)."' /></td>
+							<td><input type='text' name='o_name[".$lang."]' style='width:246px;' value='".htmlspecialchars($tmp,ENT_QUOTES)."' /></td>
 						</tr>";
 					}
 

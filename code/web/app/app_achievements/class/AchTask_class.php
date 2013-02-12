@@ -37,13 +37,16 @@
 		protected $parent_id;
 		protected $inherit_obj;
 		private $heritage_list;
+		protected $tie_race;
+		protected $tie_cult;
+		protected $tie_civ;
 
 		function AchTask($data,$parent) {
-			global $DBc,$_USER;
+			global $DBc,$_USER,$_CONF;
 
 			parent::__construct();
 
-			$this->heritage_list = array();
+			#$this->heritage_list = array();
 			
 			$this->setParent($parent);
 			$this->setID($data['at_id']);
@@ -56,15 +59,50 @@
 			$this->parent_id = $data['at_parent'];
 			$this->inherit_obj = $data['at_inherit'];
 
-			#if($this->inherit_obj == 0) {
+			if($this->inherit_obj == 1) {
+				$this->heritage_list = new AVLTree();
+			}
+			else {
+				$this->heritage_list = null;
+			}
 
-				$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement,ach_achievement_lang) ON (aa_id=ao_metalink AND aa_id=aal_achievement AND aal_lang='".$_USER->getLang()."') WHERE ao_task='".$this->id."' ORDER by aol_name ASC,aal_name ASC");
+			if($this->name == null) {
+				$res = $DBc->sqlQuery("SELECT * FROM ach_task_lang WHERE atl_lang='".$_CONF['default_lang']."' AND atl_task='".$this->id."'");
+				$this->name = $res[0]['atl_name'];
+				$this->template = $res[0]['atl_template'];
+			}
 
-				$sz = sizeof($res);
-				for($i=0;$i<$sz;$i++) {
-					$this->addChild($this->makeChild($res[$i]));
-				}
-			#}
+			$res = $DBc->sqlQuery("SELECT * FROM ach_objective LEFT JOIN (ach_objective_lang) ON (aol_lang='".$_USER->getLang()."' AND aol_objective=ao_id) LEFT JOIN (ach_player_objective) ON (apo_objective=ao_id AND apo_player='".$_USER->getID()."') LEFT JOIN (ach_achievement,ach_achievement_lang) ON (aa_id=ao_metalink AND aa_id=aal_achievement AND aal_lang='".$_USER->getLang()."') WHERE ao_task='".$this->id."' ORDER by aol_name ASC,aal_name ASC");
+
+			$sz = sizeof($res);
+			for($i=0;$i<$sz;$i++) {
+				$this->addChild($this->makeChild($res[$i]));
+			}
+
+			//load ties
+			$res = $DBc->sqlQuery("SELECT attr_race FROM ach_task_tie_race WHERE attr_task='".$this->id."'");
+			$sz = sizeof($res);
+
+			$this->tie_race = array();
+			for($i=0;$i<$sz;$i++) {
+				$this->tie_race[] = $res[$i]['attr_race'];
+			}
+
+			$res = $DBc->sqlQuery("SELECT attcult_cult FROM ach_task_tie_cult WHERE attcult_task='".$this->id."'");
+			$sz = sizeof($res);
+
+			$this->tie_cult = array();
+			for($i=0;$i<$sz;$i++) {
+				$this->tie_cult[] = $res[$i]['attcult_cult'];
+			}
+
+			$res = $DBc->sqlQuery("SELECT attciv_civ FROM ach_task_tie_civ WHERE attciv_task='".$this->id."'");
+			$sz = sizeof($res);
+
+			$this->tie_civ = array();
+			for($i=0;$i<$sz;$i++) {
+				$this->tie_civ[] = $res[$i]['attciv_civ'];
+			}
 		}
 
 		function loadHeritage() {
@@ -79,7 +117,7 @@
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
 				$this->addChild($curr);
-				$this->heritage_list[] = $curr->getID();
+				$this->heritage_list->insert($curr);
 			}
 		}
 		
@@ -93,7 +131,46 @@
 		}
 
 		function isInherited($id) {
-			return in_array($id,$this->heritage_list);
+			if($this->getHeritage() == 0) {
+				return false;
+			}
+			if($this->heritage_list == null) {
+				return false;
+			}
+			return ($this->heritage_list->find($id) != null);
+		}
+
+		function hasTieRace() {
+			return (sizeof($this->tie_race) != 0);
+		}
+
+		function hasTieCult() {
+			return (sizeof($this->tie_cult) != 0);
+		}
+
+		function hasTieCiv() {
+			return (sizeof($this->tie_civ) != 0);
+		}
+
+		function isTiedRace($r) {
+			if(sizeof($this->tie_race) == 0) {
+				return true;
+			}
+			return in_array($r,$this->race);
+		}
+
+		function isTiedCult($c) {
+			if(sizeof($this->tie_cult) == 0) {
+				return true;
+			}
+			return in_array($c,$this->tie_cult);
+		}
+
+		function isTiedCiv($c) {
+			if(sizeof($this->tie_civ) == 0) {
+				return true;
+			}
+			return in_array($c,$this->tie_civ);
 		}
 
 		function getAchievement() {

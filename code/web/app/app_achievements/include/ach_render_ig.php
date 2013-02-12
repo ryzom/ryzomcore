@@ -1,6 +1,6 @@
 <?php
 	function ach_render() {
-		global $_USER;
+		global $_USER,$_CONF;
 
 		$c = "<table>
 			<tr>
@@ -25,7 +25,7 @@
 						$cat = new AchCategory($open,$_REQUEST['cult'],$_REQUEST['civ']);
 					}
 					else {
-						$cat = new AchSummary($menu,8);
+						$cat = new AchSummary($menu,$_CONF['summary_size']);
 						$c .= ach_render_summary_header();
 					}
 
@@ -110,9 +110,9 @@
 	function ach_render_yubopoints() {
 		global $DBc,$_USER,$_CONF;
 
-		$res = $DBc->sqlQuery("SELECT sum(at_value) as anz FROM ach_task,ach_player_task WHERE ap_id=apt_task AND apt_player='".$_USER->getID()."'");
+		$res = $DBc->sqlQuery("SELECT sum(at_value) as anz FROM ach_task,ach_player_task WHERE at_id=apt_task AND apt_player='".$_USER->getID()."'");
 
-		$html = "<font size='32px'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png'>&nbsp;".max(0,$res[0]['anz'])."</font>";
+		$html = "<font size='32px'>".$_USER->getName()."&nbsp;<img src='".$_CONF['image_url']."pic/yubo_done.png?cacheid=".$_CONF['image_cdate']."'>&nbsp;".max(0,$res[0]['anz'])."</font>";
 
 		return $html;
 	}
@@ -148,10 +148,10 @@
 
 			$html .= "<tr><td>";
 					if($sub == 0) {
-						$html .= "<img src='".$_CONF['image_url']."pic/menu/ig_".$curr->getImage()."' />";
+						$html .= "<img src='".$_CONF['image_url']."pic/menu/ig_".$curr->getImage()."?cacheid=".$_CONF['image_cdate']."' />";
 					}
 					else {
-						$html .= "<img src='".$_CONF['image_url']."pic/menu_space.png' />";
+						$html .= "<img src='".$_CONF['image_url']."pic/menu_space.png?cacheid=".$_CONF['image_cdate']."' />";
 					}
 					$html .= "</td><td><a href='?lang=en&cat=".$curr->getID()."'><font size='".(16-$sub)."px'";
 					if($curr->isOpen()) {
@@ -173,11 +173,12 @@
 	}
 
 	function ach_render_category(&$cat) {
-		#return "";
+		global $_USER;
+
 		$html = "";
 
 		if($cat->isHeroic() && !$cat->hasDone()) {
-			return "<center style='font-size:24px;'>You haven't earned any Heroic Deeds so far.</center>";
+			return "<center style='font-size:24px;'>".get_translation('ach_no_heroic_deeds',$_USER->getLang())."</center>";
 		}
 
 		if($cat->isTiedCult() || $cat->isTiedCiv()) {
@@ -220,13 +221,16 @@
 				<td  width='450px' bgcolor='#D2CBDC88'>
 					<table width='450px' cellpadding='3px'>
 						<tr>
-							<td width='70px'><img src='".$_CONF['image_url']."pic/icon/".$ach->getImage()."'></td>
+							<td width='70px'><img src='".$_CONF['image_url']."pic/icon/".$ach->getImage()."?cacheid=".$_CONF['image_cdate']."'></td>
 							<td><center><font size='22px'><b>".$ach->getName()."</b></font></center>
 								<table>".ach_render_task_done($ach)."</table>
 							</td>
 							<td width='35px'>";
-		if(!$ach->isHeroic()) {
-			$html .= "<font size='24px' color='#000000'>".$ach->getValueDone()."</font><br><img src='".$_CONF['image_url']."pic/yubo_done.png'>";
+		if((!$ach->isHeroic() && !$ach->isContest()) && $ach->getValueDone() > 0) {
+			$html .= "<font size='24px' color='#000000'>".$ach->getValueDone()."</font><br><img src='".$_CONF['image_url']."pic/yubo_done.png?cacheid=".$_CONF['image_cdate']."'>";
+		}
+		else {
+			$html .= '<img src="'.$_CONF['image_url'].'pic/star_done.png?cacheid='.$_CONF['image_cdate'].'"><br>';
 		}
 		$html .= "</td>
 						</tr>
@@ -248,11 +252,15 @@
 				<td  width='450px' bgcolor='#D2CBDC33'>
 					<table width='450px' cellpadding='3px'>
 						<tr>
-							<td width='70px'><img src='".$_CONF['image_url']."pic/icon/grey/".$ach->getImage()."'></td>
+							<td width='70px'><img src='".$_CONF['image_url']."pic/icon/grey/".$ach->getImage()."?cacheid=".$_CONF['image_cdate']."'></td>
 							<td><center><font size='22px'><b>".$ach->getName()."</b></font></center>
 								<table>".ach_render_task_open($ach)."</table>
 							</td>
-							<td width='35px'><font size='22px' color='#000000'>".$ach->getValueOpen()."</font><br><img src='".$_CONF['image_url']."pic/yubo_pending.png'></td>
+							<td width='35px'>";
+		if(!$ach->isHeroic() && !$ach->isContest()) {
+			$html .= "<font size='22px' color='#000000'>".$ach->getValueOpen()."</font><br><img src='".$_CONF['image_url']."pic/yubo_pending.png?cacheid=".$_CONF['image_cdate']."'>";
+		}
+		$html .= "</td>
 						</tr>
 					</table>
 				</td>
@@ -294,7 +302,11 @@
 			if($task->inDev()) {
 				continue;
 			}
-			$html .= "<tr><td><font color='#66CC00'><b>".$task->getDisplayName()."</b></font> ( ".date('d.m.Y',$task->getDone())." ) <img src='".$_CONF['image_url']."pic/yubo_done_small.png' /> ".$task->getValue()."</td></tr>";
+			$html .= "<tr><td><font color='#66CC00'><b>".$task->getDisplayName()."</b></font><br>( ".date('d.m.Y',$task->getDone())." )";
+			if($task->getValue() > 0) {
+				$html .= " <img src='".$_CONF['image_url']."pic/yubo_done_small.png?cacheid=".$_CONF['image_cdate']."' /> ".$task->getValue();
+			}
+			$html .= "</td></tr>";
 		}
 
 		return $html;
@@ -358,10 +370,10 @@
 
 		$html = "";
 		if($obj->isdone()) {
-			$html .= "<img src='".$_CONF['image_url']."pic/check.png' height='10px' />&nbsp;<font color='#71BE02;'>";
+			$html .= "<img src='".$_CONF['image_url']."pic/check.png?cacheid=".$_CONF['image_cdate']."' height='10px' />&nbsp;<font color='#71BE02;'>";
 		}
 		else {
-			$html .= "<img src='".$_CONF['image_url']."pic/pending.png' height='10px' />&nbsp;<font color='#999999;'>";
+			$html .= "<img src='".$_CONF['image_url']."pic/pending.png?cacheid=".$_CONF['image_cdate']."' height='10px' />&nbsp;<font color='#999999;'>";
 		}
 		
 		$html .= $obj->getDisplayName()."</font>";
@@ -383,8 +395,9 @@
 
 		return "<table cellspacing='0' cellpadding='0'>
 				<tr>
-					<td><img src='".$_CONF['image_url']."pic/icon/".$grey."small/".$obj->getMetaImage()."' /></td>
-					<td><font color='".$col."'>&nbsp;".$obj->getDisplayName()."</font></td>
+					<td><img src='".$_CONF['image_url']."pic/icon/".$grey."small/".$obj->getMetaImage()."?cacheid=".$_CONF['image_cdate']."' /></td>
+					<td>&nbsp;</td>
+					<td><font color='".$col."'>".$obj->getDisplayName()."</font></td>
 				</tr>
 			</table>";
 	}
@@ -466,7 +479,7 @@
 				$html .= "<tr>";
 			}
 
-			$html .= "<td width='225px'>".$elem[0]."<br>";
+			$html .= "<td width='225px'>".$elem[0];
 			if($elem[3] == false) {
 				$html .= ach_render_progressbar($elem[1],$elem[2],150);
 			}
@@ -474,7 +487,7 @@
 				$html .= ach_render_progressbar($elem[1],false,150);
 			}
 
-			$html .= "</td>";
+			$html .= "<br></td>";
 
 			$sum_done += $elem[1];
 			$sum_total += $elem[2];
@@ -494,7 +507,7 @@
 		<font size='30px' color='#FFFFFF'>".get_translation('ach_summary_stats',$_USER->getLang())."</font>
 		<table width='450px'>
 			<tr>
-				<td width='450px'>".get_translation('ach_summary_stats_total',$_USER->getLang())."<br>".ach_render_progressbar($sum_done,$sum_total,350)."<br></td>
+				<td width='450px'>".get_translation('ach_summary_stats_total',$_USER->getLang()).ach_render_progressbar($sum_done,$sum_total,350)."<br></td>
 			</tr>
 			<tr>
 				<td width='450px'><table width='450px'>".$html."</table></td>
