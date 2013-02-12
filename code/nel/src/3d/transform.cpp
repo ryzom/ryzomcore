@@ -1418,7 +1418,7 @@ void CTransform::forceCompute()
 	}
 	else
 	{
-		// force to compûte the father
+		// force to compute the father
 		if (_HrcParent)
 		{
 			_HrcParent->forceCompute();
