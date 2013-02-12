@@ -1,4 +1,4 @@
-﻿// Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
+// Translation Manager Plugin - OVQT Plugin <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Emanuel Costea <cemycc@gmail.com>
 //

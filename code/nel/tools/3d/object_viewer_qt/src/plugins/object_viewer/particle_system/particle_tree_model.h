@@ -59,7 +59,7 @@ struct ItemType
 /**
 @class CParticleTreeItem
 @brief Basic elements tree model particles workspace.
-Сontains pointer to items particle workspace and type icons.
+Contains pointer to items particle workspace and type icons.
 */
 class CParticleTreeItem
 {
