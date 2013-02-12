@@ -421,7 +421,7 @@ void	CFamilyBehavior::update(uint32 nbTicks)
 			||	!grp->isSpawned())
 			break;
 
-//		rajouter un test sur la validité du groupe par rapport aux flags des zones occupées pour savoir s'il faut le despawner .. :)
+//		add a check if group is valid related to used regions flags to know if we need to despawn it
 
 		bool	alreadyDespawned=false;
 		breakable

@@ -30,7 +30,7 @@ class COutpost;
 /**
  * Base class to manipulate the outpost guild client database.
  *
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date october 2005
  */
@@ -102,7 +102,7 @@ private:
 /**
  * This class updates the outpost guild client database.
  *
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date october 2005
  */
@@ -158,7 +158,7 @@ typedef NLMISC::CSmartPtr<COutpostGuildDBUpdater>	COutpostGuildDBUpdaterPtr;
 /**
  * This class clears the outpost guild client database.
  *
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date october 2005
  */

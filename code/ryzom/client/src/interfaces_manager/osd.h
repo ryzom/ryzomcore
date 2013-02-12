@@ -167,7 +167,7 @@ private:
 	void drawTB();
 	/// Draw the resize borders.
 	void drawBorders(float bSizeW, float bSizeH, float x0, float y0, float x1, float y1, const CRGBA &color);
-	/// Draw a text with all informations needed.
+	/// Draw a text with all information needed.
 	void drawText(float x, float y, const ucstring &text, const CPen &pen);
 
 	/// Test the mode of the OSD.

@@ -38,9 +38,9 @@ Voici la définition de la primitive "player", dans WORLD_EDITOR_SCRIPT.XML
 <PARAMETER NAME= "y"				TYPE="string"		VISIBLE="true"> <DEFAULT_VALUE VALUE=	"0"			/> </PARAMETER>
 </PRIMITIVE>
 
-5) World_Editor_Service utilise un cache pour stocker les déplacements des joueurs, afin de n'envoyer que ce qui bouge
+5) World_Editor_Service uses a cache to save players moves, to be able to send only moving entities
 
-6) World_Editor_Plugin utilise aussi un cache avec un pointeur sur les Primitives, afin de ne modifier dans WE que ce qui bouge
+6) World_Editor_Plugin uses too a cache with a pointer on Primitives, to modify only moving entities in WE
 
 */
 #include "stdafx.h"
@@ -262,7 +262,7 @@ void CPlugin::onIdle()
 		}
 		else
 		{
-			// first, we receive the stack of messages, which is composed of players informations
+			// first, we receive the stack of messages, which is composed of players information
 			_Client->update();
 			// now, we insert the players into the GUI
 			for (uint i = 0; i < StackPlayers.size(); ++i)

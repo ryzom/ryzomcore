@@ -22,7 +22,7 @@ class COutpost;
 
 /**
  * Singleton class used to adapt different version of COutpost
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */

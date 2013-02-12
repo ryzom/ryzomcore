@@ -1403,7 +1403,7 @@ void CSceneParser::updateCamera(double timeInSec)
 			UAnimation *animation = _AnimationSet->getAnimation(idAnim);
 			if(animation)
 			{
-				// Get Camera informations from the animation (Pos, Target, Roll).
+				// Get Camera information from the animation (Pos, Target, Roll).
 				UTrack* trackRollCam	= animation->getTrackByName("Camera.roll");
 				UTrack* trackFovCam		= animation->getTrackByName("Camera.fov");
 				UTrack* trackPosCam		= animation->getTrackByName("Camera.PathPos");

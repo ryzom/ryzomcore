@@ -875,9 +875,9 @@ Colors are something like that:
 2:	VERT CITRON		VERT CITRON			GREEN 
 3:	VERT			VERT				TURQUOISE 
 4:	BLEU			BLEU				BLUE 
-5:	ROUGE foncé		ROUGE (tout court)	CRIMSON 
+5:	ROUGE fonce		ROUGE (tout court)	CRIMSON 
 6:	BLANC			JAUNE				WHITE 
-7:	NOIR			BLEU très foncé		BLACK
+7:	NOIR			BLEU tres fonce		BLACK
 
 3D column is (probably) used for equipment
 */

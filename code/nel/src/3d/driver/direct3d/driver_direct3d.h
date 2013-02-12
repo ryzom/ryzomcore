@@ -640,7 +640,7 @@ public:
 	void	*lock (uint size, uint stride, uint &offset);
 	void	unlock ();
 
-	// Runtime reset (called at the begining of the frame rendering), blocking lock here.
+	// Runtime reset (called at the beginning of the frame rendering), blocking lock here.
 	void	reset ();
 };
 
@@ -670,7 +670,7 @@ public:
 	void	*lock (uint size, uint &offset);
 	void	unlock ();
 
-	// Runtime reset (called at the begining of the frame rendering), blocking lock here.
+	// Runtime reset (called at the beginning of the frame rendering), blocking lock here.
 	void	reset ();
 };
 

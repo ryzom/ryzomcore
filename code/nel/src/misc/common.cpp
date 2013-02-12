@@ -16,6 +16,9 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/types_nl.h"
+#include "nel/misc/common.h"
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
@@ -68,6 +71,9 @@ extern "C" long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 #endif // NL_OS_WINDOWS
 
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace	NLMISC
 {

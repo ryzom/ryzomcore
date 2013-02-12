@@ -29,7 +29,7 @@ namespace NL3D {
 /*
  *	In this file, we define several template that helps to create attributes maker such as gradient (of float, int, vector etc)
  * attributes maker are used in the particle system to generate values, such as size, color etc. see ps_attrib_maker.h
- * for more informations
+ * for more information
  */
 
 

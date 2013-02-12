@@ -72,7 +72,7 @@ public:
 	void DeleteAll(); //efface provisoirement les sections DIB et les *Bits;
 	void Reload(CDC *pDC,tilelist::iterator iFirst,int n); //recharge en memoire une tranche de tiles
 	int last_id;
-	tilelist::iterator iFirst,iLast; //index du premier et du dernier element chargé en memoire
+	tilelist::iterator iFirst,iLast; // first and last index loaded in memory
 };
 
 

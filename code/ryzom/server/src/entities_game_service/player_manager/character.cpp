@@ -189,7 +189,7 @@ extern float						CarriedItemsDecayRate;
 extern uint8						TeamMembersStatusMaxValue;
 extern CCharacterBotChatBeginEnd	CharacterBotChatBeginEnd;
 //*** Removed by Sadge ***
-//extern CCreatureAskInformationMsg	CreatureNpcInformations;
+//extern CCreatureAskInformationMsg	CreatureNpcInformation;
 //*** ***
 extern float						MaxHarvestDistance;
 extern float						MaxMountDistance;
@@ -3515,8 +3515,8 @@ void CCharacter::setTarget( const CEntityId &targetId, bool sendMessage )
 
 //*** Removed by Sadge ***
 //		// Ask information about target to AI service
-//		CreatureNpcInformations.Character.push_back( _EntityRowId );
-//		CreatureNpcInformations.Creature.push_back( target->getEntityRowId() );
+//		CreatureNpcInformation.Character.push_back( _EntityRowId );
+//		CreatureNpcInformation.Creature.push_back( target->getEntityRowId() );
 //*** ***
 	}
 	else // target == NULL
@@ -7823,9 +7823,9 @@ void CCharacter::endHarvest(bool sendCloseTempImpulsion)
 	_HarvestOpened = false;
 	_DepositSearchSkill = SKILLS::unknown;
 	_MpIndex = 0xff;
-	_DepositHarvestInformations.DepositIndex = 0xffffffff;
+	_DepositHarvestInformation.DepositIndex = 0xffffffff;
 
-	if ( _DepositHarvestInformations.Sheet != CSheetId::Unknown/*_DepositHarvestInformations.EndCherchingTime != 0xffffffff && _DepositHarvestInformations.EndCherchingTime > CTickEventHandler::getGameCycle()*/ )
+	if ( _DepositHarvestInformation.Sheet != CSheetId::Unknown/*_DepositHarvestInformation.EndCherchingTime != 0xffffffff && _DepositHarvestInformation.EndCherchingTime > CTickEventHandler::getGameCycle()*/ )
 	{
 		if ( sendCloseTempImpulsion )
 		{
@@ -9950,7 +9950,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 
 		if (item->getRefInventory() == _Inventory[INVENTORIES::equipment])
 		{
-			nlwarning("<CCharacter sellItem> character %s try to sell an equiped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
+			nlwarning("<CCharacter sellItem> character %s try to sell an equipped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
 			return;
 		}
 
@@ -14056,7 +14056,7 @@ bool CCharacter::pickUpRawMaterial( uint32 indexInTempInv, bool * lastMaterial )
 				}
 
 				clearHarvestDB();
-				//CZoneManager::getInstance().removeRmFromDeposit( this, _DepositHarvestInformations.DepositIndex, _DepositHarvestInformations.DepositIndexContent,_HarvestedQuantity);
+				//CZoneManager::getInstance().removeRmFromDeposit( this, _DepositHarvestInformation.DepositIndex, _DepositHarvestInformation.DepositIndexContent,_HarvestedQuantity);
 			}
 		}
 	}

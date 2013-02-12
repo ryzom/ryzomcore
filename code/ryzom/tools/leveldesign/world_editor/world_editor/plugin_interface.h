@@ -90,7 +90,7 @@ public:
 	/// get all the current root primitve in the world editor. only the editable one are returned
 	virtual void getAllRootPluginPrimitive (std::vector<NLLIGO::IPrimitive*> &prims) = 0;
 	/*
-	 *	The players or informations coming from the server are considered as primitives by the WorldEditor
+	 *	The players or information coming from the server are considered as primitives by the WorldEditor
 	 *   so we need to create/delete/modify these primitives
 	 */
 	// Create a plugin primitive

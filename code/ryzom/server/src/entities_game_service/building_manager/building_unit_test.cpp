@@ -66,7 +66,7 @@ static CEntityId createFakeCharacter(uint32 playerId, const string & name, EGSPD
 
 /**
  * Class used to test building manager
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2004
  */
