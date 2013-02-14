@@ -33,8 +33,8 @@
 #include "../global.h"
 #include "../misc.h"
 #include "../landscape_poly_drawer.h"
-#include "../interface_v3/ctrl_polygon.h"
-#include "../interface_v3/ctrl_quad.h"
+#include "nel/gui/ctrl_polygon.h"
+#include "nel/gui/ctrl_quad.h"
 #include "../time_client.h"
 //
 
@@ -131,7 +131,7 @@ public:
 		_Parent->getCorner(winX, winY, _ParentPosRef);
 		return contains(x - winX, y - winY);
 	}
-	virtual bool		handleEvent (const CEventDescriptor &/* event */)
+	virtual bool		handleEvent (const NLGUI::CEventDescriptor &/* event */)
 	{
 		return false;
 	}

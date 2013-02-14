@@ -20,7 +20,7 @@
 #define NL_GROUP_CAREER_H
 
 #include "nel/misc/types_nl.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 
 
 // ***************************************************************************

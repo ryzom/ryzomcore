@@ -20,9 +20,9 @@
 #include "bot_chat_page_create_guild.h"
 #include "interface_manager.h"
 #include "guild_manager.h"
-#include "interface_group.h"
-#include "action_handler.h"
-#include "group_editbox.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_editbox.h"
 #include "dbctrl_sheet.h"
 #include "bot_chat_manager.h"
 #include "bot_chat_page_all.h"
@@ -38,7 +38,7 @@ void CBotChatPageCreateGuild::begin()
 	CBotChatPage::begin();
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// clear intro text
-	im->getDbProp(BOT_CHAT_BASE_DB_PATH ":CREATE_GUILD")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":CREATE_GUILD")->setValue32(0);
 	// show the dialog
 	activateWindow(WIN_BOT_CHAT_PAGE_CREATE_GUILD, true);
 }
@@ -59,13 +59,13 @@ class CHandlerGuildCreate : public IActionHandler
 		string IconWin = getParam(Params, "icon");
 		string guildDescWin = getParam(Params, "desc");
 
-		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(guildNameWin));
+		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildNameWin));
 		if (pGEB == NULL) return;
 
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(IconWin));
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(IconWin));
 		if (pCS == NULL) return;
 
-		CGroupEditBox *pDesc = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(guildDescWin));
+		CGroupEditBox *pDesc = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildDescWin));
 
 		ucstring guildName = pGEB->getInputString();
 

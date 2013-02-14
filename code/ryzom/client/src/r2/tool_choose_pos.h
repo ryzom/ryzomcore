@@ -25,8 +25,10 @@
 
 class CEntity;
 class CEntityCL;
-class CLuaObject;
-
+namespace NLGUI
+{
+	class CLuaObject;
+}
 
 namespace R2
 {

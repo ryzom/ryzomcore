@@ -190,7 +190,7 @@ void CDecal::setTexture(const std::string &fileName,   bool clampU,   bool clamp
 	if (getTextureFileName() != fileName)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CViewRenderer &vr = im->getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		UTexture *tex = vr.getGlobalTexture(fileName);
 		if (tex != NULL)
 		{

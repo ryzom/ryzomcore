@@ -21,7 +21,7 @@
 
 
 // client
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 #include "chat_window.h"
 #include "interface_pointer.h"
 // NeL

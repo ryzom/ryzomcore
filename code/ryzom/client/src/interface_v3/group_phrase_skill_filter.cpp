@@ -20,13 +20,13 @@
 
 #include "group_phrase_skill_filter.h"
 #include "interface_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 #include "game_share/skills.h"
 #include "game_share/brick_families.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 #include "skill_manager.h"
 #include "sbrick_manager.h"
@@ -91,7 +91,7 @@ bool CGroupPhraseSkillFilter::parse (xmlNodePtr cur, CInterfaceGroup *parentGrou
 		_BrickFamilyObs[k].Owner= this;
 		_BrickFamilyObs[k].BrickFamily= (BRICK_FAMILIES::TBrickFamily)k;
 		sTmp = string(DB_BRICKS)+":"+NLMISC::toString((sint32)k)+":BRICKS";
-		pIM->addDBObserver (&(_BrickFamilyObs[k]), sTmp);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&(_BrickFamilyObs[k]), ICDBNode::CTextId( sTmp ));
 	}
 
 	_MustRebuild = true;
@@ -153,7 +153,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 	// get the tree
 	if (_Tree == NULL)
 	{
-		_Tree = dynamic_cast<CGroupTree*>(pIM->getElementFromId(getId(),"sbtree:tree_list"));
+		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),"sbtree:tree_list"));
 
 		if (_Tree == NULL)
 		{

@@ -21,9 +21,13 @@
 #include "../interface_v3/group_map.h"
 #include "displayer_visual.h"
 
+namespace NLGUI
+{
+	class CCtrlQuad;
+	class CViewBitmap;
+}
+
 class CGroupMap;
-class CCtrlQuad;
-class CViewBitmap;
 
 namespace R2
 {
@@ -80,7 +84,7 @@ private:
 		CCtrlButtonEntity(CInstance &instance) : CCtrlButton(TCtorParam()), _Instance(instance) {}
 		// from IDisplayerUIHandle
 		virtual CInstance &getDisplayedInstance() { return _Instance; }
-		virtual bool		handleEvent (const CEventDescriptor &event);
+		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
 	private:
 		CInstance			&_Instance;
 	protected:

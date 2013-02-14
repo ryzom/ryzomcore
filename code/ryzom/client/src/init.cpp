@@ -62,12 +62,14 @@
 #include "ingame_database_manager.h"
 #include "client_chat_manager.h"
 #include "interface_v3/input_handler_manager.h"
+#include "interface_v3/interface_manager.h"
 //#include "crtdbg.h"
 #include "sound_manager.h"
 #include "net_manager.h"
 #include "sheet_manager.h"
 
 #include "interface_v3/sbrick_manager.h"
+#include "nel/gui/widget_manager.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -661,12 +663,12 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-
+		
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
 		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
 			setCPUMask();
-
+		
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -805,6 +807,7 @@ void prelogInit()
 		switch(ClientCfg.Driver3D)
 		{
 #ifdef NL_OS_WINDOWS
+
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
@@ -1008,7 +1011,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for (uint i=0; i<3; i++)
+		for ( uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;
@@ -1045,13 +1048,21 @@ void prelogInit()
 		if(GenericMat.empty())
 			nlerror("init: Cannot Create the generic material.");
 
-		// Yoyo: initialize NOW the InputHandler for Event filtering.
-		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
-		InputHandlerManager->addToServer (&Driver->EventServer);
 
 		// Create a text context. We need to put the full path because we not already add search path
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
+
+		
+		CInterfaceManager::getInstance();
+
+		// Yoyo: initialize NOW the InputHandler for Event filtering.
+		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
+		InputHandlerManager->addToServer (&Driver->EventServer);
+
+		std::string filename = CPath::lookup( ClientCfg.XMLInputFile, false );
+		if( !filename.empty() )
+			InputHandlerManager->readInputConfigFile( filename );
 
 		ProgressBar.setFontFactor(0.85f);
 

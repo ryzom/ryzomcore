@@ -19,10 +19,10 @@
 #include "stdpch.h"
 #include "dbgroup_list_sheet_text_share.h"
 #include "../client_sheets/sbrick_sheet.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "interface_manager.h"
-#include "view_bitmap.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/ctrl_text_button.h"
 #include "../net_manager.h"
 #include "../client_sheets/item_sheet.h"
 
@@ -158,19 +158,19 @@ void CDBGroupListSheetTextShare::CSheetChildShare::init(CDBGroupListSheetText *p
 	CCDBNodeLeaf *pNL;
 	string sTmp= Ctrl->getSheet()+":NB_MEMBER";
 	sTmp = "LOCAL" + sTmp.substr(6,sTmp.size());
-	pNL = pIM->getDbProp(sTmp, false);
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false);
 	nlassert(pNL != NULL);
 	CurrentNbMember.link ( sTmp.c_str() );
 
 	sTmp= Ctrl->getSheet()+":CHANCE";
 	sTmp = "LOCAL" + sTmp.substr(6,sTmp.size());
-	pNL = pIM->getDbProp(sTmp, false);
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false);
 	nlassert(pNL != NULL);
 	CurrentChance.link ( sTmp.c_str() );
 
 	sTmp= Ctrl->getSheet()+":WANTED";
 	sTmp = "LOCAL" + sTmp.substr(6,sTmp.size());
-	pNL = pIM->getDbProp(sTmp, false);
+	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false);
 	nlassert(pNL != NULL);
 	CurrentWanted.link ( sTmp.c_str() );
 
@@ -264,7 +264,7 @@ class CHandlerTeamShareChoose : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CBitMemStream out;
 
-		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 		if (pTB == NULL) return;
 		if (pTB->getActive() == false) return;
 
@@ -279,15 +279,15 @@ class CHandlerTeamShareChoose : public IActionHandler
 		localDB = "LOCAL" + localDB.substr(6,localDB.size());
 
 		// Retrieve index
-		if (pIM->getDbProp(localDB)->getValue8() == 0)
+		if (NLGUI::CDBManager::getInstance()->getDbProp(localDB)->getValue8() == 0)
 		{
 			strMsgName = "TEAM:SHARE_VALID_ITEM";
-			pIM->getDbProp(localDB)->setValue8(1); // We can do it because it is in local
+			NLGUI::CDBManager::getInstance()->getDbProp(localDB)->setValue8(1); // We can do it because it is in local
 		}
 		else
 		{
 			strMsgName = "TEAM:SHARE_INVALID_ITEM";
-			pIM->getDbProp(localDB)->setValue8(0); // We can do it because it is in local
+			NLGUI::CDBManager::getInstance()->getDbProp(localDB)->setValue8(0); // We can do it because it is in local
 		}
 
 		if (!GenericMsgHeaderMngr.pushNameToStream(strMsgName, out))
@@ -299,7 +299,7 @@ class CHandlerTeamShareChoose : public IActionHandler
 			// Serialize item/phrase index
 			out.serial(index);
 			// Serialize session id
-			uint8 sessionid = pIM->getDbProp("LOCAL:INVENTORY:SHARE:SESSION")->getValue8();
+			uint8 sessionid = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:SHARE:SESSION")->getValue8();
 			out.serial(sessionid);
 			NetMngr.push (out);
 			//nlinfo("impulseCallBack : %s %d %d sent", strMsgName.c_str(), index, sessionid);
@@ -317,7 +317,7 @@ class CHandlerTeamShareValid : public IActionHandler
 		CBitMemStream out;
 		string strMsgName = "TEAM:SHARE_VALID";
 
-		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId("ui:interface:team_share:content:ok"));
+		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
 		if (pTB != NULL)
 			pTB->setActive(false);
 
@@ -328,7 +328,7 @@ class CHandlerTeamShareValid : public IActionHandler
 		else
 		{
 			// Serialize session id
-			uint8 sessionid = pIM->getDbProp("LOCAL:INVENTORY:SHARE:SESSION")->getValue8();
+			uint8 sessionid = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:SHARE:SESSION")->getValue8();
 			out.serial(sessionid);
 			NetMngr.push (out);
 			//nlinfo("impulseCallBack : %s %d sent", strMsgName.c_str(), sessionid);

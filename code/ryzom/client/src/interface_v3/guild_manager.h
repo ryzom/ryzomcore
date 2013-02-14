@@ -22,7 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include "obs_huge_list.h"
 #include "dbgroup_list_sheet_text.h"
-#include "../cdb.h"
+#include "nel/misc/cdb.h"
 #include "game_share/guild_grade.h"
 #include "game_share/misc_const.h"
 
@@ -209,15 +209,15 @@ private:
 
 
 	// Database management stuff
-	class CDBObs : public ICDBNode::IPropertyObserver
+	class CDBObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
-	class CDBObsMembers : public ICDBNode::IPropertyObserver
+	class CDBObsMembers : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 
 	CDBObs			_DBObs;

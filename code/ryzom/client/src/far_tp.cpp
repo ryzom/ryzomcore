@@ -43,6 +43,7 @@
 #include "client_chat_manager.h"
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
+#include "interface_v3/action_handler_base.h"
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -187,6 +188,7 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 			_CurrentState = stateId;	\
 			break;						\
 		}								\
+		
 
 extern std::string LoginLogin, LoginPassword;
 extern bool noUserChar;
@@ -526,7 +528,7 @@ void CLoginStateMachine::run()
 			// Far TP part 1.1: From the ingame main loop, the admin html box gives us an event ev_connect for the destination shard.
 			//   Note: the admin html box is run by CInputHandlerManager::getInstance()->pumpEvents() in the main loop.
 			//   Tip: to see where a co-task is resumed from, just add a breakpoint on the end of CCoTask::resume().
-			CInterfaceManager::getInstance()->runActionHandler("quit_ryzom", NULL, "");
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL, "");
 
 			if (!FarTP.isIngame()) // assumes there is no Far TP starting between char selection and main loop, see below
 			{
@@ -866,15 +868,15 @@ retryJoinEdit:
 		if ( letReturnToCharSelect )
 		{
 //			// Hide all buttons except Quit. If !requestRetToMainland, we will show them back at the end of connectToNewShard().
-//			pIM->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
-//			pIM->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
+//			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_disable_buttons" );
+//			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:quit_but:active|value=1" );
 
-			CInterfaceElement *btnOk = pIM->getElementFromId("ui:outgame:charsel:message_box:ok");
+			CInterfaceElement *btnOk = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:message_box:ok");
 			if (btnOk)
 				btnOk->setActive( ! requestRetToMainland );
 
 			// Hide the black screen i.e. force showing the interface
-			CInterfaceElement *charSelBlackScreen = pIM->getElementFromId("ui:outgame:charsel:black_screen");
+			CInterfaceElement *charSelBlackScreen = CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel:black_screen");
 			if (charSelBlackScreen)
 			{
 				CViewBase *charSelBlackScreenBitmap = dynamic_cast<CViewBase*>(charSelBlackScreen);
@@ -907,7 +909,7 @@ retryJoinEdit:
 
 		// Save this error (regular log file is deleted at every startup)
 //		res = res + "\n\n";
-/*		try
+		/*try
 		{
 			COFile outputF;
 			if ( outputF.open( getLogDirectory() + "error_join.log", true, true ) )
@@ -922,7 +924,8 @@ retryJoinEdit:
 		}
 		catch (const Exception &)
 		{}
-*/
+		*/
+
 		// If the session is not a permanent session and has vanished, pop the position
 		if ( requestRetToMainland )
 		{
@@ -933,12 +936,12 @@ retryJoinEdit:
 		else if ( letReturnToCharSelect )
 		{
 			// Show all buttons except 'New character' so that the character can retry entering game or choose another character.
-			pIM->runActionHandler( "proc", NULL, "charsel_enable_buttons" );
-			pIM->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:create_new_but:active|value=0" );
+			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_enable_buttons" );
+			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:create_new_but:active|value=0" );
 
-			CInterfaceGroup* charselGroup = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:outgame:charsel"));
+			CInterfaceGroup* charselGroup = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel"));
 			if(charselGroup)
-				pIM->runActionHandler( "proc", charselGroup, "charsel_init_buttons" );
+				CAHManager::getInstance()->runActionHandler( "proc", charselGroup, "charsel_init_buttons" );
 		}
 
 		return false;
@@ -1252,7 +1255,7 @@ void CFarTP::sendReady()
 			{
 				// Remove all existing keys and load them back, and load new interface config
 				pIM->loadKeys();
-				pIM->hideAllWindows();
+				CWidgetManager::getInstance()->hideAllWindows();
 				pIM->loadInterfaceConfig();
 			}
 			else
@@ -1275,7 +1278,8 @@ void CFarTP::sendReady()
 			CInputHandlerManager::getInstance()->pumpEventsNoIM();
 			// Update Network.
 			NetMngr.update();
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			// Be nice to the system
 			nlSleep(100);
 		}
@@ -1357,6 +1361,7 @@ void CFarTP::onDssDown(bool forceReturn)
 }
 
 extern bool loginFinished;
+void setLoginFinished( bool f );
 extern bool loginOK;
 
 void CFarTP::joinSessionResult(uint32 /* userId */, TSessionId /* sessionId */, uint32 /* result */, const std::string &/* shardAddr */, const std::string &/* participantStatus */)
@@ -1371,7 +1376,7 @@ void CFarTP::joinSessionResult(uint32 /* userId */, TSessionId /* sessionId */, 
 //
 //		FSAddr = shardAddr;
 //
-//		loginFinished = true;
+//		setLoginFinished( true );
 //		loginOK = true;
 //
 //		LoginSM.pushEvent(CLoginStateMachine::ev_connect);
@@ -1413,7 +1418,8 @@ void CFarTP::farTPmainLoop()
 
 		// Update Network.
 		NetMngr.update();
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// TODO: resend in case the last datagram sent was lost?
 //		// check if we can send another dated block
@@ -1462,3 +1468,4 @@ void CFarTP::farTPmainLoop()
 	if(welcomeWindow)
 		initWelcomeWindow();
 }
+

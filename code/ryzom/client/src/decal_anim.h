@@ -23,7 +23,13 @@ namespace NLMISC
 	class CVector2f;
 }
 
-class CLuaObject;
+namespace NLGUI
+{
+	class CLuaObject;
+}
+
+using namespace NLGUI;
+
 class CDecal;
 
 // TODO nico : this would fit nicely in the particle system animation system (would be more flexible)

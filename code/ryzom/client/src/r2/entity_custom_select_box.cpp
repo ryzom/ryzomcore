@@ -17,7 +17,7 @@
 #include "stdpch.h"
 //
 #include "entity_custom_select_box.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 //
 #include "nel/misc/vector.h"
 
