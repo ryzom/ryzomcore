@@ -463,6 +463,27 @@ namespace NLGUI
 		{
 			type = (const char*) prop;
 		}
+		
+		if (type.empty() || type == "toggle_button")
+		{
+                _Type = ToggleButton;
+        }
+        else if (type == "push_button")
+        {
+                _Type = PushButton;
+        }
+        else if (type == "radio_button")
+        {
+                _Type = RadioButton;
+
+                initRBRef();
+                if (_Pushed)
+                        *_RBRef = this;
+        }
+        else
+        {
+                nlinfo(("cannot parse button type for button " + getId()).c_str());
+        }
 
 		prop= (char*) xmlGetProp (cur, (xmlChar*)"pushed");
 		_Pushed = false;
