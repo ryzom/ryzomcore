@@ -227,7 +227,7 @@ public:
 	enum	{MaxVPLight= 4};
 
 	/** reset the lighting setup in the driver (all lights are disabled).
-	 *	called at begining of traverse(). Must be called by any model (before and after rendering)
+	 *	called at beginning of traverse(). Must be called by any model (before and after rendering)
 	 *	that wish to use CDriver::setLight() instead of the standard behavior with changeLightSetup()
 	 */
 	void		resetLightSetup();

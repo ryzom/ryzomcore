@@ -5,7 +5,7 @@
 # nel-config
 #
 # Script printing NeL's install library/include paths and some other
-# informations like NeL's version
+# information like NeL's version
 #
 
 prefix=@prefix@

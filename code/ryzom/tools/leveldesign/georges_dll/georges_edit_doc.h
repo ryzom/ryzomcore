@@ -262,7 +262,7 @@ protected:
 // Operations
 public:
 
-	// Plugin informations
+	// Plugin information
 	class CPlugin
 	{
 	public:
@@ -274,7 +274,7 @@ public:
 		NLGEORGES::IEditPlugin				*Plugin;
 	};
 
-	// Array of plugin informations
+	// Array of plugin information
 	std::vector<CPlugin>	PluginArray;
 
 // Overrides

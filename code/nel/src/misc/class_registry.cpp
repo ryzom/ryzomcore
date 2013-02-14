@@ -17,8 +17,13 @@
 #include "stdmisc.h"
 
 #include "nel/misc/class_registry.h"
+#include "nel/misc/debug.h"
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

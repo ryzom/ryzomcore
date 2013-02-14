@@ -4460,3 +4460,4 @@ void CUserEntity::trader(const CLFECOMMON::TCLEntityId &slot)
 	if (_Trader != CLFECOMMON::INVALID_SLOT)
 		EntitiesMngr.refreshInsceneInterfaceOfFriendNPC(_Trader);
 }
+

@@ -1455,7 +1455,7 @@ void GenerateDoc()
 				AltDocs[c].write( "<td><b><a href=\"rm_" + string(DataColStr[cc]) + ".html\">" + string(DataColStr[cc]) + "</a></b></td>" );
 		AltDocs[c].write( "</tr>" );
 		string previousKey = "[NO PREVIOUS]"; // not a blank string, because it may be a valid value
-		string previousName = "";
+		string previousName;
 		for ( CRMData::CLookup::const_iterator isd=SortableData.lookup( c ).begin(); isd!=SortableData.lookup( c ).end(); ++isd )
 		{
 			const TRMItem& item = SortableData.getRow( (*isd).second );
@@ -1530,7 +1530,7 @@ void LoadFamillesMP()
 
 	ligne = fileData.splitTo( "\n", true );
 
-	while ( !ligne.empty() )
+	while ( ligne != "" )
 	{
 		NewMP( ligne );	
 		ligne = fileData.splitTo( "\n", true );

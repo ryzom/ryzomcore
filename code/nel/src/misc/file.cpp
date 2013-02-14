@@ -15,9 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
-#ifndef NL_OS_WINDOWS
-#include <errno.h>
-#endif
+
 #include "nel/misc/file.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/big_file.h"
@@ -26,9 +24,17 @@
 #include "nel/misc/sstring.h"
 #include "nel/misc/xml_pack.h"
 
+#ifndef NL_OS_WINDOWS
+#include <errno.h>
+#endif
+
 using namespace std;
 
 #define NLMISC_DONE_FILE_OPENED 40
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

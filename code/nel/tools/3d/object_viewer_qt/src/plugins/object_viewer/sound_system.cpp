@@ -86,8 +86,8 @@ void CSoundSystem::init()
 		QSettings *settings = Core::ICore::instance()->settings();
 		settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-		_PackedSheetPath = settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString().toUtf8();
-		_SamplePath = settings->value(Constants::SOUND_SAMPLE_PATH, "").toString().toUtf8();
+		_PackedSheetPath = settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString().toUtf8().constData();
+		_SamplePath = settings->value(Constants::SOUND_SAMPLE_PATH, "").toString().toUtf8().constData();
 		_AudioMixer->setSamplePath(_SamplePath);
 		_AudioMixer->setPackedSheetOption(_PackedSheetPath, true);
 		std::vector<std::string> devices;

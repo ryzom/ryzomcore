@@ -404,7 +404,6 @@ bool connection (const string &cookie, const string &fsaddr)
 	nlinfo ("PROFILE: %d seconds for connection", (uint32)(ryzomGetLocalTime ()-connStart)/1000);
 
 	// Init web box
-	nlinfo("ok");
 
 	// TMP TMP
 	if (ClientCfg.Local)

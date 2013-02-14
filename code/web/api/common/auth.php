@@ -107,7 +107,7 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='', $w
 	$_SESSION['lang'] = $lang;
 
 	define('RYZOM_IG', $user['ig']);
-	// get user informations
+	// get user information
 	$ig = $user['ig'];
 	$user = ryzom_user_get_info($cid, $webprivs);
 
@@ -137,7 +137,7 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='', $w
 
 	if (isset($user['last_played_date']))
 		$_SESSION['last_played_date'] = $user['last_played_date'];
-	 // don't send this informations to external apps
+	 // don't send this information to external apps
 	unset($user['last_played_date']);
 	unset($user['creation_date']);
 	return true;

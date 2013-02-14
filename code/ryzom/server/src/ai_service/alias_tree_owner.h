@@ -226,7 +226,7 @@ std::string CAliasTreeOwner::getAliasFullName() const
 	if (_AliasTree)
 		return _AliasTree->fullName();
 	
-	return getName(); // à upgrader ..
+	return getName(); // to upgrade...
 }
 
 inline

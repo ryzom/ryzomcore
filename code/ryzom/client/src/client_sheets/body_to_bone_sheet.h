@@ -21,6 +21,8 @@
 
 #include "game_share/body.h"
 
+#include <nel/misc/string_mapper.h>
+
 namespace NLGEORGES
 {
 	class UFormElm;

@@ -108,12 +108,12 @@ void cbClientItemEquip( NLNET::CMessage& msgin, const std::string &serviceName, 
 {
 	H_AUTO(cbClientItemEquip);
 
-	uint16 equipedInventory, equipedSlot, bagSlot;
+	uint16 equippedInventory, equippedSlot, bagSlot;
 	CEntityId id;
 
 	msgin.serial( id );
-	msgin.serial( equipedInventory );
-	msgin.serial( equipedSlot );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
 	msgin.serial( bagSlot );
 
 	CCharacter *c = (CCharacter * ) CEntityBaseManager::getEntityBasePtr( id );
@@ -125,7 +125,7 @@ void cbClientItemEquip( NLNET::CMessage& msgin, const std::string &serviceName, 
 		// if player is stunned or dead cancel action
 		if (c->isDead() || c->isStunned())
 			return;
-		c->equipCharacter( INVENTORIES::TInventory(equipedInventory), equipedSlot, bagSlot, true );
+		c->equipCharacter( INVENTORIES::TInventory(equippedInventory), equippedSlot, bagSlot, true );
 	}
 }
 
@@ -134,12 +134,12 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 {
 	H_AUTO(cbClientItemUnequip);
 
-	uint16 equipedInventory, equipedSlot;
+	uint16 equippedInventory, equippedSlot;
 	CEntityId id;
 
 	msgin.serial( id );
-	msgin.serial( equipedInventory );
-	msgin.serial( equipedSlot );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
 
 	CCharacter *c = (CCharacter * ) CEntityBaseManager::getEntityBasePtr( id );
 	if( c )
@@ -151,7 +151,7 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 		if (c->isDead() || c->isStunned())
 			return;
 
-		c->unequipCharacter( INVENTORIES::TInventory(equipedInventory), equipedSlot, true );
+		c->unequipCharacter( INVENTORIES::TInventory(equippedInventory), equippedSlot, true );
 	}
 }
 
@@ -2415,7 +2415,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 	msgin.serial( id,opt );
 	const std::vector<CEntityId> * gms = NULL;
 
-	// Make sure opt is not like "A(c)" for "é"
+	// Make sure opt is not like "A(c)" for e acute
 	ucstring ucopt;
 	ucopt.fromUtf8(opt);
 	opt = ucopt.toString();

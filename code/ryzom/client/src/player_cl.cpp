@@ -495,7 +495,7 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 	}
 
 	/* If the object is sticked (ie not a skin), decide to delete the Current instance. Why? because the animation
-		is changed according to the equiped item.
+		is changed according to the equipped item.
 
 		Hence, For example, if a sword would be changed for a gun, then the new gun animation would take place,
 		while Keeping the old sword shape. BAD.
@@ -1360,5 +1360,4 @@ void CPlayerCL::computePrimitive()
 	// Set the position.
 	pacsPos(pos());
 }// computePrimitive //
-
 

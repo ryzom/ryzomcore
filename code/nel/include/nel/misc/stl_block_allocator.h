@@ -44,7 +44,7 @@ namespace NLMISC {
  *	will assert when allocations will occur).
  *
  * To construct a container which use this allocator, do like this:
- *	list<uint, CSTLBlockAllocator<uint>>		myList( ptrOnBlockMemory );
+ *	list<uint, CSTLBlockAllocator<uint> >		myList( ptrOnBlockMemory );
  *
  * But see CSTLBlockList for easier list instanciation, because using it, you'll do like this:
  *	CSTLBlockList<uint>		myList(ptrOnBlockMemory);

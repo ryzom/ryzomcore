@@ -90,7 +90,7 @@ const NLMISC::CClassId		TransformId=NLMISC::CClassId(0x174750cb, 0xf952024);
 class CTransform : public ITransformable
 {
 public:
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 	/// get the scene which has created us
@@ -113,7 +113,7 @@ public:
 	/**
 	 *	Extra init for a model. this method is called by the framework at the very end of CScene::createModel()
 	 *	Warning! if the model is a CTransformShape, then when initModel() is called, Shape and other related member/setup
-	 *	of IShape::createInstance() are not yet done (because createModel() is called at the begining in createInstance()).
+	 *	of IShape::createInstance() are not yet done (because createModel() is called at the beginning in createInstance()).
 	 *
 	 *	Because initModel() is called at the very end, deriver could implement anything like creating other models,
 	 *	but not deleting this model...

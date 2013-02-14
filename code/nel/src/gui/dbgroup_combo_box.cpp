@@ -31,6 +31,11 @@ NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupComboBox, std::string, "combo_box");
 
 namespace NLGUI
 {
+	// Compare strings
+	static inline bool lt_text(const std::pair<int,ucstring> &s1, const std::pair<int,ucstring> &s2)
+	{
+		return toLower(s1.second) < toLower(s2.second);
+	}
 
 	std::string CDBGroupComboBox::measureMenu;
 	std::string CDBGroupComboBox::selectMenu;
@@ -228,7 +233,7 @@ namespace NLGUI
 			}
 			else
 			{
-				_ViewText->setText(_Texts[_CacheSelection]);
+				_ViewText->setText(_Texts[_CacheSelection].second);
 			}
 		}
 	}
@@ -260,7 +265,7 @@ namespace NLGUI
 	void	CDBGroupComboBox::addText(const ucstring &text)
 	{
 		dirt();
-		_Texts.push_back(text);
+		_Texts.push_back(make_pair(_Texts.size(), text));
 		_Textures.push_back(std::string());
 	}
 
@@ -269,7 +274,7 @@ namespace NLGUI
 	{
 		dirt();
 		if(i<_Texts.size())
-			_Texts[i]= text;
+			_Texts[i].second= text;
 	}
 
 	// ***************************************************************************
@@ -278,14 +283,14 @@ namespace NLGUI
 		dirt();
 		if(i<_Texts.size())
 		{
-			addText(_Texts[_Texts.size()-1]);
+			addText(_Texts[_Texts.size()-1].second);
 
 			for(uint t=i; t<_Texts.size()-1; t++)
 			{
 				_Texts[t+1] = _Texts[t];
 				_Textures[t+1] = _Textures[t];
 			}
-			_Texts[i]= text;
+			_Texts[i] = make_pair(i, text);
 			_Textures[i] = std::string();
 		}
 		else if(i==_Texts.size())
@@ -301,13 +306,13 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void	CDBGroupComboBox::removeText(uint i)
+	void	CDBGroupComboBox::removeText(uint nPos)
 	{
 		dirt();
-		if(i<_Texts.size())
+		if(nPos<_Texts.size())
 		{
-			_Texts.erase( _Texts.begin()+i );
-			_Textures.erase( _Textures.begin()+i );
+			_Texts.erase( _Texts.begin()+nPos );
+			_Textures.erase( _Textures.begin()+nPos );
 		}
 	}
 
@@ -316,11 +321,37 @@ namespace NLGUI
 	{
 		static	ucstring	null;
 		if(i<_Texts.size())
-			return _Texts[i];
+			return _Texts[i].second;
 		else
 			return null;
 	}
 
+	// ***************************************************************************
+	const uint		&CDBGroupComboBox::getTextId(uint i) const
+	{
+		static	uint	null = 0;
+		if(i<_Texts.size())
+			return _Texts[i].first;
+		else
+			return null;
+	}
+	
+	// ***************************************************************************
+	uint	CDBGroupComboBox::getTextPos(uint nId) const
+	{
+		for(uint i=0; i<_Texts.size(); i++)
+		{
+			if(nId == _Texts[i].first) {return i;}
+		}
+		return 0;
+	}
+
+	// ***************************************************************************
+	void	CDBGroupComboBox::sortText()
+	{
+		sort(_Texts.begin(), _Texts.end(), lt_text);
+	}
+	
 	// ***************************************************************************
 	const ucstring	&CDBGroupComboBox::getTexture(uint i) const
 	{

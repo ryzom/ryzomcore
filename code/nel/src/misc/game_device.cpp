@@ -17,6 +17,10 @@
 #include "stdmisc.h"
 #include "nel/misc/game_device.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 

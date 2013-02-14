@@ -259,8 +259,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				if (strnicmp(sFame.c_str(),"tribe_",6)==0)
 				{
 					tribeName = true;
-					// always display title for tribe
-					title = true;
+					//// always display title for tribe
+					//title = true;
 					theTribeName = STRING_MANAGER::CStringManagerClient::getFactionLocalizedName(sFame);
 					// tribeName stuff disable any guild name
 					guildName= false;
@@ -1201,5 +1201,4 @@ void CGroupInSceneUserInfo::serial(NLMISC::IStream &f)
 {
 	CGroupInScene::serial(f);
 }
-
 

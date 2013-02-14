@@ -26,7 +26,7 @@ typedef NLMISC::CSmartPtr<CShardStatDB> CShardStatDBPtr;
 /**
  * This class manages player and guild names for SDB
  * 
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
@@ -52,7 +52,7 @@ private:
 /**
  * This class displays a node of SDB
  * 
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
@@ -105,7 +105,7 @@ private:
 /**
  * This class provides a read-only access to a shard SDB copy
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
@@ -143,7 +143,7 @@ private:
 /**
  * A shard SDB copy
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
@@ -189,7 +189,7 @@ private:
  * This manager keeps copies of shard statistical databases up-to-date
  * and furnishes a read-only access to the shard SDB copies
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */

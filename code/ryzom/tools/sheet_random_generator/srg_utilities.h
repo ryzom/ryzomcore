@@ -639,7 +639,7 @@ void	CFaberCharacteristics::calcQualitativeValues()
 	if ( ActualEnergy > 1.0f )
 		ActualEnergy = 1.0f;
 
-	// Calculate the standard deviation (SQRT(SUM((Ai-Aavg)²)/N))
+	// Calculate the standard deviation (SQRT(SUM((Ai-Aavg)^2)/N))
 	float varianceSum = 0.0f;
 	for ( uint r=0; r!=NbCharacs; ++r )
 	{

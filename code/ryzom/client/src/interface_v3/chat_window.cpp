@@ -924,28 +924,33 @@ void CChatGroupWindow::removeAllFreeTellers()
 void CChatGroupWindow::saveFreeTeller(NLMISC::IStream &f)
 {
 	f.serialVersion(2);
-
-	// Save the free teller only if it is present in the friend list to avoid the only-growing situation
-	// because free tellers are never deleted in game if we save/load all the free tellers, we just create more
-	// and more container.
-
-	uint32 i, nNbFreeTellerSaved = 0;
-	for (i = 0; i < _FreeTellers.size(); ++i)
-		if (PeopleInterraction.FriendList.getIndexFromName(_FreeTellers[i]->getUCTitle()) != -1)
-			nNbFreeTellerSaved++;
-
+	
+	uint32 nNbFreeTellerSaved = 0;
+	
 	f.serial(nNbFreeTellerSaved);
+	
+	// Don't save the free tellers
+	//// Save the free teller only if it is present in the friend list to avoid the only-growing situation
+	//// because free tellers are never deleted in game if we save/load all the free tellers, we just create more
+	//// and more container.
+	
+	//uint32 i, nNbFreeTellerSaved = 0;
+	//for (i = 0; i < _FreeTellers.size(); ++i)
+	//	if (PeopleInterraction.FriendList.getIndexFromName(_FreeTellers[i]->getUCTitle()) != -1)
+	//		nNbFreeTellerSaved++;
+	
+	//f.serial(nNbFreeTellerSaved);
+	
+	//for (i = 0; i < _FreeTellers.size(); ++i)
+	//{
+	//	CGroupContainer *pGC = _FreeTellers[i];
+	//	if (PeopleInterraction.FriendList.getIndexFromName(pGC->getUCTitle()) != -1)
+	//	{
+	//		ucstring sTitle = pGC->getUCTitle();
+	//		f.serial(sTitle);
+	//	}
+	//}
 
-	for (i = 0; i < _FreeTellers.size(); ++i)
-	{
-		CGroupContainer *pGC = _FreeTellers[i];
-
-		if (PeopleInterraction.FriendList.getIndexFromName(pGC->getUCTitle()) != -1)
-		{
-			ucstring sTitle = pGC->getUCTitle();
-			f.serial(sTitle);
-		}
-	}
 }
 
 //=================================================================================
@@ -974,11 +979,12 @@ void CChatGroupWindow::loadFreeTeller(NLMISC::IStream &f)
 		ucstring sTitle;
 		f.serial(sTitle);
 
-		CGroupContainer *pGC = createFreeTeller(sTitle, "");
+		// Don't actually create the free teller
+		//CGroupContainer *pGC = createFreeTeller(sTitle, "");
 
-		// With version 1 all tells are active because windows information have "title based" ids and no "sID based".
-		if ((ver == 1) && (pGC != NULL))
-			pGC->setActive(false);
+		//// With version 1 all tells are active because windows information have "title based" ids and no "sID based".
+		//if ((ver == 1) && (pGC != NULL))
+		//	pGC->setActive(false);
 	}
 }
 
@@ -1427,7 +1433,4 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerInviteToRingSession, "invite_to_ring_session");
-
-
-
 

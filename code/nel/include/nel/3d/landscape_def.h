@@ -81,14 +81,14 @@ class	IDriver;
 class	CLandscapeGlobals
 {
 public:
-	// LANDSCAPE RENDERING CONTEXT.  Landscape must setup it at the begining at refine()/render().
+	// LANDSCAPE RENDERING CONTEXT.  Landscape must setup it at the beginning at refine()/render().
 	// The current date of LandScape for refine only.
 	static	sint	CurrentDate;
 	// The current date of LandScape for render only.
 	static	sint	CurrentRenderDate;
 	// The center view for refinement.
 	static	CVector RefineCenter;
-	// What is the treshold for tessellation.
+	// What is the threshold for tessellation.
 	static	float	RefineThreshold;
 	// Guess.
 	static	float	OORefineThreshold;
@@ -143,7 +143,7 @@ public:
 	static	CLandscapeVBAllocator	*CurrentTileVBAllocator;
 
 
-	// PATCH GLOBAL INTERFACE.  patch must setup them at the begining at refine()/render().
+	// PATCH GLOBAL INTERFACE.  patch must setup them at the beginning at refine()/render().
 	// NO!!! REMIND: can't have any patch global, since a propagated split()/updateErrorMetric()
 	// can arise. must use Patch pointer.
 
@@ -158,7 +158,7 @@ public:
 
 
 // ***************************************************************************
-// Out of CLandscapeGlobals, because myabe used in __asm{}
+// Out of CLandscapeGlobals, because maybe used in __asm{}
 extern	uint					NL3D_LandscapeGlobals_PassNTri;
 extern	void					*NL3D_LandscapeGlobals_PassTriCurPtr;
 extern  CIndexBuffer::TFormat	NL3D_LandscapeGlobals_PassTriFormat;

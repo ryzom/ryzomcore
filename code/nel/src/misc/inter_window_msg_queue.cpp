@@ -16,11 +16,15 @@
 
 #include "stdmisc.h"
 
-#ifdef NL_OS_WINDOWS
 #include "nel/misc/inter_window_msg_queue.h"
-//
+
+#ifdef NL_OS_WINDOWS
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/shared_memory.h"
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

@@ -59,9 +59,12 @@ namespace NLGUI
 		void			setText(uint i, const ucstring &text);
 		void			insertText(uint i, const ucstring &text);
 		const ucstring	&getText(uint i) const;
+		const uint		&getTextId(uint i) const;
+		uint			getTextPos(uint nId) const;
 		const ucstring	&getTexture(uint i) const;
-		void			removeText(uint i);
+		void			removeText(uint nPos);
 		uint			getNumTexts() const {return (uint)_Texts.size();}
+		void			sortText();
 
 		// selection
 		void			setSelection(sint32 val);
@@ -126,7 +129,7 @@ namespace NLGUI
 		// sint32
 		CInterfaceProperty		_Selection;
 		sint32					_NotLinkedToDBSelection;
-		std::vector<ucstring>	_Texts;
+		std::vector<std::pair<uint, ucstring> >	_Texts;
 		std::vector<ucstring>	_Textures;
 
 		// Action Handler called on combo click

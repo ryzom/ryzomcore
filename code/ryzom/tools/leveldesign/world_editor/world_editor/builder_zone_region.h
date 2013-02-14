@@ -38,7 +38,7 @@ class CBuilderZone;
 
 // ***************************************************************************
 
-// CZoneRegion contains informations about the zones painted
+// CZoneRegion contains information about the zones painted
 class CBuilderZoneRegion
 {
 

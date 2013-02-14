@@ -34,8 +34,8 @@
  * All classes in this file : 
  * \author Nicolas Brigand
  * \author Olivier Cado
- * \author Sébastien Guignot
- * \author Jérôme Vuarand
+ * \author Sebastien Guignot
+ * \author Jerome Vuarand
  * \author Nevrax France
  * \date 2005
  */

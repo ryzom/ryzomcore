@@ -15,7 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
+
 #include "nel/misc/shared_memory.h"
+#include "nel/misc/debug.h"
 
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
@@ -28,6 +30,9 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 

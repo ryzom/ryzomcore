@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "georgesform_model.h"
+#include "formitem.h"
 
 // NeL includes
 #include <nel/misc/types_nl.h>
@@ -34,9 +36,6 @@
 #include <QStyleOption>
 #include <QLabel>
 #include <QPixmap>
-
-// project includes
-#include "formitem.h"
 
 using namespace NLGEORGES;
 
@@ -406,7 +405,7 @@ namespace GeorgesQt
 					//uint value_uint;
 					//sint value_sint;
 					//double value_double;
-					QString elmtType = "";
+					QString elmtType;
 					UFormElm *elmt = 0;
 					if(root->getNodeByName(&elmt, elmName.c_str(),  whereN, true)) 
 					{
@@ -428,13 +427,23 @@ namespace GeorgesQt
 									switch (type->getType()) 
 									{
 									case UType::UnsignedInt:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toUtf8();
+									{
+										uint v;
+										NLMISC::fromString(value, v);
+										value = NLMISC::toString(v);
 										elmtType.append("_uint");break;
+									}
 									case UType::SignedInt:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble()).toUtf8();
+									{
+										sint v;
+										NLMISC::fromString(value, v);
+										value = NLMISC::toString(v);
 										elmtType.append("_sint");break;
+									}
 									case UType::Double:
-										value = QString("%1").arg(QString("%1").arg(value.c_str()).toDouble(),0,'f',1).toUtf8();
+										float v;
+										NLMISC::fromString(value, v);
+										value = NLMISC::toString(v);
 										elmtType.append("_double");break;
 									case UType::String:
 										elmtType.append("_string");break;
@@ -569,7 +578,7 @@ namespace GeorgesQt
 				{
 					QList<QVariant> columnData;
 					std::string value;
-					QString elmtType = "";
+					QString elmtType;
 
 					UFormElm *elmt = 0;
 					if(root->getArrayNode(&elmt,0) && elmt) 

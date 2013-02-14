@@ -26,6 +26,7 @@
 #include "../user_entity.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_editbox.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "../string_manager_client.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/action_handler.h"
@@ -80,6 +81,8 @@ static CCtrlButton *LastSelectedLandMark = NULL;
 static bool		   UseUserPositionForLandMark = false;
 static const char  *WIN_LANDMARK_NAME="ui:interface:enter_landmark_name";
 
+// Loaded position of user landmark types
+static std::vector<uint>  LoadedPosition;
 
 ////////////
 // GLOBAL //
@@ -109,6 +112,10 @@ static void popupLandMarkNameDialog()
 	
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 	if (!eb) return; 
+	
+	// Load ComboBox for Landmarks & sort entries
+	CDBGroupComboBox *cb = dynamic_cast<CDBGroupComboBox *>(gc->getGroup("landmarktypes"));
+	cb->sortText();
 
 	if (LastSelectedLandMark)
 	{
@@ -117,12 +124,12 @@ static void popupLandMarkNameDialog()
 		
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
-		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(userLM.Type);
+		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
 		eb->setInputString(userLM.Title);
 	}
 	else
 	{
-		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(CUserLandMark::Misc);
+		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
 		eb->setInputString(ucstring());
 	}
 
@@ -132,6 +139,7 @@ static void popupLandMarkNameDialog()
 
 static void closeLandMarkNameDialog()
 {
+	LoadedPosition.clear();
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
@@ -3203,10 +3211,14 @@ class CAHValidateUserLandMarkName : public IActionHandler
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("eb"));
 		if (!eb) return;
 		ig->setActive(false);
-
+		
+		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
+		if (!gc) return;
+		// Retrieve ComboBox to get the position(ordered landmark type) of the selected item
+		CDBGroupComboBox *cb = dynamic_cast<CDBGroupComboBox *>(gc->getGroup("landmarktypes"));
 
 		CUserLandMark::EUserLandMarkType landMarkType = CUserLandMark::Misc;
-		sint8 nLandMarkType = NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->getValue8();
+		sint8 nLandMarkType = cb->getTextId( CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->getValue8());
 		if (nLandMarkType>=0 && nLandMarkType<=CUserLandMark::UserLandMarkTypeCount)
 		{
 			landMarkType = (CUserLandMark::EUserLandMarkType)nLandMarkType;

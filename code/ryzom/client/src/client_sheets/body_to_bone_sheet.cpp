@@ -19,6 +19,7 @@
 #include "stdpch.h"
 //
 #include "body_to_bone_sheet.h"
+#include "client_sheets.h"
 //
 #include "nel/georges/u_form_elm.h"
 

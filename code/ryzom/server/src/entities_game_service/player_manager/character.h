@@ -115,6 +115,7 @@ class CMissionEvent;
 class CMissionSolo;
 class CCharacterVersionAdapter;
 class CCharacterEncyclopedia;
+class CCharacterAchievements;
 class CCharacterGameEvent;
 class CCharacterRespawnPoints;
 class CCharacterShoppingList;
@@ -443,6 +444,8 @@ private:
 
 	NL_INSTANCE_COUNTER_DECL(CCharacter);
 public:
+
+	void mobKill(TDataSetRow creatureRowId);
 
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
@@ -3201,7 +3204,7 @@ private:
 	/// if harvesting a deposit, the skill used
 	SKILLS::ESkills				_DepositSearchSkill;
 	/// Harvest deposit information
-	HARVEST_INFOS::CHarvestInfos _DepositHarvestInformations;		
+	HARVEST_INFOS::CHarvestInfos _DepositHarvestInformation;
 	//@}
 
 	/// the tick value of the nex decay of player items
@@ -3501,6 +3504,8 @@ private:
 	bool							_RespawnMainLandInTown;
 
 	CCharacterEncyclopedia			*_EncycloChar;
+
+	CCharacterAchievements			*_AchievementsChar;
 
 	CCharacterGameEvent				*_GameEvent;
 

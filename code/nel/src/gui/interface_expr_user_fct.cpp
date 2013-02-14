@@ -440,7 +440,7 @@ namespace NLGUI
 	/////////////////////////////////
 	static DECLARE_INTERFACE_USER_FCT(userFctMax)
 	{
-		// compute type of ouput
+		// compute type of output
 		if (!promoteToNumericalBestType(args))
 		{
 			nlwarning("max : invalid entry");
@@ -472,7 +472,7 @@ namespace NLGUI
 	/////////////////////////////////
 	static DECLARE_INTERFACE_USER_FCT(userFctMin)
 	{
-		// compute type of ouput
+		// compute type of output
 		if (!promoteToNumericalBestType(args))
 		{
 			nlwarning("max : invalid entry");

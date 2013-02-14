@@ -154,7 +154,7 @@ namespace NLGUI
 		nlwarning("add to download '%s' dest '%s' img %p", url.c_str(), dest.c_str(), img);
 	#endif
 
-			// erase the tmp file if exists
+		// erase the tmp file if exists
 		if (NLMISC::CFile::fileExists(tmpdest))
 			NLMISC::CFile::deleteFile(tmpdest);
 
