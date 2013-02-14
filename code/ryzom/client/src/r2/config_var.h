@@ -17,7 +17,7 @@
 #ifndef R2_CONFIG_VAR_H
 #define R2_CONFIG_VAR_H
 
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "editor.h"
 
 namespace R2

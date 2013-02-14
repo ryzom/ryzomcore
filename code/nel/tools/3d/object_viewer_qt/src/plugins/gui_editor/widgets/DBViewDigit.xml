@@ -1,0 +1,32 @@
+<widget>
+    <header>
+        <name>DBViewDigit</name>
+        <guiname>CDBViewDigit</guiname>
+        <ancestor>CtrlBase</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>value</name>
+            <type>string</type>
+            <default></default>
+        </property>
+        <property>
+            <name>numdigit</name>
+            <type>int</type>
+            <default>2</default>
+        </property>
+        <property>
+            <name>wspace</name>
+            <type>int</type>
+            <default>-1</default>
+        </property>
+        <property>
+            <name>color</name>
+            <type>string</type>
+            <default>255 255 255 255</default>
+        </property>
+    </properties>
+</widget>

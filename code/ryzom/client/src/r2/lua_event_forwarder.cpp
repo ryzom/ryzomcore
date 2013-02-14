@@ -16,7 +16,7 @@
 
 #include "stdpch.h"
 #include "lua_event_forwarder.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 
 
 namespace R2

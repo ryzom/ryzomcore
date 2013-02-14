@@ -20,7 +20,7 @@
 #define NL_INTERFACE_DDX_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "interface_pointer.h"
 
 // Values for float (scrollbar float) must not exceed 200,00 this is due to storing on
@@ -52,7 +52,7 @@ public:
 	void updateRealtime(CCtrlBase *pSB, bool updateOnScrollEnd);
 
 	// Update all parameters to obey their preset (no op if no preset or if preset is Custom)
-	void updateParamPreset(CCDBNodeLeaf *presetChanged);
+	void updateParamPreset(NLMISC::CCDBNodeLeaf *presetChanged);
 
 	// set apply button can be pushed
 	void validateApplyButton();
@@ -90,7 +90,7 @@ private:
 		sint32	RTBackupValue;	// When canceling
 
 		// For ConfigFile widget only
-		CCDBNodeLeaf		*PresetDB;
+		NLMISC::CCDBNodeLeaf		*PresetDB;
 
 		// -----------------------
 		CParam()
@@ -128,16 +128,16 @@ private:
 	std::vector<CParam> _Parameters;
 
 	// For preset change
-	class CPresetObs : public ICDBNode::IPropertyObserver
+	class CPresetObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 		CInterfaceDDX		*Owner;
 
 		CPresetObs() : Owner(NULL) {}
 	};
 	CPresetObs					_PresetObs;
-	std::set<CCDBNodeLeaf*>		_PresetNodes;
+	std::set<NLMISC::CCDBNodeLeaf*>		_PresetNodes;
 
 	// reset the preset values according to parameters values
 	void	resetPreSet();

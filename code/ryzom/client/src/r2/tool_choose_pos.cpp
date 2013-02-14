@@ -20,7 +20,7 @@
 #include "tool_choose_pos.h"
 #include "../interface_v3/interface_manager.h"
 #include "../global.h"
-#include "../interface_v3/group_tree.h"
+#include "nel/gui/group_tree.h"
 #include "../interface_v3/group_map.h"
 #include "../landscape_poly_drawer.h"
 //

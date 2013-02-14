@@ -1,0 +1,12 @@
+<widget>
+    <header>
+        <name>RootGroup</name>
+        <guiname>CRootGroup</guiname>
+        <ancestor>InterfaceGroup</ancestor>
+        <description></description>
+        <abstract>true</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+    </properties>
+</widget>

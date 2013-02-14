@@ -22,7 +22,7 @@
 #include "stdpch.h"
 
 #include "group_html_mail.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "../user_entity.h"
 #include "interface_manager.h"
@@ -76,7 +76,7 @@ void CGroupHTMLMail::addHTTPPostParams (HTAssocList *formfields, bool /*trustedD
 string	CGroupHTMLMail::home ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:MAIL_WAITING")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING")->setValue32(0);
 	return Home;
 }
 

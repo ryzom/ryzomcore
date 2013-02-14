@@ -18,10 +18,15 @@
 #define R2_ENTITY_CUSTOM_SELECT_BOX_H
 
 #include "nel/misc/aabbox.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include <map>
 
-class CLuaObject;
+namespace NLGUI
+{
+	class CLuaObject;
+}
+
+using namespace NLGUI;
 
 namespace R2
 {

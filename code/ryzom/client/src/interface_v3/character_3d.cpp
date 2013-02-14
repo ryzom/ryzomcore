@@ -475,7 +475,7 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 uint64 SCharacter3DSetup::getDB (const string &name)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNL = pIM->getDbProp(name);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(name);
 	if (pNL == NULL) return 0;
 	return pNL->getValue64();
 }
@@ -484,7 +484,7 @@ uint64 SCharacter3DSetup::getDB (const string &name)
 void SCharacter3DSetup::setDB (const string &name, uint64 val)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNL = pIM->getDbProp(name);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(name);
 	if (pNL == NULL) return;
 	pNL->setValue64(val);
 }
@@ -630,7 +630,7 @@ bool CCharacter3D::init (UScene *pScene)
 
 	// ANIMATIONS
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	COptionsAnimationSet	*pOAS= dynamic_cast<COptionsAnimationSet*>(pIM->getOptions("character_animations"));
+	COptionsAnimationSet	*pOAS= dynamic_cast<COptionsAnimationSet*>(CWidgetManager::getInstance()->getOptions("character_animations"));
 	if(!pOAS || !pOAS->AnimationSet)
 	{
 		nlwarning("Not found <options> 'character_animations', or not of type 'animation_set'");

@@ -1378,7 +1378,7 @@ void CClientConfig::setValues()
 					SPrintfCommand pcom;
 					pcom.X = pc->asInt(i);
 					pcom.Y = pc->asInt(i+1);
-					pcom.Color = stringToRGBA( pc->asString(i+2).c_str() );
+					pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
 					pcom.FontSize = pc->asInt(i+3);
 					pcom.Text = pc->asString(i+4);
 

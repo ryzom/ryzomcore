@@ -22,7 +22,7 @@
 #include "stdpch.h"
 
 #include "group_html_cs.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "interface_manager.h"
 
@@ -127,7 +127,7 @@ void CGroupHTMLCS::getParameters (std::vector<CParameter> &parameters, bool enco
 	{
 		webIgReady = true;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->executeLuaScript("game:onWebIgReady()");
+		CLuaManager::getInstance().executeLuaScript("game:onWebIgReady()");
 	}
 
 	// For each line

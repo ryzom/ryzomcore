@@ -20,11 +20,11 @@
 #include "bot_chat_manager.h"
 #include "bot_chat_page.h"
 #include "../net_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../user_entity.h"
 #include "interface_manager.h"
-#include "view_text_id.h"
-#include "interface_group.h"
+#include "nel/gui/view_text_id.h"
+#include "nel/gui/interface_group.h"
 #include "game_share/prerequisit_infos.h"
 
 using namespace std;

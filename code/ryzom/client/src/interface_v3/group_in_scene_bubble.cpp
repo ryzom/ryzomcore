@@ -21,16 +21,16 @@
 #include "interface_manager.h"
 #include "skill_manager.h"
 #include "../character_cl.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../entities.h"
-#include "group_paragraph.h" // For CCtrlLink
+#include "nel/gui/group_paragraph.h" // For CCtrlLink
 #include "../net_manager.h"
 #include "../string_manager_client.h"
 #include "../login.h"
 #include "../main_loop.h"
 #include "../bg_downloader_access.h"
 
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -48,7 +48,7 @@ void contextHelp (const std::string &name)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// User want context help ?
-	if ( (ClientCfg.Local || !IngameDbMngr.initInProgress()) && pIM->getDbProp("UI:SAVE:ENTITY:CONTEXT_HELP")->getValueBool())
+	if ( (ClientCfg.Local || !IngameDbMngr.initInProgress()) && NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:ENTITY:CONTEXT_HELP")->getValueBool())
 	{
 		// Look for the context help
 		uint index = 0;
@@ -56,12 +56,13 @@ void contextHelp (const std::string &name)
 		{
 			string defineTarget = name+"_"+toString(index)+"_target";
 			string defineUrl = name+"_"+toString(index)+"_url";
-			if (pIM->isDefineExist(defineTarget) && pIM->isDefineExist(defineUrl))
+			if ( CWidgetManager::getInstance()->getParser()->isDefineExist(defineTarget) &&
+				CWidgetManager::getInstance()->getParser()->isDefineExist(defineUrl))
 			{
-				string target = pIM->getDefine(defineTarget);
-				string url = pIM->getDefine(defineUrl);
+				string target = CWidgetManager::getInstance()->getParser()->getDefine(defineTarget);
+				string url = CWidgetManager::getInstance()->getParser()->getDefine(defineUrl);
 
-				CInterfaceElement *elementTarget = pIM->getElementFromId(target);
+				CInterfaceElement *elementTarget = CWidgetManager::getInstance()->getElementFromId(target);
 				if (elementTarget && elementTarget->getActive())
 				{
 					// Add the context help
@@ -73,7 +74,7 @@ void contextHelp (const std::string &name)
 						completeURL += "_" + ClientCfg.getHtmlLanguageCode() + ".html";
 						// Add bubble
 						InSceneBubbleManager.addContextHelpHTML(completeURL, target,
-							pIM->getSystemOption(CInterfaceManager::OptionTimeoutContextHtml).getValSInt32());
+							CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutContextHtml).getValSInt32());
 					}
 
 					// Found one help
@@ -124,7 +125,7 @@ bool CGroupInSceneBubbleManager::checkTimeOut(vector<CPopup> &rList)
 		// Time out ?
 		if (rList[i].timeOut ())
 		{
-			pIM->unMakeWindow(rList[i].Group);
+			CWidgetManager::getInstance()->unMakeWindow(rList[i].Group);
 			if (rList[i].Group->getParent())
 				rList[i].Group->getParent()->delGroup(rList[i].Group);
 			else
@@ -155,7 +156,7 @@ void CGroupInSceneBubbleManager::alignMessagePopup (vector<CPopup> &rList, bool 
 	{
 		CPopup popup = rList.front();
 		rList.erase (rList.begin());
-		pIM->unMakeWindow(popup.Group);
+		CWidgetManager::getInstance()->unMakeWindow(popup.Group);
 		if (popup.Group->getParent())
 			popup.Group->getParent()->delGroup(popup.Group);
 		else
@@ -165,7 +166,7 @@ void CGroupInSceneBubbleManager::alignMessagePopup (vector<CPopup> &rList, bool 
 	// First message must be aligned from the screen
 	if (!rList.empty())
 	{
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		if (pRoot)
 		{
 			sint i = (sint)rList.size ()-1;
@@ -176,12 +177,12 @@ void CGroupInSceneBubbleManager::alignMessagePopup (vector<CPopup> &rList, bool 
 			sint32 offsetY;
 			if (bCenter)
 			{
-				fromString(pIM->getDefine("popup_pos_y_center"), offsetY);
+				fromString(CWidgetManager::getInstance()->getParser()->getDefine("popup_pos_y_center"), offsetY);
 				offsetY = pRoot->getHReal() - offsetY;
 				offsetY -= rList[i].Group->getH();
 			}
 			else
-				fromString(pIM->getDefine("popup_pos_y"), offsetY);
+				fromString(CWidgetManager::getInstance()->getParser()->getDefine("popup_pos_y"), offsetY);
 
 			rList[i].Group->setY(offsetY);
 			rList[i].Group->invalidateCoords();
@@ -228,13 +229,13 @@ void CGroupInSceneBubbleManager::init ()
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-		CInterfaceGroup *group = pIM->createGroupInstance ("3dbulle_L",
+		CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("3dbulle_L",
 			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 		if (group)
 		{
 			// Link to the interface
-			pIM->addWindowToMasterGroup("ui:interface", group);
-			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 			group->setParent(pRoot);
 			if (pRoot)
 				pRoot->addGroup (group);
@@ -264,7 +265,7 @@ void CGroupInSceneBubbleManager::release ()
 	for (i=0; i<_Bubbles.size(); i++)
 	if (_Bubbles[i])
 	{
-		pIM->unMakeWindow(_Bubbles[i]);
+		CWidgetManager::getInstance()->unMakeWindow(_Bubbles[i]);
 		if (_Bubbles[i]->getParent())
 		{
 			_Bubbles[i]->getParent()->delGroup(_Bubbles[i]);
@@ -279,7 +280,7 @@ void CGroupInSceneBubbleManager::release ()
 	// Remove messages
 	for (i=0; i<_MessagePopup.size(); i++)
 	{
-		pIM->unMakeWindow(_MessagePopup[i].Group);
+		CWidgetManager::getInstance()->unMakeWindow(_MessagePopup[i].Group);
 		if (_MessagePopup[i].Group->getParent())
 			_MessagePopup[i].Group->getParent()->delGroup(_MessagePopup[i].Group);
 		else
@@ -290,7 +291,7 @@ void CGroupInSceneBubbleManager::release ()
 	// Remove messages
 	for (i=0; i<_MessagePopupCentered.size(); i++)
 	{
-		pIM->unMakeWindow(_MessagePopupCentered[i].Group);
+		CWidgetManager::getInstance()->unMakeWindow(_MessagePopupCentered[i].Group);
 		if (_MessagePopupCentered[i].Group->getParent())
 			_MessagePopupCentered[i].Group->getParent()->delGroup(_MessagePopupCentered[i].Group);
 		else
@@ -301,7 +302,7 @@ void CGroupInSceneBubbleManager::release ()
 	// Remove messages
 	for (i=0; i<_BubblePopup.size(); i++)
 	{
-		pIM->unMakeWindow(_BubblePopup[i].Group);
+		CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[i].Group);
 		if (_BubblePopup[i].Group->getParent())
 			_BubblePopup[i].Group->getParent()->delGroup(_BubblePopup[i].Group);
 		else
@@ -344,7 +345,7 @@ void CGroupInSceneBubbleManager::update ()
 		// Time out ?
 		if (_BubblePopup[i].timeOut ())
 		{
-			pIM->unMakeWindow(_BubblePopup[i].Group);
+			CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[i].Group);
 			if (_BubblePopup[i].Group->getParent())
 				_BubblePopup[i].Group->getParent()->delGroup(_BubblePopup[i].Group);
 			else
@@ -359,7 +360,7 @@ void CGroupInSceneBubbleManager::update ()
 			if (!_BubblePopup[i].Target.empty())
 			{
 				// Get the target
-				CInterfaceElement *target = pIM->getElementFromId(_BubblePopup[i].Target);
+				CInterfaceElement *target = CWidgetManager::getInstance()->getElementFromId(_BubblePopup[i].Target);
 				if (target)
 				{
 					// Target is good ?
@@ -369,7 +370,7 @@ void CGroupInSceneBubbleManager::update ()
 						(target->getWReal() != _BubblePopup[i].TargetW) ||
 						(target->getHReal() != _BubblePopup[i].TargetH))
 					{
-						pIM->unMakeWindow(_BubblePopup[i].Group);
+						CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[i].Group);
 						if (_BubblePopup[i].Group->getParent())
 							_BubblePopup[i].Group->getParent()->delGroup(_BubblePopup[i].Group);
 						else
@@ -397,7 +398,7 @@ void CGroupInSceneBubbleManager::update ()
 		{
 			if (_BubblePopup[j].Group == _GroupToDelete[i])
 			{
-				pIM->unMakeWindow(_BubblePopup[j].Group);
+				CWidgetManager::getInstance()->unMakeWindow(_BubblePopup[j].Group);
 				if (_BubblePopup[j].Group->getParent())
 					_BubblePopup[j].Group->getParent()->delGroup(_BubblePopup[j].Group);
 				else
@@ -420,7 +421,7 @@ void CGroupInSceneBubbleManager::update ()
 				if (pChar != NULL)
 					pChar->setBubble(NULL);
 
-				pIM->unMakeWindow(_DynBubbles[j].Bubble);
+				CWidgetManager::getInstance()->unMakeWindow(_DynBubbles[j].Bubble);
 				if (_DynBubbles[j].Bubble->getParent())
 					_DynBubbles[j].Bubble->getParent()->delGroup(_DynBubbles[j].Bubble);
 				else
@@ -508,7 +509,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 	templateParams.push_back (std::pair<std::string,std::string>("skillid", toString(skillId)));
 	templateParams.push_back (std::pair<std::string,std::string>("delta", toString(delta)));
 
-	CInterfaceGroup *group = pIM->createGroupInstance ("skill_popup",
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("skill_popup",
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -519,7 +520,7 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 			pViewSkillName->setText (sSkillName);
 
 		// Skill value
-		CCDBNodeLeaf *skillLeaf = pIM->getDbProp("SERVER:CHARACTER_INFO:SKILLS:"+toString(skillId)+":BaseSKILL", false);
+		CCDBNodeLeaf *skillLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SKILLS:"+toString(skillId)+":BaseSKILL", false);
 		if (skillLeaf)
 		{
 			pViewSkillName = dynamic_cast<CViewText*>(group->getView("lvl"));
@@ -538,8 +539,8 @@ void CGroupInSceneBubbleManager::addSkillPopup (uint skillId, sint delta, uint t
 			pViewSkillMax->setText (toString(pSM->getMaxSkillValue((SKILLS::ESkills)skillId)));
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -565,7 +566,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 
 	// default timeout?
 	if(time==0)
-		time=pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+		time=CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 
 	// Create a skill popup
 	string id = "message_popup_"+toString(_PopupCount++);
@@ -574,7 +575,7 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 	std::vector<std::pair<std::string,std::string> > templateParams;
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-	CInterfaceGroup *group = pIM->createGroupInstance ("message_popup",
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("message_popup",
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -587,8 +588,8 @@ void CGroupInSceneBubbleManager::addMessagePopup (const ucstring &message, CRGBA
 		}
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -614,7 +615,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 
 	// default timeout?
 	if(time==0)
-		time= pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+		time= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 
 	// Create a skill popup
 	string id = "message_popup_"+toString(_PopupCount++);
@@ -623,7 +624,7 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 	std::vector<std::pair<std::string,std::string> > templateParams;
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-	CInterfaceGroup *group = pIM->createGroupInstance ("message_popup_center",
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("message_popup_center",
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -636,8 +637,8 @@ void CGroupInSceneBubbleManager::addMessagePopupCenter (const ucstring &message,
 		}
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -663,10 +664,11 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 
 	string v="m";
 	string h="m";
-	target = CInterfaceManager::getInstance()->getElementFromId(targetName);
+	target = CWidgetManager::getInstance()->getElementFromId(targetName);
 	if (target)
 	{
 		// Find a position
+		NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 		const uint width = Driver->getWindowWidth();
 		const uint height = Driver->getWindowHeight();
 		h = (target->getXReal() < ((sint)width-target->getXReal()-target->getWReal()))?"l":"r";
@@ -694,7 +696,7 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 	std::vector<std::pair<std::string,std::string> > templateParams;
 	templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-	CInterfaceGroup *group = pIM->createGroupInstance (templateName+v+h,
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName+v+h,
 		"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	if (group)
 	{
@@ -709,8 +711,8 @@ CGroupInSceneBubbleManager::CPopupContext *CGroupInSceneBubbleManager::buildCont
 		}
 
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -789,7 +791,7 @@ void CGroupInSceneBubbleManager::addContextHelpHTML (const string &url, const st
 		if (context)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			pIM->runActionHandler("browse", NULL, "name="+context->Group->getId()+":header_opened:window:html|url="+url);
+			CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+context->Group->getId()+":header_opened:window:html|url="+url);
 
 			// Add the URL
 			context->Url = url;
@@ -824,17 +826,17 @@ void CGroupInSceneBubbleManager::chatOpen (uint32 nUID, const ucstring &ucsText,
 
 	CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(EntitiesMngr.getEntityByCompressedIndex(nUID));
 	if (pChar == NULL || nUID==CLFECOMMON::INVALID_CLIENT_DATASET_INDEX) return;
-	if (bubbleTimer == 0) bubbleTimer = pIM->getSystemOption(CInterfaceManager::OptionTimeoutBubbles).getValSInt32();
+	if (bubbleTimer == 0) bubbleTimer = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
 	// Output the message in a bubble
 
 	bool show = false;
 	if (pChar->isUser())
-		show = pIM->getDbProp ("UI:SAVE:INSCENE:USER:MESSAGES")->getValueBool();
+		show = NLGUI::CDBManager::getInstance()->getDbProp ("UI:SAVE:INSCENE:USER:MESSAGES")->getValueBool();
 	else if (pChar->isFriend())
-		show = pIM->getDbProp ("UI:SAVE:INSCENE:FRIEND:MESSAGES")->getValueBool();
+		show = NLGUI::CDBManager::getInstance()->getDbProp ("UI:SAVE:INSCENE:FRIEND:MESSAGES")->getValueBool();
 	else
-		show = pIM->getDbProp ("UI:SAVE:INSCENE:ENEMY:MESSAGES")->getValueBool();
+		show = NLGUI::CDBManager::getInstance()->getDbProp ("UI:SAVE:INSCENE:ENEMY:MESSAGES")->getValueBool();
 
 	if (show)
 	{
@@ -895,15 +897,15 @@ void CGroupInSceneBubbleManager::dynChatOpen (uint32 nBotUID, uint32 nBotName, c
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-		CInterfaceGroup *group = pIM->createGroupInstance ("dyn_3dbulle_L", "ui:interface", templateParams);
+		CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("dyn_3dbulle_L", "ui:interface", templateParams);
 		if (group == NULL)
 		{
 			nlwarning("cannot create dyn_3dbulle_L");
 			return;
 		}
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -1008,15 +1010,15 @@ void CGroupInSceneBubbleManager::webIgChatOpen (uint32 nBotUID, string text, con
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
 
-		CInterfaceGroup *group = pIM->createGroupInstance ("webig_3dbulle_L", "ui:interface", templateParams);
+		CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance ("webig_3dbulle_L", "ui:interface", templateParams);
 		if (group == NULL)
 		{
 			nlwarning("cannot create webig_3dbulle_L");
 			return;
 		}
 		// Link to the interface
-		pIM->addWindowToMasterGroup("ui:interface", group);
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		group->setParent(pRoot);
 		if (pRoot)
 			pRoot->addGroup (group);
@@ -1274,7 +1276,7 @@ void CGroupInSceneBubbleManager::CDynBubble::skip()
 	if (nNbOptions == 1)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("dynchat_click_option", Bubble, "0");
+		CAHManager::getInstance()->runActionHandler("dynchat_click_option", Bubble, "0");
 	}
 }
 
@@ -1465,7 +1467,7 @@ void CGroupInSceneBubble::setRawText (const ucstring &text)
 {
 	_CanBeShown = !text.empty();
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement *pVTIE = pIM->getElementFromId(getId()+":header_opened:window:text");
+	CInterfaceElement *pVTIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
 	CViewText *pVT= dynamic_cast<CViewText*>(pVTIE);
 	if (pVT != NULL)
 		pVT->setText(text);
@@ -1476,11 +1478,11 @@ void CGroupInSceneBubble::setRawText (const ucstring &text)
 void CGroupInSceneBubble::displayNextAndSkip(bool show)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceElement *pIE = pIM->getElementFromId(getId()+":header_opened:window:but_next");
+	CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:but_next");
 	if (pIE != NULL) pIE->setActive(show);
-	pIE = pIM->getElementFromId(getId()+":header_opened:window:but_skip");
+	pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:but_skip");
 	if (pIE != NULL) pIE->setActive(show);
-	pIE = pIM->getElementFromId(getId()+":header_opened:window:text");
+	pIE = CWidgetManager::getInstance()->getElementFromId(getId()+":header_opened:window:text");
 	if (pIE != NULL)
 	{
 		if (show)
@@ -1572,7 +1574,7 @@ class CHandlerCharacterBubble : public IActionHandler
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
-			duration = pIM->getSystemOption(CInterfaceManager::OptionTimeoutBubbles).getValSInt32();
+			duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 		else
 			fromString(sTime, duration);
 
@@ -1599,7 +1601,7 @@ class CHandlerSkillPopup : public IActionHandler
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
-			duration = pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+			duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 		else
 			fromString(sTime, duration);
 
@@ -1623,7 +1625,7 @@ class CHandlerMessagePopup : public IActionHandler
 		string sTime = getParam (sParams, "time");
 		uint duration;
 		if (sTime.empty())
-			duration = pIM->getSystemOption(CInterfaceManager::OptionTimeoutMessages).getValSInt32();
+			duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutMessages).getValSInt32();
 		else
 			fromString(sTime, duration);
 
@@ -1648,7 +1650,7 @@ class CHandlerContextHelp : public IActionHandler
 		if (itext.empty())
 			itext = CI18N::get(text);
 
-		InSceneBubbleManager.addContextHelp (itext, targetName, pIM->getSystemOption(CInterfaceManager::OptionTimeoutContext).getValSInt32());
+		InSceneBubbleManager.addContextHelp (itext, targetName, CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutContext).getValSInt32());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerContextHelp, "context_help");

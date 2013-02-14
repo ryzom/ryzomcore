@@ -20,8 +20,12 @@
 // Misc
 #include "nel/misc/singleton.h"
 
+namespace NLGUI
+{
+	class CGroupContainer;
+}
+
 class CEntityCL;
-class CGroupContainer;
 
 namespace R2
 {
@@ -47,7 +51,7 @@ private:
 private:
 
 	CDisplayerVisualEntity *	_DisplayerVE;
-	CGroupContainer *			_NPCWindow;
+	NLGUI::CGroupContainer *			_NPCWindow;
 
 };
 

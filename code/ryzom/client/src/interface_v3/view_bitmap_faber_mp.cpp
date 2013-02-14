@@ -19,7 +19,7 @@
 #include "view_bitmap_faber_mp.h"
 #include "interface_manager.h"
 #include "../sheet_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 extern CSheetManager SheetMngr;
 
@@ -119,7 +119,7 @@ void CViewBitmapFaberMp::draw ()
 */
 
 	//get the item
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	uint32 sheet = (uint32)_SheetId.getSInt64();
 	CSheetId sheetId(sheet);

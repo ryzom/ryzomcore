@@ -18,7 +18,7 @@
 #define R2_DISPLAYER_LUA_H
 
 #include "displayer_base.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "lua_event_forwarder.h"
 
 namespace R2

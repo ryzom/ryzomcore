@@ -22,8 +22,8 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/vector_2f.h"
-#include "group_container.h"
-#include "group_menu.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_menu.h"
 #include "animal_position_state.h"
 
 class CViewRadar;
@@ -86,7 +86,7 @@ public:
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 	virtual void updateCoords();
 	virtual void draw();
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	void setTarget(const CCompassTarget &target);
 	const CCompassTarget &getTarget() const { return _Target; }
@@ -110,7 +110,7 @@ private:
 	CCompassTarget					_SavedTarget;
 	bool							_SavedTargetValid;
 
-	CCDBNodeLeaf					*_DynamicTargetPos;
+	NLMISC::CCDBNodeLeaf					*_DynamicTargetPos;
 	uint32							_LastDynamicTargetPos;
 
 	// Color for each type of target

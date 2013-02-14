@@ -27,7 +27,7 @@
 #include "../misc.h"
 #include "../entities.h"
 #include "../pacs_client.h"
-#include "../cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "../interface_v3/interface_manager.h"
 #include "entity_sorter.h"
 //
@@ -50,11 +50,11 @@
 
 #include "../interface_v3/interface_3d_scene.h"
 #include "../interface_v3/character_3d.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../pacs_client.h"
 #include "../time_client.h"
 //
-#include "../interface_v3/view_renderer.h"
+#include "nel/gui/view_renderer.h"
 //
 #include "../sheet_manager.h"
 
@@ -756,7 +756,7 @@ void CDisplayerVisualEntity::updateRaceAndSex()
 	// update sex
 	SPropVisualA vA;
 	const string propNameA = toString("SERVER:Entities:E%d:P%d", _Entity->slot(), CLFECOMMON::PROPERTY_VPA);
-	CCDBNodeLeaf *leafA = CInterfaceManager::getInstance()->getDbProp(propNameA);
+	CCDBNodeLeaf *leafA = NLGUI::CDBManager::getInstance()->getDbProp(propNameA);
 	if (!leafA)
 	{
 		nlwarning("Can't find DB leaf %s", propNameA.c_str());
@@ -792,9 +792,9 @@ void CDisplayerVisualEntity::updateEntity()
 		const string propNameA = toString("SERVER:Entities:E%d:P%d", _Entity->slot(), CLFECOMMON::PROPERTY_VPA);
 		const string propNameB = toString("SERVER:Entities:E%d:P%d", _Entity->slot(), CLFECOMMON::PROPERTY_VPB);
 		const string propNameC = toString("SERVER:Entities:E%d:P%d", _Entity->slot(), CLFECOMMON::PROPERTY_VPC);
-		leafA = CInterfaceManager::getInstance()->getDbProp(propNameA);
-		leafB = CInterfaceManager::getInstance()->getDbProp(propNameB);
-		leafC = CInterfaceManager::getInstance()->getDbProp(propNameC);
+		leafA = NLGUI::CDBManager::getInstance()->getDbProp(propNameA);
+		leafB = NLGUI::CDBManager::getInstance()->getDbProp(propNameB);
+		leafC = NLGUI::CDBManager::getInstance()->getDbProp(propNameC);
 		if (!leafA)
 		{
 			nlwarning("Can't find DB leaf %s", propNameA.c_str());
@@ -1085,9 +1085,9 @@ std::string CDisplayerVisualEntity::getVisualProperties() const
 	const std::string propNameB = toString("SERVER:Entities:E%d:P%d", _Entity->slot(), CLFECOMMON::PROPERTY_VPB);
 	const std::string propNameC = toString("SERVER:Entities:E%d:P%d", _Entity->slot(), CLFECOMMON::PROPERTY_VPC);
 
-	CCDBNodeLeaf *leafA = CInterfaceManager::getInstance()->getDbProp(propNameA);
-	CCDBNodeLeaf *leafB = CInterfaceManager::getInstance()->getDbProp(propNameB);
-	CCDBNodeLeaf *leafC = CInterfaceManager::getInstance()->getDbProp(propNameC);
+	CCDBNodeLeaf *leafA = NLGUI::CDBManager::getInstance()->getDbProp(propNameA);
+	CCDBNodeLeaf *leafB = NLGUI::CDBManager::getInstance()->getDbProp(propNameB);
+	CCDBNodeLeaf *leafC = NLGUI::CDBManager::getInstance()->getDbProp(propNameC);
 	if (!leafA)
 	{
 		nlwarning("Can't find DB leaf %s", propNameA.c_str());

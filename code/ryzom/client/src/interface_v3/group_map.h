@@ -25,19 +25,28 @@
 
 #include "../client_sheets/world_sheet.h"
 
-#include "interface_group.h"
-#include "ctrl_button.h"
-#include "view_bitmap.h"
-#include "view_text.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/view_text.h"
 #include "animal_position_state.h"
 #include "../continent.h"
 //
 
 
 class CContinent;
-class CCDBNodeLeaf;
+
+namespace NLMISC
+{
+	class CCDBNodeLeaf;
+}
+
+namespace NLGUI
+{
+	class CCtrlQuad;
+}
+
 class CWorldSheet;
-class CCtrlQuad;
 struct SMap;
 
 namespace NL3D
@@ -117,7 +126,7 @@ public:
 	virtual void updateCoords();
 	virtual	void checkCoords();
 	virtual void draw ();
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 	virtual bool parse(xmlNodePtr cur, CInterfaceGroup * parentGroup);
 	virtual bool getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, sint32 clipW, sint32 clipH, std::vector<CCtrlBase*> &vICL);
 
@@ -232,7 +241,7 @@ private:
 		{
 		public:
 			CPolyButton();
-			virtual bool handleEvent (const CEventDescriptor &event);
+			virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 			virtual void updateCoords();
 			virtual void draw () {}
 			void drawPolyButton();
@@ -256,7 +265,7 @@ private:
 				CContLandMark::TContLMType Type;
 				bool					   HandleEvents;
 			public:
-				virtual bool handleEvent (const CEventDescriptor& event)
+				virtual bool handleEvent (const NLGUI::CEventDescriptor& event)
 				{
 					if (!HandleEvents) return false;
 					return CCtrlButton::handleEvent(event);
@@ -425,8 +434,8 @@ private:
 		// have the texts been received for mission targets ?
 		std::vector<bool>	_MissionTargetTextReceived;
 		// ptr on db leaf for coordinates of special landmarks
-		CCDBNodeLeaf		*_TargetPos;
-		CCDBNodeLeaf		*_HomePos;
+		NLMISC::CCDBNodeLeaf		*_TargetPos;
+		NLMISC::CCDBNodeLeaf		*_HomePos;
 		// Animals State for landMarks
 		std::vector<NLMISC::CSmartPtr<CAnimalPositionState> >	_AnimalPosStates;
 		// Teammate State for landMarks

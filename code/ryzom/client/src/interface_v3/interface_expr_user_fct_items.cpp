@@ -20,9 +20,9 @@
 
 // client
 #include "../sheet_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "dbctrl_sheet.h"
-#include "ctrl_sheet_selection.h"
+#include "nel/gui/ctrl_sheet_selection.h"
 #include "dbgroup_list_sheet.h"
 #include "interface_manager.h"
 #include "sbrick_manager.h"
@@ -134,7 +134,7 @@ REGISTER_INTERFACE_USER_FCT("getSelectedItemPrice", getSelectedItemPrice)
 /////////////////////////////////////////////////
 static DECLARE_INTERFACE_USER_FCT(getDraggedSheet)
 {
-	result.setUserType(new CDBCtrlSheetPtrUserType(CDBCtrlSheet::getDraggedSheet()));
+	result.setUserType(new CDBCtrlSheetPtrUserType( dynamic_cast< CDBCtrlSheet* >( CDBCtrlSheet::getDraggedSheet() ) ));
 	return true;
 }
 REGISTER_INTERFACE_USER_FCT("getDraggedSheet", getDraggedSheet)
@@ -157,7 +157,7 @@ static DECLARE_INTERFACE_USER_FCT(getSheetFromId)
 {
 	if (args.size() != 1 || !args[0].toString()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(im->getElementFromId(args[0].getString()));
+	CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId(args[0].getString()));
 	if (!sheet)
 	{
 		nlwarning("Sheet %s not found", args[0].getString().c_str());
@@ -541,17 +541,17 @@ static DECLARE_INTERFACE_USER_FCT(isRoomLeftFor)
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// see if there is room in the bags
 	// get the number of bags
-	std::string nbBagPath = im->getDefine("bag_nb");
-	CCDBNodeLeaf *prop = im->getDbProp(nbBagPath);
+	std::string nbBagPath = CWidgetManager::getInstance()->getParser()->getDefine("bag_nb");
+	CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(nbBagPath);
 	if (!prop) return false;
 	uint nbItemInBags = 8 * (uint) prop->getValue32(); // there are 8 item per bag
-	std::string bagsPath = im->getDefine("bag");
+	std::string bagsPath = CWidgetManager::getInstance()->getParser()->getDefine("bag");
 	if (bagsPath.empty()) return false;
 	uint k = 0;
 	for(k = 0; k < nbItemInBags; ++k)
 	{
 		std::string bagPath = bagsPath + ":" + toString(k) + ":SHEET";
-		CCDBNodeLeaf *bagProp = im->getDbProp(bagPath);
+		CCDBNodeLeaf *bagProp = NLGUI::CDBManager::getInstance()->getDbProp(bagPath);
 		if (!bagProp) return false;
 		if (bagProp->getValue32() == 0)
 		{
@@ -581,9 +581,9 @@ static DECLARE_INTERFACE_USER_FCT(isRoomLeftFor)
 
 	for(k = 0; k < numArmorSlots; ++k)
 	{
-		std::string dbPath = im->getDefine(armourInfos[k].DefineName);
+		std::string dbPath = CWidgetManager::getInstance()->getParser()->getDefine(armourInfos[k].DefineName);
 		if (dbPath.empty()) return false;
-		CCDBNodeLeaf *armorProp = im->getDbProp(dbPath + ":SHEET");
+		CCDBNodeLeaf *armorProp = NLGUI::CDBManager::getInstance()->getDbProp(dbPath + ":SHEET");
 		if (!armorProp) return false;
 		if (armorProp->getValue32() == 0)
 		{
@@ -609,7 +609,7 @@ static DECLARE_INTERFACE_USER_FCT(getSelectionGroupNameFromId)
 	if (args.size() != 1) return false;
 	if (!args[0].toInteger()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCtrlSheetSelection &css = im->getCtrlSheetSelection();
+	CCtrlSheetSelection &css = CWidgetManager::getInstance()->getParser()->getCtrlSheetSelection();
 	CSheetSelectionGroup *csg = css.getGroup((uint) args[0].getInteger());
 	if (csg) result.setString(csg->getName());
 	else result.setString("");
@@ -625,7 +625,7 @@ static DECLARE_INTERFACE_USER_FCT(getSelectionGroupIdFromName)
 	if (args.size() != 1) return false;
 	if (!args[0].toString()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCtrlSheetSelection &css = im->getCtrlSheetSelection();
+	CCtrlSheetSelection &css = CWidgetManager::getInstance()->getParser()->getCtrlSheetSelection();
 	result.setInteger(css.getGroupIndex(args[0].getString().c_str()));
 	return true;
 }
@@ -685,7 +685,7 @@ static double getItemsWeight(CCDBNodeBranch *branch, uint16 startItemIndex, uint
 static double getItemsWeight(const std::string &basePath, uint16 startItemIndex, uint16 numItems)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCDBNodeBranch *branch = im->getDbBranch(basePath);
+	CCDBNodeBranch *branch = NLGUI::CDBManager::getInstance()->getDbBranch(basePath);
 	if (!branch)
 	{
 		nlwarning("<getItemsWeight> Branch is NULL");
@@ -727,7 +727,7 @@ static double getItemBranchsWeight(const std::string &basePath, uint startBranch
 	for(uint branchIndex = startBranchIndex; branchIndex < startBranchIndex + numBranchs; ++branchIndex)
 	{
 		std::string branchName = toString("%s:%d", basePath.c_str(), branchIndex);
-		CCDBNodeBranch *currBranch = im->getDbBranch(branchName);
+		CCDBNodeBranch *currBranch = NLGUI::CDBManager::getInstance()->getDbBranch(branchName);
 		if (!currBranch)
 		{
 			nlwarning("<getItemBranchsWeight> can't get branch %s:%d, or this is a leaf", basePath.c_str(), branchIndex);
@@ -786,7 +786,7 @@ static double getWeightOfEquipmentPieces(const SLOT_EQUIPMENT::TSlotEquipment * 
 	for(uint k = 0; k < numSlots; ++k)
 	{
 		std::string dbPath = NLMISC::toString("LOCAL:INVENTORY:8:%d:SHEET", (int) slots[k]);
-		uint32 sheetID = im->getDbProp(dbPath)->getValue32();
+		uint32 sheetID = NLGUI::CDBManager::getInstance()->getDbProp(dbPath)->getValue32();
 		if (sheetID)
 		{
 			CEntitySheet *es = SheetMngr.get(CSheetId(sheetID));
@@ -862,7 +862,7 @@ REGISTER_INTERFACE_USER_FCT("getJewelryWeight", getJewelryWeightUserFct)
 static double getSheathsWeight()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	uint numSheaths = (uint) im->getDbProp("LOCAL:INVENTORY:NB_SHEATH")->getValue32();
+	uint numSheaths = (uint) NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:NB_SHEATH")->getValue32();
 	return getItemBranchsWeight("LOCAL:INVENTORY", 1, numSheaths);
 }
 
@@ -883,7 +883,7 @@ REGISTER_INTERFACE_USER_FCT("getSheathsWeight", getSheathsWeightUserFct)
 static double getBagsWeight()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	uint numBags = (uint) im->getDbProp("LOCAL:INVENTORY:NB_BAG")->getValue32();
+	uint numBags = (uint) NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:NB_BAG")->getValue32();
 	return getItemsWeight("LOCAL:INVENTORY:9", 0, 8 * numBags);
 }
 
@@ -913,7 +913,7 @@ static DECLARE_INTERFACE_USER_FCT(getBranchSheetCategory)
 		return false;
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CCDBNodeBranch *branch = im->getDbBranch(args[0].getString());
+	CCDBNodeBranch *branch = NLGUI::CDBManager::getInstance()->getDbBranch(args[0].getString());
 	if (!branch)
 	{
 		nlwarning("<getBranchSheetCategory> Branch is NULL");

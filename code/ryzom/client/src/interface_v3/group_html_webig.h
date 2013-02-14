@@ -18,7 +18,7 @@
 #define CL_GROUP_HTML_WEBIG_H
 
 #include "nel/misc/types_nl.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
 
 /**
 * Auth HTML group

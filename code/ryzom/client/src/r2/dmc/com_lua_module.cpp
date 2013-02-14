@@ -36,7 +36,8 @@
 #include "../object_factory_client.h"
 #include "../editor.h"
 #include "../../net_manager.h"
-#include "../../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
+#include "../../interface_v3/lua_ihm_ryzom.h"
 
 #include "game_share/object.h"
 #include "../r2_lua.h"
@@ -48,8 +49,9 @@
 #include <string>
 
 
-#include "../../interface_v3/lua_helper.h"
-#include "../../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
+#include "nel/gui/lua_ihm.h"
 
 #include "../../entities.h"
 
@@ -796,7 +798,7 @@ sint CComLuaModule::luaRequestSetNode(lua_State* state)
 	static volatile bool dumpCallstack = false;
 	if (dumpCallstack)
 	{
-		CLuaIHM::dumpCallStack();
+		CLuaIHMRyzom::dumpCallStack();
 	}
 	return requestSetNode(state, false);
 }

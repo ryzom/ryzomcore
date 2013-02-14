@@ -22,8 +22,8 @@
 #include "nel/misc/types_nl.h"
 #include "game_share/brick_families.h"
 #include "game_share/skills.h"
-#include "interface_group.h"
-#include "group_tree.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_tree.h"
 
 
 // ***************************************************************************
@@ -53,12 +53,12 @@ private:
 private:
 
 	// observer to know that brick family are modified
-	struct CBrickFamilyObs : public ICDBNode::IPropertyObserver
+	struct CBrickFamilyObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 		CGroupPhraseSkillFilter			*Owner;
 		BRICK_FAMILIES::TBrickFamily	BrickFamily;
 
-		virtual void update (ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node);
 	};
 	friend struct CBrickFamilyObs;
 	CBrickFamilyObs		_BrickFamilyObs[BRICK_FAMILIES::NbFamilies];

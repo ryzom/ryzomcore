@@ -40,10 +40,12 @@
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/sphrase_manager.h"
 #include "entities.h"
-#include "interface_v3/lua_helper.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
 #include "character_cl.h"
 #include "r2/editor.h"
 #include "r2/dmc/client_edition_module.h"
+#include "nel/gui/lua_manager.h"
 
 ///////////
 // USING //
@@ -326,7 +328,7 @@ void displayStreamingDebug ()
 		SpfGraph.addOneValue (1000.f*(float)deltaTime);
 
 		// lua memory
-		LuaMemGraph.addOneValue(CInterfaceManager::getInstance()->getLuaState()->getGCCount() / 1024.f);
+		LuaMemGraph.addOneValue(CLuaManager::getInstance().getLuaState()->getGCCount() / 1024.f);
 
 		// Count of waitinf instance
 		CurrentTaskGraph.addOneValue (CAsyncFileManager::getInstance().isTaskRunning()?1.f:0.f);
@@ -582,22 +584,22 @@ void displayNetDebug ()
 	TextContext->printfAt(1.f, line, "Local Counter: %d", val);
 	line += lineStep;
 	// Inventory Counter
-	val= pIM->getDbProp("SERVER:INVENTORY:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "INVENTORY:COUNTER: %d", val);
 	line += lineStep;
 	// Exchange Counter
-	val= pIM->getDbProp("SERVER:EXCHANGE:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:EXCHANGE:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "EXCHANGE:COUNTER: %d", val);
 	line += lineStep;
 	// Programme Counter
-	val= pIM->getDbProp("SERVER:TARGET:CONTEXT_MENU:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_MENU:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "TARGET:CONTEXT_MENU:COUNTER: %d", val);
 	line += lineStep;
 	// User Counter
-	val= pIM->getDbProp("SERVER:USER:COUNTER")->getValue32();
+	val= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:COUNTER")->getValue32();
 	val&= pIM->getLocalSyncActionCounterMask();
 	TextContext->printfAt(1.f, line, "USER:COUNTER: %d", val);
 	line += lineStep;
@@ -606,14 +608,14 @@ void displayNetDebug ()
 	// SPhrase Execution Synchronisation Counter
 	CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 	// Next action
-	uint	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
+	uint	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
 	uint	locVal= pPM->getPhraseNextExecuteCounter() ;
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	TextContext->printfAt(1.f, line, "NextAction  (loc/srv): %d/%d", locVal, srvVal);
 	line += lineStep;
 	// CycleAction
-	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
+	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
 	locVal= pPM->getPhraseCycleExecuteCounter();
 	srvVal&= PHRASE_EXECUTE_COUNTER_MASK;
 	locVal&= PHRASE_EXECUTE_COUNTER_MASK;

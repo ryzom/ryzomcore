@@ -255,7 +255,7 @@ void CLightCycleManager::updateState()
 			CInterfaceManager * pIM = CInterfaceManager::getInstance();
 			if( pIM )
 			{
-				pIM->runActionHandler("set",NULL,"dblink=UI:VARIABLES:NIGHT_WARNING_WANTED|value=1");
+				CAHManager::getInstance()->runActionHandler("set",NULL,"dblink=UI:VARIABLES:NIGHT_WARNING_WANTED|value=1");
 			}
 		}
 		_State = Night;

@@ -27,6 +27,7 @@
 #include "weather.h"
 #include "weather_manager_client.h"
 #include "interface_v3/input_handler_manager.h"
+#include "interface_v3/interface_manager.h"
 #include "release.h"
 #include "net_manager.h"
 #include "client_cfg.h"
@@ -393,7 +394,8 @@ void CProgress::internalProgress (float value)
 
 	// \todo GUIGUI : Remove this when possible.
 	NetMngr.update();
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	// update system dependent progress bar
 	static uint previousValue = 0;

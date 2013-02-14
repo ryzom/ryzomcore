@@ -21,7 +21,10 @@
 
 #include "bot_chat_page.h"
 
-class CDBGroupComboBox;
+namespace NLGUI
+{
+	class CDBGroupComboBox;
+}
 
 // number of choices that the player must make to create a dynamic mission
 const uint DYNAMIC_MISSION_NUM_CHOICES = 3;
@@ -51,7 +54,7 @@ public:
 	void		regen();
 private:
 	// The control for each choice list
-	CDBGroupComboBox *_ChoiceCB[DYNAMIC_MISSION_NUM_CHOICES];
+	NLGUI::CDBGroupComboBox *_ChoiceCB[DYNAMIC_MISSION_NUM_CHOICES];
 	// current choice for each group (-1 means that choice has not been made)
 	sint			  _Choice[DYNAMIC_MISSION_NUM_CHOICES];
 	// For each text ID, true if the text has been received

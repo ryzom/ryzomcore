@@ -19,21 +19,21 @@
 #include "stdpch.h"
 
 
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_manager.h"
 #include "bot_chat_manager.h"
 #include "../sheet_manager.h"
 #include "skill_manager.h"
 #include "dbctrl_sheet.h"
-#include "interface_expr.h"
-#include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/interface_expr.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_editbox.h"
 #include "group_quick_help.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "../user_entity.h"
 #include "../entities.h"
-#include "dbgroup_combo_box.h"
-#include "dbview_bar.h"
+#include "nel/gui/dbgroup_combo_box.h"
+#include "nel/gui/dbview_bar.h"
 #include "../debug_client.h"
 #include "interface_3d_scene.h"
 #include "character_3d.h"
@@ -160,14 +160,14 @@ void	CInterfaceHelp::initWindows()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	sint maxHelpWindow;
-	fromString(pIM->getDefine("MAX_HELP_WINDOW"), maxHelpWindow);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("MAX_HELP_WINDOW"), maxHelpWindow);
 
 	// Allow Max 256. More may be a script error...
 	clamp(maxHelpWindow, 0, 256);
 
 	for(sint i=0;i<maxHelpWindow;i++)
 	{
-		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:sheet_help"+toString(i)));
+		CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:sheet_help"+toString(i)));
 		// if the window exist, insert
 		if(group)
 		{
@@ -182,7 +182,7 @@ void	CInterfaceHelp::initWindows()
 	// add observers for the update of phrase help texts (depends of weight of equipped weapons)
 	for (uint i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
-		CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
+		CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
 		if(pNodeLeaf)
 		{
 			ICDBNode::CTextId textId;
@@ -205,7 +205,7 @@ void	CInterfaceHelp::release()
 	// add observers for the update of phrase help texts (depends of weight of equipped weapons)
 	for (uint i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
-		CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
+		CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp(std::string(LOCAL_INVENTORY) + ":HAND:" + toString(i), false);
 		if(pNodeLeaf)
 		{
 			ICDBNode::CTextId textId;
@@ -275,7 +275,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 				if(ok)
 				{
 					// then don't neet to open a new window, but make the older top.
-					pIM->setTopWindow(group);
+					CWidgetManager::getInstance()->setTopWindow(group);
 					return NULL;
 				}
 			}
@@ -356,7 +356,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// activate it, set top, copy item watched
 	group->setActive(true);
-	pIM->setTopWindow(group);
+	CWidgetManager::getInstance()->setTopWindow(group);
 	_InfoWindows[newIndexWindow].CtrlSheet= elt;
 	// insert in list
 	if(mustAddToActiveWindows)
@@ -464,7 +464,7 @@ void			CInterfaceHelp::resetWindowPos(sint y)
 	sint	maxHelpWindow= (sint)_InfoWindows.size();
 
 	uint32	w, h;
-	pIM->getViewRenderer().getScreenSize(w,h);
+	CViewRenderer::getInstance()->getScreenSize(w,h);
 
 	// For all windows, reset pos
 	for(uint i=0;i<(uint)maxHelpWindow;i++)
@@ -656,7 +656,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 			ucstring name = peopleList->getName(index);
 			if ( ! name.empty())
 			{
-				CInterfaceManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)CEntityCL::Player));
+				CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)CEntityCL::Player));
 			}
 			return;
 		}
@@ -697,7 +697,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 					}
 				}
 				if(!name.empty())
-					CInterfaceManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
+					CAHManager::getInstance()->runActionHandler("show_hide", pCaller, "profile|pname="+name.toUtf8()+"|ptype="+toString((int)selection->Type));
 				return;
 			}
 		}
@@ -914,7 +914,7 @@ class CHandlerBrowse : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		string container = getParam (sParams, "name");
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId(container);
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		CInterfaceGroup *elementGroup = dynamic_cast<CInterfaceGroup*>(element);
 
 		string urls = getParam (sParams, "url");
@@ -994,7 +994,7 @@ class CHandlerBrowse : public IActionHandler
 				CInterfaceManager::parseTokens(ucparams);
 				params = ucparams.toUtf8();
 				// go. NB: the action handler himself may translate params from utf8
-				CInterfaceManager::getInstance()->runActionHandler(action, elementGroup, params);
+				CAHManager::getInstance()->runActionHandler(action, elementGroup, params);
 
 				// Next name
 				start = end+2;
@@ -1055,7 +1055,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browseUndo();
@@ -1074,7 +1074,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browseRedo();
@@ -1093,7 +1093,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->refresh();
@@ -1118,7 +1118,7 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 
 		string submit_button = getParam (sParams, "submit_button");
 
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId(container);
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		{
 			// Group HTML ?
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(element);
@@ -1243,7 +1243,7 @@ static void setupSkillToTradeHelp(CSheetHelpSetup &setup)
 //		for (uint job = 0; job < 8; ++job)
 //		{
 //			std::string dbPath = toString("CHARACTER_INFO:CAREER%d:JOB%d:JOB_CAP", (int) career, (int) job);
-//			uint level = (uint) im->getDbProp(dbPath)->getValue32();
+//			uint level = (uint) NLGUI::CDBManager::getInstance()->getDbProp(dbPath)->getValue32();
 //			if (level != 0) // has the player this job ?
 //			{
 //				// check if level in this job is enough to get the skills
@@ -1437,7 +1437,7 @@ void	getMagicProtection(CDBCtrlSheet	*item, ucstring &itemText)
 	{
 		// Mul item quality by a constant
 		uint	maxAbsorb= item->getQuality();
-		CCDBNodeLeaf	*nodeFactor= pIM->getDbProp(pIM->getDefine("player_protect_absorbfactor"), false);
+		CCDBNodeLeaf	*nodeFactor= NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("player_protect_absorbfactor"), false);
 		if(nodeFactor)
 			maxAbsorb= maxAbsorb*nodeFactor->getValue32()/100;
 
@@ -1510,7 +1510,7 @@ void	getWeightText(CDBCtrlSheet *item, const CItemSheet*pIS, ucstring &itemText)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf *pWG = pIM->getDbProp(item->getSheet()+":WEIGHT",false);
+	CCDBNodeLeaf *pWG = NLGUI::CDBManager::getInstance()->getDbProp(item->getSheet()+":WEIGHT",false);
 	if(pWG)
 	{
 		// must mul weight by quantity
@@ -2338,7 +2338,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	nlassert(pIS);
 	
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeBranch *dbBranch = pIM->getDbBranch( setup.SrcSheet->getSheet() );
+	CCDBNodeBranch *dbBranch = NLGUI::CDBManager::getInstance()->getDbBranch( setup.SrcSheet->getSheet() );
 	
 	
 	CInterfaceElement *elt = setup.HelpWindow->getElement(setup.HelpWindow->getId()+setup.PrefixForExtra+INFO_ITEM_PREVIEW);
@@ -2353,7 +2353,7 @@ void setupItemPreview(CSheetHelpSetup &setup, CItemSheet *pIS)
 	}
 
 	static sint32 helpWidth = setup.HelpWindow->getW();
-	bool scene_inactive = ! pIM->getDbProp("UI:SAVE:SHOW_3D_ITEM_PREVIEW")->getValueBool();
+	bool scene_inactive = ! NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_3D_ITEM_PREVIEW")->getValueBool();
 	if (scene_inactive || 
 		(pIS->Family != ITEMFAMILY::ARMOR && 
 		 pIS->Family != ITEMFAMILY::MELEE_WEAPON && 
@@ -2818,20 +2818,20 @@ void fillOutpostBuildingListItem(const std::vector<NLMISC::CSheetId> &mps, IList
 		uint i;
 		for(i=0;i<mps.size();i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
 			if(node)
 				node->setValue32(mps[i].asInt());
-			node= pIM->getDbProp(toString("%s:%d:QUALITY", branchBase.c_str(), i), false);
+			node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:QUALITY", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(qualityLevel);
-			node= pIM->getDbProp(toString("%s:%d:PREREQUISIT_VALID", branchBase.c_str(), i), false);
+			node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:PREREQUISIT_VALID", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(1);
 		}
 		// Reset other to 0.
 		for(;;i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(0);
 			else
@@ -2918,7 +2918,7 @@ static bool		getAuraDisabledState(CDBCtrlSheet *cs)
 
 	// Get the DISABLED DBprop
 	string	db= cs->getSheet() + ":DISABLED";
-	CCDBNodeLeaf	*node= pIM->getDbProp(db, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(db, false);
 	return node && node->getValue32()!=0;
 }
 
@@ -2932,7 +2932,7 @@ static sint		getBonusMalusSpecialTT(CDBCtrlSheet *cs)
 
 	// Get the SPECIAL_TOOLTIP DBprop
 	string	db= cs->getSheet() + ":SPECIAL_TOOLTIP";
-	return pIM->getDbValue32 (db);
+	return NLGUI::CDBManager::getInstance()->getDbValue32 (db);
 }
 
 
@@ -3111,12 +3111,12 @@ void fillSabrinaPhraseListBrick(const CSPhraseCom &phrase, IListSheetBase *listB
 		uint i;
 		for(i=0;i<phrase.Bricks.size();i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i));
 			if(node)
 				node->setValue32(phrase.Bricks[i].asInt());
 
 			// For requirements bricks, update the LOCKED state
-			node= pIM->getDbProp(toString("%s:%d:LOCKED", branchBase.c_str(), i));
+			node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:LOCKED", branchBase.c_str(), i));
 			if(node)
 			{
 				if(pBM->isBrickKnown(phrase.Bricks[i]))
@@ -3129,7 +3129,7 @@ void fillSabrinaPhraseListBrick(const CSPhraseCom &phrase, IListSheetBase *listB
 		// Reset other to 0.
 		for(;;i++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SHEET", branchBase.c_str(), i), false);
 			if(node)
 				node->setValue32(0);
 			else
@@ -3469,73 +3469,73 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 	if( CSheetId(cs->getSheetId()).toString() == "mod_melee_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModMeleeSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_range_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModRangeSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_craft_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModCraftSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_defense_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModDefenseSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_dodge_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModDodgeSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:DODGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_parry_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModParrySuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:PARRY", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::common_ecosystem)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::common_ecosystem)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_desert_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModDesertForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::desert)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::desert)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_forest_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModForestForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::forest)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::forest)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_lacustre_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModLacustreForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::lacustre)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::lacustre)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_jungle_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModJungleForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::jungle)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::jungle)+":FORAGE", false);
 	}
 	else
 	if( CSheetId(cs->getSheetId()).toString() == "mod_primary_root_forage_success.sbrick" )
 	{
 		ustr = CI18N::get("uittModPrimaryRootForageSuccess");
-		nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::primary_root)+":FORAGE", false);
+		nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:"+toString((uint8)ECOSYSTEM::primary_root)+":FORAGE", false);
 	}
 
 	if( nodeSM )
@@ -3546,7 +3546,7 @@ void setConsoModSuccessTooltip( CDBCtrlSheet *cs )
 			strFindReplace(ustr, "%modifier", "@{0F0F}"+toString(nodeSM->getValue32())+"@{FFFF}");
 
 		// replace the context help that is required.
-		pIM->setContextHelpText(ustr);
+		CWidgetManager::getInstance()->setContextHelpText(ustr);
 	}
 }
 
@@ -3568,21 +3568,21 @@ public:
 		// special tooltip? (pvp outpost and xp catalyzer)
 		sint	specialTTId= getBonusMalusSpecialTT(cs);
 		if(specialTTId==BONUS_MALUS::XpCatalyser)
-			pIM->setContextHelpText(CI18N::get("uittXpBonus"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittXpBonus"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPOn)
-			pIM->setContextHelpText(CI18N::get("uittPvpOutpostOn"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOn"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPOutOfZone)
-			pIM->setContextHelpText(CI18N::get("uittPvpOutpostOutOfZone"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostOutOfZone"));
 		else if(specialTTId==BONUS_MALUS::OutpostPVPInRound)
-			pIM->setContextHelpText(CI18N::get("uittPvpOutpostInRound"));
+			CWidgetManager::getInstance()->setContextHelpText(CI18N::get("uittPvpOutpostInRound"));
 		else if(specialTTId==BONUS_MALUS::DeathPenalty)
 		{
-			CCDBNodeLeaf * node = pIM->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
+			CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEATH_XP_MALUS", false);
 			if( node )
 			{
 				ucstring txt = CI18N::get("uittDeathPenalty");
 				strFindReplace(txt, "%dp", toString((100*node->getValue16())/254));
-				pIM->setContextHelpText(txt);
+				CWidgetManager::getInstance()->setContextHelpText(txt);
 			}
 		}
 		// if disabled.
@@ -3595,7 +3595,7 @@ public:
 			str+= CI18N::get("uittAuraDisabled");
 
 			// and replace the context help that is required.
-			pIM->setContextHelpText(str);
+			CWidgetManager::getInstance()->setContextHelpText(str);
 		}
 		// else keep the default one
 	}
@@ -3613,16 +3613,16 @@ public:
 		uint8 index;
 		fromString(Params, index);
 		--index; // Param is 1-based so subtract 1
-		if (index >= MAX_INVENTORY_ANIMAL)
+		if ( index >= MAX_INVENTORY_ANIMAL)
 		{
 			return;
 		}
 
 		ucstring txt;
-		CCDBNodeLeaf *node = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:NAME", index));
 		if (node && CStringManagerClient::instance()->getDynString(node->getValue32(), txt))
 		{
-			pIM->setContextHelpText(CEntityCL::removeTitleFromName(txt));
+			CWidgetManager::getInstance()->setContextHelpText(CEntityCL::removeTitleFromName(txt));
 		}
 	}
 };
@@ -3636,13 +3636,13 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		// Find the mount's db leaf
-		CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(pIM->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
+		CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(NLGUI::CDBManager::getInstance()->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
 		BOMB_IF( ! animalsNode, "! animalsNode", return; );
 		sint32 minTimeRemaining = -1;
 		uint nbAnimals = (uint)animalsNode->getNbNodes();
 		for ( uint i=0; i!=nbAnimals; ++i )
 		{
-			CCDBNodeLeaf	*statusNode = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
+			CCDBNodeLeaf	*statusNode = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
 			if (statusNode && ANIMAL_STATUS::isDead((ANIMAL_STATUS::EAnimalStatus)statusNode->getValue32()) )
 			{
 				ICDBNode *beastNode = animalsNode->getNode( i );
@@ -3668,7 +3668,7 @@ public:
 		str += toString(minTimeRemaining);
 
 		// replace the context help that is required.
-		pIM->setContextHelpText(str);
+		CWidgetManager::getInstance()->setContextHelpText(str);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerAnimalDeadPopupTooltip, "animal_dead_popup_tooltip");
@@ -3783,7 +3783,7 @@ static	void	onMpChangeItemPart(CInterfaceGroup *wnd, uint32 itemSheetId, const s
 	if(viewBmp)
 	{
 		// texture name in config.xml
-		viewBmp->setTexture(pIM->getDefine( RM_FABER_TYPE::toIconDefineString(faberType) ));
+		viewBmp->setTexture(CWidgetManager::getInstance()->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(faberType) ));
 	}
 
 
@@ -3883,8 +3883,8 @@ public:
 		string	dbitem= getParam(Params, "dbitem");
 		string	prefix= getParam(Params, "prefix");
 
-		CInterfaceGroup		*wnd= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(wndStr));
-		CCDBNodeLeaf		*node= pIM->getDbProp(dbitem);
+		CInterfaceGroup		*wnd= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(wndStr));
+		CCDBNodeLeaf		*node= NLGUI::CDBManager::getInstance()->getDbProp(dbitem);
 
 		// common method for info and botchat
 		if(wnd && node)
@@ -3913,7 +3913,7 @@ void updateStatReport ()
 	if ((ingameTime0 () <= time4StatReport) && (ingameTime1 () > time4StatReport))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler ("proc", NULL, "proc_stat_report");
+		CAHManager::getInstance()->runActionHandler ("proc", NULL, "proc_stat_report");
 	}
 }
 
@@ -3959,7 +3959,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CCDBNodeLeaf *pVal = pIM->getDbProp("UI:SAVE:MK_MODE", false);
+		CCDBNodeLeaf *pVal = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:MK_MODE", false);
 		if(pVal)
 		{
 			sint32 mode = pVal->getValue32() + 1;
@@ -3978,6 +3978,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		#ifdef NL_OS_WINDOWS
+			NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 			if (Driver)
 			{
 				HWND wnd = (HWND) Driver->getDisplay();

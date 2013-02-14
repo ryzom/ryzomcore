@@ -20,7 +20,7 @@
 #include "outpost_manager.h"
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "game_share/generic_xml_msg_mngr.h"
 
@@ -46,23 +46,23 @@ void	COutpostManager::startPvpJoinProposal(bool playerGuildInConflict, bool play
 	// setup TEMP DB
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT");
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IN_CONFLICT");
 	if(node)	node->setValueBool(playerGuildInConflict);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IS_ATTACKER");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_PLAYER_GUILD_IS_ATTACKER");
 	if(node)	node->setValueBool(playerGuildIsAttacker);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_ATTACKER");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_ATTACKER");
 	if(node)	node->setValue32(attackerGuildNameId);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_DEFENDER");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_DEFENDER");
 	if(node)	node->setValue32(ownerGuildNameId);
-	node= pIM->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_TICK_END");
+	node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:PVP_PROPOSAL_TICK_END");
 	if(node)	node->setValue32(_EndTickForPvpJoinProposal);
 
 	// open Popup
-	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
+	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 	if (pGC)
 	{
 		pGC->setActive(true);
-		pIM->setTopWindow(pGC);
+		CWidgetManager::getInstance()->setTopWindow(pGC);
 		pGC->updateCoords();
 		pGC->updateCoords();
 		pGC->center();
@@ -105,10 +105,10 @@ void	COutpostManager::update()
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 			// Force the neutral choose
-			pIM->runActionHandler("outpost_pvp_join", NULL, "neutral");
+			CAHManager::getInstance()->runActionHandler("outpost_pvp_join", NULL, "neutral");
 
 			// close the window
-			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
+			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_outpost_proposal"));
 			if (pGC)
 				pGC->setActive(false);
 

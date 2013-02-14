@@ -20,8 +20,8 @@
 
 #include "interface_config.h"
 #include "interface_manager.h"
-#include "group_container.h"
-#include "ctrl_scroll.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/ctrl_scroll.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -522,10 +522,10 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 	// Count number of container to save
 	uint32 nCount = 0, nMasterGroup, i, nCount2;
 
-	const vector<CInterfaceManager::SMasterGroup> &rVMG = pIM->getAllMasterGroup();
+	const vector<CWidgetManager::SMasterGroup> &rVMG = CWidgetManager::getInstance()->getAllMasterGroup();
 	for (nMasterGroup = 0; nMasterGroup < rVMG.size(); nMasterGroup++)
 	{
-		const CInterfaceManager::SMasterGroup &rMG = rVMG[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = rVMG[nMasterGroup];
 		const vector<CInterfaceGroup*> &rV = rMG.Group->getGroups();
 		for (i = 0; i < rV.size(); ++i)
 		{
@@ -541,7 +541,7 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 	// retrieve all containers
 	for (nMasterGroup = 0; nMasterGroup < rVMG.size(); nMasterGroup++)
 	{
-		const CInterfaceManager::SMasterGroup &rMG = rVMG[nMasterGroup];
+		const CWidgetManager::SMasterGroup &rMG = rVMG[nMasterGroup];
 		const vector<CInterfaceGroup*> &rV = rMG.Group->getGroups();
 		for (i = 0; i < rV.size(); ++i)
 		{
@@ -565,7 +565,7 @@ void CInterfaceConfig::CDesktopImage::fromCurrentDesktop()
 	f.resetPtrTable();
 	f.seek(0, NLMISC::IStream::begin);
 	// Save the Top Window for this config.
-	CInterfaceGroup	*topWindow= pIM->getTopWindow(pIM->getLastTopWindowPriority());
+	CInterfaceGroup	*topWindow= CWidgetManager::getInstance()->getTopWindow(CWidgetManager::getInstance()->getLastTopWindowPriority());
 	string	topWindowName;
 	if (topWindow)
 	{
@@ -595,7 +595,7 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 
 	for(uint k = 0; k < GCImages.size(); ++k)
 	{
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(GCImages[k].Id));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(GCImages[k].Id));
 		if (pGC != NULL)
 			GCImages[k].setTo(pGC);
 	}
@@ -617,9 +617,9 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 		f.serial(topWindowName);
 		if(!topWindowName.empty())
 		{
-			CInterfaceGroup	*window= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(topWindowName));
+			CInterfaceGroup	*window= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(topWindowName));
 			if(window && window->getActive())
-				pIM->setTopWindow(window);
+				CWidgetManager::getInstance()->setTopWindow(window);
 		}
 	}
 	uint32 numElemWithConfig;
@@ -632,7 +632,7 @@ void CInterfaceConfig::CDesktopImage::toCurrentDesktop()
 		f.serial(chunkSize);
 		uint startPos = f.getPos();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CInterfaceElement *elem = im->getElementFromId(elemID);
+		CInterfaceElement *elem = CWidgetManager::getInstance()->getElementFromId(elemID);
 		if (!elem)
 		{
 			nlwarning("Element %s not found while loading config, skipping datas", elemID.c_str());
@@ -706,7 +706,7 @@ void CInterfaceConfig::dataBaseToStream (NLMISC::IStream &f)
 
 	// Save branch of the database
 	SDBLeaf leafTmp;
-	CCDBNodeBranch *pDB = pIM->getDbBranch ("UI:SAVE");
+	CCDBNodeBranch *pDB = NLGUI::CDBManager::getInstance()->getDbBranch ("UI:SAVE");
 	if (pDB != NULL)
 	{
 		// Number of leaf to save
@@ -742,7 +742,7 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 
 	// Load branch of the database
 	SDBLeaf leafTmp;
-	CCDBNodeBranch *pDB = pIM->getDbBranch ("UI:SAVE");
+	CCDBNodeBranch *pDB = NLGUI::CDBManager::getInstance()->getDbBranch ("UI:SAVE");
 	if (pDB != NULL)
 	{
 		// Number of leaf to save
@@ -764,10 +764,10 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 					defVerId[i]='_';
 			}
 			// check if exist
-			if(pIM->isDefineExist(defVerId))
+			if( CWidgetManager::getInstance()->getParser()->isDefineExist(defVerId))
 			{
 				uint32	dbVer;
-				fromString(pIM->getDefine(defVerId), dbVer);
+				fromString(CWidgetManager::getInstance()->getParser()->getDefine(defVerId), dbVer);
 				// if the version in the file is older than the version this db want, abort read
 				if(uiDbSaveVersion<dbVer)
 					wantRead= false;
@@ -776,7 +776,7 @@ void CInterfaceConfig::streamToDataBase (NLMISC::IStream &f, uint32 uiDbSaveVers
 			// if want read the value from file, read it, else keep the default one
 			if(wantRead)
 			{
-				CCDBNodeLeaf *pNL = pIM->getDbProp(leafTmp.Name,false);
+				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(leafTmp.Name,false);
 				if (pNL != NULL)
 					leafTmp.setTo(pNL);
 			}

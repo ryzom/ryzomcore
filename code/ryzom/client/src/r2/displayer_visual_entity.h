@@ -20,7 +20,7 @@
 #include "displayer_visual.h"
 #include "instance.h"
 #include "../decal.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "instance_map_deco.h"
 
 class CEntityCL;

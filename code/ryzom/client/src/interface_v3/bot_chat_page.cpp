@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "bot_chat_page.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "../user_entity.h"
 
 
@@ -27,7 +27,7 @@
 void CBotChatPage::activateWindow(const char *windowName, bool active)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(windowName));
+	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(windowName));
 	if (ig)
 	{
 		ig->setActive(active);

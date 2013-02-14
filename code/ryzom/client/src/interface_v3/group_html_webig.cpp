@@ -17,7 +17,7 @@
 #include "stdpch.h"
 
 #include "group_html_webig.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "../user_entity.h"
 #include "../entities.h"
@@ -38,7 +38,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browse(groupHtml->Home.c_str());
@@ -93,7 +93,7 @@ void addWebIGParams (string &url, bool trustedDomain)
 			// Target fields
 			const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeLeaf *node = im->getDbProp(dbPath, false);
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
 			if (node && (uint8)node->getValue32() != (uint8) CLFECOMMON::INVALID_SLOT)
 			{
 				CEntityCL *target = EntitiesMngr.entity((uint) node->getValue32());
@@ -195,11 +195,11 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if(pIM)
 			{
-				CCDBNodeLeaf *_CheckMailNode = pIM->getDbProp("UI:VARIABLES:MAIL_WAITING");
+				CCDBNodeLeaf *_CheckMailNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING");
 				if(_CheckMailNode)
 				{
 					_CheckMailNode->setValue32(nbmail==0?0:1);
-					CInterfaceElement *elm = pIM->getElementFromId("ui:interface:compass:mail:mail_nb");
+					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:mail:mail_nb");
 					if (elm)
 					{
 						CViewText *vt = dynamic_cast<CViewText*>(elm);
@@ -222,11 +222,11 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if(pIM)
 			{
-				CCDBNodeLeaf *_CheckForumNode = pIM->getDbProp("UI:VARIABLES:FORUM_UPDATED");
+				CCDBNodeLeaf *_CheckForumNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED");
 				if(_CheckForumNode)
 				{
 					_CheckForumNode->setValue32(nbforum==0?0:1);
-					CInterfaceElement *elm = pIM->getElementFromId("ui:interface:compass:forum:forum_nb");
+					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:forum:forum_nb");
 					if (elm)
 					{
 						CViewText *vt = dynamic_cast<CViewText*>(elm);

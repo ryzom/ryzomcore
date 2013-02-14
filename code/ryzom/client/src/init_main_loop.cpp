@@ -53,9 +53,9 @@
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/people_interraction.h"
 
-#include "interface_v3/view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 
-#include "interface_v3/interface_link.h"
+#include "nel/gui/interface_link.h"
 #include "cursor_functions.h"
 #include "pacs_client.h"
 #include "ig_client.h"
@@ -71,7 +71,7 @@
 #include "continent_manager.h"
 #include "continent.h"
 #include "sky_render.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/bot_chat_page_all.h"
 #include "main_loop.h"
@@ -104,6 +104,7 @@
 
 #include "landscape_poly_drawer.h"
 #include "session_browser_impl.h"
+#include "nel/gui/lua_manager.h"
 
 
 // ProgressBar steps in init main loop
@@ -315,7 +316,8 @@ inline void	waitForNetworkMessage(bool &var)
 		CInputHandlerManager::getInstance()->pumpEventsNoIM();
 		// Update network.
 		NetMngr.update();
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		// Send dummy info
 		NetMngr.send();
 		// Do not take all the CPU.
@@ -473,9 +475,9 @@ void initMainLoop()
 
 		IngameDbMngr.init(CPath::lookup("database.xml"), ProgressBar);
 		ICDBNode::CTextId textId("SERVER");
-		if( pIM->getDB()->getNode(textId, false) )
-			pIM->getDB()->removeNode(textId);
-		pIM->getDB()->attachChild(IngameDbMngr.getNodePtr(),"SERVER");
+		if( NLGUI::CDBManager::getInstance()->getDB()->getNode(textId, false) )
+			NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
+		NLGUI::CDBManager::getInstance()->getDB()->attachChild(IngameDbMngr.getNodePtr(),"SERVER");
 
 		// Set the database
 		NetMngr.setDataBase (IngameDbMngr.getNodePtr());
@@ -495,8 +497,8 @@ void initMainLoop()
 
 		// Add the LOCAL branch
 		ICDBNode::CTextId textId("LOCAL");
-		if( pIM->getDB()->getNode(textId, false) )
-			pIM->getDB()->removeNode(textId);
+		if( NLGUI::CDBManager::getInstance()->getDB()->getNode(textId, false) )
+			NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
 		pIM->createLocalBranch(CPath::lookup("local_database.xml"), ProgressBar);
 
 		initLast = initCurrent;
@@ -1185,8 +1187,8 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//CDebugInit dbg;
 		//dbg.init(&Driver->EventServer);
-		CInterfaceManager::getInstance()->activateMasterGroup("ui:login", false);
-		CInterfaceManager::getInstance()->activateMasterGroup("ui:interface", true);
+		CWidgetManager::getInstance()->activateMasterGroup("ui:login", false);
+		CWidgetManager::getInstance()->activateMasterGroup("ui:interface", true);
 
 	}
 
@@ -1216,7 +1218,8 @@ void initMainLoop()
 				CInputHandlerManager::getInstance()->pumpEventsNoIM();
 				// Update Network.
 				NetMngr.update();
-				CCDBNodeBranch::flushObserversCalls();
+				IngameDbMngr.flushObserverCalls();
+				NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			}
 
 			// Set the LastGameCycle
@@ -1271,11 +1274,11 @@ void initMainLoop()
 
 	// Set the default edit box for the enter key
 //	if (PeopleInterraction.MainChat.Window)
-//		CInterfaceManager::getInstance()->setCaptureKeyboard(PeopleInterraction.MainChat.Window->getEditBox());
+//		CWidgetManager::getInstance()->setCaptureKeyboard(PeopleInterraction.MainChat.Window->getEditBox());
 	if (PeopleInterraction.ChatGroup.Window)
 	{
 		CGroupEditBox	*eb= dynamic_cast<CGroupEditBox*>(PeopleInterraction.ChatGroup.Window->getEditBox());
-		CInterfaceManager::getInstance()->setCaptureKeyboard(eb);
+		CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 		// For user help, set a default input string.
 		// NB: must do it after interface loadConfig, else it is reseted
 		// NB: it is reseted also on first mode switch
@@ -1283,8 +1286,8 @@ void initMainLoop()
 			eb->setDefaultInputString(CI18N::get("uiDefaultChatInput"));
 	}
 	else
-		CInterfaceManager::getInstance()->setCaptureKeyboard(NULL);
-	CInterfaceManager::getInstance()->setCaptureKeyboard(NULL); // previous set editbox becomes '_OldCaptureKeyboard'
+		CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL); // previous set editbox becomes '_OldCaptureKeyboard'
 
 	// Some init after connection ready sent
 	if(BotChatPageAll && (!ClientCfg.R2EDEnabled))
@@ -1318,7 +1321,7 @@ void initMainLoop()
 
 
 	// init CSessionBrowserImpl
-	CSessionBrowserImpl::getInstance().init(CInterfaceManager::getInstance()->getLuaState());
+	CSessionBrowserImpl::getInstance().init(CLuaManager::getInstance().getLuaState());
 
 	// active/desactive welcome window
 	initWelcomeWindow();
@@ -1482,10 +1485,10 @@ void setLoadingContinent (CContinent *continent)
 void initWelcomeWindow()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceGroup* welcomeWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:welcome_info"));
+	CInterfaceGroup* welcomeWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:welcome_info"));
 	if(welcomeWnd)
 	{
-		bool welcomeDbProp  = pIM->getDbProp("UI:SAVE:WELCOME")->getValueBool();
+		bool welcomeDbProp  = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:WELCOME")->getValueBool();
 		CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 		welcomeWnd->setActive((sb.CurrentJoinMode!=CFarTP::LaunchEditor) && welcomeDbProp);
 	}
@@ -1499,7 +1502,7 @@ void initHardwareCursor(bool secondCall)
 	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 
 	string nodeName = "UI:SAVE:HARDWARE_CURSOR";
-	CCDBNodeLeaf * node= pIM->getDbProp(nodeName);
+	CCDBNodeLeaf * node= NLGUI::CDBManager::getInstance()->getDbProp(nodeName);
 
 	if(node)
 	{
@@ -1515,11 +1518,11 @@ void initHardwareCursor(bool secondCall)
 			// else, only the first time after this patch, open popup to propose hardare cursor mode
 			else
 			{
-				CInterfaceGroup * cursorWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:hardware_cursor"));
+				CInterfaceGroup * cursorWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:hardware_cursor"));
 				if(cursorWnd)
 				{
 					cursorWnd->setActive((sb.CurrentJoinMode!=CFarTP::LaunchEditor) || secondCall);
-					pIM->setTopWindow(cursorWnd);
+					CWidgetManager::getInstance()->setTopWindow(cursorWnd);
 					cursorWnd->updateCoords();
 					cursorWnd->center();
 				}
@@ -1543,25 +1546,25 @@ void initBloomConfigUI()
 	bool supportBloom = Driver->supportBloomEffect();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
+	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
 	if(button)
 	{
 		button->setFrozen(!supportBloom);
 	}
 
-	button = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
+	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
 	if(button)
 	{
 		button->setFrozen(!supportBloom);
 	}
 
-	CCtrlScroll * scroll = dynamic_cast<CCtrlScroll*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:density_bloom:c"));
+	CCtrlScroll * scroll = dynamic_cast<CCtrlScroll*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:density_bloom:c"));
 	if(scroll)
 	{
 		scroll->setFrozen(!supportBloom);
 	}
 
-	CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:game_config:content:fx:bloom_gr"));
+	CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr"));
 
 	if(!supportBloom)
 	{

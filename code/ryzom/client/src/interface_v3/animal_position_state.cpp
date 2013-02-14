@@ -24,6 +24,8 @@
 #include "group_compas.h"
 #include "game_share/animal_status.h"
 
+using NLMISC::CCDBNodeLeaf;
+
 // ***************************************************************************
 // CPositionState
 // ***************************************************************************
@@ -72,7 +74,7 @@ void CPositionState::serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode)
 		if (!dbPath.empty())
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			dbNode = im->getDbProp(dbPath, false);
+			dbNode = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
 		}
 	}
 	else
@@ -154,8 +156,8 @@ void CUIDEntityPositionState::build(const std::string &baseDB)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	_DBPos= pIM->getDbProp(baseDB+":POS", false);
-	_Uid= pIM->getDbProp(baseDB+":UID", false);
+	_DBPos= NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":POS", false);
+	_Uid= NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":UID", false);
 	// reset
 	_EntitySlot= CLFECOMMON::INVALID_SLOT;
 }
@@ -175,7 +177,7 @@ CTeammatePositionState::CTeammatePositionState() : CUIDEntityPositionState()
 void CTeammatePositionState::build(const std::string &baseDB)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	_Present = pIM->getDbProp(baseDB+":NAME", false);
+	_Present = NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":NAME", false);
 
 	CUIDEntityPositionState::build(baseDB);
 }
@@ -215,7 +217,7 @@ CAnimalPositionState::CAnimalPositionState() : CUIDEntityPositionState()
 void			CAnimalPositionState::build(const std::string &baseDB)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	_Status= pIM->getDbProp(baseDB+":STATUS", false);
+	_Status= NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":STATUS", false);
 
 	CUIDEntityPositionState::build(baseDB);
 }
@@ -255,7 +257,7 @@ void CAnimalPositionState::serial(NLMISC::IStream &f)
 // ***************************************************************************
 CEntityCL *CNamedEntityPositionState::getEntity()
 {
-	if (!dbOk()) return NULL;
+	if (!dbOk()) return false;
 	return EntitiesMngr.getEntityByName(_Name->getValue32());
 }
 

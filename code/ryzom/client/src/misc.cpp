@@ -808,15 +808,15 @@ void getSeedsFromDB(CSeeds &dest)
 	CInterfaceManager *im =CInterfaceManager::getInstance();
 	nlctassert(sizeof(CSeeds::TUInt) == 4); // excpect that the number of each seed type is encoded on 32 bits
 											// if this assert at compile, change the following code
-	string ls = im->getDefine("money_1");
-	string ms = im->getDefine("money_2");
-	string bs = im->getDefine("money_3");
-	string vbs = im->getDefine("money_4");
+	string ls = CWidgetManager::getInstance()->getParser()->getDefine("money_1");
+	string ms = CWidgetManager::getInstance()->getParser()->getDefine("money_2");
+	string bs = CWidgetManager::getInstance()->getParser()->getDefine("money_3");
+	string vbs = CWidgetManager::getInstance()->getParser()->getDefine("money_4");
 
-	dest = CSeeds(im->getDbProp(ls)->getValue32(),
-				  im->getDbProp(ms)->getValue32(),
-				  im->getDbProp(bs)->getValue32(),
-				  im->getDbProp(vbs)->getValue32());
+	dest = CSeeds(NLGUI::CDBManager::getInstance()->getDbProp(ls)->getValue32(),
+				  NLGUI::CDBManager::getInstance()->getDbProp(ms)->getValue32(),
+				  NLGUI::CDBManager::getInstance()->getDbProp(bs)->getValue32(),
+				  NLGUI::CDBManager::getInstance()->getDbProp(vbs)->getValue32());
 } // getSeedsFromDB //
 
 
@@ -973,115 +973,6 @@ std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest)
 		dest = src;
 	}
 	return colorCode;
-}
-
-
-NLMISC::CRGBA stringToRGBA(const char *ptr)
-{
-	if (!ptr) return NLMISC::CRGBA::White;
-	int r = 255, g = 255, b = 255, a = 255;
-	sscanf (ptr, "%d %d %d %d", &r, &g, &b, &a);
-	NLMISC::clamp (r, 0, 255);
-	NLMISC::clamp (g, 0, 255);
-	NLMISC::clamp (b, 0, 255);
-	NLMISC::clamp (a, 0, 255);
-	return CRGBA(r,g,b,a);
-}
-
-
-
-
-// ***************************************************************************
-
-inline bool isSeparator (ucchar c)
-{
-	return (c == ' ') || (c == '\t') || (c == '\n') || (c == '\r');
-}
-
-// ***************************************************************************
-
-inline bool isEndSentence (ucstring& str, uint index)
-{
-	// Ex: One sentence. Another sentence.
-	//                  ^
-	// Counterexample: nevrax.com
-	//                       ^
-	ucchar c = str[index];
-	if ((str[index] == ' ') || (str[index] == '\n'))
-	{
-		if (index < 1)
-			return false;
-		c = str[index-1];
-		return (c == '.') || (c == '!') || (c == '?');
-	}
-	return false;
-}
-
-
-void setCase (ucstring &str, TCaseMode mode)
-{
-	const uint length = (uint)str.length();
-	uint i;
-	bool newString = true;
-	bool newSentence = true;
-	bool newWord = true;
-	switch (mode)
-	{
-	case CaseLower:
-		str = toLower (str);
-		break;
-	case CaseUpper:
-		str = toUpper (str);
-		break;
-	case CaseFirstStringLetterUp:
-		for (i=0; i<length; i++)
-		{
-			if (!isSeparator (str[i]))
-			{
-				if (newString)
-					str[i] = toUpper (str[i]);
-				else
-					str[i] = toLower (str[i]);
-				newString = false;
-			}
-		}
-		break;
-	case CaseFirstSentenceLetterUp:
-		for (i=0; i<length; i++)
-		{
-			if (isEndSentence (str, i))
-				newSentence = true;
-			else
-			{
-				if (newSentence)
-					str[i] = toUpper (str[i]);
-				else
-					str[i] = toLower (str[i]);
-
-				if (!isSeparator (str[i]))
-					newSentence = false;
-			}
-		}
-		break;
-	case CaseFirstWordLetterUp:
-		for (i=0; i<length; i++)
-		{
-			if (isSeparator (str[i]) || isEndSentence (str, i))
-				newWord = true;
-			else
-			{
-				if (newWord)
-					str[i] = toUpper (str[i]);
-				else
-					str[i] = toLower (str[i]);
-
-				newWord = false;
-			}
-		}
-		break;
-	default:
-		break;
-	}
 }
 
 

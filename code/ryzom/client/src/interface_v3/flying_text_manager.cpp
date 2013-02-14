@@ -20,7 +20,7 @@
 #include "flying_text_manager.h"
 #include "interface_manager.h"
 #include "group_in_scene.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 
 using namespace std;
@@ -64,7 +64,7 @@ void	CFlyingTextManager::initInGame()
 		string id = "in_scene_flying_text_"+toString (i);
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
-		CInterfaceGroup *groupInfo = pIM->createGroupInstance ("in_scene_flying_text",
+		CInterfaceGroup *groupInfo = CWidgetManager::getInstance()->getParser()->createGroupInstance ("in_scene_flying_text",
 			"ui:interface", templateParams);
 		// if ok
 		if(groupInfo)
@@ -92,7 +92,7 @@ void	CFlyingTextManager::initInGame()
 	}
 
 	// misc
-	fromString(pIM->getDefine("in_scene_flying_char_offsetx"), _CharacterWindowOffsetX);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_flying_char_offsetx"), _CharacterWindowOffsetX);
 }
 
 // ***************************************************************************
@@ -186,7 +186,7 @@ void	CFlyingTextManager::linkToInterface(CGroupInfo &gi)
 
 	// add to group and window list
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->addWindowToMasterGroup("ui:interface", gi.GroupInScene);
+	CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", gi.GroupInScene);
 	gi.GroupInScene->setParent(_Root);
 	_Root->addGroup (gi.GroupInScene);
 }
@@ -202,7 +202,7 @@ void	CFlyingTextManager::unlinkToInterface(CGroupInfo &gi)
 
 	// remove from group and window list
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->unMakeWindow(gi.GroupInScene);
+	CWidgetManager::getInstance()->unMakeWindow(gi.GroupInScene);
 	// remove but don't delete
 	gi.GroupInScene->getParent()->delGroup(gi.GroupInScene, true);
 	gi.GroupInScene->setParent(NULL);

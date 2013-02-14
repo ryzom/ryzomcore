@@ -23,10 +23,14 @@
 #include "dbgroup_list_sheet_text.h"
 #include "game_share/bot_chat_types.h"
 
+namespace NLGUI
+{
+	class CCtrlButton;
+	class CCtrlScroll;
+}
+
 
 // ***************************************************************************
-class	CCtrlButton;
-class	CCtrlScroll;
 class	CHandlerListSheetTradeSelect;
 class	CHandlerListSheetTradeRightClick;
 
@@ -140,7 +144,7 @@ protected:
 	bool	_ApplyFamePriceFactor;
 
 	// keep pointer on leaf for fame price factor
-	CCDBNodeLeaf *	_FamePriceFactorLeaf;
+	NLMISC::CCDBNodeLeaf *	_FamePriceFactorLeaf;
 	sint16			_LastFamePriceFactor;
 
 	TSellerTypeFilter		_SellerTypeFilter;

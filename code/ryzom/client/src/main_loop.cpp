@@ -91,7 +91,7 @@
 #include "misc.h"
 #include "interface_v3/people_interraction.h"
 #include "debug_client.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_v3/action_handler_misc.h"
 #include "interface_v3/action_handler_item.h"
 #include "fx_manager.h"
@@ -111,7 +111,8 @@
 #include "camera_recorder.h"
 #include "connection.h"
 #include "landscape_poly_drawer.h"
-#include "interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
+#include "interface_v3/lua_ihm_ryzom.h"
 #include "far_tp.h"
 #include "session_browser_impl.h"
 #include "bg_downloader_access.h"
@@ -124,7 +125,7 @@
 #include "nel/misc/check_fpu.h"
 
 // TMP TMP
-#include "interface_v3/ctrl_polygon.h"
+#include "nel/gui/ctrl_polygon.h"
 // TMP TMP
 #include "game_share/scenario_entry_points.h"
 #include "nel/3d/driver.h"
@@ -143,6 +144,9 @@
 #include "precipitation.h"
 #include "interface_v3/bot_chat_manager.h"
 #include "string_manager_client.h"
+
+#include "nel/gui/lua_manager.h"
+#include "nel/gui/group_table.h"
 
 
 ///////////
@@ -239,7 +243,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if(pIM)
 		{
-			CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp("SERVER:DEBUG_INFO:Ping", false);
+			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
 			if(pNodeLeaf)
 			{
 				ICDBNode::CTextId textId;
@@ -257,7 +261,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if(pIM)
 		{
-			CCDBNodeLeaf *pNodeLeaf = pIM->getDbProp("SERVER:DEBUG_INFO:Ping", false);
+			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
 			if(pNodeLeaf)
 			{
 				ICDBNode::CTextId textId;
@@ -314,7 +318,6 @@ uint32				OldWidth;		// Last Width of the window.
 uint32				OldHeight;		// Last Height of the window.
 
 bool				ShowInterface = true;	// Do the Chat OSD have to be displayed.
-bool				DebugUICell = false;
 bool				DebugUIView = false;
 bool				DebugUICtrl = false;
 bool				DebugUIGroup = false;
@@ -1307,44 +1310,44 @@ void	updateGameQuitting()
 	// update the window
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:free_trial_game_quitting"));
+	CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:free_trial_game_quitting"));
 	if(group)
 	{
 		// if Free trial
 		if(paying_account_request)
 		{
 			// if no current modal window, or if not the quit window
-			if(group != pIM->getModalWindow())
+			if(group != CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
-				pIM->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->disableModalWindow();
+				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 			}
 		}
 
 		else
 		{
 			// if the current modal window is the quit window, disable
-			if(group == pIM->getModalWindow())
+			if(group == CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
+				CWidgetManager::getInstance()->disableModalWindow();
 			}
 		}
 	}
 
-	group= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:game_quitting"));
+	group= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_quitting"));
 	if(group)
 	{
 		// if exit request
 		if(game_exit_request && !paying_account_request)
 		{
 			// if no current modal window, or if not the quit window
-			if(group != pIM->getModalWindow())
+			if(group != CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
-				pIM->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->disableModalWindow();
+				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
 
 				bool farTPing = FarTP.isFarTPInProgress();
 				// Far TP: skipping not allowed (because we can't duplicate the avatar...), anyway the quit button would quit the game (no far tp)
@@ -1367,10 +1370,10 @@ void	updateGameQuitting()
 		else
 		{
 			// if the current modal window is the quit window, disable
-			if(group == pIM->getModalWindow())
+			if(group == CWidgetManager::getInstance()->getModalWindow())
 			{
 				// disable
-				pIM->disableModalWindow();
+				CWidgetManager::getInstance()->disableModalWindow();
 			}
 		}
 	}
@@ -1385,7 +1388,7 @@ void setDefaultChatWindow(CChatWindow *defaultChatWindow)
 		if (defaultChatWindow->getContainer())
 		{
 			CInterfaceGroup *ig = defaultChatWindow->getContainer()->getGroup("eb");
-			if (ig) im->setDefaultCaptureKeyboard(ig);
+			if (ig) CWidgetManager::getInstance()->setDefaultCaptureKeyboard(ig);
 		}
 	}
 }
@@ -1514,10 +1517,10 @@ bool mainLoop()
 			R2::getEditor().waitScenario();
 		}
 
-		CSessionBrowserImpl::getInstance().init(CInterfaceManager::getInstance()->getLuaState());
+		CSessionBrowserImpl::getInstance().init(CLuaManager::getInstance().getLuaState());
 	}
 
-	CInterfaceManager::getInstance()->executeLuaScript("game:onMainLoopBegin()");
+	CLuaManager::getInstance().executeLuaScript("game:onMainLoopBegin()");
 
 
 	if (StartInitTime != 0)
@@ -1638,7 +1641,8 @@ bool mainLoop()
 
 
 			// flush observers
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		}
 
 
@@ -1655,7 +1659,8 @@ bool mainLoop()
 
 			// NetWork Update.
 			NetMngr.update();
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			// lets some CPU.
 			NetMngr.send();
 			nlSleep(100);
@@ -1730,10 +1735,10 @@ bool mainLoop()
 			H_AUTO_USE ( RZ_Client_Main_Loop_Cursor )
 
 			// Change only if screen is not minimized
-			if(!pIMinstance->getViewRenderer().isMinimized())
+			if(!CViewRenderer::getInstance()->isMinimized())
 			{
 				// Get the cursor instance
-				CViewPointer *cursor = pIMinstance->getPointer();
+				CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 				if(cursor)
 				{
 					// Get the pointer position (in pixel)
@@ -1741,7 +1746,7 @@ bool mainLoop()
 					cursor->getPointerPos(x, y);
 
 					uint32 w, h;
-					CViewRenderer &viewRender = pIMinstance->getViewRenderer();
+					CViewRenderer &viewRender = *CViewRenderer::getInstance();
 					viewRender.getScreenSize(w, h);
 
 					if(w)
@@ -1764,7 +1769,8 @@ bool mainLoop()
 		{
 
 			NetMngr.update();
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 			bool prevDatabaseInitStatus = IngameDbMngr.initInProgress();
 			IngameDbMngr.setChangesProcessed();
 			bool newDatabaseInitStatus = IngameDbMngr.initInProgress();
@@ -1772,11 +1778,11 @@ bool mainLoop()
 			{
 				// When database received, activate allegiance buttons (for neutral state) in fame window
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:fame:content:you"));
+				CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:fame:content:you"));
 				if (group)
 					group->updateAllLinks();
 				// send a msg to lua for specific ui update
-				pIM->executeLuaScript("game:onInGameDbInitialized()");
+				CLuaManager::getInstance().executeLuaScript("game:onInGameDbInitialized()");
 			}
 		}
 
@@ -1834,7 +1840,8 @@ bool mainLoop()
 
 		// update bot chat
 		CBotChatManager::getInstance()->update();
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// updateItemEdition
 		CInterfaceItemEdition::getInstance()->update();
@@ -2289,7 +2296,7 @@ bool mainLoop()
 					deltaTime = smoothFPS.getSmoothValue ();
 					if (deltaTime > 0.0)
 					{
-						CCDBNodeLeaf*pNL = pIMinstance->getDbProp("UI:VARIABLES:FPS");
+						CCDBNodeLeaf*pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS");
 						pNL->setValue64((sint64)(1.f/deltaTime));
 					}
 				}
@@ -2889,7 +2896,7 @@ bool mainLoop()
 		// This code must remain at the very end of the main loop.
 		if(LoginSM.getCurrentState() == CLoginStateMachine::st_enter_far_tp_main_loop)
 		{
-			CInterfaceManager::getInstance()->executeLuaScript("game:onFarTpStart()");
+			CLuaManager::getInstance().executeLuaScript("game:onFarTpStart()");
 			// Will loop the network until the end of the relogging process
 			FarTP.farTPmainLoop();
 
@@ -2967,15 +2974,15 @@ bool mainLoop()
 			lastConnectionState = CNetworkConnection::Connected;
 			connectionState = NetMngr.getConnectionState();
 
-			CInterfaceManager::getInstance()->executeLuaScript("game:onFarTpEnd()");
+			CLuaManager::getInstance().executeLuaScript("game:onFarTpEnd()");
 		}
 
 	} // end of main loop
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getLuaState())
+	if (CLuaManager::getInstance().getLuaState())
 	{
-		CInterfaceManager::getInstance()->executeLuaScript("game:onMainLoopEnd()");
+		CLuaManager::getInstance().executeLuaScript("game:onMainLoopEnd()");
 	}
 
 	// Stop Running Profiles (kick result)
@@ -3003,7 +3010,7 @@ bool mainLoop()
 		Actions.enable(false);
 		EditActions.enable(false);
 
-		CInterfaceManager::getInstance()->setDefaultCaptureKeyboard(NULL);
+		CWidgetManager::getInstance()->setDefaultCaptureKeyboard(NULL);
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
@@ -3108,8 +3115,8 @@ void displayDebugUIUnderMouse()
 		line-= 2 * lineStep;
 	}
 	//
-	const vector<CCtrlBase *> &rICL = pIM->getCtrlsUnderPointer ();
-	const vector<CInterfaceGroup *> &rIGL = pIM->getGroupsUnderPointer ();
+	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
+	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer ();
 	// If previous highlighted element is found in the list, then keep it, else reset to first element
 	if (std::find(rICL.begin(), rICL.end(), HighlightedDebugUI) == rICL.end() &&
 		std::find(rIGL.begin(), rIGL.end(), HighlightedDebugUI) == rIGL.end())
@@ -3176,8 +3183,8 @@ void displayDebugUIUnderMouse()
 static void getElementsUnderMouse(vector<CInterfaceElement *> &ielem)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	const vector<CCtrlBase *> &rICL = pIM->getCtrlsUnderPointer();
-	const vector<CInterfaceGroup *> &rIGL = pIM->getGroupsUnderPointer();
+	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer();
+	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	ielem.clear();
 	ielem.insert(ielem.end(), rICL.begin(), rICL.end());
 	ielem.insert(ielem.end(), rIGL.begin(), rIGL.end());
@@ -3224,8 +3231,7 @@ class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		if (HighlightedDebugUI == NULL) return;
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CLuaState *lua = pIM->getLuaState();
+		CLuaState *lua = CLuaManager::getInstance().getLuaState();
 		if (!lua) return;
 		CLuaStackRestorer lsr(lua, 0);
 		CLuaIHM::pushUIOnStack(*lua, HighlightedDebugUI);
@@ -3399,9 +3405,9 @@ void displayDebug()
 	line-= 2 * lineStep;
 	// Lua stuffs
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	TextContext->printfAt(0.0f, line, "Lua mem (kb) : %d / %d", pIM->getLuaState()->getGCCount(),  pIM->getLuaState()->getGCThreshold());
+	TextContext->printfAt(0.0f, line, "Lua mem (kb) : %d / %d", CLuaManager::getInstance().getLuaState()->getGCCount(),  CLuaManager::getInstance().getLuaState()->getGCThreshold());
 	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "Lua stack size = %d", pIM->getLuaState()->getTop());
+	TextContext->printfAt(0.0f, line, "Lua stack size = %d", CLuaManager::getInstance().getLuaState()->getTop());
 	line-= lineStep;
 
 #endif
@@ -4388,7 +4394,8 @@ NLMISC_COMMAND(debugUI, "Debug the ui : show/hide quads of bboxs and hotspots", 
 		else
 			fromString(args[0], on);
 	}
-	DebugUICell = on;
+	
+	CGroupCell::setDebugUICell( on );
 	DebugUIView = on;
 	DebugUICtrl = on;
 	DebugUIGroup = on;
@@ -4420,7 +4427,7 @@ NLMISC_COMMAND(debugUIGroup, "Debug the ui : show/hide quads of bboxs and hotspo
 // show hide the debuging of cells
 NLMISC_COMMAND(debugUICell, "Debug the ui : show/hide quads of bboxs for cells", "")
 {
-	DebugUICell = !DebugUICell;
+	CGroupCell::setDebugUICell( !CGroupCell::getDebugUICell() );
 	return true;
 }
 
@@ -4543,14 +4550,14 @@ void	displayDebugClusters()
 void inGamePatchUncompleteWarning()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->executeLuaScript("bgdownloader:inGamePatchUncompleteWarning()");
+	CLuaManager::getInstance().executeLuaScript("bgdownloader:inGamePatchUncompleteWarning()");
 	/*
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId("ui:interface:bg_downloader"));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bg_downloader"));
 	if (gc)
 	{
 		gc->setActive(true);
-		im->setTopWindow(gc);
+		CWidgetManager::getInstance()->setTopWindow(gc);
 		gc->enableBlink(2);
 	}
 	im->messageBoxWithHelp(CI18N::get("uiBGD_InGamePatchIncomplete"));

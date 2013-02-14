@@ -23,8 +23,8 @@
 
 #include "group_in_scene.h"
 #include "interface_manager.h"
-#include "view_renderer.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -59,7 +59,7 @@ CGroupInScene::CGroupInScene(const TCtorParam &param)
 	Position= CVector::Null;
 
 	_ProjCenter= CVector::Null;
-	_DepthForZSort= 0.f;
+	_IsGroupInScene = true;
 }
 
 // ***************************************************************************
@@ -78,7 +78,7 @@ void CGroupInScene::computeWindowPos(sint32 &newX, sint32 &newY, CVector &newPro
 
 	if(getActive())
 	{
-		CViewRenderer &pVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &pVR = *CViewRenderer::getInstance();
 		nlassert(isValidDouble(Position.x) && isValidDouble(Position.y) && isValidDouble(Position.z));
 		CVector tmp = MainSceneViewMatrix * Position;
 		if (tmp.y>=0.001)
@@ -86,8 +86,8 @@ void CGroupInScene::computeWindowPos(sint32 &newX, sint32 &newY, CVector &newPro
 			tmp = pVR.getFrustum().projectZ (tmp);
 
 			// Get the width and height
-			tmp.x *= (float)Driver->getWindowWidth();
-			tmp.y *= (float)Driver->getWindowHeight();
+			tmp.x *= (float)CViewRenderer::getInstance()->getDriver()->getWindowWidth();
+			tmp.y *= (float)CViewRenderer::getInstance()->getDriver()->getWindowHeight();
 
 			// position without offset, in float
 			newProjCenter.x= tmp.x;
@@ -156,7 +156,7 @@ void CGroupInScene::draw()
 
 	if (_ProjCenter.z > NearDrawClip)
 	{
-		CViewRenderer &pVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &pVR = *CViewRenderer::getInstance();
 
 		// Set the current Z, and projCenter / scale
 		if(_UserScale)

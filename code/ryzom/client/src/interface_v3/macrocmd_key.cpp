@@ -23,14 +23,14 @@
 #include "macrocmd_manager.h"
 
 #include "interface_manager.h"
-#include "action_handler.h"
-#include "ctrl_button.h"
-#include "group_editbox.h"
-#include "group_list.h"
-#include "dbgroup_combo_box.h"
-#include "group_container.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/group_list.h"
+#include "nel/gui/dbgroup_combo_box.h"
+#include "nel/gui/group_container.h"
 #include "group_modal_get_key.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 
 // tmp
 #include "../r2/editor.h"
@@ -89,7 +89,7 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 	vParams.push_back(make_pair(string("id"), templateId));
 	vParams.push_back(make_pair(string("lineid"), toString(lineId)));
 	CInterfaceGroup *pKeysLine = NULL;
-	pKeysLine = pIM->createGroupInstance (TEMPLATE_KEYS_GROUP, pParent->getId(), vParams);
+	pKeysLine = CWidgetManager::getInstance()->getParser()->createGroupInstance (TEMPLATE_KEYS_GROUP, pParent->getId(), vParams);
 	if (pKeysLine == NULL) return;
 
 	// Put name
@@ -97,14 +97,14 @@ void addKeyLine (CGroupList *pParent, const ucstring &keyName, const ucstring &s
 	if (pViewKeyName != NULL)
 	{
 		pViewKeyName->setText (keyName);
-		pViewKeyName->setColor(grayed?pIM->getSystemOption(CInterfaceManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
+		pViewKeyName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
 	CViewText *pViewShortcutName = dynamic_cast<CViewText*>(pKeysLine->getView(TEMPLATE_KEYS_SHORTCUT_NAME));
 	if (pViewShortcutName != NULL)
 	{
 		pViewShortcutName->setText (shortcutName);
-		pViewShortcutName->setColor(grayed?pIM->getSystemOption(CInterfaceManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
+		pViewShortcutName->setColor(grayed?CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlTextGrayColor).getValColor():CRGBA::White);
 	}
 
 	pKeysLine->setParent (pParent);
@@ -237,7 +237,7 @@ public:
 			for (uint i = 0; i < rCats.size(); ++i)
 			{
 				string contName = string(WIN_KEYS_GAME)+rCats[i].Name;
-				pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(contName));
+				pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(contName));
 				if(pGC != NULL)
 				{
 					pGC->setX(0);
@@ -259,8 +259,8 @@ public:
 			for (uint i = 0; i < rCats.size(); ++i)
 			{
 				string contName = string(WIN_KEYS_GAME)+rCats[i].Name;
-				CInterfaceGroup *pCategory = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(contName));
-				CGroupList *pList = dynamic_cast<CGroupList*>(pIM->getElementFromId(contName + ":content"));
+				CInterfaceGroup *pCategory = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(contName));
+				CGroupList *pList = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(contName + ":content"));
 				if (pCategory != NULL && pList != NULL)
 				{
 					pList->clearGroups();
@@ -317,9 +317,9 @@ public:
 
 		pMCM->NewKey->CurrentEditCmdLine = pMCM->NewKey->AllLines[nLineNb];
 		pMCM->NewKey->CurAM = pMCM->ActionManagers[pMCM->NewKey->AllLines[nLineNb].ComboAM];
-		CGroupModalGetKey*pGetKey = dynamic_cast<CGroupModalGetKey*>(pIM->getElementFromId(WIN_MODAL_GET_KEY));
+		CGroupModalGetKey*pGetKey = dynamic_cast<CGroupModalGetKey*>(CWidgetManager::getInstance()->getElementFromId(WIN_MODAL_GET_KEY));
 		pGetKey->Caller = "editkey";
-		pIM->enableModalWindow(pCaller, WIN_MODAL_GET_KEY);
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, WIN_MODAL_GET_KEY);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerKeysAssign, "keys_assign");
@@ -408,12 +408,12 @@ void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool 
 	DbComboDisp2P = prefix + DB_EDITCMD_COMBO_DISPLAY_SECOND_PARAM;
 
 	// Create DB entry
-	pIM->getDbProp(DbComboSelCat);
-	pIM->getDbProp(DbComboSelAct);
-	pIM->getDbProp(DbComboSel1P);
-	pIM->getDbProp(DbComboSel2P);
-	pIM->getDbProp(DbComboDisp1P);
-	pIM->getDbProp(DbComboDisp2P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSelCat);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSelAct);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel1P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel2P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp1P);
+	NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp2P);
 
 	vector< pair<string,string> > vArgs;
 	vArgs.push_back(pair<string,string>("id",name));
@@ -424,7 +424,7 @@ void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool 
 	vArgs.push_back(pair<string,string>("db_disp_1p",DbComboDisp1P));
 	vArgs.push_back(pair<string,string>("db_disp_2p",DbComboDisp2P));
 
-	Win = dynamic_cast<CGroupContainer*>(pIM->createGroupInstance(TEMPLATE_EDITCMD, "ui:interface", vArgs));
+	Win = dynamic_cast<CGroupContainer*>( CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_EDITCMD, "ui:interface", vArgs));
 	if (Win == NULL)
 	{
 		nlwarning ("cannot create %s", name.c_str());
@@ -432,12 +432,12 @@ void CModalContainerEditCmd::create(const std::string &name, bool bDefKey, bool 
 	}
 	WinName = "ui:interface:" + name;
 
-	pIM->addWindowToMasterGroup("ui:interface", Win);
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+	CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", Win);
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	Win->setParent(pRoot);
 	pRoot->addGroup(Win);
 
-	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_KEY_GROUP));
+	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_KEY_GROUP));
 	if (pIG != NULL) pIG->setActive (CanDefineKey);
 }
 
@@ -458,7 +458,7 @@ void CModalContainerEditCmd::activate()
 	Win->launch();
 	// Initialisation of category combo box
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( WinName+WIN_EDITCMD_COMBO_CATEGORY ));
+	CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( WinName+WIN_EDITCMD_COMBO_CATEGORY ));
 	if (pCB != NULL)
 	{
 		CurrentEditCmdCategories.clear();
@@ -493,20 +493,20 @@ void CModalContainerEditCmd::activate()
 		}
 	}
 	// Clean up all actions
-	pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( WinName+WIN_EDITCMD_COMBO_ACTION ));
+	pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( WinName+WIN_EDITCMD_COMBO_ACTION ));
 	if (pCB != NULL) pCB->resetTexts();
 	// Clean up
 	CurAM = NULL;
-	pIM->getDbProp( DbComboSelCat )->setValue32(-1);
-	pIM->getDbProp( DbComboSelAct )->setValue32(-1);
-	pIM->getDbProp( DbComboSel1P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel2P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp1P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(-1);
 	// reset name of params
-	CViewText *pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
+	CViewText *pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
 	if (pViewParamName != NULL) pViewParamName->setText (string(""));
-	pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
+	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
 	if (pViewParamName != NULL) pViewParamName->setText (string(""));
 	invalidCurrentCommand();
 }
@@ -579,16 +579,18 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 
 	// Set category : Search the right category
 	CDBGroupComboBox *pCB;
-	pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(WinName+WIN_EDITCMD_COMBO_CATEGORY));
+	pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(WinName+WIN_EDITCMD_COMBO_CATEGORY));
 	pCB->setSelection(catCBIndex);
 	onChangeCategory();
-	CCDBNodeBranch::flushObserversCalls();
-	//pIM->runActionHandler("editcmd_change_category",NULL);
-	pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(WinName+WIN_EDITCMD_COMBO_ACTION));
+	IngameDbMngr.flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
+	//CAHManager::getInstance()->runActionHandler("editcmd_change_category",NULL);
+	pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(WinName+WIN_EDITCMD_COMBO_ACTION));
 	pCB->setSelection(actCBIndex);
 	onChangeAction();
-	CCDBNodeBranch::flushObserversCalls();
-	//pIM->runActionHandler("editcmd_change_action",NULL);
+	IngameDbMngr.flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
+	//CAHManager::getInstance()->runActionHandler("editcmd_change_action",NULL);
 
 	// Count number of displayed param
 	uint nbRealParam = 0;
@@ -637,8 +639,8 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 		}
 		else if (rP.Type == CBaseAction::CParameter::Constant)
 		{
-			if (noParam == 0)	pIM->getDbProp( DbComboDisp1P )->setValue32(0);
-			else				pIM->getDbProp( DbComboDisp2P )->setValue32(0);
+			if (noParam == 0)	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(0);
+			else				NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(0);
 
 			// Search the param value to get the position in combo box
 			bool bValFound = false;
@@ -656,19 +658,19 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 				string sCombo;
 				if (noParam == 0)	sCombo = WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_LIST;
 				else				sCombo = WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_LIST;
-				pCB = dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId(sCombo));
+				pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(sCombo));
 				pCB->setSelection(nPinCB);
 			}
 		}
 		else if ((rP.Type == CBaseAction::CParameter::User) || (rP.Type == CBaseAction::CParameter::UserName))
 		{
-			if (noParam == 0)	pIM->getDbProp( DbComboDisp1P )->setValue32(1);
-			else				pIM->getDbProp( DbComboDisp2P )->setValue32(1);
+			if (noParam == 0)	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(1);
+			else				NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(1);
 
 			string sEditBox;
 			if (noParam == 0)	sEditBox = WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_EDITBOX;
 			else				sEditBox = WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_EDITBOX;
-			CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(sEditBox));
+			CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBox));
 			// sTmp is utf8
 			pEB->setInputStringAsUtf8(sTmp);
 		}
@@ -679,7 +681,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 			string sText;
 			if (noParam == 0)	sText = WinName+VIEW_EDITCMD_FIRST_PARAM_NAME;
 			else				sText = WinName+VIEW_EDITCMD_SECOND_PARAM_NAME;
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(sText));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sText));
 			if (pVT != NULL) pVT->setText(CI18N::get(pBA->Parameters[i].LocalizedName));
 			noParam++;
 		}
@@ -691,7 +693,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 	CActionsManager::TActionComboMap::const_iterator it = actionCombo.find(CurrentEditCmdLine.ActionName);
 
 	// Deactive the key definition (we are in edit key mode)
-	CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_KEY));
+	CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_KEY));
 	if (pBut != NULL) pBut->setActive(false);
 
 	if (it != actionCombo.end())
@@ -699,13 +701,13 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 		CurrentEditCmdLine.Combo = it->second;
 
 		// Activate the key definer text
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
 		if (pVT != NULL) pVT->setActive(true);
 		// setup the text of the key
 		pVT->setText(it->second.toUCString());
 
 		// There is already a shortcut so we can display ok button
-		pBut = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
+		pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 		if (pBut != NULL) pBut->setFrozen (false);
 	}
 }
@@ -768,20 +770,20 @@ void CModalContainerEditCmd::invalidCurrentCommand()
 	if (CurrentEditCmdNb == -1)
 	{
 		// Dont display key shortcut if we are in creation mode
-		pVT= dynamic_cast<CViewText*>(pIM->getElementFromId( WinName+VIEW_EDITCMD_TEXT_KEY ));
+		pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( WinName+VIEW_EDITCMD_TEXT_KEY ));
 		if (pVT != NULL) pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
 
 		// Deactivate the key definer text
-		pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
+		pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
 		if (pVT != NULL) pVT->setActive(false);
 	}
 
 	// Deactivate the key definer button
-	CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_KEY));
+	CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_KEY));
 	if (pCB != NULL) pCB->setActive(false);
 
 	// Deactivate ok button
-	pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
+	pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 	if (pCB != NULL) pCB->setFrozen (true);
 }
 
@@ -790,9 +792,9 @@ void CModalContainerEditCmd::invalidCurrentCommand()
 void CModalContainerEditCmd::validCurrentCommand()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0) return;
-	sint32	actIndex= pIM->getDbProp( DbComboSelAct )->getValue32();
+	sint32	actIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->getValue32();
 	if(actIndex < 0) return;
 
 	CActionsManager *pAM;
@@ -827,8 +829,8 @@ void CModalContainerEditCmd::validCurrentCommand()
 			// cannot use index directly because some options may be disabled in current context
 			sint32 paramIndex;
 			const std::vector<CBaseAction::CParameter::CValue> &rVVal = rP.Values;
-			if (noParam == 0)	paramIndex = pIM->getDbProp(DbComboSel1P)->getValue32();
-			else				paramIndex = pIM->getDbProp(DbComboSel2P)->getValue32();
+			if (noParam == 0)	paramIndex = NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel1P)->getValue32();
+			else				paramIndex = NLGUI::CDBManager::getInstance()->getDbProp(DbComboSel2P)->getValue32();
 
 			uint currIndex = 0;
 			for (uint k = 0; k < rVVal.size(); ++k)
@@ -851,7 +853,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 			string sWin;
 			if (noParam == 0)	sWin = WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_EDITBOX;
 			else				sWin = WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_EDITBOX;
-			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(pIM->getElementFromId( sWin ));
+			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			// convert to utf8
 			if (pEB != NULL)
 				CurrentEditCmdLine.ActionName.Argu += pEB->getInputStringAsUtf8();
@@ -866,10 +868,10 @@ void CModalContainerEditCmd::validCurrentCommand()
 		if (CurrentEditCmdNb == -1)
 		{
 			// Activate the key definer button
-			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_KEY));
+			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_KEY));
 			if (pCB != NULL) pCB->setActive(true);
 			// Activate the key definer text
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_TEXT_KEY));
 			if (pVT != NULL) pVT->setActive(true);
 			// Does the command already exists ?
 			const CActionsManager::TActionComboMap &actionCombo = pAM->getActionComboMap();
@@ -880,7 +882,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 				// Yes ok let setup the text of the key
 				pVT->setText(it->second.toUCString());
 				// There is already a shortcut so we can display ok button
-				CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
+				CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 				if (pCB != NULL) pCB->setFrozen (false);
 			}
 			else
@@ -890,13 +892,13 @@ void CModalContainerEditCmd::validCurrentCommand()
 				// Display not assigned text
 				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
 				// Do not display the ok button
-				CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
+				CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 				if (pCB != NULL) pCB->setFrozen (true);
 			}
 		}
 		else
 		{
-			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
+			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 			if (pCB != NULL) pCB->setFrozen (false);
 		}
 	}
@@ -904,7 +906,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 	// If we are in mode new command (from macro) just turn on the ok button
 	if (WinName == "ui:interface:editcmd")
 	{
-		CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
+		CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(WinName+CTRL_EDITCMD_BUTTON_OK));
 		if (pCB != NULL) pCB->setFrozen(false);
 	}
 }
@@ -915,14 +917,14 @@ bool CModalContainerEditCmd::isParamValid (sint32 nParamIndex)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	sint32 paramType;
-	if (nParamIndex == 0)	paramType = pIM->getDbProp(DbComboDisp1P)->getValue32();
-	else					paramType = pIM->getDbProp(DbComboDisp2P)->getValue32();
+	if (nParamIndex == 0)	paramType = NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp1P)->getValue32();
+	else					paramType = NLGUI::CDBManager::getInstance()->getDbProp(DbComboDisp2P)->getValue32();
 
 	if (paramType == 0) // combo box list
 	{
 		sint32 paramListIndex;
-		if (nParamIndex == 0)	paramListIndex = pIM->getDbProp( DbComboSel1P )->getValue32();
-		else					paramListIndex = pIM->getDbProp( DbComboSel2P )->getValue32();
+		if (nParamIndex == 0)	paramListIndex = NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->getValue32();
+		else					paramListIndex = NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->getValue32();
 
 		if (paramListIndex < 0)	return false;
 		else					return true;
@@ -930,8 +932,8 @@ bool CModalContainerEditCmd::isParamValid (sint32 nParamIndex)
 	else if (paramType == 1)
 	{
 		CGroupEditBox *pEB;
-		if (nParamIndex == 0)	pEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId( WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_EDITBOX ));
-		else					pEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId( WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_EDITBOX ));
+		if (nParamIndex == 0)	pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_EDITBOX ));
+		else					pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_EDITBOX ));
 		if (pEB == NULL) return false;
 
 		// no need to translate utf8 or not here
@@ -947,11 +949,11 @@ void CModalContainerEditCmd::checkCurrentCommandValidity()
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
 	// Get the category selected
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0) return;
 
 	// Get the action index selected
-	sint32	actIndex= pIM->getDbProp( DbComboSelAct )->getValue32();
+	sint32	actIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->getValue32();
 	if(actIndex < 0) return;
 
 	CActionsManager *pAM;
@@ -1001,12 +1003,12 @@ void CModalContainerEditCmd::onChangeCategory()
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
 	// Get the category selected
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0)
 		return;
 
 	// Update the combo box of actions
-	CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( WinName+WIN_EDITCMD_COMBO_ACTION ));
+	CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( WinName+WIN_EDITCMD_COMBO_ACTION ));
 	if( pCB )
 	{
 		pCB->resetTexts();
@@ -1031,16 +1033,16 @@ void CModalContainerEditCmd::onChangeCategory()
 	}
 
 	// reset the action and dont display params
-	pIM->getDbProp( DbComboSelAct )->setValue32(-1);
-	pIM->getDbProp( DbComboSel1P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel2P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp1P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(-1);
 	// reset name of params
 	CViewText *pViewParamName;
-	pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
+	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
 	if (pViewParamName != NULL) pViewParamName->setText (string(""));
-	pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
+	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
 	if (pViewParamName != NULL) pViewParamName->setText (string(""));
 	// Reset key
 	invalidCurrentCommand();
@@ -1053,12 +1055,12 @@ void CModalContainerEditCmd::onChangeAction()
 	CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
 	// Get the category selected
-	sint32	catIndex= pIM->getDbProp( DbComboSelCat )->getValue32();
+	sint32	catIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelCat )->getValue32();
 	if(catIndex < 0)
 		return;
 
 	// Get the action index selected
-	sint32	actIndex= pIM->getDbProp( DbComboSelAct )->getValue32();
+	sint32	actIndex= NLGUI::CDBManager::getInstance()->getDbProp( DbComboSelAct )->getValue32();
 	if(actIndex < 0)
 		return;
 
@@ -1070,15 +1072,15 @@ void CModalContainerEditCmd::onChangeAction()
 	const vector<CBaseAction> &rVBA = CurAM->getCategories()[catIndex].BaseActions;
 	const vector<CBaseAction::CParameter> &rVParams = rVBA[actIndex].Parameters;
 
-	pIM->getDbProp( DbComboDisp1P )->setValue32(-1);
-	pIM->getDbProp( DbComboDisp2P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel1P )->setValue32(-1);
-	pIM->getDbProp( DbComboSel2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboDisp2P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel1P )->setValue32(-1);
+	NLGUI::CDBManager::getInstance()->getDbProp( DbComboSel2P )->setValue32(-1);
 	// reset name of params
 	CViewText *pViewParamName;
-	pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
+	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_FIRST_PARAM_NAME));
 	if (pViewParamName != NULL) pViewParamName->setText (string(""));
-	pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
+	pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(WinName+VIEW_EDITCMD_SECOND_PARAM_NAME));
 	if (pViewParamName != NULL) pViewParamName->setText (string(""));
 
 	uint noParam = 0;
@@ -1100,7 +1102,7 @@ void CModalContainerEditCmd::onChangeAction()
 			if (noParam == 0)	sViewText = WinName+VIEW_EDITCMD_FIRST_PARAM_NAME;
 			else				sViewText = WinName+VIEW_EDITCMD_SECOND_PARAM_NAME;
 
-			pViewParamName = dynamic_cast<CViewText*>(pIM->getElementFromId(sViewText));
+			pViewParamName = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sViewText));
 			if (pViewParamName != NULL)
 				pViewParamName->setText (CI18N::get(rP.LocalizedName));
 		}
@@ -1110,7 +1112,7 @@ void CModalContainerEditCmd::onChangeAction()
 			string sWin;
 			if (noParam == 0)	sWin = WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_LIST;
 			else				sWin = WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_LIST;
-			CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(pIM->getElementFromId( sWin ));
+			CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			if( pCB )
 			{
 				pCB->resetTexts();
@@ -1129,19 +1131,19 @@ void CModalContainerEditCmd::onChangeAction()
 					}
 				}
 			}
-			pIM->getDbProp( sDB )->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp( sDB )->setValue32(0);
 		}
 		else if ((rP.Type == CBaseAction::CParameter::User) || (rP.Type == CBaseAction::CParameter::UserName))
 		{
 			string sWin;
 			if (noParam == 0)	sWin = WinName+WIN_EDITCMD_COMBO_FIRST_PARAM_EDITBOX;
 			else				sWin = WinName+WIN_EDITCMD_COMBO_SECOND_PARAM_EDITBOX;
-			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(pIM->getElementFromId( sWin ));
+			CGroupEditBox *pEB= dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId( sWin ));
 			if( pEB )
 			{
 				pEB->setInputString(ucstring(""));
 			}
-			pIM->getDbProp( sDB )->setValue32(1);
+			NLGUI::CDBManager::getInstance()->getDbProp( sDB )->setValue32(1);
 		}
 		noParam++;
 	}
@@ -1268,9 +1270,9 @@ public:
 	{
 		//checkCurrentCommandValidity();
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupModalGetKey*pGetKey = dynamic_cast<CGroupModalGetKey*>(pIM->getElementFromId(WIN_MODAL_GET_KEY));
+		CGroupModalGetKey*pGetKey = dynamic_cast<CGroupModalGetKey*>(CWidgetManager::getInstance()->getElementFromId(WIN_MODAL_GET_KEY));
 		pGetKey->Caller = Params;
-		pIM->enableModalWindow(pCaller, WIN_MODAL_GET_KEY);
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, WIN_MODAL_GET_KEY);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerEditCmdDefineKey, "editcmd_cmd_def_key");
@@ -1308,7 +1310,7 @@ public:
 			{
 				pMCM->CurrentEditMacro.addCommand(pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name.c_str(),pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu.c_str());
 			}
-			pIM->runActionHandler("new_macro_open", pCaller);
+			CAHManager::getInstance()->runActionHandler("new_macro_open", pCaller);
 			pMCM->EditCmd->deactivate();
 		}
 	}
@@ -1324,8 +1326,8 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
-		pIM->disableModalWindow();
-		CGroupModalGetKey*pGetKey = dynamic_cast<CGroupModalGetKey*>(pIM->getElementFromId(WIN_MODAL_GET_KEY));
+		CWidgetManager::getInstance()->disableModalWindow();
+		CGroupModalGetKey*pGetKey = dynamic_cast<CGroupModalGetKey*>(CWidgetManager::getInstance()->getElementFromId(WIN_MODAL_GET_KEY));
 		if (pGetKey == NULL)
 			return;
 
@@ -1344,10 +1346,10 @@ public:
 		{
 			pMCM->NewKey->CurrentEditCmdLine.Combo = pGetKey->Combo;
 
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(pMCM->NewKey->WinName+VIEW_EDITCMD_TEXT_KEY));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(pMCM->NewKey->WinName+VIEW_EDITCMD_TEXT_KEY));
 			if (pVT != NULL) pVT->setText(pMCM->NewKey->CurrentEditCmdLine.Combo.toUCString());
 
-			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(pMCM->NewKey->WinName+CTRL_EDITCMD_BUTTON_OK));
+			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(pMCM->NewKey->WinName+CTRL_EDITCMD_BUTTON_OK));
 			if (pCB != NULL) pCB->setFrozen (false);
 		}
 
@@ -1356,7 +1358,7 @@ public:
 		{
 			pMCM->EditCmd->CurrentEditCmdLine.Combo = pGetKey->Combo;
 			pMCM->CurrentEditMacro.Combo = pMCM->EditCmd->CurrentEditCmdLine.Combo;
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_NEWMACRO_KEY));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NEWMACRO_KEY));
 			if (pVT != NULL) pVT->setText(pMCM->EditCmd->CurrentEditCmdLine.Combo.toUCString());
 		}
 	}

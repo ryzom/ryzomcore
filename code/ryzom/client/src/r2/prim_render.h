@@ -24,9 +24,13 @@
 #include "../interface_v3/group_map.h"
 
 
+namespace NLGUI
+{
+	class CLuaObject;
+	class CCtrlPolygon;
+}
+
 class CEntityCL;
-class CLuaObject;
-class CCtrlPolygon;
 
 namespace R2
 {

@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "../actions.h" // CLIENT
-#include "group_modal.h"
+#include "nel/gui/group_modal.h"
 
 
 // ***************************************************************************
@@ -38,7 +38,7 @@ public:
 	/// Constructor
 	CGroupModalGetKey(const TCtorParam &param);
 
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 	virtual void setActive(bool state);
 

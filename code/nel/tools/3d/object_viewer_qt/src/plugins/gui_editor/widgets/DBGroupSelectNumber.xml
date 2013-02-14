@@ -1,0 +1,37 @@
+<widget>
+    <header>
+        <name>DBGroupSelectNumber</name>
+        <guiname>CDBGroupSelectNumber</guiname>
+        <ancestor>InterfaceGroup</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>value</name>
+            <type>string</type>
+            <default></default>
+        </property>
+        <property>
+            <name>loop</name>
+            <type>bool</type>
+            <default>true</default>
+        </property>
+        <property>
+            <name>min</name>
+            <type>int</type>
+            <default>0</default>
+        </property>
+        <property>
+            <name>max</name>
+            <type>int</type>
+            <default>9</default>
+        </property>
+        <property>
+            <name>delta</name>
+            <type>int</type>
+            <default>1</default>
+        </property>
+    </properties>
+</widget>

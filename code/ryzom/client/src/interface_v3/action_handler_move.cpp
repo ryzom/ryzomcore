@@ -22,7 +22,7 @@
 using namespace std;
 using namespace NLMISC;
 
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../motion/user_controls.h"
 #include "../view.h"
 #include "../misc.h"
@@ -32,7 +32,7 @@ using namespace NLMISC;
 #include "../entities.h"
 #include "interface_manager.h"
 #include "action_handler_tools.h"
-#include "ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 
 ////////////
 // GLOBAL //
@@ -187,7 +187,7 @@ class CAHFreeMouse : public IActionHandler
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (im)
 		{
-			CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId("ui:interface:game_config"));
+			CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config"));
 			if (ig && ig->getActive())
 			{
 				CInterfaceGroup *igHard = dynamic_cast<CInterfaceGroup *>(ig->getGroup("hard"));
@@ -430,7 +430,7 @@ class CAHToggleDodgeParry : public IActionHandler
 		ucstring msg;
 		// 0 - dodge mode
 		// 1 - parry mode
-		if (pIM->getDbProp("SERVER:DEFENSE:DEFENSE_MODE")->getValue32() == 0)
+		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEFENSE:DEFENSE_MODE")->getValue32() == 0)
 		{
 			sendMsgToServer("COMBAT:PARRY");
 			msg = CI18N::get("msgUserModeParry");

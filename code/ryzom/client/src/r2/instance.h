@@ -19,15 +19,18 @@
 
 #include "nel/misc/smart_ptr.h"
 //
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 //
 #include "game_share/object.h"
 #include "displayer_base.h"
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "lua_event_forwarder.h"
 
 class CEntityCL;
+namespace NLGUI
+{
 class CLuaState;
+}
 
 namespace R2
 {

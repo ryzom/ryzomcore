@@ -368,10 +368,10 @@ void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::
 		if (pWS->Maps[i].ContinentName == name)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+			CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 			if (pMap != NULL)
 				pMap->setMap(pWS->Maps[i].Name);
-			pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
+			pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
 			if (pMap != NULL)
 				pMap->setMap(pWS->Maps[i].Name);
 			break;
@@ -549,7 +549,7 @@ void CContinentManager::checkNumberOfUserLandmarks( uint maxNumber )
 			// Just cut down the last landmarks (in case of hacked file)
 			if ( cont == _Current )
 			{
-				CGroupMap *pMap = dynamic_cast<CGroupMap*>(CInterfaceManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+				CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 				if ( pMap )
 					pMap->removeExceedingUserLandMarks( maxNumber );
 			}

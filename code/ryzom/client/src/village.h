@@ -25,7 +25,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "streamable_ig.h"
-#include "cdb.h"
+#include "nel/misc/cdb.h"
 #include "client_sheets/continent_sheet.h"
 #include "game_share/misc_const.h"
 #include <vector>

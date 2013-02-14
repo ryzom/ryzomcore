@@ -19,10 +19,10 @@
 #include "stdpch.h"
 #include "bot_chat_page_dynamic_mission.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "../string_manager_client.h"
-#include "action_handler.h"
-#include "dbgroup_combo_box.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "bot_chat_page_all.h"
 #include "bot_chat_manager.h"
 #include "../client_cfg.h"
@@ -64,9 +64,9 @@ CBotChatPageDynamicMission::CBotChatPageDynamicMission()
 void CBotChatPageDynamicMission::invalidateMission()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp(DM_DESCRIPTION_DB_PATH)->setValue32(0);
-	im->getDbProp(DM_TITLE_DB_PATH)->setValue32(0);
-	im->getDbProp(DM_VALID_DB_PATH)->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(DM_DESCRIPTION_DB_PATH)->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(DM_TITLE_DB_PATH)->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(DM_VALID_DB_PATH)->setValue32(0);
 	_MissionValid = false;
 }
 
@@ -80,14 +80,14 @@ void CBotChatPageDynamicMission::begin()
 	// clear all choices options
 	for(uint k = 0; k < DYNAMIC_MISSION_NUM_CHOICES; ++k)
 	{
-		im->getDbProp(toString(DM_CHOICE "%d:TITLE", (int) k))->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:TITLE", (int) k))->setValue32(0);
 		for(uint l = 0; l < DYNAMIC_MISSION_MAX_NUM_OPTIONS; ++l)
 		{
-			im->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->setValue32(0);
 		}
 	}
 	activateWindow(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION, true);
-	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION));
+	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION));
 	if (!ig)
 	{
 		std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *) NULL);
@@ -113,7 +113,7 @@ void CBotChatPageDynamicMission::begin()
 	std::fill(_Choice, _Choice + DYNAMIC_MISSION_NUM_CHOICES, -1);
 	for(uint k = 0; k < DYNAMIC_MISSION_NUM_CHOICES; ++k)
 	{
-		im->getDbProp(toString("UI:TEMP:DYNAMIC_MISSION:CHOICE%d", (int) k))->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:TEMP:DYNAMIC_MISSION:CHOICE%d", (int) k))->setValue32(-1);
 	}
 }
 
@@ -122,7 +122,7 @@ void CBotChatPageDynamicMission::end()
 {
 	// if a menu is currently poped, disable it
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 	activateWindow(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION, false);
 }
 
@@ -158,7 +158,7 @@ void CBotChatPageDynamicMission::update()
 					}
 					else
 					{
-						uint32 textID = (uint32) im->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
+						uint32 textID = (uint32) NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
 						// see if text has been receive
 						ucstring result;
 						bool received = CStringManagerClient::instance()->getDynString(textID, result);
@@ -173,7 +173,7 @@ void CBotChatPageDynamicMission::update()
 			for(l = _ChoiceCB[k]->getNumTexts(); l < DYNAMIC_MISSION_NUM_CHOICES; ++l)
 			{
 				// see if text id  has been received
-				uint32 textID = (uint32) im->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
+				uint32 textID = (uint32) NLGUI::CDBManager::getInstance()->getDbProp(toString(DM_CHOICE "%d:%d:TEXT", (int) k, (int) l))->getValue32();
 				if (textID == 0 && !ClientCfg.Local) break;
 				// see if text has been received
 				ucstring result;
@@ -193,25 +193,25 @@ void CBotChatPageDynamicMission::update()
 	}
 	if (ClientCfg.Local)
 	{
-		im->getDbProp(DM_VALID_DB_PATH)->setValue32(1);
+		NLGUI::CDBManager::getInstance()->getDbProp(DM_VALID_DB_PATH)->setValue32(1);
 	}
 	else
 	{
 		if (!_MissionValid)
 		{
 			// activate 'regen' and 'accept' button when the description has been received
-			uint32 textID = im->getDbProp(DM_TITLE_DB_PATH)->getValue32();
+			uint32 textID = NLGUI::CDBManager::getInstance()->getDbProp(DM_TITLE_DB_PATH)->getValue32();
 			if (textID != 0)
 			{
 				ucstring result;
 				if (CStringManagerClient::instance()->getDynString(textID, result))
 				{
-					textID = im->getDbProp(DM_DESCRIPTION_DB_PATH)->getValue32();
+					textID = NLGUI::CDBManager::getInstance()->getDbProp(DM_DESCRIPTION_DB_PATH)->getValue32();
 					if (textID != 0)
 					{
 						if (CStringManagerClient::instance()->getDynString(textID, result))
 						{
-							im->getDbProp(DM_VALID_DB_PATH)->setValue32(1);
+							NLGUI::CDBManager::getInstance()->getDbProp(DM_VALID_DB_PATH)->setValue32(1);
 							_MissionValid = true;
 						}
 					}

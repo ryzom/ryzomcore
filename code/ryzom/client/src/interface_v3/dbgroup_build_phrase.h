@@ -20,20 +20,24 @@
 #define NL_DBGROUP_BUILD_PHRASE_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/brick_types.h"
 #include "game_share/skills.h"
 
 
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+	class CViewText;
+	class CViewBitmap;
+	class CGroupEditBox;
+}
+
+
 // ***************************************************************************
 class	CDBCtrlSheet;
-class	CCtrlBaseButton;
 class	CSBrickSheet;
-class	CViewBitmap;
-class	CViewText;
-class	CGroupEditBox;
-
 
 // ***************************************************************************
 /**

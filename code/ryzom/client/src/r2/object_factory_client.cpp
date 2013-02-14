@@ -18,7 +18,8 @@
 #include "object_factory_client.h"
 #include "editor.h"
 #include "instance.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
+#include "../interface_v3/lua_ihm_ryzom.h"
 
 namespace R2
 {
@@ -287,7 +288,7 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 	}
 	// TMP TMP
 	nlwarning("=========================================");
-	CLuaIHM::dumpCallStack();
+	CLuaIHMRyzom::dumpCallStack();
 	nlwarning("=========================================");
 	nlwarning("ObservedObject = %s", getValue().c_str());
 	CInstance *obsInstance = getEditor().getInstanceFromId(getValue().c_str());
@@ -300,7 +301,6 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 		nlwarning("ObservedObject parent instance ptr = %p", parent);
 		parent->getLuaProjection().dump();
 	}
-	Driver->systemMessageBox("Bug catched, please send log.log to vizerie@nevrax.com", "nevrax internal", NL3D::UDriver::okType, NL3D::UDriver::exclamationIcon);
 	nlassert(0); // not found in parent
 }
 

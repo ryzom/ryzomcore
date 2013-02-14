@@ -21,7 +21,7 @@
 #include "nel/misc/types_nl.h"
 #include "game_share/entity_types.h"
 #include "game_share/msg_client_server.h"
-#include "cdb.h"
+#include "nel/misc/cdb.h"
 #include "entity_cl.h"
 #include "interface_v3/view_radar.h"
 #include <string>
@@ -51,6 +51,7 @@ namespace NPC_ICON
 	};
 };
 
+using NLMISC::ICDBNode;
 
 /**
  * Description of a mission giver NPC.

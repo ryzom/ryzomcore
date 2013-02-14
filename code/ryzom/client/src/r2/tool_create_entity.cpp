@@ -27,8 +27,8 @@
 #include "../entity_cl.h"
 #include "../player_r2_cl.h"
 #include "../sheet_manager.h"
-#include "../interface_v3/lua_ihm.h"
-#include "../cdb_leaf.h"
+#include "nel/gui/lua_ihm.h"
+#include "nel/misc/cdb_leaf.h"
 #include "../interface_v3/interface_manager.h"
 #include "dmc/palette.h"
 #include "displayer_visual.h"
@@ -36,7 +36,7 @@
 #include "verbose_clock.h"
 #include "entity_sorter.h"
 //
-#include "../interface_v3/ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 //
 #include "game_share/player_visual_properties.h"
 #include "game_share/visual_slot_manager.h"
@@ -93,7 +93,7 @@ void CToolCreateEntity::updateInvalidCursorOnUI()
 {
 	//H_AUTO(R2_CToolCreateEntity_updateInvalidCursorOnUI)
 	// set the default cursor unless the mouse is on the palette
-	const std::vector<CInterfaceGroup *> &groups = getUI().getGroupsUnderPointer();
+	const std::vector<CInterfaceGroup *> &groups = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	for(uint k = 0; k < groups.size(); ++k)
 	{
 		if (groups[k]->getId() == "ui:interface:r2ed_palette") // hardcoded for now ...
@@ -114,7 +114,7 @@ void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float crea
 		if (!getEditor().verifyRoomLeft(0, 1))
 		{
 
-			getUI().executeLuaScript("r2:checkStaticQuota(1)");
+			CLuaManager::getInstance().executeLuaScript("r2:checkStaticQuota(1)");
 			return;
 		}
 		setContextHelp(CI18N::get("uiR2EDDrawArrayContextHelp"));
@@ -141,7 +141,7 @@ void CToolCreateEntity::commit(const NLMISC::CVector &createPosition, float crea
 		// prevent newly created ghost to be removed twice ...
 		removeGhostSlot();
 		// re set this tool to generate a new entity look
-		getUI().runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + _PaletteId);
+		CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + _PaletteId);
 	}
 }
 
@@ -240,9 +240,9 @@ std::string CToolCreateEntity::cloneEntityIntoScenario(CEntityCL *clonee,
 			const string propNameA = toString("SERVER:Entities:E%d:P%d", clonee->slot(), CLFECOMMON::PROPERTY_VPA);
 			const string propNameB = toString("SERVER:Entities:E%d:P%d", clonee->slot(), CLFECOMMON::PROPERTY_VPB);
 			const string propNameC = toString("SERVER:Entities:E%d:P%d", clonee->slot(), CLFECOMMON::PROPERTY_VPC);
-			CCDBNodeLeaf *leafA = CInterfaceManager::getInstance()->getDbProp(propNameA);
-			CCDBNodeLeaf *leafB = CInterfaceManager::getInstance()->getDbProp(propNameB);
-			CCDBNodeLeaf *leafC = CInterfaceManager::getInstance()->getDbProp(propNameC);
+			CCDBNodeLeaf *leafA = NLGUI::CDBManager::getInstance()->getDbProp(propNameA);
+			CCDBNodeLeaf *leafB = NLGUI::CDBManager::getInstance()->getDbProp(propNameB);
+			CCDBNodeLeaf *leafC = NLGUI::CDBManager::getInstance()->getDbProp(propNameC);
 			if (!leafA)
 			{
 				nlwarning("Can't find DB leaf %s", propNameA.c_str());
@@ -616,7 +616,7 @@ void CToolCreateEntity::updateAfterRender()
 		{
 			commitArray();
 			CTool::TSmartPtr hold(this);
-			getUI().runActionHandler("r2ed_create_entity", NULL, "PaletteId="+_PaletteId);
+			CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId="+_PaletteId);
 			return;
 		}
 		break;
@@ -821,11 +821,11 @@ class CAHR2EDToggleDrawArray : public IActionHandler
 		CCtrlBaseButton *but = dynamic_cast<CCtrlBaseButton *>(pCaller);
 		if (but)
 		{
-			im->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->setValueBool(but->getPushed());
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->setValueBool(but->getPushed());
 			CToolCreateEntity *tce = dynamic_cast<CToolCreateEntity *>(getEditor().getCurrentTool());
 			if (tce)
 			{
-				im->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + tce->getPaletteId());
+				CAHManager::getInstance()->runActionHandler("r2ed_create_entity", NULL, "PaletteId=" + tce->getPaletteId());
 			}
 		}
 	}

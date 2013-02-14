@@ -19,7 +19,7 @@
 #include "tool_pick.h"
 #include "instance.h"
 //
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 
 using namespace NLMISC;
