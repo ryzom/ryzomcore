@@ -25,7 +25,7 @@ namespace NLOLDGEORGES
 {
 
 
-// La classe CFormFile représente un fichier composé d'un ensemble de fiches représentés par des fiches CForm.
+// CFormFile class represents a file with a set of CForm sheets.
 class CFormFile  
 {
 public:
