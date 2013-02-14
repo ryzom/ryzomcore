@@ -1536,7 +1536,7 @@ uint32 CCharacter::tickUpdate()
 		nextUpdate = 8;
 	}
 
-	_AchievementsPlayer->tickUpdate();
+	//_AchievementsPlayer->tickUpdate();
 
 	return nextUpdate;
 } // tickUpdate //
