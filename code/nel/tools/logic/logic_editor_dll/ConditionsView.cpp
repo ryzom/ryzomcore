@@ -71,7 +71,7 @@ END_MESSAGE_MAP()
 
 
 // Creating Drag Image for a CTreeCtrl without images 
-// Contribution of Pål K Tønder on www.codeguru.com
+// Contribution of Pal K Tonder on www.codeguru.com
 // The method CreateDragImage is used during drag'n drop to create a drag image. The problem is that it only works for a CTreeCtrl with images.
 // The following method, CreateDragImageEx, checks whether the CTreeCtrl has a valid normal CImageList. If so, it just calls the standard CreateDragImage method and returns. 
 // If, on the other hand, no valid CImageList is found, a bitmap is created based on the size of item rect, and the item text is drawn into it. Then a CImageList is

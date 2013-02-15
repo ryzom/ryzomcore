@@ -19,19 +19,19 @@
 #include "stdpch.h"
 
 #include "action_handler_item.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_manager.h"
 #include "../sheet_manager.h"
 #include "dbctrl_sheet.h"
 #include "dbgroup_list_sheet.h"
-#include "group_editbox.h"
-#include "interface_expr.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/interface_expr.h"
 #include "player_trade.h"
 #include "../user_entity.h"
 #include "../net_manager.h"
-#include "group_menu.h"
+#include "nel/gui/group_menu.h"
 #include "../global.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
 
 //
 #include "game_share/inventories.h"
@@ -40,9 +40,9 @@
 #include "macrocmd_manager.h"
 #include "inventory_manager.h"
 
-#include "ctrl_base_button.h"
+#include "nel/gui/ctrl_base_button.h"
 #include "../connection.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 
 extern CSheetManager SheetMngr;
 extern NLMISC::CLog	g_log;
@@ -107,13 +107,13 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			// get the dialog stack
-			CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(WindowName) );
+			CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(WindowName) );
 
-			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-			CViewText* display = dynamic_cast<CViewText*>( pIM->getElementFromId(pIM->getDefine("edit_custom_display")) );
+			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+			CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
 			if (group && editShort && editBoxShort && editLarge && editBoxLarge && display)
 			{
 				CClientItemInfo const& itemInfo = getInventory().getItemInfo( ItemSlotId );
@@ -126,7 +126,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						editBoxLarge->setActive(true);
 
 						// Set the Keyboard focus to the editbox (after the enableModalWindow())
-						pIM->setCaptureKeyboard(editBoxLarge);
+						CWidgetManager::getInstance()->setCaptureKeyboard(editBoxLarge);
 						// Select all the text for easier selection
 						editBoxLarge->setSelectionAll();
 					}
@@ -144,7 +144,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						editBoxShort->setActive(true);
 
 						// Set the Keyboard focus to the editbox (after the enableModalWindow())
-						pIM->setCaptureKeyboard(editBoxShort);
+						CWidgetManager::getInstance()->setCaptureKeyboard(editBoxShort);
 						// Select all the text for easier selection
 						editBoxShort->setSelectionAll();
 					}
@@ -159,7 +159,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						string::size_type delimiter = text.find(' ');
 						if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 						{
-							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:web_transactions:content:html"));
+							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
 								pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
 							if (delimiter == string::npos)
@@ -197,16 +197,16 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			// get the dialog stack
-			CGroupContainer* group = dynamic_cast<CGroupContainer*>( pIM->getElementFromId(WindowName) );
+			CGroupContainer* group = dynamic_cast<CGroupContainer*>( CWidgetManager::getInstance()->getElementFromId(WindowName) );
 
-			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-			CViewText* display = dynamic_cast<CViewText*>( pIM->getElementFromId(pIM->getDefine("edit_custom_display")) );
-			CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_buttons")) );
-			CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( pIM->getElementFromId(pIM->getDefine("edit_custom_close_button")) );
-			CViewBitmap* background = dynamic_cast<CViewBitmap*>( pIM->getElementFromId(pIM->getDefine("edit_custom_background")) );
+			CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+			CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+			CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+			CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+			CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
+			CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_buttons")) );
+			CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_close_button")) );
+			CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_background")) );
 			if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 			{
 
@@ -239,7 +239,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							editBoxLarge->setActive(true);
 
 							// Set the Keyboard focus to the editbox
-							pIM->setCaptureKeyboard(editBoxLarge);
+							CWidgetManager::getInstance()->setCaptureKeyboard(editBoxLarge);
 							// Select all the text for easier selection
 							editBoxLarge->setSelectionAll();
 						}
@@ -258,7 +258,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							editBoxShort->setActive(true);
 
 							// Set the Keyboard focus to the editbox
-							pIM->setCaptureKeyboard(editBoxShort);
+							CWidgetManager::getInstance()->setCaptureKeyboard(editBoxShort);
 							// Select all the text for easier selection
 							editBoxShort->setSelectionAll();
 						}
@@ -297,7 +297,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 							string::size_type delimiter = text.find(' ');
 							if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 							{
-								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId("ui:interface:web_transactions:content:html"));
+								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 								if (pGH)
 									pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
 								if (delimiter == string::npos)
@@ -334,16 +334,16 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 		// hide the dialog
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// get the dialog stack
-		CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(windowName) );
+		CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(windowName) );
 
-		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-		CViewText* display = dynamic_cast<CViewText*>( pIM->getElementFromId(pIM->getDefine("edit_custom_display")) );
-		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_buttons")) );
-		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( pIM->getElementFromId(pIM->getDefine("edit_custom_close_button")) );
-		CViewBitmap* background = dynamic_cast<CViewBitmap*>( pIM->getElementFromId(pIM->getDefine("edit_custom_background")) );
+		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+		CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
+		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_buttons")) );
+		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_close_button")) );
+		CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_background")) );
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			// disable the window
@@ -373,16 +373,16 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// get the dialog stack
-		CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(windowName) );
+		CInterfaceGroup* group = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(windowName) );
 
-		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_short")) );
-		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_short")) );
-		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_large")) );
-		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_box_large")) );
-		CViewText* display = dynamic_cast<CViewText*>( pIM->getElementFromId(pIM->getDefine("edit_custom_display")) );
-		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(pIM->getDefine("edit_custom_edit_buttons")) );
-		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( pIM->getElementFromId(pIM->getDefine("edit_custom_close_button")) );
-		CViewBitmap* background = dynamic_cast<CViewBitmap*>( pIM->getElementFromId(pIM->getDefine("edit_custom_background")) );
+		CInterfaceGroup* editShort = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_short")) );
+		CGroupEditBox* editBoxShort = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_short")) );
+		CInterfaceGroup* editLarge = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_large")) );
+		CGroupEditBox* editBoxLarge = dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_box_large")) );
+		CViewText* display = dynamic_cast<CViewText*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_display")) );
+		CInterfaceGroup* editButtons = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_edit_buttons")) );
+		CCtrlBaseButton* closeButton = dynamic_cast<CCtrlBaseButton*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_close_button")) );
+		CViewBitmap* background = dynamic_cast<CViewBitmap*>( CWidgetManager::getInstance()->getElementFromId(CWidgetManager::getInstance()->getParser()->getDefine("edit_custom_background")) );
 		if (group && editShort && editBoxShort && editLarge && editBoxLarge && display && editButtons && closeButton && background)
 		{
 			bool textValid = editShort->getActive();
@@ -458,7 +458,7 @@ static void sendSwapItemMsg(const CDBCtrlSheet *pCSSrc, const CDBCtrlSheet *pCSD
 		if ((srcInvId == (uint16)INVENTORIES::guild) || (dstInvId == (uint16)INVENTORIES::guild))
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			nGuildSessionCounter = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+			nGuildSessionCounter = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 		}
 		out.serial(nGuildSessionCounter); // always serial to use the fixed-sized msg.xml scheme
 
@@ -479,8 +479,8 @@ static void displayQuantityPopup(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCt
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	// get the dialog stack
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId("ui:interface:stack_dialog") );
-	CGroupEditBox	*editBox= dynamic_cast<CGroupEditBox*>( pIM->getElementFromId("ui:interface:stack_dialog:edit:eb") );
+	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId("ui:interface:stack_dialog") );
+	CGroupEditBox	*editBox= dynamic_cast<CGroupEditBox*>( CWidgetManager::getInstance()->getElementFromId("ui:interface:stack_dialog:edit:eb") );
 	if(group && editBox)
 	{
 		// write all info for the modal
@@ -496,14 +496,14 @@ static void displayQuantityPopup(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCt
 		pCSSrc->copyAspect(&destSheet);
 
 		// init the editbox ctrl. init cur default to max
-		pIM->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->setValue32(availableStack);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->setValue32(availableStack);
 		editBox->setInputStringAsInt(availableStack);
 
 		// enable the modal
-		pIM->enableModalWindow(pCaller, group);
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 
 		// Set the Keyboard focus to the editbox (after the enableModalWindow())
-		pIM->setCaptureKeyboard(editBox);
+		CWidgetManager::getInstance()->setCaptureKeyboard(editBox);
 		// Select all the text for easier selection
 		editBox->setSelectionAll();
 	}
@@ -592,7 +592,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 			PlayerTrade.putItemInExchange(src, dest, quantitySrc);
 
 			// user changed the proposal => reset the local ACCEPTED db
-			pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 			// send msg to server
 			sendExchangeAddToServer((uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
@@ -612,7 +612,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 		PlayerTrade.restoreItem(exchangeSlot);
 
 		// user changed the proposal => reset the local ACCEPTED db
-		pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 		// send msg to server
 		CBitMemStream out;
@@ -702,7 +702,7 @@ static void validateStackItem(CDBCtrlSheet *pCSSrc, CDBCtrlSheet *pCSDst, sint32
 				PlayerTrade.putItemInExchange(pCSSrc, pCSDst, val);
 
 				// user changed the proposal => reset the local ACCEPTED db
-				pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+				NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 				// send msg to server
 				sendExchangeAddToServer((uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
@@ -723,7 +723,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string src = getParam(Params, "src");
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if ((pCSSrc == NULL) || (pCSDst == NULL)) return;
@@ -808,7 +808,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// get the value to drop
-		sint32	val= pIM->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->getValue32();
+		sint32	val= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:STACK_SELECTED:CUR_QUANTITY")->getValue32();
 		CDBCtrlSheet *pCSSrc = CurrentStackSrc;
 		CDBCtrlSheet *pCSDst = CurrentStackDst;
 		CurrentStackSrc= NULL;
@@ -828,7 +828,7 @@ public:
 	{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			CDBCtrlSheet *src = dynamic_cast<CDBCtrlSheet *>(pCaller);
-			CDBCtrlSheet *dest = dynamic_cast<CDBCtrlSheet *>(im->getCtrlLaunchingModal());
+			CDBCtrlSheet *dest = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 			if (src->getSheetId() == 0)
 			{
 				putExchangedItemToInventory(dest);
@@ -866,7 +866,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string src = getParam(Params, "src");
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
@@ -887,7 +887,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string src = getParam(Params, "src");
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
@@ -909,7 +909,7 @@ class CIsPlayerItem : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
-		CDBCtrlSheet *cs = CDBCtrlSheet::getDraggedSheet();
+		CDBCtrlSheet *cs = dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() );
 		if (cs)
 		{
 			CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
@@ -933,7 +933,7 @@ public:
 		string	src = getParam(Params, "src");
 		string	strTestEmpty= getParam(Params, "test_empty");
 		bool	testEmpty= strTestEmpty=="true";
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (!pCSSrc || !pCSDst) return;
@@ -1024,7 +1024,7 @@ class CCanDropToExchange : public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string	src = getParam(Params, "src");
-		CInterfaceElement *pElt = pIM->getElementFromId(src);
+		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst =    dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (!pCSSrc || !pCSDst) return;
@@ -1120,7 +1120,7 @@ public:
 	{
 		PlayerTrade.restoreAllItems();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->getDbProp("LOCAL:EXCHANGE:BEGUN")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:BEGUN")->setValue32(0);
 
 		if (!ClientCfg.Local)
 		{
@@ -1157,7 +1157,7 @@ public:
 		}
 		// user changed the proposal => reset the local ACCEPTED db
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 		// Send the msg
 		CBitMemStream out;
@@ -1317,10 +1317,10 @@ class CHandlerActiveSheath : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the user interface value.
-		uint8 activeSheath = (uint8)pIM->getDbProp( pIM->getDefine("ui_set_active") )->getValue32();
+		uint8 activeSheath = (uint8)NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("ui_set_active") )->getValue32();
 
 		// Write to the Local Database.
-		pIM->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->setValue32(activeSheath);
+		NLGUI::CDBManager::getInstance()->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->setValue32(activeSheath);
 
 		// Send to server
 		if(!ClientCfg.Local)
@@ -1355,10 +1355,10 @@ class CHandlerReceiveActiveSheath : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the user interface value.
-		uint8 activeSheath = (uint8)pIM->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->getValue32();
+		uint8 activeSheath = (uint8)NLGUI::CDBManager::getInstance()->getDbProp( "LOCAL:INVENTORY:ACTIVE_SHEATH" )->getValue32();
 
 		// Write to the Local Database.
-		pIM->getDbProp( pIM->getDefine("ui_set_active") )->setValue32(activeSheath);
+		NLGUI::CDBManager::getInstance()->getDbProp( CWidgetManager::getInstance()->getParser()->getDefine("ui_set_active") )->setValue32(activeSheath);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerReceiveActiveSheath, "receive_active_sheath" );
@@ -1489,7 +1489,7 @@ class CHandlerMoveItem : public IActionHandler
 				string sListId = getParam(sParams, "listsheet"+toString(nListIt));
 				while (!sListId.empty())
 				{
-					IListSheetBase *pLS = dynamic_cast<IListSheetBase*>(pIM->getElementFromId(sListId));
+					IListSheetBase *pLS = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(sListId));
 					if (pLS == NULL) return;
 					// search an empty slot where to put
 					sint32 nbelt = pLS->getNbSheet();
@@ -1498,7 +1498,7 @@ class CHandlerMoveItem : public IActionHandler
 						if (pLS->getSheet(i)->getSheetId() == 0)
 						{
 							// Send swap_item
-							pIM->runActionHandler("swap_item", pLS->getSheet(i), "src="+toString(pCaller->getId()));
+							CAHManager::getInstance()->runActionHandler("swap_item", pLS->getSheet(i), "src="+toString(pCaller->getId()));
 							return;
 						}
 					}
@@ -1550,7 +1550,7 @@ class CHandlerMoveItem : public IActionHandler
 			while (!sGrpId.empty())
 			{
 				uint i;
-				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(sGrpId));
+				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(sGrpId));
 				if (pIG != NULL)
 				{
 					// Get all the sheets of the group
@@ -1563,7 +1563,7 @@ class CHandlerMoveItem : public IActionHandler
 							(pCS->getSheetId() == 0) && pCS->canDropItem(item) && (!pCS->getGrayed()))
 						{
 							// Send swap_item
-							pIM->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
+							CAHManager::getInstance()->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
 							return;
 						}
 					}
@@ -1583,7 +1583,7 @@ class CHandlerMoveItem : public IActionHandler
 			while (!sGrpId.empty())
 			{
 				uint i;
-				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(sGrpId));
+				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(sGrpId));
 				if (pIG != NULL)
 				{
 					// Get all the sheets of the group
@@ -1597,7 +1597,7 @@ class CHandlerMoveItem : public IActionHandler
 							if ((pCS->canDropItem(item)) && (!pCS->getGrayed()))
 							{
 								// Send swap_item
-								pIM->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
+								CAHManager::getInstance()->runActionHandler("swap_item", pCS, "src="+toString(pCaller->getId()));
 								return;
 							}
 						}
@@ -1626,10 +1626,10 @@ class CHandlerDragNDrop : public IActionHandler
 		string sDst = getParam(sParams,"dst");
 		string sAH = getParam(sParams,"ah");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *pCSsrc = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(sSrc));
-		CDBCtrlSheet *pCSdst = dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(sDst));
+		CDBCtrlSheet *pCSsrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sSrc));
+		CDBCtrlSheet *pCSdst = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sDst));
 		if ((pCSdst == NULL) || (pCSsrc == NULL) || sAH.empty()) return;
-		pIM->runActionHandler(sAH, pCSdst, "src="+pCSsrc->getId());
+		CAHManager::getInstance()->runActionHandler(sAH, pCSdst, "src="+pCSsrc->getId());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerDragNDrop, "drag_n_drop" );
@@ -1657,7 +1657,7 @@ class CHandlerItemCristalEnchant : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("item_cristal_reload", pCaller, sParams);
+		CAHManager::getInstance()->runActionHandler("item_cristal_reload", pCaller, sParams);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemCristalEnchant, "item_cristal_enchant" );
@@ -1668,7 +1668,7 @@ class CHandlerItemCristalReload : public IActionHandler
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 
 		sendToServerEnchantMessage((uint8)pCS->getInventoryIndex(), (uint16)pCS->getIndexInDB());
@@ -1701,7 +1701,7 @@ void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	
 	// get the dialog stack
-	CInterfaceGroup* pMenu = dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId("ui:interface:item_menu_in_bag") );
+	CInterfaceGroup* pMenu = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag") );
 	if(!pMenu)	return;
 
 	const CItemSheet *pIS = ctrlSheet->asItemSheet();
@@ -1734,7 +1734,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 		uint i;
 
 		// Get the ctrl sheet that launched this menu
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 		INVENTORIES::TInventory		invId= (INVENTORIES::TInventory)pCS->getInventoryIndex();
 
@@ -1933,7 +1933,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(valid)
 			{
 				pEquip->setGrayed(
-					pIM->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_FABER")->getValueBool() &&
+					NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_FABER")->getValueBool() &&
 					pIS->Family!=ITEMFAMILY::ARMOR &&
 					pIS->Family!=ITEMFAMILY::JEWELRY
 					);
@@ -1943,8 +1943,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 		//Item Text Edition
 		if (pItemTextEdition != NULL && pItemTextDisplay != NULL)
 		{
-			pItemTextEdition->setGrayed(pIM->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
-			pItemTextDisplay->setGrayed(pIM->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
+			pItemTextEdition->setGrayed(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
+			pItemTextDisplay->setGrayed(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:ISACTIVE:PHRASE_EDIT_CUSTOM")->getValueBool());
 		}
 
 		if (pCS->getGrayed())
@@ -2039,7 +2039,7 @@ class CHandlerItemMenuBaseCheck : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the ctrl sheet that launched this menu
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 		INVENTORIES::TInventory		invId= (INVENTORIES::TInventory)pCS->getInventoryIndex();
 
@@ -2111,7 +2111,7 @@ class CHandlerTeleportUse : public IActionHandler
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 
 		// use the item
@@ -2143,7 +2143,7 @@ class CHandlerItemConsume : public IActionHandler
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 
 		// use the item
@@ -2171,7 +2171,7 @@ class CHandlerItemTextDisplay : public IActionHandler
 	{
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCSItem == NULL || windowName.empty()) 
 			return;
 
@@ -2188,7 +2188,7 @@ class CHandlerItemTextEdition : public IActionHandler
 	{
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCSItem == NULL || windowName.empty()) 
 			return;
 
@@ -2213,7 +2213,7 @@ class CHandlerXpCatalyserUse : public IActionHandler
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 
 		// use the item

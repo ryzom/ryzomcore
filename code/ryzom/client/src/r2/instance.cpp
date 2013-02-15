@@ -25,7 +25,8 @@
 //
 #include "../entities.h"
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
+#include "../interface_v3/lua_ihm_ryzom.h"
 //
 #include "displayer_visual_entity.h"
 
@@ -620,7 +621,7 @@ void CInstance::CToLua::executeHandler(const CLuaString &name, int numArgs)
 	//
 	static volatile bool dumpStackWanted = false;
 	if (dumpStackWanted) ls.dumpStack();
-	_Class[name].push();
+	_Class[ name.getStr().c_str() ].push();
 	if (ls.isNil(-1)) return; // not handled
 	if (dumpStackWanted) ls.dumpStack();
 	// put method before its args
@@ -631,7 +632,7 @@ void CInstance::CToLua::executeHandler(const CLuaString &name, int numArgs)
 	ls.insert(- numArgs - 1);
 	//
 	if (dumpStackWanted) ls.dumpStack();
-	CLuaIHM::executeFunctionOnStack(ls,  numArgs + 1,  0);
+	CLuaIHMRyzom::executeFunctionOnStack(ls,  numArgs + 1,  0);
 	if (dumpStackWanted) ls.dumpStack();
 }
 

@@ -24,10 +24,12 @@
 #include "macrocmd_manager.h"
 #include "dbgroup_list_sheet.h"
 
-#include "action_handler.h"
-#include "group_container.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_container.h"
 #include "../actions_client.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
+
+#include "interface_options_ryzom.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -137,7 +139,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainerWindows *pGCW = dynamic_cast<CGroupContainerWindows*>(pIM->getElementFromId("ui:interface:windows"));
+		CGroupContainerWindows *pGCW = dynamic_cast<CGroupContainerWindows*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:windows"));
 		if (pGCW == NULL) return;
 		pGCW->setShowDesktops(!pGCW->getShowDesktops());
 	}
@@ -154,13 +156,13 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId("ui:interface:gestion_windows"));
+		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));
 		if (pGC == NULL) return;
 		CActionsManager *pAM = &Actions;
 		const CActionsManager::TActionComboMap &acmap = pAM->getActionComboMap();
 
 
-		COptionsList *pOL = dynamic_cast<COptionsList*>(pIM->getOptions("gestion_windows_key_binding"));
+		COptionsList *pOL = dynamic_cast<COptionsList*>(CWidgetManager::getInstance()->getOptions("gestion_windows_key_binding"));
 		if (pOL == NULL) return;
 
 		for (uint i = 0; i < pOL->getNumParams(); ++i)
@@ -171,7 +173,7 @@ public:
 
 			CActionsManager::TActionComboMap::const_iterator it = acmap.find(CAction::CName("show_hide",sWin.c_str()));
 			string sFullTxt = string("ui:interface:gestion_windows:") + sTxt + ":key";
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(sFullTxt));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sFullTxt));
 			if (pVT != NULL)
 			{
 				if (it != acmap.end())

@@ -19,9 +19,9 @@
 #ifndef RY_VIEW_RADAR_H
 #define RY_VIEW_RADAR_H
 
-#include "view_base.h"
+#include "nel/gui/view_base.h"
 #include "nel/3d/u_texture.h"
-#include "view_renderer.h"
+#include "nel/gui/view_renderer.h"
 
 /**
  * class implementing a radar view
@@ -80,21 +80,24 @@ protected:
 private:
 	CRadarSpotDesc		_SpotDescriptions[NbRadarSpotIds];
 
-	class CDBMissionIconqObs : public ICDBNode::IPropertyObserver
+
+	class CDBMissionIconqObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode *node);
+		virtual void update( NLMISC::ICDBNode *node);
 		bool _displayMissionSpots;
 	};
 	CDBMissionIconqObs _MissionIconsObs;
 	
-	class CDBMiniMissionSpotsObs : public ICDBNode::IPropertyObserver
+	class CDBMiniMissionSpotsObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode *node);
+		virtual void update( NLMISC::ICDBNode *node);
 		bool _displayMiniMissionSpots;
+
 	};
 	CDBMiniMissionSpotsObs _MiniMissionSpotsObs;
+
 };
 
 #endif // RY_VIEW_RADAR_H

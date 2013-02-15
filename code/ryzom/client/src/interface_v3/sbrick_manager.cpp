@@ -128,11 +128,11 @@ void CSBrickManager::initInGame()
 	{
 		//get the known brick entries in the database
 		sprintf(buf,"SERVER:BRICK_FAMILY:%d:BRICKS",i);
-		_FamiliesBits[i] = pIM->getDbProp(buf);
+		_FamiliesBits[i] = NLGUI::CDBManager::getInstance()->getDbProp(buf);
 	}
 
 	// Add a branch observer on brick family
-	pIM->getDbBranch("SERVER:BRICK_FAMILY")->addBranchObserver(&_BrickFamilyObs);
+	NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:BRICK_FAMILY", &_BrickFamilyObs);
 }
 
 // ***************************************************************************
@@ -147,7 +147,7 @@ void CSBrickManager::uninitInGame()
 	}
 
 	// remove branch observer on brick family
-	CCDBNodeBranch	*branch= pIM->getDbBranch("SERVER:BRICK_FAMILY");
+	CCDBNodeBranch	*branch= NLGUI::CDBManager::getInstance()->getDbBranch("SERVER:BRICK_FAMILY");
 	if(branch)
 		branch->removeBranchObserver(&_BrickFamilyObs);
 }

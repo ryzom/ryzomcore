@@ -342,7 +342,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		std::string prevVersionFileName;
 		if (packageIndex.getFile(i).versionCount()==1)
 		{
-			prevVersionFileName= tmpnam(NULL);
+			prevVersionFileName= _RootDirectory + "empty";
 			NLMISC::COFile tmpFile(prevVersionFileName);
 			tmpFile.close();
 		}

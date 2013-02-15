@@ -1,0 +1,17 @@
+<widget>
+    <header>
+        <name>GroupHeader</name>
+        <guiname>CGroupHeader</guiname>
+        <ancestor>GroupList</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>header_max_size</name>
+            <type>int</type>
+            <default>32767</default>
+        </property>
+    </properties>
+</widget>

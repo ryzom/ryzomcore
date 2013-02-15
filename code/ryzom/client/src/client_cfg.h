@@ -757,7 +757,7 @@ struct CClientConfig
 	// LUA //
 	/////////
 
-	/// Allow Lua commands (commands begining with Lua)
+	/// Allow Lua commands (commands beginning with Lua)
 	bool			AllowDebugLua;
 	bool			LoadLuaDebugger;
 

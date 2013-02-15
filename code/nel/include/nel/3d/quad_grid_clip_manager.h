@@ -55,7 +55,7 @@ const NLMISC::CClassId		QuadGridClipManagerId=NLMISC::CClassId(0x1ffb079a, 0x6c5
 class CQuadGridClipManager : public CTransform
 {
 public:
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 public:

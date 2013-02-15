@@ -23,10 +23,12 @@
 #include "list_sheet_base.h"
 #include "dbctrl_sheet.h"
 
-
-// ***************************************************************************
-class	CCtrlBaseButton;
-class	CCtrlScroll;
+namespace NLGUI
+{
+	class CCtrlBaseButton;
+	class CCtrlScroll;
+	class CGroupContainer;
+}
 
 // ***************************************************************************
 /**
@@ -49,7 +51,7 @@ public:
 	virtual void checkCoords ();
 	virtual void draw ();
 	virtual void clearViews ();
-	virtual bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	// mod interface
 	void	changeNbRow(sint delta);
@@ -141,14 +143,14 @@ protected:
 
 
 	// branch of the DB
-	CCDBNodeBranch				*_DbBranch;
+	NLMISC::CCDBNodeBranch				*_DbBranch;
 	std::string					_DbBranchName;
 	// Branch observer
-	class CDBObs : public ICDBNode::IPropertyObserver
+	class CDBObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
 		CDBGroupListSheet		*Owner;
-		virtual void update(ICDBNode* /* node */)	{Owner->_BranchModified= true;}
+		virtual void update(NLMISC::ICDBNode* /* node */)	{Owner->_BranchModified= true;}
 	};
 	friend class CDBObs;
 	CDBObs						_DbBranchObs;
@@ -192,7 +194,7 @@ protected:
 	}
 
 	// For animals only
-	CCDBNodeLeaf				*_AnimalStatus;
+	NLMISC::CCDBNodeLeaf				*_AnimalStatus;
 	sint32						_CacheAnimalStatus;
 
 	// For sectionnable purpose

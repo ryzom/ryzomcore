@@ -175,7 +175,7 @@ bool CToolMaintainedAction::onMouseLeftButtonClicked()
 	CGroupMap *gm = CTool::isMouseOnWorldMap();
 	if (gm)
 	{
-		if (getUI().getCapturePointerLeft())
+		if (CWidgetManager::getInstance()->getCapturePointerLeft())
 		{
 			return false;
 		}

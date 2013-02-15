@@ -24,11 +24,18 @@
 
 #include "game_share/chat_group.h"
 
+
+namespace NLGUI
+{
+	class CCtrlBase;
+	class CViewText;
+	class CGroupList;
+	class CGroupEditBox;
+	class CGroupContainer;
+	class CCtrlTabButton;
+}
+
 class CChatWindow;
-class CGroupContainer;
-class CGroupEditBox;
-class CCtrlBase;
-class CViewText;
 
 /** Interface to react to a chat box entry
   * Derivers should define the msgEntered member function to handle entry event.
@@ -114,9 +121,9 @@ public:
 	/** Get the container associated with this chat window
 	  * NB : you should not change the name of the window ! Use rename instead
 	  */
-	CGroupContainer     *getContainer() const { return _Chat; }
+	NLGUI::CGroupContainer     *getContainer() const { return _Chat; }
 	//
-	CGroupEditBox       *getEditBox() const;
+	NLGUI::CGroupEditBox       *getEditBox() const;
 	/** try to rename the chat window
 	  * \return true if success
 	  */
@@ -156,8 +163,8 @@ protected:
 	virtual ~CChatWindow();
 protected:
 	IChatWindowListener *_Listener;
-	NLMISC::CRefPtr<CGroupContainer> _Chat;
-	CGroupEditBox		*_EB;
+	NLMISC::CRefPtr<NLGUI::CGroupContainer> _Chat;
+	NLGUI::CGroupEditBox		*_EB;
 	bool 				 _ParentBlink;
 	static CChatWindow  *_ChatWindowLaunchingCommand;
 	std::vector<IObserver *> _Observers;
@@ -185,7 +192,7 @@ public:
 	void setTabIndex(sint32 n);
 
 	// Free Teller
-	CGroupContainer *createFreeTeller(const ucstring &winName, const std::string &winColor="");
+	NLGUI::CGroupContainer *createFreeTeller(const ucstring &winName, const std::string &winColor="");
 	void setActiveFreeTeller(const ucstring &winName, bool bActive=true);
 	ucstring getFreeTellerName(const std::string &containerID);
 	bool removeFreeTeller(const std::string &containerID); // Return true if free teller found
@@ -199,10 +206,10 @@ public:
 protected:
 	friend class CChatWindowManager;
 
-	std::vector<CGroupContainer*>	_FreeTellers;
+	std::vector<NLGUI::CGroupContainer*>	_FreeTellers;
 
-	void	getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, class CGroupList *&gl, class CCtrlTabButton *&tab);
-	void    updateFreeTellerHeader(CGroupContainer &ft);
+	void	getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, NLGUI::CGroupList *&gl, NLGUI::CCtrlTabButton *&tab);
+	void    updateFreeTellerHeader(NLGUI::CGroupContainer &ft);
 
 private:
 	/** Get a valid string to use like ui id
@@ -240,7 +247,7 @@ public:
 	// Remove a chat window by its pointer
 	void		 removeChatWindow(CChatWindow *cw);
 	/// from a ctrl of a chat box that triggered a menu, or an event, retrieve the associated chat box
-	CChatWindow *getChatWindowFromCaller(CCtrlBase *caller);
+	CChatWindow *getChatWindowFromCaller(NLGUI::CCtrlBase *caller);
 	// Singleton pattern applied to the chat window manager
 	static CChatWindowManager &getInstance();
 	// try to rename a window

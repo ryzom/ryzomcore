@@ -276,7 +276,7 @@ void CContextSound::init()
 				if (i == _BaseName.size())
 				{
 					// The base name is ok, check that the next char is a digit (avoid conflit if some
-					// sound have a longeur base name with same begining)
+					// sound have a longeur base name with same beginning)
 					if (soundName[i] >= '0' && soundName[i] <= '9')
 						_ContextSounds->addSound(CAudioMixerUser::instance()->getSoundId(*first), _BaseName);
 				}

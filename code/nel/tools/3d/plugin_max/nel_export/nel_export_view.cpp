@@ -714,7 +714,7 @@ void CNelExport::viewMesh (TimeValue time)
 		// Delete the pointer
 		IObjectViewer::releaseInterface (view);
 
-		// Collisions informations are no more used.
+		// Collisions information are no more used.
 		delete slInfo.RetrieverBank;
 		delete slInfo.GlobalRetriever;
 	}

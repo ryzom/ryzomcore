@@ -20,11 +20,11 @@
 #include "dbgroup_list_sheet_trade.h"
 #include "interface_manager.h"
 #include "inventory_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../sheet_manager.h"
-#include "ctrl_button.h"
-#include "view_text.h"
-#include "action_handler.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/view_text.h"
+#include "nel/gui/action_handler.h"
 #include "sphrase_manager.h"
 #include "game_share/time_weather_season/time_and_season.h"
 #include "game_share/pvp_clan.h"
@@ -55,7 +55,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 	{
 		// Basic quality
 		string	db= Ctrl->getSheet()+":QUALITY";
-		if( pIM->getDbProp(db, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(db, false) )
 			CurrentQuality.link ( db.c_str() );
 		else
 		{
@@ -69,7 +69,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 	{
 		// Basic quantity
 		string	db= Ctrl->getSheet()+":QUANTITY";
-		if( pIM->getDbProp(db, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(db, false) )
 			CurrentQuantity.link ( db.c_str() );
 		else
 		{
@@ -84,7 +84,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 	{
 		// Basic price
 		string	priceDB= Ctrl->getSheet()+":PRICE";
-		if( pIM->getDbProp(priceDB, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(priceDB, false) )
 			CurrentPrice.link ( priceDB.c_str() );
 		else
 		{
@@ -95,7 +95,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 
 		// Faction Type
 		string	factionTypeDB= Ctrl->getSheet()+":FACTION_TYPE";
-		if( pIM->getDbProp(factionTypeDB, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(factionTypeDB, false) )
 			CurrentFactionType.link ( factionTypeDB.c_str() );
 		else
 		{
@@ -106,7 +106,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 
 		// Faction Point Price
 		string	factionPointPriceDB= Ctrl->getSheet()+":PRICE";
-		if( pIM->getDbProp(factionPointPriceDB, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(factionPointPriceDB, false) )
 			CurrentFactionPointPrice.link ( factionPointPriceDB.c_str() );
 		else
 		{
@@ -121,7 +121,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 	{
 		// seller type
 		string	db= Ctrl->getSheet()+":SELLER_TYPE";
-		if( pIM->getDbProp(db, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(db, false) )
 			CurrentSellerType.link ( db.c_str() );
 		else
 		{
@@ -132,7 +132,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 
 		// Retire price (only valid if sellerType is User or ResaleAndUser)
 		db= Ctrl->getSheet()+":PRICE_RETIRE";
-		if( pIM->getDbProp(db, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(db, false) )
 			CurrentPriceRetire.link ( db.c_str() );
 		else
 		{
@@ -143,7 +143,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 
 		// Resale Time Left (only valid if sellerType is User or ResaleAndUser)
 		db= Ctrl->getSheet()+":RESALE_TIME_LEFT";
-		if( pIM->getDbProp(db, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(db, false) )
 			CurrentResaleTimeLeft.link ( db.c_str() );
 		else
 		{
@@ -154,7 +154,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::init(CDBGroupListSheetText *pFath
 
 		// VendorNameId
 		db= Ctrl->getSheet()+":VENDOR_NAMEID";
-		if( pIM->getDbProp(db, false) )
+		if( NLGUI::CDBManager::getInstance()->getDbProp(db, false) )
 			CurrentVendorNameId.link ( db.c_str() );
 		else
 		{
@@ -370,7 +370,7 @@ void CDBGroupListSheetTrade::CSheetChildTrade::updateViewText(CDBGroupListSheetT
 					// check if we should apply fame factor
 					if( zeFather->applyFamePriceFactor() )
 					{
-						priceFactor = CInterfaceManager::getInstance()->getDbProp("SERVER:TRADING:FAME_PRICE_FACTOR")->getValue16()/10000.0f;
+						priceFactor = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:FAME_PRICE_FACTOR")->getValue16()/10000.0f;
 					}
 
 					// display with correct format
@@ -615,7 +615,7 @@ CDBGroupListSheetTrade::CDBGroupListSheetTrade(const TCtorParam &param)
 	_ApplyFamePriceFactor = false;
 
 	// **** keep link to fame price factor leaf
-	_FamePriceFactorLeaf = CInterfaceManager::getInstance()->getDbProp("SERVER:TRADING:FAME_PRICE_FACTOR");
+	_FamePriceFactorLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TRADING:FAME_PRICE_FACTOR");
 	_LastFamePriceFactor = _FamePriceFactorLeaf->getValue16();
 }
 // ***************************************************************************

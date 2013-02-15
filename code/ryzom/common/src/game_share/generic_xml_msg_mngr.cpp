@@ -20,7 +20,7 @@
 
 #include "generic_xml_msg_mngr.h"
 #include "nel/misc/file.h"
-#include "xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 using namespace std;
 using namespace NLMISC;

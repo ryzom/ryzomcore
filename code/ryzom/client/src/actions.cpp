@@ -59,7 +59,7 @@ void CAction::runAction ()
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 	if (IM)
 	{
-		IM->runActionHandler (Name.Name, NULL, Name.Argu);
+		CAHManager::getInstance()->runActionHandler (Name.Name, NULL, Name.Argu);
 	}
 }
 
@@ -747,11 +747,20 @@ const CActionsManager::CCategoryLocator *CActionsManager::getActionLocator (cons
 	while ((ite != _ActionCategory.end ()) && (ite->first == name.Name))
 	{
 		// Ref on the base action
-		const CBaseAction &baseAction = _Categories[ite->second.CategoryId].BaseActions[ite->second.BaseActionId];
+		const CCategory &cat = _Categories[ite->second.CategoryId];
+		uint baseActionId = ite->second.BaseActionId;
+		uint baseActionSize = cat.BaseActions.size();
+
+		if( ite->second.BaseActionId >= cat.BaseActions.size() )
+			return NULL;
+
+		const CBaseAction &baseAction = cat.BaseActions[ite->second.BaseActionId];
 
 		// Check parameters
 		uint i;
-		for (i=0; i<baseAction.Parameters.size (); i++)
+		uint s = baseAction.Parameters.size();
+
+		for (i=0; i<s; i++)
 		{
 			bool parameterOk = false;
 			const CBaseAction::CParameter &parameter = baseAction.Parameters[i];

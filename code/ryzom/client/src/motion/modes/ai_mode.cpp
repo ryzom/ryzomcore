@@ -99,7 +99,7 @@ void CUserControls::aiMode()
 	}
 	if( EventsListener.isMouseButtonReleased (leftButton) )
 	{
-		if(T1 <= _LeftClickEnd+IM->getUserDblClickDelay())
+		if(T1 <= _LeftClickEnd + CWidgetManager::getInstance()->getUserDblClickDelay())
 		{
 			dblClickLeft = true;
 		}
@@ -114,7 +114,7 @@ void CUserControls::aiMode()
 	}
 	if( EventsListener.isMouseButtonReleased (rightButton) )
 	{
-		if(T1 <= _RightClickEnd+IM->getUserDblClickDelay())
+		if(T1 <= _RightClickEnd + CWidgetManager::getInstance()->getUserDblClickDelay())
 		{
 			dblClickRight = true;
 		}
@@ -141,16 +141,16 @@ void CUserControls::aiMode()
 		}
 
 		// Give back the mouse handling to the interface.
-		IM->enableMouseHandling(true);
+		CWidgetManager::getInstance()->enableMouseHandling(true);
 	}
 	else if (EventsListener.isMouseButtonDown (rightButton))
 	{
 		if((T1-_RightClickStart) > _TimeLongClick)
 		{
-			IM->enableMouseHandling(false);
+			CWidgetManager::getInstance()->enableMouseHandling(false);
 			EventsListener.enableMouseSmoothing(true);
 			// Get the cursor instance and hide.
-			CViewPointer *cursor = IM->getPointer();
+			CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 			if(cursor)
 			{
 				// Freelook mode.

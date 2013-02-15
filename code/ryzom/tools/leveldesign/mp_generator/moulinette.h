@@ -44,16 +44,14 @@ enum
 								// You'll have to look deeper into code
 };
 
-// Contient la description d'une Craft Part
-// ainsi que les différentes caracteristiques
-// qu'elle concerne
+// Contains Craft Part description and different stats related
 struct CraftPart
 {
 	CSString Desc;
 	bool Carac[NumMPStats];
 };
 
-// Caractéristiques d'une MP relatives au craft
+// Raw mats stats for craft
 struct MPCraftStats
 {
 	CSString Craft;
@@ -72,7 +70,7 @@ struct MPCraftStats
 	}
 };
 
-// Permet de trier des chaines de caractères
+// Allows to sort strings
 struct ItemSort : public std::less<NLMISC::CSString> 
 { 
 	bool operator()( const NLMISC::CSString& x, const NLMISC::CSString& y ) const 
@@ -82,8 +80,7 @@ struct ItemSort : public std::less<NLMISC::CSString>
 };
 typedef set<CSString, ItemSort> CSortedStringSet;
 
-// Decrit un des items générés 
-// pour une MP de créature
+// Describe a item generated for a creature raw mat
 struct CreatureMPItem
 {
 	char eco;
@@ -108,20 +105,19 @@ public:
 };
 
 //////////////////////////////////
-//      VARIABLES GLOBALES      //
+//      GLOBAL VARIABLES        //
 //////////////////////////////////
 
-// Liste des différentes Craft parts
+// Craft parts list
 CraftPart craftParts[NumMPCraftParts];
 
-// Liste des fichiers .creature
+// .creature files list
 map<string, string>	creatureFiles;
 
-// noms générés pour chaque item
+// generated names for each item
 CSortedStringSet itemNames;
 
-// Liste des items à generer 
-// pour chaque code de créature
+// Items list to generate for each creature code
 map<CSString, ListeCreatureMP> itemsAGenerer;
 
 // MP Family list
@@ -136,7 +132,7 @@ public:
 std::vector<CMPFamily>			MPFamilies;
 
 
-// chemin des différents repertoires
+// directories pathes
 CSString LEVEL_DESIGN_PATH;
 CSString TRANSLATION_PATH;
 	

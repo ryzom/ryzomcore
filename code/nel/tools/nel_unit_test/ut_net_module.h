@@ -2880,16 +2880,16 @@ public:
 	{
 		NLNET::TParsedCommandLine	mif;
 
-		string	paramString = " a=1   b=2   ( b=1) "; 
+		string	paramString = " a=1   b=2   ( b=1) ";
 		TEST_ASSERT(!mif.parseParamList(paramString));
 
-		paramString = " lswkd ,fpqoj(( çruq fzemfwijf ujr wmozejifp_zujf woijpç_u ' "; 
+		paramString = " lswkd ,fpqoj(( cruq fzemfwijf ujr wmozejifp_zujf woijpc_u ' ";
 		TEST_ASSERT(!mif.parseParamList(paramString));
 
-		paramString = "a ( b=2"; 
+		paramString = "a ( b=2";
 		TEST_ASSERT(!mif.parseParamList(paramString));
 
-		paramString = "a  b=2)"; 
+		paramString = "a  b=2)";
 		TEST_ASSERT(!mif.parseParamList(paramString));
 
 		paramString = "a  b=2\"toto\"";

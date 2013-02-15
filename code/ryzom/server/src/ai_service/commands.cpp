@@ -2513,10 +2513,10 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 	log.displayNL("value means the number of attacker sensitivity of the bot, equals to zero means the bot never mind the number of attackers on the target");
 
 	log.displayNL("- ScoreModulator     [0 1]:   %f score>ScoreModulator",	sheet->ScoreModulator());
-	log.displayNL("value means the minimum value (treshold) needed for the bot to attack, 0 means always, 1 never (also impossible)");
+	log.displayNL("value means the minimum value (threshold) needed for the bot to attack, 0 means always, 1 never (also impossible)");
 	
 	log.displayNL("- FearModulator      [0 1]:   %f score>FearModulator",	sheet->FearModulator());
-	log.displayNL("value means the minimum value (treshold) needed for the bot to flee, 0 means always, 1 never (also impossible)");
+	log.displayNL("value means the minimum value (threshold) needed for the bot to flee, 0 means always, 1 never (also impossible)");
 	
 	log.displayNL("- LifeLevelModulator [0 1]:   %f value=LifeLevelModulator*lifeCoef+(1.f-LifeLevelModulator)*levelCoef",	sheet->LifeLevelModulator());
 	log.displayNL("value means the ratio between the life and level ratio, 1 means life is only take in count, 0 means level only take in count");
@@ -2545,10 +2545,10 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 // value means the number of attacker sensitivity of the bot, equals to zero means the bot never mind the number of attackers on the target
 // 
 // - ScoreModulator     [0 1]:   score>ScoreModulator
-// value means the minimum value (treshold) needed for the bot to attack, 0 means always, 1 never (also impossible)
+// value means the minimum value (threshold) needed for the bot to attack, 0 means always, 1 never (also impossible)
 // 
 // - FearModulator      [0 1]:   score>FearModulator
-// value means the minimum value (treshold) needed for the bot to flee, 0 means always, 1 never (also impossible)
+// value means the minimum value (threshold) needed for the bot to flee, 0 means always, 1 never (also impossible)
 // 
 // - LifeLevelModulator [0 1]:   value=LifeLevelModulator*lifeCoef+(1.f-LifeLevelModulator)*levelCoef
 // value means the ratio between the life and level ratio, 1 means life is only take in count, 0 means level only take in count

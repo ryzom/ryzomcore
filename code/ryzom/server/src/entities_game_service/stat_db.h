@@ -30,7 +30,7 @@ class CFileDescription;
 /**
  * This class collects leaves and furnishes their persistent data for backup
  * 
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
@@ -63,7 +63,7 @@ private:
 /**
  * This class collects all leaves and furnishes the message data for MFS init
  * 
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
@@ -83,7 +83,7 @@ private:
 /**
  * This class displays a node of SDB
  * 
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */

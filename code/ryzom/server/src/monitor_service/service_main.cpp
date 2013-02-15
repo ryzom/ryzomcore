@@ -582,7 +582,7 @@ bool CMonitorService::update ()
 		if (var && (var->Type == CConfigFile::CVar::T_INT))
 			count = var->asInt();
 
-		// Loop to the begining
+		// Loop to the beginning
 		if (primitiveToUpdate >= Entites.size())
 			primitiveToUpdate = 0;
 
@@ -687,7 +687,7 @@ bool CMonitorService::update ()
 			// Next primitive
 			primitiveToUpdate++;
 
-			// Loop to the begining
+			// Loop to the beginning
 			if (primitiveToUpdate >= Entites.size())
 				primitiveToUpdate = 0;
 

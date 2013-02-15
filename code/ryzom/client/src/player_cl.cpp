@@ -495,7 +495,7 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 	}
 
 	/* If the object is sticked (ie not a skin), decide to delete the Current instance. Why? because the animation
-		is changed according to the equiped item.
+		is changed according to the equipped item.
 
 		Hence, For example, if a sword would be changed for a gun, then the new gun animation would take place,
 		while Keeping the old sword shape. BAD.
@@ -673,7 +673,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	}
 
 	// update title when gender changed
-	const ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, _Gender == GSGENDER::female));
+	const ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw,_Gender == GSGENDER::female));
 	if (!replacement.empty() || !ClientCfg.DebugStringManager)
 	{
 		// Get extended name
@@ -683,7 +683,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		// display the new title in player interface
 		if (_Slot == 0)
 		{
-			CViewText *pVT = dynamic_cast<CViewText*>(IM->getElementFromId("ui:interface:player:header_opened:player_title"));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
 			if (pVT != NULL) pVT->setText(_Title);
 		}
 
@@ -844,9 +844,9 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		sint64 vB, vC;
 		string propName;
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPB);
-		vB = IM->getDbProp(propName)->getValue64();
+		vB = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPC);
-		vC = IM->getDbProp(propName)->getValue64();
+		vC = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		updateVisualPropertyVpb(0, vB);
 		updateVisualPropertyVpc(0, vC);
 
@@ -1015,7 +1015,7 @@ void CPlayerCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &gameCycle,
 	if(isTarget())
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDB= pIM->getDbProp("UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE");
+		CCDBNodeLeaf *pDB= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE");
 		if(pDB)
 		{
 			sint32	val= pDB->getValue32();
@@ -1265,7 +1265,7 @@ void CPlayerCL::load()	// virtual
 	if(!_WaitForAppearance)
 	{
 		// Visual properties A
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);	// Vpa udapte vpb and vpc too.
 	}
 }// load //
@@ -1360,5 +1360,4 @@ void CPlayerCL::computePrimitive()
 	// Set the position.
 	pacsPos(pos());
 }// computePrimitive //
-
 

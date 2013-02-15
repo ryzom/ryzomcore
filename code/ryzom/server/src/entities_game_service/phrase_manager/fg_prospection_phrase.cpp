@@ -736,7 +736,7 @@ uint CFgProspectionPhrase::generateSources( CCharacter *player )
 	pos.z = 0; // to keep consistency with deposit maps
 	bool fromNeighbourhood;
 	fromNeighbourhood = (_ForageRange < 3.0f);
-	if ( (_ForageRange < 3.0f) && (_ForageAngle < 0.35) ) // <21°
+	if ( (_ForageRange < 3.0f) && (_ForageAngle < 0.35) ) // <21 degrees
 		_NbAttempts = 1;
 
 	// Get weather

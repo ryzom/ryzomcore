@@ -33,7 +33,7 @@ namespace NLQT
 
 /**
 @class CEditRangeUIntWidget
-@brief The widget provides a horizontal slider and 3 QSpinBox(to set start/end value range and сurrent value from this range.).
+@brief The widget provides a horizontal slider and 3 QSpinBox(to set start/end value range and current value from this range.).
 @details Slider sets the uint32 value within a specified range (start/end QSpinBox).
 The values range can be set through the class methods: setRange() or setRangeMin(), setRangeMax().
 Or the user input values in the widgets start/end QSpinBox.
@@ -120,7 +120,7 @@ private:
 
 /**
 @class CEditRangeIntWidget
-@brief The widget provides a horizontal slider and 3 QSpinBox(to set start/end value range and сurrent value from this range.).
+@brief The widget provides a horizontal slider and 3 QSpinBox(to set start/end value range and current value from this range.).
 @details Slider sets the sint32 value within a specified range (start/end QSpinBox).
 The values range can be set through the class methods: setRange() or setRangeMin(), setRangeMax().
 Or the user input values in the widgets start/end QSpinBox.
@@ -207,7 +207,7 @@ private:
 
 /**
 @class CEditRangeFloatWidget
-@brief The widget provides a horizontal slider and 3 QDoubleSpinBox(to set start/end value range and сurrent value from this range.).
+@brief The widget provides a horizontal slider and 3 QDoubleSpinBox(to set start/end value range and current value from this range.).
 @details Slider sets the float value within a specified range (start/end QDoubleSpinBox).
 The values range can be set through the class methods: setRange() or setRangeMin(), setRangeMax().
 Or the user input values in the widgets start/end QDoubleSpinBox.

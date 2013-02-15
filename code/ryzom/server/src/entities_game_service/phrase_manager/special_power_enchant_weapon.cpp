@@ -59,11 +59,11 @@ void CSpecialPowerEnchantWeapon::apply()
 	
 	// Test some cases that should be avoided on client (so don't bother adding an error message)
 	
-	// If we have no equiped item
+	// If we have no equipped item
 	if (inv->getSlotCount()<=0)
 		return;
 	
-	// If equiped item is invalid
+	// If equipped item is invalid
 	CGameItemPtr item = inv->getItem(0);
 	if (item == NULL)
 		return;

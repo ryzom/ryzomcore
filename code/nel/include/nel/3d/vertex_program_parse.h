@@ -188,7 +188,7 @@ public:
 	  * \warning: Only syntax is checked. It doesn't check that a register has been initialised before use.
 	  * \param src The input text of a vertex program, in OpenGL format.
 	  * \param result The result program.
-	  * \param errorOuput If parsing failed, contains the reason
+	  * \param errorOutput If parsing failed, contains the reason
 	  * \result true if the parsing succeeded
 	  */
 	bool parse(const char *src, TProgram &result, std::string &errorOutput);

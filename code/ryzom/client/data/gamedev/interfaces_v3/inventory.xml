@@ -254,7 +254,7 @@
                                                                 oncandrop="inv_can_drop" ondrop="inv_drop"
                                                                 item_slot="LEFT_HAND" value="%hand_l" other_hand_slot="handr" auto_grayed="false" />
         
-                        <! - Must update some things when the item equiped change - >
+                        <! - Must update some things when the item equipped change - >
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:SHEET)" action="phrase_update_from_hand" />
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:QUALITY)" action="phrase_update_from_hand" />
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:ENCHANT)" action="phrase_update_from_hand" />
@@ -1114,7 +1114,7 @@
             other_hand_slot="handr"
             auto_grayed="false"
             tooltip_parent="win" />
-      <!-- Must update some things when the item equiped change -->
+      <!-- Must update some things when the item equipped change -->
       <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:SHEET)"
             action="phrase_update_from_hand" />
       <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:QUALITY)"

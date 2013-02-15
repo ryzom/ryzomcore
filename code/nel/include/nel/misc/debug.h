@@ -478,7 +478,7 @@ do { \
 
 #endif // NL_NO_DEBUG
 
-#define nlunreferenced(identifier) (identifier)
+#define nlunreferenced(identifier) (void)identifier
 
 #define nlstop \
 do { \

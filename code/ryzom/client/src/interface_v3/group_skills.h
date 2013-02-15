@@ -20,8 +20,8 @@
 #define NL_GROUP_SKILLS_H
 
 #include "nel/misc/types_nl.h"
-#include "interface_group.h"
-#include "group_tree.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/group_tree.h"
 
 // ***************************************************************************
 /** A Group that display all skills by category in a job
@@ -51,10 +51,10 @@ private:
 private:
 
 	// observer to know that skills are modified
-	struct CSkillsObs : public ICDBNode::IPropertyObserver
+	struct CSkillsObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 		CGroupSkills *Owner;
-		virtual void update (ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node);
 	} _SkillsObs;
 	friend struct CSkillsObs;
 

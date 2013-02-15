@@ -4480,7 +4480,7 @@ bool CheckTri (const Point3& pos0, const Point3& pos1, const Point3& pos2, const
 	if ((plane*pos)<0.f)
 		return false;
 
-	// Derrière ?
+	// Behind ?
 	if ((dir*(center-pos))<0.f)
 		return false;
 

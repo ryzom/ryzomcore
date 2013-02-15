@@ -152,7 +152,7 @@ public:
 	sint8		HairType;	  // 0 - 3
 	sint8		HairColor;	  // 0 - 5
 
-	// color for equipement slots (Only for pre-equiped perso created with sheet)
+	// color for equipement slots (Only for pre-equipped perso created with sheet)
 	sint8		JacketColor;
 	sint8		TrousersColor;
 	sint8		HatColor;
@@ -258,7 +258,7 @@ public:
 		f.serial( EyesColor );	  // 0 - 7
 		f.serial( Tattoo );		  // 0 = neutral, 1 - 64 Tattoo
 
-		// color for equipement slots (Only for pre-equiped perso created with sheet)
+		// color for equipement slots (Only for pre-equipped perso created with sheet)
 		f.serial( JacketColor );
 		f.serial( TrousersColor );
 		f.serial( HatColor );
@@ -307,7 +307,7 @@ public:
 		f.serial( EyesColor );	  // 0 - 7
 		f.serial( Tattoo );		  // 0 = neutral, 1 - 15 Tattoo
 
-		// color for equipement slots (Only for pre-equiped perso created with sheet)
+		// color for equipement slots (Only for pre-equipped perso created with sheet)
 		f.serial( JacketColor );
 		f.serial( TrousersColor );
 		f.serial( HatColor );

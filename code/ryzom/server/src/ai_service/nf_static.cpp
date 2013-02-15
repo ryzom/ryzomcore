@@ -981,7 +981,7 @@ Arguments: s(phraseName),s(phraseContent) ->
 @param[in] phraseContent is the text associated with the phrase
 
 @code
-()setSimplePhrase("HELLO", "Salut, ca va ?"); // équivalent à "HELLO(){[Salut, ca va ?]}"
+()setSimplePhrase("HELLO", "Hi, how are you?"); // equivalent to "HELLO(){[Hi, how are you?]}"
 @endcode
 
 */

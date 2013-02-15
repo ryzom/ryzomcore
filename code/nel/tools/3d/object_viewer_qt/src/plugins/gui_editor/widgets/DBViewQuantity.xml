@@ -1,0 +1,29 @@
+<widget>
+    <header>
+        <name>DBViewQuantity</name>
+        <guiname>CDBViewQuantity</guiname>
+        <ancestor>ViewText</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>value</name>
+            <type>string</type>
+            <default></default>
+        </property>
+        <property>
+            <name>valuemax</name>
+            <type>string</type>
+            <default></default>
+        </property>
+        <property>
+            <name>emptytext</name>
+            <type>string</type>
+            <default></default>
+        </property>
+
+
+    </properties>
+</widget>

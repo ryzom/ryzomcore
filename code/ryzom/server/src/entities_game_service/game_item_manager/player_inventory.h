@@ -381,7 +381,7 @@ private:
 /**
  * CCharacterInvView
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date February 2005
  */

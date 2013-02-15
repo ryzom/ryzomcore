@@ -23,6 +23,10 @@
 #include "game_share/inventories.h"
 #include "game_share/scores.h"
 
+namespace NLMISC{
+	class CCDBNodeLeaf;
+}
+
 
 // ***************************************************************************
 /**
@@ -214,12 +218,12 @@ private:
 		CBarInfo	BarInfo;
 
 		// Connection input (used only for TargetType, TeamMemberType and AnimalType)
-		class CCDBNodeLeaf	*UIDIn;
-		class CCDBNodeLeaf	*PresentIn;		// if not NULL, this is an additional test: if(PresentIn->getValue()==0) => not present
-		class CCDBNodeLeaf	*ScoreIn[SCORES::NUM_SCORES];
+		NLMISC::CCDBNodeLeaf	*UIDIn;
+		NLMISC::CCDBNodeLeaf	*PresentIn;		// if not NULL, this is an additional test: if(PresentIn->getValue()==0) => not present
+		NLMISC::CCDBNodeLeaf	*ScoreIn[SCORES::NUM_SCORES];
 
 		// Connection output
-		class CCDBNodeLeaf	*ScoreOut[SCORES::NUM_SCORES];
+		NLMISC::CCDBNodeLeaf	*ScoreOut[SCORES::NUM_SCORES];
 
 	public:
 		CBarDataEntry();
@@ -258,11 +262,11 @@ private:
 		// last score get from impulse USER:BARS
 		sint32	Score;
 		// input DB value, to get the current MAX
-		class CCDBNodeLeaf	*DBInMax;
+		NLMISC::CCDBNodeLeaf	*DBInMax;
 		// output DB to store the real value, but clamped to 0
-		class CCDBNodeLeaf	*DBOutVal;
+		NLMISC::CCDBNodeLeaf	*DBOutVal;
 		// output DB to store the ratio -1024,1024 value
-		class CCDBNodeLeaf	*DBOutRatio;
+		NLMISC::CCDBNodeLeaf	*DBOutRatio;
 		CUserScore()
 		{
 			Score= 0;

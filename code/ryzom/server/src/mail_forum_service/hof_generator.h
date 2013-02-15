@@ -27,7 +27,7 @@
  * It parses all the 'HoF Data Template' files (.hdt)
  * and generates data in PHP scripts for all shards
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */

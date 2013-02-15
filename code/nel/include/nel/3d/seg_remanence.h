@@ -54,7 +54,7 @@ public:
 		CSegRemanence(CSegRemanence &other);
 		CSegRemanence &operator = (CSegRemanence &other);
 	//@}
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void			registerBasic();
 	/// to instanciate that model from a scene
 	static CTransform		*creator() { return new CSegRemanence; }
