@@ -68,5 +68,4 @@ require_once("common/db_lib.php");
 require_once("common/db_defs.php");
 require_once("common/render.php");
 
-
 ?>

@@ -28,11 +28,14 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='', $w
 	$is_auth_ingame = false;
 	// we have to set the $user['lang'] even for anonymous user or we cannot display the test in the right langage
     if($lang == '') {
-		$l = isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2):'en';
-        if ($l=='fr'||$l=='en'||$l=='de'||$l=='ru'||$l=='es')
-            $lang = $l;
-        else
-            $lang = 'en';
+		if  (!isset($_SESSION['lang'])) {
+			$l = isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2):'en';
+			if ($l=='fr'||$l=='en'||$l=='de'||$l=='ru'||$l=='es')
+				$lang = $l;
+			else
+				$lang = 'en';
+		} else
+			$lang = $_SESSION['lang'];
 	}
 	if ($lang!='fr'&&$lang!='en'&&$lang!='de'&&$lang!='ru'&&$lang!='es')
 		$lang = 'en';
@@ -107,13 +110,15 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='', $w
 	$_SESSION['lang'] = $lang;
 
 	define('RYZOM_IG', $user['ig']);
-	// get user information
+	// get user informations
 	$ig = $user['ig'];
-	$user = ryzom_user_get_info($cid, $webprivs);
+	$user = ryzom_user_get_info($cid, $webprivs, RYAPI_USE_PLAYER_STATS);
 
 	if (isset($user['creation_date']))
 		$user['id'] = ryzom_get_user_id($cid, $user['char_name'], $user['creation_date'], $user);
 
+	$user['gender'] = ryzom_get_user_gender($user['id']);
+	
 	$user['ig'] = $ig;
 	$user['lang'] = $_SESSION['lang'];
 	if (!isset($user['groups']))
@@ -133,11 +138,13 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='', $w
 
 	$user['translation_mode'] = $_SESSION['translater_mode'];
 
+//	$user['after_merge'] = $user['uid'] >= 671686;
+
 	ryzom_unset_url_param('translate_this');
 
 	if (isset($user['last_played_date']))
 		$_SESSION['last_played_date'] = $user['last_played_date'];
-	 // don't send this information to external apps
+	 // don't send this informations to external apps
 	unset($user['last_played_date']);
 	unset($user['creation_date']);
 	return true;

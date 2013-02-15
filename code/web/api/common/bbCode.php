@@ -804,6 +804,13 @@ class bbCode extends bbCodeParser {
         return $txt;
     }
 
+    static function bb_lang($attr, $txt) {
+		if (_user()->lang == $attr)
+			return $txt;
+		else
+			return '';
+    }
+    
     static function bb_time($options, $txt) {
         $time = strtotime($txt);
 
@@ -958,6 +965,9 @@ class bbCode extends bbCodeParser {
                 break;
             case 'date' :
                 $result = self::bb_date($attr, $text);
+                break;
+            case 'lang' :
+                $result = self::bb_lang($attr, $text);
                 break;
             default :
                 $result = $open . $text . $close;

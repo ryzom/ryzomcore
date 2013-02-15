@@ -1,5 +1,4 @@
 <?php
-
 /* Copyright (C) 2009 Winch Gate Property Limited
  *
  * This file is part of ryzom_api.
@@ -17,16 +16,24 @@
  * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-define('RYAPI_MODE', 'client');
-define('RYAPI_USE_PLAYER_STATS', false);
+function ryzom_user_get_info($cid) { 
+	if (isset($_SESSION['user']))
+		return $_SESSION['user'];
+	
+	$user = unserialize(base64_decode(ryzom_get_param('user')));
+	$_SESSION['user'] = $user;
+	return $user;
+}
 
-// Url where the api is
-define('RYAPI_URL', 'http://');
-if (!defined('RYAPI_PATH'))
-	define('RYAPI_PATH', dirname(__FILE__).'/');
-// used by "home" link
-if (!defined('RYAPP_URL'))
-	define('RYAPP_URL', 'http://');
-if (!defined('RYAPI_AUTH_KEY'))
-	define('RYAPI_AUTH_KEY', ''); // key gived by AUTH_SERVER
+function ryzom_get_user_id($cid, $name, $creation_date) {
+	if (isset($_SESSION['user']))
+		return $_SESSION['user']['id'];
+	
+	$user = unserialize(base64_decode(ryzom_get_param('user')));
+	$_SESSION['user'] = $user;
+
+	return $user['id'];
+}
+
+
 ?>

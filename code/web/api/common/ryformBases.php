@@ -37,6 +37,8 @@ define('DEF_TYPE_COMBO', 16);
 define('DEF_TYPE_OPTION_FUNCTION', 17);
 define('DEF_TYPE_NAMEID', 18);
 define('DEF_TYPE_COMBO_FUNCTION', 19);
+define('DEF_TYPE_DATE', 20);
+
 
 define('DEF_TYPE_ICON_UNKNOWN', 0);
 define('DEF_TYPE_ICON_SHARED', 1);
@@ -91,6 +93,90 @@ function getTrad($value) {
 	return substr($trad, 1);
 }
 
+function setRyformSource($object, $src, $indent=0, $protecteds=array()) {
+		$c = '';
+		$src = str_replace("\r", '', $src);
+		$ssrc = explode("\n", $src);
+		$mode = 'var';
+		$cache = '';
+		$current_ryform = NULL;
+		foreach ($ssrc as $line) {
+			if (!$line)
+				continue;
+			if ($mode != 'ryform')
+				$c .=  str_repeat("\t", $indent);
+			switch ($mode) {
+				case 'ryform':
+					if ($line[0] == "\t") {
+						$cache .= substr($line, 1)."\n";
+						break;
+					} else {
+						$mode = 'array';
+					}
+
+				case 'array':
+					if ($line == ')' || $line == '}') {
+						if ($cache && $current_ryform) {
+							$c .= $current_ryform->setSource($cache, $indent+1);
+							$c .= 'SET SOURCE ';
+							if ($line == ')')
+								$array[] = $current_ryform;
+							else
+								$array = $current_ryform;
+						}
+						if (array_key_exists($var_name, $protecteds))
+							call_user_func(array($object, $protecteds[$var_name]), $array);
+						else
+							$object->$var_name = $array;
+						$mode = 'var';
+						$cache = '';
+						continue;
+					} else if ($line[0] == '[') {
+						if ($cache && $current_ryform) {
+							$c .= $current_ryform->setSource($cache, $indent+1);
+							$array[] = $current_ryform;
+							$c .= 'SET SOURCE ';
+						}
+						$ryform_name = substr($line, 1, strlen($line)-2);
+						$c .= 'New Ryform: '.$ryform_name."\n";
+						$cache = '';
+						$current_ryform = new $ryform_name();
+						$mode = 'ryform';
+						continue;
+					}
+				break;
+
+				default:
+					$sep = strpos($line, '=');
+					if ($sep) {
+						$var_name = substr($line, 0, $sep-1);
+						$value = substr($line, $sep+2);
+						if ($value == '(' || $value == '{') {
+							$c .= $var_name.' is ARRAY'."\n";
+							$mode = 'array';
+							$array = array();
+						} else {
+							$c .= $var_name .' = '.$value."\n";
+							if ($value[0] == '\'' && $value[strlen($value)-1] == '\'')
+								$object->$var_name = str_replace('\n', "\n", substr($value, 1, -1));
+							else {
+								if (is_numeric($value))
+									$object->$var_name = eval('return '.$value.';');
+								else if ($value == 'false')
+									$object->$var_name = false;
+								else if ($value == 'true')
+									$object->$var_name = true;
+								else if ($value == 'NULL')
+									$object->$var_name = NULL;
+							}
+						}
+					}
+				break;
+			}
+		}
+		return $c;
+	}
+
 interface iRyForm {	
 	function getForm($url_params);
 	function setFormParams($params);
@@ -132,11 +218,11 @@ class basicRyForm implements iRyForm {
 	public $formName = ''; // Used by Form
 	public $id = 0;
 
-	function __construct($name, $title) {
+	function __construct($name='', $title='') {
 	}
 	
 	function getForm($url_params) {
-		$form = new ryForm($this->formName, $this->tools);
+		$form = new ryForm($this->formName);
 		$form_defs = $this->getFormDefs();
 		foreach ($form_defs as $def)
 			$form->addDefine($def);
@@ -162,15 +248,56 @@ class basicRyForm implements iRyForm {
 		return array();
 	}
 	
-	function preSerialization() {
+	/*function preSerialization() {
 		unset($this->tools);
+	}*/
+	
+	function preSerialization() {
+		$all_defs = array('class_name');
+		$this->author = _user()->id;
+		foreach ($this->getFormDefs() as $def)
+			$all_defs[] = $def->name;
+		
+		foreach (get_object_vars($this) as $name => $value) {
+			if (!in_array($name, $all_defs))
+				unset($this->$name);
+		}
 	}
-			
+	
 	function postSerialization($vars=array()) {
 	}
 	
 	function getTemplate() {
 		return '';
+	}
+	
+	function getSource($indent=0) {
+		$attrs = $this->getFormDefs();
+		$c = str_repeat("\t", $indent-1).'['.get_class($this).']'."\n";
+		foreach ($attrs as $attr) {
+			$c .= str_repeat("\t", $indent).$attr->name.' ';
+			$var = $this->{$attr->name};
+			if (is_object($var)) {
+				$c .= "= {\n".substr($var->getSource($indent+1), 0, -1)."\n".str_repeat("\t", $indent).'}';
+			} else if (is_array($var)) {
+				$c .= '= ('."\n";
+				foreach ($var as $element) {
+					if (is_object($element)) 
+						$c .= $element->getSource($indent+1);
+					else if ($element)
+						$c .= '#'.str_replace("\r", '', str_replace("\n", '\\\\n', var_export($element, true)));
+				}
+				$c .= str_repeat("\t", $indent).")";
+			} else
+				$c .= '= '.str_replace("\r", '', str_replace("\n", '\\\\n', var_export($var, true)));
+			$c .= "\n";
+		}
+		return $c;
+	}
+	
+	function setSource($src, $indent=0) {
+		$this->preSerialization();
+		return setRyformSource($this, $src, $indent);
 	}
 }
 
