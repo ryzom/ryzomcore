@@ -38,7 +38,7 @@ function ryzom_name_to_file($name)
 function ryzom_get_user_dir($user)
 {
 	global $_RYZOM_API_CONFIG;
-	
+
 	if ($user == "")
 		die("INTERNAL ERROR CODE 1");
 
