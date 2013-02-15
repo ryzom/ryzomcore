@@ -34,7 +34,7 @@
 #include "player_manager/character.h"
 #include "world_instances.h"
 #include "player_manager/player.h"
-
+#include "creature_manager/creature_manager.h"
 #include "egs_sheets/egs_sheets.h"
 
 //////////////
@@ -49,6 +49,7 @@ using namespace NLNET;
 //////////////
 extern CRandom			RandomGenerator;
 extern CPlayerManager	PlayerManager;
+extern CCreatureManager	CreatureManager;
 
 
 //--------------------------------------------------------------
@@ -130,10 +131,14 @@ bool CSpecialPowerTaunt::validate(std::string &errorCode)
 	}
 	if (!entity->getContextualProperty().directAccessForStructMembers().attackable())
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_TAUNT_TARGET_NOT_ATTACKABLE");
+		CCreature * creature = CreatureManager.getCreature( entity->getId() );
+		if ( ! creature->checkFactionAttackable(actor->getId()))
+		{
+			PHRASE_UTILITIES::sendDynamicSystemMessage(_ActorRowId, "POWER_TAUNT_TARGET_NOT_ATTACKABLE");
 		
-		DEBUGLOG("<CSpecialPowerTaunt::validate> Target not attackable");
-		return false;
+			DEBUGLOG("<CSpecialPowerTaunt::validate> Target not attackable");
+			return false;
+		}
 	}
 
 	return true;

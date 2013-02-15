@@ -18,6 +18,10 @@
 #include "nel/misc/event_emitter_multi.h"
 #include "nel/misc/system_utils.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 

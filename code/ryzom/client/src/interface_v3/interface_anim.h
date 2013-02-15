@@ -37,7 +37,7 @@ class CInterfaceTrack
 public:
 
 	CInterfaceTrack();
-	~CInterfaceTrack();
+	virtual ~CInterfaceTrack();
 
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
@@ -90,7 +90,7 @@ class CInterfaceAnim
 public:
 
 	CInterfaceAnim();
-	~CInterfaceAnim();
+	virtual ~CInterfaceAnim();
 
 	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 

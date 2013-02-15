@@ -23,6 +23,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
+#include "nel/misc/sheet_id.h"
 
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/u_form_elm.h"
@@ -34,7 +35,6 @@
 #include "nel/sound/driver/buffer.h"
 #include "nel/sound/driver/effect.h"
 
-#include "nel/sound/background_sound_manager.h"
 #include "nel/sound/background_sound_manager.h"
 #include "nel/sound/music_sound_manager.h"
 #include "nel/sound/background_source.h"
@@ -467,7 +467,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			nlwarning("AM: OptionSoftwareBuffer not available, forceSoftwareBuffer = false");
 			forceSoftware = false; // not really needed, but set anyway in case this is still used later in this function
 		}
-		if (manualRolloff && !_SoundDriver->getOption(ISoundDriver::OptionLocalBufferCopy))
+		if (manualRolloff && !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 		{
 			nlwarning("AM: OptionManualRolloff not available, manualRolloff = false");
 			manualRolloff = false; // not really needed, but set anyway in case this is still used later in this function
@@ -970,10 +970,14 @@ void CAudioMixerUser::buildSampleBankList()
 /// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
 std::string UAudioMixer::buildSoundBank(const std::string &packedSheetDir)
 {
+	CGroupControllerRoot *tempRoot = NULL;
+	if (!CGroupControllerRoot::isInitialized())
+		tempRoot = new CGroupControllerRoot();
 	std::string dir = CPath::standardizePath(packedSheetDir, true);
 	CSoundBank *soundBank = new CSoundBank();
 	soundBank->load(dir, true);
 	delete soundBank;
+	delete tempRoot;
 	return dir + "sounds.packed_sheets";
 }
 
@@ -1049,9 +1053,8 @@ public:
 			for (uint i=0; i<size; ++i)
 			{
 				items->getArrayValue(soundName, i);
-				soundName = soundName.substr(0, soundName.find(".sound"));
-
-				cs.SoundNames.push_back(CStringMapper::map(soundName));
+				nlassert(soundName.find(".sound") != std::string::npos);
+				cs.SoundNames.push_back(CSheetId(soundName));
 			}
 
 			if (!cs.SoundNames.empty())
@@ -1101,7 +1104,7 @@ void CAudioMixerUser::initUserVar()
 		TUserVarControlsContainer::iterator first(_UserVarControls.begin()), last(_UserVarControls.end());
 		for(;  first != last; ++first)
 		{
-			std::vector<NLMISC::TStringId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
+			std::vector<NLMISC::CSheetId>::iterator first2(first->second.SoundNames.begin()), last2(first->second.SoundNames.end());
 			for (; first2 != last2; ++first2)
 			{
 				CSound *sound = getSoundId(*first2);
@@ -1132,7 +1135,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 		for (uint i=0; i<size; ++i)
 		{
 			s.serial(soundName);
-			SoundNames.push_back(CStringMapper::map(soundName));
+			SoundNames.push_back(CSheetId(soundName, "sound"));
 		}
 	}
 	else
@@ -1146,7 +1149,7 @@ void CAudioMixerUser::CControledSources::serial(NLMISC::IStream &s)
 
 		for (uint i=0; i<size; ++i)
 		{
-			soundName = CStringMapper::unmap(SoundNames[i]);
+			soundName = SoundNames[i].toString();;
 			s.serial(soundName);
 		}
 	}
@@ -1780,7 +1783,7 @@ void				CAudioMixerUser::update()
 
 // ******************************************************************
 
-TSoundId			CAudioMixerUser::getSoundId( const NLMISC::TStringId &name )
+TSoundId			CAudioMixerUser::getSoundId( const NLMISC::CSheetId &name )
 {
 	return _SoundBank->getSound(name);
 }
@@ -1894,7 +1897,7 @@ retrySound:
 
 			if (invalid)
 			{
-				nlwarning("The sound %s contain an infinite recursion !", CStringMapper::unmap(id->getName()).c_str());
+				nlwarning("The sound %s contain an infinite recursion !", id->getName().toString().c_str()/*CStringMapper::unmap(id->getName()).c_str()*/);
 				return NULL;
 			}
 
@@ -2035,7 +2038,7 @@ retrySound:
 
 // ******************************************************************
 
-USource				*CAudioMixerUser::createSource( const NLMISC::TStringId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
+USource				*CAudioMixerUser::createSource( const NLMISC::CSheetId &name, bool spawn, TSpawnEndCallback cb, void *userParam, NL3D::CCluster *cluster, CSoundContext *context, UGroupController *groupController)
 {
 	return createSource( getSoundId( name ), spawn, cb, userParam, cluster, context, groupController);
 }
@@ -2162,7 +2165,7 @@ bool CAudioMixerUser::unloadSampleBank(const std::string &name)
 
 // ******************************************************************
 
-void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::TStringId> &names ) const
+void			CAudioMixerUser::getSoundNames( std::vector<NLMISC::CSheetId> &names ) const
 {
 	_SoundBank->getNames(names);
 }
@@ -2310,7 +2313,6 @@ void			CAudioMixerUser::getLoadedSampleBankInfo(std::vector<std::pair<std::strin
 {
 	_SampleBankManager->getLoadedSampleBankInfo(result);
 }
-
 
 
 void CAudioMixerUser::setListenerPos (const NLMISC::CVector &pos)

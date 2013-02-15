@@ -19,13 +19,12 @@
 
 #include "types_nl.h"
 #include "time_nl.h"
+#include "common.h"
+#include "string_mapper.h"
 
 #include <map>
 #include <string>
 #include <vector>
-
-#include "common.h"
-#include "string_mapper.h"
 
 namespace NLMISC {
 

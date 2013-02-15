@@ -39,7 +39,8 @@
 	
 	<value value="map"					hardtext="uiMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
 	
-	<value value="gestion_windows"		hardtext="uiTaskbar" contexts="game"/>
+	<value value="gestion_windows"		hardtext="uiWindows" contexts="game"/>
+	<value value="milko_pad"			hardtext="uiTaskbar" contexts="game"/>
 
 	<value value="guild"				hardtext="uiGuild" contexts="game"/>
 	<value value="guild_forum"			hardtext="uiGuildForum" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>

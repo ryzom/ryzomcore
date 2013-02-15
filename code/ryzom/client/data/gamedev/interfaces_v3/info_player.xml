@@ -1468,7 +1468,7 @@
 			<group type="webig_html"
              id="html"
              posref="TL TL"
-             url="http://atys.ryzom.com/start/app_rpjobs.php"
+             url="http://app.ryzom.com/app_rpjobs/index.php"
              title_prefix=""
              sizeref="wh"
              x="0"
@@ -1503,7 +1503,7 @@
              checkbox_bitmap_pushed="w_opacity_on.tga"
              checkbox_bitmap_over=""
              background_bitmap_view="black2"
-             home="http://atys.ryzom.com/start/app_rpjobs.php"
+             home="http://app.ryzom.com/app_rpjobs/index.php"
              browse_next_time="true"
              form_text_area_group="edit_box_widget_multiline">
 			        <group id="black"
@@ -1604,7 +1604,7 @@
              id="html"
              posref="TL TL"
              posparent="parent"
-             url="http://atys.ryzom.com/start/app_profile.php"
+             url="http://app.ryzom.com/app_profile/index.php"
              title_prefix=""
              sizeref="wh"
              x="0"
@@ -1639,7 +1639,7 @@
              checkbox_bitmap_pushed="w_opacity_on.tga"
              checkbox_bitmap_over=""
              background_bitmap_view="black2"
-             home="http://atys.ryzom.com/start/app_profile.php"
+             home="http://app.ryzom.com/app_profile/index.php"
              browse_next_time="true"
              form_text_area_group="edit_box_widget_multiline">
 			        <group id="black"
@@ -1874,8 +1874,8 @@
             fontsize="10"
             value="xxx tribe name"
             shadow="true" />
-      <link expr="or(ne(@#path:VALUE,0),ne(@#path:TREND,0))"
-            target="active" />
+   <!--   <link expr="or(ne(@#path:VALUE,0),ne(@#path:TREND,0))"
+            target="active" />-->
     </group>
   </template>
   <!-- **************** -->

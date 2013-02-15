@@ -246,7 +246,6 @@ static const ALchar *getDeviceInternal(const std::string &device)
 	if (AlEnumerateAllExt)
 	{	
 		const ALchar* deviceNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-		// const ALchar* defaultDevice = NULL;
 		if(!strlen(deviceNames))
 		{
 			nldebug("AL: No audio devices");
@@ -291,6 +290,7 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 
 	// OpenAL initialization
 	const ALchar *dev = getDeviceInternal(device);
+	if (!dev) dev = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
 	nldebug("AL: Opening device: '%s'", dev == NULL ? "NULL" : dev);
 	_AlDevice = alcOpenDevice(dev);
 	if (!_AlDevice) throw ESoundDriver("AL: Failed to open device");

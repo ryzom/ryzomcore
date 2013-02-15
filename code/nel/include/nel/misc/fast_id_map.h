@@ -94,7 +94,7 @@ public:
 			// size of used elements must be equal to the vector size minus one, when everything is allocated
 			nlassert((m_Ids.size() - 1) == m_Size);
 			
-			idx = m_Ids.size();
+			idx = (uint16)m_Ids.size();
 			uint16 verification = rand();
 			m_Ids.push_back(CIdInfo(verification, m_Next, value));
 			m_Next = idx;

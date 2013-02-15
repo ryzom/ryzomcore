@@ -197,7 +197,7 @@ void CAttachedFX::create(CCharacterCL					 &parent,
 			if (targeterInfo.StickMode.UserBoneName != 0)
 			{
 				CEntityCL *targeter =  EntitiesMngr.entity(TargeterInfo.Slot);
-				if (targeter && targeter->skeleton())
+				if (parent.skeleton() && targeter && targeter->skeleton())
 				{
 					TargeterUserBoneID = parent.skeleton()->getBoneIdByName(NLMISC::CStringMapper::unmap(TargeterInfo.StickMode.UserBoneName));
 				}

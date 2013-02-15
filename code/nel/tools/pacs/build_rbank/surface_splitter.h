@@ -19,8 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
-#include "../../../src/pacs/local_retriever.h"
-#include "../../../src/pacs/quad_grid.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/quad_grid.h"
 
 #include <map>
 

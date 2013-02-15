@@ -6,7 +6,7 @@
 #-----------------------------------------------------------------------------
 
 # This tells the application(s) where to find the installed data.
-#ADD_DEFINITIONS(-DDATA_DIR="\\"${NL_SHARE_PREFIX}/georges_editor_qt/\\"")
+#ADD_DEFINITIONS(-DDATA_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/georges_editor_qt/\\"")
 
 ADD_SUBDIRECTORY(src)
 

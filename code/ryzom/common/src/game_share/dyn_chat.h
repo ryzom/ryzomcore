@@ -131,6 +131,7 @@ public:
 	bool									Localized;      // for EGS only
 	ucstring								Title;          // gives the title of the channel when it is not translated (e.g Localized == false)
 	bool									HideBubble;		// hide the display of bubble
+	bool									UniversalChannel;	// treat like universe channel
 public:
 	CDynChatChan();
 //	CDynChatChan(TChanID id = NLMISC::CEntityId::Unknown, NLNET::TServiceId ownerServiceId, bool noBroadcast, bool forwadInput);

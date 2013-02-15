@@ -195,9 +195,12 @@ namespace MSW
 		int result = mysql_real_query(_MysqlContext, queryString.c_str(), (unsigned long)queryString.size());
 		if (result != 0)
 		{
-			if (result == CR_SERVER_GONE_ERROR)
+			// in all case, we try to reconnect
+			int merrno = mysql_errno(_MysqlContext);
+			//if (result == CR_SERVER_GONE_ERROR)
 			{
 				// reconnect and retry the request
+				nlinfo("%p Mysql error errno:%d result:%d : %s, try to reconnect...", _MysqlContext, merrno, result, mysql_error(_MysqlContext));
 				if (_connect())
 					result = mysql_real_query(_MysqlContext, queryString.c_str(), (unsigned long)queryString.size());
 				else
@@ -215,7 +218,7 @@ namespace MSW
 
 			if (result != 0)
 			{
-				nlwarning("Mysql error : %s", mysql_error(_MysqlContext));
+				nlwarning("Mysql error errno:%d result:%d : %s", merrno, result, mysql_error(_MysqlContext));
 				nlwarning("   in query '%s':", queryString.c_str());
 				if (MSWStrictMode)
 				{

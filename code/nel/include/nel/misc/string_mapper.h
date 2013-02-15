@@ -18,12 +18,11 @@
 #define STRING_MAPPER_H
 
 #include "types_nl.h"
+#include "stream.h"
+#include "mutex.h"
 
 #include <vector>
 #include <set>
-
-#include "stream.h"
-#include "mutex.h"
 
 namespace NLMISC
 {

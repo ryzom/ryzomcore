@@ -616,7 +616,6 @@ void CSourceDSound::fadeOut(const TLockedBufferInfo &lbi)
 	ptr = lbi.Ptr2;
 	count = lbi.Size2/2;
 
-
 	while (fade && count)
 	{
 		alpha = (fade<<16) / _XFadeSize;

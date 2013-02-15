@@ -293,6 +293,11 @@ public:
 	 */
 	virtual void			forceDXTCCompression(bool dxtcComp)=0;
 
+	/** if different from 0, enable anisotropic filter on textures. -1 enables max value.
+	 *	Default is 0.
+	 */
+	virtual void			setAnisotropicFilter(sint filter)=0;
+
 	/** if !=1, force mostly all the textures (but TextureFonts lightmaps, interfaces  etc..)
 	 *	to be divided by Divisor (2, 4, 8...)
 	 *	Default is 1.

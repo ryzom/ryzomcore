@@ -18,14 +18,13 @@
 #define NL_STRING_ID_ARRAY_H
 
 #include "types_nl.h"
+#include "debug.h"
 
 #include <cmath>
 #include <string>
 #include <vector>
 #include <set>
 #include <algorithm>
-
-#include "debug.h"
 
 
 namespace NLMISC {

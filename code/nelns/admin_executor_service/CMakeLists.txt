@@ -14,4 +14,4 @@ NL_ADD_RUNTIME_FLAGS(admin_executor_service)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS admin_executor_service RUNTIME DESTINATION sbin COMPONENT aes)
-INSTALL(FILES admin_executor_service.cfg common.cfg DESTINATION etc/nel/nelns COMPONENT aes)
+INSTALL(FILES admin_executor_service.cfg common.cfg DESTINATION ${NL_ETC_PREFIX}/nelns COMPONENT aes)

@@ -94,7 +94,7 @@ void BNPManagerWindow::createDialogs()
 {
 	// create dialog to list the contents of the specified
 	// bnp data file directory
-	m_BnpDirTreeDialog = new CBnpDirTreeDialog(tr(m_DataPath.toStdString().c_str()),this);
+	m_BnpDirTreeDialog = new CBnpDirTreeDialog(tr(m_DataPath.toUtf8().constData()),this);
 	addDockWidget(Qt::LeftDockWidgetArea, m_BnpDirTreeDialog);
 	m_BnpDirTreeDialog->setVisible(true);
 	restoreDockWidget(m_BnpDirTreeDialog);
@@ -187,7 +187,7 @@ void BNPManagerWindow::newFile()
 	m_openedBNPFile = filePath;
 	m_BnpFileListDialog->setWindowTitle (filePath);
 
-	myBNPFileHandle.createFile ( filePath.toStdString() );
+	myBNPFileHandle.createFile ( filePath.toUtf8().constData() );
 
 }
 // ***************************************************************************
@@ -196,7 +196,7 @@ void BNPManagerWindow::open()
 	QString fileName;
 	// file dialog to select with file should be opened
 	fileName = QFileDialog::getOpenFileName(this,
-		tr("Open BNP file"), tr(m_DataPath.toStdString().c_str()), tr("BNP Files (*.bnp)"));
+		tr("Open BNP file"), tr(m_DataPath.toUtf8().constData()), tr("BNP Files (*.bnp)"));
 
 	// Check if filename is empty
 	if (fileName.isNull())
@@ -234,7 +234,7 @@ void BNPManagerWindow::addFiles()
 	QStringList::iterator it_list = FileList.begin();
 	while (it_list != FileList.end() )
 	{
-		string fileName = CFile::getFilename (it_list->toStdString() );
+		string fileName = CFile::getFilename (it_list->toUtf8().constData() );
 		if ( std::find(currentFiles.begin(), currentFiles.end(), fileName ) !=  currentFiles.end() )
 		{
 			// Ask the user if he wants to override the existing file
@@ -246,7 +246,7 @@ void BNPManagerWindow::addFiles()
 		}
 		else
 		{
-			addFiles.push_back( it_list->toStdString() );
+			addFiles.push_back( it_list->toUtf8().constData() );
 			// log it
 			nlinfo("Add file %s", fileName.c_str() );
 		}
@@ -277,7 +277,7 @@ void BNPManagerWindow::addFiles( QStringList FileList )
 	QStringList::iterator it_list = FileList.begin();
 	while (it_list != FileList.end() )
 	{
-		string fileName = CFile::getFilename (it_list->toStdString() );
+		string fileName = CFile::getFilename (it_list->toUtf8().constData() );
 		if ( std::find(currentFiles.begin(), currentFiles.end(), fileName ) !=  currentFiles.end() )
 		{
 			// Ask the user if he wants to override the existing file
@@ -289,7 +289,7 @@ void BNPManagerWindow::addFiles( QStringList FileList )
 		}
 		else
 		{
-			addFiles.push_back( it_list->toStdString() );
+			addFiles.push_back( it_list->toUtf8().constData() );
 			// log it
 			nlinfo("Add file %s", fileName.c_str() );
 		}
@@ -346,7 +346,7 @@ void BNPManagerWindow::unpackFiles()
 	}
 
 	QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-								tr(m_DataPath.toStdString().c_str()),
+								tr(m_DataPath.toUtf8().constData()),
 								QFileDialog::ShowDirsOnly
 								| QFileDialog::DontResolveSymlinks);
 
@@ -354,7 +354,7 @@ void BNPManagerWindow::unpackFiles()
 	if ( dir.isEmpty() )
 		return;
 	
-	if (myBNPFileHandle.unpack(dir.toStdString(),selectedrows))
+	if (myBNPFileHandle.unpack(dir.toUtf8().constData(),selectedrows))
 	{
 		QMessageBox::information(this, tr("BNP Manager"),
                                 tr("All files has been exported successfully."),
@@ -426,7 +426,7 @@ void BNPManagerWindow::dropEvent(QDropEvent *event)
 			filePath = it->toLocalFile();
 			if ( filePath.endsWith(".bnp") )
 			{
-				nlwarning("Could not add a bnp file!", filePath.toStdString().c_str() );
+				nlwarning("Could not add bnp file %s!", filePath.toUtf8().constData() );
 			}
 			else
 			{

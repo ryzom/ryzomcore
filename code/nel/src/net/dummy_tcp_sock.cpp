@@ -17,7 +17,7 @@
 #include "stdnet.h"
 
 #include "nel/net/dummy_tcp_sock.h"
-#include "nel/net/net_log.h"
+#include "nel/net/net_log.h"
 
 using namespace NLMISC;
 

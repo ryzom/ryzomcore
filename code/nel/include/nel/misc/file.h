@@ -17,6 +17,7 @@
 #ifndef NL_FILE_H
 #define NL_FILE_H
 
+#include "types_nl.h"
 #include "stream.h"
 
 

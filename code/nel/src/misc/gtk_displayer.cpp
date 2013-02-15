@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
+#include "nel/misc/gtk_displayer.h"
 
 #ifdef NL_USE_GTK
 
@@ -35,9 +36,11 @@
 #include "nel/misc/command.h"
 #include "nel/misc/thread.h"
 
-#include "nel/misc/gtk_displayer.h"
-
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 

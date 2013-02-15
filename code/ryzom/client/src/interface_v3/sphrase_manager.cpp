@@ -491,6 +491,22 @@ void				CSPhraseManager::selectMemoryLineDB(sint32 memoryLine)
 	}
 }
 
+void CSPhraseManager::selectMemoryLineDBalt(sint32 memoryLine)
+{
+	if(memoryLine<0)
+		memoryLine= -1;
+	if(_SelectedMemoryDBalt!=memoryLine)
+	{
+		_SelectedMemoryDBalt= memoryLine;
+		// since memory selection changes then must update all the DB and the Ctrl states
+		updateMemoryDBAll();
+		updateAllMemoryCtrlState();
+		updateAllMemoryCtrlRegenTickRange();
+		// must update also the execution views
+		updateExecutionDisplay();
+	}
+}
+
 // ***************************************************************************
 void		CSPhraseManager::updateMemoryDBAll()
 {
@@ -517,12 +533,19 @@ void		CSPhraseManager::updateMemoryDBAll()
 		}
 	}
 
-	if(_SelectedMemoryDB != -1 && (sint32)_Memories.size() > 0)
+	if(_SelectedMemoryDBalt == -1 || _SelectedMemoryDBalt>=(sint32)_Memories.size())
+	{
+		for(uint i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
+		{
+			_MemoryAltDbLeaves[i]->setValue32(0);
+		}
+	}
+	else
 	{
 		// Always update alt gestionsets
 		for(uint i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 		{
-			CMemorySlot		&slotAlt= _Memories[0].Slot[i];
+			CMemorySlot		&slotAlt= _Memories[_SelectedMemoryDBalt].Slot[i];
 			if(!slotAlt.isPhrase())
 				_MemoryAltDbLeaves[i]->setValue32(0);
 			else
@@ -548,11 +571,8 @@ void		CSPhraseManager::updateMemoryDBSlot(uint32 memorySlot)
 			_MemoryDbLeaves[memorySlot]->setValue32(0);
 		else
 			_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
-	}
 
-	if (_SelectedMemoryDB == 0)
-	{
-		CMemorySlot		&slotAlt= _Memories[0].Slot[memorySlot];
+		CMemorySlot		&slotAlt= _Memories[_SelectedMemoryDBalt].Slot[memorySlot];
 		if(!slotAlt.isPhrase())
 			_MemoryAltDbLeaves[memorySlot]->setValue32(0);
 		else
@@ -875,6 +895,7 @@ void				CSPhraseManager::reset()
 	_InitInGameDone= false;
 
 	_SelectedMemoryDB= -1;
+	_SelectedMemoryDBalt = _SelectedMemoryDB;
 	// NB: slot under 2 can't be taken.
 	_MaxSlotSet= BookStartSlot-1;
 	_LastBookNumDbFill= 0;
@@ -2678,7 +2699,7 @@ void	CSPhraseManager::updateMemoryCtrlRegenTickRange(uint memorySlot, CDBCtrlShe
 	if (ctrl->isShortCut())
 		memoryLine = getSelectedMemoryLineDB();
 	else
-		memoryLine = 0;
+		memoryLine = getSelectedMemoryAltLineDB();
 	if (memoryLine < 0)
 		return;
 	sint32	phraseId= getMemorizedPhrase(memoryLine, memorySlot);
@@ -2820,7 +2841,7 @@ void	CSPhraseManager::updateMemoryCtrlState(uint memorySlot, CDBCtrlSheet	*ctrl,
 	if (ctrl->isShortCut()) // No memoryLine defined
 		memoryLine= getSelectedMemoryLineDB();
 	else
-		memoryLine= 0;
+		memoryLine= getSelectedMemoryAltLineDB();
 	bool	newIsMacro= isMemorizedMacro(memoryLine, memorySlot);
 	sint32	macroId= getMemorizedMacro(memoryLine, memorySlot);
 	sint32	phraseId= getMemorizedPhrase(memoryLine, memorySlot);

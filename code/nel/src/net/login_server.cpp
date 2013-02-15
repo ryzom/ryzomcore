@@ -53,7 +53,7 @@ static string ListenAddr;
 
 static bool AcceptInvalidCookie = false;
 
-static string DefaultUserPriv = "";
+static string DefaultUserPriv;
 
 static TDisconnectClientCallback DisconnectClientCallback = NULL;
 

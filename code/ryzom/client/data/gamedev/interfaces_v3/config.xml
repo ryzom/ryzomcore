@@ -318,6 +318,12 @@
   <variable entry="UI:SAVE:INSCENE:FRIEND:PVP_LOGO"
             type="bool"
             value="true" />
+  <variable entry="UI:SAVE:INSCENE:FRIEND:NPCNAME"
+            type="bool"
+            value="true" />
+  <variable entry="UI:SAVE:INSCENE:FRIEND:NPCTITLE"
+            type="bool"
+            value="true" />
   <variable entry="UI:SAVE:INSCENE:FRIEND:MISSION_ICON"
             type="bool"
             value="true" />
@@ -3389,6 +3395,10 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:VARIABLES:ISACTIVE:COSMETICS"
             type="sint32"
             value="0" />
+  <variable entry="UI:VARIABLES:ISACTIVE:MILKO_PAD"
+            type="sint32"
+            value="0" />
+
   <!-- ***************************** -->
   <!-- *      BOTCHAT VARIABLES    * -->
   <!-- ***************************** -->

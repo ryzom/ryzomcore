@@ -23,6 +23,14 @@
 
 namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
+
 static void convBlend(CMaterial::TBlend blend, GLenum& glenum)
 {
 	H_AUTO_OGL(convBlend)
@@ -79,10 +87,9 @@ static inline void convTexAddr(ITexture *tex, CMaterial::TTexAddressingMode mode
 	nlassert(mode < CMaterial::TexAddrCount);
 	static const GLenum glTex2dAddrModesNV[] =
 	{
-#ifdef USE_OPENGLES
-		0, GL_TEXTURE_2D
-#else
-		GL_NONE, GL_TEXTURE_2D, GL_PASS_THROUGH_NV, GL_CULL_FRAGMENT_NV,
+		GL_NONE, GL_TEXTURE_2D,
+#ifndef USE_OPENGLES
+		GL_PASS_THROUGH_NV, GL_CULL_FRAGMENT_NV,
 		GL_OFFSET_TEXTURE_2D_NV, GL_OFFSET_TEXTURE_2D_SCALE_NV,
 		GL_DEPENDENT_AR_TEXTURE_2D_NV, GL_DEPENDENT_GB_TEXTURE_2D_NV,
 		GL_DOT_PRODUCT_NV, GL_DOT_PRODUCT_TEXTURE_2D_NV, GL_DOT_PRODUCT_TEXTURE_CUBE_MAP_NV,
@@ -93,10 +100,9 @@ static inline void convTexAddr(ITexture *tex, CMaterial::TTexAddressingMode mode
 
 	static const GLenum glTexCubeAddrModesNV[] =
 	{
-#ifdef USE_OPENGLES
-		0, GL_TEXTURE_CUBE_MAP_OES
-#else
-		GL_NONE, GL_TEXTURE_CUBE_MAP_ARB, GL_PASS_THROUGH_NV, GL_CULL_FRAGMENT_NV,
+		GL_NONE, GL_TEXTURE_CUBE_MAP_ARB,
+#ifndef USE_OPENGLES
+		GL_PASS_THROUGH_NV, GL_CULL_FRAGMENT_NV,
 		GL_OFFSET_TEXTURE_2D_NV, GL_OFFSET_TEXTURE_2D_SCALE_NV,
 		GL_DEPENDENT_AR_TEXTURE_2D_NV, GL_DEPENDENT_GB_TEXTURE_2D_NV,
 		GL_DOT_PRODUCT_NV, GL_DOT_PRODUCT_TEXTURE_2D_NV, GL_DOT_PRODUCT_TEXTURE_CUBE_MAP_NV,
@@ -139,11 +145,7 @@ void CDriverGL::setTextureEnvFunction(uint stage, CMaterial& mat)
 			{
 				// Cubic or normal ?
 				if (text->isTextureCube ())
-#ifdef USE_OPENGLES
-					_DriverGLStates.setTexGenMode (stage, GL_REFLECTION_MAP_OES);
-#else
 					_DriverGLStates.setTexGenMode (stage, GL_REFLECTION_MAP_ARB);
-#endif
 				else
 #ifdef USE_OPENGLES
 					_DriverGLStates.setTexGenMode (stage, GL_TEXTURE_CUBE_MAP_OES);
@@ -966,11 +968,7 @@ void			CDriverGL::setupLightMapPass(uint pass)
 				if (mat._LightMapsMulx2)
 				{
 					// Multiply x 2
-#ifdef USE_OPENGLES
-					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE, 2);
-#else
 					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 2);
-#endif
 				}
 			}
 		}
@@ -1079,11 +1077,7 @@ void			CDriverGL::endLightMapMultiPass()
 		for (uint32 i = 0; i < (_NLightMapPerPass+1); ++i)
 		{
 			_DriverGLStates.activeTextureARB(i);
-#ifdef USE_OPENGLES
-			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE, 1);
-#else
 			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 1);
-#endif
 		}
 	}
 }
@@ -1157,12 +1151,7 @@ void			CDriverGL::setupSpecularBegin()
 
 	// todo hulud remove
 	// _DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
-
-#ifdef USE_OPENGLES
-	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_OES);
-#else
 	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_ARB);
-#endif
 
 	// setup the good matrix for stage 1.
 	glMatrixMode(GL_TEXTURE);
@@ -2471,5 +2460,9 @@ void CDriverGL::endWaterMultiPass()
 	}
 #endif
 }
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

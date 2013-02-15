@@ -23,8 +23,15 @@
 
 #include "driver_opengl_extension_def.h"
 
-namespace	NL3D
-{
+namespace	NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 /// The extensions used by NL3D.
@@ -48,12 +55,12 @@ struct	CGlExtensions
 	bool	NVTextureEnvCombine4;
 	bool	ARBTextureCubeMap;
 	bool	NVVertexProgram;
-	bool    EXTVertexShader;
+	bool	EXTVertexShader;
 	bool	NVTextureShader;
-	bool    NVOcclusionQuery;
+	bool	NVOcclusionQuery;
 	bool	NVTextureRectangle;
-	bool    EXTTextureRectangle;
-	bool    ARBTextureRectangle;
+	bool	EXTTextureRectangle;
+	bool	ARBTextureRectangle;
 	bool	FrameBufferObject;
 	bool	FrameBufferBlit;
 	bool	FrameBufferMultisample;
@@ -82,10 +89,10 @@ struct	CGlExtensions
 
 	// ATI Extensions.
 	bool	ATIVertexArrayObject;
-	bool    ATIMapObjectBuffer;
+	bool	ATIMapObjectBuffer;
 	bool	ATITextureEnvCombine3;
-	bool    ATIEnvMapBumpMap;
-	bool    ATIFragmentShader;
+	bool	ATIEnvMapBumpMap;
+	bool	ATIFragmentShader;
 	bool	ATIXTextureEnvRoute;
 	bool	ATIVertexAttribArrayObject;
 	// ARB Extensions
@@ -150,7 +157,7 @@ public:
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
-		EXTTextureFilterAnisotropicMaximum = 1.f;
+		EXTTextureFilterAnisotropicMaximum = 0.f;
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
@@ -262,7 +269,11 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen);
 /// This function test and register the extensions for the current GL context.
 void registerGlExtensions(CGlExtensions &ext);
 
-}
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
+
+} // NL3D
 
 // ***************************************************************************
 // The exported function names
@@ -770,3 +781,4 @@ extern NEL_PFNGLSAMPLECOVERAGEARBPROC			nglSampleCoverageARB;
 #endif // USE_OPENGLES
 
 #endif // NL_OPENGL_EXTENSION_H
+

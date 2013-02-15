@@ -30,6 +30,7 @@
 class IBrickLearnedCallback
 {
 public:
+	virtual ~IBrickLearnedCallback() { }
 	virtual	void	onBrickLearned() =0;
 };
 

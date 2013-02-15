@@ -119,7 +119,6 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 	}
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
-		nlinfo("Process Event");
 		string webAppUrl;
 		bool ret = true;
 		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
@@ -216,9 +215,7 @@ class CMissionStepKillFauna : public IMissionStepTemplate
 		ret.clear();
 		ret.resize( _SubSteps.size() );
 		for ( uint i = 0; i < _SubSteps.size(); i++ )
-		{
 			ret[i] = _SubSteps[i].Quantity;
-		}
 	}
 
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)

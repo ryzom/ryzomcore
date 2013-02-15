@@ -30,13 +30,21 @@ using namespace NLMISC;
 
 //#define DEBUG_SETUP_EXT_VERTEX_SHADER
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it) : IVertexProgramDrvInfos (drv, it)
 {
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL)
+	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
+
 	// Extension must exist
 	nlassert (drv->_Extensions.NVVertexProgram
 		      || drv->_Extensions.EXTVertexShader
@@ -80,7 +88,7 @@ bool CDriverGL::isVertexProgramEmulated () const
 // ***************************************************************************
 bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 {
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_activeNVVertexProgram)
+	H_AUTO_OGL(CVertexProgamDrvInfosGL_activeNVVertexProgram);
 
 #ifndef USE_OPENGLES
 	// Setup or unsetup ?
@@ -197,26 +205,22 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 	return false;
 }
 
-
 // ***************************************************************************
+#ifndef USE_OPENGLES
 static
 inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 {
-	H_AUTO_OGL(convSwizzleToGLFormat)
+	H_AUTO_OGL(convSwizzleToGLFormat);
+
 	if (!negate)
 	{
 		switch(comp)
 		{
-#ifdef USE_OPENGLES
-			case CVPSwizzle::X: return GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES;
-			case CVPSwizzle::Y: return GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES;
-			case CVPSwizzle::Z: return GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES;
-#else
 			case CVPSwizzle::X: return GL_X_EXT;
 			case CVPSwizzle::Y: return GL_Y_EXT;
 			case CVPSwizzle::Z: return GL_Z_EXT;
 			case CVPSwizzle::W: return GL_W_EXT;
-#endif
+
 			default:
 				nlstop;
 				return 0;
@@ -227,16 +231,11 @@ inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 	{
 		switch(comp)
 		{
-#ifdef USE_OPENGLES
-			case CVPSwizzle::X: return GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES;
-			case CVPSwizzle::Y: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES;
-			case CVPSwizzle::Z: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_OES;
-#else
 			case CVPSwizzle::X: return GL_NEGATIVE_X_EXT;
 			case CVPSwizzle::Y: return GL_NEGATIVE_Y_EXT;
 			case CVPSwizzle::Z: return GL_NEGATIVE_Z_EXT;
 			case CVPSwizzle::W: return GL_NEGATIVE_W_EXT;
-#endif
+
 			default:
 				nlstop;
 				return 0;
@@ -244,6 +243,7 @@ inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 		}
 	}
 }
+#endif
 
 // ***************************************************************************
 /** Convert an output register to a EXTVertexShader register
@@ -1341,12 +1341,10 @@ static void ARBVertexProgramDumpInstr(const CVPInstruction &instr, std::string &
 
 }
 
-
-
 // ***************************************************************************
 bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgram, GLuint id, bool &specularWritten)
 {
-	H_AUTO_OGL(CDriverGL_setupARBVertexProgram)
+	H_AUTO_OGL(CDriverGL_setupARBVertexProgram);
 
 #ifndef USE_OPENGLES
 	// tmp
@@ -1563,7 +1561,6 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 	return false;
 #endif
 }
-
 
 // ***************************************************************************
 bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
@@ -1982,5 +1979,8 @@ bool CDriverGL::supportVertexProgramDoubleSidedColor() const
 	return _Extensions.NVVertexProgram || _Extensions.ARBVertexProgram;
 }
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

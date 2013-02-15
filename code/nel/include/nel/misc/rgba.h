@@ -17,10 +17,10 @@
 #ifndef NL_RGBA_H
 #define NL_RGBA_H
 
-#include <algorithm>
-
 #include "types_nl.h"
 #include "common.h"
+
+#include <algorithm>
 
 
 namespace NLMISC

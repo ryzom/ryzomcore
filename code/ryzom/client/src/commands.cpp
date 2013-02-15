@@ -5055,14 +5055,14 @@ NLMISC_COMMAND(reloadFogMaps, "Force to reload all the fog maps", "<>")
 NLMISC_COMMAND(dumpSounds, "Dump names of all loaded sound", "<>")
 {
 	if (!args.empty()) return false;
-	std::vector<NLMISC::TStringId> sounds;
+	std::vector<NLMISC::CSheetId> sounds;
 	extern CSoundManager	*SoundMngr;
 	if (!SoundMngr) return false;
 	if (!SoundMngr->getMixer()) return false;
 	SoundMngr->getMixer()->getSoundNames(sounds);
 	for(uint k = 0; k < sounds.size(); ++k)
 	{
-		nlinfo(NLMISC::CStringMapper::unmap(sounds[k]).c_str());
+		nlinfo(sounds[k].toString()/*NLMISC::CStringMapper::unmap(sounds[k])*/.c_str());
 	}
 	return true;
 }
@@ -5770,7 +5770,7 @@ NLMISC_COMMAND(em, "emote command", "<emote phrase>")
 
 
 
-NLMISC_COMMAND(guildmotd, "Set the guild message of the day","<msg of the day>")
+NLMISC_COMMAND(guildmotd, "Set or see the guild message of the day","<msg of the day>")
 {
 	CBitMemStream out;
 	if (!GenericMsgHeaderMngr.pushNameToStream("COMMAND:GUILDMOTD", out))

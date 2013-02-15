@@ -27,9 +27,9 @@
 #include "nel/3d/shape.h"
 #include "nel/3d/transform_shape.h"
 #include "nel/3d/register_3d.h"
-#include "../../../src/pacs/global_retriever.h"
-#include "../../../src/pacs/local_retriever.h"
-#include "../../../src/pacs/retriever_bank.h"
+#include "nel/pacs/global_retriever.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/retriever_bank.h"
 #include "../ig_lighter_lib/ig_lighter_lib.h"
 
 

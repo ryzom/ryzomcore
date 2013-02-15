@@ -120,10 +120,8 @@ namespace NLQT
 							{
 								if (elmt->isAtom()) 
 								{
-									((NLGEORGES::CFormElmAtom*)elmt)->setValue(value.toString().toStdString().c_str());
-									nldebug(QString("array element string %1 %2")
-									.arg(itemData[0].toString()).arg(value.toString())
-									.toStdString().c_str());
+									((NLGEORGES::CFormElmAtom*)elmt)->setValue(value.toString().toUtf8().constData());
+									nldebug("array element string %s %s", itemData[0].toString().toUtf8().constData(), value.toString().toUtf8().constData());
 								}
 							}
 						}
@@ -131,18 +129,14 @@ namespace NLQT
 					else
 					{
 						if(parentItem->formElm->setValueByName(
-							value.toString().toStdString().c_str(),
-							itemData[0].toString().toStdString().c_str()))
+							value.toString().toUtf8().constData(),
+							itemData[0].toString().toUtf8().constData()))
 						{
-							nldebug(QString("string %1 %2")
-							.arg(itemData[0].toString()).arg(value.toString())
-							.toStdString().c_str());
+							nldebug("string %s %s", itemData[0].toString().toUtf8().constData(), value.toString().toUtf8().constData());
 						}
 						else
 						{
-							nldebug(QString("FAILED string %1 %2")
-							.arg(itemData[0].toString()).arg(value.toString())
-							.toStdString().c_str());
+							nldebug("FAILED string %s %s", itemData[0].toString().toUtf8().constData(), value.toString().toUtf8().constData());
 						}
 					}
 					break;

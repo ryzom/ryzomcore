@@ -1793,7 +1793,6 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 			vi.Pos = pos;
 			if (pos.z > -90000.0f)
 				_FloraInsts.push_back (vi);
-
 		} // End of Generate for a point
 
 		// Generate for a path
@@ -2024,7 +2023,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 
 
 		// Make the .IG
-		string ZoneName = "";
+		string ZoneName;
 		ZoneName += NLMISC::toString(-j) + "_";
 		ZoneName += 'a' + (i/26);
 		ZoneName += 'a' + (i%26);

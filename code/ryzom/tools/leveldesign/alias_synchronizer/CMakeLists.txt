@@ -9,4 +9,4 @@ ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 NL_DEFAULT_PROPS(alias_synchronizer "Ryzom, Tools, Misc: Alias Synchronizer")
 NL_ADD_RUNTIME_FLAGS(alias_synchronizer)
 
-INSTALL(TARGETS alias_synchronizer RUNTIME DESTINATION bin COMPONENT tools)
+INSTALL(TARGETS alias_synchronizer RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

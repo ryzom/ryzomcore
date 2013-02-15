@@ -18,4 +18,4 @@ NL_DEFAULT_PROPS(nel_patch_edit_adv "MAX Plugin: NeL Patch Edit (Adv)")
 NL_ADD_RUNTIME_FLAGS(nel_patch_edit_adv)
 NL_ADD_LIB_SUFFIX(nel_patch_edit_adv)
 
-INSTALL(TARGETS nel_patch_edit_adv RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION lib ARCHIVE DESTINATION lib COMPONENT libraries)
+INSTALL(TARGETS nel_patch_edit_adv RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)

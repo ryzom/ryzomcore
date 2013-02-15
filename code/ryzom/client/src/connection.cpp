@@ -57,7 +57,6 @@
 #include "time_client.h"
 #include "net_manager.h"
 #include "string_manager_client.h"
-#include "http_client.h"
 #include "far_tp.h"
 #include "movie_shooter.h"
 
@@ -223,7 +222,6 @@ void connectionRestaureVideoMode ()
 }
 
 
-#define GROUP_BROWSER			"ui:outgame:charsel:webstart:content:webstart_html"
 #define UI_VARIABLES_SCREEN_WEBSTART		8
 
 
@@ -242,23 +240,6 @@ class CAHOnReloadTestPage: public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOnReloadTestPage, "on_reload_test_page");
-
-
-void initWebBrowser()
-{
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	//pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
-
-	// start the browser
-	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
-
-	if (pGH)
-	{
-		pGH->setActive(true);
-		pGH->browse(ClientCfg.PatchletUrl.c_str());
-	}
-}
-
 
 // ------------------------------------------------------------------------------------------------
 void	setOutGameFullScreen()
@@ -388,7 +369,6 @@ bool connection (const string &cookie, const string &fsaddr)
 		WaitServerAnswer = true;
 	}*/
 
-	pIM->activateMasterGroup ("ui:outgame", true);
 	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
 	CCDBNodeBranch::flushObserversCalls();
 
@@ -420,8 +400,6 @@ bool connection (const string &cookie, const string &fsaddr)
 	nlinfo ("PROFILE: %d seconds for connection", (uint32)(ryzomGetLocalTime ()-connStart)/1000);
 
 	// Init web box
-	nlinfo("ok");
-	initWebBrowser();
 
 	// TMP TMP
 	if (ClientCfg.Local)
@@ -551,7 +529,6 @@ bool reconnection()
 	// Start the finite state machine
 	TInterfaceState InterfaceState = GLOBAL_MENU;
 
-	pIM->activateMasterGroup ("ui:outgame", true);
 	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(-1);
 	CCDBNodeBranch::flushObserversCalls();
 
@@ -1400,19 +1377,27 @@ Deprecated	{
 		}
 */			else if (sProp == "title")
 		{
-			bool womenTitle;
+			bool womanTitle;
 			if( CharacterSummaries[PlayerSelectedSlot].VisualPropA.PropertySubData.Sex == 1 )
 			{
 				UserEntity->setGender( GSGENDER::female );
-				womenTitle = true;
+				womanTitle = true;
 			}
 			else
 			{
 				UserEntity->setGender( GSGENDER::male );
-				womenTitle = false;
+				womanTitle = false;
 			}
 			string titleStr = CHARACTER_TITLE::toString(CharacterSummaries[PlayerSelectedSlot].Title);
-			sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(titleStr,womenTitle);
+			sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(titleStr, womanTitle);
+			{
+				// Sometimes translation contains another title
+				ucstring::size_type pos = sValue.find('$');
+				if (pos != ucstring::npos)
+				{
+					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue), womanTitle);
+				}
+			}
 			setTarget (pCaller, sTarget, sValue);
 		}
 /*			else if (sProp == "orient")
@@ -2006,7 +1991,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sName = getParam(Params, "name");
-		TStringId id = CStringMapper::map(sName);
+		CSheetId id = CSheetId(sName, "sound");
 		if (SoundMngr != NULL)
 			SoundMngr->spawnSource(id,CVector(0,0,0));
 	}

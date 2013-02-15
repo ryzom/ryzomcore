@@ -16,6 +16,8 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/system_info.h"
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
@@ -41,6 +43,10 @@
 #include "nel/misc/variable.h"
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 

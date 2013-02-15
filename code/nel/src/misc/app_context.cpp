@@ -19,6 +19,10 @@
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/command.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 

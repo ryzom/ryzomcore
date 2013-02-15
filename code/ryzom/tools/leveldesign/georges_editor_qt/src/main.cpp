@@ -21,6 +21,10 @@
 #include "modules.h"
 #include "georges_splash.h"
 
+#ifdef HAVE_GEQT_CONFIG_H
+#include "geqt_config.h"
+#endif
+
 // nel_qt log file name
 #define NLQT_LOG_FILE "nel_qt.log"
 
@@ -96,7 +100,7 @@ sint main(int argc, char **argv)
 #if defined(NL_OS_MAC)
 	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
 	CLibrary::addLibPath(
-		(qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
+		(qApp->applicationDirPath() + QString("/../PlugIns/nel")).toUtf8().constData());
 #endif
 
 	// go nel!

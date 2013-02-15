@@ -67,7 +67,6 @@
 
 
 #include "game_share/entity_types.h"
-#include "fe_types.h"
 
 #ifndef NL_RELEASE
 #ifndef TRACE_SHARD_MESSAGES

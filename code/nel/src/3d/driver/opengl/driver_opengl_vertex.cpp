@@ -46,13 +46,15 @@ using namespace NLMISC;
 
 
 
-namespace NL3D
-{
+namespace NL3D {
 
-
-
-
-
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 
@@ -1857,5 +1859,9 @@ void CIndexBufferInfo::setupIndexBuffer(CIndexBuffer &ib)
 }
 
 // ***************************************************************************
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

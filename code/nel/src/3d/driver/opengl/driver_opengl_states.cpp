@@ -22,8 +22,15 @@
 // define it For Debug purpose only. Normal use is to hide this line
 //#define		NL3D_GLSTATE_DISABLE_CACHE
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CDriverGLStates::CDriverGLStates()
@@ -87,6 +94,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	_CurLighting= false;
 	_CurZWrite= true;
 	_CurStencilTest=false;
+	_CurMultisample= false;
 
 	// setup GLStates.
 	glDisable(GL_FOG);
@@ -95,6 +103,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_LIGHTING);
 	glDepthMask(GL_TRUE);
+	glDisable(GL_MULTISAMPLE_ARB);
 
 	// Func.
 	_CurBlendSrc= GL_SRC_ALPHA;
@@ -156,11 +165,9 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 
 		if(_TextureCubeMapSupported)
 		{
-#ifdef USE_OPENGLES
-			glDisable(GL_TEXTURE_CUBE_MAP_OES);
-			glDisable(GL_TEXTURE_GEN_STR_OES);
-#else
 			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+#ifdef USE_OPENGLES
+			glDisable(GL_TEXTURE_GEN_STR_OES);
 #endif
 		}
 
@@ -372,6 +379,26 @@ void			CDriverGLStates::enableStencilTest(bool enable)
 	}
 }
 
+// ***************************************************************************
+void			CDriverGLStates::enableMultisample(bool enable)
+{
+	H_AUTO_OGL(CDriverGLStates_enableMultisample);
+
+	// If different from current setup, update.
+#ifndef NL3D_GLSTATE_DISABLE_CACHE
+	if( enable != _CurMultisample )
+#endif
+	{
+		// new state.
+		_CurMultisample= enable;
+
+		// Setup GLState.
+		if(_CurMultisample)
+			glEnable(GL_MULTISAMPLE_ARB);
+		else
+			glDisable(GL_MULTISAMPLE_ARB);
+	}
+}
 
 // ***************************************************************************
 void			CDriverGLStates::blendFunc(GLenum src, GLenum dst)
@@ -658,7 +685,7 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 		else
 		{
 #ifdef USE_OPENGLES
-//			nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
+			nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
 #else
 			glTexGeni( GL_S, GL_TEXTURE_GEN_MODE, mode);
 			glTexGeni( GL_T, GL_TEXTURE_GEN_MODE, mode);
@@ -674,8 +701,8 @@ void		CDriverGLStates::setTexGenMode (uint stage, GLint mode)
 #ifdef USE_OPENGLES
 //			if(mode==GL_OBJECT_LINEAR || mode==GL_EYE_LINEAR)
 //			{
-				nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
-				glEnable(GL_TEXTURE_GEN_STR_OES);
+//				nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
+//				glEnable(GL_TEXTURE_GEN_STR_OES);
 //			}
 //			else
 //			{
@@ -714,11 +741,7 @@ void			CDriverGLStates::resetTextureMode()
 
 	if (_TextureCubeMapSupported)
 	{
-#ifdef USE_OPENGLES
-		glDisable(GL_TEXTURE_CUBE_MAP_OES);
-#else
 		glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-#endif
 	}
 
 #ifndef USE_OPENGLES
@@ -761,11 +784,7 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		{
 			if(_TextureCubeMapSupported)
 			{
-#ifdef USE_OPENGLES
-				glDisable(GL_TEXTURE_CUBE_MAP_OES);
-#else
 				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-#endif
 			}
 			else
 			{
@@ -795,11 +814,7 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		{
 			if(_TextureCubeMapSupported)
 			{
-#ifdef USE_OPENGLES
-				glEnable(GL_TEXTURE_CUBE_MAP_OES);
-#else
 				glEnable(GL_TEXTURE_CUBE_MAP_ARB);
-#endif
 			}
 			else
 			{
@@ -844,11 +859,11 @@ void			CDriverGLStates::forceActiveTextureARB(uint stage)
 	_CurrentActiveTextureARB= stage;
 }
 
-
 // ***************************************************************************
 void			CDriverGLStates::enableVertexArray(bool enable)
 {
-	H_AUTO_OGL(CDriverGLStates_enableVertexArray)
+	H_AUTO_OGL(CDriverGLStates_enableVertexArray);
+
 	if(_VertexArrayEnabled != enable)
 	{
 		if(enable)
@@ -1010,7 +1025,7 @@ void CDriverGLStates::enableVertexAttribArrayARB(uint glIndex,bool enable)
 // ***************************************************************************
 void CDriverGLStates::enableVertexAttribArrayForEXTVertexShader(uint glIndex, bool enable, uint *variants)
 {
-	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArrayForEXTVertexShader)
+	H_AUTO_OGL(CDriverGLStates_enableVertexAttribArrayForEXTVertexShader);
 
 	if(_VertexAttribArrayEnabled[glIndex] != enable)
 	{
@@ -1147,6 +1162,8 @@ CDriverGLStates::TCullMode CDriverGLStates::getCullMode() const
 	return _CullMode;
 }
 
-
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

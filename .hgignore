@@ -153,6 +153,7 @@ code/nelns/build/*
 code/snowballs/build/*
 code/ryzom/build/*
 code/build/*
+code/build-2010/*
 build/*
 install/*
 

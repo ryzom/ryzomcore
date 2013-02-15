@@ -57,6 +57,8 @@ extern CCDBSynchronised IngameDbMngr;
 ///\todo nico remove that
 extern bool g_hidden;
 
+#define GROUP_BROWSER			"ui:outgame:charsel:webstart:content:webstart_html"
+
 ///max botchat distance
 #define MAX_BOTCHAT_DISTANCE_SQUARE 25
 
@@ -220,6 +222,7 @@ public:
 	class IStringProcess
 	{
 	public:
+		virtual ~IStringProcess() { }
 		virtual bool cbIDStringReceived(ucstring &inOut) = 0; // called when string or id is received (return true if valid the change)
 	};
 

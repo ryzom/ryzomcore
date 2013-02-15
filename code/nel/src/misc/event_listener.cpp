@@ -20,6 +20,9 @@
 #include "nel/misc/event_server.h"
 #include "nel/misc/events.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 

@@ -151,7 +151,7 @@ void CWords_dicDlg::on_findButton_clicked()
 {
 	QString inputStr = ui.lookUpEdit->text();
 	bool showAll = ui.showAllCheckBox->isChecked();
-	lookUp( inputStr.toStdString(), showAll );
+	lookUp( inputStr.toUtf8().constData(), showAll );
 }
 
 void CWords_dicDlg::on_lookUpEdit_textChanged()
@@ -191,7 +191,7 @@ void CWords_dicDlg::on_fileListButton_clicked()
 void CWords_dicDlg::on_resultsListWidget_itemSelectionChanged()
 {
 	QListWidgetItem *i = ui.resultsListWidget->currentItem();
-	copyIntoClipboard( i->text().toStdString() );
+	copyIntoClipboard( i->text().toUtf8().constData() );
 }
 
 

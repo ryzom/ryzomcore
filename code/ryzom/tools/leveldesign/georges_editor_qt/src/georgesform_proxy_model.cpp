@@ -42,7 +42,7 @@ namespace NLQT
 		CFormItem *item   = smodel->getItem(index);
 
 		//qDebug() << smodel->showParents() << (item->valueFrom() == NLGEORGES::UFormElm::NodeParentForm);
-		//nlinfo("%s %d %d %d %d", item->data(index.column()).toString().toStdString().c_str(), 
+		//nlinfo("%s %d %d %d %d", item->data(index.column()).toString().toUtf8().constData(), 
 		//	item->valueFrom(),
 		//	item->nodeFrom(),
 		//	smodel->showParents(), 
@@ -79,6 +79,8 @@ namespace NLQT
 					}
 				}
 			}
+		default:
+			break;
 		}
 		return true;
 	}

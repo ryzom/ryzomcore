@@ -117,7 +117,7 @@ void CGenNpcDescMsgImp::callback (const std::string &serviceName, NLNET::TServic
 				
 				//if the creature has a user model and if the user model's script contains parse errors, change
 				//the creature's name to <usermodelId:ERROR> 
-				if (_UserModelId != "" && CDynamicSheetManager::getInstance()->scriptErrors(_PrimAlias, _UserModelId) == true)
+				if (!_UserModelId.empty() && CDynamicSheetManager::getInstance()->scriptErrors(_PrimAlias, _UserModelId) == true)
 				{
 					TDataSetRow row = creature->getEntityRowId();
 					ucstring name;
@@ -253,7 +253,7 @@ void CChangeCreatureHPImp::callback(const string &, NLNET::TServiceId sid)
 
 
 //--------------------------------------------------------------
-//				CChangeCreatureMaxHPImp ::callback()  
+//				CCreatureSetUrlImp ::callback()  
 //--------------------------------------------------------------
 void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
 {

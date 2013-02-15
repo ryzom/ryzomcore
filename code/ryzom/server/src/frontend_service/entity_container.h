@@ -25,6 +25,7 @@
 #include "game_share/tick_event_handler.h"
 #include "game_share/ryzom_mirror_properties.h"
 #include "client_id_lookup.h"
+#include "fe_types.h"
 #include <map>
 #include <set>
 
