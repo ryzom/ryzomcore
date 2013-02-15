@@ -1,12 +1,12 @@
 <?php
 	function ach_render() {
-		global $user,$_CONF;
+		global $_USER,$_CONF;
 
 		$c = "<center><table>
 			<tr>
 				<td colspan='2' align='left'>
 					<div style='display:block;border-bottom:1px solid #000000;'>
-						<div style='float:left;width:420px;'>".ach_render_yubopoints($user['id'])."</div>
+						<div style='float:left;width:420px;'>".ach_render_yubopoints()."</div>
 						<div style='float:right;width:420px;text-align:right;'>".ach_render_facebook()."</div>
 						<div style='clear:both;'></div>
 					</div>
@@ -31,7 +31,21 @@
 		$open = $menu->getOpenCat();
 
 		if($open != 0) {
-			$cat = new AchCategory($open,null,$_REQUEST['cult'],$_REQUEST['civ']);
+			if($_REQUEST['cult']) {
+				$cult = $_REQUEST['cult'];
+			}
+			else {
+				$cult = $_USER->getCult();
+			}
+
+			if($_REQUEST['civ']) {
+				$civ = $_REQUEST['civ'];
+			}
+			else {
+				$civ = $_USER->getCiv();
+			}
+
+			$cat = new AchCategory($open,$_USER->getRace(),$cult,$civ);
 		}
 		else {
 			#die($_CONF['summary_size']);
@@ -51,7 +65,7 @@
 		return $c;
 	}
 
-	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral",&$cat) {
+	function ach_render_tiebar($cult = "c_neutral", $civ = "c_neutral", &$cat) {
 		global $_USER;
 
 		$html = "<style>
@@ -63,7 +77,7 @@
 		<div style='display:block;text-align:center;'><form method='post' action='?cat=".$cat->getID()."' id='cc_form'>
 			<table>
 				<tr>";
-				if($cat->isTiedCult()) {
+				if($cat->isAllowedCult()) {
 					$html.= "<td>
 						<select name='cult' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($cult == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
@@ -72,7 +86,7 @@
 						</select>
 					</td>";
 				}
-				if($cat->isTiedCiv()) {
+				if($cat->isAllowedCiv()) {
 					$html.= "<td>
 						<select name='civ' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($civ == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
@@ -89,30 +103,30 @@
 		
 		<div style='display:block;font-weight:bold;font-size:20px;color:#FFFFFF;text-align:center;margin-bottom:5px;'>";
 
-		if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
+		/*if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
 			#While being of neutral allegiance with the higher powers
 			$html .= get_translation('ach_allegiance_neutral_cult',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
 		}
 		elseif($cat->isTiedCiv() && !$cat->isTiedCult() && $civ == "c_neutral") { // xx / neutral
 			#While being of neutral allegiance with the homin civilizations
 			$html .= get_translation('ach_allegiance_neutral_civ',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
-		}
-		elseif($cat->isTiedCiv() && $cat->isTiedCult() && $cult == "c_neutral" && $civ == "c_neutral") { // neutral / neutral
+		}*/
+		if(($cult == "c_neutral" || !$cat->isAllowedCult()) && ($civ == "c_neutral" || !$cat->isAllowedCiv())) { // neutral / neutral
 			#While being of neutral allegiance
 			$html .= get_translation('ach_allegiance_neutral',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
 		}
 		else { //other
 			#While being aligned with the
 			$html .= get_translation('ach_allegiance_start',$_USER->getLang());
-			if($cat->isTiedCult() && $cult != "c_neutral") {
+			if($cat->isAllowedCult() && $cult != "c_neutral") {
 				#CULT
 				$html .= "<span class='o'>".ach_translate_cc($cult)."</span>";
-				if($cat->isTiedCiv() && $civ != "c_neutral") {
+				if($cat->isAllowedCiv() && $civ != "c_neutral") {
 					#and the CIV
 					$html .= get_translation('ach_allegiance_and',$_USER->getLang())." <span class='o'>".ach_translate_cc($civ)."</span>";
 				}
 			}
-			elseif($cat->isTiedCiv() && $civ != "c_neutral") {
+			elseif($cat->isAllowedCiv() && $civ != "c_neutral") {
 				#CIV
 				$html .= "<span class='o'>".ach_translate_cc($civ)."</span>";
 			}
@@ -193,7 +207,7 @@
 			if($curr->inDev()) {
 				continue;
 			}
-			$html .= "<span class='ach_mspan'><a href='?lang=en&cat=".$curr->getID()."'><table class='ach_menu'>
+			$html .= "<span class='ach_mspan'><a href='?cat=".$curr->getID()."'><table class='ach_menu'>
 				<tr>";
 					if($sub == 0) {
 						$html .= "<td style='width:32px;'><img src='".$_CONF['image_url']."pic/menu/".$curr->getImage()."' /></td>";
@@ -221,7 +235,7 @@
 			return "<center style='font-size:24px;'>".get_translation('ach_no_heroic_deeds',$_USER->getLang())."</center>";
 		}
 
-		if($cat->isTiedCult() || $cat->isTiedCiv()) {
+		if($cat->hasTieAlign_done() || $cat->hasTieAlign_open()) {
 			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
 		}
 
@@ -229,10 +243,10 @@
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
 
-			if($curr->inDev() || !$curr->parentDone()) {
+			if($curr->inDev() || !$curr->parentDone() || !$curr->isTiedRace_done($cat->getCurrentRace()) || !$curr->isTiedAlign_done($cat->getCurrentCult(),$cat->getCurrentCiv())) {
 				continue;
 			}
-			$html .= ach_render_achievement_done($curr);
+			$html .= ach_render_achievement_done($curr,$cat);
 		}
 
 		if($cat->isHeroic()) {
@@ -243,16 +257,16 @@
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
 
-			if($curr->inDev() || !$curr->parentDone()) {
+			if($curr->inDev() || !$curr->parentDone() || !$curr->isTiedRace_open($cat->getCurrentRace()) || !$curr->isTiedAlign_open($cat->getCurrentCult(),$cat->getCurrentCiv())) {
 				continue;
 			}
-			$html .= ach_render_achievement_open($curr);
+			$html .= ach_render_achievement_open($curr,$cat);
 		}
 
 		return $html;
 	}
 
-	function ach_render_achievement_done(&$ach) {
+	function ach_render_achievement_done(&$ach,&$cat) {
 		global $_CONF;
 
 		$html = '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
@@ -277,7 +291,7 @@
 									}
 									$html .= '</td>
 								</tr><tr><td align="center" valign="top"><table>';
-							$html .= ach_render_task_done($ach);
+							$html .= ach_render_task_done($ach,$cat);
 							$html .= '</table></td></tr></tbody></table></center>
 						</td>
 						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_done_r.png);"></td>
@@ -292,7 +306,7 @@
 		return $html;
 	}
 
-	function ach_render_achievement_open(&$ach) {
+	function ach_render_achievement_open(&$ach,&$cat) {
 		global $_CONF;
 
 		$html = '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
@@ -352,7 +366,7 @@
 		return $html;
 	}
 
-	function ach_render_task_done(&$ach) {
+	function ach_render_task_done(&$ach,&$cat) {
 		global $_CONF;
 		$html = "";
 
@@ -360,7 +374,7 @@
 		while($task_list->hasNext()) {
 			$task = $task_list->getNext();
 
-			if($task->inDev()) {
+			if($task->inDev() || !$task->isTiedRace_open($cat->getCurrentRace()) || !$task->isTiedAlign_open($cat->getCurrentCult(),$cat->getCurrentCiv())) {
 				continue;
 			}
 			$html .= "<tr><td><span style='color:#66CC00;font-weight:bold;'>".$task->getDisplayName()."</span></td><td>( ".date('d.m.Y',$task->getDone())." )</td>";

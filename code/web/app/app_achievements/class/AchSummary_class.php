@@ -15,7 +15,7 @@
 			//read all recent tasks of user
 			//make distinct achievement list
 
-			$res = $DBc->sqlQuery("SELECT DISTINCT aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name, (SELECT aal_template FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_template FROM ach_achievement as ach,ach_task,ach_player_task WHERE at_achievement=aa_id AND apt_player='".$_USER->getID()."' AND apt_task=at_id ORDER by apt_date DESC LIMIT 0,".$size);
+			$res = $DBc->sqlQuery("SELECT DISTINCT apt_date,aa_id,ach.*,(SELECT aal_name FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_name, (SELECT aal_template FROM ach_achievement_lang WHERE aal_lang='".$_USER->getLang()."' AND aal_achievement=ach.aa_id) as aal_template FROM ach_achievement as ach,ach_task,ach_player_task WHERE at_achievement=aa_id AND ach.aa_dev='0' AND apt_player='".$_USER->getID()."' AND apt_task=at_id ORDER by apt_date DESC LIMIT 0,".$size);
 
 			#echo var_export($res,true);
 
@@ -107,12 +107,66 @@
 			return "c_neutral";
 		}
 
+		function getCurrentRace() {
+			return "r_matis";
+		}
+
 		function isHeroic() {
 			return false;
 		}
 
 		function isContest() {
 			return false;
+		}
+
+		function hasTieRace_open()
+		{
+			return false;
+		}
+
+		function hasTieAlign_open()
+		{
+			return false;
+		}
+
+		function hasTieRace_done()
+		{
+			return false;
+		}
+
+		function hasTieAlign_done()
+		{
+			return false;
+		}
+
+		function hasTieRaceDev()
+		{
+			return false;
+		}
+
+		function hasTieAlignDev()
+		{
+			return false;
+		}
+
+		function isTiedRace_open($r)
+		{
+			return true;
+		}
+
+		function isTiedAlign_open($cult, $civ)
+		{
+			return true;
+		}
+
+		function isTiedRace_done($r)
+		{
+			return true;
+		}
+
+		function isTiedAlign_done($cult, $civ)
+		{
+			return true;
 		}
 	}
 ?>
