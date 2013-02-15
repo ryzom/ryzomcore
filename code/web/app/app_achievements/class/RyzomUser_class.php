@@ -23,15 +23,15 @@
 		}
 
 		function getRace() {
-			return $this->data['race'];
+			return 'r_'.$this->data['race'];
 		}
 
 		function getCiv() {
-			return $this->data['civilization'];
+			return 'c_'.$this->data['civ'];
 		}
 
 		function getCult() {
-			return $this->data['cult'];
+			return 'c_'.$this->data['cult'];
 		}
 
 		function getName() {

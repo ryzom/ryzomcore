@@ -44,9 +44,10 @@ class ryHmagic {
 		$this->dfm = new ryDataFileManager(_user()->id);
 	}
 	
-	function getWebCommand($web_app_url, $command, $is_next=false, $need_callback=false, $old_sep=false) {
+	function getWebCommand($web_app_url, $command, $is_next=false, $need_callback=false, $old_sep=false, $replace_space=true) {
 		$command = str_replace('#player', ryzom_get_param('player_eid'), $command);
-		$command = str_replace(' ', chr(160), $command);
+		if ($replace_space)
+			$command = str_replace(' ', chr(160), $command);
 		
 		$last_connected_date = strtotime($_SESSION['last_played_date']);
 		$index_infos = $this->dfm->loadUserDataFromApp('hmagic.index', 'app_profile');
@@ -72,11 +73,8 @@ class ryHmagic {
 		$eid = ryzom_get_param('datasetid');
 		$checksum = $web_app_url.'&'.$tid . $last_connected_date . $index_infos['index'] . $command . $eid;
 		$hmac =  strtoupper(hash_hmac('sha1', $checksum, RYAPI_EGS_SALT));
-		return '
-		local command = \''.str_replace("'", '\\\'',str_replace('&', '&amp;', $command)).'\'
-		runCommand("a","webExecCommand","'.str_replace('&', '&amp;', $web_app_url).'&amp;'.$tid.'","'.$index_infos['index'].'",command,"'.$hmac.'","'.($old_sep?'1':'3').'","'.($is_next?'1':'0').'","'.($need_callback?'1':'0').'")
-		--runCommand("a","webExecCommand","debug", "1", command, "hmac", "2")
-		';
+		return '	local command = \''.str_replace("'", '\\\'',str_replace('&', '&amp;', $command)).'\''."\n\t".
+		(RYAPI_HMAGIC_DEBUG?'runCommand("a","webExecCommand","debug", "1", command, "hmac", "2","'.($is_next?'1':'0').'","'.($need_callback?'1':'0').'")':'runCommand("a","webExecCommand","'.str_replace('&', '&amp;', $web_app_url).'&amp;'.$tid.'","'.$index_infos['index'].'",command,"'.$hmac.'","'.($old_sep?'1':'3').'","'.($is_next?'1':'0').'","'.($need_callback?'1':'0').'")');
 	}
 
 	function validateCallback() {

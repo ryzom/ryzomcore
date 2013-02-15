@@ -1,16 +1,16 @@
 -- --------------------------------------------------------
 -- Host:                         178.33.225.92
--- Server version:               5.5.28-0ubuntu0.12.04.2-log - (Ubuntu)
--- Server OS:                    debian-linux-gnu
--- HeidiSQL version:             7.0.0.4053
--- Date/time:                    2012-12-10 14:52:03
+-- Server Version:               5.5.28-0ubuntu0.12.04.2-log - (Ubuntu)
+-- Server Betriebssystem:        debian-linux-gnu
+-- HeidiSQL Version:             7.0.0.4328
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
-/*!40014 SET FOREIGN_KEY_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
--- Dumping structure for table app_achievements.ach_achievement
+-- Exportiere Struktur von Tabelle app_achievements.ach_achievement
 CREATE TABLE IF NOT EXISTS `ach_achievement` (
   `aa_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `aa_category` bigint(20) unsigned NOT NULL,
@@ -24,10 +24,10 @@ CREATE TABLE IF NOT EXISTS `ach_achievement` (
   PRIMARY KEY (`aa_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_achievement_lang
+-- Exportiere Struktur von Tabelle app_achievements.ach_achievement_lang
 CREATE TABLE IF NOT EXISTS `ach_achievement_lang` (
   `aal_achievement` bigint(20) unsigned NOT NULL,
   `aal_lang` varchar(2) COLLATE utf8_bin NOT NULL,
@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS `ach_achievement_lang` (
   PRIMARY KEY (`aal_achievement`,`aal_lang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_atom
+-- Exportiere Struktur von Tabelle app_achievements.ach_atom
 CREATE TABLE IF NOT EXISTS `ach_atom` (
   `atom_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `atom_objective` bigint(20) unsigned NOT NULL,
@@ -50,10 +50,10 @@ CREATE TABLE IF NOT EXISTS `ach_atom` (
   KEY `atom_objective` (`atom_objective`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_category
+-- Exportiere Struktur von Tabelle app_achievements.ach_category
 CREATE TABLE IF NOT EXISTS `ach_category` (
   `ac_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `ac_parent` bigint(20) unsigned DEFAULT NULL,
@@ -62,13 +62,15 @@ CREATE TABLE IF NOT EXISTS `ach_category` (
   `ac_dev` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `ac_heroic` tinyint(1) unsigned NOT NULL,
   `ac_contest` tinyint(1) unsigned NOT NULL,
+  `ac_allow_civ` tinyint(1) unsigned NOT NULL,
+  `ac_allow_cult` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY (`ac_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_category_lang
+-- Exportiere Struktur von Tabelle app_achievements.ach_category_lang
 CREATE TABLE IF NOT EXISTS `ach_category_lang` (
   `acl_category` bigint(20) unsigned NOT NULL,
   `acl_lang` varchar(2) COLLATE utf8_bin NOT NULL,
@@ -76,10 +78,10 @@ CREATE TABLE IF NOT EXISTS `ach_category_lang` (
   PRIMARY KEY (`acl_category`,`acl_lang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_fb_token
+-- Exportiere Struktur von Tabelle app_achievements.ach_fb_token
 CREATE TABLE IF NOT EXISTS `ach_fb_token` (
   `aft_player` bigint(20) unsigned NOT NULL,
   `aft_token` varchar(255) NOT NULL,
@@ -88,10 +90,10 @@ CREATE TABLE IF NOT EXISTS `ach_fb_token` (
   PRIMARY KEY (`aft_player`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_objective
+-- Exportiere Struktur von Tabelle app_achievements.ach_objective
 CREATE TABLE IF NOT EXISTS `ach_objective` (
   `ao_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `ao_task` bigint(20) unsigned NOT NULL,
@@ -103,10 +105,10 @@ CREATE TABLE IF NOT EXISTS `ach_objective` (
   KEY `ao_task` (`ao_task`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_objective_lang
+-- Exportiere Struktur von Tabelle app_achievements.ach_objective_lang
 CREATE TABLE IF NOT EXISTS `ach_objective_lang` (
   `aol_objective` bigint(20) unsigned NOT NULL,
   `aol_lang` varchar(2) COLLATE utf8_bin NOT NULL,
@@ -114,67 +116,76 @@ CREATE TABLE IF NOT EXISTS `ach_objective_lang` (
   PRIMARY KEY (`aol_objective`,`aol_lang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_player_atom
+-- Exportiere Struktur von Tabelle app_achievements.ach_player_atom
 CREATE TABLE IF NOT EXISTS `ach_player_atom` (
-  `apa_atom` bigint(20) unsigned NOT NULL,
-  `apa_player` bigint(20) unsigned NOT NULL,
+  `apa_atom` bigint(10) unsigned NOT NULL,
+  `apa_player` bigint(10) unsigned NOT NULL,
+  `apa_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `apa_date` bigint(20) unsigned NOT NULL,
   `apa_expire` blob,
   `apa_state` enum('GRANT','DENY') COLLATE utf8_bin NOT NULL,
   `apa_value` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`apa_id`),
   KEY `apa_atom` (`apa_atom`,`apa_player`),
-  KEY `apa_state` (`apa_state`),
-  KEY `apa_atom_2` (`apa_atom`,`apa_player`,`apa_state`),
-  KEY `apa_player` (`apa_player`),
-  KEY `apa_atom_3` (`apa_atom`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  KEY `apa_atom_2` (`apa_atom`,`apa_player`,`apa_state`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin ROW_FORMAT=FIXED;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_player_objective
+-- Exportiere Struktur von Tabelle app_achievements.ach_player_item
+CREATE TABLE IF NOT EXISTS `ach_player_item` (
+  `api_item` varchar(32) COLLATE utf8_bin NOT NULL,
+  `api_player` int(10) unsigned NOT NULL,
+  `api_date` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`api_item`,`api_player`),
+  KEY `Index 2` (`api_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin DELAY_KEY_WRITE=1 ROW_FORMAT=FIXED;
+
+-- Daten Export vom Benutzer nicht ausgewählt
+
+
+-- Exportiere Struktur von Tabelle app_achievements.ach_player_objective
 CREATE TABLE IF NOT EXISTS `ach_player_objective` (
   `apo_objective` bigint(20) unsigned NOT NULL,
   `apo_player` bigint(20) unsigned NOT NULL,
   `apo_date` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (`apo_objective`,`apo_player`),
-  KEY `apo_player` (`apo_player`),
-  KEY `apo_objective` (`apo_objective`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  PRIMARY KEY (`apo_objective`,`apo_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin DELAY_KEY_WRITE=1 ROW_FORMAT=FIXED;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_player_task
+-- Exportiere Struktur von Tabelle app_achievements.ach_player_task
 CREATE TABLE IF NOT EXISTS `ach_player_task` (
   `apt_task` bigint(20) unsigned NOT NULL,
   `apt_player` bigint(20) unsigned NOT NULL,
   `apt_date` bigint(20) unsigned NOT NULL,
   `apt_fb` tinyint(1) unsigned NOT NULL,
-  PRIMARY KEY (`apt_task`,`apt_player`),
-  KEY `apt_player` (`apt_player`),
-  KEY `apt_task` (`apt_task`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  PRIMARY KEY (`apt_task`,`apt_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin DELAY_KEY_WRITE=1;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_player_valuecache
+-- Exportiere Struktur von Tabelle app_achievements.ach_player_valuecache
 CREATE TABLE IF NOT EXISTS `ach_player_valuecache` (
-  `apv_name` varchar(64) COLLATE utf8_bin NOT NULL,
-  `apv_player` bigint(20) unsigned NOT NULL,
+  `apv_name` varchar(10) COLLATE utf8_bin NOT NULL,
+  `apv_player` bigint(10) unsigned NOT NULL,
   `apv_value` varchar(255) COLLATE utf8_bin NOT NULL,
+  `apv_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `apv_date` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (`apv_name`,`apv_player`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  PRIMARY KEY (`apv_id`),
+  UNIQUE KEY `key1` (`apv_name`,`apv_player`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin DELAY_KEY_WRITE=1 ROW_FORMAT=FIXED;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_task
+-- Exportiere Struktur von Tabelle app_achievements.ach_task
 CREATE TABLE IF NOT EXISTS `ach_task` (
   `at_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `at_achievement` bigint(20) unsigned NOT NULL,
@@ -190,10 +201,10 @@ CREATE TABLE IF NOT EXISTS `ach_task` (
   KEY `at_achievement` (`at_achievement`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_task_lang
+-- Exportiere Struktur von Tabelle app_achievements.ach_task_lang
 CREATE TABLE IF NOT EXISTS `ach_task_lang` (
   `atl_task` bigint(20) unsigned NOT NULL,
   `atl_lang` varchar(2) COLLATE utf8_bin NOT NULL,
@@ -202,40 +213,113 @@ CREATE TABLE IF NOT EXISTS `ach_task_lang` (
   PRIMARY KEY (`atl_task`,`atl_lang`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_task_tie_civ
+-- Exportiere Struktur von Tabelle app_achievements.ach_task_tie_align
+CREATE TABLE IF NOT EXISTS `ach_task_tie_align` (
+  `atta_task` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `atta_alignment` varchar(64) NOT NULL DEFAULT '',
+  PRIMARY KEY (`atta_task`,`atta_alignment`),
+  KEY `Index 2` (`atta_task`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Daten Export vom Benutzer nicht ausgewählt
+
+
+-- Exportiere Struktur von Tabelle app_achievements.ach_task_tie_civ
 CREATE TABLE IF NOT EXISTS `ach_task_tie_civ` (
-  `attciv_task` bigint(20) unsigned NOT NULL,
-  `attciv_civ` varchar(64) NOT NULL,
-  PRIMARY KEY (`attciv_task`,`attciv_civ`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `attciv_task` int(10) DEFAULT NULL,
+  `attciv_civ` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_task_tie_cult
+-- Exportiere Struktur von Tabelle app_achievements.ach_task_tie_cult
 CREATE TABLE IF NOT EXISTS `ach_task_tie_cult` (
-  `attcult_task` bigint(20) unsigned NOT NULL,
-  `attcult_cult` varchar(64) NOT NULL,
-  PRIMARY KEY (`attcult_task`,`attcult_cult`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `attcult_cult` int(10) DEFAULT NULL,
+  `attcult_task` int(10) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.ach_task_tie_race
+-- Exportiere Struktur von Tabelle app_achievements.ach_task_tie_race
 CREATE TABLE IF NOT EXISTS `ach_task_tie_race` (
   `attr_task` bigint(20) unsigned NOT NULL,
   `attr_race` varchar(64) NOT NULL,
   PRIMARY KEY (`attr_task`,`attr_race`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.stat_daily
+-- Exportiere Struktur von Tabelle app_achievements.ryzom_nimetu_item_data
+CREATE TABLE IF NOT EXISTS `ryzom_nimetu_item_data` (
+  `sheetid` varchar(64) COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `item_type` int(10) unsigned NOT NULL,
+  `race` int(10) unsigned NOT NULL,
+  `quality` int(10) unsigned NOT NULL,
+  `craftplan` varchar(32) COLLATE utf8_bin NOT NULL,
+  `skill` varchar(16) COLLATE utf8_bin NOT NULL,
+  `damage` int(10) unsigned NOT NULL,
+  `reach` int(10) unsigned NOT NULL,
+  `ecosystem` int(10) unsigned NOT NULL,
+  `grade` int(10) unsigned NOT NULL,
+  `mpft` bigint(20) unsigned NOT NULL,
+  `color` int(10) unsigned NOT NULL,
+  `is_looted` int(10) unsigned NOT NULL,
+  `is_mission` int(10) unsigned NOT NULL,
+  `index` int(10) unsigned NOT NULL,
+  `txt` text COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`sheetid`),
+  KEY `type` (`type`),
+  KEY `item_type` (`item_type`),
+  KEY `type_2` (`type`,`item_type`),
+  KEY `race` (`race`),
+  KEY `quality` (`quality`),
+  KEY `craftplan` (`craftplan`),
+  KEY `skill` (`skill`),
+  KEY `damage` (`damage`),
+  KEY `reach` (`reach`),
+  KEY `ecosystem` (`ecosystem`),
+  KEY `grade` (`grade`),
+  KEY `mpft` (`mpft`),
+  KEY `color` (`color`),
+  KEY `is_looted` (`is_looted`),
+  KEY `is_mission` (`is_mission`),
+  KEY `index` (`index`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Daten Export vom Benutzer nicht ausgewählt
+
+
+-- Exportiere Struktur von Tabelle app_achievements.ryzom_nimetu_sheets
+CREATE TABLE IF NOT EXISTS `ryzom_nimetu_sheets` (
+  `nsh_numid` bigint(20) NOT NULL,
+  `nsh_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `nsh_suffix` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`nsh_numid`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- Daten Export vom Benutzer nicht ausgewählt
+
+
+-- Exportiere Struktur von Tabelle app_achievements.ryzom_title
+CREATE TABLE IF NOT EXISTS `ryzom_title` (
+  `t_id` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `t_lang` varchar(2) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `t_male` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `t_female` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`t_id`,`t_lang`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- Daten Export vom Benutzer nicht ausgewählt
+
+
+-- Exportiere Struktur von Tabelle app_achievements.stat_daily
 CREATE TABLE IF NOT EXISTS `stat_daily` (
   `sd_day` date NOT NULL DEFAULT '0000-00-00',
   `sd_players` bigint(20) unsigned DEFAULT NULL,
@@ -257,12 +341,12 @@ CREATE TABLE IF NOT EXISTS `stat_daily` (
   PRIMARY KEY (`sd_day`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Data exporting was unselected.
+-- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Dumping structure for table app_achievements.stat_players
+-- Exportiere Struktur von Tabelle app_achievements.stat_players
 CREATE TABLE IF NOT EXISTS `stat_players` (
-  `sp_char` bigint(20) unsigned NOT NULL DEFAULT '0',
+  `sp_char` bigint(10) unsigned NOT NULL DEFAULT '0',
   `sp_money` bigint(20) unsigned DEFAULT NULL,
   `sp_race` enum('r_matis','r_tryker','r_fyros','r_zorai') DEFAULT NULL,
   `sp_yubototal` int(10) unsigned DEFAULT NULL,
@@ -271,8 +355,9 @@ CREATE TABLE IF NOT EXISTS `stat_players` (
   `sp_guildid` int(10) unsigned DEFAULT NULL,
   `sp_itemcount` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`sp_char`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 DELAY_KEY_WRITE=1;
 
--- Data exporting was unselected.
-/*!40014 SET FOREIGN_KEY_CHECKS=1 */;
+-- Daten Export vom Benutzer nicht ausgewählt
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

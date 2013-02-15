@@ -139,30 +139,6 @@
 									</td>
 								</tr>
 								<tr>
-									<td class='bw'>cult:</td>
-									<td>
-										<select name='aa_tie_cult'>
-											<option value='null' selected='selected'>any</option>
-											<option value='c_neutral'>neutral</option>
-											<option value='c_kami'>Kami</option>
-											<option value='c_karavan'>Karavan</option>
-										</select>
-									</td>
-								</tr>
-								<tr>
-									<td class='bw'>civilization:</td>
-									<td>
-										<select name='aa_tie_civ'>
-											<option value='null' selected='selected'>any</option>
-											<option value='c_neutral'>neutral</option>
-											<option value='c_fyros'>Fyros</option>
-											<option value='c_matis'>Matis</option>
-											<option value='c_tryker'>Tryker</option>
-											<option value='c_zorai'>Zorai</option>
-										</select>
-									</td>
-								</tr>
-								<tr>
 									<td class='bw'>image:</td>
 									<td><input type='text' name='aa_image' /></td>
 								</tr>
@@ -200,6 +176,28 @@
 									<td><input type='text' name='at_condition_value' /></td>
 								</tr>
 								<tr>
+									<td class='bw'>allegiance:</td>
+									<td>
+										<select name='at_tie_allegiance[]' multiple='multiple' size='15'>
+											<option value='c_neutral|c_neutral'>neutral / neutral</option>
+											<option value='c_kami|c_neutral'>Kami / neutral</option>
+											<option value='c_karavan|c_neutral'>Karavan / neutral</option>
+											<option value='c_neutral|c_fyros'>neutral / Fyros</option>
+											<option value='c_kami|c_fyros'>Kami / Fyros</option>
+											<option value='c_karavan|c_fyros'>Karavan / Fyros</option>
+											<option value='c_neutral|c_matis'>neutral / Matis</option>
+											<option value='c_kami|c_matis'>Kami / Matis</option>
+											<option value='c_karavan|c_matis'>Karavan / Matis</option>
+											<option value='c_neutral|c_tryker'>neutral / Tryker</option>
+											<option value='c_kami|c_tryker'>Kami / Tryker</option>
+											<option value='c_karavan|c_tryker'>Karavan / Tryker</option>
+											<option value='c_neutral|c_zorai'>neutral / Zorai</option>
+											<option value='c_kami|c_zorai'>Kami / Zorai</option>
+											<option value='c_karavan|c_zorai'>Karavan / Zorai</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
 									<td colspan='2'><input type='hidden' value='0' name='at_inherit' /><input type='submit' value='create' /></td>
 								</tr>
 							</table>
@@ -209,7 +207,7 @@
 				</div>
 			</div>";
 
-		if($cat->isTiedCultDev() || $cat->isTiedCivDev()) {
+		if($cat->hasTieAlignDev()) {
 			$html .= ach_render_tiebar($cat->getCurrentCult(),$cat->getCurrentCiv(),$cat);
 		}
 
@@ -218,13 +216,17 @@
 		while($iter->hasNext()) {
 			$curr = $iter->getNext();
 
-			$html .= ach_render_achievement_open($curr);
+			if(!$curr->isTiedAlign_open($cat->getCurrentCult(),$cat->getCurrentCiv())) {
+				#continue;
+			}
+
+			$html .= ach_render_achievement_open($curr,$cat);
 		}
 
 		return $html;
 	}
 
-	function ach_render_achievement_open(&$ach) {
+	function ach_render_achievement_open(&$ach,&$cat) {
 		global $_CONF,$menu;
 
 		$html = '<div style="display: block; margin-bottom: 5px;"><table cellpadding="0" cellspacing="0" width="100%">
@@ -304,30 +306,6 @@
 												</td>
 											</tr>
 											<tr>
-												<td class='bw'>cult:</td>
-												<td>
-													<select name='aa_tie_cult'>
-														<option value='null'"; if($ach->getTieCult() == null) { $html .= " selected='selected'"; } $html .= ">any</option>
-														<option value='c_neutral'"; if($ach->getTieCult() == "c_neutral") { $html .= " selected='selected'"; } $html .= ">neutral</option>
-														<option value='c_kami'"; if($ach->getTieCult() == "c_kami") { $html .= " selected='selected'"; } $html .= ">Kami</option>
-														<option value='c_karavan'"; if($ach->getTieCult() == "c_karavan") { $html .= " selected='selected'"; } $html .= ">Karavan</option>
-													</select>
-												</td>
-											</tr>
-											<tr>
-												<td class='bw'>civilization:</td>
-												<td>
-													<select name='aa_tie_civ'>
-														<option value='null'"; if($ach->getTieCiv() == null) { $html .= " selected='selected'"; } $html .= ">any</option>
-														<option value='c_neutral'"; if($ach->getTieCiv() == "c_neutral") { $html .= " selected='selected'"; } $html .= ">neutral</option>
-														<option value='c_fyros'"; if($ach->getTieCiv() == "c_fyros") { $html .= " selected='selected'"; } $html .= ">Fyros</option>
-														<option value='c_matis'"; if($ach->getTieCiv() == "c_matis") { $html .= " selected='selected'"; } $html .= ">Matis</option>
-														<option value='c_tryker'"; if($ach->getTieCiv() == "c_tryker") { $html .= " selected='selected'"; } $html .= ">Tryker</option>
-														<option value='c_zorai'"; if($ach->getTieCiv() == "c_zorai") { $html .= " selected='selected'"; } $html .= ">Zorai</option>
-													</select>
-												</td>
-											</tr>
-											<tr>
 												<td class='bw'>image:</td>
 												<td><input type='text' name='aa_image' value='".htmlspecialchars($ach->getImage())."' /></td>
 											</tr>
@@ -401,6 +379,28 @@
 												<td><input type='text' name='at_condition_value' /></td>
 											</tr>
 											<tr>
+												<td class='bw'>allegiance:</td>
+												<td>
+													<select name='at_tie_allegiance[]' multiple='multiple' size='15'>
+														<option value='c_neutral|c_neutral'>neutral / neutral</option>
+														<option value='c_kami|c_neutral'>Kami / neutral</option>
+														<option value='c_karavan|c_neutral'>Karavan / neutral</option>
+														<option value='c_neutral|c_fyros'>neutral / Fyros</option>
+														<option value='c_kami|c_fyros'>Kami / Fyros</option>
+														<option value='c_karavan|c_fyros'>Karavan / Fyros</option>
+														<option value='c_neutral|c_matis'>neutral / Matis</option>
+														<option value='c_kami|c_matis'>Kami / Matis</option>
+														<option value='c_karavan|c_matis'>Karavan / Matis</option>
+														<option value='c_neutral|c_tryker'>neutral / Tryker</option>
+														<option value='c_kami|c_tryker'>Kami / Tryker</option>
+														<option value='c_karavan|c_tryker'>Karavan / Tryker</option>
+														<option value='c_neutral|c_zorai'>neutral / Zorai</option>
+														<option value='c_kami|c_zorai'>Kami / Zorai</option>
+														<option value='c_karavan|c_zorai'>Karavan / Zorai</option>
+													</select>
+												</td>
+											</tr>
+											<tr>
 												<td colspan='2'><input type='submit' value='add' /></td>
 											</tr>
 										</table>
@@ -440,7 +440,7 @@
 								</form>
 							</div>";
 
-							$html .= ach_render_task_open($ach);
+							$html .= ach_render_task_open($ach,$cat);
 							$html .= '</td></tr></tbody></table></center>
 						</td>
 						<td style="background-image: url('.$_CONF['image_url'].'pic/bar_pending_r.png);"></td>
@@ -455,7 +455,7 @@
 		return $html;
 	}
 
-	function ach_render_task_open(&$ach) {
+	function ach_render_task_open(&$ach,&$cat) {
 		global $metalist;
 
 
@@ -466,6 +466,10 @@
 		while($task_list->hasNext()) {
 
 			$task = $task_list->getNext();
+
+			if(!$task->isTiedAlign($cat->getCurrentCult(),$cat->getCurrentCiv())) {
+				#continue;
+			}
 
 
 				$html .= "<table><tr><td><span style='color:#999999;font-weight:bold;display:block;'><a name='task_".$task->getID()."'>[task:]</a>".$task->getDisplayName()." (".$task->getValue().")</span></td>";
@@ -545,6 +549,28 @@
 									<tr>
 										<td class='bw'>condition value:</td>
 										<td><input type='text' name='at_condition_value' value='".htmlspecialchars($task->getConditionValue(),ENT_QUOTES)."' /></td>
+									</tr>
+									<tr>
+										<td class='bw'>allegiance:</td>
+										<td>
+											<select name='at_tie_allegiance[]' multiple='multiple' size='15'>
+												<option value='c_neutral|c_neutral'"; if($task->isTiedAlign('c_neutral','c_neutral')) { $html .= " selected='selected'"; } $html .= ">neutral / neutral</option>
+												<option value='c_kami|c_neutral'"; if($task->isTiedAlign('c_kami','c_neutral')) { $html .= " selected='selected'"; } $html .= ">Kami / neutral</option>
+												<option value='c_karavan|c_neutral'"; if($task->isTiedAlign('c_karavan','c_neutral')) { $html .= " selected='selected'"; } $html .= ">Karavan / neutral</option>
+												<option value='c_neutral|c_fyros'"; if($task->isTiedAlign('c_neutral','c_fyros')) { $html .= " selected='selected'"; } $html .= ">neutral / Fyros</option>
+												<option value='c_kami|c_fyros'"; if($task->isTiedAlign('c_kami','c_fyros')) { $html .= " selected='selected'"; } $html .= ">Kami / Fyros</option>
+												<option value='c_karavan|c_fyros'"; if($task->isTiedAlign('c_karavan','c_fyros')) { $html .= " selected='selected'"; } $html .= ">Karavan / Fyros</option>
+												<option value='c_neutral|c_matis'"; if($task->isTiedAlign('c_neutral','c_matis')) { $html .= " selected='selected'"; } $html .= ">neutral / Matis</option>
+												<option value='c_kami|c_matis'"; if($task->isTiedAlign('c_kami','c_matis')) { $html .= " selected='selected'"; } $html .= ">Kami / Matis</option>
+												<option value='c_karavan|c_matis'"; if($task->isTiedAlign('c_karavan','c_matis')) { $html .= " selected='selected'"; } $html .= ">Karavan / Matis</option>
+												<option value='c_neutral|c_tryker'"; if($task->isTiedAlign('c_neutral','c_tryker')) { $html .= " selected='selected'"; } $html .= ">neutral / Tryker</option>
+												<option value='c_kami|c_tryker'"; if($task->isTiedAlign('c_kami','c_tryker')) { $html .= " selected='selected'"; } $html .= ">Kami / Tryker</option>
+												<option value='c_karavan|c_tryker'"; if($task->isTiedAlign('c_karavan','c_tryker')) { $html .= " selected='selected'"; } $html .= ">Karavan / Tryker</option>
+												<option value='c_neutral|c_zorai'"; if($task->isTiedAlign('c_neutral','c_zorai')) { $html .= " selected='selected'"; } $html .= ">neutral / Zorai</option>
+												<option value='c_kami|c_zorai'"; if($task->isTiedAlign('c_kami','c_zorai')) { $html .= " selected='selected'"; } $html .= ">Kami / Zorai</option>
+												<option value='c_karavan|c_zorai'"; if($task->isTiedAlign('c_karavan','c_zorai')) { $html .= " selected='selected'"; } $html .= ">Karavan / Zorai</option>
+											</select>
+										</td>
 									</tr>
 									<tr>
 										<td colspan='2'><input type='submit' value='save' /></td>
@@ -908,7 +934,7 @@
 		<div style='display:block;text-align:center;'><form method='post' action='?mode=ach&cat=".$cat->getID()."' id='cc_form'>
 			<table>
 				<tr>";
-				if($cat->isTiedCultDev()) {
+				if($cat->isAllowedCult()) {
 					$html.= "<td>
 						<select name='cult' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($cult == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
@@ -917,7 +943,7 @@
 						</select>
 					</td>";
 				}
-				if($cat->isTiedCivDev()) {
+				if($cat->isAllowedCiv()) {
 					$html.= "<td>
 						<select name='civ' onchange='document.getElementById(\"cc_form\").submit();'>
 							<option value='c_neutral'"; if($civ == "c_neutral") { $html.= " selected='selected'"; } $html .= ">".get_translation('ach_c_neutral',$_USER->getLang())."</option>
@@ -926,7 +952,8 @@
 							<option value='c_tryker'"; if($civ == "c_tryker") { $html.= " selected='selected'"; } $html .= ">Tryker</option>
 							<option value='c_zorai'"; if($civ == "c_zorai") { $html.= " selected='selected'"; } $html .= ">Zorai</option>
 						</select>
-					</td>";
+					</td>
+					<td><a href='?mode=ach&cat=".$cat->getID()."&cult=%&civ=%'>show all</a></td>";
 				}
 				$html.= "</tr>
 			</table>
@@ -934,30 +961,30 @@
 		
 		<div style='display:block;font-weight:bold;font-size:20px;color:#FFFFFF;text-align:center;margin-bottom:5px;'>";
 
-		if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
+		/*if($cat->isTiedCult() && !$cat->isTiedCiv() && $cult == "c_neutral") { // neutral / xx
 			#While being of neutral allegiance with the higher powers
 			$html .= get_translation('ach_allegiance_neutral_cult',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
 		}
 		elseif($cat->isTiedCiv() && !$cat->isTiedCult() && $civ == "c_neutral") { // xx / neutral
 			#While being of neutral allegiance with the homin civilizations
 			$html .= get_translation('ach_allegiance_neutral_civ',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
-		}
-		elseif($cat->isTiedCiv() && $cat->isTiedCult() && $cult == "c_neutral" && $civ == "c_neutral") { // neutral / neutral
+		}*/
+		if(($cult == "c_neutral" || !$cat->isAllowedCult()) && ($civ == "c_neutral" || !$cat->isAllowedCiv())) { // neutral / neutral
 			#While being of neutral allegiance
 			$html .= get_translation('ach_allegiance_neutral',$_USER->getLang(),array("<span class='o'>".get_translation('ach_c_neutral',$_USER->getLang())."</span>"));
 		}
 		else { //other
 			#While being aligned with the
 			$html .= get_translation('ach_allegiance_start',$_USER->getLang());
-			if($cat->isTiedCult() && $cult != "c_neutral") {
+			if($cat->isAllowedCult() && $cult != "c_neutral") {
 				#CULT
 				$html .= "<span class='o'>".ach_translate_cc($cult)."</span>";
-				if($cat->isTiedCiv() && $civ != "c_neutral") {
+				if($cat->isAllowedCiv() && $civ != "c_neutral") {
 					#and the CIV
 					$html .= get_translation('ach_allegiance_and',$_USER->getLang())." <span class='o'>".ach_translate_cc($civ)."</span>";
 				}
 			}
-			elseif($cat->isTiedCiv() && $civ != "c_neutral") {
+			elseif($cat->isAllowedCiv() && $civ != "c_neutral") {
 				#CIV
 				$html .= "<span class='o'>".ach_translate_cc($civ)."</span>";
 			}

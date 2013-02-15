@@ -96,6 +96,8 @@
 
 			$DBc->sqlQuery("DELETE FROM ach_task WHERE at_id='".$this->getID()."'");
 			$DBc->sqlQuery("DELETE FROM ach_player_task WHERE apt_task='".$this->getID()."'");
+			$DBc->sqlQuery("DELETE FROM ach_task_tie_align WHERE atta_task='".$this->getID()."'");
+			$DBc->sqlQuery("DELETE FROM ach_task_tie_race WHERE attr_task='".$this->getID()."'");
 
 			$iter = $this->getIterator();
 			while($iter->hasNext()) {
@@ -111,6 +113,17 @@
 			$DBc->sqlQuery("UPDATE ach_task SET at_parent=".mkn($this->getParentID()).",at_value='".$DBc->sqlEscape($this->getValue())."',at_condition='".$DBc->sqlEscape($this->getCondition())."',at_condition_value=".mkn($this->getConditionValue()).",at_dev='".$this->getDev()."',at_torder='".$this->torder."', at_inherit='".$this->inherit_obj."' WHERE at_id='".$this->getID()."'");
 
 			$DBc->sqlQuery("INSERT INTO ach_task_lang (atl_task,atl_lang,atl_name,atl_template) VALUES ('".$this->getID()."','en','".$DBc->sqlEscape($this->getName())."',".mkn($this->getTemplate()).") ON DUPLICATE KEY UPDATE atl_name='".$DBc->sqlEscape($this->getName())."',atl_template=".mkn($this->getTemplate())."");
+
+			$DBc->sqlQuery("DELETE FROM ach_task_tie_align WHERE atta_task='".$this->getID()."'");
+			$DBc->sqlQuery("DELETE FROM ach_task_tie_race WHERE attr_task='".$this->getID()."'");
+
+			foreach($this->tie_race as $elem) {
+				$DBc->sqlQuery("INSERT INTO ach_task_tie_race (attr_task,attr_race) VALUES ('".$this->getID()."','".$DBc->sqlEscape($elem)."')");
+			}
+
+			foreach($this->tie_align as $elem) {
+				$DBc->sqlQuery("INSERT INTO ach_task_tie_align (atta_task,atta_alignment) VALUES ('".$this->getID()."','".$DBc->sqlEscape($elem)."')");
+			}
 		}
 
 		function insert() {
@@ -123,6 +136,14 @@
 			$this->setID($id);
 
 			$DBc->sqlQuery("INSERT INTO ach_task_lang (atl_task,atl_lang,atl_name,atl_template) VALUES ('".$this->getID()."','en','".$DBc->sqlEscape($this->getName())."',".mkn($this->getTemplate()).")");
+
+			foreach($this->tie_race as $elem) {
+				$DBc->sqlQuery("INSERT INTO ach_task_tie_race (attr_task,attr_race) VALUES ('".$this->getID()."','".$DBc->sqlEscape($elem)."')");
+			}
+
+			foreach($this->tie_align as $elem) {
+				$DBc->sqlQuery("INSERT INTO ach_task_tie_align (atta_task,atta_alignment) VALUES ('".$this->getID()."','".$DBc->sqlEscape($elem)."')");
+			}
 		}
 
 		function setAchievement($a) {
@@ -139,6 +160,14 @@
 
 		function setValue($v) {
 			$this->value = $v;
+		}
+
+		function setTieRace($t) {
+			$this->tie_race = $t;
+		}
+
+		function setTieAlign($t) {
+			$this->tie_align = $t;
 		}
 
 		function getCondition() {
@@ -197,6 +226,20 @@
 					}
 				}
 			}
+		}
+
+		function isTiedRace($r) {
+			if(sizeof($this->tie_race) == 0) {
+				return false;
+			}
+			return in_array($r,$this->tie_race);
+		}
+
+		function isTiedAlign($cult,$civ) {
+			if(sizeof($this->tie_align) == 0) {
+				return false;
+			}
+			return in_array(($cult.'|'.$civ),$this->tie_align);
 		}
 	}
 ?>

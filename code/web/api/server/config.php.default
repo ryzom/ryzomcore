@@ -17,6 +17,8 @@
  */
  
 define('RYAPI_SHARDID', '101');
+define('RYAPI_DEV_SHARDID', '301');
+define('RYAPI_DEV_SHARD', 'yubo');
 define('RYAPI_WEBDB_HOST', 'localhost');
 define('RYAPI_WEBDB_LOGIN', 'localhost');
 define('RYAPI_WEBDB_PASS', 'localhost');
@@ -24,12 +26,17 @@ define('RYAPI_WEBDB_PASS', 'localhost');
 define('RYAPI_NELDB_HOST', 'localhost');
 define('RYAPI_NELDB_LOGIN', 'shard');
 define('RYAPI_NELDB_PASS', 'localhost');
-define('RYAPI_NELDB_RING', 'ring_open');
+if ($_GET['shardid'] == RYAPI_DEV_SHARDID || (isset($_SESSION['dev_shard']) && $_SESSION['dev_shard']))
+	define('RYAPI_NELDB_RING', 'ring_dev');
+else
+	define('RYAPI_NELDB_RING', 'ring_open');
+define('RYAPI_NELDB_RING_DEV', 'ring_dev');
 define('RYAPI_NELDB_NEL', 'nel');
 
 define('RYAPI_AUTH_SCRIPT', '');
 define('RYAPI_COOKIE_KEY', '');
 
 define('RYAPI_EGS_SALT', 'RyZoM'); // need be exactly same salt than egs
+define('RYAPI_HMAGIC_DEBUG', false); // only :DEV: can use debug hmagic commands
 
 ?>
