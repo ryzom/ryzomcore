@@ -231,7 +231,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"align");
 		if (prop)
 		{
-			setAlignFromString( std::string( prop ) );
+			setAlignFromString( std::string( (const char*)prop ) );
 		}
 
 

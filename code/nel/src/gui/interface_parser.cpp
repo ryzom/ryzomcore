@@ -1000,7 +1000,7 @@ namespace NLGUI
 		std::string target;
 		if( ptr != NULL )
 		{
-			target = std::string( ptr );
+			target = std::string( (const char*)ptr );
 			if( !editorMode )
 				CInterfaceLink::splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
 		}
@@ -1134,17 +1134,17 @@ namespace NLGUI
 
 			ptr = xmlGetProp( cur, BAD_CAST "entry" );
 			if( ptr != NULL )
-				data.entry = std::string( ptr );
+				data.entry = std::string( (const char*)ptr );
 
 			data.type = type;
 
 			ptr = xmlGetProp( cur, BAD_CAST "value" );
 			if( ptr != NULL )
-				data.value = std::string( ptr );
+				data.value = std::string( (const char*)ptr );
 
 			ptr = xmlGetProp( cur, BAD_CAST "size" );
 			if( ptr != NULL )
-				fromString( std::string( ptr ), data.size );
+				fromString( std::string( (const char*)ptr ), data.size );
 			
 			variableCache[ data.entry ] = data;
 		}

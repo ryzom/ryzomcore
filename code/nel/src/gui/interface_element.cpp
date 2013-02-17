@@ -362,13 +362,13 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"posparent" );
 		if (ptr)
 		{
-			setPosParent( std::string( ptr ) );
+			setPosParent( std::string( (const char*)ptr ) );
 		}
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"sizeparent" );
 		if (ptr)
 		{
-			setSizeParent( std::string( ptr ) );
+			setSizeParent( std::string( (const char*)ptr ) );
 		}
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"sizeref");
