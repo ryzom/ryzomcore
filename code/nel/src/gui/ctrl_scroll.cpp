@@ -292,7 +292,8 @@ namespace NLGUI
 			{
 				_IsDBLink = true;
 				_DBLink.link( value.c_str() );
-				_DBLink.getNodePtr()->addObserver( this, ICDBNode::CTextId() );
+				ICDBNode::CTextId dummy;
+				_DBLink.getNodePtr()->addObserver( this, dummy );
 			}
 			return;
 		}

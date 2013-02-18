@@ -17,8 +17,9 @@
  * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
  */
 
- define('RYAPI_MODE', 'client');
- 
+define('RYAPI_MODE', 'client');
+define('RYAPI_USE_PLAYER_STATS', false);
+
 // Url where the api is
 define('RYAPI_URL', 'http://');
 if (!defined('RYAPI_PATH'))

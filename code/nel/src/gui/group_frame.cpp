@@ -139,7 +139,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"options" );
 		if (ptr)
 		{
-			_Options = std::string( ptr );
+			_Options = std::string( (const char*)ptr );
 		}
 
 		// The first type in display type struct is the default display type

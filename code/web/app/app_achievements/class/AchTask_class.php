@@ -1,5 +1,5 @@
 <?php
-	class AchTask extends Parentum {
+	class AchTask extends Parentum implements Tieable {
 		#########################
 		# PHP 5.3 compatible
 		# InDev_trait replaces this in PHP 5.4
@@ -38,8 +38,9 @@
 		protected $inherit_obj;
 		private $heritage_list;
 		protected $tie_race;
-		protected $tie_cult;
-		protected $tie_civ;
+		#protected $tie_cult;
+		#protected $tie_civ;
+		protected $tie_align;
 
 		function AchTask($data,$parent) {
 			global $DBc,$_USER,$_CONF;
@@ -88,7 +89,7 @@
 				$this->tie_race[] = $res[$i]['attr_race'];
 			}
 
-			$res = $DBc->sqlQuery("SELECT attcult_cult FROM ach_task_tie_cult WHERE attcult_task='".$this->id."'");
+			/*$res = $DBc->sqlQuery("SELECT attcult_cult FROM ach_task_tie_cult WHERE attcult_task='".$this->id."'");
 			$sz = sizeof($res);
 
 			$this->tie_cult = array();
@@ -102,6 +103,14 @@
 			$this->tie_civ = array();
 			for($i=0;$i<$sz;$i++) {
 				$this->tie_civ[] = $res[$i]['attciv_civ'];
+			}*/
+
+			$res = $DBc->sqlQuery("SELECT atta_alignment FROM ach_task_tie_align WHERE atta_task='".$this->id."'");
+			$sz = sizeof($res);
+
+			$this->tie_align = array();
+			for($i=0;$i<$sz;$i++) {
+				$this->tie_align[] = $res[$i]['atta_alignment'];
 			}
 		}
 
@@ -119,6 +128,7 @@
 				$this->addChild($curr);
 				$this->heritage_list->insert($curr);
 			}
+			return true;
 		}
 		
 		#@override Parentum::makeChild()
@@ -141,36 +151,74 @@
 		}
 
 		function hasTieRace() {
+			if($this->dev == 1) {
+				return false;
+			}
 			return (sizeof($this->tie_race) != 0);
 		}
 
-		function hasTieCult() {
-			return (sizeof($this->tie_cult) != 0);
+		function hasTieAlign() {
+			if($this->dev == 1) {
+				return false;
+			}
+			return (sizeof($this->tie_align) != 0);
 		}
 
-		function hasTieCiv() {
-			return (sizeof($this->tie_civ) != 0);
+		function hasTieRace_open() {
+			return $this->hasTieRace();
+		}
+
+		function hasTieRace_done() {
+			return $this->hasTieRace();
+		}
+
+		function hasTieAlign_open() {
+			return $this->hasTieAlign();
+		}
+
+		function hasTieAlign_done() {
+			return $this->hasTieAlign();
+		}
+
+		function hasTieRaceDev() {
+			return (sizeof($this->tie_race) != 0);
+		}
+
+		function hasTieAlignDev() {
+			return (sizeof($this->tie_align) != 0);
 		}
 
 		function isTiedRace($r) {
 			if(sizeof($this->tie_race) == 0) {
 				return true;
 			}
-			return in_array($r,$this->race);
+			return in_array($r,$this->tie_race);
 		}
 
-		function isTiedCult($c) {
-			if(sizeof($this->tie_cult) == 0) {
+		function isTiedAlign($cult,$civ) {
+			if($cult == "%" || $civ == "%") {
 				return true;
 			}
-			return in_array($c,$this->tie_cult);
+			if(sizeof($this->tie_align) == 0) {
+				return true;
+			}
+			return in_array(($cult.'|'.$civ),$this->tie_align);
 		}
 
-		function isTiedCiv($c) {
-			if(sizeof($this->tie_civ) == 0) {
-				return true;
-			}
-			return in_array($c,$this->tie_civ);
+		function isTiedRace_open($r) {
+			return $this->isTiedRace($r);
+		}
+
+		function isTiedRace_done($r) {
+			return $this->isTiedRace($r);
+		}
+
+		function isTiedAlign_done($cult,$civ) {
+			return $this->isTiedAlign($cult,$civ);
+		}
+
+		function isTiedAlign_open($cult,$civ) {
+			return $this->isTiedAlign($cult,$civ);
 		}
 
 		function getAchievement() {

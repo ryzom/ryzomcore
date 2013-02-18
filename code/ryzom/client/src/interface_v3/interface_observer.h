@@ -118,6 +118,8 @@ public:
 
 		char * end = ptr.getDatas() + strlen( ptr.getDatas() );
 		char * dataTok = strtok( ptr.getDatas()," ,");
+		NLMISC::ICDBNode::CTextId textId;
+		
 		while(dataTok)
 		{
 			std::string data (dataTok);
@@ -160,7 +162,8 @@ public:
 					return NULL;
 				}
 			}
-			if ( ! NLGUI::CDBManager::getInstance()->getDB()->addObserver(obs,NLMISC::ICDBNode::CTextId (data) ) )
+			textId = NLMISC::ICDBNode::CTextId( data );
+			if ( ! NLGUI::CDBManager::getInstance()->getDB()->addObserver(obs,textId ) )
 			{
 				return NULL;
 			}

@@ -25,6 +25,7 @@
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/db_manager.h"
+#include <limits>
 
 using namespace std;
 using namespace NLMISC;
@@ -538,7 +539,7 @@ namespace NLGUI
 		{
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onenter" );
 			if( prop != NULL )
-				mapAHString( "onenter", std::string( prop ) );
+				mapAHString( "onenter", std::string( (const char*)prop ) );
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"onchange" );

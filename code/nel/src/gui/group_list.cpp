@@ -507,7 +507,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur,   (xmlChar*)"hardtext" );
 		if (ptr)
 		{
-			_HardText = std::string( ptr );
+			_HardText = std::string( (const char*)ptr );
 			const char *propPtr = ptr;
 			ucstring Text = ucstring(propPtr);
 			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))

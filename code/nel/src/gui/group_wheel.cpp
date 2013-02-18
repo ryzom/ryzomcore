@@ -61,7 +61,8 @@ namespace NLGUI
 	{
 		if( name == "on_wheel_up" )
 		{
-			_AHWheelUp = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHWheelUp = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -74,7 +75,8 @@ namespace NLGUI
 		else
 		if( name == "on_wheel_down" )
 		{
-			_AHWheelDown = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHWheelDown = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -119,11 +121,11 @@ namespace NLGUI
 		{
 			CXMLAutoPtr ptr( (char*) xmlGetProp( cur, BAD_CAST "on_wheel_up" ) );
 			if( ptr != NULL )
-				mapAHString( "on_wheel_up", std::string( ptr ) );
+				mapAHString( "on_wheel_up", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_wheel_down" );
 			if( ptr != NULL )
-				mapAHString( "on_wheel_down", std::string( ptr ) );
+				mapAHString( "on_wheel_down", std::string( (const char*)ptr ) );
 
 		}
 

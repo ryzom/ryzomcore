@@ -146,7 +146,7 @@ namespace NLGUI
 		_ToolTipParent= TTCtrl;
 		if(prop)
 		{
-			_ToolTipParent = stringToToolTipParent( std::string( prop ) );
+			_ToolTipParent = stringToToolTipParent( std::string( (const char*)prop ) );
 		}
 
 		// Tooltip special parent

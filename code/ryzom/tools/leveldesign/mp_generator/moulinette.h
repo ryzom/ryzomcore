@@ -105,20 +105,19 @@ public:
 };
 
 //////////////////////////////////
-//      VARIABLES GLOBALES      //
+//      GLOBAL VARIABLES        //
 //////////////////////////////////
 
-// Liste des différentes Craft parts
+// Craft parts list
 CraftPart craftParts[NumMPCraftParts];
 
-// Liste des fichiers .creature
+// .creature files list
 map<string, string>	creatureFiles;
 
-// noms générés pour chaque item
+// generated names for each item
 CSortedStringSet itemNames;
 
-// Liste des items à generer 
-// pour chaque code de créature
+// Items list to generate for each creature code
 map<CSString, ListeCreatureMP> itemsAGenerer;
 
 // MP Family list
@@ -133,7 +132,7 @@ public:
 std::vector<CMPFamily>			MPFamilies;
 
 
-// chemin des différents repertoires
+// directories pathes
 CSString LEVEL_DESIGN_PATH;
 CSString TRANSLATION_PATH;
 	
