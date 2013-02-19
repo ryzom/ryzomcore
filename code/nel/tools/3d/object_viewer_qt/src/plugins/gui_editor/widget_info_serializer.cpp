@@ -43,7 +43,7 @@ namespace GUIEditor
 			std::vector< SPropEntry >::const_iterator itr = parentInfo.props.begin();
 			while( itr != parentInfo.props.end() )
 			{
-				std::vector< SPropEntry >::const_iterator fItr;
+				std::vector< SPropEntry >::iterator fItr;
 				fItr = std::find( props.begin(), props.end(), *itr );
 				if( fItr == props.end() )
 					continue;

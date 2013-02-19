@@ -82,7 +82,7 @@ namespace GUIEditor
 		/// Remove child by name
 		bool removeChildByName( const std::string &name )
 		{
-			for( std::vector< CWidgetInfoTreeNode* >::const_iterator itr = children.begin(); itr != children.end(); ++itr )
+			for( std::vector< CWidgetInfoTreeNode* >::iterator itr = children.begin(); itr != children.end(); ++itr )
 			{
 				if( ( *itr )->getInfo().name == name )
 				{
@@ -98,7 +98,7 @@ namespace GUIEditor
 		/// Remove child by name, but don't delete the child
 		bool removeChildByNameND( const std::string &name )
 		{
-			for( std::vector< CWidgetInfoTreeNode* >::const_iterator itr = children.begin(); itr != children.end(); ++itr )
+			for( std::vector< CWidgetInfoTreeNode* >::iterator itr = children.begin(); itr != children.end(); ++itr )
 			{
 				if( ( *itr )->getInfo().name == name )
 				{
@@ -113,7 +113,7 @@ namespace GUIEditor
 		/// Remove child by ancestor's name
 		bool removeChildByAncestor( const std::string &ancestor )
 		{
-			for( std::vector< CWidgetInfoTreeNode* >::const_iterator itr = children.begin(); itr != children.end(); ++itr )
+			for( std::vector< CWidgetInfoTreeNode* >::iterator itr = children.begin(); itr != children.end(); ++itr )
 			{
 				if( ( *itr )->getInfo().ancestor == ancestor )
 				{
@@ -172,7 +172,7 @@ namespace GUIEditor
 		/// Removes this property from the node
 		void removeProperty( const SPropEntry &prop )
 		{
-			std::vector< SPropEntry >::const_iterator itr = info.props.begin();
+			std::vector< SPropEntry >::iterator itr = info.props.begin();
 			while( itr != info.props.end() )
 			{
 				if( ( itr->propName    == prop.propName ) &&

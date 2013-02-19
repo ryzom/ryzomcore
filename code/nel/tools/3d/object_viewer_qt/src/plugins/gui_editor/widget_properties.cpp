@@ -19,7 +19,7 @@
 #include "widget_info_serializer.h"
 #include "new_property_widget.h"
 #include "new_widget_widget.h"
-#include <qmessagebox>
+#include <QMessageBox>
 
 namespace GUIEditor{
 	CWidgetProperties::CWidgetProperties( QWidget *parent ) :

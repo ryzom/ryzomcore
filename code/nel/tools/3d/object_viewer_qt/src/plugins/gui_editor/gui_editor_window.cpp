@@ -148,7 +148,8 @@ namespace GUIEditor
 
 		projectParser.clear();
 
-		if( !projectParser.parseProjectFile( fileName.toStdString() ) )
+		std::string projectFileName = fileName.toStdString();
+		if( !projectParser.parseProjectFile( projectFileName ) )
 		{
 			QMessageBox::critical( this,
 				tr( "Error parsing project file" ),
