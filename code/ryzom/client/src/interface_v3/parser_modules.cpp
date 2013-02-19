@@ -26,6 +26,10 @@
 
 using namespace NLMISC;
 
+#ifdef FINAL_VERSION
+#include "../client_cfg.h"
+#endif
+
 CIF3DSceneParser::CIF3DSceneParser()
 {
 	parsingStage |= ( Resolved | GroupChildren );
