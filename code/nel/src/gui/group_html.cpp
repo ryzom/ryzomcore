@@ -23,9 +23,9 @@
 // LibWWW
 extern "C"
 {
-#include "libwww/WWWLib.h"			      /* Global Library Include file */
-#include "libwww/WWWApp.h"
-#include "libwww/WWWInit.h"
+#include "WWWLib.h"			      /* Global Library Include file */
+#include "WWWApp.h"
+#include "WWWInit.h"
 }
 
 #include <string>
