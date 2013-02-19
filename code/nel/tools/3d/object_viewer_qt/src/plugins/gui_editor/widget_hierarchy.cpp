@@ -53,7 +53,7 @@ namespace
 			item = item->parent();
 		}
 
-		name = s.toStdString();
+		name = s.toUtf8().constData();
 		return name;
 	}
 }
@@ -137,7 +137,7 @@ namespace GUIEditor
 		if( item->parent() == NULL )
 			return;
 		
-		std::string n = item->text( 0 ).toStdString();
+		std::string n = item->text( 0 ).toUtf8().constData();
 		std::string selection = makeFullName( item, n );
 		CWidgetManager::getInstance()->setCurrentEditorSelection( selection );
 		

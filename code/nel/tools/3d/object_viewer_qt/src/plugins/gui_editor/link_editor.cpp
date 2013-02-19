@@ -78,11 +78,11 @@ namespace GUIEditor
 		if( !parser->getLinkData( currentLinkId, data ) )
 			return;
 
-		data.expr = expressionEdit->toPlainText().toStdString();		
-		data.target = targetEdit->text().toStdString();
-		data.action = ahEdit->text().toStdString();
-		data.params = ahParamEdit->text().toStdString();
-		data.cond   = condEdit->text().toStdString();
+		data.expr = expressionEdit->toPlainText().toUtf8().constData();		
+		data.target = targetEdit->text().toUtf8().constData();
+		data.action = ahEdit->text().toUtf8().constData();
+		data.params = ahParamEdit->text().toUtf8().constData();
+		data.cond   = condEdit->text().toUtf8().constData();
 		parser->updateLinkData( data.id, data );
 
 		Q_EMIT okClicked();

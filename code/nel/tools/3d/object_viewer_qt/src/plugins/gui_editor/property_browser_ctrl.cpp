@@ -109,7 +109,7 @@ namespace GUIEditor
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
 		if( e == NULL )
 			return;
-		e->setProperty( propName.toStdString(), propValue.toStdString() );
+		e->setProperty( propName.toUtf8().constData(), propValue.toUtf8().constData() );
 	}
 
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )

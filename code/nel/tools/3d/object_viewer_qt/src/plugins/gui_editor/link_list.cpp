@@ -88,7 +88,7 @@ namespace GUIEditor
 								&ok );
 		if( ok )
 		{
-			if( CWidgetManager::getInstance()->getElementFromId( parent.toStdString() ) == NULL )
+			if( CWidgetManager::getInstance()->getElementFromId( parent.toUtf8().constData() ) == NULL )
 			{
 				QMessageBox::critical( this,
 									tr( "Parent group doesn't exist" ),
@@ -96,7 +96,7 @@ namespace GUIEditor
 				return;
 			}
 			SLinkData data;
-			data.parent = parent.toStdString();
+			data.parent = parent.toUtf8().constData();
 			
 			uint32 id = CWidgetManager::getInstance()->getParser()->addLinkData( data );
 

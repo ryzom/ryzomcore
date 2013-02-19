@@ -71,7 +71,7 @@ namespace GUIEditor
 			f.close();
 		}
 		else
-			nlwarning( QString( "File %1 cannot be opened!" ).arg( file ).toStdString().c_str() );
+			nlwarning( QString( "File %1 cannot be opened!" ).arg( file ).toUtf8().constData() );
 	}
 
 	void CWidgetPropParser::parseGUIWidgetXML( QFile &file )
@@ -126,19 +126,19 @@ namespace GUIEditor
 				if( !reader.hasError() )
 				{
 					if( key == "name" )
-						info.name = value.toStdString();
+						info.name = value.toUtf8().constData();
 					else
 					if( key == "guiname" )
-						info.GUIName = value.toStdString();
+						info.GUIName = value.toUtf8().constData();
 					else
 					if( key == "ancestor" )
-						info.ancestor = value.toStdString();
+						info.ancestor = value.toUtf8().constData();
 					else
 					if( key == "description" )
-						info.description = value.toStdString();
+						info.description = value.toUtf8().constData();
 					else
 					if( key == "icon" )
-						info.icon == value.toStdString();
+						info.icon == value.toUtf8().constData();
 					else
 					if( key == "abstract" )
 					{
@@ -169,7 +169,7 @@ namespace GUIEditor
 			return;
 
 		std::map< std::string, SWidgetInfo >::iterator itr =
-			widgetInfo->find( widgetName.toStdString() );
+			widgetInfo->find( widgetName.toUtf8().constData() );
 		if( itr == widgetInfo->end() )
 			return;
 
@@ -192,15 +192,15 @@ namespace GUIEditor
 						if( !reader.hasError() )
 						{
 							if( key == "name" )
-								prop.propName = value.toStdString();
+								prop.propName = value.toUtf8().constData();
 							else
 							if( key == "type" )
-								prop.propType = value.toStdString();
+								prop.propType = value.toUtf8().constData();
 							else
 							if( key == "default" )
-								prop.propDefault = value.toStdString();
+								prop.propDefault = value.toUtf8().constData();
 							else
-								nlwarning( QString( "Unknown tag %1 within a property" ).arg( key ).toStdString().c_str() );
+								nlwarning( QString( "Unknown tag %1 within a property" ).arg( key ).toUtf8().constData() );
 
 						}
 						else

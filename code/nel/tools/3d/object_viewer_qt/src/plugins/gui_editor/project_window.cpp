@@ -88,7 +88,7 @@ namespace GUIEditor
 			for( int i = 0; i < c; i++ )
 			{
 				QTreeWidgetItem *item = topItem->child( i );
-				projectFiles.guiFiles.push_back( item->text( 0 ).toStdString() );
+				projectFiles.guiFiles.push_back( item->text( 0 ).toUtf8().constData() );
 			}
 		}
 
@@ -99,7 +99,7 @@ namespace GUIEditor
 			for( int i = 0; i < c; i++ )
 			{
 				QTreeWidgetItem *item = topItem->child( i );
-				projectFiles.mapFiles.push_back( item->text( 0 ).toStdString() );
+				projectFiles.mapFiles.push_back( item->text( 0 ).toUtf8().constData() );
 			}
 		}
 	}

@@ -148,7 +148,7 @@ namespace GUIEditor
 
 		projectParser.clear();
 
-		std::string projectFileName = fileName.toStdString();
+		std::string projectFileName = fileName.toUtf8().constData();
 		if( !projectParser.parseProjectFile( projectFileName ) )
 		{
 			QMessageBox::critical( this,
@@ -186,7 +186,7 @@ namespace GUIEditor
 			return;
 
 		CProjectFileSerializer serializer;
-		serializer.setFile( currentProjectFile.toStdString() );
+		serializer.setFile( currentProjectFile.toUtf8().constData() );
 		if( !serializer.serialize( projectFiles ) )
 		{
 			QMessageBox::critical( this,
@@ -221,7 +221,7 @@ namespace GUIEditor
 			dir + "/" + projectFiles.projectName.c_str() + ".xml";
 
 		CProjectFileSerializer serializer;
-		serializer.setFile( newFile.toStdString() );
+		serializer.setFile( newFile.toUtf8().constData() );
 		if( !serializer.serialize( projectFiles ) )
 		{
 			QMessageBox::critical( this,
@@ -231,7 +231,7 @@ namespace GUIEditor
 		}
 
 		std::string guiFile =
-			dir.toStdString() + "/" + "ui_" + projectFiles.projectName + ".xml";
+			std::string( dir.toUtf8().constData() ) + "/" + "ui_" + projectFiles.projectName + ".xml";
 
 		WidgetSerializer widgetSerializer;
 		widgetSerializer.setFile( guiFile );

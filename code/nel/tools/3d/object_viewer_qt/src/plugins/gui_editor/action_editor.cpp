@@ -50,8 +50,8 @@ namespace GUIEditor
 
 	void ActionEditor::onOkButtonClicked()
 	{
-		currentAction->Parameters = paramsEdit->text().toStdString();
-		currentAction->Conditions = condEdit->text().toStdString();
+		currentAction->Parameters = paramsEdit->text().toUtf8().constData();
+		currentAction->Conditions = condEdit->text().toUtf8().constData();
 		hide();
 	}
 }
