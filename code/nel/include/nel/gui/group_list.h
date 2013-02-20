@@ -30,6 +30,8 @@ namespace NLGUI
 	class CGroupList : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupList )
+
 		enum EAlign
 		{
 			Bottom = 0,

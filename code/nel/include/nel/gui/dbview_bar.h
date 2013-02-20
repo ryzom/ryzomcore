@@ -37,6 +37,7 @@ namespace NLGUI
 	public:
 		enum TViewBar { ViewBar_UltraMini, ViewBar_Mini, ViewBar_Normal, ViewBar_MiniThick };
 	public:
+        DECLARE_UI_CLASS( CDBViewBar )
 
 		/// Constructor
 		CDBViewBar(const TCtorParam &param)

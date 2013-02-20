@@ -25,7 +25,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CViewPolygon::CViewPolygon() : CViewBase(TCtorParam())
+    CViewPolygon::CViewPolygon( const TCtorParam &param ) : CViewBase( param )
 	{
 		// Construct
 		_Color = CRGBA::White;

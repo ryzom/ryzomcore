@@ -38,6 +38,7 @@ namespace NLGUI
 	class CCtrlTextButton : public CCtrlBaseButton
 	{
 	public:
+        DECLARE_UI_CLASS( CCtrlTextButton )
 
 		/// Constructor
 		CCtrlTextButton(const TCtorParam &param);

@@ -43,7 +43,8 @@ namespace NLGUI
 	class CCtrlPolygon : public CCtrlBase
 	{
 	public:
-		CCtrlPolygon();
+        DECLARE_UI_CLASS( CCtrlPolygon )
+        CCtrlPolygon( const TCtorParam &param );
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 		virtual void updateCoords();
 		virtual void draw();

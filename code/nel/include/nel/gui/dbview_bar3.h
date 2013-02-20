@@ -34,6 +34,7 @@ namespace NLGUI
 	class CDBViewBar3 : public CViewBitmap
 	{
 	public:
+        DECLARE_UI_CLASS( CDBViewBar3 )
 
 		/// Constructor
 		CDBViewBar3(const TCtorParam &param);

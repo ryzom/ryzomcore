@@ -31,6 +31,8 @@ namespace NLGUI
 	class CCtrlLink : public CCtrlButton
 	{
 	public:
+        DECLARE_UI_CLASS( CCtrlLink )
+
 		CCtrlLink (const TCtorParam &param) : CCtrlButton(param)
 		{}
 	};
@@ -39,6 +41,8 @@ namespace NLGUI
 	class CGroupParagraph : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupParagraph )
+
 		enum EAlign
 		{
 			Bottom = 0,

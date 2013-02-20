@@ -54,7 +54,7 @@ namespace NLGUI
 	  */
 	class CCtrlSheetSelection
 	{
-	public:
+    public:
 		// Add a group, and returns its index, or -1 if already created.
 		sint addGroup(const std::string &name);
 		// Get a group by its name (must exist)

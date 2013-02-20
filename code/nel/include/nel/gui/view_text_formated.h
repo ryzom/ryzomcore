@@ -35,6 +35,7 @@ namespace NLGUI
 	class CViewTextFormated : public  CViewText
 	{
 	public:
+        DECLARE_UI_CLASS( CViewTextFormated )
 
 		/// Interface for classes which can format the text for this view.
 		class IViewTextFormatter

@@ -36,6 +36,8 @@ namespace NLGUI
 	{
 		friend class CGroupTable;
 	public:
+        DECLARE_UI_CLASS( CGroupCell )
+
 		CGroupCell(const TCtorParam &param);
 
 		enum TAlign
@@ -121,6 +123,7 @@ namespace NLGUI
 	class CGroupTable : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupTable )
 
 		///constructor
 		CGroupTable(const TCtorParam &param);

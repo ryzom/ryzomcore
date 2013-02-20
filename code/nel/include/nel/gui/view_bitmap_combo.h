@@ -99,6 +99,8 @@ namespace NLGUI
 	class CViewBitmapCombo : public CViewBase, public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
+        DECLARE_UI_CLASS( CViewBitmapCombo )
+
 		typedef std::vector<sint32> TIdArray;
 		typedef std::vector<std::string> TStringArray;
 		typedef std::vector<NLMISC::CRGBA>		 TColorArray;

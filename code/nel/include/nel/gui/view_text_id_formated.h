@@ -36,6 +36,8 @@ namespace NLGUI
 	class CViewTextIDFormated : public  CViewTextID
 	{
 	public:
+        DECLARE_UI_CLASS( CViewTextIDFormated )
+
 		CViewTextIDFormated(const TCtorParam &param) : CViewTextID(param)
 		{}
 

@@ -24,7 +24,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CViewQuad::CViewQuad() : CViewBase(TCtorParam()), _Color(CRGBA::White),
+    CViewQuad::CViewQuad( const TCtorParam &param ) : CViewBase( param ), _Color(CRGBA::White),
 													  _Additif(false),
 													  _UMin(0.f),
 													  _UMax(1.f),

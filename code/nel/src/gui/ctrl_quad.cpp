@@ -25,7 +25,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CCtrlQuad::CCtrlQuad() : CCtrlBase(TCtorParam()), _Color(CRGBA::White),
+    CCtrlQuad::CCtrlQuad( const TCtorParam &param ) : CCtrlBase( param ), _Color(CRGBA::White),
 													  _Additif(false),
 													  _Filtered(true),
 													  _UMin(0.f),

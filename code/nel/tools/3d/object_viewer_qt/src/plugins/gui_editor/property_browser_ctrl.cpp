@@ -82,13 +82,9 @@ namespace GUIEditor
 
 		currentElement = id;
 
-		std::string n;
-		n = typeid( *e ).name();
-		std::string::size_type i = n.find_last_of( ':' );
-		if( i != std::string::npos )
-			n = n.substr( i + 1, n.size() - 1 );
+        std::string n = e->getClassName();
 
-		setupProperties( n, e );
+        setupProperties( n, e );
 		connect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
 			this, SLOT( onPropertyChanged( QtProperty* ) ) );
 	}

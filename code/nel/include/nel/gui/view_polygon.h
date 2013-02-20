@@ -36,7 +36,9 @@ namespace NLGUI
 	class CViewPolygon : public CViewBase
 	{
 	public:
-		CViewPolygon();
+        DECLARE_UI_CLASS( CViewPolygon )
+
+        CViewPolygon( const TCtorParam &param );
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
 		virtual void updateCoords();
 		virtual void draw();

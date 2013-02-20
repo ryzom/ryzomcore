@@ -42,6 +42,7 @@ namespace NLGUI
 	class CViewTextMenu : public CViewText
 	{
 	public:
+        DECLARE_UI_CLASS( CViewTextMenu )
 
 		CViewTextMenu(const TCtorParam &param) : CViewText(param)
 		{
@@ -97,6 +98,7 @@ namespace NLGUI
 	class CGroupSubMenu : public CGroupSubMenuBase
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupSubMenu )
 
 		CGroupSubMenu(const TCtorParam &param);
 		virtual ~CGroupSubMenu();
@@ -290,6 +292,7 @@ namespace NLGUI
 	{
 
 	public:
+        DECLARE_UI_CLASS( CGroupMenu )
 
 		CGroupMenu(const TCtorParam &param);
 		virtual ~CGroupMenu();

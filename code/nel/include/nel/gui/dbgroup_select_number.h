@@ -39,6 +39,7 @@ namespace NLGUI
 	class CDBGroupSelectNumber : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CDBGroupSelectNumber )
 
 		/// Constructor
 		CDBGroupSelectNumber(const TCtorParam &param);
