@@ -188,6 +188,8 @@ CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 	//H_AUTO(R2_CPrimRender_newCtrlPolygon)
 	class CCtrlMapPolygon : public CCtrlPolygon
 	{
+	public:
+		CCtrlMapPolygon( CViewBase::TCtorParam &param ) : CCtrlPolygon( param ){}
 	protected:
 		// from CCtrlPolygon
 		void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src)
@@ -197,14 +199,16 @@ CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 			gm->worldToWindow(dest, src);
 		}
 	};
-	return new CCtrlMapPolygon;
+	CViewBase::TCtorParam param;
+	return new CCtrlMapPolygon( param );
 }
 
 // *********************************************************
 CCtrlQuad *CPrimRender::newCtrlQuad(uint /* edgeIndex */) const
 {
 	//H_AUTO(R2_CPrimRender_newCtrlQuad)
-	return new CCtrlQuad;
+	CViewBase::TCtorParam param;
+	return new CCtrlQuad( param );
 }
 
 // *********************************************************
