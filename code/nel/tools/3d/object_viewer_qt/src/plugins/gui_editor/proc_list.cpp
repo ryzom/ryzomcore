@@ -65,7 +65,7 @@ namespace GUIEditor
 		if( item == NULL )
 			return;
 
-		CProcedure *proc = parser->getProc( item->text().toStdString() );
+		CProcedure *proc = parser->getProc( item->text().toUtf8().constData() );
 		if( proc == NULL )
 			return;
 
@@ -86,7 +86,7 @@ namespace GUIEditor
 		if( ok )
 		{
 			IParser *parser = CWidgetManager::getInstance()->getParser();
-			if( !parser->addProc( newProc.toStdString() ) )
+			if( !parser->addProc( newProc.toUtf8().constData() ) )
 			{
 				QMessageBox::critical( this,
 									tr( "Cannot add new procedure" ),
@@ -113,7 +113,7 @@ namespace GUIEditor
 		if( button != QMessageBox::Yes )
 			return;
 		
-		if( !parser->removeProc( item->text().toStdString() ) )
+		if( !parser->removeProc( item->text().toUtf8().constData() ) )
 			return;
 		item = procList->takeItem( procList->currentRow() );
 		delete item;

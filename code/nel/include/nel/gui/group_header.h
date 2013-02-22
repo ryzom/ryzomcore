@@ -35,6 +35,8 @@ namespace NLGUI
 	class CGroupHeader : public CGroupList
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupHeader )
+
 		REFLECT_EXPORT_START(CGroupHeader, CGroupList)
 			REFLECT_LUA_METHOD("enlargeColumns", luaEnlargeColumns);
 			REFLECT_LUA_METHOD("resizeColumnsAndContainer", luaResizeColumnsAndContainer);
@@ -67,6 +69,8 @@ namespace NLGUI
 	class CGroupHeaderEntry : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupHeaderEntry )
+
 		CGroupHeaderEntry(const TCtorParam &param);
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		// from CInterfaceGroup

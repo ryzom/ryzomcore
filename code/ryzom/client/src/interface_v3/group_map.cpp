@@ -733,7 +733,8 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		//if (pCB != NULL) pCB->setActive(false);
 	}
 	nlassert(!_FrustumView);
-	_FrustumView = new CCtrlQuad;
+	CViewBase::TCtorParam param;
+	_FrustumView = new CCtrlQuad( param );
 	_FrustumView->setActive(false);
 	addView(_FrustumView);
 	_FrustumView->setParent(this);

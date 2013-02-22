@@ -39,6 +39,8 @@ namespace NLGUI
 	class CGroupScrollText : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupScrollText )
+
 		/// Constructor
 		CGroupScrollText(const TCtorParam &param);
 		~CGroupScrollText();

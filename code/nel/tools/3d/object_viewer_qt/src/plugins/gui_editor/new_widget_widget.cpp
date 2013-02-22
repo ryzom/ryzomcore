@@ -77,7 +77,7 @@ namespace GUIEditor
 
 	bool NewWidgetWidget::checkNameField()
 	{
-		if( nameEdit->text().toStdString().empty() )
+		if( nameEdit->text().isEmpty() )
 			return false;
 
 		return true;
@@ -88,7 +88,7 @@ namespace GUIEditor
 		if( widgetInfoTree == NULL )
 			return false;
 
-		CWidgetInfoTreeNode *node = widgetInfoTree->findNodeByName( nameEdit->text().toStdString() );
+		CWidgetInfoTreeNode *node = widgetInfoTree->findNodeByName( nameEdit->text().toUtf8().constData() );
 		if( node != NULL )
 			return false;
 
@@ -98,16 +98,16 @@ namespace GUIEditor
 
 	void NewWidgetWidget::addNewWidget()
 	{
-		CWidgetInfoTreeNode *node = widgetInfoTree->findNodeByName( ancestorCB->currentText().toStdString() );
+		CWidgetInfoTreeNode *node = widgetInfoTree->findNodeByName( ancestorCB->currentText().toUtf8().constData() );
 		if( node == NULL )
 		{
-			nlerror( "Ancestor %s doesn't exist! Aborting addition!", ancestorCB->currentText().toStdString().c_str() );
+			nlerror( "Ancestor %s doesn't exist! Aborting addition!", ancestorCB->currentText().toUtf8().constData() );
 			return;
 		}
 
 		SWidgetInfo info;
-		info.ancestor   = ancestorCB->currentText().toStdString();
-		info.name       = nameEdit->text().toStdString();
+		info.ancestor   = ancestorCB->currentText().toUtf8().constData();
+		info.name       = nameEdit->text().toUtf8().constData();
 		info.GUIName    = "C" + info.name;
 		info.isAbstract = false;
 		info.resolved   = true;

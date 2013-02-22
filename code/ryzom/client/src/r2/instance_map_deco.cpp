@@ -110,7 +110,8 @@ CCtrlQuad *CInstanceMapDeco::newQuad(CGroupMap &owner)
 {
 	//H_AUTO(R2_CInstanceMapDeco_newQuad)
 	nlassert(_Instance);
-	CCtrlQuad *q = new CCtrlQuad;
+	CViewBase::TCtorParam param;
+	CCtrlQuad *q = new CCtrlQuad( param );
 	q->setActive(false);
 	q->setModulateGlobalColor(false);
 	owner.addCtrl(q);
@@ -156,9 +157,11 @@ void CInstanceMapDeco::onAdd(CGroupMap &owner)
 	CInterfaceGroup *window = owner.getParentContainer();
 	if (window)
 	{
+		CViewBase::TCtorParam param;
+
 		for(uint k = 0; k < 2; ++k)
 		{
-			_GlowStar[k] = new CCtrlQuad;
+			_GlowStar[k] = new CCtrlQuad( param );
 			_GlowStar[k]->setActive(false);
 			_GlowStar[k]->setModulateGlobalColor(false);
 			window->addCtrl(_GlowStar[k]);

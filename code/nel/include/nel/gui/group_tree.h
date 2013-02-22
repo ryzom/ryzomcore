@@ -33,6 +33,7 @@ namespace NLGUI
 	{
 
 	public:
+        DECLARE_UI_CLASS( CGroupTree )
 
 		struct SNode;
 		// optional callback that is called when a node has been added

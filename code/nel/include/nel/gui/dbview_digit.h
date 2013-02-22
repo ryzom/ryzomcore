@@ -34,6 +34,7 @@ namespace NLGUI
 	class CDBViewDigit : public CViewBase
 	{
 	public:
+        DECLARE_UI_CLASS( CDBViewDigit )
 
 		/// Constructor
 		CDBViewDigit(const TCtorParam &param);

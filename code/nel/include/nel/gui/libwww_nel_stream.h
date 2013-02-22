@@ -20,7 +20,7 @@
 #define LIBWWW_NEL_STREAM_H
 
 
-#include "libwww/HTProt.h"
+#include "HTProt.h"
 
 extern "C" HTProtCallback HTLoadNeLFile;
 extern "C" PUBLIC HTInputStream * HTNeLReader_new (HTHost * host, HTChannel * ch, void * param, int mode);

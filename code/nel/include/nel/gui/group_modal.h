@@ -35,6 +35,8 @@ namespace NLGUI
 	class CGroupModal : public CGroupFrame
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupModal )
+
 		bool		SpawnOnMousePos		: 1;
 		bool		ExitClickOut		: 1;
 		bool		ExitClickL			: 1;
