@@ -341,6 +341,7 @@ namespace NLGUI
 		/**
 		 * Capture
 		 */
+		CViewBase *getCapturedView(){ return _CapturedView; }
 		CCtrlBase *getCapturePointerLeft() { return _CapturePointerLeft; }
 		CCtrlBase *getCapturePointerRight() { return _CapturePointerRight; }
 		CCtrlBase *getCaptureKeyboard() { return _CaptureKeyboard; }
@@ -509,6 +510,8 @@ namespace NLGUI
 		NLMISC::CRefPtr<CCtrlBase>	_DefaultCaptureKeyboard;
 		NLMISC::CRefPtr<CCtrlBase>	_CapturePointerLeft;
 		NLMISC::CRefPtr<CCtrlBase>	_CapturePointerRight;
+
+		NLMISC::CRefPtr< CViewBase > _CapturedView;
 
 		// What is under pointer
 		std::vector< CViewBase* > _ViewsUnderPointer;

@@ -2945,6 +2945,11 @@ namespace NLGUI
 		}
 	}
 
+	bool CViewText::handleEvent( const NLGUI::CEventDescriptor &evnt )
+	{
+		return false;
+	}
+
 	// ***************************************************************************
 	void CViewText::serial(NLMISC::IStream &f)
 	{

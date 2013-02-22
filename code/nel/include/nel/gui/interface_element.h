@@ -473,6 +473,7 @@ namespace NLGUI
 		bool isInGroup( CInterfaceGroup *group );
 
 		static void setEditorMode( bool b ){ editorMode = b; }
+		static bool getEditorMode(){ return editorMode; }
 
 		void setEditorSelected( bool b ){ editorSelected = b; }
 		bool isEditorSelected() const{ return editorSelected; }
