@@ -31,6 +31,7 @@
 #include "nel/gui/proc.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/reflect_register.h"
+#include "nel/gui/editor_selection_watcher.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -3181,7 +3182,42 @@ namespace NLGUI
 			}
 			e->setEditorSelected( true );
 			currentEditorSelection = name;
+			notifySelectionWatchers();
 		}
+	}
+
+	void CWidgetManager::notifySelectionWatchers()
+	{
+		std::vector< IEditorSelectionWatcher* >::iterator itr = selectionWatchers.begin();
+		while( itr != selectionWatchers.end() )
+		{
+			(*itr)->selectionChanged( currentEditorSelection );
+			++itr;
+		}
+	}
+
+	void CWidgetManager::registerSelectionWatcher( IEditorSelectionWatcher *watcher )
+	{
+		std::vector< IEditorSelectionWatcher* >::iterator itr =
+			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
+		
+		// We already have this watcher
+		if( itr != selectionWatchers.end() )
+			return;
+
+		selectionWatchers.push_back( watcher );
+	}
+
+	void CWidgetManager::unregisterSelectionWatcher( IEditorSelectionWatcher *watcher )
+	{
+		std::vector< IEditorSelectionWatcher* >::iterator itr =
+			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
+		
+		// We don't have this watcher
+		if( itr == selectionWatchers.end() )
+			return;
+
+		selectionWatchers.erase( itr );
 	}
 
 

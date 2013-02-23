@@ -58,6 +58,7 @@ public Q_SLOTS:
 
 private Q_SLOTS:
 		void onProjectFilesChanged();
+		void onGUILoaded();
 
 private:
 		void createMenus();

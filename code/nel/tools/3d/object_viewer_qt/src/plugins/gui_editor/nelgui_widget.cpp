@@ -27,6 +27,7 @@
 #include <set>
 #include <string>
 #include <QTimerEvent>
+#include "editor_selection_watcher.h"
 
 namespace GUIEditor
 {
@@ -37,6 +38,7 @@ namespace GUIEditor
 	{
 		timerID = 0;
 		guiLoaded = false;
+		watcher = NULL;
 	}
 
 	NelGUIWidget::~NelGUIWidget()
@@ -70,6 +72,8 @@ namespace GUIEditor
 		NLGUI::CViewRenderer::getInstance()->init();
 
 		CWidgetManager::getInstance()->getParser()->setEditorMode( true );
+
+		watcher = new CEditorSelectionWatcher();
 	}
 
 	bool NelGUIWidget::parse( SProjectFiles &files )
@@ -106,6 +110,8 @@ namespace GUIEditor
 		guiLoaded = true;
 		Q_EMIT guiLoadComplete();
 
+		CWidgetManager::getInstance()->registerSelectionWatcher( watcher );
+
 		return true;
 	}
 
@@ -115,6 +121,7 @@ namespace GUIEditor
 		if( timerID != 0 )
 			killTimer( timerID );
 		timerID = 0;
+		CWidgetManager::getInstance()->unregisterSelectionWatcher( watcher );
 		CWidgetManager::getInstance()->reset();
 		CWidgetManager::getInstance()->getParser()->removeAll();
 		CViewRenderer::getInstance()->reset();

@@ -130,6 +130,16 @@ namespace GUIEditor
 		if( masterGroup.empty() )
 			return;
 		buildHierarchy( masterGroup );
+		currentSelection.clear();
+	}
+
+	void WidgetHierarchy::onSelectionChanged( std::string &newSelection )
+	{
+		if( newSelection == currentSelection )
+			return;
+
+
+		// Update the tree
 	}
 
 	void WidgetHierarchy::onItemDblClicked( QTreeWidgetItem *item )
@@ -138,9 +148,7 @@ namespace GUIEditor
 			return;
 		
 		std::string n = item->text( 0 ).toUtf8().constData();
-		std::string selection = makeFullName( item, n );
-		CWidgetManager::getInstance()->setCurrentEditorSelection( selection );
-		
-		Q_EMIT selectionChanged( selection );
+		currentSelection = makeFullName( item, n );
+		CWidgetManager::getInstance()->setCurrentEditorSelection( currentSelection );
 	}
 }

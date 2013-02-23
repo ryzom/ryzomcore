@@ -41,6 +41,7 @@
 #include "project_file_serializer.h"
 #include "project_window.h"
 #include "nelgui_widget.h"
+#include "editor_selection_watcher.h"
 
 namespace GUIEditor
 {
@@ -91,11 +92,7 @@ namespace GUIEditor
 
 		viewPort->init();
 
-		connect( viewPort, SIGNAL( guiLoadComplete() ), hierarchyView, SLOT( onGUILoaded() ) );
-		connect( viewPort, SIGNAL( guiLoadComplete() ), procList, SLOT( onGUILoaded() ) );
-		connect( viewPort, SIGNAL( guiLoadComplete() ), linkList, SLOT( onGUILoaded() ) );
-		connect( hierarchyView, SIGNAL( selectionChanged( std::string& ) ),
-			&browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+		connect( viewPort, SIGNAL( guiLoadComplete() ), this, SLOT( onGUILoaded() ) );
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
@@ -262,6 +259,11 @@ namespace GUIEditor
 		if( reply != QMessageBox::Yes )
 			return false;
 
+
+		CEditorSelectionWatcher *w = viewPort->getWatcher();
+		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
+		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+
 		projectFiles.clearAll();
 		projectWindow->clear();
 		hierarchyView->clearHierarchy();
@@ -291,6 +293,16 @@ namespace GUIEditor
 		setCursor( Qt::ArrowCursor );
 	}
 
+	void GUIEditorWindow::onGUILoaded()
+	{
+		hierarchyView->onGUILoaded();
+		procList->onGUILoaded();
+		linkList->onGUILoaded();
+
+		CEditorSelectionWatcher *w = viewPort->getWatcher();
+		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
+		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+	}
 
 	void GUIEditorWindow::createMenus()
 	{
