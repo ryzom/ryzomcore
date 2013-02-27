@@ -36,10 +36,12 @@ namespace NLGUI
 	class CViewQuad : public CViewBase
 	{
 	public:
+        DECLARE_UI_CLASS( CViewQuad )
+
 		enum TWrapMode { Repeat = 0, Clamp, WrapModeCount };
 
 
-		CViewQuad();
+        CViewQuad( const TCtorParam &param );
 
 		// from CInterfaceElement
 		bool parse(xmlNodePtr cur,CInterfaceGroup *parentGroup);

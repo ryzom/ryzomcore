@@ -36,6 +36,7 @@ namespace NLGUI
 	{
 
 	public:
+        DECLARE_UI_CLASS( CCtrlColPick )
 
 		CCtrlColPick(const TCtorParam &param);
 		~CCtrlColPick();

@@ -38,10 +38,12 @@ namespace NLGUI
 	class CCtrlQuad : public CCtrlBase
 	{
 	public:
+        DECLARE_UI_CLASS( CCtrlQuad )
+
 		enum TWrapMode { Repeat = 0, Clamp, CustomUVs, WrapModeCount };
 
 
-		CCtrlQuad();
+        CCtrlQuad( const TCtorParam &param );
 
 		// from CInterfaceElement
 		bool parse(xmlNodePtr cur,CInterfaceGroup *parentGroup);

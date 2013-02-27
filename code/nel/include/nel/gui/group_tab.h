@@ -43,6 +43,7 @@ namespace NLGUI
 	class CGroupTab : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupTab )
 
 		/// Constructor
 		CGroupTab(const TCtorParam &param);
@@ -153,6 +154,7 @@ namespace NLGUI
 	class CCtrlTabButton : public CCtrlTextButton
 	{
 	public:
+        DECLARE_UI_CLASS( CCtrlTabButton )
 
 		CCtrlTabButton(const TCtorParam &param);
 

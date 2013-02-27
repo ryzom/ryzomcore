@@ -54,6 +54,8 @@ namespace NLGUI
 	class CGroupHTML : public CGroupScrollText
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupHTML )
+
 		friend void TextAdd (struct _HText *me, const char * buf, int len);
 		friend void TextBeginElement (_HText *me, int element_number, const BOOL *present, const char **	value);
 		friend void TextEndElement (_HText *me, int element_number);
@@ -658,6 +660,8 @@ namespace NLGUI
 	class CGroupHTMLInputOffset : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupHTMLInputOffset )
+
 		sint32 Offset;
 		CGroupHTMLInputOffset(const TCtorParam &param);
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;

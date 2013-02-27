@@ -49,7 +49,7 @@ namespace GUIEditor
 
 		currentProc = name;
 		IParser *parser = CWidgetManager::getInstance()->getParser();
-		CProcedure *proc = parser->getProc( name.toStdString() );
+		CProcedure *proc = parser->getProc( name.toUtf8().constData() );
 		
 		std::vector< CProcAction >::const_iterator itr;
 		for( itr = proc->Actions.begin(); itr != proc->Actions.end(); ++itr )
@@ -74,7 +74,7 @@ namespace GUIEditor
 			return;
 
 		CProcedure *proc =
-			CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+			CWidgetManager::getInstance()->getParser()->getProc( currentProc.toUtf8().constData() );
 		if( proc == NULL )
 			return;
 
@@ -96,14 +96,14 @@ namespace GUIEditor
 		if( ok )
 		{
 			CProcedure *proc =
-				CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+				CWidgetManager::getInstance()->getParser()->getProc( currentProc.toUtf8().constData() );
 			if( proc != NULL )
 			{
-				proc->addAction( name.toStdString() );
+				proc->addAction( name.toUtf8().constData() );
 				actionList->addItem( name );
 			}
 			else
-				nlinfo( "Cannot find procedure %s", currentProc.toStdString().c_str() );
+				nlinfo( "Cannot find procedure %s", currentProc.toUtf8().constData() );
 		}
 	}
 
@@ -123,17 +123,17 @@ namespace GUIEditor
 			return;
 
 		CProcedure *proc = 
-			CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+			CWidgetManager::getInstance()->getParser()->getProc( currentProc.toUtf8().constData() );
 
 		if( proc != NULL )
 		{
 			if( !proc->removeAction( static_cast< uint32 >( actionList->currentRow() ) ) )
-				nlinfo( "Action #%d not found in procedure %s.", actionList->currentRow(), currentProc.toStdString().c_str() );
+				nlinfo( "Action #%d not found in procedure %s.", actionList->currentRow(), currentProc.toUtf8().constData() );
 			item = actionList->takeItem( actionList->currentRow() );
 			delete item;
 		}
 		else
-			nlinfo( "Cannot find procedure %s", currentProc.toStdString().c_str() );
+			nlinfo( "Cannot find procedure %s", currentProc.toUtf8().constData() );
 	}
 
 	void ProcEditor::onUpButtonClicked()
@@ -149,7 +149,7 @@ namespace GUIEditor
 		if( prevItem == NULL )
 			return;
 
-		CProcedure *proc = CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+		CProcedure *proc = CWidgetManager::getInstance()->getParser()->getProc( currentProc.toUtf8().constData() );
 		if( proc == NULL )
 			return;
 
@@ -172,7 +172,7 @@ namespace GUIEditor
 		if( nextItem == NULL )
 			return;
 
-		CProcedure *proc = CWidgetManager::getInstance()->getParser()->getProc( currentProc.toStdString() );
+		CProcedure *proc = CWidgetManager::getInstance()->getParser()->getProc( currentProc.toUtf8().constData() );
 		if( proc == NULL )
 			return;
 

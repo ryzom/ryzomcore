@@ -32,6 +32,7 @@ namespace NLGUI
 	class CGroupEditBox : public CGroupEditBoxBase
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupEditBox )
 
 		class IComboKeyHandler
 		{
@@ -42,7 +43,6 @@ namespace NLGUI
 
 		enum TEntryType { Text, Integer, PositiveInteger, Float, PositiveFloat, Alpha, AlphaNum, AlphaNumSpace, Password, Filename, PlayerName }; // the type of entry this edit bot can deal with
 
-		DECLARE_UI_CLASS( CGroupEditBox )
 		/// Constructor
 		CGroupEditBox(const TCtorParam &param);
 		/// Dtor

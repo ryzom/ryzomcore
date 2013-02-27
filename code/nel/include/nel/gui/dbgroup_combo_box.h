@@ -39,6 +39,7 @@ namespace NLGUI
 	class CDBGroupComboBox : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CDBGroupComboBox )
 
 		/// Constructor
 		CDBGroupComboBox(const TCtorParam &param);

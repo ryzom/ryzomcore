@@ -548,9 +548,10 @@ void CDisplayerVisualActivitySequence::setWorldMapNumEdges(uint count)
 	else
 	{
 		uint left = count - (uint)_WorldMapEdges.size();
+		CViewBase::TCtorParam param;
 		while (left --)
 		{
-			CCtrlQuad *cq = new CCtrlQuad;
+			CCtrlQuad *cq = new CCtrlQuad( param );
 			cq->setModulateGlobalColor(false);
 			cq->setActive(true);
 			gm->addCtrl(cq);

@@ -35,6 +35,7 @@ namespace NLGUI
 	class CCtrlButton : public CCtrlBaseButton
 	{
 	public:
+        DECLARE_UI_CLASS( CCtrlButton )
 
 		/// Constructor
 		CCtrlButton(const TCtorParam &param) : CCtrlBaseButton(param)

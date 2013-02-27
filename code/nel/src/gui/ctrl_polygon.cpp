@@ -25,7 +25,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CCtrlPolygon::CCtrlPolygon() : CCtrlBase(TCtorParam())
+    CCtrlPolygon::CCtrlPolygon( const TCtorParam &param ) : CCtrlBase( param )
 	{
 		// Construct
 		_Color = CRGBA::White;

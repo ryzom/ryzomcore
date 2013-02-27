@@ -82,13 +82,9 @@ namespace GUIEditor
 
 		currentElement = id;
 
-		std::string n;
-		n = typeid( *e ).name();
-		std::string::size_type i = n.find_last_of( ':' );
-		if( i != std::string::npos )
-			n = n.substr( i + 1, n.size() - 1 );
+        std::string n = e->getClassName();
 
-		setupProperties( n, e );
+        setupProperties( n, e );
 		connect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
 			this, SLOT( onPropertyChanged( QtProperty* ) ) );
 	}
@@ -109,7 +105,7 @@ namespace GUIEditor
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
 		if( e == NULL )
 			return;
-		e->setProperty( propName.toStdString(), propValue.toStdString() );
+		e->setProperty( propName.toUtf8().constData(), propValue.toUtf8().constData() );
 	}
 
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )
