@@ -188,8 +188,6 @@ namespace NLGUI
 
 		int luaSetLineMaxW(CLuaState &ls);
 
-		bool handleEvent( const NLGUI::CEventDescriptor &evnt );
-
 		REFLECT_EXPORT_START(CViewText, CViewBase)
 			REFLECT_STRING("hardtext", getHardText, setHardText);
 			REFLECT_UCSTRING("uc_hardtext", getText, setText);
