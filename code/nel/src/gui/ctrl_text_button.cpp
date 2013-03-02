@@ -60,6 +60,16 @@ namespace NLGUI
 		_ForceTextOver = false;
 	}
 
+	CCtrlTextButton::~CCtrlTextButton()
+	{
+		if( _ViewText != NULL )
+		{
+			if( getParent() != NULL )
+				getParent()->delElement( _ViewText );
+			_ViewText = NULL;
+		}
+	}
+
 	std::string CCtrlTextButton::getProperty( const std::string &name ) const
 	{
 		std::string prop;

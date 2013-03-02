@@ -42,6 +42,7 @@ namespace NLGUI
 
 		/// Constructor
 		CCtrlTextButton(const TCtorParam &param);
+		~CCtrlTextButton();
 
 		std::string getProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );

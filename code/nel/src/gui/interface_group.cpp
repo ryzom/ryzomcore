@@ -142,11 +142,11 @@ namespace NLGUI
 		clearGroups();
 	//	nlinfo ("%d seconds for clearGroups '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
 	//	initStart = ryzomGetLocalTime ();
-		clearViews();
-	//	nlinfo ("%d seconds for clearViews '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
-	//	initStart = ryzomGetLocalTime ();
 		clearControls();
 	//	nlinfo ("%d seconds for clearControls '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
+	//	initStart = ryzomGetLocalTime ();
+		clearViews();
+	//	nlinfo ("%d seconds for clearViews '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
 		CWidgetManager::getInstance()->removeRefOnGroup (this);
 
 	#ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
