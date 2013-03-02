@@ -42,6 +42,7 @@
 #include "project_window.h"
 #include "nelgui_widget.h"
 #include "editor_selection_watcher.h"
+#include "editor_message_processor.h"
 
 namespace GUIEditor
 {
@@ -54,6 +55,7 @@ namespace GUIEditor
 	QMainWindow(parent)
 	{
 		m_ui.setupUi(this);
+		messageProcessor = new CEditorMessageProcessor;
 		m_undoStack   = new QUndoStack(this);
 		widgetProps   = new CWidgetProperties;
 		linkList      = new LinkList;
@@ -98,6 +100,9 @@ namespace GUIEditor
 	GUIEditorWindow::~GUIEditorWindow()
 	{
 		writeSettings();
+
+		delete messageProcessor;
+		messageProcessor = NULL;
 
 		delete widgetProps;
 		widgetProps = NULL;
@@ -311,6 +316,7 @@ namespace GUIEditor
 		QAction *saveAction = mm->action( Core::Constants::SAVE );
 		QAction *saveAsAction = mm->action( Core::Constants::SAVE_AS );
 		QAction *closeAction = mm->action( Core::Constants::CLOSE );
+		QAction *delAction = mm->action( Core::Constants::DEL );
 
 		//if( newAction != NULL )
 		//	newAction->setEnabled( true );
@@ -320,6 +326,11 @@ namespace GUIEditor
 			saveAsAction->setEnabled( true );
 		if( closeAction != NULL )
 			closeAction->setEnabled( true );
+		if( delAction != NULL )
+		{
+			delAction->setEnabled( true );
+			connect( delAction, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onDelete() ) );
+		}
 
 		QMenu *menu = mm->menu( Core::Constants::M_TOOLS );
 		if( menu != NULL )

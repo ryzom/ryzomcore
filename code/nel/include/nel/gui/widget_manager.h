@@ -485,6 +485,7 @@ namespace NLGUI
 
 		IParser* getParser() const{ return parser; }
 
+		std::string& getCurrentEditorSelection(){ return currentEditorSelection; }
 		void setCurrentEditorSelection( const std::string &name );
 		void notifySelectionWatchers();
 		void registerSelectionWatcher( IEditorSelectionWatcher *watcher );
