@@ -18,6 +18,8 @@
 #define WIDGET_HA_H
 
 #include "ui_widget_hierarchy.h"
+#include <string>
+#include <map>
 
 namespace NLGUI
 {
@@ -53,6 +55,7 @@ namespace GUIEditor
 	private:
 		std::string currentSelection;
 		std::string masterGroup;
+		std::map< std::string, QTreeWidgetItem* > widgetHierarchyMap;
 	};
 }
 

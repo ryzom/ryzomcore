@@ -75,6 +75,7 @@ namespace GUIEditor
 	void WidgetHierarchy::clearHierarchy()
 	{
 		widgetHT->clear();
+		widgetHierarchyMap.clear();
 	}
 
 	void WidgetHierarchy::buildHierarchy( std::string &masterGroup )
@@ -87,6 +88,7 @@ namespace GUIEditor
 			QTreeWidgetItem *item = new QTreeWidgetItem( NULL );
 			item->setText( 0, "ui" );
 			widgetHT->addTopLevelItem( item );
+			widgetHierarchyMap[ "ui" ] = item;
 
 			buildHierarchy( item, mg );
 		}
@@ -96,7 +98,9 @@ namespace GUIEditor
 	{
 		// First add ourselves
 		QTreeWidgetItem *item = new QTreeWidgetItem( parent );
+		
 		item->setText( 0, makeNodeName( group->getId() ).c_str() );
+		widgetHierarchyMap[ group->getId() ] = item;
 
 		// Then add recursively our subgroups
 		const std::vector< CInterfaceGroup* > &groups = group->getGroups();
@@ -113,6 +117,7 @@ namespace GUIEditor
 		{
 			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
 			subItem->setText( 0, makeNodeName( (*citr)->getId() ).c_str() );
+			widgetHierarchyMap[ (*citr)->getId() ] = subItem;
 		}
 
 		// Add our views
@@ -122,6 +127,7 @@ namespace GUIEditor
 		{
 			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
 			subItem->setText( 0, makeNodeName( (*vitr)->getId() ).c_str() );
+			widgetHierarchyMap[ (*vitr)->getId() ] = subItem;
 		}
 	}
 
@@ -138,8 +144,24 @@ namespace GUIEditor
 		if( newSelection == currentSelection )
 			return;
 
+		std::map< std::string, QTreeWidgetItem* >::iterator itr = 
+			widgetHierarchyMap.find( newSelection );
+		if( itr == widgetHierarchyMap.end() )
+			return;
 
-		// Update the tree
+		if( widgetHT->currentItem() != NULL )
+			widgetHT->currentItem()->setSelected( false );
+
+		QTreeWidgetItem *item = itr->second;
+		QTreeWidgetItem *currItem = item;
+		while( currItem != NULL )
+		{
+			currItem->setExpanded( true );
+			currItem = currItem->parent();
+		}
+
+		item->setSelected( true );
+		widgetHT->setCurrentItem( item );
 	}
 
 	void WidgetHierarchy::onItemDblClicked( QTreeWidgetItem *item )
