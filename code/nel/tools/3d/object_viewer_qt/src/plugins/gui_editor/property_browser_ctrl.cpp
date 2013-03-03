@@ -78,7 +78,12 @@ namespace GUIEditor
 
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
 		if( e == NULL )
+		{
+			connect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
+				this, SLOT( onPropertyChanged( QtProperty* ) ) );
+
 			return;
+		}
 
 		currentElement = id;
 

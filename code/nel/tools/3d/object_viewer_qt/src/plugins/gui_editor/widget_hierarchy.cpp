@@ -144,14 +144,47 @@ namespace GUIEditor
 		if( newSelection == currentSelection )
 			return;
 
+		if( newSelection.empty() )
+		{
+			if( widgetHT->currentItem() != NULL )
+			{
+				QTreeWidgetItem *item = widgetHT->currentItem();
+				QTreeWidgetItem *p = item;
+
+				// Deselect item
+				item->setSelected( false );
+				widgetHT->setCurrentItem( NULL );
+
+				// Collapse the tree
+				while( p != NULL )
+				{
+					p->setExpanded( false );
+					p = p->parent();
+				}
+
+				// Finally remove the item!
+				delete item;
+				item = NULL;
+
+				std::map< std::string, QTreeWidgetItem* >::iterator itr =
+					widgetHierarchyMap.find( currentSelection );
+				if( itr != widgetHierarchyMap.end() )
+					widgetHierarchyMap.erase( itr );
+				currentSelection = "";
+			}
+			return;
+		}
+
 		std::map< std::string, QTreeWidgetItem* >::iterator itr = 
 			widgetHierarchyMap.find( newSelection );
 		if( itr == widgetHierarchyMap.end() )
 			return;
 
+		// deselect current item
 		if( widgetHT->currentItem() != NULL )
 			widgetHT->currentItem()->setSelected( false );
 
+		// expand the tree items, so that we can see the selected item
 		QTreeWidgetItem *item = itr->second;
 		QTreeWidgetItem *currItem = item;
 		while( currItem != NULL )
@@ -160,8 +193,10 @@ namespace GUIEditor
 			currItem = currItem->parent();
 		}
 
+		// select the current item
 		item->setSelected( true );
 		widgetHT->setCurrentItem( item );
+		currentSelection = newSelection;
 	}
 
 	void WidgetHierarchy::onItemDblClicked( QTreeWidgetItem *item )

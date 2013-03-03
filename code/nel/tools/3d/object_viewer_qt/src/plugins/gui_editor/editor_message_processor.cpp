@@ -50,7 +50,9 @@ namespace GUIEditor
 			return;
 
 		if( g->delElement( e ) )
+		{
 			CWidgetManager::getInstance()->setCurrentEditorSelection( "" );
+		}
 	}
 }
 

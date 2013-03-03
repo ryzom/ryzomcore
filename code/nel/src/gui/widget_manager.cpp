@@ -3181,9 +3181,13 @@ namespace NLGUI
 					prev->setEditorSelected( false );
 			}
 			e->setEditorSelected( true );
-			currentEditorSelection = name;
-			notifySelectionWatchers();
 		}
+		else
+		if( !name.empty() )
+			return;
+		
+		currentEditorSelection = name;
+		notifySelectionWatchers();
 	}
 
 	void CWidgetManager::notifySelectionWatchers()
