@@ -424,6 +424,8 @@ namespace NLGUI
 
 		void drawHotSpot(THotSpot hs, NLMISC::CRGBA col);
 
+		void drawHighlight();
+
 		// Returns 'true' if that element can be downcasted to a view
 		virtual bool isView() const { return false; }
 

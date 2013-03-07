@@ -774,8 +774,7 @@ namespace NLGUI
 		CCtrlBase *capturePointerLeft = CWidgetManager::getInstance()->getCapturePointerLeft();
 
 		// *** Draw Over
-		if( editorSelected ||
-		    ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed ||  capturePointerLeft == this ) ) ) 
+		if( ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed ||  capturePointerLeft == this ) ) ) 
 		)
 		{
 			if( !editorMode && (lastOver == false) && (_AHOnOver != NULL) )

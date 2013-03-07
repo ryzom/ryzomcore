@@ -1300,6 +1300,11 @@ namespace NLGUI
 
 	}
 
+	void CInterfaceElement::drawHighlight()
+	{
+		CViewRenderer::getInstance()->drawWiredQuad( _XReal, _YReal, _WReal, _HReal );
+	}
+
 	// ***************************************************************************
 	void CInterfaceElement::invalidateContent()
 	{

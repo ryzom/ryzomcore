@@ -2056,6 +2056,16 @@ namespace NLGUI
 				getPointer()->draw ();
 		}
 
+		if( CInterfaceElement::getEditorMode() )
+		{
+			if( !currentEditorSelection.empty() )
+			{
+				CInterfaceElement *e = getElementFromId( currentEditorSelection );
+				if( e != NULL )
+					e->drawHighlight();
+			}
+		}
+
 		// flush layers
 		CViewRenderer::getInstance()->flush();
 
