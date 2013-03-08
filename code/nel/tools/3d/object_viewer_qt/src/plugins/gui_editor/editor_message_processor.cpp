@@ -41,9 +41,9 @@ namespace GUIEditor
 		if( e == NULL )
 			return;
 
-		CInterfaceElement *p = e;
-		while( ( p != NULL ) && !p->isGroup() )
-			p = p->getParent();
+		CInterfaceElement *p = e->getParent();
+		if( p == NULL )
+			return;
 		
 		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( p );
 		if( g == NULL )
