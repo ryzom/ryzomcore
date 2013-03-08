@@ -124,6 +124,8 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("getViewText", luaGetViewText)
 		REFLECT_EXPORT_END
 
+		void onRemoved();
+
 	protected:
 
 		enum	{NumTexture= 3};

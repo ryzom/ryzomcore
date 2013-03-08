@@ -486,6 +486,9 @@ namespace NLGUI
 		void setSerializable( bool b ){ serializable = b; }
 		bool IsSerializable() const{ return serializable; }
 
+		/// Called when the widget is removed from it's parent group
+		virtual void onRemoved(){}
+
 	protected:
 
 		bool editorSelected;

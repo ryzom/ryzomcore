@@ -64,8 +64,8 @@ namespace NLGUI
 	{
 		if( _ViewText != NULL )
 		{
-			if( getParent() != NULL )
-				getParent()->delElement( _ViewText );
+			if( _Parent != NULL )
+				_Parent->delView( _ViewText );
 			_ViewText = NULL;
 		}
 	}
@@ -967,6 +967,13 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-
+	void CCtrlTextButton::onRemoved()
+	{
+		if( _ViewText != NULL )
+		{
+			if( _Parent != NULL )
+				_Parent->delView( _ViewText, true );
+		}
+	}
 }
 

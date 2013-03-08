@@ -1084,9 +1084,12 @@ namespace NLGUI
 		{
 			if (_Views[i] == child)
 			{
-				if (!dontDelete) delete _Views[i];
+				CViewBase *v = _Views[i];
 				_Views.erase(_Views.begin()+i);
 				delEltOrder (child);
+				child->onRemoved();
+				child->setParent( NULL );
+				if (!dontDelete) delete v;
 				return true;
 			}
 		}
@@ -1100,9 +1103,12 @@ namespace NLGUI
 		{
 			if (_Controls[i] == child)
 			{
-				if (!dontDelete) delete _Controls[i];
+				CCtrlBase *c = _Controls[i];
 				_Controls.erase(_Controls.begin()+i);
 				delEltOrder (child);
+				child->onRemoved();
+				child->setParent( NULL );
+				if (!dontDelete) delete c;
 				return true;
 			}
 		}
@@ -1116,9 +1122,12 @@ namespace NLGUI
 		{
 			if (_ChildrenGroups[i] == child)
 			{
-				if (!dontDelete) delete _ChildrenGroups[i];
+				CInterfaceGroup *g = _ChildrenGroups[i];
 				_ChildrenGroups.erase(_ChildrenGroups.begin()+i);
 				delEltOrder (child);
+				child->onRemoved();
+				child->setParent( NULL );
+				if (!dontDelete) delete g;
 				return true;
 			}
 		}
