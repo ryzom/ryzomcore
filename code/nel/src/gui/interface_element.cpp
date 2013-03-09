@@ -45,7 +45,9 @@ namespace NLGUI
 			}
 			delete _Links;
 		}
-		notifyDeletionWatchers();
+		
+		if( editorMode )
+			notifyDeletionWatchers();
 	}
 
 	// ------------------------------------------------------------------------------------------------
