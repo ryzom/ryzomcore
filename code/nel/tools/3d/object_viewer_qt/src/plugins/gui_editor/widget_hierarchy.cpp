@@ -56,6 +56,26 @@ namespace
 		name = s.toUtf8().constData();
 		return name;
 	}
+
+	class CWidgetDeletionWatcher : public CInterfaceElement::IDeletionWatcher
+	{
+	public:
+		CWidgetDeletionWatcher(){ h = NULL; }
+		
+		~CWidgetDeletionWatcher(){}
+		
+		void onDeleted( const std::string &id ){
+			if( h != NULL )
+				h->onWidgetDeleted( id );
+		}
+
+		void setWidgetHierarchy( GUIEditor::WidgetHierarchy *h ){ this->h = h; }
+
+	private:
+		GUIEditor::WidgetHierarchy *h;
+	};
+
+	CWidgetDeletionWatcher deletionWatcher;
 }
 
 namespace GUIEditor
@@ -66,6 +86,7 @@ namespace GUIEditor
 		setupUi( this );
 		connect( widgetHT, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ),
 			this, SLOT( onItemDblClicked( QTreeWidgetItem* ) ) );
+		deletionWatcher.setWidgetHierarchy( this );
 	}
 
 	WidgetHierarchy::~WidgetHierarchy()
@@ -74,6 +95,7 @@ namespace GUIEditor
 
 	void WidgetHierarchy::clearHierarchy()
 	{
+		CInterfaceElement::unregisterDeletionWatcher( &deletionWatcher );
 		widgetHT->clear();
 		widgetHierarchyMap.clear();
 	}
@@ -81,6 +103,7 @@ namespace GUIEditor
 	void WidgetHierarchy::buildHierarchy( std::string &masterGroup )
 	{
 		clearHierarchy();
+		CInterfaceElement::registerDeletionWatcher( &deletionWatcher );
 
 		CInterfaceGroup *mg = CWidgetManager::getInstance()->getMasterGroupFromId( masterGroup );
 		if( mg != NULL )
@@ -131,6 +154,39 @@ namespace GUIEditor
 		}
 	}
 
+	void WidgetHierarchy::onWidgetDeleted( const std::string &id )
+	{
+		std::map< std::string, QTreeWidgetItem* >::iterator itr
+			= widgetHierarchyMap.find( id );
+		if( itr == widgetHierarchyMap.end() )
+			return;
+
+		if( widgetHT->currentItem() == itr->second )
+		{
+			QTreeWidgetItem *item = itr->second;
+			QTreeWidgetItem *p = item;
+			
+			// Deselect item
+			item->setSelected( false );
+			widgetHT->setCurrentItem( NULL );
+			
+			// Collapse the tree
+			while( p != NULL )
+			{
+				p->setExpanded( false );
+				p = p->parent();
+			}
+			
+			currentSelection = "";
+		}
+
+		itr->second->setSelected( false );
+
+		delete itr->second;
+		itr->second = NULL;
+		widgetHierarchyMap.erase( itr );
+	}
+
 	void WidgetHierarchy::onGUILoaded()
 	{
 		if( masterGroup.empty() )
@@ -145,35 +201,7 @@ namespace GUIEditor
 			return;
 
 		if( newSelection.empty() )
-		{
-			if( widgetHT->currentItem() != NULL )
-			{
-				QTreeWidgetItem *item = widgetHT->currentItem();
-				QTreeWidgetItem *p = item;
-
-				// Deselect item
-				item->setSelected( false );
-				widgetHT->setCurrentItem( NULL );
-
-				// Collapse the tree
-				while( p != NULL )
-				{
-					p->setExpanded( false );
-					p = p->parent();
-				}
-
-				// Finally remove the item!
-				delete item;
-				item = NULL;
-
-				std::map< std::string, QTreeWidgetItem* >::iterator itr =
-					widgetHierarchyMap.find( currentSelection );
-				if( itr != widgetHierarchyMap.end() )
-					widgetHierarchyMap.erase( itr );
-				currentSelection = "";
-			}
 			return;
-		}
 
 		std::map< std::string, QTreeWidgetItem* >::iterator itr = 
 			widgetHierarchyMap.find( newSelection );

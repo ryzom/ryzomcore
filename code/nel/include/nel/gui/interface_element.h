@@ -70,6 +70,14 @@ namespace NLGUI
 	{
 	public:
 
+		/// Watches CInterfaceElement deletions
+		class IDeletionWatcher
+		{
+		public:
+			IDeletionWatcher(){}
+			virtual ~IDeletionWatcher(){}
+			virtual void onDeleted( const std::string &name ){}
+		};
 
 		enum EStrech
 		{
@@ -489,6 +497,12 @@ namespace NLGUI
 		/// Called when the widget is removed from it's parent group
 		virtual void onRemoved(){}
 
+		/// Registers a deletion watcher
+		static void registerDeletionWatcher( IDeletionWatcher *watcher );
+
+		/// Unregisters a deletion watcher
+		static void unregisterDeletionWatcher( IDeletionWatcher *watcher );
+
 	protected:
 
 		bool editorSelected;
@@ -549,6 +563,11 @@ namespace NLGUI
 		void parseSizeRef(const char *sizeRefStr, sint32 &sizeref, sint32 &sizeDivW, sint32 &sizeDivH);
 
 	private:
+		/// Notifies the deletion watchers that this interface element is being deleted
+		void notifyDeletionWatchers();
+		
+		static std::vector< IDeletionWatcher* > deletionWatchers;
+
 		//void	snapSize();
 		bool serializable;
 

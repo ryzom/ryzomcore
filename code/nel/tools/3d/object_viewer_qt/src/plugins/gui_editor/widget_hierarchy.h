@@ -42,6 +42,8 @@ namespace GUIEditor
 		void clearHierarchy();
 		void buildHierarchy( std::string &masterGroup );
 
+		void onWidgetDeleted( const std::string &id );
+
 	private:
 		void buildHierarchy( QTreeWidgetItem *parent, NLGUI::CInterfaceGroup *group );
 
