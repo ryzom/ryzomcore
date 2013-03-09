@@ -47,7 +47,11 @@ namespace NLGUI
 		}
 		
 		if( editorMode )
+		{
 			notifyDeletionWatchers();
+			if( _Parent != NULL )
+				_Parent->onWidgetDeleted( this );
+		}
 	}
 
 	// ------------------------------------------------------------------------------------------------

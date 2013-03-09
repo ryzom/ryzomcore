@@ -1088,7 +1088,6 @@ namespace NLGUI
 				_Views.erase(_Views.begin()+i);
 				delEltOrder (child);
 				child->onRemoved();
-				child->setParent( NULL );
 				if (!dontDelete) delete v;
 				return true;
 			}
@@ -1107,7 +1106,6 @@ namespace NLGUI
 				_Controls.erase(_Controls.begin()+i);
 				delEltOrder (child);
 				child->onRemoved();
-				child->setParent( NULL );
 				if (!dontDelete) delete c;
 				return true;
 			}
@@ -1126,7 +1124,6 @@ namespace NLGUI
 				_ChildrenGroups.erase(_ChildrenGroups.begin()+i);
 				delEltOrder (child);
 				child->onRemoved();
-				child->setParent( NULL );
 				if (!dontDelete) delete g;
 				return true;
 			}
@@ -2477,4 +2474,16 @@ namespace NLGUI
 		return "IMPLEMENT ME!";
 	}
 
+	void CInterfaceGroup::onWidgetDeleted( CInterfaceElement *e )
+	{
+		for( std::vector< CViewBase* >::iterator itr = _Views.begin(); itr != _Views.end(); ++itr )
+			(*itr)->onWidgetDeleted( e );
+
+		for( std::vector< CCtrlBase* >::iterator itr = _Controls.begin(); itr != _Controls.end(); ++itr )
+			(*itr)->onWidgetDeleted( e );
+
+		for( std::vector< CInterfaceGroup* >::iterator itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
+			(*itr)->onWidgetDeleted( e );
+	}
 }
+

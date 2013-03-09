@@ -503,6 +503,10 @@ namespace NLGUI
 		/// Unregisters a deletion watcher
 		static void unregisterDeletionWatcher( IDeletionWatcher *watcher );
 
+		/// Called when the widget is deleted,
+		/// so other widgets in the group can check if it belongs to them
+		virtual void onWidgetDeleted( CInterfaceElement *e ){}
+
 	protected:
 
 		bool editorSelected;

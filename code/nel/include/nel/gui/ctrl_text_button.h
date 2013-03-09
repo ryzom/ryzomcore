@@ -125,6 +125,7 @@ namespace NLGUI
 		REFLECT_EXPORT_END
 
 		void onRemoved();
+		void onWidgetDeleted( CInterfaceElement *e );
 
 	protected:
 
