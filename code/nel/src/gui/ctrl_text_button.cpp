@@ -66,6 +66,9 @@ namespace NLGUI
 		{
 			if( _Parent != NULL )
 				_Parent->delView( _ViewText );
+			else
+				delete _ViewText;
+
 			_ViewText = NULL;
 		}
 	}
