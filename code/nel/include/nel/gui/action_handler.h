@@ -71,6 +71,9 @@ namespace NLGUI
 		/// return pointer to action handler or null if it doesn't exist
 		IActionHandler *getActionHandler(const std::string &name) const
 		{
+			if( name.empty() )
+				return NULL;
+
 			TFactoryMap::const_iterator it = FactoryMap.find(name);
 			if( it == FactoryMap.end() )
 			{
