@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+#include "stdpch.h"
 #include "nel/gui/group_tree.h"
 #include "nel/gui/interface_element.h"
 #include "nel/gui/view_bitmap.h"

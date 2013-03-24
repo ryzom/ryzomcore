@@ -16,8 +16,7 @@
 
 //#include <crtdbg.h>
 
-#define NOMINMAX
-
+#include "stdpch.h"
 #include "nel/gui/group_html.h"
 
 // LibWWW

@@ -15,7 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/proc.h"
+
 #include "nel/misc/algo.h"
 
 using namespace NLMISC;

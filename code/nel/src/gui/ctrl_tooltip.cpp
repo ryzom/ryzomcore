@@ -15,12 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-// ----------------------------------------------------------------------------
+#include "stdpch.h"
 #include "nel/gui/ctrl_tooltip.h"
 #include "nel/misc/xml_auto_ptr.h"
 
-// ----------------------------------------------------------------------------
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;

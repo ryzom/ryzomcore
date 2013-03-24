@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/interface_group.h"
 

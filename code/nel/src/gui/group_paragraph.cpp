@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/group_paragraph.h"
 #include "nel/gui/group_html.h"
 #include "nel/gui/widget_manager.h"

@@ -15,8 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-// ----------------------------------------------------------------------------
+#include "stdpch.h"
 #include "nel/gui/group_wheel.h"
 
 

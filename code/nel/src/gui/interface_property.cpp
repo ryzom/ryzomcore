@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/misc/rgba.h"
 #include "nel/gui/interface_property.h"
 #include "nel/gui/interface_common.h"
