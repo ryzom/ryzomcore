@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+#include "stdmisc.h"
 
 //#define TRACE_READ_DELTA
 //#define TRACE_WRITE_DELTA

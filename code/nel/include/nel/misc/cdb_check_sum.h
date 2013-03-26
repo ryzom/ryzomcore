@@ -21,6 +21,8 @@
 
 #include "types_nl.h"
 
+#include <vector>
+
 namespace NLMISC{
 
 /**
