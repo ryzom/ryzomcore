@@ -14167,7 +14167,7 @@ void CCharacter::sendCloseTempInventoryImpulsion()
 	BOMB_IF(isRecursing,"CCharacter::sendCloseTempInventoryImpulsion is recursing!",return);		// **** Temp Fix 2/4 **** //
 	isRecursing= true;																				// **** Temp Fix 3/4 **** //
 
-	getAllTempInventoryItems();
+	getAllTempInventoryItems(false);
 
 	CMessage msgout( "IMPULSION_ID" );
 	msgout.serial( _Id );
