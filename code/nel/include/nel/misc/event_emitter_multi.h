@@ -33,7 +33,7 @@ class CEventEmitterMulti : public IEventEmitter
 {
 public:
 	/// dtor
-	~CEventEmitterMulti();
+	virtual ~CEventEmitterMulti();
 	/// add an emitter
 	void	addEmitter(IEventEmitter *e, bool mustDelete);
 	/// remove an emitter (and delete it if necessary)

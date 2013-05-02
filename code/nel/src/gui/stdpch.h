@@ -29,8 +29,9 @@
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
 
-#if NL_OS_WINDOWS
+#ifdef NL_OS_WINDOWS
 	#define NOMINMAX
+	#include <WinSock2.h>
 	#include <windows.h>
 #endif
 
