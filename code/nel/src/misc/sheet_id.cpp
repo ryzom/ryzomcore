@@ -168,12 +168,15 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 				_Id.IdInfos.Type = typeId;
 				_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
 				_DevSheetNameToId[unknownNewType] = _Id.Id;
+				if (sheetName == "unknown")
+					return true; // Return with the unknown sheet id of this type
 			}
 			else
 			{
 				typeId = tit->second;
 				_Id.IdInfos.Type = typeId;
 			}
+			// Add a new sheet name to the type
 			_DevSheetIdToName[typeId].push_back(sheetNameLc);
 			_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
 			// nldebug("SHEETID: Type %i, id %i, sheetid %i", _Id.IdInfos.Type, _Id.IdInfos.Id, _Id.Id);
