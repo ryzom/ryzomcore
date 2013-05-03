@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/dbview_number.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/misc/common.h"

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/dbgroup_select_number.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_bitmap.h"

@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 
 //#define TRACE_READ_DELTA
 //#define TRACE_WRITE_DELTA

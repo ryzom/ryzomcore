@@ -14,24 +14,25 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef NELGUI_H
+#define NELGUI_H
 
-#include "stdpch.h"
-#include "nel/gui/group_editbox_base.h"
+#include <string>
 
-namespace NLGUI
-{
+#include "nel/misc/types_nl.h"
+#include "nel/misc/algo.h"
+#include "nel/misc/factory.h"
+#include "nel/misc/bit_mem_stream.h"
+#include "nel/misc/i18n.h"
+#include "nel/misc/path.h"
+#include "nel/misc/file.h"
+#include "nel/misc/uv.h"
+#include "nel/misc/hierarchical_timer.h"
 
-	CGroupEditBoxBase *CGroupEditBoxBase::_CurrSelection = NULL;
+#ifdef NL_OS_WINDOWS
+	#define NOMINMAX
+	#include <WinSock2.h>
+	#include <windows.h>
+#endif
 
-	CGroupEditBoxBase::CGroupEditBoxBase( const TCtorParam &param ) :
-	CInterfaceGroup( param )
-	{
-		_RecoverFocusOnEnter = true;
-	}
-
-	CGroupEditBoxBase::~CGroupEditBoxBase()
-	{
-	}
-
-}
-
+#endif

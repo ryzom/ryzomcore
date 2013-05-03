@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#define NOMINMAX
+#include "stdpch.h"
 
 #include "nel/gui/group_html.h"
 
@@ -28,10 +28,6 @@ extern "C"
 
 #include "nel/gui/group_html.h"
 #include "nel/gui/libwww_nel_stream.h"
-
-#ifdef HAVE_REVISION_H
-#include "revision.h"
-#endif
 
 using namespace NLMISC;
 
@@ -554,35 +550,6 @@ namespace NLGUI
 			HTTrace_setCallback(NelTracer);
 
 			/* Initiate libwww */
-
-#if defined(HAVE_X86_64)
-#define RYZOM_ARCH "x64"
-#elif defined(HAVE_X86)
-#define RYZOM_ARCH "x86"
-#elif defined(HAVE_ARM)
-#define RYZOM_ARCH "arm"
-#else
-#define RYZOM_ARCH "unknow"
-#endif
-#if defined(NL_OS_WINDOWS)
-#define RYZOM_SYSTEM "windows"
-#elif defined(NL_OS_MAC)
-#define RYZOM_SYSTEM "mac"
-#elif defined(NL_OS_UNIX)
-#define RYZOM_SYSTEM "unix"
-#else
-#define RYZOM_SYSTEM "unkown"
-#endif
-
-/*
-			char buffer[256];
-#ifdef REVISION
-			sprintf(buffer, "%s.%s-%s-%s", RYZOM_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
-#else
-			sprintf(buffer, "%s-%s-%s", RYZOM_VERSION, RYZOM_SYSTEM, RYZOM_ARCH);
-#endif
-*/
-			
 			HTLib_setAppName( CGroupHTML::options.appName.c_str() );
 			HTLib_setAppVersion( CGroupHTML::options.appVersion.c_str() );
 

@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
+#include "nel/gui/view_renderer.h"
+
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
-#include "nel/gui/view_renderer.h"
 
 using namespace NLMISC;
 using namespace std;

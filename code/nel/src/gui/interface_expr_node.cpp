@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/misc/cdb_leaf.h"
 #include "nel/misc/cdb_branch.h"
 #include "nel/gui/interface_expr_node.h"

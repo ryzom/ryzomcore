@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+#include "stdpch.h"
 #include "nel/gui/ctrl_col_pick.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/view_renderer.h"

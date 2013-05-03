@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/group_header.h"
 #include "nel/gui/lua_ihm.h"

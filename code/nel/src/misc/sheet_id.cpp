@@ -393,7 +393,7 @@ void CSheetId::init(bool removeUnknownSheet)
 		nlwarning("SHEETID: Loading without known sound sheet id, please update sheet_id.bin with .sound sheets");
 		nlassert(_FileExtensions.size() == 1 << (NL_SHEET_ID_TYPE_BITS));
 		nlassert(_FileExtensions[a_NoSoundSheetType].empty());
-		_FileExtensions[a_NoSoundSheetType] == "sound";
+		_FileExtensions[a_NoSoundSheetType] = "sound";
 		_DevSheetIdToName.push_back(std::vector<std::string>());
 		_DevSheetIdToName[0].push_back("unknown.sound");
 		TSheetId id;

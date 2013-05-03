@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/group_table.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/interface_element.h"

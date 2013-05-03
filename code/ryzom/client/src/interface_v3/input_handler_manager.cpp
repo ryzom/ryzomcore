@@ -94,6 +94,7 @@ void CInputHandlerManager::addToServer(NLMISC::CEventServer * server)
 	// System
 	server->addListener(EventGDMouseMove,	this);
 	server->addListener(EventDestroyWindowId,	this);
+	server->addListener(EventCloseWindowId,	this);
 	server->addListener(EventSetFocusId,	this);
 	server->addListener(EventDisplayChangeId,	this);
 
@@ -118,6 +119,7 @@ void CInputHandlerManager::release()
 	// System
 	_EventServer->removeListener(EventGDMouseMove,	this);
 	_EventServer->removeListener(EventDestroyWindowId,	this);
+	_EventServer->removeListener(EventCloseWindowId,	this);
 	_EventServer->removeListener(EventSetFocusId,	this);
 	_EventServer->removeListener(EventDisplayChangeId,	this);
 
@@ -133,9 +135,7 @@ void CInputHandlerManager::release()
 	_EventServer->removeListener(EventCharId,		this);
 	_EventServer->removeListener(EventKeyDownId,	this);
 	_EventServer->removeListener(EventKeyUpId,		this);
-
 }
-
 
 // ***************************************************************************
 void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
