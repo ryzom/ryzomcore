@@ -697,7 +697,8 @@ void CMessages::init()
 	TRANSPORT_CLASS_REGISTER (CReportStaticAIInstanceMsg);
 	TRANSPORT_CLASS_REGISTER (CReportAIInstanceDespawnMsg);
 	TRANSPORT_CLASS_REGISTER (CWarnBadInstanceMsgImp);
-
+	TRANSPORT_CLASS_REGISTER (CCreatureSetUrlMsg);
+	TRANSPORT_CLASS_REGISTER (CChangeCreatureMaxHPMsg)
 	TRANSPORT_CLASS_REGISTER (CChangeCreatureHPMsg);
 	TRANSPORT_CLASS_REGISTER (CChangeCreatureModeMsgImp);
 	TRANSPORT_CLASS_REGISTER (CQueryEgs);
@@ -770,10 +771,10 @@ void	CAIAskForInfosOnEntityImp::callback (const std::string &name, NLNET::TServi
 			}
 			break;
 		default:
+			std::vector<std::string> strings = phys->getMultiLineInfoString();
+			msg.Infos.insert(msg.Infos.end(), strings.begin(), strings.end());
 			break;
 		}
-		std::vector<std::string> strings = phys->getMultiLineInfoString();
-		msg.Infos.insert(msg.Infos.end(), strings.begin(), strings.end());
 	}
 	else
 	{

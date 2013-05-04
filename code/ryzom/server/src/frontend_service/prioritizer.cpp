@@ -41,10 +41,10 @@ using namespace CLFECOMMON;
  *  t|          /
  *  a|        /
  *  n|      /
- *  c|45° /
+ *  c|45  /
  *  e|  /
  *   |/
- *   °
+ *   o
  * Observer
  *
  * If Delta exceeds Distance/2, the priority shelf (bucket) is the highest one (H)

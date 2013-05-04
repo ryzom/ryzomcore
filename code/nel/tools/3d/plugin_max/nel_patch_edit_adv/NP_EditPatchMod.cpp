@@ -264,7 +264,7 @@ void EditPatchMod::NewSetByOperator(TSTR &newName, Tab < int> &sets, int op)
 
 // Named selection set copy/paste methods follow...
 
-static BOOL CALLBACK PickSetNameDlgProc(
+static INT_PTR CALLBACK PickSetNameDlgProc(
 		HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static TSTR *name;
@@ -328,7 +328,7 @@ BOOL EditPatchMod::GetUniqueSetName(TSTR &name)
 
 
 
-static BOOL CALLBACK PickSetDlgProc(
+static INT_PTR CALLBACK PickSetDlgProc(
 		HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {	
 	switch (msg)

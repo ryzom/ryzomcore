@@ -89,7 +89,7 @@ void CVarPath::decode ()
 
 	string val = getToken ();
 
-	if (val == "")
+	if (val.empty())
 		return;
 
 	if (val == "[" )
@@ -105,7 +105,7 @@ void CVarPath::decode ()
 					osbnb++;
 
 				// end of token
-				if (val == "")
+				if (val.empty())
 				{
 					nlwarning ("VP: Bad VarPath '%s', suppose it s an empty varpath", RawVarPath.c_str());
 					Destination.clear ();
@@ -143,7 +143,7 @@ void CVarPath::decode ()
 		Destination.push_back (make_pair(RawVarPath, string("")));
 		return;
 	}
-	else if (val != "." && val != "" && val != "=")
+	else if (val != "." && !val.empty() && val != "=")
 	{
 		nlwarning ("VP: Malformated VarPath '%s' before position %d", RawVarPath.c_str (), TokenPos);
 		return;

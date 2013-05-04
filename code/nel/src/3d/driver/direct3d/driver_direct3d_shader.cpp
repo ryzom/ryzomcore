@@ -355,8 +355,8 @@ bool CDriverD3D::activeShader(CShader *shd)
 
 		// Assemble the shader
 		LPD3DXBUFFER pErrorMsgs;
-		if (D3DXCreateEffect(_DeviceInterface,	shd->getText(), (UINT)strlen(shd->getText())+1, NULL, NULL, 0, NULL, &(shaderInfo->Effect), &pErrorMsgs)
-			== D3D_OK)
+		HRESULT hr = D3DXCreateEffect(_DeviceInterface, shd->getText(), (UINT)strlen(shd->getText())+1, NULL, NULL, 0, NULL, &(shaderInfo->Effect), &pErrorMsgs);
+		if (hr == D3D_OK)
 		{
 			// Get the texture handle
 			uint i;
@@ -374,7 +374,7 @@ bool CDriverD3D::activeShader(CShader *shd)
 		}
 		else
 		{
-			nlwarning ("Can't create shader '%s':", shd->getName());
+			nlwarning ("Can't create shader '%s' (0x%x):", shd->getName(), hr);
 			if (pErrorMsgs)
 				nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
 			shd->_ShaderChanged = false;

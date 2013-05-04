@@ -4633,7 +4633,7 @@ void CCombatPhrase::applyBounceEffect(CEntityBase *actingEntity, sint32 attacker
 	}
 #endif
 
-	CEntityBase *bounceTarget = bounceEffect->getTargetForBounce();
+	CEntityBase *bounceTarget = bounceEffect->getTargetForBounce(actingEntity);
 	if (!bounceTarget)
 		return;
 

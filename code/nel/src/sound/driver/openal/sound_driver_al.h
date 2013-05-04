@@ -17,15 +17,13 @@
 #ifndef NL_SOUND_DRIVER_AL_H
 #define NL_SOUND_DRIVER_AL_H
 
-#include <nel/sound/driver/sound_driver.h>
+#include "nel/sound/driver/sound_driver.h"
 
-namespace NLSOUND
-{
+namespace NLSOUND {
 	class CBufferAL;
 	class CListenerAL;
 	class CSourceAL;
 	class CEffectAL;
-	class CMusicChannelAL;
 
 // alGenBuffers, alGenSources
 //typedef ALAPI ALvoid ALAPIENTRY (*TGenFunctionAL) ( ALsizei, ALuint* );
@@ -82,8 +80,6 @@ private:
 	std::set<CSourceAL *> _Sources;
 	// Allocated effects
 	std::set<CEffectAL *> _Effects;
-	/// Array with the allocated music channels created by client code.
-	std::set<CMusicChannelAL *> _MusicChannels;
 	// Number of exported buffers (including any deleted buffers)
 	uint _NbExpBuffers;
 	// Number of exported sources (including any deleted sources)
@@ -101,6 +97,10 @@ public:
 	/// Destructor
 	virtual ~CSoundDriverAL();
 
+	inline ALCdevice *getAlDevice() { return _AlDevice; }
+	inline ALCcontext *getAlContext() { return _AlContext; }
+	inline float getRolloffFactor() { return _RolloffFactor; }
+
 	/// Return a list of available devices for the user. The value at index 0 is empty, and is used for automatic device selection.
 	virtual void getDevices(std::vector<std::string> &devices);
 	/// Initialize the driver with a user selected device. If device.empty(), the default or most appropriate device is used.
@@ -111,50 +111,32 @@ public:
 	/// Return if an option is enabled (including those that cannot be disabled on this driver).
 	virtual bool getOption(TSoundOptions option);
 
-	/// Commit all the changes made to 3D settings of listener and sources
-	virtual void commit3DChanges();
-
+	/// Create a sound buffer
+	virtual	IBuffer *createBuffer();
 	/// Create the listener instance
 	virtual	IListener *createListener();
-	/// Create a source, destroy with delete
+	/// Create a source
 	virtual	ISource *createSource();
-	/// Create a sound buffer, destroy with delete
-	virtual	IBuffer *createBuffer();
 	/// Create a reverb effect
 	virtual IReverbEffect *createReverbEffect();
 	/// Return the maximum number of sources that can created
 	virtual uint countMaxSources();
 	/// Return the maximum number of effects that can be created
 	virtual uint countMaxEffects();
-
-	/// Write information about the driver to the output stream.
-	virtual void writeProfile(std::string& /* out */);
-
+	
 	virtual void startBench();
 	virtual void endBench();
-	virtual void displayBench(NLMISC::CLog * /* log */);
+	virtual void displayBench(NLMISC::CLog *log);
 
-	/// Create a music channel, destroy with destroyMusicChannel.
-	virtual IMusicChannel *createMusicChannel();
-
-	/** Get music info. Returns false if the song is not found or the function is not implemented.
-	 *  \param filepath path to file, CPath::lookup done by driver
-	 *  \param artist returns the song artist (empty if not available)
-	 *  \param title returns the title (empty if not available)
-	 */
-	virtual bool getMusicInfo(const std::string &filepath, std::string &artist, std::string &title);
-
-	/// Get audio/container extensions that are supported natively by the driver implementation.
-	virtual void getMusicExtensions(std::vector<std::string> & /* extensions */) const { }
-	/// Return if a music extension is supported by the driver's music channel.
-	virtual bool isMusicExtensionSupported(const std::string & /* extension */) const { return false; }
-
-	ALCdevice *getAlDevice() { return _AlDevice; }
-	ALCcontext *getAlContext() { return _AlContext; }
-	float getRolloffFactor() { return _RolloffFactor; }
 
 	/// Change the rolloff factor and apply to all sources
 	void applyRolloffFactor(float f);
+
+	/// Commit all the changes made to 3D settings of listener and sources
+	virtual void commit3DChanges();
+
+	/// Write information about the driver to the output stream.
+	virtual void writeProfile(std::string& out);
 
 	/// Remove a buffer
 	void removeBuffer(CBufferAL *buffer);
@@ -162,22 +144,13 @@ public:
 	void removeSource(CSourceAL *source);
 	/// Remove an effect
 	void removeEffect(CEffectAL *effect);
-	/// (Internal) Remove music channel (should be called by the destructor of the music channel class).
-	void removeMusicChannel(CMusicChannelAL *musicChannel);	
 
-	/** Set the gain (volume value inside [0 , 1]). (default: 1)
-	 * 0.0 -> silence
-	 * 0.5 -> -6dB
-	 * 1.0 -> no attenuation
-	 * values > 1 (amplification) not supported by most drivers
-	 */
-	void setGain( float gain );
-
-	/// Get the gain
-	float getGain();
+	/// Get audio/container extensions that are supported natively by the driver implementation.
+	virtual void getMusicExtensions(std::vector<std::string> & /* extensions */) const { }
+	/// Return if a music extension is supported by the driver's music channel.
+	virtual bool isMusicExtensionSupported(const std::string & /* extension */) const { return false; }
 
 protected:
-	void updateMusic();
 
 	/// Allocate nb new buffers or sources
 	void					allocateNewItems( TGenFunctionAL algenfunc, TTestFunctionAL altestfunc,
@@ -195,9 +168,6 @@ protected:
 
 	/// Delete a buffer or a source
 	bool					deleteItem( ALuint name, TDeleteFunctionAL aldeletefunc, std::vector<ALuint>& names );
-
-	/// Master Volume [0,1]
-	float _MasterGain;
 };
 
 

@@ -87,9 +87,9 @@ public:
 	  * 'accumulate' set to false.
 	  * NB : works only with integrable forces
 	  */
-	 virtual void integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos = NULL, NLMISC::CVector *destSpeed = NULL,
-							bool accumulate = false,
-							uint posStride = sizeof(NLMISC::CVector), uint speedStride = sizeof(NLMISC::CVector)
+	 virtual void integrate(float /* date */, CPSLocated * /* src */, uint32 /* startIndex */, uint32 /* numObjects */, NLMISC::CVector * /* destPos */ = NULL, NLMISC::CVector * /* destSpeed */ = NULL,
+							bool /* accumulate */ = false,
+							uint /* posStride */ = sizeof(NLMISC::CVector), uint /* speedStride */ = sizeof(NLMISC::CVector)
 							) const
 	 {
 		 nlassert(0); // not an integrable force
@@ -100,11 +100,11 @@ public:
 	  * If the start date is lower than the creation date, the initial position is used
 	  * NB : works only with integrable forces
 	  */
-	virtual void integrateSingle(float startDate, float deltaT, uint numStep,
-								 const CPSLocated *src, uint32 indexInLocated,
-								 NLMISC::CVector *destPos,
-								 bool accumulate = false,
-								 uint posStride = sizeof(NLMISC::CVector)) const
+	virtual void integrateSingle(float /* startDate */, float /* deltaT */, uint /* numStep */,
+								 const CPSLocated * /* src */, uint32 /* indexInLocated */,
+								 NLMISC::CVector * /* destPos */,
+								 bool /* accumulate */ = false,
+								 uint /* posStride */ = sizeof(NLMISC::CVector)) const
 	{
 		 nlassert(0); // not an integrable force
 	}
@@ -170,7 +170,7 @@ public:
 	virtual void setIntensityScheme(CPSAttribMaker<float> *scheme);
 
 	// deriver have here the opportunity to setup the functor object. The default does nothing
-	virtual void setupFunctor(uint32 indexInLocated) { }
+	virtual void setupFunctor(uint32 /* indexInLocated */) { }
 
 	/// get the attribute maker for a non constant intensity
 	CPSAttribMaker<float> *getIntensityScheme(void) { return _IntensityScheme; }
@@ -493,22 +493,22 @@ public:
 	#ifdef NL_OS_WINDOWS
 		__forceinline
 	#endif
-	 void operator() (const NLMISC::CVector &pos, NLMISC::CVector &speed, float invMass)
-	 {
+	void operator() (const NLMISC::CVector &/* pos */, NLMISC::CVector &speed, float invMass)
+	{
 		speed -= (CParticleSystem::EllapsedTime * _K * invMass * speed);
-	 }
+	}
 
-	 virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
-	 {
-		 f.serialVersion(1);
-		 // we don't save intensity info : it is saved by the owning object (and set before each use of this functor)
-	 }
+	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	{
+		f.serialVersion(1);
+		// we don't save intensity info : it is saved by the owning object (and set before each use of this functor)
+	}
 
-	 // get the friction coefficient
-	 float getK(void) const { return _K; }
+	// get the friction coefficient
+	float getK(void) const { return _K; }
 
-	 // set the friction coefficient
-	 void setK(float coeff) { _K = coeff; }
+	// set the friction coefficient
+	void setK(float coeff) { _K = coeff; }
 protected:
 	// the friction coeff
 	float _K;
@@ -630,7 +630,7 @@ struct CPSTurbulForceFunc
 	#ifdef NL_OS_WINDOWS
 		__forceinline
 	#endif
-	void operator() (const NLMISC::CVector &pos, NLMISC::CVector &speed, float invMass)
+	void operator() (const NLMISC::CVector &/* pos */, NLMISC::CVector &/* speed */, float /* invMass */)
 	{
 		nlassert(0);
 

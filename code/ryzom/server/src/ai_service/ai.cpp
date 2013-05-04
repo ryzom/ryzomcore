@@ -423,6 +423,15 @@ void	CAIS::update()
 			_CreatureChangeHPList.Entities.clear();
 			_CreatureChangeHPList.DeltaHp.clear();
 		}
+		if (!_CreatureChangeMaxHPList.Entities.empty())
+		{
+			nlassert(_CreatureChangeMaxHPList.Entities.size()==_CreatureChangeMaxHPList.MaxHp.size());
+			nlassert(_CreatureChangeMaxHPList.Entities.size()==_CreatureChangeMaxHPList.SetFull.size());
+			_CreatureChangeMaxHPList.send("EGS");
+			_CreatureChangeMaxHPList.Entities.clear();
+			_CreatureChangeMaxHPList.MaxHp.clear();
+			_CreatureChangeMaxHPList.SetFull.clear();
+		}
 	}
 
 	//

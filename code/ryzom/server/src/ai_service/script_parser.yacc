@@ -510,7 +510,7 @@ exp:			lValue TOKEN_ASSIGNATOR expression
 					NODE2 ($$, $3, $1); 
 				}
 				| lValue TOKEN_ASSIGNATOR TOKEN_LP expression { ERROR_DETECTED ($$, "missing ')' at the end of the expression"); }
-				| lValue TOKEN_ASSIGNATOR expression TOKEN_RP { ERROR_DETECTED ($$, "missing '(' at the begining of the expression");}
+				| lValue TOKEN_ASSIGNATOR expression TOKEN_RP { ERROR_DETECTED ($$, "missing '(' at the beginning of the expression");}
 
 printContent:	printContent TOKEN_SEPARATOR TOKEN_CHAIN { NODE3 ($$, $1, CScriptVM::PUSH_PRINT_STRING, $3); }
 				| TOKEN_CHAIN { NODE2 ($$, CScriptVM::PUSH_PRINT_STRING, $1); }
@@ -532,7 +532,7 @@ openStatement:	TOKEN_IF TOKEN_LP condition TOKEN_RP statement
 					NODE4 ($$, $3, CScriptVM::JE, sizeToJump, $5);
 				}
 				| TOKEN_IF TOKEN_LP condition statement {ERROR_DETECTED ($$, "missing ')' at the end of the if condition");}
-				| TOKEN_IF condition TOKEN_RP statement {ERROR_DETECTED ($$, "missing '(' at the begining of the if condition");}
+				| TOKEN_IF condition TOKEN_RP statement {ERROR_DETECTED ($$, "missing '(' at the beginning of the if condition");}
 				| TOKEN_IF TOKEN_LP condition TOKEN_RP closedStatement TOKEN_ELSE openStatement 
 				{ 
 					int sizeToJump0 = (int)$5.ByteCode->size() + 3;	// 2 jump instructions to escape
@@ -540,7 +540,7 @@ openStatement:	TOKEN_IF TOKEN_LP condition TOKEN_RP statement
 					NODE7 ($$, $3, CScriptVM::JE, sizeToJump0, $5, CScriptVM::JUMP, sizeToJump1, $7);
 				}
 				| TOKEN_IF TOKEN_LP condition closedStatement TOKEN_ELSE openStatement  { ERROR_DETECTED ($$, "missing ')' at the end of the if condition");}
-				| TOKEN_IF condition TOKEN_RP closedStatement TOKEN_ELSE openStatement  { ERROR_DETECTED ($$, "missing '(' at the begining of the if condition");}
+				| TOKEN_IF condition TOKEN_RP closedStatement TOKEN_ELSE openStatement  { ERROR_DETECTED ($$, "missing '(' at the beginning of the if condition");}
 				| TOKEN_WHILE TOKEN_LP condition TOKEN_RP openStatement
 				{ 
 					int sizeToJump0 = (int)$5.ByteCode->size() + 3;		// 2 jump instructions to escape
@@ -548,7 +548,7 @@ openStatement:	TOKEN_IF TOKEN_LP condition TOKEN_RP statement
 					NODE6 ($$, $3, CScriptVM::JE, sizeToJump0, $5, CScriptVM::JUMP, sizeToJump1);
 				}
 				| TOKEN_WHILE TOKEN_LP condition openStatement { ERROR_DETECTED ($$, "missing ')' at the end of the while condition");}
-				| TOKEN_WHILE condition TOKEN_RP openStatement { ERROR_DETECTED ($$, "missing '(' at the begining of the while condition");}
+				| TOKEN_WHILE condition TOKEN_RP openStatement { ERROR_DETECTED ($$, "missing '(' at the beginning of the while condition");}
 
 closedStatement:TOKEN_IF TOKEN_LP condition TOKEN_RP closedStatement TOKEN_ELSE closedStatement
 				{ 
@@ -565,7 +565,7 @@ closedStatement:TOKEN_IF TOKEN_LP condition TOKEN_RP closedStatement TOKEN_ELSE 
 					NODE6 ($$, $3, CScriptVM::JE, sizeToJump0, $5, CScriptVM::JUMP, sizeToJump1);
 				}
 				| TOKEN_WHILE TOKEN_LP condition closedStatement { ERROR_DETECTED ($$, "missing ')' at the end of the while condition");}
-				| TOKEN_WHILE condition TOKEN_RP closedStatement { ERROR_DETECTED ($$, "missing '(' at the begining of the while condition");}
+				| TOKEN_WHILE condition TOKEN_RP closedStatement { ERROR_DETECTED ($$, "missing '(' at the beginning of the while condition");}
 				| exp TOKEN_PV { $$ = $1; }
 				| printString TOKEN_PV { $$ = $1; }
 				| logString TOKEN_PV { $$ = $1; }
@@ -583,10 +583,10 @@ closedStatement:TOKEN_IF TOKEN_LP condition TOKEN_RP closedStatement TOKEN_ELSE 
 				| TOKEN_INCRDECR context TOKEN_NAME TOKEN_PV { NODE7 ($$, $2, CScriptVM::PUSH_CONTEXT_VAR_VAL, $3, $1, $2, CScriptVM::SET_CONTEXT_VAR_VAL, $3); }
 				| TOKEN_NAME TOKEN_ASSIGN expression TOKEN_PV { NODE6 ($$, CScriptVM::PUSH_VAR_VAL, $1, $3, $2, CScriptVM::SET_VAR_VAL, $1); }
 				| TOKEN_NAME TOKEN_ASSIGN TOKEN_LP expression TOKEN_PV  { ERROR_DETECTED ($$, "missing ')' at the end of the expression");}
-				| TOKEN_NAME TOKEN_ASSIGN expression TOKEN_RP TOKEN_PV  { ERROR_DETECTED ($$, "missing '(' at the begining of the expression");}
+				| TOKEN_NAME TOKEN_ASSIGN expression TOKEN_RP TOKEN_PV  { ERROR_DETECTED ($$, "missing '(' at the beginning of the expression");}
 				| context TOKEN_NAME TOKEN_ASSIGN expression TOKEN_PV { NODE8 ($$, $1, CScriptVM::PUSH_CONTEXT_VAR_VAL, $1, $4, $3, $1, CScriptVM::SET_CONTEXT_VAR_VAL, $2); }
 				| context TOKEN_NAME TOKEN_ASSIGN TOKEN_LP expression TOKEN_PV  { ERROR_DETECTED ($$, "missing ')' at the end of the expression");}
-				| context TOKEN_NAME TOKEN_ASSIGN expression TOKEN_RP TOKEN_PV  { ERROR_DETECTED ($$, "missing '(' at the begining of the expression");}
+				| context TOKEN_NAME TOKEN_ASSIGN expression TOKEN_RP TOKEN_PV  { ERROR_DETECTED ($$, "missing '(' at the beginning of the expression");}
 				| statementBlock { NODE1 ($$, $1); }
 				| error TOKEN_PV { NODE0 ($$); }
 
@@ -715,8 +715,8 @@ switch:			TOKEN_SWITCH TOKEN_LP expression TOKEN_RP TOKEN_LA cases TOKEN_RA
 					}
 				}
 				| TOKEN_SWITCH TOKEN_LP expression TOKEN_LA cases TOKEN_RA  {ERROR_DETECTED ($$, "missing ')' at the end of the switch expression");}
-				| TOKEN_SWITCH expression TOKEN_RP TOKEN_LA cases TOKEN_RA  {ERROR_DETECTED ($$, "missing '(' at the begining of the switch expression");}
-				| TOKEN_SWITCH TOKEN_LP expression TOKEN_RP cases TOKEN_RA	{ERROR_DETECTED ($$, "missing '{' at the begining of the switch cases");}
+				| TOKEN_SWITCH expression TOKEN_RP TOKEN_LA cases TOKEN_RA  {ERROR_DETECTED ($$, "missing '(' at the beginning of the switch expression");}
+				| TOKEN_SWITCH TOKEN_LP expression TOKEN_RP cases TOKEN_RA	{ERROR_DETECTED ($$, "missing '{' at the beginning of the switch cases");}
 
 
 statementBlock:	TOKEN_LA statements TOKEN_RA { $$ = $2; }

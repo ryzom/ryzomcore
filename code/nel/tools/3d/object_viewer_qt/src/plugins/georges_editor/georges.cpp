@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "georges.h"
 #include "nel/misc/o_xml.h"
 
@@ -28,7 +29,7 @@
 
 using namespace NLGEORGES;
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	CGeorges::CGeorges(): FormLoader(0) 
@@ -61,4 +62,4 @@ namespace Plugin
 		return type;
 	}
 
-} /* namespace Plugin */
+} /* namespace GeorgesQt */

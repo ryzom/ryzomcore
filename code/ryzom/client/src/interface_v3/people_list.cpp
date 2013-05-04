@@ -18,12 +18,12 @@
 
 #include "stdpch.h"
 #include "people_list.h"
-#include "group_container.h"
-#include "group_list.h"
-#include "view_bitmap.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_list.h"
+#include "nel/gui/view_bitmap.h"
 #include "interface_manager.h"
-#include "action_handler.h"
-#include "group_editbox.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_editbox.h"
 #include "../client_chat_manager.h"
 #include "chat_text_manager.h"
 #include "people_interraction.h"
@@ -63,7 +63,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	CGroupContainer *fatherContainer = NULL;
 	if (!desc.FatherContainer.empty())
 	{
-		fatherContainer = dynamic_cast<CGroupContainer *>(im->getElementFromId(desc.FatherContainer));
+		fatherContainer = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(desc.FatherContainer));
 		if (!fatherContainer)
 		{
 			nlwarning("<CPeopleList::create> Can't get father group, or bad type");
@@ -86,7 +86,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	{
 		baseId = fatherContainer->getId() + ":list";
 	}
-	CInterfaceGroup *mainIg = im->createGroupInstance(desc.BaseContainerTemplateName, baseId, baseContainerParams);
+	CInterfaceGroup *mainIg = CWidgetManager::getInstance()->getParser()->createGroupInstance(desc.BaseContainerTemplateName, baseId, baseContainerParams);
 	// must attach group to hierarchy before we can use it
 	CGroupContainer *gc = dynamic_cast<CGroupContainer  *>(mainIg);
 	if (!gc) return false;
@@ -99,8 +99,8 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	{
 
 		// Root container
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
-		im->addWindowToMasterGroup("ui:interface", gc);
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
+		CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", gc);
 		gc->setParent(pRoot);
 		pRoot->addGroup (gc);
 	}
@@ -211,7 +211,8 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 	{
 		return (name_a < name_b);
 	}
-	else {
+	else
+	{
 		// Compare online status
 		switch (a.Online)
 		{
@@ -360,7 +361,7 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 	}
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *group = im->createGroupInstance(templateName, "ui:interface", properties, false);
+	CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, "ui:interface", properties, false);
 	if (!group) return -1;
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(group);
 	if (!gc)
@@ -383,7 +384,7 @@ sint CPeopleList::addPeople(const ucstring &name, uint teamMateIndex /*= 0*/)
 		_BaseContainer->attachContainer(gc);
 	}
 
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pRoot->addGroup (gc);
 
 	_Peoples.push_back(CPeople());
@@ -415,7 +416,7 @@ void CPeopleList::removePeople(uint index)
 			_BaseContainer->detachContainer(_Peoples[index].Container);
 	}
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 	pRoot->delGroup (_Peoples[index].Container);
 	_Peoples.erase(_Peoples.begin() + index);
@@ -467,18 +468,12 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 		return;
 	}
 
-	ucstring cur_time;
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-	if (pNL && pNL->getValueBool())
-		cur_time = CInterfaceManager::getTimestampHuman();
-
- 	ucstring csr;
-	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
-	ucstring finalMsg = cur_time + csr + CI18N::get("youTell") + ": " + msg;
+ 	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+	ucstring finalMsg = csr + CI18N::get("youTell") + ": " + msg;
 	// display msg with good color
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
-	
+
 	ucstring s = CI18N::get("youTellPlayer");
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
@@ -533,7 +528,7 @@ void CPeopleList::displayMessage(uint index, const ucstring &msg, NLMISC::CRGBA 
 
 	gcChat->requireAttention();
 
-	CInterfaceManager::getInstance()->setTopWindow(gcChat);
+	CWidgetManager::getInstance()->setTopWindow(gcChat);
 
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
 	if (gl == NULL)
@@ -577,7 +572,7 @@ void CPeopleList::reset()
 		removeAllPeoples();
 		_BaseContainer->setContent(NULL);
 
-		CGroupContainer *father = dynamic_cast<CGroupContainer *>(_BaseContainer->getParent()->getEnclosingContainer());
+		CGroupContainer *father = static_cast<CGroupContainer *>(_BaseContainer->getParent()->getEnclosingContainer());
 		if (father)
 		{
 			father->delGroup(_BaseContainer);
@@ -587,7 +582,7 @@ void CPeopleList::reset()
 		else // detach from root
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 			pRoot->delGroup(_BaseContainer);
 		}
 		_BaseContainer = "";
@@ -783,10 +778,6 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 
 	_Peoples[index].Online = online;
 
-	// If the people goes offline remove eventually opened chat
-	if (online == ccs_offline)
-		openCloseChat(index, false);
-
 	updatePeopleMenu(index);
 }
 
@@ -903,7 +894,8 @@ class CHandlerContactEntry : public IActionHandler
 		// Well, we could have used CChatWindow class to handle this, but CPeopleList was written earlier, so for now
 		// it is simpler to keep it as it and to just use this action handler to manage user input.
 		if (!pCaller || !pCaller->getParent()) return;
-		CGroupContainer *gc = pCaller->getParent()->getEnclosingContainer();
+		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
+		
 		// title gives the name of the player
 		ucstring playerName = gc->getUCTitle();
 
@@ -944,14 +936,8 @@ class CHandlerContactEntry : public IActionHandler
 				ucstring final;
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, false);
 
-				ucstring cur_time;
-				CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-				if (pNL && pNL->getValueBool())
-					cur_time = CInterfaceManager::getTimestampHuman();
-
-				ucstring csr;
-				if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
-				final += cur_time + csr + CI18N::get("youTell")+": ";
+				ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+				final += csr + CI18N::get("youTell")+": ";
 				prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 				CChatWindow::encodeColorTag(prop.getRGBA(), final, true);
 				final += text;
@@ -962,7 +948,6 @@ class CHandlerContactEntry : public IActionHandler
 				strFindReplace(final, CI18N::get("youTell"), s);
 				CInterfaceManager::getInstance()->log(final);
 			}
-
 		}
 	}
 };

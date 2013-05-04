@@ -69,7 +69,7 @@ public:
 	
 	virtual void setTheta(CAngle theta);
 	
-	virtual void sendInfoToEGS() const = 0;
+	virtual void sendInfoToEGS() const;
 	
 	CBot& getPersistent() const;
 	
@@ -95,7 +95,7 @@ public:
 	virtual float getAggroPropagationRadius() const;
 	//@}
 	
-	void setVisualPropertiesName();
+	virtual void setVisualPropertiesName();
 	
 	// as there not a lot of prop (1 or 2, maybe 3) stores in this comportment, we don't need hash.
 	bool getProp(size_t Id, uint32& value) const;
@@ -241,8 +241,11 @@ public:
 	
 	NLMISC::CEntityId createEntityId() const;
 	
-	const std::string& getCustomName() const { return _CustomName; }
-	void setCustomName(const std::string &name) { _CustomName = name; }
+	const ucstring& getCustomName() const { return _CustomName; }
+	void setCustomName(const ucstring &name) { _CustomName = name; }
+
+	const uint32& getCustomMaxHp() const { return _CustomMaxHp; }
+	void setCustomMaxHp(const uint32 &maxHp) { _CustomMaxHp = maxHp; }
 
 	virtual void setClientSheet(const std::string & clientSheetName);  
 
@@ -272,7 +275,8 @@ private:
 	bool _IgnoreOffensiveActions;
 	bool _Healer;
 	bool _BuildingBot;
-	std::string _CustomName;
+	ucstring _CustomName;
+	uint32 _CustomMaxHp;
 	CTimer					_SetSheetTimer;
 	struct CSetSheetData
 	{

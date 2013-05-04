@@ -265,7 +265,7 @@ static void ColouriseCppDoc(unsigned int startPos, int length, int initStyle, Wo
 		}
 		
 		if (sc.atLineEnd) {
-			// Reset states to begining of colourise so no surprises 
+			// Reset states to beginning of colourise so no surprises 
 			// if different sets of lines lexed.
 			chPrevNonWhite = ' ';
 			visibleChars = 0;

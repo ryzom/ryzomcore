@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <VSTRUCT DfnName="simple_sound.dfn" Name="SoundType">
+      <ATOM Name="Filename" Value="beep.wav"/>
+      <ATOM Name="MinDistance" Value="1.2"/>
+      <ATOM Name="MaxDistance" Value="1000"/>
+    </VSTRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Oct 15 15:23:46 2004 (boucher) .SoundType = simple_sound.dfn
+Fri Oct 15 15:23:46 2004 (boucher) .SoundType.Filename = beep.wav
+Fri Oct 15 15:23:46 2004 (boucher) .SoundType.MaxDistance = 1000
+Fri Oct 15 15:23:46 2004 (boucher) .SoundType.MinDistance = 1.2
+Fri Oct 15 15:27:24 2004 (boucher) .SoundType.Alpha = </LOG>
+</FORM>

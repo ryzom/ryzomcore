@@ -197,12 +197,12 @@ CBotFauna* CSpawnGroupFauna::findLeader()
 	while (it!=itEnd)
 	{
 		CBotFauna* botPtr = static_cast<CBotFauna*>(*it);
-		if	(botPtr->isSpawned())	//	si le bot est spawné.
+		if	(botPtr->isSpawned())	//	if bot is spawned
 		{
-			if (botPtr->getSpawnObj()->isAlive())	// s'il est en vie.
+			if (botPtr->getSpawnObj()->isAlive())	// is alive
 			{
 				possibleLeader=botPtr;
-				if (_TargetPlace->atPlace(possibleLeader->getSpawn()->pos()))	//	et éventuellement s'il est dans la place.
+				if (_TargetPlace->atPlace(possibleLeader->getSpawn()->pos()))	//	and eventually in place
 					return	possibleLeader;
 			}
 		}
@@ -1032,7 +1032,7 @@ void CGrpFauna::setPopulation(CPopulation* pop)
 	if (pop && pop->size()==0)	// no population record :(
 		pop=NULL;
 	
-	if (sameAliasPop)	//	Alias already présent ?
+	if (sameAliasPop)	//	Alias already present ?
 	{
 		index = sameAliasPop->getChildIndex();
 		_Populations.addChild(pop, index);	//	automatic deletion with smart pointers

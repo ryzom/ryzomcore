@@ -307,7 +307,7 @@ void CCluster::serial (NLMISC::IStream&f)
 			_SoundGroupId = CStringMapper::map(soundGroup);
 
 			f.serial(envFxName);
-			if (envFxName == "")
+			if (envFxName.empty())
 				envFxName = "no fx";
 			_EnvironmentFxId = CStringMapper::map(envFxName);
 		}

@@ -16,6 +16,10 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/time_nl.h"
+#include "nel/misc/sstring.h"
+#include "nel/misc/thread.h"
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
@@ -29,11 +33,269 @@
 #include <mach/mach_time.h>
 #endif
 
-#include "nel/misc/time_nl.h"
-#include "nel/misc/sstring.h"
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
+
+namespace {
+#ifdef NL_OS_WINDOWS
+bool a_HaveQueryPerformance = false;
+LARGE_INTEGER a_QueryPerformanceFrequency;
+#endif
+#ifdef NL_OS_UNIX
+#	if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
+#	if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0)
+#		define NL_MONOTONIC_CLOCK
+#	endif
+#	endif
+#	ifdef NL_MONOTONIC_CLOCK
+bool a_CheckedMonotonicClock = false;
+bool a_HasMonotonicClock = false;
+uint64 a_MonotonicClockFrequency = 0;
+uint64 a_MonotonicClockResolutionNs = 0;
+bool hasMonotonicClock()
+{
+	if (!a_CheckedMonotonicClock)
+	{
+		/* Initialize the local time engine.
+		* On Unix, this method will find out if the Monotonic Clock is supported
+		* (seems supported by kernel 2.6, not by kernel 2.4). See getLocalTime().
+		*/
+		struct timespec tv;
+		if ((clock_gettime( CLOCK_MONOTONIC, &tv ) == 0) &&
+			 (clock_getres( CLOCK_MONOTONIC, &tv ) == 0))
+		{
+//			nldebug( "Monotonic local time supported (resolution %.6f ms)", ((float)tv.tv_sec)*1000.0f + ((float)tv.tv_nsec)/1000000.0f );
+
+			if (tv.tv_sec > 0)
+			{
+				nlwarning("Monotonic clock not ok, resolution > 1s");
+				a_HasMonotonicClock = false;
+			}
+			else
+			{
+				uint64 nsPerTick = tv.tv_nsec;
+				uint64 nsPerSec = 1000000000L;
+				uint64 tickPerSec = nsPerSec / nsPerTick;
+				a_MonotonicClockFrequency = tickPerSec;
+				a_MonotonicClockResolutionNs = nsPerTick;
+				a_HasMonotonicClock = true;
+			}
+		}
+		else
+		{
+			a_HasMonotonicClock = false;
+		}
+		a_CheckedMonotonicClock = true;
+	}
+	return a_HasMonotonicClock;
+}
+#	endif
+#endif
+}
+
+void CTime::probeTimerInfo(CTime::CTimerInfo &result)
+{
+	breakable
+	{
+#ifdef NL_OS_WINDOWS
+		LARGE_INTEGER winPerfFreq;
+		LARGE_INTEGER winPerfCount;
+		DWORD lowResTime;
+		if (!QueryPerformanceFrequency(&winPerfFreq))
+		{
+			nldebug("Cannot query performance frequency");
+			result.IsHighPrecisionAvailable = false;
+		}
+		else
+		{
+			result.HighPrecisionResolution = winPerfFreq.QuadPart;
+		}
+		if (winPerfFreq.QuadPart == 1000)
+		{
+			nldebug("Higher precision timer not available, OS defaulted to GetTickCount");
+			result.IsHighPrecisionAvailable = false;
+		}
+		if (!QueryPerformanceCounter(&winPerfCount))
+		{
+			nldebug("Cannot query performance counter");
+			result.IsHighPrecisionAvailable = false;
+			result.HighPrecisionResolution = 1000;
+		}
+		a_HaveQueryPerformance = result.IsHighPrecisionAvailable;
+		a_QueryPerformanceFrequency.QuadPart = winPerfFreq.QuadPart;
+		if (!result.IsHighPrecisionAvailable)
+		{
+			lowResTime = timeGetTime();
+		}
+#else
+
+		// Other platforms are awesome. Generic implementation for now.
+		TTime localTime = getLocalTime();
+		result.IsHighPrecisionAvailable = true;
+		result.HighPrecisionResolution = 0;
+
+#	ifdef NL_MONOTONIC_CLOCK
+		timespec monoClock;
+		if (hasMonotonicClock())
+		{
+			clock_gettime(CLOCK_MONOTONIC, &monoClock);
+			result.HighPrecisionResolution = a_MonotonicClockFrequency;
+		}
+		else
+		{
+			nldebug("Monotonic clock not available");
+		}
+#	endif
+
+#endif
+
+		uint64 cpuMask = IProcess::getCurrentProcess()->getCPUMask();
+#ifdef NL_OS_WINDOWS
+		uint64 threadMask = IThread::getCurrentThread()->getCPUMask(); // broken on linux, don't expect it to work anywhere
+#else
+		uint64 threadMask = cpuMask;
+#endif
+
+		uint identical = 0; // Identical stamps may indicate the os handling backwards glitches.
+		uint backwards = 0; // Happens when the timers are not always in sync and the implementation is faulty.
+		uint regular = 0; // How many times the number advanced normally.
+		uint skipping = 0; // Does not really mean anything necessarily.
+		uint frequencybug = 0; // Should never happen.
+		// uint badcore = 0; // Affinity does not work.
+
+		// Cycle 32 times trough all cores, and verify if the timing remains consistent.
+		for (uint i = 32; i; --i)
+		{
+			uint64 currentBit = 1;
+			for (uint j = 64; j; --j)
+			{
+				if (cpuMask & currentBit)
+				{
+#ifdef NL_OS_WINDOWS
+					if (!IThread::getCurrentThread()->setCPUMask(currentBit))
+#else
+					if (!IProcess::getCurrentProcess()->setCPUMask(currentBit))
+#endif
+						break; // Thread was set to last cpu.
+#ifdef NL_OS_WINDOWS
+					// Make sure the thread is rescheduled.
+					SwitchToThread();
+					Sleep(0);
+					// Verify the core
+					/* Can only verify on 2003, Vista and higher.
+					if (1 << GetCurrentProcessorNumber() != currentBit)
+						++badcore;
+					*/
+					// Check if the timer is still sane.
+					if (result.IsHighPrecisionAvailable)
+					{
+						LARGE_INTEGER winPerfFreqN;
+						LARGE_INTEGER winPerfCountN;
+						QueryPerformanceFrequency(&winPerfFreqN);
+						if (winPerfFreqN.QuadPart != winPerfFreq.QuadPart)
+							++frequencybug;
+						QueryPerformanceCounter(&winPerfCountN);
+						if (winPerfCountN.QuadPart == winPerfCount.QuadPart)
+							++identical;
+						if (winPerfCountN.QuadPart < winPerfCount.QuadPart || winPerfCountN.QuadPart - winPerfCount.QuadPart < 0)
+							++backwards;
+						if (winPerfCountN.QuadPart - winPerfCount.QuadPart > winPerfFreq.QuadPart / 20) // 50ms skipping check
+							++skipping;
+						else if (winPerfCountN.QuadPart > winPerfCount.QuadPart)
+							++regular;
+						winPerfCount.QuadPart = winPerfCountN.QuadPart;
+					}
+					else
+					{
+						DWORD lowResTimeN;
+						lowResTimeN = timeGetTime();
+						if (lowResTimeN == lowResTime)
+							++identical;
+						if (lowResTimeN < lowResTime || lowResTimeN - lowResTime < 0)
+							++backwards;
+						if (lowResTimeN - lowResTime > 50)
+							++skipping;
+						else if (lowResTimeN > lowResTime)
+							++regular;
+						lowResTime = lowResTimeN;
+					}
+#else
+#ifdef NL_OS_UNIX
+					sched_yield();
+#else
+					nlSleep(0);
+#endif
+#	ifdef NL_MONOTONIC_CLOCK
+					if (hasMonotonicClock())
+					{
+						timespec monoClockN;
+						clock_gettime(CLOCK_MONOTONIC, &monoClockN);
+						if (monoClock.tv_sec == monoClockN.tv_sec && monoClock.tv_nsec == monoClockN.tv_nsec)
+							++identical;
+						if (monoClockN.tv_sec < monoClock.tv_sec || (monoClock.tv_sec == monoClockN.tv_sec && monoClockN.tv_nsec < monoClock.tv_nsec))
+							++backwards;
+						if (monoClock.tv_sec == monoClockN.tv_sec && (monoClockN.tv_nsec - monoClock.tv_nsec > 50000000L))
+							++skipping;
+						else if ((monoClock.tv_sec == monoClockN.tv_sec && monoClock.tv_nsec < monoClockN.tv_nsec) || monoClock.tv_sec < monoClockN.tv_sec)
+							++regular;
+						monoClock.tv_sec = monoClockN.tv_sec;
+						monoClock.tv_nsec = monoClockN.tv_nsec;
+					}
+					else
+#	endif
+					{
+						TTime localTimeN = getLocalTime();
+						if (localTimeN == localTime)
+							++identical;
+						if (localTimeN < localTime || localTimeN - localTime < 0)
+							++backwards;
+						if (localTimeN - localTime > 50)
+							++skipping;
+						else if (localTimeN > localTime)
+							++regular;
+						localTime = localTimeN;
+					}
+#endif
+				}
+				currentBit <<= 1;
+			}
+		}
+
+#ifdef NL_OS_WINDOWS
+		IThread::getCurrentThread()->setCPUMask(threadMask);
+#else
+		IProcess::getCurrentProcess()->setCPUMask(threadMask);
+#endif
+
+		nldebug("Timer resolution: %i Hz", (int)(result.HighPrecisionResolution));
+		nldebug("Time identical: %i, backwards: %i, regular: %i, skipping: %i, frequency bug: %i", identical, backwards, regular, skipping, frequencybug);
+		if (identical > regular)
+			nlwarning("The system timer is of relatively low resolution, you may experience issues");
+		if (backwards > 0 || frequencybug > 0)
+		{
+			nlwarning("The current system timer is not reliable across multiple cpu cores");
+			result.RequiresSingleCore = true;
+		}
+		else result.RequiresSingleCore = false;
+
+		if (result.HighPrecisionResolution == 14318180)
+		{
+			nldebug("Detected known HPET era timer frequency");
+		}
+		if (result.HighPrecisionResolution == 3579545)
+		{
+			nldebug("Detected known AHCI era timer frequency");
+		}
+		if (result.HighPrecisionResolution == 1193182)
+		{
+			nldebug("Detected known i8253/i8254 era timer frequency");
+		}
+	}
+}
 
 /* Return the number of second since midnight (00:00:00), January 1, 1970,
  * coordinated universal time, according to the system clock.
@@ -97,54 +359,42 @@ TTime CTime::getLocalTime ()
 	//else
 	//{
 		// This is not affected by system time changes. But it cycles every 49 days.
-		return timeGetTime();
+		// return timeGetTime(); // Only this was left active before it was commented.
 	//}
+
+	/*
+	 * The above is no longer relevant.
+	 */
+
+	if (a_HaveQueryPerformance)
+	{
+		// On a (fast) 15MHz timer this rolls over after 7000 days.
+		// If my calculations are right.
+		LARGE_INTEGER counter;
+		QueryPerformanceCounter(&counter);
+		counter.QuadPart *= (LONGLONG)1000L;
+		counter.QuadPart /= a_QueryPerformanceFrequency.QuadPart;
+		return counter.QuadPart;
+	}
+	else
+	{
+		// Use default reliable low resolution timer.
+		return timeGetTime();
+	}
 
 #elif defined (NL_OS_UNIX)
 
-	static bool initdone = false;
-	static bool isMonotonicClockSupported = false;
-	if ( ! initdone )
+#ifdef NL_MONOTONIC_CLOCK
+
+	if (hasMonotonicClock())
 	{
-
-#if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
-#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0)
-
-		/* Initialize the local time engine.
-		* On Unix, this method will find out if the Monotonic Clock is supported
-		* (seems supported by kernel 2.6, not by kernel 2.4). See getLocalTime().
-		*/
-		struct timespec tv;
-		if ( (clock_gettime( CLOCK_MONOTONIC, &tv ) == 0) &&
-			 (clock_getres( CLOCK_MONOTONIC, &tv ) == 0) )
-		{
-//			nldebug( "Monotonic local time supported (resolution %.6f ms)", ((float)tv.tv_sec)*1000.0f + ((float)tv.tv_nsec)/1000000.0f );
-			isMonotonicClockSupported = true;
-		}
-		else
-
-#endif
-#endif
-		{
-//			nlwarning( "Monotonic local time not supported, caution with time sync" );
-		}
-
-		initdone = true;
-	}
-
-#if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
-#if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0)
-
-	if ( isMonotonicClockSupported )
-	{
-		struct timespec tv;
+		timespec tv;
 		// This is not affected by system time changes.
 		if ( clock_gettime( CLOCK_MONOTONIC, &tv ) != 0 )
 			nlerror ("Can't get clock time again");
 	    return (TTime)tv.tv_sec * (TTime)1000 + (TTime)((tv.tv_nsec/*+500*/) / 1000000);
 	}
 
-#endif
 #endif
 
 	// This is affected by system time changes.
@@ -155,7 +405,6 @@ TTime CTime::getLocalTime ()
 
 #endif
 }
-
 
 /* Return the time in processor ticks. Use it for profile purpose.
  * If the performance time is not supported on this hardware, it returns 0.
@@ -183,7 +432,7 @@ TTicks CTime::getPerformanceTime ()
 	return (hi << 32) | (lo & 0xffffffff);
 #elif defined(HAVE_X86) and !defined(NL_OS_MAC)
 	uint64 x;
-	// RDTSC - Read time-stamp counter into EDX:EAX. 
+	// RDTSC - Read time-stamp counter into EDX:EAX.
 	__asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
 	return x;
 #else // HAVE_X86

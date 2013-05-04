@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------------
 
 #include "stdpch.h"
+#include "utils.h"
 
 #include "nel/misc/file.h"
 #include "nel/misc/command.h"
@@ -405,7 +406,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 						nlinfo("Different packages for island '%s' in file %s", island, _EntryPointsFilename.c_str());
 				}
 			}
-			if(package == "")
+			if(package.empty())
 				nlinfo("no 'package' tag in %s island", island);
 			else
 				completeIsland.Package = CSString(package);

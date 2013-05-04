@@ -106,8 +106,11 @@ enum TFilterMapping
 // constructor
 //-----------------------------------------------
 CSoundManager::CSoundManager(IProgressCallback * /* progressCallBack */)
-:	_AudioMixer(NULL),
-	_EnvSoundRoot(NULL),
+:	_AudioMixer(NULL), 
+	_GroupControllerEffects(NULL),
+	_GroupControllerEffectsGame(NULL),  
+	_EnvSoundRoot(NULL), 
+	_Sources(NULL), 
 	_UserEntitySoundLevel(1.0f)
 {
 	_EnableBackgroundMusicAtTime= 0;
@@ -137,9 +140,12 @@ CSoundManager::~CSoundManager()
 	// detach the sound from the particule system
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
+	_GroupControllerEffects = NULL;
+	_GroupControllerEffectsGame = NULL;
+
 	// free the audio mixer (and delete all sources)
-	if (_AudioMixer)
-		delete _AudioMixer;
+	delete _AudioMixer;
+	_AudioMixer = NULL;
 
 	// release sound anim properly
 	releaseSoundAnim();
@@ -403,6 +409,9 @@ void CSoundManager::reset ()
 
 	NL3D::UParticleSystemSound::setPSSound(NULL);
 
+	_GroupControllerEffects = NULL;
+	_GroupControllerEffectsGame = NULL;
+
 	delete _AudioMixer;
 	_AudioMixer = NULL;
 
@@ -421,7 +430,6 @@ void CSoundManager::reset ()
 //---------------------------------------------------
 void CSoundManager::init(IProgressCallback *progressCallBack)
 {
-	_NextId = 1;
 	_EnvSoundRoot = NULL;
 	_PlaySound = true;
 
@@ -476,6 +484,10 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 		 * Access the singleton with CSoundAnimManager::instance().
 		 */
 		new CSoundAnimManager(_AudioMixer);
+
+		// get the controller group for effects
+		_GroupControllerEffects = _AudioMixer->getGroupController("sound:effects");
+		_GroupControllerEffectsGame = _AudioMixer->getGroupController("sound:effects:game");
 
 		// restore the volume
 		SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
@@ -612,7 +624,7 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 // add a new source to the world, attached to the specified entity
 // return 0 if creation failed, sound id if creation was successful
 //-----------------------------------------------
-uint32 CSoundManager::addSource( const NLMISC::TStringId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
+CSoundManager::TSourceId CSoundManager::addSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position, bool play, bool loop,  const CEntityId &id)
 {
 	uint32	retValue = 0;
 
@@ -622,7 +634,7 @@ uint32 CSoundManager::addSource( const NLMISC::TStringId &soundName, const NLMIS
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str());
+		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str()*/soundName.toString().c_str());
 		return retValue;
 	}
 
@@ -642,22 +654,16 @@ uint32 CSoundManager::addSource( const NLMISC::TStringId &soundName, const NLMIS
 		pSource->play();
 	}
 
+	TSourceId sourceId = _Sources.insert(pSource);
+
 	// attach the source to the entity, if specified
 	if (id != CEntityId::Unknown )
 	{
-		_AttachedSources.insert( TMultiMapEntityToSource::value_type( id, pSource ) );
+		_AttachedSources.insert( TMultiMapEntityToSource::value_type( id, sourceId ) );
 	}
 
-	// set source id
-	retValue = _NextId;
-
-	// add the new source
-	_Sources.insert( TMapIdToSource::value_type( _NextId, pSource ) );
-
-	++_NextId;
-
 	// return the id of the source
-	return retValue;
+	return sourceId;
 
 } // addSource //
 
@@ -666,7 +672,7 @@ uint32 CSoundManager::addSource( const NLMISC::TStringId &soundName, const NLMIS
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContext &context)
+bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, CSoundContext &context)
 {
 	if (!_PlaySound) return false;
 
@@ -677,7 +683,7 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContex
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", soundName);
+		nlwarning("Sound '%s' not found !", soundName.toString().c_str());
 		return false;
 	}
 
@@ -696,7 +702,7 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, CSoundContex
 // spawn a new source to the world
 // return false if creation failed, true if creation was successful
 //-----------------------------------------------
-bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC::CVector &position)
+bool CSoundManager::spawnSource(const NLMISC::CSheetId &soundName, const NLMISC::CVector &position)
 {
 	if (!_PlaySound) return false;
 
@@ -706,7 +712,7 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC
 	// If the source is valid.
 	if(pSource == 0)
 	{
-		nlwarning("Sound '%s' not found !", CStringMapper::unmap(soundName).c_str ());
+		nlwarning("Sound '%s' not found !", /*CStringMapper::unmap(soundName).c_str ()*/soundName.toString().c_str());
 		return false;
 	}
 
@@ -726,26 +732,22 @@ bool CSoundManager::spawnSource(const NLMISC::TStringId &soundName, const NLMISC
 // removeSource:
 // remove a source
 //---------------------------------------------------
-void CSoundManager::removeSource( uint32 sourceId )
+void CSoundManager::removeSource(CSoundManager::TSourceId sourceId)
 {
 nldebug("remove the source : %d", sourceId);
 
 /// \todo Malkav : optimize speed
 nldebug("nb sources = %d", _Sources.size() );
-	TMapIdToSource::iterator itS = _Sources.find( sourceId );
-	if (itS != _Sources.end() )
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource)
 	{
-		USource *pSource = (*itS).second;
-		if ( pSource == NULL )
-			return;
-
 		TMultiMapEntityToSource::iterator it = _AttachedSources.begin();//, itOld;
 
 		for ( ; it != _AttachedSources.end() ; ++it)
 		{
-			if ( (*it).second == pSource )
+			if ( (*it).second == sourceId )
 			{
-				(*it).second = NULL;
+				(*it).second = 0;
 //				itOld = it;
 //				++it;
 
@@ -759,8 +761,9 @@ nldebug("nb sources = %d", _Sources.size() );
 		}
 
 		// delete the source
-//		_AudioMixer->removeSource (pSource);
 		delete pSource;
+		// i think there was something going on here
+		_Sources.erase(sourceId);
 	}
 } // removeSource //
 
@@ -789,7 +792,7 @@ void CSoundManager::updateEntityPos( const CEntityId &id, const NLMISC::CVector 
 
 	for ( it = range.first; it != range.second ; ++it)
 	{
-		(*it).second->setPos( pos );
+		_Sources.get((*it).second)->setPos( pos );
 	}
 } // updateEntityPos //
 
@@ -805,7 +808,7 @@ void CSoundManager::updateEntityVelocity( const CEntityId &id, const NLMISC::CVe
 
 	for ( it = range.first; it != range.second ; ++it)
 	{
-		(*it).second->setVelocity( velocity );
+		_Sources.get((*it).second)->setVelocity( velocity );
 	}
 
 } // updateEntityVelocity //
@@ -822,7 +825,7 @@ void CSoundManager::updateEntityDirection( const CEntityId &id, const NLMISC::CV
 
 	for ( it = range.first; it != range.second ; ++it)
 	{
-		(*it).second->setDirection( dir );
+		_Sources.get((*it).second)->setDirection( dir );
 	}
 } // updateEntityOrientation //
 
@@ -837,26 +840,15 @@ void CSoundManager::removeEntity( const CEntityId &id)
 
 	TMultiMapEntityToSource::iterator it;
 	const std::pair<TMultiMapEntityToSource::iterator, TMultiMapEntityToSource::iterator> range = _AttachedSources.equal_range( id );
-
-	USource *pSource;
+	
 	for ( it = range.first; it != range.second ; ++it)
 	{
-		pSource = (*it).second;
-		if ( pSource != NULL)
+		TSourceId sourceId = (*it).second;
+		if (sourceId)
 		{
-			TMapIdToSource::iterator itS = _Sources.begin();//, itOld;
-
-			for ( ; itS != _Sources.end() ; ++itS)
-			{
-				if ( (*itS).second == pSource )
-				{
-					(*itS).second = NULL;
-					_Sources.erase( itS );
-					break;
-				}
-			}
-			// delete the source
-			delete (*it).second;
+			USource *pSource = _Sources.get(sourceId);
+			delete pSource;
+			_Sources.erase(sourceId);
 		}
 	}
 
@@ -869,34 +861,24 @@ void CSoundManager::removeEntity( const CEntityId &id)
 //---------------------------------------------------
 // setSoundPosition :
 //---------------------------------------------------
-void CSoundManager::setSoundPosition( uint32 soundId, const NLMISC::CVector &position)
+void CSoundManager::setSoundPosition(TSourceId sourceId, const NLMISC::CVector &position)
 {
 	if (!_PlaySound) return;
 
-	TMapIdToSource::iterator it = _Sources.find( soundId );
-	if (it != _Sources.end() )
-	{
-		nlassert( (*it).second );
-
-		(*it).second->setPos( position );
-	}
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource) pSource->setPos(position);
 } // setSoundPosition //
 
 
 //---------------------------------------------------
 // loopSound :
 //---------------------------------------------------
-void CSoundManager::loopSound( uint32 soundId, bool loop)
+void CSoundManager::loopSound(TSourceId sourceId, bool loop)
 {
 	if (!_PlaySound) return;
 
-	TMapIdToSource::iterator it = _Sources.find( soundId );
-	if (it != _Sources.end() )
-	{
-		nlassert( (*it).second );
-
-		(*it).second->setLooping( loop );
-	}
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource) pSource->setLooping(loop);
 } // loopSound //
 
 
@@ -904,19 +886,17 @@ void CSoundManager::loopSound( uint32 soundId, bool loop)
 // playSound :
 // start or stop playing sound
 //---------------------------------------------------
-void CSoundManager::playSound( uint32 soundId, bool play)
+void CSoundManager::playSound(TSourceId sourceId, bool play)
 {
 	if (!_PlaySound) return;
 
-	TMapIdToSource::iterator it = _Sources.find( soundId );
-	if (it != _Sources.end() )
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource)
 	{
-		nlassert( (*it).second );
-
 		if (play)
-			(*it).second->play();
+			pSource->play();
 		else
-			(*it).second->stop();
+			pSource->stop();
 	}
 } // loopSound //
 
@@ -926,16 +906,10 @@ void CSoundManager::playSound( uint32 soundId, bool play)
 // isPlaying :
 // return true if the source is playing
 //---------------------------------------------------
-bool CSoundManager::isPlaying( uint32 sourceId )
+bool CSoundManager::isPlaying(TSourceId sourceId)
 {
-	TMapIdToSource::iterator it = _Sources.find( sourceId );
-	if (it != _Sources.end() )
-	{
-		nlassert( (*it).second );
-
-		return ( (*it).second->isPlaying() );
-	}
-
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource) return pSource->isPlaying();
 	return false;
 } // isPlaying //
 
@@ -999,16 +973,10 @@ bool CSoundManager::setSoundForSource( uint32 sourceId, TSound sound, const CVec
 // setSourceGain :
 // set the gain of the specified source
 //---------------------------------------------------
-void CSoundManager::setSourceGain(  uint32 sourceId, float gain)
+void CSoundManager::setSourceGain(TSourceId sourceId, float gain)
 {
-	TMapIdToSource::const_iterator it = _Sources.find( sourceId );
-	if (it != _Sources.end() )
-	{
-		USource *pSource = (*it).second;
-		nlassert( pSource );
-
-		pSource->setGain( gain );
-	}
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource) pSource->setGain( gain );
 } // setSourceGain //
 
 
@@ -1016,17 +984,10 @@ void CSoundManager::setSourceGain(  uint32 sourceId, float gain)
 // getSourceGain :
 // get the gain of the specified source (-1 if source not found)
 //---------------------------------------------------
-float CSoundManager::getSourceGain(  uint32 sourceId )
+float CSoundManager::getSourceGain(TSourceId sourceId)
 {
-	TMapIdToSource::const_iterator it = _Sources.find( sourceId );
-	if (it != _Sources.end() )
-	{
-		USource *pSource = (*it).second;
-		nlassert( pSource );
-
-		return ( pSource->getGain() );
-	}
-
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource) return pSource->getGain();
 	return -1;
 } // getSourceGain //
 
@@ -1035,16 +996,10 @@ float CSoundManager::getSourceGain(  uint32 sourceId )
 // setSourcePitch :
 // set the Pitch of the specified source
 //---------------------------------------------------
-void CSoundManager::setSourcePitch(  uint32 sourceId, float Pitch)
+void CSoundManager::setSourcePitch(TSourceId sourceId, float Pitch)
 {
-	TMapIdToSource::const_iterator it = _Sources.find( sourceId );
-	if (it != _Sources.end() )
-	{
-		USource *pSource = (*it).second;
-		nlassert( pSource );
-
-		pSource->setPitch( Pitch );
-	}
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource) pSource->setPitch(Pitch);
 } // setSourcePitch //
 
 
@@ -1052,17 +1007,10 @@ void CSoundManager::setSourcePitch(  uint32 sourceId, float Pitch)
 // getSourcePitch :
 // get the Pitch of the specified source (-1 if source not found)
 //---------------------------------------------------
-float CSoundManager::getSourcePitch(  uint32 sourceId )
+float CSoundManager::getSourcePitch(TSourceId sourceId)
 {
-	TMapIdToSource::const_iterator it = _Sources.find( sourceId );
-	if (it != _Sources.end() )
-	{
-		USource *pSource = (*it).second;
-		nlassert( pSource );
-
-		return ( pSource->getPitch() );
-	}
-
+	USource *pSource = _Sources.get(sourceId);
+	if (pSource) return pSource->getPitch();
 	return -1;
 } // getSourcePitch //
 
@@ -1204,23 +1152,26 @@ void CSoundManager::playPositionedSounds( const CVector& /* pos */ )
 	list<uint32>::iterator itPSnd;
 	for( itPSnd = _PositionedSounds.begin(); itPSnd != _PositionedSounds.end(); ++itPSnd )
 	{
-		TMapIdToSource::const_iterator itSrc = _Sources.find( *itPSnd );
-		if( itSrc == _Sources.end() )
+		USource *pSource = _Sources.get(*itPSnd);
+		if (!pSource)
 		{
 			nlwarning("<CSoundManager::playPositionedSounds>  :  The source %d is unknown",*itPSnd);
 		}
-		/*
-		if( (pos - (*itSrc).second.getPos()).norm() < ...)
+		else 
 		{
-			if( (*itSrc).second.pSource->isPlaying() == false )
+			/*
+			if( (pos - (*itSrc).second.getPos()).norm() < ...)
 			{
-				(*itSrc).second.pSource->play();
+				if( (*itSrc).second.pSource->isPlaying() == false )
+				{
+					(*itSrc).second.pSource->play();
+				}
 			}
-		}
-		*/
-		if( (*itSrc).second->isPlaying() == false )
-		{
-			(*itSrc).second->play();
+			*/
+			if (!pSource->isPlaying())
+			{
+				pSource->play();
+			}
 		}
 	}
 
@@ -1597,7 +1548,8 @@ void		CSoundManager::updateVolume()
 		_AudioMixer->setEventMusicVolume(_GameMusicVolume);
 
 		// update sfx volume
-		_AudioMixer->getListener()->setGain(_SFXVolume*_FadeSFXVolume);
+		_GroupControllerEffects->setGain(_SFXVolume);
+		_GroupControllerEffectsGame->setGain(_FadeSFXVolume);
 	}
 }
 

@@ -25,6 +25,7 @@
 #include <nel/misc/time_nl.h>
 #include <nel/misc/stream.h>
 #include <nel/misc/singleton.h>
+#include <nel/misc/sheet_id.h>
 #include <nel/sound/u_audio_mixer.h>
 #include <nel/georges/u_form.h>
 
@@ -34,6 +35,11 @@
 #include "nel/sound/mixing_track.h"
 #include "nel/sound/sound.h"
 #include "nel/sound/music_channel_fader.h"
+#include "nel/sound/group_controller_root.h"
+
+// Current version is 2, Ryzom Live uses 1
+// Provided to allow compatibility with old binary files
+#define NLSOUND_SHEET_VERSION_BUILT 1
 
 namespace NLLIGO {
 	class CLigoConfig;
@@ -50,26 +56,6 @@ namespace NLSOUND {
 	class CBackgroundSoundManager;
 	class CMusicSoundManager;
 	class IReverbEffect;
-
-/// Hasher functor for hashed container with pointer key.
-template <class Pointer>
-struct THashPtr : public std::unary_function<const Pointer &, size_t>
-{
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
-	size_t operator () (const Pointer &ptr) const
-	{
-		//CHashSet<uint>::hasher	h;
-		// transtype the pointer into int then hash it
-		//return h.operator()(uint(uintptr_t(ptr)));
-		return (size_t)(uintptr_t)ptr;
-	}
-	inline bool operator() (const Pointer &ptr1, const Pointer &ptr2) const
-	{
-		// delegate the work to someone else as well?
-		return (uintptr_t)ptr1 < (uintptr_t)ptr2;
-	}
-};
 
 /**
  * Implementation of UAudioMixer
@@ -195,8 +181,11 @@ public:
 	// Load environment sounds ; treeRoot can be null if you don't want an access to the envsounds
 //	virtual	void				loadEnvSounds( const char *filename, UEnvSound **treeRoot=NULL );
 	/// Get a TSoundId from a name (returns NULL if not found)
-	virtual TSoundId			getSoundId( const NLMISC::TStringId &name );
+	virtual TSoundId			getSoundId( const NLMISC::CSheetId &name );
 
+	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
+	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
+	virtual UGroupController *getGroupController(const std::string &path);
 
 	/** Add a logical sound source (returns NULL if name not found).
 	 * If spawn is true, the source will auto-delete after playing. If so, the return USource* pointer
@@ -204,9 +193,9 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource				*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0 );
+	virtual USource				*createSource( const NLMISC::CSheetId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
-	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0 );
+	virtual USource				*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *cbUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL);
 	/// Add a source which was created by an EnvSound
 	void						addSource( CSourceCommon *source );
 	/** Delete a logical sound source. If you don't call it, the source will be auto-deleted
@@ -235,13 +224,15 @@ public:
 
 
 	/// Return the names of the sounds (call this method after loadSounds())
-	virtual void				getSoundNames( std::vector<NLMISC::TStringId> &names ) const;
+	virtual void				getSoundNames( std::vector<NLMISC::CSheetId> &names ) const;
 	/// Return the number of mixing tracks (voices)
 	virtual uint				getPolyphony() const { return (uint)_Tracks.size(); }
 	/// Return the number of sources instance.
 	virtual uint				getSourcesInstanceCount() const { return (uint)_Sources.size(); }
 	/// Return the number of playing sources (slow)
 	virtual uint				getPlayingSourcesCount() const;
+	uint 						countPlayingSimpleSources() const; // debug
+	uint						countSimpleSources() const; // debug
 	/// Return the number of available tracks
 	virtual uint				getAvailableTracksCount() const;
 	/// Return the number of used tracks
@@ -415,6 +406,7 @@ public:
 
 	/// Add a source for play as possible (for non discadable sound)
 	void						addSourceWaitingForPlay(CSourceCommon *source);
+	void						removeSourceWaitingForPlay(CSourceCommon *source);
 
 	/// Read all user controled var sheets
 	void						initUserVar();
@@ -431,8 +423,6 @@ private:
 	// utility function for automatic sample bank loading.
 	bool tryToLoadSampleBank(const std::string &sampleName);
 
-
-	typedef CHashSet<CSourceCommon*, THashPtr<CSourceCommon*> >					TSourceContainer;
 	typedef CHashSet<IMixerUpdate*, THashPtr<IMixerUpdate*> >						TMixerUpdateContainer;
 	typedef CHashMap<IBuffer*, std::vector<class CSound*>, THashPtr<IBuffer*> >	TBufferToSourceContainer;
 //	typedef std::multimap<NLMISC::TTime, IMixerEvent*>									TTimedEventContainer;
@@ -455,7 +445,7 @@ private:
 		/// Witch parameter to control
 		TControledParamId				ParamId;
 		/// The controled sounds names.
-		std::vector<NLMISC::TStringId>	SoundNames;
+		std::vector<NLMISC::CSheetId>	SoundNames;
 		/// Current parameter value
 		float							Value;
 		/// All the sources controled by this variable
@@ -564,6 +554,9 @@ private:
 
 	// Instance of the background music manager
 	CMusicSoundManager			*_BackgroundMusicManager;
+
+	/// Group controller
+	CGroupControllerRoot		_GroupController;
 
 public:
 	struct TSampleBankHeader

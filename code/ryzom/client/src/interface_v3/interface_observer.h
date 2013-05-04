@@ -21,7 +21,7 @@
 
 #include "nel/misc/types_nl.h"
 #include "interface_manager.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 
 /**
@@ -30,7 +30,7 @@
  * \author Nevrax France
  * \date 2002
  */
-class IInterfaceObserver : public ICDBNode::IPropertyObserver
+class IInterfaceObserver : public NLMISC::ICDBNode::IPropertyObserver
 {
 public:
 
@@ -45,7 +45,7 @@ public:
 	/**
 	 * observer update
 	 */
-	virtual void update (CCDBNodeLeaf* leaf)=0;
+	virtual void update (NLMISC::CCDBNodeLeaf* leaf)=0;
 
 
 };
@@ -118,10 +118,12 @@ public:
 
 		char * end = ptr.getDatas() + strlen( ptr.getDatas() );
 		char * dataTok = strtok( ptr.getDatas()," ,");
+		NLMISC::ICDBNode::CTextId textId;
+		
 		while(dataTok)
 		{
 			std::string data (dataTok);
-			if (iMngr->getDbProp(data,false) == NULL) // Full path provided ? No.
+			if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == NULL) // Full path provided ? No.
 			{
 				CInterfaceGroup *parent = parentGroup;
 				while (parent != NULL)
@@ -131,19 +133,19 @@ public:
 						sTmp = parent->getId() + data;
 					else
 						sTmp = parent->getId() + ":" + data;
-					if (iMngr->getDbProp(sTmp,false) != NULL)
+					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp,false) != NULL)
 					{
 						data = sTmp;
 						break;
 					}
 					parent = parent->getParent();
 				}
-				if (iMngr->getDbProp(data,false) == NULL)
+				if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == NULL)
 				{
 					std::string sTmp = std::string("data (")+std::string(dataTok)+std::string(") in a observer tag do not exist, CREATING!");
 					nlinfo (sTmp.c_str());
 					data = (const char*)dataTok;
-					iMngr->getDbProp (data, true);
+					NLGUI::CDBManager::getInstance()->getDbProp (data, true);
 				}
 			}
 			if ( !obs )
@@ -160,7 +162,8 @@ public:
 					return NULL;
 				}
 			}
-			if ( ! iMngr->addDBObserver(obs,ICDBNode::CTextId (data) ) )
+			textId = NLMISC::ICDBNode::CTextId( data );
+			if ( ! NLGUI::CDBManager::getInstance()->getDB()->addObserver(obs,textId ) )
 			{
 				return NULL;
 			}

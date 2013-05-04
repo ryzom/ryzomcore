@@ -144,7 +144,7 @@ bool	getProperty(xmlNodePtr node, const char* propName, T &result, const T &defa
 	if (!NLMISC::CIXml::getPropertyString(res, node, propName))
 	{
 		if (!quiet)
-			nlwarning("Couldn't get property '%s' in xml node, use '%s' value instead", propName, toString(defaultValue).c_str());
+			nlwarning("Couldn't get property '%s' in xml node, use '%s' value instead", propName, NLMISC::toString(defaultValue).c_str());
 		result = defaultValue;
 		return false;
 	}

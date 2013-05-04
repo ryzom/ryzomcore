@@ -981,7 +981,7 @@ Arguments: s(phraseName),s(phraseContent) ->
 @param[in] phraseContent is the text associated with the phrase
 
 @code
-()setSimplePhrase("HELLO", "Salut, ca va ?"); // équivalent à "HELLO(){[Salut, ca va ?]}"
+()setSimplePhrase("HELLO", "Hi, how are you?"); // equivalent to "HELLO(){[Hi, how are you?]}"
 @endcode
 
 */
@@ -1000,14 +1000,41 @@ void setSimplePhrase_ss_(CStateInstance* entity, CScriptStack& stack)
 	phraseContent2 += "]}";
 
 	ucstring ucPhraseContent;
-//	ucPhraseContent.fromUtf8(phraseContent2); // utf-8 version
-	ucPhraseContent = phraseContent2; // iso-8859-1 version
+	ucPhraseContent.fromUtf8(phraseContent2); // utf-8 version
+	//ucPhraseContent = phraseContent2; // iso-8859-1 version
 	
 	NLNET::CMessage	msgout("SET_PHRASE");
 	msgout.serial(phraseName);
 	msgout.serial(ucPhraseContent);
 	sendMessageViaMirror("IOS", msgout);
 }
+
+void setSimplePhrase_sss_(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string lang = (std::string)stack.top();
+	stack.pop();
+	std::string phraseContent = (std::string)stack.top();
+	stack.pop();
+	std::string phraseName = (std::string)stack.top();
+	stack.pop();
+	
+	std::string phraseContent2;
+	phraseContent2 += phraseName;
+	phraseContent2 += "(){[";
+	phraseContent2 += phraseContent;
+	phraseContent2 += "]}";
+
+	ucstring ucPhraseContent;
+	ucPhraseContent.fromUtf8(phraseContent2); // utf-8 version
+	//ucPhraseContent = phraseContent2; // iso-8859-1 version
+	
+	NLNET::CMessage	msgout("SET_PHRASE_LANG");
+	msgout.serial(phraseName);
+	msgout.serial(ucPhraseContent);
+	msgout.serial(lang);
+	sendMessageViaMirror("IOS", msgout);
+}
+
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -1330,6 +1357,7 @@ std::map<std::string, FScrptNativeFunc> nfGetStaticNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, getNamedEntityProp_ss_s);
 	REGISTER_NATIVE_FUNC(functions, destroyNamedEntity_s_);
 	REGISTER_NATIVE_FUNC(functions, setSimplePhrase_ss_);
+	REGISTER_NATIVE_FUNC(functions, setSimplePhrase_sss_);
 	REGISTER_NATIVE_FUNC(functions, dataGetVar_s_s);
 	REGISTER_NATIVE_FUNC(functions, dataGetVar_s_f);
 	REGISTER_NATIVE_FUNC(functions, dataSetVar_ss_);

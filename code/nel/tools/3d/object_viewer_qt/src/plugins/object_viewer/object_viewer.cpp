@@ -468,7 +468,7 @@ void CObjectViewer::loadConfig()
 #endif
 
 	_CameraFocal = settings->value("CameraFocal", 75).toInt();
-	_FontName = settings->value(Constants::FONT, "andbasr.ttf").toString().toStdString();
+	_FontName = settings->value(Constants::FONT, "andbasr.ttf").toString().toUtf8().constData();
 	_BloomEffect = settings->value(Constants::ENABLE_BLOOM, false).toBool();
 	_BloomDensity = settings->value(Constants::BLOOM_DENSITY, 0).toInt();
 	_BloomSquare = settings->value(Constants::ENABLE_SQUARE_BLOOM, false).toBool();

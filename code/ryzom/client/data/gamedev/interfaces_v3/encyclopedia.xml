@@ -11,7 +11,7 @@
 <variable entry="UI:VARIABLES:ENCY:REWARDBRICK:SHEET" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ENCY:ALBUMBRICK:SHEET" type="sint32" value="0" />
 
-<style style="ency_title" type="text" color="255 255 255 255" fontsize="14" shadow="true" case_mode="%case_first_string_letter_up"/>
+<style style="ency_title" type="text" color="255 255 255 255" fontsize="14" shadow="true" case_mode="%case_normal"/>
 <style style="ency_title2" type="text" color="255 255 255 192" fontsize="12" shadow="true" />
 
 

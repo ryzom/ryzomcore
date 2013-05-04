@@ -20,23 +20,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#ifdef USE_OPENGLES
-#	include <GLES/gl.h>
-#	include <GLES/glext.h>
-#else
-#	ifdef NL_OS_MAC
-#		define GL_GLEXT_LEGACY
-#		include <OpenGL/gl.h>
-#		include "mac/glext.h"
-#	else
-#		include <GL/gl.h>
-#		include <GL/glext.h>
-#		if defined(NL_OS_WINDOWS)
-#			include <GL/wglext.h>
-#		endif
-#	endif
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -79,7 +62,29 @@ typedef void (APIENTRY * NEL_PFNGLTEXGENXVOESPROC) (GLenum coord, GLenum pname, 
 typedef void (APIENTRY * NEL_PFNGLGETTEXGENFVOESPROC) (GLenum coord, GLenum pname, GLfloat *params);
 typedef void (APIENTRY * NEL_PFNGLGETTEXGENIVOESPROC) (GLenum coord, GLenum pname, GLint *params);
 typedef void (APIENTRY * NEL_PFNGLGETTEXGENXVOESPROC) (GLenum coord, GLenum pname, GLfixed *params);
-#endif
+
+#define GL_MULTISAMPLE_ARB GL_MULTISAMPLE
+#define GL_TEXTURE_CUBE_MAP_ARB GL_TEXTURE_CUBE_MAP_OES
+#define GL_NONE 0
+#define GL_MAX_TEXTURE_UNITS_ARB GL_MAX_TEXTURE_UNITS
+#define GL_REFLECTION_MAP_ARB GL_REFLECTION_MAP_OES
+#define GL_RGB_SCALE_EXT GL_RGB_SCALE
+#define GL_REFLECTION_MAP_ARB GL_REFLECTION_MAP_OES
+#define GL_PREVIOUS_EXT GL_PREVIOUS
+#define GL_PRIMARY_COLOR_EXT GL_PRIMARY_COLOR
+#define GL_CONSTANT_EXT GL_CONSTANT
+#define GL_ADD_SIGNED_EXT GL_ADD_SIGNED
+#define GL_INTERPOLATE_EXT GL_INTERPOLATE
+#define GL_BUMP_ENVMAP_ATI GL_INTERPOLATE
+
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_OES
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_ARB GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_ARB GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES
+
+#else
 
 // ***************************************************************************
 // ***************************************************************************
@@ -455,6 +460,8 @@ typedef void (APIENTRY * NEL_PFNGLXFREEMEMORYNVPROC) (void *pointer);
 #endif // NL_GLX_NV_vertex_array_range
 
 #endif // NL_OS_MAC
+
+#endif // USE_OPENGLES
 
 #ifdef __cplusplus
 }

@@ -18,13 +18,17 @@
 
 #include "nel/misc/fast_floor.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 int		OptFastFloorCWStack[OptFastFloorCWStackSize];
 int		*OptFastFloorCWStackEnd = OptFastFloorCWStack + OptFastFloorCWStackSize;
 int		*OptFastFloorCWStackPtr = OptFastFloorCWStack;
 
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM) && defined(NL_USE_FASTFLOOR)
 
 double	OptFastFloorMagicConst = pow(2.0,52) + pow(2.0,51);
 float	OptFastFloorMagicConst24 = (float)pow(2.0,23);

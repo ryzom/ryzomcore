@@ -19,7 +19,7 @@
 
 #include "game_share/object.h"
 #include "editor.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 
 namespace R2
 {

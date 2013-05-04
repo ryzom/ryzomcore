@@ -38,6 +38,7 @@ class CGameItemPtr;
 class IPVPInterface : public NLMISC::CRefCount
 {
 public:
+	virtual ~IPVPInterface() {}
 	///\name PVP MODE FEATURES DEPENDANTS
 	//@{
 	/// return pvp relation between the two players
@@ -61,8 +62,6 @@ public:
 	/// killed character in PvP faction
 	virtual void characterKilledInPvPFaction( CCharacter * character, PVP_CLAN::TPVPClan looserFaction, sint32 factionPoint ) const = 0;
 	//@}
-
-private:
 };
 
 #endif // RY_PVP_INTERFACE_H

@@ -15,9 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
+
+#include "nel/misc/types_nl.h"
 #include "nel/misc/co_task.h"
 #include "nel/misc/tds.h"
 #include "nel/misc/time_nl.h"
+#include "nel/misc/debug.h"
+
 // Flag to use thread instead of coroutine primitives (i.e windows fibers or gcc context)
 #ifndef NL_OS_WINDOWS
 #define NL_USE_THREAD_COTASK
@@ -58,6 +62,10 @@
 #	error "Coroutine task are not supported yet by your platform, do it ?"
 #endif
 #endif //NL_USE_THREAD_COTASK
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -237,12 +245,15 @@ namespace NLMISC
 		_PImpl = new TCoTaskData(this);
 //		_PImpl->_TaskThreadId = 0;
 //		_PImpl->_ParentThreadId = 0;
+		nlunreferenced(stackSize);
 #else //NL_USE_THREAD_COTASK
 		// allocate platform specific data storage
 		_PImpl = new TCoTaskData;
+		nlunreferenced(stackSize);
 #if defined (NL_OS_WINDOWS)
 		_PImpl->_Fiber = NULL;
 		_PImpl->_ParentFiber = NULL;
+		nlunreferenced(stackSize);
 #elif defined(NL_OS_UNIX)
 		// allocate the stack
 		_PImpl->_Stack = new uint8[stackSize];

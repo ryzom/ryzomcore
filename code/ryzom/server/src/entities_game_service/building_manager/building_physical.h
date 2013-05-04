@@ -73,9 +73,9 @@ public:
 	/// fill the icon param, send the description text to the user and store the resulting text id in the textId param. 
 	virtual void getClientDescription(uint16 roomIdx, uint16 ownerIndex, CCharacter * user, uint64 & icon, uint32 & textId )const = 0;
 	/// callback called when all the appartments of a user must be removed
-	virtual void onPlayerDeletion( const NLMISC::CEntityId & userId ){};
+	virtual void onPlayerDeletion( const NLMISC::CEntityId & userId ){}
 	/// callback called when all the appartments of a guild must be removed
-	virtual void onGuildDeletion( uint32 guild ){};
+	virtual void onGuildDeletion( uint32 guild ){}
 	/// return true if the user is allowed to go in the building
 	virtual bool isUserAllowed(CCharacter * user, uint16 ownerIdx, uint16 roomIdx) = 0;
 	///return the number of owner in this building ( return 1 for common buildings )

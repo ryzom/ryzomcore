@@ -24,11 +24,15 @@
 using	namespace std;
 using	namespace NLMISC;
 
-namespace NL3D
-{
+namespace NL3D {
 
-
-
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 // ***************************************************************************
@@ -103,10 +107,10 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 	H_AUTO_OGL(CVertexArrayRangeNVidia_allocate)
 	nlassert(_VertexArrayPtr==NULL);
 
-#ifdef	NL_OS_WINDOWS
 	// try to allocate AGP or VRAM data.
 	switch(vbType)
 	{
+#ifdef	NL_OS_WINDOWS
 	case CVertexBuffer::AGPPreferred:
 		_VertexArrayPtr= nwglAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
@@ -116,12 +120,9 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 		else
 			_VertexArrayPtr= nwglAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
-	default:
-		break;
-	}
-#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-	switch(vbType)
-	{
+#elif defined(NL_OS_MAC)
+	// TODO: implement for Mac OS X
+#elif defined(NL_OS_UNIX)
 	case CVertexBuffer::AGPPreferred:
 		_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
@@ -131,11 +132,10 @@ bool			CVertexArrayRangeNVidia::allocate(uint32 size, CVertexBuffer::TPreferredM
 		else
 			_VertexArrayPtr= nglXAllocateMemoryNV(size, 0, 0, 0.5f);
 		break;
+#endif	// NL_OS_WINDOWS
 	default:
 		break;
 	}
-#endif	// NL_OS_WINDOWS
-
 
 	// init the allocator.
 	if(_VertexArrayPtr)
@@ -175,7 +175,9 @@ void			CVertexArrayRangeNVidia::free()
 #ifdef	NL_OS_WINDOWS
 		// Free special memory.
 		nwglFreeMemoryNV(_VertexArrayPtr);
-#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#elif defined(NL_OS_MAC)
+		// TODO: implement for Mac OS X
+#elif defined(NL_OS_UNIX)
 		nglXFreeMemoryNV(_VertexArrayPtr);
 #endif	// NL_OS_WINDOWS
 
@@ -1217,7 +1219,7 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 	nglGenBuffersARB(1, &vertexBufferID);
 #endif
 
-	if (glGetError() != GL_NO_ERROR) return false;
+	if (glGetError() != GL_NO_ERROR) return NULL;
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
 	switch(_VBType)
 	{
@@ -1254,7 +1256,7 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 		nglDeleteBuffersARB(1, &vertexBufferID);
 #endif
 
-		return false;
+		return NULL;
 	}
 	CVertexBufferHardARB *newVbHard= new CVertexBufferHardARB(_Driver, vb);
 	newVbHard->initGL(vertexBufferID, this, _VBType);
@@ -1540,7 +1542,7 @@ void CVertexBufferHardARB::unlock()
 	#ifdef NL_DEBUG
 		_Unmapping = true;
 	#endif
-	GLboolean unmapOk = false;
+	GLboolean unmapOk = GL_FALSE;
 
 #ifdef USE_OPENGLES
 	if (_Driver->_Extensions.OESMapBuffer)
@@ -1664,6 +1666,9 @@ void CVertexBufferHardARB::invalidate()
 	}
 #endif
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
-}
+} // NL3D
 

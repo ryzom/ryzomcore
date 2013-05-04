@@ -21,7 +21,7 @@
 #define CL_GROUP_HTML_MAIL_H
 
 #include "nel/misc/types_nl.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
 
 
 /**
@@ -39,8 +39,8 @@ public:
 	~CGroupHTMLMail();
 
 	// From CGroupHTML
-	virtual void addHTTPGetParams (std::string &url);
-	virtual void addHTTPPostParams (HTAssocList *formfields);
+	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
+	virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
 	virtual std::string	home();
 	virtual void handle ();
 

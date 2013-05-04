@@ -58,6 +58,7 @@ protected:
 	// protect from untrolled instantiation
 	// this method registers the singleton with the singleton registry
 	IServiceSingleton();
+	virtual ~IServiceSingleton() {}
 
 private:
 	// prohibit copy

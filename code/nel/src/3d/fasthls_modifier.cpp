@@ -109,7 +109,7 @@ CRGBA		CFastHLSModifier::convert(uint H, uint L, uint S)
 	return col;
 }
 
-#if defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
 #	pragma warning( push )
 #	pragma warning( disable : 4799 )
 #endif
@@ -262,7 +262,7 @@ uint16		CFastHLSModifier::applyHLSMod(uint16 colorIn, uint8 dHue, uint dLum, uin
 #pragma managed(pop)
 #endif
 
-#if defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
 #	pragma warning( pop )
 #endif
 

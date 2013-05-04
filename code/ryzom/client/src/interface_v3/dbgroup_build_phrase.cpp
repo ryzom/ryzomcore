@@ -22,11 +22,11 @@
 #include "sphrase_manager.h"
 #include "interface_manager.h"
 #include "dbctrl_sheet.h"
-#include "view_bitmap.h"
-#include "ctrl_button.h"
-#include "group_editbox.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/group_editbox.h"
 #include "../client_cfg.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "skill_manager.h"
 #include "../string_manager_client.h"
 
@@ -94,7 +94,7 @@ bool		CDBGroupBuildPhrase::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// Init the disabled texture id
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_TextureIdSlotDisabled= rVR.getTextureIdFromName ("w_slot_brick_disabled.tga");
 
 	// Create now (before sons ctrl sheet parsing) the variables
@@ -102,13 +102,13 @@ bool		CDBGroupBuildPhrase::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	// Bricks and their Params
 	for(i=0;i<MaxBricks;i++)
 	{
-		pIM->getDbProp(BrickBuildDB + ":MAIN:" + toString(i)+":SHEET");
+		NLGUI::CDBManager::getInstance()->getDbProp(BrickBuildDB + ":MAIN:" + toString(i)+":SHEET");
 		for(uint j=0;j<MaxParam;j++)
-			pIM->getDbProp(BrickBuildDB + ":PARAM:" + toString(i) + ":" + toString(j) + ":SHEET");
+			NLGUI::CDBManager::getInstance()->getDbProp(BrickBuildDB + ":PARAM:" + toString(i) + ":" + toString(j) + ":SHEET");
 	}
 
 	// spellView: to update the icon, use a special phrase manager entry
-	pIM->getDbProp(BrickBuildDB + ":EDITION_PHRASE:PHRASE")->setValue32(CSPhraseManager::EditionSlot);
+	NLGUI::CDBManager::getInstance()->getDbProp(BrickBuildDB + ":EDITION_PHRASE:PHRASE")->setValue32(CSPhraseManager::EditionSlot);
 
 	return true;
 }
@@ -226,7 +226,7 @@ void		CDBGroupBuildPhrase::setupBuildSentence()
 	if(_GroupValid)
 	{
 		sint	rootTextMaxw;
-		fromString(pIM->getDefine("phrase_build_root_info_maxw"), rootTextMaxw);
+		fromString(CWidgetManager::getInstance()->getParser()->getDefine("phrase_build_root_info_maxw"), rootTextMaxw);
 		_MainWords[0].InfoView->setLineMaxW(rootTextMaxw);
 	}
 
@@ -1047,8 +1047,8 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	pBM->getSabrinaCom().getPhraseCost(phrase.Bricks, totalCost, totalCredit);
 
 	// update database
-	pIM->getDbProp("UI:PHRASE:BUILD:TOTAL_COST")->setValue32(totalCost);
-	pIM->getDbProp("UI:PHRASE:BUILD:TOTAL_CREDIT")->setValue32(totalCredit);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:TOTAL_COST")->setValue32(totalCost);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:TOTAL_CREDIT")->setValue32(totalCredit);
 
 	// **** Update the Cost of All Root/Mandat/ops/Credits.
 	if(phrase.Bricks.size())
@@ -1133,7 +1133,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 			mandatOk= false;
 	}
 	// set DB value accordeing to it.
-	pIM->getDbProp("UI:PHRASE:BUILD:ROOT_EFFECT_VALID")->setValue32(mandatOk);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:ROOT_EFFECT_VALID")->setValue32(mandatOk);
 
 	// update valid button
 	if(_ValidateButton)
@@ -1187,15 +1187,15 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 	if(rootBrick && rootBrick->isCombat())
 	{
 		// show the weapon restriction interface
-		pIM->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(1);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(1);
 
 		// If not already done, retrieve the weapon skills, and fill the sbricks SHEET
 		if(_WeaponSkills.empty())
 		{
 			// get define, and verify data
 			uint	numWeaponSkill;
-			fromString(pIM->getDefine("phrase_max_restrict_combat"), numWeaponSkill);
-			string	strWeaponSkill= pIM->getDefine("phrase_def_skill_restrict_combat");
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("phrase_max_restrict_combat"), numWeaponSkill);
+			string	strWeaponSkill= CWidgetManager::getInstance()->getParser()->getDefine("phrase_def_skill_restrict_combat");
 			vector<string>	weaponSkillList;
 			splitString(strWeaponSkill, " ", weaponSkillList);
 			nlassert(weaponSkillList.size()==numWeaponSkill);
@@ -1218,7 +1218,7 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 				uint32	viewBrickCombatSheetId= pBM->getVisualBrickForSkill(_WeaponSkills[i]).asInt();
 
 				// And fill in DB
-				pIM->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:SHEET", i))->setValue32(viewBrickCombatSheetId);
+				NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:SHEET", i))->setValue32(viewBrickCombatSheetId);
 			}
 		}
 
@@ -1226,13 +1226,13 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 		for(uint i=0;i<_WeaponSkills.size();i++)
 		{
 			bool	ok= pPM->skillCompatibleWithCombatPhrase(_WeaponSkills[i], phrase.Bricks);
-			pIM->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:LOCKED", i))->setValue32(!ok);
+			NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:RESTRICT_COMBAT:%d:LOCKED", i))->setValue32(!ok);
 		}
 	}
 	else
 	{
 		// hide the weapon restriction interface
-		pIM->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:RESTRICT_COMBAT:ENABLED")->setValue32(0);
 	}
 
 	// **** Setup the phrase Desc
@@ -1267,7 +1267,7 @@ void			CDBGroupBuildPhrase::resetSelection()
 
 	for(uint i=0;i<MaxSelection;i++)
 	{
-		pIM->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -1280,9 +1280,9 @@ void			CDBGroupBuildPhrase::fillSelection(const std::vector<CSheetId> &bricks)
 	for(uint i=0;i<MaxSelection;i++)
 	{
 		if(i<num)
-			pIM->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
+			NLGUI::CDBManager::getInstance()->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
 		else
-			pIM->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(BrickSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 

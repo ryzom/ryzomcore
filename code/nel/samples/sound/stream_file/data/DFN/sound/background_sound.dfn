@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Sounds" Type="Dfn" Filename="backgound_sound_item.dfn" Array="true"/>
+  <LOG>Tue Oct 08 14:55:03 2002 (boucher) Dfn Structure = </LOG>
+</DFN>

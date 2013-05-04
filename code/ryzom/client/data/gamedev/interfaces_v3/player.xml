@@ -417,7 +417,7 @@
           tx_over="W_button_24_over.tga"
           w="24"
           h="24"
-          scale="true"
+          scale="false"
           global_color_normal="false"
           global_color_over="false"
           global_color_pushed="false"
@@ -488,15 +488,15 @@
       <!-- PVP Tag Button -->
       <instance template="t_pvp_tag_button"
                 id="pvp_tag_button_0"
-                tx="pvp_green.tga"
+                tx="no_pvp.tga"
                 mode="0" />
       <instance template="t_pvp_tag_button"
                 id="pvp_tag_button_1"
-                tx="pvp_orange.tga"
+                tx="pvp_tag.tga"
                 mode="1" />
       <instance template="t_pvp_tag_button"
                 id="pvp_tag_button_2"
-                tx="pvp_red.tga"
+                tx="pvp_flag.tga"
                 mode="2" />
       <!-- PVP Tag special overed pushed icon. pushed == over rotated !!. (NB: Ugly to save icon space) -->
       <view type="bitmap"
@@ -1104,7 +1104,9 @@
            global_color_over="true"
            header_color="UI:SAVE:WIN:COLORS:ANI"
            title_delta_max_w="-150"
-           title_over_extend_view_text="true">
+           title_over_extend_view_text="true"
+		   on_tooltip="userpa_name_tooltip"
+		   on_tooltip_params="#index">
       <group id="header_closed"
              h="12"
              posref="TL TL"></group>

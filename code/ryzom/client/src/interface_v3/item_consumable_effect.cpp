@@ -43,7 +43,7 @@ void CItemConsumableEffectHelper::getItemConsumableEffectText(const CItemSheet *
 	{
 		CSString eff = pIS->Consumable.Properties[i];
 
-		if (eff == "")
+		if (eff.empty())
 			continue;
 
 		// Get name id of effect

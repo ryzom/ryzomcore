@@ -628,6 +628,49 @@ private:
 	CAITimer _Timer;
 };
 
+class CGrpProfileFollowPlayer : 
+public CMoveProfile
+{
+public:
+	CGrpProfileFollowPlayer(CProfileOwner* owner, TDataSetRow const& playerRow, uint32 dispersionRadius);
+	virtual ~CGrpProfileFollowPlayer() {}
+
+	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
+
+	/// @name IAIProfile implementation
+	//@{
+	virtual void beginProfile();
+	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void endProfile() {}
+	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
+	virtual std::string getOneLineInfoString() const { return std::string("follow_player group profile"); }
+	//@}
+
+	void	stateChangeProfile() {}
+	bool	destinationReach() const;
+
+	void		addBot			(CBot*	bot) {}
+	void		removeBot		(CBot*	bot) {}
+	CPathCont*	getPathCont		(CBot const*	bot) { return NULL; };
+
+
+protected:
+private:
+	/// the profile type to apply to bot standing between two deplacement
+	AITYPES::TProfiles _BotStandProfileType;
+	/// the profile factory to apply to bot standing between two deplacement
+	IAIProfileFactory*_BotStandProfileFactory;
+
+	CFollowPath::TFollowStatus	_Status;
+	CPathPosition	_PathPos;
+	CPathCont		_PathCont;
+	CAIVector		_LastPos;
+
+	TDataSetRow	_PlayerRow;
+	uint32      _DispersionRadius;
+};
+
+
 //////////////////////////////////////////////////////////////////////////////
 // CGrpProfileIdle                                                          //
 //////////////////////////////////////////////////////////////////////////////
@@ -791,6 +834,10 @@ public:
 
 	static std::string scriptFactionToFameFaction(std::string name);
 	static std::string fameFactionToScriptFaction(std::string name);
+
+	static bool scriptFactionToFameFactionGreaterThan(std::string name);
+	static sint32 scriptFactionToFameFactionValue(std::string name);
+
 
 private:
 	CAITimer	_checkTargetTimer;

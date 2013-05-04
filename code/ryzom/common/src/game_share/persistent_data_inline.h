@@ -420,7 +420,9 @@ inline const CPersistentDataRecord::CArg& CPersistentDataRecord::popNextArg(TTok
 inline void CPersistentDataRecord::popNextArg(TToken token,CPersistentDataRecord::CArg& result)
 {
 	#ifdef NL_DEBUG
-	BOMB_IF(peekNextToken()!=token,"Error on read code - token requested doesn't match token found",return);
+		BOMB_IF(peekNextToken()!=token,"Error on read code - token requested doesn't match token found",return);
+	#else
+		nlunreferenced(token);
 	#endif
 
 	peekNextArg(result);
@@ -445,7 +447,6 @@ inline void CPersistentDataRecord::popNextArg(TToken token,CPersistentDataRecord
 		++_ArgOffset;
 		++_TokenOffset;
 	}
-	return;
 }
 
 //inline CPersistentDataRecord::CArg CPersistentDataRecord::popNextArg(TToken token)

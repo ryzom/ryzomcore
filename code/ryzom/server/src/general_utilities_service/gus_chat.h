@@ -71,6 +71,7 @@ namespace GUS
 		//-----------------------------------------------------------------------------
 		// Public interface
 		//-----------------------------------------------------------------------------
+		virtual ~CChatChannel() {}
 
 		// open the chat channel on all clients and set its name
 		// If historySize is set other than 0, the the chat channel is

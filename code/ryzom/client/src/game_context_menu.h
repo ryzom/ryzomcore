@@ -21,16 +21,22 @@
 
 #include "nel/misc/types_nl.h"
 #include "main_loop.h"
-#include "interface_v3/ctrl_text_button.h"
-#include "interface_v3/interface_group.h"
+#include "nel/gui/ctrl_text_button.h"
+#include "nel/gui/interface_group.h"
 #include "interface_v3/interface_pointer.h"
 #include "game_share/bot_chat_types.h"
 
 
 // ***************************************************************************
-class CGroupMenu;
-class CViewTextMenu;
-class CCDBNodeLeaf;
+namespace NLGUI
+{
+	class CGroupMenu;
+	class CViewTextMenu;
+}
+
+namespace NLMISC{
+	class CCDBNodeLeaf;
+}
 
 // ***************************************************************************
 /**
@@ -77,21 +83,21 @@ private:
 
 	// MilkoPad
 	CInterfaceGroupPtr _GroupMilkoPad;
-	CCDBNodeLeaf	*_MilkoAttackDisengage;
+	NLMISC::CCDBNodeLeaf	*_MilkoAttackDisengage;
 	CCtrlTextButtonPtr	_MilkoAttDisBut1;
 	CCtrlTextButtonPtr	_MilkoAttDisBut2;
 
 	CGroupMenu		*_GroupMenu;
-	CCDBNodeLeaf	*_ContextVal;
-	CCDBNodeLeaf	*_AvailablePrograms;
-	CCDBNodeLeaf	*_ServerTeamPresent;
-	CCDBNodeLeaf	*_MissionOption[NUM_MISSION_OPTIONS];
-	CCDBNodeLeaf	*_ServerInDuel;
-	CCDBNodeLeaf	*_ServerInPvpChallenge;
-	CCDBNodeLeaf	*_WebPageTitle;
-	CCDBNodeLeaf	*_OutpostSheet;
-	CCDBNodeLeaf	*_OutpostRightToBannish;
-	CCDBNodeLeaf	*_MissionRing[BOTCHATTYPE::MaxR2MissionEntryDatabase];
+	NLMISC::CCDBNodeLeaf	*_ContextVal;
+	NLMISC::CCDBNodeLeaf	*_AvailablePrograms;
+	NLMISC::CCDBNodeLeaf	*_ServerTeamPresent;
+	NLMISC::CCDBNodeLeaf	*_MissionOption[NUM_MISSION_OPTIONS];
+	NLMISC::CCDBNodeLeaf	*_ServerInDuel;
+	NLMISC::CCDBNodeLeaf	*_ServerInPvpChallenge;
+	NLMISC::CCDBNodeLeaf	*_WebPageTitle;
+	NLMISC::CCDBNodeLeaf	*_OutpostSheet;
+	NLMISC::CCDBNodeLeaf	*_OutpostRightToBannish;
+	NLMISC::CCDBNodeLeaf	*_MissionRing[BOTCHATTYPE::MaxR2MissionEntryDatabase];
 
 
 	CViewTextMenuPtr _TextLootAction;

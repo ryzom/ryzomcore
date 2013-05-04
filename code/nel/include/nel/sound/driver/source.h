@@ -353,7 +353,7 @@ public:
 	 * In streaming mode, the time spent during buffer outruns is not 
 	 * counted towards the playback time, and the playback time is 
 	 * be the current time position in the entire submitted queue.
-	 * When using static buffers, the result is the tot time that the 
+	 * When using static buffers, the result is the total time that the 
 	 * attached buffer has been playing. If the source is looping, the 
 	 * time will be the total of all playbacks of the buffer.
 	 * When the source is stopped, this will return the time where the 
@@ -397,7 +397,7 @@ public:
 	virtual void setSourceRelativeMode(bool mode = true) = 0;
 	/// Get the source relative mode
 	virtual bool getSourceRelativeMode() const = 0;
-	/// Set the min and max distances (default: 1, MAX_FLOAT) (3D mode only)
+	/// Set the min and max distances (default: 1, sqrt(MAX_FLOAT)) (3D mode only)
 	virtual void setMinMaxDistances(float mindist, float maxdist, bool deferred = true) = 0;
 	/// Get the min and max distances
 	virtual void getMinMaxDistances(float& mindist, float& maxdist) const = 0;

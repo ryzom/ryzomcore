@@ -257,12 +257,12 @@ private:
 	/// For Tribes Threshold. FactionIndex to TribeIndex
 	std::vector<uint32>		_FactionIndexToTribeThresholdIndex;
 	// :OPTIM: init/doInit is dual to inline the _FactionIndexToTribeThresholdIndex.empty() test
-	void		initTribeTresholdIndex()
+	void		initTribeThresholdIndex()
 	{
 		if(_FactionIndexToTribeThresholdIndex.empty())
-			doInitTribeTresholdIndex();
+			doInitTribeThresholdIndex();
 	}
-	void		doInitTribeTresholdIndex();
+	void		doInitTribeThresholdIndex();
 
 	// FameStart - starting values for fame, [player's group][target group]
 	// - There are no None or Neutral clans for starting fame, so leave those out.

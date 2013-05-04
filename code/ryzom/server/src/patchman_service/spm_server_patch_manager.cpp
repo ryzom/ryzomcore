@@ -32,7 +32,7 @@
 #include "deployment_configuration_synchroniser.h"
 #include "patchman_constants.h"
 
-#include "game_share/mysql_wrapper.h"
+#include "server_share/mysql_wrapper.h"
 
 
 //-------------------------------------------------------------------------------------------------

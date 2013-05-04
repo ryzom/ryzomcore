@@ -141,7 +141,7 @@ void CIslandCollision::releaseAccessibilityTexture()
 	//H_AUTO(R2_CIslandCollision_releaseAccessibilityTexture)
 	delete _AccessibilityTexture;
 	_AccessibilityTexture = NULL;
-	CViewRenderer &vr = getEditor().getUI().getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	vr.setExternalTexture(_AccessibilityTextureId, NULL, 0, 0, 0, 0);
 }
 
@@ -460,7 +460,7 @@ CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::C
 		uint height = std::max(_HeightMap.getHeight() / MapSizeDivisor, 1u);
 		uint realWidth = NLMISC::raiseToNextPowerOf2(width);
 		uint realHeight = NLMISC::raiseToNextPowerOf2(height);
-		CViewRenderer &vr = getEditor().getUI().getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		// create / update texture
 		vr.setExternalTexture(_AccessibilityTextureId, _AccessibilityTexture, realWidth, realHeight, width, height);
 		if (vr.getTextureIdFromName(_AccessibilityTextureId) == -1)

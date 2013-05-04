@@ -57,7 +57,7 @@ bool CCurlHttpClient::authenticate(const std::string &user, const std::string &p
 	return true;
 }
 
-const char *CAFilename = "ssl_ca_cert.pem"; // this the certificate "Thawte Server CA"
+const char *CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
 
 // ***************************************************************************
 bool CCurlHttpClient::verifyServer(bool verify)

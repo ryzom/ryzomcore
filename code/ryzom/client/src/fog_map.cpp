@@ -79,7 +79,7 @@ void CFogMap::getFogParams(float startDist, float endDist, float x, float y, flo
 	float ddMx = x;
 	float ddMy = y;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	if (gm && gm->isIsland())
 	{
 		CVector front = MainCam.getMatrix().getJ();

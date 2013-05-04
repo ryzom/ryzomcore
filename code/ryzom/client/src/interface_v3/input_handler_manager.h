@@ -24,7 +24,9 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "event_descriptor.h"
+#include "nel/gui/event_descriptor.h"
+#include "nel/gui/input_handler.h"
+#include "nel/gui/group_editbox.h"
 
 
 /**
@@ -38,11 +40,8 @@
  * \date 2002
  */
 
-class CInputHandlerBase;
-class CViewText;
 
-
-class CInputHandlerManager : public NLMISC::IEventListener
+class CInputHandlerManager : public NLMISC::IEventListener, public CGroupEditBox::IComboKeyHandler
 {
 public:
 	/// The EventServer Filled with Filtered Messages the InterfaceManager didn't cactch
@@ -96,7 +95,7 @@ public:
 	 *	Basics events such as KeyA, KeyB etc.. should be in this config file.
 	 *	Combo Keys like Ctrl+A (select all) should be in this config file too.
 	 */
-	bool	isComboKeyChat(const CEventDescriptorKey &edk) const;
+	bool	isComboKeyChat(const NLGUI::CEventDescriptorKey &edk) const;
 
 
 	/** Pump The Events of The setuped EventServer (ie Driver->EventServer).
@@ -133,8 +132,6 @@ private:
 	NLMISC::CEventServer* _EventServer;
 
 	// Mouse Infos
-	NLMISC::TMouseButton	_MouseButtonsReleased;
-	NLMISC::TMouseButton	_MouseButtonsDown;
 	NLMISC::TMouseButton	_MouseButtonsState;
 
 	sint32					_MouseX, _MouseY;
@@ -165,7 +162,7 @@ private:
 		{
 			CtrlFlags= 0;
 		}
-		void		init(const CEventDescriptorKey &rDK);
+		void		init(const NLGUI::CEventDescriptorKey &rDK);
 		bool		operator<(const CComboKey &c) const;
 	};
 
@@ -178,7 +175,9 @@ private:
 	void parseKey(xmlNodePtr cur, std::vector<CComboKey> &out);
 
 	// return true if handled
-	bool updateMousePos(NLMISC::CEventMouse &event, CEventDescriptorMouse &eventDesc);
+	bool updateMousePos(NLMISC::CEventMouse &event, NLGUI::CEventDescriptorMouse &eventDesc);
+
+	NLGUI::CInputHandler inputHandler;
 
 };
 

@@ -18,6 +18,8 @@
 #ifndef NL_RESOURCE_PTR_INLINE_H
 #define NL_RESOURCE_PTR_INLINE_H
 
+#include "types_nl.h"
+
 namespace	NLMISC
 {
 

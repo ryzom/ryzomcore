@@ -63,7 +63,7 @@ void CCharInfoExtractorFactory::displayInfoExtractorList(NLMISC::CLog* log)
 	{
 		std::string s= _InfoExtractors[i]->getName();
 		if (s.size()>longestName)
-			longestName=s.size();
+			longestName=(uint32)s.size();
 	}
 
 	// iterate over the infoExtractors displaying names and description
@@ -75,7 +75,7 @@ void CCharInfoExtractorFactory::displayInfoExtractorList(NLMISC::CLog* log)
 
 uint32 CCharInfoExtractorFactory::getInfoExtractorBuilderCount()
 {
-	return _InfoExtractors.size();
+	return (uint32)_InfoExtractors.size();
 }
 
 ICharInfoExtractorBuilder* CCharInfoExtractorFactory::getInfoExtractorBuilder(uint32 idx)

@@ -21,21 +21,6 @@
 // by default, we disable the windows menu keys (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
 #define NL_DISABLE_MENU
 
-#ifdef NL_OS_WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	define NOMINMAX
-#	include <windows.h>
-#	include <windowsx.h>
-#	include <string>
-# include <GL/gl.h>
-#elif defined(NL_OS_MAC)
-#elif defined (NL_OS_UNIX)
-# include <GL/gl.h>
-# include <GL/glx.h>
-#endif // NL_OS_UNIX
-
-#include <vector>
-
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
@@ -80,45 +65,49 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 
 #endif /* NL_OS_WINDOWS */
 
+#ifdef USE_OPENGLES
+
+class CDriverGLEsNelLibrary : public INelLibrary {
+	void onLibraryLoaded(bool firstTime) { }
+	void onLibraryUnloaded(bool lastTime) { }
+};
+NLMISC_DECL_PURE_LIB(CDriverGLEsNelLibrary)
+
+#else
+
 class CDriverGLNelLibrary : public INelLibrary {
 	void onLibraryLoaded(bool firstTime) { }
 	void onLibraryUnloaded(bool lastTime) { }
 };
 NLMISC_DECL_PURE_LIB(CDriverGLNelLibrary)
 
+#endif
+
 #endif /* #ifndef NL_STATIC */
 
-
-namespace NL3D
-{
-
-CMaterial::CTexEnv CDriverGL::_TexEnvReplace;
-
-
-#ifdef NL_OS_WINDOWS
-uint CDriverGL::_Registered=0;
-#endif // NL_OS_WINDOWS
-
-// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
-const uint32 CDriverGL::ReleaseVersion = 0x11;
-
-// Number of register to allocate for the EXTVertexShader extension
-const uint CDriverGL::_EVSNumConstant = 97;
-
-#ifdef NL_OS_WINDOWS
+namespace NL3D {
 
 #ifdef NL_STATIC
 
-#	pragma comment(lib, "opengl32")
-#	pragma comment(lib, "dinput8")
-#	pragma comment(lib, "dxguid")
+#ifdef USE_OPENGLES
 
-IDriver* createGlDriverInstance ()
+IDriver* createGlEsDriverInstance ()
 {
-	return new CDriverGL;
+	return new NLDRIVERGLES::CDriverGL;
 }
 
 #else
+
+IDriver* createGlDriverInstance ()
+{
+	return new NLDRIVERGL::CDriverGL;
+}
+
+#endif
+
+#else
+
+#ifdef NL_OS_WINDOWS
 
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
@@ -130,18 +119,7 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 	return IDriver::InterfaceVersion;
 }
 
-#endif
-
 #elif defined (NL_OS_UNIX)
-
-#ifdef NL_STATIC
-
-IDriver* createGlDriverInstance ()
-{
-	return new CDriverGL;
-}
-
-#else
 
 extern "C"
 {
@@ -156,9 +134,30 @@ extern "C"
 	}
 }
 
+#endif // NL_OS_WINDOWS
+
+#endif // NL_STATIC
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
 #endif
 
-#endif // NL_OS_UNIX
+CMaterial::CTexEnv CDriverGL::_TexEnvReplace;
+
+
+#ifdef NL_OS_WINDOWS
+uint CDriverGL::_Registered=0;
+#endif // NL_OS_WINDOWS
+
+// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
+const uint32 CDriverGL::ReleaseVersion = 0x11;
+
+// Number of register to allocate for the EXTVertexShader extension
+const uint CDriverGL::_EVSNumConstant = 97;
 
 GLenum CDriverGL::NLCubeFaceToGLCubeFace[6] =
 {
@@ -175,7 +174,13 @@ CDriverGL::CDriverGL()
 {
 	H_AUTO_OGL(CDriverGL_CDriverGL)
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+
+	_EglDisplay = 0;
+	_EglContext = 0;
+	_EglSurface = 0;
+
+#elif defined(NL_OS_WINDOWS)
 
 	_PBuffer = NULL;
 	_hRC = NULL;
@@ -291,12 +296,18 @@ CDriverGL::CDriverGL()
 
 	_NVTextureShaderEnabled = false;
 
+	_AnisotropicFilter = 0.f;
+
 	// Compute the Flag which say if one texture has been changed in CMaterial.
 	_MaterialAllTextureTouchedFlag= 0;
 	for(i=0; i < IDRV_MAT_MAXTEXTURES; i++)
 	{
 		_MaterialAllTextureTouchedFlag|= IDRV_TOUCHED_TEX[i];
+#ifdef GL_NONE
 		_CurrentTexAddrMode[i] = GL_NONE;
+#else
+		_CurrentTexAddrMode[i] = 0;
+#endif
 	}
 
 	_UserTexMatEnabled = 0;
@@ -381,7 +392,9 @@ bool CDriverGL::setupDisplay()
 	for(uint i = 0; i < lines.size(); i++)
 		nlinfo("3D: %s", lines[i].c_str());
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+	registerEGlExtensions(_Extensions, _EglDisplay);
+#elif defined(NL_OS_WINDOWS)
 	registerWGlExtensions(_Extensions, _hDC);
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
@@ -421,18 +434,30 @@ bool CDriverGL::setupDisplay()
 	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+#ifdef USE_OPENGLES
+	glOrthof(0.f,_CurrentMode.Width,_CurrentMode.Height,0.f,-1.0f,1.0f);
+#else
 	glOrtho(0,_CurrentMode.Width,_CurrentMode.Height,0,-1.0f,1.0f);
+#endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+#ifndef USE_OPENGLES
 	glDisable(GL_AUTO_NORMAL);
+#endif
 	glDisable(GL_COLOR_MATERIAL);
+#ifndef USE_OPENGLES
 	glEnable(GL_DITHER);
+#endif
 	glDisable(GL_FOG);
 	glDisable(GL_LINE_SMOOTH);
+#ifndef USE_OPENGLES
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+#endif
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_NORMALIZE);
+#ifndef USE_OPENGLES
 	glDisable(GL_COLOR_SUM_EXT);
+#endif
 
 	_CurrViewport.init(0.f, 0.f, 1.f, 1.f);
 	_CurrScissor.initFullScreen();
@@ -451,7 +476,9 @@ bool CDriverGL::setupDisplay()
 	// Be always in EXTSeparateSpecularColor.
 	if(_Extensions.EXTSeparateSpecularColor)
 	{
+#ifndef USE_OPENGLES
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
+#endif
 	}
 
 	_VertexProgramEnabled= false;
@@ -470,6 +497,7 @@ bool CDriverGL::setupDisplay()
 		_SupportVBHard= true;
 		_MaxVerticesByVBHard = std::numeric_limits<uint32>::max(); // cant' know the value..
 	}
+#ifndef USE_OPENGLES
 	// Next with NVidia ext
 	else if(_Extensions.NVVertexArrayRange)
 	{
@@ -500,6 +528,7 @@ bool CDriverGL::setupDisplay()
 		// tmp fix for ati
 		_MaxVerticesByVBHard= 16777216;
 	}
+#endif
 
 	// Reset VertexArrayRange.
 	_CurrentVertexArrayRange= NULL;
@@ -559,6 +588,7 @@ bool CDriverGL::setupDisplay()
 
 		// set All TexGen by default to identity matrix (prefer use the textureMatrix scheme)
 		_DriverGLStates.activeTextureARB(stage);
+#ifndef USE_OPENGLES
 		GLfloat		params[4];
 		params[0]=1; params[1]=0; params[2]=0; params[3]=0;
 		glTexGenfv(GL_S, GL_OBJECT_PLANE, params);
@@ -572,6 +602,7 @@ bool CDriverGL::setupDisplay()
 		params[0]=0; params[1]=0; params[2]=0; params[3]=1;
 		glTexGenfv(GL_Q, GL_OBJECT_PLANE, params);
 		glTexGenfv(GL_Q, GL_EYE_PLANE, params);
+#endif
 	}
 
 	resetTextureShaders();
@@ -603,42 +634,44 @@ bool CDriverGL::setupDisplay()
 	// check whether per pixel lighting shader is supported
 	checkForPerPixelLightingSupport();
 
+#ifndef USE_OPENGLES
 	// if EXTVertexShader is used, bind  the standard GL arrays, and allocate constant
 	if (!_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
 	{
-			_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
-			_EVSNormalHandle	= nglBindParameterEXT(GL_CURRENT_NORMAL);
-			_EVSColorHandle		= nglBindParameterEXT(GL_CURRENT_COLOR);
+		_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
+		_EVSNormalHandle	= nglBindParameterEXT(GL_CURRENT_NORMAL);
+		_EVSColorHandle		= nglBindParameterEXT(GL_CURRENT_COLOR);
 
-			if (!_EVSPositionHandle || !_EVSNormalHandle || !_EVSColorHandle)
+		if (!_EVSPositionHandle || !_EVSNormalHandle || !_EVSColorHandle)
+		{
+			nlwarning("Unable to bind input parameters for use with EXT_vertex_shader, vertex program support is disabled");
+			_Extensions.EXTVertexShader = false;
+		}
+		else
+		{
+			// bind texture units
+			for(uint k = 0; k < 8; ++k)
 			{
-				nlwarning("Unable to bind input parameters for use with EXT_vertex_shader, vertex program support is disabled");
+				_EVSTexHandle[k] = nglBindTextureUnitParameterEXT(GL_TEXTURE0_ARB + k, GL_CURRENT_TEXTURE_COORDS);
+			}
+			// Other attributes are managed using variant pointers :
+			// Secondary color
+			// Fog Coords
+			// Skin Weight
+			// Skin palette
+			// This mean that they must have 4 components
+
+			// Allocate invariants. One assitionnal variant is needed for fog coordinate if fog bug is not fixed in driver version
+			_EVSConstantHandle = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_INVARIANT_EXT, GL_FULL_RANGE_EXT, _EVSNumConstant + (_ATIFogRangeFixed ? 0 : 1));
+
+			if (_EVSConstantHandle == 0)
+			{
+				nlwarning("Unable to allocate constants for EXT_vertex_shader, vertex program support is disabled");
 				_Extensions.EXTVertexShader = false;
 			}
-			else
-			{
-				// bind texture units
-				for(uint k = 0; k < 8; ++k)
-				{
-					_EVSTexHandle[k] = nglBindTextureUnitParameterEXT(GL_TEXTURE0_ARB + k, GL_CURRENT_TEXTURE_COORDS);
-				}
-				// Other attributes are managed using variant pointers :
-				// Secondary color
-				// Fog Coords
-				// Skin Weight
-				// Skin palette
-				// This mean that they must have 4 components
-
-				// Allocate invariants. One assitionnal variant is needed for fog coordinate if fog bug is not fixed in driver version
-				_EVSConstantHandle = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_INVARIANT_EXT, GL_FULL_RANGE_EXT, _EVSNumConstant + (_ATIFogRangeFixed ? 0 : 1));
-
-				if (_EVSConstantHandle == 0)
-				{
-					nlwarning("Unable to allocate constants for EXT_vertex_shader, vertex program support is disabled");
-					_Extensions.EXTVertexShader = false;
-				}
-			}
+		}
 	}
+#endif
 
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
@@ -685,7 +718,11 @@ bool CDriverGL::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
+#ifdef USE_OPENGLES
+			nglBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+#else
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+#endif
 			return true;
 		}
 	}
@@ -717,7 +754,9 @@ void CDriverGL::disableHardwareTextureShader()
 // --------------------------------------------------
 void CDriverGL::resetTextureShaders()
 {
-	H_AUTO_OGL(CDriverGL_resetTextureShaders)
+	H_AUTO_OGL(CDriverGL_resetTextureShaders);
+
+#ifndef USE_OPENGLES
 	if (_Extensions.NVTextureShader)
 	{
 		glEnable(GL_TEXTURE_SHADER_NV);
@@ -739,6 +778,7 @@ void CDriverGL::resetTextureShaders()
 
 		_NVTextureShaderEnabled = false;
 	}
+#endif
 }
 
 // --------------------------------------------------
@@ -773,8 +813,13 @@ bool CDriverGL::clear2D(CRGBA rgba)
 // --------------------------------------------------
 bool CDriverGL::clearZBuffer(float zval)
 {
-	H_AUTO_OGL(CDriverGL_clearZBuffer)
+	H_AUTO_OGL(CDriverGL_clearZBuffer);
+
+#ifdef USE_OPENGLES
+	glClearDepthf(zval);
+#else
 	glClearDepth(zval);
+#endif
 
 	_DriverGLStates.enableZWrite(true);
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -810,6 +855,7 @@ bool CDriverGL::swapBuffers()
 	//resetTextureShaders();
 	activeVertexProgram(NULL);
 
+#ifndef USE_OPENGLES
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
 		Setup a std vertex buffer to ensure NVidia synchronisation.
 	*/
@@ -872,6 +918,7 @@ bool CDriverGL::swapBuffers()
 			itVBHard++;
 		}
 	}
+#endif
 
 #ifdef NL_OS_WINDOWS
 	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
@@ -887,7 +934,11 @@ bool CDriverGL::swapBuffers()
 		if (_VRAMVertexArrayRange) _VRAMVertexArrayRange->updateLostBuffers();
 	}
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+
+	eglSwapBuffers (_EglDisplay, _EglSurface);
+
+#elif defined(NL_OS_WINDOWS)
 
 	SwapBuffers(_hDC);
 
@@ -908,6 +959,7 @@ bool CDriverGL::swapBuffers()
 
 #endif // NL_OS_WINDOWS
 
+#ifndef USE_OPENGLES
 	// Activate the default texture environnments for all stages.
 	//===========================================================
 	// This is not a requirement, but it ensure a more stable state each frame.
@@ -935,6 +987,8 @@ bool CDriverGL::swapBuffers()
 		glDisable(GL_TEXTURE_SHADER_NV);
 		_NVTextureShaderEnabled = false;
 	}
+#endif
+
 	_CurrentMaterial= NULL;
 
 	// Reset the profiling counter.
@@ -1184,9 +1238,14 @@ void CDriverGL::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rec
 	if(clipRect(rect))
 	{
 		zbuffer.resize(rect.Width*rect.Height);
+
+#ifdef USE_OPENGLES
+		glReadPixels (rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT16_OES, GL_FLOAT, &(zbuffer[0]));
+#else
 		glPixelTransferf(GL_DEPTH_SCALE, 1.0f) ;
 		glPixelTransferf(GL_DEPTH_BIAS, 0.f) ;
 		glReadPixels (rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT , GL_FLOAT, &(zbuffer[0]));
+#endif
 	}
 }
 
@@ -1215,8 +1274,23 @@ bool CDriverGL::fillBuffer (CBitmap &bitmap)
 	if( rect.Width!=bitmap.getWidth() || rect.Height!=bitmap.getHeight() || bitmap.getPixelFormat()!=CBitmap::RGBA )
 		return false;
 
+#ifdef USE_OPENGLES
+	GLuint textureId;
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rect.Width, rect.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &(bitmap.getPixels()[0]));
+//	glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES, smBackgroundCrop,0);
+	nglDrawTexfOES(0.f, 0.f, 0.f, 1.f, 1.f);
+#else
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 	glDrawPixels (rect.Width, rect.Height, GL_RGBA, GL_UNSIGNED_BYTE, &(bitmap.getPixels()[0]) );
+#endif
 
 	return true;
 }
@@ -1245,8 +1319,11 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 	_DriverGLStates.activeTextureARB(0);
 	// setup texture mode, after activeTextureARB()
 	CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+
+#ifndef USE_OPENGLES
 	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 		textureMode = CDriverGLStates::TextureRect;
+#endif
 
 	_DriverGLStates.setTextureMode(textureMode);
 	if (tex->isTextureCube())
@@ -1276,6 +1353,7 @@ void CDriverGL::setPolygonMode (TPolygonMode mode)
 	H_AUTO_OGL(CDriverGL_setPolygonMode )
 	IDriver::setPolygonMode (mode);
 
+#ifndef USE_OPENGLES
 	// Set the polygon mode
 	switch (_PolygonMode)
 	{
@@ -1289,6 +1367,7 @@ void CDriverGL::setPolygonMode (TPolygonMode mode)
 		glPolygonMode (GL_FRONT_AND_BACK, GL_POINT);
 		break;
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -1488,7 +1567,10 @@ void CDriverGL::setMatrix2DForTextureOffsetAddrMode(const uint stage, const floa
 	//nlassert(supportTextureShaders());
 	nlassert(stage < inlGetNumTextStages() );
 	_DriverGLStates.activeTextureARB(stage);
+
+#ifndef USE_OPENGLES
 	glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
+#endif
 }
 
 
@@ -1499,7 +1581,7 @@ void CDriverGL::enableNVTextureShader(bool enabled)
 
 	if (enabled != _NVTextureShaderEnabled)
 	{
-
+#ifndef USE_OPENGLES
 		if (enabled)
 		{
 			glEnable(GL_TEXTURE_SHADER_NV);
@@ -1508,6 +1590,7 @@ void CDriverGL::enableNVTextureShader(bool enabled)
 		{
 			glDisable(GL_TEXTURE_SHADER_NV);
 		}
+#endif
 		_NVTextureShaderEnabled = enabled;
 	}
 }
@@ -1568,8 +1651,11 @@ void CDriverGL::setBlendConstantColor(NLMISC::CRGBA col)
 	// update GL
 	if(!_Extensions.EXTBlendColor)
 		return;
+
+#ifndef USE_OPENGLES
 	static const	float	OO255= 1.0f/255;
 	nglBlendColorEXT(col.R*OO255, col.G*OO255, col.B*OO255, col.A*OO255);
+#endif
 }
 
 // ***************************************************************************
@@ -1623,6 +1709,7 @@ void CDriverGL::setEMBMMatrix(const uint stage,const float mat[4])
 {
 	H_AUTO_OGL(CDriverGL_setEMBMMatrix)
 
+#ifndef USE_OPENGLES
 	nlassert(supportEMBM());
 	nlassert(stage < IDRV_MAT_MAXTEXTURES);
 	//
@@ -1631,13 +1718,15 @@ void CDriverGL::setEMBMMatrix(const uint stage,const float mat[4])
 		_DriverGLStates.activeTextureARB(stage);
 		nglTexBumpParameterfvATI(GL_BUMP_ROT_MATRIX_ATI, const_cast<float *>(mat));
 	}
+#endif
 }
 
 // ***************************************************************************
 void CDriverGL::initEMBM()
 {
-	H_AUTO_OGL(CDriverGL_initEMBM)
+	H_AUTO_OGL(CDriverGL_initEMBM);
 
+#ifndef USE_OPENGLES
 	if (supportEMBM())
 	{
 		std::fill(_StageSupportEMBM, _StageSupportEMBM + IDRV_MAT_MAXTEXTURES, false);
@@ -1687,6 +1776,7 @@ void CDriverGL::initEMBM()
 			_DriverGLStates.activeTextureARB(0);
 		}
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -1832,6 +1922,8 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
 		nlwarning("The param 'prog' is null, cannot load");
 		return 0;
 	}
+
+#ifndef USE_OPENGLES
 	GLuint progID;
 	nglGenProgramsARB(1, &progID);
 	if (!progID)
@@ -1859,6 +1951,8 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
 	{
 		nlwarning("init fragment program failed: errorPos: %d isNative: %d: %s", errorPos, isNative, (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
 	}
+#endif
+
 	return 0;
 }
 
@@ -1869,11 +1963,12 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
   */
 static void fetchPerturbedEnvMapR200()
 {
-	H_AUTO_OGL(CDriverGL_fetchPerturbedEnvMapR200)
+	H_AUTO_OGL(CDriverGL_fetchPerturbedEnvMapR200);
+
+#ifndef USE_OPENGLES
 	////////////
 	// PASS 1 //
 	////////////
-
 	nglSampleMapATI(GL_REG_0_ATI, GL_TEXTURE0_ARB, GL_SWIZZLE_STR_ATI); // sample bump map 0
 	nglSampleMapATI(GL_REG_1_ATI, GL_TEXTURE1_ARB, GL_SWIZZLE_STR_ATI); // sample bump map 1
 	nglPassTexCoordATI(GL_REG_2_ATI, GL_TEXTURE2_ARB, GL_SWIZZLE_STR_ATI);	// get texcoord for envmap
@@ -1885,6 +1980,7 @@ static void fetchPerturbedEnvMapR200()
 	// PASS 2 //
 	////////////
 	nglSampleMapATI(GL_REG_2_ATI, GL_REG_2_ATI, GL_SWIZZLE_STR_ATI); // fetch envmap at perturbed texcoords
+#endif
 }
 
 // ***************************************************************************
@@ -1896,8 +1992,9 @@ void CDriverGL::forceNativeFragmentPrograms(bool nativeOnly)
 // ***************************************************************************
 void CDriverGL::initFragmentShaders()
 {
-	H_AUTO_OGL(CDriverGL_initFragmentShaders)
+	H_AUTO_OGL(CDriverGL_initFragmentShaders);
 
+#ifndef USE_OPENGLES
 	///////////////////
 	// WATER SHADERS //
 	///////////////////
@@ -2006,13 +2103,15 @@ void CDriverGL::initFragmentShaders()
 	}
 
 	// if none of the previous programs worked, fallback on NV_texture_shader, or (todo) simpler shader
+#endif
 }
 
 // ***************************************************************************
 void CDriverGL::deleteARBFragmentPrograms()
 {
-	H_AUTO_OGL(CDriverGL_deleteARBFragmentPrograms)
+	H_AUTO_OGL(CDriverGL_deleteARBFragmentPrograms);
 
+#ifndef USE_OPENGLES
 	for(uint k = 0; k < 4; ++k)
 	{
 		if (ARBWaterShader[k])
@@ -2022,6 +2121,7 @@ void CDriverGL::deleteARBFragmentPrograms()
 			ARBWaterShader[k] = 0;
 		}
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -2029,6 +2129,7 @@ void CDriverGL::deleteFragmentShaders()
 {
 	H_AUTO_OGL(CDriverGL_deleteFragmentShaders)
 
+#ifndef USE_OPENGLES
 	deleteARBFragmentPrograms();
 
 	if (ATIWaterShaderHandleNoDiffuseMap)
@@ -2046,6 +2147,7 @@ void CDriverGL::deleteFragmentShaders()
 		nglDeleteFragmentShaderATI((GLuint) ATICloudShaderHandle);
 		ATICloudShaderHandle = 0;
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -2072,7 +2174,9 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 
 	bool res = true;
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+	res = eglSwapInterval(_EglDisplay, _Interval) == EGL_TRUE;
+#elif defined(NL_OS_WINDOWS)
 	if(_Extensions.WGLEXTSwapControl)
 	{
 		res = nwglSwapIntervalEXT(_Interval) == TRUE;
@@ -2108,7 +2212,8 @@ uint	CDriverGL::getSwapVBLInterval()
 {
 	H_AUTO_OGL(CDriverGL_getSwapVBLInterval)
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+#elif defined(NL_OS_WINDOWS)
 	if(_Extensions.WGLEXTSwapControl)
 	{
 		return nwglGetSwapIntervalEXT();
@@ -2135,12 +2240,14 @@ uint	CDriverGL::getSwapVBLInterval()
 // ***************************************************************************
 void	CDriverGL::enablePolygonSmoothing(bool smooth)
 {
-	H_AUTO_OGL(CDriverGL_enablePolygonSmoothing)
+	H_AUTO_OGL(CDriverGL_enablePolygonSmoothing);
 
+#ifndef USE_OPENGLES
 	if(smooth)
 		glEnable(GL_POLYGON_SMOOTH);
 	else
 		glDisable(GL_POLYGON_SMOOTH);
+#endif
 
 	_PolygonSmooth= smooth;
 }
@@ -2508,11 +2615,10 @@ void CDriverGL::checkTextureOn() const
 		GLboolean flagCM;
 		GLboolean flagTR;
 		glGetBooleanv(GL_TEXTURE_2D, &flag2D);
+		glGetBooleanv(GL_TEXTURE_CUBE_MAP_ARB, &flagCM);
 #ifdef USE_OPENGLES
-		glGetBooleanv(GL_TEXTURE_CUBE_MAP_OES, &flagCM);
 		flagTR = true; // always true in OpenGL ES
 #else
-		glGetBooleanv(GL_TEXTURE_CUBE_MAP_ARB, &flagCM);
 		glGetBooleanv(GL_TEXTURE_RECTANGLE_NV, &flagTR);
 #endif
 		switch(dgs.getTextureMode())
@@ -2576,6 +2682,8 @@ IOcclusionQuery *CDriverGL::createOcclusionQuery()
 {
 	H_AUTO_OGL(CDriverGL_createOcclusionQuery)
 	nlassert(_Extensions.NVOcclusionQuery);
+
+#ifndef USE_OPENGLES
 	GLuint id;
 	nglGenOcclusionQueriesNV(1, &id);
 	if (id == 0) return NULL;
@@ -2587,12 +2695,17 @@ IOcclusionQuery *CDriverGL::createOcclusionQuery()
 	oqgl->Iterator = _OcclusionQueryList.begin();
 	oqgl->VisibleCount = 0;
 	return oqgl;
+#else
+	return NULL;
+#endif
 }
 
 // ***************************************************************************
 void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
 {
-	H_AUTO_OGL(CDriverGL_deleteOcclusionQuery)
+	H_AUTO_OGL(CDriverGL_deleteOcclusionQuery);
+
+#ifndef USE_OPENGLES
 	if (!oq) return;
 	COcclusionQueryGL *oqgl = NLMISC::safe_cast<COcclusionQueryGL *>(oq);
 	nlassert((CDriverGL *) oqgl->Driver == this); // should come from the same driver
@@ -2606,12 +2719,15 @@ void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
 		_CurrentOcclusionQuery = NULL;
 	}
 	delete oqgl;
+#endif
 }
 
 // ***************************************************************************
 void COcclusionQueryGL::begin()
 {
-	H_AUTO_OGL(COcclusionQueryGL_begin)
+	H_AUTO_OGL(COcclusionQueryGL_begin);
+
+#ifndef USE_OPENGLES
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == NULL); // only one query at a time
 	nlassert(ID);
@@ -2619,23 +2735,29 @@ void COcclusionQueryGL::begin()
 	Driver->_CurrentOcclusionQuery = this;
 	OcclusionType = NotAvailable;
 	VisibleCount = 0;
+#endif
 }
 
 // ***************************************************************************
 void COcclusionQueryGL::end()
 {
-	H_AUTO_OGL(COcclusionQueryGL_end)
+	H_AUTO_OGL(COcclusionQueryGL_end);
+
+#ifndef USE_OPENGLES
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == this); // only one query at a time
 	nlassert(ID);
 	nglEndOcclusionQueryNV();
 	Driver->_CurrentOcclusionQuery = NULL;
+#endif
 }
 
 // ***************************************************************************
 IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
 {
-	H_AUTO_OGL(COcclusionQueryGL_getOcclusionType)
+	H_AUTO_OGL(COcclusionQueryGL_getOcclusionType);
+
+#ifndef USE_OPENGLES
 	nlassert(Driver);
 	nlassert(ID);
 	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
@@ -2652,6 +2774,7 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
 			// Note : we could return the exact number of pixels that passed the z-test, but this value is not supported by all implementation (Direct3D ...)
 		}
 	}
+#endif
 	return OcclusionType;
 }
 
@@ -2799,8 +2922,6 @@ void CDriverGL::endDialogMode()
 {
 }
 
-} // NL3D
-
 // ***************************************************************************
 void displayGLError(GLenum error)
 {
@@ -2818,3 +2939,9 @@ void displayGLError(GLenum error)
 		break;
 	}
 }
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
+
+} // NL3D

@@ -23,6 +23,10 @@ using namespace std;
 
 #define NLMISC_DONE_TASK_SIZE 20
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 /*

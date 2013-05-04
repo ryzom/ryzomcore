@@ -28,11 +28,12 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-CSimpleSource::CSimpleSource(CSimpleSound *simpleSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
-	: CSourceCommon(simpleSound, spawn, cb, cbUserParam, cluster), 
+CSimpleSource::CSimpleSource(CSimpleSound *simpleSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
+	: CSourceCommon(simpleSound, spawn, cb, cbUserParam, cluster, groupController), 
 	_SimpleSound(simpleSound),
 	_Track(NULL), 
-	_PlayMuted(false)
+	_PlayMuted(false),
+	_WaitingForPlay(false)
 {
 	nlassert(_SimpleSound != 0);
 
@@ -133,6 +134,7 @@ void CSimpleSource::play()
 		|| (_RelativeMode ? getPos().sqrnorm() : (mixer->getListenPosVector() - getPos()).sqrnorm()) > _SimpleSound->getMaxDistance() * _SimpleSound->getMaxDistance())
 	{
 		// The sample buffer is not available, don't play (we don't know the length)
+		_WaitingForPlay = false;
 		if (_Spawn)
 		{
 			if (_SpawnEndCb != 0)
@@ -166,7 +168,7 @@ void CSimpleSource::play()
 			setDirection(_Direction); // because there is a workaround inside
 			pSource->setVelocity(_Velocity);
 		}
-		pSource->setGain(_Gain);
+		pSource->setGain(getFinalGain());
 		pSource->setSourceRelativeMode(_RelativeMode);
 		pSource->setLooping(_Looping);
 		pSource->setPitch(_Pitch);
@@ -174,7 +176,14 @@ void CSimpleSource::play()
 		
 		// and play the sound
 		bool play = pSource->play();		
+		
+#ifdef NL_DEBUG
 		nlassert(play);
+#else
+		if (!play)
+			nlwarning("Failed to play physical sound source. This is a serious error");
+#endif
+
 		// nldebug("CSimpleSource %p : REAL play done", (CAudioMixerUser::IMixerEvent*)this);
 	}
 	else
@@ -183,6 +192,7 @@ void CSimpleSource::play()
 		{
 			// This sound is not discardable, add it in waiting playlist
 			mixer->addSourceWaitingForPlay(this);
+			_WaitingForPlay = true;
 			return;
 		}
 		// there is no available track, just do a 'muted' play
@@ -193,6 +203,7 @@ void CSimpleSource::play()
 	}
 
 	CSourceCommon::play();
+	_WaitingForPlay = false;
 }
 
 /// Mixer event call when doing muted play
@@ -218,6 +229,13 @@ void CSimpleSource::stop()
 {
 	// nldebug("CSimpleSource %p : stop", (CAudioMixerUser::IMixerEvent*)this);
 	// nlassert(_Playing);
+
+	if (_WaitingForPlay)
+	{
+		nlassert(!_Playing); // cannot already be playing if waiting for play
+		CAudioMixerUser *mixer = CAudioMixerUser::instance();
+		mixer->removeSourceWaitingForPlay(this);
+	}
 
 	if (!_Playing)
 		return;
@@ -312,35 +330,12 @@ void CSimpleSource::setDirection(const NLMISC::CVector& dir)
 	}
 }
 
-
-/* Set the gain (volume value inside [0 , 1]). (default: 1)
- * 0.0 -> silence
- * 0.5 -> -6dB
- * 1.0 -> no attenuation
- * values > 1 (amplification) not supported by most drivers
- */
-void CSimpleSource::setGain(float gain)
+void CSimpleSource::updateFinalGain()
 {
-	CSourceCommon::setGain(gain);
-
 	// Set the gain
 	if (hasPhysicalSource())
-	{
-		getPhysicalSource()->setGain(gain);
-	}
+		getPhysicalSource()->setGain(getFinalGain());
 }
-
-void CSimpleSource::setRelativeGain(float gain)
-{
-	CSourceCommon::setRelativeGain(gain);
-
-	// Set the gain
-	if (hasPhysicalSource())
-	{
-		getPhysicalSource()->setGain(_Gain);
-	}
-}
-
 
 /* Shift the frequency. 1.0f equals identity, each reduction of 50% equals a pitch shift
  * of one octave. 0 is not a legal value.

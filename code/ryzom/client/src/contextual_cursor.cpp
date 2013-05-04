@@ -143,7 +143,7 @@ bool CContextualCursor::context(const std::string &contextName, float dist, cons
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
 	if(IM)
 	{
-		CViewPointer *cursor = IM->getPointer();
+		CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 		if(cursor)
 		{
 			if (!functions.isString)

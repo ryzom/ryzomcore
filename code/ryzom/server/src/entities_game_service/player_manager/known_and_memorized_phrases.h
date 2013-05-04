@@ -126,7 +126,7 @@ private:
 
 private:
 	// prevent copy constructor
-	CMemorizationSet(const CMemorizationSet &other) {};
+	CMemorizationSet(const CMemorizationSet &other) {}
 	// prevent copy operator
 	CMemorizationSet &operator =(const CMemorizationSet&other) { return *this;}
 };
@@ -183,7 +183,7 @@ private:
 
 private:
 	// prevent copy constructor
-	CPlayerPhraseMemory(const CMemorizationSet &other) {};
+	CPlayerPhraseMemory(const CMemorizationSet &other) {}
 	// prevent copy operator
 	CPlayerPhraseMemory &operator =(const CMemorizationSet&other) { return *this;}
 };

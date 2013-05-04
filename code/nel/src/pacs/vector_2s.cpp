@@ -16,7 +16,7 @@
 
 #include "stdpacs.h"
 
-#include "vector_2s.h"
+#include "nel/pacs/vector_2s.h"
 
 namespace NLPACS {
 

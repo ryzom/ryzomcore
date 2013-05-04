@@ -145,9 +145,8 @@ void					CListenerAL::getOrientation( NLMISC::CVector& front, NLMISC::CVector& u
  */
 void					CListenerAL::setGain( float gain )
 {
-	CSoundDriverAL::getInstance()->setGain(gain);
-//	alListenerf( AL_GAIN, gain );
-//	alTestError();
+	alListenerf( AL_GAIN, gain );
+	alTestError();
 }
 
 
@@ -156,15 +155,14 @@ void					CListenerAL::setGain( float gain )
  */
 float					CListenerAL::getGain() const
 {
-    return CSoundDriverAL::getInstance()->getGain();
-//	ALfloat gain;
-//#ifdef NL_OS_WINDOWS
-//	alGetListenerf( AL_GAIN, &gain );
-//#else
-//	alGetListenerfv( AL_GAIN, &gain );
-//#endif
-//	alTestError();
-//	return gain;
+	ALfloat gain;
+#ifdef NL_OS_WINDOWS
+	alGetListenerf( AL_GAIN, &gain );
+#else
+	alGetListenerfv( AL_GAIN, &gain );
+#endif
+	alTestError();
+	return gain;
 }
 
 

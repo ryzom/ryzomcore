@@ -1,0 +1,17 @@
+<widget>
+    <header>
+        <name>CtrlTabButton</name>
+        <guiname>CCtrlTabButton</guiname>
+        <ancestor>CtrlTextButton</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>group</name>
+            <type>string</type>
+            <default></default>
+        </property>
+    </properties>
+</widget>

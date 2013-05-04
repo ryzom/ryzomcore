@@ -63,7 +63,7 @@ void CFileListBuilderFactory::displayFileListBuilderList(NLMISC::CLog* log)
 	{
 		std::string s= _FileLists[i]->getName();
 		if (s.size()>longestName)
-			longestName=s.size();
+			longestName=(uint32)s.size();
 	}
 
 	// iterate over the filters displaying names and description
@@ -75,7 +75,7 @@ void CFileListBuilderFactory::displayFileListBuilderList(NLMISC::CLog* log)
 
 uint32 CFileListBuilderFactory::getFileListBuilderCount()
 {
-	return _FileLists.size();
+	return (uint32)_FileLists.size();
 }
 
 IFileListBuilderBuilder* CFileListBuilderFactory::getFileListBuilder(uint32 idx)

@@ -27,16 +27,16 @@ class CStatDBTableLeaf;
 /**
  * SDB node visitor (visitor design pattern).
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
 class CStatDBNodeVisitor
 {
 public:
-	virtual void visitBranch(CStatDBBranch * branch, const std::string & path) {}
-	virtual void visitValueLeaf(CStatDBValueLeaf * valueLeaf, const std::string & path) {}
-	virtual void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) {}
+	virtual void visitBranch(CStatDBBranch * /* branch */, const std::string & /* path */) {}
+	virtual void visitValueLeaf(CStatDBValueLeaf * /* valueLeaf */, const std::string & /* path */) {}
+	virtual void visitTableLeaf(CStatDBTableLeaf * /* tableLeaf */, const std::string & /* path */) {}
 
 protected:
 	CStatDBNodeVisitor() {}

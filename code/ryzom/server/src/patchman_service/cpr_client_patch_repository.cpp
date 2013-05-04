@@ -97,7 +97,7 @@ protected:
 static uint32 getFileVersion(const NLMISC::CSString& fileName)
 {
 	// start at the back of the file name and scan forwards until we find a '/' or '\\' or ':' or a digit
-	uint32 i= fileName.size();
+	uint32 i= (uint32)fileName.size();
 	while (i--)
 	{
 		char c= fileName[i];

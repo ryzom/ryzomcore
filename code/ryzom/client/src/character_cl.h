@@ -84,7 +84,7 @@ public:
 	enum { MaxNumAura = 2 };
 	enum	TAtkHeight
 	{
-		AtkUnknownHeight = 0,
+		AtkUnkownHeight = 0,
 		AtkLow,
 		AtkMiddle,
 		AtkHigh
@@ -368,48 +368,10 @@ public:
 	virtual uint64 getGuildSymbol () const { return _GuildSymbol; }
 
 	virtual uint32 getEventFactionID() const { return _EventFactionId; }
-	virtual uint8 getPvpMode() const { return _PvpMode; }
-	void setPvpMode(uint8 mode) { _PvpMode=mode; }
-	virtual PVP_CLAN::TPVPClan getPvpClan() const { return _PvpClan; }
-	void setPvpClan(PVP_CLAN::TPVPClan clan) { _PvpClan=clan; }
-	
-	virtual PVP_CLAN::TPVPClan getClanCivMaxFame() const { return _ClanCivMaxFame; }
-	void setClanCivMaxFame(PVP_CLAN::TPVPClan clan) { _ClanCivMaxFame=clan; }
-	virtual PVP_CLAN::TPVPClan getClanCultMaxFame() const { return _ClanCultMaxFame; }
-	void setClanCultMaxFame(PVP_CLAN::TPVPClan clan) { _ClanCultMaxFame=clan; }
-
-	virtual bool isPvpAlly(uint8 faction) const { if (faction < PVP_CLAN::NbClans) return _PvpAllies[faction]; else return false; }
-	virtual bool isPvpEnnemy(uint8 faction) const { if (faction < PVP_CLAN::NbClans) return _PvpEnemies[faction]; else return false; }
-
-	virtual bool isPvpMarauder() const
-	{
-		for (uint8 i = 0; i < 4; i++)
-			if (!_PvpEnemies[i])
-				return false;
-		return true;
-	}
-
-	virtual bool isPvpTrytonist() const
-	{
-		if (_PvpEnemies[4] && _PvpEnemies[6])
-			return true;
-		return false;
-	}
-
-	virtual bool isPvpPrimas() const
-	{
-		if (_PvpAllies[4] && _PvpAllies[6])
-			return true;
-		return false;	
-	}
-	
-	virtual bool isPvpRanger() const
-	{
-		for (uint8 i = 0; i < 4; i++)
-			if (!_PvpAllies[i])
-				return false;
-		return true;	
-	}
+	virtual uint16 getPvpMode() const { return _PvpMode; }
+	void setPvpMode(uint16 mode) { _PvpMode=mode; }
+	virtual uint32 getLeagueID() const { return _LeagueId; }
+	void setLeagueID(uint32 league) { _LeagueId=league; }
 
 	virtual uint16 getOutpostId() const { return _OutpostId; }
 	virtual OUTPOSTENUMS::TPVPSide getOutpostSide() const { return _OutpostSide; }
@@ -727,12 +689,9 @@ protected:
 	uint32										_GuildNameId;
 	uint64										_GuildSymbol;
 	uint32										_EventFactionId;
-	uint8										_PvpMode;
+	uint16										_PvpMode;
 	PVP_CLAN::TPVPClan							_PvpClan;
-	PVP_CLAN::TPVPClan							_ClanCivMaxFame;
-	PVP_CLAN::TPVPClan							_ClanCultMaxFame;
-	bool										_PvpAllies[PVP_CLAN::NbClans];
-	bool										_PvpEnemies[PVP_CLAN::NbClans];
+	uint32										_LeagueId;
 	uint16										_OutpostId;
 	OUTPOSTENUMS::TPVPSide						_OutpostSide;
 

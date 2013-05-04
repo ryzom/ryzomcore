@@ -19,7 +19,7 @@
 
 #include "nel/misc/thread.h"
 #include "nel/misc/singleton.h"
-#include "http_client.h"
+#include "game_share/http_client.h"
 
 
 namespace NLMISC

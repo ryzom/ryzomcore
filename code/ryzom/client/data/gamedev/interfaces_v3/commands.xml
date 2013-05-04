@@ -63,6 +63,9 @@
 	<command name="target" action="target" params="entity=$" />
 	<command name="tar" action="target" params="entity=$" />
 
+	<command name="target" action="target" params="entity=$|prefer_complete_match=$" />
+	<command name="tar" action="target" params="entity=$|prefer_complete_match=$" />
+
 	<command name="target" action="no_target" params="" />
 	<command name="tar" action="no_target" params="" />
 
@@ -78,9 +81,23 @@
 	<command name="guildinvite" action="command" params="a guildInvite $" />
 	<command name="invite" action="command" params="a teamInvite $" />
 
-	<command name="channel" action="command" params="a connectUserChannel +" />
+	<command name="channel" action="command" params='a connectUserChannel "$"' />
+	<command name="channel" action="command" params='a connectUserChannel "$" +' />
+
+	<command name="leaguekick" action="command" params="a leagueKick $" />
+	<command name="leaguequit" action="command" params="a setLeague" />
+	<command name="leagueinvite" action="command" params="a leagueInvite $" />
+	<command name="league" action="command" params='a setLeague "$"' />
+
+	<command name="resetname" action="command" params="a resetName"/>
+
+	<command name="chatlog" action="command" params="chatLog"/>
+
+	<command name="showonline" action="command" params="a showOnline $"/>
+	<command name="showOnline" action="command" params="a showOnline $"/>
 
 	<!-- WebIG -->
 	<command name="go" action="browse" params="name=ui:interface:webig:content:html|url=home"/>
+	<command name="webdev" action="browse" params="name=ui:interface:webig:content:html|url=http://localhost/index.html"/>
 
 </interface_config>

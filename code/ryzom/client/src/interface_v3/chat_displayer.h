@@ -20,10 +20,16 @@
 #define NL_CHAT_DISPLAYER_H
 
 #include "nel/misc/displayer.h"
-#include "group_list.h"
+#include "nel/gui/group_list.h"
 #include "interface_manager.h"
 
 #include "nel/misc/mutex.h"
+
+// to fix a conflict with syslog.h being included by libwww
+#ifdef LOG_WARNING
+#undef LOG_WARNING
+#endif
+
 
 /**
  * class used to display console text commands in the chat window

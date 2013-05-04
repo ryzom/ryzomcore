@@ -33,10 +33,10 @@
 #include "game_share/callback_adaptor.h"
 
 #include "nel/misc/time_nl.h"
-	
+
 namespace ADMIN
 {
-	
+
 	class TGraphData;
 
 	class TGraphDatas;
@@ -50,12 +50,12 @@ namespace ADMIN
 	// This is the interface used by PHP to call methods
 	// on the Admin service module
 
-	class CAdminServiceWebItf 
+	class CAdminServiceWebItf
 	{
 	protected:
 
 		/// the callback server adaptor
-		std::auto_ptr<ICallbackServerAdaptor>	_CallbackServer;	
+		std::auto_ptr<ICallbackServerAdaptor>	_CallbackServer;
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
 		{
@@ -94,7 +94,7 @@ namespace ADMIN
 
 	public:
 		/** Constructor, if you specify a replacement adaptor, then the object
-		 *	become owner of the adaptor (and it will be released with the 
+		 *	become owner of the adaptor (and it will be released with the
 		 *	interface).
 		 */
 		CAdminServiceWebItf(ICallbackServerAdaptor *replacementAdaptor = NULL)
@@ -170,7 +170,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWeb::cb_globalCmd received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebItf *callback = (CAdminServiceWebItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -195,7 +195,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWeb::cb_controlCmd received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebItf *callback = (CAdminServiceWebItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -222,7 +222,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWeb::cb_serviceCmd received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebItf *callback = (CAdminServiceWebItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -249,7 +249,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWeb::cb_getShardOrders received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebItf *callback = (CAdminServiceWebItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -263,7 +263,7 @@ namespace ADMIN
 			std::vector<std::string> retValue;
 
 			retValue = callback->on_getShardOrders(from);
-			
+
 			NLNET::CMessage retMsg("R_GSO");
 
 			nlWrite(retMsg, serialCont, retValue);
@@ -280,7 +280,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWeb::cb_getStates received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebItf *callback = (CAdminServiceWebItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -294,7 +294,7 @@ namespace ADMIN
 			std::vector<std::string> retValue;
 
 			retValue = callback->on_getStates(from);
-			
+
 			NLNET::CMessage retMsg("R_GS");
 
 			nlWrite(retMsg, serialCont, retValue);
@@ -311,7 +311,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWeb::cb_getHighRezGraphInfo received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebItf *callback = (CAdminServiceWebItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -327,7 +327,7 @@ namespace ADMIN
 			std::vector<std::string> retValue;
 
 			retValue = callback->on_getHighRezGraphInfo(from, varAddr);
-			
+
 			NLNET::CMessage retMsg("R_GHRGI");
 
 			nlWrite(retMsg, serialCont, retValue);
@@ -344,7 +344,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWeb::cb_getHighRezGraph received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebItf *callback = (CAdminServiceWebItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -366,7 +366,7 @@ namespace ADMIN
 			std::vector<std::string> retValue;
 
 			retValue = callback->on_getHighRezGraph(from, varAddr, startDate, endDate, milliStep);
-			
+
 			NLNET::CMessage retMsg("R_GHRG");
 
 			nlWrite(retMsg, serialCont, retValue);
@@ -389,7 +389,7 @@ namespace ADMIN
 		// serviceCmdResult.
 		virtual void on_globalCmd(NLNET::TSockId from, const std::string &command) =0;
 
-		// Send a service related command to the executor 
+		// Send a service related command to the executor
 		// (not to the controled service)
 		// The result is returned by the return message
 		// controlCmdResult.
@@ -426,15 +426,15 @@ namespace ADMIN
 		virtual std::vector<std::string> on_getHighRezGraph(NLNET::TSockId from, const std::string &varAddr, uint32 startDate, uint32 endDate, uint32 milliStep) =0;
 
 	};
-	
+
 		// This is the interface used by PHP to call methods
 	// on the Admin service module
 
-	/** This is the client side of the interface 
+	/** This is the client side of the interface
 	 *	Derive from this class to invoke method on the callback server
-	 */	
+	 */
 
-	class CAdminServiceWebClientItf 
+	class CAdminServiceWebClientItf
 	{
 	protected:
 
@@ -476,18 +476,18 @@ namespace ADMIN
 
 				initialized = true;
 			}
-			
+
 			std::map < std::string, std::string>::const_iterator it(messageNames.find(methodName));
 			if (it != messageNames.end())
 				return it->second;
-			
+
 
 			static std::string emptyString;
-			
+
 			return emptyString;
 
 		}
-		
+
 		CAdminServiceWebClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
 		{
 			if (adaptorReplacement == NULL)
@@ -553,7 +553,7 @@ namespace ADMIN
 
 			_CallbackClient->send(message);
 		}
-		// Send a service related command to the executor 
+		// Send a service related command to the executor
 		// (not to the controled service)
 		// The result is returned by the return message
 		// controlCmdResult.
@@ -653,7 +653,7 @@ namespace ADMIN
 			nldebug("CAdminServiceWebClient::cb_commandResult received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackClientAdaptor *adaptor = static_cast< ICallbackClientAdaptor *>(netbase.getUserData());
-			
+
 			CAdminServiceWebClientItf *callback = (CAdminServiceWebClientItf *)adaptor->getContainerClass();
 
 			if (callback  == NULL)
@@ -685,16 +685,16 @@ namespace ADMIN
 	class TGraphData
 	{
 	protected:
-		// 
+		//
 		std::string	_ServiceAlias;
-		// 
+		//
 		std::string	_VarName;
-		// 
+		//
 		uint32	_SamplePeriod;
-		// 
+		//
 		double	_Value;
 	public:
-		// 
+		//
 		const std::string &getServiceAlias() const
 		{
 			return _ServiceAlias;
@@ -712,9 +712,9 @@ namespace ADMIN
 
 				_ServiceAlias = value;
 
-				
+
 		}
-			// 
+			//
 		const std::string &getVarName() const
 		{
 			return _VarName;
@@ -732,9 +732,9 @@ namespace ADMIN
 
 				_VarName = value;
 
-				
+
 		}
-			// 
+			//
 		uint32 getSamplePeriod() const
 		{
 			return _SamplePeriod;
@@ -746,7 +746,7 @@ namespace ADMIN
 				_SamplePeriod = value;
 
 		}
-			// 
+			//
 		double getValue() const
 		{
 			return _Value;
@@ -758,7 +758,7 @@ namespace ADMIN
 				_Value = value;
 
 		}
-	
+
 		bool operator == (const TGraphData &other) const
 		{
 			return _ServiceAlias == other._ServiceAlias
@@ -773,7 +773,7 @@ namespace ADMIN
 		{
 
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_ServiceAlias);
@@ -782,10 +782,10 @@ namespace ADMIN
 			s.serial(_Value);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -796,12 +796,12 @@ namespace ADMIN
 	class TGraphDatas
 	{
 	protected:
-		// 
+		//
 		uint32	_CurrentTime;
-		// 
+		//
 		std::vector < TGraphData >	_Datas;
 	public:
-		// 
+		//
 		uint32 getCurrentTime() const
 		{
 			return _CurrentTime;
@@ -813,7 +813,7 @@ namespace ADMIN
 				_CurrentTime = value;
 
 		}
-			// 
+			//
 		const std::vector < TGraphData > &getDatas() const
 		{
 			return _Datas;
@@ -831,9 +831,9 @@ namespace ADMIN
 
 				_Datas = value;
 
-				
+
 		}
-	
+
 		bool operator == (const TGraphDatas &other) const
 		{
 			return _CurrentTime == other._CurrentTime
@@ -846,17 +846,17 @@ namespace ADMIN
 		{
 
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_CurrentTime);
 			s.serialCont(_Datas);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -867,12 +867,12 @@ namespace ADMIN
 	class THighRezData
 	{
 	protected:
-		// 
+		//
 		NLMISC::TTime	_SampleTick;
-		// 
+		//
 		double	_Value;
 	public:
-		// 
+		//
 		NLMISC::TTime getSampleTick() const
 		{
 			return _SampleTick;
@@ -884,7 +884,7 @@ namespace ADMIN
 				_SampleTick = value;
 
 		}
-			// 
+			//
 		double getValue() const
 		{
 			return _Value;
@@ -896,7 +896,7 @@ namespace ADMIN
 				_Value = value;
 
 		}
-	
+
 		bool operator == (const THighRezData &other) const
 		{
 			return _SampleTick == other._SampleTick
@@ -909,17 +909,17 @@ namespace ADMIN
 		{
 
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_SampleTick);
 			s.serial(_Value);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -930,16 +930,16 @@ namespace ADMIN
 	class THighRezDatas
 	{
 	protected:
-		// 
+		//
 		std::string	_ServiceAlias;
-		// 
+		//
 		std::string	_VarName;
-		// 
+		//
 		uint32	_CurrentTime;
-		// 
+		//
 		std::vector < THighRezData >	_Datas;
 	public:
-		// 
+		//
 		const std::string &getServiceAlias() const
 		{
 			return _ServiceAlias;
@@ -957,9 +957,9 @@ namespace ADMIN
 
 				_ServiceAlias = value;
 
-				
+
 		}
-			// 
+			//
 		const std::string &getVarName() const
 		{
 			return _VarName;
@@ -977,9 +977,9 @@ namespace ADMIN
 
 				_VarName = value;
 
-				
+
 		}
-			// 
+			//
 		uint32 getCurrentTime() const
 		{
 			return _CurrentTime;
@@ -991,7 +991,7 @@ namespace ADMIN
 				_CurrentTime = value;
 
 		}
-			// 
+			//
 		const std::vector < THighRezData > &getDatas() const
 		{
 			return _Datas;
@@ -1009,9 +1009,9 @@ namespace ADMIN
 
 				_Datas = value;
 
-				
+
 		}
-	
+
 		bool operator == (const THighRezDatas &other) const
 		{
 			return _ServiceAlias == other._ServiceAlias
@@ -1026,7 +1026,7 @@ namespace ADMIN
 		{
 
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_ServiceAlias);
@@ -1035,15 +1035,15 @@ namespace ADMIN
 			s.serialCont(_Datas);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
 
-	
+
 
 	struct TShardOrders
 	{
@@ -1057,11 +1057,11 @@ namespace ADMIN
 			end_of_enum,
 
 			invalid_val,
-			
+
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -1072,13 +1072,13 @@ namespace ADMIN
 				// fill the index table
 				indexTable.insert(std::make_pair(so_autostart_on, 0));
 				indexTable.insert(std::make_pair(so_autostart_off, 1));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1086,9 +1086,9 @@ namespace ADMIN
 				NL_STRING_CONVERSION_TABLE_ENTRY(so_autostart_on)
 				NL_STRING_CONVERSION_TABLE_ENTRY(so_autostart_off)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
-			};                                                                                             
-			static NLMISC::CStringConversion<TValues>                                                                
-			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)   
+			};
+			static NLMISC::CStringConversion<TValues>
+			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
 			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
@@ -1167,16 +1167,16 @@ namespace ADMIN
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-	
+
 
 	struct TRunningOrders
 	{
@@ -1190,11 +1190,11 @@ namespace ADMIN
 			end_of_enum,
 
 			invalid_val,
-			
+
 			/// Number of enumerated values
 			nb_enum_items = 2
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -1205,13 +1205,13 @@ namespace ADMIN
 				// fill the index table
 				indexTable.insert(std::make_pair(ro_deactivated, 0));
 				indexTable.insert(std::make_pair(ro_activated, 1));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1219,9 +1219,9 @@ namespace ADMIN
 				NL_STRING_CONVERSION_TABLE_ENTRY(ro_deactivated)
 				NL_STRING_CONVERSION_TABLE_ENTRY(ro_activated)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
-			};                                                                                             
-			static NLMISC::CStringConversion<TValues>                                                                
-			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)   
+			};
+			static NLMISC::CStringConversion<TValues>
+			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
 			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
@@ -1300,16 +1300,16 @@ namespace ADMIN
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-	
+
 
 	struct TRunningState
 	{
@@ -1324,11 +1324,11 @@ namespace ADMIN
 			end_of_enum,
 
 			invalid_val,
-			
+
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -1340,13 +1340,13 @@ namespace ADMIN
 				indexTable.insert(std::make_pair(rs_stopped, 0));
 				indexTable.insert(std::make_pair(rs_running, 1));
 				indexTable.insert(std::make_pair(rs_online, 2));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1355,9 +1355,9 @@ namespace ADMIN
 				NL_STRING_CONVERSION_TABLE_ENTRY(rs_running)
 				NL_STRING_CONVERSION_TABLE_ENTRY(rs_online)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
-			};                                                                                             
-			static NLMISC::CStringConversion<TValues>                                                                
-			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)   
+			};
+			static NLMISC::CStringConversion<TValues>
+			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
 			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
@@ -1436,16 +1436,16 @@ namespace ADMIN
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-	
+
 
 	struct TRunningTag
 	{
@@ -1465,11 +1465,11 @@ namespace ADMIN
 			end_of_enum,
 
 			invalid_val,
-			
+
 			/// Number of enumerated values
 			nb_enum_items = 8
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -1486,13 +1486,13 @@ namespace ADMIN
 				indexTable.insert(std::make_pair(rt_externaly_started, 5));
 				indexTable.insert(std::make_pair(rt_slow_to_stop, 6));
 				indexTable.insert(std::make_pair(rt_slow_to_start, 7));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1506,9 +1506,9 @@ namespace ADMIN
 				NL_STRING_CONVERSION_TABLE_ENTRY(rt_slow_to_stop)
 				NL_STRING_CONVERSION_TABLE_ENTRY(rt_slow_to_start)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
-			};                                                                                             
-			static NLMISC::CStringConversion<TValues>                                                                
-			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)   
+			};
+			static NLMISC::CStringConversion<TValues>
+			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
 			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
@@ -1587,14 +1587,14 @@ namespace ADMIN
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
 		/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -1602,24 +1602,24 @@ namespace ADMIN
 	class TServiceStatus
 	{
 	protected:
-		// 
+		//
 		std::string	_ShardName;
-		// 
+		//
 		std::string	_ServiceLongName;
-		// 
+		//
 		std::string	_ServiceShortName;
-		// 
+		//
 		std::string	_ServiceAliasName;
-		// 
+		//
 		TRunningState	_RunningState;
-		// 
+		//
 		TRunningOrders	_RunningOrders;
-		// 
+		//
 		std::set < TRunningTag >	_RunningTags;
-		// 
+		//
 		std::string	_Status;
 	public:
-		// 
+		//
 		const std::string &getShardName() const
 		{
 			return _ShardName;
@@ -1637,9 +1637,9 @@ namespace ADMIN
 
 				_ShardName = value;
 
-				
+
 		}
-			// 
+			//
 		const std::string &getServiceLongName() const
 		{
 			return _ServiceLongName;
@@ -1657,9 +1657,9 @@ namespace ADMIN
 
 				_ServiceLongName = value;
 
-				
+
 		}
-			// 
+			//
 		const std::string &getServiceShortName() const
 		{
 			return _ServiceShortName;
@@ -1677,9 +1677,9 @@ namespace ADMIN
 
 				_ServiceShortName = value;
 
-				
+
 		}
-			// 
+			//
 		const std::string &getServiceAliasName() const
 		{
 			return _ServiceAliasName;
@@ -1697,9 +1697,9 @@ namespace ADMIN
 
 				_ServiceAliasName = value;
 
-				
+
 		}
-			// 
+			//
 		TRunningState getRunningState() const
 		{
 			return _RunningState;
@@ -1711,7 +1711,7 @@ namespace ADMIN
 				_RunningState = value;
 
 		}
-			// 
+			//
 		TRunningOrders getRunningOrders() const
 		{
 			return _RunningOrders;
@@ -1723,7 +1723,7 @@ namespace ADMIN
 				_RunningOrders = value;
 
 		}
-			// 
+			//
 		const std::set < TRunningTag > &getRunningTags() const
 		{
 			return _RunningTags;
@@ -1741,9 +1741,9 @@ namespace ADMIN
 
 				_RunningTags = value;
 
-				
+
 		}
-			// 
+			//
 		const std::string &getStatus() const
 		{
 			return _Status;
@@ -1761,9 +1761,9 @@ namespace ADMIN
 
 				_Status = value;
 
-				
+
 		}
-	
+
 		bool operator == (const TServiceStatus &other) const
 		{
 			return _ShardName == other._ShardName
@@ -1782,7 +1782,7 @@ namespace ADMIN
 		{
 
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_ShardName);
@@ -1795,15 +1795,15 @@ namespace ADMIN
 			s.serial(_Status);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -1827,12 +1827,12 @@ namespace ADMIN
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {};
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {};
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {};
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -1842,7 +1842,7 @@ namespace ADMIN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void upServiceUpdate_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void graphUpdate_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1929,16 +1929,16 @@ namespace ADMIN
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_upServiceUpdate(NLNET::CMessage &__message, const std::vector < TServiceStatus > &serviceStatus);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_graphUpdate(NLNET::CMessage &__message, const TGraphDatas &graphDatas);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_highRezGraphUpdate(NLNET::CMessage &__message, const THighRezDatas &graphDatas);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_commandResult(NLNET::CMessage &__message, uint32 commandId, const std::string &serviceAlias, const std::string &result);
-	
+
 
 
 
@@ -1967,12 +1967,12 @@ namespace ADMIN
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {};
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {};
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {};
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -1982,7 +1982,7 @@ namespace ADMIN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void setShardOrders_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void shutdownShard_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -2097,7 +2097,7 @@ namespace ADMIN
 		static void broadcast_setShardOrders(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const std::string &shardName, const TShardOrders &shardOrders)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_setShardOrders(message , shardName, shardOrders);
 
@@ -2116,7 +2116,7 @@ namespace ADMIN
 		static void broadcast_shutdownShard(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const std::string &shardName, uint32 delay)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_shutdownShard(message , shardName, delay);
 
@@ -2135,7 +2135,7 @@ namespace ADMIN
 		static void broadcast_controlCmd(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, uint32 commandId, const std::string &serviceAlias, const std::string &command)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_controlCmd(message , commandId, serviceAlias, command);
 
@@ -2150,28 +2150,28 @@ namespace ADMIN
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setShardOrders(NLNET::CMessage &__message, const std::string &shardName, const TShardOrders &shardOrders);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_shutdownShard(NLNET::CMessage &__message, const std::string &shardName, uint32 delay);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_controlCmd(NLNET::CMessage &__message, uint32 commandId, const std::string &serviceAlias, const std::string &command);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_serviceCmd(NLNET::CMessage &__message, uint32 commandId, const std::string &serviceAlias, const std::string &command);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_commandResult(NLNET::CMessage &__message, uint32 commandId, const std::string &serviceAlias, const std::string &result);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_graphUpdate(NLNET::CMessage &__message, const TGraphDatas &graphDatas);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_highRezGraphUpdate(NLNET::CMessage &__message, const THighRezDatas &graphDatas);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_serviceStatusUpdate(NLNET::CMessage &__message, const std::string &status);
-	
+
 
 
 
@@ -2200,12 +2200,12 @@ namespace ADMIN
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {};
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {};
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {};
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -2215,7 +2215,7 @@ namespace ADMIN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void serviceCmd_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void serviceCmdNoReturn_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -2290,15 +2290,15 @@ namespace ADMIN
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_serviceCmd(NLNET::CMessage &__message, uint32 commandId, const std::string &command);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_serviceCmdNoReturn(NLNET::CMessage &__message, const std::string &command);
-	
+
 
 
 
 	};
 
 }
-	
+
 #endif

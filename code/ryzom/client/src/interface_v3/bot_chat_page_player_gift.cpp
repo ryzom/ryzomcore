@@ -19,8 +19,8 @@
 #include "stdpch.h"
 #include "bot_chat_page_player_gift.h"
 #include "interface_manager.h"
-#include "interface_group.h"
-#include "action_handler.h"
+#include "nel/gui/interface_group.h"
+#include "nel/gui/action_handler.h"
 #include "../net_manager.h"
 #include "bot_chat_manager.h"
 #include "bot_chat_page_all.h"
@@ -29,6 +29,8 @@
 
 static const char *WIN_BOT_CHAT_PAGE_PLAYER_GIFT = "ui:interface:bot_chat_player_gift";
 
+using NLMISC::CCDBNodeLeaf;
+
 // *************************************************************************************
 void CBotChatPagePlayerGift::begin()
 {
@@ -36,14 +38,14 @@ void CBotChatPagePlayerGift::begin()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// clear intro text
-	pIM->getDbProp(BOT_CHAT_BASE_DB_PATH ":PLAYER_GIFT")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":PLAYER_GIFT")->setValue32(0);
 
 	// clear money proposal value
-	CCDBNodeLeaf *moneyProposal = pIM->getDbProp(pIM->getDefine("money_proposal"));
+	CCDBNodeLeaf *moneyProposal = NLGUI::CDBManager::getInstance()->getDbProp(CWidgetManager::getInstance()->getParser()->getDefine("money_proposal"));
 	if (moneyProposal) moneyProposal->setValue64(0);
 
 	// clear 'accept' button
-	pIM->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 	// Default is not validated
 	PlayerGiftValidated= false;

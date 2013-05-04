@@ -68,6 +68,9 @@ CSoundPlugin::CSoundPlugin(IEdit *globalInterface)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	// Initialize without sheet id bin
+	NLMISC::CSheetId::initWithoutSheet();
+
 	CVector dir;
 
 	_GlobalInterface = globalInterface;
@@ -297,7 +300,7 @@ void CSoundPlugin::updateDisplay()
 		}
 		else
 		{
-			setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m à max dist.
+			setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m to max dist.
 		}
 		_Dialog.setAngles(uint32(180 * _Sound->getConeInnerAngle() / Pi), uint32(180 * _Sound->getConeOuterAngle() / Pi)); 
 	}
@@ -337,7 +340,7 @@ void CSoundPlugin::setActiveDocument(IEditDocument *pdoc)
 		_Dialog.setName(_Filename);
 
 		// 1st, try to found the sound in the preloaded sound bank.
-		_Sound = _Mixer->getSoundId(CStringMapper::map(_Filename));
+		_Sound = _Mixer->getSoundId(CSheetId(_Filename, "sound"));
 		if (_Sound == NULL)
 		{
 			// not found, create a new one.
@@ -430,7 +433,7 @@ void CSoundPlugin::setActiveDocument(IEditDocument *pdoc)
 			}
 			else
 			{
-				setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m à max dist.
+				setMinMaxDistances(1, _Sound->getMaxDistance()); // 1m to max dist.
 			}
 			_Dialog.setAngles(uint32(180 * _Sound->getConeInnerAngle() / Pi), uint32(180 * _Sound->getConeOuterAngle() / Pi)); 
 			if (!_InvalidSound)
@@ -537,7 +540,7 @@ void CSoundPlugin::play(std::string &filename)
 //				point.Name = string("simulation-")+_Sound->getName()+"-000";
 
 				region.VPoints.push_back(point);
-				string name = string("simulation-")+CStringMapper::unmap(_Sound->getName())+"-000";
+				string name = string("simulation-")+NLMISC::CFile::getFilenameWithoutExtension(_Sound->getName().toString())+"-000";
 				if (region.VPoints.back().checkProperty("name"))
 					region.VPoints.back().removePropertyByName("name");
 

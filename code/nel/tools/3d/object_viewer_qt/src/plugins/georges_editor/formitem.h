@@ -24,7 +24,7 @@
 #include <QList>
 #include <QVariant>
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	class CFormItem

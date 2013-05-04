@@ -206,6 +206,7 @@ SYNTAXE:
 	positive="true"
 	suffix=""
 	prefix=""
+	format="false"			// make the number thousands formatted 
 />
 
 
@@ -1275,7 +1276,7 @@ Sur les nodes qui contiennent des fils on peut setuper la valeur de départ à ouv
 	h6_font_size="16"					// Headline 6 font size
 	paragraph_begin_space="12"			// Space between paragraphs
 	multi_line_space_factor="0.25"		// Space between 2 lines of a paragraph. Factor of the font size
-	td_begin_space="0"					// Space at the begining of a table cell
+	td_begin_space="0"					// Space at the beginning of a table cell
 	li_begin_space="4"					// H space when "<IL>"
 	ul_begin_space="12"					// H space when "<UL>"
 	li_indent="-10"						// W space when "<LI>"

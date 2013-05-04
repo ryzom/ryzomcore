@@ -18,9 +18,9 @@
 
 #include "stdpch.h"
 #include "interface_manager.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "group_in_scene_user_info.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../entities.h"
 #include "../user_entity.h"
 #include "../forage_source_cl.h"
@@ -97,7 +97,7 @@ CRGBA CGroupInSceneUserInfo::BarColorHPNegative = CRGBA(127, 32, 0);
 #define nlfsinfo2 if ( _Entity->isForageSource() ) nlinfo
 
 
-CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
+CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 {
 	// Get the interface manager
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -129,13 +129,28 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 	bool forageSourceBarDisplayed= false;
 	bool needPvPLogo= false;
 	bool permanentContent = false;
-	bool displayMissionIcons = pIM->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool();
+	bool rpTags = false;
+	bool displayMissionIcons = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:INSCENE:FRIEND:MISSION_ICON")->getValueBool();
 
 	// Names
 	const char *templateName;
 	ucstring theTribeName;
 	ucstring entityName = entity->getDisplayName();
 	ucstring entityTitle = entity->getTitle();
+	
+	// For some NPC's the name is empty and only a title is given,
+	// in that case, treat the title as the name.
+	if (entityName.empty())
+	{
+		entityName = entityTitle;
+		entityTitle.clear();
+	}
+
+	ucstring entityTag1 = entity->getTag(1);
+	ucstring entityTag2 = entity->getTag(2);
+	ucstring entityTag3 = entity->getTag(3);
+	ucstring entityTag4 = entity->getTag(4);
+
 	string entityPermanentContent = entity->getPermanentStatutIcon();
 
 	// Active fields and bars
@@ -144,7 +159,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 		string dbEntry = "UI:SAVE:INSCENE:SOURCE:";
 		CForageSourceCL *forageSource = static_cast<CForageSourceCL*>(entity);
 
-		name = !entityName.empty() /*&& pIM->getDbProp(dbEntry+"NAME")->getValueBool()*/;
+		name = !entityName.empty() /*&& NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"NAME")->getValueBool()*/;
 		symbol = (forageSource->getKnowledge() != 0);
 		title = false;
 		guildName = false;
@@ -152,7 +167,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 		forageSourceBarDisplayed = (entity->slot() == UserEntity->selection());
 		bars[Time] = forageSourceBarDisplayed;
 		bars[Amount] = forageSourceBarDisplayed;
-		//bool displayExtractingParams = true; //forageSource->isExtractionInProgress() /*&& pIM->getDbProp(dbEntry+"HP")*/;
+		//bool displayExtractingParams = true; //forageSource->isExtractionInProgress() /*&& NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"HP")*/;
 		bars[Life] = forageSourceBarDisplayed;//displayExtractingParams;
 		bars[Danger] = forageSourceBarDisplayed;//displayExtractingParams;
 		bars[Spawn] = forageSourceBarDisplayed;//displayExtractingParams;
@@ -160,28 +175,32 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 	}
 	else if(npcFriendAndNeutral)
 	{
+		string dbEntry;
+		getBarSettings( pIM, user, entity->isPlayer(), _friend, dbEntry, bars );
 		// For RoleMasters, merchants etc... must display name and function, and nothing else
 		for(uint i=0;i<NumBars;i++)
 			bars[i]= false;
-		name= !entityName.empty();
+		name= !entityName.empty() && CDBManager::getInstance()->getDbProp(dbEntry+"NPCNAME")->getValueBool();
 		symbol= false;
-		title= true;
+		title= !entityTitle.empty() && CDBManager::getInstance()->getDbProp(dbEntry+"NPCTITLE")->getValueBool();
 		guildName= false;
 		templateName = "in_scene_user_info";
+		rpTags = (!entityTag1.empty()  ||  !entityTag2.empty()  || !entityTag3.empty()  || !entityTag4.empty() ) && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"RPTAGS")->getValueBool();
 	}
 	else
 	{
 		// Base entry in database
 		string dbEntry;
 		getBarSettings( pIM, user, entity->isPlayer(), _friend, dbEntry, bars );
-		name = !entityName.empty() && pIM->getDbProp(dbEntry+"NAME")->getValueBool();
-		title = !entityTitle.empty() && pIM->getDbProp(dbEntry+"TITLE")->getValueBool();
+		name = !entityName.empty() && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"NAME")->getValueBool();
+		title = !entityTitle.empty() && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"TITLE")->getValueBool();
+		rpTags = (!entityTag1.empty()  ||  !entityTag2.empty()  || !entityTag3.empty()  || !entityTag4.empty() ) && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"RPTAGS")->getValueBool();
 		// if name is empty but not title, title is displayed as name
-		if (!title && entityName.empty() && !entityTitle.empty() && pIM->getDbProp(dbEntry+"NAME")->getValueBool())
+		if (!title && entityName.empty() && !entityTitle.empty() && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"NAME")->getValueBool())
 			title = true;
 		templateName = "in_scene_user_info";
 		// special guild
-		if(pIM->getDbProp(dbEntry+"GUILD_SYMBOL")->getValueBool())
+		if(NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"GUILD_SYMBOL")->getValueBool())
 		{
 			// if symbol not still available, wait for one when VP received
 			symbol = (entity->getGuildSymbol() != 0);
@@ -192,7 +211,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			symbol= false;
 			needGuildSymbolId = false;
 		}
-		if(pIM->getDbProp(dbEntry+"GUILD_NAME")->getValueBool())
+		if(NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"GUILD_NAME")->getValueBool())
 		{
 			// if guild name not still available, wait for one when VP received
 			guildName = (entity->getGuildNameID() != 0);
@@ -203,7 +222,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			guildName= false;
 			needGuildNameId= false;
 		}
-		needPvPLogo = pIM->getDbProp(dbEntry+"PVP_LOGO")->getValueBool();
+		needPvPLogo = NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"PVP_LOGO")->getValueBool();
 
 		eventFaction = (entity->getEventFactionID() != 0);
 	}
@@ -240,8 +259,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 				if (strnicmp(sFame.c_str(),"tribe_",6)==0)
 				{
 					tribeName = true;
-					// always display title for tribe
-					title = true;
+					//// always display title for tribe
+					//title = true;
 					theTribeName = STRING_MANAGER::CStringManagerClient::getFactionLocalizedName(sFame);
 					// tribeName stuff disable any guild name
 					guildName= false;
@@ -270,11 +289,10 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			info->_Entity = entity;
 
 			// Some constants
-			sint barHeight, barSpace, textH;
-			fromString(pIM->getDefine("in_scene_user_info_bar_h"), barHeight);
-			fromString(pIM->getDefine("in_scene_user_info_bar_space"), barSpace);
-			fromString(pIM->getDefine("in_scene_user_info_text_h"), textH);
-			fromString(pIM->getDefine("in_scene_user_bar_length"), CGroupInSceneUserInfo::_BatLength);
+			sint barHeight, barSpace;
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_user_info_bar_h"), barHeight);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_user_info_bar_space"), barSpace);
+			fromString(CWidgetManager::getInstance()->getParser()->getDefine("in_scene_user_bar_length"), CGroupInSceneUserInfo::_BatLength);
 
 			// Build the bars
 			uint barCount = 0;
@@ -298,10 +316,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 								bitmap->setColorRGBA (BarColor[i]);
 							}
 							info->_Bars[i] = bitmap;
+							barCount++;
 						}
 					}
-
-					barCount++;
 				}
 			}
 
@@ -334,21 +351,33 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			if (!barCount)
 			{
 				// Delete
-				if (win_jauge_mid)
-					win_jauge_mid->setActive(false);
-					// leftGroup->delView (win_jauge_mid);
-				CViewBase *view = leftGroup->getView ("win_jauge_top");
+				CViewBase *view = leftGroup->getView ("win_bot");
 				if (view)
-					view->setActive(false);
-					//leftGroup->delView (view);
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_mid");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_top");
+				if (view)
+					leftGroup->delView (view);
+
+				if (win_jauge_mid)
+					//win_jauge_mid->setActive(false);
+					leftGroup->delView (win_jauge_mid);
+				view = leftGroup->getView ("win_jauge_top");
+
+				if (view)
+					//view->setActive(false);
+					leftGroup->delView (view);
+
 				view = leftGroup->getView ("win_jauge_bot");
 				if (view)
-					view->setActive(false);
-					//leftGroup->delView (view);
+					//view->setActive(false);
+					leftGroup->delView (view);
 			}
 
 			// Strings
-			sint stringSpace = 0;
+			//sint stringSpace = 0;
 			sint stringCount = 0;
 			if (name)
 			{
@@ -357,8 +386,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 					info->_Name = dynamic_cast<CViewText*>(text);
 				stringCount++;
 			}
-			else
-				stringSpace += textH;
+			//else
+			//	stringSpace += textH;
 			if (title)
 			{
 				CViewBase *text = leftGroup->getView ("info"+toString(stringCount));
@@ -366,9 +395,29 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 					info->_Title = dynamic_cast<CViewText*>(text);
 				stringCount++;
 			}
-			else
-				stringSpace += textH;
+			//else
+			//	stringSpace += textH;
 
+			if (rpTags)
+			{
+				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
+				CViewBitmap *bitmap;
+				if (pPlayer == NULL || (pPlayer != NULL && pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+				{
+					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_1"));
+					if (bitmap)
+						bitmap->setTexture(entityTag1.toString());
+					bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_2"));
+					if (bitmap)
+						bitmap->setTexture(entityTag2.toString());
+				}
+				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_3"));
+				if (bitmap)
+					bitmap->setTexture(entityTag3.toString());
+				bitmap = dynamic_cast<CViewBitmap*>(leftGroup->getView ("rp_logo_4"));
+				if (bitmap)
+					bitmap->setTexture(entityTag4.toString());
+			}
 
 			// Get the permanent content bitmap
 			if(permanentContent)
@@ -413,8 +462,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 					stringCount++;
 				}
 			}
-			else
-				stringSpace += textH;
+			//else
+			//	stringSpace += textH;
 
 			// Hide guild symbol / raw material source icon?
 			if ( isForageSource )
@@ -436,12 +485,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 						if ( iconFilename )
 							bitmap->setTexture (*iconFilename);
 					}
-					leftGroup->setW( leftGroup->getW() + 42 );
 					leftGroup->invalidateCoords();
 				}
-
-				// Increase vertical size to let bars be seen
-				//leftGroup->setH( leftGroup->getH() + 42 ); // hide last bar, currently
 
 				// Set ZBias of forage interface
 				info->setZBias(ClientCfg.ForageInterfaceZBias);
@@ -477,7 +522,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 							info->delView(logoOver);
 						}
 						leftGroup->setW( leftGroup->getW() + 42 );
-						leftGroup->invalidateCoords();
 					}
 					else
 					{
@@ -485,6 +529,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 						info->delView(logoOver);
 						leftGroup->setX(0);
 					}
+					leftGroup->invalidateCoords();
 				}
 			}
 			else
@@ -506,7 +551,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 							string dbLeaf = "UI:ENTITY:GUILD:"+toString (entity->slot());
 							sheet->setSheet(dbLeaf);
 
-							pIM->getDbProp(dbLeaf+":ICON")->setValue64(entity->getGuildSymbol());
+							NLGUI::CDBManager::getInstance()->getDbProp(dbLeaf+":ICON")->setValue64(entity->getGuildSymbol());
 						}
 					}
 				}
@@ -517,7 +562,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 				CViewBase * invisibleLogo = info->getView("invisible_logo");
 				if (entity->isUser() && invisibleLogo)
 				{
-					bool invisible = pIM->getDbProp("SERVER:USER:IS_INVISIBLE")->getValueBool();
+					bool invisible = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_INVISIBLE")->getValueBool();
 					invisibleLogo->setActive(invisible);
 				}
 
@@ -539,184 +584,118 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 						info->_MissionTarget = bitmap;
 				}
 
-				CViewBase * pvpCivLogo = info->getView ("pvp_faction_civ_logo");
-				CViewBase * pvpCultLogo = info->getView ("pvp_faction_cult_logo");
+				CViewBase * pvpFactionLogo = info->getView ("pvp_faction_logo");
+				CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
+				CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
 
 				CPlayerCL * pPlayer = dynamic_cast<CPlayerCL*>(entity);
 				if (pPlayer == NULL)
 					needPvPLogo = false;
 
-				// set or inactive pvp logos
-				bool needCivPvpLogo = needPvPLogo;
-				bool needCultPvpLogo = needPvPLogo;
 
-				if (pPlayer != NULL && needPvPLogo && pvpCivLogo && pvpCultLogo)
+				if (pPlayer != NULL && needPvPLogo)
 				{
-					uint8 civToDisplay = (uint8)(pPlayer->getClanCivMaxFame() & 0xFF);
-					uint8 cultToDisplay = (uint8)(pPlayer->getClanCultMaxFame() & 0xFF);
-
-					if (!entity->isUser())
+					if (pvpFactionLogo) 
 					{
-						bool civEnnemies = false;
-						for (uint8 i = 0; i < 4; i++)
+						pvpFactionLogo->setActive(true);
+						CViewBitmap * pvpFactionBitmap = dynamic_cast<CViewBitmap *>(pvpFactionLogo);
+						if( pvpFactionBitmap )
 						{
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
+							if (user)
 							{
-								civEnnemies = true;
-								if ( civToDisplay == i)
-									break;
-								else
-									 civToDisplay = i;
-							}
-							
-							if (!civEnnemies)
-							{
-								if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
-									 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
+								if (pPlayer->getPvpMode() & PVP_MODE::PvpChallenge)
 								{
-									if ( civToDisplay == i)
-										break;
-									else
-										 civToDisplay = i;
+									pvpFactionBitmap->setTexture("ico_curse.tga");
 								}
-							}
-						}
-
-
-						for (uint8 i = 4; i < 7; i++)
-						{
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) )
-							{
-								if ( cultToDisplay == i)
-									break;
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFaction)
+								{
+									if (pPlayer->getPvpMode() & PVP_MODE::PvpZoneSafe)
+										pvpFactionBitmap->setTexture("pvp_neutral.tga");
+									else
+										pvpFactionBitmap->setTexture("pvp_enemy_tag.tga");
+								}
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged)
+								{
+									if (pPlayer->getPvpMode() & PVP_MODE::PvpSafe)
+										pvpFactionBitmap->setTexture("pvp_neutral.tga");
+									else
+										pvpFactionBitmap->setTexture("pvp_enemy_flag.tga");
+								}
 								else
-									 cultToDisplay = i;
-							}
-
-							if ( (pPlayer->isPvpAlly(i) && UserEntity->isPvpAlly(i)) ||
-								 (pPlayer->isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) )
-							{
-								if ( cultToDisplay == i)
-									break;
-								else
-									 cultToDisplay = i;
-							}
-						}
-					}
-
-					if ((pPlayer->getPvpMode() & PVP_MODE::PvpFaction) || (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))
-					{
-						CViewBitmap * pvpCivLogoBmp = dynamic_cast<CViewBitmap *>(pvpCivLogo);
-						if( pvpCivLogoBmp )
-						{
-							if (pPlayer->isPvpAlly(civToDisplay))
-							{
-								if (pPlayer->isPvpRanger())
-									pvpCivLogoBmp->setTexture("pvp_ally_ranger.tga");
-								else
-									pvpCivLogoBmp->setTexture("pvp_ally_"+toString(civToDisplay)+".tga");
-							}
-							else if (pPlayer->isPvpEnnemy(civToDisplay))
-							{
-								if (pPlayer->isPvpMarauder())
-									pvpCivLogoBmp->setTexture("pvp_enemy_marauder.tga");
-								else
-									pvpCivLogoBmp->setTexture("pvp_enemy_"+toString(civToDisplay)+".tga");
+									pvpFactionLogo->setActive(false);
 							}
 							else
 							{
-								needCivPvpLogo = false;
-							}
-						}
-
-						CViewBitmap * pvpCultLogoBmp = dynamic_cast<CViewBitmap *>(pvpCultLogo);
-						if( pvpCultLogoBmp )
-						{
-							if (pPlayer->isPvpAlly(cultToDisplay))
-							{
-								if (pPlayer->isPvpPrimas())
-									pvpCultLogoBmp->setTexture("pvp_ally_primas.tga");
+								if (pPlayer->getPvpMode() & PVP_MODE::PvpChallenge)
+									pvpFactionBitmap->setTexture("ico_curse.tga");
+								else if (pPlayer->isNeutralPVP())
+									pvpFactionBitmap->setTexture("pvp_neutral.tga");
+								else if (pPlayer->isAlly() && (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))
+									pvpFactionBitmap->setTexture("pvp_ally_flag.tga");
+								else if (pPlayer->isAlly() && (pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+									pvpFactionBitmap->setTexture("pvp_ally_tag.tga");
+								else if (pPlayer->isEnemy() && (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged))
+									pvpFactionBitmap->setTexture("pvp_enemy_flag.tga");
+								else if (pPlayer->isEnemy() && (pPlayer->getPvpMode() & PVP_MODE::PvpFaction))
+									pvpFactionBitmap->setTexture("pvp_enemy_tag.tga");
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFactionFlagged)
+									pvpFactionBitmap->setTexture("pvp_enemy_flag.tga");
+								else if (pPlayer->getPvpMode() & PVP_MODE::PvpFaction)
+									pvpFactionBitmap->setTexture("pvp_enemy_tag.tga");
 								else
-									pvpCultLogoBmp->setTexture("pvp_ally_"+toString(cultToDisplay)+".tga");
-							}
-							else if (pPlayer->isPvpEnnemy(cultToDisplay))
-							{
-								if (pPlayer->isPvpTrytonist())
-									pvpCultLogoBmp->setTexture("pvp_enemy_trytonist.tga");
-								else
-									pvpCultLogoBmp->setTexture("pvp_enemy_"+toString(cultToDisplay)+".tga");
-							}
-							else
-							{
-								needCultPvpLogo = false;
+									pvpFactionLogo->setActive(false);
 							}
 						}
 					}
-					else 
-					{
-						needCivPvpLogo = false;
-						needCultPvpLogo = false;
-					}
-				
-					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
+									
 					if (pvpOutpostLogo)
 					{
-						if( pPlayer->getOutpostId() == 0 )
-						{
+						if( pPlayer->getOutpostId() != 0 )
+							pvpOutpostLogo->setActive(true);
+						else
 							pvpOutpostLogo->setActive(false);
-						}
 					}
-
-					CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
+	
 					if (pvpDuelLogo)
 					{
-						if( !(pPlayer->getPvpMode()&PVP_MODE::PvpDuel || pPlayer->getPvpMode()&PVP_MODE::PvpChallenge) )
-						{
+						if( pPlayer->getPvpMode()&PVP_MODE::PvpDuel )
+							pvpDuelLogo->setActive(true);
+						else
 							pvpDuelLogo->setActive(false);
-						}
 					}
+
 				}
 				else
 				{
-					CViewBase * pvpOutpostLogo = info->getView ("pvp_outpost_logo");
-					if (pvpOutpostLogo)
-						pvpOutpostLogo->setActive(false);
-
-					CViewBase * pvpDuelLogo = info->getView ("pvp_duel_logo");
-					if (pvpDuelLogo)
-					pvpDuelLogo->setActive(false);
+					CInterfaceGroup* grp = info->getGroup("right_pvp");
+					if (grp)
+						info->delGroup(grp);
 				}
-
-				if (pvpCivLogo)
-					pvpCivLogo->setActive(needCivPvpLogo);
-
-				if (pvpCultLogo)
-					pvpCultLogo->setActive(needCultPvpLogo);
-
 			}
 
 			// No bar and no string ?
 			if (((stringCount == 1) && !barCount) || (stringCount == 0))
 			{
-				// Delete
-				CViewBase *bitmap = leftGroup->getView ("win_top");
-				if (bitmap)
-					//leftGroup->delView (bitmap);
-					bitmap->setAlpha(0);
-				bitmap = leftGroup->getView ("win_mid");
-				if (bitmap)
-					//leftGroup->delView (bitmap);
-					bitmap->setAlpha(0);
-				bitmap = leftGroup->getView ("win_bot");
-				if (bitmap)
-					//leftGroup->delView (bitmap);
-					bitmap->setAlpha(0);
+				CViewBase *view = leftGroup->getView ("win_bot");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_mid");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_top");
+				if (view)
+					leftGroup->delView (view);
 
-				// Anti-Bug, xmargin is not take into evaluate W
-				/*if (info->_Name)
-					info->_Name->setX(0);*/
+				// Delete
+				view = leftGroup->getView ("win_jauge_top");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_jauge_mid");
+				if (view)
+					leftGroup->delView (view);
+				view = leftGroup->getView ("win_jauge_bot");
+				if (view)
+					leftGroup->delView (view);
 
 			}
 
@@ -725,23 +704,16 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			{
 				CViewBase *text = leftGroup->getView ("info"+toString(i));
 				if (text)
-					leftGroup->delView(text);
+					text->setActive(false);
 			}
 
 			// Adjust win_mid
 			CViewBase *win_mid = leftGroup->getView ("win_mid");
 			if (win_mid)
 			{
-				win_mid->setH (win_mid->getH() - spaceBar/2 - stringSpace);
-			}
+				win_mid->setH (win_mid->getH() - spaceBar/2 );
 
-			// Total height
-			sint totalHeight = info->getH ();
-			totalHeight -= spaceBar + stringSpace;
-			info->setH (totalHeight);
-			totalHeight = leftGroup->getH ();
-			totalHeight -= spaceBar + stringSpace;
-			leftGroup->setH (totalHeight);
+			}
 
 			// Set player name
 			if (info->_Name)
@@ -764,9 +736,9 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			// Init user leaf nodes
 			if (entity->isUser())
 			{
-				_Value = pIM->getDbProp ("UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK");
-				_ValueBegin = pIM->getDbProp ("UI:VARIABLES:SMOOTH_USER_ACT_START");
-				_ValueEnd = pIM->getDbProp ("UI:VARIABLES:SMOOTH_USER_ACT_END");
+				_Value = NLGUI::CDBManager::getInstance()->getDbProp ("UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK");
+				_ValueBegin = NLGUI::CDBManager::getInstance()->getDbProp ("UI:VARIABLES:SMOOTH_USER_ACT_START");
+				_ValueEnd = NLGUI::CDBManager::getInstance()->getDbProp ("UI:VARIABLES:SMOOTH_USER_ACT_END");
 			}
 
 			// Update data
@@ -776,8 +748,8 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (class CEntityCL *entity)
 			info->setActive(true);
 
 			// Link to the interface
-			pIM->addWindowToMasterGroup("ui:interface", info);
-			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", info);
+			CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 			info->setParent(pRoot);
 			if (pRoot)
 				pRoot->addGroup (info);
@@ -841,11 +813,11 @@ void CGroupInSceneUserInfo::getBarSettings( CInterfaceManager* pIM, bool isUser,
 	}
 	else
 	{
-		bars[HP] = pIM->getDbProp(dbEntry+"HP")->getValueBool();
-		bars[SAP] = (isUser || isFriend) && (isUser || isPlayer) && pIM->getDbProp(dbEntry+"SAP")->getValueBool();
-		bars[STA] = (isUser || isFriend) && (isUser || isPlayer) && pIM->getDbProp(dbEntry+"STA")->getValueBool();
-		bars[Focus] = (isUser || isFriend) && (isUser || isPlayer) && pIM->getDbProp(dbEntry+"FOCUS")->getValueBool();
-		bars[Action] = (isUser) && pIM->getDbProp(dbEntry+"ACTION")->getValueBool();
+		bars[HP] = NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"HP")->getValueBool();
+		bars[SAP] = (isUser || isFriend) && (isUser || isPlayer) && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"SAP")->getValueBool();
+		bars[STA] = (isUser || isFriend) && (isUser || isPlayer) && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"STA")->getValueBool();
+		bars[Focus] = (isUser || isFriend) && (isUser || isPlayer) && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"FOCUS")->getValueBool();
+		bars[Action] = (isUser) && NLGUI::CDBManager::getInstance()->getDbProp(dbEntry+"ACTION")->getValueBool();
 	}
 }
 
@@ -926,6 +898,9 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 		_Name->setColor(entityColor);
 		_Name->setModulateGlobalColor(false);
 		ucstring entityName = _Entity->getDisplayName();
+		if (entityName.empty())
+			entityName = _Entity->getTitle();
+
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
 				entityName += CI18N::get("uiAFK");				
@@ -969,7 +944,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string dbLeaf = "UI:ENTITY:GUILD:"+toString (_Entity->slot())+":ICON";
-		pIM->getDbProp(dbLeaf)->setValue64(_Entity->getGuildSymbol());
+		NLGUI::CDBManager::getInstance()->getDbProp(dbLeaf)->setValue64(_Entity->getGuildSymbol());
 	}
 
 	// Set the event faction
@@ -1191,7 +1166,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string 
 	{
 		// NB : only use the fast version during edition because duplication of CCDBCtrlSheet not implemented now, but we don't
 		// use it for the edition !!!!
-		CInterfaceElement *prototype = im->getElementFromId("ui:interface:" + templateName + "_proto");
+		CInterfaceElement *prototype = CWidgetManager::getInstance()->getElementFromId("ui:interface:" + templateName + "_proto");
 		if (prototype && dynamic_cast<CInterfaceGroup *>(prototype))
 		{
 			extern bool NoOpForCCtrlSheetInfo_Serial; // CCDBCtrlSheet::serial not implemented, but prevent an assert in its serial because
@@ -1210,7 +1185,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::newGroupInScene(const std::string 
 	{
 		std::vector<std::pair<std::string,std::string> > templateParams;
 		templateParams.push_back (std::pair<std::string,std::string>("id", id));
-		groupInfo = CInterfaceManager::getInstance()->createGroupInstance ( templateName,
+		groupInfo = CWidgetManager::getInstance()->getParser()->createGroupInstance ( templateName,
 			"ui:interface", templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 	}
 
@@ -1226,5 +1201,4 @@ void CGroupInSceneUserInfo::serial(NLMISC::IStream &f)
 {
 	CGroupInScene::serial(f);
 }
-
 

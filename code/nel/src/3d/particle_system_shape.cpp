@@ -39,7 +39,11 @@ namespace NL3D {
 using NLMISC::CIFile;
 
 
+namespace {
 
+NLMISC::CMutex s_PSSMutex;
+
+} /* anonymous namespace */
 
 // private usage : macro to check the memory integrity
 #if defined(NL_DEBUG) && defined(NL_OS_WINDOWS)
@@ -169,7 +173,7 @@ void	CParticleSystemShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 ///===========================================================================
 void CParticleSystemShape::buildFromPS(const CParticleSystem &ps)
 {
-	// must be sure that we are writting in the stream
+	// must be sure that we are writing in the stream
 	if (_ParticleSystemProto.isReading())
 	{
 		_ParticleSystemProto.invert();
@@ -220,9 +224,8 @@ CParticleSystem *CParticleSystemShape::instanciatePS(CScene &scene, NLMISC::CCon
 		return _SharedSystem;
 	}
 
-	// avoid prb with concurent thread (may append if an instance group containing ps is loaded in background)
-	NLMISC::CMutex mutex;
-	mutex.enter();
+	// avoid prb with concurrent thread (may happen if an instance group containing ps is loaded in background)
+	s_PSSMutex.enter();
 
 
 	#ifdef PS_FAST_ALLOC
@@ -295,7 +298,7 @@ CParticleSystem *CParticleSystemShape::instanciatePS(CScene &scene, NLMISC::CCon
 		}
 	#endif
 
-	mutex.leave();
+	s_PSSMutex.leave();
 
 	/*NLMISC::TTicks end = NLMISC::CTime::getPerformanceTime();
 	nlinfo("instanciation time = %.2f", (float) (1000 * NLMISC::CTime::ticksToSecond(end - start)));	*/
@@ -390,8 +393,7 @@ void CParticleSystemShape::flushTextures(IDriver &driver, uint selectedTexture)
 	}
 	else
 	{
-		NLMISC::CMutex mutex;
-		mutex.enter();
+		s_PSSMutex.enter();
 
 		// must create an instance just to flush the textures
 		CParticleSystem *myInstance = NULL;
@@ -436,7 +438,7 @@ void CParticleSystemShape::flushTextures(IDriver &driver, uint selectedTexture)
 		#ifdef PS_FAST_ALLOC
 			PSBlockAllocator = NULL;
 		#endif
-		mutex.leave();
+		s_PSSMutex.leave();
 	}
 	for(uint k = 0; k < _CachedTex.size(); ++k)
 	{

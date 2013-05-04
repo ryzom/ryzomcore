@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "formdelegate.h"
 
 // NeL includes
@@ -37,7 +38,7 @@
 #include "georgesform_proxy_model.h"
 #include "formitem.h"
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	FormDelegate::FormDelegate(QObject *parent)
@@ -95,7 +96,7 @@ namespace Plugin
 						//QString min = QString(type->getMin().c_str());
 						//QString max = QString(type->getMax().c_str());
 						//QString inc = QString(type->getIncrement().c_str());
-						//nldebug(QString("min %1 max %2 inc %3").arg(min).arg(max).arg(inc).toStdString().c_str());
+						//nldebug(QString("min %1 max %2 inc %3").arg(min).arg(max).arg(inc).toUtf8().constData());
 
 						// TODO: use saved min/max values
 						editor->setMinimum(-99999);
@@ -110,7 +111,7 @@ namespace Plugin
 						//QString min = QString(type->getMin().c_str());
 						//QString max = QString(type->getMax().c_str());
 						//QString inc = QString(type->getIncrement().c_str());
-						//nldebug(QString("min %1 max %2 inc %3").arg(min).arg(max).arg(inc).toStdString().c_str());
+						//nldebug(QString("min %1 max %2 inc %3").arg(min).arg(max).arg(inc).toUtf8().constData());
 
 						// TODO: use saved min/max values
 						editor->setMinimum(-99999);
@@ -201,7 +202,7 @@ namespace Plugin
 			else 
 			{
 				nldebug(QString("setModelData from %1 to %2")
-					.arg(oldValue).arg(value).toStdString().c_str());
+					.arg(oldValue).arg(value).toUtf8().constData());
 				model->setData(index, value, Qt::EditRole);
 			}
 		}
@@ -222,7 +223,7 @@ namespace Plugin
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
-							.arg(oldValue).arg(value).toStdString().c_str());
+							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
 					break;
@@ -239,7 +240,7 @@ namespace Plugin
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
-							.arg(oldValue).arg(value).toStdString().c_str());
+							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
 					break;
@@ -260,7 +261,7 @@ namespace Plugin
 					else 
 					{
 						nldebug(QString("setModelData from %1 to %2")
-							.arg(oldValue).arg(value).toStdString().c_str());
+							.arg(oldValue).arg(value).toUtf8().constData());
 						model->setData(index, value, Qt::EditRole);
 					}
 					break;
@@ -275,4 +276,4 @@ namespace Plugin
 		QRect r = option.rect;
 		editor->setGeometry(r);
 	}
-} /* namespace Plugin */
+} /* namespace GeorgesQt */

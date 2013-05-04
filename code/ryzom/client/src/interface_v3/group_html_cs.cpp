@@ -22,8 +22,9 @@
 #include "stdpch.h"
 
 #include "group_html_cs.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
+#include "interface_manager.h"
 
 // used for login cookie to be sent to the web server
 #include "../net_manager.h"
@@ -49,7 +50,7 @@ CGroupHTMLCS::~CGroupHTMLCS()
 
 // ***************************************************************************
 
-void CGroupHTMLCS::addHTTPGetParams (string &url)
+void CGroupHTMLCS::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
 	url += ((url.find('?') != string::npos) ? "&" : "?");
 
@@ -69,7 +70,7 @@ void CGroupHTMLCS::addHTTPGetParams (string &url)
 
 // ***************************************************************************
 
-void CGroupHTMLCS::addHTTPPostParams (HTAssocList *formfields)
+void CGroupHTMLCS::addHTTPPostParams (HTAssocList *formfields, bool /*trustedDomain*/)
 {
 	std::vector<CParameter> parameters;
 	getParameters (parameters, false);
@@ -119,6 +120,15 @@ void CGroupHTMLCS::getParameters (std::vector<CParameter> &parameters, bool enco
 {
 	string s = getDebugInformation();
 	s += getSystemInformation();
+
+	static bool webIgReady = false;
+
+	if (!webIgReady) // Webig is ready when getParameters of CGroupHTMLCS is called
+	{
+		webIgReady = true;
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		CLuaManager::getInstance().executeLuaScript("game:onWebIgReady()");
+	}
 
 	// For each line
 	string::size_type startOfLine = 0;

@@ -21,6 +21,9 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/common.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 
@@ -643,6 +646,8 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 	{
 		h = 2.f + (b - r) / diff;
 	}
+#if defined(GCC_VERSION) && (GCC_VERSION == 40204)
+	// use the fix only if using the specific GCC version
 	else if (maxV == b)
 	{
 		h = 4.f + (r - g) / diff;
@@ -652,6 +657,12 @@ bool CRGBA::convertToHLS(float &h, float &l, float &s) const
 		// this case is to fix a compiler bug
 		h = (g - b) / diff;
 	}
+#else
+	else
+	{
+		h = 4.f + (r - g) / diff;
+	}
+#endif
 
 	h *= 60.f; // scale to [0..360]
 
@@ -718,6 +729,40 @@ void CRGBA::buildFromHLS(float h, float l, float s)
 		clamp(v, 0.f, 1.f);
 		B = (uint8) (255.f * v);
 	}
+}
+
+CRGBA CRGBA::stringToRGBA( const char *ptr )
+{
+	if (!ptr)
+		return NLMISC::CRGBA::White;
+	
+	int r = 255, g = 255, b = 255, a = 255;
+	sscanf( ptr, "%d %d %d %d", &r, &g, &b, &a );
+	clamp( r, 0, 255 );
+	clamp( g, 0, 255 );
+	clamp( b, 0, 255 );
+	clamp( a, 0, 255 );
+	
+	return CRGBA( r,g,b,a );
+}
+
+std::string CRGBA::toString() const
+{
+	std::string s;
+	s =  NLMISC::toString( R );
+	s += " ";
+	s += NLMISC::toString( G );
+	s += " ";
+	s += NLMISC::toString( B );
+	s += " ";
+	s += NLMISC::toString( A );
+	return s;
+}
+
+bool CRGBA::fromString( const std::string &s )
+{
+	*this = stringToRGBA( s.c_str() );
+	return true;
 }
 
 

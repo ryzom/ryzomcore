@@ -254,7 +254,7 @@
                                                                 oncandrop="inv_can_drop" ondrop="inv_drop"
                                                                 item_slot="LEFT_HAND" value="%hand_l" other_hand_slot="handr" auto_grayed="false" />
         
-                        <! - Must update some things when the item equiped change - >
+                        <! - Must update some things when the item equipped change - >
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:SHEET)" action="phrase_update_from_hand" />
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:QUALITY)" action="phrase_update_from_hand" />
                         <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:ENCHANT)" action="phrase_update_from_hand" />
@@ -1114,7 +1114,7 @@
             other_hand_slot="handr"
             auto_grayed="false"
             tooltip_parent="win" />
-      <!-- Must update some things when the item equiped change -->
+      <!-- Must update some things when the item equipped change -->
       <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:SHEET)"
             action="phrase_update_from_hand" />
       <link expr="depends(@%bag:[%hand_r:INDEX_IN_BAG-1]:QUALITY)"
@@ -1317,7 +1317,7 @@
   <group type="container"
          id="gestionsets2"
          w="68"
-         h="280"
+         h="300"
          resizer="false"
          header_active="false"
          right_button="false"
@@ -1339,12 +1339,12 @@
            x="0"
            y="0"
            w="68"
-           h="280"
+           h="300"
            posref="TL TL">
     <group id="shortcuts"
 		   y="-1"
            w="68"
-           h="278"
+           h="300"
            posref="TL TL">
       <!-- The Shortcuts. Don't modify ids  -->
       <instance template="ctrl_alt_memory"
@@ -1449,6 +1449,61 @@
                 tx_noitem="W_slot_shortcut_shift_id9.tga" />
      </group>
     </group>
+<!-- Mofications Cyrillas for bar1 related selection -->
+      <group type="select_number"
+             id="select_memory"
+             value="UI:PHRASE:SELECT_MEMORY_2"
+             loop="true"
+             min="1"
+             max="10"
+             x="0"
+             y="0"
+             w="68"
+             h="300"
+             posparent="shortcuts"
+             posref="MM MM"
+             delta="1">
+        <view type="bitmap"
+              id="slot_number"
+              posref="BM BM"
+              texture="W_slot_number.tga" />
+        <view type="text"
+              id="number"
+              posparent="slot_number"
+              posref="MM MM"
+              x="0"
+              y="0"
+              color="255 255 255 255"
+              fontsize="12"
+              shadow="true"
+              hardtext="0"
+              global_color="false" />
+        <ctrl type="button"
+              id="arrow_down"
+              button_type="push_button"
+              posref="BL BL"
+              x="10"
+              y="0"
+              tx_normal="W_arrow_left_0.tga"
+              tx_pushed="W_arrow_left_0.tga"
+              tx_over="W_button_12_over.tga"
+              tooltip="uittHandSet"
+              tooltip_parent="win" />
+        <ctrl type="button"
+              id="arrow_up"
+              button_type="push_button"
+              posref="BR BR"
+              x="-9"
+              y="0"
+              tx_normal="W_arrow_right_0.tga"
+              tx_pushed="W_arrow_right_0.tga"
+              tx_over="W_button_12_over.tga"
+              tooltip="uittHandSet"
+              tooltip_parent="win" />
+      </group>
+      <link expr="@UI:PHRASE:SELECT_MEMORY_2"
+            action="phrase_select_memory_2"
+            params="value=add(@UI:PHRASE:SELECT_MEMORY_2,-1)" />
   </group>
   <tree node="gestionsets2" />
   <!-- hands -->

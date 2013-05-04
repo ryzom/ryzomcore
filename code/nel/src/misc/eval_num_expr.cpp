@@ -17,6 +17,11 @@
 #include "stdmisc.h"
 
 #include "nel/misc/eval_num_expr.h"
+#include "nel/misc/debug.h"
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -1309,7 +1314,7 @@ const int CEvalNumExpr::_OperatorPrecedence[]=
 	9,	// LogicalAnd
 	10,	// LogicalOr
 	11,	// LogicalXor
-	0xffffffff,	// OperatorCount
+	-1,	// OperatorCount
 	20,	// NotOperator
 };
 

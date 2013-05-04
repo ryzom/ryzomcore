@@ -358,7 +358,7 @@ void CEventManagerImplementation::displayModule() const
 	for (TShards::const_iterator it=_Shards.begin(); it!=_Shards.end(); ++it)
 	{
 		CSString s= (*it).first+ ": ";
-		for (TShardsMapEntry::iterator it2= (*it).second.begin(); it2!=(*it).second.end(); ++it2)
+		for (TShardsMapEntry::const_iterator it2= (*it).second.begin(); it2!=(*it).second.end(); ++it2)
 		{
 			s+= NLMISC::toString((*it2))+" ";
 		}
@@ -478,7 +478,7 @@ void CEventManagerImplementation::startEvent(const NLMISC::CSString& shardName)
 
 	// build vector of destinations to send the module message to
 	TModuleIdVector moduleIds;
-	for (TShardsMapEntry::iterator it= (*shard).second.begin(); it!= (*shard).second.end(); ++it)
+	for (TShardsMapEntry::const_iterator it= (*shard).second.begin(); it!= (*shard).second.end(); ++it)
 	{
 		nlinfo("Sending event start request to event executor: %d",(*it));
 		moduleIds.push_back(*it);
@@ -502,7 +502,7 @@ void CEventManagerImplementation::stopEvent(const NLMISC::CSString& shardName)
 
 	// build vector of destinations to send the module message to
 	TModuleIdVector moduleIds;
-	for (TShardsMapEntry::iterator it= (*shard).second.begin(); it!= (*shard).second.end(); ++it)
+	for (TShardsMapEntry::const_iterator it= (*shard).second.begin(); it!= (*shard).second.end(); ++it)
 	{
 		nlinfo("Sending event stop request to event executor: %d",(*it));
 		moduleIds.push_back(*it);
@@ -569,7 +569,7 @@ void CEventManagerImplementation::peekInstalledEvent(const NLMISC::CSString& sha
 
 	// build vector of destinations to send the module message to
 	TModuleIdVector moduleIds;
-	for (TShardsMapEntry::iterator it= (*shard).second.begin(); it!= (*shard).second.end(); ++it)
+	for (TShardsMapEntry::const_iterator it= (*shard).second.begin(); it!= (*shard).second.end(); ++it)
 	{
 		nlinfo("Sending history request to event executor: %d",(*it));
 		moduleIds.push_back(*it);

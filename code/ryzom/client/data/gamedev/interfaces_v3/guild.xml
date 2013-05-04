@@ -463,27 +463,7 @@
   <!-- ***************** -->
   <!-- *  GUILD FORUM  * -->
   <!-- ***************** -->
-  <proc id="guild_forum_proc_active">
-    <action handler="set"
-            params="dblink=UI:VARIABLES:ISACTIVE:GUILD_FORUM|value=1" />
-    <action handler="set"
-            cond="not(%is_guild_present)"
-            params="target='ui:interface:guild_forum:active'|value=0" />
-    <action handler="browse"
-            params="name=ui:interface:guild_forum:content:html|url=home|show=0" />
-  </proc>
-  <proc id="guild_forum_proc_deactive">
-    <action handler="set"
-            params="dblink=UI:VARIABLES:ISACTIVE:GUILD_FORUM|value=0" />
-  </proc>
-  <group type="menu"
-         id="guild_forum_menu"
-         extends="base_menu_with_color">
-    <action id="home"
-            name="uiHOME"
-            handler="browse"
-            params="name=ui:interface:guild_forum:content:html|url=home" />
-  </group>
+ 
   <group type="container"
          id="guild_forum"
          w="480"
@@ -531,7 +511,7 @@
            w="0"
            h="0"
            posref="TL TL">
-      <group type="forum_html"
+      <group type="html"
              id="html"
              posref="TL TL"
              url="home"
@@ -828,24 +808,7 @@
   <!-- ************** -->
   <!-- *  MAIL BOX  * -->
   <!-- ************** -->
-  <proc id="mailbox_proc_active">
-    <action handler="set"
-            params="dblink=UI:VARIABLES:ISACTIVE:MAILBOX|value=1" />
-    <action handler="browse"
-            params="name=ui:interface:mailbox:content:html|url=home|show=0" />
-  </proc>
-  <proc id="mailbox_proc_deactive">
-    <action handler="set"
-            params="dblink=UI:VARIABLES:ISACTIVE:MAILBOX|value=0" />
-  </proc>
-  <group type="menu"
-         id="mailbox_menu"
-         extends="base_menu_with_color">
-    <action id="home"
-            name="uiHOME"
-            handler="browse"
-            params="name=ui:interface:mailbox:content:html|url=home" />
-  </group>
+ 
   <group type="container"
          id="mailbox"
          w="480"
@@ -892,7 +855,7 @@
            w="0"
            h="0"
            posref="TL TL">
-      <group type="mail_html"
+      <group type="html"
              id="html"
              posref="TL TL"
              url="home"
@@ -976,8 +939,6 @@
   <proc id="webig_proc_active">
     <action handler="set"
             params="dblink=UI:VARIABLES:ISACTIVE:WEBIG|value=1" />
-    <action handler="browse"
-            params="name=ui:interface:webig:content:html|url=home" />
   </proc>
   <proc id="webig_proc_deactive">
     <action handler="set"
@@ -1088,8 +1049,8 @@
       <group type="webig_html"
              id="html"
              posref="TL TL"
-             url="http://atys.ryzom.com/start/index.php"
-             home="http://atys.ryzom.com/start/index.php"
+             url=""
+             home="http://app.ryzom.com/index.php"
              sizeref="wh"
              x="0"
              y="0"
@@ -1254,8 +1215,8 @@
       <group type="webig_html"
              id="html"
              posref="TL TL"
-             url="http://atys.ryzom.com/start/app_ig_start.php"
-             home="http://atys.ryzom.com/start/app_ig_start.php"
+             url=""
+             home="http://app.ryzom.com/init_ig.php"
              sizeref="wh"
              x="0"
              y="0"

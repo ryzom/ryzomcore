@@ -21,6 +21,8 @@
 
 class IValue {
 	public:
+		virtual ~IValue() { }
+
 		virtual void getValue(IValue &) = 0;
 		virtual void setValue(IValue &) = 0;
 

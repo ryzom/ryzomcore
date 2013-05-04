@@ -822,6 +822,13 @@ void CCharacter::moveItem(INVENTORIES::TInventory srcInvId, uint32 srcSlot, INVE
 	if ((!srcForm->DropOrSell && !canPutNonDropableItemInInventory(dstInvId)) || isAnActiveXpCatalyser(srcItem))
 		return;
 
+	// You cannot exchange genesis named items
+	if (srcItem->getPhraseId().find("genesis_") == 0 && !canPutNonDropableItemInInventory(dstInvId))
+	{
+		nlwarning("Character %s tries to move '%s' to inv %u", _Id.toString().c_str(), srcItem->getPhraseId().c_str(), dstInvId );
+		return;
+	}
+
 	// cannot move a pet animal ticket
 	if (srcForm->Family == ITEMFAMILY::PET_ANIMAL_TICKET)
 		return;
@@ -930,7 +937,7 @@ void CCharacter::equipCharacter(INVENTORIES::TInventory dstInvId, uint32 dstSlot
 		return;
 	}
 
-	// if item is already referenced (maybe equiped), do not equip it
+	// if item is already referenced (maybe equipped), do not equip it
 	if (item->getRefInventory() != NULL)
 		return;
 
@@ -1090,7 +1097,7 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		CPhraseManager::getInstance().disengage( _EntityRowId, true );
 	}
 
-	// Remove enchant weapon effects as they are linked to equiped item
+	// Remove enchant weapon effects as they are linked to equipped item
 	if (invId==INVENTORIES::handling && slot==0)
 	{
 		CSEffectPtr const effect = lookForActiveEffect(EFFECT_FAMILIES::PowerEnchantWeapon);
@@ -1777,7 +1784,7 @@ CGameItemPtr CCharacter::removeItemFromInventory(INVENTORIES::TInventory invId, 
 		return NULL;
 	}
 
-	// if item is equiped, unequip
+	// if item is equipped, unequip
 	// TODO : still needed ?
 //	bool hand;
 //	uint16 slotImg;
@@ -2120,8 +2127,8 @@ void CCharacter::clearTempInventory()
 
 		case TEMP_INV_MODE::Quarter:
 		case TEMP_INV_MODE::Harvest:
-			_DepositHarvestInformations.Sheet = CSheetId::Unknown;
-			_DepositHarvestInformations.EndCherchingTime = 0xffffffff;
+			_DepositHarvestInformation.Sheet = CSheetId::Unknown;
+			_DepositHarvestInformation.EndCherchingTime = 0xffffffff;
 			endHarvest();
 		break;
 
@@ -2443,7 +2450,7 @@ void CCharacter::sendItemInfos( uint16 slotId )
 		infos.TypeSkillMods = item->getTypeSkillMods();
 		
 		// Special case of web missions items
-		if (item->getStaticForm()->Name == "Web Transaction" || item->getStaticForm()->Family == ITEMFAMILY::SCROLL)
+		if (item->getStaticForm()->Name == "Web Transaction")
 		{
 			string cText = item->getCustomText().toString();
 			string::size_type sPos = cText.find(" ");
@@ -2453,11 +2460,16 @@ void CCharacter::sendItemInfos( uint16 slotId )
 				string cUrl = cText.substr(sPos, ePos-sPos);
 				infos.CustomText = ucstring("@WEBIG "+cUrl);
 			}
-			else
-				infos.CustomText = "";
 		}
 		else
+		{
 			infos.CustomText = item->getCustomText();
+		}
+		
+		if (item->getPetIndex() < MAX_INVENTORY_ANIMAL)
+		{
+			infos.PetNumber = item->getPetIndex() + 1;
+		}
 
 		CMessage msgout( "IMPULSION_ID" );
 		CBitMemStream bms;
@@ -2912,7 +2924,8 @@ void CCharacter::useItem(uint32 slot)
 	{
 		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegeance = getAllegiance();
 		if ((form->TpType == TELEPORT_TYPES::KAMI) && (allegeance.first == PVP_CLAN::Karavan)
-			|| (form->TpType == TELEPORT_TYPES::KARAVAN) && (allegeance.first == PVP_CLAN::Kami))
+			|| (form->TpType == TELEPORT_TYPES::KARAVAN) && (allegeance.first == PVP_CLAN::Kami)
+			|| getOrganization() == 5 ) //marauder
 		{
 			CCharacter::sendDynamicSystemMessage(_Id, "ALTAR_RESTRICTION");
 			return;
@@ -3029,12 +3042,16 @@ void CCharacter::stopUseItem( bool isRingCatalyser )
 	}
 	else
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "XP_CATALYSER_NO_MORE_ACTIVE");
-		_RingXpCatalyserSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
-//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Level", 0 );
-		CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setLevel(_PropertyDatabase, 0 );
-//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Count", 0 );
-		CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setCount(_PropertyDatabase, 0 );
+		CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( getId() ));
+		BOMB_IF(p == NULL,"Failed to find player record for character: "<<getId().toString(),return);
+		if (p->isTrialPlayer()) {		
+			PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "XP_CATALYSER_NO_MORE_ACTIVE");
+			_RingXpCatalyserSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
+	//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Level", 0 );
+			CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setLevel(_PropertyDatabase, 0 );
+	//		_PropertyDatabase.setProp( "CHARACTER_INFO:RING_XP_CATALYSER:Count", 0 );
+			CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setCount(_PropertyDatabase, 0 );
+		}
 	}
 }
 

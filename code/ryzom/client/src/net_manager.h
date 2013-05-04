@@ -244,7 +244,7 @@ public:
 	//void								clearChanges() { ALL_MANAGERS->clearChanges(); }
 
 	void				setImpulseCallback(CNetworkConnection::TImpulseCallback callback, void *argument = NULL) { FIRST_MANAGER->setImpulseCallback( callback, argument ); }
-	void				setDataBase(CCDBNodeBranch *database) { ALL_MANAGERS->setDataBase( database ); }
+	void				setDataBase(NLMISC::CCDBNodeBranch *database) { ALL_MANAGERS->setDataBase( database ); }
 	bool				connect(std::string &result) { bool res = false; std::vector<CNetManager*>::iterator inm; for( inm=_NetManagers.begin(); inm!=_NetManagers.end(); ++inm ) if ( (*inm)->connect( result ) ) res = true; return res; }
 	CNetworkConnection::TConnectionState	getConnectionState() const { return FIRST_MANAGER->getConnectionState(); }
 

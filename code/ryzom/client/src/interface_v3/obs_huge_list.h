@@ -76,7 +76,7 @@
  * \author Nevrax France
  * \date August 2003
  */
-class CHugeListObs : public ICDBNode::IPropertyObserver
+class CHugeListObs : public NLMISC::ICDBNode::IPropertyObserver
 {
 public:
 
@@ -119,39 +119,39 @@ private:
 	class CItemDBLeaves
 	{
 	public:
-		CCDBNodeLeaf *GuildIcon;	// valid only for ascensor
-		CCDBNodeLeaf *GuildName;	// valid only for ascensor
+		NLMISC::CCDBNodeLeaf *GuildIcon;	// valid only for ascensor
+		NLMISC::CCDBNodeLeaf *GuildName;	// valid only for ascensor
 		//
-		CCDBNodeLeaf *SlotType;
-		CCDBNodeLeaf *Quality;
-		CCDBNodeLeaf *SheetIDOrSkill;
+		NLMISC::CCDBNodeLeaf *SlotType;
+		NLMISC::CCDBNodeLeaf *Quality;
+		NLMISC::CCDBNodeLeaf *SheetIDOrSkill;
 		//
-		CCDBNodeLeaf *LogicTextID;	// valid if the item is to be obtained for a mission
-		CCDBNodeLeaf *DescTextID;	// valid if the item is to be obtained for a mission
+		NLMISC::CCDBNodeLeaf *LogicTextID;	// valid if the item is to be obtained for a mission
+		NLMISC::CCDBNodeLeaf *DescTextID;	// valid if the item is to be obtained for a mission
 		//
-		CCDBNodeLeaf *Price;		// valid if the item is to be obtained with money
+		NLMISC::CCDBNodeLeaf *Price;		// valid if the item is to be obtained with money
 		//
-		CCDBNodeLeaf *MissionText;
-		CCDBNodeLeaf *MissionDetailText;
-		CCDBNodeLeaf *MissionIcon;
-		CCDBNodeLeaf *MissionPreReqState;
+		NLMISC::CCDBNodeLeaf *MissionText;
+		NLMISC::CCDBNodeLeaf *MissionDetailText;
+		NLMISC::CCDBNodeLeaf *MissionIcon;
+		NLMISC::CCDBNodeLeaf *MissionPreReqState;
 		//	items only
-		CCDBNodeLeaf *Weight;
-		CCDBNodeLeaf *NameId;
-		CCDBNodeLeaf *InfoVersion;
-		CCDBNodeLeaf *UserColor;
-		CCDBNodeLeaf *Enchant;
-		CCDBNodeLeaf *RMClassType;
-		CCDBNodeLeaf *RMFaberStatType;
-		CCDBNodeLeaf *PrerequisitValid;
+		NLMISC::CCDBNodeLeaf *Weight;
+		NLMISC::CCDBNodeLeaf *NameId;
+		NLMISC::CCDBNodeLeaf *InfoVersion;
+		NLMISC::CCDBNodeLeaf *UserColor;
+		NLMISC::CCDBNodeLeaf *Enchant;
+		NLMISC::CCDBNodeLeaf *RMClassType;
+		NLMISC::CCDBNodeLeaf *RMFaberStatType;
+		NLMISC::CCDBNodeLeaf *PrerequisitValid;
 		// items Resale only
-		CCDBNodeLeaf *Quantity;
-		CCDBNodeLeaf *PriceRetire;
-		CCDBNodeLeaf *ResaleTimeLeft;
-		CCDBNodeLeaf *VendorNameId;
-		CCDBNodeLeaf *FactionType;
-		CCDBNodeLeaf *FactionPointPrice;
-		CCDBNodeLeaf *SellerType;
+		NLMISC::CCDBNodeLeaf *Quantity;
+		NLMISC::CCDBNodeLeaf *PriceRetire;
+		NLMISC::CCDBNodeLeaf *ResaleTimeLeft;
+		NLMISC::CCDBNodeLeaf *VendorNameId;
+		NLMISC::CCDBNodeLeaf *FactionType;
+		NLMISC::CCDBNodeLeaf *FactionPointPrice;
+		NLMISC::CCDBNodeLeaf *SellerType;
 	public:
 		CItemDBLeaves() :	GuildIcon(NULL),
 							GuildName(NULL),
@@ -182,7 +182,7 @@ private:
 		{}
 	};
 	//
-	virtual void update(ICDBNode *node);
+	virtual void update(NLMISC::ICDBNode *node);
 
 	void updateUIItemPage(uint index);
 
@@ -199,9 +199,9 @@ private:
 	bool			_Init;
 	CItemDBLeaves	_Items[TRADE_PAGE_NUM_ITEMS];
 	sint16			_CurrentSessionNb;
-	CCDBNodeLeaf	*_Session;
-	CCDBNodeLeaf	*_PageID;
-	CCDBNodeLeaf	*_HasNext;
+	NLMISC::CCDBNodeLeaf	*_Session;
+	NLMISC::CCDBNodeLeaf	*_PageID;
+	NLMISC::CCDBNodeLeaf	*_HasNext;
 
 	bool			 _DownloadComplete;
 
@@ -272,8 +272,8 @@ private:
 	uint32							_PhraseClientFillFlags;
 	uint32							_PhraseClientFillRace;
 	uint32							_PhraseClientFillNumPhrase;
-	CCDBNodeLeaf					*_RoleMasterFlagDB;
-	CCDBNodeLeaf					*_RoleMasterRaceDB;
+	NLMISC::CCDBNodeLeaf					*_RoleMasterFlagDB;
+	NLMISC::CCDBNodeLeaf					*_RoleMasterRaceDB;
 };
 
 #endif

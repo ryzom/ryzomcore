@@ -86,7 +86,7 @@ public:
 	/**
 	 * set the actor
 	 */
-	virtual void setActor( const TDataSetRow &entityRowId ){};
+	virtual void setActor( const TDataSetRow &entityRowId ){}
 	
 	//@}
 

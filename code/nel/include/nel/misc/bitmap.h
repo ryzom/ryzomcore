@@ -297,8 +297,8 @@ public:
 	void	swap(CBitmap &other);
 
 	/**
-	 * Read a bitmap(TGA or DDS) from an IStream.
-	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5, and
+	 * Read a bitmap(TGA, JPEG, PNG or DDS) from an IStream.
+	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5), PNG, JPEG and
 	 * uncompressed TGA (24 and 32 bits).
 	 * \param IStream The stream must be in reading mode.
 	 * \param mipMapSkip if the file is a DDS with mipMap. N=mipMapSkip mipmaps are skipped.
@@ -310,7 +310,7 @@ public:
 
 	/**
 	 * Determinate the bitmap size from a bitmap(TGA or DDS) from an IStream. load just header of the file.
-	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5, and
+	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5), PNG, JPEG and
 	 * uncompressed TGA (24 and 32 bits).
 	 * NB: at the end, f is seeked to begin.
 	 * \param IStream The stream must be in reading mode.

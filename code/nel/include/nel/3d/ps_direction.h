@@ -38,7 +38,7 @@ public :
 	/** The direction is taken from a global vector defined in the particle system
 	  * NULL or an empty string as a name disable the use of a global value
 	  */
-	virtual void				enableGlobalVectorValue(const std::string &name) {}
+	virtual void				enableGlobalVectorValue(const std::string &/* name */) {}
 	virtual std::string         getGlobalVectorValueName() const { return ""; }
 };
 

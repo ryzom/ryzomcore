@@ -1562,7 +1562,7 @@ void CGrpProfileGoToPoint::updateProfile(uint ticksSinceLastUpdate)
 			dx+=dir.x;
 			dy+=dir.y;
 			
-			// 4 rangées.
+			// 4 rows
 			CAIVector	idealPos=groupPosition;
 			if (botIndex>=_NbBotInNormalShape)
 			{
@@ -2054,7 +2054,7 @@ void CGrpProfileFollowRoute::updateProfile(uint ticksSinceLastUpdate)
 			dx+=dir.x;
 			dy+=dir.y;
 			
-			// 4 rangées.
+			// 4 rows
 			CAIVector	idealPos=groupPosition;
 			if (botIndex>=_NbBotInNormalShape)
 			{
@@ -2299,6 +2299,94 @@ void CGrpProfileStandOnVertices::updateProfile(uint ticksSinceLastUpdate)
 	}
 }
 	
+//////////////////////////////////////////////////////////////////////////////
+// CGrpProfileFollowPlayer                                                //
+//////////////////////////////////////////////////////////////////////////////
+CGrpProfileFollowPlayer::CGrpProfileFollowPlayer(CProfileOwner* owner, TDataSetRow const& playerRow, uint32 dispersionRadius)
+: CMoveProfile(owner)
+, _PlayerRow(playerRow)
+, _DispersionRadius(dispersionRadius)
+, _PathPos(CAngle(0))
+, _PathCont(NLMISC::safe_cast<CSpawnBotNpc*>(owner)->getAStarFlag())
+{
+	PROFILE_LOG("group", "follow player", "ctor", "");
+	_Status = CFollowPath::FOLLOWING;
+}
+
+bool CGrpProfileFollowPlayer::destinationReach()	const
+{
+	return	_Status == CFollowPath::FOLLOW_ARRIVED
+		||	_Status==CFollowPath::FOLLOW_NO_PATH;
+}
+
+void CGrpProfileFollowPlayer::beginProfile()
+{
+	_Status = CFollowPath::FOLLOWING;
+}
+
+// TODO: this doesn't work very well at all...
+void CGrpProfileFollowPlayer::updateProfile(uint ticksSinceLastUpdate)
+{
+	H_AUTO(CGrpProfileFollowPlayerUpdate);
+	CFollowPathContext fpcGrpFollowPlayerUpdate("CGrpProfileFollowPlayerUpdate");
+
+	// check all bot to see if there need to move 
+	CSpawnGroupNpc* grp = static_cast<CSpawnGroupNpc*>(static_cast<CSpawnGroup*>(_Grp));
+	CGroupNpc &pgrp = grp->getPersistent();
+	
+	CBotPlayer*	plrPtr	=	dynamic_cast<CBotPlayer*>(CAIS::instance().getEntityPhysical(_PlayerRow));
+
+	if ( ! plrPtr) {
+		nlwarning("CGrpProfileFollowPlayer: No valid player position to follow");
+		return;
+	}
+
+	_PathCont.setDestination(plrPtr->wpos());
+	_PathPos._Angle = plrPtr->theta();
+
+	for (uint i = 0; i < pgrp.bots().size(); ++i)
+	{
+		CBotNpc* bot = static_cast<CBotNpc*>(pgrp.bots()[i]);
+		if (!bot)
+			continue;
+
+		// check current bot state
+		CSpawnBotNpc *sbot = bot->getSpawn();
+		if (!sbot)
+			continue;
+
+		// Need to wait for a correct position before moving?
+		CAIVector const& dest = _PathCont.getDestination();
+		if (dest.x()==0 || dest.y()==0)
+			return;
+		
+		static const std::string runParameter("running");
+		float	dist;
+		if (sbot->getPersistent().getOwner()->getSpawnObj()->checkProfileParameter(runParameter))
+			dist = sbot->runSpeed()*ticksSinceLastUpdate;		
+		else
+			dist = sbot->walkSpeed()*ticksSinceLastUpdate;
+
+		// Move
+		CFollowPath::TFollowStatus const status = CFollowPath::getInstance()->followPath(
+			sbot,
+			_PathPos,
+			_PathCont,
+			dist,
+			0.f,
+			0.5f);
+
+		if (status==CFollowPath::FOLLOW_NO_PATH)
+		{
+			nlwarning("Problem with following player");
+		}
+
+		
+	}	
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // CGrpProfileIdle                                                     //
 //////////////////////////////////////////////////////////////////////////////
@@ -3687,10 +3775,14 @@ bool CGrpProfileFaction::entityHavePartOfFactions(CAIEntityPhysical const* entit
 			std::set<TStringId>::const_iterator it, end = factionsSet.end();
 			for (it=factionsSet.begin(); it!=end; ++it)
 			{
-				std::string fameFaction = scriptFactionToFameFaction(CStringMapper::unmap(*it));
+				string factionInfos = CStringMapper::unmap(*it);
+				string fameFaction = scriptFactionToFameFaction(factionInfos);
 			//	sint32 fame = CFameInterface::getInstance().getFameOrCivilisationFame(entity->getEntityId(), CStringMapper::map(fameFaction));
 				sint32 const fame = entity->getFame(fameFaction);
-				if (fame!=NO_FAME && fame>0)
+				sint32 const value = scriptFactionToFameFactionValue(factionInfos);
+				bool gt = scriptFactionToFameFactionGreaterThan(factionInfos);
+				if ((fame != NO_FAME && gt && fame > value) ||
+					(fame != NO_FAME && !gt && fame < value))
 				{
 					//	nldebug("Entity has faction %s", CStringMapper::unmap(*it).c_str());
 					return true;
@@ -3731,10 +3823,39 @@ std::string CGrpProfileFaction::scriptFactionToFameFaction(std::string name)
 			ret += "_";
 			ret += name[i]-'A'+'a';
 		}
+		else if  (name[i] == '>' || name[i] == '<')
+		{
+			return ret;
+		}
 		else
+		{
 			ret += name[i];
+		}
 	}
 	return ret;
+}
+
+bool CGrpProfileFaction::scriptFactionToFameFactionGreaterThan(string name)
+{	
+	if (name.find("<") != string::npos)
+		return false;
+		
+	return true;
+}
+
+sint32 CGrpProfileFaction::scriptFactionToFameFactionValue(string name)
+{
+	size_t start = name.find(">");
+	if (start == string::npos)
+	{
+		start = name.find("<");
+		if (start == string::npos)
+			return 0;
+	}
+
+	sint32 value;
+	NLMISC::fromString(name.substr(start+1), value);
+	return value*6000;
 }
 
 std::string CGrpProfileFaction::fameFactionToScriptFaction(std::string name)
@@ -3772,9 +3893,9 @@ void CGrpProfileFaction::checkTargetsAround()
 	CPropertySetWithExtraList<TAllianceId> const& thisEnnemyFactions = thisGrpNpc.ennemyFaction();
 
 	// We don't assist or attack players if our friends/ennemies are not in factions
-	bool const assistPlayers = thisFriendFactions.containsPartOfStrict(_FameFactions);
+	bool const assistPlayers = (thisFriendFactions.containsPartOfStrictFilter("Famous*") || thisFriendFactions.have(AITYPES::CPropertyId("Player")));
 	bool const assistBots    = !thisFriendFactions.empty() && !bNoAssist;
-	bool const attackPlayers = (!thisEnnemyFactions.extraSetEmpty()) || thisEnnemyFactions.containsPartOfStrict(_FameFactions) || thisEnnemyFactions.containsPartOfStrictFilter("outpost:*");
+	bool const attackPlayers = (!thisEnnemyFactions.extraSetEmpty()) || thisEnnemyFactions.containsPartOfStrictFilter("Famous*") || thisEnnemyFactions.have(AITYPES::CPropertyId("Player")) || thisEnnemyFactions.containsPartOfStrictFilter("outpost:*");
 	bool const attackBots    = !thisEnnemyFactions.empty();
 	
 	CAIVision<CPersistentOfPhysical>	Vision;

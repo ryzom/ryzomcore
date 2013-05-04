@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
+#include "stdpch.h"
 #include "georges_editor_form.h"
 #include "georges_editor_constants.h"
 #include "georges_dirtree_dialog.h"
@@ -33,7 +34,7 @@
 #include <QToolBar>
 #include <QDebug>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 	GeorgesEditorForm::GeorgesEditorForm(QWidget *parent)
@@ -92,6 +93,13 @@ namespace Plugin
 		addDockWidget(Qt::LeftDockWidgetArea, m_georgesDirTreeDialog);
 		restoreDockWidget(m_georgesDirTreeDialog);
 
+        // Set the default sheet dir dir to the level design path.
+        m_lastSheetDir = ".";
+        QSettings *settings = Core::ICore::instance()->settings();
+        settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+        m_lastSheetDir = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+        settings->endGroup();
+
 		connect(Core::ICore::instance(), SIGNAL(changeSettings()),
 			this, SLOT(settingsChanged()));
 		connect(m_georgesDirTreeDialog, SIGNAL(selectedForm(const QString)), 
@@ -112,33 +120,30 @@ namespace Plugin
 
 	void GeorgesEditorForm::open()
 	{
-		/*qDebug() << "GeorgesEditorForm::open()";
-		if (!m_dockedWidgets.size())
-		{
-			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
-			m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
-		}
-		else
-		{
-			m_dockedWidgets.append(new CGeorgesTreeViewDialog(m_mainDock));
-			Q_ASSERT(m_dockedWidgets.size() > 1);
-			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
-		}*/
-		
-		// TODO: FileDialog & loadFile();
-		//m_mainDock->addDockWidget(Qt::TopDockWidgetArea, new CGeorgesTreeViewDialog(m_mainDock, true));
-		//m_mainDock->addDockWidget(Qt::LeftDockWidgetArea, new CGeorgesTreeViewDialog(m_mainDock, true));
-		//QString fileName = QFileDialog::getOpenFileName();
-		//loadFile(fileName);
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Open Form"));
+		if(!fileName.isNull())
+			loadFile(fileName);
 	}
 
-	void GeorgesEditorForm::newFile()
+    void GeorgesEditorForm::newFile()
 	{
+        // Assume it is a form, for now. We'll have to retrieve the DFN we'll be using as a base.
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Select Base Form Definition"), m_lastSheetDir, "Form Definition (*.dfn)");
+        if(!fileName.isNull())
+        {
+            // Use the file loader to create the new form.
+            loadFile(fileName, true);
 
+            // Save the folder we just opened for future dialogs.
+            QFileInfo pathInfo( fileName );
+            m_lastSheetDir = pathInfo.absolutePath();
+        }
 	}
 
 	void GeorgesEditorForm::save()
 	{
+        m_lastActiveDock->write();
+        m_saveAction->setEnabled(false);
 
 	}
 
@@ -184,25 +189,18 @@ namespace Plugin
 		}
 	}
 
-	void GeorgesEditorForm::loadFile(const QString fileName)
+    void GeorgesEditorForm::loadFile(const QString fileName)
+    {
+        loadFile(fileName, false);
+    }
+
+    void GeorgesEditorForm::loadFile(const QString fileName, bool loadFromDfn)
 	{
 		QFileInfo info(fileName);
 
-		if (!m_dockedWidgets.size())
+        // Check to see if the form is already loaded, if it is just raise it.
+        if (m_dockedWidgets.size())
 		{
-			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
-			m_lastActiveDock = dock;
-			m_dockedWidgets.append(dock);
-
-			m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
-			connect(m_dockedWidgets.last(), SIGNAL(closing()),
-				this, SLOT(closingTreeView()));
-			connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)),
-				m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
-		}
-		else
-		{
-
 			Q_FOREACH(CGeorgesTreeViewDialog *wgt, m_dockedWidgets)
 			{
 				if (info.fileName() == wgt->loadedForm)
@@ -211,17 +209,38 @@ namespace Plugin
 					return;
 				}
 			}
-			CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
-			m_dockedWidgets.append(dock);
+        }
 
-			connect(m_dockedWidgets.last(), SIGNAL(closing()),
-				this, SLOT(closingTreeView()));
-			connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)),
-				m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
-			Q_ASSERT(m_dockedWidgets.size() > 1);
+        CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
+        dock->setUndoStack(m_undoStack);
+        m_lastActiveDock = dock;
+        m_dockedWidgets.append(dock);
+
+        connect(m_dockedWidgets.last(), SIGNAL(closing()), this, SLOT(closingTreeView()));
+        connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)), m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
+
+        // If there is more than one form open - tabify the new form. If this is the first form open add it to the dock.
+        if(m_dockedWidgets.size() > 1)
+        {
 			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
 		}
-		CForm *form = m_dockedWidgets.last()->getFormByName(info.fileName());
+        else
+        {
+            m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
+        }
+
+        // Retrieve the form and load the form.
+        NLGEORGES::CForm *form;
+        if(loadFromDfn)
+        {
+            // Get the form by DFN name.
+            form = m_dockedWidgets.last()->getFormByDfnName(info.fileName());
+        }
+        else
+        {
+            form = m_dockedWidgets.last()->getFormByName(info.fileName());
+        }
+
 		if (form)
 		{
 			m_dockedWidgets.last()->setForm(form);
@@ -235,6 +254,7 @@ namespace Plugin
 		}
 		else
 		{
+            nlwarning("Failed to load form: %s", info.fileName().toUtf8().constData());
 			m_dockedWidgets.last()->close();
 		}
 	}
@@ -284,4 +304,4 @@ namespace Plugin
 			}
 		}
 	}
-} /* namespace Plugin */
+} /* namespace GeorgesQt */

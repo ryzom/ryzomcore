@@ -431,6 +431,15 @@ IFileAccess::TReturnCode	CWriteFile::execute(CFileAccessManager& manager)
 		return MinorFailure;
 	}
 
+	NLMISC::COFile flog;
+	std::string str = getBackupFileName(Filename)+"\n";
+	if(str.find("characters")!=std::string::npos)
+	{
+		flog.open(getBackupFileName("new_save.txt"), true);
+		flog.serialBuffer((uint8*)&(str[0]), str.size());
+		flog.close();
+	}
+
 	return Success;
 }
 

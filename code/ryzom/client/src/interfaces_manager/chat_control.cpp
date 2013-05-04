@@ -274,7 +274,7 @@ void CChatControl::add(const ucstring &text)
 //-----------------------------------------------
 void CChatControl::display()
 {
-	// \todo GUIGUI : remove this damn thing after the UBI démo.
+	// \todo GUIGUI : remove this damn thing after the UBI demo.
 	const CRGBA playerColors[10] =
 	{
 		CRGBA(250,250, 10),	// 0 : Jaune

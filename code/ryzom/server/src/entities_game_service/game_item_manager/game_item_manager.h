@@ -61,7 +61,7 @@ public :
 	/// exception thrown when a sheet is unknown
 	struct ESheet : public NLMISC::Exception
 	{
-		ESheet( const NLMISC::CSheetId& sheetId ) : Exception ("The sheet "+sheetId.toString()+" is unknown") {};
+		ESheet( const NLMISC::CSheetId& sheetId ) : Exception ("The sheet "+sheetId.toString()+" is unknown") {}
 	};
 
 public:

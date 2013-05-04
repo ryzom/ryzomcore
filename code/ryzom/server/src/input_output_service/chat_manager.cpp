@@ -132,7 +132,7 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
  */
 void	CChatManager::resetChatLog()
 {
-	std::string	logPath = (LogChatDirectory.get() == "" ? Bsi.getLocalPath() : LogChatDirectory.get());
+	std::string	logPath = (LogChatDirectory.get().empty() ? Bsi.getLocalPath() : LogChatDirectory.get());
 	_Displayer.setParam(CPath::standardizePath(logPath) + "chat.log");
 }
 
@@ -2312,7 +2312,7 @@ ucstring CChatManager::filterClientInput(ucstring &text)
 {
 	ucstring result;
 	result.reserve(text.size());
-	// 1st, remove any begining or ending white space
+	// 1st, remove any beginning or ending white space
 	ucstring::size_type pos = 0;
 
 	// skip begin white spaces

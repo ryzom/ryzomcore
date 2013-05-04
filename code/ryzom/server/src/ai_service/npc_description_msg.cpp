@@ -128,7 +128,7 @@ static bool LookupShopType(std::string name,std::vector<uint32> &shopList)
 			uint	i;
 			for ( i=0; i < cvShopType.size(); ++i )
 			{
-				if ( cvShopType.asString(i) != "" )
+				if ( !cvShopType.asString(i).empty() )
 				{
 					// make sure the string doesn't turn up more than once in input data
 					for (uint j=0;j<ShopTypeNames.size();++j)
@@ -788,6 +788,13 @@ bool	CNpcChatProfileImp::parseChatArgs(CAIInstance	*aiInstance, const std::strin
 		return	true;
 	}
 	
+	// organization entry
+	if (NLMISC::nlstricmp(keyword, "organization") == 0)
+	{
+		NLMISC::fromString(tail, _Organization);
+		return	true;
+	}
+
 	// if no match found throw an error
 	return false;
 }
@@ -824,10 +831,10 @@ void	TGenNpcDescMsgImp::setChat(const CNpcChatProfileImp& chatProfile)
 	_ContextOptions			=	chatProfile.getContextOptions();
 //	ContextOptionsTitles	=	chatProfile.getContextOptionsTitles();
 //	ContextOptionsDetails	=	chatProfile.getContextOptionsDetails();
-	// As I don't remembre why I did an insert instead of an affectation I let it commented here.
-//	vector<string> const& chatOptionalProperties = chatProfile.getOptionalProperties();
-//	OptionalProperties.insert(OptionalProperties.end(), chatOptionalProperties.begin(), chatOptionalProperties.end());
-	_OptionalProperties		= chatProfile.getOptionalProperties();
+
+	vector<string> const& chatOptionalProperties = chatProfile.getOptionalProperties();
+	_OptionalProperties.insert(_OptionalProperties.end(), chatOptionalProperties.begin(), chatOptionalProperties.end());
 
 	_Outpost					=	chatProfile.getOutpost();
+	_Organization					=	chatProfile.getOrganization();
 }

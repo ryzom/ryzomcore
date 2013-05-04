@@ -165,6 +165,8 @@ public:
 	void addMemberToGuildChat(CGuildMember *member);
 	/// send a message to all members
 	void sendMessageToGuildMembers( const std::string &  msg, const TVectorParamCheck & params =  TVectorParamCheck() )const;
+	/// send a message to all members in guild chat
+	void sendMessageToGuildChat( const std::string &  msg, const TVectorParamCheck & params =  TVectorParamCheck() )const;
 	/// set information relative to a member in the guild client database
 	void setMemberClientDB( CGuildMember* member );
 	/// return the best online user

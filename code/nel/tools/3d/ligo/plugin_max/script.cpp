@@ -18,6 +18,14 @@
 
 #include <assert.h>
 
+#ifdef _STLPORT_VERSION
+namespace std
+{
+	float fabsf(float f);
+	double fabsl(double f);
+}
+#endif
+
 // Various MAX and MXS includes
 #include <maxversion.h>
 #if MAX_VERSION_MAJOR >= 14
@@ -29,7 +37,7 @@
 #	include <maxscript/foundation/mxstime.h>
 #	include <maxscript/maxwrapper/mxsobjects.h>
 #	include <maxscript/compiler/parser.h>
-#	include <maxscript/foundation/functions.h>
+#	include <maxscript/macros/define_instantiation_functions.h>
 #else
 #	include <MaxScrpt/MAXScrpt.h>
 #	include <MaxScrpt/3dmath.h>

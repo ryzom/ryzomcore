@@ -569,7 +569,7 @@ namespace ADMIN
 					FILE *fp = fopen("aes_nagios_report.txt", "wt");
 					if (fp != NULL)
 					{
-						// ouput the current date
+						// output the current date
 						time_t t = now;
 						fprintf(fp, "AESReportDate=%s", ::ctime(&t));
 

@@ -19,7 +19,7 @@
 
 #include "types_nl.h"
 #include "game_device.h"
-
+#include "common.h"
 
 namespace NLMISC
 {

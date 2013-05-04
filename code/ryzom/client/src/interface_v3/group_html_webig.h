@@ -18,12 +18,34 @@
 #define CL_GROUP_HTML_WEBIG_H
 
 #include "nel/misc/types_nl.h"
-#include "group_html.h"
+#include "nel/gui/group_html.h"
+
+/**
+* Auth HTML group
+*/
+class CGroupHTMLAuth : public CGroupHTML
+{
+public:
+
+	// Constructor
+	CGroupHTMLAuth(const TCtorParam &param);
+	~CGroupHTMLAuth();
+
+	// From CGroupHTML
+	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
+	virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
+	virtual std::string	home();
+	virtual void handle ();
+
+private:
+
+};
+
 
 /**
 * WebIG HTML group
 */
-class CGroupHTMLWebIG : public CGroupHTML
+class CGroupHTMLWebIG : public CGroupHTMLAuth
 {
 public:
 
@@ -31,9 +53,9 @@ public:
 	CGroupHTMLWebIG(const TCtorParam &param);
 	~CGroupHTMLWebIG();
 
-	// From CGroupHTML
-	virtual void addHTTPGetParams (std::string &url);
-	virtual void addHTTPPostParams (HTAssocList *formfields);
+	/// From CGroupHTMLAuth
+	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
+	virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
 	virtual std::string	home();
 	virtual void handle ();
 

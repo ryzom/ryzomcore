@@ -6,4 +6,4 @@ ADD_EXECUTABLE(message_box WIN32 ${SRC})
 NL_DEFAULT_PROPS(message_box "NeL, Tools, Misc: message_box")
 NL_ADD_RUNTIME_FLAGS(message_box)
 
-INSTALL(TARGETS message_box RUNTIME DESTINATION bin COMPONENT toolsmisc)
+INSTALL(TARGETS message_box RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT toolsmisc)

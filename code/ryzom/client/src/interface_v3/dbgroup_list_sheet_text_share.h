@@ -22,7 +22,10 @@
 #include "nel/misc/types_nl.h"
 #include "dbgroup_list_sheet_text.h"
 
-class CViewBitmap;
+namespace NLGUI
+{
+	class CViewBitmap;
+}
 
 // ***************************************************************************
 /**

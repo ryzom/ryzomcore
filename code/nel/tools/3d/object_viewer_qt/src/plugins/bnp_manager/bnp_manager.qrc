@@ -1,0 +1,9 @@
+<RCC>
+  <qresource>
+    <file>images/ic_nel_bnp_make.png</file>
+	<file>images/ic_nel_delete_item.png</file>
+	<file>images/ic_nel_add_item.png</file>
+	<file>images/ic_nel_export.png</file>
+	<file>images/ic_nel_reset_all.png</file>
+  </qresource>
+</RCC>

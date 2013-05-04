@@ -45,7 +45,7 @@
 #include <vector>
 // Client
 #include "connection.h"
-#include "interface_v3/action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "sound_manager.h"
 #include "input.h"
 #include "login.h"
@@ -57,21 +57,20 @@
 #include "time_client.h"
 #include "net_manager.h"
 #include "string_manager_client.h"
-#include "http_client.h"
 #include "far_tp.h"
 #include "movie_shooter.h"
 
 // Interface part
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/character_3d.h"
-#include "interface_v3/ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 #include "interface_v3/input_handler_manager.h"
-#include "interface_v3/group_editbox.h"
-#include "interface_v3/interface_expr.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/interface_expr.h"
 #include "init_main_loop.h"
 #include "continent_manager.h"
 #include "interface_v3/group_quick_help.h"
-#include "interface_v3/dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 
 #include "r2/dmc/client_edition_module.h"
 #include "r2/editor.h"
@@ -80,6 +79,8 @@
 
 #include "bg_downloader_access.h"
 #include "main_loop.h"
+
+#include "misc.h"
 
 
 ////////////////
@@ -223,7 +224,6 @@ void connectionRestaureVideoMode ()
 }
 
 
-#define GROUP_BROWSER			"ui:outgame:charsel:webstart:content:webstart_html"
 #define UI_VARIABLES_SCREEN_WEBSTART		8
 
 
@@ -235,29 +235,13 @@ class CAHOnReloadTestPage: public IActionHandler
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// need to reset password and current screen
-		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 
 		pGH->browse(ClientCfg.TestBrowserUrl.c_str());
 
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOnReloadTestPage, "on_reload_test_page");
-
-
-//void initWebBrowser()
-//{
-//	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
-//
-//	// start the browser
-//	CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
-//
-//	if (pGH)
-//	{
-//		pGH->setActive(true);
-//		pGH->browse(MainPageURL.c_str());
-//	}
-//}
 
 
 // ------------------------------------------------------------------------------------------------
@@ -388,12 +372,9 @@ bool connection (const string &cookie, const string &fsaddr)
 		WaitServerAnswer = true;
 	}*/
 
-	pIM->activateMasterGroup ("ui:outgame", true);
-	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
-	CCDBNodeBranch::flushObserversCalls();
-
-	// Init web box
-	//initWebBrowser();
+	NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(ClientCfg.Local ? 6 : -1); // TMP TMP
+	IngameDbMngr.flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	// Active inputs
 	Actions.enable(true);
@@ -412,7 +393,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		SetMouseSpeed (ClientCfg.CursorSpeed);
 		SetMouseAcceleration (ClientCfg.CursorAcceleration);
 
-		pIM->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
 	}
 
@@ -421,6 +402,8 @@ bool connection (const string &cookie, const string &fsaddr)
 	nlinfo ("PROFILE: %d seconds (%d total) for Initializing user interface", (uint32)(connCurrent-connLast)/1000, (uint32)(connCurrent-connStart)/1000);
 
 	nlinfo ("PROFILE: %d seconds for connection", (uint32)(ryzomGetLocalTime ()-connStart)/1000);
+
+	// Init web box
 
 	// TMP TMP
 	if (ClientCfg.Local)
@@ -445,7 +428,7 @@ bool connection (const string &cookie, const string &fsaddr)
 				{
 					if (ClientCfg.SelectCharacter == -1)
 					{
-						pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
+						NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
 					}
 				}
 				InterfaceState = globalMenu();
@@ -550,9 +533,9 @@ bool reconnection()
 	// Start the finite state machine
 	TInterfaceState InterfaceState = GLOBAL_MENU;
 
-	pIM->activateMasterGroup ("ui:outgame", true);
-	pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(-1);
-	CCDBNodeBranch::flushObserversCalls();
+	NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(-1);
+	IngameDbMngr.flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	// Active inputs
 	Actions.enable(true);
@@ -568,7 +551,7 @@ bool reconnection()
 		SetMouseCursor ();
 		SetMouseSpeed (ClientCfg.CursorSpeed);
 		SetMouseAcceleration (ClientCfg.CursorAcceleration);
-		pIM->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(ClientCfg.SelectedSlot);
 		PlayerSelectedSlot = ClientCfg.SelectedSlot;
 	}
 
@@ -585,7 +568,7 @@ bool reconnection()
 	{
 		if (ClientCfg.SelectCharacter == -1)
 		{
-			pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
+			NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(0); // 0 == select
 		}
 		InterfaceState = globalMenu();
 	}
@@ -822,7 +805,7 @@ void updateBGDownloaderUI()
 		static NLMISC::CRefPtr<CInterfaceElement> bgDownloaderWindow;
 		if (!bgDownloaderWindow)
 		{
-			bgDownloaderWindow = im->getElementFromId("ui:interface:bg_downloader");
+			bgDownloaderWindow = CWidgetManager::getInstance()->getElementFromId("ui:interface:bg_downloader");
 		}
 		bgWindowVisible = bgDownloaderWindow && bgDownloaderWindow->getActive();
 	}
@@ -833,7 +816,7 @@ void updateBGDownloaderUI()
 		{
 			if (LuaBGDSuccessFlag)
 			{
-				LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setPatchSuccess()");
+				LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setPatchSuccess()");
 			}
 		}
 		else
@@ -853,19 +836,19 @@ void updateBGDownloaderUI()
 					}
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript(toString("bgdownloader:setPatchProgress(%f)", progress));
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript(toString("bgdownloader:setPatchProgress(%f)", progress));
 					}
 					// display current priority of the downloader
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:displayPriority()");
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:displayPriority()");
 					}
 				}
 				break;
 				case BGDownloader::TaskResult_Success:
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setPatchSuccess()");
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setPatchSuccess()");
 					}
 					// task finished
 					AvailablePatchs = 0;
@@ -882,7 +865,7 @@ void updateBGDownloaderUI()
 					// error case
 					if (LuaBGDSuccessFlag && bgWindowVisible)
 					{
-						LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setPatchError()");
+						LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setPatchError()");
 					}
 				break;
 			}
@@ -895,12 +878,12 @@ void updateBGDownloaderUI()
 			if (isBGDownloadEnabled())
 			{
 				// no necessary patch for now
-				LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setNoNecessaryPatch()");
+				LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setNoNecessaryPatch()");
 			}
 			else
 			{
 				// no download ui
-				LuaBGDSuccessFlag = im->executeLuaScript("bgdownloader:setNoDownloader()");
+				LuaBGDSuccessFlag = CLuaManager::getInstance().executeLuaScript("bgdownloader:setNoDownloader()");
 			}
 		}
 	}
@@ -962,14 +945,14 @@ TInterfaceState globalMenu()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	sint32 nScreenConnecting, nScreenIntro, nScreenServerCrashed;
-	fromString(pIM->getDefine("screen_connecting"), nScreenConnecting);
-	fromString(pIM->getDefine("screen_intro"), nScreenIntro);
-	fromString(pIM->getDefine("screen_crashing"), nScreenServerCrashed);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("screen_connecting"), nScreenConnecting);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("screen_intro"), nScreenIntro);
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("screen_crashing"), nScreenServerCrashed);
 
 	// SKIP INTRO : Write to the database if we have to skip the intro and write we want to skip further intro to client cfg
 	if (ClientCfg.SkipIntro)
 	{
-		CCDBNodeLeaf *pNL = pIM->getDbProp("UI:TEMP:SKIP_INTRO", false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:SKIP_INTRO", false);
 		if (pNL != NULL)
 			pNL->setValue64(1);
 	}
@@ -989,16 +972,17 @@ TInterfaceState globalMenu()
 			{
 				pIM->uninitOutGame();
 				pIM->initOutGame();
-				pIM->activateMasterGroup ("ui:outgame", true);
-				pIM->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
-				CCDBNodeBranch::flushObserversCalls();
-				pIM->getElementFromId("ui:outgame:charsel")->setActive(false);
-				pIM->getElementFromId("ui:outgame:charsel")->setActive(true);
+				CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
+				NLGUI::CDBManager::getInstance()->getDbProp ("UI:CURRENT_SCREEN")->setValue32(2); // TMP TMP
+				IngameDbMngr.flushObserverCalls();
+				NLGUI::CDBManager::getInstance()->flushObserverCalls();
+				CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(false);
+				CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel")->setActive(true);
 				// Active inputs
 				Actions.enable(true);
 				EditActions.enable(true);
 				LuaBGDSuccessFlag = true;
-				pIM->reloadAllLuaFileScripts();
+				CWidgetManager::getInstance()->getParser()->reloadAllLuaFileScripts();
 			}
 		#endif
 
@@ -1020,7 +1004,7 @@ TInterfaceState globalMenu()
 			else
 			{
 				// Display the firewall alert string
-				CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:outgame:connecting:title"));
+				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:connecting:title"));
 				if (pVT != NULL)
 					pVT->setText(CI18N::get("uiFirewallAlert")+ucstring("..."));
 
@@ -1029,7 +1013,8 @@ TInterfaceState globalMenu()
 			}
 
 		}
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
@@ -1055,7 +1040,8 @@ TInterfaceState globalMenu()
 		// Interface handling & displaying (processes clicks...)
 		pIM->updateFrameEvents();
 		pIM->updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// Movie shooter
 		globalMenuMovieShooter();
@@ -1116,13 +1102,15 @@ TInterfaceState globalMenu()
 					WaitServerAnswer = false;
 					if (ClientCfg.SelectCharacter == -1)
 					{
-						CCDBNodeLeaf *pNL = pIM->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
+						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_CHARS", false);
 						if (pNL != NULL)
 						{
 							pNL->setValue64 (1); // Send impulse to interface observers
-							CCDBNodeBranch::flushObserversCalls();
+							IngameDbMngr.flushObserverCalls();
+							NLGUI::CDBManager::getInstance()->flushObserverCalls();
 							pNL->setValue64 (0);
-							CCDBNodeBranch::flushObserversCalls();
+							IngameDbMngr.flushObserverCalls();
+							NLGUI::CDBManager::getInstance()->flushObserverCalls();
 						}
 					}
 					else
@@ -1153,7 +1141,7 @@ TInterfaceState globalMenu()
 						}
 
 						// Auto-selection for fast launching (dev only)
-						pIM->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", ClientCfg.SelectCharacter));
+						CAHManager::getInstance()->runActionHandler("launch_game", NULL, toString("slot=%d|edit_mode=0", ClientCfg.SelectCharacter));
 					}
 
 				}
@@ -1170,7 +1158,7 @@ TInterfaceState globalMenu()
 				if (ClientCfg.SelectCharacter == -1)
 				{
 					CCDBNodeLeaf *pNL;
-					pNL = pIM->getDbProp(CharNameValidDBLink,false);
+					pNL = NLGUI::CDBManager::getInstance()->getDbProp(CharNameValidDBLink,false);
 					if (pNL != NULL)
 					{
 						if (CharNameValid)
@@ -1179,13 +1167,15 @@ TInterfaceState globalMenu()
 							pNL->setValue64(0);
 					}
 
-					pNL = pIM->getDbProp("UI:SERVER_RECEIVED_VALID", false);
+					pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SERVER_RECEIVED_VALID", false);
 					if (pNL != NULL)
 					{
 						pNL->setValue64 (1); // Send impulse to interface observers
-						CCDBNodeBranch::flushObserversCalls();
+						IngameDbMngr.flushObserverCalls();
+						NLGUI::CDBManager::getInstance()->flushObserverCalls();
 						pNL->setValue64 (0);
-						CCDBNodeBranch::flushObserversCalls();
+						IngameDbMngr.flushObserverCalls();
+						NLGUI::CDBManager::getInstance()->flushObserverCalls();
 					}
 				}
 			}
@@ -1212,14 +1202,14 @@ TInterfaceState globalMenu()
 			if (NetMngr.getConnectionState() == CNetManager::Disconnect)
 			{
 				// Display the connection failure screen
-				CCDBNodeLeaf *pNL = pIM->getDbProp("UI:CURRENT_SCREEN", false);
+				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:CURRENT_SCREEN", false);
 				if (pNL != NULL)
 					pNL->setValue64 (nScreenServerCrashed);
 
 				if ( firewallTimeout )
 				{
 					// Display the firewall error string instead of the normal failure string
-					CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:outgame:crashing:title"));
+					CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:crashing:title"));
 					if (pVT != NULL)
 					{
 						pVT->setMultiLine( true );
@@ -1290,7 +1280,7 @@ public:
 		for (i = 0; i < CharacterSummaries.size(); ++i)
 		{
 			CCharacterSummary &rCS = CharacterSummaries[i];
-			CInterfaceElement *pIE = pIM->getElementFromId(sPath+":text"+NLMISC::toString(i));
+			CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i));
 			CViewText *pVT = dynamic_cast<CViewText*>(pIE);
 			if (pVT == NULL) return;
 
@@ -1302,7 +1292,7 @@ public:
 		// 5 slots
 		for (; i < 5; ++i)
 		{
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(sPath+":text"+NLMISC::toString(i)));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sPath+":text"+NLMISC::toString(i)));
 			if (pVT == NULL) return;
 			pVT->setText(CI18N::get("uiEmptySlot"));
 		}
@@ -1328,7 +1318,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, ucstring &value)
 		CInterfaceExprValue exprValue;
 		exprValue.setUCString(value);
 
-		CInterfaceParser::splitLinkTargets(targetName, ig, targets);
+		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
 		{
 			if (targets[k].Elem) targets[k].affect(exprValue);
@@ -1354,7 +1344,7 @@ void setTarget(CCtrlBase *ctrl, const string &targetName, uint32 value)
 		CInterfaceExprValue exprValue;
 		exprValue.setInteger(value);
 
-		CInterfaceParser::splitLinkTargets(targetName, ig, targets);
+		CInterfaceLink::splitLinkTargets(targetName, ig, targets);
 		for(uint k = 0; k < targets.size(); ++k)
 		{
 			if (targets[k].Elem) targets[k].affect(exprValue);
@@ -1399,19 +1389,27 @@ Deprecated	{
 		}
 */			else if (sProp == "title")
 		{
-			bool womenTitle;
+			bool womanTitle;
 			if( CharacterSummaries[PlayerSelectedSlot].VisualPropA.PropertySubData.Sex == 1 )
 			{
 				UserEntity->setGender( GSGENDER::female );
-				womenTitle = true;
+				womanTitle = true;
 			}
 			else
 			{
 				UserEntity->setGender( GSGENDER::male );
-				womenTitle = false;
+				womanTitle = false;
 			}
 			string titleStr = CHARACTER_TITLE::toString(CharacterSummaries[PlayerSelectedSlot].Title);
-			sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(titleStr,womenTitle);
+			sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(titleStr, womanTitle);
+			{
+				// Sometimes translation contains another title
+				ucstring::size_type pos = sValue.find('$');
+				if (pos != ucstring::npos)
+				{
+					sValue = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(sValue), womanTitle);
+				}
+			}
 			setTarget (pCaller, sTarget, sValue);
 		}
 /*			else if (sProp == "orient")
@@ -1482,7 +1480,7 @@ public:
 	{
 		string sDBLink = getParam(Params, "dblink");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceElement *pIE = pIM->getElementFromId(pCaller->getId(), sDBLink);
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), sDBLink);
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
 		if (pIG == NULL) return;
 
@@ -1652,7 +1650,7 @@ public:
 		string sEditBoxPath = getParam (Params, "name");
 		ucstring sFirstName = ucstring("NotSet");
 		ucstring sSurName = ucstring("NotSet");
-		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(sEditBoxPath));
+		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(sEditBoxPath));
 		if (pGEB != NULL)
 			sFirstName = pGEB->getInputString();
 		else
@@ -1681,22 +1679,22 @@ public:
 
 			CreateCharMsg.Slot = (uint8)result.getInteger();
 
-			pIM->getDbProp("UI:SELECTED_SLOT")->setValue32(PlayerSelectedSlot);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_SLOT")->setValue32(PlayerSelectedSlot);
 		}
 
 		// Setup the new career
 		string sCaracBasePath = getParam (Params, "caracs");
-		CreateCharMsg.NbPointFighter	= (uint8)pIM->getDbProp(sCaracBasePath+"FIGHT")->getValue32();
-		CreateCharMsg.NbPointCaster		= (uint8)pIM->getDbProp(sCaracBasePath+"MAGIC")->getValue32();
-		CreateCharMsg.NbPointCrafter	= (uint8)pIM->getDbProp(sCaracBasePath+"CRAFT")->getValue32();
-		CreateCharMsg.NbPointHarvester	= (uint8)pIM->getDbProp(sCaracBasePath+"FORAGE")->getValue32();
+		CreateCharMsg.NbPointFighter	= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"FIGHT")->getValue32();
+		CreateCharMsg.NbPointCaster		= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"MAGIC")->getValue32();
+		CreateCharMsg.NbPointCrafter	= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"CRAFT")->getValue32();
+		CreateCharMsg.NbPointHarvester	= (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sCaracBasePath+"FORAGE")->getValue32();
 
 		// Setup starting point
 		string sLocationPath = getParam(Params, "loc");
 		{
 			CreateCharMsg.StartPoint = RYZOM_STARTING_POINT::borea;
 
-			CCDBNodeLeaf *pNL = pIM->getDbProp (sLocationPath, false);
+			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp (sLocationPath, false);
 			if (pNL != NULL)
 				CreateCharMsg.StartPoint = (RYZOM_STARTING_POINT::TStartPoint)(pNL->getValue64());
 			else
@@ -1803,7 +1801,7 @@ string getTarget(CCtrlBase * /* ctrl */, const string &targetName)
 {
 	string sTmp = targetName;
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-	CInterfaceParser::splitLinkTargets(sTmp, NULL, targetsVector);
+	CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
 
 	CInterfaceLink::CTargetInfo &rTI = targetsVector[0];
 
@@ -1825,7 +1823,7 @@ ucstring getUCTarget(CCtrlBase * /* ctrl */, const string &targetName)
 {
 	string sTmp = targetName;
 	std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-	CInterfaceParser::splitLinkTargets(sTmp, NULL, targetsVector);
+	CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
 
 	CInterfaceLink::CTargetInfo &rTI = targetsVector[0];
 
@@ -1855,7 +1853,7 @@ public:
 		string sDBSlot = getParam(Params, "dbslot");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		uint8 nSelectedSlot = (uint8)pIM->getDbProp(sDBSlot,false)->getValue32();
+		uint8 nSelectedSlot = (uint8)NLGUI::CDBManager::getInstance()->getDbProp(sDBSlot,false)->getValue32();
 
 		if (nSelectedSlot > CharacterSummaries.size())
 			return;
@@ -1917,7 +1915,7 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (sName.empty())
 		{
-			pIM->getDbProp(sDBLink,false)->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(sDBLink,false)->setValue32(0);
 			return;
 		}
 
@@ -2005,7 +2003,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sName = getParam(Params, "name");
-		TStringId id = CStringMapper::map(sName);
+		CSheetId id = CSheetId(sName, "sound");
 		if (SoundMngr != NULL)
 			SoundMngr->spawnSource(id,CVector(0,0,0));
 	}
@@ -2047,7 +2045,7 @@ public:
 		{
 			vector<string> p;
 			p.push_back(sProc);
-			pIM->runProcedure(sProc, pCaller, p);
+			CWidgetManager::getInstance()->runProcedure(sProc, pCaller, p);
 
 			CInterfaceExprValue result;
 			if (CInterfaceExpr::eval(sCond, result))
@@ -2108,7 +2106,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_MAINLAND));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
 		{
 			nlwarning("element "GROUP_LIST_MAINLAND" not found probably bad outgame.xml");
@@ -2124,7 +2122,7 @@ public:
 			if (i>0)
 				params.push_back(pair<string,string>("posref", "BL TL"));
 
-			CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_mainland", GROUP_LIST_MAINLAND, params);
+			CInterfaceGroup *pNewLine = CWidgetManager::getInstance()->getParser()->createGroupInstance("t_mainland", GROUP_LIST_MAINLAND, params);
 			if (pNewLine != NULL)
 			{
 				CViewBase *pVBon = pNewLine->getView("online");
@@ -2165,11 +2163,11 @@ public:
 				}
 			}
 
-			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(Mainlands[defaultMainland].Id)+":but"));
+			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(Mainlands[defaultMainland].Id)+":but"));
 			if (pCB != NULL)
 			{
 				pCB->setPushed(true);
-				pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+				CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 			}
 		}
 		pList->invalidateCoords();
@@ -2186,7 +2184,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_MAINLAND));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		pList->clearGroups();
 	}
 };
@@ -2206,7 +2204,7 @@ class CAHMainlandSelect : public IActionHandler
 		// Unselect
 		if (MainlandSelected.asInt() != 0)
 		{
-			pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(MainlandSelected)+":but"));
+			pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND ":"+toString(MainlandSelected)+":but"));
 			if (pCB != NULL)
 				pCB->setPushed(false);
 		}
@@ -2249,7 +2247,7 @@ public:
 		}
 		First = false;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		return pIM->createGroupInstance(templateName, GROUP_LIST_KEYSET, params);
+		return CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, GROUP_LIST_KEYSET, params);
 	}
 
 	void addGroupInList(CInterfaceGroup *pNewLine)
@@ -2301,7 +2299,7 @@ public:
 		PrevLine = NULL;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		List = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(GROUP_LIST_KEYSET));
+		List = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		if (List == NULL)
 		{
 			nlwarning("element "GROUP_LIST_KEYSET" not found probably bad outgame.xml");
@@ -2409,7 +2407,7 @@ public:
 				if (pCB != NULL)
 				{
 					pCB->setPushed(true);
-					pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+					CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 				}
 			}
 		}
@@ -2427,7 +2425,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_KEYSET));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		pList->clearGroups();
 	}
 };
@@ -2466,7 +2464,7 @@ public:
 			}
 		};
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup * list = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(GROUP_LIST_KEYSET));
+		CInterfaceGroup * list = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		if (list)
 		{
 			CUnpush unpusher;
@@ -2625,7 +2623,7 @@ class CAHScenarioControl : public IActionHandler
 		nlinfo("CAHScenarioControl called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		// -------- active some groups in function of Ryzom mode or Edition/Animation mode ----
@@ -2638,7 +2636,7 @@ class CAHScenarioControl : public IActionHandler
 			{
 				bool team = !(R2::getEditor().isInitialized());
 				if(team)
-					team = (pIM->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
+					team = (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
 				groupTeam->setActive(team);
 			}
 		}
@@ -2710,7 +2708,7 @@ class CAHScenarioControl : public IActionHandler
 					params.push_back(pair<string,string>("id", toString(Mainlands[i].Id)));
 					params.push_back(pair<string,string>("w", "1024"));
 					params.push_back(pair<string,string>("tooltip", "uiRingFilterShard"));
-					CInterfaceGroup *toggleGr =pIM->createGroupInstance("label_toggle_button", shardList->getId(), params);
+					CInterfaceGroup *toggleGr = CWidgetManager::getInstance()->getParser()->createGroupInstance("label_toggle_button", shardList->getId(), params);
 					shardList->addChild(toggleGr);
 					// set unicode name
 					CViewText *shardName = dynamic_cast<CViewText *>(toggleGr->getView("button_text"));
@@ -2836,7 +2834,7 @@ class CAHScenarioInformation : public IActionHandler
 		nlinfo("CAHScenarioDescription called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		CInterfaceElement *result = scenarioWnd->findFromShortId(string("scenario_value_text"));
@@ -2880,7 +2878,7 @@ class CAHHideCharsFilters : public IActionHandler
 		nlinfo("CAHHideCharsFilters called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		bool lookingForPlayers = true;
@@ -2911,7 +2909,7 @@ class CAHHideCharsFilters : public IActionHandler
 		result = scenarioWnd->findFromShortId(string("invite_team"));
 		if(result)
 		{
-			bool team = (pIM->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
+			bool team = (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:TEAM_MEMBER")->getValue8())!=0;
 			team = (team && !(R2::getEditor().isInitialized()) && lookingForPlayers);
 			result->setActive(team);
 		}
@@ -2927,7 +2925,7 @@ class CAHLoadScenario : public IActionHandler
 		nlinfo("CAHLoadScenario called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+		CInterfaceGroup* scenarioWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 		if(!scenarioWnd) return;
 
 		CInterfaceElement *result = NULL;
@@ -3213,13 +3211,13 @@ class CAHLoadScenario : public IActionHandler
 
 		if(R2::getEditor().getAccessMode() != R2::CEditor::AccessDM)
 		{
-			bool noob = pIM->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool();
+			bool noob = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_NEWBIE")->getValueBool();
 			if (FreeTrial && noob && (nevraxScenario != "1" || trialAllowed != "1"))
 			{
-				CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+				CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 				if (pVT != NULL)
 					pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
-				pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+				CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 
 				return;
 			}
@@ -3297,10 +3295,10 @@ class CAHLoadScenario : public IActionHandler
 
 						if(sessionBrowser._LastInvokeResult == 14)
 						{
-							CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+							CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 							if (pVT != NULL)
 								pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
-							pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+							CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 						}
 
 
@@ -3309,7 +3307,7 @@ class CAHLoadScenario : public IActionHandler
 						{
 							for (uint i = 0 ; i < 8 ; ++i)
 							{
-								uint32 val = pIM->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
+								uint32 val = NLGUI::CDBManager::getInstance()->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
 								if(val!=0)
 								{
 									STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
@@ -3326,10 +3324,10 @@ class CAHLoadScenario : public IActionHandler
 
 										if(sessionBrowser._LastInvokeResult == 14)
 										{
-											CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+											CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 											if (pVT != NULL)
 												pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
-											pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+											CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 										}
 									}
 								}
@@ -3396,7 +3394,7 @@ class CAHOpenRingSessions : public IActionHandler
 		if(!R2::getEditor().isInitialized())
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			CInterfaceGroup* ringSessionsWnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:ring_sessions"));
+			CInterfaceGroup* ringSessionsWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:ring_sessions"));
 			if(!ringSessionsWnd) return;
 			ringSessionsWnd->setActive(true);
 		}

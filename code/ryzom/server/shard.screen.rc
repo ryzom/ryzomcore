@@ -12,60 +12,62 @@ bind K kill
 bind I login on
 bind O login off
 
+hardstatus alwayslastline "%w"
+
 chdir $RYZOM_PATH/server
 
-screen -t aes /bin/sh service_launcher.sh aes src/ryzom_admin_service/ryzom_admin_service -A. -C. -L. --nobreak --fulladminname=admin_executor_service --shortadminname=AES
+screen -t aes /bin/sh service_launcher.sh aes $RYZOM_PATH/../build/bin/ryzom_admin_service -A. -C. -L. --nobreak --fulladminname=admin_executor_service --shortadminname=AES
 
 # bms_master
-screen -t bms_master /bin/sh service_launcher.sh bms_master src/backup_service/backup_service -C. -L. --nobreak --writepid -P49990
+screen -t bms_master /bin/sh service_launcher.sh bms_master $RYZOM_PATH/../build/bin/ryzom_backup_service -C. -L. --nobreak --writepid -P49990
 
 # bms_pd_master
-#screen -t bms_pd_master /bin/sh service_launcher.sh bms_pd_master src/backup_service/backup_service -C. -L. --nobreak --writepid -P49992
+#screen -t bms_pd_master /bin/sh service_launcher.sh bms_pd_master $RYZOM_PATH/../build/bin/ryzom_backup_service -C. -L. --nobreak --writepid -P49992
 
 # egs
-screen -t egs /bin/sh service_launcher.sh egs src/entities_game_service/entities_game_service -C. -L. --nobreak --writepid
+screen -t egs /bin/sh service_launcher.sh egs $RYZOM_PATH/../build/bin/ryzom_entities_game_service -C. -L. --nobreak --writepid
 
 # gpms
-screen -t gpms /bin/sh service_launcher.sh gpms src/gpm_service/gpm_service -C. -L. --nobreak --writepid
+screen -t gpms /bin/sh service_launcher.sh gpms $RYZOM_PATH/../build/bin/ryzom_gpm_service -C. -L. --nobreak --writepid
 
 # ios
-screen -t ios /bin/sh service_launcher.sh ios src/input_output_service/input_output_service -C. -L. --nobreak --writepid
+screen -t ios /bin/sh service_launcher.sh ios $RYZOM_PATH/../build/bin/ryzom_ios_service -C. -L. --nobreak --writepid
 
 # rns
-screen -t rns /bin/sh service_launcher.sh rns src/ryzom_naming_service/ryzom_naming_service -C. -L. --nobreak --writepid
+screen -t rns /bin/sh service_launcher.sh rns $RYZOM_PATH/../build/bin/ryzom_naming_service -C. -L. --nobreak --writepid
 
 # rws
-screen -t rws /bin/sh service_launcher.sh rws src/ryzom_welcome_service/ryzom_welcome_service -C. -L. --nobreak --writepid
+screen -t rws /bin/sh service_launcher.sh rws $RYZOM_PATH/../build/bin/ryzom_welcome_service -C. -L. --nobreak --writepid
 
 # ts
-screen -t ts /bin/sh service_launcher.sh ts src/tick_service/tick_service -C. -L. --nobreak --writepid
+screen -t ts /bin/sh service_launcher.sh ts $RYZOM_PATH/../build/bin/ryzom_tick_service -C. -L. --nobreak --writepid
 
 # ms
-screen -t ms /bin/sh service_launcher.sh ms src/mirror_service/mirror_service -C. -L. --nobreak --writepid
+screen -t ms /bin/sh service_launcher.sh ms $RYZOM_PATH/../build/bin/ryzom_mirror_service -C. -L. --nobreak --writepid
 
 # ais_newbyland
-screen -t ais_newbyland /bin/sh service_launcher.sh ais_newbyland src/ai_service/ai_service -C. -L. --nobreak --writepid -mCommon:Newbieland:Post
+screen -t ais_newbyland /bin/sh service_launcher.sh ais_newbyland $RYZOM_PATH/../build/bin/ryzom_ai_service -C. -L. --nobreak --writepid -mCommon:Newbieland:Post
 
 # mfs
-screen -t mfs /bin/sh service_launcher.sh mfs src/mail_forum_service/mail_forum_service -C. -L. --nobreak --writepid
+screen -t mfs /bin/sh service_launcher.sh mfs $RYZOM_PATH/../build/bin/ryzom_mail_forum_service -C. -L. --nobreak --writepid
 
 # su
-screen -t su /bin/sh service_launcher.sh su src/shard_unifier_service/shard_unifier_service -C. -L. --nobreak --writepid
+screen -t su /bin/sh service_launcher.sh su $RYZOM_PATH/../build/bin/ryzom_shard_unifier_service -C. -L. --nobreak --writepid
 
 # fes
-screen -t fes /bin/sh service_launcher.sh fes src/frontend_service/frontend_service -C. -L. --nobreak --writepid
+screen -t fes /bin/sh service_launcher.sh fes $RYZOM_PATH/../build/bin/ryzom_frontend_service -C. -L. --nobreak --writepid
 
 # sbs
-screen -t sbs /bin/sh service_launcher.sh sbs src/session_browser_server/session_browser_server -C. -L. --nobreak --writepid
+screen -t sbs /bin/sh service_launcher.sh sbs $RYZOM_PATH/../build/bin/ryzom_session_browser_service -C. -L. --nobreak --writepid
 
 # lgs
-screen -t lgs /bin/sh service_launcher.sh lgs src/logger_service/logger_service -C. -L. --nobreak --writepid
+screen -t lgs /bin/sh service_launcher.sh lgs $RYZOM_PATH/../build/bin/ryzom_logger_service -C. -L. --nobreak --writepid
 
 # mos
-#screen -t mos /bin/sh service_launcher.sh mos src/monitor_service/monitor_service -C. -L. --nobreak --writepid
+#screen -t mos /bin/sh service_launcher.sh mos $RYZOM_PATH/../build/bin/ryzom_monitor_service -C. -L. --nobreak --writepid
 
 # pdss
-#screen -t pdss /bin/sh service_launcher.sh pdss src/pd_support_service/pd_support_service -C. -L. --nobreak --writepid
+#screen -t pdss /bin/sh service_launcher.sh pdss $RYZOM_PATH/../build/bin/ryzom_pd_support_service -C. -L. --nobreak --writepid
 
 # ras
-screen -t ras /bin/sh service_launcher.sh ras src/ryzom_admin_service/ryzom_admin_service --fulladminname=admin_service --shortadminname=AS -C. -L. --nobreak --writepid
+screen -t ras /bin/sh service_launcher.sh ras $RYZOM_PATH/../build/bin/ryzom_admin_service --fulladminname=admin_service --shortadminname=AS -C. -L. --nobreak --writepid

@@ -25,6 +25,9 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 
@@ -599,7 +602,7 @@ void	CBitMemStream::append( const CBitMemStream& newBits )
 /*
  * Serial bitmemstream
  */
-void	CBitMemStream::serialMemStream(CBitMemStream &b)
+void	CBitMemStream::serialMemStream(CMemStream &b)
 {
 #ifdef LOG_ALL_TRAFFIC
 	sint32 bitpos = getPosInBit();

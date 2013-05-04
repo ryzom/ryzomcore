@@ -48,7 +48,7 @@ const NLMISC::CClassId		VegetableBlendLayerModelId=NLMISC::CClassId(0x77375163, 
 class CVegetableBlendLayerModel : public CTransform
 {
 public:
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 public:

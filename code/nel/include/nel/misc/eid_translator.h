@@ -146,6 +146,8 @@ public:
 
 	TAdditionalInfoCb	EntityInfoCallback;
 
+	static void removeShardFromName(ucstring& name);
+
 private:
 	// get all eid for a user using the user name or the user id
 	void				getByUser (uint32 uid, std::vector<NLMISC::CEntityId> &res);

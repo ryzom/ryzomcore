@@ -16,6 +16,9 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/types_nl.h"
+#include "nel/misc/common.h"
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
@@ -30,6 +33,7 @@
 
 #include "nel/misc/command.h"
 #include "nel/misc/path.h"
+#include "nel/misc/i18n.h"
 
 using namespace std;
 
@@ -67,6 +71,9 @@ extern "C" long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 #endif // NL_OS_WINDOWS
 
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace	NLMISC
 {
@@ -372,6 +379,10 @@ uint32 humanReadableToBytes (const string &str)
 
 NLMISC_CATEGORISED_COMMAND(nel,btohr, "Convert a bytes number into an human readable number", "<int>")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
 	if (args.size() != 1)
 		return false;
 
@@ -383,6 +394,10 @@ NLMISC_CATEGORISED_COMMAND(nel,btohr, "Convert a bytes number into an human read
 
 NLMISC_CATEGORISED_COMMAND(nel,hrtob, "Convert a human readable number into a bytes number", "<hr>")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
 	if (args.size() != 1)
 		return false;
 
@@ -445,6 +460,10 @@ uint32 fromHumanReadable (const std::string &str)
 
 NLMISC_CATEGORISED_COMMAND(nel,stohr, "Convert a second number into an human readable time", "<int>")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
 	if (args.size() != 1)
 		return false;
 
@@ -526,6 +545,31 @@ void		toUpper(char *str)
 	}
 }
 
+std::string formatThousands(const std::string& s)
+{
+	sint i, k;
+	sint remaining = (sint)s.length() - 1;
+	static std::string separator = NLMISC::CI18N::get("uiThousandsSeparator").toUtf8();
+
+	// Don't add separator if the number is < 10k
+	if (remaining < 4) return s;
+
+	std::string ns;
+
+	do
+	{
+		for (i = remaining, k = 0; i >= 0 && k < 3; --i, ++k )
+		{
+			ns = s[i] + ns; // New char is added to front of ns
+			if ( i > 0 && k == 2) ns = separator + ns; // j > 0 means still more digits
+		}
+
+		remaining -= 3;
+	}
+	while (remaining >= 0);
+
+	return ns;
+}
 
 //
 // Exceptions
@@ -803,6 +847,7 @@ int	nlfseek64( FILE *stream, sint64 offset, int origin )
 	return fsetpos (stream, &pos64);
 
 #else // NL_OS_WINDOWS
+	// TODO: to fix for Linux and Mac OS X
 
 	// This code doesn't work under windows : fseek() implementation uses a signed 32 bits offset. What ever we do, it can't seek more than 2 Go.
 	// For the moment, i don't know if it works under linux for seek of more than 2 Go.
@@ -845,6 +890,9 @@ sint64 nlftell64(FILE *stream)
 	}
 	else return -1;
 #else
+	nlunreferenced(stream);
+
+	// TODO: implement for Linux and Mac OS X
 	nlerror("Not implemented");
 	return -1;
 #endif
@@ -859,9 +907,14 @@ sint64 nlftell64(FILE *stream)
 
 NLMISC_CATEGORISED_COMMAND(nel, sleep, "Freeze the service for N seconds (for debug purpose)", "<N>")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
 	if(args.size() != 1) return false;
 
-	sint32 n = atoi (args[0].c_str());
+	sint32 n;
+	fromString(args[0], n);
 
 	log.displayNL ("Sleeping during %d seconds", n);
 
@@ -871,6 +924,10 @@ NLMISC_CATEGORISED_COMMAND(nel, sleep, "Freeze the service for N seconds (for de
 
 NLMISC_CATEGORISED_COMMAND(nel, system, "Execute the command line using system() function call (wait until the end of the command)", "<commandline>")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
 	if(args.size() != 1) return false;
 
 	string cmd = args[0];
@@ -889,6 +946,10 @@ NLMISC_CATEGORISED_COMMAND(nel, system, "Execute the command line using system()
 
 NLMISC_CATEGORISED_COMMAND(nel, launchProgram, "Execute the command line using launcProgram() function call (launch in background task without waiting the end of the execution)", "<programName> <arguments>")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
 	if(args.size() != 2) return false;
 
 	string cmd = args[0];
@@ -901,6 +962,10 @@ NLMISC_CATEGORISED_COMMAND(nel, launchProgram, "Execute the command line using l
 
 NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<pid>")
 {
+	nlunreferenced(rawCommandString);
+	nlunreferenced(quiet);
+	nlunreferenced(human);
+
 	if(args.size() != 1) return false;
 	uint32 pid;
 	fromString(args[0], pid);
@@ -1004,6 +1069,9 @@ bool openDoc (const char *document)
     }
 	else
 		return true;
+#else
+	// TODO: implement for Linux and Mac OS X
+	nlunreferenced(document);
 #endif // NL_OS_WINDOWS
 	return false;
 }

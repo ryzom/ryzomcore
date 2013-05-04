@@ -12,7 +12,7 @@ This sample show:
 - Managing several dynamic world image
 - Moving PACS primitives
 - Managing collisions
-- Get triggered informations by collisions (flashes)
+- Get triggered information by collisions (flashes)
 
 ----------------
 

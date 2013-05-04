@@ -30,6 +30,8 @@
 #include <nel/sound/sound_animation.h>
 #include <nel/3d/u_particle_system_sound.h>
 #include <nel/misc/path.h>
+#include <nel/misc/sheet_id.h>
+
 
 // Qt includes
 #include <QtCore/QSettings>
@@ -67,6 +69,9 @@ void CSoundSystem::init()
 {
 	//H_AUTO2
 	nldebug("CSoundSystem::init");
+	
+	// require sheet id without sheet id bin
+	NLMISC::CSheetId::initWithoutSheet();
 
 	// create audiomixer
 	_AudioMixer = NULL;
@@ -81,12 +86,12 @@ void CSoundSystem::init()
 		QSettings *settings = Core::ICore::instance()->settings();
 		settings->beginGroup(Constants::OBJECT_VIEWER_SECTION);
 
-		_PackedSheetPath = settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString().toStdString();
-		_SamplePath = settings->value(Constants::SOUND_SAMPLE_PATH, "").toString().toStdString();
+		_PackedSheetPath = settings->value(Constants::SOUND_PACKED_SHEET_PATH, "").toString().toUtf8().constData();
+		_SamplePath = settings->value(Constants::SOUND_SAMPLE_PATH, "").toString().toUtf8().constData();
 		_AudioMixer->setSamplePath(_SamplePath);
 		_AudioMixer->setPackedSheetOption(_PackedSheetPath, true);
 		std::vector<std::string> devices;
-		_AudioMixer->initDriver(settings->value(Constants::SOUND_DRIVER, "Auto").toString().toStdString());
+		_AudioMixer->initDriver(settings->value(Constants::SOUND_DRIVER, "Auto").toString().toUtf8().constData());
 		_AudioMixer->getDevices(devices);
 		NLSOUND::UAudioMixer::CInitInfo audioInfo;
 		audioInfo.AutoLoadSample = settings->value(Constants::SOUND_AUTO_LOAD_SAMPLE, true).toBool();
@@ -96,7 +101,7 @@ void CSoundSystem::init()
 		audioInfo.ForceSoftware = settings->value(Constants::SOUND_FORCE_SOFTWARE, false).toBool();
 		audioInfo.MaxTrack = settings->value(Constants::SOUND_MAX_TRACK, 48).toInt();
 		audioInfo.UseADPCM = settings->value(Constants::SOUND_USE_ADCPM, false).toBool();
-		_AudioMixer->initDevice(settings->value(Constants::SOUND_DEVICE, "").toString().toStdString(), audioInfo, NULL);
+		_AudioMixer->initDevice(settings->value(Constants::SOUND_DEVICE, "").toString().toUtf8().constData(), audioInfo, NULL);
 		_AudioMixer->setLowWaterMark(1);
 
 		settings->endGroup();
@@ -153,9 +158,10 @@ void CSoundSystem::play(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), true);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), true);
 		if (src)
 		{
+			// FIXME: Use relative positioning, and set pos to 0,0,0
 			src->setLooping(false);
 			const NLMISC::CVector &pos = _AudioMixer->getListener()->getPos();
 			src->setPos(pos);
@@ -172,9 +178,10 @@ NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), false);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), false);
 		if (src)
 		{
+			// FIXME: Use relative positioning, and set pos to 0,0,0
 			src->setLooping(false);
 			const NLMISC::CVector &pos = _AudioMixer->getListener()->getPos();
 			src->setPos(pos);

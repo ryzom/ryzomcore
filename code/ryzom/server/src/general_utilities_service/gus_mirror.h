@@ -40,15 +40,15 @@ namespace GUS
 		{
 		public:
 			// General callback
-			virtual void mirrorIsReady(CGusMirror *gusMirror) {};
-			virtual void serviceMirrorUp(CGusMirror *gusMirror, const std::string &serviceName, NLNET::TServiceId serviceId) {};
-			virtual void serviceMirrorDown(CGusMirror *gusMirror, const std::string &serviceName, NLNET::TServiceId serviceId) {};
-			virtual void mirrorTickUpdate(CGusMirror *gusMirror) {};
+			virtual void mirrorIsReady(CGusMirror *gusMirror) {}
+			virtual void serviceMirrorUp(CGusMirror *gusMirror, const std::string &serviceName, NLNET::TServiceId serviceId) {}
+			virtual void serviceMirrorDown(CGusMirror *gusMirror, const std::string &serviceName, NLNET::TServiceId serviceId) {}
+			virtual void mirrorTickUpdate(CGusMirror *gusMirror) {}
 
 			// mirror updates
-			virtual void entityAdded(CGusMirror *gusMirror, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex) {};
-			virtual void entityRemoved(CGusMirror *gusMirror, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, const NLMISC::CEntityId *entityId) {};
-			virtual void propertyChanged(CGusMirror *gusMirror, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, TPropertyIndex propIndex) {};
+			virtual void entityAdded(CGusMirror *gusMirror, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex) {}
+			virtual void entityRemoved(CGusMirror *gusMirror, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, const NLMISC::CEntityId *entityId) {}
+			virtual void propertyChanged(CGusMirror *gusMirror, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, TPropertyIndex propIndex) {}
 
 			IMirrorModuleCallback();
 			virtual ~IMirrorModuleCallback();

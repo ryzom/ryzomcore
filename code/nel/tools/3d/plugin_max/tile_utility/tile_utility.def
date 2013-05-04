@@ -1,4 +1,4 @@
-LIBRARY neltileutility.dlu
+;LIBRARY neltileutility.dlu
 EXPORTS
 	LibDescription			@1
 	LibNumberClasses		@2

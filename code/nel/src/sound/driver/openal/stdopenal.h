@@ -58,6 +58,5 @@
 #include "nel/sound/driver/source.h"
 #include "nel/sound/driver/listener.h"
 #include "nel/sound/driver/effect.h"
-#include "nel/sound/driver/music_buffer.h"
 
 /* end of file */

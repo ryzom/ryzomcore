@@ -32,6 +32,9 @@ extern "C"
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -109,7 +112,7 @@ static void jpgDecompressSkip(j_decompress_ptr cinfo, long num_bytes)
 	}
 }
 
-static void jpgDecompressTerm(j_decompress_ptr cinfo)
+static void jpgDecompressTerm(j_decompress_ptr /* cinfo */)
 {
 }
 

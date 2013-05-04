@@ -8855,7 +8855,7 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		ICDBStructNode	*_POS;
 		ICDBStructNode	*_HUNGER;
 		ICDBStructNode	*_DESPAWN;
-		
+		ICDBStructNode	*_NAME;		
 
 	public:
 		void init(ICDBStructNode *parent, uint index);
@@ -9044,7 +9044,24 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 		{
 			return _DESPAWN;
 		}
-	
+
+		void setNAME(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
+		{
+			_setProp(dbGroup, _NAME, value, forceSending);
+		}
+
+		uint32 getNAME(const CCDBSynchronised &dbGroup)
+		{
+			uint32 value;
+			_getProp(dbGroup, _NAME, value);
+
+			return value;
+		}
+
+		ICDBStructNode *getNAMECDBNode()
+		{
+			return _NAME;
+		}
 	};
 		
 

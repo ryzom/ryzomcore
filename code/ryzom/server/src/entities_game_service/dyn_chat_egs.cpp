@@ -50,14 +50,14 @@ void CDynChatEGS::init()
 	{
 		{ "DYN_CHAT:ADD_SERVICE_CHAN",		CDynChatEGS::cbServiceAddChan			},
 		{ "DYN_CHAT:SET_HIDE_BUBBLE",		CDynChatEGS::cbServiceSetHideBubble		},
+		{ "DYN_CHAT:SET_UNIVERSAL_CHANNEL",	CDynChatEGS::cbServiceSetUniversalChannel},
 		{ "DYN_CHAT:SET_CHAN_HISTORY",		CDynChatEGS::cbServiceSetChanHistory	},
 		{ "DYN_CHAT:REMOVE_SERVICE_CHAN",	CDynChatEGS::cbServiceRemoveChan		},
 		{ "DYN_CHAT:ADD_CLIENT",			CDynChatEGS::cbServiceAddClient			},
 		{ "DYN_CHAT:ADD_SESSION",			CDynChatEGS::cbServiceAddSession		},
 		{ "DYN_CHAT:ADD_SESSION_ENTITY",	CDynChatEGS::cbServiceAddSessionEntity	},
 		{ "DYN_CHAT:REMOVE_SESSION",		CDynChatEGS::cbServiceRemoveSession		},
-		{ "DYN_CHAT:REMOVE_SESSION_ENTITY",	CDynChatEGS::cbServiceRemoveSessionEntity		}
-
+		{ "DYN_CHAT:REMOVE_SESSION_ENTITY",	CDynChatEGS::cbServiceRemoveSessionEntity}
 	};
 
 	CUnifiedNetwork::getInstance()->addCallbackArray( _cbArray, sizeof(_cbArray) / sizeof(_cbArray[0]) );
@@ -248,6 +248,23 @@ bool CDynChatEGS::removeSession(TChanID chan,const TDataSetRow &client)
 	return true;
 }
 
+//============================================================================================================
+bool CDynChatEGS::getPlayersInChan(TChanID chanID, std::vector<NLMISC::CEntityId> &players)
+{
+	CDynChatChan *chan = _DynChat.getChan(chanID);
+	if (!chan) return false;	
+		
+	CDynChatSession *currSession = chan->getFirstSession();
+	bool havePlayers = false;
+	while (currSession)
+	{
+		players.push_back(TheDataset.getEntityId(currSession->getClient()->getID()));
+		havePlayers = true;
+		currSession = currSession->getNextChannelSession();
+	}
+	return havePlayers;
+}
+
 
 //============================================================================================================
 void CDynChatEGS::iosSetHistoricSize(TChanID chan, uint32 size)
@@ -298,7 +315,16 @@ bool CDynChatEGS::setHideBubble(TChanID chanID, bool hideBubble)
 	return true;
 }
 
-
+//============================================================================================================
+bool CDynChatEGS::setUniversalChannel(TChanID chanID, bool universalChannel)
+{
+	CDynChatChan *chan = _DynChat.getChan(chanID);
+	if (!chan) return false;
+	if (universalChannel == chan->UniversalChannel) return true; // already good value
+	chan->UniversalChannel = universalChannel;
+	iosSetUniversalChannel(chanID, universalChannel);
+	return true;
+}
 
 //============================================================================================================
 void CDynChatEGS::cbServiceAddChan(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
@@ -325,6 +351,16 @@ void CDynChatEGS::cbServiceSetHideBubble(NLNET::CMessage& msgin, const std::stri
 	msgin.serial(chan);
 	msgin.serial(hideBubble);		
 	DynChatEGS.setHideBubble(chan, hideBubble);
+}
+//============================================================================================================
+void CDynChatEGS::cbServiceSetUniversalChannel(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	TChanID		chan;
+	bool		universalChannel;
+
+	msgin.serial(chan);
+	msgin.serial(universalChannel);
+	DynChatEGS.setUniversalChannel(chan, universalChannel);
 }
 //============================================================================================================
 void CDynChatEGS::cbServiceAddClient(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
@@ -464,6 +500,15 @@ void CDynChatEGS::iosSetHideBubble(TChanID chan, bool hideBubble)
 	CMessage msg("DYN_CHAT:SET_HIDE_BUBBLE");
 	msg.serial(chan);	
 	msg.serial(hideBubble);		
+	sendMessageViaMirror( "IOS", msg);
+}
+
+//============================================================================================================
+void CDynChatEGS::iosSetUniversalChannel(TChanID chan, bool universalChannel)
+{
+	CMessage msg("DYN_CHAT:SET_UNIVERSAL_CHANNEL");
+	msg.serial(chan);	
+	msg.serial(universalChannel);
 	sendMessageViaMirror( "IOS", msg);
 }
 

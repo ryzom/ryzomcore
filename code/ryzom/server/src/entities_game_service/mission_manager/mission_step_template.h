@@ -41,7 +41,7 @@ public:
 	//@{
 	/// ctor
 	inline IMissionStepTemplate()
-		:_OOOStepIndex(0xFFFFFFFF),_Any(false),_Displayed(true),_IconDisplayedOnStepNPC(true),_IsInOverridenOOO(false) {}	
+		:_OOOStepIndex(0xFFFFFFFF),_Any(false),_Displayed(true),_IconDisplayedOnStepNPC(true),_IsInOverridenOOO(false),_User(NULL) {}	
 
 	//BRIANCODE my appologies, need access to this data from CMissionStepGiveItem	
 	struct CSubStep
@@ -102,7 +102,7 @@ public:
 	///\name accessors
 	//@{
 	/// return the step actions
-	inline const std::vector< IMissionAction* > &	getActions(){ return _Actions; };
+	inline const std::vector< IMissionAction* > &	getActions(){ return _Actions; }
 	/// set the out of order index of the step ( it is the index of the OOO/ANY bloc embedding the step ) 0xFF is invalid
 	inline	void									setOOOStepIndex(uint32 idx){ _OOOStepIndex = idx; }
 	///\return the OOO index ( see previous line )
@@ -120,9 +120,9 @@ public:
 	///\set displayed value
 	void											setIconDisplayedOnStepNPC(bool displayed){ _IconDisplayedOnStepNPC = displayed;}
 	/// return true if the step is in an OOO block which text wad overriden
-	bool isInOverridenOOO() { return _IsInOverridenOOO; };
+	bool isInOverridenOOO() { return _IsInOverridenOOO; }
 	/// set the isInOverridenOOO flag ( see previous method )
-	void setAsInOverridenOOO() { _IsInOverridenOOO = true; };
+	void setAsInOverridenOOO() { _IsInOverridenOOO = true; }
 	/// return true if there is a roleplay text in this step
 	bool isThereRoleplayText() { return !_RoleplayText.empty(); }
 	/// check if the current player gift is ok
@@ -130,7 +130,7 @@ public:
 
 
 	/// retrieve the escort groups
-	virtual void getEscortGroups( std::vector< TAIAlias > & groups ){};
+	virtual void getEscortGroups( std::vector< TAIAlias > & groups ){}
 	virtual bool checkEscortFailure( bool groupWiped ){return false;}
 
 	/// check the consistency of a text step
@@ -164,7 +164,8 @@ protected:
 	bool								_AddDefaultParams;
 	/// flag set to true if the step is in an OOO block which text wad overriden
 	bool								_IsInOverridenOOO;
-
+	/// Player running the mission
+	CCharacter * 						_User;
 };
 
 

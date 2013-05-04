@@ -18,11 +18,11 @@
 
 #include "stdpch.h"
 // Interface
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "chat_window.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 // client
 #include "../client_chat_manager.h"
 #include "../sheet_manager.h"
@@ -120,7 +120,7 @@ static DECLARE_INTERFACE_USER_FCT(isOpen)
 {
 	if (args.size() != 1) return false;
 	if (!args[0].toString()) return false;
-	CGroupContainer *elm = dynamic_cast<CGroupContainer*>(CInterfaceManager::getInstance()->getElementFromId(args[0].getString()));
+	CGroupContainer *elm = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(args[0].getString()));
 	if (!elm)
 	{
 		nlwarning("<isOpen> : can't find element %s", args[0].getString().c_str());
@@ -390,7 +390,7 @@ static DECLARE_INTERFACE_USER_FCT(getClientActionTypeColor)
 
 	// To Color
 	// Get the action_bar_color options
-	CInterfaceOptions	*options= CInterfaceManager::getInstance()->getOptions("action_bar_color");
+	CInterfaceOptions	*options= CWidgetManager::getInstance()->getOptions("action_bar_color");
 	if(options)
 	{
 		const CInterfaceOptionValue	&optVal= options->getValue(CLIENT_ACTION_TYPE::toString(actType));
@@ -733,7 +733,7 @@ static DECLARE_INTERFACE_USER_FCT(isCtrlLaunchModalMacro)
 	}
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pIM->getCtrlLaunchingModal());
+	CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 
 	result.setBool( ctrl->isMacro() );
 
@@ -772,7 +772,7 @@ static DECLARE_INTERFACE_USER_FCT(isUserEntityDead)
 
 	// Get the Visual Property for mode
 	string			dbName= toString("SERVER:Entities:E0:P%d", CLFECOMMON::PROPERTY_MODE );
-	CCDBNodeLeaf	*node= pIM->getDbProp(dbName, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(dbName, false);
 	if(node)
 	{
 		result.setBool( node->getValue64()== MBEHAV::DEATH );
@@ -988,7 +988,7 @@ static DECLARE_INTERFACE_USER_FCT(getBotChatBuyFilterMPIcon)
 	}
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	result.setString(pIM->getDefine( RM_FABER_TYPE::toIconDefineString(RM_FABER_TYPE::TRMFType(args[0].getInteger())) ));
+	result.setString(CWidgetManager::getInstance()->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(RM_FABER_TYPE::TRMFType(args[0].getInteger())) ));
 
 	return true;
 }

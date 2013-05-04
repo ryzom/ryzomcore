@@ -15,8 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
-#include "nel/misc/fixed_size_allocator.h"
 
+#include "nel/misc/fixed_size_allocator.h"
+#include "nel/misc/debug.h"
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -100,7 +105,7 @@ CFixedSizeAllocator::CChunk::~CChunk()
 	nlassert(NumFreeObjs == 0);
 	nlassert(Allocator->_NumChunks > 0);
 	-- (Allocator->_NumChunks);
-	delete Mem;
+	delete[] Mem;
 }
 
 // *****************************************************************************************************************

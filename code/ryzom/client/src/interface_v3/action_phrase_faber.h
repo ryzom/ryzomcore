@@ -92,6 +92,7 @@ private:
 		uint					Selected;
 		// This is the original quantity in inventory
 		sint32					OriginalQuantity;
+		bool                    LockedByOwner;
 
 		CItem() : Sheet(0)
 		{
@@ -142,18 +143,18 @@ private:
 	// The Inventory manipulated.
 	std::vector<CItem>		_InventoryMirror;
 	bool					_InventoryObsSetup;
-	class CDBInventoryObs : public ICDBNode::IPropertyObserver
+	class CDBInventoryObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 	CDBInventoryObs			_DBInventoryObs;
 	friend class			CDBInventoryObs;
 	// The animals Status
-	class CDBAnimalObs : public ICDBNode::IPropertyObserver
+	class CDBAnimalObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 	CDBAnimalObs			_DBAnimalObs;
 	friend class			CDBAnimalObs;
@@ -233,8 +234,8 @@ private:
 	void			removeMpSlotThatUseInvSlot(uint invSlot, uint quantityToRemove);
 
 	// from an index in _InventoryMirror, get the ItemImage
-	CItemImage		*getInvMirrorItemImage(uint slotIndex);
-	bool			isMpAvailable(CItemSheet *mpSheet, uint slotIndex) const;
+	CItemImage		*getInvMirrorItemImage(uint slotIndex, uint& invId, uint& indexInInv);
+	bool			isMpAvailable(CItemSheet *mpSheet, uint invId, uint slotIndex) const;
 
 	void			updateItemResult();
 };

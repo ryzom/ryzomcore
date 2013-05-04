@@ -57,13 +57,13 @@ inline CPlaneBasis PSBinOpModulate(CPlaneBasis p1, CPlaneBasis p2)
 
 }
 template <>
-inline CPlaneBasis PSBinOpAdd(CPlaneBasis p1, CPlaneBasis p2)
+inline CPlaneBasis PSBinOpAdd(CPlaneBasis /* p1 */, CPlaneBasis /* p2 */)
 {
 	nlassert(0); // not allowed for now
 	return CPlaneBasis(NLMISC::CVector::Null);
 }
 template <>
-inline CPlaneBasis PSBinOpSubtract(CPlaneBasis p1, CPlaneBasis p2)
+inline CPlaneBasis PSBinOpSubtract(CPlaneBasis /* p1 */, CPlaneBasis /* p2 */)
 {
 	nlassert(0); // not allowed for now
 	return CPlaneBasis(NLMISC::CVector::Null);

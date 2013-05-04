@@ -90,16 +90,14 @@
             inherit_gc_alpha="#inherit_gc_alpha" />
     </group>
   </template>
-  <!-- ************************************ -->
-  <!-- *  TEMPLATE FOR SCENE INFORMATIONS * -->
-  <!-- ************************************ -->
+  <!-- *********************************** -->
+  <!-- *  TEMPLATE FOR SCENE INFORMATION * -->
+  <!-- *********************************** -->
   <!-- * In scene user info with guild logo * -->
   <define id="in_scene_user_info_bar_h"
           value="4" />
   <define id="in_scene_user_info_bar_space"
           value="2" />
-  <define id="in_scene_user_info_text_h"
-          value="14" />
   <define id="in_scene_user_bar_length"
           value="120" />
   <!-- * In scene Target Selected * -->
@@ -226,69 +224,25 @@
            right_button="false"
            opened="true"
            child_resize_w="true"
-           child_resize_h="true"
-           child_resize_hmargin="20"
+		   child_resize_h="true"
            w="0"
-           h="86"
+		   h="0"
            win_priority="%win_priority_world_space"
            posref="BL BM"
            use_cursor="false">
+ 
       <group id="right"
-             x="42"
-             y="-20"
              child_resize_w="true"
+			 child_resize_h="true"
              w="0"
-             h="86"
-             posref="TL TL">
-        <view type="bitmap"
-              id="win_top"
-              posref="TL TL"
-              y="-10"
-              texture="Infos_top.tga"
-              global_color="true" />
-        <view type="bitmap"
-              id="win_mid"
-              posref="BL TL"
-              posparent="win_top"
-              scale="true"
-              w="7"
-              h="50"
-              texture="Infos_mid.tga"
-              global_color="true" />
-        <view type="bitmap"
-              id="win_bot"
-              posref="BL TL"
-              posparent="win_mid"
-              texture="Infos_bot.tga"
-              global_color="true" />
-        <view type="bitmap"
-              id="win_jauge_mid"
-              posref="TL ML"
-              x="0"
-              y="1"
-              posparent="win_bot"
-              scale="true"
-              w="128"
-              h="24"
-              texture="Bg_jauge_mid.tga"
-              global_color="true" />
-        <view type="bitmap"
-              id="win_jauge_top"
-              posref="TL BL"
-              posparent="win_jauge_mid"
-              texture="Bg_jauge_top.tga"
-              global_color="true" />
-        <view type="bitmap"
-              id="win_jauge_bot"
-              posref="BL TL"
-              posparent="win_jauge_mid"
-              texture="Bg_jauge_bot.tga"
-              global_color="true" />
+			 x="38"
+			 h="158"
+             posref="TL TL" >
         <view type="text"
               id="info0"
               posref="TL TL"
               x="0"
-              y="-3"
+              y="-7"
               fontsize="14"
               shadow="true"
               hardtext=""
@@ -296,9 +250,9 @@
               global_color="true" />
         <view type="text"
               id="info1"
-              posref="TL TL"
+              posref="BL TL"
+			  posparent="info0"
               x="0"
-              y="-17"
               fontsize="12"
               shadow="true"
               hardtext=""
@@ -306,9 +260,9 @@
               global_color="true" />
         <view type="text"
               id="info2"
-              posref="TL TL"
+              posref="BL TL"
+			  posparent="info1"
               x="0"
-              y="-32"
               fontsize="10"
               shadow="true"
               hardtext=""
@@ -327,7 +281,6 @@
               posref="TR TL"
               posparent="info0"
               x="4"
-              y=""
               texture="target.tga"
               global_color="false" />
       <view type="bitmap"
@@ -335,7 +288,7 @@
             posref="TR TL"
             posparent="target"
             x="2"
-            y="6"
+			y="3"
             scale="true"
             w="20"
             h="20"
@@ -345,15 +298,106 @@
         <view type="bitmap"
               id="mission_target"
               posref="TR TL"
-              posparent="info0"
-              x="25"
-              y=""
+              posparent="invisible_logo"
+              x="2"
+              y="4"
               texture="target_mission.tga"
               global_color="false" />
+       <view type="bitmap"
+            id="rp_logo_1"
+            posref="TR TL"
+            x="2"
+            y="0"
+            slot="false"
+            posparent="mission_target"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+            global_color="false" />
+      <view type="bitmap"
+            id="rp_logo_2"
+            posref="TR TL"
+            x="2"
+            y="0"
+            slot="false"
+            posparent="rp_logo_1"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+            global_color="false" />
+      <view type="bitmap"
+            id="rp_logo_3"
+            posref="TR TL"
+            x="2"
+            y="0"
+            slot="false"
+            posparent="rp_logo_2"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+            global_color="false" />
+      <view type="bitmap"
+            id="rp_logo_4"
+            posref="TR TL"
+            x="2"
+            y="0"
+            slot="false"
+            posparent="rp_logo_3"
+            color="255 255 255 255"
+            render_layer="1"
+            texture=""
+            global_color="false" />
+			
         <view type="bitmap"
+              id="win_top"
+			  posparent="info2"
+              posref="BL TL"
+			  y="-8"
+              texture="Infos_top.tga"
+              global_color="true" />
+        <view type="bitmap"
+              id="win_mid"
+              posparent="win_top"
+              posref="BL TL"
+              scale="true"
+              w="70"
+              h="1"
+              texture="Infos_mid.tga"
+              global_color="true" />
+        <view type="bitmap"
+              id="win_bot"
+              posparent="win_mid"
+              posref="BL TL"
+              texture="Infos_bot.tga"
+              global_color="true" />
+        <view type="bitmap"
+              id="win_jauge_mid"
+              posparent="win_bot"
+              posref="TL ML"
+              x="0"
+              y="-2"
+              scale="true"
+              w="128"
+              h="24"
+              texture="Bg_jauge_mid.tga"
+              global_color="true" />
+        <view type="bitmap"
+              id="win_jauge_top"
+              posparent="win_jauge_mid"
+              posref="TL BL"
+              texture="Bg_jauge_top.tga"
+              global_color="true" />
+        <view type="bitmap"
+              id="win_jauge_bot"
+              posparent="win_jauge_mid"
+              posref="BL TL"
+              texture="Bg_jauge_bot.tga"
+              global_color="true" />
+
+      <view type="bitmap"
               id="bar0"
-              posref="TL TL"
               posparent="win_jauge_top"
+              posref="TL TL"
               x="3"
               y="-3"
               scale="true"
@@ -364,8 +408,8 @@
               global_color="false" />
         <view type="bitmap"
               id="bar1"
-              posref="BL TL"
               posparent="bar0"
+              posref="BL TL"
               x="0"
               y="-2"
               scale="true"
@@ -376,8 +420,8 @@
               global_color="false" />
         <view type="bitmap"
               id="bar2"
-              posref="BL TL"
               posparent="bar1"
+              posref="BL TL"
               x="0"
               y="-2"
               scale="true"
@@ -388,8 +432,8 @@
               global_color="false" />
         <view type="bitmap"
               id="bar3"
-              posref="BL TL"
               posparent="bar2"
+              posref="BL TL"
               x="0"
               y="-2"
               scale="true"
@@ -400,8 +444,8 @@
               global_color="false" />
         <view type="bitmap"
               id="bar4"
-              posref="BL TL"
               posparent="bar3"
+              posref="BL TL"
               x="0"
               y="-2"
               scale="true"
@@ -412,94 +456,79 @@
               global_color="false" />
       </group>
       
-      <ctrl type="sheet"
+	  <ctrl type="sheet"
             id="guild_logo"
-            posref="ML MR"
-            x="-8"
+            posref="TL TR"
+			posparent="right"
+			x="-4"
             slot="false"
-            posparent="right"
             nature="guild_flag"
             value="UI:TEMP:GUILD_SHEET"
             dragable="false"
             color="255 255 255 255" />
-      <view type="bitmap"
+	  <view type="bitmap"
             id="npc_mission_logo"
-            posref="TL TR"
-            x="-8"
+            posref="TL TL"
             slot="false"
-            posparent="right"
+            x="0"
             color="255 255 255 255"
             render_layer="1"
             texture=""
             global_color="false" />
       <view type="bitmap"
             id="npc_mission_logo_over"
-            posref="TL TR"
-            x="-8"
+            posref="TL TL"
             slot="false"
-            posparent="right"
+            x="0"
             color="255 255 255 255"
             render_layer="2"
             texture=""
             global_color="false" />
-
+   
         <group id="right_pvp"
                posref="TR TL"
                posparent="right"
-               x="4"
-               y="-4"
-               h="0"
                child_resize_w="true"
-               child_resize_h="true"
-               child_resize_wmargin="4" >
+               child_resize_h="true" >
           <group id="top_pvp"
                  posref="TL TL"
+				 w="0"
                  h="0"
                  child_resize_w="true"
-                 child_resize_h="true"
-                 child_resize_wmargin="4" >
+                 child_resize_h="true" >
             <view type="bitmap"
-                  id="pvp_faction_civ_logo"
+                  id="pvp_faction_logo"
                   posref="TL TL"
+                  active="false"
                   texture="mp_pearl.tga"
-                  x="2"
-                  w="24"
-                  h="24"
                   global_color="false" />
             <view type="bitmap"
-                  id="pvp_faction_cult_logo"
+                  id="pvp_safe_logo"
                   posref="TR TL"
-                  posparent="pvp_faction_civ_logo"
+                  active="false"
+                  posparent="pvp_faction_logo"
                   texture="mp_pearl.tga"
                   x="2"
-                  w="24"
-                  h="24"
                   global_color="false" />
           </group>
           <group id="bottom_pvp"
                  posref="BL TL"
                  posparent="top_pvp"
-                 h="0"
                  child_resize_w="true"
-                 child_resize_h="true"
-                 child_resize_wmargin="4" >
+                 child_resize_h="true" >
             <view type="bitmap"
                   id="pvp_outpost_logo"
-                  active="true"
                   posref="TL TL"
-                  w="24"
-                  h="24"
+				  active="false"
                   texture="building_state_24x24.tga"
                   global_color="false" />
             <view type="bitmap"
                   id="pvp_duel_logo"
                   posref="TR TL"
                   posparent="pvp_outpost_logo"
-                  active="true"
+                  active="false"
                   x="2"
-                  w="24"
-                  h="24"
-                  texture="ICO_Multi_Fight.tga"
+                  texture="pvp_duel.tga"
                   global_color="false" />
           </group>
         </group>
@@ -717,26 +746,34 @@
            opened="true"
            child_resize_w="true"
            child_resize_h="true"
-           child_resize_hmargin="42"
-           w="0"
-           h="86"
+   
            win_priority="%win_priority_world_space"
            posref="BL BM"
            use_cursor="true">
       <!--<group id="right" x="240" y="320" child_resize_w="true" w="0" h="126"  posref="TL TL" >-->
       <group id="right"
-             x="42"
-             y="-20"
              child_resize_w="true"
              w="0"
              h="158"
-             posref="TL TL"
-             child_resize_wmargin="4">
-        <view type="bitmap"
-              id="win_jauge_mid"
+             x="42"
+             y="-20"
+             posref="TL TL" >
+        <view type="text"
+              id="info0"
               posref="TL TL"
               x="0"
-              y="-22"
+              y="0"
+              fontsize="14"
+              shadow="true"
+              hardtext="Forage_Source"
+              color="255 255 255 255"
+              global_color="true" />
+        <view type="bitmap"
+              id="win_jauge_mid"
+              posref="BL TL"
+			  posparent="info0"
+              x="0"
+              y="-6"
               scale="true"
               w="152"
               h="100"
@@ -753,16 +790,6 @@
               posref="BL TL"
               posparent="win_jauge_mid"
               texture="Bg_source_bot.tga"
-              global_color="true" />
-        <view type="text"
-              id="info0"
-              posref="TL TL"
-              x="4"
-              y="0"
-              fontsize="14"
-              shadow="true"
-              hardtext="Forage_Source"
-              color="255 255 255 255"
               global_color="true" />
         <view type="bitmap"
               id="bar0"
@@ -1736,7 +1763,11 @@
     <action id="xp_catalyser_use"
             name="uimXpCatalyserUse"
             handler="xp_catalyser_use" />
-    <separator />
+    <action id="item_text_display"
+            name="uiOpen"
+            handler="item_text_display"
+            params="ui:interface:edit_custom" />
+   <separator />
     <!-- Move to an Animal -->
     <action id="move"
             name="uimMoveTo">
@@ -1781,13 +1812,12 @@
     <action id="infos"
             name="uimBoldInfo"
             handler="open_item_help" />
+    <action id="lockunlock"
+            name="uimLockItem"
+            handler="lock_inv_item" />
     <action id="item_text_edition"
             name="uimItemTextEdit"
             handler="item_text_edition"
-            params="ui:interface:edit_custom" />
-    <action id="item_text_display"
-            name="uimItemTextDisplay"
-            handler="item_text_display"
             params="ui:interface:edit_custom" />
   </group>
   <!-- MAX_INVENTORY_ANIMAL -->
@@ -1802,7 +1832,8 @@
   <!-- item menu when we are in self -->
   <group type="menu"
          id="item_menu_in_self"
-         extends="base_menu">
+         extends="base_menu"
+         on_active="item_menu_base_check" >
     <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
     <action id="destroy"
             name="uimDestroy"
@@ -1812,11 +1843,15 @@
             name="uimBoldInfo"
             handler="open_item_help"
             params="" />
+    <action id="lockunlock"
+            name="uimLockItem"
+            handler="lock_inv_item" />
   </group>
   <!-- item menu default -->
   <group type="menu"
          id="item_menu"
-         extends="base_menu">
+         extends="base_menu"
+         on_active="item_menu_base_check" >
     <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
     <action id="destroy"
             name="uimDestroy"
@@ -1830,6 +1865,9 @@
             name="uimBoldInfo"
             handler="open_item_help"
             params="" />
+    <action id="lockunlock"
+            name="uimLockItem"
+            handler="lock_inv_item" />
   </group>
   <define id="item_modal_menu"
           value="ui:interface:item_menu" />
@@ -1959,7 +1997,8 @@
             fontsize="10"
             value="#value"
             global_color="false"
-            positive="true" />
+            positive="true"
+            format="true" />
       <view type="text"
             id="bad_price"
             posparent="box1"
@@ -2070,6 +2109,7 @@
             global_color="false" />
     </group>
   </template>
+
   <!-- ********************* -->
   <!-- *   FACTION POINTS  * -->
   <!-- ********************* -->
@@ -5826,7 +5866,8 @@
               posparent="creator"
               posref="ML MR"
               fontsize="12"
-              hardtext="uiCreatorHeader" />
+              hardtext="uiCreatorHeader"
+              active="false" />
         <!-- the scroll text (with only one text) -->
         <group id="scroll_text"
                sizeref="w"
@@ -5974,7 +6015,6 @@
             <group id="item_preview"
                    posref="TL TL"
                    sizeref="w"
-                   posparent="text_list"
                    w="200"
                    h="300"
                    x="0"
@@ -6246,6 +6286,8 @@
   <proc id="pinv_item_filter">
     <!-- Reset all filter first -->
     <action handler="set"
+            params="dblink=UI:SAVE:@0:FILTER_TP|value=0" />
+    <action handler="set"
             params="dblink=UI:SAVE:@0:FILTER_MISSMP|value=0" />
     <action handler="set"
             params="dblink=UI:SAVE:@0:FILTER_MP|value=0" />
@@ -6370,6 +6412,7 @@
              filter_tool="UI:SAVE:#inv_type:FILTER_TOOL"
              filter_mp="UI:SAVE:#inv_type:FILTER_MP"
              filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP"
+             filter_tp="UI:SAVE:#inv_type:FILTER_TP"
              wspace="2"
              hspace="2"
              startitem="0"
@@ -6426,6 +6469,7 @@
              filter_tool="UI:SAVE:#inv_type:FILTER_TOOL"
              filter_mp="UI:SAVE:#inv_type:FILTER_MP"
              filter_missmp="UI:SAVE:#inv_type:FILTER_MISSMP"
+             filter_tp="UI:SAVE:#inv_type:FILTER_TP"
              hspace="2"
              xitem="2"
              yitem="-2"
@@ -6480,8 +6524,17 @@
       <link expr="eq(@UI:SAVE:#inv_type:ICON_LIST, 0)"
             target="bag_list:active,sep2:active" />
       <instance template="tinv_item_list_filter"
-                id="filter_missmp"
+                id="filter_tp"
                 x="-35"
+                y="1"
+                posref="BR BR"
+                inv_type="#inv_type"
+                dblink="UI:SAVE:#inv_type:FILTER_TP"
+                texture="filter_tp.tga"
+                tooltip="uittFilterTP" />
+      <instance template="tinv_item_list_filter"
+                id="filter_missmp"
+                x="-60"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6490,7 +6543,7 @@
                 tooltip="uittFilterMissMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_mp"
-                x="-60"
+                x="-85"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6499,7 +6552,7 @@
                 tooltip="uittFilterMP" />
       <instance template="tinv_item_list_filter"
                 id="filter_tool"
-                x="-85"
+                x="-110"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6508,7 +6561,7 @@
                 tooltip="uittFilterTool" />
       <instance template="tinv_item_list_filter"
                 id="filter_weapon"
-                x="-110"
+                x="-135"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"
@@ -6517,7 +6570,7 @@
                 tooltip="uittFilterWeapon" />
       <instance template="tinv_item_list_filter"
                 id="filter_armor"
-                x="-135"
+                x="-160"
                 y="1"
                 posref="BR BR"
                 inv_type="#inv_type"

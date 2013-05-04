@@ -178,7 +178,7 @@ RPatchMesh::RPatchMesh (PatchMesh *pmesh)
 		SetNumVerts (pmesh->getNumVerts());
 	}
 
-	// Getback the binding informations
+	// Getback the binding information
 	for (int v=0; v<pmesh->hooks.Count(); v++)
 	{
 		int hookPoint=pmesh->hooks[v].hookPoint;

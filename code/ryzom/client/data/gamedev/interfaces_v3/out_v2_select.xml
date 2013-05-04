@@ -580,13 +580,9 @@
 					onclick_l="proc" params_l="proc_charsel_play"/>
 	-->
 
-	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="76" hardtext="uiCharSel_Play"
+	<ctrl style="valid_txt_button" id="play_but" posref="BR BM" x="-112" y="56" hardtext="uiCharSel_Play"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="lua" params_l="outgame:launchGame()"/>
-
-	<ctrl style="valid_txt_button" id="edit_session_but" posref="BR BM" x="-112" y="36" hardtext="uiLaunchEditor"
-					onover="play_sound" params_over="name=specie_but_over"
-					onclick_l="proc" params_l="proc_charsel_edit_menu"/>
 
 	<ctrl style="valid_txt_button" id="del_but" posref="BR BL" x="-794" y="56" hardtext="uiCharSel_Del"
 					onover="play_sound" params_over="name=specie_but_over"
@@ -676,8 +672,7 @@
 	<!-- Simple Message Box with just a OK button -->
 	<group type="modal" id="message_box" exit_click_out="true" posparent="char3d" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="100" 
 	 on_enter="leave_modal" mouse_pos="false" escapable="false" 
-	 display="false"
-	>
+	 display="false">
 		<instance template="outgame_popup" id="back" posref="TL TL" />
 
 		<view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-56" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
@@ -687,15 +682,9 @@
 						onclick_l="leave_modal" />
 	</group>
 	
-
-
-	
-
-
-	<!-- Web box
-	<group id="webstart" posref="BR BR" w="200" h="200" active="true" >
-		<group id="content" x="0" y="0" w="200" h="200" posref="TL TL" >
-			<group type="html" id="webstart_html" posref="TL TL" 
+	<group id="webstart" posref="BR BR" w="100" h="60" active="true" >
+		<group id="content" x="0" y="0" w="100" h="60" posref="MM MM" >
+			<group id="webstart_html" type="html" posref="MM MM" 
 				url="" 
 				title_prefix="uiQuickhelpTitle"
 				sizeref="wh" x="0" y="0" w="-40" h="-40" 
@@ -739,7 +728,6 @@
 			</group>
 		</group>
 	</group>
-	-->
 
 </group>
 

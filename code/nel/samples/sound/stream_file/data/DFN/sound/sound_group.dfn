@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Items" Type="Dfn" Filename="sound_group_item.dfn" Array="true"/>
+  <LOG>Thu Jan 09 11:48:30 2003 (boucher) Dfn Structure = 
+Thu Jan 09 11:51:28 2003 (boucher) Dfn Structure = 
+Thu Jan 09 11:52:03 2003 (boucher) Dfn Structure = 
+Thu Jan 09 11:52:08 2003 (boucher) Dfn Structure = </LOG>
+</DFN>

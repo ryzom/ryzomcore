@@ -16,6 +16,9 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/types_nl.h"
+#include "nel/misc/debug.h"
+
 #ifdef HAVE_NELCONFIG_H
 #  include "nelconfig.h"
 #endif // HAVE_NELCONFIG_H
@@ -27,6 +30,7 @@
 #include "nel/misc/report.h"
 #include "nel/misc/path.h"
 #include "nel/misc/variable.h"
+#include "nel/misc/system_info.h"
 
 #ifdef NL_OS_WINDOWS
 #	define _WIN32_WINDOWS	0x0410
@@ -53,6 +57,8 @@
 #	include <errno.h>
 #endif
 
+#define NL_NO_DEBUG_FILES 1
+
 using namespace std;
 
 // If you don't want to add default displayer, put 0 instead of 1. In this case, you
@@ -77,6 +83,9 @@ using namespace std;
 // If true, debug system will trap crash even if the application is in debugger
 static const bool TrapCrashInDebugger = false;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -88,7 +97,7 @@ namespace NLMISC
 bool DisableNLDebug= false;
 NLMISC::CVariablePtr<bool> _DisableNLDebug("nel","DisableNLDebug","Disables generation and output of nldebug logs (no code associated with the log generation is executed)",&DisableNLDebug,true);
 
-static std::string LogPath = "";
+static std::string LogPath;
 
 //bool DebugNeedAssert = false;
 //bool NoAssert = false;

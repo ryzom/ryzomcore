@@ -29,6 +29,7 @@
 #include <nel/misc/log.h>
 #include <nel/misc/path.h>
 #include <nel/sound/u_audio_mixer.h>
+#include <nel/misc/sheet_id.h>
 
 // Project includes
 // ...
@@ -75,6 +76,9 @@ int main(int nNbArg, char **ppArgs)
 	// add search paths
 	CPath::addSearchPath(leveldesignDir, true, false);
 	CPath::addSearchPath(dfnDir, true, false);
+	
+	// init sheet_id.bin
+	NLMISC::CSheetId::initWithoutSheet();
 
 	// build the sound bank
 	UAudioMixer::buildSoundBank(exportDir);

@@ -25,7 +25,7 @@
 #include "nel/misc/vector_2f.h"
 //
 #include "../time_client.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../global.h"
 //
 #include "../interface_v3/interface_manager.h"
@@ -65,7 +65,7 @@ CDisplayerVisual::~CDisplayerVisual()
 {
 	if (_IconInScene)
 	{
-		getEditor().getUI().unMakeWindow(_IconInScene);
+		CWidgetManager::getInstance()->unMakeWindow(_IconInScene);
 		if (_IconInScene->getParent())
 		{
 			_IconInScene->getParent()->delGroup(_IconInScene);
@@ -428,7 +428,7 @@ void CDisplayerVisual::onPostRender()
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				const char *iconTemplateName = "r2ed_bad_pos_icon";
 				// if the in scene 'stop' window wasn't created, then create it now
-				CInterfaceGroup *group = pIM->createGroupInstance (iconTemplateName , "ui:interface", NULL, 0);
+				CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (iconTemplateName , "ui:interface", NULL, 0);
 				if (group)
 				{
 					_IconInScene = dynamic_cast<CGroupInScene *>(group);
@@ -441,8 +441,8 @@ void CDisplayerVisual::onPostRender()
 					else
 					{
 						// Link to the interface
-						pIM->addWindowToMasterGroup("ui:interface", group);
-						CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+						CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", group);
+						CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 						group->setParent(pRoot);
 						if (pRoot)
 							pRoot->addGroup (group);

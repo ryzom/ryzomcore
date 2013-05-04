@@ -50,7 +50,7 @@ private:
 	void adaptToVersion4(CGuild &guild) const;
 
 private:
-	CGuildVersionAdapter(){};
+	CGuildVersionAdapter(){}
 	/// unique instance
 	static CGuildVersionAdapter*			_Instance;
 };

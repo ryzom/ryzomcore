@@ -242,7 +242,7 @@ void CShopTypeManager::initShopBase()
 		CConfigFile::CVar& cvShopType = ShopConfigFile.getVar("ShopCategory");
 		for (uint i = 0; i < cvShopType.size(); ++i )
 		{
-			if ( cvShopType.asString(i) != "" )
+			if ( !cvShopType.asString(i).empty() )
 			{
 				_CategoryName.push_back( cvShopType.asString( i ) );
 			}
@@ -252,7 +252,7 @@ void CShopTypeManager::initShopBase()
 		CConfigFile::CVar& cvShopAlias = ShopConfigFile.getVar("ShopNameAliases");
 		for ( uint i = 0; i < cvShopAlias.size(); ++i )
 		{
-			if ( cvShopAlias.asString(i) != "" )
+			if ( !cvShopAlias.asString(i).empty() )
 			{
 				CVectorSString	args;
 				explode(cvShopAlias.asString(i), string(":"), reinterpret_cast<vector<string> &>(args));

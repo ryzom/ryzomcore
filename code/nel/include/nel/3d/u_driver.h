@@ -139,6 +139,9 @@ public:
 	enum TStencilOp { keep = 0, zero, replace, incr, decr, invert };
 	enum TStencilFunc { never = 0, less, lessequal, equal, notequal, greaterequal, greater, always};
 
+	// Existing drivers
+	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs };
+
 public:
 	/// The EventServer of this driver. Init after setDisplay()!!
 	NLMISC::CEventServer			EventServer;
@@ -657,6 +660,11 @@ public:
 	 */
 	virtual void			forceDXTCCompression(bool dxtcComp)=0;
 
+	/** if different from 0, enable anisotropic filter on textures. -1 enables max value.
+	 *	Default is 0.
+	 */
+	virtual void			setAnisotropicFilter(sint filter)=0;
+
 	/** if !=1, force mostly all the textures (but TextureFonts lightmaps, interfaces  etc..)
 	 *	to be divided by Divisor (2, 4, 8...)
 	 *	Default is 1.
@@ -844,6 +852,7 @@ public:
 	 *	This is the static function which build a UDriver, the root for all 3D functions.
 	 */
 	static	UDriver			*createDriver(uint windowIcon = 0, bool direct3d = false, emptyProc exitFunc = 0);
+	static	UDriver			*createDriver(uint windowIcon, TDriver driver, emptyProc exitFunc = 0);
 
 	/**
 	 *	Purge static memory

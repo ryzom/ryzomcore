@@ -27,7 +27,7 @@
 // game share
 #include "game_share/utils.h"
 #include "game_share/file_description_container.h"
-
+#include "game_share/deployment_configuration.h"
 // local
 #include "administered_module.h"
 #include "file_receiver.h"
@@ -134,7 +134,8 @@ bool CPatchmanAdminModule::initModule(const TParsedCommandLine &initInfo)
 	CDeploymentConfigurationSynchroniser::init(this);
 
 	// now that the base classes have been initialised, we can cumulate the module manifests
-	_Manifest= (CFileReceiver::getModuleManifest()+_Manifest).strip();
+	_Manifest= (CFileReceiver::getModuleManifest()+_Manifest);
+	_Manifest = _Manifest.strip();
 
 	// we're all done so let the world know
 	registerProgress(string("PAM Initialised: ")+logMsg+" "+_Manifest);
@@ -263,7 +264,7 @@ void CPatchmanAdminModule::cbFileDownloadSuccess(const CSString& fileName,const 
 		NLMISC::CPath::setCurrentPath(oldDirectory.c_str());
 		time_t rawtime;
 		nl_time ( &rawtime );
-		setStateVariable("Environment",NLMISC::toString("Updated %s",nl_asctime (nl_localtime ( &rawtime ))));
+		setStateVariable("Environment",NLMISC::toString("Updated %s",asctime (nl_localtime ( &rawtime ))));
 
 		return;
 	}
@@ -435,7 +436,7 @@ NLMISC_CLASS_COMMAND_IMPL(CPatchmanAdminModule, download)
 			}
 
 			// iterate over matching files, adding them to the download list
-			for (uint32 i=fileInfo.size();i--;)
+			for (uint i=(uint)fileInfo.size();i--;)
 			{
 				_DownloadRequests[fileInfo[i].FileName]= NLMISC::CPath::standardizePath(destination);
 				requestFile(fileInfo[i].FileName);

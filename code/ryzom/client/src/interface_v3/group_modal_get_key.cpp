@@ -20,7 +20,7 @@
 
 #include "group_modal_get_key.h"
 #include "interface_manager.h"
-#include "ctrl_button.h"
+#include "nel/gui/ctrl_button.h"
 
 #include "nel/misc/events.h"
 
@@ -53,27 +53,27 @@ void CGroupModalGetKey::setActive (bool state)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (state == true)
-		pIM->setCaptureKeyboard (this);
+		CWidgetManager::getInstance()->setCaptureKeyboard (this);
 	else
-		pIM->setCaptureKeyboard (NULL);
+		CWidgetManager::getInstance()->setCaptureKeyboard (NULL);
 
-	CViewText *pVT= dynamic_cast<CViewText*>(pIM->getElementFromId( VIEW_TEXT_KEY ));
+	CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
 	if (pVT != NULL) pVT->setText(string(""));
-	pVT= dynamic_cast<CViewText*>(pIM->getElementFromId( VIEW_TEXT_INUSE ));
+	pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_INUSE ));
 	if (pVT != NULL) pVT->setText(string(""));
-	CCtrlBaseButton *pCB= dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( CTRL_BUTTON_OK ));
+	CCtrlBaseButton *pCB= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( CTRL_BUTTON_OK ));
 	if (pCB != NULL) pCB->setFrozen(true);
 
 	CGroupModal::setActive(state);
 }
 
 // ***************************************************************************
-bool CGroupModalGetKey::handleEvent (const CEventDescriptor &event)
+bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::key)
+	if (event.getType() == NLGUI::CEventDescriptor::key)
 	{
-		CEventDescriptorKey &edk = (CEventDescriptorKey &)event;
-		if (edk.getKeyEventType() == CEventDescriptorKey::keydown)
+		NLGUI::CEventDescriptorKey &edk = (NLGUI::CEventDescriptorKey &)event;
+		if (edk.getKeyEventType() == NLGUI::CEventDescriptorKey::keydown)
 		{
 //			if ((edk.getKey() != KeyCONTROL) && (edk.getKey() != KeyMENU) && (edk.getKey() != KeySHIFT))
 //			{
@@ -85,7 +85,7 @@ bool CGroupModalGetKey::handleEvent (const CEventDescriptor &event)
 
 				// Setup the text !
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CViewText *pVT= dynamic_cast<CViewText*>(pIM->getElementFromId( VIEW_TEXT_KEY ));
+				CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
 				if (pVT != NULL) pVT->setText(Combo.toUCString());
 
 				// Check if in use
@@ -101,7 +101,7 @@ bool CGroupModalGetKey::handleEvent (const CEventDescriptor &event)
 				{
 					const CActionsManager::TComboActionMap &keyShortcut = pCurAM->getComboActionMap();
 					CActionsManager::TComboActionMap::const_iterator it = keyShortcut.find(Combo);
-					pVT = dynamic_cast<CViewText*>(pIM->getElementFromId( VIEW_TEXT_INUSE ));
+					pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_INUSE ));
 					if (it != keyShortcut.end())
 					{
 						const CBaseAction *baseAction = pCurAM->getBaseAction(it->second);
@@ -118,7 +118,7 @@ bool CGroupModalGetKey::handleEvent (const CEventDescriptor &event)
 				}
 
 				// Show the ok button
-				CCtrlBaseButton *pCB= dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId( CTRL_BUTTON_OK ));
+				CCtrlBaseButton *pCB= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( CTRL_BUTTON_OK ));
 				if (pCB != NULL) pCB->setFrozen(false);
 			}
 //		}

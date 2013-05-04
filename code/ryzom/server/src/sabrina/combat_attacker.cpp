@@ -34,7 +34,7 @@ NLMISC_COMMAND(UseWeaponDamageFactorModifier,"toggle the use of the item damage 
 	return true;
 }
 
-//--------------------------------------------------------------²
+//--------------------------------------------------------------
 //					CCombatWeapon constructor
 //--------------------------------------------------------------
 CCombatWeapon::CCombatWeapon(CGameItemPtr itemPtr)

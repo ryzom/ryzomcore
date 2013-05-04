@@ -20,6 +20,10 @@
 // remove stupid VC6 warnings
 void foo_input_device_cpp() {}
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 
