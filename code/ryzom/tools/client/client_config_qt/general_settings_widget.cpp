@@ -65,7 +65,7 @@ void CGeneralSettingsWidget::save()
 {
 	CSystem &s = CSystem::GetInstance();
 
-	s.config.setString( "LanguageCode", languageCodes[ languageComboBox->currentIndex() ].toStdString() );
+	s.config.setString( "LanguageCode", std::string( languageCodes[ languageComboBox->currentIndex() ].toUtf8() ) );
 
 	if( saveConfigOnQuitCheckBox->isChecked() )
 		s.config.setInt( "SaveConfig", 1 );
