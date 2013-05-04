@@ -108,7 +108,7 @@ namespace GUIEditor
 		CInterfaceGroup *mg = CWidgetManager::getInstance()->getMasterGroupFromId( masterGroup );
 		if( mg != NULL )
 		{
-			QTreeWidgetItem *item = new QTreeWidgetItem( NULL );
+			QTreeWidgetItem *item = new QTreeWidgetItem( static_cast<QTreeWidgetItem*>(NULL) );
 			item->setText( 0, "ui" );
 			widgetHT->addTopLevelItem( item );
 			widgetHierarchyMap[ "ui" ] = item;
