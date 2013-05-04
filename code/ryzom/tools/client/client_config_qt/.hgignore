@@ -1,0 +1,19 @@
+syntax: glob
+
+*.user
+*.sln
+*.ncb
+*.vcproj
+*.suo
+debug
+release
+Win32
+GeneratedFiles
+*.dll
+*.log
+*.cfg
+*.pdb
+*.qm
+
+
+
