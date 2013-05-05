@@ -54,5 +54,24 @@ namespace GUIEditor
 			CWidgetManager::getInstance()->setCurrentEditorSelection( "" );
 		}
 	}
+
+	void CEditorMessageProcessor::onAdd( const QString &parentGroup, const QString &widgetType, const QString &name )
+	{
+		// Check if this group exists
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( std::string( parentGroup.toAscii() ) );
+		if( e == NULL )
+			return;
+		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( e );
+		if( g == NULL )
+			return;
+
+		// Check if an element already exists with that name
+		if( g->getElement( std::string( name.toAscii() ) ) != NULL )
+			return;
+
+		// Create and add the new widget
+		//CViewBase *v = NULL;
+		//g->addView( v );
+	}
 }
 

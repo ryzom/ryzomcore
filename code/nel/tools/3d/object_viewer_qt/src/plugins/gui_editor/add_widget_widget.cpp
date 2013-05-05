@@ -49,6 +49,16 @@ namespace GUIEditor
 
 	void AddWidgetWidget::onAddClicked()
 	{
+		if( groupEdit->text().isEmpty() )
+		{
+			QMessageBox::warning( NULL,
+				tr( "WARNING" ),
+				tr( "You need to be adding the new widget into a group!" ),
+				QMessageBox::Ok );
+
+			return;
+		}
+
 		if( nameEdit->text().isEmpty() )
 		{
 			QMessageBox::warning( NULL,
@@ -60,5 +70,8 @@ namespace GUIEditor
 		}
 
 		close();
+
+		Q_EMIT adding( groupEdit->text(), widgetCB->currentText(), nameEdit->text() );
 	}
 }
+

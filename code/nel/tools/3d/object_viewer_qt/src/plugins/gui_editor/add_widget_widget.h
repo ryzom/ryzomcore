@@ -22,6 +22,9 @@ namespace GUIEditor
 
 	private Q_SLOTS:
 		void onAddClicked();
+
+	Q_SIGNALS:
+		void adding( const QString &parentGroup, const QString &widgetType, const QString &name );
 	};
 
 }

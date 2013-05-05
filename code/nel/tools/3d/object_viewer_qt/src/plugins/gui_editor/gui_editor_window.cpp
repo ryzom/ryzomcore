@@ -99,6 +99,12 @@ namespace GUIEditor
 
 		connect( viewPort, SIGNAL( guiLoadComplete() ), this, SLOT( onGUILoaded() ) );
 		connect( widgetProps, SIGNAL( treeChanged() ), this, SLOT( onTreeChanged() ) );
+		connect(
+			addWidgetWidget,
+			SIGNAL( adding( const QString&, const QString&, const QString& ) ),
+			messageProcessor,
+			SLOT( onAdd( const QString&, const QString&, const QString& ) )
+			);
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
