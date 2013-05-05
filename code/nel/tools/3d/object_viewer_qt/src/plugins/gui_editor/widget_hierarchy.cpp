@@ -187,6 +187,38 @@ namespace GUIEditor
 		widgetHierarchyMap.erase( itr );
 	}
 
+	void WidgetHierarchy::getCurrentGroup( QString &g )
+	{
+		std::string s = CWidgetManager::getInstance()->getCurrentEditorSelection();
+		if( s.empty() )
+		{
+			g = "";
+			return;
+		}
+
+		NLGUI::CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( s );
+		if( e == NULL )
+		{
+			g = "";
+			return;
+		}
+
+		if( e->isGroup() )
+		{
+			g = e->getId().c_str();
+			return;
+		}
+
+		NLGUI::CInterfaceGroup *p = e->getParent();
+		if( p == NULL )
+		{
+			g = "";
+			return;
+		}
+
+		g = p->getId().c_str();
+	}
+
 	void WidgetHierarchy::onGUILoaded()
 	{
 		if( masterGroup.empty() )

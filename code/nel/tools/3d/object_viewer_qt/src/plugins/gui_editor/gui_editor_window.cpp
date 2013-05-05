@@ -43,6 +43,7 @@
 #include "nelgui_widget.h"
 #include "editor_selection_watcher.h"
 #include "editor_message_processor.h"
+#include "add_widget_widget.h"
 
 namespace GUIEditor
 {
@@ -61,6 +62,7 @@ namespace GUIEditor
 		linkList      = new LinkList;
 		procList      = new ProcList;
 		projectWindow = new ProjectWindow;
+		addWidgetWidget = new AddWidgetWidget;
 		connect( projectWindow, SIGNAL( projectFilesChanged() ), this, SLOT( onProjectFilesChanged() ) );
 		viewPort      = new NelGUIWidget;
 		setCentralWidget( viewPort );
@@ -76,6 +78,7 @@ namespace GUIEditor
 		parser.setWidgetInfoTree( widgetInfoTree );
 		parser.parseGUIWidgets();
 		widgetProps->setupWidgetInfo( widgetInfoTree );
+		addWidgetWidget->setupWidgetInfo( widgetInfoTree );
 
 		QDockWidget *dock = new QDockWidget( "Widget Hierarchy", this );
 		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
@@ -95,6 +98,7 @@ namespace GUIEditor
 		viewPort->init();
 
 		connect( viewPort, SIGNAL( guiLoadComplete() ), this, SLOT( onGUILoaded() ) );
+		connect( widgetProps, SIGNAL( treeChanged() ), this, SLOT( onTreeChanged() ) );
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
@@ -118,6 +122,9 @@ namespace GUIEditor
 
 		delete viewPort;
 		viewPort = NULL;
+
+		delete addWidgetWidget;
+		addWidgetWidget = NULL;
 
 		// no deletion needed for these, since dockwidget owns them
 		hierarchyView = NULL;
@@ -309,6 +316,20 @@ namespace GUIEditor
 		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
 	}
 
+	void GUIEditorWindow::onAddWidgetClicked()
+	{
+		QString g;
+		hierarchyView->getCurrentGroup( g );
+
+		addWidgetWidget->setCurrentGroup( g );
+		addWidgetWidget->show();
+	}
+
+	void GUIEditorWindow::onTreeChanged()
+	{
+		addWidgetWidget->setupWidgetInfo( widgetInfoTree );
+	}
+
 	void GUIEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
@@ -351,6 +372,10 @@ namespace GUIEditor
 
 			a = new QAction( "Project Window", this );
 			connect( a, SIGNAL( triggered( bool ) ), projectWindow, SLOT( show() ) );
+			m->addAction( a );
+
+			a = new QAction( "Add Widget", this );
+			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
 			m->addAction( a );
 		}
 	}
