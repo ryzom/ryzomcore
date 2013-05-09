@@ -19,6 +19,7 @@
 
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
+#include "widget_info_tree.h"
 
 namespace GUIEditor
 {
@@ -57,13 +58,42 @@ namespace GUIEditor
 
 	void CEditorMessageProcessor::onAdd( const QString &parentGroup, const QString &widgetType, const QString &name )
 	{
+		CWidgetInfoTreeNode *node = tree->findNodeByName( std::string( widgetType.toUtf8() ) );
+		// No such widget
+		if( node == NULL )
+		{
+			QMessageBox::critical(
+				NULL,
+				tr( "Error" ),
+				tr( "Error adding the new widget! No such widget type!" ),
+				QMessageBox::Ok
+				);
+
+			return;
+		}
+
+		// No class name defined
+		std::string className = node->getInfo().className;
+		if( className.empty() )
+		{
+			QMessageBox::critical(
+				NULL,
+				tr( "Error" ),
+				tr( "Error adding the new widget! Missing classname!" ),
+				QMessageBox::Ok
+				);
+
+			return;
+		}
+
 		CInterfaceElement *e =
 			CWidgetManager::getInstance()->addWidgetToGroup(
 			std::string( parentGroup.toUtf8() ),
-			std::string( widgetType.toUtf8() ),
+			className,
 			std::string( name.toUtf8() )
 			);
 
+		// Failed to add widget
 		if( e == NULL )
 		{
 			QMessageBox::critical(
@@ -72,7 +102,29 @@ namespace GUIEditor
 				tr( "Error adding the new widget!" ),
 				QMessageBox::Ok
 				);
+
+			return;
 		}
+
+		// Setting the defaults will override the Id too
+		std::string id = e->getId();
+
+		// Set up the defaults
+		std::vector< SPropEntry >::const_iterator itr = node->getInfo().props.begin();
+		while( itr != node->getInfo().props.end() )
+		{
+			e->setProperty( itr->propName, itr->propDefault );
+			++itr;
+		}
+
+		// Restore the Id
+		e->setId( id );
+		// Make the widget aligned to the top left corner
+		e->setParentPosRef( Hotspot_TL );
+		e->setPosRef( Hotspot_TL );
+
+		// Apply the new settings
+		e->invalidateCoords();
 	}
 }
 

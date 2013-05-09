@@ -3284,14 +3284,11 @@ namespace NLGUI
 			return NULL;
 
 		// Create and add the new widget
-		CViewBase *v = getParser()->createClass( "button" );
+		CViewBase *v = getParser()->createClass( widgetClass );
 		if( v == NULL )
 			return NULL;
 
 		v->setId( std::string( g->getId() + ":" + widgetName ) );
-
-		v->setParentPosRef( Hotspot_TL );
-		v->setPosRef( Hotspot_TL );
 
 		if( v->isGroup() )
 			g->addGroup( dynamic_cast< CInterfaceGroup* >( v ) );

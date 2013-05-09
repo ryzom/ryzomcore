@@ -79,6 +79,7 @@ namespace GUIEditor
 		parser.parseGUIWidgets();
 		widgetProps->setupWidgetInfo( widgetInfoTree );
 		addWidgetWidget->setupWidgetInfo( widgetInfoTree );
+		messageProcessor->setTree( widgetInfoTree );
 
 		QDockWidget *dock = new QDockWidget( "Widget Hierarchy", this );
 		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );

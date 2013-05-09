@@ -18,17 +18,29 @@
 
 namespace GUIEditor
 {
+	class CWidgetInfoTree;
+
 	/// Processes the GUI Editor's editor messages like delete, new, etc...
 	class CEditorMessageProcessor : public QObject
 	{
 		Q_OBJECT
 	public:
-		CEditorMessageProcessor( QObject *parent = NULL ) : QObject( parent ){}
+		CEditorMessageProcessor( QObject *parent = NULL ) :
+		QObject( parent )
+		{
+			tree = NULL;
+		}
+
 		~CEditorMessageProcessor(){}
+
+		void setTree( CWidgetInfoTree *tree ){ this->tree = tree; }
 		
 	public Q_SLOTS:
 		void onDelete();
 		void onAdd( const QString &parentGroup, const QString &widgetType, const QString &name );
+
+	private:
+		CWidgetInfoTree *tree;
 	};
 }
 
