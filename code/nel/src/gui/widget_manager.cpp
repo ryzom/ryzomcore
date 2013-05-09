@@ -3300,9 +3300,6 @@ namespace NLGUI
 
 		v->setParent( g );
 
-		// Invalidate so it shows up!
-		v->invalidateCoords();
-
 		notifyAdditionWatchers( v->getId() );
 		
 		return v;

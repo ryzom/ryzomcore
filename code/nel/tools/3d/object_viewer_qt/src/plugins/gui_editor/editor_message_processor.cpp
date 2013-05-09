@@ -124,7 +124,8 @@ namespace GUIEditor
 		e->setPosRef( Hotspot_TL );
 
 		// Apply the new settings
-		e->invalidateCoords();
+		e->setActive( false );
+		e->setActive( true );
 	}
 }
 
