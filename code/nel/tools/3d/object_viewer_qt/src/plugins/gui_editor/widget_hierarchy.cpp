@@ -18,6 +18,7 @@
 #include "widget_hierarchy.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/widget_addition_watcher.h"
 
 namespace
 {
@@ -75,7 +76,26 @@ namespace
 		GUIEditor::WidgetHierarchy *h;
 	};
 
+	class CWidgetAdditionWatcher : public IWidgetAdditionWatcher
+	{
+	public:
+		CWidgetAdditionWatcher(){ h = NULL; }
+		~CWidgetAdditionWatcher(){}
+
+		void widgetAdded( const std::string &name )
+		{
+			if( h != NULL )
+				h->onWidgetAdded( name );
+		}
+		
+		void setWidgetHierarchy( GUIEditor::WidgetHierarchy *h ){ this->h = h; }
+
+	private:
+		GUIEditor::WidgetHierarchy *h;
+	};
+
 	CWidgetDeletionWatcher deletionWatcher;
+	CWidgetAdditionWatcher additionWatcher;
 }
 
 namespace GUIEditor
@@ -87,6 +107,7 @@ namespace GUIEditor
 		connect( widgetHT, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ),
 			this, SLOT( onItemDblClicked( QTreeWidgetItem* ) ) );
 		deletionWatcher.setWidgetHierarchy( this );
+		additionWatcher.setWidgetHierarchy( this );
 	}
 
 	WidgetHierarchy::~WidgetHierarchy()
@@ -96,6 +117,7 @@ namespace GUIEditor
 	void WidgetHierarchy::clearHierarchy()
 	{
 		CInterfaceElement::unregisterDeletionWatcher( &deletionWatcher );
+		CWidgetManager::getInstance()->unregisterAdditionWatcher( &additionWatcher );
 		widgetHT->clear();
 		widgetHierarchyMap.clear();
 	}
@@ -104,6 +126,7 @@ namespace GUIEditor
 	{
 		clearHierarchy();
 		CInterfaceElement::registerDeletionWatcher( &deletionWatcher );
+		CWidgetManager::getInstance()->registerAdditionWatcher( &additionWatcher );
 
 		CInterfaceGroup *mg = CWidgetManager::getInstance()->getMasterGroupFromId( masterGroup );
 		if( mg != NULL )
@@ -185,6 +208,27 @@ namespace GUIEditor
 		delete itr->second;
 		itr->second = NULL;
 		widgetHierarchyMap.erase( itr );
+	}
+
+	void WidgetHierarchy::onWidgetAdded( const std::string &id )
+	{
+		// Get the parent's name
+		std::string::size_type p = id.find_last_of( ':' );
+		if( p == std::string::npos )
+			return;
+		std::string parentId = id.substr( 0, p );
+
+		// Do we have the parent in the hierarchy?
+		std::map< std::string, QTreeWidgetItem* >::iterator itr
+			= widgetHierarchyMap.find( parentId );
+		if( itr == widgetHierarchyMap.end() )
+			return;
+
+		// Add the new widget to the hierarchy
+		QTreeWidgetItem *parent = itr->second;
+		QTreeWidgetItem *item = new QTreeWidgetItem( parent );
+		item->setText( 0, makeNodeName( id ).c_str() );
+		widgetHierarchyMap[ id ] = item;
 	}
 
 	void WidgetHierarchy::getCurrentGroup( QString &g )

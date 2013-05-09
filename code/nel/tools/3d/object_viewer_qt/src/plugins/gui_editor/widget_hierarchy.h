@@ -43,6 +43,7 @@ namespace GUIEditor
 		void buildHierarchy( std::string &masterGroup );
 
 		void onWidgetDeleted( const std::string &id );
+		void onWidgetAdded( const std::string &id );
 
 		void getCurrentGroup( QString &g );
 

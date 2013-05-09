@@ -34,6 +34,7 @@
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/reflect_register.h"
 #include "nel/gui/editor_selection_watcher.h"
+#include "nel/gui/widget_addition_watcher.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -3234,6 +3235,78 @@ namespace NLGUI
 			return;
 
 		selectionWatchers.erase( itr );
+	}
+
+	void CWidgetManager::notifyAdditionWatchers( const std::string &widgetName )
+	{
+		std::vector< IWidgetAdditionWatcher* >::const_iterator itr = additionWatchers.begin();
+		while( itr != additionWatchers.end() )
+		{
+			(*itr)->widgetAdded( widgetName );
+			++itr;
+		}
+	}
+
+	void CWidgetManager::registerAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	{
+		std::vector< IWidgetAdditionWatcher* >::const_iterator itr 
+			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
+		// already exists
+		if( itr != additionWatchers.end() )
+			return;
+
+		additionWatchers.push_back( watcher );
+	}
+
+	void CWidgetManager::unregisterAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	{
+		std::vector< IWidgetAdditionWatcher* >::iterator itr
+			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
+		// doesn't exist
+		if( itr == additionWatchers.end() )
+			return;
+
+		additionWatchers.erase( itr );
+	}
+
+	CInterfaceElement* CWidgetManager::addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName )
+	{
+		// Check if this group exists
+		CInterfaceElement *e = getElementFromId( group );
+		if( e == NULL )
+			return NULL;
+		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( e );
+		if( g == NULL )
+			return NULL;
+
+		// Check if an element already exists with that name
+		if( g->getElement( widgetName ) != NULL )
+			return NULL;
+
+		// Create and add the new widget
+		CViewBase *v = getParser()->createClass( "button" );
+		if( v == NULL )
+			return NULL;
+
+		v->setId( std::string( g->getId() + ":" + widgetName ) );
+
+		v->setParentPosRef( Hotspot_TL );
+		v->setPosRef( Hotspot_TL );
+
+		if( v->isGroup() )
+			g->addGroup( dynamic_cast< CInterfaceGroup* >( v ) );
+		else
+		if( v->isCtrl() )
+			g->addCtrl( dynamic_cast< CCtrlBase* >( v ) );
+		else
+			g->addView( v );
+
+		// Invalidate so it shows up!
+		v->invalidateCoords();
+
+		notifyAdditionWatchers( v->getId() );
+		
+		return v;
 	}
 
 

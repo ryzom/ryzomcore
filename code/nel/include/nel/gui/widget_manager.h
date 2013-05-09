@@ -48,6 +48,7 @@ namespace NLGUI
 	class CInterfaceAnim;
 	class CProcedure;
 	class IEditorSelectionWatcher;
+	class IWidgetAdditionWatcher;
 
 	/**
 	 GUI Widget Manager
@@ -490,6 +491,12 @@ namespace NLGUI
 		void notifySelectionWatchers();
 		void registerSelectionWatcher( IEditorSelectionWatcher *watcher );
 		void unregisterSelectionWatcher( IEditorSelectionWatcher *watcher );
+		
+		void notifyAdditionWatchers( const std::string &widgetName );
+		void registerAdditionWatcher( IWidgetAdditionWatcher *watcher );
+		void unregisterAdditionWatcher( IWidgetAdditionWatcher *watcher );
+
+		CInterfaceElement* addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName );
 				
 	private:
 		CWidgetManager();
@@ -570,6 +577,7 @@ namespace NLGUI
 		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
 		std::vector< IEditorSelectionWatcher* > selectionWatchers;
+		std::vector< IWidgetAdditionWatcher* > additionWatchers;
 		
 
 		std::string currentEditorSelection;
