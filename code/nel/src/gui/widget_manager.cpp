@@ -3298,6 +3298,8 @@ namespace NLGUI
 		else
 			g->addView( v );
 
+		v->setParent( g );
+
 		// Invalidate so it shows up!
 		v->invalidateCoords();
 
