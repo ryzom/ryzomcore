@@ -237,6 +237,11 @@ namespace NLGUI
 			_TextureIdNormal[ 0 ].setTexture( std::string( value + "_l.tga" ).c_str() );
 			_TextureIdNormal[ 1 ].setTexture( std::string( value + "_m.tga" ).c_str() );
 			_TextureIdNormal[ 2 ].setTexture( std::string( value + "_r.tga" ).c_str() );
+			
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
+			rVR.getTextureSizeFromId(_TextureIdNormal[0], _BmpLeftW, _BmpH);
+			rVR.getTextureSizeFromId(_TextureIdNormal[1], _BmpMiddleW, _BmpH);
+			rVR.getTextureSizeFromId(_TextureIdNormal[2], _BmpRightW, _BmpH);
 			return;
 		}
 		else
@@ -891,7 +896,9 @@ namespace NLGUI
 			CViewBase *v = CWidgetManager::getInstance()->getParser()->createClass( "text" );
 			nlassert( v != NULL );
 			_ViewText = dynamic_cast< CViewText* >( v );
+			_ViewText->setId( _Id + "_text" );
 			_ViewText->setText( ucstring( "text" ) );
+			_ViewText->setSerializable( false );
 		}
 
 		// setup the viewText and add to parent
