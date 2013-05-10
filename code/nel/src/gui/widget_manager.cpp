@@ -3289,6 +3289,7 @@ namespace NLGUI
 			return NULL;
 
 		v->setId( std::string( g->getId() + ":" + widgetName ) );
+		v->setParent( g );
 
 		if( v->isGroup() )
 			g->addGroup( dynamic_cast< CInterfaceGroup* >( v ) );
@@ -3297,8 +3298,6 @@ namespace NLGUI
 			g->addCtrl( dynamic_cast< CCtrlBase* >( v ) );
 		else
 			g->addView( v );
-
-		v->setParent( g );
 
 		notifyAdditionWatchers( v->getId() );
 		

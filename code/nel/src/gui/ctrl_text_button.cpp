@@ -886,6 +886,14 @@ namespace NLGUI
 	{
 		_Setuped= true;
 
+		if( _ViewText == NULL )
+		{
+			CViewBase *v = CWidgetManager::getInstance()->getParser()->createClass( "text" );
+			nlassert( v != NULL );
+			_ViewText = dynamic_cast< CViewText* >( v );
+			_ViewText->setText( ucstring( "text" ) );
+		}
+
 		// setup the viewText and add to parent
 		_ViewText->setParent (getParent());
 		_ViewText->setParentPos (this);
