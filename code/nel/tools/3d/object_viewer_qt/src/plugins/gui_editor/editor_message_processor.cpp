@@ -86,11 +86,14 @@ namespace GUIEditor
 			return;
 		}
 
+		std::string pgName = std::string( parentGroup.toUtf8() );
+		std::string wName = std::string( name.toUtf8() );
+
 		CInterfaceElement *e =
 			CWidgetManager::getInstance()->addWidgetToGroup(
-			std::string( parentGroup.toUtf8() ),
+			pgName,
 			className,
-			std::string( name.toUtf8() )
+			wName
 			);
 
 		// Failed to add widget
