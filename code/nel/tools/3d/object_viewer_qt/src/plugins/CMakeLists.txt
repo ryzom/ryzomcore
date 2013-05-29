@@ -6,6 +6,7 @@ ADD_SUBDIRECTORY(log)
 ADD_SUBDIRECTORY(disp_sheet_id)
 ADD_SUBDIRECTORY(object_viewer)
 ADD_SUBDIRECTORY(georges_editor)
+ADD_SUBDIRECTORY(material_editor)
 
 IF(WITH_GUI)
 ADD_SUBDIRECTORY(gui_editor)
