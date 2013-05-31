@@ -15,10 +15,18 @@ SET(OVQT_PLUGIN_MATERIAL_EDITOR_HDR
 	material_editor_plugin.h
 	material_editor_window.h
 	material_editor_core_listener.h
+	material_properties.h
+	material_property_editor.h
+	material_widget.h
+	render_passes.h
 	)
 	
 SET(OVQT_PLUGIN_MATERIAL_EDITOR_UIS
 	material_editor_window.ui
+	material_properties.ui
+	material_property_editor.ui
+	material_widget.ui
+	render_passes.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)

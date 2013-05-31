@@ -14,36 +14,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef MATERIAL_EDITOR_WINDOW_H
-#define MATERIAL_EDITOR_WINDOW_H
-
-#include "ui_material_editor_window.h"
+#include "material_widget.h"
+#include "render_passes.h"
 
 namespace MaterialEditor
 {
 
-	class MatPropWidget;
-
-	class MaterialEditorWindow: public QMainWindow
+	MaterialWidget::MaterialWidget( QWidget *parent ) :
+	QWidget( parent )
 	{
-		Q_OBJECT
-public:
-		MaterialEditorWindow( QWidget *parent = NULL );		
-		~MaterialEditorWindow();
+		setupUi( this );
+		renderPassesWidget = new RenderPassesWidget();
+		setupConnections();
+	}
 
-private Q_SLOTS:
-		void onEditMaterialClicked();
-		
-private:
-		void createMenus();
-		void createDockWidgets();
+	MaterialWidget::~MaterialWidget()
+	{
+		delete renderPassesWidget;
+		renderPassesWidget = NULL;
+	}
 
-		MatPropWidget *matPropWidget;
+	void MaterialWidget::setupConnections()
+	{
+		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
+	}
 
-		Ui::MaterialEditorWindow m_ui;
-	};
-
+	void MaterialWidget::onPassEditClicked()
+	{
+		renderPassesWidget->show();
+	}
 }
-
-#endif
 
