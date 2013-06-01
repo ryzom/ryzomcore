@@ -37,6 +37,10 @@ namespace MaterialEditor
 
 	private Q_SLOTS:
 		void onPassEditClicked();
+		void onPassOKClicked();
+		void onPassRenamed( const QString &from, const QString &to );
+		void onPassPushedUp( const QString &pass );
+		void onPassPushedDown( const QString &pass );
 	};
 
 }

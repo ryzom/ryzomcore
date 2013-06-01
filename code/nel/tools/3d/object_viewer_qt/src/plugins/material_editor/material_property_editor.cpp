@@ -29,9 +29,34 @@ namespace MaterialEditor
 	{
 	}
 
+	void MatPropEditWidget::getProperty( MaterialProperty &prop )
+	{
+		prop.prop  = propertyEdit->text();
+		prop.label = labelEdit->text();
+		prop.type  = typeCB->currentText();
+	}
+
+	void MatPropEditWidget::setProperty( const MaterialProperty &prop )
+	{
+		propertyEdit->setText( prop.prop );
+		labelEdit->setText( prop.label );
+		int i = typeCB->findText( prop.type );
+		if( i != -1 )
+			typeCB->setCurrentIndex( i );
+
+	}
+
+	void MatPropEditWidget::clear()
+	{
+		propertyEdit->clear();
+		labelEdit->clear();
+		typeCB->setCurrentIndex( 0 );
+	}
+
 	void MatPropEditWidget::onOKClicked()
 	{
 		close();
+		Q_EMIT okClicked();
 	}
 
 	void MatPropEditWidget::onCancelClicked()

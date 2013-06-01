@@ -37,11 +37,36 @@ namespace MaterialEditor
 	void MaterialWidget::setupConnections()
 	{
 		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
+
+		connect( renderPassesWidget, SIGNAL( okClicked() ), this, SLOT( onPassOKClicked() ) );
+		connect( renderPassesWidget, SIGNAL( passRenamed( const QString&, const QString& ) ),
+			this, SLOT( onPassRenamed( const QString&, const QString& ) ) );
+		connect( renderPassesWidget, SIGNAL( passPushedUp( const QString& ) ),
+			this, SLOT( onPassPushedUp( const QString& ) ) );
+		connect( renderPassesWidget, SIGNAL( passPushedDown( const QString& ) ),
+			this, SLOT( onPassPushedDown( const QString& ) ) );
 	}
 
 	void MaterialWidget::onPassEditClicked()
 	{
 		renderPassesWidget->show();
 	}
+
+	void MaterialWidget::onPassOKClicked()
+	{
+	}
+
+	void MaterialWidget::onPassRenamed( const QString &from, const QString &to )
+	{
+	}
+
+	void MaterialWidget::onPassPushedUp( const QString &pass )
+	{
+	}
+
+	void MaterialWidget::onPassPushedDown( const QString &pass )
+	{
+	}
+
 }
 

@@ -21,12 +21,26 @@
 
 namespace MaterialEditor
 {
+
+	struct MaterialProperty
+	{
+		QString prop;
+		QString label;
+		QString type;
+	};
+
 	class MatPropEditWidget : public QWidget, public Ui::MatPropEditWidget
 	{
 		Q_OBJECT
 	public:
 		MatPropEditWidget( QWidget *parent = NULL );
 		~MatPropEditWidget();
+		void getProperty( MaterialProperty &prop );
+		void setProperty( const MaterialProperty &prop );
+		void clear();
+
+	Q_SIGNALS:
+		void okClicked();
 
 	private Q_SLOTS:
 		void onOKClicked();

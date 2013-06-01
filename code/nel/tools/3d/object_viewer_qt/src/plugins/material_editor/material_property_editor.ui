@@ -9,49 +9,92 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>538</width>
-    <height>282</height>
+    <width>300</width>
+    <height>145</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Material property editor</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="3">
-    <widget class="QTreeWidget" name="treeWidget">
-     <column>
-      <property name="text">
-       <string>Property</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Value</string>
-      </property>
-     </column>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Property</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="2">
+    <widget class="QLineEdit" name="propertyEdit"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Label</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" colspan="2">
+    <widget class="QLineEdit" name="labelEdit"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Type</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="2">
+    <widget class="QComboBox" name="typeCB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <item>
       <property name="text">
-       <string>Property</string>
+       <string>Color</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Label</string>
+       <string>Vector4</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Type</string>
+       <string>Float</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Default</string>
+       <string>Int</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>UInt</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Double</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Matrix4</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Texture</string>
       </property>
      </item>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="3" column="0">
     <widget class="QPushButton" name="okButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -64,7 +107,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="3" column="1">
     <widget class="QPushButton" name="cancelButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -77,14 +120,14 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
+   <item row="3" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>355</width>
+       <width>117</width>
        <height>20</height>
       </size>
      </property>

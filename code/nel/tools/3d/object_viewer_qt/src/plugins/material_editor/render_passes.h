@@ -18,6 +18,7 @@
 #define RENDER_PASSES_H
 
 #include "ui_render_passes.h"
+#include <QStringList>
 
 namespace MaterialEditor
 {
@@ -27,6 +28,15 @@ namespace MaterialEditor
 	public:
 		RenderPassesWidget( QWidget *parent = NULL );
 		~RenderPassesWidget();
+		void fillList( const QStringList &list );
+		void getList( QStringList &list );
+		void clear();
+
+	Q_SIGNALS:
+		void okClicked();
+		void passRenamed( const QString &from, const QString &to );
+		void passPushedUp( const QString &pass );
+		void passPushedDown( const QString &pass );
 
 	private:
 		void setupConnections();

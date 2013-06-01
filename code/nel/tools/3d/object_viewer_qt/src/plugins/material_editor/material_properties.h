@@ -36,9 +36,11 @@ namespace MaterialEditor
 		void onAddClicked();
 		void onEditClicked();
 		void onRemoveClicked();
+		void onEditorOKClicked();
 
 	private:
 		void setupConnections();
+		bool edit;
 		MatPropEditWidget *matPropEditWidget;
 	};
 

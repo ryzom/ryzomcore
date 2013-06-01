@@ -24,9 +24,9 @@ namespace MaterialEditor
 	QWidget( parent )
 	{
 		setupUi( this );
-		setupConnections();
-
 		matPropEditWidget = new MatPropEditWidget();
+		setupConnections();
+		edit = false;
 	}
 
 	MatPropWidget::~MatPropWidget()
@@ -42,16 +42,57 @@ namespace MaterialEditor
 
 	void MatPropWidget::onAddClicked()
 	{
+		edit = false;
+		matPropEditWidget->clear();
 		matPropEditWidget->show();
 	}
 
 	void MatPropWidget::onEditClicked()
 	{
+		QTreeWidgetItem *item = treeWidget->currentItem();
+		if( item == NULL )
+			return;
+
+		MaterialProperty prop;
+		prop.prop  = item->data( 0, Qt::DisplayRole ).toString();
+		prop.label = item->data( 1, Qt::DisplayRole ).toString();
+		prop.type  = item->data( 2, Qt::DisplayRole ).toString();
+		
+		edit = true;
+		matPropEditWidget->setProperty( prop );
 		matPropEditWidget->show();
 	}
 
 	void MatPropWidget::onRemoveClicked()
 	{
+		QTreeWidgetItem *item = treeWidget->currentItem();
+		if( item == NULL )
+			return;
+
+		delete item;
+	}
+
+	void MatPropWidget::onEditorOKClicked()
+	{
+		MaterialProperty prop;
+		matPropEditWidget->getProperty( prop );
+
+		if( edit )
+		{
+			QTreeWidgetItem *item = treeWidget->currentItem();
+			item->setData( 0, Qt::DisplayRole, prop.prop );
+			item->setData( 1, Qt::DisplayRole, prop.label );
+			item->setData( 2, Qt::DisplayRole, prop.type );
+		}
+		else
+		{
+			QTreeWidgetItem *item = new QTreeWidgetItem();
+			item->setData( 0, Qt::DisplayRole, prop.prop );
+			item->setData( 1, Qt::DisplayRole, prop.label );
+			item->setData( 2, Qt::DisplayRole, prop.type );
+			treeWidget->addTopLevelItem( item );
+		}
+
 	}
 
 	void MatPropWidget::setupConnections()
@@ -60,6 +101,7 @@ namespace MaterialEditor
 		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditClicked() ) );
 		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
+		connect( matPropEditWidget, SIGNAL( okClicked() ), this, SLOT( onEditorOKClicked() ) );
 	}
 
 }

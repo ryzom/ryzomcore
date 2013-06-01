@@ -9,29 +9,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>524</width>
-    <height>292</height>
+    <width>498</width>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Rendering passes</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QTreeWidget" name="treeWidget">
-       <column>
-        <property name="text">
-         <string>#</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Label</string>
-        </property>
-       </column>
-      </widget>
+      <widget class="QListWidget" name="listWidget"/>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -121,7 +110,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QPushButton" name="okButton">
