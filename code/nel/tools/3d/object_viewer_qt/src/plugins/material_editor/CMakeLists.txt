@@ -19,6 +19,7 @@ SET(OVQT_PLUGIN_MATERIAL_EDITOR_HDR
 	material_property_editor.h
 	material_widget.h
 	render_passes.h
+	shader_editor.h
 	)
 	
 SET(OVQT_PLUGIN_MATERIAL_EDITOR_UIS
@@ -27,6 +28,7 @@ SET(OVQT_PLUGIN_MATERIAL_EDITOR_UIS
 	material_property_editor.ui
 	material_widget.ui
 	render_passes.ui
+	shader_editor.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)

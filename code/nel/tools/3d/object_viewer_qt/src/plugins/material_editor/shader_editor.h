@@ -14,42 +14,40 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef RENDER_PASSES_H
-#define RENDER_PASSES_H
 
-#include "ui_render_passes.h"
-#include <QStringList>
+#ifndef SHADER_EDITOR_H
+#define SHADER_EDITOR_H
+
+#include "ui_shader_editor.h"
 
 namespace MaterialEditor
 {
-	class RenderPassesWidget : public QWidget, public Ui::RenderPassesWidget
+	class ShaderEditorWidget : public QWidget, public Ui::ShaderEditorWidget
 	{
 		Q_OBJECT
 	public:
-		RenderPassesWidget( QWidget *parent = NULL );
-		~RenderPassesWidget();
-		void fillList( const QStringList &list );
-		void getList( QStringList &list );
-		void clear();
+		ShaderEditorWidget( QWidget *parent = NULL );		
+		~ShaderEditorWidget();
 
-	Q_SIGNALS:
-		void okClicked();
-		void passAdded( const QString &pass );
-		void passRemoved( const QString &pass );
-		void passRenamed( const QString &from, const QString &to );
-		void passPushedUp( const QString &pass );
-		void passPushedDown( const QString &pass );
+		void getName( QString &name );
+		void getDescription( QString &desc );
+		void getVertexShader( QString &vs );
+		void getFragmentShader( QString &fs );
 
-	private:
-		void setupConnections();
+		void setName( const QString &name );
+		void setDescription( const QString &desc );
+		void setVertexShader( const QString &vs );
+		void setFragmentShader( const QString &fs );
 
 	private Q_SLOTS:
 		void onOKClicked();
-		void onAddClicked();
-		void onRemoveClicked();
-		void onEditClicked();
-		void onUpClicked();
-		void onDownClicked();
+		void onCancelClicked();
+
+	Q_SIGNALS:
+		void okClicked();
+
+	private:
+		void setupConnections();
 	};
 }
 

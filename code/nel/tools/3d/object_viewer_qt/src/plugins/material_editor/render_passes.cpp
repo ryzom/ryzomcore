@@ -58,7 +58,6 @@ namespace MaterialEditor
 	void RenderPassesWidget::setupConnections()
 	{
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKClicked() ) );
-		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );		
 		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditClicked() ) );
@@ -67,12 +66,6 @@ namespace MaterialEditor
 	}
 
 	void RenderPassesWidget::onOKClicked()
-	{
-		close();
-		Q_EMIT okClicked();
-	}
-
-	void RenderPassesWidget::onCancelClicked()
 	{
 		close();
 	}
@@ -111,6 +104,7 @@ namespace MaterialEditor
 		}
 
 		listWidget->addItem( label );
+		Q_EMIT passAdded( label );
 	}
 
 	void RenderPassesWidget::onRemoveClicked()
@@ -118,9 +112,13 @@ namespace MaterialEditor
 		int row = listWidget->currentRow();
 		if( row == -1 )
 			return;
+		QString pass;
 
 		QListWidgetItem *item = listWidget->takeItem( row );
+		pass = item->text();
 		delete item;
+
+		Q_EMIT passRemoved( pass );
 	}
 
 	void RenderPassesWidget::onEditClicked()
