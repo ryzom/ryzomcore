@@ -28,6 +28,21 @@ using namespace NLMISC;
 namespace NLGUI
 {
 
+	void ifexprufct_forcelink();
+
+	// Needed because otherwise GCC and co. omit the code in interface_expr_user_fct.cpp code
+	// causing the GUI not to work.
+	// It all happens because no function is called *directly* from that module.
+	struct LinkTrickster
+	{
+		LinkTrickster()
+		{
+			ifexprufct_forcelink();
+		}
+	};
+
+	LinkTrickster linkTrickster;
+
 	// Yoyo: Act like a singleton, else registerUserFct may crash.
 	CInterfaceExpr::TUserFctMap *CInterfaceExpr::_UserFct= NULL;
 
