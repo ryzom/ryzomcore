@@ -20,7 +20,7 @@ public function checkUser($username)
             return "Username must be 5 or more characters.";
         } elseif (!preg_match('/^[a-z0-9\.]*$/', $username)) {
             return "Username can only contain numbers and letters.";
-        } elseif (db_query("SELECT COUNT(*) FROM {users} WHERE name = :name", array(
+        } elseif (sql::db_query("SELECT COUNT(*) FROM {users} WHERE name = :name", array(
             ':name' => $username
         ))->fetchField()) {
             return "Username " . $username . " is in use.";
