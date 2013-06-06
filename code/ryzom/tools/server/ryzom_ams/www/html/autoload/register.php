@@ -4,10 +4,10 @@ require( '../config.php' );
     if (isset($_POST["Username"]) and isset($_POST["Password"]) and isset($_POST["Email"]) )
     {
         //check values
-        $user  = checkUser($_POST["Username"]);
-        $pass  = checkPassword($_POST["Password"]);
-        $cpass = confirmPassword();
-        $email = checkEmail($_POST["Email"]);   
+        $user  = users::checkUser($_POST["Username"]);
+        $pass  = users::checkPassword($_POST["Password"]);
+        $cpass = users::confirmPassword();
+        $email = users::checkEmail($_POST["Email"]);   
     } else {
         $user  = "";
         $pass  = "";
