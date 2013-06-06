@@ -2,7 +2,7 @@
 
 // This file contains all variables needed by other php scripts
 
-$LogRelativePath = './';
+$LogRelativePath = 'logs/';
 
 // ----------------------------------------------------------------------------------------
 // Variables for nel database access
