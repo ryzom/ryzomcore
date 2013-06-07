@@ -17,9 +17,7 @@ $DBHOST = 'localhost' ;
  $NTDBName = 'nel_tool' ;
  $NTUserName = 'shard' ;
  $NTPassword = '' ;
-
- $SITETITLE = 'Ryzom Core AMS' ;
-
+ 
  $LOGRELATIVEPATH = 'logs/' ;
 
 // If true= the server will add automatically unknown user in the database
@@ -83,5 +81,3 @@ $NELDB_CONFIG_TABLE = $NELDB_PREFIX . 'config';
  $BG_IMG = 'imgs/bg_live.png' ;
 
  $DEFAULT_LANGUAGE = 'en';
-
-$TEMPLATE_DIR = "";

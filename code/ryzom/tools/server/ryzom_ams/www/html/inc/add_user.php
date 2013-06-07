@@ -1,6 +1,10 @@
 <?php
 function add_user(){
-    echo "test";
+    
+//add user locally here
+
+$return = users::add_user();
+return $return; 
 }
 
 function checkUser(){

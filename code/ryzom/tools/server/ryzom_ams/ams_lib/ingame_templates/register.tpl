@@ -27,7 +27,7 @@
       </tr>
 
       <tr>
-        <td width="33%" <?php if ($PASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-Password">Desired Password:</td>
+        <td width="33%" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-Password">{$password_tag}</td>
 
         <td width="25%">
           <input type="password"
@@ -36,27 +36,27 @@
                maxlength="20"
                onkeyup=
                "testPassword(document.Page1.Password.value, 'comment-Password')"
-               onfocus="javascript:showTooltip(' 5-20 characters.', this);" />
+               onfocus="javascript:showTooltip('{$password_message}', this);" />
         </td>
 
-        <td id="comment-Password" <?php if ($PASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?> width="42%"><?php if ($PASSWORD_ERROR == "TRUE"){ echo $PASSWORD;}?></td>
+        <td id="comment-Password" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}{$Password}{/if}</td>
       </tr>
 
       <tr>
-        <td width="33%"<?php if ($CPASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-ConfirmPass">Confirm Password:</td>
+        <td width="33%" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-ConfirmPass">{$cpassword_tag}</td>
 
         <td width="25%"><input type="password"
                name="ConfirmPass"
                value=""
                maxlength="20"
-               onfocus="javascript:showTooltip('Retype your Password', this);" />
+               onfocus="javascript:showTooltip('{$cpassword_message}', this);" />
         </td>
 
-        <td id="comment-ConfirmPass" <?php if ($CPASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?>width="42%"><?php if ($CPASSWORD_ERROR == "TRUE"){ echo $CPASSWORD;}?></td>
+        <td id="comment-ConfirmPass" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}{$ConfirmPass}{/if}</td>
       </tr>
 
       <tr>
-        <td width="33%" <?php if ($EMAIL_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-Email">Email Address (to which a confirmation email will be sent):</td>
+        <td width="33%" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-Email">{$email_tag}</td>
 
         <td width="25%">
           <input type="text"
@@ -64,24 +64,22 @@
                value=""
                maxlength="255"
                onfocus=
-               "javascript:showTooltip('Please verify that the e-mail address you enter here is valid and will remain valid in the future. It will only be used to manage your <?php echo $GAME_NAME; ?> account.', this);" />
+               "javascript:showTooltip('{$email_message}', this);" />
         </td>
 
-        <td id="comment-Email" <?php if ($EMAIL_ERROR == "TRUE"){ echo 'class="error"';}?> width="42%"><?php if ($EMAIL_ERROR == "TRUE"){ echo $EMAIL;}?></td>
+        <td id="comment-Email" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}{$Email}{/if}</td>
       </tr>
 
       <tr>
         <td width=
-        "33%" <?php if ($TAC_ERROR == "TRUE"){ echo 'class="error"';}?>
+        "33%" {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}class="error"{/if}
             colspan="2"><input type="checkbox"
                name="TaC"
                value="1"
                onfocus="javascript:showTooltip('', this);" /><span id=
-               "caption-TaC">YES, I agree to the terms of
-               service</span></td><?php if ($TAC_ERROR == "TRUE"){
-                                echo '<td id="comment-TaC" class="error" width="42%">You must accept the Terms of Service</td>';}
-                                else {
-                                    echo '<td width="42%" id="comment-TaC" >';}; ?>
+               "caption-TaC">{$tac_tag}</span></td>
+                                <td id="comment-TaC" {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}class="error"{/if} width="42%">{$tac_message}</td>
+
       </tr>
     </table>
 
@@ -98,22 +96,20 @@
        inset=""></div>
 
   <div id="tooltip-Username">
-    5-12 lower-case characters and numbers. The login (username) you create here will be
-    your login name. The name of your game characters will be chosen later on.
+    {$username_tooltip}
   </div>
 
 
   <div id="tooltip-Password">
-    5-20 characters.
+    {$password_message}
   </div>
 
   <div id="tooltip-ConfirmPass">
-    Retype your Password
+    {$cpassword_message}
   </div>
 
   <div id="tooltip-Email">
-    Please verify that the e-mail address you enter here is valid and will remain valid
-    in the future. It will be used to manage your <?php echo $GAME_NAME; ?> account.
+    {$email_message}
   </div>
 
   <div id="tooltip-TaC"></div>

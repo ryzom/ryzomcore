@@ -10,7 +10,7 @@ class Helpers{
          $smarty = new Smarty;
         
          // turn smarty debugging on/off
-        $smarty -> debugging = false;
+        $smarty -> debugging = true;
          // caching must be disabled for multi-language support
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 120;
