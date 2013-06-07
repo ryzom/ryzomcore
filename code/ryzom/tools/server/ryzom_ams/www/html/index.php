@@ -1,7 +1,6 @@
 <?php
 
 require( '../config.php' );
-
 require( '../../ams_lib/libinclude.php' );
 
 if (isset($_POST["function"])){
@@ -18,7 +17,4 @@ if (isset($_GET["page"])) {
     $page = $_GET["page"];  
 }
 
-
-helpers::loadtemplate('templates/header.phtml');
-loadpage($page);
-helpers::loadtemplate('templates/footer.phtml');
+helpers::loadTemplate( 'register' );
