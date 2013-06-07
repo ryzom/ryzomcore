@@ -1,9 +1,10 @@
+{config_load file="ams_lib.conf" section="setup"}
   <div class="title">
-    RYZOM CORE INGAME REGISTRATION
+    {$title} 
   </div>
 
   <div>
-    <?php echo $WELCOME_MESSAGE; ?>
+    {$welcome_message}
   </div>
 
   <form name="Page1"
@@ -11,18 +12,18 @@
         >
     <table>
       <tr>
-        <td width="33%" <?php if ($USERNAME_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-Username">Desired Username: </td>
+        <td width="33%" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} id="caption-Username">{$username_tag} </td>
 
         <td width="25%">
           <input type="text"
                name="Username"
-               value=""
+               value="{if isset($Username)}{$Username}{/if}"
                maxlength="12"
                onfocus=
-               "javascript:showTooltip('5-12 lower-case characters and numbers. The login (username) you create here will be your login name. The name of your game characters will be chosen later on.', this);" />
+               "javascript:showTooltip('{$username_tooltip}', this);" />
         </td>
         
-        <td id="comment-Username" <?php if ($USERNAME_ERROR == "TRUE"){ echo 'class="error"';}?> width="42%"><?php if ($USERNAME_ERROR == "TRUE"){ echo $USERNAME;}?></td>
+        <td id="comment-Username" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($Username)}{$Username}{/if}</td>
       </tr>
 
       <tr>
@@ -99,7 +100,8 @@
   <div id="tooltip-Username">
     5-12 lower-case characters and numbers. The login (username) you create here will be
     your login name. The name of your game characters will be chosen later on.
-  </div>
+  </div>
+
 
   <div id="tooltip-Password">
     5-20 characters.

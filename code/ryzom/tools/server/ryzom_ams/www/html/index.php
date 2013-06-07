@@ -16,5 +16,7 @@ $page = 'home';
 if (isset($_GET["page"])) {
     $page = $_GET["page"];  
 }
-
-helpers::loadTemplate( 'register' );
+$pageElements = array();
+$pageElements['USERNAME_ERROR'] = 'TRUE';
+$pageElements['Username'] = 'testuser';
+helpers::loadTemplate( 'register' , $pageElements);

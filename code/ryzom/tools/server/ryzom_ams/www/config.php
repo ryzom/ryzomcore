@@ -30,7 +30,9 @@ $CREATE_RING = true ;
 
  // site paths definitions
 $AMS_LIB = dirname(dirname( __FILE__ )) . '/ams_lib';
-$NELTOOL_SITEBASE = dirname( __FILE__ ) . '/html/' ;
+$AMS_TRANS = $AMS_LIB . '/translations';
+$AMS_CACHEDIR = $AMS_LIB . '/cache';
+$SITEBASE = dirname( __FILE__ ) . '/html/' ;
  $NELTOOL_SYSTEMBASE = dirname( dirname( __FILE__ ) ) . '/admin/' ;
  $NELTOOL_LOGBASE = $NELTOOL_SYSTEMBASE . '/logs/' ;
  $NELTOOL_IMGBASE = $NELTOOL_SYSTEMBASE . '/imgs/' ;
@@ -38,7 +40,7 @@ $NELTOOL_SITEBASE = dirname( __FILE__ ) . '/html/' ;
  
  $NELTOOL_RRDTOOL = '/usr/bin/rrdtool' ;
  $NELTOOL_RRDSYSBASE = $NELTOOL_SYSTEMBASE . 'graphs_output/' ;
- $NELTOOL_RRDWEBBASE = $NELTOOL_SITEBASE . 'graphs_output/' ;
+ $NELTOOL_RRDWEBBASE = $SITEBASE . 'graphs_output/' ;
 
  // SQL table names
 $NELDB_PREFIX = 'neltool_' ;
@@ -79,7 +81,7 @@ $NELDB_CONFIG_TABLE = $NELDB_PREFIX . 'config';
  $HARDWARE_REFRESH = 600 ;
  $LOCK_TIMEOUT = 1800 ;
  $BG_IMG = 'imgs/bg_live.png' ;
- $GAME_NAME = 'Ryzom Core';
-$WELCOME_MESSAGE = 'Welcome! Please fill in the following fields to get your new '.$GAME_NAME.' account:';
+
+ $DEFAULT_LANGUAGE = 'en';
 
 $TEMPLATE_DIR = "";
