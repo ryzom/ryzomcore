@@ -35,10 +35,11 @@
 
 #include "nel/3d/scene_group.h"
 
-// #include <windows.h>
 
-#include <dirent.h> /* Pour l'utilisation des dossiers */
-#ifndef WIN32
+#include <dirent.h> 
+#ifdef NL_OS_WINDOWS
+    #include <windows.h>
+#else
     #include <sys/types.h> 
 #endif
 #include <unistd.h> /* getcwd,chdir  -- replacement for getCurDiretory & setCurDirectory on windows */
@@ -133,8 +134,31 @@ struct CZoneLimits
 };
 
 // ---------------------------------------------------------------------------
-
-
+#ifdef NL_OS_WINDOWS  // win32 code 
+void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
+{
+        WIN32_FIND_DATA findData;
+        HANDLE hFind;
+        char sCurDir[MAX_PATH];
+        sAllFiles.clear ();
+        GetCurrentDirectory (MAX_PATH, sCurDir);
+        hFind = FindFirstFile (sFilter.c_str(), &findData);
+        while (hFind != INVALID_HANDLE_VALUE)
+        {
+                DWORD res = GetFileAttributes(findData.cFileName);
+                if (res != INVALID_FILE_ATTRIBUTES && !(res&FILE_ATTRIBUTE_DIRECTORY))
+                {
+                        if (bFullPath)
+                                sAllFiles.push_back(string(sCurDir) + "\\" + findData.cFileName);
+                        else
+                                sAllFiles.push_back(findData.cFileName);
+                }
+                if (FindNextFile (hFind, &findData) == 0)
+                        break;
+        }
+        FindClose (hFind);
+}
+#else   // posix version  of the void dir(...) function.
 void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
 {
   char sCurDir[MAX_PATH];
@@ -157,7 +181,6 @@ void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
               find(sFilter)!= std::string::npos )
      {
         if (bFullPath)
-          // on windows should we use "\\" 
           sAllFiles.push_back(string(sCurDir) + "/" + sFileName);
         else
           sAllFiles.push_back(sFileName);  
@@ -167,8 +190,7 @@ void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
   }
   closedir(dp);
 }
-
-
+#endif  // endif posix version of "void dir(...)"
 
 // ---------------------------------------------------------------------------
 CZoneRegion *loadLand (const string &filename)
@@ -402,7 +424,11 @@ int main(int nNbArg, char**ppArgs)
 	// Get all files
 	vector<string> vAllFiles;
 	chdir (options.InputIGDir.c_str());
-	dir (".ig", vAllFiles, false);
+#ifdef NL_OS_WINDOWS
+	dir ("*.ig", vAllFiles, false);
+#else  // posix version
+        dir (".ig", vAllFiles, false);
+#endif
 	chdir (sCurDir);
 
 	for (uint32 i = 0; i < vAllFiles.size(); ++i)
