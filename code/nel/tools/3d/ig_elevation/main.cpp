@@ -35,14 +35,13 @@
 
 #include "nel/3d/scene_group.h"
 
-
-#include <dirent.h> 
 #ifdef NL_OS_WINDOWS
     #include <windows.h>
 #else
+    #include <dirent.h>
     #include <sys/types.h> 
+    #include <unistd.h> 
 #endif
-#include <unistd.h> /* getcwd,chdir  -- replacement for getCurDiretory & setCurDirectory on windows */
 
 
 // ---------------------------------------------------------------------------
