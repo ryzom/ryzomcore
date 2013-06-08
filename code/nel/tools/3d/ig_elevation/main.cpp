@@ -35,7 +35,14 @@
 
 #include "nel/3d/scene_group.h"
 
-#include <windows.h>
+// #include <windows.h>
+
+#include <dirent.h> /* Pour l'utilisation des dossiers */
+#ifndef WIN32
+    #include <sys/types.h> 
+#endif
+#include <unistd.h> /* getcwd,chdir  -- replacement for getCurDiretory & setCurDirectory on windows */
+
 
 // ---------------------------------------------------------------------------
 
@@ -126,29 +133,41 @@ struct CZoneLimits
 };
 
 // ---------------------------------------------------------------------------
+
+
 void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
 {
-	WIN32_FIND_DATA findData;
-	HANDLE hFind;
-	char sCurDir[MAX_PATH];
-	sAllFiles.clear ();
-	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile (sFilter.c_str(), &findData);	
-	while (hFind != INVALID_HANDLE_VALUE)
-	{
-		DWORD res = GetFileAttributes(findData.cFileName);
-		if (res != INVALID_FILE_ATTRIBUTES && !(res&FILE_ATTRIBUTE_DIRECTORY))
-		{
-			if (bFullPath)
-				sAllFiles.push_back(string(sCurDir) + "\\" + findData.cFileName);
-			else
-				sAllFiles.push_back(findData.cFileName);
-		}
-		if (FindNextFile (hFind, &findData) == 0)
-			break;
-	}
-	FindClose (hFind);
+  char sCurDir[MAX_PATH];
+  DIR* dp = NULL;
+  struct dirent *dirp= NULL;
+
+  getcwd ( sCurDir, MAX_PATH ) ;
+  sAllFiles.clear ();
+  if ( (dp = opendir( sCurDir )) == NULL) {
+    string sTmp = string("ERROR :  Can't open the dir : \"")+string(sCurDir)+string("\"") ;
+    outString ( sTmp ) ;
+    return ; 
+  }
+  
+  while ( (dirp = readdir(dp)) != NULL) {
+    
+
+    std:string sFileName = std::string(dirp->d_name) ;
+    if (   sFileName.substr((sFileName.length()-sFilter.length()),sFilter.length()).
+              find(sFilter)!= std::string::npos )
+     {
+        if (bFullPath)
+          // on windows should we use "\\" 
+          sAllFiles.push_back(string(sCurDir) + "/" + sFileName);
+        else
+          sAllFiles.push_back(sFileName);  
+
+     }
+
+  }
+  closedir(dp);
 }
+
 
 
 // ---------------------------------------------------------------------------
@@ -222,12 +241,14 @@ void SaveInstanceGroup (const char* sFilename, CInstanceGroup *pIG)
 		}
 		catch (const Exception &e)
 		{
-			outString(string(e.what()));
+                   string stTmp = string(e.what()) ;
+			outString(  stTmp );
 		}
 	}
 	else
 	{
-		outString(string("Couldn't create ") + sFilename);
+           string stTemp = string("Couldn't create ") + string(sFilename) ;
+		outString( stTemp );
 	}
 }
 
@@ -274,7 +295,7 @@ int main(int nNbArg, char**ppArgs)
 
 	NL3D_BlockMemoryAssertOnPurge = false;
 	char sCurDir[MAX_PATH];
-	GetCurrentDirectory (MAX_PATH, sCurDir);
+	getcwd (sCurDir,MAX_PATH);
 	
 	if (nNbArg != 2)
 	{
@@ -334,7 +355,9 @@ int main(int nNbArg, char**ppArgs)
 			}
 			else
 			{
-				outString(string("Couldn't not open " + options.HeightMapFile1 + " : heightmap 1 map ignored"));
+				string sTmp = string("Couldn't not open ")+string(options.HeightMapFile1)
+					+string(" : heightmap 1 map ignored");
+				outString(sTmp);
 				delete HeightMap1;
 				HeightMap1 = NULL;
 			}
@@ -360,7 +383,9 @@ int main(int nNbArg, char**ppArgs)
 			}
 			else
 			{
-				outString(string("Couldn't not open " + options.HeightMapFile2 + " : heightmap 2 map ignored\n"));
+				string sTmp = string("Couldn't not open ")+string(options.HeightMapFile2)
+					+string(" : heightmap 2 map ignored\n");
+				outString(sTmp);
 				delete HeightMap2;
 				HeightMap2 = NULL;
 			}
@@ -376,15 +401,15 @@ int main(int nNbArg, char**ppArgs)
 
 	// Get all files
 	vector<string> vAllFiles;
-	SetCurrentDirectory (options.InputIGDir.c_str());
-	dir ("*.ig", vAllFiles, false);
-	SetCurrentDirectory (sCurDir);
+	chdir (options.InputIGDir.c_str());
+	dir (".ig", vAllFiles, false);
+	chdir (sCurDir);
 
 	for (uint32 i = 0; i < vAllFiles.size(); ++i)
 	{
-		SetCurrentDirectory (options.InputIGDir.c_str());
+		chdir (options.InputIGDir.c_str());
 		CInstanceGroup *pIG = LoadInstanceGroup (vAllFiles[i].c_str());
-		SetCurrentDirectory (sCurDir);
+		chdir (sCurDir);
 		if (pIG != NULL)
 		{
 			bool realTimeSunContribution = pIG->getRealTimeSunContribution();
@@ -459,12 +484,13 @@ int main(int nNbArg, char**ppArgs)
 			pIGout->enableRealTimeSunContribution(realTimeSunContribution);
 
 
-			SetCurrentDirectory (options.OutputIGDir.c_str());
+			chdir (options.OutputIGDir.c_str());
 			SaveInstanceGroup (vAllFiles[i].c_str(), pIGout);
-			SetCurrentDirectory (sCurDir);
+			chdir (sCurDir);
 			delete pIG;
 		}
 	}
 
 	return 1;
 }
+

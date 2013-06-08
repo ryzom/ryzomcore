@@ -3,6 +3,7 @@ SUBDIRS(
 		build_far_bank
 		build_smallbank
 		ig_lighter
+		ig_elevation
 		zone_dependencies
 		zone_ig_lighter 
 		zone_lighter
@@ -26,7 +27,7 @@ SUBDIRS(
 		zviewer)
 
 IF(WIN32)
-  ADD_SUBDIRECTORY(ig_elevation)
+#  ADD_SUBDIRECTORY(ig_elevation)
   ADD_SUBDIRECTORY(lightmap_optimizer)
 
   IF(MFC_FOUND)
