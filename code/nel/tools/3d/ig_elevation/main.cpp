@@ -36,11 +36,11 @@
 #include "nel/3d/scene_group.h"
 
 #ifdef NL_OS_WINDOWS
-    #include <windows.h>
+	#include <windows.h>
 #else
-    #include <dirent.h>
-    #include <sys/types.h> 
-    #include <unistd.h> 
+	#include <dirent.h> /* for directories functions */
+	#include <sys/types.h> 
+	#include <unistd.h> /* getcwd, chdir -- replacement for getCurDiretory & setCurDirectory on windows */
 #endif
 
 
@@ -80,11 +80,11 @@ struct SExportOptions
 			return false;
 		else 
 			fclose (f);
-		
+
 		try
 		{			
 			CConfigFile cf;
-		
+
 			cf.load (sFilename);
 
 			// Out
@@ -136,60 +136,70 @@ struct CZoneLimits
 #ifdef NL_OS_WINDOWS  // win32 code 
 void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
 {
-        WIN32_FIND_DATA findData;
-        HANDLE hFind;
-        char sCurDir[MAX_PATH];
-        sAllFiles.clear ();
-        GetCurrentDirectory (MAX_PATH, sCurDir);
-        hFind = FindFirstFile (sFilter.c_str(), &findData);
-        while (hFind != INVALID_HANDLE_VALUE)
-        {
-                DWORD res = GetFileAttributes(findData.cFileName);
-                if (res != INVALID_FILE_ATTRIBUTES && !(res&FILE_ATTRIBUTE_DIRECTORY))
-                {
-                        if (bFullPath)
-                                sAllFiles.push_back(string(sCurDir) + "\\" + findData.cFileName);
-                        else
-                                sAllFiles.push_back(findData.cFileName);
-                }
-                if (FindNextFile (hFind, &findData) == 0)
-                        break;
-        }
-        FindClose (hFind);
+	WIN32_FIND_DATA findData;
+	HANDLE hFind;
+	char sCurDir[MAX_PATH];
+	sAllFiles.clear ();
+	GetCurrentDirectory (MAX_PATH, sCurDir);
+	hFind = FindFirstFile (("*"+sFilter).c_str(), &findData);
+	while (hFind != INVALID_HANDLE_VALUE)
+	{
+		DWORD res = GetFileAttributes(findData.cFileName);
+		if (res != INVALID_FILE_ATTRIBUTES && !(res&FILE_ATTRIBUTE_DIRECTORY))
+		{
+			if (bFullPath)
+				sAllFiles.push_back(string(sCurDir) + "\\" + findData.cFileName);
+			else
+				sAllFiles.push_back(findData.cFileName);
+		}
+		if (FindNextFile (hFind, &findData) == 0)
+			break;
+	}
+	FindClose (hFind);
 }
+
+void getcwd (char *dir, int length)
+{
+	GetCurrentDirectoryA (length, dir);
+}
+
+void chdir(const char *path)
+{
+	SetCurrentDirectoryA (path);
+}
+
 #else   // posix version  of the void dir(...) function.
 void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
 {
-  char sCurDir[MAX_PATH];
-  DIR* dp = NULL;
-  struct dirent *dirp= NULL;
+	char sCurDir[MAX_PATH];
+	DIR* dp = NULL;
+	struct dirent *dirp= NULL;
 
-  getcwd ( sCurDir, MAX_PATH ) ;
-  sAllFiles.clear ();
-  if ( (dp = opendir( sCurDir )) == NULL) {
-    string sTmp = string("ERROR :  Can't open the dir : \"")+string(sCurDir)+string("\"") ;
-    outString ( sTmp ) ;
-    return ; 
-  }
-  
-  while ( (dirp = readdir(dp)) != NULL) {
-    
+	getcwd ( sCurDir, MAX_PATH ) ;
+	sAllFiles.clear ();
+	if ( (dp = opendir( sCurDir )) == NULL)
+	{
+		string sTmp = string("ERROR :  Can't open the dir : \"")+string(sCurDir)+string("\"") ;
+		outString ( sTmp ) ;
+		return ; 
+	}
 
-    std:string sFileName = std::string(dirp->d_name) ;
-    if (   sFileName.substr((sFileName.length()-sFilter.length()),sFilter.length()).
-              find(sFilter)!= std::string::npos )
-     {
-        if (bFullPath)
-          sAllFiles.push_back(string(sCurDir) + "/" + sFileName);
-        else
-          sAllFiles.push_back(sFileName);  
+	while ( (dirp = readdir(dp)) != NULL)
+	{
+		std:string sFileName = std::string(dirp->d_name) ;
+		if (sFileName.substr((sFileName.length()-sFilter.length()),sFilter.length()).find(sFilter)!= std::string::npos )
+		{
+			if (bFullPath)
+				sAllFiles.push_back(string(sCurDir) + "/" + sFileName);
+			else
+				sAllFiles.push_back(sFileName);  
+		}
 
-     }
-
-  }
-  closedir(dp);
+	}
+	closedir(dp);
 }
-#endif  // endif posix version of "void dir(...)"
+#endif
+
 
 // ---------------------------------------------------------------------------
 CZoneRegion *loadLand (const string &filename)
@@ -262,19 +272,19 @@ void SaveInstanceGroup (const char* sFilename, CInstanceGroup *pIG)
 		}
 		catch (const Exception &e)
 		{
-                   string stTmp = string(e.what()) ;
+			string stTmp = string(e.what()) ;
 			outString(  stTmp );
 		}
 	}
 	else
 	{
-           string stTemp = string("Couldn't create ") + string(sFilename) ;
+		string stTemp = string("Couldn't create ") + string(sFilename) ;
 		outString( stTemp );
 	}
 }
 
 /** Get the Z of the height map at the given position
-  */
+ */
 static float  getHeightMapZ(float x, float y, const CZoneLimits &zl, const SExportOptions &options, CBitmap *heightMap1, CBitmap *heightMap2)
 {
 	float deltaZ = 0.0f, deltaZ2 = 0.0f;
@@ -316,8 +326,8 @@ int main(int nNbArg, char**ppArgs)
 
 	NL3D_BlockMemoryAssertOnPurge = false;
 	char sCurDir[MAX_PATH];
-	getcwd (sCurDir,MAX_PATH);
-	
+	getcwd (sCurDir, MAX_PATH);
+
 	if (nNbArg != 2)
 	{
 		printf ("Use : ig_elevation configfile.cfg\n");
@@ -364,7 +374,7 @@ int main(int nNbArg, char**ppArgs)
 
 	// Load the 2 height maps
 	CBitmap *HeightMap1 = NULL;
-	if (options.HeightMapFile1 != "")
+	if (!options.HeightMapFile1.empty())
 	{
 		HeightMap1 = new CBitmap;
 		try 
@@ -392,7 +402,7 @@ int main(int nNbArg, char**ppArgs)
 		}
 	}
 	CBitmap *HeightMap2 = NULL;
-	if (options.HeightMapFile2 != "")
+	if (!options.HeightMapFile2.empty())
 	{
 		HeightMap2 = new CBitmap;
 		try 
@@ -423,11 +433,7 @@ int main(int nNbArg, char**ppArgs)
 	// Get all files
 	vector<string> vAllFiles;
 	chdir (options.InputIGDir.c_str());
-#ifdef NL_OS_WINDOWS
-	dir ("*.ig", vAllFiles, false);
-#else  // posix version
-        dir (".ig", vAllFiles, false);
-#endif
+	dir (".ig", vAllFiles, false);
 	chdir (sCurDir);
 
 	for (uint32 i = 0; i < vAllFiles.size(); ++i)
@@ -445,13 +451,11 @@ int main(int nNbArg, char**ppArgs)
 			vector<CPortal> Portals;
 			vector<CPointLightNamed> PLN;
 			pIG->retrieve (vGlobalPos, IA, Clusters, Portals, PLN);
-			
+
 			if (IA.empty() && PLN.empty() && Portals.empty() && Clusters.empty()) continue;
 
 
 			uint k;
-
-			
 
 			// elevate instance
 			for(k = 0; k < IA.size(); ++k)
@@ -466,7 +470,6 @@ int main(int nNbArg, char**ppArgs)
 				CVector lightPos = vGlobalPos + PLN[k].getPosition();
 				PLN[k].setPosition( PLN[k].getPosition() + getHeightMapZ(lightPos.x, lightPos.y, zl, options, HeightMap1, HeightMap2) * CVector::K);
 			}
-		
 
 			// portals
 			std::vector<CVector> portal;
@@ -518,4 +521,3 @@ int main(int nNbArg, char**ppArgs)
 
 	return 1;
 }
-
