@@ -48,6 +48,8 @@ class Helpers{
          }
 
      public function create_folders(){
+         global $AMS_LIB;
+         global $SITEBASE;
         $arr = array( $AMS_LIB . '/ingame_templates/',
                      $AMS_LIB . '/configs',
                      $AMS_LIB . '/cache',
