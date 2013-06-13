@@ -14,6 +14,9 @@ class Helpers{
          // caching must be disabled for multi-language support
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 120;
+
+         helpers :: create_folders ();
+
          if ( !helpers :: check_if_game_client () or $forcelibrender = true ){
              $smarty -> template_dir = $AMS_LIB . '/ingame_templates/';
              $smarty -> setConfigDir( $AMS_LIB . '/configs' );
@@ -42,6 +45,23 @@ class Helpers{
              $smarty -> assign( $key, $value );
              }
          $smarty -> display( $template . '.tpl' );
+         }
+
+     public function create_folders(){
+        $arr = array( $AMS_LIB . '/ingame_templates/',
+                     $AMS_LIB . '/configs',
+                     $AMS_LIB . '/cache',
+                     $SITEBASE . '/cache/',
+                     $SITEBASE . '/templates/',
+                     $SITEBASE . '/templates_c/',
+                     $SITEBASE . '/configs'
+                     );
+        foreach ( $arr as & $value ){
+             if ( !file_exists( $value ) ){
+                 mkdir( $value );
+                 }
+            }
+
          }
 
      public function check_if_game_client()
