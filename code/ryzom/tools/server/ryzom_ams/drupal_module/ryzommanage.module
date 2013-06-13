@@ -1,14 +1,5 @@
 <?php
-/*
-Here is the current code and progress on the drupal 7 ryzom core module
-//////////////////////////
-todo
-//////////////////////////
-disable user hook
-delete user hook   --- ring_open -> ring users ---- nel user & nel permission ---- hook_user_cancel  ---- remove character data on server
-menu items that do stuff
 
-*/
 /*
 Drupal 7 ryzom core module
 Copyright (C) 2013 Matthew Lagoe (Botanic)  & Paige Offerdahl (Tobi)
@@ -26,6 +17,9 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+require_once("/ams_lib/libinclude.php");
+
 //output template
 function loadTemplate($template,$vars)
 {
@@ -34,7 +28,7 @@ function loadTemplate($template,$vars)
 }
 /**
  *
- * Function ryzommanage_admin 
+ * Function ryzommanage_admin
  *
  * @takes        Nothing
  * @return      array $form
@@ -119,14 +113,14 @@ function _webpage_profile(&$form_state)
     if ($email != "success") {
         form_set_error('mail', t('Not a valid email address, please check it and try again.'));
     }
-    if ((checkPassword($form_state['account']['pass']['#value']['pass1']) == "success" ) and ( $form_state['account']['pass']['#value']['pass1'] == 
+    if ((checkPassword($form_state['account']['pass']['#value']['pass1']) == "success" ) and ( $form_state['account']['pass']['#value']['pass1'] ==
         $form_state['account']['pass']['#value']['pass2'] )) {
     }
 }
 
 /**
  *
- * Function ryzommanage_menu 
+ * Function ryzommanage_menu
  *
  * @takes        Nothing
  * @return      array $items
@@ -212,7 +206,7 @@ function name_registration_admin_settings() {
 }
 /**
  *
- * Function ryzommanage_menu 
+ * Function ryzommanage_menu
  *
  * @takes        Int $element, &$form_state
  * @return      Nothing
@@ -228,7 +222,7 @@ function _check_port_value($element, &$form_state)
 }
 /**
  *
- * Function ryzommanage_block_info 
+ * Function ryzommanage_block_info
  *
  * @takes        Nothing
  * @return      array $blocks
@@ -242,14 +236,14 @@ function ryzommanage_block_info()
         // info: The name of the block.
         'info' => t('Ryzom Manage User Block'),
         'status' => TRUE,
-        'region' => '-1', // Not usually provided. 
-        'visibility' => BLOCK_VISIBILITY_LISTED // Not usually provided. 
+        'region' => '-1', // Not usually provided.
+        'visibility' => BLOCK_VISIBILITY_LISTED // Not usually provided.
     );
     return $blocks;
 }
 /**
  *
- * Function ryzommanage_block_view 
+ * Function ryzommanage_block_view
  *
  * @takes        Nothing
  * @return      array $block
@@ -271,9 +265,9 @@ function ryzommanage_block_view($delta = '')
 }
 /**
  *
- * Function _collect_register 
+ * Function _collect_register
  *
- * @takes        
+ * @takes
  * @return      Nothing
  *
  * Info: Determins what to send back to client, if the client is ryzom core then send the http data if its a browser send to /
@@ -292,7 +286,7 @@ function _collect_register($nids, $collection)
 }
 /**
  *
- * Function check_if_game_client 
+ * Function check_if_game_client
  *
  * @takes        Nothing
  * @return      Boolean
@@ -311,10 +305,10 @@ function check_if_game_client()
 }
 /**
  *
- * Function return_client_httpdata 
+ * Function return_client_httpdata
  *
- * @takes        
- * @return      
+ * @takes
+ * @return
  *
  * Info: Returns ryzom core formatted html for use in registration via client
  *
@@ -328,12 +322,12 @@ function return_client_httpdata()
         $user  = checkUser($_POST["Username"]);
         $pass  = checkPassword($_POST["Password"]);
         $cpass = confirmPassword();
-        $email = checkEmail($_POST["Email"]);   
+        $email = checkEmail($_POST["Email"]);
     } else {
         $user  = "";
         $pass  = "";
         $cpass = "";
-        $email = ""; 
+        $email = "";
     }
     //if all are good then create user
     if (($user == "success") and ($pass == "success") and ($cpass == "success") and ($email == "success") and (isset($_POST["TaC"]))) {
@@ -363,7 +357,7 @@ function return_client_httpdata()
             } else {
                 $pageElements['USERNAME_ERROR'] = 'FALSE';
             }
-            
+
             if ($pass != "success") {
                 $pageElements['PASSWORD_ERROR'] = 'TRUE';
             } else {
@@ -389,7 +383,7 @@ function return_client_httpdata()
 }
 /**
  *
- * Function checkUser 
+ * Function checkUser
  *
  * @takes        $username
  * @return      string
@@ -420,7 +414,7 @@ function checkUser($username)
 }
 /**
  *
- * Function checkPassword 
+ * Function checkPassword
  *
  * @takes        $pass
  * @return      string
@@ -443,7 +437,7 @@ function checkPassword($pass)
 }
 /**
  *
- * Function confirmPassword 
+ * Function confirmPassword
  *
  * @takes        $pass
  * @return      string
@@ -462,12 +456,12 @@ function confirmPassword()
 }
 /**
  *
- * Function checkEmail 
+ * Function checkEmail
  *
  * @takes        $email
- * @return      
+ * @return
  *
- * 
+ *
  *
  */
 function checkEmail($email)
@@ -517,7 +511,7 @@ function validEmail($email)
             // domain part has two consecutive dots
             $isValid = false;
         } else if (!preg_match('/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/', str_replace("\\\\", "", $local))) {
-            // character not valid in local part unless 
+            // character not valid in local part unless
             // local part is quoted
             if (!preg_match('/^"(\\\\"|[^"])+"$/', str_replace("\\\\", "", $local))) {
                 $isValid = false;
@@ -571,13 +565,13 @@ function createUser($values)
 
     $salt = generateSALT();
     $hashpass = crypt($pass, $salt);
-    
+
     $params = array(
         $login,
         $hashpass,
         $email
     );
-    
+
     try {
         $hostname = variable_get('ryzommanage_serverurl', 'localhost');
         $port     = variable_get('ryzommanage_mysqlport', '3306');
@@ -599,8 +593,8 @@ function createUser($values)
             ))
         ))->execute();
         return true;
-    }    
-    
+    }
+
     try {
         $statement = $dbh->prepare("INSERT INTO user (Login, Password, Email) VALUES (?, ?, ?)");
     }
@@ -617,7 +611,7 @@ function createUser($values)
         ))->execute();
         return true;
     }
-    
+
     try {
         $statement->execute($params);
     }
@@ -634,12 +628,12 @@ function createUser($values)
         ))->execute();
         return true;
     }
-    
+
     createPermissions(array($login));
 }
 
 function createPermissions($values) {
-        
+
     try {
         $hostname = variable_get('ryzommanage_serverurl', 'localhost');
         $port     = variable_get('ryzommanage_mysqlport', '3306');
@@ -659,8 +653,8 @@ function createPermissions($values) {
             ))
         ))->execute();
         return true;
-    }  
-    
+    }
+
     try {
         $sth = $dbh->prepare("SELECT UId FROM user WHERE Login='" . $values[0] . "';");
         $sth->execute();
@@ -682,8 +676,8 @@ function createPermissions($values) {
             ))
         ))->execute();
         return true;
-    }  
-    
+    }
+
     return true;
 }
 
@@ -763,13 +757,13 @@ function ryzommanage_user_presave(&$edit, $account, $category)
     } elseif (isset($_POST['pass']['pass1'])) {
         $pass = $_POST['pass']['pass1'];
     }
-    
+
     if (!isset($edit['name'])) {
         $name =  $user->name;
     } else {
         $name = $edit['name'];
     }
-    
+
     if ($account->is_new == 1 ) {
         createUser(array($edit['name'], $pass, $edit['mail']));
     } else {
@@ -781,15 +775,15 @@ function ryzommanage_form_user_register_form_alter(&$form, &$form_state, $form_i
   // Modification for the form with the given form ID goes here. For example, if
   // FORM_ID is "user_register_form" this code would run only on the user
   // registration form.
-  
+
   // Change the data for the username and email fields
   $form['account']['name']['#maxlength'] = '12';
   $form['account']['name']['#description'] = '5-12 lower-case characters and numbers. The login (username) you create here will be your login name.<br />The name of your game characters will be chosen later on.<br />';
   $form['account']['mail']['#description'] = 'Please verify that the e-mail address you enter here is valid and will remain valid in the future.<br />It will be used to manage your Tempest in the Aether account.<br />';
   // Add a checkbox to registration form about agreeing to terms of use.
   $form['terms_of_use'] = array(
-    '#type' => 'checkbox', 
-    '#title' => t("I agree with the <a href='".variable_get('ryzommanage_TOS', '')."'>terms and conditions</a>."), 
+    '#type' => 'checkbox',
+    '#title' => t("I agree with the <a href='".variable_get('ryzommanage_TOS', '')."'>terms and conditions</a>."),
     '#required' => TRUE,
   );
 }
@@ -798,19 +792,19 @@ function ryzommanage_form_user_profile_form_alter(&$form, &$form_state, $form_id
   // Modification for the form with the given form ID goes here. For example, if
   // FORM_ID is "user_register_form" this code would run only on the user
   // registration form.
-  
+
   // Change the data for the password field
   $form['account']['pass']['#description'] = 'Password must be 5-20 characters.<br />';
 }
 
 function user_edit($values) {
-        
+
     $username = $values[0];
     $newpassword = $values[1];
-        
+
     $salt = generateSALT();
     $pass = crypt($newpassword, $salt);
-            
+
     try {
         $hostname = variable_get('ryzommanage_serverurl', 'localhost');
         $port     = variable_get('ryzommanage_mysqlport', '3306');
@@ -832,9 +826,9 @@ function user_edit($values) {
         ))->execute();
         return true;
     }
-    
+
     $sql = "UPDATE `nel`.`user` SET `Password` = ? WHERE `user`.`Login` = ?";
-    
+
     try {
         $q = $dbh->prepare($sql);
     }
@@ -850,7 +844,7 @@ function user_edit($values) {
         ))->execute();
         return true;
     }
-    
+
     try {
         $q->execute(array( $pass, $username));
     }
@@ -866,13 +860,13 @@ function user_edit($values) {
         ))->execute();
         return true;
     }
-        
+
     return true;
 }
 
 /**
  *
- * Function syncdata 
+ * Function syncdata
  *
  * @takes        Nothing
  * @return      array $values
@@ -881,7 +875,7 @@ function user_edit($values) {
  *
  */
 function syncdata () {
-    
+
     try {
         $hostname = variable_get('ryzommanage_serverurl', 'localhost');
         $port     = variable_get('ryzommanage_mysqlport', '3306');
@@ -895,15 +889,15 @@ function syncdata () {
         watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
         return true;
     }
-    
+
     $query = db_select('ryzommanage_querycache', 'q')
       ->fields('q', array('SID', 'type', 'query'));
-    
+
     $result = $query->execute();
-    
+
     foreach ($result as $record) {
         watchdog('ryzommanage_usersync', $record->query, NULL, WATCHDOG_ERROR);
-        
+
         switch($record->type) {
             case 'createPermissions':
             case 'user_edit':
@@ -914,24 +908,24 @@ function syncdata () {
                   ->condition('SID', $SID)
                   ->execute();
                 $func = $record->type;
-                $func(json_decode($record->query));                
+                $func(json_decode($record->query));
         }
-        
+
     }
-    
+
 }
 /**
  *
  * Function ryzommanage_cron
  *
- * @takes        
- * @return      
+ * @takes
+ * @return
  *
  * Info: Runs the syncdata function with the drupal cron
  *
  */
 function ryzommanage_cron() {
-    
+
     syncdata();
- 
+
 }
