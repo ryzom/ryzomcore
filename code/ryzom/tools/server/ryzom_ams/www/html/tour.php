@@ -23,8 +23,8 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<a href="tour.html">Click Here to restart the tour</a><br/>
-						You can create Custom Tour, like this. <br/> For more help on implementing tour go <a href="http://pushly.github.com/bootstrap-tour/index.html" target="_blank">here</a>
+						<a href="tour.php">Click Here to restart the tour</a><br/>
+						You can create Custom Tour, like this. <br/> For more help on implementing tour go <a href="http://pushly.github.com/bootstrap-tour/index.php" target="_blank">here</a>
 					</div>
 				</div><!--/span-->
 			</div><!--/row-->
