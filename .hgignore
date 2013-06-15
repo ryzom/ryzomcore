@@ -146,6 +146,7 @@ external_stlport
 .svn
 thumbs.db
 Thumbs.db
+*.tpl.php
 
 # build
 code/nel/build/*
