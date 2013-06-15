@@ -55,6 +55,7 @@
 </head>
 
 <body>
+	{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 	<!-- topbar starts -->
 	<div class="navbar">
 		<div class="navbar-inner">
@@ -102,9 +103,10 @@
 			</div>
 		</div>
 	</div>
+	{/if}
 	<div class="container-fluid">
 		<div class="row-fluid">
-		
+			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 			<!-- left menu starts -->
 			<div class="span2 main-menu-span">
 				<div class="well nav-collapse sidebar-nav">
@@ -125,13 +127,14 @@
 			
 			<div id="content" class="span10">
 			<!-- content starts -->
+			{/if}
 
 			{block name=content}{/block}
-		
+			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 			</div><!--/#content.span10-->
-		
+			{/if}
 		</div><!--/fluid-row-->
-		
+		{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 		<hr>
 
 		<div class="modal hide fade" id="myModal">
@@ -152,7 +155,7 @@
 			<p class="pull-left">&copy; <a href="http://usman.it" target="_blank">Muhammad Usman</a> <?php echo date('Y') ?></p>
 			<p class="pull-right">Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>
 		</footer>
-
+		{/if}
 	</div><!--/.fluid-container-->
 
 	<!-- external javascript
