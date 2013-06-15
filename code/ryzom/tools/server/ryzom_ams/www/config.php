@@ -22,3 +22,5 @@ $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
 
 $DEFAULT_LANGUAGE = 'en';
+
+$SITEBASE = dirname( __FILE__ ) . '/html/' ;
