@@ -10,14 +10,14 @@ class Helpers{
          $smarty = new Smarty;
 
          // turn smarty debugging on/off
-        $smarty -> debugging = true;
+        $smarty -> debugging = false;
          // caching must be disabled for multi-language support
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 120;
 
          helpers :: create_folders ();
 
-         if ( !helpers :: check_if_game_client () or $forcelibrender = true ){
+         if ( helpers :: check_if_game_client () or $forcelibrender = false ){
              $smarty -> template_dir = $AMS_LIB . '/ingame_templates/';
              $smarty -> setConfigDir( $AMS_LIB . '/configs' );
              }else{
@@ -44,7 +44,12 @@ class Helpers{
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
-         $smarty -> display( $template . '.tpl' );
+	 if($vars['permission'] == 1){
+		$inherited = "layout_admin.tpl";
+	 }else{
+	 	$inherited = "layout_user.tpl";
+	 }
+         $smarty -> display( 'extends:' . $inherited .'|home.tpl' );
          }
 
      public function create_folders(){
