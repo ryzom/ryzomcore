@@ -271,10 +271,18 @@ void CBloomEffect::initTexture(CSmartPtr<ITexture> & tex, bool isMode2D, uint32 
 
 //-----------------------------------------------------------------------------------------------------------
 
-void CBloomEffect::initBloom() // clientcfg
+void CBloomEffect::initBloom()
+{
+	CTextureUser cu;
+	initBloom(cu);
+}
+
+void CBloomEffect::initBloom(UTexture &renderTarget) // clientcfg
 {
 	if(!((CDriverUser *)_Driver)->getDriver()->supportBloomEffect())
 		return;
+
+	m_UserRenderTarget = dynamic_cast<CTextureUser &>(renderTarget).getITexture();
 
 	// don't activate bloom when PolygonMode is different from Filled
 	if (_Driver->getPolygonMode() != UDriver::Filled) return;
@@ -348,14 +356,25 @@ void CBloomEffect::initBloom() // clientcfg
 			_DisplaySquareBlurMat.getObjectPtr()->setTexture(1, _BlurFinalTex);
 		}
 	}
+	
+	// For now the user target must be the window size
+	// to be compatible with the existing code.
+	// TODO: Instead, if user render target is provided, 
+	// assume the size of the user render target as
+	// the screen size to be used.
+	if (m_UserRenderTarget.getPtr())
+	{
+		nlassert(_WndWidth == m_UserRenderTarget->getWidth());
+		nlassert(_WndHeight == m_UserRenderTarget->getHeight());
+		_DisplayInitMat.getObjectPtr()->setTexture(0, m_UserRenderTarget);
+	}
 
-	NL3D::CTextureUser *txt = (_InitBloomEffect) ? (new CTextureUser(_InitText)) : (new CTextureUser());
-	if(!((CDriverUser *) _Driver)->setRenderTarget(*txt, 0, 0, _WndWidth, _WndHeight))
+	NL3D::CTextureUser txt = (_InitBloomEffect) ? (CTextureUser(m_UserRenderTarget.getPtr() ? m_UserRenderTarget : _InitText)) : (CTextureUser());
+	if(!((CDriverUser *) _Driver)->setRenderTarget(txt, 0, 0, _WndWidth, _WndHeight))
 	{
 		nlwarning("setRenderTarget return false with initial texture for bloom effect\n");
 		return;
 	}
-	delete txt;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -371,13 +390,13 @@ void CBloomEffect::endBloom() // clientcfg
 	if(_Driver->getWindowWidth()==0 || _Driver->getWindowHeight()==0)
 		return;
 
-	CTextureUser *txt1 = (_InitBloomEffect) ? (new CTextureUser(_InitText)) : (new CTextureUser());
-	CTextureUser *txt2 = new CTextureUser(_BlurFinalTex);
-	CRect *rect1 = new CRect(0, 0, _WndWidth, _WndHeight);
-	CRect *rect2 = new CRect(0, 0, _BlurWidth, _BlurHeight);
+	CTextureUser txt1 = (_InitBloomEffect) ? (CTextureUser(m_UserRenderTarget.getPtr() ? m_UserRenderTarget : _InitText)) : (CTextureUser());
+	CTextureUser txt2(_BlurFinalTex);
+	CRect rect1(0, 0, _WndWidth, _WndHeight);
+	CRect rect2(0, 0, _BlurWidth, _BlurHeight);
 	// stretch rect
-	((CDriverUser *) _Driver)->stretchRect(_Scene, *txt1 , *rect1,
-		*txt2, *rect2);
+	((CDriverUser *) _Driver)->stretchRect(_Scene, txt1 , rect1,
+		txt2, rect2);
 
 	// horizontal blur pass
 	doBlur(true);
@@ -387,10 +406,6 @@ void CBloomEffect::endBloom() // clientcfg
 
 	// apply blur with a blend operation
 	applyBlur();
-	delete txt1;
-	delete txt2;
-	delete rect1;
-	delete rect2;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -402,13 +417,12 @@ void CBloomEffect::applyBlur()
 	// in opengl, display in init texture
 	if(_InitBloomEffect)
 	{
-		CTextureUser *txt = new CTextureUser(_InitText);
-		if(!((CDriverUser *) _Driver)->setRenderTarget(*txt, 0, 0, _WndWidth, _WndHeight))
+		CTextureUser txt(m_UserRenderTarget.getPtr() ? m_UserRenderTarget : _InitText);
+		if(!((CDriverUser *) _Driver)->setRenderTarget(txt, 0, 0, _WndWidth, _WndHeight))
 		{
 			nlwarning("setRenderTarget return false with initial texture for bloom effect\n");
 			return;
 		}
-		delete txt;
 	}
 
 	// display blur texture
@@ -463,7 +477,9 @@ void CBloomEffect::applyBlur()
 
 void CBloomEffect::endInterfacesDisplayBloom() // clientcfg
 {
-	if(_InitBloomEffect)
+	// Render from render target to screen if necessary.
+	// Don't do this when the blend was done to the screen or when rendering to a user provided rendertarget.
+	if (_InitBloomEffect && m_UserRenderTarget.isNull())
 	{
 		if(!_Driver->supportBloomEffect() || !_Init)
 			return;
@@ -496,6 +512,15 @@ void CBloomEffect::endInterfacesDisplayBloom() // clientcfg
 		_Driver->drawQuad(_DisplayQuad, _DisplayInitMat);
 		_Driver->setMatrixMode3D(pCam);
 	}
+
+	if (m_UserRenderTarget.getPtr())
+	{
+		if (_InitBloomEffect)
+		{
+			_DisplayInitMat.getObjectPtr()->setTexture(0, _InitText);
+		}
+		m_UserRenderTarget = NULL;
+	}
 }
 
 
@@ -522,14 +547,13 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 	}
 
 	NL3D::IDriver *drvInternal = ((CDriverUser *) _Driver)->getDriver();
-	CTextureUser *txt = new CTextureUser(endTexture);
+	CTextureUser txt(endTexture);
 	// initialize render target
-	if(!((CDriverUser *) _Driver)->setRenderTarget(*txt, 0, 0, _BlurWidth, _BlurHeight))
+	if(!((CDriverUser *) _Driver)->setRenderTarget(txt, 0, 0, _BlurWidth, _BlurHeight))
 	{
 		nlwarning("setRenderTarget return false with blur texture for bloom effect\n");
 		return;
 	}
-	delete txt;
 
 	// initialize vertex program
 	drvInternal->activeVertexProgram(&TextureOffsetVertexProgram);
@@ -578,10 +602,9 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 
 	// disable render target and vertex program
 	drvInternal->activeVertexProgram(NULL);
-	txt = new CTextureUser();
-	((CDriverUser *)_Driver)->setRenderTarget(*txt, 0, 0, 0, 0);
+	CTextureUser cu;
+	((CDriverUser *)_Driver)->setRenderTarget(cu, 0, 0, 0, 0);
 	_Driver->setMatrixMode3D(pCam);
-	delete txt;
 }
 
 }; // NL3D
