@@ -475,9 +475,8 @@ void CBloomEffect::endInterfacesDisplayBloom() // clientcfg
 			return;
 
 		NL3D::IDriver *drvInternal = ((CDriverUser *) _Driver)->getDriver();
-		CTextureUser *txt = new CTextureUser();
-		((CDriverUser *)_Driver)->setRenderTarget(*txt, 0, 0, 0, 0);
-		delete txt;
+		CTextureUser txtNull;
+		((CDriverUser *)_Driver)->setRenderTarget(txtNull, 0, 0, 0, 0);
 
 		// initialize texture coordinates
 		float newU = drvInternal->isTextureRectangle(_InitText) ? (float)_WndWidth : 1.f;
