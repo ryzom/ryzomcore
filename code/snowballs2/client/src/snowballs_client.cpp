@@ -179,6 +179,8 @@ void releaseIngame();
 void releaseOnline();
 void releaseOffline();
 void cbGraphicsDriver(CConfigFile::CVar &var);
+void cbSquareBloom(CConfigFile::CVar &var);
+void cbDensityBloom(CConfigFile::CVar &var);
 
 //
 // Functions
@@ -362,6 +364,8 @@ void initIngame()
 		CBloomEffect::instance().setDriver(Driver);
 		CBloomEffect::instance().setScene(Scene);
 		CBloomEffect::instance().init(ConfigFile->getVar("OpenGL").asInt() == 1);
+		CConfiguration::setAndCallback("SquareBloom", cbSquareBloom);
+		CConfiguration::setAndCallback("DensityBloom", cbDensityBloom);
 
 		// Init the landscape using the previously created UScene
 		displayLoadingState("Initialize Landscape");
@@ -562,6 +566,8 @@ void releaseIngame()
 		MouseListener = NULL;
 
 		// release bloom effect
+		CConfiguration::dropCallback("SquareBloom");
+		CConfiguration::dropCallback("DensityBloom");
 		CBloomEffect::instance().releaseInstance();
 
 		Driver->deleteScene(Scene);
@@ -882,6 +888,16 @@ void cbGraphicsDriver(CConfigFile::CVar &var)
 {
 	// -- give ingame warning or something instead =)
 	NextGameState = GameStateReset;
+}
+
+void cbSquareBloom(CConfigFile::CVar &var)
+{
+	CBloomEffect::instance().setSquareBloom(var.asBool());
+}
+
+void cbDensityBloom(CConfigFile::CVar &var)
+{
+	CBloomEffect::instance().setDensityBloom((uint8)(var.asInt() & 0xFF));
 }
 
 //
