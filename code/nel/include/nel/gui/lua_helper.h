@@ -217,9 +217,7 @@ namespace NLGUI
 		void				clear() { setTop(0); }
 		int					getTop();
 		bool				empty() { return getTop() == 0; }
-#if LUA_VERSION_NUM >= 502 
 		void				pushGlobalTable();		
-#endif
 		void				pushValue(int index);  // copie nth element of stack to the top of the stack
 		void				remove(int index);     // remove nth element of stack
 		void				insert(int index);     // insert last element of the stack before the given position

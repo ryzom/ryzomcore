@@ -2613,7 +2613,7 @@ void CEditor::init(TMode initialMode, TAccessMode accessMode)
 	}
 	//
 	CLuaStackChecker lsc(&getLua());
-	getLua().pushValue(LUA_GLOBALSINDEX);
+	getLua().pushGlobalTable();
 	_Globals.pop(getLua());
 	getLua().pushValue(LUA_REGISTRYINDEX);
 	_Registry.pop(getLua());
@@ -3956,9 +3956,11 @@ void CEditor::release()
 	// clear the environment
 	if (CLuaManager::getInstance().getLuaState())
 	{
+		getLua().pushGlobalTable();
 		getLua().push(R2_LUA_PATH);
 		getLua().pushNil();
-		getLua().setTable(LUA_GLOBALSINDEX);
+		getLua().setTable(-3); // pop pop
+		getLua().pop();
 		_Globals.release();
 		_Registry.release();
 		_ObjectProjectionMetatable.release();	// AJM

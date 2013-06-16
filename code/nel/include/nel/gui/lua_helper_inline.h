@@ -81,14 +81,17 @@ inline void CLuaState::setTop(int index)
 	lua_settop(_State, index);
 }
 
-#if LUA_VERSION_NUM >= 502
 //================================================================================
 inline void CLuaState::pushGlobalTable()
 {
 	//H_AUTO(Lua_CLuaState_pushGlobalTable)
+#if LUA_VERSION_NUM >= 502
 	lua_pushglobaltable(_State);
-}
+#else
+	checkIndex(LUA_GLOBALSINDEX);
+	lua_pushvalue(_State, LUA_GLOBALSINDEX);
 #endif
+}
 
 //================================================================================
 inline void CLuaState::pushValue(int index)
