@@ -49,7 +49,8 @@ class Helpers{
 	 }else{
 	 	$inherited = "layout_user.tpl";
 	 }
-         $smarty -> display( 'extends:' . $inherited .'|home.tpl' );
+	//extends:' . $inherited .'|register.tpl
+         $smarty -> display( 'register.tpl' );
          }
 
      public function create_folders(){
