@@ -679,6 +679,7 @@ void loopIngame()
 
 		// 02. Update Time (deltas)
 		CGameTime::updateTime();
+		CGameTime::advanceTime(1.0);
 
 		// 03. Update Input (keyboard controls, etc)
 		Driver->EventServer.pump(); // Pump user input messages
