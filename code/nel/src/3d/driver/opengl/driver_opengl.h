@@ -556,6 +556,10 @@ public:
 	// return true if driver support non-power of two textures
 	virtual	bool			supportNonPowerOfTwoTextures() const;
 
+	virtual int				getMultipassCameraEffectNb();
+	virtual const CMultipassCameraEffectInfo *getMultipassCameraEffectInfo(int idx) const;
+	virtual IMultipassCameraEffect *createMultipassCameraEffect(int idx) const;
+
 	virtual bool			activeFrameBufferObject(ITexture * tex);
 
 	virtual void			getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect);
@@ -1491,6 +1495,9 @@ private:
 	  */
 	inline void setupTextureBasicParameters(ITexture &tex);
 
+	/// Multipass Camera Effects
+	void initMultipassCameraEffectInfos();
+	std::vector<const IMultipassCameraEffectInfoPriv *> m_MultipassCameraEffectInfos;
 };
 
 // ***************************************************************************

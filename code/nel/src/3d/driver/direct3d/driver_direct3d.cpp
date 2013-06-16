@@ -2999,6 +2999,26 @@ bool CDriverD3D::supportNonPowerOfTwoTextures() const
 
 // ***************************************************************************
 
+int CDriverD3D::getMultipassCameraEffectNb()
+{
+	// Screw D3D.
+	return 0;
+}
+
+const NL3D::CMultipassCameraEffectInfo *CDriverD3D::getMultipassCameraEffectInfo(int idx) const
+{
+	// Screw D3D.
+	return NULL;
+}
+
+NL3D::IMultipassCameraEffect *CDriverD3D::createMultipassCameraEffect(int idx) const
+{
+	// Screw D3D.
+	return NULL;
+}
+
+// ***************************************************************************
+
 bool CDriverD3D::fillBuffer (NLMISC::CBitmap &bitmap)
 {
 	H_AUTO_D3D(CDriverD3D_fillBuffer);

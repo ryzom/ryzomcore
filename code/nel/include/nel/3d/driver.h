@@ -66,6 +66,9 @@ class CScissor;
 class CViewport;
 struct CMonitorColorProperties;
 struct IOcclusionQuery;
+class CMultipassCameraEffectInfo;
+class IMultipassCameraEffectInfoPriv;
+class IMultipassCameraEffect;
 
 
 
@@ -806,6 +809,16 @@ public:
 
 	// return true if driver support non-power of two textures
 	virtual	bool			supportNonPowerOfTwoTextures() const =0;
+
+	/// \name Multipass Camera Effects. Prefer to use CMultipassCameraEffectManager instead of calling these directly.
+	// @{
+	/// Return the number of installed multipass camera effects.
+	virtual int				getMultipassCameraEffectNb() =0;
+	/// Return information about a specified multipass camera effect.
+	virtual const CMultipassCameraEffectInfo *getMultipassCameraEffectInfo(int idx) const =0;
+	/// Create a multipass camera effect with specified id.
+	virtual IMultipassCameraEffect *createMultipassCameraEffect(int idx) const =0;
+	// @}
 
 	/** get a part of the ZBuffer (back buffer).
 	  * NB: 0,0 is the bottom left corner of the screen.
