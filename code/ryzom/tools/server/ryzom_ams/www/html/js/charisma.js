@@ -274,7 +274,8 @@ function docReady(){
 		$('#myModal').modal('show');
 	});
 	$('.btn-help').click(function(e){
-		alert('test');
+		
+	}
 	});
 
 
