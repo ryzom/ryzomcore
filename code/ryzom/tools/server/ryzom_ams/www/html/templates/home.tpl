@@ -11,7 +11,7 @@
 					<span class="icon-bar"></span>
 				</a>
 				<a class="brand" href="index.php"> <img alt="Charisma Logo" src="img/mainlogo.png"></a>
-				
+
 				<!-- theme selector starts -->
 				<div class="btn-group pull-right theme-container">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -31,7 +31,7 @@
 					</ul>
 				</div>
 				<!-- theme selector ends -->
-				
+
 				<!-- user dropdown starts -->
 				<div class="btn-group pull-right">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -45,7 +45,7 @@
 					</ul>
 				</div>
 				<!-- user dropdown ends -->
-				
+
 
 			</div>
 		</div>
@@ -53,7 +53,7 @@
 	<!-- topbar ends -->
 		<div class="container-fluid">
 		<div class="row-fluid">
-				
+
 			<!-- left menu starts -->
 			<div class="span2 main-menu-span">
 				<div class="well nav-collapse sidebar-nav">
@@ -67,17 +67,17 @@
 				</div><!--/.well -->
 			</div><!--/span-->
 			<!-- left menu ends -->
-			
+
 			<noscript>
 				<div class="alert alert-block span10">
 					<h4 class="alert-heading">Warning!</h4>
 					<p>You need to have <a href="http://en.wikipedia.org/wiki/JavaScript" target="_blank">JavaScript</a> enabled to use this site.</p>
 				</div>
 			</noscript>
-			
+
 			<div id="content" class="span10">
 			<!-- content starts -->
-			
+
 
 			<div class="sortable row-fluid ui-sortable">
 				<a data-original-title="6 new members." data-rel="tooltip" class="well span3 top-block" href="#">
@@ -100,7 +100,7 @@
 					<div>$13320</div>
 					<span class="notification yellow">$34</span>
 				</a>
-				
+
 				<a data-original-title="12 new messages." data-rel="tooltip" class="well span3 top-block" href="#">
 					<span class="icon32 icon-color icon-envelope-closed"></span>
 					<div>Messages</div>
@@ -108,7 +108,7 @@
 					<span class="notification red">12</span>
 				</a>
 			</div>
-			
+
 			<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well">
@@ -123,15 +123,15 @@
 						<h1>Charisma <small>free, premium quality, responsive, multiple skin admin template.</small></h1>
 						<p>Its a live demo of the template. I have created Charisma to ease the repeat work I have to do on my projects. Now I re-use Charisma as a base for my admin panel work and I am sharing it with you :)</p>
 						<p><b>All pages in the menu are functional, take a look at all, please share this with your followers.</b></p>
-						
+
 						<div class="clearfix"></div>
 					</div>
 				</div>
 			</div>
-					
+
 			<div class="row-fluid sortable ui-sortable">
 
-						
+
 				<div class="box span4">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-user"></i> Member Activity</h2>
@@ -149,7 +149,7 @@
 										<strong>Name:</strong> <a href="#">Usman
 									</a><br>
 									<strong>Since:</strong> 17/05/2012<br>
-									<strong>Status:</strong> <span class="label label-success">Approved</span>                                  
+									<strong>Status:</strong> <span class="label label-success">Approved</span>
 								</li>
 								<li>
 									<a href="#">
@@ -157,7 +157,7 @@
 										<strong>Name:</strong> <a href="#">Sheikh Heera
 									</a><br>
 									<strong>Since:</strong> 17/05/2012<br>
-									<strong>Status:</strong> <span class="label label-warning">Pending</span>                                 
+									<strong>Status:</strong> <span class="label label-warning">Pending</span>
 								</li>
 								<li>
 									<a href="#">
@@ -165,7 +165,7 @@
 										<strong>Name:</strong> <a href="#">Abdullah
 									</a><br>
 									<strong>Since:</strong> 25/05/2012<br>
-									<strong>Status:</strong> <span class="label label-important">Banned</span>                                  
+									<strong>Status:</strong> <span class="label label-important">Banned</span>
 								</li>
 								<li>
 									<a href="#">
@@ -173,13 +173,13 @@
 										<strong>Name:</strong> <a href="#">Saruar Ahmed
 									</a><br>
 									<strong>Since:</strong> 17/05/2012<br>
-									<strong>Status:</strong> <span class="label label-info">Updates</span>                                  
+									<strong>Status:</strong> <span class="label label-info">Updates</span>
 								</li>
 							</ul>
 						</div>
 					</div>
 				</div><!--/span-->
-						
+
 				<div class="box span8">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-list-alt"></i> Realtime Traffic</h2>
@@ -241,7 +241,7 @@
 						</p>
 					</div>
 				</div><!--/span-->
-					
+
 				<div class="box span4">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-list"></i> Buttons</h2>
@@ -278,10 +278,10 @@
 								<li><a href="#"><i class="icon-tint"></i> Separated link</a></li>
 							</ul>
 						</div>
-						
+
 					</div>
 				</div><!--/span-->
-					
+
 				<div class="box span4">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-list"></i> Weekly Stat</h2>
@@ -295,9 +295,9 @@
 						<ul class="dashboard-list">
 							<li>
 								<a href="#">
-									<i class="icon-arrow-up"></i>                               
+									<i class="icon-arrow-up"></i>
 									<span class="green">92</span>
-									New Comments                                    
+									New Comments
 								</a>
 							</li>
 						  <li>
@@ -311,21 +311,21 @@
 							<a href="#">
 							  <i class="icon-minus"></i>
 							  <span class="blue">36</span>
-							  New Articles                                    
+							  New Articles
 							</a>
 						  </li>
 						  <li>
 							<a href="#">
 							  <i class="icon-comment"></i>
 							  <span class="yellow">45</span>
-							  User reviews                                    
+							  User reviews
 							</a>
 						  </li>
 						  <li>
 							<a href="#">
-							  <i class="icon-arrow-up"></i>                               
+							  <i class="icon-arrow-up"></i>
 							  <span class="green">112</span>
-							  New Comments                                    
+							  New Comments
 							</a>
 						  </li>
 						  <li>
@@ -339,28 +339,28 @@
 							<a href="#">
 							  <i class="icon-minus"></i>
 							  <span class="blue">93</span>
-							  New Articles                                    
+							  New Articles
 							</a>
 						  </li>
 						  <li>
 							<a href="#">
 							  <i class="icon-comment"></i>
 							  <span class="yellow">254</span>
-							  User reviews                                    
+							  User reviews
 							</a>
 						  </li>
 						</ul>
 					</div>
 				</div><!--/span-->
 			</div><!--/row-->
-				  
 
-		  
-       
+
+
+
 					<!-- content ends -->
 			</div><!--/#content.span10-->
 				</div><!--/fluid-row-->
-				
+
 		<hr>
 
 		<div class="modal hide fade" id="myModal">
@@ -380,7 +380,7 @@
 		<footer>
 			<p class="pull-right">Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>
 		</footer>
-		
+
 	</div><!--/.fluid-container-->
 
 {/block}

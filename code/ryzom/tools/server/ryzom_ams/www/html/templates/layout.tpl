@@ -51,7 +51,9 @@
 
 	<!-- The fav icon -->
 	<!--<link rel="shortcut icon" href="img/favicon.ico">-->
-		
+
+	<!--custom css file-->
+	<link href="css/custom.css" rel="stylesheet">
 </head>
 
 <body>
@@ -66,7 +68,7 @@
 					<span class="icon-bar"></span>
 				</a>
 				<a href="index.html"> <img src="img/ryzomtop.png" height="65" style="padding-left:26px;"/></a>
-				
+
 				<!-- theme selector starts -->
 				<div class="btn-group pull-right theme-container" >
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -86,7 +88,7 @@
 					</ul>
 				</div>
 				<!-- theme selector ends -->
-				
+
 				<!-- user dropdown starts -->
 				<div class="btn-group pull-right" >
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -117,14 +119,14 @@
 				</div><!--/.well -->
 			</div><!--/span-->
 			<!-- left menu ends -->
-			
+
 			<noscript>
 				<div class="alert alert-block span10">
 					<h4 class="alert-heading">Warning!</h4>
 					<p>You need to have <a href="http://en.wikipedia.org/wiki/JavaScript" target="_blank">JavaScript</a> enabled to use this site.</p>
 				</div>
 			</noscript>
-			
+
 			<div id="content" class="span10">
 			<!-- content starts -->
 			{/if}
@@ -231,7 +233,7 @@
 	<script src="js/jquery.history.js"></script>
 	<!-- application script for Charisma demo -->
 	<script src="js/charisma.js"></script>
-	
-	
+
+
 </body>
 </html>

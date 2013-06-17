@@ -1,6 +1,6 @@
 <?php
 class Users{
-    
+
      public function add_user(){
          // check if values exist
         if ( isset( $_POST["Username"] ) and isset( $_POST["Password"] ) and isset( $_POST["Email"] ) )
@@ -18,7 +18,7 @@ class Users{
              }
          // if all are good then create user
         if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success" ) and ( $email == "success" ) and ( isset( $_POST["TaC"] ) ) ){
-             $edit = array( 
+             $edit = array(
                 'name' => $_POST["Username"],
                  'pass' => $_POST["Password"],
                  'mail' => $_POST["Email"],
@@ -31,7 +31,7 @@ class Users{
              header( 'Location: email_sent.php' );
              exit;
              }else{
-             $pageElements = array( 
+             $pageElements = array(
                 'GAME_NAME' => variable_get( 'ryzommanage_game-name', '' ),
                  'WELCOME_MESSAGE' => variable_get( 'ryzommanage_register-welcome', '' ),
                  'USERNAME' => $user,
@@ -44,7 +44,7 @@ class Users{
                  }else{
                  $pageElements['USERNAME_ERROR'] = 'FALSE';
                  }
-            
+
              if ( $pass != "success" ){
                  $pageElements['PASSWORD_ERROR'] = 'TRUE';
                  }else{
@@ -68,10 +68,10 @@ class Users{
              return $pageElements;
              }
          }
-    
+
     /**
      * Function checkUser
-     * 
+     *
      * @takes $username
      * @return string Info: Returns a string based on if the username is valid, if valid then "success" is returned
      */
@@ -84,7 +84,7 @@ class Users{
                  return "Username must be 5 or more characters.";
                  }elseif ( !preg_match( '/^[a-z0-9\.]*$/', $username ) ){
                  return "Username can only contain numbers and letters.";
-                 }elseif ( sql :: db_query( "SELECT COUNT(*) FROM {users} WHERE name = :name", array( 
+                 }elseif ( sql :: db_query( "SELECT COUNT(*) FROM {users} WHERE name = :name", array(
                         ':name' => $username
                          ) ) -> fetchField() ){
                  return "Username " . $username . " is in use.";
@@ -98,7 +98,7 @@ class Users{
          }
     /**
      * Function checkPassword
-     * 
+     *
      * @takes $pass
      * @return string Info: Returns a string based on if the password is valid, if valid then "success" is returned
      */
@@ -117,7 +117,7 @@ class Users{
          }
     /**
      * Function confirmPassword
-     * 
+     *
      * @takes $pass
      * @return string Info: Verify's $_POST["Password"] is the same as $_POST["ConfirmPass"]
      */
@@ -132,16 +132,16 @@ class Users{
          }
     /**
      * Function checkEmail
-     * 
+     *
      * @takes $email
-     * @return 
+     * @return
      */
      public function checkEmail( $email )
     {
          if ( isset( $email ) ){
              if ( !validEmail( $email ) ){
                  return "Email address is not valid.";
-                 }elseif ( db_query( "SELECT COUNT(*) FROM {users} WHERE mail = :mail", array( 
+                 }elseif ( db_query( "SELECT COUNT(*) FROM {users} WHERE mail = :mail", array(
                         ':mail' => $email
                          ) ) -> fetchField() ){
                  return "Email is in use.";
@@ -230,4 +230,3 @@ class Users{
          }
      }
 
- 
