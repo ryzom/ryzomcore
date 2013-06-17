@@ -15,3 +15,7 @@
 {
 	display:none;
 }
+
+.navbar {
+    border-bottom: 0px;
+}

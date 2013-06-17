@@ -57,6 +57,7 @@
 </head>
 
 <body>
+  <div class="container-fluid">
 	{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 	<div class="navbar">
 		<div class="navbar-inner">
@@ -236,8 +237,6 @@
 	<script src="js/charisma.js"></script>
 	<!-- help script for page help -->
 	<script src="js/help.js"></script>
-
-
-
+  </div>
 </body>
 </html>
