@@ -44,13 +44,15 @@ class Helpers{
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
-         if( $vars['permission'] == 1 ){
-             $inherited = "layout_admin.tpl";
-             }else{
-             $inherited = "layout_user.tpl";
-             }
+          if( $vars['permission'] == 2 ){
+               $inherited = "extends:layout_admin.tpl|";
+          }else if($vars['permission'] == 1){
+               $inherited = "extends:layout_user.tpl|";
+          }else{
+               $inherited ="";
+          }
          // extends:' . $inherited .'|register.tpl
-        $smarty -> display( $template . '.tpl' );
+        $smarty -> display( $inherited . $template . '.tpl' );
          }
 
      static public function create_folders(){

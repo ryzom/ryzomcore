@@ -18,6 +18,6 @@ if ( isset( $_GET["page"] ) ){
      }
 
 // temporary set permission to 1 which = admin mode
-$return = array( 'permission' => 1, 'no_visible_elements' => 'TRUE' );
+$return = array( 'permission' => 1, 'no_visible_elements' => 'FALSE' );
 
 helpers :: loadTemplate( $page , $return );
