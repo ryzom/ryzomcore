@@ -233,6 +233,9 @@
 	<script src="js/jquery.history.js"></script>
 	<!-- application script for Charisma demo -->
 	<script src="js/charisma.js"></script>
+	<!-- help script for page help -->
+	<script src="js/help.js"></script>
+
 
 
 </body>

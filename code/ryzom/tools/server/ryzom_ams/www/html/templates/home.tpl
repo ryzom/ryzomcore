@@ -31,7 +31,7 @@
 					</ul>
 				</div>
 				<!-- theme selector ends -->
-
+				<button onclick="show_help('test')">Help Test</button>
 				<!-- user dropdown starts -->
 				<div class="btn-group pull-right">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -114,6 +114,7 @@
 					<div class="box-header well">
 						<h2><i class="icon-info-sign"></i> Introduction</h2>
 						<div class="box-icon">
+							<a href="#" class="btn btn-help btn-round"><i class="icon-info-sign"></i></a>
 							<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
 							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
