@@ -12,12 +12,16 @@ function loadpage ( $page ){
      require_once( 'autoload/' . $page . '.php' );
      }
 
-$page = 'home';
+$page = 'login';
 if ( isset( $_GET["page"] ) ){
      $page = $_GET["page"];
      }
 
-// temporary set permission to 1 which = admin mode
-$return = array( 'permission' => 1, 'no_visible_elements' => 'FALSE' );
+//Page Handling
+if($page == 'login' || $page == 'register'){
+     $no_visible_elements = 'TRUE';
+}
+// temporary set permission to 2 which = admin mode
+$return = array( 'permission' => 1, 'no_visible_elements' => $no_visible_elements );
 
 helpers :: loadTemplate( $page , $return );
