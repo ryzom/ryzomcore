@@ -16,7 +16,8 @@ $page = 'home';
 if ( isset( $_GET["page"] ) ){
      $page = $_GET["page"];
     }
+    
 //temporary set permission to 1 which = admin mode
 $return =  array('permission' => 1, 'no_visible_elements' => 'TRUE');
 
-helpers :: loadTemplate( 'register' , $return );
+helpers :: loadTemplate( $page , $return );

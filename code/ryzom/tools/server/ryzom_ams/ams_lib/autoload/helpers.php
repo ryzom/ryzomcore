@@ -1,7 +1,7 @@
 <?php
 class Helpers{
 
-     public function loadTemplate( $template, $vars = array (), $forcelibrender = false )
+    static public function loadTemplate( $template, $vars = array (), $forcelibrender = false )
     {
          global $AMS_LIB;
          global $SITEBASE;
@@ -50,10 +50,10 @@ class Helpers{
 	 	$inherited = "layout_user.tpl";
 	 }
 	//extends:' . $inherited .'|register.tpl
-         $smarty -> display( 'register.tpl' );
+         $smarty -> display( $template.'.tpl' );
          }
 
-     public function create_folders(){
+     static public function create_folders(){
          global $AMS_LIB;
          global $SITEBASE;
         $arr = array( $AMS_LIB . '/ingame_templates/',
@@ -72,7 +72,7 @@ class Helpers{
 
          }
 
-     public function check_if_game_client()
+    static public function check_if_game_client()
     {
          // if HTTP_USER_AGENT is not set then its ryzom core
         if ( !isset( $_SERVER['HTTP_USER_AGENT'] ) ){

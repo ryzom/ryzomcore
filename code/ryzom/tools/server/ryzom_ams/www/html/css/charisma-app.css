@@ -349,10 +349,11 @@ text-shadow:1px 1px 5px rgba(0, 0, 0, 0.5);
 width:166px;
 }
 .brand img{
-float:left;
-height:20px;
-width:20px;
-margin-right:5px;
+    float: left;
+    height: 100%;
+    margin-bottom: -18px;
+    margin-top: -15px;
+    width: 100%;
 }
 .brand span{
 float:left;
@@ -411,6 +412,7 @@ min-height:80px;
 list-style:none;
 }
 #for-is-ajax{
+display: none;
 padding-left: 12px;
 cursor:pointer;
 }
