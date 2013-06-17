@@ -133,6 +133,8 @@
 			{/if}
 
 			{block name=content}{/block}
+			
+			
 			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 			</div><!--/#content.span10-->
 			{/if}

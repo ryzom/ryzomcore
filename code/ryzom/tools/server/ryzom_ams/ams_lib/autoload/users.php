@@ -27,13 +27,13 @@ class Users{
                  'status' => 1,
                  'access' => REQUEST_TIME
                  );
-             user_save( NULL, $edit );
+             //user_save( NULL, $edit );
              header( 'Location: email_sent.php' );
              exit;
              }else{
              $pageElements = array(
-                'GAME_NAME' => variable_get( 'ryzommanage_game-name', '' ),
-                 'WELCOME_MESSAGE' => variable_get( 'ryzommanage_register-welcome', '' ),
+                //'GAME_NAME' => variable_get( 'ryzommanage_game-name', '' ),
+                 //'WELCOME_MESSAGE' => variable_get( 'ryzommanage_register-welcome', '' ),
                  'USERNAME' => $user,
                  'PASSWORD' => $pass,
                  'CPASSWORD' => $cpass,
