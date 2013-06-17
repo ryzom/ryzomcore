@@ -273,10 +273,6 @@ function docReady(){
 		e.preventDefault();
 		$('#myModal').modal('show');
 	});
-	$('.btn-help').click(function(e){
-		
-	}
-	});
 
 
 
