@@ -58,7 +58,6 @@
 
 <body>
 	{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
-	<!-- topbar starts -->
 	<div class="navbar">
 		<div class="navbar-inner">
 			<div class="container-fluid">
@@ -67,17 +66,17 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</a>
-				<a href="index.html"> <img src="img/ryzomtop.png" height="65" style="padding-left:26px;"/></a>
+				<a class="brand" href="index.php"> <img alt="Ryzom Core Logo" src="img/ryzomcore.png"></a>
 
 				<!-- theme selector starts -->
-				<div class="btn-group pull-right theme-container" >
+				<div class="btn-group pull-right theme-container">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
 						<i class="icon-tint"></i><span class="hidden-phone"> Change Theme / Skin</span>
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu" id="themes">
 						<li><a data-value="classic" href="#"><i class="icon-blank"></i> Classic</a></li>
-						<li><a data-value="cerulean" href="#"><i class="icon-blank"></i> Cerulean</a></li>
+						<li><a data-value="cerulean" href="#"><i class="icon-blank icon-ok"></i> Cerulean</a></li>
 						<li><a data-value="cyborg" href="#"><i class="icon-blank"></i> Cyborg</a></li>
 						<li><a data-value="redy" href="#"><i class="icon-blank"></i> Redy</a></li>
 						<li><a data-value="journal" href="#"><i class="icon-blank"></i> Journal</a></li>
@@ -88,9 +87,9 @@
 					</ul>
 				</div>
 				<!-- theme selector ends -->
-
+				<button onclick="show_help('test')">Help Test</button>
 				<!-- user dropdown starts -->
-				<div class="btn-group pull-right" >
+				<div class="btn-group pull-right">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
 						<i class="icon-user"></i><span class="hidden-phone"> admin</span>
 						<span class="caret"></span>
@@ -98,10 +97,12 @@
 					<ul class="dropdown-menu">
 						<li><a href="#">Profile</a></li>
 						<li class="divider"></li>
-						<li><a href="login.html">Logout</a></li>
+						<li><a href="login.php">Logout</a></li>
 					</ul>
 				</div>
 				<!-- user dropdown ends -->
+
+
 			</div>
 		</div>
 	</div>
@@ -115,7 +116,7 @@
 					<ul class="nav nav-tabs nav-stacked main-menu">
 						{block name=menu}{/block}
 					</ul>
-					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax"><input id="is-ajax" type="checkbox"> Ajax on menu</label>
+					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax" style="visibility:hidden;"><div id="uniform-is-ajax" class="checker"><span class="checked"><input style="opacity: 0;" id="is-ajax" type="checkbox"></span></div> Ajax on menu</label>
 				</div><!--/.well -->
 			</div><!--/span-->
 			<!-- left menu ends -->
