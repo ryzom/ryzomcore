@@ -16,7 +16,7 @@ if ( isset( $_POST["Username"] ) and isset( $_POST["Password"] ) and isset( $_PO
      }
  // if all are good then create user
 if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success" ) and ( $email == "success" ) and ( isset( $_POST["TaC"] ) ) ){
-     $edit = array( 
+     $edit = array(
         'name' => $_POST["Username"],
          'pass' => $_POST["Password"],
          'mail' => $_POST["Email"],
@@ -29,7 +29,7 @@ if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success"
      header( 'Location: email_sent.php' );
      exit;
      }else{
-     $pageElements = array( 
+     $pageElements = array(
         'GAME_NAME' => $GAME_NAME,
          'WELCOME_MESSAGE' => $WELCOME_MESSAGE,
          'USERNAME' => $user,
@@ -42,7 +42,7 @@ if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success"
          }else{
          $pageElements['USERNAME_ERROR'] = 'FALSE';
          }
-    
+
      if ( $pass != "success" ){
          $pageElements['PASSWORD_ERROR'] = 'TRUE';
          }else{
@@ -64,7 +64,7 @@ if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success"
          $pageElements['TAC_ERROR'] = 'TRUE';
          }
      if ( helpers :: check_if_game_client() ){
-        helpers :: loadtemplate( '../../ams_lib/ingame_templates/register.phtml', $pageElements );
+         helpers :: loadtemplate( '../../ams_lib/ingame_templates/register.phtml', $pageElements );
          }else{
          helpers :: loadtemplate( 'templates/register.phtml', $pageElements );
          }

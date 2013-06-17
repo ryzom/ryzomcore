@@ -1,0 +1,17 @@
+.login-header
+{
+	height:190px;
+}
+
+.brand img
+{
+	height:100%;
+	margin-bottom:-18px;
+	margin-top:-15px;
+	width:auto;
+}
+
+#for-is-ajax
+{
+	display:none;
+}

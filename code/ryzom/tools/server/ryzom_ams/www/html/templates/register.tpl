@@ -12,7 +12,7 @@
 		<div class="alert alert-info">
 			 {$welcome_message}
 		</div>
-		
+
 
 		  <form name="Page1"method="post">
 		    <table>
@@ -27,7 +27,7 @@
 			       onfocus=
 			       "javascript:showTooltip('{$username_tooltip}', this);" />
 			</td>
-		
+
 			<td id="comment-Username" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($Username)}{$Username}{/if}</td>
 		      </tr>
 
@@ -124,7 +124,7 @@
 			</div>
 		  </div>
 
-		
+
 	</div><!--/span-->
 </div><!--/row-->
 {/block}
