@@ -226,7 +226,7 @@ function docReady(){
 	});
 
 	//tour
-	if($('.index').length && typeof(tour)=='undefined')
+	if($('.tour').length && typeof(tour)=='undefined')
 	{
 		var tour = new Tour();
 		tour.addStep({
