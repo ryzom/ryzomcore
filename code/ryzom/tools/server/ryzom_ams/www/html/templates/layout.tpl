@@ -88,7 +88,6 @@
 					</ul>
 				</div>
 				<!-- theme selector ends -->
-				<button onclick="show_help('test')">Help Test</button>
 				<!-- user dropdown starts -->
 				<div class="btn-group pull-right">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -134,6 +133,8 @@
 			{/if}
 
 			{block name=content}{/block}
+			
+			
 			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 			</div><!--/#content.span10-->
 			{/if}

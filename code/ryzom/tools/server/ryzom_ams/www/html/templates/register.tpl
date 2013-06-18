@@ -12,119 +12,118 @@
 		<div class="alert alert-info">
 			 {$welcome_message}
 		</div>
-
-
-		  <form name="Page1"method="post">
-		    <table>
-		      <tr>
-			<td width="33%" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} id="caption-Username">{$username_tag} </td>
-
-			<td width="25%">
-			  <input type="text"
-			       name="Username"
-			       value="{if isset($Username)}{$Username}{/if}"
-			       maxlength="12"
-			       onfocus=
-			       "javascript:showTooltip('{$username_tooltip}', this);" />
-			</td>
-
-			<td id="comment-Username" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($Username)}{$Username}{/if}</td>
-		      </tr>
-
-		      <tr>
-			<td width="33%" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-Password">{$password_tag}</td>
-
-			<td width="25%">
-			  <input type="password"
-			       name="Password"
-			       value=""
-			       maxlength="20"
-			       onkeyup=
-			       "testPassword(document.Page1.Password.value, 'comment-Password')"
-			       onfocus="javascript:showTooltip('{$password_message}', this);" />
-			</td>
-
-			<td id="comment-Password" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}{$Password}{/if}</td>
-		      </tr>
-
-		      <tr>
-			<td width="33%" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-ConfirmPass">{$cpassword_tag}</td>
-
-			<td width="25%"><input type="password"
-			       name="ConfirmPass"
-			       value=""
-			       maxlength="20"
-			       onfocus="javascript:showTooltip('{$cpassword_message}', this);" />
-			</td>
-
-			<td id="comment-ConfirmPass" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}{$ConfirmPass}{/if}</td>
-		      </tr>
-
-		      <tr>
-			<td width="33%" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-Email">{$email_tag}</td>
-
-			<td width="25%">
-			  <input type="text"
-			       name="Email"
-			       value=""
-			       maxlength="255"
-			       onfocus=
-			       "javascript:showTooltip('{$email_message}', this);" />
-			</td>
-
-			<td id="comment-Email" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}{$Email}{/if}</td>
-		      </tr>
-
-		      <tr>
-			<td width=
-			"33%" {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}class="error"{/if}
-			    colspan="2"><input type="checkbox"
-			       name="TaC"
-			       value="1"
-			       onfocus="javascript:showTooltip('', this);" /><span id=
-			       "caption-TaC">{$tac_tag}</span></td>
-				                <td id="comment-TaC" {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}class="error"{/if} width="42%"><div class="alert alert-danger">{$tac_message}</div></td>
-
-		      </tr>
-		    </table>
-
-		    <div class="c1">
-		      <input type="submit"
-			   name="Submit"
-			   value="Continue" />
-		    </div>
-		    <input type="hidden" name="function" value="add_user">
-		  </form>
-
-		  <div id="signupTooltip"
-		       class="c2"
-		       inset=""></div>
-
-		  <div id="tooltip-Username">
-			<div class="alert alert-danger">
-		    		{$username_tooltip}
-		  	</div>
-		  </div>
-
-		  <div id="tooltip-Password">
-		  	<div class="alert alert-danger">
-		    		{$password_message}
+		<form id="signup" class="form-vertical" method="post" action="index.php">
+			<legend>{$title}</legend>
+			
+			<div class="control-group {if isset($USERNAME_ERROR) and $USERNAME_ERROR eq "TRUE"}error{else if
+			isset($USERNAME) and $USERNAME eq "success"}success{else}{/if}">
+			<label class="control-label">{$username_tag}</label>
+				<div class="controls">
+				    <div class="input-prepend">
+					<span class="add-on"><i class="icon-user"></i></span>
+						<input type="text" class="input-xlarge" id="Username" name="Username" placeholder="{$username_default}" {if isset($Username)}value="{$Username}"{/if} rel="popover" data-content="{$username_tooltip}" data-original-title="{$username_default}">
+					</div>
+				</div>
 			</div>
-		  </div>
 
-		  <div id="tooltip-ConfirmPass">
-		     	<div class="alert alert-danger">
-		    		{$cpassword_message}
-			</div>
-		  </div>
 
-		  <div id="tooltip-Email">
-			<div class="alert alert-danger">
-		    		{$email_message}
+			<div class="control-group {if isset($PASSWORD_ERROR) and $PASSWORD_ERROR eq "TRUE"}error{else if
+			isset($PASSWORD) and $PASSWORD eq "success"}success{else}{/if}">
+			<label class="control-label">{$password_tag}</label>
+				<div class="controls">
+				    <div class="input-prepend">
+					<span class="add-on"><i class="icon-lock"></i></span>
+						<input type="Password" id="Password" class="input-xlarge" name="Password" placeholder="{$password_default}"  {if isset($Password)}value="{$Password}"{/if} rel="popover" data-content="{$password_tooltip}" data-original-title="{$password_default}">
+					</div>
+				</div>
 			</div>
-		  </div>
+			
+			<div class="control-group {if isset($CPASSWORD_ERROR) and $CPASSWORD_ERROR eq "TRUE"}error{else if
+			isset($CPASSWORD) and $CPASSWORD eq "success"}success{else}{/if}">
+			<label class="control-label">{$cpassword_tag}</label>
+				<div class="controls">
+				    <div class="input-prepend">
+					<span class="add-on"><i class="icon-lock"></i></span>
+						<input type="Password" id="ConfirmPass" class="input-xlarge" name="ConfirmPass" placeholder="{$cpassword_default}"  {if isset($ConfirmPass)}value="{$ConfirmPass}"{/if} rel="popover" data-content="{$cpassword_tooltip}" data-original-title="{$cpassword_default}">
+					</div>
+				</div>
+			</div>
+			
+			<div class="control-group {if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}error{else if
+			isset($EMAIL) and $EMAIL eq "success"}success{else}{/if}">
+			<label class="control-label">{$email_tag}</label>
+				<div class="controls">
+				    <div class="input-prepend">
+					<span class="add-on"><i class="icon-envelope"></i></span>
+						<input type="text" class="input-xlarge" id="Email" name="Email" placeholder="{$email_default}" {if isset($Email)}value="{$Email}"{/if} rel="popover" data-content="{$email_tooltip}" data-original-title="{$email_default}">
+					</div>
+				</div>
+			</div>
+			
+			<div class="control-group {if isset($TAC_ERROR) and $TAC_ERROR eq "TRUE"}error{else if
+			isset($TAC) and $TAC eq "success"}success{else}{/if}">
+				<div class="controls">
+				    <div class="input-prepend">
+						<input type="checkbox" class="input-xlarge" id="TaC" name="TaC" placeholder="Email">{$tac_tag}
+						
+					</div>
+				</div>
+			</div>
+			
+			{if isset($USERNAME_ERROR) and $USERNAME_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Username Error</strong> {$USERNAME}
+			</div>
+			{/if}
+			
+			{if isset($PASSWORD_ERROR) and $PASSWORD_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Password Error</strong> {$PASSWORD}
+			</div>
+			{/if}
+			
+			{if isset($CPASSWORD_ERROR) and $CPASSWORD_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Confirmation Password Error</strong> {$CPASSWORD}
+			</div>
+			{/if}
+			
+			{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Email Error</strong> {$EMAIL}
+			</div>
+			{/if}
+			
+			{if isset($TAC_ERROR) and $TAC_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Terms of Service Error</strong> {$tac_message}
+			</div>
+			{/if}
+			
+			 <input type="hidden" name="function" value="add_user">
+			 <input type="hidden" name="callBack" value="register">
+			<div class="control-group">
+			<label class="control-label"></label>
+		      <div class="controls">
+		       <button type="submit" class="btn btn-large btn-primary" >Create My Account</button>
+	
+		      </div>
+		       
+			
+		 
+	
+		</div>
+	
+		</form>
 
 
 	</div><!--/span-->
 </div><!--/row-->
 {/block}
+
+	

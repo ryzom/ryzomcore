@@ -1,13 +1,13 @@
 function show_help(help_tip)
 {
-	if(help_tip =='test')
+	if(help_tip =='intro')
 	{
 		var tour = new Tour();
 		tour.addStep({
 			element: ".brand:first", /* html element next to which the step popover should be shown */
 			placement: "bottom",
-			title: "Custom Tour", /* title of the popover */
-			content: "You can create tour like this. Click Next." /* content of the popover */
+			title: "Account Management System", /* title of the popover */
+			content: "Welcome to the Ryzom Core Account Management System! Let's explore it together... Click next!" /* content of the popover */
 		});
 		tour.addStep({
 			element: ".theme-container",

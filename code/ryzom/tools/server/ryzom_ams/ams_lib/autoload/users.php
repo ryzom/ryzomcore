@@ -27,13 +27,13 @@ class Users{
                  'status' => 1,
                  'access' => REQUEST_TIME
                  );
-             user_save( NULL, $edit );
+             //user_save( NULL, $edit );
              header( 'Location: email_sent.php' );
              exit;
              }else{
              $pageElements = array(
-                'GAME_NAME' => variable_get( 'ryzommanage_game-name', '' ),
-                 'WELCOME_MESSAGE' => variable_get( 'ryzommanage_register-welcome', '' ),
+                //'GAME_NAME' => variable_get( 'ryzommanage_game-name', '' ),
+                 //'WELCOME_MESSAGE' => variable_get( 'ryzommanage_register-welcome', '' ),
                  'USERNAME' => $user,
                  'PASSWORD' => $pass,
                  'CPASSWORD' => $cpass,
@@ -84,10 +84,10 @@ class Users{
                  return "Username must be 5 or more characters.";
                  }elseif ( !preg_match( '/^[a-z0-9\.]*$/', $username ) ){
                  return "Username can only contain numbers and letters.";
-                 }elseif ( sql :: db_query( "SELECT COUNT(*) FROM {users} WHERE name = :name", array(
+                 /*}elseif ( sql :: db_query( "SELECT COUNT(*) FROM {users} WHERE name = :name", array(
                         ':name' => $username
                          ) ) -> fetchField() ){
-                 return "Username " . $username . " is in use.";
+                 return "Username " . $username . " is in use.";*/
                  }else{
                  return "success";
                  }
@@ -139,12 +139,12 @@ class Users{
      public function checkEmail( $email )
     {
          if ( isset( $email ) ){
-             if ( !validEmail( $email ) ){
+             if ( !Users::validEmail( $email ) ){
                  return "Email address is not valid.";
-                 }elseif ( db_query( "SELECT COUNT(*) FROM {users} WHERE mail = :mail", array(
+                 /*}elseif ( db_query( "SELECT COUNT(*) FROM {users} WHERE mail = :mail", array(
                         ':mail' => $email
                          ) ) -> fetchField() ){
-                 return "Email is in use.";
+                 return "Email is in use.";*/
                  }else{
                  return "success";
                  }
@@ -153,49 +153,50 @@ class Users{
              }
          return "fail";
          }
-     public function validEmail( $email )
-    {
-         $isValid = true;
-         $atIndex = strrpos( $email, "@" );
-         if ( is_bool( $atIndex ) && !$atIndex ){
-             $isValid = false;
-             }else{
-             $domain = substr( $email, $atIndex + 1 );
-             $local = substr( $email, 0, $atIndex );
-             $localLen = strlen( $local );
-             $domainLen = strlen( $domain );
-             if ( $localLen < 1 || $localLen > 64 ){
-                 // local part length exceeded
-                $isValid = false;
-                 }else if ( $domainLen < 1 || $domainLen > 255 ){
-                 // domain part length exceeded
-                $isValid = false;
-                 }else if ( $local[0] == '.' || $local[$localLen - 1] == '.' ){
-                 // local part starts or ends with '.'
-                $isValid = false;
-                 }else if ( preg_match( '/\\.\\./', $local ) ){
-                 // local part has two consecutive dots
-                $isValid = false;
-                 }else if ( !preg_match( '/^[A-Za-z0-9\\-\\.]+$/', $domain ) ){
-                 // character not valid in domain part
-                $isValid = false;
-                 }else if ( preg_match( '/\\.\\./', $domain ) ){
-                 // domain part has two consecutive dots
-                $isValid = false;
-                 }else if ( !preg_match( '/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/', str_replace( "\\\\", "", $local ) ) ){
-                 // character not valid in local part unless
-                // local part is quoted
-                if ( !preg_match( '/^"(\\\\"|[^"])+"$/', str_replace( "\\\\", "", $local ) ) ){
-                     $isValid = false;
+         
+     public function validEmail( $email ){
+          $isValid = true;
+          $atIndex = strrpos( $email, "@" );
+          if ( is_bool( $atIndex ) && !$atIndex ){
+               $isValid = false;
+          }else{
+               $domain = substr( $email, $atIndex + 1 );
+               $local = substr( $email, 0, $atIndex );
+               $localLen = strlen( $local );
+               $domainLen = strlen( $domain );
+               if ( $localLen < 1 || $localLen > 64 ){
+                    // local part length exceeded
+                    $isValid = false;
+               }else if ( $domainLen < 1 || $domainLen > 255 ){
+                    // domain part length exceeded
+                    $isValid = false;
+               }else if ( $local[0] == '.' || $local[$localLen - 1] == '.' ){
+                    // local part starts or ends with '.'
+                    $isValid = false;
+               }else if ( preg_match( '/\\.\\./', $local ) ){
+                    // local part has two consecutive dots
+                    $isValid = false;
+               }else if ( !preg_match( '/^[A-Za-z0-9\\-\\.]+$/', $domain ) ){
+                    // character not valid in domain part
+                    $isValid = false;
+               }else if ( preg_match( '/\\.\\./', $domain ) ){
+                    // domain part has two consecutive dots
+                    $isValid = false;
+               }else if ( !preg_match( '/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/', str_replace( "\\\\", "", $local ) ) ){
+                    // character not valid in local part unless
+                    // local part is quoted
+                    if ( !preg_match( '/^"(\\\\"|[^"])+"$/', str_replace( "\\\\", "", $local ) ) ){
+                         $isValid = false;
                      }
-                 }
-             if ( $isValid && !( checkdnsrr( $domain, "MX" ) || checkdnsrr( $domain, "A" ) ) ){
-                 // domain not found in DNS
-                $isValid = false;
-                 }
-             }
-         return $isValid;
-         }
+               }
+               if ( $isValid && !( checkdnsrr( $domain, "MX" ) || checkdnsrr( $domain, "A" ) ) ){
+                    // domain not found in DNS
+                    $isValid = false;
+               }
+          }
+          return $isValid;
+     }
+         
      public function generateSALT( $length = 2 )
     {
          // start with a blank salt
