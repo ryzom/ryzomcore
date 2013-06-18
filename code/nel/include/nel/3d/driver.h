@@ -146,7 +146,6 @@ public:
 protected:
 
 	CSynchronized<TTexDrvInfoPtrMap> _SyncTexDrvInfos;
-	CSynchronized<TEffectDrvInfoPtrMap> _SyncEffectDrvInfos;
 
 	TTexDrvSharePtrList		_TexDrvShares;
 	TMatDrvInfoPtrList		_MatDrvInfos;
