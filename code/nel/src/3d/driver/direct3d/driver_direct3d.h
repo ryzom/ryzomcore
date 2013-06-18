@@ -832,10 +832,6 @@ public:
 	// return true if driver support non-power of two textures
 	virtual bool			supportNonPowerOfTwoTextures() const;
 
-	virtual int				getMultipassCameraEffectNb();
-	virtual const CMultipassCameraEffectInfo *getMultipassCameraEffectInfo(int idx) const;
-	virtual IMultipassCameraEffect *createMultipassCameraEffect(int idx) const;
-
 	// copy the first texture in a second one of different dimensions
 	virtual bool			stretchRect (ITexture * srcText, NLMISC::CRect &srcRect, ITexture * destText, NLMISC::CRect &destRect);	// Only 32 bits back buffer supported
 	virtual bool			isTextureRectangle(ITexture * /* tex */) const {return false;}

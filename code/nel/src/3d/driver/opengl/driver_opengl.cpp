@@ -27,7 +27,6 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
-#include "nel/3d/multipass_camera_effect_info.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
@@ -698,34 +697,6 @@ bool CDriverGL::supportBloomEffect() const
 bool CDriverGL::supportNonPowerOfTwoTextures() const
 {
 	return _Extensions.ARBTextureNonPowerOfTwo;
-}
-
-// ***************************************************************************
-
-void CDriverGL::initMultipassCameraEffectInfos()
-{
-	if (m_MultipassCameraEffectInfos.size() == 0)
-	{
-		// Add pointers to static class instances to the list.
-	}
-}
-
-int CDriverGL::getMultipassCameraEffectNb()
-{
-	initMultipassCameraEffectInfos();
-	return m_MultipassCameraEffectInfos.size();
-}
-
-const NL3D::CMultipassCameraEffectInfo *CDriverGL::getMultipassCameraEffectInfo(int idx) const
-{
-	nlassert(idx < m_MultipassCameraEffectInfos.size());
-	return static_cast<const NL3D::CMultipassCameraEffectInfo *>(m_MultipassCameraEffectInfos[idx]);
-}
-
-NL3D::IMultipassCameraEffect *CDriverGL::createMultipassCameraEffect(int idx) const
-{
-	nlassert(idx < m_MultipassCameraEffectInfos.size());
-	return m_MultipassCameraEffectInfos[idx]->create();
 }
 
 // ***************************************************************************
