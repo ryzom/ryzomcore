@@ -25,9 +25,9 @@
 
 #include "std3d.h"
 
-#include "pixel_program.h"
+#include <nel/3d/pixel_program.h>
 
-#include "driver.h"
+#include <nel/3d/driver.h>
 
 namespace NL3D 
 {
@@ -48,15 +48,16 @@ IPixelProgramDrvInfos::~IPixelProgramDrvInfos ()
 
 
 // ***************************************************************************
-CPixelProgram::CPixelProgram(const char* program, bool isEffectPrg)
-:IProgram(program, isEffectPrg)
+CPixelProgram::CPixelProgram(const char* program)
 {
+
 }
 
 
 // ***************************************************************************
 CPixelProgram::~CPixelProgram()
 {
+
 }
 
 } // NL3D

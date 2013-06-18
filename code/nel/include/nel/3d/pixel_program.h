@@ -26,14 +26,10 @@
 #ifndef NL_PIXEL_PROGRAM_H
 #define NL_PIXEL_PROGRAM_H
 
-#include "program.h" 
-
-#include "nel/misc/types_nl.h"
-#include "nel/misc/smart_ptr.h"
+#include <nel/misc/types_nl.h>
+#include <nel/misc/smart_ptr.h>
 
 #include <list>
-
-#define PIXEL_SHADER_PROFILE "ps_2_0"
 
 namespace NL3D {
 
@@ -59,22 +55,18 @@ public:
 
 
 //-------------------------------------------------------------------------------
-class CPixelProgram : public IProgram
+class CPixelProgram : public NLMISC::CRefCount
 {
 public:
 
 	/// Constructor
-	CPixelProgram (const char* program, bool isEffectPrg=false);
+	CPixelProgram (const char* program);
 
 	/// Destructor
 	virtual ~CPixelProgram ();
 
 	/// The driver informations. For the driver implementation only.
 	NLMISC::CRefPtr<IPixelProgramDrvInfos>		_DrvInfo;
-
-	const char * getASMProfile() { return PIXEL_SHADER_PROFILE; } ;
-
-	static const char * getPixelASMProfile() { return PIXEL_SHADER_PROFILE; } ;
 };
 
 
