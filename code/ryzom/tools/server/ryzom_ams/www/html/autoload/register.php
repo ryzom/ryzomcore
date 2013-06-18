@@ -64,8 +64,8 @@ if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success"
          $pageElements['TAC_ERROR'] = 'TRUE';
          }
      if ( helpers :: check_if_game_client() ){
-         helpers :: loadtemplate( '../../ams_lib/ingame_templates/register.phtml', $pageElements );
+         helpers :: loadtemplate( 'register', $pageElements );
          }else{
-         helpers :: loadtemplate( 'templates/register.phtml', $pageElements );
+         helpers :: loadtemplate( 'register', $pageElements );
          }
      }
