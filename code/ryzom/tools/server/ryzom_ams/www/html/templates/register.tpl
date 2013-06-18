@@ -21,7 +21,7 @@
 				<div class="controls">
 				    <div class="input-prepend">
 					<span class="add-on"><i class="icon-user"></i></span>
-						<input type="text" class="input-xlarge" id="Username" name="Username" placeholder="{$username_default}" {if isset($Username)}value="{$Username}"{/if}>
+						<input type="text" class="input-xlarge" id="Username" name="Username" placeholder="{$username_default}" {if isset($Username)}value="{$Username}"{/if} rel="popover" data-content="{$username_tooltip}" data-original-title="{$username_default}">
 					</div>
 				</div>
 			</div>
@@ -33,7 +33,7 @@
 				<div class="controls">
 				    <div class="input-prepend">
 					<span class="add-on"><i class="icon-lock"></i></span>
-						<input type="Password" id="Password" class="input-xlarge" name="Password" placeholder="{$password_default}"  {if isset($Password)}value="{$Password}"{/if}>
+						<input type="Password" id="Password" class="input-xlarge" name="Password" placeholder="{$password_default}"  {if isset($Password)}value="{$Password}"{/if} rel="popover" data-content="{$password_tooltip}" data-original-title="{$password_default}">
 					</div>
 				</div>
 			</div>
@@ -44,7 +44,7 @@
 				<div class="controls">
 				    <div class="input-prepend">
 					<span class="add-on"><i class="icon-lock"></i></span>
-						<input type="Password" id="ConfirmPass" class="input-xlarge" name="ConfirmPass" placeholder="{$cpassword_default}"  {if isset($ConfirmPass)}value="{$ConfirmPass}"{/if}>
+						<input type="Password" id="ConfirmPass" class="input-xlarge" name="ConfirmPass" placeholder="{$cpassword_default}"  {if isset($ConfirmPass)}value="{$ConfirmPass}"{/if} rel="popover" data-content="{$cpassword_tooltip}" data-original-title="{$cpassword_default}">
 					</div>
 				</div>
 			</div>
@@ -55,7 +55,7 @@
 				<div class="controls">
 				    <div class="input-prepend">
 					<span class="add-on"><i class="icon-envelope"></i></span>
-						<input type="text" class="input-xlarge" id="Email" name="Email" placeholder="{$email_default}" {if isset($Email)}value="{$Email}"{/if}>
+						<input type="text" class="input-xlarge" id="Email" name="Email" placeholder="{$email_default}" {if isset($Email)}value="{$Email}"{/if} rel="popover" data-content="{$email_tooltip}" data-original-title="{$email_default}">
 					</div>
 				</div>
 			</div>
@@ -69,6 +69,42 @@
 					</div>
 				</div>
 			</div>
+			
+			{if isset($USERNAME_ERROR) and $USERNAME_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Username Error</strong> {$USERNAME}
+			</div>
+			{/if}
+			
+			{if isset($PASSWORD_ERROR) and $PASSWORD_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Password Error</strong> {$PASSWORD}
+			</div>
+			{/if}
+			
+			{if isset($CPASSWORD_ERROR) and $CPASSWORD_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Confirmation Password Error</strong> {$CPASSWORD}
+			</div>
+			{/if}
+			
+			{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Email Error</strong> {$EMAIL}
+			</div>
+			{/if}
+			
+			{if isset($TAC_ERROR) and $TAC_ERROR eq "TRUE"}
+			<div class="alert alert-error">
+				<button type="button" class="close" data-dismiss="alert">×</button>
+				<strong>Terms of Service Error</strong> {$tac_message}
+			</div>
+			{/if}
+			
 			 <input type="hidden" name="function" value="add_user">
 			 <input type="hidden" name="callBack" value="register">
 			<div class="control-group">
