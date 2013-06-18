@@ -377,6 +377,9 @@ void	CScene::endPartRender()
 	// Reset profiling
 	_NextRenderProfile= false;
 
+	IDriver *drv = getDriver();
+	drv->activeVertexProgram(NULL);
+	drv->activePixelProgram(NULL);
 
 	/*
 	uint64 total = PSStatsRegisterPSModelObserver +
@@ -1561,6 +1564,7 @@ void CScene::renderOcclusionTestMeshs()
 	nlassert(RenderTrav.getDriver());
 	RenderTrav.getDriver()->setupViewport(RenderTrav.getViewport());
 	RenderTrav.getDriver()->activeVertexProgram(NULL);
+	RenderTrav.getDriver()->activePixelProgram(NULL);
 	IDriver::TPolygonMode oldPolygonMode = RenderTrav.getDriver()->getPolygonMode();
 	CMaterial m;
 	m.initUnlit();

@@ -133,6 +133,7 @@ public:
 	// @{
 
 	virtual void			disableHardwareVertexProgram();
+	virtual void			disableHardwarePixelProgram();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 

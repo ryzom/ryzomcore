@@ -258,6 +258,11 @@ void			IDriver::removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt)
 {
 	_VtxPrgDrvInfos.erase(vtxPrgDrvInfoIt);
 }
+// ***************************************************************************
+void			IDriver::removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt)
+{
+	_PixelPrgDrvInfos.erase(pixelPrgDrvInfoIt);
+}
 
 // ***************************************************************************
 bool			IDriver::invalidateShareTexture (ITexture &texture)

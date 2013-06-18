@@ -213,6 +213,12 @@ void			CDriverUser::disableHardwareVertexProgram()
 
 	_Driver->disableHardwareVertexProgram();
 }
+void			CDriverUser::disableHardwarePixelProgram()
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	_Driver->disableHardwarePixelProgram();
+}
 void			CDriverUser::disableHardwareVertexArrayAGP()
 {
 	NL3D_HAUTO_UI_DRIVER;

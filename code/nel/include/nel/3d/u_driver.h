@@ -168,6 +168,7 @@ public:
 	 */
 	// @{
 	virtual void			disableHardwareVertexProgram()=0;
+	virtual void			disableHardwarePixelProgram()=0;
 	virtual void			disableHardwareVertexArrayAGP()=0;
 	virtual void			disableHardwareTextureShader()=0;
 	// @}
