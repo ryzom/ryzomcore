@@ -1,5 +1,4 @@
 <?php
-require( '../../../ams_lib/libinclude.php' );
 
 
 function add_user(){
