@@ -296,30 +296,22 @@ void	initCommands()
 
 #if SBCLIENT_DEV_PIXEL_PROGRAM
 	CommandsMaterial.getObjectPtr()->setShader(NL3D::CMaterial::PostProcessing);
-	/*static const char *program_arbfp1 =
-		"!!ARBfp1.0\n"
-		"PARAM c[1] = { { 0, 1 } };\n"
-		"MOV result.color, c[0].xyxy;\n"
-		"END\n";
-	static const char *program_ps_2_0 =
-		"ps.1.1\n"
-		"def c0, 1.0, 0.0, 0.0, 1.0\n"
-		"mov r0, c0\n";*/
 	a_NelLogo = Driver->createTextureFile("nel128.tga");
 	CommandsMaterial.setTexture(dynamic_cast<NL3D::UTexture *>(a_NelLogo));
-	/*CommandsMaterial.setBlend (false);
-	CommandsMaterial.setAlphaTest (false);
-	CommandsMaterial.setBlendFunc (UMaterial::one, UMaterial::zero);
-	CommandsMaterial.setZWrite(false);
-	CommandsMaterial.setZFunc(UMaterial::always);
-	CommandsMaterial.setDoubleSided(true);*/
-	//CommandsMaterial.set
 	static const char *program_arbfp1 =
 		"!!ARBfp1.0\n"
 		"PARAM c[1] = { { 1, 0 } };\n"
 		"MOV result.color.xzw, c[0].xyyx;\n"
 		"TEX result.color.y, fragment.texcoord[0], texture[0], 2D;\n"
 		"END\n";
+	static const char *program_ps_1_1 = 
+		"ps.1.1\n"
+		"def c0, 0.000000, 0.000000, 1.000000, 0.000000\n"
+		"def c1, 1.000000, 0.000000, 0.000000, 0.000000\n"
+		"def c2, 0.000000, 1.000000, 0.000000, 0.000000\n"
+		"tex t0\n"
+		"mad r0.rgb, c2, t0, c1\n"
+		"mov r0.a, c0.b\n";
 	static const char *program_ps_2_0 = 
 		"ps_2_0\n"
 		"dcl_2d s0\n"
@@ -329,11 +321,35 @@ void	initCommands()
 		"mov r0.z, c0.y\n"
 		"mov r0.xw, c0.x\n"
 		"mov oC0, r0\n";
+	static const char *program_ps_3_0 =
+		"ps_3_0\n"
+		"dcl_2d s0\n"
+		"def c0, 1.00000000, 0.00000000, 0, 0\n"
+		"dcl_texcoord0 v0.xy\n"
+		"mov oC0.xzw, c0.xyyx\n"
+		"texld oC0.y, v0, s0\n";
 	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
 	if (d->isPixelProgramSupported(IDriver::arbfp1))
+	{
+		nldebug("arbfp1");
 		a_DevPixelProgram = new CPixelProgram(program_arbfp1);
-	if (d->isPixelProgramSupported(IDriver::ps_2_0))
+	}
+	/*else if (d->isPixelProgramSupported(IDriver::ps_3_0))
+	{
+		nldebug("ps_3_0");
+		a_DevPixelProgram = new CPixelProgram(program_ps_3_0);
+		// Textures do not seem to work with ps_3_0...
+	}*/
+	else if (d->isPixelProgramSupported(IDriver::ps_2_0))
+	{
+		nldebug("ps_2_0");
 		a_DevPixelProgram = new CPixelProgram(program_ps_2_0);
+	}
+	else if (d->isPixelProgramSupported(IDriver::ps_1_1))
+	{
+		nldebug("ps_1_1");
+		a_DevPixelProgram = new CPixelProgram(program_ps_1_1);
+	}
 #endif
 }
 
