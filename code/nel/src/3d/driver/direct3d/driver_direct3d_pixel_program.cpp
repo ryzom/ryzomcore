@@ -82,10 +82,11 @@ bool CDriverD3D::activePixelProgram(CPixelProgram *program)
 			program->_DrvInfo = *itPix;
 
 			std::string dest;
+			/* TODO_REMOVE
 			if(program->isEffectProgram())
 			{
 				dest = 	program->getProgram();
-			}
+			}*/
 
 			LPD3DXBUFFER pShader;
 			LPD3DXBUFFER pErrorMsgs;
@@ -287,19 +288,6 @@ void CDriverD3D::disableHardwarePixelProgram()
 	H_AUTO_D3D(CDriverD3D_disableHardwarePixelProgram)
 	_DisableHardwarePixelProgram = true;
 	_PixelProgram = false;
-}
-
-// ***************************************************************************
-
-uint CDriverD3D::getMaxTexturesForEffects() const
-{
-	H_AUTO_D3D(CDriverD3D_getMaxTexturesForEffects)
-
-	// we use ps_2_0 profile for direct3D ASM pixel program, then 16 texture samplers are available
-	if(!strcmp(CPixelProgram::getPixelASMProfile(), "ps_2_0"))
-		return 16;
-
-	return 0;
 }
 
 } // NL3D

@@ -193,6 +193,11 @@ CDriverD3D::CDriverD3D()
 #else // NL_DISABLE_HARDWARE_VERTEX_PROGAM
 	_DisableHardwareVertexProgram = false;
 #endif // NL_DISABLE_HARDWARE_VERTEX_PROGAM
+#ifdef NL_DISABLE_HARDWARE_PIXEL_PROGAM
+	_DisableHardwarePixelProgram = true;
+#else // NL_DISABLE_HARDWARE_PIXEL_PROGAM
+	_DisableHardwarePixelProgram = false;
+#endif // NL_DISABLE_HARDWARE_PIXEL_PROGAM
 #ifdef NL_DISABLE_HARDWARE_VERTEX_ARRAY_AGP
 	_DisableHardwareVertexArrayAGP = true;
 #else // NL_DISABLE_HARDWARE_VERTEX_ARRAY_AGP
@@ -1546,6 +1551,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 #endif // NL_FORCE_TEXTURE_STAGE_COUNT
 
 	_VertexProgram = !_DisableHardwareVertexProgram && ((caps.VertexShaderVersion&0xffff) >= 0x0100);
+	_PixelProgram = !_DisableHardwarePixelProgram && (caps.PixelShaderVersion&0xffff) >= 0x0101;
 	_PixelShader = !_DisableHardwarePixelShader && (caps.PixelShaderVersion&0xffff) >= 0x0101;
 	_MaxVerticesByVertexBufferHard = caps.MaxVertexIndex;
 	_MaxLight = caps.MaxActiveLights;
@@ -2016,6 +2022,8 @@ bool CDriverD3D::swapBuffers()
 
 	// Reset vertex program
 	setVertexProgram (NULL, NULL);
+	// Reset pixel program
+	setPixelShader (NULL);
 
 	if (_VBHardProfiling)
 	{
