@@ -48,7 +48,7 @@ IPixelProgramDrvInfos::~IPixelProgramDrvInfos ()
 
 
 // ***************************************************************************
-CPixelProgram::CPixelProgram(const char* program)
+CPixelProgram::CPixelProgram(const char* program) : _Program(program)
 {
 
 }

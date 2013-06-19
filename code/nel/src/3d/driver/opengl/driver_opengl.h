@@ -1344,7 +1344,7 @@ private:
 	/// \name Pixel program implementation
 	// @{
 		bool activeARBPixelProgram (CPixelProgram *program);
-		// TODO_REMOVE_PARSER bool setupARBPixelProgram (const CPixelProgramParser::CPProgram &parsedProgram, GLuint id/*, bool &specularWritten*/);
+		bool setupARBPixelProgram (const CPixelProgram *program, GLuint id/*, bool &specularWritten*/);
 	//@}
  
 

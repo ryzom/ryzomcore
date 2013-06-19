@@ -65,8 +65,16 @@ public:
 	/// Destructor
 	virtual ~CPixelProgram ();
 
+	/// Get the program
+	inline const std::string& getProgram() const { return _Program; };
+
 	/// The driver informations. For the driver implementation only.
 	NLMISC::CRefPtr<IPixelProgramDrvInfos>		_DrvInfo;
+
+protected:
+
+	/// The progam
+	std::string									_Program;
 };
 
 
