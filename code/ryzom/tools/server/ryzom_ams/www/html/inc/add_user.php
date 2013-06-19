@@ -31,50 +31,36 @@ function add_user(){
 
 
 function write_user($newUser){
-     $login = $newUser["name"];
-     $pass = $newUser["pass"];
-     $email = $newUser["mail"];
+     global $WEBDBHOST;
+     global $WEBDBPORT;
+     global $WEBDBNAME;
+     global $WEBDBUSERNAME;
+     global $WEBDBPASSWORD;
+     global $SHARDDBHOST;
+     global $SHARDDBPORT;
+     global $SHARDDBNAME; 
+     global $SHARDDBUSERNAME;
+     global $SHARDDBPASSWORD;
+     
+     $values["name"] = $newUser["name"];
+     $values["pass"] = $newUser["pass"];
+     $values["mail"] = $newUser["mail"];
+     
+     $values["webhost"] =  $WEBDBHOST;
+     $values["webport"] =  $WEBDBPORT;
+     $values["webdbname"] = $WEBDBNAME;
+     $values["webusername"] = $WEBDBUSERNAME;
+     $values["webpassword"] = $WEBDBPASSWORD ;
  
-     $salt = Users::generateSALT();
-     $hashpass = crypt($pass, $salt);
- 
-     $params = array(
-         $login,
-         $hashpass,
-         $email
-     );
+     $values["shardhost"] = $SHARDDBHOST;
+     $values["shardport"] = $SHARDDBPORT;
+     $values["sharddbname"] = $SHARDDBNAME;
+     $values["shardusername"] = $SHARDDBUSERNAME;
+     $values["shardpassword"] = $SHARDDBPASSWORD;
      
-     $result = Users :: create_Server_User($params);
-     //test purpose
-     $result = "fail";
      
-     $hostname = 'localhost';
-     $port     = '3306';
-     $dbname   = 'ryzom_ams';
-     $username = 'shard';
-     $password = '';
-     
-     $dbh = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
-     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-     try {
-          $statement = $dbh->prepare("INSERT INTO ams_user (Login, Password, Email) VALUES (?, ?, ?)");
-          $statement->execute($params);
-          
-          if($result == "fail"){
-               print('so far');
-               $params = array("type" => "createUser","query" => json_encode(array($login,$pass,$email)));
-               $statement = $dbh->prepare("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)");
-               $statement->execute($params);
-          }
-     }
-     catch (PDOException $e) {
-           //go to error page or something
-           print_r($e);
-           exit;
-     }
+     $result = Users :: createUser($values);
     
- 
-     // add user locally here
      print('Awesome');
      }
 
