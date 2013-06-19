@@ -40,6 +40,12 @@
 #include "snowballs_client.h"
 #include "interface.h"
 
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+#include <nel/3d/driver_user.h>
+#include <nel/3d/driver.h>
+#include <nel/3d/pixel_program.h>
+#endif
+
 //
 // Namespaces
 //
@@ -237,6 +243,12 @@ void cbUpdateCommands (CConfigFile::CVar &var)
 	else nlwarning ("Unknown variable update %s", var.Name.c_str());
 }
 
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+namespace {
+CPixelProgram *a_DevPixelProgram;
+}
+#endif
+
 void	initCommands()
 {
 	// Add the keyboard listener in the event server
@@ -278,6 +290,15 @@ void	initCommands()
     CommandsMaterial.initUnlit();
     CommandsMaterial.setBlendFunc(UMaterial::srcalpha, UMaterial::invsrcalpha);
     CommandsMaterial.setBlend(true);
+
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	static const char *program =
+		"!!ARBfp1.0\n"
+		"PARAM red = {1.0, 0.0, 0.0, 1.0};\n"
+		"MOV result.color, red;\n"
+		"END\n";
+	a_DevPixelProgram = new CPixelProgram(program);
+#endif
 }
 
 void	updateCommands()
@@ -301,7 +322,17 @@ void	updateCommands()
 	float y0 = CommandsBoxY - CommandsBoxBorderY;
 	float x1 = CommandsBoxX + CommandsBoxWidth + CommandsBoxBorderX;
 	float y1 = CommandsBoxY + CommandsBoxHeight + CommandsBoxBorderY;
+
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
+	d->activePixelProgram(a_DevPixelProgram);
+#endif
+
 	Driver->drawQuad(CQuad(CVector(x0, y0, 0), CVector(x1, y0, 0), CVector(x1, y1, 0), CVector(x0, y1, 0)), CommandsMaterial);
+
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	d->activePixelProgram(NULL);
+#endif
 
 	// Set the text context
 	TextContext->setHotSpot (UTextContext::BottomLeft);
@@ -334,6 +365,10 @@ void	clearCommands ()
 
 void releaseCommands()
 {
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	delete a_DevPixelProgram;
+	a_DevPixelProgram = NULL;
+#endif
 	// Remove the displayers
 	CommandsLog.removeDisplayer(&CommandsDisplayer);
 #ifndef NL_RELEASE
