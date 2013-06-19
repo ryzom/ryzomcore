@@ -155,9 +155,9 @@ public:
 
 		// opengl - 0x0610,bitfield
 		arbfp1 = 0x06100001, // ARB_fragment_program
-		// fp20 = 0x061B0002, 
-		fp30 = 0x06100004, // NV_fragment_program
-		fp40 = 0x06100008, // NV_fragment_program2
+		// fp20 = 0x061B0002, // very limited and outdated, unnecessary
+		// fp30 = 0x06100004, // NV_fragment_program, now arbfp1, redundant
+		fp40 = 0x06100008, // NV_fragment_program2, arbfp1 with "OPTION NV_fragment_program2;\n"
 		gp4fp = 0x06100010, // NV_gpu_program4
 		gp5fp = 0x06100020, // NV_gpu_program5
 	};

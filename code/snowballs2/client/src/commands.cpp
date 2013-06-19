@@ -304,6 +304,16 @@ void	initCommands()
 		"MOV result.color.xzw, c[0].xyyx;\n"
 		"TEX result.color.y, fragment.texcoord[0], texture[0], 2D;\n"
 		"END\n";
+	static const char *program_fp40 =
+		"!!ARBfp1.0\n"
+		"OPTION NV_fragment_program2;\n"
+		"PARAM c[1] = { { 1, 0 } };\n"
+		"TEMP RC;\n"
+		"TEMP HC;\n"
+		"OUTPUT oCol = result.color;\n"
+		"MOVR  oCol.xzw, c[0].xyyx;\n"
+		"TEX   oCol.y, fragment.texcoord[0], texture[0], 2D;\n"
+		"END\n";
 	static const char *program_ps_1_1 = 
 		"ps.1.1\n"
 		"def c0, 0.000000, 0.000000, 1.000000, 0.000000\n"
@@ -329,7 +339,12 @@ void	initCommands()
 		"mov oC0.xzw, c0.xyyx\n"
 		"texld oC0.y, v0, s0\n";
 	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
-	if (d->isPixelProgramSupported(IDriver::arbfp1))
+	if (d->isPixelProgramSupported(IDriver::fp40))
+	{
+		nldebug("fp40");
+		a_DevPixelProgram = new CPixelProgram(program_fp40);
+	}
+	else if (d->isPixelProgramSupported(IDriver::arbfp1))
 	{
 		nldebug("arbfp1");
 		a_DevPixelProgram = new CPixelProgram(program_arbfp1);

@@ -71,7 +71,13 @@ bool CDriverGL::isPixelProgramSupported() const
 bool CDriverGL::isPixelProgramSupported(TPixelProgramProfile profile) const
 {
 	H_AUTO_OGL(CPixelProgamDrvInfosGL_isPixelProgramSupported_profile)
-	return profile == arbfp1 && _Extensions.ARBFragmentProgram;
+	switch (profile)
+	{
+	case arbfp1:
+		return _Extensions.ARBFragmentProgram;
+	case fp40:
+		return _Extensions.NVFragmentProgram2;
+	}
 }
 
 // ***************************************************************************

@@ -103,6 +103,9 @@ struct	CGlExtensions
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
 
+	// NV Pixel Programs
+	bool	NVFragmentProgram2;
+
 	bool	OESDrawTexture;
 	bool	OESMapBuffer;
 
@@ -208,6 +211,7 @@ public:
 		result += NVTextureShader ? "NVTextureShader " : "";
 		result += ATIFragmentShader ? "ATIFragmentShader " : "";
 		result += ARBFragmentProgram ? "ARBFragmentProgram " : "";
+		result += NVFragmentProgram2 ? "NVFragmentProgram2 " : "";
 		result += ARBVertexProgram ? "ARBVertexProgram " : "";
 		result += NVVertexProgram ? "NVVertexProgram " : "";
 		result += EXTVertexShader ? "EXTVertexShader " : "";
