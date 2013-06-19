@@ -28,8 +28,8 @@
 #include "stdopengl.h"
 
 #include "driver_opengl.h"
-#include <nel/3d/index_buffer.h>
-#include <nel/3d/vertex_program.h>
+#include "nel/3d/index_buffer.h"
+#include "nel/3d/pixel_program.h"
 #include <algorithm>
 
 // tmp
@@ -37,11 +37,17 @@
 
 using namespace std;
 using namespace NLMISC;
-
-//#define DEBUG_SETUP_EXT_VERTEX_SHADER
  
 namespace NL3D
 {
+	
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItPixelPrgDrvInfoPtrList it) : IPixelProgramDrvInfos (drv, it) 
@@ -315,5 +321,9 @@ void CDriverGL::setPixelProgramConstantMatrix (uint index, IDriver::TMatrix matr
 		nglProgramEnvParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, index + 3, matDatas + 12);
 	}
 }
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D
