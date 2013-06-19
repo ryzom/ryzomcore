@@ -45,6 +45,7 @@
 #include <nel/3d/driver.h>
 #include <nel/3d/pixel_program.h>
 #include <nel/3d/material.h>
+#include <nel/3d/u_texture.h>
 #endif
 
 //
@@ -247,6 +248,7 @@ void cbUpdateCommands (CConfigFile::CVar &var)
 #if SBCLIENT_DEV_PIXEL_PROGRAM
 namespace {
 CPixelProgram *a_DevPixelProgram = NULL;
+UTextureFile *a_NelLogo;
 }
 #endif
 
@@ -294,20 +296,44 @@ void	initCommands()
 
 #if SBCLIENT_DEV_PIXEL_PROGRAM
 	CommandsMaterial.getObjectPtr()->setShader(NL3D::CMaterial::PostProcessing);
-	static const char *program_arbfp1 =
+	/*static const char *program_arbfp1 =
 		"!!ARBfp1.0\n"
-		"PARAM red = {1.0, 0.0, 0.0, 1.0};\n"
-		"MOV result.color, red;\n"
+		"PARAM c[1] = { { 0, 1 } };\n"
+		"MOV result.color, c[0].xyxy;\n"
 		"END\n";
-	static const char *program_ps_1_1 =
+	static const char *program_ps_2_0 =
 		"ps.1.1\n"
 		"def c0, 1.0, 0.0, 0.0, 1.0\n"
-		"mov r0, c0\n";
+		"mov r0, c0\n";*/
+	a_NelLogo = Driver->createTextureFile("nel128.tga");
+	CommandsMaterial.setTexture(dynamic_cast<NL3D::UTexture *>(a_NelLogo));
+	/*CommandsMaterial.setBlend (false);
+	CommandsMaterial.setAlphaTest (false);
+	CommandsMaterial.setBlendFunc (UMaterial::one, UMaterial::zero);
+	CommandsMaterial.setZWrite(false);
+	CommandsMaterial.setZFunc(UMaterial::always);
+	CommandsMaterial.setDoubleSided(true);*/
+	//CommandsMaterial.set
+	static const char *program_arbfp1 =
+		"!!ARBfp1.0\n"
+		"PARAM c[1] = { { 1, 0 } };\n"
+		"MOV result.color.xzw, c[0].xyyx;\n"
+		"TEX result.color.y, fragment.texcoord[0], texture[0], 2D;\n"
+		"END\n";
+	static const char *program_ps_2_0 = 
+		"ps_2_0\n"
+		"dcl_2d s0\n"
+		"def c0, 1.00000000, 0.00000000, 0, 0\n"
+		"dcl t0.xy\n"
+		"texld r0, t0, s0\n"
+		"mov r0.z, c0.y\n"
+		"mov r0.xw, c0.x\n"
+		"mov oC0, r0\n";
 	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
 	if (d->isPixelProgramSupported(IDriver::arbfp1))
 		a_DevPixelProgram = new CPixelProgram(program_arbfp1);
-	if (d->isPixelProgramSupported(IDriver::ps_1_1))
-		a_DevPixelProgram = new CPixelProgram(program_ps_1_1);
+	if (d->isPixelProgramSupported(IDriver::ps_2_0))
+		a_DevPixelProgram = new CPixelProgram(program_ps_2_0);
 #endif
 }
 
@@ -327,7 +353,11 @@ void	updateCommands()
 
 	// Display the background
 	Driver->setMatrixMode2D11 ();
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	CommandsMaterial.setColor(CRGBA::Blue); // Test to check which shader is displaying.
+#else
 	CommandsMaterial.setColor(CommandsBackColor);
+#endif
 	float x0 = CommandsBoxX - CommandsBoxBorderX;
 	float y0 = CommandsBoxY - CommandsBoxBorderY;
 	float x1 = CommandsBoxX + CommandsBoxWidth + CommandsBoxBorderX;
@@ -338,13 +368,26 @@ void	updateCommands()
 	d->activePixelProgram(a_DevPixelProgram);
 	bool fogEnabled = d->fogEnabled();
 	d->enableFog(false);
-#endif
+
+	// Driver->drawQuad(CQuad(CVector(x0, y0, 0), CVector(x1, y0, 0), CVector(x1, y1, 0), CVector(x0, y1, 0)), CommandsMaterial);
+	CQuadUV quadUV;
+	quadUV.V0 = CVector(x0, y0, 0);
+	quadUV.V1 = CVector(x1, y0, 0);
+	quadUV.V2 = CVector(x1, y1, 0);
+	quadUV.V3 = CVector(x0, y1, 0);
+	quadUV.Uv0 = CUV(0, 1);
+	quadUV.Uv1 = CUV(1, 1);
+	quadUV.Uv2 = CUV(1, 0);
+	quadUV.Uv3 = CUV(0, 0);
+	Driver->drawQuad(quadUV, CommandsMaterial);
+	//Driver->drawBitmap(x0, y0, x1 - x0, y1 - y0, *a_NelLogo);
+
+	d->enableFog(fogEnabled);
+	d->activePixelProgram(NULL);
+#else
 
 	Driver->drawQuad(CQuad(CVector(x0, y0, 0), CVector(x1, y0, 0), CVector(x1, y1, 0), CVector(x0, y1, 0)), CommandsMaterial);
 
-#if SBCLIENT_DEV_PIXEL_PROGRAM
-	d->enableFog(fogEnabled);
-	d->activePixelProgram(NULL);
 #endif
 
 	// Set the text context

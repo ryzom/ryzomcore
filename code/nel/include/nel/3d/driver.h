@@ -144,7 +144,7 @@ public:
 
 	enum TPixelProgramProfile 
 	{ 
-		// direct3d
+		// direct3d - 0xD3D0,major,minor
 		ps_1_1 = 0xD3D00101, 
 		ps_1_2 = 0xD3D00102, 
 		ps_1_3 = 0xD3D00103, 
@@ -153,11 +153,13 @@ public:
 		ps_2_x = 0xD3D00201, // not sure...
 		ps_3_0 = 0xD3D00300, 
 
-		// opengl
-		arbfp1 = 0x061A0100, // made up values
-		fp20 = 0x06100200, 
-		fp30 = 0x06100300, 
-		fp40 = 0x06100400, 
+		// opengl - 0x0610,bitfield
+		arbfp1 = 0x06100001, // ARB_fragment_program
+		// fp20 = 0x061B0002, 
+		fp30 = 0x06100004, // NV_fragment_program
+		fp40 = 0x06100008, // NV_fragment_program2
+		gp4fp = 0x06100010, // NV_gpu_program4
+		gp5fp = 0x06100020, // NV_gpu_program5
 	};
 
 protected:
