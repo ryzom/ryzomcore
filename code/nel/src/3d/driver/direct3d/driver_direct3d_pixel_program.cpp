@@ -81,12 +81,7 @@ bool CDriverD3D::activePixelProgram(CPixelProgram *program)
 			// Create a driver info structure
 			program->_DrvInfo = *itPix;
 
-			std::string dest;
-			/* TODO_REMOVE
-			if(program->isEffectProgram())
-			{
-				dest = 	program->getProgram();
-			}*/
+			const std::string &dest = program->getProgram();
 
 			LPD3DXBUFFER pShader;
 			LPD3DXBUFFER pErrorMsgs;
