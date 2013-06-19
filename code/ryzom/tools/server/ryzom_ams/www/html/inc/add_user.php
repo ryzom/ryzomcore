@@ -25,6 +25,7 @@ function add_user(){
           $result['prevEmail'] = $_POST["Email"];
           $result['no_visible_elements'] = 'TRUE';
           helpers :: loadtemplate( 'register', $result);
+          exit;
      }
 }
 
