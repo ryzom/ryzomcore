@@ -43,9 +43,9 @@ CVertexProgamDrvInfosD3D::~CVertexProgamDrvInfosD3D()
 
 // ***************************************************************************
 
-bool CDriverD3D::isVertexProgramSupported () const
+bool CDriverD3D::supportVertexProgram () const
 {
-	H_AUTO_D3D(CDriverD3D_isVertexProgramSupported )
+	H_AUTO_D3D(CDriverD3D_supportVertexProgram )
 	return _VertexProgram;
 }
 

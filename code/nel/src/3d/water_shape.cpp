@@ -372,7 +372,7 @@ void CWaterShape::flushTextures (IDriver &driver, uint selectedTexture)
 
 	/*
 	if (
-		(driver.supportTextureShaders() && driver.isTextureAddrModeSupported(CMaterial::OffsetTexture))
+		(driver.supportTextureShaders() && driver.supportTextureAddrMode(CMaterial::OffsetTexture))
 		|| driver.supportEMBM()
 	   )
 	{

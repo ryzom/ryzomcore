@@ -2996,7 +2996,7 @@ bool CDriverD3D::stretchRect(ITexture * srcText, NLMISC::CRect &srcRect, ITextur
 
 bool CDriverD3D::supportBloomEffect() const
 {
-	return isVertexProgramSupported();
+	return supportVertexProgram();
 }
 
 // ***************************************************************************
@@ -3339,9 +3339,9 @@ uint COcclusionQueryD3D::getVisibleCount()
 }
 
 // ***************************************************************************
-bool CDriverD3D::isWaterShaderSupported() const
+bool CDriverD3D::supportWaterShader() const
 {
-	H_AUTO_D3D(CDriverD3D_isWaterShaderSupported);
+	H_AUTO_D3D(CDriverD3D_supportWaterShader);
 	return _PixelShaderVersion >= D3DPS_VERSION(1, 1);
 }
 
@@ -3627,7 +3627,7 @@ void CDriverD3D::CVertexProgramPtrState::apply(CDriverD3D *driver)
 void CDriverD3D::CPixelShaderPtrState::apply(CDriverD3D *driver)
 {
 	H_AUTO_D3D(CDriverD3D_CPixelShaderPtrState);
-	if (!driver->isPixelProgramSupported()) return;
+	if (!driver->supportPixelProgram()) return;
 	driver->_DeviceInterface->SetPixelShader(PixelShader);
 }
 

@@ -54,15 +54,15 @@ CPixelProgramDrvInfosD3D::~CPixelProgramDrvInfosD3D()
 
 // ***************************************************************************
 
-bool CDriverD3D::isPixelProgramSupported () const
+bool CDriverD3D::supportPixelProgram () const
 {
-	H_AUTO_D3D(CDriverD3D_isPixelProgramSupported)
+	H_AUTO_D3D(CDriverD3D_supportPixelProgram)
 	return _PixelProgram;
 }
 
-bool CDriverD3D::isPixelProgramSupported (CPixelProgram::TProfile profile) const
+bool CDriverD3D::supportPixelProgram (CPixelProgram::TProfile profile) const
 {
-	H_AUTO_D3D(CDriverD3D_isPixelProgramSupported_profile)
+	H_AUTO_D3D(CDriverD3D_supportPixelProgram_profile)
 	return ((profile & 0xFFFF0000) == 0xD3D00000)
 		&& (_PixelProgramVersion >= (uint16)(profile & 0x0000FFFF));
 }

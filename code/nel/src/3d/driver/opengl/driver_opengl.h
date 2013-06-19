@@ -601,9 +601,9 @@ public:
 	// @{
 	virtual bool			supportTextureShaders() const;
 
-	virtual bool			isWaterShaderSupported() const;
+	virtual bool			supportWaterShader() const;
 
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const;
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const;
 
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
 	// @}
@@ -1303,9 +1303,9 @@ private:
 	/// \name Vertex program interface
 	// @{
 
-	bool			isVertexProgramSupported () const;
-	bool			isPixelProgramSupported () const;
-	bool			isPixelProgramSupported (CPixelProgram::TProfile profile) const;
+	bool			supportVertexProgram () const;
+	bool			supportPixelProgram () const;
+	bool			supportPixelProgram (CPixelProgram::TProfile profile) const;
 	bool			isVertexProgramEmulated () const;
 	bool			activeVertexProgram (CVertexProgram *program);
 	bool			activePixelProgram (CPixelProgram *program);

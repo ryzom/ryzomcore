@@ -63,14 +63,14 @@ CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItPixelPrgDrvInf
 }
 
 // ***************************************************************************
-bool CDriverGL::isPixelProgramSupported() const
+bool CDriverGL::supportPixelProgram() const
 {	
-	H_AUTO_OGL(CPixelProgamDrvInfosGL_isPixelProgramSupported)
+	H_AUTO_OGL(CPixelProgamDrvInfosGL_supportPixelProgram)
 	return _Extensions.ARBFragmentProgram;
 }
-bool CDriverGL::isPixelProgramSupported(CPixelProgram::TProfile profile) const
+bool CDriverGL::supportPixelProgram(CPixelProgram::TProfile profile) const
 {
-	H_AUTO_OGL(CPixelProgamDrvInfosGL_isPixelProgramSupported_profile)
+	H_AUTO_OGL(CPixelProgamDrvInfosGL_supportPixelProgram_profile)
 	switch (profile)
 	{
 	case CPixelProgram::arbfp1:
@@ -78,6 +78,7 @@ bool CDriverGL::isPixelProgramSupported(CPixelProgram::TProfile profile) const
 	case CPixelProgram::fp40:
 		return _Extensions.NVFragmentProgram2;
 	}
+	return false;
 }
 
 // ***************************************************************************

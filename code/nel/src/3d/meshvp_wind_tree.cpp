@@ -287,7 +287,7 @@ inline	void		CMeshVPWindTree::setupPerInstanceConstants(IDriver *driver, CScene 
 // ***************************************************************************
 bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat, const NLMISC::CVector & /*viewerPos*/)
 {
-	if (!(driver->isVertexProgramSupported() && !driver->isVertexProgramEmulated())) return false;
+	if (!(driver->supportVertexProgram() && !driver->isVertexProgramEmulated())) return false;
 
 
 	// precompute mesh
@@ -367,7 +367,7 @@ bool	CMeshVPWindTree::supportMeshBlockRendering() const
 // ***************************************************************************
 bool	CMeshVPWindTree::isMBRVpOk(IDriver *driver) const
 {
-	return driver->isVertexProgramSupported() && !driver->isVertexProgramEmulated();
+	return driver->supportVertexProgram() && !driver->isVertexProgramEmulated();
 }
 
 // ***************************************************************************

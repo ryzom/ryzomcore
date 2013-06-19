@@ -61,7 +61,7 @@ void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, I
 		vb.setNumVertices(0);
 		vb.setName("Water");
 		vb.setPreferredMemory(CVertexBuffer::AGPPreferred, false);
-		if (drv->isWaterShaderSupported())
+		if (drv->supportWaterShader())
 		{
 			vb.setVertexFormat(CVertexBuffer::PositionFlag);
 		}
@@ -377,7 +377,7 @@ void	CWaterModel::traverseRender()
 
 
 	#ifndef FORCE_SIMPLE_WATER_RENDER
-		if (!drv->isWaterShaderSupported())
+		if (!drv->supportWaterShader())
 	#endif
 	{
 		doSimpleRender(drv);
@@ -1363,7 +1363,7 @@ uint CWaterModel::getNumWantedVertices()
 uint CWaterModel::fillVB(void *datas, uint startTri, IDriver &drv)
 {
 	H_AUTO( NL3D_Water_Render );
-	if (drv.isWaterShaderSupported())
+	if (drv.supportWaterShader())
 	{
 		return fillVBHard(datas, startTri);
 	}
@@ -1657,7 +1657,7 @@ void	CWaterModel::traverseRender()
 		drv->setupModelMatrix(modelMat);
 		bool isAbove = obsPos.z > getWorldMatrix().getPos().z;
 		CVertexBuffer &vb = renderTrav.Scene->getWaterVB();
-		if (drv->isWaterShaderSupported())
+		if (drv->supportWaterShader())
 		{
 			setupMaterialNVertexShader(drv, shape, obsPos, isAbove, zHeight);
 			nlassert(vb.getNumVertices() > 0);

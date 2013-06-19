@@ -574,7 +574,7 @@ void			CLandscape::setDriver(IDriver *drv)
 
 		// Does the driver support VertexShader???
 		// only if VP supported by GPU.
-		_VertexShaderOk= (_Driver->isVertexProgramSupported() && !_Driver->isVertexProgramEmulated());
+		_VertexShaderOk= (_Driver->supportVertexProgram() && !_Driver->isVertexProgramEmulated());
 
 
 		// Does the driver has sufficient requirements for Vegetable???

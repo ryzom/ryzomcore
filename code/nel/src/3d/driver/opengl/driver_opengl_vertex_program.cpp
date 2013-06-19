@@ -70,9 +70,9 @@ CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInf
 
 
 // ***************************************************************************
-bool CDriverGL::isVertexProgramSupported () const
+bool CDriverGL::supportVertexProgram () const
 {
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_isVertexProgramSupported)
+	H_AUTO_OGL(CVertexProgamDrvInfosGL_supportVertexProgram)
 	return _Extensions.NVVertexProgram || _Extensions.EXTVertexShader || _Extensions.ARBVertexProgram;
 }
 

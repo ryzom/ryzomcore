@@ -973,9 +973,9 @@ public:
 	virtual bool			supportTextureShaders() const {return false;};
 	virtual	bool			supportMADOperator() const;
 	// todo hulud d3d adressing mode
-	virtual bool			isWaterShaderSupported() const;
+	virtual bool			supportWaterShader() const;
 	// todo hulud d3d adressing mode
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const {return false;};
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode /* mode */) const {return false;};
 	// todo hulud d3d adressing mode
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint /* stage */, const float /* mat */[4]) {}
 
@@ -1006,9 +1006,9 @@ public:
 	virtual void			endMaterialMultiPass();
 
 	// Vertex program
-	virtual bool			isVertexProgramSupported () const;
-	virtual bool			isPixelProgramSupported () const;
-	virtual bool			isPixelProgramSupported (CPixelProgram::TProfile profile) const;
+	virtual bool			supportVertexProgram () const;
+	virtual bool			supportPixelProgram () const;
+	virtual bool			supportPixelProgram (CPixelProgram::TProfile profile) const;
 	virtual bool			isVertexProgramEmulated () const;
 	virtual bool			activeVertexProgram (CVertexProgram *program);
 	virtual bool			activePixelProgram (CPixelProgram *program);

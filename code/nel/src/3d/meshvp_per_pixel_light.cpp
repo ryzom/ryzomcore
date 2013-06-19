@@ -428,7 +428,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 {
 	// test if supported by driver
 	if (!
-		 (drv->isVertexProgramSupported()
+		 (drv->supportVertexProgram()
 		  && !drv->isVertexProgramEmulated()
 		  &&  drv->supportPerPixelLighting(SpecularLighting)
 		 )

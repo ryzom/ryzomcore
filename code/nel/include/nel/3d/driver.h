@@ -1004,7 +1004,7 @@ public:
 	/**
 	  * Does the driver supports vertex programs ?
 	  */
-	virtual bool			isVertexProgramSupported () const =0;
+	virtual bool			supportVertexProgram () const =0;
 
 	/**
 	  * Does the driver supports vertex program, but emulated by CPU ?
@@ -1014,8 +1014,8 @@ public:
 	/**
 	  * Does the driver supports pixel programs ?
 	  */
-	virtual bool			isPixelProgramSupported() const =0;
-	virtual bool			isPixelProgramSupported(CPixelProgram::TProfile profile) const =0;
+	virtual bool			supportPixelProgram() const =0;
+	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile) const =0;
 
 
 
@@ -1122,10 +1122,10 @@ public:
 		/// test whether the device supports some form of texture shader. (could be limited to DX6 EMBM for example)
 		virtual bool supportTextureShaders() const = 0;
 		// Is the shader water supported ? If not, the driver caller should implement its own version
-		virtual bool isWaterShaderSupported() const = 0;
+		virtual bool supportWaterShader() const = 0;
 		//
 		/// test whether a texture addressing mode is supported
-		virtual bool isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const = 0;
+		virtual bool supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const = 0;
 		/** setup the 2D matrix for the OffsetTexture, OffsetTextureScale and OffsetTexture addressing mode
 		  * It should be stored as the following
 		  * [a0 a1]

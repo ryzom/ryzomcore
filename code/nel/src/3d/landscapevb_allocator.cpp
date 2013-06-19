@@ -82,7 +82,7 @@ void			CLandscapeVBAllocator::updateDriver(IDriver *driver)
 		deleteVertexProgram();
 		// Then rebuild VB format, and VertexProgram, if needed.
 		// Do it only if VP supported by GPU.
-		setupVBFormatAndVertexProgram(_Driver->isVertexProgramSupported()  && !_Driver->isVertexProgramEmulated());
+		setupVBFormatAndVertexProgram(_Driver->supportVertexProgram()  && !_Driver->isVertexProgramEmulated());
 
 		// must reallocate the VertexBuffer.
 		if( _NumVerticesAllocated>0 )

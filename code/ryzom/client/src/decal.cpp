@@ -560,7 +560,7 @@ void CDecalRenderList::renderAllDecals()
 	NL3D::IDriver *drvInternal = ((CDriverUser *) Driver)->getDriver();
 	//
 	static volatile bool forceNoVertexProgram = false;
-	if (drvInternal->isVertexProgramSupported() && !forceNoVertexProgram)
+	if (drvInternal->supportVertexProgram() && !forceNoVertexProgram)
 	{
 		//drvInternal->setConstantMatrix(0, NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
 		drvInternal->setConstant(7, _DistScale, _DistBias, 0.f, 1.f);
