@@ -234,6 +234,27 @@ class Users{
              }
          // done!
         return $salt;
-         }
      }
+     
+     function create_Server_User($params)
+     {
+         try {
+             $hostname = 'localhost';
+             $port     = '3306';
+             $dbname   = 'nel';
+             $username = 'shard';
+             $password = '';
+             $dbh      = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
+             $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+             $statement = $dbh->prepare("INSERT INTO user (Login, Password, Email) VALUES (?, ?, ?)");
+             $statement->execute($params);
+             return "success";
+         }
+         catch (PDOException $e) {
+             return "fail";
+         }
+        // createPermissions(array($login));
+     }
+}
+
 
