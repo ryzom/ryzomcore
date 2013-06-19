@@ -142,6 +142,23 @@ public:
 	  */
 	enum TMatrixCount { MaxModelMatrix= 16 };
 
+	enum TPixelProgramProfile 
+	{ 
+		// direct3d
+		ps_1_1 = 0xD3D00101, 
+		ps_1_2 = 0xD3D00102, 
+		ps_1_3 = 0xD3D00103, 
+		ps_1_4 = 0xD3D00104, 
+		ps_2_0 = 0xD3D00200, 
+		ps_2_x = 0xD3D00201, // not sure...
+		ps_3_0 = 0xD3D00300, 
+
+		// opengl
+		arbfp1 = 0x061A0100, // made up values
+		fp20 = 0x06100200, 
+		fp30 = 0x06100300, 
+		fp40 = 0x06100400, 
+	};
 
 protected:
 
@@ -1015,7 +1032,8 @@ public:
 	/**
 	  * Does the driver supports pixel programs ?
 	  */
-	virtual bool			isPixelProgramSupported () const =0;
+	virtual bool			isPixelProgramSupported() const =0;
+	virtual bool			isPixelProgramSupported(TPixelProgramProfile profile) const =0;
 
 
 

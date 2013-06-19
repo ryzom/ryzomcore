@@ -1551,14 +1551,15 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 #endif // NL_FORCE_TEXTURE_STAGE_COUNT
 
 	_VertexProgram = !_DisableHardwareVertexProgram && ((caps.VertexShaderVersion&0xffff) >= 0x0100);
-	_PixelProgram = !_DisableHardwarePixelProgram && (caps.PixelShaderVersion&0xffff) >= 0x0101;
-	_PixelShader = !_DisableHardwarePixelShader && (caps.PixelShaderVersion&0xffff) >= 0x0101;
+	_PixelProgramVersion = _DisableHardwareVertexProgram ? 0x0000 : caps.PixelShaderVersion & 0xffff;
+	nldebug("Pixel Program Version: %i.%i", (uint32)((_PixelProgramVersion & 0xFF00) >> 8), (uint32)(_PixelProgramVersion & 0xFF));
+	_PixelProgram = _PixelProgramVersion >= 0x0101;
 	_MaxVerticesByVertexBufferHard = caps.MaxVertexIndex;
 	_MaxLight = caps.MaxActiveLights;
 
 	if(_MaxLight > 0xFF) _MaxLight = 3;
 
-	if (_PixelShader)
+	if (_PixelProgram)
 	{
 		_MaxNumPerStageConstantLighted = _NbNeLTextureStages;
 		_MaxNumPerStageConstantUnlighted = _NbNeLTextureStages;
@@ -3626,7 +3627,7 @@ void CDriverD3D::CVertexProgramPtrState::apply(CDriverD3D *driver)
 void CDriverD3D::CPixelShaderPtrState::apply(CDriverD3D *driver)
 {
 	H_AUTO_D3D(CDriverD3D_CPixelShaderPtrState);
-	if (!driver->supportPixelShaders()) return;
+	if (!driver->isPixelProgramSupported()) return;
 	driver->_DeviceInterface->SetPixelShader(PixelShader);
 }
 

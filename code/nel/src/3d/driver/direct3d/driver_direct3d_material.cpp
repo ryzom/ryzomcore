@@ -567,7 +567,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 								normalShaderDesc.TexEnvMode[stage] = mat.getTexEnvMode(uint8(stage));
 							}
 
-							if (_PixelShader)
+							if (_PixelProgram)
 							{
 								#ifdef NL_DEBUG_D3D
 									// Check, should not occured
@@ -933,7 +933,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 				activeShader (NULL);
 
 				/* If unlighted trick is needed, set the shader later */
-				if (!pShader->NeedsConstantForDiffuse && _PixelShader)
+				if (!pShader->NeedsConstantForDiffuse && _PixelProgram)
 					setPixelShader (pShader->PixelShader);
 			}
 			break;
@@ -2019,7 +2019,7 @@ void CDriverD3D::endMaterialMultiPass()
 bool CDriverD3D::supportCloudRenderSinglePass () const
 {
 	H_AUTO_D3D(CDriver3D_supportCloudRenderSinglePass);
-	return _PixelShader;
+	return _PixelProgram;
 }
 
 // ***************************************************************************

@@ -1305,6 +1305,7 @@ private:
 
 	bool			isVertexProgramSupported () const;
 	bool			isPixelProgramSupported () const;
+	bool			isPixelProgramSupported (TPixelProgramProfile profile) const;
 	bool			isVertexProgramEmulated () const;
 	bool			activeVertexProgram (CVertexProgram *program);
 	bool			activePixelProgram (CPixelProgram *program);

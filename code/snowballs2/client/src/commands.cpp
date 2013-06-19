@@ -246,7 +246,7 @@ void cbUpdateCommands (CConfigFile::CVar &var)
 
 #if SBCLIENT_DEV_PIXEL_PROGRAM
 namespace {
-CPixelProgram *a_DevPixelProgram;
+CPixelProgram *a_DevPixelProgram = NULL;
 }
 #endif
 
@@ -294,16 +294,20 @@ void	initCommands()
 
 #if SBCLIENT_DEV_PIXEL_PROGRAM
 	CommandsMaterial.getObjectPtr()->setShader(NL3D::CMaterial::PostProcessing);
-	static const char *program_arbfp10 =
+	static const char *program_arbfp1 =
 		"!!ARBfp1.0\n"
 		"PARAM red = {1.0, 0.0, 0.0, 1.0};\n"
 		"MOV result.color, red;\n"
 		"END\n";
-	static const char *program_ps10 =
+	static const char *program_ps_1_1 =
 		"ps.1.1\n"
 		"def c0, 1.0, 0.0, 0.0, 1.0\n"
 		"mov r0, c0\n";
-	a_DevPixelProgram = new CPixelProgram(program_ps10);
+	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
+	if (d->isPixelProgramSupported(IDriver::arbfp1))
+		a_DevPixelProgram = new CPixelProgram(program_arbfp1);
+	if (d->isPixelProgramSupported(IDriver::ps_1_1))
+		a_DevPixelProgram = new CPixelProgram(program_ps_1_1);
 #endif
 }
 

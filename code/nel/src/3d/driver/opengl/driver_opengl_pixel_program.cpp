@@ -57,10 +57,15 @@ CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItPixelPrgDrvInf
 }
 
 // ***************************************************************************
-bool CDriverGL::isPixelProgramSupported () const
+bool CDriverGL::isPixelProgramSupported() const
 {	
 	H_AUTO_OGL(CPixelProgamDrvInfosGL_isPixelProgramSupported)
 	return _Extensions.ARBFragmentProgram;
+}
+bool CDriverGL::isPixelProgramSupported(TPixelProgramProfile profile) const
+{
+	H_AUTO_OGL(CPixelProgamDrvInfosGL_isPixelProgramSupported_profile)
+	return profile == arbfp1 && _Extensions.ARBFragmentProgram;
 }
 
 // ***************************************************************************

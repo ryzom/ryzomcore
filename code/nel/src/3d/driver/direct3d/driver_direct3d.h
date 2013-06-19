@@ -1008,6 +1008,7 @@ public:
 	// Vertex program
 	virtual bool			isVertexProgramSupported () const;
 	virtual bool			isPixelProgramSupported () const;
+	virtual bool			isPixelProgramSupported (TPixelProgramProfile profile) const;
 	virtual bool			isVertexProgramEmulated () const;
 	virtual bool			activeVertexProgram (CVertexProgram *program);
 	virtual bool			activePixelProgram (CPixelProgram *program);
@@ -1064,8 +1065,6 @@ public:
 	virtual void			stencilMask(uint mask);
 
 	uint32					getMaxVertexIndex() const { return _MaxVertexIndex; }
-
-	bool					supportPixelShaders() const { return _PixelShader; }
 
 		// *** Inline info
 	uint					inlGetNumTextStages() const { return _NbNeLTextureStages; }
@@ -2232,7 +2231,7 @@ private:
 	bool					_TextureCubeSupported;
 	bool					_VertexProgram;
 	bool					_PixelProgram;
-	bool					_PixelShader;
+	uint16					_PixelProgramVersion;
 	bool					_DisableHardwareVertexProgram;
 	bool					_DisableHardwarePixelProgram;
 	bool					_DisableHardwareVertexArrayAGP;
