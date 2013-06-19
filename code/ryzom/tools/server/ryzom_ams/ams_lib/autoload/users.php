@@ -6,6 +6,62 @@ class Users{
              helpers :: loadtemplate( 'register', $pageElements );
 
          }
+         
+     public function check_Register(){
+          // check values
+          if ( isset( $_POST["Username"] ) and isset( $_POST["Password"] ) and isset( $_POST["Email"] ) ){
+               $user = Users :: checkUser( $_POST["Username"] );
+               $pass = Users :: checkPassword( $_POST["Password"] );
+               $cpass = Users :: confirmPassword($pass);
+               $email = Users :: checkEmail( $_POST["Email"] );
+          }else{
+               $user = "";
+               $pass = "";
+               $cpass = "";
+               $email = "";
+          }
+
+          if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success" ) and ( $email == "success" ) and (  isset( $_POST["TaC"] ) ) ){
+               return "success";
+          }else{
+               $pageElements = array(
+               //'GAME_NAME' => $GAME_NAME,
+               // 'WELCOME_MESSAGE' => $WELCOME_MESSAGE,
+                'USERNAME' => $user,
+                'PASSWORD' => $pass,
+                'CPASSWORD' => $cpass,
+                'EMAIL' => $email
+                );
+               if ( $user != "success" ){
+                    $pageElements['USERNAME_ERROR'] = 'TRUE';
+               }else{
+                    $pageElements['USERNAME_ERROR'] = 'FALSE';
+               }
+       
+               if ( $pass != "success" ){
+                    $pageElements['PASSWORD_ERROR'] = 'TRUE';
+               }else{
+                    $pageElements['PASSWORD_ERROR'] = 'FALSE';
+               }
+               if ( $cpass != "success" ){
+                    $pageElements['CPASSWORD_ERROR'] = 'TRUE';
+               }else{
+                    $pageElements['CPASSWORD_ERROR'] = 'FALSE';
+               }
+               if ( $email != "success" ){
+                    $pageElements['EMAIL_ERROR'] = 'TRUE';
+               }else{
+                    $pageElements['EMAIL_ERROR'] = 'FALSE';
+               }
+               if ( isset( $_POST["TaC"] ) ){
+                    $pageElements['TAC_ERROR'] = 'FALSE';
+               }else{
+                    $pageElements['TAC_ERROR'] = 'TRUE';
+               }
+               return $pageElements;
+          }
+
+     }
 
     /**
      * Function checkUser
@@ -22,6 +78,9 @@ class Users{
                  return "Username must be 5 or more characters.";
                  }elseif ( !preg_match( '/^[a-z0-9\.]*$/', $username ) ){
                  return "Username can only contain numbers and letters.";
+                 }elseif ( $username == "" ){
+                 return "You have to fill in a username";
+                
                  /*}elseif ( sql :: db_query( "SELECT COUNT(*) FROM {users} WHERE name = :name", array(
                         ':name' => $username
                          ) ) -> fetchField() ){
@@ -47,6 +106,8 @@ class Users{
                  return "Password must be no more than 20 characters.";
                  }elseif ( strlen( $pass ) < 5 ){
                  return "Password must be more than 5 characters.";
+                 }elseif ( $pass == ""){
+                 return "You have to fill in a password";
                  }else{
                  return "success";
                  }
@@ -59,15 +120,19 @@ class Users{
      * @takes $pass
      * @return string Info: Verify's $_POST["Password"] is the same as $_POST["ConfirmPass"]
      */
-     public function confirmPassword()
+     public function confirmPassword($pass_result)
     {
-         if ( ( $_POST["Password"] ) != ( $_POST["ConfirmPass"] ) ){
+          if ( ( $_POST["Password"] ) != ( $_POST["ConfirmPass"] ) ){
              return "Passwords do not match.";
-             }else{
+          }else if ($_POST["ConfirmPass"]==""){
+             return "You have to fill in the confirmation password.";
+          }else if($pass_result != "success"){
+               return;
+          }else{
              return "success";
-             }
-         return "fail";
-         }
+          }
+          return "fail";
+     }
     /**
      * Function checkEmail
      *
@@ -77,13 +142,16 @@ class Users{
      public function checkEmail( $email )
     {
          if ( isset( $email ) ){
-             if ( !Users::validEmail( $email ) ){
-                 return "Email address is not valid.";
+               if ( !Users::validEmail( $email ) ){
+                    return "Email address is not valid.";
+               }else if($email == ""){
+                    return "You have to fill in an email address";
+               }
                  /*}elseif ( db_query( "SELECT COUNT(*) FROM {users} WHERE mail = :mail", array(
                         ':mail' => $email
                          ) ) -> fetchField() ){
-                 return "Email is in use.";*/
-                 }else{
+                 return "Email is in use.";}*/
+                 else{
                  return "success";
                  }
              }else{
