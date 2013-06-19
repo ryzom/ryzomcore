@@ -60,7 +60,7 @@ bool CDriverD3D::isPixelProgramSupported () const
 	return _PixelProgram;
 }
 
-bool CDriverD3D::isPixelProgramSupported (TPixelProgramProfile profile) const
+bool CDriverD3D::isPixelProgramSupported (CPixelProgram::TProfile profile) const
 {
 	H_AUTO_D3D(CDriverD3D_isPixelProgramSupported_profile)
 	return ((profile & 0xFFFF0000) == 0xD3D00000)

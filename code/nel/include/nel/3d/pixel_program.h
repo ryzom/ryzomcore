@@ -59,6 +59,26 @@ class CPixelProgram : public NLMISC::CRefCount
 {
 public:
 
+	enum TProfile 
+	{ 
+		// direct3d - 0xD3D0,major,minor
+		ps_1_1 = 0xD3D00101, 
+		ps_1_2 = 0xD3D00102, 
+		ps_1_3 = 0xD3D00103, 
+		ps_1_4 = 0xD3D00104, 
+		ps_2_0 = 0xD3D00200, 
+		ps_2_x = 0xD3D00201, // not sure...
+		ps_3_0 = 0xD3D00300, 
+
+		// opengl - 0x0610,bitfield
+		// fp20 = 0x061B0001, // very limited and outdated, unnecessary
+		// fp30 = 0x06100002, // NV_fragment_program, now arbfp1, redundant
+		arbfp1 = 0x06100004, // ARB_fragment_program
+		fp40 = 0x06100008, // NV_fragment_program2, arbfp1 with "OPTION NV_fragment_program2;\n"
+		gp4fp = 0x06100010, // NV_gpu_program4
+		gp5fp = 0x06100020, // NV_gpu_program5
+	};
+
 	/// Constructor
 	CPixelProgram (const char* program);
 

@@ -1008,7 +1008,7 @@ public:
 	// Vertex program
 	virtual bool			isVertexProgramSupported () const;
 	virtual bool			isPixelProgramSupported () const;
-	virtual bool			isPixelProgramSupported (TPixelProgramProfile profile) const;
+	virtual bool			isPixelProgramSupported (CPixelProgram::TProfile profile) const;
 	virtual bool			isVertexProgramEmulated () const;
 	virtual bool			activeVertexProgram (CVertexProgram *program);
 	virtual bool			activePixelProgram (CPixelProgram *program);

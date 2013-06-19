@@ -339,28 +339,28 @@ void	initCommands()
 		"mov oC0.xzw, c0.xyyx\n"
 		"texld oC0.y, v0, s0\n";
 	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
-	if (d->isPixelProgramSupported(IDriver::fp40))
+	if (d->isPixelProgramSupported(CPixelProgram::fp40))
 	{
 		nldebug("fp40");
 		a_DevPixelProgram = new CPixelProgram(program_fp40);
 	}
-	else if (d->isPixelProgramSupported(IDriver::arbfp1))
+	else if (d->isPixelProgramSupported(CPixelProgram::arbfp1))
 	{
 		nldebug("arbfp1");
 		a_DevPixelProgram = new CPixelProgram(program_arbfp1);
 	}
-	/*else if (d->isPixelProgramSupported(IDriver::ps_3_0))
+	/*else if (d->isPixelProgramSupported(CPixelProgram::ps_3_0))
 	{
 		nldebug("ps_3_0");
 		a_DevPixelProgram = new CPixelProgram(program_ps_3_0);
 		// Textures do not seem to work with ps_3_0...
 	}*/
-	else if (d->isPixelProgramSupported(IDriver::ps_2_0))
+	else if (d->isPixelProgramSupported(CPixelProgram::ps_2_0))
 	{
 		nldebug("ps_2_0");
 		a_DevPixelProgram = new CPixelProgram(program_ps_2_0);
 	}
-	else if (d->isPixelProgramSupported(IDriver::ps_1_1))
+	else if (d->isPixelProgramSupported(CPixelProgram::ps_1_1))
 	{
 		nldebug("ps_1_1");
 		a_DevPixelProgram = new CPixelProgram(program_ps_1_1);
