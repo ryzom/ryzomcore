@@ -28,10 +28,8 @@
 #include "stdopengl.h"
 
 #include "driver_opengl.h"
-#include "../../index_buffer.h"
-#include "../../vertex_program.h"
-//#include "../../vertex_program_parse.h"
-#include "../../program_parse_D3D.h"
+#include <nel/3d/index_buffer.h>
+#include <nel/3d/vertex_program.h>
 #include <algorithm>
 
 // tmp
@@ -92,6 +90,8 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
 		{
+			/* TODO_REMOVE_PARSER
+
 			// Insert into driver list. (so it is deleted when driver is deleted).
 			ItPixelPrgDrvInfoPtrList	it= _PixelPrgDrvInfos.insert(_PixelPrgDrvInfos.end());
 
@@ -127,6 +127,8 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 				_PixelPrgDrvInfos.erase(it);
 				return false;
 			}
+
+			*/
 		}
 		else
 		{
@@ -150,7 +152,8 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 	
 	return true;
 }
-
+// TODO_REMOVE_PARSER
+#if 0
 // ***************************************************************************
 bool CDriverGL::setupARBPixelProgram (const CPixelProgramParser::CPProgram &inParsedProgram, GLuint id/*, bool &specularWritten*/)
 {
@@ -206,6 +209,7 @@ bool CDriverGL::setupARBPixelProgram (const CPixelProgramParser::CPProgram &inPa
 	}
 	return true;	
 }
+#endif
 
 // ***************************************************************************
 
@@ -213,7 +217,8 @@ void CDriverGL::setPixelProgramConstant (uint index, float f0, float f1, float f
 {
 	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
 
-	if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	//if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	if (_LastSetuppedPP) // TODO_REMOVE_EFFECTS
 	{
 		if (_Extensions.ARBFragmentProgram)
 			nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, index, f0, f1, f2, f3);
@@ -227,7 +232,8 @@ void CDriverGL::setPixelProgramConstant (uint index, double d0, double d1, doubl
 {
 	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
 
-	if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	// if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	if (_LastSetuppedPP) // TODO_REMOVE_EFFECTS
 	{
 		if (_Extensions.ARBFragmentProgram)
 			nglProgramEnvParameter4dARB(GL_FRAGMENT_PROGRAM_ARB, index, d0, d1, d2, d3);
@@ -241,7 +247,8 @@ void CDriverGL::setPixelProgramConstant (uint index, const NLMISC::CVector& valu
 {
 	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
 
-	if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	// if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	if (_LastSetuppedPP) // TODO_REMOVE_EFFECTS
 	{
 		if (_Extensions.ARBFragmentProgram)
 			nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, index, value.x, value.y, value.z, 0);
@@ -255,7 +262,8 @@ void CDriverGL::setPixelProgramConstant (uint index, const NLMISC::CVectorD& val
 {
 	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
 
-	if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	// if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	if (_LastSetuppedPP) // TODO_REMOVE_EFFECTS
 	{
 		if (_Extensions.ARBFragmentProgram)
 			nglProgramEnvParameter4dARB(GL_FRAGMENT_PROGRAM_ARB, index, value.x, value.y, value.z, 0);
@@ -268,7 +276,8 @@ void	CDriverGL::setPixelProgramConstant (uint index, uint num, const float *src)
 {
 	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
 
-	if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	// if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	if (_LastSetuppedPP) // TODO_REMOVE_EFFECTS
 	{
 		if (_Extensions.ARBFragmentProgram)
 		{
@@ -285,7 +294,8 @@ void	CDriverGL::setPixelProgramConstant (uint index, uint num, const double *src
 {
 	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
 
-	if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	// if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	if (_LastSetuppedPP) // TODO_REMOVE_EFFECTS
 	{
 		if (_Extensions.ARBFragmentProgram)
 		{
@@ -303,7 +313,8 @@ void CDriverGL::setPixelProgramConstantMatrix (uint index, IDriver::TMatrix matr
 {
 	H_AUTO_OGL(CDriverGL_setPixelProgramConstantMatrix)
 
-	if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	// if(_LastSetuppedVP && _LastSetuppedVP->isEffectProgram())
+	if (_LastSetuppedPP) // TODO_REMOVE_EFFECTS
 	{
 		if (_Extensions.ARBFragmentProgram)
 		{
@@ -358,17 +369,8 @@ void CDriverGL::setPixelProgramConstantMatrix (uint index, IDriver::TMatrix matr
 	}
 }
 
-// ***************************************************************************
-uint CDriverGL::getMaxTexturesForEffects() const
-{
-	H_AUTO_OGL(CDriverGL_getMaxTexturesForEffects)
-
-	uint texSamplerNb = 0;
-	if (_Extensions.ARBFragmentProgram) // ARB implementation
-		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS_ARB, (int*)(&texSamplerNb));
-
-	return texSamplerNb;
-}
+// TODO_REMOVE_PARSER
+#if 0
 
 // ***************************************************************************
 // ***************** CPixelProgramConversionARB *****************************
@@ -549,5 +551,7 @@ void CPixelProgramConversionARB::ARBPixelProgramDumpOperand(const CPPOperand &op
 	}
 	ARBProgramSuffix(op, destOperand, out);
 }
+
+#endif
 
 } // NL3D

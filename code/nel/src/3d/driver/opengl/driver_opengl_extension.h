@@ -111,6 +111,7 @@ public:
 	/// \name Disable Hardware feature. False by default. setuped by IDriver
 	// @{
 	bool				DisableHardwareVertexProgram;
+	bool				DisableHardwarePixelProgram;
 	bool				DisableHardwareVertexArrayAGP;
 	bool				DisableHardwareTextureShader;
 	// @}
@@ -174,6 +175,7 @@ public:
 
 		/// \name Disable Hardware feature. False by default. setuped by IDriver
 		DisableHardwareVertexProgram= false;
+		DisableHardwarePixelProgram= false;
 		DisableHardwareVertexArrayAGP= false;
 		DisableHardwareTextureShader= false;
 	}

@@ -1293,9 +1293,6 @@ public:
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass) = 0;
 	virtual void			stencilMask(uint mask) = 0;
 
-	// get the number of texture samplers available for pû•el programs
-	virtual uint getMaxTexturesForEffects() const = 0;
-
 protected:
 	friend	class	IVBDrvInfos;
 	friend	class	IIBDrvInfos;

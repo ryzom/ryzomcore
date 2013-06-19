@@ -482,6 +482,7 @@ bool CDriverGL::setupDisplay()
 	}
 
 	_VertexProgramEnabled= false;
+	_PixelProgramEnabled= false;
 	_LastSetupGLArrayVertexProgram= false;
 
 	// Init VertexArrayRange according to supported extenstion.
@@ -737,6 +738,12 @@ void CDriverGL::disableHardwareVertexProgram()
 	_Extensions.DisableHardwareVertexProgram= true;
 }
 
+void CDriverGL::disableHardwarePixelProgram()
+{
+	H_AUTO_OGL(CDriverGL_disableHardwarePixelProgram)
+	_Extensions.DisableHardwarePixelProgram= true;
+}
+
 // ***************************************************************************
 void CDriverGL::disableHardwareVertexArrayAGP()
 {
@@ -854,6 +861,7 @@ bool CDriverGL::swapBuffers()
 	// Reset texture shaders
 	//resetTextureShaders();
 	activeVertexProgram(NULL);
+	activePixelProgram(NULL);
 
 #ifndef USE_OPENGLES
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.

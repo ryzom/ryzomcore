@@ -1560,6 +1560,17 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.EXTVertexShader = false;
 		ext.ARBVertexProgram = false;
 	}
+	
+	// Check pixel program
+	// Disable feature ???
+	if(!ext.DisableHardwarePixelProgram)
+	{		
+		ext.ARBFragmentProgram= setupARBFragmentProgram(glext);				
+	}
+	else
+	{
+		ext.ARBFragmentProgram = false;
+	}
 
 	ext.OESDrawTexture = setupOESDrawTexture(glext);
 	ext.OESMapBuffer = setupOESMapBuffer(glext);
