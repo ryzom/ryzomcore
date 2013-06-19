@@ -44,6 +44,7 @@
 #include <nel/3d/driver_user.h>
 #include <nel/3d/driver.h>
 #include <nel/3d/pixel_program.h>
+#include <nel/3d/material.h>
 #endif
 
 //
@@ -292,12 +293,17 @@ void	initCommands()
     CommandsMaterial.setBlend(true);
 
 #if SBCLIENT_DEV_PIXEL_PROGRAM
-	static const char *program =
+	CommandsMaterial.getObjectPtr()->setShader(NL3D::CMaterial::PostProcessing);
+	static const char *program_arbfp10 =
 		"!!ARBfp1.0\n"
 		"PARAM red = {1.0, 0.0, 0.0, 1.0};\n"
 		"MOV result.color, red;\n"
 		"END\n";
-	a_DevPixelProgram = new CPixelProgram(program);
+	static const char *program_ps10 =
+		"ps.1.1\n"
+		"def c0, 1.0, 0.0, 0.0, 1.0\n"
+		"mov r0, c0\n";
+	a_DevPixelProgram = new CPixelProgram(program_ps10);
 #endif
 }
 
@@ -326,11 +332,14 @@ void	updateCommands()
 #if SBCLIENT_DEV_PIXEL_PROGRAM
 	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
 	d->activePixelProgram(a_DevPixelProgram);
+	bool fogEnabled = d->fogEnabled();
+	d->enableFog(false);
 #endif
 
 	Driver->drawQuad(CQuad(CVector(x0, y0, 0), CVector(x1, y0, 0), CVector(x1, y1, 0), CVector(x0, y1, 0)), CommandsMaterial);
 
 #if SBCLIENT_DEV_PIXEL_PROGRAM
+	d->enableFog(fogEnabled);
 	d->activePixelProgram(NULL);
 #endif
 

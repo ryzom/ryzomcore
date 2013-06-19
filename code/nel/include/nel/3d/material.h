@@ -171,7 +171,12 @@ public:
 	 * - Alpha of texture in stage 0 is blended with alpha of texture in stage 1. Blend done with the alpha color of each
 	 * stage and the whole is multiplied by the alpha in color vertex [AT0*ADiffuseCol+AT1*(1-ADiffuseCol)]*AStage
 	 * - RGB still unchanged
-	 *
+	 * Water :
+	 * - Water
+	 * PostProcessing :
+	 * - For internal use only when a pixel program is set manually through activePixelProgram.
+	 * - Only textures are set by CMaterial (probably does not work yet), the rest must be set manually.
+	 * - May be replaced in the future by some generic shader system.
 	 */
 	enum TShader			{ Normal=0,
 							  Bump,
@@ -183,6 +188,7 @@ public:
 							  PerPixelLightingNoSpec,
 							  Cloud,
 							  Water,
+							  PostProcessing,
 							  shaderCount};
 
 	/// \name Texture Env Modes.
