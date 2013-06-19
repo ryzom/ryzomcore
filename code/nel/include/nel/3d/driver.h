@@ -1038,7 +1038,7 @@ public:
 	virtual bool			activePixelProgram (CPixelProgram *program) =0;
 
 	/**
-	  * Setup vertex program constant values.
+	  * Setup vertex program constant (uniform) values.
 	  */
 	virtual void			setConstant (uint index, float, float, float, float) =0;
 	virtual void			setConstant (uint index, double, double, double, double) =0;
@@ -1048,9 +1048,10 @@ public:
 	virtual void			setConstant (uint index, uint num, const float *src) =0;
 	/// setup several 4 double csts taken from the given tab
 	virtual void			setConstant (uint index, uint num, const double *src) =0;
+	// TODO: rename to setVertexProgramConstant
 	
 	/**
-	  * Setup pixel program constant values.
+	  * Setup pixel program constant (uniform) values.
 	  */
 	virtual void			setPixelProgramConstant (uint index, float, float, float, float) =0;
 	virtual void			setPixelProgramConstant (uint index, double, double, double, double) =0;
@@ -1060,6 +1061,7 @@ public:
 	virtual void			setPixelProgramConstant (uint index, uint num, const float *src) =0;
 	/// setup several 4 double csts taken from the given tab
 	virtual void			setPixelProgramConstant (uint index, uint num, const double *src) =0;
+	// TODO: uint32 and sint32 uniform types supported in opengl from gp4fp and gp5fp and sint32 in d3d
 
 	/**
 	  * Setup constants with a current matrix.

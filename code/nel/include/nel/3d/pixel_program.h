@@ -61,6 +61,11 @@ public:
 
 	enum TProfile 
 	{ 
+		// TODO:
+		// If it's more useful, change this to a flags bitfield and 
+		// change the d3d (and gl) code to generate the bitfield of 
+		// supported modes instead of doing a >= version check.
+
 		// direct3d - 0xD3D0,major,minor
 		ps_1_1 = 0xD3D00101, 
 		ps_1_2 = 0xD3D00102, 
