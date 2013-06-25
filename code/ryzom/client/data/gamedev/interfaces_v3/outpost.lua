@@ -56,7 +56,7 @@ function game:outpostAdjustHour(uiLocal, prop)
 	local h = runExpr(prop);
 	
 	-- add time zone and clamp hour
-	h = math.mod(h + tz + 24, 24);
+	h = math.fmod(h + tz + 24, 24);
 	uiGroup[uiLocal].uc_hardtext = string.format('%02d:00', h);
 end
 
@@ -288,8 +288,8 @@ function game:outpostActiveDefenderHourButton()
 		local timeRangeDef= getDbProp(path .. ':TIME_RANGE_DEF');
 		local timeRangeDefWanted= getDbProp(path .. ':TIME_RANGE_DEF_WANTED');
 		timeRangeDef= secondsSince1970ToHour( timeRangeDef );
-		timeRangeDef= math.mod(timeRangeDef+24, 24);
-		timeRangeDefWanted= math.mod(timeRangeDefWanted+24, 24);
+		timeRangeDef= math.fmod(timeRangeDef+24, 24);
+		timeRangeDefWanted= math.fmod(timeRangeDefWanted+24, 24);
 
 		-- if time required is the one obtained, or if we are in peace
 		if( timeRangeDef == timeRangeDefWanted or status<=game.OutpostEnums.Peace ) then
@@ -323,8 +323,8 @@ function game:outpostActiveAttackerHourButton()
 		local timeRangeAtt= getDbProp('UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT');
 		local timeRangeAttWanted= getDbProp('UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD');
 		timeRangeAtt= secondsSince1970ToHour( timeRangeAtt );
-		timeRangeAtt= math.mod(timeRangeAtt+24, 24);
-		timeRangeAttWanted= math.mod(timeRangeAttWanted+24, 24);
+		timeRangeAtt= math.fmod(timeRangeAtt+24, 24);
+		timeRangeAttWanted= math.fmod(timeRangeAttWanted+24, 24);
 
 		-- if time required is the one obtained
 		if( timeRangeAtt == timeRangeAttWanted ) then
