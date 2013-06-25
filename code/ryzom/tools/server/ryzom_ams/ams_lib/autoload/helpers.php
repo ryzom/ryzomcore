@@ -44,9 +44,9 @@ class Helpers{
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
-          if( $vars['permission'] == 2 ){
+          if( isset($vars['permission']) && $vars['permission'] == 2 ){
                $inherited = "extends:layout_admin.tpl|";
-          }else if($vars['permission'] == 1){
+          }else if( isset($vars['permission']) && $vars['permission'] == 1){
                $inherited = "extends:layout_user.tpl|";
           }else{
                $inherited ="";
@@ -60,7 +60,7 @@ class Helpers{
          global $SITEBASE;
          $arr = array( $AMS_LIB . '/ingame_templates/',
              $AMS_LIB . '/configs',
-             $AMS_LIB . '/cache',
+             //$AMS_LIB . '/cache',
              $SITEBASE . '/cache/',
              $SITEBASE . '/templates/',
              $SITEBASE . '/templates_c/',
@@ -68,7 +68,8 @@ class Helpers{
              );
          foreach ( $arr as & $value ){
              if ( !file_exists( $value ) ){
-                 mkdir( $value );
+                 echo $value;
+                 mkdir( $value);
                  }
              }
 

@@ -15,12 +15,12 @@
 					<form method="post" action="index.php" class="form-horizontal">
 						<fieldset>
 							<div data-rel="tooltip" class="input-prepend" data-original-title="Username">
-								<span class="add-on"><i class="icon-user"></i></span><input type="text" value="" id="username" name="username" class="input-large span10" autofocus="">
+								<span class="add-on"><i class="icon-user"></i></span><input type="text" value="" id="Username" name="Username" class="input-large span10" autofocus="">
 							</div>
 							<div class="clearfix"></div>
 
 							<div data-rel="tooltip" class="input-prepend" data-original-title="Password">
-								<span class="add-on"><i class="icon-lock"></i></span><input type="password" value="" id="password" name="password" class="input-large span10">
+								<span class="add-on"><i class="icon-lock"></i></span><input type="password" value="" id="Password" name="Password" class="input-large span10">
 							</div>
 							<div class="clearfix"></div>
 
@@ -30,6 +30,7 @@
 							<div class="clearfix"></div>
 
 							<p class="center span5">
+							<input type="hidden" name="function" value="login">
 							<button class="btn btn-primary" type="submit">Login</button>
 							</p>
 						</fieldset>

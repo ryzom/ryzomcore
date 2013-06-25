@@ -5,10 +5,20 @@
 // Variables for database access
 // ----------------------------------------------------------------------------------------
 // where we can find the mysql database
-$DBHOST = 'localhost' ;
- $DBNAME = 'nel' ;
- $DBUSERNAME = 'shard' ;
- $DBPASSWORD = '' ;
+
+$WEBDBHOST = 'localhost';
+$WEBDBPORT = '3306';
+$WEBDBNAME = 'ryzom_ams';
+$WEBDBUSERNAME = 'shard';
+$WEBDBPASSWORD = '' ;
+     
+$SHARDDBHOST = 'localhost' ;
+$SHARDDBPORT = '3306';
+$SHARDDBNAME = 'nel' ;
+$SHARDDBUSERNAME = 'shard' ;
+$SHARDDBPASSWORD = '' ;
+
+
 
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters

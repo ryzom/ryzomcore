@@ -234,6 +234,123 @@ class Users{
              }
          // done!
         return $salt;
-         }
      }
+     
+     function create_Server_User($params)
+     {
+         try {
+             $hostname = 'localhost';
+             $port     = '3306';
+             $dbname   = 'nel';
+             $username = 'shard';
+             $password = '';
+             $dbh      = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
+             $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+             $statement = $dbh->prepare("INSERT INTO user (Login, Password, Email) VALUES (?, ?, ?)");
+             $statement->execute($params);
+             return "success";
+         }
+         catch (PDOException $e) {
+             return "fail";
+         }
+        // createPermissions(array($login));
+     }
+     
+     function createUser($values){
+          $login = $values["name"];
+          $pass = $values["pass"];
+          $email = $values["mail"];
+          
+          $webhost = $values["webhost"];
+          $webport = $values["webport"];
+          $webdbname = $values["webdbname"];
+          $webusername = $values["webusername"];
+          $webpassword = $values["webpassword"];
+      
+          $shardhost = $values["shardhost"];
+          $shardport = $values["shardport"];
+          $sharddbname = $values["sharddbname"];
+          $shardusername = $values["shardusername"];
+          $shardpassword = $values["shardpassword"];
+          
+          $salt = Users::generateSALT();
+          $hashpass = crypt($pass, $salt);
+      
+          $params = array(
+              $login,
+              $hashpass,
+              $email
+          );
+          
+          try{
+               //make connection with web db
+               $dbw = new PDO("mysql:host=$webhost;port=$webport;dbname=$webdbname", $webusername, $webpassword);
+               $dbw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+               
+               //put into web db
+               $statement = $dbw->prepare("INSERT INTO ams_user (Login, Password, Email) VALUES (?, ?, ?)");
+               $statement->execute($params);
+               try {
+                    //make connection with and put into shard db
+                    $dbs = new PDO("mysql:host=$shardhost;port=$shardport;dbname=$sharddbname", $shardusername, $shardpassword);
+                    $dbs->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $statement = $dbs->prepare("INSERT INTO user (Login, Password, Email) VALUES (?, ?, ?)");
+                    $statement->execute($params);
+               }
+               catch (PDOException $e) {
+                    //print_r($e);
+                    //oh noooz, the shard is offline! Put in query queue at web db!
+                    $params = array("type" => "createUser","query" => json_encode(array($login,$pass,$email)));
+                    $statement = $dbw->prepare("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)");
+                    $statement->execute($params);
+               }
+          
+          }catch (PDOException $e) {
+                //go to error page or something, because can't access website db
+                print_r($e);
+                exit;
+          }
+          
+     }
+     
+     public function login($params){
+          $webhost = $params["webhost"];
+          $webport = $params["webport"];
+          $webdbname = $params["webdbname"];
+          $webusername = $params["webusername"];
+          $webpassword = $params["webpassword"];
+          
+          try{
+               $dbw = new PDO("mysql:host=$webhost;port=$webport;dbname=$webdbname", $webusername, $webpassword);
+               $dbw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+               
+               $statement = $dbw->prepare("SELECT * FROM ams_user WHERE Login=:user");
+               $statement->execute(array('user' => $params['name']));
+               $count = $statement->rowCount();
+       
+               if ($count==1) {
+                    $row = $statement->fetch();
+                    $salt = substr($row['Password'],0,2);
+                    $hashed_input_pass = crypt($params["pass"], $salt);
+                    if($hashed_input_pass == $row['Password']){
+                         //handle successful login
+                         print("nice welcome!");
+                         $_SESSION['user'] = $params['name'];
+                         $_SESSION['permission'] = $row['Permission'];
+                         print( $_SESSION['user']);
+                         return "success";
+                    }else{
+                         //handle login failure
+                         print("Login failed");
+                         return "failure";
+                    }	
+               }
+          }catch (PDOException $e) {
+               //go to error page or something, because can't access website db
+               print_r($e);
+               exit;
+          }
+     }
+}
+
 
