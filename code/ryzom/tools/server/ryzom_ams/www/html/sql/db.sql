@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `ams_user` (
   `Login` varchar(64) NOT NULL DEFAULT '',
   `Password` varchar(13) DEFAULT NULL,
   `Email` varchar(255) NOT NULL DEFAULT '',
+  `Permission` int(3) NOT NULL DEFAULT 1,
   PRIMARY KEY (`UId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users information for ryzom_ams';
 

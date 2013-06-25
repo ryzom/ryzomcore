@@ -335,6 +335,9 @@ class Users{
                     if($hashed_input_pass == $row['Password']){
                          //handle successful login
                          print("nice welcome!");
+                         $_SESSION['user'] = $params['name'];
+                         $_SESSION['permission'] = $row['Permission'];
+                         print( $_SESSION['user']);
                          return "success";
                     }else{
                          //handle login failure
