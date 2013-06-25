@@ -60,7 +60,7 @@ class Helpers{
          global $SITEBASE;
          $arr = array( $AMS_LIB . '/ingame_templates/',
              $AMS_LIB . '/configs',
-             $AMS_LIB . '/cache',
+             //$AMS_LIB . '/cache',
              $SITEBASE . '/cache/',
              $SITEBASE . '/templates/',
              $SITEBASE . '/templates_c/',
@@ -68,7 +68,8 @@ class Helpers{
              );
          foreach ( $arr as & $value ){
              if ( !file_exists( $value ) ){
-                 mkdir( $value );
+                 echo $value;
+                 mkdir( $value);
                  }
              }
 

@@ -106,7 +106,6 @@
 			{/if}
 			
 			 <input type="hidden" name="function" value="add_user">
-			 <input type="hidden" name="callBack" value="register">
 			<div class="control-group">
 			<label class="control-label"></label>
 		      <div class="controls">

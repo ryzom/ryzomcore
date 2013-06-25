@@ -10,11 +10,6 @@ $page = 'login';
 if ( isset( $_POST["function"] ) ){
      require( "inc/" . $_POST["function"] . ".php" );
      $tempReturn = $_POST["function"]();
-     /*$functionReturn = array_merge($tempReturn,$_POST);
-     if ( isset($_POST["callBack"])){
-          $page = $_POST["callBack"];
-          
-     }*/
 }
 
 function loadpage ( $page ){

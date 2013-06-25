@@ -312,6 +312,42 @@ class Users{
           }
           
      }
+     
+     public function login($params){
+          $webhost = $params["webhost"];
+          $webport = $params["webport"];
+          $webdbname = $params["webdbname"];
+          $webusername = $params["webusername"];
+          $webpassword = $params["webpassword"];
+          
+          try{
+               $dbw = new PDO("mysql:host=$webhost;port=$webport;dbname=$webdbname", $webusername, $webpassword);
+               $dbw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+               
+               $statement = $dbw->prepare("SELECT * FROM ams_user WHERE Login=:user");
+               $statement->execute(array('user' => $params['name']));
+               $count = $statement->rowCount();
+       
+               if ($count==1) {
+                    $row = $statement->fetch();
+                    $salt = substr($row['Password'],0,2);
+                    $hashed_input_pass = crypt($params["pass"], $salt);
+                    if($hashed_input_pass == $row['Password']){
+                         //handle successful login
+                         print("nice welcome!");
+                         return "success";
+                    }else{
+                         //handle login failure
+                         print("Login failed");
+                         return "failure";
+                    }	
+               }
+          }catch (PDOException $e) {
+               //go to error page or something, because can't access website db
+               print_r($e);
+               exit;
+          }
+     }
 }
 
 
