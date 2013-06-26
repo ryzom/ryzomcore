@@ -273,6 +273,10 @@ bool CStereoOVR::nextPass()
 		m_OrientationCached = false;
 		return false;
 	}
+	nlassert(false);
+	m_Stage = 0;
+	m_OrientationCached = false;
+	return false;
 }
 
 const NL3D::CViewport &CStereoOVR::getCurrentViewport() const
