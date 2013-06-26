@@ -5,7 +5,7 @@ require( '../config.php' );
 require( '../../ams_lib/libinclude.php' );
 session_start();
 
-print("[" . $_SESSION['user'] . "] ");
+//print_r($_SESSION);
 
 //Decide what page to load
 if(isset($_SESSION['user'])){
@@ -31,8 +31,8 @@ function loadpage ( $page ){
 }
 
 //Set permission
-if(isset($_SESSION['Permission'])){
-     $return['permission'] = $_SESSION['Permission'];
+if(isset($_SESSION['permission'])){
+     $return['permission'] = $_SESSION['permission'];
 }else{
      //default permission
      $return['permission'] = 0; 
@@ -45,7 +45,5 @@ if($page == 'login' || $page == 'register'){
 }else{
      $return['no_visible_elements'] = 'FALSE';
 }
-
+//print_r($return);
 helpers :: loadTemplate( $page , $return );
-
-session_destroy();

@@ -5,21 +5,30 @@
 // Variables for database access
 // ----------------------------------------------------------------------------------------
 // where we can find the mysql database
+//-----------------------------------------------------------------------------------------
 
+//the www db
 $WEBDBHOST = 'localhost';
 $WEBDBPORT = '3306';
 $WEBDBNAME = 'ryzom_ams';
-$WEBDBUSERNAME = 'shard';
-$WEBDBPASSWORD = '' ;
-     
+$WEBDBUSERNAME = 'root';
+$WEBDBPASSWORD = 'lol123' ;
+
+//the ams_lib db
+$LIBDBHOST = 'localhost';
+$LIBDBPORT = '3306';
+$LIBDBNAME = 'ryzom_ams_lib';
+$LIBDBUSERNAME = 'root';
+$LIBDBPASSWORD = 'lol123' ;
+
+//the shard db 
 $SHARDDBHOST = 'localhost' ;
 $SHARDDBPORT = '3306';
 $SHARDDBNAME = 'nel' ;
 $SHARDDBUSERNAME = 'shard' ;
 $SHARDDBPASSWORD = '' ;
 
-
-
+//-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
 $ALLOW_UNKNOWN = true ;
