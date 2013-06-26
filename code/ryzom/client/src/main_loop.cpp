@@ -42,6 +42,7 @@
 #include "nel/3d/u_material.h"
 #include "nel/3d/u_instance_material.h"
 #include "nel/3d/u_cloud_scape.h"
+#include "nel/3d/stereo_ovr.h"
 // game share
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"
@@ -134,6 +135,7 @@
 #include "nel/3d/packed_world.h"
 #include "nel/3d/packed_zone.h"
 #include "nel/3d/driver_user.h"
+
 
 
 #ifdef USE_WATER_ENV_MAP
@@ -452,6 +454,8 @@ void validateDialogs(const CGameContextMenu &gcm);
 
 void buildCameraClippingPyramid (vector<CPlane> &planes)
 {
+	if (StereoDisplay) StereoDisplay->getClippingFrustum(0, &MainCam);
+
 	// Compute pyramid in view basis.
 	CVector		pfoc(0,0,0);
 	const CFrustum &frustum  = MainCam.getFrustum();
@@ -1006,7 +1010,7 @@ static void renderCanopyPart(UScene::TRenderPart renderPart)
 	{
 		// Update Camera Position/Rotation.
 		camRoot.setPos(View.currentViewPos());
-		camRoot.setRotQuat(View.currentView());
+		camRoot.setRotQuat(View.currentViewQuat());
 	}
 	// Render the root scene
 	SceneRoot->renderPart(renderPart);
@@ -1859,9 +1863,9 @@ bool mainLoop()
 
 		// Update Camera Position/Orientation.
 		CVector currViewPos = View.currentViewPos();
-		MainCam.setPos(currViewPos);;
-		MainCam.setRotQuat(View.currentView());
-
+		MainCam.setPos(currViewPos);
+		MainCam.setRotQuat(View.currentViewQuat());
+		if (StereoDisplay) StereoDisplay->updateCamera(0, &MainCam);
 
 		// see if camera is below water (useful for sort order)
 		if (ContinentMngr.cur())

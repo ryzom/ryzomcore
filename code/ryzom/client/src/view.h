@@ -115,6 +115,8 @@ public:
 	CVector currentViewPos() const;
 	// Return the current view (rear or normal)
 	CVector currentView() const;
+	// Return the current view as a quaternion
+	NLMISC::CQuat currentViewQuat() const;
 
 	// Return the current Camera Target (for 3rd person only. 1st person: return currentViewPos())
 	CVector currentCameraTarget() const;
