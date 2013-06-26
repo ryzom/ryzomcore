@@ -75,7 +75,7 @@
 #	ifndef SNOWBALLS_CONFIG
 #		define SBCLIENT_CONFIG_FILE "snowballs_client.cfg"
 #	else
-#		define SBCLIENT_CONFIG_FILE SNOWBALLS_CONFIG "client.cfg"
+#		define SBCLIENT_CONFIG_FILE SNOWBALLS_CONFIG "snowballs_client.cfg"
 #	endif
 #endif
 

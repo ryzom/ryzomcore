@@ -21,6 +21,7 @@
 #include <nel/misc/types_nl.h>
 
 #include <cmath>
+#include <sstream>
 #include <nel/misc/vectord.h>
 #include <nel/misc/config_file.h>
 #include <nel/3d/u_camera.h>
@@ -32,6 +33,8 @@
 #include <nel/3d/u_visual_collision_manager.h>
 #include <nel/3d/u_cloud_scape.h>
 #include <nel/3d/viewport.h>
+
+#include <nel/3d/stereo_ovr.h>
 
 #include "snowballs_client.h"
 #include "entities.h"
@@ -67,12 +70,47 @@ static UInstance			Sky = NULL;
 
 static UCloudScape			*Clouds = NULL;
 
+static CStereoOVR *s_StereoHMD = NULL;
+
 //
 // Functions
 //
 
 void	initCamera()
 {
+	if (ConfigFile->getVar("HMDEnable").asBool())
+	{
+		std::vector<NL3D::CStereoDeviceInfo> devices;
+		CStereoOVR::listDevices(devices);
+		for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+		{
+			std::stringstream name;
+			name << std::string("[") << (uint32)it->Identifier << "] [" << it->Manufacturer << " - " << it->ProductName << "]";
+			nlinfo("Stereo Device: %s", name.str().c_str());
+		}
+		CStereoDeviceInfo *deviceInfo = NULL;
+		std::string hmdDeviceCfg = ConfigFile->getVar("HMDDevice").asString();
+		if (hmdDeviceCfg == std::string("Auto")
+			&& devices.begin() != devices.end())
+		{
+			deviceInfo = &devices[0];
+		}
+		else
+		{
+			uint8 hmdDeviceId = (ConfigFile->getVar("HMDDeviceId").asInt() & 0xFF);
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				std::stringstream name;
+				name << it->Manufacturer << " - " << it->ProductName;
+				if (name.str() == hmdDeviceCfg)
+					deviceInfo = &(*it);
+				if (hmdDeviceId == it->Identifier)
+					break;
+			}
+		}
+		//s_StereoHMD->createDevice(
+	}
+
 	// Set up directly the camera
 	Camera = Scene->getCam();
 	Camera.setTransformMode (UTransformable::DirectMatrix);
@@ -114,6 +152,8 @@ void releaseCamera()
 	Driver->deleteScene(SkyScene);
 	Scene->deleteInstance(Snow);
 	VisualCollisionManager->deleteEntity(CamCollisionEntity);
+
+	CStereoOVR::releaseLibrary();
 }
 
 void updateCamera()

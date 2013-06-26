@@ -356,6 +356,7 @@ void initIngame()
 //#ifdef NL_OS_WINDOWS
 //		playMusic(SBCLIENT_MUSIC_WAIT);
 //#endif
+		displayLoadingState("Initialize");
 
 		// Create a scene
 		Scene = Driver->createScene(false);
@@ -366,7 +367,6 @@ void initIngame()
 		CBloomEffect::instance().init(ConfigFile->getVar("OpenGL").asInt() == 1);
 		CConfiguration::setAndCallback("SquareBloom", cbSquareBloom);
 		CConfiguration::setAndCallback("DensityBloom", cbDensityBloom);
-
 		// Init the landscape using the previously created UScene
 		displayLoadingState("Initialize Landscape");
 		initLandscape();
@@ -1141,21 +1141,29 @@ sint main(int argc, char **argv)
 		FILE *f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
 		if (!f)
 		{
-			OutputDebugString("    ********************************    \n");
-			OutputDebugString("    *  CHANGING WORKING DIRECTORY  *    \n");
-			OutputDebugString("    ********************************    \n\n");
-			char cwd[256];
-			_tgetcwd(cwd, 256);
-			tstring workdir(cwd);
-			workdir += "\\..\\bin\\";
-			_tchdir(workdir.c_str());
-			f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
+			f = _tfopen(_T(SBCLIENT_CONFIG_FILE), _T("r"));
 			if (!f)
 			{
 				OutputDebugString("    ********************************    \n");
-				OutputDebugString("    *    DEFAULT CONFIG MISSING    *    \n");
+				OutputDebugString("    *  CHANGING WORKING DIRECTORY  *    \n");
 				OutputDebugString("    ********************************    \n\n");
-				return EXIT_FAILURE;
+				char cwd[256];
+				_tgetcwd(cwd, 256);
+				tstring workdir(cwd);
+				workdir = "R:\\build\\devw_x86\\bin\\Debug\\";
+				_tchdir(workdir.c_str());
+				f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
+				if (!f)
+				{
+					f = _tfopen(_T(SBCLIENT_CONFIG_FILE), _T("r"));
+					if (!f)
+					{
+						OutputDebugString("    ********************************    \n");
+						OutputDebugString("    *    DEFAULT CONFIG MISSING    *    \n");
+						OutputDebugString("    ********************************    \n\n");
+						return EXIT_FAILURE;
+					}
+				}
 			}
 		}
 		fclose(f);
