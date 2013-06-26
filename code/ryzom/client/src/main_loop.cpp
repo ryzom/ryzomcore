@@ -150,6 +150,8 @@
 #include "nel/gui/lua_manager.h"
 #include "nel/gui/group_table.h"
 
+#include "ping.h"
+
 
 ///////////
 // USING //
@@ -218,84 +220,6 @@ uint64 SimulatedServerTick = 0;
 
 
 
-///////////
-// CLASS //
-///////////
-/**
- * Class to manage the ping computed with the database.
- * \author Guillaume PUZIN
- * \author Nevrax France
- * \date 2003
- */
-class CPing : public ICDBNode::IPropertyObserver
-{
-private:
-	uint32	_Ping;
-	bool	_RdyToPing;
-
-public:
-	// Constructor.
-	CPing() {_Ping = 0; _RdyToPing = true;}
-	// Destructor.
-	~CPing() {;}
-
-	// Add an observer on the database for the ping.
-	void init()
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if(pIM)
-		{
-			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
-			if(pNodeLeaf)
-			{
-				ICDBNode::CTextId textId;
-				pNodeLeaf->addObserver(this, textId);
-				//	nlwarning("CPing: cannot add the observer");
-			}
-			else
-				nlwarning("CPing: 'SERVER:DEBUG_INFO:Ping' does not exist.");
-		}
-	}
-
-	// Release the observer on the database for the ping.
-	void release()
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if(pIM)
-		{
-			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
-			if(pNodeLeaf)
-			{
-				ICDBNode::CTextId textId;
-				pNodeLeaf->removeObserver(this, textId);
-			}
-			else
-				nlwarning("CPing: 'SERVER:DEBUG_INFO:Ping' does not exist.");
-		}
-	}
-
-	// Method called when the ping message is back.
-	virtual void update(ICDBNode* node)
-	{
-		CCDBNodeLeaf *leaf = safe_cast<CCDBNodeLeaf *>(node);
-		uint32 before = (uint32)leaf->getValue32();
-		uint32 current = (uint32)(0xFFFFFFFF & ryzomGetLocalTime());
-		if(before > current)
-		{
-			//nlwarning("DB PING Pb before '%u' after '%u'.", before, current);
-			if(ClientCfg.Check)
-				nlstop;
-		}
-		_Ping = current - before;
-		_RdyToPing = true;
-	}
-
-	// return the ping in ms.
-	uint32 getValue() {return _Ping;}
-
-	void rdyToPing(bool rdy) {_RdyToPing = rdy;}
-	bool rdyToPing() const {return _RdyToPing;}
-};
 
 /////////////
 // GLOBALS //
