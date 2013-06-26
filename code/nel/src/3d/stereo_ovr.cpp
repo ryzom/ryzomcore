@@ -146,7 +146,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo) : m_Stage(2)
+CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo) : m_Stage(0)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -235,38 +235,130 @@ bool CStereoOVR::nextPass()
 	{
 	case 0:
 		++m_Stage;
+		// stage 1:
+		// (initBloom)
+		// clear buffer
+		// draw scene left
 		return true;
 	case 1:
 		++m_Stage;
-		return false;
-	case 2:
-		m_Stage = 0;
+		// stage 2:
+		// draw scene right
 		return true;
+	case 2:
+		++m_Stage;
+		// stage 3:
+		// (endBloom)
+		// draw interface 3d left
+		return true;
+	case 3:
+		++m_Stage;
+		// stage 4:
+		// draw interface 3d right
+		return true;
+	case 4:
+		++m_Stage;
+		// stage 5:
+		// (endInterfacesDisplayBloom)
+		// draw interface 2d left
+		return true;
+	case 5:
+		++m_Stage;
+		// stage 6:
+		// draw interface 2d right
+		return true;
+	case 6:
+		m_Stage = 0;
+		// present
+		return false;
 	}
 }
 
-const NL3D::CViewport &CStereoOVR::getCurrentViewport()
+const NL3D::CViewport &CStereoOVR::getCurrentViewport() const
 {
-	if (m_Stage) return m_RightViewport;
-	else return m_LeftViewport;
+	if (m_Stage % 2) return m_LeftViewport;
+	else return m_RightViewport;
 }
 
-void CStereoOVR::getCurrentFrustum(NL3D::UCamera *camera)
+void CStereoOVR::getCurrentFrustum(NL3D::UCamera *camera) const
 {
-	if (m_Stage) camera->setFrustum(m_RightFrustum);
-	else camera->setFrustum(m_LeftFrustum);
+	if (m_Stage % 2) camera->setFrustum(m_LeftFrustum);
+	else camera->setFrustum(m_RightFrustum);
 }
 
-void CStereoOVR::getCurrentMatrix(NL3D::UCamera *camera)
+void CStereoOVR::getCurrentMatrix(NL3D::UCamera *camera) const
 {
 	CMatrix translate;
-	if (m_Stage) translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
+	if (m_Stage % 2) translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
 	else translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
 	camera->setTransformMode(NL3D::UTransformable::DirectMatrix);
-	camera->setMatrix(m_CameraMatrix * translate); // or switch?
+	camera->setMatrix(m_CameraMatrix * translate);
 }
 
-NLMISC::CQuat CStereoOVR::getOrientation()
+bool CStereoOVR::beginClear()
+{
+	switch (m_Stage)
+	{
+	case 1:
+		return true;
+	}
+	return false;
+}
+
+void CStereoOVR::endClear()
+{
+
+}
+	
+bool CStereoOVR::beginScene()
+{
+	switch (m_Stage)
+	{
+	case 1:
+	case 2:
+		return true;
+	}
+	return false;
+}
+
+void CStereoOVR::endScene()
+{
+
+}
+
+bool CStereoOVR::beginInterface3D()
+{
+	switch (m_Stage)
+	{
+	case 3:
+	case 4:
+		return true;
+	}
+	return false;
+}
+
+void CStereoOVR::endInterface3D()
+{
+
+}
+
+bool CStereoOVR::beginInterface2D()
+{
+	switch (m_Stage)
+	{
+	case 5:
+	case 6:
+		return true;
+	}
+	return false;
+}
+
+void CStereoOVR::endInterface2D()
+{
+
+}
+
+NLMISC::CQuat CStereoOVR::getOrientation() const
 {
 	OVR::Quatf quatovr = m_DevicePtr->SensorFusion.GetPredictedOrientation();
 	NLMISC::CMatrix coordsys;

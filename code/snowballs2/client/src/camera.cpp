@@ -131,8 +131,6 @@ void	initCamera()
 
 	if (StereoHMD)
 	{
-		StereoHMD->nextPass(); // test
-
 		StereoHMD->initCamera(&Camera);
 	}
 

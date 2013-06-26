@@ -84,6 +84,7 @@ public:
 	CStereoOVR(const CStereoDeviceInfo &deviceInfo);
 	virtual ~CStereoOVR();
 
+
 	/// Gets the required screen resolution for this device
 	virtual void getScreenResolution(uint &width, uint &height);
 	/// Set latest camera position etcetera
@@ -92,18 +93,32 @@ public:
 	/// Is there a next pass
 	virtual bool nextPass();
 	/// Gets the current viewport
-	virtual const NL3D::CViewport &getCurrentViewport();
+	virtual const NL3D::CViewport &getCurrentViewport() const;
 	/// Gets the current camera frustum
-	virtual void getCurrentFrustum(NL3D::UCamera *camera);
+	virtual void getCurrentFrustum(NL3D::UCamera *camera) const;
 	/// Gets the current camera matrix
-	virtual void getCurrentMatrix(NL3D::UCamera *camera);
+	virtual void getCurrentMatrix(NL3D::UCamera *camera) const;
 
-	virtual NLMISC::CQuat getOrientation();
+	virtual bool beginClear();
+	virtual void endClear();
+	
+	virtual bool beginScene();
+	virtual void endScene();
+
+	virtual bool beginInterface3D();
+	virtual void endInterface3D();
+	
+	virtual bool beginInterface2D();
+	virtual void endInterface2D();
+
+	virtual NLMISC::CQuat getOrientation() const;
+
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
 	static CStereoOVR *createDevice(const CStereoDeviceInfo &deviceInfo);
 	static bool isLibraryInUse();
 	static void releaseLibrary();
+
 
 	/// Calculates internal camera information based on the reference camera
 	void initCamera(const NL3D::UCamera *camera);

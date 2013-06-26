@@ -710,7 +710,7 @@ void loopIngame()
 
 		// 09. Update Camera (depends on entities)
 		updateCamera();
-		StereoHMD->updateCamera(&Camera);
+		if (StereoHMD) StereoHMD->updateCamera(&Camera);
 
 		// 10. Update Interface (login, ui, etc)
 		// ...
@@ -730,63 +730,92 @@ void loopIngame()
 		if (Driver->isLost()) nlSleep(10);
 		else
 		{
-			// call all 3d render thingies
-			// Driver->clearBuffers(CRGBA(127, 0, 0)); // if you see red, there's a problem with bloom or stereo render
-			
-			// 01. Render Driver (background color)
-			// BLOOM CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
-			Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
-
-#if SBCLIENT_DEV_STEREO
-			_StereoRender->calculateCameras(Camera.getObjectPtr()); // calculate modified matrices for the current camera
-			for (uint cameraId = 0; cameraId < _StereoRender->getCameraCount(); ++cameraId)
+			uint i = 0;
+			uint bloomStage = 0;
+			while ((!StereoHMD && i == 0) || (StereoHMD && StereoHMD->nextPass()))
 			{
-				_StereoRender->getCamera(cameraId, Camera.getObjectPtr()); // get the matrix details for this camera
+				++i;
+				if (StereoHMD)
+				{
+					const CViewport &vp = StereoHMD->getCurrentViewport();
+					Driver->setViewport(vp);
+					Scene->setViewport(vp);
+					SkyScene->setViewport(vp);
+					StereoHMD->getCurrentFrustum(&Camera);
+					StereoHMD->getCurrentFrustum(&SkyCamera);
+					StereoHMD->getCurrentMatrix(&Camera);
+				}
+				
+				if (!StereoHMD || StereoHMD->beginClear())
+				{
+					nlassert(bloomStage == 0);
+					CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
+					bloomStage = 1;
 
-#endif /* #if SBCLIENT_DEV_STEREO */
-			while (StereoHMD->nextPass())
-			{
-				const CViewport &vp = StereoHMD->getCurrentViewport();
-				Driver->setViewport(vp);
-				Scene->setViewport(vp);
-				SkyScene->setViewport(vp);
-				StereoHMD->getCurrentFrustum(&Camera);
-				StereoHMD->getCurrentFrustum(&SkyCamera);
-				StereoHMD->getCurrentMatrix(&Camera);
+					// 01. Render Driver (background color)
+					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
+					
+					if (StereoHMD) StereoHMD->endClear();
+				}
 
-				// 02. Render Sky (sky scene)
-				updateSky(); // Render the sky scene before the main scene
+				if (!StereoHMD || StereoHMD->beginScene())
+				{				
+					// 02. Render Sky (sky scene)
+					updateSky(); // Render the sky scene before the main scene
 
-				// 04. Render Scene (entity scene)
-				Scene->render(); // Render
+					// 04. Render Scene (entity scene)
+					Scene->render(); // Render
 
-				// 05. Render Effects (flare)
-				updateLensFlare(); // Render the lens flare
-				// BLOOM CBloomEffect::instance().endBloom(); // end the actual bloom effect visible in the scene
+					// 05. Render Effects (flare)
+					if (!StereoHMD) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
 
-				// 06. Render Interface 3D (player names)
-				// BLOOM CBloomEffect::instance().endInterfacesDisplayBloom(); // end bloom effect system after drawing the 3d interface (z buffer related)
+					if (StereoHMD) StereoHMD->endScene();
+				}
 
-#if SBCLIENT_DEV_STEREO
-				_StereoRender->copyBufferToTexture(cameraId); // copy current buffer to the active stereorender texture
-			}
-			_StereoRender->restoreCamera(Camera.getObjectPtr()); // restore the camera
-			_StereoRender->render(); // render everything together in the current mode
-#endif /* #if SBCLIENT_DEV_STEREO */
+				if (!StereoHMD || StereoHMD->beginInterface3D())
+				{
+					if (bloomStage == 1)
+					{
+						// End the actual bloom effect visible in the scene.
+						if (StereoHMD) Driver->setViewport(NL3D::CViewport());
+						CBloomEffect::instance().endBloom();
+						if (StereoHMD) Driver->setViewport(StereoHMD->getCurrentViewport());
+						bloomStage = 2;
+					}
 
-				// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
-				updateCompass(); // Update the compass
-				updateRadar(); // Update the radar
-				updateGraph(); // Update the radar
-				if (ShowCommands) updateCommands(); // Update the commands panel
-				updateAnimation();
-				renderEntitiesNames(); // Render the name on top of the other players
-				updateInterface(); // Update interface
-				renderInformation();
-				update3dLogo();
+					// 06. Render Interface 3D (player names)
+					// ...  
+					
+					if (StereoHMD) StereoHMD->endInterface3D();
+				}
 
-				// 08. Render Debug (stuff for dev)
-				// ...
+				if (!StereoHMD || StereoHMD->beginInterface2D())
+				{
+					if (bloomStage == 2)
+					{
+						// End bloom effect system after drawing the 3d interface (z buffer related).
+						if (StereoHMD) Driver->setViewport(NL3D::CViewport());
+						CBloomEffect::instance().endInterfacesDisplayBloom();
+						if (StereoHMD) Driver->setViewport(StereoHMD->getCurrentViewport());
+						bloomStage = 0;
+					}
+
+					// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
+					updateCompass(); // Update the compass
+					updateRadar(); // Update the radar
+					updateGraph(); // Update the radar
+					if (ShowCommands) updateCommands(); // Update the commands panel
+					updateAnimation();
+					renderEntitiesNames(); // Render the name on top of the other players
+					updateInterface(); // Update interface
+					renderInformation();
+					if (!StereoHMD) update3dLogo(); // broken with stereo
+
+					// 08. Render Debug (stuff for dev)
+					// ...
+
+					if (StereoHMD) StereoHMD->endInterface2D();
+				}
 			}
 
 			// 09. Render Buffer
