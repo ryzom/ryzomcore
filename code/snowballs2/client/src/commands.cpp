@@ -388,7 +388,7 @@ void	updateCommands()
 	if (StereoHMD)
 	{
 		float xshift, yshift;
-		StereoHMD->getInterface2DShift(xshift, yshift, 1.f);
+		StereoHMD->getInterface2DShift(0, xshift, yshift, 1.f);
 		// snap to pixels
 		xshift = ((float)(sint32)(xshift * width)) / width;
 		yshift = ((float)(sint32)(yshift * height)) / height;

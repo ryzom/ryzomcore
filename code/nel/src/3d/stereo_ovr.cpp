@@ -204,29 +204,29 @@ void CStereoOVR::getScreenResolution(uint &width, uint &height)
 	height = m_DevicePtr->HMDInfo.VResolution;
 }
 
-void CStereoOVR::initCamera(const NL3D::UCamera *camera)
+void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 {
 	float ar = (float)m_DevicePtr->HMDInfo.HResolution / ((float)m_DevicePtr->HMDInfo.VResolution * 2.0f);
 	float fov = 2.0f * atanf((m_DevicePtr->HMDInfo.VScreenSize / 2.0f) / m_DevicePtr->HMDInfo.EyeToScreenDistance); //(float)NLMISC::Pi/2.f; // 2.0f * atanf(m_DevicePtr->HMDInfo.VScreenSize / 2.0f * m_DevicePtr->HMDInfo.EyeToScreenDistance);
-	m_LeftFrustum.initPerspective(fov, ar, camera->getFrustum().Near, camera->getFrustum().Far);
-	m_RightFrustum = m_LeftFrustum;
+	m_LeftFrustum[cid].initPerspective(fov, ar, camera->getFrustum().Near, camera->getFrustum().Far);
+	m_RightFrustum[cid] = m_LeftFrustum[cid];
 	float viewCenter = m_DevicePtr->HMDInfo.HScreenSize * 0.25f;
 	float eyeProjectionShift = viewCenter - m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f;
 	float projectionCenterOffset = 4.0f * eyeProjectionShift / m_DevicePtr->HMDInfo.HScreenSize;
 	nldebug("OVR: projectionCenterOffset = %f", projectionCenterOffset);
-	projectionCenterOffset *= (m_LeftFrustum.Left - m_LeftFrustum.Right) * 0.5f; // made this up ...
-	m_LeftFrustum.Left += projectionCenterOffset;
-	m_LeftFrustum.Right += projectionCenterOffset;
-	m_RightFrustum.Left -= projectionCenterOffset;
-	m_RightFrustum.Right -= projectionCenterOffset;
+	projectionCenterOffset *= (m_LeftFrustum[cid].Left - m_LeftFrustum[cid].Right) * 0.5f; // made this up ...
+	m_LeftFrustum[cid].Left += projectionCenterOffset;
+	m_LeftFrustum[cid].Right += projectionCenterOffset;
+	m_RightFrustum[cid].Left -= projectionCenterOffset;
+	m_RightFrustum[cid].Right -= projectionCenterOffset;
 }
 
-void CStereoOVR::updateCamera(const NL3D::UCamera *camera)
+void CStereoOVR::updateCamera(uint cid, const NL3D::UCamera *camera)
 {
-	if (camera->getFrustum().Near != m_LeftFrustum.Near
-		|| camera->getFrustum().Far != m_LeftFrustum.Far)
-		CStereoOVR::initCamera(camera);
-	m_CameraMatrix = camera->getMatrix();
+	if (camera->getFrustum().Near != m_LeftFrustum[cid].Near
+		|| camera->getFrustum().Far != m_LeftFrustum[cid].Far)
+		CStereoOVR::initCamera(cid, camera);
+	m_CameraMatrix[cid] = camera->getMatrix();
 }
 
 bool CStereoOVR::nextPass()
@@ -285,25 +285,25 @@ const NL3D::CViewport &CStereoOVR::getCurrentViewport() const
 	else return m_RightViewport;
 }
 
-const NL3D::CFrustum &CStereoOVR::getCurrentFrustum() const
+const NL3D::CFrustum &CStereoOVR::getCurrentFrustum(uint cid) const
 {
-	if (m_Stage % 2) return m_LeftFrustum;
-	else return m_RightFrustum;
+	if (m_Stage % 2) return m_LeftFrustum[cid];
+	else return m_RightFrustum[cid];
 }
 
-void CStereoOVR::getCurrentFrustum(NL3D::UCamera *camera) const
+void CStereoOVR::getCurrentFrustum(uint cid, NL3D::UCamera *camera) const
 {
-	if (m_Stage % 2) camera->setFrustum(m_LeftFrustum);
-	else camera->setFrustum(m_RightFrustum);
+	if (m_Stage % 2) camera->setFrustum(m_LeftFrustum[cid]);
+	else camera->setFrustum(m_RightFrustum[cid]);
 }
 
-void CStereoOVR::getCurrentMatrix(NL3D::UCamera *camera) const
+void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 {
 	CMatrix translate;
 	if (m_Stage % 2) translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
 	else translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
 	camera->setTransformMode(NL3D::UTransformable::DirectMatrix);
-	camera->setMatrix(m_CameraMatrix * translate);
+	camera->setMatrix(m_CameraMatrix[cid] * translate);
 }
 
 bool CStereoOVR::beginClear()
@@ -395,7 +395,7 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 }
 
 /// Get GUI shift
-void CStereoOVR::getInterface2DShift(float &x, float &y, float distance)
+void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distance)
 {
 #if 0
 
@@ -437,7 +437,7 @@ void CStereoOVR::getInterface2DShift(float &x, float &y, float distance)
 	
 	CVector rotshift = CVector(p, 0.f, t) * -distance;
 	
-	CVector proj = CStereoOVR::getCurrentFrustum().project(vec + ipd + rotshift);
+	CVector proj = CStereoOVR::getCurrentFrustum(cid).project(vec + ipd + rotshift);
 
 	x = (proj.x - 0.5f);
 	y = (proj.y - 0.5f);

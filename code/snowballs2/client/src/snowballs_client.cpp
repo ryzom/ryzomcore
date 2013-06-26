@@ -710,7 +710,7 @@ void loopIngame()
 
 		// 09. Update Camera (depends on entities)
 		updateCamera();
-		if (StereoHMD) StereoHMD->updateCamera(&Camera);
+		if (StereoHMD) StereoHMD->updateCamera(0, &Camera);
 
 		// 10. Update Interface (login, ui, etc)
 		// ...
@@ -741,9 +741,9 @@ void loopIngame()
 					Driver->setViewport(vp);
 					Scene->setViewport(vp);
 					SkyScene->setViewport(vp);
-					StereoHMD->getCurrentFrustum(&Camera);
-					StereoHMD->getCurrentFrustum(&SkyCamera);
-					StereoHMD->getCurrentMatrix(&Camera);
+					StereoHMD->getCurrentFrustum(0, &Camera);
+					StereoHMD->getCurrentFrustum(0, &SkyCamera);
+					StereoHMD->getCurrentMatrix(0, &Camera);
 				}
 				
 				if (!StereoHMD || StereoHMD->beginClear())

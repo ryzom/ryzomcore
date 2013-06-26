@@ -72,6 +72,8 @@ public:
 
 class CStereoOVRDevicePtr;
 
+#define NL_STEREO_MAX_USER_CAMERAS 8
+
 /**
  * \brief CStereoOVR
  * \date 2013-06-25 22:22GMT
@@ -88,18 +90,18 @@ public:
 	/// Gets the required screen resolution for this device
 	virtual void getScreenResolution(uint &width, uint &height);
 	/// Set latest camera position etcetera
-	virtual void updateCamera(const NL3D::UCamera *camera);
+	virtual void updateCamera(uint cid, const NL3D::UCamera *camera);
 
 	/// Is there a next pass
 	virtual bool nextPass();
 	/// Gets the current viewport
 	virtual const NL3D::CViewport &getCurrentViewport() const;
 	/// Gets the current camera frustum
-	virtual const NL3D::CFrustum &getCurrentFrustum() const;
+	virtual const NL3D::CFrustum &getCurrentFrustum(uint cid) const;
 	/// Gets the current camera frustum
-	virtual void getCurrentFrustum(NL3D::UCamera *camera) const;
+	virtual void getCurrentFrustum(uint cid, NL3D::UCamera *camera) const;
 	/// Gets the current camera matrix
-	virtual void getCurrentMatrix(NL3D::UCamera *camera) const;
+	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const;
 
 	/// At the start of a new render target
 	virtual bool beginClear();
@@ -122,7 +124,7 @@ public:
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const;
 	/// Get GUI center (1 = width, 1 = height, 0 = center)
-	virtual void getInterface2DShift(float &x, float &y, float distance);
+	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance);
 
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
@@ -132,7 +134,7 @@ public:
 
 
 	/// Calculates internal camera information based on the reference camera
-	void initCamera(const NL3D::UCamera *camera);
+	void initCamera(uint cid, const NL3D::UCamera *camera);
 
 	bool isDeviceCreated();
 
@@ -141,9 +143,9 @@ private:
 	int m_Stage;
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;
-	CFrustum m_LeftFrustum;
-	CFrustum m_RightFrustum;
-	CMatrix m_CameraMatrix;
+	CFrustum m_LeftFrustum[NL_STEREO_MAX_USER_CAMERAS];
+	CFrustum m_RightFrustum[NL_STEREO_MAX_USER_CAMERAS];
+	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];
 	mutable bool m_OrientationCached;
 	mutable NLMISC::CQuat m_OrientationCache;
 

@@ -131,7 +131,7 @@ void	initCamera()
 
 	if (StereoHMD)
 	{
-		StereoHMD->initCamera(&Camera);
+		StereoHMD->initCamera(0, &Camera);
 	}
 
 	// Create the snowing particle system
