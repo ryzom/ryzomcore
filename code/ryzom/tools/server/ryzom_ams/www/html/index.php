@@ -27,8 +27,13 @@ if ( isset( $_POST["function"] ) ){
 
 
 function loadpage ( $page ){
-     require_once( 'autoload/' . $page . '.php' );
+     $filename = 'autoload/' . $page . '.php';
+     if(is_file($filename)){
+          require_once($filename);
+     }
 }
+
+loadpage($page);
 
 //Set permission
 if(isset($_SESSION['permission'])){
@@ -40,7 +45,7 @@ if(isset($_SESSION['permission'])){
 
 
 //hide sidebar + topbar in case of login/register
-if($page == 'login' || $page == 'register'){
+if($page == 'login' || $page == 'register' || $page == 'logout'){
      $return['no_visible_elements'] = 'TRUE';
 }else{
      $return['no_visible_elements'] = 'FALSE';
