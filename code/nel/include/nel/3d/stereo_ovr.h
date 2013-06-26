@@ -49,10 +49,14 @@
 
 // NeL includes
 #include <nel/misc/smart_ptr.h>
+#include <nel/3d/frustum.h>
+#include <nel/3d/viewport.h>
 
 // Project includes
 
 namespace NL3D {
+
+class UCamera;
 
 struct CStereoDeviceInfo
 {
@@ -80,6 +84,20 @@ public:
 	CStereoOVR(const CStereoDeviceInfo &deviceInfo);
 	virtual ~CStereoOVR();
 
+	/// Gets the required screen resolution for this device
+	virtual void getScreenResolution(uint &width, uint &height);
+	/// Set latest camera position etcetera
+	virtual void updateCamera(const NL3D::UCamera *camera);
+
+	/// Is there a next pass
+	virtual bool nextPass();
+	/// Gets the current viewport
+	virtual const NL3D::CViewport &getCurrentViewport();
+	/// Gets the current camera frustum
+	virtual void getCurrentFrustum(NL3D::UCamera *camera);
+	/// Gets the current camera matrix
+	virtual void getCurrentMatrix(NL3D::UCamera *camera);
+
 	virtual NLMISC::CQuat getOrientation();
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
@@ -87,10 +105,19 @@ public:
 	static bool isLibraryInUse();
 	static void releaseLibrary();
 
+	/// Calculates internal camera information based on the reference camera
+	void initCamera(const NL3D::UCamera *camera);
+
 	bool isDeviceCreated();
 
 private:
 	CStereoOVRDevicePtr *m_DevicePtr;
+	int m_Stage;
+	CViewport m_LeftViewport;
+	CViewport m_RightViewport;
+	CFrustum m_LeftFrustum;
+	CFrustum m_RightFrustum;
+	CMatrix m_CameraMatrix;
 
 }; /* class CStereoOVR */
 

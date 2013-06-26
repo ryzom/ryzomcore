@@ -51,6 +51,7 @@
 #if SBCLIENT_DEV_STEREO
 #	include <nel/3d/stereo_render.h>
 #endif /* #if SBCLIENT_DEV_STEREO */
+#include <nel/3d/stereo_ovr.h>
 
 // Project includes
 #include "pacs.h"
@@ -709,6 +710,7 @@ void loopIngame()
 
 		// 09. Update Camera (depends on entities)
 		updateCamera();
+		StereoHMD->updateCamera(&Camera);
 
 		// 10. Update Interface (login, ui, etc)
 		// ...
@@ -729,17 +731,28 @@ void loopIngame()
 		else
 		{
 			// call all 3d render thingies
-			Driver->clearBuffers(CRGBA(127, 0, 0)); // if you see red, there's a problem with bloom or stereo render
+			// Driver->clearBuffers(CRGBA(127, 0, 0)); // if you see red, there's a problem with bloom or stereo render
+			
+			// 01. Render Driver (background color)
+			// BLOOM CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
+			Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
+
 #if SBCLIENT_DEV_STEREO
 			_StereoRender->calculateCameras(Camera.getObjectPtr()); // calculate modified matrices for the current camera
 			for (uint cameraId = 0; cameraId < _StereoRender->getCameraCount(); ++cameraId)
 			{
 				_StereoRender->getCamera(cameraId, Camera.getObjectPtr()); // get the matrix details for this camera
-#endif /* #if SBCLIENT_DEV_STEREO */
 
-				// 01. Render Driver (background color)
-				CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
-				Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
+#endif /* #if SBCLIENT_DEV_STEREO */
+			while (StereoHMD->nextPass())
+			{
+				const CViewport &vp = StereoHMD->getCurrentViewport();
+				Driver->setViewport(vp);
+				Scene->setViewport(vp);
+				SkyScene->setViewport(vp);
+				StereoHMD->getCurrentFrustum(&Camera);
+				StereoHMD->getCurrentFrustum(&SkyCamera);
+				StereoHMD->getCurrentMatrix(&Camera);
 
 				// 02. Render Sky (sky scene)
 				updateSky(); // Render the sky scene before the main scene
@@ -749,10 +762,10 @@ void loopIngame()
 
 				// 05. Render Effects (flare)
 				updateLensFlare(); // Render the lens flare
-				CBloomEffect::instance().endBloom(); // end the actual bloom effect visible in the scene
+				// BLOOM CBloomEffect::instance().endBloom(); // end the actual bloom effect visible in the scene
 
 				// 06. Render Interface 3D (player names)
-				CBloomEffect::instance().endInterfacesDisplayBloom(); // end bloom effect system after drawing the 3d interface (z buffer related)
+				// BLOOM CBloomEffect::instance().endInterfacesDisplayBloom(); // end bloom effect system after drawing the 3d interface (z buffer related)
 
 #if SBCLIENT_DEV_STEREO
 				_StereoRender->copyBufferToTexture(cameraId); // copy current buffer to the active stereorender texture
@@ -761,19 +774,20 @@ void loopIngame()
 			_StereoRender->render(); // render everything together in the current mode
 #endif /* #if SBCLIENT_DEV_STEREO */
 
-			// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
-			updateCompass(); // Update the compass
-			updateRadar(); // Update the radar
-			updateGraph(); // Update the radar
-			if (ShowCommands) updateCommands(); // Update the commands panel
-			updateAnimation();
-			renderEntitiesNames(); // Render the name on top of the other players
-			updateInterface(); // Update interface
-			renderInformation();
-			update3dLogo();
+				// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
+				updateCompass(); // Update the compass
+				updateRadar(); // Update the radar
+				updateGraph(); // Update the radar
+				if (ShowCommands) updateCommands(); // Update the commands panel
+				updateAnimation();
+				renderEntitiesNames(); // Render the name on top of the other players
+				updateInterface(); // Update interface
+				renderInformation();
+				update3dLogo();
 
-			// 08. Render Debug (stuff for dev)
-			// ...
+				// 08. Render Debug (stuff for dev)
+				// ...
+			}
 
 			// 09. Render Buffer
 			Driver->swapBuffers();

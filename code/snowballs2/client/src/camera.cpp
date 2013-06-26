@@ -64,13 +64,13 @@ UVisualCollisionEntity	*CamCollisionEntity = NULL;
 static UInstance			Snow = NULL;
 
 // The sky 3D objects
-static UScene				*SkyScene = NULL;
-static UCamera				SkyCamera = NULL;
+UScene				*SkyScene = NULL;
+UCamera				SkyCamera = NULL;
 static UInstance			Sky = NULL;
 
 static UCloudScape			*Clouds = NULL;
 
-static CStereoOVR *s_StereoHMD = NULL;
+CStereoOVR *StereoHMD = NULL;
 
 //
 // Functions
@@ -111,7 +111,7 @@ void	initCamera()
 		if (deviceInfo)
 		{
 			nlinfo("Create HMD device!");
-			s_StereoHMD = CStereoOVR::createDevice(*deviceInfo);
+			StereoHMD = CStereoOVR::createDevice(*deviceInfo);
 		}
 	}
 
@@ -128,6 +128,13 @@ void	initCamera()
 
 	CamCollisionEntity = VisualCollisionManager->createEntity();
 	CamCollisionEntity->setCeilMode(true);
+
+	if (StereoHMD)
+	{
+		StereoHMD->nextPass(); // test
+
+		StereoHMD->initCamera(&Camera);
+	}
 
 	// Create the snowing particle system
 	Snow = Scene->createInstance("snow.ps");
@@ -159,16 +166,16 @@ void releaseCamera()
 	Scene->deleteInstance(Snow);
 	VisualCollisionManager->deleteEntity(CamCollisionEntity);
 
-	delete s_StereoHMD;
-	s_StereoHMD = NULL;
+	delete StereoHMD;
+	StereoHMD = NULL;
 	CStereoOVR::releaseLibrary();
 }
 
 void updateCamera()
 {
-	if (s_StereoHMD)
+	if (StereoHMD)
 	{
-		NLMISC::CQuat hmdOrient = s_StereoHMD->getOrientation();
+		NLMISC::CQuat hmdOrient = StereoHMD->getOrientation();
 		NLMISC::CMatrix camMatrix = Camera.getMatrix();
 		NLMISC::CMatrix hmdMatrix;
 		hmdMatrix.setRot(hmdOrient);
@@ -217,7 +224,8 @@ void updateSky()
 	// Must clear ZBuffer For incoming rendering.
 	Driver->clearZBuffer();
 
-	Clouds->render();
+	if (!StereoHMD) // Cloudscape not supported (fix Viewport please)
+		Clouds->render();
 }
 
 } /* namespace SBCLIENT */

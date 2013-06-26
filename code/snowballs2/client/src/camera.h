@@ -30,6 +30,7 @@
 namespace NL3D
 {
 	class UVisualCollisionEntity;
+	class CStereoOVR;
 };
 
 namespace SBCLIENT {
@@ -39,7 +40,10 @@ namespace SBCLIENT {
 //
 
 extern NL3D::UCamera				Camera;
+extern NL3D::UCamera						SkyCamera;
 extern NL3D::UVisualCollisionEntity	*CamCollisionEntity;
+extern NL3D::CStereoOVR *StereoHMD;
+extern NL3D::UScene				*SkyScene;
 
 //
 // External functions

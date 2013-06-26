@@ -51,6 +51,7 @@
 
 // NeL includes
 // #include <nel/misc/debug.h>
+#include <nel/3d/u_camera.h>
 
 // Project includes
 
@@ -142,9 +143,10 @@ public:
 	OVR::Ptr<OVR::HMDDevice> HMDDevice;
 	OVR::Ptr<OVR::SensorDevice> SensorDevice;
 	OVR::SensorFusion SensorFusion;
+	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo)
+CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo) : m_Stage(2)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -155,11 +157,30 @@ CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo)
 
 	if (m_DevicePtr->HMDDevice)
 	{
+		m_DevicePtr->HMDDevice->GetDeviceInfo(&m_DevicePtr->HMDInfo);
+		nldebug("OVR: HScreenSize: %f, VScreenSize: %f", m_DevicePtr->HMDInfo.HScreenSize, m_DevicePtr->HMDInfo.VScreenSize);
+		nldebug("OVR: VScreenCenter: %f", m_DevicePtr->HMDInfo.VScreenCenter);
+		nldebug("OVR: EyeToScreenDistance: %f", m_DevicePtr->HMDInfo.EyeToScreenDistance);
+		nldebug("OVR: LensSeparationDistance: %f", m_DevicePtr->HMDInfo.LensSeparationDistance);
+		nldebug("OVR: InterpupillaryDistance: %f", m_DevicePtr->HMDInfo.InterpupillaryDistance);
+		nldebug("OVR: HResolution: %i, VResolution: %i", m_DevicePtr->HMDInfo.HResolution, m_DevicePtr->HMDInfo.VResolution);
+		nldebug("OVR: DistortionK[0]: %f, DistortionK[1]: %f", m_DevicePtr->HMDInfo.DistortionK[0], m_DevicePtr->HMDInfo.DistortionK[1]);
+		nldebug("OVR: DistortionK[2]: %f, DistortionK[3]: %f", m_DevicePtr->HMDInfo.DistortionK[2], m_DevicePtr->HMDInfo.DistortionK[3]);
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 160 NL3D::CStereoOVR::CStereoOVR : OVR: HScreenSize: 0.149760, VScreenSize: 0.093600
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 161 NL3D::CStereoOVR::CStereoOVR : OVR: VScreenCenter: 0.046800
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 162 NL3D::CStereoOVR::CStereoOVR : OVR: EyeToScreenDistance: 0.041000
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 163 NL3D::CStereoOVR::CStereoOVR : OVR: LensSeparationDistance: 0.063500
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 164 NL3D::CStereoOVR::CStereoOVR : OVR: InterpupillaryDistance: 0.064000
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 165 NL3D::CStereoOVR::CStereoOVR : OVR: HResolution: 1280, VResolution: 800
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 166 NL3D::CStereoOVR::CStereoOVR : OVR: DistortionK[0]: 1.000000, DistortionK[1]: 0.220000
+		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 167 NL3D::CStereoOVR::CStereoOVR : OVR: DistortionK[2]: 0.240000, DistortionK[3]: 0.000000
 		m_DevicePtr->SensorDevice = m_DevicePtr->HMDDevice->GetSensor();
 		m_DevicePtr->SensorFusion.AttachToSensor(m_DevicePtr->SensorDevice);
 		m_DevicePtr->SensorFusion.SetGravityEnabled(true);
 		m_DevicePtr->SensorFusion.SetPredictionEnabled(true);
 		m_DevicePtr->SensorFusion.SetYawCorrectionEnabled(true);
+		m_LeftViewport.init(0.f, 0.f, 0.5f, 1.0f);
+		m_RightViewport.init(0.5f, 0.f, 0.5f, 1.0f);
 	}
 }
 
@@ -175,6 +196,74 @@ CStereoOVR::~CStereoOVR()
 	delete m_DevicePtr;
 	m_DevicePtr = NULL;
 	--s_DeviceCounter;
+}
+
+void CStereoOVR::getScreenResolution(uint &width, uint &height)
+{
+	width = m_DevicePtr->HMDInfo.HResolution;
+	height = m_DevicePtr->HMDInfo.VResolution;
+}
+
+void CStereoOVR::initCamera(const NL3D::UCamera *camera)
+{
+	float ar = (float)m_DevicePtr->HMDInfo.HResolution / ((float)m_DevicePtr->HMDInfo.VResolution * 2.0f);
+	float fov = 2.0f * atanf((m_DevicePtr->HMDInfo.VScreenSize / 2.0f) / m_DevicePtr->HMDInfo.EyeToScreenDistance); //(float)NLMISC::Pi/2.f; // 2.0f * atanf(m_DevicePtr->HMDInfo.VScreenSize / 2.0f * m_DevicePtr->HMDInfo.EyeToScreenDistance);
+	m_LeftFrustum.initPerspective(fov, ar, camera->getFrustum().Near, camera->getFrustum().Far);
+	m_RightFrustum = m_LeftFrustum;
+	float viewCenter = m_DevicePtr->HMDInfo.HScreenSize * 0.25f;
+	float eyeProjectionShift = viewCenter - m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f;
+	float projectionCenterOffset = 4.0f * eyeProjectionShift / m_DevicePtr->HMDInfo.HScreenSize;
+	nldebug("OVR: projectionCenterOffset = %f", projectionCenterOffset);
+	projectionCenterOffset *= (m_LeftFrustum.Left - m_LeftFrustum.Right) * 0.5f; // made this up ...
+	m_LeftFrustum.Left += projectionCenterOffset;
+	m_LeftFrustum.Right += projectionCenterOffset;
+	m_RightFrustum.Left -= projectionCenterOffset;
+	m_RightFrustum.Right -= projectionCenterOffset;
+}
+
+void CStereoOVR::updateCamera(const NL3D::UCamera *camera)
+{
+	if (camera->getFrustum().Near != m_LeftFrustum.Near
+		|| camera->getFrustum().Far != m_LeftFrustum.Far)
+		CStereoOVR::initCamera(camera);
+	m_CameraMatrix = camera->getMatrix();
+}
+
+bool CStereoOVR::nextPass()
+{
+	switch (m_Stage)
+	{
+	case 0:
+		++m_Stage;
+		return true;
+	case 1:
+		++m_Stage;
+		return false;
+	case 2:
+		m_Stage = 0;
+		return true;
+	}
+}
+
+const NL3D::CViewport &CStereoOVR::getCurrentViewport()
+{
+	if (m_Stage) return m_RightViewport;
+	else return m_LeftViewport;
+}
+
+void CStereoOVR::getCurrentFrustum(NL3D::UCamera *camera)
+{
+	if (m_Stage) camera->setFrustum(m_RightFrustum);
+	else camera->setFrustum(m_LeftFrustum);
+}
+
+void CStereoOVR::getCurrentMatrix(NL3D::UCamera *camera)
+{
+	CMatrix translate;
+	if (m_Stage) translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
+	else translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
+	camera->setTransformMode(NL3D::UTransformable::DirectMatrix);
+	camera->setMatrix(m_CameraMatrix * translate); // or switch?
 }
 
 NLMISC::CQuat CStereoOVR::getOrientation()
@@ -225,7 +314,11 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 
 CStereoOVR *CStereoOVR::createDevice(const CStereoDeviceInfo &deviceInfo)
 {
-	return new CStereoOVR(deviceInfo);
+	CStereoOVR *stereo = new CStereoOVR(deviceInfo);
+	if (stereo->isDeviceCreated())
+		return stereo;
+	delete stereo;
+	return NULL;
 }
 
 bool CStereoOVR::isLibraryInUse()
