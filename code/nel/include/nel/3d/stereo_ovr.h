@@ -95,6 +95,8 @@ public:
 	/// Gets the current viewport
 	virtual const NL3D::CViewport &getCurrentViewport() const;
 	/// Gets the current camera frustum
+	virtual const NL3D::CFrustum &getCurrentFrustum() const;
+	/// Gets the current camera frustum
 	virtual void getCurrentFrustum(NL3D::UCamera *camera) const;
 	/// Gets the current camera matrix
 	virtual void getCurrentMatrix(NL3D::UCamera *camera) const;
@@ -119,6 +121,8 @@ public:
 
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const;
+	/// Get GUI center (1 = width, 1 = height, 0 = center) (todo: move to CStereoHMD)
+	void getInterface2DShift(float &x, float &y, float distance);
 
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
@@ -140,6 +144,8 @@ private:
 	CFrustum m_LeftFrustum;
 	CFrustum m_RightFrustum;
 	CMatrix m_CameraMatrix;
+	mutable bool m_OrientationCached;
+	mutable NLMISC::CQuat m_OrientationCache;
 
 }; /* class CStereoOVR */
 

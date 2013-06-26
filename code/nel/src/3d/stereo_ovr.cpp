@@ -146,7 +146,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo) : m_Stage(0)
+CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo) : m_Stage(0), m_OrientationCached(false)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -270,6 +270,7 @@ bool CStereoOVR::nextPass()
 	case 6:
 		m_Stage = 0;
 		// present
+		m_OrientationCached = false;
 		return false;
 	}
 }
@@ -278,6 +279,12 @@ const NL3D::CViewport &CStereoOVR::getCurrentViewport() const
 {
 	if (m_Stage % 2) return m_LeftViewport;
 	else return m_RightViewport;
+}
+
+const NL3D::CFrustum &CStereoOVR::getCurrentFrustum() const
+{
+	if (m_Stage % 2) return m_LeftFrustum;
+	else return m_RightFrustum;
 }
 
 void CStereoOVR::getCurrentFrustum(NL3D::UCamera *camera) const
@@ -360,6 +367,9 @@ void CStereoOVR::endInterface2D()
 
 NLMISC::CQuat CStereoOVR::getOrientation() const
 {
+	if (m_OrientationCached)
+		return m_OrientationCache;
+
 	OVR::Quatf quatovr = m_DevicePtr->SensorFusion.GetPredictedOrientation();
 	NLMISC::CMatrix coordsys;
 	float csys[] = {
@@ -374,7 +384,24 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 	NLMISC::CMatrix matr;
 	matr.rotateX(NLMISC::Pi * 0.5f); // fix this properly... :) (note: removing this allows you to use rift while lying down)
 	NLMISC::CMatrix matnel = matr * matovr * coordsys;
-	return matnel.getRot();
+	NLMISC::CQuat finalquat = matnel.getRot();
+	m_OrientationCache = finalquat;
+	m_OrientationCached = true;
+	return finalquat;
+}
+
+/// Get GUI shift (todo: move to CStereoHMD)
+void CStereoOVR::getInterface2DShift(float &x, float &y, float distance)
+{
+	NLMISC::CVector vector = CVector(0.f, -distance, 0.f);
+	NLMISC::CQuat rot = getOrientation();
+	rot.invert();
+	NLMISC::CMatrix mat;
+	mat.rotate(rot);
+	mat.translate(vector);
+	CVector proj = getCurrentFrustum().project(mat.getPos());
+	x = proj.x - 0.5f;
+	y = proj.y - 0.5f;
 }
 
 void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)

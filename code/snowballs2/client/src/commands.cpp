@@ -35,6 +35,7 @@
 #include <nel/3d/u_3d_mouse_listener.h>
 #include <nel/3d/u_material.h>
 #include <nel/3d/u_landscape.h>
+#include <nel/3d/stereo_ovr.h>
 
 #include "network.h"
 #include "snowballs_client.h"
@@ -374,6 +375,9 @@ void	updateCommands()
 	uint32 _width, _height;
 	Driver->getWindowSize(_width, _height);
 	float width = (float)_width, height = (float)_height;
+	NL3D::CViewport vp = Driver->getViewport();
+	width *= vp.getWidth();
+	height *= vp.getHeight();
 	float CommandsLineHeight = CommandsFontSize / height;
 	float CommandsBoxX = ((float)(sint32)(SBCLIENT::CommandsBoxX * width)) / width;
 	float CommandsBoxWidth = ((float)(sint32)(SBCLIENT::CommandsBoxWidth * width)) / width;
@@ -381,6 +385,17 @@ void	updateCommands()
 	float CommandsBoxHeight = ((float)(sint32)((CommandsNbLines + 1) * CommandsLineHeight * width)) / width;
 	float CommandsBoxBorderX = ((float)(sint32)(SBCLIENT::CommandsBoxBorder * width)) / width;
 	float CommandsBoxBorderY = ((float)(sint32)(SBCLIENT::CommandsBoxBorder * height)) / height;
+	if (StereoHMD)
+	{
+		float xshift, yshift;
+		StereoHMD->getInterface2DShift(xshift, yshift, 1.0f);
+		// snap to pixels
+		xshift = ((float)(sint32)(xshift * width)) / width;
+		yshift = ((float)(sint32)(yshift * height)) / height;
+		// adjust
+		CommandsBoxX += xshift;
+		CommandsBoxY += yshift;
+	}
 
 	// Display the background
 	Driver->setMatrixMode2D11 ();
