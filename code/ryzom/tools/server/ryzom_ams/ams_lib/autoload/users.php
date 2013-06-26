@@ -272,7 +272,7 @@ class Users{
           
           try {
                //make connection with and put into shard db
-               $dbs = new PDO("mysql:host='127.0.39.3';port=$shardport;dbname=$sharddbname", $shardusername, $shardpassword);
+               $dbs = new PDO("mysql:host=$shardhost;port=$shardport;dbname=$sharddbname", $shardusername, $shardpassword);
                $dbs->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                $statement = $dbs->prepare("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)");
                $statement->execute($values["params"]);

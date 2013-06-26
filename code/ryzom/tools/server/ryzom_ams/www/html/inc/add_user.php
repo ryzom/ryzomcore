@@ -15,7 +15,11 @@ function add_user(){
               'access' => $_SERVER['REQUEST_TIME']
               );
           //header( 'Location: email_sent.php' );
-          write_user( $edit );
+          $status = write_user( $edit );
+          $pageElements['status'] = $status;
+          //TODO: perhaps send email!
+          $pageElements['no_visible_elements'] = 'TRUE';
+          helpers :: loadtemplate( 'register_feedback', $pageElements);
           exit;
      }else{
           // pass error
@@ -77,6 +81,7 @@ function write_user($newUser){
      
      
      //Create the user on the shard + in case shard is offline put copy of query in query db
+     //returns ok, shardoffline or liboffline
      $result = Users :: createUser($values);
   
      try{
@@ -91,6 +96,7 @@ function write_user($newUser){
       print_r($e);
       exit;
      }
-     print('Awesome');
-     }
+     
+     return $result;
 
+}
