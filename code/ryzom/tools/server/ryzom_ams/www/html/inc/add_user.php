@@ -15,7 +15,11 @@ function add_user(){
               'access' => $_SERVER['REQUEST_TIME']
               );
           //header( 'Location: email_sent.php' );
-          write_user( $edit );
+          $status = write_user( $edit );
+          $pageElements['status'] = $status;
+          //TODO: perhaps send email!
+          $pageElements['no_visible_elements'] = 'TRUE';
+          helpers :: loadtemplate( 'register_feedback', $pageElements);
           exit;
      }else{
           // pass error
@@ -31,26 +35,43 @@ function add_user(){
 
 
 function write_user($newUser){
+     
+     //get the db specifics out of the config file
      global $WEBDBHOST;
      global $WEBDBPORT;
      global $WEBDBNAME;
      global $WEBDBUSERNAME;
      global $WEBDBPASSWORD;
+     
+     global $LIBDBHOST;
+     global $LIBDBPORT;
+     global $LIBDBNAME;
+     global $LIBDBUSERNAME;
+     global $LIBDBPASSWORD;
+     
      global $SHARDDBHOST;
      global $SHARDDBPORT;
      global $SHARDDBNAME; 
      global $SHARDDBUSERNAME;
      global $SHARDDBPASSWORD;
      
-     $values["name"] = $newUser["name"];
-     $values["pass"] = $newUser["pass"];
-     $values["mail"] = $newUser["mail"];
+     //create salt here, because we want it to be the same on the web/server
+     $hashpass = crypt($newUser["pass"], Users::generateSALT());
      
-     $values["webhost"] =  $WEBDBHOST;
-     $values["webport"] =  $WEBDBPORT;
-     $values["webdbname"] = $WEBDBNAME;
-     $values["webusername"] = $WEBDBUSERNAME;
-     $values["webpassword"] = $WEBDBPASSWORD ;
+     $params = array(
+          'name' => $newUser["name"],
+          'pass' => $hashpass,
+          'mail' => $newUser["mail"]      
+     );
+     
+     //print_r($params);
+     //make a $values array for passing all data to the Users::createUser() function.
+     $values["params"] = $params;
+     $values["libhost"] =  $LIBDBHOST;
+     $values["libport"] =  $LIBDBPORT;
+     $values["libdbname"] = $LIBDBNAME;
+     $values["libusername"] = $LIBDBUSERNAME;
+     $values["libpassword"] = $LIBDBPASSWORD ;
  
      $values["shardhost"] = $SHARDDBHOST;
      $values["shardport"] = $SHARDDBPORT;
@@ -59,8 +80,23 @@ function write_user($newUser){
      $values["shardpassword"] = $SHARDDBPASSWORD;
      
      
+     //Create the user on the shard + in case shard is offline put copy of query in query db
+     //returns ok, shardoffline or liboffline
      $result = Users :: createUser($values);
-    
-     print('Awesome');
+  
+     try{
+          //make connection with web db and put it in there
+          $dbw = new PDO("mysql:host=$WEBDBHOST;port=$WEBDBPORT;dbname=$WEBDBNAME", $WEBDBUSERNAME, $WEBDBPASSWORD);
+          $dbw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+          $statement = $dbw->prepare("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)");
+          $statement->execute($params);
+          
+     }catch (PDOException $e) {
+      //go to error page or something, because can't access website db
+      print_r($e);
+      exit;
      }
+     
+     return $result;
 
+}
