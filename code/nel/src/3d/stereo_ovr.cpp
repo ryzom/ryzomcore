@@ -393,17 +393,52 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 /// Get GUI shift
 void CStereoOVR::getInterface2DShift(float &x, float &y, float distance)
 {
+#if 0
+
 	NLMISC::CVector vector = CVector(0.f, -distance, 0.f);
 	NLMISC::CQuat rot = getOrientation();
 	rot.invert();
 	NLMISC::CMatrix mat;
 	mat.rotate(rot);
-	if (m_Stage % 2) mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
-	else mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
+	//if (m_Stage % 2) mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
+	//else mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
 	mat.translate(vector);
 	CVector proj = CStereoOVR::getCurrentFrustum().project(mat.getPos());
-	x = proj.x - 0.5f;
-	y = proj.y - 0.5f;
+
+	NLMISC::CVector ipd;
+	if (m_Stage % 2) ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f);
+	else ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f);
+	CVector projipd = CStereoOVR::getCurrentFrustum().project(vector + ipd);
+	CVector projvec = CStereoOVR::getCurrentFrustum().project(vector);
+
+	x = (proj.x + projipd.x - projvec.x - 0.5f);
+	y = (proj.y + projipd.y - projvec.y - 0.5f);
+
+#elif 1
+
+	// Alternative method
+
+	NLMISC::CVector vec = CVector(0.f, -distance, 0.f);
+	NLMISC::CVector ipd;
+	if (m_Stage % 2) ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f);
+	else ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f);
+	
+
+	NLMISC::CQuat rot = getOrientation();
+	NLMISC::CQuat modrot = NLMISC::CQuat(CVector(0.f, 1.f, 0.f), NLMISC::Pi);
+	rot = rot * modrot;
+	float p = NLMISC::Pi + atan2f(2.0f * ((rot.x * rot.y) + (rot.z * rot.w)), 1.0f - 2.0f * ((rot.y * rot.y) + (rot.w * rot.w)));
+	if (p > NLMISC::Pi) p -= NLMISC::Pi * 2.0f;	
+	float t = -atan2f(2.0f * ((rot.x * rot.w) + (rot.y * rot.z)), 1.0f - 2.0f * ((rot.z * rot.z) + (rot.w * rot.w)));// // asinf(2.0f * ((rot.x * rot.z) - (rot.w * rot.y)));
+	
+	CVector rotshift = CVector(p, 0.f, t) * -distance;
+	
+	CVector proj = CStereoOVR::getCurrentFrustum().project(vec + ipd + rotshift);
+
+	x = (proj.x - 0.5f);
+	y = (proj.y - 0.5f);
+
+#endif
 }
 
 void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)

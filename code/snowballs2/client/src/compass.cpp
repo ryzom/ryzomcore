@@ -98,7 +98,7 @@ void updateCompass ()
 	if (StereoHMD)
 	{
 		float xshift, yshift;
-		StereoHMD->getInterface2DShift(xshift, yshift, 4.0f);
+		StereoHMD->getInterface2DShift(xshift, yshift, 1.f);
 		x += xshift;
 		y += yshift;
 	}
