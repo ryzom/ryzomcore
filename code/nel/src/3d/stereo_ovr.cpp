@@ -390,7 +390,7 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 	return finalquat;
 }
 
-/// Get GUI shift (todo: move to CStereoHMD)
+/// Get GUI shift
 void CStereoOVR::getInterface2DShift(float &x, float &y, float distance)
 {
 	NLMISC::CVector vector = CVector(0.f, -distance, 0.f);
@@ -398,8 +398,10 @@ void CStereoOVR::getInterface2DShift(float &x, float &y, float distance)
 	rot.invert();
 	NLMISC::CMatrix mat;
 	mat.rotate(rot);
+	if (m_Stage % 2) mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
+	else mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
 	mat.translate(vector);
-	CVector proj = getCurrentFrustum().project(mat.getPos());
+	CVector proj = CStereoOVR::getCurrentFrustum().project(mat.getPos());
 	x = proj.x - 0.5f;
 	y = proj.y - 0.5f;
 }

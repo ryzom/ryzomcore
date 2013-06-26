@@ -121,8 +121,8 @@ public:
 
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const;
-	/// Get GUI center (1 = width, 1 = height, 0 = center) (todo: move to CStereoHMD)
-	void getInterface2DShift(float &x, float &y, float distance);
+	/// Get GUI center (1 = width, 1 = height, 0 = center)
+	virtual void getInterface2DShift(float &x, float &y, float distance);
 
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
