@@ -91,6 +91,8 @@ public:
 	virtual void getScreenResolution(uint &width, uint &height);
 	/// Set latest camera position etcetera
 	virtual void updateCamera(uint cid, const NL3D::UCamera *camera);
+	/// Get the frustum to use for clipping
+	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const;
 
 	/// Is there a next pass
 	virtual bool nextPass();
@@ -143,6 +145,7 @@ private:
 	int m_Stage;
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;
+	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_LeftFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_RightFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];

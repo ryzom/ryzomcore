@@ -219,6 +219,17 @@ void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 	m_LeftFrustum[cid].Right += projectionCenterOffset;
 	m_RightFrustum[cid].Left -= projectionCenterOffset;
 	m_RightFrustum[cid].Right -= projectionCenterOffset;
+
+	// TODO: Clipping frustum should also take into account the IPD
+	m_ClippingFrustum[cid] = m_LeftFrustum[cid];
+	m_ClippingFrustum[cid].Left = min(m_LeftFrustum[cid].Left, m_RightFrustum[cid].Left);
+	m_ClippingFrustum[cid].Right = max(m_LeftFrustum[cid].Right, m_RightFrustum[cid].Right);
+}
+
+/// Get the frustum to use for clipping
+void CStereoOVR::getClippingFrustum(uint cid, NL3D::UCamera *camera) const
+{
+	camera->setFrustum(m_ClippingFrustum[cid]);
 }
 
 void CStereoOVR::updateCamera(uint cid, const NL3D::UCamera *camera)
