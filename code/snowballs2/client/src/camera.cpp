@@ -108,13 +108,19 @@ void	initCamera()
 					break;
 			}
 		}
-		//s_StereoHMD->createDevice(
+		if (deviceInfo)
+		{
+			nlinfo("Create HMD device!");
+			s_StereoHMD = CStereoOVR::createDevice(*deviceInfo);
+		}
 	}
 
 	// Set up directly the camera
 	Camera = Scene->getCam();
 	Camera.setTransformMode (UTransformable::DirectMatrix);
-	Camera.setPerspective ((float)Pi/2.f, 1.33f, 0.1f, 1000);
+	Camera.setPerspective((float)Pi/2.f, 
+		ConfigFile->getVar("ScreenWidth").asFloat() / ConfigFile->getVar("ScreenHeight").asFloat(), 
+		0.1f, 1000.f);
 	Camera.lookAt (CVector(ConfigFile->getVar("StartPoint").asFloat(0),
 							ConfigFile->getVar("StartPoint").asFloat(1),
 							ConfigFile->getVar("StartPoint").asFloat(2)),
@@ -153,11 +159,21 @@ void releaseCamera()
 	Scene->deleteInstance(Snow);
 	VisualCollisionManager->deleteEntity(CamCollisionEntity);
 
+	delete s_StereoHMD;
+	s_StereoHMD = NULL;
 	CStereoOVR::releaseLibrary();
 }
 
 void updateCamera()
 {
+	if (s_StereoHMD)
+	{
+		NLMISC::CQuat hmdOrient = s_StereoHMD->getOrientation();
+		NLMISC::CMatrix camMatrix = Camera.getMatrix();
+		NLMISC::CMatrix hmdMatrix;
+		hmdMatrix.setRot(hmdOrient);
+		Camera.setMatrix(camMatrix * hmdMatrix);
+	}
 	// Set the new position of the snow emitter
 	CMatrix	mat = CMatrix::Identity;
 	mat.setPos (Camera.getMatrix().getPos()/*+CVector (0.0f, 0.0f, -10.0f)*/);

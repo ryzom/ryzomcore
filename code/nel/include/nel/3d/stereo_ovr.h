@@ -80,10 +80,14 @@ public:
 	CStereoOVR(const CStereoDeviceInfo &deviceInfo);
 	virtual ~CStereoOVR();
 
+	virtual NLMISC::CQuat getOrientation();
+
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
 	static CStereoOVR *createDevice(const CStereoDeviceInfo &deviceInfo);
 	static bool isLibraryInUse();
 	static void releaseLibrary();
+
+	bool isDeviceCreated();
 
 private:
 	CStereoOVRDevicePtr *m_DevicePtr;

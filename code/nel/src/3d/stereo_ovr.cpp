@@ -129,7 +129,7 @@ CStereoOVRSystem s_StereoOVRSystem;
 class CStereoOVRDeviceHandle : public NLMISC::CRefCount
 {
 public:
-	OVR::DeviceHandle DeviceHandle;
+	OVR::DeviceEnumerator<OVR::HMDDevice> DeviceHandle;
 };
 
 sint s_DeviceCounter = 0;
@@ -140,6 +140,8 @@ class CStereoOVRDevicePtr
 {
 public:
 	OVR::Ptr<OVR::HMDDevice> HMDDevice;
+	OVR::Ptr<OVR::SensorDevice> SensorDevice;
+	OVR::SensorFusion SensorFusion;
 };
 
 CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo)
@@ -147,18 +149,51 @@ CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo)
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
 
-	// CStereoOVRDeviceHandle *handle = static_cast<CStereoOVRDeviceHandle *>(deviceInfo.Factory.getPtr());
-	// OVR::DeviceHandle dh = handle->DeviceHandle;
-	// dh.CreateDevice();
+	CStereoOVRDeviceHandle *handle = static_cast<CStereoOVRDeviceHandle *>(deviceInfo.Factory.getPtr());
+	OVR::DeviceEnumerator<OVR::HMDDevice> dh = handle->DeviceHandle;
+	m_DevicePtr->HMDDevice = dh.CreateDevice();
+
+	if (m_DevicePtr->HMDDevice)
+	{
+		m_DevicePtr->SensorDevice = m_DevicePtr->HMDDevice->GetSensor();
+		m_DevicePtr->SensorFusion.AttachToSensor(m_DevicePtr->SensorDevice);
+		m_DevicePtr->SensorFusion.SetGravityEnabled(true);
+		m_DevicePtr->SensorFusion.SetPredictionEnabled(true);
+		m_DevicePtr->SensorFusion.SetYawCorrectionEnabled(true);
+	}
 }
 
 CStereoOVR::~CStereoOVR()
 {
-	// ...
+	if (m_DevicePtr->SensorDevice)
+		m_DevicePtr->SensorDevice->Release();
+	m_DevicePtr->SensorDevice.Clear();
+	if (m_DevicePtr->HMDDevice)
+		m_DevicePtr->HMDDevice->Release();
+	m_DevicePtr->HMDDevice.Clear();
 
 	delete m_DevicePtr;
 	m_DevicePtr = NULL;
 	--s_DeviceCounter;
+}
+
+NLMISC::CQuat CStereoOVR::getOrientation()
+{
+	OVR::Quatf quatovr = m_DevicePtr->SensorFusion.GetPredictedOrientation();
+	NLMISC::CMatrix coordsys;
+	float csys[] = {
+		1.0f, 0.0f, 0.0f, 0.0f, 
+		0.0f, 0.0f, -1.0f, 0.0f, 
+		0.0f, 1.0f, 0.0f, 0.0f, 
+		0.0f, 0.0f, 0.0f, 1.0f, 
+	};
+	coordsys.set(csys);
+	NLMISC::CMatrix matovr;
+	matovr.setRot(NLMISC::CQuat(quatovr.x, quatovr.y, quatovr.z, quatovr.w));
+	NLMISC::CMatrix matr;
+	matr.rotateX(NLMISC::Pi * 0.5f); // fix this properly... :) (note: removing this allows you to use rift while lying down)
+	NLMISC::CMatrix matnel = matr * matovr * coordsys;
+	return matnel.getRot();
 }
 
 void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
@@ -190,7 +225,7 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 
 CStereoOVR *CStereoOVR::createDevice(const CStereoDeviceInfo &deviceInfo)
 {
-	return NULL;
+	return new CStereoOVR(deviceInfo);
 }
 
 bool CStereoOVR::isLibraryInUse()
@@ -203,6 +238,11 @@ void CStereoOVR::releaseLibrary()
 {
 	nlassert(s_DeviceCounter == 0);
 	s_StereoOVRSystem.Release();
+}
+
+bool CStereoOVR::isDeviceCreated()
+{
+	return m_DevicePtr->HMDDevice != NULL;
 }
 
 } /* namespace NL3D */
