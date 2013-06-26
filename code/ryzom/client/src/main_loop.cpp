@@ -150,7 +150,9 @@
 #include "nel/gui/lua_manager.h"
 #include "nel/gui/group_table.h"
 
+// pulled from main_loop.cpp
 #include "ping.h"
+#include "profiling.h"
 
 
 ///////////
@@ -252,12 +254,6 @@ bool				ShowHelp = false;	// Do the Help have to be displayed.
 uint8				ShowInfos = 0;		// 0=no info 1=text info 2=graph info
 
 bool				bZeroCpu = false;	// For no Cpu use if application is minimize  TODO: intercept minimize message, called by CTRL + Z at this
-
-bool				Profiling = false;			// Are we in Profile mode?
-uint				ProfileNumFrame = 0;
-bool				WantProfiling = false;
-bool				ProfilingVBLock = false;
-bool				WantProfilingVBLock = false;
 
 bool				MovieShooterSaving= false;	// Are we in Shooting mode?
 
@@ -415,119 +411,8 @@ void buildCameraClippingPyramid (vector<CPlane> &planes)
 }
 
 
-//---------------------------------------------------
-// Test Profiling and run?
-//---------------------------------------------------
-void	testLaunchProfile()
-{
-	if(!WantProfiling)
-		return;
-
-	// comes from ActionHandler
-	WantProfiling= false;
-
-#ifdef _PROFILE_ON_
-	if( !Profiling )
-	{
-		// start the bench.
-		NLMISC::CHTimer::startBench();
-		ProfileNumFrame = 0;
-		Driver->startBench();
-		if (SoundMngr)
-			SoundMngr->getMixer()->startDriverBench();
-		// state
-		Profiling= true;
-	}
-	else
-	{
-		// end the bench.
-		if (SoundMngr)
-			SoundMngr->getMixer()->endDriverBench();
-		NLMISC::CHTimer::endBench();
-		Driver->endBench();
 
 
-		// Display and save profile to a File.
-		CLog	log;
-		CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile(getLogDirectory() + "profile.log"));
-		CStdDisplayer	stdDisplayer;
-		log.addDisplayer(&fileDisplayer);
-		log.addDisplayer(&stdDisplayer);
-		// diplay
-		NLMISC::CHTimer::displayHierarchicalByExecutionPathSorted(&log, CHTimer::TotalTime, true, 48, 2);
-		NLMISC::CHTimer::displayHierarchical(&log, true, 48, 2);
-		NLMISC::CHTimer::displayByExecutionPath(&log, CHTimer::TotalTime);
-		NLMISC::CHTimer::display(&log, CHTimer::TotalTime);
-		NLMISC::CHTimer::display(&log, CHTimer::TotalTimeWithoutSons);
-		Driver->displayBench(&log);
-
-		if (SoundMngr)
-			SoundMngr->getMixer()->displayDriverBench(&log);
-
-		// state
-		Profiling= false;
-	}
-#endif	// #ifdef _PROFILE_ON_
-}
-
-
-//---------------------------------------------------
-// Test ProfilingVBLock and run?
-//---------------------------------------------------
-void	testLaunchProfileVBLock()
-{
-	// If running, must stop for this frame.
-	if(ProfilingVBLock)
-	{
-		vector<string>	strs;
-		Driver->endProfileVBHardLock(strs);
-		nlinfo("Profile VBLock");
-		nlinfo("**************");
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		ProfilingVBLock= false;
-
-		// Display additional info on allocated VBHards
-		nlinfo("VBHard list");
-		nlinfo("**************");
-		Driver->profileVBHardAllocation(strs);
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		strs.clear();
-		Driver->endProfileIBLock(strs);
-		nlinfo("Profile Index Buffer Lock");
-		nlinfo("**************");
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		ProfilingVBLock= false;
-
-		// Display additional info on allocated VBHards
-		/*
-		nlinfo("Index Buffer list");
-		nlinfo("**************");
-		Driver->profileIBAllocation(strs);
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		*/
-	}
-
-	// comes from ActionHandler
-	if(WantProfilingVBLock)
-	{
-		WantProfilingVBLock= false;
-		ProfilingVBLock= true;
-		Driver->startProfileVBHardLock();
-		Driver->startProfileIBLock();
-	}
-}
 
 
 //---------------------------------------------------
