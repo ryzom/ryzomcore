@@ -85,7 +85,7 @@ void	initCamera()
 		for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 		{
 			std::stringstream name;
-			name << std::string("[") << (uint32)it->Identifier << "] [" << it->Manufacturer << " - " << it->ProductName << "]";
+			name << std::string("[") << (uint32)it->Identifier << "] [" << it->Library << " - " << it->Manufacturer << " - " << it->ProductName << "]";
 			nlinfo("Stereo Device: %s", name.str().c_str());
 		}
 		CStereoDeviceInfo *deviceInfo = NULL;
@@ -101,7 +101,7 @@ void	initCamera()
 			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 			{
 				std::stringstream name;
-				name << it->Manufacturer << " - " << it->ProductName;
+				name << it->Library << " - " << it->Manufacturer << " - " << it->ProductName;
 				if (name.str() == hmdDeviceCfg)
 					deviceInfo = &(*it);
 				if (hmdDeviceId == it->Identifier)

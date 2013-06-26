@@ -177,6 +177,7 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 			deviceInfoOut.Factory = static_cast<NLMISC::CRefCount *>(handle);
 			handle->DeviceHandle = devices;
 			deviceInfoOut.Class = 1; // OVR::HMDDevice
+			deviceInfoOut.Library = "Oculus SDK";
 			deviceInfoOut.Identifier = id;
 			deviceInfoOut.Manufacturer = deviceInfo.Manufacturer;
 			deviceInfoOut.ProductName = deviceInfo.ProductName;

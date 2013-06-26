@@ -61,6 +61,7 @@ public:
 	uint8 Identifier;
 	NLMISC::CSmartPtr<NLMISC::CRefCount> Factory;
 
+	std::string Library;
 	std::string Manufacturer;
 	std::string ProductName;
 };
