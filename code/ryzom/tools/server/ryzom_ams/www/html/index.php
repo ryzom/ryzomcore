@@ -7,9 +7,16 @@ session_start();
 
 //print_r($_SESSION);
 
+//perform an action in case one is specified
+if ( isset( $_POST["function"] ) ){
+     require( "inc/" . $_POST["function"] . ".php" );
+     $return = $_POST["function"]();
+}
+
 //Decide what page to load
 if(isset($_SESSION['user'])){
      $page = 'home';
+     $return['username'] = $_SESSION['user'];
 }else{
      //default page
      $page = 'login';   
@@ -18,13 +25,6 @@ if(isset($_SESSION['user'])){
 if ( isset( $_GET["page"] ) ){
      $page = $_GET["page"];
      }
-
-//perform an action in case one is specified
-if ( isset( $_POST["function"] ) ){
-     require( "inc/" . $_POST["function"] . ".php" );
-     $return = $_POST["function"]();
-}
-
 
 function loadpage ( $page ){
      $filename = 'autoload/' . $page . '.php';
