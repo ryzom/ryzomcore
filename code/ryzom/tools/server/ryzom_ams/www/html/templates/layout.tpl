@@ -118,7 +118,8 @@
 					<ul class="nav nav-tabs nav-stacked main-menu">
 						{block name=menu}{/block}
 					</ul>
-					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax" style="visibility:hidden;"><div id="uniform-is-ajax" class="checker"><span class="checked"><input style="opacity: 0;" id="is-ajax" type="checkbox"></span></div> Ajax on menu</label>
+					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax"><input id="is-ajax" type="checkbox"> Ajax on menu</label>
+					<!--<label id="for-is-ajax" class="hidden-tablet" for="is-ajax" style="visibility:hidden;"><div id="uniform-is-ajax" class="checker"><span class="checked"><input style="opacity: 0;" id="is-ajax" type="checkbox"></span></div> Ajax on menu</label>--!>
 				</div><!--/.well -->
 			</div><!--/span-->
 			<!-- left menu ends -->
