@@ -14,23 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CL_PROFILING_H
-#define CL_PROFILING_H
+#ifndef CL_MAIN_LOOP_DEBUG_H
+#define CL_MAIN_LOOP_DEBUG_H
 
 #include <nel/misc/types_nl.h>
 
-extern bool Profiling; // Are we in Profile mode?
-extern uint ProfileNumFrame;
-extern bool WantProfiling;
-extern bool ProfilingVBLock;
-extern bool WantProfilingVBLock;
+// Display some debug infos.
+void displayDebug();
+void displayDebugFps();
+void displayDebugUIUnderMouse();
+// Display an Help.
+void displayHelp();
 
-/// Test Profiling and run?
-void testLaunchProfile();
-
-/// Test ProfilingVBLock and run?
-void testLaunchProfileVBLock();
-
-#endif // CL_PROFILING_H
+#endif // CL_MAIN_LOOP_DEBUG_H
 
 /* end of file */
