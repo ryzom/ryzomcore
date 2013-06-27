@@ -18,6 +18,7 @@
 #include "main_loop_debug.h"
 
 #include <nel/3d/u_text_context.h>
+#include <nel/gui/lua_ihm.h>
 
 #include "game_share/ryzom_version.h"
 
@@ -40,9 +41,12 @@
 #include "client_sheets/weather_function_params_sheet.h"
 #include "weather_manager_client.h"
 #include "fog_map.h"
+#include "misc.h"
+#include "interface_v3/interface_manager.h"
 
 using namespace NLMISC;
 using namespace NL3D;
+using namespace NLGUI;
 
 // ********************************************************************
 // ********************************************************************
@@ -54,6 +58,7 @@ extern std::set<std::string> LodCharactersNotFound;
 extern uint32 NbDatabaseChanges;
 extern CFogState MainFogState;
 extern CPing Ping;
+extern bool Filter3D[RYZOM_MAX_FILTER_3D];
 
 //namespace /* anonymous */ {
 
@@ -466,6 +471,215 @@ void displayDebug()
 	// No more shadow when displaying a text.
 	TextContext->setShaded(false);
 }// displayDebug //
+
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+
+//---------------------------------------------------
+// displayDebug :
+// Display some debug infos.
+//---------------------------------------------------
+void displayDebugFps()
+{
+	float lineStep = ClientCfg.DebugLineStep;
+	float line;
+
+	// Initialize Pen //
+	//----------------//
+	// Create a shadow when displaying a text.
+	TextContext->setShaded(true);
+	// Set the font size.
+	TextContext->setFontSize(ClientCfg.DebugFontSize);
+	// Set the text color
+	TextContext->setColor(ClientCfg.DebugFontColor);
+
+	// TOP LEFT //
+	//----------//
+	TextContext->setHotSpot(UTextContext::TopLeft);
+	line = 0.9f;
+	// Ms per frame
+	{
+		float spf = smoothFPS.getSmoothValue ();
+		// Ms per frame
+		TextContext->printfAt(0.1f, line, "FPS %.1f ms - %.1f fps", spf*1000, 1.f/spf);
+		line-= lineStep;
+		// More Smoothed Ms per frame
+		spf = moreSmoothFPS.getSmoothValue ();
+		TextContext->printfAt(0.1f, line, "Smoothed FPS %.1f ms - %.1f fps", spf*1000, 1.f/spf);
+		line-= lineStep;
+	}
+}
+
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+// ********************************************************************
+
+static NLMISC::CRefPtr<CInterfaceElement> HighlightedDebugUI;
+
+// displayDebug :
+// Display information about ui elements that are under the mouse
+//---------------------------------------------------
+void displayDebugUIUnderMouse()
+{
+	float lineStep = ClientCfg.DebugLineStep;
+	float line;
+
+	// Initialize Pen //
+	//----------------//
+	// Create a shadow when displaying a text.
+	TextContext->setShaded(true);
+	// Set the font size.
+	TextContext->setFontSize(ClientCfg.DebugFontSize);
+
+
+
+	// TOP LEFT //
+	//----------//
+	TextContext->setHotSpot(UTextContext::TopLeft);
+	line = 0.9f;
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	// for now only accessible with R2ED
+	if (ClientCfg.R2EDEnabled)
+	{
+		TextContext->setColor(CRGBA::Cyan);
+		TextContext->printfAt(0.1f, line, "Press default key (ctrl+shift+A) to cycle prev");
+		line-= lineStep;
+		TextContext->printfAt(0.1f, line, "Press default key (ctrl+shift+Q) to cycle next");
+		line-= lineStep;
+		TextContext->printfAt(0.1f, line, "Press default key (ctrl+shift+W) to inspect element");
+		line-= 2 * lineStep;
+	}
+	//
+	const std::vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
+	const std::vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer ();
+	// If previous highlighted element is found in the list, then keep it, else reset to first element
+	if (std::find(rICL.begin(), rICL.end(), HighlightedDebugUI) == rICL.end() &&
+		std::find(rIGL.begin(), rIGL.end(), HighlightedDebugUI) == rIGL.end())
+	{
+		if (!rICL.empty())
+		{
+			HighlightedDebugUI = rICL[0];
+		}
+		else
+		if (!rIGL.empty())
+		{
+			HighlightedDebugUI = rIGL[0];
+		}
+		else
+		{
+			HighlightedDebugUI = NULL;
+		}
+	}
+	//
+	TextContext->setColor(CRGBA::Green);
+	TextContext->printfAt(0.1f, line, "Controls under cursor ");
+	line -= lineStep * 1.4f;
+	TextContext->printfAt(0.1f, line, "----------------------");
+	line -= lineStep;
+	for(uint k = 0; k < rICL.size(); ++k)
+	{
+		if (rICL[k])
+		{
+			TextContext->setColor(rICL[k] != HighlightedDebugUI ? ClientCfg.DebugFontColor : CRGBA::Red);
+			TextContext->printfAt(0.1f, line, "id = %s, address = 0x%p, parent = 0x%p", rICL[k]->getId().c_str(), rICL[k], rICL[k]->getParent());
+		}
+		else
+		{
+			TextContext->setColor(CRGBA::Blue);
+			TextContext->printfAt(0.1f, line, "<NULL> control found !!!");
+		}
+		line-= lineStep;
+	}
+	//
+	TextContext->setColor(CRGBA::Green);
+	TextContext->printfAt(0.1f, line, "Groups under cursor ");
+	line -= lineStep * 1.4f;
+	TextContext->printfAt(0.1f, line, "----------------------");
+	line-= lineStep;
+	for(uint k = 0; k < rIGL.size(); ++k)
+	{
+		if (rIGL[k])
+		{
+			TextContext->setColor(rIGL[k] != HighlightedDebugUI ? ClientCfg.DebugFontColor : CRGBA::Red);
+			TextContext->printfAt(0.1f, line, "id = %s, address = 0x%p, parent = 0x%p", rIGL[k]->getId().c_str(), rIGL[k], rIGL[k]->getParent());
+		}
+		else
+		{
+			TextContext->setColor(CRGBA::Blue);
+			TextContext->printfAt(0.1f, line, "<NULL> group found !!!");
+		}
+		line-= lineStep;
+	}
+}
+
+// get all element under the mouse in a single vector
+static void getElementsUnderMouse(std::vector<CInterfaceElement *> &ielem)
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	const std::vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer();
+	const std::vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer();
+	ielem.clear();
+	ielem.insert(ielem.end(), rICL.begin(), rICL.end());
+	ielem.insert(ielem.end(), rIGL.begin(), rIGL.end());
+}
+
+class CHandlerDebugUiPrevElementUnderMouse : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		std::vector<CInterfaceElement *> ielem;
+		getElementsUnderMouse(ielem);
+		for(uint k = 0; k < ielem.size(); ++k)
+		{
+			if (HighlightedDebugUI == ielem[k])
+			{
+				HighlightedDebugUI = ielem[k == 0 ? ielem.size() - 1 : k - 1];
+				return;
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerDebugUiPrevElementUnderMouse, "debug_ui_prev_element_under_mouse");
+
+class CHandlerDebugUiNextElementUnderMouse : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		std::vector<CInterfaceElement *> ielem;
+		getElementsUnderMouse(ielem);
+		for(uint k = 0; k < ielem.size(); ++k)
+		{
+			if (HighlightedDebugUI == ielem[k])
+			{
+				HighlightedDebugUI = ielem[(k + 1) % ielem.size()];
+				return;
+			}
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerDebugUiNextElementUnderMouse, "debug_ui_next_element_under_mouse");
+
+class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		if (HighlightedDebugUI == NULL) return;
+		CLuaState *lua = CLuaManager::getInstance().getLuaState();
+		if (!lua) return;
+		CLuaStackRestorer lsr(lua, 0);
+		CLuaIHM::pushUIOnStack(*lua, HighlightedDebugUI);
+		lua->pushGlobalTable();
+		CLuaObject env(*lua);
+		env["inspect"].callNoThrow(1, 0);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerDebugUiDumpElementUnderMouse, "debug_ui_inspect_element_under_mouse");
 
 // ********************************************************************
 // ********************************************************************
