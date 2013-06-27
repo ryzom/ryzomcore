@@ -14,19 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CL_MAIN_LOOP_UTILITIES_H
-#define CL_MAIN_LOOP_UTILITIES_H
+#ifndef CL_CAMERA_H
+#define CL_CAMERA_H
 
 #include <nel/misc/types_nl.h>
 
-// Update Utilities (configuration etc)
-// Only put utility update functions here that are used in the main loop.
-// This is mainly for system configuration related functions 
-// such as config file changes.
+#include <nel/misc/plane.h>
 
-/// Compare ClientCfg and LastClientCfg to know what we must update
-void updateFromClientCfg();
+void updateCameraPerspective();
+void buildCameraClippingPyramid(std::vector<NLMISC::CPlane> &planes);
 
-#endif // CL_MAIN_LOOP_UTILITIES_H
+#endif // CL_CAMERA_H
 
 /* end of file */

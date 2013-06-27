@@ -33,28 +33,10 @@
 #include "entities.h"
 #include "input.h"
 #include "sound_manager.h"
+#include "camera.h"
 
 using namespace NLMISC;
 using namespace NL3D;
-
-//---------------------------------------------------
-// update the camera perspective setup
-//---------------------------------------------------
-void updateCameraPerspective()
-{
-	float	fov, aspectRatio;
-	computeCurrentFovAspectRatio(fov, aspectRatio);
-
-	// change the perspective of the scene
-	if(!MainCam.empty())
-		MainCam.setPerspective(fov, aspectRatio, CameraSetupZNear, ClientCfg.Vision);
-	// change the perspective of the root scene
-	if(SceneRoot)
-	{
-		UCamera cam= SceneRoot->getCam();
-		cam.setPerspective(fov, aspectRatio, SceneRootCameraZNear, SceneRootCameraZFar);
-	}
-}
 
 //---------------------------------------------------
 // Compare ClientCfg and LastClientCfg to know what we must update

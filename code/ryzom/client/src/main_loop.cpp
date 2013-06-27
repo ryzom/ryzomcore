@@ -142,6 +142,7 @@
 // pulled from main_loop.cpp
 #include "ping.h"
 #include "profiling.h"
+#include "camera.h"
 #include "main_loop_debug.h"
 #include "main_loop_temp.h"
 #include "main_loop_utilities.h"
@@ -350,44 +351,6 @@ void displaySceneProfiles();
 
 // validate current dialogs (end them if the player is too far from its interlocutor)
 void validateDialogs(const CGameContextMenu &gcm);
-
-void buildCameraClippingPyramid (vector<CPlane> &planes)
-{
-	if (StereoDisplay) StereoDisplay->getClippingFrustum(0, &MainCam);
-
-	// Compute pyramid in view basis.
-	CVector		pfoc(0,0,0);
-	const CFrustum &frustum  = MainCam.getFrustum();
-	InvMainSceneViewMatrix = MainCam.getMatrix();
-	MainSceneViewMatrix = InvMainSceneViewMatrix;
-	MainSceneViewMatrix.invert();
-
-	CVector		lb(frustum.Left,  frustum.Near, frustum.Bottom );
-	CVector		lt(frustum.Left,  frustum.Near, frustum.Top    );
-	CVector		rb(frustum.Right, frustum.Near, frustum.Bottom );
-	CVector		rt(frustum.Right, frustum.Near, frustum.Top    );
-
-	CVector		lbFar(frustum.Left,  ClientCfg.CharacterFarClip, frustum.Bottom);
-	CVector		ltFar(frustum.Left,  ClientCfg.CharacterFarClip, frustum.Top   );
-	CVector		rtFar(frustum.Right, ClientCfg.CharacterFarClip, frustum.Top   );
-
-	planes.resize (4);
-	// planes[0].make(lbFar, ltFar, rtFar);
-	planes[0].make(pfoc, lt, lb);
-	planes[1].make(pfoc, rt, lt);
-	planes[2].make(pfoc, rb, rt);
-	planes[3].make(pfoc, lb, rb);
-
-	// Compute pyramid in World basis.
-	// The vector transformation M of a plane p is computed as p*M-1.
-	// Here, ViewMatrix== CamMatrix-1. Hence the following formula.
-	uint i;
-
-	for (i = 0; i < 4; i++)
-	{
-		planes[i] = planes[i]*MainSceneViewMatrix;
-	}
-}
 
 void preRenderNewSky ()
 {
