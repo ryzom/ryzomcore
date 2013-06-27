@@ -236,7 +236,7 @@ class Users{
         return $salt;
      }
      
-     function create_Server_User($params)
+     /*function create_Server_User($params)
      {
          try {
              $hostname = 'localhost';
@@ -254,7 +254,7 @@ class Users{
              return "fail";
          }
         // createPermissions(array($login));
-     }
+     }*/
      
      function createUser($values){
           
