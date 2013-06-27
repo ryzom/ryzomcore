@@ -37,23 +37,7 @@ function add_user(){
 function write_user($newUser){
      
      //get the db specifics out of the config file
-     global $WEBDBHOST;
-     global $WEBDBPORT;
-     global $WEBDBNAME;
-     global $WEBDBUSERNAME;
-     global $WEBDBPASSWORD;
-     
-     global $LIBDBHOST;
-     global $LIBDBPORT;
-     global $LIBDBNAME;
-     global $LIBDBUSERNAME;
-     global $LIBDBPASSWORD;
-     
-     global $SHARDDBHOST;
-     global $SHARDDBPORT;
-     global $SHARDDBNAME; 
-     global $SHARDDBUSERNAME;
-     global $SHARDDBPASSWORD;
+     global $cfg;
      
      //create salt here, because we want it to be the same on the web/server
      $hashpass = crypt($newUser["pass"], Users::generateSALT());
@@ -67,29 +51,16 @@ function write_user($newUser){
      //print_r($params);
      //make a $values array for passing all data to the Users::createUser() function.
      $values["params"] = $params;
-     $values["libhost"] =  $LIBDBHOST;
-     $values["libport"] =  $LIBDBPORT;
-     $values["libdbname"] = $LIBDBNAME;
-     $values["libusername"] = $LIBDBUSERNAME;
-     $values["libpassword"] = $LIBDBPASSWORD ;
- 
-     $values["shardhost"] = $SHARDDBHOST;
-     $values["shardport"] = $SHARDDBPORT;
-     $values["sharddbname"] = $SHARDDBNAME;
-     $values["shardusername"] = $SHARDDBUSERNAME;
-     $values["shardpassword"] = $SHARDDBPASSWORD;
-     
+     $values["db"] =  $cfg['db'];
      
      //Create the user on the shard + in case shard is offline put copy of query in query db
-     //returns ok, shardoffline or liboffline
+     //returns: ok, shardoffline or liboffline
      $result = Users :: createUser($values);
   
      try{
           //make connection with web db and put it in there
-          $dbw = new PDO("mysql:host=$WEBDBHOST;port=$WEBDBPORT;dbname=$WEBDBNAME", $WEBDBUSERNAME, $WEBDBPASSWORD);
-          $dbw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-          $statement = $dbw->prepare("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)");
-          $statement->execute($params);
+          $dbw = new DBLayer($cfg['db']['web']);
+          $dbw->execute("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)",$params);
           
      }catch (PDOException $e) {
       //go to error page or something, because can't access website db

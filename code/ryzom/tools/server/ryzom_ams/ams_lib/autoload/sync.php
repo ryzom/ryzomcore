@@ -14,44 +14,24 @@ class Sync{
      */
     static public function syncdata () {
 
-        global $LIBDBHOST;
-        global $LIBDBPORT;
-        global $LIBDBNAME;
-        global $LIBDBUSERNAME;
-        global $LIBDBPASSWORD;
-        
-        global $SHARDDBHOST;
-        global $SHARDDBPORT;
-        global $SHARDDBNAME; 
-        global $SHARDDBUSERNAME;
-        global $SHARDDBPASSWORD;
+        global $cfg;
         
         try {
-            $dbl = new PDO("mysql:host=$LIBDBHOST;port=$LIBDBPORT;dbname=$LIBDBNAME", $LIBDBUSERNAME, $LIBDBPASSWORD);
-            $dbl->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $statement = $dbl->prepare("SELECT * FROM ams_querycache");
-            $statement->execute();
+            $dbl = new DBLayer($cfg['db']['lib']);
+            $statement = $dbl->executeWithoutParams("SELECT * FROM ams_querycache");
             $rows = $statement->fetchAll();
-
-            $dbs = new PDO("mysql:host=$SHARDDBHOST;port=$SHARDDBPORT;dbname=$SHARDDBNAME", $SHARDDBUSERNAME, $SHARDDBPASSWORD);
-            $dbs->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
+            $dbs = new DBLayer($cfg['db']['shard']);
             foreach ($rows as $record) {
     
                 switch($record['type']) {
                     case 'createPermissions':
                     case 'user_edit':
                     case 'createUser': 
-                        $query = json_decode($record['query']);
-                        //make connection with and put into shard db
-                        $statement = $dbs->prepare("INSERT INTO user (Login, Password, Email) VALUES (?, ?, ?)");
-                        $statement->execute($query);
-                        
-                        $statement = $dbl->prepare("DELETE FROM ams_querycache WHERE SID=:SID");
-                        $query = array('SID' => $record['SID']);
-                        $statement->execute($query);
-                
-                        
+                        $decode = json_decode($record['query']);
+                        $query = array('login' => $decode[0], 'pass' => $decode[1], 'mail' => $decode[2] );
+                        //make connection with and put into shard db & delete from the lib
+                        $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:login, :pass, :mail)",$query);              
+                        $dbl->execute("DELETE FROM ams_querycache WHERE SID=:SID",array('SID' => $record['SID']));
                 }
             }
             print('Syncing completed');

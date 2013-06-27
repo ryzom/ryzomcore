@@ -258,34 +258,21 @@ class Users{
      
      function createUser($values){
           
-          $libhost = $values["libhost"];
-          $libport = $values["libport"];
-          $libdbname = $values["libdbname"];
-          $libusername = $values["libusername"];
-          $libpassword = $values["libpassword"];
-      
-          $shardhost = $values["shardhost"];
-          $shardport = $values["shardport"];
-          $sharddbname = $values["sharddbname"];
-          $shardusername = $values["shardusername"];
-          $shardpassword = $values["shardpassword"];
+          $libdb = $values['db']['lib'];
+          $sharddb = $values['db']['shard'];
           
           try {
                //make connection with and put into shard db
-               $dbs = new PDO("mysql:host=$shardhost;port=$shardport;dbname=$sharddbname", $shardusername, $shardpassword);
-               $dbs->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-               $statement = $dbs->prepare("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)");
-               $statement->execute($values["params"]);
+               $dbs = new DBLayer($sharddb);
+               $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values["params"]);
                return "ok";
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
-                    $dbl = new PDO("mysql:host=$libhost;port=$libport;dbname=$libdbname", $libusername, $libpassword);
-                    $dbl->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    $params = array("type" => "createUser","query" => json_encode(array($values["params"]["name"],$values["params"]["pass"],$values["params"]["mail"])));
-                    $statement = $dbl->prepare("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)");
-                    $statement->execute($params);
+                    $dbl = new DBLayer($libdb);
+                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "createUser",
+                    "query" => json_encode(array($values["params"]["name"],$values["params"]["pass"],$values["params"]["mail"]))));
                     return "shardoffline";
                }catch (PDOException $e) {
                     print_r($e);

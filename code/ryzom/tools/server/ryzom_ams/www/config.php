@@ -7,26 +7,23 @@
 // where we can find the mysql database
 //-----------------------------------------------------------------------------------------
 
-//the www db
-$WEBDBHOST = 'localhost';
-$WEBDBPORT = '3306';
-$WEBDBNAME = 'ryzom_ams';
-$WEBDBUSERNAME = 'root';
-$WEBDBPASSWORD = 'lol123' ;
+$cfg['db']['web']['host']    = 'localhost';
+$cfg['db']['web']['port']    = '3306';
+$cfg['db']['web']['name']    = 'ryzom_ams';
+$cfg['db']['web']['user']    = 'root';
+$cfg['db']['web']['pass']    = 'lol123';
 
-//the ams_lib db
-$LIBDBHOST = 'localhost';
-$LIBDBPORT = '3306';
-$LIBDBNAME = 'ryzom_ams_lib';
-$LIBDBUSERNAME = 'root';
-$LIBDBPASSWORD = 'lol123' ;
+$cfg['db']['lib']['host']    = 'localhost';
+$cfg['db']['lib']['port']    = '3306';
+$cfg['db']['lib']['name']    = 'ryzom_ams_lib';
+$cfg['db']['lib']['user']    = 'root';
+$cfg['db']['lib']['pass']    = 'lol123';
 
-//the shard db 
-$SHARDDBHOST = 'localhost' ;
-$SHARDDBPORT = '3306';
-$SHARDDBNAME = 'nel' ;
-$SHARDDBUSERNAME = 'shard' ;
-$SHARDDBPASSWORD = '' ;
+$cfg['db']['shard']['host']    = 'localhost';
+$cfg['db']['shard']['port']    = '3306';
+$cfg['db']['shard']['name']    = 'nel';
+$cfg['db']['shard']['user']    = 'shard';
+$cfg['db']['shard']['pass']    = '';
 
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
