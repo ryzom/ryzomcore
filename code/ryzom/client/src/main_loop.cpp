@@ -125,17 +125,6 @@
 
 #include "nel/misc/check_fpu.h"
 
-// TMP TMP
-#include "nel/gui/ctrl_polygon.h"
-// TMP TMP
-#include "game_share/scenario_entry_points.h"
-#include "nel/3d/driver.h"
-#include "nel/3d/texture_file.h"
-
-#include "nel/3d/packed_world.h"
-#include "nel/3d/packed_zone.h"
-#include "nel/3d/driver_user.h"
-
 
 
 #ifdef USE_WATER_ENV_MAP
@@ -398,11 +387,6 @@ void buildCameraClippingPyramid (vector<CPlane> &planes)
 		planes[i] = planes[i]*MainSceneViewMatrix;
 	}
 }
-
-
-
-
-
 
 //---------------------------------------------------
 // update the camera perspective setup
