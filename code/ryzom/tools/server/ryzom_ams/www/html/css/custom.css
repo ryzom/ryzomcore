@@ -19,3 +19,10 @@
 .navbar {
     border-bottom: 0px;
 }
+
+.flags {
+  display: block;
+  position:relative;
+  left:290px;
+  top:28px;
+}

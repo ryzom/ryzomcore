@@ -69,7 +69,7 @@ class Users{
      * @takes $username
      * @return string Info: Returns a string based on if the username is valid, if valid then "success" is returned
      */
-     public function checkUser( $username )
+     private function checkUser( $username )
      {
           if ( isset( $username ) ){
                if ( strlen( $username ) > 12 ){
@@ -89,6 +89,31 @@ class Users{
           return "fail";
      }
          
+     /**
+     * Function checkUserAlreadyExists
+     *
+     * @takes $username
+     * @return string Info: Returns true or false if the user is in the lib+shard db.
+     *
+     private function checkUserAlreadyExists( $username )
+     {
+          global $cfg;
+          $dbl = new DBLayer($cfg['db']['lib']);
+          $dbs = new DBLayer($cfg['db']['shard']);
+          try{
+               if ($this->dbl->execute("SELECT * FROM user WHERE Login = :name",array('name' => $username))->rowCount()){
+                    return true;
+               }  
+               if ($this->dbs->execute("SELECT * FROM user WHERE Login = :name",array('name' => $username))->rowCount()){
+                    return true;
+               }
+               return false;
+          }catch (PDOException $e) {
+               //in case one of them is offline let it be hanled lateron with the 
+               return true;
+          }
+     }*/
+         
          
     /**
      * Function checkPassword
@@ -96,7 +121,7 @@ class Users{
      * @takes $pass
      * @return string Info: Returns a string based on if the password is valid, if valid then "success" is returned
      */
-     public function checkPassword( $pass )
+     private function checkPassword( $pass )
     {
          if ( isset( $pass ) ){
              if ( strlen( $pass ) > 20 ){
@@ -119,7 +144,7 @@ class Users{
      * @takes $pass
      * @return string Info: Verify's $_POST["Password"] is the same as $_POST["ConfirmPass"]
      */
-     public function confirmPassword($pass_result)
+     private function confirmPassword($pass_result)
     {
           if ( ( $_POST["Password"] ) != ( $_POST["ConfirmPass"] ) ){
              return "Passwords do not match.";
@@ -140,7 +165,7 @@ class Users{
      * @takes $email
      * @return
      */
-     public function checkEmail( $email )
+     private function checkEmail( $email )
     {
          if ( isset( $email ) ){
                if ( !Users::validEmail( $email ) ){
@@ -164,7 +189,7 @@ class Users{
      * @takes $email
      * @return true or false depending on if its a valid email format.
      */
-     public function validEmail( $email ){
+     private function validEmail( $email ){
           $isValid = true;
           $atIndex = strrpos( $email, "@" );
           if ( is_bool( $atIndex ) && !$atIndex ){
@@ -256,7 +281,7 @@ class Users{
      * @takes $array with name,pass and mail
      * @return ok if it's get correctly added to the shard, else return lib offline and put in libDB, if libDB is also offline return liboffline.
      */
-     function createUser($values){     
+     public function createUser($values){     
           try {
                //make connection with and put into shard db
                global $cfg;
@@ -277,8 +302,7 @@ class Users{
                }
           } 
 
-     }
-     
+     }   
 }
 
 

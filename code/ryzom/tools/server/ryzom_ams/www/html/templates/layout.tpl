@@ -101,10 +101,14 @@
 						<li><a href="index.php?page=logout">Logout</a></li>
 					</ul>
 				</div>
+				<div class="btn-group pull-right">
+				    <div class="flags">
+				      <img src="img/en.png" onclick="document.cookie='language=en';document.location.reload(true);"/>
+				      <img src="img/fr.png" onclick="document.cookie='language=fr';document.location.reload(true);"/>
+				    </div>
+				</div>
 				{/if}
 				<!-- user dropdown ends -->
-
-
 			</div>
 		</div>
 	</div>
