@@ -45,6 +45,7 @@
 #include <nel/3d/stereo_ovr.h>
 
 // STL includes
+#include <sstream>
 
 // External includes
 #include <OVR.h>
@@ -127,15 +128,23 @@ public:
 
 CStereoOVRSystem s_StereoOVRSystem;
 
-class CStereoOVRDeviceHandle : public NLMISC::CRefCount
-{
-public:
-	OVR::DeviceEnumerator<OVR::HMDDevice> DeviceHandle;
-};
-
 sint s_DeviceCounter = 0;
 
 }
+
+class CStereoOVRDeviceHandle : public IStereoDeviceFactory
+{
+public:
+	OVR::DeviceEnumerator<OVR::HMDDevice> DeviceHandle;
+	IStereoDisplay *createDevice() const
+	{
+		CStereoOVR *stereo = new CStereoOVR(this);
+		if (stereo->isDeviceCreated())
+			return stereo;
+		delete stereo;
+		return NULL;
+	}
+};
 
 class CStereoOVRDevicePtr
 {
@@ -146,12 +155,11 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoDeviceInfo &deviceInfo) : m_Stage(0), m_OrientationCached(false)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_OrientationCached(false)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
 
-	CStereoOVRDeviceHandle *handle = static_cast<CStereoOVRDeviceHandle *>(deviceInfo.Factory.getPtr());
 	OVR::DeviceEnumerator<OVR::HMDDevice> dh = handle->DeviceHandle;
 	m_DevicePtr->HMDDevice = dh.CreateDevice();
 
@@ -406,7 +414,7 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 }
 
 /// Get GUI shift
-void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distance)
+void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distance) const
 {
 #if 0
 
@@ -460,7 +468,7 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
 	s_StereoOVRSystem.Init();
 	OVR::DeviceEnumerator<OVR::HMDDevice> devices = s_DeviceManager->EnumerateDevices<OVR::HMDDevice>();
-	uint8 id = 1;
+	uint id = 1;
 	do
 	{
 		CStereoDeviceInfo deviceInfoOut;
@@ -469,27 +477,20 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 		{
 			devices.GetDeviceInfo(&deviceInfo);
 			CStereoOVRDeviceHandle *handle = new CStereoOVRDeviceHandle();
-			deviceInfoOut.Factory = static_cast<NLMISC::CRefCount *>(handle);
+			deviceInfoOut.Factory = static_cast<IStereoDeviceFactory *>(handle);
 			handle->DeviceHandle = devices;
-			deviceInfoOut.Class = 1; // OVR::HMDDevice
-			deviceInfoOut.Library = "Oculus SDK";
-			deviceInfoOut.Identifier = id;
+			deviceInfoOut.Class = CStereoDeviceInfo::StereoHMD; // 1; // OVR::HMDDevice
+			deviceInfoOut.Library = CStereoDeviceInfo::OVR; // "Oculus SDK";
 			deviceInfoOut.Manufacturer = deviceInfo.Manufacturer;
 			deviceInfoOut.ProductName = deviceInfo.ProductName;
+			stringstream ser;
+			ser << id;
+			deviceInfoOut.Serial = ser.str(); // can't get the real serial from the sdk...
 			devicesOut.push_back(deviceInfoOut);
 			++id;
 		}
 
 	} while (devices.Next());
-}
-
-CStereoOVR *CStereoOVR::createDevice(const CStereoDeviceInfo &deviceInfo)
-{
-	CStereoOVR *stereo = new CStereoOVR(deviceInfo);
-	if (stereo->isDeviceCreated())
-		return stereo;
-	delete stereo;
-	return NULL;
 }
 
 bool CStereoOVR::isLibraryInUse()

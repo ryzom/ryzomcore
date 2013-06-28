@@ -49,28 +49,16 @@
 
 // NeL includes
 #include <nel/misc/smart_ptr.h>
+
+// Project includes
+#include <nel/3d/stereo_hmd.h>
 #include <nel/3d/frustum.h>
 #include <nel/3d/viewport.h>
 
-// Project includes
-
 namespace NL3D {
 
-class UCamera;
-
-struct CStereoDeviceInfo
-{
-public:
-	uint8 Class;
-	uint8 Identifier;
-	NLMISC::CSmartPtr<NLMISC::CRefCount> Factory;
-
-	std::string Library;
-	std::string Manufacturer;
-	std::string ProductName;
-};
-
 class CStereoOVRDevicePtr;
+class CStereoOVRDeviceHandle;
 
 #define NL_STEREO_MAX_USER_CAMERAS 8
 
@@ -80,10 +68,10 @@ class CStereoOVRDevicePtr;
  * \author Jan Boon (Kaetemi)
  * CStereoOVR
  */
-class CStereoOVR
+class CStereoOVR : public IStereoHMD
 {
 public:
-	CStereoOVR(const CStereoDeviceInfo &deviceInfo);
+	CStereoOVR(const CStereoOVRDeviceHandle *handle);
 	virtual ~CStereoOVR();
 
 
@@ -126,18 +114,17 @@ public:
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const;
 	/// Get GUI center (1 = width, 1 = height, 0 = center)
-	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance);
+	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance) const;
 
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
-	static CStereoOVR *createDevice(const CStereoDeviceInfo &deviceInfo);
 	static bool isLibraryInUse();
 	static void releaseLibrary();
 
 
 	/// Calculates internal camera information based on the reference camera
 	void initCamera(uint cid, const NL3D::UCamera *camera);
-
+	/// Checks if the device used by this class was actually created
 	bool isDeviceCreated();
 
 private:

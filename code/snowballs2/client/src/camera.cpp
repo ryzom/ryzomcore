@@ -34,7 +34,7 @@
 #include <nel/3d/u_cloud_scape.h>
 #include <nel/3d/viewport.h>
 
-#include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_hmd.h>
 
 #include "snowballs_client.h"
 #include "entities.h"
@@ -70,7 +70,8 @@ static UInstance			Sky = NULL;
 
 static UCloudScape			*Clouds = NULL;
 
-CStereoOVR *StereoHMD = NULL;
+IStereoDisplay *StereoDisplay = NULL;
+IStereoHMD *StereoHMD = NULL;
 
 //
 // Functions
@@ -81,12 +82,12 @@ void	initCamera()
 	if (ConfigFile->getVar("HMDEnable").asBool())
 	{
 		std::vector<NL3D::CStereoDeviceInfo> devices;
-		CStereoOVR::listDevices(devices);
+		IStereoDisplay::listDevices(devices);
 		for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 		{
 			std::stringstream name;
-			name << std::string("[") << (uint32)it->Identifier << "] [" << it->Library << " - " << it->Manufacturer << " - " << it->ProductName << "]";
-			nlinfo("Stereo Device: %s", name.str().c_str());
+			name << std::string("[") << it->Serial << "] [" << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName << "]";
+			nlinfo("Stereo Display: %s", name.str().c_str());
 		}
 		CStereoDeviceInfo *deviceInfo = NULL;
 		std::string hmdDeviceCfg = ConfigFile->getVar("HMDDevice").asString();
@@ -97,22 +98,28 @@ void	initCamera()
 		}
 		else
 		{
-			uint8 hmdDeviceId = (ConfigFile->getVar("HMDDeviceId").asInt() & 0xFF);
+			std::string hmdDeviceId = ConfigFile->getVar("HMDDeviceId").asString();
 			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 			{
 				std::stringstream name;
-				name << it->Library << " - " << it->Manufacturer << " - " << it->ProductName;
+				name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
 				if (name.str() == hmdDeviceCfg)
 					deviceInfo = &(*it);
-				if (hmdDeviceId == it->Identifier)
+				if (hmdDeviceId == it->Serial)
 					break;
 			}
 		}
 		if (deviceInfo)
 		{
-			nlinfo("Create HMD device!");
-			StereoHMD = CStereoOVR::createDevice(*deviceInfo);
+			nlinfo("Create VR stereo display device");
+			StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
+			if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
+			{
+				nlinfo("Stereo display device is a HMD");
+				StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+			}
 		}
+		IStereoDisplay::releaseUnusedLibraries();
 	}
 
 	// Set up directly the camera
@@ -128,11 +135,6 @@ void	initCamera()
 
 	CamCollisionEntity = VisualCollisionManager->createEntity();
 	CamCollisionEntity->setCeilMode(true);
-
-	if (StereoHMD)
-	{
-		StereoHMD->initCamera(0, &Camera);
-	}
 
 	// Create the snowing particle system
 	Snow = Scene->createInstance("snow.ps");
@@ -164,9 +166,15 @@ void releaseCamera()
 	Scene->deleteInstance(Snow);
 	VisualCollisionManager->deleteEntity(CamCollisionEntity);
 
-	delete StereoHMD;
-	StereoHMD = NULL;
-	CStereoOVR::releaseLibrary();
+	if (StereoHMD)
+	{
+		delete StereoHMD;
+		StereoHMD = NULL;
+		StereoDisplay = NULL;
+	}
+	delete StereoDisplay;
+	StereoDisplay = NULL;
+	IStereoDisplay::releaseAllLibraries();
 }
 
 void updateCamera()

@@ -42,7 +42,8 @@ namespace NL3D {
 	class UScene;
 	class UTextContext;
 	class ULandscape;
-	class CStereoOVR;
+	class IStereoDisplay;
+	class IStereoHMD;
 }
 
 namespace SBCLIENT {
@@ -59,7 +60,8 @@ public:
 };
 
 extern NL3D::UDriver *Driver;
-extern NL3D::CStereoOVR *StereoHMD;
+extern NL3D::IStereoDisplay *StereoDisplay;
+extern NL3D::IStereoHMD *StereoHMD;
 extern NL3D::UScene *Scene;
 extern NL3D::UTextContext *TextContext;
 extern NLMISC::CConfigFile *ConfigFile;
