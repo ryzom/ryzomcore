@@ -29,6 +29,7 @@ namespace MaterialEditor
 	
 	void MaterialEditorContext::open()
 	{
+		m_materialEditorWindow->onOpenClicked();
 	}
 
 	void MaterialEditorContext::newDocument()

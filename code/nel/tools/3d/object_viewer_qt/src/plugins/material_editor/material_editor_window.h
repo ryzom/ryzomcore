@@ -23,6 +23,7 @@ namespace MaterialEditor
 {
 
 	class MatPropWidget;
+	class ShaderWidget;
 
 	class MaterialEditorWindow: public QMainWindow
 	{
@@ -31,13 +32,20 @@ public:
 		MaterialEditorWindow( QWidget *parent = NULL );		
 		~MaterialEditorWindow();
 
+		void onOpenClicked();
+
 private Q_SLOTS:
+		void onNewMaterialClicked();
+		void onOpenMaterialClicked();
+		void onSaveMaterialClicked();
 		void onEditMaterialClicked();
+		void onShadersClicked();
 		
 private:
 		void createMenus();
 		void createDockWidgets();
 
+		ShaderWidget *shaderWidget;
 		MatPropWidget *matPropWidget;
 
 		Ui::MaterialEditorWindow m_ui;
