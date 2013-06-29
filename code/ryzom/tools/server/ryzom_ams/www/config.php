@@ -19,7 +19,7 @@ $cfg['db']['lib']['name']    = 'ryzom_ams_lib';
 $cfg['db']['lib']['user']    = 'root';
 $cfg['db']['lib']['pass']    = 'lol123';
 
-$cfg['db']['shard']['host']    = 'localhost';
+$cfg['db']['shard']['host']    = 'localhosti';
 $cfg['db']['shard']['port']    = '3306';
 $cfg['db']['shard']['name']    = 'nel';
 $cfg['db']['shard']['user']    = 'shard';
