@@ -287,7 +287,7 @@ class Users{
           try {
                //make connection with and put into shard db
                global $cfg;
-               $dbs = new DBLayer($cfg['db']['shard']);  
+               $dbs = new DBLayer($cfg['db']['shard']);
                $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values["params"]);
                return "ok";
           }
@@ -296,7 +296,7 @@ class Users{
                try {
                     $dbl = new DBLayer($cfg['db']['lib']);  
                     $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "createUser",
-                    "query" => json_encode(array($values["params"]["name"],$values["params"]["pass"],$values["params"]["mail"]))));
+                    "query" => json_encode(array($values["name"],$values["pass"],$values["mail"]))));
                     return "shardoffline";
                }catch (PDOException $e) {
                     print_r($e);

@@ -3,7 +3,7 @@
 	<div class="row-fluid">
 		<div class="box span12">
 			<div class="box-header well">
-				<h2><i class="icon-info-sign"></i>The users in the libDB</h2>
+				<h2><i class="icon-info-sign"></i>{$libuserlist_title}</h2>
 				<div class="box-icon">
 					<a href="#" class="btn btn-round" onclick="javascript:show_help('intro');return false;"><i class="icon-info-sign"></i></a>
 					<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
@@ -12,15 +12,62 @@
 				</div>
 			</div>
 			<div class="box-content">
-				<table border="1" cellpadding="5">
-				<tr><td><strong>ID</strong></td><td><strong>type</strong></td><td><strong>user</strong></td><td><strong>email</strong></td><td><strong>remove</strong></td></tr>
-				{foreach from=$liblist item=element}
-					<tr><td>{$element.id}</td><td>{$element.type}</td><td>{$element.name}</td><td>{$element.mail}</td><td><a class="btn btn-danger" href="index.php?page=libuserlist&action=remove&id={$element.id}"><i class="icon-trash icon-white"></i>Delete</a></td></tr>
-				{/foreach}
-				</table>
+				<center>
+				<p>{$libuserlist_info}</p>
+				{if $shard eq "online"}
+				<div class="alert alert-success">
+					<i class="icon-refresh icon-white"></i>{$shard_online}<a href="index.php?page=libuserlist&action=remove&id=haha">{$libuserlist_sync}</a>
+				</div>
+				{else}
+				<div class="alert alert-error">
+					<strong><i class="icon-refresh icon-white"></i></strong> {$shard_offline}
+				</div>
+				{/if}
+				</center>
 				<div class="clearfix"></div>
 			</div>
 		</div>
 	</div>
+			<div class="row-fluid sortable">		
+				<div class="box span12">
+					<div class="box-header well" data-original-title>
+						<h2><i class="icon-user"></i> Members</h2>
+						<div class="box-icon">
+							<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
+							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
+						</div>
+					</div>
+					<div class="box-content">
+						<table class="table table-striped table-bordered bootstrap-datatable datatable">
+						  <thead>
+							  <tr>
+								  <th>ID</th>
+								  <th>Type</th>
+								  <th>Name</th>
+								  <th>Email</th>
+								  <th>Action</th>
+							  </tr>
+						  </thead>   
+						  <tbody>
+							{foreach from=$liblist item=element}
+							<tr>
+								<td>{$element.id}</td>
+								<td class="center">{$element.type}</td>
+								<td class="center">{$element.name}</td>
+								<td class="center">{$element.mail}</td>
+								<td class="center">
+									<a class="btn btn-danger" href="index.php?page=libuserlist&action=remove&id={$element.id}"><i class="icon-trash icon-white"></i>Delete</a>
+								</td>
+								
+							</tr>
+							{/foreach}
+					
+						  </tbody>
+					  </table>            
+					</div>
+				</div><!--/span-->
+			
+			</div><!--/row-->
 {/block}
 

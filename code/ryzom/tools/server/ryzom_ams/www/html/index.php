@@ -8,7 +8,6 @@ session_start();
 //Decide what page to load
 if(isset($_SESSION['user'])){
      $page = 'home';
-     $return['username'] = $_SESSION['user'];
 }else{
      //default page
      $page = 'login';   
@@ -23,19 +22,18 @@ if ( isset( $_POST["function"] ) ){
      $filename = 'inc/' . $_GET["page"] . '.php';
      if(is_file($filename)){
           require_once($filename);
+          $return = $_GET["page"]();
      }
      $page = $_GET["page"];
 }
 
-
-/*function loadpage ( $page ){
-     $filename = 'autoload/' . $page . '.php';
-     if(is_file($filename)){
-          require_once($filename);
-     }
+//add username to the return array in case logged in.
+if(isset($_SESSION['user'])){
+     $return['username'] = $_SESSION['user'];
 }
+     
+     
 
-loadpage($page);*/
 
 //Set permission
 if(isset($_SESSION['permission'])){

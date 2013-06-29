@@ -46,13 +46,9 @@ function write_user($newUser){
           'mail' => $newUser["mail"]      
      );
      
-     //print_r($params);
-     //make a $values array for passing all data to the Users::createUser() function.
-     $values["params"] = $params;
-     
      //Create the user on the shard + in case shard is offline put copy of query in query db
      //returns: ok, shardoffline or liboffline
-     $result = WebUsers::createUser($values);
+     $result = WebUsers::createUser($params);
   
      try{
           //make connection with web db and put it in there
