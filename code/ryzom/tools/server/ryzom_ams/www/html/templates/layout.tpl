@@ -138,6 +138,15 @@
 			<div id="content" class="span10">
 			<!-- content starts -->
 			{/if}
+			
+			{if  isset($no_visible_elements) and  $no_visible_elements eq "TRUE"}
+		  	
+				    <div class="flags_no_visible_elements">
+				      <img src="img/en.png" onclick="document.cookie='language=en';document.location.reload(true);"/>
+				      <img src="img/fr.png" onclick="document.cookie='language=fr';document.location.reload(true);"/>
+				    </div>
+
+			{/if}
 
 			{block name=content}{/block}
 			

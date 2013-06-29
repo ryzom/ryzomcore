@@ -34,7 +34,7 @@
 	<div class="row-fluid">
 		<div class="box span12">
 			<div class="box-header well">
-				<h2><i class="icon-info-sign"></i> Introduction</h2>
+				<h2><i class="icon-info-sign"></i> {$home_title}</h2>
 				<div class="box-icon">
 					<a href="#" class="btn btn-round" onclick="javascript:show_help('intro');return false;"><i class="icon-info-sign"></i></a>
 					<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
@@ -43,7 +43,7 @@
 				</div>
 			</div>
 			<div class="box-content">
-				<p><strong>Welcome to the Ryzom Core - Account Management System</strong></p>
+				<p><strong>{$home_info}</strong></p>
 	
 				<div class="clearfix"></div>
 			</div>

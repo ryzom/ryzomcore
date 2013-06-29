@@ -14,6 +14,9 @@ function libuserlist(){
     global $cfg;
     $dbl = new DBLayer($cfg['db']['lib']);
     $rows = $dbl->executeWithoutParams("SELECT * FROM ams_querycache")->rowCount();
+    
+    //the array hat will contain all users
+    $pageResult['liblist'] = Array();
     if($rows > 0){
         //This is the number of results displayed per page 
         $page_rows = 2;
@@ -37,7 +40,6 @@ function libuserlist(){
         
         //This is where we put the results in a resultArray to be sent to smarty
         
-        $pageResult['liblist'] = Array();
         $i = 0;
         while($row = $data->fetch(PDO::FETCH_ASSOC)){
             $decode = json_decode($row['query']);

@@ -16,7 +16,14 @@
 				<p>{$libuserlist_info}</p>
 				{if $shard eq "online"}
 				<div class="alert alert-success">
-					<i class="icon-refresh icon-white"></i>{$shard_online}<a href="index.php?page=libuserlist&action=remove&id=haha">{$libuserlist_sync}</a>
+					<i class="icon-refresh icon-white"></i>{$shard_online}<a href="#" id="sync" onclick="sync()">{$libuserlist_sync}</a>
+					<script>
+						function sync(){
+							xmlhttp=new XMLHttpRequest();
+							xmlhttp.open("POST","../../../ams_lib/cron/sync_cron.php",true);
+							xmlhttp.send();
+						}
+					</script>
 				</div>
 				{else}
 				<div class="alert alert-error">
@@ -31,7 +38,7 @@
 			<div class="row-fluid sortable">		
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> Members</h2>
+						<h2><i class="icon-user"></i> {$members}</h2>
 						<div class="box-icon">
 							<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
 							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
@@ -42,11 +49,11 @@
 						<table class="table table-striped table-bordered bootstrap-datatable datatable">
 						  <thead>
 							  <tr>
-								  <th>ID</th>
-								  <th>Type</th>
-								  <th>Name</th>
-								  <th>Email</th>
-								  <th>Action</th>
+								  <th>{$id}</th>
+								  <th>{$type}</th>
+								  <th>{$name}</th>
+								  <th>{$email}</th>
+								  <th>{$action}</th>
 							  </tr>
 						  </thead>   
 						  <tbody>

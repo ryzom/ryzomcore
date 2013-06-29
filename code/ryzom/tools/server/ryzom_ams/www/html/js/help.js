@@ -25,3 +25,4 @@ function show_help(help_tip)
 
 }
 
+$("#sync").click(function() {alert("Handler for .click() called.");});
