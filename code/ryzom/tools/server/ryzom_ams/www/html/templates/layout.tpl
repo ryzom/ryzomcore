@@ -101,13 +101,13 @@
 						<li><a href="index.php?page=logout">Logout</a></li>
 					</ul>
 				</div>
+				{/if}
 				<div class="btn-group pull-right">
 				    <div class="flags">
 				      <img src="img/en.png" onclick="document.cookie='language=en';document.location.reload(true);"/>
 				      <img src="img/fr.png" onclick="document.cookie='language=fr';document.location.reload(true);"/>
 				    </div>
 				</div>
-				{/if}
 				<!-- user dropdown ends -->
 			</div>
 		</div>
@@ -245,6 +245,7 @@
 	<script src="js/charisma.js"></script>
 	<!-- help script for page help -->
 	<script src="js/help.js"></script>
+
   </div>
 </body>
 </html>

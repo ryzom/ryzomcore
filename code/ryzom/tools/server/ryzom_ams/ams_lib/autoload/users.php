@@ -10,10 +10,10 @@ class Users{
      public function check_Register($values){
           // check values
           if ( isset( $values["Username"] ) and isset( $values["Password"] ) and isset( $values["Email"] ) ){
-               $user = Users :: checkUser( $values["Username"] );
-               $pass = Users :: checkPassword( $values["Password"] );
-               $cpass = Users :: confirmPassword($pass);
-               $email = Users :: checkEmail( $values["Email"] );
+               $user = Users::checkUser( $values["Username"] );
+               $pass = Users::checkPassword( $values["Password"] );
+               $cpass = Users::confirmPassword($pass);
+               $email = Users::checkEmail( $values["Email"] );
           }else{
                $user = "";
                $pass = "";
@@ -62,6 +62,9 @@ class Users{
           }
 
      }
+     
+     
+
 
     /**
      * Function checkUser
@@ -80,8 +83,8 @@ class Users{
                     return "Username can only contain numbers and letters.";
                }else if ( $username == "" ){
                     return "You have to fill in a username";
-               /*}elseif ($this->dbs->execute("SELECT * FROM user WHERE Login = :name",array('name' => $username))->rowCount()){
-                    return "Username " . $username . " is in use.";*/
+               }elseif ($this->checkUserNameExists($username)){
+                    return "Username " . $username . " is in use.";
                }else{
                     return "success";
                }
@@ -90,29 +93,16 @@ class Users{
      }
          
      /**
-     * Function checkUserAlreadyExists
+     * Function checkUserNameExists
      *
      * @takes $username
-     * @return string Info: Returns true or false if the user is in the lib+shard db.
-     *
-     private function checkUserAlreadyExists( $username )
-     {
-          global $cfg;
-          $dbl = new DBLayer($cfg['db']['lib']);
-          $dbs = new DBLayer($cfg['db']['shard']);
-          try{
-               if ($this->dbl->execute("SELECT * FROM user WHERE Login = :name",array('name' => $username))->rowCount()){
-                    return true;
-               }  
-               if ($this->dbs->execute("SELECT * FROM user WHERE Login = :name",array('name' => $username))->rowCount()){
-                    return true;
-               }
-               return false;
-          }catch (PDOException $e) {
-               //in case one of them is offline let it be hanled lateron with the 
-               return true;
-          }
-     }*/
+     * @return string Info: Returns true or false if the user is in the www db.
+     */
+     protected function checkUserNameExists($username){
+          //You should overwrite this method with your own version!
+          print('this is the base class!');
+          
+     }
          
          
     /**
@@ -172,9 +162,9 @@ class Users{
                     return "Email address is not valid.";
                }else if($email == ""){
                     return "You have to fill in an email address";
-               /*}elseif ( $this->dbs->execute("SELECT * FROM user WHERE Email = :email",array('email' => $email))->rowCount()){
-                    return "Email is in use.";*/}
-               else{
+               }else if ($this->checkEmailExists($email)){
+                    return "Email is in use.";
+               }else{
                     return "success";
                }
           }
@@ -182,7 +172,19 @@ class Users{
      }
 
 
-
+     /**
+     * Function checkEmailExists
+     *
+     * @takes $username
+     * @return string Info: Returns true or false if the user is in the www db.
+     */
+     protected function checkEmailExists($email){
+          //TODO: You should overwrite this method with your own version!
+          print('this is the base class!');
+          
+     }
+         
+         
     /**
      * Function validEmail
      *

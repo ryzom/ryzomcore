@@ -3,7 +3,8 @@
 function add_user(){
      
      $params = Array('Username' =>  $_POST["Username"], 'Password' =>  $_POST["Password"], 'Email' =>  $_POST["Email"]);
-     $result = Users::check_Register($params);
+     $webUser = new WebUsers;
+     $result = $webUser->check_Register($params);
 
      // if all are good then create user
      if ( $result == "success"){
@@ -37,7 +38,7 @@ function add_user(){
 function write_user($newUser){
      
      //create salt here, because we want it to be the same on the web/server
-     $hashpass = crypt($newUser["pass"], Users::generateSALT());
+     $hashpass = crypt($newUser["pass"], WebUsers::generateSALT());
      
      $params = array(
           'name' => $newUser["name"],
@@ -51,7 +52,7 @@ function write_user($newUser){
      
      //Create the user on the shard + in case shard is offline put copy of query in query db
      //returns: ok, shardoffline or liboffline
-     $result = Users::createUser($values);
+     $result = WebUsers::createUser($values);
   
      try{
           //make connection with web db and put it in there
