@@ -21,9 +21,8 @@
 
 namespace MaterialEditor
 {
-
-	class RenderPassesWidget;
 	class ShaderEditorWidget;
+	class MatPropWidget;
 
 	class MaterialWidget : public QWidget, Ui::MaterialWidget
 	{
@@ -34,19 +33,12 @@ namespace MaterialEditor
 
 	private:
 		void setupConnections();
-		RenderPassesWidget *renderPassesWidget;
 		ShaderEditorWidget *shaderEditorWidget;
+		MatPropWidget *matPropWidget;
 
 	private Q_SLOTS:
 		void onPassEditClicked();
 		void onShaderEditClicked();
-
-		void onPassAdded( const QString &pass );
-		void onPassRemoved( const QString &pass );
-		void onPassRenamed( const QString &from, const QString &to );
-		void onPassPushedUp( const QString &pass );
-		void onPassPushedDown( const QString &pass );
-
 		void onShaderEditOKClicked();
 	};
 
