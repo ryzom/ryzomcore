@@ -22,11 +22,11 @@
 
 namespace MaterialEditor
 {
-	class ShaderEditorWidget : public QWidget, public Ui::ShaderEditorWidget
+	class ShaderEditorWidget : public QDialog, public Ui::ShaderEditorWidget
 	{
 		Q_OBJECT
 	public:
-		ShaderEditorWidget( QWidget *parent = NULL );		
+		ShaderEditorWidget( QDialog *parent = NULL );		
 		~ShaderEditorWidget();
 
 		void getName( QString &name );
@@ -38,6 +38,8 @@ namespace MaterialEditor
 		void setDescription( const QString &desc );
 		void setVertexShader( const QString &vs );
 		void setFragmentShader( const QString &fs );
+
+		void reset();
 
 	private Q_SLOTS:
 		void onOKClicked();

@@ -19,8 +19,8 @@
 
 namespace MaterialEditor
 {
-	ShaderEditorWidget::ShaderEditorWidget( QWidget *parent ) :
-	QWidget( parent )
+	ShaderEditorWidget::ShaderEditorWidget( QDialog *parent ) :
+	QDialog( parent )
 	{
 		setupUi( this );
 		setupConnections();
@@ -85,6 +85,15 @@ namespace MaterialEditor
 	void ShaderEditorWidget::onCancelClicked()
 	{
 		close();
+	}
+
+	void ShaderEditorWidget::reset()
+	{
+		QString empty;
+		nameEdit->setText( empty );
+		descriptionEdit->setPlainText( empty );
+		vsEdit->setPlainText( empty );
+		fsEdit->setPlainText( empty );
 	}
 }
 

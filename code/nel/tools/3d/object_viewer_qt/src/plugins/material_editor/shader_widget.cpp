@@ -15,6 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "shader_widget.h"
+#include "shader_editor.h"
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
 
 namespace MaterialEditor
 {
@@ -23,10 +27,14 @@ namespace MaterialEditor
 	{
 		setupUi( this );
 		setupConnections();
+
+		shaderEditorWidget = new ShaderEditorWidget();
 	}
 
 	ShaderWidget::~ShaderWidget()
 	{
+		delete shaderEditorWidget;
+		shaderEditorWidget = NULL;
 	}
 
 	void ShaderWidget::setupConnections()
@@ -44,20 +52,157 @@ namespace MaterialEditor
 		close();
 	}
 
+	bool ShaderWidget::nameExists( const QString &name )
+	{
+		QTreeWidgetItem *item = NULL;
+		for( int i = 0; i < shaderListWidget->topLevelItemCount(); i++ )
+		{
+			item = shaderListWidget->topLevelItem( i );
+			if( item->text( 0 ) == name )
+				return true;
+		}
+
+		return false;
+	}
+
+	void ShaderWidget::nameExistsMessage()
+	{
+		QMessageBox::critical(
+			this,
+			tr( "Shader already exists" ),
+			tr( "A shader with that name already exists!" ),
+			QMessageBox::Ok
+			);
+	}
+
 	void ShaderWidget::onNewClicked()
 	{
+		bool ok = false;
+		QString def;
+		QString name =
+			QInputDialog::getText( 
+				this,
+				tr( "Shader name" ),
+				tr( "New shader's name?" ),
+				QLineEdit::Normal,
+				def,
+				&ok
+				);
+
+		if( nameExists( name ) )
+		{
+			nameExistsMessage();
+			return;
+		}
+
+		QString fname = QFileDialog::getSaveFileName(
+							this,
+							tr( "New shader's path" ),
+							"/",
+							tr( "Shader files ( *.nelshader )" )
+							);
+
+		shaderEditorWidget->reset();
+		shaderEditorWidget->setName( name );
+
+		QString sname;
+		do{
+			ok = true;
+			shaderEditorWidget->exec();
+			shaderEditorWidget->getName( sname );
+
+			if( sname != name )
+			{
+				if( nameExists( sname ) )
+				{
+					ok = false;
+					nameExistsMessage();
+				}
+			}
+
+		}while( !ok );
+
+		QString descr;
+		shaderEditorWidget->getDescription( descr );
+
+		QTreeWidgetItem *item = new QTreeWidgetItem();
+		item->setText( 0, sname );
+		item->setText( 1, descr );
+		item->setText( 2, fname );
+		shaderListWidget->addTopLevelItem( item );
+		shaderListWidget->sortItems( 0, Qt::AscendingOrder );
+
+		// save it
 	}
 
 	void ShaderWidget::onAddClicked()
 	{
+		QString fn = 
+			QFileDialog::getOpenFileName(
+			this,
+			tr( "Load shader" ),
+			"/",
+			tr( "Shader files ( *.nelshader )" )
+			);
+
 	}
 
 	void ShaderWidget::onRemoveClicked()
 	{
+		QTreeWidgetItem *item = shaderListWidget->currentItem();
+		if( item == NULL )
+			return;
+
+		int selection =
+			QMessageBox::question(
+				this,
+				tr( "Removing shader" ),
+				tr( "Are you sure you want to remove this shader?" ),
+				QMessageBox::Yes,
+				QMessageBox::Cancel
+				);
+
+		if( selection == QMessageBox::Yes )
+			delete item;
 	}
 
 	void ShaderWidget::onEditClicked()
 	{
+		QTreeWidgetItem *item = shaderListWidget->currentItem();
+		if( item == NULL )
+			return;
+
+		QString name = item->text( 0 );
+		QString description = item->text( 1 );
+
+		shaderEditorWidget->reset();
+		shaderEditorWidget->setName( name );
+		shaderEditorWidget->setDescription( description );
+
+		QString sname;
+		bool ok;
+		do{
+			ok = true;
+			shaderEditorWidget->exec();
+			shaderEditorWidget->getName( sname );
+
+			if( sname != name )
+			{
+				if( nameExists( sname ) )
+				{
+					ok = false;
+					nameExistsMessage();
+				}
+			}
+
+		}while( !ok );
+
+		shaderEditorWidget->getDescription( description );
+		item->setText( 0, sname );
+		item->setText( 1, description );
+
+		// save
+
 	}
 }
 

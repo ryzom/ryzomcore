@@ -22,6 +22,8 @@
 
 namespace MaterialEditor
 {
+	class ShaderEditorWidget;
+
 	class ShaderWidget : public QWidget, public Ui::ShaderWidget
 	{
 		Q_OBJECT
@@ -32,6 +34,10 @@ namespace MaterialEditor
 
 	private:
 		void setupConnections();
+		bool nameExists( const QString &name );
+		void nameExistsMessage();
+
+		ShaderEditorWidget *shaderEditorWidget;
 
 	private Q_SLOTS:
 		void onOKClicked();

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ShaderEditorWidget</class>
- <widget class="QWidget" name="ShaderEditorWidget">
-  <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
-  </property>
+ <widget class="QDialog" name="ShaderEditorWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>729</height>
+    <width>861</width>
+    <height>735</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Shader Editor</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <property name="modal">
+   <bool>true</bool>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
     <layout class="QHBoxLayout" name="nameLayout">
      <item>
       <widget class="QLabel" name="label">
@@ -31,7 +31,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="1" column="0">
     <layout class="QVBoxLayout" name="descrLayout">
      <item>
       <widget class="QLabel" name="label_2">
@@ -45,7 +45,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="2" column="0">
     <layout class="QVBoxLayout" name="vsLayout">
      <item>
       <widget class="QLabel" name="label_3">
@@ -59,7 +59,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="3" column="0">
     <layout class="QVBoxLayout" name="fsLayout">
      <item>
       <widget class="QLabel" name="label_4">
@@ -73,7 +73,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="4" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="okButton">
@@ -117,6 +117,13 @@
     </layout>
    </item>
   </layout>
+  <zorder>layoutWidget</zorder>
+  <zorder>layoutWidget_2</zorder>
+  <zorder>layoutWidget_3</zorder>
+  <zorder>layoutWidget_4</zorder>
+  <zorder>layoutWidget_5</zorder>
+  <zorder>vsEdit</zorder>
+  <zorder>label_3</zorder>
  </widget>
  <resources/>
  <connections/>
