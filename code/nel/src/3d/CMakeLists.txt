@@ -144,6 +144,8 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/light.h
         material.cpp
         ../../include/nel/3d/material.h
+		dynamic_material.cpp
+		../../include/nel/3d/dynamic_material.h
         nelu.cpp
         ../../include/nel/3d/nelu.h
         ../../include/nel/3d/occlusion_query.h
