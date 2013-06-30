@@ -18,7 +18,7 @@
 #include "material_editor_constants.h"
 #include "material_widget.h"
 #include "shader_widget.h"
-#include "material_properties.h"
+#include "render_passes.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -37,7 +37,7 @@ namespace MaterialEditor
 	{
 		m_ui.setupUi(this);
 		shaderWidget = new ShaderWidget();
-		matPropWidget = new MatPropWidget();
+		passesWidget = new RenderPassesWidget();
 		createMenus();
 		createDockWidgets();
 	}
@@ -46,8 +46,8 @@ namespace MaterialEditor
 	{
 		delete shaderWidget;
 		shaderWidget = NULL;
-		delete matPropWidget;
-		matPropWidget = NULL;
+		delete passesWidget;
+		passesWidget = NULL;
 	}
 
 	void MaterialEditorWindow::onOpenClicked()
@@ -86,14 +86,14 @@ namespace MaterialEditor
 			);
 	}
 
-	void MaterialEditorWindow::onEditMaterialClicked()
-	{
-		matPropWidget->show();
-	}
-
 	void MaterialEditorWindow::onShadersClicked()
 	{
 		shaderWidget->show();
+	}
+
+	void MaterialEditorWindow::onPassesClicked()
+	{
+		passesWidget->show();
 	}
 	
 	void MaterialEditorWindow::createMenus()
@@ -118,17 +118,16 @@ namespace MaterialEditor
 				
 				a = new QAction( tr( "Save material" ), NULL );
 				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onSaveMaterialClicked() ) );
-				mm->addAction( a );
-				
-				a = new QAction( tr( "Edit material" ), NULL );
-				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onEditMaterialClicked() ) );
-				mm->addAction( a );
+				mm->addAction( a );	
 			}
 
 			a = new QAction( tr( "Shaders" ), NULL );
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onShadersClicked() ) );
 			m->addAction( a );
 
+			a = new QAction( tr( "Render passes" ), NULL );
+			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onPassesClicked() ) );
+			m->addAction( a );
 		}
 	}
 

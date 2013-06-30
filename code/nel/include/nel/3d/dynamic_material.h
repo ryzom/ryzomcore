@@ -25,7 +25,7 @@
 namespace NL3D
 {
 
-	struct CDynMaterialProp
+	struct SDynMaterialProp
 	{
 		enum EPropertyType
 		{
@@ -43,7 +43,29 @@ namespace NL3D
 		std::string label;
 		uint8 type;
 		std::string value;
+
+		void serial( NLMISC::IStream &f );
 	};
+
+
+
+	struct SRenderPass
+	{
+	public:
+		void addProperty( const SDynMaterialProp &prop );
+		void removeProperty( const std::string &name );
+		void changeProperty( const std::string &name, const SDynMaterialProp &prop );
+		void setName( const std::string &n ){ name = n; }
+		void getName( std::string &n ) const { n = name; }
+		void serial( NLMISC::IStream &f );
+	
+	private:
+		std::vector< SDynMaterialProp > properties;
+		std::string name;
+	};
+
+
+
 
 	class CDynMaterial : public NLMISC::IStreamable
 	{
@@ -52,12 +74,12 @@ namespace NL3D
 		~CDynMaterial();
 		void serial( NLMISC::IStream &f );
 
-		void addProperty( const CDynMaterialProp &prop );
-		void removeProperty( const std::string &name );
-		void changeProperty( const std::string &name, const CDynMaterialProp &prop );
+		void addPass( const SRenderPass &pass );
+		void removePass( const std::string &name );
+		SRenderPass* getPass( const std::string &name );
 
 	private:
-		std::vector< CDynMaterialProp > properties;
+		std::vector< SRenderPass > passes;
 	};
 }
 

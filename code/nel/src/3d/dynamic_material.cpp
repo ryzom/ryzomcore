@@ -18,33 +18,39 @@
 
 namespace NL3D
 {
-	CDynMaterial::CDynMaterial()
+	void SDynMaterialProp::serial( NLMISC::IStream &f )
 	{
+		f.serial( std::string( prop ) );
+		f.serial( std::string( label ) );
+		f.serial( uint8( type ) );
+		f.serial( std::string( value ) );
 	}
 
-	CDynMaterial::~CDynMaterial()
+	void SRenderPass::serial( NLMISC::IStream &f )
 	{
-	}
+		f.serial( std::string( name ) );
 
-	void CDynMaterial::serial( NLMISC::IStream &f )
-	{
-		int version = f.serialVersion( 1 );
-
-		std::vector< CDynMaterialProp >::const_iterator itr = properties.begin();
-		while( itr != properties.end() )
+		if( !f.isReading() )
 		{
-			f.serial( std::string( itr->prop ) );
-			f.serial( std::string( itr->label ) );
-			f.serial( uint8( itr->type ) );
-			f.serial( std::string( itr->value ) );
-
-			++itr;
+			std::vector< SDynMaterialProp >::iterator itr = properties.begin();
+			while( itr != properties.end() )
+			{
+				itr->serial( f );
+				++itr;
+			}
 		}
+		else
+		{
+			SDynMaterialProp prop;
+			prop.serial( f );
+			properties.push_back( prop );
+		}
+
 	}
 
-	void CDynMaterial::addProperty( const CDynMaterialProp &prop )
+	void SRenderPass::addProperty( const SDynMaterialProp &prop )
 	{
-		std::vector< CDynMaterialProp >::const_iterator itr = properties.begin();
+		std::vector< SDynMaterialProp >::const_iterator itr = properties.begin();
 		while( itr != properties.end() )
 		{
 			if( itr->prop == prop.prop )
@@ -57,9 +63,9 @@ namespace NL3D
 		properties.push_back( prop );
 	}
 
-	void CDynMaterial::removeProperty( const std::string &name )
+	void SRenderPass::removeProperty( const std::string &name )
 	{
-		std::vector< CDynMaterialProp >::iterator itr = properties.begin();
+		std::vector< SDynMaterialProp >::iterator itr = properties.begin();
 		while( itr != properties.end() )
 		{
 			if( itr->prop == name )
@@ -72,9 +78,9 @@ namespace NL3D
 		properties.erase( itr );
 	}
 
-	void CDynMaterial::changeProperty( const std::string &name, const CDynMaterialProp &prop )
+	void SRenderPass::changeProperty( const std::string &name, const SDynMaterialProp &prop )
 	{
-		std::vector< CDynMaterialProp >::iterator itr = properties.begin();
+		std::vector< SDynMaterialProp >::iterator itr = properties.begin();
 		while( itr != properties.end() )
 		{
 			if( itr->prop == name )
@@ -90,6 +96,89 @@ namespace NL3D
 		itr->value = prop.value;
 	}
 
+
+
+	CDynMaterial::CDynMaterial()
+	{
+	}
+
+	CDynMaterial::~CDynMaterial()
+	{
+	}
+
+	void CDynMaterial::serial( NLMISC::IStream &f )
+	{
+		int version = f.serialVersion( 1 );
+
+		if( !f.isReading() )
+		{
+			std::vector< SRenderPass >::iterator itr = passes.begin();
+			while( itr != passes.end() )
+			{
+				itr->serial( f );
+				++itr;
+			}
+		}
+		else
+		{
+			SRenderPass pass;
+			pass.serial( f );
+			passes.push_back( pass );
+		}
+	}
+
+	void CDynMaterial::addPass( const SRenderPass &pass )
+	{
+		std::string n;
+		std::string name;
+		pass.getName( name );
+
+		std::vector< SRenderPass >::iterator itr = passes.begin();
+		while( itr != passes.end() )
+		{
+			itr->getName( n );
+			if( n == name )
+				break;
+			++itr;
+		}
+		if( itr != passes.end() )
+			return;
+
+		passes.push_back( pass );
+	}
+
+	void CDynMaterial::removePass( const std::string &name )
+	{
+		std::string n;
+		std::vector< SRenderPass >::iterator itr = passes.begin();
+		while( itr != passes.end() )
+		{
+			itr->getName( n );
+			if( n == name )
+				break;
+			++itr;
+		}
+
+		if( itr != passes.end() )
+			passes.erase( itr );
+	}
+
+	SRenderPass* CDynMaterial::getPass( const std::string &name )
+	{
+		std::string n;
+		std::vector< SRenderPass >::iterator itr = passes.begin();
+		while( itr != passes.end() )
+		{
+			itr->getName( n );
+			if( n == name )
+				break;
+			++itr;
+		}
+		if( itr == passes.end() )
+			return NULL;
+		else
+			return &( *itr );
+	}
 }
 
 
