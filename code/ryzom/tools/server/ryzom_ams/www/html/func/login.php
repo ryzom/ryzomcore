@@ -10,6 +10,9 @@ function login(){
 			//handle successful login
 			$_SESSION['user'] = $_POST["Username"];
 			$_SESSION['permission'] = $result['Permission'];
+			$_SESSION['id'] = $result['UId'];
+			print('id=');
+			print($_SESSION['id']);
 			//go back to the index page.
 			header( 'Location: index.php' );
 			exit;

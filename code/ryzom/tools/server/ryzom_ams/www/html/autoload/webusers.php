@@ -48,9 +48,30 @@ class WebUsers extends Users{
         }else{
               return "fail";
         }	
-                   
-       
-
      }
      
+     
+    public function getUsername($id){
+        global $cfg;
+        
+        $dbw = new DBLayer($cfg['db']['web']);
+        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
+        $row = $statement->fetch();
+        return $row['Login'];
+    }
+    
+    public function isLoggedIn(){
+        if(isset($_SESSION['user'])){
+            return true;
+        }
+        return false;
+    }
+    
+    public function isAdmin(){
+        if(isset($_SESSION['permission']) && $_SESSION['permission'] == 2){
+            return true;
+        }
+        return false;
+    }
+    
 }

@@ -10,21 +10,22 @@
 			</div>
 			<div class="box-content">
 				<div class="row-fluid">
-					<form id="changePassword" class="form-vertical" method="post" action="index.php">
+					<form id="changePassword" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Password</legend>
 						
-						<div class="control-group {if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}error{else if
-			isset($match_error_message) and $match_error_message neq "fail"}success{else}{/if}">
-						<label class="control-label">Current Password</label>
-							<div class="controls">
-							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><i class="icon-lock"></i></span>
-									<input type="password" class="input-xlarge" id="CurrentPass" name="CurrentPass" placeholder="Your current password" {if isset($prevCurrentPass)}value="{$prevCurrentPass}"{/if}>
-									{if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}<span class="help-inline">The password is incorrect</span>{/if}
-							    </div>
+						{if !isset($isAdmin) or $isAdmin eq "FALSE"}
+							<div class="control-group {if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}error{else if
+				isset($match_error_message) and $match_error_message neq "fail"}success{else}{/if}">
+							<label class="control-label">Current Password</label>
+								<div class="controls">
+								    <div class="input-prepend">
+									<span class="add-on" style="margin-left:5px;"><i class="icon-lock"></i></span>
+										<input type="password" class="input-xlarge" id="CurrentPass" name="CurrentPass" placeholder="Your current password" {if isset($prevCurrentPass)}value="{$prevCurrentPass}"{/if}>
+										{if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}<span class="help-inline">The password is incorrect</span>{/if}
+								    </div>
+								</div>
 							</div>
-						</div>
-						
+						{/if}
 							<div class="control-group {if isset($NEWPASSWORD_ERROR) and $NEWPASSWORD_ERROR eq "TRUE"}error{else if
 			isset($newpass_error_message) and $newpass_error_message eq "success"}success{else}{/if}">
 						<label class="control-label">New Password</label>
@@ -50,7 +51,7 @@
 						</div>
 						
 						<input type="hidden" name="function" value="change_password">
-						
+						<input type="hidden" name="target_id" value="{$target_id}">
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">

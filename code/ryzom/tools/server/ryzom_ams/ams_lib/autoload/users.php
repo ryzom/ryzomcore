@@ -313,27 +313,43 @@ class Users{
      }
      
      public function check_change_password($values){
-          if ( isset( $values["user"] ) and isset( $values["CurrentPass"] ) and isset( $values["ConfirmNewPass"] ) and isset( $values["NewPass"] ) ){
-               $match = $this->checkLoginMatch($values["user"],$values["CurrentPass"]);
-               $newpass = $this->checkPassword($values["NewPass"]);
-               $confpass = $this->confirmPassword($newpass,$values["NewPass"],$values["ConfirmNewPass"]);
+          //if admin isn't changing others
+          if(!$values['adminChangesOther']){
+               if ( isset( $values["user"] ) and isset( $values["CurrentPass"] ) and isset( $values["ConfirmNewPass"] ) and isset( $values["NewPass"] ) ){
+                    $match = $this->checkLoginMatch($values["user"],$values["CurrentPass"]);
+                    $newpass = $this->checkPassword($values["NewPass"]);
+                    $confpass = $this->confirmPassword($newpass,$values["NewPass"],$values["ConfirmNewPass"]);
+               }else{
+                    $match = "";
+                    $newpass = "";
+                    $confpass = "";
+               }
           }else{
-               $match = "";
-               $newpass = "";
-               $confpass = "";
+               //if admin is indeed changing someone!
+               if ( isset( $values["user"] ) and isset( $values["ConfirmNewPass"] ) and isset( $values["NewPass"] ) ){
+                    $newpass = $this->checkPassword($values["NewPass"]);
+                    $confpass = $this->confirmPassword($newpass,$values["NewPass"],$values["ConfirmNewPass"]);
+               }else{
+                    $newpass = "";
+                    $confpass = "";
+               }
           }
-          if ( ( $match != "fail" ) and ( $newpass == "success" ) and ( $confpass == "success" ) ){
+          if (  !$values['adminChangesOther'] and ( $match != "fail" ) and ( $newpass == "success" ) and ( $confpass == "success" ) ){
+               return "success";
+          }else if($values['adminChangesOther'] and ( $newpass == "success" ) and ( $confpass == "success" ) ){
                return "success";
           }else{
                $pageElements = array(
-                'match_error_message' => $match,
                 'newpass_error_message' => $newpass,
                 'confirmnewpass_error_message' => $confpass
                 );
-               if ( $match != "fail" ){
-                    $pageElements['MATCH_ERROR'] = 'FALSE';
-               }else{
-                    $pageElements['MATCH_ERROR'] = 'TRUE';
+               if(!$values['adminChangesOther']){
+                    $pageElements['match_error_message'] = $match;
+                    if ( $match != "fail" ){
+                         $pageElements['MATCH_ERROR'] = 'FALSE';
+                    }else{
+                         $pageElements['MATCH_ERROR'] = 'TRUE';
+                    }
                }
                if ( $newpass != "success" ){
                     $pageElements['NEWPASSWORD_ERROR'] = 'TRUE';
@@ -348,6 +364,29 @@ class Users{
                return $pageElements;
           }
      }
+     
+     protected function setPassword($user, $pass){
+           try {
+               //make connection with and put into shard db
+               global $cfg;
+               $dbs = new DBLayer($cfg['db']['shard']);
+               $dbs->execute("UPDATE user SET Password = :pass WHERE Login = :user ",$values);
+               return "ok";
+          }
+          catch (PDOException $e) {
+               //oh noooz, the shard is offline! Put in query queue at ams_lib db!
+               /*try {
+                    $dbl = new DBLayer($cfg['db']['lib']);  
+                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "createUser",
+                    "query" => json_encode(array($values["name"],$values["pass"],$values["mail"]))));
+                    return "shardoffline";
+               }catch (PDOException $e) {
+                    print_r($e);
+                    return "liboffline";
+               }*/
+          } 
+     }
 }
 
 
+     
