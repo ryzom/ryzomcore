@@ -564,6 +564,8 @@ public:
 	virtual bool			setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height,
 												uint32 mipmapLevel, uint32 cubeFace);
 
+	virtual ITexture		*getRenderTarget() const;
+
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y,
 													uint32 width, uint32 height, uint32 mipmapLevel);
 
@@ -889,7 +891,7 @@ private:
 	// viewport before call to setRenderTarget, if BFO extension is supported
 	CViewport				_OldViewport;
 
-	bool					_RenderTargetFBO;
+	CSmartPtr<ITexture>		_RenderTargetFBO;
 
 
 	// Num lights return by GL_MAX_LIGHTS

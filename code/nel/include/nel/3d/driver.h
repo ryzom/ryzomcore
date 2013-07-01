@@ -859,6 +859,8 @@ public:
 													uint32 cubeFace = 0
 													) = 0 ;
 
+	virtual ITexture		*getRenderTarget() const = 0;
+
 	/** Trick method : copy the current texture target into another texture without updating the current texture.
 	  *
 	  * This method copies the current texture into another texture.

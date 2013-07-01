@@ -263,8 +263,6 @@ CDriverGL::CDriverGL()
 	_CurrentFogColor[2]= 0;
 	_CurrentFogColor[3]= 0;
 
-	_RenderTargetFBO = false;
-
 	_LightSetupDirty= false;
 	_ModelViewMatrixDirty= false;
 	_RenderSetupDirty= false;
