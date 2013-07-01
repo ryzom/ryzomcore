@@ -18,18 +18,25 @@
 #define MATERIAL_WIDGET_H
 
 #include "ui_material_widget.h"
+#include "material_observer.h"
 
 namespace MaterialEditor
 {
 	class ShaderEditorWidget;
 	class MatPropWidget;
 
-	class MaterialWidget : public QWidget, Ui::MaterialWidget
+	class MaterialWidget : public QWidget, public Ui::MaterialWidget, public CMaterialObserver
 	{
 		Q_OBJECT
 	public:
 		MaterialWidget( QWidget *parent = NULL );
 		~MaterialWidget();
+
+		void onPassAdded( const char *name );
+		void onPassRemoved( const char *name );
+		void onPassMovedUp( const char *name );
+		void onPassMovedDown( const char *name );
+		void onPassRenamed( const char *from, const char *to );
 
 	private:
 		void setupConnections();

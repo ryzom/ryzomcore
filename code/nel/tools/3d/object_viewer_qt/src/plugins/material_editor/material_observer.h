@@ -14,45 +14,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef RENDER_PASSES_H
-#define RENDER_PASSES_H
-
-#include "ui_render_passes.h"
-#include <QStringList>
+#ifndef MATERIAL_OBSERVER_H
+#define MATERIAL_OBSERVER_H
 
 namespace MaterialEditor
 {
-	class CNel3DInterface;
-	class CMaterialObserver;
-
-	class RenderPassesWidget : public QWidget, public Ui::RenderPassesWidget
+	/// Observes material changes
+	class CMaterialObserver
 	{
-		Q_OBJECT
 	public:
-		RenderPassesWidget( QWidget *parent = NULL );
-		~RenderPassesWidget();
-		void fillList( const QStringList &list );
-		void getList( QStringList &list );
-		void clear();
-		void setNel3dIface( CNel3DInterface *iface ){ nl3dIface = iface; }
-
-		void setMaterialObserver( CMaterialObserver *obs ){ observer = obs; }
-
-	private:
-		void setupConnections();
-
-		CNel3DInterface *nl3dIface;
-		CMaterialObserver *observer;
-
-	private Q_SLOTS:
-		void onOKClicked();
-		void onAddClicked();
-		void onRemoveClicked();
-		void onEditClicked();
-		void onUpClicked();
-		void onDownClicked();
+		CMaterialObserver(){}
+		virtual ~CMaterialObserver(){}
+		
+		virtual void onPassAdded( const char *name ) = 0;
+		virtual void onPassRemoved( const char *name ) = 0;
+		virtual void onPassMovedUp( const char *name ) = 0;
+		virtual void onPassMovedDown( const char *name ) = 0;
+		virtual void onPassRenamed( const char *from, const char *to ) = 0;
 	};
+
 }
+
 
 #endif
 

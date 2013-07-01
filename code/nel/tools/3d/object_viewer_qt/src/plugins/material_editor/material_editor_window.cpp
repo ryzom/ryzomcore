@@ -172,7 +172,10 @@ namespace MaterialEditor
 	{
 		QDockWidget *dock = new QDockWidget( tr( "Material" ), this );
 		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
-		dock->setWidget( new MaterialWidget() );
+		
+		MaterialWidget *mw = new MaterialWidget();
+		passesWidget->setMaterialObserver( mw );
+		dock->setWidget( mw );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 	}
 	

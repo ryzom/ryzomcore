@@ -16,6 +16,7 @@
 
 #include "render_passes.h"
 #include "nel3d_interface.h"
+#include "material_observer.h"
 #include <QInputDialog>
 #include <QMessageBox>
 
@@ -27,6 +28,7 @@ namespace MaterialEditor
 		setupUi( this );
 		setupConnections();
 		nl3dIface = NULL;
+		observer = NULL;
 	}
 
 	RenderPassesWidget::~RenderPassesWidget()
@@ -109,6 +111,9 @@ namespace MaterialEditor
 
 		CNelMaterialProxy material = nl3dIface->getMaterial();
 		material.addPass( label.toUtf8().data() );
+		
+		if( observer != NULL )
+			observer->onPassAdded( label.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onRemoveClicked()
@@ -124,6 +129,9 @@ namespace MaterialEditor
 
 		CNelMaterialProxy material = nl3dIface->getMaterial();
 		material.removePass( pass.toUtf8().data() );
+
+		if( observer != NULL )
+			observer->onPassRemoved( pass.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onEditClicked()
@@ -149,6 +157,9 @@ namespace MaterialEditor
 		
 		CNelMaterialProxy material = nl3dIface->getMaterial();
 		material.renamePass( from.toUtf8().data(), to.toUtf8().data() );
+
+		if( observer != NULL )
+			observer->onPassRenamed( from.toUtf8().data(), to.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onUpClicked()
@@ -169,6 +180,9 @@ namespace MaterialEditor
 
 		CNelMaterialProxy material = nl3dIface->getMaterial();
 		material.movePassUp( s.toUtf8().data() );
+
+		if( observer != NULL )
+			observer->onPassMovedUp( s.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onDownClicked()
@@ -189,6 +203,9 @@ namespace MaterialEditor
 		
 		CNelMaterialProxy material = nl3dIface->getMaterial();
 		material.movePassDown( s.toUtf8().data() );
+
+		if( observer != NULL )
+			observer->onPassMovedDown( s.toUtf8().data() );
 	}
 }
 

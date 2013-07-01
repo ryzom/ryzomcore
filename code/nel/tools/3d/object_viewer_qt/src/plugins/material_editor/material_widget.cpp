@@ -38,6 +38,56 @@ namespace MaterialEditor
 		matPropWidget = NULL;
 	}
 
+	void MaterialWidget::onPassAdded( const char *name )
+	{
+		passCB->addItem( name );
+	}
+
+	void MaterialWidget::onPassRemoved( const char *name )
+	{
+		int i = passCB->findText( name );
+		if( i == -1 )
+			return;
+
+		passCB->removeItem( i );
+	}
+
+	void MaterialWidget::onPassMovedUp( const char *name )
+	{
+		int i = passCB->findText( name );
+		if( i == -1 )
+			return;
+		if( i == 0 )
+			return;
+
+		QString t = passCB->itemText( i - 1 );
+		passCB->setItemText( i - 1, name );
+		passCB->setItemText( i, t );
+		passCB->setCurrentIndex( i - 1 );
+	}
+
+	void MaterialWidget::onPassMovedDown( const char *name )
+	{
+		int i = passCB->findText( name );
+		if( i == -1 )
+			return;
+		if( i == ( passCB->count() - 1 ) )
+			return;
+
+		QString t = passCB->itemText( i + 1 );
+		passCB->setItemText( i + 1, name );
+		passCB->setItemText( i, t );
+		passCB->setCurrentIndex( i + 1 );
+	}
+
+	void MaterialWidget::onPassRenamed( const char *from, const char *to )
+	{
+		int i = passCB->findText( from );
+		if( i == -1 )
+			return;
+		passCB->setItemText( i, to );
+	}
+
 	void MaterialWidget::setupConnections()
 	{
 		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
