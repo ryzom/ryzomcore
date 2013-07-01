@@ -42,6 +42,8 @@ class UCamera;
 class CViewport;
 class CFrustum;
 class IStereoDisplay;
+class UTexture;
+class UDriver;
 
 class IStereoDeviceFactory : public NLMISC::CRefCount
 {
@@ -88,6 +90,9 @@ class IStereoDisplay
 public:
 	IStereoDisplay();
 	virtual ~IStereoDisplay();
+
+	/// Sets driver and generates necessary render targets
+	virtual void setDriver(NL3D::UDriver &driver) = 0;
 	
 	/// Gets the required screen resolution for this device
 	virtual void getScreenResolution(uint &width, uint &height) = 0;
@@ -108,21 +113,18 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const = 0;
 
 	/// At the start of a new render target
-	virtual bool beginClear() = 0;
-	// virtual void *getRenderTarget() const;
-	virtual void endClear() = 0;
-	
+	virtual bool wantClear() = 0;	
 	/// The 3D scene
-	virtual bool beginScene() = 0;
-	virtual void endScene() = 0;
-
+	virtual bool wantScene() = 0;
 	/// Interface within the 3D scene
-	virtual bool beginInterface3D() = 0;
-	virtual void endInterface3D() = 0;
-	
+	virtual bool wantInterface3D() = 0;	
 	/// 2D Interface
-	virtual bool beginInterface2D() = 0;
-	virtual void endInterface2D() = 0;
+	virtual bool wantInterface2D() = 0;
+
+	/// Returns non-NULL if a new render target was set
+	virtual UTexture *beginRenderTarget(bool set) = 0;
+	/// Returns true if a render target was fully drawn
+	virtual bool endRenderTarget(bool render) = 0;
 	
 	static const char *getLibraryName(CStereoDeviceInfo::TStereoDeviceLibrary library);
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);

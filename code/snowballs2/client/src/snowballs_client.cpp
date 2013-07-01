@@ -750,7 +750,7 @@ void loopIngame()
 					StereoHMD->getCurrentMatrix(0, &Camera);
 				}
 				
-				if (!StereoHMD || StereoHMD->beginClear())
+				if (!StereoHMD || StereoHMD->wantClear())
 				{
 					if (s_EnableBloom)
 					{
@@ -761,11 +761,9 @@ void loopIngame()
 
 					// 01. Render Driver (background color)
 					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
-					
-					if (StereoHMD) StereoHMD->endClear();
 				}
 
-				if (!StereoHMD || StereoHMD->beginScene())
+				if (!StereoHMD || StereoHMD->wantScene())
 				{				
 					// 02. Render Sky (sky scene)
 					updateSky(); // Render the sky scene before the main scene
@@ -775,11 +773,9 @@ void loopIngame()
 
 					// 05. Render Effects (flare)
 					if (!StereoHMD) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
-
-					if (StereoHMD) StereoHMD->endScene();
 				}
 
-				if (!StereoHMD || StereoHMD->beginInterface3D())
+				if (!StereoHMD || StereoHMD->wantInterface3D())
 				{
 					if (s_EnableBloom && bloomStage == 1)
 					{
@@ -791,12 +787,10 @@ void loopIngame()
 					}
 
 					// 06. Render Interface 3D (player names)
-					// ...  
-					
-					if (StereoHMD) StereoHMD->endInterface3D();
+					// ... 
 				}
 
-				if (!StereoHMD || StereoHMD->beginInterface2D())
+				if (!StereoHMD || StereoHMD->wantInterface2D())
 				{
 					if (s_EnableBloom && bloomStage == 2)
 					{
@@ -820,8 +814,6 @@ void loopIngame()
 
 					// 08. Render Debug (stuff for dev)
 					// ...
-
-					if (StereoHMD) StereoHMD->endInterface2D();
 				}
 			}
 

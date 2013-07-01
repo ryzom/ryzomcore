@@ -74,6 +74,8 @@ public:
 	CStereoOVR(const CStereoOVRDeviceHandle *handle);
 	virtual ~CStereoOVR();
 
+	/// Sets driver and generates necessary render targets
+	virtual void setDriver(NL3D::UDriver &driver);
 
 	/// Gets the required screen resolution for this device
 	virtual void getScreenResolution(uint &width, uint &height);
@@ -94,21 +96,18 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const;
 
 	/// At the start of a new render target
-	virtual bool beginClear();
-	// virtual void *getRenderTarget() const;
-	virtual void endClear();
-	
+	virtual bool wantClear();	
 	/// The 3D scene
-	virtual bool beginScene();
-	virtual void endScene();
-
+	virtual bool wantScene();
 	/// Interface within the 3D scene
-	virtual bool beginInterface3D();
-	virtual void endInterface3D();
-	
+	virtual bool wantInterface3D();	
 	/// 2D Interface
-	virtual bool beginInterface2D();
-	virtual void endInterface2D();
+	virtual bool wantInterface2D();
+
+	/// Returns non-NULL if a new render target was set, always NULL if not using render targets
+	virtual UTexture *beginRenderTarget(bool set);
+	/// Returns true if a render target was fully drawn, always false if not using render targets
+	virtual bool endRenderTarget(bool render);
 
 
 	/// Get the HMD orientation
@@ -130,6 +129,7 @@ public:
 private:
 	CStereoOVRDevicePtr *m_DevicePtr;
 	int m_Stage;
+	int m_SubStage;
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;
 	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];

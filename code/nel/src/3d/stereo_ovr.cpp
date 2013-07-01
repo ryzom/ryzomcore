@@ -155,7 +155,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_OrientationCached(false)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -206,6 +206,11 @@ CStereoOVR::~CStereoOVR()
 	--s_DeviceCounter;
 }
 
+void CStereoOVR::setDriver(NL3D::UDriver &driver)
+{
+	// ...
+}
+
 void CStereoOVR::getScreenResolution(uint &width, uint &height)
 {
 	width = m_DevicePtr->HMDInfo.HResolution;
@@ -220,7 +225,7 @@ void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 	m_RightFrustum[cid] = m_LeftFrustum[cid];
 	
 	float viewCenter = m_DevicePtr->HMDInfo.HScreenSize * 0.25f;
-	float eyeProjectionShift = viewCenter - m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f;
+	float eyeProjectionShift = viewCenter - m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f; // docs say LensSeparationDistance, why not InterpupillaryDistance? related to how the lenses work?
 	float projectionCenterOffset = (eyeProjectionShift / (m_DevicePtr->HMDInfo.HScreenSize * 0.5f)) * (m_LeftFrustum[cid].Right - m_LeftFrustum[cid].Left); // used logic for this one, but it ends up being the same as the one i made up
 	nldebug("OVR: projectionCenterOffset = %f", projectionCenterOffset);
 
@@ -255,6 +260,7 @@ bool CStereoOVR::nextPass()
 	{
 	case 0:
 		++m_Stage;
+		m_SubStage = 0;
 		// stage 1:
 		// (initBloom)
 		// clear buffer
@@ -262,39 +268,46 @@ bool CStereoOVR::nextPass()
 		return true;
 	case 1:
 		++m_Stage;
+		m_SubStage = 0;
 		// stage 2:
 		// draw scene right
 		return true;
 	case 2:
 		++m_Stage;
+		m_SubStage = 0;
 		// stage 3:
 		// (endBloom)
 		// draw interface 3d left
 		return true;
 	case 3:
 		++m_Stage;
+		m_SubStage = 0;
 		// stage 4:
 		// draw interface 3d right
 		return true;
 	case 4:
 		++m_Stage;
+		m_SubStage = 0;
 		// stage 5:
 		// (endInterfacesDisplayBloom)
 		// draw interface 2d left
 		return true;
 	case 5:
 		++m_Stage;
+		m_SubStage = 0;
 		// stage 6:
 		// draw interface 2d right
 		return true;
 	case 6:
 		m_Stage = 0;
+		m_SubStage = 0;
 		// present
 		m_OrientationCached = false;
 		return false;
 	}
-	nlassert(false);
+	nlerror("Invalid stage");
 	m_Stage = 0;
+	m_SubStage = 0;
 	m_OrientationCached = false;
 	return false;
 }
@@ -326,67 +339,68 @@ void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 	camera->setMatrix(m_CameraMatrix[cid] * translate);
 }
 
-bool CStereoOVR::beginClear()
+bool CStereoOVR::wantClear()
 {
 	switch (m_Stage)
 	{
 	case 1:
+		m_SubStage = 1;
 		return true;
 	}
 	return false;
 }
-
-void CStereoOVR::endClear()
-{
-
-}
 	
-bool CStereoOVR::beginScene()
+bool CStereoOVR::wantScene()
 {
 	switch (m_Stage)
 	{
 	case 1:
 	case 2:
+		m_SubStage = 2;
 		return true;
 	}
 	return false;
 }
 
-void CStereoOVR::endScene()
-{
-
-}
-
-bool CStereoOVR::beginInterface3D()
+bool CStereoOVR::wantInterface3D()
 {
 	switch (m_Stage)
 	{
 	case 3:
 	case 4:
+		m_SubStage = 3;
 		return true;
 	}
 	return false;
 }
 
-void CStereoOVR::endInterface3D()
-{
-
-}
-
-bool CStereoOVR::beginInterface2D()
+bool CStereoOVR::wantInterface2D()
 {
 	switch (m_Stage)
 	{
 	case 5:
 	case 6:
+		m_SubStage = 4;
 		return true;
 	}
 	return false;
 }
 
-void CStereoOVR::endInterface2D()
-{
 
+/// Returns non-NULL if a new render target was set
+UTexture *CStereoOVR::beginRenderTarget(bool set)
+{
+	// render target always set before driver clear
+	nlassert(m_SubStage == 1);
+	return NULL;
+}
+
+/// Returns true if a render target was fully drawn
+bool CStereoOVR::endRenderTarget( bool render)
+{
+	// after rendering of course
+	nlassert(m_SubStage > 1);
+	return false;
 }
 
 NLMISC::CQuat CStereoOVR::getOrientation() const
