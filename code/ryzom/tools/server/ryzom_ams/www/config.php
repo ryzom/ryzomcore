@@ -12,14 +12,14 @@ $WEBDBHOST = 'localhost';
 $WEBDBPORT = '3306';
 $WEBDBNAME = 'ryzom_ams';
 $WEBDBUSERNAME = 'root';
-$WEBDBPASSWORD = 'lol123' ;
+$WEBDBPASSWORD = '' ;
 
 //the ams_lib db
 $LIBDBHOST = 'localhost';
 $LIBDBPORT = '3306';
 $LIBDBNAME = 'ryzom_ams_lib';
 $LIBDBUSERNAME = 'root';
-$LIBDBPASSWORD = 'lol123' ;
+$LIBDBPASSWORD = '' ;
 
 //the shard db 
 $SHARDDBHOST = 'localhost' ;
