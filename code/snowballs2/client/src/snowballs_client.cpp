@@ -152,6 +152,8 @@ LoadedOnline = false, LoadedOffline = false; // state
 static IStereoRender *_StereoRender = NULL;
 #endif /* #if SBCLIENT_DEV_STEREO */
 
+static bool s_EnableBloom = false;
+
 //
 // Prototypes
 //
@@ -182,6 +184,7 @@ void releaseOffline();
 void cbGraphicsDriver(CConfigFile::CVar &var);
 void cbSquareBloom(CConfigFile::CVar &var);
 void cbDensityBloom(CConfigFile::CVar &var);
+void cbEnableBloom(CConfigFile::CVar &var);
 
 //
 // Functions
@@ -368,6 +371,7 @@ void initIngame()
 		CBloomEffect::instance().init(ConfigFile->getVar("OpenGL").asInt() == 1);
 		CConfiguration::setAndCallback("SquareBloom", cbSquareBloom);
 		CConfiguration::setAndCallback("DensityBloom", cbDensityBloom);
+		CConfiguration::setAndCallback("EnableBloom", cbEnableBloom);
 		// Init the landscape using the previously created UScene
 		displayLoadingState("Initialize Landscape");
 		initLandscape();
@@ -748,9 +752,12 @@ void loopIngame()
 				
 				if (!StereoHMD || StereoHMD->beginClear())
 				{
-					nlassert(bloomStage == 0);
-					CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
-					bloomStage = 1;
+					if (s_EnableBloom)
+					{
+						nlassert(bloomStage == 0);
+						CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
+						bloomStage = 1;
+					}
 
 					// 01. Render Driver (background color)
 					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
@@ -774,7 +781,7 @@ void loopIngame()
 
 				if (!StereoHMD || StereoHMD->beginInterface3D())
 				{
-					if (bloomStage == 1)
+					if (s_EnableBloom && bloomStage == 1)
 					{
 						// End the actual bloom effect visible in the scene.
 						if (StereoHMD) Driver->setViewport(NL3D::CViewport());
@@ -791,7 +798,7 @@ void loopIngame()
 
 				if (!StereoHMD || StereoHMD->beginInterface2D())
 				{
-					if (bloomStage == 2)
+					if (s_EnableBloom && bloomStage == 2)
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
 						if (StereoHMD) Driver->setViewport(NL3D::CViewport());
@@ -942,6 +949,11 @@ void cbSquareBloom(CConfigFile::CVar &var)
 void cbDensityBloom(CConfigFile::CVar &var)
 {
 	CBloomEffect::instance().setDensityBloom((uint8)(var.asInt() & 0xFF));
+}
+
+void cbEnableBloom(CConfigFile::CVar &var)
+{
+	s_EnableBloom = var.asBool();
 }
 
 //
