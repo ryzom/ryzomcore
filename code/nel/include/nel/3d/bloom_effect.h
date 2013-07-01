@@ -83,7 +83,7 @@ public:
 	// If window size exceeds 256*256 the textures used to apply blur are reinitialized with
 	// 256*256 size. If a dimension is less than 256, the texture is initialized with the nearer
 	// power of 2, lower than this window dimension.
-	void initBloom(UTexture &renderTarget);
+	void initBloom(UTexture *renderTarget);
 	void initBloom();
 
 	// Called at the end of renderAll method in the main loop, recover stretched texture, apply

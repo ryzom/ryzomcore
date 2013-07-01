@@ -273,16 +273,15 @@ void CBloomEffect::initTexture(CSmartPtr<ITexture> & tex, bool isMode2D, uint32 
 
 void CBloomEffect::initBloom()
 {
-	CTextureUser cu;
-	initBloom(cu);
+	initBloom(NULL);
 }
 
-void CBloomEffect::initBloom(UTexture &renderTarget) // clientcfg
+void CBloomEffect::initBloom(UTexture *renderTarget) // clientcfg
 {
 	if(!((CDriverUser *)_Driver)->getDriver()->supportBloomEffect())
 		return;
 
-	m_UserRenderTarget = dynamic_cast<CTextureUser &>(renderTarget).getITexture();
+	m_UserRenderTarget = renderTarget ? dynamic_cast<CTextureUser *>(renderTarget)->getITexture() : NULL;
 
 	// don't activate bloom when PolygonMode is different from Filled
 	if (_Driver->getPolygonMode() != UDriver::Filled) return;

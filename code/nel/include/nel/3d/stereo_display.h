@@ -124,7 +124,7 @@ public:
 	/// Returns non-NULL if a new render target was set
 	virtual UTexture *beginRenderTarget(bool set) = 0;
 	/// Returns true if a render target was fully drawn
-	virtual bool endRenderTarget(bool unset) = 0;
+	virtual bool endRenderTarget() = 0;
 	
 	static const char *getLibraryName(CStereoDeviceInfo::TStereoDeviceLibrary library);
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);

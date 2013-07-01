@@ -736,26 +736,28 @@ void loopIngame()
 		{
 			uint i = 0;
 			uint bloomStage = 0;
-			while ((!StereoHMD && i == 0) || (StereoHMD && StereoHMD->nextPass()))
+			while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 			{
 				++i;
-				if (StereoHMD)
+				if (StereoDisplay)
 				{
-					const CViewport &vp = StereoHMD->getCurrentViewport();
+					const CViewport &vp = StereoDisplay->getCurrentViewport();
 					Driver->setViewport(vp);
 					Scene->setViewport(vp);
 					SkyScene->setViewport(vp);
-					StereoHMD->getCurrentFrustum(0, &Camera);
-					StereoHMD->getCurrentFrustum(0, &SkyCamera);
-					StereoHMD->getCurrentMatrix(0, &Camera);
+					StereoDisplay->getCurrentFrustum(0, &Camera);
+					StereoDisplay->getCurrentFrustum(0, &SkyCamera);
+					StereoDisplay->getCurrentMatrix(0, &Camera);
 				}
 				
-				if (!StereoHMD || StereoHMD->wantClear())
+				if (!StereoDisplay || StereoDisplay->wantClear())
 				{
+					NL3D::UTexture *rt = StereoDisplay ? StereoDisplay->beginRenderTarget(!s_EnableBloom) : NULL;
+
 					if (s_EnableBloom)
 					{
 						nlassert(bloomStage == 0);
-						CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
+						CBloomEffect::instance().initBloom(/*rt*/); // start bloom effect (just before the first scene element render)
 						bloomStage = 1;
 					}
 
@@ -763,7 +765,7 @@ void loopIngame()
 					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
 				}
 
-				if (!StereoHMD || StereoHMD->wantScene())
+				if (!StereoDisplay || StereoDisplay->wantScene())
 				{				
 					// 02. Render Sky (sky scene)
 					updateSky(); // Render the sky scene before the main scene
@@ -772,17 +774,17 @@ void loopIngame()
 					Scene->render(); // Render
 
 					// 05. Render Effects (flare)
-					if (!StereoHMD) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
+					if (!StereoDisplay) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
 				}
 
-				if (!StereoHMD || StereoHMD->wantInterface3D())
+				if (!StereoDisplay || StereoDisplay->wantInterface3D())
 				{
 					if (s_EnableBloom && bloomStage == 1)
 					{
 						// End the actual bloom effect visible in the scene.
-						if (StereoHMD) Driver->setViewport(NL3D::CViewport());
+						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endBloom();
-						if (StereoHMD) Driver->setViewport(StereoHMD->getCurrentViewport());
+						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 2;
 					}
 
@@ -790,14 +792,14 @@ void loopIngame()
 					// ... 
 				}
 
-				if (!StereoHMD || StereoHMD->wantInterface2D())
+				if (!StereoDisplay || StereoDisplay->wantInterface2D())
 				{
 					if (s_EnableBloom && bloomStage == 2)
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
-						if (StereoHMD) Driver->setViewport(NL3D::CViewport());
+						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endInterfacesDisplayBloom();
-						if (StereoHMD) Driver->setViewport(StereoHMD->getCurrentViewport());
+						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 0;
 					}
 
@@ -810,10 +812,15 @@ void loopIngame()
 					renderEntitiesNames(); // Render the name on top of the other players
 					updateInterface(); // Update interface
 					renderInformation();
-					if (!StereoHMD) update3dLogo(); // broken with stereo
+					if (!StereoDisplay) update3dLogo(); // broken with stereo
 
 					// 08. Render Debug (stuff for dev)
 					// ...
+				}
+
+				if (StereoDisplay)
+				{
+					StereoDisplay->endRenderTarget();
 				}
 			}
 

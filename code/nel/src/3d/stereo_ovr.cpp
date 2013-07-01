@@ -163,7 +163,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_BarrelTexU(NULL)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -453,7 +453,7 @@ UTexture *CStereoOVR::beginRenderTarget(bool set)
 {
 	// render target always set before driver clear
 	// nlassert(m_SubStage <= 1);
-	if (m_Stage == 1)
+	if (m_Driver && m_Stage == 1)
 	{
 		if (set)
 		{
@@ -465,17 +465,19 @@ UTexture *CStereoOVR::beginRenderTarget(bool set)
 }
 
 /// Returns true if a render target was fully drawn
-bool CStereoOVR::endRenderTarget(bool unset)
+bool CStereoOVR::endRenderTarget()
 {
 	// after rendering of course
 	// nlassert(m_SubStage > 1);
-	if (m_Stage == 4)
+	if (m_Driver && m_Stage == 4)
 	{
-		if (unset)
-		{
-			CTextureUser cu;
-			(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
-		}
+		CTextureUser cu;
+		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
+
+		m_Driver->setMatrixMode2D11();
+		m_Driver->setViewport(CViewport());
+		m_Driver->drawQuad(m_BarrelQuad, m_BarrelMat);
+
 		return true;
 	}
 	return false;

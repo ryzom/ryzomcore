@@ -113,10 +113,14 @@ void	initCamera()
 		{
 			nlinfo("Create VR stereo display device");
 			StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
-			if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
+			if (StereoDisplay)
 			{
-				nlinfo("Stereo display device is a HMD");
-				StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
+				{
+					nlinfo("Stereo display device is a HMD");
+					StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+				}
+				StereoDisplay->setDriver(Driver); // move after driver creation, move stereodisplay before driver creation
 			}
 		}
 		IStereoDisplay::releaseUnusedLibraries();
@@ -212,7 +216,7 @@ void releaseSky()
 // -- -- random note: update and render makes more sense than animate and update
 void animateSky(double dt)
 {
-	Clouds->anim(dt);
+	if (!StereoDisplay) Clouds->anim(dt);
 }
 
 // this is actually render
