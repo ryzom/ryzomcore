@@ -43,8 +43,7 @@
 		</div>
 		{/if}
 		<div class="alert alert-info">
-		<strong>Register</strong>
-			If you dont have an account yet, create one <a href="?page=register">here</a>!
+		{$login_register_message} <a href="?page=register">{$login_register_message_here}</a>!
 		</div>
 	</div><!--/span-->
 </div>

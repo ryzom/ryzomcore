@@ -2,18 +2,11 @@
 
 function login(){
 	
-	global $WEBDBHOST;
-	global $WEBDBPORT;
-	global $WEBDBNAME;
-	global $WEBDBUSERNAME;
-	global $WEBDBPASSWORD;
+	global $cfg;
 	
 	try{
-		$dbw = new PDO("mysql:host=$WEBDBHOST;port=$WEBDBPORT;dbname=$WEBDBNAME", $WEBDBUSERNAME, $WEBDBPASSWORD);
-		$dbw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		
-		$statement = $dbw->prepare("SELECT * FROM ams_user WHERE Login=:user");
-		$statement->execute(array('user' => $_POST['Username']));
+		$dbw = new DBLayer($cfg['db']['web']);
+		$statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:user", array('user' => $_POST['Username']));
 		
 		$row = $statement->fetch();
 		$salt = substr($row['Password'],0,2);

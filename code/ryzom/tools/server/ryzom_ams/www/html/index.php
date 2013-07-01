@@ -5,35 +5,35 @@ require( '../config.php' );
 require( '../../ams_lib/libinclude.php' );
 session_start();
 
-//print_r($_SESSION);
-
-//perform an action in case one is specified
-if ( isset( $_POST["function"] ) ){
-     require( "inc/" . $_POST["function"] . ".php" );
-     $return = $_POST["function"]();
-}
-
 //Decide what page to load
 if(isset($_SESSION['user'])){
      $page = 'home';
-     $return['username'] = $_SESSION['user'];
 }else{
      //default page
      $page = 'login';   
 }
 
-if ( isset( $_GET["page"] ) ){
-     $page = $_GET["page"];
-     }
-
-function loadpage ( $page ){
-     $filename = 'autoload/' . $page . '.php';
+//perform an action in case one is specified
+//else check if a php page is included in the inc folder, else just set page to the get param
+if ( isset( $_POST["function"] ) ){
+     require( "func/" . $_POST["function"] . ".php" );
+     $return = $_POST["function"]();
+}else if ( isset( $_GET["page"] ) ){
+     $filename = 'inc/' . $_GET["page"] . '.php';
      if(is_file($filename)){
           require_once($filename);
+          $return = $_GET["page"]();
      }
+     $page = $_GET["page"];
 }
 
-loadpage($page);
+//add username to the return array in case logged in.
+if(isset($_SESSION['user'])){
+     $return['username'] = $_SESSION['user'];
+}
+     
+     
+
 
 //Set permission
 if(isset($_SESSION['permission'])){

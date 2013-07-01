@@ -1,21 +1,15 @@
 <?php
     require( '../../config.php' );
+    require( '../../../ams_lib/libinclude.php' );
     ini_set( "display_errors", true );
     error_reporting( E_ALL );
     
-    global $WEBDBHOST;
-    global $WEBDBUSERNAME;
-    global $WEBDBPASSWORD;
-    
-    global $LIBDBHOST;
-    global $LIBDBUSERNAME;
-    global $LIBDBPASSWORD;
+    global $cfg;
     
 
     try{
         //SETUP THE WWW DB
-        $dbw = new PDO("mysql:host=$WEBDBHOST;", $WEBDBUSERNAME, $WEBDBPASSWORD);
-        $dbw->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $dbw = new DBLayer($cfg['db']['web']);
         $sql = "
             CREATE DATABASE IF NOT EXISTS `ryzom_ams`;
             USE `ryzom_ams`;
@@ -32,12 +26,10 @@
             
             );           
         ";
-        $statement = $dbw->prepare($sql);
-        $statement->execute();
+        $dbw->executeWithoutParams($sql);
         
         //SETUP THE AMS_LIB DB
-        $dbl = new PDO("mysql:host=$LIBDBHOST;", $LIBDBUSERNAME, $LIBDBPASSWORD);
-        $dbl->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $dbl = new DBLayer($cfg['db']['lib']);
         $sql = "
             CREATE DATABASE IF NOT EXISTS `ryzom_ams_lib`;
             USE `ryzom_ams_lib`;
@@ -49,16 +41,34 @@
             `query` VARCHAR( 512 ) NOT NULL 
             );          
         ";
-        $statement = $dbl->prepare($sql);
-        $statement->execute();
-        print('Install completed successful!');
+        $dbl->executeWithoutParams($sql);
+        print "The Lib & Web database were correctly installed! <br />";
+        
+        //Now create an admin account!
+        $hashpass = crypt("admin", Users::generateSALT());
+        $params = array(
+          'name' => "admin",
+          'pass' => $hashpass,
+          'mail' => "admin@admin.com",
+        );
+        Users::createUser($params);
+        try{
+            $params['permission'] = 2;
+            $dbw = new DBLayer($cfg['db']['web']);
+            $dbw->execute("INSERT INTO ams_user (Login, Password, Email, Permission) VALUES (:name, :pass, :mail, :permission)",$params);
+            print "The admin account is created, you can login with id: admin, pass: admin!";
+        }catch (PDOException $e){
+            print "There was an error while creating the admin account! ";
+        }
+        
+        
     
         
 
         
     }catch (PDOException $e) {
         //go to error page or something, because can't access website db
-        print('There was an error while installing');
+        print "There was an error while installing";
         print_r($e);
     }
     

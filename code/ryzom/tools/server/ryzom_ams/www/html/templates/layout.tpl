@@ -102,9 +102,13 @@
 					</ul>
 				</div>
 				{/if}
+				<div class="btn-group pull-right">
+				    <div class="flags">
+				      <img src="img/en.png" onclick="document.cookie='language=en';document.location.reload(true);"/>
+				      <img src="img/fr.png" onclick="document.cookie='language=fr';document.location.reload(true);"/>
+				    </div>
+				</div>
 				<!-- user dropdown ends -->
-
-
 			</div>
 		</div>
 	</div>
@@ -118,7 +122,8 @@
 					<ul class="nav nav-tabs nav-stacked main-menu">
 						{block name=menu}{/block}
 					</ul>
-					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax" style="visibility:hidden;"><div id="uniform-is-ajax" class="checker"><span class="checked"><input style="opacity: 0;" id="is-ajax" type="checkbox"></span></div> Ajax on menu</label>
+					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax"><input id="is-ajax" type="checkbox"> Ajax on menu</label>
+					<!--<label id="for-is-ajax" class="hidden-tablet" for="is-ajax" style="visibility:hidden;"><div id="uniform-is-ajax" class="checker"><span class="checked"><input style="opacity: 0;" id="is-ajax" type="checkbox"></span></div> Ajax on menu</label>--!>
 				</div><!--/.well -->
 			</div><!--/span-->
 			<!-- left menu ends -->
@@ -132,6 +137,15 @@
 
 			<div id="content" class="span10">
 			<!-- content starts -->
+			{/if}
+			
+			{if  isset($no_visible_elements) and  $no_visible_elements eq "TRUE"}
+		  	
+				    <div class="flags_no_visible_elements">
+				      <img src="img/en.png" onclick="document.cookie='language=en';document.location.reload(true);"/>
+				      <img src="img/fr.png" onclick="document.cookie='language=fr';document.location.reload(true);"/>
+				    </div>
+
 			{/if}
 
 			{block name=content}{/block}
@@ -240,6 +254,7 @@
 	<script src="js/charisma.js"></script>
 	<!-- help script for page help -->
 	<script src="js/help.js"></script>
+
   </div>
 </body>
 </html>

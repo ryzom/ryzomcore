@@ -1,19 +1,19 @@
 <?php
 class Users{
-
-     public function add_user(){
-
-             helpers :: loadtemplate( 'register', $pageElements );
-
-         }
-         
-     public function check_Register(){
+     
+     /**
+     * Function check_register
+     *
+     * @takes $array with username,password and email
+     * @return string Info: Returns a string, if input data is valid then "success" is returned, else an array with errors
+     */ 
+     public function check_Register($values){
           // check values
-          if ( isset( $_POST["Username"] ) and isset( $_POST["Password"] ) and isset( $_POST["Email"] ) ){
-               $user = Users :: checkUser( $_POST["Username"] );
-               $pass = Users :: checkPassword( $_POST["Password"] );
-               $cpass = Users :: confirmPassword($pass);
-               $email = Users :: checkEmail( $_POST["Email"] );
+          if ( isset( $values["Username"] ) and isset( $values["Password"] ) and isset( $values["Email"] ) ){
+               $user = Users::checkUser( $values["Username"] );
+               $pass = Users::checkPassword( $values["Password"] );
+               $cpass = Users::confirmPassword($pass);
+               $email = Users::checkEmail( $values["Email"] );
           }else{
                $user = "";
                $pass = "";
@@ -62,6 +62,9 @@ class Users{
           }
 
      }
+     
+     
+
 
     /**
      * Function checkUser
@@ -69,37 +72,46 @@ class Users{
      * @takes $username
      * @return string Info: Returns a string based on if the username is valid, if valid then "success" is returned
      */
-     public function checkUser( $username )
-    {
-         if ( isset( $username ) ){
-             if ( strlen( $username ) > 12 ){
-                 return "Username must be no more than 12 characters.";
-                 }elseif ( strlen( $username ) < 5 ){
-                 return "Username must be 5 or more characters.";
-                 }elseif ( !preg_match( '/^[a-z0-9\.]*$/', $username ) ){
-                 return "Username can only contain numbers and letters.";
-                 }elseif ( $username == "" ){
-                 return "You have to fill in a username";
-                
-                 /*}elseif ( sql :: db_query( "SELECT COUNT(*) FROM {users} WHERE name = :name", array(
-                        ':name' => $username
-                         ) ) -> fetchField() ){
-                 return "Username " . $username . " is in use.";*/
-                 }else{
-                 return "success";
-                 }
-             }else{
-             return "success";
-             }
-         return "fail";
-         }
+     private function checkUser( $username )
+     {
+          if ( isset( $username ) ){
+               if ( strlen( $username ) > 12 ){
+                    return "Username must be no more than 12 characters.";
+               }else if ( strlen( $username ) < 5 ){
+                    return "Username must be 5 or more characters.";
+               }else if ( !preg_match( '/^[a-z0-9\.]*$/', $username ) ){
+                    return "Username can only contain numbers and letters.";
+               }else if ( $username == "" ){
+                    return "You have to fill in a username";
+               }elseif ($this->checkUserNameExists($username)){
+                    return "Username " . $username . " is in use.";
+               }else{
+                    return "success";
+               }
+          }
+          return "fail";
+     }
+         
+     /**
+     * Function checkUserNameExists
+     *
+     * @takes $username
+     * @return string Info: Returns true or false if the user is in the www db.
+     */
+     protected function checkUserNameExists($username){
+          //You should overwrite this method with your own version!
+          print('this is the base class!');
+          
+     }
+         
+         
     /**
      * Function checkPassword
      *
      * @takes $pass
      * @return string Info: Returns a string based on if the password is valid, if valid then "success" is returned
      */
-     public function checkPassword( $pass )
+     private function checkPassword( $pass )
     {
          if ( isset( $pass ) ){
              if ( strlen( $pass ) > 20 ){
@@ -114,13 +126,15 @@ class Users{
              }
          return "fail";
          }
+         
+         
     /**
      * Function confirmPassword
      *
      * @takes $pass
      * @return string Info: Verify's $_POST["Password"] is the same as $_POST["ConfirmPass"]
      */
-     public function confirmPassword($pass_result)
+     private function confirmPassword($pass_result)
     {
           if ( ( $_POST["Password"] ) != ( $_POST["ConfirmPass"] ) ){
              return "Passwords do not match.";
@@ -133,34 +147,51 @@ class Users{
           }
           return "fail";
      }
+     
+     
     /**
      * Function checkEmail
      *
      * @takes $email
      * @return
      */
-     public function checkEmail( $email )
+     private function checkEmail( $email )
     {
          if ( isset( $email ) ){
                if ( !Users::validEmail( $email ) ){
                     return "Email address is not valid.";
                }else if($email == ""){
                     return "You have to fill in an email address";
+               }else if ($this->checkEmailExists($email)){
+                    return "Email is in use.";
+               }else{
+                    return "success";
                }
-                 /*}elseif ( db_query( "SELECT COUNT(*) FROM {users} WHERE mail = :mail", array(
-                        ':mail' => $email
-                         ) ) -> fetchField() ){
-                 return "Email is in use.";}*/
-                 else{
-                 return "success";
-                 }
-             }else{
-             return "success";
-             }
-         return "fail";
-         }
+          }
+          return "fail";
+     }
 
-     public function validEmail( $email ){
+
+     /**
+     * Function checkEmailExists
+     *
+     * @takes $username
+     * @return string Info: Returns true or false if the user is in the www db.
+     */
+     protected function checkEmailExists($email){
+          //TODO: You should overwrite this method with your own version!
+          print('this is the base class!');
+          
+     }
+         
+         
+    /**
+     * Function validEmail
+     *
+     * @takes $email
+     * @return true or false depending on if its a valid email format.
+     */
+     private function validEmail( $email ){
           $isValid = true;
           $atIndex = strrpos( $email, "@" );
           if ( is_bool( $atIndex ) && !$atIndex ){
@@ -203,6 +234,14 @@ class Users{
           return $isValid;
      }
 
+
+
+     /**
+     * Function generateSALT
+     *
+     * @takes $length, which is by default 2
+     * @return a random salt of 2 chars
+     */
      public function generateSALT( $length = 2 )
     {
          // start with a blank salt
@@ -236,56 +275,28 @@ class Users{
         return $salt;
      }
      
-     function create_Server_User($params)
-     {
-         try {
-             $hostname = 'localhost';
-             $port     = '3306';
-             $dbname   = 'nel';
-             $username = 'shard';
-             $password = '';
-             $dbh      = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
-             $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-             $statement = $dbh->prepare("INSERT INTO user (Login, Password, Email) VALUES (?, ?, ?)");
-             $statement->execute($params);
-             return "success";
-         }
-         catch (PDOException $e) {
-             return "fail";
-         }
-        // createPermissions(array($login));
-     }
-     
-     function createUser($values){
-          
-          $libhost = $values["libhost"];
-          $libport = $values["libport"];
-          $libdbname = $values["libdbname"];
-          $libusername = $values["libusername"];
-          $libpassword = $values["libpassword"];
-      
-          $shardhost = $values["shardhost"];
-          $shardport = $values["shardport"];
-          $sharddbname = $values["sharddbname"];
-          $shardusername = $values["shardusername"];
-          $shardpassword = $values["shardpassword"];
-          
+
+
+    /**
+     * Function create
+     *
+     * @takes $array with name,pass and mail
+     * @return ok if it's get correctly added to the shard, else return lib offline and put in libDB, if libDB is also offline return liboffline.
+     */
+     public function createUser($values){     
           try {
                //make connection with and put into shard db
-               $dbs = new PDO("mysql:host=$shardhost;port=$shardport;dbname=$sharddbname", $shardusername, $shardpassword);
-               $dbs->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-               $statement = $dbs->prepare("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)");
-               $statement->execute($values["params"]);
+               global $cfg;
+               $dbs = new DBLayer($cfg['db']['shard']);
+               $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values["params"]);
                return "ok";
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
-                    $dbl = new PDO("mysql:host=$libhost;port=$libport;dbname=$libdbname", $libusername, $libpassword);
-                    $dbl->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    $params = array("type" => "createUser","query" => json_encode(array($values["params"]["name"],$values["params"]["pass"],$values["params"]["mail"])));
-                    $statement = $dbl->prepare("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)");
-                    $statement->execute($params);
+                    $dbl = new DBLayer($cfg['db']['lib']);  
+                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "createUser",
+                    "query" => json_encode(array($values["name"],$values["pass"],$values["mail"]))));
                     return "shardoffline";
                }catch (PDOException $e) {
                     print_r($e);
@@ -293,8 +304,7 @@ class Users{
                }
           } 
 
-     }
-     
+     }   
 }
 
 
