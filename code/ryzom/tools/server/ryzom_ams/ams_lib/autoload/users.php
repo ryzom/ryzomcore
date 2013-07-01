@@ -9,10 +9,10 @@ class Users{
      */ 
      public function check_Register($values){
           // check values
-          if ( isset( $values["Username"] ) and isset( $values["Password"] ) and isset( $values["Email"] ) ){
+          if ( isset( $values["Username"] ) and isset( $values["Password"] ) and isset( $values["ConfirmPass"] ) and isset( $values["Email"] ) ){
                $user = Users::checkUser( $values["Username"] );
                $pass = Users::checkPassword( $values["Password"] );
-               $cpass = Users::confirmPassword($pass);
+               $cpass = Users::confirmPassword($pass,$values["Password"],$values["ConfirmPass"]);
                $email = Users::checkEmail( $values["Email"] );
           }else{
                $user = "";
@@ -134,12 +134,13 @@ class Users{
      * @takes $pass
      * @return string Info: Verify's $_POST["Password"] is the same as $_POST["ConfirmPass"]
      */
-     private function confirmPassword($pass_result)
+     private function confirmPassword($pass_result,$pass,$confirmpass)
     {
-          if ( ( $_POST["Password"] ) != ( $_POST["ConfirmPass"] ) ){
-             return "Passwords do not match.";
-          }else if ($_POST["ConfirmPass"]==""){
+          if ($confirmpass==""){
              return "You have to fill in the confirmation password.";
+          }
+          else if ( ( $pass ) != ( $confirmpass ) ){
+             return "Passwords do not match.";
           }else if($pass_result != "success"){
                return;
           }else{
@@ -288,7 +289,7 @@ class Users{
                //make connection with and put into shard db
                global $cfg;
                $dbs = new DBLayer($cfg['db']['shard']);
-               $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values["params"]);
+               $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values);
                return "ok";
           }
           catch (PDOException $e) {
@@ -304,7 +305,49 @@ class Users{
                }
           } 
 
-     }   
+     }
+     
+     
+     protected function checkLoginMatch($user,$pass){
+          print('This is the base class!');
+     }
+     
+     public function check_change_password($values){
+          if ( isset( $values["user"] ) and isset( $values["CurrentPass"] ) and isset( $values["ConfirmNewPass"] ) and isset( $values["NewPass"] ) ){
+               $match = $this->checkLoginMatch($values["user"],$values["CurrentPass"]);
+               $newpass = $this->checkPassword($values["NewPass"]);
+               $confpass = $this->confirmPassword($newpass,$values["NewPass"],$values["ConfirmNewPass"]);
+          }else{
+               $match = "";
+               $newpass = "";
+               $confpass = "";
+          }
+          if ( ( $match != "fail" ) and ( $newpass == "success" ) and ( $confpass == "success" ) ){
+               return "success";
+          }else{
+               $pageElements = array(
+                'match_error_message' => $match,
+                'newpass_error_message' => $newpass,
+                'confirmnewpass_error_message' => $confpass
+                );
+               if ( $match != "fail" ){
+                    $pageElements['MATCH_ERROR'] = 'FALSE';
+               }else{
+                    $pageElements['MATCH_ERROR'] = 'TRUE';
+               }
+               if ( $newpass != "success" ){
+                    $pageElements['NEWPASSWORD_ERROR'] = 'TRUE';
+               }else{
+                    $pageElements['NEWPASSWORD_ERROR'] = 'FALSE';
+               }
+               if ( $confpass != "success" ){
+                    $pageElements['CNEWPASSWORD_ERROR'] = 'TRUE';
+               }else{
+                    $pageElements['CNEWPASSWORD_ERROR'] = 'FALSE';
+               }
+               return $pageElements;
+          }
+     }
 }
 
 
