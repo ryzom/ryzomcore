@@ -77,10 +77,14 @@ namespace NL3D
 
 		void addPass( const SRenderPass &pass );
 		void removePass( const std::string &name );
+		void renamePass( const std::string &from, const std::string &to );
+		void movePassUp( const std::string &name );
+		void movePassDown( const std::string &name );
+
 		SRenderPass* getPass( const std::string &name );
 
 	private:
-		std::vector< SRenderPass > passes;
+		std::vector< SRenderPass* > passes;
 	};
 }
 

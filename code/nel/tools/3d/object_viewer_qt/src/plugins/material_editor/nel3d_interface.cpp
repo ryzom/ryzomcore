@@ -22,16 +22,47 @@
 
 namespace MaterialEditor
 {
-	Nel3DInterface::Nel3DInterface()
+	void CNelMaterialProxy::addPass( const char *name )
+	{
+		NL3D::SRenderPass pass;
+		pass.setName( name );
+		material->addPass( pass );
+	}
+
+	void CNelMaterialProxy::removePass( const char *name )
+	{
+		material->removePass( name );
+	}
+
+	void CNelMaterialProxy::movePassUp( const char *name )
+	{
+		material->movePassUp( name );
+	}
+
+	void CNelMaterialProxy::movePassDown( const char *name )
+	{
+		material->movePassDown( name );
+	}
+
+	void CNelMaterialProxy::renamePass( const char *from, const char *to )
+	{
+		material->renamePass( from, to );
+	}
+
+
+
+
+
+	CNel3DInterface::CNel3DInterface()
 	{
 		mat = new NL3D::CDynMaterial();
 	}
 
-	Nel3DInterface::~Nel3DInterface()
+	CNel3DInterface::~CNel3DInterface()
 	{
 	}
 
-	bool Nel3DInterface::loadMaterial( const char *fname )
+	bool CNel3DInterface::loadMaterial( const char *fname )
 	{
 		NLMISC::CIFile file;
 		if( !file.open( fname, true ) )
@@ -48,7 +79,7 @@ namespace MaterialEditor
 		return true;
 	}
 
-	bool Nel3DInterface::saveMaterial( const char *fname )
+	bool CNel3DInterface::saveMaterial( const char *fname )
 	{
 		NLMISC::COFile file;
 		if( !file.open( fname, false, true ) )
@@ -65,10 +96,15 @@ namespace MaterialEditor
 		return true;
 	}
 
-	void Nel3DInterface::newMaterial()
+	void CNel3DInterface::newMaterial()
 	{
 		delete mat;
 		mat = new NL3D::CDynMaterial();
+	}
+
+	CNelMaterialProxy CNel3DInterface::getMaterial()
+	{
+		return CNelMaterialProxy( mat );
 	}
 }
 

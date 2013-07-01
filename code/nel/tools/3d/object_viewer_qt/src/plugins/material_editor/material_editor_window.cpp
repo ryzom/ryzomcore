@@ -38,9 +38,11 @@ namespace MaterialEditor
 	QMainWindow(parent)
 	{
 		m_ui.setupUi(this);
-		nl3dIface = new Nel3DInterface();
+		nl3dIface = new CNel3DInterface();
 		shaderWidget = new ShaderWidget();
 		passesWidget = new RenderPassesWidget();
+		passesWidget->setNel3dIface( nl3dIface );
+
 		createMenus();
 		createDockWidgets();
 	}

@@ -25,16 +25,39 @@ namespace NL3D
 
 namespace MaterialEditor
 {
-	/// Proxy class for Nel3D, so the material editor and Nel3D can interface
-	class Nel3DInterface
+	class CNelMaterialProxy
 	{
 	public:
-		Nel3DInterface();
-		~Nel3DInterface();
+		CNelMaterialProxy( NL3D::CDynMaterial *mat )
+		{
+			material = mat;
+		}
+
+		~CNelMaterialProxy(){}
+
+		void addPass( const char *name );
+		void removePass( const char *name );
+		void movePassUp( const char *name );
+		void movePassDown( const char *name );
+		void renamePass( const char *from, const char *to );
+
+	private:
+		NL3D::CDynMaterial *material;
+	};
+
+
+	/// Proxy class for Nel3D, so the material editor and Nel3D can interface
+	class CNel3DInterface
+	{
+	public:
+		CNel3DInterface();
+		~CNel3DInterface();
 
 		bool loadMaterial( const char *fname );
 		bool saveMaterial( const char *fname );
 		void newMaterial();
+
+		CNelMaterialProxy getMaterial();
 
 	private:
 		NL3D::CDynMaterial *mat;

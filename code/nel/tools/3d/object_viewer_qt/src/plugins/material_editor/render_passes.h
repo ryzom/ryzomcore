@@ -22,6 +22,8 @@
 
 namespace MaterialEditor
 {
+	class CNel3DInterface;
+
 	class RenderPassesWidget : public QWidget, public Ui::RenderPassesWidget
 	{
 		Q_OBJECT
@@ -31,17 +33,12 @@ namespace MaterialEditor
 		void fillList( const QStringList &list );
 		void getList( QStringList &list );
 		void clear();
-
-	Q_SIGNALS:
-		void okClicked();
-		void passAdded( const QString &pass );
-		void passRemoved( const QString &pass );
-		void passRenamed( const QString &from, const QString &to );
-		void passPushedUp( const QString &pass );
-		void passPushedDown( const QString &pass );
+		void setNel3dIface( CNel3DInterface *iface ){ nl3dIface = iface; }
 
 	private:
 		void setupConnections();
+
+		CNel3DInterface *nl3dIface;
 
 	private Q_SLOTS:
 		void onOKClicked();

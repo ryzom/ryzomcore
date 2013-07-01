@@ -32,6 +32,9 @@ namespace NL3D
 
 		if( !f.isReading() )
 		{
+			uint32 n = properties.size();
+			f.serial( n );
+
 			std::vector< SDynMaterialProp >::iterator itr = properties.begin();
 			while( itr != properties.end() )
 			{
@@ -41,9 +44,15 @@ namespace NL3D
 		}
 		else
 		{
-			SDynMaterialProp prop;
-			prop.serial( f );
-			properties.push_back( prop );
+			uint32 n;
+			f.serial( n );
+
+			for( uint32 i = 0; i < n; i++ )
+			{
+				SDynMaterialProp prop;
+				prop.serial( f );
+				properties.push_back( prop );
+			}
 		}
 
 	}
@@ -104,6 +113,13 @@ namespace NL3D
 
 	CDynMaterial::~CDynMaterial()
 	{
+		std::vector< SRenderPass* >::iterator itr = passes.begin();
+		while( itr != passes.end() )
+		{
+			delete *itr;
+			++itr;
+		}
+		passes.clear();
 	}
 
 	void CDynMaterial::serial( NLMISC::IStream &f )
@@ -112,18 +128,27 @@ namespace NL3D
 
 		if( !f.isReading() )
 		{
-			std::vector< SRenderPass >::iterator itr = passes.begin();
+			uint32 n = passes.size();
+			f.serial( n );
+
+			std::vector< SRenderPass* >::iterator itr = passes.begin();
 			while( itr != passes.end() )
 			{
-				itr->serial( f );
+				(*itr)->serial( f );
 				++itr;
 			}
 		}
 		else
 		{
-			SRenderPass pass;
-			pass.serial( f );
-			passes.push_back( pass );
+			uint32 n;
+			f.serial( n );
+
+			for( uint32 i = 0; i < n; n++ )
+			{
+				SRenderPass *pass = new SRenderPass();
+				pass->serial( f );
+				passes.push_back( pass );
+			}
 		}
 	}
 
@@ -133,10 +158,10 @@ namespace NL3D
 		std::string name;
 		pass.getName( name );
 
-		std::vector< SRenderPass >::iterator itr = passes.begin();
+		std::vector< SRenderPass* >::iterator itr = passes.begin();
 		while( itr != passes.end() )
 		{
-			itr->getName( n );
+			(*itr)->getName( n );
 			if( n == name )
 				break;
 			++itr;
@@ -144,32 +169,97 @@ namespace NL3D
 		if( itr != passes.end() )
 			return;
 
-		passes.push_back( pass );
+		SRenderPass *p = new SRenderPass();
+		*p = pass;
+		passes.push_back( p );
 	}
 
 	void CDynMaterial::removePass( const std::string &name )
 	{
 		std::string n;
-		std::vector< SRenderPass >::iterator itr = passes.begin();
+		std::vector< SRenderPass* >::iterator itr = passes.begin();
 		while( itr != passes.end() )
 		{
-			itr->getName( n );
+			(*itr)->getName( n );
 			if( n == name )
 				break;
 			++itr;
 		}
 
 		if( itr != passes.end() )
+		{
+			delete *itr;
 			passes.erase( itr );
+		}
+	}
+
+	void CDynMaterial::renamePass( const std::string &from, const std::string &to )
+	{
+		std::string n;
+		std::vector< SRenderPass* >::iterator itr = passes.begin();
+		while( itr != passes.end() )
+		{
+			(*itr)->getName( n );
+			if( n == from )
+				break;
+			++itr;
+		}
+
+		if( itr != passes.end() )
+			(*itr)->setName( to );
+	}
+
+	void CDynMaterial::movePassUp( const std::string &name )
+	{
+		std::string n;
+		uint32 i = 0;
+		for( i = 0; i < passes.size(); i++ )
+		{
+			passes[ i ]->getName( n );
+			if( n == name )
+				break;
+		}
+
+		if( i >= passes.size() )
+			return;
+
+		if( i == 0 )
+			return;
+
+		SRenderPass *temp = passes[ i ];
+		passes[ i ] = passes[ i - 1 ];
+		passes[ i - 1 ] = temp;
+	}
+
+	void CDynMaterial::movePassDown( const std::string &name )
+	{
+		std::string n;
+		uint32 i = 0;
+		for( i = 0; i < passes.size(); i++ )
+		{
+			passes[ i ]->getName( n );
+			if( n == name )
+				break;
+		}
+
+		if( i >= passes.size() )
+			return;
+
+		if( i == ( passes.size() - 1 ) )
+			return;
+
+		SRenderPass *temp = passes[ i ];
+		passes[ i ] = passes[ i + 1 ];
+		passes[ i + 1 ] = temp;
 	}
 
 	SRenderPass* CDynMaterial::getPass( const std::string &name )
 	{
 		std::string n;
-		std::vector< SRenderPass >::iterator itr = passes.begin();
+		std::vector< SRenderPass* >::iterator itr = passes.begin();
 		while( itr != passes.end() )
 		{
-			itr->getName( n );
+			(*itr)->getName( n );
 			if( n == name )
 				break;
 			++itr;
@@ -177,7 +267,7 @@ namespace NL3D
 		if( itr == passes.end() )
 			return NULL;
 		else
-			return &( *itr );
+			return *itr;
 	}
 }
 

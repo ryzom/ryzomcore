@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "render_passes.h"
+#include "nel3d_interface.h"
 #include <QInputDialog>
 #include <QMessageBox>
 
@@ -25,6 +26,7 @@ namespace MaterialEditor
 	{
 		setupUi( this );
 		setupConnections();
+		nl3dIface = NULL;
 	}
 
 	RenderPassesWidget::~RenderPassesWidget()
@@ -104,7 +106,9 @@ namespace MaterialEditor
 		}
 
 		listWidget->addItem( label );
-		Q_EMIT passAdded( label );
+
+		CNelMaterialProxy material = nl3dIface->getMaterial();
+		material.addPass( label.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onRemoveClicked()
@@ -118,7 +122,8 @@ namespace MaterialEditor
 		pass = item->text();
 		delete item;
 
-		Q_EMIT passRemoved( pass );
+		CNelMaterialProxy material = nl3dIface->getMaterial();
+		material.removePass( pass.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onEditClicked()
@@ -141,8 +146,9 @@ namespace MaterialEditor
 			return;
 
 		item->setText( to );
-
-		Q_EMIT passRenamed( from, to );
+		
+		CNelMaterialProxy material = nl3dIface->getMaterial();
+		material.renamePass( from.toUtf8().data(), to.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onUpClicked()
@@ -161,7 +167,8 @@ namespace MaterialEditor
 
 		QString s = item->text();
 
-		Q_EMIT passPushedUp( s );
+		CNelMaterialProxy material = nl3dIface->getMaterial();
+		material.movePassUp( s.toUtf8().data() );
 	}
 
 	void RenderPassesWidget::onDownClicked()
@@ -179,8 +186,9 @@ namespace MaterialEditor
 		listWidget->setCurrentRow( row + 1 );
 
 		QString s = item->text();
-
-		Q_EMIT passPushedDown( s );
+		
+		CNelMaterialProxy material = nl3dIface->getMaterial();
+		material.movePassDown( s.toUtf8().data() );
 	}
 }
 
