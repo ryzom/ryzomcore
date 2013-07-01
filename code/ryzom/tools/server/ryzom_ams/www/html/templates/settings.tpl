@@ -1,57 +1,57 @@
 {block name=content}
-	<div class="row-fluid">
-	<div class="box span12">
-		<div class="box-header well">
-			<h2><i class=" icon-user"></i> Settings</h2>
-			<div class="box-icon">
-				<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-				<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
+	<div class="row-fluid sortable ui-sortable">
+		<div class="box span4">
+			<div class="box-header well" data-original-title="">
+				<h2><i class="icon-th"></i> Change Password</h2>
+				<div class="box-icon">
+					<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
+				</div>
 			</div>
-		</div>
-		<div class="box-content">
-			<ul class="nav nav-tabs" id="myTab">
-				<li class="active"><a href="#info">Change Password</a></li>
-				<li><a href="#custom">Change Email</a></li>
-				<li><a href="#messages">Change Info</a></li>
-			</ul>
-			 
-			<div id="myTabContent" class="tab-content">
-				<div class="tab-pane active" id="info">
-					<form id="changePassword" class="form-vertical" method="post" action="index.php">
+			<div class="box-content">
+				<div class="row-fluid">
+					<form id="changePassword" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Password</legend>
 						
-						<div class="control-group">
-						<label class="control-label">Current Password</label>
-							<div class="controls">
-							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><i class="icon-lock"></i></span>
-									<input type="password" class="input-xlarge" id="CurrentPass" name="CurrentPass" placeholder="Your current password">
+						{if !isset($isAdmin) or $isAdmin eq "FALSE"}
+							<div class="control-group {if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}error{else if
+				isset($match_error_message) and $match_error_message neq "fail"}success{else}{/if}">
+							<label class="control-label">Current Password</label>
+								<div class="controls">
+								    <div class="input-prepend">
+									<span class="add-on" style="margin-left:5px;"><i class="icon-lock"></i></span>
+										<input type="password" class="input-xlarge" id="CurrentPass" name="CurrentPass" placeholder="Your current password" {if isset($prevCurrentPass)}value="{$prevCurrentPass}"{/if}>
+										{if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}<span class="help-inline">The password is incorrect</span>{/if}
+								    </div>
 								</div>
 							</div>
-						</div>
-						
-							<div class="control-group">
+						{/if}
+							<div class="control-group {if isset($NEWPASSWORD_ERROR) and $NEWPASSWORD_ERROR eq "TRUE"}error{else if
+			isset($newpass_error_message) and $newpass_error_message eq "success"}success{else}{/if}">
 						<label class="control-label">New Password</label>
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-tag"></i></span>
-									<input type="password" class="input-xlarge" id="NewPass" name="NewPass" placeholder="Your new password">
-								</div>
+									<input type="password" class="input-xlarge" id="NewPass" name="NewPass" placeholder="Your new password"  {if isset($prevNewPass)}value="{$prevNewPass}"{/if}>
+									{if isset($NEWPASSWORD_ERROR) and $NEWPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$newpass_error_message}</span>{/if}
+							   </div>
 							</div>
 						</div>
 							
-						<div class="control-group">
+						<div class="control-group {if isset($CNEWPASSWORD_ERROR) and $CNEWPASSWORD_ERROR eq "TRUE"}error{else if
+			isset($confirmnewpass_error_message) and $confirmnewpass_error_message eq "success"}success{else}{/if}">
 						<label class="control-label">Confirm New Password</label>
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-tags"></i></span>
-									<input type="password" class="input-xlarge" id="ConfirmNewPass" name="ConfirmNewPass" placeholder="Re-enter the new password">
-								</div>
+									<input type="password" class="input-xlarge" id="ConfirmNewPass" name="ConfirmNewPass" placeholder="Re-enter the new password"  {if isset($prevConfirmNewPass)}value="{$prevConfirmNewPass}"{/if}>
+									{if isset($CNEWPASSWORD_ERROR) and $CNEWPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$confirmnewpass_error_message}</span>{/if}
+							    </div>
 							</div>
 						</div>
 						
 						<input type="hidden" name="function" value="change_password">
-						
+						<input type="hidden" name="target_id" value="{$target_id}">
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">
@@ -59,8 +59,20 @@
 							</div>
 						</div>
 					</form>		
+				</div>                   
+			</div>
+		</div><!--/span-->
+				
+		<div class="box span4">
+			<div class="box-header well" data-original-title="">
+				<h2><i class="icon-th"></i> Change Email</h2>
+				<div class="box-icon">
+					<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
 				</div>
-				<div class="tab-pane" id="custom">
+			</div>
+			<div class="box-content">
+				<div class="row-fluid">
 					<form id="changeEmail" class="form-vertical" method="post" action="index.php">
 						<legend>Change Email</legend>
 						<div class="control-group">
@@ -80,8 +92,20 @@
 							</div>
 						</div>
 					</form>
+				</div>                   
+			</div>
+		</div><!--/span-->
+				
+		<div class="box span4">
+			<div class="box-header well" data-original-title="">
+				<h2><i class="icon-th"></i> Change Info</h2>
+				<div class="box-icon">
+					<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
 				</div>
-				<div class="tab-pane" id="messages">
+			</div>
+			<div class="box-content">
+				<div class="row-fluid">
 					<form id="changeEmail" class="form-vertical" method="post" action="index.php">
 						<legend>Change Info</legend>
 						
@@ -105,10 +129,11 @@
 							</div>
 						</div>
 						
-												<div class="control-group">
+						<div class="control-group">
 						<label class="control-label">Country</label>
 							<div class="controls">
 								 <select>
+									<option value="AA" selected="selected">Select one</option>
 									<option value="AF">Afghanistan</option>
 									<option value="AX">Åland Islands</option>
 									<option value="AL">Albania</option>
@@ -391,10 +416,12 @@
 							</div>
 						</div>
 					</form>
-				</div>
+				</div>                   
 			</div>
-		</div>
-	</div><!--/span-->
-	</div>
+		</div><!--/span-->
+	</div><!--/row-->
+			
+			
+	
 {/block}
 	

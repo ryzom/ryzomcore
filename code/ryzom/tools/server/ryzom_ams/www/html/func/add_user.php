@@ -2,7 +2,7 @@
 
 function add_user(){
      
-     $params = Array('Username' =>  $_POST["Username"], 'Password' =>  $_POST["Password"], 'Email' =>  $_POST["Email"]);
+     $params = Array('Username' =>  $_POST["Username"], 'Password' =>  $_POST["Password"], 'ConfirmPass' =>  $_POST["ConfirmPass"], 'Email' =>  $_POST["Email"]);
      $webUser = new WebUsers;
      $result = $webUser->check_Register($params);
 
