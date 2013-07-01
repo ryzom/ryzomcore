@@ -53,6 +53,12 @@
 // NeL includes
 // #include <nel/misc/debug.h>
 #include <nel/3d/u_camera.h>
+#include <nel/3d/u_driver.h>
+#include <nel/3d/material.h>
+#include <nel/3d/texture_bloom.h>
+#include <nel/3d/texture_user.h>
+#include <nel/3d/driver_user.h>
+#include <nel/3d/u_texture.h>
 
 // Project includes
 
@@ -60,6 +66,8 @@ using namespace std;
 // using namespace NLMISC;
 
 namespace NL3D {
+
+extern const char *g_StereoOVR_arbfp1;
 
 namespace {
 
@@ -155,7 +163,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_BarrelTexU(NULL)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -194,6 +202,17 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_Sub
 
 CStereoOVR::~CStereoOVR()
 {
+	if (!m_BarrelMat.empty())
+	{
+		m_BarrelMat.getObjectPtr()->setTexture(0, NULL);
+		m_Driver->deleteMaterial(m_BarrelMat);
+	}
+	delete m_BarrelTexU;
+	m_BarrelTexU = NULL;
+	m_BarrelTex = NULL; // CSmartPtr
+
+	m_Driver = NULL;
+
 	if (m_DevicePtr->SensorDevice)
 		m_DevicePtr->SensorDevice->Release();
 	m_DevicePtr->SensorDevice.Clear();
@@ -206,9 +225,51 @@ CStereoOVR::~CStereoOVR()
 	--s_DeviceCounter;
 }
 
-void CStereoOVR::setDriver(NL3D::UDriver &driver)
+void CStereoOVR::setDriver(NL3D::UDriver *driver)
 {
-	// ...
+	m_Driver = driver;
+	// Do not allow weird stuff.
+	uint32 width, height;
+	driver->getWindowSize(width, height);
+	nlassert(width == m_DevicePtr->HMDInfo.HResolution);
+	nlassert(height == m_DevicePtr->HMDInfo.VResolution);
+
+	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
+
+	m_BarrelTex = new CTextureBloom(); // lol bloom
+	m_BarrelTex->setReleasable(false);
+	m_BarrelTex->resize(width, height);
+	m_BarrelTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
+	m_BarrelTex->setWrapS(ITexture::Clamp);
+	m_BarrelTex->setWrapT(ITexture::Clamp);
+	m_BarrelTex->setRenderTarget(true);
+	drvInternal->setupTexture(*m_BarrelTex);
+	m_BarrelTexU = new CTextureUser(m_BarrelTex);
+
+	m_BarrelMat = m_Driver->createMaterial();
+	NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
+	m_BarrelMat.initUnlit();
+	m_BarrelMat.setColor(CRGBA::White);
+	m_BarrelMat.setBlend (false);
+	m_BarrelMat.setAlphaTest (false);
+	barrelMat->setBlendFunc(CMaterial::one, CMaterial::zero);
+	barrelMat->setZWrite(false);
+	barrelMat->setZFunc(CMaterial::always);
+	barrelMat->setDoubleSided(true);
+	barrelMat->setTexture(0, m_BarrelTex);
+
+	m_BarrelQuad.V0 = CVector(0.f, 0.f, 0.5f);
+	m_BarrelQuad.V1 = CVector(1.f, 0.f, 0.5f);
+	m_BarrelQuad.V2 = CVector(1.f, 1.f, 0.5f);
+	m_BarrelQuad.V3 = CVector(0.f, 1.f, 0.5f);
+	
+	float newU = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)width : 1.f;
+	float newV = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)height : 1.f;
+
+	m_BarrelQuad.Uv0 = CUV(0.f,  0.f);
+	m_BarrelQuad.Uv1 = CUV(newU, 0.f);
+	m_BarrelQuad.Uv2 = CUV(newU, newV);
+	m_BarrelQuad.Uv3 = CUV(0.f,  newV);
 }
 
 void CStereoOVR::getScreenResolution(uint &width, uint &height)
@@ -391,15 +452,32 @@ bool CStereoOVR::wantInterface2D()
 UTexture *CStereoOVR::beginRenderTarget(bool set)
 {
 	// render target always set before driver clear
-	nlassert(m_SubStage == 1);
+	// nlassert(m_SubStage <= 1);
+	if (m_Stage == 1)
+	{
+		if (set)
+		{
+			(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(*m_BarrelTexU, 0, 0, 0, 0);
+		}
+		return m_BarrelTexU;
+	}
 	return NULL;
 }
 
 /// Returns true if a render target was fully drawn
-bool CStereoOVR::endRenderTarget( bool render)
+bool CStereoOVR::endRenderTarget(bool unset)
 {
 	// after rendering of course
-	nlassert(m_SubStage > 1);
+	// nlassert(m_SubStage > 1);
+	if (m_Stage == 4)
+	{
+		if (unset)
+		{
+			CTextureUser cu;
+			(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
+		}
+		return true;
+	}
 	return false;
 }
 

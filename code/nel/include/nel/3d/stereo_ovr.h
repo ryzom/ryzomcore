@@ -49,14 +49,18 @@
 
 // NeL includes
 #include <nel/misc/smart_ptr.h>
+#include <nel/misc/geom_ext.h>
 
 // Project includes
 #include <nel/3d/stereo_hmd.h>
 #include <nel/3d/frustum.h>
 #include <nel/3d/viewport.h>
+#include <nel/3d/u_material.h>
 
 namespace NL3D {
 
+class ITexture;
+class CTextureUser;
 class CStereoOVRDevicePtr;
 class CStereoOVRDeviceHandle;
 
@@ -75,7 +79,7 @@ public:
 	virtual ~CStereoOVR();
 
 	/// Sets driver and generates necessary render targets
-	virtual void setDriver(NL3D::UDriver &driver);
+	virtual void setDriver(NL3D::UDriver *driver);
 
 	/// Gets the required screen resolution for this device
 	virtual void getScreenResolution(uint &width, uint &height);
@@ -107,7 +111,7 @@ public:
 	/// Returns non-NULL if a new render target was set, always NULL if not using render targets
 	virtual UTexture *beginRenderTarget(bool set);
 	/// Returns true if a render target was fully drawn, always false if not using render targets
-	virtual bool endRenderTarget(bool render);
+	virtual bool endRenderTarget(bool unset);
 
 
 	/// Get the HMD orientation
@@ -138,6 +142,11 @@ private:
 	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];
 	mutable bool m_OrientationCached;
 	mutable NLMISC::CQuat m_OrientationCache;
+	UDriver *m_Driver;
+	NLMISC::CSmartPtr<NL3D::ITexture> m_BarrelTex;
+	NL3D::CTextureUser *m_BarrelTexU;
+	NL3D::UMaterial m_BarrelMat;
+	NLMISC::CQuadUV m_BarrelQuad;
 
 }; /* class CStereoOVR */
 

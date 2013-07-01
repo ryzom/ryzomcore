@@ -692,6 +692,7 @@ SOURCE_GROUP(Stereo FILES
 		stereo_hmd.cpp
         ../../include/nel/3d/stereo_hmd.h
 		stereo_ovr.cpp
+		stereo_ovr_fp.cpp
         ../../include/nel/3d/stereo_ovr.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
