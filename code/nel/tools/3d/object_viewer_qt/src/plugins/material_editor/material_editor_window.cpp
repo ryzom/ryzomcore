@@ -19,6 +19,7 @@
 #include "material_widget.h"
 #include "shader_widget.h"
 #include "render_passes.h"
+#include "nel3d_interface.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -29,6 +30,7 @@
 
 #include <QDockWidget>
 #include <QFileDialog>
+#include <QMessageBox>
 
 namespace MaterialEditor
 {
@@ -36,6 +38,7 @@ namespace MaterialEditor
 	QMainWindow(parent)
 	{
 		m_ui.setupUi(this);
+		nl3dIface = new Nel3DInterface();
 		shaderWidget = new ShaderWidget();
 		passesWidget = new RenderPassesWidget();
 		createMenus();
@@ -48,6 +51,8 @@ namespace MaterialEditor
 		shaderWidget = NULL;
 		delete passesWidget;
 		passesWidget = NULL;
+		delete nl3dIface;
+		nl3dIface = NULL;
 	}
 
 	void MaterialEditorWindow::onOpenClicked()
@@ -64,6 +69,7 @@ namespace MaterialEditor
 
 	void MaterialEditorWindow::onNewMaterialClicked()
 	{
+		nl3dIface->newMaterial();
 	}
 
 	void MaterialEditorWindow::onOpenMaterialClicked()
@@ -74,6 +80,20 @@ namespace MaterialEditor
 			"/",
 			tr( "Material files ( *.nelmat )" )
 			);
+
+		if( fn.isEmpty() )
+			return;
+
+		bool ok = nl3dIface->loadMaterial( fn.toUtf8().data() );
+		if( !ok )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error opening material file" ),
+				tr( "There was an error while trying to open the material file specified!" ),
+				QMessageBox::Ok 
+				);
+		}
 	}
 
 	void MaterialEditorWindow::onSaveMaterialClicked()
@@ -84,6 +104,21 @@ namespace MaterialEditor
 			"/",
 			tr( "Material files ( *.nelmat )" )
 			);
+
+		if( fn.isEmpty() )
+			return;
+
+		bool ok = nl3dIface->saveMaterial( fn.toUtf8().data() );
+		if( !ok )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error saving material file" ),
+				tr( "There was an error while trying to open the material file specified!" ),
+				QMessageBox::Ok 
+				);
+		}
+
 	}
 
 	void MaterialEditorWindow::onShadersClicked()

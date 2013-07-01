@@ -73,6 +73,7 @@ namespace NL3D
 		CDynMaterial();
 		~CDynMaterial();
 		void serial( NLMISC::IStream &f );
+		std::string getClassName(){ return "CDynMaterial"; }
 
 		void addPass( const SRenderPass &pass );
 		void removePass( const std::string &name );

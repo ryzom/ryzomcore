@@ -24,6 +24,7 @@ namespace MaterialEditor
 
 	class ShaderWidget;
 	class RenderPassesWidget;
+	class Nel3DInterface;
 
 	class MaterialEditorWindow: public QMainWindow
 	{
@@ -44,6 +45,8 @@ private Q_SLOTS:
 private:
 		void createMenus();
 		void createDockWidgets();
+
+		Nel3DInterface *nl3dIface;
 
 		ShaderWidget *shaderWidget;
 		RenderPassesWidget *passesWidget;
