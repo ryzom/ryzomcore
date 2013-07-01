@@ -218,15 +218,16 @@ void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 	float fov = 2.0f * atanf((m_DevicePtr->HMDInfo.VScreenSize / 2.0f) / m_DevicePtr->HMDInfo.EyeToScreenDistance); //(float)NLMISC::Pi/2.f; // 2.0f * atanf(m_DevicePtr->HMDInfo.VScreenSize / 2.0f * m_DevicePtr->HMDInfo.EyeToScreenDistance);
 	m_LeftFrustum[cid].initPerspective(fov, ar, camera->getFrustum().Near, camera->getFrustum().Far);
 	m_RightFrustum[cid] = m_LeftFrustum[cid];
+	
 	float viewCenter = m_DevicePtr->HMDInfo.HScreenSize * 0.25f;
 	float eyeProjectionShift = viewCenter - m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f;
-	float projectionCenterOffset = 4.0f * eyeProjectionShift / m_DevicePtr->HMDInfo.HScreenSize;
+	float projectionCenterOffset = (eyeProjectionShift / (m_DevicePtr->HMDInfo.HScreenSize * 0.5f)) * (m_LeftFrustum[cid].Right - m_LeftFrustum[cid].Left); // used logic for this one, but it ends up being the same as the one i made up
 	nldebug("OVR: projectionCenterOffset = %f", projectionCenterOffset);
-	projectionCenterOffset *= (m_LeftFrustum[cid].Left - m_LeftFrustum[cid].Right) * 0.5f; // made this up ...
-	m_LeftFrustum[cid].Left += projectionCenterOffset;
-	m_LeftFrustum[cid].Right += projectionCenterOffset;
-	m_RightFrustum[cid].Left -= projectionCenterOffset;
-	m_RightFrustum[cid].Right -= projectionCenterOffset;
+
+	m_LeftFrustum[cid].Left -= projectionCenterOffset;
+	m_LeftFrustum[cid].Right -= projectionCenterOffset;
+	m_RightFrustum[cid].Left += projectionCenterOffset;
+	m_RightFrustum[cid].Right += projectionCenterOffset;
 
 	// TODO: Clipping frustum should also take into account the IPD
 	m_ClippingFrustum[cid] = m_LeftFrustum[cid];

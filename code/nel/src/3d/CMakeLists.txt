@@ -686,6 +686,13 @@ SOURCE_GROUP(Shadows FILES
         ../../include/nel/3d/shadow_map_manager.h
         shadow_poly_receiver.cpp
         ../../include/nel/3d/shadow_poly_receiver.h)
+SOURCE_GROUP(Stereo FILES
+		stereo_display.cpp
+        ../../include/nel/3d/stereo_display.h
+		stereo_hmd.cpp
+        ../../include/nel/3d/stereo_hmd.h
+		stereo_ovr.cpp
+        ../../include/nel/3d/stereo_ovr.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 
