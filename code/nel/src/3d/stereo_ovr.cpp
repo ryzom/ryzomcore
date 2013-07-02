@@ -239,27 +239,18 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 	nlassert(!m_PixelProgram);
 
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
-	/*static const char *program_arbfp1 =
+	static const char *program_arbfp1 =
 		"!!ARBfp1.0\n"
 		"PARAM c[1] = { { 1, 0 } };\n"
 		"MOV result.color.xzw, c[0].xyyx;\n"
 		"TEX result.color.y, fragment.texcoord[0], texture[0], 2D;\n"
 		"END\n";
-	static const char *program_ps_2_0 = 
-		"ps_2_0\n"
-		"dcl_2d s0\n"
-		"def c0, 1.00000000, 0.00000000, 0, 0\n"
-		"dcl t0.xy\n"
-		"texld r0, t0, s0\n"
-		"mov r0.z, c0.y\n"
-		"mov r0.xw, c0.x\n"
-		"mov oC0, r0\n";*/
-	/*if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1))
+	if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
 		nldebug("VR: arbfp1");
 		m_PixelProgram = new CPixelProgram(program_arbfp1);		
 	}
-	else */ if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
+	else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
 	{
 		nldebug("VR: ps_2_0");
 		m_PixelProgram = new CPixelProgram(g_StereoOVR_ps_2_0);	
@@ -270,12 +261,12 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		m_Driver = driver;
 
 		m_BarrelTex = new CTextureBloom(); // lol bloom
+		m_BarrelTex->setRenderTarget(true);
 		m_BarrelTex->setReleasable(false);
 		m_BarrelTex->resize(width, height);
 		m_BarrelTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
 		m_BarrelTex->setWrapS(ITexture::Clamp);
 		m_BarrelTex->setWrapT(ITexture::Clamp);
-		m_BarrelTex->setRenderTarget(true);
 		drvInternal->setupTexture(*m_BarrelTex);
 		m_BarrelTexU = new CTextureUser(m_BarrelTex);
 
@@ -302,19 +293,17 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		m_BarrelQuadRight.V2 = CVector(1.f, 1.f, 0.5f);
 		m_BarrelQuadRight.V3 = CVector(0.5f, 1.f, 0.5f);
 		
-		nlassert(!drvInternal->isTextureRectangle(m_BarrelTex)); // this code looks no good
-		float newU = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)width : 1.f;
-		float newV = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)height : 1.f;
+		nlassert(!drvInternal->isTextureRectangle(m_BarrelTex)); // not allowed
 
 		m_BarrelQuadLeft.Uv0 = CUV(0.f,  0.f);
-		m_BarrelQuadLeft.Uv1 = CUV(newU * 0.5f, 0.f);
-		m_BarrelQuadLeft.Uv2 = CUV(newU * 0.5f, newV);
-		m_BarrelQuadLeft.Uv3 = CUV(0.f,  newV);
+		m_BarrelQuadLeft.Uv1 = CUV(0.5f, 0.f);
+		m_BarrelQuadLeft.Uv2 = CUV(0.5f, 1.f);
+		m_BarrelQuadLeft.Uv3 = CUV(0.f,  1.f);
 
-		m_BarrelQuadRight.Uv0 = CUV(newU * 0.5f,  0.f);
-		m_BarrelQuadRight.Uv1 = CUV(newU, 0.f);
-		m_BarrelQuadRight.Uv2 = CUV(newU, newV);
-		m_BarrelQuadRight.Uv3 = CUV(newU * 0.5f,  newV);
+		m_BarrelQuadRight.Uv0 = CUV(0.5f,  0.f);
+		m_BarrelQuadRight.Uv1 = CUV(1.f, 0.f);
+		m_BarrelQuadRight.Uv2 = CUV(1.f, 1.f);
+		m_BarrelQuadRight.Uv3 = CUV(0.5f, 1.f);
 	}
 	else
 	{
