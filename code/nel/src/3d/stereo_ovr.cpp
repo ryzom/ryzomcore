@@ -68,6 +68,7 @@ using namespace std;
 namespace NL3D {
 
 extern const char *g_StereoOVR_arbfp1;
+extern const char *g_StereoOVR_ps_2_0;
 
 namespace {
 
@@ -163,7 +164,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL), m_PixelProgram(NULL)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -211,6 +212,9 @@ CStereoOVR::~CStereoOVR()
 	m_BarrelTexU = NULL;
 	m_BarrelTex = NULL; // CSmartPtr
 
+	delete m_PixelProgram;
+	m_PixelProgram = NULL;
+
 	m_Driver = NULL;
 
 	if (m_DevicePtr->SensorDevice)
@@ -227,49 +231,84 @@ CStereoOVR::~CStereoOVR()
 
 void CStereoOVR::setDriver(NL3D::UDriver *driver)
 {
-	m_Driver = driver;
 	// Do not allow weird stuff.
 	uint32 width, height;
 	driver->getWindowSize(width, height);
 	nlassert(width == m_DevicePtr->HMDInfo.HResolution);
 	nlassert(height == m_DevicePtr->HMDInfo.VResolution);
+	nlassert(!m_PixelProgram);
 
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
+	/*static const char *program_arbfp1 =
+		"!!ARBfp1.0\n"
+		"PARAM c[1] = { { 1, 0 } };\n"
+		"MOV result.color.xzw, c[0].xyyx;\n"
+		"TEX result.color.y, fragment.texcoord[0], texture[0], 2D;\n"
+		"END\n";
+	static const char *program_ps_2_0 = 
+		"ps_2_0\n"
+		"dcl_2d s0\n"
+		"def c0, 1.00000000, 0.00000000, 0, 0\n"
+		"dcl t0.xy\n"
+		"texld r0, t0, s0\n"
+		"mov r0.z, c0.y\n"
+		"mov r0.xw, c0.x\n"
+		"mov oC0, r0\n";*/
+	/*if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1))
+	{
+		nldebug("VR: arbfp1");
+		m_PixelProgram = new CPixelProgram(program_arbfp1);		
+	}
+	else */ if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
+	{
+		nldebug("VR: ps_2_0");
+		m_PixelProgram = new CPixelProgram(g_StereoOVR_ps_2_0);	
+	}
 
-	m_BarrelTex = new CTextureBloom(); // lol bloom
-	m_BarrelTex->setReleasable(false);
-	m_BarrelTex->resize(width, height);
-	m_BarrelTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
-	m_BarrelTex->setWrapS(ITexture::Clamp);
-	m_BarrelTex->setWrapT(ITexture::Clamp);
-	m_BarrelTex->setRenderTarget(true);
-	drvInternal->setupTexture(*m_BarrelTex);
-	m_BarrelTexU = new CTextureUser(m_BarrelTex);
+	if (m_PixelProgram)
+	{
+		m_Driver = driver;
 
-	m_BarrelMat = m_Driver->createMaterial();
-	NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
-	m_BarrelMat.initUnlit();
-	m_BarrelMat.setColor(CRGBA::White);
-	m_BarrelMat.setBlend (false);
-	m_BarrelMat.setAlphaTest (false);
-	barrelMat->setBlendFunc(CMaterial::one, CMaterial::zero);
-	barrelMat->setZWrite(false);
-	barrelMat->setZFunc(CMaterial::always);
-	barrelMat->setDoubleSided(true);
-	barrelMat->setTexture(0, m_BarrelTex);
+		m_BarrelTex = new CTextureBloom(); // lol bloom
+		m_BarrelTex->setReleasable(false);
+		m_BarrelTex->resize(width, height);
+		m_BarrelTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
+		m_BarrelTex->setWrapS(ITexture::Clamp);
+		m_BarrelTex->setWrapT(ITexture::Clamp);
+		m_BarrelTex->setRenderTarget(true);
+		drvInternal->setupTexture(*m_BarrelTex);
+		m_BarrelTexU = new CTextureUser(m_BarrelTex);
 
-	m_BarrelQuad.V0 = CVector(0.f, 0.f, 0.5f);
-	m_BarrelQuad.V1 = CVector(1.f, 0.f, 0.5f);
-	m_BarrelQuad.V2 = CVector(1.f, 1.f, 0.5f);
-	m_BarrelQuad.V3 = CVector(0.f, 1.f, 0.5f);
-	
-	float newU = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)width : 1.f;
-	float newV = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)height : 1.f;
+		m_BarrelMat = m_Driver->createMaterial();
+		m_BarrelMat.initUnlit();
+		m_BarrelMat.setColor(CRGBA::White);
+		m_BarrelMat.setBlend (false);
+		m_BarrelMat.setAlphaTest (false);
+		NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
+		barrelMat->setShader(NL3D::CMaterial::PostProcessing);
+		barrelMat->setBlendFunc(CMaterial::one, CMaterial::zero);
+		barrelMat->setZWrite(false);
+		barrelMat->setZFunc(CMaterial::always);
+		barrelMat->setDoubleSided(true);
+		barrelMat->setTexture(0, m_BarrelTex);
 
-	m_BarrelQuad.Uv0 = CUV(0.f,  0.f);
-	m_BarrelQuad.Uv1 = CUV(newU, 0.f);
-	m_BarrelQuad.Uv2 = CUV(newU, newV);
-	m_BarrelQuad.Uv3 = CUV(0.f,  newV);
+		m_BarrelQuad.V0 = CVector(0.f, 0.f, 0.5f);
+		m_BarrelQuad.V1 = CVector(1.f, 0.f, 0.5f);
+		m_BarrelQuad.V2 = CVector(1.f, 1.f, 0.5f);
+		m_BarrelQuad.V3 = CVector(0.f, 1.f, 0.5f);
+		
+		float newU = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)width : 1.f;
+		float newV = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)height : 1.f;
+
+		m_BarrelQuad.Uv0 = CUV(0.f,  0.f);
+		m_BarrelQuad.Uv1 = CUV(newU, 0.f);
+		m_BarrelQuad.Uv2 = CUV(newU, newV);
+		m_BarrelQuad.Uv3 = CUV(0.f,  newV);
+	}
+	else
+	{
+		nlwarning("VR: No pixel program support");
+	}
 }
 
 void CStereoOVR::getScreenResolution(uint &width, uint &height)
@@ -473,10 +512,46 @@ bool CStereoOVR::endRenderTarget()
 	{
 		CTextureUser cu;
 		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
+		bool fogEnabled = m_Driver->fogEnabled();
+		m_Driver->enableFog(false);
 
 		m_Driver->setMatrixMode2D11();
-		m_Driver->setViewport(CViewport());
+		CViewport vp = CViewport();
+		m_Driver->setViewport(vp);
+		uint32 width, height;
+		m_Driver->getWindowSize(width, height);
+		NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();
+		NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
+		barrelMat->setTexture(0, m_BarrelTex);
+		drvInternal->activePixelProgram(m_PixelProgram);
+
+		float w = float(vp.getWidth()),// / float(width),
+			h = float(vp.getHeight()),// / float(height),
+			x = float(vp.getX()),/// / float(width),
+			y = float(vp.getY());// / float(height);
+
+		float lensOffset = m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f;
+		float lensShift = m_DevicePtr->HMDInfo.HScreenSize * 0.25f - lensOffset;
+		float lensViewportShift = 4.0f * lensShift / m_DevicePtr->HMDInfo.HScreenSize;
+
+		float lensCenterX = x + (w + lensViewportShift * 0.5f) * 0.5f;
+		float lensCenterY = y + h * 0.5f;
+		float screenCenterX = x + w * 0.5f;
+		float screenCenterY = y + h * 0.5f;
+		float scaleX = (w / 2);
+		float scaleY = (h / 2);
+		float scaleInX = (2 / w);
+		float scaleInY = (2 / h);
+		drvInternal->setPixelProgramConstant(0, lensCenterX, lensCenterY, 0.f, 0.f);
+		drvInternal->setPixelProgramConstant(1, screenCenterX, screenCenterY, 0.f, 0.f);
+		drvInternal->setPixelProgramConstant(2, scaleX, scaleY, 0.f, 0.f);
+		drvInternal->setPixelProgramConstant(3, scaleInX, scaleInY, 0.f, 0.f);
+		drvInternal->setPixelProgramConstant(4, 1, m_DevicePtr->HMDInfo.DistortionK);
+
+
 		m_Driver->drawQuad(m_BarrelQuad, m_BarrelMat);
+		drvInternal->activePixelProgram(NULL);
+		m_Driver->enableFog(fogEnabled);
 
 		return true;
 	}
