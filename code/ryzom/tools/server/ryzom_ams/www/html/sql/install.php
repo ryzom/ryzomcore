@@ -21,6 +21,10 @@
             `Password` varchar(13) DEFAULT NULL,
             `Email` varchar(255) NOT NULL DEFAULT '',
             `Permission` int(3) NOT NULL DEFAULT 1,
+            `FirstName` varchar(255) NOT NULL DEFAULT '',
+            `LastName` varchar(255) NOT NULL DEFAULT '',
+            `Gender` tinyint(1) unsigned NOT NULL DEFAULT '0',
+            `Country` char(2) NOT NULL DEFAULT '',
             PRIMARY KEY (`UId`)
             ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users information for ryzom_ams';
             

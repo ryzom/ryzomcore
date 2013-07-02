@@ -69,6 +69,15 @@ class WebUsers extends Users{
         return $row['Email'];
     }
     
+    public function getInfo($id){
+        global $cfg;
+        
+        $dbw = new DBLayer($cfg['db']['web']);
+        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
+        $row = $statement->fetch();
+        $result = Array('FirstName' => $row['FirstName'], 'LastName' => $row['LastName'], 'Gender' => $row['Gender'], 'Country' => $row['Country']);
+        return $result;
+    }
     
     public function isLoggedIn(){
         if(isset($_SESSION['user'])){

@@ -136,7 +136,7 @@
 			</div>
 			<div class="box-content">
 				<div class="row-fluid">
-					<form id="changeEmail" class="form-vertical" method="post" action="index.php">
+					<form id="changeEmail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Info</legend>
 						
 						<div class="control-group">
@@ -144,7 +144,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-user"></i></span>
-									<input type="text" class="input-xlarge" id="Firstname" name="Firstname" placeholder="Your firstname">
+									<input type="text" class="input-xlarge" id="Firstname" name="Firstname" placeholder="Your firstname" {if isset($FirstName) and $FirstName neq ""}value="{$FirstName}"{/if}>
 								</div>
 							</div>
 						</div>
@@ -438,7 +438,8 @@
 						</div>
 										
 												
-						<input type="hidden" name="function" value="change_info">	
+						<input type="hidden" name="function" value="change_info">
+						<input type="hidden" name="target_id" value="{$target_id}">
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">
