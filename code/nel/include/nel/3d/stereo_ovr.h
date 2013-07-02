@@ -147,7 +147,8 @@ private:
 	NLMISC::CSmartPtr<NL3D::ITexture> m_BarrelTex;
 	NL3D::CTextureUser *m_BarrelTexU;
 	NL3D::UMaterial m_BarrelMat;
-	NLMISC::CQuadUV m_BarrelQuad;
+	NLMISC::CQuadUV m_BarrelQuadLeft;
+	NLMISC::CQuadUV m_BarrelQuadRight;
 	CPixelProgram *m_PixelProgram;
 
 }; /* class CStereoOVR */

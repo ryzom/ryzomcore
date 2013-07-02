@@ -311,15 +311,17 @@ void initCore()
 		// Create the window with config file values
 		Driver->setDisplay(UDriver::CMode(ConfigFile->getVar("ScreenWidth").asInt(),
 			ConfigFile->getVar("ScreenHeight").asInt(),
-			ConfigFile->getVar("ScreenDepth").asInt()));
+			ConfigFile->getVar("ScreenDepth").asInt(),
+			(ConfigFile->getVar("OpenGL").asInt() == 1 ? true : ConfigFile->getVar("ScreenFull").asInt()==0)));
 		// Set the cache size for the font manager(in bytes)
 		Driver->setFontManagerMaxMemory(2097152);
 		// Create a Text context for later text rendering
 		displayLoadingState("Initialize Text");
-		Driver->setMode(UDriver::CMode(ConfigFile->getVar("ScreenWidth").asInt(),
-			ConfigFile->getVar("ScreenHeight").asInt(),
-			ConfigFile->getVar("ScreenDepth").asInt(),
-			ConfigFile->getVar("ScreenFull").asInt()==0));
+		if (ConfigFile->getVar("OpenGL").asInt() == 1)
+			Driver->setMode(UDriver::CMode(ConfigFile->getVar("ScreenWidth").asInt(),
+				ConfigFile->getVar("ScreenHeight").asInt(),
+				ConfigFile->getVar("ScreenDepth").asInt(),
+				ConfigFile->getVar("ScreenFull").asInt()==0));
 		TextContext = Driver->createTextContext(CPath::lookup(ConfigFile->getVar("FontName").asString()));
 		TextContext->setShaded(true);
 		TextContext->setKeep800x600Ratio(false);

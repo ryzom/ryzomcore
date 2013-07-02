@@ -292,18 +292,29 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		barrelMat->setDoubleSided(true);
 		barrelMat->setTexture(0, m_BarrelTex);
 
-		m_BarrelQuad.V0 = CVector(0.f, 0.f, 0.5f);
-		m_BarrelQuad.V1 = CVector(1.f, 0.f, 0.5f);
-		m_BarrelQuad.V2 = CVector(1.f, 1.f, 0.5f);
-		m_BarrelQuad.V3 = CVector(0.f, 1.f, 0.5f);
+		m_BarrelQuadLeft.V0 = CVector(0.f, 0.f, 0.5f);
+		m_BarrelQuadLeft.V1 = CVector(0.5f, 0.f, 0.5f);
+		m_BarrelQuadLeft.V2 = CVector(0.5f, 1.f, 0.5f);
+		m_BarrelQuadLeft.V3 = CVector(0.f, 1.f, 0.5f);
+
+		m_BarrelQuadRight.V0 = CVector(0.5f, 0.f, 0.5f);
+		m_BarrelQuadRight.V1 = CVector(1.f, 0.f, 0.5f);
+		m_BarrelQuadRight.V2 = CVector(1.f, 1.f, 0.5f);
+		m_BarrelQuadRight.V3 = CVector(0.5f, 1.f, 0.5f);
 		
+		nlassert(!drvInternal->isTextureRectangle(m_BarrelTex)); // this code looks no good
 		float newU = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)width : 1.f;
 		float newV = drvInternal->isTextureRectangle(m_BarrelTex) ? (float)height : 1.f;
 
-		m_BarrelQuad.Uv0 = CUV(0.f,  0.f);
-		m_BarrelQuad.Uv1 = CUV(newU, 0.f);
-		m_BarrelQuad.Uv2 = CUV(newU, newV);
-		m_BarrelQuad.Uv3 = CUV(0.f,  newV);
+		m_BarrelQuadLeft.Uv0 = CUV(0.f,  0.f);
+		m_BarrelQuadLeft.Uv1 = CUV(newU * 0.5f, 0.f);
+		m_BarrelQuadLeft.Uv2 = CUV(newU * 0.5f, newV);
+		m_BarrelQuadLeft.Uv3 = CUV(0.f,  newV);
+
+		m_BarrelQuadRight.Uv0 = CUV(newU * 0.5f,  0.f);
+		m_BarrelQuadRight.Uv1 = CUV(newU, 0.f);
+		m_BarrelQuadRight.Uv2 = CUV(newU, newV);
+		m_BarrelQuadRight.Uv3 = CUV(newU * 0.5f,  newV);
 	}
 	else
 	{
@@ -525,10 +536,10 @@ bool CStereoOVR::endRenderTarget()
 		barrelMat->setTexture(0, m_BarrelTex);
 		drvInternal->activePixelProgram(m_PixelProgram);
 
-		float w = float(vp.getWidth()),// / float(width),
-			h = float(vp.getHeight()),// / float(height),
-			x = float(vp.getX()),/// / float(width),
-			y = float(vp.getY());// / float(height);
+		float w = float(m_BarrelQuadLeft.V1.x),// / float(width),
+			h = float(m_BarrelQuadLeft.V2.y),// / float(height),
+			x = float(m_BarrelQuadLeft.V0.x),/// / float(width),
+			y = float(m_BarrelQuadLeft.V0.y);// / float(height);
 
 		float lensOffset = m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f;
 		float lensShift = m_DevicePtr->HMDInfo.HScreenSize * 0.25f - lensOffset;
@@ -549,7 +560,16 @@ bool CStereoOVR::endRenderTarget()
 		drvInternal->setPixelProgramConstant(4, 1, m_DevicePtr->HMDInfo.DistortionK);
 
 
-		m_Driver->drawQuad(m_BarrelQuad, m_BarrelMat);
+		m_Driver->drawQuad(m_BarrelQuadLeft, m_BarrelMat);
+
+		x = w;
+		lensCenterX = x + (w - lensViewportShift * 0.5f) * 0.5f;
+		screenCenterX = x + w * 0.5f;
+		drvInternal->setPixelProgramConstant(0, lensCenterX, lensCenterY, 0.f, 0.f);
+		drvInternal->setPixelProgramConstant(1, screenCenterX, screenCenterY, 0.f, 0.f);
+
+		m_Driver->drawQuad(m_BarrelQuadRight, m_BarrelMat);
+
 		drvInternal->activePixelProgram(NULL);
 		m_Driver->enableFog(fogEnabled);
 
