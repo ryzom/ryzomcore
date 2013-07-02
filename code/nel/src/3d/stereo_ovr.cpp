@@ -67,6 +67,7 @@ using namespace std;
 
 namespace NL3D {
 
+extern const char *g_StereoOVR_fp40;
 extern const char *g_StereoOVR_arbfp1;
 extern const char *g_StereoOVR_ps_2_0;
 
@@ -238,17 +239,16 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 	nlassert(height == m_DevicePtr->HMDInfo.VResolution);
 	nlassert(!m_PixelProgram);
 
-	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
-	static const char *program_arbfp1 =
-		"!!ARBfp1.0\n"
-		"PARAM c[1] = { { 1, 0 } };\n"
-		"MOV result.color.xzw, c[0].xyyx;\n"
-		"TEX result.color.y, fragment.texcoord[0], texture[0], 2D;\n"
-		"END\n";
-	if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
+	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();	
+	if (drvInternal->supportPixelProgram(CPixelProgram::fp40) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
+	{
+		nldebug("VR: fp40");
+		m_PixelProgram = new CPixelProgram(g_StereoOVR_fp40);		
+	}
+	else if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
 		nldebug("VR: arbfp1");
-		m_PixelProgram = new CPixelProgram(program_arbfp1);		
+		m_PixelProgram = new CPixelProgram(g_StereoOVR_arbfp1);		
 	}
 	else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
 	{
