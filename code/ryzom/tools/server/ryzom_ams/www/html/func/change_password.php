@@ -25,8 +25,23 @@ function change_password(){
                     $result = $webUser->check_change_password($params);
                     if ($result == "success"){
                         //edit stuff into db
+                        
                         $hashpass = crypt($_POST["NewPass"], WebUsers::generateSALT());
-                        print('success!');
+                        $status = WebUsers::setPassword($target_username, $hashpass);
+                        if($status == 'ok'){
+                            $succresult['SUCCESS'] = "OK";
+                        }else if($status == 'shardoffline'){
+                             $succresult['SUCCESS'] = "SHARDOFF";
+                        }
+                        $succresult['permission'] = $_SESSION['permission'];
+                        $succresult['no_visible_elements'] = 'FALSE';
+                        $succresult['target_id'] = $_POST['target_id'];
+                        if(isset($_GET['id'])){
+                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
+                                $succresult['isAdmin'] = "TRUE";
+                            }
+                        }
+                        helpers :: loadtemplate( 'settings', $succresult);
                         exit;
                          
                     }else{

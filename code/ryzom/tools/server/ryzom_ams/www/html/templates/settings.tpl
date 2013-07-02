@@ -50,6 +50,20 @@
 							</div>
 						</div>
 						
+						
+					
+						{if isset($SUCCESS) and $SUCCESS eq "OK"}
+						<div class="alert alert-success">
+							Your password has been changed!
+						</div>
+						{/if}
+						
+						{if isset($SUCCESS) and $SUCCESS eq "SHARDOFF"}
+						<div class="alert alert-warning">
+							Your password has been changed, though the shard seems offline, it may take some time to see the change on the shard.
+						</div>
+						{/if}
+						
 						<input type="hidden" name="function" value="change_password">
 						<input type="hidden" name="target_id" value="{$target_id}">
 						<div class="control-group">

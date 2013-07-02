@@ -74,4 +74,19 @@ class WebUsers extends Users{
         return false;
     }
     
+    public function setPassword($user, $pass){
+        global $cfg;
+        $reply = WebUsers::setAmsPassword($user, $pass);
+        $values = Array('user' => $user, 'pass' => $pass);
+         try {
+               //make connection with and put into shard db
+               $dbw = new DBLayer($cfg['db']['web']);
+               $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
+          }
+          catch (PDOException $e) {
+            //ERROR: the web DB is offline
+          }
+        return $reply;
+    }
+    
 }

@@ -18,6 +18,7 @@ function login(){
 			exit;
 		}else{
 			//handle login failure
+			$result = Array();
 			$result['login_error'] = 'TRUE';
 			$result['no_visible_elements'] = 'TRUE';
 			helpers :: loadtemplate( 'login', $result);
