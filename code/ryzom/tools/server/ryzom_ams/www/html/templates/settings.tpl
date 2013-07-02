@@ -52,15 +52,15 @@
 						
 						
 					
-						{if isset($SUCCESS) and $SUCCESS eq "OK"}
+						{if isset($SUCCESS_PASS) and $SUCCESS_PASS eq "OK"}
 						<div class="alert alert-success">
-							Your password has been changed!
+							The password has been changed!
 						</div>
 						{/if}
 						
-						{if isset($SUCCESS) and $SUCCESS eq "SHARDOFF"}
+						{if isset($SUCCESS_PASS) and $SUCCESS_PASS eq "SHARDOFF"}
 						<div class="alert alert-warning">
-							Your password has been changed, though the shard seems offline, it may take some time to see the change on the shard.
+							The password has been changed, though the shard seems offline, it may take some time to see the change on the shard.
 						</div>
 						{/if}
 						
@@ -87,18 +87,34 @@
 			</div>
 			<div class="box-content">
 				<div class="row-fluid">
-					<form id="changeEmail" class="form-vertical" method="post" action="index.php">
+					<form id="changeEmail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Email</legend>
-						<div class="control-group">
+						<div class="control-group {if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}error{/if}">
 						<label class="control-label">New Email</label>
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-envelope"></i></span>
-									<input type="text" class="input-xlarge" id="NewEmail" name="NewEmail" placeholder="Your new email">
-								</div>
+									<input type="text" class="input-xlarge" id="NewEmail" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
+									{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}<span class="help-inline">{$EMAIL}</span>{/if}
+						
+							    </div>
 							</div>
-						</div>		
-						<input type="hidden" name="function" value="change_email">	
+						</div>
+						
+						{if isset($SUCCESS_MAIL) and $SUCCESS_MAIL eq "OK"}
+						<div class="alert alert-success">
+							The email has been changed!
+						</div>
+						{/if}
+						
+						{if isset($SUCCESS_MAIL) and $SUCCESS_MAIL eq "SHARDOFF"}
+						<div class="alert alert-warning">
+							The email has been changed, though the shard seems offline, it may take some time to see the change on the shard.
+						</div>
+						{/if}
+						
+						<input type="hidden" name="function" value="change_mail">
+						<input type="hidden" name="target_id" value="{$target_id}">
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">

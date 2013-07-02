@@ -8,10 +8,12 @@ function settings(){
                     $result['isAdmin'] = "TRUE";
                 }
                 $result['target_id'] = $_GET['id'];
+                $result['current_mail'] = WebUsers::getEmail($_GET['id']);
             }else{
                 $result['target_id'] = $_SESSION['id'];
+                $result['current_mail'] = WebUsers::getEmail($_SESSION['id']);
             }
-
+            
             return $result;
     }else{
         //ERROR: not logged in!

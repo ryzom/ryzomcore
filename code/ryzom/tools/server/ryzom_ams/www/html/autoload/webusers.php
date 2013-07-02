@@ -60,6 +60,16 @@ class WebUsers extends Users{
         return $row['Login'];
     }
     
+    public function getEmail($id){
+        global $cfg;
+        
+        $dbw = new DBLayer($cfg['db']['web']);
+        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
+        $row = $statement->fetch();
+        return $row['Email'];
+    }
+    
+    
     public function isLoggedIn(){
         if(isset($_SESSION['user'])){
             return true;
@@ -82,6 +92,21 @@ class WebUsers extends Users{
                //make connection with and put into shard db
                $dbw = new DBLayer($cfg['db']['web']);
                $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
+          }
+          catch (PDOException $e) {
+            //ERROR: the web DB is offline
+          }
+        return $reply;
+    }
+    
+     public function setEmail($user, $mail){
+        global $cfg;
+        $reply = WebUsers::setAmsEmail($user, $mail);
+        $values = Array('user' => $user, 'mail' => $mail);
+         try {
+               //make connection with and put into shard db
+               $dbw = new DBLayer($cfg['db']['web']);
+               $dbw->execute("UPDATE ams_user SET Email = :mail WHERE Login = :user ",$values);
           }
           catch (PDOException $e) {
             //ERROR: the web DB is offline
