@@ -23,6 +23,34 @@
 namespace MaterialEditor
 {
 
+	const char *SMatProp::idToString[] =
+	{
+		"Color",
+		"Vector4",
+		"Float",
+		"Double",
+		"Int",
+		"Uint",
+		"Matrix4",
+		"Texture"
+	};
+
+	std::string SMatProp::typeIdToString( unsigned char id )
+	{
+		if( id >= EType_count )
+			return std::string();
+		else
+			return std::string( idToString[ id ] );
+	}
+
+	unsigned char SMatProp::typeStringToId( const std::string &s )
+	{
+		for( unsigned char i = 0; i < EType_count; i++ )
+			if( s == idToString[ i ] )
+				return i;
+		return 0;
+	}
+
 	void CRenderPassProxy::getProperties( std::vector< SMatProp > &v )
 	{
 		uint32 count = pass->count();

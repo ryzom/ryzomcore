@@ -41,13 +41,20 @@ namespace MaterialEditor
 			Int,
 			Uint,
 			Matrix4,
-			Texture
+			Texture,
+			EType_count
 		};
+
+		static std::string typeIdToString( unsigned char type );
+		static unsigned char typeStringToId( const std::string &s );
 
 		std::string id;
 		std::string label;
 		unsigned char type;
 		std::string value;
+
+	private:
+		static const char *idToString[];
 	};
 
 	class CRenderPassProxy

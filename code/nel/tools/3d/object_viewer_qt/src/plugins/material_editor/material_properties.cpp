@@ -60,38 +60,7 @@ namespace MaterialEditor
 			item->setData( 0, Qt::DisplayRole, QString( mp.id.c_str() ) );
 			item->setData( 1, Qt::DisplayRole, QString( mp.label.c_str() ) );
 			
-			QString type;
-			switch( mp.type )
-			{
-			case SMatProp::Color:
-				type = "Color";
-				break;
-			case SMatProp::Double:
-				type = "Double";
-				break;
-			case SMatProp::Float:
-				type = "Float";
-				break;
-			case SMatProp::Int:
-				type = "Int";
-				break;
-			case SMatProp::Matrix4:
-				type = "Matrix4";
-				break;
-			case SMatProp::Texture:
-				type = "Texture";
-				break;
-			case SMatProp::Uint:
-				type = "UInt";
-				break;
-			case SMatProp::Vector4:
-				type = "Vector4";
-				break;
-			default:
-				type = "";
-				break;
-			}
-
+			QString type = SMatProp::typeIdToString( mp.type ).c_str();
 			item->setData( 2, Qt::DisplayRole, type );
 
 			treeWidget->addTopLevelItem( item );
@@ -118,39 +87,16 @@ namespace MaterialEditor
 			std::vector< SMatProp > v;
 			SMatProp p;
 			QTreeWidgetItem *item = NULL;
+			std::string s;
 
 			for( int i = 0; i < treeWidget->topLevelItemCount(); i++ )
 			{
 				item = treeWidget->topLevelItem( i );
 				p.id = item->text( 0 ).toUtf8().data();
 				p.label = item->text( 1 ).toUtf8().data();
-
-				std::string t = item->text( 2 ).toUtf8().data();
-				if( t == "Color" )
-					p.type = SMatProp::Color;
-				else
-				if( t == "Double" )
-					p.type = SMatProp::Double;
-				else
-				if( t == "Float" )
-					p.type = SMatProp::Float;
-				else
-				if( t == "Int" )
-					p.type = SMatProp::Int;
-				else
-				if( t == "Matrix4" )
-					p.type = SMatProp::Matrix4;
-				else
-				if( t == "Texture" )
-					p.type = SMatProp::Texture;
-				else
-				if( t == "UInt" )
-					p.type = SMatProp::Uint;
-				else
-				if( t == "Vector4" )
-					p.type = SMatProp::Vector4;
-				else
-					p.type = SMatProp::Int;
+				
+				s = item->text( 2 ).toUtf8().data();
+				p.type = SMatProp::typeStringToId( s );
 
 				v.push_back( p );
 			}
