@@ -17,6 +17,7 @@
 #include "material_widget.h"
 #include "shader_editor.h"
 #include "material_properties.h"
+#include "nel3d_interface.h"
 
 namespace MaterialEditor
 {
@@ -36,6 +37,28 @@ namespace MaterialEditor
 		shaderEditorWidget = NULL;
 		delete matPropWidget;
 		matPropWidget = NULL;
+	}
+
+	void MaterialWidget::onNewMaterial()
+	{
+		passCB->clear();
+	}
+
+	void MaterialWidget::onMaterialLoaded()
+	{
+		CNelMaterialProxy mat = this->nl3dIface->getMaterial();
+		
+		std::vector< std::string > l;
+		mat.getPassList( l );
+
+		passCB->clear();
+
+		std::vector< std::string >::const_iterator itr = l.begin();
+		while( itr != l.end() )
+		{
+			passCB->addItem( itr->c_str() );
+			++itr;
+		}
 	}
 
 	void MaterialWidget::onPassAdded( const char *name )

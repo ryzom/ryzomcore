@@ -25,6 +25,9 @@ namespace MaterialEditor
 	public:
 		CMaterialObserver(){}
 		virtual ~CMaterialObserver(){}
+
+		virtual void onNewMaterial() = 0;
+		virtual void onMaterialLoaded() = 0;
 		
 		virtual void onPassAdded( const char *name ) = 0;
 		virtual void onPassRemoved( const char *name ) = 0;

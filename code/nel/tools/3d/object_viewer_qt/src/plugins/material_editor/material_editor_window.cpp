@@ -39,9 +39,11 @@ namespace MaterialEditor
 	{
 		m_ui.setupUi(this);
 		nl3dIface = new CNel3DInterface();
+		materialWidget = new MaterialWidget();
 		shaderWidget = new ShaderWidget();
 		passesWidget = new RenderPassesWidget();
 		passesWidget->setNel3dIface( nl3dIface );
+		materialWidget->setNel3DIface( nl3dIface );
 
 		createMenus();
 		createDockWidgets();
@@ -72,6 +74,7 @@ namespace MaterialEditor
 	void MaterialEditorWindow::onNewMaterialClicked()
 	{
 		nl3dIface->newMaterial();
+		materialWidget->onNewMaterial();
 	}
 
 	void MaterialEditorWindow::onOpenMaterialClicked()
@@ -96,6 +99,8 @@ namespace MaterialEditor
 				QMessageBox::Ok 
 				);
 		}
+
+		materialWidget->onMaterialLoaded();
 	}
 
 	void MaterialEditorWindow::onSaveMaterialClicked()
@@ -173,9 +178,8 @@ namespace MaterialEditor
 		QDockWidget *dock = new QDockWidget( tr( "Material" ), this );
 		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
 		
-		MaterialWidget *mw = new MaterialWidget();
-		passesWidget->setMaterialObserver( mw );
-		dock->setWidget( mw );
+		passesWidget->setMaterialObserver( materialWidget );
+		dock->setWidget( materialWidget );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 	}
 	

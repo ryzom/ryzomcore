@@ -82,6 +82,7 @@ namespace NL3D
 		void movePassDown( const std::string &name );
 
 		SRenderPass* getPass( const std::string &name );
+		void getPassList( std::vector< std::string > &l );
 
 	private:
 		std::vector< SRenderPass* > passes;

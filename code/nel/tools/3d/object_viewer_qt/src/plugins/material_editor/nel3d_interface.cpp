@@ -22,6 +22,11 @@
 
 namespace MaterialEditor
 {
+	void CNelMaterialProxy::getPassList( std::vector< std::string > &l )
+	{
+		material->getPassList( l );
+	}
+
 	void CNelMaterialProxy::addPass( const char *name )
 	{
 		NL3D::SRenderPass pass;

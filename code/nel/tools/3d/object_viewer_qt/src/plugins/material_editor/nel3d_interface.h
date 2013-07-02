@@ -18,6 +18,9 @@
 #ifndef NEL3D_INTERFACE_H
 #define NEL3D_INTERFACE_H
 
+#include <vector>
+#include <string>
+
 namespace NL3D
 {
 	class CDynMaterial;
@@ -34,6 +37,8 @@ namespace MaterialEditor
 		}
 
 		~CNelMaterialProxy(){}
+
+		void getPassList( std::vector< std::string > &l );
 
 		void addPass( const char *name );
 		void removePass( const char *name );

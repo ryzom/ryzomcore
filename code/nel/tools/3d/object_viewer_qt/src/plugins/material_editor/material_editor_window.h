@@ -25,6 +25,7 @@ namespace MaterialEditor
 	class ShaderWidget;
 	class RenderPassesWidget;
 	class CNel3DInterface;
+	class MaterialWidget;
 
 	class MaterialEditorWindow: public QMainWindow
 	{
@@ -50,6 +51,7 @@ private:
 
 		ShaderWidget *shaderWidget;
 		RenderPassesWidget *passesWidget;
+		MaterialWidget *materialWidget;
 
 		Ui::MaterialEditorWindow m_ui;
 	};

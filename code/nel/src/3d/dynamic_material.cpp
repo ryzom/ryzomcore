@@ -20,20 +20,43 @@ namespace NL3D
 {
 	void SDynMaterialProp::serial( NLMISC::IStream &f )
 	{
-		f.serial( std::string( prop ) );
-		f.serial( std::string( label ) );
-		f.serial( uint8( type ) );
-		f.serial( std::string( value ) );
+		f.xmlPush( "property" );
+
+		f.xmlPush( "id" );
+		f.serial( prop );
+		f.xmlPop();
+
+		f.xmlPush( "label" );
+		f.serial( label );
+		f.xmlPop();
+
+		f.xmlPush( "type" );
+		f.serial( type );
+		f.xmlPop();
+
+		f.xmlPush( "value" );
+		f.serial( value );
+		f.xmlPop();
+
+		f.xmlPop();
 	}
 
 	void SRenderPass::serial( NLMISC::IStream &f )
 	{
-		f.serial( std::string( name ) );
+		f.xmlPush( "pass" );
+
+		f.xmlPush( "name" );
+		f.serial( name );
+		f.xmlPop();
+
+		f.xmlPush( "properties" );
 
 		if( !f.isReading() )
 		{
 			uint32 n = properties.size();
+			f.xmlPush( "count" );
 			f.serial( n );
+			f.xmlPop();
 
 			std::vector< SDynMaterialProp >::iterator itr = properties.begin();
 			while( itr != properties.end() )
@@ -45,7 +68,9 @@ namespace NL3D
 		else
 		{
 			uint32 n;
+			f.xmlPush( "count" );
 			f.serial( n );
+			f.xmlPop();
 
 			for( uint32 i = 0; i < n; i++ )
 			{
@@ -55,6 +80,9 @@ namespace NL3D
 			}
 		}
 
+		f.xmlPop();
+
+		f.xmlPop();
 	}
 
 	void SRenderPass::addProperty( const SDynMaterialProp &prop )
@@ -124,12 +152,18 @@ namespace NL3D
 
 	void CDynMaterial::serial( NLMISC::IStream &f )
 	{
+		f.xmlPush( "Material" );
+
 		int version = f.serialVersion( 1 );
+
+		f.xmlPush( "passes" );
 
 		if( !f.isReading() )
 		{
 			uint32 n = passes.size();
+			f.xmlPush( "count" );
 			f.serial( n );
+			f.xmlPop();
 
 			std::vector< SRenderPass* >::iterator itr = passes.begin();
 			while( itr != passes.end() )
@@ -141,15 +175,21 @@ namespace NL3D
 		else
 		{
 			uint32 n;
+			f.xmlPush( "count" );
 			f.serial( n );
+			f.xmlPop();
 
-			for( uint32 i = 0; i < n; n++ )
+			for( uint32 i = 0; i < n; i++ )
 			{
 				SRenderPass *pass = new SRenderPass();
 				pass->serial( f );
 				passes.push_back( pass );
 			}
 		}
+
+		f.xmlPop();
+
+		f.xmlPop();
 	}
 
 	void CDynMaterial::addPass( const SRenderPass &pass )
@@ -268,6 +308,20 @@ namespace NL3D
 			return NULL;
 		else
 			return *itr;
+	}
+
+	void CDynMaterial::getPassList( std::vector< std::string > &l )
+	{
+		std::vector< SRenderPass* >::iterator itr = passes.begin();
+		while( itr != passes.end() )
+		{
+			std::string name;
+			
+			(*itr)->getName( name );
+			l.push_back( name );
+			
+			++itr;
+		}
 	}
 }
 

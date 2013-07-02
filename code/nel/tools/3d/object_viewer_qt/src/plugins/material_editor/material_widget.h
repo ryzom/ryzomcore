@@ -24,6 +24,7 @@ namespace MaterialEditor
 {
 	class ShaderEditorWidget;
 	class MatPropWidget;
+	class CNel3DInterface;
 
 	class MaterialWidget : public QWidget, public Ui::MaterialWidget, public CMaterialObserver
 	{
@@ -32,16 +33,22 @@ namespace MaterialEditor
 		MaterialWidget( QWidget *parent = NULL );
 		~MaterialWidget();
 
+		void onNewMaterial();
+		void onMaterialLoaded();
+
 		void onPassAdded( const char *name );
 		void onPassRemoved( const char *name );
 		void onPassMovedUp( const char *name );
 		void onPassMovedDown( const char *name );
 		void onPassRenamed( const char *from, const char *to );
 
+		void setNel3DIface( CNel3DInterface *iface ){ nl3dIface = iface; }
+
 	private:
 		void setupConnections();
 		ShaderEditorWidget *shaderEditorWidget;
 		MatPropWidget *matPropWidget;
+		CNel3DInterface *nl3dIface;
 
 	private Q_SLOTS:
 		void onPassEditClicked();
