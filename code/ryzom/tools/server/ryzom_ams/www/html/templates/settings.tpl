@@ -144,7 +144,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-user"></i></span>
-									<input type="text" class="input-xlarge" id="Firstname" name="Firstname" placeholder="Your firstname" {if isset($FirstName) and $FirstName neq ""}value="{$FirstName}"{/if}>
+									<input type="text" class="input-xlarge" id="FirstName" name="FirstName" placeholder="Your firstname" {if isset($FirstName) and $FirstName neq ""}value="{$FirstName}"{/if}>
 								</div>
 							</div>
 						</div>
@@ -154,7 +154,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-user"></i></span>
-									<input type="text" class="input-xlarge" id="Lastname" name="Lastname" placeholder="Your lastname">
+									<input type="text" class="input-xlarge" id="LastName" name="LastName" placeholder="Your lastname" {if isset($LastName) and $LastName neq ""}value="{$LastName}"{/if}>
 								</div>
 							</div>
 						</div>
@@ -421,17 +421,17 @@
 							<label class="control-label">Gender</label>
 							<div class="controls">							
 								<label class="radio">
-								      <div id="uniform-optionsRadios2" class="radio"><span class=""><input style="opacity: 0;" name="optionsRadios" id="optionsRadios2" value="option2" checked="" type="radio"></span></div>
+								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($Gender) and $Gender eq 0}checked{/if}"><input style="opacity: 0;" name="optionsRadios" id="optionsRadios2" value="option2" {if isset($Gender) and $Gender eq 0}checked=""{/if} type="radio"></span></div>
 								      Secret
 								</label>
 								<div style="clear:both"></div>
 								<label class="radio">
-									<div id="uniform-optionsRadios1" class="radio"><span class="checked"><input style="opacity: 0;" name="optionsRadios" id="optionsRadios1" value="option1"  type="radio"></span></div>
+									<div id="uniform-optionsRadios1" class="radio"><span class="{if isset($Gender) and $Gender eq 1}checked{/if}"><input style="opacity: 0;" name="optionsRadios" id="optionsRadios1" value="option1" {if isset($Gender) and $Gender eq 1}checked=""{/if} type="radio"></span></div>
 									Male
 								</label>
 								<div style="clear:both"></div>
 								<label class="radio">
-								      <div id="uniform-optionsRadios2" class="radio"><span class=""><input style="opacity: 0;" name="optionsRadios" id="optionsRadios2" value="option2" type="radio"></span></div>
+								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($Gender) and $Gender eq 2}checked{/if}"><input style="opacity: 0;" name="optionsRadios" id="optionsRadios2" value="option2" {if isset($Gender) and $Gender eq 2}checked=""{/if} type="radio"></span></div>
 								      Female
 								</label>
 							</div>

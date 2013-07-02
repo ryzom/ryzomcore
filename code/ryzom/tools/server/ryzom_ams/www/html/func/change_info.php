@@ -17,6 +17,24 @@ function change_info(){
                     }
                     
                     $webUser = new WebUsers();
+                    $current_info = $webUser->getInfo($_POST['target_id']);
+                    //TODO: XSS filtering
+                    $query = "UPDATE ams_user SET ";
+                    if(($_POST['FirstName'] != "") && ($_POST['FirstName'] != $current_info['FirstName'])){
+                        $query = $query . "FirstName = :fName ";
+                    }
+                    if(($_POST['LastName'] != "") && ($_POST['LastName'] != $current_info['LastName'])){
+                        $query = $query . "LastName = :lName ";
+                    }
+                    //TODO: add the other fields too
+                    $query = $query . "WHERE Login = :user";
+                    
+                    
+                    print($query);
+                    exit;
+                    
+                    
+                    
 		    $reply = $webUser->checkEmail($_POST['NewEmail']);
 		    if ( $reply != "success" ){
 			$result['EMAIL_ERROR'] = 'TRUE';
