@@ -58,7 +58,11 @@ namespace NL3D
 		void setName( const std::string &n ){ name = n; }
 		void getName( std::string &n ) const { n = name; }
 		void serial( NLMISC::IStream &f );
-	
+
+		uint32 count(){ return properties.size(); }
+		void clear(){ properties.clear(); }
+		const SDynMaterialProp* getProperty( uint32 i ) const;
+
 	private:
 		std::vector< SDynMaterialProp > properties;
 		std::string name;
@@ -82,6 +86,8 @@ namespace NL3D
 		void movePassDown( const std::string &name );
 
 		SRenderPass* getPass( const std::string &name );
+		SRenderPass* getPass( uint32 i );
+		uint32 count(){ return passes.size(); }
 		void getPassList( std::vector< std::string > &l );
 
 	private:

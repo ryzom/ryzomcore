@@ -28,6 +28,7 @@ namespace MaterialEditor
 		setupUi( this );
 		shaderEditorWidget = new ShaderEditorWidget();
 		matPropWidget = new MatPropWidget();
+		setNel3DIface( NULL );
 		setupConnections();
 	}
 
@@ -42,11 +43,12 @@ namespace MaterialEditor
 	void MaterialWidget::onNewMaterial()
 	{
 		passCB->clear();
+		passButton->setEnabled( false );
 	}
 
 	void MaterialWidget::onMaterialLoaded()
 	{
-		CNelMaterialProxy mat = this->nl3dIface->getMaterial();
+		CNelMaterialProxy mat = nl3dIface->getMaterial();
 		
 		std::vector< std::string > l;
 		mat.getPassList( l );
@@ -59,11 +61,15 @@ namespace MaterialEditor
 			passCB->addItem( itr->c_str() );
 			++itr;
 		}
+
+		if( passCB->count() > 0 )
+			passButton->setEnabled( true );
 	}
 
 	void MaterialWidget::onPassAdded( const char *name )
 	{
 		passCB->addItem( name );
+		passButton->setEnabled( true );
 	}
 
 	void MaterialWidget::onPassRemoved( const char *name )
@@ -73,6 +79,8 @@ namespace MaterialEditor
 			return;
 
 		passCB->removeItem( i );
+		if( passCB->count() == 0 )
+			passButton->setEnabled( false );
 	}
 
 	void MaterialWidget::onPassMovedUp( const char *name )
@@ -121,6 +129,11 @@ namespace MaterialEditor
 
 	void MaterialWidget::onPassEditClicked()
 	{
+		if( passCB->count() == 0 )
+			return;
+
+		CRenderPassProxy p = nl3dIface->getMaterial().getPass( passCB->currentText().toUtf8().data() );
+		matPropWidget->load( &p );
 		matPropWidget->show();
 	}
 

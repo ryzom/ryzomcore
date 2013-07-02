@@ -134,6 +134,13 @@ namespace NL3D
 	}
 
 
+	const SDynMaterialProp* SRenderPass::getProperty( uint32 i ) const
+	{
+		if( i >= properties.size() )
+			return NULL;
+
+		return &( properties[ i ] );
+	}
 
 	CDynMaterial::CDynMaterial()
 	{
@@ -308,6 +315,14 @@ namespace NL3D
 			return NULL;
 		else
 			return *itr;
+	}
+
+	SRenderPass* CDynMaterial::getPass( uint32 i )
+	{
+		if( i >= passes.size() )
+			return NULL;
+		else
+			return passes[ i ];
 	}
 
 	void CDynMaterial::getPassList( std::vector< std::string > &l )

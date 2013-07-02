@@ -23,6 +23,7 @@ namespace MaterialEditor
 {
 
 	class MatPropEditWidget;
+	class CRenderPassProxy;
 
 	class MatPropWidget : public QWidget, public Ui::MatPropWidget
 	{
@@ -30,9 +31,12 @@ namespace MaterialEditor
 	public:
 		MatPropWidget( QWidget *parent = NULL );
 		~MatPropWidget();
+		void load( CRenderPassProxy *proxy );
+		void clear();
 
 	private Q_SLOTS:
 		void onOKClicked();
+		void onCancelClicked();
 		void onAddClicked();
 		void onEditClicked();
 		void onRemoveClicked();
@@ -42,6 +46,7 @@ namespace MaterialEditor
 		void setupConnections();
 		bool edit;
 		MatPropEditWidget *matPropEditWidget;
+		CRenderPassProxy *proxy;
 	};
 
 }

@@ -24,10 +24,52 @@
 namespace NL3D
 {
 	class CDynMaterial;
+	struct SRenderPass;
 }
 
 namespace MaterialEditor
 {
+
+	struct SMatProp
+	{
+		enum EType
+		{
+			Color,
+			Vector4,
+			Float,
+			Double,
+			Int,
+			Uint,
+			Matrix4,
+			Texture
+		};
+
+		std::string id;
+		std::string label;
+		unsigned char type;
+		std::string value;
+	};
+
+	class CRenderPassProxy
+	{
+	public:
+		CRenderPassProxy( NL3D::SRenderPass *p )
+		{
+			pass = p;
+		}
+
+		~CRenderPassProxy(){}
+
+		void getProperties( std::vector< SMatProp > &v );
+		void setProperties( std::vector< SMatProp > &v );
+		void getName( std::string &name );
+		void setName( const std::string &name );
+
+	private:
+		NL3D::SRenderPass *pass;
+	};
+
+
 	class CNelMaterialProxy
 	{
 	public:
@@ -45,6 +87,9 @@ namespace MaterialEditor
 		void movePassUp( const char *name );
 		void movePassDown( const char *name );
 		void renamePass( const char *from, const char *to );
+
+		CRenderPassProxy getPass( unsigned long i );
+		CRenderPassProxy getPass( const char *name );
 
 	private:
 		NL3D::CDynMaterial *material;

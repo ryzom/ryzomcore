@@ -16,6 +16,7 @@
 
 #include "material_properties.h"
 #include "material_property_editor.h"
+#include "nel3d_interface.h"
 
 namespace MaterialEditor
 {
@@ -27,16 +28,143 @@ namespace MaterialEditor
 		matPropEditWidget = new MatPropEditWidget();
 		setupConnections();
 		edit = false;
+		proxy = NULL;
 	}
 
 	MatPropWidget::~MatPropWidget()
 	{
+		clear();
+
 		delete matPropEditWidget;
 		matPropEditWidget = NULL;
 	}
 
+	void MatPropWidget::load( CRenderPassProxy *proxy )
+	{
+		clear();
+		this->proxy = new CRenderPassProxy( *proxy );
+
+		std::string n;
+		proxy->getName( n );
+		nameEdit->setText( n.c_str() );
+
+		std::vector< SMatProp > v;
+		proxy->getProperties( v );
+
+		std::vector< SMatProp >::iterator itr = v.begin();
+		while( itr != v.end() )
+		{
+			SMatProp &mp = *itr;
+			QTreeWidgetItem *item = new QTreeWidgetItem();
+
+			item->setData( 0, Qt::DisplayRole, QString( mp.id.c_str() ) );
+			item->setData( 1, Qt::DisplayRole, QString( mp.label.c_str() ) );
+			
+			QString type;
+			switch( mp.type )
+			{
+			case SMatProp::Color:
+				type = "Color";
+				break;
+			case SMatProp::Double:
+				type = "Double";
+				break;
+			case SMatProp::Float:
+				type = "Float";
+				break;
+			case SMatProp::Int:
+				type = "Int";
+				break;
+			case SMatProp::Matrix4:
+				type = "Matrix4";
+				break;
+			case SMatProp::Texture:
+				type = "Texture";
+				break;
+			case SMatProp::Uint:
+				type = "UInt";
+				break;
+			case SMatProp::Vector4:
+				type = "Vector4";
+				break;
+			default:
+				type = "";
+				break;
+			}
+
+			item->setData( 2, Qt::DisplayRole, type );
+
+			treeWidget->addTopLevelItem( item );
+
+			++itr;
+		}
+	}
+
+	void MatPropWidget::clear()
+	{
+		treeWidget->clear();
+		nameEdit->clear();
+		if( this->proxy != NULL )
+		{
+			delete this->proxy;
+			this->proxy = NULL;
+		}
+	}
+
 	void MatPropWidget::onOKClicked()
 	{
+		if( proxy != NULL )
+		{
+			std::vector< SMatProp > v;
+			SMatProp p;
+			QTreeWidgetItem *item = NULL;
+
+			for( int i = 0; i < treeWidget->topLevelItemCount(); i++ )
+			{
+				item = treeWidget->topLevelItem( i );
+				p.id = item->text( 0 ).toUtf8().data();
+				p.label = item->text( 1 ).toUtf8().data();
+
+				std::string t = item->text( 2 ).toUtf8().data();
+				if( t == "Color" )
+					p.type = SMatProp::Color;
+				else
+				if( t == "Double" )
+					p.type = SMatProp::Double;
+				else
+				if( t == "Float" )
+					p.type = SMatProp::Float;
+				else
+				if( t == "Int" )
+					p.type = SMatProp::Int;
+				else
+				if( t == "Matrix4" )
+					p.type = SMatProp::Matrix4;
+				else
+				if( t == "Texture" )
+					p.type = SMatProp::Texture;
+				else
+				if( t == "UInt" )
+					p.type = SMatProp::Uint;
+				else
+				if( t == "Vector4" )
+					p.type = SMatProp::Vector4;
+				else
+					p.type = SMatProp::Int;
+
+				v.push_back( p );
+			}
+
+			proxy->setProperties( v );
+		}
+
+		clear();
+		close();
+	}
+
+	void MatPropWidget::onCancelClicked()
+	{
+		clear();
 		close();
 	}
 
@@ -98,6 +226,7 @@ namespace MaterialEditor
 	void MatPropWidget::setupConnections()
 	{
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKClicked() ) );
+		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
 		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditClicked() ) );
 		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );

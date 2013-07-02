@@ -22,6 +22,57 @@
 
 namespace MaterialEditor
 {
+
+	void CRenderPassProxy::getProperties( std::vector< SMatProp > &v )
+	{
+		uint32 count = pass->count();
+		for( uint32 i = 0; i < count; i++ )
+		{
+			const NL3D::SDynMaterialProp &p = *( pass->getProperty( i ) );
+			
+			SMatProp prop;
+			prop.id = p.prop;
+			prop.label = p.label;
+			prop.type = p.type;
+			prop.value = p.value;
+
+			v.push_back( prop );
+		}
+	}
+
+	void CRenderPassProxy::setProperties( std::vector< SMatProp > &v )
+	{
+		pass->clear();
+		NL3D::SDynMaterialProp p;
+		
+		std::vector< SMatProp >::iterator itr = v.begin();
+		while( itr != v.end() )
+		{
+			p.prop = itr->id;
+			p.label = itr->label;
+			p.type = itr->type;
+			p.value = itr->value;
+
+			pass->addProperty( p );
+
+			++itr;
+		}
+	}
+
+	void CRenderPassProxy::getName( std::string &name )
+	{
+		pass->getName( name );
+	}
+
+	void CRenderPassProxy::setName( const std::string &name )
+	{
+		pass->setName( name );
+	}
+
+
+
+
+
 	void CNelMaterialProxy::getPassList( std::vector< std::string > &l )
 	{
 		material->getPassList( l );
@@ -54,8 +105,18 @@ namespace MaterialEditor
 		material->renamePass( from, to );
 	}
 
+	CRenderPassProxy CNelMaterialProxy::getPass( unsigned long i )
+	{
+		if( material->count() >= i )
+			return CRenderPassProxy( NULL );
+		else
+			return CRenderPassProxy( material->getPass( i ) );
+	}
 
-
+	CRenderPassProxy CNelMaterialProxy::getPass( const char *name )
+	{
+		return CRenderPassProxy( material->getPass( name ) );
+	}
 
 
 	CNel3DInterface::CNel3DInterface()
