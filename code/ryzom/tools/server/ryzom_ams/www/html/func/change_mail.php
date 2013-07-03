@@ -18,6 +18,11 @@ function change_mail(){
                     
                     $webUser = new WebUsers();
 		    $reply = $webUser->checkEmail($_POST['NewEmail']);
+		    
+		    global $SITEBASE;
+                    require_once($SITEBASE . 'inc/settings.php');
+                    $result = settings();
+		    
 		    if ( $reply != "success" ){
 			$result['EMAIL_ERROR'] = 'TRUE';
 		    }else{
@@ -34,6 +39,7 @@ function change_mail(){
                         }
                         $result['permission'] = $_SESSION['permission'];
                         $result['no_visible_elements'] = 'FALSE';
+			$result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
                             if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
@@ -47,7 +53,7 @@ function change_mail(){
 			$result['EMAIL'] = $reply;
                         $result['permission'] = $_SESSION['permission'];
                         $result['no_visible_elements'] = 'FALSE';
-                        $return['username'] = $_SESSION['user'];
+                        $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
                             if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){

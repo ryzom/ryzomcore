@@ -24,7 +24,9 @@ function change_password(){
                     $result = $webUser->check_change_password($params);
                     if ($result == "success"){
                         //edit stuff into db
-                        
+                        global $SITEBASE;
+                        require_once($SITEBASE . 'inc/settings.php');
+                        $succresult = settings();
                         $hashpass = crypt($_POST["NewPass"], WebUsers::generateSALT());
                         $status = WebUsers::setPassword($target_username, $hashpass);
                         if($status == 'ok'){
@@ -34,17 +36,12 @@ function change_password(){
                         }
                         $succresult['permission'] = $_SESSION['permission'];
                         $succresult['no_visible_elements'] = 'FALSE';
+                        $succresult['username'] = $_SESSION['user'];
                         $succresult['target_id'] = $_POST['target_id'];
-                        if(isset($_GET['id'])){
-                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
-                                $succresult['isAdmin'] = "TRUE";
-                            }
-                        }
                         helpers :: loadtemplate( 'settings', $succresult);
                         exit;
                          
                     }else{
-                        
                         $result['prevCurrentPass'] = $_POST["CurrentPass"];
                         $result['prevNewPass'] = $_POST["NewPass"];
                         $result['prevConfirmNewPass'] = $_POST["ConfirmNewPass"];
@@ -52,11 +49,12 @@ function change_password(){
                         $result['no_visible_elements'] = 'FALSE';
                         $return['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
-                        if(isset($_GET['id'])){
-                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
-                                $result['isAdmin'] = "TRUE";
-                            }
-                        }
+
+                        global $SITEBASE;
+                        require_once($SITEBASE . 'inc/settings.php');
+                        $settings = settings();
+                        
+                        $result = array_merge($result,$settings);
                         helpers :: loadtemplate( 'settings', $result);
                         exit;
                     }

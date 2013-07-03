@@ -437,7 +437,12 @@
 							</div>
 						</div>
 										
-												
+						{if isset($info_updated) and $info_updated eq "OK"}
+						<div class="alert alert-success">
+							The Info has been updated!
+						</div>
+						{/if}
+						
 						<input type="hidden" name="function" value="change_info">
 						<input type="hidden" name="target_id" value="{$target_id}">
 						<div class="control-group">
