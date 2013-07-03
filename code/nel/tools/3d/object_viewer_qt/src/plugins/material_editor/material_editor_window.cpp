@@ -16,7 +16,7 @@
 
 #include "material_editor_window.h"
 #include "material_editor_constants.h"
-#include "material_widget.h"
+#include "material_splitter.h"
 #include "shader_widget.h"
 #include "render_passes.h"
 #include "nel3d_interface.h"
@@ -28,9 +28,12 @@
 
 #include <nel/misc/debug.h>
 
+#include <QSplitter>
 #include <QDockWidget>
 #include <QFileDialog>
 #include <QMessageBox>
+
+#include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
 
 namespace MaterialEditor
 {
@@ -38,13 +41,15 @@ namespace MaterialEditor
 	QMainWindow(parent)
 	{
 		m_ui.setupUi(this);
+		
 		nl3dIface = new CNel3DInterface();
-		materialWidget = new MaterialWidget();
 		shaderWidget = new ShaderWidget();
+		materialSplitter = new MaterialSplitter();
+		materialSplitter->setNel3DIface( nl3dIface );
 		passesWidget = new RenderPassesWidget();
+		passesWidget->setMaterialObserver( materialSplitter );
 		passesWidget->setNel3dIface( nl3dIface );
-		materialWidget->setNel3DIface( nl3dIface );
-
+		
 		createMenus();
 		createDockWidgets();
 	}
@@ -74,7 +79,7 @@ namespace MaterialEditor
 	void MaterialEditorWindow::onNewMaterialClicked()
 	{
 		nl3dIface->newMaterial();
-		materialWidget->onNewMaterial();
+		materialSplitter->onNewMaterial();
 	}
 
 	void MaterialEditorWindow::onOpenMaterialClicked()
@@ -100,7 +105,7 @@ namespace MaterialEditor
 				);
 		}
 
-		materialWidget->onMaterialLoaded();
+		materialSplitter->onMaterialLoaded();
 	}
 
 	void MaterialEditorWindow::onSaveMaterialClicked()
@@ -176,10 +181,8 @@ namespace MaterialEditor
 	void MaterialEditorWindow::createDockWidgets()
 	{
 		QDockWidget *dock = new QDockWidget( tr( "Material" ), this );
-		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
-		
-		passesWidget->setMaterialObserver( materialWidget );
-		dock->setWidget( materialWidget );
+		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );		
+		dock->setWidget( materialSplitter );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 	}
 	

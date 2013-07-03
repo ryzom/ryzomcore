@@ -18,9 +18,11 @@ SET(OVQT_PLUGIN_MATERIAL_EDITOR_HDR
 	material_properties.h
 	material_property_editor.h
 	material_widget.h
+	material_splitter.h
 	render_passes.h
 	shader_editor.h
 	shader_widget.h
+	prop_browser_ctrl.h
 	)
 	
 SET(OVQT_PLUGIN_MATERIAL_EDITOR_UIS
@@ -56,6 +58,7 @@ ADD_LIBRARY(ovqt_plugin_material_editor MODULE ${SRC}
 TARGET_LINK_LIBRARIES(
 						ovqt_plugin_material_editor
 						ovqt_plugin_core
+						qt_property_browser
 						nelmisc
 						nel3d
 						${QT_LIBRARIES}
