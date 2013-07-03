@@ -32,6 +32,7 @@ namespace MaterialEditor
 		browserCtrl->setBrowser( browser );
 
 		setup();
+		setupConnections();
 	}
 
 	MaterialSplitter::~MaterialSplitter()
@@ -41,6 +42,11 @@ namespace MaterialEditor
 		nl3dIface = NULL;
 		materialWidget = NULL;
 		browser = NULL;
+	}
+
+	void MaterialSplitter::setupConnections()
+	{
+		connect( materialWidget, SIGNAL( propsChanged() ), this, SLOT( onPropsChanged() ) );
 	}
 
 	void MaterialSplitter::setup()
@@ -90,6 +96,13 @@ namespace MaterialEditor
 	void MaterialSplitter::onPassRenamed( const char *from, const char *to )
 	{
 		materialWidget->onPassRenamed( from, to );
+	}
+
+	void MaterialSplitter::onPropsChanged()
+	{
+		QString pass;
+		materialWidget->getCurrentPass( pass );
+		browserCtrl->onPropsChanged();
 	}
 }
 

@@ -44,7 +44,25 @@ namespace MaterialEditor
 
 	void CPropBrowserCtrl::setupConnections()
 	{
-
 	}
+
+	void CPropBrowserCtrl::onPropsChanged()
+	{
+		clearProps();
+		loadPropsForPass( currentPass );
+	}
+
+	void CPropBrowserCtrl::clearProps()
+	{
+		browser->clear();
+	}
+
+	void CPropBrowserCtrl::loadPropsForPass( const QString &pass )
+	{
+		currentPass = pass;
+		CNelMaterialProxy m = nel3dIface->getMaterial();
+		CRenderPassProxy p = m.getPass( pass.toUtf8().data() );
+	}
+
 }
 

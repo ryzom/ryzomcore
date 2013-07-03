@@ -144,6 +144,9 @@ namespace NL3D
 
 	CDynMaterial::CDynMaterial()
 	{
+		SRenderPass *p = new SRenderPass();
+		p->setName( "pass1" );
+		passes.push_back( p );
 	}
 
 	CDynMaterial::~CDynMaterial()

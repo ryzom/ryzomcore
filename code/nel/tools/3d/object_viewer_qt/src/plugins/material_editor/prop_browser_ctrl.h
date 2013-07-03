@@ -35,10 +35,14 @@ namespace MaterialEditor
 		void setBrowser( QtTreePropertyBrowser *b );
 		void setNel3DIface( CNel3DInterface *iface );
 		void setupConnections();
+		void onPropsChanged();
+		void clearProps();
+		void loadPropsForPass( const QString &pass );		
 
 	private:
 		QtTreePropertyBrowser *browser;
 		CNel3DInterface *nel3dIface;
+		QString currentPass;
 	};
 }
 

@@ -36,6 +36,8 @@ namespace MaterialEditor
 		MaterialSplitter( QWidget *parent = NULL );
 		~MaterialSplitter();
 
+		void setupConnections();
+
 		void setup();
 
 		void setNel3DIface( CNel3DInterface *iface );
@@ -53,6 +55,9 @@ namespace MaterialEditor
 		MaterialWidget *materialWidget;
 		CPropBrowserCtrl *browserCtrl;
 		QtTreePropertyBrowser *browser;
+
+	private Q_SLOTS:
+		void onPropsChanged();
 	};
 }
 

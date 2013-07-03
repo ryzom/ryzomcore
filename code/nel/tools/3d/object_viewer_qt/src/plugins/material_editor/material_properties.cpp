@@ -22,12 +22,13 @@ namespace MaterialEditor
 {
 
 	MatPropWidget::MatPropWidget( QWidget *parent ) :
-	QWidget( parent )
+	QDialog( parent )
 	{
 		setupUi( this );
 		matPropEditWidget = new MatPropEditWidget();
 		setupConnections();
 		edit = false;
+		changed = false;
 		proxy = NULL;
 	}
 
@@ -73,6 +74,7 @@ namespace MaterialEditor
 	{
 		treeWidget->clear();
 		nameEdit->clear();
+		changed = false;
 		if( this->proxy != NULL )
 		{
 			delete this->proxy;
@@ -105,18 +107,21 @@ namespace MaterialEditor
 		}
 
 		clear();
+		setResult( QDialog::Accepted );
 		close();
 	}
 
 	void MatPropWidget::onCancelClicked()
 	{
 		clear();
+		setResult( QDialog::Rejected );
 		close();
 	}
 
 	void MatPropWidget::onAddClicked()
 	{
 		edit = false;
+		changed = true;
 		matPropEditWidget->clear();
 		matPropEditWidget->show();
 	}
@@ -144,6 +149,7 @@ namespace MaterialEditor
 			return;
 
 		delete item;
+		changed = true;
 	}
 
 	void MatPropWidget::onEditorOKClicked()
@@ -166,6 +172,7 @@ namespace MaterialEditor
 			item->setData( 2, Qt::DisplayRole, prop.type );
 			treeWidget->addTopLevelItem( item );
 		}
+		changed = true;
 
 	}
 

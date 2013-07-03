@@ -34,8 +34,8 @@ namespace MaterialEditor
 		void fillList( const QStringList &list );
 		void getList( QStringList &list );
 		void clear();
+		void onMaterialLoaded();
 		void setNel3dIface( CNel3DInterface *iface ){ nl3dIface = iface; }
-
 		void setMaterialObserver( CMaterialObserver *obs ){ observer = obs; }
 
 	private:

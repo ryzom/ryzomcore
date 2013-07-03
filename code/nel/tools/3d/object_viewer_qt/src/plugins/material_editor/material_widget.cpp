@@ -119,6 +119,11 @@ namespace MaterialEditor
 		passCB->setItemText( i, to );
 	}
 
+	void MaterialWidget::getCurrentPass( QString &pass )
+	{
+		pass = passCB->currentText();
+	}
+
 	void MaterialWidget::setupConnections()
 	{
 		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
@@ -134,7 +139,9 @@ namespace MaterialEditor
 
 		CRenderPassProxy p = nl3dIface->getMaterial().getPass( passCB->currentText().toUtf8().data() );
 		matPropWidget->load( &p );
-		matPropWidget->show();
+		matPropWidget->exec();
+		if( matPropWidget->getChanged() )
+			Q_EMIT propsChanged();
 	}
 
 	void MaterialWidget::onShaderEditClicked()

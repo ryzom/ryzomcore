@@ -59,6 +59,21 @@ namespace MaterialEditor
 		listWidget->clear();
 	}
 
+	void RenderPassesWidget::onMaterialLoaded()
+	{
+		clear();
+		CNelMaterialProxy m = nl3dIface->getMaterial();
+		std::vector< std::string > pl;
+		m.getPassList( pl );
+
+		std::vector< std::string >::const_iterator itr = pl.begin();
+		while( itr != pl.end() )
+		{
+			listWidget->addItem( QString( itr->c_str() ) );
+			++itr;
+		}
+	}
+
 	void RenderPassesWidget::setupConnections()
 	{
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKClicked() ) );

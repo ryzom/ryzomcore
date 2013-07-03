@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MatPropWidget</class>
- <widget class="QWidget" name="MatPropWidget">
+ <widget class="QDialog" name="MatPropWidget">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>669</width>
-    <height>504</height>
+    <width>685</width>
+    <height>441</height>
    </rect>
   </property>
   <property name="windowTitle">

@@ -44,6 +44,11 @@ namespace MaterialEditor
 
 		void setNel3DIface( CNel3DInterface *iface ){ nl3dIface = iface; }
 
+		void getCurrentPass( QString &pass );
+	
+	Q_SIGNALS:
+		void propsChanged();
+
 	private:
 		void setupConnections();
 		ShaderEditorWidget *shaderEditorWidget;
