@@ -11,8 +11,8 @@
         //SETUP THE WWW DB
         $dbw = new DBLayer($cfg['db']['web']);
         $sql = "
-            CREATE DATABASE IF NOT EXISTS `ryzom_ams`;
-            USE `ryzom_ams`;
+            CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['web']['name'] ."`;
+            USE `". $cfg['db']['web']['name'] . "`;
             DROP TABLE IF EXISTS ams_user;
             
             CREATE TABLE IF NOT EXISTS `ams_user` (
@@ -35,8 +35,8 @@
         //SETUP THE AMS_LIB DB
         $dbl = new DBLayer($cfg['db']['lib']);
         $sql = "
-            CREATE DATABASE IF NOT EXISTS `ryzom_ams_lib`;
-            USE `ryzom_ams_lib`;
+            CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`;
+            USE `" . $cfg['db']['lib']['name'] ."`;
             DROP TABLE IF EXISTS ams_querycache;
             
             CREATE TABLE ams_querycache (
