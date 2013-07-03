@@ -163,7 +163,7 @@
 						<label class="control-label">Country</label>
 							<div class="controls">
 								 <select>
-									<option value="AA" selected="selected">Select one</option>
+									<option value="AA">None Selected</option>
 									<option value="AF">Afghanistan</option>
 									<option value="AX">Åland Islands</option>
 									<option value="AL">Albania</option>

@@ -14,7 +14,9 @@ function userlist(){
         }
         return $pageResult;
     }else{
-        print('no permission');
+        //ERROR: No access!
+        $_SESSION['error_code'] = "403";
+        header("Location: index.php?page=error");
         exit;
     }
 }

@@ -5,7 +5,9 @@ function settings(){
             //in case id-GET param set it's value as target_id, if no id-param is given, ue the session id.
             if(isset($_GET['id'])){
                 if(($_GET['id'] != $_SESSION['id']) && (!WebUsers::isAdmin()) ){
-                    print('No permission to see this page!');
+                    //ERROR: No access!
+                    $_SESSION['error_code'] = "403";
+                    header("Location: index.php?page=error");
                     exit;
                 }else{
                     $result = WebUsers::getInfo($_GET['id']);
@@ -24,7 +26,7 @@ function settings(){
             return $result;
     }else{
         //ERROR: not logged in!
-        print("not logged in!");
+        header("Location: index.php");
         exit;
     }
 }
