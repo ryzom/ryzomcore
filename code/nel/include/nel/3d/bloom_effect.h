@@ -83,7 +83,6 @@ public:
 	// If window size exceeds 256*256 the textures used to apply blur are reinitialized with
 	// 256*256 size. If a dimension is less than 256, the texture is initialized with the nearer
 	// power of 2, lower than this window dimension.
-	void initBloom(UTexture *renderTarget);
 	void initBloom();
 
 	// Called at the end of renderAll method in the main loop, recover stretched texture, apply
@@ -132,15 +131,13 @@ private:
 	uint8		_DensityBloom;
 
 	// render target textures
-	// used to display scene (FIXME: redundant when user render target provided...)
+	// used to display scene
 	NLMISC::CSmartPtr<NL3D::ITexture>  _InitText;
 	// used as stretched texture from _InitText, as displayed texture in first blur pass,
 	// and as render target in second blur pass.
 	NLMISC::CSmartPtr<NL3D::ITexture>  _BlurFinalTex;
 	// used as render target in first blur pass, and as displayed texture on second blur pass.
 	NLMISC::CSmartPtr<NL3D::ITexture>  _BlurHorizontalTex;
-	/// User provided render target.
-	NLMISC::CSmartPtr<NL3D::ITexture> m_UserRenderTarget;
 
 
 	// materials
