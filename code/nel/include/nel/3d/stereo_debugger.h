@@ -1,9 +1,9 @@
 /**
- * \file stereo_ovr.h
- * \brief CStereoOVR
- * \date 2013-06-25 22:22GMT
+ * \file stereo_debugger.h
+ * \brief CStereoDebugger
+ * \date 2013-07-03 20:17GMT
  * \author Jan Boon (Kaetemi)
- * CStereoOVR
+ * CStereoDebugger
  */
 
 /* 
@@ -23,26 +23,11 @@
  * You should have received a copy of the GNU Affero General Public
  * License along with NL3D.  If not, see
  * <http://www.gnu.org/licenses/>.
- * 
- * Linking this library statically or dynamically with other modules
- * is making a combined work based on this library.  Thus, the terms
- * and conditions of the GNU General Public License cover the whole
- * combination.
- * 
- * As a special exception, the copyright holders of this library give
- * you permission to link this library with the Oculus SDK to produce
- * an executable, regardless of the license terms of the Oculus SDK,
- * and distribute linked combinations including the two, provided that
- * you also meet the terms and conditions of the license of the Oculus
- * SDK.  You must obey the GNU General Public License in all respects
- * for all of the code used other than the Oculus SDK.  If you modify
- * this file, you may extend this exception to your version of the
- * file, but you are not obligated to do so.  If you do not wish to do
- * so, delete this exception statement from your version.
  */
 
-#ifndef NL3D_STEREO_OVR_H
-#define NL3D_STEREO_OVR_H
+#if !FINAL_VERSION
+#ifndef NL3D_STEREO_DEBUGGER_H
+#define NL3D_STEREO_DEBUGGER_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -52,32 +37,31 @@
 #include <nel/misc/geom_ext.h>
 
 // Project includes
-#include <nel/3d/stereo_hmd.h>
+#include <nel/3d/stereo_display.h>
 #include <nel/3d/frustum.h>
 #include <nel/3d/viewport.h>
 #include <nel/3d/u_material.h>
+
+#define NL_STEREO_MAX_USER_CAMERAS 8
 
 namespace NL3D {
 
 class ITexture;
 class CTextureUser;
-class CStereoOVRDevicePtr;
-class CStereoOVRDeviceHandle;
 class CPixelProgram;
 
-#define NL_STEREO_MAX_USER_CAMERAS 8
-
 /**
- * \brief CStereoOVR
- * \date 2013-06-25 22:22GMT
+ * \brief CStereoDebugger
+ * \date 2013-07-03 20:17GMT
  * \author Jan Boon (Kaetemi)
- * CStereoOVR
+ * CStereoDebugger
  */
-class CStereoOVR : public IStereoHMD
+class CStereoDebugger : public IStereoDisplay
 {
 public:
-	CStereoOVR(const CStereoOVRDeviceHandle *handle);
-	virtual ~CStereoOVR();
+	CStereoDebugger();
+	virtual ~CStereoDebugger();
+
 
 	/// Sets driver and generates necessary render targets
 	virtual void setDriver(NL3D::UDriver *driver);
@@ -115,57 +99,32 @@ public:
 	virtual bool endRenderTarget();
 
 
-	/// Get the HMD orientation
-	virtual NLMISC::CQuat getOrientation() const;
-
-	/// Get GUI center (1 = width, 1 = height, 0 = center)
-	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance) const;
-
-	/// Set the head model, eye position relative to orientation point
-	virtual void setEyePosition(const NLMISC::CVector &v);
-	/// Get the head model, eye position relative to orientation point
-	virtual const NLMISC::CVector &getEyePosition() const;
-
-	/// Set the scale of the game in units per meter
-	virtual void setScale(float s);
-
-
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
-	static bool isLibraryInUse();
-	static void releaseLibrary();
-
-
-	/// Calculates internal camera information based on the reference camera
-	void initCamera(uint cid, const NL3D::UCamera *camera);
-	/// Checks if the device used by this class was actually created
-	bool isDeviceCreated();
 
 private:
-	CStereoOVRDevicePtr *m_DevicePtr;
+	UDriver *m_Driver;
+
 	int m_Stage;
 	int m_SubStage;
+
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;
-	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];
-	CFrustum m_LeftFrustum[NL_STEREO_MAX_USER_CAMERAS];
-	CFrustum m_RightFrustum[NL_STEREO_MAX_USER_CAMERAS];
+	CFrustum m_Frustum[NL_STEREO_MAX_USER_CAMERAS];
 	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];
-	mutable bool m_OrientationCached;
-	mutable NLMISC::CQuat m_OrientationCache;
-	UDriver *m_Driver;
-	NLMISC::CSmartPtr<NL3D::ITexture> m_BarrelTex;
-	NL3D::CTextureUser *m_BarrelTexU;
-	NL3D::UMaterial m_BarrelMat;
-	NLMISC::CQuadUV m_BarrelQuadLeft;
-	NLMISC::CQuadUV m_BarrelQuadRight;
-	CPixelProgram *m_PixelProgram;
-	NLMISC::CVector m_EyePosition;
-	float m_Scale;
 
-}; /* class CStereoOVR */
+	NLMISC::CSmartPtr<NL3D::ITexture> m_LeftTex;
+	NL3D::CTextureUser *m_LeftTexU;
+	NLMISC::CSmartPtr<NL3D::ITexture> m_RightTex;
+	NL3D::CTextureUser *m_RightTexU;
+	NL3D::UMaterial m_Mat;
+	NLMISC::CQuadUV m_QuadUV;
+	CPixelProgram *m_PixelProgram;
+
+}; /* class CStereoDebugger */
 
 } /* namespace NL3D */
 
-#endif /* #ifndef NL3D_STEREO_OVR_H */
+#endif /* #ifndef NL3D_STEREO_DEBUGGER_H */
+#endif /* #if !FINAL_VERSION */
 
 /* end of file */

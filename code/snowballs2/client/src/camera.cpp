@@ -124,8 +124,8 @@ void	initCamera()
 				StereoDisplay->setDriver(Driver); // move after driver creation, move stereodisplay before driver creation
 			}
 		}
-		IStereoDisplay::releaseUnusedLibraries();
 	}
+	IStereoDisplay::releaseUnusedLibraries();
 
 	// Set up directly the camera
 	Camera = Scene->getCam();

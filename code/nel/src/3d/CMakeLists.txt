@@ -164,7 +164,9 @@ SOURCE_GROUP(Driver FILES
         vertex_program.cpp
         ../../include/nel/3d/vertex_program.h
         vertex_program_parse.cpp
-        ../../include/nel/3d/vertex_program_parse.h)
+        ../../include/nel/3d/vertex_program_parse.h
+        pixel_program.cpp
+        ../../include/nel/3d/pixel_program.h)
 
 SOURCE_GROUP(Font FILES
         computed_string.cpp
@@ -693,7 +695,9 @@ SOURCE_GROUP(Stereo FILES
         ../../include/nel/3d/stereo_hmd.h
 		stereo_ovr.cpp
 		stereo_ovr_fp.cpp
-        ../../include/nel/3d/stereo_ovr.h)
+        ../../include/nel/3d/stereo_ovr.h
+		stereo_debugger.cpp
+		../../include/nel/3d/stereo_debugger.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 

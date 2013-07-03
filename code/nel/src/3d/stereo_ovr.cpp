@@ -145,6 +145,7 @@ sint s_DeviceCounter = 0;
 class CStereoOVRDeviceHandle : public IStereoDeviceFactory
 {
 public:
+	// fixme: virtual destructor???
 	OVR::DeviceEnumerator<OVR::HMDDevice> DeviceHandle;
 	IStereoDisplay *createDevice() const
 	{
@@ -311,10 +312,11 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 	}
 }
 
-void CStereoOVR::getScreenResolution(uint &width, uint &height)
+bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 {
 	width = m_DevicePtr->HMDInfo.HResolution;
 	height = m_DevicePtr->HMDInfo.VResolution;
+	return true;
 }
 
 void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)

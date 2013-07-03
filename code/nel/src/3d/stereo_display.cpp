@@ -35,6 +35,7 @@
 
 // Project includes
 #include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_debugger.h>
 
 using namespace std;
 // using namespace NLMISC;
@@ -75,6 +76,9 @@ const char *IStereoDisplay::getLibraryName(CStereoDeviceInfo::TStereoDeviceLibra
 void IStereoDisplay::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
 	CStereoOVR::listDevices(devicesOut);
+#if !FINAL_VERSION
+	CStereoDebugger::listDevices(devicesOut);
+#endif
 }
 
 IStereoDisplay *IStereoDisplay::createDevice(const CStereoDeviceInfo &deviceInfo)

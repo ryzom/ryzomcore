@@ -3,6 +3,7 @@
 Filename    :   stereo_ovf_fp.cpp
 Content     :   Barrel fragment program compiled to a blob of assembly
 Created     :   July 01, 2013
+Modified by :   Jan Boon (Kaetemi)
 
 Copyright   :   Copyright 2012 Oculus VR, Inc. All Rights reserved.
 

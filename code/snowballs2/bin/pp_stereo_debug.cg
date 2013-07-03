@@ -1,0 +1,25 @@
+
+void pp_stereo_debug(
+	// Per fragment parameters
+	float2 texCoord : TEXCOORD0,  
+	
+	// Fragment program constants
+	uniform sampler2D cTex0 : TEX0,
+	uniform sampler2D cTex1 : TEX1, 
+	
+	// Output color
+	out float4 oCol : COLOR)
+{
+	float4 t1 = tex2D(cTex0, texCoord);
+	float4 t2 = tex2D(cTex1, texCoord);
+	if (!any(t1 - t2))
+	{
+		oCol = (t1 * 0.5) + (t2 * 0.5);
+		oCol.g = 0.5 + (oCol.g * 0.5);
+	}
+	else
+	{
+		oCol = (t1 * 0.5) + (t2 * 0.5);
+		oCol.r = 0.5 + (oCol.r * 0.5);
+	}
+}
