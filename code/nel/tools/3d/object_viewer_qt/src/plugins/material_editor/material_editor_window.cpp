@@ -81,7 +81,7 @@ namespace MaterialEditor
 	void MaterialEditorWindow::onNewMaterialClicked()
 	{
 		nl3dIface->newMaterial();
-		materialSplitter->onNewMaterial();
+		materialSplitter->onMaterialLoaded();
 		passesWidget->onMaterialLoaded();
 	}
 

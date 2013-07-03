@@ -76,6 +76,7 @@ namespace NL3D
 	public:
 		CDynMaterial();
 		~CDynMaterial();
+		void clear();
 		void serial( NLMISC::IStream &f );
 		std::string getClassName(){ return "CDynMaterial"; }
 

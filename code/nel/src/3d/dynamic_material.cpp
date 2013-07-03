@@ -151,6 +151,11 @@ namespace NL3D
 
 	CDynMaterial::~CDynMaterial()
 	{
+		clear();
+	}
+
+	void CDynMaterial::clear()
+	{
 		std::vector< SRenderPass* >::iterator itr = passes.begin();
 		while( itr != passes.end() )
 		{

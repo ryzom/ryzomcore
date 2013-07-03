@@ -167,6 +167,7 @@ namespace MaterialEditor
 			return false;
 
 		newMaterial();
+		mat->clear();
 		mat->serial( xml );
 		file.close();
 
@@ -194,6 +195,7 @@ namespace MaterialEditor
 	{
 		delete mat;
 		mat = new NL3D::CDynMaterial();
+		
 	}
 
 	CNelMaterialProxy CNel3DInterface::getMaterial()
