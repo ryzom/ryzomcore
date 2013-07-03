@@ -52,13 +52,17 @@ public:
 	
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const = 0;
-	
-	/// Set the head model, eye position relative to orientation point
-	// virtual void setEyePosition(const NLMISC::CVector &v) = 0;
-	/// Get the head model, eye position relative to orientation point
-	// virtual const NLMISC::CVector &getEyePosition() const = 0;
+
 	/// Get GUI center (1 = width, 1 = height, 0 = center)
 	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance) const = 0;
+	
+	/// Set the head model, eye position relative to orientation point
+	virtual void setEyePosition(const NLMISC::CVector &v) = 0;
+	/// Get the head model, eye position relative to orientation point
+	virtual const NLMISC::CVector &getEyePosition() const = 0;
+
+	/// Set the scale of the game in units per meter
+	virtual void setScale(float s) = 0;
 	
 }; /* class IStereoHMD */
 

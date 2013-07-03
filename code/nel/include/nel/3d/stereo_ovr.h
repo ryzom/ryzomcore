@@ -117,8 +117,17 @@ public:
 
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const;
+
 	/// Get GUI center (1 = width, 1 = height, 0 = center)
 	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance) const;
+
+	/// Set the head model, eye position relative to orientation point
+	virtual void setEyePosition(const NLMISC::CVector &v);
+	/// Get the head model, eye position relative to orientation point
+	virtual const NLMISC::CVector &getEyePosition() const;
+
+	/// Set the scale of the game in units per meter
+	virtual void setScale(float s);
 
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
@@ -150,6 +159,8 @@ private:
 	NLMISC::CQuadUV m_BarrelQuadLeft;
 	NLMISC::CQuadUV m_BarrelQuadRight;
 	CPixelProgram *m_PixelProgram;
+	NLMISC::CVector m_EyePosition;
+	float m_Scale;
 
 }; /* class CStereoOVR */
 

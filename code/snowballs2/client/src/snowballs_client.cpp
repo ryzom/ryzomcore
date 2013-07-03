@@ -933,6 +933,8 @@ void renderInformation()
 	TextContext->setColor(CRGBA(255, 255, 255, 255));
 	TextContext->setFontSize(14);
 	TextContext->printfAt(0.01f, 0.99f, "%.2f(%.2f)fps %.3fs", FramesPerSecondSmooth, FramesPerSecond, (float)LocalTimeDelta);
+	CVector camPos = Camera.getMatrix().getPos();
+	TextContext->printfAt(0.01f, 0.89f, "CAM POS: %.3f %.3f %.3f", camPos.x, camPos.y, camPos.z);
 
 	// one more frame
 	FpsGraph.addValue(1.0f);

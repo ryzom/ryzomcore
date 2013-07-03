@@ -165,7 +165,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL), m_PixelProgram(NULL)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL), m_PixelProgram(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -433,8 +433,8 @@ void CStereoOVR::getCurrentFrustum(uint cid, NL3D::UCamera *camera) const
 void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 {
 	CMatrix translate;
-	if (m_Stage % 2) translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
-	else translate.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
+	if (m_Stage % 2) translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * -0.5f, 0.f, 0.f));
+	else translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * 0.5f, 0.f, 0.f));
 	camera->setTransformMode(NL3D::UTransformable::DirectMatrix);
 	camera->setMatrix(m_CameraMatrix[cid] * translate);
 }
@@ -594,6 +594,8 @@ void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distanc
 {
 #if 0
 
+	// todo: take into account m_EyePosition
+
 	NLMISC::CVector vector = CVector(0.f, -distance, 0.f);
 	NLMISC::CQuat rot = getOrientation();
 	rot.invert();
@@ -616,11 +618,12 @@ void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distanc
 #elif 1
 
 	// Alternative method
+	// todo: take into account m_EyePosition
 
 	NLMISC::CVector vec = CVector(0.f, -distance, 0.f);
 	NLMISC::CVector ipd;
-	if (m_Stage % 2) ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f);
-	else ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f);
+	if (m_Stage % 2) ipd = CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * -0.5f, 0.f, 0.f);
+	else ipd = CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * 0.5f, 0.f, 0.f);
 	
 
 	NLMISC::CQuat rot = getOrientation();
@@ -638,6 +641,22 @@ void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distanc
 	y = (proj.y - 0.5f);
 
 #endif
+}
+
+void CStereoOVR::setEyePosition(const NLMISC::CVector &v)
+{
+	m_EyePosition = v;
+}
+
+const NLMISC::CVector &CStereoOVR::getEyePosition() const
+{
+	return m_EyePosition;
+}
+
+void CStereoOVR::setScale(float s)
+{
+	m_EyePosition = m_EyePosition * (s / m_Scale);
+	m_Scale = s;
 }
 
 void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)

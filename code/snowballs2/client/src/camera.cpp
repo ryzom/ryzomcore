@@ -119,6 +119,7 @@ void	initCamera()
 				{
 					nlinfo("Stereo display device is a HMD");
 					StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+					StereoHMD->setScale(3.0f); // snowballs is about 4 units per meter
 				}
 				StereoDisplay->setDriver(Driver); // move after driver creation, move stereodisplay before driver creation
 			}
@@ -189,7 +190,9 @@ void updateCamera()
 		NLMISC::CMatrix camMatrix = Camera.getMatrix();
 		NLMISC::CMatrix hmdMatrix;
 		hmdMatrix.setRot(hmdOrient);
-		Camera.setMatrix(camMatrix * hmdMatrix);
+		NLMISC::CMatrix posMatrix; // minimal head modeling, will be changed in the future
+		posMatrix.translate(StereoHMD->getEyePosition());
+		Camera.setMatrix((camMatrix * hmdMatrix) * posMatrix);
 	}
 	// Set the new position of the snow emitter
 	CMatrix	mat = CMatrix::Identity;
