@@ -21,6 +21,8 @@
 #include <QObject>
 
 class QtTreePropertyBrowser;
+class QtVariantPropertyManager;
+class QtVariantEditorFactory;
 
 namespace MaterialEditor
 {
@@ -41,6 +43,9 @@ namespace MaterialEditor
 
 	private:
 		QtTreePropertyBrowser *browser;
+		QtVariantPropertyManager *manager;
+		QtVariantEditorFactory *factory;
+
 		CNel3DInterface *nel3dIface;
 		QString currentPass;
 	};

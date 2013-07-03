@@ -48,6 +48,7 @@ namespace MaterialEditor
 	
 	Q_SIGNALS:
 		void propsChanged();
+		void passChanged( const QString &pass );
 
 	private:
 		void setupConnections();
@@ -59,6 +60,7 @@ namespace MaterialEditor
 		void onPassEditClicked();
 		void onShaderEditClicked();
 		void onShaderEditOKClicked();
+		void onPassCBChanged( const QString &text );
 	};
 
 }

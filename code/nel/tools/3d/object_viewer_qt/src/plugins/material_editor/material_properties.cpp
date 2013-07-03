@@ -43,6 +43,7 @@ namespace MaterialEditor
 	void MatPropWidget::load( CRenderPassProxy *proxy )
 	{
 		clear();
+		changed = false;
 		this->proxy = new CRenderPassProxy( *proxy );
 
 		std::string n;
@@ -74,7 +75,6 @@ namespace MaterialEditor
 	{
 		treeWidget->clear();
 		nameEdit->clear();
-		changed = false;
 		if( this->proxy != NULL )
 		{
 			delete this->proxy;

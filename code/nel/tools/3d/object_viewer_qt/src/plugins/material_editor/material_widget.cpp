@@ -128,6 +128,7 @@ namespace MaterialEditor
 	{
 		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
 		connect( shaderButton, SIGNAL( clicked( bool ) ), this, SLOT( onShaderEditClicked() ) );
+		connect( passCB, SIGNAL( currentIndexChanged( const QString& ) ), this, SLOT( onPassCBChanged( const QString& ) ) );
 
 		connect( shaderEditorWidget, SIGNAL( okClicked() ), this, SLOT( onShaderEditOKClicked() ) );
 	}
@@ -153,5 +154,12 @@ namespace MaterialEditor
 	{
 	}
 
+	void MaterialWidget::onPassCBChanged( const QString &text )
+	{
+		if( text.isEmpty() )
+			return;
+
+		Q_EMIT passChanged( text );
+	}
 }
 

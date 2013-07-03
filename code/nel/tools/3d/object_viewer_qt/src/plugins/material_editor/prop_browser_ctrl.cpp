@@ -17,24 +17,163 @@
 
 #include "prop_browser_ctrl.h"
 #include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
+#include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
 #include "nel3d_interface.h"
 
 namespace MaterialEditor
 {
+	int propToQVariant( unsigned char t )
+	{
+		int type = 0;
+
+		switch( t )
+		{
+		case SMatProp::Color:
+			type = QVariant::String;
+			break;
+		
+		case SMatProp::Double:
+			type = QVariant::Double;
+			break;
+		
+		case SMatProp::Float:
+			type = QVariant::Double;
+			break;
+		
+		case SMatProp::Int:
+			type = QVariant::Int;
+			break;
+		
+		case SMatProp::Matrix4:
+			type = QVariant::String;
+			break;
+		
+		case SMatProp::Texture:
+			type = QVariant::String;
+			break;
+		
+		case SMatProp::Uint:
+			type = QVariant::UInt;
+			break;
+		
+		case SMatProp::Vector4:
+			type = QVariant::String;
+			break;
+		
+		default:
+			type = QVariant::String;
+			break;
+		}
+
+		return type;
+	}
+
+	void propValToQVariant( const SMatProp &p, QVariant &v )
+	{
+		bool ok = false;
+		QString s;
+
+		switch( p.type )
+		{
+		case SMatProp::Color:
+			v = p.value.c_str();
+			break;
+		
+		case SMatProp::Double:
+			double d;
+			
+			s = p.value.c_str();
+			d = s.toDouble( &ok );
+			if( ok )
+				v = d;
+			else
+				v = 0.0;
+
+			break;
+		
+		case SMatProp::Float:
+			float f;
+
+			s = p.value.c_str();
+			f = s.toFloat( &ok );
+			if( ok )
+				v = f;
+			else
+				v = 0.0f;
+
+			break;
+		
+		case SMatProp::Int:
+			int i;
+
+			s = p.value.c_str();
+			i = s.toInt( &ok );
+			if( ok )
+				v = i;
+			else
+				v = 0;
+
+			break;
+		
+		case SMatProp::Matrix4:
+			v = p.value.c_str();
+			break;
+		
+		case SMatProp::Texture:
+			v = p.value.c_str();
+			break;
+		
+		case SMatProp::Uint:
+			unsigned int u;
+
+			s = p.value.c_str();
+			u = s.toUInt( &ok );
+			if( ok )
+				v = u;
+			else
+				v = 0u;
+
+			break;
+		
+		case SMatProp::Vector4:
+			v = p.value.c_str();
+			break;
+		
+		default:
+			v = "";
+			break;
+		}
+	}
+
+
+
+
+
+
+
 	CPropBrowserCtrl::CPropBrowserCtrl( QObject *parent ) :
 	QObject( parent )
 	{
 		browser = NULL;
 		nel3dIface = NULL;
+		manager = new QtVariantPropertyManager();
+		factory = new QtVariantEditorFactory();
 	}
 
 	CPropBrowserCtrl::~CPropBrowserCtrl()
 	{
+		browser = NULL;
+		nel3dIface = NULL;
+		delete manager;
+		manager = NULL;
+		delete factory;
+		factory = NULL;
 	}
 	
 	void CPropBrowserCtrl::setBrowser( QtTreePropertyBrowser *b )
 	{
 		browser = b;
+		browser->setFactoryForManager( manager, factory );
 	}
 
 	void CPropBrowserCtrl::setNel3DIface( CNel3DInterface *iface )
@@ -60,8 +199,37 @@ namespace MaterialEditor
 	void CPropBrowserCtrl::loadPropsForPass( const QString &pass )
 	{
 		currentPass = pass;
+		clearProps();
+
+		if( pass.isEmpty() )
+			return;
+
 		CNelMaterialProxy m = nel3dIface->getMaterial();
 		CRenderPassProxy p = m.getPass( pass.toUtf8().data() );
+		
+		std::vector< SMatProp > v;
+		p.getProperties( v );
+
+		QtVariantProperty *vp = NULL;
+		int type = 0;
+		QVariant qv;
+
+		std::vector< SMatProp >::const_iterator itr = v.begin();
+		while( itr != v.end() )
+		{
+			const SMatProp &prop = *itr;
+
+			type = propToQVariant( prop.type );
+			
+			vp = manager->addProperty( type, prop.label.c_str() );
+
+			propValToQVariant( prop, qv );
+			vp->setValue( qv );
+
+			browser->addProperty( vp );
+
+			++itr;
+		}
 	}
 
 }
