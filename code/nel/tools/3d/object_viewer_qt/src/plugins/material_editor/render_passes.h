@@ -40,6 +40,7 @@ namespace MaterialEditor
 
 	private:
 		void setupConnections();
+		bool passExists( const QString &label );
 
 		CNel3DInterface *nl3dIface;
 		CMaterialObserver *observer;

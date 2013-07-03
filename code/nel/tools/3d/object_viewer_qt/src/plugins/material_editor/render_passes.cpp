@@ -84,6 +84,19 @@ namespace MaterialEditor
 		connect( downButton, SIGNAL( clicked( bool ) ), this, SLOT( onDownClicked() ) );
 	}
 
+	bool RenderPassesWidget::passExists( const QString &label )
+	{
+		int c = listWidget->count();
+
+		for( int i = 0; i < c; i++ )
+		{
+			if( label == listWidget->item( i )->text() )
+				return true;
+		}
+		
+		return false;
+	}
+
 	void RenderPassesWidget::onOKClicked()
 	{
 		close();
@@ -101,17 +114,7 @@ namespace MaterialEditor
 		if( label.isEmpty() )
 			return;
 
-		int i = 0;
-		while( i < listWidget->count() )
-		{
-			QListWidgetItem *item = listWidget->item( i );
-			QString text = item->text();
-			if( text == label )
-				break;
-			i++;
-		}
-
-		if( i < listWidget->count() )
+		if( passExists( label ) )
 		{
 			QMessageBox::warning( 
 				NULL,
@@ -167,6 +170,19 @@ namespace MaterialEditor
 
 		if( to.isEmpty() )
 			return;
+
+		if( from == to )
+			return;
+
+		if( passExists( to ) )
+		{
+			QMessageBox::warning( 
+				NULL,
+				tr( "Pass label" ),
+				tr( "Pass label already exists!" ) 
+				);
+			return;
+		}
 
 		item->setText( to );
 		
