@@ -109,8 +109,8 @@ public:
 	/// 2D Interface
 	virtual bool wantInterface2D();
 
-	/// Returns non-NULL if a new render target was set, always NULL if not using render targets
-	virtual UTexture *beginRenderTarget(bool set);
+	/// Returns true if a new render target was set, always fase if not using render targets
+	virtual bool beginRenderTarget();
 	/// Returns true if a render target was fully drawn, always false if not using render targets
 	virtual bool endRenderTarget();
 

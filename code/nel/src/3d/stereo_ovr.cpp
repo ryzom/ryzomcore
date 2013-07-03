@@ -488,19 +488,16 @@ bool CStereoOVR::wantInterface2D()
 
 
 /// Returns non-NULL if a new render target was set
-UTexture *CStereoOVR::beginRenderTarget(bool set)
+bool CStereoOVR::beginRenderTarget()
 {
 	// render target always set before driver clear
 	// nlassert(m_SubStage <= 1);
 	if (m_Driver && m_Stage == 1)
 	{
-		if (set)
-		{
-			(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(*m_BarrelTexU, 0, 0, 0, 0);
-		}
-		return m_BarrelTexU;
+		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_BarrelTexU, 0, 0, 0, 0);
+		return true;
 	}
-	return NULL;
+	return false;
 }
 
 /// Returns true if a render target was fully drawn

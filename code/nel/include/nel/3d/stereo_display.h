@@ -121,9 +121,9 @@ public:
 	/// 2D Interface
 	virtual bool wantInterface2D() = 0;
 
-	/// Returns non-NULL if a new render target was set
-	virtual UTexture *beginRenderTarget(bool set) = 0;
-	/// Returns true if a render target was fully drawn
+	/// Returns true if a new render target was set, always fase if not using render targets
+	virtual bool beginRenderTarget() = 0;
+	/// Returns true if a render target was fully drawn, always false if not using render targets
 	virtual bool endRenderTarget() = 0;
 	
 	static const char *getLibraryName(CStereoDeviceInfo::TStereoDeviceLibrary library);

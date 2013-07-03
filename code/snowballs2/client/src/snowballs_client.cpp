@@ -754,15 +754,19 @@ void loopIngame()
 					StereoDisplay->getCurrentFrustum(0, &SkyCamera);
 					StereoDisplay->getCurrentMatrix(0, &Camera);
 				}
+
+				if (StereoDisplay)
+				{
+					StereoDisplay->beginRenderTarget();
+				}
 				
 				if (!StereoDisplay || StereoDisplay->wantClear())
 				{
-					NL3D::UTexture *rt = StereoDisplay ? StereoDisplay->beginRenderTarget(!s_EnableBloom) : NULL;
 
 					if (s_EnableBloom)
 					{
 						nlassert(bloomStage == 0);
-						CBloomEffect::instance().initBloom(/*rt*/); // start bloom effect (just before the first scene element render)
+						CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
 						bloomStage = 1;
 					}
 
