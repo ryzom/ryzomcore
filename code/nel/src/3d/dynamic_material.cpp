@@ -115,7 +115,7 @@ namespace NL3D
 		properties.erase( itr );
 	}
 
-	void SRenderPass::changeProperty( const std::string &name, const SDynMaterialProp &prop )
+	bool SRenderPass::changeProperty( const std::string &name, const SDynMaterialProp &prop )
 	{
 		std::vector< SDynMaterialProp >::iterator itr = properties.begin();
 		while( itr != properties.end() )
@@ -125,12 +125,14 @@ namespace NL3D
 			++itr;
 		}
 		if( itr == properties.end() )
-			return;
+			return false;
 
 		itr->prop  = prop.prop;
 		itr->label = prop.label;
 		itr->type  = prop.type;
 		itr->value = prop.value;
+
+		return true;
 	}
 
 

@@ -19,10 +19,13 @@
 #define PROP_BROWSER_CTRL_H
 
 #include <QObject>
+#include <QVariant>
+#include <map>
 
 class QtTreePropertyBrowser;
 class QtVariantPropertyManager;
 class QtVariantEditorFactory;
+class QtProperty;
 
 namespace MaterialEditor
 {
@@ -39,7 +42,10 @@ namespace MaterialEditor
 		void setupConnections();
 		void onPropsChanged();
 		void clearProps();
-		void loadPropsForPass( const QString &pass );		
+		void loadPropsForPass( const QString &pass );
+
+	private Q_SLOTS:
+		void onValueChanged( QtProperty *p, const QVariant &v );
 
 	private:
 		QtTreePropertyBrowser *browser;
@@ -48,6 +54,8 @@ namespace MaterialEditor
 
 		CNel3DInterface *nel3dIface;
 		QString currentPass;
+
+		std::map< QtProperty*, std::string > propToId;
 	};
 }
 

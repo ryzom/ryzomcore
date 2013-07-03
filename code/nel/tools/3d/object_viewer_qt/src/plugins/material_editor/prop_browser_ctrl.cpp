@@ -158,6 +158,8 @@ namespace MaterialEditor
 		nel3dIface = NULL;
 		manager = new QtVariantPropertyManager();
 		factory = new QtVariantEditorFactory();
+
+		setupConnections();
 	}
 
 	CPropBrowserCtrl::~CPropBrowserCtrl()
@@ -183,6 +185,8 @@ namespace MaterialEditor
 
 	void CPropBrowserCtrl::setupConnections()
 	{
+		connect( manager, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
+			this, SLOT( onValueChanged( QtProperty*, const QVariant& ) ) );
 	}
 
 	void CPropBrowserCtrl::onPropsChanged()
@@ -194,6 +198,7 @@ namespace MaterialEditor
 	void CPropBrowserCtrl::clearProps()
 	{
 		browser->clear();
+		propToId.clear();
 	}
 
 	void CPropBrowserCtrl::loadPropsForPass( const QString &pass )
@@ -228,8 +233,33 @@ namespace MaterialEditor
 
 			browser->addProperty( vp );
 
+			propToId[ vp ] = prop.id;
+
 			++itr;
 		}
+	}
+
+	void CPropBrowserCtrl::onValueChanged( QtProperty *p, const QVariant &v )
+	{
+		QString label = p->propertyName();
+		std::string value = p->valueText().toUtf8().data();
+
+		CNelMaterialProxy m = nel3dIface->getMaterial();
+		CRenderPassProxy pass = m.getPass( currentPass.toUtf8().data() );
+
+		std::map< QtProperty*, std::string >::const_iterator itr
+			= propToId.find( p );
+		if( itr == propToId.end() )
+			return;
+
+		SMatProp prop;
+		bool ok = pass.getProperty( itr->second, prop );
+		if( !ok )
+			return;
+
+		prop.value = value;
+		pass.changeProperty( prop );
+
 	}
 
 }

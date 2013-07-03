@@ -54,7 +54,7 @@ namespace NL3D
 	public:
 		void addProperty( const SDynMaterialProp &prop );
 		void removeProperty( const std::string &name );
-		void changeProperty( const std::string &name, const SDynMaterialProp &prop );
+		bool changeProperty( const std::string &name, const SDynMaterialProp &prop );
 		void setName( const std::string &n ){ name = n; }
 		void getName( std::string &n ) const { n = name; }
 		void serial( NLMISC::IStream &f );

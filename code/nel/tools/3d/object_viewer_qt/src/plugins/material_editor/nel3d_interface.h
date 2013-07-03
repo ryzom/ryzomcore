@@ -72,6 +72,9 @@ namespace MaterialEditor
 		void getName( std::string &name );
 		void setName( const std::string &name );
 
+		bool getProperty( const std::string &name, SMatProp &p );
+		bool changeProperty( const SMatProp &p );
+
 	private:
 		NL3D::SRenderPass *pass;
 	};

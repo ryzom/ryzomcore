@@ -97,9 +97,39 @@ namespace MaterialEditor
 		pass->setName( name );
 	}
 
+	bool CRenderPassProxy::getProperty( const std::string &name, SMatProp &p )
+	{
+		uint32 count = pass->count();
+		uint32 i = 0;
+		
+		for( i = 0; i < count; i++ )
+		{
+			if( pass->getProperty( i )->prop == name )
+				break;
+		}
 
+		if( i == count )
+			return false;
+		
+		const NL3D::SDynMaterialProp *prop = pass->getProperty( i );
+		p.id    = prop->prop;
+		p.label = prop->label;
+		p.type  = prop->type;
+		p.value = prop->value;
 
+		return true;
+	}
 
+	bool CRenderPassProxy::changeProperty( const SMatProp &p )
+	{
+		NL3D::SDynMaterialProp prop;
+		prop.prop  = p.id;
+		prop.label = p.label;
+		prop.type  = p.type;
+		prop.value = p.value;
+
+		return pass->changeProperty( prop.prop, prop );
+	}
 
 	void CNelMaterialProxy::getPassList( std::vector< std::string > &l )
 	{
