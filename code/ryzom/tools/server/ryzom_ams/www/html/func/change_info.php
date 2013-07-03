@@ -32,13 +32,17 @@ function change_info(){
                         $values['fName'] = $_POST['FirstName'];
                     }
                     if(($_POST['LastName'] != "") && ($_POST['LastName'] != $current_info['LastName'])){
-                        $query = $query . "LastName = :lName ";
+			if($updated){
+			 $query = $query . ", LastName = :lName ";
+			}else{
+			 $query = $query . "LastName = :lName ";
+			}
                         $updated = true;
                         $values['lName'] = $_POST['LastName'];
                     }
                     //TODO: add the other fields too
                     $query = $query . "WHERE Login = :user";
-                    
+
                     //if some field is update then:
                     if($updated){
                         global $cfg;

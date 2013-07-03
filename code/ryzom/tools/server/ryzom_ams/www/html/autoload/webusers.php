@@ -123,4 +123,10 @@ class WebUsers extends Users{
         return $reply;
     }
     
+    public function getUsers(){
+        global $cfg;
+        $dbl = new DBLayer($cfg['db']['web']);
+        $data = $dbl->executeWithoutParams("SELECT * FROM ams_user");
+        return $data;
+    }
 }
