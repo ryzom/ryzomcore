@@ -45,8 +45,8 @@ function libuserlist(){
             $decode = json_decode($row['query']);
             $pageResult['liblist'][$i]['id'] = $row['SID'];
             $pageResult['liblist'][$i]['type'] = $row['type'];
-            $pageResult['liblist'][$i]['name'] = $decode[0];
-            $pageResult['liblist'][$i]['mail'] = $decode[2];
+            //$pageResult['liblist'][$i]['name'] = $decode[0];
+            //$pageResult['liblist'][$i]['mail'] = $decode[2];
             $i++;
         }
     }
