@@ -191,6 +191,8 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 	_WaterEnvMap = NULL;
 
 	_GlobalSystemTime= 0.0;
+
+	_RequestParticlesAnimate = false;
 }
 // ***************************************************************************
 void	CScene::release()
@@ -380,6 +382,9 @@ void	CScene::endPartRender()
 	IDriver *drv = getDriver();
 	drv->activeVertexProgram(NULL);
 	drv->activePixelProgram(NULL);
+
+	// Ensure nothing animates on subsequent renders
+	_EllapsedTime = 0.f;
 
 	/*
 	uint64 total = PSStatsRegisterPSModelObserver +
@@ -617,7 +622,11 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass)
 		// loadBalance
 		LoadBalancingTrav.traverse();
 		//
-		_ParticleSystemManager.processAnimate(_EllapsedTime); // deals with permanently animated particle systems
+		if (_RequestParticlesAnimate)
+		{
+			_ParticleSystemManager.processAnimate(_EllapsedTime); // deals with permanently animated particle systems
+			_RequestParticlesAnimate = false;
+		}
 		// Light
 		LightTrav.traverse();
 	}
@@ -863,6 +872,9 @@ void CScene::animate( TGlobalAnimationTime atTime )
 
 	// Rendered part are invalidate
 	_RenderedPart = UScene::RenderNothing;
+
+	// Particles are animated later due to dependencies
+	_RequestParticlesAnimate = true;
 }
 
 

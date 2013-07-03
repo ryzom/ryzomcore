@@ -219,7 +219,8 @@ void releaseSky()
 // -- -- random note: update and render makes more sense than animate and update
 void animateSky(double dt)
 {
-	if (!StereoDisplay) Clouds->anim(dt);
+	if (!StereoHMD) Clouds->anim(dt);
+	SkyScene->animate(AnimationTime);
 }
 
 // this is actually render
@@ -232,7 +233,6 @@ void updateSky()
 	skyCameraMatrix.setPos(CVector::Null);
 	SkyCamera.setMatrix(skyCameraMatrix);
 
-	SkyScene->animate(AnimationTime);
 	SkyScene->render();
 	// Must clear ZBuffer For incoming rendering.
 	Driver->clearZBuffer();
