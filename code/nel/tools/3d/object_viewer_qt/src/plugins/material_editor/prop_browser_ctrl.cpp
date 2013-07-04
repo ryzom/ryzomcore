@@ -20,8 +20,44 @@
 #include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
 #include "nel3d_interface.h"
 
+#include <QMatrix4x4>
+
 namespace MaterialEditor
 {
+	bool QStringToQMatrix4x4( const QString &s, QMatrix4x4 &m )
+	{
+		QString ms = s;
+		bool ok = false;
+		bool success = true;
+		double da[ 16 ];
+
+		QStringList sl = ms.split( " " );
+		QStringListIterator it( sl );
+		int i = 0;
+
+		while( it.hasNext() )
+		{
+			double d = it.next().toDouble( &ok );
+
+			if( ok )
+			{
+				da[ i ] = d;
+			}
+			else
+			{
+				da[ i ] = 0.0;
+				success = false;
+			}
+
+			i++;
+		}
+
+		m = QMatrix4x4( da );
+
+		return success;
+	}
+
+
 	int propToQVariant( unsigned char t )
 	{
 		int type = 0;
@@ -29,7 +65,7 @@ namespace MaterialEditor
 		switch( t )
 		{
 		case SMatProp::Color:
-			type = QVariant::String;
+			type = QVariant::Color;
 			break;
 		
 		case SMatProp::Double:
@@ -76,7 +112,7 @@ namespace MaterialEditor
 		switch( p.type )
 		{
 		case SMatProp::Color:
-			v = p.value.c_str();
+			v = QColor( p.value.c_str() );
 			break;
 		
 		case SMatProp::Double:
@@ -116,7 +152,15 @@ namespace MaterialEditor
 			break;
 		
 		case SMatProp::Matrix4:
-			v = p.value.c_str();
+			{
+				/*
+				QMatrix4x4 m;
+				m.fill( 0.0 );
+				QStringToQMatrix4x4( p.value.c_str(), m );
+				v = QVariant( m );
+				*/
+				v = p.value.c_str();
+			}
 			break;
 		
 		case SMatProp::Texture:
@@ -228,13 +272,13 @@ namespace MaterialEditor
 			
 			vp = manager->addProperty( type, prop.label.c_str() );
 
-			propValToQVariant( prop, qv );
-			vp->setValue( qv );
-
-			browser->addProperty( vp );
-
-			propToId[ vp ] = prop.id;
-
+			if( vp != NULL )
+			{
+				propValToQVariant( prop, qv );
+				vp->setValue( qv );
+				browser->addProperty( vp );
+				propToId[ vp ] = prop.id;
+			}
 			++itr;
 		}
 	}
@@ -259,6 +303,7 @@ namespace MaterialEditor
 
 		prop.value = value;
 		pass.changeProperty( prop );
+		
 
 	}
 
