@@ -691,13 +691,13 @@ void loopIngame()
 		CGameTime::updateTime();
 		CGameTime::advanceTime(1.0);
 
-		// 03. Update Input (keyboard controls, etc)
+		// 03. Update Incoming (network, receive messages)
+		updateNetwork();
+
+		// 04. Update Input (keyboard controls, etc)
 		Driver->EventServer.pump(); // Pump user input messages
 		MouseListener->update();
 		MouseListener->updateCamera();
-
-		// 04. Update Incoming (network, receive messages)
-		updateNetwork();
 
 		// 05. Update Weather (sky, snow, wind, fog, sun)
 		animateSky(LocalTimeDelta);
@@ -706,7 +706,7 @@ void loopIngame()
 		updateLandscape(); // Update the landscape
 
 		// ... Update Animations (TEST)
-		// ...
+		updateAnimation();
 
 		// 07. Update Entities (collisions and actions)
 		//                           - Move Other Entities (move//, animations, etc)
@@ -783,7 +783,7 @@ void loopIngame()
 					Scene->render(); // Render
 
 					// 05. Render Effects (flare)
-					if (!StereoDisplay) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
+					if (!StereoHMD) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
 				}
 
 				if (!StereoDisplay || StereoDisplay->wantInterface3D())
@@ -817,7 +817,6 @@ void loopIngame()
 					updateRadar(); // Update the radar
 					updateGraph(); // Update the radar
 					if (ShowCommands) updateCommands(); // Update the commands panel
-					updateAnimation();
 					renderEntitiesNames(); // Render the name on top of the other players
 					updateInterface(); // Update interface
 					renderInformation();
