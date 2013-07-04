@@ -550,73 +550,81 @@ void renderScene(bool forceFullDetail, bool bloom)
 }
 
 // ***************************************************************************************************************************
+
+void updateWeather()
+{
+	H_AUTO_USE ( RZ_Client_Main_Loop_Sky_And_Weather )
+
+	//HeightGrid.update(Scene->getCam().getPos());
+
+	// update description of light cycle
+	updateLightDesc();
+
+	// server driven weather mgt
+	updateDBDrivenWeatherValue();
+
+	// Update the weather manager
+	updateWeatherManager(MainCam.getMatrix(), ContinentMngr.cur());
+
+	// compute thunder color
+	ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
+
+	// Update the lighting
+	LightCycleManager.setHour(DayNightCycleHour, WeatherManager, ThunderColor);
+
+	#ifdef RENDER_CLOUDS
+	if (Filter3D[FilterCloud])
+	{
+		H_AUTO_USE ( RZ_Client_Main_Loop_Update_Cloud_Scape );
+		updateClouds();
+	}
+	#endif
+	
+	ContinentMngr.getFogState(MainFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), MainFogState);
+
+	// TODO: ZBuffer clear was originally before this, but should not be necessary normally.
+	// The anim function renders new clouds. Ensure this does not break.
+	// These are old-style nel clouds.
+
+	#ifdef RENDER_CLOUDS
+	if (CloudScape != NULL && Filter3D[FilterCloud])
+	{
+		H_AUTO_USE ( RZ_Client_Main_Loop_Anim_Cloud_Scape );
+
+		Driver->enableFog (false);
+
+		// Force polygon mode to filled
+		NL3D::UDriver::TPolygonMode oldMode = Driver->getPolygonMode();
+		Driver->setPolygonMode(NL3D::UDriver::Filled);
+
+		CloudScape->anim (DT); // WARNING this function work with screen
+
+		Driver->enableFog (true);
+
+		// Reset backuped polygon mode
+		Driver->setPolygonMode(oldMode);
+	}
+	#endif
+}
+
+// ***************************************************************************************************************************
 // Render all scenes
 void renderScene()
 {
+	if (Driver->getPolygonMode() == UDriver::Filled)
 	{
-		H_AUTO_USE ( RZ_Client_Main_Loop_Sky_And_Weather )
+		Driver->clearZBuffer();
+	}
 
-		//HeightGrid.update(Scene->getCam().getPos());
-
-		// update description of light cycle
-		updateLightDesc();
-
-		// server driven weather mgt
-		updateDBDrivenWeatherValue();
-
-		// Update the weather manager
-		updateWeatherManager(MainCam.getMatrix(), ContinentMngr.cur());
-
-		// compute thunder color
-		ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
-
-		// Update the lighting
-		LightCycleManager.setHour(DayNightCycleHour, WeatherManager, ThunderColor);
-
-		#ifdef RENDER_CLOUDS
-		if (Filter3D[FilterCloud])
+	// Sky is used to clear the frame buffer now, but if in line or point polygon mode, we should draw it
+	if (Driver->getPolygonMode() != UDriver::Filled)
+	{
+		if (!Driver->isLost())
 		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Update_Cloud_Scape );
-			updateClouds();
-		}
-		#endif
-
-
-		ContinentMngr.getFogState(MainFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), MainFogState);
-
-		if (Driver->getPolygonMode() == UDriver::Filled)
-		{
-			Driver->clearZBuffer();
-		}
-
-		#ifdef RENDER_CLOUDS
-		if (CloudScape != NULL && Filter3D[FilterCloud])
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Anim_Cloud_Scape );
-
-			Driver->enableFog (false);
-
-			// Force polygon mode to filled
-			NL3D::UDriver::TPolygonMode oldMode = Driver->getPolygonMode();
-			Driver->setPolygonMode(NL3D::UDriver::Filled);
-
-			CloudScape->anim (DT); // WARNING this function work with screen
-
-			Driver->enableFog (true);
-
-			// Reset backuped polygon mode
-			Driver->setPolygonMode(oldMode);
-		}
-		#endif
-		// Sky is used to clear the frame buffer now, but if in line or point polygon mode, we should draw it
-		if (Driver->getPolygonMode() != UDriver::Filled)
-		{
-			if (!Driver->isLost())
-			{
-				Driver->clearBuffers (CRGBA(127, 127, 127));
-			}
+			Driver->clearBuffers (CRGBA(127, 127, 127));
 		}
 	}
+
 	// Update Filter Flags
 	Scene->enableElementRender(UScene::FilterAllMeshNoVP, Filter3D[FilterMeshNoVP]);
 	Scene->enableElementRender(UScene::FilterAllMeshVP, Filter3D[FilterMeshVP]);
@@ -1541,6 +1549,9 @@ bool mainLoop()
 					Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
 				}
 				#endif
+				
+				// TODO: Verify that moving this out of renderScene does not negatively impact oversize screenshots.
+				updateWeather();
 
 				if (ClientCfg.Bloom)
 				{
