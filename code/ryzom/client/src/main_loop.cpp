@@ -352,6 +352,12 @@ void displaySceneProfiles();
 // validate current dialogs (end them if the player is too far from its interlocutor)
 void validateDialogs(const CGameContextMenu &gcm);
 
+
+// ***************************************************************************
+
+enum TSkyMode { NoSky, OldSky, NewSky };
+static TSkyMode s_SkyMode = NoSky;
+
 void preRenderNewSky ()
 {
 	CSky &sky = ContinentMngr.cur()->CurrentSky;
@@ -362,29 +368,31 @@ void preRenderNewSky ()
 		cd.Hour = 12.f;
 	}
 	sky.setup(cd, SmoothedClientDate, WeatherManager.getWeatherValue(), MainFogState.FogColor, Scene->getSunDirection(), false);
-	// setup camera
-	CFrustum frust = MainCam.getFrustum();
-	UCamera camSky = sky.getScene()->getCam();
-	sky.getScene()->setViewport(Scene->getViewport());
-	camSky.setTransformMode(UTransform::DirectMatrix);
-	// must have our own Far!!!
-	frust.Far= SkyCameraZFar;
-	camSky.setFrustum(frust);
-	CMatrix skyCameraMatrix;
-	skyCameraMatrix.identity();
-	skyCameraMatrix= MainCam.getMatrix();
-	skyCameraMatrix.setPos(CVector::Null);
-	camSky.setMatrix(skyCameraMatrix);
 }
 
-//uint32 MainLoopCounter = 0;
-
+void commitCameraSky()
+{
+	if (s_SkyMode == NewSky)
+	{
+		CSky &sky = ContinentMngr.cur()->CurrentSky;
+		// setup camera
+		CFrustum frust = MainCam.getFrustum();
+		UCamera camSky = sky.getScene()->getCam();
+		sky.getScene()->setViewport(Scene->getViewport());
+		camSky.setTransformMode(UTransform::DirectMatrix);
+		// must have our own Far!!!
+		frust.Far= SkyCameraZFar;
+		camSky.setFrustum(frust);
+		CMatrix skyCameraMatrix;
+		skyCameraMatrix.identity();
+		skyCameraMatrix= MainCam.getMatrix();
+		skyCameraMatrix.setPos(CVector::Null);
+		camSky.setMatrix(skyCameraMatrix);
+	}
+}
 
 // ***************************************************************************
-enum TSkyMode { NoSky, OldSky, NewSky };
 
-
-// ***************************************************************************
 void	beginRenderCanopyPart()
 {
 	SceneRoot->beginPartRender();
@@ -403,17 +411,17 @@ void	endRenderMainScenePart()
 	Scene->endPartRender(true);
 }
 
-void	beginRenderSkyPart(TSkyMode skyMode)
+void	beginRenderSkyPart()
 {
-	if(skyMode == NewSky)
+	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
 		sky.getScene()->beginPartRender();
 	}
 }
-void	endRenderSkyPart(TSkyMode skyMode)
+void	endRenderSkyPart()
 {
-	if(skyMode == NewSky)
+	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
 		sky.getScene()->endPartRender(false);
@@ -463,12 +471,12 @@ static void renderMainScenePart(UScene::TRenderPart renderPart)
 
 // ***************************************************************************************************************************
 // Render a part of the sky
-static void renderSkyPart(UScene::TRenderPart renderPart, TSkyMode skyMode)
+static void renderSkyPart(UScene::TRenderPart renderPart)
 {
-	nlassert(skyMode != NoSky);
+	nlassert(s_SkyMode != NoSky);
 	Driver->setDepthRange(SKY_DEPTH_RANGE_START, 1.f);
 	Driver->enableFog(false);
-	if (skyMode == NewSky)
+	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
 		sky.getScene()->renderPart(renderPart);
@@ -605,6 +613,29 @@ void updateWeather()
 		Driver->setPolygonMode(oldMode);
 	}
 	#endif
+	
+	// Update new sky
+	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
+	{
+		if(Driver->getPolygonMode() == UDriver::Filled)
+		{
+			if (Filter3D[FilterSky])
+			{
+				CSky &sky = ContinentMngr.cur()->CurrentSky;
+				if (sky.getScene())
+				{
+					s_SkyMode = NewSky;
+					sky.getScene()->animate(TimeInSec-FirstTimeInSec);
+					// Setup the sky camera
+					preRenderNewSky();
+				}
+				else
+				{
+					s_SkyMode = OldSky;
+				}
+			}
+		}
+	}
 }
 
 // ***************************************************************************************************************************
@@ -638,36 +669,13 @@ void renderScene()
 	if(Scene_Profile)
 	Scene->profileNextRender();
 
-	TSkyMode skyMode = NoSky;
-	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
-	{
-		if(Driver->getPolygonMode() == UDriver::Filled)
-		{
-			if (Filter3D[FilterSky])
-			{
-				CSky &sky = ContinentMngr.cur()->CurrentSky;
-				if (sky.getScene())
-				{
-					skyMode = NewSky;
-					sky.getScene()->animate(TimeInSec-FirstTimeInSec);
-					// Setup the sky camera
-					preRenderNewSky();
-				}
-				else
-				{
-					skyMode = OldSky;
-				}
-			}
-		}
-	}
-
 	// initialisation of polygons renderer
 	CLandscapePolyDrawer::getInstance().beginRenderLandscapePolyPart();
 
 	// Start Part Rendering
 	beginRenderCanopyPart();
 	beginRenderMainScenePart();
-	beginRenderSkyPart(skyMode);
+	beginRenderSkyPart();
 	// Render part
 	// WARNING: always must begin rendering with at least UScene::RenderOpaque,
 	// else dynamic shadows won't work
@@ -677,12 +685,12 @@ void renderScene()
 	// render of polygons on landscape
 	CLandscapePolyDrawer::getInstance().renderLandscapePolyPart();
 
-	if (skyMode != NoSky) renderSkyPart((UScene::TRenderPart) (UScene::RenderOpaque | UScene::RenderTransparent), skyMode);
+	if (s_SkyMode != NoSky) renderSkyPart((UScene::TRenderPart) (UScene::RenderOpaque | UScene::RenderTransparent));
 	renderCanopyPart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
 	renderMainScenePart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
-	if (skyMode == NewSky) renderSkyPart(UScene::RenderFlare, skyMode);
+	if (s_SkyMode == NewSky) renderSkyPart(UScene::RenderFlare);
 	// End Part Rendering
-	endRenderSkyPart(skyMode);
+	endRenderSkyPart();
 	endRenderMainScenePart();
 	endRenderCanopyPart();
 
@@ -1550,7 +1558,7 @@ bool mainLoop()
 				}
 				#endif
 				
-				// TODO: Verify that moving this out of renderScene does not negatively impact oversize screenshots.
+				// Update weather
 				updateWeather();
 
 				if (ClientCfg.Bloom)
@@ -1569,6 +1577,9 @@ bool mainLoop()
 					s_ForceFullDetail.backup();
 					s_ForceFullDetail.set();
 				}
+
+				// Commit camera changes to the sky camera
+				commitCameraSky();
 				
 				// Render scene
 				renderScene();
