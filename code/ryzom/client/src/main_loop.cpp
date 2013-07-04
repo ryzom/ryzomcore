@@ -559,6 +559,48 @@ void renderScene(bool forceFullDetail, bool bloom)
 
 // ***************************************************************************************************************************
 
+void updateWaterEnvMap()
+{
+	#ifdef USE_WATER_ENV_MAP
+	if (WaterEnvMapRefCount > 0) // water env map needed
+	{
+		if (!WaterEnvMap)
+		{
+			CSky &sky = ContinentMngr.cur()->CurrentSky;
+			if (sky.getScene())
+			{
+				nlassert(WaterEnvMapSkyCam.empty());
+				WaterEnvMapSkyCam = sky.getScene()->createCamera(); // deleted in unselect
+				nlassert(WaterEnvMapCanopyCam.empty());
+				WaterEnvMapCanopyCam = SceneRoot->createCamera(); // deleted in unselect
+				// Create water env map if not already created
+				WaterEnvMap = Driver->createWaterEnvMap();
+				if(WaterEnvMap)
+				{
+					WaterEnvMap->init(128, 256, ClientCfg.WaterEnvMapUpdateTime);
+					WaterEnvMap->setWaterEnvMapRenderCallback(&WaterEnvMapRdr);
+					Scene->setWaterEnvMap(WaterEnvMap);
+				}
+			}
+		}
+		WaterEnvMapRdr.CurrDate = SmoothedClientDate;
+		WaterEnvMapRdr.AnimationDate = SmoothedClientDate;
+		if (ClientCfg.R2EDEnabled && R2::getEditor().getFixedLighting())
+		{
+			WaterEnvMapRdr.CurrDate.Hour = 12.f;
+		}
+		WaterEnvMapRdr.CurrFogColor = MainFogState.FogColor;
+		WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
+		WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
+		CSky &sky = ContinentMngr.cur()->CurrentSky;
+		WaterEnvMap->setAlpha(sky.getWaterEnvMapAlpha());
+		Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
+	}
+	#endif
+}
+
+// ***************************************************************************************************************************
+
 void updateWeather()
 {
 	H_AUTO_USE ( RZ_Client_Main_Loop_Sky_And_Weather )
@@ -999,6 +1041,14 @@ bool mainLoop()
 	while( !UserEntity->permanentDeath()
 		&& !game_exit )
 	{
+		// If an action handler execute. NB: MUST BE DONE BEFORE ANY THING ELSE PROFILE CRASH!!!!!!!!!!!!!!!!!
+		testLaunchProfile();
+
+		// Test and may run a VBLock profile (only once)
+		testLaunchProfileVBLock();
+
+		// Start Bench
+		H_AUTO_USE ( RZ_Client_Main_Loop )
 
 		if (isBGDownloadEnabled())
 		{
@@ -1073,21 +1123,12 @@ bool mainLoop()
 		}
 
 		{
-			// If an action handler execute. NB: MUST BE DONE BEFORE ANY THING ELSE PROFILE CRASH!!!!!!!!!!!!!!!!!
-			testLaunchProfile();
-
-			// Test and may run a VBLock profile (only once)
-			testLaunchProfileVBLock();
 
 			// Stop the Outgame music, with fade effect
 			outgameFader.fade();
 
 			// update quit feature
 			updateGameQuitting();
-
-			// Start Bench
-			H_AUTO_USE ( RZ_Client_Main_Loop )
-
 
 			// update module manager
 			NLNET::IModuleManager::getInstance().updateModules();
@@ -1523,40 +1564,8 @@ bool mainLoop()
 			// Render
 			if(Render)
 			{
-				#ifdef USE_WATER_ENV_MAP
-				if (WaterEnvMapRefCount > 0) // water env map needed
-				{
-					if (!WaterEnvMap)
-					{
-						CSky &sky = ContinentMngr.cur()->CurrentSky;
-						if (sky.getScene())
-						{
-							WaterEnvMapSkyCam = sky.getScene()->createCamera(); // deleted in unselect
-							WaterEnvMapCanopyCam = SceneRoot->createCamera(); // deleted in unselect
-							// Create water env map if not already created
-							WaterEnvMap = Driver->createWaterEnvMap();
-							if(WaterEnvMap)
-							{
-								WaterEnvMap->init(128, 256, ClientCfg.WaterEnvMapUpdateTime);
-								WaterEnvMap->setWaterEnvMapRenderCallback(&WaterEnvMapRdr);
-								Scene->setWaterEnvMap(WaterEnvMap);
-							}
-						}
-					}
-					WaterEnvMapRdr.CurrDate = SmoothedClientDate;
-					WaterEnvMapRdr.AnimationDate = SmoothedClientDate;
-					if (ClientCfg.R2EDEnabled && R2::getEditor().getFixedLighting())
-					{
-						WaterEnvMapRdr.CurrDate.Hour = 12.f;
-					}
-					WaterEnvMapRdr.CurrFogColor = MainFogState.FogColor;
-					WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
-					WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
-					CSky &sky = ContinentMngr.cur()->CurrentSky;
-					WaterEnvMap->setAlpha(sky.getWaterEnvMapAlpha());
-					Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
-				}
-				#endif
+				// Update water env map (happens when continent changed etc)
+				updateWaterEnvMap();
 				
 				// Update weather
 				updateWeather();
