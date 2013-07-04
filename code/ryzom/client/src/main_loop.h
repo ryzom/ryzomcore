@@ -30,7 +30,7 @@ bool mainLoop();
 
 // render all
 void renderScene();
-void renderScene(bool forceFullDetail);
+void renderScene(bool forceFullDetail, bool bloom);
 void setDefaultChatWindow(CChatWindow *defaultChatWindow);
 
 void updateDayNightCycleHour();

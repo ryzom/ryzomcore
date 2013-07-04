@@ -487,6 +487,8 @@ static void renderSkyPart(UScene::TRenderPart renderPart, TSkyMode skyMode)
 	#endif
 }
 
+// ***************************************************************************************************************************
+// Utility to force full detail
 struct CForceFullDetail
 {
 public:
@@ -519,8 +521,16 @@ private:
 };
 static CForceFullDetail s_ForceFullDetail;
 
-void renderScene(bool forceFullDetail)
+void renderScene(bool forceFullDetail, bool bloom)
 {
+	if (bloom)
+	{
+		// set bloom parameters before applying bloom effect
+		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+		// init bloom
+		CBloomEffect::getInstance().initBloom();
+	}
 	if (forceFullDetail)
 	{
 		s_ForceFullDetail.backup();
@@ -531,21 +541,18 @@ void renderScene(bool forceFullDetail)
 	{
 		s_ForceFullDetail.restore();
 	}
+	if (bloom)
+	{
+		// apply bloom effect
+		CBloomEffect::getInstance().endBloom();
+		CBloomEffect::getInstance().endInterfacesDisplayBloom();
+	}
 }
 
 // ***************************************************************************************************************************
 // Render all scenes
 void renderScene()
 {
-	if (ClientCfg.Bloom)
-	{
-		// set bloom parameters before applying bloom effect
-		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
-		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
-		// init bloom
-		CBloomEffect::getInstance().initBloom();
-	}
-
 	{
 		H_AUTO_USE ( RZ_Client_Main_Loop_Sky_And_Weather )
 
@@ -673,10 +680,6 @@ void renderScene()
 
 	// reset depth range
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
-
-	// apply bloom effect
-	if (ClientCfg.Bloom)
-		CBloomEffect::getInstance().endBloom();
 }
 
 
@@ -1539,6 +1542,14 @@ bool mainLoop()
 				}
 				#endif
 
+				if (ClientCfg.Bloom)
+				{
+					// set bloom parameters before applying bloom effect
+					CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+					CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+					// init bloom
+					CBloomEffect::getInstance().initBloom();
+				}
 				// nb : force full detail if a screenshot is asked
 				// todo : move outside render code
 				bool fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
@@ -1547,10 +1558,18 @@ bool mainLoop()
 					s_ForceFullDetail.backup();
 					s_ForceFullDetail.set();
 				}
+				
+				// Render scene
 				renderScene();
+
 				if (fullDetail)
 				{
 					s_ForceFullDetail.restore();
+				}
+				if (ClientCfg.Bloom)
+				{
+					// apply bloom effect
+					CBloomEffect::getInstance().endBloom();
 				}
 
 				// for that frame and
