@@ -487,10 +487,55 @@ static void renderSkyPart(UScene::TRenderPart renderPart, TSkyMode skyMode)
 	#endif
 }
 
+struct CForceFullDetail
+{
+public:
+	void backup()
+	{
+		maxFullDetailChar = Scene->getMaxSkeletonsInNotCLodForm();
+		oldBalancingMode = Scene->getPolygonBalancingMode();
+		oldSkyBalancingMode = UScene::PolygonBalancingOff;
+		UScene *skyScene = getSkyScene();
+		if (skyScene) oldSkyBalancingMode = skyScene->getPolygonBalancingMode();
+	}
+	void set()
+	{
+		Scene->setMaxSkeletonsInNotCLodForm(1000000);
+		Scene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
+		UScene *skyScene = getSkyScene();
+		if (skyScene) skyScene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
+	}
+	void restore()
+	{
+		Scene->setMaxSkeletonsInNotCLodForm(maxFullDetailChar);
+		Scene->setPolygonBalancingMode(oldBalancingMode);
+		UScene *skyScene = getSkyScene();
+		if (skyScene) skyScene->setPolygonBalancingMode(oldSkyBalancingMode);
+	}
+private:
+	uint maxFullDetailChar;
+	UScene::TPolygonBalancingMode oldBalancingMode;
+	UScene::TPolygonBalancingMode oldSkyBalancingMode;
+};
+static CForceFullDetail s_ForceFullDetail;
+
+void renderScene(bool forceFullDetail)
+{
+	if (forceFullDetail)
+	{
+		s_ForceFullDetail.backup();
+		s_ForceFullDetail.set();
+	}
+	renderScene();
+	if (forceFullDetail)
+	{
+		s_ForceFullDetail.restore();
+	}
+}
 
 // ***************************************************************************************************************************
 // Render all scenes
-void renderAll(bool forceFullDetail)
+void renderScene()
 {
 	if (ClientCfg.Bloom)
 	{
@@ -499,26 +544,6 @@ void renderAll(bool forceFullDetail)
 		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
 		// init bloom
 		CBloomEffect::getInstance().initBloom();
-	}
-
-	// backup old balancing mode
-	uint maxFullDetailChar = Scene->getMaxSkeletonsInNotCLodForm();
-	UScene *skyScene = getSkyScene();
-	UScene::TPolygonBalancingMode oldBalancingMode = Scene->getPolygonBalancingMode();
-	UScene::TPolygonBalancingMode oldSkyBalancingMode = UScene::PolygonBalancingOff;
-	if (skyScene)
-	{
-		oldSkyBalancingMode = skyScene->getPolygonBalancingMode();
-	}
-	// disable load balancing for that frame only if asked
-	if (forceFullDetail)
-	{
-		Scene->setMaxSkeletonsInNotCLodForm(1000000);
-		Scene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
-		if (skyScene)
-		{
-			skyScene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
-		}
 	}
 
 	{
@@ -648,17 +673,6 @@ void renderAll(bool forceFullDetail)
 
 	// reset depth range
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
-
-	// restore load balancing mode
-	if (forceFullDetail)
-	{
-		Scene->setMaxSkeletonsInNotCLodForm(maxFullDetailChar);
-		Scene->setPolygonBalancingMode(oldBalancingMode);
-		if (skyScene)
-		{
-			skyScene->setPolygonBalancingMode(oldSkyBalancingMode);
-		}
-	}
 
 	// apply bloom effect
 	if (ClientCfg.Bloom)
@@ -1524,7 +1538,20 @@ bool mainLoop()
 					Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
 				}
 				#endif
-				renderAll(ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail); // nb : force full detail if a screenshot is asked
+
+				// nb : force full detail if a screenshot is asked
+				// todo : move outside render code
+				bool fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
+				if (fullDetail)
+				{
+					s_ForceFullDetail.backup();
+					s_ForceFullDetail.set();
+				}
+				renderScene();
+				if (fullDetail)
+				{
+					s_ForceFullDetail.restore();
+				}
 
 				// for that frame and
 				// tmp : display height grid

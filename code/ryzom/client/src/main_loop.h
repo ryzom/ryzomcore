@@ -29,7 +29,8 @@ const uint NUM_MISSION_OPTIONS = 8;
 bool mainLoop();
 
 // render all
-void renderAll(bool forceFullDetail = false);
+void renderScene();
+void renderScene(bool forceFullDetail);
 void setDefaultChatWindow(CChatWindow *defaultChatWindow);
 
 void updateDayNightCycleHour();
