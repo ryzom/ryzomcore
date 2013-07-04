@@ -34,7 +34,7 @@ void renderScene(bool forceFullDetail, bool bloom);
 void setDefaultChatWindow(CChatWindow *defaultChatWindow);
 
 // Commit sky scene camera for rendering
-void commitCameraSky();
+void commitCamera();
 
 void updateDayNightCycleHour();
 

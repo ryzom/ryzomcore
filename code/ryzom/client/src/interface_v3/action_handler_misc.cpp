@@ -541,12 +541,12 @@ void renderSceneScreenShot (uint left, uint right, uint top, uint bottom, uint s
 {
 	CCameraBackup cbScene = setupCameraForScreenshot(*Scene, left, right, top, bottom, screenShotWidth, screenShotHeight);
 	CCameraBackup cbCanopy = setupCameraForScreenshot(*SceneRoot, left, right, top, bottom, screenShotWidth, screenShotHeight);
+	commitCamera();
 	// sky setup are copied from main scene before rendering so no setup done here
-	commitCameraSky();
 	renderScene(ClientCfg.ScreenShotFullDetail, ClientCfg.Bloom);
 	restoreCamera(*Scene, cbScene);
 	restoreCamera(*SceneRoot, cbCanopy);
-	commitCameraSky();
+	commitCamera();
 }
 
 // ***************************************************************************

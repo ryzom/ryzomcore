@@ -370,8 +370,9 @@ void preRenderNewSky ()
 	sky.setup(cd, SmoothedClientDate, WeatherManager.getWeatherValue(), MainFogState.FogColor, Scene->getSunDirection(), false);
 }
 
-void commitCameraSky()
+void commitCamera()
 {
+	// Set the sky camera
 	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
@@ -388,6 +389,17 @@ void commitCameraSky()
 		skyCameraMatrix= MainCam.getMatrix();
 		skyCameraMatrix.setPos(CVector::Null);
 		camSky.setMatrix(skyCameraMatrix);
+	}
+
+	// Set The Root Camera
+	UCamera camRoot = SceneRoot->getCam();
+	if(!camRoot.empty())
+	{
+		// Update Camera Position/Rotation.
+		//camRoot.setPos(View.currentViewPos());
+		//camRoot.setRotQuat(View.currentViewQuat());
+		camRoot.setTransformMode(UTransformable::DirectMatrix); // FIXME
+		camRoot.setMatrix(MainCam.getMatrix());
 	}
 }
 
@@ -439,14 +451,6 @@ static void renderCanopyPart(UScene::TRenderPart renderPart)
 	ContinentMngr.getFogState(CanopyFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), RootFogState);
 	RootFogState.setupInDriver(*Driver);
 
-	// Set The Root Camera
-	UCamera camRoot = SceneRoot->getCam();
-	if(!camRoot.empty())
-	{
-		// Update Camera Position/Rotation.
-		camRoot.setPos(View.currentViewPos());
-		camRoot.setRotQuat(View.currentViewQuat());
-	}
 	// Render the root scene
 	SceneRoot->renderPart(renderPart);
 }
@@ -1364,9 +1368,17 @@ bool mainLoop()
 
 		// Update Camera Position/Orientation.
 		CVector currViewPos = View.currentViewPos();
+		MainCam.setTransformMode(UTransformable::RotQuat);
 		MainCam.setPos(currViewPos);
 		MainCam.setRotQuat(View.currentViewQuat());
-		if (StereoDisplay) StereoDisplay->updateCamera(0, &MainCam);
+		if (StereoDisplay) 
+		{
+			StereoDisplay->updateCamera(0, &MainCam);
+			if (SceneRoot)
+			{
+				StereoDisplay->updateCamera(1, &SceneRoot->getCam());
+			}
+		}
 
 		// see if camera is below water (useful for sort order)
 		if (ContinentMngr.cur())
@@ -1457,9 +1469,6 @@ bool mainLoop()
 		}
 
 
-		//////////////////////////
-		// RENDER THE FRAME  3D //
-		//////////////////////////
 		if (!ClientCfg.Light)
 		{
 			CClientDate newDate(RT.getRyzomDay(), DayNightCycleHour);
@@ -1546,9 +1555,6 @@ bool mainLoop()
 			}
 		}
 
-		// Set the matrix in 3D Mode.
-		Driver->setMatrixMode3D(MainCam);
-
 
 		// R2ED pre render update
 		if (ClientCfg.R2EDEnabled)
@@ -1556,11 +1562,8 @@ bool mainLoop()
 			R2::getEditor().updateBeforeRender();
 		}
 
-
-		// Position the camera to prepare the render
 		if (!ClientCfg.Light)
 		{
-
 			// Render
 			if(Render)
 			{
@@ -1569,7 +1572,42 @@ bool mainLoop()
 				
 				// Update weather
 				updateWeather();
+			}
+		}
+		
+		//////////////////////////
+		// RENDER THE FRAME  3D //
+		//////////////////////////
 
+		if (StereoDisplay)
+		{
+			// modify cameras for stereo display
+			const CViewport &vp = StereoDisplay->getCurrentViewport();
+			Driver->setViewport(vp);
+			nlassert(Scene);
+			Scene->setViewport(vp);
+			if (SceneRoot)
+			{
+				SceneRoot->setViewport(vp);
+			}
+			MainCam.setTransformMode(UTransformable::DirectMatrix);
+			StereoDisplay->getCurrentMatrix(0, &MainCam);
+			StereoDisplay->getCurrentFrustum(0, &MainCam);
+			if (SceneRoot)
+			{
+				// matrix updated during commitCamera from maincam
+				StereoDisplay->getCurrentFrustum(1, &SceneRoot->getCam());
+			}
+		}
+
+		// Commit camera changes
+		commitCamera();
+
+		if (!ClientCfg.Light)
+		{
+			// Render
+			if(Render)
+			{
 				if (ClientCfg.Bloom)
 				{
 					// set bloom parameters before applying bloom effect
@@ -1586,9 +1624,6 @@ bool mainLoop()
 					s_ForceFullDetail.backup();
 					s_ForceFullDetail.set();
 				}
-
-				// Commit camera changes to the sky camera
-				commitCameraSky();
 				
 				// Render scene
 				renderScene();
