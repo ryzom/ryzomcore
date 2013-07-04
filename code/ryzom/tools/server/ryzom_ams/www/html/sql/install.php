@@ -43,7 +43,9 @@
             `SID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
             `type` VARCHAR( 64 ) NOT NULL ,
             `query` VARCHAR( 512 ) NOT NULL 
-            );          
+            );
+            
+
         ";
         $dbl->executeWithoutParams($sql);
         print "The Lib & Web database were correctly installed! <br />";

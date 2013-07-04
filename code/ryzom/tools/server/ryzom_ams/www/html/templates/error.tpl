@@ -72,7 +72,6 @@
                     <p class="not-found">{$title404}</p>
                     <div class="clear"></div>
                     <div class="content">
-		    <img src="../html/img/notpage.jpg"/><br/>
                     {$error_message404}
                 {else if $error_code eq "403"}
                     <p class="not-found">{$title403}</p>
