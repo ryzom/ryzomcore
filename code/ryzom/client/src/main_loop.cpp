@@ -1575,9 +1575,9 @@ bool mainLoop()
 			}
 		}
 		
-		//////////////////////////
-		// RENDER THE FRAME  3D //
-		//////////////////////////
+		///////////////////
+		// SETUP CAMERAS //
+		///////////////////
 
 		if (StereoDisplay)
 		{
@@ -1602,6 +1602,10 @@ bool mainLoop()
 
 		// Commit camera changes
 		commitCamera();
+		
+		//////////////////////////
+		// RENDER THE FRAME  3D //
+		//////////////////////////
 
 		if (!ClientCfg.Light)
 		{
@@ -1711,17 +1715,6 @@ bool mainLoop()
 		// Display some things not in the scene like the name, the entity path, etc.
 		EntitiesMngr.updatePostRender();
 
-		// R2ED pre render update
-		if (ClientCfg.R2EDEnabled)
-		{
-			// IMPORTANT : this should be called after CEntitiesMngr::updatePostRender() because
-			// entity may be added / removed there !
-			R2::getEditor().updateAfterRender();
-		}
-
-		// Update FXs (remove them).
-		FXMngr.update();
-
 		// Render the stat graphs if needed
 		{
 			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
@@ -1738,6 +1731,7 @@ bool mainLoop()
 			Driver->drawQuad(0, 0, 1, 1, ThunderColor);
 
 			// TODO : boris : add sound here !
+			// Needs more explosions
 		}
 
 		// Update the contextual menu
@@ -1827,37 +1821,48 @@ bool mainLoop()
 						Driver->drawBitmap(x/(float)ClientCfg.Width, y/(float)ClientCfg.Height, width/(float)ClientCfg.Width, height/(float)ClientCfg.Height, *LogoBitmaps[i]);
 					}
 				}
-
-				// FPS
-				{
-					static TTicks oldTick = CTime::getPerformanceTime();
-					TTicks newTick = CTime::getPerformanceTime();
-					double deltaTime = CTime::ticksToSecond (newTick-oldTick);
-					oldTick = newTick;
-					smoothFPS.addValue((float)deltaTime);
-					moreSmoothFPS.addValue((float)deltaTime);
-					deltaTime = smoothFPS.getSmoothValue ();
-					if (deltaTime > 0.0)
-					{
-						CCDBNodeLeaf*pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS");
-						pNL->setValue64((sint64)(1.f/deltaTime));
-					}
-				}
-
-				// Detect disconnection / server down: display information text
-				// but keep the rendering so that the player can remember where he is
-				// and what he was doing. He can't move because the connection quality returns false.
-
-				if ((connectionState == CNetworkConnection::Disconnect) && (lastConnectionState != CNetworkConnection::Disconnect) && (!FarTP.isFarTPInProgress()))
-				{
-					UserControls.stopFreeLook(); // let the player click on Exit
-					pIMinstance->messageBoxWithHelp(CI18N::get("uiDisconnected"));
-
-					// If we have started a Far TP sequence and are waiting for onServerQuitOK()
-					// from the EGS, resume the sequence because the EGS is down and won't reply.
-					FarTP.onServerQuitOk();
-				}
 			}
+		}
+
+		// FPS
+		{
+			static TTicks oldTick = CTime::getPerformanceTime();
+			TTicks newTick = CTime::getPerformanceTime();
+			double deltaTime = CTime::ticksToSecond (newTick-oldTick);
+			oldTick = newTick;
+			smoothFPS.addValue((float)deltaTime);
+			moreSmoothFPS.addValue((float)deltaTime);
+			deltaTime = smoothFPS.getSmoothValue ();
+			if (deltaTime > 0.0)
+			{
+				CCDBNodeLeaf*pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS");
+				pNL->setValue64((sint64)(1.f/deltaTime));
+			}
+		}
+
+		// R2ED post render update
+		if (ClientCfg.R2EDEnabled)
+		{
+			// IMPORTANT : this should be called after CEntitiesMngr::updatePostRender() because
+			// entity may be added / removed there !
+			R2::getEditor().updateAfterRender();
+		}
+
+		// Update FXs (remove them).
+		FXMngr.update();
+
+		// Detect disconnection / server down: display information text
+		// but keep the rendering so that the player can remember where he is
+		// and what he was doing. He can't move because the connection quality returns false.
+
+		if ((connectionState == CNetworkConnection::Disconnect) && (lastConnectionState != CNetworkConnection::Disconnect) && (!FarTP.isFarTPInProgress()))
+		{
+			UserControls.stopFreeLook(); // let the player click on Exit
+			pIMinstance->messageBoxWithHelp(CI18N::get("uiDisconnected"));
+
+			// If we have started a Far TP sequence and are waiting for onServerQuitOK()
+			// from the EGS, resume the sequence because the EGS is down and won't reply.
+			FarTP.onServerQuitOk();
 		}
 
 		// Yoyo: MovieShooter.
