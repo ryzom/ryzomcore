@@ -3,7 +3,7 @@
 function change_info(){
     
  try{
-        //if logged in
+	//if logged in
         if(WebUsers::isLoggedIn()){
             
             if(isset($_POST['target_id'])){
@@ -19,17 +19,24 @@ function change_info(){
                     $webUser = new WebUsers();
                     //use current info to check for changes
                     $current_info = $webUser->getInfo($_POST['target_id']);
+		    
                     //TODO: XSS filtering
+		    $current_info['FirstName'] = filter_var($current_info['FirstName'], FILTER_SANITIZE_STRING);
+		    $current_info['LastName'] = filter_var($current_info['LastName'], FILTER_SANITIZE_STRING);
+		    $current_info['Country'] = filter_var($current_info['Country'], FILTER_SANITIZE_STRING);
+		    $current_info['Gender'] = filter_var($current_info['Gender'], FILTER_SANITIZE_NUMBER_INT);
+		
                     
-                    //make the query that will update the data.
                     $updated = false;
                     $values = Array();
                     $values['user'] = $target_username;
+		    
+		    //make the query that will update the data.
                     $query = "UPDATE ams_user SET ";
                     if(($_POST['FirstName'] != "") && ($_POST['FirstName'] != $current_info['FirstName'])){
                         $query = $query . "FirstName = :fName ";
                         $updated = true;
-                        $values['fName'] = $_POST['FirstName'];
+                        $values['fName'] = filter_var($_POST['FirstName'], FILTER_SANITIZE_STRING);
                     }
                     if(($_POST['LastName'] != "") && ($_POST['LastName'] != $current_info['LastName'])){
 			if($updated){
@@ -38,9 +45,27 @@ function change_info(){
 			 $query = $query . "LastName = :lName ";
 			}
                         $updated = true;
-                        $values['lName'] = $_POST['LastName'];
+                        $values['lName'] = filter_var($_POST['LastName'], FILTER_SANITIZE_STRING);
                     }
-                    //TODO: add the other fields too
+		    if(($_POST['Country'] != "AA") && ($_POST['Country'] != $current_info['Country'])){
+			if($updated){
+			 $query = $query . ", Country = :country ";
+			}else{
+			 $query = $query . "Country = :country ";
+			}
+                        $updated = true;
+                        $values['country'] = filter_var($_POST['Country'], FILTER_SANITIZE_STRING);
+		    }
+		    if($_POST['Gender'] != $current_info['Gender']){
+			if($updated){
+			 $query = $query . ", Gender = :gender ";
+			}else{
+			 $query = $query . "Gender = :gender ";
+			}
+                        $updated = true;
+                        $values['gender'] = filter_var($_POST['Gender'], FILTER_SANITIZE_NUMBER_INT);
+		    } 
+                    //finish the query!
                     $query = $query . "WHERE Login = :user";
 
                     //if some field is update then:
@@ -61,24 +86,25 @@ function change_info(){
                     $result['username'] = $_SESSION['user'];
                     $result['no_visible_elements'] = 'FALSE';
                     $result['target_id'] = $_POST['target_id'];
-                    if(isset($_GET['id'])){
-                        if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
-                            $result['isAdmin'] = "TRUE";
-                        }
-                    }
                     helpers :: loadtemplate( 'settings', $result);
                     exit;
                     
                 }else{
                     //ERROR: permission denied!
+		    $_SESSION['error_code'] = "403";
+                    header("Location: index.php?page=error");
+                    exit;
                 }
         
             }else{
                 //ERROR: The form was not filled in correclty
+		header("Location: index.php?page=settings");
+		exit;
             }    
         }else{
             //ERROR: user is not logged in
-            exit;
+	    header("Location: index.php");
+	    exit;
         }
                   
     }catch (PDOException $e) {

@@ -28,10 +28,10 @@ function change_mail(){
 		    }else{
 			$result['EMAIL_ERROR'] = 'FALSE';
 		    }
-		    $result['prevNewEmail'] = $_POST["NewEmail"];
+		    $result['prevNewEmail'] = filter_var($_POST["NewEmail"], FILTER_SANITIZE_EMAIL);
 		    
                     if ($reply== "success"){
-                        $status = WebUsers::setEmail($target_username, $_POST["NewEmail"] );
+                        $status = WebUsers::setEmail($target_username, filter_var($_POST["NewEmail"], FILTER_SANITIZE_EMAIL) );
                         if($status == 'ok'){
                             $result['SUCCESS_MAIL'] = "OK";
                         }else if($status == 'shardoffline'){
@@ -66,14 +66,20 @@ function change_mail(){
                     
                 }else{
                     //ERROR: permission denied!
+		    $_SESSION['error_code'] = "403";
+                    header("Location: index.php?page=error");
+                    exit;
                 }
         
             }else{
                 //ERROR: The form was not filled in correclty
+		header("Location: index.php?page=settings");
+		exit;
             }    
         }else{
             //ERROR: user is not logged in
-            exit;
+	    header("Location: index.php");
+	    exit;
         }
                   
     }catch (PDOException $e) {
