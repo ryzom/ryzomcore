@@ -507,7 +507,7 @@ bool CStereoOVR::endRenderTarget()
 {
 	// after rendering of course
 	// nlassert(m_SubStage > 1);
-	if (m_Driver && m_Stage == 4)
+	if (m_Driver && m_Stage == 6) // set to 4 to turn off distortion of 2d gui
 	{
 		CTextureUser cu;
 		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
@@ -606,13 +606,13 @@ void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distanc
 	//if (m_Stage % 2) mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
 	//else mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
 	mat.translate(vector);
-	CVector proj = CStereoOVR::getCurrentFrustum().project(mat.getPos());
+	CVector proj = CStereoOVR::getCurrentFrustum(cid).project(mat.getPos());
 
 	NLMISC::CVector ipd;
 	if (m_Stage % 2) ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f);
 	else ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f);
-	CVector projipd = CStereoOVR::getCurrentFrustum().project(vector + ipd);
-	CVector projvec = CStereoOVR::getCurrentFrustum().project(vector);
+	CVector projipd = CStereoOVR::getCurrentFrustum(cid).project(vector + ipd);
+	CVector projvec = CStereoOVR::getCurrentFrustum(cid).project(vector);
 
 	x = (proj.x + projipd.x - projvec.x - 0.5f);
 	y = (proj.y + projipd.y - projvec.y - 0.5f);
