@@ -27,6 +27,20 @@ namespace MaterialEditor
 		QString prop;
 		QString label;
 		QString type;
+
+		bool operator==( const MaterialProperty &o )
+		{
+			if( o.prop != prop )
+				return false;
+
+			if( o.label != label )
+				return false;
+
+			if( o.type != type )
+				return false;
+
+			return true;
+		}
 	};
 
 	class MatPropEditWidget : public QWidget, public Ui::MatPropEditWidget

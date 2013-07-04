@@ -18,6 +18,8 @@
 #include "material_property_editor.h"
 #include "nel3d_interface.h"
 
+#include <QMessageBox>
+
 namespace MaterialEditor
 {
 
@@ -160,12 +162,66 @@ namespace MaterialEditor
 		if( edit )
 		{
 			QTreeWidgetItem *item = treeWidget->currentItem();
+
+			MaterialProperty old;
+			old.prop = item->text( 0 );
+			old.label = item->text( 1 );
+			old.type = item->text( 2 );
+
+			if( old == prop )
+				return;
+
+
+			if( idExists( prop.prop ) )
+			{
+				QMessageBox::critical(
+					this,
+					tr( "Property Id" ),
+					tr( "A property with that Id already exists" )
+					);
+
+				return;
+			}
+
+			if( labelExists( prop.label ) )
+			{
+				QMessageBox::critical(
+					this,
+					tr( "Property label" ),
+					tr( "A property with that label already exists" )
+					);
+				return;
+			}
+
+			
 			item->setData( 0, Qt::DisplayRole, prop.prop );
 			item->setData( 1, Qt::DisplayRole, prop.label );
 			item->setData( 2, Qt::DisplayRole, prop.type );
 		}
 		else
 		{
+
+			if( idExists( prop.prop ) )
+			{
+				QMessageBox::critical(
+					this,
+					tr( "Property Id" ),
+					tr( "A property with that Id already exists" )
+					);
+
+				return;
+			}
+
+			if( labelExists( prop.label ) )
+			{
+				QMessageBox::critical(
+					this,
+					tr( "Property label" ),
+					tr( "A property with that label already exists" )
+					);
+				return;
+			}
+
 			QTreeWidgetItem *item = new QTreeWidgetItem();
 			item->setData( 0, Qt::DisplayRole, prop.prop );
 			item->setData( 1, Qt::DisplayRole, prop.label );
@@ -184,6 +240,30 @@ namespace MaterialEditor
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditClicked() ) );
 		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
 		connect( matPropEditWidget, SIGNAL( okClicked() ), this, SLOT( onEditorOKClicked() ) );
+	}
+
+	bool MatPropWidget::idExists( const QString &id )
+	{
+		int c = treeWidget->topLevelItemCount();
+		for( int i = 0; i < c; i++ )
+		{
+			if( id == treeWidget->topLevelItem( i )->text( 0 ) )
+				return true;
+		}
+
+		return false;
+	}
+
+	bool MatPropWidget::labelExists( const QString &label )
+	{
+		int c = treeWidget->topLevelItemCount();
+		for( int i = 0; i < c; i++ )
+		{
+			if( label == treeWidget->topLevelItem( i )->text( 1 ) )
+				return true;
+		}
+
+		return false;
 	}
 
 }

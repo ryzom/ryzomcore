@@ -45,6 +45,10 @@ namespace MaterialEditor
 
 	private:
 		void setupConnections();
+		bool idExists( const QString &id );
+		bool labelExists( const QString &id );
+
+
 		bool edit;
 		bool changed;
 		MatPropEditWidget *matPropEditWidget;
