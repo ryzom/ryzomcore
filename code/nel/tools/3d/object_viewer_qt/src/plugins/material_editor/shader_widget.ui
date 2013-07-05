@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>502</width>
-    <height>467</height>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,18 +25,7 @@
     </widget>
    </item>
    <item row="1" column="0" rowspan="4" colspan="2">
-    <widget class="QTreeWidget" name="shaderListWidget">
-     <column>
-      <property name="text">
-       <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Path</string>
-      </property>
-     </column>
-    </widget>
+    <widget class="QListWidget" name="shaderList"/>
    </item>
    <item row="1" column="2">
     <widget class="QPushButton" name="addButton">
@@ -84,7 +73,7 @@
      </property>
     </spacer>
    </item>
-   <item row="5" column="0" colspan="2">
+   <item row="5" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
       <string>Description</string>

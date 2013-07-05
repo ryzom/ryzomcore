@@ -78,13 +78,12 @@ namespace MaterialEditor
 
 	void ShaderEditorWidget::onOKClicked()
 	{
-		close();
-		Q_EMIT okClicked();
+		accept();
 	}
 
 	void ShaderEditorWidget::onCancelClicked()
 	{
-		close();
+		reject();
 	}
 
 	void ShaderEditorWidget::reset()
@@ -94,6 +93,7 @@ namespace MaterialEditor
 		descriptionEdit->setPlainText( empty );
 		vsEdit->setPlainText( empty );
 		fsEdit->setPlainText( empty );
+		setResult( QDialog::Rejected );
 	}
 }
 

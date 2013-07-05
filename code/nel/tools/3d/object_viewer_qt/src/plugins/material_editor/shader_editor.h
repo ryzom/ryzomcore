@@ -45,9 +45,6 @@ namespace MaterialEditor
 		void onOKClicked();
 		void onCancelClicked();
 
-	Q_SIGNALS:
-		void okClicked();
-
 	private:
 		void setupConnections();
 	};

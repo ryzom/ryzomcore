@@ -53,11 +53,9 @@ namespace MaterialEditor
 
 	bool ShaderWidget::nameExists( const QString &name )
 	{
-		QTreeWidgetItem *item = NULL;
-		for( int i = 0; i < shaderListWidget->topLevelItemCount(); i++ )
+		for( int i = 0; i < shaderList->count(); i++ )
 		{
-			item = shaderListWidget->topLevelItem( i );
-			if( item->text( 0 ) == name )
+			if( shaderList->item( i )->text() == name ) 
 				return true;
 		}
 
@@ -100,28 +98,13 @@ namespace MaterialEditor
 			return;
 		}
 
-		QString fn =
-			QFileDialog::getSaveFileName(
-			this,
-			tr( "Shader filename" ),
-			tr( "/" ),
-			tr( "Nel shader files ( *.nelshdr )" )
-			);
-
-		if( fn.isEmpty() )
-			return;
-
-		QTreeWidgetItem *item = new QTreeWidgetItem();
-		item->setText( 0, name );
-		item->setText( 1, fn );
-		shaderListWidget->addTopLevelItem( item );
-
+		shaderList->addItem( name );
 	}
 
 	void ShaderWidget::onRemoveClicked()
 	{
-		QTreeWidgetItem *item = shaderListWidget->currentItem();
-		if( item == NULL )
+		int i = shaderList->currentRow();
+		if( i < 0 )
 			return;
 
 		int selection =
@@ -134,25 +117,32 @@ namespace MaterialEditor
 				);
 
 		if( selection == QMessageBox::Yes )
+		{
+			QListWidgetItem *item = shaderList->takeItem( i );
 			delete item;
+		}
 	}
 
 	void ShaderWidget::onEditClicked()
 	{
-		QTreeWidgetItem *item = shaderListWidget->currentItem();
-		if( item == NULL )
+		int i = shaderList->currentRow();
+		if( i < 0 )
 			return;
 
-		QString name = item->text( 0 );
+		QString name = shaderList->item( i )->text();
 
 		shaderEditorWidget->reset();
 		shaderEditorWidget->setName( name );
 
 		QString sname;
 		bool ok;
+		int res;
 		do{
 			ok = true;
-			shaderEditorWidget->exec();
+			res = shaderEditorWidget->exec();
+			if( res == QDialog::Rejected )
+				return;
+
 			shaderEditorWidget->getName( sname );
 
 			if( sname != name )
@@ -166,7 +156,7 @@ namespace MaterialEditor
 
 		}while( !ok );
 
-		item->setText( 0, sname );
+		shaderList->item( i )->setText( sname );
 
 		// save
 
