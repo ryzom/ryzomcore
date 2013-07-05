@@ -1384,7 +1384,15 @@ bool mainLoop()
 		MainCam.setRotQuat(View.currentViewQuat());
 		if (StereoHMD)
 		{
-			// ...
+			NLMISC::CQuat hmdOrient = StereoHMD->getOrientation();
+			NLMISC::CMatrix camMatrix = MainCam.getMatrix();
+			NLMISC::CMatrix hmdMatrix;
+			hmdMatrix.setRot(hmdOrient);
+			NLMISC::CMatrix posMatrix; // minimal head modeling, will be changed in the future
+			posMatrix.translate(StereoHMD->getEyePosition());
+			NLMISC::CMatrix mat = ((camMatrix * hmdMatrix) * posMatrix);
+			MainCam.setPos(mat.getPos());
+			MainCam.setRotQuat(mat.getRot());
 		}
 		if (StereoDisplay) 
 		{
