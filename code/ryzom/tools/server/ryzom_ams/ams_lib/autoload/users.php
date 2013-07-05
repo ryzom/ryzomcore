@@ -380,7 +380,7 @@ class Users{
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer($cfg['db']['lib']);
-                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "changepass",
+                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "change_pass",
                     "query" => json_encode(array($values["user"],$values["pass"]))));
                     return "shardoffline";
                }catch (PDOException $e) {
@@ -404,7 +404,7 @@ class Users{
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer($cfg['db']['lib']);
-                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "changemail",
+                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "change_mail",
                     "query" => json_encode(array($values["user"],$values["mail"]))));
                     return "shardoffline";
                }catch (PDOException $e) {

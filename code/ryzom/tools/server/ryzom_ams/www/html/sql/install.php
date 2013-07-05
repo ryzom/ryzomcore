@@ -45,6 +45,39 @@
             `query` VARCHAR( 512 ) NOT NULL 
             );
             
+            DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_category` ;
+            CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (
+              `TCategoryId` INT NOT NULL AUTO_INCREMENT ,
+              `Name` VARCHAR(45) NOT NULL ,
+              PRIMARY KEY (`TCategoryId`) ,
+              UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) )
+            ENGINE = InnoDB;
+            
+            DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket` ;
+
+            CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket` (
+              `TId` INT NOT NULL AUTO_INCREMENT ,
+              `Timestamp` TIMESTAMP NOT NULL ,
+              `Title` VARCHAR(120) NOT NULL ,
+              `Status` INT NULL DEFAULT 0 ,
+              `Queue` INT NULL DEFAULT 0 ,
+              `Ticket_Category` INT NOT NULL ,
+              `Author` INT NOT NULL ,
+              PRIMARY KEY (`TId`) ,
+              INDEX `fk_ticket_ticket_category_idx` (`Ticket_Category` ASC) ,
+              INDEX `fk_ticket_ams_user_idx` (`Author` ASC) ,
+              CONSTRAINT `fk_ticket_ticket_category`
+                FOREIGN KEY (`Ticket_Category` )
+                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`TCategoryId` )
+                ON DELETE NO ACTION
+                ON UPDATE NO ACTION,
+              CONSTRAINT `fk_ticket_ams_user`
+                FOREIGN KEY (`Author` )
+                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ams_user` (`UId` )
+                ON DELETE NO ACTION
+                ON UPDATE NO ACTION)
+            ENGINE = InnoDB;
+
 
         ";
         $dbl->executeWithoutParams($sql);
