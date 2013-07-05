@@ -49,6 +49,10 @@ namespace NL3D
 		f.serial( name );
 		f.xmlPop();
 
+		f.xmlPush( "shader" );
+		f.serial( shaderRef );
+		f.xmlPop();
+
 		f.xmlPush( "properties" );
 
 		if( !f.isReading() )

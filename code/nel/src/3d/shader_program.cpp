@@ -1,4 +1,4 @@
-// Object Viewer Qt Material Editor plugin <http://dev.ryzom.com/projects/ryzom/>
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -15,37 +15,44 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef SHADER_WIDGET_H
-#define SHADER_WIDGET_H
+#include "nel/3d/shader_program.h"
 
-#include "ui_shader_widget.h"
-
-namespace MaterialEditor
+namespace NL3D
 {
-	class ShaderEditorWidget;
-
-	class ShaderWidget : public QWidget, public Ui::ShaderWidget
+	CShaderProgram::CShaderProgram()
 	{
-		Q_OBJECT
+		vpId = 0;
+		fpId = 0;
+	}
 
-	public:
-		ShaderWidget( QWidget *parent = NULL );
-		~ShaderWidget();
+	CShaderProgram::~CShaderProgram()
+	{
+	}
 
-	private:
-		void setupConnections();
-		bool nameExists( const QString &name );
-		void nameExistsMessage();
+	void CShaderProgram::serial( NLMISC::IStream &f )
+	{
+		f.xmlPush( "ShaderProgram" );
 
-		ShaderEditorWidget *shaderEditorWidget;
+		int version = f.serialVersion( 1 );
 
-	private Q_SLOTS:
-		void onOKClicked();
-		void onAddClicked();
-		void onRemoveClicked();
-		void onEditClicked();
-	};
+		f.xmlPush( "Name" );
+		f.serial( name );
+		f.xmlPop();
+
+		f.xmlPush( "Description" );
+		f.serial( description );
+		f.xmlPop();
+
+		f.xmlPush( "VertexProgram" );
+		f.serial( vertexProgram );
+		f.xmlPop();
+
+		f.xmlPush( "FragmentProgram" );
+		f.serial( fragmentProgram );
+		f.xmlPop();
+
+		f.xmlPop();
+	}
 }
 
-#endif
 

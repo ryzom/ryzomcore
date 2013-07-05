@@ -41,7 +41,6 @@ namespace MaterialEditor
 	{
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKClicked() ) );
 
-		connect( newButton, SIGNAL( clicked( bool ) ), this, SLOT( onNewClicked() ) );
 		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditClicked() ) );
@@ -75,19 +74,25 @@ namespace MaterialEditor
 			);
 	}
 
-	void ShaderWidget::onNewClicked()
+	void ShaderWidget::onAddClicked()
 	{
-		bool ok = false;
-		QString def;
 		QString name =
-			QInputDialog::getText( 
+			QInputDialog::getText(
+			this,
+			tr( "New shader" ),
+			tr( "Enter the new shader's name" )
+			);
+
+		if( name.isEmpty() )
+		{
+			QMessageBox::critical( 
 				this,
-				tr( "Shader name" ),
-				tr( "New shader's name?" ),
-				QLineEdit::Normal,
-				def,
-				&ok
+				tr( "New shader" ),
+				tr( "You must enter a name for the new shader" ),
+				QMessageBox::Ok 
 				);
+			return;
+		}
 
 		if( nameExists( name ) )
 		{
@@ -95,55 +100,21 @@ namespace MaterialEditor
 			return;
 		}
 
-		QString fname = QFileDialog::getSaveFileName(
-							this,
-							tr( "New shader's path" ),
-							"/",
-							tr( "Shader files ( *.nelshader )" )
-							);
+		QString fn =
+			QFileDialog::getSaveFileName(
+			this,
+			tr( "Shader filename" ),
+			tr( "/" ),
+			tr( "Nel shader files ( *.nelshdr )" )
+			);
 
-		shaderEditorWidget->reset();
-		shaderEditorWidget->setName( name );
-
-		QString sname;
-		do{
-			ok = true;
-			shaderEditorWidget->exec();
-			shaderEditorWidget->getName( sname );
-
-			if( sname != name )
-			{
-				if( nameExists( sname ) )
-				{
-					ok = false;
-					nameExistsMessage();
-				}
-			}
-
-		}while( !ok );
-
-		QString descr;
-		shaderEditorWidget->getDescription( descr );
+		if( fn.isEmpty() )
+			return;
 
 		QTreeWidgetItem *item = new QTreeWidgetItem();
-		item->setText( 0, sname );
-		item->setText( 1, descr );
-		item->setText( 2, fname );
+		item->setText( 0, name );
+		item->setText( 1, fn );
 		shaderListWidget->addTopLevelItem( item );
-		shaderListWidget->sortItems( 0, Qt::AscendingOrder );
-
-		// save it
-	}
-
-	void ShaderWidget::onAddClicked()
-	{
-		QString fn = 
-			QFileDialog::getOpenFileName(
-			this,
-			tr( "Load shader" ),
-			"/",
-			tr( "Shader files ( *.nelshader )" )
-			);
 
 	}
 
@@ -173,11 +144,9 @@ namespace MaterialEditor
 			return;
 
 		QString name = item->text( 0 );
-		QString description = item->text( 1 );
 
 		shaderEditorWidget->reset();
 		shaderEditorWidget->setName( name );
-		shaderEditorWidget->setDescription( description );
 
 		QString sname;
 		bool ok;
@@ -197,9 +166,7 @@ namespace MaterialEditor
 
 		}while( !ok );
 
-		shaderEditorWidget->getDescription( description );
 		item->setText( 0, sname );
-		item->setText( 1, description );
 
 		// save
 

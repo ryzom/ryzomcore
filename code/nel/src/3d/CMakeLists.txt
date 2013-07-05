@@ -157,6 +157,12 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/scene_group.h
         shader.cpp
         ../../include/nel/3d/shader.h
+		shader_loader.cpp
+		../../include/nel/3d/shader_loader.h
+		shader_manager.cpp
+		../../include/nel/3d/shader_manager.h
+		shader_program.cpp
+		../../include/nel/3d/shader_program.h
         texture.cpp
         ../../include/nel/3d/texture.h
         vertex_buffer.cpp

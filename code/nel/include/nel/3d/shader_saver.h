@@ -1,4 +1,4 @@
-// Object Viewer Qt Material Editor plugin <http://dev.ryzom.com/projects/ryzom/>
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -15,37 +15,36 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef SHADER_WIDGET_H
-#define SHADER_WIDGET_H
+#ifndef SHADER_SAVER_H
+#define SHADER_SAVER_H
 
-#include "ui_shader_widget.h"
+#include "nel/3d/shader_visitor.h"
+#include <string>
 
-namespace MaterialEditor
+namespace NL3D
 {
-	class ShaderEditorWidget;
+	class CShaderProgram;
+	class CShaderManager;
 
-	class ShaderWidget : public QWidget, public Ui::ShaderWidget
+	class CShaderSaver : public IShaderVisitor
 	{
-		Q_OBJECT
-
 	public:
-		ShaderWidget( QWidget *parent = NULL );
-		~ShaderWidget();
+		CShaderSaver();
+		~CShaderSaver();
+
+		void setManager( CShaderManager *mgr ){ manager = mgr; }
+
+		void visit( CShaderProgram *program );
+
+		void saveShaders( const std::string &directory );
+		void saveShader( const std::string &directory, const std::string &name );
 
 	private:
-		void setupConnections();
-		bool nameExists( const QString &name );
-		void nameExistsMessage();
-
-		ShaderEditorWidget *shaderEditorWidget;
-
-	private Q_SLOTS:
-		void onOKClicked();
-		void onAddClicked();
-		void onRemoveClicked();
-		void onEditClicked();
+		CShaderManager *manager;
+		std::string outputDir;
 	};
 }
 
 #endif
+
 
