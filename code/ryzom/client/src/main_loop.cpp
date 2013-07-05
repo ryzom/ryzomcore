@@ -398,8 +398,8 @@ void commitCamera()
 		// Update Camera Position/Rotation.
 		//camRoot.setPos(View.currentViewPos());
 		//camRoot.setRotQuat(View.currentViewQuat());
-		camRoot.setTransformMode(UTransformable::DirectMatrix); // FIXME
-		camRoot.setMatrix(MainCam.getMatrix());
+		camRoot.setPos(MainCam.getPos());
+		camRoot.setRotQuat(MainCam.getRotQuat());
 	}
 }
 
@@ -533,6 +533,30 @@ private:
 };
 static CForceFullDetail s_ForceFullDetail;
 
+void clearBuffers()
+{
+	if (Render)
+	{
+		if (Driver->getPolygonMode() == UDriver::Filled)
+		{
+			Driver->clearZBuffer();
+		}
+
+		// Sky is used to clear the frame buffer now, but if in line or point polygon mode, we should draw it
+		if (Driver->getPolygonMode() != UDriver::Filled)
+		{
+			if (!Driver->isLost())
+			{
+				Driver->clearBuffers (CRGBA(127, 127, 127));
+			}
+		}
+	}
+	else
+	{
+		Driver->clearBuffers(ClientCfg.BGColor);
+	}
+}
+
 void renderScene(bool forceFullDetail, bool bloom)
 {
 	if (bloom)
@@ -548,6 +572,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 		s_ForceFullDetail.backup();
 		s_ForceFullDetail.set();
 	}
+	clearBuffers();
 	renderScene();
 	if (forceFullDetail)
 	{
@@ -688,20 +713,6 @@ void updateWeather()
 // Render all scenes
 void renderScene()
 {
-	if (Driver->getPolygonMode() == UDriver::Filled)
-	{
-		Driver->clearZBuffer();
-	}
-
-	// Sky is used to clear the frame buffer now, but if in line or point polygon mode, we should draw it
-	if (Driver->getPolygonMode() != UDriver::Filled)
-	{
-		if (!Driver->isLost())
-		{
-			Driver->clearBuffers (CRGBA(127, 127, 127));
-		}
-	}
-
 	// Update Filter Flags
 	Scene->enableElementRender(UScene::FilterAllMeshNoVP, Filter3D[FilterMeshNoVP]);
 	Scene->enableElementRender(UScene::FilterAllMeshVP, Filter3D[FilterMeshVP]);
@@ -1371,6 +1382,10 @@ bool mainLoop()
 		MainCam.setTransformMode(UTransformable::RotQuat);
 		MainCam.setPos(currViewPos);
 		MainCam.setRotQuat(View.currentViewQuat());
+		if (StereoHMD)
+		{
+			// ...
+		}
 		if (StereoDisplay) 
 		{
 			StereoDisplay->updateCamera(0, &MainCam);
@@ -1575,498 +1590,548 @@ bool mainLoop()
 			}
 		}
 		
-		///////////////////
-		// SETUP CAMERAS //
-		///////////////////
-
-		if (StereoDisplay)
+		uint i = 0;
+		uint bloomStage = 0;
+		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 		{
-			// modify cameras for stereo display
-			const CViewport &vp = StereoDisplay->getCurrentViewport();
-			Driver->setViewport(vp);
-			nlassert(Scene);
-			Scene->setViewport(vp);
-			if (SceneRoot)
-			{
-				SceneRoot->setViewport(vp);
-			}
-			MainCam.setTransformMode(UTransformable::DirectMatrix);
-			StereoDisplay->getCurrentMatrix(0, &MainCam);
-			StereoDisplay->getCurrentFrustum(0, &MainCam);
-			if (SceneRoot)
-			{
-				// matrix updated during commitCamera from maincam
-				StereoDisplay->getCurrentFrustum(1, &SceneRoot->getCam());
-			}
-		}
+			++i;
+			///////////////////
+			// SETUP CAMERAS //
+			///////////////////
 
-		// Commit camera changes
-		commitCamera();
-		
-		//////////////////////////
-		// RENDER THE FRAME  3D //
-		//////////////////////////
-
-		if (!ClientCfg.Light)
-		{
-			// Render
-			if(Render)
+			if (StereoDisplay)
 			{
-				if (ClientCfg.Bloom)
+				// modify cameras for stereo display
+				const CViewport &vp = StereoDisplay->getCurrentViewport();
+				Driver->setViewport(vp);
+				nlassert(Scene);
+				Scene->setViewport(vp);
+				if (SceneRoot)
 				{
-					// set bloom parameters before applying bloom effect
-					CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
-					CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
-					// init bloom
-					CBloomEffect::getInstance().initBloom();
+					SceneRoot->setViewport(vp);
 				}
-				// nb : force full detail if a screenshot is asked
-				// todo : move outside render code
-				bool fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
-				if (fullDetail)
+				//MainCam.setTransformMode(UTransformable::DirectMatrix);
+				StereoDisplay->getCurrentMatrix(0, &MainCam);
+				StereoDisplay->getCurrentFrustum(0, &MainCam);
+				if (SceneRoot)
 				{
-					s_ForceFullDetail.backup();
-					s_ForceFullDetail.set();
+					// matrix updated during commitCamera from maincam
+					StereoDisplay->getCurrentFrustum(1, &SceneRoot->getCam());
 				}
+			}
+
+			// Commit camera changes
+			commitCamera();
+			
+			//////////////////////////
+			// RENDER THE FRAME  3D //
+			//////////////////////////
+
+			if (StereoDisplay)
+			{
+				StereoDisplay->beginRenderTarget();
+			}
 				
-				// Render scene
-				renderScene();
+			if (!StereoDisplay || StereoDisplay->wantClear())
+			{
+				if(Render)
+				{
+					if (ClientCfg.Bloom)
+					{
+						nlassert(bloomStage == 0);
+						// set bloom parameters before applying bloom effect
+						CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+						CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+						// start bloom effect (just before the first scene element render)
+						CBloomEffect::instance().initBloom();
+						bloomStage = 1;
+					}
+				}
 
-				if (fullDetail)
+				// Clear buffers
+				clearBuffers();
+			}
+
+			if (!StereoDisplay || StereoDisplay->wantScene())
+			{
+				if (!ClientCfg.Light)
 				{
-					s_ForceFullDetail.restore();
+					// Render
+					if(Render)
+					{
+						// nb : force full detail if a screenshot is asked
+						// todo : move outside render code
+						bool fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
+						if (fullDetail)
+						{
+							s_ForceFullDetail.backup();
+							s_ForceFullDetail.set();
+						}
+						
+						// Render scene
+						renderScene();
+
+						if (fullDetail)
+						{
+							s_ForceFullDetail.restore();
+						}
+					}
 				}
-				if (ClientCfg.Bloom)
+			}
+
+			if (!StereoDisplay || StereoDisplay->wantInterface3D())
+			{
+				if (!ClientCfg.Light)
 				{
-					// apply bloom effect
-					CBloomEffect::getInstance().endBloom();
+					// Render
+					if (Render)
+					{
+						if (ClientCfg.Bloom && bloomStage == 1)
+						{
+							// End the actual bloom effect visible in the scene.
+							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+							CBloomEffect::instance().endBloom();
+							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+							bloomStage = 2;
+						}
+
+						// for that frame and
+						// tmp : display height grid
+						//static volatile bool displayHeightGrid = true;
+						/*if (displayHeightGrid)
+						{
+							HeightGrid.display(*Driver);
+						}*/
+						// display results?
+						if(Scene_Profile)
+						{
+							displaySceneProfiles();
+							Scene_Profile= false;
+						}
+						// Render the primitives
+						{
+							H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+							PrimFiles.display (*Driver);
+						}
+					} /* if (Render) */
+
+					// Draw Extra 3D Objects
+					Driver->setMatrixMode3D(MainCam);
+					Driver->setModelMatrix(CMatrix::Identity);
+
+					// Display PACS borders.
+					if (PACSBorders)
+					{
+						H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+						displayPACSBorders();
+						displayPACSPrimitive();
+					}
+
+					// display Sound box
+					if (SoundBox)
+					{
+						H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+						displaySoundBox();
+					}
+
+					// display Debug of Clusters
+					if (DebugClusters)
+					{
+						H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+						displayDebugClusters();
+					}
+				} /* if (!ClientCfg.Light) */
+				else
+				{
+		//			static UTextureFile *backgroundBitmap = NULL;
+		//			if (backgroundBitmap == NULL)
+		//				backgroundBitmap = Driver->createTextureFile("temp_background.tga");
+		//			Driver->setMatrixMode2D11();
+		//			Driver->drawBitmap (0.f, 0.f, 1024.f/1024.f, 1024.f/768.f, (UTexture&)*backgroundBitmap);
+		//			Driver->setMatrixMode3D(MainCam);
+
+					Driver->clearBuffers(CRGBA (0,0,0,0));
+					displayPACSBorders();
+					displayPACSPrimitive();
 				}
 
-				// for that frame and
-				// tmp : display height grid
-				//static volatile bool displayHeightGrid = true;
-				/*if (displayHeightGrid)
+				if (!ClientCfg.Light && !Landscape)
 				{
-					HeightGrid.display(*Driver);
-				}*/
-				// display results?
-				if(Scene_Profile)
-				{
-					displaySceneProfiles();
-					Scene_Profile= false;
+					displayPACSBorders();
 				}
-				// Render the primitives
+
+				// Display some things not in the scene like the name, the entity path, etc.
+				EntitiesMngr.updatePostRender();
+
+				// Render the stat graphs if needed
 				{
 					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-					PrimFiles.display (*Driver);
+					CGraph::render (ShowInfos);
 				}
-			}
-			else
+
+			} /* if (!StereoDisplay || StereoDisplay->wantInterface3D()) */
+
+			if (!StereoDisplay || StereoDisplay->wantInterface2D())
 			{
-				Driver->clearBuffers(ClientCfg.BGColor);
-			}
+				// Render in 2D Mode to display 2D Interfaces and 2D texts.
+				Driver->setMatrixMode2D11();
 
-			// Draw Extra 3D Objects
-			Driver->setMatrixMode3D(MainCam);
-			Driver->setModelMatrix(CMatrix::Identity);
-
-			// Display PACS borders.
-			if (PACSBorders)
-			{
-				H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-				displayPACSBorders();
-				displayPACSPrimitive();
-			}
-
-			// display Sound box
-			if (SoundBox)
-			{
-				H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-				displaySoundBox();
-			}
-
-			// display Debug of Clusters
-			if (DebugClusters)
-			{
-				H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-				displayDebugClusters();
-			}
-
-		}
-		else
-		{
-//			static UTextureFile *backgroundBitmap = NULL;
-//			if (backgroundBitmap == NULL)
-//				backgroundBitmap = Driver->createTextureFile("temp_background.tga");
-//			Driver->setMatrixMode2D11();
-//			Driver->drawBitmap (0.f, 0.f, 1024.f/1024.f, 1024.f/768.f, (UTexture&)*backgroundBitmap);
-//			Driver->setMatrixMode3D(MainCam);
-
-			Driver->clearBuffers(CRGBA (0,0,0,0));
-			displayPACSBorders();
-			displayPACSPrimitive();
-		}
-
-		if (!ClientCfg.Light && !Landscape)
-		{
-			displayPACSBorders();
-		}
-
-		// Display some things not in the scene like the name, the entity path, etc.
-		EntitiesMngr.updatePostRender();
-
-		// Render the stat graphs if needed
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-			CGraph::render (ShowInfos);
-		}
-
-		// Render in 2D Mode to display 2D Interfaces and 2D texts.
-		Driver->setMatrixMode2D11();
-
-		// draw a big quad to represent thunder strokes
-		if (Render && WeatherManager.getThunderLevel() != 0.f)
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Render_Thunder )
-			Driver->drawQuad(0, 0, 1, 1, ThunderColor);
-
-			// TODO : boris : add sound here !
-			// Needs more explosions
-		}
-
-		// Update the contextual menu
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Interface )
-
-			// Update the game cursor.
-			ContextCur.check();
-			GameContextMenu.update();
-
-			// validate dialogs
-			validateDialogs(GameContextMenu);
-
-			// Display interface v3
-			Driver->enableFog (false);
-			if (!Driver->isLost())
-			{
-				if(ShowInterface)
-					pIMinstance->updateFrameViews (MainCam);
-				if(DebugUIView)
-					pIMinstance->displayUIViewBBoxs(DebugUIFilter);
-				if(DebugUICtrl)
-					pIMinstance->displayUICtrlBBoxs(DebugUIFilter);
-				if(DebugUIGroup)
-					pIMinstance->displayUIGroupBBoxs(DebugUIFilter);
-			}
-
-			// special case in OpenGL : all scene has been display in render target,
-			// now, final texture is display with a quad
-			if(!ClientCfg.Light && ClientCfg.Bloom)
-				CBloomEffect::getInstance().endInterfacesDisplayBloom();
-		}
-
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-			if (!Driver->isLost())
-			{
-				// If show information is Active.
-				if(ShowInfos == 1)
-					displayDebug();
-
-				// If show information is Active.
-				if(ShowInfos == 2)
-					displayNetDebug();
-
-				// If show information is Active.
-				if(ShowInfos == 4)
-					displayDebugFps();
-
-				// If show information is Active.
-				if(ShowInfos == 5)
-					displayDebugUIUnderMouse();
-
-				// If show information is Active.
-				displayStreamingDebug();
-
-				// If Show Help is active -> Display an help.
-				if(ShowHelp)
-					displayHelp();
-
-				// Yoyo: indicate profiling state
-				if( Profiling )
-					displaySpecialTextProgress("Profiling");
-
-				// Display frame rate
-
-				// Create a shadow when displaying a text.
-				TextContext->setShaded(true);
-				// Set the font size.
-				TextContext->setFontSize(10);
-				// Set the text color
-				TextContext->setColor(CRGBA(255,255,255));
-
-				// temporary values for conversions
-				float x, y, width, height;
-
-				for(uint i = 0; i < ClientCfg.Logos.size(); i++)
+				// draw a big quad to represent thunder strokes
+				if (Render && WeatherManager.getThunderLevel() != 0.f)
 				{
-					std::vector<string> res;
-					explode(ClientCfg.Logos[i],std::string(":"), res);
-					if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
+					H_AUTO_USE ( RZ_Client_Main_Loop_Render_Thunder )
+					Driver->drawQuad(0, 0, 1, 1, ThunderColor);
+
+					// TODO : boris : add sound here !
+					// Needs more explosions
+				}
+
+				// Update the contextual menu
+				{
+					H_AUTO_USE ( RZ_Client_Main_Loop_Interface )
+
+					// Update the game cursor.
+					ContextCur.check();
+					GameContextMenu.update();
+
+					// validate dialogs
+					validateDialogs(GameContextMenu);
+
+					// Display interface v3
+					Driver->enableFog (false);
+					if (!Driver->isLost())
 					{
-						fromString(res[5], x);
-						fromString(res[6], y);
-						fromString(res[7], width);
-						fromString(res[8], height);
-						Driver->drawBitmap(x/(float)ClientCfg.Width, y/(float)ClientCfg.Height, width/(float)ClientCfg.Width, height/(float)ClientCfg.Height, *LogoBitmaps[i]);
+						if(ShowInterface)
+							pIMinstance->updateFrameViews (MainCam);
+						if(DebugUIView)
+							pIMinstance->displayUIViewBBoxs(DebugUIFilter);
+						if(DebugUICtrl)
+							pIMinstance->displayUICtrlBBoxs(DebugUIFilter);
+						if(DebugUIGroup)
+							pIMinstance->displayUIGroupBBoxs(DebugUIFilter);
+					}
+
+					// special case in OpenGL : all scene has been display in render target,
+					// now, final texture is display with a quad
+					if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2)
+					{
+						// End bloom effect system after drawing the 3d interface (z buffer related).
+						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+						CBloomEffect::instance().endInterfacesDisplayBloom();
+						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+						bloomStage = 0;
 					}
 				}
-			}
-		}
 
-		// FPS
-		{
-			static TTicks oldTick = CTime::getPerformanceTime();
-			TTicks newTick = CTime::getPerformanceTime();
-			double deltaTime = CTime::ticksToSecond (newTick-oldTick);
-			oldTick = newTick;
-			smoothFPS.addValue((float)deltaTime);
-			moreSmoothFPS.addValue((float)deltaTime);
-			deltaTime = smoothFPS.getSmoothValue ();
-			if (deltaTime > 0.0)
-			{
-				CCDBNodeLeaf*pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS");
-				pNL->setValue64((sint64)(1.f/deltaTime));
-			}
-		}
-
-		// R2ED post render update
-		if (ClientCfg.R2EDEnabled)
-		{
-			// IMPORTANT : this should be called after CEntitiesMngr::updatePostRender() because
-			// entity may be added / removed there !
-			R2::getEditor().updateAfterRender();
-		}
-
-		// Update FXs (remove them).
-		FXMngr.update();
-
-		// Detect disconnection / server down: display information text
-		// but keep the rendering so that the player can remember where he is
-		// and what he was doing. He can't move because the connection quality returns false.
-
-		if ((connectionState == CNetworkConnection::Disconnect) && (lastConnectionState != CNetworkConnection::Disconnect) && (!FarTP.isFarTPInProgress()))
-		{
-			UserControls.stopFreeLook(); // let the player click on Exit
-			pIMinstance->messageBoxWithHelp(CI18N::get("uiDisconnected"));
-
-			// If we have started a Far TP sequence and are waiting for onServerQuitOK()
-			// from the EGS, resume the sequence because the EGS is down and won't reply.
-			FarTP.onServerQuitOk();
-		}
-
-		// Yoyo: MovieShooter.
-		if(MovieShooterSaving)
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-
-			// Add the buffer frame to the movie.
-			if(!MovieShooter.addFrame(TimeInSec, Driver))
-			{
-				// Fail to add the frame => abort.
-				endMovieShooting();
-			}
-			else
-			{
-				// Ok, just add a display.
-				displaySpecialTextProgress("MovieShooting");
-			}
-		}
-
-		if (isRecordingCamera())
-		{
-			displaySpecialTextProgress("CameraRecording");
-		}
-
-		// Temp for weather test
-		if (ClientCfg.ManualWeatherSetup && ContinentMngr.cur() && ContinentMngr.cur()->WeatherFunction)
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-			static float displayHourDelta = 0.04f; // static for edition during debug..
-
-			// Display weather function
-			if (DisplayWeatherFunction)
-			{
-				uint64 currDay = RT.getRyzomDay();
-				float currHour = DayNightCycleHour;
-				float singleHourDelta = fmodf(currHour, 1.f);
-				uint32 wndWidth, wndHeight;
-				Driver->getWindowSize(wndWidth, wndHeight);
-				Driver->setMatrixMode2D(CFrustum(0, 800, 600, 0, 0, 1, false));
-				const float lineHeight = 100.f;
-
-				// draw the weather function
-				for(uint x = 0; x < wndWidth; ++x)
 				{
-					float weatherValue;
-					if(ContinentMngr.cur())
-						weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+					if (!Driver->isLost())
+					{
+						// If show information is Active.
+						if(ShowInfos == 1)
+							displayDebug();
+
+						// If show information is Active.
+						if(ShowInfos == 2)
+							displayNetDebug();
+
+						// If show information is Active.
+						if(ShowInfos == 4)
+							displayDebugFps();
+
+						// If show information is Active.
+						if(ShowInfos == 5)
+							displayDebugUIUnderMouse();
+
+						// If show information is Active.
+						displayStreamingDebug();
+
+						// If Show Help is active -> Display an help.
+						if(ShowHelp)
+							displayHelp();
+
+						// Yoyo: indicate profiling state
+						if( Profiling )
+							displaySpecialTextProgress("Profiling");
+
+						// Display frame rate
+
+						// Create a shadow when displaying a text.
+						TextContext->setShaded(true);
+						// Set the font size.
+						TextContext->setFontSize(10);
+						// Set the text color
+						TextContext->setColor(CRGBA(255,255,255));
+
+						// temporary values for conversions
+						float x, y, width, height;
+
+						for(uint i = 0; i < ClientCfg.Logos.size(); i++)
+						{
+							std::vector<string> res;
+							explode(ClientCfg.Logos[i],std::string(":"), res);
+							if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
+							{
+								fromString(res[5], x);
+								fromString(res[6], y);
+								fromString(res[7], width);
+								fromString(res[8], height);
+								Driver->drawBitmap(x/(float)ClientCfg.Width, y/(float)ClientCfg.Height, width/(float)ClientCfg.Width, height/(float)ClientCfg.Height, *LogoBitmaps[i]);
+							}
+						}
+					}
+				}
+
+				// FPS
+				{
+					static TTicks oldTick = CTime::getPerformanceTime();
+					TTicks newTick = CTime::getPerformanceTime();
+					double deltaTime = CTime::ticksToSecond (newTick-oldTick);
+					oldTick = newTick;
+					smoothFPS.addValue((float)deltaTime);
+					moreSmoothFPS.addValue((float)deltaTime);
+					deltaTime = smoothFPS.getSmoothValue ();
+					if (deltaTime > 0.0)
+					{
+						CCDBNodeLeaf*pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS");
+						pNL->setValue64((sint64)(1.f/deltaTime));
+					}
+				}
+
+				// R2ED post render update
+				if (ClientCfg.R2EDEnabled)
+				{
+					// IMPORTANT : this should be called after CEntitiesMngr::updatePostRender() because
+					// entity may be added / removed there !
+					R2::getEditor().updateAfterRender();
+				}
+
+				// Update FXs (remove them).
+				FXMngr.update();
+
+				// Detect disconnection / server down: display information text
+				// but keep the rendering so that the player can remember where he is
+				// and what he was doing. He can't move because the connection quality returns false.
+
+				if ((connectionState == CNetworkConnection::Disconnect) && (lastConnectionState != CNetworkConnection::Disconnect) && (!FarTP.isFarTPInProgress()))
+				{
+					UserControls.stopFreeLook(); // let the player click on Exit
+					pIMinstance->messageBoxWithHelp(CI18N::get("uiDisconnected"));
+
+					// If we have started a Far TP sequence and are waiting for onServerQuitOK()
+					// from the EGS, resume the sequence because the EGS is down and won't reply.
+					FarTP.onServerQuitOk();
+				}
+
+				// Yoyo: MovieShooter.
+				if(MovieShooterSaving)
+				{
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+
+					// Add the buffer frame to the movie.
+					if(!MovieShooter.addFrame(TimeInSec, Driver))
+					{
+						// Fail to add the frame => abort.
+						endMovieShooting();
+					}
 					else
-						weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, 0);
-
-					NLMISC::clamp(weatherValue, 0.f, 1.f);
-					CRGBA seasonToColor[EGSPD::CSeason::Invalid] =
 					{
-						CRGBA::Green,
-						CRGBA::Yellow,
-						CRGBA::Red,
-						CRGBA::Blue
-					};
-					Driver->drawLine((float) x, 0.f, (float) x, lineHeight * weatherValue, seasonToColor[CRyzomTime::getSeasonByDay((uint32)currDay)]);
-					currHour += displayHourDelta;
-					if (currHour >= 24.f)
-					{
-						++currDay;
-						currHour -= 24.f;
-					}
-					singleHourDelta += displayHourDelta;
-					if (singleHourDelta >= 1.f)
-					{
-						singleHourDelta -= 1.f;
-						Driver->drawLine((float) x, 100.f, (float) x, 130, CRGBA::Red);
+						// Ok, just add a display.
+						displaySpecialTextProgress("MovieShooting");
 					}
 				}
 
-				if(ContinentMngr.cur())
+				if (isRecordingCamera())
 				{
-					// draw lines for current weather setups
-					uint numWeatherSetups = ContinentMngr.cur()->WeatherFunction[CurrSeason].getNumWeatherSetups();
-					for (uint y = 0; y < numWeatherSetups; ++y)
+					displaySpecialTextProgress("CameraRecording");
+				}
+
+				// Temp for weather test
+				if (ClientCfg.ManualWeatherSetup && ContinentMngr.cur() && ContinentMngr.cur()->WeatherFunction)
+				{
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+					static float displayHourDelta = 0.04f; // static for edition during debug..
+
+					// Display weather function
+					if (DisplayWeatherFunction)
 					{
-						float py = lineHeight * (y / (float) numWeatherSetups);
-						Driver->drawLine(0.f, py, 800.f, py, CRGBA::Magenta);
+						uint64 currDay = RT.getRyzomDay();
+						float currHour = DayNightCycleHour;
+						float singleHourDelta = fmodf(currHour, 1.f);
+						uint32 wndWidth, wndHeight;
+						Driver->getWindowSize(wndWidth, wndHeight);
+						Driver->setMatrixMode2D(CFrustum(0, 800, 600, 0, 0, 1, false));
+						const float lineHeight = 100.f;
+
+						// draw the weather function
+						for(uint x = 0; x < wndWidth; ++x)
+						{
+							float weatherValue;
+							if(ContinentMngr.cur())
+								weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
+							else
+								weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, 0);
+
+							NLMISC::clamp(weatherValue, 0.f, 1.f);
+							CRGBA seasonToColor[EGSPD::CSeason::Invalid] =
+							{
+								CRGBA::Green,
+								CRGBA::Yellow,
+								CRGBA::Red,
+								CRGBA::Blue
+							};
+							Driver->drawLine((float) x, 0.f, (float) x, lineHeight * weatherValue, seasonToColor[CRyzomTime::getSeasonByDay((uint32)currDay)]);
+							currHour += displayHourDelta;
+							if (currHour >= 24.f)
+							{
+								++currDay;
+								currHour -= 24.f;
+							}
+							singleHourDelta += displayHourDelta;
+							if (singleHourDelta >= 1.f)
+							{
+								singleHourDelta -= 1.f;
+								Driver->drawLine((float) x, 100.f, (float) x, 130, CRGBA::Red);
+							}
+						}
+
+						if(ContinentMngr.cur())
+						{
+							// draw lines for current weather setups
+							uint numWeatherSetups = ContinentMngr.cur()->WeatherFunction[CurrSeason].getNumWeatherSetups();
+							for (uint y = 0; y < numWeatherSetups; ++y)
+							{
+								float py = lineHeight * (y / (float) numWeatherSetups);
+								Driver->drawLine(0.f, py, 800.f, py, CRGBA::Magenta);
+							}
+						}
+					}
+
+					// Ctrl+ & Ctrl- change the weather value
+					if (Actions.valide ("inc_time"))
+					{
+						ManualWeatherValue += DT * 0.04f;
+					}
+					if (Actions.valide ("dec_time"))
+					{
+						ManualWeatherValue -= DT * 0.04f;
+					}
+					NLMISC::clamp(ManualWeatherValue, 0.f, 1.f);
+
+					if (ForcedDayNightCycleHour < 0) // if time is forced then can't change it manually ...
+					{
+						// Ctrl-K increase hour
+						if (Actions.valide ("inc_hour"))
+						{
+							RT.increaseTickOffset( (uint32)(2000 * displayHourDelta) );
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+						}
+
+						// Ctrl-L decrease hour
+						if (Actions.valide ("dec_hour"))
+						{
+							RT.decreaseTickOffset( (uint32)(2000 * displayHourDelta) );
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+							CTimedFXManager::getInstance().setDate(CClientDate(RT.getRyzomDay(), (float) RT.getRyzomTime()));
+							if (IGCallbacks)
+							{
+								IGCallbacks->changeSeason(); // the season doesn't change, but this force fxs to be recreated
+							}
+						}
+					}
+
+					// Ctrl-M generate statistics in a file
+						/*
+					if (Actions.valide ("weather_stats"))
+					{
+						// Only usable if there is a continent loaded.
+						if(ContinentMngr.cur())
+							CPredictWeather::generateWeatherStats("weather_stats.csv", WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
+					}*/
+
+					// Ctrl-B decrease display factor
+					if (Actions.valide ("dec_display_factor"))
+					{
+						displayHourDelta *= 0.90f;
+					}
+					// Ctrl-J increase display factor
+					if (Actions.valide ("inc_display_factor"))
+					{
+						displayHourDelta *= 1.1f;
+						displayHourDelta = std::min(1000.f, displayHourDelta);
 					}
 				}
-			}
 
-			// Ctrl+ & Ctrl- change the weather value
-			if (Actions.valide ("inc_time"))
-			{
-				ManualWeatherValue += DT * 0.04f;
-			}
-			if (Actions.valide ("dec_time"))
-			{
-				ManualWeatherValue -= DT * 0.04f;
-			}
-			NLMISC::clamp(ManualWeatherValue, 0.f, 1.f);
-
-			if (ForcedDayNightCycleHour < 0) // if time is forced then can't change it manually ...
-			{
-				// Ctrl-K increase hour
-				if (Actions.valide ("inc_hour"))
+				// Ctrl-AltGR-Z show timed FXs
+				if (ShowTimedFX)
 				{
-					RT.increaseTickOffset( (uint32)(2000 * displayHourDelta) );
-					RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
-				}
-
-				// Ctrl-L decrease hour
-				if (Actions.valide ("dec_hour"))
-				{
-					RT.decreaseTickOffset( (uint32)(2000 * displayHourDelta) );
-					RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
-					CTimedFXManager::getInstance().setDate(CClientDate(RT.getRyzomDay(), (float) RT.getRyzomTime()));
-					if (IGCallbacks)
+					if (!Driver->isLost())
 					{
-						IGCallbacks->changeSeason(); // the season doesn't change, but this force fxs to be recreated
+						CTimedFXManager::getInstance().displayFXBoxes(ShowTimedFXMode);
 					}
 				}
-			}
 
-			// Ctrl-M generate statistics in a file
-				/*
-			if (Actions.valide ("weather_stats"))
-			{
-				// Only usable if there is a continent loaded.
-				if(ContinentMngr.cur())
-					CPredictWeather::generateWeatherStats("weather_stats.csv", WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
-			}*/
+		#if !FINAL_VERSION
+					CVector2f camPos(Scene->getCam().getPos().x, Scene->getCam().getPos().y);
+					if (!ClientCfg.Light)
+					{
+						if (DisplayMicroLifeZones)
+						{
+							CMicroLifeManager::getInstance().renderMLZones(camPos);
+						}
+					}
+					if (DisplayWaterMap)
+					{
+						if (ContinentMngr.cur())
+						{
+							ContinentMngr.cur()->WaterMap.render(camPos);
+						}
+					}
+				#endif
 
-			// Ctrl-B decrease display factor
-			if (Actions.valide ("dec_display_factor"))
-			{
-				displayHourDelta *= 0.90f;
-			}
-			// Ctrl-J increase display factor
-			if (Actions.valide ("inc_display_factor"))
-			{
-				displayHourDelta *= 1.1f;
-				displayHourDelta = std::min(1000.f, displayHourDelta);
-			}
-		}
+				#ifdef NL_DEBUG
+					if (!ClientCfg.Light)
+					{
+						if (DisplayMicroLifeActiveTiles)
+						{
+							CMicroLifeManager::getInstance().renderActiveTiles();
+						}
+					}
+				#endif
+				// tmp : debug of ground fxs
+				//TestGroundFX.displayFXBoxes();
 
-		// Ctrl-AltGR-Z show timed FXs
-		if (ShowTimedFX)
-		{
-			if (!Driver->isLost())
-			{
-				CTimedFXManager::getInstance().displayFXBoxes(ShowTimedFXMode);
-			}
-		}
-
-#if !FINAL_VERSION
-			CVector2f camPos(Scene->getCam().getPos().x, Scene->getCam().getPos().y);
-			if (!ClientCfg.Light)
-			{
-				if (DisplayMicroLifeZones)
+				// Temp for sound debug
 				{
-					CMicroLifeManager::getInstance().renderMLZones(camPos);
-				}
-			}
-			if (DisplayWaterMap)
-			{
-				if (ContinentMngr.cur())
-				{
-					ContinentMngr.cur()->WaterMap.render(camPos);
-				}
-			}
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+
+					if (SoundMngr != 0)
+					{
+						static bool drawSound = false;
+		 				static float camHeigh = 150.0f;
+
+		#if FINAL_VERSION
+						if (ClientCfg.ExtendedCommands)
 		#endif
+							if (Actions.valide ("draw_sound"))
+								drawSound = !drawSound;
 
-		#ifdef NL_DEBUG
-			if (!ClientCfg.Light)
-			{
-				if (DisplayMicroLifeActiveTiles)
-				{
-					CMicroLifeManager::getInstance().renderActiveTiles();
+						if (Actions.valide ("inc_camera_height"))
+							camHeigh -= 10.0f;
+						if (Actions.valide ("dec_camera_height"))
+							camHeigh += 10.0f;
+
+						if (drawSound)
+							SoundMngr->drawSounds(camHeigh);
+					}
 				}
-			}
-		#endif
-		// tmp : debug of ground fxs
-		//TestGroundFX.displayFXBoxes();
+			} /* if (!StereoDisplay || StereoDisplay->wantInterface2D()) */
 
-		// Temp for sound debug
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-
-			if (SoundMngr != 0)
+			if (StereoDisplay)
 			{
-				static bool drawSound = false;
-		 		static float camHeigh = 150.0f;
-
-#if FINAL_VERSION
-				if (ClientCfg.ExtendedCommands)
-#endif
-					if (Actions.valide ("draw_sound"))
-						drawSound = !drawSound;
-
-				if (Actions.valide ("inc_camera_height"))
-					camHeigh -= 10.0f;
-				if (Actions.valide ("dec_camera_height"))
-					camHeigh += 10.0f;
-
-				if (drawSound)
-					SoundMngr->drawSounds(camHeigh);
+				StereoDisplay->endRenderTarget();
 			}
-		}
+		} /* stereo pass */
 
 		// Draw to screen.
 		static CQuat MainCamOri;
