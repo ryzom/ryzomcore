@@ -257,20 +257,41 @@ void CStereoDebugger::getClippingFrustum(uint cid, NL3D::UCamera *camera) const
 /// Is there a next pass
 bool CStereoDebugger::nextPass()
 {
-	switch (m_Stage)
+	if (m_Driver->getPolygonMode() == UDriver::Filled)
 	{
-	case 0:
-		++m_Stage;
-		m_SubStage = 0;
-		return true;
-	case 1:
-		++m_Stage;
-		m_SubStage = 0;
-		return true;
-	case 2:
-		m_Stage = 0;
-		m_SubStage = 0;
-		return false;
+		switch (m_Stage)
+		{
+		case 0:
+			++m_Stage;
+			m_SubStage = 0;
+			return true;
+		case 1:
+			++m_Stage;
+			m_SubStage = 0;
+			return true;
+		case 2:
+			++m_Stage;
+			m_SubStage = 0;
+			return true;
+		case 3:
+			m_Stage = 0;
+			m_SubStage = 0;
+			return false;
+		}
+	}
+	else
+	{
+		switch (m_Stage)
+		{
+		case 0:
+			++m_Stage;
+			m_SubStage = 0;
+			return true;
+		case 1:
+			m_Stage = 0;
+			m_SubStage = 0;
+			return false;
+		}
 	}
 }
 
@@ -303,34 +324,34 @@ void CStereoDebugger::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 bool CStereoDebugger::wantClear()
 {
 	m_SubStage = 1;
-	return true;
+	return m_Stage != 3;
 }
 	
 /// The 3D scene
 bool CStereoDebugger::wantScene()
 {
 	m_SubStage = 2;
-	return true;
+	return m_Stage != 3;
 }
 
 /// Interface within the 3D scene
 bool CStereoDebugger::wantInterface3D()
 {
 	m_SubStage = 3;
-	return true;
+	return m_Stage == 3;
 }
 	
 /// 2D Interface
 bool CStereoDebugger::wantInterface2D()
 {
 	m_SubStage = 4;
-	return true;
+	return m_Stage == 3;
 }
 
 /// Returns true if a new render target was set, always fase if not using render targets
 bool CStereoDebugger::beginRenderTarget()
 {
-	if (m_Driver)
+	if (m_Stage != 3 && m_Driver && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
 		if (m_Stage % 2) static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_RightTexU, 0, 0, 0, 0);
 		else static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_LeftTexU, 0, 0, 0, 0);
@@ -342,7 +363,7 @@ bool CStereoDebugger::beginRenderTarget()
 /// Returns true if a render target was fully drawn, always false if not using render targets
 bool CStereoDebugger::endRenderTarget()
 {
-	if (m_Driver)
+	if (m_Stage != 3 && m_Driver && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
 		CTextureUser cu;
 		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);

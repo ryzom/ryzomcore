@@ -1627,14 +1627,11 @@ bool mainLoop()
 			// RENDER THE FRAME  3D //
 			//////////////////////////
 
-			if (StereoDisplay)
-			{
-				StereoDisplay->beginRenderTarget();
-			}
+			bool stereoRenderTarget = (StereoDisplay != NULL) && StereoDisplay->beginRenderTarget();
 				
 			if (!StereoDisplay || StereoDisplay->wantClear())
 			{
-				if(Render)
+				if (Render)
 				{
 					if (ClientCfg.Bloom)
 					{
@@ -1777,14 +1774,14 @@ bool mainLoop()
 				Driver->setMatrixMode2D11();
 
 				// draw a big quad to represent thunder strokes
-				if (Render && WeatherManager.getThunderLevel() != 0.f)
+				/*if (Render && WeatherManager.getThunderLevel() != 0.f)
 				{
 					H_AUTO_USE ( RZ_Client_Main_Loop_Render_Thunder )
 					Driver->drawQuad(0, 0, 1, 1, ThunderColor);
 
 					// TODO : boris : add sound here !
 					// Needs more explosions
-				}
+				}*/
 
 				// Update the contextual menu
 				{

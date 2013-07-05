@@ -359,54 +359,71 @@ bool CStereoOVR::nextPass()
 	nlassert(width == m_DevicePtr->HMDInfo.HResolution);
 	nlassert(height == m_DevicePtr->HMDInfo.VResolution);
 
-	switch (m_Stage)
+	if (m_Driver->getPolygonMode() == UDriver::Filled)
 	{
-	case 0:
-		++m_Stage;
-		m_SubStage = 0;
-		// stage 1:
-		// (initBloom)
-		// clear buffer
-		// draw scene left
-		return true;
-	case 1:
-		++m_Stage;
-		m_SubStage = 0;
-		// stage 2:
-		// draw scene right
-		return true;
-	case 2:
-		++m_Stage;
-		m_SubStage = 0;
-		// stage 3:
-		// (endBloom)
-		// draw interface 3d left
-		return true;
-	case 3:
-		++m_Stage;
-		m_SubStage = 0;
-		// stage 4:
-		// draw interface 3d right
-		return true;
-	case 4:
-		++m_Stage;
-		m_SubStage = 0;
-		// stage 5:
-		// (endInterfacesDisplayBloom)
-		// draw interface 2d left
-		return true;
-	case 5:
-		++m_Stage;
-		m_SubStage = 0;
-		// stage 6:
-		// draw interface 2d right
-		return true;
-	case 6:
-		m_Stage = 0;
-		m_SubStage = 0;
-		// present
-		m_OrientationCached = false;
-		return false;
+		switch (m_Stage)
+		{
+		case 0:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 1:
+			// (initBloom)
+			// clear buffer
+			// draw scene left
+			return true;
+		case 1:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 2:
+			// draw scene right
+			return true;
+		case 2:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 3:
+			// (endBloom)
+			// draw interface 3d left
+			return true;
+		case 3:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 4:
+			// draw interface 3d right
+			return true;
+		case 4:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 5:
+			// (endInterfacesDisplayBloom)
+			// draw interface 2d left
+			return true;
+		case 5:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 6:
+			// draw interface 2d right
+			return true;
+		case 6:
+			m_Stage = 0;
+			m_SubStage = 0;
+			// present
+			m_OrientationCached = false;
+			return false;
+		}
+	}
+	else
+	{
+		switch (m_Stage)
+		{
+		case 0:
+			++m_Stage;
+			m_SubStage = 0;
+			return true;
+		case 1:
+			m_Stage = 0;
+			m_SubStage = 0;
+			return false;
+		}
 	}
 	nlerror("Invalid stage");
 	m_Stage = 0;
@@ -459,7 +476,7 @@ bool CStereoOVR::wantClear()
 		m_SubStage = 1;
 		return true;
 	}
-	return false;
+	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 	
 bool CStereoOVR::wantScene()
@@ -471,7 +488,7 @@ bool CStereoOVR::wantScene()
 		m_SubStage = 2;
 		return true;
 	}
-	return false;
+	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 
 bool CStereoOVR::wantInterface3D()
@@ -483,7 +500,7 @@ bool CStereoOVR::wantInterface3D()
 		m_SubStage = 3;
 		return true;
 	}
-	return false;
+	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 
 bool CStereoOVR::wantInterface2D()
@@ -495,7 +512,7 @@ bool CStereoOVR::wantInterface2D()
 		m_SubStage = 4;
 		return true;
 	}
-	return false;
+	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 
 
@@ -504,7 +521,7 @@ bool CStereoOVR::beginRenderTarget()
 {
 	// render target always set before driver clear
 	// nlassert(m_SubStage <= 1);
-	if (m_Driver && m_Stage == 1)
+	if (m_Driver && m_Stage == 1 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_BarrelTexU, 0, 0, 0, 0);
 		return true;
@@ -517,7 +534,7 @@ bool CStereoOVR::endRenderTarget()
 {
 	// after rendering of course
 	// nlassert(m_SubStage > 1);
-	if (m_Driver && m_Stage == 6) // set to 4 to turn off distortion of 2d gui
+	if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
 	{
 		CTextureUser cu;
 		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
