@@ -19,20 +19,14 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`ams_user`
+-- Table `mydb`.`ticket_user`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`ams_user` ;
+DROP TABLE IF EXISTS `mydb`.`ticket_user` ;
 
-CREATE  TABLE IF NOT EXISTS `mydb`.`ams_user` (
+CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_user` (
   `UId` INT(10) NOT NULL AUTO_INCREMENT ,
-  `Login` VARCHAR(64) NOT NULL ,
-  `Password` VARCHAR(13) NULL DEFAULT NULL ,
-  `Email` VARCHAR(255) NOT NULL ,
   `Permission` INT(3) NOT NULL DEFAULT 1 ,
-  `FirstName` VARCHAR(80) NOT NULL ,
-  `LastName` VARCHAR(80) NOT NULL ,
-  `Gender` TINYINT(1) NOT NULL DEFAULT 0 ,
-  `Country` CHAR(2) NOT NULL DEFAULT 'AA' ,
+  `Extern_Id` INT(10) NOT NULL,
   PRIMARY KEY (`UId`) )
 ENGINE = InnoDB;
 
@@ -44,7 +38,7 @@ DROP TABLE IF EXISTS `mydb`.`ticket` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket` (
   `TId` INT NOT NULL AUTO_INCREMENT ,
-  `Date` TIMESTAMP NOT NULL ,
+  `Timestamp` TIMESTAMP NOT NULL ,
   `Title` VARCHAR(120) NOT NULL ,
   `Status` INT NULL DEFAULT 0 ,
   `Queue` INT NULL DEFAULT 0 ,
@@ -60,7 +54,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`ticket` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ticket_ams_user`
     FOREIGN KEY (`Author` )
-    REFERENCES `mydb`.`ams_user` (`UId` )
+    REFERENCES `mydb`.`ticket_user` (`UId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -84,7 +78,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`assigned` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_assigned_ams_user`
     FOREIGN KEY (`User` )
-    REFERENCES `mydb`.`ams_user` (`UId` )
+    REFERENCES `mydb`.`ticket_user` (`UId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -135,7 +129,8 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_content` (
   `TContentId` INT NOT NULL AUTO_INCREMENT ,
   `Content` TEXT NULL ,
   PRIMARY KEY (`TContentId`) )
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
 
 
 -- -----------------------------------------------------
@@ -148,6 +143,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_reply` (
   `Ticket` INT NOT NULL ,
   `Author` INT NOT NULL ,
   `Content` INT NOT NULL ,
+  `Timestamp` TIMESTAMP NULL ,
   PRIMARY KEY (`TReplyId`) ,
   INDEX `fk_ticket_reply_ticket_idx` (`Ticket` ASC) ,
   INDEX `fk_ticket_reply_ams_user_idx` (`Author` ASC) ,
@@ -159,7 +155,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_reply` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ticket_reply_ams_user`
     FOREIGN KEY (`Author` )
-    REFERENCES `mydb`.`ams_user` (`UId` )
+    REFERENCES `mydb`.`ticket_user` (`UId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ticket_reply_ticket_content`
