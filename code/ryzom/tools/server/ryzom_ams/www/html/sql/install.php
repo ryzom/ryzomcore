@@ -57,6 +57,7 @@
               UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) )
             ENGINE = InnoDB;
             
+            INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
             
             -- -----------------------------------------------------
             -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket_user`
@@ -241,7 +242,6 @@
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB;
-
 
 
         ";
