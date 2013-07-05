@@ -96,20 +96,12 @@ CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), 
 
 CStereoDebugger::~CStereoDebugger()
 {
+	releaseTextures();
+
 	if (!m_Mat.empty())
 	{
-		m_Mat.getObjectPtr()->setTexture(0, NULL);
-		m_Mat.getObjectPtr()->setTexture(1, NULL);
 		m_Driver->deleteMaterial(m_Mat);
 	}
-
-	delete m_LeftTexU;
-	m_LeftTexU = NULL;
-	m_LeftTex = NULL; // CSmartPtr
-
-	delete m_RightTexU;
-	m_RightTexU = NULL;
-	m_RightTex = NULL; // CSmartPtr
 
 	delete m_PixelProgram;
 	m_PixelProgram = NULL;
@@ -143,33 +135,7 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 	{
 		m_Driver = driver;
 
-		// todo: handle reso change!
-
-		uint32 width, height;
-		driver->getWindowSize(width, height);
-
-		m_LeftTex = new CTextureBloom();
-		m_LeftTex->setRenderTarget(true);
-		m_LeftTex->setReleasable(false);
-		m_LeftTex->resize(width, height);
-		m_LeftTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
-		m_LeftTex->setWrapS(ITexture::Clamp);
-		m_LeftTex->setWrapT(ITexture::Clamp);
-		drvInternal->setupTexture(*m_LeftTex);
-		m_LeftTexU = new CTextureUser(m_LeftTex);
-		nlassert(!drvInternal->isTextureRectangle(m_LeftTex)); // not allowed
-
-		m_RightTex = new CTextureBloom();
-		m_RightTex->setRenderTarget(true);
-		m_RightTex->setReleasable(false);
-		m_RightTex->resize(width, height);
-		m_RightTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
-		m_RightTex->setWrapS(ITexture::Clamp);
-		m_RightTex->setWrapT(ITexture::Clamp);
-		drvInternal->setupTexture(*m_RightTex);
-		m_RightTexU = new CTextureUser(m_RightTex);
-		nlassert(!drvInternal->isTextureRectangle(m_RightTex)); // not allowed
-
+		initTextures();
 
 		m_Mat = m_Driver->createMaterial();
 		m_Mat.initUnlit();
@@ -182,9 +148,8 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		mat->setZWrite(false);
 		mat->setZFunc(CMaterial::always);
 		mat->setDoubleSided(true);
-		mat->setTexture(0, m_LeftTex);
-		mat->setTexture(1, m_RightTex);
-		
+
+		setTextures();		
 
 		m_QuadUV.V0 = CVector(0.f, 0.f, 0.5f);
 		m_QuadUV.V1 = CVector(1.f, 0.f, 0.5f);
@@ -195,6 +160,79 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		m_QuadUV.Uv1 = CUV(1.f, 0.f);
 		m_QuadUV.Uv2 = CUV(1.f, 1.f);
 		m_QuadUV.Uv3 = CUV(0.f,  1.f);
+	}
+}
+
+void CStereoDebugger::releaseTextures()
+{
+	if (!m_Mat.empty())
+	{
+		m_Mat.getObjectPtr()->setTexture(0, NULL);
+		m_Mat.getObjectPtr()->setTexture(1, NULL);
+		m_Driver->deleteMaterial(m_Mat);
+	}
+
+	delete m_LeftTexU;
+	m_LeftTexU = NULL;
+	m_LeftTex = NULL; // CSmartPtr
+
+	delete m_RightTexU;
+	m_RightTexU = NULL;
+	m_RightTex = NULL; // CSmartPtr
+}
+
+void CStereoDebugger::initTextures()
+{
+	uint32 width, height;
+	m_Driver->getWindowSize(width, height);
+	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();	
+
+	m_LeftTex = new CTextureBloom();
+	m_LeftTex->setRenderTarget(true);
+	m_LeftTex->setReleasable(false);
+	m_LeftTex->resize(width, height);
+	m_LeftTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
+	m_LeftTex->setWrapS(ITexture::Clamp);
+	m_LeftTex->setWrapT(ITexture::Clamp);
+	drvInternal->setupTexture(*m_LeftTex);
+	m_LeftTexU = new CTextureUser(m_LeftTex);
+	nlassert(!drvInternal->isTextureRectangle(m_LeftTex)); // not allowed
+
+	m_RightTex = new CTextureBloom();
+	m_RightTex->setRenderTarget(true);
+	m_RightTex->setReleasable(false);
+	m_RightTex->resize(width, height);
+	m_RightTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
+	m_RightTex->setWrapS(ITexture::Clamp);
+	m_RightTex->setWrapT(ITexture::Clamp);
+	drvInternal->setupTexture(*m_RightTex);
+	m_RightTexU = new CTextureUser(m_RightTex);
+	nlassert(!drvInternal->isTextureRectangle(m_RightTex)); // not allowed
+}
+
+void CStereoDebugger::setTextures()
+{
+	NL3D::CMaterial *mat = m_Mat.getObjectPtr();
+	mat->setTexture(0, m_LeftTex);
+	mat->setTexture(1, m_RightTex);
+}
+
+void CStereoDebugger::verifyTextures()
+{
+	if (m_Driver)
+	{
+		uint32 width, height;
+		m_Driver->getWindowSize(width, height);
+		if (m_LeftTex->getWidth() != width 
+			|| m_RightTex->getWidth() != width 
+			|| m_LeftTex->getHeight() != height 
+			|| m_RightTex->getHeight() != height)
+		{
+			nldebug("Rebuild textures");
+			releaseTextures();
+			initTextures();
+			setTextures();
+		}
 	}
 }
 

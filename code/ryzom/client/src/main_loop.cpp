@@ -42,7 +42,7 @@
 #include "nel/3d/u_material.h"
 #include "nel/3d/u_instance_material.h"
 #include "nel/3d/u_cloud_scape.h"
-#include "nel/3d/stereo_ovr.h"
+#include "nel/3d/stereo_hmd.h"
 // game share
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"

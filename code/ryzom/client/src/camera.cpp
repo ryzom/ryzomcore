@@ -17,7 +17,7 @@
 #include <nel/misc/types_nl.h>
 #include "camera.h"
 
-#include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_display.h>
 
 #include "global.h"
 #include "misc.h"

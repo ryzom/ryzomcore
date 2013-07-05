@@ -302,6 +302,10 @@ CClientConfig::CClientConfig()
 	Contrast			= 0.f;						// Default Monitor Contrast.
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
+	
+	VREnable			= false;
+	VRDisplayDevice		= "Auto";
+	VRDisplayDeviceId	= "";
 
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
@@ -847,6 +851,9 @@ void CClientConfig::setValues()
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
 
+	READ_BOOL_FV(VREnable)
+	READ_STRING_FV(VRDisplayDevice)
+	READ_STRING_FV(VRDisplayDeviceId)
 
 	////////////
 	// INPUTS //

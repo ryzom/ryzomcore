@@ -233,11 +233,6 @@ CStereoOVR::~CStereoOVR()
 
 void CStereoOVR::setDriver(NL3D::UDriver *driver)
 {
-	// Do not allow weird stuff.
-	uint32 width, height;
-	driver->getWindowSize(width, height);
-	nlassert(width == m_DevicePtr->HMDInfo.HResolution);
-	nlassert(height == m_DevicePtr->HMDInfo.VResolution);
 	nlassert(!m_PixelProgram);
 
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();	
@@ -264,7 +259,7 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		m_BarrelTex = new CTextureBloom(); // lol bloom
 		m_BarrelTex->setRenderTarget(true);
 		m_BarrelTex->setReleasable(false);
-		m_BarrelTex->resize(width, height);
+		m_BarrelTex->resize(m_DevicePtr->HMDInfo.HResolution, m_DevicePtr->HMDInfo.VResolution);
 		m_BarrelTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
 		m_BarrelTex->setWrapS(ITexture::Clamp);
 		m_BarrelTex->setWrapT(ITexture::Clamp);
@@ -358,6 +353,12 @@ void CStereoOVR::updateCamera(uint cid, const NL3D::UCamera *camera)
 
 bool CStereoOVR::nextPass()
 {
+	// Do not allow weird stuff.
+	uint32 width, height;
+	m_Driver->getWindowSize(width, height);
+	nlassert(width == m_DevicePtr->HMDInfo.HResolution);
+	nlassert(height == m_DevicePtr->HMDInfo.VResolution);
+
 	switch (m_Stage)
 	{
 	case 0:

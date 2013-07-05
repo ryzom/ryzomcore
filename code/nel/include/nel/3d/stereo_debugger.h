@@ -65,6 +65,10 @@ public:
 
 	/// Sets driver and generates necessary render targets
 	virtual void setDriver(NL3D::UDriver *driver);
+	void releaseTextures();
+	void initTextures();
+	void setTextures();
+	void verifyTextures();
 
 	/// Gets the required screen resolution for this device
 	virtual bool getScreenResolution(uint &width, uint &height);
