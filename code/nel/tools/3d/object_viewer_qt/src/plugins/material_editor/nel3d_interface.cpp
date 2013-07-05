@@ -16,6 +16,8 @@
 
 #include "nel3d_interface.h"
 #include "nel/3d/dynamic_material.h"
+#include "nel/3d/shader_manager.h"
+#include "nel/3d/shader_program.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
@@ -180,10 +182,14 @@ namespace MaterialEditor
 	CNel3DInterface::CNel3DInterface()
 	{
 		mat = new NL3D::CDynMaterial();
+		shaderManager = new NL3D::CShaderManager();
+
 	}
 
 	CNel3DInterface::~CNel3DInterface()
 	{
+		delete shaderManager;
+		shaderManager = NULL;
 	}
 
 	bool CNel3DInterface::loadMaterial( const char *fname )
@@ -231,6 +237,68 @@ namespace MaterialEditor
 	CNelMaterialProxy CNel3DInterface::getMaterial()
 	{
 		return CNelMaterialProxy( mat );
+	}
+
+	void CNel3DInterface::getShaderList( std::vector< std::string > &v )
+	{
+		shaderManager->getShaderList( v );
+	}
+
+	bool CNel3DInterface::getShaderInfo( const std::string &name, SShaderInfo &info )
+	{
+		NL3D::CShaderProgram program;
+		bool ok = shaderManager->getShader( name, &program );
+		if( !ok )
+			return false;
+
+		std::string s;
+		info.name = name;
+
+		program.getDescription( s );
+		info.description = s;
+
+		program.getVP( s );
+		info.vp = s;
+
+		program.getFP( s );
+		info.fp = s;
+
+		return true;
+	}
+
+	bool CNel3DInterface::updateShaderInfo( const SShaderInfo &info )
+	{
+		NL3D::CShaderProgram program;
+		program.setName( info.name );
+		program.setDescription( info.description );
+		program.setVP( info.vp );
+		program.setFP( info.fp );
+
+		return shaderManager->changeShader( info.name, &program );
+	}
+
+	bool CNel3DInterface::addShader( const SShaderInfo &info )
+	{
+		NL3D::CShaderProgram *program = new NL3D::CShaderProgram();
+
+		program->setName( info.name );
+		program->setDescription( info.description );
+		program->setVP( info.vp );
+		program->setFP( info.fp );
+
+		bool ok = shaderManager->addShader( program );
+		if( !ok )
+		{
+			delete program;
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CNel3DInterface::removeShader( const std::string &name )
+	{
+		return shaderManager->removeShader( name );
 	}
 }
 

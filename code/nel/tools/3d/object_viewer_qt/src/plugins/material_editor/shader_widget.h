@@ -23,6 +23,7 @@
 namespace MaterialEditor
 {
 	class ShaderEditorWidget;
+	class CNel3DInterface;
 
 	class ShaderWidget : public QWidget, public Ui::ShaderWidget
 	{
@@ -32,18 +33,23 @@ namespace MaterialEditor
 		ShaderWidget( QWidget *parent = NULL );
 		~ShaderWidget();
 
+		void setNel3DInterface( CNel3DInterface *iface ){ nl3dIface = iface; }
+		void load();
+
 	private:
 		void setupConnections();
 		bool nameExists( const QString &name );
 		void nameExistsMessage();
 
 		ShaderEditorWidget *shaderEditorWidget;
+		CNel3DInterface *nl3dIface;
 
 	private Q_SLOTS:
 		void onOKClicked();
 		void onAddClicked();
 		void onRemoveClicked();
 		void onEditClicked();
+		void onRowChanged( int i );
 	};
 }
 

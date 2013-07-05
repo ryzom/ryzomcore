@@ -56,7 +56,7 @@ namespace NL3D
 		}
 	}
 
-	void CShaderManager::addShader( CShaderProgram *program )
+	bool CShaderManager::addShader( CShaderProgram *program )
 	{
 		std::string n;
 		program->getName( n );
@@ -64,20 +64,34 @@ namespace NL3D
 		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
 			= programs.find( n );
 		if( itr != programs.end() )
-			return;
+			return false;
 
 		programs[ n ] = program;
+		return true;
 	}
 
-	void CShaderManager::changeShader( const std::string &name, CShaderProgram *program )
+	bool CShaderManager::removeShader( const std::string &name )
 	{
 		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
 			= programs.find( name );
 		if( itr == programs.end() )
-			return;
+			return false;
+
+		delete itr->second;
+		itr->second = NULL;
+		programs.erase( itr );
+
+		return true;
+	}
+
+	bool CShaderManager::changeShader( const std::string &name, CShaderProgram *program )
+	{
+		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
+			= programs.find( name );
+		if( itr == programs.end() )
+			return false;
 
 		CShaderProgram *p = itr->second;
-
 		std::string s;
 
 		program->getName( s );
@@ -91,7 +105,32 @@ namespace NL3D
 
 		program->getFP( s );
 		p->setFP( s );
+
+		return true;		
+	}
+
+	bool CShaderManager::getShader( const std::string &name, CShaderProgram *program )
+	{
+		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
+			= programs.find( name );
+		if( itr == programs.end() )
+			return false;
+
+		CShaderProgram *p = itr->second;
+		std::string s;
+
+		program->setName( name );
 		
+		p->getDescription( s );
+		program->setDescription( s );
+
+		p->getVP( s );
+		program->setVP( s );
+
+		p->getFP( s );
+		program->setFP( s );
+
+		return true;
 	}
 
 	void CShaderManager::visitShaders( IShaderVisitor *visitor )

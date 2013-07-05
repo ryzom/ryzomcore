@@ -16,6 +16,7 @@
 
 #include "shader_widget.h"
 #include "shader_editor.h"
+#include "nel3d_interface.h"
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -29,12 +30,29 @@ namespace MaterialEditor
 		setupConnections();
 
 		shaderEditorWidget = new ShaderEditorWidget();
+		nl3dIface = NULL;
 	}
 
 	ShaderWidget::~ShaderWidget()
 	{
 		delete shaderEditorWidget;
 		shaderEditorWidget = NULL;
+	}
+
+	void ShaderWidget::load()
+	{
+		std::vector< std::string > v;
+
+		nl3dIface->getShaderList( v );
+
+		shaderList->clear();
+
+		std::vector< std::string >::const_iterator itr = v.begin();
+		while( itr != v.end() )
+		{
+			shaderList->addItem( itr->c_str() );
+			++itr;
+		}
 	}
 
 	void ShaderWidget::setupConnections()
@@ -44,6 +62,8 @@ namespace MaterialEditor
 		connect( addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
 		connect( editButton, SIGNAL( clicked( bool ) ), this, SLOT( onEditClicked() ) );
+
+		connect( shaderList, SIGNAL( currentRowChanged( int ) ), this, SLOT( onRowChanged( int ) ) );
 	}
 
 	void ShaderWidget::onOKClicked()
@@ -98,6 +118,20 @@ namespace MaterialEditor
 			return;
 		}
 
+		SShaderInfo info;
+		info.name = name.toUtf8().data();
+		bool ok = nl3dIface->addShader( info );
+		if( !ok )
+		{
+			QMessageBox::critical( 
+				this,
+				tr( "Error adding shader" ),
+				tr( "There was an error while trying to add the shader" )
+				);
+
+			return;
+		}
+
 		shaderList->addItem( name );
 	}
 
@@ -119,8 +153,11 @@ namespace MaterialEditor
 		if( selection == QMessageBox::Yes )
 		{
 			QListWidgetItem *item = shaderList->takeItem( i );
+			std::string n = item->text().toUtf8().data();
 			delete item;
+			nl3dIface->removeShader( n );
 		}
+		
 	}
 
 	void ShaderWidget::onEditClicked()
@@ -132,34 +169,66 @@ namespace MaterialEditor
 		QString name = shaderList->item( i )->text();
 
 		shaderEditorWidget->reset();
-		shaderEditorWidget->setName( name );
+		
+		SShaderInfo info;
+		std::string n = name.toUtf8().data();
+		bool ok = nl3dIface->getShaderInfo( n, info );
+		if( !ok )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error retrieving shader data" ),
+				tr( "There was an error while trying to retrieve shader data!" )
+				);
 
-		QString sname;
-		bool ok;
-		int res;
-		do{
-			ok = true;
-			res = shaderEditorWidget->exec();
-			if( res == QDialog::Rejected )
-				return;
+			return;
+		}
 
-			shaderEditorWidget->getName( sname );
+		shaderEditorWidget->setName( info.name.c_str() );
+		shaderEditorWidget->setDescription( info.description.c_str() );
+		shaderEditorWidget->setVertexShader( info.vp.c_str() );
+		shaderEditorWidget->setFragmentShader( info.fp.c_str() );
 
-			if( sname != name )
-			{
-				if( nameExists( sname ) )
-				{
-					ok = false;
-					nameExistsMessage();
-				}
-			}
-
-		}while( !ok );
-
-		shaderList->item( i )->setText( sname );
+		int res = shaderEditorWidget->exec();
+		if( res == QDialog::Rejected )
+			return;
 
 		// save
+		QString s;
 
+		shaderEditorWidget->getDescription( s );
+		info.description = s.toUtf8().data();
+
+		shaderEditorWidget->getVertexShader( s );
+		info.vp = s.toUtf8().data();
+
+		shaderEditorWidget->getFragmentShader( s );
+		info.fp = s.toUtf8().data();
+
+		ok = nl3dIface->updateShaderInfo( info );
+		if( !ok )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error saving shader data" ),
+				tr( "There was an error while trying to save shader data!" )
+				);
+		}
+	}
+
+	void ShaderWidget::onRowChanged( int i )
+	{
+		if( i < 0 )
+			return;
+
+		std::string s = shaderList->item( i )->text().toUtf8().data();
+
+		SShaderInfo info;
+		bool ok = nl3dIface->getShaderInfo( s, info );
+		if( !ok )
+			return;
+
+		description->setPlainText( info.description.c_str() );
 	}
 }
 

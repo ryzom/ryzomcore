@@ -41,8 +41,8 @@ namespace NL3D
 
 		void setName( const std::string &n ){ name = n; }
 		void setDescription( const std::string &d ){ description = d; }
-		void setVP( std::string &vp ){ vertexProgram = vp; }
-		void setFP( std::string &fp ){ fragmentProgram = fp; }
+		void setVP( const std::string &vp ){ vertexProgram = vp; }
+		void setFP( const std::string &fp ){ fragmentProgram = fp; }
 
 		uint32 getVPId() const{ return vpId; }
 		uint32 getFPId() const{ return fpId; }

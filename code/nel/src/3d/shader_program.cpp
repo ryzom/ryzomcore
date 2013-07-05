@@ -23,6 +23,7 @@ namespace NL3D
 	{
 		vpId = 0;
 		fpId = 0;
+		pId  = 0;
 	}
 
 	CShaderProgram::~CShaderProgram()

@@ -25,6 +25,7 @@ namespace NL3D
 {
 	class CDynMaterial;
 	struct SRenderPass;
+	class CShaderManager;
 }
 
 namespace MaterialEditor
@@ -106,6 +107,14 @@ namespace MaterialEditor
 	};
 
 
+	struct SShaderInfo
+	{
+		std::string name;
+		std::string description;
+		std::string vp;
+		std::string fp;
+	};
+
 	/// Proxy class for Nel3D, so the material editor and Nel3D can interface
 	class CNel3DInterface
 	{
@@ -119,8 +128,16 @@ namespace MaterialEditor
 
 		CNelMaterialProxy getMaterial();
 
+
+		void getShaderList( std::vector< std::string > &v );
+		bool getShaderInfo( const std::string &name, SShaderInfo &info );
+		bool updateShaderInfo( const SShaderInfo &info );
+		bool addShader( const SShaderInfo &info );
+		bool removeShader( const std::string &name );
+
 	private:
 		NL3D::CDynMaterial *mat;
+		NL3D::CShaderManager *shaderManager;
 	};
 }
 

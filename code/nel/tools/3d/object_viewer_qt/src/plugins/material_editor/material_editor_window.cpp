@@ -44,6 +44,7 @@ namespace MaterialEditor
 		
 		nl3dIface = new CNel3DInterface();
 		shaderWidget = new ShaderWidget();
+		shaderWidget->setNel3DInterface( nl3dIface );
 		materialSplitter = new MaterialSplitter();
 		materialSplitter->setNel3DIface( nl3dIface );
 		passesWidget = new RenderPassesWidget();
@@ -139,6 +140,7 @@ namespace MaterialEditor
 
 	void MaterialEditorWindow::onShadersClicked()
 	{
+		shaderWidget->load();
 		shaderWidget->show();
 	}
 

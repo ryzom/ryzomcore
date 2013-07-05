@@ -34,8 +34,10 @@ namespace NL3D
 		~CShaderManager();
 		void clear();
 		void getShaderList( std::vector< std::string > &v );
-		void addShader( CShaderProgram *program );
-		void changeShader( const std::string &name, CShaderProgram *program );
+		bool addShader( CShaderProgram *program );
+		bool removeShader( const std::string &name );
+		bool changeShader( const std::string &name, CShaderProgram *program );
+		bool getShader( const std::string &name, CShaderProgram *program );
 		void visitShaders( IShaderVisitor *visitor );
 		void visitShader( const std::string &name, IShaderVisitor *visitor );
 
