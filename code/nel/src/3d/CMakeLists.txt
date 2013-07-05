@@ -163,6 +163,9 @@ SOURCE_GROUP(Driver FILES
 		../../include/nel/3d/shader_manager.h
 		shader_program.cpp
 		../../include/nel/3d/shader_program.h
+		shader_saver.cpp
+		../../include/nel/3d/shader_saver.h
+		../../include/nel/3d/shader_visitor.h
         texture.cpp
         ../../include/nel/3d/texture.h
         vertex_buffer.cpp

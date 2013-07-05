@@ -26,6 +26,7 @@ namespace NL3D
 {
 	CShaderLoader::CShaderLoader()
 	{
+		manager = NULL;
 	}
 
 	CShaderLoader::~CShaderLoader()
