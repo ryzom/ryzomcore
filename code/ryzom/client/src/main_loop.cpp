@@ -1399,7 +1399,8 @@ bool mainLoop()
 			StereoDisplay->updateCamera(0, &MainCam);
 			if (SceneRoot)
 			{
-				StereoDisplay->updateCamera(1, &SceneRoot->getCam());
+				UCamera cam = SceneRoot->getCam();
+				StereoDisplay->updateCamera(1, &cam);
 			}
 		}
 
@@ -1624,7 +1625,8 @@ bool mainLoop()
 				if (SceneRoot)
 				{
 					// matrix updated during commitCamera from maincam
-					StereoDisplay->getCurrentFrustum(1, &SceneRoot->getCam());
+					UCamera cam = SceneRoot->getCam();
+					StereoDisplay->getCurrentFrustum(1, &cam);
 				}
 			}
 
