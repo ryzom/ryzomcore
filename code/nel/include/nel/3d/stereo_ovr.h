@@ -43,6 +43,9 @@
 
 #ifndef NL3D_STEREO_OVR_H
 #define NL3D_STEREO_OVR_H
+
+#ifdef WITH_LIBOVR
+
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -165,6 +168,8 @@ private:
 }; /* class CStereoOVR */
 
 } /* namespace NL3D */
+
+#endif /* WITH_LIBOVR */
 
 #endif /* #ifndef NL3D_STEREO_OVR_H */
 

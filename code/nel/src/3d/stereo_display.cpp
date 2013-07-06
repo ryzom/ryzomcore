@@ -75,7 +75,9 @@ const char *IStereoDisplay::getLibraryName(CStereoDeviceInfo::TStereoDeviceLibra
 
 void IStereoDisplay::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
+#ifdef WITH_LIBOVR
 	CStereoOVR::listDevices(devicesOut);
+#endif
 #if !FINAL_VERSION
 	CStereoDebugger::listDevices(devicesOut);
 #endif
@@ -88,13 +90,17 @@ IStereoDisplay *IStereoDisplay::createDevice(const CStereoDeviceInfo &deviceInfo
 
 void IStereoDisplay::releaseUnusedLibraries()
 {
+#ifdef WITH_LIBOVR
 	if (!CStereoOVR::isLibraryInUse())
 		CStereoOVR::releaseLibrary();
+#endif
 }
 
 void IStereoDisplay::releaseAllLibraries()
 {
+#ifdef WITH_LIBOVR
 	CStereoOVR::releaseLibrary();
+#endif
 }
 
 } /* namespace NL3D */
