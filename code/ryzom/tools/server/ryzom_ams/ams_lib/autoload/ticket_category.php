@@ -25,9 +25,24 @@ class Ticket_Category{
         $instance = new self($db_data);
         $instance->setTCategoryId($id);
         return $instance;
-    
     }
     
+    //returns list of all category objects
+    public static function getAllCategories($db_data) {
+        $dbl = new DBLayer($db_data);
+        $statement = $dbl->executeWithoutParams("SELECT * FROM ticket_category");
+        $row = $statement->fetchAll();
+        $result = Array();
+        foreach($row as $category){
+            $instance = new self($db_data);
+            $instance->tCategoryId = $category['TCategoryId'];
+            $instance->name = $category['Name'];
+            $result[] = $instance;
+        }
+        return $result; 
+    }
+    
+
     //return constructed element based on TCategoryId
     public function load_With_TCategoryId( $id) {
         $dbl = new DBLayer($this->db);
@@ -36,6 +51,7 @@ class Ticket_Category{
         $this->tCategoryId = $row['TCategoryId'];
         $this->name = $row['Name'];
     }
+    
     
     //update private data to DB.
     public function update(){
