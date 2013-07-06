@@ -41,7 +41,7 @@
  * so, delete this exception statement from your version.
  */
 
-#ifdef WITH_LIBOVR
+#ifdef HAVE_LIBOVR
 
 #include <nel/misc/types_nl.h>
 #include <nel/3d/stereo_ovr.h>
@@ -738,6 +738,6 @@ bool CStereoOVR::isDeviceCreated()
 
 } /* namespace NL3D */
 
-#endif /* WITH_LIBOVR */
+#endif /* HAVE_LIBOVR */
 
 /* end of file */
