@@ -35,7 +35,7 @@
 #include <nel/3d/u_3d_mouse_listener.h>
 #include <nel/3d/u_material.h>
 #include <nel/3d/u_landscape.h>
-#include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_hmd.h>
 
 #include "network.h"
 #include "snowballs_client.h"

@@ -28,7 +28,7 @@
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_text_context.h>
 #include <nel/3d/u_texture.h>
-#include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_hmd.h>
 
 #include "mouse_listener.h"
 #include "camera.h"

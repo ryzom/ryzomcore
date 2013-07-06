@@ -51,7 +51,7 @@
 #if SBCLIENT_DEV_STEREO
 #	include <nel/3d/stereo_render.h>
 #endif /* #if SBCLIENT_DEV_STEREO */
-#include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_hmd.h>
 
 // Project includes
 #include "pacs.h"
