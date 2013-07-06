@@ -42,6 +42,7 @@ function change_password(){
                         exit;
                          
                     }else{
+			
                         $result['prevCurrentPass'] = filter_var($_POST["CurrentPass"], FILTER_SANITIZE_STRING);
                         $result['prevNewPass'] = filter_var($_POST["NewPass"], FILTER_SANITIZE_STRING);
                         $result['prevConfirmNewPass'] = filter_var($_POST["ConfirmNewPass"], FILTER_SANITIZE_STRING);

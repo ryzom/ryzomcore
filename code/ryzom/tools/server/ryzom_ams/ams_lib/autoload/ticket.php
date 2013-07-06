@@ -16,8 +16,7 @@ class Ticket{
 
 
     //Set ticket object
-    public function setTicket($ts,$t,$s,$q,$t_c,$a){
-        $this->timestamp = $ts;
+    public function setTicket($t,$s,$q,$t_c,$a){
         $this->title = $t;
         $this->status = $s;
         $this->queue = $q;
@@ -28,8 +27,8 @@ class Ticket{
     //create ticket by writing private data to DB.
     public function create(){
         $dbl = new DBLayer($this->db);
-        $query = "INSERT INTO ticket (Timestamp, Title, Status, Queue, Ticket_Category, Author) VALUES (:timestamp, :title, :status, :queue, :tcat, :author)";
-        $values = Array('timestamp' => $this->timestamp, 'title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author);
+        $query = "INSERT INTO ticket (Timestamp, Title, Status, Queue, Ticket_Category, Author) VALUES (now(), :title, :status, :queue, :tcat, :author)";
+        $values = Array('title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author);
         $dbl->execute($query, $values);
     }
 

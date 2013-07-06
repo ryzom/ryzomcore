@@ -42,7 +42,7 @@
                         </div>
                     </div>
 
-                    <input type="hidden" name="function" value="change_info">
+                    <input type="hidden" name="function" value="create_ticket">
                     <input type="hidden" name="target_id" value="{$target_id}">
                     <div class="control-group">
                         <label class="control-label"></label>
