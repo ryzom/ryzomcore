@@ -24,7 +24,7 @@ function settings(){
                 
                 //Sanitize Data
                 $result['current_mail'] = filter_var($result['current_mail'], FILTER_SANITIZE_EMAIL);
-                $result['Login'] = filter_var($result['Login'], FILTER_SANITIZE_STRING);
+                //$result['Login'] = filter_var($result['Login'], FILTER_SANITIZE_STRING);
                 $result['FirstName'] = filter_var($result['FirstName'], FILTER_SANITIZE_STRING);
                 $result['LastName'] = filter_var($result['LastName'], FILTER_SANITIZE_STRING);
                 $result['Country'] = filter_var($result['Country'], FILTER_SANITIZE_STRING);

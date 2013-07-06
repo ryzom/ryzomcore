@@ -1,5 +1,4 @@
 <?php
-namespace Ams_Tickets;
 
 class Ticket_Category{
     
@@ -34,9 +33,8 @@ class Ticket_Category{
         $dbl = new DBLayer($this->db);
         $statement = $dbl->execute("SELECT * FROM ticket_category WHERE TCategoryId=:id", array('id' => $id));
         $row = $statement->fetch();
-        $instance->tCategoryId = $row['TCategoryId'];
-        $instance->name = $row['Name'];
-        return $instance;
+        $this->tCategoryId = $row['TCategoryId'];
+        $this->name = $row['Name'];
     }
     
     //update private data to DB.

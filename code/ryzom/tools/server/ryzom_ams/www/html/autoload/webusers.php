@@ -50,7 +50,15 @@ class WebUsers extends Users{
         }	
      }
      
-     
+    public function getId($username){
+        global $cfg;
+        
+        $dbw = new DBLayer($cfg['db']['web']);
+        $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
+        $row = $statement->fetch();
+        return $row['UId'];
+    }
+    
     public function getUsername($id){
         global $cfg;
         

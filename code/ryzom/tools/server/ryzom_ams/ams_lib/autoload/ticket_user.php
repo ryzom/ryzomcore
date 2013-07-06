@@ -1,6 +1,4 @@
 <?php
-namespace Ams_Tickets;
-
 class Ticket_User{
     
     private $tUserId;
@@ -46,7 +44,7 @@ class Ticket_User{
     //return constructed element based on ExternId
     public static function constr_ExternId( $id, $db_data ) {
         $instance = new self($db_data);
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer($instance->db);
         $statement = $dbl->execute("SELECT * FROM ticket_user WHERE ExternId=:id", array('id' => $id));
         $row = $statement->fetch();
         $instance->tUserId = $row['TUserId'];

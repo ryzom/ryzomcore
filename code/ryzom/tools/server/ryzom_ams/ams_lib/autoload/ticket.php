@@ -1,5 +1,4 @@
 <?php
-namespace Ams_Tickets;
 
 class Ticket{
     private $tId;
