@@ -58,17 +58,17 @@
             ENGINE = InnoDB;
             
             INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
-            
+                
             -- -----------------------------------------------------
             -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket_user`
             -- -----------------------------------------------------
             DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_user` ;
             
             CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (
-              `UId` INT(10) NOT NULL AUTO_INCREMENT ,
+              `TUserId` INT(10) NOT NULL AUTO_INCREMENT ,
               `Permission` INT(3) NOT NULL DEFAULT 1 ,
-              `Extern_Id` INT(10) NOT NULL ,
-              PRIMARY KEY (`UId`) )
+              `ExternId` INT(10) NOT NULL ,
+              PRIMARY KEY (`TUserId`) )
             ENGINE = InnoDB;
             
             
@@ -95,7 +95,7 @@
                 ON UPDATE NO ACTION,
               CONSTRAINT `fk_ticket_ams_user`
                 FOREIGN KEY (`Author` )
-                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`UId` )
+                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB;
@@ -119,7 +119,7 @@
                 ON UPDATE NO ACTION,
               CONSTRAINT `fk_assigned_ams_user`
                 FOREIGN KEY (`User` )
-                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`UId` )
+                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB;
@@ -196,7 +196,7 @@
                 ON UPDATE NO ACTION,
               CONSTRAINT `fk_ticket_reply_ams_user`
                 FOREIGN KEY (`Author` )
-                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`UId` )
+                REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION,
               CONSTRAINT `fk_ticket_reply_ticket_content`
@@ -242,6 +242,7 @@
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB;
+
 
 
         ";

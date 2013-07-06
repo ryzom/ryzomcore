@@ -24,10 +24,10 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`ticket_user` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_user` (
-  `UId` INT(10) NOT NULL AUTO_INCREMENT ,
+  `TUserId` INT(10) NOT NULL AUTO_INCREMENT ,
   `Permission` INT(3) NOT NULL DEFAULT 1 ,
-  `Extern_Id` INT(10) NOT NULL,
-  PRIMARY KEY (`UId`) )
+  `ExternId` INT(10) NOT NULL ,
+  PRIMARY KEY (`TUserId`) )
 ENGINE = InnoDB;
 
 
@@ -54,7 +54,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`ticket` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ticket_ams_user`
     FOREIGN KEY (`Author` )
-    REFERENCES `mydb`.`ticket_user` (`UId` )
+    REFERENCES `mydb`.`ticket_user` (`TUserId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -78,7 +78,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`assigned` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_assigned_ams_user`
     FOREIGN KEY (`User` )
-    REFERENCES `mydb`.`ticket_user` (`UId` )
+    REFERENCES `mydb`.`ticket_user` (`TUserId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -155,7 +155,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_reply` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ticket_reply_ams_user`
     FOREIGN KEY (`Author` )
-    REFERENCES `mydb`.`ticket_user` (`UId` )
+    REFERENCES `mydb`.`ticket_user` (`TUserId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_ticket_reply_ticket_content`
