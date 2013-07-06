@@ -135,6 +135,10 @@ namespace MaterialEditor
 		bool addShader( const SShaderInfo &info );
 		bool removeShader( const std::string &name );
 
+		void loadShaders();
+		void saveShader( const std::string &name );
+		void deleteShader( const std::string &name );
+
 	private:
 		NL3D::CDynMaterial *mat;
 		NL3D::CShaderManager *shaderManager;

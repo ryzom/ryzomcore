@@ -32,8 +32,7 @@
 #include <QDockWidget>
 #include <QFileDialog>
 #include <QMessageBox>
-
-#include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
+#include <QTimer>
 
 namespace MaterialEditor
 {
@@ -55,6 +54,8 @@ namespace MaterialEditor
 		
 		createMenus();
 		createDockWidgets();
+
+		QTimer::singleShot( 1, this, SLOT( onStartup() ) );
 	}
 	
 	MaterialEditorWindow::~MaterialEditorWindow()
@@ -147,6 +148,11 @@ namespace MaterialEditor
 	void MaterialEditorWindow::onPassesClicked()
 	{
 		passesWidget->show();
+	}
+
+	void MaterialEditorWindow::onStartup()
+	{
+		nl3dIface->loadShaders();
 	}
 	
 	void MaterialEditorWindow::createMenus()

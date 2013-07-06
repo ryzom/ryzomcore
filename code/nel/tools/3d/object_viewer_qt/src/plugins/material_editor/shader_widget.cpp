@@ -121,6 +121,7 @@ namespace MaterialEditor
 		SShaderInfo info;
 		info.name = name.toUtf8().data();
 		bool ok = nl3dIface->addShader( info );
+		nl3dIface->saveShader( info.name );
 		if( !ok )
 		{
 			QMessageBox::critical( 
@@ -155,7 +156,12 @@ namespace MaterialEditor
 			QListWidgetItem *item = shaderList->takeItem( i );
 			std::string n = item->text().toUtf8().data();
 			delete item;
+			
 			nl3dIface->removeShader( n );
+			nl3dIface->deleteShader( n );
+			
+			if( shaderList->count() == 0 )
+				description->setPlainText( "" );
 		}
 		
 	}
@@ -214,6 +220,9 @@ namespace MaterialEditor
 				tr( "There was an error while trying to save shader data!" )
 				);
 		}
+		nl3dIface->saveShader( info.name );
+
+		description->setPlainText( info.description.c_str() );
 	}
 
 	void ShaderWidget::onRowChanged( int i )

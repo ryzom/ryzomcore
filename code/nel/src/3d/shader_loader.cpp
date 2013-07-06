@@ -45,7 +45,7 @@ namespace NL3D
 		std::vector< std::string >::iterator itr = files.begin();
 		while( itr != files.end() )
 		{
-			if( NLMISC::CFile::getExtension( *itr ) == ".nelshdr" )
+			if( NLMISC::CFile::getExtension( *itr ) == "nlshdr" )
 			{
 				loadShader( *itr );
 			}

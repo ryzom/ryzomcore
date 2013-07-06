@@ -18,9 +18,12 @@
 #include "nel/3d/dynamic_material.h"
 #include "nel/3d/shader_manager.h"
 #include "nel/3d/shader_program.h"
+#include "nel/3d/shader_loader.h"
+#include "nel/3d/shader_saver.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
+#include "nel/misc/path.h"
 
 namespace MaterialEditor
 {
@@ -299,6 +302,25 @@ namespace MaterialEditor
 	bool CNel3DInterface::removeShader( const std::string &name )
 	{
 		return shaderManager->removeShader( name );
+	}
+
+	void CNel3DInterface::loadShaders()
+	{
+		NL3D::CShaderLoader loader;
+		loader.setManager( shaderManager );
+		loader.loadShaders( "./shaders" );
+	}
+
+	void CNel3DInterface::saveShader( const std::string &name )
+	{
+		NL3D::CShaderSaver saver;
+		saver.setManager( shaderManager );
+		saver.saveShader( "./shaders", name );
+	}
+
+	void CNel3DInterface::deleteShader( const std::string &name )
+	{
+		NLMISC::CFile::deleteFile( "./shaders/"  + name + ".nlshdr" );
 	}
 }
 

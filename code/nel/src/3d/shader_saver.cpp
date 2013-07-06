@@ -38,7 +38,7 @@ namespace NL3D
 		program->getName( fn );
 		fn += ".nlshdr";
 
-		fn = outputDir + fn;
+		fn = outputDir + "/" + fn;
 
 		NLMISC::COFile of;
 		if( !of.open( fn, false, true ) )

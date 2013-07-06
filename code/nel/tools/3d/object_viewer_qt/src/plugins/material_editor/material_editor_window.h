@@ -42,6 +42,7 @@ private Q_SLOTS:
 		void onSaveMaterialClicked();
 		void onShadersClicked();
 		void onPassesClicked();
+		void onStartup();
 		
 private:
 		void createMenus();
