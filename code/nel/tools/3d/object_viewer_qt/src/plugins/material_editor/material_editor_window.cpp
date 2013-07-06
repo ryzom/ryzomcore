@@ -54,6 +54,7 @@ namespace MaterialEditor
 		
 		createMenus();
 		createDockWidgets();
+		setupConnections();
 
 		QTimer::singleShot( 1, this, SLOT( onStartup() ) );
 	}
@@ -153,6 +154,7 @@ namespace MaterialEditor
 	void MaterialEditorWindow::onStartup()
 	{
 		nl3dIface->loadShaders();
+		shaderWidget->load();
 	}
 	
 	void MaterialEditorWindow::createMenus()
@@ -197,5 +199,16 @@ namespace MaterialEditor
 		dock->setWidget( materialSplitter );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 	}
-	
+
+	void MaterialEditorWindow::setupConnections()
+	{
+		connect( shaderWidget, SIGNAL( shaderAdded( const QString& ) ),
+			materialSplitter, SLOT( onShaderAdded( const QString& ) ) );
+		
+		connect( shaderWidget, SIGNAL( shaderRemoved( const QString& ) ),
+			materialSplitter, SLOT( onShaderRemoved( const QString& ) ) );
+
+
+	}
+
 }

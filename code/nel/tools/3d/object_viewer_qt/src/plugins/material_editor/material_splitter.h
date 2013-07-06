@@ -50,6 +50,10 @@ namespace MaterialEditor
 		void onPassMovedDown( const char *name );
 		void onPassRenamed( const char *from, const char *to );
 
+	public Q_SLOTS:
+		void onShaderAdded( const QString &name );
+		void onShaderRemoved( const QString &name );
+
 	private:
 		CNel3DInterface *nl3dIface;
 		MaterialWidget *materialWidget;

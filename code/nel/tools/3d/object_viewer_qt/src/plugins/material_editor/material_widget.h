@@ -42,6 +42,9 @@ namespace MaterialEditor
 		void onPassMovedDown( const char *name );
 		void onPassRenamed( const char *from, const char *to );
 
+		void onShaderAdded( const QString &name );
+		void onShaderRemoved( const QString &name );
+
 		void setNel3DIface( CNel3DInterface *iface ){ nl3dIface = iface; }
 
 		void getCurrentPass( QString &pass );

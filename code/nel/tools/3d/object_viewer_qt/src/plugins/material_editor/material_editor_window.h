@@ -47,6 +47,7 @@ private Q_SLOTS:
 private:
 		void createMenus();
 		void createDockWidgets();
+		void setupConnections();
 
 		CNel3DInterface *nl3dIface;
 

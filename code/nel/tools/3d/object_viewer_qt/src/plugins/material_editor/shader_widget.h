@@ -36,6 +36,10 @@ namespace MaterialEditor
 		void setNel3DInterface( CNel3DInterface *iface ){ nl3dIface = iface; }
 		void load();
 
+	Q_SIGNALS:
+		void shaderAdded( const QString &name );
+		void shaderRemoved( const QString &name );
+
 	private:
 		void setupConnections();
 		bool nameExists( const QString &name );

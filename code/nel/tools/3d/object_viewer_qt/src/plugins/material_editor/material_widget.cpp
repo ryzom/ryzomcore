@@ -119,6 +119,20 @@ namespace MaterialEditor
 		passCB->setItemText( i, to );
 	}
 
+	void MaterialWidget::onShaderAdded( const QString &name )
+	{
+		shaderCB->addItem( name );
+	}
+
+	void MaterialWidget::onShaderRemoved( const QString &name )
+	{
+		int i = shaderCB->findText( name );
+		if( i < 0 )
+			return;
+
+		shaderCB->removeItem( i );
+	}
+
 	void MaterialWidget::getCurrentPass( QString &pass )
 	{
 		pass = passCB->currentText();

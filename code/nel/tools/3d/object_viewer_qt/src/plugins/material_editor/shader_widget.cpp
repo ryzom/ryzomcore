@@ -47,10 +47,15 @@ namespace MaterialEditor
 
 		shaderList->clear();
 
+		QString name;
+
 		std::vector< std::string >::const_iterator itr = v.begin();
 		while( itr != v.end() )
 		{
-			shaderList->addItem( itr->c_str() );
+			name = itr->c_str();
+			shaderList->addItem( name );
+			Q_EMIT shaderAdded( name );
+
 			++itr;
 		}
 	}
@@ -134,6 +139,8 @@ namespace MaterialEditor
 		}
 
 		shaderList->addItem( name );
+
+		Q_EMIT shaderAdded( name );
 	}
 
 	void ShaderWidget::onRemoveClicked()
@@ -154,7 +161,8 @@ namespace MaterialEditor
 		if( selection == QMessageBox::Yes )
 		{
 			QListWidgetItem *item = shaderList->takeItem( i );
-			std::string n = item->text().toUtf8().data();
+			QString name = item->text();
+			std::string n = name.toUtf8().data();
 			delete item;
 			
 			nl3dIface->removeShader( n );
@@ -162,6 +170,8 @@ namespace MaterialEditor
 			
 			if( shaderList->count() == 0 )
 				description->setPlainText( "" );
+
+			Q_EMIT shaderRemoved( name );
 		}
 		
 	}

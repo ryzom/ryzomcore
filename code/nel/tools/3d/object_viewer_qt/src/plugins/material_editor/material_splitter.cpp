@@ -99,6 +99,16 @@ namespace MaterialEditor
 		materialWidget->onPassRenamed( from, to );
 	}
 
+	void MaterialSplitter::onShaderAdded( const QString &name )
+	{
+		materialWidget->onShaderAdded( name );
+	}
+
+	void MaterialSplitter::onShaderRemoved( const QString &name )
+	{
+		materialWidget->onShaderRemoved( name );
+	}
+
 	void MaterialSplitter::onPropsChanged()
 	{
 		QString pass;
