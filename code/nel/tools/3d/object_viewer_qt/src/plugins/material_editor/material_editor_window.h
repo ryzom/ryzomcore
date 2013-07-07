@@ -26,6 +26,7 @@ namespace MaterialEditor
 	class RenderPassesWidget;
 	class CNel3DInterface;
 	class MaterialSplitter;
+	class ViewPortWidget;
 
 	class MaterialEditorWindow: public QMainWindow
 	{
@@ -43,6 +44,7 @@ private Q_SLOTS:
 		void onShadersClicked();
 		void onPassesClicked();
 		void onStartup();
+		void onClearSceneClicked();
 		
 private:
 		void createMenus();
@@ -54,6 +56,7 @@ private:
 		ShaderWidget *shaderWidget;
 		RenderPassesWidget *passesWidget;
 		MaterialSplitter *materialSplitter;
+		ViewPortWidget *viewPort;
 
 		Ui::MaterialEditorWindow m_ui;
 	};

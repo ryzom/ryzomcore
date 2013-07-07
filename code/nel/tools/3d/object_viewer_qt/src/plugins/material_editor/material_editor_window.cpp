@@ -20,6 +20,7 @@
 #include "shader_widget.h"
 #include "render_passes.h"
 #include "nel3d_interface.h"
+#include "viewport_widget.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -42,6 +43,8 @@ namespace MaterialEditor
 		m_ui.setupUi(this);
 		
 		nl3dIface = new CNel3DInterface();
+		viewPort = new ViewPortWidget();
+		viewPort->setNel3DInterface( nl3dIface );
 		shaderWidget = new ShaderWidget();
 		shaderWidget->setNel3DInterface( nl3dIface );
 		materialSplitter = new MaterialSplitter();
@@ -56,6 +59,8 @@ namespace MaterialEditor
 		createDockWidgets();
 		setupConnections();
 
+		setCentralWidget( viewPort );
+
 		QTimer::singleShot( 1, this, SLOT( onStartup() ) );
 	}
 	
@@ -65,6 +70,8 @@ namespace MaterialEditor
 		shaderWidget = NULL;
 		delete passesWidget;
 		passesWidget = NULL;
+		delete viewPort;
+		viewPort = NULL;
 		delete nl3dIface;
 		nl3dIface = NULL;
 	}
@@ -78,7 +85,19 @@ namespace MaterialEditor
 			tr( "Shape files ( *.shape )" )
 			);
 
+		if( fn.isEmpty() )
+			return;
 
+		std::string fname = fn.toUtf8().data();
+		bool ok = nl3dIface->loadShape( fname );
+		if( !ok )
+		{
+			QMessageBox::critical( 
+				this,
+				tr( "Error loading shape file" ),
+				tr( "There was an error while loading the shape file." )
+				);
+		}
 	}
 
 	void MaterialEditorWindow::onNewMaterialClicked()
@@ -154,6 +173,12 @@ namespace MaterialEditor
 	{
 		nl3dIface->loadShaders();
 		shaderWidget->load();
+		viewPort->init();
+	}
+
+	void MaterialEditorWindow::onClearSceneClicked()
+	{
+		nl3dIface->clearScene();
 	}
 	
 	void MaterialEditorWindow::createMenus()
@@ -179,6 +204,13 @@ namespace MaterialEditor
 				a = new QAction( tr( "Save material" ), NULL );
 				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onSaveMaterialClicked() ) );
 				mm->addAction( a );	
+			}
+
+			mm = m->addMenu( tr( "Scene" ) );
+			{
+				a = new QAction( tr( "Clear scene" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onClearSceneClicked() ) );
+				mm->addAction( a );
 			}
 
 			a = new QAction( tr( "Shaders" ), NULL );

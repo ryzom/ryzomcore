@@ -23,6 +23,7 @@ SET(OVQT_PLUGIN_MATERIAL_EDITOR_HDR
 	shader_editor.h
 	shader_widget.h
 	prop_browser_ctrl.h
+	viewport_widget.h
 	)
 	
 SET(OVQT_PLUGIN_MATERIAL_EDITOR_UIS

@@ -20,6 +20,9 @@
 #include "nel/3d/shader_program.h"
 #include "nel/3d/shader_loader.h"
 #include "nel/3d/shader_saver.h"
+#include "nel/3d/driver_user.h"
+#include "nel/3d/scene_user.h"
+#include "nel/3d/u_camera.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
@@ -196,13 +199,15 @@ namespace MaterialEditor
 	{
 		mat = new NL3D::CDynMaterial();
 		shaderManager = new NL3D::CShaderManager();
-
+		driver = NULL;
+		scene = NULL;
 	}
 
 	CNel3DInterface::~CNel3DInterface()
 	{
 		delete shaderManager;
 		shaderManager = NULL;
+		killViewPort();
 	}
 
 	bool CNel3DInterface::loadMaterial( const char *fname )
@@ -331,6 +336,41 @@ namespace MaterialEditor
 	void CNel3DInterface::deleteShader( const std::string &name )
 	{
 		NLMISC::CFile::deleteFile( "./shaders/"  + name + ".nlshdr" );
+	}
+
+	void CNel3DInterface::initViewPort( unsigned long wnd, unsigned long w, unsigned long h )
+	{
+		driver = NL3D::UDriver::createDriver( 0, false, 0 );
+		nlassert( driver != NULL );
+		driver->setDisplay( (nlWindow)wnd, NL3D::UDriver::CMode( w, h, 32 ) );
+
+		scene = driver->createScene( true );
+
+	}
+
+	void CNel3DInterface::killViewPort()
+	{
+		driver->deleteScene( scene );
+		delete driver;
+		driver = NULL;
+
+	}
+
+	void CNel3DInterface::resizeViewPort( unsigned long w, unsigned long h )
+	{
+		if( scene != NULL )
+		{
+			scene->getCam().setPerspective( 90.0f, w / (float)h, 0.1f, 1000.0f );
+		}
+	}
+
+	bool CNel3DInterface::loadShape( const std::string &fileName )
+	{
+		return true;
+	}
+
+	void CNel3DInterface::clearScene()
+	{
 	}
 }
 

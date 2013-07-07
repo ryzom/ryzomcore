@@ -26,6 +26,8 @@ namespace NL3D
 	class CDynMaterial;
 	struct SRenderPass;
 	class CShaderManager;
+	class UDriver;
+	class UScene;
 }
 
 namespace MaterialEditor
@@ -141,9 +143,20 @@ namespace MaterialEditor
 		void saveShader( const std::string &name );
 		void deleteShader( const std::string &name );
 
+		void initViewPort( unsigned long wnd, unsigned long w, unsigned long h );
+		void killViewPort();
+		void resizeViewPort( unsigned long w, unsigned long h );
+		NL3D::UDriver* getDriver(){ return driver; }
+
+		bool loadShape( const std::string &fileName );
+		void clearScene();
+
 	private:
 		NL3D::CDynMaterial *mat;
 		NL3D::CShaderManager *shaderManager;
+		NL3D::UDriver *driver;
+		NL3D::UScene *scene;
+
 	};
 }
 
