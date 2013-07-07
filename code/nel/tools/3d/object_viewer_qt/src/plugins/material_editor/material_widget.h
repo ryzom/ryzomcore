@@ -45,7 +45,7 @@ namespace MaterialEditor
 		void onShaderAdded( const QString &name );
 		void onShaderRemoved( const QString &name );
 
-		void setNel3DIface( CNel3DInterface *iface ){ nl3dIface = iface; }
+		void setNel3DIface( CNel3DInterface *iface );
 
 		void getCurrentPass( QString &pass );
 	
@@ -62,7 +62,6 @@ namespace MaterialEditor
 	private Q_SLOTS:
 		void onPassEditClicked();
 		void onShaderEditClicked();
-		void onShaderEditOKClicked();
 		void onPassCBChanged( const QString &text );
 	};
 

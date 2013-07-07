@@ -142,7 +142,6 @@ namespace MaterialEditor
 
 	void MaterialEditorWindow::onShadersClicked()
 	{
-		shaderWidget->load();
 		shaderWidget->show();
 	}
 

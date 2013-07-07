@@ -33,7 +33,7 @@ namespace MaterialEditor
 		ShaderWidget( QWidget *parent = NULL );
 		~ShaderWidget();
 
-		void setNel3DInterface( CNel3DInterface *iface ){ nl3dIface = iface; }
+		void setNel3DInterface( CNel3DInterface *iface );
 		void load();
 
 	Q_SIGNALS:

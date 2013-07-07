@@ -22,6 +22,8 @@
 
 namespace MaterialEditor
 {
+	class CNel3DInterface;
+
 	class ShaderEditorWidget : public QDialog, public Ui::ShaderEditorWidget
 	{
 		Q_OBJECT
@@ -29,17 +31,12 @@ namespace MaterialEditor
 		ShaderEditorWidget( QDialog *parent = NULL );		
 		~ShaderEditorWidget();
 
-		void getName( QString &name );
 		void getDescription( QString &desc );
-		void getVertexShader( QString &vs );
-		void getFragmentShader( QString &fs );
 
-		void setName( const QString &name );
-		void setDescription( const QString &desc );
-		void setVertexShader( const QString &vs );
-		void setFragmentShader( const QString &fs );
+		void setNel3DInterface( CNel3DInterface *iface ){ nl3dIface = iface; }
 
 		void reset();
+		void load( const QString &name );
 
 	private Q_SLOTS:
 		void onOKClicked();
@@ -47,6 +44,7 @@ namespace MaterialEditor
 
 	private:
 		void setupConnections();
+		CNel3DInterface *nl3dIface;
 	};
 }
 

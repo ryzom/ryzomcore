@@ -16,6 +16,7 @@
 
 
 #include "shader_editor.h"
+#include "nel3d_interface.h"
 
 namespace MaterialEditor
 {
@@ -23,6 +24,7 @@ namespace MaterialEditor
 	QDialog( parent )
 	{
 		setupUi( this );
+		nl3dIface = NULL;
 		setupConnections();
 	}
 
@@ -30,44 +32,9 @@ namespace MaterialEditor
 	{
 	}
 
-	void ShaderEditorWidget::getName( QString &name )
-	{
-		name = nameEdit->text();
-	}
-
 	void ShaderEditorWidget::getDescription( QString &desc )
 	{
 		desc = descriptionEdit->toPlainText();
-	}
-
-	void ShaderEditorWidget::getVertexShader( QString &vs )
-	{
-		vs = vsEdit->toPlainText();
-	}
-
-	void ShaderEditorWidget::getFragmentShader( QString &fs )
-	{
-		fs = fsEdit->toPlainText();
-	}
-
-	void ShaderEditorWidget::setName( const QString &name )
-	{
-		nameEdit->setText( name );
-	}
-
-	void ShaderEditorWidget::setDescription( const QString &desc )
-	{
-		descriptionEdit->setPlainText( desc );
-	}
-
-	void ShaderEditorWidget::setVertexShader( const QString &vs )
-	{
-		vsEdit->setPlainText( vs );
-	}
-
-	void ShaderEditorWidget::setFragmentShader( const QString &fs )
-	{
-		fsEdit->setPlainText( fs );
 	}
 
 	void ShaderEditorWidget::setupConnections()
@@ -78,6 +45,16 @@ namespace MaterialEditor
 
 	void ShaderEditorWidget::onOKClicked()
 	{
+		SShaderInfo info;
+		info.name = nameEdit->text().toUtf8().data();
+		info.description = descriptionEdit->toPlainText().toUtf8().data();
+		info.vp = vsEdit->toPlainText().toUtf8().data();
+		info.fp = fsEdit->toPlainText().toUtf8().data();
+
+		bool ok = nl3dIface->updateShaderInfo( info );
+		if( ok )
+			nl3dIface->saveShader( info.name );
+
 		accept();
 	}
 
@@ -94,6 +71,18 @@ namespace MaterialEditor
 		vsEdit->setPlainText( empty );
 		fsEdit->setPlainText( empty );
 		setResult( QDialog::Rejected );
+	}
+
+	void ShaderEditorWidget::load( const QString &name )
+	{
+		SShaderInfo info;
+		nl3dIface->getShaderInfo( name.toUtf8().data(), info );
+
+		nameEdit->setText( info.name.c_str() );
+		descriptionEdit->setPlainText( info.description.c_str() );
+		vsEdit->setPlainText( info.vp.c_str() );
+		fsEdit->setPlainText( info.fp.c_str() );
+
 	}
 }
 

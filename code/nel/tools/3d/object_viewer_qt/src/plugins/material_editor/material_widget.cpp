@@ -133,6 +133,12 @@ namespace MaterialEditor
 		shaderCB->removeItem( i );
 	}
 
+	void MaterialWidget::setNel3DIface( CNel3DInterface *iface )
+	{
+		nl3dIface = iface;
+		shaderEditorWidget->setNel3DInterface( iface );
+	}
+
 	void MaterialWidget::getCurrentPass( QString &pass )
 	{
 		pass = passCB->currentText();
@@ -161,11 +167,8 @@ namespace MaterialEditor
 
 	void MaterialWidget::onShaderEditClicked()
 	{
-		shaderEditorWidget->show();
-	}
-
-	void MaterialWidget::onShaderEditOKClicked()
-	{
+		shaderEditorWidget->load( shaderCB->currentText() );
+		int result = shaderEditorWidget->exec();
 	}
 
 	void MaterialWidget::onPassCBChanged( const QString &text )
