@@ -63,6 +63,8 @@ namespace MaterialEditor
 		void onPassEditClicked();
 		void onShaderEditClicked();
 		void onPassCBChanged( const QString &text );
+		void onShaderCBChanged( const QString &text );
+
 	};
 
 }

@@ -72,6 +72,8 @@ namespace MaterialEditor
 		void setProperties( std::vector< SMatProp > &v );
 		void getName( std::string &name );
 		void setName( const std::string &name );
+		void getShaderRef( std::string &s );
+		void setShaderRef( const std::string &s );
 
 		bool getProperty( const std::string &name, SMatProp &p );
 		bool changeProperty( const SMatProp &p );

@@ -58,6 +58,7 @@ namespace NL3D
 		void setName( const std::string &n ){ name = n; }
 		void getName( std::string &n ) const { n = name; }
 		void getShaderRef( std::string &s ) const{ s = shaderRef; }
+		void setShaderRef( const std::string &s ){ shaderRef = s; }
 		void serial( NLMISC::IStream &f );
 
 		uint32 count(){ return properties.size(); }

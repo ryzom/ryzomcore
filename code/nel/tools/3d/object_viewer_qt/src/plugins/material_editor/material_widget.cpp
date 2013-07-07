@@ -149,6 +149,7 @@ namespace MaterialEditor
 		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
 		connect( shaderButton, SIGNAL( clicked( bool ) ), this, SLOT( onShaderEditClicked() ) );
 		connect( passCB, SIGNAL( currentIndexChanged( const QString& ) ), this, SLOT( onPassCBChanged( const QString& ) ) );
+		connect( shaderCB, SIGNAL( currentIndexChanged( const QString& ) ), this, SLOT( onShaderCBChanged( const QString& ) ) );
 
 		connect( shaderEditorWidget, SIGNAL( okClicked() ), this, SLOT( onShaderEditOKClicked() ) );
 	}
@@ -167,6 +168,9 @@ namespace MaterialEditor
 
 	void MaterialWidget::onShaderEditClicked()
 	{
+		if( shaderCB->currentIndex() == 0 )
+			return;
+
 		shaderEditorWidget->load( shaderCB->currentText() );
 		int result = shaderEditorWidget->exec();
 	}
@@ -176,7 +180,32 @@ namespace MaterialEditor
 		if( text.isEmpty() )
 			return;
 
+		CNelMaterialProxy m = nl3dIface->getMaterial();
+		CRenderPassProxy pass = m.getPass( text.toUtf8().data() );
+		std::string s;
+		pass.getShaderRef( s );
+
+		int i = shaderCB->findText( s.c_str() );
+		if( i >= 0 )
+			shaderCB->setCurrentIndex( i );
+		else
+			shaderCB->setCurrentIndex( 0 );
+
 		Q_EMIT passChanged( text );
+	}
+
+	void MaterialWidget::onShaderCBChanged( const QString &text )
+	{
+		QString p = passCB->currentText();
+
+		CNelMaterialProxy m = nl3dIface->getMaterial();
+		CRenderPassProxy pass = m.getPass( p.toUtf8().data() );
+		pass.setShaderRef( text.toUtf8().data() );
+
+		if( text.isEmpty() )
+			shaderButton->setEnabled( false );
+		else
+			shaderButton->setEnabled( true );
 	}
 }
 

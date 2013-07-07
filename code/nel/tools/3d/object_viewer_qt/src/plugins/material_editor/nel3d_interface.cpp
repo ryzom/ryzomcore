@@ -102,6 +102,16 @@ namespace MaterialEditor
 		pass->setName( name );
 	}
 
+	void CRenderPassProxy::getShaderRef( std::string &s )
+	{
+		pass->getShaderRef( s );
+	}
+
+	void CRenderPassProxy::setShaderRef( const std::string &s )
+	{
+		pass->setShaderRef( s );
+	}
+
 	bool CRenderPassProxy::getProperty( const std::string &name, SMatProp &p )
 	{
 		uint32 count = pass->count();
