@@ -12,6 +12,29 @@ class Ticket{
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
+    /*FUNCTION: getTicketTitlesOf()
+     * return all ticket of the given author's id.
+     *
+     */
+    public static function getTicketsOf($author, $db_data) {
+        $dbl = new DBLayer($db_data);
+        $statement = $dbl->execute("SELECT * FROM ticket INNER JOIN ticket_user ON ticket.Author = ticket_user.TUserId and ticket_user.ExternId=:id", array('id' => $author));
+        $row = $statement->fetchAll();
+        $result = Array();
+        foreach($row as $ticket){
+            $instance = new self($db_data);
+            $instance->setTimestamp($ticket['Timestamp']);
+            $instance->setTitle($ticket['Title']);
+            $instance->setStatus($ticket['Status']);
+            $instance->setQueue($ticket['Queue']);
+            $instance->setTicket_Category($ticket['Ticket_Category']);
+            $instance->setAuthor($ticket['Author']);
+            $result[] = $instance;
+        }
+        return $result; 
+    }
+    
+    
     /*FUNCTION: create_Ticket()
      * creates a ticket + first initial reply and fills in the content of it!
      *
