@@ -39,7 +39,12 @@ namespace MaterialEditor
 
 		QPaintEngine* paintEngine() const{ return NULL; }
 
+		void startTimedUpdates( int interval );
+		void stopTimedUpdates();
+
 	protected:
+
+		void timerEvent( QTimerEvent *evnt );
 
 #if defined ( NL_OS_WINDOWS )
 		bool winEvent( MSG *message, long *result );
@@ -50,7 +55,10 @@ namespace MaterialEditor
 #endif
 
 	private:
+		void update();
+
 		CNel3DInterface *nl3dIface;
+		int timerId;
 	};
 }
 

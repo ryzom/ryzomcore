@@ -150,6 +150,7 @@ namespace MaterialEditor
 
 		bool loadShape( const std::string &fileName );
 		void clearScene();
+		void renderScene();
 
 	private:
 		NL3D::CDynMaterial *mat;

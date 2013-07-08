@@ -23,6 +23,7 @@
 #include "nel/3d/driver_user.h"
 #include "nel/3d/scene_user.h"
 #include "nel/3d/u_camera.h"
+#include "nel/3d/u_instance.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
@@ -30,6 +31,8 @@
 
 namespace MaterialEditor
 {
+
+	NL3D::UInstance currentShape;
 
 	const char *SMatProp::idToString[] =
 	{
@@ -366,11 +369,42 @@ namespace MaterialEditor
 
 	bool CNel3DInterface::loadShape( const std::string &fileName )
 	{
+		NLMISC::CPath::addSearchPath( NLMISC::CFile::getPath( fileName ), false, false );
+		NL3D::UInstance instance = scene->createInstance( fileName );
+		if( instance.empty() )
+			return false;
+
+		clearScene();
+		currentShape = instance;
+
 		return true;
 	}
 
 	void CNel3DInterface::clearScene()
 	{
+		if( scene != NULL )
+		{
+			if( currentShape.empty() )
+				return;
+			scene->deleteInstance( currentShape );
+			currentShape = NL3D::UInstance();
+		}
+
+		if( driver == NULL )
+			return;
+
+		driver->clearBuffers();
+		driver->swapBuffers();
+	}
+
+	void CNel3DInterface::renderScene()
+	{
+		if( scene != NULL )
+		{
+			driver->clearBuffers();
+			scene->render();
+			driver->swapBuffers();
+		}
 	}
 }
 

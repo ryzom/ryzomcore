@@ -98,6 +98,8 @@ namespace MaterialEditor
 				tr( "There was an error while loading the shape file." )
 				);
 		}
+
+		viewPort->startTimedUpdates( 20 );
 	}
 
 	void MaterialEditorWindow::onNewMaterialClicked()
@@ -179,6 +181,7 @@ namespace MaterialEditor
 	void MaterialEditorWindow::onClearSceneClicked()
 	{
 		nl3dIface->clearScene();
+		viewPort->stopTimedUpdates();
 	}
 	
 	void MaterialEditorWindow::createMenus()

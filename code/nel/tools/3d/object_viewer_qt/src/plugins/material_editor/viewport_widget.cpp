@@ -32,6 +32,7 @@ namespace MaterialEditor
 	QWidget( parent )
 	{
 		nl3dIface = NULL;
+		timerId = 0;
 		setAttribute( Qt::WA_PaintOnScreen, true );
 	}
 
@@ -55,72 +56,97 @@ namespace MaterialEditor
 		QWidget::resizeEvent( evnt );
 	}
 
-
-#if defined( NL_OS_WINDOWS )
-
-typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
-
-bool ViewPortWidget::winEvent( MSG *message, long *result )
-{
-	NL3D::UDriver *udriver = nl3dIface->getDriver();
-	if( ( udriver != NULL ) && udriver->isActive() )
+	void ViewPortWidget::startTimedUpdates( int interval )
 	{
-		NL3D::IDriver *driver = dynamic_cast< NL3D::CDriverUser* >( udriver )->getDriver();
-		if( driver != NULL )
-		{
-			winProc proc = (winProc)driver->getWindowProc();
+		if( interval == 0 )
+			return;
 
-			return proc( driver, message->hwnd, message->message, message->wParam, message->lParam );
-		}
+		timerId = startTimer( interval );
 	}
 
-	return false;
-}
+	void ViewPortWidget::stopTimedUpdates()
+	{
+		killTimer( timerId );
+		timerId = 0;
+	}
+
+	void ViewPortWidget::timerEvent( QTimerEvent *evnt )
+	{
+		int id = evnt->timerId();
+		if( id == timerId )
+			update();
+	}
+
+#if defined( NL_OS_WINDOWS )
+	
+	typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+	
+	bool ViewPortWidget::winEvent( MSG *message, long *result )
+	{
+		NL3D::UDriver *udriver = nl3dIface->getDriver();
+		if( ( udriver != NULL ) && udriver->isActive() )
+		{
+			NL3D::IDriver *driver = dynamic_cast< NL3D::CDriverUser* >( udriver )->getDriver();
+			if( driver != NULL )
+			{
+				winProc proc = (winProc)driver->getWindowProc();
+				return proc( driver, message->hwnd, message->message, message->wParam, message->lParam );
+			}
+		}
+		
+		return false;
+	}
 
 #elif defined( NL_OS_MAC )
 
-typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
-
-bool ViewPortWidget::macEvent( EventHandlerCallRef caller, EventRef event )
-{
-	if(caller)
-		nlerror("You are using QtCarbon! Only QtCocoa supported, please upgrade Qt");
-
-	NL3D::UDriver *udriver = nl3dIface->getDriver();
-	if( ( udriver != NULL ) && udriver->isActive() )
+	typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
+	
+	bool ViewPortWidget::macEvent( EventHandlerCallRef caller, EventRef event )
 	{
-		NL3D::IDriver *driver = dynamic_cast< NL3D::CDriverUser* >( udriver )->getDriver();
-		if( driver != NULL )
+		if( caller )
+			nlerror("You are using QtCarbon! Only QtCocoa supported, please upgrade Qt");
+		
+		NL3D::UDriver *udriver = nl3dIface->getDriver();
+		if( ( udriver != NULL ) && udriver->isActive() )
 		{
-			cocoaProc proc = ( cocoaProc )driver->getWindowProc();
-			proc( driver, event );
+			NL3D::IDriver *driver = dynamic_cast< NL3D::CDriverUser* >( udriver )->getDriver();
+			if( driver != NULL )
+			{
+				cocoaProc proc = ( cocoaProc )driver->getWindowProc();
+				proc( driver, event );
+			}
 		}
+		
+		return false;
 	}
-
-	return false;
-}
 
 #elif defined( NL_OS_UNIX )
-
-typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
-
-bool ViewPortWidget::x11Event( XEvent *event )
-{
-
-	NL3D::UDriver *udriver = nl3dIface->getDriver();
-	if( ( udriver != NULL ) && udriver->isActive() )
+	
+	typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
+	
+	bool ViewPortWidget::x11Event( XEvent *event )
 	{
-		NL3D::IDriver *driver = dynamic_cast< NL3D::CDriverUser* >( udriver )->getDriver();
-		if( driver != NULL )
+		NL3D::UDriver *udriver = nl3dIface->getDriver();
+		
+		if( ( udriver != NULL ) && udriver->isActive() )
 		{
-			x11Proc proc = ( x11Proc )driver->getWindowProc();
-			proc( driver, event );
+			NL3D::IDriver *driver = dynamic_cast< NL3D::CDriverUser* >( udriver )->getDriver();
+			if( driver != NULL )
+			{
+				x11Proc proc = ( x11Proc )driver->getWindowProc();
+				proc( driver, event );
+			}
+		
 		}
+		return false;
 	}
 
-	return false;
-}
 #endif
+
+	void ViewPortWidget::update()
+	{
+		nl3dIface->renderScene();
+	}
 
 }
 
