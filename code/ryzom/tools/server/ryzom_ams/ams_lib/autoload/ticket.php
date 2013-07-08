@@ -16,7 +16,7 @@ class Ticket{
 
 
     //Set ticket object
-    public function setTicket($t,$s,$q,$t_c,$a){
+    public function set($t,$s,$q,$t_c,$a){
         $this->title = $t;
         $this->status = $s;
         $this->queue = $q;
@@ -29,7 +29,7 @@ class Ticket{
         $dbl = new DBLayer($this->db);
         $query = "INSERT INTO ticket (Timestamp, Title, Status, Queue, Ticket_Category, Author) VALUES (now(), :title, :status, :queue, :tcat, :author)";
         $values = Array('title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author);
-        $dbl->execute($query, $values);
+        $this->tId = $dbl->executeReturnId($query, $values); ;
     }
 
     //return constructed element based on TId
@@ -56,32 +56,12 @@ class Ticket{
     }
     
     //Getters
-    public function getPermission(){
-        return $this->permission;
-    }
-   
-   
-    public function getExternId(){
-        return $this->externId;
-    }
-    
-    
-    public function getTUserId(){
-        return $this->tUserId;
+    public function getTId(){
+        return $this->tId;
     }
     
     //setters
-    public function setPermission($perm){
-        $this->permission = $perm;
-    }
-   
-   
-    public function setExternId($id){
-        $this->externId = $id;
-    }
-    
-    
-    public function setTUserId($id){
-        $this->tUserId = $id;
+    public function setTId($id){
+        $this->tId = $id;
     }
 }

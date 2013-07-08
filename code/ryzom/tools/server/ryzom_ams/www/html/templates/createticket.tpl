@@ -10,7 +10,7 @@
         </div>
         <div class="box-content">
             <div class="row-fluid">
-                <form id="changePassword" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
+                <form id="changePassword" class="form-vertical" method="post" action="index.php?page=createticket&id={$target_id}">
                     <legend>New ticket</legend>
                     
                     <div class="control-group">

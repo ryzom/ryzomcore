@@ -20,7 +20,7 @@ function change_info(){
                     //use current info to check for changes
                     $current_info = $webUser->getInfo($_POST['target_id']);
 		    
-                    //TODO: XSS filtering
+       
 		    $current_info['FirstName'] = filter_var($current_info['FirstName'], FILTER_SANITIZE_STRING);
 		    $current_info['LastName'] = filter_var($current_info['LastName'], FILTER_SANITIZE_STRING);
 		    $current_info['Country'] = filter_var($current_info['Country'], FILTER_SANITIZE_STRING);

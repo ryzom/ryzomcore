@@ -19,9 +19,22 @@ function create_ticket(){
                     }else{
                         $author=  Ticket_User::constr_ExternId($_POST['target_id'], $cfg['db']['lib'])->getTUserId();
                     }
+                    
                     $ticket = new Ticket($cfg['db']['lib']);
-                    $ticket->setTicket($title,0,0,$category,$author);
+                    $ticket->set($title,0,0,$category,$author);
                     $ticket->create();
+                    $ticket_id = $ticket->getTId();
+                    
+
+                    $ticket_content = new Ticket_Content($cfg['db']['lib']);
+                    $ticket_content->setContent($content);
+                    $ticket_content->create();
+                    $content_id = $ticket_content->getTContentId();
+
+                    
+                    $ticket_reply = new Ticket_Reply($cfg['db']['lib']);
+                    $ticket_reply->set($ticket_id, $content_id, $author);
+                    $ticket_reply->create();
                     
                 }else{
                     //ERROR: permission denied!
