@@ -5,11 +5,9 @@ class Ticket_Category{
     private $tCategoryId;
     private $name;
     
-    public function __construct($db_data) {
-        $this->db = $db_data;
-    }
-
-
+    ////////////////////////////////////////////Functions////////////////////////////////////////////////////
+    
+    
     //Creates a ticket_Catergory in the DB
     public static function createTicketCategory( $name ,$db ) {
         $dbl = new DBLayer($db);
@@ -41,7 +39,13 @@ class Ticket_Category{
         }
         return $result; 
     }
+     
     
+    ////////////////////////////////////////////Methods////////////////////////////////////////////////////
+     
+    public function __construct($db_data) {
+        $this->db = $db_data;
+    }
 
     //return constructed element based on TCategoryId
     public function load_With_TCategoryId( $id) {
@@ -61,7 +65,8 @@ class Ticket_Category{
         $statement = $dbl->execute($query, $values);
     }
     
-    //Getters
+    ////////////////////////////////////////////Getters////////////////////////////////////////////////////
+    
     public function getName(){
         if ($this->name == ""){
             $this->load_With_TCategoryId($this->tCategoryId);
@@ -75,9 +80,14 @@ class Ticket_Category{
     }
     
     
-    //setters
+    ////////////////////////////////////////////Setters////////////////////////////////////////////////////
+     
     public function setName($n){
         $this->name = $n;
+    }
+    
+    public function setTCategoryId($id){
+        $this->tCategoryId = $id;
     }
    
     

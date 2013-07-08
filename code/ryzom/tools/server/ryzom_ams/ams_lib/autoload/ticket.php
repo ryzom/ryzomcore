@@ -10,6 +10,33 @@ class Ticket{
     private $author;
     private $db;
     
+    ////////////////////////////////////////////Functions////////////////////////////////////////////////////
+    
+    /*FUNCTION: create_Ticket()
+     * creates a ticket + first initial reply and fills in the content of it!
+     *
+     */
+    public static function create_Ticket( $title, $content, $category, $author, $db_data) {
+        
+        $ticket = new Ticket($db_data);
+        $ticket->set($title,0,0,$category,$author);
+        $ticket->create();
+        $ticket_id = $ticket->getTId();
+        
+ 
+        $ticket_content = new Ticket_Content($db_data);
+        $ticket_content->setContent($content);
+        $ticket_content->create();
+        $content_id = $ticket_content->getTContentId();
+ 
+        
+        $ticket_reply = new Ticket_Reply($db_data);
+        $ticket_reply->set($ticket_id, $content_id, $author);
+        $ticket_reply->create();
+        
+    }
+    
+    ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     public function __construct($db_data) {
         $this->db = $db_data;
     }
@@ -55,13 +82,65 @@ class Ticket{
         $statement = $dbl->execute($query, $values);
     }
     
-    //Getters
+    
+    ////////////////////////////////////////////Getters////////////////////////////////////////////////////
+    
     public function getTId(){
         return $this->tId;
     }
     
-    //setters
+    public function getTimestamp(){
+        return $this->timestamp;
+    }
+    
+    public function getTitle(){
+        return $this->title;
+    }
+    
+    public function getStatus(){
+        return $this->status;
+    }
+    
+    public function getQueue(){
+        return $this->queue;
+    }
+    
+    public function getTicket_Category(){
+        return $this->ticket_category;
+    }
+    
+    public function getAuthor(){
+        return $this->author;
+    }
+    
+    ////////////////////////////////////////////Setters////////////////////////////////////////////////////
+    
     public function setTId($id){
         $this->tId = $id;
     }
+    
+    public function setTimestamp($ts){
+        $this->timestamp = $ts;
+    }
+    
+    public function setTitle($t){
+        $this->title = $t;
+    }
+    
+    public function setStatus($s){
+        $this->status = $s;
+    }
+    
+    public function setQueue($q){
+        $this->queue = $q;
+    }
+    
+    public function setTicket_Category($tc){
+        $this->ticket_category = $tc;
+    }
+    
+    public function setAuthor($a){
+        $this->author = $a;
+    }
+    
 }

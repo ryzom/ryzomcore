@@ -256,7 +256,7 @@
           'pass' => $hashpass,
           'mail' => "admin@admin.com",
         );
-        Users::createUser($params);
+        Users::createUser($params, 1);
         try{
             $params['permission'] = 2;
             $dbw = new DBLayer($cfg['db']['web']);

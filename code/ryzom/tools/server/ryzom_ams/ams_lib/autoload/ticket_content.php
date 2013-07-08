@@ -5,10 +5,22 @@ class Ticket_Content{
     private $tContentId;
     private $content;
     
+    
+    ////////////////////////////////////////////Functions////////////////////////////////////////////////////
+    
+    //return constructed element based on TCategoryId
+    public static function constr_TContentId( $id, $db_data) {
+        $instance = new self($db_data);
+        $instance->setTContentId($id);
+        return $instance;
+    } 
+
+    
+    ////////////////////////////////////////////Methods////////////////////////////////////////////////////
+    
     public function __construct($db_data) {
         $this->db = $db_data;
     }
-
 
     //Creates a ticket_content entry in the DB
     public function create() {
@@ -18,13 +30,6 @@ class Ticket_Content{
         $this->tContentId = $dbl->executeReturnId($query, $values); ;
     }
     
-    //return constructed element based on TCategoryId
-    public static function constr_TContentId( $id, $db_data) {
-        $instance = new self($db_data);
-        $instance->setTContentId($id);
-        return $instance;
-    } 
-
     //return constructed element based on TContentId
     public function load_With_TContentId( $id) {
         $dbl = new DBLayer($this->db);
@@ -42,7 +47,8 @@ class Ticket_Content{
         $statement = $dbl->execute($query, $values);
     }
     
-    //Getters
+    ////////////////////////////////////////////Getters////////////////////////////////////////////////////
+    
     public function getContent(){
         if ($this->content == ""){
             $this->load_With_TContentId($this->tContentId);
@@ -56,7 +62,8 @@ class Ticket_Content{
     }
     
     
-    //setters
+    ////////////////////////////////////////////Setters////////////////////////////////////////////////////
+    
     public function setContent($c){
         $this->content = $c;
     }

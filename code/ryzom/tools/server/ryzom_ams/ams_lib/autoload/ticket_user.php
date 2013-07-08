@@ -6,11 +6,8 @@ class Ticket_User{
     private $externId;
     private $db;
     
-    public function __construct($db_data) {
-        $this->db = $db_data;
-    }
-
-
+    ////////////////////////////////////////////Functions////////////////////////////////////////////////////
+    
     //Creates a ticket_user in the DB
     public static function createTicketUser( $extern_id, $permission,$db ) {
         $dbl = new DBLayer($db);
@@ -29,18 +26,6 @@ class Ticket_User{
     
     }
     
-    //return constructed element based on TUserId
-    public function load_With_TUserId( $id) {
-        $dbl = new DBLayer($this->db);
-        $statement = $dbl->execute("SELECT * FROM ticket_user WHERE TUserId=:id", array('id' => $id));
-        $row = $statement->fetch();
-        $instance->tUserId = $row['TUserId'];
-        $instance->permission = $row['Permission'];
-        $instance->externId = $row['ExternId'];
-        return $instance;
-    }
-    
-    
     //return constructed element based on ExternId
     public static function constr_ExternId( $id, $db_data ) {
         $instance = new self($db_data);
@@ -55,6 +40,22 @@ class Ticket_User{
     }
     
     
+    ////////////////////////////////////////////Methods////////////////////////////////////////////////////
+    public function __construct($db_data) {
+        $this->db = $db_data;
+    }
+    
+    //return constructed element based on TUserId
+    public function load_With_TUserId( $id) {
+        $dbl = new DBLayer($this->db);
+        $statement = $dbl->execute("SELECT * FROM ticket_user WHERE TUserId=:id", array('id' => $id));
+        $row = $statement->fetch();
+        $instance->tUserId = $row['TUserId'];
+        $instance->permission = $row['Permission'];
+        $instance->externId = $row['ExternId'];
+        return $instance;
+    } 
+    
     //update private data to DB.
     public function update(){
         $dbl = new DBLayer($this->db);
@@ -63,7 +64,8 @@ class Ticket_User{
         $statement = $dbl->execute($query, $values);
     }
     
-    //Getters
+    ////////////////////////////////////////////Getters////////////////////////////////////////////////////
+    
     public function getPermission(){
         if ($this->permission == ""){
             $this->load_With_TUserId($this->tUserId);
@@ -85,7 +87,8 @@ class Ticket_User{
     }
     
     
-    //setters
+    ////////////////////////////////////////////Setters////////////////////////////////////////////////////
+    
     public function setPermission($perm){
         $this->permission = $perm;
     }

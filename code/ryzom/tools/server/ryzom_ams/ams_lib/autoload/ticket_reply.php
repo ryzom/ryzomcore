@@ -8,7 +8,16 @@ class Ticket_Reply{
     private $timestamp;
     private $db;
     
-    //////////////////////////////////Methods/////////////////////////////////
+    ////////////////////////////////////////////Functions////////////////////////////////////////////////////
+    
+    //return constructed element based on TCategoryId
+    public static function constr_TReplyId( $id, $db_data) {
+        $instance = new self($db_data);
+        $instance->setTReplyId($id);
+        return $instance;
+    }
+    
+    ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     
     public function __construct($db_data) {
         $this->db = $db_data;
@@ -28,13 +37,6 @@ class Ticket_Reply{
         $query = "INSERT INTO ticket_reply (Ticket, Content, Author, Timestamp) VALUES (:ticket, :content, :author, now())";
         $values = Array('ticket' => $this->ticket, 'content' => $this->content, 'author' => $this->author);
         $dbl->execute($query, $values);
-    }
-    
-    //return constructed element based on TCategoryId
-    public static function constr_TReplyId( $id, $db_data) {
-        $instance = new self($db_data);
-        $instance->setTReplyId($id);
-        return $instance;
     }
 
     //return constructed element based on TId
@@ -57,8 +59,8 @@ class Ticket_Reply{
         $statement = $dbl->execute($query, $values);
     }
     
-    
-    //////////////////////////////////Getters/////////////////////////////////
+    ////////////////////////////////////////////Getters////////////////////////////////////////////////////
+     
     public function getTicket(){
         return $this->ticket;
     }
@@ -82,7 +84,8 @@ class Ticket_Reply{
     }
     
     
-    ///////////////////////////////////setters////////////////////////////////
+    ////////////////////////////////////////////Setters////////////////////////////////////////////////////
+     
     public function setTicket($t){
         $this->ticket = $t;
     }
