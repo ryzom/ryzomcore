@@ -290,6 +290,7 @@ class Users{
                global $cfg;
                $dbs = new DBLayer($cfg['db']['shard']);
                $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values);
+               ticket_user::createTicketUser( WebUsers::getId($values["name"]), 1, $cfg['db']['lib'] );
                return "ok";
           }
           catch (PDOException $e) {
@@ -298,6 +299,7 @@ class Users{
                     $dbl = new DBLayer($cfg['db']['lib']);  
                     $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "createUser",
                     "query" => json_encode(array($values["name"],$values["pass"],$values["mail"]))));
+                    ticket_user::createTicketUser( WebUsers::getId($values["name"]), 1, $cfg['db']['lib'] );
                     return "shardoffline";
                }catch (PDOException $e) {
                     print_r($e);

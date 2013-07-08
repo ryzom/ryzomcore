@@ -56,7 +56,7 @@ function write_user($newUser){
           //make connection with web db and put it in there
           $dbw = new DBLayer($cfg['db']['web']);
           $dbw->execute("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)",$params);
-          ticket_user::createTicketUser( WebUsers::getId($newUser["name"]), 1, $cfg['db']['lib'] );
+          //ticket_user::createTicketUser( WebUsers::getId($newUser["name"]), 1, $cfg['db']['lib'] );
           
      }catch (PDOException $e) {
       //go to error page or something, because can't access website db
