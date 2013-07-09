@@ -16,4 +16,13 @@ class Gui_Elements{
         return $result;  
     }
     
+    public static function make_table_with_key_is_id( $inputList, $funcArray, $idFunction){
+        $result = Array();
+        foreach($inputList as $element){
+            foreach($funcArray as $function){
+                $result[$element->$idFunction()] = $element->$function();
+            }
+        }
+        return $result;  
+    }
 }
