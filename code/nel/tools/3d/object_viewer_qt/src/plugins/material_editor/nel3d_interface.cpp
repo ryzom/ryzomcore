@@ -24,6 +24,7 @@
 #include "nel/3d/scene_user.h"
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_instance.h"
+#include "nel/3d/u_3d_mouse_listener.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
@@ -204,6 +205,7 @@ namespace MaterialEditor
 		shaderManager = new NL3D::CShaderManager();
 		driver = NULL;
 		scene = NULL;
+		mouseListener = NULL;
 	}
 
 	CNel3DInterface::~CNel3DInterface()
@@ -348,15 +350,18 @@ namespace MaterialEditor
 		driver->setDisplay( (nlWindow)wnd, NL3D::UDriver::CMode( w, h, 32 ) );
 
 		scene = driver->createScene( true );
-
+		mouseListener = driver->create3dMouseListener();
+		mouseListener->setMouseMode( NL3D::U3dMouseListener::nelStyle );
 	}
 
 	void CNel3DInterface::killViewPort()
 	{
 		driver->deleteScene( scene );
+		scene = NULL;
+		driver->delete3dMouseListener( mouseListener );
+		mouseListener = NULL;
 		delete driver;
 		driver = NULL;
-
 	}
 
 	void CNel3DInterface::resizeViewPort( unsigned long w, unsigned long h )
@@ -376,6 +381,8 @@ namespace MaterialEditor
 
 		clearScene();
 		currentShape = instance;
+
+		setupCamera();
 
 		return true;
 	}
@@ -397,14 +404,50 @@ namespace MaterialEditor
 		driver->swapBuffers();
 	}
 
+	void CNel3DInterface::updateInput()
+	{
+		driver->EventServer.pump();
+	}
+
 	void CNel3DInterface::renderScene()
 	{
 		if( scene != NULL )
 		{
+			scene->getCam().setTransformMode( NL3D::UTransformable::DirectMatrix );
+			scene->getCam().setMatrix( mouseListener->getViewMatrix() );
+
 			driver->clearBuffers();
 			scene->render();
 			driver->swapBuffers();
 		}
 	}
+
+	void CNel3DInterface::setupCamera()
+	{
+		NLMISC::CAABBox bbox;
+		currentShape.getShapeAABBox( bbox );
+		
+		NLMISC::CVector center = bbox.getCenter();
+		NLMISC::CQuat q( 0.0f, 0.0f, 0.0f, 0.0f );
+		currentShape.getDefaultRotQuat( q );
+
+		NLMISC::CVector max_radius = bbox.getHalfSize();
+		float radius = std::max( max_radius.x, std::max( max_radius.y, max_radius.z ) );
+		float distance = radius / tan( 45.0f );
+
+		NLMISC::CVector axis = q.getAxis();
+		if( axis.isNull() || ( axis == NLMISC::CVector::I ) )
+			axis = NLMISC::CVector::J;
+		else
+		if( axis == -NLMISC::CVector::K )
+			axis = -NLMISC::CVector::J;
+
+		NLMISC::CVector eye = center - axis * ( radius + distance );		
+		scene->getCam().lookAt( eye, center );
+
+		mouseListener->setHotSpot( center );
+		mouseListener->setMatrix( scene->getCam().getMatrix() );
+	}
+
 }
 

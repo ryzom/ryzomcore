@@ -28,6 +28,7 @@ namespace NL3D
 	class CShaderManager;
 	class UDriver;
 	class UScene;
+	class U3dMouseListener;
 }
 
 namespace MaterialEditor
@@ -150,14 +151,17 @@ namespace MaterialEditor
 
 		bool loadShape( const std::string &fileName );
 		void clearScene();
+		void updateInput();
 		void renderScene();
 
 	private:
+		void setupCamera();
+
 		NL3D::CDynMaterial *mat;
 		NL3D::CShaderManager *shaderManager;
 		NL3D::UDriver *driver;
 		NL3D::UScene *scene;
-
+		NL3D::U3dMouseListener *mouseListener;
 	};
 }
 
