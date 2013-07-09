@@ -23,6 +23,7 @@ class Ticket{
         $result = Array();
         foreach($row as $ticket){
             $instance = new self($db_data);
+            $instance->setTId($ticket['TId']);
             $instance->setTimestamp($ticket['Timestamp']);
             $instance->setTitle($ticket['Title']);
             $instance->setStatus($ticket['Status']);
@@ -122,6 +123,24 @@ class Ticket{
     
     public function getStatus(){
         return $this->status;
+    }
+    
+    public function getStatusText(){
+        $statusId = $this->getStatus();
+        if ($statusId == 0){
+            return "Waiting on support..";
+        }else if($statusId == 1){
+            return "Being handled..";
+        }else if($statusId == 2){
+            return "Closed";
+        }
+        return "Error";
+    }
+    
+    public function getCategoryName(){
+        global $cfg;
+        $category = Ticket_Category::constr_TCategoryId($this->getTicket_Category(), $cfg['db']['lib']);
+        return $category->getName();  
     }
     
     public function getQueue(){

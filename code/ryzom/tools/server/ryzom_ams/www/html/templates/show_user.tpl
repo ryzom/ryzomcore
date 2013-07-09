@@ -90,6 +90,7 @@
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
 		    <thead>
 			    <tr>
+				    <th>ID</th>
 				    <th>Title</th>
 				    <th>Timestamp</th>
 				    <th>Category</th>
@@ -99,6 +100,7 @@
 		    <tbody>
 			  {foreach from=$ticketlist item=ticket}
 			  <tr>
+				<td>{$ticket.tId}</td>
 				<td>{$ticket.title}</td>
 				<td class="center"><i>{$ticket.timestamp}</i></td>
 				<td class="center">{$ticket.category}</td>
