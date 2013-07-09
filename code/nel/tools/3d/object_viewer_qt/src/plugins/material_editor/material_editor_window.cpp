@@ -70,7 +70,6 @@ namespace MaterialEditor
 		shaderWidget = NULL;
 		delete passesWidget;
 		passesWidget = NULL;
-		delete viewPort;
 		viewPort = NULL;
 		delete nl3dIface;
 		nl3dIface = NULL;
