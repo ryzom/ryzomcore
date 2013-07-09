@@ -51,9 +51,6 @@
 							  <tr>
 								  <th>{$id}</th>
 								  <th>{$type}</th>
-								  <th>{$name}</th>
-								  <th>{$email}</th>
-								  <th>{$action}</th>
 							  </tr>
 						  </thead>   
 						  <tbody>
@@ -61,11 +58,7 @@
 							<tr>
 								<td>{$element.id}</td>
 								<td class="center">{$element.type}</td>
-								<td class="center">{$element.name}</td>
-								<td class="center">{$element.mail}</td>
-								<td class="center">
-									<a class="btn btn-danger" href="index.php?page=libuserlist&action=remove&id={$element.id}"><i class="icon-trash icon-white"></i>Delete</a>
-								</td>
+								
 								
 							</tr>
 							{/foreach}

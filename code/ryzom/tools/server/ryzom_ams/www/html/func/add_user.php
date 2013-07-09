@@ -36,7 +36,7 @@ function add_user(){
 
 
 function write_user($newUser){
-     
+              
      //create salt here, because we want it to be the same on the web/server
      $hashpass = crypt($newUser["pass"], WebUsers::generateSALT());
      
@@ -45,16 +45,17 @@ function write_user($newUser){
           'pass' => $hashpass,
           'mail' => $newUser["mail"]      
      );
-     
-     //Create the user on the shard + in case shard is offline put copy of query in query db
-     //returns: ok, shardoffline or liboffline
-     $result = WebUsers::createUser($params);
   
      try{
-          //make connection with web db and put it in there
           global $cfg;
+          //make connection with web db and put it in there
           $dbw = new DBLayer($cfg['db']['web']);
-          $dbw->execute("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)",$params);
+          $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)",$params);
+          
+          //Create the user on the shard + in case shard is offline put copy of query in query db
+          //returns: ok, shardoffline or liboffline
+          $result = WebUsers::createUser($params, $user_id);
+    
           
      }catch (PDOException $e) {
       //go to error page or something, because can't access website db

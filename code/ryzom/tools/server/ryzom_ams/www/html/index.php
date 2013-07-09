@@ -50,5 +50,11 @@ if($page == 'login' || $page == 'register' || $page == 'logout'){
 }else{
      $return['no_visible_elements'] = 'FALSE';
 }
+
+//handle error page
+if($page == 'error'){
+     $return['permission'] = 0;
+     $return['no_visible_elements'] = 'FALSE';
+}
 //print_r($return);
 helpers :: loadTemplate( $page , $return );

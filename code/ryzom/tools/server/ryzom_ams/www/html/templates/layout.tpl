@@ -96,8 +96,7 @@
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
-						<li><a href="#">Profile</a></li>
-						<li class="divider"></li>
+						<li><a href="index.php?page=show_user">Profile</a></li>
 						<li><a href="index.php?page=logout">Logout</a></li>
 					</ul>
 				</div>

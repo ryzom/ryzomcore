@@ -18,44 +18,64 @@ function change_password(){
                         $adminChangesOther = true;
                         $_POST["CurrentPass"] = "dummypass";
                     }
-                    $id = $_POST['target_id'];
                     
                     $webUser = new WebUsers();
                     $params = Array( 'user' => $target_username, 'CurrentPass' => $_POST["CurrentPass"], 'NewPass' => $_POST["NewPass"], 'ConfirmNewPass' => $_POST["ConfirmNewPass"], 'adminChangesOther' => $adminChangesOther);
                     $result = $webUser->check_change_password($params);
                     if ($result == "success"){
                         //edit stuff into db
+                        global $SITEBASE;
+                        require_once($SITEBASE . 'inc/settings.php');
+                        $succresult = settings();
                         $hashpass = crypt($_POST["NewPass"], WebUsers::generateSALT());
-                        print('success!');
+                        $status = WebUsers::setPassword($target_username, $hashpass);
+                        if($status == 'ok'){
+                            $succresult['SUCCESS_PASS'] = "OK";
+                        }else if($status == 'shardoffline'){
+                             $succresult['SUCCESS_PASS'] = "SHARDOFF";
+                        }
+                        $succresult['permission'] = $_SESSION['permission'];
+                        $succresult['no_visible_elements'] = 'FALSE';
+                        $succresult['username'] = $_SESSION['user'];
+                        $succresult['target_id'] = $_POST['target_id'];
+                        helpers :: loadtemplate( 'settings', $succresult);
                         exit;
                          
                     }else{
-                        
-                        $result['prevCurrentPass'] = $_POST["CurrentPass"];
-                        $result['prevNewPass'] = $_POST["NewPass"];
-                        $result['prevConfirmNewPass'] = $_POST["ConfirmNewPass"];
+			
+                        $result['prevCurrentPass'] = filter_var($_POST["CurrentPass"], FILTER_SANITIZE_STRING);
+                        $result['prevNewPass'] = filter_var($_POST["NewPass"], FILTER_SANITIZE_STRING);
+                        $result['prevConfirmNewPass'] = filter_var($_POST["ConfirmNewPass"], FILTER_SANITIZE_STRING);
                         $result['permission'] = $_SESSION['permission'];
                         $result['no_visible_elements'] = 'FALSE';
+                        $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
-                        if(isset($_GET['id'])){
-                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
-                                $result['isAdmin'] = "TRUE";
-                            }
-                        }
+
+                        global $SITEBASE;
+                        require_once($SITEBASE . 'inc/settings.php');
+                        $settings = settings();
+                        
+                        $result = array_merge($result,$settings);
                         helpers :: loadtemplate( 'settings', $result);
                         exit;
                     }
                     
                 }else{
                     //ERROR: permission denied!
+		    $_SESSION['error_code'] = "403";
+                    header("Location: index.php?page=error");
+                    exit;
                 }
         
             }else{
                 //ERROR: The form was not filled in correclty
+		header("Location: index.php?page=settings");
+		exit;
             }    
         }else{
             //ERROR: user is not logged in
-            exit;
+	    header("Location: index.php");
+	    exit;
         }
                   
     }catch (PDOException $e) {

@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-		<link href='http://fonts.googleapis.com/css?family=Creepster|Audiowide' rel='stylesheet' type='text/css'>
 		
 		<style>
 			*{
@@ -67,13 +66,21 @@
 	<body>
 		
 		<p class="error-code">
-			404
+			{$error_code}
 		</p>
-		<p class="not-found">Not<br/>Found</p>
-		<div class="clear"></div>
-		<div class="content">
-			The page your are looking for is not found.
-			<br/><a href="index.php">Go Home</a> 
+                {if $error_code eq "404"}
+                    <p class="not-found">{$title404}</p>
+                    <div class="clear"></div>
+                    <div class="content">
+                    {$error_message404}
+                {else if $error_code eq "403"}
+                    <p class="not-found">{$title403}</p>
+                    <div class="clear"></div>
+                    <div class="content">
+                    {$error_message403}
+                {/if}
+		      <br/><a href="index.php">{$go_home}</a> 
 		</div>
+
 	</body>
 </html>

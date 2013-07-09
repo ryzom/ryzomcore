@@ -41,4 +41,17 @@ class DBLayer{
         }
     }
     
+    public function executeReturnId($query,$params){
+        try{
+            $statement = $this->PDO->prepare($query);
+            $this->PDO->beginTransaction();
+            $statement->execute($params);
+            $lastId =$this->PDO->lastInsertId();
+            $this->PDO->commit();
+            return $lastId;
+        }catch (PDOException $e) {
+            throw $e;
+        }
+    }
+    
 }

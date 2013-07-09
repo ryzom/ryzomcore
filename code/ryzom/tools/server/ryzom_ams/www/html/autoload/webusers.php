@@ -50,7 +50,15 @@ class WebUsers extends Users{
         }	
      }
      
-     
+    public function getId($username){
+        global $cfg;
+        
+        $dbw = new DBLayer($cfg['db']['web']);
+        $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
+        $row = $statement->fetch();
+        return $row['UId'];
+    }
+    
     public function getUsername($id){
         global $cfg;
         
@@ -58,6 +66,25 @@ class WebUsers extends Users{
         $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
         $row = $statement->fetch();
         return $row['Login'];
+    }
+    
+    public function getEmail($id){
+        global $cfg;
+        
+        $dbw = new DBLayer($cfg['db']['web']);
+        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
+        $row = $statement->fetch();
+        return $row['Email'];
+    }
+    
+    public function getInfo($id){
+        global $cfg;
+        
+        $dbw = new DBLayer($cfg['db']['web']);
+        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
+        $row = $statement->fetch();
+        $result = Array('FirstName' => $row['FirstName'], 'LastName' => $row['LastName'], 'Gender' => $row['Gender'], 'Country' => $row['Country']);
+        return $result;
     }
     
     public function isLoggedIn(){
@@ -74,4 +101,40 @@ class WebUsers extends Users{
         return false;
     }
     
+    public function setPassword($user, $pass){
+        global $cfg;
+        $reply = WebUsers::setAmsPassword($user, $pass);
+        $values = Array('user' => $user, 'pass' => $pass);
+         try {
+               //make connection with and put into shard db
+               $dbw = new DBLayer($cfg['db']['web']);
+               $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
+          }
+          catch (PDOException $e) {
+            //ERROR: the web DB is offline
+          }
+        return $reply;
+    }
+    
+     public function setEmail($user, $mail){
+        global $cfg;
+        $reply = WebUsers::setAmsEmail($user, $mail);
+        $values = Array('user' => $user, 'mail' => $mail);
+         try {
+               //make connection with and put into shard db
+               $dbw = new DBLayer($cfg['db']['web']);
+               $dbw->execute("UPDATE ams_user SET Email = :mail WHERE Login = :user ",$values);
+          }
+          catch (PDOException $e) {
+            //ERROR: the web DB is offline
+          }
+        return $reply;
+    }
+    
+    public function getUsers(){
+        global $cfg;
+        $dbl = new DBLayer($cfg['db']['web']);
+        $data = $dbl->executeWithoutParams("SELECT * FROM ams_user");
+        return $data;
+    }
 }
