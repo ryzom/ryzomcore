@@ -46,8 +46,6 @@ namespace MaterialEditor
 
 		void timerEvent( QTimerEvent *evnt );
 
-		void wheelEvent( QWheelEvent *evnt );
-
 #if defined ( NL_OS_WINDOWS )
 		bool winEvent( MSG *message, long *result );
 #elif defined( NL_OS_MAC )

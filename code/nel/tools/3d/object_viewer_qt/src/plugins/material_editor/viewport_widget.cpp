@@ -77,22 +77,12 @@ namespace MaterialEditor
 			update();
 	}
 
-	void ViewPortWidget::wheelEvent( QWheelEvent *evnt )
-	{
-		QWidget::wheelEvent( evnt );
-	}
-
 #if defined( NL_OS_WINDOWS )
 	
 	typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 	
 	bool ViewPortWidget::winEvent( MSG *message, long *result )
 	{
-		if( message->message == WM_MOUSEWHEEL )
-		{
-			printf( "" );
-		}
-
 		NL3D::UDriver *udriver = nl3dIface->getDriver();
 		if( ( udriver != NULL ) && udriver->isActive() )
 		{
