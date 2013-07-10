@@ -16,8 +16,8 @@
 			{foreach from=$ticket_replies item=reply}
 			<tr>
 			    <td>
-				<p><span class="label label-info">[ID{$reply.tReplyId}] {$reply.timestamp}</span></p>
-				<p><strong>{$username}</strong>{$reply.replyContent}</p>
+				<p><span class="label label-info">[ID{$reply.tReplyId}] {$reply.timestamp}</span> <span class="label label-warning"><strong>{$username}</span></strong></p>
+				<p><pre>{$reply.replyContent}</pre></p>
 			    </td>
 			</tr>
 			{/foreach}
