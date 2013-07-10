@@ -70,9 +70,8 @@ function change_info(){
 
                     //if some field is update then:
                     if($updated){
-                        global $cfg;
                         //execute the query in the web DB.
-                        $dbw = new DBLayer($cfg['db']['web']);
+                        $dbw = new DBLayer("web");
                         $dbw->execute($query,$values);  
                     }
 

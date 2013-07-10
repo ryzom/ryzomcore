@@ -8,7 +8,6 @@ class Ticket{
     private $queue;
     private $ticket_category;
     private $author;
-    private $db;
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
@@ -16,10 +15,10 @@ class Ticket{
      * return all ticket of the given author's id.
      *
      */
-    public static function getEntireTicket($id, $db_data) {
-        $ticket = new Ticket($db_data);
+    public static function getEntireTicket($id) {
+        $ticket = new Ticket();
         $ticket->load_With_TId($id);
-        $reply_array = Ticket_Reply::getRepliesOfTicket($id,$db_data);
+        $reply_array = Ticket_Reply::getRepliesOfTicket($id);
         return Array('ticket_obj' => $ticket,'reply_array' => $reply_array); 
     }
     
@@ -28,13 +27,13 @@ class Ticket{
      * return all ticket of the given author's id.
      *
      */
-    public static function getTicketsOf($author, $db_data) {
-        $dbl = new DBLayer($db_data);
+    public static function getTicketsOf($author) {
+        $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket INNER JOIN ticket_user ON ticket.Author = ticket_user.TUserId and ticket_user.ExternId=:id", array('id' => $author));
         $row = $statement->fetchAll();
         $result = Array();
         foreach($row as $ticket){
-            $instance = new self($db_data);
+            $instance = new self();
             $instance->setTId($ticket['TId']);
             $instance->setTimestamp($ticket['Timestamp']);
             $instance->setTitle($ticket['Title']);
@@ -52,21 +51,21 @@ class Ticket{
      * creates a ticket + first initial reply and fills in the content of it!
      *
      */
-    public static function create_Ticket( $title, $content, $category, $author, $db_data) {
+    public static function create_Ticket( $title, $content, $category, $author) {
         
-        $ticket = new Ticket($db_data);
+        $ticket = new Ticket();
         $ticket->set($title,0,0,$category,$author);
         $ticket->create();
         $ticket_id = $ticket->getTId();
         
  
-        $ticket_content = new Ticket_Content($db_data);
+        $ticket_content = new Ticket_Content();
         $ticket_content->setContent($content);
         $ticket_content->create();
         $content_id = $ticket_content->getTContentId();
  
         
-        $ticket_reply = new Ticket_Reply($db_data);
+        $ticket_reply = new Ticket_Reply();
         $ticket_reply->set($ticket_id, $content_id, $author);
         $ticket_reply->create();
         
@@ -75,8 +74,8 @@ class Ticket{
     }
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
-    public function __construct($db_data) {
-        $this->db = $db_data;
+    public function __construct() {
+
     }
 
 
@@ -91,7 +90,7 @@ class Ticket{
     
     //create ticket by writing private data to DB.
     public function create(){
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $query = "INSERT INTO ticket (Timestamp, Title, Status, Queue, Ticket_Category, Author) VALUES (now(), :title, :status, :queue, :tcat, :author)";
         $values = Array('title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author);
         $this->tId = $dbl->executeReturnId($query, $values); ;
@@ -99,7 +98,7 @@ class Ticket{
 
     //return constructed element based on TId
     public function load_With_TId( $id) {
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket WHERE TId=:id", array('id' => $id));
         $row = $statement->fetch();
         $this->tId = $row['TId'];
@@ -114,7 +113,7 @@ class Ticket{
     
     //update private data to DB.
     public function update(){
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $query = "UPDATE ticket SET Timestamp = :timestamp, Title = :title, Status = :status, Queue = :queue, Ticket_Category = :tcat, Author = :author WHERE TId=:id";
         $values = Array('id' => $this->tId, 'timestamp' => $this->timestamp, 'title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author);
         $statement = $dbl->execute($query, $values);
@@ -152,8 +151,7 @@ class Ticket{
     }
     
     public function getCategoryName(){
-        global $cfg;
-        $category = Ticket_Category::constr_TCategoryId($this->getTicket_Category(), $cfg['db']['lib']);
+        $category = Ticket_Category::constr_TCategoryId($this->getTicket_Category());
         return $category->getName();  
     }
     

@@ -27,8 +27,7 @@ function createticket(){
         }
         
         //create array of category id & names
-        global $cfg;
-        $catArray = Ticket_Category::getAllCategories($cfg['db']['lib']);
+        $catArray = Ticket_Category::getAllCategories();
         $result['category'] = Gui_Elements::make_table_with_key_is_id($catArray, Array("getName"), "getTCategoryId" );
         return $result;
     

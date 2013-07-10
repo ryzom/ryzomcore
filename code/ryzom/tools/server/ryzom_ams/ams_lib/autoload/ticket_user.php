@@ -4,13 +4,12 @@ class Ticket_User{
     private $tUserId;
     private $permission;
     private $externId;
-    private $db;
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
     //Creates a ticket_user in the DB
-    public static function createTicketUser( $extern_id, $permission,$db ) {
-        $dbl = new DBLayer($db);
+    public static function createTicketUser( $extern_id, $permission) {
+        $dbl = new DBLayer("lib");
         $query = "INSERT INTO ticket_user (Permission, ExternId) VALUES (:perm, :ext_id)";
         $values = Array('perm' => $permission, 'ext_id' => $extern_id);
         $dbl->execute($query, $values);
@@ -19,17 +18,17 @@ class Ticket_User{
 
 
     //return constructed element based on TUserId
-    public static function constr_TUserId( $id, $db_data) {
-        $instance = new self($db_data);
+    public static function constr_TUserId( $id) {
+        $instance = new self();
         $instance->setTUserId($id);
         return $instance;
     
     }
     
     //return constructed element based on ExternId
-    public static function constr_ExternId( $id, $db_data ) {
-        $instance = new self($db_data);
-        $dbl = new DBLayer($instance->db);
+    public static function constr_ExternId( $id) {
+        $instance = new self();
+        $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket_user WHERE ExternId=:id", array('id' => $id));
         $row = $statement->fetch();
         $instance->tUserId = $row['TUserId'];
@@ -41,13 +40,12 @@ class Ticket_User{
     
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
-    public function __construct($db_data) {
-        $this->db = $db_data;
+    public function __construct() {
     }
     
     //return constructed element based on TUserId
     public function load_With_TUserId( $id) {
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket_user WHERE TUserId=:id", array('id' => $id));
         $row = $statement->fetch();
         $instance->tUserId = $row['TUserId'];
@@ -58,7 +56,7 @@ class Ticket_User{
     
     //update private data to DB.
     public function update(){
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $query = "UPDATE ticket_user SET Permission = :perm, ExternId = :ext_id WHERE TUserId=:id";
         $values = Array('id' => $this->tUserId, 'perm' => $this->permission, 'ext_id' => $this->externId);
         $statement = $dbl->execute($query, $values);

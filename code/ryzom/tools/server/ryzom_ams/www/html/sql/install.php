@@ -9,7 +9,7 @@
 
     try{
         //SETUP THE WWW DB
-        $dbw = new DBLayer($cfg['db']['web']);
+        $dbw = new DBLayer("web");
         $sql = "
             CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['web']['name'] ."`;
             USE `". $cfg['db']['web']['name'] . "`;
@@ -33,7 +33,7 @@
         $dbw->executeWithoutParams($sql);
         
         //SETUP THE AMS_LIB DB
-        $dbl = new DBLayer($cfg['db']['lib']);
+        $dbl = new DBLayer("lib");
         $sql = "
             CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`;
             USE `" . $cfg['db']['lib']['name'] ."`;
@@ -259,7 +259,7 @@
         Users::createUser($params, 1);
         try{
             $params['permission'] = 2;
-            $dbw = new DBLayer($cfg['db']['web']);
+            $dbw = new DBLayer("web");
             $dbw->execute("INSERT INTO ams_user (Login, Password, Email, Permission) VALUES (:name, :pass, :mail, :permission)",$params);
             print "The admin account is created, you can login with id: admin, pass: admin!";
         }catch (PDOException $e){

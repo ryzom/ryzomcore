@@ -9,8 +9,8 @@ class Ticket_Category{
     
     
     //Creates a ticket_Catergory in the DB
-    public static function createTicketCategory( $name ,$db ) {
-        $dbl = new DBLayer($db);
+    public static function createTicketCategory( $name) {
+        $dbl = new DBLayer("lib");
         $query = "INSERT INTO ticket_category (Name) VALUES (:name)";
         $values = Array('name' => $name);
         $dbl->execute($query, $values);
@@ -19,20 +19,20 @@ class Ticket_Category{
 
 
     //return constructed element based on TCategoryId
-    public static function constr_TCategoryId( $id, $db_data) {
-        $instance = new self($db_data);
+    public static function constr_TCategoryId( $id) {
+        $instance = new self();
         $instance->setTCategoryId($id);
         return $instance;
     }
     
     //returns list of all category objects
-    public static function getAllCategories($db_data) {
-        $dbl = new DBLayer($db_data);
+    public static function getAllCategories() {
+        $dbl = new DBLayer("lib");
         $statement = $dbl->executeWithoutParams("SELECT * FROM ticket_category");
         $row = $statement->fetchAll();
         $result = Array();
         foreach($row as $category){
-            $instance = new self($db_data);
+            $instance = new self();
             $instance->tCategoryId = $category['TCategoryId'];
             $instance->name = $category['Name'];
             $result[] = $instance;
@@ -43,13 +43,12 @@ class Ticket_Category{
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
      
-    public function __construct($db_data) {
-        $this->db = $db_data;
+    public function __construct() {
     }
 
     //return constructed element based on TCategoryId
     public function load_With_TCategoryId( $id) {
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket_category WHERE TCategoryId=:id", array('id' => $id));
         $row = $statement->fetch();
         $this->tCategoryId = $row['TCategoryId'];
@@ -59,7 +58,7 @@ class Ticket_Category{
     
     //update private data to DB.
     public function update(){
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $query = "UPDATE ticket_category SET Name = :name WHERE TCategoryId=:id";
         $values = Array('id' => $this->tCategoryId, 'name' => $this->name);
         $statement = $dbl->execute($query, $values);

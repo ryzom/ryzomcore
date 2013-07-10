@@ -2,8 +2,6 @@
 
 function login(){
 	
-	global $cfg;
-	
 	try{
 		$result = WebUsers::checkLoginMatch($_POST["Username"],$_POST["Password"]);
 		if( $result != "fail"){
@@ -11,7 +9,7 @@ function login(){
 			$_SESSION['user'] = $_POST["Username"];
 			$_SESSION['permission'] = $result['Permission'];
 			$_SESSION['id'] = $result['UId'];
-			$_SESSION['ticket_user'] = Ticket_User::constr_ExternId($result['UId'],$cfg['db']['lib']);
+			$_SESSION['ticket_user'] = Ticket_User::constr_ExternId($result['UId']);
 			
 			//go back to the index page.
 			header( 'Location: index.php' );

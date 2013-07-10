@@ -14,13 +14,11 @@ class Sync{
      */
     static public function syncdata () {
 
-        global $cfg;
-        
         try {
-            $dbl = new DBLayer($cfg['db']['lib']);
+            $dbl = new DBLayer("lib");
             $statement = $dbl->executeWithoutParams("SELECT * FROM ams_querycache");
             $rows = $statement->fetchAll();
-            $dbs = new DBLayer($cfg['db']['shard']);
+            $dbs = new DBLayer("shard");
             foreach ($rows as $record) {
     
                 switch($record['type']) {

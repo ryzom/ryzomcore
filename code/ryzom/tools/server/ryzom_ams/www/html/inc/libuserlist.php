@@ -11,8 +11,7 @@ function libuserlist(){
         }
         
          //Here we count the number of results
-        global $cfg;
-        $dbl = new DBLayer($cfg['db']['lib']);
+        $dbl = new DBLayer("lib");
         $rows = $dbl->executeWithoutParams("SELECT * FROM ams_querycache")->rowCount();
         
         //the array hat will contain all users
@@ -53,7 +52,7 @@ function libuserlist(){
         
         //check if shard is online
         try{
-            $dbs = new DBLayer($cfg['db']['shard']);
+            $dbs = new DBLayer("shard");
             $pageResult['shard'] = "online";
         }catch(PDOException $e) {
             $pageResult['shard'] = "offline";

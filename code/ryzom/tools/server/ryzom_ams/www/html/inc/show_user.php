@@ -19,9 +19,8 @@ function show_user(){
             $result['country'] = $info['Country'];
             $result['gender'] = $info['Gender'];
             
-            global $cfg;
-            $ticket_user = Ticket_User::constr_ExternId($result['target_id'],$cfg['db']['lib']);
-            $ticketlist = Ticket::getTicketsOf($ticket_user->getTUserId(),$cfg['db']['lib']);
+            $ticket_user = Ticket_User::constr_ExternId($result['target_id']);
+            $ticketlist = Ticket::getTicketsOf($ticket_user->getTUserId());
             
             $result['ticketlist'] = Gui_Elements::make_table($ticketlist, Array("getTId","getTimestamp","getTitle","getStatus","getStatusText","getCategoryName"), Array("tId","timestamp","title","status","statusText","category"));
             return $result;
