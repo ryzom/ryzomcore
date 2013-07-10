@@ -2,7 +2,7 @@
 <div class="row-fluid sortable ui-sortable">
     <div class="box span12">
         <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i> {$t_title}[ID#{$ticket_tId}] </h2>
+            <h2><i class="icon-tags"></i> {$t_title}[ID#{$ticket_tId}] </h2>
             <div class="box-icon">
                 <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
@@ -16,7 +16,13 @@
 			{foreach from=$ticket_replies item=reply}
 			<tr>
 			    <td>
-				<p><span class="label label-info">[ID#{$reply.tReplyId}] {$reply.timestamp}</span> <span class="label label-warning"><strong>{$username}</span></strong></p>
+				<p><span class="label label-info"><i class="icon-tag icon-white"></i> [ID#{$reply.tReplyId}] {$reply.timestamp}</span>
+				{if $reply.permission eq '1'}
+				<!-- <span class="label label-important"><strong></i>[User]:</strong></span>-->
+				{else if $reply.permission eq '2'}
+			        <span class="label label-important"><strong><i class="icon-star icon-white"></i>[CSR]</strong></span>
+				{/if}
+				<span class="label label-warning"><strong><i class="icon-user icon-white"></i>{$reply.author}</strong></span></p>
 				<p><pre>{$reply.replyContent}</pre></p>
 			    </td>
 			</tr>

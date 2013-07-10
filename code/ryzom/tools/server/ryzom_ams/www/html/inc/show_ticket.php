@@ -13,7 +13,12 @@ function show_ticket(){
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id']);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
             $result['ticket_title'] = $entire_ticket['ticket_obj']->getTitle();
-            $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp"), Array("tReplyId","replyContent","timestamp"));
+            $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp","getAuthor()->getExternId","getAuthor()->getPermission"), Array("tReplyId","replyContent","timestamp","authorExtern","permission"));
+            $i = 0;
+            foreach( $result['ticket_replies'] as $reply){
+                $result['ticket_replies'][$i]['author'] = WebUsers::getUsername($reply['authorExtern']);
+                $i++;
+            }
             return $result;
             
         }else{

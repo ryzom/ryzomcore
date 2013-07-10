@@ -65,17 +65,11 @@ class Ticket_User{
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
     
     public function getPermission(){
-        if ($this->permission == ""){
-            $this->load_With_TUserId($this->tUserId);
-        }
         return $this->permission;
     }
    
    
     public function getExternId(){
-        if ($this->ExternId == ""){
-            $this->load_With_TUserId($this->tUserId);
-        }
         return $this->externId;
     }
     
@@ -95,5 +89,10 @@ class Ticket_User{
     public function setExternId($id){
         $this->externId = $id;
     }
+    
+    public function setTUserId($id){
+        $this->tUserId= $id;
+    }
+    
     
 }

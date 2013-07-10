@@ -19,19 +19,23 @@ class Ticket_Reply{
     //return constructed element based on TCategoryId
     public static function getRepliesOfTicket( $ticket_id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_reply INNER JOIN ticket_content ON ticket_reply.Content = ticket_content.TContentId and ticket_reply.Ticket=:id", array('id' => $ticket_id));
+        $statement = $dbl->execute("SELECT * FROM ticket_reply INNER JOIN ticket_content INNER JOIN ticket_user ON ticket_reply.Content = ticket_content.TContentId and ticket_reply.Ticket=:id and ticket_user.TUserId = ticket_reply.Author ORDER BY ticket_reply.TReplyId ASC", array('id' => $ticket_id));
         $row = $statement->fetchAll();
         $result = Array();
         foreach($row as $tReply){
-            $instanceReply = new self();
-            $instanceReply->setTReplyId($tReply['TReplyId']);
-            $instanceReply->setTimestamp($tReply['Timestamp']);
-            $instanceReply->set($tReply['Ticket'],$tReply['Content'],$tReply['Author']);
+            $instanceAuthor = Ticket_User::constr_TUserId($tReply['Author']);
+            $instanceAuthor->setExternId($tReply['ExternId']);
+            $instanceAuthor->setPermission($tReply['Permission']);
             
             $instanceContent = new Ticket_Content();
             $instanceContent->setTContentId($tReply['TContentId']);
             $instanceContent->setContent($tReply['Content']);
             
+            $instanceReply = new self();
+            $instanceReply->setTReplyId($tReply['TReplyId']);
+            $instanceReply->setTimestamp($tReply['Timestamp']);
+            $instanceReply->setAuthor($instanceAuthor);
+            $instanceReply->setTicket($ticket_id);
             $instanceReply->setContent($instanceContent);
             
             $result[] = $instanceReply;
