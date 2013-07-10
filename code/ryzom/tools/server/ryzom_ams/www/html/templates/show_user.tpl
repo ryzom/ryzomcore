@@ -101,7 +101,7 @@
 			  {foreach from=$ticketlist item=ticket}
 			  <tr>
 				<td>{$ticket.tId}</td>
-				<td>{$ticket.title}</td>
+				<td><a href ="index.php?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
 				<td class="center"><i>{$ticket.timestamp}</i></td>
 				<td class="center">{$ticket.category}</td>
 
