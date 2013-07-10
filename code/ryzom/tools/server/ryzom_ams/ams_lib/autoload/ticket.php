@@ -57,18 +57,7 @@ class Ticket{
         $ticket->set($title,0,0,$category,$author);
         $ticket->create();
         $ticket_id = $ticket->getTId();
-        
- 
-        $ticket_content = new Ticket_Content();
-        $ticket_content->setContent($content);
-        $ticket_content->create();
-        $content_id = $ticket_content->getTContentId();
- 
-        
-        $ticket_reply = new Ticket_Reply();
-        $ticket_reply->set($ticket_id, $content_id, $author);
-        $ticket_reply->create();
-        
+        Ticket_Reply::createReply($content, $author, $ticket_id); 
         return $ticket_id;
         
     }

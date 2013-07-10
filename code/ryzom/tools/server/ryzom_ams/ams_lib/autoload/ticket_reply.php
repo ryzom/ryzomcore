@@ -39,6 +39,17 @@ class Ticket_Reply{
         return $result; 
     }
     
+    public static function createReply($content, $author, $ticket_id){
+        $ticket_content = new Ticket_Content();
+        $ticket_content->setContent($content);
+        $ticket_content->create();
+        $content_id = $ticket_content->getTContentId();
+ 
+        $ticket_reply = new Ticket_Reply();
+        $ticket_reply->set($ticket_id, $content_id, $author);
+        $ticket_reply->create();
+    }
+    
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     
     public function __construct() {
