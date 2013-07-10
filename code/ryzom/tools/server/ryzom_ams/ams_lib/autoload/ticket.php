@@ -12,7 +12,19 @@ class Ticket{
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
-    /*FUNCTION: getTicketTitlesOf()
+     /*FUNCTION: getEntireTicket
+     * return all ticket of the given author's id.
+     *
+     */
+    public static function getEntireTicket($id, $db_data) {
+        $ticket = new Ticket($db_data);
+        $ticket->load_With_TId($id);
+        $reply_array = Ticket_Reply::getRepliesOfTicket($id,$db_data);
+        return Array('ticket_obj' => $ticket,'reply_array' => $reply_array); 
+    }
+    
+    
+    /*FUNCTION: getTicketTitlesOf
      * return all ticket of the given author's id.
      *
      */
@@ -57,6 +69,8 @@ class Ticket{
         $ticket_reply = new Ticket_Reply($db_data);
         $ticket_reply->set($ticket_id, $content_id, $author);
         $ticket_reply->create();
+        
+        return $ticket_id;
         
     }
     

@@ -17,6 +17,29 @@ class Ticket_Reply{
         return $instance;
     }
     
+    //return constructed element based on TCategoryId
+    public static function getRepliesOfTicket( $ticket_id, $db_data) {
+        $dbl = new DBLayer($db_data);
+        $statement = $dbl->execute("SELECT * FROM ticket_reply INNER JOIN ticket_content ON ticket_reply.Content = ticket_content.TContentId and ticket_reply.Ticket=:id", array('id' => $ticket_id));
+        $row = $statement->fetchAll();
+        $result = Array();
+        foreach($row as $tReply){
+            $instanceReply = new self($db_data);
+            $instanceReply->setTReplyId($tReply['TReplyId']);
+            $instanceReply->setTimestamp($tReply['Timestamp']);
+            $instanceReply->set($tReply['Ticket'],$tReply['Content'],$tReply['Author']);
+            
+            $instanceContent = new Ticket_Content($db_data);
+            $instanceContent->setTContentId($tReply['TContentId']);
+            $instanceContent->setContent($tReply['Content']);
+            
+            $instanceReply->setContent($instanceContent);
+            
+            $result[] = $instanceReply;
+        }
+        return $result; 
+    }
+    
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     
     public function __construct($db_data) {
@@ -26,9 +49,9 @@ class Ticket_Reply{
 
     //Set ticket_reply object
     public function set($t,$c,$a){
-        $this->ticket = $t;
-        $this->content = $c;
-        $this->author = $a;
+        $this->setTicket($t);
+        $this->setContent($c);
+        $this->setAuthor($a);
     }
     
     //create ticket by writing private data to DB.

@@ -37,7 +37,7 @@
                         <label class="control-label">Description</label>
                         <div class="controls">
                             <div class="input-prepend">
-                                <textarea rows="12" class="span12" id="Content" name="Content"></textarea>
+				    <textarea rows="12" class="span12" id="Content" name="Content"></textarea>
                             </div>
                         </div>
                     </div>

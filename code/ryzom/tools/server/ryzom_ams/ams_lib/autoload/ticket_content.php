@@ -58,7 +58,7 @@ class Ticket_Content{
     
     
     public function getTContentId(){
-        return $this->tContentId;
+        return  nl2br($this->tContentId);
     }
     
     
