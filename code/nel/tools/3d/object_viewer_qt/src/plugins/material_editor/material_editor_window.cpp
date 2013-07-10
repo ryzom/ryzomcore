@@ -32,6 +32,7 @@
 #include <QSplitter>
 #include <QDockWidget>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QTimer>
 
@@ -77,15 +78,22 @@ namespace MaterialEditor
 
 	void MaterialEditorWindow::onOpenClicked()
 	{
+		if( lastShapeDir.isEmpty() )
+			lastShapeDir = "/";
+
 		QString fn = QFileDialog::getOpenFileName(
 			this,
 			tr( "Open model" ),
-			"/",
+			lastShapeDir,
 			tr( "Shape files ( *.shape )" )
 			);
 
 		if( fn.isEmpty() )
 			return;
+
+		QFileInfo info;
+		info.setFile( fn );
+		lastShapeDir = info.absolutePath();
 
 		std::string fname = fn.toUtf8().data();
 		bool ok = nl3dIface->loadShape( fname );
@@ -110,15 +118,22 @@ namespace MaterialEditor
 
 	void MaterialEditorWindow::onOpenMaterialClicked()
 	{
+		if( lastMatDir.isEmpty() )
+			lastMatDir = "/";
+
 		QString fn = QFileDialog::getOpenFileName( 
 			this,
 			tr( "Open material" ),
-			"/",
+			lastMatDir,
 			tr( "Material files ( *.nelmat )" )
 			);
 
 		if( fn.isEmpty() )
 			return;
+
+		QFileInfo info;
+		info.setFile( fn );
+		lastMatDir = info.absolutePath();
 
 		bool ok = nl3dIface->loadMaterial( fn.toUtf8().data() );
 		if( !ok )

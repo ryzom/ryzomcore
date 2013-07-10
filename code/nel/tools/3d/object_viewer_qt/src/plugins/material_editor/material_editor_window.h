@@ -65,6 +65,9 @@ private:
 		ViewPortWidget *viewPort;
 
 		Ui::MaterialEditorWindow m_ui;
+
+		QString lastShapeDir;
+		QString lastMatDir;
 	};
 
 }
