@@ -29,14 +29,14 @@ class Sync{
                         $decode = json_decode($record['query']);
                         $values = array('user' => $decode[0], 'pass' => $decode[1]);
                         //make connection with and put into shard db & delete from the lib
-                        $dbs->execute("SET Password = :pass WHERE Login = :user",$values);              
+                        $dbs->execute("UPDATE user SET Password = :pass WHERE Login = :user",$values);              
                         $dbl->execute("DELETE FROM ams_querycache WHERE SID=:SID",array('SID' => $record['SID']));
                         break;
                     case 'change_mail':
                         $decode = json_decode($record['query']);
                         $values = array('user' => $decode[0], 'mail' => $decode[1]);
                         //make connection with and put into shard db & delete from the lib
-                        $dbs->execute("SET Email = :mail WHERE Login = :user",$values);              
+                        $dbs->execute("UPDATE user SET Email = :mail WHERE Login = :user",$values);              
                         $dbl->execute("DELETE FROM ams_querycache WHERE SID=:SID",array('SID' => $record['SID']));
                         break;
                     case 'createUser': 
