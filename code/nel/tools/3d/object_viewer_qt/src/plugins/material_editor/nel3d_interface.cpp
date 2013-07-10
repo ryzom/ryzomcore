@@ -372,6 +372,26 @@ namespace MaterialEditor
 		}
 	}
 
+	bool CNel3DInterface::addCube()
+	{
+		return loadShape( "primitives/cube.shape" );
+	}
+
+	bool CNel3DInterface::addSphere()
+	{
+		return loadShape( "primitives/sphere.shape" );
+	}
+
+	bool CNel3DInterface::addCylinder()
+	{
+		return loadShape( "primitives/cylinder.shape" );
+	}
+
+	bool CNel3DInterface::addTeaPot()
+	{
+		return loadShape( "primitives/teapot.shape" );
+	}
+
 	bool CNel3DInterface::loadShape( const std::string &fileName )
 	{
 		NLMISC::CPath::addSearchPath( NLMISC::CFile::getPath( fileName ), false, false );

@@ -44,6 +44,12 @@ private Q_SLOTS:
 		void onShadersClicked();
 		void onPassesClicked();
 		void onStartup();
+
+		void onAddCubeClicked();
+		void onAddSphereClicked();
+		void onAddCylinderClicked();
+		void onAddTeaPotClicked();
+
 		void onClearSceneClicked();
 		
 private:

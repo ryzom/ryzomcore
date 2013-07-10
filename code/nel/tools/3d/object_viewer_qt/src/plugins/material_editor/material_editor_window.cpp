@@ -177,6 +177,62 @@ namespace MaterialEditor
 		viewPort->init();
 	}
 
+	void MaterialEditorWindow::onAddCubeClicked()
+	{
+		if( !nl3dIface->addCube() )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error adding primitive" ),
+				tr( "There was an error while adding this primitive" )
+				);
+			return;
+		}
+		viewPort->startTimedUpdates( 20 );
+	}
+
+	void MaterialEditorWindow::onAddSphereClicked()
+	{
+		if( !nl3dIface->addSphere() )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error adding primitive" ),
+				tr( "There was an error while adding this primitive" )
+				);
+			return;
+		}
+		viewPort->startTimedUpdates( 20 );
+	}
+
+	void MaterialEditorWindow::onAddCylinderClicked()
+	{
+		if( !nl3dIface->addCylinder() )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error adding primitive" ),
+				tr( "There was an error while adding this primitive" )
+				);
+			return;
+		}
+		viewPort->startTimedUpdates( 20 );
+	}
+
+	void MaterialEditorWindow::onAddTeaPotClicked()
+	{
+		if( !nl3dIface->addTeaPot() )
+		{
+			QMessageBox::critical(
+				this,
+				tr( "Error adding primitive" ),
+				tr( "There was an error while adding this primitive" )
+				);
+			return;
+		}
+		viewPort->startTimedUpdates( 20 );
+	}
+
 	void MaterialEditorWindow::onClearSceneClicked()
 	{
 		nl3dIface->clearScene();
@@ -210,6 +266,21 @@ namespace MaterialEditor
 
 			mm = m->addMenu( tr( "Scene" ) );
 			{
+				QMenu *mmm = mm->addMenu( tr( "Add primitive" ) );
+
+				a = new QAction( tr( "Cube" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddCubeClicked() ) );
+				mmm->addAction( a );
+				a = new QAction( tr( "Sphere" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddSphereClicked() ) );
+				mmm->addAction( a );
+				a = new QAction( tr( "Cylinder" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddCylinderClicked() ) );
+				mmm->addAction( a );
+				a = new QAction( tr( "Tea pot" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddTeaPotClicked() ) );
+				mmm->addAction( a );
+
 				a = new QAction( tr( "Clear scene" ), NULL );
 				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onClearSceneClicked() ) );
 				mm->addAction( a );

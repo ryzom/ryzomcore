@@ -149,6 +149,11 @@ namespace MaterialEditor
 		void resizeViewPort( unsigned long w, unsigned long h );
 		NL3D::UDriver* getDriver(){ return driver; }
 
+		bool addCube();
+		bool addSphere();
+		bool addCylinder();
+		bool addTeaPot();
+
 		bool loadShape( const std::string &fileName );
 		void clearScene();
 		void updateInput();
