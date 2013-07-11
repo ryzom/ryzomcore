@@ -22,7 +22,7 @@ function show_user(){
             $ticket_user = Ticket_User::constr_ExternId($result['target_id']);
             $ticketlist = Ticket::getTicketsOf($ticket_user->getTUserId());
             
-            $result['ticketlist'] = Gui_Elements::make_table($ticketlist, Array("getTId","getTimestamp","getTitle","getStatus","getStatusText","getCategoryName"), Array("tId","timestamp","title","status","statusText","category"));
+            $result['ticketlist'] = Gui_Elements::make_table($ticketlist, Array("getTId","getTimestamp","getTitle","getStatus","getStatusText","getStatusText","getCategoryName"), Array("tId","timestamp","title","status","statustext","statusText","category"));
             return $result;
             
         }else{

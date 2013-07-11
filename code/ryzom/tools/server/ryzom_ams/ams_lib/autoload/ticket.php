@@ -11,6 +11,14 @@ class Ticket{
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
+     /*FUNCTION: getStatusArray
+     * returns all possible statusses
+     *
+     */
+    public static function getStatusArray() {
+        return Array("Waiting on user reply","Waiting on support","Waiting on Dev reply","Closed");
+    }
+    
      /*FUNCTION: getEntireTicket
      * return all ticket of the given author's id.
      *
@@ -54,7 +62,7 @@ class Ticket{
     public static function create_Ticket( $title, $content, $category, $author) {
         
         $ticket = new Ticket();
-        $ticket->set($title,0,0,$category,$author);
+        $ticket->set($title,1,0,$category,$author);
         $ticket->create();
         $ticket_id = $ticket->getTId();
         Ticket_Reply::createReply($content, $author, $ticket_id); 
@@ -128,15 +136,8 @@ class Ticket{
     }
     
     public function getStatusText(){
-        $statusId = $this->getStatus();
-        if ($statusId == 0){
-            return "Waiting on support..";
-        }else if($statusId == 1){
-            return "Being handled..";
-        }else if($statusId == 2){
-            return "Closed";
-        }
-        return "Error";
+        $statusArray = Ticket::getStatusArray();
+        return $statusArray[$this->getStatus()];
     }
     
     public function getCategoryName(){

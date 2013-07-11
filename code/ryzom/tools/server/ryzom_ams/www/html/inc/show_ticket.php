@@ -19,6 +19,10 @@ function show_ticket(){
                 $result['ticket_replies'][$i]['author'] = WebUsers::getUsername($reply['authorExtern']);
                 $i++;
             }
+            if(WebUsers::isAdmin()){
+                $result['isAdmin'] = "TRUE";
+                $result['statusList'] = Ticket::getStatusArray();
+            }
             return $result;
             
         }else{
