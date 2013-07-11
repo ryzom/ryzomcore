@@ -16,6 +16,7 @@ class Ticket_Reply{
         return $instance;
     }
     
+    
     //return constructed element based on TCategoryId
     public static function getRepliesOfTicket( $ticket_id) {
         $dbl = new DBLayer("lib");
@@ -50,7 +51,7 @@ class Ticket_Reply{
         $content_id = $ticket_content->getTContentId();
  
         $ticket_reply = new Ticket_Reply();
-        $ticket_reply->set($ticket_id, $content_id, $author);
+        $ticket_reply->set(Array('Ticket' => $ticket_id,'Content' => $content_id,'Author' => $author));
         $ticket_reply->create();
     }
     
@@ -61,10 +62,13 @@ class Ticket_Reply{
 
 
     //Set ticket_reply object
-    public function set($t,$c,$a){
-        $this->setTicket($t);
-        $this->setContent($c);
-        $this->setAuthor($a);
+    public function set($values){
+        $this->setTicket($values['Ticket']);
+        $this->setContent($values['Content']);
+        $this->setAuthor($values['Author']);
+        if(isset($values['Timestamp'])){
+            $this->setTimestamp($values['Timestamp']);
+        }
     }
     
     //create ticket by writing private data to DB.

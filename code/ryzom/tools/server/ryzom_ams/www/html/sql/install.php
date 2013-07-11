@@ -83,6 +83,7 @@
               `Title` VARCHAR(120) NOT NULL ,
               `Status` INT NULL DEFAULT 0 ,
               `Queue` INT NULL DEFAULT 0 ,
+              `Priority` INT NULL DEFAULT 0 ,
               `Ticket_Category` INT NOT NULL ,
               `Author` INT NOT NULL ,
               PRIMARY KEY (`TId`) ,

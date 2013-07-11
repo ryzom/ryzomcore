@@ -13,6 +13,14 @@ function show_ticket(){
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id']);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
             $result['ticket_title'] = $entire_ticket['ticket_obj']->getTitle();
+            $result['ticket_timestamp'] = $entire_ticket['ticket_obj']->getTimestamp();
+            $result['ticket_status'] = $entire_ticket['ticket_obj']->getStatus();
+            $result['ticket_prioritytext'] = $entire_ticket['ticket_obj']->getPriorityText();
+            $result['ticket_priorities'] = Ticket::getPriorityArray();
+            $result['ticket_priority'] = $entire_ticket['ticket_obj']->getPriority();
+            $result['ticket_statustext'] = $entire_ticket['ticket_obj']->getStatusText();
+            $result['ticket_lastupdate'] = Gui_Elements::time_elapsed_string(Ticket::getLatestReply($result['ticket_id'])->getTimestamp());
+            $result['ticket_category'] = $entire_ticket['ticket_obj']->getCategoryName();
             $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp","getAuthor()->getExternId","getAuthor()->getPermission"), Array("tReplyId","replyContent","timestamp","authorExtern","permission"));
             $i = 0;
             foreach( $result['ticket_replies'] as $reply){

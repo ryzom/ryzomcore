@@ -8,21 +8,31 @@ class Ticket{
     private $queue;
     private $ticket_category;
     private $author;
+    private $priority;
     
-    ////////////////////////////////////////////Functions////////////////////////////////////////////////////
+    ////////////////////////////////////////////Functions////////////////////////////////////////////////////    
     
-     /*FUNCTION: getStatusArray
-     * returns all possible statusses
-     *
-     */
+    /*FUNCTION: getStatusArray
+    * returns all possible statusses
+    *
+    */
     public static function getStatusArray() {
         return Array("Waiting on user reply","Waiting on support","Waiting on Dev reply","Closed");
     }
     
-     /*FUNCTION: getEntireTicket
-     * return all ticket of the given author's id.
-     *
-     */
+    /*FUNCTION: getPriorityArray
+    * returns all possible statusses
+    *
+    */
+    public static function getPriorityArray() {
+        return Array("Low","Normal","High","Super Dupa High");
+    }
+    
+    
+    /*FUNCTION: getEntireTicket
+    * return all ticket of the given author's id.
+    *
+    */
     public static function getEntireTicket($id) {
         $ticket = new Ticket();
         $ticket->load_With_TId($id);
@@ -62,13 +72,24 @@ class Ticket{
     public static function create_Ticket( $title, $content, $category, $author) {
         
         $ticket = new Ticket();
-        $ticket->set($title,1,0,$category,$author);
+        $ticket->set($title,1,0,$category,$author,0);
         $ticket->create();
         $ticket_id = $ticket->getTId();
+        
         Ticket_Reply::createReply($content, $author, $ticket_id); 
         return $ticket_id;
         
     }
+    
+    //return constructed element based on TCategoryId
+    public static function getLatestReply( $ticket_id) {
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->execute("SELECT * FROM ticket_reply WHERE Ticket =:id ORDER BY TReplyId DESC LIMIT 1 ", array('id' => $ticket_id));
+        $reply = new Ticket_Reply();
+        $reply->set($statement->fetch());
+        return $reply;
+    }
+    
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     public function __construct() {
@@ -77,19 +98,20 @@ class Ticket{
 
 
     //Set ticket object
-    public function set($t,$s,$q,$t_c,$a){
+    public function set($t,$s,$q,$t_c,$a,$p){
         $this->title = $t;
         $this->status = $s;
         $this->queue = $q;
         $this->ticket_category = $t_c;
         $this->author = $a;
+        $this->priority = $p;
     }
     
     //create ticket by writing private data to DB.
     public function create(){
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket (Timestamp, Title, Status, Queue, Ticket_Category, Author) VALUES (now(), :title, :status, :queue, :tcat, :author)";
-        $values = Array('title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author);
+        $query = "INSERT INTO ticket (Timestamp, Title, Status, Queue, Ticket_Category, Author, Priority) VALUES (now(), :title, :status, :queue, :tcat, :author, :priority)";
+        $values = Array('title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author, 'priority' => $this->priority);
         $this->tId = $dbl->executeReturnId($query, $values); ;
     }
 
@@ -105,18 +127,24 @@ class Ticket{
         $this->queue = $row['Queue'];
         $this->ticket_category = $row['Ticket_Category'];
         $this->author = $row['Author'];
+        $this->priority = $row['Priority'];
     }
-    
     
     //update private data to DB.
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket SET Timestamp = :timestamp, Title = :title, Status = :status, Queue = :queue, Ticket_Category = :tcat, Author = :author WHERE TId=:id";
-        $values = Array('id' => $this->tId, 'timestamp' => $this->timestamp, 'title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author);
+        $query = "UPDATE ticket SET Timestamp = :timestamp, Title = :title, Status = :status, Queue = :queue, Ticket_Category = :tcat, Author = :author, Priority = :priority WHERE TId=:id";
+        $values = Array('id' => $this->tId, 'timestamp' => $this->timestamp, 'title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author, 'priority' => $this->priority);
         $statement = $dbl->execute($query, $values);
     }
     
-    
+    /*FUNCTION: postreply
+    * returns all possible statusses
+    *
+    *
+    public function postReply() {
+        return Array("Waiting on user reply","Waiting on support","Waiting on Dev reply","Closed");
+    }*/
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
     
     public function getTId(){
@@ -157,6 +185,15 @@ class Ticket{
         return $this->author;
     }
     
+    public function getPriority(){
+        return $this->priority;
+    }
+    
+    public function getPriorityText(){
+        $priorityArray = Ticket::getPriorityArray();
+        return $priorityArray[$this->getPriority()];
+    }
+    
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
     
     public function setTId($id){
@@ -185,6 +222,10 @@ class Ticket{
     
     public function setAuthor($a){
         $this->author = $a;
+    }
+    
+    public function setPriority($p){
+        $this->priority = $p;
     }
     
 }

@@ -17,11 +17,13 @@ function reply_on_ticket(){
                 $author = $_SESSION['ticket_user']->getTUserId();
                 Ticket_Reply::createReply($content, $author, $ticket_id);
                 
-                if(isset($_POST['ChangeStatus']) && WebUsers::isAdmin()){
-                    $newStatus = filter_var($_POST['ChangeStatus'], FILTER_SANITIZE_NUMBER_INT); 
+                if(isset($_POST['ChangeStatus']) && isset($_POST['ChangePriority']) && WebUsers::isAdmin()){
+                    $newStatus = filter_var($_POST['ChangeStatus'], FILTER_SANITIZE_NUMBER_INT);
+                    $newPriority = filter_var($_POST['ChangePriority'], FILTER_SANITIZE_NUMBER_INT); 
                     $ticket = new Ticket();
                     $ticket->load_With_TId($ticket_id);
                     $ticket->setStatus($newStatus);
+                    $ticket->setPriority($newPriority);
                     $ticket->update();
                 }
                 header("Location: index.php?page=show_ticket&id=".$ticket_id);
