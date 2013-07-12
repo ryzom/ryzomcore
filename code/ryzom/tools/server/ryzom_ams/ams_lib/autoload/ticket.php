@@ -106,13 +106,28 @@ class Ticket{
         
     }
     
-    //return constructed element based on TCategoryId
+    //return the latest reply.
     public static function getLatestReply( $ticket_id) {
         $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket_reply WHERE Ticket =:id ORDER BY TReplyId DESC LIMIT 1 ", array('id' => $ticket_id));
         $reply = new Ticket_Reply();
         $reply->set($statement->fetch());
         return $reply;
+    }
+    
+    public static function createReply($content, $author, $ticket_id){
+        if($content != ""){
+            $ticket = new Ticket();
+            $ticket->load_With_TId($ticket_id);
+            //if status is not closed
+            if($ticket->getStatus() != 3){
+                Ticket_Reply::createReply($content, $author, $ticket_id);
+            }else{
+                //TODO: Show error message that ticket is closed
+            }
+        }else{
+            //TODO: Show error content is empty
+        }
     }
     
     
