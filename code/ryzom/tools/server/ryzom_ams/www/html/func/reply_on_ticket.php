@@ -12,11 +12,11 @@ function reply_on_ticket(){
         if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  WebUsers::isAdmin() ){
             
             try{
-                
-                $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
-                $author = $_SESSION['ticket_user']->getTUserId();
-                Ticket_Reply::createReply($content, $author, $ticket_id);
-                
+                if(isset($_POST['ChangeStatus']) && $_POST['Content'] != ""){
+                    $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
+                    $author = $_SESSION['ticket_user']->getTUserId();
+                    Ticket_Reply::createReply($content, $author, $ticket_id);
+                }
                 if(isset($_POST['ChangeStatus']) && isset($_POST['ChangePriority']) && WebUsers::isAdmin()){
                     $newStatus = filter_var($_POST['ChangeStatus'], FILTER_SANITIZE_NUMBER_INT);
                     $newPriority = filter_var($_POST['ChangePriority'], FILTER_SANITIZE_NUMBER_INT); 

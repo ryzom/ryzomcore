@@ -11,7 +11,7 @@ USE `mydb` ;
 DROP TABLE IF EXISTS `mydb`.`ticket_category` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_category` (
-  `TCategoryId` INT NOT NULL AUTO_INCREMENT ,
+  `TCategoryId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`TCategoryId`) ,
   UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) )
@@ -24,9 +24,9 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`ticket_user` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_user` (
-  `TUserId` INT(10) NOT NULL AUTO_INCREMENT ,
+  `TUserId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Permission` INT(3) NOT NULL DEFAULT 1 ,
-  `ExternId` INT(10) NOT NULL ,
+  `ExternId` INT(10) UNSIGNED NOT NULL ,
   PRIMARY KEY (`TUserId`) )
 ENGINE = InnoDB;
 
@@ -37,13 +37,14 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`ticket` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket` (
-  `TId` INT NOT NULL AUTO_INCREMENT ,
+  `TId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Timestamp` TIMESTAMP NOT NULL ,
   `Title` VARCHAR(120) NOT NULL ,
   `Status` INT NULL DEFAULT 0 ,
   `Queue` INT NULL DEFAULT 0 ,
-  `Ticket_Category` INT NOT NULL ,
-  `Author` INT NOT NULL ,
+  `Ticket_Category` INT UNSIGNED NOT NULL ,
+  `Author` INT UNSIGNED NOT NULL ,
+  `Priority` INT(3) NULL DEFAULT 0 ,
   PRIMARY KEY (`TId`) ,
   INDEX `fk_ticket_ticket_category_idx` (`Ticket_Category` ASC) ,
   INDEX `fk_ticket_ams_user_idx` (`Author` ASC) ,
@@ -66,8 +67,8 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`assigned` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`assigned` (
-  `Ticket` INT NOT NULL ,
-  `User` INT NOT NULL ,
+  `Ticket` INT UNSIGNED NOT NULL ,
+  `User` INT UNSIGNED NOT NULL ,
   INDEX `fk_assigned_ticket_idx` (`Ticket` ASC) ,
   PRIMARY KEY (`Ticket`, `User`) ,
   INDEX `fk_assigned_ams_user_idx` (`User` ASC) ,
@@ -90,7 +91,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`tag` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`tag` (
-  `TagId` INT NOT NULL AUTO_INCREMENT ,
+  `TagId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Value` VARCHAR(60) NOT NULL ,
   PRIMARY KEY (`TagId`) ,
   UNIQUE INDEX `Value_UNIQUE` (`Value` ASC) )
@@ -103,8 +104,8 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`tagged` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`tagged` (
-  `Ticket` INT NOT NULL ,
-  `Tag` INT NOT NULL ,
+  `Ticket` INT UNSIGNED NOT NULL ,
+  `Tag` INT UNSIGNED NOT NULL ,
   PRIMARY KEY (`Ticket`, `Tag`) ,
   INDEX `fk_tagged_tag_idx` (`Tag` ASC) ,
   CONSTRAINT `fk_tagged_ticket`
@@ -126,7 +127,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`ticket_content` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_content` (
-  `TContentId` INT NOT NULL AUTO_INCREMENT ,
+  `TContentId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Content` TEXT NULL ,
   PRIMARY KEY (`TContentId`) )
 ENGINE = InnoDB
@@ -139,10 +140,10 @@ DEFAULT CHARACTER SET = utf8;
 DROP TABLE IF EXISTS `mydb`.`ticket_reply` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_reply` (
-  `TReplyId` INT NOT NULL AUTO_INCREMENT ,
-  `Ticket` INT NOT NULL ,
-  `Author` INT NOT NULL ,
-  `Content` INT NOT NULL ,
+  `TReplyId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `Ticket` INT UNSIGNED NOT NULL ,
+  `Author` INT UNSIGNED NOT NULL ,
+  `Content` INT UNSIGNED NOT NULL ,
   `Timestamp` TIMESTAMP NULL ,
   PRIMARY KEY (`TReplyId`) ,
   INDEX `fk_ticket_reply_ticket_idx` (`Ticket` ASC) ,
@@ -172,7 +173,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`ticket_group` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_group` (
-  `TGroupId` INT NOT NULL AUTO_INCREMENT ,
+  `TGroupId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Title` VARCHAR(80) NOT NULL ,
   PRIMARY KEY (`TGroupId`) ,
   UNIQUE INDEX `Title_UNIQUE` (`Title` ASC) )
@@ -185,8 +186,8 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`in_group` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`in_group` (
-  `Ticket_Group` INT NOT NULL ,
-  `Ticket` INT NOT NULL ,
+  `Ticket_Group` INT UNSIGNED NOT NULL ,
+  `Ticket` INT UNSIGNED NOT NULL ,
   PRIMARY KEY (`Ticket_Group`, `Ticket`) ,
   INDEX `fk_in_group_ticket_group_idx` (`Ticket_Group` ASC) ,
   INDEX `fk_in_group_ticket_idx` (`Ticket` ASC) ,
@@ -198,6 +199,33 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`in_group` (
   CONSTRAINT `fk_in_group_ticket`
     FOREIGN KEY (`Ticket` )
     REFERENCES `mydb`.`ticket` (`TId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`ticket_log`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`ticket_log` ;
+
+CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_log` (
+  `TLogId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `Timestamp` TIMESTAMP NOT NULL ,
+  `Query` VARCHAR(255) NOT NULL ,
+  `Ticket` INT UNSIGNED NOT NULL ,
+  `Author` INT(10) UNSIGNED NULL ,
+  PRIMARY KEY (`TLogId`) ,
+  INDEX `fk_ticket_log_ticket1` (`Ticket` ASC) ,
+  INDEX `fk_ticket_log_ticket_user1` (`Author` ASC) ,
+  CONSTRAINT `fk_ticket_log_ticket1`
+    FOREIGN KEY (`Ticket` )
+    REFERENCES `mydb`.`ticket` (`TId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ticket_log_ticket_user1`
+    FOREIGN KEY (`Author` )
+    REFERENCES `mydb`.`ticket_user` (`TUserId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
