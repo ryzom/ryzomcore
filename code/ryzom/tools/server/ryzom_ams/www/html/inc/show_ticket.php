@@ -11,6 +11,7 @@ function show_ticket(){
         if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  WebUsers::isAdmin() ){
             
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id']);
+            Ticket_Log::createLogEntry($result['ticket_id'],$_SESSION['ticket_user']->getTUserId(), 3);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
             $result['ticket_title'] = $entire_ticket['ticket_obj']->getTitle();
             $result['ticket_timestamp'] = $entire_ticket['ticket_obj']->getTimestamp();

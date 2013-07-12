@@ -69,15 +69,40 @@ class Ticket{
      * creates a ticket + first initial reply and fills in the content of it!
      *
      */
-    public static function create_Ticket( $title, $content, $category, $author) {
+    public static function create_Ticket( $title, $content, $category, $author, $real_author) {
         
         $ticket = new Ticket();
         $ticket->set($title,1,0,$category,$author,0);
         $ticket->create();
         $ticket_id = $ticket->getTId();
         
-        Ticket_Reply::createReply($content, $author, $ticket_id); 
+        Ticket_Reply::createReply($content, $author, $ticket_id);
+        if ( $author == $real_author){
+            Ticket_Log::createLogEntry( $ticket_id, $author, 1);
+        }else{
+            Ticket_Log::createLogEntry( $ticket_id, $real_author, 2, $author);
+        }
         return $ticket_id;
+        
+    }
+    
+    /*FUNCTION: updateTicketStatusAndPriority()
+     * creates a ticket + first initial reply and fills in the content of it!
+     *
+     */
+    public static function updateTicketStatusAndPriority( $ticket_id, $newStatus, $newPriority, $author) {
+        
+        $ticket = new Ticket();
+        $ticket->load_With_TId($ticket_id);
+        if ($ticket->getStatus() != $newStatus){
+            $ticket->setStatus($newStatus);
+            Ticket_Log::createLogEntry( $ticket_id, $author, 5, $newStatus);
+        }
+        if ($ticket->getPriority() != $newPriority){
+            $ticket->setPriority($newPriority);
+            Ticket_Log::createLogEntry( $ticket_id, $author, 6, $newPriority);
+        }
+        $ticket->update();
         
     }
     

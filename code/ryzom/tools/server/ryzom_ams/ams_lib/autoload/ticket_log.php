@@ -2,39 +2,55 @@
 
 class Ticket_Log{
     
-    private $tCategoryId;
-    private $name;
+    private $tLogId;
+    private $timestamp;
+    private $query;
+    private $author;
+    private $ticket;
+    
+    /****************************************
+     *Action ID's:
+     * 1: User X Created Ticket
+     * 2: Admin X created ticket for arg
+     * 3: Read Ticket
+     * 4: Added Reply ID: arg to ticket
+     * 5: Changed status to arg
+     * 6: Changed Priority to arg
+     *
+     ****************************************/
+    
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
     
-    //Creates a ticket_Catergory in the DB
-    public static function createTicketCategory( $name) {
-        $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket_category (Name) VALUES (:name)";
-        $values = Array('name' => $name);
-        $dbl->execute($query, $values);
-
+    //Creates a log entry
+    public static function createLogEntry( $ticket_id, $author_id, $action, $arg = -1) {
+        global $TICKET_LOGGING;
+        if($TICKET_LOGGING){
+            $dbl = new DBLayer("lib");
+            $query = "INSERT INTO ticket_log (Timestamp, Query, Ticket, Author) VALUES (now(), :query, :ticket, :author )";
+            $values = Array('ticket' => $ticket_id, 'author' => $author_id, 'query' => json_encode(array($action,$arg)));
+            $dbl->execute($query, $values);
+        }
     }
 
 
-    //return constructed element based on TCategoryId
-    public static function constr_TCategoryId( $id) {
+    //return constructed element based on TLogId
+    public static function constr_TLogId( $id) {
         $instance = new self();
-        $instance->setTCategoryId($id);
+        $instance->setTLogId($id);
         return $instance;
     }
     
-    //returns list of all category objects
-    public static function getAllCategories() {
+    //returns list of all logs of a ticket
+    public static function getAllLogs($ticket_id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->executeWithoutParams("SELECT * FROM ticket_category");
+        $statement = $dbl->execute("SELECT * FROM ticket_log INNER JOIN ticket_user ON ticket_log.Author = ticket_user.TUserId and ticket_log.Ticket=:id", array('id' => $ticket_id));
         $row = $statement->fetchAll();
         $result = Array();
-        foreach($row as $category){
+        foreach($row as $log){
             $instance = new self();
-            $instance->tCategoryId = $category['TCategoryId'];
-            $instance->name = $category['Name'];
+            $instance->set($log);
             $result[] = $instance;
         }
         return $result; 
@@ -45,48 +61,85 @@ class Ticket_Log{
      
     public function __construct() {
     }
+    
+    //set values
+    public function set($values) {
+        $this->setTLogId($values['TLogId']);
+        $this->setTimestamp($values['Timestamp']);
+        $this->setQuery($values['Query']);
+        $this->setTicket($values['Ticket']);
+        $this->setAuthor($values['Author']);
+    } 
 
-    //return constructed element based on TCategoryId
-    public function load_With_TCategoryId( $id) {
+    //Load with tlogId
+    public function load_With_TLogId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_category WHERE TCategoryId=:id", array('id' => $id));
+        $statement = $dbl->execute("SELECT * FROM ticket_log WHERE TLogId=:id", array('id' => $id));
         $row = $statement->fetch();
-        $this->tCategoryId = $row['TCategoryId'];
-        $this->name = $row['Name'];
+        $this->set($row);
     }
     
     
     //update private data to DB.
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket_category SET Name = :name WHERE TCategoryId=:id";
-        $values = Array('id' => $this->tCategoryId, 'name' => $this->name);
+        $query = "UPDATE ticket_log SET Timestamp = :timestamp, Query = :query, Author = :author, Ticket = :ticket WHERE TLogId=:id";
+        $values = Array('id' => $this->getTLogId(), 'timestamp' => $this->getTimestamp(), 'query' => $this->getQuery(), 'author' => $this->getAuthor(), 'ticket' => $this->getTicket() );
         $statement = $dbl->execute($query, $values);
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
     
-    public function getName(){
-        if ($this->name == ""){
-            $this->load_With_TCategoryId($this->tCategoryId);
-        }
-        return $this->name;
+    public function getTLogId(){
+        return $this->tLogId;
     }
     
-    
-    public function getTCategoryId(){
-        return $this->tCategoryId;
+    public function getTimestamp(){
+        return $this->timestamp;
     }
     
+    public function getQuery(){
+        return $this->query;
+    }
+    
+    public function getAuthor(){
+        return $this->author;
+    }
+   
+    public function getTicket(){
+        return $this->ticket;
+    }
+    
+    public function getAcion(){
+        $decodedQuery = json_decode($this->ticket);
+        return $decodedQuery[0];
+    }
+    
+    public function getArgument(){
+        $decodedQuery = json_decode($this->ticket);
+        return $decodedQuery[1];
+    }
     
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
      
-    public function setName($n){
-        $this->name = $n;
+    public function setTLogId($id){
+        $this->tLogId = $id;
     }
     
-    public function setTCategoryId($id){
-        $this->tCategoryId = $id;
+    public function setTimestamp($t){
+        $this->timestamp = $t;
+    }
+    
+    public function setQuery($q){
+        $this->query = $q;
+    }
+    
+    public function setAuthor($a){
+        $this->author = $a;
+    }
+    
+    public function setTicket($t){
+        $this->ticket = $t;
     }
    
     

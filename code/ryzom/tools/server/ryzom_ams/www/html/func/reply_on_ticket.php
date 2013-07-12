@@ -12,19 +12,15 @@ function reply_on_ticket(){
         if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  WebUsers::isAdmin() ){
             
             try{
+                $author = $_SESSION['ticket_user']->getTUserId();
                 if(isset($_POST['ChangeStatus']) && $_POST['Content'] != ""){
                     $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
-                    $author = $_SESSION['ticket_user']->getTUserId();
                     Ticket_Reply::createReply($content, $author, $ticket_id);
                 }
                 if(isset($_POST['ChangeStatus']) && isset($_POST['ChangePriority']) && WebUsers::isAdmin()){
                     $newStatus = filter_var($_POST['ChangeStatus'], FILTER_SANITIZE_NUMBER_INT);
                     $newPriority = filter_var($_POST['ChangePriority'], FILTER_SANITIZE_NUMBER_INT); 
-                    $ticket = new Ticket();
-                    $ticket->load_With_TId($ticket_id);
-                    $ticket->setStatus($newStatus);
-                    $ticket->setPriority($newPriority);
-                    $ticket->update();
+                    Ticket::updateTicketStatusAndPriority($ticket_id,$newStatus, $newPriority, $author);
                 }
                 header("Location: index.php?page=show_ticket&id=".$ticket_id);
                 exit;

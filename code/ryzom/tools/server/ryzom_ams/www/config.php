@@ -40,3 +40,5 @@ $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $DEFAULT_LANGUAGE = 'en';
 
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
+
+$TICKET_LOGGING = true;

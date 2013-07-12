@@ -31,7 +31,7 @@
 		<table class="table table-bordered" >
 		    <tbody>
 			{foreach from=$ticket_replies item=reply}
-			<tr {if $reply.permission eq '2'} style="background-color:rgb(242, 222, 222);{/if}">
+			<tr>
 			    <td>
 				<p><span class="label label-info"> {$reply.timestamp}</span>
 				{if $reply.permission eq '1'}
@@ -41,10 +41,19 @@
 				{/if}
 				<span class="label label-warning"><strong><i class="icon-user icon-white"></i>{if isset($isAdmin) and $isAdmin eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white">{$reply.author}</font>{else}{$reply.author} {/if}</a></strong></span></p>
 
-				<p><pre>{$reply.replyContent}</pre></p>
+				<p><pre{if $reply.permission eq '2'} style="background-color:rgb(248, 200, 200);"{/if}>{$reply.replyContent}</pre></p>
 			    </td>
 			</tr>
 			{/foreach}
+			
+			{if $ticket_status eq 3}
+			<tr>
+			    <td>
+				<p><pre style="background-color:rgb(255, 230, 153);">Ticket is closed.</pre></p>
+			    </td>
+			</tr>
+			{/if}
+			
 			<tr>
 			    <td>
 				<form id="reply" class="form-vertical" method="post" action="index.php">

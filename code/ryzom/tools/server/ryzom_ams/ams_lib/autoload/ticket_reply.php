@@ -53,6 +53,9 @@ class Ticket_Reply{
         $ticket_reply = new Ticket_Reply();
         $ticket_reply->set(Array('Ticket' => $ticket_id,'Content' => $content_id,'Author' => $author));
         $ticket_reply->create();
+        $reply_id = $ticket_reply->getTReplyId();
+ 
+        Ticket_Log::createLogEntry( $ticket_id, $author, 4, $reply_id);
     }
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
@@ -76,7 +79,7 @@ class Ticket_Reply{
         $dbl = new DBLayer("lib");
         $query = "INSERT INTO ticket_reply (Ticket, Content, Author, Timestamp) VALUES (:ticket, :content, :author, now())";
         $values = Array('ticket' => $this->ticket, 'content' => $this->content, 'author' => $this->author);
-        $dbl->execute($query, $values);
+        $this->tReplyId = $dbl->executeReturnId($query, $values); 
     }
 
     //return constructed element based on TId
