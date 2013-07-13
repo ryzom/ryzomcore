@@ -48,10 +48,9 @@ class Ticket_User{
         $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket_user WHERE TUserId=:id", array('id' => $id));
         $row = $statement->fetch();
-        $instance->tUserId = $row['TUserId'];
-        $instance->permission = $row['Permission'];
-        $instance->externId = $row['ExternId'];
-        return $instance;
+        $this->tUserId = $row['TUserId'];
+        $this->permission = $row['Permission'];
+        $this->externId = $row['ExternId'];
     } 
     
     //update private data to DB.

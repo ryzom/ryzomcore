@@ -23,7 +23,7 @@
 			  {foreach from=$ticket_logs item=log}
 			  <tr>
 				<td>{$log.tLogId}</td>
-				<td><a href="#" title="{$log.timestamp_elapsed}" data-rel="tooltip"  data-placement="right">{$log.timestamp}</td>
+				<td><span title="{$log.timestamp_elapsed}" data-rel="tooltip"  data-placement="right">{$log.timestamp}</span></td>
 				<td>{$log.query}</td>
 			  </tr>
 			  {/foreach}
