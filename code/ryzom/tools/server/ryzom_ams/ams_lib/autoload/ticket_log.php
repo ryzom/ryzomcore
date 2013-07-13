@@ -22,6 +22,28 @@ class Ticket_Log{
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
+     //return all logs that are related to a ticket
+    public static function getLogsOfTicket( $ticket_id) {
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->execute("SELECT * FROM ticket_log INNER JOIN ticket_user ON ticket_log.Author = ticket_user.TUserId and ticket_log.Ticket=:id ORDER BY ticket_log.TLogId DESC", array('id' => $ticket_id));
+        $row = $statement->fetchAll();
+        $result = Array();
+        foreach($row as $log){
+            $instanceAuthor = Ticket_User::constr_TUserId($log['Author']);
+            $instanceAuthor->setExternId($log['ExternId']);
+            $instanceAuthor->setPermission($log['Permission']);
+
+            $instanceLog = new self();
+            $instanceLog->setTLogId($log['TLogId']);
+            $instanceLog->setTimestamp($log['Timestamp']);
+            $instanceLog->setAuthor($instanceAuthor);
+            $instanceLog->setTicket($ticket_id);
+            $instanceLog->setQuery($log['Query']);
+            
+            $result[] = $instanceLog;
+        }
+        return $result; 
+    }
     
     //Creates a log entry
     public static function createLogEntry( $ticket_id, $author_id, $action, $arg = -1) {
@@ -110,13 +132,13 @@ class Ticket_Log{
         return $this->ticket;
     }
     
-    public function getAcion(){
-        $decodedQuery = json_decode($this->ticket);
+    public function getAction(){
+        $decodedQuery = json_decode($this->query);
         return $decodedQuery[0];
     }
     
     public function getArgument(){
-        $decodedQuery = json_decode($this->ticket);
+        $decodedQuery = json_decode($this->query);
         return $decodedQuery[1];
     }
     
