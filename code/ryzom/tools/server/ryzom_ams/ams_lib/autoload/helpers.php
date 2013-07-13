@@ -29,31 +29,8 @@ class Helpers{
              $smarty -> assign( $key, $value );
              }
              
-          global $DEFAULT_LANGUAGE;
-          //if language get param is given = set cookie
-          //else if no get param is given and a cookie is set, use that language, else use default.
-          if ( isset( $_GET['language'] ) ) {
-               //check if the language is supported 
-               if ( file_exists( $AMS_TRANS . '/' . $_GET['language'] . '.ini' ) ){
-                    //if it's supported, set cookie!
-                    setcookie( 'language',$_GET['language'], time() + 60*60*24*30 );
-                    $language = $_GET['language'];
-               }else{
-                    //the language is not supported, use the default.
-                    $language = $DEFAULT_LANGUAGE;
-               }
-          }else{
-               //if no get param is given, check if a cookie value for language is set 
-               if ( isset( $_COOKIE['language'] ) ) { 
-                    $language = $_COOKIE['language']; 
-               }
-               //else use the default
-               else{
-                     $language = $DEFAULT_LANGUAGE; 
-               }
-          }
-             
-         $variables = parse_ini_file( $AMS_TRANS . '/' . $language . '.ini', true );
+          
+         $variables = Helpers::handle_language();
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
@@ -91,11 +68,42 @@ class Helpers{
      static public function check_if_game_client()
     {
          // if HTTP_USER_AGENT is not set then its ryzom core
-        if ( !isset( $_SERVER['HTTP_USER_AGENT'] ) ){
+          if ( !isset( $_SERVER['HTTP_USER_AGENT'] ) ){
              return true;
-             }else{
+          }else{
              return false;
              }
-         }
      }
-
+       
+     static public function handle_language(){
+          global $DEFAULT_LANGUAGE;
+          global $AMS_TRANS;
+          
+          //if language get param is given = set cookie
+          //else if no get param is given and a cookie is set, use that language, else use default.
+          if ( isset( $_GET['language'] ) ) {
+               //check if the language is supported 
+               if ( file_exists( $AMS_TRANS . '/' . $_GET['language'] . '.ini' ) ){
+                    //if it's supported, set cookie!
+                    setcookie( 'language',$_GET['language'], time() + 60*60*24*30 );
+                    $language = $_GET['language'];
+               }else{
+                    //the language is not supported, use the default.
+                    $language = $DEFAULT_LANGUAGE;
+               }
+          }else{
+               //if no get param is given, check if a cookie value for language is set 
+               if ( isset( $_COOKIE['language'] ) ) { 
+                    $language = $_COOKIE['language']; 
+               }
+               //else use the default
+               else{
+                     $language = $DEFAULT_LANGUAGE; 
+               }
+          }
+             
+         return parse_ini_file( $AMS_TRANS . '/' . $language . '.ini', true );
+         
+         
+     }
+}

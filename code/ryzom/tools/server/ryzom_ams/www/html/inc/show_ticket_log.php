@@ -23,7 +23,7 @@ function show_ticket_log(){
                 if($log['action'] == 2){
                     $query_backpart =  WebUsers::getUsername($log['argument']);
                 }else if($log['action'] == 4){
-                    $query_backpart = "<a href='index.php?page=show_reply&id=" . $log['argument'] . "'>" . $log['argument'] . "</a>";
+                    $query_backpart = "<a href='index.php?page=show_reply&id=" . $log['argument'] . "'>ID#" . $log['argument'] . "</a>";
                 }else if($log['action'] == 5){
                     $statusArray = Ticket::getStatusArray();
                     $query_backpart = $statusArray[$log['argument'] ];
@@ -32,6 +32,7 @@ function show_ticket_log(){
                     $query_backpart = $priorityArray[$log['argument'] ];
                 }
                 $result['ticket_logs'][$i]['query'] = $author . " " . $log_action_array[$log['action']] . " " .  $query_backpart;
+                $result['ticket_logs'][$i]['timestamp_elapsed'] = Gui_Elements::time_elapsed_string($log['timestamp']);
                 $i++;
             }    
             if(WebUsers::isAdmin()){
