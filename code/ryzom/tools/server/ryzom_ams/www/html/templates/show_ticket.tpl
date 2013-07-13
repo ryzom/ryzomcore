@@ -57,6 +57,7 @@
 			<tr>
 			    <td>
 				<form id="reply" class="form-vertical" method="post" action="index.php">
+				{if $ticket_status neq 3}
 				<legend>{$t_reply}:</legend>
 				<div class="control-group">
 				    <label class="control-label">{$t_fill}</label>
@@ -66,6 +67,7 @@
 					</div>
 				    </div>
 				</div>
+				{/if}
 				{if isset($isAdmin) and $isAdmin eq "TRUE"}
 				<div class="control-group"  style="display: inline-block;">
 				    <label class="control-label">Change status to</label>
