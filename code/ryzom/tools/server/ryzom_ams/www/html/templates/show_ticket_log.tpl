@@ -16,9 +16,7 @@
 			    <tr>
 				    <th>ID</th>
 				    <th>Timestamp</th>
-				    <th>User</th>
-				    <th>Action</th>
-				    <th>Argument</th>
+				    <th>Query</th>
 			    </tr>
 		    </thead>   
 		    <tbody>
@@ -26,10 +24,7 @@
 			  <tr>
 				<td>{$log.tLogId}</td>
 				<td>{$log.timestamp}</td>
-				<td>{$log.author}</td>
-				<td>{$log.action}</td>
-				<td>{$log.argument}</td>
-
+				<td>{$log.query}</td>
 			  </tr>
 			  {/foreach}
 	  

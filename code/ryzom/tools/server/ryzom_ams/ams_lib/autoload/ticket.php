@@ -76,12 +76,12 @@ class Ticket{
         $ticket->create();
         $ticket_id = $ticket->getTId();
         
-        Ticket_Reply::createReply($content, $author, $ticket_id);
         if ( $author == $real_author){
             Ticket_Log::createLogEntry( $ticket_id, $author, 1);
         }else{
             Ticket_Log::createLogEntry( $ticket_id, $real_author, 2, $author);
         }
+        Ticket_Reply::createReply($content, $author, $ticket_id);
         return $ticket_id;
         
     }

@@ -109,7 +109,7 @@
     
     <div class="box span3">
         <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Tags</h2>
+            <h2><i class="icon-th"></i>Actions</h2>
             <div class="box-icon">
                 <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
@@ -117,6 +117,7 @@
         </div>
         <div class="box-content">
             <div class="row-fluid">
+		
 		<form id="addTag" class="form-vertical" method="post" action="index.php">
 		<legend>Tags</legend>
 		
@@ -146,61 +147,7 @@
 		    </div>
 		</div>
 		</form>
-            </div>                   
-        </div>
-    </div>
-    
-    
-    <div class="box span3">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Groups</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
-		<form id="addTag" class="form-vertical" method="post" action="index.php">
-		<legend>Groups</legend>
 		
-		<div class="control-group">
-		    <label class="control-label">Current Groups</label>
-		    <div class="controls">
-			<div class="input-prepend">
-			   <div id="checkbox1" class="checker"><span class="checked"><input style="opacity: 0;" id="inlineCheckbox2" value="option2" checked="checked" type="checkbox"></span></div> Hacked accounts
-			</div>
-		    </div>
-		</div>
-		<div class="control-group">
-		    <label class="control-label">New Group</label>
-		    <div class="controls">
-			<div class="input-prepend">
-			    <input type="text" class="span8" id="newTag" name="newTag">
-			</div>
-		    </div>
-		</div>
-		<div class="control-group">
-		    <label class="control-label"></label>
-		    <div class="controls">
-			<button type="submit" class="btn btn-primary" >Update</button>
-		    </div>
-		</div>
-		</form>
-            </div>                   
-        </div>
-    </div>
-    
-    <div class="box span3">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Associations</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
 		<form id="addTag" class="form-vertical" method="post" action="index.php">
 		<legend>Associations</legend>
 		
@@ -227,6 +174,16 @@
 		    </div>
 		</div>
 		</form>
+		<legend>Actions</legend>
+		<div class="btn-group">
+		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
+		    <ul class="dropdown-menu">
+			<li class="divider"></li>
+			<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>
+			<li><a href="index.php?page=createticket&user_id={$target_id}">Send Other Ticket</a></li>
+			<li class="divider"></li>
+		    </ul>
+		</div>
             </div>                   
         </div>
     </div>

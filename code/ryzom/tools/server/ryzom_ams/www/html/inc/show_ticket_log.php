@@ -13,10 +13,25 @@ function show_ticket_log(){
             
             $result['ticket_title'] = $target_ticket->getTitle();
             $ticket_logs = Ticket_Log::getLogsOfTicket( $result['ticket_id']);
+            $log_action_array = Ticket_Log::getActionTextArray();
             $result['ticket_logs'] = Gui_Elements::make_table($ticket_logs, Array("getTLogId","getTimestamp","getAuthor()->getExternId","getAction","getArgument()"), Array("tLogId","timestamp","authorExtern","action","argument"));
             $i = 0;
             foreach( $result['ticket_logs'] as $log){
-                $result['ticket_logs'][$i]['author'] = WebUsers::getUsername($log['authorExtern']);
+                $author = WebUsers::getUsername($log['authorExtern']);
+                $result['ticket_logs'][$i]['author'] = $author;
+                $query_backpart  = "";
+                if($log['action'] == 2){
+                    $query_backpart =  WebUsers::getUsername($log['argument']);
+                }else if($log['action'] == 4){
+                    $query_backpart = "<a href='index.php?page=show_reply&id=" . $log['argument'] . "'>" . $log['argument'] . "</a>";
+                }else if($log['action'] == 5){
+                    $statusArray = Ticket::getStatusArray();
+                    $query_backpart = $statusArray[$log['argument'] ];
+                }else if($log['action'] == 6){
+                    $priorityArray = Ticket::getPriorityArray();
+                    $query_backpart = $priorityArray[$log['argument'] ];
+                }
+                $result['ticket_logs'][$i]['query'] = $author . " " . $log_action_array[$log['action']] . " " .  $query_backpart;
                 $i++;
             }    
             if(WebUsers::isAdmin()){
