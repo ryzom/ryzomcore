@@ -6,30 +6,26 @@ function show_queue(){
     if(WebUsers::isLoggedIn() && isset($_GET['get'])){
         if( WebUsers::isAdmin()){
             $result['queue_action'] = filter_var($_GET['get'], FILTER_SANITIZE_STRING);
-            
-            $queue = new Ticket_Queue();
-            
-            switch ($result['queue_action']){
-                case "all_open":
-                    $queue->loadAllOpenTickets();
-                    break;
-                case "archive":
-                    $queue->loadAllClosedTickets();
-                    break;
-            }
    
-            $queueArray = $queue->getTickets();
-            $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText"), Array("tId","title","timestamp","authorExtern","category","status","statusText"));
-         
-            $i = 0;
-            foreach( $result['tickets'] as $ticket){
-                $result['tickets'][$i]['author'] = WebUsers::getUsername($ticket['authorExtern']);
-                $i++;
+            $queueArray = Ticket_Queue_Handler::getTickets($result['queue_action'],2);
+            if ($queueArray != "ERROR"){    
+                $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText"), Array("tId","title","timestamp","authorExtern","category","status","statusText"));
+             
+                $i = 0;
+                foreach( $result['tickets'] as $ticket){
+                    $result['tickets'][$i]['author'] = WebUsers::getUsername($ticket['authorExtern']);
+                    $i++;
+                }
+                if(WebUsers::isAdmin()){
+                    $result['isAdmin'] = "TRUE";
+                }
+                return $result;
+            }else{ 
+                //ERROR: Doesn't exist!
+                $_SESSION['error_code'] = "404";
+                header("Location: index.php?page=error");
+                exit; 
             }
-            if(WebUsers::isAdmin()){
-                $result['isAdmin'] = "TRUE";
-            }
-            return $result;
             
         }else{
             //ERROR: No access!

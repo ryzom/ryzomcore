@@ -1,7 +1,7 @@
 <?php
 class Ticket_Queue{
     
-    private $queueElements;
+    protected $queueElements;
     
     public function loadAllOpenTickets(){
         $dbl = new DBLayer("lib");
