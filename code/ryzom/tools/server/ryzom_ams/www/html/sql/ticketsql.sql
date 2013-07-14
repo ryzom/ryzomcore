@@ -231,6 +231,41 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_log` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `mydb`.`support_group`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`support_group` ;
+
+CREATE  TABLE IF NOT EXISTS `mydb`.`support_group` (
+  `SGroupId` INT(10) NOT NULL AUTO_INCREMENT ,
+  `Name` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`SGroupId`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`in_support_group`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`in_support_group` ;
+
+CREATE  TABLE IF NOT EXISTS `mydb`.`in_support_group` (
+  `User` INT(10) UNSIGNED NOT NULL ,
+  `Group` INT(10) NOT NULL ,
+  INDEX `fk_in_support_group_ticket_user1` (`User` ASC) ,
+  INDEX `fk_in_support_group_support_group1` (`Group` ASC) ,
+  CONSTRAINT `fk_in_support_group_ticket_user1`
+    FOREIGN KEY (`User` )
+    REFERENCES `mydb`.`ticket_user` (`TUserId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_in_support_group_support_group1`
+    FOREIGN KEY (`Group` )
+    REFERENCES `mydb`.`support_group` (`SGroupId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

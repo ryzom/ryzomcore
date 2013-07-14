@@ -272,6 +272,42 @@
         ENGINE = InnoDB;
             
         INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
+        
+                
+        -- -----------------------------------------------------
+        -- Table `" . $cfg['db']['lib']['name'] ."`.`support_group`
+        -- -----------------------------------------------------
+        DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`support_group` ;
+        
+        CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`support_group` (
+          `SGroupId` INT(10) NOT NULL AUTO_INCREMENT ,
+          `Name` VARCHAR(45) NOT NULL ,
+          PRIMARY KEY (`SGroupId`) )
+        ENGINE = InnoDB;
+        
+        
+        -- -----------------------------------------------------
+        -- Table `" . $cfg['db']['lib']['name'] ."`.`in_support_group`
+        -- -----------------------------------------------------
+        DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`in_support_group` ;
+        
+        CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`in_support_group` (
+          `User` INT(10) UNSIGNED NOT NULL ,
+          `Group` INT(10) NOT NULL ,
+          INDEX `fk_in_support_group_ticket_user1` (`User` ASC) ,
+          INDEX `fk_in_support_group_support_group1` (`Group` ASC) ,
+          CONSTRAINT `fk_in_support_group_ticket_user1`
+            FOREIGN KEY (`User` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
+            ON DELETE NO ACTION
+            ON UPDATE NO ACTION,
+          CONSTRAINT `fk_in_support_group_support_group1`
+            FOREIGN KEY (`Group` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`support_group` (`SGroupId` )
+            ON DELETE NO ACTION
+            ON UPDATE NO ACTION)
+        ENGINE = InnoDB;
+
                 
 
         ";
