@@ -46,8 +46,7 @@ class Gui_Elements{
     
     public static function time_elapsed_string($ptime){
         
-        $ttime = new DateTime($ptime);
-        $ptime = $ttime->getTimestamp();
+        $ptime = strtotime($ptime);
         
         $etime = time() - $ptime;
     
