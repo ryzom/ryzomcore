@@ -35,6 +35,7 @@ namespace MaterialEditor
 
 		void onNewMaterial();
 		void onMaterialLoaded();
+		void onShapeChanged();
 
 		void onPassAdded( const char *name );
 		void onPassRemoved( const char *name );
@@ -62,6 +63,7 @@ namespace MaterialEditor
 	private Q_SLOTS:
 		void onPassEditClicked();
 		void onShaderEditClicked();
+		void onSubMatCBChanged( int i );
 		void onPassCBChanged( const QString &text );
 		void onShaderCBChanged( const QString &text );
 

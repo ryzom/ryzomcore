@@ -74,6 +74,11 @@ namespace MaterialEditor
 		materialWidget->onMaterialLoaded();
 	}
 
+	void MaterialSplitter::onShapeChanged()
+	{
+		materialWidget->onShapeChanged();
+	}
+
 	void MaterialSplitter::onPassAdded( const char *name )
 	{
 		materialWidget->onPassAdded( name );

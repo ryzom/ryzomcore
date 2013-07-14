@@ -442,6 +442,14 @@ namespace MaterialEditor
 		}
 	}
 
+	unsigned long CNel3DInterface::getShapeMatCount() const
+	{
+		if( currentShape.empty() )
+			return 0;
+
+		return currentShape.getNumMaterials();
+	}
+
 	void CNel3DInterface::setupCamera()
 	{
 		NLMISC::CAABBox bbox;

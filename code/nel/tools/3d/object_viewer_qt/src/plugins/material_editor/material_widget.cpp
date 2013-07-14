@@ -66,6 +66,23 @@ namespace MaterialEditor
 			passButton->setEnabled( true );
 	}
 
+	void MaterialWidget::onShapeChanged()
+	{
+		unsigned long c = nl3dIface->getShapeMatCount();
+		subMatCB->clear();
+		subMatCB->addItem( "0" );
+
+		for( unsigned long i = 1; i < c; i++ )
+			subMatCB->addItem( QString::number( i ) );
+		
+		subMatCB->setCurrentIndex( 0 );
+
+		if( subMatCB->count() > 1 )
+			subMatCB->setEnabled( true );
+		else
+			subMatCB->setEnabled( false );
+	}
+
 	void MaterialWidget::onPassAdded( const char *name )
 	{
 		passCB->addItem( name );
@@ -148,6 +165,7 @@ namespace MaterialEditor
 	{
 		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
 		connect( shaderButton, SIGNAL( clicked( bool ) ), this, SLOT( onShaderEditClicked() ) );
+		connect( subMatCB, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSubMatCBChanged( int ) ) );
 		connect( passCB, SIGNAL( currentIndexChanged( const QString& ) ), this, SLOT( onPassCBChanged( const QString& ) ) );
 		connect( shaderCB, SIGNAL( currentIndexChanged( const QString& ) ), this, SLOT( onShaderCBChanged( const QString& ) ) );
 
@@ -173,6 +191,11 @@ namespace MaterialEditor
 
 		shaderEditorWidget->load( shaderCB->currentText() );
 		int result = shaderEditorWidget->exec();
+	}
+
+	void MaterialWidget::onSubMatCBChanged( int i )
+	{
+		// Update the material to the current submaterial
 	}
 
 	void MaterialWidget::onPassCBChanged( const QString &text )

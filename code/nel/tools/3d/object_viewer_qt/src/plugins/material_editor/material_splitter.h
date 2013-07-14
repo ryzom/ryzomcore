@@ -43,7 +43,8 @@ namespace MaterialEditor
 		void setNel3DIface( CNel3DInterface *iface );
 
 		void onNewMaterial();
-		void onMaterialLoaded();		
+		void onMaterialLoaded();
+		void onShapeChanged();
 		void onPassAdded( const char *name );
 		void onPassRemoved( const char *name );
 		void onPassMovedUp( const char *name );

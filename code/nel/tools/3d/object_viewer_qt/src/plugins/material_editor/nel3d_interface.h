@@ -159,6 +159,8 @@ namespace MaterialEditor
 		void updateInput();
 		void renderScene();
 
+		unsigned long getShapeMatCount() const;
+
 	private:
 		void setupCamera();
 

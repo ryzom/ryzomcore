@@ -106,6 +106,7 @@ namespace MaterialEditor
 				);
 		}
 
+		materialSplitter->onShapeChanged();
 		viewPort->startTimedUpdates( 20 );
 	}
 
@@ -203,6 +204,7 @@ namespace MaterialEditor
 				);
 			return;
 		}
+		materialSplitter->onShapeChanged();
 		viewPort->startTimedUpdates( 20 );
 	}
 
@@ -217,6 +219,7 @@ namespace MaterialEditor
 				);
 			return;
 		}
+		materialSplitter->onShapeChanged();
 		viewPort->startTimedUpdates( 20 );
 	}
 
@@ -231,6 +234,7 @@ namespace MaterialEditor
 				);
 			return;
 		}
+		materialSplitter->onShapeChanged();
 		viewPort->startTimedUpdates( 20 );
 	}
 
@@ -245,12 +249,14 @@ namespace MaterialEditor
 				);
 			return;
 		}
+		materialSplitter->onShapeChanged();
 		viewPort->startTimedUpdates( 20 );
 	}
 
 	void MaterialEditorWindow::onClearSceneClicked()
 	{
 		nl3dIface->clearScene();
+		materialSplitter->onShapeChanged();
 		viewPort->stopTimedUpdates();
 	}
 	
