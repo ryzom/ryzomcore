@@ -181,7 +181,7 @@
 		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
 		    <ul class="dropdown-menu">
 			<li class="divider"></li>
-			<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>
+			{if isset($isAdmin) and $isAdmin eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>{/if}
 			<li><a href="index.php?page=createticket&user_id={$target_id}">Send Other Ticket</a></li>
 			<li class="divider"></li>
 		    </ul>

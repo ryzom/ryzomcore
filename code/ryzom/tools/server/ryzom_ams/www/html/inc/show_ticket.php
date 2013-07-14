@@ -30,7 +30,7 @@ function show_ticket(){
             }
             if(WebUsers::isAdmin()){
                 $result['isAdmin'] = "TRUE";
-                $result['statusList'] = Ticket::getStatusArray();
+                //$result['statusList'] = Ticket::getStatusArray();
             }
             return $result;
             

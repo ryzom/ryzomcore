@@ -4,13 +4,11 @@ function show_ticket_log(){
    
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
-        
-        $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
-        $target_ticket = new Ticket();
-        $target_ticket->load_With_TId($result['ticket_id']);
-
-        if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  WebUsers::isAdmin() ){
-            
+        //only allow admins to browse the log!
+        if(WebUsers::isAdmin() ){
+            $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
+            $target_ticket = new Ticket();
+            $target_ticket->load_With_TId($result['ticket_id']);
             $result['ticket_title'] = $target_ticket->getTitle();
             $ticket_logs = Ticket_Log::getLogsOfTicket( $result['ticket_id']);
             $log_action_array = Ticket_Log::getActionTextArray();
