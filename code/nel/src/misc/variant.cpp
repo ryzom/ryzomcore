@@ -300,7 +300,7 @@ namespace NLMISC
 				std::fill( uvalue.vval, uvalue.vval + VARIANT_VVAL_END, 0.0 );
 				std::stringstream ss = s;
 
-				for( int i = 0; i < 4; i++ )
+				for( int i = 0; i < 16; i++ )
 				{
 					ss >> uvalue.vval[ i ];
 					if( !ss.good() )
