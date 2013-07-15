@@ -238,8 +238,11 @@ DROP TABLE IF EXISTS `mydb`.`support_group` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`support_group` (
   `SGroupId` INT(10) NOT NULL AUTO_INCREMENT ,
-  `Name` VARCHAR(45) NOT NULL ,
-  PRIMARY KEY (`SGroupId`) )
+  `Name` VARCHAR(22) NOT NULL ,
+  `Tag` VARCHAR(7) NOT NULL ,
+  PRIMARY KEY (`SGroupId`) ,
+  UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) ,
+  UNIQUE INDEX `Tag_UNIQUE` (`Tag` ASC) )
 ENGINE = InnoDB;
 
 
