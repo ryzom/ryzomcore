@@ -245,6 +245,10 @@ namespace NLMISC
 
 	void CVariant::fromString( const std::string &s, EVarType t )
 	{
+		type = t;
+		sval = "";
+		std::fill( uvalue.vval, uvalue.vval + VARIANT_VVAL_END, 0.0 );
+
 		if( s.empty() )
 			return;
 
@@ -282,7 +286,6 @@ namespace NLMISC
 
 		case Vector4:
 			{
-				std::fill( uvalue.vval, uvalue.vval + VARIANT_VVAL_END, 0.0 );
 				std::stringstream ss = s;
 
 				for( int i = 0; i < 4; i++ )
@@ -297,7 +300,6 @@ namespace NLMISC
 
 		case Matrix4:
 			{
-				std::fill( uvalue.vval, uvalue.vval + VARIANT_VVAL_END, 0.0 );
 				std::stringstream ss = s;
 
 				for( int i = 0; i < 16; i++ )
@@ -309,8 +311,6 @@ namespace NLMISC
 				break;
 			}
 		}
-
-		type = t;
 
 	}
 

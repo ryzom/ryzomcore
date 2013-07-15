@@ -287,6 +287,15 @@ namespace MaterialEditor
 	{
 		QString label = p->propertyName();
 		std::string value = p->valueText().toUtf8().data();
+		
+		if( v.type() == QVariant::Color )
+		{
+			QColor c = v.value< QColor >();
+			value.clear();
+			QString val = "%1 %2 %3 %4";
+			val = val.arg( c.red() ).arg( c.green() ).arg( c.blue() ).arg( c.alpha() );
+			value = val.toUtf8().data();
+		}
 
 		CNelMaterialProxy m = nel3dIface->getMaterial();
 		CRenderPassProxy pass = m.getPass( currentPass.toUtf8().data() );
