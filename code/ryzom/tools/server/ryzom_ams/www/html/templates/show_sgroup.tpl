@@ -2,7 +2,7 @@
 <div class="row-fluid sortable ui-sortable">
     <div class="box span12">
         <div class="box-header well" data-original-title="">
-            <h2><i class="icon-plus-sign"></i> Add</h2>
+            <h2><i class="icon-plus-sign"></i> Add User</h2>
             <div class="box-icon">
                 <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
@@ -13,27 +13,18 @@
 		
 		<form id="addSGroup" class="form-vertical" method="post" action="index.php">
 		    
-		<legend>Add  a support group</legend>
+		<legend>Add  a user to the group '{$groupsname}'</legend>
 		
 		<div class="control-group" style="display: inline-block; ">
-		    <label class="control-label">Group name</label>
+		    <label class="control-label">username</label>
 		    <div class="controls">
 			<div class="input-prepend">
-			    <input type="text" maxlength="20"   id="Name" name="Name">
+			    <input type="text" maxlength="15"   id="Name" name="Name">
 			</div>
 		    </div>
 		</div>
 		
-		<div class="control-group" style="display: inline-block; margin-left:10px;">
-		    <label class="control-label">Group Tag</label>
-		    <div class="controls">
-			<div class="input-prepend">
-			    <input type="text" maxlength="4"  id="Tag" name="Tag">
-			</div>
-		    </div>
-		</div>
-		
-		<input type="hidden" name="function" value="add_sgroup">
+		<input type="hidden" name="function" value="add_user_to_sgroup">
 		
 		<div class="control-group">
 		    <label class="control-label"></label>
@@ -69,7 +60,7 @@
 <div class="row-fluid sortable ui-sortable">
     <div class="box span12">
         <div class="box-header well" data-original-title="">
-            <h2><i class="icon-list"></i> List</h2>
+            <h2><i class="icon-list"></i>{$groupsname} List</h2>
             <div class="box-icon">
                 <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
                 <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
@@ -83,15 +74,14 @@
 			    <tr>
 				    <th>ID</th>
 				    <th>Name</th>
-				    <th>Tag</th>
-				    <th>Action</th>
+		
 			    </tr>
 		    </thead>   
 		    <tbody>
 			{foreach from=$grouplist item=group}
 			  <tr>
 				<td>{$group.sGroupId}</td>
-				<td><a href ="index.php?page=show_sgroup&id={$group.sGroupId}">{$group.name}</a></td>
+				<td><a href ="index.php?page=show_group&id={$group.sGroupId}">{$group.name}</a></td>
 				<td class="center"><span class="label label-important" >{$group.tag}</span></td>
 				<td class="center"><a class="btn btn-danger" href="#"><i class="icon-trash icon-white"></i> Delete</a></td>  
 			  </tr>

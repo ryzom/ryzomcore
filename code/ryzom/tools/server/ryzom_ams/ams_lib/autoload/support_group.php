@@ -9,6 +9,17 @@ class Support_Group{
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
     //return all groups
+    public static function getGroup($id) {
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->execute("SELECT * FROM support_group WHERE SGroupId = :id", array('id' => $id));
+        $row = $statement->fetch();
+        $instanceGroup = new self();
+        $instanceGroup->set($row);
+        return $instanceGroup;
+    
+    }
+    
+    //return all groups
     public static function getGroups() {
         $dbl = new DBLayer("lib");
         $statement = $dbl->executeWithoutParams("SELECT * FROM support_group ORDER BY Name ASC");
