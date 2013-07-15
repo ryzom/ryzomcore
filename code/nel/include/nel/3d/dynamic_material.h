@@ -19,6 +19,7 @@
 #define DYN_MATERIAL_H
 
 #include "nel/misc/stream.h"
+#include "nel/misc/variant.h"
 #include <string>
 #include <vector>
 
@@ -42,7 +43,8 @@ namespace NL3D
 		std::string prop;
 		std::string label;
 		uint8 type;
-		std::string value;
+
+		NLMISC::Variant value;
 
 		void serial( NLMISC::IStream &f );
 	};
