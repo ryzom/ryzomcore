@@ -44,7 +44,7 @@ namespace NL3D
 		std::string label;
 		uint8 type;
 
-		NLMISC::Variant value;
+		NLMISC::CVariant value;
 
 		void serial( NLMISC::IStream &f );
 	};

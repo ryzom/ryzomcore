@@ -47,6 +47,33 @@ namespace MaterialEditor
 		"Texture"
 	};
 
+	const NLMISC::CVariant::EVarType evartypes[] =
+	{
+		NLMISC::CVariant::Vector4,
+		NLMISC::CVariant::Vector4,
+		NLMISC::CVariant::Float,
+		NLMISC::CVariant::Double,
+		NLMISC::CVariant::Int,
+		NLMISC::CVariant::UInt,
+		NLMISC::CVariant::Matrix4,
+		NLMISC::CVariant::String
+	};
+
+	NLMISC::CVariant::EVarType toEVarType( uint8 t )
+	{
+		NLMISC::CVariant::EVarType rt = NLMISC::CVariant::Float;
+
+		unsigned long s = sizeof( evartypes ) / sizeof( NLMISC::CVariant::EVarType );
+
+		if( t >= s )
+			return rt;
+		else
+			rt = evartypes[ t ];
+
+		return rt;
+
+	}
+
 	std::string SMatProp::typeIdToString( unsigned char id )
 	{
 		if( id >= EType_count )
@@ -74,7 +101,7 @@ namespace MaterialEditor
 			prop.id = p.prop;
 			prop.label = p.label;
 			prop.type = p.type;
-			prop.value = p.value;
+			p.value.valueAsString( prop.value );
 
 			v.push_back( prop );
 		}
@@ -91,7 +118,7 @@ namespace MaterialEditor
 			p.prop = itr->id;
 			p.label = itr->label;
 			p.type = itr->type;
-			p.value = itr->value;
+			p.value.fromString( itr->value, toEVarType( p.type ) );
 
 			pass->addProperty( p );
 
@@ -137,7 +164,7 @@ namespace MaterialEditor
 		p.id    = prop->prop;
 		p.label = prop->label;
 		p.type  = prop->type;
-		p.value = prop->value;
+		prop->value.valueAsString( p.value );
 
 		return true;
 	}
@@ -148,7 +175,7 @@ namespace MaterialEditor
 		prop.prop  = p.id;
 		prop.label = p.label;
 		prop.type  = p.type;
-		prop.value = p.value;
+		prop.value.fromString( p.value, toEVarType( prop.type ) );
 
 		return pass->changeProperty( prop.prop, prop );
 	}
