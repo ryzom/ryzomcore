@@ -1,6 +1,41 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
-    <div class="box span12">
+    <div class="box span9">
+        <div class="box-header well" data-original-title="">
+            <h2><i class="icon-list"></i>{$groupsname} List</h2>
+            <div class="box-icon">
+                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
+            </div>
+        </div>
+        <div class="box-content">
+            <div class="row-fluid">
+                <legend>All support groups</legend>
+		<table class="table table-striped table-bordered bootstrap-datatable datatable">
+		    <thead>
+			    <tr>
+				    <th>ID</th>
+				    <th>Name</th>
+				    <th>Action</th>
+		
+			    </tr>
+		    </thead>   
+		    <tbody>
+			{foreach from=$userlist item=user}
+			  <tr>
+				<td>{$user.tUserId}</td>
+				<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
+				<td class="center"><a class="btn btn-danger" href="#"><i class="icon-trash icon-white"></i> Delete</a></td>  
+			  </tr>
+			  {/foreach}
+	  
+		    </tbody>
+	    </table>            
+	    </div>
+	</div>
+    </div><!--/span-->
+
+    <div class="box span3">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-plus-sign"></i> Add User</h2>
             <div class="box-icon">
@@ -58,41 +93,5 @@
     </div><!--/span-->
 </div><!--/row-->
 
-<div class="row-fluid sortable ui-sortable">
-    <div class="box span12">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-list"></i>{$groupsname} List</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
-                <legend>All support groups</legend>
-		<table class="table table-striped table-bordered bootstrap-datatable datatable">
-		    <thead>
-			    <tr>
-				    <th>ID</th>
-				    <th>Name</th>
-				    <th>Action</th>
-		
-			    </tr>
-		    </thead>   
-		    <tbody>
-			{foreach from=$userlist item=user}
-			  <tr>
-				<td>{$user.tUserId}</td>
-				<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
-				<td class="center"><a class="btn btn-danger" href="#"><i class="icon-trash icon-white"></i> Delete</a></td>  
-			  </tr>
-			  {/foreach}
-	  
-		    </tbody>
-	    </table>            
-	    </div>
-	</div>
-    </div><!--/span-->
-</div><!--/row-->
 {/block}
 	
