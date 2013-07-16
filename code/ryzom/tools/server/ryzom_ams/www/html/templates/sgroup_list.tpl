@@ -28,7 +28,7 @@
 				<td>{$group.sGroupId}</td>
 				<td><a href ="index.php?page=show_sgroup&id={$group.sGroupId}">{$group.name}</a></td>
 				<td class="center"><span class="label label-important" >{$group.tag}</span></td>
-				<td class="center"><a class="btn btn-danger" href="#"><i class="icon-trash icon-white"></i> Delete</a></td>  
+				<td class="center"><a class="btn btn-danger" href="index.php?page=sgroup_list&delete={$group.sGroupId}"><i class="icon-trash icon-white"></i> Delete</a></td>  
 			  </tr>
 			  {/foreach}
 	  

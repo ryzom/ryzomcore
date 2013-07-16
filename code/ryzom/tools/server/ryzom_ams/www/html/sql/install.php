@@ -307,7 +307,7 @@
           CONSTRAINT `fk_in_support_group_support_group1`
             FOREIGN KEY (`Group` )
             REFERENCES `" . $cfg['db']['lib']['name'] ."`.`support_group` (`SGroupId` )
-            ON DELETE NO ACTION
+            ON DELETE CASCADE
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
 

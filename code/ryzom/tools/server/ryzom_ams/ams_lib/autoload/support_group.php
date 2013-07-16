@@ -105,7 +105,20 @@ class Support_Group{
         return $result; 
     }
      
-    
+    //wrapper for adding user to a support group
+    public static function deleteSupportGroup($group_id) {
+        
+        //check if group id exists
+        if (self::supportGroup_Exists($group_id)){
+            $sGroup = new self();
+            $sGroup->setSGroupId($group_id);
+            $sGroup->delete();  
+        }else{
+            //return that group doesn't exist
+            return "GROUP_NOT_EXISTING";
+        }
+            
+    }
     
     //wrapper for adding user to a support group
     public static function deleteUserOfSupportGroup( $user_id, $group_id) {
@@ -184,7 +197,7 @@ class Support_Group{
     //Load with sGroupId
     public function load_With_SGroupId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_log WHERE TLogId=:id", array('id' => $id));
+        $statement = $dbl->execute("SELECT * FROM `support_group` WHERE `SGroupId` = :id", array('id' => $id));
         $row = $statement->fetch();
         $this->set($row);
     }
@@ -193,9 +206,17 @@ class Support_Group{
     //update private data to DB.
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket_log SET Timestamp = :timestamp, Query = :query, Author = :author, Ticket = :ticket WHERE TLogId=:id";
-        $values = Array('id' => $this->getTLogId(), 'timestamp' => $this->getTimestamp(), 'query' => $this->getQuery(), 'author' => $this->getAuthor(), 'ticket' => $this->getTicket() );
+        $query = "UPDATE `support_group` SET `Name` = :name, `Tag` = :tag WHERE `SGroupId` = :id";
+        $values = Array('id' => $this->getSGroupId(), 'name' => $this->getName(), 'tag' => $this->getTag() );
         $statement = $dbl->execute($query, $values);
+    }
+    
+    //delete entry
+    public function delete(){
+        $dbl = new DBLayer("lib");
+        $query = "DELETE FROM `support_group` WHERE `SGroupId` = :id";
+        $values = Array('id' => $this->getSGroupId());
+        $statement = $dbl->execute($query, $values);     
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

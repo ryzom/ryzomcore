@@ -6,12 +6,13 @@ function show_sgroup(){
         if( WebUsers::isAdmin()){
             if( isset($_GET['id'])){
                 
+                //['target_id'] holds the id of the group!
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
                 
                 if(isset($_GET['delete'])){
                     $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                     $result['delete'] = Support_Group::deleteUserOfSupportGroup( $delete_id, $result['target_id']  );
-                    header("Location: index.php?page=show_sgroup&id=1");
+                    header("Location: index.php?page=show_sgroup&id=" . $result['target_id']);
                     exit;
                     
                 }
