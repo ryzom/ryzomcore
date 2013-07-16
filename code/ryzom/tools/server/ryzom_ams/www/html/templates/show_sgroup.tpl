@@ -25,7 +25,7 @@
 			  <tr>
 				<td>{$user.tUserId}</td>
 				<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
-				<td class="center"><a class="btn btn-danger" href="#"><i class="icon-trash icon-white"></i> Delete</a></td>  
+				<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><i class="icon-trash icon-white"></i> Delete</a></td>  
 			  </tr>
 			  {/foreach}
 	  

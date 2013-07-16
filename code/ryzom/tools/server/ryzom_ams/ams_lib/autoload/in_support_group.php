@@ -8,7 +8,7 @@ class In_Support_Group{
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
   
     //check if user is in in_support_group
-    public static function userAlreadyInSGroup( $user_id, $group_id) {
+    public static function userExistsInSGroup( $user_id, $group_id) {
         $dbl = new DBLayer("lib");
         //check if name is already used
         if(  $dbl->execute(" SELECT * FROM `in_support_group` WHERE `User` = :user_id and `Group` = :group_id ", array('user_id' => $user_id, 'group_id' => $group_id) )->rowCount() ){
@@ -34,7 +34,15 @@ class In_Support_Group{
         $query = "INSERT INTO `in_support_group` (`User`,`Group`) VALUES (:user, :group)";
         $values = Array('user' => $this->user, 'group' => $this->group);
         $dbl->execute($query, $values);
-    } 
+    }
+    
+    //delete entry
+    public function delete() {
+        $dbl = new DBLayer("lib");
+        $query = "DELETE FROM `in_support_group` WHERE `User` = :user_id and `Group` = :group_id";
+        $values = array('user_id' => $this->getUser() ,'group_id' => $this->getGroup());
+        $dbl->execute($query, $values);
+    }
 
     //Load with sGroupId
     public function load( $user_id, $group_id) {

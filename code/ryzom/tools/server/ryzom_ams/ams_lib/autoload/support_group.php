@@ -106,15 +106,43 @@ class Support_Group{
     }
      
     
- 
- 
+    
+    //wrapper for adding user to a support group
+    public static function deleteUserOfSupportGroup( $user_id, $group_id) {
+        
+        //check if group id exists
+        if (self::supportGroup_Exists($group_id)){
+            
+            //check if user is in supportgroup
+            //if so, delete entry and return SUCCESS
+            if(In_Support_Group::userExistsInSGroup($user_id, $group_id) ){
+                //delete entry
+                $inSGroup = new In_Support_Group();
+                $inSGroup->setUser($user_id);
+                $inSGroup->setGroup($group_id);
+                $inSGroup->delete();
+                return "SUCCESS";
+            }
+            else{
+                //else return USER_NOT_IN_GROUP
+                return "USER_NOT_IN_GROUP";
+            }
+            
+            
+        }else{
+            //return that group doesn't exist
+            return "GROUP_NOT_EXISTING";
+        }
+            
+    }
+    
     //wrapper for adding user to a support group
     public static function addUserToSupportGroup( $user_id, $group_id) {
         //check if group id exists
         if (self::supportGroup_Exists($group_id)){
             //check if user isn't in supportgroup yet
             //if not, create entry and return SUCCESS
-            if(! In_Support_Group::userAlreadyInSGroup($user_id, $group_id) ){
+            if(! In_Support_Group::userExistsInSGroup($user_id, $group_id) ){
                 //create entry
                 $inSGroup = new In_Support_Group();
                 $inSGroup->setUser($user_id);

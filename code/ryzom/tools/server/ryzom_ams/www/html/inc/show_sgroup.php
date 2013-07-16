@@ -7,6 +7,14 @@ function show_sgroup(){
             if( isset($_GET['id'])){
                 
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
+                
+                if(isset($_GET['delete'])){
+                    $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
+                    $result['delete'] = Support_Group::deleteUserOfSupportGroup( $delete_id, $result['target_id']  );
+                    header("Location: index.php?page=show_sgroup&id=1");
+                    exit;
+                    
+                }
                 $group = Support_Group::getGroup($result['target_id']);
                
                 $result['groupsname'] = $group->getName();
@@ -17,6 +25,7 @@ function show_sgroup(){
                     $i++;
                 }
                 return $result;
+                
             
             }else{
                 
