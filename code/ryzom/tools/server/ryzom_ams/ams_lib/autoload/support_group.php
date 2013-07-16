@@ -38,7 +38,7 @@ class Support_Group{
     public static function createSupportGroup( $name, $tag) {
         
         if(strlen($name) < 21 && strlen($name) > 4 &&strlen($tag) < 8  && strlen($tag) > 1 ){
-            $notExists = self::supportGroup_NotExists($name, $tag);
+            $notExists = self::supportGroup_EntryNotExists($name, $tag);
             if ( $notExists == "SUCCESS" ){
                 $sGroup = new self();
                 $sGroup->setName($name);
@@ -56,7 +56,7 @@ class Support_Group{
     }
 
     //check if group exists
-    public static function supportGroup_NotExists( $name, $tag) {
+    public static function supportGroup_EntryNotExists( $name, $tag) {
         $dbl = new DBLayer("lib");
         //check if name is already used
         if(  $dbl->execute("SELECT * FROM support_group WHERE Name = :name",array('name' => $name))->rowCount() ){
@@ -69,6 +69,19 @@ class Support_Group{
         } 
     }
 
+
+    //check if group exists
+    public static function supportGroup_Exists( $id) {
+        $dbl = new DBLayer("lib");
+        //check if supportgroup id exist
+        if(  $dbl->execute("SELECT * FROM support_group WHERE SGroupId = :id",array('id' => $id ))->rowCount() ){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    
     //return constructed element based on SGroupId
     public static function constr_SGroupId( $id) {
         $instance = new self();
@@ -77,20 +90,50 @@ class Support_Group{
     }
     
     //returns list of all users that are enlisted to a support group
-    public static function getAllUsersOfSupportGroup($id) {
+    public static function getAllUsersOfSupportGroup($group_id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_log INNER JOIN ticket_user ON ticket_log.Author = ticket_user.TUserId and ticket_log.Ticket=:id", array('id' => $ticket_id));
-        $row = $statement->fetchAll();
+        $statement = $dbl->execute("SELECT * FROM `in_support_group` INNER JOIN `ticket_user` ON ticket_user.TUserId = in_support_group.User WHERE in_support_group.Group=:id", array('id' => $group_id));
+        $rows = $statement->fetchAll();
         $result = Array();
-        foreach($row as $log){
-            $instance = new self();
-            $instance->set($log);
-            $result[] = $instance;
+        foreach($rows as $row){
+            $userInstance = new Ticket_User();
+            $userInstance->setTUserId($row['TUserId']);
+            $userInstance->setPermission($row['Permission']);
+            $userInstance->setExternId($row['ExternId']);
+            $result[] = $userInstance;
         }
         return $result; 
     }
      
     
+ 
+ 
+    //wrapper for adding user to a support group
+    public static function addUserToSupportGroup( $user_id, $group_id) {
+        //check if group id exists
+        if (self::supportGroup_Exists($group_id)){
+            //check if user isn't in supportgroup yet
+            //if not, create entry and return SUCCESS
+            if(! In_Support_Group::userAlreadyInSGroup($user_id, $group_id) ){
+                //create entry
+                $inSGroup = new In_Support_Group();
+                $inSGroup->setUser($user_id);
+                $inSGroup->setGroup($group_id);
+                $inSGroup->create();
+                return "SUCCESS";
+            }
+            else{
+                //else return ALREADY_ADDED
+                return "ALREADY_ADDED";
+            }
+            
+            
+        }else{
+            //return that group doesn't exist
+            return "GROUP_NOT_EXISTING";
+        }
+            
+    }
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
      
     public function __construct() {

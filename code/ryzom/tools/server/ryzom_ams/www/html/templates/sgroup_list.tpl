@@ -47,15 +47,15 @@
 			{$group_success}
 		</div>
 		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "NAME_TAKEN"}
-		<div class="alert alert-warning">
+		<div class="alert alert-error">
 			{$group_name_taken}
 		</div>
 		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "TAG_TAKEN"}
-		<div class="alert alert-warning">
+		<div class="alert alert-error">
 			{$group_tag_taken}
 		</div>
 		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "SIZE_ERROR"}
-		<div class="alert alert-warning">
+		<div class="alert alert-error">
 			{$group_size_error}
 		</div>
 		{/if}

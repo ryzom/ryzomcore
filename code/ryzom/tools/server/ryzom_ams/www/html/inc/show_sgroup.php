@@ -6,11 +6,16 @@ function show_sgroup(){
         if( WebUsers::isAdmin()){
             if( isset($_GET['id'])){
                 
-                $id = filter_var($_GET['id'],FILTER_SANITIZE_STRING);
-                
-                $group = Support_Group::getGroup($id);
+                $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
+                $group = Support_Group::getGroup($result['target_id']);
+               
                 $result['groupsname'] = $group->getName();
-                $result['grouplist'] = Gui_Elements::make_table(Support_Group::getGroups(), Array("getSGroupId","getName","getTag"), Array("sGroupId","name","tag"));
+                $result['userlist'] = Gui_Elements::make_table(Support_Group::getAllUsersOfSupportGroup($result['target_id']), Array("getTUserId","getPermission","getExternId"), Array("tUserId","permission","externId"));
+                $i = 0;
+                foreach( $result['userlist'] as $user){
+                    $result['userlist'][$i]['name'] = WebUsers::getUsername($user['externId']);
+                    $i++;
+                }
                 return $result;
             
             }else{

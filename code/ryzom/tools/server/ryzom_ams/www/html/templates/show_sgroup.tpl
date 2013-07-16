@@ -11,7 +11,7 @@
         <div class="box-content">
             <div class="row-fluid">
 		
-		<form id="addSGroup" class="form-vertical" method="post" action="index.php">
+		<form id="addSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
 		    
 		<legend>Add  a user to the group '{$groupsname}'</legend>
 		
@@ -25,7 +25,8 @@
 		</div>
 		
 		<input type="hidden" name="function" value="add_user_to_sgroup">
-		
+		<input type="hidden" name="target_id" value="{$target_id}">
+		    
 		<div class="control-group">
 		    <label class="control-label"></label>
 		    <div class="controls">
@@ -35,19 +36,19 @@
 		
 		{if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "SUCCESS"}
 		<div class="alert alert-success">
-			{$group_success}
+			{$add_to_group_success}
 		</div>
-		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "NAME_TAKEN"}
-		<div class="alert alert-warning">
-			{$group_name_taken}
+		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "ALREADY_ADDED"}
+		<div class="alert alert-error">
+			{$user_already_added}
 		</div>
-		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "TAG_TAKEN"}
-		<div class="alert alert-warning">
-			{$group_tag_taken}
+		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "GROUP_NOT_EXISTING"}
+		<div class="alert alert-error">
+			{$group_not_existing}
 		</div>
-		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "SIZE_ERROR"}
-		<div class="alert alert-warning">
-			{$group_size_error}
+		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "USER_NOT_EXISTING"}
+		<div class="alert alert-error">
+			{$user_not_existing}
 		</div>
 		{/if}
 		</form>
@@ -74,15 +75,15 @@
 			    <tr>
 				    <th>ID</th>
 				    <th>Name</th>
+				    <th>Action</th>
 		
 			    </tr>
 		    </thead>   
 		    <tbody>
-			{foreach from=$grouplist item=group}
+			{foreach from=$userlist item=user}
 			  <tr>
-				<td>{$group.sGroupId}</td>
-				<td><a href ="index.php?page=show_group&id={$group.sGroupId}">{$group.name}</a></td>
-				<td class="center"><span class="label label-important" >{$group.tag}</span></td>
+				<td>{$user.tUserId}</td>
+				<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
 				<td class="center"><a class="btn btn-danger" href="#"><i class="icon-trash icon-white"></i> Delete</a></td>  
 			  </tr>
 			  {/foreach}
