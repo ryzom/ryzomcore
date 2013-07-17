@@ -43,6 +43,7 @@ namespace MaterialEditor
 		void onPropsChanged();
 		void clearProps();
 		void loadPropsForPass( const QString &pass );
+		void loadPropsForPass( int i );
 
 	private Q_SLOTS:
 		void onValueChanged( QtProperty *p, const QVariant &v );

@@ -64,6 +64,7 @@ namespace MaterialEditor
 	private Q_SLOTS:
 		void onPropsChanged();
 		void onPassChanged( const QString &pass );
+		void onSubMatChanged( int i );
 
 	};
 }

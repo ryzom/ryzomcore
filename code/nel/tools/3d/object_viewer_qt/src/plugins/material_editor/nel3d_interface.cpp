@@ -214,7 +214,7 @@ namespace MaterialEditor
 
 	CRenderPassProxy CNelMaterialProxy::getPass( unsigned long i )
 	{
-		if( material->count() >= i )
+		if( i >= material->count()  )
 			return CRenderPassProxy( NULL );
 		else
 			return CRenderPassProxy( material->getPass( i ) );
@@ -228,11 +228,11 @@ namespace MaterialEditor
 
 	CNel3DInterface::CNel3DInterface()
 	{
-		mat = new NL3D::CDynMaterial();
 		shaderManager = new NL3D::CShaderManager();
 		driver = NULL;
 		scene = NULL;
 		mouseListener = NULL;
+		subMatId = 0;
 	}
 
 	CNel3DInterface::~CNel3DInterface()
@@ -244,6 +244,9 @@ namespace MaterialEditor
 
 	bool CNel3DInterface::loadMaterial( const char *fname )
 	{
+		if( currentShape.empty() )
+			return false;
+
 		NLMISC::CIFile file;
 		if( !file.open( fname, true ) )
 			return false;
@@ -253,6 +256,7 @@ namespace MaterialEditor
 			return false;
 
 		newMaterial();
+		NL3D::CDynMaterial *mat = currentShape.getMaterial( subMatId ).getObjectPtr()->getDynMat();
 		mat->clear();
 		mat->serial( xml );
 		file.close();
@@ -262,6 +266,9 @@ namespace MaterialEditor
 
 	bool CNel3DInterface::saveMaterial( const char *fname )
 	{
+		if( currentShape.empty() )
+			return false;
+
 		NLMISC::COFile file;
 		if( !file.open( fname, false, true ) )
 			return false;
@@ -270,7 +277,8 @@ namespace MaterialEditor
 		if( !xml.init( &file ) )
 			return false;
 
-		mat->serial( xml );
+		currentShape.getMaterial( subMatId ).getObjectPtr()->getDynMat()->serial( xml );
+
 		xml.flush();
 		file.close();
 
@@ -279,13 +287,30 @@ namespace MaterialEditor
 
 	void CNel3DInterface::newMaterial()
 	{
-		delete mat;
-		mat = new NL3D::CDynMaterial();
-		
+		if( currentShape.empty() )
+			return;
+		currentShape.getMaterial( 0 ).getObjectPtr()->getDynMat()->clear();
+	}
+
+	bool CNel3DInterface::selectSubMaterial( int id )
+	{
+		if( currentShape.empty() )
+			return false;
+
+		if( currentShape.getNumMaterials() < id )
+			return false;
+
+		subMatId = id;
+
+		return true;
 	}
 
 	CNelMaterialProxy CNel3DInterface::getMaterial()
 	{
+		NL3D::CDynMaterial *mat = NULL;
+		if( !currentShape.empty() )
+			mat = currentShape.getMaterial( subMatId ).getObjectPtr()->getDynMat();
+
 		return CNelMaterialProxy( mat );
 	}
 
@@ -429,6 +454,12 @@ namespace MaterialEditor
 		clearScene();
 		currentShape = instance;
 
+		int c = currentShape.getNumMaterials();
+		for( int i = 0; i < c; i++ )
+			currentShape.getMaterial( i ).getObjectPtr()->createDynMat();
+
+		subMatId = 0;
+
 		setupCamera();
 
 		return true;
@@ -442,6 +473,7 @@ namespace MaterialEditor
 				return;
 			scene->deleteInstance( currentShape );
 			currentShape = NL3D::UInstance();
+			subMatId = 0;
 		}
 
 		if( driver == NULL )

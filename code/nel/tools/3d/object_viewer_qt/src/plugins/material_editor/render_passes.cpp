@@ -63,6 +63,9 @@ namespace MaterialEditor
 	{
 		clear();
 		CNelMaterialProxy m = nl3dIface->getMaterial();
+		if( m.isEmpty() )
+			return;
+
 		std::vector< std::string > pl;
 		m.getPassList( pl );
 
@@ -146,6 +149,9 @@ namespace MaterialEditor
 		delete item;
 
 		CNelMaterialProxy material = nl3dIface->getMaterial();
+		if( material.isEmpty() )
+			return;
+
 		material.removePass( pass.toUtf8().data() );
 
 		if( observer != NULL )
@@ -187,6 +193,9 @@ namespace MaterialEditor
 		item->setText( to );
 		
 		CNelMaterialProxy material = nl3dIface->getMaterial();
+		if( material.isEmpty() )
+			return;
+
 		material.renamePass( from.toUtf8().data(), to.toUtf8().data() );
 
 		if( observer != NULL )
@@ -210,6 +219,9 @@ namespace MaterialEditor
 		QString s = item->text();
 
 		CNelMaterialProxy material = nl3dIface->getMaterial();
+		if( material.isEmpty() )
+			return;
+
 		material.movePassUp( s.toUtf8().data() );
 
 		if( observer != NULL )
@@ -233,6 +245,9 @@ namespace MaterialEditor
 		QString s = item->text();
 		
 		CNelMaterialProxy material = nl3dIface->getMaterial();
+		if( material.isEmpty() )
+			return;
+
 		material.movePassDown( s.toUtf8().data() );
 
 		if( observer != NULL )

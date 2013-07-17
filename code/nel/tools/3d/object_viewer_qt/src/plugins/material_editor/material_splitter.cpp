@@ -48,6 +48,7 @@ namespace MaterialEditor
 	{
 		connect( materialWidget, SIGNAL( propsChanged() ), this, SLOT( onPropsChanged() ) );
 		connect( materialWidget, SIGNAL( passChanged( const QString& ) ), this, SLOT( onPassChanged( const QString& ) ) );
+		connect( materialWidget, SIGNAL( subMatChanged( int ) ), this, SLOT( onSubMatChanged( int ) ) );
 	}
 
 	void MaterialSplitter::setup()
@@ -124,6 +125,11 @@ namespace MaterialEditor
 	void MaterialSplitter::onPassChanged( const QString &pass )
 	{
 		browserCtrl->loadPropsForPass( pass );
+	}
+
+	void MaterialSplitter::onSubMatChanged( int i )
+	{
+		browserCtrl->loadPropsForPass( 0 );
 	}
 }
 

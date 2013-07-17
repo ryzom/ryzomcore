@@ -20,6 +20,8 @@
 #include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
 #include "nel3d_interface.h"
 
+#include <sstream>
+
 #include <QMatrix4x4>
 
 namespace MaterialEditor
@@ -112,8 +114,28 @@ namespace MaterialEditor
 		switch( p.type )
 		{
 		case SMatProp::Color:
-			v = QColor( p.value.c_str() );
-			break;
+			{
+				std::stringstream ss = p.value;
+				float c[ 4 ];
+				std::fill( c, c + 4, 0.0f );
+
+				for( int i = 0; i < 4; i++ )
+				{
+					ss >> c[ i ];
+					if( !ss.good() )
+						break;
+				}
+
+				QColor color;
+				color.setRedF( c[ 0 ] );
+				color.setGreenF( c[ 1 ] );
+				color.setBlueF( c[ 2 ] );
+				color.setAlphaF( c[ 3 ] );
+
+				v = color;
+
+				break;
+			}
 		
 		case SMatProp::Double:
 			double d;
@@ -254,7 +276,51 @@ namespace MaterialEditor
 			return;
 
 		CNelMaterialProxy m = nel3dIface->getMaterial();
+		if( m.isEmpty() )
+			return;
+
 		CRenderPassProxy p = m.getPass( pass.toUtf8().data() );
+		
+		std::vector< SMatProp > v;
+		p.getProperties( v );
+
+		QtVariantProperty *vp = NULL;
+		int type = 0;
+		QVariant qv;
+
+		std::vector< SMatProp >::const_iterator itr = v.begin();
+		while( itr != v.end() )
+		{
+			const SMatProp &prop = *itr;
+
+			type = propToQVariant( prop.type );
+			
+			vp = manager->addProperty( type, prop.label.c_str() );
+
+			if( vp != NULL )
+			{
+				propValToQVariant( prop, qv );
+				vp->setValue( qv );
+				browser->addProperty( vp );
+				propToId[ vp ] = prop.id;
+			}
+			++itr;
+		}
+	}
+
+	void CPropBrowserCtrl::loadPropsForPass( int i )
+	{
+		clearProps();
+
+		CNelMaterialProxy m = nel3dIface->getMaterial();
+		if( m.isEmpty() )
+			return;
+
+		CRenderPassProxy p = m.getPass( i );
+
+		std::string n;
+		p.getName( n );
+		currentPass = n.c_str();
 		
 		std::vector< SMatProp > v;
 		p.getProperties( v );
@@ -298,6 +364,9 @@ namespace MaterialEditor
 		}
 
 		CNelMaterialProxy m = nel3dIface->getMaterial();
+		if( m.isEmpty() )
+			return;
+
 		CRenderPassProxy pass = m.getPass( currentPass.toUtf8().data() );
 
 		std::map< QtProperty*, std::string >::const_iterator itr

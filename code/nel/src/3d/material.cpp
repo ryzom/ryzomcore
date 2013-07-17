@@ -20,6 +20,7 @@
 #include "nel/3d/texture.h"
 #include "nel/3d/shader.h"
 #include "nel/3d/driver.h"
+#include "nel/3d/dynamic_material.h"
 #include "nel/misc/stream.h"
 
 using namespace std;
@@ -48,6 +49,7 @@ CMaterial::CMaterial()
 	_AlphaTestThreshold= 0.5f;
 	_TexCoordGenMode= 0;
 	_LightMapsMulx2= false;
+	dynMat = NULL;
 }
 
 // ***************************************************************************
@@ -120,6 +122,8 @@ CMaterial		&CMaterial::operator=(const CMaterial &mat)
 	// All states of material is modified.
 	_Touched= IDRV_TOUCHED_ALL;
 
+	dynMat = NULL;
+
 	return *this;
 }
 
@@ -134,6 +138,11 @@ CMaterial::~CMaterial()
 
 	// Must kill the drv mirror of this material.
 	_MatDrvInfo.kill();
+	if( dynMat != NULL )
+	{
+		delete dynMat;
+		dynMat = NULL;
+	}
 }
 
 
@@ -167,6 +176,8 @@ void		CMaterial::serial(NLMISC::IStream &f)
 	Version 0:
 		- base version.
 	*/
+
+	dynMat = NULL;
 
 	sint	ver= f.serialVersion(9);
 	// For the version <=1:
@@ -622,6 +633,99 @@ bool CMaterial::isSupportedByDriver(IDriver &drv, bool forceBaseCaps) const
 			nlassert(0); // unknown shader, must complete
 	}
 	return false;
+}
+
+
+void CMaterial::createDynMat()
+{
+	if( dynMat == NULL )
+		dynMat = new CDynMaterial();
+
+	SRenderPass *p = dynMat->getPass( 0 );
+	
+	switch( _ShaderType )
+	{
+
+	case Normal:
+		p->setShaderRef( "Normal" );
+		break;
+
+	case Bump:
+		p->setShaderRef( "Bump" );
+		break;
+
+	case UserColor:
+		p->setShaderRef( "UserColor" );
+		break;
+
+	case LightMap:
+		p->setShaderRef( "LightMap" );
+		break;
+
+	case Specular:
+		p->setShaderRef( "Specular" );
+		break;
+
+	case Caustics:
+		p->setShaderRef( "Caustics" );
+		break;
+
+	case PerPixelLighting:
+		p->setShaderRef( "PerPixelLighting" );
+		break;
+
+	case PerPixelLightingNoSpec:
+		p->setShaderRef( "PerPixelLightingNoSpec" );
+		break;
+
+	case Cloud:
+		p->setShaderRef( "Cloud" );
+		break;
+
+	case Water:
+		p->setShaderRef( "Water" );
+		break;
+
+	default:
+		nlassert( false );
+		break;
+	}
+
+	float v[ 4 ];
+	float m[ 16 ];
+	SDynMaterialProp prop;
+
+	prop.type = SDynMaterialProp::Color;
+
+	prop.prop = "color";
+	prop.label = "Color";
+	_Color.toFloatVector( v );
+	prop.value.setVector4( v );
+	p->addProperty( prop );
+
+	prop.prop = "emissive";
+	prop.label = "Emissive color";
+	_Emissive.toFloatVector( v );
+	prop.value.setVector4( v );
+	p->addProperty( prop );
+
+	prop.prop = "ambient";
+	prop.label = "Ambient color";
+	_Ambient.toFloatVector( v );
+	prop.value.setVector4( v );
+	p->addProperty( prop );
+
+	prop.prop = "diffuse";
+	prop.label = "Diffuse color";
+	_Diffuse.toFloatVector( v );
+	prop.value.setVector4( v );
+	p->addProperty( prop );
+
+	prop.prop = "specular";
+	prop.label = "Specular color";
+	_Specular.toFloatVector( v );
+	prop.value.setVector4( v );
+	p->addProperty( prop );
 }
 
 }

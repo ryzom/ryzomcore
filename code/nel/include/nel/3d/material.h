@@ -33,6 +33,8 @@ using NLMISC::CRGBA;
 using NLMISC::CSmartPtr;
 using NLMISC::CRefPtr;
 
+class CDynMaterial;
+
 // --------------------------------------------------
 
 const uint32 IDRV_MAT_MAXTEXTURES	=	4;
@@ -693,7 +695,16 @@ private:
 	};
 	std::auto_ptr<CUserTexMat>	_TexUserMat;		 // user texture matrix
 
+	/// Dynamic material for the new driver
+	CDynMaterial *dynMat;
+
 public:
+
+	CDynMaterial* getDynMat() const{ return dynMat; }
+
+	/// Create the dynamic material from the current material parameters
+	void createDynMat();
+
 	// Private. For Driver only.
 	CSmartPtr<ITexture>		_Textures[IDRV_MAT_MAXTEXTURES];
 	uint8				    _TexAddrMode[IDRV_MAT_MAXTEXTURES]; // texture addressing enum packed as bytes

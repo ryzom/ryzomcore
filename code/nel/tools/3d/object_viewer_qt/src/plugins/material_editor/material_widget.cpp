@@ -49,6 +49,8 @@ namespace MaterialEditor
 	void MaterialWidget::onMaterialLoaded()
 	{
 		CNelMaterialProxy mat = nl3dIface->getMaterial();
+		if( mat.isEmpty() )
+			return;
 		
 		std::vector< std::string > l;
 		mat.getPassList( l );
@@ -177,7 +179,11 @@ namespace MaterialEditor
 		if( passCB->count() == 0 )
 			return;
 
-		CRenderPassProxy p = nl3dIface->getMaterial().getPass( passCB->currentText().toUtf8().data() );
+		CNelMaterialProxy m = nl3dIface->getMaterial();
+		if( m.isEmpty() )
+			return;
+
+		CRenderPassProxy p = m.getPass( passCB->currentText().toUtf8().data() );
 		matPropWidget->load( &p );
 		matPropWidget->exec();
 		if( matPropWidget->getChanged() )
@@ -196,6 +202,15 @@ namespace MaterialEditor
 	void MaterialWidget::onSubMatCBChanged( int i )
 	{
 		// Update the material to the current submaterial
+		bool ok = nl3dIface->selectSubMaterial( i );
+		if( !ok )
+		{
+			subMatCB->setCurrentIndex( 0 );
+			return;
+		}
+
+		onMaterialLoaded();
+		Q_EMIT subMatChanged( i );
 	}
 
 	void MaterialWidget::onPassCBChanged( const QString &text )
@@ -204,6 +219,9 @@ namespace MaterialEditor
 			return;
 
 		CNelMaterialProxy m = nl3dIface->getMaterial();
+		if( m.isEmpty() )
+			return;
+
 		CRenderPassProxy pass = m.getPass( text.toUtf8().data() );
 		std::string s;
 		pass.getShaderRef( s );
@@ -222,6 +240,9 @@ namespace MaterialEditor
 		QString p = passCB->currentText();
 
 		CNelMaterialProxy m = nl3dIface->getMaterial();
+		if( m.isEmpty() )
+			return;
+
 		CRenderPassProxy pass = m.getPass( p.toUtf8().data() );
 		pass.setShaderRef( text.toUtf8().data() );
 

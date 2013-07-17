@@ -107,6 +107,13 @@ namespace MaterialEditor
 		CRenderPassProxy getPass( unsigned long i );
 		CRenderPassProxy getPass( const char *name );
 
+		bool isEmpty() const{
+			if( material == NULL )
+				return true;
+			else
+				return false;
+		}
+
 	private:
 		NL3D::CDynMaterial *material;
 	};
@@ -131,6 +138,7 @@ namespace MaterialEditor
 		bool saveMaterial( const char *fname );
 		void newMaterial();
 
+		bool selectSubMaterial( int id );
 		CNelMaterialProxy getMaterial();
 
 
@@ -164,7 +172,8 @@ namespace MaterialEditor
 	private:
 		void setupCamera();
 
-		NL3D::CDynMaterial *mat;
+		unsigned long subMatId;
+
 		NL3D::CShaderManager *shaderManager;
 		NL3D::UDriver *driver;
 		NL3D::UScene *scene;

@@ -53,8 +53,8 @@ namespace MaterialEditor
 		passesWidget = new RenderPassesWidget();
 		passesWidget->setMaterialObserver( materialSplitter );
 		passesWidget->setNel3dIface( nl3dIface );
-		passesWidget->onMaterialLoaded();
-		materialSplitter->onMaterialLoaded();
+		//passesWidget->onMaterialLoaded();
+		//materialSplitter->onMaterialLoaded();
 		
 		createMenus();
 		createDockWidgets();

@@ -53,6 +53,7 @@ namespace MaterialEditor
 	Q_SIGNALS:
 		void propsChanged();
 		void passChanged( const QString &pass );
+		void subMatChanged( int i );
 
 	private:
 		void setupConnections();
