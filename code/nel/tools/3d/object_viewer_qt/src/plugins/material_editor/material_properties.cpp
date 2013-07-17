@@ -67,6 +67,8 @@ namespace MaterialEditor
 			QString type = SMatProp::typeIdToString( mp.type ).c_str();
 			item->setData( 2, Qt::DisplayRole, type );
 
+			item->setData( 3, Qt::DisplayRole, mp.value.c_str() );
+
 			treeWidget->addTopLevelItem( item );
 
 			++itr;
@@ -101,6 +103,8 @@ namespace MaterialEditor
 				
 				s = item->text( 2 ).toUtf8().data();
 				p.type = SMatProp::typeStringToId( s );
+
+				p.value = item->text( 3 ).toUtf8().data();
 
 				v.push_back( p );
 			}
