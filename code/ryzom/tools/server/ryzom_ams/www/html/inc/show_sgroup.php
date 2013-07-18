@@ -3,19 +3,23 @@
 function show_sgroup(){
     //if logged in
     if(WebUsers::isLoggedIn()){
-        if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
+        if(Ticket_User::isMod($_SESSION['ticket_user'])){
             if( isset($_GET['id'])){
-                
                 //['target_id'] holds the id of the group!
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
                 
-                if(isset($_GET['delete'])){
+                if(isset($_GET['delete']) && Ticket_User::isAdmin($_SESSION['ticket_user'])){
                     $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                     $result['delete'] = Support_Group::deleteUserOfSupportGroup( $delete_id, $result['target_id']  );
                     header("Location: index.php?page=show_sgroup&id=" . $result['target_id']);
                     exit;
                     
                 }
+                
+                if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
+                    $result['isAdmin'] = "TRUE";
+                }
+                
                 $group = Support_Group::getGroup($result['target_id']);
                
                 $result['groupsname'] = $group->getName();

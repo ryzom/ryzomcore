@@ -16,7 +16,7 @@
 			    <tr>
 				    <th>ID</th>
 				    <th>Name</th>
-				    <th>Action</th>
+				    {if isset($isAdmin) && $isAdmin eq 'TRUE'}<th>Action</th>{/if}
 		
 			    </tr>
 		    </thead>   
@@ -25,7 +25,7 @@
 			  <tr>
 				<td>{$user.tUserId}</td>
 				<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
-				<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><i class="icon-trash icon-white"></i> Delete</a></td>  
+				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><i class="icon-trash icon-white"></i> Delete</a></td>{/if}
 			  </tr>
 			  {/foreach}
 	  
@@ -34,7 +34,8 @@
 	    </div>
 	</div>
     </div><!--/span-->
-
+    
+    {if isset($isAdmin) && $isAdmin eq 'TRUE'}
     <div class="box span3">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-plus-sign"></i> Add User</h2>
@@ -91,6 +92,7 @@
 	    </div>                   
         </div>
     </div><!--/span-->
+    {/if}
 </div><!--/row-->
 
 {/block}

@@ -8,7 +8,7 @@ function userlist(){
         while($row = $users->fetch(PDO::FETCH_ASSOC)){
             $pageResult['userlist'][$i]['id'] = $row['UId'];
             $pageResult['userlist'][$i]['username'] = $row['Login'];
-            $pageResult['userlist'][$i]['permission'] = $row['Permission'];
+            $pageResult['userlist'][$i]['permission'] = Ticket_User::constr_ExternId($row['UId'])->getPermission();
             $pageResult['userlist'][$i]['email'] = $row['Email'];
             $i++;
         }
