@@ -17,6 +17,15 @@
 			    <td><strong>Email:</strong></td>
 			    <td>{$mail}</td>                           
 			</tr>
+			
+			<tr >
+			    <td><strong>Role:</strong></td>
+			    <td>
+			    {if $userPermission eq 1}<span class="label label-success">User</span>{/if}
+			    {if $userPermission eq 2}<span class="label label-warning">Moderator</span>{/if}
+			    {if $userPermission eq 3}<span class="label label-important">Admin</span>{/if}
+			    </td>                           
+			</tr>
 			{if $firstName neq ""}
 			<tr>
 			    <td><strong>Firstname:</strong></td>

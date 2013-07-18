@@ -20,6 +20,7 @@ function show_user(){
             $result['gender'] = $info['Gender'];
             
             $ticket_user = Ticket_User::constr_ExternId($result['target_id']);
+            $result['userPermission'] = $ticket_user->getPermission();
             $ticketlist = Ticket::getTicketsOf($ticket_user->getTUserId());
             
             $result['ticketlist'] = Gui_Elements::make_table($ticketlist, Array("getTId","getTimestamp","getTitle","getStatus","getStatusText","getStatusText","getCategoryName"), Array("tId","timestamp","title","status","statustext","statusText","category"));
