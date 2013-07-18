@@ -30,7 +30,7 @@ function show_ticket(){
             }
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isAdmin'] = "TRUE";
-                //$result['statusList'] = Ticket::getStatusArray();
+                $result['statusList'] = Ticket::getStatusArray();
             }
             return $result;
             
