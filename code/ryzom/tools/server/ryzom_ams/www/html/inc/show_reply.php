@@ -26,7 +26,7 @@ function show_reply(){
             $result['author'] = $author->getExternId();
             $result['authorName'] = WebUsers::getUsername($author->getExternId());
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
-                $result['isAdmin'] = "TRUE";
+                $result['isMod'] = "TRUE";
             }
             return $result;
             

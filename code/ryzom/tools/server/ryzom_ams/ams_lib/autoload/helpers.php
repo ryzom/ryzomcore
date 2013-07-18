@@ -34,8 +34,10 @@ class Helpers{
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
-          if( isset($vars['permission']) && $vars['permission'] == 2 ){
+          if( isset($vars['permission']) && $vars['permission'] == 3 ){
                $inherited = "extends:layout_admin.tpl|";
+          }else if( isset($vars['permission']) && $vars['permission'] == 2){
+               $inherited = "extends:layout_mod.tpl|";
           }else if( isset($vars['permission']) && $vars['permission'] == 1){
                $inherited = "extends:layout_user.tpl|";
           }else{

@@ -29,8 +29,7 @@ class Ticket_User{
         }
         return false;
     }
-
-
+    
     //return constructed element based on TUserId
     public static function constr_TUserId( $id) {
         $instance = new self();

@@ -20,7 +20,7 @@
 			    {else if $author_permission eq '2'}
 			    <span class="label label-important"><strong><i class="icon-star icon-white"></i>[CSR]</strong></span>
 			    {/if}
-			    <span class="label label-warning"><strong><i class="icon-user icon-white"></i>{if isset($isAdmin) and $isAdmin eq "TRUE"} <a href="index.php?page=show_user&id={$author}"><font color="white">{$authorName}</font>{else}{$authorName} {/if}</a></strong></span></p>
+			    <span class="label label-warning"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$author}"><font color="white">{$authorName}</font>{else}{$authorName} {/if}</a></strong></span></p>
 
 			    <p><pre{if $author_permission eq '2'} style="background-color:rgb(248, 200, 200);"{/if}>{$reply_content}</pre></p>
 			</td>

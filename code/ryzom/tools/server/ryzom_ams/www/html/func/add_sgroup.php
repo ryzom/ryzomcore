@@ -10,7 +10,7 @@ function add_sgroup(){
             $tag = "[" . $inner_tag . "]";
             
             $result['RESULT_OF_ADDING'] = Support_Group::createSupportGroup($name, $tag);
-            $result['permission'] = $_SESSION['permission'];
+            $result['permission'] = $_SESSION['ticket_user']->getPermission();
             $result['no_visible_elements'] = 'FALSE';
             $result['username'] = $_SESSION['user'];
             global $SITEBASE;

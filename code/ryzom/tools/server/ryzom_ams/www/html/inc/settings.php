@@ -12,7 +12,7 @@ function settings(){
                 }else{
                     $result = WebUsers::getInfo($_GET['id']);
                     if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_GET['id']!= $_SESSION['id'])){
-                        $result['isAdmin'] = "TRUE";
+                        $result['changesOther'] = "TRUE";
                     }
                     $result['target_id'] = $_GET['id'];
                     $result['current_mail'] = WebUsers::getEmail($_GET['id']);

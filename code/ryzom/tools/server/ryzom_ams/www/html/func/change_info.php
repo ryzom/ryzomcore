@@ -81,7 +81,7 @@ function change_info(){
                     if($updated){
                         $result['info_updated'] = "OK";
                     }
-                    $result['permission'] = $_SESSION['permission'];
+                    $result['permission'] = $_SESSION['ticket_user']->getPermission();
                     $result['username'] = $_SESSION['user'];
                     $result['no_visible_elements'] = 'FALSE';
                     $result['target_id'] = $_POST['target_id'];

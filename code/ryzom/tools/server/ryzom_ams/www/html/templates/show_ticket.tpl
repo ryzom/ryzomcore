@@ -39,7 +39,7 @@
 				{else if $reply.permission gt '1'}
 			        <span class="label label-important"><strong><i class="icon-star icon-white"></i>[CSR]</strong></span>
 				{/if}
-				<span class="label label-warning"><strong><i class="icon-user icon-white"></i>{if isset($isAdmin) and $isAdmin eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white">{$reply.author}</font>{else}{$reply.author} {/if}</a></strong></span></p>
+				<span class="label label-warning"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white">{$reply.author}</font>{else}{$reply.author} {/if}</a></strong></span></p>
 
 				<p><pre{if $reply.permission gt '1'} style="background-color:rgb(248, 200, 200);"{/if}>{$reply.replyContent}</pre></p>
 			    </td>
@@ -68,7 +68,7 @@
 				    </div>
 				</div>
 				{/if}
-				{if isset($isAdmin) and $isAdmin eq "TRUE"}
+				{if isset($isMod) and $isMod eq "TRUE"}
 				<div class="control-group"  style="display: inline-block;">
 				    <label class="control-label">Change status to</label>
 				    <div class="controls">
@@ -181,7 +181,7 @@
 		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
 		    <ul class="dropdown-menu">
 			<li class="divider"></li>
-			{if isset($isAdmin) and $isAdmin eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>{/if}
+			{if isset($isMod) and $isMod eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>{/if}
 			<li><a href="index.php?page=createticket&user_id={$target_id}">Send Other Ticket</a></li>
 			<li class="divider"></li>
 		    </ul>

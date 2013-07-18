@@ -82,13 +82,6 @@ class WebUsers extends Users{
         return false;
     }
     
-    public function isAdmin(){
-        if(isset($_SESSION['permission']) && $_SESSION['permission'] == 2){
-            return true;
-        }
-        return false;
-    }
-    
     public function setPassword($user, $pass){
         $reply = WebUsers::setAmsPassword($user, $pass);
         $values = Array('user' => $user, 'pass' => $pass);
@@ -122,4 +115,5 @@ class WebUsers extends Users{
         $data = $dbl->executeWithoutParams("SELECT * FROM ams_user");
         return $data;
     }
+    
 }

@@ -34,7 +34,7 @@ function change_password(){
                         }else if($status == 'shardoffline'){
                              $succresult['SUCCESS_PASS'] = "SHARDOFF";
                         }
-                        $succresult['permission'] = $_SESSION['permission'];
+                        $succresult['permission'] = $_SESSION['ticket_user']->getPermission();
                         $succresult['no_visible_elements'] = 'FALSE';
                         $succresult['username'] = $_SESSION['user'];
                         $succresult['target_id'] = $_POST['target_id'];
@@ -46,7 +46,7 @@ function change_password(){
                         $result['prevCurrentPass'] = filter_var($_POST["CurrentPass"], FILTER_SANITIZE_STRING);
                         $result['prevNewPass'] = filter_var($_POST["NewPass"], FILTER_SANITIZE_STRING);
                         $result['prevConfirmNewPass'] = filter_var($_POST["ConfirmNewPass"], FILTER_SANITIZE_STRING);
-                        $result['permission'] = $_SESSION['permission'];
+                        $result['permission'] =  $_SESSION['ticket_user']->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
                         $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];

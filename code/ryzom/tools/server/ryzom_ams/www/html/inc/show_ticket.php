@@ -29,7 +29,7 @@ function show_ticket(){
                 $i++;
             }
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
-                $result['isAdmin'] = "TRUE";
+                $result['isMod'] = "TRUE";
                 $result['statusList'] = Ticket::getStatusArray();
             }
             return $result;

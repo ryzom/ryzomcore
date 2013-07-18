@@ -13,7 +13,7 @@ function add_user_to_sgroup(){
             }else{
                 $result['RESULT_OF_ADDING'] = "USER_NOT_EXISTING";
             }
-            $result['permission'] = $_SESSION['permission'];
+            $result['permission'] = $_SESSION['ticket_user']->getPermission();
             $result['no_visible_elements'] = 'FALSE';
             $result['username'] = $_SESSION['user'];
             global $SITEBASE;

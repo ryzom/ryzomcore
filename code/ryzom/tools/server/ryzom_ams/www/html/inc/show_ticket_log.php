@@ -34,7 +34,7 @@ function show_ticket_log(){
                 $i++;
             }    
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
-                $result['isAdmin'] = "TRUE";
+                $result['isMod'] = "TRUE";
             }
             return $result;
             

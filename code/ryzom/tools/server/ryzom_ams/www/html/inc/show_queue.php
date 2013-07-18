@@ -17,7 +17,7 @@ function show_queue(){
                     $i++;
                 }
                 if(Ticket_User::isMod($_SESSION['ticket_user'])){
-                    $result['isAdmin'] = "TRUE";
+                    $result['isMod'] = "TRUE";
                 }
                 return $result;
             }else{ 

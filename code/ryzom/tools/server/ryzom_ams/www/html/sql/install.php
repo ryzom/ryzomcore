@@ -323,12 +323,14 @@
           'name' => "admin",
           'pass' => $hashpass,
           'mail' => "admin@admin.com",
+          'permission' => 3
         );
-        Users::createUser($params, 1);
         try{
-            $params['permission'] = 2;
             $dbw = new DBLayer("web");
-            $dbw->execute("INSERT INTO ams_user (Login, Password, Email, Permission) VALUES (:name, :pass, :mail, :permission)",$params);
+            $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Permission) VALUES (:name, :pass, :mail, :permission)",$params);
+            Users::createUser($params, $user_id);
+            $dbl = new DBLayer("lib");
+            $dbl->execute("UPDATE ticket_user SET Permission = 3 WHERE TUserId = :user_id",array('user_id' => $user_id));
             print "The admin account is created, you can login with id: admin, pass: admin!";
         }catch (PDOException $e){
             print "There was an error while creating the admin account! ";

@@ -37,13 +37,13 @@ function change_mail(){
                         }else if($status == 'shardoffline'){
                              $result['SUCCESS_MAIL'] = "SHARDOFF";
                         }
-                        $result['permission'] = $_SESSION['permission'];
+                        $result['permission'] = $_SESSION['ticket_user']->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
 			$result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
                             if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
-                                $result['isAdmin'] = "TRUE";
+                                $result['isMod'] = "TRUE";
                             }
                         }
                         helpers :: loadtemplate( 'settings', $result);
@@ -51,13 +51,13 @@ function change_mail(){
                          
                     }else{
 			$result['EMAIL'] = $reply;
-                        $result['permission'] = $_SESSION['permission'];
+                        $result['permission'] = $_SESSION['ticket_user']->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
                         $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
                             if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
-                                $result['isAdmin'] = "TRUE";
+                                $result['isMod'] = "TRUE";
                             }
                         }
                         helpers :: loadtemplate( 'settings', $result);

@@ -13,7 +13,7 @@
 					<form id="changePassword" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Password</legend>
 						
-						{if !isset($isAdmin) or $isAdmin eq "FALSE"}
+						{if !isset($changesOther) or $changesOther eq "FALSE"}
 							<div class="control-group {if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}error{else if
 				isset($match_error_message) and $match_error_message neq "fail"}success{else}{/if}">
 							<label class="control-label">Current Password</label>

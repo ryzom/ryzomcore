@@ -36,8 +36,8 @@ if(isset($_SESSION['user'])){
 
 
 //Set permission
-if(isset($_SESSION['permission'])){
-     $return['permission'] = $_SESSION['permission'];
+if(isset($_SESSION['ticket_user'])){
+     $return['permission'] = $_SESSION['ticket_user']->getPermission();
 }else{
      //default permission
      $return['permission'] = 0; 
