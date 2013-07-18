@@ -91,7 +91,7 @@ namespace MaterialEditor
 			break;
 		
 		case SMatProp::Uint:
-			type = QVariant::UInt;
+			type = QVariant::Int;
 			break;
 		
 		case SMatProp::Vector4:

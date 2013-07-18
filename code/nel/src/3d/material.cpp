@@ -21,6 +21,7 @@
 #include "nel/3d/shader.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/dynamic_material.h"
+#include "nel/3d/texture_file.h"
 #include "nel/misc/stream.h"
 
 using namespace std;
@@ -726,6 +727,124 @@ void CMaterial::createDynMat()
 	_Specular.toFloatVector( v );
 	prop.value.setVector4( v );
 	p->addProperty( prop );
+
+	prop.type = SDynMaterialProp::Float;
+	prop.prop = "shininess";
+	prop.label = "Shininess";
+	prop.value.setFloat( _Shininess );
+	p->addProperty( prop );
+
+	prop.prop = "alpha_test_threshold";
+	prop.label = "Alpha test threshold";
+	prop.value.setFloat( _AlphaTestThreshold );
+	p->addProperty( prop );
+
+	prop.type = SDynMaterialProp::Uint;
+	prop.prop = "flags";
+	prop.label = "Flags";
+	prop.value.setUInt( _Flags );
+	p->addProperty( prop );
+
+	prop.prop = "srcblend";
+	prop.label = "Source blend";
+	prop.value.setUInt( _SrcBlend );
+	p->addProperty( prop );
+
+	prop.prop = "dstblend";
+	prop.label = "Destination blend";
+	prop.value.setUInt( _DstBlend );
+	p->addProperty( prop );
+
+	prop.prop = "zfunc";
+	prop.label = "Z function";
+	prop.value.setUInt( _ZFunction );
+	p->addProperty( prop );
+
+	prop.type = SDynMaterialProp::Float;
+	prop.prop = "zbias";
+	prop.label = "Z bias";
+	prop.value.setFloat( _ZBias );
+	p->addProperty( prop );
+
+	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+	{
+		if( _Textures[ i ] == NULL )
+			continue;
+		CTextureFile *tf = dynamic_cast< CTextureFile* >( _Textures[ i ].getPtr() );
+		if( tf == NULL )
+			continue;
+
+		prop.type = SDynMaterialProp::Texture;
+		prop.prop = "texture";
+		prop.prop.push_back( char( '0' + i ) );
+
+		prop.label = "Texture";
+		prop.label.push_back( char( '0' + i ) );
+
+		prop.value.setString( tf->getFileName() );
+		p->addProperty( prop );
+	}
+
+	if( _TexUserMat.get() != NULL )
+	{
+		prop.type = SDynMaterialProp::Matrix4;
+		for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+		{
+			prop.prop = "texmat"; 
+			prop.prop.push_back( char( '0' + i ) );
+
+			prop.label = "Texture matrix";
+			prop.label.push_back( char( '0' + i ) );
+
+			prop.value.setMatrix4( _TexUserMat->TexMat[ i ].get() );
+			p->addProperty( prop );
+		}
+	}
+
+	for( int i = 0; i < _LightMaps.size(); i++ )
+	{
+		const CLightMap &lm = _LightMaps[ i ];
+		ITexture *t = lm.Texture.getPtr();
+		CTextureFile *cf = dynamic_cast< CTextureFile* >( t );
+		if( cf != NULL )
+		{
+			prop.type = SDynMaterialProp::Texture;
+			prop.prop = "lightmap";
+			prop.prop.push_back( char( '0' + i ) );
+
+			prop.label = "Lightmap";
+			prop.prop.push_back( char( '0' + i ) );
+
+			prop.value.setString( cf->getFileName() );
+			p->addProperty( prop );
+		}
+
+		prop.type = SDynMaterialProp::Color;
+		prop.prop = "lmfactor";
+		prop.prop.push_back( char( '0' + i ) );
+		prop.label = "LMFactor";
+		prop.label.push_back( char( '0' + i ) );
+		lm.Factor.toFloatVector( v );
+		prop.value.setVector4( v );
+		p->addProperty( prop );
+
+		prop.prop = "lmcambient";
+		prop.prop.push_back( char( '0' + i ) );
+		prop.label = "LMCAmbient";
+		prop.label.push_back( char( '0' + i ) );
+		lm.LMCAmbient.toFloatVector( v );
+		prop.value.setVector4( v );
+		p->addProperty( prop );
+
+		prop.prop = "lmcdiffuse";
+		prop.prop.push_back( char( '0' + i ) );
+		prop.label = "LMCDiffuse";
+		prop.label.push_back( char( '0' + i ) );
+		lm.LMCDiffuse.toFloatVector( v );
+		prop.value.setVector4( v );
+		p->addProperty( prop );
+
+	}
 }
 
 }

@@ -339,7 +339,7 @@ public:
 	}
 
 	/// Write the RGBA values to a float vector
-	void toFloatVector( float *v )
+	void toFloatVector( float *v ) const
 	{
 		v[ 0 ] = R;
 		v[ 1 ] = G;
