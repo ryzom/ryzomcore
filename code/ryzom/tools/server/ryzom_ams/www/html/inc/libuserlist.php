@@ -2,7 +2,7 @@
 
 
 function libuserlist(){
-    if(WebUsers::isAdmin()){
+    if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
         //This checks to see if there is a page number. If not, it will set it to page 1 
         if (!(isset($_GET['pagenum']))){ 
             $pagenum = 1; 

@@ -4,7 +4,7 @@ function show_user(){
      //if logged in
     if(WebUsers::isLoggedIn()){
         
-        if( !isset($_GET['id']) ||  WebUsers::isAdmin() || $_GET['id'] == $_SESSION['id'] ){
+        if( !isset($_GET['id']) ||  Ticket_User::isMod($_SESSION['ticket_user']) || $_GET['id'] == $_SESSION['id'] ){
             
             if(isset($_GET['id'])){
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);        

@@ -7,7 +7,7 @@ function create_ticket(){
         if(isset($_POST['target_id'])){
             
             //if target_id is the same as session id or is admin
-            if(  ($_POST['target_id'] == $_SESSION['id']) ||  WebUsers::isAdmin()  ){
+            if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod($_SESSION['ticket_user'])  ){
                 
                 $category = filter_var($_POST['Category'], FILTER_SANITIZE_NUMBER_INT);
                 $title = filter_var($_POST['Title'], FILTER_SANITIZE_STRING);

@@ -4,7 +4,7 @@ function add_user_to_sgroup(){
     
     if(WebUsers::isLoggedIn()){
         
-        if( WebUsers::isAdmin() &&  isset($_POST['target_id'])){
+        if( Ticket_User::isAdmin($_SESSION['ticket_user']) &&  isset($_POST['target_id'])){
             $name = filter_var($_POST['Name'],FILTER_SANITIZE_STRING);
             $id = filter_var($_POST['target_id'],FILTER_SANITIZE_NUMBER_INT);
             $user_id = WebUsers::getId($name);

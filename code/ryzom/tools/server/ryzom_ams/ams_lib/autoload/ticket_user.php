@@ -15,6 +15,20 @@ class Ticket_User{
         $dbl->execute($query, $values);
 
     }
+    
+    public static function isMod($user){
+        if(isset($user) && $user->getPermission() > 1){
+            return true;
+        }
+        return false;
+    }
+    
+    public static function isAdmin($user){
+        if(isset($user) && $user->getPermission() == 3){
+            return true;
+        }
+        return false;
+    }
 
 
     //return constructed element based on TUserId

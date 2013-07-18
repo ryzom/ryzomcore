@@ -9,14 +9,14 @@ function reply_on_ticket(){
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($ticket_id);
 
-        if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  WebUsers::isAdmin() ){
+        if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  Ticket_User::isMod($_SESSION['ticket_user']) ){
             
             try{
                 $author = $_SESSION['ticket_user']->getTUserId();
                 $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
                 Ticket::createReply($content, $author, $ticket_id);
                 
-                if(isset($_POST['ChangeStatus']) && isset($_POST['ChangePriority']) && WebUsers::isAdmin()){
+                if(isset($_POST['ChangeStatus']) && isset($_POST['ChangePriority']) && Ticket_User::isMod($_SESSION['ticket_user'])){
                     $newStatus = filter_var($_POST['ChangeStatus'], FILTER_SANITIZE_NUMBER_INT);
                     $newPriority = filter_var($_POST['ChangePriority'], FILTER_SANITIZE_NUMBER_INT); 
                     Ticket::updateTicketStatusAndPriority($ticket_id,$newStatus, $newPriority, $author);

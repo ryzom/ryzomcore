@@ -36,12 +36,12 @@
 				<p><span class="label label-info"> {$reply.timestamp}</span>
 				{if $reply.permission eq '1'}
 				<!-- <span class="label label-important"><strong></i>[User]:</strong></span>-->
-				{else if $reply.permission eq '2'}
+				{else if $reply.permission gt '1'}
 			        <span class="label label-important"><strong><i class="icon-star icon-white"></i>[CSR]</strong></span>
 				{/if}
 				<span class="label label-warning"><strong><i class="icon-user icon-white"></i>{if isset($isAdmin) and $isAdmin eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white">{$reply.author}</font>{else}{$reply.author} {/if}</a></strong></span></p>
 
-				<p><pre{if $reply.permission eq '2'} style="background-color:rgb(248, 200, 200);"{/if}>{$reply.replyContent}</pre></p>
+				<p><pre{if $reply.permission gt '1'} style="background-color:rgb(248, 200, 200);"{/if}>{$reply.replyContent}</pre></p>
 			    </td>
 			</tr>
 			{/foreach}

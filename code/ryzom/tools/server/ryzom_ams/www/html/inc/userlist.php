@@ -1,7 +1,7 @@
 <?php
 
 function userlist(){
-    if(WebUsers::isAdmin()){
+    if(Ticket_User::isMod($_SESSION['ticket_user'])){
         $users = WebUsers::getUsers();
         $i = 0;
         $pageResult['userlist'] = Array();

@@ -4,7 +4,7 @@ function add_sgroup(){
     
     if(WebUsers::isLoggedIn()){
         
-        if( WebUsers::isAdmin()){
+        if( Ticket_User::isAdmin($_SESSION['ticket_user'])){
             $name = filter_var($_POST['Name'],FILTER_SANITIZE_STRING);
             $inner_tag = filter_var($_POST['Tag'], FILTER_SANITIZE_STRING);
             $tag = "[" . $inner_tag . "]";

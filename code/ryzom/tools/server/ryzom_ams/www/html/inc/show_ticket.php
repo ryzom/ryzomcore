@@ -8,7 +8,7 @@ function show_ticket(){
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
 
-        if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  WebUsers::isAdmin() ){
+        if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] )){
             
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id']);
             Ticket_Log::createLogEntry($result['ticket_id'],$_SESSION['ticket_user']->getTUserId(), 3);
@@ -28,7 +28,7 @@ function show_ticket(){
                 $result['ticket_replies'][$i]['author'] = WebUsers::getUsername($reply['authorExtern']);
                 $i++;
             }
-            if(WebUsers::isAdmin()){
+            if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isAdmin'] = "TRUE";
                 //$result['statusList'] = Ticket::getStatusArray();
             }

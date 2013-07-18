@@ -11,7 +11,7 @@ function show_reply(){
         $ticket = new Ticket();
         $ticket->load_With_TId($reply->getTicket());
         
-        if(($ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  WebUsers::isAdmin() ){
+        if(($ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  Ticket_User::isMod($_SESSION['ticket_user'] )){
             $content = new Ticket_Content();
             $content->load_With_TContentId($reply->getContent());
             
@@ -25,7 +25,7 @@ function show_reply(){
             $result['reply_content'] = $content->getContent();
             $result['author'] = $author->getExternId();
             $result['authorName'] = WebUsers::getUsername($author->getExternId());
-            if(WebUsers::isAdmin()){
+            if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isAdmin'] = "TRUE";
             }
             return $result;

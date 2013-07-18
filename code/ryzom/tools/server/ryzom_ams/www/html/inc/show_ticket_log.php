@@ -5,7 +5,7 @@ function show_ticket_log(){
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
         //only allow admins to browse the log!
-        if(WebUsers::isAdmin() ){
+        if(Ticket_User::isMod($_SESSION['ticket_user']) ){
             $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
             $target_ticket = new Ticket();
             $target_ticket->load_With_TId($result['ticket_id']);
@@ -33,7 +33,7 @@ function show_ticket_log(){
                 $result['ticket_logs'][$i]['timestamp_elapsed'] = Gui_Elements::time_elapsed_string($log['timestamp']);
                 $i++;
             }    
-            if(WebUsers::isAdmin()){
+            if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isAdmin'] = "TRUE";
             }
             return $result;

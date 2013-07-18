@@ -9,7 +9,7 @@ function change_password(){
             if(isset($_POST['target_id'])){
                 $adminChangesOther = false;
                 //if target_id is the same as session id or is admin
-                if(  ($_POST['target_id'] == $_SESSION['id']) ||  WebUsers::isAdmin()  ){
+                if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod($_SESSION['ticket_user'])  ){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{

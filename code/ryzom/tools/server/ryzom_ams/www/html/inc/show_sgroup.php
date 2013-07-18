@@ -3,7 +3,7 @@
 function show_sgroup(){
     //if logged in
     if(WebUsers::isLoggedIn()){
-        if( WebUsers::isAdmin()){
+        if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
             if( isset($_GET['id'])){
                 
                 //['target_id'] holds the id of the group!

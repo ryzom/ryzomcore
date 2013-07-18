@@ -7,7 +7,7 @@ function createticket(){
         //in case user_id-GET param set it's value as target_id, if no user_id-param is given, use the session id.
         if(isset($_GET['user_id'])){
             
-            if(($_GET['user_id'] != $_SESSION['id']) && (!WebUsers::isAdmin()) ){
+            if(($_GET['user_id'] != $_SESSION['id']) && ( ! ticket_user::isMod($_SESSION['ticket_user'])) ){
                 
                 //ERROR: No access!
                 $_SESSION['error_code'] = "403";

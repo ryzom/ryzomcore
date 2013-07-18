@@ -3,7 +3,7 @@
 function sgroup_list(){
     //if logged in 
     if(WebUsers::isLoggedIn()){
-        if( WebUsers::isAdmin()){
+        if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
             
             if(isset($_GET['delete'])){
                 $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);

@@ -9,7 +9,7 @@ function change_mail(){
             if(isset($_POST['target_id'])){
 		
                 
-                if(  ($_POST['target_id'] == $_SESSION['id']) ||  WebUsers::isAdmin()  ){
+                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod($_SESSION['ticket_user']) ){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
@@ -42,7 +42,7 @@ function change_mail(){
 			$result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
-                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
+                            if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
                                 $result['isAdmin'] = "TRUE";
                             }
                         }
@@ -56,7 +56,7 @@ function change_mail(){
                         $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
-                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
+                            if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
                                 $result['isAdmin'] = "TRUE";
                             }
                         }

@@ -4,7 +4,7 @@ function show_queue(){
     
      //if logged in  & queue id is given
     if(WebUsers::isLoggedIn() && isset($_GET['get'])){
-        if( WebUsers::isAdmin()){
+        if( Ticket_User::isMod($_SESSION['ticket_user'])){
             $result['queue_action'] = filter_var($_GET['get'], FILTER_SANITIZE_STRING);
    
             $queueArray = Ticket_Queue_Handler::getTickets($result['queue_action'],2);
@@ -16,7 +16,7 @@ function show_queue(){
                     $result['tickets'][$i]['author'] = WebUsers::getUsername($ticket['authorExtern']);
                     $i++;
                 }
-                if(WebUsers::isAdmin()){
+                if(Ticket_User::isMod($_SESSION['ticket_user'])){
                     $result['isAdmin'] = "TRUE";
                 }
                 return $result;
