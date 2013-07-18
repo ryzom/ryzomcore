@@ -256,7 +256,7 @@ namespace MaterialEditor
 	void MaterialEditorWindow::onClearSceneClicked()
 	{
 		nl3dIface->clearScene();
-		materialSplitter->onShapeChanged();
+		materialSplitter->onSceneCleared();
 		viewPort->stopTimedUpdates();
 	}
 	

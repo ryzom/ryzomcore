@@ -75,6 +75,12 @@ namespace MaterialEditor
 		materialWidget->onMaterialLoaded();
 	}
 
+	void MaterialSplitter::onSceneCleared()
+	{
+		materialWidget->onSceneCleared();
+		browserCtrl->onSceneCleared();
+	}
+
 	void MaterialSplitter::onShapeChanged()
 	{
 		materialWidget->onShapeChanged();

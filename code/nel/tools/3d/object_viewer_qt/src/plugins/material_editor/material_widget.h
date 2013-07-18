@@ -33,6 +33,7 @@ namespace MaterialEditor
 		MaterialWidget( QWidget *parent = NULL );
 		~MaterialWidget();
 
+		void onSceneCleared();
 		void onNewMaterial();
 		void onMaterialLoaded();
 		void onShapeChanged();

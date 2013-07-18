@@ -44,6 +44,7 @@ namespace MaterialEditor
 
 		void onNewMaterial();
 		void onMaterialLoaded();
+		void onSceneCleared();
 		void onShapeChanged();
 		void onPassAdded( const char *name );
 		void onPassRemoved( const char *name );

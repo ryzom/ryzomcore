@@ -255,6 +255,11 @@ namespace MaterialEditor
 			this, SLOT( onValueChanged( QtProperty*, const QVariant& ) ) );
 	}
 
+	void CPropBrowserCtrl::onSceneCleared()
+	{
+		clearProps();
+	}
+
 	void CPropBrowserCtrl::onPropsChanged()
 	{
 		clearProps();

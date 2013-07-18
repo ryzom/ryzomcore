@@ -40,6 +40,17 @@ namespace MaterialEditor
 		matPropWidget = NULL;
 	}
 
+	void MaterialWidget::onSceneCleared()
+	{
+		passCB->clear();
+		subMatCB->clear();
+		passCB->setEnabled( false );
+		subMatCB->setEnabled( false );
+		shaderCB->setEnabled( false );
+		passButton->setEnabled( false );
+		shaderButton->setEnabled( false );
+	}
+
 	void MaterialWidget::onNewMaterial()
 	{
 		passCB->clear();
@@ -76,6 +87,11 @@ namespace MaterialEditor
 
 		for( unsigned long i = 1; i < c; i++ )
 			subMatCB->addItem( QString::number( i ) );
+
+		passCB->setEnabled( true );
+		shaderCB->setEnabled( true );
+		passButton->setEnabled( true );
+		shaderButton->setEnabled( true );
 		
 		subMatCB->setCurrentIndex( 0 );
 
