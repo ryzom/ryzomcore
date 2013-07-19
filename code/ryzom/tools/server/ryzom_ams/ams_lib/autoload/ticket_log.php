@@ -117,7 +117,7 @@ class Ticket_Log{
     }
     
     public function getTimestamp(){
-        return $this->timestamp;
+        return Helpers::outputTime($this->timestamp);
     }
     
     public function getQuery(){

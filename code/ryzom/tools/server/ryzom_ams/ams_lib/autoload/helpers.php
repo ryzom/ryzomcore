@@ -105,7 +105,11 @@ class Helpers{
           }
              
          return parse_ini_file( $AMS_TRANS . '/' . $language . '.ini', true );
-         
-         
+     }
+     
+     
+     //Time output function for handling the time display function.
+     static public function outputTime($time){
+          return date("m-d-Y H:i:s",strtotime($time));
      }
 }

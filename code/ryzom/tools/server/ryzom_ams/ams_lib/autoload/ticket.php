@@ -192,7 +192,7 @@ class Ticket{
     }
     
     public function getTimestamp(){
-        return $this->timestamp;
+        return Helpers::outputTime($this->timestamp);
     }
     
     public function getTitle(){

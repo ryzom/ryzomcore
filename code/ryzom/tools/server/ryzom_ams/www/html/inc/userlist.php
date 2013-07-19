@@ -12,6 +12,9 @@ function userlist(){
             $pageResult['userlist'][$i]['email'] = $row['Email'];
             $i++;
         }
+        if (Ticket_User::isAdmin($_SESSION['ticket_user'])){
+            $pageResult['isAdmin'] = "TRUE";
+        }
         return $pageResult;
     }else{
         //ERROR: No access!

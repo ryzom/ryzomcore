@@ -125,7 +125,7 @@ class Ticket_Reply{
     }
     
     public function getTimestamp(){
-        return $this->timestamp;
+        return Helpers::outputTime($this->timestamp);
     }
     
     
