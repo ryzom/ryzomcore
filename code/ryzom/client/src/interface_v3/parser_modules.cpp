@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "parser_modules.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/interface_group.h"
@@ -25,6 +26,10 @@
 #include "nel/misc/i_xml.h"
 
 using namespace NLMISC;
+
+#ifdef FINAL_VERSION
+#include "../client_cfg.h"
+#endif
 
 CIF3DSceneParser::CIF3DSceneParser()
 {

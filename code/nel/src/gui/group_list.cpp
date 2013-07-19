@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "nel/gui/group_list.h"
+
 #include "nel/gui/interface_element.h"
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text_id.h"
@@ -507,7 +509,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur,   (xmlChar*)"hardtext" );
 		if (ptr)
 		{
-			_HardText = std::string( ptr );
+			_HardText = std::string( (const char*)ptr );
 			const char *propPtr = ptr;
 			ucstring Text = ucstring(propPtr);
 			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))

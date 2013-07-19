@@ -132,6 +132,29 @@ using namespace NLGUI;
 
 #include "../global.h"
 
+#ifdef HAVE_REVISION_H
+#include "revision.h"
+#endif
+
+#if defined(HAVE_X86_64)
+#define RYZOM_ARCH "x64"
+#elif defined(HAVE_X86)
+#define RYZOM_ARCH "x86"
+#elif defined(HAVE_ARM)
+#define RYZOM_ARCH "arm"
+#else
+#define RYZOM_ARCH "unknow"
+#endif
+#if defined(NL_OS_WINDOWS)
+#define RYZOM_SYSTEM "windows"
+#elif defined(NL_OS_MAC)
+#define RYZOM_SYSTEM "mac"
+#elif defined(NL_OS_UNIX)
+#define RYZOM_SYSTEM "unix"
+#else
+#define RYZOM_SYSTEM "unkown"
+#endif
+
 using namespace NLMISC;
 
 namespace NLGUI
@@ -465,10 +488,19 @@ CInterfaceManager::CInterfaceManager()
 	CViewRenderer::getInstance();
 	CViewTextID::setTextProvider( &SMTextProvider );
 	CViewTextFormated::setFormatter( &RyzomTextFormatter );
+
+	char buffer[256];
+
+#ifdef REVISION
+	sprintf(buffer, "%s.%s-%s-%s", RYZOM_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
+#else
+	sprintf(buffer, "%s-%s-%s", RYZOM_VERSION, RYZOM_SYSTEM, RYZOM_ARCH);
+#endif
+
 	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
 	CGroupHTML::options.appName = "Ryzom";
-	CGroupHTML::options.appVersion = RYZOM_VERSION;
+	CGroupHTML::options.appVersion = buffer;
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
@@ -3520,12 +3552,16 @@ void CInterfaceManager::CServerToLocalAutoCopy::init(const std::string &dbPath)
 	// if found
 	if(_ServerCounter)
 	{
+		ICDBNode::CTextId textId;
+		
 		// **** Add Observers on all nodes
 		// add the observers when server node change
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&_ServerObserver, ICDBNode::CTextId( string("SERVER:") + dbPath ) );
+		textId = ICDBNode::CTextId( string("SERVER:") + dbPath );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&_ServerObserver, textId );
 
 		// add the observers when local node change
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&_LocalObserver, ICDBNode::CTextId( string("LOCAL:") + dbPath ) );
+		textId = ICDBNode::CTextId( string("LOCAL:") + dbPath );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&_LocalObserver, textId );
 
 		// **** Init the Nodes shortcut
 		// Parse all Local Nodes

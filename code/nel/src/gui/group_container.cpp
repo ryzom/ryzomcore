@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/interface_options.h"
 #include "nel/misc/xml_auto_ptr.h"
@@ -1733,7 +1735,8 @@ namespace NLGUI
 		else
 		if( name == "on_open" )
 		{
-			_AHOnOpen = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnOpen = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -1746,7 +1749,8 @@ namespace NLGUI
 		else
 		if( name == "on_close" )
 		{
-			_AHOnClose = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnClose = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -1759,7 +1763,8 @@ namespace NLGUI
 		else
 		if( name == "on_close_button" )
 		{
-			_AHOnCloseButton = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnCloseButton = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -1772,7 +1777,8 @@ namespace NLGUI
 		else
 		if( name == "on_move" )
 		{
-			_AHOnMove = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnMove = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -1785,7 +1791,8 @@ namespace NLGUI
 		else
 		if( name == "on_deactive_check" )
 		{
-			_AHOnDeactiveCheck  = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnDeactiveCheck  = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -1798,7 +1805,8 @@ namespace NLGUI
 		else
 		if( name == "on_resize" )
 		{
-			_AHOnResize = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnResize = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -1811,7 +1819,8 @@ namespace NLGUI
 		else
 		if( name == "on_alpha_settings_changed" )
 		{
-			_AHOnAlphaSettingsChanged = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnAlphaSettingsChanged = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -1824,7 +1833,8 @@ namespace NLGUI
 		else
 		if( name == "on_begin_move" )
 		{
-			_AHOnBeginMove = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnBeginMove = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -2224,35 +2234,35 @@ namespace NLGUI
 		{
 			ptr = xmlGetProp( cur, BAD_CAST "on_open" );
 			if( ptr != NULL )
-				mapAHString( "on_open", std::string( ptr ) );
+				mapAHString( "on_open", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_close" );
 			if( ptr != NULL )
-				mapAHString( "on_close", std::string( ptr ) );
+				mapAHString( "on_close", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_close_button" );
 			if( ptr != NULL )
-				mapAHString( "on_close_button", std::string( ptr ) );
+				mapAHString( "on_close_button", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_move" );
 			if( ptr != NULL )
-				mapAHString( "on_move", std::string( ptr ) );
+				mapAHString( "on_move", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_deactive_check" );
 			if( ptr != NULL )
-				mapAHString( "on_deactive_check", std::string( ptr ) );
+				mapAHString( "on_deactive_check", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_resize" );
 			if( ptr != NULL )
-				mapAHString( "on_resize", std::string( ptr ) );
+				mapAHString( "on_resize", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_alpha_settings_changed" );
 			if( ptr != NULL )
-				mapAHString( "on_alpha_settings_changed", std::string( ptr ) );
+				mapAHString( "on_alpha_settings_changed", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_begin_move" );
 			if( ptr != NULL )
-				mapAHString( "on_begin_move", std::string( ptr ) );
+				mapAHString( "on_begin_move", std::string( (const char*)ptr ) );
 		}
 
 		ptr = xmlGetProp (cur, (xmlChar*)"max_w");

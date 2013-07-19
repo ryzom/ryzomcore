@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/widget_manager.h"
@@ -231,7 +233,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"align");
 		if (prop)
 		{
-			setAlignFromString( std::string( prop ) );
+			setAlignFromString( std::string( (const char*)prop ) );
 		}
 
 

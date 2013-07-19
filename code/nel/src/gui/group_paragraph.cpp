@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/group_paragraph.h"
 #include "nel/gui/group_html.h"
 #include "nel/gui/widget_manager.h"
@@ -462,7 +463,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"hardtext" );
 		if (ptr)
 		{
-			_HardText = std::string( ptr );
+			_HardText = std::string( (const char*)ptr );
 			const char *propPtr = ptr;
 			ucstring Text = ucstring(propPtr);
 			if ((strlen(propPtr)>2) && (propPtr[0] == 'u') && (propPtr[1] == 'i'))

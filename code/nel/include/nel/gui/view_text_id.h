@@ -48,6 +48,7 @@ namespace NLGUI
 	class CViewTextID : public CViewText
 	{
 	public:
+        DECLARE_UI_CLASS( CViewTextID )
 		
 		/// Interface for classes which can provide text to CViewTextId
 		class IViewTextProvider

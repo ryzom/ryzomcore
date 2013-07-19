@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "nel/gui/view_polygon.h"
+
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
@@ -25,7 +27,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CViewPolygon::CViewPolygon() : CViewBase(TCtorParam())
+    CViewPolygon::CViewPolygon( const TCtorParam &param ) : CViewBase( param )
 	{
 		// Construct
 		_Color = CRGBA::White;

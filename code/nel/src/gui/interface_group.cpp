@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "libxml/globals.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/xml_auto_ptr.h"
@@ -348,27 +350,27 @@ namespace NLGUI
 		{
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_active" );
 			if( ptr != NULL )
-				mapAHString( "on_active", std::string( ptr ) );
+				mapAHString( "on_active", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_deactive" );
 			if( ptr != NULL )
-				mapAHString( "on_deactive", std::string( ptr ) );
+				mapAHString( "on_deactive", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "group_onclick_r" );
 			if( ptr != NULL )
-				mapAHString( "group_onclick_r", std::string( ptr ) );
+				mapAHString( "group_onclick_r", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "group_onclick_l" );
 			if( ptr != NULL )
-				mapAHString( "group_onclick_l", std::string( ptr ) );
+				mapAHString( "group_onclick_l", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_enter" );
 			if( ptr != NULL )
-				mapAHString( "on_enter", std::string( ptr ) );
+				mapAHString( "on_enter", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_escape" );
 			if( ptr != NULL )
-				mapAHString( "on_escape", std::string( ptr ) );
+				mapAHString( "on_escape", std::string( (const char*)ptr ) );
 		}
 
 
@@ -562,7 +564,8 @@ namespace NLGUI
 		else
 		if( name == "on_active" )
 		{
-			_AHOnActive = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnActive = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -575,7 +578,8 @@ namespace NLGUI
 		else
 		if( name == "on_deactive" )
 		{
-			_AHOnDeactive = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnDeactive = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -623,7 +627,8 @@ namespace NLGUI
 		else
 		if( name == "group_onclick_r" )
 		{
-			_AHOnRightClick = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnRightClick = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -636,7 +641,8 @@ namespace NLGUI
 		else
 		if( name == "group_onclick_l" )
 		{
-			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -649,7 +655,8 @@ namespace NLGUI
 		else
 		if( name == "on_enter" )
 		{
-			_AHOnEnter = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnEnter = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}
@@ -678,7 +685,8 @@ namespace NLGUI
 		else
 		if( name == "on_escape" )
 		{
-			_AHOnEscape = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnEscape = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( name, value );
 			return;
 		}

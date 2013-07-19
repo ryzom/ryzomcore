@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "nel/gui/group_frame.h"
+
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/interface_options.h"
 #include "nel/gui/interface_element.h"
@@ -139,7 +141,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"options" );
 		if (ptr)
 		{
-			_Options = std::string( ptr );
+			_Options = std::string( (const char*)ptr );
 		}
 
 		// The first type in display type struct is the default display type

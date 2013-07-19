@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "nel/gui/ctrl_polygon.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/view_renderer.h"
@@ -25,7 +27,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CCtrlPolygon::CCtrlPolygon() : CCtrlBase(TCtorParam())
+    CCtrlPolygon::CCtrlPolygon( const TCtorParam &param ) : CCtrlBase( param )
 	{
 		// Construct
 		_Color = CRGBA::White;

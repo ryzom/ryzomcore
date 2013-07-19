@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "nel/gui/view_quad.h"
+
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 
@@ -24,7 +26,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CViewQuad::CViewQuad() : CViewBase(TCtorParam()), _Color(CRGBA::White),
+    CViewQuad::CViewQuad( const TCtorParam &param ) : CViewBase( param ), _Color(CRGBA::White),
 													  _Additif(false),
 													  _UMin(0.f),
 													  _UMax(1.f),

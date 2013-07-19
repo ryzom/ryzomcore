@@ -36,6 +36,7 @@ namespace NLGUI
 	class CGroupFrame : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CGroupFrame )
 
 		/// Constructor
 		CGroupFrame(const TCtorParam &param);

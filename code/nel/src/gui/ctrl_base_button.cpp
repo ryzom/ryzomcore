@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/ctrl_base_button.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/interface_group.h"
@@ -282,7 +283,8 @@ namespace NLGUI
 		else
 		if( name == "onover" )
 		{
-			_AHOnOver = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnOver = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( "onover", value );
 			return;
 		}
@@ -295,7 +297,8 @@ namespace NLGUI
 		else
 		if( name == "onclick_l" )
 		{
-			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnLeftClick = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( "onclick_l", value );
 			return;
 		}
@@ -308,7 +311,8 @@ namespace NLGUI
 		else
 		if( name == "ondblclick_l" )
 		{
-			_AHOnLeftDblClick = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnLeftDblClick = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( "ondblclick_l", value );
 			return;
 		}
@@ -321,7 +325,8 @@ namespace NLGUI
 		else
 		if( name == "onlongclick_l" )
 		{
-			_AHOnLeftLongClick = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnLeftLongClick = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( "onlongclick_l", value );
 			return;
 		}
@@ -334,7 +339,8 @@ namespace NLGUI
 		else
 		if( name == "onclick_r" )
 		{
-			_AHOnRightClick = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnRightClick = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( "onclick_r", value );
 			return;
 		}
@@ -347,7 +353,8 @@ namespace NLGUI
 		else
 		if( name == "onclock_tick" )
 		{
-			_AHOnClockTick = CAHManager::getInstance()->getAH( value, std::string() );
+			std::string dummy;
+			_AHOnClockTick = CAHManager::getInstance()->getAH( value, dummy );
 			mapAHString( "onclock_tick", value );
 			return;
 		}
@@ -543,27 +550,27 @@ namespace NLGUI
 		{
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onover" );
 			if( prop != NULL )
-				mapAHString( "onover", std::string( prop ) );
+				mapAHString( "onover", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onclick_l" );
 			if( prop != NULL )
-				mapAHString( "onclick_l", std::string( prop ) );
+				mapAHString( "onclick_l", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "ondblclick_l" );
 			if( prop != NULL )
-				mapAHString( "ondblclick_l", std::string( prop ) );
+				mapAHString( "ondblclick_l", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onclick_r" );
 			if( prop != NULL )
-				mapAHString( "onclick_r", std::string( prop ) );
+				mapAHString( "onclick_r", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onlongclick_l" );
 			if( prop != NULL )
-				mapAHString( "onlongclick_l", std::string( prop ) );
+				mapAHString( "onlongclick_l", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onclock_tick" );
 			if( prop != NULL )
-				mapAHString( "onclock_tick", std::string( prop ) );
+				mapAHString( "onclock_tick", std::string( (const char*)prop ) );
 		}
 
 		// Context menu association

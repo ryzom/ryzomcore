@@ -426,6 +426,8 @@ void CEntityManager::initialize(uint nbMaxEntity)
 		_Entities.resize(_NbMaxEntity, 0);
 		_EntityGroundFXHandle.resize(_NbMaxEntity);
 	}
+	
+	ICDBNode::CTextId textId;
 
 	// Add an observer on the mission database
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -433,21 +435,28 @@ void CEntityManager::initialize(uint nbMaxEntity)
 	for (i=0; i<MAX_NUM_MISSIONS; i++)
 	for (j=0; j<MAX_NUM_MISSION_TARGETS; j++)
 	{
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&MissionTargetObserver, ICDBNode::CTextId( "SERVER:MISSIONS:"+toString(i)+":TARGET"+toString(j)+":TITLE" ) );
+		textId = ICDBNode::CTextId( "SERVER:MISSIONS:"+toString(i)+":TARGET"+toString(j)+":TITLE" );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&MissionTargetObserver, textId );
 	}
 
 	// Add an Observer to the Team database
 	for (i=0; i<MaxNumPeopleInTeam; i++)
 	{
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamUIDObserver, ICDBNode::CTextId( toString(TEAM_DB_PATH ":%d:UID", i) ) );
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamPresentObserver, ICDBNode::CTextId( toString(TEAM_DB_PATH ":%d:NAME", i) ));
+		textId = ICDBNode::CTextId( toString(TEAM_DB_PATH ":%d:UID", i) );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamUIDObserver, textId );
+		
+		textId = ICDBNode::CTextId( toString(TEAM_DB_PATH ":%d:NAME", i) );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamPresentObserver, textId );
 	}
 
 	// Add an Observer to the Animal database
 	for (i=0; i<MAX_INVENTORY_ANIMAL; i++)
 	{
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalUIDObserver, ICDBNode::CTextId( toString("SERVER:PACK_ANIMAL:BEAST%d:UID",i) ));
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalStatusObserver, ICDBNode::CTextId( toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i) ));
+		textId = ICDBNode::CTextId( toString("SERVER:PACK_ANIMAL:BEAST%d:UID",i) );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalUIDObserver, textId );
+		
+		textId = ICDBNode::CTextId( toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i) );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalStatusObserver, textId );
 	}
 
 }// initialize //

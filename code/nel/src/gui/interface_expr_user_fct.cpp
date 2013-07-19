@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/interface_link.h"
 #include "nel/gui/interface_element.h"

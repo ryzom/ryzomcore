@@ -67,9 +67,9 @@ namespace GUIEditor
 		}
 
 		SPropEntry prop;
-		prop.propName    = nameEdit->text().toStdString();
-		prop.propType    = typeCB->currentText().toStdString();
-		prop.propDefault = defvalEdit->text().toStdString();
+		prop.propName    = nameEdit->text().toUtf8().constData();
+		prop.propType    = typeCB->currentText().toUtf8().constData();
+		prop.propDefault = defvalEdit->text().toUtf8().constData();
 		widgetInfoTreeNode->addPropertyToAll( prop );
 
 		widgetInfoTreeNode = NULL;
@@ -84,7 +84,7 @@ namespace GUIEditor
 		if( widgetInfoTreeNode == NULL )
 			return false;
 
-		if( widgetInfoTreeNode->hasProperty( nameEdit->text().toStdString() ) )
+		if( widgetInfoTreeNode->hasProperty( nameEdit->text().toUtf8().constData() ) )
 			return false;
 
 		return true;

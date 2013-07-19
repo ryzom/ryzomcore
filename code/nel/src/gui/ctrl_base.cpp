@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "libxml/globals.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/xml_auto_ptr.h"
@@ -146,7 +148,7 @@ namespace NLGUI
 		_ToolTipParent= TTCtrl;
 		if(prop)
 		{
-			_ToolTipParent = stringToToolTipParent( std::string( prop ) );
+			_ToolTipParent = stringToToolTipParent( std::string( (const char*)prop ) );
 		}
 
 		// Tooltip special parent

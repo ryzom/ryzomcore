@@ -19,7 +19,7 @@
 #include "widget_info_serializer.h"
 #include "new_property_widget.h"
 #include "new_widget_widget.h"
-#include <qmessagebox>
+#include <QMessageBox>
 
 namespace GUIEditor{
 	CWidgetProperties::CWidgetProperties( QWidget *parent ) :
@@ -63,7 +63,7 @@ namespace GUIEditor{
 			return;
 
 		QListWidgetItem *item = widgetList->item( i );
-		setPropsOf( item->text().toStdString().c_str() );
+		setPropsOf( item->text().toUtf8().constData() );
 	}
 
 
@@ -83,7 +83,7 @@ namespace GUIEditor{
 		if( reply != QMessageBox::Yes )
 			return;
 
-		tree->removeNode( widgetName.toStdString() );
+		tree->removeNode( widgetName.toUtf8().constData() );
 		widgetPropTree->clear();
 		buildWidgetList();
 	}
@@ -91,12 +91,12 @@ namespace GUIEditor{
 	void CWidgetProperties::onRemovePButtonClicked()
 	{
 		QTreeWidgetItem *item = widgetPropTree->currentItem();
-		CWidgetInfoTreeNode *node = tree->findNodeByName( widgetList->currentItem()->text().toStdString() );
+		CWidgetInfoTreeNode *node = tree->findNodeByName( widgetList->currentItem()->text().toUtf8().constData() );
 
 		if( ( item == NULL ) || ( node == NULL ) )
 			return;
 
-		std::string name = item->text( 0 ).toStdString();
+		std::string name = item->text( 0 ).toUtf8().constData();
 
 		std::vector< SPropEntry >::const_iterator itr = node->getInfo().findProp( name );
 		if( itr == node->getInfo().props.end() )
@@ -133,7 +133,7 @@ namespace GUIEditor{
 		if( ( widgetList->currentRow() >= widgetList->count() ) || ( widgetList->currentRow() < 0 ) )
 			return;
 
-		CWidgetInfoTreeNode *node = tree->findNodeByName( widgetList->currentItem()->text().toStdString() );
+		CWidgetInfoTreeNode *node = tree->findNodeByName( widgetList->currentItem()->text().toUtf8().constData() );
 		if( node == NULL )
 			return;
 

@@ -86,12 +86,14 @@ bool CGroupPhraseSkillFilter::parse (xmlNodePtr cur, CInterfaceGroup *parentGrou
 
 	// Add observer on each Brick Families because if some brick is learned, a new skill may be displayed
 	string sTmp;
+	ICDBNode::CTextId textId;
 	for (uint k = 0; k < BRICK_FAMILIES::NbFamilies; ++k)
 	{
 		_BrickFamilyObs[k].Owner= this;
 		_BrickFamilyObs[k].BrickFamily= (BRICK_FAMILIES::TBrickFamily)k;
 		sTmp = string(DB_BRICKS)+":"+NLMISC::toString((sint32)k)+":BRICKS";
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&(_BrickFamilyObs[k]), ICDBNode::CTextId( sTmp ));
+		textId = ICDBNode::CTextId( sTmp );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&(_BrickFamilyObs[k]), textId );
 	}
 
 	_MustRebuild = true;

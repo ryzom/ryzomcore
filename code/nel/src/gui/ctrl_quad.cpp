@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "nel/gui/ctrl_quad.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
@@ -25,7 +27,7 @@ namespace NLGUI
 {
 
 	// *********************************************************************************
-	CCtrlQuad::CCtrlQuad() : CCtrlBase(TCtorParam()), _Color(CRGBA::White),
+    CCtrlQuad::CCtrlQuad( const TCtorParam &param ) : CCtrlBase( param ), _Color(CRGBA::White),
 													  _Additif(false),
 													  _Filtered(true),
 													  _UMin(0.f),

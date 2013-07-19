@@ -28,6 +28,8 @@ namespace NLGUI
 	class CInterfaceGroupWheel : public CInterfaceGroup
 	{
 	public:
+        DECLARE_UI_CLASS( CInterfaceGroupWheel )
+
 		/// Constructor
 		CInterfaceGroupWheel(const TCtorParam &param);
 

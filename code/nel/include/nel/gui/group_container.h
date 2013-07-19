@@ -48,6 +48,7 @@ namespace NLGUI
 	{
 
 	public:
+        DECLARE_UI_CLASS( CCtrlResizer )
 
 		CCtrlResizer(const TCtorParam &param);
 		virtual void draw ();
@@ -98,8 +99,9 @@ namespace NLGUI
 	class CCtrlMover : public CCtrlBase
 	{
 	public:
+        DECLARE_UI_CLASS( CCtrlMover )
 
-		CCtrlMover(const TCtorParam &param, bool canMove, bool canOpen);
+        CCtrlMover(const TCtorParam &param, bool canMove = true, bool canOpen = true );
 		~CCtrlMover();
 		virtual void draw ();
 		virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
@@ -163,6 +165,7 @@ namespace NLGUI
 			virtual void childrenMoved(uint srcIndex, uint destIndex, CGroupContainer *children) = 0;
 		};
 	public:
+        DECLARE_UI_CLASS( CGroupContainer )
 		CGroupContainer(const TCtorParam &param);
 		~CGroupContainer();
 

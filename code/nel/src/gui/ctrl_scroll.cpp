@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/interface_group.h"
@@ -292,7 +293,8 @@ namespace NLGUI
 			{
 				_IsDBLink = true;
 				_DBLink.link( value.c_str() );
-				_DBLink.getNodePtr()->addObserver( this, ICDBNode::CTextId() );
+				ICDBNode::CTextId dummy;
+				_DBLink.getNodePtr()->addObserver( this, dummy );
 			}
 			return;
 		}

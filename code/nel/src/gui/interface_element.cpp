@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/interface_property.h"
 #include "nel/gui/view_renderer.h"
@@ -362,13 +364,13 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"posparent" );
 		if (ptr)
 		{
-			setPosParent( std::string( ptr ) );
+			setPosParent( std::string( (const char*)ptr ) );
 		}
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"sizeparent" );
 		if (ptr)
 		{
-			setSizeParent( std::string( ptr ) );
+			setSizeParent( std::string( (const char*)ptr ) );
 		}
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"sizeref");

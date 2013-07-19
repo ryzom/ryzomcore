@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+#include "stdpch.h"
 #include "nel/gui/group_modal.h"
 #include "nel/gui/interface_element.h"
 #include "nel/misc/xml_auto_ptr.h"

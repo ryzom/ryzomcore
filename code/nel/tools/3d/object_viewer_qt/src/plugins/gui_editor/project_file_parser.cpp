@@ -121,7 +121,7 @@ namespace GUIEditor
 					QString name = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
 					if( name.isEmpty() )
 						return false;
-					files.projectName = name.toStdString();
+					files.projectName = name.toUtf8().constData();
 				}
 				else
 				if( reader.name() == "version" )
@@ -137,7 +137,7 @@ namespace GUIEditor
 					QString mg = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
 					if( mg.isEmpty() )
 						return false;
-					files.masterGroup = mg.toStdString();
+					files.masterGroup = mg.toUtf8().constData();
 				}
 				else
 				if( reader.name() == "activegroup" )
@@ -145,7 +145,7 @@ namespace GUIEditor
 					QString ag = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
 					if( ag.isEmpty() )
 						return false;
-					files.activeGroup = ag.toStdString();
+					files.activeGroup = ag.toUtf8().constData();
 				}
 			}
 
@@ -171,7 +171,7 @@ namespace GUIEditor
 				QString fileName = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
 				if( fileName.isEmpty() )
 					return false;
-				files.guiFiles.push_back( fileName.toStdString() );
+				files.guiFiles.push_back( fileName.toUtf8().constData() );
 
 			}
 
@@ -201,7 +201,7 @@ namespace GUIEditor
 				QString fileName = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
 				if( fileName.isEmpty() )
 					return false;
-				files.mapFiles.push_back( fileName.toStdString() );
+				files.mapFiles.push_back( fileName.toUtf8().constData() );
 
 			}
 

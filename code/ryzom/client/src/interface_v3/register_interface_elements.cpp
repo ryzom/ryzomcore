@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+#include "stdpch.h"
 #include "interface_3d_scene.h"
 #include "view_radar.h"
 #include "dbctrl_sheet.h"

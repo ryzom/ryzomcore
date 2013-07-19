@@ -86,10 +86,13 @@ bool CGroupSkills::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	_SkillsObs.Owner = this;
 
 	string sTmp;
+	ICDBNode::CTextId textId;
+	
 	for (uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
 	{
 		sTmp = string(DB_SKILLS)+":"+NLMISC::toString((sint32)k)+":BaseSKILL";
-		NLGUI::CDBManager::getInstance()->getDB()->addObserver (&_SkillsObs, ICDBNode::CTextId( sTmp ));
+		textId = ICDBNode::CTextId( sTmp );
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver (&_SkillsObs, textId );
 	}
 
 	_MustRebuild = true;
@@ -280,10 +283,12 @@ CGroupSkills::~CGroupSkills()
 
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
 	string sTmp;
+	ICDBNode::CTextId textId;
 	for (uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
 	{
 		sTmp = string(DB_SKILLS)+":"+NLMISC::toString((sint32)k)+":BaseSKILL";
-		NLGUI::CDBManager::getInstance()->getDB()->removeObserver(&_SkillsObs, ICDBNode::CTextId( sTmp ) );
+		textId = ICDBNode::CTextId( sTmp );
+		NLGUI::CDBManager::getInstance()->getDB()->removeObserver(&_SkillsObs, textId );
 	}
 
 	// first remove any nodes from the tree group

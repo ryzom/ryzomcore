@@ -36,6 +36,7 @@ namespace NLGUI
 	class CViewLink : public CViewText
 	{
 	public:
+        DECLARE_UI_CLASS( CViewLink )
 
 		// Default constructor
 		CViewLink (const TCtorParam &param);

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#include "stdpch.h"
 #include "nel/gui/ctrl_text_button.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/gui/view_text.h"

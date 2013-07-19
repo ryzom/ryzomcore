@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "nel/gui/interface_options.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/group_menu.h"
@@ -2180,7 +2181,7 @@ namespace NLGUI
 		if (prop)
 		{
 			if( editorMode )
-				_Extends = std::string( prop );
+				_Extends = std::string( (const char*)prop );
 
 			CGroupMenu *gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(prop));
 			if (!gm)
