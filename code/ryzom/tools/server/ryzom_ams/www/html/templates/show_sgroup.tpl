@@ -86,6 +86,10 @@
 		<div class="alert alert-error">
 			{$user_not_existing}
 		</div>
+		{else if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "NOT_MOD_OR_ADMIN"}
+		<div class="alert alert-error">
+			{$not_mod_or_admin}
+		</div>
 		{/if}
 		</form>
 		

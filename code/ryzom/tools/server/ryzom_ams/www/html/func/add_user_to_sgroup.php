@@ -9,7 +9,12 @@ function add_user_to_sgroup(){
             $id = filter_var($_POST['target_id'],FILTER_SANITIZE_NUMBER_INT);
             $user_id = WebUsers::getId($name);
             if ($user_id != ""){
-                $result['RESULT_OF_ADDING'] = Support_Group::addUserToSupportGroup($user_id, $id);
+                if (Ticket_User::constr_ExternId($user_id)->getPermission()>1){
+                    $result['RESULT_OF_ADDING'] = Support_Group::addUserToSupportGroup($user_id, $id);
+                }else{
+                    $result['RESULT_OF_ADDING'] = "NOT_MOD_OR_ADMIN";
+                }
+            
             }else{
                 $result['RESULT_OF_ADDING'] = "USER_NOT_EXISTING";
             }

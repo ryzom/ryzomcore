@@ -186,6 +186,7 @@
           `Author` INT UNSIGNED NOT NULL ,
           `Content` INT UNSIGNED NOT NULL ,
           `Timestamp` TIMESTAMP NULL ,
+          `Hidden` TINYINT(1) NULL DEFAULT 0 ,
           PRIMARY KEY (`TReplyId`) ,
           INDEX `fk_ticket_reply_ticket_idx` (`Ticket` ASC) ,
           INDEX `fk_ticket_reply_ams_user_idx` (`Author` ASC) ,
