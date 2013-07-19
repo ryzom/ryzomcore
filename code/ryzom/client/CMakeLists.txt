@@ -1,4 +1,9 @@
+
+# Need clientsheets lib for sheets packer tool
 ADD_SUBDIRECTORY(src)
+
+IF(WITH_RYZOM_CLIENT)
+
 #ADD_SUBDIRECTORY(data)
 #ADD_SUBDIRECTORY(patcher)
 
@@ -12,3 +17,5 @@ IF(RYZOM_ETC_PREFIX)
 ELSE(RYZOM_ETC_PREFIX)
   INSTALL(FILES client_default.cfg DESTINATION etc/ryzom)
 ENDIF(RYZOM_ETC_PREFIX)
+
+ENDIF(WITH_RYZOM_CLIENT)

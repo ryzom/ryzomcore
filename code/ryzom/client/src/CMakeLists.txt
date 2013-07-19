@@ -1,10 +1,15 @@
+
+# Need clientsheets lib for sheets packer tool
+ADD_SUBDIRECTORY(client_sheets)
+
+IF(WITH_RYZOM_CLIENT)
+
 # These are Windows/MFC apps
 IF(WIN32)
 #  ADD_SUBDIRECTORY(bug_report)
   SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
 ENDIF(WIN32)
 
-ADD_SUBDIRECTORY(client_sheets)
 ADD_SUBDIRECTORY(seven_zip)
 
 FILE(GLOB CFG ../*.cfg ../*.cfg.in)
@@ -124,3 +129,5 @@ IF(WITH_PCH)
 ENDIF(WITH_PCH)
 
 INSTALL(TARGETS ryzom_client RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)
+
+ENDIF(WITH_RYZOM_CLIENT)

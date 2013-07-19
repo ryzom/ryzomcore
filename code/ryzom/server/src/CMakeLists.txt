@@ -1,7 +1,14 @@
+
 # Supporting modules and libraries.
-ADD_SUBDIRECTORY(admin_modules)
+# Need servershare for build packed collision tool
+# Need aishare for build wmap tool
 ADD_SUBDIRECTORY(server_share)
 ADD_SUBDIRECTORY(ai_share)
+
+IF(WITH_RYZOM_SERVER)
+
+# Supporting modules and libraries.
+ADD_SUBDIRECTORY(admin_modules)
 ADD_SUBDIRECTORY(gameplay_module_lib)
 ADD_SUBDIRECTORY(pd_lib)
 
@@ -40,3 +47,5 @@ ADD_SUBDIRECTORY(general_utilities_service)
 #sabrina
 #simulation_service
 #testing_tool_service
+
+ENDIF(WITH_RYZOM_SERVER)
