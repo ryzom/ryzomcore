@@ -42,3 +42,4 @@ $DEFAULT_LANGUAGE = 'en';
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 
 $TICKET_LOGGING = true;
+$TIME_FORMAT = "m-d-Y H:i:s";

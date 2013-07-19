@@ -110,6 +110,7 @@ class Helpers{
      
      //Time output function for handling the time display function.
      static public function outputTime($time){
-          return date("m-d-Y H:i:s",strtotime($time));
+          global $TIME_FORMAT;
+          return date($TIME_FORMAT,strtotime($time));
      }
 }
