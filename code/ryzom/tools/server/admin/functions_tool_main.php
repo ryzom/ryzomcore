@@ -1,12 +1,12 @@
 <?php
 
-	$refresh_rates = array( /* // there values are for debug purposes only
+	$refresh_rates = array( 
 							array('desc' => 'Every 5 secs',
 								  'secs' => 5,
 								  ),
 							array('desc' => 'Every 30 secs',
 								  'secs' => 30,
-								  ),*/
+								  ),
 							array('desc' => 'Every 1 min.',
 								  'secs' => 60,
 								  ),

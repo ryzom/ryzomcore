@@ -25,6 +25,7 @@ IF(WITH_NEL_TOOLS)
     shapes_exporter
     tga_cut
     tga_resize
+		shape2obj
     zone_check_bind
     zone_dump
     zviewer)

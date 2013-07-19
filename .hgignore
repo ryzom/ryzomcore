@@ -147,6 +147,7 @@ external_stlport
 *.lnk
 thumbs.db
 Thumbs.db
+.Sync*
 
 # build
 code/nel/build/*
