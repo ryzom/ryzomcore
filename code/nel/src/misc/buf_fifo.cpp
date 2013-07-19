@@ -26,6 +26,10 @@ using namespace std;
 // if 0, don't stat the time of different function
 #define STAT_FIFO 1
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 #ifdef BUFFIFO_TRACK_ALL_BUFFERS

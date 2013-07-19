@@ -109,14 +109,14 @@ public:
 
 	/// Loads a file animations
 	/// @param fileName - name animation file
-	void loadAnimation(std::string &fileName);
+	void loadAnimation(const std::string &fileName);
 
 	/// Loads a file skeleton weight
-	void loadSWT(std::string &fileName);
+	void loadSWT(const std::string &fileName);
 
 	/// Adds an animation to a playlist
 	/// @param name - name loaded animations
-	void addAnimToPlayList(std::string &name);
+	void addAnimToPlayList(const std::string &name);
 
 	/// Removes the animation from a playlist
 	/// @param row - number of animations in the playlist
@@ -135,10 +135,10 @@ public:
 
 	/// Get the total time of animation playlist
 	/// @return total time of animation
-	float getPlayListLength();
+	float getPlayListLength() const;
 
 	/// get time length single animation
-	float getAnimLength(std::string name);
+	float getAnimLength(const std::string &name) const;
 
 	/// Get slot infomation
 	void setSlotInfo(uint num, CSlotInfo &slotInfo)
@@ -159,7 +159,7 @@ public:
 	}
 
 	/// Get in place mode
-	bool getInPlace()
+	bool getInPlace() const
 	{
 		return _inPlace;
 	}
@@ -171,35 +171,35 @@ public:
 	}
 
 	/// Get inc position
-	bool getIncPos()
+	bool getIncPos() const
 	{
 		return _incPos;
 	}
 
 	/// Get information about the current status of playing a playlist
 	/// @return struct containing current information playback
-	SAnimationStatus getStatus()
+	SAnimationStatus getStatus() const
 	{
 		return _AnimationStatus;
 	}
 
 	/// Get name entity
 	/// @return name entity
-	std::string getName()
+	std::string getName() const
 	{
 		return _Name;
 	}
 
 	/// Get file name shape
 	/// @return file name shape
-	std::string getFileNameShape()
+	std::string getFileNameShape() const
 	{
 		return _FileNameShape;
 	}
 
 	/// Get file name skeleton
 	/// @return file name skeleton
-	std::string getFileNameSkeleton()
+	std::string getFileNameSkeleton() const
 	{
 		return _FileNameSkeleton;
 	}

@@ -14,7 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "georges_treeview_dialog.h"
+#include "georges.h"
+#include "georgesform_model.h"
+#include "georgesform_proxy_model.h"
+#include "formitem.h"
+#include "formdelegate.h"
+#include "expandable_headerview.h"
 
 // Qt includes
 #include <QtGui/QWidget>
@@ -35,14 +42,6 @@
 // OVQT Includes
 #include "../core/icore.h"
 #include "../core/core_constants.h"
-
-// Project includes
-#include "georges.h"
-#include "georgesform_model.h"
-#include "georgesform_proxy_model.h"
-#include "formitem.h"
-#include "formdelegate.h"
-#include "expandable_headerview.h"
 
 using namespace NLMISC;
 using namespace NLGEORGES;

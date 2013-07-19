@@ -152,7 +152,7 @@ namespace NLQT
 		QString oldLdPath = Modules::config().getValue("LeveldesignPath", std::string("")).c_str();
 		if (oldLdPath != ui.leveldesignPath->text())
 		{
-			std::string ldPath = ui.leveldesignPath->text().toUtf8();
+			std::string ldPath = ui.leveldesignPath->text().toUtf8().constData();
 			Modules::config().getConfigFile().getVar("LeveldesignPath").forceAsString(ldPath);
 			Q_EMIT ldPathChanged(ldPath.c_str());
 			// TODO: remove old Path from CPath
@@ -171,8 +171,8 @@ namespace NLQT
 		std::vector<std::string> addList;
 		for (sint i = 0; i < ui.pathsListWidget->count(); ++i)
 		{
-			std::string str = ui.pathsListWidget->item(i)->text().toUtf8();
-			if (str != "")
+			std::string str = ui.pathsListWidget->item(i)->text().toUtf8().constData();
+			if (!str.empty())
 			{
 				list.push_back(str);
 				if (!sl.contains(str.c_str()))

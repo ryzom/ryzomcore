@@ -117,7 +117,7 @@ CEntity::~CEntity(void)
 	}
 }
 
-void CEntity::loadAnimation(std::string &fileName)
+void CEntity::loadAnimation(const std::string &fileName)
 {
 	uint id = _AnimationSet->addAnimation(fileName.c_str(),CFile::getFilenameWithoutExtension(fileName).c_str());
 	_AnimationList.push_back(_AnimationSet->getAnimationName(id));
@@ -128,13 +128,13 @@ void CEntity::loadAnimation(std::string &fileName)
 		_PlayList->registerTransform(_Instance);
 }
 
-void CEntity::loadSWT(std::string &fileName)
+void CEntity::loadSWT(const std::string &fileName)
 {
 	uint id = _AnimationSet->addSkeletonWeight(fileName.c_str(),CFile::getFilenameWithoutExtension(fileName).c_str());
 	_SWTList.push_back(_AnimationSet->getSkeletonWeightName(id));
 }
 
-void CEntity::addAnimToPlayList(std::string &name)
+void CEntity::addAnimToPlayList(const std::string &name)
 {
 	_PlayListAnimation.push_back(name);
 
@@ -176,7 +176,7 @@ void CEntity::reset()
 	_PlayList->resetAllChannels();
 }
 
-float CEntity::getPlayListLength()
+float CEntity::getPlayListLength() const
 {
 	// Accumul all the time
 	float time = 0;
@@ -185,7 +185,7 @@ float CEntity::getPlayListLength()
 	return time;
 }
 
-float CEntity::getAnimLength(std::string name)
+float CEntity::getAnimLength(const std::string &name) const
 {
 	uint id = _AnimationSet->getAnimationIdByName(name.c_str());
 	NL3D::UAnimation *anim = _AnimationSet->getAnimation(id);

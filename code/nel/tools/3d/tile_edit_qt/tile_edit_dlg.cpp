@@ -383,7 +383,7 @@ void CTile_edit_dlg::on_loadPushButton_clicked()
 
 void CTile_edit_dlg::on_savePushButton_clicked()
 {
-	string fullPath = this->mainFile.absoluteFilePath().toUtf8();
+	string fullPath = this->mainFile.absoluteFilePath().toUtf8().constData();
 	if ( !fullPath.empty() )
 	{
 		COFile stream;
@@ -411,7 +411,7 @@ void CTile_edit_dlg::on_saveAsPushButton_clicked()
 		ui.savePushButton->setEnabled(true);
 
 
-		string fullPath = this->mainFile.absoluteFilePath().toUtf8();
+		string fullPath = this->mainFile.absoluteFilePath().toUtf8().constData();
 		if ( !fullPath.empty() )
 		{
 			COFile stream;
@@ -445,7 +445,7 @@ void CTile_edit_dlg::on_exportPushButton_clicked()
 		copy.cleanUnusedData ();
 
 		QFileInfo fileInfo(fileName);
-		string fullPath = fileInfo.absoluteFilePath().toUtf8();
+		string fullPath = fileInfo.absoluteFilePath().toUtf8().constData();
 		if ( !fullPath.empty() )
 		{
 			COFile stream;

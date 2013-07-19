@@ -20,6 +20,10 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 	const uint64 CEntityId::MaxEntityId = ((uint64)1 << (CEntityId::ID_SIZE + 1)) - (uint64)1;

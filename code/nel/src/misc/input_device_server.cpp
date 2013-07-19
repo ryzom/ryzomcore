@@ -15,10 +15,14 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
+
 #include "nel/misc/input_device_server.h"
 #include "nel/misc/input_device.h"
+#include "nel/misc/debug.h"
 
-
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

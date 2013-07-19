@@ -17,8 +17,8 @@
 
 #include "stdmisc.h"
 
-#include "nel/misc/big_file.h"
 #include "nel/misc/path.h"
+#include "nel/misc/big_file.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/progress_callback.h"
 #include "nel/misc/file.h"
@@ -47,6 +47,10 @@
 #endif // NL_OS_WINDOWS
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 

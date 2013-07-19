@@ -110,7 +110,7 @@ void CMorphMeshDialog::add()
 		shapeNames.resize(_CM->getNumShapes() + 1);
 		_CM->getShapesNames(&shapeNames[0]);
 		uint index = (uint)shapeNames.size() - 1;
-		shapeNames[index] = fileName.toUtf8();
+		shapeNames[index] = fileName.toUtf8().constData();
 		_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
 		std::vector<sint> numVerts;
 		_CM->getShapeNumVerts(numVerts);

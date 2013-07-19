@@ -15,15 +15,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
+#include "nel/misc/win_thread.h"
 
 #ifdef NL_OS_WINDOWS
 
-#include "nel/misc/win_thread.h"
 #include "nel/misc/path.h"
 #define NOMINMAX
 #include <windows.h>
 
 #include <typeinfo>
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 

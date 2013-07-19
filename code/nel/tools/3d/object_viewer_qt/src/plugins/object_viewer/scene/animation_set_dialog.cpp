@@ -161,8 +161,7 @@ void CAnimationSetDialog::loadAnim()
 		QStringList::Iterator it = list.begin();
 		while(it != list.end())
 		{
-			std::string animName = it->toUtf8();
-			entity.loadAnimation(animName);
+			entity.loadAnimation(it->toUtf8().constData());
 			++it;
 		}
 		updateListAnim();
@@ -187,8 +186,7 @@ void CAnimationSetDialog::loadSwt()
 		QStringList::Iterator it = list.begin();
 		while(it != list.end())
 		{
-			std::string swtName = it->toUtf8();
-			entity.loadSWT(swtName);
+			entity.loadSWT(it->toUtf8().constData());
 			++it;
 		}
 		updateListAnim();
@@ -212,8 +210,7 @@ void CAnimationSetDialog::addAnim()
 
 	Q_FOREACH(QTreeWidgetItem *item, list)
 	{
-		std::string animName = item->text(0).toUtf8();
-		entity.addAnimToPlayList(animName);
+		entity.addAnimToPlayList(item->text(0).toUtf8().constData());
 		ui.animPlaylistWidget->addItem(item->text(0));
 	}
 }

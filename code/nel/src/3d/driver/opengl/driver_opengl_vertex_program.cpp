@@ -205,8 +205,8 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 	return false;
 }
 
-
 // ***************************************************************************
+#ifndef USE_OPENGLES
 static
 inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 {
@@ -216,16 +216,11 @@ inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 	{
 		switch(comp)
 		{
-#ifdef USE_OPENGLES
-			case CVPSwizzle::X: return GL_TEXTURE_CUBE_MAP_POSITIVE_X_OES;
-			case CVPSwizzle::Y: return GL_TEXTURE_CUBE_MAP_POSITIVE_Y_OES;
-			case CVPSwizzle::Z: return GL_TEXTURE_CUBE_MAP_POSITIVE_Z_OES;
-#else
 			case CVPSwizzle::X: return GL_X_EXT;
 			case CVPSwizzle::Y: return GL_Y_EXT;
 			case CVPSwizzle::Z: return GL_Z_EXT;
 			case CVPSwizzle::W: return GL_W_EXT;
-#endif
+
 			default:
 				nlstop;
 				return 0;
@@ -236,16 +231,11 @@ inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 	{
 		switch(comp)
 		{
-#ifdef USE_OPENGLES
-			case CVPSwizzle::X: return GL_TEXTURE_CUBE_MAP_NEGATIVE_X_OES;
-			case CVPSwizzle::Y: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_OES;
-			case CVPSwizzle::Z: return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_OES;
-#else
 			case CVPSwizzle::X: return GL_NEGATIVE_X_EXT;
 			case CVPSwizzle::Y: return GL_NEGATIVE_Y_EXT;
 			case CVPSwizzle::Z: return GL_NEGATIVE_Z_EXT;
 			case CVPSwizzle::W: return GL_NEGATIVE_W_EXT;
-#endif
+
 			default:
 				nlstop;
 				return 0;
@@ -253,6 +243,7 @@ inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 		}
 	}
 }
+#endif
 
 // ***************************************************************************
 /** Convert an output register to a EXTVertexShader register

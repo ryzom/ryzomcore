@@ -21,6 +21,10 @@
 #include "modules.h"
 #include "georges_splash.h"
 
+#ifdef HAVE_GEQT_CONFIG_H
+#include "geqt_config.h"
+#endif
+
 // nel_qt log file name
 #define NLQT_LOG_FILE "nel_qt.log"
 

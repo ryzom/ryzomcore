@@ -23,7 +23,7 @@ using namespace NLMISC;
 #ifdef NL_DEBUG
 #define INFO nlinfo
 #else // NL_DEBUG
-#	if defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
+#	if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
 #		define INFO __noop
 #	else
 #		define INFO 0&&

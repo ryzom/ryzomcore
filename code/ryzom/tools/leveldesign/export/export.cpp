@@ -2023,7 +2023,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 
 
 		// Make the .IG
-		string ZoneName = "";
+		string ZoneName;
 		ZoneName += NLMISC::toString(-j) + "_";
 		ZoneName += 'a' + (i/26);
 		ZoneName += 'a' + (i%26);
