@@ -45,8 +45,7 @@ class Gui_Elements{
     }
     
     public static function time_elapsed_string($ptime){
-        
-        $ptime = strtotime($ptime);
+        $ptime = DateTime::createFromFormat('m-d-Y H:i:s', $ptime)->getTimestamp();
         
         $etime = time() - $ptime;
     

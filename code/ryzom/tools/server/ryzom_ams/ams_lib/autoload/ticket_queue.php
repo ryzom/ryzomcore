@@ -3,6 +3,13 @@ class Ticket_Queue{
     
     protected $queueElements;
     
+    public function loadAllNotAssignedTickets(){
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->executeWithoutParams("SELECT ticket . * FROM ticket LEFT JOIN assigned ON ticket.TId = assigned.Ticket WHERE assigned.Ticket IS NULL");
+        $rows = $statement->fetchAll();
+        $this->setQueue($rows);
+    }
+    
     public function loadAllOpenTickets(){
         $dbl = new DBLayer("lib");
         $statement = $dbl->executeWithoutParams("SELECT * FROM ticket INNER JOIN ticket_user ON ticket.Author = ticket_user.TUserId and ticket.Status!=3");

@@ -55,6 +55,7 @@
 		    <li class="divider"></li>
 		    <li><a href="index.php?page=show_queue&get=all_open">All open tickets</a></li>
 		    <li><a href="index.php?page=show_queue&get=archive">Ticket Archive</a></li>
+		    <li><a href="index.php?page=show_queue&get=not_assigned">Not Assigned Tickets</a></li>
 		    <li class="divider"></li>
                 </ul>
               </div>

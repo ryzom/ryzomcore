@@ -7,7 +7,7 @@ function show_queue(){
         if( Ticket_User::isMod($_SESSION['ticket_user'])){
             $result['queue_action'] = filter_var($_GET['get'], FILTER_SANITIZE_STRING);
    
-            $queueArray = Ticket_Queue_Handler::getTickets($result['queue_action'],2);
+            $queueArray = Ticket_Queue_Handler::getTickets($result['queue_action']);
             if ($queueArray != "ERROR"){    
                 $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText"), Array("tId","title","timestamp","authorExtern","category","status","statusText"));
              
