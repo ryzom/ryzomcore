@@ -206,6 +206,8 @@ public:
 	static void	hashToUCString(uint64 hash, ucstring &dst);
 	//@}
 
+	static void setNoResolution( bool b ){ noResolution = b; }
+
 private:
 
 	typedef std::map<std::string, ucstring>						StrMapContainer;
@@ -254,6 +256,9 @@ private:
 								TLineFormat lineFmt,
 							    bool warnIfIncludesNotFound,
 								TReadContext &readContext);
+
+	// Don't resolve labels
+	static bool noResolution;
 };
 
 } // NLMISC

@@ -22,8 +22,8 @@
 
 #include "view_radar.h"
 #include "interface_manager.h"
-#include "game_share/xml_auto_ptr.h"
-#include "group_container.h"
+#include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/group_container.h"
 #include "../npc_icon.h"
 #include "nel/misc/fast_floor.h"
 
@@ -43,14 +43,14 @@ CViewRadar::CViewRadar(const TCtorParam &param)
 	: CViewBase(param)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pUIMI = pIM->getDbProp( "UI:SAVE:INSCENE:FRIEND:MISSION_ICON" );
+	CCDBNodeLeaf *pUIMI = CDBManager::getInstance()->getDbProp( "UI:SAVE:INSCENE:FRIEND:MISSION_ICON" );
 	if (pUIMI)
 	{
 		ICDBNode::CTextId textId;
 		pUIMI->addObserver( &_MissionIconsObs, textId);
 	}
-
-	CCDBNodeLeaf *pUIMMI = pIM->getDbProp( "UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON" );
+	
+	CCDBNodeLeaf *pUIMMI = CDBManager::getInstance()->getDbProp( "UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON" );	
 	if (pUIMMI)
 	{
 		ICDBNode::CTextId textId;
@@ -79,7 +79,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 
 	// Spot textures
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	
 	// Large missions Icons
 	const char *spotTextureNames[NbRadarSpotIds] = { "texture_std", "texture_missionlist", "texture_missionauto", "texture_missionstep" };
@@ -124,7 +124,7 @@ bool CViewRadar::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 void CViewRadar::draw ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	CEntityCL *user = EntitiesMngr.entity(0);
 	if (user == NULL) return;
@@ -170,14 +170,14 @@ void CViewRadar::draw ()
 		CRGBA col = entity->getColor();
 
 		if(getModulateGlobalColor())
-			col.modulateFromColor (col, pIM->getGlobalColorForContent());
+			col.modulateFromColor (col, CWidgetManager::getInstance()->getGlobalColorForContent());
 		else
-			col.A = (uint8)(((sint32)col.A*((sint32)pIM->getGlobalColorForContent().A+1))>>8);
+			col.A = (uint8)(((sint32)col.A*((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 
 		// Select the icon to display and draw it
 		uint spotId = CNPCIconCache::getInstance().getNPCIcon(entity).getSpotId();
 		CRadarSpotDesc spotDesc = _SpotDescriptions[spotId];
-
+			
 		if (!_MissionIconsObs._displayMissionSpots)
 			spotDesc = _SpotDescriptions[0];
 

@@ -26,7 +26,9 @@
 
 
 // ***************************************************************************
+namespace NLMISC{
 class CCDBNodeLeaf;
+}
 
 // ***************************************************************************
 /**
@@ -58,7 +60,7 @@ protected:
 	virtual bool		 getDbPos(sint32 &px, sint32 &py) = 0;
 
 	// helper to serial a CDBNodeLeaf, based on itsname
-	void serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode);
+	void serialNodeLeaf(NLMISC::IStream &f, NLMISC::CCDBNodeLeaf *&dbNode);
 
 };
 
@@ -82,8 +84,8 @@ public:
 	virtual			void serial(NLMISC::IStream &f);
 protected:
 	// Database infos
-	CCDBNodeLeaf				*_DBPos;
-	CCDBNodeLeaf				*_Uid;
+	NLMISC::CCDBNodeLeaf				*_DBPos;
+	NLMISC::CCDBNodeLeaf				*_Uid;
 	// The slot of the entity that may be used to get more precise position
 	CLFECOMMON::TCLEntityId		_EntitySlot;
 	virtual CEntityCL	*getEntity();
@@ -103,18 +105,18 @@ class CNamedEntityPositionState : public CPositionState
 public:
 	NLMISC_DECLARE_CLASS(CNamedEntityPositionState)
 	virtual bool	dbOk() {return _Name && _X && _Y;}
-	void			build(CCDBNodeLeaf *name, CCDBNodeLeaf *x, CCDBNodeLeaf *y);
-	CCDBNodeLeaf	*getNameNode() const { return _Name; }
-	CCDBNodeLeaf	*getXNode() const { return _X; }
-	CCDBNodeLeaf	*getYNode() const { return _X; }
+	void			build(NLMISC::CCDBNodeLeaf *name, NLMISC::CCDBNodeLeaf *x, NLMISC::CCDBNodeLeaf *y);
+	NLMISC::CCDBNodeLeaf	*getNameNode() const { return _Name; }
+	NLMISC::CCDBNodeLeaf	*getXNode() const { return _X; }
+	NLMISC::CCDBNodeLeaf	*getYNode() const { return _X; }
 	//
 	virtual bool	canSave() const { return true; }
 	virtual	void	serial(NLMISC::IStream &f);
 protected:
 	// Database infos
-	CCDBNodeLeaf				*_Name;
-	CCDBNodeLeaf				*_X;
-	CCDBNodeLeaf				*_Y;
+	NLMISC::CCDBNodeLeaf				*_Name;
+	NLMISC::CCDBNodeLeaf				*_X;
+	NLMISC::CCDBNodeLeaf				*_Y;
 	virtual CEntityCL	*getEntity();
 	virtual bool		 getDbPos(sint32 &px, sint32 &py);
 };
@@ -148,7 +150,7 @@ public:
 	virtual	void	serial(NLMISC::IStream &/* f */) { nlassert(0); /* notsavable */ }
 protected:
 	// Database infos
-	CCDBNodeLeaf				*_Present;
+	NLMISC::CCDBNodeLeaf				*_Present;
 	// DB ok.
 	bool						dbOk() {return _DBPos && _Present && _Uid;}
 
@@ -182,7 +184,7 @@ public:
 
 private:
 	// Animal Database infos
-	CCDBNodeLeaf				*_Status;
+	NLMISC::CCDBNodeLeaf				*_Status;
 	// DB ok.
 	bool						dbOk() {return _DBPos && _Status && _Uid;}
 

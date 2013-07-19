@@ -17,11 +17,11 @@
 #ifndef NL_RGBA_H
 #define NL_RGBA_H
 
+
 #include "types_nl.h"
 #include "common.h"
 
 #include <algorithm>
-
 
 namespace NLMISC
 {
@@ -325,6 +325,11 @@ public:
 			  */
 			void buildFromHLS(float h, float l, float s);
 	//@}
+
+	static CRGBA stringToRGBA( const char *ptr );
+
+	std::string toString() const;
+	bool fromString( const std::string &s );
 
 
 	/// Swap the B and R components, to simulate a CBRGA

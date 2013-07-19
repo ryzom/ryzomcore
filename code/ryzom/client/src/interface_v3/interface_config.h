@@ -21,8 +21,14 @@
 
 #include "nel/misc/stream.h"
 
-class CGroupContainer;
-class CCDBNodeLeaf;
+namespace NLGUI
+{
+	class CGroupContainer;
+}
+
+namespace NLMISC{
+	class CCDBNodeLeaf;
+}
 
 /**
  * interface config
@@ -75,8 +81,8 @@ public:
 		// ------------------------------
 		void serial (NLMISC::IStream &f);
 		// ------------------------------
-		void setFrom (CGroupContainer *pGC);
-		void setTo (CGroupContainer *pGC);
+		void setFrom ( NLGUI::CGroupContainer *pGC);
+		void setTo ( NLGUI::CGroupContainer *pGC);
 	};
 
 	// Image of a desktop
@@ -94,7 +100,7 @@ public:
 		// Set current desktop from this desktop image
 		void toCurrentDesktop();
 		// Update image of the given group container (added to the list if it does not exist)
-		void updateGroupContainerImage(CGroupContainer &gc);
+		void updateGroupContainerImage( NLGUI::CGroupContainer &gc);
 		// Remove a group container from the image
 		void removeGroupContainerImage(const std::string &groupName);
 	private:
@@ -111,8 +117,8 @@ public:
 		// ------------------------------
 		void serial (NLMISC::IStream &f);
 		// ------------------------------
-		void setFrom (CCDBNodeLeaf *pNL);
-		void setTo (CCDBNodeLeaf *pNL);
+		void setFrom (NLMISC::CCDBNodeLeaf *pNL);
+		void setTo (NLMISC::CCDBNodeLeaf *pNL);
 	};
 
 	void dataBaseToStream (NLMISC::IStream &f);

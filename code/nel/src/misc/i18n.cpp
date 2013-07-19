@@ -37,6 +37,7 @@ string					CI18N::_SelectedLanguageCode;
 CI18N::ILoadProxy		*CI18N::_LoadProxy = 0;
 vector<string>			CI18N::_LanguageCodes;
 vector<ucstring>		CI18N::_LanguageNames;
+bool CI18N::noResolution = false;
 
 void CI18N::setLoadProxy(ILoadProxy *loadProxy)
 {
@@ -164,6 +165,13 @@ void CI18N::loadFromFilename(const string &filename, bool reload)
 
 const ucstring &CI18N::get (const string &label)
 {
+	if( noResolution )
+	{
+		static ucstring labelString;
+		labelString = label;
+		return labelString;
+	}
+
 	if (label.empty())
 	{
 		static ucstring	emptyString;

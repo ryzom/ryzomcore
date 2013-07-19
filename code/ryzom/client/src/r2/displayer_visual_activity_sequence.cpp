@@ -19,9 +19,9 @@
 #include "displayer_visual_group.h"
 #include "r2_config.h"
 //
-#include "../interface_v3/ctrl_quad.h"
+#include "nel/gui/ctrl_quad.h"
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/view_renderer.h"
+#include "nel/gui/view_renderer.h"
 
 
 using namespace NLMISC;
@@ -598,7 +598,7 @@ void CDisplayerVisualActivitySequence::onUpdate(CGroupMap &owner)
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_onUpdate)
 	nlassert(_AddedToWorldMap);
 	nlassert(_FootSteps.size() == _WorldMapEdges.size());
-	CViewRenderer &vr = getEditor().getUI().getViewRenderer();
+	CViewRenderer &vr = *CViewRenderer::getInstance();
 	sint32 id = vr.getTextureIdFromName(CV_FootStepMapTexture.get());
 	sint32 width, height;
 	vr.getTextureSizeFromId(id, width, height);

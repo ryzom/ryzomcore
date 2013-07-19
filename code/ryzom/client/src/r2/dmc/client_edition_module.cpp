@@ -330,12 +330,12 @@ void CEditorConfig::setDisplayInfo(const std::string& formName, bool displayInfo
 	//H_AUTO(R2_CEditorConfig_setDisplayInfo)
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 	uint32 index = _NameToId[formName];
-	uint32 newValue = static_cast<uint32>(IM->getDbProp("UI:SAVE:R2:DISPLAYINFO")->getValue32());
+	uint32 newValue = static_cast<uint32>(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:R2:DISPLAYINFO")->getValue32());
 	if (displayInfo == false )
 		newValue &= ~(1 << index);
 	else
 		newValue |= (1 << index);
-	IM->getDbProp("UI:SAVE:R2:DISPLAYINFO")->setValue32(static_cast<sint32>(newValue));
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:R2:DISPLAYINFO")->setValue32(static_cast<sint32>(newValue));
 
 }
 
@@ -343,7 +343,7 @@ void CEditorConfig::setDisplayInfo(uint32 displayInfo)
 {
 	//H_AUTO(R2_CEditorConfig_setDisplayInfo)
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
-	IM->getDbProp("UI:SAVE:R2:DISPLAYINFO")->setValue32(static_cast<sint32>(displayInfo));
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:R2:DISPLAYINFO")->setValue32(static_cast<sint32>(displayInfo));
 }
 
 
@@ -356,7 +356,7 @@ bool CEditorConfig::mustDisplayInfo(const std::string& formName) const
 	if (found == _NameToId.end())
 		return false;
 	uint32 index = (*found).second;
-	uint32 newValue = static_cast<uint32>(IM->getDbProp("UI:SAVE:R2:DISPLAYINFO")->getValue32());
+	uint32 newValue = static_cast<uint32>(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:R2:DISPLAYINFO")->getValue32());
 	uint32 ok = (newValue >> index) & 0x00000001;
 	if (ok != 0)
 		return true;
@@ -376,7 +376,7 @@ uint32 CEditorConfig::getDisplayInfo() const
 {
 	//H_AUTO(R2_CEditorConfig_getDisplayInfo)
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
-	return static_cast<uint32>(IM->getDbProp("UI:SAVE:R2:DISPLAYINFO")->getValue32());
+	return static_cast<uint32>(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:R2:DISPLAYINFO")->getValue32());
 }
 
 

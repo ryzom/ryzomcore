@@ -18,10 +18,10 @@
 
 // Interface includes
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "action_handler_tools.h"
 #include "game_share/outpost.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "group_map.h"
 #include "../sheet_manager.h"
 #include "../net_manager.h"
@@ -44,7 +44,7 @@ using namespace NLMISC;
 uint8 getOutpostSelection()
 {
 	uint8 nOutpost = 0;
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SELECTION",false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SELECTION",false);
 	if (pNL != NULL)
 		nOutpost = (uint8)pNL->getValue32();
 	return nOutpost;
@@ -54,7 +54,7 @@ uint32 getOutpostSheet()
 {
 	uint32	sheet= 0;
 	uint8	outpostSel= getOutpostSelection();
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp(toString("SERVER:GUILD:OUTPOST:O%d:SHEET", outpostSel),false);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GUILD:OUTPOST:O%d:SHEET", outpostSel),false);
 	if (pNL != NULL)
 		sheet = pNL->getValue32();
 	return sheet;
@@ -70,7 +70,7 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// set confirm dialog flag
-		pIM->getDbProp("UI:TEMP:OUTPOST:CONFIRM_DEL_OUTPOST")->setValueBool(true);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:CONFIRM_DEL_OUTPOST")->setValueBool(true);
 
 		// Ask if ok before.
 		pIM->validMessageBox(CInterfaceManager::QuestionIconMsg, CI18N::get("uiQConfirmGiveupOutpost"),
@@ -88,7 +88,7 @@ public:
 		uint32	sheet= 0;
 		uint8	outpostSel;
 		fromString(sParams, outpostSel);
-		CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp(toString("SERVER:GUILD:OUTPOST:O%d:SHEET", outpostSel),false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GUILD:OUTPOST:O%d:SHEET", outpostSel),false);
 		if (pNL == NULL)
 			return;
 		sheet = pNL->getValue32();
@@ -98,7 +98,7 @@ public:
 
 		// reset confirm dialog flag
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->getDbProp("UI:TEMP:OUTPOST:CONFIRM_DEL_OUTPOST")->setValueBool(false);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:CONFIRM_DEL_OUTPOST")->setValueBool(false);
 	}
 };
 REGISTER_ACTION_HANDLER(COutpostDoGiveup, "outpost_do_giveup");
@@ -110,7 +110,7 @@ public:
 	{
 		// reset confirm dialog flag
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		pIM->getDbProp("UI:TEMP:OUTPOST:CONFIRM_DEL_OUTPOST")->setValueBool(false);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:CONFIRM_DEL_OUTPOST")->setValueBool(false);
 	}
 };
 REGISTER_ACTION_HANDLER(COutpostCancelGiveup, "outpost_cancel_giveup");
@@ -125,7 +125,7 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// get Squad slot Destination selected
-		uint8 nSquadSlot = pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
+		uint8 nSquadSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
 
 		// get Squad Id to buy selected
 		string sLine = getParam(sParams, "line");
@@ -156,7 +156,7 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// get Squad slot Destination selected
-		uint8 nSquadSlot = pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
+		uint8 nSquadSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
 
 		// send msg
 		sendMsgToServer("OUTPOST:REMOVE_SQUAD", getOutpostSheet(), nSquadSlot);
@@ -174,13 +174,13 @@ public:
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		// get Squad slot Destination selected
-		uint8 nSquadSlot = pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
+		uint8 nSquadSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
 
 		// send msg
 		sendMsgToServer("OUTPOST:INSERT_SQUAD", getOutpostSheet(), nSquadSlot);
 
 		// Then set the selected squad at this place
-		pIM->runActionHandler("outpost_set_squad", pCaller, sParams);
+		CAHManager::getInstance()->runActionHandler("outpost_set_squad", pCaller, sParams);
 	}
 };
 REGISTER_ACTION_HANDLER(COutpostInsertSquad, "outpost_insert_squad");
@@ -192,12 +192,12 @@ uint8 getOutpostSquadSpawnIndex()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// get Squad slot
-	uint8 nSquadSlot = pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
+	uint8 nSquadSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
 
 	// So we can get the spawn index stored in the DB
 	string sDBPath = "SERVER:GUILD:OUTPOST:O" + toString(getOutpostSelection()) + ":SQUADS:T";
 	sDBPath += toString(nSquadSlot) + ":SPAWN";
-	return pIM->getDbProp(sDBPath)->getValue8();
+	return NLGUI::CDBManager::getInstance()->getDbProp(sDBPath)->getValue8();
 }
 
 // ***************************************************************************
@@ -207,7 +207,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId(sParams));
+		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pMap == NULL)
 			return;
 
@@ -222,8 +222,8 @@ public:
 		uint32 i;
 		for (i = 0; i < OUTPOSTENUMS::OUTPOST_MAX_SPAWN_ZONE; ++i)
 		{
-			sint32 x = pIM->getDbProp(sDBPathSZ + toString(i) + ":X")->getValue32();
-			sint32 y = pIM->getDbProp(sDBPathSZ + toString(i) + ":Y")->getValue32();
+			sint32 x = NLGUI::CDBManager::getInstance()->getDbProp(sDBPathSZ + toString(i) + ":X")->getValue32();
+			sint32 y = NLGUI::CDBManager::getInstance()->getDbProp(sDBPathSZ + toString(i) + ":Y")->getValue32();
 			if ((x != 0) || (y != 0))
 			{
 				if (!bInit)
@@ -289,8 +289,8 @@ public:
 			m.NeedToReset = true;
 			for (i = 0; i < OUTPOSTENUMS::OUTPOST_MAX_SPAWN_ZONE; ++i)
 			{
-				sint32 x = pIM->getDbProp(sDBPathSZ + toString(i) + ":X")->getValue32();
-				sint32 y = pIM->getDbProp(sDBPathSZ + toString(i) + ":Y")->getValue32();
+				sint32 x = NLGUI::CDBManager::getInstance()->getDbProp(sDBPathSZ + toString(i) + ":X")->getValue32();
+				sint32 y = NLGUI::CDBManager::getInstance()->getDbProp(sDBPathSZ + toString(i) + ":Y")->getValue32();
 				if ((x != 0) || (y != 0))
 				{
 					CRespawnPointsMsg::SRespawnPoint pt;
@@ -313,7 +313,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId(sParams));
+		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 		if (pMap == NULL)
 			return;
 
@@ -326,7 +326,7 @@ public:
 		if (nSpawnIndex != nSpawnSelected)
 		{
 			// get Squad slot
-			uint8 nSquadSlot = pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
+			uint8 nSquadSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
 
 			sendMsgToServer("OUTPOST:SET_SQUAD_SPAWN", getOutpostSheet(), nSquadSlot, nSpawnSelected);
 		}
@@ -354,7 +354,7 @@ static sint		localToGmt(sint hour)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*node= pIM->getDbProp("UI:SAVE:OUTPOST:TIME_ZONE", false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:OUTPOST:TIME_ZONE", false);
 	if(node)
 		hour-= node->getValue32();
 	hour+= 48;
@@ -366,7 +366,7 @@ static sint		gmtToLocal(sint hour)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*node= pIM->getDbProp("UI:SAVE:OUTPOST:TIME_ZONE", false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:OUTPOST:TIME_ZONE", false);
 	if(node)
 		hour+= node->getValue32();
 	hour+= 48;
@@ -405,12 +405,12 @@ public:
 		fromString(sParams, attPeriod);
 
 		// Store in local DB (in LOCAL for consistency)
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD", false);
 		if(node)
 			node->setValue32(localToGmt(attPeriod));
 
 		// Nead to resend a Declare War Start (because wanted Att Hour changed)
-		pIM->runActionHandler("outpost_declare_war_start", pCaller);
+		CAHManager::getInstance()->runActionHandler("outpost_declare_war_start", pCaller);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHOutpostSelectAttPeriod, "outpost_select_att_period");
@@ -425,13 +425,13 @@ public:
 
 		// read current outpost sheet
 		uint32	outpostSheet= 0;
-		CCDBNodeLeaf	*node= pIM->getDbProp("SERVER:OUTPOST_SELECTED:SHEET", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:OUTPOST_SELECTED:SHEET", false);
 		if(node)
 			outpostSheet= node->getValue32();
 
 		// read wanted GMT attack period
 		uint8	wantedAttHour= 0;
-		node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD", false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD", false);
 		if(node)
 			wantedAttHour= (uint8)node->getValue32();
 
@@ -451,19 +451,19 @@ public:
 
 		// read current outpost sheet
 		uint32	outpostSheet= 0;
-		CCDBNodeLeaf	*node= pIM->getDbProp("SERVER:OUTPOST_SELECTED:SHEET", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:OUTPOST_SELECTED:SHEET", false);
 		if(node)
 			outpostSheet= node->getValue32();
 
 		// read wanted GMT attack period
 		uint8	wantedAttHour= 0;
-		node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD", false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ATTACK_PERIOD", false);
 		if(node)
 			wantedAttHour= (uint8)node->getValue32();
 
 		// read result Att Period Time (NB: for final server check: ensure that the user will get what it sees)
 		uint32	startAttackTime= 0;
-		node= pIM->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT", false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:DECLARE_WAR_ACK_TIME_RANGE_ATT", false);
 		if(node)
 			startAttackTime= node->getValue32();
 
@@ -497,9 +497,9 @@ public:
 
 		// Copy SERVER DB to Local selection
 		uint32	outpostSheet= 0;
-		CCDBNodeLeaf	*node= pIM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST");
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST");
 		if(node)	outpostSheet= node->getValue32();
-		node= pIM->getDbProp("UI:TEMP:OUTPOST:BOT_SELECTION");
+		node= NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:BOT_SELECTION");
 		if(node)	node->setValue32(outpostSheet);
 
 		// Send a msg to server
@@ -633,7 +633,7 @@ public:
 	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*dbBan = pIM->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
+		CCDBNodeLeaf	*dbBan = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
 
 		// Re-Test if can ban the selection
 		bool	okForBanPlayer= false;
@@ -656,7 +656,7 @@ public:
 	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*dbBan = pIM->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
+		CCDBNodeLeaf	*dbBan = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:PVP_OUTPOST:RIGHT_TO_BANISH", false);
 
 		// Re-Test if can ban the selection
 		bool	okForBanPlayer= false;
@@ -679,7 +679,7 @@ public:
 	void	execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*dbTZ = pIM->getDbProp("UI:SAVE:OUTPOST:TIME_ZONE", false);
+		CCDBNodeLeaf	*dbTZ = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:OUTPOST:TIME_ZONE", false);
 		if(!dbTZ)
 			return;
 

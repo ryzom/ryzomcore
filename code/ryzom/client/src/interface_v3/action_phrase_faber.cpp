@@ -22,16 +22,16 @@
 #include "interface_manager.h"
 #include "../sheet_manager.h"
 #include "inventory_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../client_cfg.h"
-#include "ctrl_base_button.h"
-#include "group_container.h"
+#include "nel/gui/ctrl_base_button.h"
+#include "nel/gui/group_container.h"
 #include "../string_manager_client.h"
 #include "../net_manager.h"
 #include "sbrick_manager.h"
 #include "sphrase_manager.h"
-#include "group_editbox.h"
-#include "dbview_bar.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/dbview_bar.h"
 #include "skill_manager.h"
 #include "game_share/bot_chat_types.h"
 
@@ -82,11 +82,11 @@ void			CActionPhraseFaber::fillDBWithMP(const std::string &sheetBase, const CIte
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	pIM->getDbProp(sheetBase + ":SHEET")->setValue32(item.Sheet.asInt());
-	pIM->getDbProp(sheetBase + ":QUALITY")->setValue32(item.Quality);
-	pIM->getDbProp(sheetBase + ":QUANTITY")->setValue32(item.Quantity);
-	pIM->getDbProp(sheetBase + ":USER_COLOR")->setValue32(item.UserColor);
-	pIM->getDbProp(sheetBase + ":WEIGHT")->setValue32(item.Weight);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":SHEET")->setValue32(item.Sheet.asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUALITY")->setValue32(item.Quality);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":QUANTITY")->setValue32(item.Quantity);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":USER_COLOR")->setValue32(item.UserColor);
+	NLGUI::CDBManager::getInstance()->getDbProp(sheetBase + ":WEIGHT")->setValue32(item.Weight);
 }
 
 
@@ -133,7 +133,7 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	// **** Hide all widgets, MP Ctrls, and reset DB, until the Plan is not selected
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// Hide the valid button
-	CCtrlBaseButton	*validButton= dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(FaberPhraseValidButton));
+	CCtrlBaseButton	*validButton= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseValidButton));
 	if(validButton)
 		validButton->setFrozen(true);
 
@@ -144,35 +144,35 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 		// Reset All Mps slots.
 		for(uint mpSlot=0;mpSlot<MAX_MP_SLOT;mpSlot++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
 			if(node)
 				node->setValue32(0);
 		}
 
 		// Hide item requirements groups per default
-		CInterfaceGroup		*itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
+		CInterfaceGroup		*itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
 		if(itemReqLineGroup)
 			itemReqLineGroup->setActive(false);
 	}
 
 	// Reset the selected plan
-	CCDBNodeLeaf	*node= pIM->getDbProp(FaberPlanDB, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanDB, false);
 	if(node)
 		node->setValue32(0);
 
 	// Reset the result item
-	node= pIM->getDbProp(ItemResultSheetDB, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetDB, false);
 	if(node)
 		node->setValue32(0);
 
 	// Hide the ItemResult group
-	CInterfaceGroup		*groupMp= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(FaberPhraseItemResultGroup));
+	CInterfaceGroup		*groupMp= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseItemResultGroup));
 	if(groupMp)
 		groupMp->setActive(false);
 
 
 	// **** Open the window!
-	CGroupContainer		*window= dynamic_cast<CGroupContainer*>(pIM->getElementFromId(FaberPhraseWindow));
+	CGroupContainer		*window= dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseWindow));
 	if(window)
 	{
 		window->setActive(true);
@@ -185,23 +185,23 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	// **** setup DB observer!
 	// ensure remove (if setuped before), then add
 	CCDBNodeBranch	*branch;
-	branch= pIM->getDbBranch("LOCAL:INVENTORY:BAG");
-	if(branch) branch->removeBranchObserver(&_DBInventoryObs);
-	if(branch) branch->addBranchObserver(&_DBInventoryObs);
+	branch= NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:INVENTORY:BAG");
+	if(branch) NLGUI::CDBManager::getInstance()->removeBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
+	if(branch) NLGUI::CDBManager::getInstance()->addBranchObserver( "LOCAL:INVENTORY:BAG",&_DBInventoryObs);
 
 	// and for all pack animals
 	uint	i;
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		branch= pIM->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
-		if(branch) branch->removeBranchObserver(&_DBInventoryObs);
-		if(branch) branch->addBranchObserver(&_DBInventoryObs);
+		branch= NLGUI::CDBManager::getInstance()->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
+		if(branch) NLGUI::CDBManager::getInstance()->removeBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
+		if(branch) NLGUI::CDBManager::getInstance()->addBranchObserver( toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i).c_str(), &_DBInventoryObs);
 	}
 
 	// Add observers on animal status, cause inventory may become unavailabe during the process
 	for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		node= pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
 		if(node)
 		{
 			ICDBNode::CTextId textId;
@@ -223,19 +223,19 @@ void			CActionPhraseFaber::onCloseFaberCastWindow()
 
 	// No more need to listen inventory change
 	CCDBNodeBranch	*branch;
-	branch= pIM->getDbBranch("LOCAL:INVENTORY:BAG");
+	branch= NLGUI::CDBManager::getInstance()->getDbBranch("LOCAL:INVENTORY:BAG");
 	if(branch) branch->removeBranchObserver(&_DBInventoryObs);
 	// and for all pack animals
 	for(uint i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		branch= pIM->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
+		branch= NLGUI::CDBManager::getInstance()->getDbBranch(toString("LOCAL:INVENTORY:PACK_ANIMAL%d", i));
 		if(branch) branch->removeBranchObserver(&_DBInventoryObs);
 	}
 
 	// remove observers on animal status, cause inventory may become unavailabe during the process
 	for(uint i=0;i<MAX_INVENTORY_ANIMAL;i++)
 	{
-		CCDBNodeLeaf *node= pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
+		CCDBNodeLeaf *node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i), false);
 		if(node)
 		{
 			ICDBNode::CTextId textId;
@@ -270,9 +270,9 @@ void			CActionPhraseFaber::fillFaberPlanSelection(const std::string &brickDB, ui
 	for(i=0;i<maxSelection;i++)
 	{
 		if(i<num)
-			pIM->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
+			NLGUI::CDBManager::getInstance()->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(bricks[i].asInt());
 		else
-			pIM->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(brickDB + ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -302,7 +302,7 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 		if (getInventory().isInventoryAvailable(INVENTORIES::guild))
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeBranch *itemBranch = im->getDbBranch(SERVER_INVENTORY ":GUILD:" + toString(slotIndex));
+			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":GUILD:" + toString(slotIndex));
 			static CItemImage image;
 			image.build(itemBranch);
 			invId = INVENTORIES::guild;
@@ -318,7 +318,7 @@ CItemImage		*CActionPhraseFaber::getInvMirrorItemImage(uint slotIndex, uint& inv
 		if (getInventory().isInventoryAvailable(INVENTORIES::player_room))
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CCDBNodeBranch *itemBranch = im->getDbBranch(SERVER_INVENTORY ":ROOM:" + toString(slotIndex));
+			CCDBNodeBranch *itemBranch = NLGUI::CDBManager::getInstance()->getDbBranch(SERVER_INVENTORY ":ROOM:" + toString(slotIndex));
 			static CItemImage image;
 			image.build(itemBranch);
 			invId = INVENTORIES::player_room;
@@ -370,22 +370,22 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 
 
 	// Setup the selected plan
-	CCDBNodeLeaf	*node= pIM->getDbProp(FaberPlanDB, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanDB, false);
 	if(node)
 		node->setValue32(_ExecuteFromItemPlanBrick->Id.asInt());
 
 	// Setup the result item
-	node= pIM->getDbProp(ItemResultSheetDB, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetDB, false);
 	if(node)
 		node->setValue32(itemPlanBrick->FaberPlan.ItemBuilt.asInt());
 
 	// Setup the result quantity (for stacked items)
-	node= pIM->getDbProp(ItemResultQuantityDB, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultQuantityDB, false);
 	if(node)
 		node->setValue32(itemPlanBrick->FaberPlan.NbItemBuilt);
 
 	// Show the ItemResult group
-	CInterfaceGroup		*groupMp= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(FaberPhraseItemResultGroup));
+	CInterfaceGroup		*groupMp= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseItemResultGroup));
 	if(groupMp)
 		groupMp->setActive(true);
 
@@ -471,7 +471,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 
 	// **** show ItemParts according to plan.
 	// Hide the valid button
-	CCtrlBaseButton	*validButton= dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(FaberPhraseValidButton));
+	CCtrlBaseButton	*validButton= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseValidButton));
 	if(validButton)
 		validButton->setFrozen(true);
 
@@ -483,13 +483,13 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 		// Reset All Mps slots.
 		for(uint mpSlot=0;mpSlot<MAX_MP_SLOT;mpSlot++)
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:%d:SHEET", MPFaberDB.c_str(), itemReqLine, mpSlot), false);
 			if(node)
 				node->setValue32(0);
 		}
 
 		// Setup item requirement groups
-		CInterfaceGroup		*itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
+		CInterfaceGroup		*itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
 		if(itemReqLineGroup)
 		{
 			if( itemReqLine<_MPBuildNumTotalItemReq )
@@ -524,7 +524,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 					if(mpBuild.RequirementType==CMPBuild::ItemPartReq)
 					{
 						// texture name in config.xml
-						viewBmp->setTexture(pIM->getDefine( RM_FABER_TYPE::toIconDefineString(mpBuild.FaberTypeRequired) ));
+						viewBmp->setTexture(CWidgetManager::getInstance()->getParser()->getDefine( RM_FABER_TYPE::toIconDefineString(mpBuild.FaberTypeRequired) ));
 					}
 					else if(mpBuild.RequirementType==CMPBuild::SpecificItemReq)
 					{
@@ -556,7 +556,7 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 	}
 
 	// **** Setup the new window title
-	CGroupContainer		*window= dynamic_cast<CGroupContainer*>(pIM->getElementFromId(FaberPhraseWindow));
+	CGroupContainer		*window= dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseWindow));
 	if(window)
 	{
 		// Setup the Title with the item built
@@ -577,7 +577,7 @@ void			CActionPhraseFaber::resetSelection()
 
 	for(uint i=0;i<MAX_MP_SELECTION_ENTRIES;i++)
 	{
-		pIM->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+		NLGUI::CDBManager::getInstance()->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -595,7 +595,7 @@ void			CActionPhraseFaber::fillSelection(const std::vector<uint> &mps)
 			fillDBWithMP(MPSelectionDB+ ":" + toString(i), item);
 		}
 		else
-			pIM->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
+			NLGUI::CDBManager::getInstance()->getDbProp(MPSelectionDB+ ":" + toString(i) + ":SHEET")->setValue32(0);
 	}
 }
 
@@ -666,7 +666,7 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 
 	// get the ctrlSlot
 	CDBCtrlSheet		*ctrlSlot= NULL;
-	CInterfaceGroup		*itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
+	CInterfaceGroup		*itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
 	if(itemReqLineGroup)
 	{
 		CDBGroupListSheet	*listSheet= dynamic_cast<CDBGroupListSheet*>(itemReqLineGroup->getGroup(FaberPhraseList));
@@ -692,9 +692,9 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		uint	maxQuantity= getMaxQuantityChange(itemReqLine, mpSlot);
 
 		// set the max quantity as the default quantity to set up.
-		CCDBNodeLeaf	*node= pIM->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
 		if(node)	node->setValue32(maxQuantity);
-		node= pIM->getDbProp(MPQuantitySelectDb + ":MAX_QUANTITY",  false);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(MPQuantitySelectDb + ":MAX_QUANTITY",  false);
 		if(node)	node->setValue32(maxQuantity);
 
 		// bkup for validation
@@ -702,20 +702,20 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		_MpChangeQuantitySlot= mpSlot;
 
 		// Setup the text with value by default
-		CInterfaceGroup		*quantityModal= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(FaberPhraseMpQuantityModal));
+		CInterfaceGroup		*quantityModal= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseMpQuantityModal));
 		if(quantityModal)
 		{
 			CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(quantityModal->getGroup("eb"));
 			if (eb)
 			{
-				pIM->setCaptureKeyboard(eb);
+				CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 				eb->setInputString(toString(maxQuantity));
 				eb->setSelectionAll();
 			}
 		}
 
 		// launch the modal
-		pIM->enableModalWindow(ctrlSlot, quantityModal);
+		CWidgetManager::getInstance()->enableModalWindow(ctrlSlot, quantityModal);
 	}
 	// else select new MP
 	else
@@ -756,7 +756,7 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		_MpCurrentSelection= selectMps;
 
 		// Open the Selection Window.
-		pIM->enableModalWindow(ctrlSlot, FaberPhraseMpListModal);
+		CWidgetManager::getInstance()->enableModalWindow(ctrlSlot, FaberPhraseMpListModal);
 	}
 }
 
@@ -767,7 +767,7 @@ void		CActionPhraseFaber::validateMpSelection(uint selectId)
 
 	if(selectId>=_MpCurrentSelection.size())
 	{
-		pIM->disableModalWindow();
+		CWidgetManager::getInstance()->disableModalWindow();
 		return;
 	}
 
@@ -817,7 +817,7 @@ void		CActionPhraseFaber::validateMpSelection(uint selectId)
 
 	// must hide the modal window which had open us. NB: must be done here because next,
 	// we'll open the MP quantity selection
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 
 	// **** when all is correctly ended, open the quantity selection
 	// NB: just enable this code, if you want this feature
@@ -841,7 +841,7 @@ void		CActionPhraseFaber::validateMpSelectQuantity()
 
 	// get the quantity selected
 	uint	quantitySelected= 0;
-	CCDBNodeLeaf	*node= pIM->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(MPQuantitySelectDb + ":CUR_QUANTITY",  false);
 	if(node)	quantitySelected= node->getValue32();
 
 	// maximize (if error)
@@ -882,7 +882,7 @@ void		CActionPhraseFaber::validateMpSelectQuantity()
 	updateItemResult();
 
 	// hide the Modal Quantity selection
-	pIM->disableModalWindow();
+	CWidgetManager::getInstance()->disableModalWindow();
 }
 
 // ***************************************************************************
@@ -931,7 +931,7 @@ void		CActionPhraseFaber::validateExecution()
 
 	// NO more Close the Execution window (allow refaber quick)
 	/*CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CInterfaceElement	*window= pIM->getElementFromId(FaberPhraseWindow);
+	CInterfaceElement	*window= CWidgetManager::getInstance()->getElementFromId(FaberPhraseWindow);
 	if(window)
 		window->setActive(false);
 	*/
@@ -981,7 +981,7 @@ void			CActionPhraseFaber::updateEmptySlot(uint itemReqLine, CInterfaceGroup *it
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	if(!itemReqLineGroup)
-		itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
+		itemReqLineGroup= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId( toString(FaberPhraseItemReqLine.c_str(), itemReqLine) ));
 	if(!itemReqLineGroup)
 		return;
 
@@ -1056,10 +1056,10 @@ void		CActionPhraseFaber::updateQuantityView(uint itemReqLine)
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*node= pIM->getDbProp(toString("%s:%d:SELECTED", MPQuantityDb.c_str(), itemReqLine), false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:SELECTED", MPQuantityDb.c_str(), itemReqLine), false);
 	if(node)
 		node->setValue32(getTotalQuantitySetuped(itemReqLine));
-	node= pIM->getDbProp(toString("%s:%d:REQUIRED", MPQuantityDb.c_str(), itemReqLine), false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(toString("%s:%d:REQUIRED", MPQuantityDb.c_str(), itemReqLine), false);
 	if(node)
 		node->setValue32(_MPBuild[itemReqLine].QuantityReq);
 }
@@ -1085,7 +1085,7 @@ void			CActionPhraseFaber::updateValidButton()
 
 	// unfreeze if valid
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCtrlBaseButton		*validButton= dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(FaberPhraseValidButton));
+	CCtrlBaseButton		*validButton= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseValidButton));
 	if(validButton)		validButton->setFrozen(!canValid);
 }
 
@@ -1178,7 +1178,7 @@ public:
 		if(!ctrl)
 		{
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 			return;
 		}
 
@@ -1213,13 +1213,13 @@ public:
 	{
 		// get the button
 		CInterfaceManager		*pIM= CInterfaceManager::getInstance();
-		CCtrlBaseButton			*button= dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(FaberPhraseValidButton));
+		CCtrlBaseButton			*button= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseValidButton));
 
 		// Ok, button found. test if active.
 		if( button && !button->getFrozen() )
 		{
 			// Act as if the player click on this button
-			pIM->runActionHandler("phrase_faber_validate", button );
+			CAHManager::getInstance()->runActionHandler("phrase_faber_validate", button );
 		}
 	}
 };
@@ -1265,7 +1265,7 @@ void		validateFaberPlanSelection(CSBrickSheet *itemPlanBrick)
 void		closeFaberCastWindow()
 {
 	if (ActionPhraseFaber == NULL) return;
-	CGroupContainer	*window= dynamic_cast<CGroupContainer*>(CInterfaceManager::getInstance()->getElementFromId(FaberPhraseWindow));
+	CGroupContainer	*window= dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseWindow));
 	if(window && window->getActive())
 		window->setActive(false);
 }
@@ -1480,12 +1480,12 @@ void		CActionPhraseFaber::onInventoryChange()
 		updateValidButton();
 
 		// close selection modals if they are opened
-		CInterfaceGroup		*quantityModal= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(FaberPhraseMpQuantityModal));
-		if(quantityModal && pIM->getModalWindow()==quantityModal)
-			pIM->disableModalWindow();
-		CInterfaceGroup		*listModal= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(FaberPhraseMpListModal));
-		if(listModal && pIM->getModalWindow()==listModal)
-			pIM->disableModalWindow();
+		CInterfaceGroup		*quantityModal= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseMpQuantityModal));
+		if(quantityModal && CWidgetManager::getInstance()->getModalWindow()==quantityModal)
+			CWidgetManager::getInstance()->disableModalWindow();
+		CInterfaceGroup		*listModal= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseMpListModal));
+		if(listModal && CWidgetManager::getInstance()->getModalWindow()==listModal)
+			CWidgetManager::getInstance()->disableModalWindow();
 
 		// update item result
 		updateItemResult();
@@ -1668,13 +1668,13 @@ void	CActionPhraseFaber::updateItemResult()
 	// **** setup Level
 	if(minLevel==INT_MAX)
 		minLevel= 0;
-	CCDBNodeLeaf	*node= pIM->getDbProp(ItemResultSheetLevel, false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetLevel, false);
 	if(node)
 		node->setValue32(minLevel);
 
 
 	// **** change success rate too
-	CViewText	*successView= dynamic_cast<CViewText*>(pIM->getElementFromId(FaberPhraseFpSuccessText));
+	CViewText	*successView= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseFpSuccessText));
 	if(successView)
 	{
 		ucstring	text= CI18N::get("uiPhraseFaberSuccessRate");
@@ -1682,7 +1682,7 @@ void	CActionPhraseFaber::updateItemResult()
 		uint		phraseSlot= pPM->getMemorizedPhrase(_ExecuteFromMemoryLine, _ExecuteFromMemoryIndex);
 
 		sint32 craftSuccessModifier = 0;
-		CCDBNodeLeaf	*nodeCSM= pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		CCDBNodeLeaf	*nodeCSM= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
 		if(nodeCSM)
 		{
 			craftSuccessModifier = nodeCSM->getValue32();
@@ -1730,7 +1730,7 @@ void	CActionPhraseFaber::updateItemResult()
 			dominanteColor = i;
 		}
 	}
-	node= pIM->getDbProp(ItemResultSheetColor, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetColor, false);
 	if(node)
 		node->setValue32(dominanteColor);
 
@@ -1742,7 +1742,7 @@ void	CActionPhraseFaber::updateItemResult()
 
 
 	// **** Stats
-	CInterfaceGroup		*groupMp= dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(FaberPhraseItemResultGroup));
+	CInterfaceGroup		*groupMp= dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(FaberPhraseItemResultGroup));
 	if(groupMp)
 	{
 		// default: hide all
@@ -1815,7 +1815,7 @@ void	CActionPhraseFaber::updateItemResult()
 
 
 	// **** BestStat (for text over)
-	node= pIM->getDbProp(ItemResultSheetStatType, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetStatType, false);
 	if(node)
 	{
 		float bestStatValue =-1.0f;
@@ -1838,7 +1838,7 @@ void	CActionPhraseFaber::updateItemResult()
 
 
 	// **** ClassType (for text over)
-	node= pIM->getDbProp(ItemResultSheetClassType, false);
+	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetClassType, false);
 	if(node)
 	{
 		// Setup DB

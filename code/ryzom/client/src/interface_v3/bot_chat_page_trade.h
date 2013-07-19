@@ -142,7 +142,7 @@ private:
 	uint32						_FilterBuyDlgMaxValue;
 
 	// keep pointer on leaf for fame price factor
-	CCDBNodeLeaf *				_FamePriceFactorLeaf;
+	NLMISC::CCDBNodeLeaf *				_FamePriceFactorLeaf;
 	bool						_DownloadComplete;
 
 private:

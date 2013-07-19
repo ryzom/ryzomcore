@@ -22,7 +22,7 @@
 #include "stdpch.h"
 
 #include "group_html_qcm.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "interface_manager.h"
 #include "../user_entity.h"
@@ -55,8 +55,8 @@ void CGroupHTMLQCM::addText (const char * buf, int len)
 	if (sTmp.find("zzz_QUIT_RYZOM_zzz") != string::npos)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("quit_ryzom", NULL);
-		CInterfaceElement *pIE = pIM->getElementFromId("ui:interface:web_on_quit");
+		CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL);
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId("ui:interface:web_on_quit");
 		pIE->setActive(false);
 	}
 

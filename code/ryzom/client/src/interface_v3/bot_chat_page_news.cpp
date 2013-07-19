@@ -19,7 +19,7 @@
 #include "stdpch.h"
 #include "bot_chat_page_news.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 
 static const char *WIN_BOT_CHAT_PAGE_NEWS = "ui:interface:bot_chat_news";
 
@@ -29,7 +29,7 @@ void CBotChatPageNews::begin()
 	CBotChatPage::begin();
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// clear intro text
-	im->getDbProp(BOT_CHAT_BASE_DB_PATH ":NEWS")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":NEWS")->setValue32(0);
 	//
 	activateWindow(WIN_BOT_CHAT_PAGE_NEWS, true);
 }

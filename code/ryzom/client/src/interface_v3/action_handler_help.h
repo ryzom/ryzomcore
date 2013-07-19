@@ -141,10 +141,10 @@ private:
 	};
 
 	// update the brick help window when weight of hands has changed
-	class CFittedWeaponWeightObserver : public ICDBNode::IPropertyObserver
+	class CFittedWeaponWeightObserver : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 
 
