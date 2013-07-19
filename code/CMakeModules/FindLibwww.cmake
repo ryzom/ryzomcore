@@ -58,6 +58,7 @@ MACRO(FIND_WWW_LIBRARY MYLIBRARY OPTION)
     PATHS
     /usr/local/lib
     /usr/lib
+    /usr/lib/x86_64-linux-gnu
     /usr/local/X11R6/lib
     /usr/X11R6/lib
     /sw/lib

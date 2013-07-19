@@ -23,7 +23,7 @@
 //		mailto:dirk_clemens@hotmail.com
 //		http://www.codeguru.com/docking/sizing_tabctrl_bar.shtml
 //
-// Copyright © 1998-99 Kirk Stowell   
+// Copyright (c) 1998-99 Kirk Stowell   
 //		mailto:kstowell@codejockeys.com
 //		http://www.codejockeys.com/kstowell/
 //
@@ -34,7 +34,7 @@
 // notices remain intact. If the source code is used in any commercial
 // applications then a statement along the lines of:
 //
-// "Portions Copyright © 1998-99 Kirk Stowell" must be included in the
+// "Portions Copyright (c) 1998-99 Kirk Stowell" must be included in the
 // startup banner, "About" box or printed documentation. An email letting
 // me know that you are using it would be nice as well. That's not much to ask
 // considering the amount of work that went into this.

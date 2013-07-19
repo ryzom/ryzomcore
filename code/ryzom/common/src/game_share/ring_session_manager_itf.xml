@@ -413,7 +413,7 @@
 
 			<!-- __________________________________________________________ -->
 			<invoke name="updateSessionInfo" msg="USS">
-				<doc line="Update the informations of a planned or running session"/>
+				<doc line="Update the information of a planned or running session"/>
 				<doc line="Return 'invokeResult' : 0 : ok, session updated"/>
 				<doc line="                        1 : unknown character"/>
 				<doc line="                        2 : unknown session"/>

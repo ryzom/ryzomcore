@@ -533,31 +533,6 @@ void checkDriverVersion()
 		nlwarning ("Can't check video driver version");
 }
 
-void checkNoATIOpenGL()
-{
-	string deviceName;
-	uint64 driverVersion;
-	if (CSystemInfo::getVideoInfo (deviceName, driverVersion))
-	{
-		string lwr = deviceName;
-		strlwr(lwr);
-		if (lwr.find (ATI_RECOMMANDED_DRIVERS_STRING_TEST)!=string::npos && ClientCfg.Driver3D==CClientConfig::OpenGL)
-		{
-			// special case for radeon 7500 or less : doesn't issue message since doesn't work with Direct3D for now
-			if (!(strstr(lwr.c_str() , "radeon 7000") || strstr(lwr.c_str() , "radeon 7200") || strstr(lwr.c_str() , "radeon 7500")))
-			{
-				ucstring	message= CI18N::get("uiUseATID3D");
-				if (ClientQuestion (message))
-				{
-					ClientCfg.Driver3D= CClientConfig::DrvAuto;
-					ClientCfg.writeString("Driver3D", "Auto");
-					ClientCfg.ConfigFile.save();
-				}
-			}
-		}
-	}
-}
-
 void checkDriverDepth ()
 {
 	// Check desktop is in 32 bit else no window mode allowed.
@@ -815,8 +790,6 @@ void prelogInit()
 		// Check driver version
 		checkDriverVersion();
 
-		// Check ATI not in OpenGL
-		 checkNoATIOpenGL();
 		// Create the driver (most important part of the client).
 		nmsg = "Creating 3d driver...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
@@ -831,21 +804,12 @@ void prelogInit()
 
 		switch(ClientCfg.Driver3D)
 		{
-			case  CClientConfig::DrvAuto:
 #ifdef NL_OS_WINDOWS
-			{
-				// Fallback to D3D for card other than nVidia
-				std::string deviceName;
-				uint64 drvVersion;
-				CSystemInfo::getVideoInfo(deviceName, drvVersion);
-				strlwr(deviceName);
-				driver = strstr(deviceName.c_str(), NVIDIA_RECOMMANDED_DRIVERS_STRING_TEST) == NULL ? UDriver::Direct3d:UDriver::OpenGl;
-			}
-			break;
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
 #endif // NL_OS_WINDOWS
+			case CClientConfig::DrvAuto:
 			case CClientConfig::OpenGL:
 				driver = UDriver::OpenGl;
 			break;

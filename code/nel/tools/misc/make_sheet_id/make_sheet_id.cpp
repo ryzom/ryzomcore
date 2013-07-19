@@ -529,10 +529,10 @@ int main( int argc, char ** argv )
 
 	// output path
 	sint lastSeparator = CFile::getLastSeparator(outputFileName);
-	string ouputPath;
+	string outputPath;
 	if( lastSeparator != -1 )
 	{
-		ouputPath = outputFileName.substr(0,lastSeparator+1);
+		outputPath = outputFileName.substr(0,lastSeparator+1);
 	}
 
 	// erase the unwanted extensions from map (modify the map, save it, and quit)
@@ -568,7 +568,7 @@ int main( int argc, char ** argv )
 	if( dumpExtensions )
 	{
 		FILE *  extListOutput;
-		string extListFileName = ouputPath + "sheet_ext.txt";
+		string extListFileName = outputPath + "sheet_ext.txt";
 		if( !(extListOutput = fopen(extListFileName.c_str(),"w")) )
 		{
 			nlwarning("Can't open output file %s",extListFileName.c_str());
@@ -608,7 +608,7 @@ int main( int argc, char ** argv )
 	// display the map
 	//display();
 
-	string sheetListFileName = ouputPath + "sheets.txt";
+	string sheetListFileName = outputPath + "sheets.txt";
 	COFile output;
 	if( !output.open(sheetListFileName,false,true) )
 	{

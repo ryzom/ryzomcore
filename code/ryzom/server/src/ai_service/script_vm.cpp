@@ -1052,7 +1052,7 @@ void CScriptVM::interpretCode(
 			}
 			continue;
 		}
-		nlassert(false);	//	must use continue !!	Non implementé.
+		nlassert(false);	//	must use continue !!	Not implemented.
 	}
 }
 

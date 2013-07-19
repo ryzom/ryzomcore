@@ -168,7 +168,7 @@ inline uint16 CCharacter::harvestedMpQuantity() const
 
 inline HARVEST_INFOS::CHarvestInfos& CCharacter::getHarvestInfos()
 {
-	return  _DepositHarvestInformations; 
+	return  _DepositHarvestInformation;
 }
 
 //------------------------------------------------------------------------------

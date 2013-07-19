@@ -777,7 +777,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 
 	// 4 - Cut the big zone into a set of unit zones
 
-	// - Build patch informations
+	// - Build patch information
 
 	// Retrieve source patches
 	vector<CPatchInfo>		SrcPI;
@@ -1694,7 +1694,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 	//=============================
 
 	// Rotate all tile elements in CW (because zones are turned in CCW)
-	// If zone flipped rotate tile elements by 180°
+	// If zone flipped rotate tile elements by 180 degrees
 	set<string> allnames; // Debug
 	for (i = 0; i < PatchInfos.size(); ++i)
 	{

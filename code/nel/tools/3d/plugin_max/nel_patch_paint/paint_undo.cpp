@@ -9,7 +9,7 @@
 
 void CTileUndo::toUndo ( const CUndoElement& undoList )
 {
-	// ¨Push in the toundo list
+	// Push in the toundo list
 	_ToUndoList.push_back (undoList);
 }
 

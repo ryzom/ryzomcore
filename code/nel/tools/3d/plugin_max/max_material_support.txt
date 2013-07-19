@@ -6,7 +6,7 @@
 
 SUMMARY
 
--> Export those informations from stdmat
+-> Export those information from stdmat
 -> How to use lightmaps
 -> How to use "color vertex"
 -> How to use "alpha vertex"
@@ -15,7 +15,7 @@ SUMMARY
 
 -------------------------------------------------
 
--> Export those informations from stdmat
+-> Export those information from stdmat
 
  * Ambiant color
  * Diffuse color

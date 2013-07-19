@@ -146,7 +146,7 @@ bool CVPParser::parseOperand(CVPOperand &operand, bool outputOperand, std::strin
 			break;
 			case 'A': result = parseAddressRegister(operand, errorOutput); break;
 			case '-':
-				errorOutput = "Negation not allowed on ouput register.";
+				errorOutput = "Negation not allowed on output register.";
 				return false;
 			default:
 				errorOutput = "Output, Address, or Temporary register expected as an output operand.";
@@ -365,7 +365,7 @@ bool CVPParser::parseOutputRegister(CVPOperand &operand, std::string &errorOutpu
 	operand.Type = CVPOperand::OutputRegister;
 	if (*_CurrChar != '[')
 	{
-		errorOutput = "'[' expected when parsing an ouput register.";
+		errorOutput = "'[' expected when parsing an output register.";
 		return false;
 	}
 	++_CurrChar;
@@ -565,7 +565,7 @@ bool CVPParser::parseAddressRegister(CVPOperand &operand, std::string &errorOutp
 bool CVPParser::parseOp2(CVPInstruction &instr,std::string &errorOutput)
 {
 	skipSpacesAndComments();
-	// parse ouput
+	// parse output
 	if (!parseOperand(instr.Dest, true, errorOutput)) return false;
 	// Can't write in input or consant register
 	if (instr.Dest.Type == CVPOperand::Constant || instr.Dest.Type == CVPOperand::InputRegister)

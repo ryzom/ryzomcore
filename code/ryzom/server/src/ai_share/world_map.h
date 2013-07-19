@@ -139,7 +139,7 @@ CSlot const& CSlot::operator ++()
  * \date 2003
  */
 class CCellLinkage
-// passer les paramètres de CCellLinkage en références. (quand meme) et enlever les tests de validité. (grosse mise à jour en perspective).
+// pass CCellLinkage parameters by references. (anyway) and remove validation checks. (big update to come).
 {
 public:
 	enum

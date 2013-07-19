@@ -98,7 +98,7 @@ public:
 	// Process logic and displacement and setup visual animation
 	void applyObjectAnimationTimeslice( double time );
 
-	// manage animation start, if they are many animation, we choose one randomly (TODO: add contrôle to animation launched and manage some mode (loop, repeat number, sequences..)
+	// manage animation start, if they are many animation, we choose one randomly (TODO: add control to animation launched and manage some mode (loop, repeat number, sequences..)
 	void manageObjectAnimation( double Time, NLMISC::CVector userPos );
 
 	// update (add to end list) Animation sequence with sequence

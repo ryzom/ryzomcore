@@ -129,7 +129,7 @@ void	CAliasTreeOwner::updateAliasTree(const	CAIAliasDescriptionNode	&newTree)
 			CAliasTreeOwner*	child	=	cont->getAliasChildByAlias(newAliasChild->getAlias());
 			if	(!child)	//	a child related to this alias not yet exists ..
 			{
-				//	so we ask to create one objet of this type ( implémentation is specialized :) )
+				//	so we ask to create one objet of this type ( implementation is specialized :) )
 				//	giving it the so precious CAIAliasDescriptionNode.
 				//	assumes that it adds the child to its parent ( check by the next assert ).
 				child=childOwner->createChild(cont,newAliasChild);

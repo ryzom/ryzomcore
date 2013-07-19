@@ -426,7 +426,7 @@ void CLogicStateMachine::setVerbose( string varName, bool b )
 		filter = 1;
 	}
 	else
-	// xxx* => we look for a string with xxx at the begining
+	// xxx* => we look for a string with xxx at the beginning
 	if( varName[varName.size()-1]=='*' )
 	{
 		motif = varName.substr(0,varName.size()-1);

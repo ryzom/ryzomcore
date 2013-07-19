@@ -808,7 +808,7 @@ private:
 	CTessFarVertex	BaseFarVertices[4];
 
 
-	// Local info for CTessFace tiles. CPatch must setup them at the begining at refine()/render().
+	// Local info for CTessFace tiles. CPatch must setup them at the beginning at refine()/render().
 	// For Far Texture coordinates.
 	float			Far0UScale, Far0VScale, Far0UBias, Far0VBias;
 	float			Far1UScale, Far1VScale, Far1UBias, Far1VBias;

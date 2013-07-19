@@ -331,7 +331,7 @@ void CTestingTool::startTest()
 		CUnifiedNetwork::getInstance()->send( "EGS", msgout );
 		_ActorsDeathFlags.set(i,false);
 	}
-	string s = string("\n*********** Starting test iteration N°") + toString( _CurrentIteration ) + string("\n");
+	string s = string("\n*********** Starting test iteration ") + toString( _CurrentIteration ) + string("\n");
 	fputs( s.c_str(), _TestSessionReport );
 	nlinfo( s.c_str() );
 

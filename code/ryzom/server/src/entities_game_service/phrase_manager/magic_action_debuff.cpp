@@ -86,10 +86,10 @@ protected:
 	{
 		NL_ALLOC_CONTEXT(MADSAPY);
 		///\todo nico:
-		//		- localisation
-		//		- armure + bouclier
-		//		- degâts sur perso + sur armure
-		//		- behaviour + messages de chat
+		//		- location
+		//		- armor + shield
+		//		- player damages + on armor
+		//		- behaviour + chat messages
 		//		- aggro
 		
 		/// test resistance

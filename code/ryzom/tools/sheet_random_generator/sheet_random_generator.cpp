@@ -3865,7 +3865,7 @@ int main(int argc, char* argv[])
 }
 
 
-// Impossible to insert game_share/protection_type.h into project because of #@&$£ precompiled headers
+// Impossible to insert game_share/protection_type.h into project because of precompiled headers
 namespace PROTECTION_TYPE
 {
 	NL_BEGIN_STRING_CONVERSION_TABLE (TProtectionType)

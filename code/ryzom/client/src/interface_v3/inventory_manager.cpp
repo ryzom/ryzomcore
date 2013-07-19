@@ -866,7 +866,7 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 		const string sMsg = "ITEM:EQUIP";
 		if (GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
-			// Fill the message (equiped inventory, equiped inventory slot, bag slot)
+			// Fill the message (equipped inventory, equipped inventory slot, bag slot)
 			out.serial(inventory);
 			out.serial(invSlot);
 			out.serial(indexInBag);
@@ -977,7 +977,7 @@ void CInventoryManager::unequip(const std::string &invPath)
 		const string sMsg = "ITEM:UNEQUIP";
 		if (GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
-			// Fill the message (equiped inventory, equiped inventory slot)
+			// Fill the message (equipped inventory, equipped inventory slot)
 			out.serial(inventory);
 			out.serial(invSlot);
 			NetMngr.push (out);

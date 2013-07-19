@@ -298,7 +298,7 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 	}
 #endif // (MAX_RELEASE < 4000)
 
-	// Get Soft Shadow informations
+	// Get Soft Shadow information
 	string sTmp = CExportNel::getScriptAppData (node, NEL3D_APPDATA_SOFTSHADOW_RADIUS, toString(NEL3D_APPDATA_SOFTSHADOW_RADIUS_DEFAULT));
 	this->rSoftShadowRadius = (float)atof(sTmp.c_str());
 	sTmp = CExportNel::getScriptAppData (node, NEL3D_APPDATA_SOFTSHADOW_CONELENGTH, toString(NEL3D_APPDATA_SOFTSHADOW_CONELENGTH_DEFAULT));

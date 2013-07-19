@@ -18,7 +18,7 @@
 
 #include "stdpch.h"
 #if 0
-#error "Dêprecated"
+#error "Deprecated"
 //#include "bot_chat_interface.h"
 #include "game_share/synchronised_message.h"
 #include "game_share/bot_chat_types.h"
