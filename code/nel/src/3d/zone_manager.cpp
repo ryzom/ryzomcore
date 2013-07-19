@@ -237,7 +237,7 @@ void CZoneLoadingTask::run(void)
 {
 	// Lookup the zone
 	string zonePathLookup = CPath::lookup (_ZoneName, false, false, true);
-	if (zonePathLookup == "")
+	if (zonePathLookup.empty())
 		zonePathLookup = _ZoneName;
 
 	CZone *ZoneTmp = new CZone;

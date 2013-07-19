@@ -230,6 +230,22 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 		}
 	}
 
+	// Add lang channel
+	if (!user->getLangChannel().empty()) {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(user->getLangChannel());
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}
+	} else {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}		
+	}
+
+	/*
 	bool matis = CFameInterface::getInstance().getFameIndexed(user->getId(), 0) >= PVPFameRequired*6000;
 	bool fyros = CFameInterface::getInstance().getFameIndexed(user->getId(), 1) >= PVPFameRequired*6000;
 	bool tryker = CFameInterface::getInstance().getFameIndexed(user->getId(), 2) >= PVPFameRequired*6000;
@@ -279,7 +295,7 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 			result.push_back((*it).second);
 		}
 	}
-//	}
+*/
 	return result;
 }
 
@@ -1088,10 +1104,19 @@ bool CPVPManager2::addFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan c
 void CPVPManager2::onIOSMirrorUp()
 {
 	// create extra factions channels
+	/*
 	createExtraFactionChannel("hominists");
 	createExtraFactionChannel("urasies");
 	createExtraFactionChannel("marauders");
 	createExtraFactionChannel("agnos");
+	*/
+
+	// Community Channels
+	createExtraFactionChannel("en");
+	createExtraFactionChannel("fr");
+	createExtraFactionChannel("de");
+	createExtraFactionChannel("ru");
+	createExtraFactionChannel("es");
 
 	for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 	{

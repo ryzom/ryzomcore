@@ -532,7 +532,10 @@ static CMessage getFileClassImp( CMessage& msgin)
 
 		for (uint j=0; j<classes[i].size(); ++j)
 		{
-			std::string	rfile = getBackupFileName(classes[i][j].File);
+			std::string	rfile = classes[i][j].File;
+			// if there's wildcard, the file is already full so we don't need to add again the backup path or we ll have "save_shard/save_shard/..." that is not valid
+			if (!CFile::isExists(rfile))
+				rfile = getBackupFileName(classes[i][j].File);
 			fdc.addFile(classes[i][j].File, CFile::getFileModificationDate(rfile),CFile::getFileSize(rfile));
 		}
 	}

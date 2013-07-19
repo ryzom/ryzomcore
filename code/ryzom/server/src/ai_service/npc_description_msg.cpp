@@ -128,7 +128,7 @@ static bool LookupShopType(std::string name,std::vector<uint32> &shopList)
 			uint	i;
 			for ( i=0; i < cvShopType.size(); ++i )
 			{
-				if ( cvShopType.asString(i) != "" )
+				if ( !cvShopType.asString(i).empty() )
 				{
 					// make sure the string doesn't turn up more than once in input data
 					for (uint j=0;j<ShopTypeNames.size();++j)

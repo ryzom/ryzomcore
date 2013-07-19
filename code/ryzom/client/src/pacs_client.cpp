@@ -139,7 +139,7 @@ UInstanceGroup *getCluster(const UGlobalPosition &gp)
 		return 0;
 
 	const string &strPos = GR->getIdentifier(gp);
-	if(strPos == "")
+	if(strPos.empty())
 		return 0;
 	// try to find the ig in the loaded ig map
 	std::map<std::string, UInstanceGroup *>::const_iterator igIt = IGLoaded.find(strlwr(strPos));

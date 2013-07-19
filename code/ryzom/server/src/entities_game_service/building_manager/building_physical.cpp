@@ -89,7 +89,15 @@ bool IBuildingPhysical::addUser(CCharacter * user, uint16 roomIdx, uint16 ownerI
 		return false;
 	}
 
+
+	if (user->currentHp() <= 0 )
+	{
+		nlwarning("<BUILDING>user %s is dead",user->getId().toString().c_str());
+		return false;
+	}
+
 	CCharacter *owner;
+
 	if (ownerIdx < _Players.size())
 	{
 		owner = PlayerManager.getChar(_Players[ownerIdx] );

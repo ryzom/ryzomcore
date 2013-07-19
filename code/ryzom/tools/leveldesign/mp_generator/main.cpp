@@ -113,13 +113,13 @@ void LoadCraftParts()
 	
 	data.readFromFile( "rm_item_parts.csv" );
 	
-	while ( data != "" )
+	while ( !data.empty() )
 	{
 		ligne = data.splitTo( "\n", true );
 		
 		// on recherche la ligne correspondant à notre craft part
 		info = ligne.splitTo( ";", true );
-		if ( info != "" )
+		if ( !info.empty() )
 		{
 			index = info.c_str()[0] - 'A';
 
@@ -179,13 +179,13 @@ void InitCreatureMP()
 		
 	data.readFromFile( "creature_models.csv" );
 
-	while ( data != "" )
+	while ( !data.empty() )
 	{
 		ligneN = data.splitTo( "\n", true );
 		ligneM = data.splitTo( "\n", true );
 		
 		// on vérifie que la ligne est valide
-		if ( ligneN.splitTo( ";", true ) != "" )
+		if ( !ligneN.splitTo( ";", true ).empty() )
 		{
 			ligneM.splitTo( ";", true );
 
@@ -195,7 +195,7 @@ void InitCreatureMP()
 			ligneN.splitTo( ";", true );
 			ligneM.splitTo( ";", true );
 
-			while ( ligneN != "" )
+			while ( !ligneN.empty() )
 			{
 				ListeCreatureMP listeCreatureMP;
 				
@@ -426,7 +426,7 @@ int GetNumeroMP( const CSString& nomMP )
 	result = FamilyTypContent.splitFrom( buffer );
 
 	// si oui, on retourne son numéro de MP
-	if ( result != "" )
+	if ( !result.empty() )
 		res = result.splitTo( "\"" ).atoi();
 	else
 	{
@@ -478,7 +478,7 @@ int GetNumeroGroupe( const CSString& groupe )
 	result = GroupTypContent.splitFrom( buffer );
 
 	// si oui, on retourne son numéro de groupe
-	if ( result != "" )
+	if ( !result.empty() )
 		res = result.splitTo( "\"" ).atoi();
 	else
 	{
@@ -557,14 +557,14 @@ void CreateParentSItem( int numMP,
 	// 3d
 	output += "    <STRUCT Name=\"3d\">\n";
 	
-	if ( icon != "" )
+	if ( !icon.empty() )
 	{
 		output += "      <ATOM Name=\"icon\" Value=\"";
 		output += icon;
 		output += "\"/>\n";
 	}
 
-	if ( overlay != "" )
+	if ( !overlay.empty() )
 	{
 		output += "      <ATOM Name=\"text overlay\" Value=\"";
 		output += overlay;
@@ -787,13 +787,13 @@ void CreateSheet( int numMP, const CSString& nomMP,
 		break;
 	}
 
-	if ( ( eco == 'c' ) && creature && ( craftStats.Craft == "" ) )
+	if ( ( eco == 'c' ) && creature && ( craftStats.Craft.empty() ) )
 		return;
 
 	outputFileName = toString( "m%04d%s%c%c%02d.sitem", numMP, code.c_str(), eco, 
 		                     'a' + level, variation );
 
-	if ( craftStats.Craft == "" )
+	if ( craftStats.Craft.empty() )
 	{
 		CSString levelZone = toString( "%c", 'a' + level );
 		currentDocItem.push( DtLevelZone, levelZone.toUpper() );
@@ -825,7 +825,7 @@ void CreateSheet( int numMP, const CSString& nomMP,
 	output += "      <ATOM Name=\"MpColor\" Value=\"";
 	
 	// materiaux de missions toujours Beige
-	if ( craftStats.Craft == "" )
+	if ( craftStats.Craft.empty() )
 	{
 		output += "Beige\"/>\n";
 		if(craftStats.UsedAsCraftRequirement)
@@ -894,7 +894,7 @@ void CreateSheet( int numMP, const CSString& nomMP,
 	CSString statEnergy;
 	if ( ( variation == 2 ) && ( numMP == 695 ) ) // cas particulier pour le kitin trophy (beurk)
 		statEnergy = "0";
-	else if ( !creature || ( craftStats.Craft == "" ) )
+	else if ( !creature || ( craftStats.Craft.empty() ) )
 		statEnergy = toString( "%d", GetStatEnergy( level ) );
 	else if ( variation < 2 )
 		statEnergy = toString( "%d", GetStatEnergy( level + 1 ) );
@@ -912,7 +912,7 @@ void CreateSheet( int numMP, const CSString& nomMP,
 		outputFileName = toString( "m%04d%s%c%c%02d", numMP, code.c_str(), eco, 'a' + level, variation );
 		output = outputFileName;
 
-		GenerateItemNames( nomMP, eco, level, ( craftStats.Craft == "" ), creature, itemName );
+		GenerateItemNames( nomMP, eco, level, ( craftStats.Craft.empty() ), creature, itemName );
 		output += "\t" + itemName;
 		itemNames.insert( output );
 	}
@@ -947,7 +947,7 @@ void GenerateDepositItems( int numMP, const CSString& nomMP, const MPCraftStats&
 		code = "cxx";
 
 	// pas de craft = items de mission
-	if ( craftStats.Craft == "" )
+	if ( craftStats.Craft.empty() )
 	{
 		if ( loc != "G" )
 			CreateSheet( numMP, nomMP, code, 'c', 0, craftStats );
@@ -1000,7 +1000,7 @@ void GenerateCreatureItems( int numMP, CSString& nomMP, const MPCraftStats& craf
 			CSString creatureFileName = "c";
 			creatureFileName += (*itMP)->codeCreature.toLower();
 			
-			if ( craftStats.Craft != "" )
+			if ( !craftStats.Craft.empty() )
 			{
 				quality = statQuality[creatureLevel-1];
 				if ( quality != 6 )
@@ -1107,7 +1107,7 @@ void NewMP( CSString& ligne )
 
 	// nouveau nom de famille
 	nomMP = ligne.splitTo( ";", true );
-	if ( nomMP == "" )
+	if ( nomMP.empty() )
 	{
 		// cette ligne ne contient pas d'info
 		return;
@@ -1126,37 +1126,37 @@ void NewMP( CSString& ligne )
 	ligne.splitTo( ";", true );
 
 	stat = ligne.splitTo( ";", true );
-	if ( stat.firstWord() != "" )
+	if ( !stat.firstWord().empty() )
 		craftStats.bestStatA = stat.atoi();
 	else
 		craftStats.bestStatA = -1;
 
 	stat = ligne.splitTo( ";", true );
-	if ( stat.firstWord() != "" )
+	if ( !stat.firstWord().empty() )
 		craftStats.worstStatA1 = stat.atoi();
 	else
 		craftStats.worstStatA1 = -1;
 
 	stat = ligne.splitTo( ";", true );
-	if ( stat.firstWord() != "" )
+	if ( !stat.firstWord().empty() )
 		craftStats.worstStatA2 = stat.atoi();
 	else
 		craftStats.worstStatA2 = -1;
 
 	stat = ligne.splitTo( ";", true );
-	if ( stat.firstWord() != "" )
+	if ( !stat.firstWord().empty() )
 		craftStats.bestStatB = stat.atoi();
 	else
 		craftStats.bestStatB = -1;
 
 	stat = ligne.splitTo( ";", true );
-	if ( stat.firstWord() != "" )
+	if ( !stat.firstWord().empty() )
 		craftStats.worstStatB1 = stat.atoi();
 	else
 		craftStats.worstStatB1 = -1;
 
 	stat = ligne.splitTo( ";", true );
-	if ( stat.firstWord() != "" )
+	if ( !stat.firstWord().empty() )
 		craftStats.worstStatB2 = stat.atoi();
 	else
 		craftStats.worstStatB2 = -1;
@@ -1168,19 +1168,19 @@ void NewMP( CSString& ligne )
 	specialOnly = stat.firstWord().contains( "x" );
 	
 	// cas particuliers
-	while ( ligne != "" )
+	while ( !ligne.empty() )
 	{
 		if ( !ligne.contains( ";" ) ) 
 		{
 			special = ligne;
-			if ( special.firstWord() != "" )
+			if ( !special.firstWord().empty() )
 				specialNames.insert( special );
 			ligne = "";
 		}
 		else
 		{
 			special = ligne.splitTo( ";", true );
-			if ( special != "" )
+			if ( !special.empty() )
 				specialNames.insert( special );
 		}
 	}
@@ -1357,7 +1357,7 @@ void LoadCustomizedProperties()
 		fileName = CPath::lookup( name, false, false, true );
 		
 		// on vérifie que le fichier concerné existe
-		if ( fileName != "" )
+		if ( !fileName.empty() )
 		{
 			CSString zone = prop.splitTo( ".", true );
 			str.readFromFile( fileName );
@@ -1530,7 +1530,7 @@ void LoadFamillesMP()
 
 	ligne = fileData.splitTo( "\n", true );
 
-	while ( ligne != "" )
+	while ( !ligne.empty() )
 	{
 		NewMP( ligne );	
 		ligne = fileData.splitTo( "\n", true );
