@@ -105,6 +105,6 @@ else {
 }
 
 
-echo ryzom_app_render("achievements", $c, $_USER->isIG());
+echo ryzom_app_render(strtoupper(get_translation('ach_app_name',$_USER->getLang())), $c, $_USER->isIG());
 
 ?>

@@ -140,6 +140,37 @@ $c = "<script type='text/javascript'>
 $c .= "</div></td>
 		<td valign='top'>";
 
+		/*if($_REQUEST['mode'] == "insert_fame" && $_ADMIN->isAdmin()) {
+			$ftpl = 'ENTITY fame AS $fame {
+	if($fame->faction == ".faction" && ceil($fame->fame/6000) >= [0]) {
+		GRANT;
+		FINAL ENTITY;
+	}
+}';
+
+			$res = $DBc->sqlQuery("SELECT at_id,atl_name FROM ach_achievement,ach_task,ach_task_lang WHERE at_achievement=aa_id AND ((aa_category<'24' AND aa_category>'15') OR aa_category='56') AND atl_task=at_id AND atl_lang='en'");
+
+			for($i=0;$i<sizeof($res);$i++) {
+				$DBc->sqlQuery("INSERT INTO ach_objective (ao_task,ao_condition,ao_value,ao_display,ao_metalink) VALUES ('".$res[$i]['at_id']."','all',NULL,'hidden',NULL)");
+				$nid = $DBc->insertID();
+				$DBc->sqlQuery("INSERT INTO ach_atom (atom_objective,atom_mandatory,atom_ruleset) VALUES ('".$nid."','0','".$DBc->sqlEscape(str_replace('[0]',$res[$i]['atl_name'],$ftpl))."')");
+
+				$c .= "INSERT INTO ach_objective (ao_task,ao_condition,ao_value,ao_display,ao_metalink) VALUES ('".$res[$i]['at_id']."','all',NULL,'hidden',NULL)<br>";
+
+				$c .= "INSERT INTO ach_atom (atom_objective,atom_mandatory,atom_ruleset) VALUES ('".$nid."','0','".$DBc->sqlEscape(str_replace('[0]',$res[$i]['atl_name'],$ftpl))."')<p>";
+			}
+		}
+
+		if($_REQUEST['mode'] == "enable_fame" && $_ADMIN->isAdmin()) {
+			$res = $DBc->sqlQuery("SELECT aa_id FROM ach_achievement WHERE (aa_category<'24' AND aa_category>'14') OR aa_category='56'");
+
+			for($i=0;$i<sizeof($res);$i++) {
+				$DBc->sqlQuery("UPDATE ach_achievement SET aa_dev='0' WHERE aa_id='".$res[$i]['aa_id']."'");
+
+				$DBc->sqlQuery("UPDATE ach_task SET at_dev='0' WHERE at_achievement='".$res[$i]['aa_id']."'");
+			}
+		}*/
+
 		/*
 		 * translation
 		 */
@@ -150,9 +181,9 @@ $c .= "</div></td>
 			$user['id'] = 0;
 			$user['lang'] = 'en';
 			$user['name'] = 'Talvela';
-			$user['race'] = "r_matis";
-			$user['civilization'] = "c_neutral";
-			$user['cult'] = "c_neutral";
+			$user['race'] = "matis";
+			$user['civ'] = "neutral";
+			$user['cult'] = "neutral";
 
 			$_USER = new RyzomUser($user);
 
@@ -236,9 +267,9 @@ $c .= "</div></td>
 			$user['id'] = 0;
 			$user['lang'] = 'en';
 			$user['name'] = 'Talvela';
-			$user['race'] = "r_matis";
-			$user['civilization'] = "c_neutral";
-			$user['cult'] = "c_neutral";
+			$user['race'] = "matis";
+			$user['civ'] = "neutral";
+			$user['cult'] = "neutral";
 
 			$_USER = new RyzomUser($user);
 
@@ -311,9 +342,9 @@ $c .= "</div></td>
 			$user['id'] = 1;
 			$user['lang'] = 'en';
 			$user['name'] = 'Talvela';
-			$user['race'] = "r_matis";
-			$user['civilization'] = "c_neutral";
-			$user['cult'] = "c_neutral";
+			$user['race'] = "matis";
+			$user['civ'] = "neutral";
+			$user['cult'] = "neutral";
 
 			$_USER = new RyzomUser($user);
 
@@ -359,9 +390,9 @@ $c .= "</div></td>
 			$user['id'] = 0;
 			$user['lang'] = 'en';
 			$user['name'] = 'Talvela';
-			$user['race'] = "r_matis";
-			$user['civilization'] = "c_neutral";
-			$user['cult'] = "c_neutral";
+			$user['race'] = "matis";
+			$user['civ'] = "neutral";
+			$user['cult'] = "neutral";
 
 			$_USER = new RyzomUser($user);
 
@@ -382,7 +413,31 @@ $c .= "</div></td>
 			$open = $menu->getOpenCat();
 
 			if($open != 0) {
-				$cat = new AdmCategory($open,$_REQUEST['race'],$_REQUEST['cult'],$_REQUEST['civ']);
+				if($_REQUEST['cult']) {
+					$cult = $_REQUEST['cult'];
+					$_SESSION['cult'] = $cult;
+				}
+				elseif($_SESSION['cult']) {
+					$cult = $_SESSION['cult'];
+				}
+				else {
+					$cult = $_USER->getCult();
+				}
+
+				if($_REQUEST['civ']) {
+					$civ = $_REQUEST['civ'];
+					$_SESSION['civ'] = $civ;
+				}
+				elseif($_SESSION['civ']) {
+					$civ = $_SESSION['civ'];
+				}
+				else {
+					$civ = $_USER->getCiv();
+				}
+
+				echo $civ.$cult;
+
+				$cat = new AdmCategory($open,$_USER->getRace(),$cult,$civ);
 
 				$microstop = explode(' ',microtime());
 				$stop_time = $microstop[0] + $microstop[1];
@@ -416,8 +471,6 @@ $c .= "</div></td>
 					$ach->setCategory($cat->getID());
 					$ach->setName($_REQUEST['aal_name']);
 					$ach->setTemplate($_REQUEST['aal_template']);
-					$ach->setTieCult($_REQUEST['aa_tie_cult']);
-					$ach->setTieCiv($_REQUEST['aa_tie_civ']);
 					$ach->setImage($_REQUEST['aa_image']);
 					$ach->setParentID($_REQUEST['aa_parent']);
 					$ach->setSticky($_REQUEST['aa_sticky']);
@@ -433,6 +486,10 @@ $c .= "</div></td>
 					$task->setConditionValue($_REQUEST['at_condition_value']);
 					$task->setHeritage(0);
 
+					if(is_array($_REQUEST['at_tie_allegiance'])) {
+						$task->setTieAlign($_REQUEST['at_tie_allegiance']);
+					}
+
 					$ach->insertNode($task);
 				}
 
@@ -442,8 +499,8 @@ $c .= "</div></td>
 					if($ach != null) {
 						$ach->setName($_REQUEST['aal_name']);
 						$ach->setTemplate($_REQUEST['aal_template']);
-						$ach->setTieCult($_REQUEST['aa_tie_cult']);
-						$ach->setTieCiv($_REQUEST['aa_tie_civ']);
+						#$ach->setTieCult($_REQUEST['aa_tie_cult']);
+						#$ach->setTieCiv($_REQUEST['aa_tie_civ']);
 						$ach->setImage($_REQUEST['aa_image']);
 						$ach->setParentID($_REQUEST['aa_parent']);
 						$ach->setSticky($_REQUEST['aa_sticky']);
@@ -464,6 +521,10 @@ $c .= "</div></td>
 						$task->setConditionValue($_REQUEST['at_condition_value']);
 						$task->setHeritage($_REQUEST['at_inherit']);
 
+						if(is_array($_REQUEST['at_tie_allegiance'])) {
+							$task->setTieAlign($_REQUEST['at_tie_allegiance']);
+						}
+
 						$ach->insertNode($task);
 						$task->setParentID($_REQUEST['at_parent']);
 						$ach->orderTasks();
@@ -481,6 +542,10 @@ $c .= "</div></td>
 						$task->setCondition($_REQUEST['at_condition']);
 						$task->setConditionValue($_REQUEST['at_condition_value']);
 						$task->setHeritage($_REQUEST['at_inherit']);
+
+						if(is_array($_REQUEST['at_tie_allegiance'])) {
+							$task->setTieAlign($_REQUEST['at_tie_allegiance']);
+						}
 
 						$task->setParentID($_REQUEST['at_parent']);
 
@@ -599,10 +664,11 @@ $c .= "</div></td>
 				$user = array();
 				$user['id'] = $_REQUEST['pid'];
 				$user['lang'] = 'en';
+				$dta = user_get_data($_REQUEST['pid']);
 				$user['char_name'] = user_get_name($_REQUEST['pid']);
-				$user['race'] = "r_matis";
-				$user['civilization'] = "c_neutral";
-				$user['cult'] = "c_neutral";
+				$user['race'] = substr($dta['race'],2);
+				$user['civ'] = substr($dta['civilisation'],2);
+				$user['cult'] = substr($dta['cult'],2);
 
 				$_USER = new RyzomUser($user);
 
@@ -611,7 +677,29 @@ $c .= "</div></td>
 				$open = $menu->getOpenCat();
 
 				if($open != 0) {
-					$cat = new CSRCategory($open,null,$_REQUEST['cult'],$_REQUEST['civ']);
+					if($_REQUEST['cult']) {
+						$cult = $_REQUEST['cult'];
+						$_SESSION['cult'] = $cult;
+					}
+					elseif($_SESSION['cult']) {
+						$cult = $_SESSION['cult'];
+					}
+					else {
+						$cult = $_USER->getCult();
+					}
+
+					if($_REQUEST['civ']) {
+						$civ = $_REQUEST['civ'];
+						$_SESSION['civ'] = $civ;
+					}
+					elseif($_SESSION['civ']) {
+						$civ = $_SESSION['civ'];
+					}
+					else {
+						$civ = $_USER->getCiv();
+					}
+
+					$cat = new CSRCategory($open,$_USER->getRace(),$cult,$civ);
 
 					if($_REQUEST['grant'] != "") {
 						$cat->grantNode($_REQUEST['grant'],$_USER->getID());
@@ -660,6 +748,7 @@ $c .= "</td>
 	</tr>
 </table></center>";
 
+#$c = var_export($_USER).$c;
 
 echo ryzom_app_render("achievements admin", $c, $_ADMIN->isIG());
 

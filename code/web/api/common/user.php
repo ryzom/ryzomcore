@@ -38,8 +38,16 @@ class ryUser {
 	function inGroup($groups) {
 		$groups = explode(':', $groups);
 		foreach ($groups as $group) {
-			if (in_array($group, $this->groups))
-				return true;
+			if ($group != '') {
+				if (in_array($group, $this->groups))
+					return true;
+				if ('P_'.$this->id == $group)
+					return true;
+				if ('G_'.$this->guild_id == $group)
+					return true;
+				if ($group == '*')
+					return true;
+			}
 		}
 		return false;
 	}

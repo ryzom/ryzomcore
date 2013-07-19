@@ -6,12 +6,28 @@
 			on a user's cult of civ allegiance.
 		---------------------------*/
 
-		function isTiedCult();
+		function hasTieRace_open();
 
-		function isTiedCiv();
+		function hasTieAlign_open();
 
-		function getCurrentCiv();
+		function hasTieRace_done();
 
-		function getCurrentCult();
+		function hasTieAlign_done();
+
+		function hasTieRaceDev();
+
+		function hasTieAlignDev();
+
+		function isTiedRace_open($r);
+
+		function isTiedAlign_open($cult,$civ);
+
+		function isTiedRace_done($r);
+
+		function isTiedAlign_done($cult,$civ);
+
+		#function getCurrentCiv();
+
+		#function getCurrentCult();
 	}
 ?>

@@ -124,18 +124,6 @@
 			$this->category = $c;
 		}
 
-		function setTieRace($t) {
-			$this->tie_race = $t;
-		}
-
-		function setTieCiv($t) {
-			$this->tie_civ = $t;
-		}
-
-		function setTieCult($t) {
-			$this->tie_cult = $t;
-		}
-
 		function setImage($i) {
 			$this->image = $i;
 		}

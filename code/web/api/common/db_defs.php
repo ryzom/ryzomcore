@@ -18,7 +18,7 @@
 
 // init database table used by webig
 $db = ryDB::getInstance('webig');
-$db->setDbDefs('players', array('id' => SQL_DEF_INT, 'cid' => SQL_DEF_INT, 'name' => SQL_DEF_TEXT, 'creation_date' => SQL_DEF_DATE, 'deleted' => SQL_DEF_BOOLEAN, 'last_login' => SQL_DEF_TEXT));
+$db->setDbDefs('players', array('id' => SQL_DEF_INT, 'cid' => SQL_DEF_INT, 'name' => SQL_DEF_TEXT, 'gender' => SQL_DEF_INT, 'creation_date' => SQL_DEF_DATE, 'deleted' => SQL_DEF_BOOLEAN, 'last_login' => SQL_DEF_TEXT, 'dev_shard' => SQL_DEF_BOOLEAN));
 $db->setDbDefs('accounts', array('uid' => SQL_DEF_INT, 'web_privs' => SQL_DEF_TEXT));
 
 ?>

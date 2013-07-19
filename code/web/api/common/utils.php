@@ -22,6 +22,15 @@ include_once('dfm.php');
 
 define('SERVER', 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']);
 
+function stripslashes_deep($value)
+{
+    $value = is_array($value) ?
+                array_map('stripslashes_deep', $value) :
+                stripslashes($value);
+
+    return $value;
+}
+
 if (ini_get('magic_quotes_gpc') == 1) {
 	$_POST = stripslashes_deep($_POST);
 	$_GET = stripslashes_deep($_GET);
@@ -306,14 +315,18 @@ function file_get_contents_cached($fn, $cache_time=300) {
 	return $content;
 }
 
-function ryzom_redirect($url, $group='webig', $extra_lua='') {
+function ryzom_redirect($url, $group='', $extra_lua='') {
 	global $user;
 	$lua = $extra_lua."\n";
 	if ($user['ig']) {
 		if (!$group)
 			$lua .= 'getUI(__CURRENT_WINDOW__):browse("'.str_replace('&', '&amp;', $url).'")';
-		else
-			$lua .= 'getUI("ui:interface:'.$group.':content:html"):browse("'.str_replace('&', '&amp;', $url).'")';
+		else {
+			if (substr($group, 0, 3) == 'ui:')
+				$lua .= 'getUI("'.$group.'"):browse("'.str_replace('&', '&amp;', $url).'")';
+			else
+				$lua .= 'getUI("ui:interface:'.$group.':content:html"):browse("'.str_replace('&', '&amp;', $url).'")';
+		}
 		echo '<lua>'.$lua.'</lua>';
 		exit();
 	} else {
@@ -409,6 +422,10 @@ function p($var, $value=pNULL, $color='#FFFF00', $level=0) {
 		return $ret;
 	}
 	
+	static function text($text) {
+		return str_replace('"', '\"', $text);
+	}
+	
 	static function url($base_params=null, $add_params=array()) {
 		return str_replace('&', '&amp;', _url($base_params, $add_params));
 	}
@@ -446,8 +463,4 @@ END;
 	
 }
 
- 
-
-
- 
 ?>

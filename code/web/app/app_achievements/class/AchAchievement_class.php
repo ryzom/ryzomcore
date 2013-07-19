@@ -4,7 +4,7 @@
 	 * open and done.
 	 */
 
-	class AchAchievement extends AchList {
+	class AchAchievement extends AchList implements Tieable {
 		#########################
 		# PHP 5.3 compatible
 		# InDev_trait replaces this in PHP 5.4
@@ -44,7 +44,7 @@
 		protected $template;
 		protected $sticky;
 
-		function AchAchievement($data,$parent) {
+		function AchAchievement($data,&$parent) {
 			global $DBc,$_USER,$_CONF;
 
 			parent::__construct();
@@ -68,7 +68,7 @@
 				$this->template = $res[0]['aal_template'];
 			}
 
-			$res = $DBc->sqlQuery("SELECT * FROM ach_task LEFT JOIN (ach_task_lang) ON (atl_lang='".$_USER->getLang()."' AND atl_task=at_id) LEFT JOIN (ach_player_task) ON (apt_task=at_id AND apt_player='".$_USER->getID()."') WHERE at_achievement='".$this->id."' ORDER by at_torder ASC");
+			$res = $DBc->sqlQuery("SELECT * FROM ach_task LEFT JOIN (ach_task_lang) ON (atl_lang='".$_USER->getLang()."' AND atl_task=at_id) LEFT JOIN (ach_player_task) ON (apt_task=at_id AND apt_player='".$_USER->getID()."') WHERE at_achievement='".$this->id."' AND (NOT EXISTS (SELECT * FROM ach_task_tie_align WHERE atta_task=at_id) OR EXISTS (SELECT * FROM ach_task_tie_align WHERE atta_task=at_id AND atta_alignment LIKE '".$parent->getCurrentCult().'|'.$parent->getCurrentCiv()."')) ORDER by at_torder ASC");
 			
 			$sz = sizeof($res);
 			for($i=0;$i<$sz;$i++) {
@@ -112,12 +112,64 @@
 			return $this->parent_id;
 		}
 
-		function getTieRace() {
+		function hasTieRace_open() {
+			#return $this->tie_race;
+			$iter = $this->child_open->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieRace_open() && !$curr->inDev()) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function hasTieAlign_open() {
+			#return $this->tie_civ;
+			$iter = $this->child_open->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieAlign_open() && !$curr->inDev()) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function hasTieRace_done() {
+			#return $this->tie_race;
+			$iter = $this->child_done->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieRace_done() && !$curr->inDev()) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function hasTieAlign_done() {
+			#return $this->tie_civ;
+			$iter = $this->child_done->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieAlign_done() && !$curr->inDev()) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		function hasTieRaceDev() {
 			#return $this->tie_race;
 			$iter = $this->nodes->getIterator();
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->hasTieRace()) {
+				if($curr->hasTieRaceDev()) {
 					return true;
 				}
 			}
@@ -125,12 +177,12 @@
 			return false;
 		}
 
-		function getTieCiv() {
+		function hasTieAlignDev() {
 			#return $this->tie_civ;
 			$iter = $this->nodes->getIterator();
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->hasTieCiv()) {
+				if($curr->hasTieAlignDev()) {
 					return true;
 				}
 			}
@@ -138,25 +190,14 @@
 			return false;
 		}
 
-		function getTieCult() {
-			#return $this->tie_cult;
-			$iter = $this->nodes->getIterator();
-			while($iter->hasNext()) {
-				$curr = $iter->getNext();
-				if($curr->hasTieCult()) {
-					return true;
-				}
-			}
 
-			return false;
-		}
 
-		function isTiedRace($r) {
+		function isTiedRace_open($r) {
 			#return $this->tie_race;
-			$iter = $this->nodes->getIterator();
+			$iter = $this->child_open->getIterator();
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->isTiedRace($r)) {
+				if($curr->isTiedRace_open($r)) {
 					return true;
 				}
 			}
@@ -164,12 +205,12 @@
 			return false;
 		}
 
-		function isTiedCiv($c) {
+		function isTiedAlign_open($cult,$civ) {
 			#return $this->tie_civ;
-			$iter = $this->nodes->getIterator();
+			$iter = $this->child_open->getIterator();
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->isTiedCiv($c)) {
+				if($curr->isTiedAlign_open($cult,$civ)) {
 					return true;
 				}
 			}
@@ -177,18 +218,32 @@
 			return false;
 		}
 
-		function isTiedCult($c) {
-			#return $this->tie_cult;
-			$iter = $this->nodes->getIterator();
+		function isTiedRace_done($r) {
+			#return $this->tie_race;
+			$iter = $this->child_done->getIterator();
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->isTiedCult($c)) {
+				if($curr->isTiedRace_done($r)) {
 					return true;
 				}
 			}
 
 			return false;
 		}
+
+		function isTiedAlign_done($cult,$civ) {
+			#return $this->tie_civ;
+			$iter = $this->child_done->getIterator();
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->isTiedAlign_done($cult,$civ)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 
 		function getImage() {
 			return $this->image;

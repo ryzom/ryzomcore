@@ -310,7 +310,10 @@ class ryForm {
 						if (count($savedRyform) == 0 || $def->type != DEF_TYPE_RYFORM) {
 							if (is_string($def->params))
 								$infos = _l(_i('16/add', _t('add')), $url_params, array('new_ryform' => $def->params, 'ryform_name' => $parent_ryform_name.$deffullname.':0', 'ryform_action' => 'add'));
+							else if (count($def->params) == 1)
+								$infos = _l(_i('16/add', _t('add')), $url_params, array('new_ryform' => $def->params[0], 'ryform_name' => $parent_ryform_name.$deffullname.':0', 'ryform_action' => 'add'));
 							else
+							
 								$infos = _l(_i('16/add', _t('add')), $url_params, array('ryform_name' => $parent_ryform_name.$deffullname.':0', 'ryform_action' => 'list'));
 							
 							if ($type == DEF_TYPE_RYFORMS_ARRAY)
@@ -673,6 +676,5 @@ class ryForm {
 		}
 	}*/
 }
-
 
 ?>

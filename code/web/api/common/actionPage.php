@@ -155,7 +155,4 @@ function callAction($action) {
 	return $c;
 }
 
-
-
-
 ?>

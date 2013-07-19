@@ -4,28 +4,34 @@
 	 */
 
 	class AchCategory extends AchList implements Tieable {
-		protected $ties_cult;
-		protected $ties_civ;
-		protected $ties_race;
+		protected $ties_align_done;
+		protected $ties_race_done;
+		protected $ties_align_open;
+		protected $ties_race_open;
 		protected $ties_race_dev;
-		protected $ties_cult_dev;
-		protected $ties_civ_dev;
+		protected $ties_align_dev;
 		protected $cult;
 		protected $civ;
 		protected $race;
 		protected $heroic;
 		protected $contest;
+		protected $allow_civ;
+		protected $allow_cult;
 
-		function AchCategory($id,$race = null,$cult = null,$civ = null) {
+		function AchCategory($id,$race = null,$cult = "c_neutral",$civ = "c_neutral") {
 			global $DBc,$_USER;
 
 			parent::__construct();
 
-			$civ = $DBc->sqlEscape($civ);
-			$cult = $DBc->sqlEscape($cult);
+			if($civ != "%") {
+				$civ = $DBc->sqlEscape($civ);
+			}
+			if($cult != "%") {
+				$cult = $DBc->sqlEscape($cult);
+			}
 			$race = $DBc->sqlEscape($race);
 
-			if($race == null) {
+			/*if($race == null) {
 				$race = $_USER->getRace();
 			}
 
@@ -35,10 +41,11 @@
 
 			if($civ == null) {
 				$civ = $_USER->getCiv();
-			}
+			}*/
 
 			$this->cult = $cult;
 			$this->civ = $civ;
+			$this->rave = $race;
 
 			$this->id = $DBc->sqlEscape($id);
 
@@ -56,61 +63,78 @@
 				}
 			}
 
-			$res = $DBc->sqlQuery("SELECT ac_heroic,ac_contest FROM ach_category WHERE ac_id='".$this->id."'");
+			$res = $DBc->sqlQuery("SELECT ac_heroic,ac_contest,ac_allow_civ,ac_allow_cult FROM ach_category WHERE ac_id='".$this->id."'");
 			$this->heroic = $res[0]['ac_heroic'];
 			$this->contest = $res[0]['ac_contest'];
-			
-			//load counts for tie determination
-			/*$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
-			$this->ties_cult = $res[0]['anz'];
+			$this->allow_civ = $res[0]['ac_allow_civ'];
+			$this->allow_cult = $res[0]['ac_allow_cult'];
 
-			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
-			$this->ties_civ = $res[0]['anz'];
-
-			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_race IS NOT NULL AND aa_category='".$this->id."' AND aa_dev='0'");
-			$this->ties_race = $res[0]['anz'];
-
-			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_race IS NOT NULL AND aa_category='".$this->id."'");
-			$this->ties_race_dev = $res[0]['anz'];
-
-			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_cult IS NOT NULL AND aa_category='".$this->id."'");
-			$this->ties_cult_dev = $res[0]['anz'];
-
-			$res = $DBc->sqlQuery("SELECT count(*) as anz FROM ach_achievement WHERE aa_tie_civ IS NOT NULL AND aa_category='".$this->id."'");
-			$this->ties_civ_dev = $res[0]['anz'];*/
 
 			$iter = $this->nodes->getIterator();
 			$tmp = false;
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->getTieRace()) {
+				if($curr->hasTieRace_open() && !$curr->inDev()) {
 					$tmp = true;
 					break;
 				}
 			}
-			$this->ties_race = $tmp;
+			$this->ties_race_open = $tmp;
 
 			$iter = $this->nodes->getIterator();
 			$tmp = false;
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->getTieCiv()) {
+				if($curr->hasTieAlign_open() && !$curr->inDev()) {
 					$tmp = true;
 					break;
 				}
 			}
-			$this->ties_civ = $tmp;
+			$this->ties_align_open = $tmp;
 
 			$iter = $this->nodes->getIterator();
 			$tmp = false;
 			while($iter->hasNext()) {
 				$curr = $iter->getNext();
-				if($curr->getTieCult()) {
+				if($curr->hasTieRace_done() && !$curr->inDev()) {
 					$tmp = true;
 					break;
 				}
 			}
-			$this->ties_cult = $tmp;
+			$this->ties_race_done = $tmp;
+
+			$iter = $this->nodes->getIterator();
+			$tmp = false;
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieAlign_done() && !$curr->inDev()) {
+					$tmp = true;
+					break;
+				}
+			}
+			$this->ties_align_done = $tmp;
+
+			$iter = $this->nodes->getIterator();
+			$tmp = false;
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieRaceDev()) {
+					$tmp = true;
+					break;
+				}
+			}
+			$this->ties_race_dev = $tmp;
+
+			$iter = $this->nodes->getIterator();
+			$tmp = false;
+			while($iter->hasNext()) {
+				$curr = $iter->getNext();
+				if($curr->hasTieAlignDev()) {
+					$tmp = true;
+					break;
+				}
+			}
+			$this->ties_align_dev = $tmp;
 		}
 		
 		#@override Parentum::makeChild()
@@ -118,28 +142,36 @@
 			return new AchAchievement($a,$this);
 		}
 
-		function isTiedRace() {
-			return ($this->ties_race > 0);
+		function isAllowedCult() {
+			return ($this->allow_cult == 1);
 		}
 
-		function isTiedCult() {
-			return ($this->ties_cult > 0);
+		function isAllowedCiv() {
+			return ($this->allow_civ == 1);
 		}
 
-		function isTiedCiv() {
-			return ($this->ties_civ > 0);
+		function hasTieRace_open() {
+			return $this->ties_race_open;
 		}
 
-		function isTiedRaceDev() {
-			return ($this->ties_race_dev > 0);
+		function hasTieAlign_open() {
+			return $this->ties_align_open;
 		}
 
-		function isTiedCultDev() {
-			return ($this->ties_cult_dev > 0);
+		function hasTieRace_done() {
+			return $this->ties_race_done;
 		}
 
-		function isTiedCivDev() {
-			return ($this->ties_civ_dev > 0);
+		function hasTieAlign_done() {
+			return $this->ties_align_done;
+		}
+
+		function hasTieRaceDev() {
+			return $this->ties_race_dev;
+		}
+
+		function hasTieAlignDev() {
+			return $this->ties_align_dev;
 		}
 
 		function getCurrentCiv() {
@@ -152,6 +184,22 @@
 
 		function getCurrentRace() {
 			return $this->race;
+		}
+
+		function isTiedRace_open($r) {
+			return null;
+		}
+
+		function isTiedAlign_open($cult,$civ) {
+			return null;
+		}
+
+		function isTiedRace_done($r) {
+			return null;
+		}
+
+		function isTiedAlign_done($cult,$civ) {
+			return null;
 		}
 
 		function isHeroic() {
