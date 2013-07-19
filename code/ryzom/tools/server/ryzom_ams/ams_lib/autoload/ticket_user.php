@@ -51,6 +51,12 @@ class Ticket_User{
 
     }
     
+    public static function change_permission($user_id, $perm){
+        $user = new Ticket_User();
+        $user->load_With_TUserId($user_id);
+        $user->setPermission($perm);
+        $user->update();
+    }
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     public function __construct() {

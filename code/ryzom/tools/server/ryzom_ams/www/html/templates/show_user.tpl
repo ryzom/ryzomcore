@@ -77,6 +77,20 @@
 		    <li><a href="index.php?page=settings&id={$target_id}">Edit User</a></li>
 		    <li><a href="index.php?page=createticket&user_id={$target_id}">Send Ticket</a></li>
 		    <li class="divider"></li>
+		    {if isset($isAdmin) and $isAdmin eq 'TRUE' and $target_id neq 1}
+			{if $userPermission eq 1}
+			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=2">Make Moderator</a></li>
+			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=3">Make Admin</a></li>
+			{else if $userPermission eq 2 }
+			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=1">Demote to User</a></li>
+			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=3">Make Admin</a></li>
+			{else if $userPermission eq 3 }
+			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=1">Demote to User</a></li>
+			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=2">Demote to Moderator</a></li>
+			{/if}
+			<li class="divider"></li>
+		    {/if}
+		    
                 </ul>
               </div>
             </div>                   
