@@ -319,7 +319,7 @@ bool CParticleTreeModel::setData(const QModelIndex &index, const QVariant &value
 		QList<QVariant> listData;
 		listData << value;
 		item->replace(listData);
-		std::string name = value.toString().toStdString();
+		std::string name = value.toString().toUtf8();
 		if (item->itemType() == ItemType::Located)
 			item->getLoc()->setName(name);
 		else

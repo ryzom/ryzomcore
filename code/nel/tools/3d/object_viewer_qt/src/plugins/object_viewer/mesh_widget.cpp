@@ -86,10 +86,10 @@ void CMeshWidget::browseShape()
 	setCursor(Qt::WaitCursor);
 	if (!fileName.isEmpty())
 	{
-		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(fileName.toStdString()));
+		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(fileName.toUtf8().constData()));
 		try
 		{
-			std::string shapeName = NLMISC::CFile::getFilename(fileName.toStdString());
+			std::string shapeName = NLMISC::CFile::getFilename(fileName.toUtf8().constData());
 			_ShapeParticle->setShape(shapeName);
 			_ui.meshLineEdit->setText(shapeName.c_str());
 			touchPSState();

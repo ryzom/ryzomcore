@@ -19,8 +19,8 @@
 #include "nel/misc/file.h"
 #include "nel/misc/o_xml.h"
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
-#include "nel/../../src/pacs/primitive_block.h"
+#include "nel/pacs/collision_mesh_build.h"
+#include "nel/pacs/primitive_block.h"
 
 #include "../nel_mesh_lib/export_nel.h"
 #include "../nel_mesh_lib/export_appdata.h"

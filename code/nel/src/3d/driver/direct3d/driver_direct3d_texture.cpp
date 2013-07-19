@@ -454,6 +454,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 		}
 		else
 		{
+/*
 			// textures with mipmaps doesn't support not power of two sizes
 			// only DXTC formats are beginning with a 'D'
 			if (supportNonPowerOfTwoTextures() && (!isPowerOf2(width) || !isPowerOf2(height)) && levels == 1)
@@ -464,6 +465,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 				_DeviceInterface->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 				_DeviceInterface->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 			}
+*/
 
 			HRESULT hr = _DeviceInterface->CreateTexture (width, height, levels, renderTarget?D3DUSAGE_RENDERTARGET:0, destFormat, renderTarget?D3DPOOL_DEFAULT:D3DPOOL_MANAGED, &(d3dtext->Texture2d), NULL);
 
@@ -506,6 +508,19 @@ inline void CDriverD3D::setupTextureWrapMode(ITexture& tex)
 	d3dtext->MagFilter = RemapMagTextureFilterTypeNeL2D3D[tex.getMagFilter()];
 	d3dtext->MinFilter = RemapMinTextureFilterTypeNeL2D3D[tex.getMinFilter()];
 	d3dtext->MipFilter = RemapMipTextureFilterTypeNeL2D3D[tex.getMinFilter()];
+
+	// only enable for min filter, because it's never supported for mag filter
+	if (_AnisotropicFilter > 1 && tex.getMinFilter() > ITexture::NearestMipMapLinear)
+	{
+		if (tex.isTextureCube())
+		{
+			if (_AnisotropicMinCubeSupported) d3dtext->MinFilter = D3DTEXF_ANISOTROPIC;
+		}
+		else
+		{
+			if (_AnisotropicMinSupported) d3dtext->MinFilter = D3DTEXF_ANISOTROPIC;
+		}
+	}
 }
 
 

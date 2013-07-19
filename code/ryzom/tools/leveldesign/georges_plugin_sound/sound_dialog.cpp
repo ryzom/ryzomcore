@@ -186,7 +186,7 @@ void CSoundDialog::setPlaying(bool play)
 
 // ***************************************************************************
 
-void CSoundDialog::OnTimer(UINT id)
+void CSoundDialog::OnTimer(UINT_PTR id)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	updateTime();

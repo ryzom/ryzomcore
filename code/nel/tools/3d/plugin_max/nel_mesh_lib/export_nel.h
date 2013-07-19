@@ -27,7 +27,7 @@
 #include "nel/3d/bone.h"
 #include "nel/3d/animation_time.h"
 #include "nel/3d/animation_time.h"
-#include "nel/../../src/pacs/collision_mesh_build.h"
+#include "nel/pacs/collision_mesh_build.h"
 #include "nel/misc/tool_logger.h"
 
 extern PIPELINE::CToolLogger ToolLogger;

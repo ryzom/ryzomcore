@@ -375,7 +375,7 @@ bool CSourceAL::isPaused() const
 uint32 CSourceAL::getTime()
 {
 	if (!_StartTime) return 0;
- 	 return (uint32)(CTime::getLocalTime() - _StartTime);
+	return (uint32)(CTime::getLocalTime() - _StartTime);
 }
 
 /// Set the position vector.

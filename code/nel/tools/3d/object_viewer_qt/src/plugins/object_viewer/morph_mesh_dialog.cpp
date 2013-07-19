@@ -110,7 +110,7 @@ void CMorphMeshDialog::add()
 		shapeNames.resize(_CM->getNumShapes() + 1);
 		_CM->getShapesNames(&shapeNames[0]);
 		uint index = (uint)shapeNames.size() - 1;
-		shapeNames[index] = fileName.toStdString();
+		shapeNames[index] = fileName.toUtf8();
 		_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
 		std::vector<sint> numVerts;
 		_CM->getShapeNumVerts(numVerts);
@@ -152,7 +152,7 @@ void CMorphMeshDialog::insert()
 		std::vector<std::string> shapeNames;
 		shapeNames.resize(_CM->getNumShapes());
 		_CM->getShapesNames(&shapeNames[0]);
-		shapeNames.insert(shapeNames.begin() + row, fileName.toStdString());
+		shapeNames.insert(shapeNames.begin() + row, fileName.toUtf8().constData());
 		_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
 		touchPSState();
 		updateMeshList();
@@ -172,7 +172,7 @@ void CMorphMeshDialog::change()
 	if (!fileName.isEmpty())
 	{
 		sint row = _ui.listWidget->currentRow();
-		_CM->setShape(row, fileName.toStdString());
+		_CM->setShape(row, fileName.toUtf8().constData());
 		updateMeshList();
 		touchPSState();
 	}

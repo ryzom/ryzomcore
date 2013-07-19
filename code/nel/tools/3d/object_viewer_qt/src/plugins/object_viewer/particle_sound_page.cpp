@@ -122,7 +122,7 @@ void CSoundPage::browse()
 
 void CSoundPage::play()
 {
-	Modules::sound().play(_ui.soundNameLineEdit->text().toStdString());
+	Modules::sound().play(_ui.soundNameLineEdit->text().toUtf8().constData());
 }
 
 void CSoundPage::setSpawn(bool state)
@@ -162,7 +162,7 @@ void CSoundPage::setKeepPitch(bool state)
 
 void CSoundPage::setSoundName(const QString &text)
 {
-	_Sound->setSoundName(NLMISC::CSheetId(text.toStdString()));
+	_Sound->setSoundName(NLMISC::CSheetId(text.toUtf8().constData()));
 }
 
 void CSoundPage::setEmissionPercent(float value)

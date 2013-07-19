@@ -29,6 +29,8 @@
 #	include <winuser.h>
 #endif // NL_OS_WINDOWS
 
+#define NL_NO_DEBUG_FILES 1
+
 using namespace std;
 
 namespace NLMISC

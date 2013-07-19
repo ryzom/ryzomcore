@@ -23,7 +23,7 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/file.h"
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
+#include "nel/pacs/collision_mesh_build.h"
 
 // External class declaration
 namespace NLPACS

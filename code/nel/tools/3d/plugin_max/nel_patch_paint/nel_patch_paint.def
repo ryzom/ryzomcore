@@ -1,4 +1,4 @@
-LIBRARY nelpaintpatch.dlm
+;LIBRARY nelpaintpatch.dlm
 EXPORTS
 	LibDescription			@1
 	LibNumberClasses		@2

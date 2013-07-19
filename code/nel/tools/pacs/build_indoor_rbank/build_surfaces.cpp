@@ -17,11 +17,11 @@
 #include <map>
 #include <vector>
 
-#include "nel/../../src/pacs/collision_mesh_build.h"
-#include "nel/../../src/pacs/local_retriever.h"
-#include "nel/../../src/pacs/exterior_mesh.h"
-#include "nel/../../src/pacs/surface_quad.h"
-#include "nel/../../src/pacs/chain.h"
+#include "nel/pacs/collision_mesh_build.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/exterior_mesh.h"
+#include "nel/pacs/surface_quad.h"
+#include "nel/pacs/chain.h"
 
 #include "build_surfaces.h"
 

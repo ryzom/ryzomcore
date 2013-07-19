@@ -63,7 +63,7 @@ void CWorkspacePage::newWP()
 					   tr("pws files (*.pws)"));
 	if (!fileName.isEmpty())
 	{
-		Modules::psEdit().createNewWorkspace(fileName.toStdString());
+		Modules::psEdit().createNewWorkspace(fileName.toUtf8().constData());
 		_treeModel->setupModelFromWorkSpace();
 		_ui.saveToolButton->setEnabled(true);
 		_ui.saveAsToolButton->setEnabled(true);
@@ -83,7 +83,7 @@ void CWorkspacePage::loadWP()
 	setCursor(Qt::WaitCursor);
 	if (!fileName.isEmpty())
 	{
-		Modules::psEdit().loadWorkspace(fileName.toStdString());
+		Modules::psEdit().loadWorkspace(fileName.toUtf8().constData());
 		_treeModel->setupModelFromWorkSpace();
 		_ui.unloadToolButton->setEnabled(true);
 		_ui.saveToolButton->setEnabled(true);
@@ -109,7 +109,7 @@ void CWorkspacePage::saveAsWP()
 					   tr("pws files (*.pws)"));
 	if (!fileName.isEmpty())
 	{
-		Modules::psEdit().getParticleWorkspace()->setFileName(fileName.toStdString());
+		Modules::psEdit().getParticleWorkspace()->setFileName(fileName.toUtf8().constData());
 		Modules::psEdit().saveWorkspaceStructure();
 		Modules::psEdit().saveWorkspaceContent();
 		_treeModel->setupModelFromWorkSpace();
@@ -125,7 +125,7 @@ void CWorkspacePage::insertPS()
 	if (!fileName.isEmpty())
 	{
 		// TODO: create method particle editor insertNewPS and multiple add
-		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toStdString()));
+		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toUtf8().constData()));
 		if (node != 0)
 		{
 			try
@@ -158,14 +158,14 @@ void CWorkspacePage::createPS()
 	{
 
 		// TODO: create method particle editor createNewPS
-		if (Modules::psEdit().getParticleWorkspace()->containsFile(NLMISC::CFile::getFilename(fileName.toStdString())))
+		if (Modules::psEdit().getParticleWorkspace()->containsFile(NLMISC::CFile::getFilename(fileName.toUtf8().constData())))
 		{
 			QMessageBox::critical(this, tr("NeL particle system editor"),
 								  tr("Failed to create new particle system"),
 								  QMessageBox::Ok);
 			return;
 		}
-		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toStdString()));
+		CWorkspaceNode *node = Modules::psEdit().getParticleWorkspace()->addNode(NLMISC::CFile::getFilename(fileName.toUtf8().constData()));
 		// should always succeed because we tested if file already exists
 		nlassert(node);
 		node->createEmptyPS();

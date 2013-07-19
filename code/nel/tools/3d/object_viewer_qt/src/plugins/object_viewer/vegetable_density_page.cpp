@@ -145,13 +145,13 @@ void CVegetableDensityPage::browseShapeVeget()
 	if (!fileName.isEmpty())
 	{
 		// Add search path for the .veget
-		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(fileName.toStdString()));
+		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(fileName.toUtf8().constData()));
 
 		try
 		{
 			// update shapeName and view
-			_Vegetable->ShapeName = NLMISC::CFile::getFilename(fileName.toStdString());
-			_ui.meshLineEdit->setText(QString(NLMISC::CFile::getFilename(fileName.toStdString()).c_str()));
+			_Vegetable->ShapeName = NLMISC::CFile::getFilename(fileName.toUtf8().constData());
+			_ui.meshLineEdit->setText(QString::fromUtf8(_Vegetable->ShapeName.c_str()));
 
 			// update the name in the list-box
 			Q_EMIT vegetNameChanged();

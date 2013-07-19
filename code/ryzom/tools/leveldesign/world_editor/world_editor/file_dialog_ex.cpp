@@ -51,7 +51,7 @@ END_MESSAGE_MAP()
 
 // ***************************************************************************
 
-int CFileDialogEx::DoModal ()
+INT_PTR CFileDialogEx::DoModal ()
 {
 	// Get the path
 	char path[512];

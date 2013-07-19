@@ -470,7 +470,7 @@ public:
 	afx_msg void OnUpdateEditCollapse(CCmdUI* pCmdUI);
 	afx_msg void OnEditSelectChildren();
 	afx_msg void OnUpdateEditSelectChildren(CCmdUI* pCmdUI);
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnEditExpand ();
 	afx_msg void OnEditCollapse ();
 	afx_msg void OnHelpFinder();

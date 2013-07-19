@@ -16,9 +16,9 @@
 
 #include "stdpacs.h"
 
-#include "move_primitive.h"
-#include "collision_desc.h"
-#include "move_element.h"
+#include "nel/pacs/move_primitive.h"
+#include "nel/pacs/collision_desc.h"
+#include "nel/pacs/move_element.h"
 #include "nel/misc/hierarchical_timer.h"
 
 using namespace NLMISC;

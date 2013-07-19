@@ -16,8 +16,8 @@
 
 #include "stdpacs.h"
 
-#include "move_element.h"
-#include "move_element_inline.h"
+#include "nel/pacs/move_element.h"
+#include "nel/pacs/move_element_inline.h"
 
 
 // leave not static else this workaround don't work
