@@ -33,10 +33,10 @@ class Ticket{
     * return all ticket of the given author's id.
     *
     */
-    public static function getEntireTicket($id) {
+    public static function getEntireTicket($id,$view_as_admin) {
         $ticket = new Ticket();
         $ticket->load_With_TId($id);
-        $reply_array = Ticket_Reply::getRepliesOfTicket($id);
+        $reply_array = Ticket_Reply::getRepliesOfTicket($id, $view_as_admin);
         return Array('ticket_obj' => $ticket,'reply_array' => $reply_array); 
     }
     
@@ -81,7 +81,7 @@ class Ticket{
         }else{
             Ticket_Log::createLogEntry( $ticket_id, $real_author, 2, $author);
         }
-        Ticket_Reply::createReply($content, $author, $ticket_id);
+        Ticket_Reply::createReply($content, $author, $ticket_id, 0);
         return $ticket_id;
         
     }
@@ -115,13 +115,13 @@ class Ticket{
         return $reply;
     }
     
-    public static function createReply($content, $author, $ticket_id){
+    public static function createReply($content, $author, $ticket_id, $hidden){
         if($content != ""){
             $ticket = new Ticket();
             $ticket->load_With_TId($ticket_id);
             //if status is not closed
             if($ticket->getStatus() != 3){
-                Ticket_Reply::createReply($content, $author, $ticket_id);
+                Ticket_Reply::createReply($content, $author, $ticket_id, $hidden);
             }else{
                 //TODO: Show error message that ticket is closed
             }

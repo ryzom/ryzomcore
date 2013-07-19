@@ -14,7 +14,11 @@ function reply_on_ticket(){
             try{
                 $author = $_SESSION['ticket_user']->getTUserId();
                 $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
-                Ticket::createReply($content, $author, $ticket_id);
+                $hidden = 0;
+                if(isset($_POST['hidden']) &&  Ticket_User::isMod($_SESSION['ticket_user'])){
+                    $hidden = 1;
+                }
+                Ticket::createReply($content, $author, $ticket_id,  $hidden);
                 
                 if(isset($_POST['ChangeStatus']) && isset($_POST['ChangePriority']) && Ticket_User::isMod($_SESSION['ticket_user'])){
                     $newStatus = filter_var($_POST['ChangeStatus'], FILTER_SANITIZE_NUMBER_INT);

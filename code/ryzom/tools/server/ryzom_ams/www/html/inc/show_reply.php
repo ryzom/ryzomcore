@@ -8,17 +8,18 @@ function show_reply(){
         $reply = new Ticket_Reply();
         $reply->load_With_TReplyId($result['reply_id']);
         
+        
         $ticket = new Ticket();
         $ticket->load_With_TId($reply->getTicket());
         
-        if(($ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  ||  Ticket_User::isMod($_SESSION['ticket_user'] )){
+        if(( $ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId() && ! $reply->getHidden())  ||  Ticket_User::isMod($_SESSION['ticket_user'] )){
             $content = new Ticket_Content();
             $content->load_With_TContentId($reply->getContent());
             
             $author = new Ticket_User();
             $author->load_With_TUserId($reply->getAuthor());
             
-            
+            $result['hidden'] = $reply->getHidden();
             $result['ticket_id'] = $reply->getTicket();
             $result['reply_timestamp'] = $reply->getTimestamp();
             $result['author_permission'] = $author->getPermission();

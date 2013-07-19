@@ -10,7 +10,11 @@ function show_ticket(){
 
         if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] )){
             
-            $entire_ticket = Ticket::getEntireTicket( $result['ticket_id']);
+            $show_as_admin = false;
+            if(Ticket_User::isMod($_SESSION['ticket_user'])){
+                $show_as_admin = true;
+            }
+            $entire_ticket = Ticket::getEntireTicket( $result['ticket_id'],$show_as_admin);
             Ticket_Log::createLogEntry($result['ticket_id'],$_SESSION['ticket_user']->getTUserId(), 3);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
             $result['ticket_title'] = $entire_ticket['ticket_obj']->getTitle();
@@ -22,7 +26,7 @@ function show_ticket(){
             $result['ticket_statustext'] = $entire_ticket['ticket_obj']->getStatusText();
             $result['ticket_lastupdate'] = Gui_Elements::time_elapsed_string(Ticket::getLatestReply($result['ticket_id'])->getTimestamp());
             $result['ticket_category'] = $entire_ticket['ticket_obj']->getCategoryName();
-            $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp","getAuthor()->getExternId","getAuthor()->getPermission"), Array("tReplyId","replyContent","timestamp","authorExtern","permission"));
+            $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp","getAuthor()->getExternId","getAuthor()->getPermission","getHidden"), Array("tReplyId","replyContent","timestamp","authorExtern","permission","hidden"));
             $i = 0;
             foreach( $result['ticket_replies'] as $reply){
                 $result['ticket_replies'][$i]['author'] = WebUsers::getUsername($reply['authorExtern']);

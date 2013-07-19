@@ -33,13 +33,15 @@
 			{foreach from=$ticket_replies item=reply}
 			<tr>
 			    <td>
-				<p><span class="label label-info"> {$reply.timestamp}</span>
-				{if $reply.permission eq '1'}
-				<span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span></p>
-				{else if $reply.permission gt '1'}
-			        <span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span></p>
-				{/if}
-				<p><pre{if $reply.permission gt '1'} style="background-color:rgb(248, 200, 200);"{/if}>{$reply.replyContent}</pre></p>
+				<p>
+				    <span class="label label-info"> {$reply.timestamp}</span>
+				    {if $reply.permission eq '1'}
+				    <span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    {else if $reply.permission gt '1'}
+				    <span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    {/if}
+				</p>
+				<p><pre{if $reply.permission gt '1'} {if $reply.hidden eq 0} style="background-color:rgb(248, 200, 200);"{else if $reply.hidden eq 1}style="background-color:rgb(207, 254, 255);"{/if}{/if}> {if $reply.hidden eq 1}<i>{/if}{$reply.replyContent}{if $reply.hidden eq 1}</i>{/if}</pre></p>
 			    </td>
 			</tr>
 			{/foreach}
@@ -56,15 +58,25 @@
 			    <td>
 				<form id="reply" class="form-vertical" method="post" action="index.php">
 				{if $ticket_status neq 3}
-				<legend>{$t_reply}:</legend>
-				<div class="control-group">
-				    <label class="control-label">{$t_fill}</label>
-				    <div class="controls">
-					<div class="input-prepend">
-					    <textarea rows="6" class="span12" id="Content" name="Content"></textarea>
+				    <legend>{$t_reply}:</legend>
+				    <div class="control-group">
+					<label class="control-label">{$t_fill}</label>
+					<div class="controls">
+					    <div class="input-prepend">
+						<textarea rows="6" class="span12" id="Content" name="Content"></textarea>
+					    </div>
 					</div>
 				    </div>
-				</div>
+				    {if isset($isMod) and $isMod eq "TRUE"}
+				     <div class="control-group">
+					<label class="control-label">Options</label>
+					<div class="controls">
+					    <div class="input-prepend">
+					<input type="checkbox" name="hidden">Hide reply for user.
+					 </div>
+					</div>
+				    </div>
+				    {/if}
 				{/if}
 				{if isset($isMod) and $isMod eq "TRUE"}
 				<div class="control-group"  style="display: inline-block;">
