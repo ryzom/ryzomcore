@@ -641,6 +641,8 @@ void CMaterial::createDynMat()
 {
 	if( dynMat == NULL )
 		dynMat = new CDynMaterial();
+	else
+		dynMat->reconstruct();
 
 	SRenderPass *p = dynMat->getPass( 0 );
 	

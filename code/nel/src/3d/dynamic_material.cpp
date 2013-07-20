@@ -150,14 +150,20 @@ namespace NL3D
 
 	CDynMaterial::CDynMaterial()
 	{
-		SRenderPass *p = new SRenderPass();
-		p->setName( "pass1" );
-		passes.push_back( p );
+		reconstruct();
 	}
 
 	CDynMaterial::~CDynMaterial()
 	{
 		clear();
+	}
+
+	void CDynMaterial::reconstruct()
+	{
+		clear();
+		SRenderPass *p = new SRenderPass();
+		p->setName( "pass1" );
+		passes.push_back( p );
 	}
 
 	void CDynMaterial::clear()
