@@ -234,6 +234,14 @@ class Ticket{
         return $priorityArray[$this->getPriority()];
     }
     
+    public function getAssigned(){
+        $user_id = Assigned::getUserAssignedToTicket($this->getTId());
+        if ($user_id == ""){
+            return 0;
+        }else{
+            return $user_id;
+        }
+    }
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
     
     public function setTId($id){

@@ -16,6 +16,7 @@
 			    <tr>
 				    <th>ID</th>
 				    <th>Title</th>
+				    <th>Assigned</th>
 				    <th>Timestamp</th>
 				    <th>Category</th>
 				    <th>Status</th>
@@ -26,6 +27,7 @@
 			  <tr>
 				<td>{$ticket.tId}</td>
 				<td><a href ="index.php?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
+				<td>{if $ticket.assignedText neq ""} <a href="index.php?page=show_user&id={$ticket.assigned}">{$ticket.assignedText}</a> {else}<i> {$not_assigned}</i> {/if}</td>
 				<td class="center"><i>{$ticket.timestamp}</i></td>
 				<td class="center">{$ticket.category}</td>
 

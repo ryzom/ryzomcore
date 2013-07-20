@@ -9,11 +9,12 @@ function show_queue(){
    
             $queueArray = Ticket_Queue_Handler::getTickets($result['queue_action']);
             if ($queueArray != "ERROR"){    
-                $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText"), Array("tId","title","timestamp","authorExtern","category","status","statusText"));
+                $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText","getAssigned"), Array("tId","title","timestamp","authorExtern","category","status","statusText","assigned"));
              
                 $i = 0;
                 foreach( $result['tickets'] as $ticket){
                     $result['tickets'][$i]['author'] = WebUsers::getUsername($ticket['authorExtern']);
+                    $result['tickets'][$i]['assignedText'] = WebUsers::getUsername($ticket['assigned']);
                     $i++;
                 }
                 if(Ticket_User::isMod($_SESSION['ticket_user'])){

@@ -22,6 +22,17 @@ class Assigned{
       
     }
     
+    // Get the id of the user assigned to a ticket
+    public static function getUserAssignedToTicket($ticket_id) {
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->execute("SELECT ticket_user.ExternId FROM `assigned` JOIN `ticket_user` ON assigned.User = ticket_user.TUserId WHERE `Ticket` = :ticket_id", Array('ticket_id' => $ticket_id));
+        $user_id = $statement->fetch();
+        return $user_id['ExternId'];
+        
+        
+      
+    }
+    
     public static function isAssigned( $ticket_id ) {
         $dbl = new DBLayer("lib");
         //check if ticket is already assigned
