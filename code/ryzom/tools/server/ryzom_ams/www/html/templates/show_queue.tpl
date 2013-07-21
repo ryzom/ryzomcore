@@ -52,7 +52,7 @@
 				<td>{$ticket.tId}</td>
 				<td><a href ="index.php?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
 				<td>{if $ticket.assignedText neq ""} <a href="index.php?page=show_user&id={$ticket.assigned}">{$ticket.assignedText} {else}<i> {$not_assigned}</i> {/if}</td>
-				<td class="center"><i>{$ticket.timestamp}</i></td>
+				<td class="center"><span title="{$ticket.timestamp_elapsed}" data-rel="tooltip"  data-placement="right">{$ticket.timestamp}</span></td>
 				<td class="center">{$ticket.category}</td>
 				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <i class="icon-exclamation-sign icon-white"></i>{/if} {$ticket.statusText}</span></td>  
 				<td>
@@ -62,7 +62,7 @@
 					    <input type="hidden" name="action" value="assignTicket">
 					    <button type="submit" class="btn btn-primary" ><i class="icon-flag icon-white"></i> Assign Ticket</button>
 					</form>
-				    {else if $ticket.assigned eq 1}
+				    {else if $ticket.assigned eq $user_id}
 					<form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 					    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 					    <input type="hidden" name="action" value="unAssignTicket">

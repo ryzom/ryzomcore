@@ -35,6 +35,7 @@ function show_queue(){
                 foreach( $result['tickets'] as $ticket){
                     $result['tickets'][$i]['author'] = WebUsers::getUsername($ticket['authorExtern']);
                     $result['tickets'][$i]['assignedText'] = WebUsers::getUsername($ticket['assigned']);
+                    $result['tickets'][$i]['timestamp_elapsed'] = Gui_Elements::time_elapsed_string($ticket['timestamp']);
                     $i++;
                 }
                 $result['user_id'] = $_SESSION['ticket_user']->getTUserId();

@@ -27,46 +27,16 @@ class Ticket_Queue{
     public function loadToDoTickets($user_id){
         
         $dbl = new DBLayer("lib");
-        
-        //first: find the tickets assigned to the user with status != waiting on user reply
-        $statement = $dbl->execute("SELECT ticket . * FROM ticket LEFT JOIN assigned ON ticket.TId = assigned.Ticket WHERE assigned.User = :user_id",array('user_id' => $user_id));
-        $assignedTo = $statement->fetchAll();
-        
-        //second: find all non-assigned tickets forwarded to the support groups to which that user belongs
-        //TODO
-        
-        //third: find all not assigned tickets that aren't forwarded yet.
-        //TODO: check if not forwarded to a group!
-        $statement = $dbl->executeWithoutParams("SELECT ticket . * FROM ticket LEFT JOIN assigned ON ticket.TId = assigned.Ticket WHERE assigned.Ticket IS NULL");
-        $notAssigned = $statement->fetchAll();
-        
-        //forth: find all tickets assigned to someone else, not forwarded to a group or forwarded to a group you are a member from, with status == waiting on support and with timestamp of last reply > 1 day
-        //TODO
-        
-        //Now let's get them all together
-        $allTogether = $assignedTo + $notAssigned;
+        $query = "SELECT t . * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User WHERE (tu.ExternId = :user_id AND t.Status = 1) OR (a.Ticket IS NULL) OR  (tu.ExternId != :user_id AND  t.Status = 1 AND   (SELECT ticket_reply.Timestamp FROM `ticket_reply` WHERE Ticket =t.TId ORDER BY TReplyId DESC LIMIT 1)  < NOW() - INTERVAL 1 DAY )";
+        $values = array('user_id' => $user_id);
+        $statement = $dbl->execute($query,$values);
+        $rows = $statement->fetchAll();
+        $this->setQueue($rows);
 
-        //filter to only get unique ticket id's
-        $this->setQueue(self::filter_tickets($allTogether));   
         
     }
     
-    //filters the array of tickets and returns unique tickets based on there TId
-    static public function filter_tickets($ticketArray){
-        $tmp = array ();
-        foreach ($ticketArray as $ticket1){
-            $found = false;
-            foreach ($tmp as $ticket2){
-                if($ticket1['TId'] == $ticket2['TId']){
-                    $found = true;
-                }
-            }
-            if(! $found){
-                $tmp[] = $ticket1;
-            }
-        }
-        return $tmp;
-    }
+
     
     public function getTickets(){
         return $this->queueElements;
