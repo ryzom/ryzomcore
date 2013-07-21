@@ -8,12 +8,13 @@ function show_queue(){
         if( Ticket_User::isMod($_SESSION['ticket_user'])){
             $result['queue_view'] = filter_var($_GET['get'], FILTER_SANITIZE_STRING);
    
-            $queueArray = Ticket_Queue_Handler::getTickets($result['queue_view']);
+            $user_id = $_SESSION['ticket_user']->getTUserId();
+            $queueArray = Ticket_Queue_Handler::getTickets($result['queue_view'], $user_id);
             
             //if queue_view is a valid parameter value
             if ($queueArray != "ERROR"){
                 
-                $user_id = $_SESSION['ticket_user']->getTUserId();
+                
                 
                 if(isset($_POST['action'])){
                     switch($_POST['action']){

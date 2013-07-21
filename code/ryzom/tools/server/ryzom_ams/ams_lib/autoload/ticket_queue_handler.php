@@ -2,7 +2,7 @@
 
 class Ticket_Queue_Handler{
     
-    public static function getTickets($input){
+    public static function getTickets($input, $user_id){
      
             $queue = new Ticket_Queue();
              
@@ -16,6 +16,9 @@ class Ticket_Queue_Handler{
                     break;
                 case "not_assigned":
                     $queue->loadAllNotAssignedTickets();
+                    break;
+                case "todo":
+                    $queue->loadToDoTickets($user_id);
                     break;
                 default:
                     return "ERROR";

@@ -26,11 +26,11 @@
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "ALREADY_ASSIGNED"}
 		<div class="alert alert-error">
-			{$already_assigned}
+			{$ticket_already_assigned}
 		</div>
 		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "NOT_ASSIGNED"}
 		<div class="alert alert-error">
-			{$not_assigned}
+			{$ticket_not_assigned}
 		</div>
 		{/if}
 		
