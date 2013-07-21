@@ -10,7 +10,21 @@ class Ticket{
     private $author;
     private $priority;
     
-    ////////////////////////////////////////////Functions////////////////////////////////////////////////////    
+    ////////////////////////////////////////////Functions////////////////////////////////////////////////////
+    
+    /*FUNCTION: ticketExists
+    * returns true if ticket exists
+    *
+    */
+    public static function ticketExists($id) {
+        $dbl = new DBLayer("lib");
+        //check if ticket is already assigned
+        if(  $dbl->execute(" SELECT * FROM `ticket` WHERE `TId` = :ticket_id", array('ticket_id' => $id) )->rowCount() ){
+            return true;
+        }else{
+            return false;
+        } 
+    }
     
     /*FUNCTION: getStatusArray
     * returns all possible statusses
@@ -130,7 +144,23 @@ class Ticket{
         }
     }
     
+    //returns SUCCESS_ASSIGNED, TICKET_NOT_EXISTING or ALREADY_ASSIGNED
+    public static function assignTicket($user_id, $ticket_id){
+        if(self::ticketExists($ticket_id)){
+            return Assigned::assignTicket($user_id, $ticket_id);
+        }else{
+            return "TICKET_NOT_EXISTING";
+        }
+    }
     
+    //returns SUCCESS_UNASSIGNED, TICKET_NOT_EXISTING or NOT_ASSIGNED
+    public static function unAssignTicket($user_id, $ticket_id){
+        if(self::ticketExists($ticket_id)){
+            return Assigned::unAssignTicket($user_id, $ticket_id);
+        }else{
+            return "TICKET_NOT_EXISTING";
+        }
+    }
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     public function __construct() {
 

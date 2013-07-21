@@ -8,16 +8,31 @@ class Assigned{
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
   
     //Assigns a ticket to a user or returns error message
-    public static function AssignTicket( $user_id, $ticket_id) {
+    public static function assignTicket( $user_id, $ticket_id) {
         $dbl = new DBLayer("lib");
         //check if ticket is already assigned, if so return "ALREADY ASSIGNED"
         if(! Assigned::isAssigned($ticket_id)){
             $assignation = new Assigned();
             $assignation->set(array('User' => $user_id, 'Ticket' => $ticket_id));
             $assignation->create();
-            return "SUCCESS";
+            return "SUCCESS_ASSIGNED";
         }else{
             return "ALREADY_ASSIGNED";
+        }
+      
+    }
+    
+    //Unsign a ticket to a user or returns error message
+    public static function unAssignTicket( $user_id, $ticket_id) {
+        $dbl = new DBLayer("lib");
+        //check if ticket is really assigned to that user
+        if( Assigned::isAssigned($ticket_id, $user_id)){
+            $assignation = new Assigned();
+            $assignation->set(array('User' => $user_id, 'Ticket' => $ticket_id));
+            $assignation->delete();
+            return "SUCCESS_UNASSIGNED";
+        }else{
+            return "NOT_ASSIGNED";
         }
       
     }
@@ -33,10 +48,13 @@ class Assigned{
       
     }
     
-    public static function isAssigned( $ticket_id ) {
+    public static function isAssigned( $ticket_id, $user_id = 0) {
         $dbl = new DBLayer("lib");
         //check if ticket is already assigned
-        if(  $dbl->execute(" SELECT * FROM `assigned` WHERE `Ticket` = :ticket_id", array('ticket_id' => $ticket_id) )->rowCount() ){
+        
+        if($user_id == 0 &&  $dbl->execute(" SELECT * FROM `assigned` WHERE `Ticket` = :ticket_id", array('ticket_id' => $ticket_id) )->rowCount() ){
+            return true;
+        }else if( $dbl->execute(" SELECT * FROM `assigned` WHERE `Ticket` = :ticket_id and `User` = :user_id", array('ticket_id' => $ticket_id, 'user_id' => $user_id) )->rowCount()){
             return true;
         }else{
             return false;
@@ -51,12 +69,12 @@ class Assigned{
     //set values
     public function set($values) {
         $this->setUser($values['User']);
-        $this->setGroup($values['Ticket']);
+        $this->setTicket($values['Ticket']);
     }
     
     public function create() {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO `assigned' (`User`,`Ticket`) VALUES (:user, :ticket)";
+        $query = "INSERT INTO `assigned` (`User`,`Ticket`) VALUES (:user, :ticket)";
         $values = Array('user' => $this->getUser(), 'ticket' => $this->getTicket());
         $dbl->execute($query, $values);
     }
@@ -65,7 +83,7 @@ class Assigned{
     public function delete() {
         $dbl = new DBLayer("lib");
         $query = "DELETE FROM `assigned` WHERE `User` = :user_id and `Ticket` = :ticket_id";
-        $values = array('user_id' => $this->getUser() ,'ticket_id' => $this->getGroup());
+        $values = array('user_id' => $this->getUser() ,'ticket_id' => $this->getTicket());
         $dbl->execute($query, $values);
     }
 
