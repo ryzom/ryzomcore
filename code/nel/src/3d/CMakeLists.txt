@@ -259,6 +259,8 @@ SOURCE_GROUP(Shapes FILES
         ../../include/nel/3d/shape.h
         shape_bank.cpp
         ../../include/nel/3d/shape_bank.h
+		shape_material_serializer.cpp
+		../../include/nel/3d/shape_material_serializer.h
         shifted_triangle_cache.cpp
         ../../include/nel/3d/shifted_triangle_cache.h
         skeleton_shape.cpp

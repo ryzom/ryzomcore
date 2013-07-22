@@ -23,6 +23,7 @@
 #include "nel/3d/skeleton_shape.h"
 #include "nel/3d/vegetable_shape.h"
 #include "nel/3d/lod_character_shape.h"
+#include "nel/3d/shape_material_serializer.h"
 #include "../nel_mesh_lib/export_nel.h"
 #include "../nel_mesh_lib/export_appdata.h"
 
@@ -91,9 +92,10 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				InfoLog->display("Beg buildShape %s \n", node.GetName());
 			// Export in mesh format
 			IShape *pShape = _ExportNel->buildShape(node, time, mapIdPtr, true);
+			
 			if (InfoLog)
 				InfoLog->display("End buildShape in %d ms \n", timeGetTime()-t);
-			
+
 			// Conversion success ?
 			if (pShape)
 			{
@@ -135,6 +137,11 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					if (_TerminateOnFileOpenIssues)
 						nelExportTerminateProcess();
 				}
+
+				// Export here
+				ShapeMatSerial sms;
+				sms.setShape( pShape );
+				sms.serial( sPath );
 
 				// Delete the pointer
 				nldebug("Delete the pointer");
