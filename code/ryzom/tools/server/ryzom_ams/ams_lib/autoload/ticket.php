@@ -99,6 +99,23 @@ class Ticket{
         return $ticket_id;
         
     }
+        
+    /*FUNCTION: updateTicketStatus()
+     *
+     *
+     */
+    public static function updateTicketStatus( $ticket_id, $newStatus, $author) {
+        
+        $ticket = new Ticket();
+        $ticket->load_With_TId($ticket_id);
+        if ($ticket->getStatus() != $newStatus){
+            $ticket->setStatus($newStatus);
+            Ticket_Log::createLogEntry( $ticket_id, $author, 5, $newStatus);
+        }
+        $ticket->update();
+        
+    }
+    
     
     /*FUNCTION: updateTicketStatusAndPriority()
      * creates a ticket + first initial reply and fills in the content of it!
@@ -135,7 +152,7 @@ class Ticket{
             $ticket->load_With_TId($ticket_id);
             //if status is not closed
             if($ticket->getStatus() != 3){
-                Ticket_Reply::createReply($content, $author, $ticket_id, $hidden);
+                Ticket_Reply::createReply($content, $author, $ticket_id, $hidden, $ticket->getAuthor());
             }else{
                 //TODO: Show error message that ticket is closed
             }
@@ -169,7 +186,11 @@ class Ticket{
     public static function forwardTicket($user_id, $ticket_id, $group_id){
         if(self::ticketExists($ticket_id)){
             if(isset($group_id) && $group_id != ""){
+                //unassign the ticket incase the ticket is assined to yourself
+                self::unAssignTicket($user_id, $ticket_id);
+                //forward the ticket
                 $returnvalue = Forwarded::forwardTicket($group_id, $ticket_id);
+                //make a log entry of this action
                 Ticket_Log::createLogEntry( $ticket_id, $user_id, 8, $group_id);
                 return $returnvalue;
             }else{
