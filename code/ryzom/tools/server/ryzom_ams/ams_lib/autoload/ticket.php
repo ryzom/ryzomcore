@@ -161,6 +161,22 @@ class Ticket{
             return "TICKET_NOT_EXISTING";
         }
     }
+    
+    public static function forwardTicket($user_id, $ticket_id, $group_id){
+        if(self::ticketExists($ticket_id)){
+            if(isset($group_id) && $group_id != ""){
+                return Forwarded::forwardTicket($group_id, $ticket_id);
+            }else{
+                return "INVALID_SGROUP";
+            }
+        }else{
+            return "TICKET_NOT_EXISTING";
+        }
+    }
+    
+    
+    
+    
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     public function __construct() {
 
@@ -270,6 +286,24 @@ class Ticket{
             return 0;
         }else{
             return $user_id;
+        }
+    }
+    
+    public function getForwardedGroupName(){
+        $group_id = Forwarded::getSGroupOfTicket($this->getTId());
+        if ($group_id == ""){
+            return 0;
+        }else{
+            return Support_Group::getGroup($group_id)->getName();
+        }
+    }
+    
+    public function getForwardedGroupId(){
+        $group_id = Forwarded::getSGroupOfTicket($this->getTId());
+        if ($group_id == ""){
+            return 0;
+        }else{
+            return $group_id;
         }
     }
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////

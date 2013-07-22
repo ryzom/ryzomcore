@@ -10,7 +10,7 @@
         </div>
         <div class="box-content">
             <div class="row-fluid">
-                <legend>All support groups</legend>
+                <legend>All members of the {$groupsname} Support Group</legend>
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
 		    <thead>
 			    <tr>

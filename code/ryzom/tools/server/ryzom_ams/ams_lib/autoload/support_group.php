@@ -175,6 +175,20 @@ class Support_Group{
         }
             
     }
+    
+    //returns list of all category objects
+    public static function getAllSupportGroups() {
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->executeWithoutParams("SELECT * FROM `support_group`");
+        $row = $statement->fetchAll();
+        $result = Array();
+        foreach($row as $group){
+            $instance = new self();
+            $instance->set($group);
+            $result[] = $instance;
+        }
+        return $result; 
+    }
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
      
     public function __construct() {

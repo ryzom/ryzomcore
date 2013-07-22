@@ -23,7 +23,15 @@
 			<tr>
 			    <td><strong>Category: </strong>{$ticket_category}</td>
 			    <td><strong>Priority: </strong>{$ticket_prioritytext}</td>
-			    <td><strong>Associated: </strong><span class="label label-info">Ticket#33</span></td>                  
+			    <td><strong>Support Group: </strong>
+				<span class="label label-info">
+				    {if $ticket_forwardedGroupName eq "0"}
+					<i>{$public_sgroup}</i>
+				    {else}
+					<a href="index.php?page=show_sgroup&id={$ticket_forwardedGroupId}"><font color="white">{$ticket_forwardedGroupName}</font></a>
+				    {/if}
+				</span>
+			    </td>                  
 			</tr> 
 		</table>
 		
@@ -130,62 +138,42 @@
         <div class="box-content">
             <div class="row-fluid">
 		
-		<form id="addTag" class="form-vertical" method="post" action="index.php">
-		<legend>Tags</legend>
+		{if isset($isMod) and $isMod eq "TRUE"}
+		<form id="forward" class="form-vertical" method="post" action="">
+		<legend>Forward to Group</legend>
 		
 		<div class="control-group">
-		    <label class="control-label">Current Tags</label>
 		    <div class="controls">
-			<div class="input-prepend">
-			   <div id="checkbox1" class="checker"><span class="checked"><input style="opacity: 0;" id="inlineCheckbox2" value="option2" checked="checked" type="checkbox"></span></div> Hacked
-			   <div id="checkbox1" class="checker"><span class="checked"><input style="opacity: 0;" id="inlineCheckbox2" value="option2" checked="checked" type="checkbox"></span></div> Botanic
-			   <div id="checkbox1" class="checker"><span class="checked"><input style="opacity: 0;" id="inlineCheckbox2" value="option2" checked="checked" type="checkbox"></span></div> evilwebsite.comz
-			   <div id="checkbox1" class="checker"><span class="checked"><input style="opacity: 0;" id="inlineCheckbox2" value="option2" checked="checked" type="checkbox"></span></div> keylogger
-			</div>
+			<select name="group">
+				    <option></option>
+			    {foreach from=$sGroups key=k item=v}
+				    <option value="{$k}">{$v}</option>
+			    {/foreach}
+			</select>	
 		    </div>
 		</div>
+		<input type="hidden" name="ticket_id" value="{$ticket_tId}">
+		<input type="hidden" name="action" value="forward">
 		<div class="control-group">
-		    <label class="control-label">New Tag</label>
 		    <div class="controls">
-			<div class="input-prepend">
-			    <input type="text" class="span8" id="newTag" name="newTag">
-			</div>
-		    </div>
-		</div>
-		<div class="control-group">
-		    <label class="control-label"></label>
-		    <div class="controls">
-			<button type="submit" class="btn btn-primary" >Update</button>
+			<button type="submit" class="btn btn-primary" >Forward</button>
 		    </div>
 		</div>
 		</form>
-		
-		<form id="addTag" class="form-vertical" method="post" action="index.php">
-		<legend>Associations</legend>
-		
-		<div class="control-group">
-		    <label class="control-label">Current Associations</label>
-		    <div class="controls">
-			<div class="input-prepend">
-			   <div id="checkbox1" class="checker"><span class="checked"><input style="opacity: 0;" id="inlineCheckbox2" value="option2" checked="checked" type="checkbox"></span></div> Ticket #33
-			</div>
-		    </div>
+		{if isset($ACTION_RESULT) and $ACTION_RESULT eq "INVALID_SGROUP"}
+		<div class="alert alert-error">
+			{$invalid_sgroup}
 		</div>
-		<div class="control-group">
-		    <label class="control-label">New Association</label>
-		    <div class="controls">
-			<div class="input-prepend">
-			    <input type="text" class="span8" id="newTag" name="newTag">
-			</div>
-		    </div>
+		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "TICKET_NOT_EXISTING"}
+		<div class="alert alert-error">
+			{$ticket_not_existing}
 		</div>
-		<div class="control-group">
-		    <label class="control-label"></label>
-		    <div class="controls">
-			<button type="submit" class="btn btn-primary" >Update</button>
-		    </div>
+		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_FORWARDED"}
+		<div class="alert alert-success">
+			{$success_forwarded}
 		</div>
-		</form>
+		{/if}
+		{/if}
 		<legend>Actions</legend>
 		<div class="btn-group">
 		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>

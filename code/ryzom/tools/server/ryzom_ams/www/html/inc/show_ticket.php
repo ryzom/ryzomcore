@@ -7,6 +7,19 @@ function show_ticket(){
         $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
+        
+        if(Ticket_User::isMod($_SESSION['ticket_user'] )){    
+            if(isset($_POST['action'])){
+                switch($_POST['action']){
+                    case "forward":
+                        $ticket_id = filter_var($_POST['ticket_id'], FILTER_SANITIZE_NUMBER_INT);
+                        $group_id = filter_var($_POST['group'], FILTER_SANITIZE_NUMBER_INT);
+                        $result['ACTION_RESULT'] = Ticket::forwardTicket($_SESSION['ticket_user']->getTUserId(), $ticket_id, $group_id);
+                        break;
+                }
+            }
+        }      
+
 
         if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] )){
             
@@ -17,6 +30,8 @@ function show_ticket(){
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id'],$show_as_admin);
             Ticket_Log::createLogEntry($result['ticket_id'],$_SESSION['ticket_user']->getTUserId(), 3);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
+            $result['ticket_forwardedGroupName'] = $entire_ticket['ticket_obj']->getForwardedGroupName();
+            $result['ticket_forwardedGroupId'] = $entire_ticket['ticket_obj']->getForwardedGroupId();
             $result['ticket_title'] = $entire_ticket['ticket_obj']->getTitle();
             $result['ticket_timestamp'] = $entire_ticket['ticket_obj']->getTimestamp();
             $result['ticket_status'] = $entire_ticket['ticket_obj']->getStatus();
@@ -35,6 +50,7 @@ function show_ticket(){
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isMod'] = "TRUE";
                 $result['statusList'] = Ticket::getStatusArray();
+                $result['sGroups'] = Gui_Elements::make_table_with_key_is_id(Support_Group::getAllSupportGroups(), Array("getName"), "getSGroupId" );
             }
             return $result;
             

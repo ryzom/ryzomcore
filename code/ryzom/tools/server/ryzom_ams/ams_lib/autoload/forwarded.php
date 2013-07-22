@@ -1,6 +1,6 @@
 <?php
 
-class Assigned{
+class Forwarded{
     
     private $group;
     private $ticket;
@@ -22,7 +22,12 @@ class Assigned{
       
     }
     
-
+    public static function getSGroupOfTicket($ticket_id) {
+        $forw = new self();
+        $forw->load($ticket_id);
+        return $forw->getGroup();
+    }
+    
     
     public static function isForwarded( $ticket_id) {
         $dbl = new DBLayer("lib");
@@ -48,7 +53,7 @@ class Assigned{
     public function create() {
         $dbl = new DBLayer("lib");
         $query = "INSERT INTO `forwarded` (`Group`,`Ticket`) VALUES (:group, :ticket)";
-        $values = Array('user' => $this->getGroup(), 'ticket' => $this->getTicket());
+        $values = Array('group' => $this->getGroup(), 'ticket' => $this->getTicket());
         $dbl->execute($query, $values);
     }
     
@@ -63,7 +68,7 @@ class Assigned{
     //Load with sGroupId
     public function load( $ticket_id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM `forwarded` WHERE `Ticket` = :ticket_id", Array('ticket_id' => $ticket_id);
+        $statement = $dbl->execute("SELECT * FROM `forwarded` WHERE `Ticket` = :ticket_id", Array('ticket_id' => $ticket_id));
         $row = $statement->fetch();
         $this->set($row);
     }
