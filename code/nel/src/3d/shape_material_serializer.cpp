@@ -62,7 +62,7 @@ namespace NL3D
 				CDynMaterial *dm = m.getDynMat();
 				fname = path + "_";
 				fname += char( '0' + i );
-				fname += ".nlmat";
+				fname += ".nelmat";
 
 				nlinfo( "exporting to %s", fname.c_str() );
 
