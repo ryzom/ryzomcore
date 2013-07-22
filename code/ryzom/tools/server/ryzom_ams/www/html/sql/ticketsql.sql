@@ -238,7 +238,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `mydb`.`support_group` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`support_group` (
-  `SGroupId` INT(10) NOT NULL AUTO_INCREMENT ,
+  `SGroupId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Name` VARCHAR(22) NOT NULL ,
   `Tag` VARCHAR(7) NOT NULL ,
   PRIMARY KEY (`SGroupId`) ,
@@ -254,7 +254,7 @@ DROP TABLE IF EXISTS `mydb`.`in_support_group` ;
 
 CREATE  TABLE IF NOT EXISTS `mydb`.`in_support_group` (
   `User` INT(10) UNSIGNED NOT NULL ,
-  `Group` INT(10) NOT NULL ,
+  `Group` INT(10) UNSIGNED NOT NULL ,
   INDEX `fk_in_support_group_ticket_user1` (`User` ASC) ,
   INDEX `fk_in_support_group_support_group1` (`Group` ASC) ,
   CONSTRAINT `fk_in_support_group_ticket_user1`
@@ -266,6 +266,29 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`in_support_group` (
     FOREIGN KEY (`Group` )
     REFERENCES `mydb`.`support_group` (`SGroupId` )
     ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`forwarded`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`forwarded` ;
+
+CREATE  TABLE IF NOT EXISTS `mydb`.`forwarded` (
+  `Group` INT(10) UNSIGNED NOT NULL ,
+  `Ticket` INT UNSIGNED NOT NULL ,
+  INDEX `fk_forwarded_support_group1` (`Group` ASC) ,
+  INDEX `fk_forwarded_ticket1` (`Ticket` ASC) ,
+  CONSTRAINT `fk_forwarded_support_group1`
+    FOREIGN KEY (`Group` )
+    REFERENCES `mydb`.`support_group` (`SGroupId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_forwarded_ticket1`
+    FOREIGN KEY (`Ticket` )
+    REFERENCES `mydb`.`ticket` (`TId` )
+    ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 

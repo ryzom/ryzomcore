@@ -274,14 +274,15 @@
             
         INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
         
-                
+                        
+        
         -- -----------------------------------------------------
         -- Table `" . $cfg['db']['lib']['name'] ."`.`support_group`
         -- -----------------------------------------------------
         DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`support_group` ;
         
         CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`support_group` (
-          `SGroupId` INT(10) NOT NULL AUTO_INCREMENT ,
+          `SGroupId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
           `Name` VARCHAR(22) NOT NULL ,
           `Tag` VARCHAR(7) NOT NULL ,
           PRIMARY KEY (`SGroupId`) ,
@@ -297,7 +298,7 @@
         
         CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`in_support_group` (
           `User` INT(10) UNSIGNED NOT NULL ,
-          `Group` INT(10) NOT NULL ,
+          `Group` INT(10) UNSIGNED NOT NULL ,
           INDEX `fk_in_support_group_ticket_user1` (`User` ASC) ,
           INDEX `fk_in_support_group_support_group1` (`Group` ASC) ,
           CONSTRAINT `fk_in_support_group_ticket_user1`
@@ -309,6 +310,28 @@
             FOREIGN KEY (`Group` )
             REFERENCES `" . $cfg['db']['lib']['name'] ."`.`support_group` (`SGroupId` )
             ON DELETE CASCADE
+            ON UPDATE NO ACTION)
+        ENGINE = InnoDB;
+        
+        -- -----------------------------------------------------
+        -- Table `" . $cfg['db']['lib']['name'] ."`.`forwarded`
+        -- -----------------------------------------------------
+        DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`forwarded` ;
+        
+        CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`forwarded` (
+          `Group` INT(10) UNSIGNED NOT NULL ,
+          `Ticket` INT UNSIGNED NOT NULL ,
+          INDEX `fk_forwarded_support_group1` (`Group` ASC) ,
+          INDEX `fk_forwarded_ticket1` (`Ticket` ASC) ,
+          CONSTRAINT `fk_forwarded_support_group1`
+            FOREIGN KEY (`Group` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`support_group` (`SGroupId` )
+            ON DELETE CASCADE
+            ON UPDATE NO ACTION,
+          CONSTRAINT `fk_forwarded_ticket1`
+            FOREIGN KEY (`Ticket` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket` (`TId` )
+            ON DELETE NO ACTION
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
 
