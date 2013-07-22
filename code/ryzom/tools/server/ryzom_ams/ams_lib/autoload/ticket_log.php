@@ -16,6 +16,9 @@ class Ticket_Log{
      * 4: Added Reply ID: arg to ticket
      * 5: Changed status to arg
      * 6: Changed Priority to arg
+     * 7: assigned to the ticket
+     * 8: Forwarded ticket to support group arg
+     * 9: unassigned to the ticket
      *
      ****************************************/
     

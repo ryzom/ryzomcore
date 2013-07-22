@@ -147,7 +147,9 @@ class Ticket{
     //returns SUCCESS_ASSIGNED, TICKET_NOT_EXISTING or ALREADY_ASSIGNED
     public static function assignTicket($user_id, $ticket_id){
         if(self::ticketExists($ticket_id)){
-            return Assigned::assignTicket($user_id, $ticket_id);
+            $returnvalue = Assigned::assignTicket($user_id, $ticket_id);
+            Ticket_Log::createLogEntry( $ticket_id, $user_id, 7);
+            return $returnvalue;
         }else{
             return "TICKET_NOT_EXISTING";
         }
@@ -156,7 +158,9 @@ class Ticket{
     //returns SUCCESS_UNASSIGNED, TICKET_NOT_EXISTING or NOT_ASSIGNED
     public static function unAssignTicket($user_id, $ticket_id){
         if(self::ticketExists($ticket_id)){
-            return Assigned::unAssignTicket($user_id, $ticket_id);
+            $returnvalue = Assigned::unAssignTicket($user_id, $ticket_id);
+            Ticket_Log::createLogEntry( $ticket_id, $user_id, 9);
+            return $returnvalue;
         }else{
             return "TICKET_NOT_EXISTING";
         }
@@ -165,7 +169,9 @@ class Ticket{
     public static function forwardTicket($user_id, $ticket_id, $group_id){
         if(self::ticketExists($ticket_id)){
             if(isset($group_id) && $group_id != ""){
-                return Forwarded::forwardTicket($group_id, $ticket_id);
+                $returnvalue = Forwarded::forwardTicket($group_id, $ticket_id);
+                Ticket_Log::createLogEntry( $ticket_id, $user_id, 8, $group_id);
+                return $returnvalue;
             }else{
                 return "INVALID_SGROUP";
             }

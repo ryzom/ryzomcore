@@ -28,6 +28,8 @@ function show_ticket_log(){
                 }else if($log['action'] == 6){
                     $priorityArray = Ticket::getPriorityArray();
                     $query_backpart = $priorityArray[$log['argument'] ];
+                }else if($log['action'] == 8){
+                    $query_backpart = "<a href='index.php?page=show_sgroupy&id=" . $log['argument'] . "'>" . Support_Group::getGroup($log['argument'])->getName() . "</a>";
                 }
                 $result['ticket_logs'][$i]['query'] = $author . " " . $log_action_array[$log['action']] . " " .  $query_backpart;
                 $result['ticket_logs'][$i]['timestamp_elapsed'] = Gui_Elements::time_elapsed_string($log['timestamp']);
