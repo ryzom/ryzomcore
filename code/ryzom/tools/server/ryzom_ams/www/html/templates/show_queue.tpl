@@ -43,6 +43,7 @@
 				    <th>Timestamp</th>
 				    <th>Category</th>
 				    <th>Status</th>
+				    <th>SupportGroup</th>
 				    <th>Actions</th>
 			    </tr>
 		    </thead>   
@@ -55,6 +56,15 @@
 				<td class="center"><span title="{$ticket.timestamp_elapsed}" data-rel="tooltip"  data-placement="right">{$ticket.timestamp}</span></td>
 				<td class="center">{$ticket.category}</td>
 				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <i class="icon-exclamation-sign icon-white"></i>{/if} {$ticket.statusText}</span></td>  
+				<td class="center">
+				    <span class="label label-info">
+				    {if $ticket.forwardedGroupName eq "0"}
+					<i>{$public_sgroup}</i>
+				    {else}
+					<a href="index.php?page=show_sgroup&id={$ticket.forwardedGroupId}"><font color="white">{$ticket.forwardedGroupName}</font></a>
+				    {/if}
+				    </span>   
+				</td>  
 				<td>
 				    {if $ticket.assigned eq 0}
 					<form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">

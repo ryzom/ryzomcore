@@ -27,7 +27,16 @@ class Ticket_Queue{
     public function loadToDoTickets($user_id){
         
         $dbl = new DBLayer("lib");
-        $query = "SELECT t . * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User WHERE (tu.ExternId = :user_id AND t.Status = 1) OR (a.Ticket IS NULL) OR  (tu.ExternId != :user_id AND  t.Status = 1 AND   (SELECT ticket_reply.Timestamp FROM `ticket_reply` WHERE Ticket =t.TId ORDER BY TReplyId DESC LIMIT 1)  < NOW() - INTERVAL 1 DAY )";
+        //first: find the tickets assigned to the user with status = waiting on support
+        //second find all not assigned tickets that aren't forwarded yet.        
+        //find all tickets assigned to someone else witht status waiting on support,  with timestamp of last reply > 1 day
+        //find all non-assigned tickets forwarded to the support groups to which that user belongs
+        $query = "SELECT * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User LEFT JOIN `forwarded` f ON t.TId = f.Ticket 
+        WHERE (tu.ExternId = :user_id AND t.Status = 1) 
+        OR (a.Ticket IS NULL AND f.Group IS NULL)
+        OR (tu.ExternId != :user_id AND  t.Status = 1 AND (SELECT ticket_reply.Timestamp FROM `ticket_reply` WHERE Ticket =t.TId ORDER BY TReplyId DESC LIMIT 1)  < NOW() - INTERVAL 1 DAY )
+        OR (a.Ticket IS NULL AND EXISTS (SELECT * FROM  `in_support_group` isg JOIN `ticket_user` tu2 ON isg.User = tu2.TUserId WHERE isg.Group = f.Group))
+        ";
         $values = array('user_id' => $user_id);
         $statement = $dbl->execute($query,$values);
         $rows = $statement->fetchAll();

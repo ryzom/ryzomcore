@@ -30,7 +30,7 @@ function show_queue(){
                     }
                 }
                 
-                $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText","getAssigned"), Array("tId","title","timestamp","authorExtern","category","status","statusText","assigned"));
+                $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText","getAssigned","getForwardedGroupName","getForwardedGroupId"), Array("tId","title","timestamp","authorExtern","category","status","statusText","assigned","forwardedGroupName","forwardedGroupId"));
                 $i = 0;
                 foreach( $result['tickets'] as $ticket){
                     $result['tickets'][$i]['author'] = WebUsers::getUsername($ticket['authorExtern']);
