@@ -4,6 +4,7 @@ function show_ticket(){
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
         
+        $result['user_id'] = $_SESSION['ticket_user']->getTUserId();
         $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
@@ -14,12 +15,20 @@ function show_ticket(){
                     case "forward":
                         $ticket_id = filter_var($_POST['ticket_id'], FILTER_SANITIZE_NUMBER_INT);
                         $group_id = filter_var($_POST['group'], FILTER_SANITIZE_NUMBER_INT);
-                        $result['ACTION_RESULT'] = Ticket::forwardTicket($_SESSION['ticket_user']->getTUserId(), $ticket_id, $group_id);
+                        $result['ACTION_RESULT'] = Ticket::forwardTicket($result['user_id'], $ticket_id, $group_id);
                         break;
+                    case "assignTicket":
+                        $ticket_id = filter_var($_POST['ticket_id'], FILTER_SANITIZE_NUMBER_INT);
+                        $result['ACTION_RESULT'] = Ticket::assignTicket($result['user_id'] , $ticket_id);
+                        break;
+                    case "unAssignTicket":
+                        $ticket_id = filter_var($_POST['ticket_id'], FILTER_SANITIZE_NUMBER_INT);
+                        $result['ACTION_RESULT'] = Ticket::unAssignTicket($result['user_id'], $ticket_id);
+                        break;
+               
                 }
             }
         }      
-
 
         if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] )){
             
@@ -41,6 +50,8 @@ function show_ticket(){
             $result['ticket_statustext'] = $entire_ticket['ticket_obj']->getStatusText();
             $result['ticket_lastupdate'] = Gui_Elements::time_elapsed_string(Ticket::getLatestReply($result['ticket_id'])->getTimestamp());
             $result['ticket_category'] = $entire_ticket['ticket_obj']->getCategoryName();
+            $result['ticket_assignedToText'] = WebUsers::getUsername(Assigned::getUserAssignedToTicket($result['ticket_tId']));
+            $result['ticket_assignedTo'] = Assigned::getUserAssignedToTicket($result['ticket_tId']);
             $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp","getAuthor()->getExternId","getAuthor()->getPermission","getHidden"), Array("tReplyId","replyContent","timestamp","authorExtern","permission","hidden"));
             $i = 0;
             foreach( $result['ticket_replies'] as $reply){

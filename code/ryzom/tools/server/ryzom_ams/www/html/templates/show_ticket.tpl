@@ -32,7 +32,12 @@
 				    {/if}
 				</span>
 			    </td>                  
-			</tr> 
+			</tr>
+			<tr>
+			    <td><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText} {else}<i> {$not_assigned}</i> {/if}</td>
+			    <td></td>
+			    <td></td> 
+		      </tr>
 		</table>
 		
 		
@@ -139,11 +144,49 @@
             <div class="row-fluid">
 		
 		{if isset($isMod) and $isMod eq "TRUE"}
-		<form id="forward" class="form-vertical" method="post" action="">
-		<legend>Forward to Group</legend>
+		
+		 <legend style="margin-bottom:9px;">Ticket Assigning</legend>
+		 {if $ticket_assignedTo eq 0}
+		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
+			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
+			<input type="hidden" name="action" value="assignTicket">
+			<button type="submit" class="btn btn-primary" style="margin-bottom:9px;><i class="icon-flag icon-white"></i> Assign Ticket</button>
+		    </form>
+		{else if $ticket_assignedTo eq $user_id}
+		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
+			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
+			<input type="hidden" name="action" value="unAssignTicket">
+			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><i class="icon-remove icon-white"></i> Remove Assign</button>
+		    </form>
+		{/if}
+				    
+		{if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_ASSIGNED"}
+		<div class="alert alert-success">
+			{$success_assigned}
+		</div>
+		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_UNASSIGNED"}
+		<div class="alert alert-success">
+			{$success_unassigned}
+		</div>
+		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "TICKET_NOT_EXISTING"}
+		<div class="alert alert-error">
+			{$ticket_not_existing}
+		</div>
+		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "ALREADY_ASSIGNED"}
+		<div class="alert alert-error">
+			{$ticket_already_assigned}
+		</div>
+		{else if isset($ACTION_RESULT) and $ACTION_RESULT eq "NOT_ASSIGNED"}
+		<div class="alert alert-error">
+			{$ticket_not_assigned}
+		</div>
+		{/if}
+		
+		<legend style="margin-bottom:9px;">Forward to Group</legend>		    
+		<form id="forward" class="form-vertical" method="post" action="" style="margin-bottom:9px;" >
 		
 		<div class="control-group">
-		    <div class="controls">
+		    <div class="controls" >
 			<select name="group">
 				    <option></option>
 			    {foreach from=$sGroups key=k item=v}
@@ -174,7 +217,7 @@
 		</div>
 		{/if}
 		{/if}
-		<legend>Actions</legend>
+		<legend style="margin-bottom:9px;">Other actions</legend>
 		<div class="btn-group">
 		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
 		    <ul class="dropdown-menu">
