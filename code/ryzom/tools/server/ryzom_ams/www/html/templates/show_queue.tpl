@@ -13,17 +13,18 @@
                 <legend>Tickets</legend>
 		
 		<div class="alert alert-info">
+		    <form id="create_queue" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 		    Show
 		    <select style="width: 136px;" name="what">
-			<option value="all">All</option>
-			<option value="wfs">'waiting for support'</option>
-			<option value="wfu">'waiting for user'</option>
-			<option value="closed">'closed'</option>
+			<option value="all">all</option>
+			<option value="waiting_for_support">waiting for support</option>
+			<option value="waiting_for_users">waiting for user</option>
+			<option value="closed">closed</option>
 		    </select>
 		    tickets
 		    <select style="width: 110px;" name="how">
-			<option value="all">assigned</option>
-			<option value="wfs">not assigned</option>
+			<option value="assigned">assigned</option>
+			<option value="not_assigned">not assigned</option>
 		    </select>
 		    to
 		    <select style="width: 140px;" name="who" onchange="aimedforwhochanged(this.value);">
@@ -31,18 +32,26 @@
 			<option value="support_group">support group</option>
 		    </select>
 		    <span id="userList" style="display:inline;">
-		    <select style="width: 140px;" name="name">
-			<option value="all">Quitta</option>
-			<option value="wfs">Botanic</option>
+		    <select style="width: 140px;" name="userid">
+			{foreach from=$teamlist item=member}
+			    <option value="{$member.tUserId}" {if $user_id eq $member.tUserId}selected="selected"{/if}>{$member.name}</option>
+			{/foreach}
 		    </select>
 		    </span>
 		    <span id="supportGroupList" style="display:none;">
-		    <select style="width: 140px;" name="name">
-			<option value="all">Developers</option>
-			<option value="wfs">Webteam</option>
+		    <select style="width: 140px;" name="groupid">
+			{foreach from=$grouplist item=group}
+			    <option value="{$group.sGroupId}">{$group.name}</option>
+			{/foreach}
 		    </select>
 		    </span>
+		    <input type="hidden" name="action" value="create_queue">
+		    <button type="submit" class="btn btn-primary" style="bottom:4px; position:relative;"  ><i class="icon-tag icon-white"></i> View</button>
+		    </form>
+		
+		    
 		</div>
+
 				
 		{if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_ASSIGNED"}
 		<div class="alert alert-success">
@@ -135,6 +144,8 @@
                 <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
                 <ul class="dropdown-menu">
 		    <li class="divider"></li>
+		    <li><a href="index.php?page=show_queue&get=todo">Todo tickets</a></li>
+		    <li><a href="index.php?page=show_queue&get=all">All tickets</a></li>
 		    <li><a href="index.php?page=show_queue&get=all_open">All open tickets</a></li>
 		    <li><a href="index.php?page=show_queue&get=archive">Ticket Archive</a></li>
 		    <li><a href="index.php?page=show_queue&get=not_assigned">Not Assigned Tickets</a></li>

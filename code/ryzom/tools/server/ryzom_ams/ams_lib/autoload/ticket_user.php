@@ -38,6 +38,20 @@ class Ticket_User{
     
     }
     
+    //return all mods/admins
+    public static function getModsAndAdmins() {
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->executeWithoutParams("SELECT * FROM `ticket_user` WHERE `Permission` > 1");
+        $rows = $statement->fetchAll();
+        $result = Array();
+        foreach($rows as $user){
+            $instanceUser = new self();
+            $instanceUser->set($user);
+            $result[] = $instanceUser;
+        }
+        return $result; 
+    }
+    
     //return constructed element based on ExternId
     public static function constr_ExternId( $id) {
         $instance = new self();
@@ -61,6 +75,14 @@ class Ticket_User{
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     public function __construct() {
     }
+    
+    //set values
+    public function set($values) {
+        $this->setTUserId($values['TUserId']);
+        $this->setPermission($values['Permission']);
+        $this->setExternId($values['ExternId']);
+    }
+    
     
     //return constructed element based on TUserId
     public function load_With_TUserId( $id) {

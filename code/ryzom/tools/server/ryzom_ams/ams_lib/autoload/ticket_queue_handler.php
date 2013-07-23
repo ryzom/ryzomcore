@@ -8,6 +8,9 @@ class Ticket_Queue_Handler{
              
             
             switch ($input){
+                case "all":
+                    $queue->loadAllTickets();
+                    break;
                 case "all_open":
                     $queue->loadAllOpenTickets();
                     break;
@@ -25,5 +28,11 @@ class Ticket_Queue_Handler{
             }
    
             return $queue->getTickets();
+    }
+    
+    public static function CreateQueue($userid, $groupid, $what, $how, $who){
+        $queue = new Ticket_Queue();
+        $queue->createQueue($userid, $groupid, $what, $how, $who);
+        return $queue->getTickets();
     }
 }

@@ -10,6 +10,13 @@ class Ticket_Queue{
         $this->setQueue($rows);
     }
     
+    public function loadAllTickets(){
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->executeWithoutParams("SELECT * FROM `ticket`");
+        $rows = $statement->fetchAll();
+        $this->setQueue($rows);
+    }
+    
     public function loadAllOpenTickets(){
         $dbl = new DBLayer("lib");
         $statement = $dbl->executeWithoutParams("SELECT * FROM ticket INNER JOIN ticket_user ON ticket.Author = ticket_user.TUserId and ticket.Status!=3");
@@ -20,6 +27,48 @@ class Ticket_Queue{
     public function loadAllClosedTickets(){
         $dbl = new DBLayer("lib");
         $statement = $dbl->executeWithoutParams("SELECT * FROM ticket INNER JOIN ticket_user ON ticket.Author = ticket_user.TUserId and ticket.Status=3");
+        $rows = $statement->fetchAll();
+        $this->setQueue($rows);
+    }
+    
+    public function createQueue($userid, $groupid, $what, $how, $who){
+        $dbl = new DBLayer("lib");
+        
+        if($who == "user"){
+            $selectfrom = "SELECT * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User";
+            if ($how == "assigned"){
+                $assign = "tu.TUserId = :id" ;
+            }else if ($how == "not_assigned"){
+                $assign = "(tu.TUserId != :id OR a.Ticket IS NULL)";
+            }
+        }else if ($who == "support_group"){
+            $selectfrom = "SELECT * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User LEFT JOIN `forwarded` f ON t.TId = f.Ticket";
+            if ($how == "assigned"){
+                $assign = "f.Group = :id";
+            }else if ($how == "not_assigned"){
+                $assign = "(f.Group != :id  OR f.Ticket IS NULL)" ;
+            }
+        
+        }
+        
+        if ($what == "waiting_for_support"){
+            $status = "t.Status = 1";
+        }else if ($what == "waiting_for_user"){
+            $status = "t.Status = 0";
+        }else if ($what == "closed"){
+            $status = "t.Status = 3";
+        }
+        
+        $query = $selectfrom ." WHERE " . $assign;
+        if(isset($status)){
+            $query = $query . " AND " . $status;
+        }
+        if($who == "user"){
+            $params = array('id' => $userid);
+        }else if ($who == "support_group"){
+            $params = array('id' => $groupid);
+        }  
+        $statement = $dbl->execute($query, $params);
         $rows = $statement->fetchAll();
         $this->setQueue($rows);
     }

@@ -22,11 +22,24 @@ function show_queue(){
                             $ticket_id = filter_var($_POST['ticket_id'], FILTER_SANITIZE_NUMBER_INT);
                             $result['ACTION_RESULT'] = Ticket::assignTicket($user_id, $ticket_id);
                             break;
+                       
                         case "unAssignTicket":
-                            
                             $ticket_id = filter_var($_POST['ticket_id'], FILTER_SANITIZE_NUMBER_INT);
                             $result['ACTION_RESULT'] = Ticket::unAssignTicket($user_id, $ticket_id);
                             break;
+                        
+                            case "create_queue":
+                            $userid = filter_var($_POST['userid'], FILTER_SANITIZE_NUMBER_INT);
+                            $groupid = filter_var($_POST['groupid'], FILTER_SANITIZE_NUMBER_INT);
+                            $what = filter_var($_POST['what'], FILTER_SANITIZE_STRING);
+                            $how = filter_var($_POST['how'], FILTER_SANITIZE_STRING);
+                            $who = filter_var($_POST['who'], FILTER_SANITIZE_STRING);
+                            $result['ACTION_RESULT'] = Ticket_Queue_Handler::CreateQueue($userid, $groupid, $what, $how, $who);
+                            if ($result['ACTION_RESULT'] != "ERROR"){
+                               $queueArray = $result['ACTION_RESULT'];
+                            }
+                            break;
+                        
                     }
                 }
                 
@@ -39,6 +52,15 @@ function show_queue(){
                     $i++;
                 }
                 $result['user_id'] = $_SESSION['ticket_user']->getTUserId();
+                
+                //Queue creator field info   
+                $result['grouplist'] = Gui_Elements::make_table(Support_Group::getGroups(), Array("getSGroupId","getName"), Array("sGroupId","name"));
+                $result['teamlist'] = Gui_Elements::make_table(Ticket_User::getModsAndAdmins(), Array("getTUserId","getExternId"), Array("tUserId","externId"));
+                $i = 0;
+                foreach( $result['teamlist'] as $member){
+                    $result['teamlist'][$i]['name'] = WebUsers::getUsername($member['externId']);
+                    $i++;
+                }
                 return $result;
             
             }else{
