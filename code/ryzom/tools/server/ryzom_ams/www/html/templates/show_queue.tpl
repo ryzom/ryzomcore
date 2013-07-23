@@ -12,6 +12,38 @@
             <div class="row-fluid">
                 <legend>Tickets</legend>
 		
+		<div class="alert alert-info">
+		    Show
+		    <select style="width: 136px;" name="what">
+			<option value="all">All</option>
+			<option value="wfs">'waiting for support'</option>
+			<option value="wfu">'waiting for user'</option>
+			<option value="closed">'closed'</option>
+		    </select>
+		    tickets
+		    <select style="width: 110px;" name="how">
+			<option value="all">assigned</option>
+			<option value="wfs">not assigned</option>
+		    </select>
+		    to
+		    <select style="width: 140px;" name="who" onchange="aimedforwhochanged(this.value);">
+			<option value="user">user</option>
+			<option value="support_group">support group</option>
+		    </select>
+		    <span id="userList" style="display:inline;">
+		    <select style="width: 140px;" name="name">
+			<option value="all">Quitta</option>
+			<option value="wfs">Botanic</option>
+		    </select>
+		    </span>
+		    <span id="supportGroupList" style="display:none;">
+		    <select style="width: 140px;" name="name">
+			<option value="all">Developers</option>
+			<option value="wfs">Webteam</option>
+		    </select>
+		    </span>
+		</div>
+				
 		{if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_ASSIGNED"}
 		<div class="alert alert-success">
 			{$success_assigned}
@@ -99,7 +131,7 @@
         </div>
         <div class="box-content">
             <div class="row-fluid">
-		<div class="btn-group">
+    		<div class="btn-group">
                 <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
                 <ul class="dropdown-menu">
 		    <li class="divider"></li>
@@ -113,5 +145,32 @@
         </div>
     </div><!--/span-->
 </div><!--/row-->
+
+
+
+
+<!----- /javascript for this page -->
+<script type="text/javascript">
+    function aimedforwhochanged(value) 
+{
+	
+if (value == "user") 
+    {
+    //hide the supportGroupList span
+    var elem = document.getElementById("supportGroupList");
+    elem.style.display="none";
+    var elem2 = document.getElementById("userList");
+    elem2.style.display="inline";
+    }
+else if(value == "support_group")
+    {
+    //hide the userList span
+    var elem = document.getElementById("supportGroupList");
+    elem.style.display= "inline";
+    var elem2 = document.getElementById("userList");
+    elem2.style.display="none";
+    }
+}
+</script>
 {/block}
 	
