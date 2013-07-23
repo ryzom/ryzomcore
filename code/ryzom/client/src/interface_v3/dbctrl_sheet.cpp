@@ -108,7 +108,7 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 		CLuaStackRestorer lsr(ls, 0);
 
 		CLuaIHM::pushReflectableOnStack(*ls, (CReflectableRefPtrTarget *)ctrlSheet);
-		ls->pushValue(LUA_GLOBALSINDEX);	
+		ls->pushGlobalTable();
 		CLuaObject game(*ls);
 		game = game["game"];		
 		game.callMethodByNameNoThrow(luaMethodName.c_str(), 1, 1);
@@ -3170,7 +3170,7 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 				_PhraseAdapter = new CSPhraseComAdpater;
 				_PhraseAdapter->Phrase = pPM->getPhrase(phraseId);
 				CLuaIHM::pushReflectableOnStack(*ls, _PhraseAdapter);
-				ls->pushValue(LUA_GLOBALSINDEX);	
+				ls->pushGlobalTable();	
 				CLuaObject game(*ls);
 				game = game["game"];		
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);

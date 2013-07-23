@@ -474,7 +474,11 @@ namespace NLGUI
 		CLuaState *luaState = table.getLuaState();
 		CLuaStackChecker lsc(luaState);
 		// get pointer to the 'next' function
+#if LUA_VERSION_NUM >= 502
+		luaState->pushGlobalTable();
+#else
 		luaState->pushValue(LUA_GLOBALSINDEX);
+#endif
 		_NextFunction = CLuaObject(*luaState)["next"];
 		//
 		nlassert(luaState);

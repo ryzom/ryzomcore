@@ -187,9 +187,11 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 	// *** clear return value
 	const	std::string		retId= "__ui_internal_ret_";
 	CLuaStackChecker	lsc(&ls);
+	ls.pushGlobalTable();
 	ls.push(retId);
 	ls.pushNil();
-	ls.setTable(LUA_GLOBALSINDEX);
+	ls.setTable(-3); //pop pop
+	ls.pop();
 
 
 	// *** execute script
@@ -201,8 +203,10 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 
 
 	// *** retrieve and convert return value
+	ls.pushGlobalTable();
 	ls.push(retId);
-	ls.getTable(LUA_GLOBALSINDEX);
+	ls.getTable(-2);
+	ls.remove(-2);
 	bool	ok= false;
 	sint	type= ls.type();
 	if (type==LUA_TBOOLEAN)
@@ -370,7 +374,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions( NLGUI::CLuaState &ls )
 	ls.registerFunc("SNode",    CUICtor::SNode);
 
 	// *** Register the metatable for access to client.cfg (nb nico this may be more general later -> access to any config file ...)
-	ls.pushValue(LUA_GLOBALSINDEX);
+	ls.pushGlobalTable();
 	CLuaObject globals(ls);
 	CLuaObject clientCfg = globals.newTable("config");
 	CLuaObject mt = globals.newTable("__cfmt");
