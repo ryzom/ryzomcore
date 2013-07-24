@@ -349,6 +349,7 @@ plugin material NelMaterial
 		cSelfIllumColor type:#color
 		pSelfIllumAmount type:#percent
 		bUseSelfIllumColor type:#boolean
+		sMaterialFile type:#string default:""
 	)
 
     parameters main rollout:NelParams
@@ -548,6 +549,12 @@ plugin material NelMaterial
 		Label lblNlbpB "http://dev.ryzom.com/" align:#center
 		CheckBox cbTwoSided "2-Sided" checked:false align:#right
 		
+		group "Material file"
+		(
+			edittext mfEdit
+			button materialButton "browse"
+		)
+		
 		group "Standard Lighting"
 		(
 			-- Label lblNlbpslA "Diffuse is the color in light, ambient in the dark." align:#right
@@ -574,55 +581,17 @@ plugin material NelMaterial
 			CheckBox cbUseSelfIllumColor "Use Color" checked:false align:#right
 		)
 		
-		Fn updateUI update =
+		on materialButton pressed do
 		(
-			if (version >= 14) then
-			(
-				if update == true then
-				(
-					cbTwoSided.checked = bTwoSided
-					cpAmbient.color = cAmbient
-					cpDiffuse.color = cDiffuse
-					spOpacity.value = pOpacity
-					cpSpecular.color = cSpecular
-					spSpecularLevel.value = pSpecularLevel
-					spGlossiness.value = pGlossiness
-					cpSelfIllumColor.color = cSelfIllumColor
-					spSelfIllumAmount.value = pSelfIllumAmount
-					cbUseSelfIllumColor.checked = bUseSelfIllumColor
-					
-					spSelfIllumAmount.visible = not bUseSelfIllumColor
-					cpSelfIllumColor.visible = bUseSelfIllumColor
-				)
-				else
-				(					
-					bTwoSided = cbTwoSided.checked
-					cAmbient = cpAmbient.color
-					cDiffuse = cpDiffuse.color
-					pOpacity = spOpacity.value
-					cSpecular = cpSpecular.color
-					pSpecularLevel = spSpecularLevel.value
-					pGlossiness = spGlossiness.value
-					cSelfIllumColor = cpSelfIllumColor.color
-					pSelfIllumAmount = spSelfIllumAmount.value
-					bUseSelfIllumColor = cbUseSelfIllumColor.checked
-					
-					delegate.twoSided = bTwoSided
-					delegate.ambient = cAmbient
-					delegate.diffuse = cDiffuse
-					delegate.opacity = pOpacity
-					delegate.specular = cSpecular
-					delegate.specularLevel = pSpecularLevel
-					delegate.glossiness = pGlossiness
-					delegate.selfIllumColor = cSelfIllumColor
-					delegate.selfIllumAmount = pSelfIllumAmount
-					delegate.useSelfIllumColor = bUseSelfIllumColor
-				)
-				
-				delegate.adTextureLock = false
-				delegate.adLock = false
-				delegate.dsLock = false
+			fname = getOpenFileName caption:"Open material file" types:"Nel material (*.nelmat)"
+			if fname == undefined then (
+				if mfEdit.text == ""  then
+					sMaterialFile = ""
 			)
+			else
+				sMaterialFile = fname
+				
+			mfEdit.text = sMaterialFile
 		)
 		
 		on cbTwoSided changed bval do
@@ -654,6 +623,59 @@ plugin material NelMaterial
 		
 		on cbUseSelfIllumColor changed bval do
 			updateUI false
+		
+		Fn updateUI update =
+		(
+			if (version >= 14) then
+			(
+				if update == true then
+				(
+					cbTwoSided.checked = bTwoSided
+					mfEdit.text = sMaterialFile
+					cpAmbient.color = cAmbient
+					cpDiffuse.color = cDiffuse
+					spOpacity.value = pOpacity
+					cpSpecular.color = cSpecular
+					spSpecularLevel.value = pSpecularLevel
+					spGlossiness.value = pGlossiness
+					cpSelfIllumColor.color = cSelfIllumColor
+					spSelfIllumAmount.value = pSelfIllumAmount
+					cbUseSelfIllumColor.checked = bUseSelfIllumColor
+					
+					spSelfIllumAmount.visible = not bUseSelfIllumColor
+					cpSelfIllumColor.visible = bUseSelfIllumColor
+				)
+				else
+				(					
+					bTwoSided = cbTwoSided.checked
+					sMaterial = mfEdit.text
+					cAmbient = cpAmbient.color
+					cDiffuse = cpDiffuse.color
+					pOpacity = spOpacity.value
+					cSpecular = cpSpecular.color
+					pSpecularLevel = spSpecularLevel.value
+					pGlossiness = spGlossiness.value
+					cSelfIllumColor = cpSelfIllumColor.color
+					pSelfIllumAmount = spSelfIllumAmount.value
+					bUseSelfIllumColor = cbUseSelfIllumColor.checked
+					
+					delegate.twoSided = bTwoSided
+					delegate.ambient = cAmbient
+					delegate.diffuse = cDiffuse
+					delegate.opacity = pOpacity
+					delegate.specular = cSpecular
+					delegate.specularLevel = pSpecularLevel
+					delegate.glossiness = pGlossiness
+					delegate.selfIllumColor = cSelfIllumColor
+					delegate.selfIllumAmount = pSelfIllumAmount
+					delegate.useSelfIllumColor = bUseSelfIllumColor
+				)
+				
+				delegate.adTextureLock = false
+				delegate.adLock = false
+				delegate.dsLock = false
+			)
+		)
 		
 		on nelBasicParameters open do
 		(
