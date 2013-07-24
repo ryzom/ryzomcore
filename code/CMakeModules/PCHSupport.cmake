@@ -33,9 +33,9 @@ ENDIF(MSVC)
 # Set PCH_FLAGS for common flags, PCH_ARCH_XXX_FLAGS for specific archs flags and PCH_ARCHS for archs
 MACRO(PCH_SET_COMPILE_FLAGS _target)
   SET(PCH_FLAGS)
-  SET(PCH_ARCHS)
-
+  SET(PCH_ARCHS) 
   SET(FLAGS)
+  
   LIST(APPEND _FLAGS ${CMAKE_CXX_FLAGS})
 
   STRING(TOUPPER "${CMAKE_BUILD_TYPE}" _UPPER_BUILD)
@@ -81,10 +81,15 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   LIST(APPEND _FLAGS " ${_directory_flags}")
   LIST(APPEND _FLAGS " ${_directory_definitions}")
 
-  STRING(REGEX REPLACE " +" " " _FLAGS ${_FLAGS})
-
   # Format definitions
-  SEPARATE_ARGUMENTS(_FLAGS)
+  IF(MSVC)
+    # Fix path with space
+    SEPARATE_ARGUMENTS(_FLAGS UNIX_COMMAND "${_FLAGS}")
+  ELSE(MSVC)
+    STRING(REGEX REPLACE " +" " " _FLAGS ${_FLAGS})
+    SEPARATE_ARGUMENTS(_FLAGS)
+  ENDIF(MSVC)
+
 
   IF(CLANG)
     # Determining all architectures and get common flags
