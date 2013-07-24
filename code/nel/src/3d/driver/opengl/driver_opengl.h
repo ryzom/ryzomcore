@@ -68,7 +68,7 @@
 #elif defined(NL_OS_MAC)
 #include "mac/cocoa_event_emitter.h"
 #elif defined (NL_OS_UNIX)
-#include "unix_event_emitter.h"
+#include "nel/3d/unix_event_emitter.h"
 #endif // NL_OS_UNIX
 
 

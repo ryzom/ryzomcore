@@ -170,6 +170,8 @@ SOURCE_GROUP(Driver FILES
 		../../include/nel/3d/shader_visitor.h
         texture.cpp
         ../../include/nel/3d/texture.h
+		unix_event_emitter.cpp
+		../../include/nel/3d/unix_event_emitter.h
         vertex_buffer.cpp
         ../../include/nel/3d/vertex_buffer.h
         vertex_buffer_heap.cpp
