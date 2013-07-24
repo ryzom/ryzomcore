@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="Max Modifier" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="Min Modifier" Type="Type" Filename="int.typ"/>
-  <LOG>Mon Feb 03 12:28:09 2003 (brigand) Dfn Structure = </LOG>
-</DFN>

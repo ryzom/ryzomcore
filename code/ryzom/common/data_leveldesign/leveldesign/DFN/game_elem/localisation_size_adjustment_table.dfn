@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.1" State="modified">
-  <ELEMENT Name="Table" Type="Dfn" Filename="_localisation_size_adjustment.dfn" Array="true"/>
-  <LOG>Wed Jun 26 11:59:35 2002 (fleury) Dfn Structure = </LOG>
-</DFN>

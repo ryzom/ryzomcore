@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.5" State="modified">
-  <ELEMENT Name="Min" Type="Type" Filename="float.typ" Default="-10"/>
-  <ELEMENT Name="Max" Type="Type" Filename="float.typ" Default="+10"/>
-  <ELEMENT Name="Value" Type="Type" Filename="float.typ" Default="1.33"/>
-  <LOG>Fri Jun 28 18:27:21 2002 (mauduit) Dfn Structure = 
-Thu Jul 18 15:33:58 2002 (chafik) Dfn Structure = </LOG>
-</DFN>

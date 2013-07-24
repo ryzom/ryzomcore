@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.0" State="modified">
-  <ELEMENT Name="Designation" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="Substitute" Type="Type" Filename="string.typ"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:34 2002 (corvazier) File converted from old format</LOG>
-</DFN>

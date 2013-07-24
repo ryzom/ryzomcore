@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="MapName" Type="Type" Filename="filename.typ"/>
-  <ELEMENT Name="ColorMode" Type="Type" Filename="sky_color_mode.typ" Default="0"/>
-  <LOG>Tue Mar 16 14:29:33 2004 (vizerie) Dfn Structure = 
-Wed Mar 17 19:50:24 2004 (vizerie) Dfn Structure = 
-Tue Mar 23 17:48:18 2004 (vizerie) Dfn Structure = 
-Tue Mar 23 18:02:47 2004 (vizerie) Dfn Structure = </LOG>
-</DFN>
