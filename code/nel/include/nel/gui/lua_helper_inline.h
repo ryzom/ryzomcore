@@ -42,10 +42,16 @@ inline void CLuaState::checkIndex(int index)
 	//H_AUTO(Lua_CLuaState_checkIndex)
 	// NB : more restrictive test that in the documentation there, because
 	// we don't expose the check stack function
+#if LUA_VERSION_NUM >= 502
+	nlassert( (index!=0 && abs(index) <= getTop())
+		|| index == LUA_REGISTRYINDEX
+		);
+#else
 	nlassert( (index!=0 && abs(index) <= getTop())
 		|| index == LUA_REGISTRYINDEX
 		|| index == LUA_GLOBALSINDEX
 		);
+#endif
 }
 
 //================================================================================
@@ -73,6 +79,18 @@ inline void CLuaState::setTop(int index)
 
 	// set top
 	lua_settop(_State, index);
+}
+
+//================================================================================
+inline void CLuaState::pushGlobalTable()
+{
+	//H_AUTO(Lua_CLuaState_pushGlobalTable)
+#if LUA_VERSION_NUM >= 502
+	lua_pushglobaltable(_State);
+#else
+	checkIndex(LUA_GLOBALSINDEX);
+	lua_pushvalue(_State, LUA_GLOBALSINDEX);
+#endif
 }
 
 //================================================================================
@@ -243,7 +261,11 @@ inline size_t CLuaState::strlen(int index)
 {
 	//H_AUTO(Lua_CLuaState_strlen)
 	checkIndex(index);
+#if LUA_VERSION_NUM >= 502
+	return lua_rawlen(_State, index);
+#else
 	return lua_strlen(_State, index);
+#endif
 }
 
 //================================================================================
@@ -342,7 +364,11 @@ inline bool         CLuaState::equal(int index1, int index2)
 	//H_AUTO(Lua_CLuaState_equal)
 	checkIndex(index1);
 	checkIndex(index2);
+#if LUA_VERSION_NUM >= 502
+	return lua_compare(_State, index1, index2, LUA_OPEQ) != 0;
+#else
 	return lua_equal(_State, index1, index2) != 0;
+#endif
 }
 
 //================================================================================
@@ -376,7 +402,11 @@ inline bool         CLuaState::lessThan(int index1, int index2)
 	//H_AUTO(Lua_CLuaState_lessThan)
 	checkIndex(index1);
 	checkIndex(index2);
+#if LUA_VERSION_NUM >= 502
+	return lua_compare(_State, index1, index2, LUA_OPLT) != 0;
+#else
 	return lua_lessthan(_State, index1, index2) != 0;
+#endif
 }
 
 

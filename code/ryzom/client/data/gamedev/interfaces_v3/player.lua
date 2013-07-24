@@ -803,8 +803,8 @@ end
 
 
 function game:timeInSecondsToReadableTime(regenTime)			
-	local seconds = math.mod(regenTime, 60)	
-	local minutes = math.mod(math.floor(regenTime / 60), 60)	
+	local seconds = math.fmod(regenTime, 60)	
+	local minutes = math.fmod(math.floor(regenTime / 60), 60)	
 	local hours = math.floor(regenTime / 3600)	
 	local result = ""
 	if seconds > 0 then result = concatUCString(tostring(seconds), i18n.get("uittSecondsShort"))	end

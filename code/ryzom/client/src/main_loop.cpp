@@ -3235,7 +3235,7 @@ class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
 		if (!lua) return;
 		CLuaStackRestorer lsr(lua, 0);
 		CLuaIHM::pushUIOnStack(*lua, HighlightedDebugUI);
-		lua->pushValue(LUA_GLOBALSINDEX);
+		lua->pushGlobalTable();
 		CLuaObject env(*lua);
 		env["inspect"].callNoThrow(1, 0);
 	}
