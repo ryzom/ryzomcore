@@ -53,6 +53,15 @@ CMaterial::CMaterial()
 	dynMat = NULL;
 }
 
+CMaterial::CMaterial( const CMaterial &mat ) :
+CRefCount()
+{
+	_Touched= 0;
+	_Flags=0;
+	dynMat = NULL;
+	operator=(mat);
+}
+
 // ***************************************************************************
 void			CMaterial::initUnlit()
 {
@@ -123,8 +132,14 @@ CMaterial		&CMaterial::operator=(const CMaterial &mat)
 	// All states of material is modified.
 	_Touched= IDRV_TOUCHED_ALL;
 
-	dynMat = NULL;
-
+	if( mat.dynMat != NULL )
+	{
+		if( dynMat == NULL )
+			dynMat = new CDynMaterial();
+		
+		*dynMat = *mat.dynMat;
+	}
+		
 	return *this;
 }
 
@@ -177,8 +192,6 @@ void		CMaterial::serial(NLMISC::IStream &f)
 	Version 0:
 		- base version.
 	*/
-
-	dynMat = NULL;
 
 	sint	ver= f.serialVersion(9);
 	// For the version <=1:

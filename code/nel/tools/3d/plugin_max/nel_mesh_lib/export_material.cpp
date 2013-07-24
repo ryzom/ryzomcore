@@ -22,6 +22,7 @@
 #include "nel/3d/texture_cube.h"
 #include "nel/3d/tangent_space_build.h"
 #include "nel/3d/meshvp_per_pixel_light.h"
+#include "nel/3d/dyn_mat_loader.h"
 
 #include <vector>
 #include <string>
@@ -276,6 +277,19 @@ void CExportNel::buildAMaterial (NL3D::CMaterial& material, CMaxMaterialInfo& ma
 	// It is a NeL material ?
 	if (isClassIdCompatible (mtl, Class_ID(NEL_MTL_A,NEL_MTL_B)))
 	{
+		std::string sMaterialFile;
+		if( CExportNel::getValueByNameUsingParamBlock2( mtl, "sMaterialFile", (ParamType2)TYPE_STRING, &sMaterialFile, time ) )
+		{
+			if( !sMaterialFile.empty() )
+			{
+				nlinfo( "Using material file %s", sMaterialFile.c_str() );
+				CDynMatLoader loader;
+				if( loader.loadFrom( sMaterialFile ) )
+					material.setDynMat( loader.getDynMat() );
+				else
+					nlinfo( "Error loading material file %s", sMaterialFile.c_str() );
+			}
+		}
 
 		// Get the shader value now
 		int iShaderType = 0;

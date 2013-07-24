@@ -158,6 +158,25 @@ namespace NL3D
 		clear();
 	}
 
+	CDynMaterial& CDynMaterial::operator=( const CDynMaterial &other )
+	{
+		if( &other != this )
+		{
+			clear();
+
+			std::vector< SRenderPass* >::const_iterator itr = other.passes.begin();
+			while( itr != other.passes.end() )
+			{
+				SRenderPass *pass = new SRenderPass();
+				*pass = *(*itr);
+				passes.push_back( pass );
+				++itr;
+			}
+		}
+
+		return *this;
+	}
+
 	void CDynMaterial::reconstruct()
 	{
 		clear();
@@ -201,6 +220,7 @@ namespace NL3D
 		}
 		else
 		{
+			clear();
 			uint32 n;
 			f.xmlPush( "count" );
 			f.serial( n );

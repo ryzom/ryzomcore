@@ -262,7 +262,7 @@ public:
 	 */
 	CMaterial();
 	/// see operator=.
-	CMaterial(const CMaterial &mat) : CRefCount() {_Touched= 0;_Flags=0; operator=(mat);}
+	CMaterial(const CMaterial &mat);
 	/// dtor.
 	~CMaterial();
 	/// Do not copy DrvInfos, copy all infos and set IDRV_TOUCHED_ALL.
@@ -701,6 +701,7 @@ private:
 public:
 
 	CDynMaterial* getDynMat() const{ return dynMat; }
+	void setDynMat( CDynMaterial *newDynMat ){ dynMat = newDynMat; }
 
 	/// Create the dynamic material from the current material parameters
 	void createDynMat();

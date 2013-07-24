@@ -81,6 +81,8 @@ namespace NL3D
 	public:
 		CDynMaterial();
 		~CDynMaterial();
+		CDynMaterial& operator=( const CDynMaterial &other );
+
 		void reconstruct();
 		void clear();
 		void serial( NLMISC::IStream &f );

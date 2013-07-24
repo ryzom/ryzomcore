@@ -58,8 +58,13 @@ namespace NL3D
 			for( int i = 0; i < n; i++ )
 			{
 				CMaterial &m = mb->getMaterial( i );
-				m.createDynMat();
 				CDynMaterial *dm = m.getDynMat();
+				if( dm == NULL )
+				{
+					m.createDynMat();
+					dm = m.getDynMat();
+				}
+
 				fname = path + "_";
 				fname += char( '0' + i );
 				fname += ".nelmat";

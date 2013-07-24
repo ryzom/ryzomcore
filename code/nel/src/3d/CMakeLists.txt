@@ -146,6 +146,8 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/material.h
 		dynamic_material.cpp
 		../../include/nel/3d/dynamic_material.h
+		dyn_mat_loader.cpp
+		../../include/nel/3d/dyb_mat_loader.h
         nelu.cpp
         ../../include/nel/3d/nelu.h
         ../../include/nel/3d/occlusion_query.h
