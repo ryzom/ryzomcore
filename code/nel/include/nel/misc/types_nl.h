@@ -104,6 +104,8 @@
 			// Windows 64bits platform SDK compilers doesn't support inline assembler
 #			define NL_NO_ASM
 #		endif
+#		undef _WIN32_WINNT
+#		define _WIN32_WINNT 0x0600 // force VISTA minimal version in 64 bits
 #	endif
 	// define NOMINMAX to be sure that windows includes will not define min max macros, but instead, use the stl template
 #	define NOMINMAX
