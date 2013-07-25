@@ -26,7 +26,7 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
@@ -72,11 +72,11 @@ namespace NLDRIVERGL {
  * \author Nevrax France
  * \date 2001
  */
-class CDriverGLStates
+class CDriverGLStates3
 {
 public:
 	/// Constructor. no-op.
-	CDriverGLStates();
+	CDriverGLStates3();
 	// init. Do it just after setDisplay()
 	void			init(bool supportTextureCubeMap, bool supportTextureRectangle, uint maxLight);
 

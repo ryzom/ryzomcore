@@ -47,15 +47,15 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
 // ***************************************************************************
-CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL *drvGl, bool isRectangleTexture) : ITextureDrvInfos(drv, it)
+CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL3 *drvGl, bool isRectangleTexture) : ITextureDrvInfos(drv, it)
 {
-	H_AUTO_OGL(CTextureDrvInfosGL_CTextureDrvInfosGL)
-	//nldebug("3D: CTextureDrvInfosGL::ctor()");
+	H_AUTO_OGL(CTextureDrvInfosGL3_CTextureDrvInfosGL3)
+	//nldebug("3D: CTextureDrvInfosGL3::ctor()");
 	// The id is auto created here.
 	glGenTextures(1,&ID);
 
@@ -81,9 +81,9 @@ CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDri
 	UsePackedDepthStencil = drvGl->supportPackedDepthStencil();
 }
 // ***************************************************************************
-CTextureDrvInfosGL::~CTextureDrvInfosGL()
+CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 {
-	H_AUTO_OGL(CTextureDrvInfosGL_CTextureDrvInfosGLDtor)
+	H_AUTO_OGL(CTextureDrvInfosGL3_CTextureDrvInfosGLDtor)
 	// The id is auto deleted here.
 	glDeleteTextures(1,&ID);
 
@@ -116,7 +116,7 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 }
 
 // ***************************************************************************
-bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
+bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 {
 	if(!InitFBO)
 	{
@@ -354,7 +354,7 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 }
 
 // ***************************************************************************
-bool CTextureDrvInfosGL::activeFrameBufferObject(ITexture * tex)
+bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 {
 	if(tex)
 	{
@@ -384,19 +384,19 @@ bool CTextureDrvInfosGL::activeFrameBufferObject(ITexture * tex)
 
 // ***************************************************************************
 // Get the glText mirror of an existing setuped texture.
-static inline CTextureDrvInfosGL* getTextureGl(ITexture& tex)
+static inline CTextureDrvInfosGL3* getTextureGl(ITexture& tex)
 {
 	H_AUTO_OGL(getTextureGl)
-	CTextureDrvInfosGL*	gltex;
-	gltex= (CTextureDrvInfosGL*)(ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
+	CTextureDrvInfosGL3*	gltex;
+	gltex= (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
 	return gltex;
 }
 
 // ***************************************************************************
 // Translation of TexFmt mode.
-GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
+GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
 {
-	H_AUTO_OGL(CDriverGL_getGlTextureFormat)
+	H_AUTO_OGL(CDriverGL3_getGlTextureFormat)
 	ITexture::TUploadFormat		texfmt= tex.getUploadFormat();
 
 	// If auto, retrieve the pixel format of the bitmap.
@@ -549,9 +549,9 @@ static GLenum getGlSrcTextureComponentType(GLint texSrcFormat)
 }
 
 // ***************************************************************************
-uint				CDriverGL::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
+uint				CDriverGL3::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 {
-	H_AUTO_OGL(CDriverGL_computeMipMapMemoryUsage)
+	H_AUTO_OGL(CDriverGL3_computeMipMapMemoryUsage)
 	switch(glfmt)
 	{
 #ifdef GL_RGBA8
@@ -640,7 +640,7 @@ static inline GLenum	translateWrapToGl(ITexture::TWrapMode mode, const CGlExtens
 }
 
 // ***************************************************************************
-static inline GLenum	translateMagFilterToGl(CTextureDrvInfosGL *glText)
+static inline GLenum	translateMagFilterToGl(CTextureDrvInfosGL3 *glText)
 {
 	H_AUTO_OGL(translateMagFilterToGl)
 #ifdef NEL_FORCE_NEAREST
@@ -660,7 +660,7 @@ static inline GLenum	translateMagFilterToGl(CTextureDrvInfosGL *glText)
 
 
 // ***************************************************************************
-static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL *glText)
+static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL3 *glText)
 {
 	H_AUTO_OGL(translateMinFilterToGl)
 #ifdef NEL_FORCE_NEAREST
@@ -758,7 +758,7 @@ static inline bool		isDXTCFormat(GLint glfmt)
 }
 
 // ***************************************************************************
-bool CDriverGL::setupTexture (ITexture& tex)
+bool CDriverGL3::setupTexture (ITexture& tex)
 {
 	H_AUTO_OGL(setupTexture)
 	bool nTmp;
@@ -769,9 +769,9 @@ bool CDriverGL::setupTexture (ITexture& tex)
 #ifndef NL_DEBUG
 	inline
 #endif
-void CDriverGL::bindTextureWithMode(ITexture &tex)
+void CDriverGL3::bindTextureWithMode(ITexture &tex)
 {
-	CTextureDrvInfosGL*	gltext;
+	CTextureDrvInfosGL3*	gltext;
 	gltext= getTextureGl(tex);
 	// system of "backup the previous binded texture" seems to not work with some drivers....
 	_DriverGLStates.activeTextureARB(0);
@@ -779,17 +779,17 @@ void CDriverGL::bindTextureWithMode(ITexture &tex)
 	{
 		if (_Extensions.ARBTextureCubeMap)
 		{
-			_DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
+			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 			// Bind this texture
 			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
 		}
 	}
 	else
 	{
-		CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+		CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 #ifndef USE_OPENGLES
 		if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
-			textureMode = CDriverGLStates::TextureRect;
+			textureMode = CDriverGLStates3::TextureRect;
 #endif
 
 		_DriverGLStates.setTextureMode(textureMode);
@@ -802,9 +802,9 @@ void CDriverGL::bindTextureWithMode(ITexture &tex)
 #ifndef NL_DEBUG
 	inline
 #endif
-void CDriverGL::setupTextureBasicParameters(ITexture &tex)
+void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 {
-	CTextureDrvInfosGL*	gltext;
+	CTextureDrvInfosGL3*	gltext;
 	gltext= getTextureGl(tex);
 	// TODO: possible cache here, but beware, this is called just after texture creation as well, so these fields
 	// haven't ever been filled.
@@ -843,10 +843,10 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 }
 
 // ***************************************************************************
-bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded, bool bMustRecreateSharedTexture)
+bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded, bool bMustRecreateSharedTexture)
 {
 	H_AUTO_OGL(setupTextureEx)
-	//nldebug("3D: CDriverGL::setupTextureEx(%016p, %d, %d, %d)", &tex, bUpload, bAllUploaded, bMustRecreateSharedTexture);
+	//nldebug("3D: CDriverGL3::setupTextureEx(%016p, %d, %d, %d)", &tex, bUpload, bAllUploaded, bMustRecreateSharedTexture);
 	bAllUploaded = false;
 
 	if(tex.isTextureCube() && (!_Extensions.ARBTextureCubeMap))
@@ -881,7 +881,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 			// Disable texture 0
 			_CurrentTexture[0]= NULL;
 			_CurrentTextureInfoGL[0]= NULL;
-			_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
+			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 			//
 		}
 		//
@@ -928,7 +928,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 				// insert into driver map. (so it is deleted when driver is deleted).
 				itTex= (rTexDrvInfos.insert(make_pair(name, (ITextureDrvInfos*)NULL))).first;
 				// create and set iterator, for future deletion.
-				itTex->second= tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL(this, itTex, this, isTextureRectangle(&tex));
+				itTex->second= tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL3(this, itTex, this, isTextureRectangle(&tex));
 
 				// need to load ALL this texture.
 				mustLoadAll= true;
@@ -957,7 +957,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 			// Must create it. Create auto a GL id (in constructor).
 			// Do not insert into the map. This un-shared texture will be deleted at deletion of the texture.
 			// Inform ITextureDrvInfos by passing NULL _Driver.
-			tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL(NULL, ItTexDrvInfoPtrMap(), this, isTextureRectangle(&tex));
+			tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL3(NULL, ItTexDrvInfoPtrMap(), this, isTextureRectangle(&tex));
 
 			// need to load ALL this texture.
 			mustLoadAll= true;
@@ -975,7 +975,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 		// system of "backup the previous binded texture" seems to not work with some drivers....
 		bindTextureWithMode(tex);
 
-		CTextureDrvInfosGL*	gltext;
+		CTextureDrvInfosGL3*	gltext;
 		gltext= getTextureGl(tex);
 
 		glPixelStorei(GL_UNPACK_ALIGNMENT,1);
@@ -1296,7 +1296,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 		// Disable texture 0
 		_CurrentTexture[0]= NULL;
 		_CurrentTextureInfoGL[0]= NULL;
-		_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
+		_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 	}
 
 	// The texture is correctly setuped.
@@ -1305,7 +1305,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 }
 
 // ***************************************************************************
-bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
+bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 {
 	H_AUTO_OGL(uploadTexture)
 	if (tex.TextureDrvShare == NULL)
@@ -1330,16 +1330,16 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	clamp (y1, y0, h);
 
 	// bind the texture to upload
-	CTextureDrvInfosGL*	gltext;
+	CTextureDrvInfosGL3*	gltext;
 	gltext = getTextureGl (tex);
 
 	// system of "backup the previous binded texture" seems to not work with some drivers....
 	_DriverGLStates.activeTextureARB (0);
-	CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
 #ifndef USE_OPENGLES
 	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
-		textureMode = CDriverGLStates::TextureRect;
+		textureMode = CDriverGLStates3::TextureRect;
 #endif
 
 	_DriverGLStates.setTextureMode (textureMode);
@@ -1390,7 +1390,7 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		{
 			_CurrentTexture[0]= NULL;
 			_CurrentTextureInfoGL[0]= NULL;
-			_DriverGLStates.setTextureMode (CDriverGLStates::TextureDisabled);
+			_DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
 			return false;
 		}
 
@@ -1457,13 +1457,13 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	// Disable texture 0
 	_CurrentTexture[0]= NULL;
 	_CurrentTextureInfoGL[0]= NULL;
-	_DriverGLStates.setTextureMode (CDriverGLStates::TextureDisabled);
+	_DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
 
 	return true;
 }
 
 // ***************************************************************************
-bool CDriverGL::uploadTextureCube (ITexture& tex, CRect& /* rect */, uint8 /* nNumMipMap */, uint8 /* nNumFace */)
+bool CDriverGL3::uploadTextureCube (ITexture& tex, CRect& /* rect */, uint8 /* nNumMipMap */, uint8 /* nNumFace */)
 {
 	H_AUTO_OGL(uploadTextureCube)
 	if (tex.TextureDrvShare == NULL)
@@ -1475,7 +1475,7 @@ bool CDriverGL::uploadTextureCube (ITexture& tex, CRect& /* rect */, uint8 /* nN
 }
 
 // ***************************************************************************
-bool CDriverGL::activateTexture(uint stage, ITexture *tex)
+bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 {
 	H_AUTO_OGL(activateTexture)
 	if (this->_CurrentTexture[stage]!=tex)
@@ -1484,7 +1484,7 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 		if(tex && tex->TextureDrvShare)
 		{
 			// get the drv info. should be not NULL.
-			CTextureDrvInfosGL*	gltext;
+			CTextureDrvInfosGL3*	gltext;
 			gltext= getTextureGl(*tex);
 
 			// Profile, log the use of this texture
@@ -1498,7 +1498,7 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			if(tex->isTextureCube())
 			{
 				// setup texture mode, after activeTextureARB()
-				_DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
+				_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 
 				if(_Extensions.ARBTextureCubeMap)
 				{
@@ -1532,12 +1532,12 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			else
 			{
 				// setup texture mode, after activeTextureARB()
-				CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+				CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 #ifndef USE_OPENGLES
 				if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
-					textureMode = CDriverGLStates::TextureRect;
+					textureMode = CDriverGLStates3::TextureRect;
 #endif
-				_DriverGLStates.setTextureMode(/*CDriverGLStates::Texture2D*/textureMode);
+				_DriverGLStates.setTextureMode(/*CDriverGLStates3::Texture2D*/textureMode);
 
 				// Activate texture...
 				//======================
@@ -1582,7 +1582,7 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			// Force no texturing for this stage.
 			_CurrentTextureInfoGL[stage]= NULL;
 			// setup texture mode, after activeTextureARB()
-			_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
+			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 
 #ifndef USE_OPENGLES
 			if (_Extensions.ATITextureEnvCombine3)
@@ -1907,7 +1907,7 @@ static void	forceActivateTexEnvModeEnvCombine4(const CMaterial::CTexEnv  &env)
 #endif
 
 // ***************************************************************************
-void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
+void		CDriverGL3::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 {
 	H_AUTO_OGL(forceActivateTexEnvMode)
 	// cache mgt.
@@ -2150,9 +2150,9 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 }
 
 // ***************************************************************************
-void		CDriverGL::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
+void		CDriverGL3::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
 {
-	H_AUTO_OGL(CDriverGL_activateTexEnvColor)
+	H_AUTO_OGL(CDriverGL3_activateTexEnvColor)
 	if (col != _CurrentTexEnv[stage].ConstantColor)
 	{
 		forceActivateTexEnvColor(stage, col);
@@ -2160,9 +2160,9 @@ void		CDriverGL::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
 }
 
 // ***************************************************************************
-void		CDriverGL::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
+void		CDriverGL3::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 {
-	H_AUTO_OGL(CDriverGL_activateTexEnvMode)
+	H_AUTO_OGL(CDriverGL3_activateTexEnvMode)
 	// If a special Texture environnement is setuped, or if not the same normal texture environnement,
 	// must setup a new normal Texture environnement.
 	if(_CurrentTexEnvSpecial[stage] != TexEnvSpecialDisabled || _CurrentTexEnv[stage].EnvPacked!= env.EnvPacked)
@@ -2173,9 +2173,9 @@ void		CDriverGL::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 
 
 // ***************************************************************************
-void		CDriverGL::activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
+void		CDriverGL3::activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 {
-	H_AUTO_OGL(CDriverGL_activateTexEnvColor)
+	H_AUTO_OGL(CDriverGL3_activateTexEnvColor)
 	if(_CurrentTexEnv[stage].ConstantColor!= env.ConstantColor)
 	{
 		forceActivateTexEnvColor(stage, env);
@@ -2184,16 +2184,16 @@ void		CDriverGL::activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 
 
 // ***************************************************************************
-void		CDriverGL::forceDXTCCompression(bool dxtcComp)
+void		CDriverGL3::forceDXTCCompression(bool dxtcComp)
 {
-	H_AUTO_OGL(CDriverGL_forceDXTCCompression)
+	H_AUTO_OGL(CDriverGL3_forceDXTCCompression)
 	_ForceDXTCCompression= dxtcComp;
 }
 
 // ***************************************************************************
-void		CDriverGL::setAnisotropicFilter(sint filtering)
+void		CDriverGL3::setAnisotropicFilter(sint filtering)
 {
-	H_AUTO_OGL(CDriverGL_setAnisotropicFiltering);
+	H_AUTO_OGL(CDriverGL3_setAnisotropicFiltering);
 
 	if (!_Extensions.EXTTextureFilterAnisotropic) return;
 
@@ -2210,9 +2210,9 @@ void		CDriverGL::setAnisotropicFilter(sint filtering)
 }
 
 // ***************************************************************************
-void		CDriverGL::forceTextureResize(uint divisor)
+void		CDriverGL3::forceTextureResize(uint divisor)
 {
-	H_AUTO_OGL(CDriverGL_forceTextureResize)
+	H_AUTO_OGL(CDriverGL3_forceTextureResize)
 	clamp(divisor, 1U, 256U);
 
 	// 16 -> 4.
@@ -2221,9 +2221,9 @@ void		CDriverGL::forceTextureResize(uint divisor)
 
 
 // ***************************************************************************
-void		CDriverGL::swapTextureHandle(ITexture &tex0, ITexture &tex1)
+void		CDriverGL3::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 {
-	H_AUTO_OGL(CDriverGL_swapTextureHandle)
+	H_AUTO_OGL(CDriverGL3_swapTextureHandle)
 	// ensure creation of both texture
 	setupTexture(tex0);
 	setupTexture(tex1);
@@ -2235,8 +2235,8 @@ void		CDriverGL::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 	}
 
 	// get the handle.
-	CTextureDrvInfosGL	*t0= getTextureGl(tex0);
-	CTextureDrvInfosGL	*t1= getTextureGl(tex1);
+	CTextureDrvInfosGL3	*t0= getTextureGl(tex0);
+	CTextureDrvInfosGL3	*t1= getTextureGl(tex1);
 
 	/* Swap contents. Can't swap directly the pointers cause would have to change all CTextureDrvShare which point on
 		Can't do swap(*t0, *t1), because must keep the correct _DriverIterator
@@ -2260,15 +2260,15 @@ void		CDriverGL::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 
 
 // ***************************************************************************
-uint CDriverGL::getTextureHandle(const ITexture &tex)
+uint CDriverGL3::getTextureHandle(const ITexture &tex)
 {
-	H_AUTO_OGL(CDriverGL_getTextureHandle)
+	H_AUTO_OGL(CDriverGL3_getTextureHandle)
 	// If DrvShare not setuped
 	if(!tex.TextureDrvShare)
 		return 0;
 
 	// If DrvInfo not setuped
-	const CTextureDrvInfosGL	*t0= (const CTextureDrvInfosGL*)(const ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
+	const CTextureDrvInfosGL3	*t0= (const CTextureDrvInfosGL3*)(const ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
 	if(!t0)
 		return 0;
 
@@ -2285,9 +2285,9 @@ uint CDriverGL::getTextureHandle(const ITexture &tex)
 	setRenderTarget (NULL) copies the modified framebuffer area into "tex" and then, updates the viewport and scissor
  */
 
-bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height, uint32 mipmapLevel, uint32 cubeFace)
+bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height, uint32 mipmapLevel, uint32 cubeFace)
 {
-	H_AUTO_OGL(CDriverGL_setRenderTarget )
+	H_AUTO_OGL(CDriverGL3_setRenderTarget )
 
 	// make backup of offscreen buffer to old texture if not using FBOs
 	if (!_RenderTargetFBO && _TextureTarget && _TextureTargetUpload && (_TextureTarget != tex || _TextureTargetCubeFace != cubeFace))
@@ -2355,7 +2355,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 
 // ***************************************************************************
 
-bool CDriverGL::copyTargetToTexture (ITexture *tex,
+bool CDriverGL3::copyTargetToTexture (ITexture *tex,
 												 uint32 offsetx,
 												 uint32 offsety,
 												 uint32 x,
@@ -2364,7 +2364,7 @@ bool CDriverGL::copyTargetToTexture (ITexture *tex,
 												 uint32 height,
 		                                         uint32 mipmapLevel)
 {
-	H_AUTO_OGL(CDriverGL_copyTargetToTexture)
+	H_AUTO_OGL(CDriverGL3_copyTargetToTexture)
 	if (!_TextureTarget)
 		return false;
 	_TextureTargetUpload = false;
@@ -2384,9 +2384,9 @@ bool CDriverGL::copyTargetToTexture (ITexture *tex,
 
 // ***************************************************************************
 
-bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
+bool CDriverGL3::getRenderTargetSize (uint32 &width, uint32 &height)
 {
-	H_AUTO_OGL(CDriverGL_getRenderTargetSize)
+	H_AUTO_OGL(CDriverGL3_getRenderTargetSize)
 	if (_TextureTarget)
 	{
 		width = _TextureTarget->getWidth();

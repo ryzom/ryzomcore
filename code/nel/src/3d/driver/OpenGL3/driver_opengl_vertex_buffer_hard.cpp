@@ -30,7 +30,7 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
@@ -47,7 +47,7 @@ namespace NLDRIVERGL {
 
 
 // ***************************************************************************
-IVertexArrayRange::IVertexArrayRange(CDriverGL *drv)
+IVertexArrayRange::IVertexArrayRange(CDriverGL3 *drv)
 {
 	H_AUTO_OGL(IVertexArrayRange_IVertexArrayRange)
 	_Driver= drv;
@@ -59,7 +59,7 @@ IVertexArrayRange::~IVertexArrayRange()
 }
 
 // ***************************************************************************
-IVertexBufferHardGL::IVertexBufferHardGL(CDriverGL *drv, CVertexBuffer *vb) : VB (vb)
+IVertexBufferHardGL::IVertexBufferHardGL(CDriverGL3 *drv, CVertexBuffer *vb) : VB (vb)
 {
 	H_AUTO_OGL(IVertexBufferHardGL_IVertexBufferHardGL)
 	_Driver= drv;
@@ -93,7 +93,7 @@ IVertexBufferHardGL::~IVertexBufferHardGL()
 
 
 // ***************************************************************************
-CVertexArrayRangeNVidia::CVertexArrayRangeNVidia(CDriverGL *drv) : IVertexArrayRange(drv)
+CVertexArrayRangeNVidia::CVertexArrayRangeNVidia(CDriverGL3 *drv) : IVertexArrayRange(drv)
 {
 	H_AUTO_OGL(CVertexArrayRangeNVidia_CVertexArrayRangeNVidia)
 	_VertexArrayPtr= NULL;
@@ -280,7 +280,7 @@ IVertexBufferHardGL		*CVertexArrayRangeNVidia::createVBHardGL(uint size, CVertex
 
 
 // ***************************************************************************
-CVertexBufferHardGLNVidia::CVertexBufferHardGLNVidia(CDriverGL *drv, CVertexBuffer *vb) : IVertexBufferHardGL(drv, vb)
+CVertexBufferHardGLNVidia::CVertexBufferHardGLNVidia(CDriverGL3 *drv, CVertexBuffer *vb) : IVertexBufferHardGL(drv, vb)
 {
 	H_AUTO_OGL(CVertexBufferHardGLNVidia_CVertexBufferHardGLNVidia)
 	_VertexArrayRange= NULL;
@@ -483,7 +483,7 @@ void			CVertexBufferHardGLNVidia::testFence()
 
 
 // ***************************************************************************
-CVertexArrayRangeATI::CVertexArrayRangeATI(CDriverGL *drv) : IVertexArrayRange(drv)
+CVertexArrayRangeATI::CVertexArrayRangeATI(CDriverGL3 *drv) : IVertexArrayRange(drv)
 {
 	H_AUTO_OGL(CVertexArrayRangeATI_CVertexArrayRangeATI)
 	_Allocated= false;
@@ -629,7 +629,7 @@ void			CVertexArrayRangeATI::freeVB(void	*ptr)
 
 
 // ***************************************************************************
-CVertexBufferHardGLATI::CVertexBufferHardGLATI(CDriverGL *drv, CVertexBuffer *vb) : IVertexBufferHardGL(drv, vb)
+CVertexBufferHardGLATI::CVertexBufferHardGLATI(CDriverGL3 *drv, CVertexBuffer *vb) : IVertexBufferHardGL(drv, vb)
 {
 	H_AUTO_OGL(CVertexBufferHardGLATI_CVertexBufferHardGLATI)
 	_VertexArrayRange= NULL;
@@ -808,7 +808,7 @@ void CVertexBufferHardGLATI::setupVBInfos(CVertexBufferInfo &vb)
 
 
 // ***************************************************************************
-CVertexArrayRangeMapObjectATI::CVertexArrayRangeMapObjectATI(CDriverGL *drv) : IVertexArrayRange(drv),
+CVertexArrayRangeMapObjectATI::CVertexArrayRangeMapObjectATI(CDriverGL3 *drv) : IVertexArrayRange(drv),
 																			   _VBType(CVertexBuffer::AGPPreferred),
 																			   _SizeAllocated(0)
 {
@@ -910,7 +910,7 @@ void CVertexArrayRangeMapObjectATI::disable()
 // ***************************************************************************
 
 // ***************************************************************************
-CVertexBufferHardGLMapObjectATI::CVertexBufferHardGLMapObjectATI(CDriverGL *drv, CVertexBuffer *vb) :  IVertexBufferHardGL(drv, vb),
+CVertexBufferHardGLMapObjectATI::CVertexBufferHardGLMapObjectATI(CDriverGL3 *drv, CVertexBuffer *vb) :  IVertexBufferHardGL(drv, vb),
 																					_VertexPtr(NULL),
 																					_VertexArrayRange(NULL),
 																					_VertexObjectId(0)
@@ -1153,7 +1153,7 @@ void CVertexArrayRangeMapObjectATI::updateLostBuffers()
 
 
 // ***************************************************************************
-CVertexArrayRangeARB::CVertexArrayRangeARB(CDriverGL *drv) : IVertexArrayRange(drv),
+CVertexArrayRangeARB::CVertexArrayRangeARB(CDriverGL3 *drv) : IVertexArrayRange(drv),
 															 _VBType(CVertexBuffer::AGPPreferred),
 															 _SizeAllocated(0)
 {
@@ -1318,7 +1318,7 @@ void CVertexArrayRangeARB::updateLostBuffers()
 
 
 // ***************************************************************************
-CVertexBufferHardARB::CVertexBufferHardARB(CDriverGL *drv, CVertexBuffer *vb) :  IVertexBufferHardGL(drv, vb),
+CVertexBufferHardARB::CVertexBufferHardARB(CDriverGL3 *drv, CVertexBuffer *vb) :  IVertexBufferHardGL(drv, vb),
                                                                                  _VertexPtr(NULL),
 																				_VertexObjectId(0)
 

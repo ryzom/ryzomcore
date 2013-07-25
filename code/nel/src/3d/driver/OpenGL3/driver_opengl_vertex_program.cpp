@@ -36,12 +36,12 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
 // ***************************************************************************
-CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it) : IVertexProgramDrvInfos (drv, it)
+CVertexProgamDrvInfosGL3::CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrvInfoPtrList it) : IVertexProgramDrvInfos (drv, it)
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
 
@@ -70,14 +70,14 @@ CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInf
 
 
 // ***************************************************************************
-bool CDriverGL::isVertexProgramSupported () const
+bool CDriverGL3::isVertexProgramSupported () const
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_isVertexProgramSupported)
 	return _Extensions.NVVertexProgram || _Extensions.EXTVertexShader || _Extensions.ARBVertexProgram;
 }
 
 // ***************************************************************************
-bool CDriverGL::isVertexProgramEmulated () const
+bool CDriverGL3::isVertexProgramEmulated () const
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_isVertexProgramEmulated)
 	return _Extensions.NVVertexProgramEmulated;
@@ -86,7 +86,7 @@ bool CDriverGL::isVertexProgramEmulated () const
 
 
 // ***************************************************************************
-bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
+bool CDriverGL3::activeNVVertexProgram (CVertexProgram *program)
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_activeNVVertexProgram);
 
@@ -100,7 +100,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 
 
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo;
+		CVertexProgamDrvInfosGL3 *drvInfo;
 
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
@@ -126,7 +126,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
 
 			// Create a driver info
-			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
+			*it = drvInfo = new CVertexProgamDrvInfosGL3 (this, it);
 
 			// Set the pointer
 			program->_DrvInfo=drvInfo;
@@ -182,7 +182,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 		else
 		{
 			// Cast the driver info pointer
-			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IVertexProgramDrvInfos*)program->_DrvInfo);
+			drvInfo=safe_cast<CVertexProgamDrvInfosGL3*>((IVertexProgramDrvInfos*)program->_DrvInfo);
 		}
 
 		// Setup this program
@@ -402,9 +402,9 @@ static void doWriteMask(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum 
 // ***************************************************************************
 /** Setup a vertex shader from its parsed program
   */
-bool CDriverGL::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint id, uint variants[EVSNumVariants], uint16 &usedInputRegisters)
+bool CDriverGL3::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint id, uint variants[EVSNumVariants], uint16 &usedInputRegisters)
 {
-	H_AUTO_OGL(CDriverGL_setupEXTVertexShader);
+	H_AUTO_OGL(CDriverGL3_setupEXTVertexShader);
 
 #ifndef USE_OPENGLES
 	// counter to see what is generated
@@ -1342,9 +1342,9 @@ static void ARBVertexProgramDumpInstr(const CVPInstruction &instr, std::string &
 }
 
 // ***************************************************************************
-bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgram, GLuint id, bool &specularWritten)
+bool CDriverGL3::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgram, GLuint id, bool &specularWritten)
 {
-	H_AUTO_OGL(CDriverGL_setupARBVertexProgram);
+	H_AUTO_OGL(CDriverGL3_setupARBVertexProgram);
 
 #ifndef USE_OPENGLES
 	// tmp
@@ -1489,16 +1489,16 @@ bool CDriverGL::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgra
 
 
 // ***************************************************************************
-bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
+bool CDriverGL3::activeARBVertexProgram (CVertexProgram *program)
 {
-	H_AUTO_OGL(CDriverGL_activeARBVertexProgram);
+	H_AUTO_OGL(CDriverGL3_activeARBVertexProgram);
 
 #ifndef USE_OPENGLES
 	// Setup or unsetup ?
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo;
+		CVertexProgamDrvInfosGL3 *drvInfo;
 
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
@@ -1520,7 +1520,7 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
 
 			// Create a driver info
-			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
+			*it = drvInfo = new CVertexProgamDrvInfosGL3 (this, it);
 			// Set the pointer
 			program->_DrvInfo=drvInfo;
 
@@ -1535,7 +1535,7 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 		else
 		{
 			// Cast the driver info pointer
-			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IVertexProgramDrvInfos*)program->_DrvInfo);
+			drvInfo=safe_cast<CVertexProgamDrvInfosGL3*>((IVertexProgramDrvInfos*)program->_DrvInfo);
 		}
 		glEnable( GL_VERTEX_PROGRAM_ARB );
 		_VertexProgramEnabled = true;
@@ -1563,16 +1563,16 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 }
 
 // ***************************************************************************
-bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
+bool CDriverGL3::activeEXTVertexShader (CVertexProgram *program)
 {
-	H_AUTO_OGL(CDriverGL_activeEXTVertexShader);
+	H_AUTO_OGL(CDriverGL3_activeEXTVertexShader);
 
 #ifndef USE_OPENGLES
 	// Setup or unsetup ?
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo;
+		CVertexProgamDrvInfosGL3 *drvInfo;
 
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
@@ -1606,7 +1606,7 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
 
 			// Create a driver info
-			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
+			*it = drvInfo = new CVertexProgamDrvInfosGL3 (this, it);
 			// Set the pointer
 			program->_DrvInfo=drvInfo;
 
@@ -1621,7 +1621,7 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 		else
 		{
 			// Cast the driver info pointer
-			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IVertexProgramDrvInfos*)program->_DrvInfo);
+			drvInfo=safe_cast<CVertexProgamDrvInfosGL3*>((IVertexProgramDrvInfos*)program->_DrvInfo);
 		}
 
 		glEnable( GL_VERTEX_SHADER_EXT);
@@ -1641,9 +1641,9 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 }
 
 // ***************************************************************************
-bool CDriverGL::activeVertexProgram (CVertexProgram *program)
+bool CDriverGL3::activeVertexProgram (CVertexProgram *program)
 {
-	H_AUTO_OGL(CDriverGL_activeVertexProgram)
+	H_AUTO_OGL(CDriverGL3_activeVertexProgram)
 	// Extension here ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1665,9 +1665,9 @@ bool CDriverGL::activeVertexProgram (CVertexProgram *program)
 
 // ***************************************************************************
 
-void CDriverGL::setConstant (uint index, float f0, float f1, float f2, float f3)
+void CDriverGL3::setConstant (uint index, float f0, float f1, float f2, float f3)
 {
-	H_AUTO_OGL(CDriverGL_setConstant);
+	H_AUTO_OGL(CDriverGL3_setConstant);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1691,9 +1691,9 @@ void CDriverGL::setConstant (uint index, float f0, float f1, float f2, float f3)
 
 // ***************************************************************************
 
-void CDriverGL::setConstant (uint index, double d0, double d1, double d2, double d3)
+void CDriverGL3::setConstant (uint index, double d0, double d1, double d2, double d3)
 {
-	H_AUTO_OGL(CDriverGL_setConstant);
+	H_AUTO_OGL(CDriverGL3_setConstant);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1717,9 +1717,9 @@ void CDriverGL::setConstant (uint index, double d0, double d1, double d2, double
 
 // ***************************************************************************
 
-void CDriverGL::setConstant (uint index, const NLMISC::CVector& value)
+void CDriverGL3::setConstant (uint index, const NLMISC::CVector& value)
 {
-	H_AUTO_OGL(CDriverGL_setConstant);
+	H_AUTO_OGL(CDriverGL3_setConstant);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1743,9 +1743,9 @@ void CDriverGL::setConstant (uint index, const NLMISC::CVector& value)
 
 // ***************************************************************************
 
-void CDriverGL::setConstant (uint index, const NLMISC::CVectorD& value)
+void CDriverGL3::setConstant (uint index, const NLMISC::CVectorD& value)
 {
-	H_AUTO_OGL(CDriverGL_setConstant);
+	H_AUTO_OGL(CDriverGL3_setConstant);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1768,9 +1768,9 @@ void CDriverGL::setConstant (uint index, const NLMISC::CVectorD& value)
 
 
 // ***************************************************************************
-void	CDriverGL::setConstant (uint index, uint num, const float *src)
+void	CDriverGL3::setConstant (uint index, uint num, const float *src)
 {
-	H_AUTO_OGL(CDriverGL_setConstant);
+	H_AUTO_OGL(CDriverGL3_setConstant);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1796,9 +1796,9 @@ void	CDriverGL::setConstant (uint index, uint num, const float *src)
 }
 
 // ***************************************************************************
-void	CDriverGL::setConstant (uint index, uint num, const double *src)
+void	CDriverGL3::setConstant (uint index, uint num, const double *src)
 {
-	H_AUTO_OGL(CDriverGL_setConstant);
+	H_AUTO_OGL(CDriverGL3_setConstant);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1825,7 +1825,7 @@ void	CDriverGL::setConstant (uint index, uint num, const double *src)
 
 // ***************************************************************************
 
-const uint CDriverGL::GLMatrix[IDriver::NumMatrix]=
+const uint CDriverGL3::GLMatrix[IDriver::NumMatrix]=
 {
 	GL_MODELVIEW,
 	GL_PROJECTION,
@@ -1839,7 +1839,7 @@ const uint CDriverGL::GLMatrix[IDriver::NumMatrix]=
 
 // ***************************************************************************
 
-const uint CDriverGL::GLTransform[IDriver::NumTransform]=
+const uint CDriverGL3::GLTransform[IDriver::NumTransform]=
 {
 #ifdef USE_OPENGLES
 	0,
@@ -1857,9 +1857,9 @@ const uint CDriverGL::GLTransform[IDriver::NumTransform]=
 
 // ***************************************************************************
 
-void CDriverGL::setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform)
+void CDriverGL3::setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform)
 {
-	H_AUTO_OGL(CDriverGL_setConstantMatrix);
+	H_AUTO_OGL(CDriverGL3_setConstantMatrix);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1936,18 +1936,18 @@ void CDriverGL::setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver:
 
 // ***************************************************************************
 
-void CDriverGL::setConstantFog (uint index)
+void CDriverGL3::setConstantFog (uint index)
 {
-	H_AUTO_OGL(CDriverGL_setConstantFog)
+	H_AUTO_OGL(CDriverGL3_setConstantFog)
 	const float *values = _ModelViewMatrix.get();
 	setConstant (index, -values[2], -values[6], -values[10], -values[14]);
 }
 
 // ***************************************************************************
 
-void CDriverGL::enableVertexProgramDoubleSidedColor(bool doubleSided)
+void CDriverGL3::enableVertexProgramDoubleSidedColor(bool doubleSided)
 {
-	H_AUTO_OGL(CDriverGL_enableVertexProgramDoubleSidedColor);
+	H_AUTO_OGL(CDriverGL3_enableVertexProgramDoubleSidedColor);
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
@@ -1972,9 +1972,9 @@ void CDriverGL::enableVertexProgramDoubleSidedColor(bool doubleSided)
 
 
 // ***************************************************************************
-bool CDriverGL::supportVertexProgramDoubleSidedColor() const
+bool CDriverGL3::supportVertexProgramDoubleSidedColor() const
 {
-	H_AUTO_OGL(CDriverGL_supportVertexProgramDoubleSidedColor)
+	H_AUTO_OGL(CDriverGL3_supportVertexProgramDoubleSidedColor)
 	// currently only supported by NV_VERTEX_PROGRAM && ARB_VERTEX_PROGRAM
 	return _Extensions.NVVertexProgram || _Extensions.ARBVertexProgram;
 }

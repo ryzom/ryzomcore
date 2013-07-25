@@ -23,14 +23,14 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
 // ***************************************************************************
-void CDriverGL::setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective)
+void CDriverGL3::setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective)
 {
-	H_AUTO_OGL(CDriverGL_setFrustum);
+	H_AUTO_OGL(CDriverGL3_setFrustum);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -62,9 +62,9 @@ void CDriverGL::setFrustum(float left, float right, float bottom, float top, flo
 
 // ***************************************************************************
 
-void CDriverGL::setFrustumMatrix(CMatrix &frustumMatrix)
+void CDriverGL3::setFrustumMatrix(CMatrix &frustumMatrix)
 {
-	H_AUTO_OGL(CDriverGL_setFrustum)
+	H_AUTO_OGL(CDriverGL3_setFrustum)
 	glMatrixMode(GL_PROJECTION);
 
 	glLoadMatrixf(((GLfloat*)frustumMatrix.get()));
@@ -74,9 +74,9 @@ void CDriverGL::setFrustumMatrix(CMatrix &frustumMatrix)
 
 // ***************************************************************************
 
-CMatrix CDriverGL::getFrustumMatrix()
+CMatrix CDriverGL3::getFrustumMatrix()
 {
-	H_AUTO_OGL(CDriverGL_getFrustum)
+	H_AUTO_OGL(CDriverGL3_getFrustum)
 
 	glMatrixMode(GL_PROJECTION);
 
@@ -91,9 +91,9 @@ CMatrix CDriverGL::getFrustumMatrix()
 }
 
 // ***************************************************************************
-void CDriverGL::setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos)
+void CDriverGL3::setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos)
 {
-	H_AUTO_OGL(CDriverGL_setupViewMatrixEx)
+	H_AUTO_OGL(CDriverGL3_setupViewMatrixEx)
 	_UserViewMtx= mtx;
 
 	// Setup the matrix to transform the CScene basis in openGL basis.
@@ -125,9 +125,9 @@ void CDriverGL::setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos)
 
 
 // ***************************************************************************
-void CDriverGL::setupViewMatrix(const CMatrix& mtx)
+void CDriverGL3::setupViewMatrix(const CMatrix& mtx)
 {
-	H_AUTO_OGL(CDriverGL_setupViewMatrix)
+	H_AUTO_OGL(CDriverGL3_setupViewMatrix)
 	_UserViewMtx= mtx;
 
 	// Setup the matrix to transform the CScene basis in openGL basis.
@@ -158,16 +158,16 @@ void CDriverGL::setupViewMatrix(const CMatrix& mtx)
 }
 
 // ***************************************************************************
-CMatrix CDriverGL::getViewMatrix(void) const
+CMatrix CDriverGL3::getViewMatrix(void) const
 {
-	H_AUTO_OGL(CDriverGL_getViewMatrix)
+	H_AUTO_OGL(CDriverGL3_getViewMatrix)
 	return _UserViewMtx;
 }
 
 // ***************************************************************************
-void CDriverGL::setupModelMatrix(const CMatrix& mtx)
+void CDriverGL3::setupModelMatrix(const CMatrix& mtx)
 {
-	H_AUTO_OGL(CDriverGL_setupModelMatrix)
+	H_AUTO_OGL(CDriverGL3_setupModelMatrix)
 	// profiling
 	_NbSetupModelMatrixCall++;
 
@@ -185,9 +185,9 @@ void CDriverGL::setupModelMatrix(const CMatrix& mtx)
 }
 
 // ***************************************************************************
-void CDriverGL::doRefreshRenderSetup()
+void CDriverGL3::doRefreshRenderSetup()
 {
-	H_AUTO_OGL(CDriverGL_doRefreshRenderSetup)
+	H_AUTO_OGL(CDriverGL3_doRefreshRenderSetup)
 	// Check if the light setup has been modified first
 	if (_LightSetupDirty)
 		// Recompute light setup

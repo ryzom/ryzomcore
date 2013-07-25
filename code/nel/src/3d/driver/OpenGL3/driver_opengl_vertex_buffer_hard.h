@@ -26,7 +26,7 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
@@ -51,7 +51,7 @@ class	CVertexBufferHardARB;
 class IVertexArrayRange
 {
 public:
-	IVertexArrayRange(CDriverGL *drv);
+	IVertexArrayRange(CDriverGL3 *drv);
 	virtual	~IVertexArrayRange();
 
 	/// allocate a vertex array space. false if error. client must free before re-allocate.
@@ -65,13 +65,13 @@ public:
 	// Check & invalidate lost buffers. Default assume they can't be lost
 	virtual void updateLostBuffers() {}
 	// Get driver
-	CDriverGL	*getDriver() const { return _Driver; }
+	CDriverGL3* getDriver() const { return _Driver; }
 	// tmp, for debug
 	#ifdef NL_DEBUG
 		virtual void		 dumpMappedBuffers() {}
 	#endif
 protected:
-	CDriverGL	*_Driver;
+	CDriverGL3	*_Driver;
 };
 
 
@@ -84,7 +84,7 @@ class IVertexBufferHardGL
 {
 public:
 
-	IVertexBufferHardGL(CDriverGL *drv, CVertexBuffer *vb);
+	IVertexBufferHardGL(CDriverGL3 *drv, CVertexBuffer *vb);
 	virtual	~IVertexBufferHardGL();
 
 
@@ -113,7 +113,7 @@ public:
 	CVertexBuffer		*VB;
 
 protected:
-	CDriverGL			*_Driver;
+	CDriverGL3			*_Driver;
 	bool		 _Invalid;
 };
 
@@ -133,7 +133,7 @@ protected:
 class CVertexArrayRangeNVidia : public IVertexArrayRange
 {
 public:
-	CVertexArrayRangeNVidia(CDriverGL *drv);
+	CVertexArrayRangeNVidia(CDriverGL3 *drv);
 
 
 	/// \name Implementation
@@ -182,7 +182,7 @@ class CVertexBufferHardGLNVidia : public IVertexBufferHardGL
 {
 public:
 
-	CVertexBufferHardGLNVidia(CDriverGL *drv, CVertexBuffer *vb);
+	CVertexBufferHardGLNVidia(CDriverGL3 *drv, CVertexBuffer *vb);
 	virtual	~CVertexBufferHardGLNVidia();
 
 
@@ -250,7 +250,7 @@ private:
 class CVertexArrayRangeATI : public IVertexArrayRange
 {
 public:
-	CVertexArrayRangeATI(CDriverGL *drv);
+	CVertexArrayRangeATI(CDriverGL3 *drv);
 
 
 	/// \name Implementation
@@ -306,7 +306,7 @@ class CVertexBufferHardGLATI : public IVertexBufferHardGL
 {
 public:
 
-	CVertexBufferHardGLATI(CDriverGL *drv, CVertexBuffer *vb);
+	CVertexBufferHardGLATI(CDriverGL3 *drv, CVertexBuffer *vb);
 	virtual	~CVertexBufferHardGLATI();
 
 
@@ -357,7 +357,7 @@ private:
 class CVertexArrayRangeMapObjectATI : public IVertexArrayRange
 {
 public:
-	CVertexArrayRangeMapObjectATI(CDriverGL *drv);
+	CVertexArrayRangeMapObjectATI(CDriverGL3 *drv);
 
 
 	/// \name Implementation
@@ -414,7 +414,7 @@ class CVertexBufferHardGLMapObjectATI : public IVertexBufferHardGL
 {
 public:
 
-	CVertexBufferHardGLMapObjectATI(CDriverGL *drv, CVertexBuffer *vb);
+	CVertexBufferHardGLMapObjectATI(CDriverGL3 *drv, CVertexBuffer *vb);
 	virtual	~CVertexBufferHardGLMapObjectATI();
 
 
@@ -470,7 +470,7 @@ public:
 class CVertexArrayRangeARB : public IVertexArrayRange
 {
 public:
-	CVertexArrayRangeARB(CDriverGL *drv);
+	CVertexArrayRangeARB(CDriverGL3 *drv);
 
 
 	/// \name Implementation
@@ -522,7 +522,7 @@ class CVertexBufferHardARB : public IVertexBufferHardGL
 {
 public:
 
-	CVertexBufferHardARB(CDriverGL *drv, CVertexBuffer *vb);
+	CVertexBufferHardARB(CDriverGL3 *drv, CVertexBuffer *vb);
 	virtual	~CVertexBufferHardARB();
 
 

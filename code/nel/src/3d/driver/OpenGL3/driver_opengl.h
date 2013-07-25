@@ -95,48 +95,44 @@ using NLMISC::CVector;
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
-namespace NLDRIVERGL {
-#endif
+namespace NLDRIVERGL3 {
 #endif
 
-class	CDriverGL;
+class	CDriverGL3;
 class	IVertexArrayRange;
 class	IVertexBufferHardGL;
-class   COcclusionQueryGL;
+class   COcclusionQueryGL3;
 
 void displayGLError(GLenum error);
 
 #ifdef NL_OS_WINDOWS
 
-bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 typedef HCURSOR nlCursor;
 #define EmptyCursor (nlCursor)NULL
 
 #elif defined (NL_OS_MAC)
 
-bool GlWndProc(CDriverGL *driver, const void* e);
+bool GlWndProc(CDriverGL3 *driver, const void* e);
 typedef void* nlCursor;
 #define EmptyCursor (nlCursor)NULL
 
 #elif defined (NL_OS_UNIX)
 
-bool GlWndProc(CDriverGL *driver, XEvent &e);
+bool GlWndProc(CDriverGL3 *driver, XEvent &e);
 typedef Cursor nlCursor;
 #define EmptyCursor None
 
 #endif
 
-typedef std::list<COcclusionQueryGL *> TOcclusionQueryList;
+typedef std::list<COcclusionQueryGL3 *> TOcclusionQueryList;
 
 // ***************************************************************************
-class COcclusionQueryGL : public IOcclusionQuery
+class COcclusionQueryGL3 : public IOcclusionQuery
 {
 public:
 	GLuint							ID;				// id of gl object
-	NLMISC::CRefPtr<CDriverGL>		Driver;			// owner driver
+	NLMISC::CRefPtr<CDriverGL3>		Driver;			// owner driver
 	TOcclusionQueryList::iterator   Iterator;		// iterator in owner driver list of queries
 	TOcclusionType					OcclusionType;  // current type of occlusion
 	uint							VisibleCount;	// number of samples that passed the test
@@ -148,7 +144,7 @@ public:
 };
 
 // ***************************************************************************
-class CTextureDrvInfosGL : public ITextureDrvInfos
+class CTextureDrvInfosGL3 : public ITextureDrvInfos
 {
 public:
 	/*
@@ -165,7 +161,7 @@ public:
 	// This is the computed size of what memory this texture take.
 	uint32					TextureMemory;
 	// This is the owner driver.
-	CDriverGL				*_Driver;
+	CDriverGL3				*_Driver;
 
 	// enum to use for this texture (GL_TEXTURE_2D, GL_TEXTURE_RECTANGLE_NV..)
 	GLenum					TextureMode;
@@ -188,9 +184,9 @@ public:
 	ITexture::TMinFilter	MinFilter;
 
 	// The gl id is auto created here.
-	CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL *drvGl, bool isRectangleTexture);
+	CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL3 *drvGl, bool isRectangleTexture);
 	// The gl id is auto deleted here.
-	~CTextureDrvInfosGL();
+	~CTextureDrvInfosGL3();
 	// For Debug info. return the memory cost of this texture
 	virtual uint	getTextureMemoryUsed() const {return TextureMemory;}
 
@@ -200,26 +196,26 @@ public:
 
 
 // ***************************************************************************
-class CVBDrvInfosGL : public IVBDrvInfos
+class CVBDrvInfosGL3 : public IVBDrvInfos
 {
 public:
-	CVBDrvInfosGL(CDriverGL *drv, ItVBDrvInfoPtrList it, CVertexBuffer *vb);
+	CVBDrvInfosGL3(CDriverGL3 *drv, ItVBDrvInfoPtrList it, CVertexBuffer *vb);
 
 	// Verex buffer hard ?
 	IVertexBufferHardGL		*_VBHard;
-	class CDriverGL			*_DriverGL;
+	class CDriverGL3			*_DriverGL;
 	uint8					*_SystemMemory;
 
 
 	// From IVBDrvInfos
-	virtual ~CVBDrvInfosGL();
+	virtual ~CVBDrvInfosGL3();
 	virtual uint8	*lock (uint first, uint last, bool readOnly);
 	virtual void	unlock (uint first, uint last);
 };
 
 
 // ***************************************************************************
-class CShaderGL : public IMaterialDrvInfos
+class CShaderGL3 : public IMaterialDrvInfos
 {
 public:
 	GLenum		SrcBlend;
@@ -239,7 +235,7 @@ public:
 	// The supported Shader type.
 	CMaterial::TShader	SupportedShader;
 
-	CShaderGL(IDriver *drv, ItMatDrvInfoPtrList it) : IMaterialDrvInfos(drv, it) {}
+	CShaderGL3(IDriver *drv, ItMatDrvInfoPtrList it) : IMaterialDrvInfos(drv, it) {}
 };
 
 
@@ -291,15 +287,15 @@ public:
 
 
 // ***************************************************************************
-class CDriverGL : public IDriver
+class CDriverGL3 : public IDriver
 {
 public:
 
 	// Some constants
 	enum { MaxLight=8 };
 
-							CDriverGL();
-	virtual					~CDriverGL();
+							CDriverGL3();
+	virtual					~CDriverGL3();
 
 	virtual	bool			isLost() const { return false; } // there's no notion of 'lost device" in OpenGL
 
@@ -690,8 +686,8 @@ public:
 
 private:
 	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
-	friend class					CTextureDrvInfosGL;
-	friend class					CVertexProgamDrvInfosGL;
+	friend class					CTextureDrvInfosGL3;
+	friend class					CVertexProgamDrvInfosGL3;
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
@@ -784,7 +780,7 @@ private:
 
 	bool						convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col = NLMISC::CRGBA::White, sint hotSpotX = 0, sint hotSpotY = 0, bool cursor = false);
 
-	friend bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	friend bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	static uint					_Registered;
 	DEVMODE						_OldScreenMode;
@@ -806,7 +802,7 @@ private:
 
 	bool						convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<long> &icon);
 
-	friend bool GlWndProc(CDriverGL *driver, XEvent &e);
+	friend bool GlWndProc(CDriverGL3 *driver, XEvent &e);
 
 	Display*					_dpy;
 	NLMISC::CUnixEventEmitter	_EventEmitter;
@@ -940,7 +936,7 @@ private:
 	*/
 	ITexture*				_CurrentTexture[IDRV_MAT_MAXTEXTURES];
 
-	CTextureDrvInfosGL*		_CurrentTextureInfoGL[IDRV_MAT_MAXTEXTURES];
+	CTextureDrvInfosGL3*		_CurrentTextureInfoGL[IDRV_MAT_MAXTEXTURES];
 	CMaterial::CTexEnv		_CurrentTexEnv[IDRV_MAT_MAXTEXTURES];
 	// Special Texture Environnement.
 	CTexEnvSpecial			_CurrentTexEnvSpecial[IDRV_MAT_MAXTEXTURES];
@@ -960,7 +956,7 @@ private:
 	float					_AnisotropicFilter;
 
 	// Prec settings for material.
-	CDriverGLStates			_DriverGLStates;
+	CDriverGLStates3			_DriverGLStates;
 	// Optim: To not test change in Materials states if just texture has changed. Very useful for landscape.
 	uint32					_MaterialAllTextureTouchedFlag;
 
@@ -1044,7 +1040,7 @@ private:
 	}
 	void					forceActivateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 	{
-		H_AUTO_OGL(CDriverGL_forceActivateTexEnvColor)
+		H_AUTO_OGL(CDriverGL3_forceActivateTexEnvColor)
 		forceActivateTexEnvColor(stage, env.ConstantColor);
 	}
 
@@ -1236,7 +1232,7 @@ private:
 	friend class					CVertexBufferHardGLATI;
 	friend class					CVertexArrayRangeMapObjectATI;
 	friend class					CVertexBufferHardGLMapObjectATI;
-	friend class					CVBDrvInfosGL;
+	friend class					CVBDrvInfosGL3;
 
 	// The VertexArrayRange activated.
 	IVertexArrayRange				*_CurrentVertexArrayRange;
@@ -1273,7 +1269,7 @@ private:
 	uint32												_NbSetupMaterialCall;
 	uint32												_NbSetupModelMatrixCall;
 	bool												_SumTextureMemoryUsed;
-	std::set<CTextureDrvInfosGL*>						_TextureUsed;
+	std::set<CTextureDrvInfosGL3*>						_TextureUsed;
 	uint							computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const;
 
 	// VBHard Lock Profiling
@@ -1462,7 +1458,7 @@ public:
 	static CMaterial::CTexEnv	_TexEnvReplace;
 	// occlusion query
 	TOcclusionQueryList			_OcclusionQueryList;
-	COcclusionQueryGL			*_CurrentOcclusionQuery;
+	COcclusionQueryGL3			*_CurrentOcclusionQuery;
 protected:
 	// is the window active ,
 	bool					_WndActive;
@@ -1494,7 +1490,7 @@ private:
 };
 
 // ***************************************************************************
-class CVertexProgamDrvInfosGL : public IVertexProgramDrvInfos
+class CVertexProgamDrvInfosGL3 : public IVertexProgramDrvInfos
 {
 public:
 	// The GL Id.
@@ -1506,7 +1502,7 @@ public:
 	/**  EXTVertexShader specific
 	  *  handle of allocated variants
 	  */
-	GLuint					Variants[CDriverGL::EVSNumVariants];
+	GLuint					Variants[CDriverGL3::EVSNumVariants];
 	/** EXTVertexShader specific
 	  * Used input registers.
 	  * This allow to activate only the gl arrays that are needed by a given shader.
@@ -1515,7 +1511,7 @@ public:
 
 
 	// The gl id is auto created here.
-	CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it);
+	CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrvInfoPtrList it);
 };
 
 #ifdef NL_STATIC

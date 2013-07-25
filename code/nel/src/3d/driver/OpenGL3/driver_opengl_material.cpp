@@ -27,7 +27,7 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
@@ -122,9 +122,9 @@ static inline void convTexAddr(ITexture *tex, CMaterial::TTexAddressingMode mode
 }
 
 // --------------------------------------------------
-void CDriverGL::setTextureEnvFunction(uint stage, CMaterial& mat)
+void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
 {
-	H_AUTO_OGL(CDriverGL_setTextureEnvFunction)
+	H_AUTO_OGL(CDriverGL3_setTextureEnvFunction)
 	ITexture	*text= mat.getTexture(uint8(stage));
 	if(text)
 	{
@@ -179,9 +179,9 @@ void CDriverGL::setTextureEnvFunction(uint stage, CMaterial& mat)
 }
 
 //--------------------------------
-void CDriverGL::setupUserTextureMatrix(uint numStages, CMaterial& mat)
+void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 {
-	H_AUTO_OGL(CDriverGL_setupUserTextureMatrix)
+	H_AUTO_OGL(CDriverGL3_setupUserTextureMatrix)
 	if (
 		(_UserTexMatEnabled != 0 && (mat.getFlags() & IDRV_MAT_USER_TEX_MAT_ALL) == 0)
 		|| (mat.getFlags() & IDRV_MAT_USER_TEX_MAT_ALL) != 0
@@ -220,9 +220,9 @@ void CDriverGL::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 	}
 }
 
-void CDriverGL::disableUserTextureMatrix()
+void CDriverGL3::disableUserTextureMatrix()
 {
-	H_AUTO_OGL(CDriverGL_disableUserTextureMatrix)
+	H_AUTO_OGL(CDriverGL3_disableUserTextureMatrix)
 	if (_UserTexMatEnabled != 0)
 	{
 		glMatrixMode(GL_TEXTURE);
@@ -245,9 +245,9 @@ void CDriverGL::disableUserTextureMatrix()
 }
 
 // --------------------------------------------------
-CMaterial::TShader	CDriverGL::getSupportedShader(CMaterial::TShader shader)
+CMaterial::TShader	CDriverGL3::getSupportedShader(CMaterial::TShader shader)
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 	switch (shader)
 	{
 	case CMaterial::PerPixelLighting: return _SupportPerPixelShader ? CMaterial::PerPixelLighting : CMaterial::Normal;
@@ -260,9 +260,9 @@ CMaterial::TShader	CDriverGL::getSupportedShader(CMaterial::TShader shader)
 }
 
 // --------------------------------------------------
-void CDriverGL::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<ITexture> *textures)
+void CDriverGL3::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<ITexture> *textures)
 {
-	H_AUTO_OGL(CDriverGL_setTextureShaders)
+	H_AUTO_OGL(CDriverGL3_setTextureShaders)
 	GLenum glAddrMode;
 	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 	{
@@ -280,10 +280,10 @@ void CDriverGL::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<
 }
 
 // --------------------------------------------------
-bool CDriverGL::setupMaterial(CMaterial& mat)
+bool CDriverGL3::setupMaterial(CMaterial& mat)
 {
-	H_AUTO_OGL(CDriverGL_setupMaterial)
-	CShaderGL*	pShader;
+	H_AUTO_OGL(CDriverGL3_setupMaterial)
+	CShaderGL3*	pShader;
 	GLenum		glenum = GL_ZERO;
 	uint32		touched = mat.getTouched();
 	uint		stage;
@@ -299,12 +299,12 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		// insert into driver list. (so it is deleted when driver is deleted).
 		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos*)NULL);
 		// create and set iterator, for future deletion.
-		*it= mat._MatDrvInfo= new CShaderGL(this, it);
+		*it= mat._MatDrvInfo= new CShaderGL3(this, it);
 
 		// Must create all OpenGL shader states.
 		touched= IDRV_TOUCHED_ALL;
 	}
-	pShader=static_cast<CShaderGL*>((IMaterialDrvInfos*)(mat._MatDrvInfo));
+	pShader=static_cast<CShaderGL3*>((IMaterialDrvInfos*)(mat._MatDrvInfo));
 
 	// 1. Setup modified fields of material.
 	//=====================================
@@ -561,9 +561,9 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 }
 
 // ***************************************************************************
-sint			CDriverGL::beginMultiPass()
+sint			CDriverGL3::beginMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_beginMultiPass)
+	H_AUTO_OGL(CDriverGL3_beginMultiPass)
 	// Depending on material type and hardware, return number of pass required to draw this material.
 	switch(_CurrentMaterialSupportedShader)
 	{
@@ -588,9 +588,9 @@ sint			CDriverGL::beginMultiPass()
 }
 
 // ***************************************************************************
-void			CDriverGL::setupPass(uint pass)
+void			CDriverGL3::setupPass(uint pass)
 {
-	H_AUTO_OGL(CDriverGL_setupPass)
+	H_AUTO_OGL(CDriverGL3_setupPass)
 	switch(_CurrentMaterialSupportedShader)
 	{
 	case CMaterial::LightMap:
@@ -621,9 +621,9 @@ void			CDriverGL::setupPass(uint pass)
 }
 
 // ***************************************************************************
-void			CDriverGL::endMultiPass()
+void			CDriverGL3::endMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endMultiPass)
+	H_AUTO_OGL(CDriverGL3_endMultiPass)
 	switch(_CurrentMaterialSupportedShader)
 	{
 	case CMaterial::LightMap:
@@ -653,9 +653,9 @@ void			CDriverGL::endMultiPass()
 }
 
 // ***************************************************************************
-void CDriverGL::computeLightMapInfos (const CMaterial &mat)
+void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_computeLightMapInfos )
+	H_AUTO_OGL(CDriverGL3_computeLightMapInfos )
 	static const uint32 RGBMaskPacked = CRGBA(255,255,255,0).getPacked();
 
 	// For optimisation consideration, suppose there is not too much lightmap.
@@ -694,9 +694,9 @@ void CDriverGL::computeLightMapInfos (const CMaterial &mat)
 }
 
 // ***************************************************************************
-sint CDriverGL::beginLightMapMultiPass ()
+sint CDriverGL3::beginLightMapMultiPass ()
 {
-	H_AUTO_OGL(CDriverGL_beginLightMapMultiPass )
+	H_AUTO_OGL(CDriverGL3_beginLightMapMultiPass )
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// compute how many lightmap and pass we must process.
@@ -726,9 +726,9 @@ sint CDriverGL::beginLightMapMultiPass ()
 }
 
 // ***************************************************************************
-void			CDriverGL::setupLightMapPass(uint pass)
+void			CDriverGL3::setupLightMapPass(uint pass)
 {
-	H_AUTO_OGL(CDriverGL_setupLightMapPass)
+	H_AUTO_OGL(CDriverGL3_setupLightMapPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// common colors
@@ -1052,9 +1052,9 @@ void			CDriverGL::setupLightMapPass(uint pass)
 }
 
 // ***************************************************************************
-void			CDriverGL::endLightMapMultiPass()
+void			CDriverGL3::endLightMapMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endLightMapMultiPass)
+	H_AUTO_OGL(CDriverGL3_endLightMapMultiPass)
 	// Flag the fact that VertexSetup is dirty (special lightmap). reseted in activeVertexBuffer(), and setupMaterial()
 	// NB: if no lightmaps, no setupUVPtr() has been called => don't need to flag
 	// (important else crash if graphist error while exporting a Lightmap material, with a MeshVertexProgram (WindTree) )
@@ -1083,9 +1083,9 @@ void			CDriverGL::endLightMapMultiPass()
 }
 
 // ***************************************************************************
-void			CDriverGL::resetLightMapVertexSetup()
+void			CDriverGL3::resetLightMapVertexSetup()
 {
-	H_AUTO_OGL(CDriverGL_resetLightMapVertexSetup)
+	H_AUTO_OGL(CDriverGL3_resetLightMapVertexSetup)
 	// special for all stage, std UV behavior.
 	for(uint i = 0; i < inlGetNumTextStages(); i++)
 	{
@@ -1104,27 +1104,27 @@ void			CDriverGL::resetLightMapVertexSetup()
 }
 
 // ***************************************************************************
-void			CDriverGL::startSpecularBatch()
+void			CDriverGL3::startSpecularBatch()
 {
-	H_AUTO_OGL(CDriverGL_startSpecularBatch)
+	H_AUTO_OGL(CDriverGL3_startSpecularBatch)
 	_SpecularBatchOn= true;
 
 	setupSpecularBegin();
 }
 
 // ***************************************************************************
-void			CDriverGL::endSpecularBatch()
+void			CDriverGL3::endSpecularBatch()
 {
-	H_AUTO_OGL(CDriverGL_endSpecularBatch)
+	H_AUTO_OGL(CDriverGL3_endSpecularBatch)
 	_SpecularBatchOn= false;
 
 	setupSpecularEnd();
 }
 
 // ***************************************************************************
-void			CDriverGL::setupSpecularBegin()
+void			CDriverGL3::setupSpecularBegin()
 {
-	H_AUTO_OGL(CDriverGL_setupSpecularBegin)
+	H_AUTO_OGL(CDriverGL3_setupSpecularBegin)
 	// ---- Reset any textures with id>=2
 	uint stage = 2;
 	for(; stage < inlGetNumTextStages(); stage++)
@@ -1150,7 +1150,7 @@ void			CDriverGL::setupSpecularBegin()
 	_DriverGLStates.activeTextureARB(1);
 
 	// todo hulud remove
-	// _DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
+	// _DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_ARB);
 
 	// setup the good matrix for stage 1.
@@ -1160,9 +1160,9 @@ void			CDriverGL::setupSpecularBegin()
 }
 
 // ***************************************************************************
-void			CDriverGL::setupSpecularEnd()
+void			CDriverGL3::setupSpecularEnd()
 {
-	H_AUTO_OGL(CDriverGL_setupSpecularEnd)
+	H_AUTO_OGL(CDriverGL3_setupSpecularEnd)
 	// Disable Texture coord generation.
 	_DriverGLStates.activeTextureARB(1);
 	_DriverGLStates.setTexGenMode(1, 0);
@@ -1174,9 +1174,9 @@ void			CDriverGL::setupSpecularEnd()
 }
 
 // ***************************************************************************
-sint			CDriverGL::beginSpecularMultiPass()
+sint			CDriverGL3::beginSpecularMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_beginSpecularMultiPass)
+	H_AUTO_OGL(CDriverGL3_beginSpecularMultiPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// activate the 2 textures here
@@ -1208,9 +1208,9 @@ sint			CDriverGL::beginSpecularMultiPass()
 }
 
 // ***************************************************************************
-void			CDriverGL::setupSpecularPass(uint pass)
+void			CDriverGL3::setupSpecularPass(uint pass)
 {
-	H_AUTO_OGL(CDriverGL_setupSpecularPass)
+	H_AUTO_OGL(CDriverGL3_setupSpecularPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// Manage the rare case when the SpecularMap is not provided (error of a graphist).
@@ -1391,7 +1391,7 @@ void			CDriverGL::setupSpecularPass(uint pass)
 			// Just display the texture
 			_DriverGLStates.enableBlend(false);
 			_DriverGLStates.activeTextureARB(1);
-			_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
+			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 		}
 		else
 		{
@@ -1432,9 +1432,9 @@ void			CDriverGL::setupSpecularPass(uint pass)
 }
 
 // ***************************************************************************
-void			CDriverGL::endSpecularMultiPass()
+void			CDriverGL3::endSpecularMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endSpecularMultiPass)
+	H_AUTO_OGL(CDriverGL3_endSpecularMultiPass)
 	// End specular , only if not Batching mode.
 	if(!_SpecularBatchOn)
 		setupSpecularEnd();
@@ -1461,9 +1461,9 @@ const uint SpecularExpStep = 8;
 const uint SpecularMapSize = 32; */
 
 // ***************************************************************************
-CTextureCube	*CDriverGL::getSpecularCubeMap(uint exp)
+CTextureCube	*CDriverGL3::getSpecularCubeMap(uint exp)
 {
-	H_AUTO_OGL(CDriverGL__getSpecularCubeMap)
+	H_AUTO_OGL(CDriverGL3__getSpecularCubeMap)
 	const uint DiffuseMapSize = 64;
 	const uint SpecularMapSize = 32;
 	const uint SpecularMapSizeHighExponent = 64;
@@ -1560,9 +1560,9 @@ CTextureCube	*CDriverGL::getSpecularCubeMap(uint exp)
 }
 
 // ***************************************************************************
-sint			CDriverGL::beginPPLMultiPass()
+sint			CDriverGL3::beginPPLMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_beginPPLMultiPass)
+	H_AUTO_OGL(CDriverGL3_beginPPLMultiPass)
 	#ifdef NL_DEBUG
 		nlassert(supportPerPixelLighting(true)); // make sure the hardware can do that
 	#endif
@@ -1570,9 +1570,9 @@ sint			CDriverGL::beginPPLMultiPass()
 }
 
 // ***************************************************************************
-void			CDriverGL::setupPPLPass(uint pass)
+void			CDriverGL3::setupPPLPass(uint pass)
 {
-	H_AUTO_OGL(CDriverGL_setupPPLPass)
+	H_AUTO_OGL(CDriverGL3_setupPPLPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	nlassert(pass == 0);
@@ -1779,16 +1779,16 @@ void			CDriverGL::setupPPLPass(uint pass)
 }
 
 // ***************************************************************************
-void			CDriverGL::endPPLMultiPass()
+void			CDriverGL3::endPPLMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endPPLMultiPass)
+	H_AUTO_OGL(CDriverGL3_endPPLMultiPass)
 	// nothing to do there ...
 }
 
 // ******PER PIXEL LIGHTING, NO SPECULAR**************************************
-sint			CDriverGL::beginPPLNoSpecMultiPass()
+sint			CDriverGL3::beginPPLNoSpecMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_beginPPLNoSpecMultiPass)
+	H_AUTO_OGL(CDriverGL3_beginPPLNoSpecMultiPass)
 	#ifdef NL_DEBUG
 		nlassert(supportPerPixelLighting(false)); // make sure the hardware can do that
 	#endif
@@ -1796,9 +1796,9 @@ sint			CDriverGL::beginPPLNoSpecMultiPass()
 }
 
 // ******PER PIXEL LIGHTING, NO SPECULAR**************************************
-void			CDriverGL::setupPPLNoSpecPass(uint pass)
+void			CDriverGL3::setupPPLNoSpecPass(uint pass)
 {
-	H_AUTO_OGL(CDriverGL_setupPPLNoSpecPass)
+	H_AUTO_OGL(CDriverGL3_setupPPLNoSpecPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	nlassert(pass == 0);
@@ -1887,14 +1887,14 @@ void			CDriverGL::setupPPLNoSpecPass(uint pass)
 }
 
 // ******PER PIXEL LIGHTING, NO SPECULAR**************************************
-void			CDriverGL::endPPLNoSpecMultiPass()
+void			CDriverGL3::endPPLNoSpecMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endPPLNoSpecMultiPass)
+	H_AUTO_OGL(CDriverGL3_endPPLNoSpecMultiPass)
 	// nothing to do there ...
 }
 
 // ***************************************************************************
-/* sint		CDriverGL::beginCausticsMultiPass(const CMaterial &mat)
+/* sint		CDriverGL3::beginCausticsMultiPass(const CMaterial &mat)
 {
 	nlassert(mat.getShader() == CMaterial::Caustics);
 	if (!_Extensions.ARBTextureCubeMap) return 1;
@@ -1908,7 +1908,7 @@ void			CDriverGL::endPPLNoSpecMultiPass()
 }*/
 
 // ***************************************************************************
-/*inline void		CDriverGL::setupCausticsFirstTex(const CMaterial &mat)
+/*inline void		CDriverGL3::setupCausticsFirstTex(const CMaterial &mat)
 {
 	/// setup texture 0
 	activateTexture(0, mat.getTexture(0));
@@ -1921,14 +1921,14 @@ void			CDriverGL::endPPLNoSpecMultiPass()
 }
 
 // ***************************************************************************
-inline void		CDriverGL::setupCausticsSecondTex(uint stage)
+inline void		CDriverGL3::setupCausticsSecondTex(uint stage)
 {
 	activateTexture(stage, mat.getTexture(0));
 	_CausticCubeMap
 }
 
 // ***************************************************************************
-void		CDriverGL::setupCausticsPass(const CMaterial &mat, uint pass)
+void		CDriverGL3::setupCausticsPass(const CMaterial &mat, uint pass)
 {
 	nlassert(mat.getShader() == CMaterial::Caustics);
 
@@ -1960,7 +1960,7 @@ void		CDriverGL::setupCausticsPass(const CMaterial &mat, uint pass)
 }
 
 // ***************************************************************************
-void		CDriverGL::endCausticsMultiPass(const CMaterial &mat)
+void		CDriverGL3::endCausticsMultiPass(const CMaterial &mat)
 {
 	nlassert(mat.getShader() == CMaterial::Caustics);
 
@@ -1968,17 +1968,17 @@ void		CDriverGL::endCausticsMultiPass(const CMaterial &mat)
 */
 
 // ***************************************************************************
-sint		CDriverGL::beginCloudMultiPass ()
+sint		CDriverGL3::beginCloudMultiPass ()
 {
-	H_AUTO_OGL(CDriverGL_beginCloudMultiPass )
+	H_AUTO_OGL(CDriverGL3_beginCloudMultiPass )
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 	return 1;
 }
 
 // ***************************************************************************
-void		CDriverGL::setupCloudPass (uint /* pass */)
+void		CDriverGL3::setupCloudPass (uint /* pass */)
 {
-	H_AUTO_OGL(CDriverGL_setupCloudPass )
+	H_AUTO_OGL(CDriverGL3_setupCloudPass )
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 
 	const CMaterial &mat= *_CurrentMaterial;
@@ -2113,9 +2113,9 @@ void		CDriverGL::setupCloudPass (uint /* pass */)
 }
 
 // ***************************************************************************
-void		CDriverGL::endCloudMultiPass()
+void		CDriverGL3::endCloudMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endCloudMultiPass)
+	H_AUTO_OGL(CDriverGL3_endCloudMultiPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 	if (ATICloudShaderHandle)
 	{
@@ -2126,9 +2126,9 @@ void		CDriverGL::endCloudMultiPass()
 }
 
 // ***************************************************************************
-sint CDriverGL::beginWaterMultiPass()
+sint CDriverGL3::beginWaterMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_beginWaterMultiPass)
+	H_AUTO_OGL(CDriverGL3_beginWaterMultiPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	return 1;
 }
@@ -2137,9 +2137,9 @@ sint CDriverGL::beginWaterMultiPass()
 // ***************************************************************************
 /** water setup for ATI
   */
-void CDriverGL::setupWaterPassR200(const CMaterial &mat)
+void CDriverGL3::setupWaterPassR200(const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPassR200);
+	H_AUTO_OGL(CDriverGL3_setupWaterPassR200);
 
 #ifndef USE_OPENGLES
 	uint k;
@@ -2219,9 +2219,9 @@ void CDriverGL::setupWaterPassR200(const CMaterial &mat)
 // ***************************************************************************
 /** water setup for ARB_fragment_program
   */
-void CDriverGL::setupWaterPassARB(const CMaterial &mat)
+void CDriverGL3::setupWaterPassARB(const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPassARB);
+	H_AUTO_OGL(CDriverGL3_setupWaterPassARB);
 
 #ifndef USE_OPENGLES
 	uint k;
@@ -2327,9 +2327,9 @@ static const uint8 WaterTexAddrMode[IDRV_MAT_MAXTEXTURES] =
 static const float IdentityTexMat[4] = { 1.f, 0.f, 0.f, 1.f };
 
 // ***************************************************************************
-void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
+void CDriverGL3::setupWaterPassNV20(const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPassNV20);
+	H_AUTO_OGL(CDriverGL3_setupWaterPassNV20);
 
 #ifndef USE_OPENGLES
 	static bool setupDone = false;
@@ -2420,9 +2420,9 @@ void CDriverGL::setupWaterPassNV20(const CMaterial &mat)
 }
 
 // ***************************************************************************
-void CDriverGL::setupWaterPass(uint /* pass */)
+void CDriverGL3::setupWaterPass(uint /* pass */)
 {
-	H_AUTO_OGL(CDriverGL_setupWaterPass)
+	H_AUTO_OGL(CDriverGL3_setupWaterPass)
 	nlassert (_CurrentMaterial);
 	CMaterial &mat = *_CurrentMaterial;
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
@@ -2442,9 +2442,9 @@ void CDriverGL::setupWaterPass(uint /* pass */)
 }
 
 // ***************************************************************************
-void CDriverGL::endWaterMultiPass()
+void CDriverGL3::endWaterMultiPass()
 {
-	H_AUTO_OGL(CDriverGL_endWaterMultiPass);
+	H_AUTO_OGL(CDriverGL3_endWaterMultiPass);
 
 #ifndef USE_OPENGLES
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);

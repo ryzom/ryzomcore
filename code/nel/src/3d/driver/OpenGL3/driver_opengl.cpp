@@ -100,7 +100,7 @@ IDriver* createGlEsDriverInstance ()
 
 IDriver* createGlDriverInstance ()
 {
-	return new NLDRIVERGL::CDriverGL;
+	return new NLDRIVERGL::CDriverGL3;
 }
 
 #endif
@@ -111,7 +111,7 @@ IDriver* createGlDriverInstance ()
 
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
-	return new CDriverGL;
+	return new CDriverGL3;
 }
 
 __declspec(dllexport) uint32 NL3D_interfaceVersion ()
@@ -125,7 +125,7 @@ extern "C"
 {
 	IDriver* NL3D_createIDriverInstance ()
 	{
-		return new CDriverGL;
+		return new CDriverGL3;
 	}
 
 	uint32 NL3D_interfaceVersion ()
@@ -142,24 +142,24 @@ extern "C"
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
-CMaterial::CTexEnv CDriverGL::_TexEnvReplace;
+CMaterial::CTexEnv CDriverGL3::_TexEnvReplace;
 
 
 #ifdef NL_OS_WINDOWS
-uint CDriverGL::_Registered=0;
+uint CDriverGL3::_Registered=0;
 #endif // NL_OS_WINDOWS
 
 // Version of the driver. Not the interface version!! Increment when implementation of the driver change.
-const uint32 CDriverGL::ReleaseVersion = 0x11;
+const uint32 CDriverGL3::ReleaseVersion = 0x11;
 
 // Number of register to allocate for the EXTVertexShader extension
-const uint CDriverGL::_EVSNumConstant = 97;
+const uint CDriverGL3::_EVSNumConstant = 97;
 
-GLenum CDriverGL::NLCubeFaceToGLCubeFace[6] =
+GLenum CDriverGL3::NLCubeFaceToGLCubeFace[6] =
 {
 	GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB,
 	GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB,
@@ -170,9 +170,9 @@ GLenum CDriverGL::NLCubeFaceToGLCubeFace[6] =
 };
 
 // ***************************************************************************
-CDriverGL::CDriverGL()
+CDriverGL3::CDriverGL3()
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 
 #ifdef USE_OPENGLES
 
@@ -368,9 +368,9 @@ CDriverGL::CDriverGL()
 }
 
 // ***************************************************************************
-CDriverGL::~CDriverGL()
+CDriverGL3::~CDriverGL3()
 {
-	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
+	H_AUTO_OGL(CDriverGL3_CDriverGLDtor)
 	release();
 
 #if defined(NL_OS_MAC)
@@ -379,9 +379,9 @@ CDriverGL::~CDriverGL()
 }
 
 // --------------------------------------------------
-bool CDriverGL::setupDisplay()
+bool CDriverGL3::setupDisplay()
 {
-	H_AUTO_OGL(CDriverGL_setupDisplay)
+	H_AUTO_OGL(CDriverGL3_setupDisplay)
 
 	// Driver caps.
 	//=============
@@ -680,40 +680,40 @@ bool CDriverGL::setupDisplay()
 }
 
 // ***************************************************************************
-bool CDriverGL::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect */, ITexture * /* destText */, NLMISC::CRect &/* destRect */)
+bool CDriverGL3::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect */, ITexture * /* destText */, NLMISC::CRect &/* destRect */)
 {
-	H_AUTO_OGL(CDriverGL_stretchRect)
+	H_AUTO_OGL(CDriverGL3_stretchRect)
 
 	return false;
 }
 
 // ***************************************************************************
-bool CDriverGL::supportBloomEffect() const
+bool CDriverGL3::supportBloomEffect() const
 {
 	return (isVertexProgramSupported() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
 }
 
 // ***************************************************************************
-bool CDriverGL::supportNonPowerOfTwoTextures() const
+bool CDriverGL3::supportNonPowerOfTwoTextures() const
 {
 	return _Extensions.ARBTextureNonPowerOfTwo;
 }
 
 // ***************************************************************************
-bool CDriverGL::isTextureRectangle(ITexture * tex) const
+bool CDriverGL3::isTextureRectangle(ITexture * tex) const
 {
 	return (supportTextureRectangle() && tex->isBloomTexture() && tex->mipMapOff()
 			&& (!isPowerOf2(tex->getWidth()) || !isPowerOf2(tex->getHeight())));
 }
 
 // ***************************************************************************
-bool CDriverGL::activeFrameBufferObject(ITexture * tex)
+bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 {
 	if(supportFrameBufferObject()/* && supportPackedDepthStencil()*/)
 	{
 		if(tex)
 		{
-			CTextureDrvInfosGL*	gltext = (CTextureDrvInfosGL*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
+			CTextureDrvInfosGL3*	gltext = (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
 			return gltext->activeFrameBufferObject(tex);
 		}
 		else
@@ -731,30 +731,30 @@ bool CDriverGL::activeFrameBufferObject(ITexture * tex)
 }
 
 // --------------------------------------------------
-void CDriverGL::disableHardwareVertexProgram()
+void CDriverGL3::disableHardwareVertexProgram()
 {
-	H_AUTO_OGL(CDriverGL_disableHardwareVertexProgram)
+	H_AUTO_OGL(CDriverGL3_disableHardwareVertexProgram)
 	_Extensions.DisableHardwareVertexProgram= true;
 }
 
 // ***************************************************************************
-void CDriverGL::disableHardwareVertexArrayAGP()
+void CDriverGL3::disableHardwareVertexArrayAGP()
 {
-	H_AUTO_OGL(CDriverGL_disableHardwareVertexArrayAGP)
+	H_AUTO_OGL(CDriverGL3_disableHardwareVertexArrayAGP)
 	_Extensions.DisableHardwareVertexArrayAGP= true;
 }
 
 // ***************************************************************************
-void CDriverGL::disableHardwareTextureShader()
+void CDriverGL3::disableHardwareTextureShader()
 {
-	H_AUTO_OGL(CDriverGL_disableHardwareTextureShader)
+	H_AUTO_OGL(CDriverGL3_disableHardwareTextureShader)
 	_Extensions.DisableHardwareTextureShader= true;
 }
 
 // --------------------------------------------------
-void CDriverGL::resetTextureShaders()
+void CDriverGL3::resetTextureShaders()
 {
-	H_AUTO_OGL(CDriverGL_resetTextureShaders);
+	H_AUTO_OGL(CDriverGL3_resetTextureShaders);
 
 #ifndef USE_OPENGLES
 	if (_Extensions.NVTextureShader)
@@ -782,9 +782,9 @@ void CDriverGL::resetTextureShaders()
 }
 
 // --------------------------------------------------
-bool CDriverGL::isTextureExist(const ITexture&tex)
+bool CDriverGL3::isTextureExist(const ITexture&tex)
 {
-	H_AUTO_OGL(CDriverGL_isTextureExist)
+	H_AUTO_OGL(CDriverGL3_isTextureExist)
 	bool result;
 
 	// Create the shared Name.
@@ -800,9 +800,9 @@ bool CDriverGL::isTextureExist(const ITexture&tex)
 }
 
 // --------------------------------------------------
-bool CDriverGL::clear2D(CRGBA rgba)
+bool CDriverGL3::clear2D(CRGBA rgba)
 {
-	H_AUTO_OGL(CDriverGL_clear2D)
+	H_AUTO_OGL(CDriverGL3_clear2D)
 	glClearColor((float)rgba.R/255.0f,(float)rgba.G/255.0f,(float)rgba.B/255.0f,(float)rgba.A/255.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -811,9 +811,9 @@ bool CDriverGL::clear2D(CRGBA rgba)
 }
 
 // --------------------------------------------------
-bool CDriverGL::clearZBuffer(float zval)
+bool CDriverGL3::clearZBuffer(float zval)
 {
-	H_AUTO_OGL(CDriverGL_clearZBuffer);
+	H_AUTO_OGL(CDriverGL3_clearZBuffer);
 
 #ifdef USE_OPENGLES
 	glClearDepthf(zval);
@@ -828,9 +828,9 @@ bool CDriverGL::clearZBuffer(float zval)
 }
 
 // --------------------------------------------------
-bool CDriverGL::clearStencilBuffer(float stencilval)
+bool CDriverGL3::clearStencilBuffer(float stencilval)
 {
-	H_AUTO_OGL(CDriverGL_clearStencilBuffer)
+	H_AUTO_OGL(CDriverGL3_clearStencilBuffer)
 	glClearStencil((int)stencilval);
 
 	glClear(GL_STENCIL_BUFFER_BIT);
@@ -839,16 +839,16 @@ bool CDriverGL::clearStencilBuffer(float stencilval)
 }
 
 // --------------------------------------------------
-void CDriverGL::setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha)
+void CDriverGL3::setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha)
 {
-	H_AUTO_OGL(CDriverGL_setColorMask )
+	H_AUTO_OGL(CDriverGL3_setColorMask )
 	glColorMask (bRed, bGreen, bBlue, bAlpha);
 }
 
 // --------------------------------------------------
-bool CDriverGL::swapBuffers()
+bool CDriverGL3::swapBuffers()
 {
-	H_AUTO_OGL(CDriverGL_swapBuffers)
+	H_AUTO_OGL(CDriverGL3_swapBuffers)
 
 	++ _SwapBufferCounter;
 	// Reset texture shaders
@@ -1013,9 +1013,9 @@ bool CDriverGL::swapBuffers()
 }
 
 // --------------------------------------------------
-bool CDriverGL::release()
+bool CDriverGL3::release()
 {
-	H_AUTO_OGL(CDriverGL_release)
+	H_AUTO_OGL(CDriverGL3_release)
 
 	// release only if the driver was initialized
 	if (!_Initialized) return true;
@@ -1061,9 +1061,9 @@ bool CDriverGL::release()
 }
 
 // --------------------------------------------------
-void CDriverGL::setupViewport (const class CViewport& viewport)
+void CDriverGL3::setupViewport (const class CViewport& viewport)
 {
-	H_AUTO_OGL(CDriverGL_setupViewport )
+	H_AUTO_OGL(CDriverGL3_setupViewport )
 
 	if (_win == EmptyWindow) return;
 
@@ -1109,16 +1109,16 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 }
 
 // --------------------------------------------------
-void CDriverGL::getViewport(CViewport &viewport)
+void CDriverGL3::getViewport(CViewport &viewport)
 {
-	H_AUTO_OGL(CDriverGL_getViewport)
+	H_AUTO_OGL(CDriverGL3_getViewport)
 	viewport = _CurrViewport;
 }
 
 // --------------------------------------------------
-void CDriverGL::setupScissor (const class CScissor& scissor)
+void CDriverGL3::setupScissor (const class CScissor& scissor)
 {
-	H_AUTO_OGL(CDriverGL_setupScissor )
+	H_AUTO_OGL(CDriverGL3_setupScissor )
 
 	if (_win == EmptyWindow) return;
 
@@ -1178,15 +1178,15 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 	}
 }
 
-uint8 CDriverGL::getBitPerPixel ()
+uint8 CDriverGL3::getBitPerPixel ()
 {
-	H_AUTO_OGL(CDriverGL_getBitPerPixel )
+	H_AUTO_OGL(CDriverGL3_getBitPerPixel )
 	return _CurrentMode.Depth;
 }
 
-const char *CDriverGL::getVideocardInformation ()
+const char *CDriverGL3::getVideocardInformation ()
 {
-	H_AUTO_OGL(CDriverGL_getVideocardInformation)
+	H_AUTO_OGL(CDriverGL3_getVideocardInformation)
 	static char name[1024];
 
 	if (!_Initialized) return "OpenGL isn't initialized";
@@ -1199,9 +1199,9 @@ const char *CDriverGL::getVideocardInformation ()
 	return name;
 }
 
-bool CDriverGL::clipRect(NLMISC::CRect &rect)
+bool CDriverGL3::clipRect(NLMISC::CRect &rect)
 {
-	H_AUTO_OGL(CDriverGL_clipRect)
+	H_AUTO_OGL(CDriverGL3_clipRect)
 	// Clip the wanted rectangle with window.
 	uint32 width, height;
 	getWindowSize(width, height);
@@ -1218,9 +1218,9 @@ bool CDriverGL::clipRect(NLMISC::CRect &rect)
 	return rect.Width>0 && rect.Height>0;
 }
 
-void CDriverGL::getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect)
+void CDriverGL3::getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect)
 {
-	H_AUTO_OGL(CDriverGL_getBufferPart )
+	H_AUTO_OGL(CDriverGL3_getBufferPart )
 	bitmap.reset();
 
 	if(clipRect(rect))
@@ -1230,9 +1230,9 @@ void CDriverGL::getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect)
 	}
 }
 
-void CDriverGL::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect)
+void CDriverGL3::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect)
 {
-	H_AUTO_OGL(CDriverGL_getZBufferPart )
+	H_AUTO_OGL(CDriverGL3_getZBufferPart )
 	zbuffer.clear();
 
 	if(clipRect(rect))
@@ -1249,26 +1249,26 @@ void CDriverGL::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rec
 	}
 }
 
-void CDriverGL::getZBuffer (std::vector<float>  &zbuffer)
+void CDriverGL3::getZBuffer (std::vector<float>  &zbuffer)
 {
-	H_AUTO_OGL(CDriverGL_getZBuffer )
+	H_AUTO_OGL(CDriverGL3_getZBuffer )
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	getZBufferPart(zbuffer, rect);
 }
 
-void CDriverGL::getBuffer (CBitmap &bitmap)
+void CDriverGL3::getBuffer (CBitmap &bitmap)
 {
-	H_AUTO_OGL(CDriverGL_getBuffer )
+	H_AUTO_OGL(CDriverGL3_getBuffer )
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	getBufferPart(bitmap, rect);
 	bitmap.flipV();
 }
 
-bool CDriverGL::fillBuffer (CBitmap &bitmap)
+bool CDriverGL3::fillBuffer (CBitmap &bitmap)
 {
-	H_AUTO_OGL(CDriverGL_fillBuffer )
+	H_AUTO_OGL(CDriverGL3_fillBuffer )
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	if( rect.Width!=bitmap.getWidth() || rect.Height!=bitmap.getHeight() || bitmap.getPixelFormat()!=CBitmap::RGBA )
@@ -1296,7 +1296,7 @@ bool CDriverGL::fillBuffer (CBitmap &bitmap)
 }
 
 // ***************************************************************************
-void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
+void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 										 uint32 level,
 										 uint32 offsetx,
 										 uint32 offsety,
@@ -1307,22 +1307,22 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 										 uint cubeFace /*= 0*/
 										)
 {
-	H_AUTO_OGL(CDriverGL_copyFrameBufferToTexture)
+	H_AUTO_OGL(CDriverGL3_copyFrameBufferToTexture)
 	bool compressed = false;
 	getGlTextureFormat(*tex, compressed);
 	nlassert(!compressed);
 	// first, mark the texture as valid, and make sure there is a corresponding texture in the device memory
 	setupTexture(*tex);
-	CTextureDrvInfosGL*	gltext = (CTextureDrvInfosGL*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
+	CTextureDrvInfosGL3*	gltext = (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
 	//if (_RenderTargetFBO)
 	//	gltext->activeFrameBufferObject(NULL);
 	_DriverGLStates.activeTextureARB(0);
 	// setup texture mode, after activeTextureARB()
-	CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
 #ifndef USE_OPENGLES
 	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
-		textureMode = CDriverGLStates::TextureRect;
+		textureMode = CDriverGLStates3::TextureRect;
 #endif
 
 	_DriverGLStates.setTextureMode(textureMode);
@@ -1340,7 +1340,7 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 		glCopyTexSubImage2D(gltext->TextureMode, level, offsetx, offsety, x, y, width, height);
 	}
 	// disable texturing.
-	_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
+	_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 	_CurrentTexture[0] = NULL;
 	_CurrentTextureInfoGL[0] = NULL;
 	//if (_RenderTargetFBO)
@@ -1348,9 +1348,9 @@ void CDriverGL::copyFrameBufferToTexture(ITexture *tex,
 }
 
 // ***************************************************************************
-void CDriverGL::setPolygonMode (TPolygonMode mode)
+void CDriverGL3::setPolygonMode (TPolygonMode mode)
 {
-	H_AUTO_OGL(CDriverGL_setPolygonMode )
+	H_AUTO_OGL(CDriverGL3_setPolygonMode )
 	IDriver::setPolygonMode (mode);
 
 #ifndef USE_OPENGLES
@@ -1371,24 +1371,24 @@ void CDriverGL::setPolygonMode (TPolygonMode mode)
 }
 
 // ***************************************************************************
-bool CDriverGL::fogEnabled()
+bool CDriverGL3::fogEnabled()
 {
-	H_AUTO_OGL(CDriverGL_fogEnabled)
+	H_AUTO_OGL(CDriverGL3_fogEnabled)
 	return _FogEnabled;
 }
 
 // ***************************************************************************
-void CDriverGL::enableFog(bool enable)
+void CDriverGL3::enableFog(bool enable)
 {
-	H_AUTO_OGL(CDriverGL_enableFog)
+	H_AUTO_OGL(CDriverGL3_enableFog)
 	_DriverGLStates.enableFog(enable);
 	_FogEnabled= enable;
 }
 
 // ***************************************************************************
-void CDriverGL::setupFog(float start, float end, CRGBA color)
+void CDriverGL3::setupFog(float start, float end, CRGBA color)
 {
-	H_AUTO_OGL(CDriverGL_setupFog)
+	H_AUTO_OGL(CDriverGL3_setupFog)
 	glFogf(GL_FOG_MODE, GL_LINEAR);
 	glFogf(GL_FOG_START, start);
 	glFogf(GL_FOG_END, end);
@@ -1422,23 +1422,23 @@ void CDriverGL::setupFog(float start, float end, CRGBA color)
 }
 
 // ***************************************************************************
-float CDriverGL::getFogStart() const
+float CDriverGL3::getFogStart() const
 {
-	H_AUTO_OGL(CDriverGL_getFogStart)
+	H_AUTO_OGL(CDriverGL3_getFogStart)
 	return _FogStart;
 }
 
 // ***************************************************************************
-float CDriverGL::getFogEnd() const
+float CDriverGL3::getFogEnd() const
 {
-	H_AUTO_OGL(CDriverGL_getFogEnd)
+	H_AUTO_OGL(CDriverGL3_getFogEnd)
 	return _FogEnd;
 }
 
 // ***************************************************************************
-CRGBA CDriverGL::getFogColor() const
+CRGBA CDriverGL3::getFogColor() const
 {
-	H_AUTO_OGL(CDriverGL_getFogColor)
+	H_AUTO_OGL(CDriverGL3_getFogColor)
 	CRGBA	ret;
 	ret.R= (uint8)(_CurrentFogColor[0]*255);
 	ret.G= (uint8)(_CurrentFogColor[1]*255);
@@ -1449,43 +1449,43 @@ CRGBA CDriverGL::getFogColor() const
 
 
 // ***************************************************************************
-void			CDriverGL::profileRenderedPrimitives(CPrimitiveProfile &pIn, CPrimitiveProfile &pOut)
+void			CDriverGL3::profileRenderedPrimitives(CPrimitiveProfile &pIn, CPrimitiveProfile &pOut)
 {
-	H_AUTO_OGL(CDriverGL_profileRenderedPrimitives)
+	H_AUTO_OGL(CDriverGL3_profileRenderedPrimitives)
 	pIn= _PrimitiveProfileIn;
 	pOut= _PrimitiveProfileOut;
 }
 
 
 // ***************************************************************************
-uint32			CDriverGL::profileAllocatedTextureMemory()
+uint32			CDriverGL3::profileAllocatedTextureMemory()
 {
-	H_AUTO_OGL(CDriverGL_profileAllocatedTextureMemory)
+	H_AUTO_OGL(CDriverGL3_profileAllocatedTextureMemory)
 	return _AllocatedTextureMemory;
 }
 
 
 // ***************************************************************************
-uint32			CDriverGL::profileSetupedMaterials() const
+uint32			CDriverGL3::profileSetupedMaterials() const
 {
-	H_AUTO_OGL(CDriverGL_profileSetupedMaterials)
+	H_AUTO_OGL(CDriverGL3_profileSetupedMaterials)
 	return _NbSetupMaterialCall;
 }
 
 
 // ***************************************************************************
-uint32			CDriverGL::profileSetupedModelMatrix() const
+uint32			CDriverGL3::profileSetupedModelMatrix() const
 {
-	H_AUTO_OGL(CDriverGL_profileSetupedModelMatrix)
+	H_AUTO_OGL(CDriverGL3_profileSetupedModelMatrix)
 
 	return _NbSetupModelMatrixCall;
 }
 
 
 // ***************************************************************************
-void			CDriverGL::enableUsedTextureMemorySum (bool enable)
+void			CDriverGL3::enableUsedTextureMemorySum (bool enable)
 {
-	H_AUTO_OGL(CDriverGL_enableUsedTextureMemorySum )
+	H_AUTO_OGL(CDriverGL3_enableUsedTextureMemorySum )
 
 	if (enable)
 		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL");
@@ -1494,19 +1494,19 @@ void			CDriverGL::enableUsedTextureMemorySum (bool enable)
 
 
 // ***************************************************************************
-uint32			CDriverGL::getUsedTextureMemory() const
+uint32			CDriverGL3::getUsedTextureMemory() const
 {
-	H_AUTO_OGL(CDriverGL_getUsedTextureMemory)
+	H_AUTO_OGL(CDriverGL3_getUsedTextureMemory)
 
 	// Sum memory used
 	uint32 memory=0;
 
 	// For each texture used
-	set<CTextureDrvInfosGL*>::const_iterator ite=_TextureUsed.begin();
+	set<CTextureDrvInfosGL3*>::const_iterator ite=_TextureUsed.begin();
 	while (ite!=_TextureUsed.end())
 	{
 		// Get the gl texture
-		CTextureDrvInfosGL*	gltext;
+		CTextureDrvInfosGL3*	gltext;
 		gltext= (*ite);
 
 		// Sum the memory used by this texture
@@ -1522,18 +1522,18 @@ uint32			CDriverGL::getUsedTextureMemory() const
 
 
 // ***************************************************************************
-bool CDriverGL::supportTextureShaders() const
+bool CDriverGL3::supportTextureShaders() const
 {
-	H_AUTO_OGL(CDriverGL_supportTextureShaders)
+	H_AUTO_OGL(CDriverGL3_supportTextureShaders)
 
 	// fully supported by NV_TEXTURE_SHADER
 	return _Extensions.NVTextureShader;
 }
 
 // ***************************************************************************
-bool CDriverGL::isWaterShaderSupported() const
+bool CDriverGL3::isWaterShaderSupported() const
 {
-	H_AUTO_OGL(CDriverGL_isWaterShaderSupported);
+	H_AUTO_OGL(CDriverGL3_isWaterShaderSupported);
 
 	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
 
@@ -1543,9 +1543,9 @@ bool CDriverGL::isWaterShaderSupported() const
 }
 
 // ***************************************************************************
-bool CDriverGL::isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const
+bool CDriverGL3::isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const
 {
-	H_AUTO_OGL(CDriverGL_isTextureAddrModeSupported)
+	H_AUTO_OGL(CDriverGL3_isTextureAddrModeSupported)
 
 	if (_Extensions.NVTextureShader)
 	{
@@ -1559,9 +1559,9 @@ bool CDriverGL::isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode
 }
 
 // ***************************************************************************
-void CDriverGL::setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4])
+void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4])
 {
-	H_AUTO_OGL(CDriverGL_setMatrix2DForTextureOffsetAddrMode)
+	H_AUTO_OGL(CDriverGL3_setMatrix2DForTextureOffsetAddrMode)
 
 	if (!supportTextureShaders()) return;
 	//nlassert(supportTextureShaders());
@@ -1575,9 +1575,9 @@ void CDriverGL::setMatrix2DForTextureOffsetAddrMode(const uint stage, const floa
 
 
 // ***************************************************************************
-void CDriverGL::enableNVTextureShader(bool enabled)
+void CDriverGL3::enableNVTextureShader(bool enabled)
 {
-	H_AUTO_OGL(CDriverGL_enableNVTextureShader)
+	H_AUTO_OGL(CDriverGL3_enableNVTextureShader)
 
 	if (enabled != _NVTextureShaderEnabled)
 	{
@@ -1596,9 +1596,9 @@ void CDriverGL::enableNVTextureShader(bool enabled)
 }
 
 // ***************************************************************************
-void CDriverGL::checkForPerPixelLightingSupport()
+void CDriverGL3::checkForPerPixelLightingSupport()
 {
-	H_AUTO_OGL(CDriverGL_checkForPerPixelLightingSupport)
+	H_AUTO_OGL(CDriverGL3_checkForPerPixelLightingSupport)
 
 	// we need at least 3 texture stages and cube map support + EnvCombine4 or 3 support
 	// TODO : support for EnvCombine3
@@ -1616,17 +1616,17 @@ void CDriverGL::checkForPerPixelLightingSupport()
 }
 
 // ***************************************************************************
-bool CDriverGL::supportPerPixelLighting(bool specular) const
+bool CDriverGL3::supportPerPixelLighting(bool specular) const
 {
-	H_AUTO_OGL(CDriverGL_supportPerPixelLighting)
+	H_AUTO_OGL(CDriverGL3_supportPerPixelLighting)
 
 	return specular ? _SupportPerPixelShader : _SupportPerPixelShaderNoSpec;
 }
 
 // ***************************************************************************
-void CDriverGL::setPerPixelLightingLight(CRGBA diffuse, CRGBA specular, float shininess)
+void CDriverGL3::setPerPixelLightingLight(CRGBA diffuse, CRGBA specular, float shininess)
 {
-	H_AUTO_OGL(CDriverGL_setPerPixelLightingLight)
+	H_AUTO_OGL(CDriverGL3_setPerPixelLightingLight)
 
 	_PPLExponent = shininess;
 	_PPLightDiffuseColor = diffuse;
@@ -1634,16 +1634,16 @@ void CDriverGL::setPerPixelLightingLight(CRGBA diffuse, CRGBA specular, float sh
 }
 
 // ***************************************************************************
-bool CDriverGL::supportBlendConstantColor() const
+bool CDriverGL3::supportBlendConstantColor() const
 {
-	H_AUTO_OGL(CDriverGL_supportBlendConstantColor)
+	H_AUTO_OGL(CDriverGL3_supportBlendConstantColor)
 	return _Extensions.EXTBlendColor;
 }
 
 // ***************************************************************************
-void CDriverGL::setBlendConstantColor(NLMISC::CRGBA col)
+void CDriverGL3::setBlendConstantColor(NLMISC::CRGBA col)
 {
-	H_AUTO_OGL(CDriverGL_setBlendConstantColor)
+	H_AUTO_OGL(CDriverGL3_setBlendConstantColor)
 
 	// bkup
 	_CurrentBlendConstantColor= col;
@@ -1659,24 +1659,24 @@ void CDriverGL::setBlendConstantColor(NLMISC::CRGBA col)
 }
 
 // ***************************************************************************
-NLMISC::CRGBA CDriverGL::getBlendConstantColor() const
+NLMISC::CRGBA CDriverGL3::getBlendConstantColor() const
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 
 	return	_CurrentBlendConstantColor;
 }
 
 // ***************************************************************************
-uint			CDriverGL::getNbTextureStages() const
+uint			CDriverGL3::getNbTextureStages() const
 {
-	H_AUTO_OGL(CDriverGL_getNbTextureStages)
+	H_AUTO_OGL(CDriverGL3_getNbTextureStages)
 	return inlGetNumTextStages();
 }
 
 // ***************************************************************************
-void CDriverGL::refreshProjMatrixFromGL()
+void CDriverGL3::refreshProjMatrixFromGL()
 {
-	H_AUTO_OGL(CDriverGL_refreshProjMatrixFromGL)
+	H_AUTO_OGL(CDriverGL3_refreshProjMatrixFromGL)
 
 	if (!_ProjMatDirty) return;
 	float mat[16];
@@ -1686,18 +1686,18 @@ void CDriverGL::refreshProjMatrixFromGL()
 }
 
 // ***************************************************************************
-bool CDriverGL::supportEMBM() const
+bool CDriverGL3::supportEMBM() const
 {
-	H_AUTO_OGL(CDriverGL_supportEMBM);
+	H_AUTO_OGL(CDriverGL3_supportEMBM);
 
 	// For now, supported via ATI extension
 	return _Extensions.ATIEnvMapBumpMap;
 }
 
 // ***************************************************************************
-bool CDriverGL::isEMBMSupportedAtStage(uint stage) const
+bool CDriverGL3::isEMBMSupportedAtStage(uint stage) const
 {
-	H_AUTO_OGL(CDriverGL_isEMBMSupportedAtStage)
+	H_AUTO_OGL(CDriverGL3_isEMBMSupportedAtStage)
 
 	nlassert(supportEMBM());
 	nlassert(stage < IDRV_MAT_MAXTEXTURES);
@@ -1705,9 +1705,9 @@ bool CDriverGL::isEMBMSupportedAtStage(uint stage) const
 }
 
 // ***************************************************************************
-void CDriverGL::setEMBMMatrix(const uint stage,const float mat[4])
+void CDriverGL3::setEMBMMatrix(const uint stage,const float mat[4])
 {
-	H_AUTO_OGL(CDriverGL_setEMBMMatrix)
+	H_AUTO_OGL(CDriverGL3_setEMBMMatrix)
 
 #ifndef USE_OPENGLES
 	nlassert(supportEMBM());
@@ -1722,9 +1722,9 @@ void CDriverGL::setEMBMMatrix(const uint stage,const float mat[4])
 }
 
 // ***************************************************************************
-void CDriverGL::initEMBM()
+void CDriverGL3::initEMBM()
 {
-	H_AUTO_OGL(CDriverGL_initEMBM);
+	H_AUTO_OGL(CDriverGL3_initEMBM);
 
 #ifndef USE_OPENGLES
 	if (supportEMBM())
@@ -1963,7 +1963,7 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
   */
 static void fetchPerturbedEnvMapR200()
 {
-	H_AUTO_OGL(CDriverGL_fetchPerturbedEnvMapR200);
+	H_AUTO_OGL(CDriverGL3_fetchPerturbedEnvMapR200);
 
 #ifndef USE_OPENGLES
 	////////////
@@ -1984,15 +1984,15 @@ static void fetchPerturbedEnvMapR200()
 }
 
 // ***************************************************************************
-void CDriverGL::forceNativeFragmentPrograms(bool nativeOnly)
+void CDriverGL3::forceNativeFragmentPrograms(bool nativeOnly)
 {
 	_ForceNativeFragmentPrograms = nativeOnly;
 }
 
 // ***************************************************************************
-void CDriverGL::initFragmentShaders()
+void CDriverGL3::initFragmentShaders()
 {
-	H_AUTO_OGL(CDriverGL_initFragmentShaders);
+	H_AUTO_OGL(CDriverGL3_initFragmentShaders);
 
 #ifndef USE_OPENGLES
 	///////////////////
@@ -2107,9 +2107,9 @@ void CDriverGL::initFragmentShaders()
 }
 
 // ***************************************************************************
-void CDriverGL::deleteARBFragmentPrograms()
+void CDriverGL3::deleteARBFragmentPrograms()
 {
-	H_AUTO_OGL(CDriverGL_deleteARBFragmentPrograms);
+	H_AUTO_OGL(CDriverGL3_deleteARBFragmentPrograms);
 
 #ifndef USE_OPENGLES
 	for(uint k = 0; k < 4; ++k)
@@ -2125,9 +2125,9 @@ void CDriverGL::deleteARBFragmentPrograms()
 }
 
 // ***************************************************************************
-void CDriverGL::deleteFragmentShaders()
+void CDriverGL3::deleteFragmentShaders()
 {
-	H_AUTO_OGL(CDriverGL_deleteFragmentShaders)
+	H_AUTO_OGL(CDriverGL3_deleteFragmentShaders)
 
 #ifndef USE_OPENGLES
 	deleteARBFragmentPrograms();
@@ -2151,23 +2151,23 @@ void CDriverGL::deleteFragmentShaders()
 }
 
 // ***************************************************************************
-void CDriverGL::finish()
+void CDriverGL3::finish()
 {
-	H_AUTO_OGL(CDriverGL_finish)
+	H_AUTO_OGL(CDriverGL3_finish)
 	glFinish();
 }
 
 // ***************************************************************************
-void CDriverGL::flush()
+void CDriverGL3::flush()
 {
-	H_AUTO_OGL(CDriverGL_flush)
+	H_AUTO_OGL(CDriverGL3_flush)
 	glFlush();
 }
 
 // ***************************************************************************
-void	CDriverGL::setSwapVBLInterval(uint interval)
+void	CDriverGL3::setSwapVBLInterval(uint interval)
 {
-	H_AUTO_OGL(CDriverGL_setSwapVBLInterval)
+	H_AUTO_OGL(CDriverGL3_setSwapVBLInterval)
 
 	if (!_Initialized)
 		return;
@@ -2208,9 +2208,9 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 }
 
 // ***************************************************************************
-uint	CDriverGL::getSwapVBLInterval()
+uint	CDriverGL3::getSwapVBLInterval()
 {
-	H_AUTO_OGL(CDriverGL_getSwapVBLInterval)
+	H_AUTO_OGL(CDriverGL3_getSwapVBLInterval)
 
 #ifdef USE_OPENGLES
 #elif defined(NL_OS_WINDOWS)
@@ -2238,9 +2238,9 @@ uint	CDriverGL::getSwapVBLInterval()
 }
 
 // ***************************************************************************
-void	CDriverGL::enablePolygonSmoothing(bool smooth)
+void	CDriverGL3::enablePolygonSmoothing(bool smooth)
 {
-	H_AUTO_OGL(CDriverGL_enablePolygonSmoothing);
+	H_AUTO_OGL(CDriverGL3_enablePolygonSmoothing);
 
 #ifndef USE_OPENGLES
 	if(smooth)
@@ -2253,15 +2253,15 @@ void	CDriverGL::enablePolygonSmoothing(bool smooth)
 }
 
 // ***************************************************************************
-bool	CDriverGL::isPolygonSmoothingEnabled() const
+bool	CDriverGL3::isPolygonSmoothingEnabled() const
 {
-	H_AUTO_OGL(CDriverGL_isPolygonSmoothingEnabled)
+	H_AUTO_OGL(CDriverGL3_isPolygonSmoothingEnabled)
 
 	return _PolygonSmooth;
 }
 
 // ***************************************************************************
-void	CDriverGL::startProfileVBHardLock()
+void	CDriverGL3::startProfileVBHardLock()
 {
 	if(_VBHardProfiling)
 		return;
@@ -2275,7 +2275,7 @@ void	CDriverGL::startProfileVBHardLock()
 }
 
 // ***************************************************************************
-void	CDriverGL::endProfileVBHardLock(vector<std::string> &result)
+void	CDriverGL3::endProfileVBHardLock(vector<std::string> &result)
 {
 	if(!_VBHardProfiling)
 		return;
@@ -2313,7 +2313,7 @@ void	CDriverGL::endProfileVBHardLock(vector<std::string> &result)
 }
 
 // ***************************************************************************
-void	CDriverGL::appendVBHardLockProfile(NLMISC::TTicks time, CVertexBuffer *vb)
+void	CDriverGL3::appendVBHardLockProfile(NLMISC::TTicks time, CVertexBuffer *vb)
 {
 	// must allocate a new place?
 	if(_CurVBHardLockCount>=_VBHardProfiles.size())
@@ -2338,25 +2338,25 @@ void	CDriverGL::appendVBHardLockProfile(NLMISC::TTicks time, CVertexBuffer *vb)
 }
 
 // ***************************************************************************
-void CDriverGL::startProfileIBLock()
+void CDriverGL3::startProfileIBLock()
 {
 	// not implemented
 }
 
 // ***************************************************************************
-void CDriverGL::endProfileIBLock(std::vector<std::string> &/* result */)
+void CDriverGL3::endProfileIBLock(std::vector<std::string> &/* result */)
 {
 	// not implemented
 }
 
 // ***************************************************************************
-void CDriverGL::profileIBAllocation(std::vector<std::string> &/* result */)
+void CDriverGL3::profileIBAllocation(std::vector<std::string> &/* result */)
 {
 	// not implemented
 }
 
 // ***************************************************************************
-void	CDriverGL::profileVBHardAllocation(std::vector<std::string> &result)
+void	CDriverGL3::profileVBHardAllocation(std::vector<std::string> &result)
 {
 	result.clear();
 	result.reserve(1000);
@@ -2392,9 +2392,9 @@ void	CDriverGL::profileVBHardAllocation(std::vector<std::string> &result)
 }
 
 // ***************************************************************************
-bool CDriverGL::supportCloudRenderSinglePass() const
+bool CDriverGL3::supportCloudRenderSinglePass() const
 {
-	H_AUTO_OGL(CDriverGL_supportCloudRenderSinglePass)
+	H_AUTO_OGL(CDriverGL3_supportCloudRenderSinglePass)
 
 	 //return _Extensions.NVTextureEnvCombine4 || (_Extensions.ATIXTextureEnvRoute && _Extensions.EXTTextureEnvCombine);
 	// there are slowdown for now with ati fragment shader... don't know why
@@ -2402,9 +2402,9 @@ bool CDriverGL::supportCloudRenderSinglePass() const
 }
 
 // ***************************************************************************
-void CDriverGL::retrieveATIDriverVersion()
+void CDriverGL3::retrieveATIDriverVersion()
 {
-	H_AUTO_OGL(CDriverGL_retrieveATIDriverVersion)
+	H_AUTO_OGL(CDriverGL3_retrieveATIDriverVersion)
 	_ATIDriverVersion = 0;
 	// we may need this driver version to fix flaws of previous ati drivers version (fog issue with V.P)
 #ifdef NL_OS_WINDOWS
@@ -2510,25 +2510,25 @@ void CDriverGL::retrieveATIDriverVersion()
 }
 
 // ***************************************************************************
-bool CDriverGL::supportMADOperator() const
+bool CDriverGL3::supportMADOperator() const
 {
-	H_AUTO_OGL(CDriverGL_supportMADOperator)
+	H_AUTO_OGL(CDriverGL3_supportMADOperator)
 
 	return _Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3;
 }
 
 // ***************************************************************************
-uint CDriverGL::getNumAdapter() const
+uint CDriverGL3::getNumAdapter() const
 {
-	H_AUTO_OGL(CDriverGL_getNumAdapter)
+	H_AUTO_OGL(CDriverGL3_getNumAdapter)
 
 	return 1;
 }
 
 // ***************************************************************************
-bool CDriverGL::getAdapter(uint adapter, CAdapter &desc) const
+bool CDriverGL3::getAdapter(uint adapter, CAdapter &desc) const
 {
-	H_AUTO_OGL(CDriverGL_getAdapter)
+	H_AUTO_OGL(CDriverGL3_getAdapter)
 
 	if (adapter == 0)
 	{
@@ -2548,43 +2548,43 @@ bool CDriverGL::getAdapter(uint adapter, CAdapter &desc) const
 }
 
 // ***************************************************************************
-bool CDriverGL::setAdapter(uint adapter)
+bool CDriverGL3::setAdapter(uint adapter)
 {
-	H_AUTO_OGL(CDriverGL_setAdapter)
+	H_AUTO_OGL(CDriverGL3_setAdapter)
 
 	return adapter == 0;
 }
 
 // ***************************************************************************
-CVertexBuffer::TVertexColorType CDriverGL::getVertexColorFormat() const
+CVertexBuffer::TVertexColorType CDriverGL3::getVertexColorFormat() const
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 
 	return CVertexBuffer::TRGBA;
 }
 
 // ***************************************************************************
-bool CDriverGL::activeShader(CShader * /* shd */)
+bool CDriverGL3::activeShader(CShader * /* shd */)
 {
-	H_AUTO_OGL(CDriverGL_activeShader)
+	H_AUTO_OGL(CDriverGL3_activeShader)
 
 	return false;
 }
 
 // ***************************************************************************
-void CDriverGL::startBench (bool wantStandardDeviation, bool quick, bool reset)
+void CDriverGL3::startBench (bool wantStandardDeviation, bool quick, bool reset)
 {
 	CHTimer::startBench (wantStandardDeviation, quick, reset);
 }
 
 // ***************************************************************************
-void CDriverGL::endBench ()
+void CDriverGL3::endBench ()
 {
 	CHTimer::endBench ();
 }
 
 // ***************************************************************************
-void CDriverGL::displayBench (class NLMISC::CLog *log)
+void CDriverGL3::displayBench (class NLMISC::CLog *log)
 {
 	// diplay
 	CHTimer::displayHierarchicalByExecutionPathSorted(log, CHTimer::TotalTime, true, 48, 2);
@@ -2595,18 +2595,18 @@ void CDriverGL::displayBench (class NLMISC::CLog *log)
 }
 
 #ifdef NL_DEBUG
-void CDriverGL::dumpMappedBuffers()
+void CDriverGL3::dumpMappedBuffers()
 {
 	_AGPVertexArrayRange->dumpMappedBuffers();
 }
 #endif
 
 // ***************************************************************************
-void CDriverGL::checkTextureOn() const
+void CDriverGL3::checkTextureOn() const
 {
-	H_AUTO_OGL(CDriverGL_checkTextureOn)
+	H_AUTO_OGL(CDriverGL3_checkTextureOn)
 	// tmp for debug
-	CDriverGLStates &dgs = const_cast<CDriverGLStates &>(_DriverGLStates);
+	CDriverGLStates3 &dgs = const_cast<CDriverGLStates3 &>(_DriverGLStates);
 	uint currTexStage = dgs.getActiveTextureARB();
 	for(uint k = 0; k < this->getNbTextureStages(); ++k)
 	{
@@ -2623,19 +2623,19 @@ void CDriverGL::checkTextureOn() const
 #endif
 		switch(dgs.getTextureMode())
 		{
-			case CDriverGLStates::TextureDisabled:
+			case CDriverGLStates3::TextureDisabled:
 				nlassert(!flag2D);
 				nlassert(!flagCM);
 			break;
-			case CDriverGLStates::Texture2D:
+			case CDriverGLStates3::Texture2D:
 				nlassert(flag2D);
 				nlassert(!flagCM);
 			break;
-			case CDriverGLStates::TextureRect:
+			case CDriverGLStates3::TextureRect:
 				nlassert(flagTR);
 				nlassert(!flagCM);
 			break;
-			case CDriverGLStates::TextureCubeMap:
+			case CDriverGLStates3::TextureCubeMap:
 				nlassert(!flag2D);
 				nlassert(flagCM);
 			break;
@@ -2647,47 +2647,47 @@ void CDriverGL::checkTextureOn() const
 }
 
 // ***************************************************************************
-bool CDriverGL::supportOcclusionQuery() const
+bool CDriverGL3::supportOcclusionQuery() const
 {
-	H_AUTO_OGL(CDriverGL_supportOcclusionQuery)
+	H_AUTO_OGL(CDriverGL3_supportOcclusionQuery)
 	return _Extensions.NVOcclusionQuery;
 }
 
 // ***************************************************************************
-bool CDriverGL::supportTextureRectangle() const
+bool CDriverGL3::supportTextureRectangle() const
 {
-	H_AUTO_OGL(CDriverGL_supportTextureRectangle);
+	H_AUTO_OGL(CDriverGL3_supportTextureRectangle);
 
 	return (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle);
 }
 
 // ***************************************************************************
-bool CDriverGL::supportPackedDepthStencil() const
+bool CDriverGL3::supportPackedDepthStencil() const
 {
-	H_AUTO_OGL(CDriverGL_supportPackedDepthStencil);
+	H_AUTO_OGL(CDriverGL3_supportPackedDepthStencil);
 
 	return _Extensions.PackedDepthStencil;
 }
 
 // ***************************************************************************
-bool CDriverGL::supportFrameBufferObject() const
+bool CDriverGL3::supportFrameBufferObject() const
 {
-	H_AUTO_OGL(CDriverGL_supportFrameBufferObject);
+	H_AUTO_OGL(CDriverGL3_supportFrameBufferObject);
 
 	return _Extensions.FrameBufferObject;
 }
 
 // ***************************************************************************
-IOcclusionQuery *CDriverGL::createOcclusionQuery()
+IOcclusionQuery *CDriverGL3::createOcclusionQuery()
 {
-	H_AUTO_OGL(CDriverGL_createOcclusionQuery)
+	H_AUTO_OGL(CDriverGL3_createOcclusionQuery)
 	nlassert(_Extensions.NVOcclusionQuery);
 
 #ifndef USE_OPENGLES
 	GLuint id;
 	nglGenOcclusionQueriesNV(1, &id);
 	if (id == 0) return NULL;
-	COcclusionQueryGL *oqgl = new COcclusionQueryGL;
+	COcclusionQueryGL3 *oqgl = new COcclusionQueryGL3;
 	oqgl->Driver = this;
 	oqgl->ID = id;
 	oqgl->OcclusionType = IOcclusionQuery::NotAvailable;
@@ -2701,14 +2701,14 @@ IOcclusionQuery *CDriverGL::createOcclusionQuery()
 }
 
 // ***************************************************************************
-void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
+void CDriverGL3::deleteOcclusionQuery(IOcclusionQuery *oq)
 {
-	H_AUTO_OGL(CDriverGL_deleteOcclusionQuery);
+	H_AUTO_OGL(CDriverGL3_deleteOcclusionQuery);
 
 #ifndef USE_OPENGLES
 	if (!oq) return;
-	COcclusionQueryGL *oqgl = NLMISC::safe_cast<COcclusionQueryGL *>(oq);
-	nlassert((CDriverGL *) oqgl->Driver == this); // should come from the same driver
+	COcclusionQueryGL3 *oqgl = NLMISC::safe_cast<COcclusionQueryGL3 *>(oq);
+	nlassert((CDriverGL3 *) oqgl->Driver == this); // should come from the same driver
 	oqgl->Driver = NULL;
 	nlassert(oqgl->ID != 0);
 	GLuint id = oqgl->ID;
@@ -2723,9 +2723,9 @@ void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
 }
 
 // ***************************************************************************
-void COcclusionQueryGL::begin()
+void COcclusionQueryGL3::begin()
 {
-	H_AUTO_OGL(COcclusionQueryGL_begin);
+	H_AUTO_OGL(COcclusionQueryGL3_begin);
 
 #ifndef USE_OPENGLES
 	nlassert(Driver);
@@ -2739,9 +2739,9 @@ void COcclusionQueryGL::begin()
 }
 
 // ***************************************************************************
-void COcclusionQueryGL::end()
+void COcclusionQueryGL3::end()
 {
-	H_AUTO_OGL(COcclusionQueryGL_end);
+	H_AUTO_OGL(COcclusionQueryGL3_end);
 
 #ifndef USE_OPENGLES
 	nlassert(Driver);
@@ -2753,9 +2753,9 @@ void COcclusionQueryGL::end()
 }
 
 // ***************************************************************************
-IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
+IOcclusionQuery::TOcclusionType COcclusionQueryGL3::getOcclusionType()
 {
-	H_AUTO_OGL(COcclusionQueryGL_getOcclusionType);
+	H_AUTO_OGL(COcclusionQueryGL3_getOcclusionType);
 
 #ifndef USE_OPENGLES
 	nlassert(Driver);
@@ -2779,9 +2779,9 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
 }
 
 // ***************************************************************************
-uint COcclusionQueryGL::getVisibleCount()
+uint COcclusionQueryGL3::getVisibleCount()
 {
-	H_AUTO_OGL(COcclusionQueryGL_getVisibleCount)
+	H_AUTO_OGL(COcclusionQueryGL3_getVisibleCount)
 	nlassert(Driver);
 	nlassert(ID);
 	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
@@ -2790,51 +2790,51 @@ uint COcclusionQueryGL::getVisibleCount()
 }
 
 // ***************************************************************************
-void CDriverGL::setDepthRange(float znear, float zfar)
+void CDriverGL3::setDepthRange(float znear, float zfar)
 {
-	H_AUTO_OGL(CDriverGL_setDepthRange)
+	H_AUTO_OGL(CDriverGL3_setDepthRange)
 	_DriverGLStates.setDepthRange(znear, zfar);
 }
 
 // ***************************************************************************
-void CDriverGL::getDepthRange(float &znear, float &zfar) const
+void CDriverGL3::getDepthRange(float &znear, float &zfar) const
 {
-	H_AUTO_OGL(CDriverGL_getDepthRange)
+	H_AUTO_OGL(CDriverGL3_getDepthRange)
 	_DriverGLStates.getDepthRange(znear, zfar);
 }
 
 // ***************************************************************************
-void CDriverGL::setCullMode(TCullMode cullMode)
+void CDriverGL3::setCullMode(TCullMode cullMode)
 {
-	H_AUTO_OGL(CDriverGL_setCullMode)
-	_DriverGLStates.setCullMode((CDriverGLStates::TCullMode) cullMode);
+	H_AUTO_OGL(CDriverGL3_setCullMode)
+	_DriverGLStates.setCullMode((CDriverGLStates3::TCullMode) cullMode);
 }
 
 // ***************************************************************************
-CDriverGL::TCullMode CDriverGL::getCullMode() const
+CDriverGL3::TCullMode CDriverGL3::getCullMode() const
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
-	return (CDriverGL::TCullMode) _DriverGLStates.getCullMode();
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
+	return (CDriverGL3::TCullMode) _DriverGLStates.getCullMode();
 }
 
 // ***************************************************************************
-void CDriverGL::enableStencilTest(bool enable)
+void CDriverGL3::enableStencilTest(bool enable)
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 	_DriverGLStates.enableStencilTest(enable);
 }
 
 // ***************************************************************************
-bool CDriverGL::isStencilTestEnabled() const
+bool CDriverGL3::isStencilTestEnabled() const
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 	return _DriverGLStates.isStencilTestEnabled();
 }
 
 // ***************************************************************************
-void CDriverGL::stencilFunc(TStencilFunc stencilFunc, int ref, uint mask)
+void CDriverGL3::stencilFunc(TStencilFunc stencilFunc, int ref, uint mask)
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 
 	GLenum glstencilFunc = 0;
 
@@ -2855,9 +2855,9 @@ void CDriverGL::stencilFunc(TStencilFunc stencilFunc, int ref, uint mask)
 }
 
 // ***************************************************************************
-void CDriverGL::stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass)
+void CDriverGL3::stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass)
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 
 	GLenum glFail = 0, glZFail = 0, glZPass = 0;
 
@@ -2898,27 +2898,27 @@ void CDriverGL::stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass)
 }
 
 // ***************************************************************************
-void CDriverGL::stencilMask(uint mask)
+void CDriverGL3::stencilMask(uint mask)
 {
-	H_AUTO_OGL(CDriverGL_CDriverGL)
+	H_AUTO_OGL(CDriverGL3_CDriverGL)
 
 	_DriverGLStates.stencilMask((GLuint)mask);
 }
 
 // ***************************************************************************
-void CDriverGL::getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const
+void CDriverGL3::getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const
 {
 	lightedMaterial = inlGetNumTextStages();
 	unlightedMaterial = inlGetNumTextStages();
 }
 
 // ***************************************************************************
-void CDriverGL::beginDialogMode()
+void CDriverGL3::beginDialogMode()
 {
 }
 
 // ***************************************************************************
-void CDriverGL::endDialogMode()
+void CDriverGL3::endDialogMode()
 {
 }
 

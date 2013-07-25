@@ -41,12 +41,12 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
 // *************************************************************************************
-CDriverGL::CCursor::CCursor() : ColorDepth(CDriverGL::ColorDepth32),
+CDriverGL3::CCursor::CCursor() : ColorDepth(CDriverGL3::ColorDepth32),
 								OrigHeight(32),
 								HotspotScale(1.f),
 								HotspotOffsetX(0),
@@ -63,13 +63,13 @@ CDriverGL::CCursor::CCursor() : ColorDepth(CDriverGL::ColorDepth32),
 }
 
 // *************************************************************************************
-CDriverGL::CCursor::~CCursor()
+CDriverGL3::CCursor::~CCursor()
 {
 	reset();
 }
 
 // *************************************************************************************
-void CDriverGL::CCursor::reset()
+void CDriverGL3::CCursor::reset()
 {
 	if (Cursor != EmptyCursor)
 	{
@@ -84,7 +84,7 @@ void CDriverGL::CCursor::reset()
 }
 
 // *************************************************************************************
-CDriverGL::CCursor& CDriverGL::CCursor::operator= (const CDriverGL::CCursor& from)
+CDriverGL3::CCursor& CDriverGL3::CCursor::operator= (const CDriverGL3::CCursor& from)
 {
 	if (&from == this)
 		return *this;
@@ -105,7 +105,7 @@ CDriverGL::CCursor& CDriverGL::CCursor::operator= (const CDriverGL::CCursor& fro
 }
 
 // *************************************************************************************
-bool CDriverGL::isAlphaBlendedCursorSupported()
+bool CDriverGL3::isAlphaBlendedCursorSupported()
 {
 	if (!_AlphaBlendedCursorSupportRetrieved)
 	{
@@ -143,7 +143,7 @@ bool CDriverGL::isAlphaBlendedCursorSupported()
 }
 
 // *************************************************************************************
-void CDriverGL::addCursor(const std::string &name, const NLMISC::CBitmap &cursorBitmap)
+void CDriverGL3::addCursor(const std::string &name, const NLMISC::CBitmap &cursorBitmap)
 {
 	if (!isAlphaBlendedCursorSupported()) return;
 
@@ -269,7 +269,7 @@ void CDriverGL::addCursor(const std::string &name, const NLMISC::CBitmap &cursor
 }
 
 // *************************************************************************************
-void CDriverGL::createCursors()
+void CDriverGL3::createCursors()
 {
 #ifdef NL_OS_WINDOWS
 	_DefaultCursor = LoadCursor(NULL, IDC_ARROW);
@@ -293,7 +293,7 @@ void CDriverGL::createCursors()
 }
 
 // *************************************************************************************
-void CDriverGL::releaseCursors()
+void CDriverGL3::releaseCursors()
 {
 #ifdef NL_OS_WINDOWS
 	SetClassLongPtr(_win, GCLP_HCURSOR, 0);
@@ -307,13 +307,13 @@ void CDriverGL::releaseCursors()
 }
 
 // *************************************************************************************
-void CDriverGL::updateCursor(bool forceRebuild)
+void CDriverGL3::updateCursor(bool forceRebuild)
 {
 	setCursor(_CurrName, _CurrCol, _CurrRot, _CurrHotSpotX, _CurrHotSpotY, forceRebuild);
 }
 
 // *************************************************************************************
-void CDriverGL::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
+void CDriverGL3::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY, bool forceRebuild)
 {
 	// don't update cursor if it's hidden or if custom cursors are not suppported
 	if (!isAlphaBlendedCursorSupported() || _CurrName == "none") return;
@@ -386,13 +386,13 @@ void CDriverGL::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot,
 }
 
 // *************************************************************************************
-void CDriverGL::setCursorScale(float scale)
+void CDriverGL3::setCursorScale(float scale)
 {
 	_CursorScale = scale;
 }
 
 // *************************************************************************************
-nlCursor CDriverGL::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
+nlCursor CDriverGL3::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot, sint hotSpotX, sint hotSpotY)
 {
 	nlassert(isAlphaBlendedCursorSupported());
 
@@ -417,9 +417,9 @@ nlCursor CDriverGL::buildCursor(const CBitmap &src, NLMISC::CRGBA col, uint8 rot
 
 
 // *************************************************************************************
-void CDriverGL::setSystemArrow()
+void CDriverGL3::setSystemArrow()
 {
-	H_AUTO_OGL(CDriverGL_setSystemArrow);
+	H_AUTO_OGL(CDriverGL3_setSystemArrow);
 
 #ifdef NL_OS_WINDOWS
 	if (isSystemCursorInClientArea() || isSystemCursorCaptured())
@@ -436,9 +436,9 @@ void CDriverGL::setSystemArrow()
 }
 
 // ***************************************************************************
-void CDriverGL::showCursor(bool b)
+void CDriverGL3::showCursor(bool b)
 {
-	H_AUTO_OGL(CDriverGL_showCursor);
+	H_AUTO_OGL(CDriverGL3_showCursor);
 
 	if (_win == EmptyWindow)
 		return;
@@ -503,9 +503,9 @@ void CDriverGL::showCursor(bool b)
 }
 
 // ***************************************************************************
-void CDriverGL::setMousePos(float x, float y)
+void CDriverGL3::setMousePos(float x, float y)
 {
-	H_AUTO_OGL(CDriverGL_setMousePos)
+	H_AUTO_OGL(CDriverGL3_setMousePos)
 
 	if (_win == EmptyWindow)
 		return;
@@ -557,9 +557,9 @@ void CDriverGL::setMousePos(float x, float y)
 }
 
 // ***************************************************************************
-void CDriverGL::setCapture (bool b)
+void CDriverGL3::setCapture (bool b)
 {
-	H_AUTO_OGL(CDriverGL_setCapture);
+	H_AUTO_OGL(CDriverGL3_setCapture);
 
 #ifdef NL_OS_WINDOWS
 
@@ -603,7 +603,7 @@ void CDriverGL::setCapture (bool b)
 }
 
 // ***************************************************************************
-bool CDriverGL::isSystemCursorInClientArea()
+bool CDriverGL3::isSystemCursorInClientArea()
 {
 	if (!_CurrentMode.Windowed)
 	{
@@ -655,9 +655,9 @@ bool CDriverGL::isSystemCursorInClientArea()
 }
 
 // ***************************************************************************
-bool CDriverGL::isSystemCursorCaptured()
+bool CDriverGL3::isSystemCursorCaptured()
 {
-	H_AUTO_OGL(CDriverGL_isSystemCursorCaptured);
+	H_AUTO_OGL(CDriverGL3_isSystemCursorCaptured);
 
 #ifdef NL_OS_WINDOWS
 	return GetCapture() == _win;
@@ -667,9 +667,9 @@ bool CDriverGL::isSystemCursorCaptured()
 }
 
 // ***************************************************************************
-NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive)
+NLMISC::IMouseDevice* CDriverGL3::enableLowLevelMouse(bool enable, bool exclusive)
 {
-	H_AUTO_OGL(CDriverGL_enableLowLevelMouse);
+	H_AUTO_OGL(CDriverGL3_enableLowLevelMouse);
 
 	NLMISC::IMouseDevice *res = NULL;
 
@@ -705,9 +705,9 @@ NLMISC::IMouseDevice* CDriverGL::enableLowLevelMouse(bool enable, bool exclusive
 }
 
 // ***************************************************************************
-NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
+NLMISC::IKeyboardDevice* CDriverGL3::enableLowLevelKeyboard(bool enable)
 {
-	H_AUTO_OGL(CDriverGL_enableLowLevelKeyboard);
+	H_AUTO_OGL(CDriverGL3_enableLowLevelKeyboard);
 
 	NLMISC::IKeyboardDevice *res = NULL;
 
@@ -743,9 +743,9 @@ NLMISC::IKeyboardDevice* CDriverGL::enableLowLevelKeyboard(bool enable)
 }
 
 // ***************************************************************************
-NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
+NLMISC::IInputDeviceManager* CDriverGL3::getLowLevelInputDeviceManager()
 {
-	H_AUTO_OGL(CDriverGL_getLowLevelInputDeviceManager);
+	H_AUTO_OGL(CDriverGL3_getLowLevelInputDeviceManager);
 
 	NLMISC::IInputDeviceManager *res = NULL;
 
@@ -762,9 +762,9 @@ NLMISC::IInputDeviceManager* CDriverGL::getLowLevelInputDeviceManager()
 }
 
 // ***************************************************************************
-uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
+uint CDriverGL3::getDoubleClickDelay(bool hardwareMouse)
 {
-	H_AUTO_OGL(CDriverGL_getDoubleClickDelay);
+	H_AUTO_OGL(CDriverGL3_getDoubleClickDelay);
 
 	uint res = 250;
 
@@ -811,7 +811,7 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 	return res;
 }
 
-bool CDriverGL::getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth, uint &dstHeight)
+bool CDriverGL3::getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth, uint &dstHeight)
 {
 #ifdef NL_OS_WINDOWS
 
@@ -834,7 +834,7 @@ bool CDriverGL::getBestCursorSize(uint srcWidth, uint srcHeight, uint &dstWidth,
 	return true;
 }
 
-bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
+bool CDriverGL3::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &cursor, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY)
 {
 #if defined(NL_OS_WINDOWS)
 

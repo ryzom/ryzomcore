@@ -52,13 +52,13 @@ namespace NL3D {
 #ifdef USE_OPENGLES
 namespace NLDRIVERGLES {
 #else
-namespace NLDRIVERGL {
+namespace NLDRIVERGL3 {
 #endif
 #endif
 
 #ifdef NL_OS_WINDOWS
 
-bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_OGL(GlWndProc)
 
@@ -116,7 +116,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	H_AUTO_OGL(DriverGL_WndProc);
 
 	// Get the driver pointer..
-	CDriverGL *pDriver=(CDriverGL*)GetWindowLongPtr (hWnd, GWLP_USERDATA);
+	CDriverGL3 *pDriver=(CDriverGL3*)GetWindowLongPtr (hWnd, GWLP_USERDATA);
 	bool trapMessage = false;
 	if (pDriver != NULL)
 	{
@@ -174,7 +174,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 #elif defined (NL_OS_MAC)
 
-bool GlWndProc(CDriverGL *driver, const void* e)
+bool GlWndProc(CDriverGL3 *driver, const void* e)
 {
 	H_AUTO_OGL(GlWndProc)
 
@@ -204,7 +204,7 @@ sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 	return 1;
 }
 
-bool GlWndProc(CDriverGL *driver, XEvent &e)
+bool GlWndProc(CDriverGL3 *driver, XEvent &e)
 {
 	H_AUTO_OGL(GlWndProc)
 
@@ -296,9 +296,9 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 #endif // NL_OS_UNIX
 
 // ***************************************************************************
-bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
+bool CDriverGL3::init (uint windowIcon, emptyProc exitFunc)
 {
-	H_AUTO_OGL(CDriverGL_init)
+	H_AUTO_OGL(CDriverGL3_init)
 
 	ExitFunc = exitFunc;
 
@@ -338,7 +338,7 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	}
 	else
 	{
-		nlwarning ("(CDriverGL::init): can't create DC");
+		nlwarning ("(CDriverGL3::init): can't create DC");
 	}
 
 	// ati specific : try to retrieve driver version
@@ -437,9 +437,9 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 }
 
 // ***************************************************************************
-bool CDriverGL::unInit()
+bool CDriverGL3::unInit()
 {
-	H_AUTO_OGL(CDriverGL_unInit)
+	H_AUTO_OGL(CDriverGL3_unInit)
 
 	if (!_CurrentMode.Windowed)
 	{
@@ -473,14 +473,14 @@ bool CDriverGL::unInit()
 		if (dc)
 		{
 			if (!SetDeviceGammaRamp (dc, _GammaRampBackuped))
-				nlwarning ("(CDriverGL::release): SetDeviceGammaRamp failed");
+				nlwarning ("(CDriverGL3::release): SetDeviceGammaRamp failed");
 
 			// Release the DC
 			ReleaseDC (NULL, dc);
 		}
 		else
 		{
-			nlwarning ("(CDriverGL::release): can't create DC");
+			nlwarning ("(CDriverGL3::release): can't create DC");
 		}
 	}
 
@@ -501,7 +501,7 @@ bool CDriverGL::unInit()
 	return true;
 }
 
-void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
+void CDriverGL3::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 {
 	if (_win == EmptyWindow)
 		return;
@@ -600,9 +600,9 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 }
 
 // --------------------------------------------------
-bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable) throw(EBadDisplay)
+bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool resizeable) throw(EBadDisplay)
 {
-	H_AUTO_OGL(CDriverGL_setDisplay)
+	H_AUTO_OGL(CDriverGL3_setDisplay)
 
 	_win = EmptyWindow;
 
@@ -665,13 +665,13 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		int pf=ChoosePixelFormat(tempHDC,&_pfd);
 		if (!pf)
 		{
-			nlwarning ("CDriverGL::setDisplay: ChoosePixelFormat failed");
+			nlwarning ("CDriverGL3::setDisplay: ChoosePixelFormat failed");
 			DestroyWindow (tmpHWND);
 			return false;
 		}
 		if ( !SetPixelFormat(tempHDC,pf,&_pfd) )
 		{
-			nlwarning ("CDriverGL::setDisplay: SetPixelFormat failed");
+			nlwarning ("CDriverGL3::setDisplay: SetPixelFormat failed");
 			DestroyWindow (tmpHWND);
 			return false;
 		}
@@ -681,7 +681,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (tempGLRC == NULL)
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglCreateContext failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglCreateContext failed: 0x%x", error);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
 			_win = EmptyWindow;
@@ -694,7 +694,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (!wglMakeCurrent(tempHDC,tempGLRC))
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglMakeCurrent failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglMakeCurrent failed: 0x%x", error);
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
@@ -716,7 +716,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (hdc == NULL)
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglGetCurrentDC failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglGetCurrentDC failed: 0x%x", error);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
 			_win = EmptyWindow;
@@ -786,7 +786,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (_PBuffer == NULL)
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglCreatePbufferARB failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglCreatePbufferARB failed: 0x%x", error);
 			wglDeleteContext (tempGLRC);
 
 			DestroyWindow (tmpHWND);
@@ -801,7 +801,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if ( !nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width ) )
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglQueryPbufferARB failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglQueryPbufferARB failed: 0x%x", error);
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
@@ -814,7 +814,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if ( !nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height ) )
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglQueryPbufferARB failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglQueryPbufferARB failed: 0x%x", error);
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
@@ -833,7 +833,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (_hDC == NULL)
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglGetPbufferDCARB failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglGetPbufferDCARB failed: 0x%x", error);
 			nwglDestroyPbufferARB( _PBuffer );
 
 			wglDeleteContext (tempGLRC);
@@ -852,7 +852,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (_hRC == NULL)
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglCreateContext failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglCreateContext failed: 0x%x", error);
 			nwglReleasePbufferDCARB( _PBuffer, _hDC );
 			nwglDestroyPbufferARB( _PBuffer );
 			wglDeleteContext (tempGLRC);
@@ -872,19 +872,19 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (!eglDestroyContext(_EglDisplay, _EglContext);)
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglDeleteContext failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglDeleteContext failed: 0x%x", error);
 		}
 #else
 		if (!wglDeleteContext (tempGLRC))
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglDeleteContext failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglDeleteContext failed: 0x%x", error);
 		}
 #endif
 
 		// Destroy the temp windows
 		if (!DestroyWindow (tmpHWND))
-			nlwarning ("CDriverGL::setDisplay: DestroyWindow failed");
+			nlwarning ("CDriverGL3::setDisplay: DestroyWindow failed");
 
 		/* After a pbuffer has been successfully created you can use it for off-screen rendering. To do
 			so, you'll first need to bind the pbuffer, or more precisely, make its GL rendering context
@@ -892,7 +892,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		if (!wglMakeCurrent(_hDC,_hRC))
 		{
 			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL::setDisplay: wglMakeCurrent failed: 0x%x", error);
+			nlwarning ("CDriverGL3::setDisplay: wglMakeCurrent failed: 0x%x", error);
 
 #ifdef USE_OPENGLES
 			eglDestroyContext(_EglDisplay, _EglContext);
@@ -1135,9 +1135,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 }
 
 // --------------------------------------------------
-bool CDriverGL::saveScreenMode()
+bool CDriverGL3::saveScreenMode()
 {
-	H_AUTO_OGL(CDriverGL_saveScreenMode)
+	H_AUTO_OGL(CDriverGL3_saveScreenMode)
 
 	bool res = true;
 
@@ -1195,9 +1195,9 @@ bool CDriverGL::saveScreenMode()
 }
 
 // --------------------------------------------------
-bool CDriverGL::restoreScreenMode()
+bool CDriverGL3::restoreScreenMode()
 {
-	H_AUTO_OGL(CDriverGL_restoreScreenMode)
+	H_AUTO_OGL(CDriverGL3_restoreScreenMode)
 
 	bool res = false;
 
@@ -1287,9 +1287,9 @@ static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
 
 // ***************************************************************************
 
-bool CDriverGL::setScreenMode(const GfxMode &mode)
+bool CDriverGL3::setScreenMode(const GfxMode &mode)
 {
-	H_AUTO_OGL(CDriverGL_setScreenMode)
+	H_AUTO_OGL(CDriverGL3_setScreenMode)
 
 	if (mode.Windowed)
 	{
@@ -1443,9 +1443,9 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 }
 
 // ***************************************************************************
-bool CDriverGL::createWindow(const GfxMode &mode)
+bool CDriverGL3::createWindow(const GfxMode &mode)
 {
-	H_AUTO_OGL(CDriverGL_createWindow)
+	H_AUTO_OGL(CDriverGL3_createWindow)
 
 	nlWindow window = EmptyWindow;
 
@@ -1597,9 +1597,9 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 // ***************************************************************************
 
-bool CDriverGL::destroyWindow()
+bool CDriverGL3::destroyWindow()
 {
-	H_AUTO_OGL(CDriverGL_destroyWindow)
+	H_AUTO_OGL(CDriverGL3_destroyWindow)
 
 	releaseCursors();
 
@@ -1687,9 +1687,9 @@ bool CDriverGL::destroyWindow()
 
 // ***************************************************************************
 
-CDriverGL::EWindowStyle CDriverGL::getWindowStyle() const
+CDriverGL3::EWindowStyle CDriverGL3::getWindowStyle() const
 {
-	H_AUTO_OGL(CDriverGL_getWindowStyle)
+	H_AUTO_OGL(CDriverGL3_getWindowStyle)
 
 	if (!_CurrentMode.Windowed)
 		return EWSFullscreen;
@@ -1699,9 +1699,9 @@ CDriverGL::EWindowStyle CDriverGL::getWindowStyle() const
 
 // ***************************************************************************
 
-bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
+bool CDriverGL3::setWindowStyle(EWindowStyle windowStyle)
 {
-	H_AUTO_OGL(CDriverGL_setWindowStyle)
+	H_AUTO_OGL(CDriverGL3_setWindowStyle)
 
 	// don't change window style, if we did not create the window
 	if (_win == EmptyWindow || !_DestroyWindow)
@@ -1856,9 +1856,9 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 }
 
 // --------------------------------------------------
-bool CDriverGL::setMode(const GfxMode& mode)
+bool CDriverGL3::setMode(const GfxMode& mode)
 {
-	H_AUTO_OGL(CDriverGL_setMode);
+	H_AUTO_OGL(CDriverGL3_setMode);
 
 	// don't modify window or screen if managed by a 3rd party library
 	if (!_DestroyWindow)
@@ -1928,9 +1928,9 @@ long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
 #endif // defined(NL_OS_MAC)
 
 // --------------------------------------------------
-bool CDriverGL::getModes(std::vector<GfxMode> &modes)
+bool CDriverGL3::getModes(std::vector<GfxMode> &modes)
 {
-	H_AUTO_OGL(CDriverGL_getModes)
+	H_AUTO_OGL(CDriverGL3_getModes)
 
 #ifdef NL_OS_WINDOWS
 	sint modeIndex = 0;
@@ -2109,9 +2109,9 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 }
 
 // --------------------------------------------------
-bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
+bool CDriverGL3::getCurrentScreenMode(GfxMode &mode)
 {
-	H_AUTO_OGL(CDriverGL_getCurrentScreenMode)
+	H_AUTO_OGL(CDriverGL3_getCurrentScreenMode)
 
 #ifdef NL_OS_WINDOWS
 
@@ -2248,9 +2248,9 @@ bool CDriverGL::getCurrentScreenMode(GfxMode &mode)
 }
 
 // --------------------------------------------------
-void CDriverGL::setWindowTitle(const ucstring &title)
+void CDriverGL3::setWindowTitle(const ucstring &title)
 {
-	H_AUTO_OGL(CDriverGL_setWindowTitle)
+	H_AUTO_OGL(CDriverGL3_setWindowTitle)
 
 	if (_win == EmptyWindow)
 		return;
@@ -2286,9 +2286,9 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 }
 
 // ***************************************************************************
-void CDriverGL::setWindowPos(sint32 x, sint32 y)
+void CDriverGL3::setWindowPos(sint32 x, sint32 y)
 {
-	H_AUTO_OGL(CDriverGL_setWindowPos)
+	H_AUTO_OGL(CDriverGL3_setWindowPos)
 
 	_WindowX = x;
 	_WindowY = y;
@@ -2331,9 +2331,9 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 }
 
 // ***************************************************************************
-void CDriverGL::showWindow(bool show)
+void CDriverGL3::showWindow(bool show)
 {
-	H_AUTO_OGL(CDriverGL_showWindow)
+	H_AUTO_OGL(CDriverGL3_showWindow)
 
 	// don't change window visibility, if we didn't create the window
 	if (_win == EmptyWindow || !_DestroyWindow)
@@ -2367,15 +2367,15 @@ void CDriverGL::showWindow(bool show)
 }
 
 // --------------------------------------------------
-emptyProc CDriverGL::getWindowProc()
+emptyProc CDriverGL3::getWindowProc()
 {
-	H_AUTO_OGL(CDriverGL_getWindowProc)
+	H_AUTO_OGL(CDriverGL3_getWindowProc)
 
 	return (emptyProc)GlWndProc;
 }
 
 // --------------------------------------------------
-bool CDriverGL::createContext()
+bool CDriverGL3::createContext()
 {
 #ifdef USE_OPENGLES
 	uint samples = 0;
@@ -2519,9 +2519,9 @@ bool CDriverGL::createContext()
 }
 
 // --------------------------------------------------
-bool CDriverGL::activate()
+bool CDriverGL3::activate()
 {
-	H_AUTO_OGL(CDriverGL_activate);
+	H_AUTO_OGL(CDriverGL3_activate);
 
 	if (_win == EmptyWindow)
 		return false;
@@ -2564,9 +2564,9 @@ bool CDriverGL::activate()
 }
 
 // --------------------------------------------------
-IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const char* title, IDriver::TMessageBoxType type, TMessageBoxIcon icon)
+IDriver::TMessageBoxId CDriverGL3::systemMessageBox (const char* message, const char* title, IDriver::TMessageBoxType type, TMessageBoxIcon icon)
 {
-	H_AUTO_OGL(CDriverGL_systemMessageBox)
+	H_AUTO_OGL(CDriverGL3_systemMessageBox)
 #ifdef NL_OS_WINDOWS
 	switch (::MessageBox (NULL, message, title, ((type==retryCancelType)?MB_RETRYCANCEL:
 										(type==yesNoCancelType)?MB_YESNOCANCEL:
@@ -2606,9 +2606,9 @@ IDriver::TMessageBoxId CDriverGL::systemMessageBox (const char* message, const c
 	return okId;
 }
 
-void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
+void CDriverGL3::getWindowSize(uint32 &width, uint32 &height)
 {
-	H_AUTO_OGL(CDriverGL_getWindowSize)
+	H_AUTO_OGL(CDriverGL3_getWindowSize)
 
 	if (_CurrentMode.OffScreen)
 	{
@@ -2639,9 +2639,9 @@ void CDriverGL::getWindowSize(uint32 &width, uint32 &height)
 	}
 }
 
-void CDriverGL::setWindowSize(uint32 width, uint32 height)
+void CDriverGL3::setWindowSize(uint32 width, uint32 height)
 {
-	H_AUTO_OGL(CDriverGL_setWindowSize)
+	H_AUTO_OGL(CDriverGL3_setWindowSize)
 
 	if (_win == EmptyWindow)
 		return;
@@ -2740,9 +2740,9 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 #endif // NL_OS_WINDOWS
 }
 
-void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
+void CDriverGL3::getWindowPos(sint32 &x, sint32 &y)
 {
-	H_AUTO_OGL(CDriverGL_getWindowPos)
+	H_AUTO_OGL(CDriverGL3_getWindowPos)
 
 	// Off-screen rendering ?
 	if (_CurrentMode.OffScreen)
@@ -2757,9 +2757,9 @@ void CDriverGL::getWindowPos(sint32 &x, sint32 &y)
 }
 
 // --------------------------------------------------
-bool CDriverGL::isActive()
+bool CDriverGL3::isActive()
 {
-	H_AUTO_OGL(CDriverGL_isActive)
+	H_AUTO_OGL(CDriverGL3_isActive)
 
 	if (_win == EmptyWindow)
 		return false;
@@ -2786,9 +2786,9 @@ bool CDriverGL::isActive()
 }
 
 // ***************************************************************************
-bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &properties)
+bool CDriverGL3::setMonitorColorProperties (const CMonitorColorProperties &properties)
 {
-	H_AUTO_OGL(CDriverGL_setMonitorColorProperties )
+	H_AUTO_OGL(CDriverGL3_setMonitorColorProperties )
 
 #ifdef NL_OS_WINDOWS
 
@@ -2832,16 +2832,16 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 	}
 	else
 	{
-		nlwarning ("(CDriverGL::setMonitorColorProperties): can't create DC");
+		nlwarning ("(CDriverGL3::setMonitorColorProperties): can't create DC");
 	}
 
 #elif defined(NL_OS_MAC)
-	// TODO for Mac: implement CDriverGL::setMonitorColorProperties
-	nlwarning ("CDriverGL::setMonitorColorProperties not implemented");
+	// TODO for Mac: implement CDriverGL3::setMonitorColorProperties
+	nlwarning ("CDriverGL3::setMonitorColorProperties not implemented");
 
 #elif defined (NL_OS_UNIX)
-	// TODO for Linux: implement CDriverGL::setMonitorColorProperties
-	nlwarning ("CDriverGL::setMonitorColorProperties not implemented");
+	// TODO for Linux: implement CDriverGL3::setMonitorColorProperties
+	nlwarning ("CDriverGL3::setMonitorColorProperties not implemented");
 
 #endif
 
@@ -2849,7 +2849,7 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 }
 
 #ifdef NL_OS_MAC
-void CDriverGL::setupApplicationMenu()
+void CDriverGL3::setupApplicationMenu()
 {
 	NSMenu*     menu;
 	NSMenuItem* menuItem;
@@ -2908,19 +2908,19 @@ void CDriverGL::setupApplicationMenu()
 }
 #endif
 
-bool CDriverGL::copyTextToClipboard(const ucstring &text)
+bool CDriverGL3::copyTextToClipboard(const ucstring &text)
 {
 	return _EventEmitter.copyTextToClipboard(text);
 }
 
-bool CDriverGL::pasteTextFromClipboard(ucstring &text)
+bool CDriverGL3::pasteTextFromClipboard(ucstring &text)
 {
 	return _EventEmitter.pasteTextFromClipboard(text);
 }
 
 #ifdef NL_OS_WINDOWS
 
-bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor)
+bool CDriverGL3::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, uint iconWidth, uint iconHeight, uint iconDepth, const NLMISC::CRGBA &col, sint hotSpotX, sint hotSpotY, bool cursor)
 {
 	CBitmap src = bitmap;
 
@@ -2999,7 +2999,7 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, HICON &icon, 
 
 #elif defined(NL_OS_UNIX)
 
-bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<long> &icon)
+bool CDriverGL3::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<long> &icon)
 {
 	// get bitmap width and height
 	uint width = bitmap.getWidth();
