@@ -33,7 +33,7 @@ namespace NL3D
 
 	void CShaderManager::clear()
 	{
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr = programs.begin();
+		std::map< std::string, CShaderProgram* >::iterator itr = programs.begin();
 		while( itr != programs.end() )
 		{
 			delete itr->second;
@@ -47,7 +47,7 @@ namespace NL3D
 		v.clear();
 
 		std::string n;
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr = programs.begin();
+		std::map< std::string, CShaderProgram* >::iterator itr = programs.begin();
 		while( itr != programs.end() )
 		{
 			itr->second->getName( n );
@@ -61,7 +61,7 @@ namespace NL3D
 		std::string n;
 		program->getName( n );
 
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CShaderProgram* >::iterator itr
 			= programs.find( n );
 		if( itr != programs.end() )
 			return false;
@@ -72,7 +72,7 @@ namespace NL3D
 
 	bool CShaderManager::removeShader( const std::string &name )
 	{
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CShaderProgram* >::iterator itr
 			= programs.find( name );
 		if( itr == programs.end() )
 			return false;
@@ -86,7 +86,7 @@ namespace NL3D
 
 	bool CShaderManager::changeShader( const std::string &name, CShaderProgram *program )
 	{
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CShaderProgram* >::iterator itr
 			= programs.find( name );
 		if( itr == programs.end() )
 			return false;
@@ -111,7 +111,7 @@ namespace NL3D
 
 	bool CShaderManager::getShader( const std::string &name, CShaderProgram *program )
 	{
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CShaderProgram* >::iterator itr
 			= programs.find( name );
 		if( itr == programs.end() )
 			return false;
@@ -135,7 +135,7 @@ namespace NL3D
 
 	void CShaderManager::visitShaders( IShaderVisitor *visitor )
 	{
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr = programs.begin();
+		std::map< std::string, CShaderProgram* >::iterator itr = programs.begin();
 		while( itr != programs.end() )
 		{
 			visitor->visit( itr->second );
@@ -145,7 +145,7 @@ namespace NL3D
 
 	void CShaderManager::visitShader( const std::string &name, IShaderVisitor *visitor )
 	{
-		std::tr1::unordered_map< std::string, CShaderProgram* >::iterator itr =
+		std::map< std::string, CShaderProgram* >::iterator itr =
 			programs.find( name );
 		if( itr == programs.end() )
 			return;

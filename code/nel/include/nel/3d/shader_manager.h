@@ -18,7 +18,7 @@
 #ifndef SHADER_MANAGER_H
 #define SHADER_MANAGER_H
 
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -42,7 +42,7 @@ namespace NL3D
 		void visitShader( const std::string &name, IShaderVisitor *visitor );
 
 	private:
-		std::tr1::unordered_map< std::string, CShaderProgram* > programs;
+		std::map< std::string, CShaderProgram* > programs;
 	};
 }
 

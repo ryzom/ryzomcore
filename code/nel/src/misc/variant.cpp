@@ -286,7 +286,7 @@ namespace NLMISC
 
 		case Vector4:
 			{
-				std::stringstream ss = s;
+				std::stringstream ss( s );
 
 				for( int i = 0; i < 4; i++ )
 				{
@@ -300,7 +300,7 @@ namespace NLMISC
 
 		case Matrix4:
 			{
-				std::stringstream ss = s;
+				std::stringstream ss( s );
 
 				for( int i = 0; i < 16; i++ )
 				{
