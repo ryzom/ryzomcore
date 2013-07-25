@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //#include "stdopengl.h"
-#include "nel/3d/unix_event_emitter.h"
+#include "unix_event_emitter.h"
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 

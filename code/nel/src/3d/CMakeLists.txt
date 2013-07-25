@@ -144,10 +144,10 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/light.h
         material.cpp
         ../../include/nel/3d/material.h
-		dynamic_material.cpp
-		../../include/nel/3d/dynamic_material.h
-		dyn_mat_loader.cpp
-		../../include/nel/3d/dyb_mat_loader.h
+	dynamic_material.cpp
+	../../include/nel/3d/dynamic_material.h
+	dyn_mat_loader.cpp
+	../../include/nel/3d/dyb_mat_loader.h
         nelu.cpp
         ../../include/nel/3d/nelu.h
         ../../include/nel/3d/occlusion_query.h
@@ -159,19 +159,17 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/scene_group.h
         shader.cpp
         ../../include/nel/3d/shader.h
-		shader_loader.cpp
-		../../include/nel/3d/shader_loader.h
-		shader_manager.cpp
-		../../include/nel/3d/shader_manager.h
-		shader_program.cpp
-		../../include/nel/3d/shader_program.h
-		shader_saver.cpp
-		../../include/nel/3d/shader_saver.h
-		../../include/nel/3d/shader_visitor.h
+	shader_loader.cpp
+	../../include/nel/3d/shader_loader.h
+	shader_manager.cpp
+	../../include/nel/3d/shader_manager.h
+	shader_program.cpp
+	../../include/nel/3d/shader_program.h
+	shader_saver.cpp
+	../../include/nel/3d/shader_saver.h
+	../../include/nel/3d/shader_visitor.h
         texture.cpp
         ../../include/nel/3d/texture.h
-		unix_event_emitter.cpp
-		../../include/nel/3d/unix_event_emitter.h
         vertex_buffer.cpp
         ../../include/nel/3d/vertex_buffer.h
         vertex_buffer_heap.cpp
