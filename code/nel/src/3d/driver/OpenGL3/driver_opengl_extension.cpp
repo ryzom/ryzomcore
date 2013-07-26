@@ -27,9 +27,7 @@ using namespace std;
 using namespace NLMISC;
 
 // ***************************************************************************
-#ifdef USE_OPENGLES
-#define	nglGetProcAddress eglGetProcAddress
-#elif defined(NL_OS_WINDOWS)
+#if defined(NL_OS_WINDOWS)
 #define	nglGetProcAddress wglGetProcAddress
 #elif defined(NL_OS_MAC)
 // #include <mach-o/dyld.h>
@@ -64,47 +62,6 @@ void (*nglGetProcAddress(const char *procName))()
 
 // ***************************************************************************
 // The exported function names
-
-#ifdef USE_OPENGLES
-
-// GL_OES_mapbuffer
-NEL_PFNGLMAPBUFFEROESPROC						nglMapBufferOES;
-NEL_PFNGLUNMAPBUFFEROESPROC						nglUnmapBufferOES;
-NEL_PFNGLGETBUFFERPOINTERVOESPROC				nglGetBufferPointervOES;
-
-NEL_PFNGLBUFFERSUBDATAPROC						nglBufferSubData;
-
-PFNGLDRAWTEXFOESPROC							nglDrawTexfOES;
-
-// GL_OES_framebuffer_object
-NEL_PFNGLISRENDERBUFFEROESPROC					nglIsRenderbufferOES;
-NEL_PFNGLBINDRENDERBUFFEROESPROC				nglBindRenderbufferOES;
-NEL_PFNGLDELETERENDERBUFFERSOESPROC				nglDeleteRenderbuffersOES;
-NEL_PFNGLGENRENDERBUFFERSOESPROC				nglGenRenderbuffersOES;
-NEL_PFNGLRENDERBUFFERSTORAGEOESPROC				nglRenderbufferStorageOES;
-NEL_PFNGLGETRENDERBUFFERPARAMETERIVOESPROC		nglGetRenderbufferParameterivOES;
-NEL_PFNGLISFRAMEBUFFEROESPROC					nglIsFramebufferOES;
-NEL_PFNGLBINDFRAMEBUFFEROESPROC					nglBindFramebufferOES;
-NEL_PFNGLDELETEFRAMEBUFFERSOESPROC				nglDeleteFramebuffersOES;
-NEL_PFNGLGENFRAMEBUFFERSOESPROC					nglGenFramebuffersOES;
-NEL_PFNGLCHECKFRAMEBUFFERSTATUSOESPROC			nglCheckFramebufferStatusOES;
-NEL_PFNGLFRAMEBUFFERRENDERBUFFEROESPROC			nglFramebufferRenderbufferOES;
-NEL_PFNGLFRAMEBUFFERTEXTURE2DOESPROC			nglFramebufferTexture2DOES;
-NEL_PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVOESPROC	nglGetFramebufferAttachmentParameterivOES;
-NEL_PFNGLGENERATEMIPMAPOESPROC					nglGenerateMipmapOES;
-
-// GL_OES_texture_cube_map
-NEL_PFNGLTEXGENFOESPROC							nglTexGenfOES;
-NEL_PFNGLTEXGENFVOESPROC						nglTexGenfvOES;
-NEL_PFNGLTEXGENIOESPROC							nglTexGeniOES;
-NEL_PFNGLTEXGENIVOESPROC						nglTexGenivOES;
-NEL_PFNGLTEXGENXOESPROC							nglTexGenxOES;
-NEL_PFNGLTEXGENXVOESPROC						nglTexGenxvOES;
-NEL_PFNGLGETTEXGENFVOESPROC						nglGetTexGenfvOES;
-NEL_PFNGLGETTEXGENIVOESPROC						nglGetTexGenivOES;
-NEL_PFNGLGETTEXGENXVOESPROC						nglGetTexGenxvOES;
-
-#else
 
 // ARB_multitexture
 NEL_PFNGLACTIVETEXTUREARBPROC					nglActiveTextureARB;
@@ -510,8 +467,6 @@ NEL_PFNGLXSWAPINTERVALMESAPROC					nglXSwapIntervalMESA;
 NEL_PFNGLXGETSWAPINTERVALMESAPROC				nglXGetSwapIntervalMESA;
 
 #endif
-
-#endif // USE_OPENGLES
 
 // ***************************************************************************
 // ***************************************************************************
