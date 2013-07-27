@@ -1978,7 +1978,11 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	// Update Player characteristics (for Item carac requirement Redifying)
 	nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
 	for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
-		_CurrentPlayerCharac[i]= NLGUI::CDBManager::getInstance()->getDbValue32(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i));
+	{
+		NLMISC::CCDBNodeLeaf *node = _CurrentPlayerCharacLeaf[i] ? &*_CurrentPlayerCharacLeaf[i]
+			: (_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false));
+		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
+	}
 
 	CWidgetManager::getInstance()->drawViews( camera );
 
