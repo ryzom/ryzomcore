@@ -477,11 +477,7 @@ NEL_PFNGLXGETSWAPINTERVALMESAPROC				nglXGetSwapIntervalMESA;
 namespace	NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 #define CHECK_EXT(ext_str) \
@@ -501,7 +497,6 @@ static bool setupARBMultiTexture(const char	*glext)
 {
 	H_AUTO_OGL(setupARBMultiTexture);
 
-#ifndef USE_OPENGLES
 	CHECK_EXT("GL_ARB_multitexture");
 
 	CHECK_ADDRESS(NEL_PFNGLACTIVETEXTUREARBPROC, glActiveTextureARB);
@@ -540,7 +535,6 @@ static bool setupARBMultiTexture(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLMULTITEXCOORD4IVARBPROC, glMultiTexCoord4ivARB);
 	CHECK_ADDRESS(NEL_PFNGLMULTITEXCOORD4FVARBPROC, glMultiTexCoord4fvARB);
 	CHECK_ADDRESS(NEL_PFNGLMULTITEXCOORD4DVARBPROC, glMultiTexCoord4dvARB);
-#endif
 
 	return true;
 }
@@ -550,11 +544,7 @@ static bool setupEXTTextureEnvCombine(const char	*glext)
 {
 	H_AUTO_OGL(setupEXTTextureEnvCombine);
 
-#ifdef USE_OPENGLES
-	return true;
-#else
 	return (strstr(glext, "GL_EXT_texture_env_combine")!=NULL || strstr(glext, "GL_ARB_texture_env_combine")!=NULL);
-#endif
 }
 
 
@@ -563,7 +553,6 @@ static bool	setupARBTextureCompression(const char	*glext)
 {
 	H_AUTO_OGL(setupARBTextureCompression);
 
-#ifndef USE_OPENGLES
 	CHECK_EXT("GL_ARB_texture_compression");
 
 	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXIMAGE3DARBPROC, glCompressedTexImage3DARB);
@@ -573,7 +562,6 @@ static bool	setupARBTextureCompression(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC, glCompressedTexSubImage2DARB);
 	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC, glCompressedTexSubImage1DARB);
 	CHECK_ADDRESS(NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC, glGetCompressedTexImageARB);
-#endif
 
 	return true;
 }
@@ -583,9 +571,7 @@ static bool	setupARBTextureNonPowerOfTwo(const char	*glext)
 {
 	H_AUTO_OGL(setupARBTextureCompression);
 
-#ifndef USE_OPENGLES
 	CHECK_EXT("GL_ARB_texture_non_power_of_two");
-#endif
 
 	return true;
 }
@@ -597,12 +583,6 @@ static bool	setupOESMapBuffer(const char *glext)
 
 	CHECK_EXT("OES_mapbuffer");
 
-#ifdef USE_OPENGLES
-	CHECK_ADDRESS(NEL_PFNGLMAPBUFFEROESPROC, glMapBufferOES);
-	CHECK_ADDRESS(NEL_PFNGLUNMAPBUFFEROESPROC, glUnmapBufferOES);
-	CHECK_ADDRESS(NEL_PFNGLGETBUFFERPOINTERVOESPROC, glGetBufferPointervOES);
-#endif
-
 	return true;
 }
 
@@ -612,10 +592,6 @@ static bool	setupOESDrawTexture(const char *glext)
 	H_AUTO_OGL(setupOESDrawTexture);
 
 	CHECK_EXT("OES_draw_texture");
-
-#ifdef USE_OPENGLES
-	CHECK_ADDRESS(PFNGLDRAWTEXFOESPROC, glDrawTexfOES);
-#endif
 
 	return true;
 }
@@ -631,7 +607,6 @@ static bool	setupNVVertexArrayRange(const char	*glext)
 	// Tess Fence too.
 	CHECK_EXT("GL_NV_fence");
 
-#ifndef USE_OPENGLES
 	// Get VAR address.
 	CHECK_ADDRESS(NEL_PFNGLFLUSHVERTEXARRAYRANGENVPROC, glFlushVertexArrayRangeNV);
 	CHECK_ADDRESS(NEL_PFNGLVERTEXARRAYRANGENVPROC, glVertexArrayRangeNV);
@@ -652,7 +627,6 @@ static bool	setupNVVertexArrayRange(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLGETFENCEIVNVPROC, glGetFenceivNV);
 	CHECK_ADDRESS(NEL_PFNGLFINISHFENCENVPROC, glFinishFenceNV);
 	CHECK_ADDRESS(NEL_PFNGLSETFENCENVPROC, glSetFenceNV);
-#endif
 
 	return true;
 }
@@ -662,13 +636,8 @@ static bool	setupEXTTextureCompressionS3TC(const char	*glext)
 {
 	H_AUTO_OGL(setupEXTTextureCompressionS3TC);
 
-#ifdef USE_OPENGLES
-	CHECK_EXT("EXT_texture_compression_s3tc");
-	// TODO: check also for EXT_texture_compression_dxt1
-#else
 	CHECK_EXT("GL_EXT_texture_compression_s3tc");
 	// TODO: check also for GL_S3_s3tc, GL_EXT_texture_compression_dxt1
-#endif
 
 	return true;
 }
@@ -679,11 +648,9 @@ static bool	setupEXTVertexWeighting(const char	*glext)
 	H_AUTO_OGL(setupEXTVertexWeighting);
 	CHECK_EXT("GL_EXT_vertex_weighting");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLVERTEXWEIGHTFEXTPROC, glVertexWeightfEXT);
 	CHECK_ADDRESS(NEL_PFNGLVERTEXWEIGHTFVEXTPROC, glVertexWeightfvEXT);
 	CHECK_ADDRESS(NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC, glVertexWeightPointerEXT);
-#endif
 
 	return true;
 }
@@ -739,7 +706,6 @@ static bool	setupATIEnvMapBumpMap(const char	*glext)
 
 	GLint num = -1;
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(PFNGLTEXBUMPPARAMETERIVATIPROC, glTexBumpParameterivATI);
 	CHECK_ADDRESS(PFNGLTEXBUMPPARAMETERFVATIPROC, glTexBumpParameterfvATI);
 	CHECK_ADDRESS(PFNGLGETTEXBUMPPARAMETERIVATIPROC, glGetTexBumpParameterivATI);
@@ -748,7 +714,6 @@ static bool	setupATIEnvMapBumpMap(const char	*glext)
 	// Check for broken ATI drivers and disable EMBM if we caught one.
 	// Reminder: This code crashes with Catalyst 7.11 fglrx drivers!
 	nglGetTexBumpParameterivATI(GL_BUMP_NUM_TEX_UNITS_ATI, &num);
-#endif
 
 	return num > 0;
 }
@@ -758,21 +723,7 @@ static bool	setupARBTextureCubeMap(const char	*glext)
 {
 	H_AUTO_OGL(setupARBTextureCubeMap);
 
-#ifdef USE_OPENGLES
-	CHECK_EXT("OES_texture_cube_map");
-
-	CHECK_ADDRESS(NEL_PFNGLTEXGENFOESPROC, glTexGenfOES);
-	CHECK_ADDRESS(NEL_PFNGLTEXGENFVOESPROC, glTexGenfvOES);
-	CHECK_ADDRESS(NEL_PFNGLTEXGENIOESPROC, glTexGeniOES);
-	CHECK_ADDRESS(NEL_PFNGLTEXGENIVOESPROC, glTexGenivOES);
-	CHECK_ADDRESS(NEL_PFNGLTEXGENXOESPROC, glTexGenxOES);
-	CHECK_ADDRESS(NEL_PFNGLTEXGENXVOESPROC, glTexGenxvOES);
-	CHECK_ADDRESS(NEL_PFNGLGETTEXGENFVOESPROC, glGetTexGenfvOES);
-	CHECK_ADDRESS(NEL_PFNGLGETTEXGENIVOESPROC, glGetTexGenivOES);
-	CHECK_ADDRESS(NEL_PFNGLGETTEXGENXVOESPROC, glGetTexGenxvOES);
-#else
 	CHECK_EXT("GL_ARB_texture_cube_map");
-#endif
 
 	return true;
 }
@@ -792,7 +743,6 @@ static bool	setupNVVertexProgram(const char	*glext)
 
 	CHECK_EXT("GL_NV_vertex_program");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLAREPROGRAMSRESIDENTNVPROC, glAreProgramsResidentNV);
 	CHECK_ADDRESS(NEL_PFNGLBINDPROGRAMNVPROC, glBindProgramNV);
 	CHECK_ADDRESS(NEL_PFNGLDELETEPROGRAMSNVPROC, glDeleteProgramsNV);
@@ -856,7 +806,6 @@ static bool	setupNVVertexProgram(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLVERTEXATTRIBS4FVNVPROC, glVertexAttribs4fvNV);
 	CHECK_ADDRESS(NEL_PFNGLVERTEXATTRIBS4SVNVPROC, glVertexAttribs4svNV);
 	CHECK_ADDRESS(NEL_PFNGLVERTEXATTRIBS4UBVNVPROC, glVertexAttribs4ubvNV);
-#endif
 
 	return true;
 }
@@ -867,7 +816,6 @@ static bool	setupEXTVertexShader(const char	*glext)
 	H_AUTO_OGL(setupEXTVertexShader);
 	CHECK_EXT("GL_EXT_vertex_shader");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLBEGINVERTEXSHADEREXTPROC, glBeginVertexShaderEXT);
 	CHECK_ADDRESS(NEL_PFNGLENDVERTEXSHADEREXTPROC, glEndVertexShaderEXT);
 	CHECK_ADDRESS(NEL_PFNGLBINDVERTEXSHADEREXTPROC, glBindVertexShaderEXT);
@@ -930,7 +878,6 @@ static bool	setupEXTVertexShader(const char	*glext)
 	GLint numVSVariants;
 	glGetIntegerv(GL_MAX_VERTEX_SHADER_VARIANTS_EXT, &numVSVariants);
 	if (numVSInvariants < 4) return false;
-#endif
 
 	return true;
 
@@ -943,7 +890,6 @@ static bool	setupEXTSecondaryColor(const char	*glext)
 	H_AUTO_OGL(setupEXTSecondaryColor);
 	CHECK_EXT("GL_EXT_secondary_color");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLSECONDARYCOLOR3BEXTPROC, glSecondaryColor3bEXT);
 	CHECK_ADDRESS(NEL_PFNGLSECONDARYCOLOR3BVEXTPROC, glSecondaryColor3bvEXT);
 	CHECK_ADDRESS(NEL_PFNGLSECONDARYCOLOR3DEXTPROC, glSecondaryColor3dEXT);
@@ -961,7 +907,6 @@ static bool	setupEXTSecondaryColor(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLSECONDARYCOLOR3USEXTPROC, glSecondaryColor3usEXT);
 	CHECK_ADDRESS(NEL_PFNGLSECONDARYCOLOR3USVEXTPROC, glSecondaryColor3usvEXT);
 	CHECK_ADDRESS(NEL_PFNGLSECONDARYCOLORPOINTEREXTPROC, glSecondaryColorPointerEXT);
-#endif
 
 	return true;
 }
@@ -972,14 +917,12 @@ static bool	setupWGLARBPBuffer(const char	*glext)
 	H_AUTO_OGL(setupWGLARBPBuffer);
 	CHECK_EXT("WGL_ARB_pbuffer");
 
-#ifndef USE_OPENGLES
 #ifdef NL_OS_WINDOWS
 	CHECK_ADDRESS(PFNWGLCREATEPBUFFERARBPROC, wglCreatePbufferARB);
 	CHECK_ADDRESS(PFNWGLGETPBUFFERDCARBPROC, wglGetPbufferDCARB);
 	CHECK_ADDRESS(PFNWGLRELEASEPBUFFERDCARBPROC, wglReleasePbufferDCARB);
 	CHECK_ADDRESS(PFNWGLDESTROYPBUFFERARBPROC, wglDestroyPbufferARB);
 	CHECK_ADDRESS(PFNWGLQUERYPBUFFERARBPROC, wglQueryPbufferARB);
-#endif
 #endif
 
 	return true;
@@ -991,9 +934,7 @@ static bool	setupARBMultisample(const char	*glext)
 	H_AUTO_OGL(setupARBMultisample);
 	CHECK_EXT("GL_ARB_multisample");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLSAMPLECOVERAGEARBPROC, glSampleCoverageARB);
-#endif
 
 	return true;
 }
@@ -1005,11 +946,9 @@ static bool	setupWGLARBPixelFormat (const char	*glext)
 	H_AUTO_OGL(setupWGLARBPixelFormat);
 	CHECK_EXT("WGL_ARB_pixel_format");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(PFNWGLGETPIXELFORMATATTRIBIVARBPROC, wglGetPixelFormatAttribivARB);
 	CHECK_ADDRESS(PFNWGLGETPIXELFORMATATTRIBFVARBPROC, wglGetPixelFormatAttribfvARB);
 	CHECK_ADDRESS(PFNWGLCHOOSEPIXELFORMATARBPROC, wglChoosePixelFormatARB);
-#endif
 
 	return true;
 }
@@ -1038,9 +977,7 @@ static bool	setupEXTBlendColor(const char	*glext)
 	H_AUTO_OGL(setupEXTBlendColor);
 	CHECK_EXT("GL_EXT_blend_color");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLBLENDCOLOREXTPROC, glBlendColorEXT);
-#endif
 
 	return true;
 }
@@ -1060,7 +997,6 @@ static bool	setupATIVertexArrayObject(const char *glext)
 	H_AUTO_OGL(setupATIVertexArrayObject);
 	CHECK_EXT("GL_ATI_vertex_array_object");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLNEWOBJECTBUFFERATIPROC, glNewObjectBufferATI);
 	CHECK_ADDRESS(NEL_PFNGLISOBJECTBUFFERATIPROC, glIsObjectBufferATI);
 	CHECK_ADDRESS(NEL_PFNGLUPDATEOBJECTBUFFERATIPROC, glUpdateObjectBufferATI);
@@ -1087,7 +1023,6 @@ static bool	setupATIVertexArrayObject(const char *glext)
 		CHECK_ADDRESS(NEL_PFNGLGETVARIANTARRAYOBJECTFVATIPROC, glGetVariantArrayObjectfvATI);
 		CHECK_ADDRESS(NEL_PFNGLGETVARIANTARRAYOBJECTIVATIPROC, glGetVariantArrayObjectivATI);
 	}
-#endif
 
 	return true;
 }
@@ -1098,10 +1033,8 @@ static bool	setupATIMapObjectBuffer(const char *glext)
 	H_AUTO_OGL(setupATIMapObjectBuffer);
 	CHECK_EXT("GL_ATI_map_object_buffer");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLMAPOBJECTBUFFERATIPROC, glMapObjectBufferATI);
 	CHECK_ADDRESS(NEL_PFNGLUNMAPOBJECTBUFFERATIPROC, glUnmapObjectBufferATI);
-#endif
 
 	return true;
 }
@@ -1114,7 +1047,6 @@ static bool	setupATIFragmentShader(const char *glext)
 	H_AUTO_OGL(setupATIFragmentShader);
 	CHECK_EXT("GL_ATI_fragment_shader");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLGENFRAGMENTSHADERSATIPROC, glGenFragmentShadersATI);
 	CHECK_ADDRESS(NEL_PFNGLBINDFRAGMENTSHADERATIPROC, glBindFragmentShaderATI);
 	CHECK_ADDRESS(NEL_PFNGLDELETEFRAGMENTSHADERATIPROC, glDeleteFragmentShaderATI);
@@ -1129,7 +1061,6 @@ static bool	setupATIFragmentShader(const char *glext)
 	CHECK_ADDRESS(NEL_PFNGLALPHAFRAGMENTOP2ATIPROC, glAlphaFragmentOp2ATI);
 	CHECK_ADDRESS(NEL_PFNGLALPHAFRAGMENTOP3ATIPROC, glAlphaFragmentOp3ATI);
 	CHECK_ADDRESS(NEL_PFNGLSETFRAGMENTSHADERCONSTANTATIPROC, glSetFragmentShaderConstantATI);
-#endif
 
 	return true;
 }
@@ -1140,11 +1071,9 @@ static bool setupATIVertexAttribArrayObject(const char *glext)
 	H_AUTO_OGL(setupATIVertexAttribArrayObject);
 	CHECK_EXT("GL_ATI_vertex_attrib_array_object");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLVERTEXATTRIBARRAYOBJECTATIPROC, glVertexAttribArrayObjectATI);
 	CHECK_ADDRESS(NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTFVATIPROC, glGetVertexAttribArrayObjectfvATI);
 	CHECK_ADDRESS(NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTIVATIPROC, glGetVertexAttribArrayObjectivATI);
-#endif
 
 	return true;
 }
@@ -1155,7 +1084,6 @@ static bool	setupARBFragmentProgram(const char *glext)
 	H_AUTO_OGL(setupARBFragmentProgram);
 	CHECK_EXT("GL_ARB_fragment_program");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLPROGRAMSTRINGARBPROC, glProgramStringARB);
 	CHECK_ADDRESS(NEL_PFNGLBINDPROGRAMARBPROC, glBindProgramARB);
 	CHECK_ADDRESS(NEL_PFNGLDELETEPROGRAMSARBPROC, glDeleteProgramsARB);
@@ -1175,7 +1103,6 @@ static bool	setupARBFragmentProgram(const char *glext)
 	CHECK_ADDRESS(NEL_PFNGLGETPROGRAMIVARBPROC, glGetProgramivARB);
 	CHECK_ADDRESS(NEL_PFNGLGETPROGRAMSTRINGARBPROC, glGetProgramStringARB);
 	CHECK_ADDRESS(NEL_PFNGLISPROGRAMARBPROC, glIsProgramARB);
-#endif
 
 	return true;
 }
@@ -1185,7 +1112,6 @@ static bool	setupARBVertexBufferObject(const char	*glext)
 {
 	H_AUTO_OGL(setupARBVertexBufferObject);
 
-#ifndef USE_OPENGLES
 	CHECK_EXT("GL_ARB_vertex_buffer_object");
 
 	CHECK_ADDRESS(PFNGLBINDBUFFERARBPROC, glBindBufferARB);
@@ -1199,7 +1125,6 @@ static bool	setupARBVertexBufferObject(const char	*glext)
 	CHECK_ADDRESS(PFNGLUNMAPBUFFERARBPROC, glUnmapBufferARB);
 	CHECK_ADDRESS(PFNGLGETBUFFERPARAMETERIVARBPROC, glGetBufferParameterivARB);
 	CHECK_ADDRESS(PFNGLGETBUFFERPOINTERVARBPROC, glGetBufferPointervARB);
-#endif
 
 	return true;
 }
@@ -1210,7 +1135,6 @@ static bool	setupARBVertexProgram(const char	*glext)
 	H_AUTO_OGL(setupARBVertexProgram);
 	CHECK_EXT("GL_ARB_vertex_program");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(PFNGLVERTEXATTRIB1SARBPROC, glVertexAttrib1sARB);
 	CHECK_ADDRESS(PFNGLVERTEXATTRIB1FARBPROC, glVertexAttrib1fARB);
 	CHECK_ADDRESS(PFNGLVERTEXATTRIB1DARBPROC, glVertexAttrib1dARB);
@@ -1273,7 +1197,6 @@ static bool	setupARBVertexProgram(const char	*glext)
 	CHECK_ADDRESS(PFNGLGETVERTEXATTRIBIVARBPROC, glGetVertexAttribivARB);
 	CHECK_ADDRESS(PFNGLGETVERTEXATTRIBPOINTERVARBPROC, glGetVertexAttribPointervARB);
 	CHECK_ADDRESS(PFNGLISPROGRAMARBPROC, glIsProgramARB);
-#endif
 
 	return true;
 }
@@ -1284,7 +1207,6 @@ static bool	setupNVOcclusionQuery(const char	*glext)
 	H_AUTO_OGL(setupNVOcclusionQuery);
 	CHECK_EXT("GL_NV_occlusion_query");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLGENOCCLUSIONQUERIESNVPROC, glGenOcclusionQueriesNV);
 	CHECK_ADDRESS(NEL_PFNGLDELETEOCCLUSIONQUERIESNVPROC, glDeleteOcclusionQueriesNV);
 	CHECK_ADDRESS(NEL_PFNGLISOCCLUSIONQUERYNVPROC, glIsOcclusionQueryNV);
@@ -1292,7 +1214,6 @@ static bool	setupNVOcclusionQuery(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLENDOCCLUSIONQUERYNVPROC, glEndOcclusionQueryNV);
 	CHECK_ADDRESS(NEL_PFNGLGETOCCLUSIONQUERYIVNVPROC, glGetOcclusionQueryivNV);
 	CHECK_ADDRESS(NEL_PFNGLGETOCCLUSIONQUERYUIVNVPROC, glGetOcclusionQueryuivNV);
-#endif
 
 	return true;
 }
@@ -1319,9 +1240,7 @@ static bool	setupARBTextureRectangle(const char	*glext)
 {
 	H_AUTO_OGL(setupARBTextureRectangle);
 
-#ifndef USE_OPENGLES
 	CHECK_EXT("GL_ARB_texture_rectangle");
-#endif
 
 	return true;
 }
@@ -1339,25 +1258,6 @@ static bool	setupFrameBufferObject(const char	*glext)
 {
 	H_AUTO_OGL(setupFrameBufferObject);
 
-#ifdef USE_OPENGLES
-	CHECK_EXT("GL_OES_framebuffer_object");
-
-	CHECK_ADDRESS(NEL_PFNGLISRENDERBUFFEROESPROC, glIsRenderbufferOES);
-	CHECK_ADDRESS(NEL_PFNGLBINDRENDERBUFFEROESPROC, glBindRenderbufferOES);
-	CHECK_ADDRESS(NEL_PFNGLDELETERENDERBUFFERSOESPROC, glDeleteRenderbuffersOES);
-	CHECK_ADDRESS(NEL_PFNGLGENRENDERBUFFERSOESPROC, glGenRenderbuffersOES);
-	CHECK_ADDRESS(NEL_PFNGLRENDERBUFFERSTORAGEOESPROC, glRenderbufferStorageOES);
-	CHECK_ADDRESS(NEL_PFNGLGETRENDERBUFFERPARAMETERIVOESPROC, glGetRenderbufferParameterivOES);
-	CHECK_ADDRESS(NEL_PFNGLISFRAMEBUFFEROESPROC, glIsFramebufferOES);
-	CHECK_ADDRESS(NEL_PFNGLBINDFRAMEBUFFEROESPROC, glBindFramebufferOES);
-	CHECK_ADDRESS(NEL_PFNGLDELETEFRAMEBUFFERSOESPROC, glDeleteFramebuffersOES);
-	CHECK_ADDRESS(NEL_PFNGLGENFRAMEBUFFERSOESPROC, glGenFramebuffersOES);
-	CHECK_ADDRESS(NEL_PFNGLCHECKFRAMEBUFFERSTATUSOESPROC, glCheckFramebufferStatusOES);
-	CHECK_ADDRESS(NEL_PFNGLFRAMEBUFFERRENDERBUFFEROESPROC, glFramebufferRenderbufferOES);
-	CHECK_ADDRESS(NEL_PFNGLFRAMEBUFFERTEXTURE2DOESPROC, glFramebufferTexture2DOES);
-	CHECK_ADDRESS(NEL_PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVOESPROC, glGetFramebufferAttachmentParameterivOES);
-	CHECK_ADDRESS(NEL_PFNGLGENERATEMIPMAPOESPROC, glGenerateMipmapOES);
-#else
 	CHECK_EXT("GL_EXT_framebuffer_object");
 
 	CHECK_ADDRESS(NEL_PFNGLISRENDERBUFFEREXTPROC, glIsRenderbufferEXT);
@@ -1374,7 +1274,6 @@ static bool	setupFrameBufferObject(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC, glDeleteFramebuffersEXT);
 	CHECK_ADDRESS(NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC, glGetRenderbufferParameterivEXT);
 	CHECK_ADDRESS(NEL_PFNGENERATEMIPMAPEXTPROC, glGenerateMipmapEXT);
-#endif
 
 	return true;
 }
@@ -1385,9 +1284,7 @@ static bool	setupFrameBufferBlit(const char	*glext)
 	H_AUTO_OGL(setupFrameBufferBlit);
 	CHECK_EXT("GL_EXT_framebuffer_blit");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLBLITFRAMEBUFFEREXTPROC, glBlitFramebufferEXT);
-#endif
 
 	return true;
 }
@@ -1398,9 +1295,7 @@ static bool	setupFrameBufferMultisample(const char	*glext)
 	H_AUTO_OGL(setupFrameBufferMultisample);
 	CHECK_EXT("GL_EXT_framebuffer_multisample");
 
-#ifndef USE_OPENGLES
 	CHECK_ADDRESS(NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC, glRenderbufferStorageMultisampleEXT);
-#endif
 
 	return true;
 }
@@ -1410,11 +1305,7 @@ static bool	setupPackedDepthStencil(const char	*glext)
 {
 	H_AUTO_OGL(setupPackedDepthStencil);
 
-#ifdef USE_OPENGLES
-	CHECK_EXT("GL_OES_packed_depth_stencil");
-#else
 	CHECK_EXT("GL_EXT_packed_depth_stencil");
-#endif
 
 	return true;
 }
@@ -1480,9 +1371,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	if(ext.NVVertexArrayRange)
 	{
 		GLint nverts = 10;
-#ifndef USE_OPENGLES
 		glGetIntegerv((GLenum)GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_NV, &nverts);
-#endif
 		ext.NVVertexArrayRangeMaxVertex= nverts;
 	}
 
@@ -1632,11 +1521,9 @@ static bool	setupWGLEXTSwapControl(const char	*glext)
 	H_AUTO_OGL(setupWGLEXTSwapControl);
 	CHECK_EXT("WGL_EXT_swap_control");
 
-#ifndef USE_OPENGLES
 #ifdef NL_OS_WINDOWS
 	CHECK_ADDRESS(PFNWGLSWAPINTERVALEXTPROC, wglSwapIntervalEXT);
 	CHECK_ADDRESS(PFNWGLGETSWAPINTERVALEXTPROC, wglGetSwapIntervalEXT);
-#endif
 #endif
 
 	return true;
@@ -1682,38 +1569,7 @@ static bool	setupGLXMESASwapControl(const char	*glext)
 	return true;
 }
 
-#ifdef USE_OPENGLES
-// ***************************************************************************
-bool registerEGlExtensions(CGlExtensions &ext, EGLDisplay dpy)
-{
-	H_AUTO_OGL(registerEGlExtensions);
-
-	// Get extension string
-	const char *glext = eglQueryString(dpy, EGL_EXTENSIONS);
-	if (glext == NULL)
-	{
-		nlwarning ("neglGetExtensionsStringARB failed");
-		return false;
-	}
-
-	nldebug("3D: Available EGL Extensions:");
-
-	if (DebugLog)
-	{
-		vector<string> exts;
-		explode(string(glext), string(" "), exts);
-		for(uint i = 0; i < exts.size(); i++)
-		{
-			if(i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
-			if(i%5==4) DebugLog->displayRaw("\n");
-		}
-		DebugLog->displayRaw("\n");
-	}
-
-	return true;
-}
-#elif defined(NL_OS_WINDOWS)
+#if defined(NL_OS_WINDOWS)
 // ***************************************************************************
 bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 {
