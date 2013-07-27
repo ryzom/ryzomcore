@@ -136,12 +136,12 @@ ShapeLightmapNotOptimizedExportDirectory = CommonPath + "/shape_lightmap_not_opt
 ShapeAnimExportDirectory = CommonPath + "/shape_anim"
 
 # Ligo directories
-LigoDatabaseExportDirectory = "landscape/ligo/" + EcosystemName
-LigoDatabaseIgExportDirectory = LigoDatabaseExportDirectory + "/igs"
-LigoDatabaseZoneExportDirectory = LigoDatabaseExportDirectory + "/zones"
-LigoDatabaseZoneLigoExportDirectory = LigoDatabaseExportDirectory + "/zoneligos"
-LigoDatabaseCmbExportDirectory = LigoDatabaseExportDirectory + "/cmb"
-LigoTagExportDirectory = "ecosystems/" + EcosystemName + "/ligo_tag"
+LigoEcosystemExportDirectory = EcosystemPath + "/ligo_es"
+LigoEcosystemIgExportDirectory = LigoEcosystemExportDirectory + "/igs"
+LigoEcosystemZoneExportDirectory = LigoEcosystemExportDirectory + "/zones"
+LigoEcosystemZoneLigoExportDirectory = LigoEcosystemExportDirectory + "/zoneligos"
+LigoEcosystemCmbExportDirectory = LigoEcosystemExportDirectory + "/cmb"
+LigoEcosystemTagExportDirectory = EcosystemPath + "/ligo_es_tag"
 
 # Zone directories
 ZoneExportDirectory = ContinentPath + "/zone"

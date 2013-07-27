@@ -6,7 +6,7 @@
 # 
 # \file directories.py
 # \brief Directories configuration
-# \date 2010-09-19-14-19-GMT
+# \date 2013-07-27-02-01-GMT
 # \author Jan Boon (Kaetemi)
 # \date 2001-2005
 # \author Nevrax
@@ -191,12 +191,12 @@ VegetTagExportDirectory = CommonPath + "/veget_tag"
 VegetSetExportDirectory = CommonPath + "/veget_set"
 
 # Ligo directories
-LigoDatabaseExportDirectory = "landscape/ligo/" + EcosystemName
-LigoDatabaseIgExportDirectory = LigoDatabaseExportDirectory + "/igs"
-LigoDatabaseZoneExportDirectory = LigoDatabaseExportDirectory + "/zones"
-LigoDatabaseZoneLigoExportDirectory = LigoDatabaseExportDirectory + "/zoneligos"
-LigoDatabaseCmbExportDirectory = LigoDatabaseExportDirectory + "/cmb"
-LigoTagExportDirectory = CommonPath + "/ligo_tag"
+LigoEcosystemExportDirectory = CommonPath + "/ligo_es"
+LigoEcosystemIgExportDirectory = LigoEcosystemExportDirectory + "/igs"
+LigoEcosystemZoneExportDirectory = LigoEcosystemExportDirectory + "/zones"
+LigoEcosystemZoneLigoExportDirectory = LigoEcosystemExportDirectory + "/zoneligos"
+LigoEcosystemCmbExportDirectory = LigoEcosystemExportDirectory + "/cmb"
+LigoEcosystemTagExportDirectory = CommonPath + "/ligo_es_tag"
 
 # Zone directories
 ZoneExportDirectory = CommonPath + "/zone"
