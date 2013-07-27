@@ -511,6 +511,8 @@ CInterfaceManager::CInterfaceManager()
 	_LogState = false;
 	_KeysLoaded = false;
 	CWidgetManager::getInstance()->resetColorProps();
+	CWidgetManager::getInstance()->resetAlphaRolloverSpeedProps();
+	CWidgetManager::getInstance()->resetGlobalAlphasProps();
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
 	_ErrorColor = NULL;
@@ -1420,8 +1422,9 @@ void CInterfaceManager::uninitInGame1 ()
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
 	_ErrorColor = NULL;
-	CWidgetManager::getInstance()->resetAlphaRolloverSpeed();
 	CWidgetManager::getInstance()->resetColorProps();
+	CWidgetManager::getInstance()->resetAlphaRolloverSpeedProps();
+	CWidgetManager::getInstance()->resetGlobalAlphasProps();
 
 #ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
 	CInterfaceManager::getInstance()->DebugTrackGroupsDump();

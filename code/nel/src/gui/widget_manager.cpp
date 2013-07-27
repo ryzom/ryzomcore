@@ -1035,8 +1035,8 @@ namespace NLGUI
 		setCapturePointerRight(NULL);
 		
 		resetColorProps();
-
-		_AlphaRolloverSpeedDB = NULL;
+		resetAlphaRolloverSpeedProps();
+		resetGlobalAlphasProps();
 
 		activeAnims.clear();
 	}
@@ -1967,10 +1967,18 @@ namespace NLGUI
 		}
 
 		// Update global color from database
-		setGlobalColor( NLMISC::CRGBA (	(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R")->getValue32(),
-								(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G")->getValue32(),
-								(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B")->getValue32(),
-								(uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A")->getValue32() ) );
+		if (!_RProp)
+		{
+			_RProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:R");
+			_GProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:G");
+			_BProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
+			_AProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
+		}
+		setGlobalColor(NLMISC::CRGBA(
+			(uint8)_RProp->getValue32(),
+			(uint8)_GProp->getValue32(),
+			(uint8)_BProp->getValue32(),
+			(uint8)_AProp->getValue32()));
 
 		NLMISC::CRGBA c  = getGlobalColorForContent();
 		NLMISC::CRGBA gc = getGlobalColor();
@@ -2965,7 +2973,7 @@ namespace NLGUI
 		return fTmp*fTmp*fTmp;
 	}
 
-	void CWidgetManager::resetAlphaRolloverSpeed()
+	void CWidgetManager::resetAlphaRolloverSpeedProps()
 	{
 		_AlphaRolloverSpeedDB = NULL;
 	}
@@ -2981,10 +2989,29 @@ namespace NLGUI
 
 	void CWidgetManager::updateGlobalAlphas()
 	{
-		_GlobalContentAlpha = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA")->getValue32();
-		_GlobalContainerAlpha = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ALPHA")->getValue32();
-		_GlobalRolloverFactorContent = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR")->getValue32();
-		_GlobalRolloverFactorContainer = (uint8)CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR")->getValue32();
+		if (!_GlobalContentAlphaDB)
+		{
+			_GlobalContentAlphaDB = CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ALPHA");
+			nlassert(_GlobalContentAlphaDB);
+			_GlobalContainerAlphaDB = CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ALPHA");
+			nlassert(_GlobalContainerAlphaDB);
+			_GlobalContentRolloverFactorDB = CDBManager::getInstance()->getDbProp("UI:SAVE:CONTENT_ROLLOVER_FACTOR");
+			nlassert(_GlobalContentRolloverFactorDB);
+			_GlobalContainerRolloverFactorDB = CDBManager::getInstance()->getDbProp("UI:SAVE:CONTAINER_ROLLOVER_FACTOR");
+			nlassert(_GlobalContainerRolloverFactorDB);
+		}
+		_GlobalContentAlpha = (uint8)_GlobalContentAlphaDB->getValue32();
+		_GlobalContainerAlpha = (uint8)_GlobalContainerAlphaDB->getValue32();
+		_GlobalRolloverFactorContent = (uint8)_GlobalContentRolloverFactorDB->getValue32();
+		_GlobalRolloverFactorContainer = (uint8)_GlobalContainerRolloverFactorDB->getValue32();
+	}
+
+	void CWidgetManager::resetGlobalAlphasProps()
+	{
+		_GlobalContentAlphaDB = NULL;
+		_GlobalContainerAlphaDB = NULL;
+		_GlobalContentRolloverFactorDB = NULL;
+		_GlobalContainerRolloverFactorDB = NULL;
 	}
 
 	void CWidgetManager::registerNewScreenSizeHandler( INewScreenSizeHandler *handler )
@@ -3171,6 +3198,8 @@ namespace NLGUI
 		_LastYContextHelp= -10000;
 
 		resetColorProps();
+		resetAlphaRolloverSpeedProps();
+		resetGlobalAlphasProps();
 
 		_GlobalColor = NLMISC::CRGBA(255,255,255,255);
 		_GlobalColorForContent = _GlobalColor;
