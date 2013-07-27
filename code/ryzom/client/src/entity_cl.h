@@ -1113,6 +1113,8 @@ protected:
 
 	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf>		_OpacityMinNodeLeaf;
 
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _ShowReticleLeaf;
+
 protected:
 	/**
 	 * Change the box position.

@@ -3041,7 +3041,9 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 
 	bool bShowReticle = true;
 
-	CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_RETICLE");
+	CCDBNodeLeaf *node = (CCDBNodeLeaf *)_ShowReticleLeaf ? &*_ShowReticleLeaf
+		: (_ShowReticleLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_RETICLE", false));
+
 	if (node)
 	{
 		bShowReticle = node->getValueBool();
