@@ -382,6 +382,8 @@ CGameContextMenu	GameContextMenu;
 NLMISC::CValueSmoother smoothFPS;
 NLMISC::CValueSmoother moreSmoothFPS(64);
 
+static CRefPtr<CCDBNodeLeaf> s_FpsLeaf;
+
 
 // Profile
 /*
@@ -2296,7 +2298,8 @@ bool mainLoop()
 					deltaTime = smoothFPS.getSmoothValue ();
 					if (deltaTime > 0.0)
 					{
-						CCDBNodeLeaf*pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS");
+						CCDBNodeLeaf *pNL = (CCDBNodeLeaf *)s_FpsLeaf ? &*s_FpsLeaf
+							: (s_FpsLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS"));
 						pNL->setValue64((sint64)(1.f/deltaTime));
 					}
 				}
