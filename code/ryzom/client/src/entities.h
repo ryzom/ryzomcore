@@ -39,6 +39,7 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/file.h"
 #include "nel/misc/aabbox.h"
+#include "nel/misc/cdb_leaf.h"
 // 3D
 #include "nel/3d/u_instance.h"
 // Std.
