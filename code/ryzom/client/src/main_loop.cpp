@@ -383,6 +383,7 @@ NLMISC::CValueSmoother smoothFPS;
 NLMISC::CValueSmoother moreSmoothFPS(64);
 
 static CRefPtr<CCDBNodeLeaf> s_FpsLeaf;
+static CRefPtr<CCDBNodeLeaf> s_UiDirectionLeaf;
 
 
 // Profile
@@ -2804,8 +2805,10 @@ bool mainLoop()
 			H_AUTO_USE ( RZ_Client_Main_Loop_Net )
 			// Put here things you have to send to the server only once per tick like user position.
 			// UPDATE COMPASS
+			NLMISC::CCDBNodeLeaf *node = s_UiDirectionLeaf ? (&*s_UiDirectionLeaf)
+				: (s_UiDirectionLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DIRECTION"));
 			CInterfaceProperty prop;
-			prop.readDouble("UI:VARIABLES:DIRECTION"," ");
+			prop.setNodePtr(node);
 			if(CompassMode == 1)
 			{
 				double camDir = atan2(View.view().y, View.view().x);
