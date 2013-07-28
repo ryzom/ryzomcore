@@ -1656,7 +1656,8 @@ float				CSPhraseManager::getPhraseSumBrickProp(const CSPhraseCom &phrase, uint 
 				else if(propId==CSBrickManager::getInstance()->StaPropId && brick->Properties[j].PropId==CSBrickManager::getInstance()->StaWeightFactorId)
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					uint32 weight = (uint32) NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEFAULT_WEIGHT_HANDS")->getValue32() / 10; // weight must be in dg here
+					if (!_ServerUserDefaultWeightHandsLeaf) _ServerUserDefaultWeightHandsLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEFAULT_WEIGHT_HANDS");
+					uint32 weight = (uint32)(&*_ServerUserDefaultWeightHandsLeaf)->getValue32() / 10; // weight must be in dg here
 					CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestionsets:hands:handr"));
 					if (ctrlSheet)
 					{
