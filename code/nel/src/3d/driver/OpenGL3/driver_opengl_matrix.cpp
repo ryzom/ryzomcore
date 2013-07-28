@@ -20,11 +20,7 @@
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 // ***************************************************************************
@@ -36,21 +32,9 @@ void CDriverGL3::setFrustum(float left, float right, float bottom, float top, fl
 	glLoadIdentity();
 
 	if (perspective)
-	{
-#ifdef USE_OPENGLES
-		glFrustumf(left,right,bottom,top,znear,zfar);
-#else
 		glFrustum(left,right,bottom,top,znear,zfar);
-#endif
-	}
 	else
-	{
-#ifdef USE_OPENGLES
-		glOrthof(left,right,bottom,top,znear,zfar);
-#else
 		glOrtho(left,right,bottom,top,znear,zfar);
-#endif
-	}
 
 	_ProjMatDirty = true;
 

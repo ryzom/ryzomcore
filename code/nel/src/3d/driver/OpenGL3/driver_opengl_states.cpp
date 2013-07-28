@@ -25,11 +25,7 @@
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 // ***************************************************************************
@@ -155,28 +151,17 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	for(stage=0;stage<nbStages; stage++)
 	{
 		// disable texturing.
-#ifdef USE_OPENGLES
-		glActiveTexture(GL_TEXTURE0+stage);
-#else
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
-
 		glDisable(GL_TEXTURE_2D);
 
 		if(_TextureCubeMapSupported)
-		{
 			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-#ifdef USE_OPENGLES
-			glDisable(GL_TEXTURE_GEN_STR_OES);
-#endif
-		}
 
 		_TextureMode[stage]= TextureDisabled;
 
 		// Tex gen init
 		_TexGenMode[stage] = 0;
 
-#ifndef USE_OPENGLES
 		if(_TextureRectangleSupported)
 			glDisable(GL_TEXTURE_RECTANGLE_NV);
 
@@ -184,17 +169,11 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 		glDisable(GL_TEXTURE_GEN_T);
 		glDisable(GL_TEXTURE_GEN_R);
 		glDisable(GL_TEXTURE_GEN_Q);
-#endif
 	}
 
 	// ActiveTexture current texture to 0.
-#ifdef USE_OPENGLES
-	glActiveTexture(GL_TEXTURE0);
-	glClientActiveTexture(GL_TEXTURE0);
-#else
 	nglActiveTextureARB(GL_TEXTURE0_ARB);
 	nglClientActiveTextureARB(GL_TEXTURE0_ARB);
-#endif
 
 	_CurrentActiveTextureARB= 0;
 	_CurrentClientActiveTextureARB= 0;
@@ -204,11 +183,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	_DepthRangeFar = 1.f;
 	_ZBias = 0.f;
 
-#ifdef USE_OPENGLES
-	glDepthRangef (0.f, 1.f);
-#else
 	glDepthRange (0, 1);
-#endif
 
 	// Cull order
 	_CullMode = CCW;
@@ -594,9 +569,7 @@ void			CDriverGLStates3::setVertexColorLighted(bool enable)
 		if (_VertexColorLighted)
 		{
 			glEnable (GL_COLOR_MATERIAL);
-#ifndef USE_OPENGLES
 			glColorMaterial (GL_FRONT_AND_BACK, GL_DIFFUSE);
-#endif
 		}
 		else
 		{
@@ -622,11 +595,8 @@ void CDriverGLStates3::updateDepthRange()
 
 	float delta = _ZBias * (_DepthRangeFar - _DepthRangeNear);
 
-#ifdef USE_OPENGLES
-	glDepthRangef(delta + _DepthRangeNear, delta + _DepthRangeFar);
-#else
 	glDepthRange(delta + _DepthRangeNear, delta + _DepthRangeFar);
-#endif
+
 }
 
 // ***************************************************************************
@@ -684,13 +654,9 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 		}
 		else
 		{
-#ifdef USE_OPENGLES
-			nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
-#else
 			glTexGeni( GL_S, GL_TEXTURE_GEN_MODE, mode);
 			glTexGeni( GL_T, GL_TEXTURE_GEN_MODE, mode);
 			glTexGeni( GL_R, GL_TEXTURE_GEN_MODE, mode);
-#endif
 
 			/* Object or Eye Space ? => enable W generation. VERY IMPORTANT because
 				was a bug with VegetableRender and ShadowRender:
@@ -698,17 +664,7 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 					- Shadow Render don't use any TexCoord in VB (since projected)
 					=> TexCoord1.w dirty!!
 			*/
-#ifdef USE_OPENGLES
-//			if(mode==GL_OBJECT_LINEAR || mode==GL_EYE_LINEAR)
-//			{
-//				nglTexGeniOES(GL_TEXTURE_GEN_STR_OES, GL_TEXTURE_GEN_MODE_OES, mode);
-//				glEnable(GL_TEXTURE_GEN_STR_OES);
-//			}
-//			else
-//			{
-//				glDisable(GL_TEXTURE_GEN_STR_OES);
-//			}
-#else
+
 			if(mode==GL_OBJECT_LINEAR || mode==GL_EYE_LINEAR)
 			{
 				glTexGeni( GL_Q, GL_TEXTURE_GEN_MODE, mode);
@@ -718,16 +674,11 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 			{
 				glDisable( GL_TEXTURE_GEN_Q );
 			}
-#endif
 
 			// Enable All.
-#ifdef USE_OPENGLES
-			glEnable(GL_TEXTURE_GEN_STR_OES);
-#else
 			glEnable( GL_TEXTURE_GEN_S );
 			glEnable( GL_TEXTURE_GEN_T );
 			glEnable( GL_TEXTURE_GEN_R );
-#endif
 		}
 	}
 }
@@ -744,12 +695,10 @@ void			CDriverGLStates3::resetTextureMode()
 		glDisable(GL_TEXTURE_CUBE_MAP_ARB);
 	}
 
-#ifndef USE_OPENGLES
 	if (_TextureRectangleSupported)
 	{
 		glDisable(GL_TEXTURE_RECTANGLE_NV);
 	}
-#endif
 
 	_TextureMode[_CurrentActiveTextureARB]= TextureDisabled;
 }
@@ -769,13 +718,11 @@ void			CDriverGLStates3::setTextureMode(TTextureMode texMode)
 		}
 		else if(oldTexMode == TextureRect)
 		{
-#ifndef USE_OPENGLES
 			if(_TextureRectangleSupported)
 			{
 				glDisable(GL_TEXTURE_RECTANGLE_NV);
 			}
 			else
-#endif
 			{
 				glDisable(GL_TEXTURE_2D);
 			}
@@ -799,13 +746,11 @@ void			CDriverGLStates3::setTextureMode(TTextureMode texMode)
 		}
 		else if(texMode == TextureRect)
 		{
-#ifndef USE_OPENGLES
 			if(_TextureRectangleSupported)
 			{
 				glEnable(GL_TEXTURE_RECTANGLE_NV);
 			}
 			else
-#endif
 			{
 				glEnable(GL_TEXTURE_2D);
 			}
@@ -835,11 +780,7 @@ void			CDriverGLStates3::activeTextureARB(uint stage)
 
 	if( _CurrentActiveTextureARB != stage )
 	{
-#ifdef USE_OPENGLES
-		glActiveTexture(GL_TEXTURE0+stage);
-#else
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
 
 		_CurrentActiveTextureARB= stage;
 	}
@@ -850,11 +791,7 @@ void			CDriverGLStates3::forceActiveTextureARB(uint stage)
 {
 	H_AUTO_OGL(CDriverGLStates3_forceActiveTextureARB);
 
-#ifdef USE_OPENGLES
-	glActiveTexture(GL_TEXTURE0+stage);
-#else
 	nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
 
 	_CurrentActiveTextureARB= stage;
 }
@@ -896,12 +833,10 @@ void			CDriverGLStates3::enableWeightArray(bool enable)
 
 	if(_WeightArrayEnabled != enable)
 	{
-#ifndef USE_OPENGLES
 		if(enable)
 			glEnableClientState(GL_VERTEX_WEIGHTING_EXT);
 		else
 			glDisableClientState(GL_VERTEX_WEIGHTING_EXT);
-#endif
 
 		_WeightArrayEnabled= enable;
 	}
@@ -931,23 +866,19 @@ void			CDriverGLStates3::enableSecondaryColorArray(bool enable)
 
 	if(_SecondaryColorArrayEnabled != enable)
 	{
-#ifndef USE_OPENGLES
 		if(enable)
 			glEnableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
 		else
 			glDisableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
-#endif
 
 		_SecondaryColorArrayEnabled= enable;
 
-#ifndef USE_OPENGLES
 		// If disable
 		if(!enable)
 		{
 			// GeForceFx Bug: Must reset Secondary color to 0 (if comes from a VP), else bugs
 			nglSecondaryColor3ubEXT(0,0,0);
 		}
-#endif
 	}
 }
 
@@ -958,11 +889,7 @@ void			CDriverGLStates3::clientActiveTextureARB(uint stage)
 
 	if( _CurrentClientActiveTextureARB != stage )
 	{
-#ifdef USE_OPENGLES
-		glClientActiveTexture(GL_TEXTURE0+stage);
-#else
 		nglClientActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
 		_CurrentClientActiveTextureARB= stage;
 	}
 }
@@ -991,13 +918,10 @@ void			CDriverGLStates3::enableVertexAttribArray(uint glIndex, bool enable)
 
 	if(_VertexAttribArrayEnabled[glIndex] != enable)
 	{
-#ifndef USE_OPENGLES
 		if(enable)
 			glEnableClientState(glIndex+GL_VERTEX_ATTRIB_ARRAY0_NV);
 		else
 			glDisableClientState(glIndex+GL_VERTEX_ATTRIB_ARRAY0_NV);
-#endif
-
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}
 }
@@ -1011,12 +935,10 @@ void CDriverGLStates3::enableVertexAttribArrayARB(uint glIndex,bool enable)
 		if(_VertexAttribArrayEnabled[glIndex] != enable)
 	#endif
 	{
-#ifndef USE_OPENGLES
 		if(enable)
 			nglEnableVertexAttribArrayARB(glIndex);
 		else
 			nglDisableVertexAttribArrayARB(glIndex);
-#endif
 
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}
@@ -1035,12 +957,10 @@ void CDriverGLStates3::enableVertexAttribArrayForEXTVertexShader(uint glIndex, b
 				enableVertexArray(enable);
 			break;
 			case 1: // skin weight
-#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL3::EVSSkinWeightVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL3::EVSSkinWeightVariant]);
-#endif
 			break;
 			case 2: // normal
 				enableNormalArray(enable);
@@ -1049,28 +969,22 @@ void CDriverGLStates3::enableVertexAttribArrayForEXTVertexShader(uint glIndex, b
 				enableColorArray(enable);
 			break;
 			case 4: // secondary color
-#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL3::EVSSecondaryColorVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL3::EVSSecondaryColorVariant]);
-#endif
 			break;
 			case 5: // fog coordinate
-#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL3::EVSFogCoordsVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL3::EVSFogCoordsVariant]);
-#endif
 			break;
 			case 6: // palette skin
-#ifndef USE_OPENGLES
 				if(enable)
 					nglEnableVariantClientStateEXT(variants[CDriverGL3::EVSPaletteSkinVariant]);
 				else
 					nglDisableVariantClientStateEXT(variants[CDriverGL3::EVSPaletteSkinVariant]);
-#endif
 			break;
 			case 7: // empty
 				nlstop;
@@ -1121,11 +1035,7 @@ void CDriverGLStates3::forceBindARBVertexBuffer(uint objectID)
 {
 	H_AUTO_OGL(CDriverGLStates3_forceBindARBVertexBuffer)
 
-#ifdef USE_OPENGLES
-	glBindBuffer(GL_ARRAY_BUFFER, objectID);
-#else
 	nglBindBufferARB(GL_ARRAY_BUFFER_ARB, objectID);
-#endif
 
 	_CurrARBVertexBuffer = objectID;
 }
