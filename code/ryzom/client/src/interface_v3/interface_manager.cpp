@@ -511,6 +511,8 @@ CInterfaceManager::CInterfaceManager()
 	_LogState = false;
 	_KeysLoaded = false;
 	CWidgetManager::getInstance()->resetColorProps();
+	CWidgetManager::getInstance()->resetAlphaRolloverSpeedProps();
+	CWidgetManager::getInstance()->resetGlobalAlphasProps();
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
 	_ErrorColor = NULL;
@@ -1420,8 +1422,9 @@ void CInterfaceManager::uninitInGame1 ()
 	_NeutralColor = NULL;
 	_WarningColor = NULL;
 	_ErrorColor = NULL;
-	CWidgetManager::getInstance()->resetAlphaRolloverSpeed();
 	CWidgetManager::getInstance()->resetColorProps();
+	CWidgetManager::getInstance()->resetAlphaRolloverSpeedProps();
+	CWidgetManager::getInstance()->resetGlobalAlphasProps();
 
 #ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
 	CInterfaceManager::getInstance()->DebugTrackGroupsDump();
@@ -1978,7 +1981,11 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	// Update Player characteristics (for Item carac requirement Redifying)
 	nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
 	for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
-		_CurrentPlayerCharac[i]= NLGUI::CDBManager::getInstance()->getDbValue32(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i));
+	{
+		NLMISC::CCDBNodeLeaf *node = _CurrentPlayerCharacLeaf[i] ? &*_CurrentPlayerCharacLeaf[i]
+			: (_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false));
+		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
+	}
 
 	CWidgetManager::getInstance()->drawViews( camera );
 
