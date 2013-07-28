@@ -120,6 +120,7 @@ NLMISC::CRGBA	CEntityCL::_PvpAllyColor;
 NLMISC::CRGBA	CEntityCL::_GMTitleColor[CHARACTER_TITLE::EndGmTitle - CHARACTER_TITLE::BeginGmTitle + 1];
 uint8 CEntityCL::_InvalidGMTitleCode = 0xFF;
 NLMISC::CRefPtr<CCDBNodeLeaf> CEntityCL::_OpacityMinNodeLeaf;
+NLMISC::CRefPtr<CCDBNodeLeaf> CEntityCL::_ShowReticleLeaf;
 
 
 // Context help
