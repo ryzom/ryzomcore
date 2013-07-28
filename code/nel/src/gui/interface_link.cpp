@@ -194,7 +194,7 @@ namespace NLGUI
 	}
 
 	//===========================================================
-	bool CInterfaceLink::init(const std::vector<CTargetInfo> &targets, const std::string &expr, const std::string &actionHandler, const std::string &ahParams, const std::string &ahCond, CInterfaceGroup *parentGroup)
+	bool CInterfaceLink::init(const std::vector<CTargetInfo> &targets, const std::vector<CCDBTargetInfo> &cdbTargets, const std::string &expr, const std::string &actionHandler, const std::string &ahParams, const std::string &ahCond, CInterfaceGroup *parentGroup)
 	{
 		CInterfaceExprValue result;
 		// Build the parse tree
@@ -240,6 +240,7 @@ namespace NLGUI
 			// There are no target for this link, so, put in a dedicated list to ensure that the link will be destroyed at exit
 			_LinksWithNoTarget.push_back(TLinkSmartPtr(this));
 		}
+		_CDBTargets = cdbTargets;
 
 		// create observers
 		createObservers(_ObservedNodes);
@@ -365,12 +366,41 @@ namespace NLGUI
 				}
 			}
 		}
+		if (_CDBTargets.size())
+		{
+			CInterfaceExprValue resultCopy = result;
+			if (resultCopy.toInteger())
+			{
+				sint64 resultValue = resultCopy.getInteger();
+				for (uint k = 0; k < _CDBTargets.size(); ++k)
+				{
+					NLMISC::CCDBNodeLeaf *node = _CDBTargets[k].Leaf;
+					if (!node) 
+					{
+						node = _CDBTargets[k].Leaf = NLGUI::CDBManager::getInstance()->getDbProp(_CDBTargets[k].LeafName, false);
+					}
+					if (node)
+					{
+						// assuming setvalue64 always works
+						node->setValue64(resultValue);
+					}
+					else
+					{
+						nlwarning("CInterfaceLink::update: Node does not exist: '%s'", _CDBTargets[k].LeafName.c_str());
+					}
+				}
+			}
+			else
+			{
+				nlwarning("CInterfaceLink::update: Result conversion to db target failed");
+			}
+		}
 		// if there's an action handler, execute it
 		if (!_ActionHandler.empty())
 		{
 			// If there is a condition, test it.
 			bool launch = _AHCond.empty();
-			if (_AHCondParsed)
+			if (_AHCondParsed) // todo: maybe makes more sense to make condition also cover target
 			{
 				CInterfaceExprValue result;
 				_AHCondParsed->eval(result);
@@ -525,6 +555,11 @@ namespace NLGUI
 				continue;
 			}
 			std::string::size_type lastPos = targetNames[k].find_last_not_of(" ");
+			if (startPos >= lastPos)
+			{
+				nlwarning("<splitLinkTargets> empty target encountered");
+				continue;
+			}
 
 			if (!splitLinkTarget(targetNames[k].substr(startPos, lastPos - startPos+1), parentGroup, ti.PropertyName, ti.Elem))
 			{
@@ -534,6 +569,70 @@ namespace NLGUI
 				continue;
 			}
 			targetsVect.push_back(ti);
+		}
+		return everythingOk;
+	}
+
+
+	// ***************************************************************************
+	bool CInterfaceLink::splitLinkTargetsExt(const std::string &targets, CInterfaceGroup *parentGroup,std::vector<CInterfaceLink::CTargetInfo> &targetsVect, std::vector<CInterfaceLink::CCDBTargetInfo> &cdbTargetsVect)
+	{
+		std::vector<std::string> targetNames;
+		NLMISC::splitString(targets, ",", targetNames);
+		targetsVect.clear();
+		targetsVect.reserve(targetNames.size());
+		cdbTargetsVect.clear(); // no reserve because less used
+		bool everythingOk = true;
+		for (uint k = 0; k < targetNames.size(); ++k)
+		{
+			std::string::size_type startPos = targetNames[k].find_first_not_of(" ");
+			if(startPos == std::string::npos)
+			{
+				// todo hulud interface syntax error
+				nlwarning("<splitLinkTargets> empty target encountered");
+				continue;
+			}
+			std::string::size_type lastPos = targetNames[k].find_last_not_of(" ");
+			if (startPos >= (lastPos+1))
+			{
+				nlwarning("<splitLinkTargets> empty target encountered");
+				continue;
+			}
+
+			if (targetNames[k][startPos] == '@')
+			{
+				CInterfaceLink::CCDBTargetInfo ti;
+				ti.LeafName = targetNames[k].substr((startPos+1), (lastPos+1) - (startPos+1));
+				// Do not allow Write on SERVER: or LOCAL:
+				static const std::string	dbServer= "SERVER:";
+				static const std::string	dbLocal= "LOCAL:";
+				static const std::string	dbLocalR2= "LOCAL:R2";
+				if( (0==ti.LeafName.compare(0,    dbServer.size(),    dbServer)) ||
+					(0==ti.LeafName.compare(0,    dbLocal.size(),    dbLocal))
+					)
+				{
+					if (0!=ti.LeafName.compare(0,    dbLocalR2.size(),    dbLocalR2))
+					{
+						//nlwarning("You are not allowed to write on 'SERVER:...' or 'LOCAL:...' database");
+						nlstop;
+						return false;
+					}
+				}
+				ti.Leaf = NLGUI::CDBManager::getInstance()->getDbProp(ti.LeafName, false);
+				cdbTargetsVect.push_back(ti);
+			}
+			else
+			{
+				CInterfaceLink::CTargetInfo ti;
+				if (!splitLinkTarget(targetNames[k].substr(startPos, lastPos - startPos+1), parentGroup, ti.PropertyName, ti.Elem))
+				{
+					// todo hulud interface syntax error
+					nlwarning("<splitLinkTargets> Can't get link target");
+					everythingOk = false;
+					continue;
+				}
+				targetsVect.push_back(ti);
+			}
 		}
 		return everythingOk;
 	}
