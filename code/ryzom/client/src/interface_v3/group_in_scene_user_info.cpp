@@ -41,6 +41,7 @@ uint CGroupInSceneUserInfo::_BatLength = 0;
 CCDBNodeLeaf *CGroupInSceneUserInfo::_Value = NULL;
 CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueBegin = NULL;
 CCDBNodeLeaf *CGroupInSceneUserInfo::_ValueEnd = NULL;
+NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> CGroupInSceneUserInfo::_GuildIconLeaf[256];
 
 // ***************************************************************************
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupInSceneUserInfo, std::string, "in_scene_user_info");
@@ -943,8 +944,13 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 	if (_Entity->getGuildSymbol() != 0)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		string dbLeaf = "UI:ENTITY:GUILD:"+toString (_Entity->slot())+":ICON";
-		NLGUI::CDBManager::getInstance()->getDbProp(dbLeaf)->setValue64(_Entity->getGuildSymbol());
+		if (!_GuildIconLeaf[_Entity->slot()])
+		{
+			string dbLeaf = "UI:ENTITY:GUILD:"+toString (_Entity->slot())+":ICON";
+			_GuildIconLeaf[_Entity->slot()] = NLGUI::CDBManager::getInstance()->getDbProp(dbLeaf);
+		}
+		nlassert(&*_GuildIconLeaf[_Entity->slot()]);
+		(&*_GuildIconLeaf[_Entity->slot()])->setValue64(_Entity->getGuildSymbol());
 	}
 
 	// Set the event faction

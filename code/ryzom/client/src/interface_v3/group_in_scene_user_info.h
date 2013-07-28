@@ -97,6 +97,9 @@ protected:
 	static NLMISC::CCDBNodeLeaf	*_ValueBegin;
 	static NLMISC::CCDBNodeLeaf	*_ValueEnd;
 
+	// Guild icon leafs
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GuildIconLeaf[256];
+
 	// Special guild
 	bool		_NeedGuildNameId;
 	bool		_NeedGuildSymbolId;
