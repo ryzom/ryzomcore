@@ -69,7 +69,7 @@ public:
 	inline NLMISC::CCDBNodeLeaf *getNPCName() { return _NPCName ? (&*_NPCName) : &*(_NPCName = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NPCNAME")); }
 	inline NLMISC::CCDBNodeLeaf *getNPCTitle() { return _NPCTitle ? (&*_NPCTitle) : &*(_NPCTitle = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NPCTITLE")); }
 	inline NLMISC::CCDBNodeLeaf *getMissionIcon() { return _MissionIcon ? (&*_MissionIcon) : &*(_MissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MISSION_ICON")); }
-	inline NLMISC::CCDBNodeLeaf *getMiniMissionIcon() { return _MiniMissionIcon ? &*(&*_MiniMissionIcon) : (_MiniMissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MINI_MISSION_ICON")); }
+	inline NLMISC::CCDBNodeLeaf *getMiniMissionIcon() { return _MiniMissionIcon ? (&*_MiniMissionIcon) : &*(_MiniMissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MINI_MISSION_ICON")); }
 private:
 	std::string _DBPrefix;
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GuildSymbol;
