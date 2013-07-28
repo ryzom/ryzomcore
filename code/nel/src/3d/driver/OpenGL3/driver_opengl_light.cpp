@@ -22,11 +22,7 @@
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 // ***************************************************************************
@@ -145,13 +141,8 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 		else
 		{
 			// Disable spot properties
-#ifdef USE_OPENGLES
-			glLightf (lightNum, GL_SPOT_CUTOFF, 180.f);
-			glLightf (lightNum, GL_SPOT_EXPONENT, 0.f);
-#else
 			glLighti (lightNum, GL_SPOT_CUTOFF, 180);
 			glLighti (lightNum, GL_SPOT_EXPONENT, 0);
-#endif
 		}
 
 		// Flag this light as dirt.

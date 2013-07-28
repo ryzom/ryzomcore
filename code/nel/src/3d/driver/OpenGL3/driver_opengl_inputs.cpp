@@ -38,11 +38,7 @@ using namespace NLMISC;
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 // *************************************************************************************
