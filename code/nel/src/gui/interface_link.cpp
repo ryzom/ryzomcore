@@ -165,6 +165,7 @@ namespace NLGUI
 		_NextTriggeredLink[0] = _NextTriggeredLink[1] = NULL;
 		_Triggered[0] = _Triggered[1] = false;
 		_ParseTree = NULL;
+		_AHCondParsed = NULL;
 	}
 
 	//===========================================================
@@ -187,6 +188,9 @@ namespace NLGUI
 		_LinkList.erase(_ListEntry);
 
 		delete _ParseTree;
+		_ParseTree = NULL;
+		delete _AHCondParsed;
+		_AHCondParsed = NULL;
 	}
 
 	//===========================================================
@@ -243,7 +247,12 @@ namespace NLGUI
 		//
 		_ActionHandler = actionHandler;
 		_AHParams = ahParams;
+		nlassert(!_AHCondParsed);
 		_AHCond = ahCond;
+		if (!ahCond.empty())
+		{
+			_AHCondParsed = CInterfaceExpr::buildExprTree(ahCond);
+		}
 		_AHParent = parentGroup;
 		return true;
 	}
@@ -360,15 +369,14 @@ namespace NLGUI
 		if (!_ActionHandler.empty())
 		{
 			// If there is a condition, test it.
-			bool	launch= true;
-			if(!_AHCond.empty())
+			bool launch = _AHCond.empty();
+			if (_AHCondParsed)
 			{
-				launch= false;
-				CInterfaceExprValue		result;
-				if(CInterfaceExpr::eval(_AHCond, result))
-					launch= result.getBool();
+				CInterfaceExprValue result;
+				_AHCondParsed->eval(result);
+				launch = result.getBool();
 			}
-			if(launch)
+			if (launch)
 			{
 				CAHManager::getInstance()->runActionHandler(_ActionHandler, _AHParent, _AHParams);
 				// do not add any code after this line because this can be deleted !!!!

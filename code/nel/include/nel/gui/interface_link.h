@@ -141,6 +141,7 @@ namespace NLGUI
 		std::string					 _ActionHandler;
 		std::string					 _AHParams;
 		std::string					 _AHCond;
+		CInterfaceExprNode			*_AHCondParsed;
 		CInterfaceGroup				*_AHParent;
 		static TLinkList             _LinkList;
 		TLinkList::iterator			 _ListEntry;
