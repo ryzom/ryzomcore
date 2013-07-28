@@ -275,7 +275,7 @@ void checkUnderCursor()
 
 		// If the mouse is over the player make the player transparent
 		CCDBNodeLeaf *pNL = s_UserCharFade ? &*s_UserCharFade
-			: (s_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
+			: &*(s_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
 		if ((pNL != NULL) && (pNL->getValue32() == 1) && UserEntity->selectable())
 		{
 			// If the nearest entity is the player, hide!

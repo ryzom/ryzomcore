@@ -295,7 +295,7 @@ void CUserControls::update()
 	View.updateCameraCollision();
 
 	NLMISC::CCDBNodeLeaf *node = _UiVarMkMoveDB ? &*_UiVarMkMoveDB
-		: (_UiVarMkMoveDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MK_MOVE"));
+		: &*(_UiVarMkMoveDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MK_MOVE"));
 	node->setValue32(autowalkState());
 }// update //
 
