@@ -24,6 +24,8 @@
 namespace NLGUI
 {
 	void ifexprufct_forcelink();
+	void force_link_dbgroup_select_number_cpp();
+	void force_link_dbgroup_combo_box_cpp();
 
 	/// Necessary so the linker doesn't drop the code of these classes from the library
 	void LinkHack()
@@ -33,5 +35,7 @@ namespace NLGUI
 		CDBViewQuantity::forceLink();
 		CViewPointer::forceLink();
 		ifexprufct_forcelink();
+		force_link_dbgroup_select_number_cpp();
+		force_link_dbgroup_combo_box_cpp();
 	}
 }
