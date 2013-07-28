@@ -72,7 +72,7 @@ protected:
 	};
 
 	/// Fill NumBars elements into bars and set dbEntry
-	static void	getBarSettings( CInterfaceManager* pIM, bool isUser, bool isPlayer, bool isFriend, std::string& dbEntry, bool *bars );
+	static void	getBarSettings( CInterfaceManager* pIM, bool isUser, bool isPlayer, bool isFriend, int &dbEntry, bool *bars );
 
 	// The entity (character or forage source)
 	CEntityCL	*_Entity;
