@@ -863,8 +863,10 @@
       </group>
     </group>
   </group>
+  <!--<define id="cs_url"
+          value="http://app.ryzom.com/ticket_system/index.php?mode=load" />-->
   <define id="cs_url"
-          value="http://app.ryzom.com/ticket_system/index.php?mode=load" />
+          value="http://localhost:40917/www/html/index.php" />
   <group type="container"
          id="cs_browser"
          w="410"

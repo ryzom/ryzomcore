@@ -25,6 +25,12 @@ $cfg['db']['shard']['name']    = 'nel';
 $cfg['db']['shard']['user']    = 'shard';
 $cfg['db']['shard']['pass']    = '';
 
+$cfg['db']['ring']['host']    = 'localhost';
+$cfg['db']['ring']['port']    = '3306';
+$cfg['db']['ring']['name']    = 'ring_open';
+$cfg['db']['ring']['user']    = 'shard';
+$cfg['db']['ring']['pass']    = '';
+
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters

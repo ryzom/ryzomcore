@@ -17,7 +17,7 @@ class Helpers{
 
          helpers :: create_folders ();
 
-         if ( helpers :: check_if_game_client () or $forcelibrender = false ){
+         if ( helpers::check_if_game_client() or $forcelibrender = false ){
              $smarty -> template_dir = $AMS_LIB . '/ingame_templates/';
              $smarty -> setConfigDir( $AMS_LIB . '/configs' );
              }else{
@@ -34,17 +34,21 @@ class Helpers{
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
-          if( isset($vars['permission']) && $vars['permission'] == 3 ){
-               $inherited = "extends:layout_admin.tpl|";
-          }else if( isset($vars['permission']) && $vars['permission'] == 2){
-               $inherited = "extends:layout_mod.tpl|";
-          }else if( isset($vars['permission']) && $vars['permission'] == 1){
-               $inherited = "extends:layout_user.tpl|";
+          if (! helpers :: check_if_game_client ()){
+               if( isset($vars['permission']) && $vars['permission'] == 3 ){
+                    $inherited = "extends:layout_admin.tpl|";
+               }else if( isset($vars['permission']) && $vars['permission'] == 2){
+                    $inherited = "extends:layout_mod.tpl|";
+               }else if( isset($vars['permission']) && $vars['permission'] == 1){
+                    $inherited = "extends:layout_user.tpl|";
+               }else{
+                    $inherited ="";
+               }
+              // extends:' . $inherited .'|register.tpl
+             $smarty -> display( $inherited . $template . '.tpl' );
           }else{
-               $inherited ="";
+               $smarty -> display($template . '.tpl' );
           }
-         // extends:' . $inherited .'|register.tpl
-        $smarty -> display( $inherited . $template . '.tpl' );
          }
 
      static public function create_folders(){
@@ -70,7 +74,7 @@ class Helpers{
      static public function check_if_game_client()
     {
          // if HTTP_USER_AGENT is not set then its ryzom core
-          if ( !isset( $_SERVER['HTTP_USER_AGENT'] ) ){
+          if ( strpos($_SERVER['HTTP_USER_AGENT'],"Ryzom") === 0){
              return true;
           }else{
              return false;
@@ -112,5 +116,25 @@ class Helpers{
      static public function outputTime($time){
           global $TIME_FORMAT;
           return date($TIME_FORMAT,strtotime($time));
+     }
+     
+     static public function  check_login_ingame(){
+          if ( helpers :: check_if_game_client () or $forcelibrender = false ){
+               $dbr = new DBLayer("ring");
+               if (isset($_GET['UserId']) && isset($_COOKIE['ryzomId'])){
+                    $id = $_GET['UserId'];
+                    $statement = $dbr->execute("SELECT * FROM ring_users WHERE user_id=:id AND cookie =:cookie", array('id' => $id, 'cookie' => $_COOKIE['ryzomId']));
+                    if ($statement->rowCount() ){
+                         $entry = $statement->fetch();
+                         return array('id' => $id, 'name' => $entry['user_name']); 
+                    }else{
+                         return "FALSE";
+                    }
+               }else{
+                    return "FALSE";
+               }
+          }else{
+               return "FALSE";
+          }
      }
 }
