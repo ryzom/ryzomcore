@@ -1488,7 +1488,10 @@ void			CDriverGL::enableUsedTextureMemorySum (bool enable)
 	H_AUTO_OGL(CDriverGL_enableUsedTextureMemorySum )
 
 	if (enable)
+	{	
 		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL");
+		_TextureUsed.reserve(512);
+	}
 	_SumTextureMemoryUsed=enable;
 }
 
@@ -1502,7 +1505,7 @@ uint32			CDriverGL::getUsedTextureMemory() const
 	uint32 memory=0;
 
 	// For each texture used
-	set<CTextureDrvInfosGL*>::const_iterator ite=_TextureUsed.begin();
+	std::vector<CTextureDrvInfosGL *>::const_iterator ite = _TextureUsed.begin();
 	while (ite!=_TextureUsed.end())
 	{
 		// Get the gl texture
@@ -1510,7 +1513,8 @@ uint32			CDriverGL::getUsedTextureMemory() const
 		gltext= (*ite);
 
 		// Sum the memory used by this texture
-		memory+=gltext->TextureMemory;
+		if (gltext)
+			memory+=gltext->TextureMemory;
 
 		// Next texture
 		ite++;
