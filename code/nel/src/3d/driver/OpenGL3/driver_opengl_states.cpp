@@ -643,14 +643,10 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 
 		if(mode==0)
 		{
-#ifdef USE_OPENGLES
-			glDisable(GL_TEXTURE_GEN_STR_OES);
-#else
 			glDisable( GL_TEXTURE_GEN_S );
 			glDisable( GL_TEXTURE_GEN_T );
 			glDisable( GL_TEXTURE_GEN_R );
 			glDisable( GL_TEXTURE_GEN_Q );
-#endif
 		}
 		else
 		{

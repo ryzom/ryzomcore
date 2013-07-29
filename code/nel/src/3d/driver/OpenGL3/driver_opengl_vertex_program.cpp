@@ -33,11 +33,7 @@ using namespace NLMISC;
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 // ***************************************************************************
@@ -51,7 +47,6 @@ CVertexProgamDrvInfosGL3::CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrv
 			  || drv->_Extensions.ARBVertexProgram
 		     );
 
-#ifndef USE_OPENGLES
 	if (drv->_Extensions.NVVertexProgram) // NVIDIA implemntation
 	{
 		// Generate a program
@@ -65,7 +60,6 @@ CVertexProgamDrvInfosGL3::CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrv
 	{
 		ID = nglGenVertexShadersEXT(1); // ATI implementation
 	}
-#endif
 }
 
 
@@ -90,7 +84,6 @@ bool CDriverGL3::activeNVVertexProgram (CVertexProgram *program)
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_activeNVVertexProgram);
 
-#ifndef USE_OPENGLES
 	// Setup or unsetup ?
 	if (program)
 	{
@@ -200,13 +193,10 @@ bool CDriverGL3::activeNVVertexProgram (CVertexProgram *program)
 		// Ok
 		return true;
 	}
-#endif
-
 	return false;
 }
 
 // ***************************************************************************
-#ifndef USE_OPENGLES
 static
 inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 {
@@ -243,7 +233,6 @@ inline GLenum convSwizzleToGLFormat(CVPSwizzle::EComp comp, bool negate)
 		}
 	}
 }
-#endif
 
 // ***************************************************************************
 /** Convert an output register to a EXTVertexShader register
@@ -252,7 +241,6 @@ static GLuint convOutputRegisterToEXTVertexShader(CVPOperand::EOutputRegister r)
 {
 	H_AUTO_OGL(convOutputRegisterToEXTVertexShader);
 
-#ifndef USE_OPENGLES
 	switch (r)
 	{
 		case 	CVPOperand::OHPosition:			return GL_OUTPUT_VERTEX_EXT;
@@ -280,7 +268,6 @@ static GLuint convOutputRegisterToEXTVertexShader(CVPOperand::EOutputRegister r)
 			nlstop;
 		break;
 	}
-#endif
 
 	return 0;
 }
@@ -334,7 +321,6 @@ static void doSwizzle(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum ou
 {
 	H_AUTO_OGL(doSwizzle);
 
-#ifndef USE_OPENGLES
 	nglSwizzleEXT(res, in, outX, outY, outZ, outW);
 #ifdef DEBUG_SETUP_EXT_VERTEX_SHADER
 	std::string swzStr = "Swizzle : ";
@@ -378,7 +364,6 @@ static void doSwizzle(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum ou
 	}
 	EVS_INFO(swzStr.c_str());
 #endif
-#endif
 }
 
 // Perform write mask and output de bug information
@@ -386,7 +371,6 @@ static void doWriteMask(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum 
 {
 	H_AUTO_OGL(doWriteMask);
 
-#ifndef USE_OPENGLES
 	nglWriteMaskEXT(res, in, outX, outY, outZ, outW);
 	#ifdef DEBUG_SETUP_EXT_VERTEX_SHADER
 	nlinfo("3D: Write Mask : %c%c%c%c",
@@ -396,7 +380,6 @@ static void doWriteMask(GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum 
 		   outW ? 'w' : '-'
 		  );
 	#endif
-#endif
 }
 
 // ***************************************************************************
@@ -406,7 +389,6 @@ bool CDriverGL3::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint
 {
 	H_AUTO_OGL(CDriverGL3_setupEXTVertexShader);
 
-#ifndef USE_OPENGLES
 	// counter to see what is generated
 	uint numOp = 0;
 	uint numOpIndex = 0;
@@ -1187,9 +1169,6 @@ bool CDriverGL3::setupEXTVertexShader(const CVPParser::TProgram &program, GLuint
 #endif
 
 	return true;
-#else
-	return false;
-#endif
 }
 
 //=================================================================================================
@@ -1346,7 +1325,6 @@ bool CDriverGL3::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgr
 {
 	H_AUTO_OGL(CDriverGL3_setupARBVertexProgram);
 
-#ifndef USE_OPENGLES
 	// tmp
 	CVPParser::TProgram parsedProgram = inParsedProgram;
 	//
@@ -1481,9 +1459,6 @@ bool CDriverGL3::setupARBVertexProgram (const CVPParser::TProgram &inParsedProgr
 #endif
 
 	return true;
-#else
-	return false;
-#endif
 }
 
 
@@ -1493,7 +1468,6 @@ bool CDriverGL3::activeARBVertexProgram (CVertexProgram *program)
 {
 	H_AUTO_OGL(CDriverGL3_activeARBVertexProgram);
 
-#ifndef USE_OPENGLES
 	// Setup or unsetup ?
 	if (program)
 	{
@@ -1557,9 +1531,6 @@ bool CDriverGL3::activeARBVertexProgram (CVertexProgram *program)
 		_VertexProgramEnabled = false;
 	}
 	return true;
-#else
-	return false;
-#endif
 }
 
 // ***************************************************************************
@@ -1567,7 +1538,6 @@ bool CDriverGL3::activeEXTVertexShader (CVertexProgram *program)
 {
 	H_AUTO_OGL(CDriverGL3_activeEXTVertexShader);
 
-#ifndef USE_OPENGLES
 	// Setup or unsetup ?
 	if (program)
 	{
@@ -1635,9 +1605,6 @@ bool CDriverGL3::activeEXTVertexShader (CVertexProgram *program)
 		_VertexProgramEnabled = false;
 	}
 	return true;
-#else
-	return false;
-#endif
 }
 
 // ***************************************************************************
@@ -1669,7 +1636,6 @@ void CDriverGL3::setConstant (uint index, float f0, float f1, float f2, float f3
 {
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1685,7 +1651,6 @@ void CDriverGL3::setConstant (uint index, float f0, float f1, float f2, float f3
 		float datas[] = { f0, f1, f2, f3 };
 		nglSetInvariantEXT(_EVSConstantHandle + index, GL_FLOAT, datas);
 	}
-#endif
 }
 
 
@@ -1695,7 +1660,6 @@ void CDriverGL3::setConstant (uint index, double d0, double d1, double d2, doubl
 {
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1711,7 +1675,6 @@ void CDriverGL3::setConstant (uint index, double d0, double d1, double d2, doubl
 		double datas[] = { d0, d1, d2, d3 };
 		nglSetInvariantEXT(_EVSConstantHandle + index, GL_DOUBLE, datas);
 	}
-#endif
 }
 
 
@@ -1721,7 +1684,6 @@ void CDriverGL3::setConstant (uint index, const NLMISC::CVector& value)
 {
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1737,7 +1699,6 @@ void CDriverGL3::setConstant (uint index, const NLMISC::CVector& value)
 		float datas[] = { value.x, value.y, value.z, 0 };
 		nglSetInvariantEXT(_EVSConstantHandle + index, GL_FLOAT, datas);
 	}
-#endif
 }
 
 
@@ -1747,7 +1708,6 @@ void CDriverGL3::setConstant (uint index, const NLMISC::CVectorD& value)
 {
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1763,7 +1723,6 @@ void CDriverGL3::setConstant (uint index, const NLMISC::CVectorD& value)
 		double datas[] = { value.x, value.y, value.z, 0 };
 		nglSetInvariantEXT(_EVSConstantHandle + index, GL_DOUBLE, datas);
 	}
-#endif
 }
 
 
@@ -1772,7 +1731,6 @@ void	CDriverGL3::setConstant (uint index, uint num, const float *src)
 {
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1792,7 +1750,6 @@ void	CDriverGL3::setConstant (uint index, uint num, const float *src)
 			nglSetInvariantEXT(_EVSConstantHandle + index + k, GL_FLOAT, (void *) (src + 4 * k));
 		}
 	}
-#endif
 }
 
 // ***************************************************************************
@@ -1800,7 +1757,6 @@ void	CDriverGL3::setConstant (uint index, uint num, const double *src)
 {
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1820,7 +1776,6 @@ void	CDriverGL3::setConstant (uint index, uint num, const double *src)
 			nglSetInvariantEXT(_EVSConstantHandle + index + k, GL_DOUBLE, (void *) (src + 4 * k));
 		}
 	}
-#endif
 }
 
 // ***************************************************************************
@@ -1829,11 +1784,7 @@ const uint CDriverGL3::GLMatrix[IDriver::NumMatrix]=
 {
 	GL_MODELVIEW,
 	GL_PROJECTION,
-#ifdef USE_OPENGLES
-	GL_MODELVIEW
-#else
 	GL_MODELVIEW_PROJECTION_NV
-#endif
 };
 
 
@@ -1841,17 +1792,10 @@ const uint CDriverGL3::GLMatrix[IDriver::NumMatrix]=
 
 const uint CDriverGL3::GLTransform[IDriver::NumTransform]=
 {
-#ifdef USE_OPENGLES
-	0,
-	0,
-	0,
-	0
-#else
 	GL_IDENTITY_NV,
 	GL_INVERSE_NV,
 	GL_TRANSPOSE_NV,
 	GL_INVERSE_TRANSPOSE_NV
-#endif
 };
 
 
@@ -1861,7 +1805,6 @@ void CDriverGL3::setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver
 {
 	H_AUTO_OGL(CDriverGL3_setConstantMatrix);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1931,7 +1874,6 @@ void CDriverGL3::setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver
 			nglSetInvariantEXT(_EVSConstantHandle + index + 3, GL_FLOAT, matDatas + 12);
 		}
 	}
-#endif
 }
 
 // ***************************************************************************
@@ -1949,7 +1891,6 @@ void CDriverGL3::enableVertexProgramDoubleSidedColor(bool doubleSided)
 {
 	H_AUTO_OGL(CDriverGL3_enableVertexProgramDoubleSidedColor);
 
-#ifndef USE_OPENGLES
 	// Vertex program exist ?
 	if (_Extensions.NVVertexProgram)
 	{
@@ -1967,7 +1908,6 @@ void CDriverGL3::enableVertexProgramDoubleSidedColor(bool doubleSided)
 		else
 			glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
 	}
-#endif
 }
 
 

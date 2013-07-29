@@ -38,13 +38,12 @@ static void convBlend(CMaterial::TBlend blend, GLenum& glenum)
 		case CMaterial::invsrcalpha:glenum=GL_ONE_MINUS_SRC_ALPHA; break;
 		case CMaterial::srccolor:	glenum=GL_SRC_COLOR; break;
 		case CMaterial::invsrccolor:glenum=GL_ONE_MINUS_SRC_COLOR; break;
+
 		// Extended Blend modes.
-#ifndef USE_OPENGLES
 		case CMaterial::blendConstantColor:		glenum=GL_CONSTANT_COLOR_EXT; break;
 		case CMaterial::blendConstantInvColor:	glenum=GL_ONE_MINUS_CONSTANT_COLOR_EXT; break;
 		case CMaterial::blendConstantAlpha:		glenum=GL_CONSTANT_ALPHA_EXT; break;
 		case CMaterial::blendConstantInvAlpha:	glenum=GL_ONE_MINUS_CONSTANT_ALPHA_EXT; break;
-#endif
 
 		default: nlstop;
 	}

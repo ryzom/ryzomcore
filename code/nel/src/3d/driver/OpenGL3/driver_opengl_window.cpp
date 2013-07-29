@@ -49,11 +49,7 @@ using namespace NLMISC;
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 #ifdef NL_OS_WINDOWS
@@ -451,7 +447,6 @@ bool CDriverGL3::unInit()
 
 #ifdef NL_OS_WINDOWS
 
-#ifndef USE_OPENGLES
 	// Off-screen rendering ?
 	if (_PBuffer)
 	{
@@ -459,7 +454,6 @@ bool CDriverGL3::unInit()
 		nwglDestroyPbufferARB(_PBuffer);
 		_PBuffer = NULL;
 	}
-#endif
 
 	if (_Registered && !UnregisterClassW(L"NLClass", GetModuleHandle(NULL)))
 	{
@@ -615,11 +609,9 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 #ifdef NL_OS_WINDOWS
 
 	// Init pointers
-#ifndef USE_OPENGLES
 	_PBuffer = NULL;
 	_hRC = NULL;
 	_hDC = NULL;
-#endif
 
 	// Driver caps.
 	//=============
@@ -705,11 +697,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		}
 
 		// Register WGL functions
-#ifdef USE_OPENGLES
-		registerEGlExtensions (_Extensions, tempHDC);
-#else
 		registerWGlExtensions (_Extensions, tempHDC);
-#endif
 
 		HDC hdc = wglGetCurrentDC ();
 
@@ -868,19 +856,11 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		_CurrentMode.Depth = uint8(GetDeviceCaps (_hDC, BITSPIXEL));
 
 		// Destroy the temp gl context
-#ifdef USE_OPENGLES
-		if (!eglDestroyContext(_EglDisplay, _EglContext);)
-		{
-			DWORD error = GetLastError ();
-			nlwarning ("CDriverGL3::setDisplay: wglDeleteContext failed: 0x%x", error);
-		}
-#else
 		if (!wglDeleteContext (tempGLRC))
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL3::setDisplay: wglDeleteContext failed: 0x%x", error);
 		}
-#endif
 
 		// Destroy the temp windows
 		if (!DestroyWindow (tmpHWND))
@@ -894,13 +874,9 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL3::setDisplay: wglMakeCurrent failed: 0x%x", error);
 
-#ifdef USE_OPENGLES
-			eglDestroyContext(_EglDisplay, _EglContext);
-#else
 			wglDeleteContext (_hRC);
 			nwglReleasePbufferDCARB( _PBuffer, _hDC );
 			nwglDestroyPbufferARB( _PBuffer );
-#endif
 
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
@@ -1607,19 +1583,7 @@ bool CDriverGL3::destroyWindow()
 	std::vector<NLMISC::CBitmap> bitmaps;
 	setWindowIcon(bitmaps);
 
-#ifdef USE_OPENGLES
-
-	if (_EglDisplay && _EglContext)
-	{
-		eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext);
-
-		if (_DestroyWindow)
-		{
-			eglDestroyContext(_EglDisplay, _EglContext);
-		}
-	}
-
-#elif defined(NL_OS_WINDOWS)
+#if defined(NL_OS_WINDOWS)
 
 	// Then delete.
 	// wglMakeCurrent(NULL,NULL);
@@ -2377,106 +2341,7 @@ emptyProc CDriverGL3::getWindowProc()
 // --------------------------------------------------
 bool CDriverGL3::createContext()
 {
-#ifdef USE_OPENGLES
-	uint samples = 0;
-
-	if (_CurrentMode.AntiAlias > -1)
-	{
-		if (_CurrentMode.AntiAlias == 0)
-		{
-			samples = 4;
-		}
-		else
-		{
-			samples = _CurrentMode.AntiAlias;
-		}
-	}
-
-	EGLint attribList[] =
-	{
-		EGL_RED_SIZE,		8,
-		EGL_GREEN_SIZE,		8,
-		EGL_BLUE_SIZE,		8,
-		EGL_ALPHA_SIZE,		8,
-		EGL_DEPTH_SIZE,		16,
-		EGL_STENCIL_SIZE,	8,
-//		EGL_SAMPLE_BUFFERS,	_CurrentMode.AntiAlias > -1 ? 1:0,
-//		EGL_SAMPLES,		samples,
-		EGL_RENDERABLE_TYPE,
-		EGL_OPENGL_ES_BIT,
-		EGL_NONE
-	};
-
-	// Get Display
-	_EglDisplay = EGL_NO_DISPLAY; // eglGetDisplay(_hDC);
-
-	if (_EglDisplay == EGL_NO_DISPLAY)
-	{
-		_EglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-
-		if (_EglDisplay == EGL_NO_DISPLAY)
-		{
-			nlwarning("3D: failed to get display 0x%x", eglGetError());
-			return false;
-		}
-	}
-
-	// Initialize EGL
-	EGLint majorVersion;
-	EGLint minorVersion;
-
-	if (!eglInitialize(_EglDisplay, &majorVersion, &minorVersion))
-	{
-		return EGL_FALSE;
-	}
-
-	const char *extensions = eglQueryString(_EglDisplay, EGL_EXTENSIONS);
-
-
-	// Get configs
-	EGLint numConfigs;
-
-	if (!eglGetConfigs(_EglDisplay, NULL, 0, &numConfigs))
-	{
-		return false;
-	}
-
-	// Choose config
-	EGLConfig config = NULL;
-
-	if (!eglChooseConfig(_EglDisplay, attribList, &config, 1, &numConfigs))
-	{
-		return false;
-	}
-
-	// Create a surface
-	_EglSurface = eglCreateWindowSurface(_EglDisplay, config, (EGLNativeWindowType)_win, NULL);
-
-	if (_EglSurface == EGL_NO_SURFACE)
-	{
-		return false;
-	}
-
-	// Create a GL context
-	EGLint contextAttribs[] =
-	{
-		EGL_CONTEXT_CLIENT_VERSION, 1,
-		EGL_NONE
-	};
-
-	_EglContext = eglCreateContext(_EglDisplay, config, EGL_NO_CONTEXT, contextAttribs);
-
-	if (_EglContext == EGL_NO_CONTEXT)
-	{
-		return false;
-	}   
-
-	// Make the context current
-	if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
-	{
-		return false;
-	}
-#elif defined(NL_OS_WINDOWS)
+#if defined(NL_OS_WINDOWS)
 	_hDC = GetDC(_win);
 	_CurrentMode.Depth = uint8(GetDeviceCaps(_hDC,BITSPIXEL));
 
@@ -2526,20 +2391,7 @@ bool CDriverGL3::activate()
 	if (_win == EmptyWindow)
 		return false;
 
-#ifdef USE_OPENGLES
-
-	EGLContext ctx = eglGetCurrentContext();
-
-	if (ctx != _EglContext)
-	{
-		// Make the context current
-		if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
-		{
-			return false;
-		}
-	}
-
-#elif defined(NL_OS_WINDOWS)
+#if defined(NL_OS_WINDOWS)
 
 	HGLRC hglrc = wglGetCurrentContext();
 
@@ -2558,7 +2410,7 @@ bool CDriverGL3::activate()
 	if (nctx != NULL && nctx != _ctx)
 		glXMakeCurrent(_dpy, _win, _ctx);
 
-#endif // USE_OPENGLES
+#endif
 
 	return true;
 }
@@ -2614,14 +2466,11 @@ void CDriverGL3::getWindowSize(uint32 &width, uint32 &height)
 	{
 #ifdef NL_OS_WINDOWS
 
-#ifndef USE_OPENGLES
 		if (_PBuffer)
 		{
 			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width );
 			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height );
 		}
-#endif
-
 #endif
 	}
 	else

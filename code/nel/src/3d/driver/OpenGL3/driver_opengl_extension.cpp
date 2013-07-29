@@ -1655,7 +1655,7 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 
 	return true;
 }
-#endif // USE_OPENGLES
+#endif
 
 #ifdef NL_STATIC
 } // NLDRIVERGL/ES

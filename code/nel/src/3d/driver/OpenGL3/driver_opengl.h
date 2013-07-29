@@ -759,11 +759,7 @@ private:
 
 	TCursorMap					_Cursors;
 
-#ifdef USE_OPENGLES
-	EGLDisplay					_EglDisplay;
-	EGLContext					_EglContext;
-	EGLSurface					_EglSurface;
-#elif defined(NL_OS_WINDOWS)
+#if defined(NL_OS_WINDOWS)
 	HGLRC						_hRC;
 	HDC							_hDC;
 	PIXELFORMATDESCRIPTOR		_pfd;

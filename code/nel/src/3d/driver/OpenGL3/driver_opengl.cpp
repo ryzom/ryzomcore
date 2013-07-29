@@ -1474,9 +1474,7 @@ void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const flo
 	nlassert(stage < inlGetNumTextStages() );
 	_DriverGLStates.activeTextureARB(stage);
 
-#ifndef USE_OPENGLES
 	glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
-#endif
 }
 
 
@@ -1487,7 +1485,6 @@ void CDriverGL3::enableNVTextureShader(bool enabled)
 
 	if (enabled != _NVTextureShaderEnabled)
 	{
-#ifndef USE_OPENGLES
 		if (enabled)
 		{
 			glEnable(GL_TEXTURE_SHADER_NV);
@@ -1496,7 +1493,6 @@ void CDriverGL3::enableNVTextureShader(bool enabled)
 		{
 			glDisable(GL_TEXTURE_SHADER_NV);
 		}
-#endif
 		_NVTextureShaderEnabled = enabled;
 	}
 }
@@ -1558,10 +1554,8 @@ void CDriverGL3::setBlendConstantColor(NLMISC::CRGBA col)
 	if(!_Extensions.EXTBlendColor)
 		return;
 
-#ifndef USE_OPENGLES
 	static const	float	OO255= 1.0f/255;
 	nglBlendColorEXT(col.R*OO255, col.G*OO255, col.B*OO255, col.A*OO255);
-#endif
 }
 
 // ***************************************************************************

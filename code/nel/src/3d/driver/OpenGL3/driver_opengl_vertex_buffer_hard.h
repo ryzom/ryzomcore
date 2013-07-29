@@ -23,11 +23,7 @@
 namespace NL3D {
 
 #ifdef NL_STATIC
-#ifdef USE_OPENGLES
-namespace NLDRIVERGLES {
-#else
 namespace NLDRIVERGL3 {
-#endif
 #endif
 
 class	CDriverGL;
@@ -116,8 +112,6 @@ protected:
 	CDriverGL3			*_Driver;
 	bool		 _Invalid;
 };
-
-#ifndef USE_OPENGLES
 
 // ***************************************************************************
 // ***************************************************************************
@@ -460,8 +454,6 @@ public:
 	#endif
 };
 
-#endif
-
 // ***************************************************************************
 // ***************************************************************************
 // ARB_vertex_buffer_object implementation
@@ -559,11 +551,7 @@ private:
 	CVertexArrayRangeARB			*_VertexArrayRange;
 	CVertexBuffer::TPreferredMemory _MemType;
 	void							*_VertexPtr; // pointer on current datas. Null if not locked
-#ifdef USE_OPENGLES
-	uint8							*_Buffer;
-	uint32							_BufferSize;
-	uint32							_LastBufferSize;
-#endif
+
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
 	std::vector<uint8>				_DummyVB;
 	// for use by CVertexArrayRangeARB
