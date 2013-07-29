@@ -320,7 +320,7 @@ void CCDBSynchronised::writeInitInProgressIntoUIDB()
 	if (pIM)
 	{
 		NLMISC::CCDBNodeLeaf *node = m_CDBInitInProgressDB ? (&*m_CDBInitInProgressDB)
-			: (m_CDBInitInProgressDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS"));
+			: &*(m_CDBInitInProgressDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS"));
 		node->setValueBool(_InitInProgress);
 	}
 	else

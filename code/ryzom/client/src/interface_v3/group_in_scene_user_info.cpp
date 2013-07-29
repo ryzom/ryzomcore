@@ -54,22 +54,22 @@ class CConfigSaveInsceneDB
 {
 public:
 	void setPrefix(const std::string &prefix) { _DBPrefix = prefix; }
-	inline NLMISC::CCDBNodeLeaf *getGuildSymbol() { return _GuildSymbol ? (&*_GuildSymbol) : (_GuildSymbol = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "GUILD_SYMBOL")); }
-	inline NLMISC::CCDBNodeLeaf *getName() { return _Name ? (&*_Name) : (_Name = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NAME")); }
-	inline NLMISC::CCDBNodeLeaf *getTitle() { return _Title ? (&*_Title) : (_Title = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "TITLE")); }
-	inline NLMISC::CCDBNodeLeaf *getRPTags() { return _RPTags ? (&*_RPTags) : (_RPTags = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "RPTAGS")); }
-	inline NLMISC::CCDBNodeLeaf *getGuildName() { return _GuildName ? (&*_GuildName) : (_GuildName = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "GUILD_NAME")); }
-	inline NLMISC::CCDBNodeLeaf *getHP() { return _HP ? (&*_HP) : (_HP = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "HP")); }
-	inline NLMISC::CCDBNodeLeaf *getSta() { return _Sta ? (&*_Sta) : (_Sta = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "STA")); }
-	inline NLMISC::CCDBNodeLeaf *getSap() { return _Sap ? (&*_Sap) : (_Sap = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "SAP")); }
-	inline NLMISC::CCDBNodeLeaf *getFocus() { return _Focus ? (&*_Focus) : (_Focus = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "FOCUS")); }
-	inline NLMISC::CCDBNodeLeaf *getAction() { return _Action ? (&*_Action) : (_Action = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "ACTION")); }
-	inline NLMISC::CCDBNodeLeaf *getMessages() { return _Messages ? (&*_Messages) : (_Messages = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MESSAGES")); }
-	inline NLMISC::CCDBNodeLeaf *getPvPLogo() { return _PvPLogo ? (&*_PvPLogo) : (_PvPLogo = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "PVP_LOGO")); }
-	inline NLMISC::CCDBNodeLeaf *getNPCName() { return _NPCName ? (&*_NPCName) : (_NPCName = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NPCNAME")); }
-	inline NLMISC::CCDBNodeLeaf *getNPCTitle() { return _NPCTitle ? (&*_NPCTitle) : (_NPCTitle = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NPCTITLE")); }
-	inline NLMISC::CCDBNodeLeaf *getMissionIcon() { return _MissionIcon ? (&*_MissionIcon) : (_MissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MISSION_ICON")); }
-	inline NLMISC::CCDBNodeLeaf *getMiniMissionIcon() { return _MiniMissionIcon ? (&*_MiniMissionIcon) : (_MiniMissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MINI_MISSION_ICON")); }
+	inline NLMISC::CCDBNodeLeaf *getGuildSymbol() { return _GuildSymbol ? (&*_GuildSymbol) : &*(_GuildSymbol = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "GUILD_SYMBOL")); }
+	inline NLMISC::CCDBNodeLeaf *getName() { return _Name ? (&*_Name) : &*(_Name = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NAME")); }
+	inline NLMISC::CCDBNodeLeaf *getTitle() { return _Title ? (&*_Title) : &*(_Title = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "TITLE")); }
+	inline NLMISC::CCDBNodeLeaf *getRPTags() { return _RPTags ? (&*_RPTags) : &*(_RPTags = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "RPTAGS")); }
+	inline NLMISC::CCDBNodeLeaf *getGuildName() { return _GuildName ? (&*_GuildName) : &*(_GuildName = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "GUILD_NAME")); }
+	inline NLMISC::CCDBNodeLeaf *getHP() { return _HP ? (&*_HP) : &*(_HP = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "HP")); }
+	inline NLMISC::CCDBNodeLeaf *getSta() { return _Sta ? (&*_Sta) : &*(_Sta = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "STA")); }
+	inline NLMISC::CCDBNodeLeaf *getSap() { return _Sap ? (&*_Sap) : &*(_Sap = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "SAP")); }
+	inline NLMISC::CCDBNodeLeaf *getFocus() { return _Focus ? (&*_Focus) : &*(_Focus = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "FOCUS")); }
+	inline NLMISC::CCDBNodeLeaf *getAction() { return _Action ? (&*_Action) : &*(_Action = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "ACTION")); }
+	inline NLMISC::CCDBNodeLeaf *getMessages() { return _Messages ? (&*_Messages) : &*(_Messages = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MESSAGES")); }
+	inline NLMISC::CCDBNodeLeaf *getPvPLogo() { return _PvPLogo ? (&*_PvPLogo) : &*(_PvPLogo = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "PVP_LOGO")); }
+	inline NLMISC::CCDBNodeLeaf *getNPCName() { return _NPCName ? (&*_NPCName) : &*(_NPCName = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NPCNAME")); }
+	inline NLMISC::CCDBNodeLeaf *getNPCTitle() { return _NPCTitle ? (&*_NPCTitle) : &*(_NPCTitle = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "NPCTITLE")); }
+	inline NLMISC::CCDBNodeLeaf *getMissionIcon() { return _MissionIcon ? (&*_MissionIcon) : &*(_MissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MISSION_ICON")); }
+	inline NLMISC::CCDBNodeLeaf *getMiniMissionIcon() { return _MiniMissionIcon ? (&*_MiniMissionIcon) : &*(_MiniMissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(_DBPrefix + "MINI_MISSION_ICON")); }
 private:
 	std::string _DBPrefix;
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GuildSymbol;

@@ -1124,8 +1124,8 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 		// **** Compute Phrase Elements from phrase
 		// get the current action malus (0-100)
 		uint32	totalActionMalus= 0;
-		CCDBNodeLeaf *actMalus = (CCDBNodeLeaf *)_TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
-			: (_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
+		CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
+			: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
 		
 		// root brick must not be Power or aura, because Action malus don't apply to them
 		// (ie leave 0 ActionMalus for Aura or Powers
@@ -4506,8 +4506,8 @@ uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
 	uint32	totalActionMalus= 0;
-	CCDBNodeLeaf *actMalus = (CCDBNodeLeaf *)_TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
-		: (_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
+	CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
+		: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
 	// root brick must not be Power or aura, because Action malus don't apply to them
 	// (ie leave 0 ActionMalus for Aura or Powers
 	if (!phrase.Bricks.empty())

@@ -2299,8 +2299,8 @@ bool mainLoop()
 					deltaTime = smoothFPS.getSmoothValue ();
 					if (deltaTime > 0.0)
 					{
-						CCDBNodeLeaf *pNL = (CCDBNodeLeaf *)s_FpsLeaf ? &*s_FpsLeaf
-							: (s_FpsLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS"));
+						CCDBNodeLeaf *pNL = s_FpsLeaf ? &*s_FpsLeaf
+							: &*(s_FpsLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FPS"));
 						pNL->setValue64((sint64)(1.f/deltaTime));
 					}
 				}
@@ -2806,7 +2806,7 @@ bool mainLoop()
 			// Put here things you have to send to the server only once per tick like user position.
 			// UPDATE COMPASS
 			NLMISC::CCDBNodeLeaf *node = s_UiDirectionLeaf ? (&*s_UiDirectionLeaf)
-				: (s_UiDirectionLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DIRECTION"));
+				: &*(s_UiDirectionLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DIRECTION"));
 			CInterfaceProperty prop;
 			prop.setNodePtr(node);
 			if(CompassMode == 1)

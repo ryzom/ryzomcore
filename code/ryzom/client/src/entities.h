@@ -31,7 +31,6 @@
 #include "user_entity.h"
 // Some constants
 #include "game_share/mission_desc.h"
-#include "interface_v3/people_interraction.h"
 #include "game_share/inventories.h"
 // Misc.
 #include "nel/misc/types_nl.h"
@@ -40,6 +39,7 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/file.h"
 #include "nel/misc/aabbox.h"
+#include "nel/misc/cdb_leaf.h"
 // 3D
 #include "nel/3d/u_instance.h"
 // Std.
@@ -155,8 +155,8 @@ private:
 
 	// DB node pointers used to update some entity flags
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _MissionTargetTitleDB[MAX_NUM_MISSIONS][MAX_NUM_MISSION_TARGETS];
-	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GroupMemberUidDB[MaxNumPeopleInTeam];
-	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GroupMemberNameDB[MaxNumPeopleInTeam];
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GroupMemberUidDB[8]; // MaxNumPeopleInTeam in people_interaction.h
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GroupMemberNameDB[8]; // MaxNumPeopleInTeam in people_interaction.h
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _BeastUidDB[MAX_INVENTORY_ANIMAL];
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _BeastStatusDB[MAX_INVENTORY_ANIMAL];
 	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _BeastTypeDB[MAX_INVENTORY_ANIMAL];

@@ -1983,7 +1983,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
 	{
 		NLMISC::CCDBNodeLeaf *node = _CurrentPlayerCharacLeaf[i] ? &*_CurrentPlayerCharacLeaf[i]
-			: (_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false));
+			: &*(_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false));
 		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
 	}
 

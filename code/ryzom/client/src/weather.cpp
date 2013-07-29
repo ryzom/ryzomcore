@@ -200,7 +200,7 @@ static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> s_ServerWeatherValueDB;
 static uint16 getServerWeather()
 {
 	CCDBNodeLeaf *node = s_ServerWeatherValueDB ? &*s_ServerWeatherValueDB
-		: (s_ServerWeatherValueDB = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:WEATHER:VALUE"));
+		: &*(s_ServerWeatherValueDB = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:WEATHER:VALUE"));
 	if (!node) return 0;
 	return (uint16) node->getValue16();
 }
