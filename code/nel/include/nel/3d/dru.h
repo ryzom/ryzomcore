@@ -27,10 +27,12 @@
 
 #ifdef NL_OS_WINDOWS
 # define NL3D_GL_DLL_NAME "nel_drv_opengl_win"
+# define NL3D_GL3_DLL_NAME "nel_drv_opengl3_win"
 # define NL3D_GLES_DLL_NAME "nel_drv_opengles_win"
 # define NL3D_D3D_DLL_NAME "nel_drv_direct3d_win"
 #elif defined (NL_OS_UNIX)
 # define NL3D_GL_DLL_NAME "nel_drv_opengl"
+# define NL3D_GL3_DLL_NAME "nel_drv_opengl3"
 # define NL3D_GLES_DLL_NAME "nel_drv_opengles"
 #else
 # error "Unknown system"
@@ -69,6 +71,32 @@ struct EDruOpenglDriverUnknownVersion : public EDru
 struct EDruOpenglDriverCantCreateDriver : public EDru
 {
 	EDruOpenglDriverCantCreateDriver() : EDru( NL3D_GL_DLL_NAME " can't create driver" ) {}
+};
+
+// OpenGL 3
+struct EDruOpengl3DriverNotFound : public EDru
+{
+	EDruOpengl3DriverNotFound() : EDru( NL3D_GL3_DLL_NAME " not found" ) {}
+};
+
+struct EDruOpengl3DriverCorrupted : public EDru
+{
+	EDruOpengl3DriverCorrupted() : EDru( "Can't get NL3D_createIDriverInstance from " NL3D_GL3_DLL_NAME " (Bad dll?)" ) {}
+};
+
+struct EDruOpengl3DriverOldVersion : public EDru
+{
+	EDruOpengl3DriverOldVersion() : EDru( NL3D_GL3_DLL_NAME " is a too old version. Ask for a more recent file" ) {}
+};
+
+struct EDruOpengl3DriverUnknownVersion : public EDru
+{
+	EDruOpengl3DriverUnknownVersion() : EDru( NL3D_GL3_DLL_NAME " is more recent than the application" ) {}
+};
+
+struct EDruOpengl3DriverCantCreateDriver : public EDru
+{
+	EDruOpengl3DriverCantCreateDriver() : EDru( NL3D_GL3_DLL_NAME " can't create driver" ) {}
 };
 
 // OpenGL ES
@@ -132,6 +160,9 @@ public:
 
 	/// Portable Function which create a GL Driver (using gl dll...).
 	static IDriver		*createGlDriver() throw(EDru);
+
+	/// Portable Function which create a GL3 Driver (using gl dll...).
+	static IDriver		*createGl3Driver() throw(EDru);
 
 	/// Portable Function which create a GL ES Driver (using gl dll...).
 	static IDriver		*createGlEsDriver() throw(EDru);

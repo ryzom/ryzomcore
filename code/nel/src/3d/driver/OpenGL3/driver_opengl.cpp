@@ -77,7 +77,7 @@ namespace NL3D {
 
 #ifdef NL_STATIC
 
-IDriver* createGlDriverInstance ()
+IDriver* createGl3DriverInstance ()
 {
 	return new NLDRIVERGL::CDriverGL3;
 }

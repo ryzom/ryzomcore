@@ -397,7 +397,8 @@ namespace MaterialEditor
 
 	void CNel3DInterface::initViewPort( unsigned long wnd, unsigned long w, unsigned long h )
 	{
-		driver = NL3D::UDriver::createDriver( 0, false, 0 );
+		//driver = NL3D::UDriver::createDriver( 0, false, 0 );
+		driver = NL3D::UDriver::createDriver( 0, NL3D::UDriver::OpenGl3, 0 );
 		nlassert( driver != NULL );
 		driver->setDisplay( (nlWindow)wnd, NL3D::UDriver::CMode( w, h, 32 ) );
 
