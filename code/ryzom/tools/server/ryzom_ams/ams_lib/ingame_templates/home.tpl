@@ -1,4 +1,5 @@
 {block name=content}
+
   <tr><td>
 	<table width="100%" bgcolor="#303030" cellspacing="2">
 	<tr><td height="7"></td><td></td></tr>
