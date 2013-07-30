@@ -449,37 +449,6 @@ bool CDriverGL3::setupDisplay()
 		_MaxVerticesByVBHard = std::numeric_limits<uint32>::max(); // cant' know the value..
 	}
 
-	// Next with NVidia ext
-	else if(_Extensions.NVVertexArrayRange)
-	{
-		_AGPVertexArrayRange= new CVertexArrayRangeNVidia(this);
-		_VRAMVertexArrayRange= new CVertexArrayRangeNVidia(this);
-		_SupportVBHard= true;
-		_MaxVerticesByVBHard= _Extensions.NVVertexArrayRangeMaxVertex;
-	}
-	else if(_Extensions.ATITextureEnvCombine3 && _Extensions.ATIVertexArrayObject)
-	{
-		// NB
-		// on Radeon 9200 and below : ATI_vertex_array_object is better (no direct access to AGP with ARB_vertex_buffer_object -> slow unlock)
-		// on Radeon 9500 and above : ARB_vertex_buffer_object is better
-		if (!_Extensions.ATIMapObjectBuffer)
-		{
-			_AGPVertexArrayRange= new CVertexArrayRangeATI(this);
-			_VRAMVertexArrayRange= new CVertexArrayRangeATI(this);
-			// BAD ATI extension scheme.
-			_SlowUnlockVBHard= true;
-		}
-		else
-		{
-			_AGPVertexArrayRange= new CVertexArrayRangeMapObjectATI(this);
-			_VRAMVertexArrayRange= new CVertexArrayRangeMapObjectATI(this);
-		}
-		_SupportVBHard= true;
-		// _MaxVerticesByVBHard= 65535; // should always work with recent drivers.
-		// tmp fix for ati
-		_MaxVerticesByVBHard= 16777216;
-	}
-
 	// Reset VertexArrayRange.
 	_CurrentVertexArrayRange= NULL;
 	_CurrentVertexBufferHard= NULL;
@@ -816,43 +785,6 @@ bool CDriverGL3::swapBuffers()
 		//
 		activeVertexBuffer(dummyVB);
 		nlassert(_CurrentVertexBufferHard==NULL);
-	}
-
-	/* PATCH For Possible NVidia Synchronisation.
-	/*/
-	// Because of Bug with GeForce, must finishFence() for all VBHard.
-	/*set<IVertexBufferHardGL*>::iterator		itVBHard= _VertexBufferHardSet.Set.begin();
-	while(itVBHard != _VertexBufferHardSet.Set.end() )
-	{
-		// Need only to do it for NVidia VB ones.
-		if((*itVBHard)->NVidiaVertexBufferHard)
-		{
-			CVertexBufferHardGLNVidia	*vbHardNV= static_cast<CVertexBufferHardGLNVidia*>(*itVBHard);
-			// If needed, "flush" these VB.
-			vbHardNV->finishFence();
-		}
-		itVBHard++;
-	}*/
-	/* Need to Do this code only if Synchronisation PATCH before not done!
-		AS NV_Fence GeForce Implementation says. Test each frame the NVFence, until completion.
-		NB: finish is not required here. Just test. This is like a "non block synchronisation"
-	 */
-	if (!_Extensions.ARBVertexBufferObject && _Extensions.NVVertexArrayRange)
-	{
-		set<IVertexBufferHardGL*>::iterator		itVBHard= _VertexBufferHardSet.Set.begin();
-		while(itVBHard != _VertexBufferHardSet.Set.end() )
-		{
-			if((*itVBHard)->VBType == IVertexBufferHardGL::NVidiaVB)
-			{
-				CVertexBufferHardGLNVidia	*vbHardNV= static_cast<CVertexBufferHardGLNVidia*>(*itVBHard);
-				if(vbHardNV->isFenceSet())
-				{
-					// update Fence Cache.
-					vbHardNV->testFence();
-				}
-			}
-			itVBHard++;
-		}
 	}
 
 #ifdef NL_OS_WINDOWS

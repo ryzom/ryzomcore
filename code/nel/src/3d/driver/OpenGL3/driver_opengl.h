@@ -1220,8 +1220,6 @@ private:
 	/// \name VertexBufferHard
 	// @{
 	CPtrSet<IVertexBufferHardGL>	_VertexBufferHardSet;
-	friend class					CVertexArrayRangeNVidia;
-	friend class					CVertexBufferHardGLNVidia;
 	friend class					CVertexArrayRangeATI;
 	friend class					CVertexArrayRangeARB;
 	friend class					CVertexBufferHardARB;

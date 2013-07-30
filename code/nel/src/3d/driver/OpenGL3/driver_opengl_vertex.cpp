@@ -1746,35 +1746,6 @@ uint32				CDriverGL3::getAvailableVertexVRAMMemory ()
 void				CDriverGL3::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
 {
 	H_AUTO_OGL(CDriverGL3_fenceOnCurVBHardIfNeeded);
-
-	// If old is not a VBHard, or if not a NVidia VBHard, no-op.
-	if( _CurrentVertexBufferHard==NULL || !_CurrentVertexBufferHard->VBType == IVertexBufferHardGL::NVidiaVB)
-		return;
-
-	// if we do not activate the same (NB: newVBHard==NULL if not a VBHard).
-	if(_CurrentVertexBufferHard!=newVBHard)
-	{
-		// get NVidia interface
-		CVertexBufferHardGLNVidia	*vbHardNV= static_cast<CVertexBufferHardGLNVidia*>(_CurrentVertexBufferHard);
-
-		// If some render() have been done with this VB.
-		if( vbHardNV->GPURenderingAfterFence )
-		{
-			/*
-				Since we won't work with this VB for a long time, we set a fence.
-
-				NB: if the fence was previously set. NV_Fence Specification says that the new ONE replaces it.
-				This is EXACTLY what we wants, since the old one is no more interesting.
-
-				NB: never insert a fence for said "Static Lock" VBHard. Those VBHard are said to be "static"
-				therefore, user should never modify them (else lock() is much slower...)
-			*/
-			if( !vbHardNV->getLockHintStatic() )
-				vbHardNV->setFence();
-			// Since we have set a new Fence, we won't need to do it at next vbHardNV->lock()
-			vbHardNV->GPURenderingAfterFence= false;
-		}
-	}
 }
 
 // ***************************************************************************
