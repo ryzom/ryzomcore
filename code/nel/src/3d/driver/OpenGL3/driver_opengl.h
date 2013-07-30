@@ -1220,12 +1220,8 @@ private:
 	/// \name VertexBufferHard
 	// @{
 	CPtrSet<IVertexBufferHardGL>	_VertexBufferHardSet;
-	friend class					CVertexArrayRangeATI;
 	friend class					CVertexArrayRangeARB;
 	friend class					CVertexBufferHardARB;
-	friend class					CVertexBufferHardGLATI;
-	friend class					CVertexArrayRangeMapObjectATI;
-	friend class					CVertexBufferHardGLMapObjectATI;
 	friend class					CVBDrvInfosGL3;
 
 	// The VertexArrayRange activated.
@@ -1248,9 +1244,6 @@ private:
 
 
 	void							resetVertexArrayRange();
-
-	void							fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard);
-
 
 	// @}
 

@@ -213,9 +213,6 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	}
 	if (info->_VBHard == NULL)
 	{
-		// Fence mgt.
-		fenceOnCurVBHardIfNeeded(NULL);
-
 		// Disable the current vertexBufferHard if setuped.
 		if(_CurrentVertexBufferHard)
 			_CurrentVertexBufferHard->disable();
@@ -224,9 +221,6 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	{
 		// 2. Setup Arrays.
 		//===================
-
-		// Fence mgt.
-		fenceOnCurVBHardIfNeeded(info->_VBHard);
 
 		// Enable the vertexArrayRange of this array.
 		info->_VBHard->enable();
@@ -1741,12 +1735,6 @@ uint32				CDriverGL3::getAvailableVertexVRAMMemory ()
 		return 0;
 }
 
-
-// ***************************************************************************
-void				CDriverGL3::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
-{
-	H_AUTO_OGL(CDriverGL3_fenceOnCurVBHardIfNeeded);
-}
 
 // ***************************************************************************
 
