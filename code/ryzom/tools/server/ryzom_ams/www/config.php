@@ -10,14 +10,14 @@
 $cfg['db']['web']['host']    = 'localhost';
 $cfg['db']['web']['port']    = '3306';
 $cfg['db']['web']['name']    = 'ryzom_ams';
-$cfg['db']['web']['user']    = 'root';
-$cfg['db']['web']['pass']    = 'lol123';
+$cfg['db']['web']['user']    = 'shard';
+$cfg['db']['web']['pass']    = '';
 
 $cfg['db']['lib']['host']    = 'localhost';
 $cfg['db']['lib']['port']    = '3306';
 $cfg['db']['lib']['name']    = 'ryzom_ams_lib';
-$cfg['db']['lib']['user']    = 'root';
-$cfg['db']['lib']['pass']    = 'lol123';
+$cfg['db']['lib']['user']    = 'shard';
+$cfg['db']['lib']['pass']    = '';
 
 $cfg['db']['shard']['host']    = 'localhost';
 $cfg['db']['shard']['port']    = '3306';
