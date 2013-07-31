@@ -284,6 +284,7 @@ private:
 	sint64  _AutoPanDelay;
 	sint64  _NumPans;
 	static bool _MouseCaptured;
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _UserCharFade;
 private:
 	/** compute the nearest valid surface at a given position from the island heightmap
 	  * (heightmap must not be empty or an assertion is raised)

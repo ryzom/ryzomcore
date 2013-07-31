@@ -62,17 +62,10 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 function game:outpostUpdateTimeZone()
-	-- update time zone auto?
-	local	tzAuto= getDbProp('UI:SAVE:OUTPOST:TIME_ZONE_AUTO');
-	if(tzAuto==0) then
-		return;
-	end
-	-- every 5 seconds?
-	local curTick= getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
-	if(curTick - game.Outpost.LastTimeZoneUpdate > 50) then
-		game.Outpost.LastTimeZoneUpdate= curTick;
-		runAH(nil,'outpost_update_time_zone_auto','');
-	end
+	local curTick = getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
+	setDbProp('UI:TEMP:OUTPOST:TIME_ZONE_NEXT_UPDATE', curTick + 50);
+	game.Outpost.LastTimeZoneUpdate = curTick;
+	runAH(nil,'outpost_update_time_zone_auto','');
 end
 
 ------------------------------------------------------------------------------------------------------------

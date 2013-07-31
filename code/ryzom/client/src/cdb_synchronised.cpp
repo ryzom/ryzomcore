@@ -318,7 +318,11 @@ void CCDBSynchronised::writeInitInProgressIntoUIDB()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (pIM)
-		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS")->setValueBool(_InitInProgress);
+	{
+		NLMISC::CCDBNodeLeaf *node = m_CDBInitInProgressDB ? (&*m_CDBInitInProgressDB)
+			: &*(m_CDBInitInProgressDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS"));
+		node->setValueBool(_InitInProgress);
+	}
 	else
 		nlwarning("InterfaceManager not created");
 }

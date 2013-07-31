@@ -218,6 +218,7 @@ ZoneExportDirectory = CommonPath + "/zone"
 
 # PACS primitives directories
 PacsPrimExportDirectory = CommonPath + "/pacs_prim"
+PacsPrimTagExportDirectory = CommonPath + "/pacs_prim_tag"
 
 
 # *** BUILD DIRECTORIES FOR THE BUILD PIPELINE ***
