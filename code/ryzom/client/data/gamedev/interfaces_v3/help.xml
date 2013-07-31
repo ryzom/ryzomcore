@@ -916,7 +916,7 @@
             posref="MR MR"
             x="-16"
             y="0"
-            hardtext="uiBrowseHomeButton"
+            hardtext="uiBrowseRedoButton"
             tooltip="uittBrowseHome"
             onclick_l="browse_home"
             params_l="name=ui:interface:cs_browser:content:html"
