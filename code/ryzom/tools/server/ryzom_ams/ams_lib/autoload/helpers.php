@@ -123,7 +123,8 @@ class Helpers{
                     $statement = $dbr->execute("SELECT * FROM ring_users WHERE user_id=:id AND cookie =:cookie", array('id' => $id, 'cookie' => $_COOKIE['ryzomId']));
                     if ($statement->rowCount() ){
                          $entry = $statement->fetch();
-                         return array('id' => $id, 'name' => $entry['user_name']); 
+			//print_r($entry);
+                         return array('id' => $entry['user_id'], 'name' => $entry['user_name']); 
                     }else{
                          return "FALSE";
                     }
