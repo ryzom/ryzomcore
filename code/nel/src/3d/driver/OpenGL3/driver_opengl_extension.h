@@ -42,9 +42,6 @@ struct	CGlExtensions
 	bool	EXTTextureEnvCombine;
 
 	// Optional Extensions.
-	// NB: Fence extension is not here, because NVVertexArrayRange is false if GL_NV_fence is not here.
-	bool	NVVertexArrayRange;
-	uint	NVVertexArrayRangeMaxVertex;
 	bool	EXTTextureCompressionS3TC;
 	bool	EXTVertexWeighting;
 	bool	EXTSeparateSpecularColor;
@@ -68,8 +65,6 @@ struct	CGlExtensions
 	bool	NVVertexProgramEmulated;
 	bool	EXTSecondaryColor;
 	bool	EXTBlendColor;
-	// NVVertexArrayRange2.
-	bool	NVVertexArrayRange2;
 	// equal to GL_VERTEX_ARRAY_RANGE_WITHOUT_FLUSH_NV if possible, or GL_VERTEX_ARRAY_RANGE_NV
 	uint	NVStateVARWithoutFlush;
 
@@ -84,13 +79,11 @@ struct	CGlExtensions
 	bool	GLXMESASwapControl;
 
 	// ATI Extensions.
-	bool	ATIVertexArrayObject;
-	bool	ATIMapObjectBuffer;
 	bool	ATITextureEnvCombine3;
 	bool	ATIEnvMapBumpMap;
 	bool	ATIFragmentShader;
 	bool	ATIXTextureEnvRoute;
-	bool	ATIVertexAttribArrayObject;
+
 	// ARB Extensions
 	bool	ARBTextureCompression;
 	bool	ARBFragmentProgram;
@@ -120,8 +113,6 @@ public:
 		NbTextureStages= 1;
 		EXTTextureEnvCombine= false;
 		ARBTextureCompression= false;
-		NVVertexArrayRange= false;
-		NVVertexArrayRangeMaxVertex= 0;
 		EXTTextureCompressionS3TC= false;
 		EXTVertexWeighting= false;
 		EXTSeparateSpecularColor= false;
@@ -140,12 +131,8 @@ public:
 		GLXSGISwapControl= false;
 		GLXMESASwapControl= false;
 		EXTBlendColor= false;
-		ATIVertexArrayObject= false;
 		ATIEnvMapBumpMap = false;
 		ATIFragmentShader = false;
-		ATIVertexArrayObject = false;
-		ATIMapObjectBuffer = false;
-		ATIVertexAttribArrayObject = false;
 		EXTVertexShader= false;
 		ARBFragmentProgram = false;
 		ARBVertexBufferObject = false;
@@ -162,7 +149,6 @@ public:
 		FrameBufferBlit = false;
 		FrameBufferMultisample = false;
 		PackedDepthStencil = false;
-		NVVertexArrayRange2 = false;
 		NVStateVARWithoutFlush = 0;
 
 		OESDrawTexture = false;
@@ -230,12 +216,7 @@ public:
 #endif
 
 		result += "\n  Array/VBO: ";
-		result += NVVertexArrayRange ? ("NVVertexArrayRange (MaxVertex = " + NLMISC::toString(NVVertexArrayRangeMaxVertex) + ") ") : "";
-		result += NVVertexArrayRange2 ? "NVVertexArrayRange2 " : "";
-		result += ATIVertexArrayObject ? "ATIVertexArrayObject " : "";
-		result += ATIVertexAttribArrayObject ? "ATIVertexAttribArrayObject " : "";
-		result += ARBVertexBufferObject ? "ARBVertexBufferObject " : "";
-		result += ATIMapObjectBuffer ? "ATIMapObjectBuffer " : "";
+		result += ARBVertexBufferObject ? "ARB VBO " : "";
 
 		result += "\n  FBO:       ";
 		result += FrameBufferObject ? "FramebufferObject " : "";
@@ -327,31 +308,6 @@ extern NEL_PFNGLCOMPRESSEDTEXSUBIMAGE3DARBPROC	nglCompressedTexSubImage3DARB;
 extern NEL_PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC	nglCompressedTexSubImage2DARB;
 extern NEL_PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC	nglCompressedTexSubImage1DARB;
 extern NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC	nglGetCompressedTexImageARB;
-
-
-// VertexArrayRangeNV.
-//====================
-extern NEL_PFNGLFLUSHVERTEXARRAYRANGENVPROC		nglFlushVertexArrayRangeNV;
-extern NEL_PFNGLVERTEXARRAYRANGENVPROC			nglVertexArrayRangeNV;
-
-#ifdef NL_OS_WINDOWS
-extern PFNWGLALLOCATEMEMORYNVPROC				nwglAllocateMemoryNV;
-extern PFNWGLFREEMEMORYNVPROC					nwglFreeMemoryNV;
-#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-extern NEL_PFNGLXALLOCATEMEMORYNVPROC			nglXAllocateMemoryNV;
-extern NEL_PFNGLXFREEMEMORYNVPROC				nglXFreeMemoryNV;
-#endif
-
-
-// FenceNV.
-//====================
-extern NEL_PFNGLDELETEFENCESNVPROC				nglDeleteFencesNV;
-extern NEL_PFNGLGENFENCESNVPROC					nglGenFencesNV;
-extern NEL_PFNGLISFENCENVPROC					nglIsFenceNV;
-extern NEL_PFNGLTESTFENCENVPROC					nglTestFenceNV;
-extern NEL_PFNGLGETFENCEIVNVPROC				nglGetFenceivNV;
-extern NEL_PFNGLFINISHFENCENVPROC				nglFinishFenceNV;
-extern NEL_PFNGLSETFENCENVPROC					nglSetFenceNV;
 
 
 // VertexWeighting.
@@ -499,28 +455,6 @@ extern NEL_PFNGLSECONDARYCOLORPOINTEREXTPROC	nglSecondaryColorPointerEXT;
 extern NEL_PFNGLBLENDCOLOREXTPROC				nglBlendColorEXT;
 
 
-// GL_ATI_vertex_array_object extension
-//========================
-extern NEL_PFNGLNEWOBJECTBUFFERATIPROC			nglNewObjectBufferATI;
-extern NEL_PFNGLISOBJECTBUFFERATIPROC			nglIsObjectBufferATI;
-extern NEL_PFNGLUPDATEOBJECTBUFFERATIPROC		nglUpdateObjectBufferATI;
-extern NEL_PFNGLGETOBJECTBUFFERFVATIPROC		nglGetObjectBufferfvATI;
-extern NEL_PFNGLGETOBJECTBUFFERIVATIPROC		nglGetObjectBufferivATI;
-extern NEL_PFNGLDELETEOBJECTBUFFERATIPROC		nglDeleteObjectBufferATI;
-extern NEL_PFNGLARRAYOBJECTATIPROC				nglArrayObjectATI;
-extern NEL_PFNGLGETARRAYOBJECTFVATIPROC			nglGetArrayObjectfvATI;
-extern NEL_PFNGLGETARRAYOBJECTIVATIPROC			nglGetArrayObjectivATI;
-extern NEL_PFNGLVARIANTARRAYOBJECTATIPROC		nglVariantArrayObjectATI;
-extern NEL_PFNGLGETVARIANTARRAYOBJECTFVATIPROC	nglGetVariantArrayObjectfvATI;
-extern NEL_PFNGLGETVARIANTARRAYOBJECTIVATIPROC	nglGetVariantArrayObjectivATI;
-
-// GL_ATI_map_object_buffer
-//===================================
-
-extern NEL_PFNGLMAPOBJECTBUFFERATIPROC			nglMapObjectBufferATI;
-extern NEL_PFNGLUNMAPOBJECTBUFFERATIPROC		nglUnmapObjectBufferATI;
-
-
 // GL_ATI_fragment_shader extension
 //===================================
 
@@ -538,15 +472,6 @@ extern NEL_PFNGLALPHAFRAGMENTOP1ATIPROC				nglAlphaFragmentOp1ATI;
 extern NEL_PFNGLALPHAFRAGMENTOP2ATIPROC				nglAlphaFragmentOp2ATI;
 extern NEL_PFNGLALPHAFRAGMENTOP3ATIPROC				nglAlphaFragmentOp3ATI;
 extern NEL_PFNGLSETFRAGMENTSHADERCONSTANTATIPROC	nglSetFragmentShaderConstantATI;
-
-// GL_ATI_vertex_attrib_array_object
-//==================================
-extern NEL_PFNGLVERTEXATTRIBARRAYOBJECTATIPROC nglVertexAttribArrayObjectATI;
-extern NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTFVATIPROC nglGetVertexAttribArrayObjectfvATI;
-extern NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTIVATIPROC nglGetVertexAttribArrayObjectivATI;
-
-
-
 
 // GL_ARB_fragment_shader_extension
 //==================================

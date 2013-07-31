@@ -42,7 +42,7 @@ class	CVertexBufferHardARB;
 
 
 // ***************************************************************************
-/** Interface to a Big block of AGP memory either throurgh NVVertexArrayRange or ATIVertexObject
+/** Interface to a Big block of video memory
  */
 class IVertexArrayRange
 {

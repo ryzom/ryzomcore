@@ -10142,26 +10142,6 @@ typedef void (APIENTRYP PFNGLIGLOOINTERFACESGIXPROC) (GLenum pname, const GLvoid
 #define GL_ATI_texture_mirror_once 1
 #endif
 
-#ifndef GL_NV_fence
-#define GL_NV_fence 1
-#ifdef GL_GLEXT_PROTOTYPES
-GLAPI void APIENTRY glDeleteFencesNV (GLsizei n, const GLuint *fences);
-GLAPI void APIENTRY glGenFencesNV (GLsizei n, GLuint *fences);
-GLAPI GLboolean APIENTRY glIsFenceNV (GLuint fence);
-GLAPI GLboolean APIENTRY glTestFenceNV (GLuint fence);
-GLAPI void APIENTRY glGetFenceivNV (GLuint fence, GLenum pname, GLint *params);
-GLAPI void APIENTRY glFinishFenceNV (GLuint fence);
-GLAPI void APIENTRY glSetFenceNV (GLuint fence, GLenum condition);
-#endif /* GL_GLEXT_PROTOTYPES */
-typedef void (APIENTRYP PFNGLDELETEFENCESNVPROC) (GLsizei n, const GLuint *fences);
-typedef void (APIENTRYP PFNGLGENFENCESNVPROC) (GLsizei n, GLuint *fences);
-typedef GLboolean (APIENTRYP PFNGLISFENCENVPROC) (GLuint fence);
-typedef GLboolean (APIENTRYP PFNGLTESTFENCENVPROC) (GLuint fence);
-typedef void (APIENTRYP PFNGLGETFENCEIVNVPROC) (GLuint fence, GLenum pname, GLint *params);
-typedef void (APIENTRYP PFNGLFINISHFENCENVPROC) (GLuint fence);
-typedef void (APIENTRYP PFNGLSETFENCENVPROC) (GLuint fence, GLenum condition);
-#endif
-
 #ifndef GL_NV_evaluators
 #define GL_NV_evaluators 1
 #ifdef GL_GLEXT_PROTOTYPES
@@ -10214,10 +10194,6 @@ typedef void (APIENTRYP PFNGLGETCOMBINERSTAGEPARAMETERFVNVPROC) (GLenum stage, G
 
 #ifndef GL_NV_texture_shader2
 #define GL_NV_texture_shader2 1
-#endif
-
-#ifndef GL_NV_vertex_array_range2
-#define GL_NV_vertex_array_range2 1
 #endif
 
 #ifndef GL_NV_vertex_program

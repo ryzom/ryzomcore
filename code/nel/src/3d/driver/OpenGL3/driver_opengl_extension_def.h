@@ -84,23 +84,6 @@ typedef void (APIENTRY * NEL_PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC) (GLenum target
 typedef void (APIENTRY * NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC) (GLenum target, GLint level, void *img);
 
 
-// VertexArrayRangeNV.
-//====================
-typedef void (APIENTRY * NEL_PFNGLFLUSHVERTEXARRAYRANGENVPROC) (void);
-typedef void (APIENTRY * NEL_PFNGLVERTEXARRAYRANGENVPROC) (GLsizei size, const GLvoid *pointer);
-
-
-// FenceNV.
-//====================
-typedef void (APIENTRY * NEL_PFNGLDELETEFENCESNVPROC) (GLsizei n, const GLuint *fences);
-typedef void (APIENTRY * NEL_PFNGLGENFENCESNVPROC) (GLsizei n, GLuint *fences);
-typedef GLboolean (APIENTRY * NEL_PFNGLISFENCENVPROC) (GLuint fence);
-typedef GLboolean (APIENTRY * NEL_PFNGLTESTFENCENVPROC) (GLuint fence);
-typedef void (APIENTRY * NEL_PFNGLGETFENCEIVNVPROC) (GLuint fence, GLenum pname, GLint *params);
-typedef void (APIENTRY * NEL_PFNGLFINISHFENCENVPROC) (GLuint fence);
-typedef void (APIENTRY * NEL_PFNGLSETFENCENVPROC) (GLuint fence, GLenum condition);
-
-
 // VertexWeighting.
 //==================
 typedef void (APIENTRY * NEL_PFNGLVERTEXWEIGHTFEXTPROC) (GLfloat weight);
@@ -238,22 +221,6 @@ typedef void (APIENTRY * NEL_PFNGLSECONDARYCOLORPOINTEREXTPROC) (GLint size, GLe
 typedef void (APIENTRY * NEL_PFNGLBLENDCOLOREXTPROC) (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 
 
-// GL_ATI_vertex_array_object extension
-//========================
-typedef GLuint (APIENTRY * NEL_PFNGLNEWOBJECTBUFFERATIPROC) (GLsizei size, const GLvoid *pointer, GLenum usage);
-typedef GLboolean (APIENTRY * NEL_PFNGLISOBJECTBUFFERATIPROC) (GLuint buffer);
-typedef void (APIENTRY * NEL_PFNGLUPDATEOBJECTBUFFERATIPROC) (GLuint buffer, GLuint offset, GLsizei size, const GLvoid *pointer, GLenum preserve);
-typedef void (APIENTRY * NEL_PFNGLGETOBJECTBUFFERFVATIPROC) (GLuint buffer, GLenum pname, GLfloat *params);
-typedef void (APIENTRY * NEL_PFNGLGETOBJECTBUFFERIVATIPROC) (GLuint buffer, GLenum pname, GLint *params);
-typedef void (APIENTRY * NEL_PFNGLDELETEOBJECTBUFFERATIPROC) (GLuint buffer);
-typedef void (APIENTRY * NEL_PFNGLARRAYOBJECTATIPROC) (GLenum array, GLint size, GLenum type, GLsizei stride, GLuint buffer, GLuint offset);
-typedef void (APIENTRY * NEL_PFNGLGETARRAYOBJECTFVATIPROC) (GLenum array, GLenum pname, GLfloat *params);
-typedef void (APIENTRY * NEL_PFNGLGETARRAYOBJECTIVATIPROC) (GLenum array, GLenum pname, GLint *params);
-typedef void (APIENTRY * NEL_PFNGLVARIANTARRAYOBJECTATIPROC) (GLuint id, GLenum type, GLsizei stride, GLuint buffer, GLuint offset);
-typedef void (APIENTRY * NEL_PFNGLGETVARIANTARRAYOBJECTFVATIPROC) (GLuint id, GLenum pname, GLfloat *params);
-typedef void (APIENTRY * NEL_PFNGLGETVARIANTARRAYOBJECTIVATIPROC) (GLuint id, GLenum pname, GLint *params);
-
-
 // GL_ATI_fragment_shader extension
 //==================================
 typedef GLuint (APIENTRY *NEL_PFNGLGENFRAGMENTSHADERSATIPROC)(GLuint range);
@@ -285,22 +252,6 @@ typedef GLvoid (APIENTRY *NEL_PFNGLALPHAFRAGMENTOP3ATIPROC)(GLenum op, GLuint ds
 															GLuint arg2, GLuint arg2Rep, GLuint arg2Mod,
 															GLuint arg3, GLuint arg3Rep, GLuint arg3Mod);
 typedef GLvoid (APIENTRY *NEL_PFNGLSETFRAGMENTSHADERCONSTANTATIPROC)(GLuint dst, const GLfloat *value);
-
-
-
-// GL_ATI_map_object_buffer
-//==================================
-typedef void *(APIENTRY * NEL_PFNGLMAPOBJECTBUFFERATIPROC)(GLuint buffer);
-typedef void (APIENTRY * NEL_PFNGLUNMAPOBJECTBUFFERATIPROC)(GLuint buffer);
-
-
-// GL_ATI_vertex_attrib_array_object
-//==================================
-
-typedef GLvoid (APIENTRY * NEL_PFNGLVERTEXATTRIBARRAYOBJECTATIPROC)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLuint buffer, GLuint offset);
-typedef GLvoid (APIENTRY * NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTFVATIPROC)(GLuint index, GLenum pname, GLfloat *params);
-typedef GLvoid (APIENTRY * NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTIVATIPROC)(GLuint index, GLenum pname, GLint *params);
-
 
 
 

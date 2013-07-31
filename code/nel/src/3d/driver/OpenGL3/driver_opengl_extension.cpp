@@ -110,19 +110,6 @@ NEL_PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC			nglCompressedTexSubImage2DARB;
 NEL_PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC			nglCompressedTexSubImage1DARB;
 NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC			nglGetCompressedTexImageARB;
 
-// VertexArrayRangeNV.
-NEL_PFNGLFLUSHVERTEXARRAYRANGENVPROC			nglFlushVertexArrayRangeNV;
-NEL_PFNGLVERTEXARRAYRANGENVPROC					nglVertexArrayRangeNV;
-
-// FenceNV.
-NEL_PFNGLDELETEFENCESNVPROC						nglDeleteFencesNV;
-NEL_PFNGLGENFENCESNVPROC						nglGenFencesNV;
-NEL_PFNGLISFENCENVPROC							nglIsFenceNV;
-NEL_PFNGLTESTFENCENVPROC						nglTestFenceNV;
-NEL_PFNGLGETFENCEIVNVPROC						nglGetFenceivNV;
-NEL_PFNGLFINISHFENCENVPROC						nglFinishFenceNV;
-NEL_PFNGLSETFENCENVPROC							nglSetFenceNV;
-
 // VertexWeighting.
 NEL_PFNGLVERTEXWEIGHTFEXTPROC					nglVertexWeightfEXT;
 NEL_PFNGLVERTEXWEIGHTFVEXTPROC					nglVertexWeightfvEXT;
@@ -250,29 +237,6 @@ NEL_PFNGLSECONDARYCOLORPOINTEREXTPROC			nglSecondaryColorPointerEXT;
 
 // BlendColor extension
 NEL_PFNGLBLENDCOLOREXTPROC						nglBlendColorEXT;
-
-//========================
-NEL_PFNGLNEWOBJECTBUFFERATIPROC					nglNewObjectBufferATI;
-NEL_PFNGLISOBJECTBUFFERATIPROC					nglIsObjectBufferATI;
-NEL_PFNGLUPDATEOBJECTBUFFERATIPROC				nglUpdateObjectBufferATI;
-NEL_PFNGLGETOBJECTBUFFERFVATIPROC				nglGetObjectBufferfvATI;
-NEL_PFNGLGETOBJECTBUFFERIVATIPROC				nglGetObjectBufferivATI;
-NEL_PFNGLDELETEOBJECTBUFFERATIPROC				nglDeleteObjectBufferATI;
-NEL_PFNGLARRAYOBJECTATIPROC						nglArrayObjectATI;
-NEL_PFNGLGETARRAYOBJECTFVATIPROC				nglGetArrayObjectfvATI;
-NEL_PFNGLGETARRAYOBJECTIVATIPROC				nglGetArrayObjectivATI;
-NEL_PFNGLVARIANTARRAYOBJECTATIPROC				nglVariantArrayObjectATI;
-NEL_PFNGLGETVARIANTARRAYOBJECTFVATIPROC			nglGetVariantArrayObjectfvATI;
-NEL_PFNGLGETVARIANTARRAYOBJECTIVATIPROC			nglGetVariantArrayObjectivATI;
-
-// GL_ATI_map_object_buffer
-NEL_PFNGLMAPOBJECTBUFFERATIPROC   				nglMapObjectBufferATI;
-NEL_PFNGLUNMAPOBJECTBUFFERATIPROC 				nglUnmapObjectBufferATI;
-
-// GL_ATI_vertex_attrib_array_object
-NEL_PFNGLVERTEXATTRIBARRAYOBJECTATIPROC			nglVertexAttribArrayObjectATI;
-NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTFVATIPROC	nglGetVertexAttribArrayObjectfvATI;
-NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTIVATIPROC	nglGetVertexAttribArrayObjectivATI;
 
 // GL_ATI_envmap_bumpmap extension
 PFNGLTEXBUMPPARAMETERIVATIPROC					nglTexBumpParameterivATI;
@@ -592,41 +556,6 @@ static bool	setupOESDrawTexture(const char *glext)
 	H_AUTO_OGL(setupOESDrawTexture);
 
 	CHECK_EXT("OES_draw_texture");
-
-	return true;
-}
-
-// *********************************
-static bool	setupNVVertexArrayRange(const char	*glext)
-{
-	H_AUTO_OGL(setupNVVertexArrayRange);
-
-	// Test if VAR is present.
-	CHECK_EXT("GL_NV_vertex_array_range");
-
-	// Tess Fence too.
-	CHECK_EXT("GL_NV_fence");
-
-	// Get VAR address.
-	CHECK_ADDRESS(NEL_PFNGLFLUSHVERTEXARRAYRANGENVPROC, glFlushVertexArrayRangeNV);
-	CHECK_ADDRESS(NEL_PFNGLVERTEXARRAYRANGENVPROC, glVertexArrayRangeNV);
-
-#ifdef NL_OS_WINDOWS
-	CHECK_ADDRESS(PFNWGLALLOCATEMEMORYNVPROC, wglAllocateMemoryNV);
-	CHECK_ADDRESS(PFNWGLFREEMEMORYNVPROC, wglFreeMemoryNV);
-#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-	CHECK_ADDRESS(NEL_PFNGLXALLOCATEMEMORYNVPROC, glXAllocateMemoryNV);
-	CHECK_ADDRESS(NEL_PFNGLXFREEMEMORYNVPROC, glXFreeMemoryNV);
-#endif
-
-	// Get fence address.
-	CHECK_ADDRESS(NEL_PFNGLDELETEFENCESNVPROC, glDeleteFencesNV);
-	CHECK_ADDRESS(NEL_PFNGLGENFENCESNVPROC, glGenFencesNV);
-	CHECK_ADDRESS(NEL_PFNGLISFENCENVPROC, glIsFenceNV);
-	CHECK_ADDRESS(NEL_PFNGLTESTFENCENVPROC, glTestFenceNV);
-	CHECK_ADDRESS(NEL_PFNGLGETFENCEIVNVPROC, glGetFenceivNV);
-	CHECK_ADDRESS(NEL_PFNGLFINISHFENCENVPROC, glFinishFenceNV);
-	CHECK_ADDRESS(NEL_PFNGLSETFENCENVPROC, glSetFenceNV);
 
 	return true;
 }
@@ -983,65 +912,6 @@ static bool	setupEXTBlendColor(const char	*glext)
 }
 
 // *********************************
-static bool	setupNVVertexArrayRange2(const char	*glext)
-{
-	H_AUTO_OGL(setupNVVertexArrayRange2);
-	CHECK_EXT("GL_NV_vertex_array_range2");
-	return true;
-}
-
-
-// *********************************
-static bool	setupATIVertexArrayObject(const char *glext)
-{
-	H_AUTO_OGL(setupATIVertexArrayObject);
-	CHECK_EXT("GL_ATI_vertex_array_object");
-
-	CHECK_ADDRESS(NEL_PFNGLNEWOBJECTBUFFERATIPROC, glNewObjectBufferATI);
-	CHECK_ADDRESS(NEL_PFNGLISOBJECTBUFFERATIPROC, glIsObjectBufferATI);
-	CHECK_ADDRESS(NEL_PFNGLUPDATEOBJECTBUFFERATIPROC, glUpdateObjectBufferATI);
-	CHECK_ADDRESS(NEL_PFNGLGETOBJECTBUFFERFVATIPROC, glGetObjectBufferfvATI);
-	CHECK_ADDRESS(NEL_PFNGLGETOBJECTBUFFERIVATIPROC, glGetObjectBufferivATI);
-
-	nglDeleteObjectBufferATI = (NEL_PFNGLDELETEOBJECTBUFFERATIPROC)nglGetProcAddress("nglDeleteObjectBufferATI");
-
-	if(!nglDeleteObjectBufferATI)
-	{
-		// seems that on matrox parhelia driver, this procedure is named nglFreeObjectBufferATI !!
-		nglDeleteObjectBufferATI = (NEL_PFNGLDELETEOBJECTBUFFERATIPROC)nglGetProcAddress("nglFreeObjectBufferATI");
-		if(!nglDeleteObjectBufferATI) return false;
-	}
-
-	CHECK_ADDRESS(NEL_PFNGLARRAYOBJECTATIPROC, glArrayObjectATI);
-	CHECK_ADDRESS(NEL_PFNGLGETARRAYOBJECTFVATIPROC, glGetArrayObjectfvATI);
-	CHECK_ADDRESS(NEL_PFNGLGETARRAYOBJECTIVATIPROC, glGetArrayObjectivATI);
-
-	if(strstr(glext, "GL_EXT_vertex_shader") != NULL)
-	{
-		// the following exist only if ext vertex shader is present
-		CHECK_ADDRESS(NEL_PFNGLVARIANTARRAYOBJECTATIPROC, glVariantArrayObjectATI);
-		CHECK_ADDRESS(NEL_PFNGLGETVARIANTARRAYOBJECTFVATIPROC, glGetVariantArrayObjectfvATI);
-		CHECK_ADDRESS(NEL_PFNGLGETVARIANTARRAYOBJECTIVATIPROC, glGetVariantArrayObjectivATI);
-	}
-
-	return true;
-}
-
-
-static bool	setupATIMapObjectBuffer(const char *glext)
-{
-	H_AUTO_OGL(setupATIMapObjectBuffer);
-	CHECK_EXT("GL_ATI_map_object_buffer");
-
-	CHECK_ADDRESS(NEL_PFNGLMAPOBJECTBUFFERATIPROC, glMapObjectBufferATI);
-	CHECK_ADDRESS(NEL_PFNGLUNMAPOBJECTBUFFERATIPROC, glUnmapObjectBufferATI);
-
-	return true;
-}
-
-
-
-// *********************************
 static bool	setupATIFragmentShader(const char *glext)
 {
 	H_AUTO_OGL(setupATIFragmentShader);
@@ -1061,19 +931,6 @@ static bool	setupATIFragmentShader(const char *glext)
 	CHECK_ADDRESS(NEL_PFNGLALPHAFRAGMENTOP2ATIPROC, glAlphaFragmentOp2ATI);
 	CHECK_ADDRESS(NEL_PFNGLALPHAFRAGMENTOP3ATIPROC, glAlphaFragmentOp3ATI);
 	CHECK_ADDRESS(NEL_PFNGLSETFRAGMENTSHADERCONSTANTATIPROC, glSetFragmentShaderConstantATI);
-
-	return true;
-}
-
-// *********************************
-static bool setupATIVertexAttribArrayObject(const char *glext)
-{
-	H_AUTO_OGL(setupATIVertexAttribArrayObject);
-	CHECK_EXT("GL_ATI_vertex_attrib_array_object");
-
-	CHECK_ADDRESS(NEL_PFNGLVERTEXATTRIBARRAYOBJECTATIPROC, glVertexAttribArrayObjectATI);
-	CHECK_ADDRESS(NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTFVATIPROC, glGetVertexAttribArrayObjectfvATI);
-	CHECK_ADDRESS(NEL_PFNGLGETVERTEXATTRIBARRAYOBJECTIVATIPROC, glGetVertexAttribArrayObjectivATI);
 
 	return true;
 }
@@ -1363,18 +1220,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check ARBMultisample
 	ext.ARBMultisample = setupARBMultisample(glext);
 
-	// Check NVVertexArrayRange
-	// Disable feature ???
-	if(!ext.DisableHardwareVertexArrayAGP)
-		ext.NVVertexArrayRange= setupNVVertexArrayRange(glext);
-
-	if(ext.NVVertexArrayRange)
-	{
-		GLint nverts = 10;
-		glGetIntegerv((GLenum)GL_MAX_VERTEX_ARRAY_RANGE_ELEMENT_NV, &nverts);
-		ext.NVVertexArrayRangeMaxVertex= nverts;
-	}
-
 	// Compression S3TC OK iff ARBTextureCompression.
 	ext.EXTTextureCompressionS3TC= (ext.ARBTextureCompression && setupEXTTextureCompressionS3TC(glext));
 
@@ -1435,19 +1280,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check EXTBlendColor
 	ext.EXTBlendColor= setupEXTBlendColor(glext);
 
-	// Check NVVertexArrayRange2
-	ext.NVVertexArrayRange2= setupNVVertexArrayRange2(glext);
-
-#ifdef GL_NV_vertex_array_range2
-	// if supported
-	if(ext.NVVertexArrayRange2)
-		// VBHard swap without flush of the VAR.
-		ext.NVStateVARWithoutFlush= GL_VERTEX_ARRAY_RANGE_WITHOUT_FLUSH_NV;
-	else
-		// VBHard with useless flush of the VAR.
-		ext.NVStateVARWithoutFlush= GL_VERTEX_ARRAY_RANGE_NV;
-#endif
-
 	// Check NV_occlusion_query
 	ext.NVOcclusionQuery = setupNVOcclusionQuery(glext);
 
@@ -1484,14 +1316,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// ATI extensions
 	// -------------
 
-	// Check ATIVertexArrayObject
-	// Disable feature ???
-	if(!ext.DisableHardwareVertexArrayAGP)
-	{
-		ext.ATIVertexArrayObject= setupATIVertexArrayObject(glext);
-		ext.ATIMapObjectBuffer= setupATIMapObjectBuffer(glext);
-		ext.ATIVertexAttribArrayObject = setupATIVertexAttribArrayObject(glext);
-	}
 	// Check ATIXTextureEnvCombine3.
 	ext.ATITextureEnvCombine3= setupATITextureEnvCombine3(glext);
 	// Check ATIXTextureEnvRoute
@@ -1504,14 +1328,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.ARBVertexBufferObject = setupARBVertexBufferObject(glext);
 	}
 
-	// fix for radeon 7200 -> disable agp
-	if (ext.NbTextureStages == 3 && (ext.ATIVertexArrayObject || ext.ARBVertexBufferObject))
-	{
-		ext.ATIVertexArrayObject = false;
-		ext.ARBVertexBufferObject = false;
-		ext.ATIMapObjectBuffer = false;
-		ext.ATIVertexAttribArrayObject = false;
-	}
 }
 
 

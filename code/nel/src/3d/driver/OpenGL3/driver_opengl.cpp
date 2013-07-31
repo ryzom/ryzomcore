@@ -764,7 +764,7 @@ bool CDriverGL3::swapBuffers()
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
 		Setup a std vertex buffer to ensure NVidia synchronisation.
 	*/
-	if (!_Extensions.ARBVertexBufferObject && _Extensions.NVVertexArrayRange)
+	if (!_Extensions.ARBVertexBufferObject )
 	{
 		static	CVertexBuffer	dummyVB;
 		static	bool			dummyVBinit= false;
