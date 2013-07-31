@@ -1,6 +1,6 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 'on');
+//error_reporting(E_ALL);
+//ini_set('display_errors', 'on');
 require( '../config.php' );
 require( '../../ams_lib/libinclude.php' );
 session_start();

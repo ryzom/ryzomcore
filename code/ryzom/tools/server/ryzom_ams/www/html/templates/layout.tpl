@@ -67,7 +67,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</a>
-				<a class="brand" href="index.php"> <img alt="Ryzom Core Logo" src="img/ryzomcore.png"></a>
+				<a class="brand" href="index.php"> <img alt="Ryzom Core Logo" src="img/ryzomcore_166_62.png"></a>
 
 				<!-- theme selector starts -->
 				<div class="btn-group pull-right theme-container">
