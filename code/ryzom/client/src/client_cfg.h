@@ -53,7 +53,7 @@ using std::string;
 //---------------------------------------------------
 struct CClientConfig
 {
-	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES };
+	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES, OpenGL3 };
 	enum TDriverSound { SoundDrvAuto = 0, SoundDrvFMod, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
 	enum TStageLCTUsage { StageUseNoLCT = 0, StageUseAllLCT, StageUsePosOnlyLCT };
 

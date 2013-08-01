@@ -819,6 +819,9 @@ void prelogInit()
 			case CClientConfig::OpenGLES:
 				driver = UDriver::OpenGlEs;
 			break;
+			case CClientConfig::OpenGL3:
+				driver = UDriver::OpenGl3;
+			break;
 			default:
 			break;
 		}
