@@ -93,50 +93,6 @@ CVertexArrayRangeARB::CVertexArrayRangeARB(CDriverGL3 *drv) : IVertexArrayRange(
 }
 
 // ***************************************************************************
-bool CVertexArrayRangeARB::allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType)
-{
-	H_AUTO_OGL(CVertexArrayRangeARB_allocate)
-	nlassert(_SizeAllocated == 0);
-	/*
-	// We don't manage memory ourselves, but test if there's enough room anyway
-	GLuint vertexBufferID;
-	glGetError();
-	glGenBuffersARB(1, &vertexBufferID);
-	if (glGetError() != GL_NO_ERROR) return false;
-
-	switch(vbType)
-	{
-		case CVertexBuffer::AGPPreferred:
-			glBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
-		break;
-		case CVertexBuffer::VRAMPreferred:
-			glBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STATIC_DRAW_ARB);
-		break;
-		default:
-			nlassert(0);
-		break;
-	}
-
-	if (glGetError() != GL_NO_ERROR)
-	{
-		glDeleteBuffersARB(1, &vertexBufferID);
-		return false;
-	}
-	glDeleteBuffersARB(1, &vertexBufferID);
-	*/
-	_SizeAllocated = size;
-	_VBType = vbType;
-	return true;
-}
-
-// ***************************************************************************
-void CVertexArrayRangeARB::free()
-{
-	H_AUTO_OGL(CVertexArrayRangeARB_free)
-	_SizeAllocated = 0;
-}
-
-// ***************************************************************************
 IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuffer *vb)
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_createVBHardGL)

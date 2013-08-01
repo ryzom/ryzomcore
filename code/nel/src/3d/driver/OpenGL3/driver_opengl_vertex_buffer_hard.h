@@ -50,14 +50,8 @@ public:
 	IVertexArrayRange(CDriverGL3 *drv);
 	virtual	~IVertexArrayRange();
 
-	/// allocate a vertex array space. false if error. client must free before re-allocate.
-	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType)= 0;
-	/// free this space.
-	virtual	void					free()= 0;
 	/// create a IVertexBufferHardGL
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb) =0;
-	/// return the size allocated. 0 if not allocated or failure
-	virtual	uint					sizeAllocated() const =0;
 	// Check & invalidate lost buffers. Default assume they can't be lost
 	virtual void updateLostBuffers() {}
 	// Get driver
@@ -124,21 +118,7 @@ class CVertexArrayRangeARB : public IVertexArrayRange
 public:
 	CVertexArrayRangeARB(CDriverGL3 *drv);
 
-
-	/// \name Implementation
-	// @{
-	/** Allocate a vertex array space. false if error. must free before re-allocate.
-	  * Will always succeed, because vb are not managed in a heap, but are rather kept as separate objects
-	  */
-	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
-	/// free this space.
-	virtual	void					free();
-	/// create a IVertexBufferHardGL
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb);
-	/// return the size allocated. 0 if not allocated or failure
-	virtual	uint					sizeAllocated() const { return _SizeAllocated; }
-	// @}
-
 
 	// Those methods read/write in _Driver->_CurrentVertexArrayRange.
 	/** active this VertexArrayRange as the current vertex array range used. no-op if already setup.

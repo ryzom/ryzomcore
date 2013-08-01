@@ -1483,12 +1483,6 @@ void			CDriverGL3::resetVertexArrayRange()
 	}
 	// Clear any VertexBufferHard created.
 	_VertexBufferHardSet.clear();
-
-	// After, Clear the 2 vertexArrayRange, if any.
-	if(_AGPVertexArrayRange)
-		_AGPVertexArrayRange->free();
-	if(_VRAMVertexArrayRange)
-		_VRAMVertexArrayRange->free();
 }
 
 
@@ -1505,83 +1499,8 @@ bool			CDriverGL3::initVertexBufferHard(uint agpMem, uint vramMem)
 
 	// First, reset any VBHard created.
 	resetVertexArrayRange();
-	bool	ok= true;
 
-	// Try to allocate AGPMemory.
-	if(agpMem>0)
-	{
-		agpMem&= ~15;	// ensure 16-bytes aligned mem count (maybe useful :) ).
-		agpMem= max(agpMem, (uint)NL3D_DRV_VERTEXARRAY_MINIMUM_SIZE);
-		while(agpMem>= NL3D_DRV_VERTEXARRAY_MINIMUM_SIZE)
-		{
-			if(_AGPVertexArrayRange->allocate(agpMem, CVertexBuffer::AGPPreferred))
-			{
-				nlinfo("3D: %.u vertices supported", _MaxVerticesByVBHard);
-				nlinfo("3D: Success to allocate %.1f Mo of AGP VAR Ram", agpMem / 1000000.f);
-				break;
-			}
-			else
-			{
-				agpMem/=2;
-				agpMem &=~15;
-			}
-		}
-
-		if(agpMem< NL3D_DRV_VERTEXARRAY_MINIMUM_SIZE)
-		{
-			nlinfo("3D: %.u vertices supported", _MaxVerticesByVBHard);
-			nlinfo("3D: Failed to allocate %.1f Mo of AGP VAR Ram", NL3D_DRV_VERTEXARRAY_MINIMUM_SIZE / 1000000.f);
-			ok= false;
-		}
-	}
-
-
-	// Try to allocate VRAMMemory.
-	if(vramMem>0)
-	{
-		vramMem&= ~15;	// ensure 16-bytes aligned mem count (maybe useful :) ).
-		vramMem= max(vramMem, (uint)NL3D_DRV_VERTEXARRAY_MINIMUM_SIZE);
-		while(vramMem>= NL3D_DRV_VERTEXARRAY_MINIMUM_SIZE)
-		{
-			if(_VRAMVertexArrayRange->allocate(vramMem, CVertexBuffer::StaticPreferred))
-				break;
-			else
-			{
-				vramMem/=2;
-				vramMem &=~15;
-			}
-		}
-
-		if(vramMem< NL3D_DRV_VERTEXARRAY_MINIMUM_SIZE)
-		{
-			ok= false;
-		}
-	}
-
-
-	return ok;
-}
-
-
-// ***************************************************************************
-uint32				CDriverGL3::getAvailableVertexAGPMemory ()
-{
-	H_AUTO_OGL(CDriverGL3_getAvailableVertexAGPMemory )
-	if (_AGPVertexArrayRange)
-		return _AGPVertexArrayRange->sizeAllocated();
-	else
-		return 0;
-}
-
-
-// ***************************************************************************
-uint32				CDriverGL3::getAvailableVertexVRAMMemory ()
-{
-	H_AUTO_OGL(CDriverGL3_getAvailableVertexVRAMMemory )
-	if (_VRAMVertexArrayRange)
-		return _VRAMVertexArrayRange->sizeAllocated();
-	else
-		return 0;
+	return true;
 }
 
 

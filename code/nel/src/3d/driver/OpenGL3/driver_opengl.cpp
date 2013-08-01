@@ -455,29 +455,9 @@ bool CDriverGL3::setupDisplay()
 	_NVCurrentVARPtr= NULL;
 	_NVCurrentVARSize= 0;
 
-	if (_SupportVBHard)
-	{
-		// try to allocate 16Mo by default of AGP Ram.
+	if( _SupportVBHard )
 		initVertexBufferHard(NL3D_DRV_VERTEXARRAY_AGP_INIT_SIZE, 0);
 
-		// If not success to allocate at least a minimum space in AGP, then disable completely VBHard feature
-		if( _AGPVertexArrayRange->sizeAllocated()==0 )
-		{
-			// reset any allocated VRAM space.
-			resetVertexArrayRange();
-
-			// delete containers
-			delete _AGPVertexArrayRange;
-			delete _VRAMVertexArrayRange;
-			_AGPVertexArrayRange= NULL;
-			_VRAMVertexArrayRange= NULL;
-
-			// disable.
-			_SupportVBHard= false;
-			_SlowUnlockVBHard= false;
-			_MaxVerticesByVBHard= 0;
-		}
-	}
 
 	// Init embm if present
 	//===========================================================
