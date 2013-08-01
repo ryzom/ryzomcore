@@ -729,32 +729,6 @@ bool CDriverGL3::swapBuffers()
 	//resetTextureShaders();
 	activeVertexProgram(NULL);
 
-	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
-		Setup a std vertex buffer to ensure NVidia synchronisation.
-	*/
-	if( false )
-	{
-		static	CVertexBuffer	dummyVB;
-		static	bool			dummyVBinit= false;
-		if(!dummyVBinit)
-		{
-			dummyVBinit= true;
-			// setup a full feature VB (maybe not useful ... :( ).
-			dummyVB.setVertexFormat(CVertexBuffer::PositionFlag|CVertexBuffer::NormalFlag|
-				CVertexBuffer::PrimaryColorFlag|CVertexBuffer::SecondaryColorFlag|
-				CVertexBuffer::TexCoord0Flag|CVertexBuffer::TexCoord1Flag|
-				CVertexBuffer::TexCoord2Flag|CVertexBuffer::TexCoord3Flag
-				);
-			// some vertices.
-			dummyVB.setNumVertices(10);
-		}
-		// activate each frame to close VBHard rendering.
-		//	NVidia: This also force a SetFence on if last VB was a VBHard, "closing" it before swap.
-		//
-		activeVertexBuffer(dummyVB);
-		nlassert(_CurrentVertexBufferHard==NULL);
-	}
-
 #ifdef NL_OS_WINDOWS
 	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
 	{
