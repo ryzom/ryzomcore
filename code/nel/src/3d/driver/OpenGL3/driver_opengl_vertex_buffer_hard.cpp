@@ -62,16 +62,16 @@ IVertexBufferHardGL::~IVertexBufferHardGL()
 
 
 // ***************************************************************************
-CVertexArrayRangeARB::CVertexArrayRangeARB(CDriverGL3 *drv) : IVertexArrayRange(drv),
+CVertexArrayRange::CVertexArrayRange(CDriverGL3 *drv) : IVertexArrayRange(drv),
 															 _VBType(CVertexBuffer::AGPPreferred)
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_CVertexArrayRangeARB)
 }
 
 // ***************************************************************************
-IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuffer *vb)
+IVertexBufferHardGL *CVertexArrayRange::createVBHardGL(uint size, CVertexBuffer *vb)
 {
-	H_AUTO_OGL(CVertexArrayRangeARB_createVBHardGL)
+	H_AUTO_OGL(CVertexArrayRange_createVBHardGL)
 
 	// create a ARB VBHard
 	GLuint vertexBufferID;
@@ -101,14 +101,14 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 		nglDeleteBuffersARB(1, &vertexBufferID);
 		return NULL;
 	}
-	CVertexBufferHardARB *newVbHard= new CVertexBufferHardARB(_Driver, vb);
+	CVertexBufferHard *newVbHard= new CVertexBufferHard(_Driver, vb);
 	newVbHard->initGL(vertexBufferID, this, _VBType);
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 	return newVbHard;
 }
 
 // ***************************************************************************
-void CVertexArrayRangeARB::enable()
+void CVertexArrayRange::enable()
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_enable)
 	if(_Driver->_CurrentVertexArrayRange != this)
@@ -118,7 +118,7 @@ void CVertexArrayRangeARB::enable()
 }
 
 // ***************************************************************************
-void CVertexArrayRangeARB::disable()
+void CVertexArrayRange::disable()
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_disbale)
 	if(_Driver->_CurrentVertexBufferHard != NULL)
@@ -128,7 +128,7 @@ void CVertexArrayRangeARB::disable()
 }
 
 // ***************************************************************************
-void CVertexArrayRangeARB::updateLostBuffers()
+void CVertexArrayRange::updateLostBuffers()
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_updateLostBuffers)
 	// Put all vb that have been lost in the NotResident state so that they will be recomputed
@@ -136,7 +136,7 @@ void CVertexArrayRangeARB::updateLostBuffers()
 	nlassert(_Driver);
 	if (_Driver->isWndActive())
 	{
-		for(std::list<CVertexBufferHardARB *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
+		for(std::list<CVertexBufferHard *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
 			nlassert((*it)->_VertexObjectId);
 			GLuint id = (GLuint) (*it)->_VertexObjectId;
@@ -156,7 +156,7 @@ void CVertexArrayRangeARB::updateLostBuffers()
 
 
 // ***************************************************************************
-CVertexBufferHardARB::CVertexBufferHardARB(CDriverGL3 *drv, CVertexBuffer *vb) :  IVertexBufferHardGL(drv, vb),
+CVertexBufferHard::CVertexBufferHard(CDriverGL3 *drv, CVertexBuffer *vb) :  IVertexBufferHardGL(drv, vb),
                                                                                  _VertexPtr(NULL),
 																				_VertexObjectId(0)
 
@@ -171,7 +171,7 @@ CVertexBufferHardARB::CVertexBufferHardARB(CDriverGL3 *drv, CVertexBuffer *vb) :
 }
 
 // ***************************************************************************
-CVertexBufferHardARB::~CVertexBufferHardARB()
+CVertexBufferHard::~CVertexBufferHard()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_CVertexBufferHardARBDtor)
 	if (_Driver && _VertexObjectId)
@@ -208,7 +208,7 @@ CVertexBufferHardARB::~CVertexBufferHardARB()
 }
 
 // ***************************************************************************
-void *CVertexBufferHardARB::lock()
+void *CVertexBufferHard::lock()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_lock);
 
@@ -293,7 +293,7 @@ void *CVertexBufferHardARB::lock()
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::unlock()
+void CVertexBufferHard::unlock()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_unlock);
 
@@ -337,21 +337,21 @@ void CVertexBufferHardARB::unlock()
 }
 
 // ***************************************************************************
-void		*CVertexBufferHardARB::getPointer()
+void		*CVertexBufferHard::getPointer()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_getPointer)
 	return _VertexPtr;
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::unlock(uint /* startVert */,uint /* endVert */)
+void CVertexBufferHard::unlock(uint /* startVert */,uint /* endVert */)
 {
 	H_AUTO_OGL(CVertexBufferHardARB_unlock)
 	unlock(); // can't do a lock on a range of the vb..
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::enable()
+void CVertexBufferHard::enable()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_enable)
 	if(_Driver->_CurrentVertexBufferHard != this)
@@ -363,7 +363,7 @@ void CVertexBufferHardARB::enable()
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::disable()
+void CVertexBufferHard::disable()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_disable)
 	if(_Driver->_CurrentVertexBufferHard != NULL)
@@ -375,7 +375,7 @@ void CVertexBufferHardARB::disable()
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TPreferredMemory memType)
+void CVertexBufferHard::initGL(uint vertexObjectID, CVertexArrayRange *var, CVertexBuffer::TPreferredMemory memType)
 {
 	H_AUTO_OGL(CVertexBufferHardARB_initGL)
 	_VertexObjectId = vertexObjectID;
@@ -384,21 +384,21 @@ void CVertexBufferHardARB::initGL(uint vertexObjectID, CVertexArrayRangeARB *var
 }
 
 // ***************************************************************************
-void			CVertexBufferHardARB::lockHintStatic(bool /* staticLock */)
+void			CVertexBufferHard::lockHintStatic(bool /* staticLock */)
 {
 	H_AUTO_OGL(CVertexBufferHardARB_lockHintStatic)
 	// no op.
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::setupVBInfos(CVertexBufferInfo &vb)
+void CVertexBufferHard::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferHardARB_setupVBInfos)
 	vb.VertexObjectId = _VertexObjectId;
 }
 
 // ***************************************************************************
-void CVertexBufferHardARB::invalidate()
+void CVertexBufferHard::invalidate()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_invalidate)
 	nlassert(!_Invalid);
@@ -414,13 +414,13 @@ void CVertexBufferHardARB::invalidate()
 
 // ***************************************************************************
 #ifdef NL_DEBUG
-	void CVertexArrayRangeARB::dumpMappedBuffers()
+	void CVertexArrayRange::dumpMappedBuffers()
 	{
 		nlwarning("*****************************************************");
 		nlwarning("Mapped buffers :");
-		for(std::list<CVertexBufferHardARB *>::iterator it = _MappedVBList.begin(); it != _MappedVBList.end(); ++it)
+		for(std::list<CVertexBufferHard *>::iterator it = _MappedVBList.begin(); it != _MappedVBList.end(); ++it)
 		{
-			CVertexBufferHardARB &vbarb = **it;
+			CVertexBufferHard &vbarb = **it;
 			nlwarning("Buffer id = %u, size = %u, address = %p", vbarb._VertexObjectId, vbarb.VB->getVertexSize() * vbarb.VB->getNumVertices(), vbarb.getPointer());
 		}
 	}

@@ -489,7 +489,7 @@ public:
 
 	virtual const char*		getDriverInformation ()
 	{
-		return "Opengl 1.2 NeL Driver";
+		return "Opengl 3.3 Core NeL Driver";
 	}
 
 	virtual const char*		getVideocardInformation ();
@@ -1212,8 +1212,8 @@ private:
 	/// \name VertexBufferHard
 	// @{
 	CPtrSet<IVertexBufferHardGL>	_VertexBufferHardSet;
-	friend class					CVertexArrayRangeARB;
-	friend class					CVertexBufferHardARB;
+	friend class					CVertexArrayRange;
+	friend class					CVertexBufferHard;
 	friend class					CVBDrvInfosGL3;
 
 	// The VertexArrayRange activated.

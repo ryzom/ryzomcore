@@ -29,17 +29,7 @@ namespace NLDRIVERGL3 {
 class	CDriverGL;
 class	IVertexBufferHardGL;
 class   CVertexBufferInfo;
-class	CVertexBufferHardGLMapObjectATI;
-class	CVertexBufferHardARB;
-
-// ***************************************************************************
-// ***************************************************************************
-// VBHard interface for both NVidia / ATI extension.
-// ***************************************************************************
-// ***************************************************************************
-
-
-
+class	CVertexBufferHard;
 
 // ***************************************************************************
 /** Interface to a Big block of video memory
@@ -66,27 +56,18 @@ protected:
 
 
 
-// ***************************************************************************
-/** Common interface for both NVidia and ATI extenstion
- *
- */
 class IVertexBufferHardGL
 {
 public:
 
 	IVertexBufferHardGL(CDriverGL3 *drv, CVertexBuffer *vb);
 	virtual	~IVertexBufferHardGL();
-
-
-	// ATI and NVidia have their own methods.
 	virtual	void		*lock() = 0;
 	virtual	void		unlock() = 0;
 	virtual void		unlock(uint start, uint end) = 0;
 	virtual void		*getPointer() = 0;
-
 	virtual	void			enable() =0;
 	virtual	void			disable() =0;
-
 	virtual void		setupVBInfos(CVertexBufferInfo &vb) = 0;
 
 	// test if buffer content is invalid. If so, no rendering should occurs (rendering should silently fail)
@@ -107,10 +88,10 @@ protected:
 // ARB_vertex_buffer_object implementation
 // ***************************************************************************
 // ***************************************************************************
-class CVertexArrayRangeARB : public IVertexArrayRange
+class CVertexArrayRange : public IVertexArrayRange
 {
 public:
-	CVertexArrayRangeARB(CDriverGL3 *drv);
+	CVertexArrayRange(CDriverGL3 *drv);
 
 	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb);
 
@@ -134,21 +115,21 @@ private:
 	CVertexBuffer::TPreferredMemory _VBType;
 	// for use by CVertexBufferHardARB
 public:
-	std::list<CVertexBufferHardARB *> _LostVBList;
+	std::list<CVertexBufferHard*> _LostVBList;
 	#ifdef NL_DEBUG
-		std::list<CVertexBufferHardARB *> _MappedVBList;
+		std::list<CVertexBufferHard*> _MappedVBList;
 	#endif
 };
 
 
 /** vb hard using the ARB_vertex_buffer_object extension. Buffer are kept separate rather than managed in a heap
   */
-class CVertexBufferHardARB : public IVertexBufferHardGL
+class CVertexBufferHard : public IVertexBufferHardGL
 {
 public:
 
-	CVertexBufferHardARB(CDriverGL3 *drv, CVertexBuffer *vb);
-	virtual	~CVertexBufferHardARB();
+	CVertexBufferHard(CDriverGL3 *drv, CVertexBuffer *vb);
+	virtual	~CVertexBufferHard();
 
 
 	/// \name Implementation
@@ -165,7 +146,7 @@ public:
 
    /**	setup ptrs allocated by createVBHard()
 	 */
-	void					initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TPreferredMemory memType);
+	void					initGL(uint vertexObjectID, CVertexArrayRange *var, CVertexBuffer::TPreferredMemory memType);
 
 
 public:
@@ -181,20 +162,20 @@ public:
 
 // *************************
 private:
-	CVertexArrayRangeARB			*_VertexArrayRange;
+	CVertexArrayRange *_VertexArrayRange;
 	CVertexBuffer::TPreferredMemory _MemType;
 	void							*_VertexPtr; // pointer on current datas. Null if not locked
 
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
 	std::vector<uint8>				_DummyVB;
-	// for use by CVertexArrayRangeARB
-	std::list<CVertexBufferHardARB *>::iterator _IteratorInLostVBList;
+	// for use by CVertexArrayRange
+	std::list<CVertexBufferHard*>::iterator _IteratorInLostVBList;
 public:
 	uint							_VertexObjectId;
 	// tmp for debug
 	#ifdef NL_DEBUG
 		bool _Unmapping;
-		std::list<CVertexBufferHardARB *>::iterator _IteratorInMappedVBList;
+		std::list<CVertexBufferHard*>::iterator _IteratorInMappedVBList;
 	#endif
 };
 

@@ -436,8 +436,8 @@ bool CDriverGL3::setupDisplay()
 	// Init VertexArrayRange according to supported extenstion.
 	_SlowUnlockVBHard= false;
 
-	_AGPVertexArrayRange= new CVertexArrayRangeARB(this);
-	_VRAMVertexArrayRange= new CVertexArrayRangeARB(this);
+	_AGPVertexArrayRange= new CVertexArrayRange(this);
+	_VRAMVertexArrayRange= new CVertexArrayRange(this);
 
 	// Reset VertexArrayRange.
 	_CurrentVertexArrayRange= NULL;
