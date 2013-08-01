@@ -84,13 +84,13 @@ IVertexBufferHardGL *CVertexArrayRange::createVBHardGL(uint size, CVertexBuffer 
 	switch(_VBType)
 	{
 		case CVertexBuffer::AGPPreferred:
-			nglBufferData(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+			nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 			break;
 		case CVertexBuffer::StaticPreferred:
 			if (_Driver->getStaticMemoryToVRAM())
-				nglBufferData(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STATIC_DRAW_ARB);
+				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
 			else
-				nglBufferData(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 			break;
 		default:
 			nlassert(0);
@@ -235,13 +235,13 @@ void *CVertexBufferHard::lock()
 		switch(_MemType)
 		{
 			case CVertexBuffer::AGPPreferred:
-				nglBufferData(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 			break;
 			case CVertexBuffer::StaticPreferred:
 				if (_Driver->getStaticMemoryToVRAM())
-					nglBufferData(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STATIC_DRAW_ARB);
+					nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
 				else
-					nglBufferData(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
+					nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 			break;
 			default:
 				nlassert(0);
@@ -268,10 +268,10 @@ void *CVertexBufferHard::lock()
 	_Driver->_DriverGLStates.bindARBVertexBuffer(_VertexObjectId);
 
 
-	_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+	_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	if (!_VertexPtr)
 	{
-		nglUnmapBuffer(GL_ARRAY_BUFFER_ARB);
+		nglUnmapBuffer(GL_ARRAY_BUFFER);
 		nlassert(nglIsBuffer((GLuint) _VertexObjectId));
 		invalidate();
 		return &_DummyVB[0];
@@ -312,7 +312,7 @@ void CVertexBufferHard::unlock()
 	#endif
 	GLboolean unmapOk = GL_FALSE;
 
-	unmapOk = nglUnmapBuffer(GL_ARRAY_BUFFER_ARB);
+	unmapOk = nglUnmapBuffer(GL_ARRAY_BUFFER);
 
 	#ifdef NL_DEBUG
 		_Unmapping = false;

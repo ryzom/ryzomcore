@@ -1031,7 +1031,7 @@ void CDriverGLStates3::forceBindARBVertexBuffer(uint objectID)
 {
 	H_AUTO_OGL(CDriverGLStates3_forceBindARBVertexBuffer)
 
-	nglBindBuffer(GL_ARRAY_BUFFER_ARB, objectID);
+	nglBindBuffer(GL_ARRAY_BUFFER, objectID);
 
 	_CurrARBVertexBuffer = objectID;
 }
