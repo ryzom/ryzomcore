@@ -86,8 +86,7 @@ IVertexBufferHardGL::~IVertexBufferHardGL()
 
 // ***************************************************************************
 CVertexArrayRangeARB::CVertexArrayRangeARB(CDriverGL3 *drv) : IVertexArrayRange(drv),
-															 _VBType(CVertexBuffer::AGPPreferred),
-															 _SizeAllocated(0)
+															 _VBType(CVertexBuffer::AGPPreferred)
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_CVertexArrayRangeARB)
 }
@@ -96,7 +95,7 @@ CVertexArrayRangeARB::CVertexArrayRangeARB(CDriverGL3 *drv) : IVertexArrayRange(
 IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuffer *vb)
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_createVBHardGL)
-	if (!_SizeAllocated) return NULL;
+
 	// create a ARB VBHard
 	GLuint vertexBufferID;
 	glGetError();

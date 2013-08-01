@@ -138,7 +138,6 @@ public:
 // *************************
 private:
 	CVertexBuffer::TPreferredMemory _VBType;
-	uint32							_SizeAllocated;
 	// for use by CVertexBufferHardARB
 public:
 	std::list<CVertexBufferHardARB *> _LostVBList;

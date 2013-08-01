@@ -1320,6 +1320,8 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.ATITextureEnvCombine3= setupATITextureEnvCombine3(glext);
 	// Check ATIXTextureEnvRoute
 	ext.ATIXTextureEnvRoute= setupATIXTextureEnvRoute(glext);
+
+	setupARBVertexBufferObject(glext);
 }
 
 
