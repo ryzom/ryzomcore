@@ -21,6 +21,8 @@
 
 #include "cdb.h"
 
+#define NL_CDB_OPTIMIZE_PREDICT 1
+
 namespace NLMISC{
 
 /**
@@ -247,6 +249,10 @@ protected:
 
 	/// called by clear
 	void			removeAllBranchObserver();
+
+#if NL_CDB_OPTIMIZE_PREDICT
+	CRefPtr<ICDBNode>		_PredictNode;
+#endif
 };
 
 }
