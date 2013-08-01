@@ -196,6 +196,8 @@ public:
 
 	bool					initFrameBufferObject(ITexture * tex);
 	bool					activeFrameBufferObject(ITexture * tex);
+
+	std::vector<CTextureDrvInfosGL *>::size_type TextureUsedIdx;
 };
 
 
@@ -1277,7 +1279,7 @@ private:
 	uint32												_NbSetupMaterialCall;
 	uint32												_NbSetupModelMatrixCall;
 	bool												_SumTextureMemoryUsed;
-	std::set<CTextureDrvInfosGL*>						_TextureUsed;
+	std::vector<CTextureDrvInfosGL *>					_TextureUsed;
 	uint							computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const;
 
 	// VBHard Lock Profiling

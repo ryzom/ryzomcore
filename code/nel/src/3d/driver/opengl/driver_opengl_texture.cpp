@@ -79,6 +79,8 @@ CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDri
 	InitFBO = false;
 	AttachDepthStencil = true;
 	UsePackedDepthStencil = drvGl->supportPackedDepthStencil();
+
+	TextureUsedIdx = 0;
 }
 // ***************************************************************************
 CTextureDrvInfosGL::~CTextureDrvInfosGL()
@@ -91,7 +93,10 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 	_Driver->_AllocatedTextureMemory-= TextureMemory;
 
 	// release in TextureUsed.
-	_Driver->_TextureUsed.erase (this);
+	if (TextureUsedIdx < _Driver->_TextureUsed.size() && _Driver->_TextureUsed[TextureUsedIdx] == this)
+	{
+		_Driver->_TextureUsed[TextureUsedIdx] = NULL;
+	}
 
 	if(InitFBO)
 	{
@@ -1492,7 +1497,11 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			if (_SumTextureMemoryUsed)
 			{
 				// Insert the pointer of this texture
-				_TextureUsed.insert (gltext);
+				if (gltext->TextureUsedIdx >= _TextureUsed.size() || _TextureUsed[gltext->TextureUsedIdx] != gltext)
+				{
+					gltext->TextureUsedIdx = _TextureUsed.size();
+					_TextureUsed.push_back(gltext);
+				}
 			}
 
 			if(tex->isTextureCube())

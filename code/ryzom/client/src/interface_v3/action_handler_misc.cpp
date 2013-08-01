@@ -425,14 +425,15 @@ class CActionHandlerAddLink : public IActionHandler
 		}
 
 		std::vector<CInterfaceLink::CTargetInfo> targetsVect;
-		bool result = CInterfaceLink::splitLinkTargets(targets, parentGroup, targetsVect);
+		std::vector<CInterfaceLink::CCDBTargetInfo> cdbTargetsVect;
+		bool result = CInterfaceLink::splitLinkTargetsExt(targets, parentGroup, targetsVect, cdbTargetsVect);
 		if (!result)
 		{
 			nlwarning("<CActionHandlerAddLink> Couldn't parse all links");
 		}
 		// add the link
 		CInterfaceLink *il = new CInterfaceLink;
-		il->init(targetsVect, expr, ah, ahparam, ahcond, parentGroup);
+		il->init(targetsVect, cdbTargetsVect, expr, ah, ahparam, ahcond, parentGroup);
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CWidgetManager::getInstance()->getParser()->addLink(il, id);
 		il->update();

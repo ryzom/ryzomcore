@@ -997,6 +997,7 @@ namespace NLGUI
 
 
 		std::vector<CInterfaceLink::CTargetInfo> targets;
+		std::vector<CInterfaceLink::CCDBTargetInfo> cdbTargets;
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"target");
 		std::string target;
@@ -1004,7 +1005,7 @@ namespace NLGUI
 		{
 			target = std::string( (const char*)ptr );
 			if( !editorMode )
-				CInterfaceLink::splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
+				CInterfaceLink::splitLinkTargetsExt(std::string((const char*)ptr), parentGroup, targets, cdbTargets);
 		}
 
 		// optional action handler
@@ -1022,7 +1023,7 @@ namespace NLGUI
 		if( !editorMode )
 		{
 			CInterfaceLink *il = new CInterfaceLink;
-			il->init(targets, expr, action, params, cond, parentGroup); // init will add 'il' in the list of link present in 'elm'
+			il->init(targets, cdbTargets, expr, action, params, cond, parentGroup); // init will add 'il' in the list of link present in 'elm'
 		}
 		else
 		{

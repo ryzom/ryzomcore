@@ -21,8 +21,9 @@
 <!-- Save the Time Zone config -->
 <variable entry="UI:SAVE:OUTPOST:TIME_ZONE"		 type="sint32" value="0" />
 <variable entry="UI:SAVE:OUTPOST:TIME_ZONE_AUTO" type="sint32" value="1" />
+<variable entry="UI:TEMP:OUTPOST:TIME_ZONE_NEXT_UPDATE" type="sint32" value="0" />
 <!-- just a script called at init and every 5 seconds, to setup TIME_ZONE, if time_zone is auto-->
-<link expr="depends(@UI:SAVE:OUTPOST:TIME_ZONE_AUTO, @UI:VARIABLES:CURRENT_SERVER_TICK)" action="lua:game:outpostUpdateTimeZone()" />
+<link expr="depends(@UI:SAVE:OUTPOST:TIME_ZONE_AUTO, @UI:VARIABLES:CURRENT_SERVER_TICK)" cond="and(eq(@UI:SAVE:OUTPOST:TIME_ZONE_AUTO, 1), ge(@UI:VARIABLES:CURRENT_SERVER_TICK, @UI:TEMP:OUTPOST:TIME_ZONE_NEXT_UPDATE))" action="lua:game:outpostUpdateTimeZone()" />
 
 
 <!-- Temp Variables -->
