@@ -204,8 +204,6 @@ public:
 	// Verex buffer hard ?
 	IVertexBufferHardGL		*_VBHard;
 	class CDriverGL3			*_DriverGL;
-	uint8					*_SystemMemory;
-
 
 	// From IVBDrvInfos
 	virtual ~CVBDrvInfosGL3();

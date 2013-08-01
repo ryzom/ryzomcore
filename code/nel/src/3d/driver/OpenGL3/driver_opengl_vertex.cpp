@@ -59,7 +59,6 @@ CVBDrvInfosGL3::CVBDrvInfosGL3(CDriverGL3 *drv, ItVBDrvInfoPtrList it, CVertexBu
 	H_AUTO_OGL(CVBDrvInfosGL_CVBDrvInfosGL)
 	_DriverGL = drv;
 	_VBHard = NULL;
-	_SystemMemory = NULL;
 }
 
 // ***************************************************************************
@@ -79,11 +78,7 @@ CVBDrvInfosGL3::~CVBDrvInfosGL3()
 		_VBHard->disable();
 		_DriverGL->_VertexBufferHardSet.erase(_VBHard);
 	}
-	if (_SystemMemory)
-	{
-		delete [] _SystemMemory;
-	}
-	_SystemMemory = NULL;
+
 	_VBHard = NULL;
 }
 
@@ -91,31 +86,14 @@ CVBDrvInfosGL3::~CVBDrvInfosGL3()
 uint8 *CVBDrvInfosGL3::lock (uint /* first */, uint /* last */, bool /* readOnly */)
 {
 	H_AUTO_OGL(CVBDrvInfosGL_lock)
-	if (_VBHard)
-	{
-		return (uint8*)_VBHard->lock ();
-	}
-	else
-	{
-		// Should be a system memory
-		nlassert (_SystemMemory);
-		return _SystemMemory;
-	}
+	return (uint8*)_VBHard->lock ();
 }
 
 // ***************************************************************************
 void CVBDrvInfosGL3::unlock (uint first, uint last)
 {
 	H_AUTO_OGL(CVBDrvInfosGL_unlock)
-	if (_VBHard)
-	{
-		_VBHard->unlock(first, last);
-	}
-	else
-	{
-		// Should be a system memory
-		nlassert (_SystemMemory);
-	}
+	_VBHard->unlock(first, last);
 }
 
 // ***************************************************************************
@@ -154,12 +132,6 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			
 			// Vertex buffer hard
 			info->_VBHard = createVertexBufferHard(size, VB.capacity(), preferred, &VB);
-			// No memory found ? Use system memory
-			if (info->_VBHard == NULL)
-			{
-				nlassert (info->_SystemMemory == NULL);
-				info->_SystemMemory = new uint8[size];
-			}
 
 			// Upload the data
 			VB.setLocation ((CVertexBuffer::TLocation)preferred);
@@ -1424,17 +1396,9 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 	uint8 *ptr;
 	CVBDrvInfosGL3 *info= safe_cast<CVBDrvInfosGL3*>((IVBDrvInfos*)vb.DrvInfos);
 	nlassert (info);
-	if (info->_VBHard)
-	{
-		ptr = (uint8*)info->_VBHard->getPointer();
-		info->_VBHard->setupVBInfos(*this);
-	}
-	else
-	{
-		nlassert (info->_SystemMemory);
-		ptr = info->_SystemMemory;
-		VBMode = SysMem;
-	}
+
+	ptr = (uint8*)info->_VBHard->getPointer();
+	info->_VBHard->setupVBInfos(*this);
 
 	// Get value pointer
 	for (i=0; i<CVertexBuffer::NumValue; i++)
