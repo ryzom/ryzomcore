@@ -52,7 +52,7 @@
 						    </tr>
 						    <tr>
 							<td valign="middle">Description:</td>
-							<td><textarea cols="50" id="Content" name="Content"><br><br><br><br><br></textarea></td>
+							<td><textarea cols="45" id="Content" name="Content"><br><br><br><br><br></textarea></td>
 						    </tr>
 						    <tr>
 							<td>
