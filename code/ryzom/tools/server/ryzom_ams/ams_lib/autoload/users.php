@@ -296,8 +296,8 @@ class Users{
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer("lib");  
-                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "createUser",
-                    "query" => json_encode(array($values["name"],$values["pass"],$values["mail"]))));
+                    $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "createUser",
+                    "query" => json_encode(array($values["name"],$values["pass"],$values["mail"])), "db" => "shard"));
                     ticket_user::createTicketUser( $user_id , 1 );
                     return "shardoffline";
                }catch (PDOException $e) {
@@ -380,8 +380,8 @@ class Users{
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer("lib");
-                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "change_pass",
-                    "query" => json_encode(array($values["user"],$values["pass"]))));
+                    $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "change_pass",
+                    "query" => json_encode(array($values["user"],$values["pass"])), "db" => "shard"));
                     return "shardoffline";
                }catch (PDOException $e) {
                     return "liboffline";
@@ -403,8 +403,8 @@ class Users{
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer("lib");
-                    $dbl->execute("INSERT INTO ams_querycache (type, query) VALUES (:type, :query)",array("type" => "change_mail",
-                    "query" => json_encode(array($values["user"],$values["mail"]))));
+                    $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "change_mail",
+                    "query" => json_encode(array($values["user"],$values["mail"])), "db" => "shard"));
                     return "shardoffline";
                }catch (PDOException $e) {
                     return "liboffline";

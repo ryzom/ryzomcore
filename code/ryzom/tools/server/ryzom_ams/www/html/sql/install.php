@@ -42,7 +42,8 @@
             CREATE TABLE ams_querycache (
             `SID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
             `type` VARCHAR( 64 ) NOT NULL ,
-            `query` VARCHAR( 512 ) NOT NULL 
+            `query` VARCHAR( 512 ) NOT NULL,
+            `db` VARCHAR( 80 ) NOT NULL
             );
             
 
