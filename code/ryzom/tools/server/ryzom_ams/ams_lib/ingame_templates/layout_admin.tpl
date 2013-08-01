@@ -14,11 +14,6 @@
          <td width="3"></td>
         <td height="25" valign="middle" nowrap><a class="ajax-link" href="index.php?page=sgroup_list"><h5> Support Groups</h5></a></td>
          <td width="3"></td>
-        <td width="10" align="center">|</td>
-         <td width="3"></td>
-        <td height="25" valign="middle" nowrap><a class="ajax-link" href="index.php?page=libuserlist"><h5> Syncing</h5></a></td>
-         <td width="3"></td>
-        <td height="25" valign="middle" nowrap><a href="?page=logout"><h5> Logout </h5></a></td>
-         <td width="3"></td>
+
 {/block}
 

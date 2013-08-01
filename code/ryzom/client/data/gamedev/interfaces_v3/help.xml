@@ -866,7 +866,7 @@
   <!--<define id="cs_url"
           value="http://app.ryzom.com/ticket_system/index.php?mode=load" />-->
   <define id="cs_url"
-          value="http://shard.ryzomcore.org/ams/index.php" />
+          value="http://localhost:40917/www/html/index.php" />
   <group type="container"
          id="cs_browser"
          w="410"
@@ -916,7 +916,7 @@
             posref="MR MR"
             x="-16"
             y="0"
-            hardtext="uiBrowseRedoButton"
+            hardtext="AMS-HOME"
             tooltip="uittBrowseHome"
             onclick_l="browse_home"
             params_l="name=ui:interface:cs_browser:content:html"
