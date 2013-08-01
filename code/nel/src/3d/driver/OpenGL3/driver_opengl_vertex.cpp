@@ -145,19 +145,15 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 
 			// Preferred memory
 			CVertexBuffer::TPreferredMemory preferred = VB.getPreferredMemory ();
-			if ((preferred == CVertexBuffer::RAMVolatile) || (preferred == CVertexBuffer::AGPVolatile))
-				preferred = CVertexBuffer::RAMPreferred;
-			const uint size = VB.capacity()*VB.getVertexSize();
-			uint preferredMemory = _Extensions.DisableHardwareVertexArrayAGP ? CVertexBuffer::RAMPreferred : preferred;
-			while (preferredMemory != CVertexBuffer::RAMPreferred)
-			{
-				// Vertex buffer hard
-				info->_VBHard = createVertexBufferHard(size, VB.capacity(), (CVertexBuffer::TPreferredMemory)preferredMemory, &VB);
-				if (info->_VBHard)
-					break;
-				preferredMemory--;
-			}
+			if ((preferred == CVertexBuffer::RAMVolatile) ||
+				(preferred == CVertexBuffer::AGPVolatile) ||
+				(preferred == CVertexBuffer::RAMPreferred ) )
+				preferred = CVertexBuffer::AGPPreferred;
 
+			const uint size = VB.capacity()*VB.getVertexSize();
+			
+			// Vertex buffer hard
+			info->_VBHard = createVertexBufferHard(size, VB.capacity(), preferred, &VB);
 			// No memory found ? Use system memory
 			if (info->_VBHard == NULL)
 			{
@@ -166,7 +162,7 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			}
 
 			// Upload the data
-			VB.setLocation ((CVertexBuffer::TLocation)preferredMemory);
+			VB.setLocation ((CVertexBuffer::TLocation)preferred);
 		}
 	}
 

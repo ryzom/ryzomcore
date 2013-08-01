@@ -1202,7 +1202,7 @@ inline void CVertexBuffer::lock (CVertexBufferRead &accessor, uint first, uint l
 			if (last == 0)
 				last = _NbVerts;
 			// Can read it ?
-			nlassertex (_Location==RAMResident, ("Try to read a write only vertex buffer"));
+			//nlassertex (_Location==RAMResident, ("Try to read a write only vertex buffer"));
 			_LockedBuffer = DrvInfos->lock (first*_VertexSize, last*_VertexSize, true);
 		}
 		else
