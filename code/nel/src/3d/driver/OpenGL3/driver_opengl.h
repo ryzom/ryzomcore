@@ -251,17 +251,11 @@ public:
 	// NB: ptrs are invalid if VertexFormat does not support the compoennt. must test VertexFormat, not the ptr.
 	void					*ValuePtr[CVertexBuffer::NumValue];
 
-
-	enum TVBMode { TVBModeNone = 0, SysMem, HW }; // standard VBs, or Hard VBs using different extensions
-
-	// Kind of vb
-	TVBMode					VBMode;
 	// the handle of ATI or ARB vertex object
 	uint					VertexObjectId;
 
 	CVertexBufferInfo()
 	{
-		VBMode = TVBModeNone;
 	}
 
 	void		setupVertexBuffer(CVertexBuffer &vb);

@@ -89,12 +89,6 @@ public:
 
 	virtual void		setupVBInfos(CVertexBufferInfo &vb) = 0;
 
-	enum TVBType { NVidiaVB, ATIVB, ATIMapObjectVB, ARBVB, UnknownVB };
-	// true if NVidia vertex buffer hard.
-	TVBType	 VBType;
-	// For Fence access. Ignored for ATI.
-	bool				GPURenderingAfterFence;
-
 	// test if buffer content is invalid. If so, no rendering should occurs (rendering should silently fail)
 	bool							isInvalid() { return _Invalid; }
 

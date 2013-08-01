@@ -169,16 +169,10 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	// 2. Setup Arrays.
 	//===================
 	// For MultiPass Material.
-	CVertexBufferInfo::TVBMode lastVBMode = _LastVB.VBMode;
 	CVBDrvInfosGL3		*info= safe_cast<CVBDrvInfosGL3*>((IVBDrvInfos*)VB.DrvInfos);
 	if (!info->_VBHard ||  (info->_VBHard && !info->_VBHard->isInvalid()))
-	{
 		_LastVB.setupVertexBuffer(VB);
-		if (lastVBMode == CVertexBufferInfo::HW && _LastVB.VBMode != CVertexBufferInfo::HW)
-		{
-			_DriverGLStates.bindARBVertexBuffer(0); // unbind ARB vertex buffer
-		}
-	}
+
 	if (info->_VBHard == NULL)
 	{
 		// Disable the current vertexBufferHard if setuped.
@@ -252,10 +246,6 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	_PrimitiveProfileIn.NLines+= nlines;
 	_PrimitiveProfileOut.NLines+= nlines;
 
-	// We have render some prims. inform the VBHard.
-	if(_CurrentVertexBufferHard)
-		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
-
 	return true;
 }
 
@@ -309,9 +299,6 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	_PrimitiveProfileIn.NTriangles+= ntris;
 	_PrimitiveProfileOut.NTriangles+= ntris * nPass;
 
-	// We have render some prims. inform the VBHard.
-	if(_CurrentVertexBufferHard)
-		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
 	return true;
 }
 
@@ -347,10 +334,6 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 	// Profiling.
 	_PrimitiveProfileIn.NTriangles+= ntris;
 	_PrimitiveProfileOut.NTriangles+= ntris;
-
-	// We have render some prims. inform the VBHard.
-	if(_CurrentVertexBufferHard)
-		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
 
 	return true;
 }
@@ -390,9 +373,6 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	_PrimitiveProfileIn.NPoints+= numPoints;
 	_PrimitiveProfileOut.NPoints+= numPoints * nPass;
 
-	// We have render some prims. inform the VBHard.
-	if(_CurrentVertexBufferHard)
-		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
 	return true;
 }
 
@@ -431,9 +411,6 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	_PrimitiveProfileIn.NLines  += numLines ;
 	_PrimitiveProfileOut.NLines += numLines  * nPass;
 
-	// We have render some prims. inform the VBHard.
-	if(_CurrentVertexBufferHard)
-		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
 	return true;
 }
 
@@ -474,9 +451,6 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	_PrimitiveProfileIn.NTriangles  += numTris ;
 	_PrimitiveProfileOut.NTriangles += numTris  * nPass;
 
-	// We have render some prims. inform the VBHard.
-	if(_CurrentVertexBufferHard)
-		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
 	return true;
 }
 
@@ -598,9 +572,6 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	_PrimitiveProfileIn.NQuads  += numQuads ;
 	_PrimitiveProfileOut.NQuads += numQuads  * nPass;
 
-	// We have render some prims. inform the VBHard.
-	if(_CurrentVertexBufferHard)
-		_CurrentVertexBufferHard->GPURenderingAfterFence= true;
 	return true;
 }
 
@@ -622,20 +593,10 @@ void		CDriverGL3::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
 		{
 			_DriverGLStates.enableTexCoordArray(true);
 			uint numTexCoord = (uvType == CVertexBuffer::Float2) ? 2 : 3;
-			// Setup ATI VBHard or std ptr.
-			switch(VB.VBMode)
-			{
-				case CVertexBufferInfo::HW:
-					_DriverGLStates.bindARBVertexBuffer(VB.VertexObjectId);
-					// with arb buffers, position is relative to the start of the stream
-					glTexCoordPointer(numTexCoord,GL_FLOAT,VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
-				break;
-				case CVertexBufferInfo::SysMem:
-					glTexCoordPointer(numTexCoord,GL_FLOAT,VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
-				break;
-                default:
-                    break;
-			}
+			_DriverGLStates.bindARBVertexBuffer(VB.VertexObjectId);
+			// with arb buffers, position is relative to the start of the stream
+			glTexCoordPointer(numTexCoord,GL_FLOAT,VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
+
 		}
 		else
 		{
@@ -826,15 +787,9 @@ void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 	H_AUTO_OGL(CDriverGL3_setupGlArraysStd)
 	uint32	flags= vb.VertexFormat;
 
-	if (vb.VBMode == CVertexBufferInfo::HW)
-	{
-		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
-	}
+	_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 
-	switch(vb.VBMode)
 	{
-		case CVertexBufferInfo::SysMem:
-		case CVertexBufferInfo::HW:
 		{
 			// setup vertex ptr.
 			//-----------
@@ -875,11 +830,6 @@ void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 				_DriverGLStates.enableColorArray(false);
 			}
 		}
-		break;
-
-		default:
-			nlassert(0);
-		break;
 	}
 
 	// Setup Uvs
@@ -1059,8 +1009,7 @@ void		CDriverGL3::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
 	H_AUTO_OGL(CDriverGL3_setupGlArraysForNVVertexProgram)
 	uint16	flags= vb.VertexFormat;
 
-	if (vb.VBMode == CVertexBufferInfo::HW)
-		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
+	_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 
 	// For each value
 	for (uint value=0; value<CVertexBuffer::NumValue; value++)
@@ -1138,8 +1087,7 @@ void		CDriverGL3::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
 		}
 	}
 
-	if (vb.VBMode == CVertexBufferInfo::HW)
-		_DriverGLStates.bindARBVertexBuffer(0);
+	_DriverGLStates.bindARBVertexBuffer(0);
 
 }
 
@@ -1172,11 +1120,7 @@ void		CDriverGL3::setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb)
 	uint32	flags= vb.VertexFormat;
 
 	nlctassert(CVertexBuffer::NumValue == sizeof(ARBVertexProgramMustNormalizeAttrib) / sizeof(ARBVertexProgramMustNormalizeAttrib[0]));
-
-	if (vb.VBMode == CVertexBufferInfo::HW)
-	{
-		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
-	}
+	_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 
 	{
 		// For each value
@@ -1226,10 +1170,7 @@ void		CDriverGL3::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 	uint32	flags= vb.VertexFormat;
 
 
-	if (vb.VBMode == CVertexBufferInfo::HW)
-	{
-		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
-	}
+	_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 
 	// For each value
 	for (uint value=0; value<CVertexBuffer::NumValue; value++)

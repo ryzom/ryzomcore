@@ -31,18 +31,6 @@ namespace NLDRIVERGL3 {
 #endif
 
 // ***************************************************************************
-// ***************************************************************************
-// ***************************************************************************
-//
-// VBHard interface for both NVidia / ATI extension.
-//
-// ***************************************************************************
-// ***************************************************************************
-// ***************************************************************************
-
-
-
-// ***************************************************************************
 IVertexArrayRange::IVertexArrayRange(CDriverGL3 *drv)
 {
 	H_AUTO_OGL(IVertexArrayRange_IVertexArrayRange)
@@ -59,8 +47,6 @@ IVertexBufferHardGL::IVertexBufferHardGL(CDriverGL3 *drv, CVertexBuffer *vb) : V
 {
 	H_AUTO_OGL(IVertexBufferHardGL_IVertexBufferHardGL)
 	_Driver= drv;
-	GPURenderingAfterFence= false;
-	VBType = UnknownVB;
 	_Invalid = false;
 }
 // ***************************************************************************
@@ -68,15 +54,6 @@ IVertexBufferHardGL::~IVertexBufferHardGL()
 {
 	H_AUTO_OGL(IVertexBufferHardGL_IVertexBufferHardGLDtor)
 }
-
-
-// ***************************************************************************
-// ***************************************************************************
-// ***************************************************************************
-// ARB implementation
-// ***************************************************************************
-// ***************************************************************************
-// ***************************************************************************
 
 
 // ***************************************************************************
@@ -185,8 +162,7 @@ CVertexBufferHardARB::CVertexBufferHardARB(CDriverGL3 *drv, CVertexBuffer *vb) :
 
 {
 	H_AUTO_OGL(CVertexBufferHardARB_CVertexBufferHardARB)
-	// Flag our type
-	VBType = ARBVB;
+
 	_VertexArrayRange = NULL;
 	#ifdef NL_DEBUG
 		_Unmapping = false;
@@ -418,7 +394,6 @@ void			CVertexBufferHardARB::lockHintStatic(bool /* staticLock */)
 void CVertexBufferHardARB::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferHardARB_setupVBInfos)
-	vb.VBMode = CVertexBufferInfo::HW;
 	vb.VertexObjectId = _VertexObjectId;
 }
 
