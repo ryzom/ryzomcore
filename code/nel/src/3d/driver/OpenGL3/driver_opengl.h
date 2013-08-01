@@ -254,7 +254,7 @@ public:
 	void					*ValuePtr[CVertexBuffer::NumValue];
 
 
-	enum TVBMode { TVBModeNone = 0, SysMem, HwNVIDIA, HwARB, HwATI }; // standard VBs, or Hard VBs using different extensions
+	enum TVBMode { TVBModeNone = 0, SysMem, HW }; // standard VBs, or Hard VBs using different extensions
 
 	// Kind of vb
 	TVBMode					VBMode;

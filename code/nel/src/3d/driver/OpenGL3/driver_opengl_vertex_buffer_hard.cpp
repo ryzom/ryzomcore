@@ -419,7 +419,7 @@ void			CVertexBufferHardARB::lockHintStatic(bool /* staticLock */)
 void CVertexBufferHardARB::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferHardARB_setupVBInfos)
-	vb.VBMode = CVertexBufferInfo::HwARB;
+	vb.VBMode = CVertexBufferInfo::HW;
 	vb.VertexObjectId = _VertexObjectId;
 }
 

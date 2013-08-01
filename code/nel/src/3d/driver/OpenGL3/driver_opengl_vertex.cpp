@@ -206,7 +206,7 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	if (!info->_VBHard ||  (info->_VBHard && !info->_VBHard->isInvalid()))
 	{
 		_LastVB.setupVertexBuffer(VB);
-		if (lastVBMode == CVertexBufferInfo::HwARB && _LastVB.VBMode != CVertexBufferInfo::HwARB)
+		if (lastVBMode == CVertexBufferInfo::HW && _LastVB.VBMode != CVertexBufferInfo::HW)
 		{
 			_DriverGLStates.bindARBVertexBuffer(0); // unbind ARB vertex buffer
 		}
@@ -657,13 +657,12 @@ void		CDriverGL3::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
 			// Setup ATI VBHard or std ptr.
 			switch(VB.VBMode)
 			{
-				case CVertexBufferInfo::HwARB:
+				case CVertexBufferInfo::HW:
 					_DriverGLStates.bindARBVertexBuffer(VB.VertexObjectId);
 					// with arb buffers, position is relative to the start of the stream
 					glTexCoordPointer(numTexCoord,GL_FLOAT,VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
 				break;
 				case CVertexBufferInfo::SysMem:
-				case CVertexBufferInfo::HwNVIDIA:
 					glTexCoordPointer(numTexCoord,GL_FLOAT,VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
 				break;
                 default:
@@ -859,7 +858,7 @@ void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 	H_AUTO_OGL(CDriverGL3_setupGlArraysStd)
 	uint32	flags= vb.VertexFormat;
 
-	if (vb.VBMode == CVertexBufferInfo::HwARB)
+	if (vb.VBMode == CVertexBufferInfo::HW)
 	{
 		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 	}
@@ -867,8 +866,7 @@ void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 	switch(vb.VBMode)
 	{
 		case CVertexBufferInfo::SysMem:
-		case CVertexBufferInfo::HwNVIDIA:
-		case CVertexBufferInfo::HwARB:
+		case CVertexBufferInfo::HW:
 		{
 			// setup vertex ptr.
 			//-----------
@@ -1093,7 +1091,7 @@ void		CDriverGL3::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
 	H_AUTO_OGL(CDriverGL3_setupGlArraysForNVVertexProgram)
 	uint16	flags= vb.VertexFormat;
 
-	if (vb.VBMode == CVertexBufferInfo::HwARB)
+	if (vb.VBMode == CVertexBufferInfo::HW)
 		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 
 	// For each value
@@ -1172,7 +1170,7 @@ void		CDriverGL3::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
 		}
 	}
 
-	if (vb.VBMode == CVertexBufferInfo::HwARB)
+	if (vb.VBMode == CVertexBufferInfo::HW)
 		_DriverGLStates.bindARBVertexBuffer(0);
 
 }
@@ -1207,7 +1205,7 @@ void		CDriverGL3::setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb)
 
 	nlctassert(CVertexBuffer::NumValue == sizeof(ARBVertexProgramMustNormalizeAttrib) / sizeof(ARBVertexProgramMustNormalizeAttrib[0]));
 
-	if (vb.VBMode == CVertexBufferInfo::HwARB)
+	if (vb.VBMode == CVertexBufferInfo::HW)
 	{
 		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 	}
@@ -1260,7 +1258,7 @@ void		CDriverGL3::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 	uint32	flags= vb.VertexFormat;
 
 
-	if (vb.VBMode == CVertexBufferInfo::HwARB)
+	if (vb.VBMode == CVertexBufferInfo::HW)
 	{
 		_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
 	}
