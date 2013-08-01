@@ -87,7 +87,6 @@ struct	CGlExtensions
 	// ARB Extensions
 	bool	ARBTextureCompression;
 	bool	ARBFragmentProgram;
-	bool	ARBVertexBufferObject;
 	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
@@ -135,7 +134,6 @@ public:
 		ATIFragmentShader = false;
 		EXTVertexShader= false;
 		ARBFragmentProgram = false;
-		ARBVertexBufferObject = false;
 		ARBVertexProgram = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
@@ -216,7 +214,7 @@ public:
 #endif
 
 		result += "\n  Array/VBO: ";
-		result += ARBVertexBufferObject ? "ARB VBO " : "";
+		result += "VertexBufferObject";
 
 		result += "\n  FBO:       ";
 		result += FrameBufferObject ? "FramebufferObject " : "";

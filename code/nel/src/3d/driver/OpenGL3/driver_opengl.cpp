@@ -249,9 +249,7 @@ CDriverGL3::CDriverGL3()
 	_CurrentVertexBufferHard= NULL;
 	_NVCurrentVARPtr= NULL;
 	_NVCurrentVARSize= 0;
-	_SupportVBHard= false;
 	_SlowUnlockVBHard= false;
-	_MaxVerticesByVBHard= 0;
 
 	_AllocatedTextureMemory= 0;
 
@@ -436,18 +434,10 @@ bool CDriverGL3::setupDisplay()
 	_LastSetupGLArrayVertexProgram= false;
 
 	// Init VertexArrayRange according to supported extenstion.
-	_SupportVBHard= false;
 	_SlowUnlockVBHard= false;
-	_MaxVerticesByVBHard= 0;
 
-	// Try with ARB ext first.
-	if (_Extensions.ARBVertexBufferObject)
-	{
-		_AGPVertexArrayRange= new CVertexArrayRangeARB(this);
-		_VRAMVertexArrayRange= new CVertexArrayRangeARB(this);
-		_SupportVBHard= true;
-		_MaxVerticesByVBHard = std::numeric_limits<uint32>::max(); // cant' know the value..
-	}
+	_AGPVertexArrayRange= new CVertexArrayRangeARB(this);
+	_VRAMVertexArrayRange= new CVertexArrayRangeARB(this);
 
 	// Reset VertexArrayRange.
 	_CurrentVertexArrayRange= NULL;
@@ -455,9 +445,7 @@ bool CDriverGL3::setupDisplay()
 	_NVCurrentVARPtr= NULL;
 	_NVCurrentVARSize= 0;
 
-	if( _SupportVBHard )
-		initVertexBufferHard(NL3D_DRV_VERTEXARRAY_AGP_INIT_SIZE, 0);
-
+	initVertexBufferHard(NL3D_DRV_VERTEXARRAY_AGP_INIT_SIZE, 0);
 
 	// Init embm if present
 	//===========================================================
@@ -744,7 +732,7 @@ bool CDriverGL3::swapBuffers()
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
 		Setup a std vertex buffer to ensure NVidia synchronisation.
 	*/
-	if (!_Extensions.ARBVertexBufferObject )
+	if( false )
 	{
 		static	CVertexBuffer	dummyVB;
 		static	bool			dummyVBinit= false;

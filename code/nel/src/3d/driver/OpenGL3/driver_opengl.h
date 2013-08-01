@@ -1232,10 +1232,7 @@ private:
 	void							*_NVCurrentVARPtr;
 	uint32							_NVCurrentVARSize;
 
-	// Info got from ATI or NVidia extension.
-	bool							_SupportVBHard;
 	bool							_SlowUnlockVBHard;
-	uint32							_MaxVerticesByVBHard;
 
 	// The AGP VertexArrayRange.
 	IVertexArrayRange				*_AGPVertexArrayRange;

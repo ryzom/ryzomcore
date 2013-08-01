@@ -701,7 +701,7 @@ void		CDriverGL3::mapTextureStageToUV(uint stage, uint uv)
 bool			CDriverGL3::supportVertexBufferHard() const
 {
 	H_AUTO_OGL(CDriverGL3_supportVertexBufferHard)
-	return _SupportVBHard;
+	return true;
 }
 
 // ***************************************************************************
@@ -725,7 +725,7 @@ bool			CDriverGL3::slowUnlockVertexBufferHard() const
 uint			CDriverGL3::getMaxVerticesByVertexBufferHard() const
 {
 	H_AUTO_OGL(CDriverGL3_getMaxVerticesByVertexBufferHard)
-	return _MaxVerticesByVBHard;
+	return std::numeric_limits<uint32>::max();
 }
 
 
@@ -755,10 +755,6 @@ IVertexBufferHardGL	*CDriverGL3::createVertexBufferHard(uint size, uint numVerti
 		return NULL;
 	else
 	{
-		// check max vertex
-		if(numVertices > _MaxVerticesByVBHard)
-			return NULL;
-
 		// Create a CVertexBufferHardGL
 		IVertexBufferHardGL		*vbHard = NULL;
 		// let the VAR create the vbhard.
