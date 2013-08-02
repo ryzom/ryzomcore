@@ -14,7 +14,7 @@
 		<table class="table table-bordered" >
 		    <tr>
 			<td>
-			    <p><span class="label label-info"> {$reply_timestamp} {$author_permission}</span>
+			    <p><span class="label label-info"> {$reply_timestamp}</span>
 			    {if $author_permission eq '1'}
 			    <span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$author}"><font color="white"> {$authorName}</font>{else} {$authorName} {/if}</a></strong></span></p>
 			    {else if $author_permission gt '1'}

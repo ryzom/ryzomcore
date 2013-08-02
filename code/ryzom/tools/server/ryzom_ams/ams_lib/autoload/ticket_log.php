@@ -28,7 +28,7 @@ class Ticket_Log{
      //return all logs that are related to a ticket
     public static function getLogsOfTicket( $ticket_id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_log INNER JOIN ticket_user ON ticket_log.Author = ticket_user.TUserId and ticket_log.Ticket=:id ORDER BY ticket_log.TLogId DESC", array('id' => $ticket_id));
+        $statement = $dbl->execute("SELECT * FROM ticket_log INNER JOIN ticket_user ON ticket_log.Author = ticket_user.TUserId and ticket_log.Ticket=:id ORDER BY ticket_log.TLogId ASC", array('id' => $ticket_id));
         $row = $statement->fetchAll();
         $result = Array();
         foreach($row as $log){

@@ -100,7 +100,7 @@
 									<span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="red"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 									{/if}
 								    </p>
-								    <p><pre> {if $reply.hidden eq 1}{/if}{$reply.replyContent}{if $reply.hidden eq 1}{/if}</pre></p>
+								    <p><pre>{$reply.replyContent}</pre></p>
 								</td>
 							    </tr>
 							    {/foreach}
