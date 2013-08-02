@@ -85,6 +85,34 @@
 							      </tr>
 							    </td></tr>
 							    </table>
+							</td></tr>
+							</table>
+						    </td></tr>
+						    <tr><td>
+							<table cellpadding="1" bgcolor="#00000060" border="2" width="100%">    
+							    {foreach from=$ticket_replies item=reply}
+							    <tr>
+								<td {if $reply.permission gt '1'} {if $reply.hidden eq 0} bgcolor="#F8C8C140"{else if $reply.hidden eq 1} bgcolor="#CFFEFF40"{/if}{/if}>
+								    <p>
+									<font color="#00CED1"> {$reply.timestamp}</font>
+									{if $reply.permission eq '1'}
+									<span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+									{else if $reply.permission gt '1'}
+									<span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="red"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+									{/if}
+								    </p>
+								    <p><pre> {if $reply.hidden eq 1}<i>{/if}{$reply.replyContent}{if $reply.hidden eq 1}</i>{/if}</pre></p>
+								</td>
+							    </tr>
+							    {/foreach}
+							    
+							    {if $ticket_status eq 3}
+							    <tr>
+								<td bgcolor="#FFE69960">
+								    <p><pre>Ticket is closed.</pre></p>
+								</td>
+							    </tr>
+							    {/if}
 							</table>
 						    </td></tr>
 					    </table>
@@ -102,47 +130,7 @@
 
 
 
-<div class="row-fluid sortable ui-sortable">
-    <div class="box span9">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i>{$t_title} #{$ticket_tId} </h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
-                <legend>{$title}: {$ticket_title} </legend>
-		
-		
-		<form id="changeTicket" class="form-vertical" method="post" action="index.php">
-		<table class="table table-bordered table-condensed ">
-			<tr>
-			    <td><strong>Original Submitted: </strong>{$ticket_timestamp}</td>
-			    <td><strong>Last Updated: </strong>{$ticket_lastupdate}</td>
-			    <td><strong>Status: </strong>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td> 
-		      </tr>
-			<tr>
-			    <td><strong>Category: </strong>{$ticket_category}</td>
-			    <td><strong>Priority: </strong>{$ticket_prioritytext}</td>
-			    <td><strong>Support Group: </strong>
-				<span class="label label-info">
-				    {if $ticket_forwardedGroupName eq "0"}
-					<i>{$public_sgroup}</i>
-				    {else}
-					<a href="index.php?page=show_sgroup&id={$ticket_forwardedGroupId}"><font color="white">{$ticket_forwardedGroupName}</font></a>
-				    {/if}
-				</span>
-			    </td>                  
-			</tr>
-			<tr>
-			    <td><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText} {else}<i> {$not_assigned}</i> {/if}</td>
-			    <td></td>
-			    <td></td> 
-		      </tr>
-		</table>
-		
+
 		
 		<table class="table table-bordered" >
 		    <tbody>
