@@ -139,7 +139,7 @@
 						      <tr>
 							    <td>{$ticket.tId}</td>
 							    <td><a href ="index.php?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
-							    <td class="center"><i>{$ticket.timestamp}</i></td>
+							    <td class="center">{$ticket.timestamp}</td>
 							    <td class="center">{$ticket.category}</td>
 			    
 							    <td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <i class="icon-exclamation-sign icon-white"></i>{/if} {$ticket.statusText}</span></td>  
