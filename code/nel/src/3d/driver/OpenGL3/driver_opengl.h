@@ -1001,9 +1001,6 @@ private:
 	// reset the cursor shape to the system arrow
 	void					setSystemArrow();
 
-	// Get the proj matrix setupped in GL
-	void					refreshProjMatrixFromGL();
-
 	bool					setupVertexBuffer(CVertexBuffer& VB);
 	// Activate Texture Environnement. Do it with caching.
 	bool					activateTexture(uint stage, ITexture *tex);
@@ -1330,8 +1327,8 @@ private:
 
 	// user texture matrix
 	NLMISC::CMatrix		_UserTexMat[IDRV_MAT_MAXTEXTURES];
+	bool _UserTexMatDirty[IDRV_MAT_MAXTEXTURES];
 	uint				_UserTexMatEnabled; // bitm ask for user texture coords
-	//NLMISC::CMatrix		_UserTexMat[IDRV_MAT_MAXTEXTURES];
 
 	// Static const
 	static const uint NumCoordinatesType[CVertexBuffer::NumType];

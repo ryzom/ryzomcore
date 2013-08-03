@@ -313,11 +313,15 @@ void		CMatrix::resetProj()
 // ======================================================================================================
 void		CMatrix::set(const float m44[16])
 {
-	StateBit= MAT_IDENTITY;
-
-	StateBit|= MAT_ROT | MAT_SCALEANY;
 	memcpy(M, m44, 16*sizeof(float));
 	Scale33= 1.0f;
+	setFlags();
+}
+
+void CMatrix::setFlags()
+{
+	StateBit= MAT_IDENTITY;
+	StateBit|= MAT_ROT | MAT_SCALEANY;
 
 	// Check Trans state.
 	if(a14!=0 || a24!=0 || a34!=0)
@@ -1561,8 +1565,61 @@ void		CMatrix::setArbitraryRotK(const CVector &kdir)
 	normalize(CMatrix::ZYX);
 }
 
+void CMatrix::frustum(float left, float right, float bottom, float top, float znear, float zfar )
+{
+	// http://www.opengl.org/sdk/docs/man2/xhtml/glFrustum.xml
 
+	a11 = 2.0f * znear / ( right - left );
+	a12 = 0.0f;
+	a13 = ( right + left ) / ( right - left );
+	a14 = 0.0f;
 
+	a21 = 0.0f;
+	a22 = 2.0f * znear / ( top - bottom );
+	a23 = ( top + bottom ) / ( top - bottom );
+	a24 = 0.0f;
+
+	a31 = 0.0f;
+	a32 = 0.0f;
+	a33 = -1.0f * ( zfar + znear ) / ( zfar - znear );
+	a34 = -1.0f * 2.0f * zfar * znear / ( zfar - znear );
+
+	a41 = 0.0f;
+	a42 = 0.0f;
+	a43 = -1.0f;
+	a44 = 0.0f;
+
+	Scale33 = 1.0f;
+	setFlags();
+}
+
+void CMatrix::ortho(float left, float right, float bottom, float top, float znear, float zfar )
+{
+	// http://www.opengl.org/sdk/docs/man2/xhtml/glOrtho.xml
+
+	a11 = 2.0f / ( right - left );
+	a12 = 0.0f;
+	a13 = 0.0f;
+	a14 = -1.0f * ( right + left ) / ( right - left );
+
+	a21 = 0.0f;
+	a22 = 2.0f / ( top - bottom );
+	a23 = 0.0f;
+	a24 = -1.0f * ( top + bottom ) / ( top - bottom );
+
+	a31 = 0.0f;
+	a32 = 0.0f;
+	a33 = -2.0f / ( zfar - znear );
+	a34 = -1.0f * ( zfar + znear ) / ( zfar - znear );
+
+	a41 = 0.0f;
+	a42 = 0.0f;
+	a43 = 0.0f;
+	a44 = 1.0f;
+
+	Scale33 = 1.0f;
+	setFlags();
+}
 
 }
 

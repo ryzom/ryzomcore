@@ -163,6 +163,10 @@ public:
 	 *	\param i : column index.
 	 *	\param j : line index.
 	 */
+
+	void		setFlags();
+
+
 	void		setCoefficient(float coeff, sint i, sint j)
 	{
 		M[ (j<<2) + i] = coeff;
@@ -357,6 +361,9 @@ public:
 	/// Plane (line vector) multiplication.
 	friend CPlane		operator*(const CPlane &p, const CMatrix &m);
 
+	void frustum(float left, float right, float bottom, float top, float znear, float zfar );
+
+	void ortho(float left, float right, float bottom, float top, float znear, float zfar );
 
 private:
 	float	M[16];

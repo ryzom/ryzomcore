@@ -275,6 +275,12 @@ CDriverGL3::CDriverGL3()
 #endif
 	}
 
+	for( i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+		_UserTexMatDirty[ i ] = false;
+
+	for( i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+		_UserTexMat[ i ].identity();
+
 	_UserTexMatEnabled = 0;
 
 	// Ligtmap preca.
@@ -1445,18 +1451,6 @@ uint			CDriverGL3::getNbTextureStages() const
 {
 	H_AUTO_OGL(CDriverGL3_getNbTextureStages)
 	return inlGetNumTextStages();
-}
-
-// ***************************************************************************
-void CDriverGL3::refreshProjMatrixFromGL()
-{
-	H_AUTO_OGL(CDriverGL3_refreshProjMatrixFromGL)
-
-	if (!_ProjMatDirty) return;
-	float mat[16];
-	glGetFloatv(GL_PROJECTION_MATRIX, mat);
-	_GLProjMat.set(mat);
-	_ProjMatDirty = false;
 }
 
 // ***************************************************************************

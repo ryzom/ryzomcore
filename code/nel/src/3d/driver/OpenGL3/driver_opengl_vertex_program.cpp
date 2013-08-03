@@ -1828,12 +1828,10 @@ void CDriverGL3::setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver
 			break;
 			case IDriver::Projection:
 				{
-					refreshProjMatrixFromGL();
 					mat = _GLProjMat;
 				}
 			break;
 			case IDriver::ModelViewProjection:
-				refreshProjMatrixFromGL();
 				mat = _GLProjMat * _ModelViewMatrix;
 			break;
             default:

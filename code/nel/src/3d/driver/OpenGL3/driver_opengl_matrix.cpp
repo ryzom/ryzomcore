@@ -28,20 +28,14 @@ void CDriverGL3::setFrustum(float left, float right, float bottom, float top, fl
 {
 	H_AUTO_OGL(CDriverGL3_setFrustum);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	if (perspective)
-		glFrustum(left,right,bottom,top,znear,zfar);
+	if( perspective )
+		_GLProjMat.frustum( left, right, bottom, top, znear, zfar );
 	else
-		glOrtho(left,right,bottom,top,znear,zfar);
+		_GLProjMat.ortho( left, right, bottom, top, znear, zfar );
 
 	_ProjMatDirty = true;
+	_OODeltaZ = 1 / ( zfar - znear );
 
-	// Backup znear and zfar for zbias setup
-	_OODeltaZ = 1 / (zfar - znear);
-
-	glMatrixMode(GL_MODELVIEW);
 }
 
 // ***************************************************************************
@@ -49,11 +43,10 @@ void CDriverGL3::setFrustum(float left, float right, float bottom, float top, fl
 void CDriverGL3::setFrustumMatrix(CMatrix &frustumMatrix)
 {
 	H_AUTO_OGL(CDriverGL3_setFrustum)
-	glMatrixMode(GL_PROJECTION);
 
-	glLoadMatrixf(((GLfloat*)frustumMatrix.get()));
+	_GLProjMat = frustumMatrix;
+	_ProjMatDirty = true;
 
-	glMatrixMode(GL_MODELVIEW);
 }
 
 // ***************************************************************************
@@ -62,16 +55,7 @@ CMatrix CDriverGL3::getFrustumMatrix()
 {
 	H_AUTO_OGL(CDriverGL3_getFrustum)
 
-	glMatrixMode(GL_PROJECTION);
-
-	CMatrix frustumMatrix;
-	float frustum[16];
-	glGetFloatv(GL_PROJECTION_MATRIX, ((GLfloat*)&frustum));
-	frustumMatrix.set(frustum);
-
-	glMatrixMode(GL_MODELVIEW);
-
-	return frustumMatrix;
+	return _GLProjMat;
 }
 
 // ***************************************************************************
@@ -179,6 +163,14 @@ void CDriverGL3::doRefreshRenderSetup()
 
 	// Check light setup is good
 	nlassert (_LightSetupDirty==false);
+
+	if( _ProjMatDirty )
+	{
+		glMatrixMode( GL_PROJECTION );
+		glLoadMatrixf( _GLProjMat.get() );
+		glMatrixMode( GL_MODELVIEW );
+		_ProjMatDirty = false;
+	}
 
 
 	// Check if must update the modelViewMatrix
