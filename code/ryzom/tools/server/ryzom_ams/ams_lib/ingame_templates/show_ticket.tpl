@@ -61,14 +61,14 @@
 							    <tr><td>
 							    <table cellpadding="3" width="100%">
 								<tr>
-								    <td><font color="#00CED1">Submitted: </font>{$ticket_timestamp}</td>
-								    <td><font color="#00CED1">Last Updated: </font>{$ticket_lastupdate}</td>
-								    <td><font color="#00CED1">Status: </font>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td> 
+								    <td><font color="{$info_color}">Submitted: </font>{$ticket_timestamp}</td>
+								    <td><font color="{$info_color}">Last Updated: </font>{$ticket_lastupdate}</td>
+								    <td><font color="{$info_color}">Status: </font>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td> 
 							      </tr>
 								<tr>
-								    <td><font color="#00CED1">Category: </font>{$ticket_category}</td>
-								    <td><font color="#00CED1">Priority </font>{$ticket_prioritytext}</td>
-								    <td><font color="#00CED1">Support Group: </font>
+								    <td><font color="{$info_color}">Category: </font>{$ticket_category}</td>
+								    <td><font color="{$info_color}">Priority </font>{$ticket_prioritytext}</td>
+								    <td><font color="{$info_color}">Support Group: </font>
 									<span class="label label-info">
 									    {if $ticket_forwardedGroupName eq "0"}
 										{$public_sgroup}
@@ -79,7 +79,7 @@
 								    </td>                  
 								</tr>
 								<tr>
-								    <td><font color="#00CED1">Assigned To:  </font>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a>{else} {$not_assigned} {/if}</td>
+								    <td><font color="{$info_color}">Assigned To:  </font>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a>{else} {$not_assigned} {/if}</td>
 								    <td></td>
 								    <td></td> 
 							      </tr>
@@ -93,7 +93,7 @@
 							    <tr>
 								<td {if $reply.permission gt '1'} {if $reply.hidden eq 0} bgcolor="#F8C8C140"{else if $reply.hidden eq 1} bgcolor="#CFFEFF40"{/if}{/if}>
 								    <p>
-									<font color="#00CED1"> {$reply.timestamp}</font>
+									<font color="{$info_color}"> {$reply.timestamp}</font>
 									{if $reply.permission eq '1'}
 									<span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 									{else if $reply.permission gt '1'}

@@ -6,6 +6,7 @@ class Helpers{
          global $AMS_LIB;
          global $SITEBASE;
          global $AMS_TRANS;
+         global $INGAME_LAYOUT;
          require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
          $smarty = new Smarty;
 
@@ -17,13 +18,17 @@ class Helpers{
 
          helpers :: create_folders ();
 
-         if ( helpers::check_if_game_client() or $forcelibrender = false ){
+          if ( helpers::check_if_game_client() or $forcelibrender = false ){
              $smarty -> template_dir = $AMS_LIB . '/ingame_templates/';
              $smarty -> setConfigDir( $AMS_LIB . '/configs' );
-             }else{
+             $variables = parse_ini_file( $AMS_LIB . '/configs/ingame_layout.ini', true );
+             foreach ( $variables[$INGAME_LAYOUT] as $key => $value ){
+               $smarty -> assign( $key, $value );
+             }
+          }else{
              $smarty -> template_dir = $SITEBASE . '/templates/';
              $smarty -> setConfigDir( $SITEBASE . '/configs' );
-             }
+          }
 
           foreach ( $vars as $key => $value ){
              $smarty -> assign( $key, $value );
