@@ -1200,6 +1200,7 @@ private:
 		}
 	}
 	void			doRefreshRenderSetup();
+	void			refreshTexMatrices();
 
 	void			setLightInternal(uint8 num, const CLight& light);
 	void			enableLightInternal(uint8 num, bool enable);

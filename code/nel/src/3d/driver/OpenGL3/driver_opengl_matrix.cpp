@@ -188,6 +188,21 @@ void CDriverGL3::doRefreshRenderSetup()
 	_RenderSetupDirty= false;
 }
 
+void CDriverGL3::refreshTexMatrices()
+{
+	glMatrixMode( GL_TEXTURE );
+	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+	{
+		if( _UserTexMatDirty[ i ] )
+		{
+			_DriverGLStates.activeTextureARB( i );
+			glLoadMatrixf( _UserTexMat[ i ].get() );
+			_UserTexMatDirty[ i ] = false;
+		}
+	}
+	glMatrixMode( GL_MODELVIEW );
+}
+
 #ifdef NL_STATIC
 } // NLDRIVERGL/ES
 #endif

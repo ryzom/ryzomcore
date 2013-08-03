@@ -166,8 +166,6 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 		|| (mat.getFlags() & IDRV_MAT_USER_TEX_MAT_ALL) != 0
 	   )
 	{
-		glMatrixMode(GL_TEXTURE);
-
 		// for each stage, setup the texture matrix if needed
 		uint newMask = (mat.getFlags() & IDRV_MAT_USER_TEX_MAT_ALL) >> IDRV_MAT_USER_TEX_FIRST_BIT;
 		uint shiftMask = 1;
@@ -175,9 +173,8 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 		{
 			if (newMask & shiftMask) // user matrix for this stage
 			{
-				_DriverGLStates.activeTextureARB(k);
-				glLoadMatrixf(mat.getUserTexMat(k).get());
-
+				_UserTexMat[ k ] = mat.getUserTexMat( k );
+				_UserTexMatDirty[ k ] = true;
 				_UserTexMatEnabled |= shiftMask;
 			}
 			else
@@ -187,15 +184,13 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 					(newMask & shiftMask) != (_UserTexMatEnabled & shiftMask)
 				   )
 				{
-					_DriverGLStates.activeTextureARB(k);
-					glLoadIdentity();
-
+					_UserTexMat[ k ].identity();
+					_UserTexMatDirty[ k ] = true;
 					_UserTexMatEnabled &= ~shiftMask;
 				}
 			}
 			shiftMask <<= 1;
 		}
-		glMatrixMode(GL_MODELVIEW);
 	}
 }
 
@@ -204,22 +199,18 @@ void CDriverGL3::disableUserTextureMatrix()
 	H_AUTO_OGL(CDriverGL3_disableUserTextureMatrix)
 	if (_UserTexMatEnabled != 0)
 	{
-		glMatrixMode(GL_TEXTURE);
-
 		uint k = 0;
 		do
 		{
 			if (_UserTexMatEnabled & (1 << k)) // user matrix for this stage
 			{
-				_DriverGLStates.activeTextureARB(k);
-				glLoadIdentity();
-
+				_UserTexMat[ k ].identity();
+				_UserTexMatDirty[ k ] = true;
 				_UserTexMatEnabled &= ~ (1 << k);
 			}
 			++k;
 		}
 		while (_UserTexMatEnabled != 0);
-		glMatrixMode(GL_MODELVIEW);
 	}
 }
 
@@ -1114,9 +1105,9 @@ void			CDriverGL3::setupSpecularBegin()
 	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_ARB);
 
 	// setup the good matrix for stage 1.
-	glMatrixMode(GL_TEXTURE);
-	glLoadMatrixf( _SpecularTexMtx.get() );
-	glMatrixMode(GL_MODELVIEW);
+	_UserTexMat[ 1 ] = _SpecularTexMtx;
+	_UserTexMatDirty[ 1 ] = true;
+
 }
 
 // ***************************************************************************
@@ -1128,9 +1119,8 @@ void			CDriverGL3::setupSpecularEnd()
 	_DriverGLStates.setTexGenMode(1, 0);
 
 	// Happiness !!! we have already enabled the stage 1
-	glMatrixMode(GL_TEXTURE);
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
+	_UserTexMat[ 1 ].identity();
+	_UserTexMatDirty[ 1 ] = true;
 }
 
 // ***************************************************************************
