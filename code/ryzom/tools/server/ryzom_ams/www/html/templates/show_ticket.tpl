@@ -34,7 +34,7 @@
 			    </td>                  
 			</tr>
 			<tr>
-			    <td><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText} {else}<i> {$not_assigned}</i> {/if}</td>
+			    <td><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a> {else}<i> {$not_assigned}</i> {/if}</td>
 			    <td></td>
 			    <td></td> 
 		      </tr>

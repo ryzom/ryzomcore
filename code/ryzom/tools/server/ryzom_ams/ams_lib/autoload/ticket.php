@@ -147,7 +147,9 @@ class Ticket{
     }
     
     public static function createReply($content, $author, $ticket_id, $hidden){
-        if($content != ""){
+        //if not empty
+        if(! ( Trim ( $content ) === '' )){
+            $content = filter_var($content, FILTER_SANITIZE_STRING);
             $ticket = new Ticket();
             $ticket->load_With_TId($ticket_id);
             //if status is not closed

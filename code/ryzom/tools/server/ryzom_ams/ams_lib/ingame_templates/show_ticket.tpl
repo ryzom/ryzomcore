@@ -79,7 +79,7 @@
 								    </td>                  
 								</tr>
 								<tr>
-								    <td><font color="#00CED1">Assigned To:  </font>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText} {else} {$not_assigned} {/if}</td>
+								    <td><font color="#00CED1">Assigned To:  </font>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a>{else} {$not_assigned} {/if}</td>
 								    <td></td>
 								    <td></td> 
 							      </tr>
@@ -178,13 +178,13 @@
 									 <p>
 									    Ticket Assigning: 
 									    {if $ticket_assignedTo eq 0}
-									       <form id="assign_ticket" method="post" action="">
+									       <form id="assign_ticket" method="post" action="index.php?page=show_ticket&id={$ticket_tId}">
 										   <input type="hidden" name="ticket_id" value="{$ticket_tId}">
 										   <input type="hidden" name="action" value="assignTicket">
 										   <input type="submit" value="Assign Ticket"/>
 									       </form>
 									   {else if $ticket_assignedTo eq $user_id}
-									       <form id="assign_ticket" method="post" action="">
+									       <form id="assign_ticket" method="post" action="index.php?page=show_ticket&id={$ticket_tId}">
 										   <input type="hidden" name="ticket_id" value="{$ticket_tId}">
 										   <input type="hidden" name="action" value="unAssignTicket">
 										   <input type="submit"value="Remove Assign"/>
@@ -218,7 +218,7 @@
 								    <td>
 									<p>
 									    Forward to Group:		    
-									    <form id="forward" method="post" action="" >
+									    <form id="forward" method="post" action="index.php?page=show_ticket&id={$ticket_tId}" >
 										<select name="group">
 											    <option></option>
 										    {foreach from=$sGroups key=k item=v}
