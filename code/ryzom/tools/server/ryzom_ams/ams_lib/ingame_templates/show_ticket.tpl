@@ -1,7 +1,7 @@
 {block name=content}
 <tr><td>
       <table width="100%" cellspacing="0" cellpadding="0" border="0">
-	<tr bgcolor="#00000040" valign="middle">
+	<tr bgcolor="{$second_menu_bg_color}" valign="middle">
 	  <td>
 	  <table>
 	    <tr>
@@ -24,7 +24,7 @@
   </td></tr>
 
   <tr><td>
-	<table width="100%" bgcolor="#303030" cellspacing="2">
+	<table width="100%" bgcolor="{$title_bg_color}" cellspacing="2">
 	<tr><td height="7"></td><td></td></tr>
 	<tr>
 		<td width="3%"></td>
@@ -51,19 +51,19 @@
 	  <td>
 	    <table width="100%" height="100%" cellpadding="10">
 	      <tr><td>
-		<table width="100%" bgcolor="#00000030" border="2">
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
 			<tr><td>
 				<table cellpadding="10" width="100%">
 					<tr><td>
 					    <table cellpadding="5" width="100%">
 						    <tr><td>
-							<table cellpadding="1" bgcolor="#00000060" border="2" width="100%">
+							<table cellpadding="1" bgcolor="{$normal_tbl_color}" border="2" width="100%">
 							    <tr><td>
 							    <table cellpadding="3" width="100%">
 								<tr>
 								    <td><font color="{$info_color}">Submitted: </font>{$ticket_timestamp}</td>
 								    <td><font color="{$info_color}">Last Updated: </font>{$ticket_lastupdate}</td>
-								    <td><font color="{$info_color}">Status: </font>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td> 
+								    <td><font color="{$info_color}">Status: </font>{if $ticket_status neq 3}<font color="green">Open</font>{/if} {if $ticket_status eq 3} <font color="red">{$ticket_statustext}</font>{else}{$ticket_statustext} {/if}</td> 
 							      </tr>
 								<tr>
 								    <td><font color="{$info_color}">Category: </font>{$ticket_category}</td>
@@ -88,36 +88,50 @@
 							</table>
 						    </td></tr>
 						    <tr><td>
-							<table cellpadding="1" bgcolor="#00000060" border="2" width="100%">    
+							<table cellpadding="1" bgcolor="{$normal_tbl_color}" border="2" width="100%">    
 							    {foreach from=$ticket_replies item=reply}
 							    <tr>
-								<td {if $reply.permission gt '1'} {if $reply.hidden eq 0} bgcolor="#F8C8C140"{else if $reply.hidden eq 1} bgcolor="#CFFEFF40"{/if}{/if}>
-								    <p>
-									<font color="{$info_color}"> {$reply.timestamp}</font>
-									{if $reply.permission eq '1'}
-									<span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
-									{else if $reply.permission gt '1'}
-									<span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="red"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
-									{/if}
-								    </p>
-								    <p><pre>{$reply.replyContent}</pre></p>
+								<td {if $reply.permission gt '1'} {if $reply.hidden eq 0} bgcolor="{$team_reply_tbl_color}"{else if $reply.hidden eq 1} bgcolor="{$hidden_reply_tbl_color}"{/if}{/if}>
+								   <table cellpadding="3">
+									<tr><td>
+									    <p>
+										<font color="{$info_color}"> {$reply.timestamp}</font>
+										{if $reply.permission eq '1'}
+										<span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+										{else if $reply.permission gt '1'}
+										<span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="{$team_color}"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+										{/if}
+									    </p>
+									    <p><pre>{$reply.replyContent}</pre></p>
+									</td></tr>
+								   </table>
 								</td>
 							    </tr>
 							    {/foreach}
 							    
 							    {if $ticket_status eq 3}
 							    <tr>
-								<td bgcolor="#FFE69960">
-								    <p><pre>Ticket is closed.</pre></p>
+								<td bgcolor="{$closed_tbl_color}">
+								     <table cellpadding="4">
+									<tr><td>
+									    <p><pre><h4>[Ticket is closed]</h4></pre></p>
+									</td></tr>
+								     </table>
 								</td>
 							    </tr>
 							    {/if}
 							    
 							    <tr>
 								<td>
-								    <form id="reply" class="form-vertical" method="post" action="index.php">
-								    <p><h4>{$t_reply}:</h4></p>
-								    <table>
+								    
+								    <form id="reply" class="form-vertical" method="post" action="index.php"> 
+								    <table cellpadding="4">
+								    <tr><td height="5"></td></tr>
+								    <tr>
+									<td>
+									    <p><h4>{$t_reply}:</h4></p>
+									</td>
+								    </tr>
 								    {if $ticket_status neq 3}
 								    <tr>
 									<td><textarea cols="50" id="Content" name="Content"><br><br><br></textarea></td>
@@ -170,7 +184,7 @@
 						    
 							{if isset($isMod) and $isMod eq "TRUE"}
 						        <tr><td>
-							<table cellpadding="1" bgcolor="#00000060" border="2" width="100%">
+							<table cellpadding="1" bgcolor="{$normal_tbl_color}" border="2" width="100%">
 							    <tr><td>
 							    <table cellpadding="3" width="100%">
 								<tr>

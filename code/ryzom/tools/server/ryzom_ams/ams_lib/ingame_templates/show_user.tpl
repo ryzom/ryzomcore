@@ -1,7 +1,7 @@
 {block name=content}
 <tr><td>
       <table width="100%" cellspacing="0" cellpadding="0" border="0">
-	<tr bgcolor="#00000040" valign="middle">
+	<tr bgcolor="{$second_menu_bg_color}" valign="middle">
 	  <td>
 	  <table>
 	    <tr>
@@ -36,7 +36,7 @@
   </td></tr>
 
     <tr><td>
-	<table width="100%" bgcolor="#303030" cellspacing="2">
+	<table width="100%" bgcolor="{$title_bg_color}" cellspacing="2">
 	<tr><td height="7"></td><td></td></tr>
 	<tr>
 		<td width="3%"></td>
@@ -63,7 +63,7 @@
 	  <td>
 	    <table width="100%" height="100%" cellpadding="10">
 	      <tr><td>
-		<table width="100%" bgcolor="#00000030" border="2">
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
 			<tr><td>
 				<table cellpadding="10">
 					<tr><td>
@@ -120,14 +120,14 @@
 		</table>
 	      </td></tr>
 	      <tr><td>
-		<table width="100%" bgcolor="#00000030" border="2">
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
 			<tr><td>
 				<table cellpadding="10">
 					<tr><td>
 						<p><h3>Tickets</h3></p>
 						<table cellpadding="3">
 
-							<tr bgcolor="#00000090">
+							<tr bgcolor="{$table_header_tr_color}">
 								<td>ID</td>
 								<td>Title</td>
 								<td>Timestamp</td>

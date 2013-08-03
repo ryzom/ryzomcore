@@ -1,7 +1,7 @@
 {block name=content}
 
   <tr><td>
-	<table width="100%" bgcolor="#303030" cellspacing="2">
+	<table width="100%" bgcolor="{$title_bg_color}" cellspacing="2">
 	<tr><td height="7"></td><td></td></tr>
 	<tr>
 		<td width="3%"></td>
@@ -29,7 +29,7 @@
 	    <table width="100%" height="100%" cellpadding="10">
 	      {if isset($isAdmin) && $isAdmin eq 'TRUE'}
 	      <tr><td>
-		<table width="100%" bgcolor="#00000030" border="2">
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
 			<tr><td>
 				<table cellpadding="10">
 					<tr><td>
@@ -76,13 +76,13 @@
 	      </td></tr>
 	      {/if}
 	       <tr><td>
-		<table width="100%" bgcolor="#00000030" border="2">
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
 			<tr><td>
 				<table cellspacing="10">
 					<tr><td>
 						<p><h3>All groups</h3></p>
 						<table cellpadding="4">
-						    <tr bgcolor="#00000090">
+						    <tr bgcolor="{$table_header_tr_color}">
 							<td>ID</td>
 							<td>Name</td>
 							<td>Tag</td>

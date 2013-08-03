@@ -1,7 +1,7 @@
 {block name=content}
 <tr><td>
       <table width="100%" cellspacing="0" cellpadding="0" border="0">
-	<tr bgcolor="#00000040" valign="middle">
+	<tr bgcolor="{$second_menu_bg_color}" valign="middle">
 	  <td>
 	  <table>
 	    <tr>
@@ -23,7 +23,7 @@
       </table>
   </td></tr>
 <tr><td>
-	<table width="100%" bgcolor="#303030" cellspacing="2">
+	<table width="100%" bgcolor="{$title_bg_color}" cellspacing="2">
 	<tr><td height="7"></td><td></td></tr>
 	<tr>
 		<td width="3%"></td>
@@ -50,7 +50,7 @@
 	  <td>
 	    <table width="100%" height="100%" cellpadding="10">
 	      <tr><td>
-		<table width="100%" bgcolor="#00000030" border="2">
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
 			<tr><td>
 				<table cellpadding="10">
 					<tr><td>
@@ -60,11 +60,11 @@
 							<tr>
 							    <td>
 								<p>
-								<font color="#00CED1"> {$reply_timestamp}</font>
+								<font color="{$info_color}"> {$reply_timestamp}</font>
 								{if $author_permission eq '1'}
 								<span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$author}"><font color="white"> {$authorName}</font>{else} {$authorName} {/if}</a></strong></span>
 								{else if $reply.permission gt '1'}
-								<span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$author}"><font color="red"> {$authorName}</font>{else} {$authorName} {/if}</a></strong></span>
+								<span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$author}"><font color="{$team_color}"> {$authorName}</font>{else} {$authorName} {/if}</a></strong></span>
 								{/if}</p>
 								<p><pre>{$reply_content}</pre></p>
 							    </td>
