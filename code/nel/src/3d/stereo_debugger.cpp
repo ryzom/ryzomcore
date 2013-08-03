@@ -293,6 +293,7 @@ bool CStereoDebugger::nextPass()
 			return false;
 		}
 	}
+	return false;
 }
 
 /// Gets the current viewport
