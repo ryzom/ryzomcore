@@ -168,10 +168,6 @@ public:
 	/** For vertexProgram. do not check if supported or not.
 	  */
 	void			enableVertexAttribArray(uint glIndex, bool enable);
-	/** Same as enableVertexAttribArray, but for EXTVertexShader (need variant ID)
-	  * \param firstVariantSymbol the first variant symbol
-	  */
-	void			enableVertexAttribArrayForEXTVertexShader(uint glIndex, bool enable, uint *variants);
 
 	// special version for ARB_vertex_program used with ARB_vertex_buffer or ATI_vertex_attrib_array_object
 	void			enableVertexAttribArrayARB(uint glIndex, bool enable);

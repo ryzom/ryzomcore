@@ -91,44 +91,6 @@ typedef void (APIENTRY * NEL_PFNGLVERTEXWEIGHTFVEXTPROC) (const GLfloat *weight)
 typedef void (APIENTRY * NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC) (GLsizei size, GLenum type, GLsizei stride, const GLvoid *pointer);
 
 
-// VertexShaderExtension (EXT)
-//============================
-typedef void	(APIENTRY * NEL_PFNGLBEGINVERTEXSHADEREXTPROC) ( void );
-typedef void	(APIENTRY * NEL_PFNGLENDVERTEXSHADEREXTPROC) ( void );
-typedef void	(APIENTRY * NEL_PFNGLBINDVERTEXSHADEREXTPROC) ( GLuint id );
-typedef GLuint	(APIENTRY * NEL_PFNGLGENVERTEXSHADERSEXTPROC) ( GLuint range );
-typedef void	(APIENTRY * NEL_PFNGLDELETEVERTEXSHADEREXTPROC) ( GLuint id );
-typedef void	(APIENTRY * NEL_PFNGLSHADEROP1EXTPROC) ( GLenum op, GLuint res, GLuint arg1 );
-typedef void	(APIENTRY * NEL_PFNGLSHADEROP2EXTPROC) ( GLenum op, GLuint res, GLuint arg1, GLuint arg2 );
-typedef void	(APIENTRY * NEL_PFNGLSHADEROP3EXTPROC) ( GLenum op, GLuint res, GLuint arg1, GLuint arg2, GLuint arg3 );
-typedef void	(APIENTRY * NEL_PFNGLSWIZZLEEXTPROC) ( GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum outZ, GLenum outW );
-typedef void	(APIENTRY * NEL_PFNGLWRITEMASKEXTPROC) ( GLuint res, GLuint in, GLenum outX, GLenum outY, GLenum outZ, GLenum outW );
-typedef void	(APIENTRY * NEL_PFNGLINSERTCOMPONENTEXTPROC) ( GLuint res, GLuint src, GLuint num );
-typedef void	(APIENTRY * NEL_PFNGLEXTRACTCOMPONENTEXTPROC) ( GLuint res, GLuint src, GLuint num );
-typedef GLuint	(APIENTRY * NEL_PFNGLGENSYMBOLSEXTPROC) ( GLenum datatype, GLenum storagetype, GLenum range, GLuint components ) ;
-typedef void	(APIENTRY * NEL_PFNGLSETINVARIANTEXTPROC) ( GLuint id, GLenum type, void *addr );
-typedef void	(APIENTRY * NEL_PFNGLSETLOCALCONSTANTEXTPROC) ( GLuint id, GLenum type, void *addr );
-typedef void	(APIENTRY * NEL_PFNGLVARIANTPOINTEREXTPROC) ( GLuint id, GLenum type, GLuint stride, void *addr );
-typedef void	(APIENTRY * NEL_PFNGLENABLEVARIANTCLIENTSTATEEXTPROC) ( GLuint id);
-typedef void	(APIENTRY * NEL_PFNGLDISABLEVARIANTCLIENTSTATEEXTPROC) ( GLuint id);
-typedef GLuint	(APIENTRY * NEL_PFNGLBINDLIGHTPARAMETEREXTPROC) ( GLenum light, GLenum value);
-typedef GLuint	(APIENTRY * NEL_PFNGLBINDMATERIALPARAMETEREXTPROC) ( GLenum face, GLenum value);
-typedef GLuint	(APIENTRY * NEL_PFNGLBINDTEXGENPARAMETEREXTPROC) ( GLenum unit, GLenum coord, GLenum value);
-typedef GLuint	(APIENTRY * NEL_PFNGLBINDTEXTUREUNITPARAMETEREXTPROC) ( GLenum unit, GLenum value);
-typedef GLuint	(APIENTRY * NEL_PFNGLBINDPARAMETEREXTPROC) ( GLenum value);
-typedef GLboolean (APIENTRY * NEL_PFNGLISVARIANTENABLEDEXTPROC) ( GLuint id, GLenum cap);
-typedef void	(APIENTRY * NEL_PFNGLGETVARIANTBOOLEANVEXTPROC) ( GLuint id, GLenum value, GLboolean *data);
-typedef void	(APIENTRY * NEL_PFNGLGETVARIANTINTEGERVEXTPROC) ( GLuint id, GLenum value, GLint *data);
-typedef void	(APIENTRY * NEL_PFNGLGETVARIANTFLOATVEXTPROC) ( GLuint id, GLenum value, GLfloat *data);
-typedef void	(APIENTRY * NEL_PFNGLGETVARIANTPOINTERVEXTPROC) ( GLuint id, GLenum value, void **data);
-typedef void	(APIENTRY * NEL_PFNGLGETINVARIANTBOOLEANVEXTPROC) ( GLuint id, GLenum value, GLboolean *data);
-typedef void	(APIENTRY * NEL_PFNGLGETINVARIANTINTEGERVEXTPROC) ( GLuint id, GLenum value, GLint *data);
-typedef void	(APIENTRY * NEL_PFNGLGETINVARIANTFLOATVEXTPROC) ( GLuint id, GLenum value, GLfloat *data);
-typedef void	(APIENTRY * NEL_PFNGLGETLOCALCONSTANTBOOLEANVEXTPROC) ( GLuint id, GLenum value, GLboolean *data);
-typedef void	(APIENTRY * NEL_PFNGLGETLOCALCONSTANTINTEGERVEXTPROC) ( GLuint id, GLenum value, GLint *data);
-typedef void	(APIENTRY * NEL_PFNGLGETLOCALCONSTANTFLOATVEXTPROC) ( GLuint id, GLenum value, GLfloat *data);
-
-
 // SecondaryColor extension
 //========================
 typedef void (APIENTRY * NEL_PFNGLSECONDARYCOLOR3BEXTPROC) (GLbyte red, GLbyte green, GLbyte blue);

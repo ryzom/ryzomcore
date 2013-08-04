@@ -115,42 +115,6 @@ NEL_PFNGLVERTEXWEIGHTFEXTPROC					nglVertexWeightfEXT;
 NEL_PFNGLVERTEXWEIGHTFVEXTPROC					nglVertexWeightfvEXT;
 NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC				nglVertexWeightPointerEXT;
 
-// VertexShaderExt extension
-NEL_PFNGLBEGINVERTEXSHADEREXTPROC				nglBeginVertexShaderEXT;
-NEL_PFNGLENDVERTEXSHADEREXTPROC					nglEndVertexShaderEXT;
-NEL_PFNGLBINDVERTEXSHADEREXTPROC				nglBindVertexShaderEXT;
-NEL_PFNGLGENVERTEXSHADERSEXTPROC				nglGenVertexShadersEXT;
-NEL_PFNGLDELETEVERTEXSHADEREXTPROC				nglDeleteVertexShaderEXT;
-NEL_PFNGLSHADEROP1EXTPROC						nglShaderOp1EXT;
-NEL_PFNGLSHADEROP2EXTPROC						nglShaderOp2EXT;
-NEL_PFNGLSHADEROP3EXTPROC						nglShaderOp3EXT;
-NEL_PFNGLSWIZZLEEXTPROC							nglSwizzleEXT;
-NEL_PFNGLWRITEMASKEXTPROC						nglWriteMaskEXT;
-NEL_PFNGLINSERTCOMPONENTEXTPROC					nglInsertComponentEXT;
-NEL_PFNGLEXTRACTCOMPONENTEXTPROC				nglExtractComponentEXT;
-NEL_PFNGLGENSYMBOLSEXTPROC						nglGenSymbolsEXT;
-NEL_PFNGLSETINVARIANTEXTPROC					nglSetInvariantEXT;
-NEL_PFNGLSETLOCALCONSTANTEXTPROC				nglSetLocalConstantEXT;
-NEL_PFNGLVARIANTPOINTEREXTPROC					nglVariantPointerEXT;
-NEL_PFNGLENABLEVARIANTCLIENTSTATEEXTPROC		nglEnableVariantClientStateEXT;
-NEL_PFNGLDISABLEVARIANTCLIENTSTATEEXTPROC		nglDisableVariantClientStateEXT;
-NEL_PFNGLBINDLIGHTPARAMETEREXTPROC				nglBindLightParameterEXT;
-NEL_PFNGLBINDMATERIALPARAMETEREXTPROC			nglBindMaterialParameterEXT;
-NEL_PFNGLBINDTEXGENPARAMETEREXTPROC				nglBindTexGenParameterEXT;
-NEL_PFNGLBINDTEXTUREUNITPARAMETEREXTPROC		nglBindTextureUnitParameterEXT;
-NEL_PFNGLBINDPARAMETEREXTPROC					nglBindParameterEXT;
-NEL_PFNGLISVARIANTENABLEDEXTPROC				nglIsVariantEnabledEXT;
-NEL_PFNGLGETVARIANTBOOLEANVEXTPROC				nglGetVariantBooleanvEXT;
-NEL_PFNGLGETVARIANTINTEGERVEXTPROC				nglGetVariantIntegervEXT;
-NEL_PFNGLGETVARIANTFLOATVEXTPROC				nglGetVariantFloatvEXT;
-NEL_PFNGLGETVARIANTPOINTERVEXTPROC				nglGetVariantPointervEXT;
-NEL_PFNGLGETINVARIANTBOOLEANVEXTPROC			nglGetInvariantBooleanvEXT;
-NEL_PFNGLGETINVARIANTINTEGERVEXTPROC			nglGetInvariantIntegervEXT;
-NEL_PFNGLGETINVARIANTFLOATVEXTPROC				nglGetInvariantFloatvEXT;
-NEL_PFNGLGETLOCALCONSTANTBOOLEANVEXTPROC		nglGetLocalConstantBooleanvEXT;
-NEL_PFNGLGETLOCALCONSTANTINTEGERVEXTPROC		nglGetLocalConstantIntegervEXT;
-NEL_PFNGLGETLOCALCONSTANTFLOATVEXTPROC			nglGetLocalConstantFloatvEXT;
-
 // SecondaryColor extension
 NEL_PFNGLSECONDARYCOLOR3BEXTPROC				nglSecondaryColor3bEXT;
 NEL_PFNGLSECONDARYCOLOR3BVEXTPROC				nglSecondaryColor3bvEXT;
@@ -592,81 +556,6 @@ static bool	setupARBTextureCubeMap(const char	*glext)
 	return true;
 }
 
-
-// *********************************
-static bool	setupEXTVertexShader(const char	*glext)
-{
-	H_AUTO_OGL(setupEXTVertexShader);
-	CHECK_EXT("GL_EXT_vertex_shader");
-
-	CHECK_ADDRESS(NEL_PFNGLBEGINVERTEXSHADEREXTPROC, glBeginVertexShaderEXT);
-	CHECK_ADDRESS(NEL_PFNGLENDVERTEXSHADEREXTPROC, glEndVertexShaderEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDVERTEXSHADEREXTPROC, glBindVertexShaderEXT);
-	CHECK_ADDRESS(NEL_PFNGLGENVERTEXSHADERSEXTPROC, glGenVertexShadersEXT);
-	CHECK_ADDRESS(NEL_PFNGLDELETEVERTEXSHADEREXTPROC, glDeleteVertexShaderEXT);
-	CHECK_ADDRESS(NEL_PFNGLSHADEROP1EXTPROC, glShaderOp1EXT);
-	CHECK_ADDRESS(NEL_PFNGLSHADEROP2EXTPROC, glShaderOp2EXT);
-	CHECK_ADDRESS(NEL_PFNGLSHADEROP3EXTPROC, glShaderOp3EXT);
-	CHECK_ADDRESS(NEL_PFNGLSWIZZLEEXTPROC, glSwizzleEXT);
-	CHECK_ADDRESS(NEL_PFNGLWRITEMASKEXTPROC, glWriteMaskEXT);
-	CHECK_ADDRESS(NEL_PFNGLINSERTCOMPONENTEXTPROC, glInsertComponentEXT);
-	CHECK_ADDRESS(NEL_PFNGLEXTRACTCOMPONENTEXTPROC, glExtractComponentEXT);
-	CHECK_ADDRESS(NEL_PFNGLGENSYMBOLSEXTPROC, glGenSymbolsEXT);
-	CHECK_ADDRESS(NEL_PFNGLSETINVARIANTEXTPROC, glSetInvariantEXT);
-	CHECK_ADDRESS(NEL_PFNGLSETLOCALCONSTANTEXTPROC, glSetLocalConstantEXT);
-	CHECK_ADDRESS(NEL_PFNGLVARIANTPOINTEREXTPROC, glVariantPointerEXT);
-	CHECK_ADDRESS(NEL_PFNGLENABLEVARIANTCLIENTSTATEEXTPROC, glEnableVariantClientStateEXT);
-	CHECK_ADDRESS(NEL_PFNGLDISABLEVARIANTCLIENTSTATEEXTPROC, glDisableVariantClientStateEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDLIGHTPARAMETEREXTPROC, glBindLightParameterEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDMATERIALPARAMETEREXTPROC, glBindMaterialParameterEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDTEXGENPARAMETEREXTPROC, glBindTexGenParameterEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDTEXTUREUNITPARAMETEREXTPROC, glBindTextureUnitParameterEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDPARAMETEREXTPROC, glBindParameterEXT);
-	CHECK_ADDRESS(NEL_PFNGLISVARIANTENABLEDEXTPROC, glIsVariantEnabledEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETVARIANTBOOLEANVEXTPROC, glGetVariantBooleanvEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETVARIANTINTEGERVEXTPROC, glGetVariantIntegervEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETVARIANTFLOATVEXTPROC, glGetVariantFloatvEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETVARIANTPOINTERVEXTPROC, glGetVariantPointervEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETINVARIANTBOOLEANVEXTPROC, glGetInvariantBooleanvEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETINVARIANTINTEGERVEXTPROC, glGetInvariantIntegervEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETINVARIANTFLOATVEXTPROC, glGetInvariantFloatvEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETLOCALCONSTANTBOOLEANVEXTPROC, glGetLocalConstantBooleanvEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETLOCALCONSTANTINTEGERVEXTPROC, glGetLocalConstantIntegervEXT);
-	CHECK_ADDRESS(NEL_PFNGLGETLOCALCONSTANTFLOATVEXTPROC, glGetLocalConstantFloatvEXT);
-
-	// we require at least 128 instructions, 15 local register (r0, r1,..,r11) + 3 temporary vector for swizzle emulation + 1 vector for indexing temp + 3 temporary scalar for LOGG, EXPP and LIT emulation,  1 address register
-	// we require 11 variants (4 textures + position + normal + primary color + secondary color + weight + palette skin + fog)
-	// we also require 2 local constants (0 and 1)
-	// 96 invariants (c[0], c[1] ..) + 1 invariants for fog emulation (fog coordinate must range from 0 to 1 with EXT_VERTEX_shader)
-	GLint numVSInst;
-	glGetIntegerv(GL_MAX_OPTIMIZED_VERTEX_SHADER_INSTRUCTIONS_EXT, &numVSInst);
-	if (numVSInst < 128) return false;
-	//
-	GLint numVSLocals;
-	glGetIntegerv(GL_MAX_VERTEX_SHADER_LOCALS_EXT, &numVSLocals);
-	if (numVSLocals < 4 * (12 + 4) + 1 + 3)
-	{
-		nlwarning("EXT_vertex_shader extension has not much register. Some vertex program may fail loading");
-		return false;
-	}
-	//
-	GLint numVSLocalConstants;
-	glGetIntegerv(GL_MAX_VERTEX_SHADER_LOCAL_CONSTANTS_EXT, &numVSLocalConstants);
-	if (numVSLocalConstants < 2) return false;
-	//
-	GLint numVSInvariants;
-	glGetIntegerv(GL_MAX_OPTIMIZED_VERTEX_SHADER_INVARIANTS_EXT, &numVSInvariants);
-	if (numVSInvariants < 96 + 1) return false;
-	//
-	GLint numVSVariants;
-	glGetIntegerv(GL_MAX_VERTEX_SHADER_VARIANTS_EXT, &numVSVariants);
-	if (numVSInvariants < 4) return false;
-
-	return true;
-
-}
-
-
 // *********************************
 static bool	setupEXTSecondaryColor(const char	*glext)
 {
@@ -1093,12 +982,10 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Disable feature ???
 	if(!ext.DisableHardwareVertexProgram)
 	{
-		ext.EXTVertexShader = setupEXTVertexShader(glext);
 		ext.ARBVertexProgram= setupARBVertexProgram(glext);
 	}
 	else
 	{
-		ext.EXTVertexShader = false;
 		ext.ARBVertexProgram = false;
 	}
 

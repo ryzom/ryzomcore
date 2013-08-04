@@ -1171,9 +1171,7 @@ private:
 	/// Tools fct used by setupGLArrays
 	void			setupGlArraysStd(CVertexBufferInfo &vb);
 	void			setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb);
-	void			setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb);
 	void			toggleGlArraysForARBVertexProgram();
-	void			toggleGlArraysForEXTVertexShader();
 
 	/// Test/activate normalisation of normal.
 	void			enableGlNormalize(bool normalize)
@@ -1291,7 +1289,6 @@ private:
 	/// \name Vertex program implementation
 	// @{
 		bool activeARBVertexProgram (CVertexProgram *program);
-		bool activeEXTVertexShader (CVertexProgram *program);
 	//@}
 
 
@@ -1348,31 +1345,9 @@ private:
 
 	NLMISC::CRGBA					_CurrentBlendConstantColor;
 
-	/// \name EXTVertexShader specifics.
-	// @{
-			// Variants offset used for :
-			// Secondary color
-			// Fog Coords
-			// Skin Weight
-			// Palette Skin
-			// This mean that they must have 4 components
-			public:
-				enum EEVSVariants { EVSSecondaryColorVariant = 0, EVSFogCoordsVariant = 1, EVSSkinWeightVariant = 2, EVSPaletteSkinVariant = 3, EVSNumVariants };
-			private:
-			// Handle for standard gl arrays
-			GLuint _EVSPositionHandle;
-			GLuint _EVSNormalHandle;
-			GLuint _EVSColorHandle;
-			GLuint _EVSTexHandle[8];
-			// Handle of the first constant c[0]. In vertex program we have 96 constant c[0] .. c[95]
-			GLuint _EVSConstantHandle;
-			// number of constant
-			static const uint _EVSNumConstant;
-			//
-			bool   setupEXTVertexShader(const CVPParser::TProgram &program, GLuint id, uint variants[EVSNumVariants], uint16 &usedInputRegisters);
-			bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten);
-			//
-	// @}
+	private:
+
+		bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten);
 
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();
@@ -1469,17 +1444,6 @@ public:
 
 	// ARB_vertex_program specific -> must know if specular part is written
 	bool					SpecularWritten;
-
-	/**  EXTVertexShader specific
-	  *  handle of allocated variants
-	  */
-	GLuint					Variants[CDriverGL3::EVSNumVariants];
-	/** EXTVertexShader specific
-	  * Used input registers.
-	  * This allow to activate only the gl arrays that are needed by a given shader.
-	  */
-	uint16					UsedVertexComponents;
-
 
 	// The gl id is auto created here.
 	CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrvInfoPtrList it);

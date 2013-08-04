@@ -929,55 +929,6 @@ void		CDriverGL3::toggleGlArraysForARBVertexProgram()
 	}
 }
 
-
-
-// ***************************************************************************
-void		CDriverGL3::toggleGlArraysForEXTVertexShader()
-{
-	H_AUTO_OGL(CDriverGL3_toggleGlArraysForEXTVertexShader)
-	// If change of setup type, must disable olds.
-	//=======================
-
-
-	// If last was a VertexProgram setup, and now it is a standard GL array setup.
-	if( _LastSetupGLArrayVertexProgram && !isVertexProgramEnabled () )
-	{
-		CVertexProgram *vp = _LastSetuppedVP;
-		if (vp)
-		{
-			CVertexProgamDrvInfosGL3 *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL3 *>((IVertexProgramDrvInfos *) vp->_DrvInfo);
-			if (drvInfo)
-			{
-				// Disable all VertexAttribs.
-				for (uint value=0; value<CVertexBuffer::NumValue; value++)
-				{
-					_DriverGLStates.enableVertexAttribArrayForEXTVertexShader(value, false, drvInfo->Variants);
-				}
-			}
-		}
-		// no more a vertex program setup.
-		_LastSetupGLArrayVertexProgram= false;
-	}
-
-	// If last was a standard GL array setup, and now it is a VertexProgram setup.
-	if( !_LastSetupGLArrayVertexProgram && isVertexProgramEnabled () )
-	{
-		// Disable all standards ptrs.
-		_DriverGLStates.enableVertexArray(false);
-		_DriverGLStates.enableNormalArray(false);
-		_DriverGLStates.enableColorArray(false);
-		_DriverGLStates.enableSecondaryColorArray(false);
-		for(uint i=0; i<inlGetNumTextStages(); i++)
-		{
-			_DriverGLStates.clientActiveTextureARB(i);
-			_DriverGLStates.enableTexCoordArray(false);
-		}
-
-		// now, vertex program setup.
-		_LastSetupGLArrayVertexProgram= true;
-	}
-}
-
 // tells for each vertex argument if it must be normalized when it is an integral type
 static const GLboolean ARBVertexProgramMustNormalizeAttrib[] =
 {
@@ -1042,121 +993,6 @@ void		CDriverGL3::setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb)
 }
 
 
-
-// ***************************************************************************
-void		CDriverGL3::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
-{
-	H_AUTO_OGL(CDriverGL3_setupGlArraysForEXTVertexShader)
-
-
-	CVertexProgram *vp = _LastSetuppedVP;
-	if (!vp) return;
-	CVertexProgamDrvInfosGL3 *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL3 *>((IVertexProgramDrvInfos *) vp->_DrvInfo);
-	if (!drvInfo) return;
-
-	uint32	flags= vb.VertexFormat;
-
-
-	_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
-
-	// For each value
-	for (uint value=0; value<CVertexBuffer::NumValue; value++)
-	{
-		// Flag
-		uint16 flag=1<<value;
-
-		// Type
-		CVertexBuffer::TType type=vb.Type[value];
-
-		// Index
-		uint glIndex=GLVertexAttribIndex[value];
-
-		// Not setuped value and used
-		if (flags & flag & drvInfo->UsedVertexComponents)
-		{
-			_DriverGLStates.enableVertexAttribArrayForEXTVertexShader(glIndex, true, drvInfo->Variants);
-
-			// use variant or open gl standard array
-
-			{
-				switch(value)
-				{
-					case CVertexBuffer::Position: // position
-					{
-						nlassert(NumCoordinatesType[type] >= 2);
-						glVertexPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-					}
-					break;
-					case CVertexBuffer::Weight: // skin weight
-					{
-						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-						nglVariantPointerEXT(drvInfo->Variants[CDriverGL3::EVSSkinWeightVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-					}
-					break;
-					case CVertexBuffer::Normal: // normal
-					{
-						nlassert(NumCoordinatesType[type] == 3); // must have 3 components for normals
-						glNormalPointer(GLType[type], vb.VertexSize, vb.ValuePtr[CVertexBuffer::Normal]);
-					}
-					break;
-					case CVertexBuffer::PrimaryColor: // color
-					{
-						nlassert(NumCoordinatesType[type] >= 3); // must have 3 or 4 components for primary color
-						glColorPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-					}
-					break;
-					case CVertexBuffer::SecondaryColor: // secondary color
-					{
-						// implemented using a variant, as not available with EXTVertexShader
-						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-						nglVariantPointerEXT(drvInfo->Variants[CDriverGL3::EVSSecondaryColorVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-					}
-					break;
-					case CVertexBuffer::Fog: // fog coordinate
-					{
-						// implemented using a variant
-						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-						nglVariantPointerEXT(drvInfo->Variants[CDriverGL3::EVSFogCoordsVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-					}
-					break;
-					case CVertexBuffer::PaletteSkin: // palette skin
-					{
-						// implemented using a variant
-						nlassert(NumCoordinatesType[type] == 4); // variant, only 4 component supported
-						nglVariantPointerEXT(drvInfo->Variants[CDriverGL3::EVSPaletteSkinVariant], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-					}
-					break;
-					case CVertexBuffer::Empty: // empty
-						nlstop;
-					break;
-					case CVertexBuffer::TexCoord0:
-					case CVertexBuffer::TexCoord1:
-					case CVertexBuffer::TexCoord2:
-					case CVertexBuffer::TexCoord3:
-					case CVertexBuffer::TexCoord4:
-					case CVertexBuffer::TexCoord5:
-					case CVertexBuffer::TexCoord6:
-					case CVertexBuffer::TexCoord7:
-					{
-						_DriverGLStates.clientActiveTextureARB(value - CVertexBuffer::TexCoord0);
-						glTexCoordPointer(NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-					}
-					break;
-					default:
-						nlstop; // invalid value
-					break;
-				}
-			}
-		}
-		else
-		{
-			_DriverGLStates.enableVertexAttribArrayForEXTVertexShader(glIndex, false, drvInfo->Variants);
-		}
-	}
-}
-
-
-
 // ***************************************************************************
 void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 {
@@ -1173,19 +1009,6 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 		else
 		{
 			setupGlArraysForARBVertexProgram(vb);
-		}
-	}
-	else if (_Extensions.EXTVertexShader)
-	{
-		toggleGlArraysForEXTVertexShader();
-		// Use a vertex program ?
-		if (!isVertexProgramEnabled ())
-		{
-			setupGlArraysStd(vb);
-		}
-		else
-		{
-			setupGlArraysForEXTVertexShader(vb);
 		}
 	}
 	else

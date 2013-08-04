@@ -47,7 +47,6 @@ struct	CGlExtensions
 	bool	EXTSeparateSpecularColor;
 	bool	NVTextureEnvCombine4;
 	bool	ARBTextureCubeMap;
-	bool	EXTVertexShader;
 	bool	NVTextureShader;
 	bool	NVOcclusionQuery;
 	bool	NVTextureRectangle;
@@ -127,7 +126,6 @@ public:
 		EXTBlendColor= false;
 		ATIEnvMapBumpMap = false;
 		ATIFragmentShader = false;
-		EXTVertexShader= false;
 		ARBFragmentProgram = false;
 		ARBVertexProgram = false;
 		NVTextureRectangle = false;
@@ -182,7 +180,6 @@ public:
 		result += ATIFragmentShader ? "ATIFragmentShader " : "";
 		result += ARBFragmentProgram ? "ARBFragmentProgram " : "";
 		result += ARBVertexProgram ? "ARBVertexProgram " : "";
-		result += EXTVertexShader ? "EXTVertexShader " : "";
 
 		result += "\n  Misc:      ";
 		result += EXTVertexWeighting ? "EXTVertexWeighting " : "";
@@ -306,44 +303,6 @@ extern NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC	nglGetCompressedTexImageARB;
 extern NEL_PFNGLVERTEXWEIGHTFEXTPROC			nglVertexWeightfEXT;
 extern NEL_PFNGLVERTEXWEIGHTFVEXTPROC			nglVertexWeightfvEXT;
 extern NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC		nglVertexWeightPointerEXT;
-
-
-// VertexShaderExtension.
-//========================
-extern NEL_PFNGLBEGINVERTEXSHADEREXTPROC		 nglBeginVertexShaderEXT;
-extern NEL_PFNGLENDVERTEXSHADEREXTPROC			 nglEndVertexShaderEXT;
-extern NEL_PFNGLBINDVERTEXSHADEREXTPROC			 nglBindVertexShaderEXT;
-extern NEL_PFNGLGENVERTEXSHADERSEXTPROC			 nglGenVertexShadersEXT;
-extern NEL_PFNGLDELETEVERTEXSHADEREXTPROC		 nglDeleteVertexShaderEXT;
-extern NEL_PFNGLSHADEROP1EXTPROC				 nglShaderOp1EXT;
-extern NEL_PFNGLSHADEROP2EXTPROC				 nglShaderOp2EXT;
-extern NEL_PFNGLSHADEROP3EXTPROC				 nglShaderOp3EXT;
-extern NEL_PFNGLSWIZZLEEXTPROC					 nglSwizzleEXT;
-extern NEL_PFNGLWRITEMASKEXTPROC				 nglWriteMaskEXT;
-extern NEL_PFNGLINSERTCOMPONENTEXTPROC			 nglInsertComponentEXT;
-extern NEL_PFNGLEXTRACTCOMPONENTEXTPROC			 nglExtractComponentEXT;
-extern NEL_PFNGLGENSYMBOLSEXTPROC				 nglGenSymbolsEXT;
-extern NEL_PFNGLSETINVARIANTEXTPROC				 nglSetInvariantEXT;
-extern NEL_PFNGLSETLOCALCONSTANTEXTPROC			 nglSetLocalConstantEXT;
-extern NEL_PFNGLVARIANTPOINTEREXTPROC			 nglVariantPointerEXT;
-extern NEL_PFNGLENABLEVARIANTCLIENTSTATEEXTPROC  nglEnableVariantClientStateEXT;
-extern NEL_PFNGLDISABLEVARIANTCLIENTSTATEEXTPROC nglDisableVariantClientStateEXT;
-extern NEL_PFNGLBINDLIGHTPARAMETEREXTPROC		 nglBindLightParameterEXT;
-extern NEL_PFNGLBINDMATERIALPARAMETEREXTPROC	 nglBindMaterialParameterEXT;
-extern NEL_PFNGLBINDTEXGENPARAMETEREXTPROC		 nglBindTexGenParameterEXT;
-extern NEL_PFNGLBINDTEXTUREUNITPARAMETEREXTPROC	 nglBindTextureUnitParameterEXT;
-extern NEL_PFNGLBINDPARAMETEREXTPROC			 nglBindParameterEXT;
-extern NEL_PFNGLISVARIANTENABLEDEXTPROC			 nglIsVariantEnabledEXT;
-extern NEL_PFNGLGETVARIANTBOOLEANVEXTPROC		 nglGetVariantBooleanvEXT;
-extern NEL_PFNGLGETVARIANTINTEGERVEXTPROC		 nglGetVariantIntegervEXT;
-extern NEL_PFNGLGETVARIANTFLOATVEXTPROC			 nglGetVariantFloatvEXT;
-extern NEL_PFNGLGETVARIANTPOINTERVEXTPROC		 nglGetVariantPointervEXT;
-extern NEL_PFNGLGETINVARIANTBOOLEANVEXTPROC		 nglGetInvariantBooleanvEXT;
-extern NEL_PFNGLGETINVARIANTINTEGERVEXTPROC		 nglGetInvariantIntegervEXT;
-extern NEL_PFNGLGETINVARIANTFLOATVEXTPROC		 nglGetInvariantFloatvEXT;
-extern NEL_PFNGLGETLOCALCONSTANTBOOLEANVEXTPROC  nglGetLocalConstantBooleanvEXT;
-extern NEL_PFNGLGETLOCALCONSTANTINTEGERVEXTPROC  nglGetLocalConstantIntegervEXT;
-extern NEL_PFNGLGETLOCALCONSTANTFLOATVEXTPROC    nglGetLocalConstantFloatvEXT;
 
 
 // ATI_envmap_bumpmap extension

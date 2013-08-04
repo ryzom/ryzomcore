@@ -129,9 +129,6 @@ uint CDriverGL3::_Registered=0;
 // Version of the driver. Not the interface version!! Increment when implementation of the driver change.
 const uint32 CDriverGL3::ReleaseVersion = 0x11;
 
-// Number of register to allocate for the EXTVertexShader extension
-const uint CDriverGL3::_EVSNumConstant = 97;
-
 GLenum CDriverGL3::NLCubeFaceToGLCubeFace[6] =
 {
 	GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB,
@@ -525,43 +522,6 @@ bool CDriverGL3::setupDisplay()
 
 	// check whether per pixel lighting shader is supported
 	checkForPerPixelLightingSupport();
-
-	// if EXTVertexShader is used, bind  the standard GL arrays, and allocate constant
-	if ( !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
-	{
-		_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
-		_EVSNormalHandle	= nglBindParameterEXT(GL_CURRENT_NORMAL);
-		_EVSColorHandle		= nglBindParameterEXT(GL_CURRENT_COLOR);
-
-		if (!_EVSPositionHandle || !_EVSNormalHandle || !_EVSColorHandle)
-		{
-			nlwarning("Unable to bind input parameters for use with EXT_vertex_shader, vertex program support is disabled");
-			_Extensions.EXTVertexShader = false;
-		}
-		else
-		{
-			// bind texture units
-			for(uint k = 0; k < 8; ++k)
-			{
-				_EVSTexHandle[k] = nglBindTextureUnitParameterEXT(GL_TEXTURE0_ARB + k, GL_CURRENT_TEXTURE_COORDS);
-			}
-			// Other attributes are managed using variant pointers :
-			// Secondary color
-			// Fog Coords
-			// Skin Weight
-			// Skin palette
-			// This mean that they must have 4 components
-
-			// Allocate invariants. One assitionnal variant is needed for fog coordinate if fog bug is not fixed in driver version
-			_EVSConstantHandle = nglGenSymbolsEXT(GL_VECTOR_EXT, GL_INVARIANT_EXT, GL_FULL_RANGE_EXT, _EVSNumConstant + (_ATIFogRangeFixed ? 0 : 1));
-
-			if (_EVSConstantHandle == 0)
-			{
-				nlwarning("Unable to allocate constants for EXT_vertex_shader, vertex program support is disabled");
-				_Extensions.EXTVertexShader = false;
-			}
-		}
-	}
 
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
@@ -1186,23 +1146,6 @@ void CDriverGL3::setupFog(float start, float end, CRGBA color)
 
 	glFogfv(GL_FOG_COLOR, _CurrentFogColor);
 
-	/** Special : with vertex program, using the extension EXT_vertex_shader, fog is emulated using 1 more constant to scale result to [0, 1]
-	  */
-	if (_Extensions.EXTVertexShader && !_Extensions.ARBVertexProgram)
-	{
-		if (!_ATIFogRangeFixed)
-		{
-			// last constant is used to store fog information (fog must be rescaled to [0, 1], because of a driver bug)
-			if (start != end)
-			{
-				setConstant(_EVSNumConstant, 1.f / (start - end), - end / (start - end), 0, 0);
-			}
-			else
-			{
-				setConstant(_EVSNumConstant, 0.f, 0, 0, 0);
-			}
-		}
-	}
 	_FogStart = start;
 	_FogEnd = end;
 }
@@ -1323,7 +1266,7 @@ bool CDriverGL3::isWaterShaderSupported() const
 
 	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
 
-	if (!_Extensions.EXTVertexShader && !_Extensions.ARBVertexProgram) return false; // should support vertex programs
+	if (!_Extensions.ARBVertexProgram) return false; // should support vertex programs
 	if (!_Extensions.NVTextureShader && !_Extensions.ATIFragmentShader && !_Extensions.ARBFragmentProgram) return false;
 	return true;
 }
@@ -1389,12 +1332,12 @@ void CDriverGL3::checkForPerPixelLightingSupport()
 	_SupportPerPixelShaderNoSpec = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
 								   && _Extensions.ARBTextureCubeMap
 								   && _Extensions.NbTextureStages >= 3
-								   && ( _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
+								   && ( _Extensions.ARBVertexProgram );
 
 	_SupportPerPixelShader = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
 							 && _Extensions.ARBTextureCubeMap
 							 && _Extensions.NbTextureStages >= 2
-							 && ( _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
+							 && ( _Extensions.ARBVertexProgram );
 }
 
 // ***************************************************************************

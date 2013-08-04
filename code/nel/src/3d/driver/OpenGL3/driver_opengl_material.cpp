@@ -2123,14 +2123,7 @@ void CDriverGL3::setupWaterPassARB(const CMaterial &mat)
 			  * So we must add a special path for this case, where the fog coordinate is 'unscaled' again.
 			  * NB : this is fixed in later drivers (from 6.14.10.6343), so check this
 			  */
-			if (_Extensions.EXTVertexShader && !_ATIFogRangeFixed)
-			{
-				nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 1.f, 0.f, 0.f, 0.f);
-			}
-			else
-			{
-				nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, - 1.f/  (_FogEnd - _FogStart), _FogEnd / (_FogEnd - _FogStart), 0.f, 0.f);
-			}
+			nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, - 1.f/  (_FogEnd - _FogStart), _FogEnd / (_FogEnd - _FogStart), 0.f, 0.f);
 		}
 	}
 }
