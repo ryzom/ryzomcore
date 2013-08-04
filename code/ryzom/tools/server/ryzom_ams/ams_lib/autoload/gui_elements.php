@@ -34,6 +34,7 @@ class Gui_Elements{
         return $result;  
     }
     
+    
     public static function make_table_with_key_is_id( $inputList, $funcArray, $idFunction){
         $result = Array();
         foreach($inputList as $element){
@@ -43,6 +44,7 @@ class Gui_Elements{
         }
         return $result;  
     }
+    
     
     public static function time_elapsed_string($ptime){
         global $TIME_FORMAT;
@@ -73,6 +75,5 @@ class Gui_Elements{
             }
         }
     }
-
 
 }

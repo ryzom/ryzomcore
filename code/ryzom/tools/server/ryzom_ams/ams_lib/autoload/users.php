@@ -7,7 +7,7 @@ class Users{
      * @takes $array with username,password and email
      * @return string Info: Returns a string, if input data is valid then "success" is returned, else an array with errors
      */ 
-     public function check_Register($values){
+     public static function check_Register($values){
           // check values
           if ( isset( $values["Username"] ) and isset( $values["Password"] ) and isset( $values["ConfirmPass"] ) and isset( $values["Email"] ) ){
                $user = Users::checkUser( $values["Username"] );
@@ -156,7 +156,7 @@ class Users{
      * @takes $email
      * @return
      */
-     public function checkEmail( $email )
+     public static function checkEmail( $email )
     {
          if ( isset( $email ) ){
                if ( !Users::validEmail( $email ) ){
@@ -243,7 +243,7 @@ class Users{
      * @takes $length, which is by default 2
      * @return a random salt of 2 chars
      */
-     public function generateSALT( $length = 2 )
+     public static function generateSALT( $length = 2 )
     {
          // start with a blank salt
         $salt = "";
@@ -284,7 +284,7 @@ class Users{
      * @takes $array with name,pass and mail
      * @return ok if it's get correctly added to the shard, else return lib offline and put in libDB, if libDB is also offline return liboffline.
      */
-     public function createUser($values, $user_id){     
+     public static function createUser($values, $user_id){     
           try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
