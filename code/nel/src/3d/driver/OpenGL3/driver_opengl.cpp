@@ -576,20 +576,6 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 	return false;
 }
 
-// --------------------------------------------------
-void CDriverGL3::disableHardwareVertexProgram()
-{
-	H_AUTO_OGL(CDriverGL3_disableHardwareVertexProgram)
-	_Extensions.DisableHardwareVertexProgram= true;
-}
-
-// ***************************************************************************
-void CDriverGL3::disableHardwareVertexArrayAGP()
-{
-	H_AUTO_OGL(CDriverGL3_disableHardwareVertexArrayAGP)
-	_Extensions.DisableHardwareVertexArrayAGP= true;
-}
-
 // ***************************************************************************
 void CDriverGL3::disableHardwareTextureShader()
 {
@@ -1266,7 +1252,6 @@ bool CDriverGL3::isWaterShaderSupported() const
 
 	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
 
-	if (!_Extensions.ARBVertexProgram) return false; // should support vertex programs
 	if (!_Extensions.NVTextureShader && !_Extensions.ATIFragmentShader && !_Extensions.ARBFragmentProgram) return false;
 	return true;
 }
@@ -1331,13 +1316,11 @@ void CDriverGL3::checkForPerPixelLightingSupport()
 
 	_SupportPerPixelShaderNoSpec = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
 								   && _Extensions.ARBTextureCubeMap
-								   && _Extensions.NbTextureStages >= 3
-								   && ( _Extensions.ARBVertexProgram );
+								   && _Extensions.NbTextureStages >= 3;
 
 	_SupportPerPixelShader = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
 							 && _Extensions.ARBTextureCubeMap
-							 && _Extensions.NbTextureStages >= 2
-							 && ( _Extensions.ARBVertexProgram );
+							 && _Extensions.NbTextureStages >= 2;
 }
 
 // ***************************************************************************

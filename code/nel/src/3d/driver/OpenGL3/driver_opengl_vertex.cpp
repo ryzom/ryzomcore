@@ -642,14 +642,6 @@ void		CDriverGL3::mapTextureStageToUV(uint stage, uint uv)
 // ***************************************************************************
 // ***************************************************************************
 
-
-// ***************************************************************************
-bool			CDriverGL3::supportVertexBufferHard() const
-{
-	H_AUTO_OGL(CDriverGL3_supportVertexBufferHard)
-	return true;
-}
-
 // ***************************************************************************
 bool			CDriverGL3::supportVolatileVertexBuffer() const
 {
@@ -998,7 +990,6 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CDriverGL3_setupGlArrays)
 
-	if (_Extensions.ARBVertexProgram)
 	{
 		toggleGlArraysForARBVertexProgram();
 		// Use a vertex program ?
@@ -1010,11 +1001,6 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 		{
 			setupGlArraysForARBVertexProgram(vb);
 		}
-	}
-	else
-	{
-		// no vertex programs
-		setupGlArraysStd(vb);
 	}
 }
 
@@ -1081,8 +1067,6 @@ void			CDriverGL3::resetVertexArrayRange()
 bool			CDriverGL3::initVertexBufferHard(uint agpMem, uint vramMem)
 {
 	H_AUTO_OGL(CDriverGL3_initVertexBufferHard)
-	if(!supportVertexBufferHard())
-		return false;
 
 	// must be supported
 	if(!_AGPVertexArrayRange || !_VRAMVertexArrayRange)

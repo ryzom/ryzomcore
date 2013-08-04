@@ -48,14 +48,6 @@ CVertexProgamDrvInfosGL3::CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrv
 
 }
 
-
-// ***************************************************************************
-bool CDriverGL3::isVertexProgramSupported () const
-{
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_isVertexProgramSupported)
-	return _Extensions.ARBVertexProgram;
-}
-
 //=================================================================================================
 static const char *ARBVertexProgramInstrToName[] =
 {
@@ -586,25 +578,13 @@ void CDriverGL3::enableVertexProgramDoubleSidedColor(bool doubleSided)
 {
 	H_AUTO_OGL(CDriverGL3_enableVertexProgramDoubleSidedColor);
 
-	// Vertex program exist ?
-	if (_Extensions.ARBVertexProgram)
-	{
-		// change mode (not cached because supposed to be rare)
-		if(doubleSided)
-			glEnable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-		else
-			glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-	}
+	// change mode (not cached because supposed to be rare)
+	if(doubleSided)
+		glEnable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
+	else
+		glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
 }
 
-
-// ***************************************************************************
-bool CDriverGL3::supportVertexProgramDoubleSidedColor() const
-{
-	H_AUTO_OGL(CDriverGL3_supportVertexProgramDoubleSidedColor)
-	// currently only supported by NV_VERTEX_PROGRAM && ARB_VERTEX_PROGRAM
-	return _Extensions.ARBVertexProgram;
-}
 
 #ifdef NL_STATIC
 } // NLDRIVERGL/ES

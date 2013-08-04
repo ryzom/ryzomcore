@@ -439,26 +439,6 @@ static bool	setupARBTextureNonPowerOfTwo(const char	*glext)
 	return true;
 }
 
-// ***************************************************************************
-static bool	setupOESMapBuffer(const char *glext)
-{
-	H_AUTO_OGL(setupOESMapBuffer);
-
-	CHECK_EXT("OES_mapbuffer");
-
-	return true;
-}
-
-// ***************************************************************************
-static bool	setupOESDrawTexture(const char *glext)
-{
-	H_AUTO_OGL(setupOESDrawTexture);
-
-	CHECK_EXT("OES_draw_texture");
-
-	return true;
-}
-
 // *********************************
 static bool	setupEXTTextureCompressionS3TC(const char	*glext)
 {
@@ -978,19 +958,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check for cube mapping
 	ext.ARBTextureCubeMap = setupARBTextureCubeMap(glext);
 
-	// Check vertex program
-	// Disable feature ???
-	if(!ext.DisableHardwareVertexProgram)
-	{
-		ext.ARBVertexProgram= setupARBVertexProgram(glext);
-	}
-	else
-	{
-		ext.ARBVertexProgram = false;
-	}
-
-	ext.OESDrawTexture = setupOESDrawTexture(glext);
-	ext.OESMapBuffer = setupOESMapBuffer(glext);
+	setupARBVertexProgram(glext);
 
 	// Check texture shaders
 	// Disable feature ???

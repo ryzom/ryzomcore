@@ -293,8 +293,8 @@ public:
 
 	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
 
-	virtual void			disableHardwareVertexProgram();
-	virtual void			disableHardwareVertexArrayAGP();
+	virtual void			disableHardwareVertexProgram(){}
+	virtual void			disableHardwareVertexArrayAGP(){}
 	virtual void			disableHardwareTextureShader();
 
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
@@ -408,7 +408,7 @@ public:
 
 	virtual void			getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const;
 
-	virtual	bool			supportVertexBufferHard() const;
+	virtual	bool			supportVertexBufferHard() const{ return true; };
 
 	virtual bool			supportVolatileVertexBuffer() const;
 
@@ -1267,7 +1267,7 @@ private:
 	/// \name Vertex program interface
 	// @{
 
-	bool			isVertexProgramSupported () const;
+	bool			isVertexProgramSupported () const{ return true; }
 	bool			isVertexProgramEmulated () const{ return false; }
 	bool			activeVertexProgram (CVertexProgram *program);
 	void			setConstant (uint index, float, float, float, float);
@@ -1279,7 +1279,7 @@ private:
 	void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
 	void			setConstantFog (uint index);
 	void			enableVertexProgramDoubleSidedColor(bool doubleSided);
-	bool		    supportVertexProgramDoubleSidedColor() const;
+	bool		    supportVertexProgramDoubleSidedColor() const{ return true; };
 
 	virtual	bool			supportMADOperator() const ;
 

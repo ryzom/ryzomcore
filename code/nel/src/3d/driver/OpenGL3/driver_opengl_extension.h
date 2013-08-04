@@ -87,15 +87,10 @@ struct	CGlExtensions
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
 
-	bool	OESDrawTexture;
-	bool	OESMapBuffer;
-
 public:
 
 	/// \name Disable Hardware feature. False by default. setuped by IDriver
 	// @{
-	bool				DisableHardwareVertexProgram;
-	bool				DisableHardwareVertexArrayAGP;
 	bool				DisableHardwareTextureShader;
 	// @}
 
@@ -142,12 +137,7 @@ public:
 		PackedDepthStencil = false;
 		NVStateVARWithoutFlush = 0;
 
-		OESDrawTexture = false;
-		OESMapBuffer = false;
-
 		/// \name Disable Hardware feature. False by default. setuped by IDriver
-		DisableHardwareVertexProgram= false;
-		DisableHardwareVertexArrayAGP= false;
 		DisableHardwareTextureShader= false;
 	}
 
