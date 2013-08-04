@@ -527,7 +527,7 @@ bool CDriverGL3::setupDisplay()
 	checkForPerPixelLightingSupport();
 
 	// if EXTVertexShader is used, bind  the standard GL arrays, and allocate constant
-	if (!_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
+	if ( !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
 	{
 		_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
 		_EVSNormalHandle	= nglBindParameterEXT(GL_CURRENT_NORMAL);
@@ -1188,7 +1188,7 @@ void CDriverGL3::setupFog(float start, float end, CRGBA color)
 
 	/** Special : with vertex program, using the extension EXT_vertex_shader, fog is emulated using 1 more constant to scale result to [0, 1]
 	  */
-	if (_Extensions.EXTVertexShader && !_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram)
+	if (_Extensions.EXTVertexShader && !_Extensions.ARBVertexProgram)
 	{
 		if (!_ATIFogRangeFixed)
 		{
@@ -1323,7 +1323,7 @@ bool CDriverGL3::isWaterShaderSupported() const
 
 	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
 
-	if (!_Extensions.EXTVertexShader && !_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram) return false; // should support vertex programs
+	if (!_Extensions.EXTVertexShader && !_Extensions.ARBVertexProgram) return false; // should support vertex programs
 	if (!_Extensions.NVTextureShader && !_Extensions.ATIFragmentShader && !_Extensions.ARBFragmentProgram) return false;
 	return true;
 }
@@ -1389,12 +1389,12 @@ void CDriverGL3::checkForPerPixelLightingSupport()
 	_SupportPerPixelShaderNoSpec = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
 								   && _Extensions.ARBTextureCubeMap
 								   && _Extensions.NbTextureStages >= 3
-								   && (_Extensions.NVVertexProgram || _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
+								   && ( _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
 
 	_SupportPerPixelShader = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
 							 && _Extensions.ARBTextureCubeMap
 							 && _Extensions.NbTextureStages >= 2
-							 && (_Extensions.NVVertexProgram || _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
+							 && ( _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
 }
 
 // ***************************************************************************

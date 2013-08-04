@@ -47,7 +47,6 @@ struct	CGlExtensions
 	bool	EXTSeparateSpecularColor;
 	bool	NVTextureEnvCombine4;
 	bool	ARBTextureCubeMap;
-	bool	NVVertexProgram;
 	bool	EXTVertexShader;
 	bool	NVTextureShader;
 	bool	NVOcclusionQuery;
@@ -61,8 +60,6 @@ struct	CGlExtensions
 	bool	EXTTextureFilterAnisotropic;
 	float	EXTTextureFilterAnisotropicMaximum;
 
-	// true if NVVertexProgram and if we know that VP is emulated
-	bool	NVVertexProgramEmulated;
 	bool	EXTSecondaryColor;
 	bool	EXTBlendColor;
 	// equal to GL_VERTEX_ARRAY_RANGE_WITHOUT_FLUSH_NV if possible, or GL_VERTEX_ARRAY_RANGE_NV
@@ -120,8 +117,6 @@ public:
 		ATIXTextureEnvRoute= false;
 		ARBTextureCubeMap= false;
 		NVTextureShader= false;
-		NVVertexProgram= false;
-		NVVertexProgramEmulated= false;
 		EXTSecondaryColor= false;
 		WGLARBPBuffer= false;
 		WGLARBPixelFormat= false;
@@ -187,9 +182,7 @@ public:
 		result += ATIFragmentShader ? "ATIFragmentShader " : "";
 		result += ARBFragmentProgram ? "ARBFragmentProgram " : "";
 		result += ARBVertexProgram ? "ARBVertexProgram " : "";
-		result += NVVertexProgram ? "NVVertexProgram " : "";
 		result += EXTVertexShader ? "EXTVertexShader " : "";
-		result += NVVertexProgramEmulated ? "NVVertexProgramEmulated " : "";
 
 		result += "\n  Misc:      ";
 		result += EXTVertexWeighting ? "EXTVertexWeighting " : "";
@@ -314,72 +307,6 @@ extern NEL_PFNGLVERTEXWEIGHTFEXTPROC			nglVertexWeightfEXT;
 extern NEL_PFNGLVERTEXWEIGHTFVEXTPROC			nglVertexWeightfvEXT;
 extern NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC		nglVertexWeightPointerEXT;
 
-
-// VertexProgramExtension.
-//========================
-extern NEL_PFNGLAREPROGRAMSRESIDENTNVPROC		nglAreProgramsResidentNV;
-extern NEL_PFNGLBINDPROGRAMNVPROC				nglBindProgramNV;
-extern NEL_PFNGLDELETEPROGRAMSNVPROC			nglDeleteProgramsNV;
-extern NEL_PFNGLEXECUTEPROGRAMNVPROC			nglExecuteProgramNV;
-extern NEL_PFNGLGENPROGRAMSNVPROC				nglGenProgramsNV;
-extern NEL_PFNGLGETPROGRAMPARAMETERDVNVPROC		nglGetProgramParameterdvNV;
-extern NEL_PFNGLGETPROGRAMPARAMETERFVNVPROC		nglGetProgramParameterfvNV;
-extern NEL_PFNGLGETPROGRAMIVNVPROC				nglGetProgramivNV;
-extern NEL_PFNGLGETPROGRAMSTRINGNVPROC			nglGetProgramStringNV;
-extern NEL_PFNGLGETTRACKMATRIXIVNVPROC			nglGetTrackMatrixivNV;
-extern NEL_PFNGLGETVERTEXATTRIBDVNVPROC			nglGetVertexAttribdvNV;
-extern NEL_PFNGLGETVERTEXATTRIBFVNVPROC			nglGetVertexAttribfvNV;
-extern NEL_PFNGLGETVERTEXATTRIBIVNVPROC			nglGetVertexAttribivNV;
-extern NEL_PFNGLGETVERTEXATTRIBPOINTERVNVPROC	nglGetVertexAttribPointervNV;
-extern NEL_PFNGLISPROGRAMNVPROC					nglIsProgramNV;
-extern NEL_PFNGLLOADPROGRAMNVPROC				nglLoadProgramNV;
-extern NEL_PFNGLPROGRAMPARAMETER4DNVPROC		nglProgramParameter4dNV;
-extern NEL_PFNGLPROGRAMPARAMETER4DVNVPROC		nglProgramParameter4dvNV;
-extern NEL_PFNGLPROGRAMPARAMETER4FNVPROC		nglProgramParameter4fNV;
-extern NEL_PFNGLPROGRAMPARAMETER4FVNVPROC		nglProgramParameter4fvNV;
-extern NEL_PFNGLPROGRAMPARAMETERS4DVNVPROC		nglProgramParameters4dvNV;
-extern NEL_PFNGLPROGRAMPARAMETERS4FVNVPROC		nglProgramParameters4fvNV;
-extern NEL_PFNGLREQUESTRESIDENTPROGRAMSNVPROC	nglRequestResidentProgramsNV;
-extern NEL_PFNGLTRACKMATRIXNVPROC				nglTrackMatrixNV;
-extern NEL_PFNGLVERTEXATTRIBPOINTERNVPROC		nglVertexAttribPointerNV;
-extern NEL_PFNGLVERTEXATTRIB1DNVPROC			nglVertexAttrib1dNV;
-extern NEL_PFNGLVERTEXATTRIB1DVNVPROC			nglVertexAttrib1dvNV;
-extern NEL_PFNGLVERTEXATTRIB1FNVPROC			nglVertexAttrib1fNV;
-extern NEL_PFNGLVERTEXATTRIB1FVNVPROC			nglVertexAttrib1fvNV;
-extern NEL_PFNGLVERTEXATTRIB1SNVPROC			nglVertexAttrib1sNV;
-extern NEL_PFNGLVERTEXATTRIB1SVNVPROC			nglVertexAttrib1svNV;
-extern NEL_PFNGLVERTEXATTRIB2DNVPROC			nglVertexAttrib2dNV;
-extern NEL_PFNGLVERTEXATTRIB2DVNVPROC			nglVertexAttrib2dvNV;
-extern NEL_PFNGLVERTEXATTRIB2FNVPROC			nglVertexAttrib2fNV;
-extern NEL_PFNGLVERTEXATTRIB2FVNVPROC			nglVertexAttrib2fvNV;
-extern NEL_PFNGLVERTEXATTRIB2SNVPROC			nglVertexAttrib2sNV;
-extern NEL_PFNGLVERTEXATTRIB2SVNVPROC			nglVertexAttrib2svNV;
-extern NEL_PFNGLVERTEXATTRIB3DNVPROC			nglVertexAttrib3dNV;
-extern NEL_PFNGLVERTEXATTRIB3DVNVPROC			nglVertexAttrib3dvNV;
-extern NEL_PFNGLVERTEXATTRIB3FNVPROC			nglVertexAttrib3fNV;
-extern NEL_PFNGLVERTEXATTRIB3FVNVPROC			nglVertexAttrib3fvNV;
-extern NEL_PFNGLVERTEXATTRIB3SNVPROC			nglVertexAttrib3sNV;
-extern NEL_PFNGLVERTEXATTRIB3SVNVPROC			nglVertexAttrib3svNV;
-extern NEL_PFNGLVERTEXATTRIB4DNVPROC			nglVertexAttrib4dNV;
-extern NEL_PFNGLVERTEXATTRIB4DVNVPROC			nglVertexAttrib4dvNV;
-extern NEL_PFNGLVERTEXATTRIB4FNVPROC			nglVertexAttrib4fNV;
-extern NEL_PFNGLVERTEXATTRIB4FVNVPROC			nglVertexAttrib4fvNV;
-extern NEL_PFNGLVERTEXATTRIB4SNVPROC			nglVertexAttrib4sNV;
-extern NEL_PFNGLVERTEXATTRIB4SVNVPROC			nglVertexAttrib4svNV;
-extern NEL_PFNGLVERTEXATTRIB4UBVNVPROC			nglVertexAttrib4ubvNV;
-extern NEL_PFNGLVERTEXATTRIBS1DVNVPROC			nglVertexAttribs1dvNV;
-extern NEL_PFNGLVERTEXATTRIBS1FVNVPROC			nglVertexAttribs1fvNV;
-extern NEL_PFNGLVERTEXATTRIBS1SVNVPROC			nglVertexAttribs1svNV;
-extern NEL_PFNGLVERTEXATTRIBS2DVNVPROC			nglVertexAttribs2dvNV;
-extern NEL_PFNGLVERTEXATTRIBS2FVNVPROC			nglVertexAttribs2fvNV;
-extern NEL_PFNGLVERTEXATTRIBS2SVNVPROC			nglVertexAttribs2svNV;
-extern NEL_PFNGLVERTEXATTRIBS3DVNVPROC			nglVertexAttribs3dvNV;
-extern NEL_PFNGLVERTEXATTRIBS3FVNVPROC			nglVertexAttribs3fvNV;
-extern NEL_PFNGLVERTEXATTRIBS3SVNVPROC			nglVertexAttribs3svNV;
-extern NEL_PFNGLVERTEXATTRIBS4DVNVPROC			nglVertexAttribs4dvNV;
-extern NEL_PFNGLVERTEXATTRIBS4FVNVPROC			nglVertexAttribs4fvNV;
-extern NEL_PFNGLVERTEXATTRIBS4SVNVPROC			nglVertexAttribs4svNV;
-extern NEL_PFNGLVERTEXATTRIBS4UBVNVPROC			nglVertexAttribs4ubvNV;
 
 // VertexShaderExtension.
 //========================

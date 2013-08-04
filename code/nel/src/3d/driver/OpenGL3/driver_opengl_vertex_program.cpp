@@ -42,17 +42,11 @@ CVertexProgamDrvInfosGL3::CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrv
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
 
 	// Extension must exist
-	nlassert (drv->_Extensions.NVVertexProgram
-		      || drv->_Extensions.EXTVertexShader
+	nlassert (drv->_Extensions.EXTVertexShader
 			  || drv->_Extensions.ARBVertexProgram
 		     );
 
-	if (drv->_Extensions.NVVertexProgram) // NVIDIA implemntation
-	{
-		// Generate a program
-		nglGenProgramsNV (1, &ID);
-	}
-	else if (drv->_Extensions.ARBVertexProgram) // ARB implementation
+	if (drv->_Extensions.ARBVertexProgram) // ARB implementation
 	{
 		nglGenProgramsARB(1, &ID);
 	}
@@ -67,133 +61,7 @@ CVertexProgamDrvInfosGL3::CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrv
 bool CDriverGL3::isVertexProgramSupported () const
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_isVertexProgramSupported)
-	return _Extensions.NVVertexProgram || _Extensions.EXTVertexShader || _Extensions.ARBVertexProgram;
-}
-
-// ***************************************************************************
-bool CDriverGL3::isVertexProgramEmulated () const
-{
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_isVertexProgramEmulated)
-	return _Extensions.NVVertexProgramEmulated;
-}
-
-
-
-// ***************************************************************************
-bool CDriverGL3::activeNVVertexProgram (CVertexProgram *program)
-{
-	H_AUTO_OGL(CVertexProgamDrvInfosGL_activeNVVertexProgram);
-
-	// Setup or unsetup ?
-	if (program)
-	{
-		// Enable vertex program
-		glEnable (GL_VERTEX_PROGRAM_NV);
-		_VertexProgramEnabled= true;
-
-
-		// Driver info
-		CVertexProgamDrvInfosGL3 *drvInfo;
-
-		// Program setuped ?
-		if (program->_DrvInfo==NULL)
-		{
-			/** Check with our parser if the program will works with other implemented extensions, too. (EXT_vertex_shader ..).
-			  * There are some incompatibilities.
-			  */
-			CVPParser parser;
-			CVPParser::TProgram parsedProgram;
-			std::string errorOutput;
-			bool result = parser.parse(program->getProgram().c_str(), parsedProgram, errorOutput);
-			if (!result)
-			{
-				nlwarning("Unable to parse a vertex program :");
-				nlwarning(errorOutput.c_str());
-				#ifdef NL_DEBUG
-					nlassert(0);
-				#endif
-				return false;
-			}
-
-			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
-
-			// Create a driver info
-			*it = drvInfo = new CVertexProgamDrvInfosGL3 (this, it);
-
-			// Set the pointer
-			program->_DrvInfo=drvInfo;
-
-			// Compile the program
-			nglLoadProgramNV (GL_VERTEX_PROGRAM_NV, drvInfo->ID, (GLsizei)program->getProgram().length(), (const GLubyte*)program->getProgram().c_str());
-
-			// Get loading error code
-			GLint errorOff;
-			glGetIntegerv (GL_PROGRAM_ERROR_POSITION_NV, &errorOff);
-
-			// Compilation error ?
-			if (errorOff>=0)
-			{
-				// String length
-				uint length = (uint)program->getProgram ().length();
-				const char* sString= program->getProgram ().c_str();
-
-				// Line count and char count
-				uint line=1;
-				uint charC=1;
-
-				// Find the line
-				uint offset=0;
-				while ((offset<length)&&(offset<(uint)errorOff))
-				{
-					if (sString[offset]=='\n')
-					{
-						line++;
-						charC=1;
-					}
-					else
-						charC++;
-
-					// Next character
-					offset++;
-				}
-
-				// Show the error
-				nlwarning("3D: Vertex program syntax error line %d character %d\n", line, charC);
-
-				// Disable vertex program
-				glDisable (GL_VERTEX_PROGRAM_NV);
-				_VertexProgramEnabled= false;
-
-				// Setup not ok
-				return false;
-			}
-
-			// Setup ok
-			return true;
-		}
-		else
-		{
-			// Cast the driver info pointer
-			drvInfo=safe_cast<CVertexProgamDrvInfosGL3*>((IVertexProgramDrvInfos*)program->_DrvInfo);
-		}
-
-		// Setup this program
-		nglBindProgramNV (GL_VERTEX_PROGRAM_NV, drvInfo->ID);
-		_LastSetuppedVP = program;
-
-		// Ok
-		return true;
-	}
-	else // Unsetup
-	{
-		// Disable vertex program
-		glDisable (GL_VERTEX_PROGRAM_NV);
-		_VertexProgramEnabled= false;
-		// Ok
-		return true;
-	}
-	return false;
+	return _Extensions.EXTVertexShader || _Extensions.ARBVertexProgram;
 }
 
 // ***************************************************************************
@@ -1612,11 +1480,7 @@ bool CDriverGL3::activeVertexProgram (CVertexProgram *program)
 {
 	H_AUTO_OGL(CDriverGL3_activeVertexProgram)
 	// Extension here ?
-	if (_Extensions.NVVertexProgram)
-	{
-		return activeNVVertexProgram(program);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		return activeARBVertexProgram(program);
 	}
@@ -1637,12 +1501,7 @@ void CDriverGL3::setConstant (uint index, float f0, float f1, float f2, float f3
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		// Setup constant
-		nglProgramParameter4fNV (GL_VERTEX_PROGRAM_NV, index, f0, f1, f2, f3);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		nglProgramEnvParameter4fARB(GL_VERTEX_PROGRAM_ARB, index, f0, f1, f2, f3);
 	}
@@ -1661,12 +1520,7 @@ void CDriverGL3::setConstant (uint index, double d0, double d1, double d2, doubl
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		// Setup constant
-		nglProgramParameter4dNV (GL_VERTEX_PROGRAM_NV, index, d0, d1, d2, d3);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		nglProgramEnvParameter4dARB(GL_VERTEX_PROGRAM_ARB, index, d0, d1, d2, d3);
 	}
@@ -1685,12 +1539,7 @@ void CDriverGL3::setConstant (uint index, const NLMISC::CVector& value)
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		// Setup constant
-		nglProgramParameter4fNV (GL_VERTEX_PROGRAM_NV, index, value.x, value.y, value.z, 0);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		nglProgramEnvParameter4fARB(GL_VERTEX_PROGRAM_ARB, index, value.x, value.y, value.z, 0);
 	}
@@ -1709,12 +1558,7 @@ void CDriverGL3::setConstant (uint index, const NLMISC::CVectorD& value)
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		// Setup constant
-		nglProgramParameter4dNV (GL_VERTEX_PROGRAM_NV, index, value.x, value.y, value.z, 0);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		nglProgramEnvParameter4dARB(GL_VERTEX_PROGRAM_ARB, index, value.x, value.y, value.z, 0);
 	}
@@ -1732,11 +1576,7 @@ void	CDriverGL3::setConstant (uint index, uint num, const float *src)
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		nglProgramParameters4fvNV(GL_VERTEX_PROGRAM_NV, index, num, src);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		for(uint k = 0; k < num; ++k)
 		{
@@ -1758,11 +1598,7 @@ void	CDriverGL3::setConstant (uint index, uint num, const double *src)
 	H_AUTO_OGL(CDriverGL3_setConstant);
 
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		nglProgramParameters4dvNV(GL_VERTEX_PROGRAM_NV, index, num, src);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		for(uint k = 0; k < num; ++k)
 		{
@@ -1805,18 +1641,6 @@ void CDriverGL3::setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver
 {
 	H_AUTO_OGL(CDriverGL3_setConstantMatrix);
 
-	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		// First, ensure that the render setup is correclty setuped.
-		refreshRenderSetup();
-
-		// Track the matrix
-		nglTrackMatrixNV (GL_VERTEX_PROGRAM_NV, index, GLMatrix[matrix], GLTransform[transform]);
-		// Release Track => matrix data is copied.
-		nglTrackMatrixNV (GL_VERTEX_PROGRAM_NV, index, GL_NONE, GL_IDENTITY_NV);
-	}
-	else
 	{
 		// First, ensure that the render setup is correctly setuped.
 		refreshRenderSetup();
@@ -1890,15 +1714,7 @@ void CDriverGL3::enableVertexProgramDoubleSidedColor(bool doubleSided)
 	H_AUTO_OGL(CDriverGL3_enableVertexProgramDoubleSidedColor);
 
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		// change mode (not cached because supposed to be rare)
-		if(doubleSided)
-			glEnable (GL_VERTEX_PROGRAM_TWO_SIDE_NV);
-		else
-			glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_NV);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		// change mode (not cached because supposed to be rare)
 		if(doubleSided)
@@ -1914,7 +1730,7 @@ bool CDriverGL3::supportVertexProgramDoubleSidedColor() const
 {
 	H_AUTO_OGL(CDriverGL3_supportVertexProgramDoubleSidedColor)
 	// currently only supported by NV_VERTEX_PROGRAM && ARB_VERTEX_PROGRAM
-	return _Extensions.NVVertexProgram || _Extensions.ARBVertexProgram;
+	return _Extensions.ARBVertexProgram;
 }
 
 #ifdef NL_STATIC

@@ -862,49 +862,6 @@ void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 
 
 // ***************************************************************************
-void		CDriverGL3::toggleGlArraysForNVVertexProgram()
-{
-	H_AUTO_OGL(CDriverGL3_toggleGlArraysForNVVertexProgram)
-	// If change of setup type, must disable olds.
-	//=======================
-
-	// If last was a VertexProgram setup, and now it is a standard GL array setup.
-	if( _LastSetupGLArrayVertexProgram && !isVertexProgramEnabled () )
-	{
-
-		// Disable all VertexAttribs.
-		for (uint value=0; value<CVertexBuffer::NumValue; value++)
-		{
-			// Index
-			uint glIndex=GLVertexAttribIndex[value];
-			_DriverGLStates.enableVertexAttribArray(glIndex, false);
-		}
-		_DriverGLStates.enableColorArray(false);
-		_DriverGLStates.enableSecondaryColorArray(false);
-
-		// no more a vertex program setup.
-		_LastSetupGLArrayVertexProgram= false;
-	}
-
-	// If last was a standard GL array setup, and now it is a VertexProgram setup.
-	if( !_LastSetupGLArrayVertexProgram && isVertexProgramEnabled () )
-	{
-		// Disable all standards ptrs.
-		_DriverGLStates.enableVertexArray(false);
-		_DriverGLStates.enableNormalArray(false);
-		_DriverGLStates.enableColorArray(false);
-		for(uint i=0; i<inlGetNumTextStages(); i++)
-		{
-			_DriverGLStates.clientActiveTextureARB(i);
-			_DriverGLStates.enableTexCoordArray(false);
-		}
-
-		// now, vertex program setup.
-		_LastSetupGLArrayVertexProgram= true;
-	}
-}
-
-// ***************************************************************************
 void		CDriverGL3::toggleGlArraysForARBVertexProgram()
 {
 	H_AUTO_OGL(CDriverGL3_toggleGlArraysForARBVertexProgram)
@@ -1019,94 +976,6 @@ void		CDriverGL3::toggleGlArraysForEXTVertexShader()
 		// now, vertex program setup.
 		_LastSetupGLArrayVertexProgram= true;
 	}
-}
-
-// ***************************************************************************
-void		CDriverGL3::setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb)
-{
-	H_AUTO_OGL(CDriverGL3_setupGlArraysForNVVertexProgram)
-	uint16	flags= vb.VertexFormat;
-
-	_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
-
-	// For each value
-	for (uint value=0; value<CVertexBuffer::NumValue; value++)
-	{
-		//nldebug("3D:   value = %d", value);
-		// Flag
-		uint16 flag=1<<value;
-
-		// Type
-		CVertexBuffer::TType type=vb.Type[value];
-
-		// Index
-		uint glIndex=GLVertexAttribIndex[value];
-
-		// Not setuped value and used
-		if (flags & flag)
-		{
-			/* OpenGL Driver Bug with VertexProgram, UChar4 type, and VertexArrayRange.
-				Don't work and lead to very poor performance (1/10) (VAR is "disabled").
-			*/
-			// Test if can use glColorPointer() / glSecondaryColorPointerEXT() instead.
-			if( (glIndex==3 || glIndex==4) )
-			{
-				if( type == CVertexBuffer::UChar4 )
-				{
-					// Must disable VertexAttrib array.
-					_DriverGLStates.enableVertexAttribArray(glIndex, false);
-
-					// Active this value, with standard gl calls
-					if(glIndex==3)
-					{
-						// Primary color
-						_DriverGLStates.enableColorArray(true);
-						glColorPointer(4,GL_UNSIGNED_BYTE, vb.VertexSize, vb.ValuePtr[value]);
-					}
-					else
-					{
-						// Secondary color
-						_DriverGLStates.enableSecondaryColorArray(true);
-						nglSecondaryColorPointerEXT(4, GL_UNSIGNED_BYTE, vb.VertexSize, vb.ValuePtr[value]);
-					}
-				}
-				else
-				{
-					// Can use normal VertexAttribArray.
-					// Disable first standard Color Array.
-					if(glIndex==3)
-						_DriverGLStates.enableColorArray(false);
-					else
-						_DriverGLStates.enableSecondaryColorArray(false);
-
-					// Active this value
-					_DriverGLStates.enableVertexAttribArray(glIndex, true);
-					nglVertexAttribPointerNV (glIndex, NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-				}
-			}
-			// Else normal case, can't do anything for other values with UChar4....
-			else
-			{
-				// Active this value
-				_DriverGLStates.enableVertexAttribArray(glIndex, true);
-				nglVertexAttribPointerNV (glIndex, NumCoordinatesType[type], GLType[type], vb.VertexSize, vb.ValuePtr[value]);
-			}
-		}
-		else
-		{
-			_DriverGLStates.enableVertexAttribArray(glIndex, false);
-			/* OpenGL Driver Bug with VertexProgram, UChar4 type, and VertexArrayRange.
-				Must also disable colorArray in standard gl calls.
-			*/
-			if(glIndex==3)
-				_DriverGLStates.enableColorArray(false);
-			else if(glIndex==4)
-				_DriverGLStates.enableSecondaryColorArray(false);
-		}
-	}
-
-	_DriverGLStates.bindARBVertexBuffer(0);
-
 }
 
 // tells for each vertex argument if it must be normalized when it is an integral type
@@ -1293,21 +1162,7 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CDriverGL3_setupGlArrays)
 
-	// Standard case (NVVertexProgram or no vertex program case)
-	if (_Extensions.NVVertexProgram)
-	{
-		toggleGlArraysForNVVertexProgram();
-		// Use a vertex program ?
-		if (!isVertexProgramEnabled ())
-		{
-			setupGlArraysStd(vb);
-		}
-		else
-		{
-			setupGlArraysForNVVertexProgram(vb);
-		}
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		toggleGlArraysForARBVertexProgram();
 		// Use a vertex program ?

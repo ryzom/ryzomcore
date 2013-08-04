@@ -1170,10 +1170,8 @@ private:
 
 	/// Tools fct used by setupGLArrays
 	void			setupGlArraysStd(CVertexBufferInfo &vb);
-	void			setupGlArraysForNVVertexProgram(CVertexBufferInfo &vb);
 	void			setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb);
 	void			setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb);
-	void			toggleGlArraysForNVVertexProgram();
 	void			toggleGlArraysForARBVertexProgram();
 	void			toggleGlArraysForEXTVertexShader();
 
@@ -1272,7 +1270,7 @@ private:
 	// @{
 
 	bool			isVertexProgramSupported () const;
-	bool			isVertexProgramEmulated () const;
+	bool			isVertexProgramEmulated () const{ return false; }
 	bool			activeVertexProgram (CVertexProgram *program);
 	void			setConstant (uint index, float, float, float, float);
 	void			setConstant (uint index, double, double, double, double);
@@ -1292,7 +1290,6 @@ private:
 
 	/// \name Vertex program implementation
 	// @{
-		bool activeNVVertexProgram (CVertexProgram *program);
 		bool activeARBVertexProgram (CVertexProgram *program);
 		bool activeEXTVertexShader (CVertexProgram *program);
 	//@}
