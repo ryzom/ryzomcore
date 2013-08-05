@@ -38,47 +38,52 @@ class Pagination{
             $max = 'limit ' .($this->current- 1) * $page_rows .',' .$page_rows; 
             
             //This is your query again, the same one... the only difference is we add $max into it
-            $data = $dbl->executeWithoutParams($query . $max); 
+            $data = $db->executeWithoutParams($query . " " . $max); 
             
             $this->element_array = Array();
             //This is where we put the results in a resultArray to be sent to smarty
             while($row = $data->fetch(PDO::FETCH_ASSOC)){
                 $element = new $resultClass();
-                $element.set($row);
+                $element->set($row);
                 $this->element_array[] = $element;
             }
         }
     }
     
     
-    function getLast(){
+    public function getLast(){
         return $this->last;
     }
     
     
-    function getElements(){
+    public function getElements(){
         return $this->element_array;
     }
     
     
-    function getPagination($nrOfLinks){
+    public function getLinks($nrOfLinks){
         $pageLinks = Array();
+        $pageLinks[] = 1;
+        //if amount of showable links is greater than the amount of pages: show all!
         if ($this->last <= $nrOfLinks){
-            for($var = 1; $var <= $this->last; $var++){
+            for($var = 2; $var <= $this->last; $var++){
                 $pageLinks[] = $var;
             }
         }else{
-            $pageLinks[] = 1;
-            $offset = (ceil($nrOfLinks/2)-1);
+            $offset = ($nrOfLinks-3)/2 ;
+            print "<font color='purple'>offset:" . $offset . "</font>";
             $startpoint = $this->current - $offset;
             $endpoint =  $this->current + $offset;
+            print "<font color='blue'>startpointX:" . $startpoint . "</font>";
             if($startpoint < 2){
                 $startpoint = 2;
-                $endpoint = $startpoint + $nrOfLinks - 2;
-            }else if($endpoint > $this->last){
-                $endpoint = $this->last;
-                $startpoint = $this->last - $nrOfLinks -2;
+                $endpoint = $startpoint + $nrOfLinks - 3;
+            }else if($endpoint > $this->last-1){
+                $endpoint = $this->last-1;
+                $startpoint = $endpoint - ($nrOfLinks -3);
             }
+            print "<font color='blue'>startpoint:" . $startpoint . "</font>";
+            print "<font color='orange'>endpoint:" . $endpoint . "</font>";
             for($var = $startpoint; $var <= $endpoint; $var++){
                 $pageLinks[] = $var;
             }
