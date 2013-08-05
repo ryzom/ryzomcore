@@ -223,7 +223,7 @@
 		    <ul class="dropdown-menu">
 			<li class="divider"></li>
 			{if isset($isMod) and $isMod eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>{/if}
-			<li><a href="index.php?page=createticket&user_id={$target_id}">Send Other Ticket</a></li>
+			<li><a href="index.php?page=createticket&user_id={$ticket_author}">Send Other Ticket</a></li>
 			<li class="divider"></li>
 		    </ul>
 		</div>

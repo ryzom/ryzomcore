@@ -12,7 +12,25 @@ function show_queue(){
             $user_id = $_SESSION['ticket_user']->getTUserId();
             $queueArray = array();           
             $queue_handler = new  Ticket_Queue_handler();
-                                
+            
+            //Pagination Base Links
+            $result['pagination_base_link'] = "index.php?page=show_queue&get=".$result['queue_view'] ;
+            
+            if(isset($_GET['get']) && ($_GET['get'] == "create") && isset($_GET['userid']) && isset($_GET['groupid']) && isset($_GET['what']) && isset($_GET['how']) && isset($_GET['who'])){
+                $userid = filter_var($_GET['userid'], FILTER_SANITIZE_NUMBER_INT);
+                $groupid = filter_var($_GET['groupid'], FILTER_SANITIZE_NUMBER_INT);
+                $what = filter_var($_GET['what'], FILTER_SANITIZE_STRING);
+                $how = filter_var($_GET['how'], FILTER_SANITIZE_STRING);
+                $who = filter_var($_GET['who'], FILTER_SANITIZE_STRING);
+                $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
+                $result['pagination_base_link'] = "index.php?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+                $result['prev_created_userid'] = $userid;
+                $result['prev_created_groupid'] = $groupid;
+                $result['prev_created_what'] = $what;
+                $result['prev_created_how'] = $how;
+                $result['prev_created_who'] = $who;
+            }
+            
             //if an action is set
             if(isset($_POST['action'])){
                 switch($_POST['action']){
@@ -32,19 +50,29 @@ function show_queue(){
                         $what = filter_var($_POST['what'], FILTER_SANITIZE_STRING);
                         $how = filter_var($_POST['how'], FILTER_SANITIZE_STRING);
                         $who = filter_var($_POST['who'], FILTER_SANITIZE_STRING);
-                        $result['ACTION_RESULT'] = $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
-                        if ($result['ACTION_RESULT'] != "ERROR"){
-                           $queueArray = $result['ACTION_RESULT'];
-                        }
+                        $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
+                        $result['pagination_base_link'] = "index.php?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+                        $result['prev_created_userid'] = $userid;
+                        $result['prev_created_groupid'] = $groupid;
+                        $result['prev_created_what'] = $what;
+                        $result['prev_created_how'] = $how;
+                        $result['prev_created_who'] = $who;
+                        
+                        
+                        
+                        
                         break;
                     
                 }
             }
+          
+            $queueArray = $queue_handler->getTickets($result['queue_view'], $user_id);
             
-            //if we didn't make a queue ourselves, then use the one specified by the get param
-            if( ! (isset($_POST['action']) && $_POST['action'] == "create_queue") ){
-                $queueArray = $queue_handler->getTickets($result['queue_view'], $user_id);
-            }
+            //pagination
+            $result['links'] = $queue_handler->getPagination()->getLinks(5);
+            $result['lastPage'] = $queue_handler->getPagination()->getLast();
+            $result['currentPage'] = $queue_handler->getPagination()->getCurrent();
+            
             
             //if queue_view is a valid parameter value
             if ($queueArray != "ERROR"){

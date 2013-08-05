@@ -3,31 +3,37 @@
 class Ticket_Queue_Handler{
     
     private $pagination;
+    private $queue;
+    
+    function __construct() {
+        $this->queue = new Ticket_Queue();
+    }
     
     public function getTickets($input, $user_id){
      
-            $queue = new Ticket_Queue();
-
             switch ($input){
                 case "all":
-                    $queue->loadAllTickets();
+                    $this->queue->loadAllTickets();
                     break;
                 case "all_open":
-                    $queue->loadAllOpenTickets();
+                    $this->queue->loadAllOpenTickets();
                     break;
                 case "archive":
-                    $queue->loadAllClosedTickets();
+                    $this->queue->loadAllClosedTickets();
                     break;
                 case "not_assigned":
-                    $queue->loadAllNotAssignedTickets();
+                    $this->queue->loadAllNotAssignedTickets();
                     break;
                 case "todo":
-                    $queue->loadToDoTickets($user_id);
+                    $this->queue->loadToDoTickets($user_id);
+                    break;
+                case "create":
+                    //set these with the createQueue function proceding the getTickets function
                     break;
                 default:
                     return "ERROR";
             }
-            $this->pagination = new Pagination($queue->getQuery(),"lib",10,"Ticket",$queue->getParams());
+            $this->pagination = new Pagination($this->queue->getQuery(),"lib",2,"Ticket",$this->queue->getParams());
             foreach( $this->pagination->getElements() as $element ){
                 $catInstance = new Ticket_Category();
                 $catInstance->load_With_TCategoryId($element->getTicket_Category());
@@ -37,15 +43,16 @@ class Ticket_Queue_Handler{
                 $userInstance->load_With_TUserId($element->getAuthor());
                 $element->setAuthor($userInstance);
             }
-            return $this->pagination->getElements();
-            
-            
+            return $this->pagination->getElements();    
             
     }
     
-    public static function CreateQueue($userid, $groupid, $what, $how, $who){
-        $queue = new Ticket_Queue();
-        $queue->createQueue($userid, $groupid, $what, $how, $who);
-        return $queue->getTickets();
+    public function getPagination(){
+        return $this->pagination;
     }
+    
+    public function createQueue($userid, $groupid, $what, $how, $who){     
+        $this->queue->createQueue($userid, $groupid, $what, $how, $who);
+    }
+    
 }

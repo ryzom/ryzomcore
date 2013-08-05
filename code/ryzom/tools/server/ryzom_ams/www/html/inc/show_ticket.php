@@ -44,6 +44,7 @@ function show_ticket(){
             $result['ticket_title'] = $entire_ticket['ticket_obj']->getTitle();
             $result['ticket_timestamp'] = $entire_ticket['ticket_obj']->getTimestamp();
             $result['ticket_status'] = $entire_ticket['ticket_obj']->getStatus();
+            $result['ticket_author'] = $entire_ticket['ticket_obj']->getAuthor();
             $result['ticket_prioritytext'] = $entire_ticket['ticket_obj']->getPriorityText();
             $result['ticket_priorities'] = Ticket::getPriorityArray();
             $result['ticket_priority'] = $entire_ticket['ticket_obj']->getPriority();

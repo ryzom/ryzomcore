@@ -13,35 +13,35 @@
                 <legend>Tickets</legend>
 		
 		<div class="alert alert-info">
-		    <form id="create_queue" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
+		    <form id="create_queue" class="form-vertical" method="post" action="index.php?page=show_queue&get=create" style="margin:0px 0px 0px;">
 		    Show
 		    <select style="width: 136px;" name="what">
-			<option value="all">all</option>
-			<option value="waiting_for_support">waiting for support</option>
-			<option value="waiting_for_users">waiting for user</option>
-			<option value="closed">closed</option>
+			<option value="all" {if $prev_created_what eq "all"}selected="selected"{/if}>all</option>
+			<option value="waiting_for_support" {if $prev_created_what eq "waiting_for_support"}selected="selected"{/if}>waiting for support</option>
+			<option value="waiting_for_users" {if $prev_created_what eq "waiting_for_users"}selected="selected"{/if}>waiting for user</option>
+			<option value="closed" {if $prev_created_what eq "closed"}selected="selected"{/if}>closed</option>
 		    </select>
 		    tickets
 		    <select style="width: 110px;" name="how">
-			<option value="assigned">assigned</option>
-			<option value="not_assigned">not assigned</option>
+			<option value="assigned" {if $prev_created_how eq "assigned"}selected="selected"{/if}>assigned</option>
+			<option value="not_assigned" {if $prev_created_how eq "not_assigned"}selected="selected"{/if}>not assigned</option>
 		    </select>
 		    to
 		    <select style="width: 140px;" name="who" onchange="aimedforwhochanged(this.value);">
-			<option value="user">user</option>
-			<option value="support_group">support group</option>
+			<option value="user" {if $prev_created_who eq "user"}selected="selected"{/if}>user</option>
+			<option value="support_group" {if $prev_created_who eq "support_group"}selected="selected"{/if}>support group</option>
 		    </select>
-		    <span id="userList" style="display:inline;">
+		    <span id="userList" {if $prev_created_who eq "user"}style="display:inline;"{else if $prev_created_who eq "support_group"}style="display:none;"{else}style="display:inline;"{/if}>
 		    <select style="width: 140px;" name="userid">
 			{foreach from=$teamlist item=member}
-			    <option value="{$member.tUserId}" {if $user_id eq $member.tUserId}selected="selected"{/if}>{$member.name}</option>
+			    <option value="{$member.tUserId}" {if $prev_created_userid eq $member.tUserId}selected="selected"{else if $user_id eq $member.tUserId}selected="selected"{/if}>{$member.name}</option>
 			{/foreach}
 		    </select>
 		    </span>
-		    <span id="supportGroupList" style="display:none;">
+		    <span id="supportGroupList" {if $prev_created_who eq "user"}style="display:none;"{else if $prev_created_who eq "support_group"}style="display:inline;"{else}style="display:none;"{/if}>
 		    <select style="width: 140px;" name="groupid">
 			{foreach from=$grouplist item=group}
-			    <option value="{$group.sGroupId}">{$group.name}</option>
+			    <option value="{$group.sGroupId}" {if $prev_created_groupid eq $group.sGroupId}selected="selected"{/if}>{$group.name}</option>
 			{/foreach}
 		    </select>
 		    </span>
@@ -125,7 +125,17 @@
 			  {/foreach}
 	  
 		    </tbody>
-	    </table>            
+	    </table>
+		
+	    <div style="width: 300px; margin:0px auto;">
+		<ul class="pagination">
+		    <li><a href="{$pagination_base_link}&pagenum=1">&laquo;</a></li>
+		    {foreach from=$links item=link}
+		    <li {if $link == $currentPage}class="active"{/if}><a href="{$pagination_base_link}&pagenum={$link}">{$link}</a></li>
+		    {/foreach}
+		    <li><a href="{$pagination_base_link}&pagenum={$lastPage}">&raquo;</a></li>
+		</ul>
+	    </div>
 	    </div>
 	</div>
     </div><!--/span-->

@@ -40,7 +40,6 @@ class Ticket_Queue{
     }
     
     public function createQueue($userid, $groupid, $what, $how, $who){
-        $dbl = new DBLayer("lib");
         
         if($who == "user"){
             $selectfrom = "SELECT * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User";
@@ -76,9 +75,8 @@ class Ticket_Queue{
         }else if ($who == "support_group"){
             $params = array('id' => $groupid);
         }  
-        $statement = $dbl->execute($query, $params);
-        $rows = $statement->fetchAll();
-        $this->setQueue($rows);
+        $this->query = $query;
+        $this->params = $params;
     }    
     
     public function getQuery(){

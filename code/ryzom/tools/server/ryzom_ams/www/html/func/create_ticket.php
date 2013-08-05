@@ -24,6 +24,8 @@ function create_ticket(){
                     
                 }catch (PDOException $e) {
                     //ERROR: LIB DB is not online!
+                    print_r($e);
+                    exit;
                     header("Location: index.php");
                     exit;
                 }
@@ -37,7 +39,7 @@ function create_ticket(){
     
         }else{
             //ERROR: The form was not filled in correclty
-            header("Location: index.php?page=settings");
+            header("Location: index.php?page=create_ticket");
             exit;
         }    
     }else{
