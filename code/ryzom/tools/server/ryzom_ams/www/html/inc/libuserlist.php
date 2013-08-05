@@ -4,19 +4,12 @@
 function libuserlist(){
     if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
         
-        $pagination = new Pagination("SELECT * FROM ams_querycache","lib",1,"Querycache");
-        print "<font color='red'>1 elements / page </font><br/>";
-        print "<font color='green'>7 links max</font>";
-        print "<br/><br/>";
-        print "last page=";
-        print_r($pagination->getLast());
-        print "<br/>----------------------------------------------<br/>";
-        print "elements:";
-        print_r($pagination->getElements());
-        print "<br/>----------------------------------------------<br/>";
-        print "links:";
-        print_r($pagination->getLinks(7));
-        exit;
+        $pagination = new Pagination("SELECT * FROM ams_querycache","lib",2,"Querycache");
+        $pageResult['liblist'] = Gui_Elements::make_table($pagination->getElements() , Array("getSID","getType"), Array("id","type"));
+        $pageResult['links'] = $pagination->getLinks(5);
+        $pageResult['lastPage'] = $pagination->getLast();
+        $pageResult['currentPage'] = $pagination->getCurrent();
+        
         
         //check if shard is online
         try{

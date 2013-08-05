@@ -46,7 +46,7 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<table class="table table-striped table-bordered bootstrap-datatable datatable">
+						<table class="table table-striped table-bordered">
 						  <thead>
 							  <tr>
 								  <th>{$id}</th>
@@ -64,7 +64,16 @@
 							{/foreach}
 					
 						  </tbody>
-					  </table>            
+					  </table>
+						<div style="width: 300px; margin:0px auto;">
+							<ul class="pagination">
+								<li><a href="index.php?page=sync&pagenum=1">&laquo;</a></li>
+								{foreach from=$links item=link}
+								<li {if $link == $currentPage}class="active"{/if}><a href="index.php?page=sync&pagenum={$link}">{$link}</a></li>
+								{/foreach}
+								<li><a href="index.php?page=sync&pagenum={$lastPage}">&raquo;</a></li>
+							</ul>
+						</div>
 					</div>
 				</div><!--/span-->
 			

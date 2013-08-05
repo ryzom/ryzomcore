@@ -5,6 +5,7 @@ class Pagination{
     private $element_array;
     private $last;
     private $current;
+    private $amountOfRows;
     
     function __construct($query,$db,$nrDisplayed,$resultClass) {
         if (!(isset($_GET['pagenum']))){ 
@@ -16,7 +17,7 @@ class Pagination{
         //Here we count the number of results
         $db = new DBLayer($db);
         $rows = $db->executeWithoutParams($query)->rowCount();
-        
+        $this->amountOfRows = $rows;
         //the array hat will contain all users
 
         if($rows > 0){
@@ -55,39 +56,41 @@ class Pagination{
         return $this->last;
     }
     
+    public function getCurrent(){
+        return $this->current;
+    }
     
     public function getElements(){
         return $this->element_array;
     }
     
+    public function getAmountOfRows(){
+        return $this->amountOfRows;
+    }
     
     public function getLinks($nrOfLinks){
         $pageLinks = Array();
-        $pageLinks[] = 1;
         //if amount of showable links is greater than the amount of pages: show all!
         if ($this->last <= $nrOfLinks){
-            for($var = 2; $var <= $this->last; $var++){
+            for($var = 1; $var <= $this->last; $var++){
                 $pageLinks[] = $var;
             }
         }else{
-            $offset = ($nrOfLinks-3)/2 ;
-            print "<font color='purple'>offset:" . $offset . "</font>";
+            $offset = ($nrOfLinks-1)/2 ;
             $startpoint = $this->current - $offset;
             $endpoint =  $this->current + $offset;
-            print "<font color='blue'>startpointX:" . $startpoint . "</font>";
-            if($startpoint < 2){
-                $startpoint = 2;
-                $endpoint = $startpoint + $nrOfLinks - 3;
-            }else if($endpoint > $this->last-1){
-                $endpoint = $this->last-1;
-                $startpoint = $endpoint - ($nrOfLinks -3);
+            
+            if($startpoint < 1){
+                $startpoint = 1;
+                $endpoint = $startpoint + $nrOfLinks - 1;
+            }else if($endpoint > $this->last){
+                $endpoint = $this->last;
+                $startpoint = $endpoint - ($nrOfLinks -1);
             }
-            print "<font color='blue'>startpoint:" . $startpoint . "</font>";
-            print "<font color='orange'>endpoint:" . $endpoint . "</font>";
+           
             for($var = $startpoint; $var <= $endpoint; $var++){
                 $pageLinks[] = $var;
             }
-            $pageLinks[] = $this->last;
         }
         return $pageLinks;
     }
