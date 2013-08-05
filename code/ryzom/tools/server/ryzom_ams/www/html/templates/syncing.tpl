@@ -3,7 +3,7 @@
 	<div class="row-fluid">
 		<div class="box span12">
 			<div class="box-header well">
-				<h2><i class="icon-info-sign"></i>{$libuserlist_title}</h2>
+				<h2><i class="icon-info-sign"></i>{$syncing_title}</h2>
 				<div class="box-icon">
 					<a href="#" class="btn btn-round" onclick="javascript:show_help('intro');return false;"><i class="icon-info-sign"></i></a>
 					<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
@@ -13,10 +13,10 @@
 			</div>
 			<div class="box-content">
 				<center>
-				<p>{$libuserlist_info}</p>
+				<p>{$syncing_info}</p>
 				{if $shard eq "online"}
 				<div class="alert alert-success">
-					<i class="icon-refresh icon-white"></i>{$shard_online}<a href="#" id="sync" onclick="sync()">{$libuserlist_sync}</a>
+					<i class="icon-refresh icon-white"></i>{$shard_online}<a href="#" id="sync" onclick="sync()">{$syncing_sync}</a>
 					<script>
 						function sync(){
 							xmlhttp=new XMLHttpRequest();
@@ -46,7 +46,7 @@
 						</div>
 					</div>
 					<div class="box-content">
-						<table class="table table-striped table-bordered bootstrap-datatable datatable">
+						<table class="table table-striped table-bordered">
 						  <thead>
 							  <tr>
 								  <th>{$id}</th>
@@ -64,7 +64,16 @@
 							{/foreach}
 					
 						  </tbody>
-					  </table>            
+					  </table>
+						<div style="width: 300px; margin:0px auto;">
+							<ul class="pagination">
+								<li><a href="index.php?page=syncing&pagenum=1">&laquo;</a></li>
+								{foreach from=$links item=link}
+								<li {if $link == $currentPage}class="active"{/if}><a href="index.php?page=syncing&pagenum={$link}">{$link}</a></li>
+								{/foreach}
+								<li><a href="index.php?page=syncing&pagenum={$lastPage}">&raquo;</a></li>
+							</ul>
+						</div>
 					</div>
 				</div><!--/span-->
 			

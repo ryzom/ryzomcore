@@ -9,7 +9,7 @@
         <li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=show_queue&get=todo"><i class="icon-th-list"></i><span class="hidden-tablet"> Queues</span></a></li>
         <li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=sgroup_list"><i class="icon-briefcase"></i><span class="hidden-tablet"> Support Groups</span></a></li>
         <li class="nav-header hidden-tablet">Actions</li>
-        <li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=libuserlist"><i class="icon-th-list"></i><span class="hidden-tablet"> Syncing</span></a></li>
+        <li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=syncing"><i class="icon-th-list"></i><span class="hidden-tablet"> Syncing</span></a></li>
         <li style="margin-left: -2px;"><a href="?page=logout"><i class="icon-off"></i><span class="hidden-tablet"> Logout </span></a></li>
 {/block}
 
