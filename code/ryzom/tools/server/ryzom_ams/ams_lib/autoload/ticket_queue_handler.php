@@ -2,11 +2,12 @@
 
 class Ticket_Queue_Handler{
     
-    public static function getTickets($input, $user_id){
+    private $pagination;
+    
+    public function getTickets($input, $user_id){
      
             $queue = new Ticket_Queue();
-             
-            
+
             switch ($input){
                 case "all":
                     $queue->loadAllTickets();
@@ -26,8 +27,20 @@ class Ticket_Queue_Handler{
                 default:
                     return "ERROR";
             }
-   
-            return $queue->getTickets();
+            $this->pagination = new Pagination($queue->getQuery(),"lib",10,"Ticket",$queue->getParams());
+            foreach( $this->pagination->getElements() as $element ){
+                $catInstance = new Ticket_Category();
+                $catInstance->load_With_TCategoryId($element->getTicket_Category());
+                $element->setTicket_Category($catInstance);
+                
+                $userInstance = new Ticket_User();
+                $userInstance->load_With_TUserId($element->getAuthor());
+                $element->setAuthor($userInstance);
+            }
+            return $this->pagination->getElements();
+            
+            
+            
     }
     
     public static function CreateQueue($userid, $groupid, $what, $how, $who){

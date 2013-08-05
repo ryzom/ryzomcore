@@ -213,13 +213,14 @@ class Ticket{
 
 
     //Set ticket object
-    public function set($t,$s,$q,$t_c,$a,$p){
-        $this->title = $t;
-        $this->status = $s;
-        $this->queue = $q;
-        $this->ticket_category = $t_c;
-        $this->author = $a;
-        $this->priority = $p;
+    public function set($values){
+        $this->tId = $values['TId'];
+        $this->title = $values['Title'];
+        $this->status = $values['Status'];
+        $this->queue = $values['Queue'];
+        $this->ticket_category = $values['Ticket_Category'];
+        $this->author = $values['Author'];
+        $this->priority = $values['Priority'];
     }
     
     //create ticket by writing private data to DB.

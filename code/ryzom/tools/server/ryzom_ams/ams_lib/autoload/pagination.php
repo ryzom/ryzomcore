@@ -7,7 +7,7 @@ class Pagination{
     private $current;
     private $amountOfRows;
     
-    function __construct($query,$db,$nrDisplayed,$resultClass) {
+    function __construct($query, $db, $nrDisplayed, $resultClass, $params = array()) {
         if (!(isset($_GET['pagenum']))){ 
             $this->current= 1; 
         }else{
@@ -16,7 +16,7 @@ class Pagination{
         
         //Here we count the number of results
         $db = new DBLayer($db);
-        $rows = $db->executeWithoutParams($query)->rowCount();
+        $rows = $db->execute($query, $params)->rowCount();
         $this->amountOfRows = $rows;
         //the array hat will contain all users
 
@@ -39,7 +39,7 @@ class Pagination{
             $max = 'limit ' .($this->current- 1) * $page_rows .',' .$page_rows; 
             
             //This is your query again, the same one... the only difference is we add $max into it
-            $data = $db->executeWithoutParams($query . " " . $max); 
+            $data = $db->execute($query . " " . $max, $params); 
             
             $this->element_array = Array();
             //This is where we put the results in a resultArray to be sent to smarty
