@@ -1,6 +1,28 @@
 <?php
 
 class WebUsers extends Users{
+
+       private $uId;
+       private $login;
+       private $email;
+       private $firstname;
+       private $lastname;
+       private $gender;
+       private $country;
+       
+       function __construct($UId = 0) {
+              $this->uId = $UId;
+       }
+       
+       public function set($values){
+              $this->uId = $values['UId'];
+              $this->login = $values['Login'];
+              $this->email = $values['Email'];
+              $this->firstname = $values['FirstName'];
+              $this->lastname = $values['LastName'];
+              $this->gender = $values['Gender'];
+              $this->country = $values['Country'];
+       }
     
      /**
      * Function checkUserNameExists
@@ -46,33 +68,43 @@ class WebUsers extends Users{
         }	
      }
      
-    public function getId($username){
-        $dbw = new DBLayer("web");
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
-        $row = $statement->fetch();
-        return $row['UId'];
+    public static function getId($username){
+       $dbw = new DBLayer("web");  
+       $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
+       $row = $statement->fetch();
+       return $row['UId'];
     }
     
-    public function getUsername($id){
-        $dbw = new DBLayer("web");
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
-        $row = $statement->fetch();
-        return $row['Login'];
+    public function getUsername(){
+       $dbw = new DBLayer("web");
+       if(! isset($this->login) || $this->login == ""){
+             $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+             $row = $statement->fetch();
+             $this->set($row);
+       }
+       return $this->login;
     }
     
-    public function getEmail($id){
-        $dbw = new DBLayer("web");
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
-        $row = $statement->fetch();
-        return $row['Email'];
+    public function getEmail(){
+       $dbw = new DBLayer("web");
+       if(! isset($this->email) || $this->email == ""){
+              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+              $row = $statement->fetch();
+              $this->set($row);
+       }
+       return $this->email;
     }
     
-    public function getInfo($id){
-        $dbw = new DBLayer("web");
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
-        $row = $statement->fetch();
-        $result = Array('FirstName' => $row['FirstName'], 'LastName' => $row['LastName'], 'Gender' => $row['Gender'], 'Country' => $row['Country']);
-        return $result;
+    public function getInfo(){
+       $dbw = new DBLayer("web");
+       if(! (isset($this->firstname) && isset($this->lastname) && isset($this->gender) && isset($this->country) ) ||
+          $this->firstname == "" || $this->lastname == "" || $this->gender == "" || $this->country == ""){
+             $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+             $row = $statement->fetch();
+             $this->set($row);
+       }
+       $result = Array('FirstName' => $this->firstname, 'LastName' => $this->lastname, 'Gender' => $this->gender, 'Country' => $this->country);
+       return $result;
     }
     
     public function isLoggedIn(){

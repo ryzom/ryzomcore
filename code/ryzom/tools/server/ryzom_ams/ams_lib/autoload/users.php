@@ -7,7 +7,7 @@ class Users{
      * @takes $array with username,password and email
      * @return string Info: Returns a string, if input data is valid then "success" is returned, else an array with errors
      */ 
-     public static function check_Register($values){
+     public function check_Register($values){
           // check values
           if ( isset( $values["Username"] ) and isset( $values["Password"] ) and isset( $values["ConfirmPass"] ) and isset( $values["Email"] ) ){
                $user = Users::checkUser( $values["Username"] );
@@ -156,7 +156,7 @@ class Users{
      * @takes $email
      * @return
      */
-     public static function checkEmail( $email )
+     public function checkEmail( $email )
     {
          if ( isset( $email ) ){
                if ( !Users::validEmail( $email ) ){

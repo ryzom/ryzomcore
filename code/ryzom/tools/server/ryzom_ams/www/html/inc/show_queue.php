@@ -46,8 +46,10 @@ function show_queue(){
                 $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText","getAssigned","getForwardedGroupName","getForwardedGroupId"), Array("tId","title","timestamp","authorExtern","category","status","statusText","assigned","forwardedGroupName","forwardedGroupId"));
                 $i = 0;
                 foreach( $result['tickets'] as $ticket){
-                    $result['tickets'][$i]['author'] = WebUsers::getUsername($ticket['authorExtern']);
-                    $result['tickets'][$i]['assignedText'] = WebUsers::getUsername($ticket['assigned']);
+                    $web_author = new WebUsers($ticket['authorExtern']);
+                    $result['tickets'][$i]['author'] = $web_author->getUsername();
+                    $web_assigned = new WebUsers($ticket['assigned']);
+                    $result['tickets'][$i]['assignedText'] = $web_assigned->getUsername();
                     $result['tickets'][$i]['timestamp_elapsed'] = Gui_Elements::time_elapsed_string($ticket['timestamp']);
                     $i++;
                 }
@@ -58,7 +60,8 @@ function show_queue(){
                 $result['teamlist'] = Gui_Elements::make_table(Ticket_User::getModsAndAdmins(), Array("getTUserId","getExternId"), Array("tUserId","externId"));
                 $i = 0;
                 foreach( $result['teamlist'] as $member){
-                    $result['teamlist'][$i]['name'] = WebUsers::getUsername($member['externId']);
+                    $web_teammember = new Webusers($member['externId']);
+                    $result['teamlist'][$i]['name'] = $web_teammember->getUsername();
                     $i++;
                 }
                 return $result;

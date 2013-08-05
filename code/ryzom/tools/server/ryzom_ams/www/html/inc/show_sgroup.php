@@ -26,7 +26,8 @@ function show_sgroup(){
                 $result['userlist'] = Gui_Elements::make_table(Support_Group::getAllUsersOfSupportGroup($result['target_id']), Array("getTUserId","getPermission","getExternId"), Array("tUserId","permission","externId"));
                 $i = 0;
                 foreach( $result['userlist'] as $user){
-                    $result['userlist'][$i]['name'] = WebUsers::getUsername($user['externId']);
+                    $webuser = new Webusers($user['externId']);
+                    $result['userlist'][$i]['name'] = $webuser->getUsername();
                     $i++;
                 }
                 return $result;

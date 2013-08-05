@@ -50,12 +50,14 @@ function show_ticket(){
             $result['ticket_statustext'] = $entire_ticket['ticket_obj']->getStatusText();
             $result['ticket_lastupdate'] = Gui_Elements::time_elapsed_string(Ticket::getLatestReply($result['ticket_id'])->getTimestamp());
             $result['ticket_category'] = $entire_ticket['ticket_obj']->getCategoryName();
-            $result['ticket_assignedToText'] = WebUsers::getUsername(Assigned::getUserAssignedToTicket($result['ticket_tId']));
+            $webUser = new WebUsers(Assigned::getUserAssignedToTicket($result['ticket_tId']));
+            $result['ticket_assignedToText'] = $webUser->getUsername();
             $result['ticket_assignedTo'] = Assigned::getUserAssignedToTicket($result['ticket_tId']);
             $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp","getAuthor()->getExternId","getAuthor()->getPermission","getHidden"), Array("tReplyId","replyContent","timestamp","authorExtern","permission","hidden"));
             $i = 0;
             foreach( $result['ticket_replies'] as $reply){
-                $result['ticket_replies'][$i]['author'] = WebUsers::getUsername($reply['authorExtern']);
+                $webReplyUser = new WebUsers($reply['authorExtern']);
+                $result['ticket_replies'][$i]['author'] = $webReplyUser->getUsername();
                 $i++;
             }
             if(Ticket_User::isMod($_SESSION['ticket_user'])){

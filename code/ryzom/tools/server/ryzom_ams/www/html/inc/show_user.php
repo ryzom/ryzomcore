@@ -11,9 +11,10 @@ function show_user(){
             }else{
                 $result['target_id'] = $_SESSION['id']; 
             }
-            $result['target_name'] = WebUsers::getUsername( $result['target_id']);
-            $result['mail'] = WebUsers::getEmail( $result['target_id']);
-            $info = WebUsers::getInfo($result['target_id']);
+            $webUser = new WebUsers($result['target_id']);
+            $result['target_name'] = $webUser->getUsername();
+            $result['mail'] = $webUser->getEmail();
+            $info = $webUser->getInfo();
             $result['firstName'] = $info['FirstName'];
             $result['lastName'] = $info['LastName'];
             $result['country'] = $info['Country'];

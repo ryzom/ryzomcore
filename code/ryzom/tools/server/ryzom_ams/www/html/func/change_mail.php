@@ -13,10 +13,11 @@ function change_mail(){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
-                        $target_username = WebUsers::getUsername($_POST['target_id']);
+			$webUser = new WebUsers($_POST['target_id']);
+                        $target_username = $webUser->getUsername();
                     }
                     
-                    $webUser = new WebUsers();
+                    $webUser = new WebUsers($_POST['target_id']);
 		    $reply = $webUser->checkEmail($_POST['NewEmail']);
 		    
 		    global $SITEBASE;

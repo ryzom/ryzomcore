@@ -13,12 +13,13 @@ function change_info(){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
-                        $target_username = WebUsers::getUsername($_POST['target_id']);
+			$webUser = new WebUsers($_POST['target_id']);
+                        $target_username = $webUser->getUsername();
                     }
                     
-                    $webUser = new WebUsers();
+                    $webUser = new WebUsers($_POST['target_id']);
                     //use current info to check for changes
-                    $current_info = $webUser->getInfo($_POST['target_id']);
+                    $current_info = $webUser->getInfo();
 		    
        
 		    $current_info['FirstName'] = filter_var($current_info['FirstName'], FILTER_SANITIZE_STRING);

@@ -3,7 +3,7 @@
 function add_user(){
      
      $params = Array('Username' =>  $_POST["Username"], 'Password' =>  $_POST["Password"], 'ConfirmPass' =>  $_POST["ConfirmPass"], 'Email' =>  $_POST["Email"]);
-     $webUser = new WebUsers;
+     $webUser = new WebUsers();
      $result = $webUser->check_Register($params);
 
      // if all are good then create user

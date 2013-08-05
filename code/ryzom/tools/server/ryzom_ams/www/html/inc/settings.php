@@ -10,17 +10,19 @@ function settings(){
                     header("Location: index.php?page=error");
                     exit;
                 }else{
-                    $result = WebUsers::getInfo($_GET['id']);
+                    $webUser = new Webusers($_GET['id']);
+                    $result = $webUser->getInfo();
                     if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_GET['id']!= $_SESSION['id'])){
                         $result['changesOther'] = "TRUE";
                     }
                     $result['target_id'] = $_GET['id'];
-                    $result['current_mail'] = WebUsers::getEmail($_GET['id']);
+                    $result['current_mail'] = $webUser->getEmail();
                 }
             }else{
-                $result = WebUsers::getInfo($_SESSION['id']);
+                $webUser = new Webusers($_SESSION['id']);
+                $result = $webUser->getInfo();
                 $result['target_id'] = $_SESSION['id'];
-                $result['current_mail'] = WebUsers::getEmail($_SESSION['id']);
+                $result['current_mail'] = $webUser->getEmail();
                 
                 //Sanitize Data
                 $result['current_mail'] = filter_var($result['current_mail'], FILTER_SANITIZE_EMAIL);

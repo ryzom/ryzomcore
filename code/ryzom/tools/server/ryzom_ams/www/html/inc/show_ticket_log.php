@@ -15,11 +15,13 @@ function show_ticket_log(){
             $result['ticket_logs'] = Gui_Elements::make_table($ticket_logs, Array("getTLogId","getTimestamp","getAuthor()->getExternId","getAction","getArgument()"), Array("tLogId","timestamp","authorExtern","action","argument"));
             $i = 0;
             foreach( $result['ticket_logs'] as $log){
-                $author = WebUsers::getUsername($log['authorExtern']);
+                $webUser = new WebUsers($log['authorExtern']);
+                $author = $webUser->getUsername();
                 $result['ticket_logs'][$i]['author'] = $author;
                 $query_backpart  = "";
                 if($log['action'] == 2){
-                    $query_backpart =  WebUsers::getUsername($log['argument']);
+                    $webUser2 = new WebUsers($log['argument']);
+                    $query_backpart =  $webUser2->getUsername();
                 }else if($log['action'] == 4){
                     $query_backpart = "<a href='index.php?page=show_reply&id=" . $log['argument'] . "'>ID#" . $log['argument'] . "</a>";
                 }else if($log['action'] == 5){

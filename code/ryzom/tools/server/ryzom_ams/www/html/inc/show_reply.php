@@ -25,7 +25,8 @@ function show_reply(){
             $result['author_permission'] = $author->getPermission();
             $result['reply_content'] = $content->getContent();
             $result['author'] = $author->getExternId();
-            $result['authorName'] = WebUsers::getUsername($author->getExternId());
+            $webUser = new WebUsers($author->getExternId());
+            $result['authorName'] = $webUser->getUsername();
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isMod'] = "TRUE";
             }
