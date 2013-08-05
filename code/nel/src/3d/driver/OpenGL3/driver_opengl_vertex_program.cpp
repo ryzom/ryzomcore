@@ -41,11 +41,7 @@ CVertexProgamDrvInfosGL3::CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrv
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
 
-	// Extension must exist
-	nlassert ( drv->_Extensions.ARBVertexProgram );
-
 	nglGenProgramsARB(1, &ID);
-
 }
 
 //=================================================================================================

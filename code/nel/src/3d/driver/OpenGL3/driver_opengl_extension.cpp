@@ -895,13 +895,18 @@ static bool	setupPackedDepthStencil(const char	*glext)
 void	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
-	// OpenGL 1.2 ??
+
 	const char	*nglVersion= (const char *)glGetString (GL_VERSION);
 	sint	a=0, b=0;
-	// 1.2***  ???
-	sscanf(nglVersion, "%d.%d", &a, &b);
-	ext.Version1_2= (a==1 && b>=2) || (a>=2);
 
+	sscanf(nglVersion, "%d.%d", &a, &b);
+	if( ( a < 3 ) || ( ( a == 3 ) && ( b < 3 ) ) )
+	{
+		nlinfo( "OpenGL version is less than 3.3!" );
+		nlinfo( "Version string: %s",nglVersion );
+		nlassert( false );
+	}
+	
 	// Extensions.
 	const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
 	GLint	ntext;

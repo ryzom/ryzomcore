@@ -518,11 +518,8 @@ static inline GLenum	translateWrapToGl(ITexture::TWrapMode mode, const CGlExtens
 	H_AUTO_OGL(translateWrapToGl)
 	if(mode== ITexture::Repeat)
 		return GL_REPEAT;
-
-	if(extensions.Version1_2)
-		return GL_CLAMP_TO_EDGE;
-
-	return GL_CLAMP;
+	
+	return GL_CLAMP_TO_EDGE;
 }
 
 // ***************************************************************************

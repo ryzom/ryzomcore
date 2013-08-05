@@ -33,8 +33,7 @@ namespace NLDRIVERGL3 {
 /// The extensions used by NL3D.
 struct	CGlExtensions
 {
-	// Is this driver a correct OpenGL 1.2 driver?
-	bool	Version1_2;
+	std::string GLVersion;
 
 	// Required Extensions.
 	bool	ARBMultiTexture;
@@ -83,7 +82,6 @@ struct	CGlExtensions
 	// ARB Extensions
 	bool	ARBTextureCompression;
 	bool	ARBFragmentProgram;
-	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
 
@@ -98,7 +96,6 @@ public:
 	CGlExtensions()
 	{
 		// Fill all false by default.
-		Version1_2= false;
 		ARBMultiTexture= false;
 		NbTextureStages= 1;
 		EXTTextureEnvCombine= false;
@@ -122,7 +119,6 @@ public:
 		ATIEnvMapBumpMap = false;
 		ATIFragmentShader = false;
 		ARBFragmentProgram = false;
-		ARBVertexProgram = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
@@ -144,7 +140,7 @@ public:
 	std::string toString()
 	{
 		std::string result = "OpenGL version ";
-		result += Version1_2 ? "1.2 or above(*)" : "1.1 or below";
+		result += GLVersion;
 		result += "; Available extensions:";
 
 		result += "\n  Texturing: ";
@@ -169,7 +165,7 @@ public:
 		result += NVTextureShader ? "NVTextureShader " : "";
 		result += ATIFragmentShader ? "ATIFragmentShader " : "";
 		result += ARBFragmentProgram ? "ARBFragmentProgram " : "";
-		result += ARBVertexProgram ? "ARBVertexProgram " : "";
+		result += "ARBVertexProgram";
 
 		result += "\n  Misc:      ";
 		result += EXTVertexWeighting ? "EXTVertexWeighting " : "";
