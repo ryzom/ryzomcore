@@ -120,6 +120,7 @@ NLMISC::CRGBA	CEntityCL::_PvpAllyColor;
 NLMISC::CRGBA	CEntityCL::_GMTitleColor[CHARACTER_TITLE::EndGmTitle - CHARACTER_TITLE::BeginGmTitle + 1];
 uint8 CEntityCL::_InvalidGMTitleCode = 0xFF;
 NLMISC::CRefPtr<CCDBNodeLeaf> CEntityCL::_OpacityMinNodeLeaf;
+NLMISC::CRefPtr<CCDBNodeLeaf> CEntityCL::_ShowReticleLeaf;
 
 
 // Context help
@@ -2646,7 +2647,7 @@ void CEntityCL::updateMissionTarget()
 			for (j=0; j<MAX_NUM_MISSION_TARGETS; j++)
 			{
 				// Get the db prop
-				CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:MISSIONS:"+toString(i)+":TARGET"+toString(j)+":TITLE", false);
+				CCDBNodeLeaf *prop = EntitiesMngr.getMissionTargetTitleDB(i, j); // NLGUI::CDBManager::getInstance()->getDbProp("SERVER:MISSIONS:"+toString(i)+":TARGET"+toString(j)+":TITLE", false);
 				if (prop)
 				{
 					_MissionTarget = _NameId == (uint32)prop->getValue32();
@@ -2846,8 +2847,8 @@ void CEntityCL::updateIsInTeam ()
 	for (uint i=0; i<MaxNumPeopleInTeam; i++)
 	{
 		// Get the db prop
-		CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:UID", i), false);
-		CCDBNodeLeaf *presentProp = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:NAME", i), false);
+		CCDBNodeLeaf *uidProp = EntitiesMngr.getGroupMemberUidDB(i);
+		CCDBNodeLeaf *presentProp = EntitiesMngr.getGroupMemberNameDB(i);
 		// If same Entity uid than the one in the Database, ok the entity is in the Player TEAM!!
 		if (uidProp && uidProp->getValue32() == (sint32)dataSetId() &&
 			presentProp && presentProp->getValueBool() )
@@ -2876,9 +2877,9 @@ void CEntityCL::updateIsUserAnimal ()
 	for (uint i=0; i<MAX_INVENTORY_ANIMAL; i++)
 	{
 		// Get the db prop
-		CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i), false);
-		CCDBNodeLeaf *statusProp  = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS", i), false);
-		CCDBNodeLeaf *typeProp  = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", i), false);
+		CCDBNodeLeaf *uidProp = EntitiesMngr.getBeastUidDB(i);
+		CCDBNodeLeaf *statusProp  = EntitiesMngr.getBeastStatusDB(i);
+		CCDBNodeLeaf *typeProp  = EntitiesMngr.getBeastTypeDB(i);
 		// I must have the same Id, and the animal entry must be ok.
 		if(uidProp && statusProp && typeProp && uidProp->getValue32() == (sint32)dataSetId() &&
 			ANIMAL_STATUS::isSpawned((ANIMAL_STATUS::EAnimalStatus)(statusProp->getValue32()) ))
@@ -3041,7 +3042,9 @@ void	CEntityCL::updateVisiblePostPos(const NLMISC::TTime &/* currentTimeInMs */,
 
 	bool bShowReticle = true;
 
-	CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_RETICLE");
+	CCDBNodeLeaf *node = (CCDBNodeLeaf *)_ShowReticleLeaf ? &*_ShowReticleLeaf
+		: &*(_ShowReticleLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_RETICLE", false));
+
 	if (node)
 	{
 		bShowReticle = node->getValueBool();

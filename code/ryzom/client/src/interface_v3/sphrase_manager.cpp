@@ -941,6 +941,8 @@ void				CSPhraseManager::reset()
 	CSkillManager	*pSM= CSkillManager::getInstance();
 	pBM->removeBrickLearnedCallback(&_ProgressionUpdate);
 	pSM->removeSkillChangeCallback(&_ProgressionUpdate);
+
+	_TotalMalusEquipLeaf = NULL;
 }
 
 // ***************************************************************************
@@ -1122,7 +1124,9 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 		// **** Compute Phrase Elements from phrase
 		// get the current action malus (0-100)
 		uint32	totalActionMalus= 0;
-		CCDBNodeLeaf	*actMalus= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false);
+		CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
+			: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
+		
 		// root brick must not be Power or aura, because Action malus don't apply to them
 		// (ie leave 0 ActionMalus for Aura or Powers
 		if(actMalus && !rootBrick->isSpecialPower())
@@ -1652,7 +1656,8 @@ float				CSPhraseManager::getPhraseSumBrickProp(const CSPhraseCom &phrase, uint 
 				else if(propId==CSBrickManager::getInstance()->StaPropId && brick->Properties[j].PropId==CSBrickManager::getInstance()->StaWeightFactorId)
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					uint32 weight = (uint32) NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEFAULT_WEIGHT_HANDS")->getValue32() / 10; // weight must be in dg here
+					if (!_ServerUserDefaultWeightHandsLeaf) _ServerUserDefaultWeightHandsLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEFAULT_WEIGHT_HANDS");
+					uint32 weight = (uint32)(&*_ServerUserDefaultWeightHandsLeaf)->getValue32() / 10; // weight must be in dg here
 					CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestionsets:hands:handr"));
 					if (ctrlSheet)
 					{
@@ -4501,7 +4506,8 @@ uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
 	uint32	totalActionMalus= 0;
-	CCDBNodeLeaf	*actMalus= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false);
+	CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
+		: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
 	// root brick must not be Power or aura, because Action malus don't apply to them
 	// (ie leave 0 ActionMalus for Aura or Powers
 	if (!phrase.Bricks.empty())

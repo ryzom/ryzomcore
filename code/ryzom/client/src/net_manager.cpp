@@ -3861,22 +3861,28 @@ bool CNetManager::update()
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (im)
 		{
-			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false);
+			CCDBNodeLeaf *node = m_PingLeaf ? &*m_PingLeaf
+				: &*(m_PingLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false));
 			if (node)
 				node->setValue32(getPing());
-			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UPLOAD", false);
+			node = m_UploadLeaf ? &*m_UploadLeaf
+				: &*(m_UploadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UPLOAD", false));
 			if (node)
 				node->setValue32((sint32)(getMeanUpload()*1024.f/8.f));
-			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DOWNLOAD", false);
+			node = m_DownloadLeaf ? &*m_DownloadLeaf
+				: &*(m_DownloadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DOWNLOAD", false));
 			if (node)
 				node->setValue32((sint32)(getMeanDownload()*1024.f/8.f));
-			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PACKETLOST", false);
+			node = m_PacketLostLeaf ? &* m_PacketLostLeaf
+				: &*(m_PacketLostLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PACKETLOST", false));
 			if (node)
 				node->setValue32((sint32)getMeanPacketLoss());
-			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SERVERSTATE", false);
+			node = m_ServerStateLeaf ? &*m_ServerStateLeaf
+				: &*(m_ServerStateLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SERVERSTATE", false));
 			if (node)
 				node->setValue32((sint32)getConnectionState());
-			node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false);
+			node = m_ConnectionQualityLeaf ? &*m_ConnectionQualityLeaf
+				: &*(m_ConnectionQualityLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false));
 			if (node)
 				node->setValue32((sint32)getConnectionQuality());
 		}
