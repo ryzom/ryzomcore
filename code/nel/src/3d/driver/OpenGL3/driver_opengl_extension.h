@@ -437,18 +437,48 @@ extern PFNGLDELETEPROGRAMPROC							nglDeleteProgram;
 extern PFNGLDELETESHADERPROC							nglDeleteShader;
 extern PFNGLDETACHSHADERPROC							nglDetachShader;
 extern PFNGLDISABLEVERTEXATTRIBARRAYPROC				nglDisableVertexAttribArray;
-extern PFNGLENABLEVERTEXATTRIBARRAYPROC				nglEnableVertexAttribArray;
+extern PFNGLENABLEVERTEXATTRIBARRAYPROC					nglEnableVertexAttribArray;
 extern PFNGLGETPROGRAMIVPROC							nglGetProgramiv;
 extern PFNGLGETPROGRAMINFOLOGPROC						nglGetProgramInfoLog;
-extern PFNGLGETSHADERIVPROC							nglGetShaderiv;
+extern PFNGLGETSHADERIVPROC								nglGetShaderiv;
 extern PFNGLGETSHADERINFOLOGPROC						nglGetShaderInfoLog;
 extern PFNGLGETUNIFORMLOCATIONPROC						nglGetUniformLocation;
 extern PFNGLISPROGRAMPROC								nglIsProgram;
 extern PFNGLISSHADERPROC								nglIsShader;
-extern PFNGLLINKPROGRAMPROC							nglLinkProgram;
+extern PFNGLLINKPROGRAMPROC								nglLinkProgram;
 extern PFNGLSHADERSOURCEPROC							nglShaderSource;
 extern PFNGLUSEPROGRAMPROC								nglUseProgram;
-extern PFNGLVALIDATEPROGRAMPROC						nglValidateProgram;
+extern PFNGLVALIDATEPROGRAMPROC							nglValidateProgram;
+
+extern PFNGLUNIFORM1FPROC								nglUniform1f;
+extern PFNGLUNIFORM2FPROC								nglUniform2f;
+extern PFNGLUNIFORM3FPROC								nglUniform3f;
+extern PFNGLUNIFORM4FPROC								nglUniform4f;
+extern PFNGLUNIFORM1IPROC								nglUniform1i;
+extern PFNGLUNIFORM2IPROC								nglUniform2i;
+extern PFNGLUNIFORM3IPROC								nglUniform3i;
+extern PFNGLUNIFORM4IPROC								nglUniform4i;
+extern PFNGLUNIFORM1FVPROC								nglUniform1fv;
+extern PFNGLUNIFORM2FVPROC								nglUniform2fv;
+extern PFNGLUNIFORM3FVPROC								nglUniform3fv;
+extern PFNGLUNIFORM4FVPROC								nglUniform4fv;
+extern PFNGLUNIFORM1IVPROC								nglUniform1iv;
+extern PFNGLUNIFORM2IVPROC								nglUniform2iv;
+extern PFNGLUNIFORM3IVPROC								nglUniform3iv;
+extern PFNGLUNIFORM4IVPROC								nglUniform4iv;
+extern PFNGLUNIFORMMATRIX2FVPROC						nglUniformMatrix2fv;
+extern PFNGLUNIFORMMATRIX3FVPROC						nglUniformMatrix3fv;
+extern PFNGLUNIFORMMATRIX4FVPROC						nglUniformMatrix4fv;
+extern PFNGLVERTEXATTRIBPOINTERPROC						nglVertexAttribPointer;
+
+extern PFNGLUNIFORM1UIPROC								nglUniform1ui;
+extern PFNGLUNIFORM2UIPROC								nglUniform2ui;
+extern PFNGLUNIFORM3UIPROC								nglUniform3ui;
+extern PFNGLUNIFORM4UIPROC								nglUniform4ui;
+extern PFNGLUNIFORM1UIVPROC								nglUniform1uiv;
+extern PFNGLUNIFORM2UIVPROC								nglUniform2uiv;
+extern PFNGLUNIFORM3UIVPROC								nglUniform3uiv;
+extern PFNGLUNIFORM4UIVPROC								nglUniform4uiv;
 
 // GL_NV_occlusion_query
 //==================================
