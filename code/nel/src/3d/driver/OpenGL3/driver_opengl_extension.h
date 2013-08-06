@@ -428,6 +428,28 @@ extern PFNGLGETVERTEXATTRIBIVARBPROC nglGetVertexAttribivARB;
 extern PFNGLGETVERTEXATTRIBPOINTERVARBPROC nglGetVertexAttribPointervARB;
 extern PFNGLISPROGRAMARBPROC nglIsProgramARB;
 
+// GL_ARB_Shader_Object
+extern PFNGLATTACHSHADERPROC							nglAttachShader;
+extern PFNGLCOMPILESHADERPROC							nglCompileShader;
+extern PFNGLCREATEPROGRAMPROC							nglCreateProgram;
+extern PFNGLCREATESHADERPROC							nglCreateShader;
+extern PFNGLDELETEPROGRAMPROC							nglDeleteProgram;
+extern PFNGLDELETESHADERPROC							nglDeleteShader;
+extern PFNGLDETACHSHADERPROC							nglDetachShader;
+extern PFNGLDISABLEVERTEXATTRIBARRAYPROC				nglDisableVertexAttribArray;
+extern PFNGLENABLEVERTEXATTRIBARRAYPROC				nglEnableVertexAttribArray;
+extern PFNGLGETPROGRAMIVPROC							nglGetProgramiv;
+extern PFNGLGETPROGRAMINFOLOGPROC						nglGetProgramInfoLog;
+extern PFNGLGETSHADERIVPROC							nglGetShaderiv;
+extern PFNGLGETSHADERINFOLOGPROC						nglGetShaderInfoLog;
+extern PFNGLGETUNIFORMLOCATIONPROC						nglGetUniformLocation;
+extern PFNGLISPROGRAMPROC								nglIsProgram;
+extern PFNGLISSHADERPROC								nglIsShader;
+extern PFNGLLINKPROGRAMPROC							nglLinkProgram;
+extern PFNGLSHADERSOURCEPROC							nglShaderSource;
+extern PFNGLUSEPROGRAMPROC								nglUseProgram;
+extern PFNGLVALIDATEPROGRAMPROC						nglValidateProgram;
+
 // GL_NV_occlusion_query
 //==================================
 extern NEL_PFNGLGENOCCLUSIONQUERIESNVPROC nglGenOcclusionQueriesNV;

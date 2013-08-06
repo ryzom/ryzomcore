@@ -258,6 +258,29 @@ PFNGLGETVERTEXATTRIBIVARBPROC					nglGetVertexAttribivARB;
 PFNGLGETVERTEXATTRIBPOINTERVARBPROC				nglGetVertexAttribPointervARB;
 PFNGLISPROGRAMARBPROC							nglIsProgramARB;
 
+// GL_ARB_Shader_Object
+PFNGLATTACHSHADERPROC							nglAttachShader;
+PFNGLCOMPILESHADERPROC							nglCompileShader;
+PFNGLCREATEPROGRAMPROC							nglCreateProgram;
+PFNGLCREATESHADERPROC							nglCreateShader;
+PFNGLDELETEPROGRAMPROC							nglDeleteProgram;
+PFNGLDELETESHADERPROC							nglDeleteShader;
+PFNGLDETACHSHADERPROC							nglDetachShader;
+PFNGLDISABLEVERTEXATTRIBARRAYPROC				nglDisableVertexAttribArray;
+PFNGLENABLEVERTEXATTRIBARRAYPROC				nglEnableVertexAttribArray;
+PFNGLGETPROGRAMIVPROC							nglGetProgramiv;
+PFNGLGETPROGRAMINFOLOGPROC						nglGetProgramInfoLog;
+PFNGLGETSHADERIVPROC							nglGetShaderiv;
+PFNGLGETSHADERINFOLOGPROC						nglGetShaderInfoLog;
+PFNGLGETUNIFORMLOCATIONPROC						nglGetUniformLocation;
+PFNGLISPROGRAMPROC								nglIsProgram;
+PFNGLISSHADERPROC								nglIsShader;
+PFNGLLINKPROGRAMPROC							nglLinkProgram;
+PFNGLSHADERSOURCEPROC							nglShaderSource;
+PFNGLUSEPROGRAMPROC								nglUseProgram;
+PFNGLVALIDATEPROGRAMPROC						nglValidateProgram;
+
+
 // NV_occlusion_query
 NEL_PFNGLGENOCCLUSIONQUERIESNVPROC				nglGenOcclusionQueriesNV;
 NEL_PFNGLDELETEOCCLUSIONQUERIESNVPROC			nglDeleteOcclusionQueriesNV;
@@ -864,6 +887,32 @@ static bool	setupPackedDepthStencil(const char	*glext)
 	return true;
 }
 
+static bool setupGLSL()
+{
+	CHECK_ADDRESS( PFNGLATTACHSHADERPROC, glAttachShader );
+	CHECK_ADDRESS( PFNGLCOMPILESHADERPROC, glCompileShader );
+	CHECK_ADDRESS( PFNGLCREATEPROGRAMPROC, glCreateProgram );
+	CHECK_ADDRESS( PFNGLCREATESHADERPROC, glCreateShader );
+	CHECK_ADDRESS( PFNGLDELETEPROGRAMPROC, glDeleteProgram );
+	CHECK_ADDRESS( PFNGLDELETESHADERPROC, glDeleteShader );
+	CHECK_ADDRESS( PFNGLDETACHSHADERPROC, glDetachShader );
+	CHECK_ADDRESS( PFNGLDISABLEVERTEXATTRIBARRAYPROC, glDisableVertexAttribArray );
+	CHECK_ADDRESS( PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray );
+	CHECK_ADDRESS( PFNGLGETPROGRAMIVPROC, glGetProgramiv );
+	CHECK_ADDRESS( PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog );
+	CHECK_ADDRESS( PFNGLGETSHADERIVPROC, glGetShaderiv );
+	CHECK_ADDRESS( PFNGLGETSHADERINFOLOGPROC, glGetShaderInfoLog );
+	CHECK_ADDRESS( PFNGLGETUNIFORMLOCATIONPROC, glGetUniformLocation );
+	CHECK_ADDRESS( PFNGLISPROGRAMPROC, glIsProgram );
+	CHECK_ADDRESS( PFNGLISSHADERPROC, glIsShader );
+	CHECK_ADDRESS( PFNGLLINKPROGRAMPROC, glLinkProgram );
+	CHECK_ADDRESS( PFNGLSHADERSOURCEPROC, glShaderSource );
+	CHECK_ADDRESS( PFNGLUSEPROGRAMPROC, glUseProgram );
+	CHECK_ADDRESS( PFNGLVALIDATEPROGRAMPROC, glValidateProgram );
+	
+	return true;
+}
+
 // ***************************************************************************
 // Extension Check.
 void	registerGlExtensions(CGlExtensions &ext)
@@ -988,6 +1037,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.ATIXTextureEnvRoute= setupATIXTextureEnvRoute(glext);
 
 	setupARBVertexBufferObject(glext);
+
+	if( !setupGLSL() )
+	{
+		nlinfo( "Failed to set up GLSL related calls!" );
+		nlassert( false );
+	}
 }
 
 
