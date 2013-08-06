@@ -33,7 +33,7 @@ class Ticket_Queue_Handler{
                 default:
                     return "ERROR";
             }
-            $this->pagination = new Pagination($this->queue->getQuery(),"lib",2,"Ticket",$this->queue->getParams());
+            $this->pagination = new Pagination($this->queue->getQuery(),"lib",10,"Ticket",$this->queue->getParams());
             foreach( $this->pagination->getElements() as $element ){
                 $catInstance = new Ticket_Category();
                 $catInstance->load_With_TCategoryId($element->getTicket_Category());
