@@ -256,8 +256,6 @@ CDriverGL3::CDriverGL3()
 
 	_SumTextureMemoryUsed = false;
 
-	_NVTextureShaderEnabled = false;
-
 	_AnisotropicFilter = 0.f;
 
 	// Compute the Flag which say if one texture has been changed in CMaterial.
@@ -422,11 +420,6 @@ bool CDriverGL3::setupDisplay()
 	// Default delta camera pos.
 	_PZBCameraPos= CVector::Null;
 
-	if (_NVTextureShaderEnabled)
-	{
-		enableNVTextureShader(false);
-	}
-
 	// Be always in EXTSeparateSpecularColor.
 	if(_Extensions.EXTSeparateSpecularColor)
 	{
@@ -493,8 +486,6 @@ bool CDriverGL3::setupDisplay()
 		glTexGenfv(GL_Q, GL_OBJECT_PLANE, params);
 		glTexGenfv(GL_Q, GL_EYE_PLANE, params);
 	}
-
-	resetTextureShaders();
 
 	_PPLExponent = 1.f;
 	_PPLightDiffuseColor = NLMISC::CRGBA::White;
@@ -584,34 +575,6 @@ void CDriverGL3::disableHardwareTextureShader()
 }
 
 // --------------------------------------------------
-void CDriverGL3::resetTextureShaders()
-{
-	H_AUTO_OGL(CDriverGL3_resetTextureShaders);
-
-	if (_Extensions.NVTextureShader)
-	{
-		glEnable(GL_TEXTURE_SHADER_NV);
-
-		for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
-		{
-			_DriverGLStates.activeTextureARB(stage);
-			if (stage != 0)
-			{
-				glTexEnvi(GL_TEXTURE_SHADER_NV, GL_PREVIOUS_TEXTURE_INPUT_NV, GL_TEXTURE0_ARB + stage - 1);
-			}
-
-			glTexEnvi(GL_TEXTURE_SHADER_NV, GL_SHADER_OPERATION_NV, GL_NONE);
-
-			_CurrentTexAddrMode[stage] = GL_NONE;
-		}
-
-		glDisable(GL_TEXTURE_SHADER_NV);
-
-		_NVTextureShaderEnabled = false;
-	}
-}
-
-// --------------------------------------------------
 bool CDriverGL3::isTextureExist(const ITexture&tex)
 {
 	H_AUTO_OGL(CDriverGL3_isTextureExist)
@@ -678,7 +641,6 @@ bool CDriverGL3::swapBuffers()
 
 	++ _SwapBufferCounter;
 	// Reset texture shaders
-	//resetTextureShaders();
 	activeVertexProgram(NULL);
 
 #ifdef NL_OS_WINDOWS
@@ -738,11 +700,6 @@ bool CDriverGL3::swapBuffers()
 	//===========================================================
 	// Same reasoning as textures :)
 	_DriverGLStates.forceDefaults(inlGetNumTextStages());
-	if (_NVTextureShaderEnabled)
-	{
-		glDisable(GL_TEXTURE_SHADER_NV);
-		_NVTextureShaderEnabled = false;
-	}
 
 	_CurrentMaterial= NULL;
 
@@ -1237,39 +1194,14 @@ uint32			CDriverGL3::getUsedTextureMemory() const
 
 
 // ***************************************************************************
-bool CDriverGL3::supportTextureShaders() const
-{
-	H_AUTO_OGL(CDriverGL3_supportTextureShaders)
-
-	// fully supported by NV_TEXTURE_SHADER
-	return _Extensions.NVTextureShader;
-}
-
-// ***************************************************************************
 bool CDriverGL3::isWaterShaderSupported() const
 {
 	H_AUTO_OGL(CDriverGL3_isWaterShaderSupported);
 
 	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
 
-	if (!_Extensions.NVTextureShader && !_Extensions.ATIFragmentShader && !_Extensions.ARBFragmentProgram) return false;
+	if ( !_Extensions.ATIFragmentShader && !_Extensions.ARBFragmentProgram) return false;
 	return true;
-}
-
-// ***************************************************************************
-bool CDriverGL3::isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const
-{
-	H_AUTO_OGL(CDriverGL3_isTextureAddrModeSupported)
-
-	if (_Extensions.NVTextureShader)
-	{
-		// all the given addessing mode are supported with this extension
-		return true;
-	}
-	else
-	{
-		return false;
-	}
 }
 
 // ***************************************************************************
@@ -1285,25 +1217,6 @@ void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const flo
 	glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
 }
 
-
-// ***************************************************************************
-void CDriverGL3::enableNVTextureShader(bool enabled)
-{
-	H_AUTO_OGL(CDriverGL3_enableNVTextureShader)
-
-	if (enabled != _NVTextureShaderEnabled)
-	{
-		if (enabled)
-		{
-			glEnable(GL_TEXTURE_SHADER_NV);
-		}
-		else
-		{
-			glDisable(GL_TEXTURE_SHADER_NV);
-		}
-		_NVTextureShaderEnabled = enabled;
-	}
-}
 
 // ***************************************************************************
 void CDriverGL3::checkForPerPixelLightingSupport()

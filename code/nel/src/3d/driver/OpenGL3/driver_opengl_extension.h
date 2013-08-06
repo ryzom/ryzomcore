@@ -46,7 +46,6 @@ struct	CGlExtensions
 	bool	EXTSeparateSpecularColor;
 	bool	NVTextureEnvCombine4;
 	bool	ARBTextureCubeMap;
-	bool	NVTextureShader;
 	bool	NVOcclusionQuery;
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
@@ -107,7 +106,6 @@ public:
 		ATITextureEnvCombine3= false;
 		ATIXTextureEnvRoute= false;
 		ARBTextureCubeMap= false;
-		NVTextureShader= false;
 		EXTSecondaryColor= false;
 		WGLARBPBuffer= false;
 		WGLARBPixelFormat= false;
@@ -162,7 +160,6 @@ public:
 		result += NLMISC::toString(NbTextureStages);
 
 		result += "\n  Programs:  ";
-		result += NVTextureShader ? "NVTextureShader " : "";
 		result += ATIFragmentShader ? "ATIFragmentShader " : "";
 		result += ARBFragmentProgram ? "ARBFragmentProgram " : "";
 		result += "ARBVertexProgram";

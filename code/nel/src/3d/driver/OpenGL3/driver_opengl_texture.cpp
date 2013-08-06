@@ -371,8 +371,7 @@ GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
 		case ITexture::Alpha: return GL_ALPHA8;
 		case ITexture::AlphaLuminance: return GL_LUMINANCE8_ALPHA8;
 		case ITexture::DsDt:
-			if (_Extensions.NVTextureShader) return GL_DSDT_NV;
-			else if (_Extensions.ATIEnvMapBumpMap || _Extensions.ATIFragmentShader)
+			if (_Extensions.ATIEnvMapBumpMap || _Extensions.ATIFragmentShader)
 			{
 				return GL_DU8DV8_ATI;
 			}

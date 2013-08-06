@@ -586,11 +586,11 @@ public:
 
 	/// \name texture addressing modes
 	// @{
-	virtual bool			supportTextureShaders() const;
+	virtual bool			supportTextureShaders() const{ return false; };
 
 	virtual bool			isWaterShaderSupported() const;
 
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const;
+	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const{ return false; };
 
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
 	// @}
@@ -930,14 +930,6 @@ private:
 	CTexEnvSpecial			_CurrentTexEnvSpecial[IDRV_MAT_MAXTEXTURES];
 	// Texture addressing mode
 	GLenum					_CurrentTexAddrMode[IDRV_MAT_MAXTEXTURES];
-	// Reset texture shaders to their initial state if they are used
-	void					resetTextureShaders();
-	/** set texture shaders from stage 0 to stage IDRV_MAT_MAXTEXTURES - 1
-	  * textures are needed to setup the right kind of shader (cubic or 2d texture)
-	  */
-	void					setTextureShaders(const uint8 *addressingModes, const NLMISC::CSmartPtr<ITexture> *textures);
-	// activation of texture shaders
-	bool					_NVTextureShaderEnabled;
 	// Which stages support EMBM
 	bool					_StageSupportEMBM[IDRV_MAT_MAXTEXTURES];
 	// Anisotropic filtering value
@@ -1028,12 +1020,6 @@ private:
 		H_AUTO_OGL(CDriverGL3_forceActivateTexEnvColor)
 		forceActivateTexEnvColor(stage, env.ConstantColor);
 	}
-
-
-	/// nv texture shaders. Should be used only if this caps is present!
-	void					enableNVTextureShader(bool enabled);
-	// check nv texture shader consistency
-	void			verifyNVTextureShaderConfig();
 
 	// Called by doRefreshRenderSetup(). set _LightSetupDirty to false
 	void					cleanLightSetup ();
@@ -1375,7 +1361,6 @@ private:
 
 			void   setupWaterPassR200(const CMaterial &mat);
 			void   setupWaterPassARB(const CMaterial &mat);
-			void   setupWaterPassNV20(const CMaterial &mat);
 	// @}
 
 

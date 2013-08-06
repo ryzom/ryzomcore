@@ -607,23 +607,6 @@ static bool	setupWGLARBPixelFormat (const char	*glext)
 #endif
 
 // *********************************
-static bool	setupNVTextureShader(const char	*glext)
-{
-	H_AUTO_OGL(setupNVTextureShader);
-
-// reenabled to allow bloom on mac, TODO: cleanly fix the water issue
-// i think this issue was mtp target related - is this the case in ryzom too?
-// #ifdef NL_OS_MAC
-// // Water doesn't render on GeForce 8600M GT (on MAC OS X) if this extension is enabled
-// 	return false;
-// #endif
-
-	CHECK_EXT("GL_NV_texture_shader");
-	return true;
-}
-
-
-// *********************************
 static bool	setupEXTBlendColor(const char	*glext)
 {
 	H_AUTO_OGL(setupEXTBlendColor);
@@ -969,7 +952,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Disable feature ???
 	if(!ext.DisableHardwareTextureShader)
 	{
-		ext.NVTextureShader = setupNVTextureShader(glext);
 		ext.ATIEnvMapBumpMap = setupATIEnvMapBumpMap(glext);
 		ext.ATIFragmentShader = setupATIFragmentShader(glext);
 		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);
@@ -977,7 +959,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	else
 	{
 		ext.ATIEnvMapBumpMap = false;
-		ext.NVTextureShader = false;
 		ext.ATIFragmentShader = false;
 		ext.ARBFragmentProgram = false;
 	}

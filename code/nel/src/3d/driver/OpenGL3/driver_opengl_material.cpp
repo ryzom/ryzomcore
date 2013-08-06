@@ -230,24 +230,6 @@ CMaterial::TShader	CDriverGL3::getSupportedShader(CMaterial::TShader shader)
 }
 
 // --------------------------------------------------
-void CDriverGL3::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<ITexture> *textures)
-{
-	H_AUTO_OGL(CDriverGL3_setTextureShaders)
-	GLenum glAddrMode;
-	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
-	{
-		convTexAddr(textures[stage], (CMaterial::TTexAddressingMode) addressingModes[stage], glAddrMode);
-
-		if (glAddrMode != _CurrentTexAddrMode[stage]) // addressing mode different from the one in the device?
-		{
-			_DriverGLStates.activeTextureARB(stage);
-			glTexEnvi(GL_TEXTURE_SHADER_NV, GL_SHADER_OPERATION_NV, glAddrMode);
-			_CurrentTexAddrMode[stage] = glAddrMode;
-		}
-	}
-}
-
-// --------------------------------------------------
 bool CDriverGL3::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL3_setupMaterial)
@@ -478,31 +460,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		{
 			// Restaure fog state to its current value
 			_DriverGLStates.enableFog(_FogEnabled);
-		}
-
-		// Texture shader part.
-		//=====================
-
-		if (_Extensions.NVTextureShader)
-		{
-			if (matShader == CMaterial::Normal)
-			{
-				// Texture addressing modes (support only via NVTextureShader for now)
-				//===================================================================
-				if ( mat.getFlags() & IDRV_MAT_TEX_ADDR )
-				{
-					enableNVTextureShader(true);
-					setTextureShaders(&mat._TexAddrMode[0], &mat._Textures[0]);
-				}
-				else
-				{
-					enableNVTextureShader(false);
-				}
-			}
-			else
-			{
-				enableNVTextureShader(false);
-			}
 		}
 
 		_CurrentMaterial=&mat;
@@ -2150,97 +2107,6 @@ static const uint8 WaterTexAddrMode[IDRV_MAT_MAXTEXTURES] =
 static const float IdentityTexMat[4] = { 1.f, 0.f, 0.f, 1.f };
 
 // ***************************************************************************
-void CDriverGL3::setupWaterPassNV20(const CMaterial &mat)
-{
-	H_AUTO_OGL(CDriverGL3_setupWaterPassNV20);
-
-	static bool setupDone = false;
-	static CMaterial::CTexEnv texEnvReplace;
-	static CMaterial::CTexEnv texEnvModulate;
-
-	if (!setupDone)
-	{
-		texEnvReplace.Env.OpRGB   = CMaterial::Replace;
-		texEnvReplace.Env.OpAlpha = CMaterial::Replace;
-		// use default setup for texenv modulate
-		setupDone = true;
-	}
-
-	// activate the textures & set the matrixs
-	ITexture *tex = mat.getTexture(0);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(0, tex);
-		_DriverGLStates.activeTextureARB(1);
-		if (tex->isBumpMap())
-		{
-			CTextureBump *tb = static_cast<CTextureBump *>(tex);
-			// set the matrix for the texture shader
-			float factor = tb->getNormalizationFactor();
-			float tsMatrix[4] = { 0.25f * factor, 0.f, 0.f, 0.25f * factor };
-			glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, tsMatrix);
-		}
-		else
-		{
-			glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, IdentityTexMat);
-		}
-	}
-	tex = mat.getTexture(1);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(1, tex);
-		_DriverGLStates.activeTextureARB(2);
-		if (tex->isBumpMap())
-		{
-			CTextureBump *tb = static_cast<CTextureBump *>(tex);
-			// set the matrix for the texture shader
-			float factor = tb->getNormalizationFactor();
-			float tsMatrix[4] = { factor, 0.f, 0.f, factor };
-			glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, tsMatrix);
-		}
-		else
-		{
-			glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, IdentityTexMat);
-		}
-	}
-	tex = mat.getTexture(2);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(2, tex);
-	}
-	tex = mat.getTexture(3);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(3, tex);
-	}
-	for (uint k = 4; k < inlGetNumTextStages(); ++k)
-	{
-		activateTexture(k, NULL);
-	}
-
-	// setup the texture shaders
-	enableNVTextureShader(true);
-	activateTexEnvMode(0, texEnvReplace);
-	activateTexEnvMode(1, texEnvReplace);
-	nlctassert(IDRV_MAT_MAXTEXTURES == 4); // if this value changes, may have to change the arrays WaterNoDiffuseTexAddrMode & WaterTexAddrMode
-	if (mat.getTexture(3) == NULL)
-	{
-		setTextureShaders(WaterNoDiffuseTexAddrMode, mat._Textures);
-		activateTexEnvMode(2, texEnvReplace);
-	}
-	else
-	{
-		setTextureShaders(WaterTexAddrMode, mat._Textures);
-		activateTexEnvMode(2, texEnvReplace);
-		activateTexEnvMode(3, texEnvModulate);
-	}
-}
-
-// ***************************************************************************
 void CDriverGL3::setupWaterPass(uint /* pass */)
 {
 	H_AUTO_OGL(CDriverGL3_setupWaterPass)
@@ -2248,11 +2114,7 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 	CMaterial &mat = *_CurrentMaterial;
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 
-	if (_Extensions.NVTextureShader)
-	{
-		setupWaterPassNV20(mat);
-	}
-	else if (ARBWaterShader[0])
+	if (ARBWaterShader[0])
 	{
 		setupWaterPassARB(mat);
 	}
@@ -2269,7 +2131,6 @@ void CDriverGL3::endWaterMultiPass()
 
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	// NB : as fragment shaders / programs bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
-	if (_Extensions.NVTextureShader) return;
 	if (ARBWaterShader[0])
 	{
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
