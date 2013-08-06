@@ -1227,13 +1227,8 @@ void CDriverGL3::checkForPerPixelLightingSupport()
 	// TODO : support for EnvCombine3
 	// TODO : support for less than 3 stages
 
-	_SupportPerPixelShaderNoSpec = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
-								   && _Extensions.ARBTextureCubeMap
-								   && _Extensions.NbTextureStages >= 3;
-
-	_SupportPerPixelShader = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
-							 && _Extensions.ARBTextureCubeMap
-							 && _Extensions.NbTextureStages >= 2;
+	_SupportPerPixelShaderNoSpec = _Extensions.ATITextureEnvCombine3 && _Extensions.ARBTextureCubeMap && _Extensions.NbTextureStages >= 3;
+	_SupportPerPixelShader = _Extensions.ATITextureEnvCombine3 && _Extensions.ARBTextureCubeMap && _Extensions.NbTextureStages >= 2;
 }
 
 // ***************************************************************************
@@ -1984,9 +1979,8 @@ bool CDriverGL3::supportCloudRenderSinglePass() const
 {
 	H_AUTO_OGL(CDriverGL3_supportCloudRenderSinglePass)
 
-	 //return _Extensions.NVTextureEnvCombine4 || (_Extensions.ATIXTextureEnvRoute && _Extensions.EXTTextureEnvCombine);
 	// there are slowdown for now with ati fragment shader... don't know why
-	return _Extensions.NVTextureEnvCombine4 || _Extensions.ATIFragmentShader;
+	return _Extensions.ATIFragmentShader;
 }
 
 // ***************************************************************************
@@ -2102,7 +2096,7 @@ bool CDriverGL3::supportMADOperator() const
 {
 	H_AUTO_OGL(CDriverGL3_supportMADOperator)
 
-	return _Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3;
+	return _Extensions.ATITextureEnvCombine3;
 }
 
 // ***************************************************************************

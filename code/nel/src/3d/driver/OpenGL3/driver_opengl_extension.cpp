@@ -472,15 +472,6 @@ static bool	setupEXTSeparateSpecularColor(const char	*glext)
 	return true;
 }
 
-
-// *********************************
-static bool	setupNVTextureEnvCombine4(const char	*glext)
-{
-	H_AUTO_OGL(setupNVTextureEnvCombine4);
-	CHECK_EXT("GL_NV_texture_env_combine4");
-	return true;
-}
-
 // *********************************
 static bool	setupATITextureEnvCombine3(const char	*glext)
 {
@@ -939,9 +930,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check EXTSeparateSpecularColor.
 	ext.EXTSeparateSpecularColor= setupEXTSeparateSpecularColor(glext);
-
-	// Check NVTextureEnvCombine4.
-	ext.NVTextureEnvCombine4= setupNVTextureEnvCombine4(glext);
 
 	// Check for cube mapping
 	ext.ARBTextureCubeMap = setupARBTextureCubeMap(glext);

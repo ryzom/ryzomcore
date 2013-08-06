@@ -1741,12 +1741,6 @@ void		CDriverGL3::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  
 	// "Normal drivers", setup EnvCombine.
 	if(_Extensions.EXTTextureEnvCombine)
 	{
-		// if Mad operator is used, special setup
-		if ((env.Env.OpAlpha == CMaterial::Mad || env.Env.OpRGB == CMaterial::Mad) && _Extensions.NVTextureEnvCombine4)
-		{
-			forceActivateTexEnvModeEnvCombine4(env);
-		}
-		else
 		{
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 			// RGB.

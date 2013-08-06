@@ -44,7 +44,6 @@ struct	CGlExtensions
 	bool	EXTTextureCompressionS3TC;
 	bool	EXTVertexWeighting;
 	bool	EXTSeparateSpecularColor;
-	bool	NVTextureEnvCombine4;
 	bool	ARBTextureCubeMap;
 	bool	NVOcclusionQuery;
 	bool	NVTextureRectangle;
@@ -102,7 +101,6 @@ public:
 		EXTTextureCompressionS3TC= false;
 		EXTVertexWeighting= false;
 		EXTSeparateSpecularColor= false;
-		NVTextureEnvCombine4= false;
 		ATITextureEnvCombine3= false;
 		ATIXTextureEnvRoute= false;
 		ARBTextureCubeMap= false;
@@ -146,7 +144,6 @@ public:
 		result += EXTTextureEnvCombine ? "EXTTextureEnvCombine(*) " : "";
 		result += ARBTextureCompression ? "ARBTextureCompression " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
-		result += NVTextureEnvCombine4 ? "NVTextureEnvCombine4 " : "";
 		result += ATITextureEnvCombine3 ? "ATITextureEnvCombine3 " : "";
 		result += ATIXTextureEnvRoute ? "ATITextureEnvRoute " : "";
 		result += ARBTextureCubeMap ? "ARBTextureCubeMap " : "";
