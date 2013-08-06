@@ -567,13 +567,6 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 	return false;
 }
 
-// ***************************************************************************
-void CDriverGL3::disableHardwareTextureShader()
-{
-	H_AUTO_OGL(CDriverGL3_disableHardwareTextureShader)
-	_Extensions.DisableHardwareTextureShader= true;
-}
-
 // --------------------------------------------------
 bool CDriverGL3::isTextureExist(const ITexture&tex)
 {
@@ -1198,9 +1191,9 @@ bool CDriverGL3::isWaterShaderSupported() const
 {
 	H_AUTO_OGL(CDriverGL3_isWaterShaderSupported);
 
-	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
+	if(ARBWaterShader[0] != 0) return true;
 
-	if ( !_Extensions.ATIFragmentShader && !_Extensions.ARBFragmentProgram) return false;
+	if ( !_Extensions.ATIFragmentShader ) return false;
 	return true;
 }
 
@@ -1593,7 +1586,6 @@ void CDriverGL3::initFragmentShaders()
 	///////////////////
 
 	// the ARB_fragment_program is prioritary over other extensions when present
-	if (_Extensions.ARBFragmentProgram)
 	{
 		nlinfo("WATER: Try ARB_fragment_program");
 		ARBWaterShader[0] = loadARBFragmentProgramStringNative(WaterCodeNoDiffuseForARBFragmentProgram, _ForceNativeFragmentPrograms);

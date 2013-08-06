@@ -79,16 +79,8 @@ struct	CGlExtensions
 
 	// ARB Extensions
 	bool	ARBTextureCompression;
-	bool	ARBFragmentProgram;
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
-
-public:
-
-	/// \name Disable Hardware feature. False by default. setuped by IDriver
-	// @{
-	bool				DisableHardwareTextureShader;
-	// @}
 
 public:
 	CGlExtensions()
@@ -114,7 +106,6 @@ public:
 		EXTBlendColor= false;
 		ATIEnvMapBumpMap = false;
 		ATIFragmentShader = false;
-		ARBFragmentProgram = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
@@ -128,9 +119,6 @@ public:
 		FrameBufferMultisample = false;
 		PackedDepthStencil = false;
 		NVStateVARWithoutFlush = 0;
-
-		/// \name Disable Hardware feature. False by default. setuped by IDriver
-		DisableHardwareTextureShader= false;
 	}
 
 	std::string toString()
@@ -158,7 +146,7 @@ public:
 
 		result += "\n  Programs:  ";
 		result += ATIFragmentShader ? "ATIFragmentShader " : "";
-		result += ARBFragmentProgram ? "ARBFragmentProgram " : "";
+		result += "ARBFragmentProgram ";
 		result += "ARBVertexProgram";
 
 		result += "\n  Misc:      ";

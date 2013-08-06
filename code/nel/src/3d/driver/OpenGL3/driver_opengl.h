@@ -295,7 +295,7 @@ public:
 
 	virtual void			disableHardwareVertexProgram(){}
 	virtual void			disableHardwareVertexArrayAGP(){}
-	virtual void			disableHardwareTextureShader();
+	virtual void			disableHardwareTextureShader(){};
 
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
 	virtual bool			setMode(const GfxMode& mode);

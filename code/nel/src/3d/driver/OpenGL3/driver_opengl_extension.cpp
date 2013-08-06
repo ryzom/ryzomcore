@@ -936,20 +936,9 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	setupARBVertexProgram(glext);
 
-	// Check texture shaders
-	// Disable feature ???
-	if(!ext.DisableHardwareTextureShader)
-	{
-		ext.ATIEnvMapBumpMap = setupATIEnvMapBumpMap(glext);
-		ext.ATIFragmentShader = setupATIFragmentShader(glext);
-		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);
-	}
-	else
-	{
-		ext.ATIEnvMapBumpMap = false;
-		ext.ATIFragmentShader = false;
-		ext.ARBFragmentProgram = false;
-	}
+	ext.ATIEnvMapBumpMap = setupATIEnvMapBumpMap(glext);
+	ext.ATIFragmentShader = setupATIFragmentShader(glext);
+	setupARBFragmentProgram(glext);
 
 	// Check EXTSecondaryColor
 	ext.EXTSecondaryColor= setupEXTSecondaryColor(glext);
