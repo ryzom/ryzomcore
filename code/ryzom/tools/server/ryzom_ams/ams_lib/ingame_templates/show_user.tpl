@@ -79,9 +79,9 @@
 						    <tr>
 							<td><strong>Role:</strong></td>
 							<td>
-							{if $userPermission eq 1}<span class="label label-success">User</span>{/if}
-							{if $userPermission eq 2}<span class="label label-warning">Moderator</span>{/if}
-							{if $userPermission eq 3}<span class="label label-important">Admin</span>{/if}
+							{if $userPermission eq 1}<font color="{$user_color}">User</font>{/if}
+							{if $userPermission eq 2}<font color="{$mod_color}">Moderator</font>{/if}
+							{if $userPermission eq 3}<font color="{$admin_color}">Admin</font>{/if}
 							</td>                           
 						    </tr>
 						    {if $firstName neq ""}
@@ -146,7 +146,7 @@
 						      </tr>
 						      {/foreach}
 
-					</table>            
+						</table>            
 					</td></tr>
 				</table>
 			</td></tr>
