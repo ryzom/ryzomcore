@@ -485,7 +485,7 @@ namespace MaterialEditor
 			
 			NL3D::CMaterial mat;
 			mat.setColor( NLMISC::CRGBA::White );
-			id->renderRawTriangles( mat, 0, 1 );
+			id->renderRawTriangles2( mat, 0, 1 );
 		}
 
 		driver->swapBuffers();

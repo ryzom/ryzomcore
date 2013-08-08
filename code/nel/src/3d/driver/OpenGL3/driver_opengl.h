@@ -436,6 +436,7 @@ public:
 	virtual bool			renderRawPoints(CMaterial& Mat, uint32 startIndex, uint32 numPoints);
 	virtual bool			renderRawLines(CMaterial& Mat, uint32 startIndex, uint32 numLines);
 	virtual bool			renderRawTriangles(CMaterial& Mat, uint32 startIndex, uint32 numTris);
+	virtual bool			renderRawTriangles2( CMaterial &mat, uint32 startVertex, uint32 numTri );
 	virtual bool			renderRawQuads(CMaterial& Mat, uint32 startIndex, uint32 numQuads);
 	//
 	virtual bool			renderLinesWithIndexOffset(CMaterial& /* mat */, uint32 /* firstIndex */, uint32 /* nlines */, uint /* indexOffset */) { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }

@@ -521,6 +521,7 @@ public:
 	 *  \param numTri is the number of triangle to render.
 	 */
 	virtual bool			renderRawTriangles(CMaterial& mat, uint32 startVertex, uint32 numTri)=0;
+	virtual bool			renderRawTriangles2( CMaterial &mat, uint32 startVertex, uint32 numTri ){ return false; }
 
 	/** If the driver support it, primitive can be rendered with an offset added to each index
       * These are the offseted version of the 'render' functions

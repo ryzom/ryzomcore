@@ -44,7 +44,7 @@ namespace NL3D
 		GLint ok;
 		nglGetShaderiv( shaderId, GL_COMPILE_STATUS, &ok );
 
-		if( ok != 0 )
+		if( ok != GL_TRUE )
 		{
 			char infoLog[ MAX_SHADER_COMPILE_INFOLOG ];
 			nglGetShaderInfoLog( shaderId, MAX_SHADER_COMPILE_INFOLOG, NULL, infoLog );
