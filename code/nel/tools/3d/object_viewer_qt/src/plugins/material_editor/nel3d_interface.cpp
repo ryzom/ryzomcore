@@ -445,6 +445,53 @@ namespace MaterialEditor
 		return loadShape( "primitives/teapot.shape" );
 	}
 
+	void CNel3DInterface::drawTriangle()
+	{
+		driver->clearBuffers( NLMISC::CRGBA::Black );
+
+		NLMISC::CMatrix f;
+		f.identity();
+		driver->setFrustumMatrix( f );
+
+		NL3D::CDriverUser *d = dynamic_cast< NL3D::CDriverUser* >( driver );
+		if( d != NULL )
+		{
+			NL3D::IDriver *id = d->getDriver();
+			
+			NL3D::CVertexBuffer vb;
+			vb.setVertexFormat( NL3D::CVertexBuffer::PositionFlag );
+			vb.setNumVertices( 3 );
+			vb.setPreferredMemory( NL3D::CVertexBuffer::StaticPreferred, false );
+			
+			NL3D::CVertexBufferReadWrite rw;
+			vb.lock( rw );
+			rw.setVertexCoord( 0, -1.0f, -1.0f, 0.0f );
+			rw.setVertexCoord( 1, 1.0f, -1.0f, 0.0f );
+			rw.setVertexCoord( 2, 0.0f, 1.0f, 0.0f );
+			rw.unlock();
+
+			NL3D::CIndexBuffer  ib;
+			ib.setNumIndexes( 3 );
+			ib.setFormat( NL3D::CIndexBuffer::Indices32 );
+			ib.setPreferredMemory( NL3D::CIndexBuffer::StaticPreferred, false );
+			
+			NL3D::CIndexBufferReadWrite iw;
+			ib.lock( iw );
+			iw.setTri( 0, 0, 1, 2 );
+			iw.unlock();
+
+			id->activeVertexBuffer( vb );
+			id->activeIndexBuffer( ib );
+			
+			NL3D::CMaterial mat;
+			mat.setColor( NLMISC::CRGBA::White );
+			id->renderRawTriangles( mat, 0, 1 );
+		}
+
+		driver->swapBuffers();
+	}
+	
+
 	bool CNel3DInterface::loadShape( const std::string &fileName )
 	{
 		NLMISC::CPath::addSearchPath( NLMISC::CFile::getPath( fileName ), false, false );

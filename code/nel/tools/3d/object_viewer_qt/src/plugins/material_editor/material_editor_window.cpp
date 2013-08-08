@@ -259,6 +259,13 @@ namespace MaterialEditor
 		materialSplitter->onSceneCleared();
 		viewPort->stopTimedUpdates();
 	}
+
+	void MaterialEditorWindow::onTriangleClicked()
+	{
+		nl3dIface->clearScene();
+		materialSplitter->onSceneCleared();
+		nl3dIface->drawTriangle();
+	}
 	
 	void MaterialEditorWindow::createMenus()
 	{
@@ -305,6 +312,13 @@ namespace MaterialEditor
 				a = new QAction( tr( "Clear scene" ), NULL );
 				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onClearSceneClicked() ) );
 				mm->addAction( a );
+
+				QMenu *mmmm = mm->addMenu( tr( "Debug" ) );
+				{
+					a = new QAction( tr( "Triangle" ), NULL );
+					connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onTriangleClicked() ) );
+					mmmm->addAction( a );
+				}
 			}
 
 			a = new QAction( tr( "Shaders" ), NULL );
