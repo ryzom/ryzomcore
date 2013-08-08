@@ -15,23 +15,37 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef GLSL_VERTEX_PROGRAM_H
-#define GLSL_VERTEX_PROGRAM_H
-
-#include "driver_glsl_shader_base.h"
-#include <string>
+#ifndef GLSL_SHADER_BASE_H
+#define GLSL_SHADER_BASE_H
 
 namespace NL3D
 {
-	class CGLSLVertexProgram : public CGLSLShaderBase
+	/// Base class for OpenGL shader objects
+	class CGLSLShaderBase
 	{
 	public:
-		CGLSLVertexProgram();
-		~CGLSLVertexProgram();
+		CGLSLShaderBase(){
+			shaderId = 0;
+			compiled = false;
+		}
+
+		virtual ~CGLSLShaderBase(){}
+
+		void shaderSource( const char *source );
+		bool compile( std::string &log );
+
+		unsigned int getShaderId() const{ return shaderId; }
+		bool isCompiled() const{ return compiled; }
+
+	protected:
+		unsigned int shaderId;
+
+	private:
+		bool compiled;
 	};
 }
 
-#endif
 
+#endif
 
 

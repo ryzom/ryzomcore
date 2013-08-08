@@ -18,18 +18,33 @@
 #ifndef GLSL_PROGRAM_H
 #define GLSL_PROGRAM_H
 
+#include <vector>
+#include <string>
+
 namespace NL3D
 {
+	class CGLSLShaderBase;
+
+	/// Wrapper class for OpenGL shader program object
 	class CGLSLProgram
 	{
 	public:
 		CGLSLProgram();
 		~CGLSLProgram();
 
+		bool attachShader( CGLSLShaderBase *shader );
+		bool link( std::string &log );
+
 		unsigned int getProgramId() const{ return programId; }
+		bool isLinked() const{ return linked; }
 
 	private:
+		void deleteShaders();
+
 		unsigned int programId;
+		bool linked;
+
+		std::vector< CGLSLShaderBase* > attachedShaders;
 	};
 }
 

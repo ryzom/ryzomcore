@@ -102,6 +102,7 @@ class	CDriverGL3;
 class	IVertexArrayRange;
 class	IVertexBufferHardGL;
 class   COcclusionQueryGL3;
+class   CGLSLProgram;
 
 void displayGLError(GLenum error);
 
@@ -1275,6 +1276,7 @@ private:
 	/// \name Vertex program implementation
 	// @{
 		bool activeARBVertexProgram (CVertexProgram *program);
+		bool activeGLSLProgram( CGLSLProgram *program );
 	//@}
 
 

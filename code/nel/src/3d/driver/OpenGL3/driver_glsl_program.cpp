@@ -16,8 +16,11 @@
 
 
 #include "driver_glsl_program.h"
+#include "driver_glsl_shader_base.h"
 #include "stdopengl.h"
 #include "driver_opengl_extension.h"
+
+#define MAX_PROGRAM_LINK_ERROR_LOG 1024
 
 namespace NL3D
 {
@@ -25,13 +28,69 @@ namespace NL3D
 	{
 		programId = nglCreateProgram();
 		nlassert( programId != 0 );
+		linked = false;
 
 	}
 
 	CGLSLProgram::~CGLSLProgram()
 	{
 		nglDeleteProgram( programId );
+		deleteShaders();
 		programId = 0;
+	}
+
+	bool CGLSLProgram::attachShader( CGLSLShaderBase *shader )
+	{
+		if( !shader->isCompiled() )
+			return false;
+
+		std::vector< CGLSLShaderBase* >::const_iterator itr =
+			std::find( attachedShaders.begin(), attachedShaders.end(), shader );
+		if( itr != attachedShaders.end() )
+			return false;
+
+		nglAttachShader( programId, shader->getShaderId() );
+		GLenum error = glGetError();
+
+		if( error != 0 )
+			return false;
+
+		attachedShaders.push_back( shader );
+
+		return true;
+	}
+
+	bool CGLSLProgram::link( std::string &log )
+	{
+		if( attachedShaders.empty() )
+			return false;
+
+		nglLinkProgram( programId );
+
+		GLint ok;
+		nglGetProgramiv( programId, GL_LINK_STATUS, &ok );
+		if( ok == 0 )
+		{
+			char errorLog[ MAX_PROGRAM_LINK_ERROR_LOG ];
+			nglGetProgramInfoLog( programId, MAX_PROGRAM_LINK_ERROR_LOG, NULL, errorLog );
+			log.assign( errorLog );
+			return false;
+		}
+
+		linked = true;
+
+		return true;
+	}
+
+
+	void CGLSLProgram::deleteShaders()
+	{
+		std::vector< CGLSLShaderBase* >::iterator itr = attachedShaders.begin();
+		while( itr != attachedShaders.end() )
+		{
+			delete *itr;
+			++itr;
+		}
 	}
 }
 

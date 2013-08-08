@@ -18,17 +18,15 @@
 #ifndef GLSL_PIXEL_PROGRAM_H
 #define GLSL_PIXEL_PROGRAM_H
 
+#include "driver_glsl_shader_base.h"
+
 namespace NL3D
 {
-	class CGLSLPixelProgram
+	class CGLSLPixelProgram : public CGLSLShaderBase
 	{
 	public:
 		CGLSLPixelProgram();
 		~CGLSLPixelProgram();
-		unsigned int getShaderId() const{ return shaderId; }
-
-	private:
-		unsigned int shaderId;
 	};
 }
 

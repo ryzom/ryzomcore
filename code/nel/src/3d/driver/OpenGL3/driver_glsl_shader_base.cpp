@@ -15,23 +15,50 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef GLSL_VERTEX_PROGRAM_H
-#define GLSL_VERTEX_PROGRAM_H
-
 #include "driver_glsl_shader_base.h"
-#include <string>
+#include "stdopengl.h"
+#include "driver_opengl_extension.h"
+
+#define MAX_SHADER_COMPILE_INFOLOG 1024
+
 
 namespace NL3D
 {
-	class CGLSLVertexProgram : public CGLSLShaderBase
+
+	void CGLSLShaderBase::shaderSource( const char *source )
 	{
-	public:
-		CGLSLVertexProgram();
-		~CGLSLVertexProgram();
-	};
+		nlassert( shaderId != 0 );
+
+		const GLchar *p[1];
+		p[ 0 ] = source;
+		GLint lengths[ 1 ];
+		lengths[ 0 ] = strlen( source );
+
+		nglShaderSource( shaderId, 1, p, lengths );
+	}
+
+	bool CGLSLShaderBase::compile( std::string &log )
+	{
+		nglCompileShader( shaderId );
+
+		GLint ok;
+		nglGetShaderiv( shaderId, GL_COMPILE_STATUS, &ok );
+
+		if( ok != 0 )
+		{
+			char infoLog[ MAX_SHADER_COMPILE_INFOLOG ];
+			nglGetShaderInfoLog( shaderId, MAX_SHADER_COMPILE_INFOLOG, NULL, infoLog );
+			log.assign( infoLog );
+			return false;
+		}
+
+		compiled = true;
+
+		return true;
+	}
+
 }
 
-#endif
 
 
 
