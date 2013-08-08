@@ -438,6 +438,7 @@ extern PFNGLDELETESHADERPROC							nglDeleteShader;
 extern PFNGLDETACHSHADERPROC							nglDetachShader;
 extern PFNGLDISABLEVERTEXATTRIBARRAYPROC				nglDisableVertexAttribArray;
 extern PFNGLENABLEVERTEXATTRIBARRAYPROC					nglEnableVertexAttribArray;
+extern PFNGLGETATTACHEDSHADERSPROC						nglGetAttachedShaders;
 extern PFNGLGETPROGRAMIVPROC							nglGetProgramiv;
 extern PFNGLGETPROGRAMINFOLOGPROC						nglGetProgramInfoLog;
 extern PFNGLGETSHADERIVPROC								nglGetShaderiv;
