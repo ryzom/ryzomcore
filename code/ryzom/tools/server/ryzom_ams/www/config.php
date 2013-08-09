@@ -19,7 +19,7 @@ $cfg['db']['lib']['name']    = 'ryzom_ams_lib';
 $cfg['db']['lib']['user']    = 'shard';
 $cfg['db']['lib']['pass']    = '';
 
-$cfg['db']['shard']['host']    = 'localhosti';
+$cfg['db']['shard']['host']    = 'localhost';
 $cfg['db']['shard']['port']    = '3306';
 $cfg['db']['shard']['name']    = 'nel';
 $cfg['db']['shard']['user']    = 'shard';
@@ -30,6 +30,10 @@ $cfg['db']['ring']['port']    = '3306';
 $cfg['db']['ring']['name']    = 'ring_open';
 $cfg['db']['ring']['user']    = 'shard';
 $cfg['db']['ring']['pass']    = '';
+
+$cfg['mail']['username']    = '123';
+$cfg['mail']['password']    = '456';
+$cfg['mail']['host']    = 'test.com';
 
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
