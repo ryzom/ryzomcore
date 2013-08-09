@@ -34,6 +34,9 @@ namespace NL3D
 		void shaderSource( const char *source );
 		bool compile( std::string &log );
 
+		virtual bool isVertexProgram() const = 0;
+		virtual bool isPixelProgram() const = 0;
+
 		unsigned int getShaderId() const{ return shaderId; }
 		bool isCompiled() const{ return compiled; }
 

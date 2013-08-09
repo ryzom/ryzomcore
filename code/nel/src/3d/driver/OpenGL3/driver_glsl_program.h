@@ -32,7 +32,12 @@ namespace NL3D
 		CGLSLProgram();
 		~CGLSLProgram();
 
-		bool attachShader( CGLSLShaderBase *shader );
+		bool attachVertexProgram( CGLSLShaderBase *shader );
+		bool attachPixelProgram( CGLSLShaderBase *shader );
+
+		bool detachVertexProgram( CGLSLShaderBase *shader );
+		bool detachPixelProgram( CGLSLShaderBase *shader );		
+
 		bool link( std::string &log );
 
 		unsigned int getProgramId() const{ return programId; }
@@ -44,7 +49,8 @@ namespace NL3D
 		unsigned int programId;
 		bool linked;
 
-		std::vector< CGLSLShaderBase* > attachedShaders;
+		std::vector< CGLSLShaderBase* > vertexPrograms;
+		std::vector< CGLSLShaderBase* > pixelPrograms;
 	};
 }
 

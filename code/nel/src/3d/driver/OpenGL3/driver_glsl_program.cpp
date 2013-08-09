@@ -39,14 +39,17 @@ namespace NL3D
 		programId = 0;
 	}
 
-	bool CGLSLProgram::attachShader( CGLSLShaderBase *shader )
+	bool CGLSLProgram::attachVertexProgram( CGLSLShaderBase *shader )
 	{
+		if( !shader->isVertexProgram() )
+			return false;
+
 		if( !shader->isCompiled() )
 			return false;
 
 		std::vector< CGLSLShaderBase* >::const_iterator itr =
-			std::find( attachedShaders.begin(), attachedShaders.end(), shader );
-		if( itr != attachedShaders.end() )
+			std::find( vertexPrograms.begin(), vertexPrograms.end(), shader );
+		if( itr != vertexPrograms.end() )
 			return false;
 
 		nglAttachShader( programId, shader->getShaderId() );
@@ -55,14 +58,81 @@ namespace NL3D
 		if( error != 0 )
 			return false;
 
-		attachedShaders.push_back( shader );
+		vertexPrograms.push_back( shader );
+
+		return true;
+	}
+
+	bool CGLSLProgram::attachPixelProgram( CGLSLShaderBase *shader )
+	{
+		if( !shader->isPixelProgram() )
+			return false;
+
+		if( !shader->isCompiled() )
+			return false;
+
+		std::vector< CGLSLShaderBase* >::const_iterator itr =
+			std::find( pixelPrograms.begin(), pixelPrograms.end(), shader );
+		if( itr != pixelPrograms.end() )
+			return false;
+
+		nglAttachShader( programId, shader->getShaderId() );
+		GLenum error = glGetError();
+
+		if( error != GL_NO_ERROR )
+			return false;
+
+		pixelPrograms.push_back( shader );
+
+		return true;
+	}
+
+	bool CGLSLProgram::detachVertexProgram( CGLSLShaderBase *shader )
+	{
+		if( !shader->isVertexProgram() )
+			return false;
+
+		std::vector< CGLSLShaderBase* >::iterator itr =
+			std::find( vertexPrograms.begin(), vertexPrograms.end(), shader );
+		if( itr == vertexPrograms.end() )
+			return false;
+
+		nglDetachShader( programId, shader->getShaderId() );
+		GLenum error = glGetError();
+
+		if( error != GL_NO_ERROR )
+			return false;
+
+		vertexPrograms.erase( itr );
+
+		return true;
+	}
+
+
+	bool CGLSLProgram::detachPixelProgram( CGLSLShaderBase *shader )
+	{
+		if( !shader->isPixelProgram() )
+			return false;
+
+		std::vector< CGLSLShaderBase* >::iterator itr =
+			std::find( pixelPrograms.begin(), pixelPrograms.end(), shader );
+		if( itr == pixelPrograms.end() )
+			return false;
+
+		nglDetachShader( programId, shader->getShaderId() );
+		GLenum error = glGetError();
+
+		if( error != GL_NO_ERROR )
+			return false;
+
+		pixelPrograms.erase( itr );
 
 		return true;
 	}
 
 	bool CGLSLProgram::link( std::string &log )
 	{
-		if( attachedShaders.empty() )
+		if( vertexPrograms.empty() || pixelPrograms.empty() )
 			return false;
 
 		nglLinkProgram( programId );
@@ -85,8 +155,17 @@ namespace NL3D
 
 	void CGLSLProgram::deleteShaders()
 	{
-		std::vector< CGLSLShaderBase* >::iterator itr = attachedShaders.begin();
-		while( itr != attachedShaders.end() )
+		std::vector< CGLSLShaderBase* >::iterator itr;
+		
+		itr = vertexPrograms.begin();
+		while( itr != vertexPrograms.end() )
+		{
+			delete *itr;
+			++itr;
+		}
+
+		itr = pixelPrograms.begin();
+		while( itr != pixelPrograms.end() )
 		{
 			delete *itr;
 			++itr;

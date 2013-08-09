@@ -74,10 +74,10 @@ namespace NL3D
 			return false;
 		}
 
-		if( !program.attachShader( vp ) )
+		if( !program.attachVertexProgram( vp ) )
 			return false;
 
-		if( !program.attachShader( pp ) )
+		if( !program.attachPixelProgram( pp ) )
 			return false;
 
 		if( !program.link( log ) )

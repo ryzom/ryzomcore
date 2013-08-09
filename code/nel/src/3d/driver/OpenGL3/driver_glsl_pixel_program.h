@@ -27,6 +27,9 @@ namespace NL3D
 	public:
 		CGLSLPixelProgram();
 		~CGLSLPixelProgram();
+
+		bool isVertexProgram() const{ return false; }
+		bool isPixelProgram() const{ return true; }
 	};
 }
 
