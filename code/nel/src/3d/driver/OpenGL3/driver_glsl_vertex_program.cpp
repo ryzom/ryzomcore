@@ -24,6 +24,7 @@ namespace NL3D
 	CGLSLVertexProgram::CGLSLVertexProgram() :
 	CGLSLShaderBase()
 	{
+		type = VERTEX_PROGRAM;
 		shaderId = nglCreateShader( GL_VERTEX_SHADER );
 		nlassert( shaderId != 0 );
 	}

@@ -102,7 +102,6 @@ class	CDriverGL3;
 class	IVertexArrayRange;
 class	IVertexBufferHardGL;
 class   COcclusionQueryGL3;
-class   CGLSLProgram;
 
 void displayGLError(GLenum error);
 
@@ -1258,6 +1257,11 @@ private:
 	bool			isVertexProgramSupported () const{ return true; }
 	bool			isVertexProgramEmulated () const{ return false; }
 	bool			activeVertexProgram (CVertexProgram *program);
+	bool			activeProgramObject( IProgramObject *program );
+	IProgramObject* createProgramObject() const;
+	IProgram*		createVertexProgram() const;
+	IProgram*		createPixelProgram() const;
+
 	void			setConstant (uint index, float, float, float, float);
 	void			setConstant (uint index, double, double, double, double);
 	void			setConstant (uint indexStart, const NLMISC::CVector& value);
@@ -1277,7 +1281,6 @@ private:
 	/// \name Vertex program implementation
 	// @{
 		bool activeARBVertexProgram (CVertexProgram *program);
-		bool activeGLSLProgram( CGLSLProgram *program );
 	//@}
 
 

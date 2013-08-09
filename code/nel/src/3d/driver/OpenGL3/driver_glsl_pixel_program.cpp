@@ -23,6 +23,7 @@ namespace NL3D
 {
 	CGLSLPixelProgram::CGLSLPixelProgram()
 	{
+		type = PIXEL_PROGRAM;
 		shaderId = nglCreateShader( GL_FRAGMENT_SHADER );
 		nlassert( shaderId != 0 );
 	}

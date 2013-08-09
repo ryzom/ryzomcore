@@ -136,6 +136,8 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/dru.h
         event_mouse_listener.cpp
         ../../include/nel/3d/event_mouse_listener.h
+		../../include/nel/3d/i_program.h
+		../../include/nel/3d/i_program_object.h
         index_buffer.cpp
         ../../include/nel/3d/index_buffer.h
         init_3d.cpp

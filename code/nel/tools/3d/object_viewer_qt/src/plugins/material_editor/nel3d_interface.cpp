@@ -25,6 +25,8 @@
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_instance.h"
 #include "nel/3d/u_3d_mouse_listener.h"
+#include "nel/3d/i_program.h"
+#include "nel/3d/i_program_object.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
@@ -445,14 +447,24 @@ namespace MaterialEditor
 		return loadShape( "primitives/teapot.shape" );
 	}
 
+	const char *vs =
+		"#version 330\n"
+		"in vec4 vertex;\n"
+		"void main( void )\n"
+		"{\n"
+		"gl_Position = vertex;\n"
+		"}\n";
+	
+	const char *ps =
+		"#version 330\n"
+		"out vec4 color;\n"
+		"void main( void )\n"
+		"{\n"
+		"color = vec4( 1.0, 0.0, 0.0, 1.0 );\n"
+		"}\n";
+
 	void CNel3DInterface::drawTriangle()
 	{
-		driver->clearBuffers( NLMISC::CRGBA::Black );
-
-		NLMISC::CMatrix f;
-		f.identity();
-		driver->setFrustumMatrix( f );
-
 		NL3D::CDriverUser *d = dynamic_cast< NL3D::CDriverUser* >( driver );
 		if( d != NULL )
 		{
@@ -484,11 +496,73 @@ namespace MaterialEditor
 			id->activeIndexBuffer( ib );
 			
 			NL3D::CMaterial mat;
-			mat.setColor( NLMISC::CRGBA::White );
-			id->renderRawTriangles2( mat, 0, 1 );
-		}
 
-		driver->swapBuffers();
+			NL3D::IProgramObject *po = id->createProgramObject();
+			NL3D::IProgram *vp = id->createVertexProgram();
+			NL3D::IProgram *pp = id->createPixelProgram();
+
+			vp->shaderSource( vs );
+			pp->shaderSource( ps );
+
+			std::string log;
+			bool ok = false;
+
+			ok = vp->compile( log );
+			if( !ok )
+			{
+				delete po;
+				delete vp;
+				delete pp;
+				return;
+			}
+
+			ok = pp->compile( log );
+			if( !ok )
+			{
+				delete po;
+				delete vp;
+				delete pp;
+				return;
+			}
+
+			ok = po->attachVertexProgram( vp );
+			if( !ok )
+			{
+				delete po;
+				return;
+			}
+
+			ok = po->attachPixelProgram( pp );
+			if( !ok )
+			{
+				delete po;
+				return;
+			}
+
+			ok = po->link( log );
+			if( !ok )
+			{
+				delete po;
+				return;
+			}
+
+			ok = id->activeProgramObject( po );
+			if( !ok )
+			{
+				delete po;
+				return;
+			}
+			
+			driver->clearBuffers( NLMISC::CRGBA::Black );
+			NLMISC::CMatrix f;
+			f.identity();
+			driver->setFrustumMatrix( f );
+
+			id->renderRawTriangles2( mat, 0, 1 );
+			driver->swapBuffers();
+			id->activeProgramObject( NULL );
+			delete po;
+		}
 	}
 	
 

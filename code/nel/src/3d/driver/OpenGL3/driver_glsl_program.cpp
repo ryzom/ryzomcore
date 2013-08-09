@@ -16,6 +16,7 @@
 
 
 #include "driver_glsl_program.h"
+#include "nel/3d/i_program_object.h"
 #include "driver_glsl_shader_base.h"
 #include "stdopengl.h"
 #include "driver_opengl_extension.h"
@@ -24,7 +25,8 @@
 
 namespace NL3D
 {
-	CGLSLProgram::CGLSLProgram()
+	CGLSLProgram::CGLSLProgram() :
+	IProgramObject()
 	{
 		programId = nglCreateProgram();
 		nlassert( programId != 0 );
@@ -39,7 +41,7 @@ namespace NL3D
 		programId = 0;
 	}
 
-	bool CGLSLProgram::attachVertexProgram( CGLSLShaderBase *shader )
+	bool CGLSLProgram::attachVertexProgram( IProgram *shader )
 	{
 		if( !shader->isVertexProgram() )
 			return false;
@@ -47,7 +49,7 @@ namespace NL3D
 		if( !shader->isCompiled() )
 			return false;
 
-		std::vector< CGLSLShaderBase* >::const_iterator itr =
+		std::vector< IProgram* >::const_iterator itr =
 			std::find( vertexPrograms.begin(), vertexPrograms.end(), shader );
 		if( itr != vertexPrograms.end() )
 			return false;
@@ -63,7 +65,7 @@ namespace NL3D
 		return true;
 	}
 
-	bool CGLSLProgram::attachPixelProgram( CGLSLShaderBase *shader )
+	bool CGLSLProgram::attachPixelProgram( IProgram *shader )
 	{
 		if( !shader->isPixelProgram() )
 			return false;
@@ -71,7 +73,7 @@ namespace NL3D
 		if( !shader->isCompiled() )
 			return false;
 
-		std::vector< CGLSLShaderBase* >::const_iterator itr =
+		std::vector< IProgram* >::const_iterator itr =
 			std::find( pixelPrograms.begin(), pixelPrograms.end(), shader );
 		if( itr != pixelPrograms.end() )
 			return false;
@@ -87,12 +89,12 @@ namespace NL3D
 		return true;
 	}
 
-	bool CGLSLProgram::detachVertexProgram( CGLSLShaderBase *shader )
+	bool CGLSLProgram::detachVertexProgram( IProgram *shader )
 	{
 		if( !shader->isVertexProgram() )
 			return false;
 
-		std::vector< CGLSLShaderBase* >::iterator itr =
+		std::vector< IProgram* >::iterator itr =
 			std::find( vertexPrograms.begin(), vertexPrograms.end(), shader );
 		if( itr == vertexPrograms.end() )
 			return false;
@@ -109,12 +111,12 @@ namespace NL3D
 	}
 
 
-	bool CGLSLProgram::detachPixelProgram( CGLSLShaderBase *shader )
+	bool CGLSLProgram::detachPixelProgram( IProgram *shader )
 	{
 		if( !shader->isPixelProgram() )
 			return false;
 
-		std::vector< CGLSLShaderBase* >::iterator itr =
+		std::vector< IProgram* >::iterator itr =
 			std::find( pixelPrograms.begin(), pixelPrograms.end(), shader );
 		if( itr == pixelPrograms.end() )
 			return false;
@@ -155,7 +157,7 @@ namespace NL3D
 
 	void CGLSLProgram::deleteShaders()
 	{
-		std::vector< CGLSLShaderBase* >::iterator itr;
+		std::vector< IProgram* >::iterator itr;
 		
 		itr = vertexPrograms.begin();
 		while( itr != vertexPrograms.end() )

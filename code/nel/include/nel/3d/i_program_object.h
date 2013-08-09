@@ -15,23 +15,40 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef GLSL_VERTEX_PROGRAM_H
-#define GLSL_VERTEX_PROGRAM_H
-
-#include "driver_glsl_shader_base.h"
-#include <string>
+#ifndef I_PROGRAM_OBJECT_H
+#define I_PROGRAM_OBJECT_H
 
 namespace NL3D
 {
-	class CGLSLVertexProgram : public CGLSLShaderBase
+
+	class IProgram;
+
+	class IProgramObject
 	{
 	public:
-		CGLSLVertexProgram();
-		~CGLSLVertexProgram();
+		IProgramObject(){}
+		virtual ~IProgramObject(){}
+
+		virtual bool attachVertexProgram( IProgram *shader ) = 0;
+
+		virtual bool attachPixelProgram( IProgram *shader ) = 0;
+
+		virtual bool detachVertexProgram( IProgram *shader ) = 0;
+
+		virtual bool detachPixelProgram( IProgram *shader ) = 0;
+
+		unsigned int getProgramId() const{ return programId; }
+
+		virtual bool link( std::string &log ) = 0;
+
+		bool isLinked() const{ return linked; }
+
+	protected:
+		unsigned int programId;
+		bool linked;
 	};
+
 }
 
 #endif
-
-
 

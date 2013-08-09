@@ -18,33 +18,20 @@
 #ifndef GLSL_SHADER_BASE_H
 #define GLSL_SHADER_BASE_H
 
+#include "nel/3d/i_program.h"
+
 namespace NL3D
 {
 	/// Base class for OpenGL shader objects
-	class CGLSLShaderBase
+	class CGLSLShaderBase : public IProgram
 	{
 	public:
-		CGLSLShaderBase(){
-			shaderId = 0;
-			compiled = false;
-		}
+		CGLSLShaderBase() : IProgram(){}
 
-		virtual ~CGLSLShaderBase(){}
+		~CGLSLShaderBase(){}
 
 		void shaderSource( const char *source );
 		bool compile( std::string &log );
-
-		virtual bool isVertexProgram() const = 0;
-		virtual bool isPixelProgram() const = 0;
-
-		unsigned int getShaderId() const{ return shaderId; }
-		bool isCompiled() const{ return compiled; }
-
-	protected:
-		unsigned int shaderId;
-
-	private:
-		bool compiled;
 	};
 }
 

@@ -20,37 +20,30 @@
 
 #include <vector>
 #include <string>
+#include "nel/3d/i_program_object.h"
 
 namespace NL3D
 {
-	class CGLSLShaderBase;
-
 	/// Wrapper class for OpenGL shader program object
-	class CGLSLProgram
+	class CGLSLProgram : public IProgramObject
 	{
 	public:
 		CGLSLProgram();
 		~CGLSLProgram();
 
-		bool attachVertexProgram( CGLSLShaderBase *shader );
-		bool attachPixelProgram( CGLSLShaderBase *shader );
+		bool attachVertexProgram( IProgram *shader );
+		bool attachPixelProgram( IProgram *shader );
 
-		bool detachVertexProgram( CGLSLShaderBase *shader );
-		bool detachPixelProgram( CGLSLShaderBase *shader );		
+		bool detachVertexProgram( IProgram *shader );
+		bool detachPixelProgram( IProgram *shader );		
 
 		bool link( std::string &log );
-
-		unsigned int getProgramId() const{ return programId; }
-		bool isLinked() const{ return linked; }
 
 	private:
 		void deleteShaders();
 
-		unsigned int programId;
-		bool linked;
-
-		std::vector< CGLSLShaderBase* > vertexPrograms;
-		std::vector< CGLSLShaderBase* > pixelPrograms;
+		std::vector< IProgram* > vertexPrograms;
+		std::vector< IProgram* > pixelPrograms;
 	};
 }
 

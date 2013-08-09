@@ -104,6 +104,9 @@ struct EBadDisplay : public NLMISC::Exception
 // ****************************************************************************
 typedef void (*emptyProc)(void);
 
+class IProgram;
+class IProgramObject;
+
 // ****************************************************************************
 // *** IMPORTANT ********************
 // *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
@@ -463,7 +466,6 @@ public:
 	 * \see activeVertexProgram
 	 */
 	virtual bool			activeVertexBuffer(CVertexBuffer& VB)=0;
-
 
 	/** active a current IB, for future render().
 	 *
@@ -1020,6 +1022,19 @@ public:
 	  * \return true if setup/unsetup succeeded, false else.
 	  */
 	virtual bool			activeVertexProgram (CVertexProgram *program) =0;
+
+
+	/// Activates the specified GPU program object
+	virtual bool			activeProgramObject( IProgramObject *program ) = 0;
+
+	/// Creates a new GPU program object
+	virtual IProgramObject* createProgramObject() const = 0;
+
+	/// Creates a new Vertex program
+	virtual IProgram*		createVertexProgram() const = 0;
+
+	/// Creates a new Pixel program
+	virtual IProgram*		createPixelProgram() const = 0;
 
 	/**
 	  * Setup constant values.
