@@ -35,6 +35,17 @@ $cfg['mail']['username']    = '123';
 $cfg['mail']['password']    = '456';
 $cfg['mail']['host']    = 'test.com';
 
+// To connect to an IMAP server running on port 143 on the local machine,
+// do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");       
+// POP3 server on port 110: $mbox = imap_open ("{localhost:110/pop3}INBOX", "user_id", "password");      
+// SSL IMAP or POP3 server, add /ssl after the protocol:  $mbox = imap_open ("{localhost:993/imap/ssl}INBOX", "user_id", "password");   
+// To connect to an SSL IMAP or POP3 server with a self-signed certificate,
+// add /ssl/novalidate-cert after the protocol specification:
+// $mbox = imap_open ("{localhost:995/pop3/ssl/novalidate-cert}", "user_id", "password");       
+// NNTP server on port 119 use: $nntp = imap_open ("{localhost:119/nntp}comp.test", "", "");
+// To connect to a remote server replace "localhost" with the name or the IP address of the server you want to connect to.
+$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
+
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
