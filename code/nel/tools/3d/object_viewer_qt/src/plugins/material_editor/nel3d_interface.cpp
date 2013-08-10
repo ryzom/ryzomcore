@@ -449,18 +449,26 @@ namespace MaterialEditor
 
 	const char *vs =
 		"#version 330\n"
-		"in vec4 vertex;\n"
+		"\n"
+		"layout ( location = 0 )in vec4 vertex;\n"
+		"layout ( location = 3 ) in vec4 color;\n"
+		"out vec4 vColor;\n"
+		"\n"
 		"void main( void )\n"
 		"{\n"
 		"gl_Position = vertex;\n"
+		"vColor = color;\n"
 		"}\n";
 	
 	const char *ps =
 		"#version 330\n"
+		"\n"
+		"in vec4 vColor;\n"
 		"out vec4 color;\n"
+		"\n"
 		"void main( void )\n"
 		"{\n"
-		"color = vec4( 1.0, 0.0, 0.0, 1.0 );\n"
+		"color = vColor;\n"
 		"}\n";
 
 	void CNel3DInterface::drawTriangle()
@@ -471,15 +479,18 @@ namespace MaterialEditor
 			NL3D::IDriver *id = d->getDriver();
 			
 			NL3D::CVertexBuffer vb;
-			vb.setVertexFormat( NL3D::CVertexBuffer::PositionFlag );
+			vb.setVertexFormat( NL3D::CVertexBuffer::PositionFlag | NL3D::CVertexBuffer::PrimaryColorFlag );
 			vb.setNumVertices( 3 );
 			vb.setPreferredMemory( NL3D::CVertexBuffer::StaticPreferred, false );
 			
 			NL3D::CVertexBufferReadWrite rw;
 			vb.lock( rw );
 			rw.setVertexCoord( 0, -1.0f, -1.0f, 0.0f );
+			rw.setColor( 0, NLMISC::CRGBA::Red );
 			rw.setVertexCoord( 1, 1.0f, -1.0f, 0.0f );
+			rw.setColor( 1, NLMISC::CRGBA::Green );
 			rw.setVertexCoord( 2, 0.0f, 1.0f, 0.0f );
+			rw.setColor( 2, NLMISC::CRGBA::Blue );
 			rw.unlock();
 
 			NL3D::CIndexBuffer  ib;
@@ -492,9 +503,6 @@ namespace MaterialEditor
 			iw.setTri( 0, 0, 1, 2 );
 			iw.unlock();
 
-			id->activeVertexBuffer( vb );
-			id->activeIndexBuffer( ib );
-			
 			NL3D::CMaterial mat;
 
 			NL3D::IProgramObject *po = id->createProgramObject();
@@ -552,6 +560,9 @@ namespace MaterialEditor
 				delete po;
 				return;
 			}
+
+			id->activeVertexBuffer( vb );
+			id->activeIndexBuffer( ib );
 			
 			driver->clearBuffers( NLMISC::CRGBA::Black );
 			NLMISC::CMatrix f;
