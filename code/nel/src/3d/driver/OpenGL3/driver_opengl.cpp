@@ -331,6 +331,8 @@ CDriverGL3::CDriverGL3()
 
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
+
+	currentProgram = NULL;
 }
 
 // ***************************************************************************

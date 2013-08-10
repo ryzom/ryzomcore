@@ -1262,6 +1262,18 @@ private:
 	IProgram*		createVertexProgram() const;
 	IProgram*		createPixelProgram() const;
 
+	int getUniformLocation( const char *name );
+
+	void setUniform1f( uint index, float f );
+	void setUniform4f( uint index, float f1, float f2, float f3, float f4  );
+	void setUniform1i( uint index, int i );
+	void setUniform4i( uint index, int i1, int i2, int i3, int i4 );
+	void setUniform1u( uint index, uint u );
+	void setUniform4u( uint index, uint u1, uint u2, uint u3, uint u4 );
+	void setUniformMatrix2fv( uint index, uint count, bool transpose, const float *values );
+	void setUniformMatrix3fv( uint index, uint count, bool transpose, const float *values );
+	void setUniformMatrix4fv( uint index, uint count, bool transpose, const float *values );
+
 	void			setConstant (uint index, float, float, float, float);
 	void			setConstant (uint index, double, double, double, double);
 	void			setConstant (uint indexStart, const NLMISC::CVector& value);
@@ -1338,6 +1350,8 @@ private:
 	NLMISC::CRGBA					_CurrentBlendConstantColor;
 
 	private:
+
+		IProgramObject *currentProgram;
 
 		bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten);
 

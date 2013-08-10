@@ -1025,16 +1025,28 @@ public:
 
 
 	/// Activates the specified GPU program object
-	virtual bool			activeProgramObject( IProgramObject *program ) = 0;
+	virtual bool			activeProgramObject( IProgramObject *program ){ return false; };
 
 	/// Creates a new GPU program object
-	virtual IProgramObject* createProgramObject() const = 0;
+	virtual IProgramObject* createProgramObject() const { return NULL; }
 
 	/// Creates a new Vertex program
-	virtual IProgram*		createVertexProgram() const = 0;
+	virtual IProgram*		createVertexProgram() const { return NULL; }
 
 	/// Creates a new Pixel program
-	virtual IProgram*		createPixelProgram() const = 0;
+	virtual IProgram*		createPixelProgram() const { return NULL; }
+
+	virtual int getUniformLocation( const char *name ){ return -1; }
+
+	virtual void setUniform1f( uint index, float f ){}
+	virtual void setUniform4f( uint index, float f1, float f2, float f3, float f4  ){}
+	virtual void setUniform1i( uint index, int i ){}
+	virtual void setUniform4i( uint index, int i1, int i2, int i3, int i4 ){}
+	virtual void setUniform1u( uint index, uint u ){}
+	virtual void setUniform4u( uint index, uint u1, uint u2, uint u3, uint u4 ){}
+	virtual void setUniformMatrix2fv( uint index, uint count, bool transpose, const float *values ){}
+	virtual void setUniformMatrix3fv( uint index, uint count, bool transpose, const float *values ){}
+	virtual void setUniformMatrix4fv( uint index, uint count, bool transpose, const float *values ){}
 
 	/**
 	  * Setup constant values.

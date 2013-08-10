@@ -450,7 +450,7 @@ namespace MaterialEditor
 	const char *vs =
 		"#version 330\n"
 		"\n"
-		"layout ( location = 0 )in vec4 vertex;\n"
+		"layout ( location = 0 ) in vec4 vertex;\n"
 		"layout ( location = 3 ) in vec4 color;\n"
 		"out vec4 vColor;\n"
 		"\n"
@@ -466,9 +466,13 @@ namespace MaterialEditor
 		"in vec4 vColor;\n"
 		"out vec4 color;\n"
 		"\n"
+		"uniform float redShift;"
+		"\n"
 		"void main( void )\n"
 		"{\n"
-		"color = vColor;\n"
+		"vec4 finalColor = vColor.rgba;\n"
+		"finalColor.r = redShift;\n"
+		"color = finalColor;\n"
 		"}\n";
 
 	void CNel3DInterface::drawTriangle()
@@ -560,6 +564,10 @@ namespace MaterialEditor
 				delete po;
 				return;
 			}
+
+			int opacityLocation = id->getUniformLocation( "redShift" );
+			if( opacityLocation != -1 )
+				id->setUniform1f( opacityLocation, 0.25f );
 
 			id->activeVertexBuffer( vb );
 			id->activeIndexBuffer( ib );
