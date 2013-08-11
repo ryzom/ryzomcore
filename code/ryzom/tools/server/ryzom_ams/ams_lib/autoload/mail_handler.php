@@ -41,6 +41,21 @@ class Mail_Handler{
         }
     }*/
     
+    function get_email_by_user_id($id){
+        $user = new Ticket_User();
+        $user->load_With_TUserId($id);
+        $webUser = new WebUsers($user->getExternId());
+        return $webUsers->getEmail();      
+    }
+    
+    function get_username_from_id($id){
+        $user = new Ticket_User();
+        $user->load_With_TUserId($id);
+        $webUser = new WebUsers($user->getExternId());
+        return $webUsers->getUsername();   
+    }
+    
+    
     function oms_mail_send($recipient, $subject, $body, $from = NULL) {
     
         if(is_numeric($recipient)) {
@@ -63,56 +78,68 @@ class Mail_Handler{
         // Deliver new mail
         echo("mail cron\n");
         
-        //TO ASK:
+        //creates child process
         $pid = mail_fork();
-        $pidfile = '/tmp/oms_cron_email_pid';
+        $pidfile = '/tmp/ams_cron_email_pid';
     
-        //if process is running, then we are already cronning
+        //INFO: if $pid = 
+        //-1: "Could not fork!\n";
+        // 0: "In child!\n";
+        //>0: "In parent!\n";
+        
         if($pid) {
-    
-        // We're the main process.
+        
+        // We're the parent process, do nothing!
     
         } else {
-    
+            
+            //if $pidfile doesn't exist yet, then start sending the mails that are in the db.
             if(!file_exists($pidfile)) {
                 
+                //create the file and write the child processes id in it!
                 $pid = getmypid();
                 $file = fopen($pidfile, 'w');
                 fwrite($file, $pid);
                 fclose($file);
                 
                 //select all new & failed emails & try to send them
-                $emails = db_query("select * from email where status = 'NEW' or status = 'FAILED'");
+                //$emails = db_query("select * from email where status = 'NEW' or status = 'FAILED'");
+                $statement = $this->db->executeWithoutParams("select * from email where Status = 'NEW' or Status = 'FAILED'");
+                $emails = $statement->fetchAll();
+
         
                 foreach($emails as $email) {
-                    $message_id = oms_new_message_id();
-                    echo("Emailing {$email['recipient']}\n");
-                    if(!$email['recipient']) {
-                        $email['recipient'] = oms_get_email_by_user_id($email['id_user']);
+                    $message_id = new_message_id();
+                    //if recipient isn't given, then use the email of the id_user instead!
+                    echo("Emailing {$email['Recipient']}\n");
+                    if(!$email['Recipient']) {
+                        $email['Recipient'] = get_email_by_user_id($email['UserId']);
                     }
                     
-                    if($email['sender']) {
-                        $username = oms_get_username_from_id($email['sender']);          
+                    //create sending email adres based on the $sender id
+                    if($email['Sender']) {
+                        $username = get_username_from_id($email['Sender']);          
                         $from =  "$username <$username@$inbox_host>";          
                     } else {
                         $from = $oms_reply_to;          
                     }
                     $headers = "From: $from\r\n" . "Message-ID: " . $message_id;
     
-                    if(mail($email['recipient'], $email['subject'], $email['body'], $headers)) {       
+                    if(mail($email['Recipient'], $email['Subject'], $email['Body'], $headers)) {       
                         $status = "DELIVERED";        
-                        echo("Emailed {$email['recipient']}\n");        
+                        echo("Emailed {$email['Recipient']}\n");        
                     } else {       
                         $status = "FAILED";
-                        echo("Email to {$email['recipient']} failed\n");
+                        echo("Email to {$email['Recipient']} failed\n");
                     }
                     //change the status of the emails.
-                    db_exec('update email set status = ?, message_id = ?, attempts = attempts + 1 where id_email = ?', array($status, $message_id, $email['id_email']));
+                    $this->db->execute('update email set Status = ?, MessageId = ?, Attempts = Attempts + 1 where MailId = ?', array($status, $message_id, $email['MailId']));
+                    //db_exec('update email set status = ?, message_id = ?, attempts = attempts + 1 where id_email = ?', array($status, $message_id, $email['id_email']));
                 }
                 unlink($pidfile);
             }
             // Check mail
-        
+            /*
             //$mailbox = imap_open("{localhost:110/pop3/novalidate-cert}INBOX", $inbox_username, $inbox_password);
             $mbox = imap_open($cfg['mail']['server'], $inbox_username, $inbox_password);
             $message_count = imap_num_msg($mbox);
@@ -137,19 +164,21 @@ class Mail_Handler{
             }
             imap_expunge($mbox);  
             imap_close($mbox);
+            */
         }
     
     }
     
      
     
-    function oms_new_message_id() {
+    function new_message_id() {
     
         $time = time();
         $pid = getmypid();
-        global $oms_mail_count;
-        $oms_mail_count = ($oms_mail_count == '') ? 1 : $oms_mail_count + 1;
-        return "<oms.message.$pid.$oms_mail_count.$time@dev1.dev.subrigo.net>";
+        global $cfg;
+        global $ams_mail_count;
+        $ams_mail_count = ($ams_mail_count == '') ? 1 : $ams_mail_count + 1;
+        return "<ams.message".$pid.$ams_mail_count.$time."@".$cfg['web']['host'].">";
     
     }
     
