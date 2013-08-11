@@ -4,13 +4,13 @@ class Mail_Handler{
     
     private $db;
         
-    function mail_fork() {
+    public function mail_fork() {
         /*global $db;
         $db = NULL;
         $pid = pcntl_fork();
         oms_db_connect();
         return $pid;*/
-        $this->db = new DBLayer("lib");
+       
         //Start a new thread and return the thread id!
         $pid = pcntl_fork();
         return $pid;
@@ -45,14 +45,14 @@ class Mail_Handler{
         $user = new Ticket_User();
         $user->load_With_TUserId($id);
         $webUser = new WebUsers($user->getExternId());
-        return $webUsers->getEmail();      
+        return $webUser->getEmail();      
     }
     
     function get_username_from_id($id){
         $user = new Ticket_User();
         $user->load_With_TUserId($id);
         $webUser = new WebUsers($user->getExternId());
-        return $webUsers->getUsername();   
+        return $webUser->getUsername();   
     }
     
     
@@ -67,7 +67,7 @@ class Mail_Handler{
     
      
     
-    function mail_cron() {
+    function cron() {
         global $cfg;
         $inbox_username = $cfg['mail']['username'];
         $inbox_password = $cfg['mail']['password'];
@@ -79,7 +79,7 @@ class Mail_Handler{
         echo("mail cron\n");
         
         //creates child process
-        $pid = mail_fork();
+        $pid = self::mail_fork();
         $pidfile = '/tmp/ams_cron_email_pid';
     
         //INFO: if $pid = 
@@ -92,10 +92,12 @@ class Mail_Handler{
         // We're the parent process, do nothing!
     
         } else {
+            //make db connection here because the children have to make the connection.
+            $this->db = new DBLayer("lib");
             
             //if $pidfile doesn't exist yet, then start sending the mails that are in the db.
             if(!file_exists($pidfile)) {
-                
+                 
                 //create the file and write the child processes id in it!
                 $pid = getmypid();
                 $file = fopen($pidfile, 'w');
@@ -107,24 +109,26 @@ class Mail_Handler{
                 $statement = $this->db->executeWithoutParams("select * from email where Status = 'NEW' or Status = 'FAILED'");
                 $emails = $statement->fetchAll();
 
-        
                 foreach($emails as $email) {
-                    $message_id = new_message_id();
+                    $message_id = self::new_message_id();
                     //if recipient isn't given, then use the email of the id_user instead!
                     echo("Emailing {$email['Recipient']}\n");
                     if(!$email['Recipient']) {
-                        $email['Recipient'] = get_email_by_user_id($email['UserId']);
+                        $email['Recipient'] = self::get_email_by_user_id($email['UserId']);
                     }
                     
                     //create sending email adres based on the $sender id
                     if($email['Sender']) {
-                        $username = get_username_from_id($email['Sender']);          
+                        $username = self::get_username_from_id($email['Sender']);          
                         $from =  "$username <$username@$inbox_host>";          
                     } else {
                         $from = $oms_reply_to;          
                     }
                     $headers = "From: $from\r\n" . "Message-ID: " . $message_id;
-    
+                    print("recip: " . $email['Recipient']);
+                    print("subj: " .$email['Subject']);
+                    print("body: " . $email['Body']);
+                    print("headers: " . $headers);
                     if(mail($email['Recipient'], $email['Subject'], $email['Body'], $headers)) {       
                         $status = "DELIVERED";        
                         echo("Emailed {$email['Recipient']}\n");        
@@ -178,7 +182,7 @@ class Mail_Handler{
         global $cfg;
         global $ams_mail_count;
         $ams_mail_count = ($ams_mail_count == '') ? 1 : $ams_mail_count + 1;
-        return "<ams.message".$pid.$ams_mail_count.$time."@".$cfg['web']['host'].">";
+        return "<ams.message".$pid.$ams_mail_count.$time."@".$cfg['mail']['host'].">";
     
     }
     

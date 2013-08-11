@@ -335,6 +335,37 @@
             ON DELETE NO ACTION
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
+        
+        
+        -- -----------------------------------------------------
+        -- Table `" . $cfg['db']['lib']['name'] ."`.`email`
+        -- -----------------------------------------------------
+        DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`email` ;
+        
+        CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`email` (
+          `MailId` INT NOT NULL AUTO_INCREMENT ,
+          `Recipient` VARCHAR(50) NULL ,
+          `Subject` VARCHAR(60) NULL ,
+          `Body` VARCHAR(400) NULL ,
+          `Status` VARCHAR(45) NULL ,
+          `Attempts` VARCHAR(45) NULL DEFAULT 0 ,
+          `Sender` INT(10) UNSIGNED NOT NULL ,
+          `UserId` INT(10) UNSIGNED NOT NULL ,
+          `MessageId` VARCHAR(45) NOT NULL ,
+          PRIMARY KEY (`MailId`) ,
+          INDEX `fk_email_ticket_user1` (`Sender` ASC) ,
+          INDEX `fk_email_ticket_user2` (`UserId` ASC) ,
+          CONSTRAINT `fk_email_ticket_user1`
+            FOREIGN KEY (`Sender` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
+            ON DELETE NO ACTION
+            ON UPDATE NO ACTION,
+          CONSTRAINT `fk_email_ticket_user2`
+            FOREIGN KEY (`UserId` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
+            ON DELETE NO ACTION
+            ON UPDATE NO ACTION)
+        ENGINE = InnoDB;
 
                 
 

@@ -293,6 +293,37 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`forwarded` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `mydb`.`email`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`email` ;
+
+CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
+  `MailId` INT NOT NULL AUTO_INCREMENT ,
+  `Recipient` VARCHAR(50) NULL ,
+  `Subject` VARCHAR(60) NULL ,
+  `Body` VARCHAR(400) NULL ,
+  `Status` VARCHAR(45) NULL ,
+  `Attempts` VARCHAR(45) NULL DEFAULT 0 ,
+  `Sender` INT(10) UNSIGNED NOT NULL ,
+  `UserId` INT(10) UNSIGNED NOT NULL ,
+  `MessageId` VARCHAR(45) NOT NULL ,
+  PRIMARY KEY (`MailId`) ,
+  INDEX `fk_email_ticket_user1` (`Sender` ASC) ,
+  INDEX `fk_email_ticket_user2` (`UserId` ASC) ,
+  CONSTRAINT `fk_email_ticket_user1`
+    FOREIGN KEY (`Sender` )
+    REFERENCES `mydb`.`ticket_user` (`TUserId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_email_ticket_user2`
+    FOREIGN KEY (`UserId` )
+    REFERENCES `mydb`.`ticket_user` (`TUserId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
