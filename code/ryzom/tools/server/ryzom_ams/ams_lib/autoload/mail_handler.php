@@ -80,7 +80,7 @@ class Mail_Handler{
         
         //creates child process
         $pid = self::mail_fork();
-        $pidfile = '/tmp/ams_cron_email_pid';
+        $pidfile = '/tmp/ams_cron_email_pid2';
     
         //INFO: if $pid = 
         //-1: "Could not fork!\n";
@@ -89,15 +89,14 @@ class Mail_Handler{
         
         if($pid) {
         
-        // We're the parent process, do nothing!
-    
+            // We're the parent process, do nothing!
+        
         } else {
             //make db connection here because the children have to make the connection.
             $this->db = new DBLayer("lib");
             
             //if $pidfile doesn't exist yet, then start sending the mails that are in the db.
             if(!file_exists($pidfile)) {
-                 
                 //create the file and write the child processes id in it!
                 $pid = getmypid();
                 $file = fopen($pidfile, 'w');
@@ -143,12 +142,13 @@ class Mail_Handler{
                 unlink($pidfile);
             }
             // Check mail
-            /*
+            
             //$mailbox = imap_open("{localhost:110/pop3/novalidate-cert}INBOX", $inbox_username, $inbox_password);
-            $mbox = imap_open($cfg['mail']['server'], $inbox_username, $inbox_password);
+            $mbox = imap_open($cfg['mail']['server'], $inbox_username, $inbox_password) or die('Cannot connect to mail server: ' . imap_last_error());
             $message_count = imap_num_msg($mbox);
     
             for ($i = 1; $i <= $message_count; ++$i) {
+                
                 $header = imap_header($mbox, $i);    
                 $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
                 $subject = decode_utf8($header->subject);    
@@ -156,6 +156,7 @@ class Mail_Handler{
                 $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
                 $txt = get_part($mbox, $i, "TEXT/PLAIN");   
                 $html = get_part($mbox, $i, "TEXT/HTML");
+                
                 //return task ID
                 $tid = oms_create_email($from, $subject, $txt, $html, $to, $from);
     
@@ -163,12 +164,14 @@ class Mail_Handler{
                     $file = fopen("$basedir/mail/$tid", 'w');      
                     fwrite($file, $entire_email);     
                     fclose($file);     
-                }    
+                }
+                //mark message $i of $mbox for deletion!
                 imap_delete($mbox, $i);
             }
+            //delete marked messages
             imap_expunge($mbox);  
             imap_close($mbox);
-            */
+            
         }
     
     }

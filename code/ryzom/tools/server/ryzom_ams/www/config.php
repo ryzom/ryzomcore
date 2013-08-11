@@ -31,8 +31,8 @@ $cfg['db']['ring']['name']    = 'ring_open';
 $cfg['db']['ring']['user']    = 'shard';
 $cfg['db']['ring']['pass']    = '';
 
-$cfg['mail']['username']    = '123';
-$cfg['mail']['password']    = '456';
+$cfg['mail']['username']    = 'amsryzom@gmail.com';
+$cfg['mail']['password']    = 'lol123bol';
 $cfg['mail']['host']    = 'test.com';
 
 // To connect to an IMAP server running on port 143 on the local machine,
@@ -44,8 +44,8 @@ $cfg['mail']['host']    = 'test.com';
 // $mbox = imap_open ("{localhost:995/pop3/ssl/novalidate-cert}", "user_id", "password");       
 // NNTP server on port 119 use: $nntp = imap_open ("{localhost:119/nntp}comp.test", "", "");
 // To connect to a remote server replace "localhost" with the name or the IP address of the server you want to connect to.
-$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
-
+//$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
+$cfg['mail']['server']= '{imap.gmail.com:993/imap/ssl}INBOX'
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
