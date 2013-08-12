@@ -4,42 +4,13 @@ class Mail_Handler{
     
     private $db;
         
-    public function mail_fork() {
-        /*global $db;
-        $db = NULL;
-        $pid = pcntl_fork();
-        oms_db_connect();
-        return $pid;*/
-       
-        //Start a new thread and return the thread id!
+    public function mail_fork() {   
+        //Start a new child process and return the process id!
         $pid = pcntl_fork();
         return $pid;
         
     }
     
-    /*
-    function oms_db_connect() {
-        global $db;
-        global $db_host, $db_name, $db_user, $db_pass;
-        if(!isset($db)) {
-            try {
-                    $db = new PDO(
-                    "mysql:host=$db_host;dbname=$db_name",
-                    $db_user,
-                    $db_pass,
-                    array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8")
-                );
-                $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                //$db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-                oms_error_log("oms_db_connect: database connection established", 3);
-            } catch(PDOException $e) {
-                print "Database error: " . $e->getMessage() . "<br/>";
-                die();
-            }
-        } else {
-            oms_error_log("oms_db_connect: already connected");
-        }
-    }*/
     
     function get_email_by_user_id($id){
         $user = new Ticket_User();
@@ -56,31 +27,42 @@ class Mail_Handler{
     }
     
     
-    function oms_mail_send($recipient, $subject, $body, $from = NULL) {
+    function get_id_from_username($username){
+        $externId = WebUsers::getId($username);
+        $user = Ticket_User::constr_ExternId($externId);
+        return $user->getTUserId();   
+    }
+    
+    
+    public static function send_mail($recipient, $subject, $body, $from = NULL) {
     
         if(is_numeric($recipient)) {
             $id_user = $recipient;
             $recipient = NULL;
         }
-        db_insert('email', array('recipient' => $recipient, 'subject' => $subject, 'body' => $body, 'status' => 'NEW', 'id_user' => $id_user, 'sender' => $from));
+        $query = "INSERT INTO email (Recipient,Subject,Body,Status,UserId,Sender) VALUES (:recipient, :subject, :body, :status, :id_user, :sender)";
+        $values = array('recipient' => $recipient, 'subject' => $subject, 'body' => $body, 'status' => 'NEW', 'id_user' => $id_user, 'sender' => $from);
+        $db = new DBLayer("lib");
+        $db->execute($query, $values);
+        
     }
     
      
-    
+    //the main function
     function cron() {
         global $cfg;
         $inbox_username = $cfg['mail']['username'];
         $inbox_password = $cfg['mail']['password'];
         $inbox_host = $cfg['mail']['host'];
         $oms_reply_to = "OMS <oms@".$inbox_host.">";
-        global $basedir;
+        global $MAIL_DIR;
         
         // Deliver new mail
         echo("mail cron\n");
         
         //creates child process
         $pid = self::mail_fork();
-        $pidfile = '/tmp/ams_cron_email_pid2';
+        $pidfile = '/tmp/ams_cron_email_pid';
     
         //INFO: if $pid = 
         //-1: "Could not fork!\n";
@@ -149,19 +131,26 @@ class Mail_Handler{
     
             for ($i = 1; $i <= $message_count; ++$i) {
                 
-                $header = imap_header($mbox, $i);    
+                $header = imap_header($mbox, $i);
+                //print_r($header);
                 $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
-                $subject = decode_utf8($header->subject);    
+                $subject = self::decode_utf8($header->subject);    
                 $to = $header->to[0]->mailbox;   
                 $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
-                $txt = get_part($mbox, $i, "TEXT/PLAIN");   
-                $html = get_part($mbox, $i, "TEXT/HTML");
+                $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
+                $html = self::get_part($mbox, $i, "TEXT/HTML");
+                print("================");
+                print("subj: ".$subject);
+                print("to: ".$to);
+                print("from: ".$from);
+                print("txt: " .$txt);
+                print("html: ".$html);
                 
                 //return task ID
-                $tid = oms_create_email($from, $subject, $txt, $html, $to, $from);
+                $tid = 1; //self::ams_create_email($from, $subject, $txt, $html, $to, $from);
     
-                if($tid) {     
-                    $file = fopen("$basedir/mail/$tid", 'w');      
+                if($tid) {
+                    $file = fopen($MAIL_DIR."/mail/".$tid, 'w');      
                     fwrite($file, $entire_email);     
                     fclose($file);     
                 }
@@ -191,22 +180,20 @@ class Mail_Handler{
     
      
     
-    function oms_create_email($from, $subject, $body, $html, $recipient = 0, $sender = NULL) {
+    function ams_create_email($from, $subject, $body, $html, $recipient = 0, $sender = NULL) {
     
-        if($recipient == 0 && !is_string($recipient)) {
+        //TODO:
+        /*if($recipient == 0 && !is_string($recipient)) {
             global $user;
             $recipient = $user->uid;
-        }
+        }*/
     
-        if($sender !== NULL && !is_numeric($sender)) $sender = oms_get_id_from_username($sender);
-        if(!is_numeric($recipient)) $recipient = oms_get_id_from_username($recipient);
-    
-        oms_error_log("Sending message: '$subject' from $sender to $recipient", 3);
+        if($sender !== NULL && !is_numeric($sender)) $sender = self::get_id_from_username($sender);
+        if(!is_numeric($recipient)) $recipient = self::get_id_from_username($recipient);
     
         $message = array(
         'creator' => $sender,
         'owner' => $recipient,
-        'id_module' => 'email',
         'type' => 'email',
         'summary' => $subject,
         'data' => array (
@@ -229,7 +216,7 @@ class Mail_Handler{
     
      
     
-    function oms_get_email($id) {
+    /*function oms_get_email($id) {
     
         $message = oms_task_load($id);
         if($message) {
@@ -239,26 +226,26 @@ class Mail_Handler{
             return FALSE; 
         }
     
-    }
+    }*/
     
      
     
-    function oms_prepare_email(&$message) {
+    /*function oms_prepare_email(&$message) {
     
         $data = $message['data'];
         $data['id_message'] = $message['id_task'];
         $data['read'] = ($message['status'] != 'NEW' && $message['status'] != 'UNREAD');
         $message = $data;
     
-    }
+    }*/
     
      
     
-    function oms_email_mark_read($mid) {
+    /*function oms_email_mark_read($mid) {
     
         db_exec("update task set status = 'READ' where id_task = ? and type = 'email' and module = 'email'", array($mid));
     
-    }
+    }*/
     
      
     
@@ -296,7 +283,7 @@ class Mail_Handler{
         }
     
         if($structure) {
-            if($mime_type == get_mime_type($structure)) {
+            if($mime_type == self::get_mime_type($structure)) {
                 if(!$part_number) {
                     $part_number = "1";
                 }
@@ -317,7 +304,7 @@ class Mail_Handler{
                     } else {
                         $prefix = '';
                     }
-                    $data = get_part($stream, $msg_number, $mime_type, $sub_structure,$prefix .    ($index + 1));
+                    $data = self::get_part($stream, $msg_number, $mime_type, $sub_structure,$prefix .    ($index + 1));
                     if($data) {
                         return $data;
                     }

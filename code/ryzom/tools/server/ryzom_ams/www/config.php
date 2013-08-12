@@ -45,7 +45,7 @@ $cfg['mail']['host']    = 'test.com';
 // NNTP server on port 119 use: $nntp = imap_open ("{localhost:119/nntp}comp.test", "", "");
 // To connect to a remote server replace "localhost" with the name or the IP address of the server you want to connect to.
 //$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
-$cfg['mail']['server']= '{imap.gmail.com:993/imap/ssl}INBOX'
+$cfg['mail']['server']= '{imap.gmail.com:993/imap/ssl}INBOX';
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
@@ -65,3 +65,4 @@ $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 $TICKET_LOGGING = true;
 $TIME_FORMAT = "m-d-Y H:i:s";
 $INGAME_LAYOUT = "basic";
+$MAIL_DIR = "/tmp";
