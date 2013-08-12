@@ -33,6 +33,11 @@ class Mail_Handler{
         return $user->getTUserId();   
     }
     
+    function get_id_from_email($email){
+        $webUserId = WebUsers::getIdFromEmail($email);
+        $user = Ticket_User::constr_ExternId($webUserId);
+        return $user->getTUserId();    
+    }
     
     public static function send_mail($recipient, $subject, $body, $from = NULL) {
     
@@ -91,7 +96,8 @@ class Mail_Handler{
                 $emails = $statement->fetchAll();
 
                 foreach($emails as $email) {
-                    $message_id = self::new_message_id();
+                    $message_id = self::new_message_id($email['TicketId']);
+
                     //if recipient isn't given, then use the email of the id_user instead!
                     echo("Emailing {$email['Recipient']}\n");
                     if(!$email['Recipient']) {
@@ -105,7 +111,7 @@ class Mail_Handler{
                     } else {
                         $from = $oms_reply_to;          
                     }
-                    $headers = "From: $from\r\n" . "Message-ID: " . $message_id;
+                    $headers = "From: $from\r\n" . "Message-ID: " . $message_id ;
                     print("recip: " . $email['Recipient']);
                     print("subj: " .$email['Subject']);
                     print("body: " . $email['Body']);
@@ -131,28 +137,15 @@ class Mail_Handler{
     
             for ($i = 1; $i <= $message_count; ++$i) {
                 
-                $header = imap_header($mbox, $i);
-                //print_r($header);
-                $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
-                $subject = self::decode_utf8($header->subject);    
-                $to = $header->to[0]->mailbox;   
-                $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
-                $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
-                $html = self::get_part($mbox, $i, "TEXT/HTML");
-                print("================");
-                print("subj: ".$subject);
-                print("to: ".$to);
-                print("from: ".$from);
-                print("txt: " .$txt);
-                print("html: ".$html);
-                
                 //return task ID
+                self::incoming_mail_handler($mbox, $i);
                 $tid = 1; //self::ams_create_email($from, $subject, $txt, $html, $to, $from);
     
                 if($tid) {
-                    $file = fopen($MAIL_DIR."/mail/".$tid, 'w');      
+                    //TODO: base file on Ticket + reply id
+                   /* $file = fopen($MAIL_DIR."/mail/".$tid, 'w');      
                     fwrite($file, $entire_email);     
-                    fclose($file);     
+                    fclose($file);     */
                 }
                 //mark message $i of $mbox for deletion!
                 imap_delete($mbox, $i);
@@ -167,26 +160,87 @@ class Mail_Handler{
     
      
     
-    function new_message_id() {
-    
+    function new_message_id($ticketId) {
         $time = time();
         $pid = getmypid();
         global $cfg;
         global $ams_mail_count;
         $ams_mail_count = ($ams_mail_count == '') ? 1 : $ams_mail_count + 1;
-        return "<ams.message".$pid.$ams_mail_count.$time."@".$cfg['mail']['host'].">";
+        return "<ams.message".".".$ticketId.".".$pid.$ams_mail_count.".".$time."@".$cfg['mail']['host'].">";
     
     }
     
-     
+    function get_ticket_id_from_subject($subject){
+        print('got it from subject!');
+        $startpos = strpos($subject, "[Ticket #");
+        $tempString = substr($subject, $startpos+9);
+        $endpos = strpos($tempString, "]");
+        $ticket_id = substr($tempString, 0, $endpos);
+        return $ticket_id;
+    }
     
-    function ams_create_email($from, $subject, $body, $html, $recipient = 0, $sender = NULL) {
+    
+    function incoming_mail_handler($mbox,$i){
+        
+        $header = imap_header($mbox, $i);
+        $subject = self::decode_utf8($header->subject);
+        
+        print_r($header);
+        
+        //get ticket_id out of the message-id or else out of the subject line
+        $ticket_id = 0;
+        if(isset($header->references)){
+            $pieces = explode(".", $header->references);
+            if($pieces[0] == "<ams"){
+                print('got it from message-id');
+                $ticket_id = $pieces[2];
+            }else{
+                $ticket_id = self::get_ticket_id_from_subject($subject);
+            }
+        }else{
+            print('elseeee');
+            $ticket_id = self::get_ticket_id_from_subject($subject);
+        }
+       
+        //if ticket id is found
+        if($ticket_id){
+            
+            $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
+            $subject = self::decode_utf8($header->subject);    
+            $to = $header->to[0]->mailbox;   
+            $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
+            $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
+            $html = self::get_part($mbox, $i, "TEXT/HTML");
+            
+            //get the id out of the email address of the person sending the email.
+            if($from !== NULL && !is_numeric($from)) $from = self::get_id_from_email($from);
+            
+            $user = new Ticket_User();
+            $user->load_With_TUserId($from);
+            $ticket = new Ticket();
+            $ticket->load_With_TId($ticket_id);
+            
+            //if user has access to it!
+            if($user->isMod() or ($ticket->getAuthor() == $user->getTUserId())){
+                
+            }
+            /*print("================");
+            print("subj: ".$subject);
+            print("to: ".$to);
+            print("from: ".$from);
+            print("txt: " .$txt);
+            print("html: ".$html);*/
+        }
+        
+    }
+    
+    /*function ams_create_email($from, $subject, $body, $html, $recipient = 0, $sender = NULL) {
     
         //TODO:
-        /*if($recipient == 0 && !is_string($recipient)) {
+        if($recipient == 0 && !is_string($recipient)) {
             global $user;
             $recipient = $user->uid;
-        }*/
+        }
     
         if($sender !== NULL && !is_numeric($sender)) $sender = self::get_id_from_username($sender);
         if(!is_numeric($recipient)) $recipient = self::get_id_from_username($recipient);
@@ -212,7 +266,7 @@ class Mail_Handler{
         oms_task_index($message, array('subject', 'body', 'sender', 'recipient'));
         //---------------------------
         return $message['id_task'];
-    }
+    }*/
     
      
     

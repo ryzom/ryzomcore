@@ -67,14 +67,22 @@ class WebUsers extends Users{
               return "fail";
         }	
      }
-     
-     //returns te id for a given username
-    public static function getId($username){
-       $dbw = new DBLayer("web");  
-       $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
-       $row = $statement->fetch();
-       return $row['UId'];
-    }
+       
+       //returns te id for a given username
+       public static function getId($username){
+         $dbw = new DBLayer("web");  
+         $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
+         $row = $statement->fetch();
+         return $row['UId'];
+       }
+    
+       //returns te id for a given username
+       public static function getIdFromEmail($email){
+          $dbw = new DBLayer("web");  
+          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Email=:email", array('email' => $email));
+          $row = $statement->fetch();
+          return $row['UId'];
+       }
     
        public function getUId(){
               return $this->uId;

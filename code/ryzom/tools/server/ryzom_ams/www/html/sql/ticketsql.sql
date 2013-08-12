@@ -308,9 +308,11 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
   `Sender` INT(10) UNSIGNED NOT NULL ,
   `UserId` INT(10) UNSIGNED NOT NULL ,
   `MessageId` VARCHAR(45) NOT NULL ,
+  `TicketId` INT UNSIGNED NOT NULL ,
   PRIMARY KEY (`MailId`) ,
   INDEX `fk_email_ticket_user1` (`Sender` ASC) ,
   INDEX `fk_email_ticket_user2` (`UserId` ASC) ,
+  INDEX `fk_email_ticket1` (`TicketId` ASC) ,
   CONSTRAINT `fk_email_ticket_user1`
     FOREIGN KEY (`Sender` )
     REFERENCES `mydb`.`ticket_user` (`TUserId` )
@@ -319,6 +321,11 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
   CONSTRAINT `fk_email_ticket_user2`
     FOREIGN KEY (`UserId` )
     REFERENCES `mydb`.`ticket_user` (`TUserId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_email_ticket1`
+    FOREIGN KEY (`TicketId` )
+    REFERENCES `mydb`.`ticket` (`TId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
