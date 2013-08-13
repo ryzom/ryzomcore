@@ -72,6 +72,37 @@ class Ticket_User{
         $user->update();
     }
     
+    
+    public static function get_email_by_user_id($id){
+        $user = new Ticket_User();
+        $user->load_With_TUserId($id);
+        $webUser = new WebUsers($user->getExternId());
+        return $webUser->getEmail();      
+    }
+    
+    
+    public static function get_username_from_id($id){
+        $user = new Ticket_User();
+        $user->load_With_TUserId($id);
+        $webUser = new WebUsers($user->getExternId());
+        return $webUser->getUsername();   
+    }
+    
+    
+    public static function get_id_from_username($username){
+        $externId = WebUsers::getId($username);
+        $user = Ticket_User::constr_ExternId($externId);
+        return $user->getTUserId();   
+    }
+    
+    
+    public static function get_id_from_email($email){
+        $webUserId = WebUsers::getIdFromEmail($email);
+        $user = Ticket_User::constr_ExternId($webUserId);
+        return $user->getTUserId();    
+    }
+    
+    
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     public function __construct() {
     }

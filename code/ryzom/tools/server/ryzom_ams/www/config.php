@@ -33,7 +33,7 @@ $cfg['db']['ring']['pass']    = '';
 
 $cfg['mail']['username']    = 'amsryzom@gmail.com';
 $cfg['mail']['password']    = 'lol123bol';
-$cfg['mail']['host']    = 'test.com';
+$cfg['mail']['host']    = 'ryzomcore.com';
 
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");       
@@ -63,6 +63,7 @@ $DEFAULT_LANGUAGE = 'en';
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 
 $TICKET_LOGGING = true;
+$TICKET_MAILING_SUPPORT = true;
 $TIME_FORMAT = "m-d-Y H:i:s";
 $INGAME_LAYOUT = "basic";
 $MAIL_DIR = "/tmp";

@@ -96,7 +96,8 @@ class Ticket{
         }else{
             Ticket_Log::createLogEntry( $ticket_id, $real_author, 2, $author);
         }
-        Ticket_Reply::createReply($content, $author, $ticket_id, 0);
+        Ticket_Reply::createReply($content, $author, $ticket_id, 0, $author);       
+        Mail_Handler::send_ticketing_mail($ticket, $content, "NEW", $real_author);
         return $ticket_id;
         
     }
@@ -156,6 +157,13 @@ class Ticket{
             //if status is not closed
             if($ticket->getStatus() != 3){
                 Ticket_Reply::createReply($content, $author, $ticket_id, $hidden, $ticket->getAuthor());
+                
+                //notify ticket author that a new reply is added!
+                if($ticket->getAuthor() != $author){
+                    Mail_Handler::send_ticketing_mail($ticket, $content, "REPLY", $author);
+                }
+                
+                
             }else{
                 //TODO: Show error message that ticket is closed
             }
@@ -215,7 +223,9 @@ class Ticket{
 
     //Set ticket object
     public function set($values){
-        $this->tId = $values['TId'];
+        if(isset($values['TId'])){
+            $this->tId = $values['TId'];
+        }
         $this->title = $values['Title'];
         $this->status = $values['Status'];
         $this->queue = $values['Queue'];

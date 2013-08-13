@@ -31,7 +31,8 @@ function reply_on_ticket(){
                 
             }catch (PDOException $e) {
                 //ERROR: LIB DB is not online!
-                header("Location: index.php");
+                print_r($e);
+                //header("Location: index.php");
                 exit;
             }
             

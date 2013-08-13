@@ -12,41 +12,43 @@ class Mail_Handler{
     }
     
     
-    function get_email_by_user_id($id){
-        $user = new Ticket_User();
-        $user->load_With_TUserId($id);
-        $webUser = new WebUsers($user->getExternId());
-        return $webUser->getEmail();      
-    }
+    public static function send_ticketing_mail($ticketObj, $content, $type, $author) {
+        global $TICKET_MAILING_SUPPORT;
+        if($TICKET_MAILING_SUPPORT){
+            $txt = "";
+            $subject = "";
+            if($type == "REPLY"){
+                $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n You received a new reply on your ticket: " . $ticketObj->getTitle() .
+                "\n --------------------\n\n";
+                $subject = "New reply on [Ticket #" . $ticketObj->getTId() ."]";
+                $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
+                $txt = $txt . $content . $endTxt;
+                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId(),$author);
+            }else if($type == "NEW"){
+                $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n Your ticket: " . $ticketObj->getTitle() . " is newly created";
+                if($ticketObj->getAuthor() != $author){
+                    $txt = $txt . " by " . Ticket_User::get_username_from_id($author);
+                }else{
+                    $author = $ticketObj->getAuthor();
+                }
+                $txt = $txt . "\n --------------------\n\n";
+                $subject = "New ticket created [Ticket #" . $ticketObj->getTId() ."]";
+                $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
+                $txt = $txt . $content . $endTxt;
+                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId());
+            }
+            
+        }
+    } 
     
-    function get_username_from_id($id){
-        $user = new Ticket_User();
-        $user->load_With_TUserId($id);
-        $webUser = new WebUsers($user->getExternId());
-        return $webUser->getUsername();   
-    }
     
-    
-    function get_id_from_username($username){
-        $externId = WebUsers::getId($username);
-        $user = Ticket_User::constr_ExternId($externId);
-        return $user->getTUserId();   
-    }
-    
-    function get_id_from_email($email){
-        $webUserId = WebUsers::getIdFromEmail($email);
-        $user = Ticket_User::constr_ExternId($webUserId);
-        return $user->getTUserId();    
-    }
-    
-    public static function send_mail($recipient, $subject, $body, $from = NULL) {
-    
+    public static function send_mail($recipient, $subject, $body, $ticket_id = 0, $from = 1) {
         if(is_numeric($recipient)) {
             $id_user = $recipient;
             $recipient = NULL;
         }
-        $query = "INSERT INTO email (Recipient,Subject,Body,Status,UserId,Sender) VALUES (:recipient, :subject, :body, :status, :id_user, :sender)";
-        $values = array('recipient' => $recipient, 'subject' => $subject, 'body' => $body, 'status' => 'NEW', 'id_user' => $id_user, 'sender' => $from);
+        $query = "INSERT INTO email (Recipient,Subject,Body,Status,Attempts,Sender,UserId,MessageId,TicketId) VALUES (:recipient, :subject, :body, :status, :attempts, :sender, :id_user, :messageId, :ticketId)";
+        $values = array('recipient' => $recipient, 'subject' => $subject, 'body' => $body, 'status' => 'NEW', 'attempts'=> 0, 'sender' => $from,'id_user' => $id_user,  'messageId' => 0, 'ticketId'=> $ticket_id);
         $db = new DBLayer("lib");
         $db->execute($query, $values);
         
@@ -59,7 +61,7 @@ class Mail_Handler{
         $inbox_username = $cfg['mail']['username'];
         $inbox_password = $cfg['mail']['password'];
         $inbox_host = $cfg['mail']['host'];
-        $oms_reply_to = "OMS <oms@".$inbox_host.">";
+        $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";
         global $MAIL_DIR;
         
         // Deliver new mail
@@ -101,12 +103,12 @@ class Mail_Handler{
                     //if recipient isn't given, then use the email of the id_user instead!
                     echo("Emailing {$email['Recipient']}\n");
                     if(!$email['Recipient']) {
-                        $email['Recipient'] = self::get_email_by_user_id($email['UserId']);
+                        $email['Recipient'] = Ticket_User::get_email_by_user_id($email['UserId']);
                     }
                     
                     //create sending email adres based on the $sender id
-                    if($email['Sender']) {
-                        $username = self::get_username_from_id($email['Sender']);          
+                    if($email['Sender'] != 0) {
+                        $username = Ticket_User::get_username_from_id($email['Sender']);          
                         $from =  "$username <$username@$inbox_host>";          
                     } else {
                         $from = $oms_reply_to;          
@@ -171,7 +173,6 @@ class Mail_Handler{
     }
     
     function get_ticket_id_from_subject($subject){
-        print('got it from subject!');
         $startpos = strpos($subject, "[Ticket #");
         $tempString = substr($subject, $startpos+9);
         $endpos = strpos($tempString, "]");
@@ -192,13 +193,11 @@ class Mail_Handler{
         if(isset($header->references)){
             $pieces = explode(".", $header->references);
             if($pieces[0] == "<ams"){
-                print('got it from message-id');
                 $ticket_id = $pieces[2];
             }else{
                 $ticket_id = self::get_ticket_id_from_subject($subject);
             }
         }else{
-            print('elseeee');
             $ticket_id = self::get_ticket_id_from_subject($subject);
         }
        
@@ -210,10 +209,22 @@ class Mail_Handler{
             $to = $header->to[0]->mailbox;   
             $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
             $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
-            $html = self::get_part($mbox, $i, "TEXT/HTML");
+            //$html = self::get_part($mbox, $i, "TEXT/HTML");
+            
+            //use the line ---------- Ticket # to make a distincton between the old message and the reply
+            $endpos = strpos($txt, ">---------- Ticket #");
+            if($endpos){
+                $txt = substr($txt, 0, $endpos);
+            }else{
+                $endpos = strpos($txt, "---------- Ticket #");
+                if($endpos){
+                    $txt = substr($txt, 0, $endpos);
+                }
+            }
+            
             
             //get the id out of the email address of the person sending the email.
-            if($from !== NULL && !is_numeric($from)) $from = self::get_id_from_email($from);
+            if($from !== NULL && !is_numeric($from)) $from = Ticket_User::get_id_from_email($from);
             
             $user = new Ticket_User();
             $user->load_With_TUserId($from);
@@ -221,15 +232,10 @@ class Mail_Handler{
             $ticket->load_With_TId($ticket_id);
             
             //if user has access to it!
-            if($user->isMod() or ($ticket->getAuthor() == $user->getTUserId())){
-                
+            if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
+                Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);              
             }
-            /*print("================");
-            print("subj: ".$subject);
-            print("to: ".$to);
-            print("from: ".$from);
-            print("txt: " .$txt);
-            print("html: ".$html);*/
+            
         }
         
     }
