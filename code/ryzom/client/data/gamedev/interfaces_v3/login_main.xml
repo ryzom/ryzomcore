@@ -45,7 +45,7 @@
     text_ref="BM BM" text_y="-2"
     reset_focus_on_hide="false"  max_historic="0"
     onenter="set_keyboard_focus" params="target=ui:login:checkpass:content:submit_gr:eb_password:eb|select_all=false"
-    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
+    prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="12" color="135 243 28 255" />
     
     <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BM TM" w="240" h="24" fontsize="14" x="0" y="-4"
     text_ref="BM BM" text_y="-2"
@@ -660,7 +660,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_password" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_confirm_password:eb|select_all=false"
-		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="8" color="135 243 28 255" />
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
 
 		<!-- confirm password -->
 		<view type="text" id="txt_confirm_pas" posparent="txt_pas" posref="BL TL" hardtext="uiConfirmPassword" fontsize="10" x="0" y="-30" color="255 255 255 255" />
@@ -669,7 +669,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_password_conf" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_email:eb|select_all=false"
-		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="8" color="135 243 28 255" />
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
     
 		<!-- email -->
 		<view type="text" id="txt_email" posparent="txt_confirm_pas" posref="BL TL" hardtext="uiEmail" fontsize="10" x="0" y="-30" color="255 255 255 255" />
@@ -678,7 +678,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_email" reset_focus_on_hide="false"  max_historic="0"
 		onenter="" params=""
-		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="255" color="135 243 28 255" />
+		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="254" color="135 243 28 255" />
 
 		<!-- accept conditions -->
 		<ctrl type="button" id="accept_cond" button_type="toggle_button" pushed="true"	

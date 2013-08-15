@@ -123,7 +123,7 @@ MACRO(NL_DEFAULT_PROPS name label)
       VERSION ${NL_VERSION}
       SOVERSION ${NL_VERSION_MAJOR}
       COMPILE_FLAGS "/GA"
-      LINK_FLAGS "/VERSION:${NL_VERSION}")
+      LINK_FLAGS "/VERSION:${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}")
   ENDIF(${type} STREQUAL EXECUTABLE AND WIN32)
 
   IF(WITH_STLPORT AND WIN32)
@@ -247,6 +247,11 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ELSE(WIN32)
     OPTION(WITH_STATIC            "With static libraries."                        OFF)
   ENDIF(WIN32)
+  IF (WITH_STATIC)
+    OPTION(WITH_STATIC_LIBXML2    "With static libxml2"                           ON )
+  ELSE(WITH_STATIC)
+    OPTION(WITH_STATIC_LIBXML2    "With static libxml2"                           OFF)
+  ENDIF(WITH_STATIC)
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
   IF(WIN32)
     OPTION(WITH_EXTERNAL          "With provided external."                       ON )

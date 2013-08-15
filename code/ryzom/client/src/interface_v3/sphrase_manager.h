@@ -651,6 +651,10 @@ private:
 	void				computePhraseProgression();
 	void				insertProgressionSkillRecurs(SKILLS::ESkills skill, uint32 value, sint *skillReqLevel, std::vector<SKILLS::ESkills>	&skillsToInsert);
 
+	mutable NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _TotalMalusEquipLeaf;
+
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _ServerUserDefaultWeightHandsLeaf;
+
 	// @}
 
 	/// return the skill of the root

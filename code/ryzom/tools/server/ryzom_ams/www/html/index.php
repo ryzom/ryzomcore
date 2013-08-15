@@ -6,11 +6,15 @@ require( '../../ams_lib/libinclude.php' );
 session_start();
 
 //Decide what page to load
-if(isset($_SESSION['user'])){
-     $page = 'home';
+if ( ! isset( $_GET["page"]) ){
+     if(isset($_SESSION['user'])){
+          $page = 'home';
+     }else{
+          //default page
+          $page = 'login';   
+     }
 }else{
-     //default page
-     $page = 'login';   
+     $page = $_GET["page"];
 }
 
 //perform an action in case one is specified
@@ -18,13 +22,12 @@ if(isset($_SESSION['user'])){
 if ( isset( $_POST["function"] ) ){
      require( "func/" . $_POST["function"] . ".php" );
      $return = $_POST["function"]();
-}else if ( isset( $_GET["page"] ) ){
-     $filename = 'inc/' . $_GET["page"] . '.php';
+}else{
+     $filename = 'inc/' . $page . '.php';
      if(is_file($filename)){
           require_once($filename);
-          $return = $_GET["page"]();
+          $return = $page();
      }
-     $page = $_GET["page"];
 }
 
 //add username to the return array in case logged in.
@@ -36,8 +39,8 @@ if(isset($_SESSION['user'])){
 
 
 //Set permission
-if(isset($_SESSION['permission'])){
-     $return['permission'] = $_SESSION['permission'];
+if(isset($_SESSION['ticket_user'])){
+     $return['permission'] = $_SESSION['ticket_user']->getPermission();
 }else{
      //default permission
      $return['permission'] = 0; 

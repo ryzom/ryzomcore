@@ -2,16 +2,15 @@
 
 function login(){
 	
-	global $cfg;
-	
 	try{
-		$result = WebUsers::checkLoginMatch($_POST["Username"],$_POST["Password"]);
+		$username = filter_var($_POST['Username'],FILTER_SANITIZE_STRING);
+		$password = filter_var($_POST['Password'],FILTER_SANITIZE_STRING);
+		$result = WebUsers::checkLoginMatch($username, $password);
 		if( $result != "fail"){
 			//handle successful login
-			$_SESSION['user'] = $_POST["Username"];
-			$_SESSION['permission'] = $result['Permission'];
+			$_SESSION['user'] = $username;
 			$_SESSION['id'] = $result['UId'];
-			$_SESSION['ticket_user'] = Ticket_User::constr_ExternId($result['UId'],$cfg['db']['lib']);
+			$_SESSION['ticket_user'] = Ticket_User::constr_ExternId($result['UId']);
 			
 			//go back to the index page.
 			header( 'Location: index.php' );

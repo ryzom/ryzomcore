@@ -88,8 +88,6 @@ def generateSimpleMaxExporter(processName, fileExtension, sourceDirectoriesVaria
 
 
 
-generateSimpleMaxExporter("pacs_prim", "pacs_prim", "PacsPrimSourceDirectories", "PacsPrimExportDirectory", "PacsPrimInstallDirectory")
-
 generateSimpleMaxExporter("skel", "skel", "SkelSourceDirectories", "SkelExportDirectory", "SkelInstallDirectory")
 
 generateSimpleMaxExporter("swt", "swt", "SwtSourceDirectories", "SwtExportDirectory", "SwtInstallDirectory")

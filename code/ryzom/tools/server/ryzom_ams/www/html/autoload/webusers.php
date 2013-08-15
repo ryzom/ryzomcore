@@ -1,6 +1,28 @@
 <?php
 
 class WebUsers extends Users{
+
+       private $uId;
+       private $login;
+       private $email;
+       private $firstname;
+       private $lastname;
+       private $gender;
+       private $country;
+       
+       function __construct($UId = 0) {
+              $this->uId = $UId;
+       }
+       
+       public function set($values){
+              $this->uId = $values['UId'];
+              $this->login = $values['Login'];
+              $this->email = $values['Email'];
+              $this->firstname = $values['FirstName'];
+              $this->lastname = $values['LastName'];
+              $this->gender = $values['Gender'];
+              $this->country = $values['Country'];
+       }
     
      /**
      * Function checkUserNameExists
@@ -9,8 +31,7 @@ class WebUsers extends Users{
      * @return string Info: Returns true or false if the user is in the web db.
      */
      protected function checkUserNameExists($username){
-            global $cfg;
-            $dbw = new DBLayer($cfg['db']['web']);
+            $dbw = new DBLayer("web");
             return $dbw->execute("SELECT * FROM ams_user WHERE Login = :name",array('name' => $username))->rowCount();  
      }
     
@@ -22,8 +43,7 @@ class WebUsers extends Users{
      * @return string Info: Returns true or false if the user is in the www db.
      */
      protected function checkEmailExists($email){
-            global $cfg;
-            $dbw = new DBLayer($cfg['db']['web']);
+            $dbw = new DBLayer("web");
             return $dbw->execute("SELECT * FROM ams_user WHERE Email = :email",array('email' => $email))->rowCount();
      }
      
@@ -35,9 +55,7 @@ class WebUsers extends Users{
      * @return string Info: Returns true or false if a login match is found in the web db
      */
      public function checkLoginMatch($username,$password){
-        global $cfg;
-        
-        $dbw = new DBLayer($cfg['db']['web']);
+        $dbw = new DBLayer("web");
         $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:user", array('user' => $username));
         $row = $statement->fetch();
         
@@ -49,42 +67,57 @@ class WebUsers extends Users{
               return "fail";
         }	
      }
-     
-    public function getId($username){
-        global $cfg;
-        
-        $dbw = new DBLayer($cfg['db']['web']);
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
-        $row = $statement->fetch();
-        return $row['UId'];
+       
+       //returns te id for a given username
+       public static function getId($username){
+         $dbw = new DBLayer("web");  
+         $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
+         $row = $statement->fetch();
+         return $row['UId'];
+       }
+    
+       //returns te id for a given username
+       public static function getIdFromEmail($email){
+          $dbw = new DBLayer("web");  
+          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Email=:email", array('email' => $email));
+          $row = $statement->fetch();
+          return $row['UId'];
+       }
+    
+       public function getUId(){
+              return $this->uId;
+       }
+    
+    public function getUsername(){
+       $dbw = new DBLayer("web");
+       if(! isset($this->login) || $this->login == ""){
+             $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+             $row = $statement->fetch();
+             $this->set($row);
+       }
+       return $this->login;
     }
     
-    public function getUsername($id){
-        global $cfg;
-        
-        $dbw = new DBLayer($cfg['db']['web']);
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
-        $row = $statement->fetch();
-        return $row['Login'];
+    public function getEmail(){
+       $dbw = new DBLayer("web");
+       if(! isset($this->email) || $this->email == ""){
+              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+              $row = $statement->fetch();
+              $this->set($row);
+       }
+       return $this->email;
     }
     
-    public function getEmail($id){
-        global $cfg;
-        
-        $dbw = new DBLayer($cfg['db']['web']);
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
-        $row = $statement->fetch();
-        return $row['Email'];
-    }
-    
-    public function getInfo($id){
-        global $cfg;
-        
-        $dbw = new DBLayer($cfg['db']['web']);
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $id));
-        $row = $statement->fetch();
-        $result = Array('FirstName' => $row['FirstName'], 'LastName' => $row['LastName'], 'Gender' => $row['Gender'], 'Country' => $row['Country']);
-        return $result;
+    public function getInfo(){
+       $dbw = new DBLayer("web");
+       if(! (isset($this->firstname) && isset($this->lastname) && isset($this->gender) && isset($this->country) ) ||
+          $this->firstname == "" || $this->lastname == "" || $this->gender == "" || $this->country == ""){
+             $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+             $row = $statement->fetch();
+             $this->set($row);
+       }
+       $result = Array('FirstName' => $this->firstname, 'LastName' => $this->lastname, 'Gender' => $this->gender, 'Country' => $this->country);
+       return $result;
     }
     
     public function isLoggedIn(){
@@ -94,20 +127,12 @@ class WebUsers extends Users{
         return false;
     }
     
-    public function isAdmin(){
-        if(isset($_SESSION['permission']) && $_SESSION['permission'] == 2){
-            return true;
-        }
-        return false;
-    }
-    
     public function setPassword($user, $pass){
-        global $cfg;
         $reply = WebUsers::setAmsPassword($user, $pass);
         $values = Array('user' => $user, 'pass' => $pass);
          try {
                //make connection with and put into shard db
-               $dbw = new DBLayer($cfg['db']['web']);
+               $dbw = new DBLayer("web");
                $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
           }
           catch (PDOException $e) {
@@ -117,12 +142,11 @@ class WebUsers extends Users{
     }
     
      public function setEmail($user, $mail){
-        global $cfg;
         $reply = WebUsers::setAmsEmail($user, $mail);
         $values = Array('user' => $user, 'mail' => $mail);
          try {
                //make connection with and put into shard db
-               $dbw = new DBLayer($cfg['db']['web']);
+               $dbw = new DBLayer("web");
                $dbw->execute("UPDATE ams_user SET Email = :mail WHERE Login = :user ",$values);
           }
           catch (PDOException $e) {
@@ -132,9 +156,13 @@ class WebUsers extends Users{
     }
     
     public function getUsers(){
-        global $cfg;
-        $dbl = new DBLayer($cfg['db']['web']);
+        $dbl = new DBLayer("web");
         $data = $dbl->executeWithoutParams("SELECT * FROM ams_user");
         return $data;
     }
+    
+    public static function getAllUsersQuery(){
+       return "SELECT * FROM ams_user";
+    }
+    
 }

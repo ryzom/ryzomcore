@@ -131,7 +131,7 @@ local function levelToForceRegion(level)
 end 
 
 local function levelToLevelForce(level)
-	return math.floor(math.mod(level, 50) * 5 / 50) + 1	
+	return math.floor(math.fmod(level, 50) * 5 / 50) + 1	
 end 
 
 

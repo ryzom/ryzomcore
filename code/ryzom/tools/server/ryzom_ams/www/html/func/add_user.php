@@ -3,7 +3,7 @@
 function add_user(){
      
      $params = Array('Username' =>  $_POST["Username"], 'Password' =>  $_POST["Password"], 'ConfirmPass' =>  $_POST["ConfirmPass"], 'Email' =>  $_POST["Email"]);
-     $webUser = new WebUsers;
+     $webUser = new WebUsers();
      $result = $webUser->check_Register($params);
 
      // if all are good then create user
@@ -47,9 +47,8 @@ function write_user($newUser){
      );
   
      try{
-          global $cfg;
           //make connection with web db and put it in there
-          $dbw = new DBLayer($cfg['db']['web']);
+          $dbw = new DBLayer("web");
           $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)",$params);
           
           //Create the user on the shard + in case shard is offline put copy of query in query db

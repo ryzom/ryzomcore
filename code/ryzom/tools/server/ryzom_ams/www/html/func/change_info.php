@@ -9,16 +9,17 @@ function change_info(){
             if(isset($_POST['target_id'])){
 		
                 
-                if(  ($_POST['target_id'] == $_SESSION['id']) ||  WebUsers::isAdmin()  ){
+                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod($_SESSION['ticket_user'] ) ){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
-                        $target_username = WebUsers::getUsername($_POST['target_id']);
+			$webUser = new WebUsers($_POST['target_id']);
+                        $target_username = $webUser->getUsername();
                     }
                     
-                    $webUser = new WebUsers();
+                    $webUser = new WebUsers($_POST['target_id']);
                     //use current info to check for changes
-                    $current_info = $webUser->getInfo($_POST['target_id']);
+                    $current_info = $webUser->getInfo();
 		    
        
 		    $current_info['FirstName'] = filter_var($current_info['FirstName'], FILTER_SANITIZE_STRING);
@@ -70,9 +71,8 @@ function change_info(){
 
                     //if some field is update then:
                     if($updated){
-                        global $cfg;
                         //execute the query in the web DB.
-                        $dbw = new DBLayer($cfg['db']['web']);
+                        $dbw = new DBLayer("web");
                         $dbw->execute($query,$values);  
                     }
 
@@ -82,7 +82,7 @@ function change_info(){
                     if($updated){
                         $result['info_updated'] = "OK";
                     }
-                    $result['permission'] = $_SESSION['permission'];
+                    $result['permission'] = $_SESSION['ticket_user']->getPermission();
                     $result['username'] = $_SESSION['user'];
                     $result['no_visible_elements'] = 'FALSE';
                     $result['target_id'] = $_POST['target_id'];

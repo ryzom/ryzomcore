@@ -5164,7 +5164,7 @@ NLMISC_COMMAND(luaObject, "Dump the content of a lua object", "<table name> [max
 		CLuaIHMRyzom::debugInfo(e.what());
 		return false;
 	}
-	luaState->pushValue(LUA_GLOBALSINDEX);
+	luaState->pushGlobalTable();
 	CLuaObject env;
 	env.pop(*luaState);
 	uint maxDepth;

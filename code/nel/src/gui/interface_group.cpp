@@ -2325,7 +2325,8 @@ namespace NLGUI
 		_LUAOnDbChange[dbList]= newLink;
 		// Init and attach to list of untargeted links
 		std::vector<CInterfaceLink::CTargetInfo> noTargets;
-		newLink->init(noTargets, NLMISC::toString("depends(%s)", dbList.c_str()), "lua", script, "", this);
+		std::vector<CInterfaceLink::CCDBTargetInfo> noCdbTargets;
+		newLink->init(noTargets, noCdbTargets, NLMISC::toString("depends(%s)", dbList.c_str()), "lua", script, "", this);
 	}
 
 	// ------------------------------------------------------------------------------------------------

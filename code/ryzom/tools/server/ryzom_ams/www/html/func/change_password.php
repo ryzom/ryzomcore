@@ -9,17 +9,18 @@ function change_password(){
             if(isset($_POST['target_id'])){
                 $adminChangesOther = false;
                 //if target_id is the same as session id or is admin
-                if(  ($_POST['target_id'] == $_SESSION['id']) ||  WebUsers::isAdmin()  ){
+                if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod($_SESSION['ticket_user'])  ){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
-                        $target_username = WebUsers::getUsername($_POST['target_id']);
+			$webUser = new WebUsers($_POST['target_id']);
+                        $target_username = $webUser->getUsername();
                         //isAdmin is true when it's the admin, but the target_id != own id
                         $adminChangesOther = true;
                         $_POST["CurrentPass"] = "dummypass";
                     }
                     
-                    $webUser = new WebUsers();
+                    $webUser = new WebUsers($_POST['target_id']);
                     $params = Array( 'user' => $target_username, 'CurrentPass' => $_POST["CurrentPass"], 'NewPass' => $_POST["NewPass"], 'ConfirmNewPass' => $_POST["ConfirmNewPass"], 'adminChangesOther' => $adminChangesOther);
                     $result = $webUser->check_change_password($params);
                     if ($result == "success"){
@@ -34,7 +35,7 @@ function change_password(){
                         }else if($status == 'shardoffline'){
                              $succresult['SUCCESS_PASS'] = "SHARDOFF";
                         }
-                        $succresult['permission'] = $_SESSION['permission'];
+                        $succresult['permission'] = $_SESSION['ticket_user']->getPermission();
                         $succresult['no_visible_elements'] = 'FALSE';
                         $succresult['username'] = $_SESSION['user'];
                         $succresult['target_id'] = $_POST['target_id'];
@@ -46,7 +47,7 @@ function change_password(){
                         $result['prevCurrentPass'] = filter_var($_POST["CurrentPass"], FILTER_SANITIZE_STRING);
                         $result['prevNewPass'] = filter_var($_POST["NewPass"], FILTER_SANITIZE_STRING);
                         $result['prevConfirmNewPass'] = filter_var($_POST["ConfirmNewPass"], FILTER_SANITIZE_STRING);
-                        $result['permission'] = $_SESSION['permission'];
+                        $result['permission'] =  $_SESSION['ticket_user']->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
                         $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];

@@ -7,9 +7,8 @@ function create_ticket(){
         if(isset($_POST['target_id'])){
             
             //if target_id is the same as session id or is admin
-            if(  ($_POST['target_id'] == $_SESSION['id']) ||  WebUsers::isAdmin()  ){
+            if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod($_SESSION['ticket_user'])  ){
                 
-                global $cfg;
                 $category = filter_var($_POST['Category'], FILTER_SANITIZE_NUMBER_INT);
                 $title = filter_var($_POST['Title'], FILTER_SANITIZE_STRING);
                 $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
@@ -17,11 +16,16 @@ function create_ticket(){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $author = $_SESSION['ticket_user']->getTUserId();
                     }else{
-                        $author=  Ticket_User::constr_ExternId($_POST['target_id'], $cfg['db']['lib'])->getTUserId();
+                        $author=  Ticket_User::constr_ExternId($_POST['target_id'])->getTUserId();
                     }
-                    Ticket::create_Ticket($title, $content, $category, $author, $cfg['db']['lib'] );
+                    $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, $_SESSION['ticket_user']->getTUserId());
+                    header("Location: index.php?page=show_ticket&id=".$ticket_id);
+                    exit;
+                    
                 }catch (PDOException $e) {
                     //ERROR: LIB DB is not online!
+                    print_r($e);
+                    exit;
                     header("Location: index.php");
                     exit;
                 }
@@ -35,7 +39,7 @@ function create_ticket(){
     
         }else{
             //ERROR: The form was not filled in correclty
-            header("Location: index.php?page=settings");
+            header("Location: index.php?page=create_ticket");
             exit;
         }    
     }else{

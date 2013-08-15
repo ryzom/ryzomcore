@@ -521,7 +521,7 @@ function GameR2Loading:validateLoading()
 	
 	local filename = GameR2Loading.CurrentFile	
 	
-	if  string.find(filename, '\.r2', -3) == nil then
+	if  string.find(filename, '.r2', -3) == nil then
 		messageBox(i18n.get("uiR2EDLoadScenario_InvalidFileName"))
 		return
 	end

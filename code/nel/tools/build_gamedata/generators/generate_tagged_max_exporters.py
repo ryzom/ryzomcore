@@ -100,6 +100,8 @@ def generateTaggedMaxExporter(processName, fileExtension, sourceDirectoriesVaria
 
 
 
+generateTaggedMaxExporter("pacs_prim", "pacs_prim", "PacsPrimSourceDirectories", "PacsPrimExportDirectory", "PacsPrimTagExportDirectory", "PacsPrimInstallDirectory")
+
 generateTaggedMaxExporter("clodbank", "clod", "ClodSourceDirectories", "ClodExportDirectory", "ClodTagExportDirectory", "ClodInstallDirectory")
 
 generateTaggedMaxScript("ig", "ig")

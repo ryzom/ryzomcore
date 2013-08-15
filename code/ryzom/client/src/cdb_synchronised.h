@@ -151,6 +151,8 @@ private:
 	bool allInitPacketReceived() const { return _InitDeltaReceived == 2; } // Classic database + inventory
 
 	void writeInitInProgressIntoUIDB();
+
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_CDBInitInProgressDB;
 };
 
 

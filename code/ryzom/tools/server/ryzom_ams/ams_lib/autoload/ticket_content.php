@@ -9,8 +9,8 @@ class Ticket_Content{
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
     //return constructed element based on TCategoryId
-    public static function constr_TContentId( $id, $db_data) {
-        $instance = new self($db_data);
+    public static function constr_TContentId( $id) {
+        $instance = new self();
         $instance->setTContentId($id);
         return $instance;
     } 
@@ -18,13 +18,12 @@ class Ticket_Content{
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
     
-    public function __construct($db_data) {
-        $this->db = $db_data;
+    public function __construct() {
     }
 
     //Creates a ticket_content entry in the DB
     public function create() {
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $query = "INSERT INTO ticket_content (Content) VALUES (:content)";
         $values = Array('content' => $this->content);
         $this->tContentId = $dbl->executeReturnId($query, $values); ;
@@ -32,7 +31,7 @@ class Ticket_Content{
     
     //return constructed element based on TContentId
     public function load_With_TContentId( $id) {
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket_content WHERE TContentId=:id", array('id' => $id));
         $row = $statement->fetch();
         $this->tContentId = $row['TContentId'];
@@ -41,7 +40,7 @@ class Ticket_Content{
     
     //update private data to DB.
     public function update(){
-        $dbl = new DBLayer($this->db);
+        $dbl = new DBLayer("lib");
         $query = "UPDATE ticket_content SET Content = :content WHERE TContentId=:id";
         $values = Array('id' => $this->tContentId, 'content' => $this->content);
         $statement = $dbl->execute($query, $values);

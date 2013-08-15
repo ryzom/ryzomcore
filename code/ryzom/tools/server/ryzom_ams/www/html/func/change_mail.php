@@ -9,14 +9,15 @@ function change_mail(){
             if(isset($_POST['target_id'])){
 		
                 
-                if(  ($_POST['target_id'] == $_SESSION['id']) ||  WebUsers::isAdmin()  ){
+                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod($_SESSION['ticket_user']) ){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
-                        $target_username = WebUsers::getUsername($_POST['target_id']);
+			$webUser = new WebUsers($_POST['target_id']);
+                        $target_username = $webUser->getUsername();
                     }
                     
-                    $webUser = new WebUsers();
+                    $webUser = new WebUsers($_POST['target_id']);
 		    $reply = $webUser->checkEmail($_POST['NewEmail']);
 		    
 		    global $SITEBASE;
@@ -37,13 +38,13 @@ function change_mail(){
                         }else if($status == 'shardoffline'){
                              $result['SUCCESS_MAIL'] = "SHARDOFF";
                         }
-                        $result['permission'] = $_SESSION['permission'];
+                        $result['permission'] = $_SESSION['ticket_user']->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
 			$result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
-                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
-                                $result['isAdmin'] = "TRUE";
+                            if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
+                                $result['isMod'] = "TRUE";
                             }
                         }
                         helpers :: loadtemplate( 'settings', $result);
@@ -51,13 +52,13 @@ function change_mail(){
                          
                     }else{
 			$result['EMAIL'] = $reply;
-                        $result['permission'] = $_SESSION['permission'];
+                        $result['permission'] = $_SESSION['ticket_user']->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
                         $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
-                            if(WebUsers::isAdmin() && ($_POST['target_id'] != $_SESSION['id'])){
-                                $result['isAdmin'] = "TRUE";
+                            if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
+                                $result['isMod'] = "TRUE";
                             }
                         }
                         helpers :: loadtemplate( 'settings', $result);
