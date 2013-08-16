@@ -12,7 +12,7 @@ class Support_Group{
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
-    //return all groups
+    //return group
     public static function getGroup($id) {
         $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM support_group WHERE SGroupId = :id", array('id' => $id));
@@ -234,8 +234,8 @@ class Support_Group{
     //update private data to DB.
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE `support_group` SET `Name` = :name, `Tag` = :tag WHERE `SGroupId` = :id";
-        $values = Array('id' => $this->getSGroupId(), 'name' => $this->getName(), 'tag' => $this->getTag() );
+        $query = "UPDATE `support_group` SET `Name` = :name, `Tag` = :tag, `GroupEmail` = :groupemail, `IMAP_MailServer` = :mailserver, `IMAP_Username` = :username, `IMAP_Password` = :password WHERE `SGroupId` = :id";
+        $values = Array('id' => $this->getSGroupId(), 'name' => $this->getName(), 'tag' => $this->getTag(), 'groupemail' => $this->getGroupEmail(), 'mailserver' => $this->getIMAP_MailServer(), 'username' => $this->getIMAP_Username(), 'password' => $this->getIMAP_Password() );
         $statement = $dbl->execute($query, $values);
     }
     

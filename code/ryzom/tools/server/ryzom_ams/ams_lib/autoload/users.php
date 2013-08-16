@@ -192,7 +192,7 @@ class Users{
      * @takes $email
      * @return true or false depending on if its a valid email format.
      */
-     private function validEmail( $email ){
+     public function validEmail( $email ){
           $isValid = true;
           $atIndex = strrpos( $email, "@" );
           if ( is_bool( $atIndex ) && !$atIndex ){

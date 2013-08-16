@@ -21,8 +21,10 @@ function show_sgroup(){
                 }
                 
                 $group = Support_Group::getGroup($result['target_id']);
-               
                 $result['groupsname'] = $group->getName();
+                $result['groupemail'] = $group->getGroupEmail();
+                $result['imap_mailserver'] = $group->getIMAP_MailServer();
+                $result['imap_username'] = $group->getIMAP_Username();
                 $result['userlist'] = Gui_Elements::make_table(Support_Group::getAllUsersOfSupportGroup($result['target_id']), Array("getTUserId","getPermission","getExternId"), Array("tUserId","permission","externId"));
                 $i = 0;
                 foreach( $result['userlist'] as $user){
