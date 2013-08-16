@@ -241,6 +241,10 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`support_group` (
   `SGroupId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Name` VARCHAR(22) NOT NULL ,
   `Tag` VARCHAR(7) NOT NULL ,
+  `GroupEmail` VARCHAR(45) NULL ,
+  `IMAP_MailServer` VARCHAR(60) NULL ,
+  `IMAP_Username` VARCHAR(45) NULL ,
+  `IMAP_Password` VARCHAR(45) NULL ,
   PRIMARY KEY (`SGroupId`) ,
   UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) ,
   UNIQUE INDEX `Tag_UNIQUE` (`Tag` ASC) )

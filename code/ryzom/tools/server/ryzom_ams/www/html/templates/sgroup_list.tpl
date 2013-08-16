@@ -19,6 +19,7 @@
 				    <th>ID</th>
 				    <th>Name</th>
 				    <th>Tag</th>
+				    <th>Email</th>
 				    {if isset($isAdmin) && $isAdmin eq 'TRUE'}<th>Action</th>{/if}
 			    </tr>
 		    </thead>   
@@ -28,6 +29,7 @@
 				<td>{$group.sGroupId}</td>
 				<td><a href ="index.php?page=show_sgroup&id={$group.sGroupId}">{$group.name}</a></td>
 				<td class="center"><span class="label label-important" >{$group.tag}</span></td>
+				<td class="center">{$group.groupemail}</td>
 				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=sgroup_list&delete={$group.sGroupId}"><i class="icon-trash icon-white"></i> Delete</a></td>{/if}
 			  </tr>
 			  {/foreach}
@@ -67,6 +69,42 @@
 		    <div class="controls">
 			<div class="input-prepend">
 			    <input type="text" maxlength="4"  id="Tag" name="Tag">
+			</div>
+		    </div>
+		</div>
+		
+		<div class="control-group">
+		    <label class="control-label">Group EmailAddress</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="text"  id="GroupEmail" name="GroupEmail">
+			</div>
+		    </div>
+		</div>
+				
+		<div class="control-group">
+		    <label class="control-label">IMAP MailServer IP</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="text"  id="IMAP_MailServer" name="IMAP_MailServer">
+			</div>
+		    </div>
+		</div>
+		
+		<div class="control-group">
+		    <label class="control-label">IMAP Username</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="text"  id="IMAP_Username" name="IMAP_Username">
+			</div>
+		    </div>
+		</div>
+		
+		<div class="control-group">
+		    <label class="control-label">IMAP Password</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="password"   id="IMAP_Password" name="IMAP_Password">
 			</div>
 		    </div>
 		</div>

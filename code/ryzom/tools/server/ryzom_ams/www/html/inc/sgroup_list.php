@@ -14,7 +14,7 @@ function sgroup_list(){
             if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
                 $result['isAdmin'] = "TRUE";
             }
-            $result['grouplist'] = Gui_Elements::make_table(Support_Group::getGroups(), Array("getSGroupId","getName","getTag"), Array("sGroupId","name","tag"));
+            $result['grouplist'] = Gui_Elements::make_table(Support_Group::getGroups(), Array("getSGroupId","getName","getTag","getGroupEmail"), Array("sGroupId","name","tag","groupemail"));
             return $result;
         }else{
             //ERROR: No access!

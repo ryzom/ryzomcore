@@ -57,13 +57,21 @@ $CREATE_RING = true ;
 $AMS_LIB = dirname( dirname( __FILE__ ) ) . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
-
-$DEFAULT_LANGUAGE = 'en';
-
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 
+//defines the default language
+$DEFAULT_LANGUAGE = 'en';
+
+//defines if logging actions should happen or not.
 $TICKET_LOGGING = true;
-$TICKET_MAILING_SUPPORT = true;
+
+//defines the time format display
 $TIME_FORMAT = "m-d-Y H:i:s";
+
+//defines which ingame layout template should be used
 $INGAME_LAYOUT = "basic";
+
+//Defines mailing related stuff
+$SUPPORT_GROUP_IMAP_CRYPTKEY = "azerty";
+$TICKET_MAILING_SUPPORT = true;
 $MAIL_DIR = "/tmp";

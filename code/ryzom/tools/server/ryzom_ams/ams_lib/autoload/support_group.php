@@ -5,6 +5,10 @@ class Support_Group{
     private $sGroupId;
     private $name;
     private $tag;
+    private $groupEmail;
+    private $iMAP_MailServer;
+    private $iMAP_Username;
+    private $iMAP_Password;
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
@@ -35,15 +39,21 @@ class Support_Group{
     }
     
     //wrapper for creating a support group
-    public static function createSupportGroup( $name, $tag) {
+    public static function createSupportGroup( $name, $tag, $groupemail, $imap_mailserver, $imap_username, $imap_password) {
         
         if(strlen($name) < 21 && strlen($name) > 4 &&strlen($tag) < 8  && strlen($tag) > 1 ){
             $notExists = self::supportGroup_EntryNotExists($name, $tag);
             if ( $notExists == "SUCCESS" ){
                 $sGroup = new self();
-                $sGroup->setName($name);
-                $sGroup->setTag($tag);
+                $values = array('Name' => $name, 'Tag' => $tag, 'GroupEmail' => $groupemail, 'IMAP_MailServer' => $imap_mailserver, 'IMAP_Username' => $imap_username, 'IMAP_Password' => $imap_password);
+                $sGroup->setName($values['Name']);
+                $sGroup->setTag($values['Tag']);
+                $sGroup->setGroupEmail($values['GroupEmail']);
+                $sGroup->setIMAP_MailServer($values['IMAP_MailServer']);
+                $sGroup->setIMAP_Username($values['IMAP_Username']);
+                $sGroup->setIMAP_Password($values['IMAP_Password']);
                 $sGroup->create();
+                
                 return "SUCCESS";
             }else{
                 //return NAME_TAKEN  or TAG_TAKEN
@@ -199,12 +209,16 @@ class Support_Group{
         $this->setSGroupId($values['SGroupId']);
         $this->setName($values['Name']);
         $this->setTag($values['Tag']);
+        $this->setGroupEmail($values['GroupEmail']);
+        $this->setIMAP_MailServer($values['IMAP_MailServer']);
+        $this->setIMAP_Username($values['IMAP_Username']);
+        $this->setIMAP_Password($values['IMAP_Password']);
     }
     
     public function create() {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO support_group (Name, Tag) VALUES (:name, :tag)";
-        $values = Array('name' => $this->name, 'tag' => $this->tag);
+        $query = "INSERT INTO support_group (Name, Tag, GroupEmail, IMAP_MailServer, IMAP_Username, IMAP_Password) VALUES (:name, :tag, :groupemail, :imap_mailserver, :imap_username, :imap_password)";
+        $values = Array('name' => $this->getName(), 'tag' => $this->getTag(), 'groupemail' => $this->getGroupEmail(), 'imap_mailserver' => $this->getIMAP_MailServer(), 'imap_username' => $this->getIMAP_Username(), 'imap_password' => $this->getIMAP_Password());
         $dbl->execute($query, $values);
     } 
 
@@ -247,6 +261,21 @@ class Support_Group{
         return $this->tag;
     }
     
+    public function getGroupEmail(){
+        return $this->groupEmail;
+    }
+    
+    public function getIMAP_MailServer(){
+        return $this->iMAP_MailServer;
+    }
+    
+    public function getIMAP_Username(){
+        return $this->iMAP_Username;
+    }
+    
+    public function getIMAP_Password(){
+        return $this->iMap_Password;
+    }
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
      
     public function setSGroupId($id){
@@ -261,5 +290,19 @@ class Support_Group{
         $this->tag = $t;
     }
    
+    public function setGroupEmail($ge){
+        $this->groupEmail = $ge;
+    }
     
+    public function setIMAP_MailServer($ms){
+        $this->iMAP_MailServer = $ms;
+    }
+    
+    public function setIMAP_Username($u){
+        $this->iMAP_Username = $u;
+    }
+    
+    public function setIMAP_Password($p){
+        $this->iMap_Password = $p;
+    }
 }
