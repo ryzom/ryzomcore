@@ -104,23 +104,72 @@ namespace NL3D
 				ss << i;
 				ss << " ) ";
 				ss << "in vec4 ";
-				ss << attribNames[ i ];
+				ss << "v" << attribNames[ i ];
 				ss << ";";
 				ss << std::endl;
 			}
 		}
 		ss << std::endl;
 
+		for( int i = 1; i < CVertexBuffer::NumValue; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "smooth out vec4 ";
+				ss << attribNames[ i ] << ";" << std::endl;
+			}
+		}
+		ss << std::endl;
+
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "gl_Position = mvp * " << attribNames[ 0 ] << ";" << std::endl;
+		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
+
+		for( int i = 1; i < CVertexBuffer::NumValue; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << attribNames[ i ];
+				ss << " = ";
+				ss << "v" << attribNames[ i ] << ";" << std::endl;
+			}
+		}
+
 		ss << "}" << std::endl;
 		
-		vs.append( ss.str() );
+		vs.assign( ss.str() );
 	}
 
 	void CGLSLShaderGenerator::generatePS( std::string &ps )
 	{
+		std::stringstream ss;
+
+		ss << "#version 330" << std::endl;
+		ss << std::endl;
+
+		ss << "out vec4 fragColor;" << std::endl;
+
+		for( int i = 1; i < CVertexBuffer::NumValue; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "smooth in vec4 ";
+				ss << attribNames[ i ] << ";" << std::endl;
+			}
+		}
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "fragColor = ";
+
+		//////////////////// obviously this is just temporary /////////
+		ss << "vec4( 1.0, 0.0, 0.0, 1.0 );" << std::endl;
+		/////////////////////////////////////////////////////
+
+		ss << "}" << std::endl;
+
+		ps.assign( ss.str() );
 	}
 
 }
