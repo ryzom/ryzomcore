@@ -58,11 +58,14 @@ class Mail_Handler{
     //the main function
     function cron() {
         global $cfg;
-        $inbox_username = $cfg['mail']['username'];
+        $default_groupemail = $cfg['mail']['default_groupemail'];
+        $default_groupname = $cfg['mail']['default_groupname'];
+        /*$inbox_username = $cfg['mail']['username'];
         $inbox_password = $cfg['mail']['password'];
         $inbox_host = $cfg['mail']['host'];
         $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";
-        global $MAIL_DIR;
+        global $MAIL_DIR;*/
+        
         
         // Deliver new mail
         echo("mail cron\n");
@@ -70,15 +73,14 @@ class Mail_Handler{
         //creates child process
         $pid = self::mail_fork();
         $pidfile = '/tmp/ams_cron_email_pid';
-    
-        //INFO: if $pid = 
-        //-1: "Could not fork!\n";
-        // 0: "In child!\n";
-        //>0: "In parent!\n";
         
         if($pid) {
         
             // We're the parent process, do nothing!
+            //INFO: if $pid = 
+            //-1: "Could not fork!\n";
+            // 0: "In child!\n";
+            //>0: "In parent!\n";
         
         } else {
             //make db connection here because the children have to make the connection.
@@ -86,6 +88,7 @@ class Mail_Handler{
             
             //if $pidfile doesn't exist yet, then start sending the mails that are in the db.
             if(!file_exists($pidfile)) {
+                
                 //create the file and write the child processes id in it!
                 $pid = getmypid();
                 $file = fopen($pidfile, 'w');
@@ -106,18 +109,16 @@ class Mail_Handler{
                         $email['Recipient'] = Ticket_User::get_email_by_user_id($email['UserId']);
                     }
                     
-                    //create sending email adres based on the $sender id
-                    if($email['Sender'] != 0) {
-                        $username = Ticket_User::get_username_from_id($email['Sender']);          
-                        $from =  "$username <$username@$inbox_host>";          
+                    //create sending email adres based on the $sender id which refers to the department id
+                    if($email['Sender'] == NULL) {
+                        $from =  $default_groupname ." <".$default_groupemail.">";
                     } else {
-                        $from = $oms_reply_to;          
+                        $group = Support_Group::getGroup($email['Sender']);
+                        $from = $group->getName()." <".$group->getGroupEmail().">";
                     }
+                   
                     $headers = "From: $from\r\n" . "Message-ID: " . $message_id ;
-                    print("recip: " . $email['Recipient']);
-                    print("subj: " .$email['Subject']);
-                    print("body: " . $email['Body']);
-                    print("headers: " . $headers);
+                   
                     if(mail($email['Recipient'], $email['Subject'], $email['Body'], $headers)) {       
                         $status = "DELIVERED";        
                         echo("Emailed {$email['Recipient']}\n");        
@@ -127,13 +128,12 @@ class Mail_Handler{
                     }
                     //change the status of the emails.
                     $this->db->execute('update email set Status = ?, MessageId = ?, Attempts = Attempts + 1 where MailId = ?', array($status, $message_id, $email['MailId']));
-                    //db_exec('update email set status = ?, message_id = ?, attempts = attempts + 1 where id_email = ?', array($status, $message_id, $email['id_email']));
+                   
                 }
                 unlink($pidfile);
             }
             // Check mail
             
-            //$mailbox = imap_open("{localhost:110/pop3/novalidate-cert}INBOX", $inbox_username, $inbox_password);
             $mbox = imap_open($cfg['mail']['server'], $inbox_username, $inbox_password) or die('Cannot connect to mail server: ' . imap_last_error());
             $message_count = imap_num_msg($mbox);
     

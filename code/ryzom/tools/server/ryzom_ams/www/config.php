@@ -31,9 +31,11 @@ $cfg['db']['ring']['name']    = 'ring_open';
 $cfg['db']['ring']['user']    = 'shard';
 $cfg['db']['ring']['pass']    = '';
 
+$cfg['mail']['default_groupemail'] = 'support@ryzomcore.com';
+$cfg['mail']['default_groupname'] = 'Ryzomcore Support';
 $cfg['mail']['username']    = 'amsryzom@gmail.com';
 $cfg['mail']['password']    = 'lol123bol';
-$cfg['mail']['host']    = 'ryzomcore.com';
+//$cfg['mail']['host']    = 'ryzomcore.com';
 
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");       

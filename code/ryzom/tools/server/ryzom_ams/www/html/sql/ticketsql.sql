@@ -309,19 +309,14 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
   `Body` VARCHAR(400) NULL ,
   `Status` VARCHAR(45) NULL ,
   `Attempts` VARCHAR(45) NULL DEFAULT 0 ,
-  `Sender` INT(10) UNSIGNED NOT NULL ,
   `UserId` INT(10) UNSIGNED NOT NULL ,
   `MessageId` VARCHAR(45) NOT NULL ,
   `TicketId` INT UNSIGNED NOT NULL ,
+  `Sender` INT(10) UNSIGNED NULL ,
   PRIMARY KEY (`MailId`) ,
-  INDEX `fk_email_ticket_user1` (`Sender` ASC) ,
   INDEX `fk_email_ticket_user2` (`UserId` ASC) ,
   INDEX `fk_email_ticket1` (`TicketId` ASC) ,
-  CONSTRAINT `fk_email_ticket_user1`
-    FOREIGN KEY (`Sender` )
-    REFERENCES `mydb`.`ticket_user` (`TUserId` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_email_support_group1` (`Sender` ASC) ,
   CONSTRAINT `fk_email_ticket_user2`
     FOREIGN KEY (`UserId` )
     REFERENCES `mydb`.`ticket_user` (`TUserId` )
@@ -330,6 +325,11 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
   CONSTRAINT `fk_email_ticket1`
     FOREIGN KEY (`TicketId` )
     REFERENCES `mydb`.`ticket` (`TId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_email_support_group1`
+    FOREIGN KEY (`Sender` )
+    REFERENCES `mydb`.`support_group` (`SGroupId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
