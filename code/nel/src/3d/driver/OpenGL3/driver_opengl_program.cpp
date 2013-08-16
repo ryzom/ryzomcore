@@ -2,6 +2,8 @@
 #include "driver_glsl_program.h"
 #include "driver_glsl_vertex_program.h"
 #include "driver_glsl_pixel_program.h"
+#include "driver_glsl_shader_generator.h"
+#include "driver_opengl_vertex_buffer_hard.h"
 #include "nel/3d/i_program_object.h"
 
 namespace NL3D
@@ -114,6 +116,29 @@ namespace NL3D
 		return true;
 	}
 
+	bool CDriverGL3::renderTriangles2( CMaterial &mat, uint32 startIndex, uint32 numTris )
+	{
+		if( !setupProgram( mat ) )
+			return false;
+
+		glDrawArrays( GL_TRIANGLES, startIndex * 3, numTris * 3 );
+
+		return true;
+	}
+
+	bool CDriverGL3::setupProgram( CMaterial &mat )
+	{
+		std::string vs;
+		std::string ps;
+
+		shaderGenerator->reset();
+		shaderGenerator->setMaterial( &mat );
+		shaderGenerator->setVBFormat( _CurrentVertexBufferHard->VB->getVertexFormat() );
+		shaderGenerator->generateVS( vs );
+		shaderGenerator->generatePS( ps );
+
+		return true;
+	}
 }
 
 

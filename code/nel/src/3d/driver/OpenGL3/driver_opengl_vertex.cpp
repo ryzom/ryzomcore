@@ -265,6 +265,8 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
 		return false;
 
+	setupProgram( mat );
+
 	refreshTexMatrices();
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;

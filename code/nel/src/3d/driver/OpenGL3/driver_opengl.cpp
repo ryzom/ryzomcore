@@ -33,6 +33,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/dynloadlib.h"
 #include "driver_opengl_vertex_buffer_hard.h"
+#include "driver_glsl_shader_generator.h"
 
 
 using namespace std;
@@ -333,13 +334,24 @@ CDriverGL3::CDriverGL3()
 	_TextureTargetUpload = false;
 
 	currentProgram = NULL;
+	shaderGenerator = new CGLSLShaderGenerator();
 }
 
 // ***************************************************************************
 CDriverGL3::~CDriverGL3()
 {
 	H_AUTO_OGL(CDriverGL3_CDriverGLDtor)
+
+	if( currentProgram != NULL )
+	{
+		delete currentProgram;
+		currentProgram = NULL;
+	}
+
 	release();
+
+	delete shaderGenerator;
+	shaderGenerator = NULL;
 
 #if defined(NL_OS_MAC)
 	[_autoreleasePool release];

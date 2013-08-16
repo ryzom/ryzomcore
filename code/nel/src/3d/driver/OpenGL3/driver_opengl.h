@@ -277,6 +277,8 @@ public:
 };
 
 
+class CGLSLShaderGenerator;
+
 
 // ***************************************************************************
 class CDriverGL3 : public IDriver
@@ -374,6 +376,7 @@ public:
 	static inline void		setupCausticsSecondTex(uint stage);*/
 
 	virtual bool			setupMaterial(CMaterial& mat);
+	bool					setupProgram(CMaterial& mat);
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -431,6 +434,7 @@ public:
 
 	virtual bool			renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines);
 	virtual bool			renderTriangles(CMaterial& Mat, uint32 firstIndex, uint32 ntris);
+	bool					renderTriangles2(CMaterial& Mat, uint32 firstIndex, uint32 ntris );
 	virtual bool			renderSimpleTriangles(uint32 firstTri, uint32 ntris);
 	virtual bool			renderRawPoints(CMaterial& Mat, uint32 startIndex, uint32 numPoints);
 	virtual bool			renderRawLines(CMaterial& Mat, uint32 startIndex, uint32 numLines);
@@ -1350,6 +1354,8 @@ private:
 	NLMISC::CRGBA					_CurrentBlendConstantColor;
 
 	private:
+
+		CGLSLShaderGenerator *shaderGenerator;
 
 		IProgramObject *currentProgram;
 
