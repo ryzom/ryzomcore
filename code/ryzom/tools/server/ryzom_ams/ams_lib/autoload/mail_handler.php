@@ -60,8 +60,7 @@ class Mail_Handler{
         global $cfg;
         $default_groupemail = $cfg['mail']['default_groupemail'];
         $default_groupname = $cfg['mail']['default_groupname'];
-        /*$inbox_username = $cfg['mail']['username'];
-        $inbox_password = $cfg['mail']['password'];
+        /*
         $inbox_host = $cfg['mail']['host'];
         $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";
         global $MAIL_DIR;*/
@@ -133,29 +132,38 @@ class Mail_Handler{
                 unlink($pidfile);
             }
             // Check mail
+            $sGroups = Support_Group::getGroups();
+            $defaultGroup = new Support_Group();
+            $defaultGroup->setGroupEmail($default_groupemail);
+            $defaultGroup->setIMAP_MailServer($cfg['mail']['default_mailserver']);
+            $defaultGroup->setIMAP_Username($cfg['mail']['default_username']);
+            $defaultGroup->setIMAP_Password($cfg['mail']['default_password']);
+
+            $sGroups[] = $defaultGroup;
             
-            $mbox = imap_open($cfg['mail']['server'], $inbox_username, $inbox_password) or die('Cannot connect to mail server: ' . imap_last_error());
-            $message_count = imap_num_msg($mbox);
-    
-            for ($i = 1; $i <= $message_count; ++$i) {
-                
-                //return task ID
-                self::incoming_mail_handler($mbox, $i);
-                $tid = 1; //self::ams_create_email($from, $subject, $txt, $html, $to, $from);
-    
-                if($tid) {
-                    //TODO: base file on Ticket + reply id
-                   /* $file = fopen($MAIL_DIR."/mail/".$tid, 'w');      
-                    fwrite($file, $entire_email);     
-                    fclose($file);     */
+            foreach($sGroups as $group){
+                $mbox = imap_open($group->getIMAP_MailServer(), $group->getIMAP_Username(), $group->getIMAP_Password()) or die('Cannot connect to mail server: ' . imap_last_error());
+                $message_count = imap_num_msg($mbox);
+        
+                for ($i = 1; $i <= $message_count; ++$i) {
+                    
+                    //return task ID
+                    self::incoming_mail_handler($mbox, $i);
+                    $tid = 1; //self::ams_create_email($from, $subject, $txt, $html, $to, $from);
+        
+                    if($tid) {
+                        //TODO: base file on Ticket + reply id
+                       /* $file = fopen($MAIL_DIR."/mail/".$tid, 'w');      
+                        fwrite($file, $entire_email);     
+                        fclose($file);     */
+                    }
+                    //mark message $i of $mbox for deletion!
+                    imap_delete($mbox, $i);
                 }
-                //mark message $i of $mbox for deletion!
-                imap_delete($mbox, $i);
+                //delete marked messages
+                imap_expunge($mbox);  
+                imap_close($mbox);
             }
-            //delete marked messages
-            imap_expunge($mbox);  
-            imap_close($mbox);
-            
         }
     
     }

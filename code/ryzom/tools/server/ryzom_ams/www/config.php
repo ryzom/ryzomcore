@@ -31,12 +31,6 @@ $cfg['db']['ring']['name']    = 'ring_open';
 $cfg['db']['ring']['user']    = 'shard';
 $cfg['db']['ring']['pass']    = '';
 
-$cfg['mail']['default_groupemail'] = 'support@ryzomcore.com';
-$cfg['mail']['default_groupname'] = 'Ryzomcore Support';
-$cfg['mail']['username']    = 'amsryzom@gmail.com';
-$cfg['mail']['password']    = 'lol123bol';
-//$cfg['mail']['host']    = 'ryzomcore.com';
-
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");       
 // POP3 server on port 110: $mbox = imap_open ("{localhost:110/pop3}INBOX", "user_id", "password");      
@@ -47,7 +41,12 @@ $cfg['mail']['password']    = 'lol123bol';
 // NNTP server on port 119 use: $nntp = imap_open ("{localhost:119/nntp}comp.test", "", "");
 // To connect to a remote server replace "localhost" with the name or the IP address of the server you want to connect to.
 //$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
-$cfg['mail']['server']= '{imap.gmail.com:993/imap/ssl}INBOX';
+$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';
+$cfg['mail']['default_groupemail'] = 'support@ryzomcore.com';
+$cfg['mail']['default_groupname'] = 'Ryzomcore Support';
+$cfg['mail']['default_username']    = 'amsryzom@gmail.com';
+$cfg['mail']['default_password']    = 'lol123bol';
+
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
