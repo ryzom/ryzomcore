@@ -273,7 +273,7 @@
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
             
-        INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
+        INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Uncategorized'),('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
         
                         
         
@@ -374,7 +374,7 @@
           CONSTRAINT `fk_email_support_group1`
             FOREIGN KEY (`Sender` )
             REFERENCES `" . $cfg['db']['lib']['name'] ."`.`support_group` (`SGroupId` )
-            ON DELETE NO ACTION
+            ON DELETE CASCADE
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
 

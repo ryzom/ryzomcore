@@ -310,7 +310,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
   `Status` VARCHAR(45) NULL ,
   `Attempts` VARCHAR(45) NULL DEFAULT 0 ,
   `UserId` INT(10) UNSIGNED NOT NULL ,
-  `MessageId` VARCHAR(45) NOT NULL ,
+  `MessageId` VARCHAR(45) NULL ,
   `TicketId` INT UNSIGNED NOT NULL ,
   `Sender` INT(10) UNSIGNED NULL ,
   PRIMARY KEY (`MailId`) ,
@@ -330,7 +330,7 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
   CONSTRAINT `fk_email_support_group1`
     FOREIGN KEY (`Sender` )
     REFERENCES `mydb`.`support_group` (`SGroupId` )
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 

@@ -46,6 +46,7 @@ $cfg['mail']['default_groupemail'] = 'support@ryzomcore.com';
 $cfg['mail']['default_groupname'] = 'Ryzomcore Support';
 $cfg['mail']['default_username']    = 'amsryzom@gmail.com';
 $cfg['mail']['default_password']    = 'lol123bol';
+$cfg['mail']['host'] = "ryzomcore.com";
 
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database

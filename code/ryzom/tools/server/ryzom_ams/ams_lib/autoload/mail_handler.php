@@ -42,7 +42,7 @@ class Mail_Handler{
     } 
     
     
-    public static function send_mail($recipient, $subject, $body, $ticket_id = 0, $from = 1) {
+    public static function send_mail($recipient, $subject, $body, $ticket_id = 0, $from = NULL) {
         if(is_numeric($recipient)) {
             $id_user = $recipient;
             $recipient = NULL;
@@ -134,6 +134,7 @@ class Mail_Handler{
             // Check mail
             $sGroups = Support_Group::getGroups();
             $defaultGroup = new Support_Group();
+            $defaultGroup->setSGroupId(0);
             $defaultGroup->setGroupEmail($default_groupemail);
             $defaultGroup->setIMAP_MailServer($cfg['mail']['default_mailserver']);
             $defaultGroup->setIMAP_Username($cfg['mail']['default_username']);
@@ -148,7 +149,7 @@ class Mail_Handler{
                 for ($i = 1; $i <= $message_count; ++$i) {
                     
                     //return task ID
-                    self::incoming_mail_handler($mbox, $i);
+                    self::incoming_mail_handler($mbox, $i,$group);
                     $tid = 1; //self::ams_create_email($from, $subject, $txt, $html, $to, $from);
         
                     if($tid) {
@@ -182,19 +183,36 @@ class Mail_Handler{
     
     function get_ticket_id_from_subject($subject){
         $startpos = strpos($subject, "[Ticket #");
-        $tempString = substr($subject, $startpos+9);
-        $endpos = strpos($tempString, "]");
-        $ticket_id = substr($tempString, 0, $endpos);
+        if($startpos){
+            $tempString = substr($subject, $startpos+9);
+            $endpos = strpos($tempString, "]");
+            if($endpos){
+                $ticket_id = substr($tempString, 0, $endpos);
+            }else{
+                $ticket_id = 0;
+            }
+        }else{
+            $ticket_id = 0;
+        }
         return $ticket_id;
     }
     
     
-    function incoming_mail_handler($mbox,$i){
+    function incoming_mail_handler($mbox,$i,$group){
         
         $header = imap_header($mbox, $i);
         $subject = self::decode_utf8($header->subject);
+        $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
+        $subject = self::decode_utf8($header->subject);    
+        $to = $header->to[0]->mailbox;   
+        $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
+        $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
+        //$html = self::get_part($mbox, $i, "TEXT/HTML");
         
-        print_r($header);
+        //get the id out of the email address of the person sending the email.
+        if($from !== NULL && !is_numeric($from)){
+            $from = Ticket_User::get_id_from_email($from);
+        }
         
         //get ticket_id out of the message-id or else out of the subject line
         $ticket_id = 0;
@@ -209,15 +227,8 @@ class Mail_Handler{
             $ticket_id = self::get_ticket_id_from_subject($subject);
         }
        
-        //if ticket id is found
+        //if ticket id is found, that means it is a reply on an existing ticket
         if($ticket_id){
-            
-            $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
-            $subject = self::decode_utf8($header->subject);    
-            $to = $header->to[0]->mailbox;   
-            $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
-            $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
-            //$html = self::get_part($mbox, $i, "TEXT/HTML");
             
             //use the line ---------- Ticket # to make a distincton between the old message and the reply
             $endpos = strpos($txt, ">---------- Ticket #");
@@ -230,18 +241,32 @@ class Mail_Handler{
                 }
             }
             
+            //if email is sent from an existing email address in the db (else it will give an error while loading the user object)
+            if($from != "FALSE"){
+                $user = new Ticket_User();
+                $user->load_With_TUserId($from);
+                $ticket = new Ticket();
+                $ticket->load_With_TId($ticket_id);
+                
+                //if user has access to it!
+                if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
+                    Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);              
+                }
+            }
             
-            //get the id out of the email address of the person sending the email.
-            if($from !== NULL && !is_numeric($from)) $from = Ticket_User::get_id_from_email($from);
+        }else{
             
-            $user = new Ticket_User();
-            $user->load_With_TUserId($from);
-            $ticket = new Ticket();
-            $ticket->load_With_TId($ticket_id);
+            //if ticket_id isn't found, create a new ticket!
             
-            //if user has access to it!
-            if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
-                Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);              
+            //if an existing email address mailed the ticket
+            if($from != "FALSE"){
+                
+                $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from);
+                
+                //if not default group, then forward it!
+                if($group->getSGroupId()){
+                    Ticket::forwardTicket(0, $newTicketId, $group->getSGroupId());
+                }
             }
             
         }

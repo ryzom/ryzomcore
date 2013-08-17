@@ -98,8 +98,12 @@ class Ticket_User{
     
     public static function get_id_from_email($email){
         $webUserId = WebUsers::getIdFromEmail($email);
-        $user = Ticket_User::constr_ExternId($webUserId);
-        return $user->getTUserId();    
+        if($webUserId != "FALSE"){
+            $user = Ticket_User::constr_ExternId($webUserId);
+            return $user->getTUserId();
+        }else{
+            return "FALSE";
+        }
     }
     
     

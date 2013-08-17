@@ -197,12 +197,15 @@ class Ticket{
     public static function forwardTicket($user_id, $ticket_id, $group_id){
         if(self::ticketExists($ticket_id)){
             if(isset($group_id) && $group_id != ""){
-                //unassign the ticket incase the ticket is assined to yourself
-                self::unAssignTicket($user_id, $ticket_id);
                 //forward the ticket
                 $returnvalue = Forwarded::forwardTicket($group_id, $ticket_id);
-                //make a log entry of this action
-                Ticket_Log::createLogEntry( $ticket_id, $user_id, 8, $group_id);
+                
+                if($user_id != 0){
+                    //unassign the ticket incase the ticket is assined to yourself
+                    self::unAssignTicket($user_id, $ticket_id);
+                    //make a log entry of this action
+                    Ticket_Log::createLogEntry( $ticket_id, $user_id, 8, $group_id);
+                }
                 return $returnvalue;
             }else{
                 return "INVALID_SGROUP";

@@ -81,7 +81,11 @@ class WebUsers extends Users{
           $dbw = new DBLayer("web");  
           $statement = $dbw->execute("SELECT * FROM ams_user WHERE Email=:email", array('email' => $email));
           $row = $statement->fetch();
-          return $row['UId'];
+          if($row !== "FALSE"){
+              return $row['UId'];
+          }else{
+              return "FALSE";
+          }
        }
     
        public function getUId(){
