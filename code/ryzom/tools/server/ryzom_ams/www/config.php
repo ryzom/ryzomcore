@@ -42,7 +42,7 @@ $cfg['db']['ring']['pass']    = '';
 // To connect to a remote server replace "localhost" with the name or the IP address of the server you want to connect to.
 //$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
 $cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';
-$cfg['mail']['default_groupemail'] = 'support@ryzomcore.com';
+$cfg['mail']['default_groupemail'] = 'amsryzom@gmail.com';
 $cfg['mail']['default_groupname'] = 'Ryzomcore Support';
 $cfg['mail']['default_username']    = 'amsryzom@gmail.com';
 $cfg['mail']['default_password']    = 'lol123bol';

@@ -149,17 +149,18 @@ class Mail_Handler{
                 for ($i = 1; $i <= $message_count; ++$i) {
                     
                     //return task ID
-                    self::incoming_mail_handler($mbox, $i,$group);
-                    $tid = 1; //self::ams_create_email($from, $subject, $txt, $html, $to, $from);
+                    $tid = self::incoming_mail_handler($mbox, $i,$group);
         
                     if($tid) {
-                        //TODO: base file on Ticket + reply id
-                       /* $file = fopen($MAIL_DIR."/mail/".$tid, 'w');      
+                        //TODO: base file on Ticket + timestamp
+                        $file = fopen($MAIL_DIR."/mail/ticket".$tid.".".time(), 'w');      
                         fwrite($file, $entire_email);     
-                        fclose($file);     */
+                        fclose($file);
+                        
+                        //mark message $i of $mbox for deletion!
+                        imap_delete($mbox, $i);
                     }
-                    //mark message $i of $mbox for deletion!
-                    imap_delete($mbox, $i);
+
                 }
                 //delete marked messages
                 imap_expunge($mbox);  
@@ -252,23 +253,30 @@ class Mail_Handler{
                 if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
                     Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);              
                 }
+                
             }
+            print("\n Email found that is a reply to a ticket!\n");
+            return $ticket_id;
             
-        }else{
+        }else if($from != "FALSE"){
             
             //if ticket_id isn't found, create a new ticket!
-            
             //if an existing email address mailed the ticket
-            if($from != "FALSE"){
-                
-                $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from);
-                
-                //if not default group, then forward it!
-                if($group->getSGroupId()){
-                    Ticket::forwardTicket(0, $newTicketId, $group->getSGroupId());
-                }
-            }
             
+            $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from);
+            
+            //if not default group, then forward it!
+            if($group->getSGroupId()){
+                Ticket::forwardTicket(0, $newTicketId, $group->getSGroupId());
+            }
+            print("\n Email found that is a new ticket!\n");
+            return $newTicketId;
+            
+            
+        }else{
+            //if it's a email that has nothing to do with ticketing, return 0;
+            print("\n Email found that isn't a reply or new ticket!\n");
+            return 0;
         }
         
     }

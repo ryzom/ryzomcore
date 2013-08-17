@@ -81,7 +81,9 @@ class WebUsers extends Users{
           $dbw = new DBLayer("web");  
           $statement = $dbw->execute("SELECT * FROM ams_user WHERE Email=:email", array('email' => $email));
           $row = $statement->fetch();
-          if($row !== "FALSE"){
+          if(!empty($row)){
+              print "shouldn't be here!" . $row . "seee";
+              
               return $row['UId'];
           }else{
               return "FALSE";
