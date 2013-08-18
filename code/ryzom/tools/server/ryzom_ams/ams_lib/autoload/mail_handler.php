@@ -12,30 +12,29 @@ class Mail_Handler{
     }
     
     
-    public static function send_ticketing_mail($ticketObj, $content, $type, $author) {
+    public static function send_ticketing_mail($ticketObj, $content, $type, $sendingGroupId = 0) {
         global $TICKET_MAILING_SUPPORT;
         if($TICKET_MAILING_SUPPORT){
-            $txt = "";
-            $subject = "";
+            //$txt = "";
+            //$subject = "";
+            if($sendingGroupId == 0){
+                //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
+                $sendingGroupId = NULL;
+            }
             if($type == "REPLY"){
                 $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n You received a new reply on your ticket: " . $ticketObj->getTitle() .
                 "\n --------------------\n\n";
                 $subject = "New reply on [Ticket #" . $ticketObj->getTId() ."]";
                 $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
                 $txt = $txt . $content . $endTxt;
-                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId(),$author);
+                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId(),$sendingGroupId);
             }else if($type == "NEW"){
                 $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n Your ticket: " . $ticketObj->getTitle() . " is newly created";
-                if($ticketObj->getAuthor() != $author){
-                    $txt = $txt . " by " . Ticket_User::get_username_from_id($author);
-                }else{
-                    $author = $ticketObj->getAuthor();
-                }
                 $txt = $txt . "\n --------------------\n\n";
                 $subject = "New ticket created [Ticket #" . $ticketObj->getTId() ."]";
                 $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
                 $txt = $txt . $content . $endTxt;
-                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId());
+                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId(), $sendingGroupId);
             }
             
         }
@@ -62,8 +61,8 @@ class Mail_Handler{
         $default_groupname = $cfg['mail']['default_groupname'];
         /*
         $inbox_host = $cfg['mail']['host'];
-        $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";
-        global $MAIL_DIR;*/
+        $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";*/
+        global $MAIL_DIR;
         
         
         // Deliver new mail
@@ -154,7 +153,7 @@ class Mail_Handler{
                     if($tid) {
                         //TODO: base file on Ticket + timestamp
                         $file = fopen($MAIL_DIR."/mail/ticket".$tid.".".time(), 'w');      
-                        fwrite($file, $entire_email);     
+                        fwrite($file, imap_fetchheader($mbox, $i) . imap_body($mbox, $i));     
                         fclose($file);
                         
                         //mark message $i of $mbox for deletion!
@@ -255,7 +254,7 @@ class Mail_Handler{
                 }
                 
             }
-            print("\n Email found that is a reply to a ticket!\n");
+            print("\n Email found that is a reply to a ticket at:".$group->getGroupEmail());
             return $ticket_id;
             
         }else if($from != "FALSE"){
@@ -263,90 +262,20 @@ class Mail_Handler{
             //if ticket_id isn't found, create a new ticket!
             //if an existing email address mailed the ticket
             
-            $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from);
+            //if not default group, then forward it by giving the $group->getSGroupId's param
+            $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from, $group->getSGroupId());
             
-            //if not default group, then forward it!
-            if($group->getSGroupId()){
-                Ticket::forwardTicket(0, $newTicketId, $group->getSGroupId());
-            }
-            print("\n Email found that is a new ticket!\n");
+            print("\n Email regarding new ticket found at:".$group->getGroupEmail());
             return $newTicketId;
             
             
         }else{
             //if it's a email that has nothing to do with ticketing, return 0;
-            print("\n Email found that isn't a reply or new ticket!\n");
+            print("\n Email found that isn't a reply or new ticket, at:".$group->getGroupEmail());
             return 0;
         }
         
     }
-    
-    /*function ams_create_email($from, $subject, $body, $html, $recipient = 0, $sender = NULL) {
-    
-        //TODO:
-        if($recipient == 0 && !is_string($recipient)) {
-            global $user;
-            $recipient = $user->uid;
-        }
-    
-        if($sender !== NULL && !is_numeric($sender)) $sender = self::get_id_from_username($sender);
-        if(!is_numeric($recipient)) $recipient = self::get_id_from_username($recipient);
-    
-        $message = array(
-        'creator' => $sender,
-        'owner' => $recipient,
-        'type' => 'email',
-        'summary' => $subject,
-        'data' => array (
-            'subject' => $subject,
-            'body' => $body,
-            'html' => $html,
-            'sender' => oms_get_username_from_id($sender),
-            'from' => $from,
-            'recipient' => oms_get_username_from_id($recipient),
-            'time' => time(),
-            ),
-        );
-        
-        //TO ASK:
-        oms_task_create($message);
-        oms_task_index($message, array('subject', 'body', 'sender', 'recipient'));
-        //---------------------------
-        return $message['id_task'];
-    }*/
-    
-     
-    
-    /*function oms_get_email($id) {
-    
-        $message = oms_task_load($id);
-        if($message) {
-            oms_prepare_email($message);
-            return $message;
-        } else {
-            return FALSE; 
-        }
-    
-    }*/
-    
-     
-    
-    /*function oms_prepare_email(&$message) {
-    
-        $data = $message['data'];
-        $data['id_message'] = $message['id_task'];
-        $data['read'] = ($message['status'] != 'NEW' && $message['status'] != 'UNREAD');
-        $message = $data;
-    
-    }*/
-    
-     
-    
-    /*function oms_email_mark_read($mid) {
-    
-        db_exec("update task set status = 'READ' where id_task = ? and type = 'email' and module = 'email'", array($mid));
-    
-    }*/
     
      
     

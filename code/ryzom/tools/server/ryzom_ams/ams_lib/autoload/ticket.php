@@ -81,9 +81,9 @@ class Ticket{
     
     /*FUNCTION: create_Ticket()
      * creates a ticket + first initial reply and fills in the content of it!
-     *
+     * for_support_group defines to which support group the ticket has to  be forwarded
      */
-    public static function create_Ticket( $title, $content, $category, $author, $real_author) {
+    public static function create_Ticket( $title, $content, $category, $author, $real_author, $for_support_group = 0) {
         
         $ticket = new Ticket();
         $values = array("Title" => $title, "Status"=> 1, "Queue"=> 0, "Ticket_Category" => $category, "Author" => $author, "Priority" => 0);
@@ -96,8 +96,14 @@ class Ticket{
         }else{
             Ticket_Log::createLogEntry( $ticket_id, $real_author, 2, $author);
         }
-        Ticket_Reply::createReply($content, $author, $ticket_id, 0, $author);       
-        Mail_Handler::send_ticketing_mail($ticket, $content, "NEW", $real_author);
+        Ticket_Reply::createReply($content, $author, $ticket_id, 0, $author);
+        
+        //send email that new ticket has been created
+        if($for_support_group){
+            Ticket::forwardTicket(0, $ticket_id, $for_support_group);
+        }
+        
+        Mail_Handler::send_ticketing_mail($ticket, $content, "NEW", $real_author, $ticket->getForwardedGroupId());
         return $ticket_id;
         
     }
@@ -160,7 +166,7 @@ class Ticket{
                 
                 //notify ticket author that a new reply is added!
                 if($ticket->getAuthor() != $author){
-                    Mail_Handler::send_ticketing_mail($ticket, $content, "REPLY", $author);
+                    Mail_Handler::send_ticketing_mail($ticket, $content, "REPLY", $ticket->getForwardedGroupId());
                 }
                 
                 
