@@ -231,7 +231,7 @@ class Mail_Handler{
         if($ticket_id){
             
             //use the line ---------- Ticket # to make a distincton between the old message and the reply
-            $endpos = strpos($txt, ">---------- Ticket #");
+            /*$endpos = strpos($txt, ">---------- Ticket #");
             if($endpos){
                 $txt = substr($txt, 0, $endpos);
             }else{
@@ -239,7 +239,7 @@ class Mail_Handler{
                 if($endpos){
                     $txt = substr($txt, 0, $endpos);
                 }
-            }
+            }*/
             
             //if email is sent from an existing email address in the db (else it will give an error while loading the user object)
             if($from != "FALSE"){

@@ -84,7 +84,7 @@ class Ticket{
      * for_support_group defines to which support group the ticket has to  be forwarded
      */
     public static function create_Ticket( $title, $content, $category, $author, $real_author, $for_support_group = 0) {
-        
+
         $ticket = new Ticket();
         $values = array("Title" => $title, "Status"=> 1, "Queue"=> 0, "Ticket_Category" => $category, "Author" => $author, "Priority" => 0);
         $ticket->set($values);
@@ -102,8 +102,8 @@ class Ticket{
         if($for_support_group){
             Ticket::forwardTicket(0, $ticket_id, $for_support_group);
         }
-        
-        Mail_Handler::send_ticketing_mail($ticket, $content, "NEW", $real_author, $ticket->getForwardedGroupId());
+
+        Mail_Handler::send_ticketing_mail($ticket, $content, "NEW", $ticket->getForwardedGroupId());
         return $ticket_id;
         
     }
