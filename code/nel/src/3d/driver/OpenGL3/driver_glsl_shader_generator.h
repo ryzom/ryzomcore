@@ -19,6 +19,7 @@
 #define GLSL_SHADER_GENERATOR
 
 #include <string>
+#include <sstream>
 
 namespace NL3D
 {
@@ -38,6 +39,7 @@ namespace NL3D
 		void setVBFormat( uint16 format ){ vbFormat = format; }
 
 	private:
+		std::stringstream ss;
 		uint16 vbFormat;
 		CMaterial const *material;
 	};

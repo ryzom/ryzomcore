@@ -107,11 +107,14 @@ namespace NL3D
 	{
 		material = NULL;
 		vbFormat = 0;
+		ss.str( "" );
+		ss.clear();
 	}
 
 	void CGLSLShaderGenerator::generateVS( std::string &vs )
 	{
-		std::stringstream ss;
+		ss.str( "" );
+		ss.clear();
 
 		ss << "#version 330" << std::endl;
 		ss << "uniform mat4 mvpMatrix;" << std::endl;
@@ -163,7 +166,8 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generatePS( std::string &ps )
 	{
-		std::stringstream ss;
+		ss.str( "" );
+		ss.clear();
 
 		ss << "#version 330" << std::endl;
 		ss << std::endl;
