@@ -27,6 +27,27 @@ namespace
 		else
 			return false;
 	}
+
+	enum AttribOffset
+	{
+		Position,
+		Weight,
+		Normal,
+		PrimaryColor,
+		SecondaryColor,
+		Fog,
+		PaletteSkin,
+		Empty,
+		TexCoord0,
+		TexCoord1,
+		TexCoord2,
+		TexCoord3,
+		TexCoord4,
+		TexCoord5,
+		TexCoord6,
+		TexCoord7,
+		NumOffsets
+	};
 }
 
 namespace NL3D
@@ -96,7 +117,7 @@ namespace NL3D
 		ss << "uniform mat4 mvpMatrix;" << std::endl;
 		ss << std::endl;
 
-		for( int i = 0; i < CVertexBuffer::NumValue; i++ )
+		for( int i = Position; i < NumOffsets; i++ )
 		{
 			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
 			{
@@ -111,7 +132,7 @@ namespace NL3D
 		}
 		ss << std::endl;
 
-		for( int i = 1; i < CVertexBuffer::NumValue; i++ )
+		for( int i = Weight; i < NumOffsets; i++ )
 		{
 			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
 			{
@@ -125,7 +146,7 @@ namespace NL3D
 		ss << "{" << std::endl;
 		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
 
-		for( int i = 1; i < CVertexBuffer::NumValue; i++ )
+		for( int i = Weight; i < NumOffsets; i++ )
 		{
 			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
 			{
@@ -149,7 +170,7 @@ namespace NL3D
 
 		ss << "out vec4 fragColor;" << std::endl;
 
-		for( int i = 1; i < CVertexBuffer::NumValue; i++ )
+		for( int i = Weight; i < NumOffsets; i++ )
 		{
 			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
 			{
