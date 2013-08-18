@@ -48,6 +48,11 @@ $cfg['mail']['default_username']    = 'amsryzom@gmail.com';
 $cfg['mail']['default_password']    = 'lol123bol';
 $cfg['mail']['host'] = "ryzomcore.com";
 
+//Defines mailing related stuff
+$SUPPORT_GROUP_IMAP_CRYPTKEY = "azerty";
+$TICKET_MAILING_SUPPORT = true;
+$MAIL_DIR = "/tmp";
+
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
@@ -73,7 +78,4 @@ $TIME_FORMAT = "m-d-Y H:i:s";
 //defines which ingame layout template should be used
 $INGAME_LAYOUT = "basic";
 
-//Defines mailing related stuff
-$SUPPORT_GROUP_IMAP_CRYPTKEY = "azerty";
-$TICKET_MAILING_SUPPORT = true;
-$MAIL_DIR = "/tmp";
+

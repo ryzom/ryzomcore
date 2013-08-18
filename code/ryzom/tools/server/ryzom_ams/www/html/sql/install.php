@@ -25,6 +25,7 @@
             `LastName` varchar(255) NOT NULL DEFAULT '',
             `Gender` tinyint(1) unsigned NOT NULL DEFAULT '0',
             `Country` char(2) NOT NULL DEFAULT '',
+            `ReceiveMail` int(1) NOT NULL DEFAULT 1,
             PRIMARY KEY (`UId`)
             ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users information for ryzom_ams';
             

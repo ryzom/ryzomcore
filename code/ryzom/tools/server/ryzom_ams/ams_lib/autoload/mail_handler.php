@@ -21,22 +21,32 @@ class Mail_Handler{
                 //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
                 $sendingGroupId = NULL;
             }
-            if($type == "REPLY"){
-                $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n You received a new reply on your ticket: " . $ticketObj->getTitle() .
-                "\n --------------------\n\n";
-                $subject = "New reply on [Ticket #" . $ticketObj->getTId() ."]";
-                $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
-                $txt = $txt . $content . $endTxt;
-                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId(),$sendingGroupId);
-            }else if($type == "NEW"){
-                $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n Your ticket: " . $ticketObj->getTitle() . " is newly created";
-                $txt = $txt . "\n --------------------\n\n";
-                $subject = "New ticket created [Ticket #" . $ticketObj->getTId() ."]";
-                $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
-                $txt = $txt . $content . $endTxt;
-                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId(), $sendingGroupId);
-            }
+            $author = $ticketObj->getAuthor();
+            $webUser = new WebUsers($author);
             
+            //if the author of the ticket wants to receive mail, then send it!
+            if($webUser->getReceiveMail()){
+                
+                switch($type){
+                    case "REPLY":
+                        $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n You received a new reply on your ticket: " . $ticketObj->getTitle() .
+                        "\n --------------------\n\n";
+                        $subject = "New reply on [Ticket #" . $ticketObj->getTId() ."]";
+                        $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
+                        $txt = $txt . $content . $endTxt;
+                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(),$sendingGroupId);
+                        break;
+                    
+                    case "NEW":
+                        $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n Your ticket: " . $ticketObj->getTitle() . " is newly created";
+                        $txt = $txt . "\n --------------------\n\n";
+                        $subject = "New ticket created [Ticket #" . $ticketObj->getTId() ."]";
+                        $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
+                        $txt = $txt . $content . $endTxt;
+                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(), $sendingGroupId);
+                        break;
+                }
+            }
         }
     } 
     

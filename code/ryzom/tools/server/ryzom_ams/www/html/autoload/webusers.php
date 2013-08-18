@@ -9,6 +9,7 @@ class WebUsers extends Users{
        private $lastname;
        private $gender;
        private $country;
+       private $receiveMail;
        
        function __construct($UId = 0) {
               $this->uId = $UId;
@@ -22,6 +23,7 @@ class WebUsers extends Users{
               $this->lastname = $values['LastName'];
               $this->gender = $values['Gender'];
               $this->country = $values['Country'];
+              $this->receiveMail = $values['ReceiveMail'];
        }
     
      /**
@@ -114,14 +116,24 @@ class WebUsers extends Users{
     
     public function getInfo(){
        $dbw = new DBLayer("web");
-       if(! (isset($this->firstname) && isset($this->lastname) && isset($this->gender) && isset($this->country) ) ||
-          $this->firstname == "" || $this->lastname == "" || $this->gender == "" || $this->country == ""){
+       if(! (isset($this->firstname) && isset($this->lastname) && isset($this->gender) && isset($this->country) && isset($this->receiveMail) ) ||
+          $this->firstname == "" || $this->lastname == "" || $this->gender == "" || $this->country == "" || $this->receiveMail == ""){
              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
              $row = $statement->fetch();
              $this->set($row);
        }
-       $result = Array('FirstName' => $this->firstname, 'LastName' => $this->lastname, 'Gender' => $this->gender, 'Country' => $this->country);
+       $result = Array('FirstName' => $this->firstname, 'LastName' => $this->lastname, 'Gender' => $this->gender, 'Country' => $this->country, 'ReceiveMail' => $this->receiveMail);
        return $result;
+    }
+    
+       public function getReceiveMail(){
+       $dbw = new DBLayer("web");
+       if(! isset($this->receiveMail) || $this->receiveMail == ""){
+              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+              $row = $statement->fetch();
+              $this->set($row);
+       }
+       return $this->receiveMail;
     }
     
     public function isLoggedIn(){
@@ -157,6 +169,18 @@ class WebUsers extends Users{
             //ERROR: the web DB is offline
           }
         return $reply;
+    }
+    
+       public static function setReceiveMail($user, $receivemail){
+        $values = Array('user' => $user, 'receivemail' => $receivemail);
+         try {
+               //make connection with and put into shard db
+               $dbw = new DBLayer("web");
+               $dbw->execute("UPDATE ams_user SET ReceiveMail = :receivemail WHERE UId = :user ",$values);
+          }
+          catch (PDOException $e) {
+            //ERROR: the web DB is offline
+          }
     }
     
     public function getUsers(){

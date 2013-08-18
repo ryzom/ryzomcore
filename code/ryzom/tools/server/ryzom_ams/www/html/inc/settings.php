@@ -22,16 +22,17 @@ function settings(){
                 $webUser = new Webusers($_SESSION['id']);
                 $result = $webUser->getInfo();
                 $result['target_id'] = $_SESSION['id'];
-                $result['current_mail'] = $webUser->getEmail();
-                
-                //Sanitize Data
-                $result['current_mail'] = filter_var($result['current_mail'], FILTER_SANITIZE_EMAIL);
-                //$result['Login'] = filter_var($result['Login'], FILTER_SANITIZE_STRING);
-                $result['FirstName'] = filter_var($result['FirstName'], FILTER_SANITIZE_STRING);
-                $result['LastName'] = filter_var($result['LastName'], FILTER_SANITIZE_STRING);
-                $result['Country'] = filter_var($result['Country'], FILTER_SANITIZE_STRING);
-                $result['Gender'] = filter_var($result['Gender'], FILTER_SANITIZE_NUMBER_INT);
+                $result['current_mail'] = $webUser->getEmail();          
+
             }
+            //Sanitize Data
+            $result['current_mail'] = filter_var($result['current_mail'], FILTER_SANITIZE_EMAIL);
+            //$result['Login'] = filter_var($result['Login'], FILTER_SANITIZE_STRING);
+            $result['FirstName'] = filter_var($result['FirstName'], FILTER_SANITIZE_STRING);
+            $result['LastName'] = filter_var($result['LastName'], FILTER_SANITIZE_STRING);
+            $result['Country'] = filter_var($result['Country'], FILTER_SANITIZE_STRING);
+            $result['Gender'] = filter_var($result['Gender'], FILTER_SANITIZE_NUMBER_INT);
+            $result['ReceiveMail'] = filter_var($result['ReceiveMail'], FILTER_SANITIZE_NUMBER_INT);
             $result['country_array'] = getCountryArray();
             return $result;
     }else{
