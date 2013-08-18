@@ -16,6 +16,12 @@ function show_queue(){
             //Pagination Base Links
             $result['pagination_base_link'] = "index.php?page=show_queue&get=".$result['queue_view'] ;
             
+            //form url to keep the getters constant
+            $result['getURL'] = "index.php?page=show_queue&get=" . $result['queue_view'];
+            if(isset($_GET['pagenum'])){
+                $result['getURL'] = $result['getURL'] . "&pagenum=".$_GET['pagenum'];
+            }
+            
             if(isset($_GET['get']) && ($_GET['get'] == "create") && isset($_GET['userid']) && isset($_GET['groupid']) && isset($_GET['what']) && isset($_GET['how']) && isset($_GET['who'])){
                 $userid = filter_var($_GET['userid'], FILTER_SANITIZE_NUMBER_INT);
                 $groupid = filter_var($_GET['groupid'], FILTER_SANITIZE_NUMBER_INT);
@@ -29,6 +35,9 @@ function show_queue(){
                 $result['prev_created_what'] = $what;
                 $result['prev_created_how'] = $how;
                 $result['prev_created_who'] = $who;
+                
+                $result['getURL'] = $result['getURL'] . "&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+
             }
             
             //if an action is set
@@ -57,10 +66,8 @@ function show_queue(){
                         $result['prev_created_what'] = $what;
                         $result['prev_created_how'] = $how;
                         $result['prev_created_who'] = $who;
-                        
-                        
-                        
-                        
+                        $result['getURL'] = $result['getURL'] . "&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+   
                         break;
                     
                 }

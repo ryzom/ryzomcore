@@ -34,7 +34,7 @@
 		    <span id="userList" {if $prev_created_who eq "user"}style="display:inline;"{else if $prev_created_who eq "support_group"}style="display:none;"{else}style="display:inline;"{/if}>
 		    <select style="width: 140px;" name="userid">
 			{foreach from=$teamlist item=member}
-			    <option value="{$member.tUserId}" {if $prev_created_userid eq $member.tUserId}selected="selected"{else if $user_id eq $member.tUserId}selected="selected"{/if}>{$member.name}</option>
+			    <option value="{$member.tUserId}" {if isset($prev_created_userid)} {if $prev_created_userid eq $member.tUserId}selected="selected"{/if}{else if $user_id eq $member.tUserId}selected="selected"{/if}>{$member.name}</option>
 			{/foreach}
 		    </select>
 		    </span>
@@ -108,13 +108,13 @@
 				</td>  
 				<td>
 				    {if $ticket.assigned eq 0}
-					<form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
+					<form id="assign_ticket" class="form-vertical" method="post" action="{$getURL}" style="margin:0px 0px 0px;">
 					    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 					    <input type="hidden" name="action" value="assignTicket">
 					    <button type="submit" class="btn btn-primary" ><i class="icon-flag icon-white"></i> Assign Ticket</button>
 					</form>
 				    {else if $ticket.assigned eq $user_id}
-					<form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
+					<form id="assign_ticket" class="form-vertical" method="post" action="{$getURL}" style="margin:0px 0px 0px;">
 					    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 					    <input type="hidden" name="action" value="unAssignTicket">
 					    <button type="submit" class="btn btn-warning" ><i class="icon-remove icon-white"></i> Remove Assign</button>

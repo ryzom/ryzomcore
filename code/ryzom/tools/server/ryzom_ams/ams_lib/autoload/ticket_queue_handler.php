@@ -33,15 +33,19 @@ class Ticket_Queue_Handler{
                 default:
                     return "ERROR";
             }
+            
             $this->pagination = new Pagination($this->queue->getQuery(),"lib",10,"Ticket",$this->queue->getParams());
-            foreach( $this->pagination->getElements() as $element ){
-                $catInstance = new Ticket_Category();
-                $catInstance->load_With_TCategoryId($element->getTicket_Category());
-                $element->setTicket_Category($catInstance);
-                
-                $userInstance = new Ticket_User();
-                $userInstance->load_With_TUserId($element->getAuthor());
-                $element->setAuthor($userInstance);
+            $elemArray = $this->pagination->getElements();
+            if(!empty($elemArray)){
+                foreach( $elemArray as $element ){
+                    $catInstance = new Ticket_Category();
+                    $catInstance->load_With_TCategoryId($element->getTicket_Category());
+                    $element->setTicket_Category($catInstance);
+                    
+                    $userInstance = new Ticket_User();
+                    $userInstance->load_With_TUserId($element->getAuthor());
+                    $element->setAuthor($userInstance);
+                }
             }
             return $this->pagination->getElements();    
             
