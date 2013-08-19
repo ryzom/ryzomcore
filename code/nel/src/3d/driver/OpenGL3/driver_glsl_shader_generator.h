@@ -39,6 +39,12 @@ namespace NL3D
 		void setVBFormat( uint16 format ){ vbFormat = format; }
 
 	private:
+		void generateNormalPS();
+		void generateTexEnv();
+		void generateTexEnvRGB( unsigned int stage );
+		void generateTexEnvAlpha( unsigned int stage );
+		void buildArg( unsigned int stage, unsigned int n, bool alpha, std::string &arg );
+
 		std::stringstream ss;
 		uint16 vbFormat;
 		CMaterial const *material;

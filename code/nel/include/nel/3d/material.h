@@ -619,7 +619,7 @@ public:
 		}
 
 		// helpers
-		inline uint getColorArg(uint index)
+		inline uint getColorArg(uint index) const
 		{
 			switch(index)
 			{
@@ -632,7 +632,7 @@ public:
 			}
 			return 0;
 		}
-		inline uint getAlphaArg(uint index)
+		inline uint getAlphaArg(uint index) const
 		{
 			switch(index)
 			{
@@ -645,7 +645,7 @@ public:
 			}
 			return 0;
 		}
-		inline uint getColorOperand(uint index)
+		inline uint getColorOperand(uint index) const
 		{
 			switch(index)
 			{
@@ -658,7 +658,7 @@ public:
 			}
 			return 0;
 		}
-		inline uint getAlphaOperand(uint index)
+		inline uint getAlphaOperand(uint index) const
 		{
 			switch(index)
 			{
