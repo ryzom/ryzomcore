@@ -53,6 +53,10 @@ $SUPPORT_GROUP_IMAP_CRYPTKEY = "azerty";
 $TICKET_MAILING_SUPPORT = true;
 $MAIL_DIR = "/tmp";
 
+$cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
+$cfg['crypt']['enc_method']    = 'AES-256-CBC';
+$cfg['crypt']['hash_method'] = "SHA512";
+
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters

@@ -142,38 +142,49 @@ class Mail_Handler{
             }
             // Check mail
             $sGroups = Support_Group::getGroups();
+            
+            //decrypt passwords in the db!
+            $crypter = new MyCrypt($cfg['crypt']);     
+            foreach($sGroups as $group){
+                $group->setIMAP_Password($crypter->decrypt($cfg['mail']['default_password'])); 
+            }
+            
             $defaultGroup = new Support_Group();
             $defaultGroup->setSGroupId(0);
             $defaultGroup->setGroupEmail($default_groupemail);
             $defaultGroup->setIMAP_MailServer($cfg['mail']['default_mailserver']);
             $defaultGroup->setIMAP_Username($cfg['mail']['default_username']);
             $defaultGroup->setIMAP_Password($cfg['mail']['default_password']);
-
+            
+            //add default group to the list
             $sGroups[] = $defaultGroup;
             
             foreach($sGroups as $group){
-                $mbox = imap_open($group->getIMAP_MailServer(), $group->getIMAP_Username(), $group->getIMAP_Password()) or die('Cannot connect to mail server: ' . imap_last_error());
-                $message_count = imap_num_msg($mbox);
-        
-                for ($i = 1; $i <= $message_count; ++$i) {
-                    
-                    //return task ID
-                    $tid = self::incoming_mail_handler($mbox, $i,$group);
-        
-                    if($tid) {
-                        //TODO: base file on Ticket + timestamp
-                        $file = fopen($MAIL_DIR."/mail/ticket".$tid.".".time(), 'w');      
-                        fwrite($file, imap_fetchheader($mbox, $i) . imap_body($mbox, $i));     
-                        fclose($file);
+                //check if group has mailing stuff filled in!
+                if($group->getGroupEmail() != "" && $group->getIMAP_MailServer() != "" && $group->getIMAP_Username() != "" && $group->getIMAP_Password() != "")
+                    $mbox = imap_open($group->getIMAP_MailServer(), $group->getIMAP_Username(), $group->getIMAP_Password()) or die('Cannot connect to mail server: ' . imap_last_error());
+                    $message_count = imap_num_msg($mbox);
+            
+                    for ($i = 1; $i <= $message_count; ++$i) {
                         
-                        //mark message $i of $mbox for deletion!
-                        imap_delete($mbox, $i);
+                        //return task ID
+                        $tid = self::incoming_mail_handler($mbox, $i,$group);
+            
+                        if($tid) {
+                            //TODO: base file on Ticket + timestamp
+                            $file = fopen($MAIL_DIR."/mail/ticket".$tid.".".time(), 'w');      
+                            fwrite($file, imap_fetchheader($mbox, $i) . imap_body($mbox, $i));     
+                            fclose($file);
+                            
+                            //mark message $i of $mbox for deletion!
+                            imap_delete($mbox, $i);
+                        }
+    
                     }
-
+                    //delete marked messages
+                    imap_expunge($mbox);  
+                    imap_close($mbox);
                 }
-                //delete marked messages
-                imap_expunge($mbox);  
-                imap_close($mbox);
             }
         }
     

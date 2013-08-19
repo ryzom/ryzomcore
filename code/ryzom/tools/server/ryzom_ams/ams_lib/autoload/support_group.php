@@ -51,7 +51,12 @@ class Support_Group{
                 $sGroup->setGroupEmail($values['GroupEmail']);
                 $sGroup->setIMAP_MailServer($values['IMAP_MailServer']);
                 $sGroup->setIMAP_Username($values['IMAP_Username']);
-                $sGroup->setIMAP_Password($values['IMAP_Password']);
+                
+                //encrypt password!
+                global $cfg;
+                $crypter = new MyCrypt($cfg['crypt']);
+                $enc_password = $crypter->encrypt($values['IMAP_Password']);
+                $sGroup->setIMAP_Password($enc_password);
                 $sGroup->create();
                 
                 return "SUCCESS";

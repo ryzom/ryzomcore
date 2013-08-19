@@ -15,7 +15,12 @@ function modify_email_of_sgroup(){
                     $group->setGroupEmail($groupemail);
                     $group->setIMAP_MailServer(filter_var($_POST['IMAP_MailServer'],FILTER_SANITIZE_STRING));
                     $group->setIMAP_Username(filter_var($_POST['IMAP_Username'],FILTER_SANITIZE_STRING));
-                    $group->setIMAP_Password($password);
+                    
+                    //encrypt password!
+                    global $cfg;
+                    $crypter = new MyCrypt($cfg['crypt']);
+                    $enc_password = $crypter->encrypt($password);
+                    $group->setIMAP_Password($enc_password);
                     $group->update();
                     $result['RESULT_OF_MODIFYING'] = "SUCCESS";
                 }else{
