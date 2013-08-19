@@ -201,6 +201,7 @@ namespace NL3D
 		switch( material->getShader() )
 		{
 		case CMaterial::Normal:
+		case CMaterial::UserColor:
 			generateNormalPS();
 			break;
 		}
