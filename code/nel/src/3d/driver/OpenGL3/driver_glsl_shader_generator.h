@@ -45,6 +45,8 @@ namespace NL3D
 		void generateTexEnvAlpha( unsigned int stage );
 		void buildArg( unsigned int stage, unsigned int n, bool alpha, std::string &arg );
 
+		void generateLightMapPS();
+
 		std::stringstream ss;
 		uint16 vbFormat;
 		CMaterial const *material;

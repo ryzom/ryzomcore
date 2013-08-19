@@ -204,6 +204,10 @@ namespace NL3D
 		case CMaterial::UserColor:
 			generateNormalPS();
 			break;
+
+		case CMaterial::LightMap:
+			generateLightMapPS();
+			break;
 		}
 
 		ps.assign( ss.str() );
@@ -256,27 +260,24 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateTexEnv()
 	{
-		uint32 stage = 0;
-		
 		// only 4 stages have env settings in the nel material
 		for( int i = 0; i < 4; i++ )
 		{
-			if( ( material->_TexEnvs[ stage ].getColorArg( 0 ) == CMaterial::Constant ) ||
-				( material->_TexEnvs[ stage ].getColorArg( 1 ) == CMaterial::Constant ) ||
-				( material->_TexEnvs[ stage ].getColorArg( 2 ) == CMaterial::Constant )
+			if( ( material->_TexEnvs[ i ].getColorArg( 0 ) == CMaterial::Constant ) ||
+				( material->_TexEnvs[ i ].getColorArg( 1 ) == CMaterial::Constant ) ||
+				( material->_TexEnvs[ i ].getColorArg( 2 ) == CMaterial::Constant )
 				)
 			{
-				ss << "vec4 " << constantNames[ stage ] << " = vec4( ";
-				ss << material->_TexEnvs[ stage ].ConstantColor.R / 255.0f << ", ";
-				ss << material->_TexEnvs[ stage ].ConstantColor.G / 255.0f << ", ";
-				ss << material->_TexEnvs[ stage ].ConstantColor.B / 255.0f << ", ";
-				ss << material->_TexEnvs[ stage ].ConstantColor.A / 255.0f << " );";
+				ss << "vec4 " << constantNames[ i ] << " = vec4( ";
+				ss << material->_TexEnvs[ i ].ConstantColor.R / 255.0f << ", ";
+				ss << material->_TexEnvs[ i ].ConstantColor.G / 255.0f << ", ";
+				ss << material->_TexEnvs[ i ].ConstantColor.B / 255.0f << ", ";
+				ss << material->_TexEnvs[ i ].ConstantColor.A / 255.0f << " );";
 				ss << std::endl;
 			}
-			stage++;
 		}
 
-		stage = 0;
+		uint32 stage = 0;
 		for( int i = TexCoord0; i < TexCoord4; i++ )
 		{
 			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
@@ -604,6 +605,77 @@ namespace NL3D
 		}
 
 		arg.assign( ds.str() );
+	}
+
+
+	void CGLSLShaderGenerator::generateLightMapPS()
+	{
+		uint sampler = 0;
+		for( int i = TexCoord0; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "uniform sampler2D sampler" << sampler;
+				ss << ";";
+				ss << std::endl;
+			}
+			sampler++;
+		}
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+
+		ss << "float diffuse  = vec4( ";
+		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().A / 255.0f ) << " );";
+		ss << std::endl;
+
+		sampler = 0;
+		for( int i = TexCoord0; i < TexCoord4; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "vec4 " << constantNames[ sampler ] << " = vec4( ";
+				ss << float( material->_TexEnvs[ sampler ].ConstantColor.R / 255.0f ) << ", ";
+				ss << float( material->_TexEnvs[ sampler ].ConstantColor.G / 255.0f ) << ", ";
+				ss << float( material->_TexEnvs[ sampler ].ConstantColor.B / 255.0f ) << ", ";
+				ss << float( material->_TexEnvs[ sampler ].ConstantColor.A / 255.0f ) << " );";
+				ss << std::endl;
+			}
+			sampler++;
+		}
+		
+		sampler = 0;
+		for( int i = TexCoord0; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "vec4 texel" << sampler;
+				ss << " = texture2D( sampler" << sampler;
+				ss << ", " << attribNames[ i ] << " );" << std::endl;
+			}
+			sampler++;
+		}
+
+		ss << "vec4 texel = diffuse;" << std::endl;
+
+		sampler = 0;
+		for( int i = TexCoord0; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "texel = ";
+				ss << texelNames[ sampler ] << " * " << constantNames[ sampler ] << " + texel;" << std::endl;
+			}
+			sampler++;
+		}
+
+		ss << "fragColor = texel;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
 	}
 
 }
