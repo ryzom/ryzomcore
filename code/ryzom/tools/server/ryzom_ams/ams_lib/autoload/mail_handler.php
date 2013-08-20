@@ -69,15 +69,15 @@ class Mail_Handler{
     //the main function
     function cron() {
         global $cfg;
+        global $MAIL_LOG_PATH;
         $default_groupemail = $cfg['mail']['default_groupemail'];
         $default_groupname = $cfg['mail']['default_groupname'];
         /*
         $inbox_host = $cfg['mail']['host'];
         $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";*/
         global $MAIL_DIR;
-        
-        echo("\n========================================================\n");
-        echo("mailing cron Job started at: ". Helpers::outputTime(time(),0) . "\n");
+        error_log("========================================================\n", 3, $MAIL_LOG_PATH);
+        error_log("mailing cron Job started at: ". Helpers::outputTime(time(),0) . "\n", 3, $MAIL_LOG_PATH);
         
         //creates child process
         $pid = self::mail_fork();
@@ -130,10 +130,10 @@ class Mail_Handler{
                    
                     if(mail($email['Recipient'], $email['Subject'], $email['Body'], $headers)) {       
                         $status = "DELIVERED";        
-                        echo("Emailed {$email['Recipient']}\n");        
+                        error_log("Emailed {$email['Recipient']}\n", 3, $MAIL_LOG_PATH);
                     } else {       
                         $status = "FAILED";
-                        echo("Email to {$email['Recipient']} failed\n");
+                        error_log("Email to {$email['Recipient']} failed\n", 3, $MAIL_LOG_PATH);
                     }
                     //change the status of the emails.
                     $this->db->execute('update email set Status = ?, MessageId = ?, Attempts = Attempts + 1 where MailId = ?', array($status, $message_id, $email['MailId']));
@@ -174,7 +174,7 @@ class Mail_Handler{
                         if($tkey) {
                             //TODO: base file on Ticket + timestamp
                             $file = fopen($MAIL_DIR."/ticket".$tkey, 'w');
-                            print("Email was written to ".$MAIL_DIR."/ticket".$tkey."\n");
+                            error_log("Email was written to ".$MAIL_DIR."/ticket".$tkey."\n", 3, $MAIL_LOG_PATH);
                             fwrite($file, imap_fetchheader($mbox, $i) . imap_body($mbox, $i));     
                             fclose($file);
                             
@@ -188,8 +188,8 @@ class Mail_Handler{
                     imap_close($mbox);
                 }
             }
-            print("\nChild Cron job finished at ". Helpers::outputTime(time(),0) . "\n");
-            echo("========================================================\n");
+            error_log("Child Cron job finished at ". Helpers::outputTime(time(),0) . "\n", 3, $MAIL_LOG_PATH);
+            error_log("========================================================\n", 3, $MAIL_LOG_PATH);
         }
         
     
@@ -225,6 +225,8 @@ class Mail_Handler{
     
     
     function incoming_mail_handler($mbox,$i,$group){
+        
+        global $MAIL_LOG_PATH;
         
         $header = imap_header($mbox, $i);
         $subject = self::decode_utf8($header->subject);
@@ -262,14 +264,17 @@ class Mail_Handler{
             
             //if email is sent from an existing email address in the db (else it will give an error while loading the user object)
             if($from != "FALSE"){
+                
                 $user = new Ticket_User();
                 $user->load_With_TUserId($from);
 
                 
                 //if user has access to it!
                 if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
+                    
                     Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);
-                    print("Email found that is a reply to a ticket at:".$group->getGroupEmail()."\n");
+                    error_log("Email found that is a reply to a ticket at:".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+                    
                 }else{
                     //if user has no access to it
                     //Warn real ticket owner + person that send the mail
@@ -283,10 +288,12 @@ class Mail_Handler{
                     This action is notified to the real ticket owner!" ;
                     Mail_Handler::send_mail($from,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);
                     
-                    print("Email found that was a reply to a ticket, though send by another user to ".$group->getGroupEmail()."\n");
+                    error_log("Email found that was a reply to a ticket, though send by another user to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+                  
                 }
                 
             }else{
+                
                 //if a reply to a ticket is being sent by a non-user!
                 //Warn real ticket owner + person that send the mail
                 $subject_warnAuthor = "Someone tried to reply to your ticket: [Ticket #" . $ticket->getTId() ."]";
@@ -298,7 +305,8 @@ class Mail_Handler{
                 $body_warnSender = "It seems you tried to reply to someone's ticket, However this email address isn't linked to any account, please use the matching email address to that account!\n\n
                 This action is notified to the real ticket owner!" ;
                 Mail_Handler::send_mail($fromEmail,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);
-                print("Email found that was a reply to a ticket, though send by an unknown email address to ".$group->getGroupEmail()."\n");
+                
+                error_log("Email found that was a reply to a ticket, though send by an unknown email address to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
                 
             }
            
@@ -312,13 +320,14 @@ class Mail_Handler{
             //if not default group, then forward it by giving the $group->getSGroupId's param
             $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from, $group->getSGroupId());
             
-            print("Email regarding new ticket found at:".$group->getGroupEmail()."\n");
+            error_log("Email regarding new ticket found at:".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+            
             return $newTicketId .".".time();
             
             
         }else{
             //if it's a email that has nothing to do with ticketing, return 0;
-            print("Email found that isn't a reply or new ticket, at:".$group->getGroupEmail()."\n");
+            error_log("Email found that isn't a reply or new ticket, at:".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
             return 0;
         }
         
