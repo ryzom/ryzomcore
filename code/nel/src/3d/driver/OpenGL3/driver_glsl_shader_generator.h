@@ -46,6 +46,7 @@ namespace NL3D
 		void buildArg( unsigned int stage, unsigned int n, bool alpha, std::string &arg );
 
 		void generateLightMapPS();
+		void generateSpecularPS();
 
 		std::stringstream ss;
 		uint16 vbFormat;

@@ -208,6 +208,12 @@ namespace NL3D
 		case CMaterial::LightMap:
 			generateLightMapPS();
 			break;
+
+		case CMaterial::Specular:
+			generateSpecularPS();
+			break;
+
+
 		}
 
 		ps.assign( ss.str() );
@@ -676,6 +682,50 @@ namespace NL3D
 		ss << "fragColor = texel;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
+	}
+
+	void CGLSLShaderGenerator::generateSpecularPS()
+	{
+		uint sampler = 0;
+		for( int i = TexCoord0; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "uniform sampler2D sampler" << sampler;
+				ss << ";";
+				ss << std::endl;
+			}
+			sampler++;
+		}
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+
+		ss << "float diffuse  = vec4( ";
+		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().A / 255.0f ) << " );";
+		ss << std::endl;
+
+		sampler = 0;
+		for( int i = TexCoord0; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "vec4 texel" << sampler;
+				ss << " = texture2D( sampler" << sampler;
+				ss << ", " << attribNames[ i ] << " );" << std::endl;
+			}
+			sampler++;
+		}
+
+		ss << "vec4 texel = diffuse;" << std::endl;
+		ss << "texel.rgb = texel1.rgb * texel.alpha + texel.rgb;" << std::endl;
+		ss << "texel.a = color.a;" << std::endl;
+		ss << "fragColor = texel;" << std::endl;
+		ss << "}" << std::endl;
 	}
 
 }
