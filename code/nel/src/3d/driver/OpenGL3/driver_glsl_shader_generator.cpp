@@ -219,6 +219,34 @@ namespace NL3D
 		ps.assign( ss.str() );
 	}
 
+	void CGLSLShaderGenerator::addDiffuse()
+	{
+		ss << "float diffuse  = vec4( ";
+		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
+		ss << float( material->getDiffuse().A / 255.0f ) << " );";
+		ss << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addConstants()
+	{
+		int j = 0;
+		for( int i = TexCoord0; i < TexCoord4; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << "vec4 " << constantNames[ j ] << " = vec4( ";
+				ss << float( material->_TexEnvs[ j ].ConstantColor.R / 255.0f ) << ", ";
+				ss << float( material->_TexEnvs[ j ].ConstantColor.G / 255.0f ) << ", ";
+				ss << float( material->_TexEnvs[ j ].ConstantColor.B / 255.0f ) << ", ";
+				ss << float( material->_TexEnvs[ j ].ConstantColor.A / 255.0f ) << " );";
+				ss << std::endl;
+			}
+			j++;
+		}
+	}
+
 	void CGLSLShaderGenerator::generateNormalPS()
 	{
 		uint sampler = 0;
@@ -237,12 +265,7 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 
-		ss << "float diffuse  = vec4( ";
-		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().A / 255.0f ) << " );";
-		ss << std::endl;
+		addDiffuse();
 
 		sampler = 0;
 		for( int i = TexCoord0; i < NumOffsets; i++ )
@@ -266,22 +289,7 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateTexEnv()
 	{
-		// only 4 stages have env settings in the nel material
-		for( int i = 0; i < 4; i++ )
-		{
-			if( ( material->_TexEnvs[ i ].getColorArg( 0 ) == CMaterial::Constant ) ||
-				( material->_TexEnvs[ i ].getColorArg( 1 ) == CMaterial::Constant ) ||
-				( material->_TexEnvs[ i ].getColorArg( 2 ) == CMaterial::Constant )
-				)
-			{
-				ss << "vec4 " << constantNames[ i ] << " = vec4( ";
-				ss << material->_TexEnvs[ i ].ConstantColor.R / 255.0f << ", ";
-				ss << material->_TexEnvs[ i ].ConstantColor.G / 255.0f << ", ";
-				ss << material->_TexEnvs[ i ].ConstantColor.B / 255.0f << ", ";
-				ss << material->_TexEnvs[ i ].ConstantColor.A / 255.0f << " );";
-				ss << std::endl;
-			}
-		}
+		addConstants();
 
 		uint32 stage = 0;
 		for( int i = TexCoord0; i < TexCoord4; i++ )
@@ -632,27 +640,9 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 
-		ss << "float diffuse  = vec4( ";
-		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().A / 255.0f ) << " );";
-		ss << std::endl;
+		addDiffuse();
 
-		sampler = 0;
-		for( int i = TexCoord0; i < TexCoord4; i++ )
-		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "vec4 " << constantNames[ sampler ] << " = vec4( ";
-				ss << float( material->_TexEnvs[ sampler ].ConstantColor.R / 255.0f ) << ", ";
-				ss << float( material->_TexEnvs[ sampler ].ConstantColor.G / 255.0f ) << ", ";
-				ss << float( material->_TexEnvs[ sampler ].ConstantColor.B / 255.0f ) << ", ";
-				ss << float( material->_TexEnvs[ sampler ].ConstantColor.A / 255.0f ) << " );";
-				ss << std::endl;
-			}
-			sampler++;
-		}
+		addConstants();
 		
 		sampler = 0;
 		for( int i = TexCoord0; i < NumOffsets; i++ )
@@ -702,12 +692,7 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 
-		ss << "float diffuse  = vec4( ";
-		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().A / 255.0f ) << " );";
-		ss << std::endl;
+		addDiffuse();
 
 		sampler = 0;
 		for( int i = TexCoord0; i < NumOffsets; i++ )

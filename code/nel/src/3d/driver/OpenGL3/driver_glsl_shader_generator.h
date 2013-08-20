@@ -39,6 +39,9 @@ namespace NL3D
 		void setVBFormat( uint16 format ){ vbFormat = format; }
 
 	private:
+		void addDiffuse();
+		void addConstants();
+
 		void generateNormalPS();
 		void generateTexEnv();
 		void generateTexEnvRGB( unsigned int stage );
