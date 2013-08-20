@@ -9,21 +9,20 @@ function modify_email_of_sgroup(){
             $sgroupid = filter_var($_POST['target_id'],FILTER_SANITIZE_NUMBER_INT);
             $group = Support_Group::getGroup($sgroupid);
             $groupemail = filter_var($_POST['GroupEmail'],FILTER_SANITIZE_STRING);
-            if(Users::validEmail($groupemail)){
-                $password = filter_var($_POST['IMAP_Password'],FILTER_SANITIZE_STRING);
-                if($password != ""){
-                    $group->setGroupEmail($groupemail);
-                    $group->setIMAP_MailServer(filter_var($_POST['IMAP_MailServer'],FILTER_SANITIZE_STRING));
-                    $group->setIMAP_Username(filter_var($_POST['IMAP_Username'],FILTER_SANITIZE_STRING));
-                    
-                    //encrypt password!
-                    global $cfg;
-                    $crypter = new MyCrypt($cfg['crypt']);
-                    $enc_password = $crypter->encrypt($password);
-                    $group->setIMAP_Password($enc_password);
-                    $group->update();
-                    $result['RESULT_OF_MODIFYING'] = "SUCCESS";
-                }else{
+            if(Users::validEmail($groupemail) || $groupemail == ""){
+                $password = filter_var($_POST['IMAP_Password'],FILTER_SANITIZE_STRING);              
+                $group->setGroupEmail($groupemail);
+                $group->setIMAP_MailServer(filter_var($_POST['IMAP_MailServer'],FILTER_SANITIZE_STRING));
+                $group->setIMAP_Username(filter_var($_POST['IMAP_Username'],FILTER_SANITIZE_STRING));
+                
+                //encrypt password!
+                global $cfg;
+                $crypter = new MyCrypt($cfg['crypt']);
+                $enc_password = $crypter->encrypt($password);
+                $group->setIMAP_Password($enc_password);
+                $group->update();
+                $result['RESULT_OF_MODIFYING'] = "SUCCESS";
+                if($password == ""){
                     $result['RESULT_OF_MODIFYING'] = "NO_PASSWORD";
                 }
             }else{

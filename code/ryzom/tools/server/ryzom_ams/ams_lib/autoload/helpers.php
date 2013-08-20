@@ -115,9 +115,13 @@ class Helpers{
      
      
      //Time output function for handling the time display function.
-     static public function outputTime($time){
+     static public function outputTime($time, $str = 1){
           global $TIME_FORMAT;
-          return date($TIME_FORMAT,strtotime($time));
+          if($str){
+               return date($TIME_FORMAT,strtotime($time));
+          }else{
+               return date($TIME_FORMAT,$time);
+          }
      }
      
      static public function  check_login_ingame(){

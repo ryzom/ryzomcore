@@ -164,7 +164,7 @@
 			{$email_not_valid}
 		</div>
 		{else if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "NO_PASSWORD"}
-		<div class="alert alert-error">
+		<div class="alert alert-warning">
 			{$no_password_given}
 		</div>
 		{/if}

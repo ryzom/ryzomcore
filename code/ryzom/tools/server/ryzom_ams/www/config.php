@@ -51,7 +51,7 @@ $cfg['mail']['host'] = "ryzomcore.com";
 //Defines mailing related stuff
 $SUPPORT_GROUP_IMAP_CRYPTKEY = "azerty";
 $TICKET_MAILING_SUPPORT = true;
-$MAIL_DIR = "/tmp";
+$MAIL_DIR = "/tmp/mail";
 
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
 $cfg['crypt']['enc_method']    = 'AES-256-CBC';

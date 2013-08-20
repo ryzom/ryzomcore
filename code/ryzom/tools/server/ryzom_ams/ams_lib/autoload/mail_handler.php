@@ -12,14 +12,14 @@ class Mail_Handler{
     }
     
     
-    public static function send_ticketing_mail($ticketObj, $content, $type, $sendingGroupId = 0) {
+    public static function send_ticketing_mail($ticketObj, $content, $type, $sendingId = 0) {
         global $TICKET_MAILING_SUPPORT;
         if($TICKET_MAILING_SUPPORT){
             //$txt = "";
             //$subject = "";
-            if($sendingGroupId == 0){
+            if($sendingId == 0){
                 //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
-                $sendingGroupId = NULL;
+                $sendingId = NULL;
             }
             $author = $ticketObj->getAuthor();
             $webUser = new WebUsers($author);
@@ -34,7 +34,7 @@ class Mail_Handler{
                         $subject = "New reply on [Ticket #" . $ticketObj->getTId() ."]";
                         $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
                         $txt = $txt . $content . $endTxt;
-                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(),$sendingGroupId);
+                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(),$sendingId);
                         break;
                     
                     case "NEW":
@@ -43,7 +43,7 @@ class Mail_Handler{
                         $subject = "New ticket created [Ticket #" . $ticketObj->getTId() ."]";
                         $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
                         $txt = $txt . $content . $endTxt;
-                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(), $sendingGroupId);
+                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(), $sendingId);
                         break;
                 }
             }
@@ -52,10 +52,12 @@ class Mail_Handler{
     
     
     public static function send_mail($recipient, $subject, $body, $ticket_id = 0, $from = NULL) {
+        $id_user = NULL;
         if(is_numeric($recipient)) {
             $id_user = $recipient;
             $recipient = NULL;
         }
+
         $query = "INSERT INTO email (Recipient,Subject,Body,Status,Attempts,Sender,UserId,MessageId,TicketId) VALUES (:recipient, :subject, :body, :status, :attempts, :sender, :id_user, :messageId, :ticketId)";
         $values = array('recipient' => $recipient, 'subject' => $subject, 'body' => $body, 'status' => 'NEW', 'attempts'=> 0, 'sender' => $from,'id_user' => $id_user,  'messageId' => 0, 'ticketId'=> $ticket_id);
         $db = new DBLayer("lib");
@@ -74,9 +76,8 @@ class Mail_Handler{
         $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";*/
         global $MAIL_DIR;
         
-        
-        // Deliver new mail
-        echo("mail cron\n");
+        echo("\n========================================================\n");
+        echo("mailing cron Job started at: ". Helpers::outputTime(time(),0) . "\n");
         
         //creates child process
         $pid = self::mail_fork();
@@ -91,6 +92,7 @@ class Mail_Handler{
             //>0: "In parent!\n";
         
         } else {
+            //deliver new mail            
             //make db connection here because the children have to make the connection.
             $this->db = new DBLayer("lib");
             
@@ -112,7 +114,6 @@ class Mail_Handler{
                     $message_id = self::new_message_id($email['TicketId']);
 
                     //if recipient isn't given, then use the email of the id_user instead!
-                    echo("Emailing {$email['Recipient']}\n");
                     if(!$email['Recipient']) {
                         $email['Recipient'] = Ticket_User::get_email_by_user_id($email['UserId']);
                     }
@@ -146,7 +147,7 @@ class Mail_Handler{
             //decrypt passwords in the db!
             $crypter = new MyCrypt($cfg['crypt']);     
             foreach($sGroups as $group){
-                $group->setIMAP_Password($crypter->decrypt($cfg['mail']['default_password'])); 
+                $group->setIMAP_Password($crypter->decrypt($group->getIMAP_Password())); 
             }
             
             $defaultGroup = new Support_Group();
@@ -161,18 +162,19 @@ class Mail_Handler{
             
             foreach($sGroups as $group){
                 //check if group has mailing stuff filled in!
-                if($group->getGroupEmail() != "" && $group->getIMAP_MailServer() != "" && $group->getIMAP_Username() != "" && $group->getIMAP_Password() != "")
+                if($group->getGroupEmail() != "" && $group->getIMAP_MailServer() != "" && $group->getIMAP_Username() != "" && $group->getIMAP_Password() != ""){
                     $mbox = imap_open($group->getIMAP_MailServer(), $group->getIMAP_Username(), $group->getIMAP_Password()) or die('Cannot connect to mail server: ' . imap_last_error());
                     $message_count = imap_num_msg($mbox);
             
                     for ($i = 1; $i <= $message_count; ++$i) {
                         
                         //return task ID
-                        $tid = self::incoming_mail_handler($mbox, $i,$group);
+                        $tkey = self::incoming_mail_handler($mbox, $i,$group);
             
-                        if($tid) {
+                        if($tkey) {
                             //TODO: base file on Ticket + timestamp
-                            $file = fopen($MAIL_DIR."/mail/ticket".$tid.".".time(), 'w');      
+                            $file = fopen($MAIL_DIR."/ticket".$tkey, 'w');
+                            print("Email was written to ".$MAIL_DIR."/ticket".$tkey."\n");
                             fwrite($file, imap_fetchheader($mbox, $i) . imap_body($mbox, $i));     
                             fclose($file);
                             
@@ -186,7 +188,10 @@ class Mail_Handler{
                     imap_close($mbox);
                 }
             }
+            print("\nChild Cron job finished at ". Helpers::outputTime(time(),0) . "\n");
+            echo("========================================================\n");
         }
+        
     
     }
     
@@ -226,7 +231,8 @@ class Mail_Handler{
         $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
         $subject = self::decode_utf8($header->subject);    
         $to = $header->to[0]->mailbox;   
-        $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
+        $from = $header->from[0]->mailbox . '@' . $header->from[0]->host;
+        $fromEmail =  $header->from[0]->mailbox . '@' . $header->from[0]->host;
         $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
         //$html = self::get_part($mbox, $i, "TEXT/HTML");
         
@@ -251,32 +257,52 @@ class Mail_Handler{
         //if ticket id is found, that means it is a reply on an existing ticket
         if($ticket_id){
             
-            //use the line ---------- Ticket # to make a distincton between the old message and the reply
-            /*$endpos = strpos($txt, ">---------- Ticket #");
-            if($endpos){
-                $txt = substr($txt, 0, $endpos);
-            }else{
-                $endpos = strpos($txt, "---------- Ticket #");
-                if($endpos){
-                    $txt = substr($txt, 0, $endpos);
-                }
-            }*/
+            $ticket = new Ticket();
+            $ticket->load_With_TId($ticket_id);
             
             //if email is sent from an existing email address in the db (else it will give an error while loading the user object)
             if($from != "FALSE"){
                 $user = new Ticket_User();
                 $user->load_With_TUserId($from);
-                $ticket = new Ticket();
-                $ticket->load_With_TId($ticket_id);
+
                 
                 //if user has access to it!
                 if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
-                    Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);              
+                    Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);
+                    print("Email found that is a reply to a ticket at:".$group->getGroupEmail()."\n");
+                }else{
+                    //if user has no access to it
+                    //Warn real ticket owner + person that send the mail
+                    $subject_warnAuthor = "Someone tried to reply to your ticket: [Ticket #" . $ticket->getTId() ."]";
+                    $body_warnAuthor = "Someone tried to reply at your ticket: " . $ticket->getTitle() ."by sending an email from ".$fromEmail."! Please use the email address matching to your account if you want to auto reply!\n\n
+                    If ".  $fromEmail. " isn't one of your email addresses, please contact us by replying to this ticket!" ;
+                    Mail_Handler::send_mail($ticket->getAuthor(),  $subject_warnAuthor , $body_warnAuthor, $ticket->getTId(), NULL);
+                    
+                    $subject_warnSender = "You tried to reply to someone elses ticket!";
+                    $body_warnSender = "It seems you tried to reply to someone elses ticket, please use the matching email address to that account!\n\n
+                    This action is notified to the real ticket owner!" ;
+                    Mail_Handler::send_mail($from,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);
+                    
+                    print("Email found that was a reply to a ticket, though send by another user to ".$group->getGroupEmail()."\n");
                 }
                 
+            }else{
+                //if a reply to a ticket is being sent by a non-user!
+                //Warn real ticket owner + person that send the mail
+                $subject_warnAuthor = "Someone tried to reply to your ticket: [Ticket #" . $ticket->getTId() ."]";
+                $body_warnAuthor = "Someone tried to reply at your ticket:' " . $ticket->getTitle() ."' by sending an email from ".$fromEmail." ! Please use the email address matching to your account if you want to auto reply!\n\n
+                If ".  $fromEmail. " isn't one of your email addresses, please contact us by replying to this ticket!" ;
+                Mail_Handler::send_mail($ticket->getAuthor(),  $subject_warnAuthor , $body_warnAuthor, $ticket->getTId(), NULL);
+                
+                $subject_warnSender = "You tried to reply to someone's ticket!";
+                $body_warnSender = "It seems you tried to reply to someone's ticket, However this email address isn't linked to any account, please use the matching email address to that account!\n\n
+                This action is notified to the real ticket owner!" ;
+                Mail_Handler::send_mail($fromEmail,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);
+                print("Email found that was a reply to a ticket, though send by an unknown email address to ".$group->getGroupEmail()."\n");
+                
             }
-            print("\n Email found that is a reply to a ticket at:".$group->getGroupEmail());
-            return $ticket_id;
+           
+            return $ticket_id .".".time();
             
         }else if($from != "FALSE"){
             
@@ -286,13 +312,13 @@ class Mail_Handler{
             //if not default group, then forward it by giving the $group->getSGroupId's param
             $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from, $group->getSGroupId());
             
-            print("\n Email regarding new ticket found at:".$group->getGroupEmail());
-            return $newTicketId;
+            print("Email regarding new ticket found at:".$group->getGroupEmail()."\n");
+            return $newTicketId .".".time();
             
             
         }else{
             //if it's a email that has nothing to do with ticketing, return 0;
-            print("\n Email found that isn't a reply or new ticket, at:".$group->getGroupEmail());
+            print("Email found that isn't a reply or new ticket, at:".$group->getGroupEmail()."\n");
             return 0;
         }
         
@@ -367,3 +393,4 @@ class Mail_Handler{
     } // END OF FUNCTION
     
 }
+    
