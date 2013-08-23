@@ -42,6 +42,9 @@ namespace NL3D
 		void addDiffuse();
 		void addConstants();
 
+		void generateNormalVS();
+		void generateSpecularVS();
+
 		void generateNormalPS();
 		void generateTexEnv();
 		void generateTexEnvRGB( unsigned int stage );

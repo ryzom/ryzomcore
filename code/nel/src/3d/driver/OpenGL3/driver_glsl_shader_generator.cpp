@@ -159,21 +159,18 @@ namespace NL3D
 		}
 		ss << std::endl;
 
-		ss << "void main( void )" << std::endl;
-		ss << "{" << std::endl;
-		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
-
-		for( int i = Weight; i < NumOffsets; i++ )
+		switch( material->getShader() )
 		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << attribNames[ i ];
-				ss << " = ";
-				ss << "v" << attribNames[ i ] << ";" << std::endl;
-			}
-		}
+		case CMaterial::Normal:
+		case CMaterial::UserColor:
+		case CMaterial::LightMap:
+			generateNormalVS();
+			break;
 
-		ss << "}" << std::endl;
+		case CMaterial::Specular:
+			generateSpecularVS();
+			break;
+		}
 		
 		vs.assign( ss.str() );
 	}
@@ -212,8 +209,6 @@ namespace NL3D
 		case CMaterial::Specular:
 			generateSpecularPS();
 			break;
-
-
 		}
 
 		ps.assign( ss.str() );
@@ -245,6 +240,62 @@ namespace NL3D
 			}
 			j++;
 		}
+	}
+
+	void CGLSLShaderGenerator::generateNormalVS()
+	{
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
+
+		for( int i = Weight; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << attribNames[ i ];
+				ss << " = ";
+				ss << "v" << attribNames[ i ] << ";" << std::endl;
+			}
+		}
+
+		ss << "}" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::generateSpecularVS()
+	{
+		
+		ss << "uniform mat4 mvMatrix;" << std::endl;
+		ss << "uniform mat4 texMatrix;" << std::endl;
+		ss << "smooth out vec3 cubeTexCoords;" << std::endl;
+		ss << std::endl;
+
+		ss << "vec3 ReflectionMap( const in vec3 eyePos, const in vec3 normal )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 u = normalize( eyePos );" << std::endl;
+		ss <<"return reflect( u, normal );" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec4 eyePosition = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "cubeTexCoords = ReflectionMap( eyePosition, v" << attribNames[ 2 ] << " );" << std::endl;
+		ss << "vec4 t = vec4( cubeTexCoords, 1.0 );" << std::endl;
+		ss << "t = t * texMatrix;" << std::endl;
+		ss << "cubeTexCoords = t.xyz;" << std::endl;
+		ss << "gl_Position = mvpMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+
+		for( int i = Weight; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << attribNames[ i ];
+				ss << " = ";
+				ss << "v" << attribNames[ i ] << ";" << std::endl;
+			}
+		}
+
+		ss << "}" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::generateNormalPS()
@@ -676,37 +727,19 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateSpecularPS()
 	{
-		uint sampler = 0;
-		for( int i = TexCoord0; i < NumOffsets; i++ )
-		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "uniform sampler2D sampler" << sampler;
-				ss << ";";
-				ss << std::endl;
-			}
-			sampler++;
-		}
-		ss << std::endl;
-
+		ss << "smooth in vec3 cubeTexCoords;" << std::endl;
+		ss << "uniform sampler2D sampler0;" << std::endl;
+		ss << "uniform samplerCube cubeSampler;" << std::endl;
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-
+		
 		addDiffuse();
 
-		sampler = 0;
-		for( int i = TexCoord0; i < NumOffsets; i++ )
-		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "vec4 texel" << sampler;
-				ss << " = texture2D( sampler" << sampler;
-				ss << ", " << attribNames[ i ] << " );" << std::endl;
-			}
-			sampler++;
-		}
-
-		ss << "vec4 texel = diffuse;" << std::endl;
+		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
+		ss << "vec4 texel1 = textureCube( cubeSampler, cubeTexCoords );" << std::endl;
+		ss << "vec4 texel;" << std::endl;
+		ss << "texel.rgb = texel0.rgb * diffuse;" << std::endl;
+		ss << "texel.a = texel0.a;" << std::endl;
 		ss << "texel.rgb = texel1.rgb * texel.alpha + texel.rgb;" << std::endl;
 		ss << "texel.a = color.a;" << std::endl;
 		ss << "fragColor = texel;" << std::endl;
