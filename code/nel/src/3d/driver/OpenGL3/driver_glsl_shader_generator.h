@@ -45,6 +45,9 @@ namespace NL3D
 		void generateNormalVS();
 		void generateSpecularVS();
 
+		/// Per-Pixel Lighting
+		void generatePPLVS();
+
 		void generateNormalPS();
 		void generateTexEnv();
 		void generateTexEnvRGB( unsigned int stage );
@@ -53,6 +56,9 @@ namespace NL3D
 
 		void generateLightMapPS();
 		void generateSpecularPS();
+		
+		/// Per-Pixel Lighting
+		void generatePPLPS();
 
 		std::stringstream ss;
 		uint16 vbFormat;

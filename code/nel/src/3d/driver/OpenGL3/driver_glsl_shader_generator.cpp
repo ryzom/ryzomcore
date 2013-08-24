@@ -170,6 +170,10 @@ namespace NL3D
 		case CMaterial::Specular:
 			generateSpecularVS();
 			break;
+
+		case CMaterial::PerPixelLighting:
+			generatePPLVS();
+			break;
 		}
 		
 		vs.assign( ss.str() );
@@ -208,6 +212,10 @@ namespace NL3D
 
 		case CMaterial::Specular:
 			generateSpecularPS();
+			break;
+
+		case CMaterial::PerPixelLighting:
+			generatePPLPS();
 			break;
 		}
 
@@ -295,6 +303,55 @@ namespace NL3D
 			}
 		}
 
+		ss << "}" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::generatePPLVS()
+	{
+		ss << "uniform vec4 lightPosition;" << std::endl;
+		ss << "uniform vec4 viewerPos;" << std::endl;
+		ss << "uniform mat4 invModelMat;" << std::endl;
+		ss << std::endl;
+
+		ss << "smooth out vec3 cubeTexCoords0;" << std::endl;
+		ss << "smooth out vec3 cubeTexCoords2;" << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "gl_Position = mvpMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+		
+		for( int i = Weight; i < NumOffsets; i++ )
+		{
+			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			{
+				ss << attribNames[ i ];
+				ss << " = ";
+				ss << "v" << attribNames[ i ] << ";" << std::endl;
+			}
+		}
+
+		ss << "vec4 n = normalize( vnormal ); //normalized normal" << std::endl;
+		ss << "vec4 R5; // second basis" << std::endl;
+		ss << "R5.x = dot( n, texCoord1 );" << std::endl;
+		ss << "R5.y = R5.x;" << std::endl;
+		ss << "R5.z = R5.x;" << std::endl;
+		ss << "R5.w = R5.x;" << std::endl;
+		ss << "R5 = n * -1 * R5 + texCoord1;" << std::endl;
+		ss << "R5 = normalize( R5 );" << std::endl;
+		ss << "vec4 B = n.yzxw * R5.zxyw; //Binormal" << std::endl;
+		ss << "B = R5.yzxw * -1 * n.zxyw + B;" << std::endl;
+		ss << "vec4 L = lightPos - vposition; //Inverse light vector" << std::endl;
+		ss << "L = normalize( L );" << std::endl;
+		ss << "cubeTexCoords0.x = dot( R5.xyz, L.xyz );" << std::endl;
+		ss << "cubeTexCoords0.y = dot( B.xyz, L.xyz );" << std::endl;
+		ss << "cubeTexCoords0.z = dot( n.xyz, L.xyz );" << std::endl;
+		ss << "vec4 V = invModelMat * viewerPos - vposition;" << std::endl;
+		ss << "V = normalize( V );" << std::endl;
+		ss << "vec4 H = L + V; // half-angle" << std::endl;
+		ss << "vec4 H = normalize( H );" << std::endl;
+		ss << "cubeTexCoords2.x = dot( R5, H );" << std::endl;
+		ss << "cubeTexCoords2.y = dot( B, H );" << std::endl;
+		ss << "cubeTexCoords2.w = dot( n, H );" << std::endl;
 		ss << "}" << std::endl;
 	}
 
@@ -742,6 +799,37 @@ namespace NL3D
 		ss << "texel.a = texel0.a;" << std::endl;
 		ss << "texel.rgb = texel1.rgb * texel.alpha + texel.rgb;" << std::endl;
 		ss << "texel.a = color.a;" << std::endl;
+		ss << "fragColor = texel;" << std::endl;
+		ss << "}" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::generatePPLPS()
+	{
+		ss << "smooth in vec3 cubeTexCoords0;" << std::endl;
+		ss << "smooth in vec3 cubeTexCoords2;" << std::endl;
+		ss << std::endl;
+
+		ss << "uniform samplerCube cubeSampler0;" << std::endl;
+		ss << "uniform sampler2D sampler1;" << std::endl;
+		ss << "uniform samplerCube cubeSampler2;" << std::endl;
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+		
+		addConstants();
+
+		addDiffuse();
+
+		ss << "vec4 texel0 = textureCube( cubeSampler0, cubeTexCoords0 );" << std::endl;
+		ss << "vec4 texel1 = texture2D( sampler1, texCoord1 );" << std::endl;
+		ss << "vec4 texel2 = textureCube( cubeSampler2, cubeTexCoords2 );" << std::endl;
+		ss << "vec4 texel;" << std::endl;
+		ss << "texel.rgb = texel0.rgb * constant0.rgb + constant0.rgb;" << std::endl;
+		ss << "texel.rgb = texel1.rgb * texel.rgb;" << std::endl;
+		ss << "texel.rgb = texel2.rgb * constant2.rgb + texel.rgb;" << std::endl;
+		ss << "texel.a = texel0.a * diffuse.a" << std::endl;
+		ss << "texel.a = texel1.a * texel.a;" << std::endl;
 		ss << "fragColor = texel;" << std::endl;
 		ss << "}" << std::endl;
 	}
