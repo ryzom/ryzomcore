@@ -129,7 +129,7 @@
 							<tr><td valign="middle">
 							New Email:
 							</td><td>
-							<input type="text" class="input-xlarge" id="NewEmail" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
+							<input type="text" class="input-xlarge" id="NewEmail" size="200" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
 							{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}<font color="red">{$EMAIL}</font>{/if}
 							</td></tr>
 						</table>
@@ -200,6 +200,36 @@
 						<input type="submit" value="Change Info"/>
 						</p>
 					</form>
+						
+					</td></tr>
+				</table>
+			</td></tr>
+		</table>
+	      </td></tr>
+		<tr><td>
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
+			<tr><td>
+				<table cellpadding="10">
+					<tr><td>
+						<p><h3>Ticket-Update Mail Settings</h3></p>
+						<form id="changeReceiveMail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
+							<table>
+								<tr><td valign="middle">
+									Receive ticket updates
+								</td><td>
+									 <select name="ReceiveMail">	
+										<option value="1" {if isset($ReceiveMail) and $ReceiveMail eq 1}selected="selected"{/if}>Yes</option>
+										<option value="0" {if isset($ReceiveMail) and $ReceiveMail eq 0}selected="selected"{/if}>No</option>
+									</select>
+								</td></tr>
+							</table>
+							
+							<input type="hidden" name="function" value="change_receivemail">
+							<input type="hidden" name="target_id" value="{$target_id}">
+							<p>
+								<input type="submit" value="Change Updates"/>
+							</p>
+						</form>
 						
 					</td></tr>
 				</table>
