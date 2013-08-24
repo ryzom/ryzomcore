@@ -42,17 +42,17 @@
 								<table>
 								    <tr>
 									<td valign="middle">Group name: </td>
-									<td><input type="text" maxlength="20"   id="Name" name="Name"></td>
+									<td><input type="text" maxlength="20" size="180"  id="Name" name="Name"></td>
 								    </tr>
 								    
 								    <tr>
 									<td valign="middle">Group Tag: </td>
-									<td><input type="text" maxlength="4"  id="Tag" name="Tag"></td>
+									<td><input type="text" maxlength="4" size="180" id="Tag" name="Tag"></td>
 								    </tr>
 								    
 								    <tr>
 									<td valign="middle">Group EmailAddress: </td>
-									<td><input type="text"  id="GroupEmail" name="GroupEmail"></td>
+									<td><input type="text"  id="GroupEmail" size="180" name="GroupEmail"></td>
 								    </tr>
 								</table>
 							    </td>
@@ -61,17 +61,17 @@
 								<table>	    
 								    <tr>
 									<td valign="middle">IMAP MailServer IP: </td>
-									<td><input type="text"  id="IMAP_MailServer" name="IMAP_MailServer"></td>
+									<td><input type="text"  id="IMAP_MailServer" size="180" name="IMAP_MailServer"></td>
 								    </tr>
 								    
 								    <tr>
 									<td valign="middle">IMAP Username: </td>
-									<td><input type="text"  id="IMAP_Username" name="IMAP_Username"></td>
+									<td><input type="text"  id="IMAP_Username" size="180" name="IMAP_Username"></td>
 								    </tr>
 			       
 								    <tr>
 									<td valign="middle">IMAP Password: </td>
-									<td><input type="text" id="IMAP_Password" name="IMAP_Password"></td>
+									<td><input type="text" id="IMAP_Password" size="180" name="IMAP_Password"></td>
 								    </tr>
 								</table>
 							    </td>
