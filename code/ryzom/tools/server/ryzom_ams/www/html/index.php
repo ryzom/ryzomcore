@@ -59,5 +59,5 @@ if($page == 'error'){
      $return['permission'] = 0;
      $return['no_visible_elements'] = 'FALSE';
 }
-//print_r($return);
+
 helpers :: loadTemplate( $page , $return );

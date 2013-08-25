@@ -26,6 +26,7 @@
             `Gender` tinyint(1) unsigned NOT NULL DEFAULT '0',
             `Country` char(2) NOT NULL DEFAULT '',
             `ReceiveMail` int(1) NOT NULL DEFAULT 1,
+            `Language` varchar(3) DEFAULT NULL,
             PRIMARY KEY (`UId`)
             ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users information for ryzom_ams';
             
@@ -391,11 +392,12 @@
           'name' => "admin",
           'pass' => $hashpass,
           'mail' => "admin@admin.com",
-          'permission' => 3
+          'permission' => 3,
+          'lang' => "en"
         );
         try{
             $dbw = new DBLayer("web");
-            $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Permission) VALUES (:name, :pass, :mail, :permission)",$params);
+            $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Permission, Language) VALUES (:name, :pass, :mail, :permission, :lang)",$params);
             Users::createUser($params, $user_id);
             $dbl = new DBLayer("lib");
             $dbl->execute("UPDATE ticket_user SET Permission = 3 WHERE TUserId = :user_id",array('user_id' => $user_id));

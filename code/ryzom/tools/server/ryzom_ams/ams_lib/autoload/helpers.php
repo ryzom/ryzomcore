@@ -1,13 +1,19 @@
 <?php
-class Helpers{
 
-     static public function loadTemplate( $template, $vars = array (), $forcelibrender = false )
+class Helpers{
+     
+
+     public static function loadTemplate( $template, $vars = array (), $forcelibrender = false )
     {
+
          global $AMS_LIB;
          global $SITEBASE;
          global $AMS_TRANS;
          global $INGAME_LAYOUT;
+         define('SMARTY_SPL_AUTOLOAD',1); 
          require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
+         spl_autoload_register('__autoload');
+
          $smarty = new Smarty;
 
          // turn smarty debugging on/off
@@ -34,7 +40,7 @@ class Helpers{
              $smarty -> assign( $key, $value );
              }
              
-          
+      
          $variables = Helpers::handle_language();
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
@@ -87,7 +93,49 @@ class Helpers{
           global $DEFAULT_LANGUAGE;
           global $AMS_TRANS;
           
-          //if language get param is given = set cookie
+          //if user wants to change the language
+          if(isset($_GET['Language']) && isset($_GET['setLang'])){
+               //The ingame client sometimes sends full words, derive those!
+               switch($_GET['Language']){
+                    
+                    case "English":
+                         $lang = "en";
+                         break;
+                    
+                    case "French":
+                         $lang = "fr";
+                         break;
+                    
+                    default:
+                         $lang = $_GET['Language'];           
+               }
+               //if the file exists en the setLang = true
+               if( file_exists( $AMS_TRANS . '/' . $lang . '.ini' ) && $_GET['setLang'] == "true"){
+                    //set a cookie & session var and incase logged in write it to the db!
+                    setcookie( 'Language', $lang , time() + 60*60*24*30 );
+                    $_SESSION['Language'] = $lang;
+                    if(WebUsers::isLoggedIn()){
+                         WebUsers::setLanguage($_SESSION['id'],$lang);
+                    }     
+               }else{
+                    $_SESSION['Language'] = $DEFAULT_LANGUAGE;
+               }
+          }else{
+               //if the session var is not set yet
+               if(!isset($_SESSION['Language'])){
+                    //check if a cookie already exists for it
+                    if ( isset( $_COOKIE['Language'] ) ) { 
+                         $_SESSION['Language'] = $_COOKIE['Language'];
+                    //else use the default language
+                    }else{
+                         $_SESSION['Language'] = $DEFAULT_LANGUAGE;
+                    }
+               }
+          }
+          
+          return parse_ini_file( $AMS_TRANS . '/' .  $_SESSION['Language'] . '.ini', true );
+          
+          /*/if language get param is given = set cookie
           //else if no get param is given and a cookie is set, use that language, else use default.
           if ( isset( $_GET['language'] ) ) {
                //check if the language is supported 
@@ -110,7 +158,7 @@ class Helpers{
                }
           }
              
-         return parse_ini_file( $AMS_TRANS . '/' . $language . '.ini', true );
+         return parse_ini_file( $AMS_TRANS . '/' . $language . '.ini', true );*/
      }
      
      

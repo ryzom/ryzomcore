@@ -47,9 +47,8 @@ function write_user($newUser){
      );
   
      try{
-          //make connection with web db and put it in there
-          $dbw = new DBLayer("web");
-          $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email) VALUES (:name, :pass, :mail)",$params);
+          //make new webuser
+          createWebuser($params['name'], $params['pass'], $params['mail']);
           
           //Create the user on the shard + in case shard is offline put copy of query in query db
           //returns: ok, shardoffline or liboffline

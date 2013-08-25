@@ -10,6 +10,7 @@ class WebUsers extends Users{
        private $gender;
        private $country;
        private $receiveMail;
+       private $language;
        
        function __construct($UId = 0) {
               $this->uId = $UId;
@@ -24,6 +25,7 @@ class WebUsers extends Users{
               $this->gender = $values['Gender'];
               $this->country = $values['Country'];
               $this->receiveMail = $values['ReceiveMail'];
+              $this->language = $values['Language'];
        }
     
      /**
@@ -136,6 +138,16 @@ class WebUsers extends Users{
        return $this->receiveMail;
     }
     
+       public function getLanguage(){
+       $dbw = new DBLayer("web");
+       if(! isset($this->language) || $this->language == ""){
+              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+              $row = $statement->fetch();
+              $this->set($row);
+       }
+       return $this->language;
+    }
+    
     public function isLoggedIn(){
         if(isset($_SESSION['user'])){
             return true;
@@ -183,6 +195,18 @@ class WebUsers extends Users{
           }
     }
     
+      public static function setLanguage($user, $language){
+        $values = Array('user' => $user, 'language' => $language);
+         try {
+               //make connection with and put into shard db
+               $dbw = new DBLayer("web");
+               $dbw->execute("UPDATE ams_user SET Language = :language WHERE UId = :user ",$values);
+          }
+          catch (PDOException $e) {
+            //ERROR: the web DB is offline
+          }
+    }
+    
     public function getUsers(){
         $dbl = new DBLayer("web");
         $data = $dbl->executeWithoutParams("SELECT * FROM ams_user");
@@ -191,6 +215,27 @@ class WebUsers extends Users{
     
     public static function getAllUsersQuery(){
        return "SELECT * FROM ams_user";
+    }
+    
+    public static function createWebuser($name, $pass, $mail){
+       
+       //register account with the correct language (check if cookie is already set)!
+       if ( isset( $_COOKIE['Language'] ) ) { 
+              $lang = $_COOKIE['Language'];
+       }else{
+              global $DEFAULT_LANGUAGE;
+              $lang = $DEFAULT_LANGUAGE;
+       }
+       
+       $values = Array('name' => $name, 'pass' => $pass, 'mail' => $mail, 'lang' => $lang);
+       
+       try {
+          $dbw = new DBLayer("web");
+          return $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Language) VALUES (:name, :pass, :mail, :lang)",$values);
+       }
+       catch (PDOException $e) {
+            //ERROR: the web DB is offline
+       }
     }
     
 }

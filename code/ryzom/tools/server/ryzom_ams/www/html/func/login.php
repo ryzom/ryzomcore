@@ -11,6 +11,8 @@ function login(){
 			$_SESSION['user'] = $username;
 			$_SESSION['id'] = $result['UId'];
 			$_SESSION['ticket_user'] = Ticket_User::constr_ExternId($result['UId']);
+			$user = new WebUsers($_SESSION['id']);
+			$_SESSION['Language'] = $user->getLanguage();
 			
 			//go back to the index page.
 			header( 'Location: index.php' );
