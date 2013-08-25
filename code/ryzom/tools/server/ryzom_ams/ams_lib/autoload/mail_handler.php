@@ -12,40 +12,50 @@ class Mail_Handler{
     }
     
     
-    public static function send_ticketing_mail($ticketObj, $content, $type, $sendingId = 0) {
+    public static function send_ticketing_mail($receiver, $ticketObj, $content, $type, $sendingId = 0) {
         global $TICKET_MAILING_SUPPORT;
         if($TICKET_MAILING_SUPPORT){
-            //$txt = "";
-            //$subject = "";
+
             if($sendingId == 0){
                 //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
                 $sendingId = NULL;
             }
-            $author = $ticketObj->getAuthor();
-            $webUser = new WebUsers($author);
             
-            //if the author of the ticket wants to receive mail, then send it!
-            if($webUser->getReceiveMail()){
                 
-                switch($type){
-                    case "REPLY":
+            switch($type){
+                case "REPLY":
+                    $webUser = new WebUsers($receiver);
+                    if($webUser->getReceiveMail()){                       
                         $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n You received a new reply on your ticket: " . $ticketObj->getTitle() .
                         "\n --------------------\n\n";
                         $subject = "New reply on [Ticket #" . $ticketObj->getTId() ."]";
                         $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
                         $txt = $txt . $content . $endTxt;
-                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(),$sendingId);
-                        break;
-                    
-                    case "NEW":
+                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(),$sendingId);
+                    }
+                    break;
+                
+                case "NEW":
+                    $webUser = new WebUsers($receiver);
+                    if($webUser->getReceiveMail()){    
                         $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n Your ticket: " . $ticketObj->getTitle() . " is newly created";
                         $txt = $txt . "\n --------------------\n\n";
                         $subject = "New ticket created [Ticket #" . $ticketObj->getTId() ."]";
                         $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
                         $txt = $txt . $content . $endTxt;
-                        self::send_mail($author,$subject,$txt, $ticketObj->getTId(), $sendingId);
-                        break;
-                }
+                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), $sendingId);
+                    }
+                    break;
+                
+                case "WARNAUTHOR":
+                    break;
+                
+                case "WARNSENDER":
+                    break;
+                
+                case "WARNUNKNOWNSENDER":
+                    break;
+                
             }
         }
     } 
@@ -278,15 +288,17 @@ class Mail_Handler{
                 }else{
                     //if user has no access to it
                     //Warn real ticket owner + person that send the mail
-                    $subject_warnAuthor = "Someone tried to reply to your ticket: [Ticket #" . $ticket->getTId() ."]";
+                    /*$subject_warnAuthor = "Someone tried to reply to your ticket: [Ticket #" . $ticket->getTId() ."]";
                     $body_warnAuthor = "Someone tried to reply at your ticket: " . $ticket->getTitle() ."by sending an email from ".$fromEmail."! Please use the email address matching to your account if you want to auto reply!\n\n
                     If ".  $fromEmail. " isn't one of your email addresses, please contact us by replying to this ticket!" ;
-                    Mail_Handler::send_mail($ticket->getAuthor(),  $subject_warnAuthor , $body_warnAuthor, $ticket->getTId(), NULL);
+                    Mail_Handler::send_mail($ticket->getAuthor(),  $subject_warnAuthor , $body_warnAuthor, $ticket->getTId(), NULL);*/
+                    Mail_Handler::send_ticketing_mail($ticket->getAuthor(),$ticket,  NULL , "WARNAUTHOR" , NULL);
                     
-                    $subject_warnSender = "You tried to reply to someone elses ticket!";
+                    /*$subject_warnSender = "You tried to reply to someone elses ticket!";
                     $body_warnSender = "It seems you tried to reply to someone elses ticket, please use the matching email address to that account!\n\n
                     This action is notified to the real ticket owner!" ;
-                    Mail_Handler::send_mail($from,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);
+                    Mail_Handler::send_mail($from,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);*/
+                    Mail_Handler::send_ticketing_mail($from ,$ticket,  NULL , "WARNSENDER" , NULL);
                     
                     error_log("Email found that was a reply to a ticket, though send by another user to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
                   
@@ -296,15 +308,17 @@ class Mail_Handler{
                 
                 //if a reply to a ticket is being sent by a non-user!
                 //Warn real ticket owner + person that send the mail
-                $subject_warnAuthor = "Someone tried to reply to your ticket: [Ticket #" . $ticket->getTId() ."]";
+                /*$subject_warnAuthor = "Someone tried to reply to your ticket: [Ticket #" . $ticket->getTId() ."]";
                 $body_warnAuthor = "Someone tried to reply at your ticket:' " . $ticket->getTitle() ."' by sending an email from ".$fromEmail." ! Please use the email address matching to your account if you want to auto reply!\n\n
                 If ".  $fromEmail. " isn't one of your email addresses, please contact us by replying to this ticket!" ;
-                Mail_Handler::send_mail($ticket->getAuthor(),  $subject_warnAuthor , $body_warnAuthor, $ticket->getTId(), NULL);
+                Mail_Handler::send_mail($ticket->getAuthor(),  $subject_warnAuthor , $body_warnAuthor, $ticket->getTId(), NULL);*/
+                Mail_Handler::send_ticketing_mail($ticket->getAuthor() ,$ticket,  NULL , "WARNAUTHOR" , NULL);
                 
-                $subject_warnSender = "You tried to reply to someone's ticket!";
+                /*$subject_warnSender = "You tried to reply to someone's ticket!";
                 $body_warnSender = "It seems you tried to reply to someone's ticket, However this email address isn't linked to any account, please use the matching email address to that account!\n\n
                 This action is notified to the real ticket owner!" ;
-                Mail_Handler::send_mail($fromEmail,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);
+                Mail_Handler::send_mail($fromEmail,  $subject_warnSender , $body_warnSender, $ticket->getTId(), NULL);*/
+                Mail_Handler::send_ticketing_mail($fromEmail ,$ticket,  NULL , "WARNUNKNOWNSENDER" , NULL);
                 
                 error_log("Email found that was a reply to a ticket, though send by an unknown email address to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
                 

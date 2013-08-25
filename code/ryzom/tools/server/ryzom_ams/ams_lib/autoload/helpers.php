@@ -135,30 +135,6 @@ class Helpers{
           
           return parse_ini_file( $AMS_TRANS . '/' .  $_SESSION['Language'] . '.ini', true );
           
-          /*/if language get param is given = set cookie
-          //else if no get param is given and a cookie is set, use that language, else use default.
-          if ( isset( $_GET['language'] ) ) {
-               //check if the language is supported 
-               if ( file_exists( $AMS_TRANS . '/' . $_GET['language'] . '.ini' ) ){
-                    //if it's supported, set cookie!
-                    setcookie( 'language',$_GET['language'], time() + 60*60*24*30 );
-                    $language = $_GET['language'];
-               }else{
-                    //the language is not supported, use the default.
-                    $language = $DEFAULT_LANGUAGE;
-               }
-          }else{
-               //if no get param is given, check if a cookie value for language is set 
-               if ( isset( $_COOKIE['language'] ) ) { 
-                    $language = $_COOKIE['language']; 
-               }
-               //else use the default
-               else{
-                     $language = $DEFAULT_LANGUAGE; 
-               }
-          }
-             
-         return parse_ini_file( $AMS_TRANS . '/' . $language . '.ini', true );*/
      }
      
      

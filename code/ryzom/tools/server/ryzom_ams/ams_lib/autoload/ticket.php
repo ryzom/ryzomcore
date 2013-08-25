@@ -103,7 +103,7 @@ class Ticket{
             Ticket::forwardTicket(0, $ticket_id, $for_support_group);
         }
 
-        Mail_Handler::send_ticketing_mail($ticket, $content, "NEW", $ticket->getForwardedGroupId());
+        Mail_Handler::send_ticketing_mail($ticket->getAuthor(), $ticket, $content, "NEW", $ticket->getForwardedGroupId());
         return $ticket_id;
         
     }
@@ -166,7 +166,7 @@ class Ticket{
                 
                 //notify ticket author that a new reply is added!
                 if($ticket->getAuthor() != $author){
-                    Mail_Handler::send_ticketing_mail($ticket, $content, "REPLY", $ticket->getForwardedGroupId());
+                    Mail_Handler::send_ticketing_mail($ticket->getAuthor(), $ticket, $content, "REPLY", $ticket->getForwardedGroupId());
                 }
                 
                 
