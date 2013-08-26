@@ -12,13 +12,15 @@ class Mail_Handler{
     }
     
     
-    public static function send_ticketing_mail($receiver, $ticketObj, $content, $type, $sendingId = 0) {
+    public static function send_ticketing_mail($receiver, $ticketObj, $content, $type, $sender = 0) {
+        global $MAIL_LOG_PATH;
+        error_log("Receiver: {$receiver}, content: {$content}, type: {$type}, SendingId: {$sender} \n", 3, $MAIL_LOG_PATH);
         global $TICKET_MAILING_SUPPORT;
         if($TICKET_MAILING_SUPPORT){
 
-            if($sendingId == 0){
+            if($sender == 0){
                 //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
-                $sendingId = NULL;
+                $sender = NULL;
             }
             
             global $AMS_TRANS;
@@ -42,7 +44,7 @@ class Mail_Handler{
                         $subject = $mailText['email_subject_new_reply'] . $ticketObj->getTId() ."]";
                         $txt = $mailText['email_body_new_reply_1']. $ticketObj->getTId() . $mailText['email_body_new_reply_2'] . $ticketObj->getTitle() .
                         $mailText['email_body_new_reply_3'] . $content . $mailText['email_body_new_reply_4'];
-                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(),$sendingId);
+                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(),$sender);
                     }
                     break;
                 
@@ -52,27 +54,30 @@ class Mail_Handler{
                         $subject = $mailText['email_subject_new_ticket'] . $ticketObj->getTId() ."]";
                         $txt = $mailText['email_body_new_ticket_1'] . $ticketObj->getTId() . $mailText['email_body_new_ticket_2'] . $ticketObj->getTitle() . $mailText['email_body_new_ticket_3']
                         . $content . $mailText['email_body_new_ticket_4'];
-                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), $sendingId);
+                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), $sender);
                     }
                     break;
                 
                 case "WARNAUTHOR":
+                    if(is_numeric($sender)){
+                        $sender = Ticket_User::get_email_by_user_id($sender);
+                    }
                     $subject = $mailText['email_subject_warn_author'] . $ticketObj->getTId() ."]";
-                    $txt = $mailText['email_body_warn_author_1'] . $ticket->getTitle() .$mailText['email_body_warn_author_2'].$fromEmail.$mailText['email_body_warn_author_3'].
-                    $fromEmail. $mailText['email_body_warn_author_4'] ;
-                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), $sendingId);
+                    $txt = $mailText['email_body_warn_author_1'] . $ticketObj->getTitle() .$mailText['email_body_warn_author_2'].$sender.$mailText['email_body_warn_author_3'].
+                    $sender. $mailText['email_body_warn_author_4'] ;
+                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), NULL);
                     break;
                 
                 case "WARNSENDER":
                     $subject = $mailText['email_subject_warn_sender'];
                     $txt = $mailText['email_body_warn_sender'];
-                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), $sendingId);
+                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), NULL);
                     break;
                 
                 case "WARNUNKNOWNSENDER":
                     $subject = $mailText['email_subject_warn_unknown_sender'];
                     $txt = $mailText['email_body_warn_unknown_sender'];
-                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), $sendingId);
+                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), NULL);
                     break;
                 
             }
@@ -287,7 +292,6 @@ class Mail_Handler{
        
         //if ticket id is found, that means it is a reply on an existing ticket
         if($ticket_id){
-            
             $ticket = new Ticket();
             $ticket->load_With_TId($ticket_id);
             
@@ -296,7 +300,6 @@ class Mail_Handler{
                 
                 $user = new Ticket_User();
                 $user->load_With_TUserId($from);
-
                 
                 //if user has access to it!
                 if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
@@ -307,7 +310,7 @@ class Mail_Handler{
                 }else{
                     //if user has no access to it
                     //Warn real ticket owner + person that send the mail
-                    Mail_Handler::send_ticketing_mail($ticket->getAuthor(),$ticket,  NULL , "WARNAUTHOR" , NULL);
+                    Mail_Handler::send_ticketing_mail($ticket->getAuthor(),$ticket,  NULL , "WARNAUTHOR" , $from);
                     Mail_Handler::send_ticketing_mail($from ,$ticket,  NULL , "WARNSENDER" , NULL);
                     
                     error_log("Email found that was a reply to a ticket, though send by another user to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
@@ -318,7 +321,7 @@ class Mail_Handler{
                 
                 //if a reply to a ticket is being sent by a non-user!
                 //Warn real ticket owner + person that send the mail
-                Mail_Handler::send_ticketing_mail($ticket->getAuthor() ,$ticket,  NULL , "WARNAUTHOR" , NULL);
+                Mail_Handler::send_ticketing_mail($ticket->getAuthor() ,$ticket,  NULL , "WARNAUTHOR" , $fromEmail);
                 Mail_Handler::send_ticketing_mail($fromEmail ,$ticket,  NULL , "WARNUNKNOWNSENDER" , NULL);
                 
                 error_log("Email found that was a reply to a ticket, though send by an unknown email address to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
