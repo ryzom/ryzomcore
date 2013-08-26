@@ -189,7 +189,8 @@ gint KeyIn(GtkWidget *Widget, GdkEventKey *Event, gpointer *Data)
 		}
 		break;
 	case GDK_Down :
-		if (CommandHistoryPos + 1 < CommandHistory.size()) {
+		if (CommandHistoryPos + 1 < CommandHistory.size())
+		{
 			CommandHistoryPos++;
 			gtk_entry_set_text (GTK_ENTRY(Widget), CommandHistory[CommandHistoryPos].c_str());
 		}
@@ -374,7 +375,8 @@ gint updateInterf (gpointer data)
 		{
 			uint32 col = (*it).first;
 			GtkTextTag *tag = NULL;
-			if ((col>>24) == 0) {
+			if ((col>>24) == 0)
+			{
 				GdkColor color;
 				color.red = (col >> 8) & 0xFF00;
 				color.green = col & 0xFF00;
