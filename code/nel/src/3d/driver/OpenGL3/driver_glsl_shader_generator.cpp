@@ -342,11 +342,13 @@ namespace NL3D
 		ss << "vec4 n = normalize( vnormal ); //normalized normal" << std::endl;
 		ss << "vec4 T; // second basis, Tangent" << std::endl;
 		ss << "T = texCoord1;" << std::endl;
+		ss << "T = T - n * dot( N, T ); // Gramm-Schmidt process" << std::endl;
 		ss << "T = normalize( T );" << std::endl;
 		ss << "vec4 B;" << std::endl;
-		ss << "B.xyz = cross( n.xyz, T.xyz );" << std::endl;
+		ss << "B.xyz = cross( n.xyz, T.xyz ); // B = N x T" << std::endl;
 		ss << "vec4 L = lightPos - vposition; //Inverse light vector" << std::endl;
 		ss << "L = normalize( L );" << std::endl;
+		ss << "L * [ T B N ]" << std::endl;
 		ss << "cubeTexCoords0.x = dot( T.xyz, L.xyz );" << std::endl;
 		ss << "cubeTexCoords0.y = dot( B.xyz, L.xyz );" << std::endl;
 		ss << "cubeTexCoords0.z = dot( n.xyz, L.xyz );" << std::endl;
