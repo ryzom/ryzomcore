@@ -21,7 +21,15 @@ class Mail_Handler{
                 $sendingId = NULL;
             }
             
-            $variables = Helpers::handle_language();
+            global $AMS_TRANS;
+            if(is_numeric($receiver)){
+                $webUser = new WebUsers($receiver);
+                $lang = $webUser->getLanguage();
+            }else{
+                global $DEFAULT_LANGUAGE;
+                $lang = $DEFAULT_LANGUAGE;
+            }
+            $variables = parse_ini_file( $AMS_TRANS . '/' .  $lang . '.ini', true );
             $mailText = array();
             foreach ( $variables['email'] as $key => $value ){
                 $mailText[$key] = $value;
