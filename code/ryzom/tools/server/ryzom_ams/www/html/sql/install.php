@@ -379,6 +379,39 @@
             ON DELETE CASCADE
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
+        
+        
+        -- -----------------------------------------------------
+        -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket_info`
+        -- -----------------------------------------------------
+        DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_info` ;
+        
+        CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_info` (
+          `TInfoId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+          `Ticket` INT UNSIGNED NOT NULL ,
+          `ShardId` INT NULL ,
+          `UserPosition` VARCHAR(65) NULL ,
+          `ViewPosition` VARCHAR(65) NULL ,
+          `ClientVersion` VARCHAR(65) NULL ,
+          `PatchVersion` VARCHAR(65) NULL ,
+          `ServerTick` VARCHAR(40) NULL ,
+          `ConnectState` VARCHAR(40) NULL ,
+          `LocalAddress` VARCHAR(60) NULL ,
+          `Memory` VARCHAR(60) NULL ,
+          `OS` VARCHAR(70) NULL ,
+          `Processor` VARCHAR(70) NULL ,
+          `CPUID` VARCHAR(50) NULL ,
+          `CpuMask` VARCHAR(50) NULL ,
+          `HT` VARCHAR(65) NULL ,
+          `NeL3D` VARCHAR(70) NULL ,
+          PRIMARY KEY (`TInfoId`) ,
+          INDEX `fk_ticket_info_ticket1` (`Ticket` ASC) ,
+          CONSTRAINT `fk_ticket_info_ticket1`
+            FOREIGN KEY (`Ticket` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket` (`TId` )
+            ON DELETE NO ACTION
+            ON UPDATE NO ACTION)
+        ENGINE = InnoDB;
 
                 
 

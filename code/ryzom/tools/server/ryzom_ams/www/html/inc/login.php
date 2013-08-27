@@ -2,6 +2,7 @@
 
 function login(){
 	if ( helpers :: check_if_game_client () ){
+		//check if you are logged in ingame.
 		$result = Helpers::check_login_ingame();
 		if( $result != "FALSE"){
 			//handle successful login
