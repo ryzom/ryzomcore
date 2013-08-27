@@ -85,12 +85,14 @@ class Ticket{
      */
     public static function create_Ticket( $title, $content, $category, $author, $real_author, $for_support_group = 0) {
 
+        //create the new ticket!
         $ticket = new Ticket();
         $values = array("Title" => $title, "Status"=> 1, "Queue"=> 0, "Ticket_Category" => $category, "Author" => $author, "Priority" => 0);
         $ticket->set($values);
         $ticket->create();
         $ticket_id = $ticket->getTId();
         
+        //write a log entry
         if ( $author == $real_author){
             Ticket_Log::createLogEntry( $ticket_id, $author, 1);
         }else{
@@ -98,11 +100,11 @@ class Ticket{
         }
         Ticket_Reply::createReply($content, $author, $ticket_id, 0, $author);
         
-        //send email that new ticket has been created
+        //forwards the ticket directly after creation to the supposed support group
         if($for_support_group){
             Ticket::forwardTicket(0, $ticket_id, $for_support_group);
         }
-
+        //send email that new ticket has been created
         Mail_Handler::send_ticketing_mail($ticket->getAuthor(), $ticket, $content, "NEW", $ticket->getForwardedGroupId());
         return $ticket_id;
         
