@@ -83,7 +83,7 @@ class Ticket{
      * creates a ticket + first initial reply and fills in the content of it!
      * for_support_group defines to which support group the ticket has to  be forwarded
      */
-    public static function create_Ticket( $title, $content, $category, $author, $real_author, $for_support_group = 0) {
+    public static function create_Ticket( $title, $content, $category, $author, $real_author, $for_support_group = 0, $extra_info = 0) {
 
         //create the new ticket!
         $ticket = new Ticket();
@@ -91,6 +91,12 @@ class Ticket{
         $ticket->set($values);
         $ticket->create();
         $ticket_id = $ticket->getTId();
+        
+        //if ingame then add an extra info
+        if(Helpers::check_if_game_client() && $extra_info != 0){
+            $extra_info['Ticket'] = $ticket_id;
+            Ticket_Info::create_Ticket_Info($extra_info);
+        }
         
         //write a log entry
         if ( $author == $real_author){
@@ -104,6 +110,7 @@ class Ticket{
         if($for_support_group){
             Ticket::forwardTicket(0, $ticket_id, $for_support_group);
         }
+        
         //send email that new ticket has been created
         Mail_Handler::send_ticketing_mail($ticket->getAuthor(), $ticket, $content, "NEW", $ticket->getForwardedGroupId());
         return $ticket_id;

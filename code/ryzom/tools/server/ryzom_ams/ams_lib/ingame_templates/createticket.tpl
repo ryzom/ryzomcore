@@ -58,6 +58,27 @@
 							<td>
 							    <input type="hidden" name="function" value="create_ticket">
 							    <input type="hidden" name="target_id" value="{$target_id}">
+
+							    <!-- Additional Ticket info-->
+							    {if $ingame}
+							    <input type="hidden" name="ShardId" value="{$ShardId}">
+							    <input type="hidden" name="UserPosition" value="{$UserPosition}">
+							    <input type="hidden" name="ViewPosition" value="{$ViewPosition}">
+							    <input type="hidden" name="ClientVersion" value="{$ClientVersion}">
+							    <input type="hidden" name="PatchVersion" value="{$PatchVersion}">
+							    <input type="hidden" name="ServerTick" value="{$ServerTick}">
+							    <input type="hidden" name="ConnectState" value="{$ConnectState}">
+							    <input type="hidden" name="LocalAddress" value="{$LocalAddress}">
+							    <input type="hidden" name="Memory" value="{$Memory}">
+							    <input type="hidden" name="OS" value="{$OS}">
+							    <input type="hidden" name="Processor" value="{$Processor}">
+							    <input type="hidden" name="CPUID" value="{$CPUID}">
+							    <input type="hidden" name="CpuMask" value="{$CpuMask}">
+							    <input type="hidden" name="HT" value="{$HT}">
+							    <input type="hidden" name="NeL3D" value="{$NeL3D}">
+							    <input type="hidden" name="UserId" value="{$UserId}">
+							    
+							    {/if}
 							    <input type="submit" value="Send Ticket"/>
 							</td>  
 						    </tr>

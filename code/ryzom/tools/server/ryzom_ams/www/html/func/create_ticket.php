@@ -18,7 +18,7 @@ function create_ticket(){
                     }else{
                         $author=  Ticket_User::constr_ExternId($_POST['target_id'])->getTUserId();
                     }
-                    $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, $_SESSION['ticket_user']->getTUserId());
+                    $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, $_SESSION['ticket_user']->getTUserId(),0, $_POST);
                     header("Location: index.php?page=show_ticket&id=".$ticket_id);
                     exit;
                     

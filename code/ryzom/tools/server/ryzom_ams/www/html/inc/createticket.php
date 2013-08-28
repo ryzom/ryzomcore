@@ -25,7 +25,13 @@ function createticket(){
             
      
         }
+        if(Helpers::check_if_game_client()){
+            //get all additional info, which is needed for adding the extra info page
+           $result[] =  $_GET;
+           $result['ingame'] = true;
+        }
         
+       
         //create array of category id & names
         $catArray = Ticket_Category::getAllCategories();
         $result['category'] = Gui_Elements::make_table_with_key_is_id($catArray, Array("getName"), "getTCategoryId" );

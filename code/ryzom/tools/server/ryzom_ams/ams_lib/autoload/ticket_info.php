@@ -1,10 +1,9 @@
 <?php
 
-class Ticket_Log{
+class Ticket_Info{
     
     private $tInfoId;
-    private $ticket;
-    
+    private $ticket; 
     private $shardid;
     private $user_position;
     private $view_position;
@@ -20,6 +19,7 @@ class Ticket_Log{
     private $cpu_mask;
     private $ht;
     private $nel3d;
+    private $user_id;
 
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
@@ -41,7 +41,6 @@ class Ticket_Log{
     
     //set values
     public function set($values) {
-        $this->setTInfoId($values['TInfoId']);
         $this->setTicket($values['Ticket']);
         $this->setShardId($values['ShardId']);
         $this->setUser_Position($values['UserPosition']);
@@ -58,6 +57,8 @@ class Ticket_Log{
         $this->setCPU_Mask($values['CpuMask']);
         $this->setHT($values['HT']);
         $this->setNel3D($values['NeL3D']);
+        $this->setUser_Id($values['UserId']);
+      
     } 
 
     //Load with tInfoId
@@ -78,11 +79,12 @@ class Ticket_Log{
     
     //create ticket info
     public function create() {
-        $query = "INSERT INTO ticket_Info (TInfoId, Ticket, ShardId, UserPosition,ViewPosition, ClientVersion, PatchVersion,ServerTick, ConnectState, LocalAddress, Memory, OS, 
-Processor, CPUID, CpuMask, HT, NeL3D) VALUES (:id, :ticket, :shardid, :userposition, :viewposition, :clientversion, :patchversion, :servertick, :connectstate, :localaddress, :memory, :os, :processor, :cpuid, :cpu_mask, :ht, :nel3d   )";
-        $values = Array('id' => $this->getTInfoId(), 'ticket' => $this->getTicket(), 'shardid' => $this->getShardId, 'userposition' => $this->getUser_Position(), 'viewposition' => $this->getView_Position(), 'clientversion' => $this->getClient_Version(),
+        $dbl = new DBLayer("lib");
+        $query = "INSERT INTO ticket_info ( Ticket, ShardId, UserPosition,ViewPosition, ClientVersion, PatchVersion,ServerTick, ConnectState, LocalAddress, Memory, OS, 
+Processor, CPUID, CpuMask, HT, NeL3D,  UserId) VALUES ( :ticket, :shardid, :userposition, :viewposition, :clientversion, :patchversion, :servertick, :connectstate, :localaddress, :memory, :os, :processor, :cpuid, :cpu_mask, :ht, :nel3d, :user_id )";
+        $values = Array('ticket' => $this->getTicket(), 'shardid' => $this->getShardId(), 'userposition' => $this->getUser_Position(), 'viewposition' => $this->getView_Position(), 'clientversion' => $this->getClient_Version(),
 'patchversion' => $this->getPatch_Version(), 'servertick' => $this->getServer_Tick(), 'connectstate' => $this->getConnect_State(), 'localaddress' => $this->getLocal_Address(), 'memory' => $this->getMemory(), 'os'=> $this->getOS(), 'processor' => $this->getProcessor(), 'cpuid' => $this->getCPUId(),
-'cpu_mask' => $this->getCpu_Mask(), 'ht' => $this->getHT(), 'nel3d' => $this->getNel3D());
+'cpu_mask' => $this->getCpu_Mask(), 'ht' => $this->getHT(), 'nel3d' => $this->getNel3D(), 'user_id' => $this->getUser_Id());
         $dbl->execute($query, $values);
     }
 
@@ -158,6 +160,11 @@ Processor, CPUID, CpuMask, HT, NeL3D) VALUES (:id, :ticket, :shardid, :userposit
         return $this->nel3d;
     }
     
+    public function getUser_Id(){
+       return $this->user_id;
+    }
+    
+
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
      
     public function setTInfoId($id){
@@ -229,4 +236,9 @@ Processor, CPUID, CpuMask, HT, NeL3D) VALUES (:id, :ticket, :shardid, :userposit
         $this->nel3d = $n;
     }
     
+    public function setUser_Id($u){
+        $this->user_id = $u;
+    }
+    
+
 }
