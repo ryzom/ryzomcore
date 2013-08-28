@@ -35,6 +35,7 @@
 
 // Project includes
 #include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_libvr.h>
 #include <nel/3d/stereo_debugger.h>
 
 using namespace std;
@@ -77,6 +78,9 @@ void IStereoDisplay::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
 #ifdef HAVE_LIBOVR
 	CStereoOVR::listDevices(devicesOut);
+#endif
+#ifdef HAVE_LIBVR
+	CStereoLibVR::listDevices(devicesOut);
 #endif
 #if !FINAL_VERSION
 	CStereoDebugger::listDevices(devicesOut);
