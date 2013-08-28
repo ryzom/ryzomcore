@@ -10,7 +10,7 @@
 		  <tr>		    
 			{if isset($isMod) and $isMod eq "TRUE"}<td valign="middle" nowrap><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></td>{/if}
 			<td valign="middle" nowrap><a href="index.php?page=createticket&user_id={$ticket_author}">Send Other Ticket</a></td>
-			<td valign="middle" nowrap><a href="index.php?page=show_ticket_info&id={$ticket_tId}">Show Additional Info</a></td>
+			{if $hasInfo}<td valign="middle" nowrap><a href="index.php?page=show_ticket_info&id={$ticket_tId}">Show Additional Info</a></td>{/if}
 		  </tr>
 		</table>
 	      </td>

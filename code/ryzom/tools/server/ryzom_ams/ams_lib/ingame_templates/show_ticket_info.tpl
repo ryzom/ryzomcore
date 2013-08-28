@@ -1,96 +1,149 @@
 {block name=content}
-<div class="row-fluid sortable ui-sortable">
-    <div class="box span9">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i> <a href="index.php?page=show_ticket&id={$ticket_id}">[#{$ticket_id}] {$ticket_title}</a> </h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
-                <legend>Additional Info </legend>
-		
-		
-		<form id="changeTicket" class="form-vertical" method="post" action="index.php">
-		<table class="table table-bordered table-condensed " >
-			<tr>
-			    <td><strong>Shard ID: </strong>{$shard_id}</td>
-			</tr>
-			<tr>
-			    <td><strong>User Position: </strong>{$user_position}</td> 
-			<tr>
-			    <td><strong>View Position: </strong>{$view_position}</td>
-			</tr>
-			<tr>
-			    <td><strong>client_version: </strong> {$client_version}</td>              
-			</tr>
-			<tr>
-			    <td><strong>patch_version: </strong>{$patch_version}</td>
-			</tr>
-			<tr>
-			    <td><strong>memory: </strong>{$memory}</td>
-			</tr>
-			
-			<tr>
-			    <td><strong>server_tick: </strong>{$server_tick}</td>
-			</tr>
-			<tr>
-			    <td><strong>connect_state: </strong>{$connect_state}</td>
-			</tr>
-			<tr>
-			    <td><strong>local_address: </strong>{$local_address}</td>
-			</tr>			
-			<tr>
-			    <td><strong>os: </strong>{$os}</td>
-			</tr>
-			<tr>
-			    <td><strong>processor: </strong>{$processor}</td>
-			</tr>
-			<tr>
-			    <td><strong>cpu_id: </strong>{$cpu_id}</td>
-			</tr>			
-			<tr>
-			    <td><strong>cpu_mask: </strong>{$cpu_mask}</td>
-			</tr>
-			<tr>
-			    <td><strong>ht: </strong>{$ht}</td>
-			</tr>
-			<tr>
-			    <td><strong>nel3d: </strong>{$nel3d}</td>
-			</tr>            
+<tr><td>
+      <table width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr bgcolor="{$second_menu_bg_color}" valign="middle">
+	  <td>
+	  <table>
+	    <tr>
+	      <td>
+		<table cellspacing="0" cellpadding="4">
+		  <tr>		    
+			{if isset($isMod) and $isMod eq "TRUE"}<td valign="middle" nowrap><a href="index.php?page=show_ticket_log&id={$ticket_id}">Show Ticket Log</a></td>{/if}
+			<td valign="middle" nowrap><a href="index.php?page=createticket&user_id={$ticket_author}">Send Other Ticket</a></td>
+			<td valign="middle" nowrap><a href="index.php?page=show_ticket&id={$ticket_id}">Show Ticket</a></td>
+		  </tr>
 		</table>
-		
-	    </div>                   
-        </div>
-    </div><!--/span-->
-    
-    <div class="box span3">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Actions</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
-		
-		<legend style="margin-bottom:9px;">Actions</legend>
-		<div class="btn-group">
-		    <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
-		    <ul class="dropdown-menu">
-			<li class="divider"></li>
-			{if isset($isMod) and $isMod eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_id}">Show Ticket Log</a></li>{/if}
-			<li><a href="index.php?page=createticket&user_id={$ticket_author}">Send Other Ticket</a></li>
-			<li><a href="index.php?page=show_ticket&id={$ticket_id}">Show Ticket</a></li>
-			<li class="divider"></li>
-		    </ul>
-		</div>
-            </div>                   
-        </div>
-    </div>
-</div><!--/row-->
+	      </td>
+	    </tr>
+	  </table>
+	  </td>
+	</tr>
+	<tr>
+		<td height="3" bgcolor="#000000"></td>
+	</tr>
+      </table>
+  </td></tr>
+
+  <tr><td>
+	<table width="100%" bgcolor="{$title_bg_color}" cellspacing="2">
+	<tr><td height="7"></td><td></td></tr>
+	<tr>
+		<td width="3%"></td>
+		<td width="100%" height="12" valign="middle"><h1>Additional Info For Ticket <a href="index.php?page=show_ticket&id={$ticket_id}">[#{$ticket_id}]</a></h1></td>
+	</tr>
+	<tr>
+	  <td height="5"></td><td></td>
+	</tr>
+	</table>
+  </td></tr>
+  <tr><td>
+      <table width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr bgcolor="#000000" valign="middle">
+	  <td>
+	    <table>
+	      <tr><td height="8"></td></tr>
+	    </table>
+	  </td>
+	</tr>
+	<tr><td height="2"></td></tr>
+	<tr><td height="1" bgcolor="#000000"></td></tr>
+	<tr><td height="10"></td></tr>
+	<tr valign="middle">
+	  <td>
+	    <table width="100%" height="100%" cellpadding="10">
+	      <tr><td>
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
+			<tr><td>
+				<table cellpadding="10" width="100%">
+					<tr><td>
+					    <table cellpadding="5" width="100%">
+						    <tr><td>
+							<table cellpadding="1" bgcolor="{$normal_tbl_color}" border="2" width="100%">
+							    <tr><td>
+							    <p><h3>Ingame related</h3></p>
+							    <table cellpadding="3" width="100%">
+								<tr>
+								    <td><font color="{$info_color}">Shard ID: </font>{$shard_id}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">User_Id:  </font>{$user_id}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">User Position: </font>{$user_position}</td> 
+							        </tr>
+								<tr>
+								    <td><font color="{$info_color}">View Position: </font>{$view_position}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">Client_Version: </font>{$client_version}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">Patch_Version:  </font>{$patch_version}</td>                  
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}"> Server_Tick:  </font>{$server_tick}</td>
+								</tr>
+							    </table>
+							</td></tr>
+							</table>
+						    </td></tr>
+						    <tr><td>
+							<table cellpadding="1" bgcolor="{$normal_tbl_color}" border="2" width="100%">
+							    <tr><td>
+							    <p><h3>Hardware & Software related</h3></p>
+							    <table cellpadding="3" width="100%">
+								<tr>
+								    <td><font color="{$info_color}">Memory: </font>{$memory}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">Processor:  </font>{$processor}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">Cpu_Id: </font>{$cpu_id}</td> 
+							        </tr>
+								<tr>
+								    <td><font color="{$info_color}">Cpu_Mask: </font>{$cpu_mask}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">HT: </font>{$ht}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">OS: </font>{$os}</td>                  
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">NeL3D: </font>{$nel3d}</td>
+								</tr>
+							    </table>
+							</td></tr>
+							</table>
+						    </td></tr>
+						    <tr><td>
+							<table cellpadding="1" bgcolor="{$normal_tbl_color}" border="2" width="100%">
+							    <tr><td>
+							    <p><h3>Network related</h3></p>
+							    <table cellpadding="3" width="100%">
+								<tr>
+								    <td><font color="{$info_color}">Connect_State: </font>{$connect_state}</td>
+								</tr>
+								<tr>
+								    <td><font color="{$info_color}">Local_Address:  </font>{$local_address}</td>
+								</tr>
+							    </table>
+							</td></tr>
+							</table>
+						    </td></tr>
+					    </table>
+					</td></tr>
+				</table>
+			</td></tr>
+		</table>
+	      </td></tr>
+	    </table>
+	  </td>
+	</tr>
+      </table>
+      
+  </td></tr>
+
 {/block}
 	

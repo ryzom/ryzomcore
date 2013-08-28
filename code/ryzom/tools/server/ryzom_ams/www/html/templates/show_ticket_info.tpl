@@ -11,61 +11,71 @@
         <div class="box-content">
             <div class="row-fluid">
                 <legend>Additional Info </legend>
-		
-		
-		<form id="changeTicket" class="form-vertical" method="post" action="index.php">
-		<table class="table table-bordered table-condensed " >
-			<tr>
-			    <td><img src="img/shard.png" height="40" /><strong> Shard ID: </strong>{$shard_id}</td>
-			</tr>
-			<tr>
-			    <td><strong>User Position: </strong>{$user_position}</td> 
-			<tr>
-			    <td><strong>View Position: </strong>{$view_position}</td>
-			</tr>
-
-			<tr>
-			    <td><strong>client_version: </strong> {$client_version}</td>              
-			</tr>
-			<tr>
-			    <td><strong>patch_version: </strong>{$patch_version}</td>
-			</tr>
-			<tr>
-			    <td><strong>memory: </strong>{$memory}</td>
-			</tr>
-			
-			<tr>
-			    <td><strong>server_tick: </strong>{$server_tick}</td>
-			</tr>
-			<tr>
-			    <td><strong>connect_state: </strong>{$connect_state}</td>
-			</tr>
-			<tr>
-			    <td><strong>local_address: </strong>{$local_address}</td>
-			</tr>			
-			<tr>
-			    <td><strong>os: </strong>{$os}</td>
-			</tr>
-			<tr>
-			    <td><strong>processor: </strong>{$processor}</td>
-			</tr>
-			<tr>
-			    <td><strong>cpu_id: </strong>{$cpu_id}</td>
-			</tr>			
-			<tr>
-			    <td><strong>cpu_mask: </strong>{$cpu_mask}</td>
-			</tr>
-			<tr>
-			    <td><strong>ht: </strong>{$ht}</td>
-			</tr>
-			<tr>
-			    <td><strong>nel3d: </strong>{$nel3d}</td>
-			</tr>
-			<tr>
-			    <td><strong>user_id: </strong>{$user_id}</td>
-			</tr>   
-		</table>
-		
+		<div style=" padding-left:10%;padding-right:10%;">
+		    <table class="table table-bordered table-condensed " >
+			    <tr class="alert alert-info">
+				<td><center><strong> Ingame related </strong></center></td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/shard.png" height="30" /><strong> Shard ID: </strong>{$shard_id}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/user.png" height="30" /><strong> User_Id: </strong>{$user_id}</td>
+			    </tr>   
+			    <tr>
+				<td><img src="img/info/position.png" height="30" /><strong> User Position: </strong>{$user_position}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/view.png" height="30" /><strong> View Position: </strong>{$view_position}</td>
+			    </tr>
+    
+			    <tr>
+				<td><img src="img/info/client.png" height="30" /><strong> Client_Version: </strong> {$client_version}</td>              
+			    </tr>
+			    <tr>
+				<td><img src="img/info/patch.png" height="30" /><strong> Patch_Version: </strong>{$patch_version}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/server.png" height="30" /><strong> Server_Tick: </strong>{$server_tick}</td>
+			    </tr>
+			    <tr class="alert alert-info">
+				<td><center><strong> Hardware & Software related </strong></center></td>
+			    </tr>
+			    <tr>
+				<td><strong><img src="img/info/memory.png" height="30" /> Memory: </strong>{$memory}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/processor.png" height="30" /><strong> Processor: </strong>{$processor}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/cpuid.png" height="30" /><strong> Cpu_Id: </strong>{$cpu_id}</td>
+			    </tr>			
+			    <tr>
+				<td><img src="img/info/mask.png" height="30" /><strong> Cpu_Mask: </strong>{$cpu_mask}</td>
+			    </tr>
+			    
+			     <tr>
+				<td><img src="img/info/ht.png" height="30" /><strong> HT: </strong>{$ht}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/os.png" height="30" /><strong> OS: </strong>{$os}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/nel.png" height="30" /><strong> NeL3D: </strong>{$nel3d}</td>
+			    </tr>
+			    
+			    <tr class="alert alert-info">
+				<td><center><strong> Network related </strong></center></td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/connect.png" height="30" /><strong> Connect_State: </strong>{$connect_state}</td>
+			    </tr>
+			    <tr>
+				<td><img src="img/info/local.png" height="30" /><strong> Local_Address: </strong>{$local_address}</td>
+			    </tr>
+			   
+		    </table>
+		</div>
 	    </div>                   
         </div>
     </div><!--/span-->
