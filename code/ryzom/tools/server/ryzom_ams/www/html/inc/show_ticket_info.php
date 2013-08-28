@@ -9,29 +9,28 @@ function show_ticket_info(){
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
         
-        if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] )){
+        if( $target_ticket->hasInfo() && (($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] ))){
             $result['ticket_title'] = $target_ticket->getTitle();
             $result['ticket_author'] = $target_ticket->getAuthor();
             
-            
-            $result['shard_id'] = $_GET['ShardId'];
-            $result['user_position'] = $_GET['UserPosition'];
-            $result['view_position'] = $_GET['ViewPosition'];
-            $result['client_version'] = $_GET['ClientVersion'];
-            $result['patch_version'] = $_GET['PatchVersion'];
-            
-            
-            $result['server_tick'] = $_GET['ServerTick'];
-            $result['connect_state'] = $_GET['ConnectState'];
-            $result['local_address'] = $_GET['LocalAddress'];
-            $result['memory'] = $_GET['Memory'];
-            $result['os'] = $_GET['OS'];
-            $result['processor'] = $_GET['Processor'];
-            $result['cpu_id'] = $_GET['CPUID'];
-            $result['cpu_mask'] = $_GET['CpuMask'];
-            $result['ht'] = $_GET['HT'];
-            
-            $result['nel3d'] = $_GET['NeL3D'];
+            $ticket_info = new Ticket_Info();
+            $ticket_info->load_With_Ticket($result['ticket_id']);
+            $result['shard_id'] = $ticket_info->getShardId();
+            $result['user_position'] = $ticket_info->getUser_Position();
+            $result['view_position'] = $ticket_info->getView_Position();
+            $result['client_version'] = $ticket_info->getClient_Version();
+            $result['patch_version'] = $ticket_info->getPatch_Version();
+            $result['server_tick'] = $ticket_info->getServer_Tick();
+            $result['connect_state'] = $ticket_info->getConnect_State();
+            $result['local_address'] = $ticket_info->getLocal_Address();
+            $result['memory'] = $ticket_info->getMemory();
+            $result['os'] = $ticket_info->getOS();
+            $result['processor'] = $ticket_info->getProcessor();
+            $result['cpu_id'] = $ticket_info->getCPUId();
+            $result['cpu_mask'] = $ticket_info->getCPU_Mask();
+            $result['ht'] = $ticket_info->getHT();
+            $result['nel3d'] = $ticket_info->getNel3D();
+            $result['user_id'] = $ticket_info->getUser_Id();
             
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isMod'] = "TRUE";

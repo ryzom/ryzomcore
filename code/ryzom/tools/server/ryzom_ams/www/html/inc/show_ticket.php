@@ -36,6 +36,7 @@ function show_ticket(){
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $show_as_admin = true;
             }
+            
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id'],$show_as_admin);
             Ticket_Log::createLogEntry($result['ticket_id'],$_SESSION['ticket_user']->getTUserId(), 3);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
@@ -66,6 +67,7 @@ function show_ticket(){
                 $result['statusList'] = Ticket::getStatusArray();
                 $result['sGroups'] = Gui_Elements::make_table_with_key_is_id(Support_Group::getAllSupportGroups(), Array("getName"), "getSGroupId" );
             }
+            $result['hasInfo'] = $target_ticket->hasInfo();
             return $result;
             
         }else{

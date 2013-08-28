@@ -283,6 +283,11 @@ class Ticket{
         $statement = $dbl->execute($query, $values);
     }
     
+    //hasInfo
+    public function hasInfo(){
+        return Ticket_Info::TicketHasInfo($this->getTId());
+    }
+    
     /*FUNCTION: postreply
     * returns all possible statusses
     *

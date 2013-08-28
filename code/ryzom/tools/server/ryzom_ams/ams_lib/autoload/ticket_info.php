@@ -33,7 +33,15 @@ class Ticket_Info{
         $ticket_info->create();
     }
      
-    
+    public static function TicketHasInfo($ticket_id) {
+        $dbl = new DBLayer("lib");
+        //check if ticket is already assigned
+        if(  $dbl->execute(" SELECT * FROM `ticket_info` WHERE `Ticket` = :ticket_id", array('ticket_id' => $ticket_id) )->rowCount() ){
+            return true;
+        }else{
+            return false;
+        } 
+    }
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
      
     public function __construct() {

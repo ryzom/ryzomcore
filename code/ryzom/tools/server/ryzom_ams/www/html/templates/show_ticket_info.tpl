@@ -16,7 +16,7 @@
 		<form id="changeTicket" class="form-vertical" method="post" action="index.php">
 		<table class="table table-bordered table-condensed " >
 			<tr>
-			    <td><strong>Shard ID: </strong>{$shard_id}</td>
+			    <td><img src="img/shard.png" height="40" /><strong> Shard ID: </strong>{$shard_id}</td>
 			</tr>
 			<tr>
 			    <td><strong>User Position: </strong>{$user_position}</td> 
@@ -60,7 +60,10 @@
 			</tr>
 			<tr>
 			    <td><strong>nel3d: </strong>{$nel3d}</td>
-			</tr>            
+			</tr>
+			<tr>
+			    <td><strong>user_id: </strong>{$user_id}</td>
+			</tr>   
 		</table>
 		
 	    </div>                   
