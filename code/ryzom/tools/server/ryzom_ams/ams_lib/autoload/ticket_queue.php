@@ -39,6 +39,12 @@ class Ticket_Queue{
         $this->params = array('user_id' => $user_id);     
     }
     
+    public function loadAssignedandWaiting($user_id){
+        $this->query = "SELECT * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User
+        WHERE (tu.ExternId = :user_id AND t.Status = 1)";
+        $this->params = array('user_id' => $user_id);     
+    }
+    
     public function createQueue($userid, $groupid, $what, $how, $who){
         
         if($who == "user"){

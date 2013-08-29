@@ -8,7 +8,11 @@ session_start();
 //Decide what page to load
 if ( ! isset( $_GET["page"]) ){
      if(isset($_SESSION['user'])){
-          $page = 'home';
+          if(Ticket_User::isMod($_SESSION['ticket_user'])){
+               $page = 'dashboard';
+          }else{
+               $page = 'show_user';
+          }
      }else{
           //default page
           $page = 'login';   

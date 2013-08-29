@@ -59,4 +59,41 @@ class Ticket_Queue_Handler{
         $this->queue->createQueue($userid, $groupid, $what, $how, $who);
     }
     
+    //==================================================================================
+    //Info retrievers about ticket statistics
+    
+    public static function getNrOfTicketsToDo($user_id){
+        $queueHandler = new Ticket_Queue_Handler();
+        $queueHandler->queue->loadToDoTickets($user_id);
+        $query = $queueHandler->queue->getQuery();
+        $params = $queueHandler->queue->getParams();
+        $dbl = new DBLayer("lib");
+        return $dbl->execute($query,$params)->rowCount();
+    }
+    
+    public static function getNrOfTicketsAssignedWaiting($user_id){
+        $queueHandler = new Ticket_Queue_Handler();
+        $queueHandler->queue->loadAssignedandWaiting($user_id);
+        $query = $queueHandler->queue->getQuery();
+        $params = $queueHandler->queue->getParams();
+        $dbl = new DBLayer("lib");
+        return $dbl->execute($query,$params)->rowCount();
+    }
+    
+    public static function getNrOfTickets(){
+        $queueHandler = new Ticket_Queue_Handler();
+        $queueHandler->queue->loadAllTickets();
+        $query = $queueHandler->queue->getQuery();
+        $params = $queueHandler->queue->getParams();
+        $dbl = new DBLayer("lib");
+        return $dbl->execute($query,$params)->rowCount();
+    }
+    
+    public static function getNewestTicket(){
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->executeWithoutParams("SELECT * FROM `ticket` ORDER BY `TId` DESC LIMIT 1 ");
+        $ticket = new Ticket();
+        $ticket->set($statement->fetch());
+        return $ticket;
+    }
 }
