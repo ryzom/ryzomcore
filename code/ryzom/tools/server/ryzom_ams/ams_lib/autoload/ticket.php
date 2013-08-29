@@ -246,6 +246,7 @@ class Ticket{
         }
         $this->title = $values['Title'];
         $this->status = $values['Status'];
+        $this->timestamp = $values['Timestamp'];
         $this->queue = $values['Queue'];
         $this->ticket_category = $values['Ticket_Category'];
         $this->author = $values['Author'];

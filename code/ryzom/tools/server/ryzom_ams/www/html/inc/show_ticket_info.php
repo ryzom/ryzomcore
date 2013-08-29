@@ -31,8 +31,8 @@ function show_ticket_info(){
             $result['ht'] = $ticket_info->getHT();
             $result['nel3d'] = $ticket_info->getNel3D();
             $result['user_id'] = $ticket_info->getUser_Id();
-            global $SITEBASE;
-            $result['SITEBASE'] = $SITEBASE;
+            global $WEBPATH;
+            $result['WEBPATH'] = $WEBPATH;
             
             if(Ticket_User::isMod($_SESSION['ticket_user'])){
                 $result['isMod'] = "TRUE";

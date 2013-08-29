@@ -62,25 +62,33 @@
 							    <tr><td>
 							    <p><h3>Ingame related</h3></p>
 							    <table cellpadding="3" width="100%">
+								<tr><td></td><td></td></tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/shard.png"/></td>
 								    <td><font color="{$info_color}">Shard ID: </font>{$shard_id}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/user.png"/></td>
 								    <td><font color="{$info_color}">User_Id:  </font>{$user_id}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/position.png"/></td>
 								    <td><font color="{$info_color}">User Position: </font>{$user_position}</td> 
 							        </tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/view.png"/></td>
 								    <td><font color="{$info_color}">View Position: </font>{$view_position}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/client.png"/></td>
 								    <td><font color="{$info_color}">Client_Version: </font>{$client_version}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/patch.png"/></td>
 								    <td><font color="{$info_color}">Patch_Version:  </font>{$patch_version}</td>                  
 								</tr>
 								<tr>
+								    <td><img src="{$WEBPATH}/ams_lib/img/info/server.png"/></td>
 								    <td><font color="{$info_color}"> Server_Tick:  </font>{$server_tick}</td>
 								</tr>
 							    </table>
@@ -92,25 +100,33 @@
 							    <tr><td>
 							    <p><h3>Hardware & Software related</h3></p>
 							    <table cellpadding="3" width="100%">
+								<tr><td></td><td></td></tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/memory.png"/></td>
 								    <td><font color="{$info_color}">Memory: </font>{$memory}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/processor.png"/></td>
 								    <td><font color="{$info_color}">Processor:  </font>{$processor}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/cpuid.png"/></td>
 								    <td><font color="{$info_color}">Cpu_Id: </font>{$cpu_id}</td> 
 							        </tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/mask.png"/></td>
 								    <td><font color="{$info_color}">Cpu_Mask: </font>{$cpu_mask}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/ht.png"/></td>
 								    <td><font color="{$info_color}">HT: </font>{$ht}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/os.png"/></td>
 								    <td><font color="{$info_color}">OS: </font>{$os}</td>                  
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/nel.png"/></td>
 								    <td><font color="{$info_color}">NeL3D: </font>{$nel3d}</td>
 								</tr>
 							    </table>
@@ -122,10 +138,13 @@
 							    <tr><td>
 							    <p><h3>Network related</h3></p>
 							    <table cellpadding="3" width="100%">
+								<tr><td></td><td></td></tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/connect.png"/></td>
 								    <td><font color="{$info_color}">Connect_State: </font>{$connect_state}</td>
 								</tr>
 								<tr>
+								    <td width=30><img src="{$WEBPATH}/ams_lib/img/info/local.png"/></td>
 								    <td><font color="{$info_color}">Local_Address:  </font>{$local_address}</td>
 								</tr>
 							    </table>

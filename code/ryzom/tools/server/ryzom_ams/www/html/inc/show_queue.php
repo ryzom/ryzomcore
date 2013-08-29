@@ -83,7 +83,6 @@ function show_queue(){
             
             //if queue_view is a valid parameter value
             if ($queueArray != "ERROR"){
-
                 $result['tickets'] = Gui_Elements::make_table($queueArray, Array("getTId","getTitle","getTimestamp","getAuthor()->getExternId","getTicket_Category()->getName","getStatus","getStatusText","getAssigned","getForwardedGroupName","getForwardedGroupId"), Array("tId","title","timestamp","authorExtern","category","status","statusText","assigned","forwardedGroupName","forwardedGroupId"));
                 $i = 0;
                 foreach( $result['tickets'] as $ticket){

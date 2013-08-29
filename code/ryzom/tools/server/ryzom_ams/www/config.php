@@ -73,6 +73,7 @@ $AMS_LIB = dirname( dirname( __FILE__ ) ) . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
+$WEBPATH ='http://localhost:40917' ;
 
 //defines the default language
 $DEFAULT_LANGUAGE = 'en';
