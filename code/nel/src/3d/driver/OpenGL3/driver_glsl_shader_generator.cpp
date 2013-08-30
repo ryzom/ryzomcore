@@ -175,6 +175,10 @@ namespace NL3D
 		case CMaterial::PerPixelLightingNoSpec:
 			generatePPLVS();
 			break;
+
+		case CMaterial::Water:
+			generateWaterVS();
+			break;
 		}
 		
 		vs.assign( ss.str() );
@@ -218,6 +222,10 @@ namespace NL3D
 		case CMaterial::PerPixelLighting:
 		case CMaterial::PerPixelLightingNoSpec:
 			generatePPLPS();
+			break;
+
+		case CMaterial::Water:
+			generateWaterPS();
 			break;
 		}
 
@@ -362,6 +370,64 @@ namespace NL3D
 			ss << "cubeTexCoords2.x = dot( T, H );" << std::endl;
 			ss << "cubeTexCoords2.y = dot( B, H );" << std::endl;
 			ss << "cubeTexCoords2.w = dot( n, H );" << std::endl;
+		}
+
+		ss << "}" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::generateWaterVS()
+	{
+		bool diffuse = false;
+		if( material->getTexture( 3 ) )
+			diffuse = true;
+
+		ss << "smooth out vec4 texCoord0;" << std::endl;
+		ss << "smooth out vec4 texCoord1;" << std::endl;
+		ss << "smooth out vec4 texCoord2;" << std::endl;
+		ss << "flat out vec4 bump0ScaleBias;" << std::endl;
+		ss << "flat out vec4 bump1ScaleBias;" << std::endl;
+
+		if( diffuse )
+			ss << "smooth out vec4 texCoord3;" << std::endl;
+
+		ss << std::endl;
+
+		if( diffuse )
+		{
+			ss << "uniform vec4 diffuseMapVector0;" << std::endl;
+			ss << "uniform vec4 diffuseMapVector1;" << std::endl;
+		}
+		
+		ss << "uniform vec4 bumpMap0Scale;" << std::endl;
+		ss << "uniform vec4 bumpMap1Scale;" << std::endl;
+		ss << "uniform vec4 bumpMap0Offset;" << std::endl;
+		ss << "uniform vec4 bumpMap1Offset;" << std::endl;
+
+		// no fog yet
+		//ss << "uniform mat4 mvMatrix;" << std::endl;
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "position = vposition;" << std::endl;
+		ss << "gl_Position = mvpMatrix * position;" << std::endl;
+		ss << "bump0ScaleBias = bumpMap0Scale;" << std::endl;
+		ss << "bump1ScaleBias = bumpMap1Scale;" << std::endl;
+		
+		// no fog yet
+		//ss << "vec4 v = mvMatrix[ 3 ];" << std::endl;
+		//fog.x = dot( position, v );
+
+		ss << "texCoord0 = position * bumpMap0Scale + bumpMap0Offset;" << std::endl;
+		ss << "texCoord1 = position * bumpMap1Scale + bumpMap1Offset;" << std::endl;
+		ss << "vec4 eyeDirection = normalize( eye - position );" << std::endl;
+
+		ss << "texCoord2 = -1 * eyeDirection * vec4( 0.5, 0.05, 0.0, 1.0 ) + vec4( 0.5, 0.05, 0.0, 1.0 );" << std::endl;
+
+		if( diffuse )
+		{
+			ss << "texCoord3.x = dot( position, diffuseMapVector0 );" << std::endl;
+			ss << "texCoord3.y = dot( position, diffuseMapVector1 );" << std::endl;
 		}
 
 		ss << "}" << std::endl;
@@ -865,6 +931,63 @@ namespace NL3D
 		ss << "}" << std::endl;
 	}
 
+
+	void CGLSLShaderGenerator::generateWaterPS()
+	{
+		bool diffuse = false;
+		if( material->getTexture( 3 ) != NULL )
+			diffuse = true;
+
+		ss << "smooth in texCoord0;" << std::endl;
+		ss << "smooth in texCoord1;" << std::endl;
+		ss << "smooth in texCoord2;" << std::endl;
+
+		if( diffuse )
+			ss << "smooth in texCoord3;" << std::endl;
+
+		ss << "flat in vec4 bump0ScaleBias;" << std::endl;
+		ss << "flat in vec4 bump1ScaleBias;" << std::endl;
+
+		ss << std::endl;
+
+		ss << "uniform sampler2D sampler0;" << std::endl;
+		ss << "uniform sampler2D sampler1;" << std::endl;
+		ss << "uniform sampler2D sampler2;" << std::endl;
+
+		if( diffuse )
+			ss << "uniform sampler2D sampler3;" << std::endl;
+
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
+		ss << "texel0 = texel0 * bump0ScaleBias.xxxx + bump0ScaleBias.yyzz;" << std::endl;
+		ss << "texel0 = texel0 + texCoord1;" << std::endl;
+		ss << "vec4 texel1 = texture2D( sampler1, texel0 );" << std::endl;
+		ss << "texel1 = texel1 * bump1ScaleBias.xxxx + bump1ScaleBias.yyzz;" << std::endl;
+		ss << "texel1 = texel1 + texCoord2;" << std::endl;
+		ss << "vec4 texel2 = texture2D( sampler2, texel1 );" << std::endl;
+
+		if( diffuse )
+		{
+			ss << "vec4 texel3 = texture2D( sampler3, texCoord3 );" << std::endl;
+			ss << "texel3 = texel3 * texel2;" << std::endl;
+		}
+		
+		// No fog yet, so for later
+		//vec4 tmpFog = clamp( fogValue.x * fogFactor.x + fogFactor.y );
+		//vec4 fragColor = mix( texel3, fogColor, tmpFog.x );
+		
+		if( diffuse )
+			ss << "fragColor = texel3;" << std::endl;
+		else
+			ss << "fragColor = texel2" << std::endl;
+
+		ss << "}" << std::endl;
+
+		ss << std::endl;
+	}
 }
 
 

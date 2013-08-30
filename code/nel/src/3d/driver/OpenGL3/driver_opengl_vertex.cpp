@@ -441,6 +441,8 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	if ( !setupMaterial(mat) )
 		return false;
 
+	setupProgram( mat );
+
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
 	//==============================
