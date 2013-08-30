@@ -996,10 +996,6 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateCloudPS()
 	{
-		ss << "smooth in vec4 texCoord0;" << std::endl;
-		ss << "smooth in vec4 texCoord1;" << std::endl;
-		ss << std::endl;
-
 		ss << "uniform sampler2D sampler0;" << std::endl;
 		ss << "uniform sampler2D sampler1;" << std::endl;
 		ss << std::endl;

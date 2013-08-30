@@ -489,6 +489,8 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 
+	setupProgram( mat );
+
 	const uint32 QUAD_BATCH_SIZE = 2048;
 	static GLshort defaultIndices[QUAD_BATCH_SIZE * 6];
 	static bool	init = false;
