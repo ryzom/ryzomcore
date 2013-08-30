@@ -164,6 +164,7 @@ namespace NL3D
 		case CMaterial::Normal:
 		case CMaterial::UserColor:
 		case CMaterial::LightMap:
+		case CMaterial::Cloud:
 			generateNormalVS();
 			break;
 
@@ -226,6 +227,10 @@ namespace NL3D
 
 		case CMaterial::Water:
 			generateWaterPS();
+			break;
+
+		case CMaterial::Cloud:
+			generateCloudPS();
 			break;
 		}
 
@@ -987,6 +992,31 @@ namespace NL3D
 		ss << "}" << std::endl;
 
 		ss << std::endl;
+	}
+
+	void CGLSLShaderGenerator::generateCloudPS()
+	{
+		ss << "smooth in vec4 texCoord0;" << std::endl;
+		ss << "smooth in vec4 texCoord1;" << std::endl;
+		ss << std::endl;
+
+		ss << "uniform sampler2D sampler0;" << std::endl;
+		ss << "uniform sampler2D sampler1;" << std::endl;
+		ss << std::endl;
+
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;
+
+		addDiffuse();
+
+		ss << "vec4 tex0 = texture2D( sampler0, texCoord0 );" << std::endl;
+		ss << "vec4 tex1 = texture2D( sampler1, texCoord1 );" << std::endl;
+		ss << "vec4 tex = mix( tex0, tex1, diffuse.a );" << std::endl;
+		ss << "tex.a = 0;" << std::endl;
+		ss << "fragColor = tex;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
 	}
 }
 

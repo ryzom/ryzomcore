@@ -64,6 +64,8 @@ namespace NL3D
 
 		void generateWaterPS();
 
+		void generateCloudPS();
+
 		std::stringstream ss;
 		uint16 vbFormat;
 		CMaterial const *material;
