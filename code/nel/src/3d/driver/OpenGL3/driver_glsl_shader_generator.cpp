@@ -239,7 +239,7 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addDiffuse()
 	{
-		ss << "float diffuse  = vec4( ";
+		ss << "vec4 diffuse  = vec4( ";
 		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
 		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
 		ss << float( material->getDiffuse().B / 255.0f ) << ", ";

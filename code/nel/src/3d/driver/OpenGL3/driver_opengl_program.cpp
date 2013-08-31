@@ -118,6 +118,9 @@ namespace NL3D
 
 	bool CDriverGL3::renderTriangles2( CMaterial &mat, uint32 startIndex, uint32 numTris )
 	{
+		if( !setupMaterial( mat ) )
+			return false;
+
 		if( !setupProgram( mat ) )
 			return false;
 
@@ -186,9 +189,7 @@ namespace NL3D
 		p->attachPixelProgram( pp );
 		if( !p->link( log ) )
 		{
-			delete vp;
 			vp = NULL;
-			delete pp;
 			pp = NULL;
 			delete p;
 			p = NULL;
@@ -204,6 +205,13 @@ namespace NL3D
 		{
 			CMatrix mat = _GLProjMat * _ModelViewMatrix;
 			setUniformMatrix4fv( mvpIndex, 1, false, mat.get() );
+		}
+
+		switch( mat.getShader() )
+		{
+		case CMaterial::Normal:
+			setupNormalPass();
+			break;
 		}
 
 		return true;

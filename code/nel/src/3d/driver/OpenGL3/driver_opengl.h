@@ -1071,6 +1071,9 @@ private:
 	void			setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId);
 
 
+	void setupNormalPass();
+
+
 	/// \name Lightmap.
 	// @{
 	void			computeLightMapInfos(const CMaterial &mat);

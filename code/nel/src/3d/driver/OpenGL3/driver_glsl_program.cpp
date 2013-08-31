@@ -54,6 +54,7 @@ namespace NL3D
 		if( itr != vertexPrograms.end() )
 			return false;
 
+		glGetError();
 		nglAttachShader( programId, shader->getShaderId() );
 		GLenum error = glGetError();
 
@@ -78,6 +79,7 @@ namespace NL3D
 		if( itr != pixelPrograms.end() )
 			return false;
 
+		glGetError();
 		nglAttachShader( programId, shader->getShaderId() );
 		GLenum error = glGetError();
 

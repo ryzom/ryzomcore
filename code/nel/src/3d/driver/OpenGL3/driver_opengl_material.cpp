@@ -577,6 +577,32 @@ void			CDriverGL3::endMultiPass()
 	}
 }
 
+	const char *samplers[ 4 ] = 
+	{
+		"sampler0",
+		"sampler1",
+		"sampler2",
+		"sampler3"
+	};
+
+void CDriverGL3::setupNormalPass()
+{
+	const CMaterial &mat = *_CurrentMaterial;
+	
+	for( int i = 0; i < 4; i++ )
+	{
+		ITexture *t = mat.getTexture( i );
+		if( t == NULL )
+			continue;
+		
+		int index = getUniformLocation( samplers[ i ] );
+		if( index == -1 )
+			continue;
+		
+		setUniform1i( index, i );
+	}
+}
+
 // ***************************************************************************
 void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 {
