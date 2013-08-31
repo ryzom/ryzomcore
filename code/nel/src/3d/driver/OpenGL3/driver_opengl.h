@@ -377,6 +377,7 @@ public:
 
 	virtual bool			setupMaterial(CMaterial& mat);
 	bool					setupProgram(CMaterial& mat);
+	void					releaseProgram();
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();

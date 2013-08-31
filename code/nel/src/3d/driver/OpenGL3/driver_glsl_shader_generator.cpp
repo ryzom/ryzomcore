@@ -470,7 +470,7 @@ namespace NL3D
 			sampler++;
 		}
 
-		ss << "vec4 texel = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
+		ss << "vec4 texel = vec4( 0.0, 0.0, 0.0, 1.0 );" << std::endl;
 
 		generateTexEnv();
 	

@@ -256,6 +256,8 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 
 bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris)
 {
+	return renderTriangles2( mat, firstIndex, ntris );
+	
 	H_AUTO_OGL(CDriverGL3_renderTriangles);
 
 	// update matrix and Light in OpenGL if needed

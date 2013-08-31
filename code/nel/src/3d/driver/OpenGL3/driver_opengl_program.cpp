@@ -121,10 +121,30 @@ namespace NL3D
 		if( !setupProgram( mat ) )
 			return false;
 
-		glDrawArrays( GL_TRIANGLES, startIndex * 3, numTris * 3 );
+		//glDrawArrays( GL_TRIANGLES, startIndex * 3, numTris * 3 );
+
+		if( numTris )
+		{
+			if (_LastIB._Format == CIndexBuffer::Indices16)
+			{
+				glDrawElements(GL_TRIANGLES,3*numTris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+startIndex);
+			}
+			else
+			{
+				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
+				glDrawElements(GL_TRIANGLES,3*numTris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+startIndex);
+			}
+		}
+
+		releaseProgram();
 
 		return true;
 	}
+
+	static IProgram *vp;
+	static IProgram *pp;
+	static IProgramObject *p;
+
 
 	bool CDriverGL3::setupProgram( CMaterial &mat )
 	{
@@ -137,8 +157,66 @@ namespace NL3D
 		shaderGenerator->generateVS( vs );
 		shaderGenerator->generatePS( ps );
 
+		vp = createVertexProgram();
+		std::string log;
+
+		vp->shaderSource( vs.c_str() );
+		if( !vp->compile( log ) )
+		{
+			delete vp;
+			vp = NULL;
+			nlinfo( "%s", log.c_str() );
+			return false;
+		}
+		
+		pp = createPixelProgram();
+		pp->shaderSource( ps.c_str() );
+		if( !pp->compile( log ) )
+		{
+			delete vp;
+			vp = NULL;
+			delete pp;
+			pp = NULL;
+			nlinfo( "%s", log.c_str() );
+			return false;
+		}
+
+		p = createProgramObject();
+		p->attachVertexProgram( vp );
+		p->attachPixelProgram( pp );
+		if( !p->link( log ) )
+		{
+			delete vp;
+			vp = NULL;
+			delete pp;
+			pp = NULL;
+			delete p;
+			p = NULL;
+			nlinfo( "%s", log.c_str() );
+			return false;
+		}
+
+		if( !activeProgramObject( p ) )
+			return false;
+
+		int mvpIndex = getUniformLocation( "mvpMatrix" );
+		if( mvpIndex != -1 )
+		{
+			CMatrix mat = _GLProjMat * _ModelViewMatrix;
+			setUniformMatrix4fv( mvpIndex, 1, false, mat.get() );
+		}
+
 		return true;
 	}
+
+	void CDriverGL3::releaseProgram()
+	{
+		delete p;
+		p = NULL;
+		vp = NULL;
+		pp = NULL;
+	}
+
 }
 
 
