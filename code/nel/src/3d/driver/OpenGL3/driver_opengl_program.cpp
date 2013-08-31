@@ -215,6 +215,8 @@ namespace NL3D
 		p = NULL;
 		vp = NULL;
 		pp = NULL;
+		currentProgram = NULL;
+		_VertexProgramEnabled = false;
 	}
 
 }
