@@ -804,6 +804,7 @@ const uint		CDriverGL3::GLVertexAttribIndex[CVertexBuffer::NumValue]=
 // ***************************************************************************
 void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 {
+#ifndef GLSL
 	H_AUTO_OGL(CDriverGL3_setupGlArraysStd)
 	uint32	flags= vb.VertexFormat;
 
@@ -860,6 +861,9 @@ void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 		// normal behavior: each texture has its own UV.
 		setupUVPtr(i, vb, vb.UVRouting[i]);
 	}
+
+#endif
+
 }
 
 
@@ -869,6 +873,8 @@ void		CDriverGL3::toggleGlArraysForARBVertexProgram()
 	H_AUTO_OGL(CDriverGL3_toggleGlArraysForARBVertexProgram)
 	// If change of setup type, must disable olds.
 	//=======================
+
+#ifndef GLSL
 
 	// If last was a VertexProgram setup, and now it is a standard GL array setup.
 	if( _LastSetupGLArrayVertexProgram && !isVertexProgramEnabled () )
@@ -929,6 +935,9 @@ void		CDriverGL3::toggleGlArraysForARBVertexProgram()
 		// now, vertex program setup.
 		_LastSetupGLArrayVertexProgram= true;
 	}
+
+#endif
+
 }
 
 // tells for each vertex argument if it must be normalized when it is an integral type
@@ -999,21 +1008,22 @@ void		CDriverGL3::setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb)
 void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CDriverGL3_setupGlArrays)
-
-	{
+		
+#ifndef GLSL
 		toggleGlArraysForARBVertexProgram();
 		// Use a vertex program ?
 		if (!isVertexProgramEnabled ())
 		{
-#ifndef GLSL
 			setupGlArraysStd(vb);
-#endif
 		}
 		else
 		{
+#endif
 			setupGlArraysForARBVertexProgram(vb);
+#ifndef GLSL
 		}
-	}
+#endif
+
 }
 
 

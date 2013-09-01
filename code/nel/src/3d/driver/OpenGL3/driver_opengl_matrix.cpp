@@ -166,9 +166,11 @@ void CDriverGL3::doRefreshRenderSetup()
 
 	if( _ProjMatDirty )
 	{
+#ifndef GLSL
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixf( _GLProjMat.get() );
 		glMatrixMode( GL_MODELVIEW );
+#endif
 		_ProjMatDirty = false;
 	}
 
@@ -176,11 +178,13 @@ void CDriverGL3::doRefreshRenderSetup()
 	// Check if must update the modelViewMatrix
 	if( _ModelViewMatrixDirty )
 	{
+#ifndef GLSL
 		// By default, the first model matrix is active
 		glLoadMatrixf( _ModelViewMatrix.get() );
 		// enable normalize if matrix has scale.
 		enableGlNormalize( _ModelViewMatrix.hasScalePart() || _ForceNormalize );
 		// clear.
+#endif
 		_ModelViewMatrixDirty= false;
 	}
 
@@ -190,6 +194,7 @@ void CDriverGL3::doRefreshRenderSetup()
 
 void CDriverGL3::refreshTexMatrices()
 {
+#ifndef GLSL
 	glMatrixMode( GL_TEXTURE );
 	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
 	{
@@ -201,6 +206,7 @@ void CDriverGL3::refreshTexMatrices()
 		}
 	}
 	glMatrixMode( GL_MODELVIEW );
+#endif
 }
 
 #ifdef NL_STATIC

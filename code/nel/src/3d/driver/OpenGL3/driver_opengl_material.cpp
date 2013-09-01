@@ -828,6 +828,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 						// TexEnv is special.
 						_CurrentTexEnvSpecial[stage] = TexEnvSpecialLightMap;
 
+#ifndef GLSL
 						{
 							// ATI EnvCombine3
 							// What we want to setup is  Texture*Constant + Previous.
@@ -845,6 +846,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 							glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
 							glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
 						}
+#endif
 					}
 				}
 
@@ -982,7 +984,9 @@ void			CDriverGL3::endLightMapMultiPass()
 	// If multi-pass, then must reset the fog color
 	if(_NLightMapPass>=2 && _FogEnabled)
 	{
+#ifndef GLSL
 		glFogfv(GL_FOG_COLOR, _CurrentFogColor);
+#endif
 	}
 
 	// nothing to do with blending/lighting, since always setuped in activeMaterial().
@@ -992,11 +996,13 @@ void			CDriverGL3::endLightMapMultiPass()
 	// Clean up all stage for Multiply x 2
 	if (_CurrentMaterial->_LightMapsMulx2)
 	{
+#ifndef GLSL
 		for (uint32 i = 0; i < (_NLightMapPerPass+1); ++i)
 		{
 			_DriverGLStates.activeTextureARB(i);
 			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 1);
 		}
+#endif
 	}
 }
 

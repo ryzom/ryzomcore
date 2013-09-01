@@ -299,10 +299,12 @@ void			CDriverGLStates3::enableLight(uint num, uint enable)
 		// new state.
 		_CurLight[num]= enabled;
 		// Setup GLState.
+#ifndef GLSL
 		if(_CurLight[num])
 			glEnable ((GLenum)(GL_LIGHT0+num));
 		else
 			glDisable ((GLenum)(GL_LIGHT0+num));
+#endif
 	}
 }
 
@@ -424,7 +426,9 @@ void			CDriverGLStates3::alphaFunc(float threshold)
 		// new state
 		_CurAlphaTestThreshold= threshold;
 		// setup function.
+#ifndef GLSL
 		glAlphaFunc(GL_GREATER, _CurAlphaTestThreshold);
+#endif
 	}
 }
 
@@ -492,7 +496,9 @@ void			CDriverGLStates3::setEmissive(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurEmissive= packedColor;
+#ifndef GLSL
 		glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, color);
+#endif
 	}
 }
 
@@ -505,7 +511,9 @@ void			CDriverGLStates3::setAmbient(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurAmbient= packedColor;
+#ifndef GLSL
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color);
+#endif
 	}
 }
 
@@ -518,7 +526,9 @@ void			CDriverGLStates3::setDiffuse(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurDiffuse= packedColor;
+#ifndef GLSL
 		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+#endif
 	}
 }
 
@@ -531,7 +541,9 @@ void			CDriverGLStates3::setSpecular(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurSpecular= packedColor;
+#ifndef GLSL
 		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
+#endif
 	}
 }
 
@@ -544,7 +556,9 @@ void			CDriverGLStates3::setShininess(float shin)
 #endif
 	{
 		_CurShininess= shin;
+#ifndef GLSL
 		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shin);
+#endif
 	}
 }
 
@@ -570,6 +584,8 @@ void			CDriverGLStates3::setVertexColorLighted(bool enable)
 	{
 		_VertexColorLighted= enable;
 
+#ifndef GLSL
+
 		if (_VertexColorLighted)
 		{
 			glEnable (GL_COLOR_MATERIAL);
@@ -588,6 +604,8 @@ void			CDriverGLStates3::setVertexColorLighted(bool enable)
 			convColor(diffCol, glColor);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, glColor);
 		}
+
+#endif
 	}
 }
 
@@ -643,6 +661,8 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 	{
 		_TexGenMode[stage] = mode;
 
+#ifndef GLSL
+
 		if (!_TextureCubeMapSupported) return;
 
 		if(mode==0)
@@ -680,6 +700,8 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 			glEnable( GL_TEXTURE_GEN_T );
 			glEnable( GL_TEXTURE_GEN_R );
 		}
+#endif
+
 	}
 }
 
@@ -687,6 +709,8 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 void			CDriverGLStates3::resetTextureMode()
 {
 	H_AUTO_OGL(CDriverGLStates3_resetTextureMode);
+
+#ifndef GLSL
 
 	glDisable(GL_TEXTURE_2D);
 
@@ -700,6 +724,8 @@ void			CDriverGLStates3::resetTextureMode()
 		glDisable(GL_TEXTURE_RECTANGLE_NV);
 	}
 
+#endif
+
 	_TextureMode[_CurrentActiveTextureARB]= TextureDisabled;
 }
 
@@ -711,6 +737,9 @@ void			CDriverGLStates3::setTextureMode(TTextureMode texMode)
 	TTextureMode	oldTexMode = _TextureMode[_CurrentActiveTextureARB];
 	if(oldTexMode != texMode)
 	{
+
+#ifndef GLSL
+
 		// Disable first old mode.
 		if (oldTexMode == Texture2D)
 		{
@@ -767,6 +796,8 @@ void			CDriverGLStates3::setTextureMode(TTextureMode texMode)
 			}
 		}
 
+#endif
+
 		// new mode.
 		_TextureMode[_CurrentActiveTextureARB]= texMode;
 	}
@@ -799,6 +830,8 @@ void			CDriverGLStates3::forceActiveTextureARB(uint stage)
 // ***************************************************************************
 void			CDriverGLStates3::enableVertexArray(bool enable)
 {
+#ifndef GLSL
+
 	H_AUTO_OGL(CDriverGLStates3_enableVertexArray);
 
 	if(_VertexArrayEnabled != enable)
@@ -810,10 +843,15 @@ void			CDriverGLStates3::enableVertexArray(bool enable)
 
 		_VertexArrayEnabled= enable;
 	}
+
+#endif
+
 }
 // ***************************************************************************
 void			CDriverGLStates3::enableNormalArray(bool enable)
 {
+#ifndef GLSL
+
 	H_AUTO_OGL(CDriverGLStates3_enableNormalArray)
 	if(_NormalArrayEnabled != enable)
 	{
@@ -825,10 +863,14 @@ void			CDriverGLStates3::enableNormalArray(bool enable)
 
 
 	}
+
+#endif
+
 }
 // ***************************************************************************
 void			CDriverGLStates3::enableWeightArray(bool enable)
 {
+#ifndef GLSL
 	H_AUTO_OGL(CDriverGLStates3_enableWeightArray);
 
 	if(_WeightArrayEnabled != enable)
@@ -840,10 +882,13 @@ void			CDriverGLStates3::enableWeightArray(bool enable)
 
 		_WeightArrayEnabled= enable;
 	}
+#endif
+
 }
 // ***************************************************************************
 void			CDriverGLStates3::enableColorArray(bool enable)
 {
+#ifndef GLSL
 	H_AUTO_OGL(CDriverGLStates3_enableColorArray);
 
 	if(_ColorArrayEnabled != enable)
@@ -856,12 +901,15 @@ void			CDriverGLStates3::enableColorArray(bool enable)
 
 
 	}
+#endif
+
 }
 
 
 // ***************************************************************************
 void			CDriverGLStates3::enableSecondaryColorArray(bool enable)
 {
+#ifndef GLSL
 	H_AUTO_OGL(CDriverGLStates3_enableSecondaryColorArray);
 
 	if(_SecondaryColorArrayEnabled != enable)
@@ -880,11 +928,14 @@ void			CDriverGLStates3::enableSecondaryColorArray(bool enable)
 			nglSecondaryColor3ubEXT(0,0,0);
 		}
 	}
+#endif
+
 }
 
 // ***************************************************************************
 void			CDriverGLStates3::clientActiveTextureARB(uint stage)
 {
+#ifndef GLSL
 	H_AUTO_OGL(CDriverGLStates3_clientActiveTextureARB);
 
 	if( _CurrentClientActiveTextureARB != stage )
@@ -892,11 +943,14 @@ void			CDriverGLStates3::clientActiveTextureARB(uint stage)
 		nglClientActiveTextureARB(GL_TEXTURE0_ARB+stage);
 		_CurrentClientActiveTextureARB= stage;
 	}
+#endif
+
 }
 
 // ***************************************************************************
 void			CDriverGLStates3::enableTexCoordArray(bool enable)
 {
+#ifndef GLSL
 	H_AUTO_OGL(CDriverGLStates3_enableTexCoordArray);
 
 	if(_TexCoordArrayEnabled[_CurrentClientActiveTextureARB] != enable)
@@ -909,11 +963,14 @@ void			CDriverGLStates3::enableTexCoordArray(bool enable)
 
 		_TexCoordArrayEnabled[_CurrentClientActiveTextureARB]= enable;
 	}
+#endif
+
 }
 
 // ***************************************************************************
 void			CDriverGLStates3::enableVertexAttribArray(uint glIndex, bool enable)
 {
+#ifndef GLSL
 	H_AUTO_OGL(CDriverGLStates3_enableVertexAttribArray);
 
 	if(_VertexAttribArrayEnabled[glIndex] != enable)
@@ -924,6 +981,7 @@ void			CDriverGLStates3::enableVertexAttribArray(uint glIndex, bool enable)
 			glDisableClientState(glIndex+GL_VERTEX_ATTRIB_ARRAY0_NV);
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -956,11 +1014,13 @@ void			CDriverGLStates3::enableFog(uint enable)
 	{
 		// new state.
 		_CurFog= enabled;
+#ifndef GLSL
 		// Setup GLState.
 		if(_CurFog)
 			glEnable(GL_FOG);
 		else
 			glDisable(GL_FOG);
+#endif
 	}
 }
 

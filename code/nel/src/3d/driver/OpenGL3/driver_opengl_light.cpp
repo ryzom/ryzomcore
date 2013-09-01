@@ -69,6 +69,7 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 		// Copy the mode
 		_LightMode[num]=mode;
 
+#ifndef GLSL
 		// Set the ambiant color
 		GLfloat colorGL[4];
 		CRGBA colorNeL=light.getAmbiant ();
@@ -111,6 +112,8 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 		glLightf (lightNum, GL_LINEAR_ATTENUATION, light.getLinearAttenuation());
 		glLightf (lightNum, GL_QUADRATIC_ATTENUATION, light.getQuadraticAttenuation());
 
+#endif
+
 		// Set the position
 		if ((mode==CLight::DirectionalLight)||(mode==CLight::SpotLight))
 		{
@@ -129,20 +132,27 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 			// Get the exponent of the spot
 			float exponent=light.getExponent ();
 
+#ifndef GLSL
 			// Set it
 			glLightf (lightNum, GL_SPOT_EXPONENT, exponent);
+#endif
 
 			// Get the cutoff of the spot
 			float cutoff=180.f*(light.getCutoff ()/(float)NLMISC::Pi);
 
+#ifndef GLSL
 			// Set it
 			glLightf (lightNum, GL_SPOT_CUTOFF, cutoff);
+#endif
+
 		}
 		else
 		{
+#ifndef GLSL
 			// Disable spot properties
 			glLighti (lightNum, GL_SPOT_CUTOFF, 180);
 			glLighti (lightNum, GL_SPOT_EXPONENT, 0);
+#endif
 		}
 
 		// Flag this light as dirt.
@@ -199,6 +209,8 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 void	CDriverGL3::setAmbientColor (CRGBA color)
 {
 	H_AUTO_OGL(CDriverGL3_setAmbientColor )
+	
+#ifndef GLSL
 	// Gl array
 	GLfloat array[4];
 	array[0]=(float)color.R/255.f;
@@ -208,6 +220,8 @@ void	CDriverGL3::setAmbientColor (CRGBA color)
 
 	// Set the color
 	glLightModelfv (GL_LIGHT_MODEL_AMBIENT, array);
+#endif
+
 }
 
 
@@ -217,6 +231,8 @@ void				CDriverGL3::cleanLightSetup ()
 	H_AUTO_OGL(CDriverGL3_cleanLightSetup )
 	// Should be dirty
 	nlassert (_LightSetupDirty);
+
+#ifndef GLSL
 
 	// First light
 	bool first=true;
@@ -295,6 +311,8 @@ void				CDriverGL3::cleanLightSetup ()
 	// Pop old matrix
 	if (!first)
 		glPopMatrix ();
+
+#endif
 
 	// Clean flag
 	_LightSetupDirty=false;

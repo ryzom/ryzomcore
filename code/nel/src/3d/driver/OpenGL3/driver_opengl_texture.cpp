@@ -1443,6 +1443,7 @@ void		CDriverGL3::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  
 	// Disable Special tex env f().
 	_CurrentTexEnvSpecial[stage]= TexEnvSpecialDisabled;
 
+#ifndef GLSL
 
 	// Setup the gl env mode.
 	_DriverGLStates.activeTextureARB(stage);
@@ -1561,6 +1562,8 @@ void		CDriverGL3::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  
 	{
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
+
+#endif
 
 }
 

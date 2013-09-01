@@ -1014,6 +1014,7 @@ private:
 	{
 		static	const float	OO255= 1.0f/255;
 		_CurrentTexEnv[stage].ConstantColor= col;
+#ifndef GLSL
 		// Setup the gl cte color.
 		_DriverGLStates.activeTextureARB(stage);
 		GLfloat		glcol[4];
@@ -1022,6 +1023,7 @@ private:
 		glcol[2]= col.B*OO255;
 		glcol[3]= col.A*OO255;
 		glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, glcol);
+#endif
 	}
 	void					forceActivateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 	{
