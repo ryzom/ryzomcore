@@ -48,7 +48,7 @@ function write_user($newUser){
   
      try{
           //make new webuser
-          createWebuser($params['name'], $params['pass'], $params['mail']);
+          $user_id = WebUsers::createWebuser($params['name'], $params['pass'], $params['mail']);
           
           //Create the user on the shard + in case shard is offline put copy of query in query db
           //returns: ok, shardoffline or liboffline
