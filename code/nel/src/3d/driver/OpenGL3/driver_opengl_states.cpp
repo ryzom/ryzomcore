@@ -120,7 +120,9 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	glStencilFunc(_CurStencilFunc, _CurStencilRef, _CurStencilMask);
 	glStencilOp(_CurStencilOpFail, _CurStencilOpZFail, _CurStencilOpZPass);
 	glStencilMask(_CurStencilWriteMask);
+#ifndef GLSL
 	glAlphaFunc(GL_GREATER, _CurAlphaTestThreshold);
+#endif
 
 
 
@@ -140,11 +142,13 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	// setup GLStates.
 	static const GLfloat		one[4]= {1,1,1,1};
 	static const GLfloat		zero[4]= {0,0,0,1};
+#ifndef GLSL
 	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, zero);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, one);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, one);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, zero);
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, _CurShininess);
+#endif
 
 	// TexModes
 	uint stage;

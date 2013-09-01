@@ -256,7 +256,9 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 
 bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris)
 {
+#ifdef GLSL
 	return renderTriangles2( mat, firstIndex, ntris );
+#endif
 	
 	H_AUTO_OGL(CDriverGL3_renderTriangles);
 
@@ -1003,7 +1005,9 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 		// Use a vertex program ?
 		if (!isVertexProgramEnabled ())
 		{
+#ifndef GLSL
 			setupGlArraysStd(vb);
+#endif
 		}
 		else
 		{

@@ -12,7 +12,9 @@ namespace NL3D
 	{
 		if( !program )
 		{
+#ifndef GLSL
 			_VertexProgramEnabled = false;
+#endif
 			currentProgram = NULL;
 			return true;
 		}
@@ -124,8 +126,6 @@ namespace NL3D
 		if( !setupProgram( mat ) )
 			return false;
 
-		//glDrawArrays( GL_TRIANGLES, startIndex * 3, numTris * 3 );
-
 		if( numTris )
 		{
 			if (_LastIB._Format == CIndexBuffer::Indices16)
@@ -160,6 +160,7 @@ namespace NL3D
 		shaderGenerator->generateVS( vs );
 		shaderGenerator->generatePS( ps );
 
+#ifdef GLSL
 		vp = createVertexProgram();
 		std::string log;
 
@@ -213,6 +214,7 @@ namespace NL3D
 			setupNormalPass();
 			break;
 		}
+#endif
 
 		return true;
 	}
@@ -224,7 +226,9 @@ namespace NL3D
 		vp = NULL;
 		pp = NULL;
 		currentProgram = NULL;
+#ifndef GLSL
 		_VertexProgramEnabled = false;
+#endif
 	}
 
 }

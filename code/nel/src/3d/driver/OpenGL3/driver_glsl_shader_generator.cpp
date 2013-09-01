@@ -458,6 +458,7 @@ namespace NL3D
 
 		addDiffuse();
 
+		bool textures = false;
 		sampler = 0;
 		for( int i = TexCoord0; i < NumOffsets; i++ )
 		{
@@ -466,13 +467,20 @@ namespace NL3D
 				ss << "vec4 texel" << sampler;
 				ss << " = texture2D( sampler" << sampler << ",";
 				ss << attribNames[ i ] << " );" << std::endl;
+				textures = true;
 			}
 			sampler++;
 		}
 
-		ss << "vec4 texel = vec4( 0.0, 0.0, 0.0, 1.0 );" << std::endl;
+		if( textures )
+			ss << "vec4 texel = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
+		else
+			ss << "vec4 texel = vec4( 0.5, 0.5, 0.5, 1.0 );" << std::endl;
 
 		generateTexEnv();
+
+		// Alpha test
+		//ss << "if( texel.a <= 0.5 ) discard;" << std::endl;
 	
 		ss << "fragColor = texel;" << std::endl;
 		ss << "}" << std::endl;
@@ -514,33 +522,37 @@ namespace NL3D
 			{
 				buildArg( stage, 0, false, arg0 );
 				buildArg( stage, 1, false, arg1 );
-				ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb * " << arg1 << ";" << std::endl;
+				ss << "texel.rgb = " << arg0 << " * " << arg1 << ";" << std::endl;
+				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb * " << arg1 << ";" << std::endl;
 			}
 			break;
 		
 		case CMaterial::Add:
 				buildArg( stage, 0, false, arg0 );
 				buildArg( stage, 1, false, arg1 );
-				ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
+				ss << "texel.rgb = " << arg0 << " + " << arg1 << ";" << std::endl;
+				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
 			break;
 		
 		case CMaterial::AddSigned:
 				buildArg( stage, 0, false, arg0 );
 				buildArg( stage, 1, false, arg1 );
-				ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb - vec3( 0.5, 0.5, 0.5 );" << std::endl;
+				ss << "texel.rgb = " << arg0 << " + " << arg1 << " - vec3( 0.5, 0.5, 0.5 );" << std::endl;
+				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb - vec3( 0.5, 0.5, 0.5 );" << std::endl;
 			break;
 
 		case CMaterial::Mad:
 				buildArg( stage, 0, false, arg0 );
 				buildArg( stage, 1, false, arg1 );
 				buildArg( stage, 2, false, arg2 );
-				ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb * " << arg1 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg2 << ";" << std::endl;
+				ss << "texel.rgb = " << arg0 << " * " << arg1 << " + " << arg2 << ";" << std::endl;
+				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb * " << arg1 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb + " << arg2 << ";" << std::endl;
 			break;
 
 		case CMaterial::InterpolateTexture:
@@ -614,24 +626,27 @@ namespace NL3D
 			{
 				buildArg( stage, 0, true, arg0 );
 				buildArg( stage, 1, true, arg1 );
-				ss << "texel.a = " << arg0 << ";" << std::endl;
-				ss << "texel.a = texel.a * " << arg1 << ";" << std::endl;
+				ss << "texel.a = " << arg0 << " * " << arg1 << ";" << std::endl;
+				//ss << "texel.a = " << arg0 << ";" << std::endl;
+				//ss << "texel.a = texel.a * " << arg1 << ";" << std::endl;
 			}
 			break;
 		
 		case CMaterial::Add:
 				buildArg( stage, 0, true, arg0 );
 				buildArg( stage, 1, true, arg1 );
-				ss << "texel.a = " << arg0 << ";" << std::endl;
-				ss << "texel.a = texel.a + " << arg1 << ";" << std::endl;
+				ss << "texel.a = " << arg0 << " + " << arg1 << ";" << std::endl;
+				//ss << "texel.a = " << arg0 << ";" << std::endl;
+				//ss << "texel.a = texel.a + " << arg1 << ";" << std::endl;
 			break;
 		
 		case CMaterial::AddSigned:
 				buildArg( stage, 0, true, arg0 );
 				buildArg( stage, 1, true, arg1 );
-				ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb - vec3( 0.5, 0.5, 0.5 );" << std::endl;
+				ss << "texel.a = " << arg0 << " * " << arg1 << " - vec3( 0.5, 0.5, 0.5 );" << std::endl;
+				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
+				//ss << "texel.rgb = texel.rgb - vec3( 0.5, 0.5, 0.5 );" << std::endl;
 			break;
 
 		case CMaterial::Mad:

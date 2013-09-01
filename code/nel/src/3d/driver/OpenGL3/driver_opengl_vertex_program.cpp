@@ -401,7 +401,9 @@ bool CDriverGL3::activeARBVertexProgram (CVertexProgram *program)
 	{
 		glDisable( GL_VERTEX_PROGRAM_ARB );
 		glDisable( GL_COLOR_SUM_ARB );
+#ifndef GLSL
 		_VertexProgramEnabled = false;
+#endif
 	}
 	return true;
 }

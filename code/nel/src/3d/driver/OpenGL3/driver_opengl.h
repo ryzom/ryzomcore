@@ -19,6 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
+#define GLSL
+
 //#define NL_PROFILE_DRIVER_OGL
 #ifdef NL_PROFILE_DRIVER_OGL
 #	define H_AUTO_OGL(label) H_AUTO(label)

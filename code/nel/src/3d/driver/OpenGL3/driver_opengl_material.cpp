@@ -377,9 +377,11 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			// activate the texture, or disable texturing if NULL.
 			activateTexture(stage,text);
 
+#ifndef GLSL
 			// If texture not NULL, Change texture env function.
 			//==================================================
 			setTextureEnvFunction(stage, mat);
+#endif
 		}
 	}
 
@@ -429,6 +431,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		//=====================
 
 		// Light Part.
+#ifndef GLSL
 		_DriverGLStates.enableLighting(mat.getFlags()&IDRV_MAT_LIGHTING);
 		if(mat.getFlags()&IDRV_MAT_LIGHTING)
 		{
@@ -448,6 +451,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			_DriverGLStates.setVertexColorLighted(false);
 		}
 
+
 		// Fog Part.
 		//=================
 
@@ -461,6 +465,8 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			// Restaure fog state to its current value
 			_DriverGLStates.enableFog(_FogEnabled);
 		}
+
+#endif
 
 		_CurrentMaterial=&mat;
 	}
