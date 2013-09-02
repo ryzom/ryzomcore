@@ -9,13 +9,12 @@ delete user hook   --- ring_open -> ring users ---- nel user & nel permission --
 menu items that do stuff
 
 */
-error_reporting(E_ALL);
-ini_set('display_errors', 'on');
 
-$path = drupal_get_path('module', 'ryzommanage');
-require_once ($path . '/config.php');
-require_once( $path . '/ams_lib/libinclude.php' );
-
+module_load_include('php', 'ryzommanage', 'config');
+module_load_include('php', 'ryzommanage', 'ams_lib/libinclude');
+global $MAIL_DIR;
+echo $MAIL_DIR;
+echo "booo";
 
 /*
 Drupal 7 ryzom core module
@@ -56,8 +55,8 @@ function ryzommanage_admin()
     //admin menu items
     
     
-    $path = drupal_get_path('module', 'ryzommanage');
-    require($path . '/config.php');
+    //$path = drupal_get_path('module', 'ryzommanage');
+    //require($path . '/config.php');
     $form['ryzommanage_serverurl'] = array(
         '#type' => 'textfield',
         '#title' => t('Server url'),
@@ -299,7 +298,7 @@ function _collect_register($nids, $collection)
         return_client_httpdata();
     } else {
         //redirect to registration page
-        header("Location: /user/register");
+        header("Location: user/register");
     }
 }
 /**
