@@ -72,7 +72,7 @@ class Users{
      * @takes $username
      * @return string Info: Returns a string based on if the username is valid, if valid then "success" is returned
      */
-     private function checkUser( $username )
+     public function checkUser( $username )
      {
           if ( isset( $username ) ){
                if ( strlen( $username ) > 12 ){
@@ -111,7 +111,7 @@ class Users{
      * @takes $pass
      * @return string Info: Returns a string based on if the password is valid, if valid then "success" is returned
      */
-     private function checkPassword( $pass )
+     public function checkPassword( $pass )
     {
          if ( isset( $pass ) ){
              if ( strlen( $pass ) > 20 ){

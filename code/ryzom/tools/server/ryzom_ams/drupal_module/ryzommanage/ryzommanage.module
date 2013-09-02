@@ -56,9 +56,9 @@ function ryzommanage_form_alter(&$form, &$form_state, $form_id)
 
 function _webpage_registration(&$form_state)
 {
-
-    $user  = checkUser($form_state['account']['name']['#value']);
-    $email = validEmail($form_state['account']['mail']['#value']);
+    $webUser = new WebUsers();
+    $user  = $webUser->checkUser($form_state['account']['name']['#value']);
+    $email = $webUser->validEmail($form_state['account']['mail']['#value']);
 
     if ($user != "success") {
         form_set_error('name', t($user));
@@ -71,12 +71,13 @@ function _webpage_registration(&$form_state)
 
 function _webpage_profile(&$form_state)
 {
-    $email = validEmail($form_state['account']['mail']['#value']);
+    $webUser = new WebUsers();
+    $email = $webUser->validEmail($form_state['account']['mail']['#value']);
 
     if ($email != "success") {
         form_set_error('mail', t('Not a valid email address, please check it and try again.'));
     }
-    if ((checkPassword($form_state['account']['pass']['#value']['pass1']) == "success" ) and ( $form_state['account']['pass']['#value']['pass1'] == 
+    if (($webUser->checkPassword($form_state['account']['pass']['#value']['pass1']) == "success" ) and ( $form_state['account']['pass']['#value']['pass1'] == 
         $form_state['account']['pass']['#value']['pass2'] )) {
     }
 }
@@ -329,7 +330,7 @@ function return_client_httpdata()
  * Info: Returns a string based on if the username is valid, if valid then "success" is returned
  *
  */
-function checkUser($username)
+/*function checkUser($username)
 {
     if (isset($username)) {
         if (strlen($username) > 12) {
@@ -349,7 +350,7 @@ function checkUser($username)
         return "success";
     }
     return "fail";
-}
+}*/
 /**
  *
  * Function checkPassword 
@@ -360,7 +361,7 @@ function checkUser($username)
  * Info: Returns a string based on if the password is valid, if valid then "success" is returned
  *
  */
-function checkPassword($pass)
+/*function checkPassword($pass)
 {
     if (isset($pass)) {
         if (strlen($pass) > 20) {
@@ -372,7 +373,7 @@ function checkPassword($pass)
         }
     }
     return "fail";
-}
+}*/
 /**
  *
  * Function confirmPassword 
@@ -402,7 +403,7 @@ function confirmPassword()
  * 
  *
  */
-function checkEmail($email)
+/*function checkEmail($email)
 {
     if (isset($email)) {
         if (!validEmail($email)) {
@@ -461,7 +462,7 @@ function validEmail($email)
         }
     }
     return $isValid;
-}
+}*/
 
 /**
  *
@@ -503,7 +504,6 @@ function createUser($values, $user_id)
     //Create the user on the shard + in case shard is offline put copy of query in query db
     //returns: ok, shardoffline or liboffline
     $result = WebUsers::createUser($params, $user_id);
-    echo $result;
     //createPermissions(array($login));
 }
 
