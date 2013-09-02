@@ -199,7 +199,8 @@ code/nel/tools/pacs/build_rbank/build_rbank
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
 code/ryzom/tools/server/sql/ryzom_admin_default_data.sql
-
+code/ryzom/tools/server/ryzom_ams/drupal
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib
 # Linux server compile
 code/ryzom/server/src/entities_game_service/entities_game_service
 code/ryzom/server/src/frontend_service/frontend_service

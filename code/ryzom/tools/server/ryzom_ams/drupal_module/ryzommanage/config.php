@@ -1,5 +1,5 @@
 <?php
-
+echo "config";
 // This file contains all variables needed by other php scripts
 // ----------------------------------------------------------------------------------------
 // Variables for database access
