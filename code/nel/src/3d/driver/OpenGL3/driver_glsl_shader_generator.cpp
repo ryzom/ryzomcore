@@ -830,17 +830,21 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateLightMapPS()
 	{
-		uint sampler = 0;
-		for( int i = TexCoord0; i < NumOffsets; i++ )
+		int ntextures = 0;
+		for( int i = TexCoord0; i < TexCoord4; i++ )
 		{
 			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "uniform sampler2D sampler" << sampler;
-				ss << ";";
-				ss << std::endl;
-			}
-			sampler++;
+				ntextures++;
 		}
+
+		for( int i = 0; i < ntextures; i++ )
+			ss << "uniform sampler2D sampler" << i << ";" << std::endl;
+
+
+		ss << "uniform vec4 constant0;" << std::endl;
+		ss << "uniform vec4 constant1;" << std::endl;
+		ss << "uniform vec4 constant2;" << std::endl;
+		ss << "uniform vec4 constant3;" << std::endl;
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
@@ -848,31 +852,36 @@ namespace NL3D
 
 		addDiffuse();
 
-		addConstants();
-		
-		sampler = 0;
-		for( int i = TexCoord0; i < NumOffsets; i++ )
+		// Lightmap UV coords are at position 1
+		for( int i = 0; i < ntextures - 1; i++ )
 		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "vec4 texel" << sampler;
-				ss << " = texture2D( sampler" << sampler;
-				ss << ", " << attribNames[ i ] << " );" << std::endl;
-			}
-			sampler++;
+			ss << "vec4 texel" << i;
+			ss << " = texture2D( sampler" << i;
+			ss << ", " << attribNames[ TexCoord1 ] << " );" << std::endl;
 		}
 
-		ss << "vec4 texel = diffuse;" << std::endl;
+		// Color map UV coords are at position 0
+		ss << "vec4 texel" << ntextures - 1 << " = texture2D( sampler" << ntextures - 1 << ", " << attribNames[ TexCoord0 ] << " );" << std::endl;
+		
+		//ss << "vec4 texel = diffuse;" << std::endl;
+		//ss << "vec4 texel = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
+		ss << "vec4 texel = vec4( 0.0, 0.0, 0.0, 0.0 );" << std::endl;
 
-		sampler = 0;
-		for( int i = TexCoord0; i < NumOffsets; i++ )
+		// Lightmaps
+		for( int i = 0; i < ntextures - 1; i++ )
 		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "texel = ";
-				ss << texelNames[ sampler ] << " * " << constantNames[ sampler ] << " + texel;" << std::endl;
-			}
-			sampler++;
+			ss << "texel.rgb = " << texelNames[ i ] << ".rgb * " << constantNames[ i ] << ".rgb + texel.rgb;" << std::endl;
+			ss << "texel.a = " << texelNames[ i ] << ".a * texel.a + texel.a;" << std::endl;
+		}
+
+		// Texture
+		ss << "texel.rgb = " << texelNames[ ntextures - 1 ] << ".rgb * texel.rgb;" << std::endl;
+		ss << "texel.a = " << texelNames[ ntextures - 1] << ".a;" << std::endl;
+
+		if( material->_LightMapsMulx2 )
+		{
+			ss << "texel.rgb = texel.rgb * 2.0;" << std::endl;
+			ss << "texel.a = texel.a * 2.0;" << std::endl;
 		}
 
 		ss << "fragColor = texel;" << std::endl;

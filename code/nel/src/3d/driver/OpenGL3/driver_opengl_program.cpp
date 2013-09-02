@@ -213,6 +213,11 @@ namespace NL3D
 		case CMaterial::Normal:
 			setupNormalPass();
 			break;
+
+		case CMaterial::LightMap:
+			beginLightMapMultiPass();
+			setupLightMapPass( 0 );
+			break;
 		}
 #endif
 
@@ -221,6 +226,13 @@ namespace NL3D
 
 	void CDriverGL3::releaseProgram()
 	{
+		switch( _CurrentMaterial->getShader() )
+		{
+		case CMaterial::LightMap:
+			endLightMapMultiPass();
+			break;
+		}
+
 		delete p;
 		p = NULL;
 		vp = NULL;

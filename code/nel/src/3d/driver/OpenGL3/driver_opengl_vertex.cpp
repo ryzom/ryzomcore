@@ -607,6 +607,8 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 
 void		CDriverGL3::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
 {
+#ifndef GLSL
+
 	H_AUTO_OGL(CDriverGL3_setupUVPtr)
 	// sould not be called with vertex program Array setuped.
 	nlassert(!_LastSetupGLArrayVertexProgram);
@@ -633,6 +635,9 @@ void		CDriverGL3::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
 	}
 	else
 		_DriverGLStates.enableTexCoordArray(false);
+
+#endif
+
 }
 
 

@@ -633,16 +633,6 @@ void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 
 	// Compute how many pass, according to driver caps.
 	_NLightMapPerPass = inlGetNumTextStages()-1;
-	// Can do more than 2 texture stages only if NVTextureEnvCombine4 or ATITextureEnvCombine3
-	if ( !_Extensions.ATITextureEnvCombine3 )
-	{
-		_NLightMapPerPass = 1;
-		_LightMapNoMulAddFallBack= true;
-	}
-	else
-	{
-		_LightMapNoMulAddFallBack= false;
-	}
 
 	// Number of pass.
 	_NLightMapPass = (_NLightMaps + _NLightMapPerPass-1)/(_NLightMapPerPass);
@@ -681,6 +671,14 @@ sint CDriverGL3::beginLightMapMultiPass ()
 	// Manage too if no lightmaps.
 	return	std::max (_NLightMapPass, (uint)1);
 }
+
+const char *constNames[ 4 ] =
+{
+	"constant0",
+	"constant1",
+	"constant2",
+	"constant3"
+};
 
 // ***************************************************************************
 void			CDriverGL3::setupLightMapPass(uint pass)
@@ -736,7 +734,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 
 	// For LMC (lightmap 8Bit compression) compute the total AmbientColor in vertex diffuse
 	// need only if standard MulADD version
-	if (!_LightMapNoMulAddFallBack)
 	{
 		uint32	r=0;
 		uint32	g=0;
@@ -776,11 +773,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 			CRGBA lmapFactor = mat._LightMaps[whichLightMap].Factor;
 			// Modulate the factor with LightMap compression Diffuse
 			CRGBA lmcDiff= mat._LightMaps[whichLightMap].LMCDiffuse;
-			// FallBack if the (very common) extension for MulADD was not found
-			if(_LightMapNoMulAddFallBack)
-			{
-				lmcDiff.addRGBOnly(lmcDiff, mat._LightMaps[whichLightMap].LMCAmbient);
-			}
+
 			lmapFactor.R = (uint8)(((uint32)lmapFactor.R  * ((uint32)lmcDiff.R+(lmcDiff.R>>7))) >>8);
 			lmapFactor.G = (uint8)(((uint32)lmapFactor.G  * ((uint32)lmcDiff.G+(lmcDiff.G>>7))) >>8);
 			lmapFactor.B = (uint8)(((uint32)lmapFactor.B  * ((uint32)lmcDiff.B+(lmcDiff.B>>7))) >>8);
@@ -794,28 +787,27 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 			{
 				static CMaterial::CTexEnv	stdEnv;
 
-				// fallBack if extension MulAdd not found. just mul factor with (Ambient+Diffuse)
-				if(_LightMapNoMulAddFallBack)
-				{
-					// do not use constant color to blend lightmap, but incoming diffuse color, for stage0 only.
-					GLfloat	glcol[4];
-					convColor(lmapFactor, glcol);
-					_DriverGLStates.setEmissive(lmapFactor.getPacked(), glcol);
-
-					// Leave stage as default env (Modulate with previous)
-					activateTexEnvMode(stage, stdEnv);
-
-					// Setup gen tex off
-					_DriverGLStates.activeTextureARB(stage);
-					_DriverGLStates.setTexGenMode(stage, 0);
-				}
-				else
 				{
 					// Here, we are sure that texEnvCombine4 or texEnvCombine3 is OK.
 					nlassert( _Extensions.ATITextureEnvCombine3);
 
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
+#ifdef GLSL
+					int cl = getUniformLocation( constNames[ stage ] );
+					if( cl != -1 )
+					{
+						GLfloat glCol[ 4 ];
+						convColor( lmapFactor, glCol );
+						setUniform4f( cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+					}
+
+					int tl = getUniformLocation( samplers[ stage ] );
+					if( tl != -1 )
+					{
+						setUniform1i( tl, stage );
+					}
+#endif
 					activateTexEnvColor(stage, stdEnv);
 
 					// Setup env for texture stage.
@@ -878,6 +870,14 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				_DriverGLStates.activeTextureARB(stage);
 				_DriverGLStates.setTexGenMode(stage, 0);
 
+#ifdef GLSL
+				int tl = getUniformLocation( samplers[ stage ] );
+				if( tl != -1 )
+				{
+					setUniform1i( tl, stage );
+				}
+#endif
+
 				// setup UV, with UV0. Only if needed (cached)
 				if( !_LastVertexSetupIsLightMap || _LightMapUVMap[stage]!=0 )
 				{
@@ -885,11 +885,14 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					_LightMapUVMap[stage]= 0;
 				}
 
+#ifndef GLSL
 				if (mat._LightMapsMulx2)
 				{
 					// Multiply x 2
 					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 2);
 				}
+#endif
+
 			}
 		}
 		else
@@ -905,11 +908,13 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	/* If multi-pass, then must setup a black Fog color for 1+ pass (just do it for the pass 1).
 		This is because Transparency ONE/ONE is used.
 	*/
+#ifndef GLSL
 	if(pass==1 && _FogEnabled)
 	{
 		static	GLfloat		blackFog[4]= {0,0,0,0};
 		glFogfv(GL_FOG_COLOR, blackFog);
 	}
+#endif
 
 	// Blend is different if the material is blended or not
 	if( !mat.getBlend() )

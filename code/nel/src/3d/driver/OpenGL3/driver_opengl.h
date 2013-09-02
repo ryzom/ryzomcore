@@ -1089,7 +1089,6 @@ private:
 	uint			_NLightMaps;
 	uint			_NLightMapPerPass;
 	uint			_NLightMapPass;
-	bool			_LightMapNoMulAddFallBack;
 	// This array is the LUT from lmapId in [0, _NLightMaps[, to original lightmap id in material.
 	std::vector<uint>		_LightMapLUT;
 
