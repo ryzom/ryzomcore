@@ -1,5 +1,4 @@
 <?php
-echo "config";
 // This file contains all variables needed by other php scripts
 // ----------------------------------------------------------------------------------------
 // Variables for database access
@@ -7,29 +6,29 @@ echo "config";
 // where we can find the mysql database
 //-----------------------------------------------------------------------------------------
 
-$cfg['db']['web']['host']    = 'localhost';
-$cfg['db']['web']['port']    = '3306';
-$cfg['db']['web']['name']    = 'ryzom_ams';
-$cfg['db']['web']['user']    = 'shard';
-$cfg['db']['web']['pass']    = '';
+$cfg['db']['web']['host']    = variable_get('ryzommanage_webserverurl', 'localhost');
+$cfg['db']['web']['port']    = variable_get('ryzommanage_webmysqlport', '3306');
+$cfg['db']['web']['name']    = variable_get('ryzommanage_webdbname', 'ryzom_ams');
+$cfg['db']['web']['user']    = variable_get('ryzommanage_webusername', 'shard');
+$cfg['db']['web']['pass']    = variable_get('ryzommanage_webpassword', '');
 
-$cfg['db']['lib']['host']    = 'localhost';
-$cfg['db']['lib']['port']    = '3306';
-$cfg['db']['lib']['name']    = 'ryzom_ams_lib';
-$cfg['db']['lib']['user']    = 'shard';
-$cfg['db']['lib']['pass']    = '';
+$cfg['db']['lib']['host']    = variable_get('ryzommanage_libserverurl', 'localhost');
+$cfg['db']['lib']['port']    = variable_get('ryzommanage_libmysqlport', '3306');
+$cfg['db']['lib']['name']    = variable_get('ryzommanage_libdbname', 'ryzom_ams_lib');
+$cfg['db']['lib']['user']    = variable_get('ryzommanage_libusername', 'shard');
+$cfg['db']['lib']['pass']    = variable_get('ryzommanage_libpassword', '');
 
-$cfg['db']['shard']['host']    = 'localhost';
-$cfg['db']['shard']['port']    = '3306';
-$cfg['db']['shard']['name']    = 'nel';
-$cfg['db']['shard']['user']    = 'shard';
-$cfg['db']['shard']['pass']    = '';
+$cfg['db']['shard']['host']    = variable_get('ryzommanage_shardserverurl', 'localhost');
+$cfg['db']['shard']['port']    = variable_get('ryzommanage_shardmysqlport', '3306');
+$cfg['db']['shard']['name']    = variable_get('ryzommanage_sharddbname', 'nel');
+$cfg['db']['shard']['user']    = variable_get('ryzommanage_shardusername', 'shard');
+$cfg['db']['shard']['pass']    = variable_get('ryzommanage_shardpassword', '');
 
-$cfg['db']['ring']['host']    = 'localhost';
-$cfg['db']['ring']['port']    = '3306';
-$cfg['db']['ring']['name']    = 'ring_open';
-$cfg['db']['ring']['user']    = 'shard';
-$cfg['db']['ring']['pass']    = '';
+$cfg['db']['ring']['host']    = variable_get('ryzommanage_ringserverurl', 'localhost');
+$cfg['db']['ring']['port']    = variable_get('ryzommanage_ringmysqlport', '3306');
+$cfg['db']['ring']['name']    = variable_get('ryzommanage_ringdbname', 'ring_open');
+$cfg['db']['ring']['user']    = variable_get('ryzommanage_ringusername', 'shard');
+$cfg['db']['ring']['pass']    = variable_get('ryzommanage_ringpassword', '');
 
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");       
@@ -54,13 +53,14 @@ $TICKET_MAILING_SUPPORT = true;
 
 //You have to create this dir at first!
 $MAIL_DIR = "/tmp/mail";
-$TOS_URL ="http://createyourtos.com";
 $MAIL_LOG_PATH = "/tmp/mail/cron_mail.log";
 
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
 $cfg['crypt']['enc_method']    = 'AES-256-CBC';
 $cfg['crypt']['hash_method'] = "SHA512";
 
+
+$TOS_URL = variable_get('ryzommanage_TOS', 'www.mytosurlhere.com');
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
