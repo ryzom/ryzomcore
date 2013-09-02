@@ -8,3 +8,4 @@ configure = admin/settings/ryzommanage
 ; Information added by drupal.org packaging script on 2012-04-24
 version = "7.x-.01"
 core = "7.x"
+

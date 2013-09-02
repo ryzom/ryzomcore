@@ -9,13 +9,15 @@ delete user hook   --- ring_open -> ring users ---- nel user & nel permission --
 menu items that do stuff
 
 */
-
+error_reporting(E_ALL);
+ini_set('display_errors', 'on');
 
 global $TOS_URL;
 global $cfg;
-include 'ams_lib/libinclude.php';
-include 'config.php';
 
+include 'ams_lib/libinclude.php';
+spl_autoload_register('__autoload');
+include 'config.php';
 
 /*
 Drupal 7 ryzom core module
@@ -40,143 +42,7 @@ function loadTemplate($template,$vars)
     extract($vars);
     include($template);
 }
-/**
- *
- * Function ryzommanage_admin 
- *
- * @takes        Nothing
- * @return      array $form
- *
- * Info: Creates the box's etc that go in the ryzom admin menu
- *
- */
-function ryzommanage_admin()
-{
-    $form = array();
-    //admin menu items
-    global $cfg;
-    
-    $form['ryzommanage_shardserverurl'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Shard server url'),
-        '#default_value' => $cfg['db']['shard']['host'],
-        '#description' => t("The url of the ryzom server to integrate with."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_shardmysqlport'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Port for MySQL of the Shard'),
-        '#size' => 5,
-        '#maxlength' => 5,
-        '#default_value' => $cfg['db']['shard']['port'],
-        '#description' => t("The MySQL port of the ryzom server to integrate with."),
-        '#required' => TRUE,
-        '#element_validate' => array(
-            '_check_port_value'
-        )
-    );
-    $form['ryzommanage_sharddbname'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Shard Database Name'),
-        '#default_value' => $cfg['db']['shard']['name'],
-        '#description' => t("The MySQL database name to connect to."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_shardusername'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Shard MySQL Username'),
-        '#default_value' => $cfg['db']['shard']['user'],
-        '#description' => t("The MySQL username to connect with."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_shardpassword'] = array(
-        '#type' => 'password_confirm',
-        '#title' => t('Shard MySQL Password'),
-        '#description' => t("Confirm the MySQL password."),
-        '#suffix' => '<hr/>'
-    );
-    
-    $form['ryzommanage_libserverurl'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Lib server url'),
-        '#default_value' => $cfg['db']['lib']['host'],
-        '#description' => t("The url of the ryzom's lib db to integrate with."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_libmysqlport'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Port for MySQL of the Lib'),
-        '#size' => 5,
-        '#maxlength' => 5,
-        '#default_value' => $cfg['db']['lib']['port'],
-        '#description' => t("The MySQL port of the ryzom's lib db to integrate with."),
-        '#required' => TRUE,
-        '#element_validate' => array(
-            '_check_port_value'
-        )
-    );
-    $form['ryzommanage_libdbname'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Lib Database Name'),
-        '#default_value' => $cfg['db']['lib']['name'],
-        '#description' => t("The MySQL database name to connect to."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_libusername'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Lib MySQL Username'),
-        '#default_value' => $cfg['db']['lib']['user'],
-        '#description' => t("The MySQL username to connect with."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_libpassword'] = array(
-        '#type' => 'password_confirm',
-        '#title' => t('Lib MySQL Password'),
-        '#description' => t("Confirm the MySQL password."),
-        '#suffix' => '<hr/>'
-    );
-    
-    
-    $form['ryzommanage_ringserverurl'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Ring server url'),
-        '#default_value' => $cfg['db']['ring']['host'],
-        '#description' => t("The url of the ryzom's ring db to integrate with."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_ringmysqlport'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Port for MySQL of the Lib'),
-        '#size' => 5,
-        '#maxlength' => 5,
-        '#default_value' => $cfg['db']['ring']['port'],
-        '#description' => t("The MySQL port of the ryzom ring db to integrate with."),
-        '#required' => TRUE,
-        '#element_validate' => array(
-            '_check_port_value'
-        )
-    );
-    $form['ryzommanage_ringdbname'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Ring Database Name'),
-        '#default_value' => $cfg['db']['ring']['name'],
-        '#description' => t("The MySQL database name to connect to."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_ringusername'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Ring MySQL Username'),
-        '#default_value' => $cfg['db']['ring']['user'],
-        '#description' => t("The MySQL username to connect with."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_ringpassword'] = array(
-        '#type' => 'password_confirm',
-        '#title' => t('Ring MySQL Password'),
-        '#description' => t("Confirm the MySQL password.")
-    );
-    return system_settings_form($form);
-}
+
 //validate registration webpage
 function ryzommanage_form_alter(&$form, &$form_state, $form_id)
 {
@@ -274,34 +140,8 @@ function ryzommanage_menu()
     );
     return $items;
 }
-function name_registration_admin_settings() {
-    global $TOS_URL;
-    $form = array();
-    $form['ryzommanage_game-name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Game Name'),
-        '#default_value' => variable_get('ryzommanage_game-name', ''),
-        '#description' => t("Name of game used on registration pages."),
-        '#required' => TRUE
-    );
-    //this is not the TOS url used in the create account page, you change that in the config of the client with the ConditionsTermsURL value
-    $form['ryzommanage_TOS'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Terms of Service URL'),
-        '#default_value' => $TOS_URL,
-        '#description' => t("The url of the TOS for your server."),
-        '#required' => TRUE
-    );
-    $form['ryzommanage_register-welcome'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Registration Welcome Message'),
-        '#default_value' => variable_get('ryzommanage_register-welcome', ''),
-        '#description' => t("Registration welcome message on first page of create account."),
-        '#required' => TRUE
-    );
 
-    return system_settings_form($form);
-}
+
 /**
  *
  * Function ryzommanage_menu 
@@ -622,115 +462,52 @@ function validEmail($email)
     }
     return $isValid;
 }
-function generateSALT($length = 2)
-{
-    // start with a blank salt
-    $salt      = "";
-    // define possible characters - any character in this string can be
-    // picked for use in the salt, so if you want to put vowels back in
-    // or add special characters such as exclamation marks, this is where
-    // you should do it
-    $possible  = "2346789bcdfghjkmnpqrtvwxyzBCDFGHJKLMNPQRTVWXYZ";
-    // we refer to the length of $possible a few times, so let's grab it now
-    $maxlength = strlen($possible);
-    // check for length overflow and truncate if necessary
-    if ($length > $maxlength) {
-        $length = $maxlength;
+
+/**
+ *
+ * Function ryzommanage_user_insert
+ *
+ * @takes        $pass
+ * @return      string
+ *
+ * Info: Hook that's being called after creating a drupal user, we need to do it like this to access the drupals newly created user's id.
+ *
+ */
+function ryzommanage_user_insert(&$edit, $account, $category){
+    if (isset($edit['unhashpass'])) {
+        $pass = $edit['unhashpass'];
+    } elseif (isset($_POST['pass']['pass1'])) {
+        $pass = $_POST['pass']['pass1'];
     }
-    // set up a counter for how many characters are in the salt so far
-    $i = 0;
-    // add random characters to $salt until $length is reached
-    while ($i < $length) {
-        // pick a random character from the possible ones
-        $char = substr($possible, mt_rand(0, $maxlength - 1), 1);
-        // have we already used this character in $salt?
-        if (!strstr($salt, $char)) {
-            // no, so it's OK to add it onto the end of whatever we've already got...
-            $salt .= $char;
-            // ... and increase the counter by one
-            $i++;
-        }
-    }
-    // done!
-    return $salt;
+    createUser(array($edit['name'], $pass, $edit['mail']), $account->uid);
 }
-function createUser($values)
+
+function createUser($values, $user_id)
 {
 
     $login = $values[0];
     $pass = $values[1];
     $email = $values[2];
 
-    $salt = generateSALT();
-    $hashpass = crypt($pass, $salt);
+    /*$salt = generateSALT();
+    $hashpass = crypt($pass, $salt);*/
+    
+    $hashpass = crypt($pass, WebUsers::generateSALT());
     
     $params = array(
-        $login,
-        $hashpass,
-        $email
+        'name' => $login,
+        'pass' => $hashpass,
+        'mail' => $email     
     );
     
-    try {
-        $hostname = variable_get('ryzommanage_serverurl', 'localhost');
-        $port     = variable_get('ryzommanage_mysqlport', '3306');
-        $dbname   = variable_get('ryzommanage_dbname', 'nel');
-        $username = variable_get('ryzommanage_username', 'root');
-        $password = variable_get('ryzommanage_password', '');
-        $dbh      = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-    catch (PDOException $e) {
-        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
-        $nid = db_insert('ryzommanage_querycache')->fields(array(
-            "SID" => NULL,
-            "type" => "createUser",
-            "query" => json_encode(array(
-                $login,
-                $pass,
-                $email
-            ))
-        ))->execute();
-        return true;
-    }    
-    
-    try {
-        $statement = $dbh->prepare("INSERT INTO user (Login, Password, Email) VALUES (?, ?, ?)");
-    }
-    catch (PDOException $e) {
-        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
-        $nid = db_insert('ryzommanage_querycache')->fields(array(
-            "SID" => NULL,
-            "type" => "createUser",
-            "query" => json_encode(array(
-                $login,
-                $pass,
-                $email
-            ))
-        ))->execute();
-        return true;
-    }
-    
-    try {
-        $statement->execute($params);
-    }
-    catch (PDOException $e) {
-        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
-        $nid = db_insert('ryzommanage_querycache')->fields(array(
-            "SID" => NULL,
-            "type" => "createUser",
-            "query" => json_encode(array(
-                $login,
-                $pass,
-                $email
-            ))
-        ))->execute();
-        return true;
-    }
-    
-    createPermissions(array($login));
+    //Create the user on the shard + in case shard is offline put copy of query in query db
+    //returns: ok, shardoffline or liboffline
+    $result = WebUsers::createUser($params, $user_id);
+    echo $result;
+    //createPermissions(array($login));
 }
 
-function createPermissions($values) {
+/*function createPermissions($values) {
         
     try {
         $hostname = variable_get('ryzommanage_serverurl', 'localhost');
@@ -777,7 +554,7 @@ function createPermissions($values) {
     }  
     
     return true;
-}
+}*/
 
 function login_form($login_form)
 {
@@ -841,7 +618,7 @@ function top_bar()
     $userId = $user->uid;
     if (user_is_logged_in()) {
         // Logged in user
-        return "<div class='ryzomuserbar'>Notepad | Mail | Wiki | Profile | Craft Recipe-Book | Occupations | News/Events | <a href='user/".$userId."/edit'>Account</a> | <a href='user/logout'>Logout</a></div>";
+        return "<div class='ryzomuserbar'>Notepad | Mail | Wiki | Profile | Craft Recipe-Book | Occupations | News/Events | <a href='/user/".$userId."/edit'>Account</a> | <a href='/user/logout'>Logout</a></div>";
     } else {
         return drupal_get_form('login_form');
         // Not logged in
@@ -863,7 +640,7 @@ function ryzommanage_user_presave(&$edit, $account, $category)
     }
     
     if ($account->is_new == 1 ) {
-        createUser(array($edit['name'], $pass, $edit['mail']));
+        //createUser(array($edit['name'], $pass, $edit['mail']));
     } else {
         user_edit( array($edit['name'], $pass));
     }
@@ -1026,4 +803,172 @@ function ryzommanage_cron() {
     
     syncdata();
  
+}
+
+function name_registration_admin_settings() {
+    global $TOS_URL;
+    $form = array();
+    $form['ryzommanage_game-name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Game Name'),
+        '#default_value' => variable_get('ryzommanage_game-name', ''),
+        '#description' => t("Name of game used on registration pages."),
+        '#required' => TRUE
+    );
+    //this is not the TOS url used in the create account page, you change that in the config of the client with the ConditionsTermsURL value
+    $form['ryzommanage_TOS'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Terms of Service URL'),
+        '#default_value' => $TOS_URL,
+        '#description' => t("The url of the TOS for your server."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_register-welcome'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Registration Welcome Message'),
+        '#default_value' => variable_get('ryzommanage_register-welcome', ''),
+        '#description' => t("Registration welcome message on first page of create account."),
+        '#required' => TRUE
+    );
+
+    return system_settings_form($form);
+}
+
+
+/**
+ *
+ * Function ryzommanage_admin 
+ *
+ * @takes        Nothing
+ * @return      array $form
+ *
+ * Info: Creates the box's etc that go in the ryzom admin menu
+ *
+ */
+function ryzommanage_admin()
+{
+    $form = array();
+    //admin menu items
+    global $cfg;
+    
+    $form['ryzommanage_shardserverurl'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Shard server url'),
+        '#default_value' => $cfg['db']['shard']['host'],
+        '#description' => t("The url of the ryzom server to integrate with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_shardmysqlport'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Port for MySQL of the Shard'),
+        '#size' => 5,
+        '#maxlength' => 5,
+        '#default_value' => $cfg['db']['shard']['port'],
+        '#description' => t("The MySQL port of the ryzom server to integrate with."),
+        '#required' => TRUE,
+        '#element_validate' => array(
+            '_check_port_value'
+        )
+    );
+    $form['ryzommanage_sharddbname'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Shard Database Name'),
+        '#default_value' => $cfg['db']['shard']['name'],
+        '#description' => t("The MySQL database name to connect to."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_shardusername'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Shard MySQL Username'),
+        '#default_value' => $cfg['db']['shard']['user'],
+        '#description' => t("The MySQL username to connect with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_shardpassword'] = array(
+        '#type' => 'password_confirm',
+        '#title' => t('Shard MySQL Password'),
+        '#description' => t("Confirm the MySQL password."),
+        '#suffix' => '<hr/>'
+    );
+    
+    $form['ryzommanage_libserverurl'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Lib server url'),
+        '#default_value' => $cfg['db']['lib']['host'],
+        '#description' => t("The url of the ryzom's lib db to integrate with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_libmysqlport'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Port for MySQL of the Lib'),
+        '#size' => 5,
+        '#maxlength' => 5,
+        '#default_value' => $cfg['db']['lib']['port'],
+        '#description' => t("The MySQL port of the ryzom's lib db to integrate with."),
+        '#required' => TRUE,
+        '#element_validate' => array(
+            '_check_port_value'
+        )
+    );
+    $form['ryzommanage_libdbname'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Lib Database Name'),
+        '#default_value' => $cfg['db']['lib']['name'],
+        '#description' => t("The MySQL database name to connect to."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_libusername'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Lib MySQL Username'),
+        '#default_value' => $cfg['db']['lib']['user'],
+        '#description' => t("The MySQL username to connect with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_libpassword'] = array(
+        '#type' => 'password_confirm',
+        '#title' => t('Lib MySQL Password'),
+        '#description' => t("Confirm the MySQL password."),
+        '#suffix' => '<hr/>'
+    );
+    
+    
+    $form['ryzommanage_ringserverurl'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Ring server url'),
+        '#default_value' => $cfg['db']['ring']['host'],
+        '#description' => t("The url of the ryzom's ring db to integrate with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_ringmysqlport'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Port for MySQL of the Lib'),
+        '#size' => 5,
+        '#maxlength' => 5,
+        '#default_value' => $cfg['db']['ring']['port'],
+        '#description' => t("The MySQL port of the ryzom ring db to integrate with."),
+        '#required' => TRUE,
+        '#element_validate' => array(
+            '_check_port_value'
+        )
+    );
+    $form['ryzommanage_ringdbname'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Ring Database Name'),
+        '#default_value' => $cfg['db']['ring']['name'],
+        '#description' => t("The MySQL database name to connect to."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_ringusername'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Ring MySQL Username'),
+        '#default_value' => $cfg['db']['ring']['user'],
+        '#description' => t("The MySQL username to connect with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_ringpassword'] = array(
+        '#type' => 'password_confirm',
+        '#title' => t('Ring MySQL Password'),
+        '#description' => t("Confirm the MySQL password.")
+    );
+    return system_settings_form($form);
 }
