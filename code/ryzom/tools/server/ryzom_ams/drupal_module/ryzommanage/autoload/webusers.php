@@ -72,9 +72,7 @@ class WebUsers extends Users{
        
        //returns te id for a given username
        public static function getId($username){
-         $dbw = new DBLayer("web");  
-         $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
-         $row = $statement->fetch();
+         $row = db_query("SELECT * FROM {users} WHERE name = :name", array(':name' => $username))->fetchField(); 
          return $row['UId'];
        }
     

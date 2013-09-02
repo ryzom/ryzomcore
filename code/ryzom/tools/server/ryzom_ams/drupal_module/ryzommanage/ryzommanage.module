@@ -37,6 +37,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 //output template
+
 function loadTemplate($template,$vars)
 {
     extract($vars);
@@ -104,6 +105,16 @@ function ryzommanage_menu()
         'access arguments' => array('access content'),
         'type' => MENU_CALLBACK,
 	);
+    
+    $items['login'] = array(
+        'title' => 'Login',
+        'page callback' => '_collect_login',
+        'page arguments' => array(1, 2),
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+	);
+    
     //main menu item
     $items['admin/config/ryzommanage'] = array(
         'title' => 'Ryzom Server Integration',
@@ -216,164 +227,49 @@ function _collect_register($nids, $collection)
 {
     syncdata();
     //if not using ryzom core client show registration page
-    if (check_if_game_client()) {
+    if (Helpers::check_if_game_client()) {
         return_client_httpdata();
     } else {
         //redirect to registration page
         header("Location: user/register");
     }
 }
+
+
 /**
  *
- * Function check_if_game_client 
- *
- * @takes        Nothing
- * @return      Boolean
- *
- * Info: Returns True if connecting client is ryzom core
- *
- */
-function check_if_game_client()
-{
-    //if HTTP_USER_AGENT is not set then its ryzom core
-    if (!isset($_SERVER['HTTP_USER_AGENT'])) {
-        return true;
-    } else {
-        return false;
-    }
-}
-/**
- *
- * Function return_client_httpdata 
+ * Function _collect_register 
  *
  * @takes        
- * @return      
+ * @return      Nothing
  *
- * Info: Returns ryzom core formatted html for use in registration via client
+ * Info: Determins what to send back to client, if the client is ryzom core then send the http data if its a browser send to /
  *
  */
-function return_client_httpdata()
+function _collect_login($nids, $collection)
 {
-    //check if values exist
-    if (isset($_POST["Username"]) and isset($_POST["Password"]) and isset($_POST["Email"]) )
-    {
-        //check values
-        $user  = checkUser($_POST["Username"]);
-        $pass  = checkPassword($_POST["Password"]);
-        $cpass = confirmPassword();
-        $email = checkEmail($_POST["Email"]);   
+    $result = Helpers::check_login_ingame();	
+    if ($result != "FALSE") {
+        //handle successful ingame login
+        $_SESSION['user'] = $result['name'];
+        $_SESSION['id'] = WebUsers::getId($result['name']);
+        $_SESSION['ticket_user'] = Ticket_User::constr_ExternId($_SESSION['id']);
+        
+        if ($account = user_load( $_SESSION['id'])) {
+            global $user;
+            $user->uid =  $_SESSION['id'];
+            $user->name = $account->name;
+            $user->timezone = $account->timezone;
+            user_login_finalize();
+        }
+        header( 'Location: ams' );      
     } else {
-        $user  = "";
-        $pass  = "";
-        $cpass = "";
-        $email = ""; 
-    }
-    //if all are good then create user
-    if (($user == "success") and ($pass == "success") and ($cpass == "success") and ($email == "success") and (isset($_POST["TaC"]))) {
-        $edit = array(
-            'name' => $_POST["Username"],
-            'pass' => $_POST["Password"],
-            'mail' => $_POST["Email"],
-            'init' => $_POST["Email"],
-            'unhashpass' => $_POST["Password"],
-            'status' => 1,
-            'access' => REQUEST_TIME
-        );
-        user_save(NULL, $edit);
-        header('Location: email_sent.php');
-        exit;
-    } else {
-            $pageElements = array(
-                        'GAME_NAME' => variable_get('ryzommanage_game-name', ''),
-                        'WELCOME_MESSAGE' => variable_get('ryzommanage_register-welcome', ''),
-                        'USERNAME' => $user,
-                        'PASSWORD' => $pass,
-                        'CPASSWORD' => $cpass,
-                        'EMAIL' => $email
-                     );
-            if ($user != "success") {
-                $pageElements['USERNAME_ERROR'] = 'TRUE';
-            } else {
-                $pageElements['USERNAME_ERROR'] = 'FALSE';
-            }
-            
-            if ($pass != "success") {
-                $pageElements['PASSWORD_ERROR'] = 'TRUE';
-            } else {
-                $pageElements['PASSWORD_ERROR'] = 'FALSE';
-            }
-            if ($cpass != "success") {
-                $pageElements['CPASSWORD_ERROR'] = 'TRUE';
-            } else {
-                $pageElements['CPASSWORD_ERROR'] = 'FALSE';
-            }
-            if ($email != "success") {
-                $pageElements['EMAIL_ERROR'] = 'TRUE';
-            } else {
-                $pageElements['EMAIL_ERROR'] = 'FALSE';
-            }
-            if (isset($_POST["TaC"])) {
-                $pageElements['TAC_ERROR'] = 'FALSE';
-            } else {
-                $pageElements['TAC_ERROR'] = 'TRUE';
-            }
-            loadTemplate('templates/ingame_register.phtml',$pageElements);
+        //redirect to registration page
+        header("Location: user/login");
     }
 }
-/**
- *
- * Function checkUser 
- *
- * @takes        $username
- * @return      string
- *
- * Info: Returns a string based on if the username is valid, if valid then "success" is returned
- *
- */
-/*function checkUser($username)
-{
-    if (isset($username)) {
-        if (strlen($username) > 12) {
-            return "Username must be no more than 12 characters.";
-        } elseif (strlen($username) < 5) {
-            return "Username must be 5 or more characters.";
-        } elseif (!preg_match('/^[a-z0-9\.]*$/', $username)) {
-            return "Username can only contain numbers and letters.";
-        } elseif (db_query("SELECT COUNT(*) FROM {users} WHERE name = :name", array(
-            ':name' => $username
-        ))->fetchField()) {
-            return "Username " . $username . " is in use.";
-        } else {
-            return "success";
-        }
-    } else {
-        return "success";
-    }
-    return "fail";
-}*/
-/**
- *
- * Function checkPassword 
- *
- * @takes        $pass
- * @return      string
- *
- * Info: Returns a string based on if the password is valid, if valid then "success" is returned
- *
- */
-/*function checkPassword($pass)
-{
-    if (isset($pass)) {
-        if (strlen($pass) > 20) {
-            return "Password must be no more than 20 characters.";
-        } elseif (strlen($pass) < 5) {
-            return "Password must be more than 5 characters.";
-        } else {
-            return "success";
-        }
-    }
-    return "fail";
-}*/
+
+
 /**
  *
  * Function confirmPassword 
@@ -393,76 +289,7 @@ function confirmPassword()
     }
     return "fail";
 }
-/**
- *
- * Function checkEmail 
- *
- * @takes        $email
- * @return      
- *
- * 
- *
- */
-/*function checkEmail($email)
-{
-    if (isset($email)) {
-        if (!validEmail($email)) {
-            return "Email address is not valid.";
-        } elseif (db_query("SELECT COUNT(*) FROM {users} WHERE mail = :mail", array(
-            ':mail' => $email
-        ))->fetchField()) {
-            return "Email is in use.";
-        } else {
-            return "success";
-        }
-    } else {
-        return "success";
-    }
-    return "fail";
-}
-function validEmail($email)
-{
-    $isValid = true;
-    $atIndex = strrpos($email, "@");
-    if (is_bool($atIndex) && !$atIndex) {
-        $isValid = false;
-    } else {
-        $domain    = substr($email, $atIndex + 1);
-        $local     = substr($email, 0, $atIndex);
-        $localLen  = strlen($local);
-        $domainLen = strlen($domain);
-        if ($localLen < 1 || $localLen > 64) {
-            // local part length exceeded
-            $isValid = false;
-        } else if ($domainLen < 1 || $domainLen > 255) {
-            // domain part length exceeded
-            $isValid = false;
-        } else if ($local[0] == '.' || $local[$localLen - 1] == '.') {
-            // local part starts or ends with '.'
-            $isValid = false;
-        } else if (preg_match('/\\.\\./', $local)) {
-            // local part has two consecutive dots
-            $isValid = false;
-        } else if (!preg_match('/^[A-Za-z0-9\\-\\.]+$/', $domain)) {
-            // character not valid in domain part
-            $isValid = false;
-        } else if (preg_match('/\\.\\./', $domain)) {
-            // domain part has two consecutive dots
-            $isValid = false;
-        } else if (!preg_match('/^(\\\\.|[A-Za-z0-9!#%&`_=\\/$\'*+?^{}|~.-])+$/', str_replace("\\\\", "", $local))) {
-            // character not valid in local part unless 
-            // local part is quoted
-            if (!preg_match('/^"(\\\\"|[^"])+"$/', str_replace("\\\\", "", $local))) {
-                $isValid = false;
-            }
-        }
-        if ($isValid && !(checkdnsrr($domain, "MX") || checkdnsrr($domain, "A"))) {
-            // domain not found in DNS
-            $isValid = false;
-        }
-    }
-    return $isValid;
-}*/
+
 
 /**
  *
@@ -555,6 +382,13 @@ function createUser($values, $user_id)
     
     return true;
 }*/
+
+function ryzommanage_user_login(&$edit, $account){
+    echo "You just logged in with id";
+    $_SESSION['user'] = $account->name;
+    $_SESSION['id'] = $account->uid;
+    $_SESSION['ticket_user'] = Ticket_User::constr_ExternId($_SESSION['id']);	
+}
 
 function login_form($login_form)
 {
@@ -972,3 +806,84 @@ function ryzommanage_admin()
     );
     return system_settings_form($form);
 }
+
+/**
+ *
+ * Function return_client_httpdata 
+ *
+ * @takes        
+ * @return      
+ *
+ * Info: Returns ryzom core formatted html for use in registration via client
+ *
+ */
+function return_client_httpdata()
+{
+    //needs $cpass = confirmPassword(($_POST["Password"]) != ($_POST["ConfirmPass"])); !!!!!!
+    //check if values exist
+    if (isset($_POST["Username"]) and isset($_POST["Password"]) and isset($_POST["Email"]) )
+    {
+        //check values
+        $user  = checkUser($_POST["Username"]);
+        $pass  = checkPassword($_POST["Password"]);
+        $cpass = confirmPassword(($_POST["Password"]) != ($_POST["ConfirmPass"]));
+        $email = checkEmail($_POST["Email"]);   
+    } else {
+        $user  = "";
+        $pass  = "";
+        $cpass = "";
+        $email = ""; 
+    }
+    //if all are good then create user
+    if (($user == "success") and ($pass == "success") and ($cpass == "success") and ($email == "success") and (isset($_POST["TaC"]))) {
+        $edit = array(
+            'name' => $_POST["Username"],
+            'pass' => $_POST["Password"],
+            'mail' => $_POST["Email"],
+            'init' => $_POST["Email"],
+            'unhashpass' => $_POST["Password"],
+            'status' => 1,
+            'access' => REQUEST_TIME
+        );
+        user_save(NULL, $edit);
+        header('Location: email_sent.php');
+        exit;
+    } else {
+            $pageElements = array(
+                        'GAME_NAME' => variable_get('ryzommanage_game-name', ''),
+                        'WELCOME_MESSAGE' => variable_get('ryzommanage_register-welcome', ''),
+                        'USERNAME' => $user,
+                        'PASSWORD' => $pass,
+                        'CPASSWORD' => $cpass,
+                        'EMAIL' => $email
+                     );
+            if ($user != "success") {
+                $pageElements['USERNAME_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['USERNAME_ERROR'] = 'FALSE';
+            }
+            
+            if ($pass != "success") {
+                $pageElements['PASSWORD_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['PASSWORD_ERROR'] = 'FALSE';
+            }
+            if ($cpass != "success") {
+                $pageElements['CPASSWORD_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['CPASSWORD_ERROR'] = 'FALSE';
+            }
+            if ($email != "success") {
+                $pageElements['EMAIL_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['EMAIL_ERROR'] = 'FALSE';
+            }
+            if (isset($_POST["TaC"])) {
+                $pageElements['TAC_ERROR'] = 'FALSE';
+            } else {
+                $pageElements['TAC_ERROR'] = 'TRUE';
+            }
+            loadTemplate('templates/ingame_register.phtml',$pageElements);
+    }
+}
+
