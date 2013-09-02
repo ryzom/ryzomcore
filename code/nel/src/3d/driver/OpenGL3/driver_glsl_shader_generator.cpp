@@ -295,14 +295,16 @@ namespace NL3D
 		ss << "vec3 ReflectionMap( const in vec3 eyePos, const in vec3 normal )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec3 u = normalize( eyePos );" << std::endl;
-		ss <<"return reflect( u, normal );" << std::endl;
+		ss << "return reflect( u, normal );" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec4 eyePosition = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
-		ss << "cubeTexCoords = ReflectionMap( eyePosition, v" << attribNames[ 2 ] << " );" << std::endl;
+		ss << "vec3 ep = eyePosition.xyz / eyePosition.w;" << std::endl;
+		ss << "vec3 n = vnormal.xyz;" << std::endl;
+		ss << "cubeTexCoords = ReflectionMap( ep, n );" << std::endl;
 		ss << "vec4 t = vec4( cubeTexCoords, 1.0 );" << std::endl;
 		ss << "t = t * texMatrix;" << std::endl;
 		ss << "cubeTexCoords = t.xyz;" << std::endl;
@@ -904,8 +906,8 @@ namespace NL3D
 		ss << "vec4 texel;" << std::endl;
 		ss << "texel.rgb = texel0.rgb * diffuse;" << std::endl;
 		ss << "texel.a = texel0.a;" << std::endl;
-		ss << "texel.rgb = texel1.rgb * texel.alpha + texel.rgb;" << std::endl;
-		ss << "texel.a = color.a;" << std::endl;
+		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
+		ss << "texel.a = texel1.a;" << std::endl;
 		ss << "fragColor = texel;" << std::endl;
 		ss << "}" << std::endl;
 	}
