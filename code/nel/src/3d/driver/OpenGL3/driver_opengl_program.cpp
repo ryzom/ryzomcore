@@ -22,12 +22,18 @@ namespace NL3D
 		if( !program->isLinked() )
 			return false;
 		
+		/*
 		nglValidateProgram( program->getProgramId() );
 
 		GLint ok;
 		nglGetProgramiv( program->getProgramId(), GL_VALIDATE_STATUS, &ok );
 		if( ok != GL_TRUE )
+		{
+			char errorLog[ 1024 ];
+			nglGetProgramInfoLog( program->getProgramId(), 1024, NULL, errorLog );
 			return false;
+		}
+		*/
 
 		nglUseProgram( program->getProgramId() );
 
@@ -218,6 +224,11 @@ namespace NL3D
 			beginLightMapMultiPass();
 			setupLightMapPass( 0 );
 			break;
+
+		case CMaterial::Specular:
+			beginSpecularMultiPass();
+			setupSpecularPass( 0 );
+			break;
 		}
 #endif
 
@@ -230,6 +241,10 @@ namespace NL3D
 		{
 		case CMaterial::LightMap:
 			endLightMapMultiPass();
+			break;
+
+		case CMaterial::Specular:
+			endSpecularMultiPass();
 			break;
 		}
 

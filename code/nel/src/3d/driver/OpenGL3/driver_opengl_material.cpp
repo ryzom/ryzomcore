@@ -1078,9 +1078,11 @@ void			CDriverGL3::setupSpecularBegin()
 	// For all cases, setup the TexCoord gen for stage1
 	_DriverGLStates.activeTextureARB(1);
 
+#ifndef GLSL
 	// todo hulud remove
 	// _DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_ARB);
+#endif
 
 	// setup the good matrix for stage 1.
 	_UserTexMat[ 1 ] = _SpecularTexMtx;
@@ -1128,11 +1130,8 @@ sint			CDriverGL3::beginSpecularMultiPass()
 
 	if(!_Extensions.ARBTextureCubeMap)
 		return 1;
-
-	if( _Extensions.ATITextureEnvCombine3) // NVidia or ATI optimization
-		return 1;
-	else
-		return 2;
+	
+	return 1;
 }
 
 // ***************************************************************************
@@ -1148,8 +1147,35 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		// NB: setupMaterial() code has correclty setuped textures.
 		return;
 	}
+
+#ifdef GLSL
+
+	int sl0 = getUniformLocation( "sampler0" );
+	if( sl0 != -1 )
+	{
+		setUniform1i( sl0, 0 );
+	}
+
+	int sl1 = getUniformLocation( "cubeSampler" );
+	if( sl1 != -1 )
+	{
+		setUniform1i( sl1, 1 );
+	}
+
+	int mvl = getUniformLocation( "mvMatrix" );
+	if( mvl != -1 )
+	{
+		setUniformMatrix4fv( mvl, 1, false, _ModelViewMatrix.get() );
+	}
+
+	int tml = getUniformLocation( "texMatrix" );
+	if( tml != -1 )
+	{
+		setUniformMatrix4fv( mvl, 1, false, _UserTexMat[ 1 ].get() );
+	}
+
+#endif
 	
-	if (_Extensions.ATITextureEnvCombine3)
 	{
 		// Ok we can do it in a single pass
 
@@ -1167,6 +1193,9 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 			_CurrentTexEnvSpecial[1] = newEnvStage1;
 
 			_DriverGLStates.activeTextureARB(1);
+
+#ifndef GLSL
+
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 			// Operator Add (Arg0*Arg2+Arg1)
 			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI );
@@ -1198,53 +1227,9 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 			// Arg1.
 			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_ZERO );
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, GL_SRC_ALPHA);
-		}
-	}
-	else
-	{
-		// We have to do it in 2 passes
-		// For Both Pass, setup correct Env.
-		if( pass == 0 )
-		{
-			// Just display the texture
-			_DriverGLStates.enableBlend(false);
-			_DriverGLStates.activeTextureARB(1);
-			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
-		}
-		else
-		{
-			// Multiply texture1 by alpha_texture0 and display with add
-			_DriverGLStates.enableBlend(true);
-			_DriverGLStates.blendFunc(GL_ONE, GL_ONE);
 
-			// Set stage 0
-			_DriverGLStates.activeTextureARB(0);
-			CMaterial::CTexEnv	env;
+#endif
 
-			env.Env.OpRGB = CMaterial::Replace;
-			env.Env.SrcArg0RGB = CMaterial::Texture;
-			env.Env.OpArg0RGB = CMaterial::SrcAlpha;
-
-			activateTexEnvMode(0, env);
-
-			// Set stage 1
-			if( mat.getTexture(0) == NULL )
-			{
-				env.Env.OpRGB = CMaterial::Replace;
-				env.Env.SrcArg0RGB = CMaterial::Texture;
-				env.Env.OpArg0RGB = CMaterial::SrcColor;
-			}
-			else
-			{
-				env.Env.OpRGB = CMaterial::Modulate;
-				env.Env.SrcArg0RGB = CMaterial::Texture;
-				env.Env.OpArg0RGB = CMaterial::SrcColor;
-
-				env.Env.SrcArg1RGB = CMaterial::Previous;
-				env.Env.OpArg1RGB = CMaterial::SrcColor;
-			}
-
-			activateTexEnvMode(1, env);
 		}
 	}
 }
