@@ -115,6 +115,15 @@ function ryzommanage_menu()
         'type' => MENU_CALLBACK,
 	);
     
+    $items['ams'] = array(
+        'title' => 'Account Management System',
+        'page callback' => '_collect_ams',
+        'page arguments' => array(1, 2),
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+	);
+    
     //main menu item
     $items['admin/config/ryzommanage'] = array(
         'title' => 'Ryzom Server Integration',
@@ -384,7 +393,6 @@ function createUser($values, $user_id)
 }*/
 
 function ryzommanage_user_login(&$edit, $account){
-    echo "You just logged in with id";
     $_SESSION['user'] = $account->name;
     $_SESSION['id'] = $account->uid;
     $_SESSION['ticket_user'] = Ticket_User::constr_ExternId($_SESSION['id']);	
@@ -495,6 +503,7 @@ function ryzommanage_form_user_register_form_alter(&$form, &$form_state, $form_i
     '#title' => t("I agree with the <a href='".variable_get('ryzommanage_TOS', '')."'>terms and conditions</a>."), 
     '#required' => TRUE,
   );
+  
 }
 
 function ryzommanage_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
@@ -887,3 +896,20 @@ function return_client_httpdata()
     }
 }
 
+/**
+* Implements hook_help.
+*
+* Displays help and module information.
+*
+* @param path
+*   Which path of the site we're using to display help
+* @param arg
+*   Array that holds the current path as returned from arg() function
+*/
+function ryzommanage_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#ryzommanage":
+      return '<p>' . t("A module that handles account registration and a ticketing service regarding ryzomcore.") . '</p>';
+      break;
+  }
+} 
