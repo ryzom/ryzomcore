@@ -310,7 +310,7 @@ namespace MaterialEditor
 	CNelMaterialProxy CNel3DInterface::getMaterial()
 	{
 		NL3D::CDynMaterial *mat = NULL;
-		if( !currentShape.empty() )
+		if( !currentShape.empty() && ( currentShape.getNumMaterials() > 0 ) )
 			mat = currentShape.getMaterial( subMatId ).getObjectPtr()->getDynMat();
 
 		return CNelMaterialProxy( mat );
