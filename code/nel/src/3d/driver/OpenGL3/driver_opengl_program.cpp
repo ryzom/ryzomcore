@@ -114,32 +114,6 @@ namespace NL3D
 		return true;
 	}
 
-	bool CDriverGL3::renderTriangles2( CMaterial &mat, uint32 startIndex, uint32 numTris )
-	{
-		if( !setupMaterial( mat ) )
-			return false;
-
-		if( !setupProgram( mat ) )
-			return false;
-
-		if( numTris )
-		{
-			if (_LastIB._Format == CIndexBuffer::Indices16)
-			{
-				glDrawElements(GL_TRIANGLES,3*numTris,GL_UNSIGNED_SHORT, ((uint16 *) _LastIB._Values)+startIndex);
-			}
-			else
-			{
-				nlassert(_LastIB._Format == CIndexBuffer::Indices32);
-				glDrawElements(GL_TRIANGLES,3*numTris,GL_UNSIGNED_INT, ((uint32 *) _LastIB._Values)+startIndex);
-			}
-		}
-
-		releaseProgram();
-
-		return true;
-	}
-
 	static IProgram *vp;
 	static IProgram *pp;
 	static IProgramObject *p;

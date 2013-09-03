@@ -437,7 +437,6 @@ public:
 
 	virtual bool			renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines);
 	virtual bool			renderTriangles(CMaterial& Mat, uint32 firstIndex, uint32 ntris);
-	bool					renderTriangles2(CMaterial& Mat, uint32 firstIndex, uint32 ntris );
 	virtual bool			renderSimpleTriangles(uint32 firstTri, uint32 ntris);
 	virtual bool			renderRawPoints(CMaterial& Mat, uint32 startIndex, uint32 numPoints);
 	virtual bool			renderRawLines(CMaterial& Mat, uint32 startIndex, uint32 numLines);
