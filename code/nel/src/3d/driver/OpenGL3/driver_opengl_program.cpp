@@ -21,6 +21,9 @@ namespace NL3D
 
 		if( !program->isLinked() )
 			return false;
+
+		// Release previous program
+		releaseProgram();
 		
 		nglUseProgram( program->getProgramId() );
 
@@ -208,11 +211,12 @@ namespace NL3D
 
 	void CDriverGL3::releaseProgram()
 	{
-		delete p;
-		p = NULL;
-		vp = NULL;
-		pp = NULL;
+		if( currentProgram == NULL )
+			return;
+		
+		delete currentProgram;
 		currentProgram = NULL;
+
 #ifndef GLSL
 		_VertexProgramEnabled = false;
 #endif
