@@ -161,7 +161,6 @@ namespace MaterialEditor
 		bool addSphere();
 		bool addCylinder();
 		bool addTeaPot();
-		void drawTriangle();
 
 		bool loadShape( const std::string &fileName );
 		void clearScene();

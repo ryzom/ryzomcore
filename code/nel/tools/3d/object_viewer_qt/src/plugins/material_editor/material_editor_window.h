@@ -51,8 +51,7 @@ private Q_SLOTS:
 		void onAddTeaPotClicked();
 
 		void onClearSceneClicked();
-		void onTriangleClicked();
-		
+	
 private:
 		void createMenus();
 		void createDockWidgets();
