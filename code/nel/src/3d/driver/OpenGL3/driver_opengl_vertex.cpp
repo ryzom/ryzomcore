@@ -214,6 +214,10 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
 		return false;
 
+#ifdef GLSL
+	setupProgram( mat );
+#endif
+
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
 	//==============================
@@ -256,10 +260,6 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 
 bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris)
 {
-#ifdef GLSL
-	return renderTriangles2( mat, firstIndex, ntris );
-#endif
-	
 	H_AUTO_OGL(CDriverGL3_renderTriangles);
 
 	// update matrix and Light in OpenGL if needed
@@ -269,7 +269,9 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
 		return false;
 
+#ifdef GLSL
 	setupProgram( mat );
+#endif
 
 	refreshTexMatrices();
 
@@ -363,6 +365,10 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	if ( !setupMaterial(mat) )
 		return false;
 
+#ifdef GLSL
+	setupProgram( mat );
+#endif
+
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
 	//==============================
@@ -403,6 +409,10 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	// setup material
 	if ( !setupMaterial(mat) )
 		return false;
+
+#ifdef GLSL
+	setupProgram( mat );
+#endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
@@ -445,7 +455,9 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	if ( !setupMaterial(mat) )
 		return false;
 
+#ifdef GLSL
 	setupProgram( mat );
+#endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
@@ -491,9 +503,11 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	if ( !setupMaterial(mat) )
 		return false;
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
-
+#ifdef GLSL
 	setupProgram( mat );
+#endif
+
+	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 
 	const uint32 QUAD_BATCH_SIZE = 2048;
 	static GLshort defaultIndices[QUAD_BATCH_SIZE * 6];

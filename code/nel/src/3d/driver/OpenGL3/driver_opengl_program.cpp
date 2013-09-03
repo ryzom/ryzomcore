@@ -201,33 +201,6 @@ namespace NL3D
 			setUniformMatrix4fv( mvpIndex, 1, false, mat.get() );
 		}
 
-		switch( mat.getShader() )
-		{
-		case CMaterial::Normal:
-			setupNormalPass();
-			break;
-
-		case CMaterial::LightMap:
-			beginLightMapMultiPass();
-			setupLightMapPass( 0 );
-			break;
-
-		case CMaterial::Specular:
-			beginSpecularMultiPass();
-			setupSpecularPass( 0 );
-			break;
-		}
-
-		if( !p->validate( log ) )
-		{
-			vp = NULL;
-			pp = NULL;
-			delete p;
-			p = NULL;
-			nlinfo( "%s", log.c_str() );
-			return false;
-		}
-
 #endif
 
 		return true;
@@ -235,17 +208,6 @@ namespace NL3D
 
 	void CDriverGL3::releaseProgram()
 	{
-		switch( _CurrentMaterial->getShader() )
-		{
-		case CMaterial::LightMap:
-			endLightMapMultiPass();
-			break;
-
-		case CMaterial::Specular:
-			endSpecularMultiPass();
-			break;
-		}
-
 		delete p;
 		p = NULL;
 		vp = NULL;

@@ -549,6 +549,7 @@ void			CDriverGL3::setupPass(uint pass)
 	// All others materials do not require multi pass.
 	default: return;
 	}
+
 }
 
 // ***************************************************************************
