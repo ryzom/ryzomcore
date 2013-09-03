@@ -21,7 +21,7 @@
 #include "stdopengl.h"
 #include "driver_opengl_extension.h"
 
-#define MAX_PROGRAM_LINK_ERROR_LOG 1024
+#define MAX_PROGRAM_LOG 1024
 
 namespace NL3D
 {
@@ -145,8 +145,8 @@ namespace NL3D
 		nglGetProgramiv( programId, GL_LINK_STATUS, &ok );
 		if( ok == 0 )
 		{
-			char errorLog[ MAX_PROGRAM_LINK_ERROR_LOG ];
-			nglGetProgramInfoLog( programId, MAX_PROGRAM_LINK_ERROR_LOG, NULL, errorLog );
+			char errorLog[ MAX_PROGRAM_LOG ];
+			nglGetProgramInfoLog( programId, MAX_PROGRAM_LOG, NULL, errorLog );
 			log.assign( errorLog );
 			return false;
 		}
@@ -156,6 +156,22 @@ namespace NL3D
 		return true;
 	}
 
+	bool CGLSLProgram::validate( std::string &log )
+	{
+		nglValidateProgram( programId );
+
+		GLint ok;
+		nglGetProgramiv( programId, GL_VALIDATE_STATUS, &ok );
+		if( ok != GL_TRUE )
+		{
+			char errorLog[ MAX_PROGRAM_LOG ];
+			nglGetProgramInfoLog( programId, MAX_PROGRAM_LOG, NULL, errorLog );
+			log.assign( errorLog );
+			return false;
+		}
+
+		return true;
+	}
 
 	void CGLSLProgram::deleteShaders()
 	{

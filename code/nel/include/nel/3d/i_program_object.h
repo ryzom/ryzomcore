@@ -41,6 +41,8 @@ namespace NL3D
 
 		virtual bool link( std::string &log ) = 0;
 
+		virtual bool validate( std::string &log ) = 0;
+
 		bool isLinked() const{ return linked; }
 
 	protected:

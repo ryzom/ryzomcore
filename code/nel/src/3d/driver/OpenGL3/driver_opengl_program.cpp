@@ -22,19 +22,6 @@ namespace NL3D
 		if( !program->isLinked() )
 			return false;
 		
-		/*
-		nglValidateProgram( program->getProgramId() );
-
-		GLint ok;
-		nglGetProgramiv( program->getProgramId(), GL_VALIDATE_STATUS, &ok );
-		if( ok != GL_TRUE )
-		{
-			char errorLog[ 1024 ];
-			nglGetProgramInfoLog( program->getProgramId(), 1024, NULL, errorLog );
-			return false;
-		}
-		*/
-
 		nglUseProgram( program->getProgramId() );
 
 		GLenum error = glGetError();
@@ -230,6 +217,17 @@ namespace NL3D
 			setupSpecularPass( 0 );
 			break;
 		}
+
+		if( !p->validate( log ) )
+		{
+			vp = NULL;
+			pp = NULL;
+			delete p;
+			p = NULL;
+			nlinfo( "%s", log.c_str() );
+			return false;
+		}
+
 #endif
 
 		return true;

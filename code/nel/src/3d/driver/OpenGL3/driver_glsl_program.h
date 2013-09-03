@@ -39,6 +39,8 @@ namespace NL3D
 
 		bool link( std::string &log );
 
+		bool validate( std::string &log );
+
 	private:
 		void deleteShaders();
 
