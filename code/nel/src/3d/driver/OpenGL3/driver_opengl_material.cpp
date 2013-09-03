@@ -524,6 +524,9 @@ void			CDriverGL3::setupPass(uint pass)
 	H_AUTO_OGL(CDriverGL3_setupPass)
 	switch(_CurrentMaterialSupportedShader)
 	{
+	case CMaterial::Normal:
+		setupNormalPass();
+		break;
 	case CMaterial::LightMap:
 		setupLightMapPass (pass);
 		break;
