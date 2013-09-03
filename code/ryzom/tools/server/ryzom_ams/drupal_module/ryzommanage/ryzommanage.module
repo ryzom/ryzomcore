@@ -11,6 +11,7 @@ menu items that do stuff
 */
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
+ini_set('display_startup_errors', TRUE);
 
 global $TOS_URL;
 global $cfg;
@@ -103,7 +104,7 @@ function ryzommanage_menu()
         'page arguments' => array(1, 2),
         'access callback' => 'user_access',
         'access arguments' => array('access content'),
-        'type' => MENU_CALLBACK,
+        'type' => MENU_CALLBACK
 	);
     
     $items['login'] = array(
@@ -112,16 +113,15 @@ function ryzommanage_menu()
         'page arguments' => array(1, 2),
         'access callback' => 'user_access',
         'access arguments' => array('access content'),
-        'type' => MENU_CALLBACK,
+        'type' => MENU_CALLBACK
 	);
     
     $items['ams'] = array(
-        'title' => 'Account Management System',
-        'page callback' => '_collect_ams',
-        'page arguments' => array(1, 2),
+        'title' => 'Ryzom Account Management System',
+        'page callback' => '_ams_callback',
         'access callback' => 'user_access',
         'access arguments' => array('access content'),
-        'type' => MENU_CALLBACK,
+        'type' => MENU_NORMAL_ITEM
 	);
     
     //main menu item
@@ -163,6 +163,12 @@ function ryzommanage_menu()
 }
 
 
+function _ams_callback(){
+    //an empty call back function, because we need an empty page!
+    //without this the page gets access denied, perhaps for later use..
+   return array();
+}
+
 /**
  *
  * Function ryzommanage_menu 
@@ -198,6 +204,15 @@ function ryzommanage_block_info()
         'region' => '-1', // Not usually provided. 
         'visibility' => BLOCK_VISIBILITY_LISTED // Not usually provided. 
     );
+    
+    $blocks['ryzommanage_amsblock'] = array(
+        // info: The name of the block.
+        'info' => t('Ryzom AMS Block'),
+        'status' => TRUE,
+        'region' => '-1', // Not usually provided. 
+        'visibility' => BLOCK_VISIBILITY_LISTED, 
+        'pages' => 'ams'
+    );
     return $blocks;
 }
 /**
@@ -218,6 +233,11 @@ function ryzommanage_block_view($delta = '')
         case 'ryzommanage_usersblock':
             $block['subject'] = t("uppercase this please");
             $block['content'] = top_bar();
+            break;
+        
+        case 'ryzommanage_amsblock':
+            $block['subject'] = t("uppercase this please");
+            $block['content'] = ams_handler();
             break;
     }
     return $block;
@@ -465,6 +485,11 @@ function top_bar()
         return drupal_get_form('login_form');
         // Not logged in
     }
+}
+
+function ams_handler()
+{
+    return "This is a placeholder."; 
 }
 
 function ryzommanage_user_presave(&$edit, $account, $category)
