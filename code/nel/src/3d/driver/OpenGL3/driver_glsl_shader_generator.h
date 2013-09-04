@@ -40,6 +40,7 @@ namespace NL3D
 
 	private:
 		void addDiffuse();
+		void addColor();
 		void addConstants();
 
 		void generateNormalVS();

@@ -108,6 +108,20 @@ namespace NL3D
 		"constant3"
 	};
 
+	const char *shaderNames[] = 
+	{
+		"Normal",
+		"Bump",
+		"Usercolor",
+		"Lightmap",
+		"Specular",
+		"Caustics",
+		"Per-Pixel Lighting",
+		"Per-Pixel Lighting, no specular",
+		"Cloud",
+		"Water"
+	};
+
 	CGLSLShaderGenerator::CGLSLShaderGenerator()
 	{
 		reset();
@@ -129,6 +143,8 @@ namespace NL3D
 	{
 		ss.str( "" );
 		ss.clear();
+		ss << "// " << shaderNames[ material->getShader() ] << " Vertex Shader" << std::endl;
+		ss << std::endl;
 
 		ss << "#version 330" << std::endl;
 		ss << "uniform mat4 mvpMatrix;" << std::endl;
@@ -190,6 +206,9 @@ namespace NL3D
 		ss.str( "" );
 		ss.clear();
 
+		ss << "// " << shaderNames[ material->getShader() ] << " Pixel Shader" << std::endl;
+		ss << std::endl;
+
 		ss << "#version 330" << std::endl;
 		ss << std::endl;
 
@@ -244,6 +263,17 @@ namespace NL3D
 		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
 		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
 		ss << float( material->getDiffuse().A / 255.0f ) << " );";
+		ss << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addColor()
+	{
+		CRGBA color = material->getColor();
+		ss << "vec4 mcolor = vec4( ";
+		ss << color.R / 255.0f << ", ";
+		ss << color.G / 255.0f << ", ";
+		ss << color.B / 255.0f << ", ";
+		ss << color.A / 255.0f << " );";
 		ss << std::endl;
 	}
 
@@ -458,7 +488,7 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 
-		addDiffuse();
+		addColor();
 
 		bool textures = false;
 		sampler = 0;
@@ -474,12 +504,25 @@ namespace NL3D
 			sampler++;
 		}
 
-		if( textures )
+		bool vertexColor = false;
+		if( hasFlag( vbFormat, vertexFlags[ PrimaryColor ] ) )
+			vertexColor = true;
+
+		if( textures && !vertexColor )
 			ss << "vec4 texel = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
+		else
+		if( vertexColor )
+			ss << "vec4 texel = color;" << std::endl;
 		else
 			ss << "vec4 texel = vec4( 0.5, 0.5, 0.5, 1.0 );" << std::endl;
 
 		generateTexEnv();
+
+		// This is just an idea I had, but it seems to be working.
+		// Unfortunately it's not documented anywhere I looked in the GL spec, but if I don't have this modulation here,
+		// the Ryzom UI looks horrific.
+		if( vertexColor )
+			ss << "texel = color * texel;" << std::endl;
 
 		// Alpha test
 		//ss << "if( texel.a <= 0.5 ) discard;" << std::endl;
@@ -786,19 +829,19 @@ namespace NL3D
 				switch( op )
 				{
 				case CMaterial::SrcColor:
-					ds << "diffuse.rgb";
+					ds << "mcolor.rgb";
 					break;
 
 				case CMaterial::InvSrcColor:
-					ds << "( vec3( 1.0, 1.0, 1.0 ) - diffuse.rgb )";
+					ds << "( vec3( 1.0, 1.0, 1.0 ) - mcolor.rgb )";
 					break;
 
 				case CMaterial::SrcAlpha:
-					ds << "diffuse.a";
+					ds << "mcolor.a";
 					break;
 
 				case CMaterial::InvSrcAlpha:
-					ds << "( 1.0 - diffuse.a )";
+					ds << "( 1.0 - mcolor.a )";
 					break;
 				}
 			break;
