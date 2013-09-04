@@ -69,10 +69,10 @@ $ALLOW_UNKNOWN = true ;
 $CREATE_RING = true ;
 
  // site paths definitions
-$AMS_LIB = dirname( dirname( __FILE__ ) ) . '/ams_lib';
+$AMS_LIB =  dirname( __FILE__ )  . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
-$SITEBASE = dirname( __FILE__ ) . '/html/' ;
+$SITEBASE = dirname( __FILE__ );
 $WEBPATH ='http://localhost:40917' ;
 
 //defines the default language

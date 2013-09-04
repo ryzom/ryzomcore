@@ -14,6 +14,10 @@ ini_set('display_errors', 'on');
 ini_set('display_startup_errors', TRUE);
 
 global $TOS_URL;
+global $AMS_LIB;
+global $SITEBASE;
+global $AMS_TRANS;
+global $DEFAULT_LANGUAGE;
 global $cfg;
 
 require 'ams_lib/libinclude.php';
@@ -257,7 +261,8 @@ function _ams_handler()
               }
          }else{
               //default page
-              $page = 'login';   
+              header("Location: user/login");
+              exit;
          }
     }else{
          $page = $_GET["page"];
@@ -266,14 +271,17 @@ function _ams_handler()
     //perform an action in case one is specified
     //else check if a php page is included in the inc folder, else just set page to the get param
     if ( isset( $_POST["function"] ) ){
-         require( "func/" . $_POST["function"] . ".php" );
-         $return = $_POST["function"]();
+        $filename = dirname( __FILE__ ).'/func/' . $_POST["function"] . '.php';
+        if(is_file($filename)){
+            require($filename);
+            $return = $_POST["function"]();
+        }
     }else{
-         $filename = 'inc/' . $page . '.php';
-         if(is_file($filename)){
-              require_once($filename);
-              $return = $page();
-         }
+        $filename = dirname( __FILE__ ).'/inc/' . $page . '.php';
+        if(is_file($filename)){
+            require_once($filename);
+            $return = $page();
+        }
     }
     
     //add username to the return array in case logged in.
@@ -295,8 +303,8 @@ function _ams_handler()
          $return['no_visible_elements'] = 'FALSE';
     }
     
-    return $page;
-    //helpers :: loadTemplate( $page , $return );
+    //return $page;
+    return helpers :: loadTemplate( $page , $return, true);
 }
 
 
@@ -341,7 +349,7 @@ function _collect_login($nids, $collection)
         //handle successful ingame login
         $_SESSION['user'] = $result['name'];
         $_SESSION['id'] = WebUsers::getId($result['name']);
-        $_SESSION['ticket_user'] = Ticket_User::constr_ExternId($_SESSION['id']);
+        $_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
         
         if ($account = user_load( $_SESSION['id'])) {
             global $user;
