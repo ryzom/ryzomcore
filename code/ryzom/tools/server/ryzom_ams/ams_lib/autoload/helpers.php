@@ -3,27 +3,28 @@
 class Helpers{
      
 
-     public static function loadTemplate( $template, $vars = array (), $forcelibrender = false )
+     public static function loadTemplate( $template, $vars = array (), $returnHTML = false )
     {
 
          global $AMS_LIB;
          global $SITEBASE;
          global $AMS_TRANS;
          global $INGAME_LAYOUT;
-         define('SMARTY_SPL_AUTOLOAD',1); 
+         //define('SMARTY_SPL_AUTOLOAD',1);
          require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
          spl_autoload_register('__autoload');
 
          $smarty = new Smarty;
-
+         $smarty->setCompileDir($SITEBASE.'/templates_c/');
+         $smarty->setCacheDir($SITEBASE.'/cache/');
+         $smarty -> setConfigDir($SITEBASE . '/configs/' );
          // turn smarty debugging on/off
-        $smarty -> debugging = false;
+         $smarty -> debugging = false;
          // caching must be disabled for multi-language support
-        $smarty -> caching = false;
+         $smarty -> caching = false;
          $smarty -> cache_lifetime = 120;
 
          helpers :: create_folders ();
-
           if ( helpers::check_if_game_client() or $forcelibrender = false ){
              $smarty -> template_dir = $AMS_LIB . '/ingame_templates/';
              $smarty -> setConfigDir( $AMS_LIB . '/configs' );
@@ -45,7 +46,7 @@ class Helpers{
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
-          
+
           if( isset($vars['permission']) && $vars['permission'] == 3 ){
                $inherited = "extends:layout_admin.tpl|";
           }else if( isset($vars['permission']) && $vars['permission'] == 2){
@@ -55,9 +56,15 @@ class Helpers{
           }else{
                $inherited ="";
           }
-          // extends:' . $inherited .'|register.tpl
-          $smarty -> display( $inherited . $template . '.tpl' );
-         }
+
+          
+
+          if($returnHTML == true){
+               return $smarty ->fetch($inherited . $template . '.tpl' );
+          }else{
+               $smarty -> display( $inherited . $template . '.tpl' );
+          }
+     }
 
      static public function create_folders(){
          global $AMS_LIB;
@@ -72,8 +79,9 @@ class Helpers{
              );
          foreach ( $arr as & $value ){
              if ( !file_exists( $value ) ){
-                 echo $value;
-                 mkdir( $value);
+                 //echo $value;
+                 print($value);
+                 drupal_mkdir($value);
                  }
              }
 
@@ -133,6 +141,9 @@ class Helpers{
                }
           }
           
+          if ($_SESSION['Language'] == ""){
+               $_SESSION['Language'] = $DEFAULT_LANGUAGE;
+          }
           return parse_ini_file( $AMS_TRANS . '/' .  $_SESSION['Language'] . '.ini', true );
           
      }
