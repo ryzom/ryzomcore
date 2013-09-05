@@ -49,7 +49,7 @@ $cfg['mail']['host'] = "ryzomcore.com";
 
 //Defines mailing related stuff
 $SUPPORT_GROUP_IMAP_CRYPTKEY = "azerty";
-$TICKET_MAILING_SUPPORT = true;
+$TICKET_MAILING_SUPPORT = false;
 
 //You have to create this dir at first!
 $MAIL_DIR = "/tmp/mail";

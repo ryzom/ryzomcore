@@ -19,6 +19,9 @@ global $SITEBASE;
 global $AMS_TRANS;
 global $DEFAULT_LANGUAGE;
 global $cfg;
+global $TICKET_LOGGING;
+global $TIME_FORMAT;
+global $TICKET_MAILING_SUPPORT;
 
 require 'ams_lib/libinclude.php';
 spl_autoload_register('__autoload');

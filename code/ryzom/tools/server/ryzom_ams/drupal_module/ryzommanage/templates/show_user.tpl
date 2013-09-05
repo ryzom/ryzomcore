@@ -83,7 +83,7 @@
 				<td class="center"><i>{$ticket.timestamp}</i></td>
 				<td class="center">{$ticket.category}</td>
 
-				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <i class="icon-exclamation-sign icon-white"></i>{/if} {$ticket.statusText}</span></td>  
+				<td class="center"><font color=" {if $ticket.status eq 0}green{else if $ticket.status eq 1}orange{else if $ticket.status eq 3}red{/if}">{$ticket.statusText}</span></td>  
 			  </tr>
 			  {/foreach}
 	  

@@ -86,7 +86,7 @@
 		<tr>
 		    <td width=33%><strong>Original Submitted: </strong>{$ticket_timestamp}</td>
 		    <td width=33%><strong>Last Updated: </strong>{$ticket_lastupdate}</td>
-		    <td width=33%><strong>Status: </strong>{if $ticket_status neq 3}<font color="green">Open</font>{/if} <font color="{if $ticket_status eq 0}orange{else if $ticket_status eq 1}green{else if $ticket_status eq 3}red{/if}"><strong>{$ticket_statustext}</strong></font></td> 
+		    <td width=33%><strong>Status: </strong>{if $ticket_status neq 3}<font color="green">Open</font>{/if} <font color="{if $ticket_status eq 0}green{else if $ticket_status eq 1}orange{else if $ticket_status eq 3}red{/if}"><strong>{$ticket_statustext}</strong></font></td> 
 	      </tr>
 		<tr>
 		    <td width=33%><strong>Category: </strong>{$ticket_category}</td>

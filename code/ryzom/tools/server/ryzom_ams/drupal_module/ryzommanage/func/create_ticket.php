@@ -19,7 +19,7 @@ function create_ticket(){
                         $author=  Ticket_User::constr_ExternId($_POST['target_id'])->getTUserId();
                     }
                     $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, unserialize($_SESSION['ticket_user'])->getTUserId(),0, $_POST);
-                    header("Location: index.php?page=show_ticket&id=".$ticket_id);
+                    header("Location: ams?page=show_ticket&id=".$ticket_id);
                     exit;
                     
                 }catch (PDOException $e) {
