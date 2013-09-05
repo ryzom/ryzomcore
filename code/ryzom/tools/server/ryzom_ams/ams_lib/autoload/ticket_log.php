@@ -42,7 +42,6 @@ class Ticket_Log{
             $instanceLog->setAuthor($instanceAuthor);
             $instanceLog->setTicket($ticket_id);
             $instanceLog->setQuery($log['Query']);
-            
             $result[] = $instanceLog;
         }
         return $result; 

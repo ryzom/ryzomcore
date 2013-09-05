@@ -87,7 +87,7 @@ class Ticket{
 
         //create the new ticket!
         $ticket = new Ticket();
-        $values = array("Title" => $title, "Status"=> 1, "Queue"=> 0, "Ticket_Category" => $category, "Author" => $author, "Priority" => 0);
+        $values = array("Title" => $title, "Timestamp"=>0,  "Status"=> 1, "Queue"=> 0, "Ticket_Category" => $category, "Author" => $author, "Priority" => 0);
         $ticket->set($values);
         $ticket->create();
         $ticket_id = $ticket->getTId();

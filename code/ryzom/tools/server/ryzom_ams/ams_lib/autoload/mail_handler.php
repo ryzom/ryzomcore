@@ -13,11 +13,11 @@ class Mail_Handler{
     
     
     public static function send_ticketing_mail($receiver, $ticketObj, $content, $type, $sender = 0) {
-        global $MAIL_LOG_PATH;
-        error_log("Receiver: {$receiver}, content: {$content}, type: {$type}, SendingId: {$sender} \n", 3, $MAIL_LOG_PATH);
+        
         global $TICKET_MAILING_SUPPORT;
         if($TICKET_MAILING_SUPPORT){
-
+            global $MAIL_LOG_PATH;
+            error_log("Receiver: {$receiver}, content: {$content}, type: {$type}, SendingId: {$sender} \n", 3, $MAIL_LOG_PATH);
             if($sender == 0){
                 //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
                 $sender = NULL;

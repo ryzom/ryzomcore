@@ -81,7 +81,7 @@ class Helpers{
              if ( !file_exists( $value ) ){
                  //echo $value;
                  print($value);
-                 drupal_mkdir($value);
+                 mkdir($value);
                  }
              }
 
