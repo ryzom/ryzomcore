@@ -207,7 +207,7 @@ class WebUsers extends Users{
     }
     
     public static function getAllUsersQuery(){
-       return "SELECT * FROM ams_user";
+       return "SELECT * FROM users WHERE `uid` > 0";
     }
     
     public static function createWebuser($name, $pass, $mail){

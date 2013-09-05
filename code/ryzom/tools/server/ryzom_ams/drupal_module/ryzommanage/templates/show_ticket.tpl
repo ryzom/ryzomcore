@@ -96,13 +96,13 @@
 			    {if $ticket_forwardedGroupName eq "0"}
 				<i>{$public_sgroup}</i>
 			    {else}
-				<a href="index.php?page=show_sgroup&id={$ticket_forwardedGroupId}">{$ticket_forwardedGroupName}</a>
+				<a href="ams?page=show_sgroup&id={$ticket_forwardedGroupId}">{$ticket_forwardedGroupName}</a>
 			    {/if}
 			</span>
 		    </td>                  
 		</tr>
 		<tr>
-		    <td width=33%><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a> {else}<i> {$not_assigned}</i> {/if}</td>
+		    <td width=33%><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="ams?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a> {else}<i> {$not_assigned}</i> {/if}</td>
 		    <td width=33%></td>
 		    <td width=33%></td> 
 	      </tr>
@@ -117,9 +117,9 @@
 			<p>
 			    <font color="blue"> {$reply.timestamp}</font>
 			    {if $reply.permission eq '1'}
-			    <span class="label label-success"><strong>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"> {$reply.author}{else} {$reply.author} {/if}</a></strong></span>
+			    <span class="label label-success"><strong>{if isset($isMod) and $isMod eq "TRUE"} <a href="ams?page=show_user&id={$reply.authorExtern}"> {$reply.author}{else} {$reply.author} {/if}</a></strong></span>
 			    {else if $reply.permission gt '1'}
-			    <span class="label label-warning"><strong>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}">{$reply.author}{else} {$reply.author} {/if}</a></strong></span>
+			    <span class="label label-warning"><strong>{if isset($isMod) and $isMod eq "TRUE"} <a href="ams?page=show_user&id={$reply.authorExtern}">{$reply.author}{else} {$reply.author} {/if}</a></strong></span>
 			    {/if}
 			</p>
 			<p><pre{if $reply.permission gt '1'} {if $reply.hidden eq 0} style="background-color:rgb(248, 200, 200);"{else if $reply.hidden eq 1}style="background-color:rgb(207, 254, 255);"{/if}{/if}> {if $reply.hidden eq 1}<i>{/if}{$reply.replyContent}{if $reply.hidden eq 1}</i>{/if}</pre></p>

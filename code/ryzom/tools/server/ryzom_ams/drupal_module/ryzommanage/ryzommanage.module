@@ -556,7 +556,7 @@ function top_bar()
         if(ticket_user::isMod(unserialize($_SESSION['ticket_user']))){
               return "<div class='ryzomuserbar'><a href='ams?page=show_user&id=".$userId."'>Profile</a> |
         <a href='ams?page=createticket&id=".$userId."'>Create Ticket</a> | 
-        <a href='/user/".$userId."/edit'>Settings</a> | <a href='ams?page=userlist".$userId."'>Users</a> |
+        <a href='/user/".$userId."/edit'>Settings</a> | <a href='ams?page=userlist'>Users</a> |
         <a href='ams?page=show_queue&get=todo'>Queues</a> |
         <a href='ams?page=sgroup_list'>Support Groups</a> | <a href='/user/logout'>Logout</a></div>";
         

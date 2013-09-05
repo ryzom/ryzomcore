@@ -63,8 +63,6 @@
  
   
             <h2><i class="icon-tag"></i> Tickets of {$target_name}</h2>
-           
-                <legend>Tickets</legend>
 		<table>
 		    <thead>
 			    <tr>

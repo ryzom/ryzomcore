@@ -8,9 +8,9 @@
 
 $cfg['db']['web']['host']    = variable_get('ryzommanage_webserverurl', 'localhost');
 $cfg['db']['web']['port']    = variable_get('ryzommanage_webmysqlport', '3306');
-$cfg['db']['web']['name']    = variable_get('ryzommanage_webdbname', 'ryzom_ams');
-$cfg['db']['web']['user']    = variable_get('ryzommanage_webusername', 'shard');
-$cfg['db']['web']['pass']    = variable_get('ryzommanage_webpassword', '');
+$cfg['db']['web']['name']    = variable_get('ryzommanage_webdbname', 'drupal');
+$cfg['db']['web']['user']    = variable_get('ryzommanage_webusername', 'root');
+$cfg['db']['web']['pass']    = variable_get('ryzommanage_webpassword', 'lol123');
 
 $cfg['db']['lib']['host']    = variable_get('ryzommanage_libserverurl', 'localhost');
 $cfg['db']['lib']['port']    = variable_get('ryzommanage_libmysqlport', '3306');
