@@ -1,2 +1,3 @@
 -Remove full path in autoload functions
 -Make Permission www dependend, so it can be implemented in drupal with hook_permission();
+-in helpers make_folders  mkdir($value); should be drupal_mkdir();

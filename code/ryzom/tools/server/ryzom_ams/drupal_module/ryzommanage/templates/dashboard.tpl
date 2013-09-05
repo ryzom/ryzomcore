@@ -5,27 +5,27 @@
 		<tr>
 			<td width="25%">
 				<a data-original-title="{$nrAssignedWaiting} Assigned to you and waiting for support!" data-rel="tooltip" class="well span3 top-block"
-				   href="ams/?page=show_queue&get=create&userid={$user_id}&groupid=1&what=waiting_for_support&how=assigned&who=user">
+				   href="ams?page=show_queue&get=create&userid={$user_id}&groupid=1&what=waiting_for_support&how=assigned&who=user">
 					<div style="text-align:center;">Tickets Waiting for Direct Action:
 					<font color="red">{$nrAssignedWaiting}</font></div>
 				</a>
 			</td>
 			<td width="25%">
-				<a data-original-title="{$nrToDo} Tickets Todo." data-rel="tooltip" class="well span3 top-block" href="ams/?page=show_queue&get=todo">
+				<a data-original-title="{$nrToDo} Tickets Todo." data-rel="tooltip" class="well span3 top-block" href="ams?page=show_queue&get=todo">
 					<div style="text-align:center;">Tickets Todo:
 					<font color="red">{$nrToDo}</font></div>
 				</a>
 			</td>
 			<td width="25">
 	
-				<a data-original-title="By {$newestTicketAuthor}" data-rel="tooltip" class="well span3 top-block" href="ams/?page=show_ticket&id={$newestTicketId}">
+				<a data-original-title="By {$newestTicketAuthor}" data-rel="tooltip" class="well span3 top-block" href="ams?page=show_ticket&id={$newestTicketId}">
 					<div style="text-align:center;">Newest Ticket:
 					<font color="red">{$newestTicketTitle}</font></div>
 				</a>
 			</td>
 			<td width="25%">
 		
-				<a data-original-title="{$nrTotalTickets} tickets in total" data-rel="tooltip" class="well span3 top-block" href="ams/?page=show_queue&get=all">
+				<a data-original-title="{$nrTotalTickets} tickets in total" data-rel="tooltip" class="well span3 top-block" href="ams?page=show_queue&get=all">
 					<div style="text-align:center;">Total amount of Tickets:
 					<font color="red">{$nrTotalTickets}</font></div>
 				</a>

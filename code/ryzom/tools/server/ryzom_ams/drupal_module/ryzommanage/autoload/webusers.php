@@ -17,15 +17,15 @@ class WebUsers extends Users{
        }
        
        public function set($values){
-              $this->uId = $values['UId'];
-              $this->login = $values['Login'];
-              $this->email = $values['Email'];
-              $this->firstname = $values['FirstName'];
-              $this->lastname = $values['LastName'];
-              $this->gender = $values['Gender'];
-              $this->country = $values['Country'];
-              $this->receiveMail = $values['ReceiveMail'];
-              $this->language = $values['Language'];
+              $this->uId = $values['uid'];
+              $this->login = $values['name'];
+              $this->email = $values['mail'];
+              //$this->firstname = $values['FirstName'];
+              //$this->lastname = $values['LastName'];
+              //$this->gender = $values['Gender'];
+              //$this->country = $values['Country'];
+              //$this->receiveMail = $values['ReceiveMail'];
+              //$this->language = $values['Language'];
        }
     
      /**
@@ -72,8 +72,8 @@ class WebUsers extends Users{
        
        //returns te id for a given username
        public static function getId($username){
-         $row = db_query("SELECT * FROM {users} WHERE name = :name", array(':name' => $username))->fetchField(); 
-         return $row['UId'];
+         $row = db_query("SELECT * FROM {users} WHERE name = :name", array(':name' => $username))->fetchAssoc(); 
+         return $row['uid'];
        }
     
        //returns te id for a given username
@@ -93,20 +93,17 @@ class WebUsers extends Users{
        }
     
     public function getUsername(){
-       $dbw = new DBLayer("web");
+
        if(! isset($this->login) || $this->login == ""){
-             $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
-             $row = $statement->fetch();
-             $this->set($row);
+              $row = db_query("SELECT * FROM {users} WHERE uid = :id", array(':id' => $this->uId))->fetchAssoc();
+              $this->set($row);
        }
        return $this->login;
     }
     
     public function getEmail(){
-       $dbw = new DBLayer("web");
        if(! isset($this->email) || $this->email == ""){
-              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
-              $row = $statement->fetch();
+              $row = db_query("SELECT * FROM {users} WHERE uid = :id", array(':id' => $this->uId))->fetchAssoc();
               $this->set($row);
        }
        return $this->email;

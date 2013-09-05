@@ -248,6 +248,8 @@ function ryzommanage_block_view($delta = '')
 }
 
 
+
+
 function _ams_handler()
 {
     
@@ -547,7 +549,20 @@ function top_bar()
     $userId = $user->uid;
     if (user_is_logged_in()) {
         // Logged in user
-        return "<div class='ryzomuserbar'>Notepad | Mail | Wiki | Profile | Craft Recipe-Book | Occupations | News/Events | <a href='/user/".$userId."/edit'>Account</a> | <a href='/user/logout'>Logout</a></div>";
+        //check permission, if user
+        if(ticket_user::isMod(unserialize($_SESSION['ticket_user']))){
+              return "<div class='ryzomuserbar'><a href='ams?page=show_user&id=".$userId."'>Profile</a> |
+        <a href='ams?page=createticket&id=".$userId."'>Create Ticket</a> | 
+        <a href='/user/".$userId."/edit'>Settings</a> | <a href='ams?page=userlist".$userId."'>Users</a> |
+        <a href='ams?page=show_queue&get=todo'>Queues</a> |
+        <a href='ams?page=sgroup_list'>Support Groups</a> | <a href='/user/logout'>Logout</a></div>";
+        
+        }else{
+            return "<div class='ryzomuserbar'><a href='ams?page=show_user&id=".$userId."'>Profile</a> |
+        <a href='ams?page=createticket&id=".$userId."'>Create Ticket</a> | 
+        <a href='/user/".$userId."/edit'>Settings</a> | <a href='/user/logout'>Logout</a></div>";
+        }
+       
     } else {
         return drupal_get_form('login_form');
         // Not logged in
@@ -1001,4 +1016,60 @@ function ryzommanage_help($path, $arg) {
       return '<p>' . t("A module that handles account registration and a ticketing service regarding ryzomcore.") . '</p>';
       break;
   }
-} 
+}
+
+function ryzommanage_enable() {
+  // Check if our field is not already created.
+  if (!field_info_field('firstname')) {
+    $field = array(
+        'field_name' => 'firstname', 
+        'type' => 'text', 
+    );
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+        'field_name' => 'firstname', 
+        'entity_type' => 'user', 
+        'label' => 'First Name', 
+        'bundle' => 'user', 
+        // If you don't set the "required" property then the field wont be required by default.
+        'required' => FALSE,
+        'settings' => array(
+           // Here you inform either or not you want this field showing up on the registration form.
+            
+        ),
+        'widget' => array(
+            'type' => 'textfield',
+            'weight' => '1',
+        ), 
+    );
+    field_create_instance($instance);
+  }
+  
+  if (!field_info_field('secondname')) {
+    $field = array(
+        'field_name' => 'secondname', 
+        'type' => 'text', 
+    );
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+        'field_name' => 'secondname', 
+        'entity_type' => 'user', 
+        'label' => 'Second Name', 
+        'bundle' => 'user', 
+        // If you don't set the "required" property then the field wont be required by default.
+        'required' => FALSE,
+        'settings' => array(
+           // Here you inform either or not you want this field showing up on the registration form.
+        ),
+        'widget' => array(
+            'type' => 'textfield',
+            'weight' => '1',
+        ), 
+    );
+    field_create_instance($instance);
+  }
+}

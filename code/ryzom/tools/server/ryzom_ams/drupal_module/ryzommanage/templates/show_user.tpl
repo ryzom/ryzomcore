@@ -1,17 +1,8 @@
 {block name=content}
-<div class="row-fluid sortable ui-sortable">
-    <div class="box span9">
-        <div class="box-header well" data-original-title="">
+
             <h2><i class="icon-user"></i> Profile of {$target_name}</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
-                <legend>Info</legend>
-		<table class="table table-striped" >
+         
+		<table >
 		    <tbody>
 			<tr >
 			    <td><strong>Email:</strong></td>
@@ -21,96 +12,60 @@
 			<tr >
 			    <td><strong>Role:</strong></td>
 			    <td>
-			    {if $userPermission eq 1}<span class="label label-success">User</span>{/if}
-			    {if $userPermission eq 2}<span class="label label-warning">Moderator</span>{/if}
-			    {if $userPermission eq 3}<span class="label label-important">Admin</span>{/if}
+			    {if $userPermission eq 1}<font color="green">User</font>{/if}
+			    {if $userPermission eq 2}<font color="orange">Moderator</font>{/if}
+			    {if $userPermission eq 3}<font color="red">Admin</font>{/if}
 			    </td>                           
 			</tr>
-			{if $firstName neq ""}
-			<tr>
-			    <td><strong>Firstname:</strong></td>
-			    <td>{$firstName}</td>                           
-			</tr>
-			{/if}
-			{if $lastName neq ""}
-			<tr>
-			    <td><strong>LastName:</strong></td>
-			    <td>{$lastName}</td>                           
-			</tr>
-			{/if}
-			{if $country neq ""}
-			<tr>
-			    <td><strong>Country:</strong></td>
-			    <td>{$country}</td>                           
-			</tr>
-			{/if}
-			{if $gender neq 0}
-			<tr>
-			    <td><strong>Gender:</strong></td>
-			    {if $gender eq 1}
-			    <td><strong>♂</strong></td>
-			    {else if $gender eq 2}
-			    <td><strong>♀</strong></td>
-			    {/if}
-			</tr>
-			{/if}
+
 		    </tbody>
 		</table>
-	    </div>                   
-        </div>
-    </div><!--/span-->
+	
     
-    <div class="box span3">
-        <div class="box-header well" data-original-title="">
+        
             <h2><i class="icon-th"></i>Actions</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
-		<div class="btn-group">
-                <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
-                <ul class="dropdown-menu">
-		    <li class="divider"></li>
-		    <li><a href="index.php?page=settings&id={$target_id}">Edit User</a></li>
-		    <li><a href="index.php?page=createticket&user_id={$target_id}">Send Ticket</a></li>
-		    <li class="divider"></li>
-		    {if isset($isAdmin) and $isAdmin eq 'TRUE' and $target_id neq 1}
-			{if $userPermission eq 1}
-			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=2">Make Moderator</a></li>
-			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=3">Make Admin</a></li>
-			{else if $userPermission eq 2 }
-			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=1">Demote to User</a></li>
-			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=3">Make Admin</a></li>
-			{else if $userPermission eq 3 }
-			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=1">Demote to User</a></li>
-			<li><a href="index.php?page=change_permission&user_id={$target_id}&value=2">Demote to Moderator</a></li>
+                <table width="100%">
+		    <tr>
+			<td width="25%">
+			    <a href="ams?page=settings&id={$target_id}">Edit User</a>
+			</td>
+			<td width="25%">
+			    <a href="ams?page=createticket&user_id={$target_id}">Send Ticket</a>
+			</td>
+			{if isset($isAdmin) and $isAdmin eq 'TRUE' and $target_id neq 1}
+			    {if $userPermission eq 1}
+			    <td width="25%">
+				<a href="ams?page=change_permission&user_id={$target_id}&value=2">Make Moderator</a>
+			    </td>
+			    <td width="25%">
+				<a href="ams?page=change_permission&user_id={$target_id}&value=3">Make Admin</a>
+			    </td>
+			    {else if $userPermission eq 2 }
+			    <td width="25%">
+				<a href="ams?page=change_permission&user_id={$target_id}&value=1">Demote to User</a>
+			    </td>
+			    <td width="25%">
+				<a href="ams?page=change_permission&user_id={$target_id}&value=3">Make Admin</a>
+			    </td>
+			    {else if $userPermission eq 3 }
+			    <td width="25%">
+				<a href="ams?page=change_permission&user_id={$target_id}&value=1">Demote to User</a>
+			    </td>
+			    <td width="25%">
+				<a href="ams?page=change_permission&user_id={$target_id}&value=2">Demote to Moderator</a>
+			    </td>
+			    {/if}
+			   
 			{/if}
-			<li class="divider"></li>
-		    {/if}
-		    
-                </ul>
-              </div>
-            </div>                   
-        </div>
-    </div><!--/span-->
-</div><!--/row-->
-
-<div class="row-fluid sortable ui-sortable">
-    <div class="box span9">
-        <div class="box-header well" data-original-title="">
+		    </tr>
+                </table>
+      
+ 
+  
             <h2><i class="icon-tag"></i> Tickets of {$target_name}</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
-        </div>
-        <div class="box-content">
-            <div class="row-fluid">
+           
                 <legend>Tickets</legend>
-		<table class="table table-striped table-bordered bootstrap-datatable datatable">
+		<table>
 		    <thead>
 			    <tr>
 				    <th>ID</th>
@@ -124,7 +79,7 @@
 			  {foreach from=$ticketlist item=ticket}
 			  <tr>
 				<td>{$ticket.tId}</td>
-				<td><a href ="index.php?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
+				<td><a href ="ams?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
 				<td class="center"><i>{$ticket.timestamp}</i></td>
 				<td class="center">{$ticket.category}</td>
 
@@ -134,9 +89,7 @@
 	  
 		    </tbody>
 	    </table>            
-	    </div>
-	</div>
-    </div><!--/span-->
-</div><!--/row-->
+	
+
 {/block}
 	
