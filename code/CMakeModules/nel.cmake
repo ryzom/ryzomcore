@@ -125,10 +125,6 @@ MACRO(NL_DEFAULT_PROPS name label)
       COMPILE_FLAGS "/GA"
       LINK_FLAGS "/VERSION:${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}")
   ENDIF(${type} STREQUAL EXECUTABLE AND WIN32)
-
-  IF(WITH_STLPORT AND WIN32)
-    SET_TARGET_PROPERTIES(${name} PROPERTIES COMPILE_FLAGS "/X")
-  ENDIF(WITH_STLPORT AND WIN32)
 ENDMACRO(NL_DEFAULT_PROPS)
 
 ###
@@ -539,6 +535,9 @@ MACRO(NL_SETUP_BUILD)
     IF(MSVC_VERSION EQUAL "1700" AND NOT MSVC11)
       SET(MSVC11 ON)
     ENDIF(MSVC_VERSION EQUAL "1700" AND NOT MSVC11)
+
+    # Ignore default include paths
+    ADD_PLATFORM_FLAGS("/X")
 
     IF(MSVC11)
       ADD_PLATFORM_FLAGS("/Gy- /MP")
@@ -1069,74 +1068,14 @@ MACRO(SETUP_EXTERNAL)
   IF(WIN32)
     FIND_PACKAGE(External REQUIRED)
 
-    IF(NOT VC_DIR)
-      SET(VC_DIR $ENV{VC_DIR})
-    ENDIF(NOT VC_DIR)
-
-    IF(MSVC11)
-      IF(NOT MSVC_REDIST_DIR)
-        # If you have VC++ 2012 Express, put x64/Microsoft.VC110.CRT/*.dll in ${EXTERNAL_PATH}/redist
-        SET(MSVC_REDIST_DIR "${EXTERNAL_PATH}/redist")
-      ENDIF(NOT MSVC_REDIST_DIR)
-
-      IF(NOT VC_DIR)
-        IF(NOT VC_ROOT_DIR)
-          GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\11.0_Config;InstallDir]" ABSOLUTE)
-          # VC_ROOT_DIR is set to "registry" when a key is not found
-          IF(VC_ROOT_DIR MATCHES "registry")
-            GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\WDExpress\\11.0_Config\\Setup\\VC;InstallDir]" ABSOLUTE)
-            IF(VC_ROOT_DIR MATCHES "registry")
-              SET(VS110COMNTOOLS $ENV{VS110COMNTOOLS})
-              IF(VS110COMNTOOLS)
-                FILE(TO_CMAKE_PATH ${VS110COMNTOOLS} VC_ROOT_DIR)
-              ENDIF(VS110COMNTOOLS)
-              IF(NOT VC_ROOT_DIR)
-                MESSAGE(FATAL_ERROR "Unable to find VC++ 2012 directory!")
-              ENDIF(NOT VC_ROOT_DIR)
-            ENDIF(VC_ROOT_DIR MATCHES "registry")
-          ENDIF(VC_ROOT_DIR MATCHES "registry")
-        ENDIF(NOT VC_ROOT_DIR)
-        # convert IDE fullpath to VC++ path
-        STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_DIR})
-      ENDIF(NOT VC_DIR)
-    ELSEIF(MSVC10)
-      IF(NOT MSVC_REDIST_DIR)
-        # If you have VC++ 2010 Express, put x64/Microsoft.VC100.CRT/*.dll in ${EXTERNAL_PATH}/redist
-        SET(MSVC_REDIST_DIR "${EXTERNAL_PATH}/redist")
-      ENDIF(NOT MSVC_REDIST_DIR)
-
-      IF(NOT VC_DIR)
-        IF(NOT VC_ROOT_DIR)
-          GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VisualStudio\\10.0_Config;InstallDir]" ABSOLUTE)
-          # VC_ROOT_DIR is set to "registry" when a key is not found
-          IF(VC_ROOT_DIR MATCHES "registry")
-            GET_FILENAME_COMPONENT(VC_ROOT_DIR "[HKEY_CURRENT_USER\\Software\\Microsoft\\VCExpress\\10.0_Config;InstallDir]" ABSOLUTE)
-            IF(VC_ROOT_DIR MATCHES "registry")
-              SET(VS100COMNTOOLS $ENV{VS100COMNTOOLS})
-              IF(VS100COMNTOOLS)
-                FILE(TO_CMAKE_PATH ${VS100COMNTOOLS} VC_ROOT_DIR)
-              ENDIF(VS100COMNTOOLS)
-              IF(NOT VC_ROOT_DIR)
-                MESSAGE(FATAL_ERROR "Unable to find VC++ 2010 directory!")
-              ENDIF(NOT VC_ROOT_DIR)
-            ENDIF(VC_ROOT_DIR MATCHES "registry")
-          ENDIF(VC_ROOT_DIR MATCHES "registry")
-        ENDIF(NOT VC_ROOT_DIR)
-        # convert IDE fullpath to VC++ path
-        STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${VC_ROOT_DIR})
-      ENDIF(NOT VC_DIR)
-    ELSE(MSVC11)
-      IF(NOT VC_DIR)
-        IF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-          # convert IDE fullpath to VC++ path
-          STRING(REGEX REPLACE "Common7/.*" "VC" VC_DIR ${CMAKE_MAKE_PROGRAM})
-        ELSE(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-          # convert compiler fullpath to VC++ path
-          STRING(REGEX REPLACE "VC/bin/.+" "VC" VC_DIR ${CMAKE_CXX_COMPILER})
-        ENDIF(${CMAKE_MAKE_PROGRAM} MATCHES "Common7")
-      ENDIF(NOT VC_DIR)
-    ENDIF(MSVC11)
+    # If using custom boost, we need to define the right variables used by official boost CMake module
+    IF(DEFINED BOOST_DIR)
+      SET(BOOST_INCLUDEDIR ${BOOST_DIR}/include)
+      SET(BOOST_LIBRARYDIR ${BOOST_DIR}/lib)
+    ENDIF(DEFINED BOOST_DIR)
   ELSE(WIN32)
+    FIND_PACKAGE(External QUIET)
+
     IF(APPLE)
       IF(WITH_STATIC_EXTERNAL)
         SET(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -1152,15 +1091,22 @@ MACRO(SETUP_EXTERNAL)
     ENDIF(APPLE)
   ENDIF(WIN32)
 
+  # Android and iOS have pthread  
+  IF(ANDROID OR IOS)
+    SET(CMAKE_USE_PTHREADS_INIT 1)
+    SET(Threads_FOUND TRUE)
+  ELSE(ANDROID OR IOS)
+    FIND_PACKAGE(Threads REQUIRED)
+    # TODO: replace all -l<lib> by absolute path to <lib> in CMAKE_THREAD_LIBS_INIT
+  ENDIF(ANDROID OR IOS)
+
   IF(WITH_STLPORT)
     FIND_PACKAGE(STLport REQUIRED)
     INCLUDE_DIRECTORIES(${STLPORT_INCLUDE_DIR})
-    IF(MSVC)
-      SET(VC_INCLUDE_DIR "${VC_DIR}/include")
-
-      FIND_PACKAGE(WindowsSDK REQUIRED)
-      # use VC++ and Windows SDK include paths
-      INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR} ${WINSDK_INCLUDE_DIRS})
-    ENDIF(MSVC)
   ENDIF(WITH_STLPORT)
+
+  IF(MSVC)
+    FIND_PACKAGE(MSVC REQUIRED)
+    FIND_PACKAGE(WindowsSDK REQUIRED)
+  ENDIF(MSVC)
 ENDMACRO(SETUP_EXTERNAL)
