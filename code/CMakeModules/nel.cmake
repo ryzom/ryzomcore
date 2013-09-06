@@ -416,6 +416,11 @@ MACRO(NL_SETUP_BUILD)
     MESSAGE(STATUS "Generating Xcode project")
   ENDIF(CMAKE_GENERATOR MATCHES "Xcode")
 
+  IF(CMAKE_GENERATOR MATCHES "NMake")
+    SET(NMAKE ON)
+    MESSAGE(STATUS "Generating NMake project")
+  ENDIF(CMAKE_GENERATOR MATCHES "NMake")
+
   # If target and host CPU are the same
   IF("${HOST_CPU}" STREQUAL "${TARGET_CPU}" AND NOT CMAKE_CROSSCOMPILING)
     # x86-compatible CPU
