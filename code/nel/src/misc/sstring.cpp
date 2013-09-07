@@ -37,14 +37,13 @@ namespace NLMISC
 			return token;
 		}
 
-		uint i;
+		uint i, j;
 		CSString result;
 
 		// skip leading junk
 		for (i=0;i<size();++i)
 		{
 			// look for the next character in the 'separator' character list supplied
-			uint j;
 			for (j=0;separators[j] && (*this)[i]!=separators[j];++j)
 			{}
 			// if not found then we're at end of leading junk
@@ -56,7 +55,6 @@ namespace NLMISC
 		for (;i<size();++i)
 		{
 			// look for the next character in the 'separator' character list supplied
-			uint j;
 			for (j=0;separators[j] && (*this)[i]!=separators[j];++j)
 			{}
 			// if not found then we're at end of text chunk
@@ -69,7 +67,6 @@ namespace NLMISC
 		for (;i<size();++i)
 		{
 			// look for the next character in the 'separator' character list supplied
-			uint j;
 			for (j=0;separators[j] && (*this)[i]!=separators[j];++j)
 			{}
 			// if not found then we're at end of leading junk

@@ -8,6 +8,12 @@ function getDbPropU(dbEntry)
 	return value
 end
 
+if string.find(_VERSION, "Lua 5.0") then
+	function math.fmod(a, b)
+		return math.mod(a, b)
+	end
+end
+
 ------------------------------------------------------------------------------------------------------------
 -- create the game namespace without reseting if already created in an other file.
 if (game==nil) then

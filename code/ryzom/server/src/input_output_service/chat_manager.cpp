@@ -636,6 +636,18 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 			{
 				if (session->WriteRight) // player must have the right to speak in the channel
 				{
+					// If universal channel check if player muted
+					if (session->getChan()->UniversalChannel)
+					{
+						if(_MutedUsers.find( eid ) != _MutedUsers.end())
+						{
+							nldebug("IOSCM:  chat The player %s:%x is muted",
+								TheDataset.getEntityId(sender).toString().c_str(),
+								sender.getIndex());
+							return;
+						}
+					}
+
 					if (!session->getChan()->getDontBroadcastPlayerInputs())
 					{
 						// add msg to the historic						
