@@ -32,6 +32,8 @@
 
 // NeL includes
 // #include <nel/misc/debug.h>
+#include <nel/misc/vector.h>
+#include <nel/misc/matrix.h>
 
 // Project includes
 
@@ -50,7 +52,28 @@ CGPUProgramParams::~CGPUProgramParams()
 	
 }
 
-void CGPUProgramParams::set(uint index, float f0, float f1, float f2, float f3)
+void CGPUProgramParams::setF(uint index, float f0)
+{
+	float *f = getPtrFByOffset(allocOffset(index, 1, Float));
+	f[0] = f0;
+}
+
+void CGPUProgramParams::setF(uint index, float f0, float f1)
+{
+	float *f = getPtrFByOffset(allocOffset(index, 2, Float));
+	f[0] = f0;
+	f[1] = f1;
+}
+
+void CGPUProgramParams::setF(uint index, float f0, float f1, float f2)
+{
+	float *f = getPtrFByOffset(allocOffset(index, 3, Float));
+	f[0] = f0;
+	f[1] = f1;
+	f[2] = f2;
+}
+
+void CGPUProgramParams::setF(uint index, float f0, float f1, float f2, float f3)
 {
 	float *f = getPtrFByOffset(allocOffset(index, 4, Float));
 	f[0] = f0;
@@ -59,13 +82,58 @@ void CGPUProgramParams::set(uint index, float f0, float f1, float f2, float f3)
 	f[3] = f3;
 }
 
-void CGPUProgramParams::set(uint index, int i0, int i1, int i2, int i3)
+void CGPUProgramParams::setI(uint index, int i0)
+{
+	int *i = getPtrIByOffset(allocOffset(index, 1, Int));
+	i[0] = i0;
+}
+
+void CGPUProgramParams::setI(uint index, int i0, int i1)
+{
+	int *i = getPtrIByOffset(allocOffset(index, 2, Int));
+	i[0] = i0;
+	i[1] = i1;
+}
+
+void CGPUProgramParams::setI(uint index, int i0, int i1, int i2)
+{
+	int *i = getPtrIByOffset(allocOffset(index, 3, Int));
+	i[0] = i0;
+	i[1] = i1;
+	i[2] = i2;
+}
+
+void CGPUProgramParams::setI(uint index, int i0, int i1, int i2, int i3)
 {
 	int *i = getPtrIByOffset(allocOffset(index, 4, Int));
 	i[0] = i0;
 	i[1] = i1;
 	i[2] = i2;
 	i[3] = i3;
+}
+
+void CGPUProgramParams::setF(uint index, const NLMISC::CVector& v)
+{
+	float *f = getPtrFByOffset(allocOffset(index, 3, Float));
+	f[0] = v.x;
+	f[1] = v.y;
+	f[2] = v.z;
+}
+
+void CGPUProgramParams::setF(uint index, const NLMISC::CMatrix& m)
+{
+	// TODO: Verify this!
+	float *f = getPtrFByOffset(allocOffset(index, 16, Float));
+	NLMISC::CMatrix mt = m;
+	mt.transpose();
+	mt.get(f);
+}
+
+void CGPUProgramParams::setF(uint index, uint num, const float *src)
+{
+	float *f = getPtrFByOffset(allocOffset(index, num, Float));
+	for (uint i = 0; i < num; ++i)
+		f[i] = src[i];
 }
 
 /// Allocate specified number of components if necessary
@@ -96,7 +164,7 @@ size_t CGPUProgramParams::allocOffset(uint index, uint count, TType type)
 
 	// Allocate space
 	offset = m_Meta.size();
-	uint blocks = (count + 3) >> 2; // per 4 components
+	uint blocks = getNbRegistersByComponents(count); // per 4 components
 	m_Meta.resize(offset + blocks);
 	m_Vec.resize(offset + blocks);
 

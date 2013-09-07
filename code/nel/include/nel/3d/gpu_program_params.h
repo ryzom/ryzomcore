@@ -37,6 +37,11 @@
 
 // Project includes
 
+namespace NLMISC {
+	class CVector;
+	class CMatrix;
+}
+
 namespace NL3D {
 
 /**
@@ -61,8 +66,17 @@ public:
 	CGPUProgramParams();
 	virtual ~CGPUProgramParams();
 
-	void set(uint index, float f0, float f1, float f2, float f3);
-	void set(uint index, int i0, int i1, int i2, int i3);
+	void setF(uint index, float f0);
+	void setF(uint index, float f0, float f1);
+	void setF(uint index, float f0, float f1, float f2);
+	void setF(uint index, float f0, float f1, float f2, float f3);
+	void setI(uint index, int i0);
+	void setI(uint index, int i0, int i1);
+	void setI(uint index, int i0, int i1, int i2);
+	void setI(uint index, int i0, int i1, int i2, int i3);
+	void setF(uint index, const NLMISC::CVector& v);
+	void setF(uint index, const NLMISC::CMatrix& m);
+	void setF(uint index, uint num, const float *src);
 
 	// Internal
 	/// Allocate specified number of components if necessary
@@ -82,6 +96,9 @@ public:
 	float *getPtrFByOffset(size_t offset) { return m_Vec[offset].F; }
 	int *getPtrIByOffset(size_t offset) { return m_Vec[offset].I; }
 	TType getTypeByOffset(size_t offset) { return m_Meta[offset].Type; }
+
+	// Utility
+	static inline uint getNbRegistersByComponents(uint count) { return (count + 3) >> 2; } // vector register per 4 components
 
 private:
 	std::vector<CVec> m_Vec;
