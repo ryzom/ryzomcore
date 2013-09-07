@@ -15,6 +15,8 @@ function dashboard(){
             $result['newestTicketId'] = $ticket->getTId();
             $result['newestTicketTitle'] = $ticket->getTitle();
             $result['newestTicketAuthor'] = Ticket_User::get_username_from_id($ticket->getAuthor());
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
         
         }else{

@@ -57,17 +57,11 @@ class WebUsers extends Users{
      * @return string Info: Returns true or false if a login match is found in the web db
      */
      public function checkLoginMatch($username,$password){
-        $dbw = new DBLayer("web");
-        $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:user", array('user' => $username));
-        $row = $statement->fetch();
-        
-        $salt = substr($row['Password'],0,2);
-        $hashed_input_pass = crypt($password, $salt);
-        if($hashed_input_pass == $row['Password']){
-              return $row;
-        }else{
-              return "fail";
-        }	
+       if(!user_authenticate($username, $password)){
+              return 'fail';
+       }else{
+              return db_query("SELECT * FROM {users} WHERE name = :name", array(':name' => $username))->fetchAssoc();
+       }
      }
        
        //returns te id for a given username
@@ -132,13 +126,7 @@ class WebUsers extends Users{
     }
     
        public function getLanguage(){
-       $dbw = new DBLayer("web");
-       if(! isset($this->language) || $this->language == ""){
-              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
-              $row = $statement->fetch();
-              $this->set($row);
-       }
-       return $this->language;
+       return $DEFAULT_LANGUAGE;
     }
     
     public function isLoggedIn(){

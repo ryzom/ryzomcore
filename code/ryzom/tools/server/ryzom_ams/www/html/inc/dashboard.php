@@ -1,8 +1,7 @@
 <?php
 
 function dashboard(){
-    
-      //if logged in
+    //if logged in
     if(WebUsers::isLoggedIn()){
        
         //is Mod

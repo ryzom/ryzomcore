@@ -73,7 +73,11 @@ $AMS_LIB =  dirname( __FILE__ )  . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $SITEBASE = dirname( __FILE__ );
-$WEBPATH ='http://localhost:40917/drupal/sites/all/modules/ryzommanage/' ;
+$BASE_WEBPATH = 'http://localhost:40917/drupal';
+$IMAGELOC_WEBPATH = $BASE_WEBPATH. '/sites/all/modules/ryzommanage/' ;
+$WEBPATH = $BASE_WEBPATH .'/ams';
+$INGAME_WEBPATH = $BASE_WEBPATH . '/ingame';
+$CONFIG_PATH = dirname( __FILE__ );
 
 //defines the default language
 $DEFAULT_LANGUAGE = 'en';
@@ -86,5 +90,6 @@ $TIME_FORMAT = "m-d-Y H:i:s";
 
 //defines which ingame layout template should be used
 $INGAME_LAYOUT = "basic";
+
 
 

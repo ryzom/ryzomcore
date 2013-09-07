@@ -22,10 +22,15 @@ global $cfg;
 global $TICKET_LOGGING;
 global $TIME_FORMAT;
 global $TICKET_MAILING_SUPPORT;
+global $IMAGELOC_WEBPATH;
 global $WEBPATH;
+global $INGAME_WEBPATH;
+global $BASE_WEBPATH;
+global $INGAME_LAYOUT;
 
 require 'ams_lib/libinclude.php';
 spl_autoload_register('__autoload');
+
 require 'config.php';
 
 /*
@@ -130,6 +135,15 @@ function ryzommanage_menu()
         'access callback' => 'user_access',
         'access arguments' => array('access content'),
         'type' => MENU_NORMAL_ITEM
+	);
+    
+     $items['ingame'] = array(
+        'title' => 'Ingame AMS',
+        'page callback' => '_collect_ingame_ams',
+        'page arguments' => array(1, 2),
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
 	);
     
     //main menu item
@@ -256,7 +270,7 @@ function ryzommanage_block_view($delta = '')
 
 function _ams_handler()
 {
-    
+    global $BASE_WEBPATH;
     //Decide what page to load
     if ( ! isset( $_GET["page"]) ){
          if(isset($_SESSION['user'])){
@@ -267,7 +281,7 @@ function _ams_handler()
               }
          }else{
               //default page
-              header("Location: user/login");
+              header("Location: ".$BASE_WEBPATH."/user/login");
               exit;
          }
     }else{
@@ -333,9 +347,10 @@ function _collect_register($nids, $collection)
         return_client_httpdata();
     } else {
         //redirect to registration page
-        header("Location: user/register");
+        header("Location: ".$BASE_WEBPATH. "/user/register");
     }
 }
+
 
 
 /**
@@ -348,8 +363,97 @@ function _collect_register($nids, $collection)
  * Info: Determins what to send back to client, if the client is ryzom core then send the http data if its a browser send to /
  *
  */
+function _collect_ingame_ams($nids, $collection)
+{
+    //if not using ryzom core client show registration page
+    if (Helpers::check_if_game_client(true)) {
+        _return_ingame_httpdata();
+    } else {
+        //redirect to registration page
+        global $WEBPATH;
+        header("Location: ". $WEBPATH);
+    }
+}
+
+
+function _return_ingame_httpdata(){
+    
+    //Decide what page to load
+    if ( ! isset( $_GET["page"]) ){
+         if(isset($_SESSION['user'])){
+              if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
+                   $page = 'dashboard';
+              }else{
+                   $page = 'show_user';
+              }
+         }else{
+              //default page
+              $page = 'login';   
+         }
+    }else{
+         $page = $_GET["page"];
+    }
+    
+    //perform an action in case one is specified
+    //else check if a php page is included in the inc folder, else just set page to the get param
+    global $SITEBASE;
+    if ( isset( $_POST["function"] ) ){
+        $filename = $SITEBASE.'/func/' . $_POST["function"] . '.php';
+        if(is_file($filename)){
+            require($filename);
+            $return = $_POST["function"]();
+        }
+    }else{
+
+         $filename = $SITEBASE.'/inc/' . $page . '.php';
+         if(is_file($filename)){
+              require_once($filename);
+              $return = $page();
+         }
+    }
+    
+    //add username to the return array in case logged in.
+    if(isset($_SESSION['user'])){
+         $return['username'] = $_SESSION['user'];
+    }
+
+    //Set permission
+    if(isset($_SESSION['ticket_user'])){
+         $return['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+    }else{
+         //default permission
+         $return['permission'] = 0; 
+    }
+    
+    //hide sidebar + topbar in case of login/register
+    if($page == 'login' || $page == 'register' || $page == 'logout'){
+         $return['no_visible_elements'] = 'TRUE';
+    }else{
+         $return['no_visible_elements'] = 'FALSE';
+    }
+    
+    //handle error page
+    if($page == 'error'){
+         $return['permission'] = 0;
+         $return['no_visible_elements'] = 'FALSE';
+    }
+    
+    helpers :: loadTemplate( $page , $return );
+}
+/**
+ *
+ * Function _collect_register 
+ *
+ * @takes        
+ * @return      Nothing
+ *
+ * Info: Determins what to send back to client, if the client is ryzom core then send the http data if its a browser send to /
+ *
+ */
 function _collect_login($nids, $collection)
 {
+    global $WEBPATH;
+    global $BASE_WEBPATH;
     $result = Helpers::check_login_ingame();	
     if ($result != "FALSE") {
         //handle successful ingame login
@@ -364,10 +468,10 @@ function _collect_login($nids, $collection)
             $user->timezone = $account->timezone;
             user_login_finalize();
         }
-        header( 'Location: ams' );      
+        header( 'Location: '.$WEBPATH );      
     } else {
         //redirect to registration page
-        header("Location: user/login");
+        header("Location: ".$BASE_WEBPATH."/user/login");
     }
 }
 
@@ -550,21 +654,23 @@ function login_form($login_form)
 function top_bar()
 {
     global $user;
+    global $WEBPATH;
+    global $BASE_WEBPATH;
     $userId = $user->uid;
     if (user_is_logged_in()) {
         // Logged in user
         //check permission, if user
         if(ticket_user::isMod(unserialize($_SESSION['ticket_user']))){
-              return "<div class='ryzomuserbar'><a href='ams?page=show_user&id=".$userId."'>Profile</a> |
-        <a href='ams?page=createticket&id=".$userId."'>Create Ticket</a> | 
-        <a href='/user/".$userId."/edit'>Settings</a> | <a href='ams?page=userlist'>Users</a> |
-        <a href='ams?page=show_queue&get=todo'>Queues</a> |
-        <a href='ams?page=sgroup_list'>Support Groups</a> | <a href='/user/logout'>Logout</a></div>";
+              return "<div class='ryzomuserbar'><a href='".$WEBPATH."?page=show_user&id=".$userId."'>Profile</a> |
+        <a href='".$WEBPATH."?page=createticket&id=".$userId."'>Create Ticket</a> | 
+        <a href='".$BASE_WEBPATH."/user/".$userId."/edit'>Settings</a> | <a href='".$WEBPATH."?page=userlist'>Users</a> |
+        <a href='".$WEBPATH."?page=show_queue&get=todo'>Queues</a> |
+        <a href='".$WEBPATH."?page=sgroup_list'>Support Groups</a> | <a href='".$BASE_WEBPATH."/user/logout'>Logout</a></div>";
         
         }else{
-            return "<div class='ryzomuserbar'><a href='ams?page=show_user&id=".$userId."'>Profile</a> |
-        <a href='ams?page=createticket&id=".$userId."'>Create Ticket</a> | 
-        <a href='/user/".$userId."/edit'>Settings</a> | <a href='/user/logout'>Logout</a></div>";
+            return "<div class='ryzomuserbar'><a href='".$WEBPATH."?page=show_user&id=".$userId."'>Profile</a> |
+        <a href='".$WEBPATH."?page=createticket&id=".$userId."'>Create Ticket</a> | 
+        <a href='".$BASE_WEBPATH."/user/".$userId."/edit'>Settings</a> | <a href='".$BASE_WEBPATH."/user/logout'>Logout</a></div>";
         }
        
     } else {
