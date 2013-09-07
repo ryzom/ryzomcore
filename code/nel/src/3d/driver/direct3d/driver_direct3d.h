@@ -35,7 +35,6 @@
 #include "nel/3d/scissor.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/ptr_set.h"
@@ -181,6 +180,75 @@ public:
 };
 
 
+using NLMISC::CRefCount;
+
+
+class	IDriver;
+class CDriverD3D;
+
+// List typedef.
+class	IShaderDrvInfos;
+typedef	std::list<IShaderDrvInfos*>		TShaderDrvInfoPtrList;
+typedef	TShaderDrvInfoPtrList::iterator	ItShaderDrvInfoPtrList;
+
+/**
+  * Interface for shader driver infos.
+  */
+class IShaderDrvInfos : public CRefCount
+{
+private:
+	CDriverD3D				*_Driver;
+	ItShaderDrvInfoPtrList		_DriverIterator;
+
+public:
+	IShaderDrvInfos(CDriverD3D	*drv, ItShaderDrvInfoPtrList it) {_Driver= drv; _DriverIterator= it;}
+	// The virtual dtor is important.
+	virtual ~IShaderDrvInfos();
+};
+
+
+/**
+ * Shader resource for the driver. It is just a container for a ".fx" text file.
+ */
+/* *** IMPORTANT ********************
+ * *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
+ * **********************************
+ */
+// --------------------------------------------------
+class CShader
+{
+public:
+	CShader();
+	~CShader();
+
+	// Load a shader file
+	bool loadShaderFile (const char *filename);
+
+	// Set the shader text
+	void setText (const char *text);
+
+	// Get the shader text
+	const char *getText () const { return _Text.c_str(); }
+
+	// Set the shader name
+	void setName (const char *name);
+
+	// Get the shader name
+	const char *getName () const { return _Name.c_str(); }
+
+public:
+	// Private. For Driver only.
+	bool								_ShaderChanged;
+	NLMISC::CRefPtr<IShaderDrvInfos>	_DrvInfo;
+private:
+	// The shader
+	std::string					_Text;
+	// The shader name
+	std::string					_Name;
+};
+
+
+
 // ***************************************************************************
 class CTextureDrvInfosD3D : public ITextureDrvInfos
 {
@@ -229,29 +297,48 @@ public:
 };
 
 
+
 // ***************************************************************************
-class CVertexProgamDrvInfosD3D : public IVertexProgramDrvInfos
+class CVertexProgamDrvInfosD3D : public IGPUProgramDrvInfos
 {
 public:
 
 	// The shader
 	IDirect3DVertexShader9	*Shader;
 
-	CVertexProgamDrvInfosD3D(IDriver *drv, ItVtxPrgDrvInfoPtrList it);
+	CVertexProgamDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	~CVertexProgamDrvInfosD3D();
+
+	virtual uint getParamIdx(char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
 };
  
 
 // ***************************************************************************
-class CPixelProgramDrvInfosD3D : public IPixelProgramDrvInfos
+class CPixelProgramDrvInfosD3D : public IGPUProgramDrvInfos
 {
 public:
  
 	// The shader
 	IDirect3DPixelShader9	*Shader;
 
-	CPixelProgramDrvInfosD3D(IDriver *drv, ItPixelPrgDrvInfoPtrList it);
+	CPixelProgramDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	~CPixelProgramDrvInfosD3D();
+
+	virtual uint getParamIdx(char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
 };
 
 
@@ -346,7 +433,7 @@ public:
 	// Scalar handles
 	D3DXHANDLE				ScalarFloatHandle[MaxShaderTexture];
 
-	CShaderDrvInfosD3D(IDriver *drv, ItShaderDrvInfoPtrList it);
+	CShaderDrvInfosD3D(CDriverD3D *drv, ItShaderDrvInfoPtrList it);
 	virtual ~CShaderDrvInfosD3D();
 };
 
@@ -1048,7 +1135,7 @@ public:
 	  * ColorOp[n] = DISABLE;
 	  * AlphaOp[n] = DISABLE;
     */
-	virtual bool			activeShader(CShader *shd);
+	bool			activeShader(CShader *shd);
 
 	// Bench
 	virtual void startBench (bool wantStandardDeviation = false, bool quick = false, bool reset = true);
@@ -1922,7 +2009,7 @@ public:
 	{
 		H_AUTO_D3D(CDriverD3D_getPixelProgramD3D);
 		CPixelProgramDrvInfosD3D*	d3dPixelProgram;
-		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IPixelProgramDrvInfos*)(pixelProgram._DrvInfo);
+		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IGPUProgramDrvInfos*)(pixelProgram._DrvInfo);
 		return d3dPixelProgram;
 	}
 
@@ -1931,7 +2018,7 @@ public:
 	{
 		H_AUTO_D3D(CDriverD3D_getVertexProgramD3D);
 		CVertexProgamDrvInfosD3D*	d3dVertexProgram;
-		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IVertexProgramDrvInfos*)(vertexProgram._DrvInfo);
+		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IGPUProgramDrvInfos*)(vertexProgram._DrvInfo);
 		return d3dVertexProgram;
 	}
 
@@ -2113,6 +2200,8 @@ public:
 private:
 
 	void findNearestFullscreenVideoMode();
+
+	TShaderDrvInfoPtrList	_ShaderDrvInfos;
 
 	// Windows
 	std::string				_WindowClass;
@@ -2562,6 +2651,10 @@ public:
 
 	// Clip the wanted rectangle with window. return true if rect is not NULL.
 	bool					clipRect(NLMISC::CRect &rect);
+
+	friend	class	IShaderDrvInfos;
+
+	void			removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt);
 
 };
 

@@ -49,7 +49,6 @@
 
 #include "nel/3d/driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/ptr_set.h"
 #include "nel/3d/texture_cube.h"

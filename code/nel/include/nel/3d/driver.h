@@ -26,11 +26,11 @@
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/3d/texture.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/vertex_program.h"
 #include "nel/3d/pixel_program.h"
+#include "nel/3d/geometry_program.h"
 #include "nel/3d/material.h"
 #include "nel/misc/mutex.h"
 #include "nel/3d/primitive_profile.h"
@@ -152,9 +152,6 @@ protected:
 	TIBDrvInfoPtrList		_IBDrvInfos;
 	TPolygonMode			_PolygonMode;
 	TGPUPrgDrvInfoPtrList	_GPUPrgDrvInfos;
-	// TPixelPrgDrvInfoPtrList	_PixelPrgDrvInfos;
-	// TGeomPrgDrvInfoPtrList	_GeomPrgDrvInfos;
-	// TShaderDrvInfoPtrList	_ShaderDrvInfos;
 
 	uint					_ResetCounter;
 
@@ -1299,9 +1296,6 @@ protected:
 	friend	class	CTextureDrvShare;
 	friend	class	ITextureDrvInfos;
 	friend	class	IMaterialDrvInfos;
-	// friend	class	IVertexProgramDrvInfos;
-	// friend	class	IPixelProgramDrvInfos;
-	// friend	class	IShaderDrvInfos;
 	friend	class	IGPUProgramDrvInfos;
 
 	/// remove ptr from the lists in the driver.
@@ -1310,9 +1304,6 @@ protected:
 	void			removeTextureDrvInfoPtr(ItTexDrvInfoPtrMap texDrvInfoIt);
 	void			removeTextureDrvSharePtr(ItTexDrvSharePtrList texDrvShareIt);
 	void			removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt);
-	// void			removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt);
-	// void			removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt);
-	// void			removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt);
 	void			removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt);
 
 private:

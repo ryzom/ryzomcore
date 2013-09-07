@@ -1710,6 +1710,13 @@ bool CDriverD3D::release()
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
 
+	ItShaderDrvInfoPtrList		itshd;
+	while( (itshd = _ShaderDrvInfos.begin()) != _ShaderDrvInfos.end() )
+	{
+		// NB: at IShader deletion, this->_MatDrvInfos is updated (entry deleted);
+		delete *itshd;
+	}
+
 	_SwapBufferCounter = 0;
 
 	if (_QuadIB)

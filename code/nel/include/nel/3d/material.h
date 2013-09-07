@@ -22,7 +22,6 @@
 #include "nel/misc/rgba.h"
 #include "nel/misc/matrix.h"
 #include "nel/3d/texture.h"
-#include "nel/3d/shader.h"
 
 #include <memory>
 

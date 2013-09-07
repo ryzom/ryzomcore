@@ -26,7 +26,7 @@ namespace NL3D
 
 // ***************************************************************************
 
-CVertexProgamDrvInfosD3D::CVertexProgamDrvInfosD3D(IDriver *drv, ItVtxPrgDrvInfoPtrList it) : IVertexProgramDrvInfos (drv, it)
+CVertexProgamDrvInfosD3D::CVertexProgamDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it)
 {
 	H_AUTO_D3D(CVertexProgamDrvInfosD3D_CVertexProgamDrvInfosD3D)
 	Shader = NULL;
@@ -274,9 +274,25 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
 		{
-			_VtxPrgDrvInfos.push_front (NULL);
-			ItVtxPrgDrvInfoPtrList itTex = _VtxPrgDrvInfos.begin();
-			*itTex = new CVertexProgamDrvInfosD3D(this, itTex);
+			// Find nelvp
+			CGPUProgramSource *source = NULL;
+			for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+			{
+				if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+				{
+					source = program->getProgramSource()->Sources[i];
+				}
+			}
+			if (!source)
+			{
+				nlwarning("Direct3D driver only supports 'nelvp' profile, vertex program cannot be used");
+				return false;
+			}
+
+			_GPUPrgDrvInfos.push_front (NULL);
+			ItGPUPrgDrvInfoPtrList itTex = _GPUPrgDrvInfos.begin();
+			CVertexProgamDrvInfosD3D *drvInfo;
+			*itTex = drvInfo = new CVertexProgamDrvInfosD3D(this, itTex);
 
 			// Create a driver info structure
 			program->_DrvInfo = *itTex;
@@ -287,7 +303,7 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 			CVPParser parser;
 			CVPParser::TProgram parsedProgram;
 			std::string errorOutput;
-			bool result = parser.parse(program->getProgram().c_str(), parsedProgram, errorOutput);
+			bool result = parser.parse(source->SourcePtr, parsedProgram, errorOutput);
 			if (!result)
 			{
 				nlwarning("Unable to parse a vertex program :");
@@ -345,13 +361,19 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 				nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
 				return false;
 			}
+
+			// Set parameters for assembly programs
+			drvInfo->ParamIndices = source->ParamIndices;
+
+			// Build the feature info
+			program->buildInfo(source->DisplayName.c_str(), source->Features);
 		}
 	}
 
 	// Set the vertex program
 	if (program)
 	{
-		CVertexProgamDrvInfosD3D *info = static_cast<CVertexProgamDrvInfosD3D *>((IVertexProgramDrvInfos*)program->_DrvInfo);
+		CVertexProgamDrvInfosD3D *info = static_cast<CVertexProgamDrvInfosD3D *>((IGPUProgramDrvInfos*)program->_DrvInfo);
 		setVertexProgram (info->Shader, program);
 
 		/* D3DRS_FOGSTART and D3DRS_FOGEND must be set with [1, 0] else the fog doesn't work properly on VertexShader and non-VertexShader objects

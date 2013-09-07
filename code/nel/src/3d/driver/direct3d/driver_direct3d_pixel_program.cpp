@@ -37,7 +37,7 @@ namespace NL3D
 
 // ***************************************************************************
 
-CPixelProgramDrvInfosD3D::CPixelProgramDrvInfosD3D(IDriver *drv, ItPixelPrgDrvInfoPtrList it) : IPixelProgramDrvInfos (drv, it)
+CPixelProgramDrvInfosD3D::CPixelProgramDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it)
 {
 	H_AUTO_D3D(CPixelProgramDrvInfosD3D_CPixelProgamDrvInfosD3D)
 	Shader = NULL;
@@ -81,18 +81,32 @@ bool CDriverD3D::activePixelProgram(CPixelProgram *program)
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
 		{
-			_PixelPrgDrvInfos.push_front (NULL);
-			ItPixelPrgDrvInfoPtrList itPix = _PixelPrgDrvInfos.begin();
-			*itPix = new CPixelProgramDrvInfosD3D(this, itPix);
+			// Find a supported pixel program profile
+			CGPUProgramSource *source = NULL;
+			for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+			{
+				if (supportPixelProgram(program->getProgramSource()->Sources[i]->Profile))
+				{
+					source = program->getProgramSource()->Sources[i];
+				}
+			}
+			if (!source)
+			{
+				nlwarning("No supported source profile for pixel program");
+				return false;
+			}
+
+			_GPUPrgDrvInfos.push_front (NULL);
+			ItGPUPrgDrvInfoPtrList itPix = _GPUPrgDrvInfos.begin();
+			CPixelProgramDrvInfosD3D *drvInfo;
+			*itPix = drvInfo = new CPixelProgramDrvInfosD3D(this, itPix);
 
 			// Create a driver info structure
 			program->_DrvInfo = *itPix;
 
-			const std::string &dest = program->getProgram();
-
 			LPD3DXBUFFER pShader;
 			LPD3DXBUFFER pErrorMsgs;
-			if (D3DXAssembleShader (dest.c_str(), dest.size(), NULL, NULL, 0, &pShader, &pErrorMsgs) == D3D_OK)
+			if (D3DXAssembleShader(source->SourcePtr, source->SourceLen, NULL, NULL, 0, &pShader, &pErrorMsgs) == D3D_OK)
 			{
 				if (_DeviceInterface->CreatePixelShader((DWORD*)pShader->GetBufferPointer(), &(getPixelProgramD3D(*program)->Shader)) != D3D_OK)
 					return false;
@@ -103,13 +117,19 @@ bool CDriverD3D::activePixelProgram(CPixelProgram *program)
 				nlwarning ((const char*)pErrorMsgs->GetBufferPointer());
 				return false;
 			}
+
+			// Set parameters for assembly programs
+			drvInfo->ParamIndices = source->ParamIndices;
+
+			// Build the feature info
+			program->buildInfo(source->DisplayName.c_str(), source->Features);
 		}
 	}
 
 	// Set the pixel program
 	if (program)
 	{
-		CPixelProgramDrvInfosD3D *info = static_cast<CPixelProgramDrvInfosD3D *>((IPixelProgramDrvInfos*)program->_DrvInfo);
+		CPixelProgramDrvInfosD3D *info = static_cast<CPixelProgramDrvInfosD3D *>((IGPUProgramDrvInfos*)program->_DrvInfo);
 		setPixelShader (info->Shader);
 
 		float z = 0;

@@ -20,7 +20,6 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/3d/driver.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/misc/algo.h"
 
@@ -94,14 +93,6 @@ bool		IDriver::release(void)
 		// NB: at IShader deletion, this->_MatDrvInfos is updated (entry deleted);
 		delete *itmat;
 	}
-/*
-	// Release Shader drv.
-	ItShaderDrvInfoPtrList		itshd;
-	while( (itshd = _ShaderDrvInfos.begin()) != _ShaderDrvInfos.end() )
-	{
-		// NB: at IShader deletion, this->_MatDrvInfos is updated (entry deleted);
-		delete *itshd;
-	}*/
 
 	// Release VBs drv.
 	ItVBDrvInfoPtrList		itvb;
