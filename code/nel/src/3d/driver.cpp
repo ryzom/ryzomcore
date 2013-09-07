@@ -58,7 +58,7 @@ IDriver::~IDriver()
 	nlassert(_MatDrvInfos.size()==0);
 	nlassert(_VBDrvInfos.size()==0);
 	nlassert(_IBDrvInfos.size()==0);
-	nlassert(_VtxPrgDrvInfos.size()==0);
+	nlassert(_GPUPrgDrvInfos.size()==0);
 }
 
 
@@ -94,14 +94,14 @@ bool		IDriver::release(void)
 		// NB: at IShader deletion, this->_MatDrvInfos is updated (entry deleted);
 		delete *itmat;
 	}
-
+/*
 	// Release Shader drv.
 	ItShaderDrvInfoPtrList		itshd;
 	while( (itshd = _ShaderDrvInfos.begin()) != _ShaderDrvInfos.end() )
 	{
 		// NB: at IShader deletion, this->_MatDrvInfos is updated (entry deleted);
 		delete *itshd;
-	}
+	}*/
 
 	// Release VBs drv.
 	ItVBDrvInfoPtrList		itvb;
@@ -119,12 +119,12 @@ bool		IDriver::release(void)
 		delete *itib;
 	}
 
-	// Release VtxPrg drv.
-	ItVtxPrgDrvInfoPtrList		itVtxPrg;
-	while( (itVtxPrg = _VtxPrgDrvInfos.begin()) != _VtxPrgDrvInfos.end() )
+	// Release GPUPrg drv.
+	ItGPUPrgDrvInfoPtrList		itGPUPrg;
+	while( (itGPUPrg = _GPUPrgDrvInfos.begin()) != _GPUPrgDrvInfos.end() )
 	{
-		// NB: at IVertexProgramDrvInfos deletion, this->_VtxPrgDrvInfos is updated (entry deleted);
-		delete *itVtxPrg;
+		// NB: at IVertexProgramDrvInfos deletion, this->_GPUPrgDrvInfos is updated (entry deleted);
+		delete *itGPUPrg;
 	}
 
 	return true;
@@ -249,7 +249,7 @@ void			IDriver::removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt)
 	_MatDrvInfos.erase(shaderIt);
 }
 // ***************************************************************************
-void			IDriver::removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt)
+/*void			IDriver::removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt)
 {
 	_ShaderDrvInfos.erase(shaderIt);
 }
@@ -262,6 +262,11 @@ void			IDriver::removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt)
 void			IDriver::removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt)
 {
 	_PixelPrgDrvInfos.erase(pixelPrgDrvInfoIt);
+}*/
+// ***************************************************************************
+void			IDriver::removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList vtxPrgDrvInfoIt)
+{
+	_GPUPrgDrvInfos.erase(vtxPrgDrvInfoIt);
 }
 
 // ***************************************************************************

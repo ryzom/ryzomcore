@@ -45,7 +45,7 @@ namespace NL3D {
  * \author Jan Boon (Kaetemi)
  * A single GPU program with a specific profile.
  */
-struct CGPUProgramSource
+struct CGPUProgramSource : public NLMISC::CRefCount
 {
 public:
 	std::string DisplayName;
@@ -53,11 +53,11 @@ public:
 	/// Minimal required profile for this GPU program
 	IGPUProgram::TProfile Profile;
 	
-	char *SourcePtr;
-	/// Copy the source string
-	inline void setSource(char *source) { SourceCopy = source; SourcePtr = &source[0]; }
-	/// Set pointer to source string without copying the string
-	inline void setSourcePtr(char *sourcePtr) { SourceCopy.clear(); SourcePtr = sourcePtr; }
+	const char *CodePtr;
+	/// Copy the source code string
+	inline void setCode(const char *source) { CodeCopy = source; CodePtr = &source[0]; }
+	/// Set pointer to source code string without copying the string
+	inline void setCodePtr(const char *sourcePtr) { CodeCopy.clear(); CodePtr = sourcePtr; }
 	
 	/// CVertexProgramInfo/CPixelProgramInfo/... NeL features
 	uint Features;
@@ -66,7 +66,7 @@ public:
 	std::map<std::string, uint> ParamIndices;
 	
 private:
-	std::string SourceCopy;
+	std::string CodeCopy;
 	
 }; /* class CGPUProgramSource */
 
@@ -77,10 +77,10 @@ private:
  * Container for the source code of a single GPU program, allowing
  * variations in different language profiles.
  */
-struct CGPUProgramSourceCont
+struct CGPUProgramSourceCont : public NLMISC::CRefCount
 {
-public:	
-	std::vector<CGPUProgramSource> Sources;
+public:
+	std::vector<NLMISC::CSmartPtr<CGPUProgramSource> > Sources;
 	
 }; /* class CGPUProgramSourceCont */
 

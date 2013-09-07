@@ -237,21 +237,33 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 {
 	nlassert(!m_PixelProgram);
 
-	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();	
+	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
+
+	CGPUProgramSource *source = new CGPUProgramSource();
+	CGPUProgramSourceCont *sourceCont = new CGPUProgramSourceCont();
+	sourceCont->Sources.push_back(source);
+	source->Features = CPixelProgramInfo::MaterialTextures;
+
 	if (drvInternal->supportPixelProgram(CPixelProgram::fp40) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
 		nldebug("VR: fp40");
-		m_PixelProgram = new CPixelProgram(g_StereoOVR_fp40);		
+		source->Profile = IGPUProgram::fp40;
+		source->setCodePtr(g_StereoOVR_fp40);
+		m_PixelProgram = new CPixelProgram(sourceCont);	
 	}
 	else if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
 		nldebug("VR: arbfp1");
-		m_PixelProgram = new CPixelProgram(g_StereoOVR_arbfp1);		
+		source->Profile = IGPUProgram::arbfp1;
+		source->setCodePtr(g_StereoOVR_arbfp1);
+		m_PixelProgram = new CPixelProgram(sourceCont);
 	}
 	else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
 	{
 		nldebug("VR: ps_2_0");
-		m_PixelProgram = new CPixelProgram(g_StereoOVR_ps_2_0);	
+		source->Profile = IGPUProgram::ps_2_0;
+		source->setCodePtr(g_StereoOVR_ps_2_0);
+		m_PixelProgram = new CPixelProgram(sourceCont);
 	}
 
 	if (m_PixelProgram)

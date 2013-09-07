@@ -151,9 +151,10 @@ protected:
 	TVBDrvInfoPtrList		_VBDrvInfos;
 	TIBDrvInfoPtrList		_IBDrvInfos;
 	TPolygonMode			_PolygonMode;
-	TVtxPrgDrvInfoPtrList	_VtxPrgDrvInfos;
-	TPixelPrgDrvInfoPtrList	_PixelPrgDrvInfos;
-	TShaderDrvInfoPtrList	_ShaderDrvInfos;
+	TGPUPrgDrvInfoPtrList	_GPUPrgDrvInfos;
+	// TPixelPrgDrvInfoPtrList	_PixelPrgDrvInfos;
+	// TGeomPrgDrvInfoPtrList	_GeomPrgDrvInfos;
+	// TShaderDrvInfoPtrList	_ShaderDrvInfos;
 
 	uint					_ResetCounter;
 
@@ -316,11 +317,6 @@ public:
 
 
 	virtual bool			setupMaterial(CMaterial& mat)=0;
-
-	/**
-	  * Activate a shader, NULL to disable the current shader.
-	  */
-	virtual bool			activeShader(CShader *shd)=0;
 
 	/** Special for Faster Specular Setup. Call this between lot of primitives rendered with Specular Materials.
 	 *	Visual Errors may arise if you don't correctly call endSpecularBatch().
@@ -1303,9 +1299,10 @@ protected:
 	friend	class	CTextureDrvShare;
 	friend	class	ITextureDrvInfos;
 	friend	class	IMaterialDrvInfos;
-	friend	class	IVertexProgramDrvInfos;
-	friend	class	IPixelProgramDrvInfos;
-	friend	class	IShaderDrvInfos;
+	// friend	class	IVertexProgramDrvInfos;
+	// friend	class	IPixelProgramDrvInfos;
+	// friend	class	IShaderDrvInfos;
+	friend	class	IGPUProgramDrvInfos;
 
 	/// remove ptr from the lists in the driver.
 	void			removeVBDrvInfoPtr(ItVBDrvInfoPtrList  vbDrvInfoIt);
@@ -1313,9 +1310,10 @@ protected:
 	void			removeTextureDrvInfoPtr(ItTexDrvInfoPtrMap texDrvInfoIt);
 	void			removeTextureDrvSharePtr(ItTexDrvSharePtrList texDrvShareIt);
 	void			removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt);
-	void			removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt);
-	void			removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt);
-	void			removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt);
+	// void			removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt);
+	// void			removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt);
+	// void			removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt);
+	void			removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt);
 
 private:
 	bool			_StaticMemoryToVRAM;

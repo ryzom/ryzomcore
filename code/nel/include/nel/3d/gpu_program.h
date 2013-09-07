@@ -1,6 +1,6 @@
 /**
  * \file gpu_program.h
- * \brief CGPUProgram
+ * \brief IGPUProgram
  * \date 2013-09-07 15:00GMT
  * \author Jan Boon (Kaetemi)
  * IGPUProgram
@@ -38,110 +38,33 @@
 
 namespace NL3D {
 
-/**
- * \brief CVertexProgramInfo
- * \date 2013-09-07 15:00GMT
- * \author Jan Boon (Kaetemi)
- * Read-only information structure.
- */
-struct CVertexProgramInfo
+// List typedef.
+class	IDriver;
+class	IGPUProgramDrvInfos;
+typedef	std::list<IGPUProgramDrvInfos*>	TGPUPrgDrvInfoPtrList;
+typedef	TGPUPrgDrvInfoPtrList::iterator		ItGPUPrgDrvInfoPtrList;
+
+// Class for interaction of vertex program with Driver.
+// IGPUProgramDrvInfos represent the real data of the GPU program, stored into the driver (eg: just a GLint for opengl).
+class IGPUProgramDrvInfos : public NLMISC::CRefCount
 {
+private:
+	IDriver					*_Driver;
+	ItGPUPrgDrvInfoPtrList	_DriverIterator;
+
 public:
-	std::string DisplayName;
+	IGPUProgramDrvInfos (IDriver *drv, ItGPUPrgDrvInfoPtrList it);
+	// The virtual dtor is important.
+	virtual ~IGPUProgramDrvInfos(void);
 
-	enum TFeatures
-	{
-		// World
-		// transform
-
-		// Lights
-		Ambient = 0x0001, 
-		Sun = 0x0002, 
-		PointLight0 = 0x0004, 
-		PointLight1 = 0x0008, 
-		PointLight2 = 0x0010, 
-
-		// Lights, additional parameters for user shaders
-		/// Adds an enabled/disabled parameter to all of the lights
-		DynamicLights = 0x0020, 
-	};
-
-	/// Bitfield containing features used by this vertex program.
-	uint Features;
-
-	/// Indices of parameters used by features.
-
-	/// Lights, NeL supports:
-	/// - Ambient light
-	uint AmbientIdx; // (Ambient)
-	/// - One directional light
-	uint SunDirectionIdx; // (Sun)
-	uint SunDiffuseIdx; // (Sun)
-	/// - Zero to three point lights
-	uint PointLight0PositionIdx; // (PointLight0)
-	uint PointLight0DiffuseIdx; // (PointLight0)
-	uint PointLight1PositionIdx; // (PointLight1)
-	uint PointLight1DiffuseIdx; // (PointLight1)
-	uint PointLight2PositionIdx; // (PointLight2)
-	uint PointLight2DiffuseIdx; // (PointLight2)
-
-	/// DynamicLights
-	uint SunEnabledIdx; // (DynamicLights && Sun)
-	uint PointLight0EnabledIdx; // (DynamicLights && PointLight0)
-	uint PointLight1EnabledIdx; // (DynamicLights && PointLight1)
-	uint PointLight2EnabledIdx; // (DynamicLights && PointLight2)
+	virtual uint getParamIdx(char *name) const { return ~0; }; // STEREO_TODO
 };
 
-/**
- * \brief CPixelProgramInfo
- * \date 2013-09-07 15:00GMT
- * \author Jan Boon (Kaetemi)
- * Read-only information structure.
- */
-struct CPixelProgramInfo
-{
-public:
-	std::string DisplayName;
-	
-	enum TFeatures
-	{
-		/// Use texture stages from CMaterial as texture parameters
-		MaterialTextures = 0x0001, 
-		/// Set driver fog parameters on this program
-		Fog = 0x0002, 
-		/// Adds an enabled/disabled parameter to the fog, for user shaders
-		DynamicFog = 0x0004, 
-	};
-
-	// Bitfield containing features used by this pixel program
-	uint Features;
-
-	// Indices of parameters used by features
-	uint FogEnabledIdx; // (Fog && DynamicFog) nlFogEnabled, fog enabled
-	uint FogStartEndIdx; // (Fog) nlFogStartEnd, start and end of fog
-	uint FogColorIdx; // (Fog) nlFogColor, fog color
-};
+class CGPUProgramSource;
+class CGPUProgramSourceCont;
 
 /**
- * \brief CGeometryProgramInfo
- * \date 2013-09-07 15:00GMT
- * \author Jan Boon (Kaetemi)
- * Read-only information structure.
- */
-struct CGeometryProgramInfo
-{
-public:
-	/*enum TFeatures
-	{
-		
-	};*/
-	/// Bitfield containing features used by this pixel program.
-	// uint Features;
-	/// Indices of parameters used by features.
-};
-
-/**
- * \brief CGPUProgram
+ * \brief IGPUProgram
  * \date 2013-09-07 15:00GMT
  * \author Jan Boon (Kaetemi)
  * A compiled GPU program
@@ -202,28 +125,23 @@ public:
 
 public:
 	IGPUProgram();
+	IGPUProgram(CGPUProgramSourceCont *programSource);
 	virtual ~IGPUProgram();
 
 	/// Get the idx of a parameter (ogl: uniform, d3d: constant, etcetera) by name. Invalid name returns ~0
-	virtual uint getParamIdx(char *name) const = 0;
+	inline uint getParamIdx(char *name) const { return _DrvInfo->getParamIdx(name); };
 
-	void buildVPInfo(const char *displayName, uint features);
-	void buildPPInfo(const char *displayName, uint features);
-	void buildGPInfo(const char *displayName, uint features);
+	/// Get the program
+	inline const CGPUProgramSourceCont *getProgramSource() const { return _ProgramSource; };
 
-	inline const CVertexProgramInfo *getVPInfo() const { return Info.VertexProgram; }
-	inline const CPixelProgramInfo *getPPInfo() const { return Info.PixelProgram; }
-	inline const CGeometryProgramInfo *getGPInfo() const { return Info.GeometryProgram; }
+protected:
+	/// The progam source
+	NLMISC::CSmartPtr<CGPUProgramSourceCont>	_ProgramSource;
 
-private:
-	union
-	{
-		CVertexProgramInfo *VertexProgram;
-		CPixelProgramInfo *PixelProgram;
-		CGeometryProgramInfo *GeometryProgram;
-		void *Ptr;
-	} Info;
-	
+public:
+	/// The driver information. For the driver implementation only.
+	NLMISC::CRefPtr<IGPUProgramDrvInfos>		_DrvInfo;
+
 }; /* class IGPUProgram */
 
 } /* namespace NL3D */

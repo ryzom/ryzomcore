@@ -1,5 +1,5 @@
-/** \file pixel_program.h
- * Pixel program definition
+/** \file geometry_program.h
+ * Geometry program definition
  */
 
 /* Copyright, 2000, 2001 Nevrax Ltd.
@@ -21,8 +21,8 @@
  * MA 02111-1307, USA.
  */
 
-#ifndef NL_PIXEL_PROGRAM_H
-#define NL_PIXEL_PROGRAM_H
+#ifndef NL_GEOMETRY_PROGRAM_H
+#define NL_GEOMETRY_PROGRAM_H
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/smart_ptr.h>
@@ -34,57 +34,50 @@
 namespace NL3D {
 
 /**
- * \brief CPixelProgramInfo
+ * \brief CGeometryProgramInfo
  * \date 2013-09-07 15:00GMT
  * \author Jan Boon (Kaetemi)
  * Read-only information structure.
  */
-struct CPixelProgramInfo
+struct CGeometryProgramInfo
 {
 public:
 	std::string DisplayName;
 	
-	enum TFeatures
+	/*enum TFeatures
 	{
-		/// Use texture stages from CMaterial as texture parameters
-		MaterialTextures = 0x0001, 
-		/// Set driver fog parameters on this program
-		Fog = 0x0002, 
-		/// Adds an enabled/disabled parameter to the fog, for user shaders
-		DynamicFog = 0x0004, 
-	};
+		
+	};*/
 
-	// Bitfield containing features used by this pixel program
+	// Bitfield containing features used by this geometry program
 	uint Features;
 
 	// Indices of parameters used by features
-	uint FogEnabledIdx; // (Fog && DynamicFog) nlFogEnabled, fog enabled
-	uint FogStartEndIdx; // (Fog) nlFogStartEnd, start and end of fog
-	uint FogColorIdx; // (Fog) nlFogColor, fog color
+	// ...
 };
 
-class CPixelProgram : public IGPUProgram
+class CGeometryProgram : public IGPUProgram
 {
 public:
 	/// Constructor
-	CPixelProgram(CGPUProgramSourceCont *programSource);
+	CGeometryProgram(CGPUProgramSourceCont *programSource);
 	/// Destructor
-	virtual ~CPixelProgram ();
+	virtual ~CGeometryProgram ();
 
 	/// Build feature information
 	void buildInfo(const char *displayName, uint features);
 	/// Get feature information
-	inline const CPixelProgramInfo *getInfo() const { return _Info; }
+	inline const CGeometryProgramInfo *getInfo() const { return _Info; }
 
 private:
 
 	/// Feature information
-	CPixelProgramInfo							*_Info;
+	CGeometryProgramInfo							*_Info;
 };
 
 } // NL3D
 
 
-#endif // NL_PIXEL_PROGRAM_H
+#endif // NL_GEOMETRY_PROGRAM_H
 
 /* End of vertex_program.h */

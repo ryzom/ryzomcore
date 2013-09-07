@@ -1,5 +1,5 @@
-/** \file pixel_program.cpp
- * Pixel program definition
+/** \file geometry_program.cpp
+ * Geometry program definition
  */
 
 /* Copyright, 2000, 2001 Nevrax Ltd.
@@ -23,7 +23,7 @@
 
 #include "std3d.h"
 
-#include <nel/3d/pixel_program.h>
+#include <nel/3d/geometry_program.h>
 
 #include <nel/3d/driver.h>
 
@@ -32,14 +32,14 @@ namespace NL3D
 
 // ***************************************************************************
 
-CPixelProgram::CPixelProgram(CGPUProgramSourceCont *programSource) : _Info(NULL), IGPUProgram(programSource)
+CGeometryProgram::CGeometryProgram(CGPUProgramSourceCont *programSource) : _Info(NULL), IGPUProgram(programSource)
 {
 	
 }
 
 // ***************************************************************************
 
-CPixelProgram::~CPixelProgram ()
+CGeometryProgram::~CGeometryProgram ()
 {
 	delete _Info;
 	_Info = NULL;
@@ -47,33 +47,13 @@ CPixelProgram::~CPixelProgram ()
 
 // ***************************************************************************
 
-void CPixelProgram::buildInfo(const char *displayName, uint features)
+void CGeometryProgram::buildInfo(const char *displayName, uint features)
 {
 	nlassert(_Info == NULL);
-	_Info = new CPixelProgramInfo();
-	CPixelProgramInfo *info = _Info;
+	_Info = new CGeometryProgramInfo();
+	CGeometryProgramInfo *info = _Info;
 	info->DisplayName = displayName;
 	info->Features = features;
-	if (features & CPixelProgramInfo::Fog)
-	{
-		if (features & CPixelProgramInfo::DynamicFog)
-		{
-			info->FogEnabledIdx = getParamIdx("nlFogEnabled");
-			if (info->FogEnabledIdx == ~0)
-			{
-				nlwarning("Missing 'nlFogEnabled' in gpu program '%s', DynamicFog disabled", displayName);
-				info->Features &= ~CPixelProgramInfo::DynamicFog;
-			}
-		}
-		info->FogStartEndIdx = getParamIdx("nlFogStartEnd");
-		info->FogColorIdx = getParamIdx("nlFogColor");
-		if (info->FogStartEndIdx == ~0
-			|| info->FogStartEndIdx == ~0)
-		{
-			nlwarning("Missing 'nlFogStartEnd/nlFogColor' in gpu program '%s', Fog disabled", displayName);
-			info->Features &= ~CPixelProgramInfo::Fog;
-		}
-	}
 }
 
 } // NL3D

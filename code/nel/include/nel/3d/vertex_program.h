@@ -19,89 +19,86 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
+#include "nel/3d/gpu_program.h"
+#include "nel/3d/gpu_program_source.h"
 
 #include <list>
 
-
 namespace NL3D {
 
-// List typedef.
-class	IDriver;
-class	IVertexProgramDrvInfos;
-typedef	std::list<IVertexProgramDrvInfos*>	TVtxPrgDrvInfoPtrList;
-typedef	TVtxPrgDrvInfoPtrList::iterator		ItVtxPrgDrvInfoPtrList;
-
-// Class for interaction of vertex program with Driver.
-// IVertexProgramDrvInfos represent the real data of the vertex program, stored into the driver (eg: just a GLint for opengl).
-class IVertexProgramDrvInfos : public NLMISC::CRefCount
+/**
+ * \brief CVertexProgramInfo
+ * \date 2013-09-07 15:00GMT
+ * \author Jan Boon (Kaetemi)
+ * Read-only information structure.
+ */
+struct CVertexProgramInfo
 {
-private:
-	IDriver					*_Driver;
-	ItVtxPrgDrvInfoPtrList	_DriverIterator;
-
 public:
-	IVertexProgramDrvInfos (IDriver *drv, ItVtxPrgDrvInfoPtrList it);
-	// The virtual dtor is important.
-	virtual ~IVertexProgramDrvInfos(void);
+	std::string DisplayName;
+
+	enum TFeatures
+	{
+		// World
+		// transform
+
+		// Lights
+		Ambient = 0x0001, 
+		Sun = 0x0002, 
+		PointLight0 = 0x0004, 
+		PointLight1 = 0x0008, 
+		PointLight2 = 0x0010, 
+
+		// Lights, additional parameters for user shaders
+		/// Adds an enabled/disabled parameter to all of the lights
+		DynamicLights = 0x0020, 
+	};
+
+	/// Bitfield containing features used by this vertex program.
+	uint Features;
+
+	/// Indices of parameters used by features.
+
+	/// Lights, NeL supports:
+	/// - Ambient light
+	uint AmbientIdx; // (Ambient)
+	/// - One directional light
+	uint SunDirectionIdx; // (Sun)
+	uint SunDiffuseIdx; // (Sun)
+	/// - Zero to three point lights
+	uint PointLight0PositionIdx; // (PointLight0)
+	uint PointLight0DiffuseIdx; // (PointLight0)
+	uint PointLight1PositionIdx; // (PointLight1)
+	uint PointLight1DiffuseIdx; // (PointLight1)
+	uint PointLight2PositionIdx; // (PointLight2)
+	uint PointLight2DiffuseIdx; // (PointLight2)
+
+	/// DynamicLights
+	uint SunEnabledIdx; // (DynamicLights && Sun)
+	uint PointLight0EnabledIdx; // (DynamicLights && PointLight0)
+	uint PointLight1EnabledIdx; // (DynamicLights && PointLight1)
+	uint PointLight2EnabledIdx; // (DynamicLights && PointLight2)
 };
 
-
-/**
- * This class is a vertex program.
- *
- * D3D / OPENGL compatibility notes:
- * ---------------------------------
- *
- * To make your program compatible with D3D and OPENGL nel drivers, please follow thoses directives to write your vertex programs
- *
- * - Use only v[0], v[1] etc.. syntax for input registers. Don't use v0, v1 or v[OPOS] etc..
- * - Use only c[0], c[1] etc.. syntax for constant registers. Don't use c0, c1 etc..
- * - Use only o[HPOS], o[COL0] etc.. syntax for output registers. Don't use oPos, oD0 etc..
- * - Use only uppercase for registers R1, R2 etc.. Don't use lowercase r1, r2 etc..
- * - Use a semicolon to delineate instructions.
- * - Use ARL instruction to load the adress register and not MOV.
- * - Don't use the NOP instruction.
- * - Don't use macros.
- *
- * -> Thoses programs work without any change under OpenGL.
- * -> Direct3D driver implementation will have to modify the syntax on the fly before the setup like this:
- *   - "v[0]" must be changed in "v0" etc..
- *   - "o[HPOS]" must be changed in oPos etc..
- *   - Semicolon must be changed in line return character.
- *   - ARL instruction must be changed in MOV.
- *
- * Behaviour of LOG may change depending on implementation: You can only expect to have dest.z = log2(abs(src.w)).
- * LIT may or may not clamp the specular exponent to [-128, 128] (not done when EXT_vertex_shader is used for example ..)
- *
- * Depending on the implementation, some optimizations can be achieved by masking the unused output values of instructions
- * as LIT, EXPP ..
- *
- * \author Cyril 'Hulud' Corvazier
- * \author Nevrax France
- * \date 2001
- */
-class CVertexProgram : public NLMISC::CRefCount
+class CVertexProgram : public IGPUProgram
 {
 public:
-
 	/// Constructor
-	CVertexProgram (const char* program);
-
+	CVertexProgram(CGPUProgramSourceCont *programSource);
+	CVertexProgram(const char *nelvp);
 	/// Destructor
 	virtual ~CVertexProgram ();
 
-	/// Get the program
-	const std::string&	getProgram () const { return _Program; };
+	/// Build feature information
+	void buildInfo(const char *displayName, uint features);
+	/// Get feature information
+	inline const CVertexProgramInfo *getInfo() const { return _Info; }
 
 private:
-	/// The progam
-	std::string									_Program;
 
-public:
-	/// The driver information. For the driver implementation only.
-	NLMISC::CRefPtr<IVertexProgramDrvInfos>		_DrvInfo;
+	/// Feature information
+	CVertexProgramInfo							*_Info;
 };
-
 
 } // NL3D
 
