@@ -53,11 +53,13 @@ public:
 	/// Minimal required profile for this GPU program
 	IGPUProgram::TProfile Profile;
 	
-	const char *CodePtr;
+	const char *SourcePtr;
+	size_t SourceLen;
 	/// Copy the source code string
-	inline void setCode(const char *source) { CodeCopy = source; CodePtr = &source[0]; }
+	inline void setSource(const char *source) { SourceCopy = source; SourcePtr = &SourceCopy[0]; SourceLen = SourceCopy.size(); }
 	/// Set pointer to source code string without copying the string
-	inline void setCodePtr(const char *sourcePtr) { CodeCopy.clear(); CodePtr = sourcePtr; }
+	inline void setSourcePtr(const char *sourcePtr, size_t sourceLen) { SourceCopy.clear(); SourcePtr = sourcePtr; SourceLen = sourceLen; }
+	inline void setSourcePtr(const char *sourcePtr) { SourceCopy.clear(); SourcePtr = sourcePtr; SourceLen = strlen(sourcePtr); }
 	
 	/// CVertexProgramInfo/CPixelProgramInfo/... NeL features
 	uint Features;
@@ -66,7 +68,7 @@ public:
 	std::map<std::string, uint> ParamIndices;
 	
 private:
-	std::string CodeCopy;
+	std::string SourceCopy;
 	
 }; /* class CGPUProgramSource */
 

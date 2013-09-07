@@ -41,7 +41,7 @@ namespace NLDRIVERGL {
 #endif
 
 // ***************************************************************************
-CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it) : IVertexProgramDrvInfos (drv, it)
+CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL(CDriverGL *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it)
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
 
@@ -105,13 +105,28 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
 		{
+			// Find nelvp
+			CGPUProgramSource *source = NULL;
+			for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+			{
+				if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+				{
+					source = program->getProgramSource()->Sources[i];
+				}
+			}
+			if (!source)
+			{
+				nlwarning("OpenGL driver only supports 'nelvp' profile, vertex program cannot be used");
+				return false;
+			}
+
 			/** Check with our parser if the program will works with other implemented extensions, too. (EXT_vertex_shader ..).
 			  * There are some incompatibilities.
 			  */
 			CVPParser parser;
 			CVPParser::TProgram parsedProgram;
 			std::string errorOutput;
-			bool result = parser.parse(program->getProgram().c_str(), parsedProgram, errorOutput);
+			bool result = parser.parse(source->SourcePtr, parsedProgram, errorOutput);
 			if (!result)
 			{
 				nlwarning("Unable to parse a vertex program :");
@@ -123,7 +138,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 			}
 
 			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
+			ItGPUPrgDrvInfoPtrList	it= _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
 
 			// Create a driver info
 			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
@@ -132,7 +147,7 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 			program->_DrvInfo=drvInfo;
 
 			// Compile the program
-			nglLoadProgramNV (GL_VERTEX_PROGRAM_NV, drvInfo->ID, (GLsizei)program->getProgram().length(), (const GLubyte*)program->getProgram().c_str());
+			nglLoadProgramNV (GL_VERTEX_PROGRAM_NV, drvInfo->ID, (GLsizei)source->SourceLen, (const GLubyte*)source->SourcePtr);
 
 			// Get loading error code
 			GLint errorOff;
@@ -142,8 +157,8 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 			if (errorOff>=0)
 			{
 				// String length
-				uint length = (uint)program->getProgram ().length();
-				const char* sString= program->getProgram ().c_str();
+				uint length = (uint)source->SourceLen;
+				const char* sString = source->SourcePtr;
 
 				// Line count and char count
 				uint line=1;
@@ -176,13 +191,19 @@ bool CDriverGL::activeNVVertexProgram (CVertexProgram *program)
 				return false;
 			}
 
+			// Set parameters for assembly programs
+			drvInfo->ParamIndices = source->ParamIndices;
+
+			// Build the feature info
+			program->buildInfo(source->DisplayName.c_str(), source->Features);
+
 			// Setup ok
 			return true;
 		}
 		else
 		{
 			// Cast the driver info pointer
-			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IVertexProgramDrvInfos*)program->_DrvInfo);
+			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
 		}
 
 		// Setup this program
@@ -1503,11 +1524,26 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
 		{
+			// Find nelvp
+			CGPUProgramSource *source = NULL;
+			for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+			{
+				if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+				{
+					source = program->getProgramSource()->Sources[i];
+				}
+			}
+			if (!source)
+			{
+				nlwarning("OpenGL driver only supports 'nelvp' profile, vertex program cannot be used");
+				return false;
+			}
+
 			// try to parse the program
 			CVPParser parser;
 			CVPParser::TProgram parsedProgram;
 			std::string errorOutput;
-			bool result = parser.parse(program->getProgram().c_str(), parsedProgram, errorOutput);
+			bool result = parser.parse(source->SourcePtr, parsedProgram, errorOutput);
 			if (!result)
 			{
 				nlwarning("Unable to parse a vertex program.");
@@ -1517,7 +1553,7 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 				return false;
 			}
 			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
+			ItGPUPrgDrvInfoPtrList	it= _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
 
 			// Create a driver info
 			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
@@ -1528,14 +1564,20 @@ bool CDriverGL::activeARBVertexProgram (CVertexProgram *program)
 			{
 				delete drvInfo;
 				program->_DrvInfo = NULL;
-				_VtxPrgDrvInfos.erase(it);
+				_GPUPrgDrvInfos.erase(it);
 				return false;
 			}
+
+			// Set parameters for assembly programs
+			drvInfo->ParamIndices = source->ParamIndices;
+
+			// Build the feature info
+			program->buildInfo(source->DisplayName.c_str(), source->Features);
 		}
 		else
 		{
 			// Cast the driver info pointer
-			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IVertexProgramDrvInfos*)program->_DrvInfo);
+			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
 		}
 		glEnable( GL_VERTEX_PROGRAM_ARB );
 		_VertexProgramEnabled = true;
@@ -1577,11 +1619,26 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 		// Program setuped ?
 		if (program->_DrvInfo==NULL)
 		{
+			// Find nelvp
+			CGPUProgramSource *source = NULL;
+			for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+			{
+				if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+				{
+					source = program->getProgramSource()->Sources[i];
+				}
+			}
+			if (!source)
+			{
+				nlwarning("OpenGL driver only supports 'nelvp' profile, vertex program cannot be used");
+				return false;
+			}
+
 			// try to parse the program
 			CVPParser parser;
 			CVPParser::TProgram parsedProgram;
 			std::string errorOutput;
-			bool result = parser.parse(program->getProgram().c_str(), parsedProgram, errorOutput);
+			bool result = parser.parse(source->SourcePtr, parsedProgram, errorOutput);
 			if (!result)
 			{
 				nlwarning("Unable to parse a vertex program.");
@@ -1603,7 +1660,7 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 			*/
 
 			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItVtxPrgDrvInfoPtrList	it= _VtxPrgDrvInfos.insert(_VtxPrgDrvInfos.end(), (NL3D::IVertexProgramDrvInfos*)NULL);
+			ItGPUPrgDrvInfoPtrList	it= _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
 
 			// Create a driver info
 			*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
@@ -1614,14 +1671,20 @@ bool CDriverGL::activeEXTVertexShader (CVertexProgram *program)
 			{
 				delete drvInfo;
 				program->_DrvInfo = NULL;
-				_VtxPrgDrvInfos.erase(it);
+				_GPUPrgDrvInfos.erase(it);
 				return false;
 			}
+
+			// Set parameters for assembly programs
+			drvInfo->ParamIndices = source->ParamIndices;
+
+			// Build the feature info
+			program->buildInfo(source->DisplayName.c_str(), source->Features);
 		}
 		else
 		{
 			// Cast the driver info pointer
-			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IVertexProgramDrvInfos*)program->_DrvInfo);
+			drvInfo=safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
 		}
 
 		glEnable( GL_VERTEX_SHADER_EXT);

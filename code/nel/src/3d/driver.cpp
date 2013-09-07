@@ -33,7 +33,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x6c; // pixel program interface
+const uint32 IDriver::InterfaceVersion = 0x6d; // gpu program interface
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )

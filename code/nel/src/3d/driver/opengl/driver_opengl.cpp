@@ -2574,14 +2574,6 @@ CVertexBuffer::TVertexColorType CDriverGL::getVertexColorFormat() const
 }
 
 // ***************************************************************************
-bool CDriverGL::activeShader(CShader * /* shd */)
-{
-	H_AUTO_OGL(CDriverGL_activeShader)
-
-	return false;
-}
-
-// ***************************************************************************
 void CDriverGL::startBench (bool wantStandardDeviation, bool quick, bool reset)
 {
 	CHTimer::startBench (wantStandardDeviation, quick, reset);

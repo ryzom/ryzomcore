@@ -130,7 +130,7 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 	{
 		nldebug("VR: arbfp1");		
 		source->Profile = IGPUProgram::arbfp1;
-		source->setCodePtr(a_arbfp1);
+		source->setSourcePtr(a_arbfp1);
 		m_PixelProgram = new CPixelProgram(sourceCont);
 	}
 	/*else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))

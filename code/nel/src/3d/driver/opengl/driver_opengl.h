@@ -406,8 +406,6 @@ public:
 
 	virtual CMatrix			getViewMatrix() const;
 
-	virtual bool			activeShader(CShader *shd);
-
 	virtual	void			forceNormalize(bool normalize)
 	{
 		_ForceNormalize= normalize;
@@ -1349,7 +1347,7 @@ private:
 	/// \name Pixel program implementation
 	// @{
 		bool activeARBPixelProgram (CPixelProgram *program);
-		bool setupARBPixelProgram (const CPixelProgram *program, GLuint id/*, bool &specularWritten*/);
+		bool setupPixelProgram (CPixelProgram *program, GLuint id/*, bool &specularWritten*/);
 	//@}
  
 
@@ -1530,7 +1528,7 @@ private:
 };
 
 // ***************************************************************************
-class CVertexProgamDrvInfosGL : public IVertexProgramDrvInfos
+class CVertexProgamDrvInfosGL : public IGPUProgramDrvInfos
 {
 public:
 	// The GL Id.
@@ -1551,18 +1549,36 @@ public:
 
 
 	// The gl id is auto created here.
-	CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it);
+	CVertexProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it);
+
+	virtual uint getParamIdx(char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
 };
 
 // ***************************************************************************
-class CPixelProgamDrvInfosGL : public IPixelProgramDrvInfos
+class CPixelProgamDrvInfosGL : public IGPUProgramDrvInfos
 {
 public:
 	// The GL Id.
 	GLuint					ID;
  
 	// The gl id is auto created here.
-	CPixelProgamDrvInfosGL (CDriverGL *drv, ItPixelPrgDrvInfoPtrList it);
+	CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it);
+
+	virtual uint getParamIdx(char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
 };
 
 #ifdef NL_STATIC

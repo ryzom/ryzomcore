@@ -39,7 +39,7 @@ CVertexProgram::CVertexProgram(const char *nelvp) : _Info(NULL)
 	_ProgramSource = new CGPUProgramSourceCont();
 	_ProgramSource->Sources.push_back(source);
 	source->Profile = IGPUProgram::nelvp;
-	source->setCode(nelvp);
+	source->setSource(nelvp);
 	source->Features = 0;
 }
 

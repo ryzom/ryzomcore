@@ -50,7 +50,7 @@ namespace NLDRIVERGL {
 #endif
 
 // ***************************************************************************
-CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItPixelPrgDrvInfoPtrList it) : IPixelProgramDrvInfos (drv, it) 
+CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it) 
 {
 	H_AUTO_OGL(CPixelProgamDrvInfosGL_CPixelProgamDrvInfosGL)
 	// Extension must exist
@@ -109,25 +109,25 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 		if (program->_DrvInfo==NULL)
 		{
 			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItPixelPrgDrvInfoPtrList	it= _PixelPrgDrvInfos.insert(_PixelPrgDrvInfos.end(), (NL3D::IPixelProgramDrvInfos*)NULL);
+			ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
 
 			// Create a driver info
-			*it = drvInfo = new CPixelProgamDrvInfosGL (this, it);
+			*it = drvInfo = new CPixelProgamDrvInfosGL(this, it);
 			// Set the pointer
-			program->_DrvInfo=drvInfo;
+			program->_DrvInfo = drvInfo;
 		
-			if(!setupARBPixelProgram(program, drvInfo->ID))
+			if (!setupPixelProgram(program, drvInfo->ID))
 			{
 				delete drvInfo;
 				program->_DrvInfo = NULL;
-				_PixelPrgDrvInfos.erase(it);
+				_GPUPrgDrvInfos.erase(it);
 				return false;
 			}
 		}
 		else
 		{
 			// Cast the driver info pointer
-			drvInfo=safe_cast<CPixelProgamDrvInfosGL*>((IPixelProgramDrvInfos*)program->_DrvInfo);
+			drvInfo=safe_cast<CPixelProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
 		}
 		glEnable( GL_FRAGMENT_PROGRAM_ARB );
 		_PixelProgramEnabled = true;
@@ -148,15 +148,31 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 }
 
 // ***************************************************************************
-bool CDriverGL::setupARBPixelProgram (const CPixelProgram *program, GLuint id/*, bool &specularWritten*/)
+bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &specularWritten*/)
 {
 	H_AUTO_OGL(CDriverGL_setupARBPixelProgram)
+	
+	CPixelProgamDrvInfosGL *drvInfo = static_cast<CPixelProgamDrvInfosGL *>((IGPUProgramDrvInfos *)program->_DrvInfo);
 
-	const std::string &code = program->getProgram();
+	// Find a supported pixel program profile
+	CGPUProgramSource *source = NULL;
+	for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+	{
+		if (supportPixelProgram(program->getProgramSource()->Sources[i]->Profile))
+		{
+			source = program->getProgramSource()->Sources[i];
+		}
+	}
+	if (!source)
+	{
+		nlwarning("No supported source profile for pixel program");
+		return false;
+	}
 
+	// Compile the program
 	nglBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, id);
 	glGetError();
-	nglProgramStringARB( GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, code.size(), code.c_str() );
+	nglProgramStringARB( GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, source->SourceLen, source->SourcePtr);
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR)
 	{
@@ -165,25 +181,25 @@ bool CDriverGL::setupARBPixelProgram (const CPixelProgram *program, GLuint id/*,
 			GLint position;
 			glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &position);
 			nlassert(position != -1); // there was an error..
-			nlassert(position < (GLint) code.size());
+			nlassert(position < (GLint) source->SourceLen);
 			uint line = 0;
-			const char *lineStart = program->getProgram().c_str();
+			const char *lineStart = source->SourcePtr;
 			for(uint k = 0; k < (uint) position; ++k)
 			{
-				if (code[k] == '\n') 
+				if (source->SourcePtr[k] == '\n') 
 				{
-					lineStart = code.c_str() + k;
+					lineStart = source->SourcePtr + k;
 					++line;
 				}
 			}
 			nlwarning("ARB fragment program parse error at line %d.", (int) line);
 			// search end of line
-			const char *lineEnd = code.c_str() + code.size();
-			for(uint k = position; k < code.size(); ++k)
+			const char *lineEnd = source->SourcePtr + source->SourceLen;
+			for(uint k = position; k < source->SourceLen; ++k)
 			{
-				if (code[k] == '\n')
+				if (source->SourcePtr[k] == '\n')
 				{
-					lineEnd = code.c_str() + k;
+					lineEnd = source->SourcePtr + k;
 					break;
 				}
 			}
@@ -196,6 +212,13 @@ bool CDriverGL::setupARBPixelProgram (const CPixelProgram *program, GLuint id/*,
 		nlassert(0);
 		return false;
 	}
+
+	// Set parameters for assembly programs
+	drvInfo->ParamIndices = source->ParamIndices;
+
+	// Build the feature info
+	program->buildInfo(source->DisplayName.c_str(), source->Features);
+
 	return true;	
 }
 

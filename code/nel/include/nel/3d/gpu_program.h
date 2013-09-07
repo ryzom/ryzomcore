@@ -57,7 +57,7 @@ public:
 	// The virtual dtor is important.
 	virtual ~IGPUProgramDrvInfos(void);
 
-	virtual uint getParamIdx(char *name) const { return ~0; }; // STEREO_TODO
+	virtual uint getParamIdx(char *name) const = 0;
 };
 
 class CGPUProgramSource;

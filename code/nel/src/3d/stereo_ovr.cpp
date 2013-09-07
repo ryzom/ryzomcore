@@ -248,21 +248,21 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 	{
 		nldebug("VR: fp40");
 		source->Profile = IGPUProgram::fp40;
-		source->setCodePtr(g_StereoOVR_fp40);
+		source->setSourcePtr(g_StereoOVR_fp40);
 		m_PixelProgram = new CPixelProgram(sourceCont);	
 	}
 	else if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
 		nldebug("VR: arbfp1");
 		source->Profile = IGPUProgram::arbfp1;
-		source->setCodePtr(g_StereoOVR_arbfp1);
+		source->setSourcePtr(g_StereoOVR_arbfp1);
 		m_PixelProgram = new CPixelProgram(sourceCont);
 	}
 	else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
 	{
 		nldebug("VR: ps_2_0");
 		source->Profile = IGPUProgram::ps_2_0;
-		source->setCodePtr(g_StereoOVR_ps_2_0);
+		source->setSourcePtr(g_StereoOVR_ps_2_0);
 		m_PixelProgram = new CPixelProgram(sourceCont);
 	}
 
