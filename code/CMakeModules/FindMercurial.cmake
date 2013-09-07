@@ -48,7 +48,8 @@
 #  License text for the above reference.)
 
 FIND_PROGRAM(Mercurial_HG_EXECUTABLE hg
-  DOC "mercurial command line client")
+  DOC "mercurial command line client"
+  HINTS /opt/local/bin)
 MARK_AS_ADVANCED(Mercurial_HG_EXECUTABLE)
 
 IF(Mercurial_HG_EXECUTABLE)
@@ -58,7 +59,7 @@ IF(Mercurial_HG_EXECUTABLE)
 	
   STRING(REGEX REPLACE ".*version ([\\.0-9]+).*"
     "\\1" Mercurial_VERSION_HG "${Mercurial_VERSION_HG}")
-	
+
   MACRO(Mercurial_WC_INFO dir prefix)
     EXECUTE_PROCESS(COMMAND ${Mercurial_HG_EXECUTABLE} tip --template "{rev};{node};{tags};{author}"
       WORKING_DIRECTORY ${dir}

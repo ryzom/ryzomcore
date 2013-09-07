@@ -47,14 +47,14 @@ uint					CPUFrequency;
 bool GetGLInformation ()
 {
 	// *** INIT VARIABLES
-	
+
 	GLExtensions.clear ();
 	GLRenderer = "";
 	GLVendor = "";
 	GLVersion = "";
 
 	// *** INIT OPENGL
-	
+
 	// Register a window class
 	WNDCLASS		wc;
 	memset(&wc,0,sizeof(wc));
@@ -79,14 +79,14 @@ bool GetGLInformation ()
 	WndRect.right=100;
 	WndRect.bottom=100;
 	HWND hWnd = CreateWindow (	"RyzomGetGlInformation",
-							"",
-							WndFlags,
-							CW_USEDEFAULT,CW_USEDEFAULT,
-							WndRect.right,WndRect.bottom,
-							NULL,
-							NULL,
-							GetModuleHandle(NULL),
-							NULL);
+		"",
+		WndFlags,
+		CW_USEDEFAULT,CW_USEDEFAULT,
+		WndRect.right,WndRect.bottom,
+		NULL,
+		NULL,
+		GetModuleHandle(NULL),
+		NULL);
 	if (!hWnd) 
 		return false;
 
@@ -384,7 +384,7 @@ void CDisplayDlg::updateState ()
 	TextWnd1.EnableWindow (Windowed == 1);
 	TextWnd2.EnableWindow (Windowed == 1);
 	TextWnd3.EnableWindow (Windowed == 1);
-	
+
 	// Fill the combobox values
 	ModeCtrl.ResetContent ();
 	uint i;
@@ -411,11 +411,11 @@ void CDisplayDlg::updateState ()
 BOOL CDisplayDlg::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
-	
+
 	updateState ();
-	
+
 	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+	// EXCEPTION: OCX Property Pages should return FALSE
 }
 
 // ***************************************************************************

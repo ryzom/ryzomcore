@@ -130,6 +130,7 @@ public:		// Methods.
 	template <class V> CAngle angleTo(const V &v)	const		{ return CAngle(atan2((v.y()-y()).asDouble(),
 																					  (v.x()-x()).asDouble())); }
 	template <class V> double distTo(const V &v)	const		{ return (*this-v).norm(); }
+	template <class V> double distSqTo(const V &v)	const		{ return (*this-v).sqrnorm(); }
 	template <class V> double quickDistTo(const V &v) const		{ double dx=fabs((v.x()-x()).asDouble()),
 																		 dy=fabs((v.y()-y()).asDouble());
 																  return (dx>dy)? (dx+dy/2): (dy+dx/2);	}
