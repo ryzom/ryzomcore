@@ -1124,9 +1124,6 @@ public:
 	virtual void			setVertexProgram3f(uint index, const NLMISC::CVector& v) = 0;
 	virtual void			setVertexProgram4f(uint index, const NLMISC::CVector& v, float f3) = 0;
 	virtual void			setVertexProgram4x4f(uint index, const NLMISC::CMatrix& m) = 0;
-	virtual void			setVertexProgram1fv(uint index, size_t num, const float *src) = 0;
-	virtual void			setVertexProgram2fv(uint index, size_t num, const float *src) = 0;
-	virtual void			setVertexProgram3fv(uint index, size_t num, const float *src) = 0;
 	virtual void			setVertexProgram4fv(uint index, size_t num, const float *src) = 0;
 	// @}
 
@@ -1170,9 +1167,6 @@ public:
 	virtual void			setPixelProgram3f(uint index, const NLMISC::CVector& v) = 0;
 	virtual void			setPixelProgram4f(uint index, const NLMISC::CVector& v, float f3) = 0;
 	virtual void			setPixelProgram4x4f(uint index, const NLMISC::CMatrix& m) = 0;
-	virtual void			setPixelProgram1fv(uint index, size_t num, const float *src) = 0;
-	virtual void			setPixelProgram2fv(uint index, size_t num, const float *src) = 0;
-	virtual void			setPixelProgram3fv(uint index, size_t num, const float *src) = 0;
 	virtual void			setPixelProgram4fv(uint index, size_t num, const float *src) = 0;
 	// @}
 

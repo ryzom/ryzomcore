@@ -56,11 +56,11 @@ namespace NL3D {
 class CGPUProgramParams
 {
 public:
-	enum TType { Float, Int };
-	struct CMeta { uint Index, Count; TType Type; size_t Next, Prev; };
+	enum TType { Float, Int, UInt };
+	struct CMeta { uint Index, Size, Count; TType Type; size_t Next, Prev; }; // size is element size, count is nb of elements
 
 private:
-	union CVec { float F[4]; sint32 I[4]; };
+	union CVec { float F[4]; sint32 I[4]; uint32 UI[4]; };
 
 public:
 	CGPUProgramParams();
@@ -81,9 +81,6 @@ public:
 	void set3f(uint index, const NLMISC::CVector& v);
 	void set4f(uint index, const NLMISC::CVector& v, float f3);
 	void set4x4f(uint index, const NLMISC::CMatrix& m);
-	void set1fv(uint index, size_t num, const float *src);
-	void set2fv(uint index, size_t num, const float *src);
-	void set3fv(uint index, size_t num, const float *src);
 	void set4fv(uint index, size_t num, const float *src);
 	void unset(uint index);
 
@@ -99,9 +96,6 @@ public:
 	void set3f(const std::string &name, const NLMISC::CVector& v);
 	void set4f(const std::string &name, const NLMISC::CVector& v, float f3);
 	void set4x4f(const std::string &name, const NLMISC::CMatrix& m);
-	void set1fv(const std::string &name, size_t num, const float *src);
-	void set2fv(const std::string &name, size_t num, const float *src);
-	void set3fv(const std::string &name, size_t num, const float *src);
 	void set4fv(const std::string &name, size_t num, const float *src);
 	void unset(const std::string &name);
 
@@ -110,8 +104,8 @@ public:
 
 	// Internal
 	/// Allocate specified number of components if necessary
-	size_t allocOffset(uint index, uint count, TType type);
-	size_t allocOffset(const std::string &name, uint count, TType type);
+	size_t allocOffset(uint index, uint size, uint count, TType type);
+	size_t allocOffset(const std::string &name, uint size, uint count, TType type);
 	/// Return offset for specified index
 	size_t getOffset(uint index) const;
 	size_t getOffset(const std::string &name) const;
@@ -119,20 +113,23 @@ public:
 	void freeOffset(size_t offset);
 
 	// Iteration (returns the offsets for access using getFooByOffset)
-	size_t getBegin() const { return m_Meta.size() ? m_First : s_End; }
-	size_t getNext(size_t offset) const { return m_Meta[offset].Next; }
-	size_t getEnd() const { return s_End; }
+	inline size_t getBegin() const { return m_Meta.size() ? m_First : s_End; }
+	inline size_t getNext(size_t offset) const { return m_Meta[offset].Next; }
+	inline size_t getEnd() const { return s_End; }
 
 	// Data access
-	uint getCountByOffset(size_t offset) { return m_Meta[offset].Count; } // component count (number of floats or ints)
-	float *getPtrFByOffset(size_t offset) { return m_Vec[offset].F; }
-	int *getPtrIByOffset(size_t offset) { return m_Vec[offset].I; }
-	TType getTypeByOffset(size_t offset) { return m_Meta[offset].Type; }
-	uint getIndexByOffset(size_t offset) { return m_Meta[offset].Index; }
-	const std::string *getNameByOffset(size_t offset); // non-optimized for dev tools only, may return NULL if name unknown
+	inline uint getSizeByOffset(size_t offset) const { return m_Meta[offset].Size; } // size of element (4 for float4)
+	inline uint getCountByOffset(size_t offset) const { return m_Meta[offset].Count; } // number of elements (usually 1)
+	inline uint getNbComponentsByOffset(size_t offset) const { return m_Meta[offset].Size * m_Meta[offset].Count; } // nb of components (size * count)
+	inline float *getPtrFByOffset(size_t offset) { return m_Vec[offset].F; }
+	inline sint32 *getPtrIByOffset(size_t offset) { return m_Vec[offset].I; }
+	inline uint32 *getPtrUIByOffset(size_t offset) { return m_Vec[offset].UI; }
+	inline TType getTypeByOffset(size_t offset) const { return m_Meta[offset].Type; }
+	inline uint getIndexByOffset(size_t offset) const { return m_Meta[offset].Index; }
+	const std::string *getNameByOffset(size_t offset) const; // non-optimized for dev tools only, may return NULL if name unknown
 
 	// Utility
-	static inline uint getNbRegistersByComponents(uint count) { return (count + 3) >> 2; } // vector register per 4 components
+	static inline uint getNbRegistersByComponents(uint nbComponents) { return (nbComponents + 3) >> 2; } // vector register per 4 components
 
 private:
 	std::vector<CVec> m_Vec;
