@@ -8,7 +8,7 @@ ADD_SUBDIRECTORY(object_viewer)
 ADD_SUBDIRECTORY(georges_editor)
 
 IF(WITH_GUI)
-ADD_SUBDIRECTORY(gui_editor)
+  ADD_SUBDIRECTORY(gui_editor)
 ENDIF(WITH_GUI)
 
 ADD_SUBDIRECTORY(translation_manager)
