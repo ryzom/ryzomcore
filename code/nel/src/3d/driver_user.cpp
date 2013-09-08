@@ -1496,12 +1496,6 @@ void			CDriverUser::forceTextureResize(uint divisor)
 
 	_Driver->forceTextureResize(divisor);
 }
-void			CDriverUser::forceNativeFragmentPrograms(bool nativeOnly)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	_Driver->forceNativeFragmentPrograms(nativeOnly);
-}
 bool			CDriverUser::setMonitorColorProperties (const CMonitorColorProperties &properties)
 {
 	NL3D_HAUTO_UI_DRIVER;

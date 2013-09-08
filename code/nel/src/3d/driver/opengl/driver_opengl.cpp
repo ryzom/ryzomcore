@@ -1994,12 +1994,6 @@ static void fetchPerturbedEnvMapR200()
 }
 
 // ***************************************************************************
-void CDriverGL::forceNativeFragmentPrograms(bool nativeOnly)
-{
-	_ForceNativeFragmentPrograms = nativeOnly;
-}
-
-// ***************************************************************************
 void CDriverGL::initFragmentShaders()
 {
 	H_AUTO_OGL(CDriverGL_initFragmentShaders);

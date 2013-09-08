@@ -880,7 +880,6 @@ public:
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
 	virtual void			forceTextureResize(uint divisor);
-	virtual void			forceNativeFragmentPrograms(bool /* nativeOnly */) {} // ignored
 
 	// Driver information
 	virtual uint			getNumAdapter() const;

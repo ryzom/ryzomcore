@@ -563,6 +563,7 @@ bool CStereoOVR::endRenderTarget()
 		NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();
 		NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
 		barrelMat->setTexture(0, m_BarrelTex);
+
 		drvInternal->activePixelProgram(m_PixelProgram);
 
 		float w = float(m_BarrelQuadLeft.V1.x),// / float(width),
@@ -582,20 +583,21 @@ bool CStereoOVR::endRenderTarget()
 		float scaleY = (h / 2);
 		float scaleInX = (2 / w);
 		float scaleInY = (2 / h);
-		drvInternal->setPixelProgramConstant(0, lensCenterX, lensCenterY, 0.f, 0.f);
-		drvInternal->setPixelProgramConstant(1, screenCenterX, screenCenterY, 0.f, 0.f);
-		drvInternal->setPixelProgramConstant(2, scaleX, scaleY, 0.f, 0.f);
-		drvInternal->setPixelProgramConstant(3, scaleInX, scaleInY, 0.f, 0.f);
-		drvInternal->setPixelProgramConstant(4, 1, m_DevicePtr->HMDInfo.DistortionK);
-
+		
+		drvInternal->setPixelProgram2f(0, lensCenterX, lensCenterY);
+		drvInternal->setPixelProgram2f(1, screenCenterX, screenCenterY);
+		drvInternal->setPixelProgram2f(2, scaleX, scaleY);
+		drvInternal->setPixelProgram2f(3, scaleInX, scaleInY);
+		drvInternal->setPixelProgram4fv(4, 1, m_DevicePtr->HMDInfo.DistortionK);
 
 		m_Driver->drawQuad(m_BarrelQuadLeft, m_BarrelMat);
 
 		x = w;
 		lensCenterX = x + (w - lensViewportShift * 0.5f) * 0.5f;
 		screenCenterX = x + w * 0.5f;
-		drvInternal->setPixelProgramConstant(0, lensCenterX, lensCenterY, 0.f, 0.f);
-		drvInternal->setPixelProgramConstant(1, screenCenterX, screenCenterY, 0.f, 0.f);
+
+		drvInternal->setPixelProgram2f(0, lensCenterX, lensCenterY);
+		drvInternal->setPixelProgram2f(1, screenCenterX, screenCenterY);
 
 		m_Driver->drawQuad(m_BarrelQuadRight, m_BarrelMat);
 

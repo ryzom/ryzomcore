@@ -48,10 +48,10 @@ namespace NL3D {
  * \brief CGPUProgramParams
  * \date 2013-09-07 22:17GMT
  * \author Jan Boon (Kaetemi)
- * A storage for user-provided parameters for GPU programs.
+ * A storage for USERCODE-PROVIDED parameters for GPU programs.
  * Allows for fast updating and iteration of parameters.
  * NOTE TO DRIVER IMPLEMENTORS: DO NOT USE FOR STORING COPIES 
- * OF HARDCODED MATERIAL PARAMETERS OR DRIVER PARAMETERS!!!
+ * OF HARDCODED DRIVER MATERIAL PARAMETERS OR DRIVER PARAMETERS!!!
  */
 class CGPUProgramParams
 {
@@ -66,36 +66,70 @@ public:
 	CGPUProgramParams();
 	virtual ~CGPUProgramParams();
 
-	void setF(uint index, float f0);
-	void setF(uint index, float f0, float f1);
-	void setF(uint index, float f0, float f1, float f2);
-	void setF(uint index, float f0, float f1, float f2, float f3);
-	void setI(uint index, int i0);
-	void setI(uint index, int i0, int i1);
-	void setI(uint index, int i0, int i1, int i2);
-	void setI(uint index, int i0, int i1, int i2, int i3);
-	void setF(uint index, const NLMISC::CVector& v);
-	void setF(uint index, const NLMISC::CMatrix& m);
-	void setF(uint index, uint num, const float *src);
+	// Copy from another params storage
+	void copy(CGPUProgramParams *params);
+
+	// Set by index, available only when the associated program has been compiled
+	void set1f(uint index, float f0);
+	void set2f(uint index, float f0, float f1);
+	void set3f(uint index, float f0, float f1, float f2);
+	void set4f(uint index, float f0, float f1, float f2, float f3);
+	void set1i(uint index, sint32 i0);
+	void set2i(uint index, sint32 i0, sint32 i1);
+	void set3i(uint index, sint32 i0, sint32 i1, sint32 i2);
+	void set4i(uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	void set3f(uint index, const NLMISC::CVector& v);
+	void set4f(uint index, const NLMISC::CVector& v, float f3);
+	void set4x4f(uint index, const NLMISC::CMatrix& m);
+	void set1fv(uint index, size_t num, const float *src);
+	void set2fv(uint index, size_t num, const float *src);
+	void set3fv(uint index, size_t num, const float *src);
+	void set4fv(uint index, size_t num, const float *src);
+	void unset(uint index);
+
+	// Set by name, it is recommended to use index when repeatedly setting an element
+	void set1f(const std::string &name, float f0);
+	void set2f(const std::string &name, float f0, float f1);
+	void set3f(const std::string &name, float f0, float f1, float f2);
+	void set4f(const std::string &name, float f0, float f1, float f2, float f3);
+	void set1i(const std::string &name, sint32 i0);
+	void set2i(const std::string &name, sint32 i0, sint32 i1);
+	void set3i(const std::string &name, sint32 i0, sint32 i1, sint32 i2);
+	void set4i(const std::string &name, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	void set3f(const std::string &name, const NLMISC::CVector& v);
+	void set4f(const std::string &name, const NLMISC::CVector& v, float f3);
+	void set4x4f(const std::string &name, const NLMISC::CMatrix& m);
+	void set1fv(const std::string &name, size_t num, const float *src);
+	void set2fv(const std::string &name, size_t num, const float *src);
+	void set3fv(const std::string &name, size_t num, const float *src);
+	void set4fv(const std::string &name, size_t num, const float *src);
+	void unset(const std::string &name);
+
+	/// Maps the given name to the given index, on duplicate entry the data set by name will be prefered as it can be assumed to have been set after the data set by index
+	void map(uint index, const std::string &name);
 
 	// Internal
 	/// Allocate specified number of components if necessary
 	size_t allocOffset(uint index, uint count, TType type);
+	size_t allocOffset(const std::string &name, uint count, TType type);
 	/// Return offset for specified index
 	size_t getOffset(uint index) const;
+	size_t getOffset(const std::string &name) const;
 	/// Remove by offset
 	void freeOffset(size_t offset);
 
-	// Iteration
+	// Iteration (returns the offsets for access using getFooByOffset)
 	size_t getBegin() const { return m_Meta.size() ? m_First : s_End; }
 	size_t getNext(size_t offset) const { return m_Meta[offset].Next; }
 	size_t getEnd() const { return s_End; }
 
 	// Data access
-	uint getCountByOffset(size_t offset) { return m_Meta[offset].Count; }
+	uint getCountByOffset(size_t offset) { return m_Meta[offset].Count; } // component count (number of floats or ints)
 	float *getPtrFByOffset(size_t offset) { return m_Vec[offset].F; }
 	int *getPtrIByOffset(size_t offset) { return m_Vec[offset].I; }
 	TType getTypeByOffset(size_t offset) { return m_Meta[offset].Type; }
+	uint getIndexByOffset(size_t offset) { return m_Meta[offset].Index; }
+	const std::string *getNameByOffset(size_t offset); // non-optimized for dev tools only, may return NULL if name unknown
 
 	// Utility
 	static inline uint getNbRegistersByComponents(uint count) { return (count + 3) >> 2; } // vector register per 4 components
@@ -103,7 +137,8 @@ public:
 private:
 	std::vector<CVec> m_Vec;
 	std::vector<CMeta> m_Meta;
-	std::vector<size_t> m_Map; // map from index to buffer index
+	std::vector<size_t> m_Map; // map from index to offset
+	std::map<std::string, size_t> m_MapName; // map from name to offset
 	size_t m_First;
 	size_t m_Last;
 	static const size_t s_End = -1;

@@ -673,13 +673,6 @@ public:
 	 */
 	virtual void			forceTextureResize(uint divisor)=0;
 
-	/** Sets enforcement of native fragment programs. This is by default enabled.
-	 *
-	 * \param nativeOnly If set to false, fragment programs don't need to be native to stay loaded,
-	 * 	                 otherwise (aka if true) they will be purged.
-	 */
-	virtual void			forceNativeFragmentPrograms(bool nativeOnly) = 0;
-
 	/** Setup monitor color properties.
 	  *
 	  * Return false if setup failed.

@@ -240,24 +240,9 @@ void			IDriver::removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt)
 	_MatDrvInfos.erase(shaderIt);
 }
 // ***************************************************************************
-/*void			IDriver::removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt)
+void			IDriver::removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt)
 {
-	_ShaderDrvInfos.erase(shaderIt);
-}
-// ***************************************************************************
-void			IDriver::removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt)
-{
-	_VtxPrgDrvInfos.erase(vtxPrgDrvInfoIt);
-}
-// ***************************************************************************
-void			IDriver::removePixelPrgDrvInfoPtr(ItPixelPrgDrvInfoPtrList pixelPrgDrvInfoIt)
-{
-	_PixelPrgDrvInfos.erase(pixelPrgDrvInfoIt);
-}*/
-// ***************************************************************************
-void			IDriver::removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList vtxPrgDrvInfoIt)
-{
-	_GPUPrgDrvInfos.erase(vtxPrgDrvInfoIt);
+	_GPUPrgDrvInfos.erase(gpuPrgDrvInfoIt);
 }
 
 // ***************************************************************************

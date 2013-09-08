@@ -370,8 +370,6 @@ public:
 
 	virtual void			forceTextureResize(uint divisor);
 
-	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
-
 	/// Setup texture env functions. Used by setupMaterial
 	void					setTextureEnvFunction(uint stage, CMaterial& mat);
 
