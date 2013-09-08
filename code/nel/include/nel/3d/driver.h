@@ -1125,6 +1125,9 @@ public:
 	virtual void			setVertexProgram4f(uint index, const NLMISC::CVector& v, float f3) = 0;
 	virtual void			setVertexProgram4x4f(uint index, const NLMISC::CMatrix& m) = 0;
 	virtual void			setVertexProgram4fv(uint index, size_t num, const float *src) = 0;
+	// Set builtin parameters
+	virtual void			setVertexProgramMatrix(uint index, TMatrix matrix, TTransform transform) = 0;
+	virtual void			setVertexProgramFog(uint index) = 0;
 	// @}
 
 
@@ -1168,6 +1171,9 @@ public:
 	virtual void			setPixelProgram4f(uint index, const NLMISC::CVector& v, float f3) = 0;
 	virtual void			setPixelProgram4x4f(uint index, const NLMISC::CMatrix& m) = 0;
 	virtual void			setPixelProgram4fv(uint index, size_t num, const float *src) = 0;
+	// Set builtin parameters
+	virtual void			setPixelProgramMatrix(uint index, TMatrix matrix, TTransform transform) = 0;
+	virtual void			setPixelProgramFog(uint index) = 0;
 	// @}
 
 
@@ -1183,8 +1189,6 @@ public:
 	inline void				setConstant(uint index, const NLMISC::CVectorD &value) { setVertexProgram4f(index, (float)value.x, (float)value.y, (float)value.z, 0.f); }
 	/// setup several 4 float csts taken from the given tab
 	inline void				setConstant(uint index, uint num, const float *src) { setVertexProgram4fv(index, num, src); }
-	/// setup several 4 double csts taken from the given tab (convert to float)
-	virtual void			setConstant(uint index, uint num, const double *src) = 0;
 
 	/**
 	  * Setup constants with a current matrix.
@@ -1197,7 +1201,7 @@ public:
 	  * \param transform is the transformation to apply to the matrix before store it in the constants.
 	  *
 	  */
-	virtual void			setConstantMatrix(uint index, TMatrix matrix, TTransform transform) = 0;
+	inline void				setConstantMatrix(uint index, TMatrix matrix, TTransform transform) { setVertexProgramMatrix(index, matrix, transform); };
 
 	/**
 	  * Setup the constant with the fog vector. This vector must be used to get the final fog value in a vertex shader.
@@ -1211,7 +1215,7 @@ public:
 	  * \param index is the index where to store the vector.
 	  *
 	  */
-	virtual void			setConstantFog(uint index) = 0;
+	inline void				setConstantFog(uint index) { setVertexProgramFog(index); };
 	// @}
 
 

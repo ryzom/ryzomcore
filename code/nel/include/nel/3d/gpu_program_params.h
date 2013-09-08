@@ -52,6 +52,9 @@ namespace NL3D {
  * Allows for fast updating and iteration of parameters.
  * NOTE TO DRIVER IMPLEMENTORS: DO NOT USE FOR STORING COPIES 
  * OF HARDCODED DRIVER MATERIAL PARAMETERS OR DRIVER PARAMETERS!!!
+ * The 4-component alignment that is done in this storage
+ * class is necessary to simplify support for register-based
+ * assembly shaders, which require setting per 4 components.
  */
 class CGPUProgramParams
 {
