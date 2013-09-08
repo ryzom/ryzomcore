@@ -87,7 +87,7 @@ class WebUsers extends Users{
        }
     
     public function getUsername(){
-
+              
        if(! isset($this->login) || $this->login == ""){
               $row = db_query("SELECT * FROM {users} WHERE uid = :id", array(':id' => $this->uId))->fetchAssoc();
               $this->set($row);
@@ -137,12 +137,13 @@ class WebUsers extends Users{
     }
     
     public function setPassword($user, $pass){
-        $reply = WebUsers::setAmsPassword($user, $pass);
-        $values = Array('user' => $user, 'pass' => $pass);
+        $hashpass = crypt($pass, WebUsers::generateSALT());
+        $reply = WebUsers::setAmsPassword($user, $hashpass);
+        $drupal_pass = user_hash_password($pass);
+        $values = Array('user' => $user, 'pass' => $drupal_pass);
          try {
                //make connection with and put into shard db
-               $dbw = new DBLayer("web");
-               $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
+               db_query("UPDATE {users} SET pass = :pass WHERE name = :user", $values);
           }
           catch (PDOException $e) {
             //ERROR: the web DB is offline
@@ -155,8 +156,8 @@ class WebUsers extends Users{
         $values = Array('user' => $user, 'mail' => $mail);
          try {
                //make connection with and put into shard db
-               $dbw = new DBLayer("web");
-               $dbw->execute("UPDATE ams_user SET Email = :mail WHERE Login = :user ",$values);
+               db_query("UPDATE {users} SET mail = :mail WHERE name = :user", $values);
+               
           }
           catch (PDOException $e) {
             //ERROR: the web DB is offline

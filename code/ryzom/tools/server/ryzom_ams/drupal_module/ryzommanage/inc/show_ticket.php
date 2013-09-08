@@ -68,6 +68,8 @@ function show_ticket(){
                 $result['sGroups'] = Gui_Elements::make_table_with_key_is_id(Support_Group::getAllSupportGroups(), Array("getName"), "getSGroupId" );
             }
             $result['hasInfo'] = $target_ticket->hasInfo();
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
             
         }else{

@@ -18,6 +18,8 @@ function userlist(){
         if (Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
             $pageResult['isAdmin'] = "TRUE";
         }
+        global $INGAME_WEBPATH;
+        $pageResult['ingame_webpath'] = $INGAME_WEBPATH;
         return $pageResult;
     }else{
         //ERROR: No access!

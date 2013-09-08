@@ -1,7 +1,8 @@
 <?php
 
 function login(){
-	
+	global $INGAME_WEBPATH;
+	global $WEBPATH;
 	try{
 		$username = filter_var($_POST['Username'],FILTER_SANITIZE_STRING);
 		$password = filter_var($_POST['Password'],FILTER_SANITIZE_STRING);
@@ -15,7 +16,11 @@ function login(){
 			$_SESSION['Language'] = $user->getLanguage();
 			
 			//go back to the index page.
-			header( 'Location: '. $INGAME_WEBPATH );
+			if (Helpers::check_if_game_client()) {
+				header( 'Location: '. $INGAME_WEBPATH );
+			}else{
+				header( 'Location: '. $WEBPATH );
+			}
 			exit;
 		}else{
 			//handle login failure

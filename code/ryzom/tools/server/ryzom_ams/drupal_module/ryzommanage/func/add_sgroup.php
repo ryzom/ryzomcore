@@ -1,7 +1,8 @@
 <?php
 
 function add_sgroup(){
-    
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     if(WebUsers::isLoggedIn()){
         
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
@@ -22,7 +23,11 @@ function add_sgroup(){
             //require($SITEBASE . '/inc/sgroup_list.php');
             //$result= array_merge($result, sgroup_list());
             //return helpers :: loadtemplate( 'sgroup_list', $result, true);
-            header("Location: ams?page=sgroup_list");
+            if (Helpers::check_if_game_client()) {
+                header("Location: ".$INGAME_WEBPATH."?page=sgroup_list");
+            }else{
+                header("Location: ".$WEBPATH."?page=sgroup_list");
+            }
             exit;
             
         }else{

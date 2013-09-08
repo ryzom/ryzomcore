@@ -91,5 +91,7 @@ $TIME_FORMAT = "m-d-Y H:i:s";
 //defines which ingame layout template should be used
 $INGAME_LAYOUT = "basic";
 
+$FORCE_INGAME = true;
+
 
 

@@ -2,6 +2,8 @@
 
 function create_ticket(){
     //if logged in
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     if(WebUsers::isLoggedIn() && isset($_SESSION['ticket_user'])){
         
         if(isset($_POST['target_id'])){
@@ -19,7 +21,11 @@ function create_ticket(){
                         $author=  Ticket_User::constr_ExternId($_POST['target_id'])->getTUserId();
                     }
                     $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, unserialize($_SESSION['ticket_user'])->getTUserId(),0, $_POST);
-                    header("Location: ams?page=show_ticket&id=".$ticket_id);
+                    if (Helpers::check_if_game_client()) {
+                        header("Location: ".$INGAME_WEBPATH."?page=show_ticket&id=".$ticket_id);
+                    }else{
+                        header("Location: ".$WEBPATH."?page=show_ticket&id=".$ticket_id);
+                    }
                     exit;
                     
                 }catch (PDOException $e) {

@@ -1,6 +1,8 @@
 <?php
 
 function show_sgroup(){
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     //if logged in
     if(WebUsers::isLoggedIn()){
         if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
@@ -11,7 +13,11 @@ function show_sgroup(){
                 if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                     $result['delete'] = Support_Group::deleteUserOfSupportGroup( $delete_id, $result['target_id']  );
-                    header("Location: ams?page=show_sgroup&id=" . $result['target_id']);
+                    if (Helpers::check_if_game_client()) {
+                        header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
+                    }else{
+                        header("Location: ".$WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
+                    }
                     exit;
                     
                 }
@@ -32,6 +38,8 @@ function show_sgroup(){
                     $result['userlist'][$i]['name'] = $webuser->getUsername();
                     $i++;
                 }
+                global $INGAME_WEBPATH;
+                $result['ingame_webpath'] = $INGAME_WEBPATH;
                 return $result;
                 
             

@@ -35,6 +35,8 @@ function createticket(){
         //create array of category id & names
         $catArray = Ticket_Category::getAllCategories();
         $result['category'] = Gui_Elements::make_table_with_key_is_id($catArray, Array("getName"), "getTCategoryId" );
+        global $INGAME_WEBPATH;
+        $result['ingame_webpath'] = $INGAME_WEBPATH;
         return $result;
     
     }else{

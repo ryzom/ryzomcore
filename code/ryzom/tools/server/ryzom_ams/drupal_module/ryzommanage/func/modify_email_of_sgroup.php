@@ -1,7 +1,8 @@
 <?php
 
 function modify_email_of_sgroup(){
-    
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     if(WebUsers::isLoggedIn()){
         
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user'])) &&  isset($_POST['target_id'])){
@@ -36,7 +37,11 @@ function modify_email_of_sgroup(){
             //require_once($SITEBASE . 'inc/show_sgroup.php');
             //$result= array_merge($result, show_sgroup());
             //helpers :: loadtemplate( 'show_sgroup', $result);
-            header("Location: ams?page=show_sgroup&id=".$sgroupid);
+            if (Helpers::check_if_game_client()) {
+                header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=".$sgroupid);
+            }else{
+                header("Location: ".$WEBPATH."?page=show_sgroup&id=".$sgroupid);
+            }
             exit;
             
         }else{
