@@ -486,10 +486,10 @@ function createUser($values, $user_id)
     //Create the user on the shard + in case shard is offline put copy of query in query db
     //returns: ok, shardoffline or liboffline
     $result = WebUsers::createUser($params, $user_id);
-    //createPermissions(array($login));
+    createPermissions(array($login));
 }
 
-/*function createPermissions($values) {
+function createPermissions($values) {
         
     try {
         $hostname = variable_get('ryzommanage_serverurl', 'localhost');
@@ -536,7 +536,7 @@ function createUser($values, $user_id)
     }  
     
     return true;
-}*/
+}
 
 function ryzommanage_user_login(&$edit, $account){
     $_SESSION['user'] = $account->name;
@@ -610,7 +610,7 @@ function top_bar()
         // Logged in user
         //check permission, if user
         if(ticket_user::isMod(unserialize($_SESSION['ticket_user']))){
-              return "<div class='ryzomuserbar'><a href='".$WEBPATH."?page=show_user&id=".$userId."'>Profile</a> |
+              return "<div class='ryzomuserbar'><a href='".$WEBPATH."?page=dashboard'>Dashboard</a> | <a href='".$WEBPATH."?page=show_user&id=".$userId."'>Profile</a> |
         <a href='".$WEBPATH."?page=createticket&id=".$userId."'>Create Ticket</a> | 
         <a href='".$BASE_WEBPATH."/user/".$userId."/edit'>Settings</a> | <a href='".$WEBPATH."?page=userlist'>Users</a> |
         <a href='".$WEBPATH."?page=show_queue&get=todo'>Queues</a> |
