@@ -1,11 +1,12 @@
 <?php
 
 function show_ticket_log(){
-   
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
         //only allow admins to browse the log!
-        if(Ticket_User::isMod($_SESSION['ticket_user']) ){
+        if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) ){
             $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
             $target_ticket = new Ticket();
             $target_ticket->load_With_TId($result['ticket_id']);
@@ -23,7 +24,11 @@ function show_ticket_log(){
                     $webUser2 = new WebUsers($log['argument']);
                     $query_backpart =  $webUser2->getUsername();
                 }else if($log['action'] == 4){
-                    $query_backpart = "<a href='index.php?page=show_reply&id=" . $log['argument'] . "'>ID#" . $log['argument'] . "</a>";
+                    if (Helpers::check_if_game_client()) {
+                        $query_backpart = "<a href='".$INGAME_WEBPATH."?page=show_reply&id=" . $log['argument'] . "'>ID#" . $log['argument'] . "</a>";
+                    }else{
+                        $query_backpart = "<a href='".$WEBPATH."?page=show_reply&id=" . $log['argument'] . "'>ID#" . $log['argument'] . "</a>";
+                    }
                 }else if($log['action'] == 5){
                     $statusArray = Ticket::getStatusArray();
                     $query_backpart = $statusArray[$log['argument'] ];
@@ -31,15 +36,21 @@ function show_ticket_log(){
                     $priorityArray = Ticket::getPriorityArray();
                     $query_backpart = $priorityArray[$log['argument'] ];
                 }else if($log['action'] == 8){
-                    $query_backpart = "<a href='index.php?page=show_sgroupy&id=" . $log['argument'] . "'>" . Support_Group::getGroup($log['argument'])->getName() . "</a>";
+                    if (Helpers::check_if_game_client()) {
+                        $query_backpart = "<a href='".$INGAME_WEBPATH."?page=show_sgroupy&id=" . $log['argument'] . "'>" . Support_Group::getGroup($log['argument'])->getName() . "</a>";
+                    }else{
+                        $query_backpart = "<a href='".$WEBPATH."?page=show_sgroupy&id=" . $log['argument'] . "'>" . Support_Group::getGroup($log['argument'])->getName() . "</a>";
+                    }
                 }
                 $result['ticket_logs'][$i]['query'] = $author . " " . $log_action_array[$log['action']] . " " .  $query_backpart;
                 $result['ticket_logs'][$i]['timestamp_elapsed'] = Gui_Elements::time_elapsed_string($log['timestamp']);
                 $i++;
             }    
-            if(Ticket_User::isMod($_SESSION['ticket_user'])){
+            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $result['isMod'] = "TRUE";
             }
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
             
         }else{

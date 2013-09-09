@@ -9,7 +9,7 @@ function change_info(){
             if(isset($_POST['target_id'])){
 		
                 
-                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod($_SESSION['ticket_user'] ) ){
+                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user']) ) ){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
@@ -77,15 +77,17 @@ function change_info(){
                     }
 
                     global $SITEBASE;
-                    require_once($SITEBASE . 'inc/settings.php');
+                    require_once($SITEBASE . '/inc/settings.php');
                     $result = settings();
                     if($updated){
                         $result['info_updated'] = "OK";
                     }
-                    $result['permission'] = $_SESSION['ticket_user']->getPermission();
+                    $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
                     $result['username'] = $_SESSION['user'];
                     $result['no_visible_elements'] = 'FALSE';
                     $result['target_id'] = $_POST['target_id'];
+		    global $INGAME_WEBPATH;
+                    $result['ingame_webpath'] = $INGAME_WEBPATH;
                     helpers :: loadtemplate( 'settings', $result);
                     exit;
                     

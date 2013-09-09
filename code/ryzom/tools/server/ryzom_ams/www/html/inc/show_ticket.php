@@ -4,12 +4,12 @@ function show_ticket(){
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
         
-        $result['user_id'] = $_SESSION['ticket_user']->getTUserId();
+        $result['user_id'] = unserialize($_SESSION['ticket_user'])->getTUserId();
         $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
         
-        if(Ticket_User::isMod($_SESSION['ticket_user'] )){    
+        if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'] ))){    
             if(isset($_POST['action'])){
                 switch($_POST['action']){
                     case "forward":
@@ -30,15 +30,15 @@ function show_ticket(){
             }
         }      
 
-        if(($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] )){
+        if(($target_ticket->getAuthor() ==   unserialize($_SESSION['ticket_user'])->getTUserId())  || Ticket_User::isMod(unserialize($_SESSION['ticket_user']) )){
             
             $show_as_admin = false;
-            if(Ticket_User::isMod($_SESSION['ticket_user'])){
+            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $show_as_admin = true;
             }
             
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id'],$show_as_admin);
-            Ticket_Log::createLogEntry($result['ticket_id'],$_SESSION['ticket_user']->getTUserId(), 3);
+            Ticket_Log::createLogEntry($result['ticket_id'],unserialize($_SESSION['ticket_user'])->getTUserId(), 3);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
             $result['ticket_forwardedGroupName'] = $entire_ticket['ticket_obj']->getForwardedGroupName();
             $result['ticket_forwardedGroupId'] = $entire_ticket['ticket_obj']->getForwardedGroupId();
@@ -62,12 +62,14 @@ function show_ticket(){
                 $result['ticket_replies'][$i]['author'] = $webReplyUser->getUsername();
                 $i++;
             }
-            if(Ticket_User::isMod($_SESSION['ticket_user'])){
+            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $result['isMod'] = "TRUE";
                 $result['statusList'] = Ticket::getStatusArray();
                 $result['sGroups'] = Gui_Elements::make_table_with_key_is_id(Support_Group::getAllSupportGroups(), Array("getName"), "getSGroupId" );
             }
             $result['hasInfo'] = $target_ticket->hasInfo();
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
             
         }else{

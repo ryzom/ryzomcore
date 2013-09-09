@@ -12,7 +12,7 @@ function show_reply(){
         $ticket = new Ticket();
         $ticket->load_With_TId($reply->getTicket());
         
-        if(( $ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId() && ! $reply->getHidden())  ||  Ticket_User::isMod($_SESSION['ticket_user'] )){
+        if(( $ticket->getAuthor() ==   unserialize($_SESSION['ticket_user'])->getTUserId() && ! $reply->getHidden())  ||  Ticket_User::isMod(unserialize($_SESSION['ticket_user']) )){
             $content = new Ticket_Content();
             $content->load_With_TContentId($reply->getContent());
             
@@ -27,9 +27,11 @@ function show_reply(){
             $result['author'] = $author->getExternId();
             $webUser = new WebUsers($author->getExternId());
             $result['authorName'] = $webUser->getUsername();
-            if(Ticket_User::isMod($_SESSION['ticket_user'])){
+            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $result['isMod'] = "TRUE";
             }
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
             
         }else{

@@ -1,7 +1,7 @@
 <?php
 
 function add_user(){
-     
+     global $INGAME_WEBPATH;
      $params = Array('Username' =>  $_POST["Username"], 'Password' =>  $_POST["Password"], 'ConfirmPass' =>  $_POST["ConfirmPass"], 'Email' =>  $_POST["Email"]);
      $webUser = new WebUsers();
      $result = $webUser->check_Register($params);
@@ -20,6 +20,7 @@ function add_user(){
           $status = write_user( $edit );
           $pageElements['status'] = $status;
           $pageElements['no_visible_elements'] = 'TRUE';
+	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register_feedback', $pageElements);
           exit;
      }else{
@@ -29,6 +30,7 @@ function add_user(){
           $result['prevConfirmPass'] = $_POST["ConfirmPass"];
           $result['prevEmail'] = $_POST["Email"];
           $result['no_visible_elements'] = 'TRUE';
+	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register', $result);
           exit;
      }

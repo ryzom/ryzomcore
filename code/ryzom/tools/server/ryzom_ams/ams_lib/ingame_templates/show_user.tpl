@@ -8,18 +8,18 @@
 	      <td>
 		<table cellspacing="0" cellpadding="4">
 		  <tr>		    
-		    <td valign="middle" nowrap><a href="index.php?page=settings&id={$target_id}"><h7>Edit User</h7></a></td>
-		    <td valign="middle" nowrap><a href="index.php?page=createticket&user_id={$target_id}"><h7>Send Ticket</h7></a></td>
+		    <td valign="middle" nowrap><a href="{$ingame_webpath}?page=settings&id={$target_id}"><h7>Edit User</h7></a></td>
+		    <td valign="middle" nowrap><a href="{$ingame_webpath}?page=createticket&user_id={$target_id}"><h7>Send Ticket</h7></a></td>
 		    {if isset($isAdmin) and $isAdmin eq 'TRUE' and $target_id neq 1}
 			{if $userPermission eq 1}
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=2"><h7>Make Moderator</h7></a></td>
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=2"><h7>Make Moderator</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
 			{else if $userPermission eq 2 }
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
 			{else if $userPermission eq 3 }
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=2"><h7>Demote to Moderator</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=2"><h7>Demote to Moderator</h7></a></td>
 			{/if}
 		    {/if}
 		  </tr>
@@ -138,7 +138,7 @@
 						      {foreach from=$ticketlist item=ticket}
 						      <tr>
 							    <td>{$ticket.tId}</td>
-							    <td><a href ="index.php?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
+							    <td><a href ="{$ingame_webpath}?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
 							    <td class="center">{$ticket.timestamp}</td>
 							    <td class="center">{$ticket.category}</td>
 			    

@@ -25,7 +25,7 @@
 				<a class="btn btn-primary" href="ams?page=show_user&id={$element.id}"><i class=" icon-eye-open icon-white"></i> Show User</a>
 				</td>
 				<td>
-				<a class="btn btn-info" href="ams?page=settings&id={$element.id}"><i class=" icon-pencil icon-white"></i> Edit User</a>
+				<a href='{$base_webpath}/user/{$element.id}/edit'><i class=" icon-pencil icon-white"></i> Edit User</a>
 				</td>
 				{if isset($isAdmin) and $isAdmin eq 'TRUE' and $element.id neq 1}
 					

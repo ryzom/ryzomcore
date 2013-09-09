@@ -4,18 +4,24 @@ function change_receivemail(){
 	
     try{
         //if logged in
+    	global $INGAME_WEBPATH;
+    	global $WEBPATH;
         if(WebUsers::isLoggedIn()){
             
             if(isset($_POST['target_id'])){
 		
                 
-                if( ( ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod($_SESSION['ticket_user'])) && isset($_POST['ReceiveMail']) ){
+                if( ( ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user']))) && isset($_POST['ReceiveMail']) ){
 			$user_id = filter_var($_POST['target_id'], FILTER_SANITIZE_NUMBER_INT);
 		    	$receiveMail = filter_var($_POST['ReceiveMail'], FILTER_SANITIZE_NUMBER_INT);
 			if($receiveMail == 0 || $receiveMail == 1){
 			    WebUsers::setReceiveMail($user_id, $receiveMail);
 			}
-			header("Location: index.php?page=settings&id=".$user_id);
+			if (Helpers::check_if_game_client()) {
+				header("Location: ".$INGAME_WEBPATH."?page=settings&id=".$user_id);
+			}else{
+				header("Location: ".$WEBPATH."?page=settings&id=".$user_id);
+			}
 			exit;
                     
                 }else{

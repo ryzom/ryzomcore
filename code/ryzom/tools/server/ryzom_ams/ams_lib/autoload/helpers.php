@@ -5,7 +5,6 @@ class Helpers{
 
      public static function loadTemplate( $template, $vars = array (), $returnHTML = false )
     {
-
          global $AMS_LIB;
          global $SITEBASE;
          global $AMS_TRANS;
@@ -25,7 +24,8 @@ class Helpers{
          $smarty -> cache_lifetime = 120;
 
          helpers :: create_folders ();
-          if ( helpers::check_if_game_client() or $forcelibrender = false ){
+          global $FORCE_INGAME;
+          if ( helpers::check_if_game_client() or $FORCE_INGAME ){
              $smarty -> template_dir = $AMS_LIB . '/ingame_templates/';
              $smarty -> setConfigDir( $AMS_LIB . '/configs' );
              $variables = parse_ini_file( $AMS_LIB . '/configs/ingame_layout.ini', true );
@@ -58,7 +58,7 @@ class Helpers{
           }
 
           
-
+         
           if($returnHTML == true){
                return $smarty ->fetch($inherited . $template . '.tpl' );
           }else{
@@ -90,7 +90,8 @@ class Helpers{
      static public function check_if_game_client()
     {
          // if HTTP_USER_AGENT is not set then its ryzom core
-          if ( strpos($_SERVER['HTTP_USER_AGENT'],"Ryzom") === 0){
+          global $FORCE_INGAME;
+          if (( strpos($_SERVER['HTTP_USER_AGENT'],"Ryzom") === 0) || $FORCE_INGAME){
              return true;
           }else{
              return false;

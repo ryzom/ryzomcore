@@ -8,8 +8,8 @@
 	      <td>
 		<table cellspacing="0" cellpadding="4">
 		  <tr>		    
-			<td valign="middle" nowrap><a href="index.php?page=show_ticket&id={$ticket_id}">Show Ticket</a></td>
-			<td valign="middle" nowrap><a href="index.php?page=show_ticket_log&id={$ticket_id}">Show Ticket Log</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_ticket&id={$ticket_id}">Show Ticket</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_ticket_log&id={$ticket_id}">Show Ticket Log</a></td>
 		  </tr>
 		</table>
 	      </td>
@@ -27,7 +27,7 @@
 	<tr><td height="7"></td><td></td></tr>
 	<tr>
 		<td width="3%"></td>
-		<td width="100%" height="12" valign="middle"><h1>Reply ID#{$reply_id} of Ticket <a href="index.php?page=show_ticket&id={$ticket_id}">#{$ticket_id}</a></h1></td>
+		<td width="100%" height="12" valign="middle"><h1>Reply ID#{$reply_id} of Ticket <a href="{$ingame_webpath}?page=show_ticket&id={$ticket_id}">#{$ticket_id}</a></h1></td>
 	</tr>
 	<tr>
 	  <td height="5"></td><td></td>

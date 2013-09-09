@@ -8,9 +8,9 @@
 	      <td>
 		<table cellspacing="0" cellpadding="4">
 		  <tr>		    
-			{if isset($isMod) and $isMod eq "TRUE"}<td valign="middle" nowrap><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></td>{/if}
-			<td valign="middle" nowrap><a href="index.php?page=createticket&user_id={$ticket_author}">Send Other Ticket</a></td>
-			{if $hasInfo}<td valign="middle" nowrap><a href="index.php?page=show_ticket_info&id={$ticket_tId}">Show Additional Info</a></td>{/if}
+			{if isset($isMod) and $isMod eq "TRUE"}<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></td>{/if}
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=createticket&user_id={$ticket_author}">Send Other Ticket</a></td>
+			{if $hasInfo}<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_ticket_info&id={$ticket_tId}">Show Additional Info</a></td>{/if}
 		  </tr>
 		</table>
 	      </td>
@@ -74,13 +74,13 @@
 									    {if $ticket_forwardedGroupName eq "0"}
 										{$public_sgroup}
 									    {else}
-										<a href="index.php?page=show_sgroup&id={$ticket_forwardedGroupId}"><font color="white">{$ticket_forwardedGroupName}</font></a>
+										<a href="{$ingame_webpath}?page=show_sgroup&id={$ticket_forwardedGroupId}"><font color="white">{$ticket_forwardedGroupName}</font></a>
 									    {/if}
 									</span>
 								    </td>                  
 								</tr>
 								<tr>
-								    <td><font color="{$info_color}">Assigned To:  </font>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a>{else} {$not_assigned} {/if}</td>
+								    <td><font color="{$info_color}">Assigned To:  </font>{if $ticket_assignedTo neq ""} <a href="{$ingame_webpath}?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a>{else} {$not_assigned} {/if}</td>
 								    <td></td>
 								    <td></td> 
 							      </tr>
@@ -125,7 +125,7 @@
 							    <tr>
 								<td>
 								    
-								    <form id="reply" class="form-vertical" method="post" action="index.php"> 
+								    <form id="reply" class="form-vertical" method="post" action="{$ingame_webpath}"> 
 								    <table cellpadding="4">
 								    <tr><td height="5"></td></tr>
 								    <tr>
@@ -193,13 +193,13 @@
 									 <p>
 									    Ticket Assigning: 
 									    {if $ticket_assignedTo eq 0}
-									       <form id="assign_ticket" method="post" action="index.php?page=show_ticket&id={$ticket_tId}">
+									       <form id="assign_ticket" method="post" action="{$ingame_webpath}?page=show_ticket&id={$ticket_tId}">
 										   <input type="hidden" name="ticket_id" value="{$ticket_tId}">
 										   <input type="hidden" name="action" value="assignTicket">
 										   <input type="submit" value="Assign Ticket"/>
 									       </form>
 									   {else if $ticket_assignedTo eq $user_id}
-									       <form id="assign_ticket" method="post" action="index.php?page=show_ticket&id={$ticket_tId}">
+									       <form id="assign_ticket" method="post" action="{$ingame_webpath}?page=show_ticket&id={$ticket_tId}">
 										   <input type="hidden" name="ticket_id" value="{$ticket_tId}">
 										   <input type="hidden" name="action" value="unAssignTicket">
 										   <input type="submit"value="Remove Assign"/>
@@ -233,7 +233,7 @@
 								    <td>
 									<p>
 									    Forward to Group:		    
-									    <form id="forward" method="post" action="index.php?page=show_ticket&id={$ticket_tId}" >
+									    <form id="forward" method="post" action="{$ingame_webpath}?page=show_ticket&id={$ticket_tId}" >
 										<select name="group">
 											    <option></option>
 										    {foreach from=$sGroups key=k item=v}

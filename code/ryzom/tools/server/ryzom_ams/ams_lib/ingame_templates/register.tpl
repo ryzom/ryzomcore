@@ -6,7 +6,7 @@
   <div>
     {$welcome_message}
   </div>
-<a href="index.php">click hereeeee</a>
+
   <form name="Page1"
         method="post"
         >

@@ -1,10 +1,11 @@
 <?php
 
 function modify_email_of_sgroup(){
-    
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     if(WebUsers::isLoggedIn()){
         
-        if( Ticket_User::isAdmin($_SESSION['ticket_user']) &&  isset($_POST['target_id'])){
+        if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user'])) &&  isset($_POST['target_id'])){
 
             $sgroupid = filter_var($_POST['target_id'],FILTER_SANITIZE_NUMBER_INT);
             $group = Support_Group::getGroup($sgroupid);
@@ -29,13 +30,18 @@ function modify_email_of_sgroup(){
                 $result['RESULT_OF_MODIFYING'] = "EMAIL_NOT_VALID";
             }
              
-            $result['permission'] = $_SESSION['ticket_user']->getPermission();
+            $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
             $result['no_visible_elements'] = 'FALSE';
             $result['username'] = $_SESSION['user'];
-            global $SITEBASE;
-            require_once($SITEBASE . 'inc/show_sgroup.php');
-            $result= array_merge($result, show_sgroup());
-            helpers :: loadtemplate( 'show_sgroup', $result);
+            //global $SITEBASE;
+            //require_once($SITEBASE . 'inc/show_sgroup.php');
+            //$result= array_merge($result, show_sgroup());
+            //helpers :: loadtemplate( 'show_sgroup', $result);
+            if (Helpers::check_if_game_client()) {
+                header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=".$sgroupid);
+            }else{
+                header("Location: ".$WEBPATH."?page=show_sgroup&id=".$sgroupid);
+            }
             exit;
             
         }else{

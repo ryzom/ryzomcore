@@ -34,7 +34,7 @@
 					<tr><td>
 						<p><h3>Add user to the list</h3></p>
 						 {if isset($isAdmin) && $isAdmin eq 'TRUE'}	    
-						    <form id="addSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
+						    <form id="addSGroup" class="form-vertical" method="post" action="{$ingame_webpath}?page=show_sgroup&id={$target_id}">
 						    <table>
 							<tr>
 							    <td valign="middle">Username: </td>
@@ -92,8 +92,8 @@
 						{foreach from=$userlist item=user}
 						  <tr>
 							<td>{$user.tUserId}</td>
-							<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
-							{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><font color="red">Delete</font></a></td>{/if}
+							<td><a href ="{$ingame_webpath}?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
+							{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a href="{$ingame_webpath}?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><font color="red">Delete</font></a></td>{/if}
 						  </tr>
 						  {/foreach}
 						</table>            
@@ -108,7 +108,7 @@
 				<table cellpadding="10">
 					<tr><td>
 						<p><h3>Mail settings</h3></p>
-						<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
+						<form id="modifyMailSGroup" class="form-vertical" method="post" action="{$ingame_webpath}?page=show_sgroup&id={$target_id}">
 						 <table>
 						    
 						    <tr>

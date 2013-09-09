@@ -3,3 +3,5 @@
 -in helpers make_folders  mkdir($value); should be drupal_mkdir();
 -write backwards compatible script for existing nel db!
 -fix the callback in add_user_to_sgroup.php and show_sgroup.php in the func dir
+-add createPermissions function to www side.
+-add db install stuff to drupal install file + create a matching admin link!

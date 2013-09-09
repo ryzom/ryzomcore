@@ -9,7 +9,7 @@ function show_ticket_info(){
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
         
-        if( $target_ticket->hasInfo() && (($target_ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId())  || Ticket_User::isMod($_SESSION['ticket_user'] ))){
+        if( $target_ticket->hasInfo() && (($target_ticket->getAuthor() ==   unserialize($_SESSION['ticket_user'])->getTUserId())  || Ticket_User::isMod(unserialize($_SESSION['ticket_user']) ))){
             $result['ticket_title'] = $target_ticket->getTitle();
             $result['ticket_author'] = $target_ticket->getAuthor();
             
@@ -31,12 +31,14 @@ function show_ticket_info(){
             $result['ht'] = $ticket_info->getHT();
             $result['nel3d'] = $ticket_info->getNel3D();
             $result['user_id'] = $ticket_info->getUser_Id();
-            global $WEBPATH;
-            $result['WEBPATH'] = $WEBPATH;
+            global $IMAGELOC_WEBPATH;
+            $result['IMAGELOC_WEBPATH'] = $IMAGELOC_WEBPATH;
             
-            if(Ticket_User::isMod($_SESSION['ticket_user'])){
+            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $result['isMod'] = "TRUE";
             }
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
             
         }else{

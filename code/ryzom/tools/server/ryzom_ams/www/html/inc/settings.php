@@ -4,7 +4,7 @@ function settings(){
     if(WebUsers::isLoggedIn()){
             //in case id-GET param set it's value as target_id, if no id-param is given, ue the session id.
             if(isset($_GET['id'])){
-                if(($_GET['id'] != $_SESSION['id']) && (!Ticket_User::isMod($_SESSION['ticket_user'])) ){
+                if(($_GET['id'] != $_SESSION['id']) && (!Ticket_User::isMod(unserialize($_SESSION['ticket_user']))) ){
                     //ERROR: No access!
                     $_SESSION['error_code'] = "403";
                     header("Location: index.php?page=error");
@@ -12,28 +12,32 @@ function settings(){
                 }else{
                     $webUser = new Webusers($_GET['id']);
                     $result = $webUser->getInfo();
-                    if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_GET['id']!= $_SESSION['id'])){
+                    if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) && ($_GET['id']!= $_SESSION['id'])){
                         $result['changesOther'] = "TRUE";
                     }
                     $result['target_id'] = $_GET['id'];
                     $result['current_mail'] = $webUser->getEmail();
+                    $result['target_username'] = $webUser->getUsername();
                 }
             }else{
                 $webUser = new Webusers($_SESSION['id']);
                 $result = $webUser->getInfo();
                 $result['target_id'] = $_SESSION['id'];
-                $result['current_mail'] = $webUser->getEmail();          
+                $result['current_mail'] = $webUser->getEmail();
+                $result['target_username'] = $webUser->getUsername();
 
             }
             //Sanitize Data
             $result['current_mail'] = filter_var($result['current_mail'], FILTER_SANITIZE_EMAIL);
-            //$result['Login'] = filter_var($result['Login'], FILTER_SANITIZE_STRING);
+            $result['target_username'] = filter_var($result['target_username'], FILTER_SANITIZE_STRING);
             $result['FirstName'] = filter_var($result['FirstName'], FILTER_SANITIZE_STRING);
             $result['LastName'] = filter_var($result['LastName'], FILTER_SANITIZE_STRING);
             $result['Country'] = filter_var($result['Country'], FILTER_SANITIZE_STRING);
             $result['Gender'] = filter_var($result['Gender'], FILTER_SANITIZE_NUMBER_INT);
             $result['ReceiveMail'] = filter_var($result['ReceiveMail'], FILTER_SANITIZE_NUMBER_INT);
             $result['country_array'] = getCountryArray();
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
     }else{
         //ERROR: not logged in!

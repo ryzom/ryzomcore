@@ -8,7 +8,7 @@
 	      <td>
 		<table cellspacing="0" cellpadding="4">
 		  <tr>		    
-			<td valign="middle" nowrap><a href="index.php?page=show_ticket&id={$ticket_id}">Show Ticket</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_ticket&id={$ticket_id}">Show Ticket</a></td>
 		  </tr>
 		</table>
 	      </td>
@@ -53,7 +53,7 @@
 			<tr><td>
 				<table cellpadding="10">
 					<tr><td>
-						<p><h3>Title: <a href="index.php?page=show_ticket&id={$ticket_id}">{$ticket_title}</a></h3></p>
+						<p><h3>Title: <a href="{$ingame_webpath}?page=show_ticket&id={$ticket_id}">{$ticket_title}</a></h3></p>
 						<p>
 						    <table cellspacing="5">
 							<tr bgcolor="{$table_header_tr_color}">

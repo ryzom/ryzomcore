@@ -35,7 +35,7 @@
 					<tr><td>
 						<p><h3>Add a Support group</h3></p>
 							    
-						<form id="addSGroup" class="form-vertical" method="post" action="index.php">
+						<form id="addSGroup" class="form-vertical" method="post" action="{$ingame_webpath}">
 						    <table cellpadding="1">
 							<tr>
 							    <td>
@@ -123,10 +123,10 @@
 						    {foreach from=$grouplist item=group}
 						      <tr>
 							    <td>{$group.sGroupId}</td>
-							    <td><a href ="index.php?page=show_sgroup&id={$group.sGroupId}">{$group.name}</a></td>
+							    <td><a href ="{$ingame_webpath}?page=show_sgroup&id={$group.sGroupId}">{$group.name}</a></td>
 							    <td class="center"><span class="label label-important" >{$group.tag}</span></td>
 							    <td class="center">{$group.groupemail}</td>
-							    {if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a href="index.php?page=sgroup_list&delete={$group.sGroupId}"><font color="red">Delete</font></a></td>{/if}
+							    {if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a href="{$ingame_webpath}?page=sgroup_list&delete={$group.sGroupId}"><font color="red">Delete</font></a></td>{/if}
 						      </tr>
 						    {/foreach}
 					    </table>            

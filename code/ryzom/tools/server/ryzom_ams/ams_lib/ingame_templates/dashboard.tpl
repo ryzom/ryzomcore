@@ -40,10 +40,10 @@
 								<td width="25%" align = "center" ><font color="{$info_color}">Total amount of Tickets</font></td>
 							</tr>
 							<tr>
-								<td width="25%" align = "center" ><a href="index.php?page=show_queue&get=create&userid={$user_id}&groupid=1&what=waiting_for_support&how=assigned&who=user"><font color="{$notification_color}">{$nrAssignedWaiting}</font></a></td>
-								<td width="25%" align = "center" ><a href="index.php?page=show_queue&get=todo"><font color="{$notification_color}">{$nrToDo}</font></a></td>
-								<td width="25%" align = "center" ><a href="index.php?page=show_ticket&id={$newestTicketId}"><font color="{$notification_color}">{$newestTicketTitle}</font></a></td>
-								<td width="25%" align = "center" ><a href="index.php?page=show_queue&get=all"><font color="{$notification_color}">{$nrTotalTickets}</font></a></td>
+								<td width="25%" align = "center" ><a href="{$ingame_webpath}?page=show_queue&get=create&userid={$user_id}&groupid=1&what=waiting_for_support&how=assigned&who=user"><font color="{$notification_color}">{$nrAssignedWaiting}</font></a></td>
+								<td width="25%" align = "center" ><a href="{$ingame_webpath}?page=show_queue&get=todo"><font color="{$notification_color}">{$nrToDo}</font></a></td>
+								<td width="25%" align = "center" ><a href="{$ingame_webpath}?page=show_ticket&id={$newestTicketId}"><font color="{$notification_color}">{$newestTicketTitle}</font></a></td>
+								<td width="25%" align = "center" ><a href="{$ingame_webpath}?page=show_queue&get=all"><font color="{$notification_color}">{$nrTotalTickets}</font></a></td>
 							</tr>
 						</table>
 					</td></tr>

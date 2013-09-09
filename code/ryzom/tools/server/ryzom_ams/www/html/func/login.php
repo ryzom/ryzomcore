@@ -1,21 +1,27 @@
 <?php
 
 function login(){
-	
+	global $INGAME_WEBPATH;
+	global $WEBPATH;
 	try{
 		$username = filter_var($_POST['Username'],FILTER_SANITIZE_STRING);
 		$password = filter_var($_POST['Password'],FILTER_SANITIZE_STRING);
 		$result = WebUsers::checkLoginMatch($username, $password);
+
 		if( $result != "fail"){
 			//handle successful login
 			$_SESSION['user'] = $username;
-			$_SESSION['id'] = $result['UId'];
-			$_SESSION['ticket_user'] = Ticket_User::constr_ExternId($result['UId']);
+			$_SESSION['id'] = WebUsers::getId($username);
+			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
 			$user = new WebUsers($_SESSION['id']);
 			$_SESSION['Language'] = $user->getLanguage();
-			
+
 			//go back to the index page.
-			header( 'Location: index.php' );
+			if (Helpers::check_if_game_client()) {
+				header( 'Location: '. $INGAME_WEBPATH );
+			}else{
+				header( 'Location: '. $WEBPATH );
+			}
 			exit;
 		}else{
 			//handle login failure

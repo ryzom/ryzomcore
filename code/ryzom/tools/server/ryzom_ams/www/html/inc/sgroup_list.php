@@ -1,20 +1,28 @@
 <?php
 
 function sgroup_list(){
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     //if logged in 
     if(WebUsers::isLoggedIn()){
-        if(Ticket_User::isMod($_SESSION['ticket_user'])){
+        if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
             
-            if(isset($_GET['delete']) && Ticket_User::isAdmin($_SESSION['ticket_user'])){
+            if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                 $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                 $result['delete'] = Support_Group::deleteSupportGroup( $delete_id);
-                header("Location: index.php?page=sgroup_list");
+                if (Helpers::check_if_game_client()) {
+                    header("Location: ".$INGAME_WEBPATH."?page=sgroup_list");
+                }else{
+                    header("Location: ".$WEBPATH."?page=sgroup_list");
+                }
                 exit;             
             }
-            if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
+            if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                 $result['isAdmin'] = "TRUE";
             }
             $result['grouplist'] = Gui_Elements::make_table(Support_Group::getGroups(), Array("getSGroupId","getName","getTag","getGroupEmail"), Array("sGroupId","name","tag","groupemail"));
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
         }else{
             //ERROR: No access!

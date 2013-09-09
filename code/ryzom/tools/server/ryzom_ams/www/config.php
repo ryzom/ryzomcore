@@ -72,8 +72,14 @@ $CREATE_RING = true ;
 $AMS_LIB = dirname( dirname( __FILE__ ) ) . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
+//Here your inc and func resides
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
-$WEBPATH ='http://localhost:40917' ;
+
+$BASE_WEBPATH = 'http://localhost:40917/www/html';
+$IMAGELOC_WEBPATH = 'http://localhost:40917';
+$WEBPATH = $BASE_WEBPATH . '/index.php';
+$INGAME_WEBPATH = $BASE_WEBPATH . '/index.php';
+$CONFIG_PATH = dirname( __FILE__ );
 
 //defines the default language
 $DEFAULT_LANGUAGE = 'en';
@@ -87,4 +93,5 @@ $TIME_FORMAT = "m-d-Y H:i:s";
 //defines which ingame layout template should be used
 $INGAME_LAYOUT = "basic";
 
+$FORCE_INGAME = false;
 

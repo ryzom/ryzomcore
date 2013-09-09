@@ -7,7 +7,7 @@ function createticket(){
         //in case user_id-GET param set it's value as target_id, if no user_id-param is given, use the session id.
         if(isset($_GET['user_id'])){
             
-            if(($_GET['user_id'] != $_SESSION['id']) && ( ! ticket_user::isMod($_SESSION['ticket_user'])) ){
+            if(($_GET['user_id'] != $_SESSION['id']) && ( ! ticket_user::isMod(unserialize($_SESSION['ticket_user']))) ){
                 
                 //ERROR: No access!
                 $_SESSION['error_code'] = "403";
@@ -35,6 +35,8 @@ function createticket(){
         //create array of category id & names
         $catArray = Ticket_Category::getAllCategories();
         $result['category'] = Gui_Elements::make_table_with_key_is_id($catArray, Array("getName"), "getTCategoryId" );
+        global $INGAME_WEBPATH;
+        $result['ingame_webpath'] = $INGAME_WEBPATH;
         return $result;
     
     }else{

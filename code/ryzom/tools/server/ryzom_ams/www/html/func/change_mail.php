@@ -9,7 +9,7 @@ function change_mail(){
             if(isset($_POST['target_id'])){
 		
                 
-                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod($_SESSION['ticket_user']) ){
+                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) ){
                     if($_POST['target_id'] == $_SESSION['id']){
                         $target_username = $_SESSION['user'];
                     }else{
@@ -21,7 +21,7 @@ function change_mail(){
 		    $reply = $webUser->checkEmail($_POST['NewEmail']);
 		    
 		    global $SITEBASE;
-                    require_once($SITEBASE . 'inc/settings.php');
+                    require_once($SITEBASE . '/inc/settings.php');
                     $result = settings();
 		    
 		    if ( $reply != "success" ){
@@ -38,12 +38,12 @@ function change_mail(){
                         }else if($status == 'shardoffline'){
                              $result['SUCCESS_MAIL'] = "SHARDOFF";
                         }
-                        $result['permission'] = $_SESSION['ticket_user']->getPermission();
+                        $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
 			$result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
-                            if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
+                            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) && ($_POST['target_id'] != $_SESSION['id'])){
                                 $result['isMod'] = "TRUE";
                             }
                         }
@@ -52,12 +52,12 @@ function change_mail(){
                          
                     }else{
 			$result['EMAIL'] = $reply;
-                        $result['permission'] = $_SESSION['ticket_user']->getPermission();
+                        $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
                         $result['no_visible_elements'] = 'FALSE';
                         $result['username'] = $_SESSION['user'];
                         $result['target_id'] = $_POST['target_id'];
                         if(isset($_GET['id'])){
-                            if(Ticket_User::isMod($_SESSION['ticket_user']) && ($_POST['target_id'] != $_SESSION['id'])){
+                            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) && ($_POST['target_id'] != $_SESSION['id'])){
                                 $result['isMod'] = "TRUE";
                             }
                         }
@@ -90,5 +90,4 @@ function change_mail(){
     }
     
 }
-
 

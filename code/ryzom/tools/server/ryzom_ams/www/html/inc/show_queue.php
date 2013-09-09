@@ -1,23 +1,34 @@
 <?php
 
 function show_queue(){
-    
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
      //if logged in  & queue id is given
     if(WebUsers::isLoggedIn() && isset($_GET['get'])){
         
-        if( Ticket_User::isMod($_SESSION['ticket_user'])){
+        if( Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
             
             //the default queue you want to see.
             $result['queue_view'] = filter_var($_GET['get'], FILTER_SANITIZE_STRING);
-            $user_id = $_SESSION['ticket_user']->getTUserId();
+            $user_id = unserialize($_SESSION['ticket_user'])->getTUserId();
             $queueArray = array();           
             $queue_handler = new  Ticket_Queue_handler();
             
             //Pagination Base Links
-            $result['pagination_base_link'] = "index.php?page=show_queue&get=".$result['queue_view'] ;
+            if (Helpers::check_if_game_client()) {
+                $result['pagination_base_link'] = $INGAME_WEBPATH."?page=show_queue&get=".$result['queue_view'] ;
+            }else{
+                $result['pagination_base_link'] = $WEBPATH."?page=show_queue&get=".$result['queue_view'] ;
+            }
             
             //form url to keep the getters constant
-            $result['getURL'] = "index.php?page=show_queue&get=" . $result['queue_view'];
+            
+            if (Helpers::check_if_game_client()) {
+                $result['getURL'] = $INGAME_WEBPATH."?page=show_queue&get=" . $result['queue_view'];
+            }else{
+                $result['getURL'] = $WEBPATH."?page=show_queue&get=" . $result['queue_view'];
+            }
+           
             if(isset($_GET['pagenum'])){
                 $result['getURL'] = $result['getURL'] . "&pagenum=".$_GET['pagenum'];
             }
@@ -29,7 +40,14 @@ function show_queue(){
                 $how = filter_var($_GET['how'], FILTER_SANITIZE_STRING);
                 $who = filter_var($_GET['who'], FILTER_SANITIZE_STRING);
                 $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
-                $result['pagination_base_link'] = "index.php?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+                
+                if (Helpers::check_if_game_client()) {
+                    $result['pagination_base_link'] = $INGAME_WEBPATH."?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+                }else{
+                    $result['pagination_base_link'] = $WEBPATH."?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+                }
+                
+                
                 $result['prev_created_userid'] = $userid;
                 $result['prev_created_groupid'] = $groupid;
                 $result['prev_created_what'] = $what;
@@ -60,7 +78,11 @@ function show_queue(){
                         $how = filter_var($_POST['how'], FILTER_SANITIZE_STRING);
                         $who = filter_var($_POST['who'], FILTER_SANITIZE_STRING);
                         $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
-                        $result['pagination_base_link'] = "index.php?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+                        if (Helpers::check_if_game_client()) {
+                            $result['pagination_base_link'] = $INGAME_WEBPATH."?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;
+                        }else{
+                           $result['pagination_base_link'] = $WEBPATH."?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who; 
+                        }
                         $result['prev_created_userid'] = $userid;
                         $result['prev_created_groupid'] = $groupid;
                         $result['prev_created_what'] = $what;
@@ -93,7 +115,7 @@ function show_queue(){
                     $result['tickets'][$i]['timestamp_elapsed'] = Gui_Elements::time_elapsed_string($ticket['timestamp']);
                     $i++;
                 }
-                $result['user_id'] = $_SESSION['ticket_user']->getTUserId();
+                $result['user_id'] = unserialize($_SESSION['ticket_user'])->getTUserId();
                 
                 //Queue creator field info   
                 $result['grouplist'] = Gui_Elements::make_table(Support_Group::getGroups(), Array("getSGroupId","getName"), Array("sGroupId","name"));
@@ -104,13 +126,15 @@ function show_queue(){
                     $result['teamlist'][$i]['name'] = $web_teammember->getUsername();
                     $i++;
                 }
+                global $INGAME_WEBPATH;
+                $result['ingame_webpath'] = $INGAME_WEBPATH;
                 return $result;
             
             }else{
                 
                 //ERROR: Doesn't exist!
                 $_SESSION['error_code'] = "404";
-                header("Location: index.php?page=error");
+                header("Location: ams?page=error");
                 exit; 
             }
             

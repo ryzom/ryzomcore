@@ -32,7 +32,7 @@
 			<tr><td>
 				<table cellpadding="10">
 					<tr><td>
-					    <form id="changePassword" class="form-vertical" method="post" action="index.php?page=createticket&id={$target_id}">
+					    <form id="changePassword" class="form-vertical" method="post" action="{$ingame_webpath}?page=createticket&id={$target_id}">
 						<table cellspacing="3">
 						    <tr>
 							<td valign="middle">Title: </td>

@@ -8,7 +8,7 @@ session_start();
 //Decide what page to load
 if ( ! isset( $_GET["page"]) ){
      if(isset($_SESSION['user'])){
-          if(Ticket_User::isMod($_SESSION['ticket_user'])){
+          if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                $page = 'dashboard';
           }else{
                $page = 'show_user';
@@ -44,7 +44,7 @@ if(isset($_SESSION['user'])){
 
 //Set permission
 if(isset($_SESSION['ticket_user'])){
-     $return['permission'] = $_SESSION['ticket_user']->getPermission();
+     $return['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
 }else{
      //default permission
      $return['permission'] = 0; 

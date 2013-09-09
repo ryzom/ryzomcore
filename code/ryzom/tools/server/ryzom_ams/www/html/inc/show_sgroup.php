@@ -1,22 +1,28 @@
 <?php
 
 function show_sgroup(){
+    global $INGAME_WEBPATH;
+    global $WEBPATH;
     //if logged in
     if(WebUsers::isLoggedIn()){
-        if(Ticket_User::isMod($_SESSION['ticket_user'])){
+        if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
             if( isset($_GET['id'])){
                 //['target_id'] holds the id of the group!
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
                 
-                if(isset($_GET['delete']) && Ticket_User::isAdmin($_SESSION['ticket_user'])){
+                if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                     $result['delete'] = Support_Group::deleteUserOfSupportGroup( $delete_id, $result['target_id']  );
-                    header("Location: index.php?page=show_sgroup&id=" . $result['target_id']);
+                    if (Helpers::check_if_game_client()) {
+                        header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
+                    }else{
+                        header("Location: ".$WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
+                    }
                     exit;
                     
                 }
                 
-                if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
+                if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $result['isAdmin'] = "TRUE";
                 }
                 
@@ -32,6 +38,8 @@ function show_sgroup(){
                     $result['userlist'][$i]['name'] = $webuser->getUsername();
                     $i++;
                 }
+                global $INGAME_WEBPATH;
+                $result['ingame_webpath'] = $INGAME_WEBPATH;
                 return $result;
                 
             
@@ -39,7 +47,7 @@ function show_sgroup(){
                 
                 //ERROR: No page specified!
                 $_SESSION['error_code'] = "404";
-                header("Location: index.php?page=error");
+                header("Location: ams?page=error");
                 exit;
             }
                 
