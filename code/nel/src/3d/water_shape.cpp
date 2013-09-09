@@ -223,6 +223,7 @@ static CVertexProgram *BuildWaterVP(bool diffuseMap, bool bumpMap, bool use2Bump
 
 	vp += "\nEND";
 	return new CVertexProgram(vp.c_str());
+	// TODO_VP_GLSL
 }
 
 
@@ -330,8 +331,8 @@ void CWaterShape::initVertexProgram()
 		_VertexProgramNoBump = std::auto_ptr<CVertexProgram>(BuildWaterVP(false, false, false));
 		_VertexProgramNoBumpDiffuse = std::auto_ptr<CVertexProgram>(BuildWaterVP(true, false, false));
 		// no waves
-		_VertexProgramNoWave.reset(new CVertexProgram(WaterVPNoWave));
-		_VertexProgramNoWaveDiffuse.reset(new CVertexProgram(WaterVPNoWaveDiffuse));
+		_VertexProgramNoWave.reset(new CVertexProgram(WaterVPNoWave)); // TODO_VP_GLSL
+		_VertexProgramNoWaveDiffuse.reset(new CVertexProgram(WaterVPNoWaveDiffuse)); // TODO_VP_GLSL
 		created = true;
 	}
 }

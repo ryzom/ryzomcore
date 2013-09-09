@@ -563,6 +563,7 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			string	vpgram= string(NL3D_LandscapeCommonStartProgram) +
 				string(NL3D_LandscapeFar0EndProgram);
 			_VertexProgram[0]= new CVertexProgram(vpgram.c_str());
+			// TODO_VP_GLSL
 		}
 		else if(_Type==Far1)
 		{
@@ -580,6 +581,7 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			string	vpgram= string(NL3D_LandscapeCommonStartProgram) +
 				string(NL3D_LandscapeFar1EndProgram);
 			_VertexProgram[0]= new CVertexProgram(vpgram.c_str());
+			// TODO_VP_GLSL
 		}
 		else
 		{
@@ -597,11 +599,13 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			string	vpgram= string(NL3D_LandscapeCommonStartProgram) +
 				string(NL3D_LandscapeTileEndProgram);
 			_VertexProgram[0]= new CVertexProgram(vpgram.c_str());
+			// TODO_VP_GLSL
 
 			// Init the Vertex Program for lightmap pass
 			vpgram= string(NL3D_LandscapeCommonStartProgram) +
 				string(NL3D_LandscapeTileLightMapEndProgram);
 			_VertexProgram[1]= new CVertexProgram(vpgram.c_str());
+			// TODO_VP_GLSL
 		}
 	}
 

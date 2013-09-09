@@ -86,6 +86,8 @@ static const char *DecalAttenuationVertexProgramCode =
 
 static NL3D::CVertexProgram DecalAttenuationVertexProgram(DecalAttenuationVertexProgramCode);
 
+// TODO_VP_GLSL
+
 
 typedef CShadowPolyReceiver::CRGBAVertex CRGBAVertex;
 

@@ -158,6 +158,7 @@ void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
 					+ CRenderTrav::getLightVPFragment(numPls, VPLightConstantStart, specular, normalize)
 					+ WindTreeVPCodeEnd;
 			_VertexProgram[i]= std::auto_ptr<CVertexProgram>(new CVertexProgram(vpCode.c_str()));
+			// TODO_VP_GLSL
 		}
 	}
 

@@ -602,7 +602,7 @@ void					CVegetableManager::initVertexProgram(uint vpType, bool fogEnabled)
 
 	// create VP.
 	_VertexProgram[vpType][fogEnabled ? 1 : 0] = new CVertexProgram(vpgram.c_str());
-
+	// TODO_VP_GLSL
 }
 
 

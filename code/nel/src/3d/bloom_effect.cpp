@@ -57,6 +57,8 @@ static const char *TextureOffset =
 
 static CVertexProgram TextureOffsetVertexProgram(TextureOffset);
 
+// TODO_VP_GLSL
+
 
 //-----------------------------------------------------------------------------------------------------------
 
