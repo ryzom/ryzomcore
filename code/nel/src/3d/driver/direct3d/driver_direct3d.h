@@ -309,7 +309,7 @@ public:
 	CVertexProgamDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	~CVertexProgamDrvInfosD3D();
 
-	virtual uint getUniformIndex(char *name) const
+	virtual uint getUniformIndex(const char *name) const
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
@@ -331,7 +331,7 @@ public:
 	CPixelProgramDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	~CPixelProgramDrvInfosD3D();
 
-	virtual uint getUniformIndex(char *name) const
+	virtual uint getUniformIndex(const char *name) const
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
@@ -1210,7 +1210,7 @@ public:
     // Set feature parameters
 	virtual bool			setUniformDriver(TProgram program); // set all driver-specific features params (based on program->features->DriverFlags)
 	virtual bool			setUniformMaterial(TProgram program, CMaterial &material); // set all material-specific feature params (based on program->features->MaterialFlags)
-	virtual void			setUniformParams(TProgram program, const CGPUProgramParams &params); // set all user-provided params from the storage
+	virtual void			setUniformParams(TProgram program, CGPUProgramParams &params); // set all user-provided params from the storage
 	// @}
 
 

@@ -57,7 +57,7 @@ public:
 	// The virtual dtor is important.
 	virtual ~IGPUProgramDrvInfos(void);
 
-	virtual uint getUniformIndex(char *name) const = 0;
+	virtual uint getUniformIndex(const char *name) const = 0;
 };
 
 #define NL_GPU_PROGRAM_LIGHTS 8
@@ -261,7 +261,7 @@ public:
 	inline void removeSource(size_t i) { nlassert(!m_Source); m_Sources.erase(m_Sources.begin() + i); }
 
 	// Get the idx of a parameter (ogl: uniform, d3d: constant, etcetera) by name. Invalid name returns ~0
-	inline uint getUniformIndex(char *name) const { return m_DrvInfo->getUniformIndex(name); };
+	inline uint getUniformIndex(const char *name) const { return m_DrvInfo->getUniformIndex(name); };
 
 	// Get feature information of the current program
 	inline CSource *source() const { return m_Source; };

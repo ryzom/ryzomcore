@@ -229,7 +229,7 @@ bool CDriverD3D::setUniformMaterial(TProgram program, const CMaterial &material)
 	return true;
 }
 
-void CDriverD3D::setUniformParams(TProgram program, const CGPUProgramParams &params)
+void CDriverD3D::setUniformParams(TProgram program, CGPUProgramParams &params)
 {
 	// todo
 }

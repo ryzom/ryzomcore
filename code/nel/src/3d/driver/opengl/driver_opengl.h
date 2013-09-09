@@ -1417,7 +1417,7 @@ private:
 	virtual bool			setUniformDriver(TProgram program); // set all driver-specific features params (based on program->features->DriverFlags)
 	virtual bool			setUniformMaterial(TProgram program, CMaterial &material); // set all material-specific feature params (based on program->features->MaterialFlags)
 	bool					setUniformMaterialInternal(TProgram program, CMaterial &material); // set all material-specific feature params (based on program->features->MaterialFlags)
-	virtual void			setUniformParams(TProgram program, const CGPUProgramParams &params); // set all user-provided params from the storage
+	virtual void			setUniformParams(TProgram program, CGPUProgramParams &params); // set all user-provided params from the storage
 	// @}
 
 
@@ -1650,7 +1650,7 @@ public:
 	// The gl id is auto created here.
 	CVertexProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it);
 
-	virtual uint getUniformIndex(char *name) const
+	virtual uint getUniformIndex(const char *name) const
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
@@ -1670,7 +1670,7 @@ public:
 	// The gl id is auto created here.
 	CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it);
 
-	virtual uint getUniformIndex(char *name) const
+	virtual uint getUniformIndex(const char *name) const
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 

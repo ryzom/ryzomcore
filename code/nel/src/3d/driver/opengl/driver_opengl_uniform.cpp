@@ -387,7 +387,7 @@ bool CDriverGL::setUniformMaterialInternal(TProgram program, CMaterial &material
 	return true;
 }
 
-void CDriverGL::setUniformParams(TProgram program, const CGPUProgramParams &params)
+void CDriverGL::setUniformParams(TProgram program, CGPUProgramParams &params)
 {
 	IGPUProgram *prog = NULL;
 	switch (program)

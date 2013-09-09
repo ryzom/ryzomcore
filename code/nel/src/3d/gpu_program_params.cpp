@@ -533,6 +533,14 @@ size_t CGPUProgramParams::getOffset(uint index) const
 	return m_Map[index];
 }
 
+size_t CGPUProgramParams::getOffset(const std::string &name) const
+{
+	std::map<std::string, size_t>::const_iterator it = m_MapName.find(name);
+	if (it == m_MapName.end())
+		return s_End;
+	return it->second;
+}
+
 /// Remove by offset
 void CGPUProgramParams::freeOffset(size_t offset)
 {
