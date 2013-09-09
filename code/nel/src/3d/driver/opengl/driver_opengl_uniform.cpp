@@ -415,7 +415,7 @@ void CDriverGL::setUniformParams(TProgram program, const CGPUProgramParams &para
 		{
 			const std::string &name = params.getNameByOffset(offset);
 			nlassert(!name.empty() /* missing both parameter name and index, code error */);
-			uint index = prog->getUniformIndex(name);
+			uint index = prog->getUniformIndex(name.c_str());
 			nlassert(index != ~0 /* invalid parameter name */);
 			params.map(index, name);
 		}

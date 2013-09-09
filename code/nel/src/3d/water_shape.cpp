@@ -188,15 +188,15 @@ uint32									CWaterShape::_XGridBorder = 4;
 uint32									CWaterShape::_YGridBorder = 4;
 uint32									CWaterShape::_MaxGridSize;
 bool									CWaterShape::_GridSizeTouched = true;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump1;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump2;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump1Diffuse;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump2Diffuse;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoBump;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoBumpDiffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump1;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump2;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump1Diffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump2Diffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBump;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBumpDiffuse;
 // water with no waves
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoWave;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoWaveDiffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoWave;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoWaveDiffuse;
 
 
 /** Build a vertex program for water depending on requirements
@@ -322,17 +322,17 @@ void CWaterShape::initVertexProgram()
 	if (!created)
 	{
 		// waves
-		_VertexProgramBump1 = std::auto_ptr<CVertexProgram>(BuildWaterVP(false, true, false));
-		_VertexProgramBump2 = std::auto_ptr<CVertexProgram>(BuildWaterVP(false, true, true));
+		_VertexProgramBump1 = BuildWaterVP(false, true, false);
+		_VertexProgramBump2 = BuildWaterVP(false, true, true);
 
-		_VertexProgramBump1Diffuse = std::auto_ptr<CVertexProgram>(BuildWaterVP(true, true, false));
-		_VertexProgramBump2Diffuse = std::auto_ptr<CVertexProgram>(BuildWaterVP(true, true, true));
+		_VertexProgramBump1Diffuse = BuildWaterVP(true, true, false);
+		_VertexProgramBump2Diffuse = BuildWaterVP(true, true, true);
 
-		_VertexProgramNoBump = std::auto_ptr<CVertexProgram>(BuildWaterVP(false, false, false));
-		_VertexProgramNoBumpDiffuse = std::auto_ptr<CVertexProgram>(BuildWaterVP(true, false, false));
+		_VertexProgramNoBump = BuildWaterVP(false, false, false);
+		_VertexProgramNoBumpDiffuse = BuildWaterVP(true, false, false);
 		// no waves
-		_VertexProgramNoWave.reset(new CVertexProgram(WaterVPNoWave)); // TODO_VP_GLSL
-		_VertexProgramNoWaveDiffuse.reset(new CVertexProgram(WaterVPNoWaveDiffuse)); // TODO_VP_GLSL
+		_VertexProgramNoWave = new CVertexProgram(WaterVPNoWave); // TODO_VP_GLSL
+		_VertexProgramNoWaveDiffuse = new CVertexProgram(WaterVPNoWaveDiffuse); // TODO_VP_GLSL
 		created = true;
 	}
 }

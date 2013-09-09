@@ -84,110 +84,119 @@ void IGPUProgram::buildInfo(CSource *source)
 
 	if (features.DriverFlags & CGPUProgramFeatures::ModelView)
 	{
-		m_Indices.ModelView = getUniformIndex("nlModelView");
+		m_Indices.ModelView = getUniformIndex("modelView");
 		if (m_Indices.ModelView == ~0)
 		{
-			nlwarning("Missing 'nlModelView' in gpu program '%s', ModelView disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelView' in gpu program '%s', ModelView disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelView;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ModelViewInverse)
 	{
-		m_Indices.ModelViewInverse = getUniformIndex("nlModelViewInverse");
+		m_Indices.ModelViewInverse = getUniformIndex("modelViewInverse");
 		if (m_Indices.ModelViewInverse == ~0)
 		{
-			nlwarning("Missing 'nlModelViewInverse' in gpu program '%s', ModelViewInverse disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelViewInverse' in gpu program '%s', ModelViewInverse disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelViewInverse;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ModelViewTranspose)
 	{
-		m_Indices.ModelViewTranspose = getUniformIndex("nlModelViewTranspose");
+		m_Indices.ModelViewTranspose = getUniformIndex("modelViewTranspose");
 		if (m_Indices.ModelViewTranspose == ~0)
 		{
-			nlwarning("Missing 'nlModelViewTranspose' in gpu program '%s', ModelViewTranspose disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelViewTranspose' in gpu program '%s', ModelViewTranspose disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelViewTranspose;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ModelViewInverseTranspose)
 	{
-		m_Indices.ModelViewInverseTranspose = getUniformIndex("nlModelViewInverseTranspose");
+		m_Indices.ModelViewInverseTranspose = getUniformIndex("modelViewInverseTranspose");
 		if (m_Indices.ModelViewInverseTranspose == ~0)
 		{
-			nlwarning("Missing 'nlModelViewInverseTranspose' in gpu program '%s', ModelViewInverseTranspose disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelViewInverseTranspose' in gpu program '%s', ModelViewInverseTranspose disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelViewInverseTranspose;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::Projection)
 	{
-		m_Indices.Projection = getUniformIndex("nlProjection");
+		m_Indices.Projection = getUniformIndex("projection");
 		if (m_Indices.Projection == ~0)
 		{
-			nlwarning("Missing 'nlProjection' in gpu program '%s', Projection disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'projection' in gpu program '%s', Projection disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::Projection;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ProjectionInverse)
 	{
-		m_Indices.ProjectionInverse = getUniformIndex("nlProjectionInverse");
+		m_Indices.ProjectionInverse = getUniformIndex("projectionInverse");
 		if (m_Indices.ProjectionInverse == ~0)
 		{
-			nlwarning("Missing 'nlProjectionInverse' in gpu program '%s', ProjectionInverse disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'projectionInverse' in gpu program '%s', ProjectionInverse disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ProjectionInverse;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ProjectionTranspose)
 	{
-		m_Indices.ProjectionTranspose = getUniformIndex("nlProjectionTranspose");
+		m_Indices.ProjectionTranspose = getUniformIndex("projectionTranspose");
 		if (m_Indices.ProjectionTranspose == ~0)
 		{
-			nlwarning("Missing 'nlProjectionTranspose' in gpu program '%s', ProjectionTranspose disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'projectionTranspose' in gpu program '%s', ProjectionTranspose disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ProjectionTranspose;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ProjectionInverseTranspose)
 	{
-		m_Indices.ProjectionInverseTranspose = getUniformIndex("nlProjectionInverseTranspose");
+		m_Indices.ProjectionInverseTranspose = getUniformIndex("projectionInverseTranspose");
 		if (m_Indices.ProjectionInverseTranspose == ~0)
 		{
-			nlwarning("Missing 'nlProjectionInverseTranspose' in gpu program '%s', ProjectionInverseTranspose disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'projectionInverseTranspose' in gpu program '%s', ProjectionInverseTranspose disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ProjectionInverseTranspose;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjection)
 	{
-		m_Indices.ModelViewProjection = getUniformIndex("nlModelViewProjection");
+		m_Indices.ModelViewProjection = getUniformIndex("modelViewProjection");
 		if (m_Indices.ModelViewProjection == ~0)
 		{
-			nlwarning("Missing 'nlModelViewProjection' in gpu program '%s', ModelViewProjection disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelViewProjection' in gpu program '%s', ModelViewProjection disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelViewProjection;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjectionInverse)
 	{
-		m_Indices.ModelViewProjectionInverse = getUniformIndex("nlModelViewProjectionInverse");
+		m_Indices.ModelViewProjectionInverse = getUniformIndex("modelViewProjectionInverse");
 		if (m_Indices.ModelViewProjectionInverse == ~0)
 		{
-			nlwarning("Missing 'nlModelViewProjectionInverse' in gpu program '%s', ModelViewProjectionInverse disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelViewProjectionInverse' in gpu program '%s', ModelViewProjectionInverse disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelViewProjectionInverse;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjectionTranspose)
 	{
-		m_Indices.ModelViewProjectionTranspose = getUniformIndex("nlModelViewProjectionTranspose");
+		m_Indices.ModelViewProjectionTranspose = getUniformIndex("modelViewProjectionTranspose");
 		if (m_Indices.ModelViewProjectionTranspose == ~0)
 		{
-			nlwarning("Missing 'nlModelViewProjectionTranspose' in gpu program '%s', ModelViewProjectionTranspose disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelViewProjectionTranspose' in gpu program '%s', ModelViewProjectionTranspose disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelViewProjectionTranspose;
 		}
 	}
 	if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjectionInverseTranspose)
 	{
-		m_Indices.ModelViewProjectionInverseTranspose = getUniformIndex("nlModelViewProjectionInverseTranspose");
+		m_Indices.ModelViewProjectionInverseTranspose = getUniformIndex("modelViewProjectionInverseTranspose");
 		if (m_Indices.ModelViewProjectionInverseTranspose == ~0)
 		{
-			nlwarning("Missing 'nlModelViewProjectionInverseTranspose' in gpu program '%s', ModelViewProjectionInverseTranspose disabled", source->DisplayName.c_str());
+			nlwarning("Missing 'modelViewProjectionInverseTranspose' in gpu program '%s', ModelViewProjectionInverseTranspose disabled", source->DisplayName.c_str());
 			features.DriverFlags &= ~CGPUProgramFeatures::ModelViewProjectionInverseTranspose;
+		}
+	}
+	if (features.DriverFlags & CGPUProgramFeatures::Fog)
+	{
+		m_Indices.Fog = getUniformIndex("fog");
+		if (m_Indices.Fog == ~0)
+		{
+			nlwarning("Missing 'fog' in gpu program '%s', Fog disabled", source->DisplayName.c_str());
+			features.DriverFlags &= ~CGPUProgramFeatures::Fog;
 		}
 	}
 	

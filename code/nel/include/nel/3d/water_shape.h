@@ -247,17 +247,17 @@ private:
 	static bool								_GridSizeTouched;
 
 	//
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump1;
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump2;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump1;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump2;
 	//
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump1Diffuse;
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump2Diffuse;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump1Diffuse;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump2Diffuse;
 	//
-	static std::auto_ptr<CVertexProgram>	_VertexProgramNoBump;
-	static std::auto_ptr<CVertexProgram>	_VertexProgramNoBumpDiffuse;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBump;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBumpDiffuse;
 	//
-	static std::auto_ptr<CVertexProgram>    _VertexProgramNoWave;
-	static std::auto_ptr<CVertexProgram>    _VertexProgramNoWaveDiffuse;
+	static NLMISC::CSmartPtr<CVertexProgram>    _VertexProgramNoWave;
+	static NLMISC::CSmartPtr<CVertexProgram>    _VertexProgramNoWaveDiffuse;
 };
 
 

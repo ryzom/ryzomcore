@@ -86,6 +86,9 @@ struct CGPUProgramFeatures
 		ModelViewProjectionTranspose			= 0x00000400, 
 		ModelViewProjectionInverseTranspose		= 0x00000800, 
 
+		// Fog
+		Fog										= 0x00001000, 
+
 		//
 		// Rough example, modify as necessary.
 		//
@@ -143,6 +146,8 @@ struct CGPUProgramIndices
 	uint ModelViewProjectionInverse;
 	uint ModelViewProjectionTranspose;
 	uint ModelViewProjectionInverseTranspose;
+
+	uint Fog;
 
 	//
 	// Rough example, modify as necessary.

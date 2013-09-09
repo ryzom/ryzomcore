@@ -908,6 +908,10 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	//=========================//
 	//	setup Water material   //
 	//=========================//
+	shape->initVertexProgram();
+	CVertexProgram *program = shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse : CWaterShape::_VertexProgramNoWave;
+	drv->activeVertexProgram(program);
+	// TODO_VP_MATERIAL
 	CWaterModel::_WaterMat.setTexture(0, shape->_BumpMap[0]);
 	CWaterModel::_WaterMat.setTexture(1, shape->_BumpMap[1]);
 	CWaterModel::_WaterMat.setTexture(3, shape->_ColorMap);
@@ -969,8 +973,6 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	cst[10].set(0.5f, 0.5f, 0.f, 1.f); // used to scale reflected ray into the envmap
 	/// set all our constants in one call
 	drv->setConstant(cstOffset, sizeof(cst) / sizeof(cst[0]) - cstOffset, (float *) &cst[cstOffset]);
-	shape->initVertexProgram();
-	drv->activeVertexProgram(shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse.get() : CWaterShape::_VertexProgramNoWave.get());
 	drv->setConstantFog(4);
 }
 

@@ -112,7 +112,7 @@ private:
 	/** The 16 versions: Specular or not (0 or 2), + normalize normal or not (0 or 1).
 	 *	All multiplied by 4, because support from 0 to 3 pointLights activated. (0.., 4.., 8.., 12..)
 	 */
-	static	std::auto_ptr<CVertexProgram>	_VertexProgram[NumVp];
+	static	NLMISC::CSmartPtr<CVertexProgram>	_VertexProgram[NumVp];
 
 	// WindTree Time for this mesh param setup. Stored in mesh because same for all instances.
 	float		_CurrentTime[HrcDepth];

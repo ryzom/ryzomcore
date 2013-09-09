@@ -32,7 +32,7 @@
 
 namespace NL3D
 {
-std::auto_ptr<CVertexProgram>	CMeshVPPerPixelLight::_VertexProgram[NumVp];
+NLMISC::CSmartPtr<CVertexProgram>	CMeshVPPerPixelLight::_VertexProgram[NumVp];
 
 // ***************************************************************************
 // Light VP fragment constants start at 24
@@ -414,7 +414,7 @@ void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
 					nlassert(0);
 				}
 			#endif
-			_VertexProgram[vp]= std::auto_ptr<CVertexProgram>(new CVertexProgram(vpCode.c_str()));
+			_VertexProgram[vp] = new CVertexProgram(vpCode.c_str());
 		}
 
 	}
@@ -521,7 +521,7 @@ void	CMeshVPPerPixelLight::enable(bool enabled, IDriver *drv)
 						   | (SpecularLighting	      ? 2 : 0)
 						   | (_IsPointLight		      ? 1 : 0);
 			//
-			drv->activeVertexProgram(_VertexProgram[idVP].get());
+			drv->activeVertexProgram(_VertexProgram[idVP]);
 		}
 		else
 		{

@@ -84,7 +84,7 @@ private:
 	bool	_IsPointLight;
 	//
 	enum { NumVp = 8};
-	static	std::auto_ptr<CVertexProgram>	_VertexProgram[NumVp];
+	static	NLMISC::CSmartPtr<CVertexProgram>	_VertexProgram[NumVp];
 };
 
 } // NL3D

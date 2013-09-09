@@ -39,7 +39,7 @@ static	const uint	VPLightConstantStart= 24;
 
 
 // ***************************************************************************
-std::auto_ptr<CVertexProgram>	CMeshVPWindTree::_VertexProgram[CMeshVPWindTree::NumVp];
+NLMISC::CSmartPtr<CVertexProgram>	CMeshVPWindTree::_VertexProgram[CMeshVPWindTree::NumVp];
 
 static const char*	WindTreeVPCodeWave=
 "!!VP1.0																				\n\
@@ -157,7 +157,7 @@ void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
 			vpCode= string(WindTreeVPCodeWave)
 					+ CRenderTrav::getLightVPFragment(numPls, VPLightConstantStart, specular, normalize)
 					+ WindTreeVPCodeEnd;
-			_VertexProgram[i]= std::auto_ptr<CVertexProgram>(new CVertexProgram(vpCode.c_str()));
+			_VertexProgram[i] = new CVertexProgram(vpCode.c_str());
 			// TODO_VP_GLSL
 		}
 	}
@@ -312,7 +312,7 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	idVP= numPls*4 + idVP;
 
 	// activate VP.
-	driver->activeVertexProgram(_VertexProgram[idVP].get());
+	driver->activeVertexProgram(_VertexProgram[idVP]);
 
 
 	return true;
@@ -383,7 +383,7 @@ void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 	_LastMBRIdVP= 0;
 
 	// activate VP.
-	driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP].get());
+	driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);
 }
 
 // ***************************************************************************
@@ -407,7 +407,7 @@ void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBase
 	if( idVP!=_LastMBRIdVP )
 	{
 		_LastMBRIdVP= idVP;
-		driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP].get());
+		driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);
 	}
 }
 
