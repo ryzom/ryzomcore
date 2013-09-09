@@ -32,7 +32,7 @@ namespace NL3D
 
 // ***************************************************************************
 
-CGeometryProgram::CGeometryProgram(CGPUProgramSourceCont *programSource) : _Info(NULL), IGPUProgram(programSource)
+CGeometryProgram::CGeometryProgram()
 {
 	
 }
@@ -41,19 +41,9 @@ CGeometryProgram::CGeometryProgram(CGPUProgramSourceCont *programSource) : _Info
 
 CGeometryProgram::~CGeometryProgram ()
 {
-	delete _Info;
-	_Info = NULL;
+	
 }
 
 // ***************************************************************************
-
-void CGeometryProgram::buildInfo(const char *displayName, uint features)
-{
-	nlassert(_Info == NULL);
-	_Info = new CGeometryProgramInfo();
-	CGeometryProgramInfo *info = _Info;
-	info->DisplayName = displayName;
-	info->Features = features;
-}
 
 } // NL3D

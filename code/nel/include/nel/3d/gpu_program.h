@@ -57,11 +57,103 @@ public:
 	// The virtual dtor is important.
 	virtual ~IGPUProgramDrvInfos(void);
 
-	virtual uint getParamIdx(char *name) const = 0;
+	virtual uint getUniformIndex(char *name) const = 0;
 };
 
-class CGPUProgramSource;
-class CGPUProgramSourceCont;
+#define NL_GPU_PROGRAM_LIGHTS 8
+
+/// Features exposed by a program. Used to set builtin parameters on user provided shaders
+struct CGPUProgramFeatures
+{
+	CGPUProgramFeatures() : DriverFlags(0), MaterialFlags(0) /*, NumLights(0) */ { }
+
+	// Driver builtin parameters
+	enum TDriverFlags
+	{
+		// Matrices
+		ModelView								= 0x00000001, 
+		ModelViewInverse						= 0x00000002, 
+		ModelViewTranspose						= 0x00000004,
+		ModelViewInverseTranspose				= 0x00000008, 
+
+		Projection								= 0x00000010, 
+		ProjectionInverse						= 0x00000020, 		
+		ProjectionTranspose						= 0x00000040, 
+		ProjectionInverseTranspose				= 0x00000080, 
+
+		ModelViewProjection						= 0x00000100, 
+		ModelViewProjectionInverse				= 0x00000200, 
+		ModelViewProjectionTranspose			= 0x00000400, 
+		ModelViewProjectionInverseTranspose		= 0x00000800, 
+
+		//
+		// Rough example, modify as necessary.
+		//
+
+		// Lighting (todo)
+		/// Driver ambient, must be ignored when material ambient is flagged
+		//DriverAmbient							= 0x00001000, 
+		/// Lights, does not set diffuses if material lights is flagged
+		//DriverLights							= 0x00002000, 
+		// etcetera
+
+		// Fog (todo)
+		// Fog									= ..., 
+	};
+	uint32 DriverFlags;
+	// uint NumLights; // number of lights supported by the program (not used yet, modify as necessary)
+
+	enum TMaterialFlags
+	{
+		/// Use the CMaterial texture stages as the textures for a Pixel Program
+		TextureStages							= 0x00000001, // <- don't remove this one, it's already used, if you want to split them up into the different stages, then it's ok to change it
+
+		//
+		// Rough example, modify as necessary.
+		//
+
+		// Lighting (todo)
+		/// Material ambient premultiplied with driver ambient
+		//MaterialAmbient							= 0x00000002, 
+		/// Premultiply lights diffuse with material diffuse, requires driver lights to be flagged
+		//MaterialLights							= 0x00000004, 
+		// etcetera
+
+		// Add all necessary feature sets used with builtin materials here
+	};
+	// Material builtin parameters
+	uint32 MaterialFlags;
+};
+
+/// Stucture used to cache the indices of builtin parameters
+struct CGPUProgramIndices
+{
+	uint ModelView;
+	uint ModelViewInverse;
+	uint ModelViewTranspose;
+	uint ModelViewInverseTranspose;
+
+	uint Projection;
+	uint ProjectionInverse;	
+	uint ProjectionTranspose;
+	uint ProjectionInverseTranspose;
+
+	uint ModelViewProjection;
+	uint ModelViewProjectionInverse;
+	uint ModelViewProjectionTranspose;
+	uint ModelViewProjectionInverseTranspose;
+
+	//
+	// Rough example, modify as necessary.
+	//
+	//uint Ambient;
+
+	//uint LightType[NL_GPU_PROGRAM_LIGHTS];
+	//uint LightAmbient[NL_GPU_PROGRAM_LIGHTS];
+	//uint LightDiffuse[NL_GPU_PROGRAM_LIGHTS];
+	//uint LightPosition[NL_GPU_PROGRAM_LIGHTS];
+	//uint LightDirection[NL_GPU_PROGRAM_LIGHTS];
+};
 
 /**
  * \brief IGPUProgram
@@ -74,6 +166,8 @@ class IGPUProgram : public NLMISC::CRefCount
 public:
 	enum TProfile
 	{
+		none = 0,
+
 		// types
 		// Vertex Shader = 0x01
 		// Pixel Shader = 0x02
@@ -123,24 +217,66 @@ public:
 		glsl330g = 0x65030330, // GLSL geometry program version 330
 	};
 
+	struct CSource : public NLMISC::CRefCount
+	{
+	public:
+		std::string DisplayName;
+
+		/// Minimal required profile for this GPU program
+		IGPUProgram::TProfile Profile;
+
+		const char *SourcePtr;
+		size_t SourceLen;
+		/// Copy the source code string
+		inline void setSource(const char *source) { SourceCopy = source; SourcePtr = &SourceCopy[0]; SourceLen = SourceCopy.size(); }
+		/// Set pointer to source code string without copying the string
+		inline void setSourcePtr(const char *sourcePtr, size_t sourceLen) { SourceCopy.clear(); SourcePtr = sourcePtr; SourceLen = sourceLen; }
+		inline void setSourcePtr(const char *sourcePtr) { SourceCopy.clear(); SourcePtr = sourcePtr; SourceLen = strlen(sourcePtr); }
+
+		/// CVertexProgramInfo/CPixelProgramInfo/... NeL features
+		CGPUProgramFeatures Features;
+
+		/// Map with known parameter indices, used for assembly programs
+		std::map<std::string, uint> ParamIndices;
+		
+	private:
+		std::string SourceCopy;
+	};
+
 public:
 	IGPUProgram();
-	IGPUProgram(CGPUProgramSourceCont *programSource);
 	virtual ~IGPUProgram();
 
-	/// Get the idx of a parameter (ogl: uniform, d3d: constant, etcetera) by name. Invalid name returns ~0
-	inline uint getParamIdx(char *name) const { return _DrvInfo->getParamIdx(name); };
+	// Manage the sources, not allowed after compilation.
+	// Add multiple sources using different profiles, the driver will use the first one it supports.
+	inline size_t getSourceNb() const { return m_Sources.size(); };
+	inline CSource *getSource(size_t i) const { return m_Sources[i]; };
+	inline size_t addSource(CSource *source) { nlassert(!m_Source); m_Sources.push_back(source); return (m_Sources.size() - 1); }
+	inline void removeSource(size_t i) { nlassert(!m_Source); m_Sources.erase(m_Sources.begin() + i); }
 
-	/// Get the program
-	inline const CGPUProgramSourceCont *getProgramSource() const { return _ProgramSource; };
+	// Get the idx of a parameter (ogl: uniform, d3d: constant, etcetera) by name. Invalid name returns ~0
+	inline uint getUniformIndex(char *name) const { return m_DrvInfo->getUniformIndex(name); };
+
+	// Get feature information of the current program
+	inline CSource *source() const { return m_Source; };
+	inline const CGPUProgramFeatures &features() const { return m_Source->Features; };
+	inline const CGPUProgramIndices &indices() const { return m_Indices; };
+	inline TProfile profile() const { return m_Source->Profile; }
+
+	// Build feature info, called automatically by the driver after compile succeeds
+	void buildInfo(CSource *source);
 
 protected:
 	/// The progam source
-	NLMISC::CSmartPtr<CGPUProgramSourceCont>	_ProgramSource;
+	std::vector<NLMISC::CSmartPtr<CSource> >				m_Sources;
+
+	/// The source used for compilation
+	NLMISC::CSmartPtr<CSource>								m_Source;
+	CGPUProgramIndices										m_Indices;
 
 public:
 	/// The driver information. For the driver implementation only.
-	NLMISC::CRefPtr<IGPUProgramDrvInfos>		_DrvInfo;
+	NLMISC::CRefPtr<IGPUProgramDrvInfos>					m_DrvInfo;
 
 }; /* class IGPUProgram */
 

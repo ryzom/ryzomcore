@@ -265,15 +265,15 @@ void dump(const CVPParser::TProgram &prg, std::string &dest)
 bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 {
 	// Program setuped ?
-	if (program->_DrvInfo == NULL)
+	if (program->m_DrvInfo == NULL)
 	{
 		// Find nelvp
-		CGPUProgramSource *source = NULL;
-		for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+		IGPUProgram::CSource *source = NULL;
+		for (uint i = 0; i < program->getSourceNb(); ++i)
 		{
-			if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+			if (program->getSource(i)->Profile == CVertexProgram::nelvp)
 			{
-				source = program->getProgramSource()->Sources[i];
+				source = program->getSource(i);
 			}
 		}
 		if (!source)
@@ -288,7 +288,7 @@ bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 		*itTex = drvInfo = new CVertexProgamDrvInfosD3D(this, itTex);
 
 		// Create a driver info structure
-		program->_DrvInfo = *itTex;
+		program->m_DrvInfo = *itTex;
 
 		/** Check with our parser if the program will works with other implemented extensions, too. (EXT_vertex_shader ..).
 		  * There are some incompatibilities.
@@ -359,7 +359,7 @@ bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 		drvInfo->ParamIndices = source->ParamIndices;
 
 		// Build the feature info
-		program->buildInfo(source->DisplayName.c_str(), source->Features);
+		program->buildInfo(source);
 	}
 
 	return true;
@@ -378,7 +378,7 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 	{
 		if (!CDriverD3D::compileVertexProgram(program)) return false;
 
-		CVertexProgamDrvInfosD3D *info = NLMISC::safe_cast<CVertexProgamDrvInfosD3D *>((IGPUProgramDrvInfos*)program->_DrvInfo);
+		CVertexProgamDrvInfosD3D *info = NLMISC::safe_cast<CVertexProgamDrvInfosD3D *>((IGPUProgramDrvInfos*)program->m_DrvInfo);
 		setVertexProgram (info->Shader, program);
 
 		/* D3DRS_FOGSTART and D3DRS_FOGEND must be set with [1, 0] else the fog doesn't work properly on VertexShader and non-VertexShader objects

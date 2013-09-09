@@ -93,17 +93,17 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 	// Driver info
 	CVertexProgamDrvInfosGL *drvInfo;
 
-	nlassert(!program->_DrvInfo);
+	nlassert(!program->m_DrvInfo);
 	glDisable(GL_VERTEX_PROGRAM_NV);
 	_VertexProgramEnabled = false;
 	
 	// Find nelvp
-	CGPUProgramSource *source = NULL;
-	for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+	IGPUProgram::CSource *source = NULL;
+	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
-		if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
 		{
-			source = program->getProgramSource()->Sources[i];
+			source = program->getSource(i);
 		}
 	}
 	if (!source)
@@ -136,7 +136,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 	*it = drvInfo = new CVertexProgamDrvInfosGL(this, it);
 
 	// Set the pointer
-	program->_DrvInfo = drvInfo;
+	program->m_DrvInfo = drvInfo;
 
 	// Compile the program
 	nglLoadProgramNV(GL_VERTEX_PROGRAM_NV, drvInfo->ID, (GLsizei)source->SourceLen, (const GLubyte*)source->SourcePtr);
@@ -177,7 +177,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 
 		// Setup not ok
 		delete drvInfo;
-		program->_DrvInfo = NULL;
+		program->m_DrvInfo = NULL;
 		_GPUPrgDrvInfos.erase(it);
 		return false;
 	}
@@ -186,7 +186,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 	drvInfo->ParamIndices = source->ParamIndices;
 
 	// Build the feature info
-	program->buildInfo(source->DisplayName.c_str(), source->Features);
+	program->buildInfo(source);
 
 	// Setup ok
 	return true;
@@ -208,7 +208,7 @@ bool CDriverGL::activeNVVertexProgram(CVertexProgram *program)
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
+		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->m_DrvInfo);
 		nlassert(drvInfo);
 
 		// Enable vertex program
@@ -1524,17 +1524,17 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 
 #ifndef USE_OPENGLES
 
-	nlassert(!program->_DrvInfo);
+	nlassert(!program->m_DrvInfo);
 	glDisable(GL_VERTEX_PROGRAM_ARB);
 	_VertexProgramEnabled = false;
 
 	// Find nelvp
-	CGPUProgramSource *source = NULL;
-	for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+	IGPUProgram::CSource *source = NULL;
+	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
-		if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
 		{
-			source = program->getProgramSource()->Sources[i];
+			source = program->getSource(i);
 		}
 	}
 	if (!source)
@@ -1563,12 +1563,12 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	CVertexProgamDrvInfosGL *drvInfo;
 	*it = drvInfo = new CVertexProgamDrvInfosGL(this, it);
 	// Set the pointer
-	program->_DrvInfo=drvInfo;
+	program->m_DrvInfo = drvInfo;
 
 	if (!setupARBVertexProgram(parsedProgram, drvInfo->ID, drvInfo->SpecularWritten))
 	{
 		delete drvInfo;
-		program->_DrvInfo = NULL;
+		program->m_DrvInfo = NULL;
 		_GPUPrgDrvInfos.erase(it);
 		return false;
 	}
@@ -1577,7 +1577,7 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	drvInfo->ParamIndices = source->ParamIndices;
 
 	// Build the feature info
-	program->buildInfo(source->DisplayName.c_str(), source->Features);
+	program->buildInfo(source);
 
 	return true;
 
@@ -1600,7 +1600,7 @@ bool CDriverGL::activeARBVertexProgram(CVertexProgram *program)
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
+		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->m_DrvInfo);
 		nlassert(drvInfo);
 
 		glEnable( GL_VERTEX_PROGRAM_ARB );
@@ -1639,17 +1639,17 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 
 #ifndef USE_OPENGLES
 
-	nlassert(program->_DrvInfo);
+	nlassert(program->m_DrvInfo);
 	glDisable(GL_VERTEX_SHADER_EXT);
 	_VertexProgramEnabled = false;
 
 	// Find nelvp
-	CGPUProgramSource *source = NULL;
-	for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+	IGPUProgram::CSource *source = NULL;
+	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
-		if (program->getProgramSource()->Sources[i]->Profile == CVertexProgram::nelvp)
+		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
 		{
-			source = program->getProgramSource()->Sources[i];
+			source = program->getSource(i);
 		}
 	}
 	if (!source)
@@ -1690,12 +1690,12 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	CVertexProgamDrvInfosGL *drvInfo;
 	*it = drvInfo = new CVertexProgamDrvInfosGL (this, it);
 	// Set the pointer
-	program->_DrvInfo=drvInfo;
+	program->m_DrvInfo=drvInfo;
 
 	if (!setupEXTVertexShader(parsedProgram, drvInfo->ID, drvInfo->Variants, drvInfo->UsedVertexComponents))
 	{
 		delete drvInfo;
-		program->_DrvInfo = NULL;
+		program->m_DrvInfo = NULL;
 		_GPUPrgDrvInfos.erase(it);
 		return false;
 	}
@@ -1704,7 +1704,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	drvInfo->ParamIndices = source->ParamIndices;
 
 	// Build the feature info
-	program->buildInfo(source->DisplayName.c_str(), source->Features);
+	program->buildInfo(source);
 
 	return true;
 
@@ -1727,7 +1727,7 @@ bool CDriverGL::activeEXTVertexShader(CVertexProgram *program)
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
+		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->m_DrvInfo);
 		nlassert(drvInfo);
 
 		glEnable(GL_VERTEX_SHADER_EXT);
@@ -1751,7 +1751,7 @@ bool CDriverGL::activeEXTVertexShader(CVertexProgram *program)
 
 bool CDriverGL::compileVertexProgram(NL3D::CVertexProgram *program)
 {
-	if (program->_DrvInfo == NULL)
+	if (program->m_DrvInfo == NULL)
 	{
 		// Extension
 		if (_Extensions.NVVertexProgram)

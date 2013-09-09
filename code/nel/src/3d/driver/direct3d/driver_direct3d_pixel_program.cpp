@@ -66,15 +66,15 @@ bool CDriverD3D::supportPixelProgram (CPixelProgram::TProfile profile) const
 bool CDriverD3D::compilePixelProgram(CPixelProgram *program)
 {
 	// Program setuped ?
-	if (program->_DrvInfo==NULL)
+	if (program->m_DrvInfo==NULL)
 	{
 		// Find a supported pixel program profile
-		CGPUProgramSource *source = NULL;
-		for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+		IGPUProgram::CSource *source = NULL;
+		for (uint i = 0; i < program->getSourceNb(); ++i)
 		{
-			if (supportPixelProgram(program->getProgramSource()->Sources[i]->Profile))
+			if (supportPixelProgram(program->getSource(i)->Profile))
 			{
-				source = program->getProgramSource()->Sources[i];
+				source = program->getSource(i);
 			}
 		}
 		if (!source)
@@ -89,7 +89,7 @@ bool CDriverD3D::compilePixelProgram(CPixelProgram *program)
 		*itPix = drvInfo = new CPixelProgramDrvInfosD3D(this, itPix);
 
 		// Create a driver info structure
-		program->_DrvInfo = *itPix;
+		program->m_DrvInfo = *itPix;
 
 		LPD3DXBUFFER pShader;
 		LPD3DXBUFFER pErrorMsgs;
@@ -109,7 +109,7 @@ bool CDriverD3D::compilePixelProgram(CPixelProgram *program)
 		drvInfo->ParamIndices = source->ParamIndices;
 
 		// Build the feature info
-		program->buildInfo(source->DisplayName.c_str(), source->Features);
+		program->buildInfo(source);
 	}
 
 	return true;
@@ -128,7 +128,7 @@ bool CDriverD3D::activePixelProgram(CPixelProgram *program)
 	{
 		if (!CDriverD3D::compilePixelProgram(program)) return false;
 
-		CPixelProgramDrvInfosD3D *info = static_cast<CPixelProgramDrvInfosD3D *>((IGPUProgramDrvInfos*)program->_DrvInfo);
+		CPixelProgramDrvInfosD3D *info = static_cast<CPixelProgramDrvInfosD3D *>((IGPUProgramDrvInfos*)program->m_DrvInfo);
 		setPixelShader(info->Shader);
 	}
 	else

@@ -1147,6 +1147,33 @@ public:
 
 
 
+	/// \name Geometry Program
+	// @{
+
+	// Order of preference
+	// - activeGeometryProgram
+	// - CMaterial pass[n] PP (uses activeGeometryProgram, but does not override if one already set by code)
+	// - none
+
+	/** Return true if the driver supports the specified pixel program profile.
+	  */
+	virtual bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const = 0;
+
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
+	  */
+	virtual bool			compileGeometryProgram(CGeometryProgram *program) = 0;
+
+	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getGeometryProgram returns NULL.
+	  * The pixel program is activated immediately.
+	  */
+	virtual bool			activeGeometryProgram(CGeometryProgram *program) = 0;
+	// @}
+
+
+
 	/// \name Program parameters
 	// @{
 	// Set parameters

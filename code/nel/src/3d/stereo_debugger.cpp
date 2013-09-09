@@ -116,10 +116,8 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
 
-	CGPUProgramSource *source = new CGPUProgramSource();
-	CGPUProgramSourceCont *sourceCont = new CGPUProgramSourceCont();
-	sourceCont->Sources.push_back(source);
-	source->Features = CPixelProgramInfo::MaterialTextures;
+	IGPUProgram::CSource *source = new IGPUProgram::CSource();
+	source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
 
 	/*if (drvInternal->supportPixelProgram(CPixelProgram::fp40) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
@@ -131,7 +129,8 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		nldebug("VR: arbfp1");		
 		source->Profile = IGPUProgram::arbfp1;
 		source->setSourcePtr(a_arbfp1);
-		m_PixelProgram = new CPixelProgram(sourceCont);
+		m_PixelProgram = new CPixelProgram();
+		m_PixelProgram->addSource(source);
 	}
 	/*else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
 	{

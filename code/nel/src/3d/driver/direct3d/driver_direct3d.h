@@ -309,7 +309,7 @@ public:
 	CVertexProgamDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	~CVertexProgamDrvInfosD3D();
 
-	virtual uint getParamIdx(char *name) const
+	virtual uint getUniformIndex(char *name) const
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
@@ -331,7 +331,7 @@ public:
 	CPixelProgramDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	~CPixelProgramDrvInfosD3D();
 
-	virtual uint getParamIdx(char *name) const
+	virtual uint getUniformIndex(char *name) const
 	{ 
 		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
 		if (it != ParamIndices.end()) return it->second; 
@@ -1152,6 +1152,33 @@ public:
 	  * The pixel program is activated immediately.
 	  */
 	virtual bool			activePixelProgram(CPixelProgram *program);
+	// @}
+
+
+
+	/// \name Geometry Program
+	// @{
+
+	// Order of preference
+	// - activeGeometryProgram
+	// - CMaterial pass[n] PP (uses activeGeometryProgram, but does not override if one already set by code)
+	// - none
+
+	/** Return true if the driver supports the specified pixel program profile.
+	  */
+	virtual bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const { return false; }
+
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
+	  */
+	virtual bool			compileGeometryProgram(CGeometryProgram *program) { return false; }
+
+	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getGeometryProgram returns NULL.
+	  * The pixel program is activated immediately.
+	  */
+	virtual bool			activeGeometryProgram(CGeometryProgram *program) { return false; }
 	// @}
 
 
@@ -2078,7 +2105,7 @@ public:
 	{
 		H_AUTO_D3D(CDriverD3D_getPixelProgramD3D);
 		CPixelProgramDrvInfosD3D*	d3dPixelProgram;
-		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IGPUProgramDrvInfos*)(pixelProgram._DrvInfo);
+		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IGPUProgramDrvInfos*)(pixelProgram.m_DrvInfo);
 		return d3dPixelProgram;
 	}
 
@@ -2087,7 +2114,7 @@ public:
 	{
 		H_AUTO_D3D(CDriverD3D_getVertexProgramD3D);
 		CVertexProgamDrvInfosD3D*	d3dVertexProgram;
-		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IGPUProgramDrvInfos*)(vertexProgram._DrvInfo);
+		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IGPUProgramDrvInfos*)(vertexProgram.m_DrvInfo);
 		return d3dVertexProgram;
 	}
 

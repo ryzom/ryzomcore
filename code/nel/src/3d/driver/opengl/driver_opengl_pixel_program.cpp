@@ -97,7 +97,7 @@ bool CDriverGL::activePixelProgram(CPixelProgram *program)
 bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 {
 	// Program setuped ?
-	if (program->_DrvInfo == NULL)
+	if (program->m_DrvInfo == NULL)
 	{
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
 		_PixelProgramEnabled = false;
@@ -109,12 +109,12 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 		CPixelProgamDrvInfosGL *drvInfo;
 		*it = drvInfo = new CPixelProgamDrvInfosGL(this, it);
 		// Set the pointer
-		program->_DrvInfo = drvInfo;
+		program->m_DrvInfo = drvInfo;
 	
 		if (!setupPixelProgram(program, drvInfo->ID))
 		{
 			delete drvInfo;
-			program->_DrvInfo = NULL;
+			program->m_DrvInfo = NULL;
 			_GPUPrgDrvInfos.erase(it);
 			return false;
 		}
@@ -136,7 +136,7 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 		if (!CDriverGL::compilePixelProgram(program)) return false;
 
 		// Cast the driver info pointer
-		CPixelProgamDrvInfosGL *drvInfo = safe_cast<CPixelProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
+		CPixelProgamDrvInfosGL *drvInfo = safe_cast<CPixelProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->m_DrvInfo);
 
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
 		_PixelProgramEnabled = true;
@@ -159,15 +159,15 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 {
 	H_AUTO_OGL(CDriverGL_setupARBPixelProgram)
 	
-	CPixelProgamDrvInfosGL *drvInfo = static_cast<CPixelProgamDrvInfosGL *>((IGPUProgramDrvInfos *)program->_DrvInfo);
+	CPixelProgamDrvInfosGL *drvInfo = static_cast<CPixelProgamDrvInfosGL *>((IGPUProgramDrvInfos *)program->m_DrvInfo);
 
 	// Find a supported pixel program profile
-	CGPUProgramSource *source = NULL;
-	for (uint i = 0; i < program->getProgramSource()->Sources.size(); ++i)
+	IGPUProgram::CSource *source = NULL;
+	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
-		if (supportPixelProgram(program->getProgramSource()->Sources[i]->Profile))
+		if (supportPixelProgram(program->getSource(i)->Profile))
 		{
-			source = program->getProgramSource()->Sources[i];
+			source = program->getSource(i);
 		}
 	}
 	if (!source)
@@ -224,7 +224,7 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 	drvInfo->ParamIndices = source->ParamIndices;
 
 	// Build the feature info
-	program->buildInfo(source->DisplayName.c_str(), source->Features);
+	program->buildInfo(source);
 
 	return true;	
 }

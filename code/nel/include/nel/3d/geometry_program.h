@@ -27,52 +27,18 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/smart_ptr.h>
 #include <nel/3d/gpu_program.h>
-#include <nel/3d/gpu_program_source.h>
 
 #include <list>
 
 namespace NL3D {
 
-/**
- * \brief CGeometryProgramInfo
- * \date 2013-09-07 15:00GMT
- * \author Jan Boon (Kaetemi)
- * Read-only information structure.
- */
-struct CGeometryProgramInfo
-{
-public:
-	std::string DisplayName;
-	
-	/*enum TFeatures
-	{
-		
-	};*/
-
-	// Bitfield containing features used by this geometry program
-	uint Features;
-
-	// Indices of parameters used by features
-	// ...
-};
-
 class CGeometryProgram : public IGPUProgram
 {
 public:
 	/// Constructor
-	CGeometryProgram(CGPUProgramSourceCont *programSource);
+	CGeometryProgram();
 	/// Destructor
 	virtual ~CGeometryProgram ();
-
-	/// Build feature information
-	void buildInfo(const char *displayName, uint features);
-	/// Get feature information
-	inline const CGeometryProgramInfo *getInfo() const { return _Info; }
-
-private:
-
-	/// Feature information
-	CGeometryProgramInfo							*_Info;
 };
 
 } // NL3D

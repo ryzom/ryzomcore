@@ -32,7 +32,7 @@ namespace NL3D
 
 // ***************************************************************************
 
-CPixelProgram::CPixelProgram(CGPUProgramSourceCont *programSource) : _Info(NULL), IGPUProgram(programSource)
+CPixelProgram::CPixelProgram()
 {
 	
 }
@@ -41,39 +41,9 @@ CPixelProgram::CPixelProgram(CGPUProgramSourceCont *programSource) : _Info(NULL)
 
 CPixelProgram::~CPixelProgram ()
 {
-	delete _Info;
-	_Info = NULL;
+	
 }
 
 // ***************************************************************************
-
-void CPixelProgram::buildInfo(const char *displayName, uint features)
-{
-	nlassert(_Info == NULL);
-	_Info = new CPixelProgramInfo();
-	CPixelProgramInfo *info = _Info;
-	info->DisplayName = displayName;
-	info->Features = features;
-	if (features & CPixelProgramInfo::Fog)
-	{
-		if (features & CPixelProgramInfo::DynamicFog)
-		{
-			info->FogEnabledIdx = getParamIdx("nlFogEnabled");
-			if (info->FogEnabledIdx == ~0)
-			{
-				nlwarning("Missing 'nlFogEnabled' in gpu program '%s', DynamicFog disabled", displayName);
-				info->Features &= ~CPixelProgramInfo::DynamicFog;
-			}
-		}
-		info->FogStartEndIdx = getParamIdx("nlFogStartEnd");
-		info->FogColorIdx = getParamIdx("nlFogColor");
-		if (info->FogStartEndIdx == ~0
-			|| info->FogStartEndIdx == ~0)
-		{
-			nlwarning("Missing 'nlFogStartEnd/nlFogColor' in gpu program '%s', Fog disabled", displayName);
-			info->Features &= ~CPixelProgramInfo::Fog;
-		}
-	}
-}
 
 } // NL3D

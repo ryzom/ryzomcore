@@ -169,8 +169,6 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/geometry_program.h
         gpu_program.cpp
         ../../include/nel/3d/gpu_program.h
-        gpu_program_source.cpp
-        ../../include/nel/3d/gpu_program_source.h
         gpu_program_params.cpp
         ../../include/nel/3d/gpu_program_params.h)
 
