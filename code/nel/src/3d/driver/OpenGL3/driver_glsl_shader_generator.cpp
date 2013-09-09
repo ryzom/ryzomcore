@@ -258,41 +258,20 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addDiffuse()
 	{
-		ss << "vec4 diffuse  = vec4( ";
-		ss << float( material->getDiffuse().R / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().G / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().B / 255.0f ) << ", ";
-		ss << float( material->getDiffuse().A / 255.0f ) << " );";
-		ss << std::endl;
+		ss << "uniform vec4 diffuse;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addColor()
 	{
-		CRGBA color = material->getColor();
-		ss << "vec4 mcolor = vec4( ";
-		ss << color.R / 255.0f << ", ";
-		ss << color.G / 255.0f << ", ";
-		ss << color.B / 255.0f << ", ";
-		ss << color.A / 255.0f << " );";
-		ss << std::endl;
+		ss << "uniform vec4 mcolor;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addConstants()
 	{
-		int j = 0;
-		for( int i = TexCoord0; i < TexCoord4; i++ )
-		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "vec4 " << constantNames[ j ] << " = vec4( ";
-				ss << float( material->_TexEnvs[ j ].ConstantColor.R / 255.0f ) << ", ";
-				ss << float( material->_TexEnvs[ j ].ConstantColor.G / 255.0f ) << ", ";
-				ss << float( material->_TexEnvs[ j ].ConstantColor.B / 255.0f ) << ", ";
-				ss << float( material->_TexEnvs[ j ].ConstantColor.A / 255.0f ) << " );";
-				ss << std::endl;
-			}
-			j++;
-		}
+		ss << "uniform vec4 contant0;" << std::endl;
+		ss << "uniform vec4 contant1;" << std::endl;
+		ss << "uniform vec4 contant2;" << std::endl;
+		ss << "uniform vec4 contant3;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::generateNormalVS()
@@ -483,12 +462,13 @@ namespace NL3D
 			}
 			sampler++;
 		}
+		addColor();
+		addConstants();
+
 		ss << std::endl;
 		
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-
-		addColor();
 
 		bool textures = false;
 		sampler = 0;
@@ -533,8 +513,6 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateTexEnv()
 	{
-		addConstants();
-
 		uint32 stage = 0;
 		for( int i = TexCoord0; i < TexCoord4; i++ )
 		{
@@ -890,12 +868,13 @@ namespace NL3D
 		ss << "uniform vec4 constant1;" << std::endl;
 		ss << "uniform vec4 constant2;" << std::endl;
 		ss << "uniform vec4 constant3;" << std::endl;
+		
+		addDiffuse();
+
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-
-		addDiffuse();
 
 		// Lightmap UV coords are at position 1
 		for( int i = 0; i < ntextures - 1; i++ )
@@ -939,11 +918,10 @@ namespace NL3D
 		ss << "smooth in vec3 cubeTexCoords;" << std::endl;
 		ss << "uniform sampler2D sampler0;" << std::endl;
 		ss << "uniform samplerCube cubeSampler;" << std::endl;
-		ss << "void main( void )" << std::endl;
-		ss << "{" << std::endl;
-		
 		addDiffuse();
 
+		ss << "void main( void )" << std::endl;
+		ss << "{" << std::endl;		
 		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
 		ss << "vec4 texel1 = textureCube( cubeSampler, cubeTexCoords );" << std::endl;
 		ss << "vec4 texel;" << std::endl;
@@ -968,15 +946,15 @@ namespace NL3D
 		if( material->getShader() == CMaterial::PerPixelLighting )
 			ss << "uniform samplerCube cubeSampler2;" << std::endl;
 
+		addDiffuse();
+
+		addConstants();
+
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		
-		addConstants();
-
-		addDiffuse();
-
 		ss << "vec4 texel0 = textureCube( cubeSampler0, cubeTexCoords0 );" << std::endl;
 		ss << "vec4 texel1 = texture2D( sampler1, texCoord1 );" << std::endl;
 
@@ -1067,13 +1045,11 @@ namespace NL3D
 	{
 		ss << "uniform sampler2D sampler0;" << std::endl;
 		ss << "uniform sampler2D sampler1;" << std::endl;
+		addDiffuse();
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-
-		addDiffuse();
-
 		ss << "vec4 tex0 = texture2D( sampler0, texCoord0 );" << std::endl;
 		ss << "vec4 tex1 = texture2D( sampler1, texCoord1 );" << std::endl;
 		ss << "vec4 tex = mix( tex0, tex1, diffuse.a );" << std::endl;

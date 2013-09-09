@@ -587,20 +587,38 @@ void			CDriverGL3::endMultiPass()
 	}
 }
 
-	const char *samplers[ 4 ] = 
-	{
-		"sampler0",
-		"sampler1",
-		"sampler2",
-		"sampler3"
-	};
+const char *samplers[ IDRV_MAT_MAXTEXTURES ] = 
+{
+	"sampler0",
+	"sampler1",
+	"sampler2",
+	"sampler3"
+};
+
+const char *constNames[ IDRV_MAT_MAXTEXTURES ] =
+{
+	"constant0",
+	"constant1",
+	"constant2",
+	"constant3"
+};
 
 void CDriverGL3::setupNormalPass()
 {
 	const CMaterial &mat = *_CurrentMaterial;
 	
-	for( int i = 0; i < 4; i++ )
+	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
 	{
+		// Set constant
+		int cl = getUniformLocation( constNames[ i ] );
+		if( cl != -1 )
+		{
+			GLfloat glCol[ 4 ];
+			convColor( mat._TexEnvs[ i ].ConstantColor, glCol );
+			setUniform4f( cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+		}
+
+		// Set texture
 		ITexture *t = mat.getTexture( i );
 		if( t == NULL )
 			continue;
@@ -675,14 +693,6 @@ sint CDriverGL3::beginLightMapMultiPass ()
 	// Manage too if no lightmaps.
 	return	std::max (_NLightMapPass, (uint)1);
 }
-
-const char *constNames[ 4 ] =
-{
-	"constant0",
-	"constant1",
-	"constant2",
-	"constant3"
-};
 
 // ***************************************************************************
 void			CDriverGL3::setupLightMapPass(uint pass)

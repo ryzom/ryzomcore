@@ -23,6 +23,18 @@
 #include "driver_opengl_vertex_buffer_hard.h"
 #include "nel/3d/i_program_object.h"
 
+namespace
+{
+	const char *constNames[ NL3D::IDRV_MAT_MAXTEXTURES ] =
+	{
+		"constant0",
+		"constant1",
+		"constant2",
+		"constant3"
+	};
+
+}
+
 namespace NL3D
 {
 	bool CDriverGL3::activeProgramObject( IProgramObject *program )
@@ -215,7 +227,19 @@ namespace NL3D
 			desc.setProgram( p );
 			shaderCache.cacheShader( desc );
 		}
-		
+
+		setupUniforms( mat );
+
+#endif
+
+		return true;
+	}
+
+	void CDriverGL3::setupUniforms( CMaterial& mat )
+	{
+
+#ifdef GLSL
+
 		int mvpIndex = getUniformLocation( "mvpMatrix" );
 		if( mvpIndex != -1 )
 		{
@@ -223,9 +247,56 @@ namespace NL3D
 			setUniformMatrix4fv( mvpIndex, 1, false, mat.get() );
 		}
 
-#endif
+		int colorIndex = getUniformLocation( "mcolor" );
+		if( colorIndex != -1 )
+		{
+			GLfloat glCol[ 4 ];
+			CRGBA col = mat.getColor();
+			glCol[ 0 ] = col.R / 255.0f;
+			glCol[ 1 ] = col.G / 255.0f;
+			glCol[ 2 ] = col.B / 255.0f;
+			glCol[ 3 ] = col.A / 255.0f;
 
-		return true;
+			setUniform4f( colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+		}
+
+		int diffuseIndex = getUniformLocation( "diffuse" );
+		if( diffuseIndex != -1 )
+		{
+			GLfloat glCol[ 4 ];
+			CRGBA col = mat.getDiffuse();
+			glCol[ 0 ] = col.R / 255.0f;
+			glCol[ 1 ] = col.G / 255.0f;
+			glCol[ 2 ] = col.B / 255.0f;
+			glCol[ 3 ] = col.A / 255.0f;
+
+			setUniform4f( diffuseIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+		}
+
+
+		// Lightmaps have special constants
+		if( mat.getShader() != CMaterial::LightMap )
+		{
+		
+			for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+			{
+				int cl = getUniformLocation( constNames[ i ] );
+				if( cl != -1 )
+				{
+					CRGBA col = mat._TexEnvs[ i ].ConstantColor;
+					GLfloat glCol[ 4 ];
+					glCol[ 0 ] = col.R / 255.0f;
+					glCol[ 1 ] = col.G / 255.0f;
+					glCol[ 2 ] = col.B / 255.0f;
+					glCol[ 3 ] = col.A / 255.0f;
+
+					setUniform4f( cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+				}
+			}
+
+		}
+
+#endif
 	}
 
 	void CDriverGL3::releaseProgram()
