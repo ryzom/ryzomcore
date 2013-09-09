@@ -76,7 +76,7 @@ $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 
 $BASE_WEBPATH = 'http://localhost:40917/www/html';
-$IMAGELOC_WEBPATH = 'http://localhost:40917';
+$IMAGELOC_WEBPATH = 'http://localhost:40917/ams_lib/img';
 $WEBPATH = $BASE_WEBPATH . '/index.php';
 $INGAME_WEBPATH = $BASE_WEBPATH . '/index.php';
 $CONFIG_PATH = dirname( __FILE__ );

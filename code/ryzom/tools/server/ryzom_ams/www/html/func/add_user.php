@@ -55,6 +55,7 @@ function write_user($newUser){
           //Create the user on the shard + in case shard is offline put copy of query in query db
           //returns: ok, shardoffline or liboffline
           $result = WebUsers::createUser($params, $user_id);
+          Users::createPermissions(array($newUser["name"]));
     
           
      }catch (PDOException $e) {

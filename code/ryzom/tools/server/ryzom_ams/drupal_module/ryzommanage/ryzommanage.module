@@ -29,10 +29,10 @@ global $BASE_WEBPATH;
 global $INGAME_LAYOUT;
 global $FORCE_INGAME;
 
+require 'config.php';
+
 require 'ams_lib/libinclude.php';
 spl_autoload_register('__autoload');
-
-require 'config.php';
 
 /*
 Drupal 7 ryzom core module
@@ -354,12 +354,13 @@ function _ams_handler($ingame = false)
  */
 function _collect_register($nids, $collection)
 {
-    syncdata();
+    Sync::syncdata();
     //if not using ryzom core client show registration page
     if (Helpers::check_if_game_client()) {
         return_client_httpdata();
     } else {
         //redirect to registration page
+        global $BASE_WEBPATH;
         header("Location: ".$BASE_WEBPATH. "/user/register");
     }
 }
@@ -368,7 +369,7 @@ function _collect_register($nids, $collection)
 
 /**
  *
- * Function _collect_register 
+ * Function _collect_ingame_ams
  *
  * @takes        
  * @return      Nothing
@@ -486,10 +487,10 @@ function createUser($values, $user_id)
     //Create the user on the shard + in case shard is offline put copy of query in query db
     //returns: ok, shardoffline or liboffline
     $result = WebUsers::createUser($params, $user_id);
-    createPermissions(array($login));
+    Users::createPermissions(array($login));
 }
 
-function createPermissions($values) {
+/*function createPermissions($values) {
         
     try {
         $hostname = variable_get('ryzommanage_serverurl', 'localhost');
@@ -536,7 +537,7 @@ function createPermissions($values) {
     }  
     
     return true;
-}
+}*/
 
 function ryzommanage_user_login(&$edit, $account){
     $_SESSION['user'] = $account->name;
@@ -683,118 +684,15 @@ function user_edit($values) {
     $username = $values[0];
     $newpassword = $values[1];
         
-    $salt = generateSALT();
+    $salt = WebUsers::generateSALT();
     $pass = crypt($newpassword, $salt);
-            
-    try {
-        $hostname = variable_get('ryzommanage_serverurl', 'localhost');
-        $port     = variable_get('ryzommanage_mysqlport', '3306');
-        $dbname   = variable_get('ryzommanage_dbname', 'nel');
-        $ryusername = variable_get('ryzommanage_username', 'root');
-        $password = variable_get('ryzommanage_password', '');
-        $dbh      = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $ryusername, $password);
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-    catch (PDOException $e) {
-        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
-        $nid = db_insert('ryzommanage_querycache')->fields(array(
-            "SID" => NULL,
-            "type" => "user_edit",
-            "query" => json_encode(array(
-                $username,
-                $newpassword
-            ))
-        ))->execute();
-        return true;
-    }
     
-    $sql = "UPDATE `nel`.`user` SET `Password` = ? WHERE `user`.`Login` = ?";
-    
-    try {
-        $q = $dbh->prepare($sql);
-    }
-    catch (PDOException $e) {
-        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
-        $nid = db_insert('ryzommanage_querycache')->fields(array(
-            "SID" => NULL,
-            "type" => "user_edit",
-            "query" => json_encode(array(
-                $username,
-                $newpassword
-            ))
-        ))->execute();
-        return true;
-    }
-    
-    try {
-        $q->execute(array( $pass, $username));
-    }
-    catch (PDOException $e) {
-        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
-        $nid = db_insert('ryzommanage_querycache')->fields(array(
-            "SID" => NULL,
-            "type" => "user_edit",
-            "query" => json_encode(array(
-                $username,
-                $newpassword
-            ))
-        ))->execute();
-        return true;
-    }
-        
+    $webUser = new WebUsers();
+    $webUser->setAmsPassword($username,$pass);
     return true;
 }
 
-/**
- *
- * Function syncdata 
- *
- * @takes        Nothing
- * @return      array $values
- *
- * Info: Runs functions to finish syncing data when shard is offline
- *
- */
-function syncdata () {
-    
-    try {
-        $hostname = variable_get('ryzommanage_serverurl', 'localhost');
-        $port     = variable_get('ryzommanage_mysqlport', '3306');
-        $dbname   = variable_get('ryzommanage_dbname', 'nel');
-        $ryusername = variable_get('ryzommanage_username', 'root');
-        $password = variable_get('ryzommanage_password', '');
-        $dbh      = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $ryusername, $password);
-        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-    catch (PDOException $e) {
-        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
-        return true;
-    }
-    
-    $query = db_select('ryzommanage_querycache', 'q')
-      ->fields('q', array('SID', 'type', 'query'));
-    
-    $result = $query->execute();
-    
-    foreach ($result as $record) {
-        watchdog('ryzommanage_usersync', $record->query, NULL, WATCHDOG_ERROR);
-        
-        switch($record->type) {
-            case 'createPermissions':
-            case 'user_edit':
-            case 'createUser':
-                watchdog('ryzommanage_usersync', $record->type, NULL, WATCHDOG_INFO);
-                $SID = $record->SID;
-                $num_deleted = db_delete('ryzommanage_querycache')
-                  ->condition('SID', $SID)
-                  ->execute();
-                $func = $record->type;
-                $func(json_decode($record->query));                
-        }
-        
-    }
-    
-}
+
 /**
  *
  * Function ryzommanage_cron
@@ -807,7 +705,7 @@ function syncdata () {
  */
 function ryzommanage_cron() {
     
-    syncdata();
+    Sync::syncdata();
  
 }
 

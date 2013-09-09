@@ -308,6 +308,30 @@ class Users{
 
      }
      
+     public static function createPermissions($pvalues) {
+          
+          try {
+               $values = array('username' =>  $pvalues[0]);
+               $dbs = new DBLayer("shard");
+               $sth = $dbs->execute("SELECT UId FROM user WHERE Login= :username;", $values);
+               $result = $sth->fetchAll();
+               foreach ($result as $UId) {
+                   $ins_values = array('id' => $UId['UId']);
+                   $dbs->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id, 'r2', 'OPEN');", $ins_values);
+                   $dbs->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id , 'ryzom_open', 'OPEN');", $ins_values);
+               }
+          }
+          catch (PDOException $e) {
+               //oh noooz, the shard is offline! Put it in query queue at ams_lib db!
+               $dbl = new DBLayer("lib");
+               $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "createPermissions",
+               "query" => json_encode(array($pvalues[0])), "db" => "shard"));
+                    
+            
+          } 
+          return true;
+     }
+     
      
      protected function checkLoginMatch($user,$pass){
           print('This is the base class!');

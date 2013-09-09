@@ -39,7 +39,7 @@
         $sql = "
             CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`;
             USE `" . $cfg['db']['lib']['name'] ."`;
-            DROP TABLE IF EXISTS ams_querycache;
+            DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ams_querycache`;
             
             CREATE TABLE ams_querycache (
             `SID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
@@ -48,7 +48,27 @@
             `db` VARCHAR( 80 ) NOT NULL
             );
             
+        -- -----------------------------------------------------------------------------------------------------------------------
+        -- -----------------------------------------------------------------------------------------------------------------------
 
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_log` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`tagged` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`tag` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`in_support_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`in_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_info` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`email` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`forwarded` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`assigned` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_reply` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_content` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`support_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_category` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_user` ;
+
+        
         -- -----------------------------------------------------
         -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket_category`
         -- -----------------------------------------------------
@@ -415,9 +435,6 @@
             ON DELETE NO ACTION
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
-
-                
-
         ";
         $dbl->executeWithoutParams($sql);
         print "The Lib & Web database were correctly installed! <br />";
