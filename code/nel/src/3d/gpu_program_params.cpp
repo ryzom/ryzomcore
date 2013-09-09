@@ -53,6 +53,43 @@ CGPUProgramParams::~CGPUProgramParams()
 	
 }
 
+void CGPUProgramParams::copy(CGPUProgramParams *params)
+{
+	size_t offset = params->getBegin();
+	while (offset != params->getEnd())
+	{
+		uint index = params->getIndexByOffset(offset);
+		const std::string &name = params->getNameByOffset(offset);
+		size_t local;
+		uint size = params->getSizeByOffset(offset);
+		uint count = params->getCountByOffset(offset);
+		uint nbComponents = size * count;
+		if (index)
+		{
+			local = allocOffset(index, size, count, params->getTypeByOffset(offset));
+			if (!name.empty())
+			{
+				map(index, name);
+			}
+		}
+		else
+		{
+			nlassert(!name.empty());
+			local = allocOffset(name, size, count, params->getTypeByOffset(offset));
+		}
+		
+		uint32 *src = params->getPtrUIByOffset(offset);
+		uint32 *dst = getPtrUIByOffset(local);
+
+		for (uint c = 0; c < nbComponents; ++c)
+		{
+			dst[c] = src[c];
+		}
+
+		offset = params->getNext(offset);
+	}
+}
+
 void CGPUProgramParams::set1f(uint index, float f0)
 {
 	float *f = getPtrFByOffset(allocOffset(index, 1, 1, Float));
