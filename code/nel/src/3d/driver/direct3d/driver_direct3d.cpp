@@ -3634,7 +3634,7 @@ void CDriverD3D::CVertexProgramPtrState::apply(CDriverD3D *driver)
 void CDriverD3D::CPixelShaderPtrState::apply(CDriverD3D *driver)
 {
 	H_AUTO_D3D(CDriverD3D_CPixelShaderPtrState);
-	if (!driver->supportPixelProgram()) return;
+	if (!driver->_PixelProgram) return;
 	driver->_DeviceInterface->SetPixelShader(PixelShader);
 }
 
