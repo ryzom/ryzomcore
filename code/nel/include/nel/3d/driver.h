@@ -159,6 +159,13 @@ public:
 		NumTransform
 	};
 
+	enum TProgram
+	{
+		VertexProgram,
+		PixelProgram,
+		GeometryProgram
+	};
+
 protected:
 	CSynchronized<TTexDrvInfoPtrMap>	_SyncTexDrvInfos;
 	TTexDrvSharePtrList					_TexDrvShares;
@@ -1111,23 +1118,6 @@ public:
 	/** Get the currently active vertex program.
 	  */
 	virtual CVertexProgram	*getActiveVertexProgram() const = 0;
-
-	// Set parameters
-	virtual void			setVertexProgram1f(uint index, float f0) = 0;
-	virtual void			setVertexProgram2f(uint index, float f0, float f1) = 0;
-	virtual void			setVertexProgram3f(uint index, float f0, float f1, float f2) = 0;
-	virtual void			setVertexProgram4f(uint index, float f0, float f1, float f2, float f3) = 0;
-	virtual void			setVertexProgram1i(uint index, sint32 i0) = 0;
-	virtual void			setVertexProgram2i(uint index, sint32 i0, sint32 i1) = 0;
-	virtual void			setVertexProgram3i(uint index, sint32 i0, sint32 i1, sint32 i2) = 0;
-	virtual void			setVertexProgram4i(uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3) = 0;
-	virtual void			setVertexProgram3f(uint index, const NLMISC::CVector& v) = 0;
-	virtual void			setVertexProgram4f(uint index, const NLMISC::CVector& v, float f3) = 0;
-	virtual void			setVertexProgram4x4f(uint index, const NLMISC::CMatrix& m) = 0;
-	virtual void			setVertexProgram4fv(uint index, size_t num, const float *src) = 0;
-	// Set builtin parameters
-	virtual void			setVertexProgramMatrix(uint index, TMatrix matrix, TTransform transform) = 0;
-	virtual void			setVertexProgramFog(uint index) = 0;
 	// @}
 
 
@@ -1157,23 +1147,28 @@ public:
 	/** Get the currently active pixel program.
 	  */
 	virtual CPixelProgram	*getActivePixelProgram() const = 0;
+	// @}
 
+
+
+	/// \name Program parameters
+	// @{
 	// Set parameters
-	virtual void			setPixelProgram1f(uint index, float f0) = 0;
-	virtual void			setPixelProgram2f(uint index, float f0, float f1) = 0;
-	virtual void			setPixelProgram3f(uint index, float f0, float f1, float f2) = 0;
-	virtual void			setPixelProgram4f(uint index, float f0, float f1, float f2, float f3) = 0;
-	virtual void			setPixelProgram1i(uint index, sint32 i0) = 0;
-	virtual void			setPixelProgram2i(uint index, sint32 i0, sint32 i1) = 0;
-	virtual void			setPixelProgram3i(uint index, sint32 i0, sint32 i1, sint32 i2) = 0;
-	virtual void			setPixelProgram4i(uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3) = 0;
-	virtual void			setPixelProgram3f(uint index, const NLMISC::CVector& v) = 0;
-	virtual void			setPixelProgram4f(uint index, const NLMISC::CVector& v, float f3) = 0;
-	virtual void			setPixelProgram4x4f(uint index, const NLMISC::CMatrix& m) = 0;
-	virtual void			setPixelProgram4fv(uint index, size_t num, const float *src) = 0;
+	virtual void			setUniform1f(TProgram program, uint index, float f0) = 0;
+	virtual void			setUniform2f(TProgram program, uint index, float f0, float f1) = 0;
+	virtual void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2) = 0;
+	virtual void			setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3) = 0;
+	virtual void			setUniform1i(TProgram program, uint index, sint32 i0) = 0;
+	virtual void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1) = 0;
+	virtual void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2) = 0;
+	virtual void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3) = 0;
+	virtual void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v) = 0;
+	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3) = 0;
+	virtual void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m) = 0;
+	virtual void			setUniform4fv(TProgram program, uint index, size_t num, const float *src) = 0;
 	// Set builtin parameters
-	virtual void			setPixelProgramMatrix(uint index, TMatrix matrix, TTransform transform) = 0;
-	virtual void			setPixelProgramFog(uint index) = 0;
+	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform) = 0;
+	virtual void			setUniformFog(TProgram program, uint index) = 0;
 	// @}
 
 
@@ -1183,12 +1178,12 @@ public:
 	/**
 	  * Setup constant values.
 	  */
-	inline void				setConstant(uint index, float f0, float f1, float f2, float f3) { setVertexProgram4f(index, f0, f1, f2, f3); }
-	inline void				setConstant(uint index, double d0, double d1, double d2, double d3) { setVertexProgram4f(index, (float)d0, (float)d1, (float)d2, (float)d3); }
-	inline void				setConstant(uint index, const NLMISC::CVector &value) { setVertexProgram4f(index, value, 0.f); }
-	inline void				setConstant(uint index, const NLMISC::CVectorD &value) { setVertexProgram4f(index, (float)value.x, (float)value.y, (float)value.z, 0.f); }
+	inline void				setConstant(uint index, float f0, float f1, float f2, float f3) { setUniform4f(VertexProgram, index, f0, f1, f2, f3); }
+	inline void				setConstant(uint index, double d0, double d1, double d2, double d3) { setUniform4f(VertexProgram, index, (float)d0, (float)d1, (float)d2, (float)d3); }
+	inline void				setConstant(uint index, const NLMISC::CVector &value) { setUniform4f(VertexProgram, index, value, 0.f); }
+	inline void				setConstant(uint index, const NLMISC::CVectorD &value) { setUniform4f(VertexProgram, index, (float)value.x, (float)value.y, (float)value.z, 0.f); }
 	/// setup several 4 float csts taken from the given tab
-	inline void				setConstant(uint index, uint num, const float *src) { setVertexProgram4fv(index, num, src); }
+	inline void				setConstant(uint index, uint num, const float *src) { setUniform4fv(VertexProgram, index, num, src); }
 
 	/**
 	  * Setup constants with a current matrix.
@@ -1201,7 +1196,7 @@ public:
 	  * \param transform is the transformation to apply to the matrix before store it in the constants.
 	  *
 	  */
-	inline void				setConstantMatrix(uint index, TMatrix matrix, TTransform transform) { setVertexProgramMatrix(index, matrix, transform); };
+	inline void				setConstantMatrix(uint index, TMatrix matrix, TTransform transform) { setUniformMatrix(VertexProgram, index, matrix, transform); };
 
 	/**
 	  * Setup the constant with the fog vector. This vector must be used to get the final fog value in a vertex shader.
@@ -1215,7 +1210,7 @@ public:
 	  * \param index is the index where to store the vector.
 	  *
 	  */
-	inline void				setConstantFog(uint index) { setVertexProgramFog(index); };
+	inline void				setConstantFog(uint index) { setUniformFog(VertexProgram, index); };
 	// @}
 
 

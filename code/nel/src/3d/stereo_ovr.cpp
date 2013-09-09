@@ -584,11 +584,11 @@ bool CStereoOVR::endRenderTarget()
 		float scaleInX = (2 / w);
 		float scaleInY = (2 / h);
 		
-		drvInternal->setPixelProgram2f(0, lensCenterX, lensCenterY);
-		drvInternal->setPixelProgram2f(1, screenCenterX, screenCenterY);
-		drvInternal->setPixelProgram2f(2, scaleX, scaleY);
-		drvInternal->setPixelProgram2f(3, scaleInX, scaleInY);
-		drvInternal->setPixelProgram4fv(4, 1, m_DevicePtr->HMDInfo.DistortionK);
+		drvInternal->setUniform2f(IDriver::PixelProgram, 0, lensCenterX, lensCenterY);
+		drvInternal->setUniform2f(IDriver::PixelProgram, 1, screenCenterX, screenCenterY);
+		drvInternal->setUniform2f(IDriver::PixelProgram, 2, scaleX, scaleY);
+		drvInternal->setUniform2f(IDriver::PixelProgram, 3, scaleInX, scaleInY);
+		drvInternal->setUniform4fv(IDriver::PixelProgram, 4, 1, m_DevicePtr->HMDInfo.DistortionK);
 
 		m_Driver->drawQuad(m_BarrelQuadLeft, m_BarrelMat);
 
@@ -596,8 +596,8 @@ bool CStereoOVR::endRenderTarget()
 		lensCenterX = x + (w - lensViewportShift * 0.5f) * 0.5f;
 		screenCenterX = x + w * 0.5f;
 
-		drvInternal->setPixelProgram2f(0, lensCenterX, lensCenterY);
-		drvInternal->setPixelProgram2f(1, screenCenterX, screenCenterY);
+		drvInternal->setUniform2f(IDriver::PixelProgram, 0, lensCenterX, lensCenterY);
+		drvInternal->setUniform2f(IDriver::PixelProgram, 1, screenCenterX, screenCenterY);
 
 		m_Driver->drawQuad(m_BarrelQuadRight, m_BarrelMat);
 
