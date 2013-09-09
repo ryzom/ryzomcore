@@ -9,14 +9,14 @@
 $cfg['db']['web']['host']    = variable_get('ryzommanage_webserverurl', 'localhost');
 $cfg['db']['web']['port']    = variable_get('ryzommanage_webmysqlport', '3306');
 $cfg['db']['web']['name']    = variable_get('ryzommanage_webdbname', 'drupal');
-$cfg['db']['web']['user']    = variable_get('ryzommanage_webusername', 'root');
-$cfg['db']['web']['pass']    = variable_get('ryzommanage_webpassword', 'lol123');
+$cfg['db']['web']['user']    = variable_get('ryzommanage_webusername', 'shard');
+$cfg['db']['web']['pass']    = variable_get('ryzommanage_webpassword', '');
 
 $cfg['db']['lib']['host']    = variable_get('ryzommanage_libserverurl', 'localhost');
 $cfg['db']['lib']['port']    = variable_get('ryzommanage_libmysqlport', '3306');
 $cfg['db']['lib']['name']    = variable_get('ryzommanage_libdbname', 'ryzom_ams_lib');
-$cfg['db']['lib']['user']    = variable_get('ryzommanage_libusername', 'root');
-$cfg['db']['lib']['pass']    = variable_get('ryzommanage_libpassword', 'lol123');
+$cfg['db']['lib']['user']    = variable_get('ryzommanage_libusername', 'shard');
+$cfg['db']['lib']['pass']    = variable_get('ryzommanage_libpassword', '');
 
 $cfg['db']['shard']['host']    = variable_get('ryzommanage_shardserverurl', 'localhost');
 $cfg['db']['shard']['port']    = variable_get('ryzommanage_shardmysqlport', '3306');
