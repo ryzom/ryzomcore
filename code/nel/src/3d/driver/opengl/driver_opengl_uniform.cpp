@@ -389,7 +389,41 @@ bool CDriverGL::setUniformMaterialInternal(TProgram program, CMaterial &material
 
 void CDriverGL::setUniformParams(TProgram program, const CGPUProgramParams &params)
 {
-	// todo
+	IGPUProgram *prog = NULL;
+	switch (program)
+	{
+	case VertexProgram:
+		prog = _LastSetuppedVP;
+		break;
+	case PixelProgram:
+		prog = _LastSetuppedPP;
+		break;
+	}
+	if (!prog) return;
+
+	size_t offset = params.getBegin();
+	while (offset != params.getEnd())
+	{
+		uint size = params.getSizeByOffset(offset);
+		uint count = params.getCountByOffset(offset);
+
+		nlassert(size == 4 || count == 1); // only support float4 arrays
+		nlassert(params.getTypeByOffset(offset) == CGPUProgramParams::Float); // only support float
+		
+		uint index = params.getIndexByOffset(offset);
+		if (index == ~0)
+		{
+			const std::string &name = params.getNameByOffset(offset);
+			nlassert(!name.empty() /* missing both parameter name and index, code error */);
+			uint index = prog->getUniformIndex(name);
+			nlassert(index != ~0 /* invalid parameter name */);
+			params.map(index, name);
+		}
+		
+		setUniform4fv(program, index, count, params.getPtrFByOffset(offset));
+
+		offset = params.getNext(offset);
+	}
 }
 
 #ifdef NL_STATIC
