@@ -107,6 +107,7 @@ struct CGPUProgramFeatures
 	{
 		/// Use the CMaterial texture stages as the textures for a Pixel Program
 		TextureStages							= 0x00000001, // <- don't remove this one, it's already used, if you want to split them up into the different stages, then it's ok to change it
+		TextureMatrices							= 0x00000002, 
 
 		//
 		// Rough example, modify as necessary.
