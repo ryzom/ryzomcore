@@ -1413,6 +1413,11 @@ private:
 	// Set builtin parameters
 	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform);
 	virtual void			setUniformFog(TProgram program, uint index);
+    // Set feature parameters
+	virtual bool			setUniformDriver(TProgram program); // set all driver-specific features params (based on program->features->DriverFlags)
+	virtual bool			setUniformMaterial(TProgram program, CMaterial &material); // set all material-specific feature params (based on program->features->MaterialFlags)
+	bool					setUniformMaterialInternal(TProgram program, CMaterial &material); // set all material-specific feature params (based on program->features->MaterialFlags)
+	virtual void			setUniformParams(TProgram program, const CGPUProgramParams &params); // set all user-provided params from the storage
 	// @}
 
 

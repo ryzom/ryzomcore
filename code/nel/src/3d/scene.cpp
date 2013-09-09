@@ -382,6 +382,7 @@ void	CScene::endPartRender()
 	IDriver *drv = getDriver();
 	drv->activeVertexProgram(NULL);
 	drv->activePixelProgram(NULL);
+	drv->activeGeometryProgram(NULL);
 
 	// Ensure nothing animates on subsequent renders
 	_EllapsedTime = 0.f;
@@ -1577,6 +1578,7 @@ void CScene::renderOcclusionTestMeshs()
 	RenderTrav.getDriver()->setupViewport(RenderTrav.getViewport());
 	RenderTrav.getDriver()->activeVertexProgram(NULL);
 	RenderTrav.getDriver()->activePixelProgram(NULL);
+	RenderTrav.getDriver()->activeGeometryProgram(NULL);
 	IDriver::TPolygonMode oldPolygonMode = RenderTrav.getDriver()->getPolygonMode();
 	CMaterial m;
 	m.initUnlit();

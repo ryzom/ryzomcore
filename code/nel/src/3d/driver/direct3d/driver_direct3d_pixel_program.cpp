@@ -129,11 +129,13 @@ bool CDriverD3D::activePixelProgram(CPixelProgram *program)
 		if (!CDriverD3D::compilePixelProgram(program)) return false;
 
 		CPixelProgramDrvInfosD3D *info = static_cast<CPixelProgramDrvInfosD3D *>((IGPUProgramDrvInfos*)program->m_DrvInfo);
+		_PixelProgramUser = true;
 		setPixelShader(info->Shader);
 	}
 	else
 	{
 		setPixelShader(NULL);
+		_PixelProgramUser = false;
 	}
 
 	return true;

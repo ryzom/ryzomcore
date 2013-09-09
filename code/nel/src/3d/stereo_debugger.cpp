@@ -150,7 +150,7 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		m_Mat.setBlend (false);
 		m_Mat.setAlphaTest (false);
 		NL3D::CMaterial *mat = m_Mat.getObjectPtr();
-		mat->setShader(NL3D::CMaterial::PostProcessing);
+		mat->setShader(NL3D::CMaterial::Normal);
 		mat->setBlendFunc(CMaterial::one, CMaterial::zero);
 		mat->setZWrite(false);
 		mat->setZFunc(CMaterial::always);

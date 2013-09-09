@@ -356,7 +356,7 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		m_BarrelMat.setBlend (false);
 		m_BarrelMat.setAlphaTest (false);
 		NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
-		barrelMat->setShader(NL3D::CMaterial::PostProcessing);
+		barrelMat->setShader(NL3D::CMaterial::Normal);
 		barrelMat->setBlendFunc(CMaterial::one, CMaterial::zero);
 		barrelMat->setZWrite(false);
 		barrelMat->setZFunc(CMaterial::always);

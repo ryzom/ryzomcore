@@ -291,6 +291,107 @@ void CDriverGL::setUniformFog(NL3D::IDriver::TProgram program, uint index)
 	CDriverGL::setUniform4f(program, index, -values[2], -values[6], -values[10], -values[14]);
 }
 
+bool CDriverGL::setUniformDriver(TProgram program)
+{
+	IGPUProgram *prog = NULL;
+	switch (program)
+	{
+	case VertexProgram:
+		prog = _LastSetuppedVP;
+		break;
+	case PixelProgram:
+		prog = _LastSetuppedPP;
+		break;
+	}
+	if (!prog) return false;
+
+	const CGPUProgramFeatures &features = prog->features();
+
+	if (features.DriverFlags)
+	{
+		// todo
+	}
+
+	return true;
+}
+
+bool CDriverGL::setUniformMaterial(TProgram program, CMaterial &material)
+{
+	IGPUProgram *prog = NULL;
+	switch (program)
+	{
+	case VertexProgram:
+		prog = _LastSetuppedVP;
+		break;
+	case PixelProgram:
+		prog = _LastSetuppedPP;
+		break;
+	}
+	if (!prog) return false;
+
+	const CGPUProgramFeatures &features = prog->features();
+
+	// These are also already set by setupMaterial, so setupMaterial uses setUniformMaterialInternal instead
+	if (features.MaterialFlags & (CGPUProgramFeatures::TextureStages | CGPUProgramFeatures::TextureMatrices))
+	{
+		if (features.MaterialFlags & CGPUProgramFeatures::TextureStages)
+		{
+			for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
+			{
+				ITexture *text= material.getTexture(uint8(stage));
+
+				// Must setup textures each frame. (need to test if touched).
+				if (text != NULL && !setupTexture(*text))
+					return false;
+
+				// activate the texture, or disable texturing if NULL.
+				activateTexture(stage, text);
+
+				// If texture not NULL, Change texture env function.
+				setTextureEnvFunction(stage, material);
+			}
+
+			
+		}
+		if (features.MaterialFlags & CGPUProgramFeatures::TextureMatrices)
+		{
+			// Textures user matrix
+			setupUserTextureMatrix(inlGetNumTextStages(), material);
+		}
+	}
+
+	return true;
+}
+
+bool CDriverGL::setUniformMaterialInternal(TProgram program, CMaterial &material)
+{
+	IGPUProgram *prog = NULL;
+	switch (program)
+	{
+	case VertexProgram:
+		prog = _LastSetuppedVP;
+		break;
+	case PixelProgram:
+		prog = _LastSetuppedPP;
+		break;
+	}
+	if (!prog) return false;
+
+	const CGPUProgramFeatures &features = prog->features();
+
+	if (features.MaterialFlags & ~(CGPUProgramFeatures::TextureStages | CGPUProgramFeatures::TextureMatrices))
+	{
+		// todo
+	}
+
+	return true;
+}
+
+void CDriverGL::setUniformParams(TProgram program, const CGPUProgramParams &params)
+{
+	// todo
+}
+
 #ifdef NL_STATIC
 } // NLDRIVERGL/ES
 #endif

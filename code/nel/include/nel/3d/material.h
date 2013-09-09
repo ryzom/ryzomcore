@@ -172,10 +172,6 @@ public:
 	 * - RGB still unchanged
 	 * Water :
 	 * - Water
-	 * PostProcessing :
-	 * - For internal use only when a pixel program is set manually through activePixelProgram.
-	 * - Only textures are set by CMaterial (does not work with ps_3_0 for some reason), the rest must be set manually.
-	 * - May be replaced in the future by some generic shader system.
 	 */
 	enum TShader			{ Normal=0,
 							  Bump,
@@ -187,8 +183,8 @@ public:
 							  PerPixelLightingNoSpec,
 							  Cloud,
 							  Water,
-							  PostProcessing,
-							  shaderCount};
+							  shaderCount,
+							  Program /* internally used when a pixel program is active */ };
 
 	/// \name Texture Env Modes.
 	// @{

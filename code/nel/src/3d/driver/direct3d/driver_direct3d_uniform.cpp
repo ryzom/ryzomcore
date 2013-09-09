@@ -215,4 +215,23 @@ void CDriverD3D::setUniformFog(NL3D::IDriver::TProgram program, uint index)
 		1 - (_D3DModelView._43 - _FogStart) / delta);
 }
 
+bool CDriverD3D::setUniformDriver(TProgram program)
+{
+	// todo
+
+	return true;
+}
+
+bool CDriverD3D::setUniformMaterial(TProgram program, const CMaterial &material)
+{
+	// todo
+
+	return true;
+}
+
+void CDriverD3D::setUniformParams(TProgram program, const CGPUProgramParams &params)
+{
+	// todo
+}
+
 } // NL3D
