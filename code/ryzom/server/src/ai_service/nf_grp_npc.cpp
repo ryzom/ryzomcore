@@ -1607,6 +1607,7 @@ Then user events are triggered on the group to inform it about what happens:
 - user_event_3: triggered after the player has given the mission items to the npc.
 
 Warning: this function can only be called after the event "player_target_npc".
+Warning: only works on an R2 shard for R2 plot items.
 
 Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 @param[in] missionItems is the list of mission items, the string format is "item1:qty1;item2:qty2;...".
@@ -1709,38 +1710,6 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 			DEBUG_STOP;
 			return;
 		}
-		// if LD use this the function outside a ring shard 
-		if (IsRingShard)
-		{
-		
-			// Here we destroy the item: so we do not want that a user create a scenario where we destroy
-			// other players precious items
-			
-			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
-			// lazy intialisation
-			if (r2PlotItemSheetId.empty())
-			{
-				for (uint32 i = 0 ; i <= 184 ; ++i)
-				{
-					r2PlotItemSheetId.insert( CSheetId( NLMISC::toString("r2_plot_item_%d.sitem", i)));
-				}
-			}
-
-			// A npc give a mission to take an item given by another npc
-			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
-			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
-			{
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
-				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!!");
-				return ;
-			}
-
-		}
 
 		uint32 quantity;
 		NLMISC::fromString(itemAndQty[1], quantity);
@@ -1774,6 +1743,7 @@ Then user events are triggered on the group to inform it about what happens:
 - user_event_1: triggered after the player has received the mission items from the npc.
 
 Warning: this function can only be called after the event "player_target_npc".
+Warning: only works on an R2 shard for R2 plot items.
 
 Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 @param[in] missionItems is the list of mission items, the string format is "item1:qty1;item2:qty2;...".
@@ -1875,37 +1845,6 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 			nlwarning("giveMissionItems failed: invalid mission item sheet '%s'", itemAndQty[0].c_str());
 			DEBUG_STOP;
 			return;
-		}
-
-
-				// if LD use this the function outside a ring shard 
-		if (IsRingShard)
-		{
-		
-			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
-			// lazy intialisation
-			if (r2PlotItemSheetId.empty())
-			{
-				for (uint32 i = 0 ; i <= 184 ; ++i)
-				{
-					r2PlotItemSheetId.insert( CSheetId( NLMISC::toString("r2_plot_item_%d.sitem", i)));
-				}
-			}
-
-			// A npc give a mission to give a item to another npc
-			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
-			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
-			{
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
-				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!!");
-				return ;
-			}
-
 		}
 
 		uint32 quantity;

@@ -9,7 +9,7 @@ ADD_SUBDIRECTORY(georges_editor)
 ADD_SUBDIRECTORY(material_editor)
 
 IF(WITH_GUI)
-ADD_SUBDIRECTORY(gui_editor)
+  ADD_SUBDIRECTORY(gui_editor)
 ENDIF(WITH_GUI)
 
 ADD_SUBDIRECTORY(translation_manager)
