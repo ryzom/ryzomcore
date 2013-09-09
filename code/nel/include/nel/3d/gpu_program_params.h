@@ -60,7 +60,7 @@ class CGPUProgramParams
 {
 public:
 	enum TType { Float, Int, UInt };
-	struct CMeta { uint Index, Size, Count; TType Type; size_t Next, Prev; }; // size is element size, count is nb of elements
+	struct CMeta { uint Index, Size, Count; TType Type; std::string Name; size_t Next, Prev; }; // size is element size, count is nb of elements
 
 private:
 	union CVec { float F[4]; sint32 I[4]; uint32 UI[4]; };
@@ -69,6 +69,8 @@ public:
 	CGPUProgramParams();
 	virtual ~CGPUProgramParams();
 
+	/// \name User functions
+	// @{
 	// Copy from another params storage
 	void copy(CGPUProgramParams *params);
 
@@ -81,10 +83,16 @@ public:
 	void set2i(uint index, sint32 i0, sint32 i1);
 	void set3i(uint index, sint32 i0, sint32 i1, sint32 i2);
 	void set4i(uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	void set1ui(uint index, uint32 ui0);
+	void set2ui(uint index, uint32 ui0, uint32 ui1);
+	void set3ui(uint index, uint32 ui0, uint32 ui1, uint32 ui2);
+	void set4ui(uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3);
 	void set3f(uint index, const NLMISC::CVector& v);
 	void set4f(uint index, const NLMISC::CVector& v, float f3);
 	void set4x4f(uint index, const NLMISC::CMatrix& m);
 	void set4fv(uint index, size_t num, const float *src);
+	void set4iv(uint index, size_t num, const sint32 *src);
+	void set4uiv(uint index, size_t num, const uint32 *src);
 	void unset(uint index);
 
 	// Set by name, it is recommended to use index when repeatedly setting an element
@@ -96,25 +104,42 @@ public:
 	void set2i(const std::string &name, sint32 i0, sint32 i1);
 	void set3i(const std::string &name, sint32 i0, sint32 i1, sint32 i2);
 	void set4i(const std::string &name, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	void set1ui(const std::string &name, uint32 ui0);
+	void set2ui(const std::string &name, uint32 ui0, uint32 ui1);
+	void set3ui(const std::string &name, uint32 ui0, uint32 ui1, uint32 ui2);
+	void set4ui(const std::string &name, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3);
 	void set3f(const std::string &name, const NLMISC::CVector& v);
 	void set4f(const std::string &name, const NLMISC::CVector& v, float f3);
 	void set4x4f(const std::string &name, const NLMISC::CMatrix& m);
 	void set4fv(const std::string &name, size_t num, const float *src);
+	void set4iv(const std::string &name, size_t num, const sint32 *src);
+	void set4uiv(const std::string &name, size_t num, const uint32 *src);
 	void unset(const std::string &name);
+	// @}
 
-	/// Maps the given name to the given index, on duplicate entry the data set by name will be prefered as it can be assumed to have been set after the data set by index
+	// Maps the given name to the given index.
+	// on duplicate entry the data set by name will be prefered, as it can be 
+	// assumed to have been set after the data set by index, and the mapping 
+	// will usually happen while iterating and finding an element with name
+	// but no known index.
+	// Unknown index will be set to ~0, unknown name will have an empty string.
 	void map(uint index, const std::string &name);
 
-	// Internal
-	/// Allocate specified number of components if necessary
+	/// \name Internal
+	// @{
+	/// Allocate specified number of components if necessary (internal use only)
 	size_t allocOffset(uint index, uint size, uint count, TType type);
 	size_t allocOffset(const std::string &name, uint size, uint count, TType type);
+	size_t allocOffset(uint size, uint count, TType type);
 	/// Return offset for specified index
 	size_t getOffset(uint index) const;
 	size_t getOffset(const std::string &name) const;
 	/// Remove by offset
 	void freeOffset(size_t offset);
+	// @}
 
+	/// \name Driver and dev tools
+	// @{
 	// Iteration (returns the offsets for access using getFooByOffset)
 	inline size_t getBegin() const { return m_Meta.size() ? m_First : s_End; }
 	inline size_t getNext(size_t offset) const { return m_Meta[offset].Next; }
@@ -129,7 +154,8 @@ public:
 	inline uint32 *getPtrUIByOffset(size_t offset) { return m_Vec[offset].UI; }
 	inline TType getTypeByOffset(size_t offset) const { return m_Meta[offset].Type; }
 	inline uint getIndexByOffset(size_t offset) const { return m_Meta[offset].Index; }
-	const std::string *getNameByOffset(size_t offset) const; // non-optimized for dev tools only, may return NULL if name unknown
+	const std::string &getNameByOffset(size_t offset) const { return m_Meta[offset].Name; };
+	// @}
 
 	// Utility
 	static inline uint getNbRegistersByComponents(uint nbComponents) { return (nbComponents + 3) >> 2; } // vector register per 4 components

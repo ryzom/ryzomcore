@@ -1132,7 +1132,7 @@ public:
 
 	/** Return true if the driver supports the specified pixel program profile.
 	  */
-	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile = CPixelProgram::nelvp) const = 0;
+	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile) const = 0;
 
 	/** Compile the given pixel program, return if successful. Error information is returned as a string.
 	  */
@@ -1162,10 +1162,16 @@ public:
 	virtual void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1) = 0;
 	virtual void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2) = 0;
 	virtual void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3) = 0;
+	virtual void			setUniform1ui(TProgram program, uint index, uint32 ui0) = 0;
+	virtual void			setUniform2ui(TProgram program, uint index, uint32 ui0, uint32 ui1) = 0;
+	virtual void			setUniform3ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2) = 0;
+	virtual void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3) = 0;
 	virtual void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v) = 0;
 	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3) = 0;
 	virtual void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m) = 0;
 	virtual void			setUniform4fv(TProgram program, uint index, size_t num, const float *src) = 0;
+	virtual void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src) = 0;
+	virtual void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src) = 0;
 	// Set builtin parameters
 	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform) = 0;
 	virtual void			setUniformFog(TProgram program, uint index) = 0;

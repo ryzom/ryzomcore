@@ -83,34 +83,64 @@ void CGPUProgramParams::set4f(uint index, float f0, float f1, float f2, float f3
 	f[3] = f3;
 }
 
-void CGPUProgramParams::set1i(uint index, int i0)
+void CGPUProgramParams::set1i(uint index, sint32 i0)
 {
-	int *i = getPtrIByOffset(allocOffset(index, 1, 1, Int));
+	sint32 *i = getPtrIByOffset(allocOffset(index, 1, 1, Int));
 	i[0] = i0;
 }
 
-void CGPUProgramParams::set2i(uint index, int i0, int i1)
+void CGPUProgramParams::set2i(uint index, sint32 i0, sint32 i1)
 {
-	int *i = getPtrIByOffset(allocOffset(index, 2, 1, Int));
+	sint32 *i = getPtrIByOffset(allocOffset(index, 2, 1, Int));
 	i[0] = i0;
 	i[1] = i1;
 }
 
-void CGPUProgramParams::set3i(uint index, int i0, int i1, int i2)
+void CGPUProgramParams::set3i(uint index, sint32 i0, sint32 i1, sint32 i2)
 {
-	int *i = getPtrIByOffset(allocOffset(index, 3, 1, Int));
+	sint32 *i = getPtrIByOffset(allocOffset(index, 3, 1, Int));
 	i[0] = i0;
 	i[1] = i1;
 	i[2] = i2;
 }
 
-void CGPUProgramParams::set4i(uint index, int i0, int i1, int i2, int i3)
+void CGPUProgramParams::set4i(uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3)
 {
-	int *i = getPtrIByOffset(allocOffset(index, 4, 1, Int));
+	sint32 *i = getPtrIByOffset(allocOffset(index, 4, 1, Int));
 	i[0] = i0;
 	i[1] = i1;
 	i[2] = i2;
 	i[3] = i3;
+}
+
+void CGPUProgramParams::set1ui(uint index, uint32 ui0)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(index, 1, 1, UInt));
+	ui[0] = ui0;
+}
+
+void CGPUProgramParams::set2ui(uint index, uint32 ui0, uint32 ui1)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(index, 2, 1, UInt));
+	ui[0] = ui0;
+	ui[1] = ui1;
+}
+
+void CGPUProgramParams::set3ui(uint index, uint32 ui0, uint32 ui1, uint32 ui2)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(index, 3, 1, UInt));
+	ui[0] = ui0;
+	ui[1] = ui1;
+	ui[2] = ui2;
+}
+
+void CGPUProgramParams::set4ui(uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(index, 4, 1, UInt));
+	ui[0] = ui0;
+	ui[1] = ui1;
+	ui[2] = ui2;
+	ui[3] = ui3;
 }
 
 void CGPUProgramParams::set3f(uint index, const NLMISC::CVector& v)
@@ -119,6 +149,15 @@ void CGPUProgramParams::set3f(uint index, const NLMISC::CVector& v)
 	f[0] = v.x;
 	f[1] = v.y;
 	f[2] = v.z;
+}
+
+void CGPUProgramParams::set4f(uint index, const NLMISC::CVector& v, float f3)
+{
+	float *f = getPtrFByOffset(allocOffset(index, 4, 1, Float));
+	f[0] = v.x;
+	f[1] = v.y;
+	f[2] = v.z;
+	f[3] = f3;
 }
 
 void CGPUProgramParams::set4x4f(uint index, const NLMISC::CMatrix& m)
@@ -136,6 +175,210 @@ void CGPUProgramParams::set4fv(uint index, size_t num, const float *src)
 	size_t nb = 4 * num;
 	for (uint c = 0; c < nb; ++c)
 		f[c] = src[c];
+}
+
+void CGPUProgramParams::set4iv(uint index, size_t num, const sint32 *src)
+{
+	sint32 *i = getPtrIByOffset(allocOffset(index, 4, num, Int));
+	size_t nb = 4 * num;
+	for (uint c = 0; c < nb; ++c)
+		i[c] = src[c];
+}
+
+void CGPUProgramParams::set4uiv(uint index, size_t num, const uint32 *src)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(index, 4, num, UInt));
+	size_t nb = 4 * num;
+	for (uint c = 0; c < nb; ++c)
+		ui[c] = src[c];
+}
+
+void CGPUProgramParams::unset(uint index)
+{
+	size_t offset = getOffset(index);
+	if (offset != getEnd())
+	{
+		freeOffset(offset);
+	}
+}
+
+void CGPUProgramParams::set1f(const std::string &name, float f0)
+{
+	float *f = getPtrFByOffset(allocOffset(name, 1, 1, Float));
+	f[0] = f0;
+}
+
+void CGPUProgramParams::set2f(const std::string &name, float f0, float f1)
+{
+	float *f = getPtrFByOffset(allocOffset(name, 2, 1, Float));
+	f[0] = f0;
+	f[1] = f1;
+}
+
+void CGPUProgramParams::set3f(const std::string &name, float f0, float f1, float f2)
+{
+	float *f = getPtrFByOffset(allocOffset(name, 3, 1, Float));
+	f[0] = f0;
+	f[1] = f1;
+	f[2] = f2;
+}
+
+void CGPUProgramParams::set4f(const std::string &name, float f0, float f1, float f2, float f3)
+{
+	float *f = getPtrFByOffset(allocOffset(name, 4, 1, Float));
+	f[0] = f0;
+	f[1] = f1;
+	f[2] = f2;
+	f[3] = f3;
+}
+
+void CGPUProgramParams::set1i(const std::string &name, sint32 i0)
+{
+	sint32 *i = getPtrIByOffset(allocOffset(name, 1, 1, Int));
+	i[0] = i0;
+}
+
+void CGPUProgramParams::set2i(const std::string &name, sint32 i0, sint32 i1)
+{
+	sint32 *i = getPtrIByOffset(allocOffset(name, 2, 1, Int));
+	i[0] = i0;
+	i[1] = i1;
+}
+
+void CGPUProgramParams::set3i(const std::string &name, sint32 i0, sint32 i1, sint32 i2)
+{
+	sint32 *i = getPtrIByOffset(allocOffset(name, 3, 1, Int));
+	i[0] = i0;
+	i[1] = i1;
+	i[2] = i2;
+}
+
+void CGPUProgramParams::set4i(const std::string &name, sint32 i0, sint32 i1, sint32 i2, sint32 i3)
+{
+	sint32 *i = getPtrIByOffset(allocOffset(name, 4, 1, Int));
+	i[0] = i0;
+	i[1] = i1;
+	i[2] = i2;
+	i[3] = i3;
+}
+
+void CGPUProgramParams::set1ui(const std::string &name, uint32 ui0)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(name, 1, 1, UInt));
+	ui[0] = ui0;
+}
+
+void CGPUProgramParams::set2ui(const std::string &name, uint32 ui0, uint32 ui1)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(name, 2, 1, UInt));
+	ui[0] = ui0;
+	ui[1] = ui1;
+}
+
+void CGPUProgramParams::set3ui(const std::string &name, uint32 ui0, uint32 ui1, uint32 ui2)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(name, 3, 1, UInt));
+	ui[0] = ui0;
+	ui[1] = ui1;
+	ui[2] = ui2;
+}
+
+void CGPUProgramParams::set4ui(const std::string &name, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(name, 4, 1, UInt));
+	ui[0] = ui0;
+	ui[1] = ui1;
+	ui[2] = ui2;
+	ui[3] = ui3;
+}
+
+void CGPUProgramParams::set3f(const std::string &name, const NLMISC::CVector& v)
+{
+	float *f = getPtrFByOffset(allocOffset(name, 3, 1, Float));
+	f[0] = v.x;
+	f[1] = v.y;
+	f[2] = v.z;
+}
+
+void CGPUProgramParams::set4f(const std::string &name, const NLMISC::CVector& v, float f3)
+{
+	float *f = getPtrFByOffset(allocOffset(name, 4, 1, Float));
+	f[0] = v.x;
+	f[1] = v.y;
+	f[2] = v.z;
+	f[3] = f3;
+}
+
+void CGPUProgramParams::set4x4f(const std::string &name, const NLMISC::CMatrix& m)
+{
+	// TODO: Verify this!
+	float *f = getPtrFByOffset(allocOffset(name, 4, 4, Float));
+	NLMISC::CMatrix mt = m;
+	mt.transpose();
+	mt.get(f);
+}
+
+void CGPUProgramParams::set4fv(const std::string &name, size_t num, const float *src)
+{
+	float *f = getPtrFByOffset(allocOffset(name, 4, num, Float));
+	size_t nb = 4 * num;
+	for (uint c = 0; c < nb; ++c)
+		f[c] = src[c];
+}
+
+void CGPUProgramParams::set4iv(const std::string &name, size_t num, const sint32 *src)
+{
+	sint32 *i = getPtrIByOffset(allocOffset(name, 4, num, Int));
+	size_t nb = 4 * num;
+	for (uint c = 0; c < nb; ++c)
+		i[c] = src[c];
+}
+
+void CGPUProgramParams::set4uiv(const std::string &name, size_t num, const uint32 *src)
+{
+	uint32 *ui = getPtrUIByOffset(allocOffset(name, 4, num, UInt));
+	size_t nb = 4 * num;
+	for (uint c = 0; c < nb; ++c)
+		ui[c] = src[c];
+}
+
+void CGPUProgramParams::unset(const std::string &name)
+{
+	size_t offset = getOffset(name);
+	if (offset != getEnd())
+	{
+		freeOffset(offset);
+	}
+}
+
+void CGPUProgramParams::map(uint index, const std::string &name)
+{
+	size_t offsetIndex = getOffset(index);
+	size_t offsetName = getOffset(name);
+	if (offsetName != getEnd())
+	{
+		// Remove possible duplicate
+		if (offsetIndex != getEnd())
+		{
+			freeOffset(offsetIndex);
+		}
+
+		// Set index
+		m_Meta[offsetName].Index = index;
+
+		// Map index to name
+		if (index >= m_Map.size())
+			m_Map.resize(index + 1, s_End);
+		m_Map[index] = offsetName;
+	}
+	else if (offsetIndex != getEnd())
+	{
+		// Set name
+		m_Meta[offsetIndex].Name = name;
+
+		// Map name to index
+		m_MapName[name] = offsetIndex;
+	}
 }
 
 /// Allocate specified number of components if necessary
@@ -163,18 +406,67 @@ size_t CGPUProgramParams::allocOffset(uint index, uint size, uint count, TType t
 	}
 
 	// Allocate space
-	offset = m_Meta.size();
-	uint blocks = getNbRegistersByComponents(nbComponents); // per 4 components
-	m_Meta.resize(offset + blocks);
-	m_Vec.resize(offset + blocks);
+	offset = allocOffset(size, count, type);
+
+	// Fill
+	m_Meta[offset].Index = index;
 
 	// Store offset in map
 	if (index >= m_Map.size())
 		m_Map.resize(index + 1, s_End);
 	m_Map[index] = offset;
 
+	return offset;
+}
+
+/// Allocate specified number of components if necessary
+size_t CGPUProgramParams::allocOffset(const std::string &name, uint size, uint count, TType type)
+{
+	nlassert(count > 0); // this code will not properly handle 0
+	nlassert(size > 0); // this code will not properly handle 0
+	nlassert(!name.empty()); // sanity check
+
+	uint nbComponents = size * count;
+	size_t offset = getOffset(name);
+	if (offset != s_End)
+	{
+		if (getCountByOffset(offset) >= nbComponents)
+		{
+			m_Meta[offset].Type = type;
+			m_Meta[offset].Size = size;
+			m_Meta[offset].Count = count;
+			return offset;
+		}
+		if (getCountByOffset(offset) < nbComponents)
+		{
+			freeOffset(offset);
+		}
+	}
+
+	// Allocate space
+	offset = allocOffset(size, count, type);
+
 	// Fill
-	m_Meta[offset].Index = index;
+	m_Meta[offset].Name = name;
+
+	// Store offset in map
+	m_MapName[name] = offset;
+
+	return offset;
+}
+
+/// Allocate specified number of components if necessary
+size_t CGPUProgramParams::allocOffset(uint size, uint count, TType type)
+{
+	uint nbComponents = size * count;
+
+	// Allocate space
+	size_t offset = m_Meta.size();
+	uint blocks = getNbRegistersByComponents(nbComponents); // per 4 components
+	m_Meta.resize(offset + blocks);
+	m_Vec.resize(offset + blocks);
+
+	// Fill
 	m_Meta[offset].Size = size;
 	m_Meta[offset].Count = count;
 	m_Meta[offset].Type = type;
@@ -207,6 +499,22 @@ size_t CGPUProgramParams::getOffset(uint index) const
 /// Remove by offset
 void CGPUProgramParams::freeOffset(size_t offset)
 {
+	uint index = getIndexByOffset(offset);
+	if (index != ~0)
+	{
+		if (m_Map.size() > index)
+		{
+			m_Map[index] = getEnd();
+		}
+	}
+	const std::string &name = getNameByOffset(offset);
+	if (!name.empty())
+	{
+		if (m_MapName.find(name) != m_MapName.end())
+		{
+			m_MapName.erase(name);
+		}
+	}
 	if (offset == m_Last)
 	{
 		nlassert(m_Meta[offset].Next == s_End);
