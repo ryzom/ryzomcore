@@ -1200,6 +1200,7 @@ public:
 	virtual void			setUniformFog(TProgram program, uint index) = 0;
     // Set feature parameters
 	virtual bool			setUniformDriver(TProgram program) = 0; // set all driver-specific features params (based on program->features->DriverFlags) (called automatically when rendering with cmaterial and using a user program)
+	virtual bool			setUniformMaterial(TProgram program, CMaterial &material) = 0; // set all material-specific feature params (based on program->features->MaterialFlags) (called automatically when rendering with cmaterial and using a user program)
 	virtual void			setUniformParams(TProgram program, const CGPUProgramParams &params) = 0; // set all user-provided params from the storage
 	// @}
 
