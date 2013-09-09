@@ -161,9 +161,9 @@ public:
 
 	enum TProgram
 	{
-		VertexProgram,
-		PixelProgram,
-		GeometryProgram
+		VertexProgram = 0,
+		PixelProgram = 1,
+		GeometryProgram = 2
 	};
 
 protected:
@@ -1105,19 +1105,17 @@ public:
 	  */
 	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile = CVertexProgram::nelvp) const = 0;
 
-	/** Compile the given vertex program, return if successful. Error information is returned as a string.
+	/** Compile the given vertex program, return if successful.
+	  * If a vertex program was set active before compilation, 
+	  * the state of the active vertex program is undefined behaviour afterwards.
 	  */
-	virtual bool			compileVertexProgram(CVertexProgram *program, std::string &error) const = 0;
+	virtual bool			compileVertexProgram(CVertexProgram *program) = 0;
 
 	/** Set the active vertex program. This will override vertex programs specified in CMaterial render calls.
 	  * Also used internally by setupMaterial(CMaterial) when getVertexProgram returns NULL.
 	  * The vertex program is activated immediately.
 	  */
 	virtual bool			activeVertexProgram(CVertexProgram *program) = 0;
-
-	/** Get the currently active vertex program.
-	  */
-	virtual CVertexProgram	*getActiveVertexProgram() const = 0;
 	// @}
 
 
@@ -1134,19 +1132,17 @@ public:
 	  */
 	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile) const = 0;
 
-	/** Compile the given pixel program, return if successful. Error information is returned as a string.
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
 	  */
-	virtual bool			compilePixelProgram(CPixelProgram *program, std::string &error) const = 0;
+	virtual bool			compilePixelProgram(CPixelProgram *program) = 0;
 
 	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
 	  * Also used internally by setupMaterial(CMaterial) when getPixelProgram returns NULL.
 	  * The pixel program is activated immediately.
 	  */
 	virtual bool			activePixelProgram(CPixelProgram *program) = 0;
-
-	/** Get the currently active pixel program.
-	  */
-	virtual CPixelProgram	*getActivePixelProgram() const = 0;
 	// @}
 
 

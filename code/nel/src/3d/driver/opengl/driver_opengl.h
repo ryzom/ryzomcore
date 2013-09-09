@@ -1299,45 +1299,115 @@ private:
 
 	// @}
 
-	/// \name Vertex program interface
+
+
+
+
+	/// \name Vertex Program
 	// @{
 
-	bool			supportVertexProgram () const;
-	bool			supportPixelProgram () const;
-	bool			supportPixelProgram (CPixelProgram::TProfile profile) const;
-	bool			isVertexProgramEmulated () const;
-	bool			activeVertexProgram (CVertexProgram *program);
-	bool			activePixelProgram (CPixelProgram *program);
-	void			setConstant (uint index, float, float, float, float);
-	void			setConstant (uint index, double, double, double, double);
-	void			setConstant (uint indexStart, const NLMISC::CVector& value);
-	void			setConstant (uint indexStart, const NLMISC::CVectorD& value);
-	void			setConstant (uint index, uint num, const float *src);
-	void			setConstant (uint index, uint num, const double *src);
-	void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
-	void			setConstantFog (uint index);
-	void			enableVertexProgramDoubleSidedColor(bool doubleSided);
-	bool		    supportVertexProgramDoubleSidedColor() const;
- 
-	// Pixel program
-	virtual void			setPixelProgramConstant (uint index, float, float, float, float);
-	virtual void			setPixelProgramConstant (uint index, double, double, double, double);
-	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVector& value);
-	virtual void			setPixelProgramConstant (uint index, const NLMISC::CVectorD& value);
-	virtual void			setPixelProgramConstant (uint index, uint num, const float *src);
-	virtual void			setPixelProgramConstant (uint index, uint num, const double *src);
-	virtual void			setPixelProgramConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
+	// Order of preference
+	// - activeVertexProgram
+	// - CMaterial pass[n] VP (uses activeVertexProgram, but does not override if one already set by code)
+	// - default generic VP that mimics fixed pipeline / no VP with fixed pipeline
+
+	/**
+	  * Does the driver supports vertex program, but emulated by CPU ?
+	  */
+	virtual bool			isVertexProgramEmulated() const;
+
+	/** Return true if the driver supports the specified vertex program profile.
+	  */
+	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile = CVertexProgram::nelvp) const;
+
+	/** Compile the given vertex program, return if successful.
+	  * If a vertex program was set active before compilation, 
+	  * the state of the active vertex program is undefined behaviour afterwards.
+	  */
+	virtual bool			compileVertexProgram(CVertexProgram *program);
+
+	/** Set the active vertex program. This will override vertex programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getVertexProgram returns NULL.
+	  * The vertex program is activated immediately.
+	  */
+	virtual bool			activeVertexProgram(CVertexProgram *program);
+	// @}
+
+
+
+	/// \name Pixel Program
+	// @{
+
+	// Order of preference
+	// - activePixelProgram
+	// - CMaterial pass[n] PP (uses activePixelProgram, but does not override if one already set by code)
+	// - PP generated from CMaterial (uses activePixelProgram, but does not override if one already set by code)
+
+	/** Return true if the driver supports the specified pixel program profile.
+	  */
+	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile = CPixelProgram::arbfp1) const;
+
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
+	  */
+	virtual bool			compilePixelProgram(CPixelProgram *program);
+
+	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getPixelProgram returns NULL.
+	  * The pixel program is activated immediately.
+	  */
+	virtual bool			activePixelProgram(CPixelProgram *program);
+	// @}
+
+
+
+	/// \name Program parameters
+	// @{
+	// Set parameters
+	virtual void			setUniform1f(TProgram program, uint index, float f0);
+	virtual void			setUniform2f(TProgram program, uint index, float f0, float f1);
+	virtual void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2);
+	virtual void			setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3);
+	virtual void			setUniform1i(TProgram program, uint index, sint32 i0);
+	virtual void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1);
+	virtual void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2);
+	virtual void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	virtual void			setUniform1ui(TProgram program, uint index, uint32 ui0);
+	virtual void			setUniform2ui(TProgram program, uint index, uint32 ui0, uint32 ui1);
+	virtual void			setUniform3ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2);
+	virtual void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3);
+	virtual void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v);
+	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3);
+	virtual void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m);
+	virtual void			setUniform4fv(TProgram program, uint index, size_t num, const float *src);
+	virtual void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src);
+	virtual void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src);
+	// Set builtin parameters
+	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform);
+	virtual void			setUniformFog(TProgram program, uint index);
+	// @}
+
+
+
+
+
+	virtual void			enableVertexProgramDoubleSidedColor(bool doubleSided);
+	virtual bool		    supportVertexProgramDoubleSidedColor() const;
 
 	virtual	bool			supportMADOperator() const ;
 
 
-	// @}
 
 	/// \name Vertex program implementation
 	// @{
 		bool activeNVVertexProgram (CVertexProgram *program);
 		bool activeARBVertexProgram (CVertexProgram *program);
 		bool activeEXTVertexShader (CVertexProgram *program);
+
+		bool compileNVVertexProgram (CVertexProgram *program);
+		bool compileARBVertexProgram (CVertexProgram *program);
+		bool compileEXTVertexShader (CVertexProgram *program);
 	//@}
 
 

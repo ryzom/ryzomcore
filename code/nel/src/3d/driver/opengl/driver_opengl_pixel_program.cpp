@@ -50,6 +50,7 @@ namespace NLDRIVERGL {
 #endif
 
 // ***************************************************************************
+
 CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it) 
 {
 	H_AUTO_OGL(CPixelProgamDrvInfosGL_CPixelProgamDrvInfosGL)
@@ -63,11 +64,7 @@ CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoP
 }
 
 // ***************************************************************************
-bool CDriverGL::supportPixelProgram() const
-{	
-	H_AUTO_OGL(CPixelProgamDrvInfosGL_supportPixelProgram)
-	return _Extensions.ARBFragmentProgram;
-}
+
 bool CDriverGL::supportPixelProgram(CPixelProgram::TProfile profile) const
 {
 	H_AUTO_OGL(CPixelProgamDrvInfosGL_supportPixelProgram_profile)
@@ -82,6 +79,7 @@ bool CDriverGL::supportPixelProgram(CPixelProgram::TProfile profile) const
 }
 
 // ***************************************************************************
+
 bool CDriverGL::activePixelProgram(CPixelProgram *program)
 {
 	H_AUTO_OGL(CDriverGL_activePixelProgram)
@@ -95,59 +93,68 @@ bool CDriverGL::activePixelProgram(CPixelProgram *program)
 }
 
 // ***************************************************************************
+
+bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
+{
+	// Program setuped ?
+	if (program->_DrvInfo == NULL)
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+		_PixelProgramEnabled = false;
+		
+		// Insert into driver list. (so it is deleted when driver is deleted).
+		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
+
+		// Create a driver info
+		CPixelProgamDrvInfosGL *drvInfo;
+		*it = drvInfo = new CPixelProgamDrvInfosGL(this, it);
+		// Set the pointer
+		program->_DrvInfo = drvInfo;
+	
+		if (!setupPixelProgram(program, drvInfo->ID))
+		{
+			delete drvInfo;
+			program->_DrvInfo = NULL;
+			_GPUPrgDrvInfos.erase(it);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// ***************************************************************************
+
 bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 {
 	H_AUTO_OGL(CDriverGL_activeARBPixelProgram)
 
 	// Setup or unsetup ?
 	if (program)
-	{		
-		// Driver info
-		CPixelProgamDrvInfosGL *drvInfo;
-
+	{
 		// Program setuped ?
-		if (program->_DrvInfo==NULL)
-		{
-			// Insert into driver list. (so it is deleted when driver is deleted).
-			ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
+		if (!CDriverGL::compilePixelProgram(program)) return false;
 
-			// Create a driver info
-			*it = drvInfo = new CPixelProgamDrvInfosGL(this, it);
-			// Set the pointer
-			program->_DrvInfo = drvInfo;
-		
-			if (!setupPixelProgram(program, drvInfo->ID))
-			{
-				delete drvInfo;
-				program->_DrvInfo = NULL;
-				_GPUPrgDrvInfos.erase(it);
-				return false;
-			}
-		}
-		else
-		{
-			// Cast the driver info pointer
-			drvInfo=safe_cast<CPixelProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
-		}
-		glEnable( GL_FRAGMENT_PROGRAM_ARB );
+		// Cast the driver info pointer
+		CPixelProgamDrvInfosGL *drvInfo = safe_cast<CPixelProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->_DrvInfo);
+
+		glEnable(GL_FRAGMENT_PROGRAM_ARB);
 		_PixelProgramEnabled = true;
-		nglBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, drvInfo->ID );
-		
-		glDisable( GL_COLOR_SUM_ARB ); // no specular written
+		nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, drvInfo->ID);
 				
 		_LastSetuppedPP = program;
 	}
 	else
 	{		
-		glDisable( GL_FRAGMENT_PROGRAM_ARB );		
-		glDisable( GL_COLOR_SUM_ARB );
-		_PixelProgramEnabled = false;		
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+		_PixelProgramEnabled = false;
 	}
 	
 	return true;
 }
 
 // ***************************************************************************
+
 bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &specularWritten*/)
 {
 	H_AUTO_OGL(CDriverGL_setupARBPixelProgram)
@@ -170,9 +177,9 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 	}
 
 	// Compile the program
-	nglBindProgramARB( GL_FRAGMENT_PROGRAM_ARB, id);
+	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, id);
 	glGetError();
-	nglProgramStringARB( GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, source->SourceLen, source->SourcePtr);
+	nglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, source->SourceLen, source->SourcePtr);
 	GLenum err = glGetError();
 	if (err != GL_NO_ERROR)
 	{
@@ -220,136 +227,6 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 	program->buildInfo(source->DisplayName.c_str(), source->Features);
 
 	return true;	
-}
-
-// ***************************************************************************
-
-void CDriverGL::setPixelProgramConstant (uint index, float f0, float f1, float f2, float f3)
-{
-	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
-
-	if (_Extensions.ARBFragmentProgram)
-		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, index, f0, f1, f2, f3);
-}
-
-
-// ***************************************************************************
-
-void CDriverGL::setPixelProgramConstant (uint index, double d0, double d1, double d2, double d3)
-{
-	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
-
-	if (_Extensions.ARBFragmentProgram)
-		nglProgramEnvParameter4dARB(GL_FRAGMENT_PROGRAM_ARB, index, d0, d1, d2, d3);
-}
-
-
-// ***************************************************************************
-
-void CDriverGL::setPixelProgramConstant (uint index, const NLMISC::CVector& value)
-{
-	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
-
-	if (_Extensions.ARBFragmentProgram)
-		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, index, value.x, value.y, value.z, 0);
-}
-
-
-// ***************************************************************************
-
-void CDriverGL::setPixelProgramConstant (uint index, const NLMISC::CVectorD& value)
-{
-	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
-
-	if (_Extensions.ARBFragmentProgram)
-		nglProgramEnvParameter4dARB(GL_FRAGMENT_PROGRAM_ARB, index, value.x, value.y, value.z, 0);
-}
-
-
-// ***************************************************************************
-void	CDriverGL::setPixelProgramConstant (uint index, uint num, const float *src)
-{
-	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
-
-	if (_Extensions.ARBFragmentProgram)
-	{
-		for(uint k = 0; k < num; ++k)
-		{					
-			nglProgramEnvParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, index + k, src + 4 * k);
-		}
-	}
-}
-
-// ***************************************************************************
-void	CDriverGL::setPixelProgramConstant (uint index, uint num, const double *src)
-{
-	H_AUTO_OGL(CDriverGL_setPixelProgramConstant)
-
-	if (_Extensions.ARBFragmentProgram)
-	{
-		for(uint k = 0; k < num; ++k)
-		{					
-			nglProgramEnvParameter4dvARB(GL_FRAGMENT_PROGRAM_ARB, index + k, src + 4 * k);
-		}
-	}
-}
-
-// ***************************************************************************
-
-void CDriverGL::setPixelProgramConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform)
-{
-	H_AUTO_OGL(CDriverGL_setPixelProgramConstantMatrix)
-
-	if (_Extensions.ARBFragmentProgram)
-	{
-
-		// First, ensure that the render setup is correctly setuped.
-		refreshRenderSetup();		
-		CMatrix mat;		
-		switch (matrix)
-		{
-			case IDriver::ModelView:
-				mat = _ModelViewMatrix;
-			break;
-			case IDriver::Projection:
-				{
-					refreshProjMatrixFromGL();
-					mat = _GLProjMat;
-				}
-			break;
-			case IDriver::ModelViewProjection:
-				refreshProjMatrixFromGL();				
-				mat = _GLProjMat * _ModelViewMatrix;
-			break;
-			default:
-				break;
-		}
-		
-		switch(transform)
-		{
-			case IDriver::Identity: break;
-			case IDriver::Inverse:
-				mat.invert();
-			break;		
-			case IDriver::Transpose:
-				mat.transpose();
-			break;
-			case IDriver::InverseTranspose:
-				mat.invert();
-				mat.transpose();
-			break;
-			default:
-				break;
-		}
-		mat.transpose();
-		float matDatas[16];
-		mat.get(matDatas);
-
-		nglProgramEnvParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, index, matDatas);
-		nglProgramEnvParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, index + 1, matDatas + 4);
-		nglProgramEnvParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, index + 2, matDatas + 8);
-		nglProgramEnvParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, index + 3, matDatas + 12);
-	}
 }
 
 #ifdef NL_STATIC
