@@ -72,6 +72,7 @@ namespace NL3D {
 extern const char *g_StereoOVR_fp40;
 extern const char *g_StereoOVR_arbfp1;
 extern const char *g_StereoOVR_ps_2_0;
+extern const char *g_StereoOVR_glsl330f;
 
 namespace {
 
@@ -233,43 +234,106 @@ CStereoOVR::~CStereoOVR()
 	--s_DeviceCounter;
 }
 
+class CPixelProgramOVR : public CPixelProgram
+{
+public:
+	struct COVRIndices
+	{
+		uint LensCenter;
+		uint ScreenCenter;
+		uint Scale;
+		uint ScaleIn;
+		uint HmdWarpParam;
+	};
+
+	CPixelProgramOVR()
+	{
+		{
+			CSource *source = new CSource();
+			source->Profile = glsl330f;
+			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->setSourcePtr(g_StereoOVR_glsl330f);
+			addSource(source);
+		}
+		{
+			CSource *source = new CSource();
+			source->Profile = fp40;
+			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->setSourcePtr(g_StereoOVR_fp40);
+			source->ParamIndices["cLensCenter"] = 0;
+			source->ParamIndices["cScreenCenter"] = 1;
+			source->ParamIndices["cScale"] = 2;
+			source->ParamIndices["cScaleIn"] = 3;
+			source->ParamIndices["cHmdWarpParam"] = 4;
+			addSource(source);
+		}
+		{
+			CSource *source = new CSource();
+			source->Profile = arbfp1;
+			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->setSourcePtr(g_StereoOVR_arbfp1);
+			source->ParamIndices["cLensCenter"] = 0;
+			source->ParamIndices["cScreenCenter"] = 1;
+			source->ParamIndices["cScale"] = 2;
+			source->ParamIndices["cScaleIn"] = 3;
+			source->ParamIndices["cHmdWarpParam"] = 4;
+			addSource(source);
+		}
+		{
+			CSource *source = new CSource();
+			source->Profile = ps_2_0;
+			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->setSourcePtr(g_StereoOVR_ps_2_0);
+			source->ParamIndices["cLensCenter"] = 0;
+			source->ParamIndices["cScreenCenter"] = 1;
+			source->ParamIndices["cScale"] = 2;
+			source->ParamIndices["cScaleIn"] = 3;
+			source->ParamIndices["cHmdWarpParam"] = 4;
+			addSource(source);
+		}
+	}
+
+	virtual ~CPixelProgramOVR()
+	{
+		
+	}
+
+	virtual void buildInfo()
+	{
+		CPixelProgram::buildInfo();
+
+		m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
+		nlassert(m_OVRIndices.LensCenter != ~0);
+		m_OVRIndices.ScreenCenter = getUniformIndex("cScreenCenter");
+		nlassert(m_OVRIndices.ScreenCenter != ~0);
+		m_OVRIndices.Scale = getUniformIndex("cScale");
+		nlassert(m_OVRIndices.Scale != ~0);
+		m_OVRIndices.ScaleIn = getUniformIndex("cScaleIn");
+		nlassert(m_OVRIndices.ScaleIn != ~0);
+		m_OVRIndices.HmdWarpParam = getUniformIndex("cHmdWarpParam");
+		nlassert(m_OVRIndices.HmdWarpParam != ~0);
+	}
+
+	inline const COVRIndices &ovrIndices() { return m_OVRIndices; }
+
+private:
+	COVRIndices m_OVRIndices;
+
+};
+
 void CStereoOVR::setDriver(NL3D::UDriver *driver)
 {
 	nlassert(!m_PixelProgram);
 
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
 
-	m_PixelProgram = new CPixelProgram();
-
-	IGPUProgram::CSource *source = new IGPUProgram::CSource();
-	source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
-	source->Profile = IGPUProgram::none;
-	if (drvInternal->supportPixelProgram(CPixelProgram::fp40) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
+	if (drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
-		nldebug("VR: fp40");
-		source->Profile = IGPUProgram::fp40;
-		source->setSourcePtr(g_StereoOVR_fp40);
-		m_PixelProgram->addSource(source);
-	}
-	else if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
-	{
-		nldebug("VR: arbfp1");
-		source->Profile = IGPUProgram::arbfp1;
-		source->setSourcePtr(g_StereoOVR_arbfp1);
-		m_PixelProgram->addSource(source);
-	}
-	else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
-	{
-		nldebug("VR: ps_2_0");
-		source->Profile = IGPUProgram::ps_2_0;
-		source->setSourcePtr(g_StereoOVR_ps_2_0);
-		m_PixelProgram->addSource(source);
-	}
-	
-	if (!drvInternal->compilePixelProgram(m_PixelProgram))
-	{
-		delete m_PixelProgram;
-		m_PixelProgram = NULL;
+		m_PixelProgram = new CPixelProgramOVR();
+		if (!drvInternal->compilePixelProgram(m_PixelProgram))
+		{
+			m_PixelProgram.kill();
+		}
 	}
 
 	if (m_PixelProgram)
@@ -590,11 +654,27 @@ bool CStereoOVR::endRenderTarget()
 		float scaleInX = (2 / w);
 		float scaleInY = (2 / h);
 		
-		drvInternal->setUniform2f(IDriver::PixelProgram, 0, lensCenterX, lensCenterY);
-		drvInternal->setUniform2f(IDriver::PixelProgram, 1, screenCenterX, screenCenterY);
-		drvInternal->setUniform2f(IDriver::PixelProgram, 2, scaleX, scaleY);
-		drvInternal->setUniform2f(IDriver::PixelProgram, 3, scaleInX, scaleInY);
-		drvInternal->setUniform4fv(IDriver::PixelProgram, 4, 1, m_DevicePtr->HMDInfo.DistortionK);
+
+		drvInternal->setUniform2f(IDriver::PixelProgram, 
+			m_PixelProgram->ovrIndices().LensCenter, 
+			lensCenterX, lensCenterY);
+
+		drvInternal->setUniform2f(IDriver::PixelProgram, 
+			m_PixelProgram->ovrIndices().ScreenCenter, 
+			screenCenterX, screenCenterY);
+
+		drvInternal->setUniform2f(IDriver::PixelProgram, 
+			m_PixelProgram->ovrIndices().Scale, 
+			scaleX, scaleY);
+
+		drvInternal->setUniform2f(IDriver::PixelProgram, 
+			m_PixelProgram->ovrIndices().ScaleIn, 
+			scaleInX, scaleInY);
+
+
+		drvInternal->setUniform4fv(IDriver::PixelProgram, 
+			m_PixelProgram->ovrIndices().HmdWarpParam, 
+			1, m_DevicePtr->HMDInfo.DistortionK);
 
 		m_Driver->drawQuad(m_BarrelQuadLeft, m_BarrelMat);
 
@@ -602,8 +682,15 @@ bool CStereoOVR::endRenderTarget()
 		lensCenterX = x + (w - lensViewportShift * 0.5f) * 0.5f;
 		screenCenterX = x + w * 0.5f;
 
-		drvInternal->setUniform2f(IDriver::PixelProgram, 0, lensCenterX, lensCenterY);
-		drvInternal->setUniform2f(IDriver::PixelProgram, 1, screenCenterX, screenCenterY);
+
+		drvInternal->setUniform2f(IDriver::PixelProgram, 
+			m_PixelProgram->ovrIndices().LensCenter, 
+			lensCenterX, lensCenterY);
+
+		drvInternal->setUniform2f(IDriver::PixelProgram, 
+			m_PixelProgram->ovrIndices().ScreenCenter, 
+			screenCenterX, screenCenterY);
+
 
 		m_Driver->drawQuad(m_BarrelQuadRight, m_BarrelMat);
 

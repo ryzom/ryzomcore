@@ -204,6 +204,13 @@ void IGPUProgram::buildInfo(CSource *source)
 			features.MaterialFlags &= ~CGPUProgramFeatures::MaterialAmbient;
 		}
 	}*/
+
+	buildInfo();
+}
+
+void IGPUProgram::buildInfo()
+{
+	
 }
 
 } /* namespace NL3D */

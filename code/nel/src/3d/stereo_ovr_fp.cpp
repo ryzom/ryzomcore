@@ -44,7 +44,7 @@ const char *g_StereoOVR_fp40 =
 	//#var float2 cScale :  : c[2] : 3 : 1
 	//#var float2 cScaleIn :  : c[3] : 4 : 1
 	//#var float4 cHmdWarpParam :  : c[4] : 5 : 1
-	//#var sampler2D cTex0 : TEX0 : texunit 0 : 6 : 1
+	//#var sampler2D nlTex0 : TEX0 : texunit 0 : 6 : 1
 	//#var float4 oCol : $vout.COLOR : COL : 7 : 1
 	//#const c[5] = 0.25 0.5 0
 	"PARAM c[6] = { program.env[0..4],\n" // program.local->program.env!
@@ -81,6 +81,7 @@ const char *g_StereoOVR_fp40 =
 	"ENDIF;\n"
 	"END\n";
 	//# 24 instructions, 2 R-regs, 1 H-regs
+
 const char *g_StereoOVR_arbfp1 =
 	"!!ARBfp1.0\n"
 	//# cgc version 3.1.0013, build date Apr 18 2012
@@ -102,7 +103,7 @@ const char *g_StereoOVR_arbfp1 =
 	//#var float2 cScale :  : c[2] : 3 : 1
 	//#var float2 cScaleIn :  : c[3] : 4 : 1
 	//#var float4 cHmdWarpParam :  : c[4] : 5 : 1
-	//#var sampler2D cTex0 : TEX0 : texunit 0 : 6 : 1
+	//#var sampler2D nlTex0 : TEX0 : texunit 0 : 6 : 1
 	//#var float4 oCol : $vout.COLOR : COL : 7 : 1
 	//#const c[5] = 0.25 0.5 0 1
 	"PARAM c[6] = { program.env[0..4],\n"
@@ -139,6 +140,7 @@ const char *g_StereoOVR_arbfp1 =
 	"CMP result.color, -R1.x, R0, c[5].z;\n"
 	"END\n";
 	//# 28 instructions, 2 R-regs
+
 const char *g_StereoOVR_ps_2_0 =
 	"ps_2_0\n"
 	// cgc version 3.1.0013, build date Apr 18 2012
@@ -160,7 +162,7 @@ const char *g_StereoOVR_ps_2_0 =
 	//var float2 cScale :  : c[2] : 3 : 1
 	//var float2 cScaleIn :  : c[3] : 4 : 1
 	//var float4 cHmdWarpParam :  : c[4] : 5 : 1
-	//var sampler2D cTex0 : TEX0 : texunit 0 : 6 : 1
+	//var sampler2D nlTex0 : TEX0 : texunit 0 : 6 : 1
 	//var float4 oCol : $vout.COLOR : COL : 7 : 1
 	//const c[5] = -0.25 -0.5 0.25 0.5
 	//const c[6] = 1 0
@@ -199,4 +201,49 @@ const char *g_StereoOVR_ps_2_0 =
 	"texld r0, r3, s0\n"
 	"cmp r0, -r1.x, r0, c6.y\n"
 	"mov oC0, r0\n";
+
+const char *g_StereoOVR_glsl330f = 
+	"#version 330\n"
+	"\n"
+	"bool _TMP2;\n"
+	"bvec2 _TMP1;\n"
+	"vec2 _TMP3;\n"
+	"uniform vec2 cLensCenter;\n"
+	"uniform vec2 cScreenCenter;\n"
+	"uniform vec2 cScale;\n"
+	"uniform vec2 cScaleIn;\n"
+	"uniform vec4 cHmdWarpParam;\n"
+	"uniform sampler2D nlTex0;\n"
+	"vec2 _TMP10;\n"
+	"vec2 _b0011;\n"
+	"vec2 _a0011;\n"
+	"in vec4 nlTexCoord0;\n"
+	"out vec4 nlCol;\n"
+	"\n"
+	"void main()\n"
+	"{\n"
+	"	vec2 _theta;\n"
+	"	float _rSq;\n"
+	"	vec2 _theta1;\n"
+	"	vec2 _tc;\n"
+	"\n"
+	"	_theta = (nlTexCoord0.xy - cLensCenter)*cScaleIn;\n"
+	"	_rSq = _theta.x*_theta.x + _theta.y*_theta.y;\n"
+	"	_theta1 = _theta*(cHmdWarpParam.x + cHmdWarpParam.y*_rSq + cHmdWarpParam.z*_rSq*_rSq + cHmdWarpParam.w*_rSq*_rSq*_rSq);\n"
+	"	_tc = cLensCenter + cScale*_theta1;\n"
+	"	_a0011 = cScreenCenter - vec2( 0.25, 0.5);\n"
+	"	_b0011 = cScreenCenter + vec2( 0.25, 0.5);\n"
+	"	_TMP3 = min(_b0011, _tc);\n"
+	"	_TMP10 = max(_a0011, _TMP3);\n"
+	"	_TMP1 = bvec2(_TMP10.x == _tc.x, _TMP10.y == _tc.y);\n"
+	"	_TMP2 = _TMP1.x && _TMP1.y;\n"
+	"	if (!_TMP2) {\n"
+	"		nlCol = vec4(0, 0, 0, 0);\n"
+	"	} else {\n"
+	"		nlCol = texture(nlTex0, _tc);\n"
+	"	}\n"
+	"}\n";
+
 }
+
+/* end of file */

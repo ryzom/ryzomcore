@@ -66,7 +66,7 @@ class ITexture;
 class CTextureUser;
 class CStereoOVRDevicePtr;
 class CStereoOVRDeviceHandle;
-class CPixelProgram;
+class CPixelProgramOVR;
 
 #define NL_STEREO_MAX_USER_CAMERAS 8
 
@@ -161,7 +161,7 @@ private:
 	NL3D::UMaterial m_BarrelMat;
 	NLMISC::CQuadUV m_BarrelQuadLeft;
 	NLMISC::CQuadUV m_BarrelQuadRight;
-	CPixelProgram *m_PixelProgram;
+	NLMISC::CRefPtr<CPixelProgramOVR> m_PixelProgram;
 	NLMISC::CVector m_EyePosition;
 	float m_Scale;
 

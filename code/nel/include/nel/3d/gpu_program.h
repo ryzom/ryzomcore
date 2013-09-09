@@ -266,6 +266,9 @@ public:
 	// Build feature info, called automatically by the driver after compile succeeds
 	void buildInfo(CSource *source);
 
+	// Override this to build additional info in a subclass
+	virtual void buildInfo();
+
 protected:
 	/// The progam source
 	std::vector<NLMISC::CSmartPtr<CSource> >				m_Sources;

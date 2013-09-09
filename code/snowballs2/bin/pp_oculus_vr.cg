@@ -32,7 +32,7 @@ void pp_oculus_vr(
 	uniform float2 cScale,
 	uniform float2 cScaleIn,
 	uniform float4 cHmdWarpParam,
-	uniform sampler2D cTex0 : TEX0, 
+	uniform sampler2D nlTex0 : TEX0, 
 	
 	// Output color
 	out float4 oCol : COLOR)
@@ -49,6 +49,6 @@ void pp_oculus_vr(
 	}
     else
 	{
-		oCol = tex2D(cTex0, tc);
+		oCol = tex2D(nlTex0, tc);
 	}
 }
