@@ -63,6 +63,7 @@
 
 #include "driver_opengl_states.h"
 #include "driver_opengl_extension.h"
+#include "driver_opengl_shader_cache.h"
 
 
 #ifdef NL_OS_WINDOWS
@@ -1450,6 +1451,9 @@ private:
 	  */
 	inline void setupTextureBasicParameters(ITexture &tex);
 
+
+private:
+	CShaderCache shaderCache;
 };
 
 // ***************************************************************************

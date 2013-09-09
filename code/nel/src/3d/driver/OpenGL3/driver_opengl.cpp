@@ -342,11 +342,7 @@ CDriverGL3::~CDriverGL3()
 {
 	H_AUTO_OGL(CDriverGL3_CDriverGLDtor)
 
-	if( currentProgram != NULL )
-	{
-		delete currentProgram;
-		currentProgram = NULL;
-	}
+	currentProgram = NULL;
 
 	release();
 

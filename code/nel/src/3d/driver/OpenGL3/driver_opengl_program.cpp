@@ -1,3 +1,20 @@
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 #include "driver_opengl.h"
 #include "driver_glsl_program.h"
 #include "driver_glsl_vertex_program.h"
@@ -121,56 +138,84 @@ namespace NL3D
 
 	bool CDriverGL3::setupProgram( CMaterial &mat )
 	{
-		std::string vs;
-		std::string ps;
-
-		shaderGenerator->reset();
-		shaderGenerator->setMaterial( &mat );
-		shaderGenerator->setVBFormat( _CurrentVertexBufferHard->VB->getVertexFormat() );
-		shaderGenerator->generateVS( vs );
-		shaderGenerator->generatePS( ps );
 
 #ifdef GLSL
-		vp = createVertexProgram();
-		std::string log;
+		CShaderDesc desc;
+		desc.setShaderType( mat.getShader() );
+		desc.setVBFlags( _CurrentVertexBufferHard->VB->getVertexFormat() );
+		
+		int i = 0;
 
-		vp->shaderSource( vs.c_str() );
-		if( !vp->compile( log ) )
+		if( mat.getShader() == CMaterial::Normal )
 		{
-			delete vp;
-			vp = NULL;
-			nlinfo( "%s", log.c_str() );
-			return false;
+			for( i = 0; i < MAX_TEXTURES; i++ )
+			{
+				desc.setTexEnvMode( i, mat.getTexEnvMode( i ) );
+			}
+		}
+
+		p = shaderCache.findShader( desc );
+
+		if( p != NULL )
+		{
+			if( !activeProgramObject( p ) )
+				return false;
+		}
+		else
+		{
+			std::string vs;
+			std::string ps;
+
+			shaderGenerator->reset();
+			shaderGenerator->setMaterial( &mat );
+			shaderGenerator->setVBFormat( _CurrentVertexBufferHard->VB->getVertexFormat() );
+			shaderGenerator->generateVS( vs );
+			shaderGenerator->generatePS( ps );
+
+			vp = createVertexProgram();
+			std::string log;
+
+			vp->shaderSource( vs.c_str() );
+			if( !vp->compile( log ) )
+			{
+				delete vp;
+				vp = NULL;
+				nlinfo( "%s", log.c_str() );
+				return false;
+			}
+		
+			pp = createPixelProgram();
+			pp->shaderSource( ps.c_str() );
+			if( !pp->compile( log ) )
+			{
+				delete vp;
+				vp = NULL;
+				delete pp;
+				pp = NULL;
+				nlinfo( "%s", log.c_str() );
+				return false;
+			}
+
+			p = createProgramObject();
+			p->attachVertexProgram( vp );
+			p->attachPixelProgram( pp );
+			if( !p->link( log ) )
+			{
+				vp = NULL;
+				pp = NULL;
+				delete p;
+				p = NULL;
+				nlinfo( "%s", log.c_str() );
+				return false;
+			}
+
+			if( !activeProgramObject( p ) )
+				return false;
+
+			desc.setProgram( p );
+			shaderCache.cacheShader( desc );
 		}
 		
-		pp = createPixelProgram();
-		pp->shaderSource( ps.c_str() );
-		if( !pp->compile( log ) )
-		{
-			delete vp;
-			vp = NULL;
-			delete pp;
-			pp = NULL;
-			nlinfo( "%s", log.c_str() );
-			return false;
-		}
-
-		p = createProgramObject();
-		p->attachVertexProgram( vp );
-		p->attachPixelProgram( pp );
-		if( !p->link( log ) )
-		{
-			vp = NULL;
-			pp = NULL;
-			delete p;
-			p = NULL;
-			nlinfo( "%s", log.c_str() );
-			return false;
-		}
-
-		if( !activeProgramObject( p ) )
-			return false;
-
 		int mvpIndex = getUniformLocation( "mvpMatrix" );
 		if( mvpIndex != -1 )
 		{
@@ -185,10 +230,6 @@ namespace NL3D
 
 	void CDriverGL3::releaseProgram()
 	{
-		if( currentProgram == NULL )
-			return;
-		
-		delete currentProgram;
 		currentProgram = NULL;
 
 #ifndef GLSL
