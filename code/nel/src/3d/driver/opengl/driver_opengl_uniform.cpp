@@ -309,7 +309,58 @@ bool CDriverGL::setUniformDriver(TProgram program)
 
 	if (features.DriverFlags)
 	{
-		// todo
+		if (features.DriverFlags & CGPUProgramFeatures::ModelView)
+		{
+			setUniformMatrix(program, prog->indices().ModelView, ModelView, Identity);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ModelViewInverse)
+		{
+			setUniformMatrix(program, prog->indices().ModelViewInverse, ModelView, Inverse);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ModelViewTranspose)
+		{
+			setUniformMatrix(program, prog->indices().ModelViewTranspose, ModelView, Transpose);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ModelViewInverseTranspose)
+		{
+			setUniformMatrix(program, prog->indices().ModelViewInverseTranspose, ModelView, InverseTranspose);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::Projection)
+		{
+			setUniformMatrix(program, prog->indices().Projection, Projection, Identity);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ProjectionInverse)
+		{
+			setUniformMatrix(program, prog->indices().ProjectionInverse, Projection, Inverse);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ProjectionTranspose)
+		{
+			setUniformMatrix(program, prog->indices().ProjectionTranspose, Projection, Transpose);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ProjectionInverseTranspose)
+		{
+			setUniformMatrix(program, prog->indices().ProjectionInverseTranspose, Projection, InverseTranspose);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjection)
+		{
+			setUniformMatrix(program, prog->indices().ModelViewProjection, ModelViewProjection, Identity);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjectionInverse)
+		{
+			setUniformMatrix(program, prog->indices().ModelViewProjectionInverse, ModelViewProjection, Inverse);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjectionTranspose)
+		{
+			setUniformMatrix(program, prog->indices().ModelViewProjectionTranspose, ModelViewProjection, Transpose);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::ModelViewProjectionInverseTranspose)
+		{
+			setUniformMatrix(program, prog->indices().ModelViewProjectionInverseTranspose, ModelViewProjection, InverseTranspose);
+		}
+		if (features.DriverFlags & CGPUProgramFeatures::Fog)
+		{
+			setUniformFog(program, prog->indices().Fog);
+		}
 	}
 
 	return true;
