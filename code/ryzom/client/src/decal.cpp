@@ -84,9 +84,59 @@ static const char *DecalAttenuationVertexProgramCode =
 	MUL o[COL0].w, v[3], R0.w;														\n\
 	END \n";
 
-static NL3D::CVertexProgram DecalAttenuationVertexProgram(DecalAttenuationVertexProgramCode);
+class CVertexProgramDecalAttenuation : public CVertexProgram
+{
+public:
+	struct CIdx
+	{
+		// 0-3 mvp
+		uint WorldToUV0; // 4
+		uint WorldToUV1; // 5
+		uint RefCamDist; // 6
+		uint DistScaleBias; // 7
+		uint Diffuse; // 8
+		// 9
+		// 10
+		uint BlendScale; // 11
+	};
+	CVertexProgramDecalAttenuation()
+	{
+		// nelvp
+		{
+			CSource *source = new CSource();
+			source->Profile = nelvp;
+			source->DisplayName = "nelvp/DecalAttenuation";
+			source->setSourcePtr(DecalAttenuationVertexProgramCode);
+			source->ParamIndices["modelViewProjection"] = 0;
+			source->ParamIndices["worldToUV0"] = 4;
+			source->ParamIndices["worldToUV1"] = 5;
+			source->ParamIndices["refCamDist"] = 6;
+			source->ParamIndices["distScaleBias"] = 7;
+			source->ParamIndices["diffuse"] = 8;
+			source->ParamIndices["blendScale"] = 11;
+			addSource(source);
+		}
+		// TODO_VP_GLSL
+	}
+	~CVertexProgramDecalAttenuation()
+	{
+		
+	}
+	virtual void buildInfo()
+	{
+		m_Idx.WorldToUV0 = getUniformIndex("worldToUV0");
+		m_Idx.WorldToUV1 = getUniformIndex("worldToUV1");
+		m_Idx.RefCamDist = getUniformIndex("refCamDist");
+		m_Idx.DistScaleBias = getUniformIndex("distScaleBias");
+		m_Idx.Diffuse = getUniformIndex("diffuse");
+		m_Idx.BlendScale = getUniformIndex("blendScale");
+	}
+	inline const CIdx &idx() const { return m_Idx; }
+private:
+	CIdx m_Idx;
+};
 
-// TODO_VP_GLSL
+static CVertexProgramDecalAttenuation DecalAttenuationVertexProgram;
 
 
 typedef CShadowPolyReceiver::CRGBAVertex CRGBAVertex;
@@ -312,16 +362,16 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 			memcpy(vba.getVertexCoordPointer(), &_TriCache[0], sizeof(CRGBAVertex) * _TriCache.size());
 		}
 		drv.activeVertexBuffer(_VB);
-		drv.setConstantMatrix(0, NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
-		drv.setConstant(4, _WorldToUVMatrix[0][0], _WorldToUVMatrix[1][0], _WorldToUVMatrix[2][0], _WorldToUVMatrix[3][0]);
-		drv.setConstant(5, _WorldToUVMatrix[0][1], _WorldToUVMatrix[1][1], _WorldToUVMatrix[2][1], _WorldToUVMatrix[3][1]);
-		drv.setConstant(8, _Diffuse.R * (1.f / 255.f), _Diffuse.G * (1.f / 255.f), _Diffuse.B * (1.f / 255.f), 1.f);
+		drv.setUniformMatrix(IDriver::VertexProgram, DecalAttenuationVertexProgram.getUniformIndex(CGPUProgramIndex::ModelViewProjection), NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
+		drv.setUniform4f(IDriver::VertexProgram, DecalAttenuationVertexProgram.idx().WorldToUV0, _WorldToUVMatrix[0][0], _WorldToUVMatrix[1][0], _WorldToUVMatrix[2][0], _WorldToUVMatrix[3][0]);
+		drv.setUniform4f(IDriver::VertexProgram, DecalAttenuationVertexProgram.idx().WorldToUV1, _WorldToUVMatrix[0][1], _WorldToUVMatrix[1][1], _WorldToUVMatrix[2][1], _WorldToUVMatrix[3][1]);
+		drv.setUniform4f(IDriver::VertexProgram, DecalAttenuationVertexProgram.idx().Diffuse, _Diffuse.R * (1.f / 255.f), _Diffuse.G * (1.f / 255.f), _Diffuse.B * (1.f / 255.f), 1.f);
 		const NLMISC::CVector &camPos = MainCam.getMatrix().getPos();
-		drv.setConstant(6, camPos.x - _RefPosition.x, camPos.y - _RefPosition.y, camPos.z - _RefPosition.z, 1.f);
+		drv.setUniform4f(IDriver::VertexProgram, DecalAttenuationVertexProgram.idx().RefCamDist, camPos.x - _RefPosition.x, camPos.y - _RefPosition.y, camPos.z - _RefPosition.z, 1.f);
 		// bottom & top blend
 		float bottomBlendScale = 1.f / favoid0(_BottomBlendZMax - _BottomBlendZMin);
 		float topBlendScale = 1.f / favoid0(_TopBlendZMin - _TopBlendZMax);
-		drv.setConstant(11, bottomBlendScale, bottomBlendScale * (_RefPosition.z - _BottomBlendZMin),
+		drv.setUniform4f(IDriver::VertexProgram, DecalAttenuationVertexProgram.idx().BlendScale, bottomBlendScale, bottomBlendScale * (_RefPosition.z - _BottomBlendZMin),
 							topBlendScale, topBlendScale * (_RefPosition.z - _TopBlendZMax));
 		//
 		static volatile bool wantSimpleMat = false;
@@ -562,12 +612,12 @@ void CDecalRenderList::renderAllDecals()
 	NL3D::IDriver *drvInternal = ((CDriverUser *) Driver)->getDriver();
 	//
 	static volatile bool forceNoVertexProgram = false;
-	if (drvInternal->supportVertexProgram() && !forceNoVertexProgram)
+	if (!forceNoVertexProgram && drvInternal->compileVertexProgram(&DecalAttenuationVertexProgram))
 	{
-		//drvInternal->setConstantMatrix(0, NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
-		drvInternal->setConstant(7, _DistScale, _DistBias, 0.f, 1.f);
-		useVertexProgram = true;
 		drvInternal->activeVertexProgram(&DecalAttenuationVertexProgram);
+		//drvInternal->setConstantMatrix(0, NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
+		drvInternal->setUniform4f(IDriver::VertexProgram, DecalAttenuationVertexProgram.idx().DistScaleBias, _DistScale, _DistBias, 0.f, 1.f);
+		useVertexProgram = true;
 	}
 	else
 	{
