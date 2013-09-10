@@ -64,6 +64,15 @@ public:
 // This is only used for user provided shaders, not for builtin shaders, 
 // as it is a slow method which has to go through all of the options every time.
 // Builtin shaders should set all flags to 0.
+// Example:
+//   User shader flags Matrices in the Vertex Program:
+//   -> When rendering with a material, the driver will call setUniformDriver,
+//      which will check if the flag Matrices exists, and if so, it will use
+//      the index cache to find which matrices are needed by the shader,
+//      and set those which are found.
+// This does not work extremely efficient, but it's the most practical option
+// for passing builtin parameters onto user provided shaders.
+// Note: May need additional flags related to scene sorting, etcetera.
 struct CGPUProgramFeatures
 {
 	CGPUProgramFeatures() : DriverFlags(0), MaterialFlags(0) { }
@@ -72,26 +81,12 @@ struct CGPUProgramFeatures
 	enum TDriverFlags
 	{
 		// Matrices
-		ModelView								= 0x00000001, 
-		ModelViewInverse						= 0x00000002, 
-		ModelViewTranspose						= 0x00000004, 
-		ModelViewInverseTranspose				= 0x00000008, 
-
-		Projection								= 0x00000010, 
-		ProjectionInverse						= 0x00000020, 
-		ProjectionTranspose						= 0x00000040, 
-		ProjectionInverseTranspose				= 0x00000080, 
-
-		ModelViewProjection						= 0x00000100, 
-		ModelViewProjectionInverse				= 0x00000200, 
-		ModelViewProjectionTranspose			= 0x00000400, 
-		ModelViewProjectionInverseTranspose		= 0x00000800, 
+		Matrices								= 0x00000001, 
 
 		// Fog
-		Fog										= 0x00001000, 
+		Fog										= 0x00000002, 
 	};
 	uint32 DriverFlags;
-	// uint NumLights;
 
 	enum TMaterialFlags
 	{

@@ -1208,7 +1208,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 			// c[4] take useful constants.
 			driver->setUniform4f(IDriver::VertexProgram, program->idx().ProgramConstants0, 0, 1, 0.5f, 0);
 			// c[5] take RefineCenter
-			driver->setuniform3f(IDriver::VertexProgram, program->idx().RefineCenter, refineCenter);
+			driver->setUniform3f(IDriver::VertexProgram, program->idx().RefineCenter, refineCenter);
 			// c[6] take info for Geomorph trnasition to TileNear.
 			driver->setUniform2f(IDriver::VertexProgram, program->idx().TileDist, CLandscapeGlobals::TileDistFarSqr, CLandscapeGlobals::OOTileDistDeltaSqr);
 			// c[10] take the fog vector.
