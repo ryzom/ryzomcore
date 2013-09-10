@@ -91,11 +91,11 @@ class Helpers{
     {
          // if HTTP_USER_AGENT is not set then its ryzom core
           global $FORCE_INGAME;
-          if (( strpos($_SERVER['HTTP_USER_AGENT'],"Ryzom") === 0) || $FORCE_INGAME){
+          if ( ( isset($_SERVER['HTTP_USER_AGENT']) && (strpos($_SERVER['HTTP_USER_AGENT'],"Ryzom") === 0)) || $FORCE_INGAME){
              return true;
           }else{
              return false;
-             }
+          }
      }
        
      static public function handle_language(){
