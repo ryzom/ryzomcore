@@ -1193,20 +1193,29 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 
 	// If VertexShader enabled, setup VertexProgram Constants.
-	if(_VertexShaderOk)
+	if (_VertexShaderOk)
 	{
-		// c[0..3] take the ModelViewProjection Matrix.
-		driver->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
-		// c[4] take useful constants.
-		driver->setConstant(4, 0, 1, 0.5f, 0);
-		// c[5] take RefineCenter
-		driver->setConstant(5, refineCenter);
-		// c[6] take info for Geomorph trnasition to TileNear.
-		driver->setConstant(6, CLandscapeGlobals::TileDistFarSqr, CLandscapeGlobals::OOTileDistDeltaSqr, 0, 0);
-		// c[10] take the fog vector.
-		driver->setConstantFog(10);
-		// c[12] take the current landscape Center / delta Pos to apply
-		driver->setConstant(12, _PZBModelPosition);
+		bool uprogstate = driver->isUniformProgramState();
+		uint nbvp = uprogstate ? CLandscapeVBAllocator::MaxVertexProgram : 1;
+		for (uint i = 0; i < nbvp; ++i)
+		{
+			// activate the program to set the uniforms in the program state for all programs
+			// note: when uniforms are driver state, the indices must be the same across programs
+			if (uprogstate) _TileVB.activateVP(i);
+			CVertexProgramLandscape *program = _TileVB.getVP(i);
+			// c[0..3] take the ModelViewProjection Matrix.
+			driver->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+			// c[4] take useful constants.
+			driver->setUniform4f(IDriver::VertexProgram, program->idx().ProgramConstants0, 0, 1, 0.5f, 0);
+			// c[5] take RefineCenter
+			driver->setuniform3f(IDriver::VertexProgram, program->idx().RefineCenter, refineCenter);
+			// c[6] take info for Geomorph trnasition to TileNear.
+			driver->setUniform2f(IDriver::VertexProgram, program->idx().TileDist, CLandscapeGlobals::TileDistFarSqr, CLandscapeGlobals::OOTileDistDeltaSqr);
+			// c[10] take the fog vector.
+			driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::Fog));
+			// c[12] take the current landscape Center / delta Pos to apply
+			driver->setUniform3f(IDriver::VertexProgram, program->idx().PZBModelPosition, _PZBModelPosition);
+		}
 	}
 
 

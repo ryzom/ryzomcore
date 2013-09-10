@@ -247,14 +247,23 @@ void			CLandscapeVBAllocator::activate(uint vpId)
 	nlassert(_Driver);
 	nlassert(!_BufferLocked);
 
+	activateVP(vpId);
+
+	_Driver->activeVertexBuffer(_VB);
+}
+
+
+// ***************************************************************************
+void			CLandscapeVBAllocator::activateVP(uint vpId)
+{
+	nlassert(_Driver);
+
 	// If enabled, activate Vertex program first.
-	if(_VertexProgram[vpId])
+	if (_VertexProgram[vpId])
 	{
 		//nlinfo("\nSTARTVP\n%s\nENDVP\n", _VertexProgram[vpId]->getProgram().c_str());
 		nlverify(_Driver->activeVertexProgram(_VertexProgram[vpId]));
 	}
-
-	_Driver->activeVertexBuffer(_VB);
 }
 
 
@@ -516,12 +525,11 @@ const char* NL3D_LandscapeTileLightMapEndProgram=
 // ***************************************************************************
 void			CLandscapeVBAllocator::deleteVertexProgram()
 {
-	for(uint i=0;i<MaxVertexProgram;i++)
+	for (uint i = 0; i < MaxVertexProgram; ++i)
 	{
-		if(_VertexProgram[i])
+		if (_VertexProgram[i])
 		{
-			delete _VertexProgram[i];
-			_VertexProgram[i]= NULL;
+			_VertexProgram[i] = NULL; // smartptr
 		}
 	}
 }
@@ -560,10 +568,7 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			_VB.initEx();
 
 			// Init the Vertex Program.
-			string	vpgram= string(NL3D_LandscapeCommonStartProgram) +
-				string(NL3D_LandscapeFar0EndProgram);
-			_VertexProgram[0]= new CVertexProgram(vpgram.c_str());
-			// TODO_VP_GLSL
+			_VertexProgram[0]= new CVertexProgramLandscape(Far0);
 		}
 		else if(_Type==Far1)
 		{
@@ -578,10 +583,7 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			_VB.initEx();
 
 			// Init the Vertex Program.
-			string	vpgram= string(NL3D_LandscapeCommonStartProgram) +
-				string(NL3D_LandscapeFar1EndProgram);
-			_VertexProgram[0]= new CVertexProgram(vpgram.c_str());
-			// TODO_VP_GLSL
+			_VertexProgram[0] = new CVertexProgramLandscape(Far1);
 		}
 		else
 		{
@@ -596,22 +598,70 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			_VB.initEx();
 
 			// Init the Vertex Program.
-			string	vpgram= string(NL3D_LandscapeCommonStartProgram) +
-				string(NL3D_LandscapeTileEndProgram);
-			_VertexProgram[0]= new CVertexProgram(vpgram.c_str());
-			// TODO_VP_GLSL
+			_VertexProgram[0] = new CVertexProgramLandscape(Tile, false);
 
 			// Init the Vertex Program for lightmap pass
-			vpgram= string(NL3D_LandscapeCommonStartProgram) +
-				string(NL3D_LandscapeTileLightMapEndProgram);
-			_VertexProgram[1]= new CVertexProgram(vpgram.c_str());
-			// TODO_VP_GLSL
+			_VertexProgram[1] = new CVertexProgramLandscape(Tile, true);
 		}
 	}
 
 }
 
 
+CVertexProgramLandscape::CVertexProgramLandscape(CLandscapeVBAllocator::TType type, bool lightMap)
+{
+	// nelvp
+	{
+		CSource *source = new CSource();
+		source->Profile = nelvp;
+		source->DisplayName = "Landscape/nelvp";
+		switch (type)
+		{
+		case CLandscapeVBAllocator::Far0:
+			source->DisplayName += "/far0";
+			source->setSource(std::string(NL3D_LandscapeCommonStartProgram) 
+				+ std::string(NL3D_LandscapeFar0EndProgram));
+			break;
+		case CLandscapeVBAllocator::Far1:
+			source->DisplayName += "/far1";
+			source->setSource(std::string(NL3D_LandscapeCommonStartProgram) 
+				+ std::string(NL3D_LandscapeFar1EndProgram));
+			break;
+		case CLandscapeVBAllocator::Tile:
+			source->DisplayName += "/tile";
+			if (lightMap)
+			{
+				source->DisplayName += "/lightmap";
+				source->setSource(std::string(NL3D_LandscapeCommonStartProgram) 
+					+ std::string(NL3D_LandscapeTileLightMapEndProgram));
+			}
+			else
+			{
+				source->setSource(std::string(NL3D_LandscapeCommonStartProgram) 
+					+ std::string(NL3D_LandscapeTileEndProgram));
+			}
+			break;
+		}
+		source->ParamIndices["modelViewProjection"] = 0;
+		source->ParamIndices["programConstants0"] = 4;
+		source->ParamIndices["refineCenter"] = 5;
+		source->ParamIndices["tileDist"] = 6;
+		source->ParamIndices["fog"] = 10;
+		source->ParamIndices["pzbModelPosition"] = 12;
+		addSource(source);
+	}
+	// TODO_VP_GLSL
+	{
+		// ....
+	}
+}
 
+void CVertexProgramLandscape::buildInfo()
+{
+	m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
+	m_Idx.RefineCenter = getUniformIndex("refineCenter");
+	m_Idx.TileDist = getUniformIndex("tileDist");
+	m_Idx.PZBModelPosition = getUniformIndex("pzbModelPosition");
+}
 
 } // NL3D

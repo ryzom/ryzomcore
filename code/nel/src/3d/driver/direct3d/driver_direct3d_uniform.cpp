@@ -222,7 +222,7 @@ bool CDriverD3D::setUniformDriver(TProgram program)
 	return true;
 }
 
-bool CDriverD3D::setUniformMaterial(TProgram program, const CMaterial &material)
+bool CDriverD3D::setUniformMaterial(TProgram program, CMaterial &material)
 {
 	// todo
 

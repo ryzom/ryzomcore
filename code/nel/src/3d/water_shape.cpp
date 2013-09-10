@@ -89,9 +89,6 @@ CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
 		CSource *source = new CSource();
 		source->Profile = nelvp;
 		source->DisplayName = "WaterVPNoWave/nelvp";
-		source->Features.DriverFlags = 
-			CGPUProgramFeatures::ModelViewProjection
-			| CGPUProgramFeatures::Fog;
 		source->ParamIndices["modelViewProjection"] = 0;
 		source->ParamIndices["fog"] = 4;
 		source->ParamIndices["bumpMap0Scale"] = 5;
@@ -120,9 +117,6 @@ CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
 		// source->Profile = glsl330v;
 		// source->DisplayName = "WaterVPNoWave/glsl330v";
 		// if (diffuse) source->DisplayName += "/diffuse";
-		// source->Features.DriverFlags = 
-		//	CGPUProgramFeatures::ModelViewProjection
-		//	| CGPUProgramFeatures::Fog;
 		// source->setSource...
 		// addSource(source);
 	}

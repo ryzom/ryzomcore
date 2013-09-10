@@ -60,12 +60,13 @@ public:
 	virtual uint getUniformIndex(const char *name) const = 0;
 };
 
-#define NL_GPU_PROGRAM_LIGHTS 8
-
-/// Features exposed by a program. Used to set builtin parameters on user provided shaders
+// Features exposed by a program. Used to set builtin parameters on user provided shaders.
+// This is only used for user provided shaders, not for builtin shaders, 
+// as it is a slow method which has to go through all of the options every time.
+// Builtin shaders should set all flags to 0.
 struct CGPUProgramFeatures
 {
-	CGPUProgramFeatures() : DriverFlags(0), MaterialFlags(0) /*, NumLights(0) */ { }
+	CGPUProgramFeatures() : DriverFlags(0), MaterialFlags(0) { }
 
 	// Driver builtin parameters
 	enum TDriverFlags
@@ -73,11 +74,11 @@ struct CGPUProgramFeatures
 		// Matrices
 		ModelView								= 0x00000001, 
 		ModelViewInverse						= 0x00000002, 
-		ModelViewTranspose						= 0x00000004,
+		ModelViewTranspose						= 0x00000004, 
 		ModelViewInverseTranspose				= 0x00000008, 
 
 		Projection								= 0x00000010, 
-		ProjectionInverse						= 0x00000020, 		
+		ProjectionInverse						= 0x00000020, 
 		ProjectionTranspose						= 0x00000040, 
 		ProjectionInverseTranspose				= 0x00000080, 
 
@@ -88,84 +89,54 @@ struct CGPUProgramFeatures
 
 		// Fog
 		Fog										= 0x00001000, 
-
-		//
-		// Rough example, modify as necessary.
-		//
-
-		// Lighting (todo)
-		/// Driver ambient, must be ignored when material ambient is flagged
-		//DriverAmbient							= 0x00001000, 
-		/// Lights, does not set diffuses if material lights is flagged
-		//DriverLights							= 0x00002000, 
-		// etcetera
-
-		// Fog (todo)
-		// Fog									= ..., 
 	};
 	uint32 DriverFlags;
-	// uint NumLights; // number of lights supported by the program (not used yet, modify as necessary)
+	// uint NumLights;
 
 	enum TMaterialFlags
 	{
 		/// Use the CMaterial texture stages as the textures for a Pixel Program
-		TextureStages							= 0x00000001, // <- don't remove this one, it's already used, if you want to split them up into the different stages, then it's ok to change it
+		TextureStages							= 0x00000001, 
 		TextureMatrices							= 0x00000002, 
-
-		//
-		// Rough example, modify as necessary.
-		//
-
-		// Lighting (todo)
-		/// Material ambient premultiplied with driver ambient
-		//MaterialAmbient							= 0x00000002, 
-		/// Premultiply lights diffuse with material diffuse, requires driver lights to be flagged
-		//MaterialLights							= 0x00000004, 
-		// etcetera
-
-		// Add all necessary feature sets used with builtin materials here
 	};
 	// Material builtin parameters
 	uint32 MaterialFlags;
 };
 
-/// Stucture used to cache the indices of builtin parameters
-struct CGPUProgramIndices
+// Stucture used to cache the indices of builtin parameters which are used by the drivers
+// Not used for parameters of specific nl3d programs
+struct CGPUProgramIndex
 {
-	uint ModelView;
-	uint ModelViewInverse;
-	uint ModelViewTranspose;
-	uint ModelViewInverseTranspose;
+	enum TName
+	{
+		ModelView, 
+		ModelViewInverse, 
+		ModelViewTranspose, 
+		ModelViewInverseTranspose, 
 
-	uint Projection;
-	uint ProjectionInverse;	
-	uint ProjectionTranspose;
-	uint ProjectionInverseTranspose;
+		Projection, 
+		ProjectionInverse, 
+		ProjectionTranspose, 
+		ProjectionInverseTranspose, 
 
-	uint ModelViewProjection;
-	uint ModelViewProjectionInverse;
-	uint ModelViewProjectionTranspose;
-	uint ModelViewProjectionInverseTranspose;
+		ModelViewProjection, 
+		ModelViewProjectionInverse, 
+		ModelViewProjectionTranspose, 
+		ModelViewProjectionInverseTranspose, 
 
-	uint Fog;
+		Fog, 
 
-	//
-	// Rough example, modify as necessary.
-	//
-	//uint Ambient;
-
-	//uint LightType[NL_GPU_PROGRAM_LIGHTS];
-	//uint LightAmbient[NL_GPU_PROGRAM_LIGHTS];
-	//uint LightDiffuse[NL_GPU_PROGRAM_LIGHTS];
-	//uint LightPosition[NL_GPU_PROGRAM_LIGHTS];
-	//uint LightDirection[NL_GPU_PROGRAM_LIGHTS];
+		NUM_UNIFORMS
+	};
+	static const char *Names[NUM_UNIFORMS];
+	uint Indices[NUM_UNIFORMS];
 };
 
 /**
  * \brief IGPUProgram
  * \date 2013-09-07 15:00GMT
  * \author Jan Boon (Kaetemi)
- * A compiled GPU program
+ * A generic GPU program
  */
 class IGPUProgram : public NLMISC::CRefCount
 {
@@ -234,6 +205,7 @@ public:
 		const char *SourcePtr;
 		size_t SourceLen;
 		/// Copy the source code string
+		inline void setSource(const std::string &source) { SourceCopy = source; SourcePtr = &SourceCopy[0]; SourceLen = SourceCopy.size(); }
 		inline void setSource(const char *source) { SourceCopy = source; SourcePtr = &SourceCopy[0]; SourceLen = SourceCopy.size(); }
 		/// Set pointer to source code string without copying the string
 		inline void setSourcePtr(const char *sourcePtr, size_t sourceLen) { SourceCopy.clear(); SourcePtr = sourcePtr; SourceLen = sourceLen; }
@@ -262,11 +234,11 @@ public:
 
 	// Get the idx of a parameter (ogl: uniform, d3d: constant, etcetera) by name. Invalid name returns ~0
 	inline uint getUniformIndex(const char *name) const { return m_DrvInfo->getUniformIndex(name); };
+	inline uint getUniformIndex(CGPUProgramIndex::TName name) const { return m_Index.Indices[name]; }
 
 	// Get feature information of the current program
 	inline CSource *source() const { return m_Source; };
 	inline const CGPUProgramFeatures &features() const { return m_Source->Features; };
-	inline const CGPUProgramIndices &indices() const { return m_Indices; };
 	inline TProfile profile() const { return m_Source->Profile; }
 
 	// Build feature info, called automatically by the driver after compile succeeds
@@ -281,7 +253,7 @@ protected:
 
 	/// The source used for compilation
 	NLMISC::CSmartPtr<CSource>								m_Source;
-	CGPUProgramIndices										m_Indices;
+	CGPUProgramIndex										m_Index;
 
 public:
 	/// The driver information. For the driver implementation only.
