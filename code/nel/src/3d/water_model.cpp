@@ -903,15 +903,12 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 		_WaterMat.setZWrite(true);
 		_WaterMat.setShader(CMaterial::Water);
 	}
-	const uint cstOffset = 5; // 4 places for the matrix
-	NLMISC::CVectorH cst[13];
 	//=========================//
 	//	setup Water material   //
 	//=========================//
 	shape->initVertexProgram();
-	CVertexProgram *program = shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse : CWaterShape::_VertexProgramNoWave;
+	CVertexProgramWaterVPNoWave *program = shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse : CWaterShape::_VertexProgramNoWave;
 	drv->activeVertexProgram(program);
-	// TODO_VP_MATERIAL
 	CWaterModel::_WaterMat.setTexture(0, shape->_BumpMap[0]);
 	CWaterModel::_WaterMat.setTexture(1, shape->_BumpMap[1]);
 	CWaterModel::_WaterMat.setTexture(3, shape->_ColorMap);
@@ -957,23 +954,21 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	{
 		// setup 2x3 matrix for lookup in diffuse map
 		updateDiffuseMapMatrix();
-		cst[11].set(_ColorMapMatColumn0.x, _ColorMapMatColumn1.x, 0, _ColorMapMatColumn0.x * obsPos.x + _ColorMapMatColumn1.x * obsPos.y + _ColorMapMatPos.x);
-		cst[12].set(_ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0, _ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector0, _ColorMapMatColumn0.x, _ColorMapMatColumn1.x, 0, _ColorMapMatColumn0.x * obsPos.x + _ColorMapMatColumn1.x * obsPos.y + _ColorMapMatPos.x);
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector1, _ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0, _ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
 	}
-	/// set matrix
-	drv->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
+	/// temp
+	// drv->setUniformMatrix(IDriver::VertexProgram, program->indices().ModelViewProjection, IDriver::ModelViewProjection, IDriver::Identity); // now set by setUniformDriver in setupMaterial
+	// drv->setUniformFog(IDriver::VertexProgram, program->indices().Fog); // now set by setUniformDriver in setupMaterial
 	// retrieve current time
 	double date  = scene->getCurrentTime();
 	// set bumpmaps pos
-	cst[6].set(fmodf(obsPos.x * shape->_HeightMapScale[0].x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].x, 1), fmodf(shape->_HeightMapScale[0].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].y, 1), 0.f, 1.f); // bump map 0 offset
-	cst[5].set(shape->_HeightMapScale[0].x, shape->_HeightMapScale[0].y, 0, 0); // bump map 0 scale
-	cst[8].set(fmodf(shape->_HeightMapScale[1].x * obsPos.x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].x, 1), fmodf(shape->_HeightMapScale[1].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].y, 1), 0.f, 1.f); // bump map 1 offset
-	cst[7].set(shape->_HeightMapScale[1].x, shape->_HeightMapScale[1].y, 0, 0); // bump map 1 scale
-	cst[9].set(0, 0, obsPos.z - zHeight, 1.f);
-	cst[10].set(0.5f, 0.5f, 0.f, 1.f); // used to scale reflected ray into the envmap
-	/// set all our constants in one call
-	drv->setConstant(cstOffset, sizeof(cst) / sizeof(cst[0]) - cstOffset, (float *) &cst[cstOffset]);
-	drv->setConstantFog(4);
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Offset, fmodf(obsPos.x * shape->_HeightMapScale[0].x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].x, 1), fmodf(shape->_HeightMapScale[0].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].y, 1), 0.f, 1.f); // bump map 0 offset
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Scale, shape->_HeightMapScale[0].x, shape->_HeightMapScale[0].y, 0, 0); // bump map 0 scale
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Offset, fmodf(shape->_HeightMapScale[1].x * obsPos.x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].x, 1), fmodf(shape->_HeightMapScale[1].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].y, 1), 0.f, 1.f); // bump map 1 offset
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Scale, shape->_HeightMapScale[1].x, shape->_HeightMapScale[1].y, 0, 0); // bump map 1 scale
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().ObserverHeight, 0, 0, obsPos.z - zHeight, 1.f);
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().ScaleReflectedRay, 0.5f, 0.5f, 0.f, 1.f); // used to scale reflected ray into the envmap
 }
 
 //================================================
