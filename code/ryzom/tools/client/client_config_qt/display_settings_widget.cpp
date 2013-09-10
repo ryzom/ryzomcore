@@ -32,6 +32,7 @@ CDisplaySettingsWidget::CDisplaySettingsWidget( QWidget *parent ) :
 
 	connect( autoRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( openglRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
+	connect( openGL3RB, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( direct3dRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( fullscreenRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( windowedRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
@@ -64,6 +65,12 @@ void CDisplaySettingsWidget::load()
 		break;
 	case DRV_DIRECT3D:
 		direct3dRadioButton->setChecked( true );
+		break;
+	case DRV_GLES:
+		openglRadioButton->setChecked( true );
+		break;
+	case DRV_OPENGL3:
+		openGL3RB->setChecked( true );
 		break;
 	}
 
@@ -99,6 +106,8 @@ void CDisplaySettingsWidget::save()
 
 	if( openglRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "OpenGL" ) );
+	else if( openGL3RB->isChecked() )
+		s.config.setString( "Driver3D", std::string( "OpenGL3" ) );
 	else if( direct3dRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "Direct3D" ) );
 	else
@@ -217,11 +226,16 @@ E3DDriver CDisplaySettingsWidget::getDriverFromConfigString(std::string &str) co
 		return DRV_OPENGL;
 	if( str.compare( "2" ) == 0 )
 		return DRV_DIRECT3D;
+	if( str.compare( "3" ) == 0 )
+		return DRV_GLES;
+	if( str.compare( "4" ) == 0 )
+		return DRV_OPENGL3;
 	if( str.compare( "OpenGL" ) == 0 )
 		return DRV_OPENGL;
 	if( str.compare( "Direct3D" ) == 0)
 		return DRV_DIRECT3D;
-
+	if( str.compare( "OpenGL3" ) == 0 )
+		return DRV_OPENGL3;
 
 	return DRV_AUTO;
 }
