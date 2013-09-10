@@ -34,6 +34,7 @@ namespace NL3D
 			shaderType = 0;
 			program = NULL;
 			vbFlags = 0;
+			nlightmaps = 0;
 		}
 
 		~CShaderDesc(){
@@ -47,6 +48,9 @@ namespace NL3D
 			if( vbFlags != o.vbFlags )
 				return false;
 
+			if( nlightmaps != o.nlightmaps )
+				return false;
+
 			for( int i = 0; i < MAX_TEXTURES; i++ )
 				if( texEnvMode[ i ] != o.texEnvMode[ i ] )
 					return false;
@@ -58,12 +62,14 @@ namespace NL3D
 		void setVBFlags( uint32 flags ){ vbFlags = flags; }
 		void setShaderType( uint32 type ){ shaderType = type; }
 		void setProgram( IProgramObject *p ){ program = p; }
+		void setNLightMaps( uint32 n ){ nlightmaps = n; }
 		IProgramObject* getProgram() const{ return program; }
 
 	private:
 		uint32 texEnvMode[ MAX_TEXTURES ];
 		uint32 vbFlags;
 		uint32 shaderType;
+		uint32 nlightmaps;
 		IProgramObject *program;
 	};
 }

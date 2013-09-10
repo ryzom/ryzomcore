@@ -853,12 +853,17 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateLightMapPS()
 	{
+		int ls = material->_LightMaps.size();
+		ls++; // lightmaps + color texture
+
 		int ntextures = 0;
 		for( int i = TexCoord0; i < TexCoord4; i++ )
 		{
 			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
 				ntextures++;
 		}
+
+		ntextures = std::max( ntextures, ls );
 
 		for( int i = 0; i < ntextures; i++ )
 			ss << "uniform sampler2D sampler" << i << ";" << std::endl;

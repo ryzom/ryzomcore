@@ -156,6 +156,9 @@ namespace NL3D
 		desc.setShaderType( mat.getShader() );
 		desc.setVBFlags( _CurrentVertexBufferHard->VB->getVertexFormat() );
 		
+		if( mat.getShader() == CMaterial::LightMap )
+			desc.setNLightMaps( mat._LightMaps.size() );
+		
 		int i = 0;
 
 		if( mat.getShader() == CMaterial::Normal )
