@@ -215,7 +215,8 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 		return false;
 
 #ifdef GLSL
-	setupProgram( mat );
+	if( !setupProgram( mat ) )
+		return false;
 #endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -270,7 +271,8 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 		return false;
 
 #ifdef GLSL
-	setupProgram( mat );
+	if( !setupProgram( mat ) )
+		return false;
 #endif
 
 	refreshTexMatrices();
@@ -366,7 +368,8 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 		return false;
 
 #ifdef GLSL
-	setupProgram( mat );
+	if( !setupProgram( mat ) )
+		return false;
 #endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -411,7 +414,8 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 		return false;
 
 #ifdef GLSL
-	setupProgram( mat );
+	if( !setupProgram( mat ) )
+		return false;
 #endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -456,7 +460,8 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 		return false;
 
 #ifdef GLSL
-	setupProgram( mat );
+	if( !setupProgram( mat ) )
+		return false;
 #endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -504,7 +509,8 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 		return false;
 
 #ifdef GLSL
-	setupProgram( mat );
+	if( !setupProgram( mat ) )
+		return false;
 #endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
