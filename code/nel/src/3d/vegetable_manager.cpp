@@ -642,6 +642,8 @@ public:
 
 			source->setSource(vpgram);
 
+			source->ParamIndices["modelViewProjection"] = 0;
+			source->ParamIndices["fog"] = 6;
 			source->ParamIndices["programConstants0"] = 8;
 			source->ParamIndices["directionalLight"] = 9;
 			source->ParamIndices["viewCenter"] = 10;
@@ -670,20 +672,33 @@ public:
 	virtual void buildInfo()
 	{
 		m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
+		nlassert(m_Idx.ProgramConstants0 != ~0);
 		m_Idx.DirectionalLight = getUniformIndex("directionalLight");
+		nlassert(m_Idx.DirectionalLight != ~0);
 		m_Idx.ViewCenter = getUniformIndex("viewCenter");
+		nlassert(m_Idx.ViewCenter != ~0);
 		m_Idx.NegInvTransDist = getUniformIndex("negInvTransDist");
+		nlassert(m_Idx.NegInvTransDist != ~0);
 		m_Idx.AngleAxis = getUniformIndex("angleAxis");
+		nlassert(m_Idx.AngleAxis != ~0);
 		m_Idx.Wind = getUniformIndex("wind");
+		nlassert(m_Idx.Wind != ~0);
 		m_Idx.CosCoeff0 = getUniformIndex("cosCoeff0");
+		nlassert(m_Idx.CosCoeff0 != ~0);
 		m_Idx.CosCoeff1 = getUniformIndex("cosCoeff1");
+		nlassert(m_Idx.CosCoeff1 != ~0);
 		m_Idx.CosCoeff2 = getUniformIndex("cosCoeff2");
+		nlassert(m_Idx.CosCoeff2 != ~0);
 		m_Idx.QuatConstants = getUniformIndex("quatConstants");
+		nlassert(m_Idx.QuatConstants != ~0);
 		m_Idx.PiConstants = getUniformIndex("piConstants");
+		nlassert(m_Idx.PiConstants != ~0);
 		m_Idx.LUTSize = getUniformIndex("lutSize");
+		nlassert(m_Idx.LUTSize != ~0);
 		for (uint i = 0; i < NL3D_VEGETABLE_VP_LUT_SIZE; ++i)
 		{
 			m_Idx.LUT[i] = getUniformIndex(NLMISC::toString("lut[%i]", i));
+			nlassert(m_Idx.LUT[i] != ~0);
 		}
 	}
 	const CIdx &idx() const { return m_Idx; }

@@ -1204,7 +1204,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 			{
 				// activate the program to set the uniforms in the program state for all programs
 				// note: when uniforms are driver state, the indices must be the same across programs
-				if (uprogstate) _TileVB.activateVP(i);
+				_TileVB.activateVP(i);
 
 				// c[0..3] take the ModelViewProjection Matrix.
 				driver->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);

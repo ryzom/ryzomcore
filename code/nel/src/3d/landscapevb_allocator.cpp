@@ -659,9 +659,13 @@ CVertexProgramLandscape::CVertexProgramLandscape(CLandscapeVBAllocator::TType ty
 void CVertexProgramLandscape::buildInfo()
 {
 	m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
+	nlassert(m_Idx.ProgramConstants0 != ~0);
 	m_Idx.RefineCenter = getUniformIndex("refineCenter");
+	nlassert(m_Idx.RefineCenter != ~0);
 	m_Idx.TileDist = getUniformIndex("tileDist");
+	nlassert(m_Idx.TileDist != ~0);
 	m_Idx.PZBModelPosition = getUniformIndex("pzbModelPosition");
+	nlassert(m_Idx.PZBModelPosition != ~0);
 }
 
 } // NL3D

@@ -78,6 +78,48 @@ const char *a_arbfp1 =
 	"MOV result.color.yzw, R0;\n"
 	"END\n";
 
+const char *a_ps_2_0 = 
+	"ps_2_0\n"
+	// cgc version 3.1.0013, build date Apr 18 2012
+	// command line args: -profile ps_2_0
+	// source file: pp_stereo_debug.cg
+	//vendor NVIDIA Corporation
+	//version 3.1.0.13
+	//profile ps_2_0
+	//program pp_stereo_debug
+	//semantic pp_stereo_debug.cTex0 : TEX0
+	//semantic pp_stereo_debug.cTex1 : TEX1
+	//var float2 texCoord : $vin.TEXCOORD0 : TEX0 : 0 : 1
+	//var sampler2D cTex0 : TEX0 : texunit 0 : 1 : 1
+	//var sampler2D cTex1 : TEX1 : texunit 1 : 2 : 1
+	//var float4 oCol : $vout.COLOR : COL : 3 : 1
+	//const c[0] = 0 1 0.5
+	"dcl_2d s0\n"
+	"dcl_2d s1\n"
+	"def c0, 0.00000000, 1.00000000, 0.50000000, 0\n"
+	"dcl t0.xy\n"
+	"texld r1, t0, s1\n"
+	"texld r2, t0, s0\n"
+	"add r0, r2, -r1\n"
+	"add r1, r2, r1\n"
+	"mul r1, r1, c0.z\n"
+	"abs r0, r0\n"
+	"cmp r0, -r0, c0.x, c0.y\n"
+	"add_pp_sat r0.x, r0, r0.y\n"
+	"add_pp_sat r0.x, r0, r0.z\n"
+	"add_pp_sat r0.x, r0, r0.w\n"
+	"abs_pp r0.x, r0\n"
+	"cmp_pp r0.x, -r0, c0.y, c0\n"
+	"abs_pp r0.x, r0\n"
+	"mov r2.xzw, r1\n"
+	"mad r2.y, r1, c0.z, c0.z\n"
+	"cmp r2, -r0.x, r1, r2\n"
+	"mad r1.x, r2, c0.z, c0.z\n"
+	"mov r0.yzw, r2\n"
+	"cmp r0.x, -r0, r1, r2\n"
+	"mov oC0, r0\n";
+;
+
 class CStereoDebuggerFactory : public IStereoDeviceFactory
 {
 public:
@@ -116,27 +158,31 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
 
-	IGPUProgram::CSource *source = new IGPUProgram::CSource();
-	source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
-
-	/*if (drvInternal->supportPixelProgram(CPixelProgram::fp40) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
+	if (drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
 	{
-		nldebug("VR: fp40");
-		m_PixelProgram = new CPixelProgram(a_fp40);		
-	}
-	else*/ if (drvInternal->supportPixelProgram(CPixelProgram::arbfp1) && drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
-	{
-		nldebug("VR: arbfp1");		
-		source->Profile = IGPUProgram::arbfp1;
-		source->setSourcePtr(a_arbfp1);
 		m_PixelProgram = new CPixelProgram();
-		m_PixelProgram->addSource(source);
+		// arbfp1
+		{
+			IGPUProgram::CSource *source = new IGPUProgram::CSource();
+			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->Profile = IGPUProgram::arbfp1;
+			source->setSourcePtr(a_arbfp1);
+			m_PixelProgram->addSource(source);
+		}
+		// ps_2_0
+		{
+			IGPUProgram::CSource *source = new IGPUProgram::CSource();
+			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->Profile = IGPUProgram::ps_2_0;
+			source->setSourcePtr(a_ps_2_0);
+			m_PixelProgram->addSource(source);
+		}
+		if (!drvInternal->compilePixelProgram(m_PixelProgram))
+		{
+			delete m_PixelProgram;
+			m_PixelProgram = NULL;
+		}
 	}
-	/*else if (drvInternal->supportPixelProgram(CPixelProgram::ps_2_0))
-	{
-		nldebug("VR: ps_2_0");
-		m_PixelProgram = new CPixelProgram(a_ps_2_0);	
-	}*/
 
 	if (m_PixelProgram)
 	{

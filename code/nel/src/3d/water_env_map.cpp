@@ -266,6 +266,7 @@ public:
 	virtual void buildInfo()
 	{
 		m_Idx.ProgramConstant0 = getUniformIndex("programConstant0");
+		nlassert(m_Idx.ProgramConstant0 != ~0);
 	}
 	inline const CIdx &idx() { return m_Idx; }
 private:

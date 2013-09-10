@@ -379,7 +379,7 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 		if (!CDriverD3D::compileVertexProgram(program)) return false;
 
 		CVertexProgamDrvInfosD3D *info = NLMISC::safe_cast<CVertexProgamDrvInfosD3D *>((IGPUProgramDrvInfos*)program->m_DrvInfo);
-		_VertexProgramUser = true;
+		_VertexProgramUser = program;
 		setVertexProgram (info->Shader, program);
 
 		/* D3DRS_FOGSTART and D3DRS_FOGEND must be set with [1, 0] else the fog doesn't work properly on VertexShader and non-VertexShader objects
@@ -395,7 +395,7 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 	else
 	{
 		setVertexProgram (NULL, NULL);
-		_VertexProgramUser = false;
+		_VertexProgramUser = NULL;
 
 		// Set the old fog range
 		setRenderState (D3DRS_FOGSTART, *((DWORD*) (&_FogStart)));

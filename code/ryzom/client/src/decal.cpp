@@ -125,11 +125,17 @@ public:
 	virtual void buildInfo()
 	{
 		m_Idx.WorldToUV0 = getUniformIndex("worldToUV0");
+		nlassert(m_Idx.WorldToUV0 != ~0);
 		m_Idx.WorldToUV1 = getUniformIndex("worldToUV1");
+		nlassert(m_Idx.WorldToUV1 != ~0);
 		m_Idx.RefCamDist = getUniformIndex("refCamDist");
+		nlassert(m_Idx.RefCamDist != ~0);
 		m_Idx.DistScaleBias = getUniformIndex("distScaleBias");
+		nlassert(m_Idx.DistScaleBias != ~0);
 		m_Idx.Diffuse = getUniformIndex("diffuse");
+		nlassert(m_Idx.Diffuse != ~0);
 		m_Idx.BlendScale = getUniformIndex("blendScale");
+		nlassert(m_Idx.BlendScale != ~0);
 	}
 	inline const CIdx &idx() const { return m_Idx; }
 private:

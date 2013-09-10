@@ -328,7 +328,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	pShader = static_cast<CMaterialDrvInfosD3D*>((IMaterialDrvInfos*)(mat._MatDrvInfo));
 
 	// Now we can get the supported shader from the cache.
-	CMaterial::TShader matShader = mat.getShader();
+	CMaterial::TShader matShader = _PixelProgramUser ? CMaterial::Program : mat.getShader();
 
 	if (_CurrentMaterialSupportedShader != CMaterial::Normal)
 	{
@@ -648,7 +648,9 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 		// Must separate texture setup and texture activation in 2 "for"...
 		// because setupTexture() may disable all stage.
 
-		if (matShader == CMaterial::Normal || matShader == CMaterial::PostProcessing)
+		if (matShader == CMaterial::Normal 
+			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CGPUProgramFeatures::TextureStages))
+			)
 		{
 			uint stage;
 			for(stage=0 ; stage<maxTexture; ++stage)
@@ -668,7 +670,9 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	// Don't do it also for Specular because the EnvFunction and the TexGen may be special.
 	{
 		H_AUTO_D3D(CDriverD3D_setupMaterial_normalShaderActivateTextures)
-		if (matShader == CMaterial::Normal || matShader == CMaterial::PostProcessing)
+		if (matShader == CMaterial::Normal 
+			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CGPUProgramFeatures::TextureStages))
+			)
 		{
 			uint stage;
 			for(stage=0 ; stage<maxTexture; ++stage)

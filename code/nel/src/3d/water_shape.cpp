@@ -125,15 +125,23 @@ CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
 void CVertexProgramWaterVPNoWave::buildInfo()
 {
 	m_Idx.BumpMap0Scale = getUniformIndex("bumpMap0Scale");
+	nlassert(m_Idx.BumpMap0Scale != ~0);
 	m_Idx.BumpMap0Offset = getUniformIndex("bumpMap0Offset");
+	nlassert(m_Idx.BumpMap0Offset != ~0);
 	m_Idx.BumpMap1Scale = getUniformIndex("bumpMap1Scale");
+	nlassert(m_Idx.BumpMap1Scale != ~0);
 	m_Idx.BumpMap1Offset = getUniformIndex("bumpMap1Offset");
+	nlassert(m_Idx.BumpMap1Offset != ~0);
 	m_Idx.ObserverHeight = getUniformIndex("observerHeight");
+	nlassert(m_Idx.ObserverHeight != ~0);
 	m_Idx.ScaleReflectedRay = getUniformIndex("scaleReflectedRay");
+	nlassert(m_Idx.ScaleReflectedRay != ~0);
 	if (m_Diffuse)
 	{
 		m_Idx.DiffuseMapVector0 = getUniformIndex("diffuseMapVector0");
+		nlassert(m_Idx.DiffuseMapVector0 != ~0);
 		m_Idx.DiffuseMapVector1 = getUniformIndex("diffuseMapVector1");
+		nlassert(m_Idx.DiffuseMapVector1 != ~0);
 	}
 }
 

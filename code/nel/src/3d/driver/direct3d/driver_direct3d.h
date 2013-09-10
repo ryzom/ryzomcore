@@ -2542,8 +2542,8 @@ private:
 	// The last vertex buffer needs vertex color
 	bool					_FogEnabled;
 
-	bool					_VertexProgramUser;
-	bool					_PixelProgramUser;
+	NLMISC::CRefPtr<CVertexProgram> _VertexProgramUser;
+	NLMISC::CRefPtr<CPixelProgram> _PixelProgramUser;
 
 	// *** Internal resources
 
