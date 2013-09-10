@@ -560,49 +560,144 @@ const char* NL3D_SimpleStartVegetableProgram=
 	MOV o[COL0].xyz, v[3];			# col.RGBA= vertex color							\n\
 ";
 
+class CVertexProgramVeget : public CVertexProgram
+{
+public:
+	struct CIdx
+	{
+		// 0-3 modelViewProjection
+		// 4
+		// 5
+		// 6 fog
+		// 7
+		uint ProgramConstants0; // 8
+		uint DirectionalLight; // 9
+		uint ViewCenter; // 10
+		uint NegInvTransDist; // 11
+		// 12
+		// 13
+		// 14
+		// 15
+		uint AngleAxis; // 16
+		uint Wind; // 17
+		uint CosCoeff0; // 18
+		uint CosCoeff1; // 19
+		uint CosCoeff2; // 20
+		uint QuatConstants; // 21
+		uint PiConstants; // 22
+		uint LUTSize; // 23 (value = 64)
+		uint LUT[NL3D_VEGETABLE_VP_LUT_SIZE]; // 32+
+	};
+	CVertexProgramVeget(uint vpType, bool fogEnabled)
+	{
+		// nelvp
+		{
+			CSource *source = new CSource();
+			source->Profile = nelvp;
+			source->DisplayName = "nelvp/Veget";
+			
+			// Init the Vertex Program.
+			string	vpgram;
+			// start always with Bend.
+			if( vpType==NL3D_VEGETABLE_RDRPASS_LIGHTED || vpType==NL3D_VEGETABLE_RDRPASS_LIGHTED_2SIDED )
+			{
+				source->DisplayName += "/Bend";
+				vpgram= NL3D_BendProgram;
+			}
+			else
+			{
+				source->DisplayName += "/FastBend";
+				vpgram= NL3D_FastBendProgram;
+			}
 
+			// combine the VP according to Type
+			switch(vpType)
+			{
+			case NL3D_VEGETABLE_RDRPASS_LIGHTED:
+			case NL3D_VEGETABLE_RDRPASS_LIGHTED_2SIDED:
+				source->DisplayName += "/Lighted";
+				vpgram+= string(NL3D_LightedStartVegetableProgram);
+				break;
+			case NL3D_VEGETABLE_RDRPASS_UNLIT:
+			case NL3D_VEGETABLE_RDRPASS_UNLIT_2SIDED:
+				source->DisplayName += "/Unlit";
+				vpgram+= string(NL3D_UnlitVegetableProgram);
+				break;
+			case NL3D_VEGETABLE_RDRPASS_UNLIT_2SIDED_ZSORT:
+				source->DisplayName += "/UnlitAlphaBlend";
+				vpgram+= string(NL3D_UnlitAlphaBlendVegetableProgram);
+				break;
+			}
+
+			// common end of VP
+			vpgram+= string(NL3D_CommonEndVegetableProgram);
+
+			if (fogEnabled)
+			{
+				source->DisplayName += "/Fog";
+				vpgram+= string(NL3D_VegetableProgramFog);
+			}
+
+			vpgram+="\nEND\n";
+
+			source->setSource(vpgram);
+
+			source->ParamIndices["programConstants0"] = 8;
+			source->ParamIndices["directionalLight"] = 9;
+			source->ParamIndices["viewCenter"] = 10;
+			source->ParamIndices["negInvTransDist"] = 11;
+			source->ParamIndices["angleAxis"] = 16;
+			source->ParamIndices["wind"] = 17;
+			source->ParamIndices["cosCoeff0"] = 18;
+			source->ParamIndices["cosCoeff1"] = 19;
+			source->ParamIndices["cosCoeff2"] = 20;
+			source->ParamIndices["quatConstants"] = 21;
+			source->ParamIndices["piConstants"] = 22;
+			source->ParamIndices["lutSize"] = 23;
+			for (uint i = 0; i < NL3D_VEGETABLE_VP_LUT_SIZE; ++i)
+			{
+				source->ParamIndices[NLMISC::toString("lut[%i]", i)] = 32 + i;
+			}
+
+			addSource(source);
+		}
+		// TODO_VP_GLSL
+	}
+	virtual ~CVertexProgramVeget()
+	{
+
+	}
+	virtual void buildInfo()
+	{
+		m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
+		m_Idx.DirectionalLight = getUniformIndex("directionalLight");
+		m_Idx.ViewCenter = getUniformIndex("viewCenter");
+		m_Idx.NegInvTransDist = getUniformIndex("negInvTransDist");
+		m_Idx.AngleAxis = getUniformIndex("angleAxis");
+		m_Idx.Wind = getUniformIndex("wind");
+		m_Idx.CosCoeff0 = getUniformIndex("cosCoeff0");
+		m_Idx.CosCoeff1 = getUniformIndex("cosCoeff1");
+		m_Idx.CosCoeff2 = getUniformIndex("cosCoeff2");
+		m_Idx.QuatConstants = getUniformIndex("quatConstants");
+		m_Idx.PiConstants = getUniformIndex("piConstants");
+		m_Idx.LUTSize = getUniformIndex("lutSize");
+		for (uint i = 0; i < NL3D_VEGETABLE_VP_LUT_SIZE; ++i)
+		{
+			m_Idx.LUT[i] = getUniformIndex(NLMISC::toString("lut[%i]", i));
+		}
+	}
+	const CIdx &idx() const { return m_Idx; }
+private:
+	CIdx m_Idx;
+};
 
 // ***************************************************************************
 void					CVegetableManager::initVertexProgram(uint vpType, bool fogEnabled)
 {
 	nlassert(_LastDriver); // update driver should have been called at least once !
-	// Init the Vertex Program.
-	string	vpgram;
-	// start always with Bend.
-	if( vpType==NL3D_VEGETABLE_RDRPASS_LIGHTED || vpType==NL3D_VEGETABLE_RDRPASS_LIGHTED_2SIDED )
-		vpgram= NL3D_BendProgram;
-	else
-		vpgram= NL3D_FastBendProgram;
-
-	// combine the VP according to Type
-	switch(vpType)
-	{
-	case NL3D_VEGETABLE_RDRPASS_LIGHTED:
-	case NL3D_VEGETABLE_RDRPASS_LIGHTED_2SIDED:
-		vpgram+= string(NL3D_LightedStartVegetableProgram);
-		break;
-	case NL3D_VEGETABLE_RDRPASS_UNLIT:
-	case NL3D_VEGETABLE_RDRPASS_UNLIT_2SIDED:
-		vpgram+= string(NL3D_UnlitVegetableProgram);
-		break;
-	case NL3D_VEGETABLE_RDRPASS_UNLIT_2SIDED_ZSORT:
-		vpgram+= string(NL3D_UnlitAlphaBlendVegetableProgram);
-		break;
-	}
-
-	// common end of VP
-	vpgram+= string(NL3D_CommonEndVegetableProgram);
-
-	if (fogEnabled)
-	{
-		vpgram+= string(NL3D_VegetableProgramFog);
-	}
-
-	vpgram+="\nEND\n";
-
+	
 	// create VP.
-	_VertexProgram[vpType][fogEnabled ? 1 : 0] = new CVertexProgram(vpgram.c_str());
-	// TODO_VP_GLSL
+	_VertexProgram[vpType][fogEnabled ? 1 : 0] = new CVertexProgramVeget(vpType, fogEnabled);
 }
 
 
@@ -1758,6 +1853,9 @@ public:
 // ***************************************************************************
 void			CVegetableManager::setupVertexProgramConstants(IDriver *driver)
 {
+	nlassert(_ActiveVertexProgram);
+	
+
 	// Standard
 	// setup VertexProgram constants.
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
@@ -1925,10 +2023,6 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 	}
 
 
-	// setup VP constants.
-	setupVertexProgramConstants(driver);
-
-
 	// Setup TexEnvs for Dynamic lightmapping
 	//--------------------
 	// if the dynamic lightmap is provided
@@ -1968,6 +2062,12 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 	_VegetableMaterial.setZWrite(true);
 	_VegetableMaterial.setAlphaTestThreshold(0.5f);
 
+	bool uprogst = driver->isUniformProgramState();
+	bool progstateset[NL3D_VEGETABLE_NRDRPASS];
+	for (sint rdrPass=0; rdrPass < NL3D_VEGETABLE_NRDRPASS; rdrPass++)
+	{
+		progstateset[rdrPass] = !uprogst;
+	}
 
 	/*
 		Prefer sort with Soft / Hard first.
@@ -1995,14 +2095,20 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 				// set the 2Sided flag in the material
 				_VegetableMaterial.setDoubleSided( doubleSided );
 
-
-				// Activate the unique material.
-				driver->setupMaterial(_VegetableMaterial);
-
 				// activate Vertex program first.
 				//nlinfo("\nSTARTVP\n%s\nENDVP\n", _VertexProgram[rdrPass]->getProgram().c_str());
 
-				nlverify(driver->activeVertexProgram(_VertexProgram[rdrPass][fogged ? 1 : 0]));
+				_ActiveVertexProgram = _VertexProgram[rdrPass][fogged ? 1 : 0];
+				nlverify(driver->activeVertexProgram(_ActiveVertexProgram));
+
+				// Set VP constants
+				if (!progstateset[uprogst ? 0 : rdrPass])
+				{
+					setupVertexProgramConstants(driver);
+				}
+
+				// Activate the unique material.
+				driver->setupMaterial(_VegetableMaterial);
 
 				// Activate the good VBuffer
 				vbAllocator.activate();
@@ -2222,6 +2328,7 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 
 	// disable VertexProgram.
 	driver->activeVertexProgram(NULL);
+	_ActiveVertexProgram = NULL;
 
 
 	// restore Fog.
@@ -2261,25 +2368,25 @@ void		CVegetableManager::setupRenderStateForBlendLayerModel(IDriver *driver)
 	// set model matrix to the manager matrix.
 	driver->setupModelMatrix(_ManagerMatrix);
 
-	// setup VP constants.
-	setupVertexProgramConstants(driver);
-
 	// Setup RdrPass.
 	//=============
 	uint	rdrPass= NL3D_VEGETABLE_RDRPASS_UNLIT_2SIDED_ZSORT;
 
-	// Activate the unique material (correclty setuped for AlphaBlend in render()).
-	driver->setupMaterial(_VegetableMaterial);
-
 	// activate Vertex program first.
 	//nlinfo("\nSTARTVP\n%s\nENDVP\n", _VertexProgram[rdrPass]->getProgram().c_str());
-	nlverify(driver->activeVertexProgram(_VertexProgram[rdrPass][fogged ? 1 : 0]));
+	_ActiveVertexProgram = _VertexProgram[rdrPass][fogged ? 1 : 0];
+	nlverify(driver->activeVertexProgram(_ActiveVertexProgram));
+
+	// setup VP constants.
+	setupVertexProgramConstants(driver);
 
 	if (fogged)
 	{
 		driver->setConstantFog(6);
 	}
 
+	// Activate the unique material (correclty setuped for AlphaBlend in render()).
+	driver->setupMaterial(_VegetableMaterial);
 }
 
 
@@ -2302,6 +2409,7 @@ void		CVegetableManager::exitRenderStateForBlendLayerModel(IDriver *driver)
 {
 	// disable VertexProgram.
 	driver->activeVertexProgram(NULL);
+	_ActiveVertexProgram = NULL;
 
 	// restore Fog.
 	driver->enableFog(_BkupFog);

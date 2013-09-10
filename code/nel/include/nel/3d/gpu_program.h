@@ -229,6 +229,7 @@ public:
 
 	// Get the idx of a parameter (ogl: uniform, d3d: constant, etcetera) by name. Invalid name returns ~0
 	inline uint getUniformIndex(const char *name) const { return m_DrvInfo->getUniformIndex(name); };
+	inline uint getUniformIndex(const std::string &name) const { return m_DrvInfo->getUniformIndex(name.c_str()); };
 	inline uint getUniformIndex(CGPUProgramIndex::TName name) const { return m_Index.Indices[name]; }
 
 	// Get feature information of the current program

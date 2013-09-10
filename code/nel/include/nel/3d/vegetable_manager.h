@@ -48,6 +48,7 @@ class	CVegetableLightEx;
 // default distance is 60 meters.
 #define	NL3D_VEGETABLE_DEFAULT_DIST_MAX			60.f
 
+class CVertexProgramVeget;
 
 // ***************************************************************************
 /**
@@ -306,7 +307,8 @@ private:
 	// The same, but no VBHard.
 	CVegetableVBAllocator							_VBSoftAllocator[CVegetableVBAllocator::VBTypeCount];
 	// Vertex Program. One VertexProgram for each rdrPass (with / without fog)
-	CVertexProgram									*_VertexProgram[NL3D_VEGETABLE_NRDRPASS][2];
+	CSmartPtr<CVertexProgramVeget>					_VertexProgram[NL3D_VEGETABLE_NRDRPASS][2];
+	CRefPtr<CVertexProgramVeget>					_ActiveVertexProgram;
 
 
 	// Material. Useful for texture and alphaTest
