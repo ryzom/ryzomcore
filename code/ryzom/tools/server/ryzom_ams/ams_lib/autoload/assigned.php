@@ -3,7 +3,6 @@
 * Handles the assigning of a ticket to a user. This is being used to make someone responsible for the handling and solving of a ticket.
 * The idea is that someone can easily assign a ticket to himself and by doing that, he makes aware to the other moderators that he will deal with the ticket in the future.
 * @author Daan Janssens, mentored by Matthew Lagoe
-* 
 */
 class Assigned{
 
@@ -91,7 +90,6 @@ class Assigned{
     }
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
-    
     
     /**
     * A constructor.

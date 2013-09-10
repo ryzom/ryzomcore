@@ -1,23 +1,42 @@
  <?php
- 
+/**
+* Handles the mailing functionality.
+* This class covers the reading of the mail boxes of the support_groups, handling those emails, updating tickets accoring to the content & title of the emails,
+* but also the sending of emails after creating a new ticket and when someone else replies on your ticket.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 class Mail_Handler{
     
-    private $db;
-        
-    public function mail_fork() {   
+    private $db; /**< db object used by various methods. */
+    
+    /**
+    * Start a new child process and return the process id
+    * this is used because imap might take some time, we dont want the cron parent process waiting on that.
+    * @return return the child process id
+    */    
+    private function mail_fork() {   
         //Start a new child process and return the process id!
         $pid = pcntl_fork();
         return $pid;
         
     }
     
-    
+    /**
+    * Wrapper for sending emails, creates the content of the email
+    * Based on the type of the ticketing mail it will create a specific email, it will use the language.ini files to load the correct language of the email for the receiver.
+    * Also if the $TICKET_MAILING_SUPPORT is set to false or if the user's personal 'ReceiveMail' entry is set to false then no mail will be sent.
+    * @param $receiver if integer, then it refers to the id of the user to whom we want to mail, if it's a string(email-address) then we will use that.
+    * @param $ticketObj the ticket object itself, this is being used for including ticket related information into the email.
+    * @param $content the content of a reply or new ticket
+    * @param $type REPLY, NEW, WARNAUTHOR, WARNSENDER, WARNUNKNOWNSENDER
+    * @param $sender (default = 0 (if it is not forwarded)) else use the id of the support group to which the ticket is currently forwarded, the support groups email address will be used to send the ticket.
+    */    
     public static function send_ticketing_mail($receiver, $ticketObj, $content, $type, $sender = 0) {
         
         global $TICKET_MAILING_SUPPORT;
         if($TICKET_MAILING_SUPPORT){
             global $MAIL_LOG_PATH;
-            error_log("Receiver: {$receiver}, content: {$content}, type: {$type}, SendingId: {$sender} \n", 3, $MAIL_LOG_PATH);
+            //error_log("Receiver: {$receiver}, content: {$content}, type: {$type}, SendingId: {$sender} \n", 3, $MAIL_LOG_PATH);
             if($sender == 0){
                 //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
                 $sender = NULL;
@@ -84,7 +103,15 @@ class Mail_Handler{
         }
     } 
     
-    
+    /**
+    * send mail function that will add the email to the db.
+    * this function is being used by the send_ticketing_mail() function. It adds the email as an entry to the `email` table in the database, which will be sent later on when we run the cron job.
+    * @param $recipient if integer, then it refers to the id of the user to whom we want to mail, if it's a string(email-address) then we will use that.
+    * @param $subject the subject of the email
+    * @param $body the body of the email
+    * @param $ticket_id the id of the ticket
+    * @param $from the sending support_group's id (NULL in case the default group is sending))
+    */    
     public static function send_mail($recipient, $subject, $body, $ticket_id = 0, $from = NULL) {
         $id_user = NULL;
         if(is_numeric($recipient)) {
@@ -100,7 +127,12 @@ class Mail_Handler{
     }
     
      
-    //the main function
+    /**
+    * the cron funtion (workhorse of the mailing system).
+    * The cron job will create a child process, which will first send the emails that are in the email table in the database, we use some kind of semaphore (a temp file) to make sure that
+    * if the cron job is called multiple times, it wont email those mails multiple times. After this, we will read the mail inboxes of the support groups and the default group using IMAP
+    * and we will add new tickets or new replies according to the incoming emails.
+    */    
     function cron() {
         global $cfg;
         global $MAIL_LOG_PATH;
@@ -206,7 +238,7 @@ class Mail_Handler{
                         $tkey = self::incoming_mail_handler($mbox, $i,$group);
             
                         if($tkey) {
-                            //TODO: base file on Ticket + timestamp
+                            //base file on Ticket + timestamp
                             $file = fopen($MAIL_DIR."/ticket".$tkey, 'w');
                             error_log("Email was written to ".$MAIL_DIR."/ticket".$tkey."\n", 3, $MAIL_LOG_PATH);
                             fwrite($file, imap_fetchheader($mbox, $i) . imap_body($mbox, $i));     
@@ -231,6 +263,12 @@ class Mail_Handler{
     
      
     
+    /**
+    * creates a new message id for a email about to send.
+    * @param $ticket_id the ticket id of the ticket that is mentioned in the email.
+    * @return returns a string, that consist out of some variable parts, a consistent part and the ticket_id. The ticket_id will be used lateron, if someone replies on the message,
+    * to see to which ticket the reply should be added.
+    */    
     function new_message_id($ticketId) {
         $time = time();
         $pid = getmypid();
@@ -241,6 +279,12 @@ class Mail_Handler{
     
     }
     
+    /**
+    * try to fetch the ticket_id out of the subject.
+    * The subject should have a substring of the form [Ticket #ticket_id], where ticket_id should be the integer ID of the ticket.
+    * @param $subject, the subject of an incomming email.
+    * @return if the ticket's id is succesfully parsed, it will return the ticket_id, else it returns 0.
+    */   
     function get_ticket_id_from_subject($subject){
         $startpos = strpos($subject, "[Ticket #");
         if($startpos){
@@ -258,6 +302,16 @@ class Mail_Handler{
     }
     
     
+    /**
+    * Handles an incomming email
+    * Read the content of one email by using imap's functionality. If a ticket id is found inside the message_id or else in the subject line, then a reply will be added
+    * (if the email is not being sent from the authors email address it won't be added though and a warning will be sent to both parties).  If no ticket id is found, then a new
+    * ticket will be created.
+    * @param $mbox a mailbox object
+    * @param $i the email's id in the mailbox (integer)
+    * @param $group the group object that owns the inbox.
+    * @return a string based on the found ticket i and timestamp (will be used to store a copy of the email locally)
+    */   
     function incoming_mail_handler($mbox,$i,$group){
         
         global $MAIL_LOG_PATH;
@@ -352,7 +406,11 @@ class Mail_Handler{
     }
     
      
-    
+    /**
+    * decode utf8
+    * @param $str str to be decoded
+    * @return decoded string
+    */  
     function decode_utf8($str) {
     
         preg_match_all("/=\?UTF-8\?B\?([^\?]+)\?=/i",$str, $arr);
@@ -364,10 +422,12 @@ class Mail_Handler{
     
     }
     
-     
-    
-     
-    
+    /**
+    * returns the mime type of a structure of a email
+    * @param &$structure the structure of an email message.
+    * @return "TEXT", "MULTIPART","MESSAGE", "APPLICATION", "AUDIO","IMAGE", "VIDEO", "OTHER","TEXT/PLAIN"
+    * @todo take care of the HTML part of incoming emails.
+    */  
     function get_mime_type(&$structure) {
     
         $primary_mime_type = array("TEXT", "MULTIPART","MESSAGE", "APPLICATION", "AUDIO","IMAGE", "VIDEO", "OTHER");
@@ -379,7 +439,7 @@ class Mail_Handler{
     }
     
      
-    
+    //to document..
     function get_part($stream, $msg_number, $mime_type, $structure = false, $part_number = false) {
     
         if(!$structure) {

@@ -1,8 +1,20 @@
 <?php
-
+/**
+* Helper class for more site specific functions.
+* @author Daan Janssens, mentored by Matthew Lagoe
+* 
+*/
 class Helpers{
      
-
+     /**
+    * workhorse of the website, it loads the template and shows it or returns th html.
+    * it uses smarty to load the $template, but before displaying the template it will pass the $vars to smarty. Also based on your language settings a matching
+    * array of words & sentences for that page will be loaded. In case the $returnHTML parameter is set to true, it will return the html instead of displaying the template.
+    * @param $template the name of the template(page) that we want to load.
+    * @param $vars an array of variables that should be loaded by smarty before displaying or returning the html.
+    * @param $returnHTML (default=false) if set to true, the html that should have been displayed, will be returned.
+    * @return in case $returnHTML=true, it returns the html of the template being loaded.
+    */
      public static function loadTemplate( $template, $vars = array (), $returnHTML = false )
     {
          global $AMS_LIB;
@@ -23,8 +35,11 @@ class Helpers{
          $smarty -> caching = false;
          $smarty -> cache_lifetime = 120;
 
+          //needed by smarty.
          helpers :: create_folders ();
           global $FORCE_INGAME;
+          
+          //if ingame, then use the ingame templates
           if ( helpers::check_if_game_client() or $FORCE_INGAME ){
              $smarty -> template_dir = $AMS_LIB . '/ingame_templates/';
              $smarty -> setConfigDir( $AMS_LIB . '/configs' );
@@ -41,12 +56,13 @@ class Helpers{
              $smarty -> assign( $key, $value );
              }
              
-      
+          //load page specific variables that are language dependent
          $variables = Helpers::handle_language();
          foreach ( $variables[$template] as $key => $value ){
              $smarty -> assign( $key, $value );
              }
 
+          //smarty inheritance for loading the matching wrapper layout (with the matching menu bar)
           if( isset($vars['permission']) && $vars['permission'] == 3 ){
                $inherited = "extends:layout_admin.tpl|";
           }else if( isset($vars['permission']) && $vars['permission'] == 2){
@@ -57,8 +73,7 @@ class Helpers{
                $inherited ="";
           }
 
-          
-         
+          //if $returnHTML is set to true, return the html by fetching the template else display the template.
           if($returnHTML == true){
                return $smarty ->fetch($inherited . $template . '.tpl' );
           }else{
@@ -66,6 +81,11 @@ class Helpers{
           }
      }
 
+
+     /**
+    * creates the folders that are needed for smarty.
+    * @todo for the drupal module it might be possible that drupal_mkdir needs to be used instead of mkdir, also this should be in the install.php instead.
+    */
      static public function create_folders(){
          global $AMS_LIB;
          global $SITEBASE;
@@ -78,8 +98,8 @@ class Helpers{
              $SITEBASE . '/configs'
              );
          foreach ( $arr as & $value ){
+          
              if ( !file_exists( $value ) ){
-                 //echo $value;
                  print($value);
                  mkdir($value);
                  }
@@ -87,6 +107,11 @@ class Helpers{
 
          }
 
+
+     /**
+     * check if the http request is sent ingame or not.
+     * @return returns true in case it's sent ingame, else false is returned.
+     */
      static public function check_if_game_client()
     {
          // if HTTP_USER_AGENT is not set then its ryzom core
@@ -98,6 +123,13 @@ class Helpers{
           }
      }
        
+       
+     /**
+     * Handles the language specific aspect.
+     * The language can be changed by setting the $_GET['Language'] & $_GET['setLang'] together. This will also change the language entry of the user in the db.
+     * Cookies are also being used in case the user isn't logged in.
+     * @return returns the parsed content of the language .ini file related to the users language setting.
+     */
      static public function handle_language(){
           global $DEFAULT_LANGUAGE;
           global $AMS_TRANS;
@@ -149,8 +181,11 @@ class Helpers{
           
      }
      
-     
-     //Time output function for handling the time display function.
+
+     /**
+     * Time output function for handling the time display.
+     * @return returns the time in the format specified in the $TIME_FORMAT global variable.
+     */
      static public function outputTime($time, $str = 1){
           global $TIME_FORMAT;
           if($str){
@@ -160,6 +195,12 @@ class Helpers{
           }
      }
      
+     /**
+     * Auto login function for ingame use.
+     * This function will allow users who access the website ingame, to log in without entering the username and password. It uses the COOKIE entry in the open_ring db.
+     * it checks if the cookie sent by the http request matches the one in the db. This cookie in the db is changed everytime the user relogs.
+     * @return returns "FALSE" if the cookies didn't match, else it returns an array with the user's id and name.
+     */
      static public function  check_login_ingame(){
           if ( helpers :: check_if_game_client () or $forcelibrender = false ){
                $dbr = new DBLayer("ring");
