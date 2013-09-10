@@ -29,7 +29,7 @@ namespace NL3D
 
 // ***************************************************************************
 
-CShader::~CShader()
+CD3DShaderFX::~CD3DShaderFX()
 {
 	// Must kill the drv mirror of this shader.
 	_DrvInfo.kill();
@@ -37,14 +37,14 @@ CShader::~CShader()
 
 // ***************************************************************************
 
-CShader::CShader()
+CD3DShaderFX::CD3DShaderFX()
 {
 	_ShaderChanged = true;
 }
 
 // ***************************************************************************
 
-void CShader::setText (const char *text)
+void CD3DShaderFX::setText (const char *text)
 {
 	_Text = text;
 	_ShaderChanged = true;
@@ -52,7 +52,7 @@ void CShader::setText (const char *text)
 
 // ***************************************************************************
 
-void CShader::setName (const char *name)
+void CD3DShaderFX::setName (const char *name)
 {
 	_Name = name;
 	_ShaderChanged = true;
@@ -60,7 +60,7 @@ void CShader::setName (const char *name)
 
 // ***************************************************************************
 
-bool CShader::loadShaderFile (const char *filename)
+bool CD3DShaderFX::loadShaderFile (const char *filename)
 {
 	_Text = "";
 	// Lookup
@@ -354,7 +354,7 @@ CShaderDrvInfosD3D::~CShaderDrvInfosD3D()
 
 // ***************************************************************************
 
-bool CDriverD3D::validateShader(CShader *shader)
+bool CDriverD3D::validateShader(CD3DShaderFX *shader)
 {
 	H_AUTO_D3D(CDriverD3D_validateShader)
 	CShaderDrvInfosD3D *shaderInfo = static_cast<CShaderDrvInfosD3D*>((IShaderDrvInfos*)shader->_DrvInfo);
@@ -416,7 +416,7 @@ bool CDriverD3D::validateShader(CShader *shader)
 
 // ***************************************************************************
 
-bool CDriverD3D::activeShader(CShader *shd)
+bool CDriverD3D::activeShader(CD3DShaderFX *shd)
 {
 	H_AUTO_D3D(CDriverD3D_activeShader)
 	if (_DisableHardwarePixelShader)
@@ -482,7 +482,7 @@ bool CDriverD3D::activeShader(CShader *shd)
 }
 
 
-static void setFX(CShader &s, const char *name, const char *prog, CDriverD3D *drv)
+static void setFX(CD3DShaderFX &s, const char *name, const char *prog, CDriverD3D *drv)
 {
 	H_AUTO_D3D(setFX)
 

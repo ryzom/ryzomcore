@@ -215,11 +215,11 @@ public:
  * **********************************
  */
 // --------------------------------------------------
-class CShader
+class CD3DShaderFX
 {
 public:
-	CShader();
-	~CShader();
+	CD3DShaderFX();
+	~CD3DShaderFX();
 
 	// Load a shader file
 	bool loadShaderFile (const char *filename);
@@ -1236,7 +1236,7 @@ public:
 	  * ColorOp[n] = DISABLE;
 	  * AlphaOp[n] = DISABLE;
     */
-	bool			activeShader(CShader *shd);
+	bool			activeShader(CD3DShaderFX *shd);
 
 	// Bench
 	virtual void startBench (bool wantStandardDeviation = false, bool quick = false, bool reset = true);
@@ -2165,7 +2165,7 @@ public:
 	void releaseInternalShaders();
 	bool setShaderTexture (uint textureHandle, ITexture *texture, CFXCache *cache);
 
-	bool validateShader(CShader *shader);
+	bool validateShader(CD3DShaderFX *shader);
 
 	void activePass (uint pass)
 	{
@@ -2573,7 +2573,7 @@ private:
 	CIndexBuffer			_QuadIndexesAGP;
 
 	// The last setuped shader
-	CShader					*_CurrentShader;
+	CD3DShaderFX					*_CurrentShader;
 	UINT					_CurrentShaderPassCount;
 public:
 	struct CTextureRef
@@ -2598,29 +2598,29 @@ private:
 	CRenderVariable			*_ModifiedRenderState;
 
 	// Internal shaders
-	CShader					_ShaderLightmap0;
-	CShader					_ShaderLightmap1;
-	CShader					_ShaderLightmap2;
-	CShader					_ShaderLightmap3;
-	CShader					_ShaderLightmap4;
-	CShader					_ShaderLightmap0Blend;
-	CShader					_ShaderLightmap1Blend;
-	CShader					_ShaderLightmap2Blend;
-	CShader					_ShaderLightmap3Blend;
-	CShader					_ShaderLightmap4Blend;
-	CShader					_ShaderLightmap0X2;
-	CShader					_ShaderLightmap1X2;
-	CShader					_ShaderLightmap2X2;
-	CShader					_ShaderLightmap3X2;
-	CShader					_ShaderLightmap4X2;
-	CShader					_ShaderLightmap0BlendX2;
-	CShader					_ShaderLightmap1BlendX2;
-	CShader					_ShaderLightmap2BlendX2;
-	CShader					_ShaderLightmap3BlendX2;
-	CShader					_ShaderLightmap4BlendX2;
-	CShader					_ShaderCloud;
-	CShader					_ShaderWaterNoDiffuse;
-	CShader					_ShaderWaterDiffuse;
+	CD3DShaderFX					_ShaderLightmap0;
+	CD3DShaderFX					_ShaderLightmap1;
+	CD3DShaderFX					_ShaderLightmap2;
+	CD3DShaderFX					_ShaderLightmap3;
+	CD3DShaderFX					_ShaderLightmap4;
+	CD3DShaderFX					_ShaderLightmap0Blend;
+	CD3DShaderFX					_ShaderLightmap1Blend;
+	CD3DShaderFX					_ShaderLightmap2Blend;
+	CD3DShaderFX					_ShaderLightmap3Blend;
+	CD3DShaderFX					_ShaderLightmap4Blend;
+	CD3DShaderFX					_ShaderLightmap0X2;
+	CD3DShaderFX					_ShaderLightmap1X2;
+	CD3DShaderFX					_ShaderLightmap2X2;
+	CD3DShaderFX					_ShaderLightmap3X2;
+	CD3DShaderFX					_ShaderLightmap4X2;
+	CD3DShaderFX					_ShaderLightmap0BlendX2;
+	CD3DShaderFX					_ShaderLightmap1BlendX2;
+	CD3DShaderFX					_ShaderLightmap2BlendX2;
+	CD3DShaderFX					_ShaderLightmap3BlendX2;
+	CD3DShaderFX					_ShaderLightmap4BlendX2;
+	CD3DShaderFX					_ShaderCloud;
+	CD3DShaderFX					_ShaderWaterNoDiffuse;
+	CD3DShaderFX					_ShaderWaterDiffuse;
 
 
 	// Backup frame buffer
