@@ -41,8 +41,14 @@ namespace NL3D
 
 		bool validate( std::string &log );
 
+		void cacheUniformIndices();
+
+		int getUniformIndex( EUniform uniform );
+
 	private:
 		void deleteShaders();
+
+		int uniformIndices[ NUM_UNIFORMS ];
 
 		std::vector< IProgram* > vertexPrograms;
 		std::vector< IProgram* > pixelPrograms;

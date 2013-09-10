@@ -20,6 +20,7 @@
 #include "nel/3d/texture_mem.h"
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
+#include "nel/3d/i_program_object.h"
 
 namespace NL3D {
 
@@ -587,22 +588,6 @@ void			CDriverGL3::endMultiPass()
 	}
 }
 
-const char *samplers[ IDRV_MAT_MAXTEXTURES ] = 
-{
-	"sampler0",
-	"sampler1",
-	"sampler2",
-	"sampler3"
-};
-
-const char *constNames[ IDRV_MAT_MAXTEXTURES ] =
-{
-	"constant0",
-	"constant1",
-	"constant2",
-	"constant3"
-};
-
 void CDriverGL3::setupNormalPass()
 {
 	const CMaterial &mat = *_CurrentMaterial;
@@ -610,7 +595,7 @@ void CDriverGL3::setupNormalPass()
 	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
 	{
 		// Set constant
-		int cl = getUniformLocation( constNames[ i ] );
+		int cl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Constant0 + i ) );
 		if( cl != -1 )
 		{
 			GLfloat glCol[ 4 ];
@@ -623,7 +608,7 @@ void CDriverGL3::setupNormalPass()
 		if( t == NULL )
 			continue;
 		
-		int index = getUniformLocation( samplers[ i ] );
+		int index = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Sampler0 + i ) );
 		if( index == -1 )
 			continue;
 		
@@ -808,7 +793,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
 #ifdef GLSL
-					int cl = getUniformLocation( constNames[ stage ] );
+					int cl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Constant0 + stage ) );
 					if( cl != -1 )
 					{
 						GLfloat glCol[ 4 ];
@@ -816,7 +801,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 						setUniform4f( cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 					}
 
-					int tl = getUniformLocation( samplers[ stage ] );
+					int tl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Sampler0 + stage ) );
 					if( tl != -1 )
 					{
 						setUniform1i( tl, stage );
@@ -885,7 +870,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				_DriverGLStates.setTexGenMode(stage, 0);
 
 #ifdef GLSL
-				int tl = getUniformLocation( samplers[ stage ] );
+				int tl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Sampler0 + stage ) );
 				if( tl != -1 )
 				{
 					setUniform1i( tl, stage );
@@ -1164,25 +1149,25 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 
 #ifdef GLSL
 
-	int sl0 = getUniformLocation( "sampler0" );
+	int sl0 = currentProgram->getUniformIndex( IProgramObject::Sampler0 );
 	if( sl0 != -1 )
 	{
 		setUniform1i( sl0, 0 );
 	}
 
-	int sl1 = getUniformLocation( "cubeSampler" );
+	int sl1 = currentProgram->getUniformIndex( IProgramObject::Sampler1 );
 	if( sl1 != -1 )
 	{
 		setUniform1i( sl1, 1 );
 	}
 
-	int mvl = getUniformLocation( "mvMatrix" );
+	int mvl = currentProgram->getUniformIndex( IProgramObject::MVMatrix );
 	if( mvl != -1 )
 	{
 		setUniformMatrix4fv( mvl, 1, false, _ModelViewMatrix.get() );
 	}
 
-	int tml = getUniformLocation( "texMatrix" );
+	int tml = currentProgram->getUniformIndex( IProgramObject::TexMatrix0 );
 	if( tml != -1 )
 	{
 		setUniformMatrix4fv( mvl, 1, false, _UserTexMat[ 1 ].get() );

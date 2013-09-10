@@ -31,7 +31,7 @@ namespace NL3D
 		programId = nglCreateProgram();
 		nlassert( programId != 0 );
 		linked = false;
-
+		std::fill( uniformIndices, uniformIndices + NUM_UNIFORMS, -1 );
 	}
 
 	CGLSLProgram::~CGLSLProgram()
@@ -171,6 +171,43 @@ namespace NL3D
 		}
 
 		return true;
+	}
+
+	const char *uniformNames[ CGLSLProgram::NUM_UNIFORMS ] =
+	{
+		"mvpMatrix",
+		"mvMatrix",
+		"texMatrix0",
+		"texMatrix1",
+		"texMatrix2",
+		"texMatrix3",
+		"constant0",
+		"constant1",
+		"constant2",
+		"constant3",
+		"diffuse",
+		"mcolor",
+		"sampler0",
+		"sampler1",
+		"sampler2",
+		"sampler3"
+	};
+
+	void CGLSLProgram::cacheUniformIndices()
+	{
+		nlassert( programId != 0 );
+
+		for( int i = MVPMatrix; i < NUM_UNIFORMS; i++ )
+		{
+			uniformIndices[ i ] = nglGetUniformLocation( programId, uniformNames[ i ] );
+		}
+	}
+
+	int CGLSLProgram::getUniformIndex( EUniform uniform )
+	{
+		nlassert( uniform < NUM_UNIFORMS );
+
+		return uniformIndices[ uniform ];
 	}
 
 	void CGLSLProgram::deleteShaders()

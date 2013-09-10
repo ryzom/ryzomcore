@@ -268,10 +268,10 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addConstants()
 	{
-		ss << "uniform vec4 contant0;" << std::endl;
-		ss << "uniform vec4 contant1;" << std::endl;
-		ss << "uniform vec4 contant2;" << std::endl;
-		ss << "uniform vec4 contant3;" << std::endl;
+		ss << "uniform vec4 constant0;" << std::endl;
+		ss << "uniform vec4 constant1;" << std::endl;
+		ss << "uniform vec4 constant2;" << std::endl;
+		ss << "uniform vec4 constant3;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::generateNormalVS()
@@ -297,7 +297,7 @@ namespace NL3D
 	{
 		
 		ss << "uniform mat4 mvMatrix;" << std::endl;
-		ss << "uniform mat4 texMatrix;" << std::endl;
+		ss << "uniform mat4 texMatrix0;" << std::endl;
 		ss << "smooth out vec3 cubeTexCoords;" << std::endl;
 		ss << std::endl;
 
@@ -315,7 +315,7 @@ namespace NL3D
 		ss << "vec3 n = vnormal.xyz;" << std::endl;
 		ss << "cubeTexCoords = ReflectionMap( ep, n );" << std::endl;
 		ss << "vec4 t = vec4( cubeTexCoords, 1.0 );" << std::endl;
-		ss << "t = t * texMatrix;" << std::endl;
+		ss << "t = t * texMatrix0;" << std::endl;
 		ss << "cubeTexCoords = t.xyz;" << std::endl;
 		ss << "gl_Position = mvpMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
 
@@ -863,12 +863,8 @@ namespace NL3D
 		for( int i = 0; i < ntextures; i++ )
 			ss << "uniform sampler2D sampler" << i << ";" << std::endl;
 
+		addConstants();
 
-		ss << "uniform vec4 constant0;" << std::endl;
-		ss << "uniform vec4 constant1;" << std::endl;
-		ss << "uniform vec4 constant2;" << std::endl;
-		ss << "uniform vec4 constant3;" << std::endl;
-		
 		addDiffuse();
 
 		ss << std::endl;
@@ -917,13 +913,13 @@ namespace NL3D
 	{
 		ss << "smooth in vec3 cubeTexCoords;" << std::endl;
 		ss << "uniform sampler2D sampler0;" << std::endl;
-		ss << "uniform samplerCube cubeSampler;" << std::endl;
+		ss << "uniform samplerCube sampler1;" << std::endl;
 		addDiffuse();
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;		
 		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
-		ss << "vec4 texel1 = textureCube( cubeSampler, cubeTexCoords );" << std::endl;
+		ss << "vec4 texel1 = textureCube( sampler1, cubeTexCoords );" << std::endl;
 		ss << "vec4 texel;" << std::endl;
 		ss << "texel.rgb = texel0.rgb * diffuse;" << std::endl;
 		ss << "texel.a = texel0.a;" << std::endl;

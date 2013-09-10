@@ -223,7 +223,8 @@ namespace NL3D
 
 			if( !activeProgramObject( p ) )
 				return false;
-
+			
+			p->cacheUniformIndices();
 			desc.setProgram( p );
 			shaderCache.cacheShader( desc );
 		}
@@ -240,14 +241,14 @@ namespace NL3D
 
 #ifdef GLSL
 
-		int mvpIndex = getUniformLocation( "mvpMatrix" );
+		int mvpIndex = currentProgram->getUniformIndex( IProgramObject::MVPMatrix );
 		if( mvpIndex != -1 )
 		{
 			CMatrix mat = _GLProjMat * _ModelViewMatrix;
 			setUniformMatrix4fv( mvpIndex, 1, false, mat.get() );
 		}
 
-		int colorIndex = getUniformLocation( "mcolor" );
+		int colorIndex = currentProgram->getUniformIndex( IProgramObject::Color );
 		if( colorIndex != -1 )
 		{
 			GLfloat glCol[ 4 ];
@@ -260,7 +261,7 @@ namespace NL3D
 			setUniform4f( colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 		}
 
-		int diffuseIndex = getUniformLocation( "diffuse" );
+		int diffuseIndex = currentProgram->getUniformIndex( IProgramObject::Diffuse );
 		if( diffuseIndex != -1 )
 		{
 			GLfloat glCol[ 4 ];
@@ -280,7 +281,7 @@ namespace NL3D
 		
 			for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
 			{
-				int cl = getUniformLocation( constNames[ i ] );
+				int cl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Constant0 + i ) );
 				if( cl != -1 )
 				{
 					CRGBA col = mat._TexEnvs[ i ].ConstantColor;

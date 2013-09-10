@@ -26,7 +26,30 @@ namespace NL3D
 	class IProgramObject
 	{
 	public:
+
+		enum EUniform
+		{
+			MVPMatrix,
+			MVMatrix,
+			TexMatrix0,
+			TexMatrix1,
+			TexMatrix2,
+			TexMatrix3,
+			Constant0,
+			Constant1,
+			Constant2,
+			Constant3,
+			Diffuse,
+			Color,
+			Sampler0,
+			Sampler1,
+			Sampler2,
+			Sampler3,
+			NUM_UNIFORMS
+		};
+
 		IProgramObject(){}
+
 		virtual ~IProgramObject(){}
 
 		virtual bool attachVertexProgram( IProgram *shader ) = 0;
@@ -42,6 +65,10 @@ namespace NL3D
 		virtual bool link( std::string &log ) = 0;
 
 		virtual bool validate( std::string &log ) = 0;
+
+		virtual void cacheUniformIndices() = 0;
+
+		virtual int getUniformIndex( EUniform uniform ) = 0;
 
 		bool isLinked() const{ return linked; }
 
