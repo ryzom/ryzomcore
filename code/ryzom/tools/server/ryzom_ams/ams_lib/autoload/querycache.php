@@ -1,7 +1,7 @@
 <?php
 
 /**
-* handler for storing changes when shard is offline.
+* class for storing changes when shard is offline.
 * @todo make sure that the querycache class is being used by the sync class and also for inserting the queries themselfs into it.
 * Atm this class isn't used yet if I remember correctly
 * @author Daan Janssens, mentored by Matthew Lagoe

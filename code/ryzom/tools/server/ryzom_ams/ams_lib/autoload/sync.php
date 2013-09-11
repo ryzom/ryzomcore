@@ -1,16 +1,17 @@
 <?php
-
+/**
+* handler for performing changes when shard is back online after being offline.
+* the sync class is responsible for the syncdata function, which will synchronise the website with the shard
+* (when the shard is offline, users can still change their password, email or even register)
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 class Sync{
     
     /**
-     *
-     * Function syncdata
-     *
-     * @takes        Nothing
-     * @return      array $values
-     *
-     * Info: Runs functions to finish syncing data when shard is offline
-     *
+     * performs the actions listed in the querycache.
+     * All entries in the querycache will be read and performed depending on their type.
+     * This is done because the shard could have been offline and we want changes made on the website (which is still online) to eventually hit the shard.
+     * These changes are: createPermissions, createUser, change_pass, change_mail
      */
     static public function syncdata () {
 
