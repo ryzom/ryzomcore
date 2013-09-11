@@ -586,7 +586,7 @@ namespace NL3D
 				std::string As = texelNames[ stage ];
 				As.append( ".a" );
 
-				ss << "texel.rgb = " << arg0 << " * " << As << ";";
+				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -598,7 +598,7 @@ namespace NL3D
 
 				std::string As = "texel.a";
 
-				ss << "texel.rgb = " << arg0 << " * " << As << ";";
+				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -610,7 +610,7 @@ namespace NL3D
 
 				std::string As = "diffuse.a";
 
-				ss << "texel.rgb = " << arg0 << " * " << As << ";";
+				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -623,7 +623,7 @@ namespace NL3D
 				std::string As = constantNames[ stage ];
 				As.append( ".a" );
 
-				ss << "texel.rgb = " << arg0 << " * " << As << ";";
+				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -689,7 +689,7 @@ namespace NL3D
 				std::string As = texelNames[ stage ];
 				As.append( ".a" );
 
-				ss << "texel.a = " << arg0 << " * " << As << ";";
+				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.a = texel.a + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -701,7 +701,7 @@ namespace NL3D
 
 				std::string As = "texel.a";
 
-				ss << "texel.a = " << arg0 << " * " << As << ";";
+				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.a = texel.a + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -713,7 +713,7 @@ namespace NL3D
 
 				std::string As = "diffuse.a";
 
-				ss << "texel.a = " << arg0 << " * " << As << ";";
+				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.a = texel.a + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -726,7 +726,7 @@ namespace NL3D
 				std::string As = constantNames[ stage ];
 				As.append( ".a" );
 
-				ss << "texel.a = " << arg0 << " * " << As << ";";
+				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.a = texel.a + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
 			}
 			break;
@@ -793,7 +793,7 @@ namespace NL3D
 					break;
 
 				case CMaterial::SrcAlpha:
-					ds << "texel.a;";
+					ds << "texel.a";
 					break;
 
 				case CMaterial::InvSrcAlpha:
@@ -829,19 +829,19 @@ namespace NL3D
 				switch( op )
 				{
 				case CMaterial::SrcColor:
-					ss << constantNames[ stage ] << ".rgb";
+					ds << constantNames[ stage ] << ".rgb";
 					break;
 
 				case CMaterial::InvSrcColor:
-					ss << "( vec3( 1.0, 1.0, 1.0 ) - " << constantNames[ stage ] << ".rgb )";
+					ds << "( vec3( 1.0, 1.0, 1.0 ) - " << constantNames[ stage ] << ".rgb )";
 					break;
 
 				case CMaterial::SrcAlpha:
-					ss << constantNames[ stage ] << ".a";
+					ds << constantNames[ stage ] << ".a";
 					break;
 
 				case CMaterial::InvSrcAlpha:
-					ss << "( 1.0 - " << constantNames[ stage ] << ".a )";
+					ds << "( 1.0 - " << constantNames[ stage ] << ".a )";
 					break;
 				}
 			break;
