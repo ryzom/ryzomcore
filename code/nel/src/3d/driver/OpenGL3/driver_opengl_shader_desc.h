@@ -35,6 +35,8 @@ namespace NL3D
 			program = NULL;
 			vbFlags = 0;
 			nlightmaps = 0;
+			alphaTest = false;
+			alphaTestTreshold = 0.5f;
 		}
 
 		~CShaderDesc(){
@@ -51,6 +53,18 @@ namespace NL3D
 			if( nlightmaps != o.nlightmaps )
 				return false;
 
+			if( alphaTest != o.alphaTest )
+				return false;
+
+			if( alphaTest )
+			{
+				if( alphaTestTreshold > o.alphaTestTreshold + 0.0001f )
+					return false;
+
+				if( alphaTestTreshold < o.alphaTestTreshold - 0.0001f )
+					return false;
+			}
+
 			for( int i = 0; i < MAX_TEXTURES; i++ )
 				if( texEnvMode[ i ] != o.texEnvMode[ i ] )
 					return false;
@@ -63,6 +77,9 @@ namespace NL3D
 		void setShaderType( uint32 type ){ shaderType = type; }
 		void setProgram( IProgramObject *p ){ program = p; }
 		void setNLightMaps( uint32 n ){ nlightmaps = n; }
+		void setAlphaTest( bool b ){ alphaTest = b; }
+		void setAlphaTestThreshold( float t ){ alphaTestTreshold = t; }
+
 		IProgramObject* getProgram() const{ return program; }
 
 	private:
@@ -70,6 +87,9 @@ namespace NL3D
 		uint32 vbFlags;
 		uint32 shaderType;
 		uint32 nlightmaps;
+		bool alphaTest;
+		float alphaTestTreshold;
+
 		IProgramObject *program;
 	};
 }

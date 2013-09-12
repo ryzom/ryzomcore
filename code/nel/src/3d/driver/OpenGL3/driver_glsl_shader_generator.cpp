@@ -274,6 +274,17 @@ namespace NL3D
 		ss << "uniform vec4 constant3;" << std::endl;
 	}
 
+	void CGLSLShaderGenerator::addAlphaTreshold()
+	{
+		ss << "uniform float alphaTreshold;" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addAlphaTest()
+	{
+		if( material->getAlphaTest() )
+			ss << "if( fragColor.a <= ( alphaTreshold - 0.0001 ) ) discard;" << std::endl;
+	}
+
 	void CGLSLShaderGenerator::generateNormalVS()
 	{
 		ss << "void main( void )" << std::endl;
@@ -464,6 +475,7 @@ namespace NL3D
 		}
 		addColor();
 		addConstants();
+		addAlphaTreshold();
 
 		ss << std::endl;
 		
@@ -504,10 +516,10 @@ namespace NL3D
 		if( vertexColor )
 			ss << "texel = color * texel;" << std::endl;
 
-		// Alpha test
-		//ss << "if( texel.a <= 0.5 ) discard;" << std::endl;
-	
 		ss << "fragColor = texel;" << std::endl;
+
+		addAlphaTest();
+
 		ss << "}" << std::endl;
 	}
 
@@ -872,6 +884,8 @@ namespace NL3D
 
 		addDiffuse();
 
+		addAlphaTreshold();
+
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
@@ -910,6 +924,7 @@ namespace NL3D
 		}
 
 		ss << "fragColor = texel;" << std::endl;
+		addAlphaTest();
 		ss << "}" << std::endl;
 		ss << std::endl;
 	}
@@ -920,6 +935,7 @@ namespace NL3D
 		ss << "uniform sampler2D sampler0;" << std::endl;
 		ss << "uniform samplerCube sampler1;" << std::endl;
 		addDiffuse();
+		addAlphaTreshold();
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;		
@@ -931,6 +947,7 @@ namespace NL3D
 		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
 		ss << "texel.a = texel1.a;" << std::endl;
 		ss << "fragColor = texel;" << std::endl;
+		addAlphaTest();
 		ss << "}" << std::endl;
 	}
 
@@ -950,6 +967,8 @@ namespace NL3D
 		addDiffuse();
 
 		addConstants();
+
+		addAlphaTreshold();
 
 		ss << std::endl;
 
@@ -981,6 +1000,7 @@ namespace NL3D
 		}
 
 		ss << "fragColor = texel;" << std::endl;
+		addAlphaTest();
 		ss << "}" << std::endl;
 	}
 
@@ -1010,6 +1030,8 @@ namespace NL3D
 		if( diffuse )
 			ss << "uniform sampler2D sampler3;" << std::endl;
 
+		addAlphaTreshold();
+
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
@@ -1037,6 +1059,8 @@ namespace NL3D
 		else
 			ss << "fragColor = texel2" << std::endl;
 
+		addAlphaTest();
+
 		ss << "}" << std::endl;
 
 		ss << std::endl;
@@ -1047,6 +1071,7 @@ namespace NL3D
 		ss << "uniform sampler2D sampler0;" << std::endl;
 		ss << "uniform sampler2D sampler1;" << std::endl;
 		addDiffuse();
+		addAlphaTreshold();
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
@@ -1056,6 +1081,7 @@ namespace NL3D
 		ss << "vec4 tex = mix( tex0, tex1, diffuse.a );" << std::endl;
 		ss << "tex.a = 0;" << std::endl;
 		ss << "fragColor = tex;" << std::endl;
+		addAlphaTest();
 		ss << "}" << std::endl;
 		ss << std::endl;
 

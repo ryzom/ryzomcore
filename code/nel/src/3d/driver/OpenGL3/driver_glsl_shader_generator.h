@@ -42,6 +42,8 @@ namespace NL3D
 		void addDiffuse();
 		void addColor();
 		void addConstants();
+		void addAlphaTreshold();
+		void addAlphaTest();
 
 		void generateNormalVS();
 		void generateSpecularVS();

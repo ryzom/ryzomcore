@@ -190,7 +190,8 @@ namespace NL3D
 		"sampler0",
 		"sampler1",
 		"sampler2",
-		"sampler3"
+		"sampler3",
+		"alphaTreshold"
 	};
 
 	void CGLSLProgram::cacheUniformIndices()

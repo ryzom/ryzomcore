@@ -169,6 +169,9 @@ namespace NL3D
 			}
 		}
 
+		desc.setAlphaTest( mat.getAlphaTest() );
+		desc.setAlphaTestThreshold( mat.getAlphaTestThreshold() );
+
 		p = shaderCache.findShader( desc );
 
 		if( p != NULL )

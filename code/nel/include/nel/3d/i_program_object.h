@@ -45,6 +45,7 @@ namespace NL3D
 			Sampler1,
 			Sampler2,
 			Sampler3,
+			AlphaTreshold,
 			NUM_UNIFORMS
 		};
 
