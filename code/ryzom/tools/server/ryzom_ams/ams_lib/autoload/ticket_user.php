@@ -1,13 +1,24 @@
 <?php
+/**
+* user entry point in the ticket system.
+* The ticket_user makes a link between the entire ticket system's lib db and the www user, which is stored in another db (this is the external ID).
+* The externalID could be the ID of a drupal user or wordpress user,.. The ticket_user also stores the permission of that user, this way the permission system
+* is inside the lib itself and can be used in any www version that you like. permission 1 = user, 2 = mod, 3 = admin.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 class Ticket_User{
     
-    private $tUserId;
-    private $permission;
-    private $externId;
+    private $tUserId;  /**< The id of the user inside the ticket system*/ 
+    private $permission;  /**< The permission of the user */ 
+    private $externId;  /**< The id of the user account in the www (could be drupal,...) that is linked to the ticket_user */ 
     
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
     
-    //Creates a ticket_user in the DB
+    /**
+    * create a new ticket user.
+    * @param $extern_id the id of the user account in the www version (drupal,...)
+    * @param $permission the permission that will be given to the user. 1=user, 2=mod, 3=admin
+    */
     public static function createTicketUser( $extern_id, $permission) {
         $dbl = new DBLayer("lib");
         $query = "INSERT INTO ticket_user (Permission, ExternId) VALUES (:perm, :ext_id)";
@@ -16,6 +27,12 @@ class Ticket_User{
 
     }
     
+    
+    /**
+    * check if a ticket_user object is a mod or not.
+    * @param $user the ticket_user object itself
+    * @return true or false
+    */
     public static function isMod($user){
         if(isset($user) && $user->getPermission() > 1){
             return true;
@@ -23,6 +40,12 @@ class Ticket_User{
         return false;
     }
     
+    
+    /**
+    * check if a ticket_user object is an admin or not.
+    * @param $user the ticket_user object itself
+    * @return true or false
+    */
     public static function isAdmin($user){
         if(isset($user) && $user->getPermission() == 3){
             return true;
@@ -30,7 +53,12 @@ class Ticket_User{
         return false;
     }
     
-    //return constructed element based on TUserId
+    
+    /**
+    * return constructed ticket_user object based on TUserId.
+    * @param $id the TUserId of the entry.
+    * @return constructed ticket_user object
+    */
     public static function constr_TUserId( $id) {
         $instance = new self();
         $instance->setTUserId($id);
@@ -38,7 +66,11 @@ class Ticket_User{
     
     }
     
-    //return all mods/admins
+    
+    /**
+    * return a list of all mods/admins.
+    * @return an array consisting of ticket_user objects that are mods & admins.
+    */
     public static function getModsAndAdmins() {
         $dbl = new DBLayer("lib");
         $statement = $dbl->executeWithoutParams("SELECT * FROM `ticket_user` WHERE `Permission` > 1");
@@ -52,7 +84,12 @@ class Ticket_User{
         return $result; 
     }
     
-    //return constructed element based on ExternId
+    
+    /**
+    * return constructed ticket_user object based on ExternId.
+    * @param $id the ExternId of the entry.
+    * @return constructed ticket_user object
+    */
     public static function constr_ExternId( $id) {
         $instance = new self();
         $dbl = new DBLayer("lib");
@@ -62,9 +99,14 @@ class Ticket_User{
         $instance->permission = $row['Permission'];
         $instance->externId = $row['ExternId'];
         return $instance;
-
     }
     
+    
+    /**
+    * change the permission of a ticket_user.
+    * @param $user_id the TUserId of the entry.
+    * @param $perm the new permission value.
+    */
     public static function change_permission($user_id, $perm){
         $user = new Ticket_User();
         $user->load_With_TUserId($user_id);
@@ -73,6 +115,11 @@ class Ticket_User{
     }
     
     
+    /**
+    * return the email address of a ticket_user.
+    * @param $id the TUserId of the entry.
+    * @return string containing the email address of that user.
+    */
     public static function get_email_by_user_id($id){
         $user = new Ticket_User();
         $user->load_With_TUserId($id);
@@ -81,6 +128,11 @@ class Ticket_User{
     }
     
     
+    /**
+    * return the username of a ticket_user.
+    * @param $id the TUserId of the entry.
+    * @return string containing username of that user.
+    */
     public static function get_username_from_id($id){
         $user = new Ticket_User();
         $user->load_With_TUserId($id);
@@ -89,13 +141,22 @@ class Ticket_User{
     }
     
     
+    /**
+    * return the TUserId of a ticket_user by giving a username.
+    * @param $username the username of a user.
+    * @return the TUserId related to that username.
+    */
     public static function get_id_from_username($username){
         $externId = WebUsers::getId($username);
         $user = Ticket_User::constr_ExternId($externId);
         return $user->getTUserId();   
     }
     
-    
+    /**
+    * return the ticket_user id from an email address.
+    * @param $email the emailaddress of a user.
+    * @return the ticket_user id related to that email address, in case none, return "FALSE".
+    */
     public static function get_id_from_email($email){
         $webUserId = WebUsers::getIdFromEmail($email);
         if($webUserId != "FALSE"){
@@ -108,10 +169,19 @@ class Ticket_User{
     
     
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
+    
+    /**
+    * A constructor.
+    * Empty constructor
+    */
     public function __construct() {
     }
     
-    //set values
+    
+    /**
+    * sets the object's attributes.
+    * @param $values should be an array of the form array('TUserId' => id, 'Permission' => perm, 'ExternId' => ext_id).
+    */
     public function set($values) {
         $this->setTUserId($values['TUserId']);
         $this->setPermission($values['Permission']);
@@ -119,7 +189,11 @@ class Ticket_User{
     }
     
     
-    //return constructed element based on TUserId
+    /**
+    * loads the object's attributes.
+    * loads the object's attributes by giving a TUserId.
+    * @param $id the id of the ticket_user that should be loaded
+    */
     public function load_With_TUserId( $id) {
         $dbl = new DBLayer("lib");
         $statement = $dbl->execute("SELECT * FROM ticket_user WHERE TUserId=:id", array('id' => $id));
@@ -129,7 +203,10 @@ class Ticket_User{
         $this->externId = $row['ExternId'];
     } 
     
-    //update private data to DB.
+    
+    /**
+    * update the object's attributes to the db.
+    */
     public function update(){
         $dbl = new DBLayer("lib");
         $query = "UPDATE ticket_user SET Permission = :perm, ExternId = :ext_id WHERE TUserId=:id";
@@ -139,16 +216,23 @@ class Ticket_User{
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
     
+    /**
+    * get permission attribute of the object.
+    */
     public function getPermission(){
         return $this->permission;
     }
    
-   
+    /**
+    * get externId attribute of the object.
+    */
     public function getExternId(){
         return $this->externId;
     }
     
-    
+    /**
+    * get tUserId attribute of the object.
+    */
     public function getTUserId(){
         return $this->tUserId;
     }
@@ -156,15 +240,27 @@ class Ticket_User{
     
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
     
+    /**
+    * set permission attribute of the object.
+    * @param $perm integer that indicates the permission level. (1= user, 2= mod, 3= admin)
+    */
     public function setPermission($perm){
         $this->permission = $perm;
     }
    
    
+    /**
+    * set externId attribute of the object.
+    * @param $id the external id.
+    */  
     public function setExternId($id){
         $this->externId = $id;
     }
     
+    /**
+    * set tUserId attribute of the object.
+    * @param $id the ticket_user id
+    */
     public function setTUserId($id){
         $this->tUserId= $id;
     }

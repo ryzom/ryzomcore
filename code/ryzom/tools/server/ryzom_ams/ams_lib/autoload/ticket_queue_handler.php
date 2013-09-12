@@ -1,14 +1,31 @@
 <?php
-
+/**
+* returns tickets (queues) that are related in some way.
+* This class handles the creation and returning of existing ticket queues. Normally a $_GET['get'] parameter is being used to identify what kind of tickets should be shown.
+* the getTickets() function uses this parameter($input) and uses the ticket_queue class to load the specific query.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 class Ticket_Queue_Handler{
     
-    private $pagination;
-    private $queue;
+    private $pagination; /**< Pagination object, this way only a few tickets (related to that pagenumber) will be shown */ 
+    private $queue; /**< The queue object, being used to get the queries and parameters. */ 
     
+    /**
+    * A constructor.
+    * Instantiates the queue object.
+    */
     function __construct() {
         $this->queue = new Ticket_Queue();
     }
     
+    /**
+    * returns the tickets that are related in someway defined by $input.
+    * The $input parameter should be a string that defines what kind of queue should be loaded. A new pagination object will be instantiated and will load 10 entries,
+    * related to the $_GET['pagenum'] variable.
+    * @param $input identifier that defines what queue to load.
+    * @param $user_id the id of the user that browses the queues, some queues can be depending on this.
+    * @return an array consisting of ticket objects, beware, the author & category of a ticket, are objects on their own (no integers are used this time).
+    */
     public function getTickets($input, $user_id){
      
             switch ($input){
@@ -51,17 +68,29 @@ class Ticket_Queue_Handler{
             
     }
     
+    
+    /**
+    * get pagination attribute of the object.
+    */
     public function getPagination(){
         return $this->pagination;
     }
     
+    /**
+    * creates the queue.
+    * afterwards the getTickets function should be called, else a lot of extra parameters had to be added to the getTickets function..
+    */
     public function createQueue($userid, $groupid, $what, $how, $who){     
         $this->queue->createQueue($userid, $groupid, $what, $how, $who);
     }
     
-    //==================================================================================
-    //Info retrievers about ticket statistics
     
+    ////////////////////////////////////////////Info retrievers about ticket statistics////////////////////////////////////////////////////
+    
+    /**
+    * get the number of tickets in the todo queue for a specific user.
+    * @param $user_id the user being queried
+    */
     public static function getNrOfTicketsToDo($user_id){
         $queueHandler = new Ticket_Queue_Handler();
         $queueHandler->queue->loadToDoTickets($user_id);
@@ -71,6 +100,10 @@ class Ticket_Queue_Handler{
         return $dbl->execute($query,$params)->rowCount();
     }
     
+    /**
+    * get the number of tickets assigned to a specific user and waiting for support.
+    * @param $user_id the user being queried
+    */
     public static function getNrOfTicketsAssignedWaiting($user_id){
         $queueHandler = new Ticket_Queue_Handler();
         $queueHandler->queue->loadAssignedandWaiting($user_id);
@@ -80,6 +113,9 @@ class Ticket_Queue_Handler{
         return $dbl->execute($query,$params)->rowCount();
     }
     
+    /**
+    * get the total number of tickets.
+    */
     public static function getNrOfTickets(){
         $queueHandler = new Ticket_Queue_Handler();
         $queueHandler->queue->loadAllTickets();
@@ -89,6 +125,9 @@ class Ticket_Queue_Handler{
         return $dbl->execute($query,$params)->rowCount();
     }
     
+    /**
+    * get the ticket object of the latest added ticket.
+    */
     public static function getNewestTicket(){
         $dbl = new DBLayer("lib");
         $statement = $dbl->executeWithoutParams("SELECT * FROM `ticket` ORDER BY `TId` DESC LIMIT 1 ");
