@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['load',['load',['../classAssigned.html#aa3f2ea4abe6e71c19373de8df7481cfb',1,'Assigned\load()'],['../classForwarded.html#a9ef9ba4dff566a32fb08fe1bb3e36740',1,'Forwarded\load()']]],
+  ['load_5fwith_5fsgroupid',['load_With_SGroupId',['../classSupport__Group.html#aa7dcaff3a34942cbfa74fdda31e37620',1,'Support_Group']]],
+  ['load_5fwith_5fsid',['load_With_SID',['../classQuerycache.html#a579edcc576b076f884884cf509436768',1,'Querycache']]],
+  ['load_5fwith_5ftcategoryid',['load_With_TCategoryId',['../classTicket__Category.html#a66f5c7cb775b14bfa5ffc9467a63970f',1,'Ticket_Category']]],
+  ['load_5fwith_5ftcontentid',['load_With_TContentId',['../classTicket__Content.html#a3fe4c1b84b3751c8d8afe82eeb46155d',1,'Ticket_Content']]],
+  ['load_5fwith_5fticket',['load_With_Ticket',['../classTicket__Info.html#a745aad9aceb76cc81222a458e8eba99d',1,'Ticket_Info']]],
+  ['load_5fwith_5ftid',['load_With_TId',['../classTicket.html#a015b73c7de955bbf6991f1345d91eecf',1,'Ticket']]],
+  ['load_5fwith_5ftinfoid',['load_With_TInfoId',['../classTicket__Info.html#a7d2ea8863661e2e492b2a31c3b619139',1,'Ticket_Info']]],
+  ['load_5fwith_5ftlogid',['load_With_TLogId',['../classTicket__Log.html#a56d7a9f19d4913489aef19c279c0e076',1,'Ticket_Log']]],
+  ['load_5fwith_5ftreplyid',['load_With_TReplyId',['../classTicket__Reply.html#a262662361c75e7d12b148058f340ecf4',1,'Ticket_Reply']]],
+  ['load_5fwith_5ftuserid',['load_With_TUserId',['../classTicket__User.html#a982f1e0aa98f3abb6451772ceac74708',1,'Ticket_User']]],
+  ['loadallclosedtickets',['loadAllClosedTickets',['../classTicket__Queue.html#a328adadd5c9481a87ff712b2830a8519',1,'Ticket_Queue']]],
+  ['loadallnotassignedtickets',['loadAllNotAssignedTickets',['../classTicket__Queue.html#a5760df002c7ad36b92479754835058e9',1,'Ticket_Queue']]],
+  ['loadallopentickets',['loadAllOpenTickets',['../classTicket__Queue.html#a93e3b5126f01a9b14dce1d89bacc73b6',1,'Ticket_Queue']]],
+  ['loadalltickets',['loadAllTickets',['../classTicket__Queue.html#a0053185e73f37195adf22051cc7d87f8',1,'Ticket_Queue']]],
+  ['loadassignedandwaiting',['loadAssignedandWaiting',['../classTicket__Queue.html#a309b4c6c5423eecd6c8f57af7f60aee2',1,'Ticket_Queue']]],
+  ['loadtemplate',['loadTemplate',['../classHelpers.html#ad70beebe7bd2f0909dc882f6d381cbb7',1,'Helpers']]],
+  ['loadtodotickets',['loadToDoTickets',['../classTicket__Queue.html#ac35ffa886f20979b41a70b446bf7e6b2',1,'Ticket_Queue']]]
+];
