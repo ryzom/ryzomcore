@@ -1,10 +1,15 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the login page.
+* it will try to auto-login, this can only be used while ingame, the web browser sends additional cookie information that's also stored in the open_ring db.
+* We will compare the values and if they match, the user will be automatically logged in!
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function login(){
 	global $INGAME_WEBPATH;
 	global $WEBPATH;
 	if ( helpers :: check_if_game_client () ){
-		//check if you are logged in ingame.
+		//check if you are logged in ingame, this should auto login
 		$result = Helpers::check_login_ingame();
 		if( $result != "FALSE"){
 			//handle successful login

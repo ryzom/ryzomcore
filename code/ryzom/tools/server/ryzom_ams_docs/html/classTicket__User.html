@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -89,82 +91,73 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Ticket_User" -->
 <p>user entry point in the ticket system.  
  <a href="classTicket__User.html#details">More...</a></p>
-
-<p><a href="classTicket__User-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a7581ea4400e1a8f0824598a1e0e038b3">__construct</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a7581ea4400e1a8f0824598a1e0e038b3"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#af038656737c0518eab287ef4098d37e7">set</a> ($values)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#af038656737c0518eab287ef4098d37e7"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a982f1e0aa98f3abb6451772ceac74708">load_With_TUserId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#a982f1e0aa98f3abb6451772ceac74708"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a68c6a834f65de5fbdddaa9818cf4842d"></a><!-- doxytag: member="Ticket_User::update" ref="a68c6a834f65de5fbdddaa9818cf4842d" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a68c6a834f65de5fbdddaa9818cf4842d">update</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the object's attributes to the db. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3f28fd031679b16d4a80653754f179eb"></a><!-- doxytag: member="Ticket_User::getPermission" ref="a3f28fd031679b16d4a80653754f179eb" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a3f28fd031679b16d4a80653754f179eb">getPermission</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get permission attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a45675149ecaa6bbabd8673823437b1ea"></a><!-- doxytag: member="Ticket_User::getExternId" ref="a45675149ecaa6bbabd8673823437b1ea" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a45675149ecaa6bbabd8673823437b1ea">getExternId</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get externId attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4df262f17c5e543842e5f49db1970280"></a><!-- doxytag: member="Ticket_User::getTUserId" ref="a4df262f17c5e543842e5f49db1970280" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a4df262f17c5e543842e5f49db1970280">getTUserId</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get tUserId attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a3a35f8730a62f8bc527fda697a520df6">setPermission</a> ($perm)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set permission attribute of the object.  <a href="#a3a35f8730a62f8bc527fda697a520df6"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#af62595ffa430126baa9cb965174486f0">setExternId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set externId attribute of the object.  <a href="#af62595ffa430126baa9cb965174486f0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a3dd334c95ac15ccbc49c8971fab95b35">setTUserId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set tUserId attribute of the object.  <a href="#a3dd334c95ac15ccbc49c8971fab95b35"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a095c5d389db211932136b53f25f39685"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a8bdfe0a5256e35367225bcd6d278ef21"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#af43df1ba39e073e4b3a0120e6e4d3140">load_With_TUserId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#af43df1ba39e073e4b3a0120e6e4d3140"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a842e4774e3b3601a005b995c02f7e883">update</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the object's attributes to the db.  <a href="#a842e4774e3b3601a005b995c02f7e883"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a478067ecf173884c2ee3e5b94e746200">getPermission</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get permission attribute of the object.  <a href="#a478067ecf173884c2ee3e5b94e746200"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ace230deb485c9f115f7fea4ce92442a3">getExternId</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get externId attribute of the object.  <a href="#ace230deb485c9f115f7fea4ce92442a3"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a4a31c27c61f9794200b647bf810461f5">getTUserId</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get tUserId attribute of the object.  <a href="#a4a31c27c61f9794200b647bf810461f5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#adf7c497fb026ee6e05f6ece91f541839">setPermission</a> ($perm)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set permission attribute of the object.  <a href="#adf7c497fb026ee6e05f6ece91f541839"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ad38846bb954052a5293ae2d26cf810d2">setExternId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set externId attribute of the object.  <a href="#ad38846bb954052a5293ae2d26cf810d2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a0faf8954e86346e7b566870b1a3c0a4a">setTUserId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set tUserId attribute of the object.  <a href="#a0faf8954e86346e7b566870b1a3c0a4a"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a531f0c78a90cb284e81bc1a9651d808d">createTicketUser</a> ($extern_id, $permission)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">create a new ticket user.  <a href="#a531f0c78a90cb284e81bc1a9651d808d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ab0badcae4b662e589f2eab4124a2adf7">isMod</a> ($user)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if a ticket_user object is a mod or not.  <a href="#ab0badcae4b662e589f2eab4124a2adf7"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a30a17880b9ad06c7d5c3e7a8f2fb5d9c">isAdmin</a> ($user)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if a ticket_user object is an admin or not.  <a href="#a30a17880b9ad06c7d5c3e7a8f2fb5d9c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a43c21d6bdccb68a79677eb41291b3082">constr_TUserId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return constructed ticket_user object based on TUserId.  <a href="#a43c21d6bdccb68a79677eb41291b3082"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#af988917dc55b56b71764e0bb79075e97">getModsAndAdmins</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return a list of all mods/admins.  <a href="#af988917dc55b56b71764e0bb79075e97"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ab61b472135a3b4cc4c24481de6bd90cc">constr_ExternId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return constructed ticket_user object based on ExternId.  <a href="#ab61b472135a3b4cc4c24481de6bd90cc"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#aa3123d101bc451c3d2911263e10a4464">change_permission</a> ($user_id, $perm)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">change the permission of a ticket_user.  <a href="#aa3123d101bc451c3d2911263e10a4464"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ac9233453c39a9193993baa30711f1856">get_email_by_user_id</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the email address of a ticket_user.  <a href="#ac9233453c39a9193993baa30711f1856"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a550d9a436e4820854d7fd3d998a2cb7c">get_username_from_id</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the username of a ticket_user.  <a href="#a550d9a436e4820854d7fd3d998a2cb7c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a7e8ec955186676aff3f3b7757841962c">get_id_from_username</a> ($username)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the TUserId of a ticket_user by giving a username.  <a href="#a7e8ec955186676aff3f3b7757841962c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ad74a6cb7ac2f021ff70cf8bcb43b1cba">get_id_from_email</a> ($email)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the ticket_user id from an email address.  <a href="#ad74a6cb7ac2f021ff70cf8bcb43b1cba"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a37c416f7d3723874f3ac49c7f9f5a21c">createTicketUser</a> ($extern_id, $permission)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">create a new ticket user.  <a href="#a37c416f7d3723874f3ac49c7f9f5a21c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a8d88cdbf205bf7d24be03157d25bb7d8">isMod</a> ($user)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if a ticket_user object is a mod or not.  <a href="#a8d88cdbf205bf7d24be03157d25bb7d8"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ae8a7d91474cde916fced2127fab426d2">isAdmin</a> ($user)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if a ticket_user object is an admin or not.  <a href="#ae8a7d91474cde916fced2127fab426d2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a10939bce9b667f26d3827993b4e3df1d">constr_TUserId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return constructed ticket_user object based on TUserId.  <a href="#a10939bce9b667f26d3827993b4e3df1d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a71099747902fb7e064ec1d4128ea4576">getModsAndAdmins</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return a list of all mods/admins.  <a href="#a71099747902fb7e064ec1d4128ea4576"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a4e5c577ed0a9da4b1c56397912f02ba0">constr_ExternId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return constructed ticket_user object based on ExternId.  <a href="#a4e5c577ed0a9da4b1c56397912f02ba0"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a78d4d6de74b1ee26cb9192f36e022416">change_permission</a> ($user_id, $perm)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">change the permission of a ticket_user.  <a href="#a78d4d6de74b1ee26cb9192f36e022416"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a7274bc305ccce731091c68d1607cb6e9">get_email_by_user_id</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the email address of a ticket_user.  <a href="#a7274bc305ccce731091c68d1607cb6e9"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a266ff1e60e08dcd8c7e70f22f5a33e93">get_username_from_id</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the username of a ticket_user.  <a href="#a266ff1e60e08dcd8c7e70f22f5a33e93"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a0bcfa281f41b948eb42dd18992724543">get_id_from_username</a> ($username)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the TUserId of a ticket_user by giving a username.  <a href="#a0bcfa281f41b948eb42dd18992724543"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a7feeb7a909bf6733de21300d0ea0e1bd">get_id_from_email</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the ticket_user id from an email address.  <a href="#a7feeb7a909bf6733de21300d0ea0e1bd"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab017c0eab7b6083b3de58c8388251b50"></a><!-- doxytag: member="Ticket_User::$tUserId" ref="ab017c0eab7b6083b3de58c8388251b50" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#ab017c0eab7b6083b3de58c8388251b50">$tUserId</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the user inside the ticket system. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2a3f7ae998f3926ab666167c9f63bcfc"></a><!-- doxytag: member="Ticket_User::$permission" ref="a2a3f7ae998f3926ab666167c9f63bcfc" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a2a3f7ae998f3926ab666167c9f63bcfc">$permission</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The permission of the user. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abee3b416d7f7db5bf23ed39a095c36c6"></a><!-- doxytag: member="Ticket_User::$externId" ref="abee3b416d7f7db5bf23ed39a095c36c6" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#abee3b416d7f7db5bf23ed39a095c36c6">$externId</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the user account in the www (could be drupal,...) that is linked to the ticket_user. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#a2f1828693b198682ae3e926e63a4c110">$tUserId</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the user inside the ticket system.  <a href="#a2f1828693b198682ae3e926e63a4c110"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#aad04b6f3304fe6a13d5be37f7cd28938">$permission</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The permission of the user.  <a href="#aad04b6f3304fe6a13d5be37f7cd28938"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__User.html#af51400fe5820e964cb38fcc60b3afd84">$externId</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the user account in the www (could be drupal,...) that is linked to the ticket_user.  <a href="#af51400fe5820e964cb38fcc60b3afd84"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>user entry point in the ticket system. </p>
 <p>The ticket_user makes a link between the entire ticket system's lib db and the www user, which is stored in another db (this is the external ID). The externalID could be the ID of a drupal user or wordpress user,.. The ticket_user also stores the permission of that user, this way the permission system is inside the lib itself and can be used in any www version that you like. permission 1 = user, 2 = mod, 3 = admin. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a7581ea4400e1a8f0824598a1e0e038b3"></a><!-- doxytag: member="Ticket_User::__construct" ref="a7581ea4400e1a8f0824598a1e0e038b3" args="()" -->
+<a class="anchor" id="a095c5d389db211932136b53f25f39685"></a><!-- doxytag: member="Ticket_User::__construct" ref="a095c5d389db211932136b53f25f39685" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__User.html#a7581ea4400e1a8f0824598a1e0e038b3">Ticket_User::__construct</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#a095c5d389db211932136b53f25f39685">__construct</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -179,12 +172,12 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="aa3123d101bc451c3d2911263e10a4464"></a><!-- doxytag: member="Ticket_User::change_permission" ref="aa3123d101bc451c3d2911263e10a4464" args="($user_id, $perm)" -->
+<a class="anchor" id="a78d4d6de74b1ee26cb9192f36e022416"></a><!-- doxytag: member="Ticket_User::change_permission" ref="a78d4d6de74b1ee26cb9192f36e022416" args="($user_id, $perm)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#aa3123d101bc451c3d2911263e10a4464">Ticket_User::change_permission</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a78d4d6de74b1ee26cb9192f36e022416">change_permission</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user_id</em>, </td>
@@ -215,12 +208,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab61b472135a3b4cc4c24481de6bd90cc"></a><!-- doxytag: member="Ticket_User::constr_ExternId" ref="ab61b472135a3b4cc4c24481de6bd90cc" args="($id)" -->
+<a class="anchor" id="a4e5c577ed0a9da4b1c56397912f02ba0"></a><!-- doxytag: member="Ticket_User::constr_ExternId" ref="a4e5c577ed0a9da4b1c56397912f02ba0" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#ab61b472135a3b4cc4c24481de6bd90cc">Ticket_User::constr_ExternId</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a4e5c577ed0a9da4b1c56397912f02ba0">constr_ExternId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -241,12 +234,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a43c21d6bdccb68a79677eb41291b3082"></a><!-- doxytag: member="Ticket_User::constr_TUserId" ref="a43c21d6bdccb68a79677eb41291b3082" args="($id)" -->
+<a class="anchor" id="a10939bce9b667f26d3827993b4e3df1d"></a><!-- doxytag: member="Ticket_User::constr_TUserId" ref="a10939bce9b667f26d3827993b4e3df1d" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#a43c21d6bdccb68a79677eb41291b3082">Ticket_User::constr_TUserId</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a10939bce9b667f26d3827993b4e3df1d">constr_TUserId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -267,12 +260,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a531f0c78a90cb284e81bc1a9651d808d"></a><!-- doxytag: member="Ticket_User::createTicketUser" ref="a531f0c78a90cb284e81bc1a9651d808d" args="($extern_id, $permission)" -->
+<a class="anchor" id="a37c416f7d3723874f3ac49c7f9f5a21c"></a><!-- doxytag: member="Ticket_User::createTicketUser" ref="a37c416f7d3723874f3ac49c7f9f5a21c" args="($extern_id, $permission)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#a531f0c78a90cb284e81bc1a9651d808d">Ticket_User::createTicketUser</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a37c416f7d3723874f3ac49c7f9f5a21c">createTicketUser</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>extern_id</em>, </td>
@@ -303,12 +296,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac9233453c39a9193993baa30711f1856"></a><!-- doxytag: member="Ticket_User::get_email_by_user_id" ref="ac9233453c39a9193993baa30711f1856" args="($id)" -->
+<a class="anchor" id="a7274bc305ccce731091c68d1607cb6e9"></a><!-- doxytag: member="Ticket_User::get_email_by_user_id" ref="a7274bc305ccce731091c68d1607cb6e9" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#ac9233453c39a9193993baa30711f1856">Ticket_User::get_email_by_user_id</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a7274bc305ccce731091c68d1607cb6e9">get_email_by_user_id</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -329,12 +322,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad74a6cb7ac2f021ff70cf8bcb43b1cba"></a><!-- doxytag: member="Ticket_User::get_id_from_email" ref="ad74a6cb7ac2f021ff70cf8bcb43b1cba" args="($email)" -->
+<a class="anchor" id="a7feeb7a909bf6733de21300d0ea0e1bd"></a><!-- doxytag: member="Ticket_User::get_id_from_email" ref="a7feeb7a909bf6733de21300d0ea0e1bd" args="($email)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#ad74a6cb7ac2f021ff70cf8bcb43b1cba">Ticket_User::get_id_from_email</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a7feeb7a909bf6733de21300d0ea0e1bd">get_id_from_email</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>email</em></td><td>)</td>
@@ -355,12 +348,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7e8ec955186676aff3f3b7757841962c"></a><!-- doxytag: member="Ticket_User::get_id_from_username" ref="a7e8ec955186676aff3f3b7757841962c" args="($username)" -->
+<a class="anchor" id="a0bcfa281f41b948eb42dd18992724543"></a><!-- doxytag: member="Ticket_User::get_id_from_username" ref="a0bcfa281f41b948eb42dd18992724543" args="($username)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#a7e8ec955186676aff3f3b7757841962c">Ticket_User::get_id_from_username</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a0bcfa281f41b948eb42dd18992724543">get_id_from_username</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>username</em></td><td>)</td>
@@ -381,12 +374,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a550d9a436e4820854d7fd3d998a2cb7c"></a><!-- doxytag: member="Ticket_User::get_username_from_id" ref="a550d9a436e4820854d7fd3d998a2cb7c" args="($id)" -->
+<a class="anchor" id="a266ff1e60e08dcd8c7e70f22f5a33e93"></a><!-- doxytag: member="Ticket_User::get_username_from_id" ref="a266ff1e60e08dcd8c7e70f22f5a33e93" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#a550d9a436e4820854d7fd3d998a2cb7c">Ticket_User::get_username_from_id</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a266ff1e60e08dcd8c7e70f22f5a33e93">get_username_from_id</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -407,12 +400,30 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="af988917dc55b56b71764e0bb79075e97"></a><!-- doxytag: member="Ticket_User::getModsAndAdmins" ref="af988917dc55b56b71764e0bb79075e97" args="()" -->
+<a class="anchor" id="ace230deb485c9f115f7fea4ce92442a3"></a><!-- doxytag: member="Ticket_User::getExternId" ref="ace230deb485c9f115f7fea4ce92442a3" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#af988917dc55b56b71764e0bb79075e97">Ticket_User::getModsAndAdmins</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#ace230deb485c9f115f7fea4ce92442a3">getExternId</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get externId attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a71099747902fb7e064ec1d4128ea4576"></a><!-- doxytag: member="Ticket_User::getModsAndAdmins" ref="a71099747902fb7e064ec1d4128ea4576" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a71099747902fb7e064ec1d4128ea4576">getModsAndAdmins</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [static]</code></td>
@@ -426,12 +437,48 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a30a17880b9ad06c7d5c3e7a8f2fb5d9c"></a><!-- doxytag: member="Ticket_User::isAdmin" ref="a30a17880b9ad06c7d5c3e7a8f2fb5d9c" args="($user)" -->
+<a class="anchor" id="a478067ecf173884c2ee3e5b94e746200"></a><!-- doxytag: member="Ticket_User::getPermission" ref="a478067ecf173884c2ee3e5b94e746200" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#a30a17880b9ad06c7d5c3e7a8f2fb5d9c">Ticket_User::isAdmin</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#a478067ecf173884c2ee3e5b94e746200">getPermission</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get permission attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a4a31c27c61f9794200b647bf810461f5"></a><!-- doxytag: member="Ticket_User::getTUserId" ref="a4a31c27c61f9794200b647bf810461f5" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__User.html#a4a31c27c61f9794200b647bf810461f5">getTUserId</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get tUserId attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae8a7d91474cde916fced2127fab426d2"></a><!-- doxytag: member="Ticket_User::isAdmin" ref="ae8a7d91474cde916fced2127fab426d2" args="($user)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTicket__User.html#ae8a7d91474cde916fced2127fab426d2">isAdmin</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em></td><td>)</td>
@@ -452,12 +499,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab0badcae4b662e589f2eab4124a2adf7"></a><!-- doxytag: member="Ticket_User::isMod" ref="ab0badcae4b662e589f2eab4124a2adf7" args="($user)" -->
+<a class="anchor" id="a8d88cdbf205bf7d24be03157d25bb7d8"></a><!-- doxytag: member="Ticket_User::isMod" ref="a8d88cdbf205bf7d24be03157d25bb7d8" args="($user)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__User.html#ab0badcae4b662e589f2eab4124a2adf7">Ticket_User::isMod</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__User.html#a8d88cdbf205bf7d24be03157d25bb7d8">isMod</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em></td><td>)</td>
@@ -478,12 +525,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a982f1e0aa98f3abb6451772ceac74708"></a><!-- doxytag: member="Ticket_User::load_With_TUserId" ref="a982f1e0aa98f3abb6451772ceac74708" args="($id)" -->
+<a class="anchor" id="af43df1ba39e073e4b3a0120e6e4d3140"></a><!-- doxytag: member="Ticket_User::load_With_TUserId" ref="af43df1ba39e073e4b3a0120e6e4d3140" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__User.html#a982f1e0aa98f3abb6451772ceac74708">Ticket_User::load_With_TUserId</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#af43df1ba39e073e4b3a0120e6e4d3140">load_With_TUserId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -504,12 +551,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="af038656737c0518eab287ef4098d37e7"></a><!-- doxytag: member="Ticket_User::set" ref="af038656737c0518eab287ef4098d37e7" args="($values)" -->
+<a class="anchor" id="a8bdfe0a5256e35367225bcd6d278ef21"></a><!-- doxytag: member="Ticket_User::set" ref="a8bdfe0a5256e35367225bcd6d278ef21" args="($values)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__User.html#af038656737c0518eab287ef4098d37e7">Ticket_User::set</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em></td><td>)</td>
@@ -529,12 +576,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="af62595ffa430126baa9cb965174486f0"></a><!-- doxytag: member="Ticket_User::setExternId" ref="af62595ffa430126baa9cb965174486f0" args="($id)" -->
+<a class="anchor" id="ad38846bb954052a5293ae2d26cf810d2"></a><!-- doxytag: member="Ticket_User::setExternId" ref="ad38846bb954052a5293ae2d26cf810d2" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__User.html#af62595ffa430126baa9cb965174486f0">Ticket_User::setExternId</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#ad38846bb954052a5293ae2d26cf810d2">setExternId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -554,12 +601,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3a35f8730a62f8bc527fda697a520df6"></a><!-- doxytag: member="Ticket_User::setPermission" ref="a3a35f8730a62f8bc527fda697a520df6" args="($perm)" -->
+<a class="anchor" id="adf7c497fb026ee6e05f6ece91f541839"></a><!-- doxytag: member="Ticket_User::setPermission" ref="adf7c497fb026ee6e05f6ece91f541839" args="($perm)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__User.html#a3a35f8730a62f8bc527fda697a520df6">Ticket_User::setPermission</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#adf7c497fb026ee6e05f6ece91f541839">setPermission</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>perm</em></td><td>)</td>
@@ -579,12 +626,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3dd334c95ac15ccbc49c8971fab95b35"></a><!-- doxytag: member="Ticket_User::setTUserId" ref="a3dd334c95ac15ccbc49c8971fab95b35" args="($id)" -->
+<a class="anchor" id="a0faf8954e86346e7b566870b1a3c0a4a"></a><!-- doxytag: member="Ticket_User::setTUserId" ref="a0faf8954e86346e7b566870b1a3c0a4a" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__User.html#a3dd334c95ac15ccbc49c8971fab95b35">Ticket_User::setTUserId</a> </td>
+          <td class="memname"><a class="el" href="classTicket__User.html#a0faf8954e86346e7b566870b1a3c0a4a">setTUserId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -604,8 +651,72 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a842e4774e3b3601a005b995c02f7e883"></a><!-- doxytag: member="Ticket_User::update" ref="a842e4774e3b3601a005b995c02f7e883" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__User.html#a842e4774e3b3601a005b995c02f7e883">update</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>update the object's attributes to the db. </p>
+
+</div>
+</div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="af51400fe5820e964cb38fcc60b3afd84"></a><!-- doxytag: member="Ticket_User::$externId" ref="af51400fe5820e964cb38fcc60b3afd84" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$externId<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The id of the user account in the www (could be drupal,...) that is linked to the ticket_user. </p>
+
+</div>
+</div>
+<a class="anchor" id="aad04b6f3304fe6a13d5be37f7cd28938"></a><!-- doxytag: member="Ticket_User::$permission" ref="aad04b6f3304fe6a13d5be37f7cd28938" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$permission<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The permission of the user. </p>
+
+</div>
+</div>
+<a class="anchor" id="a2f1828693b198682ae3e926e63a4c110"></a><!-- doxytag: member="Ticket_User::$tUserId" ref="a2f1828693b198682ae3e926e63a4c110" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$tUserId<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The id of the user inside the ticket system. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/ticket_user.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="ticket__user_8php.html">ticket_user.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -613,7 +724,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -625,7 +736,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:46 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

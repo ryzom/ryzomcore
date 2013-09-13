@@ -91,7 +91,7 @@ class Ticket_Log{
 
     /**
     * return constructed element based on TLogId
-    * @param $ticket_log id of the entry that we want to load into our object.
+    * @param $id ticket_log id of the entry that we want to load into our object.
     * @return constructed ticket_log object.
     */
     public static function constr_TLogId( $id) {

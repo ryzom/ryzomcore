@@ -1,5 +1,12 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the show_ticket page.
+* check if the person browsing this page is a mod/admin or the ticket creator himself, if not he'll be redirected to an error page.
+* if the $_GET['action'] var is set and the user executing is a mod/admin, it will try to execute the action. The actions here are: forwarding of a ticket,
+* assigning a ticket and unassigning a ticket. This function returns a lot of information that will be used by the template to show the ticket. Mods/admins will be able to
+* also see hidden replies to a ticket.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function show_ticket(){
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){

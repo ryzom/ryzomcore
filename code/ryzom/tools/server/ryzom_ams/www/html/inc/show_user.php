@@ -1,8 +1,15 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the show_user page.
+* Users can only browse their own user page, while mods/admins can browse all user pages. The current settings of the user being browsed will be loaded, as also their created tickets
+* and this info will be returned so it can be used by the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function show_user(){
      //if logged in
     if(WebUsers::isLoggedIn()){
+        
+        //Users can only browse their own user page, while mods/admins can browse all user pages
         if( !isset($_GET['id']) ||  Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) || $_GET['id'] == $_SESSION['id'] ){
             
             if(isset($_GET['id'])){

@@ -1,11 +1,17 @@
 <?php
-
+/**
+* This function is beign used to login a user.
+* It will first check if the sent POST data returns a match with the DB, if it does, some session variables will be appointed to the user and he will be redirected to the index page again.
+* If it didn't match, the template will be reloaded and a matching error message will be shown.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function login(){
 	global $INGAME_WEBPATH;
 	global $WEBPATH;
 	try{
 		$username = filter_var($_POST['Username'],FILTER_SANITIZE_STRING);
 		$password = filter_var($_POST['Password'],FILTER_SANITIZE_STRING);
+		//check if the filtered sent POST data returns a match with the DB
 		$result = WebUsers::checkLoginMatch($username, $password);
 
 		if( $result != "fail"){

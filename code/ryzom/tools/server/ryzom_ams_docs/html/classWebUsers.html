@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -87,7 +89,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">WebUsers Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<!-- doxytag: class="WebUsers" --><!-- doxytag: inherits="Users" -->
+<!-- doxytag: class="WebUsers" --><!-- doxytag: inherits="Users,Users" -->
 <p>handles CMS/WWW related functions regarding user management &amp; registration.  
  <a href="classWebUsers.html#details">More...</a></p>
 <div class="dynheader">
@@ -97,103 +99,132 @@ Inheritance diagram for WebUsers:</div>
   <img src="classWebUsers.png" usemap="#WebUsers_map" alt=""/>
   <map id="WebUsers_map" name="WebUsers_map">
 <area href="classUsers.html" title="handles basic user registration &amp; management functions (shard related)." alt="Users" shape="rect" coords="0,0,69,24"/>
+<area href="classUsers.html" title="handles basic user registration &amp; management functions (shard related)." alt="Users" shape="rect" coords="79,0,148,24"/>
 </map>
  </div></div>
-
-<p><a href="classWebUsers-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a3402f45e3a0f54f9756d1054afef0716">__construct</a> ($UId=0)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a3402f45e3a0f54f9756d1054afef0716"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a69330e33d34bc1f667644b5417999c8d">set</a> ($values)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a69330e33d34bc1f667644b5417999c8d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a488f20463bfac01871810fa5f7461e10">checkLoginMatch</a> ($username, $password)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the login username and password match the db.  <a href="#a488f20463bfac01871810fa5f7461e10"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a38654984bdbf75178cd0277807d94bfe"></a><!-- doxytag: member="WebUsers::getUId" ref="a38654984bdbf75178cd0277807d94bfe" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a38654984bdbf75178cd0277807d94bfe">getUId</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get uId attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a6f9bc7fdf77969e857dcfd5c1f8fd9bc">getUsername</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get login attribute of the object.  <a href="#a6f9bc7fdf77969e857dcfd5c1f8fd9bc"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8c782c9dfcacbebb2deca789930849f3"></a><!-- doxytag: member="WebUsers::getEmail" ref="a8c782c9dfcacbebb2deca789930849f3" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a8c782c9dfcacbebb2deca789930849f3">getEmail</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get email attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a323844dc355f89ee9c81254cb15f8bd4">getInfo</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get basic info of the object.  <a href="#a323844dc355f89ee9c81254cb15f8bd4"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a46aa8f355529e73c680e2e85f6fb8d75"></a><!-- doxytag: member="WebUsers::getReceiveMail" ref="a46aa8f355529e73c680e2e85f6fb8d75" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a46aa8f355529e73c680e2e85f6fb8d75">getReceiveMail</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get receiveMail attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2f2d5c0335ecdd177f9db54150bcb2b"></a><!-- doxytag: member="WebUsers::getLanguage" ref="ac2f2d5c0335ecdd177f9db54150bcb2b" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ac2f2d5c0335ecdd177f9db54150bcb2b">getLanguage</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get language attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a46665dd9dba9bd764837aad1bdec3774">isLoggedIn</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the user is logged in.  <a href="#a46665dd9dba9bd764837aad1bdec3774"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#abc9803620918174c45ebf4b1ee8b7b97">setPassword</a> ($user, $pass)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the password.  <a href="#abc9803620918174c45ebf4b1ee8b7b97"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a687c7b5c20d9d2e10ac807e396eeaeca">setEmail</a> ($user, $mail)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the emailaddress.  <a href="#a687c7b5c20d9d2e10ac807e396eeaeca"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a9c773c1cc57aaf3429b11fd127b01a70">getUsers</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return all users.  <a href="#a9c773c1cc57aaf3429b11fd127b01a70"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a4e63742e531873e01e1e97dd7530539b">__construct</a> ($UId=0)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a4e63742e531873e01e1e97dd7530539b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a8bdfe0a5256e35367225bcd6d278ef21"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a11894eb69bb2f172baf5186e8f92246d">checkLoginMatch</a> ($username, $password)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the login username and password match the db.  <a href="#a11894eb69bb2f172baf5186e8f92246d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#aa36a98da4146d85e7813e99df7d97497">getUId</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get uId attribute of the object.  <a href="#aa36a98da4146d85e7813e99df7d97497"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a81b37a3c9d639574e394f80c1138c75e">getUsername</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get login attribute of the object.  <a href="#a81b37a3c9d639574e394f80c1138c75e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a02a01849f28e2535e888ae4ec87b20f2">getEmail</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get email attribute of the object.  <a href="#a02a01849f28e2535e888ae4ec87b20f2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a164026f74736817927e1cacd282a2e28">getInfo</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get basic info of the object.  <a href="#a164026f74736817927e1cacd282a2e28"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ae4680f622bd8d571530615fb616d37e7">getReceiveMail</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get receiveMail attribute of the object.  <a href="#ae4680f622bd8d571530615fb616d37e7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#afcef2403c4111bc44ef0530f1e493909">getLanguage</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get language attribute of the object.  <a href="#afcef2403c4111bc44ef0530f1e493909"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a33bdd79e5da367ebddd4cfbdbbfc7cff">isLoggedIn</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the user is logged in.  <a href="#a33bdd79e5da367ebddd4cfbdbbfc7cff"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a91506e5f74c9884045e865ef7c314fed">setPassword</a> ($user, $pass)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the password.  <a href="#a91506e5f74c9884045e865ef7c314fed"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0cd214763f395718db166fbd598689f4">setEmail</a> ($user, $mail)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the emailaddress.  <a href="#a0cd214763f395718db166fbd598689f4"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0fc10b64683021b70c7eb95fb514c119">getUsers</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return all users.  <a href="#a0fc10b64683021b70c7eb95fb514c119"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a4e63742e531873e01e1e97dd7530539b">__construct</a> ($UId=0)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a4e63742e531873e01e1e97dd7530539b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a8bdfe0a5256e35367225bcd6d278ef21"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a11894eb69bb2f172baf5186e8f92246d">checkLoginMatch</a> ($username, $password)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the login username and password match the db.  <a href="#a11894eb69bb2f172baf5186e8f92246d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#aa36a98da4146d85e7813e99df7d97497">getUId</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get uId attribute of the object.  <a href="#aa36a98da4146d85e7813e99df7d97497"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a81b37a3c9d639574e394f80c1138c75e">getUsername</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get login attribute of the object.  <a href="#a81b37a3c9d639574e394f80c1138c75e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a02a01849f28e2535e888ae4ec87b20f2">getEmail</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get email attribute of the object.  <a href="#a02a01849f28e2535e888ae4ec87b20f2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a164026f74736817927e1cacd282a2e28">getInfo</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get basic info of the object.  <a href="#a164026f74736817927e1cacd282a2e28"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ae4680f622bd8d571530615fb616d37e7">getReceiveMail</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get receiveMail attribute of the object.  <a href="#ae4680f622bd8d571530615fb616d37e7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#afcef2403c4111bc44ef0530f1e493909">getLanguage</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get language attribute of the object.  <a href="#afcef2403c4111bc44ef0530f1e493909"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a33bdd79e5da367ebddd4cfbdbbfc7cff">isLoggedIn</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the user is logged in.  <a href="#a33bdd79e5da367ebddd4cfbdbbfc7cff"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a91506e5f74c9884045e865ef7c314fed">setPassword</a> ($user, $pass)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the password.  <a href="#a91506e5f74c9884045e865ef7c314fed"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0cd214763f395718db166fbd598689f4">setEmail</a> ($user, $mail)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the emailaddress.  <a href="#a0cd214763f395718db166fbd598689f4"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0fc10b64683021b70c7eb95fb514c119">getUsers</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return all users.  <a href="#a0fc10b64683021b70c7eb95fb514c119"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#adfdf81197e5dd57e151e2faaa0f83480">getId</a> ($username)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns te id for a given username  <a href="#adfdf81197e5dd57e151e2faaa0f83480"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a3d0ec30b9d7320e0a892a0e8f07ce243">getIdFromEmail</a> ($email)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns te id for a given emailaddress  <a href="#a3d0ec30b9d7320e0a892a0e8f07ce243"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a5655d4bf05243a4e0ad2ffdc77ed02e2">setReceiveMail</a> ($user, $receivemail)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the setReceiveMail value in the db.  <a href="#a5655d4bf05243a4e0ad2ffdc77ed02e2"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a44c8a46add7a525e8902a4e2a3a9f9d1">setLanguage</a> ($user, $language)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the language value in the db.  <a href="#a44c8a46add7a525e8902a4e2a3a9f9d1"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ab7901cc22a26dcff53de5257579bb7ea">getAllUsersQuery</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the query that should get all users.  <a href="#ab7901cc22a26dcff53de5257579bb7ea"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#abb1b5f937d609c7bbf02710efdc49115">createWebuser</a> ($name, $pass, $mail)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a webuser.  <a href="#abb1b5f937d609c7bbf02710efdc49115"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a585ef354b38d0fad9d92f45e183b639f">getId</a> ($username)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns te id for a given username  <a href="#a585ef354b38d0fad9d92f45e183b639f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#aee8d6b322defc5dfe8e47f382becca62">getIdFromEmail</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns te id for a given emailaddress  <a href="#aee8d6b322defc5dfe8e47f382becca62"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#aa0f439ff7a5cd6377a557f545fbeb45c">setReceiveMail</a> ($user, $receivemail)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the setReceiveMail value in the db.  <a href="#aa0f439ff7a5cd6377a557f545fbeb45c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a5ab1bd5f0959a3c33a46c176d9412c80">setLanguage</a> ($user, $language)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the language value in the db.  <a href="#a5ab1bd5f0959a3c33a46c176d9412c80"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a2f8e928ed02e462b40e909965250fb7d">getAllUsersQuery</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the query that should get all users.  <a href="#a2f8e928ed02e462b40e909965250fb7d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0cb7168a6b8358106512804ff28cea17">createWebuser</a> ($name, $pass, $mail)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a webuser.  <a href="#a0cb7168a6b8358106512804ff28cea17"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a585ef354b38d0fad9d92f45e183b639f">getId</a> ($username)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns te id for a given username  <a href="#a585ef354b38d0fad9d92f45e183b639f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#aee8d6b322defc5dfe8e47f382becca62">getIdFromEmail</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns te id for a given emailaddress  <a href="#aee8d6b322defc5dfe8e47f382becca62"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#aa0f439ff7a5cd6377a557f545fbeb45c">setReceiveMail</a> ($user, $receivemail)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the setReceiveMail value in the db.  <a href="#aa0f439ff7a5cd6377a557f545fbeb45c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a5ab1bd5f0959a3c33a46c176d9412c80">setLanguage</a> ($user, $language)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update the language value in the db.  <a href="#a5ab1bd5f0959a3c33a46c176d9412c80"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a2f8e928ed02e462b40e909965250fb7d">getAllUsersQuery</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return the query that should get all users.  <a href="#a2f8e928ed02e462b40e909965250fb7d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0cb7168a6b8358106512804ff28cea17">createWebuser</a> ($name, $pass, $mail)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a webuser.  <a href="#a0cb7168a6b8358106512804ff28cea17"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a717ecd295ccfcf9dfa9a9d6d84b97d3b">checkUserNameExists</a> ($username)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">function that checks if a username exists already or not.  <a href="#a717ecd295ccfcf9dfa9a9d6d84b97d3b"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a2874604f0ac49c770bbbffef342466ff">checkEmailExists</a> ($email)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">function that checks if a email exists already or not.  <a href="#a2874604f0ac49c770bbbffef342466ff"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ac3a8cb9a038f6aef0bd98be091274122">checkUserNameExists</a> ($username)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">function that checks if a username exists already or not.  <a href="#ac3a8cb9a038f6aef0bd98be091274122"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a37275e677004927b6b1a30e16c5b5b38">checkEmailExists</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">function that checks if a email exists already or not.  <a href="#a37275e677004927b6b1a30e16c5b5b38"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ac3a8cb9a038f6aef0bd98be091274122">checkUserNameExists</a> ($username)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">function that checks if a username exists already or not.  <a href="#ac3a8cb9a038f6aef0bd98be091274122"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a37275e677004927b6b1a30e16c5b5b38">checkEmailExists</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">function that checks if a email exists already or not.  <a href="#a37275e677004927b6b1a30e16c5b5b38"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4c118152530d9b7a1aab240392b504b8"></a><!-- doxytag: member="WebUsers::$uId" ref="a4c118152530d9b7a1aab240392b504b8" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a4c118152530d9b7a1aab240392b504b8">$uId</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The user id. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7b61ca04b134c0b5452fa2e61f4b36bd"></a><!-- doxytag: member="WebUsers::$login" ref="a7b61ca04b134c0b5452fa2e61f4b36bd" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a7b61ca04b134c0b5452fa2e61f4b36bd">$login</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The username. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a532667fc1fa71ee38f3b8a9a0bbb3991"></a><!-- doxytag: member="WebUsers::$email" ref="a532667fc1fa71ee38f3b8a9a0bbb3991" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a532667fc1fa71ee38f3b8a9a0bbb3991">$email</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The email address. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a39d55355d537ad77e08f2c196b1b39b5"></a><!-- doxytag: member="WebUsers::$firstname" ref="a39d55355d537ad77e08f2c196b1b39b5" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a39d55355d537ad77e08f2c196b1b39b5">$firstname</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The users first name. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac0122258b652e5629269ec98db168a44"></a><!-- doxytag: member="WebUsers::$lastname" ref="ac0122258b652e5629269ec98db168a44" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ac0122258b652e5629269ec98db168a44">$lastname</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The users last name. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a101472ee52f1e37416b472fdd151a6b4"></a><!-- doxytag: member="WebUsers::$gender" ref="a101472ee52f1e37416b472fdd151a6b4" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a101472ee52f1e37416b472fdd151a6b4">$gender</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The gender. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0aeb933ed72691c038d40ffc57ec1504"></a><!-- doxytag: member="WebUsers::$country" ref="a0aeb933ed72691c038d40ffc57ec1504" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0aeb933ed72691c038d40ffc57ec1504">$country</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">2 letter word matching the country of the user <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a7186a146bb276d51181b9e62ad0ed8c5">$receiveMail</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">configuration regarding if the user wants to receive email notifications or not.  <a href="#a7186a146bb276d51181b9e62ad0ed8c5"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af7e97cee72066f85737453d81c931550"></a><!-- doxytag: member="WebUsers::$language" ref="af7e97cee72066f85737453d81c931550" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#af7e97cee72066f85737453d81c931550">$language</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Language of the user. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a8f11c60ae8f70a5059b97bc0ea9d0de5">$uId</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The user id.  <a href="#a8f11c60ae8f70a5059b97bc0ea9d0de5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#afc31993e855f9631572adfedcfe6f34b">$login</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The username.  <a href="#afc31993e855f9631572adfedcfe6f34b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#ad634f418b20382e2802f80532d76d3cd">$email</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The email address.  <a href="#ad634f418b20382e2802f80532d76d3cd"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a55793c72c535d153ffd3f0e43377898b">$firstname</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The users first name.  <a href="#a55793c72c535d153ffd3f0e43377898b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a1d2ddb6354180329b59e8b90ed94dc7f">$lastname</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The users last name.  <a href="#a1d2ddb6354180329b59e8b90ed94dc7f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a0f1d7cfb9dc6f494b9014885205fc47e">$gender</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The gender.  <a href="#a0f1d7cfb9dc6f494b9014885205fc47e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a1437a5f6eb157f0eb267a26e0ad4f1ba">$country</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">2 letter word matching the country of the user  <a href="#a1437a5f6eb157f0eb267a26e0ad4f1ba"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a3c74ba660e348124f36d978b137f691d">$receiveMail</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">configuration regarding if the user wants to receive email notifications or not.  <a href="#a3c74ba660e348124f36d978b137f691d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classWebUsers.html#a83170d318260a5a2e2a79dccdd371b10">$language</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Language of the user.  <a href="#a83170d318260a5a2e2a79dccdd371b10"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>handles CMS/WWW related functions regarding user management &amp; registration. </p>
 <p>inherits from the <a class="el" href="classUsers.html" title="handles basic user registration &amp; management functions (shard related).">Users</a> class. The methods of this class have to be rewritten according to the CMS's functionality that you wish to use. The drupal_module has a webusers class of its own in the module itself. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a3402f45e3a0f54f9756d1054afef0716"></a><!-- doxytag: member="WebUsers::__construct" ref="a3402f45e3a0f54f9756d1054afef0716" args="($UId=0)" -->
+<a class="anchor" id="a4e63742e531873e01e1e97dd7530539b"></a><!-- doxytag: member="WebUsers::__construct" ref="a4e63742e531873e01e1e97dd7530539b" args="($UId=0)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a3402f45e3a0f54f9756d1054afef0716">WebUsers::__construct</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a4e63742e531873e01e1e97dd7530539b">__construct</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>UId</em> = <code>0</code></td><td>)</td>
@@ -207,7 +238,33 @@ Private Attributes</h2></td></tr>
 <p>loads the object with the UID, if none is given it will use 0. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
-    <tr><td class="paramname">$UID</td><td>the UID of the user you want to instantiate. </td></tr>
+    <tr><td class="paramname">$UId</td><td>the UID of the user you want to instantiate. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a4e63742e531873e01e1e97dd7530539b"></a><!-- doxytag: member="WebUsers::__construct" ref="a4e63742e531873e01e1e97dd7530539b" args="($UId=0)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a4e63742e531873e01e1e97dd7530539b">__construct</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>UId</em> = <code>0</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>A constructor. </p>
+<p>loads the object with the UID, if none is given it will use 0. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$UId</td><td>the UID of the user you want to instantiate. </td></tr>
   </table>
   </dd>
 </dl>
@@ -215,12 +272,12 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a2874604f0ac49c770bbbffef342466ff"></a><!-- doxytag: member="WebUsers::checkEmailExists" ref="a2874604f0ac49c770bbbffef342466ff" args="($email)" -->
+<a class="anchor" id="a37275e677004927b6b1a30e16c5b5b38"></a><!-- doxytag: member="WebUsers::checkEmailExists" ref="a37275e677004927b6b1a30e16c5b5b38" args="($email)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a2874604f0ac49c770bbbffef342466ff">WebUsers::checkEmailExists</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a37275e677004927b6b1a30e16c5b5b38">checkEmailExists</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>email</em></td><td>)</td>
@@ -231,19 +288,54 @@ Private Attributes</h2></td></tr>
 <div class="memdoc">
 
 <p>function that checks if a email exists already or not. </p>
-<p>This function overrides the function of the base class.  $email the email address in question. </p>
+<p>This function overrides the function of the base class. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$email</td><td>the email address in question. </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>string Info: Returns 0 if the email address is not in the web db, else a positive number is returned. </dd></dl>
 
-<p>Reimplemented from <a class="el" href="classUsers.html#ab48b703be38135a0478aed6674a30fb0">Users</a>.</p>
+<p>Reimplemented from <a class="el" href="classUsers.html#a37275e677004927b6b1a30e16c5b5b38">Users</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a488f20463bfac01871810fa5f7461e10"></a><!-- doxytag: member="WebUsers::checkLoginMatch" ref="a488f20463bfac01871810fa5f7461e10" args="($username, $password)" -->
+<a class="anchor" id="a37275e677004927b6b1a30e16c5b5b38"></a><!-- doxytag: member="WebUsers::checkEmailExists" ref="a37275e677004927b6b1a30e16c5b5b38" args="($email)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a488f20463bfac01871810fa5f7461e10">WebUsers::checkLoginMatch</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a37275e677004927b6b1a30e16c5b5b38">checkEmailExists</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>email</em></td><td>)</td>
+          <td><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>function that checks if a email exists already or not. </p>
+<p>This function overrides the function of the base class. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$email</td><td>the email address in question. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>string Info: Returns 0 if the email address is not in the web db, else a positive number is returned. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classUsers.html#a37275e677004927b6b1a30e16c5b5b38">Users</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a11894eb69bb2f172baf5186e8f92246d"></a><!-- doxytag: member="WebUsers::checkLoginMatch" ref="a11894eb69bb2f172baf5186e8f92246d" args="($username, $password)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a11894eb69bb2f172baf5186e8f92246d">checkLoginMatch</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>username</em>, </td>
@@ -273,16 +365,55 @@ Private Attributes</h2></td></tr>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>the logged in user's db row as array if login was a success, else "fail" will be returned. </dd></dl>
 
-<p>Reimplemented from <a class="el" href="classUsers.html#a230235f569309159fb4b2b03956ebbd5">Users</a>.</p>
+<p>Reimplemented from <a class="el" href="classUsers.html#af0b98012abb190cf4617999f008de27e">Users</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a717ecd295ccfcf9dfa9a9d6d84b97d3b"></a><!-- doxytag: member="WebUsers::checkUserNameExists" ref="a717ecd295ccfcf9dfa9a9d6d84b97d3b" args="($username)" -->
+<a class="anchor" id="a11894eb69bb2f172baf5186e8f92246d"></a><!-- doxytag: member="WebUsers::checkLoginMatch" ref="a11894eb69bb2f172baf5186e8f92246d" args="($username, $password)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a717ecd295ccfcf9dfa9a9d6d84b97d3b">WebUsers::checkUserNameExists</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a11894eb69bb2f172baf5186e8f92246d">checkLoginMatch</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>username</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>password</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>check if the login username and password match the db. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$username</td><td>the inserted username </td></tr>
+    <tr><td class="paramname">$password</td><td>the inserted password (unhashed) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>the logged in user's db row as array if login was a success, else "fail" will be returned. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classUsers.html#af0b98012abb190cf4617999f008de27e">Users</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ac3a8cb9a038f6aef0bd98be091274122"></a><!-- doxytag: member="WebUsers::checkUserNameExists" ref="ac3a8cb9a038f6aef0bd98be091274122" args="($username)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#ac3a8cb9a038f6aef0bd98be091274122">checkUserNameExists</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>username</em></td><td>)</td>
@@ -293,19 +424,54 @@ Private Attributes</h2></td></tr>
 <div class="memdoc">
 
 <p>function that checks if a username exists already or not. </p>
-<p>This function overrides the function of the base class.  $username the username in question </p>
+<p>This function overrides the function of the base class. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$username</td><td>the username in question </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>string Info: Returns 0 if the user is not in the web db, else a positive number is returned. </dd></dl>
 
-<p>Reimplemented from <a class="el" href="classUsers.html#a809c817e5f9d61f80b6c07aaf3882e2d">Users</a>.</p>
+<p>Reimplemented from <a class="el" href="classUsers.html#ac3a8cb9a038f6aef0bd98be091274122">Users</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="abb1b5f937d609c7bbf02710efdc49115"></a><!-- doxytag: member="WebUsers::createWebuser" ref="abb1b5f937d609c7bbf02710efdc49115" args="($name, $pass, $mail)" -->
+<a class="anchor" id="ac3a8cb9a038f6aef0bd98be091274122"></a><!-- doxytag: member="WebUsers::checkUserNameExists" ref="ac3a8cb9a038f6aef0bd98be091274122" args="($username)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classWebUsers.html#abb1b5f937d609c7bbf02710efdc49115">WebUsers::createWebuser</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#ac3a8cb9a038f6aef0bd98be091274122">checkUserNameExists</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>username</em></td><td>)</td>
+          <td><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>function that checks if a username exists already or not. </p>
+<p>This function overrides the function of the base class. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$username</td><td>the username in question </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>string Info: Returns 0 if the user is not in the web db, else a positive number is returned. </dd></dl>
+
+<p>Reimplemented from <a class="el" href="classUsers.html#ac3a8cb9a038f6aef0bd98be091274122">Users</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a0cb7168a6b8358106512804ff28cea17"></a><!-- doxytag: member="WebUsers::createWebuser" ref="a0cb7168a6b8358106512804ff28cea17" args="($name, $pass, $mail)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a0cb7168a6b8358106512804ff28cea17">createWebuser</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>name</em>, </td>
@@ -344,12 +510,56 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab7901cc22a26dcff53de5257579bb7ea"></a><!-- doxytag: member="WebUsers::getAllUsersQuery" ref="ab7901cc22a26dcff53de5257579bb7ea" args="()" -->
+<a class="anchor" id="a0cb7168a6b8358106512804ff28cea17"></a><!-- doxytag: member="WebUsers::createWebuser" ref="a0cb7168a6b8358106512804ff28cea17" args="($name, $pass, $mail)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classWebUsers.html#ab7901cc22a26dcff53de5257579bb7ea">WebUsers::getAllUsersQuery</a> </td>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a0cb7168a6b8358106512804ff28cea17">createWebuser</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>pass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>mail</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>creates a webuser. </p>
+<p>it will set the language matching to the language cookie setting and add it to the www/CMS's DB. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$name</td><td>the username </td></tr>
+    <tr><td class="paramname">$pass</td><td>the unhashed password </td></tr>
+    <tr><td class="paramname">$mail</td><td>the email address </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a2f8e928ed02e462b40e909965250fb7d"></a><!-- doxytag: member="WebUsers::getAllUsersQuery" ref="a2f8e928ed02e462b40e909965250fb7d" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a2f8e928ed02e462b40e909965250fb7d">getAllUsersQuery</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [static]</code></td>
@@ -363,12 +573,67 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="adfdf81197e5dd57e151e2faaa0f83480"></a><!-- doxytag: member="WebUsers::getId" ref="adfdf81197e5dd57e151e2faaa0f83480" args="($username)" -->
+<a class="anchor" id="a2f8e928ed02e462b40e909965250fb7d"></a><!-- doxytag: member="WebUsers::getAllUsersQuery" ref="a2f8e928ed02e462b40e909965250fb7d" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classWebUsers.html#adfdf81197e5dd57e151e2faaa0f83480">WebUsers::getId</a> </td>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a2f8e928ed02e462b40e909965250fb7d">getAllUsersQuery</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>return the query that should get all users. </p>
+<dl class="return"><dt><b>Returns:</b></dt><dd>string: the query to receive all users. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a02a01849f28e2535e888ae4ec87b20f2"></a><!-- doxytag: member="WebUsers::getEmail" ref="a02a01849f28e2535e888ae4ec87b20f2" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a02a01849f28e2535e888ae4ec87b20f2">getEmail</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get email attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a02a01849f28e2535e888ae4ec87b20f2"></a><!-- doxytag: member="WebUsers::getEmail" ref="a02a01849f28e2535e888ae4ec87b20f2" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a02a01849f28e2535e888ae4ec87b20f2">getEmail</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get email attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a585ef354b38d0fad9d92f45e183b639f"></a><!-- doxytag: member="WebUsers::getId" ref="a585ef354b38d0fad9d92f45e183b639f" args="($username)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a585ef354b38d0fad9d92f45e183b639f">getId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>username</em></td><td>)</td>
@@ -389,12 +654,38 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3d0ec30b9d7320e0a892a0e8f07ce243"></a><!-- doxytag: member="WebUsers::getIdFromEmail" ref="a3d0ec30b9d7320e0a892a0e8f07ce243" args="($email)" -->
+<a class="anchor" id="a585ef354b38d0fad9d92f45e183b639f"></a><!-- doxytag: member="WebUsers::getId" ref="a585ef354b38d0fad9d92f45e183b639f" args="($username)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classWebUsers.html#a3d0ec30b9d7320e0a892a0e8f07ce243">WebUsers::getIdFromEmail</a> </td>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a585ef354b38d0fad9d92f45e183b639f">getId</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>username</em></td><td>)</td>
+          <td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>returns te id for a given username </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$username</td><td>the username </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>the user's id linked to the username </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="aee8d6b322defc5dfe8e47f382becca62"></a><!-- doxytag: member="WebUsers::getIdFromEmail" ref="aee8d6b322defc5dfe8e47f382becca62" args="($email)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWebUsers.html#aee8d6b322defc5dfe8e47f382becca62">getIdFromEmail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>email</em></td><td>)</td>
@@ -415,12 +706,38 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a323844dc355f89ee9c81254cb15f8bd4"></a><!-- doxytag: member="WebUsers::getInfo" ref="a323844dc355f89ee9c81254cb15f8bd4" args="()" -->
+<a class="anchor" id="aee8d6b322defc5dfe8e47f382becca62"></a><!-- doxytag: member="WebUsers::getIdFromEmail" ref="aee8d6b322defc5dfe8e47f382becca62" args="($email)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a323844dc355f89ee9c81254cb15f8bd4">WebUsers::getInfo</a> </td>
+          <td class="memname">static <a class="el" href="classWebUsers.html#aee8d6b322defc5dfe8e47f382becca62">getIdFromEmail</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>email</em></td><td>)</td>
+          <td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>returns te id for a given emailaddress </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$email</td><td>the emailaddress </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>the user's id linked to the emailaddress </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a164026f74736817927e1cacd282a2e28"></a><!-- doxytag: member="WebUsers::getInfo" ref="a164026f74736817927e1cacd282a2e28" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a164026f74736817927e1cacd282a2e28">getInfo</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -434,12 +751,139 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6f9bc7fdf77969e857dcfd5c1f8fd9bc"></a><!-- doxytag: member="WebUsers::getUsername" ref="a6f9bc7fdf77969e857dcfd5c1f8fd9bc" args="()" -->
+<a class="anchor" id="a164026f74736817927e1cacd282a2e28"></a><!-- doxytag: member="WebUsers::getInfo" ref="a164026f74736817927e1cacd282a2e28" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a6f9bc7fdf77969e857dcfd5c1f8fd9bc">WebUsers::getUsername</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a164026f74736817927e1cacd282a2e28">getInfo</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get basic info of the object. </p>
+<dl class="return"><dt><b>Returns:</b></dt><dd>returns an array in the form of Array('FirstName' =&gt; $this-&gt;firstname, 'LastName' =&gt; $this-&gt;lastname, 'Gender' =&gt; $this-&gt;gender, 'Country' =&gt; $this-&gt;country, 'ReceiveMail' =&gt; $this-&gt;receiveMail) </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="afcef2403c4111bc44ef0530f1e493909"></a><!-- doxytag: member="WebUsers::getLanguage" ref="afcef2403c4111bc44ef0530f1e493909" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#afcef2403c4111bc44ef0530f1e493909">getLanguage</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get language attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="afcef2403c4111bc44ef0530f1e493909"></a><!-- doxytag: member="WebUsers::getLanguage" ref="afcef2403c4111bc44ef0530f1e493909" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#afcef2403c4111bc44ef0530f1e493909">getLanguage</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get language attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae4680f622bd8d571530615fb616d37e7"></a><!-- doxytag: member="WebUsers::getReceiveMail" ref="ae4680f622bd8d571530615fb616d37e7" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#ae4680f622bd8d571530615fb616d37e7">getReceiveMail</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get receiveMail attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae4680f622bd8d571530615fb616d37e7"></a><!-- doxytag: member="WebUsers::getReceiveMail" ref="ae4680f622bd8d571530615fb616d37e7" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#ae4680f622bd8d571530615fb616d37e7">getReceiveMail</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get receiveMail attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="aa36a98da4146d85e7813e99df7d97497"></a><!-- doxytag: member="WebUsers::getUId" ref="aa36a98da4146d85e7813e99df7d97497" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#aa36a98da4146d85e7813e99df7d97497">getUId</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get uId attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="aa36a98da4146d85e7813e99df7d97497"></a><!-- doxytag: member="WebUsers::getUId" ref="aa36a98da4146d85e7813e99df7d97497" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#aa36a98da4146d85e7813e99df7d97497">getUId</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get uId attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a81b37a3c9d639574e394f80c1138c75e"></a><!-- doxytag: member="WebUsers::getUsername" ref="a81b37a3c9d639574e394f80c1138c75e" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a81b37a3c9d639574e394f80c1138c75e">getUsername</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -453,12 +897,31 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9c773c1cc57aaf3429b11fd127b01a70"></a><!-- doxytag: member="WebUsers::getUsers" ref="a9c773c1cc57aaf3429b11fd127b01a70" args="()" -->
+<a class="anchor" id="a81b37a3c9d639574e394f80c1138c75e"></a><!-- doxytag: member="WebUsers::getUsername" ref="a81b37a3c9d639574e394f80c1138c75e" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a9c773c1cc57aaf3429b11fd127b01a70">WebUsers::getUsers</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a81b37a3c9d639574e394f80c1138c75e">getUsername</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get login attribute of the object. </p>
+<p>(username) </p>
+
+</div>
+</div>
+<a class="anchor" id="a0fc10b64683021b70c7eb95fb514c119"></a><!-- doxytag: member="WebUsers::getUsers" ref="a0fc10b64683021b70c7eb95fb514c119" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a0fc10b64683021b70c7eb95fb514c119">getUsers</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -472,12 +935,31 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a46665dd9dba9bd764837aad1bdec3774"></a><!-- doxytag: member="WebUsers::isLoggedIn" ref="a46665dd9dba9bd764837aad1bdec3774" args="()" -->
+<a class="anchor" id="a0fc10b64683021b70c7eb95fb514c119"></a><!-- doxytag: member="WebUsers::getUsers" ref="a0fc10b64683021b70c7eb95fb514c119" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a46665dd9dba9bd764837aad1bdec3774">WebUsers::isLoggedIn</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a0fc10b64683021b70c7eb95fb514c119">getUsers</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>return all users. </p>
+<dl class="return"><dt><b>Returns:</b></dt><dd>return an array of users </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a33bdd79e5da367ebddd4cfbdbbfc7cff"></a><!-- doxytag: member="WebUsers::isLoggedIn" ref="a33bdd79e5da367ebddd4cfbdbbfc7cff" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a33bdd79e5da367ebddd4cfbdbbfc7cff">isLoggedIn</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -491,12 +973,31 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a69330e33d34bc1f667644b5417999c8d"></a><!-- doxytag: member="WebUsers::set" ref="a69330e33d34bc1f667644b5417999c8d" args="($values)" -->
+<a class="anchor" id="a33bdd79e5da367ebddd4cfbdbbfc7cff"></a><!-- doxytag: member="WebUsers::isLoggedIn" ref="a33bdd79e5da367ebddd4cfbdbbfc7cff" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a69330e33d34bc1f667644b5417999c8d">WebUsers::set</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a33bdd79e5da367ebddd4cfbdbbfc7cff">isLoggedIn</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>check if the user is logged in. </p>
+<dl class="return"><dt><b>Returns:</b></dt><dd>true or false </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a8bdfe0a5256e35367225bcd6d278ef21"></a><!-- doxytag: member="WebUsers::set" ref="a8bdfe0a5256e35367225bcd6d278ef21" args="($values)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em></td><td>)</td>
@@ -516,12 +1017,37 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a687c7b5c20d9d2e10ac807e396eeaeca"></a><!-- doxytag: member="WebUsers::setEmail" ref="a687c7b5c20d9d2e10ac807e396eeaeca" args="($user, $mail)" -->
+<a class="anchor" id="a8bdfe0a5256e35367225bcd6d278ef21"></a><!-- doxytag: member="WebUsers::set" ref="a8bdfe0a5256e35367225bcd6d278ef21" args="($values)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#a687c7b5c20d9d2e10ac807e396eeaeca">WebUsers::setEmail</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>values</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>sets the object's attributes. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$values</td><td>should be an array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a0cd214763f395718db166fbd598689f4"></a><!-- doxytag: member="WebUsers::setEmail" ref="a0cd214763f395718db166fbd598689f4" args="($user, $mail)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a0cd214763f395718db166fbd598689f4">setEmail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em>, </td>
@@ -554,12 +1080,50 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a44c8a46add7a525e8902a4e2a3a9f9d1"></a><!-- doxytag: member="WebUsers::setLanguage" ref="a44c8a46add7a525e8902a4e2a3a9f9d1" args="($user, $language)" -->
+<a class="anchor" id="a0cd214763f395718db166fbd598689f4"></a><!-- doxytag: member="WebUsers::setEmail" ref="a0cd214763f395718db166fbd598689f4" args="($user, $mail)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classWebUsers.html#a44c8a46add7a525e8902a4e2a3a9f9d1">WebUsers::setLanguage</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a0cd214763f395718db166fbd598689f4">setEmail</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>user</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>mail</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>update the emailaddress. </p>
+<p>update the emailaddress in the shard + update the emailaddress in the www/CMS version. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$user</td><td>the username </td></tr>
+    <tr><td class="paramname">$mail</td><td>the new emailaddress. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a5ab1bd5f0959a3c33a46c176d9412c80"></a><!-- doxytag: member="WebUsers::setLanguage" ref="a5ab1bd5f0959a3c33a46c176d9412c80" args="($user, $language)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a5ab1bd5f0959a3c33a46c176d9412c80">setLanguage</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em>, </td>
@@ -591,12 +1155,49 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abc9803620918174c45ebf4b1ee8b7b97"></a><!-- doxytag: member="WebUsers::setPassword" ref="abc9803620918174c45ebf4b1ee8b7b97" args="($user, $pass)" -->
+<a class="anchor" id="a5ab1bd5f0959a3c33a46c176d9412c80"></a><!-- doxytag: member="WebUsers::setLanguage" ref="a5ab1bd5f0959a3c33a46c176d9412c80" args="($user, $language)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classWebUsers.html#abc9803620918174c45ebf4b1ee8b7b97">WebUsers::setPassword</a> </td>
+          <td class="memname">static <a class="el" href="classWebUsers.html#a5ab1bd5f0959a3c33a46c176d9412c80">setLanguage</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>user</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>language</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>update the language value in the db. </p>
+<p>update the language in the www/CMS version. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$user</td><td>the username </td></tr>
+    <tr><td class="paramname">$language</td><td>the new language value. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a91506e5f74c9884045e865ef7c314fed"></a><!-- doxytag: member="WebUsers::setPassword" ref="a91506e5f74c9884045e865ef7c314fed" args="($user, $pass)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classWebUsers.html#a91506e5f74c9884045e865ef7c314fed">setPassword</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em>, </td>
@@ -629,12 +1230,50 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5655d4bf05243a4e0ad2ffdc77ed02e2"></a><!-- doxytag: member="WebUsers::setReceiveMail" ref="a5655d4bf05243a4e0ad2ffdc77ed02e2" args="($user, $receivemail)" -->
+<a class="anchor" id="a91506e5f74c9884045e865ef7c314fed"></a><!-- doxytag: member="WebUsers::setPassword" ref="a91506e5f74c9884045e865ef7c314fed" args="($user, $pass)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classWebUsers.html#a5655d4bf05243a4e0ad2ffdc77ed02e2">WebUsers::setReceiveMail</a> </td>
+          <td class="memname"><a class="el" href="classWebUsers.html#a91506e5f74c9884045e865ef7c314fed">setPassword</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>user</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>pass</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>update the password. </p>
+<p>update the password in the shard + update the password in the www/CMS version. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$user</td><td>the username </td></tr>
+    <tr><td class="paramname">$pass</td><td>the new password. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="aa0f439ff7a5cd6377a557f545fbeb45c"></a><!-- doxytag: member="WebUsers::setReceiveMail" ref="aa0f439ff7a5cd6377a557f545fbeb45c" args="($user, $receivemail)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classWebUsers.html#aa0f439ff7a5cd6377a557f545fbeb45c">setReceiveMail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em>, </td>
@@ -666,13 +1305,155 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/><h2>Member Data Documentation</h2>
-<a class="anchor" id="a7186a146bb276d51181b9e62ad0ed8c5"></a><!-- doxytag: member="WebUsers::$receiveMail" ref="a7186a146bb276d51181b9e62ad0ed8c5" args="" -->
+<a class="anchor" id="aa0f439ff7a5cd6377a557f545fbeb45c"></a><!-- doxytag: member="WebUsers::setReceiveMail" ref="aa0f439ff7a5cd6377a557f545fbeb45c" args="($user, $receivemail)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">WebUsers::$receiveMail<code> [private]</code></td>
+          <td class="memname">static <a class="el" href="classWebUsers.html#aa0f439ff7a5cd6377a557f545fbeb45c">setReceiveMail</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>user</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>receivemail</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>update the setReceiveMail value in the db. </p>
+<p>update the receiveMail in the www/CMS version. </p>
+<dl class="params"><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">$user</td><td>the username </td></tr>
+    <tr><td class="paramname">$receivemail</td><td>the receivemail setting . </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="a1437a5f6eb157f0eb267a26e0ad4f1ba"></a><!-- doxytag: member="WebUsers::$country" ref="a1437a5f6eb157f0eb267a26e0ad4f1ba" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$country<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>2 letter word matching the country of the user </p>
+
+</div>
+</div>
+<a class="anchor" id="ad634f418b20382e2802f80532d76d3cd"></a><!-- doxytag: member="WebUsers::$email" ref="ad634f418b20382e2802f80532d76d3cd" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$email<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The email address. </p>
+
+</div>
+</div>
+<a class="anchor" id="a55793c72c535d153ffd3f0e43377898b"></a><!-- doxytag: member="WebUsers::$firstname" ref="a55793c72c535d153ffd3f0e43377898b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$firstname<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The users first name. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0f1d7cfb9dc6f494b9014885205fc47e"></a><!-- doxytag: member="WebUsers::$gender" ref="a0f1d7cfb9dc6f494b9014885205fc47e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$gender<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The gender. </p>
+
+</div>
+</div>
+<a class="anchor" id="a83170d318260a5a2e2a79dccdd371b10"></a><!-- doxytag: member="WebUsers::$language" ref="a83170d318260a5a2e2a79dccdd371b10" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$language<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Language of the user. </p>
+
+</div>
+</div>
+<a class="anchor" id="a1d2ddb6354180329b59e8b90ed94dc7f"></a><!-- doxytag: member="WebUsers::$lastname" ref="a1d2ddb6354180329b59e8b90ed94dc7f" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$lastname<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The users last name. </p>
+
+</div>
+</div>
+<a class="anchor" id="afc31993e855f9631572adfedcfe6f34b"></a><!-- doxytag: member="WebUsers::$login" ref="afc31993e855f9631572adfedcfe6f34b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$<a class="el" href="inc_2login_8php.html#aa311da27ba5706f5710cea7706c8eae1">login</a><code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The username. </p>
+
+</div>
+</div>
+<a class="anchor" id="a3c74ba660e348124f36d978b137f691d"></a><!-- doxytag: member="WebUsers::$receiveMail" ref="a3c74ba660e348124f36d978b137f691d" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$receiveMail<code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -682,8 +1463,24 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/www/html/autoload/webusers.php</li>
+<a class="anchor" id="a8f11c60ae8f70a5059b97bc0ea9d0de5"></a><!-- doxytag: member="WebUsers::$uId" ref="a8f11c60ae8f70a5059b97bc0ea9d0de5" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$uId<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The user id. </p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/autoload/<a class="el" href="drupal__module_2ryzommanage_2autoload_2webusers_8php.html">webusers.php</a></li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/www/html/autoload/<a class="el" href="www_2html_2autoload_2webusers_8php.html">webusers.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -691,7 +1488,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -703,7 +1500,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:46 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

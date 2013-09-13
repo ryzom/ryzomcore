@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -90,51 +92,48 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Mail_Handler" -->
 <p>Handles the mailing functionality.  
  <a href="classMail__Handler.html#details">More...</a></p>
-
-<p><a href="classMail__Handler-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a228e3c16f470e35a68a6c639bfb08803">cron</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">the cron funtion (workhorse of the mailing system).  <a href="#a228e3c16f470e35a68a6c639bfb08803"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#aec330ff71f834079a89cb80ba9cd079c">new_message_id</a> ($ticketId)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a new message id for a email about to send.  <a href="#aec330ff71f834079a89cb80ba9cd079c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a642b3996a7b826cdf84f057cc6813458">get_ticket_id_from_subject</a> ($subject)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">try to fetch the ticket_id out of the subject.  <a href="#a642b3996a7b826cdf84f057cc6813458"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a4cee2c20a8c05b71647ef4762879f0a4">incoming_mail_handler</a> ($mbox, $i, $group)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles an incomming email Read the content of one email by using imap's functionality.  <a href="#a4cee2c20a8c05b71647ef4762879f0a4"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a0941972d8f81caba60261e743d4d4567">decode_utf8</a> ($str)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">decode utf8  <a href="#a0941972d8f81caba60261e743d4d4567"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#ae4fbc4bc50da356e611e50b9ef77a52e">get_mime_type</a> (&amp;$structure)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the mime type of a structure of a email  <a href="#ae4fbc4bc50da356e611e50b9ef77a52e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2d820c452ae302fb5f8bbbd1043579cc"></a><!-- doxytag: member="Mail_Handler::get_part" ref="a2d820c452ae302fb5f8bbbd1043579cc" args="($stream, $msg_number, $mime_type, $structure=false, $part_number=false)" -->
-&#160;</td><td class="memItemRight" valign="bottom"><b>get_part</b> ($stream, $msg_number, $mime_type, $structure=false, $part_number=false)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a1b65890aa4eb8c0c6129c3e787a53405">cron</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">the cron funtion (workhorse of the mailing system).  <a href="#a1b65890aa4eb8c0c6129c3e787a53405"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a667ca75b6c659157d855c3d19978a436">new_message_id</a> ($ticketId)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a new message id for a email about to send.  <a href="#a667ca75b6c659157d855c3d19978a436"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a8604569b1e012ea3b1fe466018f75ce2">get_ticket_id_from_subject</a> ($subject)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">try to fetch the ticket_id out of the subject.  <a href="#a8604569b1e012ea3b1fe466018f75ce2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a2896dabadb8e435de7ba7bbb258f8a96">incoming_mail_handler</a> ($mbox, $i, $group)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles an incomming email Read the content of one email by using imap's functionality.  <a href="#a2896dabadb8e435de7ba7bbb258f8a96"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a6fc5947eaa45b0724f8720b374481275">decode_utf8</a> ($str)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">decode utf8  <a href="#a6fc5947eaa45b0724f8720b374481275"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a719c5051ef00fbb0d7c7ce2c78e3b4e1">get_mime_type</a> (&amp;$structure)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the mime type of a structure of a email  <a href="#a719c5051ef00fbb0d7c7ce2c78e3b4e1"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#ab3a5e8f69692826c6dae96f873859642">get_part</a> ($stream, $msg_number, $mime_type, $structure=false, $part_number=false)</td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#ab94d83ed9e6875da971c416c1752cbef">send_ticketing_mail</a> ($receiver, $ticketObj, $content, $type, $sender=0)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrapper for sending emails, creates the content of the email Based on the type of the ticketing mail it will create a specific email, it will use the language.ini files to load the correct language of the email for the receiver.  <a href="#ab94d83ed9e6875da971c416c1752cbef"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a39c146922e58ad8456fb73f979649263">send_mail</a> ($recipient, $subject, $body, $ticket_id=0, $from=NULL)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">send mail function that will add the email to the db.  <a href="#a39c146922e58ad8456fb73f979649263"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#abe649044c8b8bd8eb05787a401865e6d">send_ticketing_mail</a> ($receiver, $ticketObj, $content, $type, $sender=0)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Wrapper for sending emails, creates the content of the email Based on the type of the ticketing mail it will create a specific email, it will use the language.ini files to load the correct language of the email for the receiver.  <a href="#abe649044c8b8bd8eb05787a401865e6d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a50308ad0711aee080dacef7e3f574699">send_mail</a> ($recipient, $subject, $body, $ticket_id=0, $from=NULL)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">send mail function that will add the email to the db.  <a href="#a50308ad0711aee080dacef7e3f574699"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a285306bacd7e6774c5737c91acdf8ba4">mail_fork</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Start a new child process and return the process id this is used because imap might take some time, we dont want the cron parent process waiting on that.  <a href="#a285306bacd7e6774c5737c91acdf8ba4"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#ac6f9bcfab65cc93fdd4723284fff6b7a">mail_fork</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Start a new child process and return the process id this is used because imap might take some time, we dont want the cron parent process waiting on that.  <a href="#ac6f9bcfab65cc93fdd4723284fff6b7a"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a586665d45069c9b7ffcc9759872b30f5">$db</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">db object used by various methods.  <a href="#a586665d45069c9b7ffcc9759872b30f5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMail__Handler.html#a1fa3127fc82f96b1436d871ef02be319">$db</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">db object used by various methods.  <a href="#a1fa3127fc82f96b1436d871ef02be319"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Handles the mailing functionality. </p>
 <p>This class covers the reading of the mail boxes of the support_groups, handling those emails, updating tickets accoring to the content &amp; title of the emails, but also the sending of emails after creating a new ticket and when someone else replies on your ticket. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a228e3c16f470e35a68a6c639bfb08803"></a><!-- doxytag: member="Mail_Handler::cron" ref="a228e3c16f470e35a68a6c639bfb08803" args="()" -->
+<a class="anchor" id="a1b65890aa4eb8c0c6129c3e787a53405"></a><!-- doxytag: member="Mail_Handler::cron" ref="a1b65890aa4eb8c0c6129c3e787a53405" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMail__Handler.html#a228e3c16f470e35a68a6c639bfb08803">Mail_Handler::cron</a> </td>
+          <td class="memname"><a class="el" href="classMail__Handler.html#a1b65890aa4eb8c0c6129c3e787a53405">cron</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -148,12 +147,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0941972d8f81caba60261e743d4d4567"></a><!-- doxytag: member="Mail_Handler::decode_utf8" ref="a0941972d8f81caba60261e743d4d4567" args="($str)" -->
+<a class="anchor" id="a6fc5947eaa45b0724f8720b374481275"></a><!-- doxytag: member="Mail_Handler::decode_utf8" ref="a6fc5947eaa45b0724f8720b374481275" args="($str)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMail__Handler.html#a0941972d8f81caba60261e743d4d4567">Mail_Handler::decode_utf8</a> </td>
+          <td class="memname"><a class="el" href="classMail__Handler.html#a6fc5947eaa45b0724f8720b374481275">decode_utf8</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>str</em></td><td>)</td>
@@ -174,12 +173,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae4fbc4bc50da356e611e50b9ef77a52e"></a><!-- doxytag: member="Mail_Handler::get_mime_type" ref="ae4fbc4bc50da356e611e50b9ef77a52e" args="(&amp;$structure)" -->
+<a class="anchor" id="a719c5051ef00fbb0d7c7ce2c78e3b4e1"></a><!-- doxytag: member="Mail_Handler::get_mime_type" ref="a719c5051ef00fbb0d7c7ce2c78e3b4e1" args="(&amp;$structure)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMail__Handler.html#ae4fbc4bc50da356e611e50b9ef77a52e">Mail_Handler::get_mime_type</a> </td>
+          <td class="memname"><a class="el" href="classMail__Handler.html#a719c5051ef00fbb0d7c7ce2c78e3b4e1">get_mime_type</a> </td>
           <td>(</td>
           <td class="paramtype">&amp;$&#160;</td>
           <td class="paramname"><em>structure</em></td><td>)</td>
@@ -201,12 +200,57 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a642b3996a7b826cdf84f057cc6813458"></a><!-- doxytag: member="Mail_Handler::get_ticket_id_from_subject" ref="a642b3996a7b826cdf84f057cc6813458" args="($subject)" -->
+<a class="anchor" id="ab3a5e8f69692826c6dae96f873859642"></a><!-- doxytag: member="Mail_Handler::get_part" ref="ab3a5e8f69692826c6dae96f873859642" args="($stream, $msg_number, $mime_type, $structure=false, $part_number=false)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMail__Handler.html#a642b3996a7b826cdf84f057cc6813458">Mail_Handler::get_ticket_id_from_subject</a> </td>
+          <td class="memname"><a class="el" href="classMail__Handler.html#ab3a5e8f69692826c6dae96f873859642">get_part</a> </td>
+          <td>(</td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>stream</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>msg_number</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>mime_type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>structure</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">$&#160;</td>
+          <td class="paramname"><em>part_number</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="a8604569b1e012ea3b1fe466018f75ce2"></a><!-- doxytag: member="Mail_Handler::get_ticket_id_from_subject" ref="a8604569b1e012ea3b1fe466018f75ce2" args="($subject)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classMail__Handler.html#a8604569b1e012ea3b1fe466018f75ce2">get_ticket_id_from_subject</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>subject</em></td><td>)</td>
@@ -220,7 +264,7 @@ Private Attributes</h2></td></tr>
 <p>The subject should have a substring of the form [<a class="el" href="classTicket.html" title="class that handles most ticket related functions.">Ticket</a> #ticket_id], where ticket_id should be the integer ID of the ticket. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
-    <tr><td class="paramname">$subject,the</td><td>subject of an incomming email. </td></tr>
+    <tr><td class="paramname">$subject</td><td>the subject of an incomming email. </td></tr>
   </table>
   </dd>
 </dl>
@@ -228,12 +272,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a4cee2c20a8c05b71647ef4762879f0a4"></a><!-- doxytag: member="Mail_Handler::incoming_mail_handler" ref="a4cee2c20a8c05b71647ef4762879f0a4" args="($mbox, $i, $group)" -->
+<a class="anchor" id="a2896dabadb8e435de7ba7bbb258f8a96"></a><!-- doxytag: member="Mail_Handler::incoming_mail_handler" ref="a2896dabadb8e435de7ba7bbb258f8a96" args="($mbox, $i, $group)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMail__Handler.html#a4cee2c20a8c05b71647ef4762879f0a4">Mail_Handler::incoming_mail_handler</a> </td>
+          <td class="memname"><a class="el" href="classMail__Handler.html#a2896dabadb8e435de7ba7bbb258f8a96">incoming_mail_handler</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>mbox</em>, </td>
@@ -273,12 +317,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a285306bacd7e6774c5737c91acdf8ba4"></a><!-- doxytag: member="Mail_Handler::mail_fork" ref="a285306bacd7e6774c5737c91acdf8ba4" args="()" -->
+<a class="anchor" id="ac6f9bcfab65cc93fdd4723284fff6b7a"></a><!-- doxytag: member="Mail_Handler::mail_fork" ref="ac6f9bcfab65cc93fdd4723284fff6b7a" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMail__Handler.html#a285306bacd7e6774c5737c91acdf8ba4">Mail_Handler::mail_fork</a> </td>
+          <td class="memname"><a class="el" href="classMail__Handler.html#ac6f9bcfab65cc93fdd4723284fff6b7a">mail_fork</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [private]</code></td>
@@ -292,12 +336,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aec330ff71f834079a89cb80ba9cd079c"></a><!-- doxytag: member="Mail_Handler::new_message_id" ref="aec330ff71f834079a89cb80ba9cd079c" args="($ticketId)" -->
+<a class="anchor" id="a667ca75b6c659157d855c3d19978a436"></a><!-- doxytag: member="Mail_Handler::new_message_id" ref="a667ca75b6c659157d855c3d19978a436" args="($ticketId)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMail__Handler.html#aec330ff71f834079a89cb80ba9cd079c">Mail_Handler::new_message_id</a> </td>
+          <td class="memname"><a class="el" href="classMail__Handler.html#a667ca75b6c659157d855c3d19978a436">new_message_id</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ticketId</em></td><td>)</td>
@@ -310,7 +354,7 @@ Private Attributes</h2></td></tr>
 <p>creates a new message id for a email about to send. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
-    <tr><td class="paramname">$ticket_id</td><td>the ticket id of the ticket that is mentioned in the email. </td></tr>
+    <tr><td class="paramname">$ticketId</td><td>the ticket id of the ticket that is mentioned in the email. </td></tr>
   </table>
   </dd>
 </dl>
@@ -318,12 +362,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a39c146922e58ad8456fb73f979649263"></a><!-- doxytag: member="Mail_Handler::send_mail" ref="a39c146922e58ad8456fb73f979649263" args="($recipient, $subject, $body, $ticket_id=0, $from=NULL)" -->
+<a class="anchor" id="a50308ad0711aee080dacef7e3f574699"></a><!-- doxytag: member="Mail_Handler::send_mail" ref="a50308ad0711aee080dacef7e3f574699" args="($recipient, $subject, $body, $ticket_id=0, $from=NULL)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classMail__Handler.html#a39c146922e58ad8456fb73f979649263">Mail_Handler::send_mail</a> </td>
+          <td class="memname">static <a class="el" href="classMail__Handler.html#a50308ad0711aee080dacef7e3f574699">send_mail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>recipient</em>, </td>
@@ -362,7 +406,7 @@ Private Attributes</h2></td></tr>
 <div class="memdoc">
 
 <p>send mail function that will add the email to the db. </p>
-<p>this function is being used by the <a class="el" href="classMail__Handler.html#ab94d83ed9e6875da971c416c1752cbef" title="Wrapper for sending emails, creates the content of the email Based on the type of the ticketing mail ...">send_ticketing_mail()</a> function. It adds the email as an entry to the `email` table in the database, which will be sent later on when we run the cron job. </p>
+<p>this function is being used by the <a class="el" href="classMail__Handler.html#abe649044c8b8bd8eb05787a401865e6d" title="Wrapper for sending emails, creates the content of the email Based on the type of the ticketing mail ...">send_ticketing_mail()</a> function. It adds the email as an entry to the `email` table in the database, which will be sent later on when we run the cron job. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">$recipient</td><td>if integer, then it refers to the id of the user to whom we want to mail, if it's a string(email-address) then we will use that. </td></tr>
@@ -376,12 +420,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab94d83ed9e6875da971c416c1752cbef"></a><!-- doxytag: member="Mail_Handler::send_ticketing_mail" ref="ab94d83ed9e6875da971c416c1752cbef" args="($receiver, $ticketObj, $content, $type, $sender=0)" -->
+<a class="anchor" id="abe649044c8b8bd8eb05787a401865e6d"></a><!-- doxytag: member="Mail_Handler::send_ticketing_mail" ref="abe649044c8b8bd8eb05787a401865e6d" args="($receiver, $ticketObj, $content, $type, $sender=0)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classMail__Handler.html#ab94d83ed9e6875da971c416c1752cbef">Mail_Handler::send_ticketing_mail</a> </td>
+          <td class="memname">static <a class="el" href="classMail__Handler.html#abe649044c8b8bd8eb05787a401865e6d">send_ticketing_mail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>receiver</em>, </td>
@@ -434,13 +478,13 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/><h2>Member Data Documentation</h2>
-<a class="anchor" id="a586665d45069c9b7ffcc9759872b30f5"></a><!-- doxytag: member="Mail_Handler::$db" ref="a586665d45069c9b7ffcc9759872b30f5" args="" -->
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="a1fa3127fc82f96b1436d871ef02be319"></a><!-- doxytag: member="Mail_Handler::$db" ref="a1fa3127fc82f96b1436d871ef02be319" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Mail_Handler::$db<code> [private]</code></td>
+          <td class="memname">$db<code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -451,7 +495,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/mail_handler.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="mail__handler_8php.html">mail_handler.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -459,7 +503,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -471,7 +515,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:45 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

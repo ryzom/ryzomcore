@@ -265,7 +265,7 @@ class Mail_Handler{
     
     /**
     * creates a new message id for a email about to send.
-    * @param $ticket_id the ticket id of the ticket that is mentioned in the email.
+    * @param $ticketId the ticket id of the ticket that is mentioned in the email.
     * @return returns a string, that consist out of some variable parts, a consistent part and the ticket_id. The ticket_id will be used lateron, if someone replies on the message,
     * to see to which ticket the reply should be added.
     */    
@@ -281,8 +281,8 @@ class Mail_Handler{
     
     /**
     * try to fetch the ticket_id out of the subject.
-    * The subject should have a substring of the form [Ticket #ticket_id], where ticket_id should be the integer ID of the ticket.
-    * @param $subject, the subject of an incomming email.
+    * The subject should have a substring of the form [Ticket \#ticket_id], where ticket_id should be the integer ID of the ticket.
+    * @param $subject the subject of an incomming email.
     * @return if the ticket's id is succesfully parsed, it will return the ticket_id, else it returns 0.
     */   
     function get_ticket_id_from_subject($subject){

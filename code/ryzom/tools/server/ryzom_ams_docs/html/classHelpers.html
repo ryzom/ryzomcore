@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -87,34 +89,32 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Helpers" -->
 <p>Helper class for more site specific functions.  
  <a href="classHelpers.html#details">More...</a></p>
-
-<p><a href="classHelpers-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#ad70beebe7bd2f0909dc882f6d381cbb7">loadTemplate</a> ($template, $vars=array(), $returnHTML=false)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">workhorse of the website, it loads the template and shows it or returns th html.  <a href="#ad70beebe7bd2f0909dc882f6d381cbb7"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a121768ce7285cdfd011d461ec359ac18">create_folders</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates the folders that are needed for smarty.  <a href="#a121768ce7285cdfd011d461ec359ac18"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a828e3e0cf73e98beb9ace8f5277e5f29">check_if_game_client</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the http request is sent ingame or not.  <a href="#a828e3e0cf73e98beb9ace8f5277e5f29"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a42edc35c0057da2769d5b5ede1da0001">handle_language</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles the language specific aspect.  <a href="#a42edc35c0057da2769d5b5ede1da0001"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a61b01d13dc043d49115ee7f5c169ac73">outputTime</a> ($time, $str=1)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Time output function for handling the time display.  <a href="#a61b01d13dc043d49115ee7f5c169ac73"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a0d0ad4ad22288b9aa225b7d71534fc33">check_login_ingame</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto login function for ingame use.  <a href="#a0d0ad4ad22288b9aa225b7d71534fc33"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a78997ab39ba0237dc7a5441b58601211">loadTemplate</a> ($template, $vars=array(), $returnHTML=false)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">workhorse of the website, it loads the template and shows it or returns th html.  <a href="#a78997ab39ba0237dc7a5441b58601211"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#add8ef9ce82106c505f6f04c2a8e3b2b4">create_folders</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates the folders that are needed for smarty.  <a href="#add8ef9ce82106c505f6f04c2a8e3b2b4"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a4e3e5309a66456d81a1effdabcc9cd79">check_if_game_client</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the http request is sent ingame or not.  <a href="#a4e3e5309a66456d81a1effdabcc9cd79"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a334920d0652c160c6145d3bd7be31a22">handle_language</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Handles the language specific aspect.  <a href="#a334920d0652c160c6145d3bd7be31a22"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#a4370c805a72fe32c03b178b03ad2e393">outputTime</a> ($time, $str=1)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Time output function for handling the time display.  <a href="#a4370c805a72fe32c03b178b03ad2e393"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classHelpers.html#abd01528a1145831a4fc98eae7ffaca36">check_login_ingame</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto login function for ingame use.  <a href="#abd01528a1145831a4fc98eae7ffaca36"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Helper class for more site specific functions. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a828e3e0cf73e98beb9ace8f5277e5f29"></a><!-- doxytag: member="Helpers::check_if_game_client" ref="a828e3e0cf73e98beb9ace8f5277e5f29" args="()" -->
+<a class="anchor" id="a4e3e5309a66456d81a1effdabcc9cd79"></a><!-- doxytag: member="Helpers::check_if_game_client" ref="a4e3e5309a66456d81a1effdabcc9cd79" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classHelpers.html#a828e3e0cf73e98beb9ace8f5277e5f29">Helpers::check_if_game_client</a> </td>
+          <td class="memname">static <a class="el" href="classHelpers.html#a4e3e5309a66456d81a1effdabcc9cd79">check_if_game_client</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [static]</code></td>
@@ -128,12 +128,12 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0d0ad4ad22288b9aa225b7d71534fc33"></a><!-- doxytag: member="Helpers::check_login_ingame" ref="a0d0ad4ad22288b9aa225b7d71534fc33" args="()" -->
+<a class="anchor" id="abd01528a1145831a4fc98eae7ffaca36"></a><!-- doxytag: member="Helpers::check_login_ingame" ref="abd01528a1145831a4fc98eae7ffaca36" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classHelpers.html#a0d0ad4ad22288b9aa225b7d71534fc33">Helpers::check_login_ingame</a> </td>
+          <td class="memname">static <a class="el" href="classHelpers.html#abd01528a1145831a4fc98eae7ffaca36">check_login_ingame</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [static]</code></td>
@@ -148,12 +148,12 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a121768ce7285cdfd011d461ec359ac18"></a><!-- doxytag: member="Helpers::create_folders" ref="a121768ce7285cdfd011d461ec359ac18" args="()" -->
+<a class="anchor" id="add8ef9ce82106c505f6f04c2a8e3b2b4"></a><!-- doxytag: member="Helpers::create_folders" ref="add8ef9ce82106c505f6f04c2a8e3b2b4" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classHelpers.html#a121768ce7285cdfd011d461ec359ac18">Helpers::create_folders</a> </td>
+          <td class="memname">static <a class="el" href="classHelpers.html#add8ef9ce82106c505f6f04c2a8e3b2b4">create_folders</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [static]</code></td>
@@ -163,16 +163,16 @@ Static Public Member Functions</h2></td></tr>
 <div class="memdoc">
 
 <p>creates the folders that are needed for smarty. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>for the drupal module it might be possible that drupal_mkdir needs to be used instead of mkdir, also this should be in the install.php instead. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>for the drupal module it might be possible that drupal_mkdir needs to be used instead of mkdir, also this should be in the <a class="el" href="install_8php.html">install.php</a> instead. </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a42edc35c0057da2769d5b5ede1da0001"></a><!-- doxytag: member="Helpers::handle_language" ref="a42edc35c0057da2769d5b5ede1da0001" args="()" -->
+<a class="anchor" id="a334920d0652c160c6145d3bd7be31a22"></a><!-- doxytag: member="Helpers::handle_language" ref="a334920d0652c160c6145d3bd7be31a22" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classHelpers.html#a42edc35c0057da2769d5b5ede1da0001">Helpers::handle_language</a> </td>
+          <td class="memname">static <a class="el" href="classHelpers.html#a334920d0652c160c6145d3bd7be31a22">handle_language</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [static]</code></td>
@@ -187,12 +187,12 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad70beebe7bd2f0909dc882f6d381cbb7"></a><!-- doxytag: member="Helpers::loadTemplate" ref="ad70beebe7bd2f0909dc882f6d381cbb7" args="($template, $vars=array(), $returnHTML=false)" -->
+<a class="anchor" id="a78997ab39ba0237dc7a5441b58601211"></a><!-- doxytag: member="Helpers::loadTemplate" ref="a78997ab39ba0237dc7a5441b58601211" args="($template, $vars=array(), $returnHTML=false)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classHelpers.html#ad70beebe7bd2f0909dc882f6d381cbb7">Helpers::loadTemplate</a> </td>
+          <td class="memname">static <a class="el" href="classHelpers.html#a78997ab39ba0237dc7a5441b58601211">loadTemplate</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>template</em>, </td>
@@ -232,12 +232,12 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a61b01d13dc043d49115ee7f5c169ac73"></a><!-- doxytag: member="Helpers::outputTime" ref="a61b01d13dc043d49115ee7f5c169ac73" args="($time, $str=1)" -->
+<a class="anchor" id="a4370c805a72fe32c03b178b03ad2e393"></a><!-- doxytag: member="Helpers::outputTime" ref="a4370c805a72fe32c03b178b03ad2e393" args="($time, $str=1)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classHelpers.html#a61b01d13dc043d49115ee7f5c169ac73">Helpers::outputTime</a> </td>
+          <td class="memname">static <a class="el" href="classHelpers.html#a4370c805a72fe32c03b178b03ad2e393">outputTime</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>time</em>, </td>
@@ -263,7 +263,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/helpers.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="helpers_8php.html">helpers.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -271,7 +271,7 @@ Static Public Member Functions</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -283,7 +283,7 @@ Static Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:45 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

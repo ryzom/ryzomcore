@@ -1,29 +1,31 @@
 <?php
-// This file contains all variables needed by other php scripts
-// ----------------------------------------------------------------------------------------
-// Variables for database access
-// ----------------------------------------------------------------------------------------
-// where we can find the mysql database
-//-----------------------------------------------------------------------------------------
+/**
+* This file contains all variables needed by other php scripts.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 
+// Variables for database access to the CMS/WWW database
 $cfg['db']['web']['host']    = variable_get('ryzommanage_webserverurl', 'localhost');
 $cfg['db']['web']['port']    = variable_get('ryzommanage_webmysqlport', '3306');
 $cfg['db']['web']['name']    = variable_get('ryzommanage_webdbname', 'drupal');
 $cfg['db']['web']['user']    = variable_get('ryzommanage_webusername', 'shard');
 $cfg['db']['web']['pass']    = variable_get('ryzommanage_webpassword', '');
 
+// Variables for database access to the lib database
 $cfg['db']['lib']['host']    = variable_get('ryzommanage_libserverurl', 'localhost');
 $cfg['db']['lib']['port']    = variable_get('ryzommanage_libmysqlport', '3306');
 $cfg['db']['lib']['name']    = variable_get('ryzommanage_libdbname', 'ryzom_ams_lib');
 $cfg['db']['lib']['user']    = variable_get('ryzommanage_libusername', 'shard');
 $cfg['db']['lib']['pass']    = variable_get('ryzommanage_libpassword', '');
 
+// Variables for database access to the shard database
 $cfg['db']['shard']['host']    = variable_get('ryzommanage_shardserverurl', 'localhost');
 $cfg['db']['shard']['port']    = variable_get('ryzommanage_shardmysqlport', '3306');
 $cfg['db']['shard']['name']    = variable_get('ryzommanage_sharddbname', 'nel');
 $cfg['db']['shard']['user']    = variable_get('ryzommanage_shardusername', 'shard');
 $cfg['db']['shard']['pass']    = variable_get('ryzommanage_shardpassword', '');
 
+// Variables for database access to the open_ring database
 $cfg['db']['ring']['host']    = variable_get('ryzommanage_ringserverurl', 'localhost');
 $cfg['db']['ring']['port']    = variable_get('ryzommanage_ringmysqlport', '3306');
 $cfg['db']['ring']['name']    = variable_get('ryzommanage_ringdbname', 'ring_open');
@@ -55,11 +57,12 @@ $TICKET_MAILING_SUPPORT = false;
 $MAIL_DIR = "/tmp/mail";
 $MAIL_LOG_PATH = "/tmp/mail/cron_mail.log";
 
+//crypt is being used by encrypting & decrypting of the IMAP password of the supportgroups
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
 $cfg['crypt']['enc_method']    = 'AES-256-CBC';
 $cfg['crypt']['hash_method'] = "SHA512";
 
-
+//terms of service url location
 $TOS_URL = variable_get('ryzommanage_TOS', 'www.mytosurlhere.com');
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
@@ -91,6 +94,7 @@ $TIME_FORMAT = "m-d-Y H:i:s";
 //defines which ingame layout template should be used
 $INGAME_LAYOUT = "basic";
 
+//forces to load the ingame templates if set to true
 $FORCE_INGAME = false;
 
 

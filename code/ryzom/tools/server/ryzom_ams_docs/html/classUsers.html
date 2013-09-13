@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -97,61 +99,60 @@ Inheritance diagram for Users:</div>
   <img src="classUsers.png" usemap="#Users_map" alt=""/>
   <map id="Users_map" name="Users_map">
 <area href="classWebUsers.html" title="handles CMS/WWW related functions regarding user management &amp; registration." alt="WebUsers" shape="rect" coords="0,56,69,80"/>
+<area href="classWebUsers.html" title="handles CMS/WWW related functions regarding user management &amp; registration." alt="WebUsers" shape="rect" coords="79,56,148,80"/>
 </map>
  </div></div>
-
-<p><a href="classUsers-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a6f124a6e3b8d117604e707601a6b4876">check_Register</a> ($values)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if entered values before registering are valid.  <a href="#a6f124a6e3b8d117604e707601a6b4876"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ac078497a378d4bedb8bab22dcc362b7c">checkUser</a> ($username)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if entered username is valid.  <a href="#ac078497a378d4bedb8bab22dcc362b7c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a7c61019e954d60fa38fe0c20554fa53d">checkPassword</a> ($pass)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if the password is valid.  <a href="#a7c61019e954d60fa38fe0c20554fa53d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a1ccd65e0ad68710b6176b381fe062a18">checkEmail</a> ($email)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">wrapper to check if the email address is valid.  <a href="#a1ccd65e0ad68710b6176b381fe062a18"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a090fa5f2ca4565c03ffd21eae1393ab0">validEmail</a> ($email)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the emailaddress structure is valid.  <a href="#a090fa5f2ca4565c03ffd21eae1393ab0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ad6da3241c4a12f4e81729ab830737e3c">check_change_password</a> ($values)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the changing of a password is valid.  <a href="#ad6da3241c4a12f4e81729ab830737e3c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a740de04dc3aa7cf3bed959540ffab8f8">check_Register</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if entered values before registering are valid.  <a href="#a740de04dc3aa7cf3bed959540ffab8f8"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#adfffce17947a9f72d68838db250c9ab8">checkUser</a> ($username)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if entered username is valid.  <a href="#adfffce17947a9f72d68838db250c9ab8"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a4cb5e34b56fb6de0ec318fb59e90838f">checkPassword</a> ($pass)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if the password is valid.  <a href="#a4cb5e34b56fb6de0ec318fb59e90838f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a76646237ab053cdde386c06aa5437d8a">checkEmail</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">wrapper to check if the email address is valid.  <a href="#a76646237ab053cdde386c06aa5437d8a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a73637e760498c5cea55074896ec982ac">validEmail</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the emailaddress structure is valid.  <a href="#a73637e760498c5cea55074896ec982ac"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a9c78408d50465957eeb8068810315a8e">check_change_password</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if the changing of a password is valid.  <a href="#a9c78408d50465957eeb8068810315a8e"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ad9b1ccad9f285f5e3554003b17884482">generateSALT</a> ($length=2)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">generate a SALT.  <a href="#ad9b1ccad9f285f5e3554003b17884482"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a110c60194f014cf45b93bde09b40a565">createUser</a> ($values, $user_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a user in the shard.  <a href="#a110c60194f014cf45b93bde09b40a565"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a5879a0f4b8da3e91af153cd19ca6e548">createPermissions</a> ($pvalues)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates permissions in the shard db for a user.  <a href="#a5879a0f4b8da3e91af153cd19ca6e548"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#afb7603ac9556c1069fbf1c0062251203">generateSALT</a> ($length=2)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">generate a SALT.  <a href="#afb7603ac9556c1069fbf1c0062251203"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ac93aebf1960fb12975b120a2c394a8af">createUser</a> ($values, $user_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a user in the shard.  <a href="#ac93aebf1960fb12975b120a2c394a8af"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#aeac9f32fd53c97c92e5c774e154399df">createPermissions</a> ($pvalues)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates permissions in the shard db for a user.  <a href="#aeac9f32fd53c97c92e5c774e154399df"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a809c817e5f9d61f80b6c07aaf3882e2d">checkUserNameExists</a> ($username)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if username already exists.  <a href="#a809c817e5f9d61f80b6c07aaf3882e2d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ab48b703be38135a0478aed6674a30fb0">checkEmailExists</a> ($email)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if email already exists.  <a href="#ab48b703be38135a0478aed6674a30fb0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a230235f569309159fb4b2b03956ebbd5">checkLoginMatch</a> ($user, $pass)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if username and password matches.  <a href="#a230235f569309159fb4b2b03956ebbd5"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a6373c269ad6747ca429fa128e7eaf20b">setAmsPassword</a> ($user, $pass)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the shards password.  <a href="#a6373c269ad6747ca429fa128e7eaf20b"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#aa28b8a5cb27f4330acf692f02a83d39f">setAmsEmail</a> ($user, $mail)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the shards email.  <a href="#aa28b8a5cb27f4330acf692f02a83d39f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ac3a8cb9a038f6aef0bd98be091274122">checkUserNameExists</a> ($username)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if username already exists.  <a href="#ac3a8cb9a038f6aef0bd98be091274122"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a37275e677004927b6b1a30e16c5b5b38">checkEmailExists</a> ($email)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if email already exists.  <a href="#a37275e677004927b6b1a30e16c5b5b38"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#af0b98012abb190cf4617999f008de27e">checkLoginMatch</a> ($user, $pass)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">check if username and password matches.  <a href="#af0b98012abb190cf4617999f008de27e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ab89812058b0a71baf492af4652d67501">setAmsPassword</a> ($user, $pass)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the shards password.  <a href="#ab89812058b0a71baf492af4652d67501"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#ad1cbb1fe6ee72f46dc385bec6e274363">setAmsEmail</a> ($user, $mail)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the shards email.  <a href="#ad1cbb1fe6ee72f46dc385bec6e274363"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a7bbf5cef9e09e9dc49d7811d3012da86">confirmPassword</a> ($pass_result, $pass, $confirmpass)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if the confirmPassword matches the original.  <a href="#a7bbf5cef9e09e9dc49d7811d3012da86"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classUsers.html#a2f5349025bed3874f08d80652cab2fe0">confirmPassword</a> ($pass_result, $pass, $confirmpass)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if the confirmPassword matches the original.  <a href="#a2f5349025bed3874f08d80652cab2fe0"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>handles basic user registration &amp; management functions (shard related). </p>
 <p>The <a class="el" href="classUsers.html" title="handles basic user registration &amp; management functions (shard related).">Users</a> class is the basis class of <a class="el" href="classWebUsers.html" title="handles CMS/WWW related functions regarding user management &amp; registration.">WebUsers</a>, this class provides functions being used by all CMS's and our own www version. The <a class="el" href="classWebUsers.html" title="handles CMS/WWW related functions regarding user management &amp; registration.">WebUsers</a> class however needs to be reimplemented by using the CMS's it's funcionality. This class handles the writing to the shard db mainly, and in case it's offline: writing to the ams_querycache. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="ad6da3241c4a12f4e81729ab830737e3c"></a><!-- doxytag: member="Users::check_change_password" ref="ad6da3241c4a12f4e81729ab830737e3c" args="($values)" -->
+<a class="anchor" id="a9c78408d50465957eeb8068810315a8e"></a><!-- doxytag: member="Users::check_change_password" ref="a9c78408d50465957eeb8068810315a8e" args="($values)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#ad6da3241c4a12f4e81729ab830737e3c">Users::check_change_password</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#a9c78408d50465957eeb8068810315a8e">check_change_password</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em></td><td>)</td>
@@ -173,12 +174,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6f124a6e3b8d117604e707601a6b4876"></a><!-- doxytag: member="Users::check_Register" ref="a6f124a6e3b8d117604e707601a6b4876" args="($values)" -->
+<a class="anchor" id="a740de04dc3aa7cf3bed959540ffab8f8"></a><!-- doxytag: member="Users::check_Register" ref="a740de04dc3aa7cf3bed959540ffab8f8" args="($values)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a6f124a6e3b8d117604e707601a6b4876">Users::check_Register</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#a740de04dc3aa7cf3bed959540ffab8f8">check_Register</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em></td><td>)</td>
@@ -191,7 +192,7 @@ Private Member Functions</h2></td></tr>
 <p>checks if entered values before registering are valid. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
-    <tr><td class="paramname">$array</td><td>with Username,Password, ConfirmPass and Email. </td></tr>
+    <tr><td class="paramname">$values</td><td>array with Username,Password, ConfirmPass and Email. </td></tr>
   </table>
   </dd>
 </dl>
@@ -199,12 +200,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1ccd65e0ad68710b6176b381fe062a18"></a><!-- doxytag: member="Users::checkEmail" ref="a1ccd65e0ad68710b6176b381fe062a18" args="($email)" -->
+<a class="anchor" id="a76646237ab053cdde386c06aa5437d8a"></a><!-- doxytag: member="Users::checkEmail" ref="a76646237ab053cdde386c06aa5437d8a" args="($email)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a1ccd65e0ad68710b6176b381fe062a18">Users::checkEmail</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#a76646237ab053cdde386c06aa5437d8a">checkEmail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>email</em></td><td>)</td>
@@ -225,12 +226,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab48b703be38135a0478aed6674a30fb0"></a><!-- doxytag: member="Users::checkEmailExists" ref="ab48b703be38135a0478aed6674a30fb0" args="($email)" -->
+<a class="anchor" id="a37275e677004927b6b1a30e16c5b5b38"></a><!-- doxytag: member="Users::checkEmailExists" ref="a37275e677004927b6b1a30e16c5b5b38" args="($email)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#ab48b703be38135a0478aed6674a30fb0">Users::checkEmailExists</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#a37275e677004927b6b1a30e16c5b5b38">checkEmailExists</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>email</em></td><td>)</td>
@@ -250,16 +251,16 @@ Private Member Functions</h2></td></tr>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>string Info: Returns true or false if the email is in the www db. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classWebUsers.html#a2874604f0ac49c770bbbffef342466ff">WebUsers</a>.</p>
+<p>Reimplemented in <a class="el" href="classWebUsers.html#a37275e677004927b6b1a30e16c5b5b38">WebUsers</a>, and <a class="el" href="classWebUsers.html#a37275e677004927b6b1a30e16c5b5b38">WebUsers</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a230235f569309159fb4b2b03956ebbd5"></a><!-- doxytag: member="Users::checkLoginMatch" ref="a230235f569309159fb4b2b03956ebbd5" args="($user, $pass)" -->
+<a class="anchor" id="af0b98012abb190cf4617999f008de27e"></a><!-- doxytag: member="Users::checkLoginMatch" ref="af0b98012abb190cf4617999f008de27e" args="($user, $pass)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a230235f569309159fb4b2b03956ebbd5">Users::checkLoginMatch</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#af0b98012abb190cf4617999f008de27e">checkLoginMatch</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em>, </td>
@@ -289,16 +290,16 @@ Private Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Reimplemented in <a class="el" href="classWebUsers.html#a488f20463bfac01871810fa5f7461e10">WebUsers</a>.</p>
+<p>Reimplemented in <a class="el" href="classWebUsers.html#a11894eb69bb2f172baf5186e8f92246d">WebUsers</a>, and <a class="el" href="classWebUsers.html#a11894eb69bb2f172baf5186e8f92246d">WebUsers</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a7c61019e954d60fa38fe0c20554fa53d"></a><!-- doxytag: member="Users::checkPassword" ref="a7c61019e954d60fa38fe0c20554fa53d" args="($pass)" -->
+<a class="anchor" id="a4cb5e34b56fb6de0ec318fb59e90838f"></a><!-- doxytag: member="Users::checkPassword" ref="a4cb5e34b56fb6de0ec318fb59e90838f" args="($pass)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a7c61019e954d60fa38fe0c20554fa53d">Users::checkPassword</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#a4cb5e34b56fb6de0ec318fb59e90838f">checkPassword</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>pass</em></td><td>)</td>
@@ -319,12 +320,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac078497a378d4bedb8bab22dcc362b7c"></a><!-- doxytag: member="Users::checkUser" ref="ac078497a378d4bedb8bab22dcc362b7c" args="($username)" -->
+<a class="anchor" id="adfffce17947a9f72d68838db250c9ab8"></a><!-- doxytag: member="Users::checkUser" ref="adfffce17947a9f72d68838db250c9ab8" args="($username)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#ac078497a378d4bedb8bab22dcc362b7c">Users::checkUser</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#adfffce17947a9f72d68838db250c9ab8">checkUser</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>username</em></td><td>)</td>
@@ -345,12 +346,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a809c817e5f9d61f80b6c07aaf3882e2d"></a><!-- doxytag: member="Users::checkUserNameExists" ref="a809c817e5f9d61f80b6c07aaf3882e2d" args="($username)" -->
+<a class="anchor" id="ac3a8cb9a038f6aef0bd98be091274122"></a><!-- doxytag: member="Users::checkUserNameExists" ref="ac3a8cb9a038f6aef0bd98be091274122" args="($username)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a809c817e5f9d61f80b6c07aaf3882e2d">Users::checkUserNameExists</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#ac3a8cb9a038f6aef0bd98be091274122">checkUserNameExists</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>username</em></td><td>)</td>
@@ -370,16 +371,16 @@ Private Member Functions</h2></td></tr>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>string Info: Returns true or false if the user is in the www db. </dd></dl>
 
-<p>Reimplemented in <a class="el" href="classWebUsers.html#a717ecd295ccfcf9dfa9a9d6d84b97d3b">WebUsers</a>.</p>
+<p>Reimplemented in <a class="el" href="classWebUsers.html#ac3a8cb9a038f6aef0bd98be091274122">WebUsers</a>, and <a class="el" href="classWebUsers.html#ac3a8cb9a038f6aef0bd98be091274122">WebUsers</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a7bbf5cef9e09e9dc49d7811d3012da86"></a><!-- doxytag: member="Users::confirmPassword" ref="a7bbf5cef9e09e9dc49d7811d3012da86" args="($pass_result, $pass, $confirmpass)" -->
+<a class="anchor" id="a2f5349025bed3874f08d80652cab2fe0"></a><!-- doxytag: member="Users::confirmPassword" ref="a2f5349025bed3874f08d80652cab2fe0" args="($pass_result, $pass, $confirmpass)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a7bbf5cef9e09e9dc49d7811d3012da86">Users::confirmPassword</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#a2f5349025bed3874f08d80652cab2fe0">confirmPassword</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>pass_result</em>, </td>
@@ -418,12 +419,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5879a0f4b8da3e91af153cd19ca6e548"></a><!-- doxytag: member="Users::createPermissions" ref="a5879a0f4b8da3e91af153cd19ca6e548" args="($pvalues)" -->
+<a class="anchor" id="aeac9f32fd53c97c92e5c774e154399df"></a><!-- doxytag: member="Users::createPermissions" ref="aeac9f32fd53c97c92e5c774e154399df" args="($pvalues)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classUsers.html#a5879a0f4b8da3e91af153cd19ca6e548">Users::createPermissions</a> </td>
+          <td class="memname">static <a class="el" href="classUsers.html#aeac9f32fd53c97c92e5c774e154399df">createPermissions</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>pvalues</em></td><td>)</td>
@@ -444,12 +445,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a110c60194f014cf45b93bde09b40a565"></a><!-- doxytag: member="Users::createUser" ref="a110c60194f014cf45b93bde09b40a565" args="($values, $user_id)" -->
+<a class="anchor" id="ac93aebf1960fb12975b120a2c394a8af"></a><!-- doxytag: member="Users::createUser" ref="ac93aebf1960fb12975b120a2c394a8af" args="($values, $user_id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classUsers.html#a110c60194f014cf45b93bde09b40a565">Users::createUser</a> </td>
+          <td class="memname">static <a class="el" href="classUsers.html#ac93aebf1960fb12975b120a2c394a8af">createUser</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em>, </td>
@@ -470,10 +471,11 @@ Private Member Functions</h2></td></tr>
 <div class="memdoc">
 
 <p>creates a user in the shard. </p>
-<p>incase the shard is offline it will place it in the ams_querycache. </p>
+<p>incase the shard is offline it will place it in the ams_querycache. You have to create a user first in the CMS/WWW and use the id for this function. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">$values</td><td>with name,pass and mail </td></tr>
+    <tr><td class="paramname">$user_id</td><td>the extern id of the user (the id given by the www/CMS) </td></tr>
   </table>
   </dd>
 </dl>
@@ -481,12 +483,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad9b1ccad9f285f5e3554003b17884482"></a><!-- doxytag: member="Users::generateSALT" ref="ad9b1ccad9f285f5e3554003b17884482" args="($length=2)" -->
+<a class="anchor" id="afb7603ac9556c1069fbf1c0062251203"></a><!-- doxytag: member="Users::generateSALT" ref="afb7603ac9556c1069fbf1c0062251203" args="($length=2)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classUsers.html#ad9b1ccad9f285f5e3554003b17884482">Users::generateSALT</a> </td>
+          <td class="memname">static <a class="el" href="classUsers.html#afb7603ac9556c1069fbf1c0062251203">generateSALT</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>length</em> = <code>2</code></td><td>)</td>
@@ -499,7 +501,7 @@ Private Member Functions</h2></td></tr>
 <p>generate a SALT. </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
-    <tr><td class="paramname">$length,which</td><td>is by default 2 </td></tr>
+    <tr><td class="paramname">$length</td><td>the length of the SALT which is by default 2 </td></tr>
   </table>
   </dd>
 </dl>
@@ -507,12 +509,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa28b8a5cb27f4330acf692f02a83d39f"></a><!-- doxytag: member="Users::setAmsEmail" ref="aa28b8a5cb27f4330acf692f02a83d39f" args="($user, $mail)" -->
+<a class="anchor" id="ad1cbb1fe6ee72f46dc385bec6e274363"></a><!-- doxytag: member="Users::setAmsEmail" ref="ad1cbb1fe6ee72f46dc385bec6e274363" args="($user, $mail)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#aa28b8a5cb27f4330acf692f02a83d39f">Users::setAmsEmail</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#ad1cbb1fe6ee72f46dc385bec6e274363">setAmsEmail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em>, </td>
@@ -545,12 +547,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6373c269ad6747ca429fa128e7eaf20b"></a><!-- doxytag: member="Users::setAmsPassword" ref="a6373c269ad6747ca429fa128e7eaf20b" args="($user, $pass)" -->
+<a class="anchor" id="ab89812058b0a71baf492af4652d67501"></a><!-- doxytag: member="Users::setAmsPassword" ref="ab89812058b0a71baf492af4652d67501" args="($user, $pass)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a6373c269ad6747ca429fa128e7eaf20b">Users::setAmsPassword</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#ab89812058b0a71baf492af4652d67501">setAmsPassword</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user</em>, </td>
@@ -583,12 +585,12 @@ Private Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a090fa5f2ca4565c03ffd21eae1393ab0"></a><!-- doxytag: member="Users::validEmail" ref="a090fa5f2ca4565c03ffd21eae1393ab0" args="($email)" -->
+<a class="anchor" id="a73637e760498c5cea55074896ec982ac"></a><!-- doxytag: member="Users::validEmail" ref="a73637e760498c5cea55074896ec982ac" args="($email)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classUsers.html#a090fa5f2ca4565c03ffd21eae1393ab0">Users::validEmail</a> </td>
+          <td class="memname"><a class="el" href="classUsers.html#a73637e760498c5cea55074896ec982ac">validEmail</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>email</em></td><td>)</td>
@@ -610,7 +612,7 @@ Private Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/users.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="users_8php.html">users.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -618,7 +620,7 @@ Private Member Functions</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -630,7 +632,7 @@ Private Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:46 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -88,66 +90,55 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Querycache" -->
 <p>class for storing changes when shard is offline.  
  <a href="classQuerycache.html#details">More...</a></p>
-
-<p><a href="classQuerycache-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a7ddcdec027091f50d8009adfc6b44ec4">__construct</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a7ddcdec027091f50d8009adfc6b44ec4"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a0c711df493c72eb461241855f9f34c5f">set</a> ($values)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a0c711df493c72eb461241855f9f34c5f"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a579edcc576b076f884884cf509436768">load_With_SID</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#a579edcc576b076f884884cf509436768"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5840a78a238aeccc749f9e76fd9bfcde"></a><!-- doxytag: member="Querycache::update" ref="a5840a78a238aeccc749f9e76fd9bfcde" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a5840a78a238aeccc749f9e76fd9bfcde">update</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">updates the entry. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad090d4d9a422540e8f93d1480d811c57"></a><!-- doxytag: member="Querycache::getSID" ref="ad090d4d9a422540e8f93d1480d811c57" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#ad090d4d9a422540e8f93d1480d811c57">getSID</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get SID attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3e833722f16d96f44c0d887f4e833bcf"></a><!-- doxytag: member="Querycache::getType" ref="a3e833722f16d96f44c0d887f4e833bcf" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a3e833722f16d96f44c0d887f4e833bcf">getType</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get type attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a75b6539cc93eed689f4c34cf3140684f"></a><!-- doxytag: member="Querycache::getQuery" ref="a75b6539cc93eed689f4c34cf3140684f" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a75b6539cc93eed689f4c34cf3140684f">getQuery</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get query attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab7d8e4258fc22338afe76c5ca0487588"></a><!-- doxytag: member="Querycache::getDb" ref="ab7d8e4258fc22338afe76c5ca0487588" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#ab7d8e4258fc22338afe76c5ca0487588">getDb</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get db attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a7a4b7276270a9df57f7a5cc920fe5edc">setSID</a> ($s)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set SID attribute of the object.  <a href="#a7a4b7276270a9df57f7a5cc920fe5edc"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#ac4a9fb03e63f009d57045c1c23adf550">setType</a> ($t)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set type attribute of the object.  <a href="#ac4a9fb03e63f009d57045c1c23adf550"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a6e2e369125270695466baf423ae62ad2">setQuery</a> ($q)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set query attribute of the object.  <a href="#a6e2e369125270695466baf423ae62ad2"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a26331885b240e1ac6cd3b8409f6787d2">setDb</a> ($d)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set db attribute of the object.  <a href="#a26331885b240e1ac6cd3b8409f6787d2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a095c5d389db211932136b53f25f39685"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a8bdfe0a5256e35367225bcd6d278ef21"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#ae960510ccb242704233c38d787242f53">load_With_SID</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#ae960510ccb242704233c38d787242f53"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a842e4774e3b3601a005b995c02f7e883">update</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">updates the entry.  <a href="#a842e4774e3b3601a005b995c02f7e883"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a5bac91964d19751986cccad6fad28dda">getSID</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get SID attribute of the object.  <a href="#a5bac91964d19751986cccad6fad28dda"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a830b5c75df72b32396701bc563fbe3c7">getType</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get type attribute of the object.  <a href="#a830b5c75df72b32396701bc563fbe3c7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a55f162785567258fe5138af282e588c2">getQuery</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get query attribute of the object.  <a href="#a55f162785567258fe5138af282e588c2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#aceb656ee5135578ab3a9947252caa772">getDb</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get db attribute of the object.  <a href="#aceb656ee5135578ab3a9947252caa772"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a2f536a1f8c8e463eb0346ac375f2a24d">setSID</a> ($s)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set SID attribute of the object.  <a href="#a2f536a1f8c8e463eb0346ac375f2a24d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a0f29af8d4b9fdd8959739727a33acee5">setType</a> ($t)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set type attribute of the object.  <a href="#a0f29af8d4b9fdd8959739727a33acee5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#adbd6075ec5d3bd84122e52b0134ed8e7">setQuery</a> ($q)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set query attribute of the object.  <a href="#adbd6075ec5d3bd84122e52b0134ed8e7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#afa9c249972ca269a2b1a399ed2faf9b4">setDb</a> ($d)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set db attribute of the object.  <a href="#afa9c249972ca269a2b1a399ed2faf9b4"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a30393f88b13bfd390c76cc94454b123e"></a><!-- doxytag: member="Querycache::$SID" ref="a30393f88b13bfd390c76cc94454b123e" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a30393f88b13bfd390c76cc94454b123e">$SID</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The queries ID. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a299788dde0e69545f3e0199132f013d2"></a><!-- doxytag: member="Querycache::$type" ref="a299788dde0e69545f3e0199132f013d2" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a299788dde0e69545f3e0199132f013d2">$type</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The type of query. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6be0975d09b713fdacc2e32330d30c74"></a><!-- doxytag: member="Querycache::$query" ref="a6be0975d09b713fdacc2e32330d30c74" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a6be0975d09b713fdacc2e32330d30c74">$query</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The query itself (json encoded) <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a781742cc162f5714e15c7ef7dc30ebb2"></a><!-- doxytag: member="Querycache::$db" ref="a781742cc162f5714e15c7ef7dc30ebb2" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a781742cc162f5714e15c7ef7dc30ebb2">$db</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">the db where the query should be performed <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a69c31f890638fa4930097cf55ae27995">$SID</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The queries ID.  <a href="#a69c31f890638fa4930097cf55ae27995"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a9a4a6fba2208984cabb3afacadf33919">$type</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The type of query.  <a href="#a9a4a6fba2208984cabb3afacadf33919"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#af59a5f7cd609e592c41dc3643efd3c98">$query</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The query itself (json encoded)  <a href="#af59a5f7cd609e592c41dc3643efd3c98"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classQuerycache.html#a1fa3127fc82f96b1436d871ef02be319">$db</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">the db where the query should be performed  <a href="#a1fa3127fc82f96b1436d871ef02be319"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>class for storing changes when shard is offline. </p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>make sure that the querycache class is being used by the sync class and also for inserting the queries themselfs into it. Atm this class isn't used yet if I remember correctly </dd></dl>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a7ddcdec027091f50d8009adfc6b44ec4"></a><!-- doxytag: member="Querycache::__construct" ref="a7ddcdec027091f50d8009adfc6b44ec4" args="()" -->
+<a class="anchor" id="a095c5d389db211932136b53f25f39685"></a><!-- doxytag: member="Querycache::__construct" ref="a095c5d389db211932136b53f25f39685" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classQuerycache.html#a7ddcdec027091f50d8009adfc6b44ec4">Querycache::__construct</a> </td>
+          <td class="memname"><a class="el" href="classQuerycache.html#a095c5d389db211932136b53f25f39685">__construct</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -162,12 +153,84 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a579edcc576b076f884884cf509436768"></a><!-- doxytag: member="Querycache::load_With_SID" ref="a579edcc576b076f884884cf509436768" args="($id)" -->
+<a class="anchor" id="aceb656ee5135578ab3a9947252caa772"></a><!-- doxytag: member="Querycache::getDb" ref="aceb656ee5135578ab3a9947252caa772" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classQuerycache.html#a579edcc576b076f884884cf509436768">Querycache::load_With_SID</a> </td>
+          <td class="memname"><a class="el" href="classQuerycache.html#aceb656ee5135578ab3a9947252caa772">getDb</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get db attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a55f162785567258fe5138af282e588c2"></a><!-- doxytag: member="Querycache::getQuery" ref="a55f162785567258fe5138af282e588c2" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classQuerycache.html#a55f162785567258fe5138af282e588c2">getQuery</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get query attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a5bac91964d19751986cccad6fad28dda"></a><!-- doxytag: member="Querycache::getSID" ref="a5bac91964d19751986cccad6fad28dda" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classQuerycache.html#a5bac91964d19751986cccad6fad28dda">getSID</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get SID attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a830b5c75df72b32396701bc563fbe3c7"></a><!-- doxytag: member="Querycache::getType" ref="a830b5c75df72b32396701bc563fbe3c7" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classQuerycache.html#a830b5c75df72b32396701bc563fbe3c7">getType</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get type attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae960510ccb242704233c38d787242f53"></a><!-- doxytag: member="Querycache::load_With_SID" ref="ae960510ccb242704233c38d787242f53" args="($id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classQuerycache.html#ae960510ccb242704233c38d787242f53">load_With_SID</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -188,12 +251,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0c711df493c72eb461241855f9f34c5f"></a><!-- doxytag: member="Querycache::set" ref="a0c711df493c72eb461241855f9f34c5f" args="($values)" -->
+<a class="anchor" id="a8bdfe0a5256e35367225bcd6d278ef21"></a><!-- doxytag: member="Querycache::set" ref="a8bdfe0a5256e35367225bcd6d278ef21" args="($values)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classQuerycache.html#a0c711df493c72eb461241855f9f34c5f">Querycache::set</a> </td>
+          <td class="memname"><a class="el" href="classQuerycache.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em></td><td>)</td>
@@ -213,12 +276,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a26331885b240e1ac6cd3b8409f6787d2"></a><!-- doxytag: member="Querycache::setDb" ref="a26331885b240e1ac6cd3b8409f6787d2" args="($d)" -->
+<a class="anchor" id="afa9c249972ca269a2b1a399ed2faf9b4"></a><!-- doxytag: member="Querycache::setDb" ref="afa9c249972ca269a2b1a399ed2faf9b4" args="($d)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classQuerycache.html#a26331885b240e1ac6cd3b8409f6787d2">Querycache::setDb</a> </td>
+          <td class="memname"><a class="el" href="classQuerycache.html#afa9c249972ca269a2b1a399ed2faf9b4">setDb</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>d</em></td><td>)</td>
@@ -238,12 +301,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6e2e369125270695466baf423ae62ad2"></a><!-- doxytag: member="Querycache::setQuery" ref="a6e2e369125270695466baf423ae62ad2" args="($q)" -->
+<a class="anchor" id="adbd6075ec5d3bd84122e52b0134ed8e7"></a><!-- doxytag: member="Querycache::setQuery" ref="adbd6075ec5d3bd84122e52b0134ed8e7" args="($q)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classQuerycache.html#a6e2e369125270695466baf423ae62ad2">Querycache::setQuery</a> </td>
+          <td class="memname"><a class="el" href="classQuerycache.html#adbd6075ec5d3bd84122e52b0134ed8e7">setQuery</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>q</em></td><td>)</td>
@@ -263,12 +326,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7a4b7276270a9df57f7a5cc920fe5edc"></a><!-- doxytag: member="Querycache::setSID" ref="a7a4b7276270a9df57f7a5cc920fe5edc" args="($s)" -->
+<a class="anchor" id="a2f536a1f8c8e463eb0346ac375f2a24d"></a><!-- doxytag: member="Querycache::setSID" ref="a2f536a1f8c8e463eb0346ac375f2a24d" args="($s)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classQuerycache.html#a7a4b7276270a9df57f7a5cc920fe5edc">Querycache::setSID</a> </td>
+          <td class="memname"><a class="el" href="classQuerycache.html#a2f536a1f8c8e463eb0346ac375f2a24d">setSID</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>s</em></td><td>)</td>
@@ -288,12 +351,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac4a9fb03e63f009d57045c1c23adf550"></a><!-- doxytag: member="Querycache::setType" ref="ac4a9fb03e63f009d57045c1c23adf550" args="($t)" -->
+<a class="anchor" id="a0f29af8d4b9fdd8959739727a33acee5"></a><!-- doxytag: member="Querycache::setType" ref="a0f29af8d4b9fdd8959739727a33acee5" args="($t)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classQuerycache.html#ac4a9fb03e63f009d57045c1c23adf550">Querycache::setType</a> </td>
+          <td class="memname"><a class="el" href="classQuerycache.html#a0f29af8d4b9fdd8959739727a33acee5">setType</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>t</em></td><td>)</td>
@@ -313,8 +376,87 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a842e4774e3b3601a005b995c02f7e883"></a><!-- doxytag: member="Querycache::update" ref="a842e4774e3b3601a005b995c02f7e883" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classQuerycache.html#a842e4774e3b3601a005b995c02f7e883">update</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>updates the entry. </p>
+
+</div>
+</div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="a1fa3127fc82f96b1436d871ef02be319"></a><!-- doxytag: member="Querycache::$db" ref="a1fa3127fc82f96b1436d871ef02be319" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$db<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>the db where the query should be performed </p>
+
+</div>
+</div>
+<a class="anchor" id="af59a5f7cd609e592c41dc3643efd3c98"></a><!-- doxytag: member="Querycache::$query" ref="af59a5f7cd609e592c41dc3643efd3c98" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$query<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The query itself (json encoded) </p>
+
+</div>
+</div>
+<a class="anchor" id="a69c31f890638fa4930097cf55ae27995"></a><!-- doxytag: member="Querycache::$SID" ref="a69c31f890638fa4930097cf55ae27995" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$SID<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The queries ID. </p>
+
+</div>
+</div>
+<a class="anchor" id="a9a4a6fba2208984cabb3afacadf33919"></a><!-- doxytag: member="Querycache::$type" ref="a9a4a6fba2208984cabb3afacadf33919" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$type<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The type of query. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/querycache.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="querycache_8php.html">querycache.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -322,7 +464,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -334,7 +476,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:45 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

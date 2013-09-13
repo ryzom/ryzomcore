@@ -1,5 +1,10 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the createticket page.
+* the $_GET['user_id'] identifies for which user you try to create a ticket. A normal user can only create a ticket for himself, a mod/admin however can also create tickets for other users.
+* It will also load all categories and return these, they will be used by the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function createticket(){
 
     //if logged in
@@ -7,6 +12,7 @@ function createticket(){
         //in case user_id-GET param set it's value as target_id, if no user_id-param is given, use the session id.
         if(isset($_GET['user_id'])){
             
+            //check if you are a mod/admin or you try to create a ticket for your own, if this is not the case redirect to error page
             if(($_GET['user_id'] != $_SESSION['id']) && ( ! ticket_user::isMod(unserialize($_SESSION['ticket_user']))) ){
                 
                 //ERROR: No access!

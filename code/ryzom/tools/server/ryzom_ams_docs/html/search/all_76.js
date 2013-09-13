@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['validemail',['validEmail',['../classUsers.html#a090fa5f2ca4565c03ffd21eae1393ab0',1,'Users']]]
+  ['validemail',['validEmail',['../classUsers.html#a73637e760498c5cea55074896ec982ac',1,'Users']]]
 ];

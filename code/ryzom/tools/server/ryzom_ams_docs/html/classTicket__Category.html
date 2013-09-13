@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -89,55 +91,48 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Ticket_Category" -->
 <p>Class related to the ticket categories.  
  <a href="classTicket__Category.html#details">More...</a></p>
-
-<p><a href="classTicket__Category-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a6dfdb4328151d710388fd9171043ad85">__construct</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a6dfdb4328151d710388fd9171043ad85"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a66f5c7cb775b14bfa5ffc9467a63970f">load_With_TCategoryId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#a66f5c7cb775b14bfa5ffc9467a63970f"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9120c893d7a2db005dec5439f3868ff6"></a><!-- doxytag: member="Ticket_Category::update" ref="a9120c893d7a2db005dec5439f3868ff6" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a9120c893d7a2db005dec5439f3868ff6">update</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update object attributes to the DB. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a04cf7fa795b9d23b5b0f2664b4bdcc1c"></a><!-- doxytag: member="Ticket_Category::getName" ref="a04cf7fa795b9d23b5b0f2664b4bdcc1c" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a04cf7fa795b9d23b5b0f2664b4bdcc1c">getName</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get name attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac1b758198fb7edcebf962b317167022e"></a><!-- doxytag: member="Ticket_Category::getTCategoryId" ref="ac1b758198fb7edcebf962b317167022e" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#ac1b758198fb7edcebf962b317167022e">getTCategoryId</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get tCategoryId attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#afa5aabc3304855425c3efd65de740012">setName</a> ($n)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set name attribute of the object.  <a href="#afa5aabc3304855425c3efd65de740012"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#ab9c3df7c426fcc8d3de87b3b115e3aaa">setTCategoryId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set tCategoryId attribute of the object.  <a href="#ab9c3df7c426fcc8d3de87b3b115e3aaa"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a095c5d389db211932136b53f25f39685"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#ab3a70940917530d91a39536a6d45a21d">load_With_TCategoryId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#ab3a70940917530d91a39536a6d45a21d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a842e4774e3b3601a005b995c02f7e883">update</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update object attributes to the DB.  <a href="#a842e4774e3b3601a005b995c02f7e883"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a3d0963e68bb313b163a73f2803c64600">getName</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get name attribute of the object.  <a href="#a3d0963e68bb313b163a73f2803c64600"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#acb530a119e5e52230a92ece95cc7ec82">getTCategoryId</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get tCategoryId attribute of the object.  <a href="#acb530a119e5e52230a92ece95cc7ec82"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#aa3dcc220094e19fef1f918a3a917dba7">setName</a> ($n)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set name attribute of the object.  <a href="#aa3dcc220094e19fef1f918a3a917dba7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a39a64c3f7ab33ba3f5a67c31647e889f">setTCategoryId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set tCategoryId attribute of the object.  <a href="#a39a64c3f7ab33ba3f5a67c31647e889f"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a9229f3d3e6479058d094aedd7ecaeaef">createTicketCategory</a> ($name)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a ticket_Catergory in the DB.  <a href="#a9229f3d3e6479058d094aedd7ecaeaef"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a9069b59fd0dfc8e92e01c8a3c19c6f35">constr_TCategoryId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">construct a category object based on the TCategoryId.  <a href="#a9069b59fd0dfc8e92e01c8a3c19c6f35"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#ad0ae199cc88bb083768f37515e0a143b">getAllCategories</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return a list of all category objects.  <a href="#ad0ae199cc88bb083768f37515e0a143b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a506fc7f32de9547e91a5dbb68c391907">createTicketCategory</a> ($name)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a ticket_Catergory in the DB.  <a href="#a506fc7f32de9547e91a5dbb68c391907"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a332d2dd59b46fc933a3c9a1b2967803a">constr_TCategoryId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">construct a category object based on the TCategoryId.  <a href="#a332d2dd59b46fc933a3c9a1b2967803a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a1e4b8ecfd737337e35976126b521499f">getAllCategories</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return a list of all category objects.  <a href="#a1e4b8ecfd737337e35976126b521499f"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2928ce0f2387b21b42bc6ede4a3f0e6a"></a><!-- doxytag: member="Ticket_Category::$tCategoryId" ref="a2928ce0f2387b21b42bc6ede4a3f0e6a" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a2928ce0f2387b21b42bc6ede4a3f0e6a">$tCategoryId</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the category. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81ea14ddb8794f34800aad4e9d0baf91"></a><!-- doxytag: member="Ticket_Category::$name" ref="a81ea14ddb8794f34800aad4e9d0baf91" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a81ea14ddb8794f34800aad4e9d0baf91">$name</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The name of the category. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#a0111df4559c9f524272d94df0b7f9d6b">$tCategoryId</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the category.  <a href="#a0111df4559c9f524272d94df0b7f9d6b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Category.html#ab2fc40d43824ea3e1ce5d86dee0d763b">$name</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The name of the category.  <a href="#ab2fc40d43824ea3e1ce5d86dee0d763b"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Class related to the ticket categories. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a6dfdb4328151d710388fd9171043ad85"></a><!-- doxytag: member="Ticket_Category::__construct" ref="a6dfdb4328151d710388fd9171043ad85" args="()" -->
+<a class="anchor" id="a095c5d389db211932136b53f25f39685"></a><!-- doxytag: member="Ticket_Category::__construct" ref="a095c5d389db211932136b53f25f39685" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Category.html#a6dfdb4328151d710388fd9171043ad85">Ticket_Category::__construct</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Category.html#a095c5d389db211932136b53f25f39685">__construct</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -152,12 +147,12 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a9069b59fd0dfc8e92e01c8a3c19c6f35"></a><!-- doxytag: member="Ticket_Category::constr_TCategoryId" ref="a9069b59fd0dfc8e92e01c8a3c19c6f35" args="($id)" -->
+<a class="anchor" id="a332d2dd59b46fc933a3c9a1b2967803a"></a><!-- doxytag: member="Ticket_Category::constr_TCategoryId" ref="a332d2dd59b46fc933a3c9a1b2967803a" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Category.html#a9069b59fd0dfc8e92e01c8a3c19c6f35">Ticket_Category::constr_TCategoryId</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Category.html#a332d2dd59b46fc933a3c9a1b2967803a">constr_TCategoryId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -172,12 +167,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9229f3d3e6479058d094aedd7ecaeaef"></a><!-- doxytag: member="Ticket_Category::createTicketCategory" ref="a9229f3d3e6479058d094aedd7ecaeaef" args="($name)" -->
+<a class="anchor" id="a506fc7f32de9547e91a5dbb68c391907"></a><!-- doxytag: member="Ticket_Category::createTicketCategory" ref="a506fc7f32de9547e91a5dbb68c391907" args="($name)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Category.html#a9229f3d3e6479058d094aedd7ecaeaef">Ticket_Category::createTicketCategory</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Category.html#a506fc7f32de9547e91a5dbb68c391907">createTicketCategory</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>name</em></td><td>)</td>
@@ -197,12 +192,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad0ae199cc88bb083768f37515e0a143b"></a><!-- doxytag: member="Ticket_Category::getAllCategories" ref="ad0ae199cc88bb083768f37515e0a143b" args="()" -->
+<a class="anchor" id="a1e4b8ecfd737337e35976126b521499f"></a><!-- doxytag: member="Ticket_Category::getAllCategories" ref="a1e4b8ecfd737337e35976126b521499f" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Category.html#ad0ae199cc88bb083768f37515e0a143b">Ticket_Category::getAllCategories</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Category.html#a1e4b8ecfd737337e35976126b521499f">getAllCategories</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [static]</code></td>
@@ -216,12 +211,48 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a66f5c7cb775b14bfa5ffc9467a63970f"></a><!-- doxytag: member="Ticket_Category::load_With_TCategoryId" ref="a66f5c7cb775b14bfa5ffc9467a63970f" args="($id)" -->
+<a class="anchor" id="a3d0963e68bb313b163a73f2803c64600"></a><!-- doxytag: member="Ticket_Category::getName" ref="a3d0963e68bb313b163a73f2803c64600" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Category.html#a66f5c7cb775b14bfa5ffc9467a63970f">Ticket_Category::load_With_TCategoryId</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Category.html#a3d0963e68bb313b163a73f2803c64600">getName</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get name attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="acb530a119e5e52230a92ece95cc7ec82"></a><!-- doxytag: member="Ticket_Category::getTCategoryId" ref="acb530a119e5e52230a92ece95cc7ec82" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Category.html#acb530a119e5e52230a92ece95cc7ec82">getTCategoryId</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get tCategoryId attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="ab3a70940917530d91a39536a6d45a21d"></a><!-- doxytag: member="Ticket_Category::load_With_TCategoryId" ref="ab3a70940917530d91a39536a6d45a21d" args="($id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Category.html#ab3a70940917530d91a39536a6d45a21d">load_With_TCategoryId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -242,12 +273,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="afa5aabc3304855425c3efd65de740012"></a><!-- doxytag: member="Ticket_Category::setName" ref="afa5aabc3304855425c3efd65de740012" args="($n)" -->
+<a class="anchor" id="aa3dcc220094e19fef1f918a3a917dba7"></a><!-- doxytag: member="Ticket_Category::setName" ref="aa3dcc220094e19fef1f918a3a917dba7" args="($n)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Category.html#afa5aabc3304855425c3efd65de740012">Ticket_Category::setName</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Category.html#aa3dcc220094e19fef1f918a3a917dba7">setName</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>n</em></td><td>)</td>
@@ -267,12 +298,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab9c3df7c426fcc8d3de87b3b115e3aaa"></a><!-- doxytag: member="Ticket_Category::setTCategoryId" ref="ab9c3df7c426fcc8d3de87b3b115e3aaa" args="($id)" -->
+<a class="anchor" id="a39a64c3f7ab33ba3f5a67c31647e889f"></a><!-- doxytag: member="Ticket_Category::setTCategoryId" ref="a39a64c3f7ab33ba3f5a67c31647e889f" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Category.html#ab9c3df7c426fcc8d3de87b3b115e3aaa">Ticket_Category::setTCategoryId</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Category.html#a39a64c3f7ab33ba3f5a67c31647e889f">setTCategoryId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -292,8 +323,57 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a842e4774e3b3601a005b995c02f7e883"></a><!-- doxytag: member="Ticket_Category::update" ref="a842e4774e3b3601a005b995c02f7e883" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Category.html#a842e4774e3b3601a005b995c02f7e883">update</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>update object attributes to the DB. </p>
+
+</div>
+</div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="ab2fc40d43824ea3e1ce5d86dee0d763b"></a><!-- doxytag: member="Ticket_Category::$name" ref="ab2fc40d43824ea3e1ce5d86dee0d763b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$name<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The name of the category. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0111df4559c9f524272d94df0b7f9d6b"></a><!-- doxytag: member="Ticket_Category::$tCategoryId" ref="a0111df4559c9f524272d94df0b7f9d6b" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$tCategoryId<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The id of the category. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/ticket_category.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="ticket__category_8php.html">ticket_category.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -301,7 +381,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -313,7 +393,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:46 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

@@ -1,5 +1,11 @@
 <?php
-
+/**
+* This function is beign used to change the users password.
+* It will first check if the user who executed this function is the person of whom the emailaddress is or if it's a mod/admin. If this is not the case the page will be redirected to an error page.
+* If the executing user tries to change someone elses password, he doesn't has to fill in the previous password. The password will be validated first. If the checking was successful the password will be updated and the settings template will be reloaded. Errors made by invalid data will be shown
+* also after reloading the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function change_password(){
 	
     try{
@@ -11,8 +17,10 @@ function change_password(){
                 //if target_id is the same as session id or is admin
                 if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod(unserialize($_SESSION['ticket_user']))  ){
                     if($_POST['target_id'] == $_SESSION['id']){
+			//if the password is of the executing user himself
                         $target_username = $_SESSION['user'];
                     }else{
+			//if the password is of someone else.
 			$webUser = new WebUsers($_POST['target_id']);
                         $target_username = $webUser->getUsername();
                         //isAdmin is true when it's the admin, but the target_id != own id

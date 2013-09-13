@@ -1,5 +1,10 @@
 <?php
-
+/**
+* This function is beign used to create a new ticket.
+* It will first check if the user who executed this function is the person of whom the setting is or if it's a mod/admin. If this is not the case the page will be redirected to an error page.
+* next it will filter the POST data and it will try to create the new ticket. Afterwards a redirecion to the ticket will occur.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function create_ticket(){
     //if logged in
     global $INGAME_WEBPATH;
@@ -16,11 +21,15 @@ function create_ticket(){
                 $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
                 try{
                     if($_POST['target_id'] == $_SESSION['id']){
+                        //if the ticket is being made for the executing user himself
                         $author = unserialize($_SESSION['ticket_user'])->getTUserId();
                     }else{
+                        //if a mod tries to make a ticket for someone else
                         $author=  Ticket_User::constr_ExternId($_POST['target_id'])->getTUserId();
                     }
+                    //create the ticket & return the id of the newly created ticket.
                     $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, unserialize($_SESSION['ticket_user'])->getTUserId(),0, $_POST);
+                    //redirect to the new ticket.
                     if (Helpers::check_if_game_client()) {
                         header("Location: ".$INGAME_WEBPATH."?page=show_ticket&id=".$ticket_id);
                     }else{

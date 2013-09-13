@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -89,39 +91,36 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="MyCrypt" -->
 <p>Basic encryption/decryption class.  
  <a href="classMyCrypt.html#details">More...</a></p>
-
-<p><a href="classMyCrypt-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a35146c564f37f0b0274dfa0c05d3ba13">__construct</a> ($cryptinfo)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">constructor.  <a href="#a35146c564f37f0b0274dfa0c05d3ba13"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a72a803d99bc6687a64d0d80043a7516c">encrypt</a> ($data)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">encrypts by using the given enc_method and hash_method.  <a href="#a72a803d99bc6687a64d0d80043a7516c"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a8833cd07b177eaac011d154ad46991c4">decrypt</a> ($edata)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">decrypts by using the given enc_method and hash_method.  <a href="#a8833cd07b177eaac011d154ad46991c4"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#af200cbfd49bfea2fecf5629ab2361033">__construct</a> ($cryptinfo)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">constructor.  <a href="#af200cbfd49bfea2fecf5629ab2361033"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a07bcc8ef1d23370470ecb5ae8fc07dfa">encrypt</a> ($data)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">encrypts by using the given enc_method and hash_method.  <a href="#a07bcc8ef1d23370470ecb5ae8fc07dfa"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#aed69cdc691e1155856c905ee1c08d9b7">decrypt</a> ($edata)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">decrypts by using the given enc_method and hash_method.  <a href="#aed69cdc691e1155856c905ee1c08d9b7"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a338bfce76aec4f14c73af16e7c0b6fe6">hashIV</a> ($key, $method, $iv_size)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">hashes the key by using a hash method specified.  <a href="#a338bfce76aec4f14c73af16e7c0b6fe6"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a20dcd7883eb21d0f6f62175891c9e51c">check_methods</a> ($enc, $hash)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if the encryption and hash methods are supported  <a href="#a20dcd7883eb21d0f6f62175891c9e51c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a1bdf94a5906655bf0965338c9d17ab27">hashIV</a> ($key, $method, $iv_size)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">hashes the key by using a hash method specified.  <a href="#a1bdf94a5906655bf0965338c9d17ab27"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#ad72fefc790b0bb1ac6edc252427b0970">check_methods</a> ($enc, $hash)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">checks if the encryption and hash methods are supported  <a href="#ad72fefc790b0bb1ac6edc252427b0970"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9701fd447bb31495494d7580f8fbad31"></a><!-- doxytag: member="MyCrypt::$config" ref="a9701fd447bb31495494d7580f8fbad31" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a9701fd447bb31495494d7580f8fbad31">$config</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">array that should contain the enc_method &amp; hash_method &amp; key <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classMyCrypt.html#a49c7011be9c979d9174c52a8b83e5d8e">$config</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">array that should contain the enc_method &amp; hash_method &amp; key  <a href="#a49c7011be9c979d9174c52a8b83e5d8e"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Basic encryption/decryption class. </p>
 <p>We use this class atm for encrypting &amp; decrypting the imap passwords. </p>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a35146c564f37f0b0274dfa0c05d3ba13"></a><!-- doxytag: member="MyCrypt::__construct" ref="a35146c564f37f0b0274dfa0c05d3ba13" args="($cryptinfo)" -->
+<a class="anchor" id="af200cbfd49bfea2fecf5629ab2361033"></a><!-- doxytag: member="MyCrypt::__construct" ref="af200cbfd49bfea2fecf5629ab2361033" args="($cryptinfo)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMyCrypt.html#a35146c564f37f0b0274dfa0c05d3ba13">MyCrypt::__construct</a> </td>
+          <td class="memname"><a class="el" href="classMyCrypt.html#af200cbfd49bfea2fecf5629ab2361033">__construct</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>cryptinfo</em></td><td>)</td>
@@ -143,12 +142,12 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a20dcd7883eb21d0f6f62175891c9e51c"></a><!-- doxytag: member="MyCrypt::check_methods" ref="a20dcd7883eb21d0f6f62175891c9e51c" args="($enc, $hash)" -->
+<a class="anchor" id="ad72fefc790b0bb1ac6edc252427b0970"></a><!-- doxytag: member="MyCrypt::check_methods" ref="ad72fefc790b0bb1ac6edc252427b0970" args="($enc, $hash)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classMyCrypt.html#a20dcd7883eb21d0f6f62175891c9e51c">MyCrypt::check_methods</a> </td>
+          <td class="memname">static <a class="el" href="classMyCrypt.html#ad72fefc790b0bb1ac6edc252427b0970">check_methods</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>enc</em>, </td>
@@ -185,12 +184,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8833cd07b177eaac011d154ad46991c4"></a><!-- doxytag: member="MyCrypt::decrypt" ref="a8833cd07b177eaac011d154ad46991c4" args="($edata)" -->
+<a class="anchor" id="aed69cdc691e1155856c905ee1c08d9b7"></a><!-- doxytag: member="MyCrypt::decrypt" ref="aed69cdc691e1155856c905ee1c08d9b7" args="($edata)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMyCrypt.html#a8833cd07b177eaac011d154ad46991c4">MyCrypt::decrypt</a> </td>
+          <td class="memname"><a class="el" href="classMyCrypt.html#aed69cdc691e1155856c905ee1c08d9b7">decrypt</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>edata</em></td><td>)</td>
@@ -211,12 +210,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a72a803d99bc6687a64d0d80043a7516c"></a><!-- doxytag: member="MyCrypt::encrypt" ref="a72a803d99bc6687a64d0d80043a7516c" args="($data)" -->
+<a class="anchor" id="a07bcc8ef1d23370470ecb5ae8fc07dfa"></a><!-- doxytag: member="MyCrypt::encrypt" ref="a07bcc8ef1d23370470ecb5ae8fc07dfa" args="($data)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classMyCrypt.html#a72a803d99bc6687a64d0d80043a7516c">MyCrypt::encrypt</a> </td>
+          <td class="memname"><a class="el" href="classMyCrypt.html#a07bcc8ef1d23370470ecb5ae8fc07dfa">encrypt</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>data</em></td><td>)</td>
@@ -238,12 +237,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a338bfce76aec4f14c73af16e7c0b6fe6"></a><!-- doxytag: member="MyCrypt::hashIV" ref="a338bfce76aec4f14c73af16e7c0b6fe6" args="($key, $method, $iv_size)" -->
+<a class="anchor" id="a1bdf94a5906655bf0965338c9d17ab27"></a><!-- doxytag: member="MyCrypt::hashIV" ref="a1bdf94a5906655bf0965338c9d17ab27" args="($key, $method, $iv_size)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classMyCrypt.html#a338bfce76aec4f14c73af16e7c0b6fe6">MyCrypt::hashIV</a> </td>
+          <td class="memname">static <a class="el" href="classMyCrypt.html#a1bdf94a5906655bf0965338c9d17ab27">hashIV</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>key</em>, </td>
@@ -282,8 +281,24 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="a49c7011be9c979d9174c52a8b83e5d8e"></a><!-- doxytag: member="MyCrypt::$config" ref="a49c7011be9c979d9174c52a8b83e5d8e" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$config<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>array that should contain the enc_method &amp; hash_method &amp; key </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/mycrypt.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="mycrypt_8php.html">mycrypt.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -291,7 +306,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -303,7 +318,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:45 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

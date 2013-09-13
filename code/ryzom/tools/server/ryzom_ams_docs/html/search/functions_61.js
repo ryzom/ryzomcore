@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['addusertosupportgroup',['addUserToSupportGroup',['../classSupport__Group.html#adaa2d30acacac56032605b34e246b253',1,'Support_Group']]],
-  ['assignticket',['assignTicket',['../classAssigned.html#ac493092d0fcd0e3b2b9145cc8cd03d8e',1,'Assigned\assignTicket()'],['../classTicket.html#ab2653e3c80e3582c38c6845e6add6fac',1,'Ticket\assignTicket()']]]
+  ['add_5fsgroup',['add_sgroup',['../add__sgroup_8php.html#a45490c056bdd114ef28893fc29286d2b',1,'add_sgroup.php']]],
+  ['add_5fuser',['add_user',['../add__user_8php.html#a69e8de25de7560db0292bb474882a489',1,'add_user.php']]],
+  ['add_5fuser_5fto_5fsgroup',['add_user_to_sgroup',['../add__user__to__sgroup_8php.html#a6ad0c5a1bfd563e11a107bf0023b6150',1,'add_user_to_sgroup.php']]],
+  ['addusertosupportgroup',['addUserToSupportGroup',['../classSupport__Group.html#a4616317379ffef08dbaeea2a9dbba02c',1,'Support_Group']]],
+  ['assignticket',['assignTicket',['../classAssigned.html#a51c3d5b6f78de455619581fd3e591f17',1,'Assigned\assignTicket()'],['../classTicket.html#a51c3d5b6f78de455619581fd3e591f17',1,'Ticket\assignTicket()']]]
 ];

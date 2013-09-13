@@ -1,5 +1,10 @@
 <?php
-
+/**
+* This function is beign used to change the users receiveMail setting.
+* It will first check if the user who executed this function is the person of whom the setting is or if it's a mod/admin. If this is not the case the page will be redirected to an error page.
+* it will check if the new value equals 1 or 0 and it will update the setting and redirect the page again.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function change_receivemail(){
 	
     try{
@@ -10,7 +15,7 @@ function change_receivemail(){
             
             if(isset($_POST['target_id'])){
 		
-                
+                //check if the user who executed this function is the person of whom the setting is or if it's a mod/admin.
                 if( ( ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user']))) && isset($_POST['ReceiveMail']) ){
 			$user_id = filter_var($_POST['target_id'], FILTER_SANITIZE_NUMBER_INT);
 		    	$receiveMail = filter_var($_POST['ReceiveMail'], FILTER_SANITIZE_NUMBER_INT);

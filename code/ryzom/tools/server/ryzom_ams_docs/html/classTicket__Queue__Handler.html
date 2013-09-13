@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -89,51 +91,45 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Ticket_Queue_Handler" -->
 <p>returns tickets (queues) that are related in some way.  
  <a href="classTicket__Queue__Handler.html#details">More...</a></p>
-
-<p><a href="classTicket__Queue__Handler-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a0831f1e09fce035802be012a71bc6e88">__construct</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a0831f1e09fce035802be012a71bc6e88"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a989ef733df2ecd57cbdf89364985d98a">getTickets</a> ($input, $user_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the tickets that are related in someway defined by $input.  <a href="#a989ef733df2ecd57cbdf89364985d98a"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a50a09229d462401177d1cd532853d358"></a><!-- doxytag: member="Ticket_Queue_Handler::getPagination" ref="a50a09229d462401177d1cd532853d358" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a50a09229d462401177d1cd532853d358">getPagination</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get pagination attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#acd3f4a706276cd12a5f105b098bcc274">createQueue</a> ($userid, $groupid, $what, $how, $who)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates the queue.  <a href="#acd3f4a706276cd12a5f105b098bcc274"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a095c5d389db211932136b53f25f39685"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a45e8c11ba9485041fa92c7c470a8f9f9">getTickets</a> ($input, $user_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the tickets that are related in someway defined by $input.  <a href="#a45e8c11ba9485041fa92c7c470a8f9f9"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#ab45a102a508e9727b108e8f24486c464">getPagination</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get pagination attribute of the object.  <a href="#ab45a102a508e9727b108e8f24486c464"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#af077496b6071af47c19a873bf025c1f3">createQueue</a> ($userid, $groupid, $what, $how, $who)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates the queue.  <a href="#af077496b6071af47c19a873bf025c1f3"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a1623e3f03e28508e76fc148b936bdfda">getNrOfTicketsToDo</a> ($user_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the number of tickets in the todo queue for a specific user.  <a href="#a1623e3f03e28508e76fc148b936bdfda"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#aaa4b015079a5b37ede9ec03f63f203e4">getNrOfTicketsAssignedWaiting</a> ($user_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the number of tickets assigned to a specific user and waiting for support.  <a href="#aaa4b015079a5b37ede9ec03f63f203e4"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acbee619eecfb9a81769f4389fa48ff51"></a><!-- doxytag: member="Ticket_Queue_Handler::getNrOfTickets" ref="acbee619eecfb9a81769f4389fa48ff51" args="()" -->
-static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#acbee619eecfb9a81769f4389fa48ff51">getNrOfTickets</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the total number of tickets. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6a130b06a4cbbc10e5a19431456ae080"></a><!-- doxytag: member="Ticket_Queue_Handler::getNewestTicket" ref="a6a130b06a4cbbc10e5a19431456ae080" args="()" -->
-static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a6a130b06a4cbbc10e5a19431456ae080">getNewestTicket</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the ticket object of the latest added ticket. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#ae8d1a2a66991583c05c173147e8dc657">getNrOfTicketsToDo</a> ($user_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the number of tickets in the todo queue for a specific user.  <a href="#ae8d1a2a66991583c05c173147e8dc657"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a0d3daaaf5c79188eb62bb3adda11fa2a">getNrOfTicketsAssignedWaiting</a> ($user_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the number of tickets assigned to a specific user and waiting for support.  <a href="#a0d3daaaf5c79188eb62bb3adda11fa2a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#ada8f87ed8466c5e0477fa20359c3c8ad">getNrOfTickets</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the total number of tickets.  <a href="#ada8f87ed8466c5e0477fa20359c3c8ad"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#ab5a79318a0c771083f03400093b3b2ec">getNewestTicket</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the ticket object of the latest added ticket.  <a href="#ab5a79318a0c771083f03400093b3b2ec"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acadf7665fa564ba8c6dbaf047d3a220b"></a><!-- doxytag: member="Ticket_Queue_Handler::$pagination" ref="acadf7665fa564ba8c6dbaf047d3a220b" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#acadf7665fa564ba8c6dbaf047d3a220b">$pagination</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPagination.html" title="Handles returning arrays based on a given pagenumber.">Pagination</a> object, this way only a few tickets (related to that pagenumber) will be shown. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#ae9d10b4bfc09d7cd09a2609f3317686f">$queue</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The queue object, being used to get the queries and parameters.  <a href="#ae9d10b4bfc09d7cd09a2609f3317686f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a388a4a950e936f746d3b9c1b56450ce7">$pagination</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classPagination.html" title="Handles returning arrays based on a given pagenumber.">Pagination</a> object, this way only a few tickets (related to that pagenumber) will be shown.  <a href="#a388a4a950e936f746d3b9c1b56450ce7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue__Handler.html#a4a0b48f6ae2fcb248a4f0288c7c344a6">$queue</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The queue object, being used to get the queries and parameters.  <a href="#a4a0b48f6ae2fcb248a4f0288c7c344a6"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>returns tickets (queues) that are related in some way. </p>
-<p>This class handles the creation and returning of existing ticket queues. Normally a $_GET['get'] parameter is being used to identify what kind of tickets should be shown. the <a class="el" href="classTicket__Queue__Handler.html#a989ef733df2ecd57cbdf89364985d98a" title="returns the tickets that are related in someway defined by $input.">getTickets()</a> function uses this parameter($input) and uses the ticket_queue class to load the specific query. </p>
+<p>This class handles the creation and returning of existing ticket queues. Normally a $_GET['get'] parameter is being used to identify what kind of tickets should be shown. the <a class="el" href="classTicket__Queue__Handler.html#a45e8c11ba9485041fa92c7c470a8f9f9" title="returns the tickets that are related in someway defined by $input.">getTickets()</a> function uses this parameter($input) and uses the ticket_queue class to load the specific query. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a0831f1e09fce035802be012a71bc6e88"></a><!-- doxytag: member="Ticket_Queue_Handler::__construct" ref="a0831f1e09fce035802be012a71bc6e88" args="()" -->
+<a class="anchor" id="a095c5d389db211932136b53f25f39685"></a><!-- doxytag: member="Ticket_Queue_Handler::__construct" ref="a095c5d389db211932136b53f25f39685" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Queue__Handler.html#a0831f1e09fce035802be012a71bc6e88">Ticket_Queue_Handler::__construct</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Queue__Handler.html#a095c5d389db211932136b53f25f39685">__construct</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -148,12 +144,12 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="acd3f4a706276cd12a5f105b098bcc274"></a><!-- doxytag: member="Ticket_Queue_Handler::createQueue" ref="acd3f4a706276cd12a5f105b098bcc274" args="($userid, $groupid, $what, $how, $who)" -->
+<a class="anchor" id="af077496b6071af47c19a873bf025c1f3"></a><!-- doxytag: member="Ticket_Queue_Handler::createQueue" ref="af077496b6071af47c19a873bf025c1f3" args="($userid, $groupid, $what, $how, $who)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Queue__Handler.html#acd3f4a706276cd12a5f105b098bcc274">Ticket_Queue_Handler::createQueue</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Queue__Handler.html#af077496b6071af47c19a873bf025c1f3">createQueue</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>userid</em>, </td>
@@ -196,12 +192,48 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aaa4b015079a5b37ede9ec03f63f203e4"></a><!-- doxytag: member="Ticket_Queue_Handler::getNrOfTicketsAssignedWaiting" ref="aaa4b015079a5b37ede9ec03f63f203e4" args="($user_id)" -->
+<a class="anchor" id="ab5a79318a0c771083f03400093b3b2ec"></a><!-- doxytag: member="Ticket_Queue_Handler::getNewestTicket" ref="ab5a79318a0c771083f03400093b3b2ec" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Queue__Handler.html#aaa4b015079a5b37ede9ec03f63f203e4">Ticket_Queue_Handler::getNrOfTicketsAssignedWaiting</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Queue__Handler.html#ab5a79318a0c771083f03400093b3b2ec">getNewestTicket</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get the ticket object of the latest added ticket. </p>
+
+</div>
+</div>
+<a class="anchor" id="ada8f87ed8466c5e0477fa20359c3c8ad"></a><!-- doxytag: member="Ticket_Queue_Handler::getNrOfTickets" ref="ada8f87ed8466c5e0477fa20359c3c8ad" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTicket__Queue__Handler.html#ada8f87ed8466c5e0477fa20359c3c8ad">getNrOfTickets</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get the total number of tickets. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0d3daaaf5c79188eb62bb3adda11fa2a"></a><!-- doxytag: member="Ticket_Queue_Handler::getNrOfTicketsAssignedWaiting" ref="a0d3daaaf5c79188eb62bb3adda11fa2a" args="($user_id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTicket__Queue__Handler.html#a0d3daaaf5c79188eb62bb3adda11fa2a">getNrOfTicketsAssignedWaiting</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user_id</em></td><td>)</td>
@@ -221,12 +253,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1623e3f03e28508e76fc148b936bdfda"></a><!-- doxytag: member="Ticket_Queue_Handler::getNrOfTicketsToDo" ref="a1623e3f03e28508e76fc148b936bdfda" args="($user_id)" -->
+<a class="anchor" id="ae8d1a2a66991583c05c173147e8dc657"></a><!-- doxytag: member="Ticket_Queue_Handler::getNrOfTicketsToDo" ref="ae8d1a2a66991583c05c173147e8dc657" args="($user_id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Queue__Handler.html#a1623e3f03e28508e76fc148b936bdfda">Ticket_Queue_Handler::getNrOfTicketsToDo</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Queue__Handler.html#ae8d1a2a66991583c05c173147e8dc657">getNrOfTicketsToDo</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user_id</em></td><td>)</td>
@@ -246,12 +278,30 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a989ef733df2ecd57cbdf89364985d98a"></a><!-- doxytag: member="Ticket_Queue_Handler::getTickets" ref="a989ef733df2ecd57cbdf89364985d98a" args="($input, $user_id)" -->
+<a class="anchor" id="ab45a102a508e9727b108e8f24486c464"></a><!-- doxytag: member="Ticket_Queue_Handler::getPagination" ref="ab45a102a508e9727b108e8f24486c464" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Queue__Handler.html#a989ef733df2ecd57cbdf89364985d98a">Ticket_Queue_Handler::getTickets</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Queue__Handler.html#ab45a102a508e9727b108e8f24486c464">getPagination</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get pagination attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a45e8c11ba9485041fa92c7c470a8f9f9"></a><!-- doxytag: member="Ticket_Queue_Handler::getTickets" ref="a45e8c11ba9485041fa92c7c470a8f9f9" args="($input, $user_id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Queue__Handler.html#a45e8c11ba9485041fa92c7c470a8f9f9">getTickets</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>input</em>, </td>
@@ -284,13 +334,28 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<hr/><h2>Member Data Documentation</h2>
-<a class="anchor" id="ae9d10b4bfc09d7cd09a2609f3317686f"></a><!-- doxytag: member="Ticket_Queue_Handler::$queue" ref="ae9d10b4bfc09d7cd09a2609f3317686f" args="" -->
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="a388a4a950e936f746d3b9c1b56450ce7"></a><!-- doxytag: member="Ticket_Queue_Handler::$pagination" ref="a388a4a950e936f746d3b9c1b56450ce7" args="" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Ticket_Queue_Handler::$queue<code> [private]</code></td>
+          <td class="memname">$pagination<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p><a class="el" href="classPagination.html" title="Handles returning arrays based on a given pagenumber.">Pagination</a> object, this way only a few tickets (related to that pagenumber) will be shown. </p>
+
+</div>
+</div>
+<a class="anchor" id="a4a0b48f6ae2fcb248a4f0288c7c344a6"></a><!-- doxytag: member="Ticket_Queue_Handler::$queue" ref="a4a0b48f6ae2fcb248a4f0288c7c344a6" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$queue<code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -301,7 +366,7 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/ticket_queue_handler.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="ticket__queue__handler_8php.html">ticket_queue_handler.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -309,7 +374,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -321,7 +386,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:46 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

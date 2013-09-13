@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -88,55 +90,45 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Ticket_Queue" -->
 <p>Data class that holds a lot of queries that load specific tickets.  
  <a href="classTicket__Queue.html#details">More...</a></p>
-
-<p><a href="classTicket__Queue-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5760df002c7ad36b92479754835058e9"></a><!-- doxytag: member="Ticket_Queue::loadAllNotAssignedTickets" ref="a5760df002c7ad36b92479754835058e9" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a5760df002c7ad36b92479754835058e9">loadAllNotAssignedTickets</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the not yet assigned tickets query into the objects attributes. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0053185e73f37195adf22051cc7d87f8"></a><!-- doxytag: member="Ticket_Queue::loadAllTickets" ref="a0053185e73f37195adf22051cc7d87f8" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a0053185e73f37195adf22051cc7d87f8">loadAllTickets</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'all' tickets query into the objects attributes. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a93e3b5126f01a9b14dce1d89bacc73b6"></a><!-- doxytag: member="Ticket_Queue::loadAllOpenTickets" ref="a93e3b5126f01a9b14dce1d89bacc73b6" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a93e3b5126f01a9b14dce1d89bacc73b6">loadAllOpenTickets</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'all open' tickets query into the objects attributes. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a328adadd5c9481a87ff712b2830a8519"></a><!-- doxytag: member="Ticket_Queue::loadAllClosedTickets" ref="a328adadd5c9481a87ff712b2830a8519" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a328adadd5c9481a87ff712b2830a8519">loadAllClosedTickets</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'closed' tickets query into the objects attributes. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#ac35ffa886f20979b41a70b446bf7e6b2">loadToDoTickets</a> ($user_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'todo' tickets query &amp; params into the objects attributes.  <a href="#ac35ffa886f20979b41a70b446bf7e6b2"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a309b4c6c5423eecd6c8f57af7f60aee2">loadAssignedandWaiting</a> ($user_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'tickets asssigned to a user and waiting on support' query &amp; params into the objects attributes.  <a href="#a309b4c6c5423eecd6c8f57af7f60aee2"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a7b9b007668bc769c605e22075630b6dd">createQueue</a> ($userid, $groupid, $what, $how, $who)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'created' query &amp; params into the objects attributes.  <a href="#a7b9b007668bc769c605e22075630b6dd"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7c6eef6c98cebf9aec82a83027afef13"></a><!-- doxytag: member="Ticket_Queue::getQuery" ref="a7c6eef6c98cebf9aec82a83027afef13" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a7c6eef6c98cebf9aec82a83027afef13">getQuery</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get query attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0e2af91baf1bf2de6d564c2e6616e64c"></a><!-- doxytag: member="Ticket_Queue::getParams" ref="a0e2af91baf1bf2de6d564c2e6616e64c" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a0e2af91baf1bf2de6d564c2e6616e64c">getParams</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get params attribute of the object. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a771627a0bd387cd666474a6ef0d5eaaf">loadAllNotAssignedTickets</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the not yet assigned tickets query into the objects attributes.  <a href="#a771627a0bd387cd666474a6ef0d5eaaf"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a80542bde30a8a589f1d088422cb7719b">loadAllTickets</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'all' tickets query into the objects attributes.  <a href="#a80542bde30a8a589f1d088422cb7719b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a3a1cf8a88a3604e093f7d276050f1c49">loadAllOpenTickets</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'all open' tickets query into the objects attributes.  <a href="#a3a1cf8a88a3604e093f7d276050f1c49"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#af2a9b20ac9dc0e1992f717abbb418be7">loadAllClosedTickets</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'closed' tickets query into the objects attributes.  <a href="#af2a9b20ac9dc0e1992f717abbb418be7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#ad88848edf9a9132eb0cfcac904a8459f">loadToDoTickets</a> ($user_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'todo' tickets query &amp; params into the objects attributes.  <a href="#ad88848edf9a9132eb0cfcac904a8459f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a348c76f7ae32437b7e91b57671d6f33d">loadAssignedandWaiting</a> ($user_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'tickets asssigned to a user and waiting on support' query &amp; params into the objects attributes.  <a href="#a348c76f7ae32437b7e91b57671d6f33d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#af077496b6071af47c19a873bf025c1f3">createQueue</a> ($userid, $groupid, $what, $how, $who)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the 'created' query &amp; params into the objects attributes.  <a href="#af077496b6071af47c19a873bf025c1f3"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a55f162785567258fe5138af282e588c2">getQuery</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get query attribute of the object.  <a href="#a55f162785567258fe5138af282e588c2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#ae32cd7c32721b02d676bb63b4b1366db">getParams</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get params attribute of the object.  <a href="#ae32cd7c32721b02d676bb63b4b1366db"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a83d238bbb14b4ca80ff563b8d1992355"></a><!-- doxytag: member="Ticket_Queue::$query" ref="a83d238bbb14b4ca80ff563b8d1992355" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#a83d238bbb14b4ca80ff563b8d1992355">$query</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The query that loads specific tickets. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad87a813bbfd9ce28b5f7d763f094e655"></a><!-- doxytag: member="Ticket_Queue::$params" ref="ad87a813bbfd9ce28b5f7d763f094e655" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#ad87a813bbfd9ce28b5f7d763f094e655">$params</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The parameter array that's being needed by the query. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#af59a5f7cd609e592c41dc3643efd3c98">$query</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The query that loads specific tickets.  <a href="#af59a5f7cd609e592c41dc3643efd3c98"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Queue.html#afe68e6fbe7acfbffc0af0c84a1996466">$params</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The parameter array that's being needed by the query.  <a href="#afe68e6fbe7acfbffc0af0c84a1996466"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Data class that holds a lot of queries that load specific tickets. </p>
 <p>These queries are being used by the ticket_queue_handler class. An object of this class holds 2 attributes: the query and the params used for the query. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a7b9b007668bc769c605e22075630b6dd"></a><!-- doxytag: member="Ticket_Queue::createQueue" ref="a7b9b007668bc769c605e22075630b6dd" args="($userid, $groupid, $what, $how, $who)" -->
+<a class="anchor" id="af077496b6071af47c19a873bf025c1f3"></a><!-- doxytag: member="Ticket_Queue::createQueue" ref="af077496b6071af47c19a873bf025c1f3" args="($userid, $groupid, $what, $how, $who)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Queue.html#a7b9b007668bc769c605e22075630b6dd">Ticket_Queue::createQueue</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#af077496b6071af47c19a873bf025c1f3">createQueue</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>userid</em>, </td>
@@ -179,8 +171,8 @@ Private Attributes</h2></td></tr>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">$who</td><td>specifies if we want to user the user_id or group_id to form the query. </td></tr>
-    <tr><td class="paramname">$user_id</td><td>the user's id to whom the tickets should be assigned/not assigned </td></tr>
-    <tr><td class="paramname">$group_id</td><td>the group's id to whom the tickets should be forwarded/not forwarded </td></tr>
+    <tr><td class="paramname">$userid</td><td>the user's id to whom the tickets should be assigned/not assigned </td></tr>
+    <tr><td class="paramname">$groupid</td><td>the group's id to whom the tickets should be forwarded/not forwarded </td></tr>
     <tr><td class="paramname">$what</td><td>specifies what kind of tickets we want to return: waiting for support, waiting on user, closed </td></tr>
     <tr><td class="paramname">$how</td><td>specifies if the tickets should be or shouldn't be assigned/forwarded to the group/user selected. </td></tr>
   </table>
@@ -189,12 +181,120 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a309b4c6c5423eecd6c8f57af7f60aee2"></a><!-- doxytag: member="Ticket_Queue::loadAssignedandWaiting" ref="a309b4c6c5423eecd6c8f57af7f60aee2" args="($user_id)" -->
+<a class="anchor" id="ae32cd7c32721b02d676bb63b4b1366db"></a><!-- doxytag: member="Ticket_Queue::getParams" ref="ae32cd7c32721b02d676bb63b4b1366db" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Queue.html#a309b4c6c5423eecd6c8f57af7f60aee2">Ticket_Queue::loadAssignedandWaiting</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#ae32cd7c32721b02d676bb63b4b1366db">getParams</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get params attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a55f162785567258fe5138af282e588c2"></a><!-- doxytag: member="Ticket_Queue::getQuery" ref="a55f162785567258fe5138af282e588c2" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#a55f162785567258fe5138af282e588c2">getQuery</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get query attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="af2a9b20ac9dc0e1992f717abbb418be7"></a><!-- doxytag: member="Ticket_Queue::loadAllClosedTickets" ref="af2a9b20ac9dc0e1992f717abbb418be7" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#af2a9b20ac9dc0e1992f717abbb418be7">loadAllClosedTickets</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>loads the 'closed' tickets query into the objects attributes. </p>
+
+</div>
+</div>
+<a class="anchor" id="a771627a0bd387cd666474a6ef0d5eaaf"></a><!-- doxytag: member="Ticket_Queue::loadAllNotAssignedTickets" ref="a771627a0bd387cd666474a6ef0d5eaaf" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#a771627a0bd387cd666474a6ef0d5eaaf">loadAllNotAssignedTickets</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>loads the not yet assigned tickets query into the objects attributes. </p>
+
+</div>
+</div>
+<a class="anchor" id="a3a1cf8a88a3604e093f7d276050f1c49"></a><!-- doxytag: member="Ticket_Queue::loadAllOpenTickets" ref="a3a1cf8a88a3604e093f7d276050f1c49" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#a3a1cf8a88a3604e093f7d276050f1c49">loadAllOpenTickets</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>loads the 'all open' tickets query into the objects attributes. </p>
+
+</div>
+</div>
+<a class="anchor" id="a80542bde30a8a589f1d088422cb7719b"></a><!-- doxytag: member="Ticket_Queue::loadAllTickets" ref="a80542bde30a8a589f1d088422cb7719b" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#a80542bde30a8a589f1d088422cb7719b">loadAllTickets</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>loads the 'all' tickets query into the objects attributes. </p>
+
+</div>
+</div>
+<a class="anchor" id="a348c76f7ae32437b7e91b57671d6f33d"></a><!-- doxytag: member="Ticket_Queue::loadAssignedandWaiting" ref="a348c76f7ae32437b7e91b57671d6f33d" args="($user_id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#a348c76f7ae32437b7e91b57671d6f33d">loadAssignedandWaiting</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user_id</em></td><td>)</td>
@@ -214,12 +314,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac35ffa886f20979b41a70b446bf7e6b2"></a><!-- doxytag: member="Ticket_Queue::loadToDoTickets" ref="ac35ffa886f20979b41a70b446bf7e6b2" args="($user_id)" -->
+<a class="anchor" id="ad88848edf9a9132eb0cfcac904a8459f"></a><!-- doxytag: member="Ticket_Queue::loadToDoTickets" ref="ad88848edf9a9132eb0cfcac904a8459f" args="($user_id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Queue.html#ac35ffa886f20979b41a70b446bf7e6b2">Ticket_Queue::loadToDoTickets</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Queue.html#ad88848edf9a9132eb0cfcac904a8459f">loadToDoTickets</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user_id</em></td><td>)</td>
@@ -240,8 +340,39 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="afe68e6fbe7acfbffc0af0c84a1996466"></a><!-- doxytag: member="Ticket_Queue::$params" ref="afe68e6fbe7acfbffc0af0c84a1996466" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$params<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The parameter array that's being needed by the query. </p>
+
+</div>
+</div>
+<a class="anchor" id="af59a5f7cd609e592c41dc3643efd3c98"></a><!-- doxytag: member="Ticket_Queue::$query" ref="af59a5f7cd609e592c41dc3643efd3c98" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$query<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The query that loads specific tickets. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/ticket_queue.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="ticket__queue_8php.html">ticket_queue.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -249,7 +380,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -261,7 +392,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:46 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

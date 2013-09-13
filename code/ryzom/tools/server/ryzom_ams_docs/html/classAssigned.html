@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -89,61 +91,55 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Assigned" -->
 <p>Handles the assigning of a ticket to a user.  
  <a href="classAssigned.html#details">More...</a></p>
-
-<p><a href="classAssigned-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a34db106389637f5136b822a48e363043">__construct</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a34db106389637f5136b822a48e363043"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#ad4d2eececfa3d1ad7b72c8594f1eec33">set</a> ($values)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#ad4d2eececfa3d1ad7b72c8594f1eec33"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a1b0669bd661f60f9984d9c623102f4c0">create</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a new 'assigned' entry.  <a href="#a1b0669bd661f60f9984d9c623102f4c0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#adf0e3ee5ea2c0536d4d59408868136c8">delete</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">deletes an existing 'assigned' entry.  <a href="#adf0e3ee5ea2c0536d4d59408868136c8"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#aa3f2ea4abe6e71c19373de8df7481cfb">load</a> ($ticket_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#aa3f2ea4abe6e71c19373de8df7481cfb"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3b04e63f83c1b064018159f6f6ef68f7"></a><!-- doxytag: member="Assigned::getUser" ref="a3b04e63f83c1b064018159f6f6ef68f7" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a3b04e63f83c1b064018159f6f6ef68f7">getUser</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get user attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac42feb1177792e8d37b3b92ad33065fb"></a><!-- doxytag: member="Assigned::getTicket" ref="ac42feb1177792e8d37b3b92ad33065fb" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#ac42feb1177792e8d37b3b92ad33065fb">getTicket</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get ticket attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a5a9a262eec26f7b7607d269c36dac0a4">setUser</a> ($u)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set user attribute of the object.  <a href="#a5a9a262eec26f7b7607d269c36dac0a4"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a80db44acb118dae58653443eb103402f">setTicket</a> ($t)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set ticket attribute of the object.  <a href="#a80db44acb118dae58653443eb103402f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a095c5d389db211932136b53f25f39685"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a8bdfe0a5256e35367225bcd6d278ef21"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a435e7d7525d4bcd0ed5e34a469f3adf6">create</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a new 'assigned' entry.  <a href="#a435e7d7525d4bcd0ed5e34a469f3adf6"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a13bdffdd926f26b825ea57066334ff01">delete</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">deletes an existing 'assigned' entry.  <a href="#a13bdffdd926f26b825ea57066334ff01"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a689011be59ec3d216ebe6852f07ab37f">load</a> ($ticket_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#a689011be59ec3d216ebe6852f07ab37f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#ae81b7186fb97a7c6457edcc68c9aa2ef">getUser</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get user attribute of the object.  <a href="#ae81b7186fb97a7c6457edcc68c9aa2ef"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a42ddf34a72af750b7013fa309b67e46c">getTicket</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get ticket attribute of the object.  <a href="#a42ddf34a72af750b7013fa309b67e46c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#af560ca7f201e2f871384a150e8ffd9aa">setUser</a> ($u)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set user attribute of the object.  <a href="#af560ca7f201e2f871384a150e8ffd9aa"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a47c6ae5b3cd713fdbf0a7f4d568b7c27">setTicket</a> ($t)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set ticket attribute of the object.  <a href="#a47c6ae5b3cd713fdbf0a7f4d568b7c27"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#ac493092d0fcd0e3b2b9145cc8cd03d8e">assignTicket</a> ($user_id, $ticket_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns a ticket to a user or returns an error message.  <a href="#ac493092d0fcd0e3b2b9145cc8cd03d8e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#ab4713000e4216c858bf62783a96e6770">unAssignTicket</a> ($user_id, $ticket_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Unassign a ticket being coupled to a user or return an error message.  <a href="#ab4713000e4216c858bf62783a96e6770"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a2a745eac7f9c3ea9ce80d38c1fdc11a7">getUserAssignedToTicket</a> ($ticket_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the (external) id of the user assigned to a ticket.  <a href="#a2a745eac7f9c3ea9ce80d38c1fdc11a7"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a41debee6bc7d4974204cdafd51e33c88">isAssigned</a> ($ticket_id, $user_id=0)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a ticket is already assigned (in case the user_id param is used, it will check if it's assigned to that user)  <a href="#a41debee6bc7d4974204cdafd51e33c88"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a51c3d5b6f78de455619581fd3e591f17">assignTicket</a> ($user_id, $ticket_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Assigns a ticket to a user or returns an error message.  <a href="#a51c3d5b6f78de455619581fd3e591f17"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a8263a9c223957bb558a2c16d4431ca29">unAssignTicket</a> ($user_id, $ticket_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Unassign a ticket being coupled to a user or return an error message.  <a href="#a8263a9c223957bb558a2c16d4431ca29"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#afcfb156712a9477a97423a49238d13c5">getUserAssignedToTicket</a> ($ticket_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the (external) id of the user assigned to a ticket.  <a href="#afcfb156712a9477a97423a49238d13c5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#ade127364a5e5635077119b7217b6059c">isAssigned</a> ($ticket_id, $user_id=0)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if a ticket is already assigned (in case the user_id param is used, it will check if it's assigned to that user)  <a href="#ade127364a5e5635077119b7217b6059c"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9d9ca239af74fc2671568461854310da"></a><!-- doxytag: member="Assigned::$user" ref="a9d9ca239af74fc2671568461854310da" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a9d9ca239af74fc2671568461854310da">$user</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the user being assigned. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4e729931e02c5ea56933dd18d5cdfc25"></a><!-- doxytag: member="Assigned::$ticket" ref="a4e729931e02c5ea56933dd18d5cdfc25" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a4e729931e02c5ea56933dd18d5cdfc25">$ticket</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the ticket being assigned. <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#a598ca4e71b15a1313ec95f0df1027ca5">$user</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the user being assigned.  <a href="#a598ca4e71b15a1313ec95f0df1027ca5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classAssigned.html#abf7832c7c53a3be2ca8a8fc305006bb0">$ticket</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the ticket being assigned.  <a href="#abf7832c7c53a3be2ca8a8fc305006bb0"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Handles the assigning of a ticket to a user. </p>
 <p>This is being used to make someone responsible for the handling and solving of a ticket. The idea is that someone can easily assign a ticket to himself and by doing that, he makes aware to the other moderators that he will deal with the ticket in the future. </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a34db106389637f5136b822a48e363043"></a><!-- doxytag: member="Assigned::__construct" ref="a34db106389637f5136b822a48e363043" args="()" -->
+<a class="anchor" id="a095c5d389db211932136b53f25f39685"></a><!-- doxytag: member="Assigned::__construct" ref="a095c5d389db211932136b53f25f39685" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classAssigned.html#a34db106389637f5136b822a48e363043">Assigned::__construct</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#a095c5d389db211932136b53f25f39685">__construct</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -158,12 +154,12 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="ac493092d0fcd0e3b2b9145cc8cd03d8e"></a><!-- doxytag: member="Assigned::assignTicket" ref="ac493092d0fcd0e3b2b9145cc8cd03d8e" args="($user_id, $ticket_id)" -->
+<a class="anchor" id="a51c3d5b6f78de455619581fd3e591f17"></a><!-- doxytag: member="Assigned::assignTicket" ref="a51c3d5b6f78de455619581fd3e591f17" args="($user_id, $ticket_id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classAssigned.html#ac493092d0fcd0e3b2b9145cc8cd03d8e">Assigned::assignTicket</a> </td>
+          <td class="memname">static <a class="el" href="classAssigned.html#a51c3d5b6f78de455619581fd3e591f17">assignTicket</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user_id</em>, </td>
@@ -196,12 +192,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1b0669bd661f60f9984d9c623102f4c0"></a><!-- doxytag: member="Assigned::create" ref="a1b0669bd661f60f9984d9c623102f4c0" args="()" -->
+<a class="anchor" id="a435e7d7525d4bcd0ed5e34a469f3adf6"></a><!-- doxytag: member="Assigned::create" ref="a435e7d7525d4bcd0ed5e34a469f3adf6" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classAssigned.html#a1b0669bd661f60f9984d9c623102f4c0">Assigned::create</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#a435e7d7525d4bcd0ed5e34a469f3adf6">create</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -215,12 +211,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="adf0e3ee5ea2c0536d4d59408868136c8"></a><!-- doxytag: member="Assigned::delete" ref="adf0e3ee5ea2c0536d4d59408868136c8" args="()" -->
+<a class="anchor" id="a13bdffdd926f26b825ea57066334ff01"></a><!-- doxytag: member="Assigned::delete" ref="a13bdffdd926f26b825ea57066334ff01" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classAssigned.html#adf0e3ee5ea2c0536d4d59408868136c8">Assigned::delete</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#a13bdffdd926f26b825ea57066334ff01">delete</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -234,12 +230,48 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a2a745eac7f9c3ea9ce80d38c1fdc11a7"></a><!-- doxytag: member="Assigned::getUserAssignedToTicket" ref="a2a745eac7f9c3ea9ce80d38c1fdc11a7" args="($ticket_id)" -->
+<a class="anchor" id="a42ddf34a72af750b7013fa309b67e46c"></a><!-- doxytag: member="Assigned::getTicket" ref="a42ddf34a72af750b7013fa309b67e46c" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classAssigned.html#a2a745eac7f9c3ea9ce80d38c1fdc11a7">Assigned::getUserAssignedToTicket</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#a42ddf34a72af750b7013fa309b67e46c">getTicket</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get ticket attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="ae81b7186fb97a7c6457edcc68c9aa2ef"></a><!-- doxytag: member="Assigned::getUser" ref="ae81b7186fb97a7c6457edcc68c9aa2ef" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classAssigned.html#ae81b7186fb97a7c6457edcc68c9aa2ef">getUser</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get user attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="afcfb156712a9477a97423a49238d13c5"></a><!-- doxytag: member="Assigned::getUserAssignedToTicket" ref="afcfb156712a9477a97423a49238d13c5" args="($ticket_id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classAssigned.html#afcfb156712a9477a97423a49238d13c5">getUserAssignedToTicket</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ticket_id</em></td><td>)</td>
@@ -260,12 +292,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a41debee6bc7d4974204cdafd51e33c88"></a><!-- doxytag: member="Assigned::isAssigned" ref="a41debee6bc7d4974204cdafd51e33c88" args="($ticket_id, $user_id=0)" -->
+<a class="anchor" id="ade127364a5e5635077119b7217b6059c"></a><!-- doxytag: member="Assigned::isAssigned" ref="ade127364a5e5635077119b7217b6059c" args="($ticket_id, $user_id=0)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classAssigned.html#a41debee6bc7d4974204cdafd51e33c88">Assigned::isAssigned</a> </td>
+          <td class="memname">static <a class="el" href="classAssigned.html#ade127364a5e5635077119b7217b6059c">isAssigned</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ticket_id</em>, </td>
@@ -297,12 +329,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa3f2ea4abe6e71c19373de8df7481cfb"></a><!-- doxytag: member="Assigned::load" ref="aa3f2ea4abe6e71c19373de8df7481cfb" args="($ticket_id)" -->
+<a class="anchor" id="a689011be59ec3d216ebe6852f07ab37f"></a><!-- doxytag: member="Assigned::load" ref="a689011be59ec3d216ebe6852f07ab37f" args="($ticket_id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classAssigned.html#aa3f2ea4abe6e71c19373de8df7481cfb">Assigned::load</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#a689011be59ec3d216ebe6852f07ab37f">load</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ticket_id</em></td><td>)</td>
@@ -323,12 +355,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad4d2eececfa3d1ad7b72c8594f1eec33"></a><!-- doxytag: member="Assigned::set" ref="ad4d2eececfa3d1ad7b72c8594f1eec33" args="($values)" -->
+<a class="anchor" id="a8bdfe0a5256e35367225bcd6d278ef21"></a><!-- doxytag: member="Assigned::set" ref="a8bdfe0a5256e35367225bcd6d278ef21" args="($values)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classAssigned.html#ad4d2eececfa3d1ad7b72c8594f1eec33">Assigned::set</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em></td><td>)</td>
@@ -348,12 +380,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a80db44acb118dae58653443eb103402f"></a><!-- doxytag: member="Assigned::setTicket" ref="a80db44acb118dae58653443eb103402f" args="($t)" -->
+<a class="anchor" id="a47c6ae5b3cd713fdbf0a7f4d568b7c27"></a><!-- doxytag: member="Assigned::setTicket" ref="a47c6ae5b3cd713fdbf0a7f4d568b7c27" args="($t)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classAssigned.html#a80db44acb118dae58653443eb103402f">Assigned::setTicket</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#a47c6ae5b3cd713fdbf0a7f4d568b7c27">setTicket</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>t</em></td><td>)</td>
@@ -373,12 +405,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5a9a262eec26f7b7607d269c36dac0a4"></a><!-- doxytag: member="Assigned::setUser" ref="a5a9a262eec26f7b7607d269c36dac0a4" args="($u)" -->
+<a class="anchor" id="af560ca7f201e2f871384a150e8ffd9aa"></a><!-- doxytag: member="Assigned::setUser" ref="af560ca7f201e2f871384a150e8ffd9aa" args="($u)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classAssigned.html#a5a9a262eec26f7b7607d269c36dac0a4">Assigned::setUser</a> </td>
+          <td class="memname"><a class="el" href="classAssigned.html#af560ca7f201e2f871384a150e8ffd9aa">setUser</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>u</em></td><td>)</td>
@@ -398,12 +430,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab4713000e4216c858bf62783a96e6770"></a><!-- doxytag: member="Assigned::unAssignTicket" ref="ab4713000e4216c858bf62783a96e6770" args="($user_id, $ticket_id)" -->
+<a class="anchor" id="a8263a9c223957bb558a2c16d4431ca29"></a><!-- doxytag: member="Assigned::unAssignTicket" ref="a8263a9c223957bb558a2c16d4431ca29" args="($user_id, $ticket_id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classAssigned.html#ab4713000e4216c858bf62783a96e6770">Assigned::unAssignTicket</a> </td>
+          <td class="memname">static <a class="el" href="classAssigned.html#a8263a9c223957bb558a2c16d4431ca29">unAssignTicket</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>user_id</em>, </td>
@@ -436,8 +468,39 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="abf7832c7c53a3be2ca8a8fc305006bb0"></a><!-- doxytag: member="Assigned::$ticket" ref="abf7832c7c53a3be2ca8a8fc305006bb0" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$ticket<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The id of the ticket being assigned. </p>
+
+</div>
+</div>
+<a class="anchor" id="a598ca4e71b15a1313ec95f0df1027ca5"></a><!-- doxytag: member="Assigned::$user" ref="a598ca4e71b15a1313ec95f0df1027ca5" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$user<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The id of the user being assigned. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/assigned.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="assigned_8php.html">assigned.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -445,7 +508,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -457,7 +520,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:45 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

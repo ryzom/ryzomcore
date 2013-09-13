@@ -1,7 +1,8 @@
 <?php
-// ***********************************************
-// Base include file for library functions for AMS
-// ***********************************************
+/**
+* Base include file for library functions for AMS.
+* Autoload function that loads the classes in case they aren't loaded yet.
+*/
 function __autoload( $className ){
      global $AMS_LIB;
      global $SITEBASE;

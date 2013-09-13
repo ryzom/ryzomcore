@@ -1,10 +1,17 @@
 <?php
-
+/**
+* This function is beign used to modify the email related to a support group.
+* It will first check if the user who executed this function is an admin. If this is not the case the page will be redirected to an error page.
+* the new email will be validated and in case it's valid we'll add it to the db. Before adding it, we will encrypt the password by using the MyCrypt class. Afterwards the password gets
+* updated and the page redirected again.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function modify_email_of_sgroup(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
     if(WebUsers::isLoggedIn()){
         
+        //check if user is an admin
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user'])) &&  isset($_POST['target_id'])){
 
             $sgroupid = filter_var($_POST['target_id'],FILTER_SANITIZE_NUMBER_INT);

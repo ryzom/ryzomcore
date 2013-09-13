@@ -1,5 +1,14 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the show_queue page.
+* check if the person who wants to view this page is a mod/admin, if this is not the case, he will be redirected to an error page.
+* if an action is set (this is done by $_GET['action']) it will try to execute it first, actions are: assign a ticket, unassign a ticket an create a queue.
+* There are a few predefined queues which is the 'all tickets' queue, 'archive' queue, 'todo' queue, .. these are passed by $_GET['get'].
+* if  $_GET['get'] = create; then it's a custom made queue, this will call the createQueue function which builds the query that we will later use to get the tickets.
+* The tickets fetched will be returned and used in the template. Now why use POST and GET params here and have a createQueue function twice? Well the first time someone creates
+* a queue the POST variables will be used, however after going to the next page it will use the GET params.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function show_queue(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
@@ -8,7 +17,7 @@ function show_queue(){
         
         if( Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
             
-            //the default queue you want to see.
+            //the  queue you want to see.
             $result['queue_view'] = filter_var($_GET['get'], FILTER_SANITIZE_STRING);
             $user_id = unserialize($_SESSION['ticket_user'])->getTUserId();
             $queueArray = array();           
@@ -21,8 +30,7 @@ function show_queue(){
                 $result['pagination_base_link'] = $WEBPATH."?page=show_queue&get=".$result['queue_view'] ;
             }
             
-            //form url to keep the getters constant
-            
+            //form url to keep the getters constant          
             if (Helpers::check_if_game_client()) {
                 $result['getURL'] = $INGAME_WEBPATH."?page=show_queue&get=" . $result['queue_view'];
             }else{
@@ -39,6 +47,7 @@ function show_queue(){
                 $what = filter_var($_GET['what'], FILTER_SANITIZE_STRING);
                 $how = filter_var($_GET['how'], FILTER_SANITIZE_STRING);
                 $who = filter_var($_GET['who'], FILTER_SANITIZE_STRING);
+                //create the custom queue
                 $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
                 
                 if (Helpers::check_if_game_client()) {
@@ -77,6 +86,7 @@ function show_queue(){
                         $what = filter_var($_POST['what'], FILTER_SANITIZE_STRING);
                         $how = filter_var($_POST['how'], FILTER_SANITIZE_STRING);
                         $who = filter_var($_POST['who'], FILTER_SANITIZE_STRING);
+                        //create the custom queue
                         $queue_handler->CreateQueue($userid, $groupid, $what, $how, $who);
                         if (Helpers::check_if_game_client()) {
                             $result['pagination_base_link'] = $INGAME_WEBPATH."?page=show_queue&get=create&userid=".$userid."&groupid=".$groupid."&what=".$what."&how=".$how."&who=".$who;

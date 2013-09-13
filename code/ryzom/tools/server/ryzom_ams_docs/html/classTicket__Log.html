@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -89,80 +91,65 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Ticket_Log" -->
 <p>Class that handles the logging.  
  <a href="classTicket__Log.html#details">More...</a></p>
-
-<p><a href="classTicket__Log-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a3f9b0887d0f4552a120f8df9e7765c0d">__construct</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a3f9b0887d0f4552a120f8df9e7765c0d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a5faab1d6b0e6aeca20b51dd80112e565">set</a> ($values)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a5faab1d6b0e6aeca20b51dd80112e565"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a56d7a9f19d4913489aef19c279c0e076">load_With_TLogId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#a56d7a9f19d4913489aef19c279c0e076"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a55abe9e6ffb80530c0df403a45c724f7"></a><!-- doxytag: member="Ticket_Log::update" ref="a55abe9e6ffb80530c0df403a45c724f7" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a55abe9e6ffb80530c0df403a45c724f7">update</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update attributes of the object to the DB. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeebe7f20e361f7cb7d48cfe40d32190c"></a><!-- doxytag: member="Ticket_Log::getTLogId" ref="aeebe7f20e361f7cb7d48cfe40d32190c" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#aeebe7f20e361f7cb7d48cfe40d32190c">getTLogId</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get tLogId attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad75b52a665afe333ea5cb505bfb1bb16"></a><!-- doxytag: member="Ticket_Log::getTimestamp" ref="ad75b52a665afe333ea5cb505bfb1bb16" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ad75b52a665afe333ea5cb505bfb1bb16">getTimestamp</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get timestamp attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a53c652f4677d734ea8a4dcab512cd536"></a><!-- doxytag: member="Ticket_Log::getQuery" ref="a53c652f4677d734ea8a4dcab512cd536" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a53c652f4677d734ea8a4dcab512cd536">getQuery</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get query attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad5995445284657a1041be811e29d9c7d"></a><!-- doxytag: member="Ticket_Log::getAuthor" ref="ad5995445284657a1041be811e29d9c7d" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ad5995445284657a1041be811e29d9c7d">getAuthor</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get author attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac6767e71178317c003e4b0b9e7aa2430"></a><!-- doxytag: member="Ticket_Log::getTicket" ref="ac6767e71178317c003e4b0b9e7aa2430" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ac6767e71178317c003e4b0b9e7aa2430">getTicket</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get ticket attribute of the object. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae74bffd2a4d675a9d693a63d893d9bd3"></a><!-- doxytag: member="Ticket_Log::getAction" ref="ae74bffd2a4d675a9d693a63d893d9bd3" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ae74bffd2a4d675a9d693a63d893d9bd3">getAction</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the action id out of the query by decoding it. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac40db2b8ff140a476c9345c119b64f53"></a><!-- doxytag: member="Ticket_Log::getArgument" ref="ac40db2b8ff140a476c9345c119b64f53" args="()" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ac40db2b8ff140a476c9345c119b64f53">getArgument</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the argument out of the query by decoding it. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a0a4484014b124129e99929358be47e10">getActionTextArray</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the action text(string) array.  <a href="#a0a4484014b124129e99929358be47e10"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a1176599841ab35b84321449d6d5cfb8d">setTLogId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set tLogId attribute of the object.  <a href="#a1176599841ab35b84321449d6d5cfb8d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#aba55ce726ac8f07ad8e8fc394c88d2a0">setTimestamp</a> ($t)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set timestamp attribute of the object.  <a href="#aba55ce726ac8f07ad8e8fc394c88d2a0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a8bdfb3350931c321e4f0b5e95e9edc72">setQuery</a> ($q)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set query attribute of the object.  <a href="#a8bdfb3350931c321e4f0b5e95e9edc72"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#abbcf255fe8cb6f84c325c2175fa77c69">setAuthor</a> ($a)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set author attribute of the object.  <a href="#abbcf255fe8cb6f84c325c2175fa77c69"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a428d22c1acf7713b66c6257de486885c">setTicket</a> ($t)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set ticket attribute of the object.  <a href="#a428d22c1acf7713b66c6257de486885c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a095c5d389db211932136b53f25f39685">__construct</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">A constructor.  <a href="#a095c5d389db211932136b53f25f39685"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> ($values)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">sets the object's attributes.  <a href="#a8bdfe0a5256e35367225bcd6d278ef21"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a76e8e991002c7e408f7b182556cdeade">load_With_TLogId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">loads the object's attributes.  <a href="#a76e8e991002c7e408f7b182556cdeade"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a842e4774e3b3601a005b995c02f7e883">update</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">update attributes of the object to the DB.  <a href="#a842e4774e3b3601a005b995c02f7e883"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ab174d340ee116d8cc3aa377003421fc5">getTLogId</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get tLogId attribute of the object.  <a href="#ab174d340ee116d8cc3aa377003421fc5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a92aa1d82129ec8cd803d64c28efcb30f">getTimestamp</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get timestamp attribute of the object.  <a href="#a92aa1d82129ec8cd803d64c28efcb30f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a55f162785567258fe5138af282e588c2">getQuery</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get query attribute of the object.  <a href="#a55f162785567258fe5138af282e588c2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a5286e30390ae3e1b274940286493dd24">getAuthor</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get author attribute of the object.  <a href="#a5286e30390ae3e1b274940286493dd24"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a42ddf34a72af750b7013fa309b67e46c">getTicket</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get ticket attribute of the object.  <a href="#a42ddf34a72af750b7013fa309b67e46c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a189a4abe5faf11f4320d5d3f1d3d1715">getAction</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the action id out of the query by decoding it.  <a href="#a189a4abe5faf11f4320d5d3f1d3d1715"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a88ec9370bcbdb60301f89e401c9e64e1">getArgument</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the argument out of the query by decoding it.  <a href="#a88ec9370bcbdb60301f89e401c9e64e1"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ac760071c0ce36337c16d8146fcb3bade">getActionTextArray</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">get the action text(string) array.  <a href="#ac760071c0ce36337c16d8146fcb3bade"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#aca708aae8c7320e11d9e08936ec74dec">setTLogId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set tLogId attribute of the object.  <a href="#aca708aae8c7320e11d9e08936ec74dec"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#aa8903a0020a17d745524806f4e751f4c">setTimestamp</a> ($t)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set timestamp attribute of the object.  <a href="#aa8903a0020a17d745524806f4e751f4c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#adbd6075ec5d3bd84122e52b0134ed8e7">setQuery</a> ($q)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set query attribute of the object.  <a href="#adbd6075ec5d3bd84122e52b0134ed8e7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a0c8f116992af7c8737c70119dae00d45">setAuthor</a> ($a)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set author attribute of the object.  <a href="#a0c8f116992af7c8737c70119dae00d45"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a47c6ae5b3cd713fdbf0a7f4d568b7c27">setTicket</a> ($t)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">set ticket attribute of the object.  <a href="#a47c6ae5b3cd713fdbf0a7f4d568b7c27"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ae5acfd872f759c4d06caf30bde61aab6">getLogsOfTicket</a> ($ticket_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return all log entries related to a ticket.  <a href="#ae5acfd872f759c4d06caf30bde61aab6"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a6f51a7e188cb3579be9d28ea003c78f1">createLogEntry</a> ($ticket_id, $author_id, $action, $arg=-1)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">create a new log entry.  <a href="#a6f51a7e188cb3579be9d28ea003c78f1"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a6a67397d349e8f08bef67f4c7a330c44">constr_TLogId</a> ($id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return constructed element based on TLogId  <a href="#a6a67397d349e8f08bef67f4c7a330c44"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a7111b8cf64ff9c9a81572cd68718564b">getAllLogs</a> ($ticket_id)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return all log entries related to a ticket.  <a href="#a7111b8cf64ff9c9a81572cd68718564b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a37ad4d95b0bb2d5a6dfc2dd7c3744292">getLogsOfTicket</a> ($ticket_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return all log entries related to a ticket.  <a href="#a37ad4d95b0bb2d5a6dfc2dd7c3744292"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a345a2da9c23780c7e6aef7134baa1749">createLogEntry</a> ($ticket_id, $author_id, $action, $arg=-1)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">create a new log entry.  <a href="#a345a2da9c23780c7e6aef7134baa1749"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a001ec13f64bb026b1c8a3b3bd02ee22b">constr_TLogId</a> ($id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return constructed element based on TLogId  <a href="#a001ec13f64bb026b1c8a3b3bd02ee22b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#aeaf1c995cc807afe241f6e7bdc684921">getAllLogs</a> ($ticket_id)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">return all log entries related to a ticket.  <a href="#aeaf1c995cc807afe241f6e7bdc684921"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af6d2b7abef8e6f4ff14fefd02a5cbe11"></a><!-- doxytag: member="Ticket_Log::$tLogId" ref="af6d2b7abef8e6f4ff14fefd02a5cbe11" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#af6d2b7abef8e6f4ff14fefd02a5cbe11">$tLogId</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the log entry. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a89151c1a9a3cd99c14cceec07105db15"></a><!-- doxytag: member="Ticket_Log::$timestamp" ref="a89151c1a9a3cd99c14cceec07105db15" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a89151c1a9a3cd99c14cceec07105db15">$timestamp</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The timestamp of the log entry. <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7b8691897e69a12536fff2c3f3c29ae8"></a><!-- doxytag: member="Ticket_Log::$query" ref="a7b8691897e69a12536fff2c3f3c29ae8" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a7b8691897e69a12536fff2c3f3c29ae8">$query</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The query (json encoded array containing action id &amp; argument) <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad1458fe1e2a7831a7b53ea61adb21db1"></a><!-- doxytag: member="Ticket_Log::$author" ref="ad1458fe1e2a7831a7b53ea61adb21db1" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ad1458fe1e2a7831a7b53ea61adb21db1">$author</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">author of the log <br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae7c23a6f7c0c9f083a3e01f3bcedf2b3"></a><!-- doxytag: member="Ticket_Log::$ticket" ref="ae7c23a6f7c0c9f083a3e01f3bcedf2b3" args="" -->
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ae7c23a6f7c0c9f083a3e01f3bcedf2b3">$ticket</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">the id of the ticket related to the log entry <br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a734657bd8aac85b5a33e03646c17eb65">$tLogId</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The id of the log entry.  <a href="#a734657bd8aac85b5a33e03646c17eb65"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#a2b69de9676dd97c675cd4d9bcceb684c">$timestamp</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The timestamp of the log entry.  <a href="#a2b69de9676dd97c675cd4d9bcceb684c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#af59a5f7cd609e592c41dc3643efd3c98">$query</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">The query (json encoded array containing action id &amp; argument)  <a href="#af59a5f7cd609e592c41dc3643efd3c98"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#ac35b828f7d4064a7c9f849c255468ee3">$author</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">author of the log  <a href="#ac35b828f7d4064a7c9f849c255468ee3"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classTicket__Log.html#abf7832c7c53a3be2ca8a8fc305006bb0">$ticket</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">the id of the ticket related to the log entry  <a href="#abf7832c7c53a3be2ca8a8fc305006bb0"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Class that handles the logging. </p>
@@ -181,12 +168,12 @@ Private Attributes</h2></td></tr>
 </ol>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a3f9b0887d0f4552a120f8df9e7765c0d"></a><!-- doxytag: member="Ticket_Log::__construct" ref="a3f9b0887d0f4552a120f8df9e7765c0d" args="()" -->
+<a class="anchor" id="a095c5d389db211932136b53f25f39685"></a><!-- doxytag: member="Ticket_Log::__construct" ref="a095c5d389db211932136b53f25f39685" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#a3f9b0887d0f4552a120f8df9e7765c0d">Ticket_Log::__construct</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a095c5d389db211932136b53f25f39685">__construct</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -201,12 +188,12 @@ Private Attributes</h2></td></tr>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a6a67397d349e8f08bef67f4c7a330c44"></a><!-- doxytag: member="Ticket_Log::constr_TLogId" ref="a6a67397d349e8f08bef67f4c7a330c44" args="($id)" -->
+<a class="anchor" id="a001ec13f64bb026b1c8a3b3bd02ee22b"></a><!-- doxytag: member="Ticket_Log::constr_TLogId" ref="a001ec13f64bb026b1c8a3b3bd02ee22b" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Log.html#a6a67397d349e8f08bef67f4c7a330c44">Ticket_Log::constr_TLogId</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Log.html#a001ec13f64bb026b1c8a3b3bd02ee22b">constr_TLogId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -219,7 +206,7 @@ Private Attributes</h2></td></tr>
 <p>return constructed element based on TLogId </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
-    <tr><td class="paramname">$ticket_log</td><td>id of the entry that we want to load into our object. </td></tr>
+    <tr><td class="paramname">$id</td><td>ticket_log id of the entry that we want to load into our object. </td></tr>
   </table>
   </dd>
 </dl>
@@ -227,12 +214,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6f51a7e188cb3579be9d28ea003c78f1"></a><!-- doxytag: member="Ticket_Log::createLogEntry" ref="a6f51a7e188cb3579be9d28ea003c78f1" args="($ticket_id, $author_id, $action, $arg=&#45;1)" -->
+<a class="anchor" id="a345a2da9c23780c7e6aef7134baa1749"></a><!-- doxytag: member="Ticket_Log::createLogEntry" ref="a345a2da9c23780c7e6aef7134baa1749" args="($ticket_id, $author_id, $action, $arg=&#45;1)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Log.html#a6f51a7e188cb3579be9d28ea003c78f1">Ticket_Log::createLogEntry</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Log.html#a345a2da9c23780c7e6aef7134baa1749">createLogEntry</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ticket_id</em>, </td>
@@ -278,12 +265,30 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0a4484014b124129e99929358be47e10"></a><!-- doxytag: member="Ticket_Log::getActionTextArray" ref="a0a4484014b124129e99929358be47e10" args="()" -->
+<a class="anchor" id="a189a4abe5faf11f4320d5d3f1d3d1715"></a><!-- doxytag: member="Ticket_Log::getAction" ref="a189a4abe5faf11f4320d5d3f1d3d1715" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#a0a4484014b124129e99929358be47e10">Ticket_Log::getActionTextArray</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a189a4abe5faf11f4320d5d3f1d3d1715">getAction</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get the action id out of the query by decoding it. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac760071c0ce36337c16d8146fcb3bade"></a><!-- doxytag: member="Ticket_Log::getActionTextArray" ref="ac760071c0ce36337c16d8146fcb3bade" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Log.html#ac760071c0ce36337c16d8146fcb3bade">getActionTextArray</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -297,12 +302,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7111b8cf64ff9c9a81572cd68718564b"></a><!-- doxytag: member="Ticket_Log::getAllLogs" ref="a7111b8cf64ff9c9a81572cd68718564b" args="($ticket_id)" -->
+<a class="anchor" id="aeaf1c995cc807afe241f6e7bdc684921"></a><!-- doxytag: member="Ticket_Log::getAllLogs" ref="aeaf1c995cc807afe241f6e7bdc684921" args="($ticket_id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Log.html#a7111b8cf64ff9c9a81572cd68718564b">Ticket_Log::getAllLogs</a> </td>
+          <td class="memname">static <a class="el" href="classTicket__Log.html#aeaf1c995cc807afe241f6e7bdc684921">getAllLogs</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ticket_id</em></td><td>)</td>
@@ -324,12 +329,48 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae5acfd872f759c4d06caf30bde61aab6"></a><!-- doxytag: member="Ticket_Log::getLogsOfTicket" ref="ae5acfd872f759c4d06caf30bde61aab6" args="($ticket_id)" -->
+<a class="anchor" id="a88ec9370bcbdb60301f89e401c9e64e1"></a><!-- doxytag: member="Ticket_Log::getArgument" ref="a88ec9370bcbdb60301f89e401c9e64e1" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classTicket__Log.html#ae5acfd872f759c4d06caf30bde61aab6">Ticket_Log::getLogsOfTicket</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a88ec9370bcbdb60301f89e401c9e64e1">getArgument</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get the argument out of the query by decoding it. </p>
+
+</div>
+</div>
+<a class="anchor" id="a5286e30390ae3e1b274940286493dd24"></a><!-- doxytag: member="Ticket_Log::getAuthor" ref="a5286e30390ae3e1b274940286493dd24" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a5286e30390ae3e1b274940286493dd24">getAuthor</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get author attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a37ad4d95b0bb2d5a6dfc2dd7c3744292"></a><!-- doxytag: member="Ticket_Log::getLogsOfTicket" ref="a37ad4d95b0bb2d5a6dfc2dd7c3744292" args="($ticket_id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classTicket__Log.html#a37ad4d95b0bb2d5a6dfc2dd7c3744292">getLogsOfTicket</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ticket_id</em></td><td>)</td>
@@ -350,12 +391,84 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a56d7a9f19d4913489aef19c279c0e076"></a><!-- doxytag: member="Ticket_Log::load_With_TLogId" ref="a56d7a9f19d4913489aef19c279c0e076" args="($id)" -->
+<a class="anchor" id="a55f162785567258fe5138af282e588c2"></a><!-- doxytag: member="Ticket_Log::getQuery" ref="a55f162785567258fe5138af282e588c2" args="()" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#a56d7a9f19d4913489aef19c279c0e076">Ticket_Log::load_With_TLogId</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a55f162785567258fe5138af282e588c2">getQuery</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get query attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a42ddf34a72af750b7013fa309b67e46c"></a><!-- doxytag: member="Ticket_Log::getTicket" ref="a42ddf34a72af750b7013fa309b67e46c" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a42ddf34a72af750b7013fa309b67e46c">getTicket</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get ticket attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a92aa1d82129ec8cd803d64c28efcb30f"></a><!-- doxytag: member="Ticket_Log::getTimestamp" ref="a92aa1d82129ec8cd803d64c28efcb30f" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a92aa1d82129ec8cd803d64c28efcb30f">getTimestamp</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get timestamp attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="ab174d340ee116d8cc3aa377003421fc5"></a><!-- doxytag: member="Ticket_Log::getTLogId" ref="ab174d340ee116d8cc3aa377003421fc5" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Log.html#ab174d340ee116d8cc3aa377003421fc5">getTLogId</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>get tLogId attribute of the object. </p>
+
+</div>
+</div>
+<a class="anchor" id="a76e8e991002c7e408f7b182556cdeade"></a><!-- doxytag: member="Ticket_Log::load_With_TLogId" ref="a76e8e991002c7e408f7b182556cdeade" args="($id)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a76e8e991002c7e408f7b182556cdeade">load_With_TLogId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -376,12 +489,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5faab1d6b0e6aeca20b51dd80112e565"></a><!-- doxytag: member="Ticket_Log::set" ref="a5faab1d6b0e6aeca20b51dd80112e565" args="($values)" -->
+<a class="anchor" id="a8bdfe0a5256e35367225bcd6d278ef21"></a><!-- doxytag: member="Ticket_Log::set" ref="a8bdfe0a5256e35367225bcd6d278ef21" args="($values)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#a5faab1d6b0e6aeca20b51dd80112e565">Ticket_Log::set</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a8bdfe0a5256e35367225bcd6d278ef21">set</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>values</em></td><td>)</td>
@@ -401,12 +514,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="abbcf255fe8cb6f84c325c2175fa77c69"></a><!-- doxytag: member="Ticket_Log::setAuthor" ref="abbcf255fe8cb6f84c325c2175fa77c69" args="($a)" -->
+<a class="anchor" id="a0c8f116992af7c8737c70119dae00d45"></a><!-- doxytag: member="Ticket_Log::setAuthor" ref="a0c8f116992af7c8737c70119dae00d45" args="($a)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#abbcf255fe8cb6f84c325c2175fa77c69">Ticket_Log::setAuthor</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a0c8f116992af7c8737c70119dae00d45">setAuthor</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>a</em></td><td>)</td>
@@ -426,12 +539,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8bdfb3350931c321e4f0b5e95e9edc72"></a><!-- doxytag: member="Ticket_Log::setQuery" ref="a8bdfb3350931c321e4f0b5e95e9edc72" args="($q)" -->
+<a class="anchor" id="adbd6075ec5d3bd84122e52b0134ed8e7"></a><!-- doxytag: member="Ticket_Log::setQuery" ref="adbd6075ec5d3bd84122e52b0134ed8e7" args="($q)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#a8bdfb3350931c321e4f0b5e95e9edc72">Ticket_Log::setQuery</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#adbd6075ec5d3bd84122e52b0134ed8e7">setQuery</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>q</em></td><td>)</td>
@@ -451,12 +564,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a428d22c1acf7713b66c6257de486885c"></a><!-- doxytag: member="Ticket_Log::setTicket" ref="a428d22c1acf7713b66c6257de486885c" args="($t)" -->
+<a class="anchor" id="a47c6ae5b3cd713fdbf0a7f4d568b7c27"></a><!-- doxytag: member="Ticket_Log::setTicket" ref="a47c6ae5b3cd713fdbf0a7f4d568b7c27" args="($t)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#a428d22c1acf7713b66c6257de486885c">Ticket_Log::setTicket</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a47c6ae5b3cd713fdbf0a7f4d568b7c27">setTicket</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>t</em></td><td>)</td>
@@ -476,12 +589,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aba55ce726ac8f07ad8e8fc394c88d2a0"></a><!-- doxytag: member="Ticket_Log::setTimestamp" ref="aba55ce726ac8f07ad8e8fc394c88d2a0" args="($t)" -->
+<a class="anchor" id="aa8903a0020a17d745524806f4e751f4c"></a><!-- doxytag: member="Ticket_Log::setTimestamp" ref="aa8903a0020a17d745524806f4e751f4c" args="($t)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#aba55ce726ac8f07ad8e8fc394c88d2a0">Ticket_Log::setTimestamp</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#aa8903a0020a17d745524806f4e751f4c">setTimestamp</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>t</em></td><td>)</td>
@@ -501,12 +614,12 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1176599841ab35b84321449d6d5cfb8d"></a><!-- doxytag: member="Ticket_Log::setTLogId" ref="a1176599841ab35b84321449d6d5cfb8d" args="($id)" -->
+<a class="anchor" id="aca708aae8c7320e11d9e08936ec74dec"></a><!-- doxytag: member="Ticket_Log::setTLogId" ref="aca708aae8c7320e11d9e08936ec74dec" args="($id)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classTicket__Log.html#a1176599841ab35b84321449d6d5cfb8d">Ticket_Log::setTLogId</a> </td>
+          <td class="memname"><a class="el" href="classTicket__Log.html#aca708aae8c7320e11d9e08936ec74dec">setTLogId</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>id</em></td><td>)</td>
@@ -526,8 +639,102 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a842e4774e3b3601a005b995c02f7e883"></a><!-- doxytag: member="Ticket_Log::update" ref="a842e4774e3b3601a005b995c02f7e883" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classTicket__Log.html#a842e4774e3b3601a005b995c02f7e883">update</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>update attributes of the object to the DB. </p>
+
+</div>
+</div>
+<hr/><h2>Field Documentation</h2>
+<a class="anchor" id="ac35b828f7d4064a7c9f849c255468ee3"></a><!-- doxytag: member="Ticket_Log::$author" ref="ac35b828f7d4064a7c9f849c255468ee3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$author<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>author of the log </p>
+
+</div>
+</div>
+<a class="anchor" id="af59a5f7cd609e592c41dc3643efd3c98"></a><!-- doxytag: member="Ticket_Log::$query" ref="af59a5f7cd609e592c41dc3643efd3c98" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$query<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The query (json encoded array containing action id &amp; argument) </p>
+
+</div>
+</div>
+<a class="anchor" id="abf7832c7c53a3be2ca8a8fc305006bb0"></a><!-- doxytag: member="Ticket_Log::$ticket" ref="abf7832c7c53a3be2ca8a8fc305006bb0" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$ticket<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>the id of the ticket related to the log entry </p>
+
+</div>
+</div>
+<a class="anchor" id="a2b69de9676dd97c675cd4d9bcceb684c"></a><!-- doxytag: member="Ticket_Log::$timestamp" ref="a2b69de9676dd97c675cd4d9bcceb684c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$timestamp<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The timestamp of the log entry. </p>
+
+</div>
+</div>
+<a class="anchor" id="a734657bd8aac85b5a33e03646c17eb65"></a><!-- doxytag: member="Ticket_Log::$tLogId" ref="a734657bd8aac85b5a33e03646c17eb65" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">$tLogId<code> [private]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>The id of the log entry. </p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/ticket_log.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="ticket__log_8php.html">ticket_log.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -535,7 +742,7 @@ Private Attributes</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -547,7 +754,7 @@ Private Attributes</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:46 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

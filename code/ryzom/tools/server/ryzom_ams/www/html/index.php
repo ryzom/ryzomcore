@@ -1,4 +1,16 @@
 <?php
+/**
+* Core that runs the entire system.
+* The index.php page handles:
+* -# checks what page to load
+* -# if a $_POST['function'] is set try to execute that function in the matching php file located in the func folder.
+* -# else load the inc's folder matching function related to the page
+* -# set the permission and other smarty related settings
+* -# call the helper function to load the page.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
+
+//load required pages and turn error reporting on/off
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 require( '../config.php' );
@@ -64,4 +76,5 @@ if($page == 'error'){
      $return['no_visible_elements'] = 'FALSE';
 }
 
+//load the template with the variables in the $return array
 helpers :: loadTemplate( $page , $return );

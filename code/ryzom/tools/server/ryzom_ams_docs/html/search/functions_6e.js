@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['new_5fmessage_5fid',['new_message_id',['../classMail__Handler.html#aec330ff71f834079a89cb80ba9cd079c',1,'Mail_Handler']]]
+  ['new_5fmessage_5fid',['new_message_id',['../classMail__Handler.html#a667ca75b6c659157d855c3d19978a436',1,'Mail_Handler']]]
 ];

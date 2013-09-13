@@ -1,30 +1,31 @@
 <?php
+/**
+* This file contains all variables needed by other php scripts.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 
-// This file contains all variables needed by other php scripts
-// ----------------------------------------------------------------------------------------
-// Variables for database access
-// ----------------------------------------------------------------------------------------
-// where we can find the mysql database
-//-----------------------------------------------------------------------------------------
-
-$cfg['db']['web']['host']    = 'localhost';
+// Variables for database access to the www/CMS database
+$cfg['db']['web']['host']    = 'localhost'; 
 $cfg['db']['web']['port']    = '3306';
 $cfg['db']['web']['name']    = 'ryzom_ams';
 $cfg['db']['web']['user']    = 'shard';
 $cfg['db']['web']['pass']    = '';
 
+// Variables for database access to the lib database
 $cfg['db']['lib']['host']    = 'localhost';
 $cfg['db']['lib']['port']    = '3306';
 $cfg['db']['lib']['name']    = 'ryzom_ams_lib';
 $cfg['db']['lib']['user']    = 'shard';
 $cfg['db']['lib']['pass']    = '';
 
+// Variables for database access to the shard database
 $cfg['db']['shard']['host']    = 'localhost';
 $cfg['db']['shard']['port']    = '3306';
 $cfg['db']['shard']['name']    = 'nel';
 $cfg['db']['shard']['user']    = 'shard';
 $cfg['db']['shard']['pass']    = '';
 
+// Variables for database access to the open_ring database
 $cfg['db']['ring']['host']    = 'localhost';
 $cfg['db']['ring']['port']    = '3306';
 $cfg['db']['ring']['name']    = 'ring_open';
@@ -41,7 +42,7 @@ $cfg['db']['ring']['pass']    = '';
 // NNTP server on port 119 use: $nntp = imap_open ("{localhost:119/nntp}comp.test", "", "");
 // To connect to a remote server replace "localhost" with the name or the IP address of the server you want to connect to.
 //$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
-$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';
+$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX'; 
 $cfg['mail']['default_groupemail'] = 'amsryzom@gmail.com';
 $cfg['mail']['default_groupname'] = 'Ryzomcore Support';
 $cfg['mail']['default_username']    = 'amsryzom@gmail.com';
@@ -54,9 +55,12 @@ $TICKET_MAILING_SUPPORT = true;
 
 //You have to create this dir at first!
 $MAIL_DIR = "/tmp/mail";
-$TOS_URL ="http://createyourtos.com";
 $MAIL_LOG_PATH = "/tmp/mail/cron_mail.log";
 
+//terms of service url location
+$TOS_URL ="http://createyourtos.com";
+
+//crypt is being used by encrypting & decrypting of the IMAP password of the supportgroups
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
 $cfg['crypt']['enc_method']    = 'AES-256-CBC';
 $cfg['crypt']['hash_method'] = "SHA512";
@@ -68,7 +72,7 @@ $ALLOW_UNKNOWN = true ;
 // if true= the login service automaticaly create a ring user and a editor character if needed
 $CREATE_RING = true ;
 
- // site paths definitions
+// site paths definitions
 $AMS_LIB = dirname( dirname( __FILE__ ) ) . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
@@ -93,5 +97,6 @@ $TIME_FORMAT = "m-d-Y H:i:s";
 //defines which ingame layout template should be used
 $INGAME_LAYOUT = "basic";
 
+//forces to load the ingame templates if set to true
 $FORCE_INGAME = false;
 

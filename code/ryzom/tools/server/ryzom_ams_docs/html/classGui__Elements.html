@@ -25,10 +25,12 @@
  <tbody>
  <tr style="height: 56px;">
   
+  <td id="projectlogo"><img alt="Logo" src="logo.png"/></td>
+  
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">Ryzom Account Management System
-   
+   &#160;<span id="projectnumber">1.0</span>
    </div>
    
   </td>
@@ -48,8 +50,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
-      <li><a href="dirs.html"><span>Directories</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -70,10 +72,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
-      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
       <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
     </ul>
   </div>
 </div>
@@ -87,29 +89,27 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <!-- doxytag: class="Gui_Elements" -->
 <p>Helper class for generating gui related elements.  
  <a href="classGui__Elements.html#details">More...</a></p>
-
-<p><a href="classGui__Elements-members.html">List of all members.</a></p>
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGui__Elements.html#a1636b9683d6e0649e95fd7c09d4bf8b7">make_table</a> ($inputList, $funcArray, $fieldArray)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates an array of information out of a list of objects which can be used to form a table.  <a href="#a1636b9683d6e0649e95fd7c09d4bf8b7"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGui__Elements.html#a4ffe8dfe08c927ae43ea70c742a811f1">make_table_with_key_is_id</a> ($inputList, $funcArray, $idFunction)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates an array of information out of a list of objects which can be used to form a table with a key as id.  <a href="#a4ffe8dfe08c927ae43ea70c742a811f1"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGui__Elements.html#afb74abd6dc4abcae4e035e23eb22619a">time_elapsed_string</a> ($ptime)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the elapsed time from a timestamp up till now.  <a href="#afb74abd6dc4abcae4e035e23eb22619a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGui__Elements.html#a639930203d81ff01840ac90a51cbbfe7">make_table</a> ($inputList, $funcArray, $fieldArray)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates an array of information out of a list of objects which can be used to form a table.  <a href="#a639930203d81ff01840ac90a51cbbfe7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGui__Elements.html#ae3c8c19fce4cdd7d87d4ae759ab06f24">make_table_with_key_is_id</a> ($inputList, $funcArray, $idFunction)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">creates an array of information out of a list of objects which can be used to form a table with a key as id.  <a href="#ae3c8c19fce4cdd7d87d4ae759ab06f24"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classGui__Elements.html#a04d9bc70e65231a470426f0a94b7583d">time_elapsed_string</a> ($ptime)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">returns the elapsed time from a timestamp up till now.  <a href="#a04d9bc70e65231a470426f0a94b7583d"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Helper class for generating gui related elements. </p>
 <p>This class contains functions that generate data-arrays for tables, or other visual entities </p>
 <dl class="author"><dt><b>Author:</b></dt><dd>Daan Janssens, mentored by Matthew Lagoe </dd></dl>
 </div><hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a1636b9683d6e0649e95fd7c09d4bf8b7"></a><!-- doxytag: member="Gui_Elements::make_table" ref="a1636b9683d6e0649e95fd7c09d4bf8b7" args="($inputList, $funcArray, $fieldArray)" -->
+<a class="anchor" id="a639930203d81ff01840ac90a51cbbfe7"></a><!-- doxytag: member="Gui_Elements::make_table" ref="a639930203d81ff01840ac90a51cbbfe7" args="($inputList, $funcArray, $fieldArray)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classGui__Elements.html#a1636b9683d6e0649e95fd7c09d4bf8b7">Gui_Elements::make_table</a> </td>
+          <td class="memname">static <a class="el" href="classGui__Elements.html#a639930203d81ff01840ac90a51cbbfe7">make_table</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>inputList</em>, </td>
@@ -149,12 +149,12 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a4ffe8dfe08c927ae43ea70c742a811f1"></a><!-- doxytag: member="Gui_Elements::make_table_with_key_is_id" ref="a4ffe8dfe08c927ae43ea70c742a811f1" args="($inputList, $funcArray, $idFunction)" -->
+<a class="anchor" id="ae3c8c19fce4cdd7d87d4ae759ab06f24"></a><!-- doxytag: member="Gui_Elements::make_table_with_key_is_id" ref="ae3c8c19fce4cdd7d87d4ae759ab06f24" args="($inputList, $funcArray, $idFunction)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classGui__Elements.html#a4ffe8dfe08c927ae43ea70c742a811f1">Gui_Elements::make_table_with_key_is_id</a> </td>
+          <td class="memname">static <a class="el" href="classGui__Elements.html#ae3c8c19fce4cdd7d87d4ae759ab06f24">make_table_with_key_is_id</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>inputList</em>, </td>
@@ -181,7 +181,7 @@ Static Public Member Functions</h2></td></tr>
 <div class="memdoc">
 
 <p>creates an array of information out of a list of objects which can be used to form a table with a key as id. </p>
-<p>The idea is comparable to the <a class="el" href="classGui__Elements.html#a1636b9683d6e0649e95fd7c09d4bf8b7" title="creates an array of information out of a list of objects which can be used to form a table...">make_table()</a> function, though this time the results are stored in the index that is returned by the idFunction() </p>
+<p>The idea is comparable to the <a class="el" href="classGui__Elements.html#a639930203d81ff01840ac90a51cbbfe7" title="creates an array of information out of a list of objects which can be used to form a table...">make_table()</a> function, though this time the results are stored in the index that is returned by the idFunction() </p>
 <dl class="params"><dt><b>Parameters:</b></dt><dd>
   <table class="params">
     <tr><td class="paramname">$inputList</td><td>the list of objects of which we want to make a table. </td></tr>
@@ -194,12 +194,12 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="afb74abd6dc4abcae4e035e23eb22619a"></a><!-- doxytag: member="Gui_Elements::time_elapsed_string" ref="afb74abd6dc4abcae4e035e23eb22619a" args="($ptime)" -->
+<a class="anchor" id="a04d9bc70e65231a470426f0a94b7583d"></a><!-- doxytag: member="Gui_Elements::time_elapsed_string" ref="a04d9bc70e65231a470426f0a94b7583d" args="($ptime)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="classGui__Elements.html#afb74abd6dc4abcae4e035e23eb22619a">Gui_Elements::time_elapsed_string</a> </td>
+          <td class="memname">static <a class="el" href="classGui__Elements.html#a04d9bc70e65231a470426f0a94b7583d">time_elapsed_string</a> </td>
           <td>(</td>
           <td class="paramtype">$&#160;</td>
           <td class="paramname"><em>ptime</em></td><td>)</td>
@@ -221,7 +221,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/gui_elements.php</li>
+<li>/home/daan/ryzom/ryzomcore/code/ryzom/tools/server/ryzom_ams/ams_lib/autoload/<a class="el" href="gui__elements_8php.html">gui_elements.php</a></li>
 </ul>
 </div><!-- contents -->
 <!-- window showing the filter options -->
@@ -229,7 +229,7 @@ Static Public Member Functions</h2></td></tr>
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -241,7 +241,7 @@ Static Public Member Functions</h2></td></tr>
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Sep 13 2013 00:20:37 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Sep 14 2013 00:33:45 for Ryzom Account Management System by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.7.6.1
 </small></address>

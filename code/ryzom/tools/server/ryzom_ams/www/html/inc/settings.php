@@ -1,5 +1,10 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the settings page.
+* check if the person who wants to view this page is a mod/admin or the user to whom te settings belong himself, if this is not the case, he will be redirected to an error page.
+* it will return a lot of information of that user, that's being used for loading the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function settings(){
     if(WebUsers::isLoggedIn()){
             //in case id-GET param set it's value as target_id, if no id-param is given, ue the session id.

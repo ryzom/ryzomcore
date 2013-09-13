@@ -9,7 +9,7 @@ class Users{
      
      /**
      * checks if entered values before registering are valid.
-     * @param $array with Username,Password, ConfirmPass and Email.
+     * @param $values array with Username,Password, ConfirmPass and Email.
      * @return string Info: Returns a string, if input data is valid then "success" is returned, else an array with errors
      */ 
      public function check_Register($values){
@@ -239,7 +239,7 @@ class Users{
 
      /**
      * generate a SALT.
-     * @param $length, which is by default 2
+     * @param $length the length of the SALT which is by default 2
      * @return a random salt of 2 chars
      */
      public static function generateSALT( $length = 2 )
@@ -279,8 +279,9 @@ class Users{
 
      /**
      * creates a user in the shard.
-     * incase the shard is offline it will place it in the ams_querycache.
+     * incase the shard is offline it will place it in the ams_querycache. You have to create a user first in the CMS/WWW and use the id for this function.
      * @param $values with name,pass and mail
+     * @param $user_id the extern id of the user (the id given by the www/CMS)
      * @return ok if it's get correctly added to the shard, else return lib offline and put in libDB, if libDB is also offline return liboffline.
      */
      public static function createUser($values, $user_id){     

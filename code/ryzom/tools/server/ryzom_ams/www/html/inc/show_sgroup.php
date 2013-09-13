@@ -1,5 +1,11 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the show_sgroup page.
+* check if the person browsing this page is a mod/admin, if not he'll be redirected to an error page.
+* if the $_GET['delete'] var is set and the user executing is an admin, an entry will be deleted out of the support group.
+* A list of users that are member of the group will be returned, which can be used by the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function show_sgroup(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
@@ -10,6 +16,7 @@ function show_sgroup(){
                 //['target_id'] holds the id of the group!
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
                 
+                //if the $_GET['delete'] var is set and the user executing is an admin, an entry will be deleted out of the support group.
                 if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                     $result['delete'] = Support_Group::deleteUserOfSupportGroup( $delete_id, $result['target_id']  );

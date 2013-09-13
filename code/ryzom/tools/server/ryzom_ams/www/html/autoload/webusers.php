@@ -21,7 +21,7 @@ class WebUsers extends Users{
        /**
        * A constructor.
        * loads the object with the UID, if none is given it will use 0.
-       * @param $UID the UID of the user you want to instantiate.
+       * @param $UId the UID of the user you want to instantiate.
        */
        function __construct($UId = 0) {
               $this->uId = $UId;
@@ -48,7 +48,7 @@ class WebUsers extends Users{
        /**
        * function that checks if a username exists already or not.
        * This function overrides the function of the base class.
-       * @takes $username the username in question
+       * @param $username the username in question
        * @return string Info: Returns 0 if the user is not in the web db, else a positive number is returned.
        */
        protected function checkUserNameExists($username){
@@ -60,7 +60,7 @@ class WebUsers extends Users{
        /**
        * function that checks if a email exists already or not.
        * This function overrides the function of the base class.
-       * @takes $email the email address in question.
+       * @param $email the email address in question.
        * @return string Info: Returns 0 if the email address is not in the web db, else a positive number is returned.
        */
        protected function checkEmailExists($email){

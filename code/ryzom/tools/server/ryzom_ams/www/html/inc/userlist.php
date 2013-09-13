@@ -1,5 +1,9 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the userlist page.
+* this function will return all users by using he pagination class, so that it can be used in the template. Only Mods and Admins can browse this page though.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function userlist(){
     if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
         

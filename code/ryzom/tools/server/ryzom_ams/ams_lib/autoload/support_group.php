@@ -140,7 +140,7 @@ class Support_Group{
 
     /**
     * get list of all users that are enlisted to a support group.
-    * @param $id the id of the group we want to query
+    * @param $group_id the id of the group we want to query
     * @return an array of ticket_user objects that are in the support group.
     */
     public static function getAllUsersOfSupportGroup($group_id) {

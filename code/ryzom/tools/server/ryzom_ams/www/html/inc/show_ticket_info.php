@@ -1,5 +1,10 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the show_ticket_info page.
+* check if the person browsing this page is a mod/admin or the ticket creator himself, if not he'll be redirected to an error page.
+* not all tickets have this page related to it, only tickets created ingame will have additional information. The returned info will be used by the template to show the show_ticket_info page.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function show_ticket_info(){
    
     //if logged in

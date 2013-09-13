@@ -75,8 +75,8 @@ class Ticket_Queue{
     * loads the 'created' query & params into the objects attributes.
     * This function creates dynamically a query based on the selected features.
     * @param $who specifies if we want to user the user_id or group_id to form the query.
-    * @param $user_id the user's id to whom the tickets should be assigned/not assigned
-    * @param $group_id  the group's id to whom the tickets should be forwarded/not forwarded
+    * @param $userid the user's id to whom the tickets should be assigned/not assigned
+    * @param $groupid  the group's id to whom the tickets should be forwarded/not forwarded
     * @param $what specifies what kind of tickets we want to return: waiting for support, waiting on user, closed
     * @param $how specifies if the tickets should be or shouldn't be assigned/forwarded to the group/user selected.
     */

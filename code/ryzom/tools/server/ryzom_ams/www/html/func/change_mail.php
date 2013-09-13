@@ -1,5 +1,11 @@
 <?php
-
+/**
+* This function is beign used to change the users emailaddress info.
+* It will first check if the user who executed this function is the person of whom the emailaddress is or if it's a mod/admin. If this is not the case the page will be redirected to an error page.
+* The emailaddress will be validated first. If the checking was successful the email will be updated and the settings template will be reloaded. Errors made by invalid data will be shown
+* also after reloading the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function change_mail(){
 	
     try{
@@ -8,16 +14,19 @@ function change_mail(){
             
             if(isset($_POST['target_id'])){
 		
-                
+                //check if the user who executed this function is the person of whom the emailaddress is or if it's a mod/admin.
                 if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) ){
                     if($_POST['target_id'] == $_SESSION['id']){
+			//if the email is of the executing user himself
                         $target_username = $_SESSION['user'];
                     }else{
+			//if its from someone else.
 			$webUser = new WebUsers($_POST['target_id']);
                         $target_username = $webUser->getUsername();
                     }
                     
                     $webUser = new WebUsers($_POST['target_id']);
+		    //check if emailaddress is valid.
 		    $reply = $webUser->checkEmail($_POST['NewEmail']);
 		    
 		    global $SITEBASE;
@@ -32,6 +41,7 @@ function change_mail(){
 		    $result['prevNewEmail'] = filter_var($_POST["NewEmail"], FILTER_SANITIZE_EMAIL);
 		    
                     if ($reply== "success"){
+			//if validation was successful, update the emailaddress
                         $status = WebUsers::setEmail($target_username, filter_var($_POST["NewEmail"], FILTER_SANITIZE_EMAIL) );
                         if($status == 'ok'){
                             $result['SUCCESS_MAIL'] = "OK";

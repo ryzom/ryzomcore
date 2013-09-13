@@ -12,7 +12,7 @@ class DBLayer{
     /**
     * The constructor.
     * Instantiates the PDO object attribute by connecting to the arguments matching database(the db info is stored in the $cfg global var)
-    * @param String, the name of the databases entry in the $cfg global var.
+    * @param $db String, the name of the databases entry in the $cfg global var.
     */
     function __construct($db)
     {

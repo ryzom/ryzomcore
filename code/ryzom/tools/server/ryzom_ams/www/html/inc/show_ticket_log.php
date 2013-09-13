@@ -1,20 +1,31 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the show_ticket_log page.
+* This page shows the logs related to a ticket: who created the ticket, who replied on it, who viewed it, assigned or forwarded it.
+* Only mods/admins are able to browse the log though. The found information is returned so it can be used by the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function show_ticket_log(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
+        
         //only allow admins to browse the log!
         if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'])) ){
+            
             $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
             $target_ticket = new Ticket();
             $target_ticket->load_With_TId($result['ticket_id']);
             $result['ticket_title'] = $target_ticket->getTitle();
+            
+            //return all logs related to a ticket.
             $ticket_logs = Ticket_Log::getLogsOfTicket( $result['ticket_id']);
             $log_action_array = Ticket_Log::getActionTextArray();
+            //fetch information about each returned ticket in a format that is usable for the template
             $result['ticket_logs'] = Gui_Elements::make_table($ticket_logs, Array("getTLogId","getTimestamp","getAuthor()->getExternId","getAction","getArgument()"), Array("tLogId","timestamp","authorExtern","action","argument"));
             $i = 0;
+            //for each ticket add action specific informaton to the to-be-shown text: uses the query_backpart
             foreach( $result['ticket_logs'] as $log){
                 $webUser = new WebUsers($log['authorExtern']);
                 $author = $webUser->getUsername();

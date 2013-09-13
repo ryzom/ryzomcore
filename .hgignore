@@ -208,6 +208,7 @@ code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
 code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
 code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
 code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
+code/ryzom/tools/server/ryzom_ams/www/html/templates_c
 
 # Linux server compile
 code/ryzom/server/src/entities_game_service/entities_game_service
