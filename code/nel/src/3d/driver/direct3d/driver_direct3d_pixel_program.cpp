@@ -57,7 +57,7 @@ CPixelProgramDrvInfosD3D::~CPixelProgramDrvInfosD3D()
 bool CDriverD3D::supportPixelProgram (CPixelProgram::TProfile profile) const
 {
 	H_AUTO_D3D(CDriverD3D_supportPixelProgram_profile)
-	return ((profile & 0xFFFF0000) == 0xD3D00000)
+	return ((profile & 0xFFFF0000) == 0xD9020000)
 		&& (_PixelProgramVersion >= (uint16)(profile & 0x0000FFFF));
 }
 

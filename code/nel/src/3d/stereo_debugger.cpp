@@ -118,7 +118,6 @@ const char *a_ps_2_0 =
 	"mov r0.yzw, r2\n"
 	"cmp r0.x, -r0, r1, r2\n"
 	"mov oC0, r0\n";
-;
 
 class CStereoDebuggerFactory : public IStereoDeviceFactory
 {
@@ -155,7 +154,8 @@ CStereoDebugger::~CStereoDebugger()
 void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 {
 	nlassert(!m_PixelProgram);
-
+	
+	m_Driver = driver;
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
 
 	if (drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
@@ -179,6 +179,8 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		}
 		if (!drvInternal->compilePixelProgram(m_PixelProgram))
 		{
+			nlwarning("No supported pixel program for stereo debugger");
+
 			delete m_PixelProgram;
 			m_PixelProgram = NULL;
 		}
@@ -186,8 +188,6 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 
 	if (m_PixelProgram)
 	{
-		m_Driver = driver;
-
 		initTextures();
 
 		m_Mat = m_Driver->createMaterial();
