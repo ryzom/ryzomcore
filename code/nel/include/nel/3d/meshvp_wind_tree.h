@@ -116,6 +116,8 @@ private:
 	 */
 	static	NLMISC::CSmartPtr<CVertexProgramWindTree> _VertexProgram[NumVp];
 
+	NLMISC::CRefPtr<CVertexProgramWindTree> _ActiveVertexProgram;
+
 	// WindTree Time for this mesh param setup. Stored in mesh because same for all instances.
 	float		_CurrentTime[HrcDepth];
 	double		_LastSceneTime;

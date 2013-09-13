@@ -289,7 +289,7 @@ public:
 	 *	\param supportSpecular asitsounds. PointLights and dirLight are localViewer
 	 *	\param invObjectWM the inverse of object matrix: lights are mul by this. Vp compute in object space.
 	 */
-	void		beginVPLightSetup(uint ctStart, bool supportSpecular, const CMatrix &invObjectWM);
+	void		beginVPLightSetup(CVertexProgramLighted *program, const CMatrix &invObjectWM);
 
 	/** change the driver VP LightSetup constants which depends on material.
 	 *  \param excludeStrongest This remove the strongest light from the setup. The typical use is to have it computed by using perpixel lighting.
@@ -418,12 +418,14 @@ private:
 	mutable uint				_StrongestLightIndex;
 	mutable bool				_StrongestLightTouched;
 
+	// Current vp setuped with beginVPLightSetup()
+	NLMISC::CRefPtr<CVertexProgramLighted> _VPCurrent;
 	// Current ctStart setuped with beginVPLightSetup()
-	uint						_VPCurrentCtStart;
+	//uint						_VPCurrentCtStart;
 	// Current num of VP lights enabled.
 	uint						_VPNumLights;
 	// Current support of specular
-	bool						_VPSupportSpecular;
+	//bool						_VPSupportSpecular;
 	// Sum of all ambiant of all lights + ambiantGlobal.
 	NLMISC::CRGBAF				_VPFinalAmbient;
 	// Diffuse/Spec comp of all light / 255.

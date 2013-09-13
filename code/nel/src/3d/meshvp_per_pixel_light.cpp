@@ -488,9 +488,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 	//
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	/// Setup for gouraud lighting
-	renderTrav->beginVPLightSetup(VPLightConstantStart,
-								  SpecularLighting,
-								  invertedModelMat);
+	renderTrav->beginVPLightSetup(_ActiveVertexProgram, invertedModelMat);
 	//
 	sint strongestLightIndex = renderTrav->getStrongestLightIndex();
 	if (strongestLightIndex == -1) return false; // if no strongest light, disable this vertex program
@@ -569,10 +567,12 @@ void	CMeshVPPerPixelLight::enable(bool enabled, IDriver *drv)
 						   | (_IsPointLight		      ? 1 : 0);
 			//
 			drv->activeVertexProgram((CVertexProgramPerPixelLight *)_VertexProgram[idVP]);
+			_ActiveVertexProgram = _VertexProgram[idVP];
 		}
 		else
 		{
 			drv->activeVertexProgram(NULL);
+			_ActiveVertexProgram = NULL;
 		}
 		_Enabled = enabled;
 	}

@@ -1191,6 +1191,7 @@ public:
 	virtual void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3) = 0;
 	virtual void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v) = 0;
 	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3) = 0;
+	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba) = 0;
 	virtual void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m) = 0;
 	virtual void			setUniform4fv(TProgram program, uint index, size_t num, const float *src) = 0;
 	virtual void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src) = 0;

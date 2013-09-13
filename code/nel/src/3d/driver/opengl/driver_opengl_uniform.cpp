@@ -169,6 +169,11 @@ void CDriverGL::setUniform4f(TProgram program, uint index, const NLMISC::CVector
 	CDriverGL::setUniform4f(program, index, v.x, v.y, v.z, f3);
 }
 
+void CDriverGL::setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba)
+{
+	CDriverGL::setUniform4fv(program, index, 1, &rgba.R);
+}
+
 void CDriverGL::setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m)
 {
 	H_AUTO_OGL(CDriverGL_setUniform4x4f);

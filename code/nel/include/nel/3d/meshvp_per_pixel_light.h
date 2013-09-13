@@ -88,6 +88,8 @@ private:
 	//
 	enum { NumVp = 8};
 	static	NLMISC::CSmartPtr<CVertexProgramPerPixelLight> _VertexProgram[NumVp];
+
+	NLMISC::CRefPtr<CVertexProgramPerPixelLight> _ActiveVertexProgram;
 };
 
 } // NL3D

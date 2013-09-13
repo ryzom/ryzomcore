@@ -138,6 +138,11 @@ void CDriverD3D::setUniform4f(TProgram program, uint index, const NLMISC::CVecto
 	CDriverD3D::setUniform4f(program, index, v.x, v.y, v.z, f3);
 }
 
+void CDriverD3D::setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba)
+{
+	CDriverD3D::setUniform4fv(program, index, 1, &rgba.R);
+}
+
 void CDriverD3D::setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m)
 {
 	H_AUTO_D3D(CDriverD3D_setUniform4x4f);

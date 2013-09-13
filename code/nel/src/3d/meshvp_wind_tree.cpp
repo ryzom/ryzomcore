@@ -354,6 +354,7 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	idVP= numPls*4 + idVP;
 	// activate VP.
 	driver->activeVertexProgram(_VertexProgram[idVP]);
+	_ActiveVertexProgram = _VertexProgram[idVP];
 
 
 	// precompute mesh
@@ -373,6 +374,7 @@ void	CMeshVPWindTree::end(IDriver *driver)
 {
 	// Disable the VertexProgram
 	driver->activeVertexProgram(NULL);
+	_ActiveVertexProgram = NULL;
 }
 
 // ***************************************************************************
@@ -398,7 +400,8 @@ void	CMeshVPWindTree::setupLighting(CScene *scene, CMeshBaseInstance *mbi, const
 	nlassert(scene != NULL);
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	// setup cte for lighting
-	renderTrav->beginVPLightSetup(VPLightConstantStart, SpecularLighting, invertedModelMat);
+	CVertexProgramWindTree *program = _ActiveVertexProgram;
+	renderTrav->beginVPLightSetup(program, invertedModelMat);
 }
 
 
@@ -431,6 +434,7 @@ void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 
 	// activate VP.
 	driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);
+	_ActiveVertexProgram = _VertexProgram[_LastMBRIdVP];
 
 	// precompute mesh
 	setupPerMesh(driver, scene);
@@ -456,6 +460,7 @@ void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBase
 	{
 		_LastMBRIdVP= idVP;
 		driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);
+		_ActiveVertexProgram = _VertexProgram[_LastMBRIdVP];
 
 		if (!_VertexProgram[_LastMBRIdVP]->PerMeshSetup)
 		{
@@ -474,6 +479,7 @@ void	CMeshVPWindTree::endMBRMesh(IDriver *driver)
 {
 	// Disable the VertexProgram
 	driver->activeVertexProgram(NULL);
+	_ActiveVertexProgram = NULL;
 }
 
 // ***************************************************************************
