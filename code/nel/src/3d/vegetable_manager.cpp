@@ -2400,7 +2400,7 @@ void		CVegetableManager::setupRenderStateForBlendLayerModel(IDriver *driver)
 
 	/*if (fogged) // duplicate
 	{
-		driver->setConstantFog(6);
+		driver->setCon/stantFog(6);
 	}*/
 
 	// Activate the unique material (correclty setuped for AlphaBlend in render()).

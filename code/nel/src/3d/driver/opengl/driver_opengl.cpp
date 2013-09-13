@@ -1415,11 +1415,13 @@ void CDriverGL::setupFog(float start, float end, CRGBA color)
 			// last constant is used to store fog information (fog must be rescaled to [0, 1], because of a driver bug)
 			if (start != end)
 			{
-				setConstant(_EVSNumConstant, 1.f / (start - end), - end / (start - end), 0, 0);
+				float datas[] = { 1.f / (start - end), - end / (start - end), 0, 0 };
+				nglSetInvariantEXT(_EVSConstantHandle + _EVSNumConstant, GL_FLOAT, datas);
 			}
 			else
 			{
-				setConstant(_EVSNumConstant, 0.f, 0, 0, 0);
+				float datas[] = { 0.f, 0, 0, 0 };
+				nglSetInvariantEXT(_EVSConstantHandle + _EVSNumConstant, GL_FLOAT, datas);
 			}
 		}
 	}

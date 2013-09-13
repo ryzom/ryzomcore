@@ -621,7 +621,7 @@ void CDecalRenderList::renderAllDecals()
 	if (!forceNoVertexProgram && drvInternal->compileVertexProgram(&DecalAttenuationVertexProgram))
 	{
 		drvInternal->activeVertexProgram(&DecalAttenuationVertexProgram);
-		//drvInternal->setConstantMatrix(0, NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
+		//drvInternal->setCons/tantMatrix(0, NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
 		drvInternal->setUniform4f(IDriver::VertexProgram, DecalAttenuationVertexProgram.idx().DistScaleBias, _DistScale, _DistBias, 0.f, 1.f);
 		useVertexProgram = true;
 	}
