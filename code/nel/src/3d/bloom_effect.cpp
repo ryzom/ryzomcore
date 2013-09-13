@@ -446,8 +446,8 @@ void CBloomEffect::applyBlur()
 
 	// initialize vertex program
 	drvInternal->activeVertexProgram(&TextureOffsetVertexProgram);
-	drvInternal->setConstant(8, 255.f, 255.f, 255.f, 255.f);
-	drvInternal->setConstant(9, 0.0f, 0.f, 0.f, 1.f);
+	drvInternal->setUniform4f(IDriver::VertexProgram, 8, 255.f, 255.f, 255.f, 255.f);
+	drvInternal->setUniform4f(IDriver::VertexProgram, 9, 0.0f, 0.f, 0.f, 1.f);
 
 	// initialize blur material
 	UMaterial displayBlurMat;
@@ -552,8 +552,8 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 
 	// initialize vertex program
 	drvInternal->activeVertexProgram(&TextureOffsetVertexProgram);
-	drvInternal->setConstant(8, 255.f, 255.f, 255.f, 255.f);
-	drvInternal->setConstant(9, 0.0f, 0.f, 0.f, 1.f);
+	drvInternal->setUniform4f(IDriver::VertexProgram, 8, 255.f, 255.f, 255.f, 255.f);
+	drvInternal->setUniform4f(IDriver::VertexProgram, 9, 0.0f, 0.f, 0.f, 1.f);
 
 	// set several decal constants in order to obtain in the render target texture a mix of color
 	// of a texel and its neighbored texels on the axe of the pass.
@@ -572,10 +572,10 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 		decalR = 1.f;
 		decal2R = 2.f;
 	}
-	drvInternal->setConstant(10, (decalR/(float)_BlurWidth)*blurVec.x,		(decalR/(float)_BlurHeight)*blurVec.y, 0.f, 0.f);
-	drvInternal->setConstant(11, (decal2R/(float)_BlurWidth)*blurVec.x,		(decal2R/(float)_BlurHeight)*blurVec.y, 0.f, 0.f);
-	drvInternal->setConstant(12, (decalL/(float)_BlurWidth)*blurVec.x,		(decalL/(float)_BlurHeight)*blurVec.y, 0.f, 0.f);
-	drvInternal->setConstant(13, (decal2L/(float)_BlurWidth)*blurVec.x,		(decal2L/(float)_BlurHeight)*blurVec.y, 0.f, 0.f);
+	drvInternal->setUniform2f(IDriver::VertexProgram, 10, (decalR/(float)_BlurWidth)*blurVec.x,		(decalR/(float)_BlurHeight)*blurVec.y);
+	drvInternal->setUniform2f(IDriver::VertexProgram, 11, (decal2R/(float)_BlurWidth)*blurVec.x,		(decal2R/(float)_BlurHeight)*blurVec.y);
+	drvInternal->setUniform2f(IDriver::VertexProgram, 12, (decalL/(float)_BlurWidth)*blurVec.x,		(decalL/(float)_BlurHeight)*blurVec.y);
+	drvInternal->setUniform2f(IDriver::VertexProgram, 13, (decal2L/(float)_BlurWidth)*blurVec.x,		(decal2L/(float)_BlurHeight)*blurVec.y);
 
 	// initialize material textures
 	CMaterial * matObject = _BlurMat.getObjectPtr();
