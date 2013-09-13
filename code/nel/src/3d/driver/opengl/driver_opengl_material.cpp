@@ -362,17 +362,17 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 
 	// 2b. User supplied pixel shader overrides material
 	//==================================
-	if (_VertexProgramEnabled)
+	/*if (_VertexProgramEnabled)
 	{
 		if (!setUniformDriver(VertexProgram)) return false;
 		if (!setUniformMaterialInternal(VertexProgram, mat)) return false;
-	}
+	}*/
 	if (_PixelProgramEnabled)
 	{
 		matShader = CMaterial::Program;
 
-		if (!setUniformDriver(PixelProgram)) return false;
-		if (!setUniformMaterialInternal(PixelProgram, mat)) return false;
+		// if (!setUniformDriver(PixelProgram)) return false;
+		// if (!setUniformMaterialInternal(PixelProgram, mat)) return false;
 		if (!_LastSetuppedPP) return false;
 	}
 	else

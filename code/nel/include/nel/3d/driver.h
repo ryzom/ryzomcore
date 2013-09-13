@@ -1200,10 +1200,6 @@ public:
 	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform) = 0;
 	virtual void			setUniformFog(TProgram program, uint index) = 0;
     // Set feature parameters
-	virtual bool			setUniformDriver(TProgram program) = 0; // set all driver-specific features params (based on program->features->DriverFlags) (called automatically when rendering with cmaterial and using a user program)
-	virtual bool			setUniformMaterial(TProgram program, CMaterial &material) = 0; // set all material-specific feature params (based on program->features->MaterialFlags) (called automatically when rendering with cmaterial and using a user program)
-	virtual void			setUniformParams(TProgram program, CGPUProgramParams &params) = 0; // set all user-provided params from the storage
-	// Return true if uniforms are kept as program state and switched together with programs, false if uniforms are driver state and stay accross program switches.
 	virtual bool			isUniformProgramState() = 0;
 	// @}
 

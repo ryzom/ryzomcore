@@ -126,9 +126,7 @@ CVegetableManager::~CVegetableManager()
 	// delete All VP
 	for(sint i=0; i <NL3D_VEGETABLE_NRDRPASS; i++)
 	{
-		delete	_VertexProgram[i][0];
-		delete	_VertexProgram[i][1];
-		_VertexProgram[i][0] = NULL;
+		_VertexProgram[i][0] = NULL; // smart ptr
 		_VertexProgram[i][1] = NULL;
 	}
 

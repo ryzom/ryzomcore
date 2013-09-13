@@ -31,7 +31,7 @@ namespace NLDRIVERGL {
 #endif
 #endif
 
-inline void CDriverGL::setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3)
+inline void CDriverGL::setUniform4fInl(TProgram program, uint index, float f0, float f1, float f2, float f3)
 {
 	H_AUTO_OGL(CDriverGL_setUniform4f);
 
@@ -64,7 +64,7 @@ inline void CDriverGL::setUniform4f(TProgram program, uint index, float f0, floa
 #endif
 }
 
-inline void CDriverGL::setUniform4fv(TProgram program, uint index, size_t num, const float *src)
+inline void CDriverGL::setUniform4fvInl(TProgram program, uint index, size_t num, const float *src)
 {
 	H_AUTO_OGL(CDriverGL_setUniform4fv);
 
@@ -106,17 +106,22 @@ inline void CDriverGL::setUniform4fv(TProgram program, uint index, size_t num, c
 
 void CDriverGL::setUniform1f(TProgram program, uint index, float f0)
 {
-	CDriverGL::setUniform4f(program, index, f0, 0.f, 0.f, 0.f);
+	CDriverGL::setUniform4fInl(program, index, f0, 0.f, 0.f, 0.f);
 }
 
 void CDriverGL::setUniform2f(TProgram program, uint index, float f0, float f1)
 {
-	CDriverGL::setUniform4f(program, index, f0, f1, 0.f, 0.f);
+	CDriverGL::setUniform4fInl(program, index, f0, f1, 0.f, 0.f);
 }
 
 void CDriverGL::setUniform3f(TProgram program, uint index, float f0, float f1, float f2)
 {
-	CDriverGL::setUniform4f(program, index, f0, f1, f2, 0.0f);
+	CDriverGL::setUniform4fInl(program, index, f0, f1, f2, 0.0f);
+}
+
+void CDriverGL::setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3)
+{
+	CDriverGL::setUniform4fInl(program, index, f0, f1, f2, f3);
 }
 
 void CDriverGL::setUniform1i(TProgram program, uint index, sint32 i0)
@@ -161,17 +166,17 @@ void CDriverGL::setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 u
 
 void CDriverGL::setUniform3f(TProgram program, uint index, const NLMISC::CVector& v)
 {
-	CDriverGL::setUniform4f(program, index, v.x, v.y, v.z, 0.f);
+	CDriverGL::setUniform4fInl(program, index, v.x, v.y, v.z, 0.f);
 }
 
 void CDriverGL::setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3)
 {
-	CDriverGL::setUniform4f(program, index, v.x, v.y, v.z, f3);
+	CDriverGL::setUniform4fInl(program, index, v.x, v.y, v.z, f3);
 }
 
 void CDriverGL::setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba)
 {
-	CDriverGL::setUniform4fv(program, index, 1, &rgba.R);
+	CDriverGL::setUniform4fvInl(program, index, 1, &rgba.R);
 }
 
 void CDriverGL::setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m)
@@ -183,7 +188,12 @@ void CDriverGL::setUniform4x4f(TProgram program, uint index, const NLMISC::CMatr
 	mat.transpose();
 	const float *md = mat.get();
 
-	CDriverGL::setUniform4fv(program, index, 4, md);
+	CDriverGL::setUniform4fvInl(program, index, 4, md);
+}
+
+void CDriverGL::setUniform4fv(TProgram program, uint index, size_t num, const float *src)
+{
+	CDriverGL::setUniform4fvInl(program, index, num, src);
 }
 
 void CDriverGL::setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src)
@@ -283,7 +293,7 @@ void CDriverGL::setUniformMatrix(NL3D::IDriver::TProgram program, uint index, NL
 		mat.transpose();
 		const float *md = mat.get();
 		
-		CDriverGL::setUniform4fv(program, index, 4, md);
+		CDriverGL::setUniform4fvInl(program, index, 4, md);
 	}
 #endif
 }
@@ -293,8 +303,10 @@ void CDriverGL::setUniformFog(NL3D::IDriver::TProgram program, uint index)
 	H_AUTO_OGL(CDriverGL_setUniformFog)
 	
 	const float *values = _ModelViewMatrix.get();
-	CDriverGL::setUniform4f(program, index, -values[2], -values[6], -values[10], -values[14]);
+	CDriverGL::setUniform4fInl(program, index, -values[2], -values[6], -values[10], -values[14]);
 }
+
+/*
 
 bool CDriverGL::setUniformDriver(TProgram program)
 {
@@ -476,9 +488,9 @@ void CDriverGL::setUniformParams(TProgram program, CGPUProgramParams &params)
 		if (index == ~0)
 		{
 			const std::string &name = params.getNameByOffset(offset);
-			nlassert(!name.empty() /* missing both parameter name and index, code error */);
+			nlassert(!name.empty() /* missing both parameter name and index, code error /);
 			uint index = prog->getUniformIndex(name.c_str());
-			nlassert(index != ~0 /* invalid parameter name */);
+			nlassert(index != ~0 /* invalid parameter name /);
 			params.map(index, name);
 		}
 		
@@ -487,6 +499,8 @@ void CDriverGL::setUniformParams(TProgram program, CGPUProgramParams &params)
 		offset = params.getNext(offset);
 	}
 }
+
+*/
 
 #ifdef NL_STATIC
 } // NLDRIVERGL/ES
