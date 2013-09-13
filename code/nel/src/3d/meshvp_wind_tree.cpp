@@ -291,14 +291,9 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	if (!(driver->supportVertexProgram() && !driver->isVertexProgramEmulated())) return false;
 
 
-	// precompute mesh
-	setupPerMesh(driver, scene);
-
-	// Setup instance constants
-	setupPerInstanceConstants(driver, scene, mbi, invertedModelMat);
-
 	// Activate the good VertexProgram
 	//===============
+
 
 	// Get how many pointLights are setuped now.
 	nlassert(scene != NULL);
@@ -306,13 +301,22 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	sint	numPls= renderTrav->getNumVPLights()-1;
 	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
 
+
 	// Enable normalize only if requested by user. Because lighting don't manage correct "scale lighting"
 	uint	idVP= (SpecularLighting?2:0) + (driver->isForceNormalize()?1:0) ;
 	// correct VP id for correct unmber of pls.
 	idVP= numPls*4 + idVP;
-
 	// activate VP.
 	driver->activeVertexProgram(_VertexProgram[idVP]);
+
+
+	// precompute mesh
+	setupPerMesh(driver, scene);
+
+	// Setup instance constants
+	setupPerInstanceConstants(driver, scene, mbi, invertedModelMat);
+
+
 
 
 	return true;

@@ -363,7 +363,7 @@ void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
 {
 	// init the vertexProgram code.
 	static	bool	vpCreated= false;
-	if(!vpCreated)
+	if (!vpCreated)
 	{
 		vpCreated= true;
 
@@ -437,6 +437,8 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 		return false;
 	}
 	//
+	enable(true, drv); // must enable the vertex program before the vb is activated
+	//
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	/// Setup for gouraud lighting
 	renderTrav->beginVPLightSetup(VPLightConstantStart,
@@ -482,9 +484,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
 	drv->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
-	//
-	enable(true, drv); // must enable the vertex program before the vb is activated
-	//
+
 	return true;
 }
 
@@ -538,6 +538,8 @@ bool  CMeshVPPerPixelLight::setupForMaterial(const CMaterial &mat,
 											)
 {
 	bool enabled = (mat.getShader() == CMaterial::PerPixelLighting || mat.getShader() == CMaterial::PerPixelLightingNoSpec);
+	bool change = (enabled != _Enabled);
+	enable(enabled, drv); // enable disable the vertex program (for material that don't have the right shader)
 	if (enabled)
 	{
 		CRenderTrav		*renderTrav= &scene->getRenderTrav();
@@ -547,8 +549,6 @@ bool  CMeshVPPerPixelLight::setupForMaterial(const CMaterial &mat,
 		renderTrav->getStrongestLightColors(pplDiffuse, pplSpecular);
 		drv->setPerPixelLightingLight(pplDiffuse, pplSpecular, mat.getShininess());
 	}
-	bool change = (enabled != _Enabled);
-	enable(enabled, drv); // enable disable the vertex program (for material that don't have the right shader)
 	return change;
 }
 //=================================================================================
