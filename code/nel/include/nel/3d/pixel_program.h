@@ -26,13 +26,13 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/smart_ptr.h>
-#include <nel/3d/gpu_program.h>
+#include <nel/3d/program.h>
 
 #include <list>
 
 namespace NL3D {
 
-class CPixelProgram : public IGPUProgram
+class CPixelProgram : public IProgram
 {
 public:
 	/// Constructor

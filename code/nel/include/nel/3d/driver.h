@@ -1455,8 +1455,8 @@ protected:
 	friend	class			CTextureDrvShare;
 	friend	class			ITextureDrvInfos;
 	friend	class			IMaterialDrvInfos;
-	friend	class			IGPUProgramDrvInfos;
-	friend	class			IGPUProgramParamsDrvInfos;
+	friend	class			IProgramDrvInfos;
+	friend	class			IProgramParamsDrvInfos;
 
 	/// remove ptr from the lists in the driver.
 	void					removeVBDrvInfoPtr(ItVBDrvInfoPtrList vbDrvInfoIt);

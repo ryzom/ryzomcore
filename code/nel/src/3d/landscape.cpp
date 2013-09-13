@@ -1207,7 +1207,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 				_TileVB.activateVP(i);
 
 				// c[0..3] take the ModelViewProjection Matrix.
-				driver->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+				driver->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
 				// c[4] take useful constants.
 				driver->setUniform4f(IDriver::VertexProgram, program->idx().ProgramConstants0, 0, 1, 0.5f, 0);
 				// c[5] take RefineCenter
@@ -1215,7 +1215,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 				// c[6] take info for Geomorph trnasition to TileNear.
 				driver->setUniform2f(IDriver::VertexProgram, program->idx().TileDist, CLandscapeGlobals::TileDistFarSqr, CLandscapeGlobals::OOTileDistDeltaSqr);
 				// c[10] take the fog vector.
-				driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::Fog));
+				driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 				// c[12] take the current landscape Center / delta Pos to apply
 				driver->setUniform3f(IDriver::VertexProgram, program->idx().PZBModelPosition, _PZBModelPosition);
 			}

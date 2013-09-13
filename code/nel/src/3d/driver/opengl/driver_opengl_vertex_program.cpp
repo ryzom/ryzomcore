@@ -41,7 +41,7 @@ namespace NLDRIVERGL {
 #endif
 
 // ***************************************************************************
-CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL(CDriverGL *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it)
+CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL(CDriverGL *drv, ItGPUPrgDrvInfoPtrList it) : IProgramDrvInfos (drv, it)
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
 
@@ -98,7 +98,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 	_VertexProgramEnabled = false;
 	
 	// Find nelvp
-	IGPUProgram::CSource *source = NULL;
+	IProgram::CSource *source = NULL;
 	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
 		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
@@ -130,7 +130,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 	}
 
 	// Insert into driver list. (so it is deleted when driver is deleted).
-	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
+	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
 
 	// Create a driver info
 	*it = drvInfo = new CVertexProgamDrvInfosGL(this, it);
@@ -208,7 +208,7 @@ bool CDriverGL::activeNVVertexProgram(CVertexProgram *program)
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->m_DrvInfo);
+		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IProgramDrvInfos*)program->m_DrvInfo);
 		nlassert(drvInfo);
 
 		// Enable vertex program
@@ -1529,7 +1529,7 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	_VertexProgramEnabled = false;
 
 	// Find nelvp
-	IGPUProgram::CSource *source = NULL;
+	IProgram::CSource *source = NULL;
 	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
 		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
@@ -1557,7 +1557,7 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 		return false;
 	}
 	// Insert into driver list. (so it is deleted when driver is deleted).
-	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
+	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
 
 	// Create a driver info
 	CVertexProgamDrvInfosGL *drvInfo;
@@ -1600,7 +1600,7 @@ bool CDriverGL::activeARBVertexProgram(CVertexProgram *program)
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->m_DrvInfo);
+		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IProgramDrvInfos*)program->m_DrvInfo);
 		nlassert(drvInfo);
 
 		glEnable( GL_VERTEX_PROGRAM_ARB );
@@ -1644,7 +1644,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	_VertexProgramEnabled = false;
 
 	// Find nelvp
-	IGPUProgram::CSource *source = NULL;
+	IProgram::CSource *source = NULL;
 	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
 		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
@@ -1684,7 +1684,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	*/
 
 	// Insert into driver list. (so it is deleted when driver is deleted).
-	ItGPUPrgDrvInfoPtrList	it= _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IGPUProgramDrvInfos*)NULL);
+	ItGPUPrgDrvInfoPtrList	it= _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
 
 	// Create a driver info
 	CVertexProgamDrvInfosGL *drvInfo;
@@ -1727,7 +1727,7 @@ bool CDriverGL::activeEXTVertexShader(CVertexProgram *program)
 	if (program)
 	{
 		// Driver info
-		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IGPUProgramDrvInfos*)program->m_DrvInfo);
+		CVertexProgamDrvInfosGL *drvInfo = safe_cast<CVertexProgamDrvInfosGL*>((IProgramDrvInfos*)program->m_DrvInfo);
 		nlassert(drvInfo);
 
 		glEnable(GL_VERTEX_SHADER_EXT);

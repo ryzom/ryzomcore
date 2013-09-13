@@ -310,7 +310,7 @@ void CDriverGL::setUniformFog(NL3D::IDriver::TProgram program, uint index)
 
 bool CDriverGL::setUniformDriver(TProgram program)
 {
-	IGPUProgram *prog = NULL;
+	IProgram *prog = NULL;
 	switch (program)
 	{
 	case VertexProgram:
@@ -322,66 +322,66 @@ bool CDriverGL::setUniformDriver(TProgram program)
 	}
 	if (!prog) return false;
 
-	const CGPUProgramFeatures &features = prog->features();
+	const CProgramFeatures &features = prog->features();
 
 	if (features.DriverFlags)
 	{
-		if (features.DriverFlags & CGPUProgramFeatures::Matrices)
+		if (features.DriverFlags & CProgramFeatures::Matrices)
 		{
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelView) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelView) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelView), ModelView, Identity);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelView), ModelView, Identity);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelViewInverse) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewInverse) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelViewInverse), ModelView, Inverse);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewInverse), ModelView, Inverse);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelViewTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewTranspose) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelViewTranspose), ModelView, Transpose);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewTranspose), ModelView, Transpose);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelViewInverseTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewInverseTranspose) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelViewInverseTranspose), ModelView, InverseTranspose);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewInverseTranspose), ModelView, InverseTranspose);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::Projection) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::Projection) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::Projection), Projection, Identity);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::Projection), Projection, Identity);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ProjectionInverse) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ProjectionInverse) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ProjectionInverse), Projection, Inverse);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ProjectionInverse), Projection, Inverse);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ProjectionTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ProjectionTranspose) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ProjectionTranspose), Projection, Transpose);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ProjectionTranspose), Projection, Transpose);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ProjectionInverseTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ProjectionInverseTranspose) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ProjectionInverseTranspose), Projection, InverseTranspose);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ProjectionInverseTranspose), Projection, InverseTranspose);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelViewProjection) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjection) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelViewProjection), ModelViewProjection, Identity);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjection), ModelViewProjection, Identity);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelViewProjectionInverse) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverse) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelViewProjectionInverse), ModelViewProjection, Inverse);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverse), ModelViewProjection, Inverse);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelViewProjectionTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionTranspose) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelViewProjectionTranspose), ModelViewProjection, Transpose);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjectionTranspose), ModelViewProjection, Transpose);
 			}
-			if (prog->getUniformIndex(CGPUProgramIndex::ModelViewProjectionInverseTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverseTranspose) != ~0)
 			{
-				setUniformMatrix(program, prog->getUniformIndex(CGPUProgramIndex::ModelViewProjectionInverseTranspose), ModelViewProjection, InverseTranspose);
+				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverseTranspose), ModelViewProjection, InverseTranspose);
 			}
 		}
-		if (features.DriverFlags & CGPUProgramFeatures::Fog)
+		if (features.DriverFlags & CProgramFeatures::Fog)
 		{
-			if (prog->getUniformIndex(CGPUProgramIndex::Fog) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::Fog) != ~0)
 			{
-				setUniformFog(program, prog->getUniformIndex(CGPUProgramIndex::Fog));
+				setUniformFog(program, prog->getUniformIndex(CProgramIndex::Fog));
 			}
 		}
 	}
@@ -391,7 +391,7 @@ bool CDriverGL::setUniformDriver(TProgram program)
 
 bool CDriverGL::setUniformMaterial(TProgram program, CMaterial &material)
 {
-	IGPUProgram *prog = NULL;
+	IProgram *prog = NULL;
 	switch (program)
 	{
 	case VertexProgram:
@@ -403,12 +403,12 @@ bool CDriverGL::setUniformMaterial(TProgram program, CMaterial &material)
 	}
 	if (!prog) return false;
 
-	const CGPUProgramFeatures &features = prog->features();
+	const CProgramFeatures &features = prog->features();
 
 	// These are also already set by setupMaterial, so setupMaterial uses setUniformMaterialInternal instead
-	if (features.MaterialFlags & (CGPUProgramFeatures::TextureStages | CGPUProgramFeatures::TextureMatrices))
+	if (features.MaterialFlags & (CProgramFeatures::TextureStages | CProgramFeatures::TextureMatrices))
 	{
-		if (features.MaterialFlags & CGPUProgramFeatures::TextureStages)
+		if (features.MaterialFlags & CProgramFeatures::TextureStages)
 		{
 			for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
 			{
@@ -427,7 +427,7 @@ bool CDriverGL::setUniformMaterial(TProgram program, CMaterial &material)
 
 			
 		}
-		if (features.MaterialFlags & CGPUProgramFeatures::TextureMatrices)
+		if (features.MaterialFlags & CProgramFeatures::TextureMatrices)
 		{
 			// Textures user matrix
 			setupUserTextureMatrix(inlGetNumTextStages(), material);
@@ -439,7 +439,7 @@ bool CDriverGL::setUniformMaterial(TProgram program, CMaterial &material)
 
 bool CDriverGL::setUniformMaterialInternal(TProgram program, CMaterial &material)
 {
-	IGPUProgram *prog = NULL;
+	IProgram *prog = NULL;
 	switch (program)
 	{
 	case VertexProgram:
@@ -451,9 +451,9 @@ bool CDriverGL::setUniformMaterialInternal(TProgram program, CMaterial &material
 	}
 	if (!prog) return false;
 
-	const CGPUProgramFeatures &features = prog->features();
+	const CProgramFeatures &features = prog->features();
 
-	if (features.MaterialFlags & ~(CGPUProgramFeatures::TextureStages | CGPUProgramFeatures::TextureMatrices))
+	if (features.MaterialFlags & ~(CProgramFeatures::TextureStages | CProgramFeatures::TextureMatrices))
 	{
 		// none
 	}
@@ -463,7 +463,7 @@ bool CDriverGL::setUniformMaterialInternal(TProgram program, CMaterial &material
 
 void CDriverGL::setUniformParams(TProgram program, CGPUProgramParams &params)
 {
-	IGPUProgram *prog = NULL;
+	IProgram *prog = NULL;
 	switch (program)
 	{
 	case VertexProgram:

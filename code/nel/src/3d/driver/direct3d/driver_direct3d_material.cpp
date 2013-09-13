@@ -649,7 +649,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 		// because setupTexture() may disable all stage.
 
 		if (matShader == CMaterial::Normal 
-			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CGPUProgramFeatures::TextureStages))
+			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CProgramFeatures::TextureStages))
 			)
 		{
 			uint stage;
@@ -671,7 +671,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	{
 		H_AUTO_D3D(CDriverD3D_setupMaterial_normalShaderActivateTextures)
 		if (matShader == CMaterial::Normal 
-			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CGPUProgramFeatures::TextureStages))
+			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CProgramFeatures::TextureStages))
 			)
 		{
 			uint stage;

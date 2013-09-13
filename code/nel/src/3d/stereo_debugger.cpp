@@ -163,17 +163,17 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		m_PixelProgram = new CPixelProgram();
 		// arbfp1
 		{
-			IGPUProgram::CSource *source = new IGPUProgram::CSource();
-			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
-			source->Profile = IGPUProgram::arbfp1;
+			IProgram::CSource *source = new IProgram::CSource();
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+			source->Profile = IProgram::arbfp1;
 			source->setSourcePtr(a_arbfp1);
 			m_PixelProgram->addSource(source);
 		}
 		// ps_2_0
 		{
-			IGPUProgram::CSource *source = new IGPUProgram::CSource();
-			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
-			source->Profile = IGPUProgram::ps_2_0;
+			IProgram::CSource *source = new IProgram::CSource();
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+			source->Profile = IProgram::ps_2_0;
 			source->setSourcePtr(a_ps_2_0);
 			m_PixelProgram->addSource(source);
 		}

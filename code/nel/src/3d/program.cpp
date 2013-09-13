@@ -1,9 +1,9 @@
 /**
- * \file gpu_program.cpp
- * \brief IGPUProgram
+ * \file program.cpp
+ * \brief IProgram
  * \date 2013-09-07 15:00GMT
  * \author Jan Boon (Kaetemi)
- * IGPUProgram
+ * IProgram
  */
 
 /* 
@@ -26,7 +26,7 @@
  */
 
 #include <nel/misc/types_nl.h>
-#include <nel/3d/gpu_program.h>
+#include <nel/3d/program.h>
 
 // STL includes
 
@@ -44,7 +44,7 @@ namespace NL3D {
 
 // ***************************************************************************
 
-IGPUProgramDrvInfos::IGPUProgramDrvInfos(IDriver *drv, ItGPUPrgDrvInfoPtrList it)
+IProgramDrvInfos::IProgramDrvInfos(IDriver *drv, ItGPUPrgDrvInfoPtrList it)
 {
 	_Driver = drv;
 	_DriverIterator = it;
@@ -52,27 +52,27 @@ IGPUProgramDrvInfos::IGPUProgramDrvInfos(IDriver *drv, ItGPUPrgDrvInfoPtrList it
 
 // ***************************************************************************
 
-IGPUProgramDrvInfos::~IGPUProgramDrvInfos ()
+IProgramDrvInfos::~IProgramDrvInfos ()
 {
 	_Driver->removeGPUPrgDrvInfoPtr(_DriverIterator);
 }
 
 // ***************************************************************************
 
-IGPUProgram::IGPUProgram()
+IProgram::IProgram()
 {
 	
 }
 
 // ***************************************************************************
 
-IGPUProgram::~IGPUProgram()
+IProgram::~IProgram()
 {
 	// Must kill the drv mirror of this program.
 	m_DrvInfo.kill();
 }
 
-const char *CGPUProgramIndex::Names[NUM_UNIFORMS] = 
+const char *CProgramIndex::Names[NUM_UNIFORMS] = 
 {
 	"modelView", 
 	"modelViewInverse", 
@@ -92,14 +92,14 @@ const char *CGPUProgramIndex::Names[NUM_UNIFORMS] =
 	"fog", 
 };
 
-void IGPUProgram::buildInfo(CSource *source)
+void IProgram::buildInfo(CSource *source)
 {
 	nlassert(!m_Source);
 
 	m_Source = source;
 
 	// Fill index cache
-	for (int i = 0; i < CGPUProgramIndex::NUM_UNIFORMS; ++i)
+	for (int i = 0; i < CProgramIndex::NUM_UNIFORMS; ++i)
 	{
 		m_Index.Indices[i] = getUniformIndex(m_Index.Names[i]);
 	}
@@ -107,7 +107,7 @@ void IGPUProgram::buildInfo(CSource *source)
 	buildInfo();
 }
 
-void IGPUProgram::buildInfo()
+void IProgram::buildInfo()
 {
 	
 }

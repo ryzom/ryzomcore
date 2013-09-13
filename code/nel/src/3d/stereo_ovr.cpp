@@ -251,14 +251,14 @@ public:
 		{
 			CSource *source = new CSource();
 			source->Profile = glsl330f;
-			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
 			source->setSourcePtr(g_StereoOVR_glsl330f);
 			addSource(source);
 		}
 		{
 			CSource *source = new CSource();
 			source->Profile = fp40;
-			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
 			source->setSourcePtr(g_StereoOVR_fp40);
 			source->ParamIndices["cLensCenter"] = 0;
 			source->ParamIndices["cScreenCenter"] = 1;
@@ -270,7 +270,7 @@ public:
 		{
 			CSource *source = new CSource();
 			source->Profile = arbfp1;
-			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
 			source->setSourcePtr(g_StereoOVR_arbfp1);
 			source->ParamIndices["cLensCenter"] = 0;
 			source->ParamIndices["cScreenCenter"] = 1;
@@ -282,7 +282,7 @@ public:
 		{
 			CSource *source = new CSource();
 			source->Profile = ps_2_0;
-			source->Features.MaterialFlags = CGPUProgramFeatures::TextureStages;
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
 			source->setSourcePtr(g_StereoOVR_ps_2_0);
 			source->ParamIndices["cLensCenter"] = 0;
 			source->ParamIndices["cScreenCenter"] = 1;

@@ -303,7 +303,7 @@ void CWaterEnvMap::renderTestMesh(IDriver &driver)
 	driver.activeVertexBuffer(_TestVB);
 	driver.activeIndexBuffer(_TestIB);
 	_MaterialPassThruZTest.setTexture(0, _EnvCubic);
-	driver.setUniformMatrix(IDriver::VertexProgram, testMeshVP->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+	driver.setUniformMatrix(IDriver::VertexProgram, testMeshVP->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
 	driver.setUniform2f(IDriver::VertexProgram, testMeshVP->idx().ProgramConstant0, 2.f, 1.f);
 	//driver.renderTriangles(testMat, 0, TEST_VB_NUM_TRIS);
 	driver.renderTriangles(_MaterialPassThruZTest, 0, TEST_VB_NUM_TRIS);

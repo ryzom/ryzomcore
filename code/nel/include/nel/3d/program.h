@@ -1,9 +1,9 @@
 /**
- * \file gpu_program.h
- * \brief IGPUProgram
+ * \file program.h
+ * \brief IProgram
  * \date 2013-09-07 15:00GMT
  * \author Jan Boon (Kaetemi)
- * IGPUProgram
+ * IProgram
  */
 
 /* 
@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NL3D_GPU_PROGRAM_H
-#define NL3D_GPU_PROGRAM_H
+#ifndef NL3D_PROGRAM_H
+#define NL3D_PROGRAM_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -40,22 +40,22 @@ namespace NL3D {
 
 // List typedef.
 class	IDriver;
-class	IGPUProgramDrvInfos;
-typedef	std::list<IGPUProgramDrvInfos*>	TGPUPrgDrvInfoPtrList;
+class	IProgramDrvInfos;
+typedef	std::list<IProgramDrvInfos*>	TGPUPrgDrvInfoPtrList;
 typedef	TGPUPrgDrvInfoPtrList::iterator		ItGPUPrgDrvInfoPtrList;
 
 // Class for interaction of vertex program with Driver.
-// IGPUProgramDrvInfos represent the real data of the GPU program, stored into the driver (eg: just a GLint for opengl).
-class IGPUProgramDrvInfos : public NLMISC::CRefCount
+// IProgramDrvInfos represent the real data of the GPU program, stored into the driver (eg: just a GLint for opengl).
+class IProgramDrvInfos : public NLMISC::CRefCount
 {
 private:
 	IDriver					*_Driver;
 	ItGPUPrgDrvInfoPtrList	_DriverIterator;
 
 public:
-	IGPUProgramDrvInfos (IDriver *drv, ItGPUPrgDrvInfoPtrList it);
+	IProgramDrvInfos (IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	// The virtual dtor is important.
-	virtual ~IGPUProgramDrvInfos(void);
+	virtual ~IProgramDrvInfos(void);
 
 	virtual uint getUniformIndex(const char *name) const = 0;
 };
@@ -73,9 +73,9 @@ public:
 // This does not work extremely efficient, but it's the most practical option
 // for passing builtin parameters onto user provided shaders.
 // Note: May need additional flags related to scene sorting, etcetera.
-struct CGPUProgramFeatures
+struct CProgramFeatures
 {
-	CGPUProgramFeatures() : DriverFlags(0), MaterialFlags(0) { }
+	CProgramFeatures() : DriverFlags(0), MaterialFlags(0) { }
 
 	// Driver builtin parameters
 	enum TDriverFlags
@@ -100,7 +100,7 @@ struct CGPUProgramFeatures
 
 // Stucture used to cache the indices of builtin parameters which are used by the drivers
 // Not used for parameters of specific nl3d programs
-struct CGPUProgramIndex
+struct CProgramIndex
 {
 	enum TName
 	{
@@ -128,12 +128,12 @@ struct CGPUProgramIndex
 };
 
 /**
- * \brief IGPUProgram
+ * \brief IProgram
  * \date 2013-09-07 15:00GMT
  * \author Jan Boon (Kaetemi)
  * A generic GPU program
  */
-class IGPUProgram : public NLMISC::CRefCount
+class IProgram : public NLMISC::CRefCount
 {
 public:
 	enum TProfile
@@ -195,7 +195,7 @@ public:
 		std::string DisplayName;
 
 		/// Minimal required profile for this GPU program
-		IGPUProgram::TProfile Profile;
+		IProgram::TProfile Profile;
 
 		const char *SourcePtr;
 		size_t SourceLen;
@@ -207,7 +207,7 @@ public:
 		inline void setSourcePtr(const char *sourcePtr) { SourceCopy.clear(); SourcePtr = sourcePtr; SourceLen = strlen(sourcePtr); }
 
 		/// CVertexProgramInfo/CPixelProgramInfo/... NeL features
-		CGPUProgramFeatures Features;
+		CProgramFeatures Features;
 
 		/// Map with known parameter indices, used for assembly programs
 		std::map<std::string, uint> ParamIndices;
@@ -217,8 +217,8 @@ public:
 	};
 
 public:
-	IGPUProgram();
-	virtual ~IGPUProgram();
+	IProgram();
+	virtual ~IProgram();
 
 	// Manage the sources, not allowed after compilation.
 	// Add multiple sources using different profiles, the driver will use the first one it supports.
@@ -230,11 +230,11 @@ public:
 	// Get the idx of a parameter (ogl: uniform, d3d: constant, etcetera) by name. Invalid name returns ~0
 	inline uint getUniformIndex(const char *name) const { return m_DrvInfo->getUniformIndex(name); };
 	inline uint getUniformIndex(const std::string &name) const { return m_DrvInfo->getUniformIndex(name.c_str()); };
-	inline uint getUniformIndex(CGPUProgramIndex::TName name) const { return m_Index.Indices[name]; }
+	inline uint getUniformIndex(CProgramIndex::TName name) const { return m_Index.Indices[name]; }
 
 	// Get feature information of the current program
 	inline CSource *source() const { return m_Source; };
-	inline const CGPUProgramFeatures &features() const { return m_Source->Features; };
+	inline const CProgramFeatures &features() const { return m_Source->Features; };
 	inline TProfile profile() const { return m_Source->Profile; }
 
 	// Build feature info, called automatically by the driver after compile succeeds
@@ -249,16 +249,16 @@ protected:
 
 	/// The source used for compilation
 	NLMISC::CSmartPtr<CSource>								m_Source;
-	CGPUProgramIndex										m_Index;
+	CProgramIndex										m_Index;
 
 public:
 	/// The driver information. For the driver implementation only.
-	NLMISC::CRefPtr<IGPUProgramDrvInfos>					m_DrvInfo;
+	NLMISC::CRefPtr<IProgramDrvInfos>					m_DrvInfo;
 
-}; /* class IGPUProgram */
+}; /* class IProgram */
 
 } /* namespace NL3D */
 
-#endif /* #ifndef NL3D_GPU_PROGRAM_H */
+#endif /* #ifndef NL3D_PROGRAM_H */
 
 /* end of file */

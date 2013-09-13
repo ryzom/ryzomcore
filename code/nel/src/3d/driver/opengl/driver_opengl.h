@@ -1627,7 +1627,7 @@ private:
 };
 
 // ***************************************************************************
-class CVertexProgamDrvInfosGL : public IGPUProgramDrvInfos
+class CVertexProgamDrvInfosGL : public IProgramDrvInfos
 {
 public:
 	// The GL Id.
@@ -1661,7 +1661,7 @@ public:
 };
 
 // ***************************************************************************
-class CPixelProgamDrvInfosGL : public IGPUProgramDrvInfos
+class CPixelProgamDrvInfosGL : public IProgramDrvInfos
 {
 public:
 	// The GL Id.

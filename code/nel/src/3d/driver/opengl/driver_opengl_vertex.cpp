@@ -1151,7 +1151,7 @@ void		CDriverGL::toggleGlArraysForEXTVertexShader()
 		CVertexProgram *vp = _LastSetuppedVP;
 		if (vp)
 		{
-			CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IGPUProgramDrvInfos *) vp->m_DrvInfo);
+			CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IProgramDrvInfos *) vp->m_DrvInfo);
 			if (drvInfo)
 			{
 				// Disable all VertexAttribs.
@@ -1396,7 +1396,7 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 
 	CVertexProgram *vp = _LastSetuppedVP;
 	if (!vp) return;
-	CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IGPUProgramDrvInfos *) vp->m_DrvInfo);
+	CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IProgramDrvInfos *) vp->m_DrvInfo);
 	if (!drvInfo) return;
 
 	uint32	flags= vb.VertexFormat;

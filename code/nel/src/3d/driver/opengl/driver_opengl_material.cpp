@@ -404,7 +404,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	// Must separate texture setup and texture activation in 2 "for"...
 	// because setupTexture() may disable all stage.
 	if (matShader != CMaterial::Water 
-		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CGPUProgramFeatures::TextureStages))
+		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureStages))
 		)
 	{
 		for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
@@ -441,7 +441,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		&& matShader != CMaterial::Cloud
 		&& matShader != CMaterial::Water
 		&& matShader != CMaterial::Specular
-		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CGPUProgramFeatures::TextureStages))
+		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureStages))
 	   )
 	{
 		for(uint stage=0 ; stage<inlGetNumTextStages() ; stage++)
@@ -573,7 +573,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 
 	// Textures user matrix
 	if (matShader == CMaterial::Normal
-		|| ((matShader == CMaterial::Program) && (_LastSetuppedPP->features().MaterialFlags & CGPUProgramFeatures::TextureMatrices))
+		|| ((matShader == CMaterial::Program) && (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureMatrices))
 		)
 	{
 		setupUserTextureMatrix(inlGetNumTextStages(), mat);

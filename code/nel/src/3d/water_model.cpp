@@ -958,8 +958,8 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 		drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector1, _ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0, _ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
 	}
 	// set builtins
-	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
-	drv->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::Fog));
+	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+	drv->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 	// retrieve current time
 	double date  = scene->getCurrentTime();
 	// set bumpmaps pos

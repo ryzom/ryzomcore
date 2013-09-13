@@ -555,7 +555,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 	}
 
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
-	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
 
 	return true;
 }

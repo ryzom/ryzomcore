@@ -299,7 +299,7 @@ public:
 
 
 // ***************************************************************************
-class CVertexProgamDrvInfosD3D : public IGPUProgramDrvInfos
+class CVertexProgamDrvInfosD3D : public IProgramDrvInfos
 {
 public:
 
@@ -321,7 +321,7 @@ public:
  
 
 // ***************************************************************************
-class CPixelProgramDrvInfosD3D : public IGPUProgramDrvInfos
+class CPixelProgramDrvInfosD3D : public IProgramDrvInfos
 {
 public:
  
@@ -2111,7 +2111,7 @@ public:
 	{
 		H_AUTO_D3D(CDriverD3D_getPixelProgramD3D);
 		CPixelProgramDrvInfosD3D*	d3dPixelProgram;
-		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IGPUProgramDrvInfos*)(pixelProgram.m_DrvInfo);
+		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IProgramDrvInfos*)(pixelProgram.m_DrvInfo);
 		return d3dPixelProgram;
 	}
 
@@ -2120,7 +2120,7 @@ public:
 	{
 		H_AUTO_D3D(CDriverD3D_getVertexProgramD3D);
 		CVertexProgamDrvInfosD3D*	d3dVertexProgram;
-		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IGPUProgramDrvInfos*)(vertexProgram.m_DrvInfo);
+		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IProgramDrvInfos*)(vertexProgram.m_DrvInfo);
 		return d3dVertexProgram;
 	}
 

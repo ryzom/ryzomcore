@@ -1872,11 +1872,11 @@ void			CVegetableManager::setupVertexProgramConstants(IDriver *driver, bool fogE
 	// Standard
 	// setup VertexProgram constants.
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
-	driver->setUniformMatrix(IDriver::VertexProgram, _ActiveVertexProgram->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+	driver->setUniformMatrix(IDriver::VertexProgram, _ActiveVertexProgram->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
 	// c[6] take the Fog vector. After setupModelMatrix();
 	if (fogEnabled)
 	{
-		driver->setUniformFog(IDriver::VertexProgram, _ActiveVertexProgram->getUniformIndex(CGPUProgramIndex::Fog));
+		driver->setUniformFog(IDriver::VertexProgram, _ActiveVertexProgram->getUniformIndex(CProgramIndex::Fog));
 	}
 	// c[8] take useful constants.
 	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().ProgramConstants0, 0, 1, 0.5f, 2);

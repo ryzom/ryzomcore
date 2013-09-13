@@ -373,7 +373,7 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 			memcpy(vba.getVertexCoordPointer(), &_TriCache[0], sizeof(CRGBAVertex) * _TriCache.size());
 		}
 		drv.activeVertexBuffer(_VB);
-		drv.setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
+		drv.setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), NL3D::IDriver::ModelViewProjection, NL3D::IDriver::Identity);
 		drv.setUniform4f(IDriver::VertexProgram, program->idx().WorldToUV0, _WorldToUVMatrix[0][0], _WorldToUVMatrix[1][0], _WorldToUVMatrix[2][0], _WorldToUVMatrix[3][0]);
 		drv.setUniform4f(IDriver::VertexProgram, program->idx().WorldToUV1, _WorldToUVMatrix[0][1], _WorldToUVMatrix[1][1], _WorldToUVMatrix[2][1], _WorldToUVMatrix[3][1]);
 		drv.setUniform4f(IDriver::VertexProgram, program->idx().Diffuse, _Diffuse.R * (1.f / 255.f), _Diffuse.G * (1.f / 255.f), _Diffuse.B * (1.f / 255.f), 1.f);

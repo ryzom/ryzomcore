@@ -36,7 +36,7 @@ CVertexProgram::CVertexProgram()
 CVertexProgram::CVertexProgram(const char *nelvp)
 {
 	CSource *source = new CSource();
-	source->Profile = IGPUProgram::nelvp;
+	source->Profile = IProgram::nelvp;
 	source->setSource(nelvp);
 	addSource(source);
 }

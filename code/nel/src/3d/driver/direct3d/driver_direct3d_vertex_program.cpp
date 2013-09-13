@@ -26,7 +26,7 @@ namespace NL3D
 
 // ***************************************************************************
 
-CVertexProgamDrvInfosD3D::CVertexProgamDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it)
+CVertexProgamDrvInfosD3D::CVertexProgamDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it) : IProgramDrvInfos (drv, it)
 {
 	H_AUTO_D3D(CVertexProgamDrvInfosD3D_CVertexProgamDrvInfosD3D)
 	Shader = NULL;
@@ -268,7 +268,7 @@ bool CDriverD3D::compileVertexProgram(NL3D::CVertexProgram *program)
 	if (program->m_DrvInfo == NULL)
 	{
 		// Find nelvp
-		IGPUProgram::CSource *source = NULL;
+		IProgram::CSource *source = NULL;
 		for (uint i = 0; i < program->getSourceNb(); ++i)
 		{
 			if (program->getSource(i)->Profile == CVertexProgram::nelvp)
@@ -378,7 +378,7 @@ bool CDriverD3D::activeVertexProgram (CVertexProgram *program)
 	{
 		if (!CDriverD3D::compileVertexProgram(program)) return false;
 
-		CVertexProgamDrvInfosD3D *info = NLMISC::safe_cast<CVertexProgamDrvInfosD3D *>((IGPUProgramDrvInfos*)program->m_DrvInfo);
+		CVertexProgamDrvInfosD3D *info = NLMISC::safe_cast<CVertexProgamDrvInfosD3D *>((IProgramDrvInfos*)program->m_DrvInfo);
 		_VertexProgramUser = program;
 		setVertexProgram (info->Shader, program);
 

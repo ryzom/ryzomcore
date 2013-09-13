@@ -315,10 +315,10 @@ inline	void		CMeshVPWindTree::setupPerInstanceConstants(IDriver *driver, CScene 
 	setupLighting(scene, mbi, invertedModelMat);
 
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
-	driver->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), 
+	driver->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), 
 		IDriver::ModelViewProjection, IDriver::Identity);
 	// c[4..7] take the ModelView Matrix. After setupModelMatrix();00
-	driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::Fog));
+	driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 
 
 	// c[15] take Wind of level 0.

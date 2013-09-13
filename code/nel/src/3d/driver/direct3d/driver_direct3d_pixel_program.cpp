@@ -37,7 +37,7 @@ namespace NL3D
 
 // ***************************************************************************
 
-CPixelProgramDrvInfosD3D::CPixelProgramDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it) : IGPUProgramDrvInfos (drv, it)
+CPixelProgramDrvInfosD3D::CPixelProgramDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it) : IProgramDrvInfos (drv, it)
 {
 	H_AUTO_D3D(CPixelProgramDrvInfosD3D_CPixelProgamDrvInfosD3D)
 	Shader = NULL;
@@ -69,7 +69,7 @@ bool CDriverD3D::compilePixelProgram(CPixelProgram *program)
 	if (program->m_DrvInfo==NULL)
 	{
 		// Find a supported pixel program profile
-		IGPUProgram::CSource *source = NULL;
+		IProgram::CSource *source = NULL;
 		for (uint i = 0; i < program->getSourceNb(); ++i)
 		{
 			if (supportPixelProgram(program->getSource(i)->Profile))
@@ -128,7 +128,7 @@ bool CDriverD3D::activePixelProgram(CPixelProgram *program)
 	{
 		if (!CDriverD3D::compilePixelProgram(program)) return false;
 
-		CPixelProgramDrvInfosD3D *info = static_cast<CPixelProgramDrvInfosD3D *>((IGPUProgramDrvInfos*)program->m_DrvInfo);
+		CPixelProgramDrvInfosD3D *info = static_cast<CPixelProgramDrvInfosD3D *>((IProgramDrvInfos*)program->m_DrvInfo);
 		_PixelProgramUser = program;
 		setPixelShader(info->Shader);
 	}
