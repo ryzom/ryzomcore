@@ -357,9 +357,12 @@ static const char*	PPLightingVPCodeTest =
 class CVertexProgramPerPixelLight : public CVertexProgramLighted
 {
 public:
-	class CIdx
+	struct CIdx
 	{
-
+		/// Position or direction of strongest light
+		uint StrongestLight;
+		/// Viewer position
+		uint ViewerPos;
 	};
 	CVertexProgramPerPixelLight(uint vp);
 	virtual ~CVertexProgramPerPixelLight() { };
@@ -436,6 +439,7 @@ CVertexProgramPerPixelLight::CVertexProgramPerPixelLight(uint vp)
 		source->DisplayName = NLMISC::toString("nelvp/MeshVPPerPixel/%i", vp);
 		source->Profile = CVertexProgram::nelvp;
 		source->setSource(vpCode);
+		source->ParamIndices["modelViewProjection"] = 0;
 		addSource(source);
 	}
 
@@ -448,6 +452,27 @@ CVertexProgramPerPixelLight::CVertexProgramPerPixelLight(uint vp)
 void CVertexProgramPerPixelLight::buildInfo()
 {
 	CVertexProgramLighted::buildInfo();
+	if (profile() == nelvp)
+	{
+		m_Idx.StrongestLight = 4;
+		if (m_FeaturesLighted.SupportSpecular)
+		{
+			m_Idx.ViewerPos = 5;
+		}
+		else
+		{
+			m_Idx.ViewerPos = ~0;
+		}
+	}
+	else
+	{
+		// TODO_VP_GLSL
+	}
+	nlassert(m_Idx.StrongestLight != ~0);
+	if (m_FeaturesLighted.SupportSpecular)
+	{
+		nlassert(m_Idx.ViewerPos != ~0);
+	}
 }
 
 
@@ -485,10 +510,12 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 	}
 	//
 	enable(true, drv); // must enable the vertex program before the vb is activated
+	CVertexProgramPerPixelLight *program = _ActiveVertexProgram;
+	nlassert(program);
 	//
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	/// Setup for gouraud lighting
-	renderTrav->beginVPLightSetup(_ActiveVertexProgram, invertedModelMat);
+	renderTrav->beginVPLightSetup(program, invertedModelMat);
 	//
 	sint strongestLightIndex = renderTrav->getStrongestLightIndex();
 	if (strongestLightIndex == -1) return false; // if no strongest light, disable this vertex program
@@ -502,7 +529,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 		{
 			// put light direction in object space
 			NLMISC::CVector lPos = invertedModelMat.mulVector(strongestLight.getDirection());
-			drv->setConstant(4, lPos);
+			drv->setUniform3f(IDriver::VertexProgram, program->idx().StrongestLight, lPos);
 			_IsPointLight = false;
 		}
 		break;
@@ -510,7 +537,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 		{
 			// put light in object space
 			NLMISC::CVector lPos = invertedModelMat * strongestLight.getPosition();
-			drv->setConstant(4, lPos);
+			drv->setUniform3f(IDriver::VertexProgram, program->idx().StrongestLight, lPos);
 			_IsPointLight = true;
 		}
 		break;
@@ -524,11 +551,11 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 	{
 		// viewer pos in object space
 		NLMISC::CVector vPos = invertedModelMat * viewerPos;
-		drv->setConstant(5, vPos);
+		drv->setUniform3f(IDriver::VertexProgram, program->idx().ViewerPos, vPos);
 	}
 
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
-	drv->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
+	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
 
 	return true;
 }
