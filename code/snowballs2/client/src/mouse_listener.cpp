@@ -427,6 +427,11 @@ void	C3dMouseListener::updateCamera()
 		cpos = snapped+CVector(0.0f, 0.0f, GroundCamLimit);
 		_ViewHeight = cpos.z - getPosition().z;
 	}
+	if (StereoHMD)
+	{
+		// look at straight forward
+		tpos.z = cpos.z;
+	}
 	_Camera.lookAt(cpos, tpos);
 }
 

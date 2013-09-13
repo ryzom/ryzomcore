@@ -81,7 +81,69 @@ DP4 o[TEX3].x, v[0], c[11];           #compute uv for diffuse texture			\n\
 DP4 o[TEX3].y, v[0], c[12];													    \n\
 END";
 
+CVertexProgramWaterVPNoWave::CVertexProgramWaterVPNoWave(bool diffuse)
+{
+	m_Diffuse = diffuse;
+	// nelvp
+	{
+		CSource *source = new CSource();
+		source->Profile = nelvp;
+		source->DisplayName = "WaterVPNoWave/nelvp";
+		source->ParamIndices["modelViewProjection"] = 0;
+		source->ParamIndices["fog"] = 4;
+		source->ParamIndices["bumpMap0Scale"] = 5;
+		source->ParamIndices["bumpMap0Offset"] = 6;
+		source->ParamIndices["bumpMap1Scale"] = 7;
+		source->ParamIndices["bumpMap1Offset"] = 8;
+		source->ParamIndices["observerHeight"] = 9;
+		source->ParamIndices["scaleReflectedRay"] = 10;
+		if (diffuse)
+		{
+			source->DisplayName += "/diffuse";
+			source->ParamIndices["diffuseMapVector0"] = 11;
+			source->ParamIndices["diffuseMapVector1"] = 12;
+			source->setSourcePtr(WaterVPNoWaveDiffuse);
+		}
+		else
+		{
+			source->setSourcePtr(WaterVPNoWave);
+		}
+		addSource(source);
+	}
+	// glsl330v
+	{
+		// TODO_VP_GLSL
+		// CSource *source = new CSource();
+		// source->Profile = glsl330v;
+		// source->DisplayName = "WaterVPNoWave/glsl330v";
+		// if (diffuse) source->DisplayName += "/diffuse";
+		// source->setSource...
+		// addSource(source);
+	}
+}
 
+void CVertexProgramWaterVPNoWave::buildInfo()
+{
+	m_Idx.BumpMap0Scale = getUniformIndex("bumpMap0Scale");
+	nlassert(m_Idx.BumpMap0Scale != ~0);
+	m_Idx.BumpMap0Offset = getUniformIndex("bumpMap0Offset");
+	nlassert(m_Idx.BumpMap0Offset != ~0);
+	m_Idx.BumpMap1Scale = getUniformIndex("bumpMap1Scale");
+	nlassert(m_Idx.BumpMap1Scale != ~0);
+	m_Idx.BumpMap1Offset = getUniformIndex("bumpMap1Offset");
+	nlassert(m_Idx.BumpMap1Offset != ~0);
+	m_Idx.ObserverHeight = getUniformIndex("observerHeight");
+	nlassert(m_Idx.ObserverHeight != ~0);
+	m_Idx.ScaleReflectedRay = getUniformIndex("scaleReflectedRay");
+	nlassert(m_Idx.ScaleReflectedRay != ~0);
+	if (m_Diffuse)
+	{
+		m_Idx.DiffuseMapVector0 = getUniformIndex("diffuseMapVector0");
+		nlassert(m_Idx.DiffuseMapVector0 != ~0);
+		m_Idx.DiffuseMapVector1 = getUniformIndex("diffuseMapVector1");
+		nlassert(m_Idx.DiffuseMapVector1 != ~0);
+	}
+}
 
 ////////////////
 // WAVY WATER //
@@ -188,15 +250,15 @@ uint32									CWaterShape::_XGridBorder = 4;
 uint32									CWaterShape::_YGridBorder = 4;
 uint32									CWaterShape::_MaxGridSize;
 bool									CWaterShape::_GridSizeTouched = true;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump1;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump2;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump1Diffuse;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramBump2Diffuse;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoBump;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoBumpDiffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump1;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump2;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump1Diffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump2Diffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBump;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBumpDiffuse;
 // water with no waves
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoWave;
-std::auto_ptr<CVertexProgram>			CWaterShape::_VertexProgramNoWaveDiffuse;
+NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWave;
+NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWaveDiffuse;
 
 
 /** Build a vertex program for water depending on requirements
@@ -223,6 +285,7 @@ static CVertexProgram *BuildWaterVP(bool diffuseMap, bool bumpMap, bool use2Bump
 
 	vp += "\nEND";
 	return new CVertexProgram(vp.c_str());
+	// TODO_VP_GLSL
 }
 
 
@@ -321,17 +384,17 @@ void CWaterShape::initVertexProgram()
 	if (!created)
 	{
 		// waves
-		_VertexProgramBump1 = std::auto_ptr<CVertexProgram>(BuildWaterVP(false, true, false));
-		_VertexProgramBump2 = std::auto_ptr<CVertexProgram>(BuildWaterVP(false, true, true));
+		_VertexProgramBump1 = BuildWaterVP(false, true, false);
+		_VertexProgramBump2 = BuildWaterVP(false, true, true);
 
-		_VertexProgramBump1Diffuse = std::auto_ptr<CVertexProgram>(BuildWaterVP(true, true, false));
-		_VertexProgramBump2Diffuse = std::auto_ptr<CVertexProgram>(BuildWaterVP(true, true, true));
+		_VertexProgramBump1Diffuse = BuildWaterVP(true, true, false);
+		_VertexProgramBump2Diffuse = BuildWaterVP(true, true, true);
 
-		_VertexProgramNoBump = std::auto_ptr<CVertexProgram>(BuildWaterVP(false, false, false));
-		_VertexProgramNoBumpDiffuse = std::auto_ptr<CVertexProgram>(BuildWaterVP(true, false, false));
+		_VertexProgramNoBump = BuildWaterVP(false, false, false);
+		_VertexProgramNoBumpDiffuse = BuildWaterVP(true, false, false);
 		// no waves
-		_VertexProgramNoWave.reset(new CVertexProgram(WaterVPNoWave));
-		_VertexProgramNoWaveDiffuse.reset(new CVertexProgram(WaterVPNoWaveDiffuse));
+		_VertexProgramNoWave = new CVertexProgramWaterVPNoWave(false);
+		_VertexProgramNoWaveDiffuse = new CVertexProgramWaterVPNoWave(true); // TODO_VP_GLSL
 		created = true;
 	}
 }
@@ -372,7 +435,7 @@ void CWaterShape::flushTextures (IDriver &driver, uint selectedTexture)
 
 	/*
 	if (
-		(driver.supportTextureShaders() && driver.isTextureAddrModeSupported(CMaterial::OffsetTexture))
+		(driver.supportTextureShaders() && driver.supportTextureAddrMode(CMaterial::OffsetTexture))
 		|| driver.supportEMBM()
 	   )
 	{

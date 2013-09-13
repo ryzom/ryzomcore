@@ -35,6 +35,7 @@
 #include "nel/3d/u_scene.h"
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_shape_bank.h"
+#include "nel/3d/stereo_hmd.h"
 // Client
 #include "global.h"
 #include "release.h"
@@ -558,6 +559,15 @@ void release()
 	// Release the Entities Animation Manager
 	CEntityAnimationManager::delInstance();
 	EAM= NULL;
+
+	nldebug("VR [C]: VR Shutting down");
+	if (StereoDisplay)
+	{
+		delete StereoDisplay;
+		StereoDisplay = NULL;
+		StereoHMD = NULL;
+	}
+	IStereoDisplay::releaseAllLibraries();
 
 	// Delete the driver.
 	if(Driver)

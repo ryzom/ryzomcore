@@ -42,6 +42,14 @@ static bool _SkipAnimationOnce;
 static NLMISC::TTime _TimeMs;
 static CValueSmootherTemplate<float> _FpsSmoother;
 
+namespace
+{
+
+NLMISC::TLocalTime a_LocalTimeDelta;
+NL3D::TGlobalAnimationTime a_AnimationTimeDelta;
+
+} /* anonymous namespace */
+
 static void cbFpsSmoothing(CConfigFile::CVar &var)
 {
 	_FpsSmoother.init((uint)var.asInt());
@@ -53,8 +61,10 @@ void CGameTime::init()
 	_TimeMs = NLMISC::CTime::getLocalTime();
 	LocalTime = ((TLocalTime)_TimeMs) / 1000.0;
 	LocalTimeDelta = 0.0;
+	a_LocalTimeDelta = 0.0;
 	AnimationTime = 0.0;
 	AnimationTimeDelta = 0.f;
+	a_AnimationTimeDelta = 0.0;
 	FramesPerSecond = 0.f;
 	FramesPerSecondSmooth = 0.f;
 	CConfiguration::setAndCallback("FpsSmoothing", cbFpsSmoothing);
@@ -78,31 +88,38 @@ void CGameTime::updateTime()
 		// average of previous fps and this fps should be ok
 		FramesPerSecond *= 3;
 
-		LocalTimeDelta = 0.f;
-		AnimationTimeDelta = 0.f;
+		a_LocalTimeDelta = 0.f;
+		a_AnimationTimeDelta = 0.f;
 	}
 	else
 	{
 		FramesPerSecond = 1000.0f / (float)deltams;
 
 		TLocalTime localTime = ((TLocalTime)timems) / 1000.0;
-		LocalTimeDelta = localTime - LocalTime;
-		LocalTime = localTime;
+		a_LocalTimeDelta = localTime - LocalTime;
 
 		if (_SkipAnimationOnce)
 		{
-			AnimationTimeDelta = 0.f;
+			a_AnimationTimeDelta = 0.f;
 			_SkipAnimationOnce = false;
 		}
 		else
 		{
-			AnimationTimeDelta = (TAnimationTime)LocalTimeDelta;
-			AnimationTime += (TGlobalAnimationTime)LocalTimeDelta;
+			a_AnimationTimeDelta = (TGlobalAnimationTime)a_LocalTimeDelta;
 		}
 	}
 
 	_FpsSmoother.addValue(FramesPerSecond);
 	FramesPerSecondSmooth = _FpsSmoother.getSmoothValue();
+}
+
+void CGameTime::advanceTime(double f)
+{
+	LocalTimeDelta = a_LocalTimeDelta * f;
+	LocalTime += LocalTimeDelta;
+	TGlobalAnimationTime atd = a_AnimationTimeDelta * f;
+	AnimationTimeDelta = (NL3D::TAnimationTime)atd;
+	AnimationTime += atd;
 }
 
 void CGameTime::skipAnimationOnce()

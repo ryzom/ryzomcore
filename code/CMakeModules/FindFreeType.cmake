@@ -52,6 +52,7 @@ FIND_LIBRARY(FREETYPE_LIBRARY_RELEASE
   /opt/csw/lib
   /opt/lib
   /usr/freeware/lib64
+  /usr/lib/x86_64-linux-gnu
 )
 
 FIND_LIBRARY(FREETYPE_LIBRARY_DEBUG
@@ -67,6 +68,7 @@ FIND_LIBRARY(FREETYPE_LIBRARY_DEBUG
   /opt/csw/lib
   /opt/lib
   /usr/freeware/lib64
+  /usr/lib/x86_64-linux-gnu
 )
 
 IF(FREETYPE_INCLUDE_DIRS)

@@ -24,6 +24,7 @@
 
 namespace NL3D {
 
+class CVertexProgramWindTree;
 
 // ***************************************************************************
 /**
@@ -35,6 +36,7 @@ namespace NL3D {
 class CMeshVPWindTree : public IMeshVertexProgram
 {
 public:
+	friend class CVertexProgramWindTree;
 
 	enum	{HrcDepth= 3};
 
@@ -112,7 +114,9 @@ private:
 	/** The 16 versions: Specular or not (0 or 2), + normalize normal or not (0 or 1).
 	 *	All multiplied by 4, because support from 0 to 3 pointLights activated. (0.., 4.., 8.., 12..)
 	 */
-	static	std::auto_ptr<CVertexProgram>	_VertexProgram[NumVp];
+	static	NLMISC::CSmartPtr<CVertexProgramWindTree> _VertexProgram[NumVp];
+
+	NLMISC::CRefPtr<CVertexProgramWindTree> _ActiveVertexProgram;
 
 	// WindTree Time for this mesh param setup. Stored in mesh because same for all instances.
 	float		_CurrentTime[HrcDepth];

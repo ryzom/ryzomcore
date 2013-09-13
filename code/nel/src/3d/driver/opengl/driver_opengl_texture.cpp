@@ -2323,7 +2323,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 			newVP.init(0, 0, ((float)width/(float)w), ((float)height/(float)h));
 			setupViewport(newVP);
 
-			_RenderTargetFBO = true;
+			_RenderTargetFBO = tex;
 
 			return activeFrameBufferObject(tex);
 		}
@@ -2343,7 +2343,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 		setupViewport(_OldViewport);
 		_OldViewport = _CurrViewport;
 
-		_RenderTargetFBO = false;
+		_RenderTargetFBO = NULL;
 		return false;
 	}
 
@@ -2356,10 +2356,15 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 	// Update the scissor
 	setupScissor (_CurrScissor);
 
-	_RenderTargetFBO = false;
+	_RenderTargetFBO = NULL;
 	_OldViewport = _CurrViewport;
 
 	return true;
+}
+
+ITexture *CDriverGL::getRenderTarget() const
+{
+	return _RenderTargetFBO ? _RenderTargetFBO : _TextureTarget;
 }
 
 // ***************************************************************************
