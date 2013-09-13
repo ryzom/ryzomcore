@@ -27,6 +27,7 @@
 
 namespace NL3D {
 
+class CVertexProgramPerPixelLight;
 
 /**
  * This vertex program is used to perform perpixel lighting with meshs. Its outputs are :
@@ -49,6 +50,8 @@ namespace NL3D {
 class CMeshVPPerPixelLight : public IMeshVertexProgram
 {
 public:
+	friend class CVertexProgramPerPixelLight;
+
 	/// true if want Specular Lighting.
 	bool		SpecularLighting;
 public:
@@ -84,7 +87,7 @@ private:
 	bool	_IsPointLight;
 	//
 	enum { NumVp = 8};
-	static	NLMISC::CSmartPtr<CVertexProgram>	_VertexProgram[NumVp];
+	static	NLMISC::CSmartPtr<CVertexProgramPerPixelLight> _VertexProgram[NumVp];
 };
 
 } // NL3D

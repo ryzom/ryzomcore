@@ -70,7 +70,7 @@ class   CWaterModel;
 #define	NL3D_SHADOW_MESH_SKIN_MANAGER_NUMVB				8
 
 /// Container for lighted vertex program.
-class CVertexProgramLighted : CVertexProgram
+class CVertexProgramLighted : public CVertexProgram
 {
 public:
 	static const uint MaxLight = 4;
@@ -99,7 +99,7 @@ public:
 	const CIdxLighted &idxLighted() const { return m_IdxLighted; }
 	const CFeaturesLighted &featuresLighted() const { return m_FeaturesLighted; }
 
-private:
+protected:
 	CIdxLighted m_IdxLighted;
 	CFeaturesLighted m_FeaturesLighted;
 

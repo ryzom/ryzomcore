@@ -1170,7 +1170,8 @@ static	void	strReplaceAll(string &strInOut, const string &tokenSrc, const string
 
 void CVertexProgramLighted::buildInfo()
 {
-	if (m_FeaturesLighted.CtStartNeLVP != ~0)
+	CVertexProgram::buildInfo();
+	if (profile() == nelvp)
 	{
 		// Fixed uniform locations
 		m_IdxLighted.Ambient = 0;

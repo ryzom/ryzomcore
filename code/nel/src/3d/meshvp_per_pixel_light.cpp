@@ -32,13 +32,12 @@
 
 namespace NL3D
 {
-NLMISC::CSmartPtr<CVertexProgram>	CMeshVPPerPixelLight::_VertexProgram[NumVp];
+
+NLMISC::CSmartPtr<CVertexProgramPerPixelLight>	CMeshVPPerPixelLight::_VertexProgram[NumVp];
 
 // ***************************************************************************
 // Light VP fragment constants start at 24
 static	const uint	VPLightConstantStart = 24;
-
-
 
 // ***************************************************************************
 // ***************************************************************************
@@ -355,18 +354,33 @@ static const char*	PPLightingVPCodeTest =
 ";
 ***************************************************************/
 
-
-
-
-//=================================================================================
-void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
+class CVertexProgramPerPixelLight : public CVertexProgramLighted
 {
-	// init the vertexProgram code.
-	static	bool	vpCreated= false;
-	if (!vpCreated)
+public:
+	class CIdx
 	{
-		vpCreated= true;
 
+	};
+	CVertexProgramPerPixelLight(uint vp);
+	virtual ~CVertexProgramPerPixelLight() { };
+	virtual void buildInfo();
+	const CIdx &idx() const { return m_Idx; }
+
+private:
+	CIdx m_Idx;
+
+};
+
+CVertexProgramPerPixelLight::CVertexProgramPerPixelLight(uint vp)
+{
+	// lighted settings
+	m_FeaturesLighted.SupportSpecular = (vp & 2) != 0;
+	m_FeaturesLighted.NumActivePointLights = MaxLight - 1;
+	m_FeaturesLighted.Normalize = false;
+	m_FeaturesLighted.CtStartNeLVP = VPLightConstantStart;
+
+	// nelvp
+	{
 		// Gives each vp name
 		// Bit 0 : 1 when it is a directionnal light
 		// Bit 1 : 1 when specular is needed
@@ -389,34 +403,67 @@ void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
 		};
 
 		uint numvp  = sizeof(vpName) / sizeof(const char *);
-		nlassert(NumVp == numvp); // make sure that it is in sync with header..todo : compile time assert :)
+		nlassert(CMeshVPPerPixelLight::NumVp == numvp); // make sure that it is in sync with header..todo : compile time assert :)
+
+		// \todo yoyo TODO_OPTIM Manage different number of pointLights
+		// NB: never call getLightVPFragmentNeLVP() with normalize, because already done by PerPixel fragment before.
+		std::string vpCode	= std::string(vpName[vp])
+							  + std::string("# ***************") // temp for debug
+							  + CRenderTrav::getLightVPFragmentNeLVP(
+									m_FeaturesLighted.NumActivePointLights, 
+									m_FeaturesLighted.CtStartNeLVP, 
+									m_FeaturesLighted.SupportSpecular,  
+									m_FeaturesLighted.Normalize)
+							  + std::string("# ***************") // temp for debug
+							  + std::string(PPLightingVPCodeEnd);
+		#ifdef NL_DEBUG
+			/** For test : parse those programs before they are used.
+			  * As a matter of fact some program will works with the NV_VERTEX_PROGRAM extension,
+			  * but won't with EXT_vertex_shader, because there are some limitations (can't read a temp
+			  * register that hasn't been written before..)
+			  */
+			CVPParser			vpParser;
+			CVPParser::TProgram result;
+			std::string          parseOutput;
+			if (!vpParser.parse(vpCode.c_str(), result, parseOutput))
+			{
+				nlwarning(parseOutput.c_str());
+				nlassert(0);
+			}
+		#endif
+
+		CSource *source = new CSource();
+		source->DisplayName = NLMISC::toString("nelvp/MeshVPPerPixel/%i", vp);
+		source->Profile = CVertexProgram::nelvp;
+		source->setSource(vpCode);
+		addSource(source);
+	}
+
+	// glsl
+	{
+		// TODO_VP_GLSL
+	}
+}
+
+void CVertexProgramPerPixelLight::buildInfo()
+{
+	CVertexProgramLighted::buildInfo();
+}
+
+
+//=================================================================================
+void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
+{
+	// init the vertexProgram code.
+	static	bool	vpCreated= false;
+	if (!vpCreated)
+	{
+		vpCreated = true;
+		
 		for (uint vp = 0; vp < NumVp; ++vp)
 		{
-			// \todo yoyo TODO_OPTIM Manage different number of pointLights
-			// NB: never call getLightVPFragmentNeLVP() with normalize, because already done by PerPixel fragment before.
-			std::string vpCode	= std::string(vpName[vp])
-								  + std::string("# ***************") // temp for debug
-								  + CRenderTrav::getLightVPFragmentNeLVP(CRenderTrav::MaxVPLight-1, VPLightConstantStart, (vp & 2) != 0, false)
-								  + std::string("# ***************") // temp for debug
-								  + std::string(PPLightingVPCodeEnd);
-			#ifdef NL_DEBUG
-				/** For test : parse those programs before they are used.
-				  * As a matter of fact some program will works with the NV_VERTEX_PROGRAM extension,
-				  * but won't with EXT_vertex_shader, because there are some limitations (can't read a temp
-				  * register that hasn't been written before..)
-				  */
-				CVPParser			vpParser;
-				CVPParser::TProgram result;
-				std::string          parseOutput;
-				if (!vpParser.parse(vpCode.c_str(), result, parseOutput))
-				{
-					nlwarning(parseOutput.c_str());
-					nlassert(0);
-				}
-			#endif
-			_VertexProgram[vp] = new CVertexProgram(vpCode.c_str());
+			_VertexProgram[vp] = new CVertexProgramPerPixelLight(vp);
 		}
-
 	}
 }
 
@@ -521,7 +568,7 @@ void	CMeshVPPerPixelLight::enable(bool enabled, IDriver *drv)
 						   | (SpecularLighting	      ? 2 : 0)
 						   | (_IsPointLight		      ? 1 : 0);
 			//
-			drv->activeVertexProgram(_VertexProgram[idVP]);
+			drv->activeVertexProgram((CVertexProgramPerPixelLight *)_VertexProgram[idVP]);
 		}
 		else
 		{
