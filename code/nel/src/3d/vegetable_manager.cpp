@@ -1866,7 +1866,7 @@ public:
 
 
 // ***************************************************************************
-void			CVegetableManager::setupVertexProgramConstants(IDriver *driver)
+void			CVegetableManager::setupVertexProgramConstants(IDriver *driver, bool fogEnabled)
 {
 	nlassert(_ActiveVertexProgram);
 	
@@ -1874,37 +1874,40 @@ void			CVegetableManager::setupVertexProgramConstants(IDriver *driver)
 	// Standard
 	// setup VertexProgram constants.
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
-	driver->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
+	driver->setUniformMatrix(IDriver::VertexProgram, _ActiveVertexProgram->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
 	// c[6] take the Fog vector. After setupModelMatrix();
-	driver->setConstantFog(6);
+	if (fogEnabled)
+	{
+		driver->setUniformFog(IDriver::VertexProgram, _ActiveVertexProgram->getUniformIndex(CGPUProgramIndex::Fog));
+	}
 	// c[8] take useful constants.
-	driver->setConstant(8, 0, 1, 0.5f, 2);
+	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().ProgramConstants0, 0, 1, 0.5f, 2);
 	// c[9] take normalized directional light
-	driver->setConstant(9, _DirectionalLight);
+	driver->setUniform3f(IDriver::VertexProgram, _ActiveVertexProgram->idx().DirectionalLight, _DirectionalLight);
 	// c[10] take pos of camera
-	driver->setConstant(10, _ViewCenter);
+	driver->setUniform3f(IDriver::VertexProgram, _ActiveVertexProgram->idx().ViewCenter, _ViewCenter);
 	// c[11] take factor for Blend formula
-	driver->setConstant(11, -1.f/NL3D_VEGETABLE_BLOCK_BLEND_TRANSITION_DIST, 0, 0, 0);
+	driver->setUniform1f(IDriver::VertexProgram, _ActiveVertexProgram->idx().NegInvTransDist, -1.f/NL3D_VEGETABLE_BLOCK_BLEND_TRANSITION_DIST);
 
 
 
 	// Bend.
 	// c[16]= quaternion axis. w==1, and z must be 0
-	driver->setConstant( 16, _AngleAxis.x, _AngleAxis.y, _AngleAxis.z, 1);
+	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().AngleAxis, _AngleAxis, 1);
 	// c[17]=	{timeAnim, WindPower, WindPower*(1-WindBendMin)/2, 0)}
-	driver->setConstant( 17, (float)_WindAnimTime, _WindPower, _WindPower*(1-_WindBendMin)/2, 0 );
+	driver->setUniform3f(IDriver::VertexProgram, _ActiveVertexProgram->idx().Wind, (float)_WindAnimTime, _WindPower, _WindPower * (1 - _WindBendMin) / 2);
 	// c[18]=	High order Taylor cos coefficient: { -1/2, 1/24, -1/720, 1/40320 }
-	driver->setConstant( 18, -1/2.f, 1/24.f, -1/720.f, 1/40320.f );
+	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().CosCoeff0, -1/2.f, 1/24.f, -1/720.f, 1/40320.f );
 	// c[19]=	Low order Taylor cos coefficient: { 1, -1/2, 1/24, -1/720 }
-	driver->setConstant( 19, 1, -1/2.f, 1/24.f, -1/720.f );
+	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().CosCoeff1, 1, -1/2.f, 1/24.f, -1/720.f );
 	// c[20]=	Low order Taylor sin coefficient: { 1, -1/6, 1/120, -1/5040 }
-	driver->setConstant( 20, 1, -1/6.f, 1/120.f, -1/5040.f );
+	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().CosCoeff2, 1, -1/6.f, 1/120.f, -1/5040.f );
 	// c[21]=	Special constant vector for quatToMatrix: { 0, 1, -1, 0 }
-	driver->setConstant( 21, 0.f, 1.f, -1.f, 0.f);
+	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().QuatConstants, 0.f, 1.f, -1.f, 0.f);
 	// c[22]=	{0.5f, Pi, 2*Pi, 1/(2*Pi)}
-	driver->setConstant( 22, 0.5f, (float)Pi, (float)(2*Pi), (float)(1/(2*Pi)) );
+	driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().PiConstants, 0.5f, (float)Pi, (float)(2*Pi), (float)(1/(2*Pi)));
 	// c[23]=	{NL3D_VEGETABLE_VP_LUT_SIZE, 0, 0, 0}. NL3D_VEGETABLE_VP_LUT_SIZE==64.
-	driver->setConstant( 23, NL3D_VEGETABLE_VP_LUT_SIZE, 0.f, 0.f, 0.f );
+	driver->setUniform1f(IDriver::VertexProgram, _ActiveVertexProgram->idx().LUTSize, NL3D_VEGETABLE_VP_LUT_SIZE);
 
 
 	// Fill constant. Start at 32.
@@ -1912,7 +1915,7 @@ void			CVegetableManager::setupVertexProgramConstants(IDriver *driver)
 	{
 		CVector2f		cur= _WindTable[i];
 		CVector2f		delta= _WindDeltaTable[i];
-		driver->setConstant( 32+i, cur.x, cur.y, delta.x, delta.y );
+		driver->setUniform4f(IDriver::VertexProgram, _ActiveVertexProgram->idx().LUT[i], cur.x, cur.y, delta.x, delta.y);
 	}
 }
 
@@ -2079,9 +2082,9 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 
 	bool uprogst = driver->isUniformProgramState();
 	bool progstateset[NL3D_VEGETABLE_NRDRPASS];
-	for (sint rdrPass=0; rdrPass < NL3D_VEGETABLE_NRDRPASS; rdrPass++)
+	for (sint rdrPass = 0; rdrPass < NL3D_VEGETABLE_NRDRPASS; ++rdrPass)
 	{
-		progstateset[rdrPass] = !uprogst;
+		progstateset[rdrPass] = false;
 	}
 
 	/*
@@ -2117,9 +2120,9 @@ void			CVegetableManager::render(const CVector &viewCenter, const CVector &front
 				nlverify(driver->activeVertexProgram(_ActiveVertexProgram));
 
 				// Set VP constants
-				if (!progstateset[uprogst ? 0 : rdrPass])
+				if (!progstateset[uprogst ? rdrPass : 0])
 				{
-					setupVertexProgramConstants(driver);
+					setupVertexProgramConstants(driver, uprogst ? fogged : true);
 				}
 
 				// Activate the unique material.
@@ -2393,12 +2396,12 @@ void		CVegetableManager::setupRenderStateForBlendLayerModel(IDriver *driver)
 	nlverify(driver->activeVertexProgram(_ActiveVertexProgram));
 
 	// setup VP constants.
-	setupVertexProgramConstants(driver);
+	setupVertexProgramConstants(driver, fogged);
 
-	if (fogged)
+	/*if (fogged) // duplicate
 	{
 		driver->setConstantFog(6);
-	}
+	}*/
 
 	// Activate the unique material (correclty setuped for AlphaBlend in render()).
 	driver->setupMaterial(_VegetableMaterial);

@@ -344,7 +344,7 @@ private:
 
 
 	/// setup the vertexProgram constants.
-	void					setupVertexProgramConstants(IDriver *driver);
+	void					setupVertexProgramConstants(IDriver *driver, bool fogEnabled);
 
 
 	/** swap the RdrPass type (hard or soft) of the rdrPass of an instance group.
