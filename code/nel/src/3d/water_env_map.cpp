@@ -274,13 +274,18 @@ private:
 };
 
 
-static CVertexProgramTestMeshVP testMeshVP;
+static NLMISC::CSmartPtr<CVertexProgramTestMeshVP> testMeshVP;
 
 
 
 // *******************************************************************************
 void CWaterEnvMap::renderTestMesh(IDriver &driver)
 {
+	if (!testMeshVP)
+	{
+		testMeshVP = new CVertexProgramTestMeshVP();
+	}
+
 	doInit();
 	CMaterial testMat;
 	testMat.setLighting(false);
@@ -294,12 +299,12 @@ void CWaterEnvMap::renderTestMesh(IDriver &driver)
 	testMat.setZWrite(false);
 	testMat.setZFunc(CMaterial::always);
 	// tmp : test cubemap
-	driver.activeVertexProgram(&testMeshVP);
+	driver.activeVertexProgram(testMeshVP);
 	driver.activeVertexBuffer(_TestVB);
 	driver.activeIndexBuffer(_TestIB);
 	_MaterialPassThruZTest.setTexture(0, _EnvCubic);
-	driver.setUniformMatrix(IDriver::VertexProgram, testMeshVP.getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
-	driver.setUniform2f(IDriver::VertexProgram, testMeshVP.idx().ProgramConstant0, 2.f, 1.f);
+	driver.setUniformMatrix(IDriver::VertexProgram, testMeshVP->getUniformIndex(CGPUProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+	driver.setUniform2f(IDriver::VertexProgram, testMeshVP->idx().ProgramConstant0, 2.f, 1.f);
 	//driver.renderTriangles(testMat, 0, TEST_VB_NUM_TRIS);
 	driver.renderTriangles(_MaterialPassThruZTest, 0, TEST_VB_NUM_TRIS);
 	driver.activeVertexProgram(NULL);

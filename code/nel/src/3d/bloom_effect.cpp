@@ -55,15 +55,18 @@ static const char *TextureOffset =
 	END \n";
 
 
-static CVertexProgram TextureOffsetVertexProgram(TextureOffset);
-
-// TODO_VP_GLSL
+static NLMISC::CSmartPtr<CVertexProgram> TextureOffsetVertexProgram;
 
 
 //-----------------------------------------------------------------------------------------------------------
 
 CBloomEffect::CBloomEffect()
 {
+	if (!TextureOffsetVertexProgram)
+	{
+		TextureOffsetVertexProgram = new CVertexProgram(TextureOffset);
+	}
+
 	_Driver = NULL;
 	_Scene = NULL;
 	_SquareBloom = true;
@@ -445,7 +448,7 @@ void CBloomEffect::applyBlur()
 	}
 
 	// initialize vertex program
-	drvInternal->activeVertexProgram(&TextureOffsetVertexProgram);
+	drvInternal->activeVertexProgram(TextureOffsetVertexProgram);
 	drvInternal->setUniform4f(IDriver::VertexProgram, 8, 255.f, 255.f, 255.f, 255.f);
 	drvInternal->setUniform4f(IDriver::VertexProgram, 9, 0.0f, 0.f, 0.f, 1.f);
 
@@ -551,7 +554,7 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 	}
 
 	// initialize vertex program
-	drvInternal->activeVertexProgram(&TextureOffsetVertexProgram);
+	drvInternal->activeVertexProgram(TextureOffsetVertexProgram);
 	drvInternal->setUniform4f(IDriver::VertexProgram, 8, 255.f, 255.f, 255.f, 255.f);
 	drvInternal->setUniform4f(IDriver::VertexProgram, 9, 0.0f, 0.f, 0.f, 1.f);
 
