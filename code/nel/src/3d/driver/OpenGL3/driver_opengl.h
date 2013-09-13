@@ -379,6 +379,7 @@ public:
 	static inline void		setupCausticsSecondTex(uint stage);*/
 
 	virtual bool			setupMaterial(CMaterial& mat);
+	void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
 	bool					setupProgram(CMaterial& mat);
 	void					setupUniforms(CMaterial& mat);
 	void					releaseProgram();

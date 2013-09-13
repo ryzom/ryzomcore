@@ -148,11 +148,8 @@ namespace NL3D
 	static IProgramObject *p;
 
 
-	bool CDriverGL3::setupProgram( CMaterial &mat )
+	void CDriverGL3::generateShaderDesc( CShaderDesc &desc, CMaterial &mat )
 	{
-
-#ifdef GLSL
-		CShaderDesc desc;
 		desc.setShaderType( mat.getShader() );
 		desc.setVBFlags( _CurrentVertexBufferHard->VB->getVertexFormat() );
 		
@@ -171,6 +168,16 @@ namespace NL3D
 
 		desc.setAlphaTest( mat.getAlphaTest() );
 		desc.setAlphaTestThreshold( mat.getAlphaTestThreshold() );
+	}
+
+
+	bool CDriverGL3::setupProgram( CMaterial &mat )
+	{
+
+#ifdef GLSL
+		CShaderDesc desc;
+
+		generateShaderDesc( desc, mat );
 
 		p = shaderCache.findShader( desc );
 
