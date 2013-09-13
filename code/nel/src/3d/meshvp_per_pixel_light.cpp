@@ -393,10 +393,10 @@ void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
 		for (uint vp = 0; vp < NumVp; ++vp)
 		{
 			// \todo yoyo TODO_OPTIM Manage different number of pointLights
-			// NB: never call getLightVPFragment() with normalize, because already done by PerPixel fragment before.
+			// NB: never call getLightVPFragmentNeLVP() with normalize, because already done by PerPixel fragment before.
 			std::string vpCode	= std::string(vpName[vp])
 								  + std::string("# ***************") // temp for debug
-								  + CRenderTrav::getLightVPFragment(CRenderTrav::MaxVPLight-1, VPLightConstantStart, (vp & 2) != 0, false)
+								  + CRenderTrav::getLightVPFragmentNeLVP(CRenderTrav::MaxVPLight-1, VPLightConstantStart, (vp & 2) != 0, false)
 								  + std::string("# ***************") // temp for debug
 								  + std::string(PPLightingVPCodeEnd);
 			#ifdef NL_DEBUG

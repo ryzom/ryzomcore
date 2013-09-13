@@ -155,7 +155,7 @@ void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
 
 			// combine fragments
 			vpCode= string(WindTreeVPCodeWave)
-					+ CRenderTrav::getLightVPFragment(numPls, VPLightConstantStart, specular, normalize)
+					+ CRenderTrav::getLightVPFragmentNeLVP(numPls, VPLightConstantStart, specular, normalize)
 					+ WindTreeVPCodeEnd;
 			_VertexProgram[i] = new CVertexProgram(vpCode.c_str());
 			// TODO_VP_GLSL

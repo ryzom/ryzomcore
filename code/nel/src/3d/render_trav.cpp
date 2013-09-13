@@ -1168,8 +1168,56 @@ static	void	strReplaceAll(string &strInOut, const string &tokenSrc, const string
 	}
 }
 
+void CVertexProgramLighted::buildInfo()
+{
+	if (m_FeaturesLighted.CtStartNeLVP != ~0)
+	{
+		// Fixed uniform locations
+		m_IdxLighted.Ambient = 0;
+		for (uint i = 0; i < MaxLight; ++i)
+		{
+			m_IdxLighted.Diffuse[i] = 1 + i;
+		}
+		if (m_FeaturesLighted.SupportSpecular)
+		{
+			for (uint i = 0; i < MaxLight; ++i)
+			{
+				m_IdxLighted.Specular[i] = 5 + i;
+			}
+			m_IdxLighted.DirOrPos[0] = 9;
+			for (uint i = 1; i < MaxLight; ++i)
+			{
+				m_IdxLighted.DirOrPos[i] = (12 - 1) + i;
+			}
+			m_IdxLighted.DiffuseAlpha = 10;
+			m_IdxLighted.EyePosition = 11;
+		}
+		else
+		{
+			for (uint i = 0; i < MaxLight; ++i)
+			{
+				m_IdxLighted.Specular[i] = ~0;
+			}
+			for (uint i = 0; i < MaxLight; ++i)
+			{
+				m_IdxLighted.DirOrPos[i] = 5 + i;
+			}
+			m_IdxLighted.DiffuseAlpha = 9;
+			m_IdxLighted.EyePosition = ~0;
+		}
+	}
+	else
+	{
+		// Named uniform locations
+		// TODO_VP_GLSL
+		// m_IdxLighted.Ambient = getUniformIndex("ambient");
+		// etc
+	}
+}
+
+// generates the lighting part of a vertex program, nelvp profile
 // ***************************************************************************
-std::string		CRenderTrav::getLightVPFragment(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize)
+std::string		CRenderTrav::getLightVPFragmentNeLVP(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize)
 {
 	string	ret;
 

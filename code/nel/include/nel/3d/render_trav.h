@@ -27,6 +27,7 @@
 #include "nel/3d/mesh_block_manager.h"
 #include "nel/3d/shadow_map_manager.h"
 #include "nel/3d/u_scene.h"
+#include "nel/3d/vertex_program.h"
 #include <vector>
 
 
@@ -68,6 +69,41 @@ class   CWaterModel;
 #define	NL3D_SHADOW_MESH_SKIN_MANAGER_MAXVERTICES		3000
 #define	NL3D_SHADOW_MESH_SKIN_MANAGER_NUMVB				8
 
+/// Container for lighted vertex program.
+class CVertexProgramLighted : CVertexProgram
+{
+public:
+	static const uint MaxLight = 4;
+	static const uint MaxPointLight = (MaxLight - 1);
+	struct CIdxLighted
+	{
+		uint Ambient;
+		uint Diffuse[MaxLight];
+		uint Specular[MaxLight];
+		uint DirOrPos[MaxLight]; // light 0, directional sun; light 1,2,3, omni point light
+		uint EyePosition;
+		uint DiffuseAlpha;
+	};
+	struct CFeaturesLighted
+	{
+		/// Number of point lights that this program is generated for, varies from 0 to 3.
+		uint NumActivePointLights;
+		bool SupportSpecular;
+		bool Normalize;
+		/// Start of constants to use for lighting with assembly shaders.
+		uint CtStartNeLVP;
+	};
+	CVertexProgramLighted() { }
+	virtual ~CVertexProgramLighted() { }
+	virtual void buildInfo();
+	const CIdxLighted &idxLighted() const { return m_IdxLighted; }
+	const CFeaturesLighted &featuresLighted() const { return m_FeaturesLighted; }
+
+private:
+	CIdxLighted m_IdxLighted;
+	CFeaturesLighted m_FeaturesLighted;
+
+};
 
 
 // ***************************************************************************
@@ -224,7 +260,7 @@ public:
 	// @{
 
 	// Max VP Light setup Infos.
-	enum	{MaxVPLight= 4};
+	enum	{MaxVPLight = CVertexProgramLighted::MaxLight};
 
 	/** reset the lighting setup in the driver (all lights are disabled).
 	 *	called at beginning of traverse(). Must be called by any model (before and after rendering)
@@ -299,7 +335,8 @@ public:
 	 *  \param numActivePoinLights tells how many point light from 0 to 3 this VP must handle. NB: the Sun directionnal is not option
 	 *		NB: nlassert(numActiveLights<=MaxVPLight-1).
 	 */
-	static	std::string		getLightVPFragment(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize);
+	static	std::string		getLightVPFragmentNeLVP(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize);
+	// TODO_VP_GLSL
 
 	/** This returns a reference to a driver light, by its index
 	  * \see getStrongestLightIndex
