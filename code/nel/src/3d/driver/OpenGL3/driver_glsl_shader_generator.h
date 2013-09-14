@@ -24,6 +24,7 @@
 namespace NL3D
 {
 	class CMaterial;
+	class CShaderDesc;
 
 	class CGLSLShaderGenerator
 	{
@@ -37,13 +38,19 @@ namespace NL3D
 
 		void setMaterial( CMaterial *mat ){ material = mat; }
 		void setVBFormat( uint16 format ){ vbFormat = format; }
+		void setShaderDesc( CShaderDesc *d ){ desc = d; }
 
 	private:
 		void addDiffuse();
 		void addColor();
 		void addConstants();
+		
 		void addAlphaTreshold();
 		void addAlphaTest();
+
+		void addFogUniform();
+		void addFogFunction();
+		void addFog();
 
 		void generateNormalVS();
 		void generateSpecularVS();
@@ -72,6 +79,7 @@ namespace NL3D
 		std::stringstream ss;
 		uint16 vbFormat;
 		CMaterial const *material;
+		CShaderDesc const *desc;
 	};
 }
 

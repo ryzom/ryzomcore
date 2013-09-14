@@ -17,6 +17,7 @@
 #include "sstream"
 #include "driver_glsl_shader_generator.h"
 #include "nel/3d/vertex_buffer.h"
+#include "driver_opengl_shader_desc.h"
 
 namespace
 {
@@ -285,11 +286,63 @@ namespace NL3D
 			ss << "if( fragColor.a <= ( alphaTreshold - 0.0001 ) ) discard;" << std::endl;
 	}
 
+	void CGLSLShaderGenerator::addFogUniform()
+	{
+		if( !desc->fogEnabled() )
+			return;
+
+		ss << "uniform float fogStart;" << std::endl;
+		ss << "uniform float fogEnd;" << std::endl;
+		ss << "uniform vec4 fogColor;" << std::endl;
+
+		if( desc->getFogMode() == CShaderDesc::Linear )
+			return;
+
+		ss << "uniform float fogDensity;" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addFogFunction()
+	{
+		if( !desc->fogEnabled() )
+			return;
+
+		switch( desc->getFogMode() )
+		{
+		case CShaderDesc::Linear:
+			ss << "vec4 applyFog( vec4 col )" << std::endl;
+			ss << "{" << std::endl;
+			ss << "float z = ecPos.z / ecPos.w;" << std::endl;
+			ss << "z = abs( z );" << std::endl;
+			ss << "float fogFactor = ( fogEnd - z ) / ( fogEnd - fogStart );" << std::endl;
+			ss << "fogFactor = clamp( fogFactor, 0.0, 1.0 );" << std::endl;
+			ss << "vec4 fColor = mix( fogColor, col, fogFactor );" << std::endl;
+			ss << "return fColor;" << std::endl;
+			ss << "}" << std::endl;
+			ss << std::endl;
+			break;
+		}
+	}
+
+	void CGLSLShaderGenerator::addFog()
+	{
+		ss << "fragColor = applyFog( fragColor );" << std::endl;
+	}
+
 	void CGLSLShaderGenerator::generateNormalVS()
 	{
+		if( desc->fogEnabled() )
+		{
+			ss << "uniform mat4 mvMatrix;" << std::endl;
+			ss << "smooth out vec4 ecPos;" << std::endl;
+		}
+		ss << std::endl;
+
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
+
+		if( desc->fogEnabled() )
+			ss << "ecPos = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
 
 		for( int i = Weight; i < NumOffsets; i++ )
 		{
@@ -310,6 +363,8 @@ namespace NL3D
 		ss << "uniform mat4 mvMatrix;" << std::endl;
 		ss << "uniform mat4 texMatrix0;" << std::endl;
 		ss << "smooth out vec3 cubeTexCoords;" << std::endl;
+		if( desc->fogEnabled() )
+			ss << "smooth out vec4 ecPos;" << std::endl;
 		ss << std::endl;
 
 		ss << "vec3 ReflectionMap( const in vec3 eyePos, const in vec3 normal )" << std::endl;
@@ -322,6 +377,7 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec4 eyePosition = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "ecPos = eyePosition;" << std::endl;
 		ss << "vec3 ep = eyePosition.xyz / eyePosition.w;" << std::endl;
 		ss << "vec3 n = vnormal.xyz;" << std::endl;
 		ss << "cubeTexCoords = ReflectionMap( ep, n );" << std::endl;
@@ -476,8 +532,15 @@ namespace NL3D
 		addColor();
 		addConstants();
 		addAlphaTreshold();
+		addFogUniform();
+
+		if( desc->fogEnabled() )
+			ss << "smooth in vec4 ecPos;" << std::endl;
 
 		ss << std::endl;
+
+		if( desc->fogEnabled() )
+			addFogFunction();
 		
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
@@ -517,6 +580,9 @@ namespace NL3D
 			ss << "texel = color * texel;" << std::endl;
 
 		ss << "fragColor = texel;" << std::endl;
+
+		if( desc->fogEnabled() )
+			addFog();
 
 		addAlphaTest();
 
@@ -886,7 +952,15 @@ namespace NL3D
 
 		addAlphaTreshold();
 
+		addFogUniform();
+
+		if( desc->fogEnabled() )
+			ss << "smooth in vec4 ecPos;" << std::endl;
+
 		ss << std::endl;
+
+		if( desc->fogEnabled() )
+			addFogFunction();
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
@@ -924,7 +998,12 @@ namespace NL3D
 		}
 
 		ss << "fragColor = texel;" << std::endl;
+		
+		if( desc->fogEnabled() )
+			addFog();
+
 		addAlphaTest();
+
 		ss << "}" << std::endl;
 		ss << std::endl;
 	}
@@ -937,6 +1016,16 @@ namespace NL3D
 		addDiffuse();
 		addAlphaTreshold();
 
+		addFogUniform();
+
+		if( desc->fogEnabled() )
+			ss << "smooth in vec4 ecPos;" << std::endl;
+
+		ss << std::endl;
+
+		if( desc->fogEnabled() )
+			addFogFunction();
+
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;		
 		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
@@ -947,7 +1036,12 @@ namespace NL3D
 		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
 		ss << "texel.a = texel1.a;" << std::endl;
 		ss << "fragColor = texel;" << std::endl;
+		
+		if( desc->fogEnabled() )
+			addFog();
+		
 		addAlphaTest();
+
 		ss << "}" << std::endl;
 	}
 

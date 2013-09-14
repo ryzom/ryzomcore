@@ -191,7 +191,11 @@ namespace NL3D
 		"sampler1",
 		"sampler2",
 		"sampler3",
-		"alphaTreshold"
+		"alphaTreshold",
+		"fogStart",
+		"fogEnd",
+		"fogColor",
+		"fogDensity"
 	};
 
 	void CGLSLProgram::cacheUniformIndices()

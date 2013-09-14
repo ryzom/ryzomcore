@@ -168,6 +168,9 @@ namespace NL3D
 
 		desc.setAlphaTest( mat.getAlphaTest() );
 		desc.setAlphaTestThreshold( mat.getAlphaTestThreshold() );
+
+		desc.setFog( fogEnabled() );
+		desc.setFogMode( CShaderDesc::Linear );
 	}
 
 
@@ -194,6 +197,7 @@ namespace NL3D
 			shaderGenerator->reset();
 			shaderGenerator->setMaterial( &mat );
 			shaderGenerator->setVBFormat( _CurrentVertexBufferHard->VB->getVertexFormat() );
+			shaderGenerator->setShaderDesc( &desc );
 			shaderGenerator->generateVS( vs );
 			shaderGenerator->generatePS( ps );
 
@@ -259,6 +263,36 @@ namespace NL3D
 		{
 			CMatrix mat = _GLProjMat * _ModelViewMatrix;
 			setUniformMatrix4fv( mvpIndex, 1, false, mat.get() );
+		}
+
+		int mvIndex = currentProgram->getUniformIndex( IProgramObject::MVMatrix );
+		if( mvIndex != -1 )
+		{
+			setUniformMatrix4fv( mvIndex, 1, false, _ModelViewMatrix.get() );
+		}
+
+		int fogStartIdx = currentProgram->getUniformIndex( IProgramObject::FogStart );
+		if( fogStartIdx != -1 )
+		{
+			setUniform1f( fogStartIdx, getFogStart() );
+		}
+
+		int fogEndIdx = currentProgram->getUniformIndex( IProgramObject::FogEnd );
+		if( fogEndIdx != -1 )
+		{
+			setUniform1f( fogEndIdx, getFogEnd() );
+		}
+
+		int fogColorIdx = currentProgram->getUniformIndex( IProgramObject::FogColor );
+		if( fogColorIdx != -1 )
+		{
+			GLfloat glCol[ 4 ];
+			CRGBA col = getFogColor();
+			glCol[ 0 ] = col.R / 255.0f;
+			glCol[ 1 ] = col.G / 255.0f;
+			glCol[ 2 ] = col.B / 255.0f;
+			glCol[ 3 ] = col.A / 255.0f;
+			setUniform4f( fogColorIdx, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 		}
 
 		int colorIndex = currentProgram->getUniformIndex( IProgramObject::Color );

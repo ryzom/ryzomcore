@@ -465,6 +465,9 @@ namespace MaterialEditor
 
 		setupCamera();
 
+		driver->enableFog( true );
+		driver->setupFog( 1.0f, 5.0f, NLMISC::CRGBA::White );
+
 		return true;
 	}
 

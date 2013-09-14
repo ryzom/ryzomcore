@@ -46,6 +46,10 @@ namespace NL3D
 			Sampler2,
 			Sampler3,
 			AlphaTreshold,
+			FogStart,
+			FogEnd,
+			FogColor,
+			FogDensity,
 			NUM_UNIFORMS
 		};
 

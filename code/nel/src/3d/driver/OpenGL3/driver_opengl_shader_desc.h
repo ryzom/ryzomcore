@@ -28,6 +28,14 @@ namespace NL3D
 	class CShaderDesc
 	{
 	public:
+		
+		enum TFogMode
+		{
+			Exponential,
+			Exponential2,
+			Linear
+		};
+
 		CShaderDesc(){
 			for( int i = 0; i < MAX_TEXTURES; i++ )
 				texEnvMode[ i ] = 0;
@@ -37,6 +45,7 @@ namespace NL3D
 			vbFlags = 0;
 			nlightmaps = 0;
 			alphaTestTreshold = 0.5f;
+			fogMode = Exponential;
 		}
 
 		~CShaderDesc(){
@@ -65,6 +74,12 @@ namespace NL3D
 					return false;
 			}
 
+			if( ( features & Fog ) != 0 )
+			{
+				if( fogMode != o.fogMode )
+					return false;
+			}
+
 			for( int i = 0; i < MAX_TEXTURES; i++ )
 				if( texEnvMode[ i ] != o.texEnvMode[ i ] )
 					return false;
@@ -78,7 +93,8 @@ namespace NL3D
 		void setProgram( IProgramObject *p ){ program = p; }
 		void setNLightMaps( uint32 n ){ nlightmaps = n; }
 		
-		void setAlphaTest( bool b ){
+		void setAlphaTest( bool b )
+		{
 			if( b )
 				features |= AlphaTest;
 			else
@@ -87,6 +103,26 @@ namespace NL3D
 
 		void setAlphaTestThreshold( float t ){ alphaTestTreshold = t; }
 
+		void setFog( bool b )
+		{
+			if( b )
+				features |= Fog;
+			else
+				features &= ~Fog;
+		}
+
+		bool fogEnabled() const
+		{
+			if( ( features & Fog ) != 0 )
+				return true;
+			else
+				return false;
+		}
+
+		void setFogMode( TFogMode mode ){ fogMode = mode; }
+
+		uint32 getFogMode() const{ return fogMode; }
+
 		IProgramObject* getProgram() const{ return program; }
 
 	private:
@@ -94,7 +130,8 @@ namespace NL3D
 		enum TShaderFeatures
 		{
 			None      = 0,
-			AlphaTest = 1
+			AlphaTest = 1,
+			Fog       = 2
 		};
 
 		uint32 features;
@@ -103,6 +140,7 @@ namespace NL3D
 		uint32 shaderType;
 		uint32 nlightmaps;
 		float alphaTestTreshold;
+		uint32 fogMode;
 
 		IProgramObject *program;
 	};
