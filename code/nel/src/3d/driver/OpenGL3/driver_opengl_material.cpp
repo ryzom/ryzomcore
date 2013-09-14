@@ -1161,16 +1161,10 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		setUniform1i( sl1, 1 );
 	}
 
-	int mvl = currentProgram->getUniformIndex( IProgramObject::MVMatrix );
-	if( mvl != -1 )
-	{
-		setUniformMatrix4fv( mvl, 1, false, _ModelViewMatrix.get() );
-	}
-
 	int tml = currentProgram->getUniformIndex( IProgramObject::TexMatrix0 );
 	if( tml != -1 )
 	{
-		setUniformMatrix4fv( mvl, 1, false, _UserTexMat[ 1 ].get() );
+		setUniformMatrix4fv( tml, 1, false, _UserTexMat[ 1 ].get() );
 	}
 
 #endif
