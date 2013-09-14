@@ -689,7 +689,7 @@ bool CDriverGL::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect 
 // ***************************************************************************
 bool CDriverGL::supportBloomEffect() const
 {
-	return (supportVertexProgram() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
+	return (supportVertexProgram(CVertexProgram::nelvp) && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
 }
 
 // ***************************************************************************

@@ -207,12 +207,11 @@ void	CMeshVPWindTree::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(SpecularLighting);
 }
 
-
-// ***************************************************************************
-void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
+void CMeshVPWindTree::initVertexPrograms()
 {
 	// init the vertexProgram code.
 	static	bool	vpCreated= false;
+
 	if(!vpCreated)
 	{
 		vpCreated= true;
@@ -231,6 +230,12 @@ void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
 			_VertexProgram[i] = new CVertexProgramWindTree(numPls, normalize, specular);
 		}
 	}
+}
+
+// ***************************************************************************
+void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
+{
+	initVertexPrograms();
 
 	// init a random phase.
 	mbi->_VPWindTreePhase= frand(1);
@@ -374,12 +379,14 @@ inline	void		CMeshVPWindTree::setupPerInstanceConstants(IDriver *driver, CScene 
 // ***************************************************************************
 bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat, const NLMISC::CVector & /*viewerPos*/)
 {
-	if (!(driver->supportVertexProgram() && !driver->isVertexProgramEmulated())) return false;
+	if (driver->isVertexProgramEmulated()) return false;
 
 
 	// Activate the good VertexProgram
 	//===============
 
+	// Update nb vp lights
+	renderTrav->prepareVPLightSetup();
 
 	// Get how many pointLights are setuped now.
 	nlassert(scene != NULL);
@@ -393,8 +400,16 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	// correct VP id for correct unmber of pls.
 	idVP= numPls*4 + idVP;
 	// activate VP.
-	driver->activeVertexProgram(_VertexProgram[idVP]);
-	_ActiveVertexProgram = _VertexProgram[idVP];
+	if (driver->activeVertexProgram(_VertexProgram[idVP]))
+	{
+		_ActiveVertexProgram = _VertexProgram[idVP];
+	}
+	else
+	{
+		// vertex program not supported
+		_ActiveVertexProgram = NULL;
+		return false;
+	}
 
 
 	// precompute mesh
@@ -461,7 +476,20 @@ bool	CMeshVPWindTree::supportMeshBlockRendering() const
 // ***************************************************************************
 bool	CMeshVPWindTree::isMBRVpOk(IDriver *driver) const
 {
-	return driver->supportVertexProgram() && !driver->isVertexProgramEmulated();
+	initVertexPrograms();
+
+	if (driver->isVertexProgramEmulated())
+	{
+		return false;
+	}
+	for (uint i = 0; i < NumVp; ++i)
+	{
+		if (!driver->compileVertexProgram(_VertexProgram[i]))
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 // ***************************************************************************
@@ -484,6 +512,9 @@ void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 // ***************************************************************************
 void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat)
 {
+	// Update nb vp lights
+	renderTrav->prepareVPLightSetup();
+
 	// Get how many pointLights are setuped now.
 	nlassert(scene != NULL);
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();

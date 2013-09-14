@@ -3003,7 +3003,7 @@ bool CDriverD3D::stretchRect(ITexture * srcText, NLMISC::CRect &srcRect, ITextur
 
 bool CDriverD3D::supportBloomEffect() const
 {
-	return supportVertexProgram();
+	return supportVertexProgram(CVertexProgram::nelvp);
 }
 
 // ***************************************************************************

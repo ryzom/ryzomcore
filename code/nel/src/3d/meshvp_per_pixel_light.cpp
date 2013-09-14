@@ -499,22 +499,23 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 									const NLMISC::CVector &viewerPos)
 {
 	// test if supported by driver
-	if (!
-		 (drv->supportVertexProgram()
-		  && !drv->isVertexProgramEmulated()
-		  &&  drv->supportPerPixelLighting(SpecularLighting)
-		 )
-	   )
+	if (drv->isVertexProgramEmulated()
+		|| !drv->supportPerPixelLighting(SpecularLighting))
 	{
 		return false;
 	}
 	//
 	enable(true, drv); // must enable the vertex program before the vb is activated
 	CVertexProgramPerPixelLight *program = _ActiveVertexProgram;
-	nlassert(program);
+	if (!program)
+	{
+		// failed to compile vertex program
+		return false;
+	}
 	//
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	/// Setup for gouraud lighting
+	renderTrav->prepareVPLightSetup();
 	renderTrav->beginVPLightSetup(program, invertedModelMat);
 	//
 	sint strongestLightIndex = renderTrav->getStrongestLightIndex();
@@ -593,8 +594,14 @@ void	CMeshVPPerPixelLight::enable(bool enabled, IDriver *drv)
 						   | (SpecularLighting	      ? 2 : 0)
 						   | (_IsPointLight		      ? 1 : 0);
 			//
-			drv->activeVertexProgram((CVertexProgramPerPixelLight *)_VertexProgram[idVP]);
-			_ActiveVertexProgram = _VertexProgram[idVP];
+			if (drv->activeVertexProgram((CVertexProgramPerPixelLight *)_VertexProgram[idVP]))
+			{
+				_ActiveVertexProgram = _VertexProgram[idVP];
+			}
+			else
+			{
+				_ActiveVertexProgram = NULL;
+			}
 		}
 		else
 		{

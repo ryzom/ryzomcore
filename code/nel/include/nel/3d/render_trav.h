@@ -280,7 +280,8 @@ public:
 	 */
 	void		changeLightSetup(CLightContribution	*lightContribution, bool useLocalAttenuation);
 
-
+	/// Must call before beginVPLightSetup
+	void		prepareVPLightSetup();
 	/** setup the driver VP constants to get info from current LightSetup.
 	 *	Only 0..3 Light + SunLights are supported. The VP do NOT support distance/Spot attenuation
 	 *	Also it does not handle World Matrix with non uniform scale correctly since lighting is made in ObjectSpace
@@ -425,7 +426,7 @@ private:
 	// Current num of VP lights enabled.
 	uint						_VPNumLights;
 	// Current support of specular
-	//bool						_VPSupportSpecular;
+	// bool						_VPSupportSpecular;
 	// Sum of all ambiant of all lights + ambiantGlobal.
 	NLMISC::CRGBAF				_VPFinalAmbient;
 	// Diffuse/Spec comp of all light / 255.

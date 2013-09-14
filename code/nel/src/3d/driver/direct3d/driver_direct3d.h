@@ -1112,7 +1112,7 @@ public:
 
 	/** Return true if the driver supports the specified vertex program profile.
 	  */
-	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile = CVertexProgram::nelvp) const;
+	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile) const;
 
 	/** Compile the given vertex program, return if successful.
 	  * If a vertex program was set active before compilation, 
