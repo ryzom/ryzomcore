@@ -429,6 +429,9 @@
   <variable entry="UI:TEMP:PRESET_FX"
             type="sint32"
             value="0" />
+  <variable entry="UI:TEMP:VR_DEVICE"
+            type="sint32"
+            value="0" />
   <variable entry="UI:TEMP:TEXTURE_MODE"
             type="sint32"
             value="0" />
@@ -692,6 +695,12 @@
                   name="uigcSpecialFX"
                   handler="lua"
                   params="game:configShowOne('fx')"
+                  fontsize="10"
+                  y_decal="-1" />
+            <node id="vr"
+                  name="uigcVR"
+                  handler="lua"
+                  params="game:configShowOne('vr')"
                   fontsize="10"
                   y_decal="-1" />
           </node>
@@ -2733,6 +2742,57 @@
             x="-8"
             y="0" />
       <!-- *** -->
+      <group id="vr"
+             active="false"
+             posparent="crop"
+             posref="TM TM"
+             x="0"
+             y="-8"
+             sizeref="w"
+             child_resize_h="true"
+             child_resize_hmargin="4"
+             w="-4"
+             max_sizeparent="crop"
+             max_sizeref="h"
+             max_h="-4">
+        <view style="sgc_title"
+              type="text"
+              id="gen"
+              posref="TM TM"
+              x="0"
+              y="0"
+              hardtext="uiVRGeneral" />
+        <instance template="tgcw_checkbox"
+                  id="enabler"
+                  text="uiVREnable"
+                  posref="TL TL"
+                  x="0"
+                  y="-16" />
+        <group type="combo_box"
+               id="vr_devices"
+               sizeparent="parent"
+               sizeref="w"
+               w="0"
+               h="20"
+               value="UI:TEMP:VR_DEVICE"
+               posparent="enabler"
+               posref="BL TL"
+               x="0"
+               y="-4">
+          <instance template="combo_box_def1" />
+        </group>
+        <link expr="@UI:TEMP:VR_DEVICE"
+              action="game_config_change_vr_device" />
+      </group>
+      <ctrl style="skin_scroll"
+            id="sb_vr"
+            align="T"
+            target="vr"
+            posparent="crop"
+            posref="TL TR"
+            x="-8"
+            y="0" />
+      <!-- *** -->
       <group id="sound"
              active="false"
              posparent="crop"
@@ -3706,6 +3766,11 @@
                type="cfg"
                widget="sbfloat"
                link="RotKeySpeedMin"
+               realtime="true" />
+        <param ui="vr:enabler:c"
+               type="cfg"
+               widget="boolbut"
+               link="VREnable"
                realtime="true" />
         <param ui="sound:enabler:c"
                type="cfg"

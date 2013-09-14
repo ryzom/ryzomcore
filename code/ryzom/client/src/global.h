@@ -120,6 +120,10 @@ extern bool							ConnectionReadySent;
 extern bool							PermanentlyBanned;
 extern bool							IgnoreEntityDbUpdates;
 
+// VR
+extern std::vector<std::pair<
+	std::string, std::string> >		VRDeviceCache;
+
 extern std::string					Cookie, FSAddr;
 extern std::string					RingMainURL;
 extern bool							FreeTrial;

@@ -19,6 +19,8 @@
 
 #include "stdpch.h"
 
+#include <sstream>
+
 // Interface includes
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
@@ -2919,12 +2921,60 @@ static vector<UDriver::CMode> VideoModes;
 // We allow only this RGB depth to be taken
 #define GAME_CONFIG_VIDEO_DEPTH_REQ		32
 
+// VR_CONFIG
+#define GAME_CONFIG_VR_DEVICES_COMBO	"ui:interface:game_config:content:vr:vr_devices"
+#define GAME_CONFIG_VR_DEVICE_DB		"UI:TEMP:VR_DEVICE"
+
 // The combo for Texture Mode selected
 #define GAME_CONFIG_TEXTURE_MODE_COMBO	"ui:interface:game_config:content:general:texture_mode:combo"
 #define GAME_CONFIG_TEXTURE_MODE_DB		"UI:TEMP:TEXTURE_MODE"
 
 // The 3 possible modes editable (NB: do not allow client.cfg HDEntityTexture==1 and DivideTextureSizeBy2=2
 enum	TTextureMode	{LowTextureMode= 0, NormalTextureMode= 1, HighTextureMode= 2};
+
+void cacheStereoDisplayDevices(); // from init.cpp
+
+void updateVRDevicesComboUI()
+{
+	// VR_CONFIG
+	nldebug("Init VR device name list from cache into UI");
+	// init vr device name list from cache
+	CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_DEVICES_COMBO));
+	if (pCB)
+	{
+		pCB->setActive(ClientCfg.VREnable);
+		if (ClientCfg.VREnable)
+		{
+			nldebug("pCB ok");
+			cacheStereoDisplayDevices();
+			pCB->resetTexts();
+			sint32 selectedDevice = -1;
+			for (uint i = 0; i < VRDeviceCache.size(); ++i)
+			{
+				std::stringstream displayname;
+				displayname << std::string("[") << VRDeviceCache[i].first << "] [" << VRDeviceCache[i].second << "]";
+				pCB->addText(ucstring(displayname.str()));
+				if (ClientCfg.VRDisplayDevice == VRDeviceCache[i].first)
+				{
+					if (selectedDevice == -1 || ClientCfg.VRDisplayDeviceId == VRDeviceCache[i].second)
+					{
+						selectedDevice = i;
+					}
+				}
+			}
+			if (selectedDevice == -1)
+			{
+				// configured device not found, add a dummy
+				std::stringstream displayname;
+				displayname << std::string("[") << ClientCfg.VRDisplayDevice << "] [" << ClientCfg.VRDisplayDeviceId<< "] [DEVICE NOT FOUND]";
+				pCB->addText(ucstring(displayname.str()));
+				selectedDevice = VRDeviceCache.size();
+			}
+			NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->setValue32(-1);
+			NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->setValue32(selectedDevice);
+		}
+	}
+}
 
 // ***************************************************************************
 class CHandlerGameConfigInit : public IActionHandler
@@ -2974,6 +3024,9 @@ public:
 			if(ClientCfg.HDTextureInstalled)
 				pCB->addText(CI18N::get("uigcHighTextureMode"));
 		}
+
+		// VR_CONFIG
+		updateVRDevicesComboUI();
 
 		// init the mode in DB
 		TTextureMode	texMode;
@@ -3025,7 +3078,7 @@ class CHandlerGameConfigMode : public IActionHandler
 
 		sint oldVideoMode= NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getOldValue32();
 		sint nVideModeNb = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->getValue32();
-		if (nVideModeNb == -1) return;
+		if (nVideModeNb == -1 || oldVideoMode == -1) return;
 
 		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 		if( pCB == NULL ) return;
@@ -3205,6 +3258,29 @@ class CHandlerGameConfigFullscreen : public IActionHandler
 REGISTER_ACTION_HANDLER (CHandlerGameConfigFullscreen, "game_config_change_vid_fullscreen");
 
 // ***************************************************************************
+class CHandlerGameConfigVRDevice : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	{
+		// VR_CONFIG
+
+		sint oldDevice = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->getOldValue32();
+		sint newDevice = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->getValue32();
+
+		if (oldDevice != -1 && newDevice != -1 && pCaller)
+		{
+			// nldebug("TODO_VR switch vr device (from combo box)");
+
+			CDDXManager *pDM = CDDXManager::getInstance();
+			CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+			if(pDDX)
+				pDDX->validateApplyButton();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerGameConfigVRDevice, "game_config_change_vr_device");
+
+// ***************************************************************************
 class CHandlerGameConfigApply : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
@@ -3295,6 +3371,16 @@ class CHandlerGameConfigApply : public IActionHandler
 					ClientCfg.writeInt("Frequency", freq);
 				}
 			}
+		}
+
+		if (ClientCfg.VREnable)
+		{
+			// store the new config variables
+			sint deviceIdx = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_VR_DEVICE_DB)->getValue32();
+			ClientCfg.VRDisplayDevice = VRDeviceCache[deviceIdx].first;
+			ClientCfg.VRDisplayDeviceId = VRDeviceCache[deviceIdx].second;
+			ClientCfg.writeString("VRDisplayDevice", VRDeviceCache[deviceIdx].first);
+			ClientCfg.writeString("VRDisplayDeviceId", VRDeviceCache[deviceIdx].second);
 		}
 
 		bool requestReboot = false;
