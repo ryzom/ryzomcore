@@ -385,12 +385,10 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	// Activate the good VertexProgram
 	//===============
 
-	// Update nb vp lights
-	renderTrav->prepareVPLightSetup();
-
 	// Get how many pointLights are setuped now.
 	nlassert(scene != NULL);
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
+	renderTrav->prepareVPLightSetup();
 	sint	numPls= renderTrav->getNumVPLights()-1;
 	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
 
@@ -512,12 +510,10 @@ void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 // ***************************************************************************
 void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat)
 {
-	// Update nb vp lights
-	renderTrav->prepareVPLightSetup();
-
 	// Get how many pointLights are setuped now.
 	nlassert(scene != NULL);
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
+	renderTrav->prepareVPLightSetup();
 	sint	numPls= renderTrav->getNumVPLights()-1;
 	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
 
