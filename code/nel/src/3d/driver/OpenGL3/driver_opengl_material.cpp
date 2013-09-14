@@ -452,6 +452,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			_DriverGLStates.setVertexColorLighted(false);
 		}
 
+#endif
 
 		// Fog Part.
 		//=================
@@ -467,7 +468,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			_DriverGLStates.enableFog(_FogEnabled);
 		}
 
-#endif
 
 		_CurrentMaterial=&mat;
 	}
