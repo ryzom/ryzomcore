@@ -515,6 +515,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 	//
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	/// Setup for gouraud lighting
+	renderTrav->prepareVPLightSetup();
 	renderTrav->beginVPLightSetup(program, invertedModelMat);
 	//
 	sint strongestLightIndex = renderTrav->getStrongestLightIndex();

@@ -760,13 +760,20 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 // ***************************************************************************
 // ***************************************************************************
 
+void		CRenderTrav::prepareVPLightSetup()
+{
+	nlassert(MaxVPLight==4);
+	_VPNumLights= min(_NumLightEnabled, (uint)MaxVPLight);
+	// Must force real light setup at least the first time, in changeVPLightSetupMaterial()
+	_VPMaterialCacheDirty= true;
+}
 
 // ***************************************************************************
 void		CRenderTrav::beginVPLightSetup(CVertexProgramLighted *program, const CMatrix &invObjectWM)
 {
 	uint	i;
-	nlassert(MaxVPLight==4);
-	_VPNumLights= min(_NumLightEnabled, (uint)MaxVPLight);
+	// nlassert(MaxVPLight==4);
+	// _VPNumLights= min(_NumLightEnabled, (uint)MaxVPLight);
 	// _VPCurrentCtStart= ctStart;
 	// _VPSupportSpecular= supportSpecular;
 	_VPCurrent = program;
