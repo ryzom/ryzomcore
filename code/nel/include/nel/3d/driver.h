@@ -1197,28 +1197,8 @@ public:
 	virtual void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src) = 0;
 	virtual void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src) = 0;
 	// Set builtin parameters
-	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform) = 0;
-	virtual void			setUniformFog(TProgram program, uint index) = 0;
-    // Set feature parameters
-	virtual bool			isUniformProgramState() = 0;
-	// @}
-
-
-
-	/// \name Legacy vertex program parameter setters
-	// @{
 	/**
-	  * Setup constant values.
-	  */
-	inline void				setConstant(uint index, float f0, float f1, float f2, float f3) { setUniform4f(VertexProgram, index, f0, f1, f2, f3); }
-	inline void				setConstant(uint index, double d0, double d1, double d2, double d3) { setUniform4f(VertexProgram, index, (float)d0, (float)d1, (float)d2, (float)d3); }
-	inline void				setConstant(uint index, const NLMISC::CVector &value) { setUniform4f(VertexProgram, index, value, 0.f); }
-	inline void				setConstant(uint index, const NLMISC::CVectorD &value) { setUniform4f(VertexProgram, index, (float)value.x, (float)value.y, (float)value.z, 0.f); }
-	/// setup several 4 float csts taken from the given tab
-	inline void				setConstant(uint index, uint num, const float *src) { setUniform4fv(VertexProgram, index, num, src); }
-
-	/**
-	  * Setup constants with a current matrix.
+	  * Setup uniforms with a current matrix.
 	  *
 	  *	This call must be done after setFrustum(), setupViewMatrix() or setupModelMatrix() to get correct
 	  *	results.
@@ -1228,10 +1208,9 @@ public:
 	  * \param transform is the transformation to apply to the matrix before store it in the constants.
 	  *
 	  */
-	inline void				setConstantMatrix(uint index, TMatrix matrix, TTransform transform) { setUniformMatrix(VertexProgram, index, matrix, transform); };
-
+	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform) = 0;
 	/**
-	  * Setup the constant with the fog vector. This vector must be used to get the final fog value in a vertex shader.
+	  * Setup the uniform with the fog vector. This vector must be used to get the final fog value in a vertex shader.
 	  * You must use it like this:
 	  * DP4 o[FOGC].x, c[4], R4;
 	  * With c[4] the constant used for the fog vector and R4 the vertex local position.
@@ -1242,7 +1221,9 @@ public:
 	  * \param index is the index where to store the vector.
 	  *
 	  */
-	inline void				setConstantFog(uint index) { setUniformFog(VertexProgram, index); };
+	virtual void			setUniformFog(TProgram program, uint index) = 0;
+    // Set feature parameters
+	virtual bool			isUniformProgramState() = 0;
 	// @}
 
 
