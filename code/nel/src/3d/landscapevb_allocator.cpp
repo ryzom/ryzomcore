@@ -82,7 +82,10 @@ void			CLandscapeVBAllocator::updateDriver(IDriver *driver)
 		deleteVertexProgram();
 		// Then rebuild VB format, and VertexProgram, if needed.
 		// Do it only if VP supported by GPU.
-		setupVBFormatAndVertexProgram(_Driver->supportVertexProgram()  && !_Driver->isVertexProgramEmulated());
+		setupVBFormatAndVertexProgram(!_Driver->isVertexProgramEmulated() && (
+			_Driver->supportVertexProgram(CVertexProgram::nelvp)
+			// || _Driver->supportVertexProgram(CVertexProgram::glsl330v) // TODO_VP_GLSL
+			));
 
 		// must reallocate the VertexBuffer.
 		if( _NumVerticesAllocated>0 )
@@ -568,7 +571,8 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			_VB.initEx();
 
 			// Init the Vertex Program.
-			_VertexProgram[0]= new CVertexProgramLandscape(Far0);
+			_VertexProgram[0] = new CVertexProgramLandscape(Far0);
+			nlverify(_Driver->compileVertexProgram(_VertexProgram[0]));
 		}
 		else if(_Type==Far1)
 		{
@@ -584,6 +588,7 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 
 			// Init the Vertex Program.
 			_VertexProgram[0] = new CVertexProgramLandscape(Far1);
+			nlverify(_Driver->compileVertexProgram(_VertexProgram[0]));
 		}
 		else
 		{
@@ -599,9 +604,11 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 
 			// Init the Vertex Program.
 			_VertexProgram[0] = new CVertexProgramLandscape(Tile, false);
+			nlverify(_Driver->compileVertexProgram(_VertexProgram[0]));
 
 			// Init the Vertex Program for lightmap pass
 			_VertexProgram[1] = new CVertexProgramLandscape(Tile, true);
+			nlverify(_Driver->compileVertexProgram(_VertexProgram[1]));
 		}
 	}
 

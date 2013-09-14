@@ -106,6 +106,7 @@ public:
 	// @}
 
 private:
+	static void	initVertexPrograms();
 	void	setupLighting(CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat);
 private:
 

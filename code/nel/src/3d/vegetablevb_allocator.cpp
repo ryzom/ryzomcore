@@ -98,7 +98,9 @@ void			CVegetableVBAllocator::updateDriver(IDriver *driver)
 			_VBHardOk= false;
 
 		// Driver must support VP.
-		nlassert(_Driver->supportVertexProgram());
+		nlassert(_Driver->supportVertexProgram(CVertexProgram::nelvp)
+			// || _Driver->supportVertexProgram(CVertexProgram::glsl330v) // TODO_VP_GLSL
+			);
 
 		// must reallocate the VertexBuffer.
 		if( _NumVerticesAllocated>0 )
