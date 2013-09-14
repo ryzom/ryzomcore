@@ -1063,9 +1063,9 @@ static const char*	LightingVPFragmentSpecular_Begin=
 																						\n\
 	# Compute vertex-to-eye vector normed.												\n\
 	ADD	R4, c[CTS+11], -R5;																\n\
-	DP3	R4.w, R4, R4;																	\n\
-	RSQ	R4.w, R4.w;																		\n\
-	MUL R4, R4, R4.w;																	\n\
+	DP3	R1.w, R4, R4;																	\n\
+	RSQ	R1.w, R1.w;																		\n\
+	MUL	R4, R4, R1.w;																	\n\
 																						\n\
 	# Diffuse-Specular Sun																\n\
 	# Compute R1= halfAngleVector= (lightDir+R4).normed().								\n\
