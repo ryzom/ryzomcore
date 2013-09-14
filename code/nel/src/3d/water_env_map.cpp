@@ -226,7 +226,7 @@ void CWaterEnvMap::doInit()
 		_MaterialPassThru.setZFunc(CMaterial::always);
 	}
 }
-
+/*
 static const char *testMeshVPstr =
 "!!VP1.0\n\
  DP4 o[HPOS].x, c[0], v[0]; \n\
@@ -257,7 +257,6 @@ public:
 			source->ParamIndices["programConstant0"] = 4;
 			addSource(source);
 		}
-		// TODO_VP_GLSL
 	}
 	virtual ~CVertexProgramTestMeshVP()
 	{
@@ -309,7 +308,7 @@ void CWaterEnvMap::renderTestMesh(IDriver &driver)
 	driver.renderTriangles(_MaterialPassThruZTest, 0, TEST_VB_NUM_TRIS);
 	driver.activeVertexProgram(NULL);
 }
-
+*/
 // *******************************************************************************
 void CWaterEnvMap::initFlattenVB()
 {

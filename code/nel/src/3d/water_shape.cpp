@@ -250,19 +250,19 @@ uint32									CWaterShape::_XGridBorder = 4;
 uint32									CWaterShape::_YGridBorder = 4;
 uint32									CWaterShape::_MaxGridSize;
 bool									CWaterShape::_GridSizeTouched = true;
-NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump1;
+/*NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump1;
 NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump2;
 NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump1Diffuse;
 NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramBump2Diffuse;
 NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBump;
-NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBumpDiffuse;
+NLMISC::CSmartPtr<CVertexProgram>		CWaterShape::_VertexProgramNoBumpDiffuse;*/
 // water with no waves
 NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWave;
 NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>		CWaterShape::_VertexProgramNoWaveDiffuse;
 
 
 /** Build a vertex program for water depending on requirements
-  */
+  *//*
 static CVertexProgram *BuildWaterVP(bool diffuseMap, bool bumpMap, bool use2BumpMap)
 {
 	std::string vp = WaterVPStartCode;
@@ -285,9 +285,8 @@ static CVertexProgram *BuildWaterVP(bool diffuseMap, bool bumpMap, bool use2Bump
 
 	vp += "\nEND";
 	return new CVertexProgram(vp.c_str());
-	// TODO_VP_GLSL
 }
-
+*/
 
 
 //============================================
@@ -384,17 +383,17 @@ void CWaterShape::initVertexProgram()
 	if (!created)
 	{
 		// waves
-		_VertexProgramBump1 = BuildWaterVP(false, true, false);
+		/*_VertexProgramBump1 = BuildWaterVP(false, true, false);
 		_VertexProgramBump2 = BuildWaterVP(false, true, true);
 
 		_VertexProgramBump1Diffuse = BuildWaterVP(true, true, false);
 		_VertexProgramBump2Diffuse = BuildWaterVP(true, true, true);
 
 		_VertexProgramNoBump = BuildWaterVP(false, false, false);
-		_VertexProgramNoBumpDiffuse = BuildWaterVP(true, false, false);
+		_VertexProgramNoBumpDiffuse = BuildWaterVP(true, false, false);*/
 		// no waves
 		_VertexProgramNoWave = new CVertexProgramWaterVPNoWave(false);
-		_VertexProgramNoWaveDiffuse = new CVertexProgramWaterVPNoWave(true); // TODO_VP_GLSL
+		_VertexProgramNoWaveDiffuse = new CVertexProgramWaterVPNoWave(true);
 		created = true;
 	}
 }
