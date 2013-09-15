@@ -362,7 +362,9 @@ namespace NL3D
 
 			case CShaderDesc::Directional:
 				ss << "uniform vec3 light" << i << "Dir;" << std::endl;
-				ss << "" << std::endl;
+				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
+				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
+				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
 				break;
 			}
 		}
@@ -379,9 +381,6 @@ namespace NL3D
 				break;
 
 			case CShaderDesc::Directional:
-				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
 				break;
 			}
 		}
@@ -399,8 +398,7 @@ namespace NL3D
 				break;
 
 			case CShaderDesc::Directional:
-				ss << "smooth out float intensity" << i << ";" << std::endl;
-				ss << "smooth out float specIntensity" << i << ";" << std::endl;
+				ss << "smooth out vec4 lightColor;" << std::endl;
 				break;
 			}
 		}
@@ -417,8 +415,7 @@ namespace NL3D
 				break;
 
 			case CShaderDesc::Directional:
-				ss << "smooth in float intensity" << i << ";" << std::endl;
-				ss << "smooth in float specIntensity" << i << ";" << std::endl;
+				ss << "smooth in vec4 lightColor;" << std::endl;
 				break;
 			}
 		}
@@ -470,23 +467,14 @@ namespace NL3D
 	{
 		ss << "vec4 applyLights( vec4 col )" << std::endl;
 		ss << "{" << std::endl;
-
-		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
-		{
-			if( desc->getLight( i ) != CShaderDesc::Nolight )
-			{
-				ss << "col = col * ( intensity" << i << " * light" << i << "ColDiff";
-				ss << " + specIntensity" << i << "* light" << i << "ColSpec";
-				ss << " + light" << i << "ColAmb );" << std::endl;
-			}
-		}
-
-		ss << "return col;" << std::endl;
+		ss << "return col * lightColor;" << std::endl;
 		ss << "}" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addLightsVS()
 	{
+		ss << "lightColor = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
+
 		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
 		{
 			switch( desc->getLight( i ) )
@@ -496,8 +484,11 @@ namespace NL3D
 				break;
 
 			case CShaderDesc::Directional:
-				ss << "intensity" << i << " = getIntensity" << i << "();" << std::endl;
-				ss << "specIntensity" << i << " = getSpecIntensity" << i << "();" << std::endl;
+				ss << "lightColor = lightColor * (";
+				ss << "getIntensity" << i << "() * light" << i << "ColDiff + ";
+				ss << "getSpecIntensity" << i << "() * light" << i << "ColSpec + ";
+				ss << "light" << i << "ColAmb );";
+				ss << std::endl;
 				break;
 			}
 		}
