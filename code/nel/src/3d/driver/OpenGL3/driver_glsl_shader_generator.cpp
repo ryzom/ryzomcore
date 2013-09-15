@@ -328,17 +328,173 @@ namespace NL3D
 		ss << "fragColor = applyFog( fragColor );" << std::endl;
 	}
 
+
+	/////////////////////////////////////////////////////////// Lights ////////////////////////////////////////////////////////////////////
+
+	void CGLSLShaderGenerator::addLightUniformsVS()
+	{
+		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+		{
+			switch( desc->getLight( i ) )
+			{
+			case CShaderDesc::Nolight:
+				continue;
+				break;
+
+			case CShaderDesc::Directional:
+				ss << "uniform vec3 light" << i << "Dir;" << std::endl;
+				break;
+			}
+		}
+	}
+
+	void CGLSLShaderGenerator::addLightUniformsFS()
+	{
+		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+		{
+			switch( desc->getLight( i ) )
+			{
+			case CShaderDesc::Nolight:
+				continue;
+				break;
+
+			case CShaderDesc::Directional:
+				ss << "uniform vec4 light" << i << "Col;" << std::endl;
+				break;
+			}
+		}
+
+	}
+
+	void CGLSLShaderGenerator::addLightOutsVS()
+	{
+		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+		{
+			switch( desc->getLight( i ) )
+			{
+			case CShaderDesc::Nolight:
+				continue;
+				break;
+
+			case CShaderDesc::Directional:
+				ss << "smooth out float intensity" << i << ";" << std::endl;
+				break;
+			}
+		}
+	}
+
+	void CGLSLShaderGenerator::addLightInsFS()
+	{
+		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+		{
+			switch( desc->getLight( i ) )
+			{
+			case CShaderDesc::Nolight:
+				continue;
+				break;
+
+			case CShaderDesc::Directional:
+				ss << "smooth in float intensity" << i << ";" << std::endl;
+				break;
+			}
+		}
+	}
+
+	void CGLSLShaderGenerator::addDirectionalFunctionVS( int num )
+	{
+		ss << "float getIntensity" << num << "( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "mat3 nmat;" << std::endl;
+		ss << "nmat[ 0 ] = mvMatrix[ 0 ].xyz;" << std::endl;
+		ss << "nmat[ 1 ] = mvMatrix[ 1 ].xyz;" << std::endl;
+		ss << "nmat[ 2 ] = mvMatrix[ 2 ].xyz;" << std::endl;
+		ss << "nmat = inverse( nmat );" << std::endl;
+		ss << "nmat = transpose( nmat );" << std::endl;
+		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
+		ss << "normal3 = nmat * normal3;" << std::endl;
+		ss << "float angle = dot( normalize( light" << num << "Dir ), normal3 );" << std::endl;
+		ss << "angle = max( 0.0, angle );" << std::endl;
+		ss << "return angle;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addLightsFunctionVS()
+	{
+		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+		{
+			switch( desc->getLight( i ) )
+			{
+			case CShaderDesc::Nolight:
+				continue;
+				break;
+
+			case CShaderDesc::Directional:
+				addDirectionalFunctionVS( i );
+				break;
+			}
+		}
+	}
+
+	void CGLSLShaderGenerator::addLightsFunctionFS()
+	{
+		ss << "vec4 applyLights( vec4 col )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "col = col * intensity0 * light0Col;" << std::endl;
+		ss << "return col;" << std::endl;
+		ss << "}" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addLightsVS()
+	{
+		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+		{
+			switch( desc->getLight( i ) )
+			{
+			case CShaderDesc::Nolight:
+				continue;
+				break;
+
+			case CShaderDesc::Directional:
+				ss << "intensity" << i << " = getIntensity" << i << "();" << std::endl;
+				break;
+			}
+		}
+	}
+
+	void CGLSLShaderGenerator::addLightsFS()
+	{
+		ss << "fragColor = applyLights( fragColor );" << std::endl;
+	}
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void CGLSLShaderGenerator::generateNormalVS()
 	{
-		if( desc->fogEnabled() )
+		if( desc->fogEnabled() || desc->lightingEnabled() )
 		{
 			ss << "uniform mat4 mvMatrix;" << std::endl;
-			ss << "smooth out vec4 ecPos;" << std::endl;
 		}
+		if( desc->fogEnabled() )
+			ss << "smooth out vec4 ecPos;" << std::endl;
 		ss << std::endl;
 
+		if( desc->lightingEnabled() )
+		{
+			addLightUniformsVS();
+			addLightOutsVS();
+			ss << std::endl;
+
+			addLightsFunctionVS();
+			ss << std::endl;
+		}
+		
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
+		
+		if( desc->lightingEnabled() )
+			addLightsVS();
+
 		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
 
 		if( desc->fogEnabled() )
@@ -539,6 +695,16 @@ namespace NL3D
 
 		ss << std::endl;
 
+		if( desc->lightingEnabled() )
+		{
+			addLightUniformsFS();
+			addLightInsFS();
+			ss << std::endl;
+			
+			addLightsFunctionFS();
+			ss << std::endl;
+		}
+
 		if( desc->fogEnabled() )
 			addFogFunction();
 		
@@ -580,6 +746,9 @@ namespace NL3D
 			ss << "texel = color * texel;" << std::endl;
 
 		ss << "fragColor = texel;" << std::endl;
+
+		if( desc->lightingEnabled() )
+			addLightsFS();
 
 		if( desc->fogEnabled() )
 			addFog();

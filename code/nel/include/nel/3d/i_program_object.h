@@ -50,6 +50,22 @@ namespace NL3D
 			FogEnd,
 			FogColor,
 			FogDensity,
+			Light0Dir,
+			Light1Dir,
+			Light2Dir,
+			Light3Dir,
+			Light4Dir,
+			Light5Dir,
+			Light6Dir,
+			Light7Dir,
+			Light0Col,
+			Light1Col,
+			Light2Col,
+			Light3Col,
+			Light4Col,
+			Light5Col,
+			Light6Col,
+			Light7Col,
 			NUM_UNIFORMS
 		};
 

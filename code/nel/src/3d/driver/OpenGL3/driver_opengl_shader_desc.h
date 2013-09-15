@@ -19,7 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
-#define MAX_TEXTURES 4
+#define SHADER_MAX_TEXTURES 4
+#define SHADER_MAX_LIGHTS   8
 
 namespace NL3D
 {
@@ -28,6 +29,20 @@ namespace NL3D
 	class CShaderDesc
 	{
 	public:
+
+		enum TShaderType
+		{
+			Normal,
+			Bump_unused,
+			UserColor,
+			LightMap,
+			Specular,
+			Caustics_unused,
+			PerPixelLighting,
+			PerPixelNoSpecular,
+			Cloud,
+			Water
+		};
 		
 		enum TFogMode
 		{
@@ -36,16 +51,28 @@ namespace NL3D
 			Linear
 		};
 
+		enum TLightMode
+		{
+			Nolight,
+			Directional,
+			Point,
+			Spot
+		};
+
 		CShaderDesc(){
-			for( int i = 0; i < MAX_TEXTURES; i++ )
+			for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
 				texEnvMode[ i ] = 0;
+
+			for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+				lightMode[ i ] = Nolight;
+			
 			features = None;
-			shaderType = 0;
+			shaderType = Normal;
 			program = NULL;
 			vbFlags = 0;
 			nlightmaps = 0;
 			alphaTestTreshold = 0.5f;
-			fogMode = Exponential;
+			fogMode = Linear;
 		}
 
 		~CShaderDesc(){
@@ -74,15 +101,25 @@ namespace NL3D
 					return false;
 			}
 
-			if( ( features & Fog ) != 0 )
+			if( fogEnabled() )
 			{
 				if( fogMode != o.fogMode )
 					return false;
 			}
 
-			for( int i = 0; i < MAX_TEXTURES; i++ )
-				if( texEnvMode[ i ] != o.texEnvMode[ i ] )
-					return false;
+			if( shaderType == Normal )
+			{
+				for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
+					if( texEnvMode[ i ] != o.texEnvMode[ i ] )
+						return false;
+			}
+
+			if( lightingEnabled() )
+			{
+				for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+					if( lightMode[ i ] != o.lightMode[ i ] )
+						return false;
+			}
 		
 			return true;
 		}
@@ -123,6 +160,29 @@ namespace NL3D
 
 		uint32 getFogMode() const{ return fogMode; }
 
+		void setLighting( bool b )
+		{
+			if( b )
+				features |= Lighting;
+			else
+				features &= ~Lighting;
+		}
+
+		bool lightingEnabled() const
+		{
+			if( ( features & Lighting ) != 0 )
+				return true;
+			else
+				return false;
+		}
+
+		void setLight( int idx, TLightMode mode )
+		{
+			lightMode[ idx ] = mode;
+		}
+
+		TLightMode getLight( int idx ) const{ return lightMode[ idx ]; }
+
 		IProgramObject* getProgram() const{ return program; }
 
 	private:
@@ -131,16 +191,18 @@ namespace NL3D
 		{
 			None      = 0,
 			AlphaTest = 1,
-			Fog       = 2
+			Fog       = 2,
+			Lighting  = 4
 		};
 
 		uint32 features;
-		uint32 texEnvMode[ MAX_TEXTURES ];
+		uint32 texEnvMode[ SHADER_MAX_TEXTURES ];
 		uint32 vbFlags;
 		uint32 shaderType;
 		uint32 nlightmaps;
 		float alphaTestTreshold;
 		uint32 fogMode;
+		TLightMode lightMode[ SHADER_MAX_LIGHTS ];
 
 		IProgramObject *program;
 	};

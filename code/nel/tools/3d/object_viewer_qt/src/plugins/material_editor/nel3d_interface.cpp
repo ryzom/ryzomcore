@@ -24,6 +24,7 @@
 #include "nel/3d/scene_user.h"
 #include "nel/3d/u_camera.h"
 #include "nel/3d/u_instance.h"
+#include "nel/3d/u_light.h"
 #include "nel/3d/u_3d_mouse_listener.h"
 #include "nel/3d/i_program.h"
 #include "nel/3d/i_program_object.h"
@@ -405,6 +406,25 @@ namespace MaterialEditor
 		driver->setDisplay( (nlWindow)wnd, NL3D::UDriver::CMode( w, h, 32 ) );
 
 		scene = driver->createScene( true );
+
+
+		driver->enableFog( true );
+		driver->setupFog( 1.0f, 5.0f, NLMISC::CRGBA::White );
+
+		NL3D::ULight *l = NL3D::ULight::createLight();
+		
+		l->setMode( NL3D::ULight::DirectionalLight );
+		l->setDirection( NLMISC::CVector( -100.0f, 100.0f, 100.0f ) );
+		l->setAmbiant( NLMISC::CRGBA::White );
+		driver->setLight( 0, *l );
+		driver->enableLight( 0, true );
+
+		delete l;
+		l = NULL;
+
+		scene->enableLightingSystem( false );
+
+
 		mouseListener = driver->create3dMouseListener();
 		mouseListener->setMouseMode( NL3D::U3dMouseListener::nelStyle );
 	}
@@ -464,10 +484,7 @@ namespace MaterialEditor
 		subMatId = 0;
 
 		setupCamera();
-
-		driver->enableFog( true );
-		driver->setupFog( 1.0f, 5.0f, NLMISC::CRGBA::White );
-
+		
 		return true;
 	}
 

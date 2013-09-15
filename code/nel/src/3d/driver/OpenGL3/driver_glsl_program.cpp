@@ -195,7 +195,23 @@ namespace NL3D
 		"fogStart",
 		"fogEnd",
 		"fogColor",
-		"fogDensity"
+		"fogDensity",
+		"light0Dir",
+		"light1Dir",
+		"light2Dir",
+		"light3Dir",
+		"light4Dir",
+		"light5Dir",
+		"light6Dir",
+		"light7Dir",
+		"light0Col",
+		"light1Col",
+		"light2Col",
+		"light3Col",
+		"light4Col",
+		"light5Col",
+		"light6Col",
+		"light7Col",
 	};
 
 	void CGLSLProgram::cacheUniformIndices()

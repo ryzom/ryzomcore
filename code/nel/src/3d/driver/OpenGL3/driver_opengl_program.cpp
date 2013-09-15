@@ -96,6 +96,11 @@ namespace NL3D
 		nglUniform1f( index, f );
 	}
 
+	void CDriverGL3::setUniform3f( uint index, float f1, float f2, float f3 )
+	{
+		nglUniform3f( index, f1, f2, f3 );
+	}
+
 	void CDriverGL3::setUniform4f( uint index, float f1, float f2, float f3, float f4 )
 	{
 		nglUniform4f( index, f1, f2, f3, f4 );
@@ -160,17 +165,52 @@ namespace NL3D
 
 		if( mat.getShader() == CMaterial::Normal )
 		{
-			for( i = 0; i < MAX_TEXTURES; i++ )
+			int maxTextures = std::min( int( SHADER_MAX_TEXTURES ), int( IDRV_MAT_MAXTEXTURES ) );
+			for( i = 0; i < maxTextures; i++ )
 			{
 				desc.setTexEnvMode( i, mat.getTexEnvMode( i ) );
 			}
 		}
 
-		desc.setAlphaTest( mat.getAlphaTest() );
-		desc.setAlphaTestThreshold( mat.getAlphaTestThreshold() );
+		if( mat.getAlphaTest() )
+		{
+			desc.setAlphaTest( true );
+			desc.setAlphaTestThreshold( mat.getAlphaTestThreshold() );
+		}
 
-		desc.setFog( fogEnabled() );
-		desc.setFogMode( CShaderDesc::Linear );
+		if( fogEnabled() )
+		{
+			desc.setFog( true );
+			desc.setFogMode( CShaderDesc::Linear );
+		}
+
+		int maxLights = std::min( int( SHADER_MAX_LIGHTS ), int( MaxLight ) );
+		bool enableLights = false;
+		for( int i = 0; i < maxLights; i++ )
+		{
+			if( !_UserLightEnable[ i ] )
+				continue;
+
+			enableLights = true;
+			
+			switch( _LightMode[ i ] )
+			{
+			case CLight::DirectionalLight:
+				desc.setLight( i, CShaderDesc::Directional );
+				break;
+			
+			case CLight::PointLight:
+				desc.setLight( i, CShaderDesc::Point );
+				break;
+			
+			case CLight::SpotLight:
+				desc.setLight( i, CShaderDesc::Spot );
+				break;
+			}
+		
+		}
+
+		desc.setLighting( enableLights );			
 	}
 
 
@@ -253,6 +293,13 @@ namespace NL3D
 		return true;
 	}
 
+
+	struct LightData
+	{
+		float direction[ 3 ];
+		float color[ 4 ];
+	};
+
 	void CDriverGL3::setupUniforms( CMaterial& mat )
 	{
 
@@ -319,6 +366,37 @@ namespace NL3D
 			glCol[ 3 ] = col.A / 255.0f;
 
 			setUniform4f( diffuseIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+		}
+
+
+		int maxLights = std::min( int( MaxLight ), int( SHADER_MAX_LIGHTS ) );
+		for( int i = 0; i < maxLights; i++ )
+		{
+			if( !_UserLightEnable[ i ] )
+				continue;
+			
+			////////////////// Temporary insanity  ///////////////////////////////
+			if( _LightMode[ i ] != CLight::DirectionalLight )
+				continue;
+			//////////////////////////////////////////////////////////////////////
+			
+			LightData d;
+			d.direction[ 0 ] = _WorldLightDirection[ i ].x;
+			d.direction[ 1 ] = _WorldLightDirection[ i ].y;
+			d.direction[ 2 ] = _WorldLightDirection[ i ].z;
+
+			int ld = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0Dir + i ) );
+			if( ld != -1 )
+			{
+				setUniform3f( ld, d.direction[ 0 ], d.direction[ 1 ], d.direction[ 2 ] );
+			}
+
+			int lc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0Col + i ) );
+			if( lc != -1 )
+			{
+				setUniform4f( lc, 1.0f, 1.0f, 1.0f, 1.0f );
+			}
+
 		}
 
 

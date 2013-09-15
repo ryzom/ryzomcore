@@ -52,6 +52,18 @@ namespace NL3D
 		void addFogFunction();
 		void addFog();
 
+		//////////////////////////// Lights ///////////////////////////
+		void addLightUniformsVS();
+		void addLightUniformsFS();
+		void addLightOutsVS();
+		void addLightInsFS();
+		void addDirectionalFunctionVS( int num );
+		void addLightsFunctionVS();
+		void addLightsFunctionFS();
+		void addLightsVS();
+		void addLightsFS();
+		//////////////////////////////////////////////////////////////
+
 		void generateNormalVS();
 		void generateSpecularVS();
 

@@ -1278,6 +1278,7 @@ private:
 	int getUniformLocation( const char *name );
 
 	void setUniform1f( uint index, float f );
+	void setUniform3f( uint index, float f1, float f2, float f3 );
 	void setUniform4f( uint index, float f1, float f2, float f3, float f4  );
 	void setUniform1i( uint index, int i );
 	void setUniform4i( uint index, int i1, int i2, int i3, int i4 );

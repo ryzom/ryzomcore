@@ -432,7 +432,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		//=====================
 
 		// Light Part.
-#ifndef GLSL
+
 		_DriverGLStates.enableLighting(mat.getFlags()&IDRV_MAT_LIGHTING);
 		if(mat.getFlags()&IDRV_MAT_LIGHTING)
 		{
@@ -442,17 +442,18 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			_DriverGLStates.setSpecular(pShader->PackedSpecular, pShader->Specular);
 			_DriverGLStates.setShininess(mat.getShininess());
 			_DriverGLStates.setVertexColorLighted(mat.isLightedVertexColor ());
+
 		}
 		else
 		{
+#ifndef GLSL
 			// Color unlit part.
 			CRGBA	col= mat.getColor();
 			glColor4ub(col.R, col.G, col.B, col.A);
+#endif
 
 			_DriverGLStates.setVertexColorLighted(false);
 		}
-
-#endif
 
 		// Fog Part.
 		//=================
