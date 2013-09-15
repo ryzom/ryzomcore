@@ -44,6 +44,8 @@ namespace NL3D
 		void addDiffuse();
 		void addColor();
 		void addConstants();
+		void addNormalMatrix();
+		void addNormalFromMVFunction();
 		
 		void addAlphaTreshold();
 		void addAlphaTest();

@@ -275,6 +275,25 @@ namespace NL3D
 		ss << "uniform vec4 constant3;" << std::endl;
 	}
 
+	void CGLSLShaderGenerator::addNormalMatrix()
+	{
+		ss << "mat3 normalMatrix;" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addNormalFromMVFunction()
+	{
+		ss << "// Calculates the normal matrix from the modelview matrix" << std::endl;
+		ss << "void calcNMFromMV()" << std::endl;
+		ss << "{" << std::endl;
+		ss << "normalMatrix[ 0 ] = mvMatrix[ 0 ].xyz;" << std::endl;
+		ss << "normalMatrix[ 1 ] = mvMatrix[ 1 ].xyz;" << std::endl;
+		ss << "normalMatrix[ 2 ] = mvMatrix[ 2 ].xyz;" << std::endl;
+		ss << "normalMatrix = inverse( normalMatrix );" << std::endl;
+		ss << "normalMatrix = transpose( normalMatrix );" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+	}
+
 	void CGLSLShaderGenerator::addAlphaTreshold()
 	{
 		ss << "uniform float alphaTreshold;" << std::endl;
@@ -343,6 +362,7 @@ namespace NL3D
 
 			case CShaderDesc::Directional:
 				ss << "uniform vec3 light" << i << "Dir;" << std::endl;
+				ss << "" << std::endl;
 				break;
 			}
 		}
@@ -361,6 +381,7 @@ namespace NL3D
 			case CShaderDesc::Directional:
 				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
+				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
 				break;
 			}
 		}
@@ -379,6 +400,7 @@ namespace NL3D
 
 			case CShaderDesc::Directional:
 				ss << "smooth out float intensity" << i << ";" << std::endl;
+				ss << "smooth out float specIntensity" << i << ";" << std::endl;
 				break;
 			}
 		}
@@ -396,6 +418,7 @@ namespace NL3D
 
 			case CShaderDesc::Directional:
 				ss << "smooth in float intensity" << i << ";" << std::endl;
+				ss << "smooth in float specIntensity" << i << ";" << std::endl;
 				break;
 			}
 		}
@@ -405,17 +428,23 @@ namespace NL3D
 	{
 		ss << "float getIntensity" << num << "( void )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "mat3 nmat;" << std::endl;
-		ss << "nmat[ 0 ] = mvMatrix[ 0 ].xyz;" << std::endl;
-		ss << "nmat[ 1 ] = mvMatrix[ 1 ].xyz;" << std::endl;
-		ss << "nmat[ 2 ] = mvMatrix[ 2 ].xyz;" << std::endl;
-		ss << "nmat = inverse( nmat );" << std::endl;
-		ss << "nmat = transpose( nmat );" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
-		ss << "normal3 = nmat * normal3;" << std::endl;
+		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "float angle = dot( normalize( light" << num << "Dir ), normal3 );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "return angle;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "float getSpecIntensity" << num << "( void )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
+		ss << "normal3 = normalMatrix * normal3;" << std::endl;
+		ss << "vec3 reflection = reflect( normalize( -light" << num << "Dir ), normal3 );" << std::endl;
+		ss << "float angle = dot( normal3, reflection );" << std::endl;
+		ss << "angle = max( 0.0, angle );" << std::endl;
+		ss << "float si = pow( angle, 128.0 );" << std::endl;
+		ss << "return si;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 	}
@@ -445,7 +474,11 @@ namespace NL3D
 		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
 		{
 			if( desc->getLight( i ) != CShaderDesc::Nolight )
-				ss << "col = col * ( intensity" << i << " * light" << i << "ColDiff + light" << i << "ColAmb );" << std::endl;
+			{
+				ss << "col = col * ( intensity" << i << " * light" << i << "ColDiff";
+				ss << " + specIntensity" << i << "* light" << i << "ColSpec";
+				ss << " + light" << i << "ColAmb );" << std::endl;
+			}
 		}
 
 		ss << "return col;" << std::endl;
@@ -464,6 +497,7 @@ namespace NL3D
 
 			case CShaderDesc::Directional:
 				ss << "intensity" << i << " = getIntensity" << i << "();" << std::endl;
+				ss << "specIntensity" << i << " = getSpecIntensity" << i << "();" << std::endl;
 				break;
 			}
 		}
@@ -488,9 +522,12 @@ namespace NL3D
 
 		if( desc->lightingEnabled() )
 		{
+			addNormalMatrix();
 			addLightUniformsVS();
 			addLightOutsVS();
 			ss << std::endl;
+
+			addNormalFromMVFunction();
 
 			addLightsFunctionVS();
 			ss << std::endl;
@@ -498,6 +535,9 @@ namespace NL3D
 		
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
+
+		if( desc->lightingEnabled() )
+			ss << "calcNMFromMV();" << std::endl;
 		
 		if( desc->lightingEnabled() )
 			addLightsVS();

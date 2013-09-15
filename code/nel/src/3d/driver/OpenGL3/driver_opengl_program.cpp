@@ -318,6 +318,13 @@ namespace NL3D
 			setUniformMatrix4fv( mvIndex, 1, false, _ModelViewMatrix.get() );
 		}
 
+		/*
+		int nmIdx = currentProgram->getUniformIndex( IProgramObject::NormalMatrix );
+		if( nmIdx != -1 )
+		{
+		}
+		*/
+
 		int fogStartIdx = currentProgram->getUniformIndex( IProgramObject::FogStart );
 		if( fogStartIdx != -1 )
 		{
@@ -394,13 +401,19 @@ namespace NL3D
 			int ldc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColDiff + i ) );
 			if( ldc != -1 )
 			{
-				setUniform4f( ldc, 1.0f, 1.0f, 1.0f, 1.0f );
+				setUniform4f( ldc, 1.0f, 0.0f, 0.0f, 1.0f );
+			}
+
+			int lsc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColSpec + i ) );
+			if( lsc != -1 )
+			{
+				setUniform4f( lsc, 0.0f, 1.0f, 0.0f, 1.0f );
 			}
 
 			int lac = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColAmb + i ) );
 			if( lac != -1 )
 			{
-				setUniform4f( lac, 0.1f, 0.1f, 0.1f, 1.0f );
+				setUniform4f( lac, 0.0f, 0.0f, 0.3f, 1.0f );
 			}
 
 		}

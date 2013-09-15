@@ -177,6 +177,7 @@ namespace NL3D
 	{
 		"mvpMatrix",
 		"mvMatrix",
+		"normalMatrix",
 		"texMatrix0",
 		"texMatrix1",
 		"texMatrix2",
@@ -219,7 +220,15 @@ namespace NL3D
 		"light4ColAmb",
 		"light5ColAmb",
 		"light6ColAmb",
-		"light7ColAmb"
+		"light7ColAmb",
+		"light0ColSpec",
+		"light1ColSpec",
+		"light2ColSpec",
+		"light3ColSpec",
+		"light4ColSpec",
+		"light5ColSpec",
+		"light6ColSpec",
+		"light7ColSpec"
 	};
 
 	void CGLSLProgram::cacheUniformIndices()

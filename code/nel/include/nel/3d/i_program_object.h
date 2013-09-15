@@ -31,6 +31,7 @@ namespace NL3D
 		{
 			MVPMatrix,
 			MVMatrix,
+			NormalMatrix,
 			TexMatrix0,
 			TexMatrix1,
 			TexMatrix2,
@@ -74,6 +75,14 @@ namespace NL3D
 			Light5ColAmb,
 			Light6ColAmb,
 			Light7ColAmb,
+			Light0ColSpec,
+			Light1ColSpec,
+			Light2ColSpec,
+			Light3ColSpec,
+			Light4ColSpec,
+			Light5ColSpec,
+			Light6ColSpec,
+			Light7ColSpec,
 			NUM_UNIFORMS
 		};
 
