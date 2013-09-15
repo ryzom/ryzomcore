@@ -391,7 +391,7 @@ namespace NL3D
 				setUniform3f( ld, d.direction[ 0 ], d.direction[ 1 ], d.direction[ 2 ] );
 			}
 
-			int lc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0Col + i ) );
+			int lc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColDiff + i ) );
 			if( lc != -1 )
 			{
 				setUniform4f( lc, 1.0f, 1.0f, 1.0f, 1.0f );

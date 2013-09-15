@@ -204,14 +204,14 @@ namespace NL3D
 		"light5Dir",
 		"light6Dir",
 		"light7Dir",
-		"light0Col",
-		"light1Col",
-		"light2Col",
-		"light3Col",
-		"light4Col",
-		"light5Col",
-		"light6Col",
-		"light7Col",
+		"light0ColDiff",
+		"light1ColDiff",
+		"light2ColDiff",
+		"light3ColDiff",
+		"light4ColDiff",
+		"light5ColDiff",
+		"light6ColDiff",
+		"light7ColDiff",
 	};
 
 	void CGLSLProgram::cacheUniformIndices()

@@ -58,14 +58,14 @@ namespace NL3D
 			Light5Dir,
 			Light6Dir,
 			Light7Dir,
-			Light0Col,
-			Light1Col,
-			Light2Col,
-			Light3Col,
-			Light4Col,
-			Light5Col,
-			Light6Col,
-			Light7Col,
+			Light0ColDiff,
+			Light1ColDiff,
+			Light2ColDiff,
+			Light3ColDiff,
+			Light4ColDiff,
+			Light5ColDiff,
+			Light6ColDiff,
+			Light7ColDiff,
 			NUM_UNIFORMS
 		};
 
