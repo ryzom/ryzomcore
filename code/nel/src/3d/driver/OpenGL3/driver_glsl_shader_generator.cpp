@@ -1168,6 +1168,16 @@ namespace NL3D
 
 		ss << std::endl;
 
+		if( desc->lightingEnabled() )
+		{
+			addLightUniformsFS();
+			addLightInsFS();
+			ss << std::endl;
+			
+			addLightsFunctionFS();
+			ss << std::endl;
+		}
+
 		if( desc->fogEnabled() )
 			addFogFunction();
 
@@ -1207,6 +1217,9 @@ namespace NL3D
 		}
 
 		ss << "fragColor = texel;" << std::endl;
+
+		if( desc->lightingEnabled() )
+			addLightsFS();
 		
 		if( desc->fogEnabled() )
 			addFog();
