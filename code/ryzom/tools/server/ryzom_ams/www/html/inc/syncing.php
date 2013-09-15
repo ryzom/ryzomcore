@@ -7,7 +7,7 @@
 */
 function syncing(){
     
-    if(Ticket_User::isAdmin($_SESSION['ticket_user'])){
+    if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
         
         //return a paginated version of all unsynced changes.
         $pagination = new Pagination("SELECT * FROM ams_querycache","lib",5,"Querycache");
@@ -16,6 +16,8 @@ function syncing(){
         $pageResult['lastPage'] = $pagination->getLast();
         $pageResult['currentPage'] = $pagination->getCurrent();
         
+        global $INGAME_WEBPATH;
+        $pageResult['ingame_webpath'] = $INGAME_WEBPATH;
         
         //check if shard is online
         try{
