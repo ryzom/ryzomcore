@@ -2922,6 +2922,7 @@ static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_VIDEO_DEPTH_REQ		32
 
 // VR_CONFIG
+#define GAME_CONFIG_VR_ENABLE_BUTTON	"ui:interface:game_config:content:vr:enabler:c"
 #define GAME_CONFIG_VR_DEVICES_COMBO	"ui:interface:game_config:content:vr:vr_devices"
 #define GAME_CONFIG_VR_DEVICE_DB		"UI:TEMP:VR_DEVICE"
 
@@ -2934,7 +2935,7 @@ enum	TTextureMode	{LowTextureMode= 0, NormalTextureMode= 1, HighTextureMode= 2};
 
 void cacheStereoDisplayDevices(); // from init.cpp
 
-void updateVRDevicesComboUI()
+void updateVRDevicesComboUI(bool enable)
 {
 	// VR_CONFIG
 	nldebug("Init VR device name list from cache into UI");
@@ -2942,8 +2943,8 @@ void updateVRDevicesComboUI()
 	CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_DEVICES_COMBO));
 	if (pCB)
 	{
-		pCB->setActive(ClientCfg.VREnable);
-		if (ClientCfg.VREnable)
+		pCB->setActive(enable);
+		if (enable)
 		{
 			nldebug("pCB ok");
 			cacheStereoDisplayDevices();
@@ -3026,7 +3027,12 @@ public:
 		}
 
 		// VR_CONFIG
-		updateVRDevicesComboUI();
+		pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
+		if (pBut)
+		{
+			pBut->setPushed(ClientCfg.VREnable);
+		}
+		updateVRDevicesComboUI(ClientCfg.VREnable);
 
 		// init the mode in DB
 		TTextureMode	texMode;
@@ -3258,6 +3264,31 @@ class CHandlerGameConfigFullscreen : public IActionHandler
 REGISTER_ACTION_HANDLER (CHandlerGameConfigFullscreen, "game_config_change_vid_fullscreen");
 
 // ***************************************************************************
+class CHandlerGameConfigVREnable : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	{
+		// VR_CONFIG
+
+		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
+		if (pBut) 
+		{
+			// hide or show device list depending on enabled or not
+			updateVRDevicesComboUI(pBut->getPushed());
+		}
+
+		if (pCaller)
+		{
+			CDDXManager *pDM = CDDXManager::getInstance();
+			CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+			if(pDDX)
+				pDDX->validateApplyButton();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerGameConfigVREnable, "game_config_change_vr_enable");
+
+// ***************************************************************************
 class CHandlerGameConfigVRDevice : public IActionHandler
 {
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
@@ -3373,6 +3404,13 @@ class CHandlerGameConfigApply : public IActionHandler
 			}
 		}
 
+		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
+		if (pBut) 
+		{
+			// store the new config variables
+			ClientCfg.VREnable = pBut->getPushed();
+			ClientCfg.writeBool("VREnable", pBut->getPushed());
+		}
 		if (ClientCfg.VREnable)
 		{
 			// store the new config variables

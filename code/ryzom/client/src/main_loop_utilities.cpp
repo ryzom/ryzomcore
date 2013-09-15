@@ -49,6 +49,17 @@ void updateFromClientCfg()
 {
 	CClientConfig::setValues();
 	ClientCfg.IsInvalidated = false;
+	
+	if ((ClientCfg.VREnable != LastClientCfg.VREnable)
+		|| (ClientCfg.VREnable && (
+			ClientCfg.VRDisplayDevice != LastClientCfg.VRDisplayDevice
+			|| ClientCfg.VRDisplayDeviceId != LastClientCfg.VRDisplayDeviceId
+			)))
+	{
+		nldebug("Apply VR device change");
+		releaseStereoDisplayDevice();
+		initStereoDisplayDevice();
+	}
 
 	// GRAPHICS - GENERAL
 	//---------------------------------------------------
@@ -77,27 +88,6 @@ void updateFromClientCfg()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
-	}
-
-	if (ClientCfg.VREnable != LastClientCfg.VREnable)
-	{
-		// VR_CONFIG
-
-		// switch visibility of list & reload
-		updateVRDevicesComboUI();
-	}
-	else
-	{
-		if (((StereoDisplay != NULL) != ClientCfg.VREnable)
-			|| (ClientCfg.VREnable && (
-				ClientCfg.VRDisplayDevice != LastClientCfg.VRDisplayDevice
-				|| ClientCfg.VRDisplayDeviceId != LastClientCfg.VRDisplayDeviceId
-				)))
-		{
-			nldebug("Apply VR device change");
-			releaseStereoDisplayDevice();
-			initStereoDisplayDevice();
-		}
 	}
 
 	// GRAPHICS - LANDSCAPE
