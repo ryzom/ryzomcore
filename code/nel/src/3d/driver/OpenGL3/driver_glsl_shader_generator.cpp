@@ -437,8 +437,10 @@ namespace NL3D
 		ss << "{" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
-		ss << "vec3 reflection = reflect( normalize( -light" << num << "Dir ), normal3 );" << std::endl;
-		ss << "float angle = dot( normal3, reflection );" << std::endl;
+		//ss << "vec3 reflection = reflect( normalize( -light" << num << "Dir ), normal3 );" << std::endl;
+		ss << "vec3 halfVector = normalize( light" << num << "Dir + normal3 );" << std::endl;
+		//ss << "float angle = dot( normal3, reflection );" << std::endl;
+		ss << "float angle = dot( normal3, halfVector );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "float si = pow( angle, 128.0 );" << std::endl;
 		ss << "return si;" << std::endl;
