@@ -360,6 +360,7 @@ namespace NL3D
 
 			case CShaderDesc::Directional:
 				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
+				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
 				break;
 			}
 		}
@@ -440,7 +441,13 @@ namespace NL3D
 	{
 		ss << "vec4 applyLights( vec4 col )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "col = col * intensity0 * light0ColDiff;" << std::endl;
+
+		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+		{
+			if( desc->getLight( i ) != CShaderDesc::Nolight )
+				ss << "col = col * ( intensity" << i << " * light" << i << "ColDiff + light" << i << "ColAmb );" << std::endl;
+		}
+
 		ss << "return col;" << std::endl;
 		ss << "}" << std::endl;
 	}

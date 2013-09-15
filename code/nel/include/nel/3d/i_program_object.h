@@ -66,6 +66,14 @@ namespace NL3D
 			Light5ColDiff,
 			Light6ColDiff,
 			Light7ColDiff,
+			Light0ColAmb,
+			Light1ColAmb,
+			Light2ColAmb,
+			Light3ColAmb,
+			Light4ColAmb,
+			Light5ColAmb,
+			Light6ColAmb,
+			Light7ColAmb,
 			NUM_UNIFORMS
 		};
 

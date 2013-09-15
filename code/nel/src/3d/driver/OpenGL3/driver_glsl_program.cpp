@@ -212,6 +212,14 @@ namespace NL3D
 		"light5ColDiff",
 		"light6ColDiff",
 		"light7ColDiff",
+		"light0ColAmb",
+		"light1ColAmb",
+		"light2ColAmb",
+		"light3ColAmb",
+		"light4ColAmb",
+		"light5ColAmb",
+		"light6ColAmb",
+		"light7ColAmb"
 	};
 
 	void CGLSLProgram::cacheUniformIndices()
