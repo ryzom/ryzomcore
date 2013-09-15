@@ -294,12 +294,6 @@ namespace NL3D
 	}
 
 
-	struct LightData
-	{
-		float direction[ 3 ];
-		float color[ 4 ];
-	};
-
 	void CDriverGL3::setupUniforms( CMaterial& mat )
 	{
 
@@ -387,33 +381,52 @@ namespace NL3D
 				continue;
 			//////////////////////////////////////////////////////////////////////
 			
-			LightData d;
-			d.direction[ 0 ] = _WorldLightDirection[ i ].x;
-			d.direction[ 1 ] = _WorldLightDirection[ i ].y;
-			d.direction[ 2 ] = _WorldLightDirection[ i ].z;
-
 			int ld = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0Dir + i ) );
 			if( ld != -1 )
 			{
-				setUniform3f( ld, d.direction[ 0 ], d.direction[ 1 ], d.direction[ 2 ] );
+				CVector v = _UserLight[ i ].getDirection();
+				setUniform3f( ld, v.x, v.y, v.z );
 			}
 
 			int ldc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColDiff + i ) );
 			if( ldc != -1 )
 			{
-				setUniform4f( ldc, 1.0f, 1.0f, 1.0f, 1.0f );
+				GLfloat glCol[ 4 ];
+				CRGBA col = _UserLight[ i ].getDiffuse();
+				glCol[ 0 ] = col.R / 255.0f;
+				glCol[ 1 ] = col.G / 255.0f;
+				glCol[ 2 ] = col.B / 255.0f;
+				glCol[ 3 ] = col.A / 255.0f;
+				setUniform4f( ldc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
 			int lsc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColSpec + i ) );
 			if( lsc != -1 )
 			{
-				setUniform4f( lsc, 1.0f, 1.0f, 1.0f, 1.0f );
+				GLfloat glCol[ 4 ];
+				CRGBA col = _UserLight[ i ].getSpecular();
+				glCol[ 0 ] = col.R / 255.0f;
+				glCol[ 1 ] = col.G / 255.0f;
+				glCol[ 2 ] = col.B / 255.0f;
+				glCol[ 3 ] = col.A / 255.0f;
+				setUniform4f( lsc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
 			int lac = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColAmb + i ) );
 			if( lac != -1 )
 			{
-				setUniform4f( lac, 0.1f, 0.1f, 0.1f, 1.0f );
+				GLfloat glCol[ 4 ];
+				CRGBA col;
+				if( mat.getShader() == CMaterial::LightMap )
+					col = _UserLight[ i ].getAmbiant();
+				else
+					col.add( _UserLight[ i ].getAmbiant(), mat.getEmissive() );
+
+				glCol[ 0 ] = col.R / 255.0f;
+				glCol[ 1 ] = col.G / 255.0f;
+				glCol[ 2 ] = col.B / 255.0f;
+				glCol[ 3 ] = col.A / 255.0f;
+				setUniform4f( lac, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
 		}

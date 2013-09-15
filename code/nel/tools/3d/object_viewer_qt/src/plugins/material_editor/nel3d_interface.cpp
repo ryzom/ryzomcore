@@ -415,7 +415,9 @@ namespace MaterialEditor
 		
 		l->setMode( NL3D::ULight::DirectionalLight );
 		l->setDirection( NLMISC::CVector( -100.0f, 100.0f, 100.0f ) );
-		l->setAmbiant( NLMISC::CRGBA::White );
+		l->setAmbiant( NLMISC::CRGBA::CRGBA( 0.1f, 0.1f, 0.1f, 0.1f ) );
+		l->setSpecular( NLMISC::CRGBA::White );
+		l->setDiffuse( NLMISC::CRGBA::White );
 		driver->setLight( 0, *l );
 		driver->enableLight( 0, true );
 

@@ -897,6 +897,9 @@ private:
 	bool						_LightMapDynamicLightDirty;
 	// this is the backup of standard lighting (cause GL states may be modified by Lightmap Dynamic Lighting)
 	CLight						_UserLight0;
+#ifdef GLSL
+	CLight						_UserLight[MaxLight];
+#endif
 	bool						_UserLightEnable[MaxLight];
 
 	//\name description of the per pixel light

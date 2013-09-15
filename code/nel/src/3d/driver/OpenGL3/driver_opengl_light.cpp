@@ -69,6 +69,10 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 		// Copy the mode
 		_LightMode[num]=mode;
 
+#ifdef GLSL
+		_UserLight[num] = light;
+#endif
+
 #ifndef GLSL
 		// Set the ambiant color
 		GLfloat colorGL[4];
