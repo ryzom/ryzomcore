@@ -412,6 +412,12 @@ namespace NL3D
 				setUniform4f( lsc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
+			int shl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0Shininess + i ) );
+			if( shl != -1 )
+			{
+				setUniform1f( shl, mat.getShininess() );
+			}
+
 			int lac = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColAmb + i ) );
 			if( lac != -1 )
 			{

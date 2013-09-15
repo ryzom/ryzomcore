@@ -228,7 +228,15 @@ namespace NL3D
 		"light4ColSpec",
 		"light5ColSpec",
 		"light6ColSpec",
-		"light7ColSpec"
+		"light7ColSpec",
+		"light0Shininess",
+		"light1Shininess",
+		"light2Shininess",
+		"light3Shininess",
+		"light4Shininess",
+		"light5Shininess",
+		"light6Shininess",
+		"light7Shininess"
 	};
 
 	void CGLSLProgram::cacheUniformIndices()

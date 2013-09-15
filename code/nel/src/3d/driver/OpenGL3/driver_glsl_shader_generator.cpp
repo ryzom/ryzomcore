@@ -365,6 +365,7 @@ namespace NL3D
 				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
+				ss << "uniform float light" << i << "Shininess;" << std::endl;
 				break;
 			}
 		}
@@ -442,7 +443,7 @@ namespace NL3D
 		//ss << "float angle = dot( normal3, reflection );" << std::endl;
 		ss << "float angle = dot( normal3, halfVector );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
-		ss << "float si = pow( angle, 128.0 );" << std::endl;
+		ss << "float si = pow( angle, light" << num << "Shininess );" << std::endl;
 		ss << "return si;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;

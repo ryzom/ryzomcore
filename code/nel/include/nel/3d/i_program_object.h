@@ -83,6 +83,14 @@ namespace NL3D
 			Light5ColSpec,
 			Light6ColSpec,
 			Light7ColSpec,
+			Light0Shininess,
+			Light1Shininess,
+			Light2Shininess,
+			Light3Shininess,
+			Light4Shininess,
+			Light5Shininess,
+			Light6Shininess,
+			Light7Shininess,
 			NUM_UNIFORMS
 		};
 
