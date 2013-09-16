@@ -21,6 +21,19 @@
 
 namespace MaterialEditor
 {
+	const char *stockShaders[ 10 ] = 
+	{
+		"Normal",
+		"Bump",
+		"UserColor",
+		"LightMap",
+		"Specular",
+		"Caustics",
+		"PerPixelLighting",
+		"PerPixelLightingNoSpec",
+		"Cloud",
+		"Water"
+	};
 
 	MaterialWidget::MaterialWidget( QWidget *parent ) :
 	QWidget( parent )
@@ -29,6 +42,7 @@ namespace MaterialEditor
 		shaderEditorWidget = new ShaderEditorWidget();
 		matPropWidget = new MatPropWidget();
 		setNel3DIface( NULL );
+		addStockShaders();
 		setupConnections();
 	}
 
@@ -177,6 +191,13 @@ namespace MaterialEditor
 	void MaterialWidget::getCurrentPass( QString &pass )
 	{
 		pass = passCB->currentText();
+	}
+
+	void MaterialWidget::addStockShaders()
+	{
+		for( int i = 0; i < 10; i++ )
+			shaderCB->addItem( QString( stockShaders[ i ] ) );
+
 	}
 
 	void MaterialWidget::setupConnections()

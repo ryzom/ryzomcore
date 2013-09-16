@@ -57,6 +57,7 @@ namespace MaterialEditor
 		void subMatChanged( int i );
 
 	private:
+		void addStockShaders();
 		void setupConnections();
 		ShaderEditorWidget *shaderEditorWidget;
 		MatPropWidget *matPropWidget;
