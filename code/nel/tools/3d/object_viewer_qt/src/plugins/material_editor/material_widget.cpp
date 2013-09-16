@@ -21,7 +21,9 @@
 
 namespace MaterialEditor
 {
-	const char *stockShaders[ 10 ] = 
+	const int NUM_STOCK_SHADERS = 10;
+
+	const char *stockShaders[ NUM_STOCK_SHADERS ] = 
 	{
 		"Normal",
 		"Bump",
@@ -103,9 +105,8 @@ namespace MaterialEditor
 			subMatCB->addItem( QString::number( i ) );
 
 		passCB->setEnabled( true );
-		shaderCB->setEnabled( true );
 		passButton->setEnabled( true );
-		shaderButton->setEnabled( true );
+		shaderCB->setEnabled( true );
 		
 		subMatCB->setCurrentIndex( 0 );
 
@@ -231,8 +232,9 @@ namespace MaterialEditor
 	{
 		if( shaderCB->currentIndex() == 0 )
 			return;
+		if( !shaderEditorWidget->load( shaderCB->currentText() ) )
+			return;
 
-		shaderEditorWidget->load( shaderCB->currentText() );
 		int result = shaderEditorWidget->exec();
 	}
 
@@ -269,6 +271,11 @@ namespace MaterialEditor
 		else
 			shaderCB->setCurrentIndex( 0 );
 
+		if( i > NUM_STOCK_SHADERS )
+			shaderButton->setEnabled( true );
+		else
+			shaderButton->setEnabled( false );
+
 		Q_EMIT passChanged( text );
 	}
 
@@ -283,10 +290,10 @@ namespace MaterialEditor
 		CRenderPassProxy pass = m.getPass( p.toUtf8().data() );
 		pass.setShaderRef( text.toUtf8().data() );
 
-		if( text.isEmpty() )
-			shaderButton->setEnabled( false );
-		else
+		if( shaderCB->currentIndex() > NUM_STOCK_SHADERS )
 			shaderButton->setEnabled( true );
+		else
+			shaderButton->setEnabled( false );
 	}
 }
 

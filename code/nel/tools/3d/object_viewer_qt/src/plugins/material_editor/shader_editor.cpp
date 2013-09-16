@@ -73,16 +73,17 @@ namespace MaterialEditor
 		setResult( QDialog::Rejected );
 	}
 
-	void ShaderEditorWidget::load( const QString &name )
+	bool ShaderEditorWidget::load( const QString &name )
 	{
 		SShaderInfo info;
-		nl3dIface->getShaderInfo( name.toUtf8().data(), info );
+		if( !nl3dIface->getShaderInfo( name.toUtf8().data(), info ) )
+			return false;
 
 		nameEdit->setText( info.name.c_str() );
 		descriptionEdit->setPlainText( info.description.c_str() );
 		vsEdit->setPlainText( info.vp.c_str() );
 		fsEdit->setPlainText( info.fp.c_str() );
-
+		return true;
 	}
 }
 

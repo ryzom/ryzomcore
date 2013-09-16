@@ -36,7 +36,7 @@ namespace MaterialEditor
 		void setNel3DInterface( CNel3DInterface *iface ){ nl3dIface = iface; }
 
 		void reset();
-		void load( const QString &name );
+		bool load( const QString &name );
 
 	private Q_SLOTS:
 		void onOKClicked();
