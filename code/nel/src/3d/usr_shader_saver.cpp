@@ -15,24 +15,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "nel/3d/shader_saver.h"
-#include "nel/3d/shader_manager.h"
-#include "nel/3d/shader_program.h"
+#include "nel/3d/usr_shader_saver.h"
+#include "nel/3d/usr_shader_manager.h"
+#include "nel/3d/usr_shader_program.h"
 #include "nel/misc/file.h"
 #include "nel/misc/o_xml.h"
 
 namespace NL3D
 {
-	CShaderSaver::CShaderSaver()
+	CUsrShaderSaver::CUsrShaderSaver()
 	{
 		manager = NULL;
 	}
 
-	CShaderSaver::~CShaderSaver()
+	CUsrShaderSaver::~CUsrShaderSaver()
 	{
 	}
 
-	void CShaderSaver::visit( CShaderProgram *program )
+	void CUsrShaderSaver::visit( CUsrShaderProgram *program )
 	{
 		std::string fn;
 		program->getName( fn );
@@ -55,13 +55,13 @@ namespace NL3D
 
 	}
 
-	void CShaderSaver::saveShaders( const std::string &directory )
+	void CUsrShaderSaver::saveShaders( const std::string &directory )
 	{
 		outputDir = directory;
 		manager->visitShaders( this );
 	}
 
-	void CShaderSaver::saveShader( const std::string &directory, const std::string &name )
+	void CUsrShaderSaver::saveShader( const std::string &directory, const std::string &name )
 	{
 		outputDir = directory;
 		manager->visitShader( name, this );

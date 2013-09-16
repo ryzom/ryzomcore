@@ -15,20 +15,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef SHADER_VISITOR_H
-#define SHADER_VISITOR_H
+#ifndef USR_SHADER_VISITOR_H
+#define USR_SHADER_VISITOR_H
 
 namespace NL3D
 {
-	class CShaderProgram;
+	class CUsrShaderProgram;
 
-	class IShaderVisitor
+	class IUsrShaderVisitor
 	{
 	public:
-		IShaderVisitor(){}
-		~IShaderVisitor(){}
+		IUsrShaderVisitor(){}
+		~IUsrShaderVisitor(){}
 
-		virtual void visit( CShaderProgram *program ) = 0;
+		virtual void visit( CUsrShaderProgram *program ) = 0;
 
 	};
 

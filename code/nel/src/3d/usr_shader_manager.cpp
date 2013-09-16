@@ -15,25 +15,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "nel/3d/shader_manager.h"
-#include "nel/3d/shader_program.h"
-#include "nel/3d/shader_visitor.h"
+#include "nel/3d/usr_shader_manager.h"
+#include "nel/3d/usr_shader_program.h"
+#include "nel/3d/usr_shader_visitor.h"
 
 namespace NL3D
 {
-	CShaderManager::CShaderManager()
+	CUsrShaderManager::CUsrShaderManager()
 	{
 	}
 
-	CShaderManager::~CShaderManager()
+	CUsrShaderManager::~CUsrShaderManager()
 	{
 		clear();
 	}
 
 
-	void CShaderManager::clear()
+	void CUsrShaderManager::clear()
 	{
-		std::map< std::string, CShaderProgram* >::iterator itr = programs.begin();
+		std::map< std::string, CUsrShaderProgram* >::iterator itr = programs.begin();
 		while( itr != programs.end() )
 		{
 			delete itr->second;
@@ -42,12 +42,12 @@ namespace NL3D
 		programs.clear();
 	}
 
-	void CShaderManager::getShaderList( std::vector< std::string > &v )
+	void CUsrShaderManager::getShaderList( std::vector< std::string > &v )
 	{
 		v.clear();
 
 		std::string n;
-		std::map< std::string, CShaderProgram* >::iterator itr = programs.begin();
+		std::map< std::string, CUsrShaderProgram* >::iterator itr = programs.begin();
 		while( itr != programs.end() )
 		{
 			itr->second->getName( n );
@@ -56,12 +56,12 @@ namespace NL3D
 		}
 	}
 
-	bool CShaderManager::addShader( CShaderProgram *program )
+	bool CUsrShaderManager::addShader( CUsrShaderProgram *program )
 	{
 		std::string n;
 		program->getName( n );
 
-		std::map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CUsrShaderProgram* >::iterator itr
 			= programs.find( n );
 		if( itr != programs.end() )
 			return false;
@@ -70,9 +70,9 @@ namespace NL3D
 		return true;
 	}
 
-	bool CShaderManager::removeShader( const std::string &name )
+	bool CUsrShaderManager::removeShader( const std::string &name )
 	{
-		std::map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CUsrShaderProgram* >::iterator itr
 			= programs.find( name );
 		if( itr == programs.end() )
 			return false;
@@ -84,14 +84,14 @@ namespace NL3D
 		return true;
 	}
 
-	bool CShaderManager::changeShader( const std::string &name, CShaderProgram *program )
+	bool CUsrShaderManager::changeShader( const std::string &name, CUsrShaderProgram *program )
 	{
-		std::map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CUsrShaderProgram* >::iterator itr
 			= programs.find( name );
 		if( itr == programs.end() )
 			return false;
 
-		CShaderProgram *p = itr->second;
+		CUsrShaderProgram *p = itr->second;
 		std::string s;
 
 		program->getName( s );
@@ -109,14 +109,14 @@ namespace NL3D
 		return true;		
 	}
 
-	bool CShaderManager::getShader( const std::string &name, CShaderProgram *program )
+	bool CUsrShaderManager::getShader( const std::string &name, CUsrShaderProgram *program )
 	{
-		std::map< std::string, CShaderProgram* >::iterator itr
+		std::map< std::string, CUsrShaderProgram* >::iterator itr
 			= programs.find( name );
 		if( itr == programs.end() )
 			return false;
 
-		CShaderProgram *p = itr->second;
+		CUsrShaderProgram *p = itr->second;
 		std::string s;
 
 		program->setName( name );
@@ -133,9 +133,9 @@ namespace NL3D
 		return true;
 	}
 
-	void CShaderManager::visitShaders( IShaderVisitor *visitor )
+	void CUsrShaderManager::visitShaders( IUsrShaderVisitor *visitor )
 	{
-		std::map< std::string, CShaderProgram* >::iterator itr = programs.begin();
+		std::map< std::string, CUsrShaderProgram* >::iterator itr = programs.begin();
 		while( itr != programs.end() )
 		{
 			visitor->visit( itr->second );
@@ -143,9 +143,9 @@ namespace NL3D
 		}
 	}
 
-	void CShaderManager::visitShader( const std::string &name, IShaderVisitor *visitor )
+	void CUsrShaderManager::visitShader( const std::string &name, IUsrShaderVisitor *visitor )
 	{
-		std::map< std::string, CShaderProgram* >::iterator itr =
+		std::map< std::string, CUsrShaderProgram* >::iterator itr =
 			programs.find( name );
 		if( itr == programs.end() )
 			return;

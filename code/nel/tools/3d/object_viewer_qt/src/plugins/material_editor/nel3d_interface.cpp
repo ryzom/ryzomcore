@@ -16,10 +16,10 @@
 
 #include "nel3d_interface.h"
 #include "nel/3d/dynamic_material.h"
-#include "nel/3d/shader_manager.h"
-#include "nel/3d/shader_program.h"
-#include "nel/3d/shader_loader.h"
-#include "nel/3d/shader_saver.h"
+#include "nel/3d/usr_shader_manager.h"
+#include "nel/3d/usr_shader_program.h"
+#include "nel/3d/usr_shader_loader.h"
+#include "nel/3d/usr_shader_saver.h"
 #include "nel/3d/driver_user.h"
 #include "nel/3d/scene_user.h"
 #include "nel/3d/u_camera.h"
@@ -231,7 +231,7 @@ namespace MaterialEditor
 
 	CNel3DInterface::CNel3DInterface()
 	{
-		shaderManager = new NL3D::CShaderManager();
+		shaderManager = new NL3D::CUsrShaderManager();
 		driver = NULL;
 		scene = NULL;
 		mouseListener = NULL;
@@ -324,7 +324,7 @@ namespace MaterialEditor
 
 	bool CNel3DInterface::getShaderInfo( const std::string &name, SShaderInfo &info )
 	{
-		NL3D::CShaderProgram program;
+		NL3D::CUsrShaderProgram program;
 		bool ok = shaderManager->getShader( name, &program );
 		if( !ok )
 			return false;
@@ -346,7 +346,7 @@ namespace MaterialEditor
 
 	bool CNel3DInterface::updateShaderInfo( const SShaderInfo &info )
 	{
-		NL3D::CShaderProgram program;
+		NL3D::CUsrShaderProgram program;
 		program.setName( info.name );
 		program.setDescription( info.description );
 		program.setVP( info.vp );
@@ -357,7 +357,7 @@ namespace MaterialEditor
 
 	bool CNel3DInterface::addShader( const SShaderInfo &info )
 	{
-		NL3D::CShaderProgram *program = new NL3D::CShaderProgram();
+		NL3D::CUsrShaderProgram *program = new NL3D::CUsrShaderProgram();
 
 		program->setName( info.name );
 		program->setDescription( info.description );
@@ -381,14 +381,14 @@ namespace MaterialEditor
 
 	void CNel3DInterface::loadShaders()
 	{
-		NL3D::CShaderLoader loader;
+		NL3D::CUsrShaderLoader loader;
 		loader.setManager( shaderManager );
 		loader.loadShaders( "./shaders" );
 	}
 
 	void CNel3DInterface::saveShader( const std::string &name )
 	{
-		NL3D::CShaderSaver saver;
+		NL3D::CUsrShaderSaver saver;
 		saver.setManager( shaderManager );
 		saver.saveShader( "./shaders", name );
 	}

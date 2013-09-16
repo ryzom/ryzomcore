@@ -15,25 +15,25 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "nel/3d/shader_loader.h"
-#include "nel/3d/shader_manager.h"
-#include "nel/3d/shader_program.h"
+#include "nel/3d/usr_shader_loader.h"
+#include "nel/3d/usr_shader_manager.h"
+#include "nel/3d/usr_shader_program.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
 #include "nel/misc/i_xml.h"
 
 namespace NL3D
 {
-	CShaderLoader::CShaderLoader()
+	CUsrShaderLoader::CUsrShaderLoader()
 	{
 		manager = NULL;
 	}
 
-	CShaderLoader::~CShaderLoader()
+	CUsrShaderLoader::~CUsrShaderLoader()
 	{
 	}
 
-	void CShaderLoader::loadShaders( const std::string &directory )
+	void CUsrShaderLoader::loadShaders( const std::string &directory )
 	{
 		if( manager == NULL )
 			return;
@@ -54,7 +54,7 @@ namespace NL3D
 		}
 	}
 
-	void CShaderLoader::loadShader( const std::string &file )
+	void CUsrShaderLoader::loadShader( const std::string &file )
 	{
 		NLMISC::CIFile f;
 		if( !f.open( file, true ) )
@@ -64,7 +64,7 @@ namespace NL3D
 		if( !xml.init( f ) )
 			return;
 
-		CShaderProgram *p = new CShaderProgram();
+		CUsrShaderProgram *p = new CUsrShaderProgram();
 		p->serial( xml );
 		manager->addShader( p );
 

@@ -25,7 +25,7 @@ namespace NL3D
 {
 	class CDynMaterial;
 	struct SRenderPass;
-	class CShaderManager;
+	class CUsrShaderManager;
 	class UDriver;
 	class UScene;
 	class U3dMouseListener;
@@ -174,7 +174,7 @@ namespace MaterialEditor
 
 		unsigned long subMatId;
 
-		NL3D::CShaderManager *shaderManager;
+		NL3D::CUsrShaderManager *shaderManager;
 		NL3D::UDriver *driver;
 		NL3D::UScene *scene;
 		NL3D::U3dMouseListener *mouseListener;

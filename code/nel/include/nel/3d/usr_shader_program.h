@@ -23,14 +23,14 @@
 
 namespace NL3D
 {
-	class CShaderProgram : public NLMISC::IStreamable
+	class CUsrShaderProgram : public NLMISC::IStreamable
 	{
 	public:
-		CShaderProgram();
+		CUsrShaderProgram();
 		
-		~CShaderProgram();
+		~CUsrShaderProgram();
 		
-		std::string getClassName(){ return "CShaderProgram"; }
+		std::string getClassName(){ return "CUsrShaderProgram"; }
 		
 		void serial( NLMISC::IStream &f );
 

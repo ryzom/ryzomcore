@@ -15,36 +15,45 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef SHADER_SAVER_H
-#define SHADER_SAVER_H
-
-#include "nel/3d/shader_visitor.h"
-#include <string>
+#include "nel/3d/usr_shader_program.h"
 
 namespace NL3D
 {
-	class CShaderProgram;
-	class CShaderManager;
-
-	class CShaderSaver : public IShaderVisitor
+	CUsrShaderProgram::CUsrShaderProgram()
 	{
-	public:
-		CShaderSaver();
-		~CShaderSaver();
+		vpId = 0;
+		fpId = 0;
+		pId  = 0;
+	}
 
-		void setManager( CShaderManager *mgr ){ manager = mgr; }
+	CUsrShaderProgram::~CUsrShaderProgram()
+	{
+	}
 
-		void visit( CShaderProgram *program );
+	void CUsrShaderProgram::serial( NLMISC::IStream &f )
+	{
+		f.xmlPush( "ShaderProgram" );
 
-		void saveShaders( const std::string &directory );
-		void saveShader( const std::string &directory, const std::string &name );
+		int version = f.serialVersion( 1 );
 
-	private:
-		CShaderManager *manager;
-		std::string outputDir;
-	};
+		f.xmlPush( "Name" );
+		f.serial( name );
+		f.xmlPop();
+
+		f.xmlPush( "Description" );
+		f.serial( description );
+		f.xmlPop();
+
+		f.xmlPush( "VertexProgram" );
+		f.serial( vertexProgram );
+		f.xmlPop();
+
+		f.xmlPush( "FragmentProgram" );
+		f.serial( fragmentProgram );
+		f.xmlPop();
+
+		f.xmlPop();
+	}
 }
-
-#endif
 
 

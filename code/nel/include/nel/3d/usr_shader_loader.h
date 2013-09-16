@@ -15,36 +15,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef SHADER_MANAGER_H
-#define SHADER_MANAGER_H
+#ifndef SHADER_LOADER_H
+#define SHADER_LOADER_H
 
-#include <map>
-#include <vector>
 #include <string>
 
 namespace NL3D
 {
-	class CShaderProgram;
-	class IShaderVisitor;
+	class CUsrShaderManager;
 
-	class CShaderManager
+	class CUsrShaderLoader
 	{
 	public:
-		CShaderManager();
-		~CShaderManager();
-		void clear();
-		void getShaderList( std::vector< std::string > &v );
-		bool addShader( CShaderProgram *program );
-		bool removeShader( const std::string &name );
-		bool changeShader( const std::string &name, CShaderProgram *program );
-		bool getShader( const std::string &name, CShaderProgram *program );
-		void visitShaders( IShaderVisitor *visitor );
-		void visitShader( const std::string &name, IShaderVisitor *visitor );
+		CUsrShaderLoader();
+		~CUsrShaderLoader();
+		void setManager( CUsrShaderManager *mgr ){ manager = mgr; }
+		void loadShaders( const std::string &directory );
 
 	private:
-		std::map< std::string, CShaderProgram* > programs;
+		void loadShader( const std::string &file );
+
+		CUsrShaderManager *manager;
 	};
 }
+
 
 #endif
 
