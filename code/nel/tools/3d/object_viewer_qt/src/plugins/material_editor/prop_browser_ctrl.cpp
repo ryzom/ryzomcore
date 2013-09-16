@@ -127,10 +127,10 @@ namespace MaterialEditor
 				}
 
 				QColor color;
-				color.setRedF( c[ 0 ] );
-				color.setGreenF( c[ 1 ] );
-				color.setBlueF( c[ 2 ] );
-				color.setAlphaF( c[ 3 ] );
+				color.setRedF( c[ 0 ] / 255.0f );
+				color.setGreenF( c[ 1 ] / 255.0f );
+				color.setBlueF( c[ 2 ] / 255.0f );
+				color.setAlphaF( c[ 3 ] / 255.0f );
 
 				v = color;
 
