@@ -35,7 +35,7 @@ if ( ! isset( $_GET["page"]) ){
 
 //check if ingame & page= register
 //this is needed because the ingame register can't send a hidden $_POST["function"]
-if ( Helpers::check_if_game_client() && $page.equals("register")){
+if ( Helpers::check_if_game_client() && ($page == "register")){
      require( "func/add_user.php" );
      $return = add_user();
 }
