@@ -574,7 +574,10 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec4 eyePosition = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
-		ss << "ecPos = eyePosition;" << std::endl;
+		
+		if( desc->fogEnabled() )
+			ss << "ecPos = eyePosition;" << std::endl;
+
 		ss << "vec3 ep = eyePosition.xyz / eyePosition.w;" << std::endl;
 		ss << "vec3 n = vnormal.xyz;" << std::endl;
 		ss << "cubeTexCoords = ReflectionMap( ep, n );" << std::endl;
