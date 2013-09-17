@@ -27,6 +27,11 @@ function add_user(){
               'access' => $_SERVER['REQUEST_TIME']
               );
           $status = write_user( $edit );
+          if(Helpers::check_if_game_client()){
+               //if registering ingame then we have to set the header and dont need to reload the template.
+               header('Location: email_sent.php');
+               exit;
+          }
           $pageElements['status'] = $status;
           $pageElements['no_visible_elements'] = 'TRUE';
 	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;

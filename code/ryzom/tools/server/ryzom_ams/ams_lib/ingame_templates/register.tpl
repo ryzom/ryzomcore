@@ -87,7 +87,7 @@
            name="Submit"
            value="Continue" />
     </div>
-    <input type="hidden" name="function" value="add_user">
+
   </form>
 
   <div id="signupTooltip"
