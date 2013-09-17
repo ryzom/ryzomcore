@@ -23,7 +23,7 @@
                "javascript:showTooltip('{$username_tooltip}', this);" />
         </td>
         
-        <td id="comment-Username" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($Username)}{$Username}{/if}</td>
+        <td id="comment-Username" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}{$USERNAME}{/if}</td>
       </tr>
 
       <tr>
@@ -39,7 +39,7 @@
                onfocus="javascript:showTooltip('{$password_message}', this);" />
         </td>
 
-        <td id="comment-Password" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}{$Password}{/if}</td>
+        <td id="comment-Password" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}{$PASSWORD}{/if}</td>
       </tr>
 
       <tr>
@@ -52,11 +52,11 @@
                onfocus="javascript:showTooltip('{$cpassword_message}', this);" />
         </td>
 
-        <td id="comment-ConfirmPass" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}{$ConfirmPass}{/if}</td>
+        <td id="comment-ConfirmPass" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}{$CPASSWORD}{/if}</td>
       </tr>
 
       <tr>
-        <td width="33%" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-Email">{$email_tag}</td>
+        <td width="33%" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} id="caption-Email">{$email_tag}</td>
 
         <td width="25%">
           <input type="text"
@@ -67,7 +67,7 @@
                "javascript:showTooltip('{$email_message}', this);" />
         </td>
 
-        <td id="comment-Email" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}{$Email}{/if}</td>
+        <td id="comment-Email" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}{$EMAIL}{/if}</td>
       </tr>
 
       <tr>
