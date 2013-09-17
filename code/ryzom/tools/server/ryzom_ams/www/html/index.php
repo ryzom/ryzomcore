@@ -33,6 +33,13 @@ if ( ! isset( $_GET["page"]) ){
      $page = $_GET["page"];
 }
 
+//check if ingame & page= register
+//this is needed because the ingame register can't send a hidden $_POST["function"]
+if ( Helpers::check_if_game_client() && $page.equals("register")){
+     require( "func/add_user.php" );
+     $return = add_user();
+}
+
 //perform an action in case one is specified
 //else check if a php page is included in the inc folder, else just set page to the get param
 if ( isset( $_POST["function"] ) ){

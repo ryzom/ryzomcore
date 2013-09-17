@@ -82,7 +82,6 @@
 
       </tr>
     </table>
-    <input type="hidden" name="function" value="add_user">
     <div class="c1">
       <input type="submit"
            name="Submit"
