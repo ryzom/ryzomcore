@@ -78,11 +78,11 @@
                value="1"
                onfocus="javascript:showTooltip('', this);" /><span id=
                "caption-TaC">{$tac_tag}</span></td>
-                                <td id="comment-TaC" {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}class="error"{/if} width="42%">{$tac_message}</td>
+                                {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}<td id="comment-TaC" class="error" width="42%">{$tac_message}</td>{/if}
 
       </tr>
     </table>
-
+    <input type="hidden" name="function" value="add_user">
     <div class="c1">
       <input type="submit"
            name="Submit"
