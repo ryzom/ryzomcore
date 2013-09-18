@@ -411,25 +411,32 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addDirectionalFunctionVS( int num )
 	{
-		ss << "float getIntensity" << num << "( void )" << std::endl;
+		ss << "float getIntensity" << num << "( vec3 normal3 )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
-		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "float angle = dot( normalize( light" << num << "Dir ), normal3 );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "return angle;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 
-		ss << "float getSpecIntensity" << num << "( void )" << std::endl;
+		ss << "float getSpecIntensity" << num << "( vec3 normal3 )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
-		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "vec3 halfVector = normalize( light" << num << "Dir + normal3 );" << std::endl;
 		ss << "float angle = dot( normal3, halfVector );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "float si = pow( angle, light" << num << "Shininess );" << std::endl;
 		ss << "return si;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "vec4 getLight" << num << "Color()" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
+		ss << "normal3 = normalMatrix * normal3;" << std::endl;
+		ss << "vec4 lc = getIntensity" << num << "( normal3 ) * light" << num << "ColDiff + ";
+		ss << "getSpecIntensity" << num << "( normal3 ) * light" << num << "ColSpec + ";
+		ss << "light" << num << "ColAmb;" << std::endl;
+		ss << "return lc;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 	}
@@ -515,24 +522,10 @@ namespace NL3D
 
 		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
 		{
-			switch( desc->getLight( i ) )
-			{
-			case CShaderDesc::Nolight:
+			if( desc->getLight( i ) == CShaderDesc::Nolight )
 				continue;
-				break;
 
-			case CShaderDesc::Directional:
-				ss << "lightColor = lightColor + (";
-				ss << "getIntensity" << i << "() * light" << i << "ColDiff + ";
-				ss << "getSpecIntensity" << i << "() * light" << i << "ColSpec + ";
-				ss << "light" << i << "ColAmb );";
-				ss << std::endl;
-				break;
-
-			case CShaderDesc::Point:
-				ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
-				break;
-			}
+			ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
 		}
 	}
 
