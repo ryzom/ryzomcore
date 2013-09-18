@@ -413,7 +413,7 @@ namespace NL3D
 	{
 		ss << "float getIntensity" << num << "( vec3 normal3, vec3 lightDir )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "float angle = dot( normalize( lightDir ), normal3 );" << std::endl;
+		ss << "float angle = dot( normalize( -lightDir ), normal3 );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "return angle;" << std::endl;
 		ss << "}" << std::endl;
