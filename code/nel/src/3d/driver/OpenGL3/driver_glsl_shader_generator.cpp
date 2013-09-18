@@ -411,20 +411,16 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addDirectionalFunctionVS( int num )
 	{
-		ss << "float getIntensity" << num << "( vec3 normal3 )" << std::endl;
+		ss << "float getIntensity" << num << "( vec3 normal3, vec3 lightDir )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 lightDir4 = mvMatrix * vec4( light" << num << "Dir, 1.0 );" << std::endl;
-		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
 		ss << "float angle = dot( normalize( lightDir ), normal3 );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "return angle;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 
-		ss << "float getSpecIntensity" << num << "( vec3 normal3 )" << std::endl;
+		ss << "float getSpecIntensity" << num << "( vec3 normal3, vec3 lightDir )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 lightDir4 = mvMatrix * vec4( light" << num << "Dir, 1.0 );" << std::endl;
-		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
 		ss << "vec3 halfVector = normalize( lightDir + normal3 );" << std::endl;
 		ss << "float angle = dot( normal3, halfVector );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
@@ -435,6 +431,8 @@ namespace NL3D
 
 		ss << "vec4 getLight" << num << "Color()" << std::endl;
 		ss << "{" << std::endl;
+		ss << "vec4 lightDir4 = mvMatrix * vec4( light" << num << "Dir, 1.0 );" << std::endl;
+		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "vec4 lc = getIntensity" << num << "( normal3 ) * light" << num << "ColDiff + ";
