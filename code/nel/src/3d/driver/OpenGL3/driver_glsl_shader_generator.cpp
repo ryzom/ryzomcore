@@ -601,9 +601,28 @@ namespace NL3D
 		ss << "uniform mat4 mvMatrix;" << std::endl;
 		ss << "uniform mat4 texMatrix0;" << std::endl;
 		ss << "smooth out vec3 cubeTexCoords;" << std::endl;
+
+		if( desc->fogEnabled() || desc->hasPointLight() )
+		{
+			ss << "vec4 ecPos4;" << std::endl;
+		}
+		
 		if( desc->fogEnabled() )
 			ss << "smooth out vec4 ecPos;" << std::endl;
 		ss << std::endl;
+
+		if( desc->lightingEnabled() )
+		{
+			addNormalMatrix();
+			addLightUniformsVS();
+			addLightOutsVS();
+			ss << std::endl;
+
+			addNormalFromMVFunction();
+
+			addLightsFunctionVS();
+			ss << std::endl;
+		}
 
 		ss << "vec3 ReflectionMap( const in vec3 eyePos, const in vec3 normal )" << std::endl;
 		ss << "{" << std::endl;
@@ -615,6 +634,12 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec4 eyePosition = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+
+		if( desc->lightingEnabled() )
+			ss << "calcNMFromMV();" << std::endl;
+
+		if( desc->hasPointLight() )
+			ss << "ecPos4 = eyePosition;" << std::endl;
 		
 		if( desc->fogEnabled() )
 			ss << "ecPos = eyePosition;" << std::endl;
@@ -626,6 +651,9 @@ namespace NL3D
 		ss << "t = t * texMatrix0;" << std::endl;
 		ss << "cubeTexCoords = t.xyz;" << std::endl;
 		ss << "gl_Position = mvpMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+
+		if( desc->lightingEnabled() )
+			addLightsVS();
 
 		for( int i = Weight; i < NumOffsets; i++ )
 		{
@@ -1282,8 +1310,17 @@ namespace NL3D
 		ss << "uniform samplerCube sampler1;" << std::endl;
 		addDiffuse();
 		addAlphaTreshold();
-
 		addFogUniform();
+
+		if( desc->lightingEnabled() )
+		{
+			addLightUniformsFS();
+			addLightInsFS();
+			ss << std::endl;
+			
+			addLightsFunctionFS();
+			ss << std::endl;
+		}
 
 		if( desc->fogEnabled() )
 			ss << "smooth in vec4 ecPos;" << std::endl;
@@ -1303,6 +1340,9 @@ namespace NL3D
 		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
 		ss << "texel.a = texel1.a;" << std::endl;
 		ss << "fragColor = texel;" << std::endl;
+
+		if( desc->lightingEnabled() )
+			addLightsFS();
 		
 		if( desc->fogEnabled() )
 			addFog();
