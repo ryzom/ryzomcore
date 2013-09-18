@@ -435,8 +435,8 @@ namespace NL3D
 		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
-		ss << "vec4 lc = getIntensity" << num << "( normal3 ) * light" << num << "ColDiff + ";
-		ss << "getSpecIntensity" << num << "( normal3 ) * light" << num << "ColSpec + ";
+		ss << "vec4 lc = getIntensity" << num << "( normal3, lightDir ) * light" << num << "ColDiff + ";
+		ss << "getSpecIntensity" << num << "( normal3, lightDir ) * light" << num << "ColSpec + ";
 		ss << "light" << num << "ColAmb;" << std::endl;
 		ss << "return lc;" << std::endl;
 		ss << "}" << std::endl;
