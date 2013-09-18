@@ -367,6 +367,17 @@ namespace NL3D
 				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
 				ss << "uniform float light" << i << "Shininess;" << std::endl;
 				break;
+
+			case CShaderDesc::Point:
+				ss << "uniform vec3 light" << i << "Pos;" << std::endl;
+				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
+				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
+				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
+				ss << "uniform float light" << i << "Shininess;" << std::endl;
+				ss << "uniform float light" << i << "ConstAttn;" << std::endl;
+				ss << "uniform float light" << i << "LinAttn;" << std::endl;
+				ss << "uniform float light" << i << "QuadAttn;" << std::endl;
+				break;
 			}
 		}
 	}
@@ -390,36 +401,12 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addLightOutsVS()
 	{
-		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
-		{
-			switch( desc->getLight( i ) )
-			{
-			case CShaderDesc::Nolight:
-				continue;
-				break;
-
-			case CShaderDesc::Directional:
-				ss << "smooth out vec4 lightColor;" << std::endl;
-				break;
-			}
-		}
+		ss << "smooth out vec4 lightColor;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addLightInsFS()
 	{
-		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
-		{
-			switch( desc->getLight( i ) )
-			{
-			case CShaderDesc::Nolight:
-				continue;
-				break;
-
-			case CShaderDesc::Directional:
-				ss << "smooth in vec4 lightColor;" << std::endl;
-				break;
-			}
-		}
+		ss << "smooth in vec4 lightColor;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addDirectionalFunctionVS( int num )
@@ -438,13 +425,55 @@ namespace NL3D
 		ss << "{" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
-		//ss << "vec3 reflection = reflect( normalize( -light" << num << "Dir ), normal3 );" << std::endl;
 		ss << "vec3 halfVector = normalize( light" << num << "Dir + normal3 );" << std::endl;
-		//ss << "float angle = dot( normal3, reflection );" << std::endl;
 		ss << "float angle = dot( normal3, halfVector );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "float si = pow( angle, light" << num << "Shininess );" << std::endl;
 		ss << "return si;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addPointLightFunctionVS( int num )
+	{
+		ss << "float getIntensity" << num << "( vec3 normal3, vec3 direction3 )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "float angle = dot( normalize( direction3 ), normal3 );" << std::endl;
+		ss << "angle = max( 0.0, angle );" << std::endl;
+		ss << "return angle;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "float getSpecIntensity" << num << "( vec3 normal3, vec3 direction3 )" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 halfVector = normalize( direction3 + normal3 );" << std::endl;
+		ss << "float angle = dot( normal3, halfVector );" << std::endl;
+		ss << "angle = max( 0.0, angle );" << std::endl;
+		ss << "float si = pow( angle, light" << num << "Shininess );" << std::endl;
+		ss << "return si;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "vec4 getLight" << num << "Color()" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
+		ss << "vec3 lightDirection = light" << num << "Pos - ecPos3;" << std::endl;
+		ss << "float lightDistance = length( lightDirection );" << std::endl;
+		ss << "lightDirection = normalize( lightDirection );" << std::endl;
+
+		ss << "float attenuation = light" << num << "ConstAttn + ";
+		ss << "light" << num << "LinAttn * lightDistance +";
+		ss << "light" << num << "QuadAttn * lightDistance * lightDistance;" << std::endl;
+		
+		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
+		ss << "normal3 = normalMatrix * normal3;" << std::endl;
+
+		ss << "vec4 lc = getIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColDiff + ";
+		ss << "getSpecIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColSpec + ";
+		ss << "light" << num << "ColAmb;" << std::endl;
+
+		ss << "lc = lc / attenuation;" << std::endl;
+		ss << "return lc;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 	}
@@ -462,7 +491,13 @@ namespace NL3D
 			case CShaderDesc::Directional:
 				addDirectionalFunctionVS( i );
 				break;
+
+			case CShaderDesc::Point:
+				addPointLightFunctionVS( i );
+				break;
+
 			}
+
 		}
 	}
 
@@ -476,7 +511,7 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addLightsVS()
 	{
-		ss << "lightColor = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
+		ss << "lightColor = vec4( 0.0, 0.0, 0.0, 1.0 );" << std::endl;
 
 		for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
 		{
@@ -487,11 +522,15 @@ namespace NL3D
 				break;
 
 			case CShaderDesc::Directional:
-				ss << "lightColor = lightColor * (";
+				ss << "lightColor = lightColor + (";
 				ss << "getIntensity" << i << "() * light" << i << "ColDiff + ";
 				ss << "getSpecIntensity" << i << "() * light" << i << "ColSpec + ";
 				ss << "light" << i << "ColAmb );";
 				ss << std::endl;
+				break;
+
+			case CShaderDesc::Point:
+				ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
 				break;
 			}
 		}
@@ -510,8 +549,14 @@ namespace NL3D
 		{
 			ss << "uniform mat4 mvMatrix;" << std::endl;
 		}
+		if( desc->fogEnabled() || desc->hasPointLight() )
+		{
+			ss << "vec4 ecPos4;" << std::endl;
+		}
+
 		if( desc->fogEnabled() )
 			ss << "smooth out vec4 ecPos;" << std::endl;
+
 		ss << std::endl;
 
 		if( desc->lightingEnabled() )
@@ -533,13 +578,16 @@ namespace NL3D
 		if( desc->lightingEnabled() )
 			ss << "calcNMFromMV();" << std::endl;
 		
-		if( desc->lightingEnabled() )
-			addLightsVS();
-
 		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
 
+		if( desc->fogEnabled() || desc->hasPointLight() )
+			ss << "ecPos4 = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+
 		if( desc->fogEnabled() )
-			ss << "ecPos = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+			ss << "ecPos = ecPos4;" << std::endl;
+
+		if( desc->lightingEnabled() )
+			addLightsVS();
 
 		for( int i = Weight; i < NumOffsets; i++ )
 		{
@@ -1201,7 +1249,7 @@ namespace NL3D
 		
 		//ss << "vec4 texel = diffuse;" << std::endl;
 		//ss << "vec4 texel = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
-		ss << "vec4 texel = vec4( 0.0, 0.0, 0.0, 0.0 );" << std::endl;
+		ss << "vec4 texel = vec4( 0.0, 0.0, 0.0, 1.0 );" << std::endl;
 
 		// Lightmaps
 		for( int i = 0; i < ntextures - 1; i++ )

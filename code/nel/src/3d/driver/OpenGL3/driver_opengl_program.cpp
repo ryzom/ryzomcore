@@ -377,7 +377,7 @@ namespace NL3D
 				continue;
 			
 			////////////////// Temporary insanity  ///////////////////////////////
-			if( _LightMode[ i ] != CLight::DirectionalLight )
+			if( _LightMode[ i ] != CLight::DirectionalLight && _LightMode[ i ] != CLight::PointLight )
 				continue;
 			//////////////////////////////////////////////////////////////////////
 			
@@ -386,6 +386,13 @@ namespace NL3D
 			{
 				CVector v = _UserLight[ i ].getDirection();
 				setUniform3f( ld, v.x, v.y, v.z );
+			}
+
+			int lp = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0Pos + i ) );
+			if( lp != -1 )
+			{
+				CVector v = _UserLight[ i ].getPosition();
+				setUniform3f( lp, v.x, v.y, v.z );
 			}
 
 			int ldc = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ColDiff + i ) );
@@ -435,6 +442,23 @@ namespace NL3D
 				setUniform4f( lac, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
+			int lca = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0ConstAttn + i ) );
+			if( lca != -1 )
+			{
+				setUniform1f( lca, _UserLight[ i ].getConstantAttenuation() );
+			}
+
+			int lla = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0LinAttn + i ) );
+			if( lla != -1 )
+			{
+				setUniform1f( lla, _UserLight[ i ].getLinearAttenuation() );
+			}
+
+			int lqa = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Light0QuadAttn + i ) );
+			if( lqa != -1 )
+			{
+				setUniform1f( lqa, _UserLight[ i ].getQuadraticAttenuation() );
+			}
 		}
 
 

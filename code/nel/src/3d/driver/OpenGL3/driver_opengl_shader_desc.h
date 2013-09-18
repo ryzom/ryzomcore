@@ -73,6 +73,7 @@ namespace NL3D
 			nlightmaps = 0;
 			alphaTestTreshold = 0.5f;
 			fogMode = Linear;
+			pointLight = false;
 		}
 
 		~CShaderDesc(){
@@ -179,9 +180,13 @@ namespace NL3D
 		void setLight( int idx, TLightMode mode )
 		{
 			lightMode[ idx ] = mode;
+			if( mode == Point )
+				pointLight = true;
 		}
 
 		TLightMode getLight( int idx ) const{ return lightMode[ idx ]; }
+
+		bool hasPointLight() const{ return pointLight; }
 
 		IProgramObject* getProgram() const{ return program; }
 
@@ -203,6 +208,7 @@ namespace NL3D
 		float alphaTestTreshold;
 		uint32 fogMode;
 		TLightMode lightMode[ SHADER_MAX_LIGHTS ];
+		bool pointLight;
 
 		IProgramObject *program;
 	};

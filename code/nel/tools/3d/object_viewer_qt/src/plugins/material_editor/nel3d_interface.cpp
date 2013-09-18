@@ -411,18 +411,35 @@ namespace MaterialEditor
 		driver->enableFog( true );
 		driver->setupFog( 1.0f, 5.0f, NLMISC::CRGBA::White );
 
-		NL3D::ULight *l = NL3D::ULight::createLight();
+		NL3D::ULight *ld;
 		
-		l->setMode( NL3D::ULight::DirectionalLight );
-		l->setDirection( NLMISC::CVector( -100.0f, 100.0f, 100.0f ) );
-		l->setAmbiant( NLMISC::CRGBA::CRGBA( 0.1f, 0.1f, 0.1f, 0.1f ) );
-		l->setSpecular( NLMISC::CRGBA::White );
-		l->setDiffuse( NLMISC::CRGBA::White );
-		driver->setLight( 0, *l );
+		/*
+		// Let's add a directional light!
+		ld = NL3D::ULight::createLight();
+		ld->setMode( NL3D::ULight::DirectionalLight );
+		ld->setDirection( NLMISC::CVector( -100.0f, 100.0f, 100.0f ) );
+		ld->setAmbiant( NLMISC::CRGBA::CRGBA( 0.1f, 0.1f, 0.1f, 0.1f ) );
+		ld->setSpecular( NLMISC::CRGBA::White );
+		ld->setDiffuse( NLMISC::CRGBA::White );
+		driver->setLight( 0, *ld );
 		driver->enableLight( 0, true );
-
-		delete l;
-		l = NULL;
+		delete ld;
+		*/
+		
+		// Let's add a point light as well!
+		ld = NL3D::ULight::createLight();
+		ld->setMode( NL3D::ULight::PointLight );
+		ld->setPosition( NLMISC::CVector( 0.0f, 0.0f, 0.0f ) );
+		ld->setAmbiant( NLMISC::CRGBA::CRGBA( 0.1f, 0.1f, 0.1f, 0.1f ) );
+		ld->setSpecular( NLMISC::CRGBA::White );
+		ld->setDiffuse( NLMISC::CRGBA::White );
+		ld->setConstantAttenuation( 1.0f );
+		ld->setLinearAttenuation( 0.0f );
+		ld->setQuadraticAttenuation( 0.0f );
+		driver->setLight( 1, *ld );
+		driver->enableLight( 1, true );
+		delete ld;
+		ld = NULL;
 
 		scene->enableLightingSystem( false );
 

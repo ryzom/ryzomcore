@@ -60,6 +60,7 @@ namespace NL3D
 		void addLightOutsVS();
 		void addLightInsFS();
 		void addDirectionalFunctionVS( int num );
+		void addPointLightFunctionVS( int num );
 		void addLightsFunctionVS();
 		void addLightsFunctionFS();
 		void addLightsVS();
