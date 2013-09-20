@@ -30,7 +30,16 @@ if ( ! isset( $_GET["page"]) ){
           $page = 'login';   
      }
 }else{
-     $page = $_GET["page"];
+     if(isset($_SESSION['user'])){
+          $page = $_GET["page"];
+     }else{
+          if($_GET["page"] == 'register'){
+               $page = 'register';
+          }else{
+               $page = 'login';   
+          }
+          
+     }
 }
 
 //check if ingame & page= register

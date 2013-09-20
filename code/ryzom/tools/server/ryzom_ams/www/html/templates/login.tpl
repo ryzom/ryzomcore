@@ -12,7 +12,7 @@
 		<div class="alert alert-info">
 			{$login_info}
 		</div>
-		<form method="post" action="index.php" class="form-horizontal">
+		<form method="post" action="index.php{$getstring}" class="form-horizontal">
 			<fieldset>
 				<div data-rel="tooltip" class="input-prepend" data-original-title="Username">
 					<span class="add-on"><i class="icon-user"></i></span><input type="text" value="" id="Username" name="Username" class="input-large span10" placeholder="Username">

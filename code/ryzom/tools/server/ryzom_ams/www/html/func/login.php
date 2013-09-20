@@ -21,12 +21,21 @@ function login(){
 			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
 			$user = new WebUsers($_SESSION['id']);
 			$_SESSION['Language'] = $user->getLanguage();
+			
+			$GETString = "";
+			foreach($_GET as $key => $value){
+				$GETString = $GETString . $key . '=' . $value . "&";
+			}		
+			if($GETString != ""){
+				$GETString = '?'.$GETString;
+			}
+
 
 			//go back to the index page.
 			if (Helpers::check_if_game_client()) {
-				header( 'Location: '. $INGAME_WEBPATH );
+				header( 'Location: '. $INGAME_WEBPATH . $GETString);
 			}else{
-				header( 'Location: '. $WEBPATH );
+				header( 'Location: '. $WEBPATH . $GETString);
 			}
 			exit;
 		}else{

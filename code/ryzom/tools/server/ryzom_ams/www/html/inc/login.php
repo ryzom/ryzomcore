@@ -26,6 +26,14 @@ function login(){
 		}
 	}
 	$pageElements['ingame_webpath'] = $INGAME_WEBPATH;
+	$GETString = "";
+	foreach($_GET as $key => $value){
+		$GETString = $GETString . $key . '=' . $value . "&";
+	}		
+	if($GETString != ""){
+		$GETString = '?'.$GETString;
+	}
+	$pageElements['getstring'] = $GETString;
 	return $pageElements;
 
 }

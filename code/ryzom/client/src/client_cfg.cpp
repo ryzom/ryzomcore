@@ -325,7 +325,7 @@ CClientConfig::CClientConfig()
 	DisplayAccountButtons = true;
 	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
 	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
-	EditAccountURL		= "https://secure.ryzom.com/payment_profile/index.php";
+	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
 	BetaAccountURL		= "http://www.ryzom.com/profile";
 	ForgetPwdURL		= "https://secure.ryzom.com/payment_profile/lost_secure_password.php";
 	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
