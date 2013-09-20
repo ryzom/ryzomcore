@@ -37,16 +37,15 @@
 				{$email_sent}
 			</div>
 			{/if}
-			<input type="hidden" name="function" value="forgot_password">
-			<div class="control-group">
-				<label class="control-label"></label>			
-				<div class="controls">
-					<button type="submit" class="btn btn-large btn-primary" >Send me the reset link</button>	
-				</div>
-			</div>
+			<input type="hidden" name="function" value="forgot_password">		
+			<p class="center span5">
+				<button type="submit" class="btn btn-primary" >Send me the reset link</button>
+			</p>
 	
 		</form>
-
+		<div class="alert alert-info">
+			{$register_message} <a href="?page=register">{$here}</a>.<br/> {$login_message} <a href="?page=login">{$here}</a>
+		</div>
 
 	</div><!--/span-->
 </div><!--/row-->

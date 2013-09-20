@@ -106,17 +106,9 @@
 			{/if}
 			
 			<input type="hidden" name="function" value="add_user">
-			<div class="control-group">
-			<label class="control-label"></label>
-		      <div class="controls">
-		       <button type="submit" class="btn btn-large btn-primary" >Create My Account</button>
-	
-		      </div>
-		       
-			
-		 
-
-		</div>
+			<p class="center span5">
+				<button type="submit" class="btn btn-primary" >Create My Account</button>
+			</p>
 	
 		</form>
 
