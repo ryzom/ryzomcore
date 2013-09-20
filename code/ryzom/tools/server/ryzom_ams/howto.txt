@@ -1,7 +1,0 @@
--Edit config .php file
--Atm also edit the autoload function's paths
--call the install.php function in your terminal located in the sql folder
-
-for mailing:
--set imap settings in config file (also make sure the folder exists that you will use for mail logging and storing emails)
--make sure imap is enabled.

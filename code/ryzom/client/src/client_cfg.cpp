@@ -323,13 +323,13 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "https://secure.ryzom.com/signup/from_client.php";
+	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
 	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
 	EditAccountURL		= "https://secure.ryzom.com/payment_profile/index.php";
 	BetaAccountURL		= "http://www.ryzom.com/profile";
 	ForgetPwdURL		= "https://secure.ryzom.com/payment_profile/lost_secure_password.php";
 	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
-	LoginSupportURL		= "http://www.ryzom.com/en/support.html";
+	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.

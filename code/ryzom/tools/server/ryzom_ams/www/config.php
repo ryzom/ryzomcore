@@ -42,23 +42,31 @@ $cfg['db']['ring']['pass']    = '';
 // NNTP server on port 119 use: $nntp = imap_open ("{localhost:119/nntp}comp.test", "", "");
 // To connect to a remote server replace "localhost" with the name or the IP address of the server you want to connect to.
 //$cfg['mail']['server'] = '{localhost:110/pop3/novalidate-cert}INBOX';
-$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX'; 
+
+//imap connection string as explained above
+$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';
+//groupemail is the email that sends the email
 $cfg['mail']['default_groupemail'] = 'amsryzom@gmail.com';
+//groupname will be the name displayed as sender
 $cfg['mail']['default_groupname'] = 'Ryzomcore Support';
+//the username of the account 
 $cfg['mail']['default_username']    = 'amsryzom@gmail.com';
-$cfg['mail']['default_password']    = 'lol123bol';
+//the matching password
+$cfg['mail']['default_password']    = 'passw0rd';
+//the host, being used when a mail is sent from a support group: support_groups_name@host
 $cfg['mail']['host'] = "ryzomcore.com";
 
 //Defines mailing related stuff
 $SUPPORT_GROUP_IMAP_CRYPTKEY = "azerty";
-$TICKET_MAILING_SUPPORT = true;
+$TICKET_MAILING_SUPPORT = false;
 
 //You have to create this dir at first!
-$MAIL_DIR = "/tmp/mail";
-$MAIL_LOG_PATH = "/tmp/mail/cron_mail.log";
+//The incoming emails will be backed up here and the log file keeps track of the mail_cron job.
+$MAIL_DIR = "/home/daan/mail";
+$MAIL_LOG_PATH = "/home/daan/mail/cron_mail.log";
 
 //terms of service url location
-$TOS_URL ="http://createyourtos.com";
+$TOS_URL ="http://heregoesyourtos.com";
 
 //crypt is being used by encrypting & decrypting of the IMAP password of the supportgroups
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
@@ -72,15 +80,16 @@ $ALLOW_UNKNOWN = true ;
 // if true= the login service automaticaly create a ring user and a editor character if needed
 $CREATE_RING = true ;
 
-// site paths definitions
+// site paths definitions (you shouldn't have to edit these..)
 $AMS_LIB = dirname( dirname( __FILE__ ) ) . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
 //Here your inc and func resides
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 
-$BASE_WEBPATH = 'http://localhost:40917/www/html';
-$IMAGELOC_WEBPATH = 'http://localhost:40917/ams_lib/img';
+//the paths to your website url
+$BASE_WEBPATH = 'http://localhost:40917';
+$IMAGELOC_WEBPATH = 'http://localhost:40917/img';
 $WEBPATH = $BASE_WEBPATH . '/index.php';
 $INGAME_WEBPATH = $BASE_WEBPATH . '/index.php';
 $CONFIG_PATH = dirname( __FILE__ );
