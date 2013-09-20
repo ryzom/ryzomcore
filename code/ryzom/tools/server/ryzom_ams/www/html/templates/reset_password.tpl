@@ -52,13 +52,9 @@
 				{/if}
 			
 			<input type="hidden" name="function" value="reset_password">
-			<div class="control-group">
-				<label class="control-label"></label>
-				<div class="controls">
-					<button type="submit" class="btn btn-large btn-primary" >Reset the password!</button>
-	
-				</div>
-			</div>
+			<p class="center span5">
+				<button type="submit" class="btn btn-primary" >Reset the password!</button>
+			</p>
 	
 		</form>
 
