@@ -4,33 +4,33 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 
-// Variables for database access to the www/CMS database
-$cfg['db']['web']['host']    = 'localhost'; 
-$cfg['db']['web']['port']    = '3306';
-$cfg['db']['web']['name']    = 'ryzom_ams';
-$cfg['db']['web']['user']    = 'shard';
-$cfg['db']['web']['pass']    = '';
+// Variables for database access to the CMS/WWW database
+$cfg['db']['web']['host']    = variable_get('ryzommanage_webserverurl', 'localhost');
+$cfg['db']['web']['port']    = variable_get('ryzommanage_webmysqlport', '3306');
+$cfg['db']['web']['name']    = variable_get('ryzommanage_webdbname', 'drupal');
+$cfg['db']['web']['user']    = variable_get('ryzommanage_webusername', 'shard');
+$cfg['db']['web']['pass']    = variable_get('ryzommanage_webpassword', '');
 
 // Variables for database access to the lib database
-$cfg['db']['lib']['host']    = 'localhost';
-$cfg['db']['lib']['port']    = '3306';
-$cfg['db']['lib']['name']    = 'ryzom_ams_lib';
-$cfg['db']['lib']['user']    = 'shard';
-$cfg['db']['lib']['pass']    = '';
+$cfg['db']['lib']['host']    = variable_get('ryzommanage_libserverurl', 'localhost');
+$cfg['db']['lib']['port']    = variable_get('ryzommanage_libmysqlport', '3306');
+$cfg['db']['lib']['name']    = variable_get('ryzommanage_libdbname', 'ryzom_ams_lib');
+$cfg['db']['lib']['user']    = variable_get('ryzommanage_libusername', 'shard');
+$cfg['db']['lib']['pass']    = variable_get('ryzommanage_libpassword', '');
 
 // Variables for database access to the shard database
-$cfg['db']['shard']['host']    = 'localhost';
-$cfg['db']['shard']['port']    = '3306';
-$cfg['db']['shard']['name']    = 'nel';
-$cfg['db']['shard']['user']    = 'shard';
-$cfg['db']['shard']['pass']    = '';
+$cfg['db']['shard']['host']    = variable_get('ryzommanage_shardserverurl', 'localhost');
+$cfg['db']['shard']['port']    = variable_get('ryzommanage_shardmysqlport', '3306');
+$cfg['db']['shard']['name']    = variable_get('ryzommanage_sharddbname', 'nel');
+$cfg['db']['shard']['user']    = variable_get('ryzommanage_shardusername', 'shard');
+$cfg['db']['shard']['pass']    = variable_get('ryzommanage_shardpassword', '');
 
 // Variables for database access to the open_ring database
-$cfg['db']['ring']['host']    = 'localhost';
-$cfg['db']['ring']['port']    = '3306';
-$cfg['db']['ring']['name']    = 'ring_open';
-$cfg['db']['ring']['user']    = 'shard';
-$cfg['db']['ring']['pass']    = '';
+$cfg['db']['ring']['host']    = variable_get('ryzommanage_ringserverurl', 'localhost');
+$cfg['db']['ring']['port']    = variable_get('ryzommanage_ringmysqlport', '3306');
+$cfg['db']['ring']['name']    = variable_get('ryzommanage_ringdbname', 'ring_open');
+$cfg['db']['ring']['user']    = variable_get('ryzommanage_ringusername', 'shard');
+$cfg['db']['ring']['pass']    = variable_get('ryzommanage_ringpassword', '');
 
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");       
@@ -46,13 +46,13 @@ $cfg['db']['ring']['pass']    = '';
 //imap connection string as explained above
 $cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';
 //groupemail is the email that sends the email
-$cfg['mail']['default_groupemail'] = 'amsryzom@gmail.com';
+$cfg['mail']['default_groupemail'] = 'example@gmail.com';
 //groupname will be the name displayed as sender
 $cfg['mail']['default_groupname'] = 'Ryzomcore Support';
 //the username of the account 
-$cfg['mail']['default_username']    = 'amsryzom@gmail.com';
+$cfg['mail']['default_username']    = 'example@gmail.com';
 //the matching password
-$cfg['mail']['default_password']    = 'passw0rd';
+$cfg['mail']['default_password']    = 'lol123bol';
 //the host, being used when a mail is sent from a support group: support_groups_name@host
 $cfg['mail']['host'] = "ryzomcore.com";
 
@@ -62,17 +62,16 @@ $TICKET_MAILING_SUPPORT = false;
 
 //You have to create this dir at first!
 //The incoming emails will be backed up here and the log file keeps track of the mail_cron job.
-$MAIL_DIR = "/home/daan/mail";
-$MAIL_LOG_PATH = "/home/daan/mail/cron_mail.log";
-
-//terms of service url location
-$TOS_URL ="http://heregoesyourtos.com";
+$MAIL_DIR = "/home/username/mail";
+$MAIL_LOG_PATH = "/home/username/mail/cron_mail.log";
 
 //crypt is being used by encrypting & decrypting of the IMAP password of the supportgroups
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
 $cfg['crypt']['enc_method']    = 'AES-256-CBC';
 $cfg['crypt']['hash_method'] = "SHA512";
 
+//terms of service url location
+$TOS_URL = variable_get('ryzommanage_TOS', 'www.mytosurlhere.com');
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters
@@ -80,25 +79,24 @@ $ALLOW_UNKNOWN = true ;
 // if true= the login service automaticaly create a ring user and a editor character if needed
 $CREATE_RING = true ;
 
-// site paths definitions (you shouldn't have to edit these..)
-$AMS_LIB = dirname( dirname( __FILE__ ) ) . '/ams_lib';
+// site paths definitions, you shouldn't have to alter these!
+$AMS_LIB =  dirname( __FILE__ )  . '/ams_lib';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
-//Here your inc and func resides
-$SITEBASE = dirname( __FILE__ ) . '/html/' ;
+$SITEBASE = dirname( __FILE__ );
 
 //the paths to your website url
-$BASE_WEBPATH = 'http://localhost:40917';
-$IMAGELOC_WEBPATH = 'http://localhost:40917/img';
-$WEBPATH = $BASE_WEBPATH . '/index.php';
-$INGAME_WEBPATH = $BASE_WEBPATH . '/index.php';
+$BASE_WEBPATH = 'http://localhost:40917/drupal';
+$IMAGELOC_WEBPATH = $BASE_WEBPATH. '/sites/all/modules/ryzommanage/ams_lib/img' ;
+$WEBPATH = $BASE_WEBPATH .'/ams';
+$INGAME_WEBPATH = $BASE_WEBPATH . '/ingame';
 $CONFIG_PATH = dirname( __FILE__ );
 
 //defines the default language
 $DEFAULT_LANGUAGE = 'en';
 
 //defines if logging actions should happen or not.
-$TICKET_LOGGING = true;
+$TICKET_LOGGING = false;
 
 //defines the time format display
 $TIME_FORMAT = "m-d-Y H:i:s";
@@ -108,4 +106,6 @@ $INGAME_LAYOUT = "basic";
 
 //forces to load the ingame templates if set to true
 $FORCE_INGAME = false;
+
+
 
