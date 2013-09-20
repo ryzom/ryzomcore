@@ -154,6 +154,16 @@ class WebUsers extends Users{
           }
           return $this->email;
        }
+       
+       /**
+       * get the  hashed password
+       */
+       public function getHashedPass(){
+              $dbw = new DBLayer("web");
+              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+              $row = $statement->fetch();
+              return $row['Password'];
+       }
     
     
        /**
@@ -221,17 +231,19 @@ class WebUsers extends Users{
        * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
        */
        public function setPassword($user, $pass){
-           $reply = WebUsers::setAmsPassword($user, $pass);
-           $values = Array('user' => $user, 'pass' => $pass);
-            try {
-                  //make connection with and put into shard db
-                  $dbw = new DBLayer("web");
-                  $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
-             }
-             catch (PDOException $e) {
-               //ERROR: the web DB is offline
-             }
-           return $reply;
+              
+              $hashpass = crypt($pass, WebUsers::generateSALT());
+              $reply = WebUsers::setAmsPassword($user, $hashpass);
+              $values = Array('user' => $user, 'pass' => $hashpass);
+               try {
+                     //make connection with and put into shard db
+                     $dbw = new DBLayer("web");
+                     $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
+                }
+                catch (PDOException $e) {
+                  //ERROR: the web DB is offline
+                }
+              return $reply;
        }
        
     

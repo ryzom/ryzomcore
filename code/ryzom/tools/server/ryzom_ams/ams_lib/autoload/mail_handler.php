@@ -345,7 +345,7 @@ class Mail_Handler{
         }
        
         //if ticket id is found, that means it is a reply on an existing ticket
-        if($ticket_id){
+        if($ticket_id && is_numeric($ticket_id) && $ticket_id > 0){
             $ticket = new Ticket();
             $ticket->load_With_TId($ticket_id);
             

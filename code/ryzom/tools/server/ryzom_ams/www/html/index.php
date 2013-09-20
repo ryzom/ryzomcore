@@ -33,12 +33,23 @@ if ( ! isset( $_GET["page"]) ){
      if(isset($_SESSION['user'])){
           $page = $_GET["page"];
      }else{
-          if($_GET["page"] == 'register'){
-               $page = 'register';
-          }else{
-               $page = 'login';   
-          }
-          
+          switch($_GET["page"]){
+               case 'register':
+                    $page = 'register';
+                    break;
+               case 'forgot_password':
+                    $page = 'forgot_password';
+                    break;
+               case 'reset_password':
+                    $page = 'reset_password';
+                    break;
+               case 'error':
+                    $page = 'error';
+                    break;
+               default:
+                    $page = 'login';
+                    break;
+          }         
      }
 }
 
@@ -80,7 +91,7 @@ if(isset($_SESSION['ticket_user'])){
 
 
 //hide sidebar + topbar in case of login/register
-if($page == 'login' || $page == 'register' || $page == 'logout'){
+if($page == 'login' || $page == 'register' || $page == 'logout' || $page == 'forgot_password' || $page == 'reset_password'){
      $return['no_visible_elements'] = 'TRUE';
 }else{
      $return['no_visible_elements'] = 'FALSE';
