@@ -41,6 +41,7 @@ private Q_SLOTS:
 		void onNewMaterialClicked();
 		void onOpenMaterialClicked();
 		void onSaveMaterialClicked();
+		void onGenMaterialsClicked();
 		void onShadersClicked();
 		void onPassesClicked();
 		void onStartup();

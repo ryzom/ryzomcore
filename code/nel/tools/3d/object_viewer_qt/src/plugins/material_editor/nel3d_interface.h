@@ -136,6 +136,7 @@ namespace MaterialEditor
 
 		bool loadMaterial( const char *fname );
 		bool saveMaterial( const char *fname );
+		void genMaterials();
 		void newMaterial();
 
 		bool selectSubMaterial( int id );

@@ -288,6 +288,13 @@ namespace MaterialEditor
 		return true;
 	}
 
+	void CNel3DInterface::genMaterials()
+	{
+		int c = currentShape.getNumMaterials();
+		for( int i = 0; i < c; i++ )
+			currentShape.getMaterial( i ).getObjectPtr()->createDynMat();
+	}
+
 	void CNel3DInterface::newMaterial()
 	{
 		if( currentShape.empty() )
@@ -495,10 +502,6 @@ namespace MaterialEditor
 
 		clearScene();
 		currentShape = instance;
-
-		int c = currentShape.getNumMaterials();
-		for( int i = 0; i < c; i++ )
-			currentShape.getMaterial( i ).getObjectPtr()->createDynMat();
 
 		subMatId = 0;
 

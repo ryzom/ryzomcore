@@ -176,6 +176,13 @@ namespace MaterialEditor
 
 	}
 
+	void MaterialEditorWindow::onGenMaterialsClicked()
+	{
+		nl3dIface->genMaterials();
+		passesWidget->onMaterialLoaded();
+		materialSplitter->onMaterialLoaded();
+	}
+
 	void MaterialEditorWindow::onShadersClicked()
 	{
 		shaderWidget->show();
@@ -283,6 +290,10 @@ namespace MaterialEditor
 				a = new QAction( tr( "Save material" ), NULL );
 				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onSaveMaterialClicked() ) );
 				mm->addAction( a );	
+
+				a = new QAction( tr( "Generate materials" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onGenMaterialsClicked() ) );
+				mm->addAction( a );
 			}
 
 			mm = m->addMenu( tr( "Scene" ) );
