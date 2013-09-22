@@ -483,7 +483,7 @@ bool	CDBReferenceFile::read(uint32 index, uint8* rowdata)
  */
 bool	CDBReferenceFile::serialHeader()
 {
-	serialCheck((uint32)'DbRf');
+	serialCheck(NELID("DbRf');
 	uint	version = serialVersion(0);
 
 	if (isReading())
@@ -504,7 +504,7 @@ bool	CDBReferenceFile::serialHeader()
 		serial(_Header);
 	}
 
-	serialCheck((uint32)'Data');
+	serialCheck(NELID("Data');
 
 	_DataStart = ftell(_File);
 

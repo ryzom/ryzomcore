@@ -89,8 +89,8 @@ void CAnimation::serial (NLMISC::IStream& f)
 	nlassert(_IdByChannelId.empty());
 
 	// Serial a header
-	f.serialCheck ((uint32)'_LEN');
-	f.serialCheck ((uint32)'MINA');
+	f.serialCheck (NELID("_LEN"));
+	f.serialCheck (NELID("MINA"));
 
 	// Serial a version
 	sint version=f.serialVersion (2);

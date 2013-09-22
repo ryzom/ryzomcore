@@ -73,7 +73,7 @@ void	CPDStringMapper::setMapping(const std::string& str, uint32 id)
  */
 void	CPDStringMapper::serial(NLMISC::IStream& f)
 {
-	f.serialCheck((uint32)'PDSM');
+	f.serialCheck(NELID("PDSM');
 
 	uint	version = f.serialVersion(0);
 

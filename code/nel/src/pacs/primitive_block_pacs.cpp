@@ -85,7 +85,7 @@ void CPrimitiveBlock::serial (NLMISC::IStream &s)
 	s.xmlPush ("PRIMITIVE_BLOCK");
 
 	// Serial checks
-	s.serialCheck ((uint32)'KBRP');
+	s.serialCheck (NELID("KBRP"));
 
 	// Serial the version
 	(void)s.serialVersion (0);

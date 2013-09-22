@@ -60,7 +60,7 @@ public:
 	{
 		s.xmlPush("reference");
 
-		s.serialCheck((uint32)'RIDX');
+		s.serialCheck(NELID("RIDX');
 		uint	version = s.serialVersion(0);
 
 		s.xmlPush("database");

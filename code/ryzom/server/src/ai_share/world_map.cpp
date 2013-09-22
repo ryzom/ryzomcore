@@ -553,7 +553,7 @@ void	CWorldMap::clear()
 
 void	CWorldMap::serial(NLMISC::IStream &f)
 {
-	f.serialCheck((uint32)'WMAP');
+	f.serialCheck(NELID("WMAP');
 
 	// Version
 	// 0: initial version

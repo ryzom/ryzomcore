@@ -259,7 +259,7 @@ bool	CDBDeltaFile::preload()
  */
 bool	CDBDeltaFile::serialHeader()
 {
-	serialCheck((uint32)'DbDt');
+	serialCheck(NELID("DbDt');
 	uint	version = serialVersion(0);
 
 	if (isReading())
@@ -280,7 +280,7 @@ bool	CDBDeltaFile::serialHeader()
 		serial(_Header);
 	}
 
-	serialCheck((uint32)'Data');
+	serialCheck(NELID("Data');
 
 	_DataStart = ftell(_File);
 

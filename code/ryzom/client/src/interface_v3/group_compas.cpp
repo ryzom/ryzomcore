@@ -68,7 +68,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 			return;
 		}
 	}
-	f.serialCheck((uint32) 'CTAR');
+	f.serialCheck(NELID("CTAR"));
 	f.serialVersion(0);
 	f.serial(Pos);
 	// for the name, try to save a string identifier if possible, because language may be changed between
@@ -95,7 +95,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 			_PositionState = NULL;
 		}
 	}
-	f.serialCheck((uint32) '_END');
+	f.serialCheck(NELID("_END"));
 	// if language has been modified, then we are not able to display correctly the name, so just
 	// reset the compass to north to avoid incoherency
 	if (f.isReading())
