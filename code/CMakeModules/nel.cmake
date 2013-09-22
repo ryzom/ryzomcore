@@ -345,7 +345,8 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   ###
   # Optional support
   ###
-  OPTION(WITH_LUA51               "Build Ryzom Core using Lua51"                  ON )
+  OPTION(WITH_LUA51               "Build Ryzom Core using Lua 5.1"                ON )
+  OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
