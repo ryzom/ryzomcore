@@ -277,10 +277,10 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName)
     # NMAKE-VS2012 Error LNK2011 (NMAKE-VS2010 do not complain)
     # we need to link the pch.obj file, see http://msdn.microsoft.com/en-us/library/3ay26wa2(v=vs.110).aspx
     GET_TARGET_PROPERTY(DEPS ${_targetName} LINK_LIBRARIES)
-    if (NOT DEPS)
-      set (DEPS)
-    endif ()
-    list (INSERT DEPS 0 "${PCH_OUTPUT}.obj")
+    IF(NOT DEPS)
+      SET(DEPS)
+    ENDIF()
+    LIST(INSERT DEPS 0 "${PCH_OUTPUT}.obj")
     SET_TARGET_PROPERTIES(${_targetName} PROPERTIES LINK_LIBRARIES "${DEPS}")
   ELSE(MSVC)
     # for use with distcc and gcc >4.0.1 if preprocessed files are accessible
@@ -369,17 +369,6 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PCH_OUTPUTS}")
 ENDMACRO(ADD_PRECOMPILED_HEADER)
 
-# Macro to move PCH creation file to the front of files list
-# or remove .cpp from library/executable to avoid warning
-MACRO(FIX_PRECOMPILED_HEADER _files _pch)
-  # Remove .cpp creating PCH from the list
-  LIST(REMOVE_ITEM ${_files} ${_pch})
-  IF(MSVC)
-    # Prepend .cpp creating PCH to the list
-    LIST(INSERT ${_files} 0 ${_pch})
-  ENDIF(MSVC)
-ENDMACRO(FIX_PRECOMPILED_HEADER)
-
 MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   IF(NOT PCHSupport_FOUND)
     MESSAGE(STATUS "PCH disabled because compiler doesn't support them")
@@ -391,10 +380,6 @@ MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   # 2 => setting PCH for XCode project, works for XCode projects
   IF(CMAKE_GENERATOR MATCHES "Visual Studio")
     SET(PCH_METHOD 1)
-  ELSEIF(CMAKE_GENERATOR MATCHES "NMake Makefiles" AND MFC_FOUND AND CMAKE_MFC_FLAG)
-    # To fix a bug with MFC
-    # Don't forget to use FIX_PRECOMPILED_HEADER before creating the target
-#    SET(PCH_METHOD 1)
   ELSEIF(CMAKE_GENERATOR MATCHES "Xcode")
     SET(PCH_METHOD 2)
   ELSE(CMAKE_GENERATOR MATCHES "Visual Studio")
