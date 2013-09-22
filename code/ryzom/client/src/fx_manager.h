@@ -77,7 +77,7 @@ protected:
 		float						  TimeOut;
 		bool						  TestNoMoreParticles;
 	public:
-		CFX2Remove(NL3D::UParticleSystemInstance instance=NL3D::UParticleSystemInstance(), float timeOut = NULL, bool testNoMoreParticles = false)
+		CFX2Remove(NL3D::UParticleSystemInstance instance=NL3D::UParticleSystemInstance(), float timeOut = 0.f, bool testNoMoreParticles = false)
 		{
 			Instance = instance;
 			TimeOut = timeOut;
