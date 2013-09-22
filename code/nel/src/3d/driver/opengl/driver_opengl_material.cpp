@@ -1502,7 +1502,7 @@ CTextureCube	*CDriverGL::getSpecularCubeMap(uint exp)
 	{
 		1.f, 4.f, 8.f, 24.f, 48.f, 128.f, 256.f, 511.f
 	};
-	const uint numCubeMap = sizeof(expToCubeMap) / sizeof(float);
+	const uint numCubeMap = sizeof(cubeMapExp) / sizeof(float);
 	static bool tableBuilt = false;
 
 	if (!tableBuilt)
