@@ -10,7 +10,7 @@ TARGET_LINK_LIBRARIES(nel_launcher_ext2
 						nelnet
 						nelmisc
 						${ZLIB_LIBRARY}
-						${CURL_LIBRARY})
+						${CURL_LIBRARIES})
 
 NL_DEFAULT_PROPS(nel_launcher_ext2 "NeLNS, Launcher: NeL Launcher Ext2")
 NL_ADD_RUNTIME_FLAGS(nel_launcher_ext2)
