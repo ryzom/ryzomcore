@@ -42,7 +42,7 @@ void CFilteredChatSummary::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 void CFilteredDynChatSummary::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	sint ver = f.serialVersion(0);
-	f.serialCheck((NELID("USHC"));
+	f.serialCheck(NELID("USHC"));
 	if (ver >= 0)
 	{
 		for (uint8 i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
