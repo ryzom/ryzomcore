@@ -398,6 +398,9 @@ namespace MaterialEditor
 		NL3D::CUsrShaderSaver saver;
 		saver.setManager( shaderManager );
 		saver.saveShader( "./shaders", name );
+		NL3D::CDriverUser *d = dynamic_cast< NL3D::CDriverUser* >( driver );
+		if( d != NULL )
+			d->getDriver()->reloadUserShaders();
 	}
 
 	void CNel3DInterface::deleteShader( const std::string &name )

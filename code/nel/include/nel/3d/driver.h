@@ -1299,6 +1299,9 @@ protected:
 
 private:
 	bool			_StaticMemoryToVRAM;
+
+public:
+	virtual void reloadUserShaders(){}
 };
 
 // --------------------------------------------------
