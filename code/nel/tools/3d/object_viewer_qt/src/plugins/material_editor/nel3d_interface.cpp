@@ -258,9 +258,15 @@ namespace MaterialEditor
 		if( !xml.init( file ) )
 			return false;
 
-		newMaterial();
 		NL3D::CDynMaterial *mat = currentShape.getMaterial( subMatId ).getObjectPtr()->getDynMat();
-		mat->clear();
+		if( mat != NULL )
+			mat->clear();
+		else
+		{
+			currentShape.getMaterial( subMatId ).getObjectPtr()->createCleanDynMat();
+			mat = currentShape.getMaterial( subMatId ).getObjectPtr()->getDynMat();
+		}
+
 		mat->serial( xml );
 		file.close();
 
