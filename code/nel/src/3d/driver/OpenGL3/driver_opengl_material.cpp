@@ -21,6 +21,7 @@
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
 #include "nel/3d/i_program_object.h"
+#include "nel/3d/dynamic_material.h"
 
 namespace NL3D {
 
@@ -234,6 +235,17 @@ CMaterial::TShader	CDriverGL3::getSupportedShader(CMaterial::TShader shader)
 bool CDriverGL3::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL3_setupMaterial)
+
+#ifdef GLSL
+	
+	if( mat.getDynMat() != NULL )
+	{
+		_CurrentMaterial = &mat; 
+		return true;
+	}
+
+#endif
+
 	CShaderGL3*	pShader;
 	GLenum		glenum = GL_ZERO;
 	uint32		touched = mat.getTouched();
@@ -497,6 +509,12 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 sint			CDriverGL3::beginMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginMultiPass)
+
+#ifdef GLSL
+	if( _CurrentMaterial->getDynMat() != NULL )
+		return _CurrentMaterial->getDynMat()->getPassCount();
+#endif
+
 	// Depending on material type and hardware, return number of pass required to draw this material.
 	switch(_CurrentMaterialSupportedShader)
 	{
@@ -521,9 +539,16 @@ sint			CDriverGL3::beginMultiPass()
 }
 
 // ***************************************************************************
-void			CDriverGL3::setupPass(uint pass)
+bool CDriverGL3::setupPass(uint pass)
 {
 	H_AUTO_OGL(CDriverGL3_setupPass)
+	
+#ifdef GLSL
+	if( _CurrentMaterial->getDynMat() != NULL )
+		return setupDynMatPass( pass );
+	
+#endif
+
 	switch(_CurrentMaterialSupportedShader)
 	{
 	case CMaterial::Normal:
@@ -550,17 +575,21 @@ void			CDriverGL3::setupPass(uint pass)
 	case CMaterial::Cloud:
 		setupCloudPass (pass);
 		break;
-
-	// All others materials do not require multi pass.
-	default: return;
 	}
 
+	return true;
 }
 
 // ***************************************************************************
 void			CDriverGL3::endMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endMultiPass)
+	
+#ifdef GLSL
+	if( _CurrentMaterial->getDynMat() != NULL )
+		return;
+#endif
+
 	switch(_CurrentMaterialSupportedShader)
 	{
 	case CMaterial::LightMap:
@@ -587,6 +616,77 @@ void			CDriverGL3::endMultiPass()
 	// All others materials do not require multi pass.
 	default: return;
 	}
+}
+
+bool CDriverGL3::setupDynMatPass( uint pass )
+{
+#ifdef GLSL
+
+	if( !setupDynMatProgram( *_CurrentMaterial, pass ) )
+		return false;
+
+	CDynMaterial *m = _CurrentMaterial->getDynMat();
+	SRenderPass *p = m->getPass( pass );
+
+	for( uint32 i = 0; i < p->count(); i++ )
+	{
+		const SDynMaterialProp *prop = p->getProperty( i );		
+		int loc = nglGetUniformLocation( currentProgram->getProgramId(), prop->prop.c_str() );
+		if( loc == -1 )
+			continue;
+
+		switch( prop->type )
+		{
+		case SDynMaterialProp::Float:
+			setUniform1f( loc, prop->value.toFloat() );
+			break;
+
+		case SDynMaterialProp::Int:
+			setUniform1i( loc, prop->value.toInt() );
+			break;
+
+		case SDynMaterialProp::Uint:
+			setUniform1u( loc, prop->value.toUInt() );
+			break;
+
+		case SDynMaterialProp::Color:
+		case SDynMaterialProp::Vector4:
+			float v[ 4 ];
+			prop->value.getVector4( v );
+			setUniform4f( loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+			break;
+
+		case SDynMaterialProp::Matrix4:
+			float m[ 16 ];
+			prop->value.getMatrix4( m );
+			setUniformMatrix4fv( loc, 1, false, m );
+			break;
+
+		case SDynMaterialProp::Texture:
+			break;
+		}
+	}
+
+	////////////////////////////////// Set up some standard uniforms //////////////////////////////////
+
+	int loc = -1;
+	loc = nglGetUniformLocation( currentProgram->getProgramId(), "mvpMatrix" );
+	if( loc != -1 )
+	{
+		CMatrix mat = _GLProjMat * _ModelViewMatrix;
+		setUniformMatrix4fv( loc, 1, false, mat.get() );
+	}
+
+	loc = nglGetUniformLocation( currentProgram->getProgramId(), "mvMatrix" );
+	if( loc != -1 )
+	{
+		setUniformMatrix4fv( loc, 1, false, _ModelViewMatrix.get() );
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#endif
+	return true;
 }
 
 void CDriverGL3::setupNormalPass()

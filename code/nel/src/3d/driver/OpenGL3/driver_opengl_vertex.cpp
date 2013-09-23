@@ -229,7 +229,8 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	for(uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		setupPass(pass);
+		if( !setupPass(pass) )
+			return false;
 
 		refreshTexMatrices();
 
@@ -290,7 +291,8 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	for(uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		setupPass(pass);
+		if( !setupPass(pass) )
+			return false;
 
 		refreshTexMatrices();
 
@@ -382,7 +384,8 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	for(uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		setupPass(pass);
+		if( !setupPass(pass) )
+			return false;
 
 		refreshTexMatrices();
 
@@ -428,7 +431,8 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	for(uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		setupPass(pass);
+		if( !setupPass(pass) )
+			return false;
 
 		refreshTexMatrices();
 
@@ -474,7 +478,8 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	for(uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		setupPass(pass);
+		if( !setupPass(pass) )
+			return false;
 
 		refreshTexMatrices();
 
@@ -545,7 +550,8 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	for(uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		setupPass(pass);
+		if( !setupPass(pass) )
+			return false;
 
 		refreshTexMatrices();
 

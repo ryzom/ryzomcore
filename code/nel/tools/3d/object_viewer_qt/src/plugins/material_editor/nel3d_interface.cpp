@@ -217,7 +217,7 @@ namespace MaterialEditor
 
 	CRenderPassProxy CNelMaterialProxy::getPass( unsigned long i )
 	{
-		if( i >= material->count()  )
+		if( i >= material->getPassCount()  )
 			return CRenderPassProxy( NULL );
 		else
 			return CRenderPassProxy( material->getPass( i ) );

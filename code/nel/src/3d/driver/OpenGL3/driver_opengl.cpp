@@ -27,6 +27,8 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
+#include "nel/3d/usr_shader_manager.h"
+#include "nel/3d/usr_shader_loader.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
@@ -333,8 +335,19 @@ CDriverGL3::CDriverGL3()
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
 
+#ifdef GLSL
 	currentProgram = NULL;
+	dynMatProgram = NULL;
+
 	shaderGenerator = new CGLSLShaderGenerator();
+	usrShaderManager = new CUsrShaderManager();
+
+	CUsrShaderLoader loader;
+	loader.setManager( usrShaderManager );
+	loader.loadShaders( "./shaders" );
+
+#endif
+
 }
 
 // ***************************************************************************
@@ -342,12 +355,20 @@ CDriverGL3::~CDriverGL3()
 {
 	H_AUTO_OGL(CDriverGL3_CDriverGLDtor)
 
+	release();
+
+#ifdef GLSL
 	currentProgram = NULL;
 
-	release();
+	if( dynMatProgram != NULL )
+		delete dynMatProgram;
+	dynMatProgram = NULL;
 
 	delete shaderGenerator;
 	shaderGenerator = NULL;
+	delete usrShaderManager;
+	usrShaderManager = NULL;
+#endif
 
 #if defined(NL_OS_MAC)
 	[_autoreleasePool release];
@@ -2508,6 +2529,15 @@ void CDriverGL3::beginDialogMode()
 // ***************************************************************************
 void CDriverGL3::endDialogMode()
 {
+}
+
+// ***************************************************************************
+void CDriverGL3::reloadUserShaders()
+{
+	usrShaderManager->clear();
+	NL3D::CUsrShaderLoader loader;
+	loader.setManager( usrShaderManager );
+	loader.loadShaders( "./shaders" );
 }
 
 // ***************************************************************************

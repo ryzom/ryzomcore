@@ -279,9 +279,10 @@ public:
 	void					setupIndexBuffer(CIndexBuffer &vb);
 };
 
-
+#ifdef GLSL
 class CGLSLShaderGenerator;
-
+class CUsrShaderManager;
+#endif
 
 // ***************************************************************************
 class CDriverGL3 : public IDriver
@@ -381,8 +382,8 @@ public:
 	virtual bool			setupMaterial(CMaterial& mat);
 	void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
 	bool					setupProgram(CMaterial& mat);
+	bool					setupDynMatProgram(CMaterial& mat, uint pass);
 	void					setupUniforms(CMaterial& mat);
-	void					releaseProgram();
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -1067,10 +1068,12 @@ private:
 	/// init multipass for _CurrentMaterial. return number of pass required to render this material.
 	 sint			beginMultiPass();
 	/// active the ith pass of this material.
-	 void			setupPass(uint pass);
+	 bool			setupPass(uint pass);
 	/// end multipass for this material.
 	 void			endMultiPass();
 	// @}
+
+	bool setupDynMatPass( uint pass );
 
 	/// LastVB for UV setup.
 	CVertexBufferInfo		_LastVB;
@@ -1368,9 +1371,13 @@ private:
 
 	private:
 
+#ifdef GLSL
 		CGLSLShaderGenerator *shaderGenerator;
-
+		CUsrShaderManager    *usrShaderManager;
+		
 		IProgramObject *currentProgram;
+		IProgramObject *dynMatProgram;
+#endif
 
 		bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten);
 
@@ -1460,6 +1467,10 @@ private:
 
 private:
 	CShaderCache shaderCache;
+
+public:
+	void reloadUserShaders();
+
 };
 
 // ***************************************************************************

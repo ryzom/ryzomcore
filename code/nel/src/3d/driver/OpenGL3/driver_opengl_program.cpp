@@ -22,6 +22,9 @@
 #include "driver_glsl_shader_generator.h"
 #include "driver_opengl_vertex_buffer_hard.h"
 #include "nel/3d/i_program_object.h"
+#include "nel/3d/dynamic_material.h"
+#include "nel/3d/usr_shader_manager.h"
+#include "nel/3d/usr_shader_program.h"
 
 namespace
 {
@@ -51,9 +54,6 @@ namespace NL3D
 		if( !program->isLinked() )
 			return false;
 
-		// Release previous program
-		releaseProgram();
-		
 		nglUseProgram( program->getProgramId() );
 
 		GLenum error = glGetError();
@@ -148,11 +148,6 @@ namespace NL3D
 		return true;
 	}
 
-	static IProgram *vp;
-	static IProgram *pp;
-	static IProgramObject *p;
-
-
 	void CDriverGL3::generateShaderDesc( CShaderDesc &desc, CMaterial &mat )
 	{
 		desc.setShaderType( mat.getShader() );
@@ -216,8 +211,13 @@ namespace NL3D
 
 	bool CDriverGL3::setupProgram( CMaterial &mat )
 	{
+		if( mat.getDynMat() != NULL )
+			return true;
+		
+		IProgram *vp = NULL;
+		IProgram *pp = NULL;
+		IProgramObject *p = NULL;
 
-#ifdef GLSL
 		CShaderDesc desc;
 
 		generateShaderDesc( desc, mat );
@@ -288,7 +288,65 @@ namespace NL3D
 
 		setupUniforms( mat );
 
-#endif
+		return true;
+	}
+
+	bool CDriverGL3::setupDynMatProgram( CMaterial& mat, uint pass )
+	{
+		CDynMaterial *m = mat.getDynMat();
+		const SRenderPass *rp = m->getPass( pass );
+		std::string shaderRef;
+		rp->getShaderRef( shaderRef );
+
+		NL3D::CUsrShaderProgram prg;
+
+		if( !usrShaderManager->getShader( shaderRef, &prg ) )
+			return false;
+		
+		IProgramObject *p = createProgramObject();
+		IProgram *vp = createVertexProgram();
+		IProgram *pp = createPixelProgram();
+
+		std::string shaderSource;
+		std::string log;
+		prg.getVP( shaderSource );
+		vp->shaderSource( shaderSource.c_str() );
+		if( !vp->compile( log ) )
+		{
+			delete vp;
+			delete pp;
+			delete p;
+			return false;
+		}
+
+		prg.getFP( shaderSource );
+		pp->shaderSource( shaderSource.c_str() );
+		if( !pp->compile( log ) )
+		{
+			delete vp;
+			delete pp;
+			delete p;
+			return false;
+		}
+
+		p->attachVertexProgram( vp );
+		p->attachPixelProgram( pp );
+
+		if( !p->link( log ) )
+		{
+			delete p;
+			return false;
+		}
+
+		if( !activeProgramObject( p ) )
+		{
+			delete p;
+			return false;
+		}
+
+		if( dynMatProgram != NULL )
+			delete dynMatProgram;
+		dynMatProgram = p;
 
 		return true;
 	}
@@ -484,15 +542,6 @@ namespace NL3D
 
 		}
 
-#endif
-	}
-
-	void CDriverGL3::releaseProgram()
-	{
-		currentProgram = NULL;
-
-#ifndef GLSL
-		_VertexProgramEnabled = false;
 #endif
 	}
 

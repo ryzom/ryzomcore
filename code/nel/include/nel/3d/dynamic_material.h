@@ -96,7 +96,7 @@ namespace NL3D
 
 		SRenderPass* getPass( const std::string &name );
 		SRenderPass* getPass( uint32 i );
-		uint32 count(){ return passes.size(); }
+		uint32 getPassCount(){ return passes.size(); }
 		void getPassList( std::vector< std::string > &l );
 
 	private:
