@@ -650,17 +650,32 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 			break;
 
 		case SDynMaterialProp::Color:
+			{
+				float v[ 4 ];
+				prop->value.getVector4( v );
+				
+				for( int j = 0; j < 4; j++ )
+					v[ j ] = v[ j ] / 255.0f;
+				
+				setUniform4f( loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+			}
+			break;
+
 		case SDynMaterialProp::Vector4:
-			float v[ 4 ];
-			prop->value.getVector4( v );
-			setUniform4f( loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+			{
+				float v[ 4 ];
+				prop->value.getVector4( v );
+				setUniform4f( loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+			}
 			break;
 
 		case SDynMaterialProp::Matrix4:
-			float m[ 16 ];
-			prop->value.getMatrix4( m );
-			setUniformMatrix4fv( loc, 1, false, m );
-			break;
+			{
+				float m[ 16 ];
+				prop->value.getMatrix4( m );
+				setUniformMatrix4fv( loc, 1, false, m );
+				break;
+			}
 
 		case SDynMaterialProp::Texture:
 			break;
