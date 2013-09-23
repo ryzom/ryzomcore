@@ -25,7 +25,7 @@
 
 namespace NL3D
 {
-
+	/// Rendering property
 	struct SDynMaterialProp
 	{
 		enum EPropertyType
@@ -40,8 +40,13 @@ namespace NL3D
 			Texture
 		};
 
+		/// Id of the property
 		std::string prop;
+
+		/// Label of the property ( user-friendly name )
 		std::string label;
+
+		/// type of the property ( see EPropertyType )
 		uint8 type;
 
 		NLMISC::CVariant value;
@@ -50,7 +55,7 @@ namespace NL3D
 	};
 
 
-
+	/// Rendering pass data, contains the rendering properties for the pass
 	struct SRenderPass
 	{
 	public:
@@ -63,8 +68,12 @@ namespace NL3D
 		void setShaderRef( const std::string &s ){ shaderRef = s; }
 		void serial( NLMISC::IStream &f );
 
+		/// Returns the number of properties this pass has
 		uint32 count(){ return properties.size(); }
+
+		/// Clears all properties
 		void clear(){ properties.clear(); }
+
 		const SDynMaterialProp* getProperty( uint32 i ) const;
 
 	private:
@@ -75,7 +84,7 @@ namespace NL3D
 
 
 
-
+	/// Multi-pass material for rendering using user shaders
 	class CDynMaterial : public NLMISC::IStreamable
 	{
 	public:
@@ -83,7 +92,10 @@ namespace NL3D
 		~CDynMaterial();
 		CDynMaterial& operator=( const CDynMaterial &other );
 
+		/// Clears all passes, and then adds a new pass
 		void reconstruct();
+
+		/// Clears all passes
 		void clear();
 		void serial( NLMISC::IStream &f );
 		std::string getClassName(){ return "CDynMaterial"; }

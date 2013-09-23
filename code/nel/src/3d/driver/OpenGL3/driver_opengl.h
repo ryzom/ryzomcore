@@ -1083,7 +1083,7 @@ private:
 	/// setup a texture stage with an UV from VB.
 	void			setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId);
 
-
+	/// Sets up the rendering parameters for the normal shader
 	void setupNormalPass();
 
 
@@ -1376,7 +1376,10 @@ private:
 		CGLSLShaderGenerator *shaderGenerator;
 		CUsrShaderManager    *usrShaderManager;
 		
+		/// The program that is currently used
 		IProgramObject *currentProgram;
+
+		/// The current user shader program
 		IProgramObject *dynMatProgram;
 #endif
 

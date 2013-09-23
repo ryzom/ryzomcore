@@ -1036,16 +1036,34 @@ public:
 	/// Creates a new Pixel program
 	virtual IProgram*		createPixelProgram() const { return NULL; }
 
+	/// Returns the location of the specified uniform, or -1 if it's not found
 	virtual int getUniformLocation( const char *name ){ return -1; }
 
+	/// Sets a single float uniform
 	virtual void setUniform1f( uint index, float f ){}
+
+	/// Sets 4 floats uniform value ( vector )
 	virtual void setUniform4f( uint index, float f1, float f2, float f3, float f4  ){}
+
+	/// Sets a single integer uniform value
 	virtual void setUniform1i( uint index, int i ){}
+
+	/// Sets a 4 integer uniform value ( vector )
 	virtual void setUniform4i( uint index, int i1, int i2, int i3, int i4 ){}
+
+	/// Sets a single unsigned integer uniform value
 	virtual void setUniform1u( uint index, uint u ){}
+
+	/// Sets a 4 unsigned integer uniform value
 	virtual void setUniform4u( uint index, uint u1, uint u2, uint u3, uint u4 ){}
+
+	/// Sets a 2x2 float matrix uniform value ( column major order )
 	virtual void setUniformMatrix2fv( uint index, uint count, bool transpose, const float *values ){}
+
+	/// Sets a 3x3 float matrix uniform value ( column major order )
 	virtual void setUniformMatrix3fv( uint index, uint count, bool transpose, const float *values ){}
+
+	/// Sets a 4x4 float matrix uniform value ( column major order )
 	virtual void setUniformMatrix4fv( uint index, uint count, bool transpose, const float *values ){}
 
 	/**
@@ -1301,6 +1319,7 @@ private:
 	bool			_StaticMemoryToVRAM;
 
 public:
+	/// Reloads the user shaders
 	virtual void reloadUserShaders(){}
 };
 

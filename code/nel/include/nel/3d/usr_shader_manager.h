@@ -27,17 +27,32 @@ namespace NL3D
 	class CUsrShaderProgram;
 	class IUsrShaderVisitor;
 
+	/// Manages user defined shaders ( add, remove, change )
 	class CUsrShaderManager
 	{
 	public:
 		CUsrShaderManager();
 		~CUsrShaderManager();
+
+		/// Throw away the currently loaded shaders
 		void clear();
+
+		/// Returns a list of the currently loaded shaders
 		void getShaderList( std::vector< std::string > &v );
+
+		/// Adds a shader
 		bool addShader( CUsrShaderProgram *program );
+
+		/// Removes a shader
 		bool removeShader( const std::string &name );
+
+		/// Changes a shader
 		bool changeShader( const std::string &name, CUsrShaderProgram *program );
+
+		/// Looks up and returns a shader
 		bool getShader( const std::string &name, CUsrShaderProgram *program );
+
+
 		void visitShaders( IUsrShaderVisitor *visitor );
 		void visitShader( const std::string &name, IUsrShaderVisitor *visitor );
 

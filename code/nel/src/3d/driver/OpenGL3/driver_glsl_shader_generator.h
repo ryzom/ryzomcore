@@ -26,14 +26,20 @@ namespace NL3D
 	class CMaterial;
 	class CShaderDesc;
 
+	/// GLSL 330+ shader program generator
 	class CGLSLShaderGenerator
 	{
 	public:
 		CGLSLShaderGenerator();
 		~CGLSLShaderGenerator();
+
+		/// Resets the generator to 0.
 		void reset();
 
+		/// Generate Vertex Shader based on the data provided in material, descriptor and vertexbuffer flags
 		void generateVS( std::string &vs );
+
+		/// Generate Pixel Shader based on the data provided in material, descriptor and vertexbuffer flags
 		void generatePS( std::string &ps );
 
 		void setMaterial( CMaterial *mat ){ material = mat; }
@@ -41,31 +47,82 @@ namespace NL3D
 		void setShaderDesc( CShaderDesc *d ){ desc = d; }
 
 	private:
+		/// Adds diffuse constant uniform declaration  to the program
 		void addDiffuse();
+
+		/// Adds Color constant uniform declaration to the program
 		void addColor();
+
+		/// Adds constant uniform declarations to the program
 		void addConstants();
+
+		/// Adds the normal matrix declaration to the program
 		void addNormalMatrix();
+
+		/// Adds the normal matrix calculating function to the program ( calculated from the inverse transpose of the upper left 3x3 part )
 		void addNormalFromMVFunction();
 		
+		//////////////////////////// Alpha Threshold //////////////////
+		
+		/// Adds the alpha threshold uniform to the program
 		void addAlphaTreshold();
+
+		/// Adds the actual alpha test to the program ( discards fragment if below threshold )
 		void addAlphaTest();
 
+		//////////////////////////////////////////////////////////////
+
+		/////////////////////////// Fog ///////////////////////////////
+		
+		/// Adds the fog uniforms to the program
 		void addFogUniform();
+
+		/// Adds the fog function to the program
 		void addFogFunction();
+
+		/// Adds the fog call to the program
 		void addFog();
 
+		///////////////////////////////////////////////////////////////
+
 		//////////////////////////// Lights ///////////////////////////
+		
+		/// Adds the Vertex Shader light uniforms to the program
 		void addLightUniformsVS();
+
+		/// Adds the Pixel Shader light uniforms to the program
 		void addLightUniformsFS();
+
+		/// Adds the Vertex Shader light output variables to the program
 		void addLightOutsVS();
+
+		/// Adds the Pixel Shader light output variables to the program
 		void addLightInsFS();
+
+		/// Adds the directional light Vertex Shader function, num is the light number
 		void addDirectionalFunctionVS( int num );
+
+		/// Adds the point-light Vertex Shader function, num is the light number
 		void addPointLightFunctionVS( int num );
+
+		/// Adds the appropriate light functions to the Vertex Shader
 		void addLightsFunctionVS();
+
+		/// Adds the appropriate light functions to the Pixel Shader
 		void addLightsFunctionFS();
+
+		/// Adds the lights to the Vertex Shader ( calls the appropriate functions )
 		void addLightsVS();
+
+		/// Adds the lights to the Fragment Shader ( calls the appropriate functions )
 		void addLightsFS();
+
 		//////////////////////////////////////////////////////////////
+
+
+
+		//////////////////////////////////////// Vertex Shader generation ////////////////////////////////////
+
 
 		void generateNormalVS();
 		void generateSpecularVS();
@@ -75,7 +132,15 @@ namespace NL3D
 
 		void generateWaterVS();
 
+
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+		/////////////////////////////////////// Pixel Shader generation ///////////////////////////////////////
+		
 		void generateNormalPS();
+		
+
 		void generateTexEnv();
 		void generateTexEnvRGB( unsigned int stage );
 		void generateTexEnvAlpha( unsigned int stage );
@@ -90,6 +155,8 @@ namespace NL3D
 		void generateWaterPS();
 
 		void generateCloudPS();
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		std::stringstream ss;
 		uint16 vbFormat;

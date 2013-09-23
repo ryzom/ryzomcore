@@ -33,7 +33,7 @@ namespace NL3D
 
 namespace MaterialEditor
 {
-
+	/// Material Property, holds the user shader parameters as string ( for the editor )
 	struct SMatProp
 	{
 		enum EType
@@ -49,7 +49,10 @@ namespace MaterialEditor
 			EType_count
 		};
 
+		/// Creates a string representation of the type id
 		static std::string typeIdToString( unsigned char type );
+
+		/// Turns the type id string back to Id
 		static unsigned char typeStringToId( const std::string &s );
 
 		std::string id;
@@ -61,6 +64,8 @@ namespace MaterialEditor
 		static const char *idToString[];
 	};
 
+
+	/// Proxy class for the rendering pass
 	class CRenderPassProxy
 	{
 	public:
@@ -71,21 +76,35 @@ namespace MaterialEditor
 
 		~CRenderPassProxy(){}
 
+		/// Retrieves the rendering properties as a vector
 		void getProperties( std::vector< SMatProp > &v );
+
+		/// Clears the properties and then copies the ones from the vector specified
 		void setProperties( std::vector< SMatProp > &v );
+
+		/// Retrieves the name of the pass
 		void getName( std::string &name );
+
+		/// Sets the name of the pass
 		void setName( const std::string &name );
+
+		/// Returns the reference ( just a string ) to the user shader associated
 		void getShaderRef( std::string &s );
+
+		/// Sets the reference ( just a string ) to the user shader associated
 		void setShaderRef( const std::string &s );
 
+		/// Retrieves a single rendering property
 		bool getProperty( const std::string &name, SMatProp &p );
+
+		/// Changes a single rendering property
 		bool changeProperty( const SMatProp &p );
 
 	private:
 		NL3D::SRenderPass *pass;
 	};
 
-
+	/// Proxy class for the dynamic material
 	class CNelMaterialProxy
 	{
 	public:
@@ -96,15 +115,28 @@ namespace MaterialEditor
 
 		~CNelMaterialProxy(){}
 
+		/// Retrieves the list of rendering passes
 		void getPassList( std::vector< std::string > &l );
 
+		/// Adds a new pass
 		void addPass( const char *name );
+
+		/// Removes the specified pass, if exists
 		void removePass( const char *name );
+
+		/// Moves the pass up by one position
 		void movePassUp( const char *name );
+
+		/// Moves the pass down by one position
 		void movePassDown( const char *name );
+
+		/// Renames the specified pass
 		void renamePass( const char *from, const char *to );
 
+		/// Retrieves the specified pass, by position
 		CRenderPassProxy getPass( unsigned long i );
+
+		/// Retrieves the specified pass, by name
 		CRenderPassProxy getPass( const char *name );
 
 		bool isEmpty() const{
@@ -134,38 +166,81 @@ namespace MaterialEditor
 		CNel3DInterface();
 		~CNel3DInterface();
 
+		/// Load a material for the current (sub)object
 		bool loadMaterial( const char *fname );
+
+		/// Save the current (sub)object's material
 		bool saveMaterial( const char *fname );
+
+		/// Generate materials from the current (sub)object(s) "old" material(s)
 		void genMaterials();
+
+		/// Creates new material(s) for the current (sub)object(s)
 		void newMaterial();
 
+		/// Makes the specified sub-material current
 		bool selectSubMaterial( int id );
+
+		/// Returns a proxy object to the current sub-material
 		CNelMaterialProxy getMaterial();
 
-
+		/// Retrieves a list of user shaders loaded
 		void getShaderList( std::vector< std::string > &v );
+
+		/// Retrieves the specified user shader if exists
 		bool getShaderInfo( const std::string &name, SShaderInfo &info );
+
+		/// Updates a user shader
 		bool updateShaderInfo( const SShaderInfo &info );
+
+		/// Adds a new user shader
 		bool addShader( const SShaderInfo &info );
+
+		/// Removes a user shader
 		bool removeShader( const std::string &name );
 
+		/// Loads the user shaders
 		void loadShaders();
+
+		/// Saves the specified user shader
 		void saveShader( const std::string &name );
+
+		/// Deletes the specified user shader
 		void deleteShader( const std::string &name );
 
+		/// Sets up the viewport widget
 		void initViewPort( unsigned long wnd, unsigned long w, unsigned long h );
+
+		/// Shuts down the viewport widget
 		void killViewPort();
+
+		/// Resizes the viewport widget
 		void resizeViewPort( unsigned long w, unsigned long h );
 		NL3D::UDriver* getDriver(){ return driver; }
 
+		/// Clears the scene then adds a cube
 		bool addCube();
+
+		/// Clears the scene then adds a sphere
 		bool addSphere();
+
+		/// Clears the scene then add a cylinder
 		bool addCylinder();
+
+		/// Clears the scene the adds a teapot
 		bool addTeaPot();
 
+
+		/// Clears the scene then loads a shape
 		bool loadShape( const std::string &fileName );
+
+		/// Clears the scene, as the name suggests
 		void clearScene();
+
+		/// Sends the input events to Nel3D
 		void updateInput();
+
+		/// Renders the scene
 		void renderScene();
 
 		unsigned long getShapeMatCount() const;

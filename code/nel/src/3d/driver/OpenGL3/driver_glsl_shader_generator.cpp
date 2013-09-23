@@ -136,6 +136,7 @@ namespace NL3D
 	{
 		material = NULL;
 		vbFormat = 0;
+		desc = NULL;
 		ss.str( "" );
 		ss.clear();
 	}
