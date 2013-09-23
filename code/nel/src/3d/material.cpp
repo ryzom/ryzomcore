@@ -656,54 +656,6 @@ void CMaterial::createDynMat()
 
 	SRenderPass *p = dynMat->getPass( 0 );
 	
-	switch( _ShaderType )
-	{
-
-	case Normal:
-		p->setShaderRef( "Normal" );
-		break;
-
-	case Bump:
-		p->setShaderRef( "Bump" );
-		break;
-
-	case UserColor:
-		p->setShaderRef( "UserColor" );
-		break;
-
-	case LightMap:
-		p->setShaderRef( "LightMap" );
-		break;
-
-	case Specular:
-		p->setShaderRef( "Specular" );
-		break;
-
-	case Caustics:
-		p->setShaderRef( "Caustics" );
-		break;
-
-	case PerPixelLighting:
-		p->setShaderRef( "PerPixelLighting" );
-		break;
-
-	case PerPixelLightingNoSpec:
-		p->setShaderRef( "PerPixelLightingNoSpec" );
-		break;
-
-	case Cloud:
-		p->setShaderRef( "Cloud" );
-		break;
-
-	case Water:
-		p->setShaderRef( "Water" );
-		break;
-
-	default:
-		nlassert( false );
-		break;
-	}
-
 	float v[ 4 ];
 	float m[ 16 ];
 	SDynMaterialProp prop;

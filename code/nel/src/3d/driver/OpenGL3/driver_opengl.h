@@ -1073,6 +1073,7 @@ private:
 	 void			endMultiPass();
 	// @}
 
+	// Sets up a rendering pass from the dynamic material
 	bool setupDynMatPass( uint pass );
 
 	/// LastVB for UV setup.

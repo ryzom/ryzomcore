@@ -21,22 +21,6 @@
 
 namespace MaterialEditor
 {
-	const int NUM_STOCK_SHADERS = 10;
-
-	const char *stockShaders[ NUM_STOCK_SHADERS ] = 
-	{
-		"Normal",
-		"Bump",
-		"UserColor",
-		"LightMap",
-		"Specular",
-		"Caustics",
-		"PerPixelLighting",
-		"PerPixelLightingNoSpec",
-		"Cloud",
-		"Water"
-	};
-
 	MaterialWidget::MaterialWidget( QWidget *parent ) :
 	QWidget( parent )
 	{
@@ -44,7 +28,6 @@ namespace MaterialEditor
 		shaderEditorWidget = new ShaderEditorWidget();
 		matPropWidget = new MatPropWidget();
 		setNel3DIface( NULL );
-		addStockShaders();
 		setupConnections();
 	}
 
@@ -194,13 +177,6 @@ namespace MaterialEditor
 		pass = passCB->currentText();
 	}
 
-	void MaterialWidget::addStockShaders()
-	{
-		for( int i = 0; i < 10; i++ )
-			shaderCB->addItem( QString( stockShaders[ i ] ) );
-
-	}
-
 	void MaterialWidget::setupConnections()
 	{
 		connect( passButton, SIGNAL( clicked( bool ) ), this, SLOT( onPassEditClicked() ) );
@@ -266,16 +242,11 @@ namespace MaterialEditor
 		pass.getShaderRef( s );
 
 		int i = shaderCB->findText( s.c_str() );
-		if( i >= 0 )
+		if( i > 0 )
 			shaderCB->setCurrentIndex( i );
 		else
 			shaderCB->setCurrentIndex( 0 );
-
-		if( i > NUM_STOCK_SHADERS )
-			shaderButton->setEnabled( true );
-		else
-			shaderButton->setEnabled( false );
-
+		
 		Q_EMIT passChanged( text );
 	}
 
@@ -290,7 +261,7 @@ namespace MaterialEditor
 		CRenderPassProxy pass = m.getPass( p.toUtf8().data() );
 		pass.setShaderRef( text.toUtf8().data() );
 
-		if( shaderCB->currentIndex() > NUM_STOCK_SHADERS )
+		if( !text.isEmpty() )
 			shaderButton->setEnabled( true );
 		else
 			shaderButton->setEnabled( false );
