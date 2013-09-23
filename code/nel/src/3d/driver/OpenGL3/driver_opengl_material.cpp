@@ -624,6 +624,11 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 
 	if( !setupDynMatProgram( *_CurrentMaterial, pass ) )
 		return false;
+	
+	if( ( _CurrentMaterial->getFlags() & IDRV_MAT_DOUBLE_SIDED ) != 0 )
+		_DriverGLStates.enableCullFace( false );
+	else
+		_DriverGLStates.enableCullFace( true );
 
 	CDynMaterial *m = _CurrentMaterial->getDynMat();
 	SRenderPass *p = m->getPass( pass );
