@@ -706,6 +706,9 @@ public:
 	/// Create the dynamic material from the current material parameters
 	void createDynMat();
 
+	/// Creates a clean dynamic material instance
+	void createCleanDynMat();
+
 	// Private. For Driver only.
 	CSmartPtr<ITexture>		_Textures[IDRV_MAT_MAXTEXTURES];
 	uint8				    _TexAddrMode[IDRV_MAT_MAXTEXTURES]; // texture addressing enum packed as bytes

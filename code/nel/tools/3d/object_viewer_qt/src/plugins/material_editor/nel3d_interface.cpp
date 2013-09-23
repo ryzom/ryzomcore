@@ -299,7 +299,9 @@ namespace MaterialEditor
 	{
 		if( currentShape.empty() )
 			return;
-		currentShape.getMaterial( 0 ).getObjectPtr()->getDynMat()->clear();
+
+		for( int i = 0; i < currentShape.getNumMaterials(); i++ )
+			currentShape.getMaterial( i ).getObjectPtr()->createCleanDynMat();
 	}
 
 	bool CNel3DInterface::selectSubMaterial( int id )

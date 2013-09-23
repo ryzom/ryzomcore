@@ -652,10 +652,7 @@ bool CMaterial::isSupportedByDriver(IDriver &drv, bool forceBaseCaps) const
 
 void CMaterial::createDynMat()
 {
-	if( dynMat == NULL )
-		dynMat = new CDynMaterial();
-	else
-		dynMat->reconstruct();
+	createCleanDynMat();
 
 	SRenderPass *p = dynMat->getPass( 0 );
 	
@@ -860,6 +857,14 @@ void CMaterial::createDynMat()
 		p->addProperty( prop );
 
 	}
+}
+
+void CMaterial::createCleanDynMat()
+{
+	if( dynMat == NULL )
+		dynMat = new CDynMaterial();
+	else
+		dynMat->reconstruct();
 }
 
 }
