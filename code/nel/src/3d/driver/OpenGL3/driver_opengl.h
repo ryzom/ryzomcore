@@ -279,10 +279,8 @@ public:
 	void					setupIndexBuffer(CIndexBuffer &vb);
 };
 
-#ifdef GLSL
 class CGLSLShaderGenerator;
 class CUsrShaderManager;
-#endif
 
 // ***************************************************************************
 class CDriverGL3 : public IDriver
@@ -834,20 +832,8 @@ private:
 	// The forceNormalize() state.
 	bool					_ForceNormalize;
 
-	// To know if light setup has been changed from last render() ( any call to setupViewMatrix() or setLight() ).
-	bool					_LightSetupDirty;
-
-	// To know if the modelview matrix setup has been changed from last render() (any call to setupViewMatrix() / setupModelMatrix() ).
-	bool					_ModelViewMatrixDirty;
-
-	// To know if the projection matrix has been changed
-	bool					_ProjMatDirty;
-
 	// Mirror the gl projection matrix when _ProjMatDirty = false
 	NLMISC::CMatrix			_GLProjMat;
-
-	// Ored of _LightSetupDirty and _ModelViewMatrixDirty
-	bool					_RenderSetupDirty;
 
 	// Backup znear and zfar
 	float					_OODeltaZ;
@@ -891,16 +877,14 @@ private:
 	uint						_LightMode[MaxLight];				// Light mode.
 	CVector						_WorldLightPos[MaxLight];			// World position of the lights.
 	CVector						_WorldLightDirection[MaxLight];		// World direction of the lights.
-	bool						_LightDirty[MaxLight];				// Light that need a View position setup in refreshRenderSetup().
+
 	// For Lightmap Dynamic Lighting
 	CLight						_LightMapDynamicLight;
 	bool						_LightMapDynamicLightEnabled;
 	bool						_LightMapDynamicLightDirty;
 	// this is the backup of standard lighting (cause GL states may be modified by Lightmap Dynamic Lighting)
 	CLight						_UserLight0;
-#ifdef GLSL
 	CLight						_UserLight[MaxLight];
-#endif
 	bool						_UserLightEnable[MaxLight];
 
 	//\name description of the per pixel light
@@ -1016,29 +1000,18 @@ private:
 	// Force Activate Texture Environnement. no caching here. TexEnvSpecial is disabled.
 	void					forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env);
 	void					activateTexEnvColor(uint stage, NLMISC::CRGBA col);
+	
 	void					forceActivateTexEnvColor(uint stage, NLMISC::CRGBA col)
 	{
 		static	const float	OO255= 1.0f/255;
 		_CurrentTexEnv[stage].ConstantColor= col;
-#ifndef GLSL
-		// Setup the gl cte color.
-		_DriverGLStates.activeTextureARB(stage);
-		GLfloat		glcol[4];
-		glcol[0]= col.R*OO255;
-		glcol[1]= col.G*OO255;
-		glcol[2]= col.B*OO255;
-		glcol[3]= col.A*OO255;
-		glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, glcol);
-#endif
 	}
+
 	void					forceActivateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 	{
 		H_AUTO_OGL(CDriverGL3_forceActivateTexEnvColor)
 		forceActivateTexEnvColor(stage, env.ConstantColor);
 	}
-
-	// Called by doRefreshRenderSetup(). set _LightSetupDirty to false
-	void					cleanLightSetup ();
 
 	// According to extensions, retrieve GL tex format of the texture.
 	GLint					getGlTextureFormat(ITexture& tex, bool &compressed);
@@ -1193,18 +1166,6 @@ private:
 		}
 	}
 
-	// refresh matrixes and lights.
-	void			refreshRenderSetup()
-	{
-		// check if something to change.
-		if(_RenderSetupDirty)
-		{
-			doRefreshRenderSetup();
-		}
-	}
-	void			doRefreshRenderSetup();
-	void			refreshTexMatrices();
-
 	void			setLightInternal(uint8 num, const CLight& light);
 	void			enableLightInternal(uint8 num, bool enable);
 	void			setupLightMapDynamicLighting(bool enable);
@@ -1276,7 +1237,7 @@ private:
 
 	bool			isVertexProgramSupported () const{ return true; }
 	bool			isVertexProgramEmulated () const{ return false; }
-	bool			activeVertexProgram (CVertexProgram *program);
+	bool			activeVertexProgram (CVertexProgram *program){ return true; };
 	bool			activeProgramObject( IProgramObject *program );
 	IProgramObject* createProgramObject() const;
 	IProgram*		createVertexProgram() const;
@@ -1295,27 +1256,18 @@ private:
 	void setUniformMatrix3fv( uint index, uint count, bool transpose, const float *values );
 	void setUniformMatrix4fv( uint index, uint count, bool transpose, const float *values );
 
-	void			setConstant (uint index, float, float, float, float);
-	void			setConstant (uint index, double, double, double, double);
-	void			setConstant (uint indexStart, const NLMISC::CVector& value);
-	void			setConstant (uint indexStart, const NLMISC::CVectorD& value);
-	void			setConstant (uint index, uint num, const float *src);
-	void			setConstant (uint index, uint num, const double *src);
-	void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
-	void			setConstantFog (uint index);
+	void			setConstant (uint index, float, float, float, float){}
+	void			setConstant (uint index, double, double, double, double){}
+	void			setConstant (uint indexStart, const NLMISC::CVector& value){}
+	void			setConstant (uint indexStart, const NLMISC::CVectorD& value){}
+	void			setConstant (uint index, uint num, const float *src){}
+	void			setConstant (uint index, uint num, const double *src){}
+	void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform){}
+	void			setConstantFog (uint index){}
 	void			enableVertexProgramDoubleSidedColor(bool doubleSided);
 	bool		    supportVertexProgramDoubleSidedColor() const{ return true; };
 
 	virtual	bool			supportMADOperator() const ;
-
-
-	// @}
-
-	/// \name Vertex program implementation
-	// @{
-		bool activeARBVertexProgram (CVertexProgram *program);
-	//@}
-
 
 
 	/// \fallback for material shaders
@@ -1326,14 +1278,8 @@ private:
 
 	bool			isVertexProgramEnabled () const
 	{
-		// Don't use glIsEnabled, too slow.
-		return _VertexProgramEnabled;
+		return true;
 	}
-
-	// Track state of activeVertexProgram()
-	bool							_VertexProgramEnabled;
-	// Say if last setupGlArrays() was a VertexProgram setup.
-	bool							_LastSetupGLArrayVertexProgram;
 
 	// The last vertex program that was setupped
 	NLMISC::CRefPtr<CVertexProgram> _LastSetuppedVP;
@@ -1347,7 +1293,6 @@ private:
 
 	// user texture matrix
 	NLMISC::CMatrix		_UserTexMat[IDRV_MAT_MAXTEXTURES];
-	bool _UserTexMatDirty[IDRV_MAT_MAXTEXTURES];
 	uint				_UserTexMatEnabled; // bitm ask for user texture coords
 
 	// Static const
@@ -1372,7 +1317,6 @@ private:
 
 	private:
 
-#ifdef GLSL
 		CGLSLShaderGenerator *shaderGenerator;
 		CUsrShaderManager    *usrShaderManager;
 		
@@ -1381,9 +1325,6 @@ private:
 
 		/// The current user shader program
 		IProgramObject *dynMatProgram;
-#endif
-
-		bool   setupARBVertexProgram (const CVPParser::TProgram &parsedProgram, GLuint id, bool &specularWritten);
 
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();
@@ -1475,20 +1416,6 @@ private:
 public:
 	void reloadUserShaders();
 
-};
-
-// ***************************************************************************
-class CVertexProgamDrvInfosGL3 : public IVertexProgramDrvInfos
-{
-public:
-	// The GL Id.
-	GLuint					ID;
-
-	// ARB_vertex_program specific -> must know if specular part is written
-	bool					SpecularWritten;
-
-	// The gl id is auto created here.
-	CVertexProgamDrvInfosGL3 (CDriverGL3 *drv, ItVtxPrgDrvInfoPtrList it);
 };
 
 #ifdef NL_STATIC

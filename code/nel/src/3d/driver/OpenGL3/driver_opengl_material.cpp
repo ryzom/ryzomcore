@@ -176,7 +176,6 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 			if (newMask & shiftMask) // user matrix for this stage
 			{
 				_UserTexMat[ k ] = mat.getUserTexMat( k );
-				_UserTexMatDirty[ k ] = true;
 				_UserTexMatEnabled |= shiftMask;
 			}
 			else
@@ -187,7 +186,6 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 				   )
 				{
 					_UserTexMat[ k ].identity();
-					_UserTexMatDirty[ k ] = true;
 					_UserTexMatEnabled &= ~shiftMask;
 				}
 			}
@@ -207,7 +205,6 @@ void CDriverGL3::disableUserTextureMatrix()
 			if (_UserTexMatEnabled & (1 << k)) // user matrix for this stage
 			{
 				_UserTexMat[ k ].identity();
-				_UserTexMatDirty[ k ] = true;
 				_UserTexMatEnabled &= ~ (1 << k);
 			}
 			++k;
@@ -236,15 +233,11 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL3_setupMaterial)
 
-#ifdef GLSL
-	
 	if( mat.getDynMat() != NULL )
 	{
 		_CurrentMaterial = &mat; 
 		return true;
 	}
-
-#endif
 
 	CShaderGL3*	pShader;
 	GLenum		glenum = GL_ZERO;
@@ -390,11 +383,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			// activate the texture, or disable texturing if NULL.
 			activateTexture(stage,text);
 
-#ifndef GLSL
-			// If texture not NULL, Change texture env function.
-			//==================================================
-			setTextureEnvFunction(stage, mat);
-#endif
 		}
 	}
 
@@ -458,12 +446,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		}
 		else
 		{
-#ifndef GLSL
-			// Color unlit part.
-			CRGBA	col= mat.getColor();
-			glColor4ub(col.R, col.G, col.B, col.A);
-#endif
-
 			_DriverGLStates.setVertexColorLighted(false);
 		}
 
@@ -510,10 +492,8 @@ sint			CDriverGL3::beginMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginMultiPass)
 
-#ifdef GLSL
 	if( _CurrentMaterial->getDynMat() != NULL )
 		return _CurrentMaterial->getDynMat()->getPassCount();
-#endif
 
 	// Depending on material type and hardware, return number of pass required to draw this material.
 	switch(_CurrentMaterialSupportedShader)
@@ -543,12 +523,9 @@ bool CDriverGL3::setupPass(uint pass)
 {
 	H_AUTO_OGL(CDriverGL3_setupPass)
 	
-#ifdef GLSL
 	if( _CurrentMaterial->getDynMat() != NULL )
 		return setupDynMatPass( pass );
 	
-#endif
-
 	switch(_CurrentMaterialSupportedShader)
 	{
 	case CMaterial::Normal:
@@ -585,10 +562,8 @@ void			CDriverGL3::endMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endMultiPass)
 	
-#ifdef GLSL
 	if( _CurrentMaterial->getDynMat() != NULL )
 		return;
-#endif
 
 	switch(_CurrentMaterialSupportedShader)
 	{
@@ -620,7 +595,6 @@ void			CDriverGL3::endMultiPass()
 
 bool CDriverGL3::setupDynMatPass( uint pass )
 {
-#ifdef GLSL
 
 	if( !setupDynMatProgram( *_CurrentMaterial, pass ) )
 		return false;
@@ -705,7 +679,6 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#endif
 	return true;
 }
 
@@ -913,7 +886,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
-#ifdef GLSL
+
 					int cl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Constant0 + stage ) );
 					if( cl != -1 )
 					{
@@ -927,7 +900,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					{
 						setUniform1i( tl, stage );
 					}
-#endif
+
 					activateTexEnvColor(stage, stdEnv);
 
 					// Setup env for texture stage.
@@ -939,26 +912,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					{
 						// TexEnv is special.
 						_CurrentTexEnvSpecial[stage] = TexEnvSpecialLightMap;
-
-#ifndef GLSL
-						{
-							// ATI EnvCombine3
-							// What we want to setup is  Texture*Constant + Previous.
-							glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-							// Operator.
-							glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
-							glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE_ADD_ATI);
-							// Arg0.
-							glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-							glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, GL_SRC_COLOR);
-							// Arg1.
-							glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_EXT, GL_CONSTANT_EXT );
-							glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_EXT, GL_SRC_COLOR);
-							// Arg2.
-							glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-							glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
-						}
-#endif
 					}
 				}
 
@@ -990,13 +943,11 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				_DriverGLStates.activeTextureARB(stage);
 				_DriverGLStates.setTexGenMode(stage, 0);
 
-#ifdef GLSL
 				int tl = currentProgram->getUniformIndex( IProgramObject::EUniform( IProgramObject::Sampler0 + stage ) );
 				if( tl != -1 )
 				{
 					setUniform1i( tl, stage );
 				}
-#endif
 
 				// setup UV, with UV0. Only if needed (cached)
 				if( !_LastVertexSetupIsLightMap || _LightMapUVMap[stage]!=0 )
@@ -1004,14 +955,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					setupUVPtr(stage, _LastVB, 0);
 					_LightMapUVMap[stage]= 0;
 				}
-
-#ifndef GLSL
-				if (mat._LightMapsMulx2)
-				{
-					// Multiply x 2
-					glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 2);
-				}
-#endif
 
 			}
 		}
@@ -1028,13 +971,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	/* If multi-pass, then must setup a black Fog color for 1+ pass (just do it for the pass 1).
 		This is because Transparency ONE/ONE is used.
 	*/
-#ifndef GLSL
-	if(pass==1 && _FogEnabled)
-	{
-		static	GLfloat		blackFog[4]= {0,0,0,0};
-		glFogfv(GL_FOG_COLOR, blackFog);
-	}
-#endif
 
 	// Blend is different if the material is blended or not
 	if( !mat.getBlend() )
@@ -1106,29 +1042,10 @@ void			CDriverGL3::endLightMapMultiPass()
 	if(_NLightMaps!=0)
 		_LastVertexSetupIsLightMap= true;
 
-	// If multi-pass, then must reset the fog color
-	if(_NLightMapPass>=2 && _FogEnabled)
-	{
-#ifndef GLSL
-		glFogfv(GL_FOG_COLOR, _CurrentFogColor);
-#endif
-	}
-
 	// nothing to do with blending/lighting, since always setuped in activeMaterial().
 	// If material is the same, then it is still a lightmap material (if changed => touched => different!)
 	// So no need to reset blending/lighting here.
 
-	// Clean up all stage for Multiply x 2
-	if (_CurrentMaterial->_LightMapsMulx2)
-	{
-#ifndef GLSL
-		for (uint32 i = 0; i < (_NLightMapPerPass+1); ++i)
-		{
-			_DriverGLStates.activeTextureARB(i);
-			glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_EXT, 1);
-		}
-#endif
-	}
 }
 
 // ***************************************************************************
@@ -1198,15 +1115,8 @@ void			CDriverGL3::setupSpecularBegin()
 	// For all cases, setup the TexCoord gen for stage1
 	_DriverGLStates.activeTextureARB(1);
 
-#ifndef GLSL
-	// todo hulud remove
-	// _DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
-	_DriverGLStates.setTexGenMode (1, GL_REFLECTION_MAP_ARB);
-#endif
-
 	// setup the good matrix for stage 1.
 	_UserTexMat[ 1 ] = _SpecularTexMtx;
-	_UserTexMatDirty[ 1 ] = true;
 
 }
 
@@ -1220,7 +1130,6 @@ void			CDriverGL3::setupSpecularEnd()
 
 	// Happiness !!! we have already enabled the stage 1
 	_UserTexMat[ 1 ].identity();
-	_UserTexMatDirty[ 1 ] = true;
 }
 
 // ***************************************************************************
@@ -1268,8 +1177,6 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		return;
 	}
 
-#ifdef GLSL
-
 	int sl0 = currentProgram->getUniformIndex( IProgramObject::Sampler0 );
 	if( sl0 != -1 )
 	{
@@ -1288,8 +1195,6 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		setUniformMatrix4fv( tml, 1, false, _UserTexMat[ 1 ].get() );
 	}
 
-#endif
-	
 	{
 		// Ok we can do it in a single pass
 
@@ -1307,42 +1212,6 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 			_CurrentTexEnvSpecial[1] = newEnvStage1;
 
 			_DriverGLStates.activeTextureARB(1);
-
-#ifndef GLSL
-
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-			// Operator Add (Arg0*Arg2+Arg1)
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI );
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE_ADD_ATI );
-			// Arg0.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, GL_SRC_COLOR );
-			// Arg2.
-			if( newEnvStage1 == TexEnvSpecialSpecularStage1NoText )
-			{
-				glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_EXT, GL_ZERO );
-				glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_EXT, GL_ONE_MINUS_SRC_COLOR);
-			}
-			else
-			{
-				glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_EXT, GL_PREVIOUS_EXT );
-				glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_EXT, GL_SRC_ALPHA );
-			}
-			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR );
-			// Result : Texture*Previous.Alpha+Previous
-			// Setup Alpha Diffuse Copy
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_PRIMARY_COLOR_EXT );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, GL_SRC_ALPHA );
-			// Arg2.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_ALPHA_EXT, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA_EXT, GL_ONE_MINUS_SRC_ALPHA );
-			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, GL_SRC_ALPHA);
-
-#endif
 
 		}
 	}

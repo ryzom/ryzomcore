@@ -33,7 +33,6 @@ void CDriverGL3::setFrustum(float left, float right, float bottom, float top, fl
 	else
 		_GLProjMat.ortho( left, right, bottom, top, znear, zfar );
 
-	_ProjMatDirty = true;
 	_OODeltaZ = 1 / ( zfar - znear );
 
 }
@@ -45,8 +44,6 @@ void CDriverGL3::setFrustumMatrix(CMatrix &frustumMatrix)
 	H_AUTO_OGL(CDriverGL3_setFrustum)
 
 	_GLProjMat = frustumMatrix;
-	_ProjMatDirty = true;
-
 }
 
 // ***************************************************************************
@@ -77,14 +74,6 @@ void CDriverGL3::setupViewMatrixEx(const CMatrix& mtx, const CVector &cameraPos)
 	_ViewMtx.setPos(CVector::Null);
 	_PZBCameraPos= cameraPos;
 
-	// Anything that depend on the view martix must be updated.
-	_LightSetupDirty= true;
-	_ModelViewMatrixDirty= true;
-	_RenderSetupDirty= true;
-	// All lights must be refresh.
-	for(uint i=0;i<MaxLight;i++)
-		_LightDirty[i]= true;
-
 	_SpecularTexMtx = _ViewMtx;
 	_SpecularTexMtx.setPos(CVector(0.0f,0.0f,0.0f));
 	_SpecularTexMtx.invert();
@@ -110,14 +99,6 @@ void CDriverGL3::setupViewMatrix(const CMatrix& mtx)
 	// Just set the PZBCameraPos to 0.
 	_PZBCameraPos= CVector::Null;
 
-	// Anything that depend on the view martix must be updated.
-	_LightSetupDirty= true;
-	_ModelViewMatrixDirty= true;
-	_RenderSetupDirty= true;
-	// All lights must be refresh.
-	for(uint i=0;i<MaxLight;i++)
-		_LightDirty[i]= true;
-
 	_SpecularTexMtx = _ViewMtx;
 	_SpecularTexMtx.setPos(CVector(0.0f,0.0f,0.0f));
 	_SpecularTexMtx.invert();
@@ -139,74 +120,11 @@ void CDriverGL3::setupModelMatrix(const CMatrix& mtx)
 	// profiling
 	_NbSetupModelMatrixCall++;
 
-
-	// Dirt flags.
-	_ModelViewMatrixDirty= true;
-	_RenderSetupDirty= true;
-
-
 	// Put the matrix in the opengl eye space, and store it.
 	CMatrix		mat= mtx;
 	// remove first the _PZBCameraPos
 	mat.setPos(mtx.getPos() - _PZBCameraPos);
 	_ModelViewMatrix= _ViewMtx*mat;
-}
-
-// ***************************************************************************
-void CDriverGL3::doRefreshRenderSetup()
-{
-	H_AUTO_OGL(CDriverGL3_doRefreshRenderSetup)
-	// Check if the light setup has been modified first
-	if (_LightSetupDirty)
-		// Recompute light setup
-		cleanLightSetup ();
-
-	// Check light setup is good
-	nlassert (_LightSetupDirty==false);
-
-	if( _ProjMatDirty )
-	{
-#ifndef GLSL
-		glMatrixMode( GL_PROJECTION );
-		glLoadMatrixf( _GLProjMat.get() );
-		glMatrixMode( GL_MODELVIEW );
-#endif
-		_ProjMatDirty = false;
-	}
-
-
-	// Check if must update the modelViewMatrix
-	if( _ModelViewMatrixDirty )
-	{
-#ifndef GLSL
-		// By default, the first model matrix is active
-		glLoadMatrixf( _ModelViewMatrix.get() );
-		// enable normalize if matrix has scale.
-		enableGlNormalize( _ModelViewMatrix.hasScalePart() || _ForceNormalize );
-		// clear.
-#endif
-		_ModelViewMatrixDirty= false;
-	}
-
-	// render setup is cleaned.
-	_RenderSetupDirty= false;
-}
-
-void CDriverGL3::refreshTexMatrices()
-{
-#ifndef GLSL
-	glMatrixMode( GL_TEXTURE );
-	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
-	{
-		if( _UserTexMatDirty[ i ] )
-		{
-			_DriverGLStates.activeTextureARB( i );
-			glLoadMatrixf( _UserTexMat[ i ].get() );
-			_UserTexMatDirty[ i ] = false;
-		}
-	}
-	glMatrixMode( GL_MODELVIEW );
-#endif
 }
 
 #ifdef NL_STATIC

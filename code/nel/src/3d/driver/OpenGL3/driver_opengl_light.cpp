@@ -69,54 +69,7 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 		// Copy the mode
 		_LightMode[num]=mode;
 
-#ifdef GLSL
 		_UserLight[num] = light;
-#endif
-
-#ifndef GLSL
-		// Set the ambiant color
-		GLfloat colorGL[4];
-		CRGBA colorNeL=light.getAmbiant ();
-		colorGL[0]=(float)colorNeL.R/255.f;
-		colorGL[1]=(float)colorNeL.G/255.f;
-		colorGL[2]=(float)colorNeL.B/255.f;
-		colorGL[3]=1.f;
-		glLightfv (lightNum, GL_AMBIENT, colorGL);
-
-		// Set the diffuse color
-		colorNeL=light.getDiffuse ();
-		colorGL[0]=(float)colorNeL.R/255.f;
-		colorGL[1]=(float)colorNeL.G/255.f;
-		colorGL[2]=(float)colorNeL.B/255.f;
-		colorGL[3]=1.f;
-		glLightfv (lightNum, GL_DIFFUSE, colorGL);
-
-		// Set the specular color
-		colorNeL=light.getSpecular ();
-		// don't know why, but with ATI cards, specular of 0 causes incorrect rendering (random specular is added)
-		if (_Extensions.ATITextureEnvCombine3)
-		{
-			// special case for ATI (there will be some specular, but there's a bug otherwise)
-			colorGL[0]=std::max(1.f / 1024.f, (float)colorNeL.R/255.f);
-			colorGL[1]=std::max(1.f / 1024.f, (float)colorNeL.G/255.f);
-			colorGL[2]=std::max(1.f / 1024.f, (float)colorNeL.B/255.f);
-			colorGL[3]=1.f;
-		}
-		else
-		{
-			colorGL[0]=(float)colorNeL.R/255.f;
-			colorGL[1]=(float)colorNeL.G/255.f;
-			colorGL[2]=(float)colorNeL.B/255.f;
-			colorGL[3]=1.f;
-		}
-		glLightfv (lightNum, GL_SPECULAR, colorGL);
-
-		// Set light attenuation
-		glLightf (lightNum, GL_CONSTANT_ATTENUATION, light.getConstantAttenuation());
-		glLightf (lightNum, GL_LINEAR_ATTENUATION, light.getLinearAttenuation());
-		glLightf (lightNum, GL_QUADRATIC_ATTENUATION, light.getQuadraticAttenuation());
-
-#endif
 
 		// Set the position
 		if ((mode==CLight::DirectionalLight)||(mode==CLight::SpotLight))
@@ -136,35 +89,11 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 			// Get the exponent of the spot
 			float exponent=light.getExponent ();
 
-#ifndef GLSL
-			// Set it
-			glLightf (lightNum, GL_SPOT_EXPONENT, exponent);
-#endif
-
 			// Get the cutoff of the spot
 			float cutoff=180.f*(light.getCutoff ()/(float)NLMISC::Pi);
 
-#ifndef GLSL
-			// Set it
-			glLightf (lightNum, GL_SPOT_CUTOFF, cutoff);
-#endif
-
-		}
-		else
-		{
-#ifndef GLSL
-			// Disable spot properties
-			glLighti (lightNum, GL_SPOT_CUTOFF, 180);
-			glLighti (lightNum, GL_SPOT_EXPONENT, 0);
-#endif
 		}
 
-		// Flag this light as dirt.
-		_LightDirty[num]= true;
-
-		// dirt the lightSetup and hence the render setup
-		_LightSetupDirty= true;
-		_RenderSetupDirty=true;
 	}
 }
 
@@ -198,12 +127,6 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 	{
 		_DriverGLStates.enableLight(num, enable);
 
-		// If this light is dirty, and reenabled, then it must be refresh at next render => set the global flag.
-		if (enable && _LightDirty[num])
-		{
-			_LightSetupDirty= true;
-			_RenderSetupDirty= true;
-		}
 	}
 }
 
@@ -214,112 +137,6 @@ void	CDriverGL3::setAmbientColor (CRGBA color)
 {
 	H_AUTO_OGL(CDriverGL3_setAmbientColor )
 	
-#ifndef GLSL
-	// Gl array
-	GLfloat array[4];
-	array[0]=(float)color.R/255.f;
-	array[1]=(float)color.G/255.f;
-	array[2]=(float)color.B/255.f;
-	array[3]=1.f;
-
-	// Set the color
-	glLightModelfv (GL_LIGHT_MODEL_AMBIENT, array);
-#endif
-
-}
-
-
-// ***************************************************************************
-void				CDriverGL3::cleanLightSetup ()
-{
-	H_AUTO_OGL(CDriverGL3_cleanLightSetup )
-	// Should be dirty
-	nlassert (_LightSetupDirty);
-
-#ifndef GLSL
-
-	// First light
-	bool first=true;
-
-	// For each lights
-	for (uint i=0; i<_MaxDriverLight; i++)
-	{
-		// Is this light enabled and dirty?
-		if (_DriverGLStates.isLightEnabled(i) && _LightDirty[i])
-		{
-			// If first light
-			if (first)
-			{
-				first=false;
-
-				// Push the matrix
-				glPushMatrix ();
-
-				// Load the view matrix
-				glLoadMatrixf (_ViewMtx.get());
-			}
-
-			// Light is directionnal ?
-			if (_LightMode[i]==(uint)CLight::DirectionalLight)
-			{
-				// GL vector
-				GLfloat vectorGL[4];
-
-				// Set the GL array
-				vectorGL[0]=-_WorldLightDirection[i].x;
-				vectorGL[1]=-_WorldLightDirection[i].y;
-				vectorGL[2]=-_WorldLightDirection[i].z;
-				vectorGL[3]=0.f;
-
-				// Set it
-				glLightfv ((GLenum)(GL_LIGHT0+i), (GLenum)GL_POSITION, vectorGL);
-			}
-
-			// Spotlight ?
-			if (_LightMode[i]==(uint)CLight::SpotLight)
-			{
-				// GL vector
-				GLfloat vectorGL[4];
-
-				// Set the GL array
-				vectorGL[0]=_WorldLightDirection[i].x;
-				vectorGL[1]=_WorldLightDirection[i].y;
-				vectorGL[2]=_WorldLightDirection[i].z;
-
-				// Set it
-				glLightfv ((GLenum)(GL_LIGHT0+i), (GLenum)GL_SPOT_DIRECTION, vectorGL);
-			}
-
-			// Position
-			if (_LightMode[i]!=(uint)CLight::DirectionalLight)
-			{
-				// GL vector
-				GLfloat vectorGL[4];
-
-				// Set the GL array
-				// Must Substract CameraPos, because ViewMtx may not be the exact view.
-				vectorGL[0]=_WorldLightPos[i].x - _PZBCameraPos.x;
-				vectorGL[1]=_WorldLightPos[i].y - _PZBCameraPos.y;
-				vectorGL[2]=_WorldLightPos[i].z - _PZBCameraPos.z;
-				vectorGL[3]=1.f;
-
-				// Set it
-				glLightfv ((GLenum)(GL_LIGHT0+i), (GLenum)GL_POSITION, vectorGL);
-			}
-
-			// Cleaned!
-			_LightDirty[i]= false;
-		}
-	}
-
-	// Pop old matrix
-	if (!first)
-		glPopMatrix ();
-
-#endif
-
-	// Clean flag
-	_LightSetupDirty=false;
 }
 
 
@@ -371,9 +188,6 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 		for(uint i=0;i<_MaxDriverLight;i++)
 			enableLightInternal(i, _UserLightEnable[i]);
 	}
-
-	// in all case, must refresh render setup, cause lighting may be modified
-	refreshRenderSetup();
 }
 
 #ifdef NL_STATIC

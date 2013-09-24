@@ -44,9 +44,6 @@ namespace NL3D
 	{
 		if( !program )
 		{
-#ifndef GLSL
-			_VertexProgramEnabled = false;
-#endif
 			currentProgram = NULL;
 			return true;
 		}
@@ -60,7 +57,6 @@ namespace NL3D
 		if( error != GL_NO_ERROR )
 			return false;
 
-		_VertexProgramEnabled = true;
 		currentProgram = program;
 
 		return true;
@@ -354,9 +350,6 @@ namespace NL3D
 
 	void CDriverGL3::setupUniforms( CMaterial& mat )
 	{
-
-#ifdef GLSL
-
 		int mvpIndex = currentProgram->getUniformIndex( IProgramObject::MVPMatrix );
 		if( mvpIndex != -1 )
 		{
@@ -542,7 +535,6 @@ namespace NL3D
 
 		}
 
-#endif
 	}
 
 }

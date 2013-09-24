@@ -120,11 +120,6 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	glStencilFunc(_CurStencilFunc, _CurStencilRef, _CurStencilMask);
 	glStencilOp(_CurStencilOpFail, _CurStencilOpZFail, _CurStencilOpZPass);
 	glStencilMask(_CurStencilWriteMask);
-#ifndef GLSL
-	glAlphaFunc(GL_GREATER, _CurAlphaTestThreshold);
-#endif
-
-
 
 	// Materials.
 	uint32			packedOne= (CRGBA(255,255,255,255)).getPacked();
@@ -142,13 +137,6 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	// setup GLStates.
 	static const GLfloat		one[4]= {1,1,1,1};
 	static const GLfloat		zero[4]= {0,0,0,1};
-#ifndef GLSL
-	glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, zero);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, one);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, one);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, zero);
-	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, _CurShininess);
-#endif
 
 	// TexModes
 	uint stage;
@@ -298,13 +286,6 @@ void			CDriverGLStates3::enableLight(uint num, uint enable)
 	{
 		// new state.
 		_CurLight[num]= enabled;
-		// Setup GLState.
-#ifndef GLSL
-		if(_CurLight[num])
-			glEnable ((GLenum)(GL_LIGHT0+num));
-		else
-			glDisable ((GLenum)(GL_LIGHT0+num));
-#endif
 	}
 }
 
@@ -425,10 +406,6 @@ void			CDriverGLStates3::alphaFunc(float threshold)
 	{
 		// new state
 		_CurAlphaTestThreshold= threshold;
-		// setup function.
-#ifndef GLSL
-		glAlphaFunc(GL_GREATER, _CurAlphaTestThreshold);
-#endif
 	}
 }
 
@@ -496,9 +473,6 @@ void			CDriverGLStates3::setEmissive(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurEmissive= packedColor;
-#ifndef GLSL
-		glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, color);
-#endif
 	}
 }
 
@@ -511,9 +485,6 @@ void			CDriverGLStates3::setAmbient(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurAmbient= packedColor;
-#ifndef GLSL
-		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color);
-#endif
 	}
 }
 
@@ -526,9 +497,6 @@ void			CDriverGLStates3::setDiffuse(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurDiffuse= packedColor;
-#ifndef GLSL
-		glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
-#endif
 	}
 }
 
@@ -541,9 +509,6 @@ void			CDriverGLStates3::setSpecular(uint32 packedColor, const GLfloat color[4])
 #endif
 	{
 		_CurSpecular= packedColor;
-#ifndef GLSL
-		glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
-#endif
 	}
 }
 
@@ -556,9 +521,6 @@ void			CDriverGLStates3::setShininess(float shin)
 #endif
 	{
 		_CurShininess= shin;
-#ifndef GLSL
-		glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shin);
-#endif
 	}
 }
 
@@ -583,29 +545,6 @@ void			CDriverGLStates3::setVertexColorLighted(bool enable)
 #endif
 	{
 		_VertexColorLighted= enable;
-
-#ifndef GLSL
-
-		if (_VertexColorLighted)
-		{
-			glEnable (GL_COLOR_MATERIAL);
-			glColorMaterial (GL_FRONT_AND_BACK, GL_DIFFUSE);
-		}
-		else
-		{
-			glDisable (GL_COLOR_MATERIAL);
-			// Since we leave glColorMaterial mode, GL diffuse is now scracth. reset him to current value.
-			CRGBA	diffCol;
-			diffCol.R= (uint8)((_CurDiffuse >> 24) & 255);
-			diffCol.G= (uint8)((_CurDiffuse >> 16) & 255);
-			diffCol.B= (uint8)((_CurDiffuse >>  8) & 255);
-			diffCol.A= (uint8)((_CurDiffuse      ) & 255);
-			GLfloat	glColor[4];
-			convColor(diffCol, glColor);
-			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, glColor);
-		}
-
-#endif
 	}
 }
 
@@ -660,48 +599,6 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 #endif
 	{
 		_TexGenMode[stage] = mode;
-
-#ifndef GLSL
-
-		if (!_TextureCubeMapSupported) return;
-
-		if(mode==0)
-		{
-			glDisable( GL_TEXTURE_GEN_S );
-			glDisable( GL_TEXTURE_GEN_T );
-			glDisable( GL_TEXTURE_GEN_R );
-			glDisable( GL_TEXTURE_GEN_Q );
-		}
-		else
-		{
-			glTexGeni( GL_S, GL_TEXTURE_GEN_MODE, mode);
-			glTexGeni( GL_T, GL_TEXTURE_GEN_MODE, mode);
-			glTexGeni( GL_R, GL_TEXTURE_GEN_MODE, mode);
-
-			/* Object or Eye Space ? => enable W generation. VERY IMPORTANT because
-				was a bug with VegetableRender and ShadowRender:
-					- Vegetable use the TexCoord1.w in his VertexProgram
-					- Shadow Render don't use any TexCoord in VB (since projected)
-					=> TexCoord1.w dirty!!
-			*/
-
-			if(mode==GL_OBJECT_LINEAR || mode==GL_EYE_LINEAR)
-			{
-				glTexGeni( GL_Q, GL_TEXTURE_GEN_MODE, mode);
-				glEnable( GL_TEXTURE_GEN_Q );
-			}
-			else
-			{
-				glDisable( GL_TEXTURE_GEN_Q );
-			}
-
-			// Enable All.
-			glEnable( GL_TEXTURE_GEN_S );
-			glEnable( GL_TEXTURE_GEN_T );
-			glEnable( GL_TEXTURE_GEN_R );
-		}
-#endif
-
 	}
 }
 
@@ -709,22 +606,6 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 void			CDriverGLStates3::resetTextureMode()
 {
 	H_AUTO_OGL(CDriverGLStates3_resetTextureMode);
-
-#ifndef GLSL
-
-	glDisable(GL_TEXTURE_2D);
-
-	if (_TextureCubeMapSupported)
-	{
-		glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-	}
-
-	if (_TextureRectangleSupported)
-	{
-		glDisable(GL_TEXTURE_RECTANGLE_NV);
-	}
-
-#endif
 
 	_TextureMode[_CurrentActiveTextureARB]= TextureDisabled;
 }
@@ -738,67 +619,7 @@ void			CDriverGLStates3::setTextureMode(TTextureMode texMode)
 	if(oldTexMode != texMode)
 	{
 
-#ifndef GLSL
-
-		// Disable first old mode.
-		if (oldTexMode == Texture2D)
-		{
-			glDisable(GL_TEXTURE_2D);
-		}
-		else if(oldTexMode == TextureRect)
-		{
-			if(_TextureRectangleSupported)
-			{
-				glDisable(GL_TEXTURE_RECTANGLE_NV);
-			}
-			else
-			{
-				glDisable(GL_TEXTURE_2D);
-			}
-		}
-		else if(oldTexMode == TextureCubeMap)
-		{
-			if(_TextureCubeMapSupported)
-			{
-				glDisable(GL_TEXTURE_CUBE_MAP_ARB);
-			}
-			else
-			{
-				glDisable(GL_TEXTURE_2D);
-			}
-		}
-
-		// Enable new mode.
-		if(texMode == Texture2D)
-		{
-			glEnable(GL_TEXTURE_2D);
-		}
-		else if(texMode == TextureRect)
-		{
-			if(_TextureRectangleSupported)
-			{
-				glEnable(GL_TEXTURE_RECTANGLE_NV);
-			}
-			else
-			{
-				glEnable(GL_TEXTURE_2D);
-			}
-		}
-		else if(texMode == TextureCubeMap)
-		{
-			if(_TextureCubeMapSupported)
-			{
-				glEnable(GL_TEXTURE_CUBE_MAP_ARB);
-			}
-			else
-			{
-				glEnable(GL_TEXTURE_2D);
-			}
-		}
-
-#endif
-
-		// new mode.
+	// new mode.
 		_TextureMode[_CurrentActiveTextureARB]= texMode;
 	}
 }
@@ -830,158 +651,43 @@ void			CDriverGLStates3::forceActiveTextureARB(uint stage)
 // ***************************************************************************
 void			CDriverGLStates3::enableVertexArray(bool enable)
 {
-#ifndef GLSL
-
-	H_AUTO_OGL(CDriverGLStates3_enableVertexArray);
-
-	if(_VertexArrayEnabled != enable)
-	{
-		if(enable)
-			glEnableClientState(GL_VERTEX_ARRAY);
-		else
-			glDisableClientState(GL_VERTEX_ARRAY);
-
-		_VertexArrayEnabled= enable;
-	}
-
-#endif
-
 }
+
 // ***************************************************************************
 void			CDriverGLStates3::enableNormalArray(bool enable)
 {
-#ifndef GLSL
-
-	H_AUTO_OGL(CDriverGLStates3_enableNormalArray)
-	if(_NormalArrayEnabled != enable)
-	{
-		if(enable)
-			glEnableClientState(GL_NORMAL_ARRAY);
-		else
-			glDisableClientState(GL_NORMAL_ARRAY);
-		_NormalArrayEnabled= enable;
-
-
-	}
-
-#endif
-
 }
+
 // ***************************************************************************
 void			CDriverGLStates3::enableWeightArray(bool enable)
 {
-#ifndef GLSL
-	H_AUTO_OGL(CDriverGLStates3_enableWeightArray);
-
-	if(_WeightArrayEnabled != enable)
-	{
-		if(enable)
-			glEnableClientState(GL_VERTEX_WEIGHTING_EXT);
-		else
-			glDisableClientState(GL_VERTEX_WEIGHTING_EXT);
-
-		_WeightArrayEnabled= enable;
-	}
-#endif
-
 }
+
 // ***************************************************************************
 void			CDriverGLStates3::enableColorArray(bool enable)
 {
-#ifndef GLSL
-	H_AUTO_OGL(CDriverGLStates3_enableColorArray);
-
-	if(_ColorArrayEnabled != enable)
-	{
-		if(enable)
-			glEnableClientState(GL_COLOR_ARRAY);
-		else
-			glDisableClientState(GL_COLOR_ARRAY);
-		_ColorArrayEnabled= enable;
-
-
-	}
-#endif
-
 }
 
 
 // ***************************************************************************
 void			CDriverGLStates3::enableSecondaryColorArray(bool enable)
 {
-#ifndef GLSL
-	H_AUTO_OGL(CDriverGLStates3_enableSecondaryColorArray);
-
-	if(_SecondaryColorArrayEnabled != enable)
-	{
-		if(enable)
-			glEnableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
-		else
-			glDisableClientState(GL_SECONDARY_COLOR_ARRAY_EXT);
-
-		_SecondaryColorArrayEnabled= enable;
-
-		// If disable
-		if(!enable)
-		{
-			// GeForceFx Bug: Must reset Secondary color to 0 (if comes from a VP), else bugs
-			nglSecondaryColor3ubEXT(0,0,0);
-		}
-	}
-#endif
 
 }
 
 // ***************************************************************************
 void			CDriverGLStates3::clientActiveTextureARB(uint stage)
 {
-#ifndef GLSL
-	H_AUTO_OGL(CDriverGLStates3_clientActiveTextureARB);
-
-	if( _CurrentClientActiveTextureARB != stage )
-	{
-		nglClientActiveTextureARB(GL_TEXTURE0_ARB+stage);
-		_CurrentClientActiveTextureARB= stage;
-	}
-#endif
-
 }
 
 // ***************************************************************************
 void			CDriverGLStates3::enableTexCoordArray(bool enable)
 {
-#ifndef GLSL
-	H_AUTO_OGL(CDriverGLStates3_enableTexCoordArray);
-
-	if(_TexCoordArrayEnabled[_CurrentClientActiveTextureARB] != enable)
-	{
-		if(enable)
-			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		else
-			glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-
-		_TexCoordArrayEnabled[_CurrentClientActiveTextureARB]= enable;
-	}
-#endif
-
 }
 
 // ***************************************************************************
 void			CDriverGLStates3::enableVertexAttribArray(uint glIndex, bool enable)
 {
-#ifndef GLSL
-	H_AUTO_OGL(CDriverGLStates3_enableVertexAttribArray);
-
-	if(_VertexAttribArrayEnabled[glIndex] != enable)
-	{
-		if(enable)
-			glEnableClientState(glIndex+GL_VERTEX_ATTRIB_ARRAY0_NV);
-		else
-			glDisableClientState(glIndex+GL_VERTEX_ATTRIB_ARRAY0_NV);
-		_VertexAttribArrayEnabled[glIndex]= enable;
-	}
-#endif
 }
 
 // ***************************************************************************
@@ -1014,13 +720,6 @@ void			CDriverGLStates3::enableFog(uint enable)
 	{
 		// new state.
 		_CurFog= enabled;
-#ifndef GLSL
-		// Setup GLState.
-		if(_CurFog)
-			glEnable(GL_FOG);
-		else
-			glDisable(GL_FOG);
-#endif
 	}
 }
 

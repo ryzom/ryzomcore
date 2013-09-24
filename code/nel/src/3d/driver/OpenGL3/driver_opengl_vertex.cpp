@@ -207,17 +207,13 @@ bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 {
 	H_AUTO_OGL(CDriverGL3_renderLines)
-	// update matrix and Light in OpenGL if needed
-	refreshRenderSetup();
 
 	// setup material
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
 		return false;
 
-#ifdef GLSL
 	if( !setupProgram( mat ) )
 		return false;
-#endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
@@ -231,8 +227,6 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 		// setup the pass.
 		if( !setupPass(pass) )
 			return false;
-
-		refreshTexMatrices();
 
 		// draw the primitives.
 		if(nlines)
@@ -264,19 +258,12 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 {
 	H_AUTO_OGL(CDriverGL3_renderTriangles);
 
-	// update matrix and Light in OpenGL if needed
-	refreshRenderSetup();
-
 	// setup material
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
 		return false;
 
-#ifdef GLSL
 	if( !setupProgram( mat ) )
 		return false;
-#endif
-
-	refreshTexMatrices();
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 
@@ -293,8 +280,6 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 		// setup the pass.
 		if( !setupPass(pass) )
 			return false;
-
-		refreshTexMatrices();
 
 		// draw the primitives.
 		if(ntris)
@@ -329,9 +314,6 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 
 	nlassert(ntris>0);
 
-	// update matrix and Light in OpenGL if needed
-	refreshRenderSetup();
-
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// Don't setup any material here.
 
@@ -362,17 +344,13 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPoints)
 {
 	H_AUTO_OGL(CDriverGL3_renderRawPoints)
-	// update matrix and Light in OpenGL if needed
-	refreshRenderSetup();
 
 	// setup material
 	if ( !setupMaterial(mat) )
 		return false;
 
-#ifdef GLSL
 	if( !setupProgram( mat ) )
 		return false;
-#endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
@@ -386,8 +364,6 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 		// setup the pass.
 		if( !setupPass(pass) )
 			return false;
-
-		refreshTexMatrices();
 
 		// draw the primitives.
 		if(numPoints)
@@ -409,17 +385,13 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLines)
 {
 	H_AUTO_OGL(CDriverGL3_renderRawLines)
-	// update matrix and Light in OpenGL if needed
-	refreshRenderSetup();
 
 	// setup material
 	if ( !setupMaterial(mat) )
 		return false;
 
-#ifdef GLSL
 	if( !setupProgram( mat ) )
 		return false;
-#endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
@@ -433,8 +405,6 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 		// setup the pass.
 		if( !setupPass(pass) )
 			return false;
-
-		refreshTexMatrices();
 
 		// draw the primitives.
 		if(numLines)
@@ -456,17 +426,13 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 numTris)
 {
 	H_AUTO_OGL(CDriverGL3_renderRawTriangles)
-	// update matrix and Light in OpenGL if needed
-	refreshRenderSetup();
 
 	// setup material
 	if ( !setupMaterial(mat) )
 		return false;
 
-#ifdef GLSL
 	if( !setupProgram( mat ) )
 		return false;
-#endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
@@ -480,8 +446,6 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 		// setup the pass.
 		if( !setupPass(pass) )
 			return false;
-
-		refreshTexMatrices();
 
 		// draw the primitives.
 		if(numTris)
@@ -506,17 +470,13 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 {
 	H_AUTO_OGL(CDriverGL3_renderRawQuads)
 	if (!numQuads) return true;
-	// update matrix and Light in OpenGL if needed
-	refreshRenderSetup();
 
 	// setup material
 	if ( !setupMaterial(mat) )
 		return false;
 
-#ifdef GLSL
 	if( !setupProgram( mat ) )
 		return false;
-#endif
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 
@@ -552,8 +512,6 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 		// setup the pass.
 		if( !setupPass(pass) )
 			return false;
-
-		refreshTexMatrices();
 
 		uint32 currIndex = startIndex;
 		uint32 numLeftQuads = numQuads;
@@ -633,37 +591,6 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 
 void		CDriverGL3::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
 {
-#ifndef GLSL
-
-	H_AUTO_OGL(CDriverGL3_setupUVPtr)
-	// sould not be called with vertex program Array setuped.
-	nlassert(!_LastSetupGLArrayVertexProgram);
-
-	_DriverGLStates.clientActiveTextureARB(stage);
-	if (VB.VertexFormat & (CVertexBuffer::TexCoord0Flag<<uvId))
-	{
-		// Check type, if not supported, just ignore
-		CVertexBuffer::TType uvType = VB.Type[CVertexBuffer::TexCoord0+uvId];
-		if (uvType == CVertexBuffer::Float2 ||
-			uvType == CVertexBuffer::Float3)
-		{
-			_DriverGLStates.enableTexCoordArray(true);
-			uint numTexCoord = (uvType == CVertexBuffer::Float2) ? 2 : 3;
-			_DriverGLStates.bindARBVertexBuffer(VB.VertexObjectId);
-			// with arb buffers, position is relative to the start of the stream
-			glTexCoordPointer(numTexCoord,GL_FLOAT,VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0+uvId]);
-
-		}
-		else
-		{
-			_DriverGLStates.enableTexCoordArray(false);
-		}
-	}
-	else
-		_DriverGLStates.enableTexCoordArray(false);
-
-#endif
-
 }
 
 
@@ -835,66 +762,6 @@ const uint		CDriverGL3::GLVertexAttribIndex[CVertexBuffer::NumValue]=
 // ***************************************************************************
 void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
 {
-#ifndef GLSL
-	H_AUTO_OGL(CDriverGL3_setupGlArraysStd)
-	uint32	flags= vb.VertexFormat;
-
-	_DriverGLStates.bindARBVertexBuffer(vb.VertexObjectId);
-
-	{
-		{
-			// setup vertex ptr.
-			//-----------
-			uint numVertexCoord = CVertexBuffer::NumComponentsType[vb.Type[CVertexBuffer::Position]];
-			nlassert (numVertexCoord >= 2);
-			_DriverGLStates.enableVertexArray(true);
-			glVertexPointer(numVertexCoord, GL_FLOAT, vb.VertexSize, vb.ValuePtr[CVertexBuffer::Position]);
-
-			// setup normal ptr.
-			//-----------
-			// Check for normal param in vertex buffer
-			if (flags & CVertexBuffer::NormalFlag)
-			{
-				// Check type
-				nlassert (vb.Type[CVertexBuffer::Normal]==CVertexBuffer::Float3);
-
-				_DriverGLStates.enableNormalArray(true);
-				glNormalPointer(GL_FLOAT, vb.VertexSize, vb.ValuePtr[CVertexBuffer::Normal]);
-			}
-			else
-			{
-				_DriverGLStates.enableNormalArray(false);
-			}
-
-			// Setup Color
-			//-----------
-			// Check for color param in vertex buffer
-			if (flags & CVertexBuffer::PrimaryColorFlag)
-			{
-				// Check type
-				nlassert (vb.Type[CVertexBuffer::PrimaryColor]==CVertexBuffer::UChar4);
-				_DriverGLStates.enableColorArray(true);
-				// Setup ATI VBHard or std ptr.
-				glColorPointer(4,GL_UNSIGNED_BYTE, vb.VertexSize, vb.ValuePtr[CVertexBuffer::PrimaryColor]);
-			}
-			else
-			{
-				_DriverGLStates.enableColorArray(false);
-			}
-		}
-	}
-
-	// Setup Uvs
-	//-----------
-	// Get the routing
-	for(uint i=0; i<inlGetNumTextStages(); i++)
-	{
-		// normal behavior: each texture has its own UV.
-		setupUVPtr(i, vb, vb.UVRouting[i]);
-	}
-
-#endif
-
 }
 
 
@@ -904,70 +771,6 @@ void		CDriverGL3::toggleGlArraysForARBVertexProgram()
 	H_AUTO_OGL(CDriverGL3_toggleGlArraysForARBVertexProgram)
 	// If change of setup type, must disable olds.
 	//=======================
-
-#ifndef GLSL
-
-	// If last was a VertexProgram setup, and now it is a standard GL array setup.
-	if( _LastSetupGLArrayVertexProgram && !isVertexProgramEnabled () )
-	{
-
-		if (_Extensions.ATITextureEnvCombine3)
-		{
-			// fix for ATI : when switching from Vertex Program to fixed Pipe, must clean texture, otherwise texture may be disabled in next render
-			// (seems to be a driver bug)
-			ITexture *oldTex[IDRV_MAT_MAXTEXTURES];
-			for(uint stage=0 ; stage < inlGetNumTextStages() ; stage++)
-			{
-				oldTex[stage] = _CurrentTexture[stage];
-				// activate the texture, or disable texturing if NULL.
-				activateTexture(stage, NULL);
-			}
-
-			glBegin(GL_QUADS);
-			glVertex4f(0.f, 0.f, 0.f, 1.f);
-			glVertex4f(0.f, 0.f, 0.f, 1.f);
-			glVertex4f(0.f, 0.f, 0.f, 1.f);
-			glVertex4f(0.f, 0.f, 0.f, 1.f);
-			glEnd();
-
-
-			for(uint stage=0 ; stage<inlGetNumTextStages() ; stage++)
-			{
-				// activate the texture, or disable texturing if NULL.
-				activateTexture(stage, oldTex[stage]);
-			}
-		}
-
-		// Disable all VertexAttribs.
-		for (uint value=0; value<CVertexBuffer::NumValue; value++)
-		{
-			// Index
-			uint glIndex=GLVertexAttribIndex[value];
-			_DriverGLStates.enableVertexAttribArrayARB(glIndex, false);
-		}
-		// no more a vertex program setup.
-		_LastSetupGLArrayVertexProgram= false;
-	}
-
-	// If last was a standard GL array setup, and now it is a VertexProgram setup.
-	if( !_LastSetupGLArrayVertexProgram && isVertexProgramEnabled () )
-	{
-		// Disable all standards ptrs.
-		_DriverGLStates.enableVertexArray(false);
-		_DriverGLStates.enableNormalArray(false);
-		_DriverGLStates.enableColorArray(false);
-		_DriverGLStates.enableSecondaryColorArray(false);
-		for(uint i=0; i<inlGetNumTextStages(); i++)
-		{
-			_DriverGLStates.clientActiveTextureARB(i);
-			_DriverGLStates.enableTexCoordArray(false);
-		}
-
-		// now, vertex program setup.
-		_LastSetupGLArrayVertexProgram= true;
-	}
-
-#endif
 
 }
 
@@ -1039,22 +842,8 @@ void		CDriverGL3::setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb)
 void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CDriverGL3_setupGlArrays)
-		
-#ifndef GLSL
-		toggleGlArraysForARBVertexProgram();
-		// Use a vertex program ?
-		if (!isVertexProgramEnabled ())
-		{
-			setupGlArraysStd(vb);
-		}
-		else
-		{
-#endif
-			setupGlArraysForARBVertexProgram(vb);
-#ifndef GLSL
-		}
-#endif
-
+	
+	setupGlArraysForARBVertexProgram(vb);
 }
 
 

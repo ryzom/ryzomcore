@@ -232,13 +232,7 @@ CDriverGL3::CDriverGL3()
 
 	_RenderTargetFBO = false;
 
-	_LightSetupDirty= false;
-	_ModelViewMatrixDirty= false;
-	_RenderSetupDirty= false;
-	// All lights default pos.
 	uint i;
-	for(i=0;i<MaxLight;i++)
-		_LightDirty[i]= false;
 
 	_CurrentGlNormalize= false;
 	_ForceNormalize= false;
@@ -274,9 +268,6 @@ CDriverGL3::CDriverGL3()
 	}
 
 	for( i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
-		_UserTexMatDirty[ i ] = false;
-
-	for( i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
 		_UserTexMat[ i ].identity();
 
 	_UserTexMatEnabled = 0;
@@ -291,8 +282,6 @@ CDriverGL3::CDriverGL3()
 	_LightMapLastStageEnv.Env.OpAlpha= CMaterial::Replace;
 	_LightMapLastStageEnv.Env.SrcArg0Alpha= CMaterial::Texture;
 	_LightMapLastStageEnv.Env.OpArg0Alpha= CMaterial::SrcAlpha;
-
-	_ProjMatDirty = true;
 
 	std::fill(_StageSupportEMBM, _StageSupportEMBM + IDRV_MAT_MAXTEXTURES, false);
 
@@ -335,7 +324,6 @@ CDriverGL3::CDriverGL3()
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
 
-#ifdef GLSL
 	currentProgram = NULL;
 	dynMatProgram = NULL;
 
@@ -346,8 +334,6 @@ CDriverGL3::CDriverGL3()
 	loader.setManager( usrShaderManager );
 	loader.loadShaders( "./shaders" );
 
-#endif
-
 }
 
 // ***************************************************************************
@@ -357,7 +343,6 @@ CDriverGL3::~CDriverGL3()
 
 	release();
 
-#ifdef GLSL
 	currentProgram = NULL;
 
 	if( dynMatProgram != NULL )
@@ -368,7 +353,6 @@ CDriverGL3::~CDriverGL3()
 	shaderGenerator = NULL;
 	delete usrShaderManager;
 	usrShaderManager = NULL;
-#endif
 
 #if defined(NL_OS_MAC)
 	[_autoreleasePool release];
@@ -427,13 +411,6 @@ bool CDriverGL3::setupDisplay()
 	// Init OpenGL/Driver defaults.
 	//=============================
 	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
-#ifndef GLSL
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0,_CurrentMode.Width,_CurrentMode.Height,0,-1.0f,1.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-#endif
 	glDisable(GL_AUTO_NORMAL);
 	glDisable(GL_COLOR_MATERIAL);
 	glEnable(GL_DITHER);
@@ -456,18 +433,7 @@ bool CDriverGL3::setupDisplay()
 	// Be always in EXTSeparateSpecularColor.
 	if(_Extensions.EXTSeparateSpecularColor)
 	{
-#ifndef GLSL
-		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
-#endif
 	}
-
-#ifndef GLSL
-	_VertexProgramEnabled= false;
-#else
-	_VertexProgramEnabled = true;
-#endif
-
-	_LastSetupGLArrayVertexProgram= false;
 
 	// Init VertexArrayRange according to supported extenstion.
 	_SlowUnlockVBHard= false;
@@ -503,10 +469,6 @@ bool CDriverGL3::setupDisplay()
 		// init default env.
 		CMaterial::CTexEnv	env;	// envmode init to default.
 		env.ConstantColor.set(255,255,255,255);
-#ifndef GLSL
-		forceActivateTexEnvMode(stage, env);
-		forceActivateTexEnvColor(stage, env);
-#endif
 
 		// Not special TexEnv.
 		_CurrentTexEnvSpecial[stage]= TexEnvSpecialDisabled;
@@ -514,21 +476,6 @@ bool CDriverGL3::setupDisplay()
 		// set All TexGen by default to identity matrix (prefer use the textureMatrix scheme)
 		_DriverGLStates.activeTextureARB(stage);
 
-#ifndef GLSL
-		GLfloat		params[4];
-		params[0]=1; params[1]=0; params[2]=0; params[3]=0;
-		glTexGenfv(GL_S, GL_OBJECT_PLANE, params);
-		glTexGenfv(GL_S, GL_EYE_PLANE, params);
-		params[0]=0; params[1]=1; params[2]=0; params[3]=0;
-		glTexGenfv(GL_T, GL_OBJECT_PLANE, params);
-		glTexGenfv(GL_T, GL_EYE_PLANE, params);
-		params[0]=0; params[1]=0; params[2]=1; params[3]=0;
-		glTexGenfv(GL_R, GL_OBJECT_PLANE, params);
-		glTexGenfv(GL_R, GL_EYE_PLANE, params);
-		params[0]=0; params[1]=0; params[2]=0; params[3]=1;
-		glTexGenfv(GL_Q, GL_OBJECT_PLANE, params);
-		glTexGenfv(GL_Q, GL_EYE_PLANE, params);
-#endif
 	}
 
 	_PPLExponent = 1.f;
