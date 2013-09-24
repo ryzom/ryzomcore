@@ -714,7 +714,7 @@ public:
 
 	void				serial(NLMISC::IStream& f)
 	{
-		f.serialCheck(NELID("IALC');
+		f.serialCheck(NELID("IALC"));
 		f.serialVersion(0);
 
 		f.serial(_NextIndex);

@@ -331,7 +331,7 @@ void	CDatabaseState::serial(NLMISC::IStream& s)
 {
 	s.xmlPush("database_state");
 
-	s.serialCheck(NELID("DBST');
+	s.serialCheck(NELID("DBST"));
 	uint	version = s.serialVersion(0);
 
 	s.xmlPush("name");

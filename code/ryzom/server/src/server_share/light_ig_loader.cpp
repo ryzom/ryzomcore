@@ -114,7 +114,7 @@ void	CLightIGLoader::loadIG(const string &filename)
 
 
 	// Serial a header
-	_File.serialCheck (NELID("TPRG');
+	_File.serialCheck (NELID("TPRG"));
 
 	// Serial a version number
 	sint version = _File.serialVersion (5);

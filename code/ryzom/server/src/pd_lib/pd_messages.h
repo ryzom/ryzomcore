@@ -1436,7 +1436,7 @@ inline uint32	CDbMessage::getMessageHeaderSize()
  */
 inline void	CUpdateLog::serial(NLMISC::IStream& f)
 {
-	f.serialCheck(NELID("ULOG');
+	f.serialCheck(NELID("ULOG"));
 
 	uint	version = f.serialVersion(1);
 

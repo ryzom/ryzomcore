@@ -189,7 +189,7 @@ private:
 
 		void				serial(NLMISC::IStream& s)
 		{
-			s.serialCheck(NELID("DHdr');
+			s.serialCheck(NELID("DHdr"));
 			uint	version = s.serialVersion(0);
 
 			s.serial(RowSize);

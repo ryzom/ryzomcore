@@ -1711,8 +1711,8 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 {
 	// version 4: include particle workspace infos
 	// serial "OBJV_CFG"
-	f.serialCheck (NELID("VJBO');
-	f.serialCheck (NELID("GFC_');
+	f.serialCheck (NELID("VJBO"));
+	f.serialCheck (NELID("GFC_"));
 
 	// serial the version
 	int ver=f.serialVersion (4);
