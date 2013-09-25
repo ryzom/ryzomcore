@@ -450,7 +450,6 @@ extern PFNGLLINKPROGRAMPROC								nglLinkProgram;
 extern PFNGLSHADERSOURCEPROC							nglShaderSource;
 extern PFNGLUSEPROGRAMPROC								nglUseProgram;
 extern PFNGLVALIDATEPROGRAMPROC							nglValidateProgram;
-
 extern PFNGLUNIFORM1FPROC								nglUniform1f;
 extern PFNGLUNIFORM2FPROC								nglUniform2f;
 extern PFNGLUNIFORM3FPROC								nglUniform3f;
@@ -471,7 +470,6 @@ extern PFNGLUNIFORMMATRIX2FVPROC						nglUniformMatrix2fv;
 extern PFNGLUNIFORMMATRIX3FVPROC						nglUniformMatrix3fv;
 extern PFNGLUNIFORMMATRIX4FVPROC						nglUniformMatrix4fv;
 extern PFNGLVERTEXATTRIBPOINTERPROC						nglVertexAttribPointer;
-
 extern PFNGLUNIFORM1UIPROC								nglUniform1ui;
 extern PFNGLUNIFORM2UIPROC								nglUniform2ui;
 extern PFNGLUNIFORM3UIPROC								nglUniform3ui;
@@ -480,6 +478,68 @@ extern PFNGLUNIFORM1UIVPROC								nglUniform1uiv;
 extern PFNGLUNIFORM2UIVPROC								nglUniform2uiv;
 extern PFNGLUNIFORM3UIVPROC								nglUniform3uiv;
 extern PFNGLUNIFORM4UIVPROC								nglUniform4uiv;
+
+// GL_ARB_separate_shader_objects
+extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
+extern PFNGLACTIVESHADERPROGRAMPROC						nglActiveShaderProgram;
+extern PFNGLCREATESHADERPROGRAMVPROC					nglCreateShaderProgramv;
+extern PFNGLBINDPROGRAMPIPELINEPROC						nglBindProgramPipeline;
+extern PFNGLDELETEPROGRAMPIPELINESPROC					nglDeleteProgramPipelines;
+extern PFNGLGENPROGRAMPIPELINESPROC						nglGenProgramPipelines;
+extern PFNGLISPROGRAMPIPELINEPROC						nglIsProgramPipeline;
+extern PFNGLGETPROGRAMPIPELINEIVPROC					nglGetProgramPipelineiv;
+extern PFNGLPROGRAMUNIFORM1IPROC						nglProgramUniform1i;
+extern PFNGLPROGRAMUNIFORM1IVPROC						nglProgramUniform1iv;
+extern PFNGLPROGRAMUNIFORM1FPROC						nglProgramUniform1f;
+extern PFNGLPROGRAMUNIFORM1FVPROC						nglProgramUniform1fv;
+extern PFNGLPROGRAMUNIFORM1DPROC						nglProgramUniform1d;
+extern PFNGLPROGRAMUNIFORM1DVPROC						nglProgramUniform1dv;
+extern PFNGLPROGRAMUNIFORM1UIPROC						nglProgramUniform1ui;
+extern PFNGLPROGRAMUNIFORM1UIVPROC						nglProgramUniform1uiv;
+extern PFNGLPROGRAMUNIFORM2IPROC						nglProgramUniform2i;
+extern PFNGLPROGRAMUNIFORM2IVPROC						nglProgramUniform2iv;
+extern PFNGLPROGRAMUNIFORM2FPROC						nglProgramUniform2f;
+extern PFNGLPROGRAMUNIFORM2FVPROC						nglProgramUniform2fv;
+extern PFNGLPROGRAMUNIFORM2DPROC						nglProgramUniform2d;
+extern PFNGLPROGRAMUNIFORM2DVPROC						nglProgramUniform2dv;
+extern PFNGLPROGRAMUNIFORM2UIPROC						nglProgramUniform2ui;
+extern PFNGLPROGRAMUNIFORM2UIVPROC						nglProgramUniform2uiv;
+extern PFNGLPROGRAMUNIFORM3IPROC						nglProgramUniform3i;
+extern PFNGLPROGRAMUNIFORM3IVPROC						nglProgramUniform3iv;
+extern PFNGLPROGRAMUNIFORM3FPROC						nglProgramUniform3f;
+extern PFNGLPROGRAMUNIFORM3FVPROC						nglProgramUniform3fv;
+extern PFNGLPROGRAMUNIFORM3DPROC						nglProgramUniform3d;
+extern PFNGLPROGRAMUNIFORM3DVPROC						nglProgramUniform3dv;
+extern PFNGLPROGRAMUNIFORM3UIPROC						nglProgramUniform3ui;
+extern PFNGLPROGRAMUNIFORM3UIVPROC						nglProgramUniform3uiv;
+extern PFNGLPROGRAMUNIFORM4IPROC						nglProgramUniform4i;
+extern PFNGLPROGRAMUNIFORM4IVPROC						nglProgramUniform4iv;
+extern PFNGLPROGRAMUNIFORM4FPROC						nglProgramUniform4f;
+extern PFNGLPROGRAMUNIFORM4FVPROC						nglProgramUniform4fv;
+extern PFNGLPROGRAMUNIFORM4DPROC						nglProgramUniform4d;
+extern PFNGLPROGRAMUNIFORM4DVPROC						nglProgramUniform4dv;
+extern PFNGLPROGRAMUNIFORM4UIPROC						nglProgramUniform4ui;
+extern PFNGLPROGRAMUNIFORM4UIVPROC						nglProgramUniform4uiv;
+extern PFNGLPROGRAMUNIFORMMATRIX2FVPROC					nglProgramUniformMatrix2fv;
+extern PFNGLPROGRAMUNIFORMMATRIX3FVPROC					nglProgramUniformMatrix3fv;
+extern PFNGLPROGRAMUNIFORMMATRIX4FVPROC					nglProgramUniformMatrix4fv;
+extern PFNGLPROGRAMUNIFORMMATRIX2DVPROC					nglProgramUniformMatrix2dv;
+extern PFNGLPROGRAMUNIFORMMATRIX3DVPROC					nglProgramUniformMatrix3dv;
+extern PFNGLPROGRAMUNIFORMMATRIX4DVPROC					nglProgramUniformMatrix4dv;
+extern PFNGLPROGRAMUNIFORMMATRIX2X3FVPROC				nglProgramUniformMatrix2x3fv;
+extern PFNGLPROGRAMUNIFORMMATRIX3X2FVPROC				nglProgramUniformMatrix3x2fv;
+extern PFNGLPROGRAMUNIFORMMATRIX2X4FVPROC				nglProgramUniformMatrix2x4fv;
+extern PFNGLPROGRAMUNIFORMMATRIX4X2FVPROC				nglProgramUniformMatrix4x2fv;
+extern PFNGLPROGRAMUNIFORMMATRIX3X4FVPROC				nglProgramUniformMatrix3x4fv;
+extern PFNGLPROGRAMUNIFORMMATRIX4X3FVPROC				nglProgramUniformMatrix4x3fv;
+extern PFNGLPROGRAMUNIFORMMATRIX2X3DVPROC				nglProgramUniformMatrix2x3dv;
+extern PFNGLPROGRAMUNIFORMMATRIX3X2DVPROC				nglProgramUniformMatrix3x2dv;
+extern PFNGLPROGRAMUNIFORMMATRIX2X4DVPROC				nglProgramUniformMatrix2x4dv;
+extern PFNGLPROGRAMUNIFORMMATRIX4X2DVPROC				nglProgramUniformMatrix4x2dv;
+extern PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC				nglProgramUniformMatrix3x4dv;
+extern PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC				nglProgramUniformMatrix4x3dv;
+extern PFNGLVALIDATEPROGRAMPIPELINEPROC					nglValidateProgramPipeline;
+extern PFNGLGETPROGRAMPIPELINEINFOLOGPROC				nglGetProgramPipelineInfoLog;
 
 // GL_NV_occlusion_query
 //==================================
@@ -558,6 +618,10 @@ extern NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC		nglRenderbufferStorageMul
 
 // GL_ARB_multisample
 extern NEL_PFNGLSAMPLECOVERAGEARBPROC			nglSampleCoverageARB;
+
+
+
+
 
 #endif // NL_OPENGL_EXTENSION_H
 
