@@ -1264,7 +1264,8 @@ private:
 	void			setConstant (uint index, uint num, const double *src){}
 	void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform){}
 	void			setConstantFog (uint index){}
-	void			enableVertexProgramDoubleSidedColor(bool doubleSided);
+
+	void			enableVertexProgramDoubleSidedColor(bool doubleSided){}
 	bool		    supportVertexProgramDoubleSidedColor() const{ return true; };
 
 	virtual	bool			supportMADOperator() const ;

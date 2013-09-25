@@ -36,18 +36,6 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 #endif
 
-void CDriverGL3::enableVertexProgramDoubleSidedColor(bool doubleSided)
-{
-	H_AUTO_OGL(CDriverGL3_enableVertexProgramDoubleSidedColor);
-
-	// change mode (not cached because supposed to be rare)
-	if(doubleSided)
-		glEnable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-	else
-		glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
-}
-
-
 #ifdef NL_STATIC
 } // NLDRIVERGL/ES
 #endif
