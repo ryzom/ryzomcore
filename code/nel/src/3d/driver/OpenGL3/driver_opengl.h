@@ -435,7 +435,7 @@ public:
 
 	virtual bool			activeIndexBuffer(CIndexBuffer& IB);
 
-	virtual	void			mapTextureStageToUV(uint stage, uint uv);
+	virtual	void			mapTextureStageToUV(uint stage, uint uv){}
 
 	virtual bool			renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines);
 	virtual bool			renderTriangles(CMaterial& Mat, uint32 firstIndex, uint32 ntris);
@@ -1053,9 +1053,6 @@ private:
 	CVertexBufferInfo		_LastVB;
 	CIndexBufferInfo		_LastIB;
 
-	/// setup a texture stage with an UV from VB.
-	void			setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId);
-
 	/// Sets up the rendering parameters for the normal shader
 	void setupNormalPass();
 
@@ -1076,13 +1073,6 @@ private:
 
 	// last stage env.
 	CMaterial::CTexEnv	_LightMapLastStageEnv;
-
-	// Caching
-	bool			_LastVertexSetupIsLightMap;
-	sint8			_LightMapUVMap[IDRV_MAT_MAXTEXTURES];
-
-	// restore std vertex Setup.
-	void			resetLightMapVertexSetup();
 
 	// @}
 
@@ -1147,11 +1137,6 @@ private:
 
 	/// setup GL arrays, with a vb info.
 	void			setupGlArrays(CVertexBufferInfo &vb);
-
-	/// Tools fct used by setupGLArrays
-	void			setupGlArraysStd(CVertexBufferInfo &vb);
-	void			setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb);
-	void			toggleGlArraysForARBVertexProgram();
 
 	/// Test/activate normalisation of normal.
 	void			enableGlNormalize(bool normalize)

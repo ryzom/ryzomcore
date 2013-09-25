@@ -470,10 +470,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// 4. Misc
 	//=====================================
 
-	// If !lightMap and prec material was lihgtmap => vertex setup is dirty!
-	if( matShader != CMaterial::LightMap && _LastVertexSetupIsLightMap )
-		resetLightMapVertexSetup();
-
 	// Textures user matrix
 	if (matShader == CMaterial::Normal)
 	{
@@ -765,10 +761,6 @@ sint CDriverGL3::beginLightMapMultiPass ()
 	_DriverGLStates.setAmbient(packedColorBlack, glcolBlack);
 	_DriverGLStates.setSpecular(packedColorBlack, glcolBlack);
 
-	// reset VertexColor array if necessary.
-	if (_LastVB.VertexFormat & CVertexBuffer::PrimaryColorFlag)
-		_DriverGLStates.enableColorArray(false);
-
 	// Manage too if no lightmaps.
 	return	std::max (_NLightMapPass, (uint)1);
 }
@@ -914,13 +906,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 						_CurrentTexEnvSpecial[stage] = TexEnvSpecialLightMap;
 					}
 				}
-
-				// setup UV, with UV1. Only if needed (cached)
-				if( !_LastVertexSetupIsLightMap || _LightMapUVMap[stage]!=1 )
-				{
-					setupUVPtr(stage, _LastVB, 1);
-					_LightMapUVMap[stage]= 1;
-				}
 			}
 
 			// Next lightmap.
@@ -947,13 +932,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				if( tl != -1 )
 				{
 					setUniform1i( tl, stage );
-				}
-
-				// setup UV, with UV0. Only if needed (cached)
-				if( !_LastVertexSetupIsLightMap || _LightMapUVMap[stage]!=0 )
-				{
-					setupUVPtr(stage, _LastVB, 0);
-					_LightMapUVMap[stage]= 0;
 				}
 
 			}
@@ -1036,37 +1014,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 void			CDriverGL3::endLightMapMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endLightMapMultiPass)
-	// Flag the fact that VertexSetup is dirty (special lightmap). reseted in activeVertexBuffer(), and setupMaterial()
-	// NB: if no lightmaps, no setupUVPtr() has been called => don't need to flag
-	// (important else crash if graphist error while exporting a Lightmap material, with a MeshVertexProgram (WindTree) )
-	if(_NLightMaps!=0)
-		_LastVertexSetupIsLightMap= true;
-
-	// nothing to do with blending/lighting, since always setuped in activeMaterial().
-	// If material is the same, then it is still a lightmap material (if changed => touched => different!)
-	// So no need to reset blending/lighting here.
-
-}
-
-// ***************************************************************************
-void			CDriverGL3::resetLightMapVertexSetup()
-{
-	H_AUTO_OGL(CDriverGL3_resetLightMapVertexSetup)
-	// special for all stage, std UV behavior.
-	for(uint i = 0; i < inlGetNumTextStages(); i++)
-	{
-		// normal behavior: each texture has its own UV.
-		setupUVPtr(i, _LastVB, i);
-		// reset cache
-		_LightMapUVMap[i]= -1;
-	}
-
-	// pop VertexColor array if necessary.
-	if (_LastVB.VertexFormat & CVertexBuffer::PrimaryColorFlag)
-		_DriverGLStates.enableColorArray(true);
-
-	// flag
-	_LastVertexSetupIsLightMap= false;
 }
 
 // ***************************************************************************

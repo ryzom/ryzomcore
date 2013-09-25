@@ -649,48 +649,6 @@ void			CDriverGLStates3::forceActiveTextureARB(uint stage)
 }
 
 // ***************************************************************************
-void			CDriverGLStates3::enableVertexArray(bool enable)
-{
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableNormalArray(bool enable)
-{
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableWeightArray(bool enable)
-{
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableColorArray(bool enable)
-{
-}
-
-
-// ***************************************************************************
-void			CDriverGLStates3::enableSecondaryColorArray(bool enable)
-{
-
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::clientActiveTextureARB(uint stage)
-{
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableTexCoordArray(bool enable)
-{
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableVertexAttribArray(uint glIndex, bool enable)
-{
-}
-
-// ***************************************************************************
 void CDriverGLStates3::enableVertexAttribArrayARB(uint glIndex,bool enable)
 {
 	H_AUTO_OGL(CDriverGLStates3_enableVertexAttribArrayARB);

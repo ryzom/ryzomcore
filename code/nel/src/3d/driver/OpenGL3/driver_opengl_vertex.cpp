@@ -149,9 +149,6 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	// NB: must duplicate changes in activeVertexBufferHard()
 	uint32	flags;
 
-	// In any case, we'll erase any special vertex setup for Lightmap Material
-	_LastVertexSetupIsLightMap= false;
-
 	// setup
 	if (!setupVertexBuffer(VB))
 		return false;
@@ -201,23 +198,6 @@ bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 	_LastIB.setupIndexBuffer(IB);
 	return true;
 }
-
-// ***************************************************************************
-
-void		CDriverGL3::setupUVPtr(uint stage, CVertexBufferInfo &VB, uint uvId)
-{
-}
-
-
-// ***************************************************************************
-void		CDriverGL3::mapTextureStageToUV(uint stage, uint uv)
-{
-	H_AUTO_OGL(CDriverGL3_mapTextureStageToUV)
-	// Just call it for last VertexBuffer setuped.
-	setupUVPtr(stage, _LastVB, uv);
-}
-
-
 
 // ***************************************************************************
 // ***************************************************************************
@@ -372,23 +352,6 @@ const uint		CDriverGL3::GLVertexAttribIndex[CVertexBuffer::NumValue]=
 	7,	// Empty
 };
 
-
-
-// ***************************************************************************
-void		CDriverGL3::setupGlArraysStd(CVertexBufferInfo &vb)
-{
-}
-
-
-// ***************************************************************************
-void		CDriverGL3::toggleGlArraysForARBVertexProgram()
-{
-	H_AUTO_OGL(CDriverGL3_toggleGlArraysForARBVertexProgram)
-	// If change of setup type, must disable olds.
-	//=======================
-
-}
-
 // tells for each vertex argument if it must be normalized when it is an integral type
 static const GLboolean ARBVertexProgramMustNormalizeAttrib[] =
 {
@@ -411,9 +374,9 @@ static const GLboolean ARBVertexProgramMustNormalizeAttrib[] =
 };
 
 // ***************************************************************************
-void		CDriverGL3::setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb)
+void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 {
-	H_AUTO_OGL(CDriverGL3_setupGlArraysForARBVertexProgram)
+	H_AUTO_OGL(CDriverGL3_setupGlArrays)
 
 	uint32	flags= vb.VertexFormat;
 
@@ -450,15 +413,6 @@ void		CDriverGL3::setupGlArraysForARBVertexProgram(CVertexBufferInfo &vb)
 			}
 		}
 	}
-}
-
-
-// ***************************************************************************
-void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
-{
-	H_AUTO_OGL(CDriverGL3_setupGlArrays)
-	
-	setupGlArraysForARBVertexProgram(vb);
 }
 
 

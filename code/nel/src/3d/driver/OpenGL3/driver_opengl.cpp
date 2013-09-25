@@ -272,10 +272,6 @@ CDriverGL3::CDriverGL3()
 
 	_UserTexMatEnabled = 0;
 
-	// Ligtmap preca.
-	_LastVertexSetupIsLightMap= false;
-	for(i=0; i < IDRV_MAT_MAXTEXTURES; i++)
-		_LightMapUVMap[i]= -1;
 	// reserve enough space to never reallocate, nor test for reallocation.
 	_LightMapLUT.resize(NL3D_DRV_MAX_LIGHTMAP);
 	// must set replace for alpha part.

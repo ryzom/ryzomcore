@@ -153,27 +153,8 @@ public:
 	void			resetTextureMode();
 	// @}
 
-	/// \name Vertex Array enabling.
-	/// equivalent to glEnableClientState() / glDisableClientState(). NB: Not modified by forceDefaults()
-	// @{
-	void			enableVertexArray(bool enable);
-	void			enableNormalArray(bool enable);
-	void			enableWeightArray(bool enable);
-	void			enableColorArray(bool enable);
-	void			enableSecondaryColorArray(bool enable);
-	/// same as glClientActiveTextureARB(). useful for enableTexCoordArray.
-	void			clientActiveTextureARB(uint stage);
-	/// NB: caller must call correct clientActiveTextureARB() before.
-	void			enableTexCoordArray(bool enable);
-	/** For vertexProgram. do not check if supported or not.
-	  */
-	void			enableVertexAttribArray(uint glIndex, bool enable);
-
 	// special version for ARB_vertex_program used with ARB_vertex_buffer or ATI_vertex_attrib_array_object
 	void			enableVertexAttribArrayARB(uint glIndex, bool enable);
-
-
-	// @}
 
 
 	// ARB_vertex_buffer_object buffer binding
