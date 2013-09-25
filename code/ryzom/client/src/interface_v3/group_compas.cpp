@@ -811,18 +811,19 @@ void CGroupCompasMenu::setActive (bool state)
 				uint nbUserLandMarks = std::min( uint(currCont->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks() );
 
 				// Sort the landmarks
-				std::sort(currCont->UserLandMarks.begin(), currCont->UserLandMarks.end(), UserLandMarksSortPredicate);
+				std::vector<CUserLandMark> sortedLandmarks(currCont->UserLandMarks);
+				std::sort(sortedLandmarks.begin(), sortedLandmarks.end(), UserLandMarksSortPredicate);
 
 				for(k = 0; k < nbUserLandMarks; ++k)
 				{
-					if (currCont->UserLandMarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
+					if (sortedLandmarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
 					{
 						CCompassTarget ct;
 						ct.setType(CCompassTarget::UserLandMark);
-						ct.Pos = currCont->UserLandMarks[k].Pos;
-						ct.Name = currCont->UserLandMarks[k].Title;
+						ct.Pos = sortedLandmarks[k].Pos;
+						ct.Name = sortedLandmarks[k].Title;
 						Targets.push_back(ct);
-						landMarkSubMenus[currCont->UserLandMarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+						landMarkSubMenus[sortedLandmarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 						selectable= true;
 					}
 				}
