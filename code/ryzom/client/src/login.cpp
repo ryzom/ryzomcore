@@ -2111,7 +2111,12 @@ class CAHUninitResLod : public IActionHandler
 		//nlinfo("CAHUninitResLod called");
 
 		// If the mode requested is a windowed mode do nothnig
-		if (CurrentMode != 0)
+		if (CurrentMode == 0)
+		{
+			ClientCfg.Windowed = true;
+			ClientCfg.writeBool("FullScreen", false);
+		}
+		else
 		{
 			ClientCfg.Windowed = false;
 			// Get W, H
@@ -2125,6 +2130,10 @@ class CAHUninitResLod : public IActionHandler
 			}
 			ClientCfg.Width = w;
 			ClientCfg.Height = h;
+
+			ClientCfg.writeBool("FullScreen", true);
+			ClientCfg.writeInt("Width", w);
+			ClientCfg.writeInt("Height", h);
 		}
 
 		if (CurrentPreset != 4) // CInterfaceDDX::CustomPreset
