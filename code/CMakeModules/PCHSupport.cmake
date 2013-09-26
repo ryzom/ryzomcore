@@ -273,15 +273,22 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName)
     # Ninja PCH Support
     # http://public.kitware.com/pipermail/cmake-developers/2012-March/003653.html
     SET_TARGET_PROPERTIES(${_targetName} PROPERTIES OBJECT_DEPENDS "${PCH_OUTPUT}")
-    
+
     # NMAKE-VS2012 Error LNK2011 (NMAKE-VS2010 do not complain)
     # we need to link the pch.obj file, see http://msdn.microsoft.com/en-us/library/3ay26wa2(v=vs.110).aspx
-    GET_TARGET_PROPERTY(DEPS ${_targetName} LINK_LIBRARIES)
-    IF(NOT DEPS)
-      SET(DEPS)
-    ENDIF()
-    LIST(INSERT DEPS 0 "${PCH_OUTPUT}.obj")
-    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES LINK_LIBRARIES "${DEPS}")
+    GET_TARGET_PROPERTY(_STATIC_LIBRARY_FLAGS ${_targetName} STATIC_LIBRARY_FLAGS)
+    IF(NOT _STATIC_LIBRARY_FLAGS)
+      SET(_STATIC_LIBRARY_FLAGS)
+    ENDIF(NOT _STATIC_LIBRARY_FLAGS)
+    SET(_STATIC_LIBRARY_FLAGS "${PCH_OUTPUT}.obj ${_STATIC_LIBRARY_FLAGS}")
+
+    GET_TARGET_PROPERTY(_LINK_FLAGS ${_targetName} LINK_FLAGS)
+    IF(NOT _LINK_FLAGS)
+      SET(_LINK_FLAGS)
+    ENDIF(NOT _LINK_FLAGS)
+    SET(_LINK_FLAGS "${PCH_OUTPUT}.obj ${_LINK_FLAGS}")
+
+    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES STATIC_LIBRARY_FLAGS ${_STATIC_LIBRARY_FLAGS} LINK_FLAGS ${_LINK_FLAGS})
   ELSE(MSVC)
     # for use with distcc and gcc >4.0.1 if preprocessed files are accessible
     # on all remote machines set
