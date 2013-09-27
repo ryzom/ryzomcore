@@ -257,7 +257,7 @@ void CAnimalPositionState::serial(NLMISC::IStream &f)
 // ***************************************************************************
 CEntityCL *CNamedEntityPositionState::getEntity()
 {
-	if (!dbOk()) return false;
+	if (!dbOk()) return NULL;
 	return EntitiesMngr.getEntityByName(_Name->getValue32());
 }
 
