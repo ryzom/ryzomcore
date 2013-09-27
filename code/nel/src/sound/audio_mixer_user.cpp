@@ -2685,26 +2685,7 @@ float	CAudioMixerUser::getMusicLength()
 // ***************************************************************************
 bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &result)
 {
-	if (_SoundDriver)
-	{
-		std::string artist;
-		std::string title;
-		if (_SoundDriver->getMusicInfo(filename, artist, title))
-		{
-			if (!title.empty())
-			{
-				if (!artist.empty()) result = artist + " - " + title;
-				else result = title;
-			}
-			else if (!artist.empty())
-			{
-				result = artist + " - " + CFile::getFilename(filename);
-			}
-			else result = CFile::getFilename(filename);
-			return true;
-		}
-	}
-	result = "???";
+	result = CFile::getFilename(filename);;
 	return false;
 }
 
@@ -2751,7 +2732,7 @@ bool	CAudioMixerUser::isEventMusicEnded()
 /// Get audio/container extensions that are currently supported by nel or the used driver implementation.
 void CAudioMixerUser::getMusicExtensions(std::vector<std::string> &extensions)
 {
-	_SoundDriver->getMusicExtensions(extensions);
+	extensions.push_back("ogg");
 }
 
 /// Add a reverb environment

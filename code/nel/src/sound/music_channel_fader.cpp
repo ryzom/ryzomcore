@@ -19,7 +19,6 @@
 
 // Project includes
 #include "nel/sound/driver/sound_driver.h"
-#include "nel/sound/driver/music_channel.h"
 #include "nel/sound/source_music_channel.h"
 
 using namespace std;
@@ -47,19 +46,15 @@ void CMusicChannelFader::init(ISoundDriver *soundDriver)
 	for (uint i = 0; i < _MaxMusicFader; ++i)
 	{
 		nlassert(!_MusicFader[i].MusicChannel);
-		_MusicFader[i].MusicChannel = _SoundDriver->createMusicChannel();
-		if (!_MusicFader[i].MusicChannel)
+		if (_SoundDriver->getOption(ISoundDriver::OptionHasBufferStreaming))
 		{
-			if (_SoundDriver->getOption(ISoundDriver::OptionHasBufferStreaming))
-			{
-				_MusicFader[i].MusicChannel = new CSourceMusicChannel();
-			}
-			else
-			{
-				release();
-				nlwarning("No music channel available!");
-				return;
-			}
+			_MusicFader[i].MusicChannel = new CSourceMusicChannel();
+		}
+		else
+		{
+			release();
+			nlwarning("No music channel available!");
+			return;
 		}
 	}
 }

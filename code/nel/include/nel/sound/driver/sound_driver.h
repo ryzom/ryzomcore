@@ -183,22 +183,6 @@ public:
 	/// Filled at createDriver()
 	const std::string &getDllName() const { return _DllName; }
 	
-	/// \name Stuff for drivers that have native music support
-	//@{
-	/// Create a native music channel, only supported by the FMod driver.
-	virtual IMusicChannel *createMusicChannel() { return NULL; }
-	/** Get music info. Returns false if the song is not found or the function is not implemented.
-	 *  \param filepath path to file, CPath::lookup done by driver
-	 *  \param artist returns the song artist (empty if not available)
-	 *  \param title returns the title (empty if not available)
-	 */
-	virtual bool getMusicInfo(const std::string &/* filepath */, std::string &artist, std::string &title) { artist.clear(); title.clear(); return false; }
-	/// Get audio/container extensions that are supported natively by the driver implementation.
-	virtual void getMusicExtensions(std::vector<std::string> &extensions) const = 0;
-	/// Return if a music extension is supported by the driver's music channel.
-	virtual bool isMusicExtensionSupported(const std::string &extension) const = 0;
-	//@}
-	
 private:
 	std::string _DllName;
 	

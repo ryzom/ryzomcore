@@ -32,7 +32,6 @@
 // STL includes
 
 // NeL includes
-#include <nel/sound/driver/music_channel.h>
 #include <nel/sound/stream_file_sound.h>
 
 // Project includes
@@ -45,8 +44,9 @@ namespace NLSOUND {
  * \date 2012-04-11 16:08GMT
  * \author Jan Boon (Kaetemi)
  * CSourceMusicChannel
+ * TODO_DEPRECATED
  */
-class CSourceMusicChannel : public IMusicChannel
+class CSourceMusicChannel
 {
 public:
 	CSourceMusicChannel();

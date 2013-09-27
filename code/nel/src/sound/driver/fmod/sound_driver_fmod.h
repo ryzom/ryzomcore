@@ -108,45 +108,21 @@ public:
 
 	bool	forceSofwareBuffer() const {return _ForceSoftwareBuffer;}
 
-	/// Create a music channel, destroy with destroyMusicChannel
-	virtual IMusicChannel *createMusicChannel();
-	
-	/** Get music info. Returns false if the song is not found or the function is not implemented.
-	 *  \param filepath path to file, CPath::lookup done by driver
-	 *  \param artist returns the song artist (empty if not available)
-	 *  \param title returns the title (empty if not available)
-	 */
-	virtual bool getMusicInfo(const std::string &filepath, std::string &artist, std::string &title);
-
-	// also check that the channel still exist (avoid any free problem)
-	void markMusicChannelEnded(void *stream, CMusicChannelFMod *musicChannel);
-
 	/// (Internal) Remove a buffer (should be called by the destructor of the buffer class)
 	void removeBuffer(CBufferFMod *buffer);
 	/// (Internal) Remove a source (should be called by the destructor of the source class)
 	void removeSource(CSourceFMod *source);
-	/// (Internal) Remove a music channel (should be called by the destructor of the music channel class)
-	void removeMusicChannel(CMusicChannelFMod *musicChannel);
-
-	/// Get audio/container extensions that are supported natively by the driver implementation.
-	virtual void getMusicExtensions(std::vector<std::string> &extensions) const;
-	/// Return if a music extension is supported by the driver's music channel.
-	virtual bool isMusicExtensionSupported(const std::string &extension) const;
 
 private:	
 	virtual void startBench();
 	virtual void endBench();
 	virtual void displayBench(NLMISC::CLog *log);
 
-	void updateMusic();
-
 	/// The string mapper provided by client code
 	IStringMapperProvider *_StringMapper;
 
     // Array with the allocated sources
 	std::set<CSourceFMod*> _Sources;
-	/// Array with the allocated music channels
-	std::set<CMusicChannelFMod *> _MusicChannels;
 
 	/// if correctly created
 	bool _FModOk;

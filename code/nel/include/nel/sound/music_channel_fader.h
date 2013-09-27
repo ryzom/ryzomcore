@@ -33,7 +33,7 @@
 
 namespace NLSOUND {
 	class ISoundDriver;
-	class IMusicChannel;
+	class CSourceMusicChannel;
 
 /**
  * \brief CMusicChannelFader
@@ -47,7 +47,7 @@ private:
 	struct _CMusicFader
 	{
 		_CMusicFader() : MusicChannel(NULL), XFadeVolume(0.f), XFadeDVolume(0.f), Playing(false), Fade(false) { }
-		IMusicChannel *MusicChannel;
+		CSourceMusicChannel *MusicChannel;
 		float XFadeVolume; // 0--1
 		float XFadeDVolume; // delta
 		bool Playing;

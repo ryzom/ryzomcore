@@ -42,7 +42,7 @@
 #define NL_SOUND_DATA "."
 #endif // NL_SOUND_DATA
 
-#define SAMPLE_OGG "D:/source/kaetemi/toverhex/src/samples/music_stream/data/aeon_1_10_mystic_river.ogg"
+#define SAMPLE_OGG "F:/sync/source/_shelved/toverhex/src/samples/music_stream/data/aeon_1_10_mystic_river.ogg"
 
 using namespace std;
 using namespace NLMISC;

@@ -167,11 +167,6 @@ public:
 	virtual void startBench();
 	virtual void endBench();
 	virtual void displayBench(NLMISC::CLog *log);
-
-	/// Get audio/container extensions that are supported natively by the driver implementation.
-	virtual void getMusicExtensions(std::vector<std::string> & /* extensions */) const { }
-	/// Return if a music extension is supported by the driver's music channel.
-	virtual bool isMusicExtensionSupported(const std::string & /* extension */) const { return false; }
 	
 	/// (Internal) Remove a buffer (should be called by the destructor of the buffer class).
 	void removeBuffer(CBufferXAudio2 *buffer);	

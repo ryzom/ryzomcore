@@ -18,7 +18,6 @@
 
 #include "sound_driver_fmod.h"
 #include "listener_fmod.h"
-#include "music_channel_fmod.h"
 #include "source_fmod.h"
 #include "buffer_fmod.h"
 
@@ -133,25 +132,12 @@ CSoundDriverFMod::~CSoundDriverFMod()
 {
 	//nldebug("Destroying FMOD");
 
-	// Stop any played music
-	{
-		set<CMusicChannelFMod *>::iterator it(_MusicChannels.begin()), end(_MusicChannels.end());
-		for (; it != end; ++it)
-		{
-			nlwarning("CMusicChannelFMod was not deleted by user, deleting now!");
-			delete *it;
-		}
-		_MusicChannels.clear();
-	}
-
-
 	// Assure that the remaining sources have released all their channels before closing
 	set<CSourceFMod*>::iterator iter;
 	for (iter = _Sources.begin(); iter != _Sources.end(); iter++)
 	{
 		(*iter)->release();
 	}
-
 
 	// Assure that the listener has released all resources before closing down FMod
 	if (CListenerFMod::getInstance() != 0)
@@ -341,13 +327,6 @@ void CSoundDriverFMod::removeSource(CSourceFMod *source)
 
 // ******************************************************************
 
-void CSoundDriverFMod::removeMusicChannel(CMusicChannelFMod *musicChannel)
-{
-	_MusicChannels.erase(static_cast<CMusicChannelFMod *>(musicChannel));
-}
-
-// ******************************************************************
-
 void CSoundDriverFMod::commit3DChanges()
 {
     if ( !_FModOk )
@@ -382,9 +361,6 @@ void CSoundDriverFMod::commit3DChanges()
 
 	// update sources state each frame though
 	update();
-
-	// update the music (XFade etc...)
-	updateMusic();
 
 	// update 3D change in FMod
 	FSOUND_Update();
@@ -459,14 +435,6 @@ void	CSoundDriverFMod::toFModCoord(const CVector &in, float out[3])
 	out[2]= in.y;
 }
 
-/// Create a music channel
-IMusicChannel *CSoundDriverFMod::createMusicChannel()
-{
-	CMusicChannelFMod *music_channel = new CMusicChannelFMod(this);
-	_MusicChannels.insert(music_channel);
-	return static_cast<IMusicChannel *>(music_channel);
-}
-
 bool getTag (std::string &result, const char *tag, FSOUND_STREAM *stream)
 {
 	void *name;
@@ -489,83 +457,6 @@ bool getTag (std::string &result, const char *tag, FSOUND_STREAM *stream)
 		}
 	}
 	return false;
-}
-
-/** Get music info. Returns false if the song is not found or the function is not implemented. 
- *  \param filepath path to file, CPath::lookup done by driver
- *  \param artist returns the song artist (empty if not available)
- *  \param title returns the title (empty if not available)
- */
-bool CSoundDriverFMod::getMusicInfo(const std::string &filepath, std::string &artist, std::string &title)
-{
-	/* Open a stream, get the tag if it exists, close the stream */
-	string pathName = CPath::lookup(filepath, false);
-	uint32 fileOffset = 0, fileSize = 0;
-	if (pathName.empty())
-	{
-		nlwarning("NLSOUND FMod Driver: Music file %s not found!", filepath.c_str());
-		return false;
-	}
-	// if the file is in a bnp
-	if (pathName.find('@') != string::npos)
-	{
-		if (CBigFile::getInstance().getFileInfo(pathName, fileSize, fileOffset))
-		{
-			// set pathname to bnp
-			pathName = pathName.substr(0, pathName.find('@'));			
-		}
-		else
-		{
-			nlwarning("NLSOUND FMod Driver: BNP BROKEN");
-			return false;
-		}
-	}
-
-	FSOUND_STREAM *stream = FSOUND_Stream_Open((const char *)CPath::lookup(filepath, false).c_str(), FSOUND_2D, (sint)fileOffset, (sint)fileSize);
-	if (stream)
-	{
-		getTag(artist, "ARTIST", stream);
-		getTag(title, "TITLE", stream);
-		FSOUND_Stream_Close(stream);
-		return true;
-	}
-	artist.clear();
-	title.clear();
-	return false;
-}
-
-void CSoundDriverFMod::updateMusic()
-{
-	set<CMusicChannelFMod *>::iterator it(_MusicChannels.begin()), end(_MusicChannels.end());
-	for (; it != end; ++it) (*it)->update();
-}
-
-void CSoundDriverFMod::markMusicChannelEnded(void *stream, CMusicChannelFMod *musicChannel)
-{
-	// verify if it exists
-	set<CMusicChannelFMod *>::iterator it(_MusicChannels.find(musicChannel));
-	if (it != _MusicChannels.end()) musicChannel->markMusicChannelEnded(stream);
-}
-
-/// Get audio/container extensions that are supported natively by the driver implementation.
-void CSoundDriverFMod::getMusicExtensions(std::vector<std::string> &extensions) const
-{
-	extensions.push_back("ogg");
-	extensions.push_back("mp3");
-	extensions.push_back("mp2");
-	extensions.push_back("mp1");
-	extensions.push_back("wav");
-	extensions.push_back("raw");
-}
-/// Return if a music extension is supported by the driver's music channel.
-bool CSoundDriverFMod::isMusicExtensionSupported(const std::string &extension) const
-{
-	return (extension == "ogg")
-		|| (extension == "mp3")
-		|| (extension == "mp2")
-		|| (extension == "mp1")
-		|| (extension == "wav")
-		|| (extension == "raw");
 }
 
 } // NLSOUND
