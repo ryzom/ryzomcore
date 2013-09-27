@@ -37,7 +37,7 @@
 #include <nel/sound/stream_sound.h>
 
 namespace NLSOUND {
-	class CSourceMusicChannel;
+	class CMusicChannel;
 
 /**
  * \brief CStreamFileSound
@@ -48,7 +48,7 @@ namespace NLSOUND {
 class CStreamFileSound : public CStreamSound
 {
 public:
-	friend class CSourceMusicChannel;
+	friend class CMusicChannel;
 
 public:
 	CStreamFileSound();
@@ -74,7 +74,7 @@ public:
 	inline const std::string &getFilePath()					{ return m_FilePath; }
 
 private:
-	/// Used by CSourceMusicChannel to set the filePath and default settings on other parameters.
+	/// Used by CMusicChannel to set the filePath and default settings on other parameters.
 	void setMusicFilePath(const std::string &filePath, bool async = true, bool loop = false);
 
 private:

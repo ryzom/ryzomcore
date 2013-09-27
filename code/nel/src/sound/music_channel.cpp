@@ -1,9 +1,9 @@
 /**
  * \file source_music_channel.cpp
- * \brief CSourceMusicChannel
+ * \brief CMusicChannel
  * \date 2012-04-11 16:08GMT
  * \author Jan Boon (Kaetemi)
- * CSourceMusicChannel
+ * CMusicChannel
  */
 
 /* 
@@ -26,7 +26,7 @@
  */
 
 #include "stdsound.h"
-#include <nel/sound/source_music_channel.h>
+#include <nel/sound/music_channel.h>
 
 // STL includes
 
@@ -41,19 +41,19 @@ using namespace std;
 
 namespace NLSOUND {
 
-CSourceMusicChannel::CSourceMusicChannel() : m_Source(NULL), m_Gain(1.0f)
+CMusicChannel::CMusicChannel() : m_Source(NULL), m_Gain(1.0f)
 {
 	
 }
 
-CSourceMusicChannel::~CSourceMusicChannel()
+CMusicChannel::~CMusicChannel()
 {
 	nlassert(!m_Source);
 	delete m_Source;
 	m_Source = NULL;
 }
 
-bool CSourceMusicChannel::play(const std::string &filepath, bool async, bool loop)
+bool CMusicChannel::play(const std::string &filepath, bool async, bool loop)
 {
 	// delete previous source if any
 	// note that this waits for the source's thread to finish if the source was still playing
@@ -72,33 +72,33 @@ bool CSourceMusicChannel::play(const std::string &filepath, bool async, bool loo
 	return m_Source->isPlaying();
 }
 
-void CSourceMusicChannel::stop()
+void CMusicChannel::stop()
 {
 	// stop but don't delete the source, deleting source may cause waiting for thread
 	if (m_Source)
 		m_Source->stop();
 }
 
-void CSourceMusicChannel::reset()
+void CMusicChannel::reset()
 {
 	// forces the source to be deleted, happens when audio mixer is reset
 	delete m_Source;
 	m_Source = NULL;
 }
 
-void CSourceMusicChannel::pause()
+void CMusicChannel::pause()
 {
 	if (m_Source)
 		m_Source->pause();
 }
 
-void CSourceMusicChannel::resume()
+void CMusicChannel::resume()
 {
 	if (m_Source)
 		m_Source->resume();
 }
 
-bool CSourceMusicChannel::isEnded()
+bool CMusicChannel::isEnded()
 {
 	if (m_Source)
 	{
@@ -114,21 +114,21 @@ bool CSourceMusicChannel::isEnded()
 	return true;
 }
 
-bool CSourceMusicChannel::isLoadingAsync()
+bool CMusicChannel::isLoadingAsync()
 {
 	if (m_Source)
 		return m_Source->isLoadingAsync();
 	return false;
 }
 
-float CSourceMusicChannel::getLength()
+float CMusicChannel::getLength()
 {
 	if (m_Source)
 		return m_Source->getLength();
 	return 0.0f;
 }
 
-void CSourceMusicChannel::setVolume(float gain)
+void CMusicChannel::setVolume(float gain)
 {
 	m_Gain = gain;
 	if (m_Source)

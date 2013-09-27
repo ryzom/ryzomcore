@@ -1,9 +1,9 @@
 /**
  * \file source_music_channel.h
- * \brief CSourceMusicChannel
+ * \brief CMusicChannel
  * \date 2012-04-11 16:08GMT
  * \author Jan Boon (Kaetemi)
- * CSourceMusicChannel
+ * CMusicChannel
  */
 
 /* 
@@ -40,58 +40,58 @@ namespace NLSOUND {
 	class CStreamFileSource;
 
 /**
- * \brief CSourceMusicChannel
+ * \brief CMusicChannel
  * \date 2012-04-11 16:08GMT
  * \author Jan Boon (Kaetemi)
- * CSourceMusicChannel
- * TODO_DEPRECATED
+ * CMusicChannel
+ * Background music channel
  */
-class CSourceMusicChannel
+class CMusicChannel
 {
 public:
-	CSourceMusicChannel();
-	virtual ~CSourceMusicChannel();
+	CMusicChannel();
+	~CMusicChannel();
 
-	/** Play some music (.ogg etc...)
+	/** Play some music (.ogg only)
 	 *	NB: if an old music was played, it is first stop with stopMusic()
 	 *	\param filepath file path, CPath::lookup is done here
 	 *  \param async stream music from hard disk, preload in memory if false
 	 *	\param loop must be true to play the music in loop. 
 	 */
-	virtual bool play(const std::string &filepath, bool async, bool loop); 
+	bool play(const std::string &filepath, bool async, bool loop); 
 	
 	/// Stop the music previously loaded and played (the Memory is also freed)
-	virtual void stop();
+	void stop();
 
 	/// Makes sure any resources are freed, but keeps available for next play call
-	virtual void reset();
+	void reset();
 	
 	/// Pause the music previously loaded and played (the Memory is not freed)
-	virtual void pause();
+	void pause();
 	
 	/// Resume the music previously paused
-	virtual void resume();
+	void resume();
 	
 	/// Return true if a song is finished.
-	virtual bool isEnded();
+	bool isEnded();
 	
 	/// Return true if the song is still loading asynchronously and hasn't started playing yet (false if not async), used to delay fading
-	virtual bool isLoadingAsync();
+	bool isLoadingAsync();
 	
 	/// Return the total length (in second) of the music currently played
-	virtual float getLength();
+	float getLength();
 	
 	/** Set the music volume (if any music played). (volume value inside [0 , 1]) (default: 1)
 	 *	NB: the volume of music is NOT affected by IListener::setGain()
 	 */
-	virtual void setVolume(float gain);
+	void setVolume(float gain);
 	
 private:
 	CStreamFileSound m_Sound;
 	CStreamFileSource *m_Source;
 	float m_Gain;
 
-}; /* class CSourceMusicChannel */
+}; /* class CMusicChannel */
 
 } /* namespace NLSOUND */
 

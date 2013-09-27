@@ -33,7 +33,7 @@
 
 namespace NLSOUND {
 	class ISoundDriver;
-	class CSourceMusicChannel;
+	class CMusicChannel;
 
 /**
  * \brief CMusicChannelFader
@@ -47,7 +47,7 @@ private:
 	struct _CMusicFader
 	{
 		_CMusicFader() : MusicChannel(NULL), XFadeVolume(0.f), XFadeDVolume(0.f), Playing(false), Fade(false) { }
-		CSourceMusicChannel *MusicChannel;
+		CMusicChannel *MusicChannel;
 		float XFadeVolume; // 0--1
 		float XFadeDVolume; // delta
 		bool Playing;
@@ -96,7 +96,7 @@ private:
 	void updateVolume();
 
 public:
-	/** Play some music (.ogg etc...)
+	/** Play some music (.ogg only)
 	 *	NB: if an old music was played, it is first stop with stopMusic()
 	 *	\param filepath file path, CPath::lookup is done here
 	 *  \param async stream music from hard disk, preload in memory if false
@@ -104,10 +104,10 @@ public:
 	 */
 	bool play(const std::string &filepath, uint xFadeTime = 0, bool async = true, bool loop = true); 
 
-	/// Stop the music previously loaded and played (the Memory is also freed)
+	/// Stop the music previously loaded and played
 	void stop(uint xFadeTime = 0);
 
-	/// Pause the music previously loaded and played (the Memory is not freed)
+	/// Pause the music previously loaded and played
 	void pause();
 	
 	/// Resume the music previously paused
