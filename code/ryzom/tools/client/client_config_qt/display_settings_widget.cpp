@@ -103,8 +103,10 @@ void CDisplaySettingsWidget::save()
 
 	if( openglRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "OpenGL" ) );
+#ifdef Q_OS_WIN32
 	else if( direct3dRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "Direct3D" ) );
+#endif
 	else
 		s.config.setString( "Driver3D", std::string( "Auto" ) );
 
