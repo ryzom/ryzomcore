@@ -16,6 +16,7 @@
 
 #include "stdpacs.h"
 #include "nel/misc/i_xml.h"
+#include "nel/misc/stream.h"
 #include "nel/pacs/primitive_block.h"
 
 

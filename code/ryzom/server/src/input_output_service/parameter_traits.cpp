@@ -42,7 +42,7 @@ extern CVariable<bool> VerboseStringManager;
 #define LOG if (!VerboseStringManager) {} else nlinfo
 
 
-char *OperatorNames[] =
+const char *OperatorNames[] =
 {
 		"equal",
 		"notEqual",

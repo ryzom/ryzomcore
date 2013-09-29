@@ -154,7 +154,7 @@ private:
 		/// Serializes
 		void	serial(NLMISC::IStream &f)
 		{
-			f.serialCheck((uint32)('PCHK'));
+			f.serialCheck(NELID("PCHK"));
 			f.serialVersion(0);
 
 			if (f.isReading())
