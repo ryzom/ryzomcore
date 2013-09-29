@@ -17,7 +17,7 @@
 #ifndef SYSINFOD3DWIDGET_H
 #define SYSINFOD3DWIDGET_H
 
-#include "ui_sys_Info_d3d_widget.h"
+#include "ui_sys_info_d3d_widget.h"
 
 
 /**

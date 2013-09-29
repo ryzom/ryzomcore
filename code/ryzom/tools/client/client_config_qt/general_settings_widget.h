@@ -53,7 +53,7 @@ private:
 	 @param  languageCode  -  Reference to the language code, we are trying to find.
 	 @return Returns the index on success, returns -1 if the language code cannot be found.
     */
-	sint32 getIndexForLanguageCode( QString &languageCode );
+	sint32 getIndexForLanguageCode(const QString &languageCode);
 
 	// Contains the language codes used in the config file
 	// They are in the same order as the options in languageComboBox

@@ -47,7 +47,7 @@ void CGeneralSettingsWidget::load()
 {
 	CSystem &s = CSystem::GetInstance();
 
-	sint32 cbIndex = getIndexForLanguageCode( QString( s.config.getString( "LanguageCode" ).c_str() ) );
+	sint32 cbIndex = getIndexForLanguageCode( QString::fromUtf8( s.config.getString( "LanguageCode" ).c_str() ) );
 	if( cbIndex != -1 ){
 		languageComboBox->setCurrentIndex( cbIndex );
 		onLanguageChanged();
@@ -112,7 +112,7 @@ void CGeneralSettingsWidget::changeEvent( QEvent *event )
 	QWidget::changeEvent( event );
 }
 
-int CGeneralSettingsWidget::getIndexForLanguageCode( QString &languageCode )
+int CGeneralSettingsWidget::getIndexForLanguageCode(const QString &languageCode)
 {
 	for( sint32 i = 0; i < NUM_LANGUAGE_CODES; i++ )
 		if( languageCode.compare( languageCodes[ i ] ) == 0 )

@@ -112,9 +112,11 @@ void CDisplaySettingsWidget::save()
 		CVideoMode mode;
 
 		// OpenGL should be available everywhere!
+#ifdef Q_OS_WIN32
 		if( direct3dRadioButton->isChecked() )
 			mode = s.d3dInfo.modes[ index ];
 		else
+#endif
 			mode = s.openglInfo.modes[ index ];
 
 		s.config.setInt( "Width", mode.width );
@@ -151,24 +153,27 @@ void CDisplaySettingsWidget::updateVideoModes()
 
 	videomodeComboBox->clear();
 
+	std::vector< CVideoMode >::iterator itr, iend;
+
+#ifdef Q_OS_WIN32
 	if( direct3dRadioButton->isChecked() )
 	{
-		for( std::vector< CVideoMode >::iterator itr = s.d3dInfo.modes.begin(); itr != s.d3dInfo.modes.end(); ++itr )
-		{
-			std::stringstream ss;
-			ss << itr->widht << "x" << itr->height << " " << itr->depth << " bit @" << itr->frequency;
-			videomodeComboBox->addItem( ss.str().c_str() );
-		}
+		itr = s.d3dInfo.modes.begin();
+		iend = s.d3dInfo.modes.end();
 	}
 	else
+#endif
 	{
 		// OpenGL should be available everywhere!
-		for( std::vector< CVideoMode >::iterator itr = s.openglInfo.modes.begin(); itr != s.openglInfo.modes.end(); ++itr )
-		{
-			std::stringstream ss;
-			ss << itr->widht << "x" << itr->height << " " << itr->depth << " bit @" << itr->frequency;
-			videomodeComboBox->addItem( ss.str().c_str() );
-		}
+		itr = s.openglInfo.modes.begin();
+		iend = s.openglInfo.modes.end();
+	}
+
+	while(itr != iend)
+	{
+		videomodeComboBox->addItem(QString("%1x%2 %3 bit @%4").arg(itr->width).arg(itr->height).arg(itr->depth).arg(itr->frequency));
+
+		++itr;
 	}
 }
 
@@ -192,6 +197,7 @@ uint32 CDisplaySettingsWidget::findVideoModeIndex( CVideoMode *mode )
 	CVideoMode &m = *mode;
 	CSystem &s = CSystem::GetInstance();
 
+#ifdef Q_OS_WIN32
 	if( direct3dRadioButton->isChecked() )
 	{
 		for( uint32 i = 0; i < s.d3dInfo.modes.size(); i++ )
@@ -199,6 +205,7 @@ uint32 CDisplaySettingsWidget::findVideoModeIndex( CVideoMode *mode )
 				return i;
 	}
 	else
+#endif
 	{
 		// Again OpenGL should be available everywhere!
 		for( uint32 i = 0; i < s.openglInfo.modes.size(); i++ )
