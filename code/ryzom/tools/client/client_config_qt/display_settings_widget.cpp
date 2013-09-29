@@ -30,6 +30,10 @@ CDisplaySettingsWidget::CDisplaySettingsWidget( QWidget *parent ) :
 	ypositionLineEdit->setValidator( new QRegExpValidator( QRegExp( "[0-9]{1,6}" ), ypositionLineEdit ) );
 	load();
 
+#ifndef Q_OS_WIN32
+	direct3dRadioButton->setEnabled(false);
+#endif
+
 	connect( autoRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( openglRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( direct3dRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
