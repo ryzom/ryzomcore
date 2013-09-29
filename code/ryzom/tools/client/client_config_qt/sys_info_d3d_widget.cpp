@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "sys_info_d3d_widget.h"
+
 #include "system.h"
 
 CSysInfoD3DWidget::CSysInfoD3DWidget( QWidget *parent ) :

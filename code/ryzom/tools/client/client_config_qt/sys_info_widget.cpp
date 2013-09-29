@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "sys_info_widget.h"
+
 #include "system.h"
 
 CSysInfoWidget::CSysInfoWidget( QWidget *parent ) :

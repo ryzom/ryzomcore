@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "display_settings_advanced_widget.h"
+
 #include "system.h"
 
 CDisplaySettingsAdvancedWidget::CDisplaySettingsAdvancedWidget( QWidget *parent ) :

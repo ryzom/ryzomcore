@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "sys_info_opengl_widget.h"
+
 #include "system.h"
 
 CSysInfoOpenGLWidget::CSysInfoOpenGLWidget( QWidget *parent ) :

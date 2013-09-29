@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "sound_settings_widget.h"
+
 #include "system.h"
 
 CSoundSettingsWidget::CSoundSettingsWidget( QWidget *parent ) :
