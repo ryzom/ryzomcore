@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "general_settings_widget.h"
+
 #include "system.h"
 #include <QTranslator>
 
