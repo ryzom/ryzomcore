@@ -36,7 +36,7 @@ class CGeneralSettingsWidget : public CWidgetBase, public Ui::general_settings_w
 
 public:
 	CGeneralSettingsWidget( QWidget *parent = NULL );
-	~CGeneralSettingsWidget();
+	virtual	~CGeneralSettingsWidget();
 
 	void load();
 	void save();
