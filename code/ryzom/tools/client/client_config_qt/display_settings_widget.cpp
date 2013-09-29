@@ -70,7 +70,7 @@ void CDisplaySettingsWidget::load()
 
 
 	CVideoMode mode;
-	mode.widht = s.config.getInt( "Width" );
+	mode.width = s.config.getInt( "Width" );
 	mode.height = s.config.getInt( "Height" );
 	mode.depth = s.config.getInt( "Depth" );
 	mode.frequency = s.config.getInt( "Frequency" );
@@ -85,7 +85,7 @@ void CDisplaySettingsWidget::load()
 		windowedRadioButton->setChecked( true );
 	}
 
-	widthLineEdit->setText( QString( "%1" ).arg( mode.widht ) );
+	widthLineEdit->setText( QString( "%1" ).arg( mode.width ) );
 	heightLineEdit->setText( QString( "%1" ).arg( mode.height ) );
 	xpositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionX" ) ) );
 	ypositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionY" ) ) );
@@ -116,7 +116,7 @@ void CDisplaySettingsWidget::save()
 		else
 			mode = s.openglInfo.modes[ index ];
 
-		s.config.setInt( "Width", mode.widht );
+		s.config.setInt( "Width", mode.width );
 		s.config.setInt( "Height", mode.height );
 		s.config.setInt( "Depth", mode.depth );
 		s.config.setInt( "Frequency", mode.frequency );
