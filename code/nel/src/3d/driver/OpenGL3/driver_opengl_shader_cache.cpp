@@ -28,15 +28,15 @@ namespace NL3D
 		clearCache();
 	}
 
-	IProgramObject* CShaderCache::findShader( const CShaderDesc &desc ) const
+	SShaderPair CShaderCache::findShader( const CShaderDesc &desc ) const
 	{
 		for( int i = 0; i < shaders.size(); i++ )
 		{
 			if( shaders[ i ] == desc )
-				return shaders[ i ].getProgram();
+				return shaders[ i ].getShaders();
 		}
 
-		return NULL;
+		return SShaderPair();
 	}
 
 	void CShaderCache::cacheShader( CShaderDesc &desc )
@@ -49,8 +49,10 @@ namespace NL3D
 		std::vector< CShaderDesc >::iterator itr = shaders.begin();
 		while( itr != shaders.end() )
 		{
-			IProgramObject *p = itr->getProgram();
-			delete p;
+			SShaderPair sp;
+			sp = itr->getShaders();
+			delete sp.vp;
+			delete sp.pp;
 			++itr;
 		}
 

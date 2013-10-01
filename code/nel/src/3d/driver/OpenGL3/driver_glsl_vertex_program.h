@@ -18,12 +18,12 @@
 #ifndef GLSL_VERTEX_PROGRAM_H
 #define GLSL_VERTEX_PROGRAM_H
 
-#include "driver_glsl_shader_base.h"
+#include "driver_glsl_program.h"
 #include <string>
 
 namespace NL3D
 {
-	class CGLSLVertexProgram : public CGLSLShaderBase
+	class CGLSLVertexProgram : public CGLSLProgram
 	{
 	public:
 		CGLSLVertexProgram();

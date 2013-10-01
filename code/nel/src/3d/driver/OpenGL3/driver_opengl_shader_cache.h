@@ -31,7 +31,7 @@ namespace NL3D
 		~CShaderCache();
 
 		/// Checks if there's a shader cached that was generated from the specified descriptor
-		IProgramObject* findShader( const CShaderDesc &desc ) const;
+		SShaderPair findShader( const CShaderDesc &desc ) const;
 
 		/// Caches a shader with the specified descriptor as key
 		void cacheShader( CShaderDesc &desc );

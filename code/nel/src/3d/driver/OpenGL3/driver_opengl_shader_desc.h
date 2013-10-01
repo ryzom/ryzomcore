@@ -24,7 +24,33 @@
 
 namespace NL3D
 {
-	class IProgramObject;
+	class CGLSLVertexProgram;
+	class CGLSLPixelProgram;
+
+	struct SShaderPair
+	{
+		SShaderPair()
+		{
+			vp = NULL;
+			pp = NULL;
+		}
+
+		~SShaderPair()
+		{
+			vp = NULL;
+			pp = NULL;
+		}
+
+		bool empty() const{
+			if( ( vp == NULL ) && ( pp == NULL ) )
+				return true;
+			else
+				return false;
+		}
+
+		CGLSLVertexProgram *vp;
+		CGLSLPixelProgram  *pp;
+	};
 
 	class CShaderDesc
 	{
@@ -68,7 +94,6 @@ namespace NL3D
 			
 			features = None;
 			shaderType = Normal;
-			program = NULL;
 			vbFlags = 0;
 			nlightmaps = 0;
 			alphaTestTreshold = 0.5f;
@@ -128,7 +153,6 @@ namespace NL3D
 		void setTexEnvMode( uint32 index, uint32 mode ){ texEnvMode[ index ] = mode; }
 		void setVBFlags( uint32 flags ){ vbFlags = flags; }
 		void setShaderType( uint32 type ){ shaderType = type; }
-		void setProgram( IProgramObject *p ){ program = p; }
 		void setNLightMaps( uint32 n ){ nlightmaps = n; }
 		
 		void setAlphaTest( bool b )
@@ -188,7 +212,8 @@ namespace NL3D
 
 		bool hasPointLight() const{ return pointLight; }
 
-		IProgramObject* getProgram() const{ return program; }
+		void setShaders( SShaderPair sp ){ shaderPair = sp; }
+		SShaderPair getShaders() const{ return shaderPair; }
 
 	private:
 
@@ -210,7 +235,7 @@ namespace NL3D
 		TLightMode lightMode[ SHADER_MAX_LIGHTS ];
 		bool pointLight;
 
-		IProgramObject *program;
+		SShaderPair shaderPair;
 	};
 }
 

@@ -21,16 +21,16 @@
 
 namespace NL3D
 {
-	CGLSLPixelProgram::CGLSLPixelProgram()
+	CGLSLPixelProgram::CGLSLPixelProgram() :
+	CGLSLProgram()
 	{
 		type = PIXEL_PROGRAM;
-		shaderId = nglCreateShader( GL_FRAGMENT_SHADER );
-		nlassert( shaderId != 0 );
 	}
 
 	CGLSLPixelProgram::~CGLSLPixelProgram()
 	{
-		nglDeleteShader( shaderId );
+		if( programId != 0 )
+			nglDeleteProgram( programId );
 	}
 }
 

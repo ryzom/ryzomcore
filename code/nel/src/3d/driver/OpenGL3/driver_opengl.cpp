@@ -320,8 +320,11 @@ CDriverGL3::CDriverGL3()
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
 
-	currentProgram = NULL;
-	dynMatProgram = NULL;
+	vertexProgram = NULL;
+	pixelProgram = NULL;
+
+	dynMatVP = NULL;
+	dynMatPP = NULL;
 
 	shaderGenerator = new CGLSLShaderGenerator();
 	usrShaderManager = new CUsrShaderManager();
@@ -329,7 +332,6 @@ CDriverGL3::CDriverGL3()
 	CUsrShaderLoader loader;
 	loader.setManager( usrShaderManager );
 	loader.loadShaders( "./shaders" );
-
 }
 
 // ***************************************************************************
@@ -339,11 +341,16 @@ CDriverGL3::~CDriverGL3()
 
 	release();
 
-	currentProgram = NULL;
+	vertexProgram = NULL;
+	pixelProgram = NULL;
 
-	if( dynMatProgram != NULL )
-		delete dynMatProgram;
-	dynMatProgram = NULL;
+	if( dynMatVP != NULL )
+		delete dynMatVP;
+	dynMatVP = NULL;
+
+	if( dynMatPP != NULL )
+		delete dynMatPP;
+	dynMatPP = NULL;
 
 	delete shaderGenerator;
 	shaderGenerator = NULL;
@@ -504,6 +511,12 @@ bool CDriverGL3::setupDisplay()
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
 
+	if( !initPipeline() )
+	{
+		nlinfo( "Failed to create Pipeline Object" );
+		nlassert( false );
+	}
+
 	return true;
 }
 
@@ -620,8 +633,6 @@ bool CDriverGL3::swapBuffers()
 	H_AUTO_OGL(CDriverGL3_swapBuffers)
 
 	++ _SwapBufferCounter;
-	// Reset texture shaders
-	activeVertexProgram(NULL);
 
 #ifdef NL_OS_WINDOWS
 	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?

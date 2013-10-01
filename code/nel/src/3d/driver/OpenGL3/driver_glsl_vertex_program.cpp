@@ -22,15 +22,14 @@
 namespace NL3D
 {
 	CGLSLVertexProgram::CGLSLVertexProgram() :
-	CGLSLShaderBase()
+	CGLSLProgram()
 	{
 		type = VERTEX_PROGRAM;
-		shaderId = nglCreateShader( GL_VERTEX_SHADER );
-		nlassert( shaderId != 0 );
 	}
 
 	CGLSLVertexProgram::~CGLSLVertexProgram()
 	{
-		nglDeleteShader( shaderId );
+		if( programId != 0 )
+			nglDeleteProgram( programId );
 	}
 }

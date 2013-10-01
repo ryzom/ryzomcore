@@ -16,296 +16,32 @@
 
 
 #include "driver_glsl_program.h"
-#include "nel/3d/i_program_object.h"
-#include "driver_glsl_shader_base.h"
-#include "stdopengl.h"
+#include <algorithm>
 #include "driver_opengl_extension.h"
-
-#define MAX_PROGRAM_LOG 1024
 
 namespace NL3D
 {
 	CGLSLProgram::CGLSLProgram() :
-	IProgramObject()
+	IProgram()
 	{
-		programId = nglCreateProgram();
-		nlassert( programId != 0 );
-		linked = false;
 		std::fill( uniformIndices, uniformIndices + NUM_UNIFORMS, -1 );
+		programId = 0;
 	}
 
 	CGLSLProgram::~CGLSLProgram()
 	{
-		nglDeleteProgram( programId );
-		deleteShaders();
-		programId = 0;
 	}
 
-	bool CGLSLProgram::attachVertexProgram( IProgram *shader )
-	{
-		if( !shader->isVertexProgram() )
-			return false;
-
-		if( !shader->isCompiled() )
-			return false;
-
-		std::vector< IProgram* >::const_iterator itr =
-			std::find( vertexPrograms.begin(), vertexPrograms.end(), shader );
-		if( itr != vertexPrograms.end() )
-			return false;
-
-		glGetError();
-		nglAttachShader( programId, shader->getShaderId() );
-		GLenum error = glGetError();
-
-		if( error != 0 )
-			return false;
-
-		vertexPrograms.push_back( shader );
-
-		return true;
-	}
-
-	bool CGLSLProgram::attachPixelProgram( IProgram *shader )
-	{
-		if( !shader->isPixelProgram() )
-			return false;
-
-		if( !shader->isCompiled() )
-			return false;
-
-		std::vector< IProgram* >::const_iterator itr =
-			std::find( pixelPrograms.begin(), pixelPrograms.end(), shader );
-		if( itr != pixelPrograms.end() )
-			return false;
-
-		glGetError();
-		nglAttachShader( programId, shader->getShaderId() );
-		GLenum error = glGetError();
-
-		if( error != GL_NO_ERROR )
-			return false;
-
-		pixelPrograms.push_back( shader );
-
-		return true;
-	}
-
-	bool CGLSLProgram::detachVertexProgram( IProgram *shader )
-	{
-		if( !shader->isVertexProgram() )
-			return false;
-
-		std::vector< IProgram* >::iterator itr =
-			std::find( vertexPrograms.begin(), vertexPrograms.end(), shader );
-		if( itr == vertexPrograms.end() )
-			return false;
-
-		nglDetachShader( programId, shader->getShaderId() );
-		GLenum error = glGetError();
-
-		if( error != GL_NO_ERROR )
-			return false;
-
-		vertexPrograms.erase( itr );
-
-		return true;
-	}
-
-
-	bool CGLSLProgram::detachPixelProgram( IProgram *shader )
-	{
-		if( !shader->isPixelProgram() )
-			return false;
-
-		std::vector< IProgram* >::iterator itr =
-			std::find( pixelPrograms.begin(), pixelPrograms.end(), shader );
-		if( itr == pixelPrograms.end() )
-			return false;
-
-		nglDetachShader( programId, shader->getShaderId() );
-		GLenum error = glGetError();
-
-		if( error != GL_NO_ERROR )
-			return false;
-
-		pixelPrograms.erase( itr );
-
-		return true;
-	}
-
-	bool CGLSLProgram::link( std::string &log )
-	{
-		if( vertexPrograms.empty() || pixelPrograms.empty() )
-			return false;
-
-		nglLinkProgram( programId );
-
-		GLint ok;
-		nglGetProgramiv( programId, GL_LINK_STATUS, &ok );
-		if( ok == 0 )
-		{
-			char errorLog[ MAX_PROGRAM_LOG ];
-			nglGetProgramInfoLog( programId, MAX_PROGRAM_LOG, NULL, errorLog );
-			log.assign( errorLog );
-			return false;
-		}
-
-		linked = true;
-
-		return true;
-	}
-
-	bool CGLSLProgram::validate( std::string &log )
-	{
-		nglValidateProgram( programId );
-
-		GLint ok;
-		nglGetProgramiv( programId, GL_VALIDATE_STATUS, &ok );
-		if( ok != GL_TRUE )
-		{
-			char errorLog[ MAX_PROGRAM_LOG ];
-			nglGetProgramInfoLog( programId, MAX_PROGRAM_LOG, NULL, errorLog );
-			log.assign( errorLog );
-			return false;
-		}
-
-		return true;
-	}
-
-	const char *uniformNames[ CGLSLProgram::NUM_UNIFORMS ] =
-	{
-		"mvpMatrix",
-		"mvMatrix",
-		"normalMatrix",
-		"texMatrix0",
-		"texMatrix1",
-		"texMatrix2",
-		"texMatrix3",
-		"constant0",
-		"constant1",
-		"constant2",
-		"constant3",
-		"diffuse",
-		"mcolor",
-		"sampler0",
-		"sampler1",
-		"sampler2",
-		"sampler3",
-		"alphaTreshold",
-		"fogStart",
-		"fogEnd",
-		"fogColor",
-		"fogDensity",
-		"light0Dir",
-		"light1Dir",
-		"light2Dir",
-		"light3Dir",
-		"light4Dir",
-		"light5Dir",
-		"light6Dir",
-		"light7Dir",
-		"light0ColDiff",
-		"light1ColDiff",
-		"light2ColDiff",
-		"light3ColDiff",
-		"light4ColDiff",
-		"light5ColDiff",
-		"light6ColDiff",
-		"light7ColDiff",
-		"light0ColAmb",
-		"light1ColAmb",
-		"light2ColAmb",
-		"light3ColAmb",
-		"light4ColAmb",
-		"light5ColAmb",
-		"light6ColAmb",
-		"light7ColAmb",
-		"light0ColSpec",
-		"light1ColSpec",
-		"light2ColSpec",
-		"light3ColSpec",
-		"light4ColSpec",
-		"light5ColSpec",
-		"light6ColSpec",
-		"light7ColSpec",
-		"light0Shininess",
-		"light1Shininess",
-		"light2Shininess",
-		"light3Shininess",
-		"light4Shininess",
-		"light5Shininess",
-		"light6Shininess",
-		"light7Shininess",
-		"light0Pos",
-		"light1Pos",
-		"light2Pos",
-		"light3Pos",
-		"light4Pos",
-		"light5Pos",
-		"light6Pos",
-		"light7Pos",
-		"light0ConstAttn",
-		"light1ConstAttn",
-		"light2ConstAttn",
-		"light3ConstAttn",
-		"light4ConstAttn",
-		"light5ConstAttn",
-		"light6ConstAttn",
-		"light7ConstAttn",
-		"light0LinAttn",
-		"light1LinAttn",
-		"light2LinAttn",
-		"light3LinAttn",
-		"light4LinAttn",
-		"light5LinAttn",
-		"light6LinAttn",
-		"light7LinAttn",
-		"light0QuadAttn",
-		"light1QuadAttn",
-		"light2QuadAttn",
-		"light3QuadAttn",
-		"light4QuadAttn",
-		"light5QuadAttn",
-		"light6QuadAttn",
-		"light7QuadAttn"
-	};
-
-	void CGLSLProgram::cacheUniformIndices()
+	void CGLSLProgram::cacheUniforms()
 	{
 		nlassert( programId != 0 );
 
-		for( int i = MVPMatrix; i < NUM_UNIFORMS; i++ )
+		for( int i = 0; i < NUM_UNIFORMS; i++ )
 		{
 			uniformIndices[ i ] = nglGetUniformLocation( programId, uniformNames[ i ] );
 		}
 	}
 
-	int CGLSLProgram::getUniformIndex( EUniform uniform )
-	{
-		nlassert( uniform < NUM_UNIFORMS );
-
-		return uniformIndices[ uniform ];
-	}
-
-	void CGLSLProgram::deleteShaders()
-	{
-		std::vector< IProgram* >::iterator itr;
-		
-		itr = vertexPrograms.begin();
-		while( itr != vertexPrograms.end() )
-		{
-			delete *itr;
-			++itr;
-		}
-
-		itr = pixelPrograms.begin();
-		while( itr != pixelPrograms.end() )
-		{
-			delete *itr;
-			++itr;
-		}
-	}
 }
 
 

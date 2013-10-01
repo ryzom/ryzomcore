@@ -18,41 +18,28 @@
 #ifndef GLSL_PROGRAM_H
 #define GLSL_PROGRAM_H
 
-#include <vector>
-#include <string>
-#include "nel/3d/i_program_object.h"
+#include "nel/3d/i_program.h"
 
 namespace NL3D
 {
 	/// Wrapper class for OpenGL shader program object
-	class CGLSLProgram : public IProgramObject
+	class CGLSLProgram : public IProgram
 	{
 	public:
 		CGLSLProgram();
 		~CGLSLProgram();
 
-		bool attachVertexProgram( IProgram *shader );
-		bool attachPixelProgram( IProgram *shader );
+		unsigned int getProgramId() const{ return programId; }
+		void setProgramId( unsigned int Id ){ programId = Id; }
 
-		bool detachVertexProgram( IProgram *shader );
-		bool detachPixelProgram( IProgram *shader );		
+		void cacheUniforms();
+		int getUniformIndex( uint32 id ) const{ return uniformIndices[ id ]; }
 
-		bool link( std::string &log );
-
-		bool validate( std::string &log );
-
-		void cacheUniformIndices();
-
-		int getUniformIndex( EUniform uniform );
-
-	private:
-		void deleteShaders();
-
+	protected:
+		unsigned int programId;
 		int uniformIndices[ NUM_UNIFORMS ];
-
-		std::vector< IProgram* > vertexPrograms;
-		std::vector< IProgram* > pixelPrograms;
 	};
+
 }
 
 #endif

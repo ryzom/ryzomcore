@@ -149,6 +149,12 @@ namespace NL3D
 		ss << std::endl;
 
 		ss << "#version 330" << std::endl;
+		ss << "#extension GL_ARB_separate_shader_objects : enable" << std::endl;
+		ss << "out gl_PerVertex" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec4 gl_Position;" << std::endl;
+		ss << "};" << std::endl;
+		ss << std::endl;
 		ss << "uniform mat4 mvpMatrix;" << std::endl;
 		ss << std::endl;
 

@@ -19,8 +19,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#define GLSL
-
 //#define NL_PROFILE_DRIVER_OGL
 #ifdef NL_PROFILE_DRIVER_OGL
 #	define H_AUTO_OGL(label) H_AUTO(label)
@@ -282,6 +280,10 @@ public:
 class CGLSLShaderGenerator;
 class CUsrShaderManager;
 
+class CGLSLProgram;
+class CGLSLVertexProgram;
+class CGLSLPixelProgram;
+
 // ***************************************************************************
 class CDriverGL3 : public IDriver
 {
@@ -381,7 +383,8 @@ public:
 	void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
 	bool					setupProgram(CMaterial& mat);
 	bool					setupDynMatProgram(CMaterial& mat, uint pass);
-	void					setupUniforms(CMaterial& mat);
+	void					setupUniforms();
+	void					setupUniforms( CGLSLProgram *program );
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -443,7 +446,6 @@ public:
 	virtual bool			renderRawPoints(CMaterial& Mat, uint32 startIndex, uint32 numPoints);
 	virtual bool			renderRawLines(CMaterial& Mat, uint32 startIndex, uint32 numLines);
 	virtual bool			renderRawTriangles(CMaterial& Mat, uint32 startIndex, uint32 numTris);
-	virtual bool			renderRawTriangles2( CMaterial &mat, uint32 startVertex, uint32 numTri );
 	virtual bool			renderRawQuads(CMaterial& Mat, uint32 startIndex, uint32 numQuads);
 	//
 	virtual bool			renderLinesWithIndexOffset(CMaterial& /* mat */, uint32 /* firstIndex */, uint32 /* nlines */, uint /* indexOffset */) { nlassertex(0, (UNSUPPORTED_INDEX_OFFSET_MSG)); return false; }
@@ -1223,23 +1225,28 @@ private:
 	bool			isVertexProgramSupported () const{ return true; }
 	bool			isVertexProgramEmulated () const{ return false; }
 	bool			activeVertexProgram (CVertexProgram *program){ return true; };
-	bool			activeProgramObject( IProgramObject *program );
-	IProgramObject* createProgramObject() const;
+
+	bool			compileVertexProgram( CGLSLVertexProgram *program );
+	bool			activeVertexProgram( CGLSLVertexProgram *program );
+
+	bool			compilePixelProgram( CGLSLPixelProgram *program );
+	bool			activePixelProgram( CGLSLPixelProgram *program );
+
 	IProgram*		createVertexProgram() const;
 	IProgram*		createPixelProgram() const;
 
-	int getUniformLocation( const char *name );
+	int getUniformLocation( uint32 programType, const char *name );
 
-	void setUniform1f( uint index, float f );
-	void setUniform3f( uint index, float f1, float f2, float f3 );
-	void setUniform4f( uint index, float f1, float f2, float f3, float f4  );
-	void setUniform1i( uint index, int i );
-	void setUniform4i( uint index, int i1, int i2, int i3, int i4 );
-	void setUniform1u( uint index, uint u );
-	void setUniform4u( uint index, uint u1, uint u2, uint u3, uint u4 );
-	void setUniformMatrix2fv( uint index, uint count, bool transpose, const float *values );
-	void setUniformMatrix3fv( uint index, uint count, bool transpose, const float *values );
-	void setUniformMatrix4fv( uint index, uint count, bool transpose, const float *values );
+	void setUniform1f( uint32 programType, uint index, float f );
+	void setUniform3f( uint32 programType, uint index, float f1, float f2, float f3 );
+	void setUniform4f( uint32 programType, uint index, float f1, float f2, float f3, float f4  );
+	void setUniform1i( uint32 programType, uint index, int i );
+	void setUniform4i( uint32 programType, uint index, int i1, int i2, int i3, int i4 );
+	void setUniform1u( uint32 programType, uint index, uint u );
+	void setUniform4u( uint32 programType, uint index, uint u1, uint u2, uint u3, uint u4 );
+	void setUniformMatrix2fv( uint32 programType, uint index, uint count, bool transpose, const float *values );
+	void setUniformMatrix3fv( uint32 programType, uint index, uint count, bool transpose, const float *values );
+	void setUniformMatrix4fv( uint32 programType, uint index, uint count, bool transpose, const float *values );
 
 	void			setConstant (uint index, float, float, float, float){}
 	void			setConstant (uint index, double, double, double, double){}
@@ -1306,11 +1313,14 @@ private:
 		CGLSLShaderGenerator *shaderGenerator;
 		CUsrShaderManager    *usrShaderManager;
 		
-		/// The program that is currently used
-		IProgramObject *currentProgram;
+		bool initPipeline();
 
-		/// The current user shader program
-		IProgramObject *dynMatProgram;
+		uint32 ppoId;
+		CGLSLVertexProgram *vertexProgram;
+		CGLSLPixelProgram *pixelProgram;
+
+		CGLSLVertexProgram *dynMatVP;
+		CGLSLPixelProgram *dynMatPP;
 
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();

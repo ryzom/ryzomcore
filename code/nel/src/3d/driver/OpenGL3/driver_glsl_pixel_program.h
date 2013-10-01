@@ -18,11 +18,11 @@
 #ifndef GLSL_PIXEL_PROGRAM_H
 #define GLSL_PIXEL_PROGRAM_H
 
-#include "driver_glsl_shader_base.h"
+#include "driver_glsl_program.h"
 
 namespace NL3D
 {
-	class CGLSLPixelProgram : public CGLSLShaderBase
+	class CGLSLPixelProgram : public CGLSLProgram
 	{
 	public:
 		CGLSLPixelProgram();

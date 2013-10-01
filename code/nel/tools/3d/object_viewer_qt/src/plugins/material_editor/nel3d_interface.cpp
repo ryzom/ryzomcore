@@ -27,7 +27,6 @@
 #include "nel/3d/u_light.h"
 #include "nel/3d/u_3d_mouse_listener.h"
 #include "nel/3d/i_program.h"
-#include "nel/3d/i_program_object.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/file.h"
