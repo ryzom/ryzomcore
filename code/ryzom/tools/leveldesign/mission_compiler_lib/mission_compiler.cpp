@@ -177,8 +177,8 @@ GenderExtractor::GenderExtractor(const std::string & literal, const std::string&
 
 	
 	static const char * es[] ={"e", "e1", "e2", "e3"};
-	static char * fs[] ={"f", "f1", "f2", "f3"};
-	static char * hs[] ={"h", "h1", "h2", "h3"};
+	static const char * fs[] ={"f", "f1", "f2", "f3"};
+	static const char * hs[] ={"h", "h1", "h2", "h3"};
 
 	const char * e = es[level];
 	const char * f = fs[level];

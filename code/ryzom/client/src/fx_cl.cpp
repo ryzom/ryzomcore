@@ -263,7 +263,7 @@ CFxCL::~CFxCL()
 	// Stop emitters
 	UParticleSystemInstance fxInst;
 	fxInst.cast (_Instance);
-	if (!fxInst.removeByID( 'STOP' ) && !fxInst.removeByID( 'main' ) )
+	if (!fxInst.removeByID(NELID("STOP")) && !fxInst.removeByID(NELID("main")))
 	{
 		fxInst.activateEmitters( false );
 	}

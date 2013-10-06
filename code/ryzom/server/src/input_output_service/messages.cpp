@@ -336,7 +336,7 @@ void cbImpulsionFilter( CMessage& msgin, const string &serviceName, TServiceId s
 } // impulsionFilter //
 
 
-static char*DebugChatModeName[]	=
+static const char* DebugChatModeName[] =
 {
 	"say",
 	"shout",

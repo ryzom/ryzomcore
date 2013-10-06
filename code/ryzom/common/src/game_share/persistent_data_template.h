@@ -325,9 +325,11 @@ static _TOKENS_CLASSNAME _TOKENS_OBJNAME;
 
 #else
 
+#ifdef NL_OS_WINDOWS
 	#pragma message( " ")
 	#pragma message( "NON-OPTIMISED: Persistent data class " NL_MACRO_TO_STR(PERSISTENT_CLASS) " not using a token family")
 	#pragma message( " ")
+#endif
 
 #endif
 

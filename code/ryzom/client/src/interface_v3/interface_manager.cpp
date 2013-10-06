@@ -1663,7 +1663,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		// serial user chats info (serial it before position of windows so that they can be updated properly)
 		if (ver >= 1)
 		{
-			f.serialCheck(uint32('_ICU'));
+			f.serialCheck(NELID("_ICU"));
 			if (!PeopleInterraction.loadUserChatsInfos(f))
 			{
 				nlwarning("Bad user chat saving");
@@ -1671,7 +1671,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		}
 
 		// header
-		f.serialCheck(uint32('GFCI'));
+		f.serialCheck(NELID("GFCI"));
 		f.serial(nNbMode);
 		f.serial(_CurrentMode);
 		if(ver>=10)
@@ -1897,7 +1897,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		f.serialVersion(ICFG_STREAM_VERSION);
 
 		// serial user chats info (serial it before position of windows so that they can be updated properly)
-		f.serialCheck(uint32('_ICU'));
+		f.serialCheck(NELID("_ICU"));
 		if (!PeopleInterraction.saveUserChatsInfos(f))
 		{
 			nlwarning("Config saving failed");
@@ -1907,7 +1907,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		}
 
 		// header
-		f.serialCheck(uint32('GFCI'));
+		f.serialCheck(NELID("GFCI"));
 		f.serial(i);
 		f.serial(_CurrentMode);
 		f.serial(_LastInGameScreenW);

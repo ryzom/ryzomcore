@@ -43,7 +43,7 @@ void CSecurityCheckForFastDisconnection::forwardSecurityCode(NLMISC::IStream& ms
 }
 
 //
-CSecurityCode CSecurityCheckForFastDisconnection::encode(char *passPhrase)
+CSecurityCode CSecurityCheckForFastDisconnection::encode(const char *passPhrase)
 {
 	if (!passPhrase)
 		throw Exception("Null passPhrase");
@@ -56,7 +56,7 @@ CSecurityCode CSecurityCheckForFastDisconnection::encode(char *passPhrase)
 }
 
 //
-void CSecurityCheckForFastDisconnection::check(char *passPhrase)
+void CSecurityCheckForFastDisconnection::check(const char *passPhrase)
 {
 	if (SecurityCode != encode(passPhrase))
 		throw Exception("Check not passed");

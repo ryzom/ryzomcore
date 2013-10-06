@@ -349,13 +349,13 @@ static std::string getActiveOutputPath()
 	if (TheCharScanScriptFile==NULL)
 	{
 		nlwarning("There is no active script file right now from which to extract output directory");
-		return false;
+		return "";
 	}
 	bool isOK=true;
 
 	// write the current script file to a tmp file
 	isOK=TheCharScanScriptFile->writeToFile(TmpScriptFileName);
-	if (!isOK) return false;
+	if (!isOK) return "";
 
 	// create a new script object and assign the tmp file to it
 	CCharScanScript script;

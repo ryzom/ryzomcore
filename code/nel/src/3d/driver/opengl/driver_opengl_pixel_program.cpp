@@ -54,6 +54,8 @@ namespace NLDRIVERGL {
 CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it) : IProgramDrvInfos (drv, it) 
 {
 	H_AUTO_OGL(CPixelProgamDrvInfosGL_CPixelProgamDrvInfosGL)
+
+#ifndef USE_OPENGLES
 	// Extension must exist
 	nlassert(drv->_Extensions.ARBFragmentProgram);
 
@@ -61,6 +63,7 @@ CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoP
 	{
 		nglGenProgramsARB(1, &ID);
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -96,6 +99,7 @@ bool CDriverGL::activePixelProgram(CPixelProgram *program)
 
 bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 {
+#ifndef USE_OPENGLES
 	// Program setuped ?
 	if (program->m_DrvInfo == NULL)
 	{
@@ -121,6 +125,9 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 	}
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 // ***************************************************************************
@@ -129,6 +136,7 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 {
 	H_AUTO_OGL(CDriverGL_activeARBPixelProgram)
 
+#ifndef USE_OPENGLES
 	// Setup or unsetup ?
 	if (program)
 	{
@@ -151,14 +159,18 @@ bool CDriverGL::activeARBPixelProgram(CPixelProgram *program)
 	}
 	
 	return true;
+#else
+	return false;
+#endif
 }
 
 // ***************************************************************************
 
 bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &specularWritten*/)
 {
-	H_AUTO_OGL(CDriverGL_setupARBPixelProgram)
+	H_AUTO_OGL(CDriverGL_setupARBPixelProgram);
 	
+#ifndef USE_OPENGLES
 	CPixelProgamDrvInfosGL *drvInfo = static_cast<CPixelProgamDrvInfosGL *>((IProgramDrvInfos *)program->m_DrvInfo);
 
 	// Find a supported pixel program profile
@@ -226,7 +238,10 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 	// Build the feature info
 	program->buildInfo(source);
 
-	return true;	
+	return true;
+#else
+	return false;
+#endif
 }
 
 #ifdef NL_STATIC

@@ -14,24 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
+#ifndef STDPCH_H
+#define STDPCH_H
 
-#include "client_config_dialog.h"
-#include "system.h"
+#include <string>
 
-int main( sint32 argc, char **argv )
-{
-	QApplication app( argc, argv );
-	QPixmap pixmap( ":/resources/splash_screen.bmp" );
-	QSplashScreen splash( pixmap );
+#include <nel/misc/types_nl.h>
+#include <nel/misc/config_file.h>
 
-	splash.show();
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
 
-	CSystem::GetInstance().config.load( "client.cfg" );
+#endif
 
-	CClientConfigDialog d;
-	d.show();
-	splash.finish( &d );
-
-	return app.exec();
-}

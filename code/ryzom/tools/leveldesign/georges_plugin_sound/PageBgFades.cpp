@@ -25,6 +25,7 @@
 #include "nel/sound/u_audio_mixer.h"
 
 #include "PageBgFades.h"
+#include "resource.h"
 
 using namespace std;
 

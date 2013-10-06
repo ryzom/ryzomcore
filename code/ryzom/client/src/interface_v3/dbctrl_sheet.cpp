@@ -591,7 +591,7 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		return false;
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"dragable" );
-	if( prop != NULL )
+	if (prop)
 		setDraggable( CInterfaceElement::convertBool(prop) );
 	else
 		setDraggable( false );

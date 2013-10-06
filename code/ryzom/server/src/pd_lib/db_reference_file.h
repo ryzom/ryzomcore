@@ -199,7 +199,7 @@ private:
 
 		void				serial(NLMISC::IStream& s)
 		{
-			s.serialCheck((uint32)'RHdr');
+			s.serialCheck(NELID("RHdr"));
 			uint	version = s.serialVersion(0);
 
 			s.serial(BaseIndex);

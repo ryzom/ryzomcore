@@ -1406,6 +1406,7 @@ void CDriverGL::setupFog(float start, float end, CRGBA color)
 
 	glFogfv(GL_FOG_COLOR, _CurrentFogColor);
 
+#ifndef USE_OPENGLES
 	/** Special : with vertex program, using the extension EXT_vertex_shader, fog is emulated using 1 more constant to scale result to [0, 1]
 	  */
 	if (_Extensions.EXTVertexShader && !_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram)
@@ -1425,6 +1426,8 @@ void CDriverGL::setupFog(float start, float end, CRGBA color)
 			}
 		}
 	}
+#endif
+
 	_FogStart = start;
 	_FogEnd = end;
 }

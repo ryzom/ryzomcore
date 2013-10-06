@@ -1695,14 +1695,14 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 	try
 	{
 		sint ver= f.serialVersion(USER_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		//saveFilteredChat(f, MainChat);
 		saveFilteredChat(f, ChatGroup);
 		for(uint k = 0; k < MaxNumUserChats; ++k)
 		{
 			saveFilteredChat(f, UserChat[k]);
 		}
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		if (ver>=1)
 		{
 			CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
@@ -1732,7 +1732,7 @@ bool CPeopleInterraction::saveUserDynChatsInfos(NLMISC::IStream &f)
 	try
 	{
 		sint ver = f.serialVersion(USER_DYN_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'OMGY');
+		f.serialCheck(NELID("OMGY"));
 		if (ver >= 1)
 		{
 			saveFilteredDynChat(f, TheUserChat);
@@ -1755,7 +1755,7 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 	{
 		bool present;
 		sint ver = f.serialVersion(USER_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		f.serial(present);
 		if (!present)
 		{
@@ -1777,7 +1777,7 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 				setupUserChatFromSummary(fcs, UserChat[k]);
 			}
 		}
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		if (ver>=1)
 		{
 //			CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
@@ -1819,7 +1819,7 @@ bool CPeopleInterraction::loadUserDynChatsInfos(NLMISC::IStream &f)
 	{
 		bool present;
 		sint ver = f.serialVersion(USER_DYN_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'OMGY');
+		f.serialCheck(NELID("OMGY"));
 		f.serial(present);
 		if (!present)
 		{

@@ -401,7 +401,7 @@ void CPackedWorldBuilder::fly(std::vector<CIslandInfo>  &islands, float camSpeed
 	// fly into scene	
 	try
 	{	
-		CNELU::init(1024, 768, CViewport(), 32, true, NULL, false, true);
+		CNELU::init(1024, 768, CViewport(), 32, true, EmptyWindow, false, true);
 	}
 	catch(const Exception &e)
 	{		

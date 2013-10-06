@@ -468,8 +468,6 @@ void releaseOutGame()
 	// flush the server string cache
 	STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
 
-	ClientCfg.release ();
-
 	// Disconnect the client from the server.
 	NetMngr.disconnect();
 
