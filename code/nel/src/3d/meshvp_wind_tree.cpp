@@ -35,11 +35,11 @@ namespace NL3D
 
 // ***************************************************************************
 // Light VP fragment constants start at 24
-static	const uint	VPLightConstantStart= 24;
+static const uint	VPLightConstantStart = 24;
 
 
 // ***************************************************************************
-std::auto_ptr<CVertexProgram>	CMeshVPWindTree::_VertexProgram[CMeshVPWindTree::NumVp];
+NLMISC::CSmartPtr<CVertexProgramWindTree> CMeshVPWindTree::_VertexProgram[CMeshVPWindTree::NumVp];
 
 static const char*	WindTreeVPCodeWave=
 "!!VP1.0																				\n\
@@ -78,6 +78,83 @@ static const char*	WindTreeVPCodeEnd=
 	DP4	o[FOGC].x, c[6], R5;															\n\
 	END																					\n\
 ";
+
+
+class CVertexProgramWindTree : public CVertexProgramLighted
+{
+public:
+	struct CIdx
+	{
+		uint ProgramConstants[3];
+		uint WindLevel1;
+		uint WindLevel2[4];
+		uint WindLevel3[4];
+	};
+	CVertexProgramWindTree(uint numPls, bool specular, bool normalize);
+	virtual ~CVertexProgramWindTree() { };
+	virtual void buildInfo();
+	const CIdx &idx() const { return m_Idx; }
+
+	bool PerMeshSetup;
+
+private:
+	CIdx m_Idx;
+
+};
+
+CVertexProgramWindTree::CVertexProgramWindTree(uint numPls, bool specular, bool normalize)
+{
+	// lighted settings
+	m_FeaturesLighted.SupportSpecular = specular;
+	m_FeaturesLighted.NumActivePointLights = numPls;
+	m_FeaturesLighted.Normalize = normalize;
+	m_FeaturesLighted.CtStartNeLVP = VPLightConstantStart;
+
+	// constants cache
+	PerMeshSetup = false;
+
+	// nelvp
+	{
+		std::string vpCode = std::string(WindTreeVPCodeWave)
+			+ CRenderTrav::getLightVPFragmentNeLVP(numPls, VPLightConstantStart, specular, normalize)
+			+ WindTreeVPCodeEnd;
+
+		CSource *source = new CSource();
+		source->DisplayName = NLMISC::toString("nelvp/MeshVPWindTree/%i/%s/%s", numPls, specular ? "spec" : "nospec", normalize ? "normalize" : "nonormalize");
+		source->Profile = CVertexProgram::nelvp;
+		source->setSource(vpCode);
+		source->ParamIndices["modelViewProjection"] = 0;
+		source->ParamIndices["fog"] = 6;
+		addSource(source);
+	}
+
+	// TODO_VP_GLSL
+}
+
+void CVertexProgramWindTree::buildInfo()
+{
+	CVertexProgramLighted::buildInfo();
+	if (profile() == nelvp)
+	{
+		m_Idx.ProgramConstants[0] = 8;
+		m_Idx.ProgramConstants[1] = 9;
+		m_Idx.ProgramConstants[2] = 10;
+		m_Idx.WindLevel1 = 15;
+		m_Idx.WindLevel2[0] = 16;
+		m_Idx.WindLevel2[1] = 17;
+		m_Idx.WindLevel2[2] = 18;
+		m_Idx.WindLevel2[3] = 19;
+		m_Idx.WindLevel3[0] = 20;
+		m_Idx.WindLevel3[1] = 21;
+		m_Idx.WindLevel3[2] = 22;
+		m_Idx.WindLevel3[3] = 23;
+	}
+	else
+	{
+		// TODO_VP_GLSL
+	}
+}
+
 
 // ***************************************************************************
 float	CMeshVPWindTree::speedCos(float angle)
@@ -130,20 +207,16 @@ void	CMeshVPWindTree::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(SpecularLighting);
 }
 
-
-// ***************************************************************************
-void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
+void CMeshVPWindTree::initVertexPrograms()
 {
 	// init the vertexProgram code.
 	static	bool	vpCreated= false;
+
 	if(!vpCreated)
 	{
 		vpCreated= true;
 		// All vpcode and begin() written for HrcDepth==3
 		nlassert(HrcDepth==3);
-
-		// combine fragments.
-		string	vpCode;
 
 		// For all possible VP.
 		for(uint i=0;i<NumVp;i++)
@@ -153,13 +226,16 @@ void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
 			bool	normalize= (i&1)!=0;
 			bool	specular= (i&2)!=0;
 
-			// combine fragments
-			vpCode= string(WindTreeVPCodeWave)
-					+ CRenderTrav::getLightVPFragment(numPls, VPLightConstantStart, specular, normalize)
-					+ WindTreeVPCodeEnd;
-			_VertexProgram[i]= std::auto_ptr<CVertexProgram>(new CVertexProgram(vpCode.c_str()));
+			// combine
+			_VertexProgram[i] = new CVertexProgramWindTree(numPls, normalize, specular);
 		}
 	}
+}
+
+// ***************************************************************************
+void	CMeshVPWindTree::initInstance(CMeshBaseInstance *mbi)
+{
+	initVertexPrograms();
 
 	// init a random phase.
 	mbi->_VPWindTreePhase= frand(1);
@@ -203,21 +279,27 @@ inline void			CMeshVPWindTree::setupPerMesh(IDriver *driver, CScene *scene)
 		}
 	}
 
+	CVertexProgramWindTree *program = _ActiveVertexProgram;
+	nlassert(program);
+
 	// Setup common constants for each instances.
 	// c[8] take useful constants.
-	static	float	ct8[4]= {0, 1, 0.5f, 2};
-	driver->setConstant(8, 1, ct8);
+	driver->setUniform4f(IDriver::VertexProgram, program->idx().ProgramConstants[0], 
+		0, 1, 0.5f, 2);
 	// c[9] take other useful constants.
-	static	float	ct9[4]= {3.f, 0.f, -1.f, -2.f};
-	driver->setConstant(9, 1, ct9);
+	driver->setUniform4f(IDriver::VertexProgram, program->idx().ProgramConstants[1], 
+		3.f, 0.f, -1.f, -2.f);
 	// c[10] take Number of phase (4) for level2 and 3. -0.01 to avoid int value == 4.
-	static	float	ct10[4]= {4-0.01f, 0, 0, 0};
-	driver->setConstant(10, 1, ct10);
+	driver->setUniform4f(IDriver::VertexProgram, program->idx().ProgramConstants[2], 
+		4-0.01f, 0, 0, 0);
 }
 
 // ***************************************************************************
 inline	void		CMeshVPWindTree::setupPerInstanceConstants(IDriver *driver, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat)
 {
+	CVertexProgramWindTree *program = _ActiveVertexProgram;
+	nlassert(program);
+
 	// get instance info
 	float	instancePhase= mbi->_VPWindTreePhase;
 
@@ -238,16 +320,18 @@ inline	void		CMeshVPWindTree::setupPerInstanceConstants(IDriver *driver, CScene 
 	setupLighting(scene, mbi, invertedModelMat);
 
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
-	driver->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
+	driver->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), 
+		IDriver::ModelViewProjection, IDriver::Identity);
 	// c[4..7] take the ModelView Matrix. After setupModelMatrix();00
-	driver->setConstantFog(6);
+	driver->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 
 
 	// c[15] take Wind of level 0.
 	float	f;
 	f= _CurrentTime[0] + instancePhase;
 	f= speedCos(f) + Bias[0];
-	driver->setConstant(15, maxDeltaPosOS[0]*f );
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel1, 
+		maxDeltaPosOS[0]*f );
 
 
 	// c[16-19] take Wind of level 1.
@@ -255,16 +339,20 @@ inline	void		CMeshVPWindTree::setupPerInstanceConstants(IDriver *driver, CScene 
 	float	instTime1= _CurrentTime[1] + instancePhase;
 	// phase 0.
 	f= speedCos( instTime1+0 ) + Bias[1];
-	driver->setConstant(16+0, maxDeltaPosOS[1]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel2[0], 
+		maxDeltaPosOS[1]*f);
 	// phase 1.
 	f= speedCos( instTime1+0.25f ) + Bias[1];
-	driver->setConstant(16+1, maxDeltaPosOS[1]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel2[1], 
+		maxDeltaPosOS[1]*f);
 	// phase 2.
 	f= speedCos( instTime1+0.50f ) + Bias[1];
-	driver->setConstant(16+2, maxDeltaPosOS[1]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel2[2], 
+		maxDeltaPosOS[1]*f);
 	// phase 3.
 	f= speedCos( instTime1+0.75f ) + Bias[1];
-	driver->setConstant(16+3, maxDeltaPosOS[1]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel2[3], 
+		maxDeltaPosOS[1]*f);
 
 
 	// c[20, 23] take Wind of level 2.
@@ -272,22 +360,54 @@ inline	void		CMeshVPWindTree::setupPerInstanceConstants(IDriver *driver, CScene 
 	float	instTime2= _CurrentTime[2] + instancePhase;
 	// phase 0.
 	f= speedCos( instTime2+0 ) + Bias[2];
-	driver->setConstant(20+0, maxDeltaPosOS[2]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel3[0], 
+		maxDeltaPosOS[2]*f);
 	// phase 1.
 	f= speedCos( instTime2+0.25f ) + Bias[2];
-	driver->setConstant(20+1, maxDeltaPosOS[2]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel3[1], 
+		maxDeltaPosOS[2]*f);
 	// phase 2.
 	f= speedCos( instTime2+0.50f ) + Bias[2];
-	driver->setConstant(20+2, maxDeltaPosOS[2]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel3[2], 
+		maxDeltaPosOS[2]*f);
 	// phase 3.
 	f= speedCos( instTime2+0.75f ) + Bias[2];
-	driver->setConstant(20+3, maxDeltaPosOS[2]*f);
+	driver->setUniform3f(IDriver::VertexProgram, program->idx().WindLevel3[3], 
+		maxDeltaPosOS[2]*f);
 }
 
 // ***************************************************************************
 bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat, const NLMISC::CVector & /*viewerPos*/)
 {
-	if (!(driver->isVertexProgramSupported() && !driver->isVertexProgramEmulated())) return false;
+	if (driver->isVertexProgramEmulated()) return false;
+
+
+	// Activate the good VertexProgram
+	//===============
+
+	// Get how many pointLights are setuped now.
+	nlassert(scene != NULL);
+	CRenderTrav		*renderTrav= &scene->getRenderTrav();
+	renderTrav->prepareVPLightSetup();
+	sint	numPls= renderTrav->getNumVPLights()-1;
+	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
+
+
+	// Enable normalize only if requested by user. Because lighting don't manage correct "scale lighting"
+	uint	idVP= (SpecularLighting?2:0) + (driver->isForceNormalize()?1:0) ;
+	// correct VP id for correct unmber of pls.
+	idVP= numPls*4 + idVP;
+	// activate VP.
+	if (driver->activeVertexProgram(_VertexProgram[idVP]))
+	{
+		_ActiveVertexProgram = _VertexProgram[idVP];
+	}
+	else
+	{
+		// vertex program not supported
+		_ActiveVertexProgram = NULL;
+		return false;
+	}
 
 
 	// precompute mesh
@@ -296,22 +416,7 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	// Setup instance constants
 	setupPerInstanceConstants(driver, scene, mbi, invertedModelMat);
 
-	// Activate the good VertexProgram
-	//===============
 
-	// Get how many pointLights are setuped now.
-	nlassert(scene != NULL);
-	CRenderTrav		*renderTrav= &scene->getRenderTrav();
-	sint	numPls= renderTrav->getNumVPLights()-1;
-	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
-
-	// Enable normalize only if requested by user. Because lighting don't manage correct "scale lighting"
-	uint	idVP= (SpecularLighting?2:0) + (driver->isForceNormalize()?1:0) ;
-	// correct VP id for correct unmber of pls.
-	idVP= numPls*4 + idVP;
-
-	// activate VP.
-	driver->activeVertexProgram(_VertexProgram[idVP].get());
 
 
 	return true;
@@ -322,6 +427,7 @@ void	CMeshVPWindTree::end(IDriver *driver)
 {
 	// Disable the VertexProgram
 	driver->activeVertexProgram(NULL);
+	_ActiveVertexProgram = NULL;
 }
 
 // ***************************************************************************
@@ -347,7 +453,8 @@ void	CMeshVPWindTree::setupLighting(CScene *scene, CMeshBaseInstance *mbi, const
 	nlassert(scene != NULL);
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	// setup cte for lighting
-	renderTrav->beginVPLightSetup(VPLightConstantStart, SpecularLighting, invertedModelMat);
+	CVertexProgramWindTree *program = _ActiveVertexProgram;
+	renderTrav->beginVPLightSetup(program, invertedModelMat);
 }
 
 
@@ -367,47 +474,71 @@ bool	CMeshVPWindTree::supportMeshBlockRendering() const
 // ***************************************************************************
 bool	CMeshVPWindTree::isMBRVpOk(IDriver *driver) const
 {
-	return driver->isVertexProgramSupported() && !driver->isVertexProgramEmulated();
+	initVertexPrograms();
+
+	if (driver->isVertexProgramEmulated())
+	{
+		return false;
+	}
+	for (uint i = 0; i < NumVp; ++i)
+	{
+		if (!driver->compileVertexProgram(_VertexProgram[i]))
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 // ***************************************************************************
 void	CMeshVPWindTree::beginMBRMesh(IDriver *driver, CScene *scene)
 {
-	// precompute mesh
-	setupPerMesh(driver, scene);
-
 	/* Since need a VertexProgram Activation before activeVBHard, activate a default one
 		bet the common one will be "NoPointLight, NoSpecular, No ForceNormalize" => 0.
 	*/
-	_LastMBRIdVP= 0;
+	_LastMBRIdVP = 0;
 
 	// activate VP.
-	driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP].get());
+	driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);
+	_ActiveVertexProgram = _VertexProgram[_LastMBRIdVP];
+
+	// precompute mesh
+	setupPerMesh(driver, scene);
+	_VertexProgram[_LastMBRIdVP]->PerMeshSetup = true;
 }
 
 // ***************************************************************************
 void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat)
 {
-	// setup first constants for this instance
-	setupPerInstanceConstants(driver, scene, mbi, invertedModelMat);
-
 	// Get how many pointLights are setuped now.
 	nlassert(scene != NULL);
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
+	renderTrav->prepareVPLightSetup();
 	sint	numPls= renderTrav->getNumVPLights()-1;
 	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
 
 	// Enable normalize only if requested by user. Because lighting don't manage correct "scale lighting"
-	uint	idVP= (SpecularLighting?2:0) + (driver->isForceNormalize()?1:0) ;
+	uint idVP = (SpecularLighting?2:0) + (driver->isForceNormalize()?1:0) ;
 	// correct VP id for correct number of pls.
-	idVP= numPls*4 + idVP;
+	idVP = numPls*4 + idVP;
 
 	// re-activate VP if idVP different from last setup
-	if( idVP!=_LastMBRIdVP )
+	if(idVP != _LastMBRIdVP)
 	{
 		_LastMBRIdVP= idVP;
-		driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP].get());
+		driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);
+		_ActiveVertexProgram = _VertexProgram[_LastMBRIdVP];
+
+		if (!_VertexProgram[_LastMBRIdVP]->PerMeshSetup)
+		{
+			// precompute mesh
+			setupPerMesh(driver, scene);
+			_VertexProgram[_LastMBRIdVP]->PerMeshSetup = true;
+		}
 	}
+
+	// setup first constants for this instance
+	setupPerInstanceConstants(driver, scene, mbi, invertedModelMat);
 }
 
 // ***************************************************************************
@@ -415,6 +546,7 @@ void	CMeshVPWindTree::endMBRMesh(IDriver *driver)
 {
 	// Disable the VertexProgram
 	driver->activeVertexProgram(NULL);
+	_ActiveVertexProgram = NULL;
 }
 
 // ***************************************************************************

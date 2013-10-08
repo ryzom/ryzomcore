@@ -1943,9 +1943,11 @@ class CAHInitResLod : public IActionHandler
 
 		VideoModes.clear();
 		StringModeList.clear();
-		StringModeList.push_back("uiConfigWindowed");
 
 		CurrentMode = getRyzomModes(VideoModes, StringModeList);
+
+		// getRyzomModes() expects empty list, so we need to insert 'Windowed' after mode list is filled
+		StringModeList.insert(StringModeList.begin(), "uiConfigWindowed");
 
 		// If the client is in windowed mode, still in windowed mode and do not change anything
 		if (ClientCfg.Windowed)
@@ -1953,6 +1955,9 @@ class CAHInitResLod : public IActionHandler
 		// If we have not found the mode so it can be an error or machine change, so propose the first available
 		else if (CurrentMode == -1)
 			CurrentMode = 1;
+		// We inserted 'Windowed' as first mode, so index needs to move too
+		else
+			++CurrentMode;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:res_value"));
@@ -2111,7 +2116,12 @@ class CAHUninitResLod : public IActionHandler
 		//nlinfo("CAHUninitResLod called");
 
 		// If the mode requested is a windowed mode do nothnig
-		if (CurrentMode != 0)
+		if (CurrentMode == 0)
+		{
+			ClientCfg.Windowed = true;
+			ClientCfg.writeBool("FullScreen", false);
+		}
+		else
 		{
 			ClientCfg.Windowed = false;
 			// Get W, H
@@ -2125,6 +2135,10 @@ class CAHUninitResLod : public IActionHandler
 			}
 			ClientCfg.Width = w;
 			ClientCfg.Height = h;
+
+			ClientCfg.writeBool("FullScreen", true);
+			ClientCfg.writeInt("Width", w);
+			ClientCfg.writeInt("Height", h);
 		}
 
 		if (CurrentPreset != 4) // CInterfaceDDX::CustomPreset

@@ -488,7 +488,7 @@ void CCharacterCL::stopAttachedFXForCurrrentAnim(bool stopLoopingFX)
 			{
 				if(!(*tmpItAttached)->FX.empty())
 				{
-					if (!(*tmpItAttached)->FX.removeByID('STOP') && !(*tmpItAttached)->FX.removeByID('main'))
+					if (!(*tmpItAttached)->FX.removeByID(NELID("STOP")) && !(*tmpItAttached)->FX.removeByID(NELID("main")))
 					{
 						(*tmpItAttached)->FX.activateEmitters(false);
 					}
@@ -9373,7 +9373,7 @@ void CCharacterCL::CWornItem::enableAdvantageFX(NL3D::UInstance parent)
 	if (!enabled)
 	{
 		// well, it is unlikely that player will loses its ability to master an item after he gained it, but manage the case anyway.
-		if (!AdvantageFX.removeByID('STOP') && !AdvantageFX.removeByID('main'))
+		if (!AdvantageFX.removeByID(NELID("STOP")) && !AdvantageFX.removeByID(NELID("main")))
 		{
 			AdvantageFX.activateEmitters(false);
 		}

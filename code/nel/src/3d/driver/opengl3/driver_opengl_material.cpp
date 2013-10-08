@@ -21,8 +21,6 @@
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
 #include "nel/3d/dynamic_material.h"
-#include "driver_glsl_vertex_program.h"
-#include "driver_glsl_pixel_program.h"
 
 namespace NL3D {
 
@@ -602,39 +600,41 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 		_DriverGLStates.enableCullFace( true );
 
 	CDynMaterial *m = _CurrentMaterial->getDynMat();
-	SRenderPass *p = m->getPass( pass );
+	SRenderPass *currentPass = m->getPass( pass );
 
-	CGLSLProgram *currentProgram;
-	uint32 type;
+	IProgram *p;
 
-	CGLSLProgram* programs[ 2 ];
-	programs[ 0 ] = vertexProgram;
-	programs[ 1 ] = pixelProgram;
+	IProgram* programs[ 2 ];
+	programs[ 0 ] = currentProgram.vp;
+	programs[ 1 ] = currentProgram.pp;
+	
+	IDriver::TProgram type[ 2 ];
+	type[ 0 ] = IDriver::VertexProgram;
+	type[ 1 ] = IDriver::PixelProgram;
 
 	for( uint32 j = 0; j < 2; j++ )
 	{
-		currentProgram = programs[ j ];
-		type = currentProgram->getType();
+		p = programs[ j ];
 
-		for( uint32 i = 0; i < p->count(); i++ )
+		for( uint32 i = 0; i < currentPass->count(); i++ )
 		{
-			const SDynMaterialProp *prop = p->getProperty( i );		
-			int loc = nglGetUniformLocation( currentProgram->getProgramId(), prop->prop.c_str() );
+			const SDynMaterialProp *prop = currentPass->getProperty( i );		
+			int loc = getUniformLocation( type[ j ], prop->prop.c_str() );
 			if( loc == -1 )
 				continue;
 
 			switch( prop->type )
 			{
 			case SDynMaterialProp::Float:
-				setUniform1f( type, loc, prop->value.toFloat() );
+				setUniform1f( type[ j ], loc, prop->value.toFloat() );
 				break;
 
 			case SDynMaterialProp::Int:
-				setUniform1i( type, loc, prop->value.toInt() );
+				setUniform1i( type[ j ], loc, prop->value.toInt() );
 				break;
 
 			case SDynMaterialProp::Uint:
-				setUniform1u( type, loc, prop->value.toUInt() );
+				setUniform1ui( type[ j ], loc, prop->value.toUInt() );
 				break;
 
 			case SDynMaterialProp::Color:
@@ -642,10 +642,10 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 					float v[ 4 ];
 					prop->value.getVector4( v );
 				
-					for( int j = 0; j < 4; j++ )
-						v[ j ] = v[ j ] / 255.0f;
+					for( int k = 0; k < 4; k++ )
+						v[ k ] = v[ k ] / 255.0f;
 				
-					setUniform4f( type, loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+					setUniform4f( type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
 				}
 				break;
 
@@ -653,7 +653,7 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 				{
 					float v[ 4 ];
 					prop->value.getVector4( v );
-					setUniform4f( type, loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+					setUniform4f( type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
 				}
 				break;
 
@@ -661,7 +661,7 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 				{
 					float m[ 16 ];
 					prop->value.getMatrix4( m );
-					setUniformMatrix4fv( type, loc, 1, false, m );
+					setUniform4x4f( type[ j ], loc, m );
 					break;
 				}
 
@@ -673,17 +673,17 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 		////////////////////////////////// Set up some standard uniforms //////////////////////////////////
 
 		int loc = -1;
-		loc = nglGetUniformLocation( currentProgram->getProgramId(), "mvpMatrix" );
+		loc = getUniformLocation( type[ j ], "mvpMatrix" );
 		if( loc != -1 )
 		{
 			CMatrix mat = _GLProjMat * _ModelViewMatrix;
-			setUniformMatrix4fv( type, loc, 1, false, mat.get() );
+			setUniform4x4f( type[ j ], loc, mat );
 		}
 
-		loc = nglGetUniformLocation( currentProgram->getProgramId(), "mvMatrix" );
+		loc = getUniformLocation( type[ j ], "mvMatrix" );
 		if( loc != -1 )
 		{
-			setUniformMatrix4fv( type, loc, 1, false, _ModelViewMatrix.get() );
+			setUniform4x4f( type[ j ], loc, _ModelViewMatrix );
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -700,12 +700,12 @@ void CDriverGL3::setupNormalPass()
 	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
 	{
 		// Set constant
-		int cl = pixelProgram->getUniformIndex( IProgram::EUniform( IProgram::Constant0 + i ) );
+		int cl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Constant0 + i ) );
 		if( cl != -1 )
 		{
 			GLfloat glCol[ 4 ];
 			convColor( mat._TexEnvs[ i ].ConstantColor, glCol );
-			setUniform4f( IProgram::PIXEL_PROGRAM, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+			setUniform4f( IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 		}
 
 		// Set texture
@@ -713,11 +713,11 @@ void CDriverGL3::setupNormalPass()
 		if( t == NULL )
 			continue;
 		
-		int index = pixelProgram->getUniformIndex( IProgram::EUniform( IProgram::Sampler0 + i ) );
+		int index = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Sampler0 + i ) );
 		if( index == -1 )
 			continue;
 		
-		setUniform1i( IProgram::PIXEL_PROGRAM, index, i );
+		setUniform1i( IDriver::PixelProgram, index, i );
 	}
 }
 
@@ -894,18 +894,18 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
 
-					int cl = pixelProgram->getUniformIndex( IProgram::EUniform( IProgram::Constant0 + stage ) );
+					int cl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Constant0 + stage ) );
 					if( cl != -1 )
 					{
 						GLfloat glCol[ 4 ];
 						convColor( lmapFactor, glCol );
-						setUniform4f( IProgram::PIXEL_PROGRAM, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+						setUniform4f( IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 					}
 
-					int tl = pixelProgram->getUniformIndex( IProgram::EUniform( IProgram::Sampler0 + stage ) );
+					int tl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Sampler0 + stage ) );
 					if( tl != -1 )
 					{
-						setUniform1i( IProgram::PIXEL_PROGRAM, tl, stage );
+						setUniform1i( IDriver::PixelProgram, tl, stage );
 					}
 
 					activateTexEnvColor(stage, stdEnv);
@@ -943,10 +943,10 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				_DriverGLStates.activeTextureARB(stage);
 				_DriverGLStates.setTexGenMode(stage, 0);
 
-				int tl = pixelProgram->getUniformIndex( IProgram::EUniform( IProgram::Sampler0 + stage ) );
+				int tl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Sampler0 + stage ) );
 				if( tl != -1 )
 				{
-					setUniform1i( IProgram::PIXEL_PROGRAM, tl, stage );
+					setUniform1i( IDriver::PixelProgram, tl, stage );
 				}
 
 			}
@@ -1139,22 +1139,22 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		return;
 	}
 
-	int sl0 = pixelProgram->getUniformIndex( IProgram::Sampler0 );
+	int sl0 = currentProgram.pp->getUniformIndex( CProgramIndex::Sampler0 );
 	if( sl0 != -1 )
 	{
-		setUniform1i( IProgram::PIXEL_PROGRAM, sl0, 0 );
+		setUniform1i( IDriver::PixelProgram, sl0, 0 );
 	}
 
-	int sl1 = pixelProgram->getUniformIndex( IProgram::Sampler1 );
+	int sl1 = currentProgram.pp->getUniformIndex( CProgramIndex::Sampler1 );
 	if( sl1 != -1 )
 	{
-		setUniform1i( IProgram::PIXEL_PROGRAM, sl1, 1 );
+		setUniform1i( IDriver::PixelProgram, sl1, 1 );
 	}
 
-	int tml = pixelProgram->getUniformIndex( IProgram::TexMatrix0 );
+	int tml = currentProgram.vp->getUniformIndex( CProgramIndex::TexMatrix0 );
 	if( tml != -1 )
 	{
-		setUniformMatrix4fv( IProgram::PIXEL_PROGRAM, tml, 1, false, _UserTexMat[ 1 ].get() );
+		setUniform4x4f( IDriver::VertexProgram, tml, _UserTexMat[ 1 ] );
 	}
 
 	{

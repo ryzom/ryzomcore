@@ -320,11 +320,11 @@ CDriverGL3::CDriverGL3()
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
 
-	vertexProgram = NULL;
-	pixelProgram = NULL;
-
-	dynMatVP = NULL;
-	dynMatPP = NULL;
+	currentProgram.vp = NULL;
+	currentProgram.pp = NULL;
+	currentProgram.gp = NULL;
+	currentProgram.dynmatVP = NULL;
+	currentProgram.dynmatPP = NULL;
 
 	shaderGenerator = new CGLSLShaderGenerator();
 	usrShaderManager = new CUsrShaderManager();
@@ -341,16 +341,17 @@ CDriverGL3::~CDriverGL3()
 
 	release();
 
-	vertexProgram = NULL;
-	pixelProgram = NULL;
+	currentProgram.vp = NULL;
+	currentProgram.pp = NULL;
+	currentProgram.gp = NULL;
+	
+	if( currentProgram.dynmatVP != NULL )
+		delete currentProgram.dynmatVP;
+	currentProgram.dynmatVP = NULL;
 
-	if( dynMatVP != NULL )
-		delete dynMatVP;
-	dynMatVP = NULL;
-
-	if( dynMatPP != NULL )
-		delete dynMatPP;
-	dynMatPP = NULL;
+	if( currentProgram.dynmatPP != NULL )
+		delete currentProgram.dynmatPP;
+	currentProgram.dynmatPP = NULL;
 
 	delete shaderGenerator;
 	shaderGenerator = NULL;
@@ -1183,17 +1184,6 @@ uint32			CDriverGL3::getUsedTextureMemory() const
 	return memory;
 }
 
-
-// ***************************************************************************
-bool CDriverGL3::isWaterShaderSupported() const
-{
-	H_AUTO_OGL(CDriverGL3_isWaterShaderSupported);
-
-	if(ARBWaterShader[0] != 0) return true;
-
-	if ( !_Extensions.ATIFragmentShader ) return false;
-	return true;
-}
 
 // ***************************************************************************
 void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4])
@@ -2136,14 +2126,6 @@ CVertexBuffer::TVertexColorType CDriverGL3::getVertexColorFormat() const
 }
 
 // ***************************************************************************
-bool CDriverGL3::activeShader(CShader * /* shd */)
-{
-	H_AUTO_OGL(CDriverGL3_activeShader)
-
-	return false;
-}
-
-// ***************************************************************************
 void CDriverGL3::startBench (bool wantStandardDeviation, bool quick, bool reset)
 {
 	CHTimer::startBench (wantStandardDeviation, quick, reset);
@@ -2493,6 +2475,47 @@ void CDriverGL3::reloadUserShaders()
 	loader.setManager( usrShaderManager );
 	loader.loadShaders( "./shaders" );
 }
+
+CVertexProgramDrvInfosGL3::CVertexProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it ) :
+IProgramDrvInfos( drv, it )
+{
+	programId = 0;
+}
+
+CVertexProgramDrvInfosGL3::~CVertexProgramDrvInfosGL3()
+{
+	programId = 0;
+}
+
+uint CVertexProgramDrvInfosGL3::getUniformIndex( const char *name ) const
+{
+	int idx = nglGetUniformLocation( programId, name );	
+	if( idx == -1 )
+		return ~0;
+	else
+		return idx;
+}
+
+CPixelProgramDrvInfosGL3::CPixelProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it ) :
+IProgramDrvInfos( drv, it )
+{
+	programId = 0;
+}
+
+CPixelProgramDrvInfosGL3::~CPixelProgramDrvInfosGL3()
+{
+	programId = 0;
+}
+
+uint CPixelProgramDrvInfosGL3::getUniformIndex( const char *name ) const
+{
+	int idx = nglGetUniformLocation( programId, name );
+	if( idx == -1 )
+		return ~0;
+	else
+		return idx;
+}
+
 
 // ***************************************************************************
 void displayGLError(GLenum error)

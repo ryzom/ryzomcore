@@ -15,9 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "driver_opengl.h"
-#include "driver_glsl_program.h"
-#include "driver_glsl_vertex_program.h"
-#include "driver_glsl_pixel_program.h"
 #include "driver_glsl_shader_generator.h"
 #include "driver_opengl_vertex_buffer_hard.h"
 #include "nel/3d/dynamic_material.h"
@@ -38,13 +35,32 @@ namespace
 
 namespace NL3D
 {
-	bool CDriverGL3::compileVertexProgram( CGLSLVertexProgram *program )
+	bool CDriverGL3::supportVertexProgram(CVertexProgram::TProfile profile) const
 	{
-		// Already compiled
-		if( program->getProgramId() != 0 )
+		if( profile == IProgram::glsl330v )
 			return true;
+		else
+			return false;
+	}
 
-		const char *s = program->getSource().c_str();
+	bool CDriverGL3::compileVertexProgram( CVertexProgram *program )
+	{
+		if( program->m_DrvInfo != NULL )
+			return false;
+
+		IProgram::CSource *src = NULL;
+		for( int i = 0; i < program->getSourceNb(); i++ )
+		{
+			src = program->getSource( i );
+			if( src->Profile == IProgram::glsl330v )
+				break;
+			
+			src = NULL;
+		}
+		if( src == NULL )
+			return false;
+
+		const char *s = src->SourcePtr;
 		glGetError();
 		unsigned int id = nglCreateShaderProgramv( GL_VERTEX_SHADER, 1, &s );
 
@@ -66,19 +82,31 @@ namespace NL3D
 		if( error != GL_NO_ERROR )
 			return false;
 
-		program->setProgramId( id );
+		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert( _GPUPrgDrvInfos.end(),(NL3D::IProgramDrvInfos*)NULL );
+		CVertexProgramDrvInfosGL3 *drvInfo = new CVertexProgramDrvInfosGL3( this, it );
+
+		program->m_DrvInfo = drvInfo;
+
+		drvInfo->setProgramId( id );
+
+		program->buildInfo( src );
 
 		return true;
 	}
 
-	bool CDriverGL3::activeVertexProgram( CGLSLVertexProgram *program )
+	bool CDriverGL3::activeVertexProgram( CVertexProgram *program )
 	{
-		if( program->getProgramId() == 0 )		
+		if( program == NULL )
+			return true;
+
+		IProgramDrvInfos *di = program->m_DrvInfo;
+		CVertexProgramDrvInfosGL3 *drvInfo = dynamic_cast< CVertexProgramDrvInfosGL3* >( di );
+		if( drvInfo == NULL )
 			return false;
 
 		glGetError();
 
-		nglUseProgramStages( ppoId, GL_VERTEX_SHADER_BIT, program->getProgramId() );
+		nglUseProgramStages( ppoId, GL_VERTEX_SHADER_BIT, drvInfo->getProgramId() );
 
 		GLenum error = glGetError();
 		if( error != GL_NO_ERROR )
@@ -87,18 +115,39 @@ namespace NL3D
 			return false;
 		}
 
-		vertexProgram = program;
+		currentProgram.vp = program;
 
 		return true;
 	}
 
-	bool CDriverGL3::compilePixelProgram( CGLSLPixelProgram *program )
+	bool CDriverGL3::supportPixelProgram( IProgram::TProfile profile ) const
 	{
-		// Already compiled
-		if( program->getProgramId() != 0 )
+		if( profile == IProgram::glsl330f )
 			return true;
+		else
+			return false;
+	}
 
-		const char *s = program->getSource().c_str();
+	bool CDriverGL3::compilePixelProgram( CPixelProgram *program )
+	{
+		if( program->m_DrvInfo != NULL )
+			return false;
+
+		IProgram::CSource *src = NULL;
+
+		for( int i = 0; i < program->getSourceNb(); i++ )
+		{
+			src = program->getSource( i );
+			if( src->Profile == IProgram::glsl330f )
+				break;
+
+			src = NULL;
+		}
+
+		if( src == NULL )
+			return false;
+
+		const char *s = src->SourcePtr;
 		glGetError();
 		unsigned int id = nglCreateShaderProgramv( GL_FRAGMENT_SHADER, 1, &s );
 		if( id == 0 )
@@ -118,19 +167,32 @@ namespace NL3D
 		if( error != GL_NO_ERROR )
 			return false;
 
-		program->setProgramId( id );
+		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert( _GPUPrgDrvInfos.end(), ( NL3D::IProgramDrvInfos* )NULL );
+		CPixelProgramDrvInfosGL3 *drvInfo = new CPixelProgramDrvInfosGL3( this, it );
+		drvInfo->setProgramId( id );
+		program->m_DrvInfo = drvInfo;
+
+		program->buildInfo( src );
 
 		return true;
 	}
 
-	bool CDriverGL3::activePixelProgram( CGLSLPixelProgram *program )
+	bool CDriverGL3::activePixelProgram( CPixelProgram *program )
 	{
-		if( program->getProgramId() == 0 )
+		if( program == NULL )
+			return true;
+
+		if( program->m_DrvInfo == NULL )
+			return false;
+		
+		IProgramDrvInfos *di = program->m_DrvInfo;
+		CPixelProgramDrvInfosGL3 *drvInfo = dynamic_cast< CPixelProgramDrvInfosGL3* >( di );
+		if( drvInfo == NULL )
 			return false;
 
 		glGetError();
 
-		nglUseProgramStages( ppoId, GL_FRAGMENT_SHADER_BIT, program->getProgramId() );
+		nglUseProgramStages( ppoId, GL_FRAGMENT_SHADER_BIT, drvInfo->getProgramId() );
 
 		GLenum error = glGetError();
 		if( error != GL_NO_ERROR )
@@ -138,228 +200,237 @@ namespace NL3D
 			return false;
 		}
 
-		pixelProgram = program;
+		currentProgram.pp = program;
 
 		return true;
 	}
 
-	IProgram* CDriverGL3::createVertexProgram() const
-	{
-		return new CGLSLVertexProgram();
-	}
 
-	IProgram* CDriverGL3::createPixelProgram() const
+	uint32 CDriverGL3::getProgramId( TProgram program ) const
 	{
-		return new CGLSLPixelProgram();
-	}
+		uint32 id = 0;
 
-	int CDriverGL3::getUniformLocation( uint32 programType, const char *name )
-	{
-		switch( programType )
+		switch( program )
 		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			return nglGetUniformLocation( vertexProgram->getProgramId(), name );
+		case IDriver::VertexProgram:
+			{
+				if( currentProgram.vp != NULL )
+				{
+					IProgramDrvInfos *di = currentProgram.vp->m_DrvInfo;
+					CVertexProgramDrvInfosGL3 *drvInfo = dynamic_cast< CVertexProgramDrvInfosGL3* >( di );
+					if( drvInfo != NULL )
+						id = drvInfo->getProgramId();
+				}
+			}
 			break;
 
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			return nglGetUniformLocation( pixelProgram->getProgramId(), name );
+		case IDriver::PixelProgram:
+			if( currentProgram.pp != NULL )
+			{
+				IProgramDrvInfos *di = currentProgram.pp->m_DrvInfo;
+				CPixelProgramDrvInfosGL3 *drvInfo = dynamic_cast< CPixelProgramDrvInfosGL3* >( di );
+				if( drvInfo != NULL )
+					id = drvInfo->getProgramId();
+			}
+			break;
+
+		case IDriver::GeometryProgram:
 			break;
 		}
 
-		return -1;
+		return id;
 	}
 
-
-	void CDriverGL3::setUniform1f( uint32 programType, uint index, float f )
+	IProgram* CDriverGL3::getProgram( TProgram program ) const
 	{
-		switch( programType )
+		IProgram *p = NULL;
+
+		switch( program )
 		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniform1f( vertexProgram->getProgramId(), index, f );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniform1f( pixelProgram->getProgramId(), index, f );
+		case IDriver::VertexProgram:
+			p = currentProgram.vp;
 			break;
 
-		default:
-			nlassert( false );
+		case IDriver::PixelProgram:
+			p = currentProgram.pp;
+			break;
+
+		case IDriver::GeometryProgram:
+			p = currentProgram.gp;
 			break;
 		}
+
+		return p;
 	}
 
-	void CDriverGL3::setUniform3f( uint32 programType, uint index, float f1, float f2, float f3 )
+	int CDriverGL3::getUniformLocation( TProgram program, const char *name )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniform3f( vertexProgram->getProgramId(), index, f1, f2, f3 );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniform3f( pixelProgram->getProgramId(), index, f1, f2, f3 );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		return nglGetUniformLocation( id, name );
 	}
 
-	void CDriverGL3::setUniform4f( uint32 programType, uint index, float f1, float f2, float f3, float f4 )
+	void CDriverGL3::setUniform1f( TProgram program, uint index, float f0 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniform4f( vertexProgram->getProgramId(), index, f1, f2, f3, f4 );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniform4f( pixelProgram->getProgramId(), index, f1, f2, f3, f4 );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		nglProgramUniform1f( id, index, f0 );
 	}
 
-	void CDriverGL3::setUniform1i( uint32 programType, uint index, int i )
+	void CDriverGL3::setUniform2f( TProgram program, uint index, float f0, float f1 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniform1i( vertexProgram->getProgramId(), index, i );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniform1i( pixelProgram->getProgramId(), index, i );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		nglProgramUniform2f( id, index, f0, f1 );
 	}
 
-	void CDriverGL3::setUniform4i( uint32 programType, uint index, int i1, int i2, int i3, int i4 )
+	void CDriverGL3::setUniform3f( TProgram program, uint index, float f0, float f1, float f2 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniform4i( vertexProgram->getProgramId(), index, i1, i2, i3, i4 );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniform4i( pixelProgram->getProgramId(), index, i1, i2, i3, i4 );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		nglProgramUniform3f( id, index, f0, f1, f2 );
 	}
 
-	void CDriverGL3::setUniform1u( uint32 programType, uint index, uint u )
+	void CDriverGL3::setUniform4f( TProgram program, uint index, float f0, float f1, float f2, float f3 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniform1ui( vertexProgram->getProgramId(), index, u );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniform1ui( pixelProgram->getProgramId(), index, u );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		nglProgramUniform4f( id, index, f0, f1, f2, f3 );
 	}
 
-	void CDriverGL3::setUniform4u( uint32 programType, uint index, uint u1, uint u2, uint u3, uint u4 )
+	void CDriverGL3::setUniform1i( TProgram program, uint index, sint32 i0 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniform4ui( vertexProgram->getProgramId(), index, u1, u2, u3, u4 );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniform4ui( pixelProgram->getProgramId(), index, u1, u2, u3, u4 );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		nglProgramUniform1i( id, index, i0 );
 	}
 
-	void CDriverGL3::setUniformMatrix2fv( uint32 programType, uint index, uint count, bool transpose, const float *values )
+	void CDriverGL3::setUniform2i( TProgram program, uint index, sint32 i0, sint32 i1 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniformMatrix2fv( vertexProgram->getProgramId(), index, count, transpose, values );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniformMatrix2fv( pixelProgram->getProgramId(), index, count, transpose, values );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		nglProgramUniform2i( id, index, i0, i1 );
 	}
 
-	void CDriverGL3::setUniformMatrix3fv( uint32 programType, uint index, uint count, bool transpose, const float *values )
+	void CDriverGL3::setUniform3i( TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniformMatrix3fv( vertexProgram->getProgramId(), index, count, transpose, values );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniformMatrix3fv( pixelProgram->getProgramId(), index, count, transpose, values );
-			break;
-
-		default:
-			nlassert( false );
-			break;
-		}
+		uint32 id = getProgramId( program );
+		nglProgramUniform3i( id, index, i0, i1, i2 );
 	}
 
-	void CDriverGL3::setUniformMatrix4fv( uint32 programType, uint index, uint count, bool transpose, const float *values )
+	void CDriverGL3::setUniform4i( TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3 )
 	{
-		switch( programType )
-		{
-		case IProgram::VERTEX_PROGRAM:
-			nlassert( vertexProgram != NULL );
-			nglProgramUniformMatrix4fv( vertexProgram->getProgramId(), index, count, transpose, values );
-			break;
-		case IProgram::PIXEL_PROGRAM:
-			nlassert( pixelProgram != NULL );
-			nglProgramUniformMatrix4fv( pixelProgram->getProgramId(), index, count, transpose, values );
-			break;
+		uint32 id = getProgramId( program );
+		nglProgramUniform4i( id, index, i0, i1, i2, i3 );
+	}
 
-		default:
-			nlassert( false );
+	void CDriverGL3::setUniform1ui( TProgram program, uint index, uint32 ui0 )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform1ui( id, index, ui0 );
+	}
+
+	void CDriverGL3::setUniform2ui( TProgram program, uint index, uint32 ui0, uint32 ui1 )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform2ui( id, index, ui0, ui1 );
+	}
+
+	void CDriverGL3::setUniform3ui( TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2 )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform3ui( id, index, ui0, ui1, ui2 );
+	}
+
+	void CDriverGL3::setUniform4ui( TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3 )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform4ui( id, index, ui0, ui1, ui2, ui3 );
+	}
+
+	void CDriverGL3::setUniform3f( TProgram program, uint index, const CVector &v )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform3f( id, index, v.x, v.y, v.z );
+	}
+
+	void CDriverGL3::setUniform4f( TProgram program, uint index, const CVector &v, float f3 )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform4f( id, index, v.x, v.y, v.z, f3 );
+	}
+
+	void CDriverGL3::setUniform4f( TProgram program, uint index, const NLMISC::CRGBAF& rgba )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform4f( id, index, rgba.R, rgba.G, rgba.B, rgba.A );
+	}
+
+	void CDriverGL3::setUniform4x4f( TProgram program, uint index, const CMatrix &m )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniformMatrix4fv( id, index, 1, false, m.get() );
+	}
+
+	void CDriverGL3::setUniform4x4f( TProgram program, uint index, const float *src )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniformMatrix4fv( id, index, 1, false, src );
+	}
+
+	void CDriverGL3::setUniform4fv( TProgram program, uint index, size_t num, const float *src )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform4fv( id, index, num, src );
+	}
+
+	void CDriverGL3::setUniform4iv( TProgram program, uint index, size_t num, const sint32 *src )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform4iv( id, index, num, src );
+	}
+
+	void CDriverGL3::setUniform4uiv( TProgram program, uint index, size_t num, const uint32 *src )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniform4uiv( id, index, num, src );
+	}
+
+	void CDriverGL3::setUniformMatrix( TProgram program, uint index, TMatrix matrix, TTransform transform )
+	{
+		uint32 id = getProgramId( program );
+		CMatrix mat;
+		
+
+		switch( matrix )
+		{
+		case IDriver::ModelView:
+			mat = _ModelViewMatrix;
+			break;
+		case IDriver::Projection:
+			mat = _GLProjMat;
+			break;
+		case IDriver::ModelViewProjection:
+			mat = _ModelViewMatrix * _GLProjMat;
 			break;
 		}
+
+		switch( transform )
+		{
+		case IDriver::Inverse:
+			mat.invert();
+			break;
+		case IDriver::Transpose:
+			mat.transpose();
+			break;
+		case IDriver::InverseTranspose:
+			mat.transpose();
+			mat.invert();
+			break;
+		}
+
+
+		nglProgramUniformMatrix4fv( id, index, 1, false, mat.get() );
+	}
+
+	void CDriverGL3::setUniformFog( TProgram program, uint index )
+	{
+		uint32 id = getProgramId( program );
+		const float *v = _ModelViewMatrix.get();
+		nglProgramUniform4f( id, index, -v[ 2 ], -v[ 6 ], -v[ 10 ], -v[ 4 ] );
 	}
 
 	void CDriverGL3::generateShaderDesc( CShaderDesc &desc, CMaterial &mat )
@@ -428,8 +499,8 @@ namespace NL3D
 		if( mat.getDynMat() != NULL )
 			return true;
 		
-		CGLSLVertexProgram *vp = NULL;
-		CGLSLPixelProgram *pp = NULL;
+		CVertexProgram *vp = NULL;
+		CPixelProgram *pp = NULL;
 		SShaderPair sp;
 
 		CShaderDesc desc;
@@ -458,8 +529,15 @@ namespace NL3D
 			shaderGenerator->generateVS( vs );
 			shaderGenerator->generatePS( ps );
 
-			vp = new CGLSLVertexProgram();
-			vp->setSource( vs.c_str() );
+			vp = new CVertexProgram();
+			{
+				IProgram::CSource *src = new IProgram::CSource();
+				src->Profile = IProgram::glsl330v;
+				src->DisplayName = "";
+				src->setSource( vs );
+				vp->addSource( src );
+			}
+
 			if( !compileVertexProgram( vp ) )
 			{
 				delete vp;
@@ -467,8 +545,15 @@ namespace NL3D
 				return false;
 			}
 		
-			pp = new CGLSLPixelProgram();
-			pp->setSource( ps.c_str() );
+			pp = new CPixelProgram();
+			{
+				IProgram::CSource *src = new IProgram::CSource();
+				src->Profile = IProgram::glsl330f;
+				src->DisplayName = "";
+				src->setSource( ps );
+				pp->addSource( src );
+			}
+			
 			if( !compilePixelProgram( pp ) )
 			{
 				delete vp;
@@ -496,8 +581,6 @@ namespace NL3D
 				return false;
 			}
 			
-			vp->cacheUniforms();
-			pp->cacheUniforms();
 			sp.vp = vp;
 			sp.pp = pp;
 			desc.setShaders( sp );
@@ -521,13 +604,23 @@ namespace NL3D
 		if( !usrShaderManager->getShader( shaderRef, &prg ) )
 			return false;
 		
-		CGLSLVertexProgram *vp = new CGLSLVertexProgram();
-		CGLSLPixelProgram *pp = new CGLSLPixelProgram();
+		CVertexProgram *vp = new CVertexProgram();
+		CPixelProgram *pp = new CPixelProgram();
 
 		std::string shaderSource;
 		std::string log;
+		std::string name;
 		prg.getVP( shaderSource );
-		vp->setSource( shaderSource.c_str() );
+		prg.getName( name );
+		
+		{
+			IProgram::CSource *src = new IProgram::CSource();
+			src->Profile = IProgram::glsl330v;			
+			src->DisplayName = name;
+			src->setSource( shaderSource.c_str() );
+			vp->addSource( src );
+		}
+		
 		if( !compileVertexProgram( vp ) )
 		{
 			delete vp;
@@ -536,7 +629,14 @@ namespace NL3D
 		}
 
 		prg.getFP( shaderSource );
-		pp->setSource( shaderSource.c_str() );
+		{
+			IProgram::CSource *src = new IProgram::CSource();
+			src->Profile = IProgram::glsl330f;			
+			src->DisplayName = name;
+			src->setSource( shaderSource.c_str() );
+			pp->addSource( src );
+		}
+		
 		if( !compilePixelProgram( pp ) )
 		{
 			delete vp;
@@ -558,16 +658,23 @@ namespace NL3D
 			return false;
 		}
 
-		if( dynMatVP != NULL )
-			delete dynMatVP;
-		dynMatVP = vp;
+		if( currentProgram.dynmatVP != NULL )
+		{
+			ItGPUPrgDrvInfoPtrList itr = std::find( _GPUPrgDrvInfos.begin(), _GPUPrgDrvInfos.end(), currentProgram.dynmatVP->m_DrvInfo );
+			if( itr != _GPUPrgDrvInfos.end() )
+				_GPUPrgDrvInfos.erase( itr );
+			delete currentProgram.dynmatVP;
+		}
+		currentProgram.dynmatVP = vp;
 
-		if( dynMatPP != NULL )
-			delete dynMatPP;
-		dynMatPP = pp;
-
-		vp->cacheUniforms();
-		pp->cacheUniforms();
+		if( currentProgram.dynmatPP != NULL )
+		{
+			ItGPUPrgDrvInfoPtrList itr = std::find( _GPUPrgDrvInfos.begin(), _GPUPrgDrvInfos.end(), currentProgram.dynmatPP->m_DrvInfo );
+			if( itr != _GPUPrgDrvInfos.end() )
+				_GPUPrgDrvInfos.erase( itr );
+			delete currentProgram.dynmatPP;
+		}
+		currentProgram.dynmatPP = pp;
 
 		return true;
 	}
@@ -575,27 +682,26 @@ namespace NL3D
 
 	void CDriverGL3::setupUniforms()
 	{
-		setupUniforms( vertexProgram );
-		setupUniforms( pixelProgram );
+		setupUniforms( IDriver::VertexProgram);
+		setupUniforms( IDriver::PixelProgram );
 	}
 
-	void CDriverGL3::setupUniforms( CGLSLProgram *program )
+	void CDriverGL3::setupUniforms( TProgram program )
 	{
 		CMaterial &mat = *_CurrentMaterial;
-		CGLSLProgram *currentProgram = program;
-		uint32 type = program->getType();
+		IProgram *p = getProgram( program );
 
-		int mvpIndex = currentProgram->getUniformIndex( IProgram::MVPMatrix );
+		int mvpIndex = p->getUniformIndex( CProgramIndex::ModelViewProjection );
 		if( mvpIndex != -1 )
 		{
-			CMatrix mat = _GLProjMat * _ModelViewMatrix;
-			setUniformMatrix4fv( type, mvpIndex, 1, false, mat.get() );
+			CMatrix mvp = _GLProjMat * _ModelViewMatrix;
+			setUniform4x4f( program, mvpIndex, mvp );
 		}
 
-		int mvIndex = currentProgram->getUniformIndex( IProgram::MVMatrix );
+		int mvIndex = p->getUniformIndex( CProgramIndex::ModelView );
 		if( mvIndex != -1 )
 		{
-			setUniformMatrix4fv( type, mvIndex, 1, false, _ModelViewMatrix.get() );
+			setUniform4x4f( program, mvIndex, _ModelViewMatrix );
 		}
 
 		/*
@@ -605,19 +711,19 @@ namespace NL3D
 		}
 		*/
 
-		int fogStartIdx = currentProgram->getUniformIndex( IProgram::FogStart );
+		int fogStartIdx = p->getUniformIndex( CProgramIndex::FogStart );
 		if( fogStartIdx != -1 )
 		{
-			setUniform1f( type, fogStartIdx, getFogStart() );
+			setUniform1f( program, fogStartIdx, getFogStart() );
 		}
 
-		int fogEndIdx = currentProgram->getUniformIndex( IProgram::FogEnd );
+		int fogEndIdx = p->getUniformIndex( CProgramIndex::FogEnd );
 		if( fogEndIdx != -1 )
 		{
-			setUniform1f( type, fogEndIdx, getFogEnd() );
+			setUniform1f( program, fogEndIdx, getFogEnd() );
 		}
 
-		int fogColorIdx = currentProgram->getUniformIndex( IProgram::FogColor );
+		int fogColorIdx = p->getUniformIndex( CProgramIndex::FogColor );
 		if( fogColorIdx != -1 )
 		{
 			GLfloat glCol[ 4 ];
@@ -626,10 +732,10 @@ namespace NL3D
 			glCol[ 1 ] = col.G / 255.0f;
 			glCol[ 2 ] = col.B / 255.0f;
 			glCol[ 3 ] = col.A / 255.0f;
-			setUniform4f( type, fogColorIdx, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+			setUniform4f( program, fogColorIdx, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 		}
 
-		int colorIndex = currentProgram->getUniformIndex( IProgram::Color );
+		int colorIndex = p->getUniformIndex( CProgramIndex::Color );
 		if( colorIndex != -1 )
 		{
 			GLfloat glCol[ 4 ];
@@ -639,10 +745,10 @@ namespace NL3D
 			glCol[ 2 ] = col.B / 255.0f;
 			glCol[ 3 ] = col.A / 255.0f;
 
-			setUniform4f( type, colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+			setUniform4f( program, colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 		}
 
-		int diffuseIndex = currentProgram->getUniformIndex( IProgram::Diffuse );
+		int diffuseIndex = p->getUniformIndex( CProgramIndex::DiffuseColor );
 		if( diffuseIndex != -1 )
 		{
 			GLfloat glCol[ 4 ];
@@ -652,7 +758,7 @@ namespace NL3D
 			glCol[ 2 ] = col.B / 255.0f;
 			glCol[ 3 ] = col.A / 255.0f;
 
-			setUniform4f( type, diffuseIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+			setUniform4f( program, diffuseIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 		}
 
 
@@ -667,21 +773,26 @@ namespace NL3D
 				continue;
 			//////////////////////////////////////////////////////////////////////
 			
-			int ld = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0Dir + i ) );
-			if( ld != -1 )
+			if( _LightMode[ i ] == CLight::DirectionalLight )
 			{
-				CVector v = _UserLight[ i ].getDirection();
-				setUniform3f( type, ld, v.x, v.y, v.z );
+				int ld = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0DirOrPos + i ) );
+				if( ld != -1 )
+				{
+					CVector v = _UserLight[ i ].getDirection();
+					setUniform3f( program, ld, v.x, v.y, v.z );
+				}
+			}
+			else
+			{
+				int lp = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0DirOrPos + i ) );
+				if( lp != -1 )
+				{
+					CVector v = _UserLight[ i ].getPosition();
+					setUniform3f( program, lp, v.x, v.y, v.z );
+				}
 			}
 
-			int lp = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0Pos + i ) );
-			if( lp != -1 )
-			{
-				CVector v = _UserLight[ i ].getPosition();
-				setUniform3f( type, lp, v.x, v.y, v.z );
-			}
-
-			int ldc = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0ColDiff + i ) );
+			int ldc = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0ColDiff + i ) );
 			if( ldc != -1 )
 			{
 				GLfloat glCol[ 4 ];
@@ -690,10 +801,10 @@ namespace NL3D
 				glCol[ 1 ] = col.G / 255.0f;
 				glCol[ 2 ] = col.B / 255.0f;
 				glCol[ 3 ] = col.A / 255.0f;
-				setUniform4f( type, ldc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+				setUniform4f( program, ldc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
-			int lsc = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0ColSpec + i ) );
+			int lsc = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0ColSpec + i ) );
 			if( lsc != -1 )
 			{
 				GLfloat glCol[ 4 ];
@@ -702,16 +813,16 @@ namespace NL3D
 				glCol[ 1 ] = col.G / 255.0f;
 				glCol[ 2 ] = col.B / 255.0f;
 				glCol[ 3 ] = col.A / 255.0f;
-				setUniform4f( type, lsc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+				setUniform4f( program, lsc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
-			int shl = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0Shininess + i ) );
+			int shl = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0Shininess + i ) );
 			if( shl != -1 )
 			{
-				setUniform1f( type, shl, mat.getShininess() );
+				setUniform1f( program, shl, mat.getShininess() );
 			}
 
-			int lac = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0ColAmb + i ) );
+			int lac = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0ColAmb + i ) );
 			if( lac != -1 )
 			{
 				GLfloat glCol[ 4 ];
@@ -725,25 +836,25 @@ namespace NL3D
 				glCol[ 1 ] = col.G / 255.0f;
 				glCol[ 2 ] = col.B / 255.0f;
 				glCol[ 3 ] = col.A / 255.0f;
-				setUniform4f( type, lac, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+				setUniform4f( program, lac, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 			}
 
-			int lca = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0ConstAttn + i ) );
+			int lca = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0ConstAttn + i ) );
 			if( lca != -1 )
 			{
-				setUniform1f( type, lca, _UserLight[ i ].getConstantAttenuation() );
+				setUniform1f( program, lca, _UserLight[ i ].getConstantAttenuation() );
 			}
 
-			int lla = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0LinAttn + i ) );
+			int lla = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0LinAttn + i ) );
 			if( lla != -1 )
 			{
-				setUniform1f( type, lla, _UserLight[ i ].getLinearAttenuation() );
+				setUniform1f( program, lla, _UserLight[ i ].getLinearAttenuation() );
 			}
 
-			int lqa = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Light0QuadAttn + i ) );
+			int lqa = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0QuadAttn + i ) );
 			if( lqa != -1 )
 			{
-				setUniform1f( type, lqa, _UserLight[ i ].getQuadraticAttenuation() );
+				setUniform1f( program, lqa, _UserLight[ i ].getQuadraticAttenuation() );
 			}
 		}
 
@@ -754,7 +865,7 @@ namespace NL3D
 		
 			for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
 			{
-				int cl = currentProgram->getUniformIndex( IProgram::EUniform( IProgram::Constant0 + i ) );
+				int cl = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Constant0 + i ) );
 				if( cl != -1 )
 				{
 					CRGBA col = mat._TexEnvs[ i ].ConstantColor;
@@ -764,7 +875,7 @@ namespace NL3D
 					glCol[ 2 ] = col.B / 255.0f;
 					glCol[ 3 ] = col.A / 255.0f;
 
-					setUniform4f( type, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+					setUniform4f( program, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
 				}
 			}
 

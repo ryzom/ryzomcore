@@ -110,7 +110,7 @@ bool CDBGroupListSheet::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	// value
 	prop = xmlGetProp (cur, (xmlChar*)"value");
-	if ( prop )
+	if (prop)
 	{
 		// get a branch in the database.
 		CCDBNodeBranch *branch= NLGUI::CDBManager::getInstance()->getDbBranch(prop);

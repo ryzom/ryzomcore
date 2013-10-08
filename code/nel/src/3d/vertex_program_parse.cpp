@@ -885,7 +885,7 @@ bool CVPParser::parseInstruction(CVPInstruction &instr, std::string &errorOutput
 	}
 
 	// it is not allowed to write to an adress register except for ARL
-	if (instrStr != 'ARL ')
+	if (instrStr != NELID("ARL"))
 	{
 		if (instr.Dest.Type == CVPOperand::AddressRegister)
 		{

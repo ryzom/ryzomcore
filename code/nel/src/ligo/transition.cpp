@@ -199,7 +199,7 @@ void CTransition::serial (NLMISC::IStream &s)
 	s.xmlPush ("LIGO_TRANSITION");
 
 		// Serial the header
-		s.serialCheck ((uint32)'STGL');
+		s.serialCheck (NELID("STGL"));
 
 		// Serial the version
 		/*sint ver =*/ s.serialVersion (0);

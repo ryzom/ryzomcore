@@ -64,7 +64,7 @@ bool CPositionState::getPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 void CPositionState::serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode)
 {
-	f.serialCheck((uint32) 'NL__');
+	f.serialCheck(NELID("NL__"));
 	f.serialVersion(0);
 	std::string dbPath;
 	if (f.isReading())
@@ -85,18 +85,18 @@ void CPositionState::serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode)
 		}
 		f.serial(dbPath);
 	}
-	f.serialCheck((uint32) 'END_');
+	f.serialCheck(NELID("END_"));
 }
 
 
 // ***************************************************************************
 void CUIDEntityPositionState::serial(NLMISC::IStream &f)
 {
-	f.serialCheck((uint32) 'UIDE');
+	f.serialCheck(NELID("UIDE"));
 	f.serialVersion(0);
 	serialNodeLeaf(f, _DBPos);
 	serialNodeLeaf(f, _Uid);
-	f.serialCheck((uint32) '_END');
+	f.serialCheck(NELID("_END"));
 }
 
 // ***************************************************************************
@@ -241,11 +241,11 @@ bool		CAnimalPositionState::getPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 void CAnimalPositionState::serial(NLMISC::IStream &f)
 {
-	f.serialCheck((uint32) 'APS_');
+	f.serialCheck(NELID("APS_"));
 	f.serialVersion(0);
 	CUIDEntityPositionState::serial(f);
 	serialNodeLeaf(f, _Status);
-	f.serialCheck((uint32) 'END_');
+	f.serialCheck(NELID("END_"));
 }
 
 
@@ -257,7 +257,7 @@ void CAnimalPositionState::serial(NLMISC::IStream &f)
 // ***************************************************************************
 CEntityCL *CNamedEntityPositionState::getEntity()
 {
-	if (!dbOk()) return false;
+	if (!dbOk()) return NULL;
 	return EntitiesMngr.getEntityByName(_Name->getValue32());
 }
 
@@ -299,11 +299,11 @@ bool		 CDialogEntityPositionState::getDbPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 void CNamedEntityPositionState::serial(NLMISC::IStream &f)
 {
-	f.serialCheck((uint32) 'NEPS');
+	f.serialCheck(NELID("NEPS"));
 	f.serialVersion(0);
 	serialNodeLeaf(f, _Name);
 	serialNodeLeaf(f, _X);
 	serialNodeLeaf(f, _Y);
-	f.serialCheck((uint32) 'END_');
+	f.serialCheck(NELID("END_"));
 }
 

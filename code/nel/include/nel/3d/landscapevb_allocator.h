@@ -21,6 +21,7 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/3d/tessellation.h"
 #include "nel/3d/vertex_buffer.h"
+#include "nel/3d/vertex_program.h"
 
 
 namespace NL3D
@@ -41,6 +42,7 @@ class	CVertexProgram;
 #define	NL3D_LANDSCAPE_VPPOS_DELTAPOS		(CVertexBuffer::TexCoord3)
 #define	NL3D_LANDSCAPE_VPPOS_ALPHAINFO		(CVertexBuffer::TexCoord4)
 
+class CVertexProgramLandscape;
 
 // ***************************************************************************
 /**
@@ -107,6 +109,8 @@ public:
 	 * Give a vertexProgram Id to activate. Always 0, but 1 For tile Lightmap Pass.
 	 */
 	void			activate(uint vpId);
+	void			activateVP(uint vpId);
+	inline CVertexProgramLandscape *getVP(uint vpId) const { return _VertexProgram[vpId]; }
 	// @}
 
 
@@ -151,13 +155,33 @@ private:
 
 	/// \name Vertex Program mgt .
 	// @{
+public:
 	enum	{MaxVertexProgram= 2,};
 	// Vertex Program , NULL if not enabled.
-	CVertexProgram		*_VertexProgram[MaxVertexProgram];
+private:
+	NLMISC::CSmartPtr<CVertexProgramLandscape> _VertexProgram[MaxVertexProgram];
 	void				deleteVertexProgram();
 	void				setupVBFormatAndVertexProgram(bool withVertexProgram);
 	// @}
 
+};
+
+class CVertexProgramLandscape : public CVertexProgram
+{
+public:
+	struct CIdx
+	{
+		uint ProgramConstants0;
+		uint RefineCenter;
+		uint TileDist;
+		uint PZBModelPosition;
+	};
+	CVertexProgramLandscape(CLandscapeVBAllocator::TType type, bool lightMap = false);
+	virtual ~CVertexProgramLandscape() { }
+	virtual void buildInfo();
+public:
+	const CIdx &idx() const { return m_Idx; }
+	CIdx m_Idx;
 };
 
 

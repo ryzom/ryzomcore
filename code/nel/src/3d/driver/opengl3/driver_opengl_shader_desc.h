@@ -24,8 +24,8 @@
 
 namespace NL3D
 {
-	class CGLSLVertexProgram;
-	class CGLSLPixelProgram;
+	class CVertexProgram;
+	class CPixelProgram;
 
 	struct SShaderPair
 	{
@@ -48,8 +48,8 @@ namespace NL3D
 				return false;
 		}
 
-		CGLSLVertexProgram *vp;
-		CGLSLPixelProgram  *pp;
+		CVertexProgram *vp;
+		CPixelProgram  *pp;
 	};
 
 	class CShaderDesc

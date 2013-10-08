@@ -49,7 +49,6 @@
 
 #include "nel/3d/driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/ptr_set.h"
 #include "nel/3d/texture_cube.h"
@@ -204,7 +203,7 @@ public:
 
 	// Verex buffer hard ?
 	IVertexBufferHardGL		*_VBHard;
-	class CDriverGL3			*_DriverGL;
+	CDriverGL3			*_DriverGL;
 
 	// From IVBDrvInfos
 	virtual ~CVBDrvInfosGL3();
@@ -280,9 +279,25 @@ public:
 class CGLSLShaderGenerator;
 class CUsrShaderManager;
 
-class CGLSLProgram;
-class CGLSLVertexProgram;
-class CGLSLPixelProgram;
+struct SProgram
+{
+	CVertexProgram    *vp;
+	CPixelProgram     *pp;
+	CGeometryProgram  *gp;
+
+	CVertexProgram    *dynmatVP;
+	CPixelProgram     *dynmatPP;
+
+	SProgram()
+	{
+		vp = NULL;
+		pp = NULL;
+		gp = NULL;
+		dynmatVP = NULL;
+		dynmatPP = NULL;
+	}
+};
+
 
 // ***************************************************************************
 class CDriverGL3 : public IDriver
@@ -300,9 +315,10 @@ public:
 	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
 
 	virtual void			disableHardwareVertexProgram(){}
+	virtual void			disableHardwarePixelProgram(){}
 	virtual void			disableHardwareVertexArrayAGP(){}
-	virtual void			disableHardwareTextureShader(){};
-
+	virtual void			disableHardwareTextureShader(){}
+	
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
 	virtual bool			setMode(const GfxMode& mode);
 	virtual bool			getModes(std::vector<GfxMode> &modes);
@@ -384,7 +400,7 @@ public:
 	bool					setupProgram(CMaterial& mat);
 	bool					setupDynMatProgram(CMaterial& mat, uint pass);
 	void					setupUniforms();
-	void					setupUniforms( CGLSLProgram *program );
+	void					setupUniforms( TProgram program );
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -401,8 +417,6 @@ public:
 	virtual void			setupModelMatrix(const CMatrix& mtx);
 
 	virtual CMatrix			getViewMatrix() const;
-
-	virtual bool			activeShader(CShader *shd);
 
 	virtual	void			forceNormalize(bool normalize)
 	{
@@ -561,6 +575,7 @@ public:
 
 	virtual bool			setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height,
 												uint32 mipmapLevel, uint32 cubeFace);
+	virtual ITexture*		getRenderTarget() const{ return _TextureTarget; }
 
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y,
 													uint32 width, uint32 height, uint32 mipmapLevel);
@@ -599,9 +614,9 @@ public:
 	// @{
 	virtual bool			supportTextureShaders() const{ return false; };
 
-	virtual bool			isWaterShaderSupported() const;
+	virtual bool			supportWaterShader() const{ return true; }
 
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const{ return false; };
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const{ return false; };
 
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
 	// @}
@@ -1219,43 +1234,59 @@ private:
 
 	// @}
 
-	/// \name Vertex program interface
-	// @{
+	public:
 
-	bool			isVertexProgramSupported () const{ return true; }
-	bool			isVertexProgramEmulated () const{ return false; }
-	bool			activeVertexProgram (CVertexProgram *program){ return true; };
+	bool			isVertexProgramSupported() const{ return true; }
 
-	bool			compileVertexProgram( CGLSLVertexProgram *program );
-	bool			activeVertexProgram( CGLSLVertexProgram *program );
+	bool			isVertexProgramEmulated() const{ return false; }
+	
+	bool			supportVertexProgram(CVertexProgram::TProfile profile) const;
 
-	bool			compilePixelProgram( CGLSLPixelProgram *program );
-	bool			activePixelProgram( CGLSLPixelProgram *program );
+	bool			compileVertexProgram(CVertexProgram *program);
 
-	IProgram*		createVertexProgram() const;
-	IProgram*		createPixelProgram() const;
+	bool			activeVertexProgram(CVertexProgram *program);
 
-	int getUniformLocation( uint32 programType, const char *name );
+	bool			supportPixelProgram(CPixelProgram::TProfile profile) const;
 
-	void setUniform1f( uint32 programType, uint index, float f );
-	void setUniform3f( uint32 programType, uint index, float f1, float f2, float f3 );
-	void setUniform4f( uint32 programType, uint index, float f1, float f2, float f3, float f4  );
-	void setUniform1i( uint32 programType, uint index, int i );
-	void setUniform4i( uint32 programType, uint index, int i1, int i2, int i3, int i4 );
-	void setUniform1u( uint32 programType, uint index, uint u );
-	void setUniform4u( uint32 programType, uint index, uint u1, uint u2, uint u3, uint u4 );
-	void setUniformMatrix2fv( uint32 programType, uint index, uint count, bool transpose, const float *values );
-	void setUniformMatrix3fv( uint32 programType, uint index, uint count, bool transpose, const float *values );
-	void setUniformMatrix4fv( uint32 programType, uint index, uint count, bool transpose, const float *values );
+	bool			compilePixelProgram(CPixelProgram *program);
 
-	void			setConstant (uint index, float, float, float, float){}
-	void			setConstant (uint index, double, double, double, double){}
-	void			setConstant (uint indexStart, const NLMISC::CVector& value){}
-	void			setConstant (uint indexStart, const NLMISC::CVectorD& value){}
-	void			setConstant (uint index, uint num, const float *src){}
-	void			setConstant (uint index, uint num, const double *src){}
-	void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform){}
-	void			setConstantFog (uint index){}
+	bool			activePixelProgram(CPixelProgram *program);
+
+	bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const{ return false; }
+
+	bool			compileGeometryProgram(CGeometryProgram *program){ return false; }
+
+	bool			activeGeometryProgram(CGeometryProgram *program){ return false; }
+
+	uint32			getProgramId( TProgram program ) const;
+	IProgram*		getProgram( TProgram program ) const;
+
+	int				getUniformLocation( TProgram program, const char *name );
+	void			setUniform1f(TProgram program, uint index, float f0);
+	void			setUniform2f(TProgram program, uint index, float f0, float f1);
+	void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2);
+	void			setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3);
+	void			setUniform1i(TProgram program, uint index, sint32 i0);
+	void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1);
+	void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2);
+	void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	void			setUniform1ui(TProgram program, uint index, uint32 ui0);
+	void			setUniform2ui(TProgram program, uint index, uint32 ui0, uint32 ui1);
+	void			setUniform3ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2);
+	void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3);
+	void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v);
+	void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3);
+	void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba);
+	void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m);
+	void			setUniform4x4f(TProgram program, uint index, const float *src );
+	void			setUniform4fv(TProgram program, uint index, size_t num, const float *src);
+	void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src);
+	void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src);
+
+	void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform);
+	void			setUniformFog(TProgram program, uint index);
+
+	bool			isUniformProgramState(){ return false; }
 
 	void			enableVertexProgramDoubleSidedColor(bool doubleSided){}
 	bool		    supportVertexProgramDoubleSidedColor() const{ return true; };
@@ -1273,6 +1304,8 @@ private:
 	{
 		return true;
 	}
+
+	private:
 
 	// The last vertex program that was setupped
 	NLMISC::CRefPtr<CVertexProgram> _LastSetuppedVP;
@@ -1316,11 +1349,7 @@ private:
 		bool initPipeline();
 
 		uint32 ppoId;
-		CGLSLVertexProgram *vertexProgram;
-		CGLSLPixelProgram *pixelProgram;
-
-		CGLSLVertexProgram *dynMatVP;
-		CGLSLPixelProgram *dynMatPP;
+		SProgram currentProgram;
 
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();
@@ -1411,6 +1440,34 @@ private:
 
 public:
 	void reloadUserShaders();
+
+};
+
+
+class CVertexProgramDrvInfosGL3 : public IProgramDrvInfos
+{
+public:
+	CVertexProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it );
+	~CVertexProgramDrvInfosGL3();
+	uint getUniformIndex( const char *name ) const;
+	uint getProgramId() const{ return programId; }
+	void setProgramId( uint id ){ programId = id; }
+
+private:
+	uint programId;
+};
+
+class CPixelProgramDrvInfosGL3 : public IProgramDrvInfos
+{
+public:
+	CPixelProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it );
+	~CPixelProgramDrvInfosGL3();
+	uint getUniformIndex( const char *name ) const;
+	uint getProgramId() const{ return programId; }
+	void setProgramId( uint id ){ programId = id; }
+
+private:
+	uint programId;
 
 };
 

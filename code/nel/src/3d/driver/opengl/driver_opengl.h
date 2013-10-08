@@ -49,7 +49,6 @@
 
 #include "nel/3d/driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/ptr_set.h"
 #include "nel/3d/texture_cube.h"
@@ -308,6 +307,7 @@ public:
 	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
 
 	virtual void			disableHardwareVertexProgram();
+	virtual void			disableHardwarePixelProgram();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
@@ -370,8 +370,6 @@ public:
 
 	virtual void			forceTextureResize(uint divisor);
 
-	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
-
 	/// Setup texture env functions. Used by setupMaterial
 	void					setTextureEnvFunction(uint stage, CMaterial& mat);
 
@@ -404,8 +402,6 @@ public:
 	virtual void			setupModelMatrix(const CMatrix& mtx);
 
 	virtual CMatrix			getViewMatrix() const;
-
-	virtual bool			activeShader(CShader *shd);
 
 	virtual	void			forceNormalize(bool normalize)
 	{
@@ -565,6 +561,8 @@ public:
 	virtual bool			setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height,
 												uint32 mipmapLevel, uint32 cubeFace);
 
+	virtual ITexture		*getRenderTarget() const;
+
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y,
 													uint32 width, uint32 height, uint32 mipmapLevel);
 
@@ -602,9 +600,9 @@ public:
 	// @{
 	virtual bool			supportTextureShaders() const;
 
-	virtual bool			isWaterShaderSupported() const;
+	virtual bool			supportWaterShader() const;
 
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode mode) const;
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode mode) const;
 
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint stage, const float mat[4]);
 	// @}
@@ -694,6 +692,7 @@ private:
 	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL;
 	friend class					CVertexProgamDrvInfosGL;
+	friend class					CPixelProgamDrvInfosGL;
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
@@ -889,7 +888,7 @@ private:
 	// viewport before call to setRenderTarget, if BFO extension is supported
 	CViewport				_OldViewport;
 
-	bool					_RenderTargetFBO;
+	CSmartPtr<ITexture>		_RenderTargetFBO;
 
 
 	// Num lights return by GL_MAX_LIGHTS
@@ -1300,36 +1299,156 @@ private:
 
 	// @}
 
-	/// \name Vertex program interface
+
+
+
+
+	/// \name Vertex Program
 	// @{
 
-	bool			isVertexProgramSupported () const;
-	bool			isVertexProgramEmulated () const;
-	bool			activeVertexProgram (CVertexProgram *program);
-	void			setConstant (uint index, float, float, float, float);
-	void			setConstant (uint index, double, double, double, double);
-	void			setConstant (uint indexStart, const NLMISC::CVector& value);
-	void			setConstant (uint indexStart, const NLMISC::CVectorD& value);
-	void			setConstant (uint index, uint num, const float *src);
-	void			setConstant (uint index, uint num, const double *src);
-	void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
-	void			setConstantFog (uint index);
-	void			enableVertexProgramDoubleSidedColor(bool doubleSided);
-	bool		    supportVertexProgramDoubleSidedColor() const;
+	// Order of preference
+	// - activeVertexProgram
+	// - CMaterial pass[n] VP (uses activeVertexProgram, but does not override if one already set by code)
+	// - default generic VP that mimics fixed pipeline / no VP with fixed pipeline
+
+	/**
+	  * Does the driver supports vertex program, but emulated by CPU ?
+	  */
+	virtual bool			isVertexProgramEmulated() const;
+
+	/** Return true if the driver supports the specified vertex program profile.
+	  */
+	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile) const;
+
+	/** Compile the given vertex program, return if successful.
+	  * If a vertex program was set active before compilation, 
+	  * the state of the active vertex program is undefined behaviour afterwards.
+	  */
+	virtual bool			compileVertexProgram(CVertexProgram *program);
+
+	/** Set the active vertex program. This will override vertex programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getVertexProgram returns NULL.
+	  * The vertex program is activated immediately.
+	  */
+	virtual bool			activeVertexProgram(CVertexProgram *program);
+	// @}
+
+
+
+	/// \name Pixel Program
+	// @{
+
+	// Order of preference
+	// - activePixelProgram
+	// - CMaterial pass[n] PP (uses activePixelProgram, but does not override if one already set by code)
+	// - PP generated from CMaterial (uses activePixelProgram, but does not override if one already set by code)
+
+	/** Return true if the driver supports the specified pixel program profile.
+	  */
+	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile = CPixelProgram::arbfp1) const;
+
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
+	  */
+	virtual bool			compilePixelProgram(CPixelProgram *program);
+
+	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getPixelProgram returns NULL.
+	  * The pixel program is activated immediately.
+	  */
+	virtual bool			activePixelProgram(CPixelProgram *program);
+	// @}
+
+
+
+	/// \name Geometry Program
+	// @{
+
+	// Order of preference
+	// - activeGeometryProgram
+	// - CMaterial pass[n] PP (uses activeGeometryProgram, but does not override if one already set by code)
+	// - none
+
+	/** Return true if the driver supports the specified pixel program profile.
+	  */
+	virtual bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const { return false; }
+
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
+	  */
+	virtual bool			compileGeometryProgram(CGeometryProgram *program) { return false; }
+
+	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getGeometryProgram returns NULL.
+	  * The pixel program is activated immediately.
+	  */
+	virtual bool			activeGeometryProgram(CGeometryProgram *program) { return false; }
+	// @}
+
+
+
+	/// \name Program parameters
+	// @{
+	// Set parameters
+	inline void				setUniform4fInl(TProgram program, uint index, float f0, float f1, float f2, float f3);
+	inline void				setUniform4fvInl(TProgram program, uint index, size_t num, const float *src);
+	virtual void			setUniform1f(TProgram program, uint index, float f0);
+	virtual void			setUniform2f(TProgram program, uint index, float f0, float f1);
+	virtual void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2);
+	virtual void			setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3);
+	virtual void			setUniform1i(TProgram program, uint index, sint32 i0);
+	virtual void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1);
+	virtual void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2);
+	virtual void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	virtual void			setUniform1ui(TProgram program, uint index, uint32 ui0);
+	virtual void			setUniform2ui(TProgram program, uint index, uint32 ui0, uint32 ui1);
+	virtual void			setUniform3ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2);
+	virtual void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3);
+	virtual void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v);
+	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3);
+	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba);
+	virtual void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m);
+	virtual void			setUniform4fv(TProgram program, uint index, size_t num, const float *src);
+	virtual void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src);
+	virtual void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src);
+	// Set builtin parameters
+	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform);
+	virtual void			setUniformFog(TProgram program, uint index);
+    // Set feature parameters
+	virtual bool			isUniformProgramState() { return false; }
+	// @}
+
+
+
+
+
+	virtual void			enableVertexProgramDoubleSidedColor(bool doubleSided);
+	virtual bool		    supportVertexProgramDoubleSidedColor() const;
 
 	virtual	bool			supportMADOperator() const ;
 
 
-	// @}
 
 	/// \name Vertex program implementation
 	// @{
 		bool activeNVVertexProgram (CVertexProgram *program);
 		bool activeARBVertexProgram (CVertexProgram *program);
 		bool activeEXTVertexShader (CVertexProgram *program);
+
+		bool compileNVVertexProgram (CVertexProgram *program);
+		bool compileARBVertexProgram (CVertexProgram *program);
+		bool compileEXTVertexShader (CVertexProgram *program);
 	//@}
 
 
+	/// \name Pixel program implementation
+	// @{
+		bool activeARBPixelProgram (CPixelProgram *program);
+		bool setupPixelProgram (CPixelProgram *program, GLuint id/*, bool &specularWritten*/);
+	//@}
+ 
 
 	/// \fallback for material shaders
 	// @{
@@ -1342,14 +1461,26 @@ private:
 		// Don't use glIsEnabled, too slow.
 		return _VertexProgramEnabled;
 	}
+ 
+	bool			isPixelProgramEnabled () const
+	{
+		// Don't use glIsEnabled, too slow.
+		return _PixelProgramEnabled;
+	}
 
 	// Track state of activeVertexProgram()
 	bool							_VertexProgramEnabled;
+	// Track state of activePixelProgram()
+	bool							_PixelProgramEnabled;
+
 	// Say if last setupGlArrays() was a VertexProgram setup.
 	bool							_LastSetupGLArrayVertexProgram;
 
 	// The last vertex program that was setupped
 	NLMISC::CRefPtr<CVertexProgram> _LastSetuppedVP;
+
+	// The last pixel program that was setupped
+	NLMISC::CRefPtr<CPixelProgram> _LastSetuppedPP;
 
 	bool							_ForceDXTCCompression;
 	/// Divisor for textureResize (power).
@@ -1496,7 +1627,7 @@ private:
 };
 
 // ***************************************************************************
-class CVertexProgamDrvInfosGL : public IVertexProgramDrvInfos
+class CVertexProgamDrvInfosGL : public IProgramDrvInfos
 {
 public:
 	// The GL Id.
@@ -1517,7 +1648,36 @@ public:
 
 
 	// The gl id is auto created here.
-	CVertexProgamDrvInfosGL (CDriverGL *drv, ItVtxPrgDrvInfoPtrList it);
+	CVertexProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it);
+
+	virtual uint getUniformIndex(const char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
+};
+
+// ***************************************************************************
+class CPixelProgamDrvInfosGL : public IProgramDrvInfos
+{
+public:
+	// The GL Id.
+	GLuint					ID;
+ 
+	// The gl id is auto created here.
+	CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoPtrList it);
+
+	virtual uint getUniformIndex(const char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
 };
 
 #ifdef NL_STATIC

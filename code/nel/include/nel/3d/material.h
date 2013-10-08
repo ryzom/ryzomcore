@@ -22,7 +22,6 @@
 #include "nel/misc/rgba.h"
 #include "nel/misc/matrix.h"
 #include "nel/3d/texture.h"
-#include "nel/3d/shader.h"
 
 #include <memory>
 
@@ -173,7 +172,8 @@ public:
 	 * - Alpha of texture in stage 0 is blended with alpha of texture in stage 1. Blend done with the alpha color of each
 	 * stage and the whole is multiplied by the alpha in color vertex [AT0*ADiffuseCol+AT1*(1-ADiffuseCol)]*AStage
 	 * - RGB still unchanged
-	 *
+	 * Water :
+	 * - Water
 	 */
 	enum TShader			{ Normal=0,
 							  Bump,
@@ -185,7 +185,8 @@ public:
 							  PerPixelLightingNoSpec,
 							  Cloud,
 							  Water,
-							  shaderCount};
+							  shaderCount,
+							  Program /* internally used when a pixel program is active */ };
 
 	/// \name Texture Env Modes.
 	// @{

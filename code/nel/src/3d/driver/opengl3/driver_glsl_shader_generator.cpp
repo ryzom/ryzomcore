@@ -155,7 +155,7 @@ namespace NL3D
 		ss << "vec4 gl_Position;" << std::endl;
 		ss << "};" << std::endl;
 		ss << std::endl;
-		ss << "uniform mat4 mvpMatrix;" << std::endl;
+		ss << "uniform mat4 modelViewProjection;" << std::endl;
 		ss << std::endl;
 
 		for( int i = Position; i < NumOffsets; i++ )
@@ -292,9 +292,9 @@ namespace NL3D
 		ss << "// Calculates the normal matrix from the modelview matrix" << std::endl;
 		ss << "void calcNMFromMV()" << std::endl;
 		ss << "{" << std::endl;
-		ss << "normalMatrix[ 0 ] = mvMatrix[ 0 ].xyz;" << std::endl;
-		ss << "normalMatrix[ 1 ] = mvMatrix[ 1 ].xyz;" << std::endl;
-		ss << "normalMatrix[ 2 ] = mvMatrix[ 2 ].xyz;" << std::endl;
+		ss << "normalMatrix[ 0 ] = modelView[ 0 ].xyz;" << std::endl;
+		ss << "normalMatrix[ 1 ] = modelView[ 1 ].xyz;" << std::endl;
+		ss << "normalMatrix[ 2 ] = modelView[ 2 ].xyz;" << std::endl;
 		ss << "normalMatrix = inverse( normalMatrix );" << std::endl;
 		ss << "normalMatrix = transpose( normalMatrix );" << std::endl;
 		ss << "}" << std::endl;
@@ -368,7 +368,7 @@ namespace NL3D
 				break;
 
 			case CShaderDesc::Directional:
-				ss << "uniform vec3 light" << i << "Dir;" << std::endl;
+				ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
@@ -376,7 +376,7 @@ namespace NL3D
 				break;
 
 			case CShaderDesc::Point:
-				ss << "uniform vec3 light" << i << "Pos;" << std::endl;
+				ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
 				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
@@ -438,7 +438,7 @@ namespace NL3D
 
 		ss << "vec4 getLight" << num << "Color()" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 lightDir4 = mvMatrix * vec4( light" << num << "Dir, 1.0 );" << std::endl;
+		ss << "vec4 lightDir4 = modelView * vec4( light" << num << "DirOrPos, 1.0 );" << std::endl;
 		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
@@ -473,7 +473,7 @@ namespace NL3D
 		ss << "vec4 getLight" << num << "Color()" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
-		ss << "vec4 lightPos4 = mvMatrix * vec4( light" << num << "Pos, 1.0 );" << std::endl;
+		ss << "vec4 lightPos4 = modelView * vec4( light" << num << "DirOrPos, 1.0 );" << std::endl;
 		ss << "vec3 lightPos = lightPos4.xyz / lightPos4.w;" << std::endl;
 		ss << "vec3 lightDirection = lightPos - ecPos3;" << std::endl;
 		ss << "float lightDistance = length( lightDirection );" << std::endl;
@@ -551,7 +551,7 @@ namespace NL3D
 	{
 		if( desc->fogEnabled() || desc->lightingEnabled() )
 		{
-			ss << "uniform mat4 mvMatrix;" << std::endl;
+			ss << "uniform mat4 modelView;" << std::endl;
 		}
 		if( desc->fogEnabled() || desc->hasPointLight() )
 		{
@@ -582,10 +582,10 @@ namespace NL3D
 		if( desc->lightingEnabled() )
 			ss << "calcNMFromMV();" << std::endl;
 		
-		ss << "gl_Position = mvpMatrix * " << "v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "gl_Position = modelViewProjection * " << "v" << attribNames[ 0 ] << ";" << std::endl;
 
 		if( desc->fogEnabled() || desc->hasPointLight() )
-			ss << "ecPos4 = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+			ss << "ecPos4 = modelView * v" << attribNames[ 0 ] << ";" << std::endl;
 
 		if( desc->fogEnabled() )
 			ss << "ecPos = ecPos4;" << std::endl;
@@ -609,7 +609,7 @@ namespace NL3D
 	void CGLSLShaderGenerator::generateSpecularVS()
 	{
 		
-		ss << "uniform mat4 mvMatrix;" << std::endl;
+		ss << "uniform mat4 modelView;" << std::endl;
 		ss << "uniform mat4 texMatrix0;" << std::endl;
 		ss << "smooth out vec3 cubeTexCoords;" << std::endl;
 
@@ -644,7 +644,7 @@ namespace NL3D
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 eyePosition = mvMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "vec4 eyePosition = modelView * v" << attribNames[ 0 ] << ";" << std::endl;
 
 		if( desc->lightingEnabled() )
 			ss << "calcNMFromMV();" << std::endl;
@@ -661,7 +661,7 @@ namespace NL3D
 		ss << "vec4 t = vec4( cubeTexCoords, 1.0 );" << std::endl;
 		ss << "t = t * texMatrix0;" << std::endl;
 		ss << "cubeTexCoords = t.xyz;" << std::endl;
-		ss << "gl_Position = mvpMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "gl_Position = modelViewProjection * v" << attribNames[ 0 ] << ";" << std::endl;
 
 		if( desc->lightingEnabled() )
 			addLightsVS();
@@ -698,7 +698,7 @@ namespace NL3D
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "gl_Position = mvpMatrix * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "gl_Position = modelViewProjection * v" << attribNames[ 0 ] << ";" << std::endl;
 		
 		for( int i = Weight; i < NumOffsets; i++ )
 		{
@@ -767,18 +767,18 @@ namespace NL3D
 		ss << "uniform vec4 bumpMap1Offset;" << std::endl;
 
 		// no fog yet
-		//ss << "uniform mat4 mvMatrix;" << std::endl;
+		//ss << "uniform mat4 modelView;" << std::endl;
 		ss << std::endl;
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "position = vposition;" << std::endl;
-		ss << "gl_Position = mvpMatrix * position;" << std::endl;
+		ss << "gl_Position = modelViewProjection * position;" << std::endl;
 		ss << "bump0ScaleBias = bumpMap0Scale;" << std::endl;
 		ss << "bump1ScaleBias = bumpMap1Scale;" << std::endl;
 		
 		// no fog yet
-		//ss << "vec4 v = mvMatrix[ 3 ];" << std::endl;
+		//ss << "vec4 v = modelView[ 3 ];" << std::endl;
 		//fog.x = dot( position, v );
 
 		ss << "texCoord0 = position * bumpMap0Scale + bumpMap0Offset;" << std::endl;

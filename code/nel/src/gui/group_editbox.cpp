@@ -540,7 +540,7 @@ namespace NLGUI
 		if( editorMode )
 		{
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onenter" );
-			if( prop != NULL )
+			if (prop)
 				mapAHString( "onenter", std::string( (const char*)prop ) );
 		}
 

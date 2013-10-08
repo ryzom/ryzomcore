@@ -648,7 +648,7 @@ void CProjectileManager::CProjectile::shutDown(CCharacterCL *target)
 				target->buildAlignMatrix(userMatrix);
 				FX[k].forceSetUserMatrix(userMatrix);
 			}
-			if (!FX[k].removeByID('STOP') && !FX[k].removeByID('main'))
+			if (!FX[k].removeByID(NELID("STOP")) && !FX[k].removeByID(NELID("main")))
 			{
 				FX[k].activateEmitters(false);
 				//nlwarning("Projectile with a particle system that has no 'STOP' emitter");
