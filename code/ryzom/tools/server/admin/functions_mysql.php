@@ -69,8 +69,8 @@ class sql_db
 		}
 		else
 		{
-      echo "Connection to mySQL failed!";
-      exit;
+			echo "Connection to mySQL failed!";
+			exit;
 		}
 	}
 
