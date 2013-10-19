@@ -1,0 +1,7 @@
+###################################################################
+CREDITS REGARDING THE AMS
+##################################################################
+- Muhammad Usman (Charisma Layout http://usman.it/themes/charisma/)
+- prdatur (Icon Set http://opengameart.org/users/prdatur)
+- Tobi (original Drupal Module)
+- Botanic (Mentoring & original drupal module)

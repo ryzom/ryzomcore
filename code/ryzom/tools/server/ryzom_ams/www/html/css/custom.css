@@ -1,0 +1,35 @@
+.login-header
+{
+	height:190px;
+}
+
+.brand img
+{
+	height:100%;
+	margin-bottom:-18px;
+	margin-top:-15px;
+	width:auto;
+}
+
+#for-is-ajax
+{
+	display:none;
+}
+
+.navbar {
+    border-bottom: 0px;
+}
+
+.flags {
+  display: block;
+  position:relative;
+  left:290px;
+  top:28px;
+}
+
+.flags_no_visible_elements{
+  display: block;
+  position:relative;
+  left:67%;
+  top:210px;
+}
