@@ -66,7 +66,7 @@ $MAIL_DIR = "/home/username/mail";
 $MAIL_LOG_PATH = "/home/username/mail/cron_mail.log";
 
 //terms of service url location
-$TOS_URL ="http://heregoesyourtos.com";
+$TOS_URL ="http://www.gnu.org/licenses/agpl-3.0.html";
 
 //crypt is being used by encrypting & decrypting of the IMAP password of the supportgroups
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
