@@ -16,7 +16,7 @@ ini_set('display_errors', 'on');
 require_once( '../../ams_lib/libinclude.php' );
 if (!@include '../config.php') {
     //if config doesnt exist run setup
-    require( 'install/libsetup.php' );
+    require( 'installer/libsetup.php' );
 } else {
     //if config exists then include it
     require( '../config.php' );

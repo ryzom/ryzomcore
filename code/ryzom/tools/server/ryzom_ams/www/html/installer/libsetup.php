@@ -27,7 +27,7 @@
         //var used to access the DB;
         global $cfg;
         
-
+        sleep(15);
         try{
             //SETUP THE WWW DB
             $dbw = new DBLayer("install", "web");
@@ -490,7 +490,7 @@
                     echo "failed to copy ../config.php ...\n";
                 }
             }
-            echo '<a href="/" target="_blank">Reload!</a> ';
+            echo '<br><a href="'.$_SERVER['REQUEST_URI'].'" >Reload!</a> ';
             exit;
             
 
