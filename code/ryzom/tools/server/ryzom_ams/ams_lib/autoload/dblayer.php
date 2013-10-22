@@ -14,19 +14,33 @@ class DBLayer{
     * Instantiates the PDO object attribute by connecting to the arguments matching database(the db info is stored in the $cfg global var)
     * @param $db String, the name of the databases entry in the $cfg global var.
     */
-    function __construct($db)
+    function __construct($db, $dbn = null)
     {
-        global $cfg;
-        $dsn  = "mysql:";
-        $dsn .= "host=".   $cfg['db'][$db]['host'].";";
-        $dsn .= "dbname=". $cfg['db'][$db]['name'].";";
-        $dsn .= "port=".   $cfg['db'][$db]['port'].";";
-    
-        $opt = array(
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-        );
-        $this->PDO = new PDO($dsn,$cfg['db'][$db]['user'],$cfg['db'][$db]['pass'], $opt);
+        if ($db != "install"){
+        
+            global $cfg;
+            $dsn  = "mysql:";
+            $dsn .= "host=".   $cfg['db'][$db]['host'].";";
+            $dsn .= "dbname=". $cfg['db'][$db]['name'].";";
+            $dsn .= "port=".   $cfg['db'][$db]['port'].";";
+        
+            $opt = array(
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            );
+            $this->PDO = new PDO($dsn,$cfg['db'][$db]['user'],$cfg['db'][$db]['pass'], $opt);
+        } else {
+            global $cfg;
+            $dsn  = "mysql:";
+            $dsn .= "host=".   $cfg['db'][$dbn]['host'].";";
+            $dsn .= "port=".   $cfg['db'][$dbn]['port'].";";
+        
+            $opt = array(
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+            );
+            $this->PDO = new PDO($dsn,$_POST['Username'],$_POST['Password'], $opt);
+        }
 
     }
     

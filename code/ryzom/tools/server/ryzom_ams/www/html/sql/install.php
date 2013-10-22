@@ -6,8 +6,8 @@
     */
     
     //require the pages that are being needed.
-    require( '../../config.php' );
-    require( '../../../ams_lib/libinclude.php' );
+    require_once( '../../config.php' );
+    require_once( '../../../ams_lib/libinclude.php' );
     ini_set( "display_errors", true );
     error_reporting( E_ALL );
     

@@ -13,8 +13,14 @@
 //load required pages and turn error reporting on/off
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
-require( '../config.php' );
-require( '../../ams_lib/libinclude.php' );
+require_once( '../../ams_lib/libinclude.php' );
+if (!@include '../config.php') {
+    //if config doesnt exist run setup
+    require( 'install/libsetup.php' );
+} else {
+    //if config exists then include it
+    require( '../config.php' );
+}
 session_start();
 
 //Decide what page to load
