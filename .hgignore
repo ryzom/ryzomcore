@@ -199,6 +199,16 @@ code/nel/tools/pacs/build_rbank/build_rbank
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
 code/ryzom/tools/server/sql/ryzom_admin_default_data.sql
+code/ryzom/tools/server/ryzom_ams/drupal
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
+code/ryzom/tools/server/ryzom_ams/www/html/templates_c
 
 # Linux server compile
 code/ryzom/server/src/entities_game_service/entities_game_service

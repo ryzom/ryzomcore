@@ -1,0 +1,13 @@
+void pp_test(
+	// Per fragment parameters
+	float2 texCoord : TEXCOORD0, 
+	
+	// Fragment program constants
+	uniform sampler2D cTex0 : TEX0, 
+	
+	// Output color
+	out float4 oCol : COLOR)
+{
+	oCol.rba = float3(1.0, 0.0, 1.0);
+	oCol.g = tex2D(cTex0, texCoord).g;
+}

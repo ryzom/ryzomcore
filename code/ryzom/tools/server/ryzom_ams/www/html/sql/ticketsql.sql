@@ -241,6 +241,10 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`support_group` (
   `SGroupId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
   `Name` VARCHAR(22) NOT NULL ,
   `Tag` VARCHAR(7) NOT NULL ,
+  `GroupEmail` VARCHAR(45) NULL ,
+  `IMAP_MailServer` VARCHAR(60) NULL ,
+  `IMAP_Username` VARCHAR(45) NULL ,
+  `IMAP_Password` VARCHAR(45) NULL ,
   PRIMARY KEY (`SGroupId`) ,
   UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) ,
   UNIQUE INDEX `Tag_UNIQUE` (`Tag` ASC) )
@@ -305,19 +309,14 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
   `Body` VARCHAR(400) NULL ,
   `Status` VARCHAR(45) NULL ,
   `Attempts` VARCHAR(45) NULL DEFAULT 0 ,
-  `Sender` INT(10) UNSIGNED NOT NULL ,
-  `UserId` INT(10) UNSIGNED NOT NULL ,
-  `MessageId` VARCHAR(45) NOT NULL ,
-  `TicketId` INT UNSIGNED NOT NULL ,
+  `UserId` INT(10) UNSIGNED NULL ,
+  `MessageId` VARCHAR(45) NULL ,
+  `TicketId` INT UNSIGNED NULL ,
+  `Sender` INT(10) UNSIGNED NULL ,
   PRIMARY KEY (`MailId`) ,
-  INDEX `fk_email_ticket_user1` (`Sender` ASC) ,
   INDEX `fk_email_ticket_user2` (`UserId` ASC) ,
   INDEX `fk_email_ticket1` (`TicketId` ASC) ,
-  CONSTRAINT `fk_email_ticket_user1`
-    FOREIGN KEY (`Sender` )
-    REFERENCES `mydb`.`ticket_user` (`TUserId` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `fk_email_support_group1` (`Sender` ASC) ,
   CONSTRAINT `fk_email_ticket_user2`
     FOREIGN KEY (`UserId` )
     REFERENCES `mydb`.`ticket_user` (`TUserId` )
@@ -325,6 +324,47 @@ CREATE  TABLE IF NOT EXISTS `mydb`.`email` (
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_email_ticket1`
     FOREIGN KEY (`TicketId` )
+    REFERENCES `mydb`.`ticket` (`TId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_email_support_group1`
+    FOREIGN KEY (`Sender` )
+    REFERENCES `mydb`.`support_group` (`SGroupId` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`ticket_info`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`ticket_info` ;
+
+CREATE  TABLE IF NOT EXISTS `mydb`.`ticket_info` (
+  `TInfoId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `Ticket` INT UNSIGNED NOT NULL ,
+  `ShardId` INT NULL ,
+  `UserPosition` VARCHAR(65) NULL ,
+  `ViewPosition` VARCHAR(65) NULL ,
+  `ClientVersion` VARCHAR(65) NULL ,
+  `PatchVersion` VARCHAR(65) NULL ,
+  `ServerTick` VARCHAR(40) NULL ,
+  `ConnectState` VARCHAR(40) NULL ,
+  `LocalAddress` VARCHAR(60) NULL ,
+  `Memory` VARCHAR(60) NULL ,
+  `OS` VARCHAR(120) NULL ,
+  `Processor` VARCHAR(120) NULL ,
+  `CPUID` VARCHAR(50) NULL ,
+  `CpuMask` VARCHAR(50) NULL ,
+  `HT` VARCHAR(65) NULL ,
+  `NeL3D` VARCHAR(120) NULL ,
+  `PlayerName` VARCHAR(45) NULL ,
+  `UserId` INT NULL ,
+  `TimeInGame` VARCHAR(50) NULL ,
+  PRIMARY KEY (`TInfoId`) ,
+  INDEX `fk_ticket_info_ticket1` (`Ticket` ASC) ,
+  CONSTRAINT `fk_ticket_info_ticket1`
+    FOREIGN KEY (`Ticket` )
     REFERENCES `mydb`.`ticket` (`TId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)

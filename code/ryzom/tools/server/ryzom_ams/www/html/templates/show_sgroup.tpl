@@ -10,7 +10,7 @@
         </div>
         <div class="box-content">
             <div class="row-fluid">
-                <legend>All members of the {$groupsname} Support Group</legend>
+                <legend>{$groupsname} Support Group Members</legend>
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
 		    <thead>
 			    <tr>
@@ -49,7 +49,7 @@
 		
 		<form id="addSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
 		    
-		<legend>Add  a user to the group '{$groupsname}'</legend>
+		<legend style="margin:0">Add user to '{$groupsname}'</legend>
 		
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">username</label>
@@ -95,6 +95,83 @@
 		
 	    </div>                   
         </div>
+	<div class="box-header well" data-original-title="">
+            <h2><i class="icon-pencil"></i> Modify Email Settings</h2>
+            <div class="box-icon">
+                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
+            </div>
+        </div>
+	 <div class="box-content">
+            <div class="row-fluid">
+		
+		<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
+		    
+		<legend style="margin:0">Mail settings of '{$groupsname}'</legend>
+		
+		<div class="control-group" style="display: inline-block; ">
+		    <label class="control-label">Group Email</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="text" id="GroupEmail" name="GroupEmail" value="{$groupemail}">
+			</div>
+		    </div>
+		</div>
+		
+		<div class="control-group" style="display: inline-block; ">
+		    <label class="control-label">IMAP Mail Server</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="text" id="IMAP_MailServer" name="IMAP_MailServer" value="{$imap_mailserver}">
+			</div>
+		    </div>
+		</div>
+		
+		<div class="control-group" style="display: inline-block; ">
+		    <label class="control-label">IMAP Username</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="text"  id="IMAP_Username" name="IMAP_Username" value="{$imap_username}">
+			</div>
+		    </div>
+		</div>
+		
+		<div class="control-group" style="display: inline-block; ">
+		    <label class="control-label">IMAP Password</label>
+		    <div class="controls">
+			<div class="input-prepend">
+			    <input type="password"   id="IMAP_Password" name="IMAP_Password">
+			</div>
+		    </div>
+		</div>
+		
+		<input type="hidden" name="function" value="modify_email_of_sgroup">
+		<input type="hidden" name="target_id" value="{$target_id}">
+		    
+		<div class="control-group">
+		    <label class="control-label"></label>
+		    <div class="controls">
+			<button type="submit" class="btn btn-primary" >Update</button>
+		    </div>
+		</div>
+		
+		{if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "SUCCESS"}
+		<div class="alert alert-success">
+			{$modify_mail_of_group_success}
+		</div>
+		{else if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "EMAIL_NOT_VALID"}
+		<div class="alert alert-error">
+			{$email_not_valid}
+		</div>
+		{else if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "NO_PASSWORD"}
+		<div class="alert alert-warning">
+			{$no_password_given}
+		</div>
+		{/if}
+		
+		</form>
+	    </div>
+	 </div>
     </div><!--/span-->
     {/if}
 </div><!--/row-->

@@ -302,6 +302,10 @@ CClientConfig::CClientConfig()
 	Contrast			= 0.f;						// Default Monitor Contrast.
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
+	
+	VREnable			= false;
+	VRDisplayDevice		= "Auto";
+	VRDisplayDeviceId	= "";
 
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
@@ -323,13 +327,13 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "https://secure.ryzom.com/signup/from_client.php";
+	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
 	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
-	EditAccountURL		= "https://secure.ryzom.com/payment_profile/index.php";
+	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
 	BetaAccountURL		= "http://www.ryzom.com/profile";
-	ForgetPwdURL		= "https://secure.ryzom.com/payment_profile/lost_secure_password.php";
+	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
 	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
-	LoginSupportURL		= "http://www.ryzom.com/en/support.html";
+	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -847,6 +851,9 @@ void CClientConfig::setValues()
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
 
+	READ_BOOL_FV(VREnable)
+	READ_STRING_FV(VRDisplayDevice)
+	READ_STRING_FV(VRDisplayDeviceId)
 
 	////////////
 	// INPUTS //

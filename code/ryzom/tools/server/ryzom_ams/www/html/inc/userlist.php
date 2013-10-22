@@ -1,7 +1,11 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the userlist page.
+* this function will return all users by using he pagination class, so that it can be used in the template. Only Mods and Admins can browse this page though.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function userlist(){
-    if(Ticket_User::isMod($_SESSION['ticket_user'])){
+    if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
         
         $pagination = new Pagination(WebUsers::getAllUsersQuery(),"web",10,"WebUsers");
         $pageResult['userlist'] = Gui_Elements::make_table($pagination->getElements() , Array("getUId","getUsername","getEmail"), Array("id","username","email"));
@@ -15,9 +19,13 @@ function userlist(){
             $i++;
         }
         
-        if (Ticket_User::isAdmin($_SESSION['ticket_user'])){
+        if (Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
             $pageResult['isAdmin'] = "TRUE";
         }
+        global $INGAME_WEBPATH;
+        $pageResult['ingame_webpath'] = $INGAME_WEBPATH;
+ 	global $BASE_WEBPATH;
+        $pageResult['base_webpath'] = $BASE_WEBPATH;
         return $pageResult;
     }else{
         //ERROR: No access!

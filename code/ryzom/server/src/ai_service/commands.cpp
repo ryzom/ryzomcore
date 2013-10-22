@@ -1700,7 +1700,7 @@ NLMISC_COMMAND(scriptHex,"execute a hex-encoded script for a group in the given 
 	return	true;
 }
 
-static char* hexEncoderTcl =
+static const char* hexEncoderTcl =
 "proc copy_encoded {} {"
 "	# Get the args from the text fields"
 "	set group [ .group.name get 1.0 end ]"

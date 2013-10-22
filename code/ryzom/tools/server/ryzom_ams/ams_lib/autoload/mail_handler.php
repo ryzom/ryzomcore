@@ -1,52 +1,124 @@
  <?php
- 
+/**
+* Handles the mailing functionality.
+* This class covers the reading of the mail boxes of the support_groups, handling those emails, updating tickets accoring to the content & title of the emails,
+* but also the sending of emails after creating a new ticket and when someone else replies on your ticket.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 class Mail_Handler{
     
-    private $db;
-        
-    public function mail_fork() {   
+    private $db; /**< db object used by various methods. */
+    
+    /**
+    * Start a new child process and return the process id
+    * this is used because imap might take some time, we dont want the cron parent process waiting on that.
+    * @return return the child process id
+    */    
+    private function mail_fork() {   
         //Start a new child process and return the process id!
         $pid = pcntl_fork();
         return $pid;
         
     }
     
-    
-    public static function send_ticketing_mail($ticketObj, $content, $type, $author) {
+    /**
+    * Wrapper for sending emails, creates the content of the email
+    * Based on the type of the ticketing mail it will create a specific email, it will use the language.ini files to load the correct language of the email for the receiver.
+    * Also if the $TICKET_MAILING_SUPPORT is set to false or if the user's personal 'ReceiveMail' entry is set to false then no mail will be sent.
+    * @param $receiver if integer, then it refers to the id of the user to whom we want to mail, if it's a string(email-address) then we will use that.
+    * @param $ticketObj the ticket object itself, this is being used for including ticket related information into the email.
+    * @param $content the content of a reply or new ticket
+    * @param $type REPLY, NEW, WARNAUTHOR, WARNSENDER, WARNUNKNOWNSENDER
+    * @param $sender (default = 0 (if it is not forwarded)) else use the id of the support group to which the ticket is currently forwarded, the support groups email address will be used to send the ticket.
+    */    
+    public static function send_ticketing_mail($receiver, $ticketObj, $content, $type, $sender = 0) {
+        
         global $TICKET_MAILING_SUPPORT;
         if($TICKET_MAILING_SUPPORT){
-            $txt = "";
-            $subject = "";
-            if($type == "REPLY"){
-                $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n You received a new reply on your ticket: " . $ticketObj->getTitle() .
-                "\n --------------------\n\n";
-                $subject = "New reply on [Ticket #" . $ticketObj->getTId() ."]";
-                $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
-                $txt = $txt . $content . $endTxt;
-                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId(),$author);
-            }else if($type == "NEW"){
-                $txt = "---------- Ticket #". $ticketObj->getTId() . " ----------\n Your ticket: " . $ticketObj->getTitle() . " is newly created";
-                if($ticketObj->getAuthor() != $author){
-                    $txt = $txt . " by " . Ticket_User::get_username_from_id($author);
-                }else{
-                    $author = $ticketObj->getAuthor();
-                }
-                $txt = $txt . "\n --------------------\n\n";
-                $subject = "New ticket created [Ticket #" . $ticketObj->getTId() ."]";
-                $endTxt = "\n\n----------\nYou can reply on this message to answer directly on the ticket!";
-                $txt = $txt . $content . $endTxt;
-                self::send_mail($ticketObj->getAuthor(),$subject,$txt, $ticketObj->getTId());
+            global $MAIL_LOG_PATH;
+            //error_log("Receiver: {$receiver}, content: {$content}, type: {$type}, SendingId: {$sender} \n", 3, $MAIL_LOG_PATH);
+            if($sender == 0){
+                //if it is not forwarded (==public == which returns 0) then make it NULL which is needed to be placed in the DB.
+                $sender = NULL;
             }
             
+            global $AMS_TRANS;
+            if(is_numeric($receiver)){
+                $webUser = new WebUsers($receiver);
+                $lang = $webUser->getLanguage();
+            }else{
+                global $DEFAULT_LANGUAGE;
+                $lang = $DEFAULT_LANGUAGE;
+            }
+            $variables = parse_ini_file( $AMS_TRANS . '/' .  $lang . '.ini', true );
+            $mailText = array();
+            foreach ( $variables['email'] as $key => $value ){
+                $mailText[$key] = $value;
+            }
+                 
+            switch($type){
+                case "REPLY":
+                    $webUser = new WebUsers($receiver);
+                    if($webUser->getReceiveMail()){
+                        $subject = $mailText['email_subject_new_reply'] . $ticketObj->getTId() ."]";
+                        $txt = $mailText['email_body_new_reply_1']. $ticketObj->getTId() . $mailText['email_body_new_reply_2'] . $ticketObj->getTitle() .
+                        $mailText['email_body_new_reply_3'] . $content . $mailText['email_body_new_reply_4'];
+                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(),$sender);
+                    }
+                    break;
+                
+                case "NEW":
+                    $webUser = new WebUsers($receiver);
+                    if($webUser->getReceiveMail()){
+                        $subject = $mailText['email_subject_new_ticket'] . $ticketObj->getTId() ."]";
+                        $txt = $mailText['email_body_new_ticket_1'] . $ticketObj->getTId() . $mailText['email_body_new_ticket_2'] . $ticketObj->getTitle() . $mailText['email_body_new_ticket_3']
+                        . $content . $mailText['email_body_new_ticket_4'];
+                        self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), $sender);
+                    }
+                    break;
+                
+                case "WARNAUTHOR":
+                    if(is_numeric($sender)){
+                        $sender = Ticket_User::get_email_by_user_id($sender);
+                    }
+                    $subject = $mailText['email_subject_warn_author'] . $ticketObj->getTId() ."]";
+                    $txt = $mailText['email_body_warn_author_1'] . $ticketObj->getTitle() .$mailText['email_body_warn_author_2'].$sender.$mailText['email_body_warn_author_3'].
+                    $sender. $mailText['email_body_warn_author_4'] ;
+                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), NULL);
+                    break;
+                
+                case "WARNSENDER":
+                    $subject = $mailText['email_subject_warn_sender'];
+                    $txt = $mailText['email_body_warn_sender'];
+                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), NULL);
+                    break;
+                
+                case "WARNUNKNOWNSENDER":
+                    $subject = $mailText['email_subject_warn_unknown_sender'];
+                    $txt = $mailText['email_body_warn_unknown_sender'];
+                    self::send_mail($receiver,$subject,$txt, $ticketObj->getTId(), NULL);
+                    break;
+                
+            }
         }
     } 
     
-    
-    public static function send_mail($recipient, $subject, $body, $ticket_id = 0, $from = 1) {
+    /**
+    * send mail function that will add the email to the db.
+    * this function is being used by the send_ticketing_mail() function. It adds the email as an entry to the `email` table in the database, which will be sent later on when we run the cron job.
+    * @param $recipient if integer, then it refers to the id of the user to whom we want to mail, if it's a string(email-address) then we will use that.
+    * @param $subject the subject of the email
+    * @param $body the body of the email
+    * @param $ticket_id the id of the ticket
+    * @param $from the sending support_group's id (NULL in case the default group is sending))
+    */    
+    public static function send_mail($recipient, $subject, $body, $ticket_id = 0, $from = NULL) {
+        $id_user = NULL;
         if(is_numeric($recipient)) {
             $id_user = $recipient;
             $recipient = NULL;
         }
+
         $query = "INSERT INTO email (Recipient,Subject,Body,Status,Attempts,Sender,UserId,MessageId,TicketId) VALUES (:recipient, :subject, :body, :status, :attempts, :sender, :id_user, :messageId, :ticketId)";
         $values = array('recipient' => $recipient, 'subject' => $subject, 'body' => $body, 'status' => 'NEW', 'attempts'=> 0, 'sender' => $from,'id_user' => $id_user,  'messageId' => 0, 'ticketId'=> $ticket_id);
         $db = new DBLayer("lib");
@@ -55,37 +127,44 @@ class Mail_Handler{
     }
     
      
-    //the main function
+    /**
+    * the cron funtion (workhorse of the mailing system).
+    * The cron job will create a child process, which will first send the emails that are in the email table in the database, we use some kind of semaphore (a temp file) to make sure that
+    * if the cron job is called multiple times, it wont email those mails multiple times. After this, we will read the mail inboxes of the support groups and the default group using IMAP
+    * and we will add new tickets or new replies according to the incoming emails.
+    */    
     function cron() {
         global $cfg;
-        $inbox_username = $cfg['mail']['username'];
-        $inbox_password = $cfg['mail']['password'];
+        global $MAIL_LOG_PATH;
+        $default_groupemail = $cfg['mail']['default_groupemail'];
+        $default_groupname = $cfg['mail']['default_groupname'];
+        /*
         $inbox_host = $cfg['mail']['host'];
-        $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";
+        $oms_reply_to = "Ryzom Ticketing Support <ticketing@".$inbox_host.">";*/
         global $MAIL_DIR;
-        
-        // Deliver new mail
-        echo("mail cron\n");
+        error_log("========================================================\n", 3, $MAIL_LOG_PATH);
+        error_log("mailing cron Job started at: ". Helpers::outputTime(time(),0) . "\n", 3, $MAIL_LOG_PATH);
         
         //creates child process
         $pid = self::mail_fork();
         $pidfile = '/tmp/ams_cron_email_pid';
-    
-        //INFO: if $pid = 
-        //-1: "Could not fork!\n";
-        // 0: "In child!\n";
-        //>0: "In parent!\n";
         
         if($pid) {
         
             // We're the parent process, do nothing!
+            //INFO: if $pid = 
+            //-1: "Could not fork!\n";
+            // 0: "In child!\n";
+            //>0: "In parent!\n";
         
         } else {
+            //deliver new mail            
             //make db connection here because the children have to make the connection.
             $this->db = new DBLayer("lib");
             
             //if $pidfile doesn't exist yet, then start sending the mails that are in the db.
             if(!file_exists($pidfile)) {
+                
                 //create the file and write the child processes id in it!
                 $pid = getmypid();
                 $file = fopen($pidfile, 'w');
@@ -101,67 +180,95 @@ class Mail_Handler{
                     $message_id = self::new_message_id($email['TicketId']);
 
                     //if recipient isn't given, then use the email of the id_user instead!
-                    echo("Emailing {$email['Recipient']}\n");
                     if(!$email['Recipient']) {
                         $email['Recipient'] = Ticket_User::get_email_by_user_id($email['UserId']);
                     }
                     
-                    //create sending email adres based on the $sender id
-                    if($email['Sender'] != 0) {
-                        $username = Ticket_User::get_username_from_id($email['Sender']);          
-                        $from =  "$username <$username@$inbox_host>";          
+                    //create sending email adres based on the $sender id which refers to the department id
+                    if($email['Sender'] == NULL) {
+                        $from =  $default_groupname ." <".$default_groupemail.">";
                     } else {
-                        $from = $oms_reply_to;          
+                        $group = Support_Group::getGroup($email['Sender']);
+                        $from = $group->getName()." <".$group->getGroupEmail().">";
                     }
+                   
                     $headers = "From: $from\r\n" . "Message-ID: " . $message_id ;
-                    print("recip: " . $email['Recipient']);
-                    print("subj: " .$email['Subject']);
-                    print("body: " . $email['Body']);
-                    print("headers: " . $headers);
+                   
                     if(mail($email['Recipient'], $email['Subject'], $email['Body'], $headers)) {       
                         $status = "DELIVERED";        
-                        echo("Emailed {$email['Recipient']}\n");        
+                        error_log("Emailed {$email['Recipient']}\n", 3, $MAIL_LOG_PATH);
                     } else {       
                         $status = "FAILED";
-                        echo("Email to {$email['Recipient']} failed\n");
+                        error_log("Email to {$email['Recipient']} failed\n", 3, $MAIL_LOG_PATH);
                     }
                     //change the status of the emails.
                     $this->db->execute('update email set Status = ?, MessageId = ?, Attempts = Attempts + 1 where MailId = ?', array($status, $message_id, $email['MailId']));
-                    //db_exec('update email set status = ?, message_id = ?, attempts = attempts + 1 where id_email = ?', array($status, $message_id, $email['id_email']));
+                   
                 }
                 unlink($pidfile);
             }
             // Check mail
+            $sGroups = Support_Group::getGroups();
             
-            //$mailbox = imap_open("{localhost:110/pop3/novalidate-cert}INBOX", $inbox_username, $inbox_password);
-            $mbox = imap_open($cfg['mail']['server'], $inbox_username, $inbox_password) or die('Cannot connect to mail server: ' . imap_last_error());
-            $message_count = imap_num_msg($mbox);
-    
-            for ($i = 1; $i <= $message_count; ++$i) {
-                
-                //return task ID
-                self::incoming_mail_handler($mbox, $i);
-                $tid = 1; //self::ams_create_email($from, $subject, $txt, $html, $to, $from);
-    
-                if($tid) {
-                    //TODO: base file on Ticket + reply id
-                   /* $file = fopen($MAIL_DIR."/mail/".$tid, 'w');      
-                    fwrite($file, $entire_email);     
-                    fclose($file);     */
-                }
-                //mark message $i of $mbox for deletion!
-                imap_delete($mbox, $i);
+            //decrypt passwords in the db!
+            $crypter = new MyCrypt($cfg['crypt']);     
+            foreach($sGroups as $group){
+                $group->setIMAP_Password($crypter->decrypt($group->getIMAP_Password())); 
             }
-            //delete marked messages
-            imap_expunge($mbox);  
-            imap_close($mbox);
             
+            $defaultGroup = new Support_Group();
+            $defaultGroup->setSGroupId(0);
+            $defaultGroup->setGroupEmail($default_groupemail);
+            $defaultGroup->setIMAP_MailServer($cfg['mail']['default_mailserver']);
+            $defaultGroup->setIMAP_Username($cfg['mail']['default_username']);
+            $defaultGroup->setIMAP_Password($cfg['mail']['default_password']);
+            
+            //add default group to the list
+            $sGroups[] = $defaultGroup;
+            
+            foreach($sGroups as $group){
+                //check if group has mailing stuff filled in!
+                if($group->getGroupEmail() != "" && $group->getIMAP_MailServer() != "" && $group->getIMAP_Username() != "" && $group->getIMAP_Password() != ""){
+                    $mbox = imap_open($group->getIMAP_MailServer(), $group->getIMAP_Username(), $group->getIMAP_Password()) or die('Cannot connect to mail server: ' . imap_last_error());
+                    $message_count = imap_num_msg($mbox);
+            
+                    for ($i = 1; $i <= $message_count; ++$i) {
+                        
+                        //return task ID
+                        $tkey = self::incoming_mail_handler($mbox, $i,$group);
+            
+                        if($tkey) {
+                            //base file on Ticket + timestamp
+                            $file = fopen($MAIL_DIR."/ticket".$tkey, 'w');
+                            error_log("Email was written to ".$MAIL_DIR."/ticket".$tkey."\n", 3, $MAIL_LOG_PATH);
+                            fwrite($file, imap_fetchheader($mbox, $i) . imap_body($mbox, $i));     
+                            fclose($file);
+                            
+                            //mark message $i of $mbox for deletion!
+                            imap_delete($mbox, $i);
+                        }
+    
+                    }
+                    //delete marked messages
+                    imap_expunge($mbox);  
+                    imap_close($mbox);
+                }
+            }
+            error_log("Child Cron job finished at ". Helpers::outputTime(time(),0) . "\n", 3, $MAIL_LOG_PATH);
+            error_log("========================================================\n", 3, $MAIL_LOG_PATH);
         }
+        
     
     }
     
      
     
+    /**
+    * creates a new message id for a email about to send.
+    * @param $ticketId the ticket id of the ticket that is mentioned in the email.
+    * @return returns a string, that consist out of some variable parts, a consistent part and the ticket_id. The ticket_id will be used lateron, if someone replies on the message,
+    * to see to which ticket the reply should be added.
+    */    
     function new_message_id($ticketId) {
         $time = time();
         $pid = getmypid();
@@ -172,21 +279,57 @@ class Mail_Handler{
     
     }
     
+    /**
+    * try to fetch the ticket_id out of the subject.
+    * The subject should have a substring of the form [Ticket \#ticket_id], where ticket_id should be the integer ID of the ticket.
+    * @param $subject the subject of an incomming email.
+    * @return if the ticket's id is succesfully parsed, it will return the ticket_id, else it returns 0.
+    */   
     function get_ticket_id_from_subject($subject){
         $startpos = strpos($subject, "[Ticket #");
-        $tempString = substr($subject, $startpos+9);
-        $endpos = strpos($tempString, "]");
-        $ticket_id = substr($tempString, 0, $endpos);
+        if($startpos){
+            $tempString = substr($subject, $startpos+9);
+            $endpos = strpos($tempString, "]");
+            if($endpos){
+                $ticket_id = substr($tempString, 0, $endpos);
+            }else{
+                $ticket_id = 0;
+            }
+        }else{
+            $ticket_id = 0;
+        }
         return $ticket_id;
     }
     
     
-    function incoming_mail_handler($mbox,$i){
+    /**
+    * Handles an incomming email
+    * Read the content of one email by using imap's functionality. If a ticket id is found inside the message_id or else in the subject line, then a reply will be added
+    * (if the email is not being sent from the authors email address it won't be added though and a warning will be sent to both parties).  If no ticket id is found, then a new
+    * ticket will be created.
+    * @param $mbox a mailbox object
+    * @param $i the email's id in the mailbox (integer)
+    * @param $group the group object that owns the inbox.
+    * @return a string based on the found ticket i and timestamp (will be used to store a copy of the email locally)
+    */   
+    function incoming_mail_handler($mbox,$i,$group){
+        
+        global $MAIL_LOG_PATH;
         
         $header = imap_header($mbox, $i);
         $subject = self::decode_utf8($header->subject);
+        $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
+        $subject = self::decode_utf8($header->subject);    
+        $to = $header->to[0]->mailbox;   
+        $from = $header->from[0]->mailbox . '@' . $header->from[0]->host;
+        $fromEmail =  $header->from[0]->mailbox . '@' . $header->from[0]->host;
+        $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
+        //$html = self::get_part($mbox, $i, "TEXT/HTML");
         
-        print_r($header);
+        //get the id out of the email address of the person sending the email.
+        if($from !== NULL && !is_numeric($from)){
+            $from = Ticket_User::get_id_from_email($from);
+        }
         
         //get ticket_id out of the message-id or else out of the subject line
         $ticket_id = 0;
@@ -201,114 +344,73 @@ class Mail_Handler{
             $ticket_id = self::get_ticket_id_from_subject($subject);
         }
        
-        //if ticket id is found
-        if($ticket_id){
-            
-            $entire_email = imap_fetchheader($mbox, $i) . imap_body($mbox, $i);   
-            $subject = self::decode_utf8($header->subject);    
-            $to = $header->to[0]->mailbox;   
-            $from = $header->from[0]->mailbox . '@' . $header->from[0]->host; 
-            $txt = self::get_part($mbox, $i, "TEXT/PLAIN");   
-            //$html = self::get_part($mbox, $i, "TEXT/HTML");
-            
-            //use the line ---------- Ticket # to make a distincton between the old message and the reply
-            $endpos = strpos($txt, ">---------- Ticket #");
-            if($endpos){
-                $txt = substr($txt, 0, $endpos);
-            }else{
-                $endpos = strpos($txt, "---------- Ticket #");
-                if($endpos){
-                    $txt = substr($txt, 0, $endpos);
-                }
-            }
-            
-            
-            //get the id out of the email address of the person sending the email.
-            if($from !== NULL && !is_numeric($from)) $from = Ticket_User::get_id_from_email($from);
-            
-            $user = new Ticket_User();
-            $user->load_With_TUserId($from);
+        //if ticket id is found, that means it is a reply on an existing ticket
+        if($ticket_id && is_numeric($ticket_id) && $ticket_id > 0){
             $ticket = new Ticket();
             $ticket->load_With_TId($ticket_id);
             
-            //if user has access to it!
-            if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
-                Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);              
+            //if email is sent from an existing email address in the db (else it will give an error while loading the user object)
+            if($from != "FALSE"){
+                
+                $user = new Ticket_User();
+                $user->load_With_TUserId($from);
+                
+                //if user has access to it!
+                if((Ticket_User::isMod($user) or ($ticket->getAuthor() == $user->getTUserId())) and $txt != ""){
+                    
+                    Ticket::createReply($txt, $user->getTUserId(), $ticket->getTId(),  0);
+                    error_log("Email found that is a reply to a ticket at:".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+                    
+                }else{
+                    //if user has no access to it
+                    //Warn real ticket owner + person that send the mail
+                    Mail_Handler::send_ticketing_mail($ticket->getAuthor(),$ticket,  NULL , "WARNAUTHOR" , $from);
+                    Mail_Handler::send_ticketing_mail($from ,$ticket,  NULL , "WARNSENDER" , NULL);
+                    
+                    error_log("Email found that was a reply to a ticket, though send by another user to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+                  
+                }
+                
+            }else{
+                
+                //if a reply to a ticket is being sent by a non-user!
+                //Warn real ticket owner + person that send the mail
+                Mail_Handler::send_ticketing_mail($ticket->getAuthor() ,$ticket,  NULL , "WARNAUTHOR" , $fromEmail);
+                Mail_Handler::send_ticketing_mail($fromEmail ,$ticket,  NULL , "WARNUNKNOWNSENDER" , NULL);
+                
+                error_log("Email found that was a reply to a ticket, though send by an unknown email address to ".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+                
             }
+           
+            return $ticket_id .".".time();
             
+        }else if($from != "FALSE"){
+            
+            //if ticket_id isn't found, create a new ticket!
+            //if an existing email address mailed the ticket
+            
+            //if not default group, then forward it by giving the $group->getSGroupId's param
+            $newTicketId = Ticket::create_Ticket($subject, $txt,1, $from, $from, $group->getSGroupId());
+            
+            error_log("Email regarding new ticket found at:".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+            
+            return $newTicketId .".".time();
+            
+            
+        }else{
+            //if it's a email that has nothing to do with ticketing, return 0;
+            error_log("Email found that isn't a reply or new ticket, at:".$group->getGroupEmail()."\n", 3, $MAIL_LOG_PATH);
+            return 0;
         }
         
     }
     
-    /*function ams_create_email($from, $subject, $body, $html, $recipient = 0, $sender = NULL) {
-    
-        //TODO:
-        if($recipient == 0 && !is_string($recipient)) {
-            global $user;
-            $recipient = $user->uid;
-        }
-    
-        if($sender !== NULL && !is_numeric($sender)) $sender = self::get_id_from_username($sender);
-        if(!is_numeric($recipient)) $recipient = self::get_id_from_username($recipient);
-    
-        $message = array(
-        'creator' => $sender,
-        'owner' => $recipient,
-        'type' => 'email',
-        'summary' => $subject,
-        'data' => array (
-            'subject' => $subject,
-            'body' => $body,
-            'html' => $html,
-            'sender' => oms_get_username_from_id($sender),
-            'from' => $from,
-            'recipient' => oms_get_username_from_id($recipient),
-            'time' => time(),
-            ),
-        );
-        
-        //TO ASK:
-        oms_task_create($message);
-        oms_task_index($message, array('subject', 'body', 'sender', 'recipient'));
-        //---------------------------
-        return $message['id_task'];
-    }*/
-    
      
-    
-    /*function oms_get_email($id) {
-    
-        $message = oms_task_load($id);
-        if($message) {
-            oms_prepare_email($message);
-            return $message;
-        } else {
-            return FALSE; 
-        }
-    
-    }*/
-    
-     
-    
-    /*function oms_prepare_email(&$message) {
-    
-        $data = $message['data'];
-        $data['id_message'] = $message['id_task'];
-        $data['read'] = ($message['status'] != 'NEW' && $message['status'] != 'UNREAD');
-        $message = $data;
-    
-    }*/
-    
-     
-    
-    /*function oms_email_mark_read($mid) {
-    
-        db_exec("update task set status = 'READ' where id_task = ? and type = 'email' and module = 'email'", array($mid));
-    
-    }*/
-    
-     
-    
+    /**
+    * decode utf8
+    * @param $str str to be decoded
+    * @return decoded string
+    */  
     function decode_utf8($str) {
     
         preg_match_all("/=\?UTF-8\?B\?([^\?]+)\?=/i",$str, $arr);
@@ -320,10 +422,12 @@ class Mail_Handler{
     
     }
     
-     
-    
-     
-    
+    /**
+    * returns the mime type of a structure of a email
+    * @param &$structure the structure of an email message.
+    * @return "TEXT", "MULTIPART","MESSAGE", "APPLICATION", "AUDIO","IMAGE", "VIDEO", "OTHER","TEXT/PLAIN"
+    * @todo take care of the HTML part of incoming emails.
+    */  
     function get_mime_type(&$structure) {
     
         $primary_mime_type = array("TEXT", "MULTIPART","MESSAGE", "APPLICATION", "AUDIO","IMAGE", "VIDEO", "OTHER");
@@ -335,7 +439,7 @@ class Mail_Handler{
     }
     
      
-    
+    //to document..
     function get_part($stream, $msg_number, $mime_type, $structure = false, $part_number = false) {
     
         if(!$structure) {
@@ -376,3 +480,4 @@ class Mail_Handler{
     } // END OF FUNCTION
     
 }
+    

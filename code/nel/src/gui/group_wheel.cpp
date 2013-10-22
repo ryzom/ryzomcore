@@ -119,11 +119,11 @@ namespace NLGUI
 		if( editorMode )
 		{
 			CXMLAutoPtr ptr( (char*) xmlGetProp( cur, BAD_CAST "on_wheel_up" ) );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_wheel_up", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_wheel_down" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_wheel_down", std::string( (const char*)ptr ) );
 
 		}

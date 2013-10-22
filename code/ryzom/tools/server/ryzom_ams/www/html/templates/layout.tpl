@@ -103,8 +103,8 @@
 				{/if}
 				<div class="btn-group pull-right">
 				    <div class="flags">
-				      <img src="img/en.png" onclick="document.cookie='language=en';document.location.reload(true);"/>
-				      <img src="img/fr.png" onclick="document.cookie='language=fr';document.location.reload(true);"/>
+				      <img src="img/en.png" onclick="reloadPageWithLanguage('en');"/>
+				      <img src="img/fr.png" onclick="reloadPageWithLanguage('fr');"/>
 				    </div>
 				</div>
 				<!-- user dropdown ends -->
@@ -141,8 +141,8 @@
 			{if  isset($no_visible_elements) and  $no_visible_elements eq "TRUE"}
 		  	
 				    <div class="flags_no_visible_elements">
-				      <img src="img/en.png" onclick="document.cookie='language=en';document.location.reload(true);"/>
-				      <img src="img/fr.png" onclick="document.cookie='language=fr';document.location.reload(true);"/>
+				      <img src="img/en.png" onclick="reloadPageWithLanguage('en');"/>
+				      <img src="img/fr.png" onclick="reloadPageWithLanguage('fr');"/>
 				    </div>
 
 			{/if}
@@ -181,6 +181,16 @@
 	<!-- external javascript
 	================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
+	<script>
+	function reloadPageWithLanguage(language){
+	  if(window.location.search == ""){
+	    var url = window.location.href + "?setLang=true&Language=" + language;
+	  }else{
+	    var url = window.location.href + "&setLang=true&Language=" + language;
+	  }
+	  window.location.href = url;
+	}
+	</script>
 
 	<!-- jQuery -->
 	<script src="js/jquery-1.7.2.min.js"></script>

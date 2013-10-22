@@ -1,9 +1,17 @@
 <?php
+
+    /**
+    * This script will install all databases related to the Ryzom AMS and it will generate an admin account..
+    * @author Daan Janssens, mentored by Matthew Lagoe
+    */
+    
+    //require the pages that are being needed.
     require( '../../config.php' );
     require( '../../../ams_lib/libinclude.php' );
     ini_set( "display_errors", true );
     error_reporting( E_ALL );
     
+    //var used to access the DB;
     global $cfg;
     
 
@@ -25,6 +33,8 @@
             `LastName` varchar(255) NOT NULL DEFAULT '',
             `Gender` tinyint(1) unsigned NOT NULL DEFAULT '0',
             `Country` char(2) NOT NULL DEFAULT '',
+            `ReceiveMail` int(1) NOT NULL DEFAULT 1,
+            `Language` varchar(3) DEFAULT NULL,
             PRIMARY KEY (`UId`)
             ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users information for ryzom_ams';
             
@@ -37,7 +47,7 @@
         $sql = "
             CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`;
             USE `" . $cfg['db']['lib']['name'] ."`;
-            DROP TABLE IF EXISTS ams_querycache;
+            DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ams_querycache`;
             
             CREATE TABLE ams_querycache (
             `SID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
@@ -46,7 +56,27 @@
             `db` VARCHAR( 80 ) NOT NULL
             );
             
+        -- -----------------------------------------------------------------------------------------------------------------------
+        -- -----------------------------------------------------------------------------------------------------------------------
 
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_log` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`tagged` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`tag` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`in_support_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`in_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_info` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`email` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`forwarded` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`assigned` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_reply` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_content` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`support_group` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_category` ;
+	DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_user` ;
+
+        
         -- -----------------------------------------------------
         -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket_category`
         -- -----------------------------------------------------
@@ -273,7 +303,7 @@
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
             
-        INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
+        INSERT IGNORE INTO `" . $cfg['db']['lib']['name'] ."`.`ticket_category` (`Name`) VALUES ('Uncategorized'),('Hacking'),('Ingame-Bug'),('Website-Bug'),('Installation');
         
                         
         
@@ -286,6 +316,10 @@
           `SGroupId` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
           `Name` VARCHAR(22) NOT NULL ,
           `Tag` VARCHAR(7) NOT NULL ,
+          `GroupEmail` VARCHAR(45) NULL ,
+          `IMAP_MailServer` VARCHAR(60) NULL ,
+          `IMAP_Username` VARCHAR(45) NULL ,
+          `IMAP_Password` VARCHAR(90) NULL ,
           PRIMARY KEY (`SGroupId`) ,
           UNIQUE INDEX `Name_UNIQUE` (`Name` ASC) ,
           UNIQUE INDEX `Tag_UNIQUE` (`Tag` ASC) )
@@ -349,19 +383,14 @@
           `Body` VARCHAR(400) NULL ,
           `Status` VARCHAR(45) NULL ,
           `Attempts` VARCHAR(45) NULL DEFAULT 0 ,
-          `Sender` INT(10) UNSIGNED NOT NULL ,
-          `UserId` INT(10) UNSIGNED NOT NULL ,
-          `MessageId` VARCHAR(45) NOT NULL ,
-          `TicketId` INT UNSIGNED NOT NULL ,
+          `UserId` INT(10) UNSIGNED NULL ,
+          `MessageId` VARCHAR(45) NULL ,
+          `TicketId` INT UNSIGNED NULL ,
+          `Sender` INT(10) UNSIGNED NULL ,
           PRIMARY KEY (`MailId`) ,
-          INDEX `fk_email_ticket_user1` (`Sender` ASC) ,
           INDEX `fk_email_ticket_user2` (`UserId` ASC) ,
           INDEX `fk_email_ticket1` (`TicketId` ASC) ,
-          CONSTRAINT `fk_email_ticket_user1`
-            FOREIGN KEY (`Sender` )
-            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
-            ON DELETE NO ACTION
-            ON UPDATE NO ACTION,
+          INDEX `fk_email_support_group1` (`Sender` ASC) ,
           CONSTRAINT `fk_email_ticket_user2`
             FOREIGN KEY (`UserId` )
             REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket_user` (`TUserId` )
@@ -371,11 +400,49 @@
             FOREIGN KEY (`TicketId` )
             REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket` (`TId` )
             ON DELETE NO ACTION
+            ON UPDATE NO ACTION,
+          CONSTRAINT `fk_email_support_group1`
+            FOREIGN KEY (`Sender` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`support_group` (`SGroupId` )
+            ON DELETE CASCADE
             ON UPDATE NO ACTION)
         ENGINE = InnoDB;
-
-                
-
+        
+        
+        -- -----------------------------------------------------
+        -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket_info`
+        -- -----------------------------------------------------
+        DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_info` ;
+        
+        CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket_info` (
+          `TInfoId` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+          `Ticket` INT UNSIGNED NOT NULL ,
+          `ShardId` INT NULL ,
+          `UserPosition` VARCHAR(65) NULL ,
+          `ViewPosition` VARCHAR(65) NULL ,
+          `ClientVersion` VARCHAR(65) NULL ,
+          `PatchVersion` VARCHAR(65) NULL ,
+          `ServerTick` VARCHAR(40) NULL ,
+          `ConnectState` VARCHAR(40) NULL ,
+          `LocalAddress` VARCHAR(70) NULL ,
+          `Memory` VARCHAR(60) NULL ,
+          `OS` VARCHAR(120) NULL ,
+          `Processor` VARCHAR(120) NULL ,
+          `CPUID` VARCHAR(50) NULL ,
+          `CpuMask` VARCHAR(50) NULL ,
+          `HT` VARCHAR(35) NULL ,
+          `NeL3D` VARCHAR(120) NULL ,
+          `PlayerName` VARCHAR(45) NULL ,
+          `UserId` INT NULL ,
+          `TimeInGame` VARCHAR(50) NULL ,
+          PRIMARY KEY (`TInfoId`) ,
+          INDEX `fk_ticket_info_ticket1` (`Ticket` ASC) ,
+          CONSTRAINT `fk_ticket_info_ticket1`
+            FOREIGN KEY (`Ticket` )
+            REFERENCES `" . $cfg['db']['lib']['name'] ."`.`ticket` (`TId` )
+            ON DELETE NO ACTION
+            ON UPDATE NO ACTION)
+        ENGINE = InnoDB;
         ";
         $dbl->executeWithoutParams($sql);
         print "The Lib & Web database were correctly installed! <br />";
@@ -386,11 +453,12 @@
           'name' => "admin",
           'pass' => $hashpass,
           'mail' => "admin@admin.com",
-          'permission' => 3
+          'permission' => 3,
+          'lang' => "en"
         );
         try{
             $dbw = new DBLayer("web");
-            $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Permission) VALUES (:name, :pass, :mail, :permission)",$params);
+            $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Permission, Language) VALUES (:name, :pass, :mail, :permission, :lang)",$params);
             Users::createUser($params, $user_id);
             $dbl = new DBLayer("lib");
             $dbl->execute("UPDATE ticket_user SET Permission = 3 WHERE TUserId = :user_id",array('user_id' => $user_id));

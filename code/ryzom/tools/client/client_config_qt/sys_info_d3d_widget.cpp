@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "sys_info_d3d_widget.h"
+
 #include "system.h"
 
 CSysInfoD3DWidget::CSysInfoD3DWidget( QWidget *parent ) :
@@ -22,9 +24,11 @@ CSysInfoD3DWidget::CSysInfoD3DWidget( QWidget *parent ) :
 {
 	setupUi( this );
 
+#ifdef Q_OS_WIN32
 	descriptionLabel->setText( CSystem::GetInstance().d3dInfo.device.c_str() );
 	driverLabel->setText( CSystem::GetInstance().d3dInfo.driver.c_str() );
 	versionLabel->setText( CSystem::GetInstance().d3dInfo.driverVersion.c_str() );
+#endif
 }
 
 CSysInfoD3DWidget::~CSysInfoD3DWidget()

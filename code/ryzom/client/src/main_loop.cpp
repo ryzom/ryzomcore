@@ -42,6 +42,7 @@
 #include "nel/3d/u_material.h"
 #include "nel/3d/u_instance_material.h"
 #include "nel/3d/u_cloud_scape.h"
+#include "nel/3d/stereo_hmd.h"
 // game share
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"
@@ -77,7 +78,7 @@
 #include "world_database_manager.h"
 #include "continent_manager.h"
 #include "ig_callback.h"
-#include "fog_map.h"
+//#include "fog_map.h"
 #include "movie_shooter.h"
 #include "sound_manager.h"
 #include "graph.h"
@@ -124,16 +125,6 @@
 
 #include "nel/misc/check_fpu.h"
 
-// TMP TMP
-#include "nel/gui/ctrl_polygon.h"
-// TMP TMP
-#include "game_share/scenario_entry_points.h"
-#include "nel/3d/driver.h"
-#include "nel/3d/texture_file.h"
-
-#include "nel/3d/packed_world.h"
-#include "nel/3d/packed_zone.h"
-#include "nel/3d/driver_user.h"
 
 
 #ifdef USE_WATER_ENV_MAP
@@ -148,6 +139,14 @@
 #include "nel/gui/lua_manager.h"
 #include "nel/gui/group_table.h"
 
+// pulled from main_loop.cpp
+#include "ping.h"
+#include "profiling.h"
+#include "camera.h"
+#include "main_loop_debug.h"
+#include "main_loop_temp.h"
+#include "main_loop_utilities.h"
+
 
 ///////////
 // USING //
@@ -159,20 +158,12 @@ using namespace NLNET;
 using namespace std;
 
 
-// TMP TMP
-static void viewportToScissor(const CViewport &vp, CScissor &scissor)
-{
-	scissor.X = vp.getX();
-	scissor.Y = vp.getY();
-	scissor.Width = vp.getWidth();
-	scissor.Height = vp.getHeight();
-}
+
 
 
 ////////////
 // EXTERN //
 ////////////
-extern std::set<std::string>	LodCharactersNotFound;
 extern UDriver					*Driver;
 extern IMouseDevice				*MouseDevice;
 extern UScene					*Scene;
@@ -187,12 +178,15 @@ extern TTime					UniversalTime;
 extern UMaterial				GenericMat;
 extern UCamera					MainCam;
 extern CEventsListener			EventsListener;
-extern uint32					NbDatabaseChanges;
 extern CMatrix					MainSceneViewMatrix;
 extern CMatrix					InvMainSceneViewMatrix;
 extern std::vector<UTextureFile*> LogoBitmaps;
 extern bool						IsInRingSession;
 extern std::string				UsedFSAddr;
+
+// temp
+extern NLMISC::CValueSmoother smoothFPS;
+extern NLMISC::CValueSmoother moreSmoothFPS;
 
 void loadBackgroundBitmap (TBackground background);
 void destroyLoadingBitmap ();
@@ -216,84 +210,6 @@ uint64 SimulatedServerTick = 0;
 
 
 
-///////////
-// CLASS //
-///////////
-/**
- * Class to manage the ping computed with the database.
- * \author Guillaume PUZIN
- * \author Nevrax France
- * \date 2003
- */
-class CPing : public ICDBNode::IPropertyObserver
-{
-private:
-	uint32	_Ping;
-	bool	_RdyToPing;
-
-public:
-	// Constructor.
-	CPing() {_Ping = 0; _RdyToPing = true;}
-	// Destructor.
-	~CPing() {;}
-
-	// Add an observer on the database for the ping.
-	void init()
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if(pIM)
-		{
-			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
-			if(pNodeLeaf)
-			{
-				ICDBNode::CTextId textId;
-				pNodeLeaf->addObserver(this, textId);
-				//	nlwarning("CPing: cannot add the observer");
-			}
-			else
-				nlwarning("CPing: 'SERVER:DEBUG_INFO:Ping' does not exist.");
-		}
-	}
-
-	// Release the observer on the database for the ping.
-	void release()
-	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if(pIM)
-		{
-			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DEBUG_INFO:Ping", false);
-			if(pNodeLeaf)
-			{
-				ICDBNode::CTextId textId;
-				pNodeLeaf->removeObserver(this, textId);
-			}
-			else
-				nlwarning("CPing: 'SERVER:DEBUG_INFO:Ping' does not exist.");
-		}
-	}
-
-	// Method called when the ping message is back.
-	virtual void update(ICDBNode* node)
-	{
-		CCDBNodeLeaf *leaf = safe_cast<CCDBNodeLeaf *>(node);
-		uint32 before = (uint32)leaf->getValue32();
-		uint32 current = (uint32)(0xFFFFFFFF & ryzomGetLocalTime());
-		if(before > current)
-		{
-			//nlwarning("DB PING Pb before '%u' after '%u'.", before, current);
-			if(ClientCfg.Check)
-				nlstop;
-		}
-		_Ping = current - before;
-		_RdyToPing = true;
-	}
-
-	// return the ping in ms.
-	uint32 getValue() {return _Ping;}
-
-	void rdyToPing(bool rdy) {_RdyToPing = rdy;}
-	bool rdyToPing() const {return _RdyToPing;}
-};
 
 /////////////
 // GLOBALS //
@@ -326,12 +242,6 @@ bool				ShowHelp = false;	// Do the Help have to be displayed.
 uint8				ShowInfos = 0;		// 0=no info 1=text info 2=graph info
 
 bool				bZeroCpu = false;	// For no Cpu use if application is minimize  TODO: intercept minimize message, called by CTRL + Z at this
-
-bool				Profiling = false;			// Are we in Profile mode?
-uint				ProfileNumFrame = 0;
-bool				WantProfiling = false;
-bool				ProfilingVBLock = false;
-bool				WantProfilingVBLock = false;
 
 bool				MovieShooterSaving= false;	// Are we in Shooting mode?
 
@@ -379,8 +289,6 @@ CGameContextMenu	GameContextMenu;
 
 
 
-NLMISC::CValueSmoother smoothFPS;
-NLMISC::CValueSmoother moreSmoothFPS(64);
 
 static CRefPtr<CCDBNodeLeaf> s_FpsLeaf;
 static CRefPtr<CCDBNodeLeaf> s_UiDirectionLeaf;
@@ -425,12 +333,6 @@ H_AUTO_DECL ( RZ_Client_Main_Loop_Net )
 ///////////////
 // FUNCTIONS //
 ///////////////
-// Display some debug infos.
-void displayDebug();
-void displayDebugFps();
-void displayDebugUIUnderMouse();
-// Display an Help.
-void displayHelp();
 
 //update the sound manager (listener pos, user walk/run sound...)
 void updateSound();
@@ -453,476 +355,11 @@ void displaySceneProfiles();
 // validate current dialogs (end them if the player is too far from its interlocutor)
 void validateDialogs(const CGameContextMenu &gcm);
 
-void buildCameraClippingPyramid (vector<CPlane> &planes)
-{
-	// Compute pyramid in view basis.
-	CVector		pfoc(0,0,0);
-	const CFrustum &frustum  = MainCam.getFrustum();
-	InvMainSceneViewMatrix = MainCam.getMatrix();
-	MainSceneViewMatrix = InvMainSceneViewMatrix;
-	MainSceneViewMatrix.invert();
 
-	CVector		lb(frustum.Left,  frustum.Near, frustum.Bottom );
-	CVector		lt(frustum.Left,  frustum.Near, frustum.Top    );
-	CVector		rb(frustum.Right, frustum.Near, frustum.Bottom );
-	CVector		rt(frustum.Right, frustum.Near, frustum.Top    );
+// ***************************************************************************
 
-	CVector		lbFar(frustum.Left,  ClientCfg.CharacterFarClip, frustum.Bottom);
-	CVector		ltFar(frustum.Left,  ClientCfg.CharacterFarClip, frustum.Top   );
-	CVector		rtFar(frustum.Right, ClientCfg.CharacterFarClip, frustum.Top   );
-
-	planes.resize (4);
-	// planes[0].make(lbFar, ltFar, rtFar);
-	planes[0].make(pfoc, lt, lb);
-	planes[1].make(pfoc, rt, lt);
-	planes[2].make(pfoc, rb, rt);
-	planes[3].make(pfoc, lb, rb);
-
-	// Compute pyramid in World basis.
-	// The vector transformation M of a plane p is computed as p*M-1.
-	// Here, ViewMatrix== CamMatrix-1. Hence the following formula.
-	uint i;
-
-	for (i = 0; i < 4; i++)
-	{
-		planes[i] = planes[i]*MainSceneViewMatrix;
-	}
-}
-
-
-//---------------------------------------------------
-// Test Profiling and run?
-//---------------------------------------------------
-void	testLaunchProfile()
-{
-	if(!WantProfiling)
-		return;
-
-	// comes from ActionHandler
-	WantProfiling= false;
-
-#ifdef _PROFILE_ON_
-	if( !Profiling )
-	{
-		// start the bench.
-		NLMISC::CHTimer::startBench();
-		ProfileNumFrame = 0;
-		Driver->startBench();
-		if (SoundMngr)
-			SoundMngr->getMixer()->startDriverBench();
-		// state
-		Profiling= true;
-	}
-	else
-	{
-		// end the bench.
-		if (SoundMngr)
-			SoundMngr->getMixer()->endDriverBench();
-		NLMISC::CHTimer::endBench();
-		Driver->endBench();
-
-
-		// Display and save profile to a File.
-		CLog	log;
-		CFileDisplayer	fileDisplayer(NLMISC::CFile::findNewFile(getLogDirectory() + "profile.log"));
-		CStdDisplayer	stdDisplayer;
-		log.addDisplayer(&fileDisplayer);
-		log.addDisplayer(&stdDisplayer);
-		// diplay
-		NLMISC::CHTimer::displayHierarchicalByExecutionPathSorted(&log, CHTimer::TotalTime, true, 48, 2);
-		NLMISC::CHTimer::displayHierarchical(&log, true, 48, 2);
-		NLMISC::CHTimer::displayByExecutionPath(&log, CHTimer::TotalTime);
-		NLMISC::CHTimer::display(&log, CHTimer::TotalTime);
-		NLMISC::CHTimer::display(&log, CHTimer::TotalTimeWithoutSons);
-		Driver->displayBench(&log);
-
-		if (SoundMngr)
-			SoundMngr->getMixer()->displayDriverBench(&log);
-
-		// state
-		Profiling= false;
-	}
-#endif	// #ifdef _PROFILE_ON_
-}
-
-
-//---------------------------------------------------
-// Test ProfilingVBLock and run?
-//---------------------------------------------------
-void	testLaunchProfileVBLock()
-{
-	// If running, must stop for this frame.
-	if(ProfilingVBLock)
-	{
-		vector<string>	strs;
-		Driver->endProfileVBHardLock(strs);
-		nlinfo("Profile VBLock");
-		nlinfo("**************");
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		ProfilingVBLock= false;
-
-		// Display additional info on allocated VBHards
-		nlinfo("VBHard list");
-		nlinfo("**************");
-		Driver->profileVBHardAllocation(strs);
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		strs.clear();
-		Driver->endProfileIBLock(strs);
-		nlinfo("Profile Index Buffer Lock");
-		nlinfo("**************");
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		ProfilingVBLock= false;
-
-		// Display additional info on allocated VBHards
-		/*
-		nlinfo("Index Buffer list");
-		nlinfo("**************");
-		Driver->profileIBAllocation(strs);
-		for(uint i=0;i<strs.size();i++)
-		{
-			nlinfo(strs[i].c_str());
-		}
-		*/
-	}
-
-	// comes from ActionHandler
-	if(WantProfilingVBLock)
-	{
-		WantProfilingVBLock= false;
-		ProfilingVBLock= true;
-		Driver->startProfileVBHardLock();
-		Driver->startProfileIBLock();
-	}
-}
-
-
-//---------------------------------------------------
-// update the camera perspective setup
-//---------------------------------------------------
-void	updateCameraPerspective()
-{
-	float	fov, aspectRatio;
-	computeCurrentFovAspectRatio(fov, aspectRatio);
-
-	// change the perspective of the scene
-	if(!MainCam.empty())
-		MainCam.setPerspective(fov, aspectRatio, CameraSetupZNear, ClientCfg.Vision);
-	// change the perspective of the root scene
-	if(SceneRoot)
-	{
-		UCamera cam= SceneRoot->getCam();
-		cam.setPerspective(fov, aspectRatio, SceneRootCameraZNear, SceneRootCameraZFar);
-	}
-}
-
-//---------------------------------------------------
-// Compare ClientCfg and LastClientCfg to know what we must update
-//---------------------------------------------------
-void updateFromClientCfg()
-{
-	CClientConfig::setValues();
-	ClientCfg.IsInvalidated = false;
-
-	// GRAPHICS - GENERAL
-	//---------------------------------------------------
-	if ((ClientCfg.Windowed != LastClientCfg.Windowed)	||
-		(ClientCfg.Width != LastClientCfg.Width)		||
-		(ClientCfg.Height != LastClientCfg.Height)		||
-		(ClientCfg.Depth != LastClientCfg.Depth)		||
-		(ClientCfg.Frequency != LastClientCfg.Frequency))
-	{
-		setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
-									ClientCfg.Windowed, ClientCfg.Frequency));
-	}
-
-	if (ClientCfg.DivideTextureSizeBy2 != LastClientCfg.DivideTextureSizeBy2)
-	{
-		if (ClientCfg.DivideTextureSizeBy2)
-			Driver->forceTextureResize(2);
-		else
-			Driver->forceTextureResize(1);
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.WaitVBL != LastClientCfg.WaitVBL)
-	{
-		if(ClientCfg.WaitVBL)
-			Driver->setSwapVBLInterval(1);
-		else
-			Driver->setSwapVBLInterval(0);
-	}
-
-	// GRAPHICS - LANDSCAPE
-	//---------------------------------------------------
-	if (ClientCfg.LandscapeThreshold != LastClientCfg.LandscapeThreshold)
-	{
-		if (Landscape) Landscape->setThreshold(ClientCfg.getActualLandscapeThreshold());
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.LandscapeTileNear != LastClientCfg.LandscapeTileNear)
-	{
-		if (Landscape) Landscape->setTileNear(ClientCfg.LandscapeTileNear);
-	}
-
-	//---------------------------------------------------
-	if (Landscape)
-	{
-		if (ClientCfg.Vision != LastClientCfg.Vision)
-		{
-			if (!ClientCfg.Light)
-			{
-				// Not in an indoor ?
-				if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
-				{
-					// Refresh All Zone in streaming according to the refine position
-					vector<string>		zonesAdded;
-					vector<string>		zonesRemoved;
-					const R2::CScenarioEntryPoints::CCompleteIsland *ci = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
-					Landscape->refreshAllZonesAround(View.refinePos(), ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, ProgressBar, ci ? &(ci->ZoneIDs) : NULL);
-					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
-					LandscapeIGManager.loadArrayZoneIG(zonesAdded);
-				}
-			}
-		}
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.Vision != LastClientCfg.Vision || ClientCfg.FoV!=LastClientCfg.FoV ||
-		ClientCfg.Windowed != LastClientCfg.Windowed || ClientCfg.ScreenAspectRatio != LastClientCfg.ScreenAspectRatio )
-	{
-		updateCameraPerspective();
-	}
-
-	//---------------------------------------------------
-	if (Landscape)
-	{
-		if (ClientCfg.MicroVeget != LastClientCfg.MicroVeget)
-		{
-			if(ClientCfg.MicroVeget)
-			{
-				// if configured, enable the vegetable and load the texture.
-				Landscape->enableVegetable(true);
-				// Default setup. TODO later by gameDev.
-				Landscape->setVegetableWind(CVector(0.5, 0.5, 0).normed(), 0.5, 1, 0);
-				// Default setup. should work well for night/day transition in 30 minutes.
-				// Because all vegetables will be updated every 20 seconds => 90 steps.
-				Landscape->setVegetableUpdateLightingFrequency(1/20.f);
-				// Density (percentage to ratio)
-				Landscape->setVegetableDensity(ClientCfg.MicroVegetDensity/100.f);
-			}
-			else
-			{
-				Landscape->enableVegetable(false);
-			}
-		}
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.MicroVegetDensity != LastClientCfg.MicroVegetDensity)
-	{
-		// Density (percentage to ratio)
-		if (Landscape) Landscape->setVegetableDensity(ClientCfg.MicroVegetDensity/100.f);
-	}
-
-	// GRAPHICS - SPECIAL EFFECTS
-	//---------------------------------------------------
-	if (ClientCfg.FxNbMaxPoly != LastClientCfg.FxNbMaxPoly)
-	{
-		if (Scene->getGroupLoadMaxPolygon("Fx") != ClientCfg.FxNbMaxPoly)
-			Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.Cloud != LastClientCfg.Cloud)
-	{
-		if (ClientCfg.Cloud)
-		{
-			InitCloudScape = true;
-			CloudScape = Scene->createCloudScape();
-		}
-		else
-		{
-			if (CloudScape != NULL)
-				Scene->deleteCloudScape(CloudScape);
-			CloudScape = NULL;
-		}
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.CloudQuality != LastClientCfg.CloudQuality)
-	{
-		if (CloudScape != NULL)
-			CloudScape->setQuality(ClientCfg.CloudQuality);
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.CloudUpdate != LastClientCfg.CloudUpdate)
-	{
-		if (CloudScape != NULL)
-			CloudScape->setNbCloudToUpdateIn80ms(ClientCfg.CloudUpdate);
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.Shadows != LastClientCfg.Shadows)
-	{
-		// Enable/Disable Receive on Landscape
-		if(Landscape)
-		{
-			Landscape->enableReceiveShadowMap(ClientCfg.Shadows);
-		}
-		// Enable/Disable Cast for all entities
-		for(uint i=0;i<EntitiesMngr.entities().size();i++)
-		{
-			CEntityCL	*ent= EntitiesMngr.entities()[i];
-			if(ent)
-				ent->updateCastShadowMap();
-		}
-	}
-
-	// GRAPHICS - CHARACTERS
-	//---------------------------------------------------
-	if (ClientCfg.SkinNbMaxPoly != LastClientCfg.SkinNbMaxPoly)
-	{
-		if (Scene->getGroupLoadMaxPolygon("Skin") != ClientCfg.SkinNbMaxPoly)
-			Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.NbMaxSkeletonNotCLod != LastClientCfg.NbMaxSkeletonNotCLod )
-	{
-		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.CharacterFarClip != LastClientCfg.CharacterFarClip)
-	{
-		// Nothing to do
-	}
-
-	//---------------------------------------------------
-	if (ClientCfg.HDEntityTexture != LastClientCfg.HDEntityTexture)
-	{
-		// Don't reload Texture, will be done at next Game Start
-	}
-
-	// INTERFACE works
-
-
-	// INPUTS
-	//---------------------------------------------------
-	if (ClientCfg.CursorSpeed != LastClientCfg.CursorSpeed)
-		SetMouseSpeed (ClientCfg.CursorSpeed);
-
-	if (ClientCfg.CursorAcceleration != LastClientCfg.CursorAcceleration)
-		SetMouseAcceleration (ClientCfg.CursorAcceleration);
-
-	if (ClientCfg.HardwareCursor != LastClientCfg.HardwareCursor)
-	{
-		if (ClientCfg.HardwareCursor != IsMouseCursorHardware())
-		{
-			InitMouseWithCursor (ClientCfg.HardwareCursor);
-		}
-	}
-
-
-	// SOUND
-	//---------------------------------------------------
-	bool	mustReloadSoundMngrContinent= false;
-
-	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn)
-	{
-		if (SoundMngr && !ClientCfg.SoundOn)
-		{
-			nlwarning("Deleting sound manager...");
-			delete SoundMngr;
-			SoundMngr = NULL;
-		}
-		else if (SoundMngr == NULL && ClientCfg.SoundOn)
-		{
-			nlwarning("Creating sound manager...");
-			SoundMngr = new CSoundManager();
-			try
-			{
-				SoundMngr->init(NULL);
-			}
-			catch(const Exception &e)
-			{
-				nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-				SoundMngr = 0;
-			}
-
-			// re-init with good SFX/Music Volume
-			if(SoundMngr)
-			{
-				SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
-				SoundMngr->setGameMusicVolume(ClientCfg.SoundGameMusicVolume);
-			}
-		}
-		else
-		{
-			nlwarning("Sound config error !");
-		}
-
-		mustReloadSoundMngrContinent= true;
-	}
-
-	// change EAX?
-	if ( SoundMngr && LastClientCfg.SoundOn &&
-		(ClientCfg.UseEax != LastClientCfg.UseEax) )
-	{
-		SoundMngr->reset();
-
-		mustReloadSoundMngrContinent= true;
-	}
-
-	// change SoundForceSoftwareBuffer?
-	if ( SoundMngr && LastClientCfg.SoundOn &&
-		(ClientCfg.SoundForceSoftwareBuffer != LastClientCfg.SoundForceSoftwareBuffer) )
-	{
-		SoundMngr->reset();
-
-		mustReloadSoundMngrContinent= true;
-	}
-
-	// change MaxTrack? don't reset
-	if ( SoundMngr && LastClientCfg.SoundOn &&
-		(ClientCfg.MaxTrack != LastClientCfg.MaxTrack))
-	{
-		SoundMngr->getMixer()->changeMaxTrack(ClientCfg.MaxTrack);
-	}
-
-	// change SoundFX Volume? don't reset
-	if (SoundMngr && ClientCfg.SoundSFXVolume != LastClientCfg.SoundSFXVolume)
-	{
-		SoundMngr->setSFXVolume(ClientCfg.SoundSFXVolume);
-	}
-
-	// change Game Music Volume? don't reset
-	if (SoundMngr && ClientCfg.SoundGameMusicVolume != LastClientCfg.SoundGameMusicVolume)
-	{
-		SoundMngr->setGameMusicVolume(ClientCfg.SoundGameMusicVolume);
-	}
-
-	// reload only if active and reseted
-	if (mustReloadSoundMngrContinent && SoundMngr && ContinentMngr.cur() && !ContinentMngr.cur()->Indoor && UserEntity)
-	{
-		SoundMngr->loadContinent(ContinentMngr.getCurrentContinentSelectName(), UserEntity->pos());
-	}
-
-	// Ok backup the new clientcfg
-	LastClientCfg = ClientCfg;
-}
+enum TSkyMode { NoSky, OldSky, NewSky };
+static TSkyMode s_SkyMode = NoSky;
 
 void preRenderNewSky ()
 {
@@ -934,29 +371,43 @@ void preRenderNewSky ()
 		cd.Hour = 12.f;
 	}
 	sky.setup(cd, SmoothedClientDate, WeatherManager.getWeatherValue(), MainFogState.FogColor, Scene->getSunDirection(), false);
-	// setup camera
-	CFrustum frust = MainCam.getFrustum();
-	UCamera camSky = sky.getScene()->getCam();
-	sky.getScene()->setViewport(Scene->getViewport());
-	camSky.setTransformMode(UTransform::DirectMatrix);
-	// must have our own Far!!!
-	frust.Far= SkyCameraZFar;
-	camSky.setFrustum(frust);
-	CMatrix skyCameraMatrix;
-	skyCameraMatrix.identity();
-	skyCameraMatrix= MainCam.getMatrix();
-	skyCameraMatrix.setPos(CVector::Null);
-	camSky.setMatrix(skyCameraMatrix);
 }
 
-//uint32 MainLoopCounter = 0;
+void commitCamera()
+{
+	// Set the sky camera
+	if (s_SkyMode == NewSky)
+	{
+		CSky &sky = ContinentMngr.cur()->CurrentSky;
+		// setup camera
+		CFrustum frust = MainCam.getFrustum();
+		UCamera camSky = sky.getScene()->getCam();
+		sky.getScene()->setViewport(Scene->getViewport());
+		camSky.setTransformMode(UTransform::DirectMatrix);
+		// must have our own Far!!!
+		frust.Far= SkyCameraZFar;
+		camSky.setFrustum(frust);
+		CMatrix skyCameraMatrix;
+		skyCameraMatrix.identity();
+		skyCameraMatrix= MainCam.getMatrix();
+		skyCameraMatrix.setPos(CVector::Null);
+		camSky.setMatrix(skyCameraMatrix);
+	}
 
+	// Set The Root Camera
+	UCamera camRoot = SceneRoot->getCam();
+	if(!camRoot.empty())
+	{
+		// Update Camera Position/Rotation.
+		//camRoot.setPos(View.currentViewPos());
+		//camRoot.setRotQuat(View.currentViewQuat());
+		camRoot.setPos(MainCam.getPos());
+		camRoot.setRotQuat(MainCam.getRotQuat());
+	}
+}
 
 // ***************************************************************************
-enum TSkyMode { NoSky, OldSky, NewSky };
 
-
-// ***************************************************************************
 void	beginRenderCanopyPart()
 {
 	SceneRoot->beginPartRender();
@@ -975,17 +426,17 @@ void	endRenderMainScenePart()
 	Scene->endPartRender(true);
 }
 
-void	beginRenderSkyPart(TSkyMode skyMode)
+void	beginRenderSkyPart()
 {
-	if(skyMode == NewSky)
+	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
 		sky.getScene()->beginPartRender();
 	}
 }
-void	endRenderSkyPart(TSkyMode skyMode)
+void	endRenderSkyPart()
 {
-	if(skyMode == NewSky)
+	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
 		sky.getScene()->endPartRender(false);
@@ -1003,14 +454,6 @@ static void renderCanopyPart(UScene::TRenderPart renderPart)
 	ContinentMngr.getFogState(CanopyFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), RootFogState);
 	RootFogState.setupInDriver(*Driver);
 
-	// Set The Root Camera
-	UCamera camRoot = SceneRoot->getCam();
-	if(!camRoot.empty())
-	{
-		// Update Camera Position/Rotation.
-		camRoot.setPos(View.currentViewPos());
-		camRoot.setRotQuat(View.currentView());
-	}
 	// Render the root scene
 	SceneRoot->renderPart(renderPart);
 }
@@ -1035,12 +478,12 @@ static void renderMainScenePart(UScene::TRenderPart renderPart)
 
 // ***************************************************************************************************************************
 // Render a part of the sky
-static void renderSkyPart(UScene::TRenderPart renderPart, TSkyMode skyMode)
+static void renderSkyPart(UScene::TRenderPart renderPart)
 {
-	nlassert(skyMode != NoSky);
+	nlassert(s_SkyMode != NoSky);
 	Driver->setDepthRange(SKY_DEPTH_RANGE_START, 1.f);
 	Driver->enableFog(false);
-	if (skyMode == NewSky)
+	if (s_SkyMode == NewSky)
 	{
 		CSky &sky = ContinentMngr.cur()->CurrentSky;
 		sky.getScene()->renderPart(renderPart);
@@ -1059,95 +502,49 @@ static void renderSkyPart(UScene::TRenderPart renderPart, TSkyMode skyMode)
 	#endif
 }
 
-
 // ***************************************************************************************************************************
-// Render all scenes
-void renderAll(bool forceFullDetail)
+// Utility to force full detail
+struct CForceFullDetail
 {
-	if (ClientCfg.Bloom)
+public:
+	void backup()
 	{
-		// set bloom parameters before applying bloom effect
-		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
-		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
-		// init bloom
-		CBloomEffect::getInstance().initBloom();
+		maxFullDetailChar = Scene->getMaxSkeletonsInNotCLodForm();
+		oldBalancingMode = Scene->getPolygonBalancingMode();
+		oldSkyBalancingMode = UScene::PolygonBalancingOff;
+		UScene *skyScene = getSkyScene();
+		if (skyScene) oldSkyBalancingMode = skyScene->getPolygonBalancingMode();
 	}
-
-	// backup old balancing mode
-	uint maxFullDetailChar = Scene->getMaxSkeletonsInNotCLodForm();
-	UScene *skyScene = getSkyScene();
-	UScene::TPolygonBalancingMode oldBalancingMode = Scene->getPolygonBalancingMode();
-	UScene::TPolygonBalancingMode oldSkyBalancingMode = UScene::PolygonBalancingOff;
-	if (skyScene)
-	{
-		oldSkyBalancingMode = skyScene->getPolygonBalancingMode();
-	}
-	// disable load balancing for that frame only if asked
-	if (forceFullDetail)
+	void set()
 	{
 		Scene->setMaxSkeletonsInNotCLodForm(1000000);
 		Scene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
-		if (skyScene)
-		{
-			skyScene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
-		}
+		UScene *skyScene = getSkyScene();
+		if (skyScene) skyScene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
 	}
-
+	void restore()
 	{
-		H_AUTO_USE ( RZ_Client_Main_Loop_Sky_And_Weather )
+		Scene->setMaxSkeletonsInNotCLodForm(maxFullDetailChar);
+		Scene->setPolygonBalancingMode(oldBalancingMode);
+		UScene *skyScene = getSkyScene();
+		if (skyScene) skyScene->setPolygonBalancingMode(oldSkyBalancingMode);
+	}
+private:
+	uint maxFullDetailChar;
+	UScene::TPolygonBalancingMode oldBalancingMode;
+	UScene::TPolygonBalancingMode oldSkyBalancingMode;
+};
+static CForceFullDetail s_ForceFullDetail;
 
-		//HeightGrid.update(Scene->getCam().getPos());
-
-		// update description of light cycle
-		updateLightDesc();
-
-		// server driven weather mgt
-		updateDBDrivenWeatherValue();
-
-		// Update the weather manager
-		updateWeatherManager(MainCam.getMatrix(), ContinentMngr.cur());
-
-		// compute thunder color
-		ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
-
-		// Update the lighting
-		LightCycleManager.setHour(DayNightCycleHour, WeatherManager, ThunderColor);
-
-		#ifdef RENDER_CLOUDS
-		if (Filter3D[FilterCloud])
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Update_Cloud_Scape );
-			updateClouds();
-		}
-		#endif
-
-
-		ContinentMngr.getFogState(MainFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), MainFogState);
-
+void clearBuffers()
+{
+	if (Render)
+	{
 		if (Driver->getPolygonMode() == UDriver::Filled)
 		{
 			Driver->clearZBuffer();
 		}
 
-		#ifdef RENDER_CLOUDS
-		if (CloudScape != NULL && Filter3D[FilterCloud])
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Anim_Cloud_Scape );
-
-			Driver->enableFog (false);
-
-			// Force polygon mode to filled
-			NL3D::UDriver::TPolygonMode oldMode = Driver->getPolygonMode();
-			Driver->setPolygonMode(NL3D::UDriver::Filled);
-
-			CloudScape->anim (DT); // WARNING this function work with screen
-
-			Driver->enableFog (true);
-
-			// Reset backuped polygon mode
-			Driver->setPolygonMode(oldMode);
-		}
-		#endif
 		// Sky is used to clear the frame buffer now, but if in line or point polygon mode, we should draw it
 		if (Driver->getPolygonMode() != UDriver::Filled)
 		{
@@ -1157,6 +554,168 @@ void renderAll(bool forceFullDetail)
 			}
 		}
 	}
+	else
+	{
+		Driver->clearBuffers(ClientCfg.BGColor);
+	}
+}
+
+void renderScene(bool forceFullDetail, bool bloom)
+{
+	if (bloom)
+	{
+		// set bloom parameters before applying bloom effect
+		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+		// init bloom
+		CBloomEffect::getInstance().initBloom();
+	}
+	if (forceFullDetail)
+	{
+		s_ForceFullDetail.backup();
+		s_ForceFullDetail.set();
+	}
+	clearBuffers();
+	renderScene();
+	if (forceFullDetail)
+	{
+		s_ForceFullDetail.restore();
+	}
+	if (bloom)
+	{
+		// apply bloom effect
+		CBloomEffect::getInstance().endBloom();
+		CBloomEffect::getInstance().endInterfacesDisplayBloom();
+	}
+}
+
+// ***************************************************************************************************************************
+
+void updateWaterEnvMap()
+{
+	#ifdef USE_WATER_ENV_MAP
+	if (WaterEnvMapRefCount > 0) // water env map needed
+	{
+		if (!WaterEnvMap)
+		{
+			CSky &sky = ContinentMngr.cur()->CurrentSky;
+			if (sky.getScene())
+			{
+				nlassert(WaterEnvMapSkyCam.empty());
+				WaterEnvMapSkyCam = sky.getScene()->createCamera(); // deleted in unselect
+				nlassert(WaterEnvMapCanopyCam.empty());
+				WaterEnvMapCanopyCam = SceneRoot->createCamera(); // deleted in unselect
+				// Create water env map if not already created
+				WaterEnvMap = Driver->createWaterEnvMap();
+				if(WaterEnvMap)
+				{
+					WaterEnvMap->init(128, 256, ClientCfg.WaterEnvMapUpdateTime);
+					WaterEnvMap->setWaterEnvMapRenderCallback(&WaterEnvMapRdr);
+					Scene->setWaterEnvMap(WaterEnvMap);
+				}
+			}
+		}
+		WaterEnvMapRdr.CurrDate = SmoothedClientDate;
+		WaterEnvMapRdr.AnimationDate = SmoothedClientDate;
+		if (ClientCfg.R2EDEnabled && R2::getEditor().getFixedLighting())
+		{
+			WaterEnvMapRdr.CurrDate.Hour = 12.f;
+		}
+		WaterEnvMapRdr.CurrFogColor = MainFogState.FogColor;
+		WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
+		WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
+		CSky &sky = ContinentMngr.cur()->CurrentSky;
+		WaterEnvMap->setAlpha(sky.getWaterEnvMapAlpha());
+		Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
+	}
+	#endif
+}
+
+// ***************************************************************************************************************************
+
+void updateWeather()
+{
+	H_AUTO_USE ( RZ_Client_Main_Loop_Sky_And_Weather )
+
+	//HeightGrid.update(Scene->getCam().getPos());
+
+	// update description of light cycle
+	updateLightDesc();
+
+	// server driven weather mgt
+	updateDBDrivenWeatherValue();
+
+	// Update the weather manager
+	updateWeatherManager(MainCam.getMatrix(), ContinentMngr.cur());
+
+	// compute thunder color
+	ThunderColor.modulateFromui(WeatherManager.getCurrWeatherState().ThunderColor, (uint) (256.f * WeatherManager.getThunderLevel()));
+
+	// Update the lighting
+	LightCycleManager.setHour(DayNightCycleHour, WeatherManager, ThunderColor);
+
+	#ifdef RENDER_CLOUDS
+	if (Filter3D[FilterCloud])
+	{
+		H_AUTO_USE ( RZ_Client_Main_Loop_Update_Cloud_Scape );
+		updateClouds();
+	}
+	#endif
+	
+	ContinentMngr.getFogState(MainFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), MainFogState);
+
+	// TODO: ZBuffer clear was originally before this, but should not be necessary normally.
+	// The anim function renders new clouds. Ensure this does not break.
+	// These are old-style nel clouds.
+
+	#ifdef RENDER_CLOUDS
+	if (CloudScape != NULL && Filter3D[FilterCloud])
+	{
+		H_AUTO_USE ( RZ_Client_Main_Loop_Anim_Cloud_Scape );
+
+		Driver->enableFog (false);
+
+		// Force polygon mode to filled
+		NL3D::UDriver::TPolygonMode oldMode = Driver->getPolygonMode();
+		Driver->setPolygonMode(NL3D::UDriver::Filled);
+
+		CloudScape->anim (DT); // WARNING this function work with screen
+
+		Driver->enableFog (true);
+
+		// Reset backuped polygon mode
+		Driver->setPolygonMode(oldMode);
+	}
+	#endif
+	
+	// Update new sky
+	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
+	{
+		if(Driver->getPolygonMode() == UDriver::Filled)
+		{
+			if (Filter3D[FilterSky])
+			{
+				CSky &sky = ContinentMngr.cur()->CurrentSky;
+				if (sky.getScene())
+				{
+					s_SkyMode = NewSky;
+					sky.getScene()->animate(TimeInSec-FirstTimeInSec);
+					// Setup the sky camera
+					preRenderNewSky();
+				}
+				else
+				{
+					s_SkyMode = OldSky;
+				}
+			}
+		}
+	}
+}
+
+// ***************************************************************************************************************************
+// Render all scenes
+void renderScene()
+{
 	// Update Filter Flags
 	Scene->enableElementRender(UScene::FilterAllMeshNoVP, Filter3D[FilterMeshNoVP]);
 	Scene->enableElementRender(UScene::FilterAllMeshVP, Filter3D[FilterMeshVP]);
@@ -1170,36 +729,13 @@ void renderAll(bool forceFullDetail)
 	if(Scene_Profile)
 	Scene->profileNextRender();
 
-	TSkyMode skyMode = NoSky;
-	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
-	{
-		if(Driver->getPolygonMode() == UDriver::Filled)
-		{
-			if (Filter3D[FilterSky])
-			{
-				CSky &sky = ContinentMngr.cur()->CurrentSky;
-				if (sky.getScene())
-				{
-					skyMode = NewSky;
-					sky.getScene()->animate(TimeInSec-FirstTimeInSec);
-					// Setup the sky camera
-					preRenderNewSky();
-				}
-				else
-				{
-					skyMode = OldSky;
-				}
-			}
-		}
-	}
-
 	// initialisation of polygons renderer
 	CLandscapePolyDrawer::getInstance().beginRenderLandscapePolyPart();
 
 	// Start Part Rendering
 	beginRenderCanopyPart();
 	beginRenderMainScenePart();
-	beginRenderSkyPart(skyMode);
+	beginRenderSkyPart();
 	// Render part
 	// WARNING: always must begin rendering with at least UScene::RenderOpaque,
 	// else dynamic shadows won't work
@@ -1209,32 +745,17 @@ void renderAll(bool forceFullDetail)
 	// render of polygons on landscape
 	CLandscapePolyDrawer::getInstance().renderLandscapePolyPart();
 
-	if (skyMode != NoSky) renderSkyPart((UScene::TRenderPart) (UScene::RenderOpaque | UScene::RenderTransparent), skyMode);
+	if (s_SkyMode != NoSky) renderSkyPart((UScene::TRenderPart) (UScene::RenderOpaque | UScene::RenderTransparent));
 	renderCanopyPart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
 	renderMainScenePart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
-	if (skyMode == NewSky) renderSkyPart(UScene::RenderFlare, skyMode);
+	if (s_SkyMode == NewSky) renderSkyPart(UScene::RenderFlare);
 	// End Part Rendering
-	endRenderSkyPart(skyMode);
+	endRenderSkyPart();
 	endRenderMainScenePart();
 	endRenderCanopyPart();
 
 	// reset depth range
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
-
-	// restore load balancing mode
-	if (forceFullDetail)
-	{
-		Scene->setMaxSkeletonsInNotCLodForm(maxFullDetailChar);
-		Scene->setPolygonBalancingMode(oldBalancingMode);
-		if (skyScene)
-		{
-			skyScene->setPolygonBalancingMode(oldSkyBalancingMode);
-		}
-	}
-
-	// apply bloom effect
-	if (ClientCfg.Bloom)
-		CBloomEffect::getInstance().endBloom();
 }
 
 
@@ -1538,6 +1059,14 @@ bool mainLoop()
 	while( !UserEntity->permanentDeath()
 		&& !game_exit )
 	{
+		// If an action handler execute. NB: MUST BE DONE BEFORE ANY THING ELSE PROFILE CRASH!!!!!!!!!!!!!!!!!
+		testLaunchProfile();
+
+		// Test and may run a VBLock profile (only once)
+		testLaunchProfileVBLock();
+
+		// Start Bench
+		H_AUTO_USE ( RZ_Client_Main_Loop )
 
 		if (isBGDownloadEnabled())
 		{
@@ -1612,21 +1141,12 @@ bool mainLoop()
 		}
 
 		{
-			// If an action handler execute. NB: MUST BE DONE BEFORE ANY THING ELSE PROFILE CRASH!!!!!!!!!!!!!!!!!
-			testLaunchProfile();
-
-			// Test and may run a VBLock profile (only once)
-			testLaunchProfileVBLock();
 
 			// Stop the Outgame music, with fade effect
 			outgameFader.fade();
 
 			// update quit feature
 			updateGameQuitting();
-
-			// Start Bench
-			H_AUTO_USE ( RZ_Client_Main_Loop )
-
 
 			// update module manager
 			NLNET::IModuleManager::getInstance().updateModules();
@@ -1862,9 +1382,30 @@ bool mainLoop()
 
 		// Update Camera Position/Orientation.
 		CVector currViewPos = View.currentViewPos();
-		MainCam.setPos(currViewPos);;
-		MainCam.setRotQuat(View.currentView());
-
+		MainCam.setTransformMode(UTransformable::RotQuat);
+		MainCam.setPos(currViewPos);
+		MainCam.setRotQuat(View.currentViewQuat());
+		if (StereoHMD)
+		{
+			NLMISC::CQuat hmdOrient = StereoHMD->getOrientation();
+			NLMISC::CMatrix camMatrix = MainCam.getMatrix();
+			NLMISC::CMatrix hmdMatrix;
+			hmdMatrix.setRot(hmdOrient);
+			NLMISC::CMatrix posMatrix; // minimal head modeling, will be changed in the future
+			posMatrix.translate(StereoHMD->getEyePosition());
+			NLMISC::CMatrix mat = ((camMatrix * hmdMatrix) * posMatrix);
+			MainCam.setPos(mat.getPos());
+			MainCam.setRotQuat(mat.getRot());
+		}
+		if (StereoDisplay) 
+		{
+			StereoDisplay->updateCamera(0, &MainCam);
+			if (SceneRoot)
+			{
+				UCamera cam = SceneRoot->getCam();
+				StereoDisplay->updateCamera(1, &cam);
+			}
+		}
 
 		// see if camera is below water (useful for sort order)
 		if (ContinentMngr.cur())
@@ -1955,9 +1496,6 @@ bool mainLoop()
 		}
 
 
-		//////////////////////////
-		// RENDER THE FRAME  3D //
-		//////////////////////////
 		if (!ClientCfg.Light)
 		{
 			CClientDate newDate(RT.getRyzomDay(), DayNightCycleHour);
@@ -2044,9 +1582,6 @@ bool mainLoop()
 			}
 		}
 
-		// Set the matrix in 3D Mode.
-		Driver->setMatrixMode3D(MainCam);
-
 
 		// R2ED pre render update
 		if (ClientCfg.R2EDEnabled)
@@ -2054,237 +1589,306 @@ bool mainLoop()
 			R2::getEditor().updateBeforeRender();
 		}
 
-
-		// Position the camera to prepare the render
 		if (!ClientCfg.Light)
 		{
-
 			// Render
 			if(Render)
 			{
-				#ifdef USE_WATER_ENV_MAP
-				if (WaterEnvMapRefCount > 0) // water env map needed
+				// Update water env map (happens when continent changed etc)
+				updateWaterEnvMap();
+				
+				// Update weather
+				updateWeather();
+			}
+		}
+		
+		uint i = 0;
+		uint bloomStage = 0;
+		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
+		{
+			++i;
+			///////////////////
+			// SETUP CAMERAS //
+			///////////////////
+
+			if (StereoDisplay)
+			{
+				// modify cameras for stereo display
+				const CViewport &vp = StereoDisplay->getCurrentViewport();
+				Driver->setViewport(vp);
+				nlassert(Scene);
+				Scene->setViewport(vp);
+				if (SceneRoot)
 				{
-					if (!WaterEnvMap)
+					SceneRoot->setViewport(vp);
+				}
+				//MainCam.setTransformMode(UTransformable::DirectMatrix);
+				StereoDisplay->getCurrentMatrix(0, &MainCam);
+				StereoDisplay->getCurrentFrustum(0, &MainCam);
+				if (SceneRoot)
+				{
+					// matrix updated during commitCamera from maincam
+					UCamera cam = SceneRoot->getCam();
+					StereoDisplay->getCurrentFrustum(1, &cam);
+				}
+			}
+
+			// Commit camera changes
+			commitCamera();
+			
+			//////////////////////////
+			// RENDER THE FRAME  3D //
+			//////////////////////////
+
+			bool stereoRenderTarget = (StereoDisplay != NULL) && StereoDisplay->beginRenderTarget();
+				
+			if (!StereoDisplay || StereoDisplay->wantClear())
+			{
+				if (Render)
+				{
+					if (ClientCfg.Bloom)
 					{
-						CSky &sky = ContinentMngr.cur()->CurrentSky;
-						if (sky.getScene())
+						nlassert(bloomStage == 0);
+						// set bloom parameters before applying bloom effect
+						CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+						CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+						// start bloom effect (just before the first scene element render)
+						CBloomEffect::instance().initBloom();
+						bloomStage = 1;
+					}
+				}
+
+				// Clear buffers
+				clearBuffers();
+			}
+
+			if (!StereoDisplay || StereoDisplay->wantScene())
+			{
+				if (!ClientCfg.Light)
+				{
+					// Render
+					if(Render)
+					{
+						// nb : force full detail if a screenshot is asked
+						// todo : move outside render code
+						bool fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
+						if (fullDetail)
 						{
-							WaterEnvMapSkyCam = sky.getScene()->createCamera(); // deleted in unselect
-							WaterEnvMapCanopyCam = SceneRoot->createCamera(); // deleted in unselect
-							// Create water env map if not already created
-							WaterEnvMap = Driver->createWaterEnvMap();
-							if(WaterEnvMap)
-							{
-								WaterEnvMap->init(128, 256, ClientCfg.WaterEnvMapUpdateTime);
-								WaterEnvMap->setWaterEnvMapRenderCallback(&WaterEnvMapRdr);
-								Scene->setWaterEnvMap(WaterEnvMap);
-							}
+							s_ForceFullDetail.backup();
+							s_ForceFullDetail.set();
+						}
+						
+						// Render scene
+						renderScene();
+
+						if (fullDetail)
+						{
+							s_ForceFullDetail.restore();
 						}
 					}
-					WaterEnvMapRdr.CurrDate = SmoothedClientDate;
-					WaterEnvMapRdr.AnimationDate = SmoothedClientDate;
-					if (ClientCfg.R2EDEnabled && R2::getEditor().getFixedLighting())
-					{
-						WaterEnvMapRdr.CurrDate.Hour = 12.f;
-					}
-					WaterEnvMapRdr.CurrFogColor = MainFogState.FogColor;
-					WaterEnvMapRdr.CurrTime = TimeInSec - FirstTimeInSec;
-					WaterEnvMapRdr.CurrWeather = WeatherManager.getWeatherValue();
-					CSky &sky = ContinentMngr.cur()->CurrentSky;
-					WaterEnvMap->setAlpha(sky.getWaterEnvMapAlpha());
-					Scene->updateWaterEnvMaps(TimeInSec - FirstTimeInSec);
 				}
-				#endif
-				renderAll(ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail); // nb : force full detail if a screenshot is asked
+			}
 
-				// for that frame and
-				// tmp : display height grid
-				//static volatile bool displayHeightGrid = true;
-				/*if (displayHeightGrid)
+			if (!StereoDisplay || StereoDisplay->wantInterface3D())
+			{
+				if (!ClientCfg.Light)
 				{
-					HeightGrid.display(*Driver);
-				}*/
-				// display results?
-				if(Scene_Profile)
+					// Render
+					if (Render)
+					{
+						if (ClientCfg.Bloom && bloomStage == 1)
+						{
+							// End the actual bloom effect visible in the scene.
+							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+							CBloomEffect::instance().endBloom();
+							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+							bloomStage = 2;
+						}
+
+						// for that frame and
+						// tmp : display height grid
+						//static volatile bool displayHeightGrid = true;
+						/*if (displayHeightGrid)
+						{
+							HeightGrid.display(*Driver);
+						}*/
+						// display results?
+						if(Scene_Profile)
+						{
+							displaySceneProfiles();
+							Scene_Profile= false;
+						}
+						// Render the primitives
+						{
+							H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+							PrimFiles.display (*Driver);
+						}
+					} /* if (Render) */
+
+					// Draw Extra 3D Objects
+					Driver->setMatrixMode3D(MainCam);
+					Driver->setModelMatrix(CMatrix::Identity);
+
+					// Display PACS borders.
+					if (PACSBorders)
+					{
+						H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+						displayPACSBorders();
+						displayPACSPrimitive();
+					}
+
+					// display Sound box
+					if (SoundBox)
+					{
+						H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+						displaySoundBox();
+					}
+
+					// display Debug of Clusters
+					if (DebugClusters)
+					{
+						H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+						displayDebugClusters();
+					}
+				} /* if (!ClientCfg.Light) */
+				else
 				{
-					displaySceneProfiles();
-					Scene_Profile= false;
+		//			static UTextureFile *backgroundBitmap = NULL;
+		//			if (backgroundBitmap == NULL)
+		//				backgroundBitmap = Driver->createTextureFile("temp_background.tga");
+		//			Driver->setMatrixMode2D11();
+		//			Driver->drawBitmap (0.f, 0.f, 1024.f/1024.f, 1024.f/768.f, (UTexture&)*backgroundBitmap);
+		//			Driver->setMatrixMode3D(MainCam);
+
+					Driver->clearBuffers(CRGBA (0,0,0,0));
+					displayPACSBorders();
+					displayPACSPrimitive();
 				}
-				// Render the primitives
+
+				if (!ClientCfg.Light && !Landscape)
+				{
+					displayPACSBorders();
+				}
+
+				// Display some things not in the scene like the name, the entity path, etc.
+				EntitiesMngr.updatePostRender();
+
+				// Render the stat graphs if needed
 				{
 					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-					PrimFiles.display (*Driver);
+					CGraph::render (ShowInfos);
 				}
-			}
-			else
+
+			} /* if (!StereoDisplay || StereoDisplay->wantInterface3D()) */
+
+			if (!StereoDisplay || StereoDisplay->wantInterface2D())
 			{
-				Driver->clearBuffers(ClientCfg.BGColor);
-			}
+				// Render in 2D Mode to display 2D Interfaces and 2D texts.
+				Driver->setMatrixMode2D11();
 
-			// Draw Extra 3D Objects
-			Driver->setMatrixMode3D(MainCam);
-			Driver->setModelMatrix(CMatrix::Identity);
-
-			// Display PACS borders.
-			if (PACSBorders)
-			{
-				H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-				displayPACSBorders();
-				displayPACSPrimitive();
-			}
-
-			// display Sound box
-			if (SoundBox)
-			{
-				H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-				displaySoundBox();
-			}
-
-			// display Debug of Clusters
-			if (DebugClusters)
-			{
-				H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-				displayDebugClusters();
-			}
-
-		}
-		else
-		{
-//			static UTextureFile *backgroundBitmap = NULL;
-//			if (backgroundBitmap == NULL)
-//				backgroundBitmap = Driver->createTextureFile("temp_background.tga");
-//			Driver->setMatrixMode2D11();
-//			Driver->drawBitmap (0.f, 0.f, 1024.f/1024.f, 1024.f/768.f, (UTexture&)*backgroundBitmap);
-//			Driver->setMatrixMode3D(MainCam);
-
-			Driver->clearBuffers(CRGBA (0,0,0,0));
-			displayPACSBorders();
-			displayPACSPrimitive();
-		}
-
-		if (!ClientCfg.Light && !Landscape)
-		{
-			displayPACSBorders();
-		}
-
-		// Display some things not in the scene like the name, the entity path, etc.
-		EntitiesMngr.updatePostRender();
-
-		// R2ED pre render update
-		if (ClientCfg.R2EDEnabled)
-		{
-			// IMPORTANT : this should be called after CEntitiesMngr::updatePostRender() because
-			// entity may be added / removed there !
-			R2::getEditor().updateAfterRender();
-		}
-
-		// Update FXs (remove them).
-		FXMngr.update();
-
-		// Render the stat graphs if needed
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-			CGraph::render (ShowInfos);
-		}
-
-		// Render in 2D Mode to display 2D Interfaces and 2D texts.
-		Driver->setMatrixMode2D11();
-
-		// draw a big quad to represent thunder strokes
-		if (Render && WeatherManager.getThunderLevel() != 0.f)
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Render_Thunder )
-			Driver->drawQuad(0, 0, 1, 1, ThunderColor);
-
-			// TODO : boris : add sound here !
-		}
-
-		// Update the contextual menu
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Interface )
-
-			// Update the game cursor.
-			ContextCur.check();
-			GameContextMenu.update();
-
-			// validate dialogs
-			validateDialogs(GameContextMenu);
-
-			// Display interface v3
-			Driver->enableFog (false);
-			if (!Driver->isLost())
-			{
-				if(ShowInterface)
-					pIMinstance->updateFrameViews (MainCam);
-				if(DebugUIView)
-					pIMinstance->displayUIViewBBoxs(DebugUIFilter);
-				if(DebugUICtrl)
-					pIMinstance->displayUICtrlBBoxs(DebugUIFilter);
-				if(DebugUIGroup)
-					pIMinstance->displayUIGroupBBoxs(DebugUIFilter);
-			}
-
-			// special case in OpenGL : all scene has been display in render target,
-			// now, final texture is display with a quad
-			if(!ClientCfg.Light && ClientCfg.Bloom)
-				CBloomEffect::getInstance().endInterfacesDisplayBloom();
-		}
-
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-			if (!Driver->isLost())
-			{
-				// If show information is Active.
-				if(ShowInfos == 1)
-					displayDebug();
-
-				// If show information is Active.
-				if(ShowInfos == 2)
-					displayNetDebug();
-
-				// If show information is Active.
-				if(ShowInfos == 4)
-					displayDebugFps();
-
-				// If show information is Active.
-				if(ShowInfos == 5)
-					displayDebugUIUnderMouse();
-
-				// If show information is Active.
-				displayStreamingDebug();
-
-				// If Show Help is active -> Display an help.
-				if(ShowHelp)
-					displayHelp();
-
-				// Yoyo: indicate profiling state
-				if( Profiling )
-					displaySpecialTextProgress("Profiling");
-
-				// Display frame rate
-
-				// Create a shadow when displaying a text.
-				TextContext->setShaded(true);
-				// Set the font size.
-				TextContext->setFontSize(10);
-				// Set the text color
-				TextContext->setColor(CRGBA(255,255,255));
-
-				// temporary values for conversions
-				float x, y, width, height;
-
-				for(uint i = 0; i < ClientCfg.Logos.size(); i++)
+				// draw a big quad to represent thunder strokes
+				/*if (Render && WeatherManager.getThunderLevel() != 0.f)
 				{
-					std::vector<string> res;
-					explode(ClientCfg.Logos[i],std::string(":"), res);
-					if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
+					H_AUTO_USE ( RZ_Client_Main_Loop_Render_Thunder )
+					Driver->drawQuad(0, 0, 1, 1, ThunderColor);
+
+					// TODO : boris : add sound here !
+					// Needs more explosions
+				}*/
+
+				// Update the contextual menu
+				{
+					H_AUTO_USE ( RZ_Client_Main_Loop_Interface )
+
+					// Update the game cursor.
+					ContextCur.check();
+					GameContextMenu.update();
+
+					// validate dialogs
+					validateDialogs(GameContextMenu);
+
+					// Display interface v3
+					Driver->enableFog (false);
+					if (!Driver->isLost())
 					{
-						fromString(res[5], x);
-						fromString(res[6], y);
-						fromString(res[7], width);
-						fromString(res[8], height);
-						Driver->drawBitmap(x/(float)ClientCfg.Width, y/(float)ClientCfg.Height, width/(float)ClientCfg.Width, height/(float)ClientCfg.Height, *LogoBitmaps[i]);
+						if(ShowInterface)
+							pIMinstance->updateFrameViews (MainCam);
+						if(DebugUIView)
+							pIMinstance->displayUIViewBBoxs(DebugUIFilter);
+						if(DebugUICtrl)
+							pIMinstance->displayUICtrlBBoxs(DebugUIFilter);
+						if(DebugUIGroup)
+							pIMinstance->displayUIGroupBBoxs(DebugUIFilter);
+					}
+
+					// special case in OpenGL : all scene has been display in render target,
+					// now, final texture is display with a quad
+					if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2)
+					{
+						// End bloom effect system after drawing the 3d interface (z buffer related).
+						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+						CBloomEffect::instance().endInterfacesDisplayBloom();
+						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+						bloomStage = 0;
+					}
+				}
+
+				{
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+					if (!Driver->isLost())
+					{
+						// If show information is Active.
+						if(ShowInfos == 1)
+							displayDebug();
+
+						// If show information is Active.
+						if(ShowInfos == 2)
+							displayNetDebug();
+
+						// If show information is Active.
+						if(ShowInfos == 4)
+							displayDebugFps();
+
+						// If show information is Active.
+						if(ShowInfos == 5)
+							displayDebugUIUnderMouse();
+
+						// If show information is Active.
+						displayStreamingDebug();
+
+						// If Show Help is active -> Display an help.
+						if(ShowHelp)
+							displayHelp();
+
+						// Yoyo: indicate profiling state
+						if( Profiling )
+							displaySpecialTextProgress("Profiling");
+
+						// Display frame rate
+
+						// Create a shadow when displaying a text.
+						TextContext->setShaded(true);
+						// Set the font size.
+						TextContext->setFontSize(10);
+						// Set the text color
+						TextContext->setColor(CRGBA(255,255,255));
+
+						// temporary values for conversions
+						float x, y, width, height;
+
+						for(uint i = 0; i < ClientCfg.Logos.size(); i++)
+						{
+							std::vector<string> res;
+							explode(ClientCfg.Logos[i],std::string(":"), res);
+							if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
+							{
+								fromString(res[5], x);
+								fromString(res[6], y);
+								fromString(res[7], width);
+								fromString(res[8], height);
+								Driver->drawBitmap(x/(float)ClientCfg.Width, y/(float)ClientCfg.Height, width/(float)ClientCfg.Width, height/(float)ClientCfg.Height, *LogoBitmaps[i]);
+							}
+						}
 					}
 				}
 
@@ -2305,6 +1909,17 @@ bool mainLoop()
 					}
 				}
 
+				// R2ED post render update
+				if (ClientCfg.R2EDEnabled)
+				{
+					// IMPORTANT : this should be called after CEntitiesMngr::updatePostRender() because
+					// entity may be added / removed there !
+					R2::getEditor().updateAfterRender();
+				}
+
+				// Update FXs (remove them).
+				FXMngr.update();
+
 				// Detect disconnection / server down: display information text
 				// but keep the rendering so that the player can remember where he is
 				// and what he was doing. He can't move because the connection quality returns false.
@@ -2318,211 +1933,216 @@ bool mainLoop()
 					// from the EGS, resume the sequence because the EGS is down and won't reply.
 					FarTP.onServerQuitOk();
 				}
-			}
-		}
 
-		// Yoyo: MovieShooter.
-		if(MovieShooterSaving)
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-
-			// Add the buffer frame to the movie.
-			if(!MovieShooter.addFrame(TimeInSec, Driver))
-			{
-				// Fail to add the frame => abort.
-				endMovieShooting();
-			}
-			else
-			{
-				// Ok, just add a display.
-				displaySpecialTextProgress("MovieShooting");
-			}
-		}
-
-		if (isRecordingCamera())
-		{
-			displaySpecialTextProgress("CameraRecording");
-		}
-
-		// Temp for weather test
-		if (ClientCfg.ManualWeatherSetup && ContinentMngr.cur() && ContinentMngr.cur()->WeatherFunction)
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-			static float displayHourDelta = 0.04f; // static for edition during debug..
-
-			// Display weather function
-			if (DisplayWeatherFunction)
-			{
-				uint64 currDay = RT.getRyzomDay();
-				float currHour = DayNightCycleHour;
-				float singleHourDelta = fmodf(currHour, 1.f);
-				uint32 wndWidth, wndHeight;
-				Driver->getWindowSize(wndWidth, wndHeight);
-				Driver->setMatrixMode2D(CFrustum(0, 800, 600, 0, 0, 1, false));
-				const float lineHeight = 100.f;
-
-				// draw the weather function
-				for(uint x = 0; x < wndWidth; ++x)
+				// Yoyo: MovieShooter.
+				if(MovieShooterSaving)
 				{
-					float weatherValue;
-					if(ContinentMngr.cur())
-						weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+
+					// Add the buffer frame to the movie.
+					if(!MovieShooter.addFrame(TimeInSec, Driver))
+					{
+						// Fail to add the frame => abort.
+						endMovieShooting();
+					}
 					else
-						weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, 0);
-
-					NLMISC::clamp(weatherValue, 0.f, 1.f);
-					CRGBA seasonToColor[EGSPD::CSeason::Invalid] =
 					{
-						CRGBA::Green,
-						CRGBA::Yellow,
-						CRGBA::Red,
-						CRGBA::Blue
-					};
-					Driver->drawLine((float) x, 0.f, (float) x, lineHeight * weatherValue, seasonToColor[CRyzomTime::getSeasonByDay((uint32)currDay)]);
-					currHour += displayHourDelta;
-					if (currHour >= 24.f)
-					{
-						++currDay;
-						currHour -= 24.f;
-					}
-					singleHourDelta += displayHourDelta;
-					if (singleHourDelta >= 1.f)
-					{
-						singleHourDelta -= 1.f;
-						Driver->drawLine((float) x, 100.f, (float) x, 130, CRGBA::Red);
+						// Ok, just add a display.
+						displaySpecialTextProgress("MovieShooting");
 					}
 				}
 
-				if(ContinentMngr.cur())
+				if (isRecordingCamera())
 				{
-					// draw lines for current weather setups
-					uint numWeatherSetups = ContinentMngr.cur()->WeatherFunction[CurrSeason].getNumWeatherSetups();
-					for (uint y = 0; y < numWeatherSetups; ++y)
+					displaySpecialTextProgress("CameraRecording");
+				}
+
+				// Temp for weather test
+				if (ClientCfg.ManualWeatherSetup && ContinentMngr.cur() && ContinentMngr.cur()->WeatherFunction)
+				{
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+					static float displayHourDelta = 0.04f; // static for edition during debug..
+
+					// Display weather function
+					if (DisplayWeatherFunction)
 					{
-						float py = lineHeight * (y / (float) numWeatherSetups);
-						Driver->drawLine(0.f, py, 800.f, py, CRGBA::Magenta);
+						uint64 currDay = RT.getRyzomDay();
+						float currHour = DayNightCycleHour;
+						float singleHourDelta = fmodf(currHour, 1.f);
+						uint32 wndWidth, wndHeight;
+						Driver->getWindowSize(wndWidth, wndHeight);
+						Driver->setMatrixMode2D(CFrustum(0, 800, 600, 0, 0, 1, false));
+						const float lineHeight = 100.f;
+
+						// draw the weather function
+						for(uint x = 0; x < wndWidth; ++x)
+						{
+							float weatherValue;
+							if(ContinentMngr.cur())
+								weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
+							else
+								weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, 0);
+
+							NLMISC::clamp(weatherValue, 0.f, 1.f);
+							CRGBA seasonToColor[EGSPD::CSeason::Invalid] =
+							{
+								CRGBA::Green,
+								CRGBA::Yellow,
+								CRGBA::Red,
+								CRGBA::Blue
+							};
+							Driver->drawLine((float) x, 0.f, (float) x, lineHeight * weatherValue, seasonToColor[CRyzomTime::getSeasonByDay((uint32)currDay)]);
+							currHour += displayHourDelta;
+							if (currHour >= 24.f)
+							{
+								++currDay;
+								currHour -= 24.f;
+							}
+							singleHourDelta += displayHourDelta;
+							if (singleHourDelta >= 1.f)
+							{
+								singleHourDelta -= 1.f;
+								Driver->drawLine((float) x, 100.f, (float) x, 130, CRGBA::Red);
+							}
+						}
+
+						if(ContinentMngr.cur())
+						{
+							// draw lines for current weather setups
+							uint numWeatherSetups = ContinentMngr.cur()->WeatherFunction[CurrSeason].getNumWeatherSetups();
+							for (uint y = 0; y < numWeatherSetups; ++y)
+							{
+								float py = lineHeight * (y / (float) numWeatherSetups);
+								Driver->drawLine(0.f, py, 800.f, py, CRGBA::Magenta);
+							}
+						}
+					}
+
+					// Ctrl+ & Ctrl- change the weather value
+					if (Actions.valide ("inc_time"))
+					{
+						ManualWeatherValue += DT * 0.04f;
+					}
+					if (Actions.valide ("dec_time"))
+					{
+						ManualWeatherValue -= DT * 0.04f;
+					}
+					NLMISC::clamp(ManualWeatherValue, 0.f, 1.f);
+
+					if (ForcedDayNightCycleHour < 0) // if time is forced then can't change it manually ...
+					{
+						// Ctrl-K increase hour
+						if (Actions.valide ("inc_hour"))
+						{
+							RT.increaseTickOffset( (uint32)(2000 * displayHourDelta) );
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+						}
+
+						// Ctrl-L decrease hour
+						if (Actions.valide ("dec_hour"))
+						{
+							RT.decreaseTickOffset( (uint32)(2000 * displayHourDelta) );
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+							CTimedFXManager::getInstance().setDate(CClientDate(RT.getRyzomDay(), (float) RT.getRyzomTime()));
+							if (IGCallbacks)
+							{
+								IGCallbacks->changeSeason(); // the season doesn't change, but this force fxs to be recreated
+							}
+						}
+					}
+
+					// Ctrl-M generate statistics in a file
+						/*
+					if (Actions.valide ("weather_stats"))
+					{
+						// Only usable if there is a continent loaded.
+						if(ContinentMngr.cur())
+							CPredictWeather::generateWeatherStats("weather_stats.csv", WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
+					}*/
+
+					// Ctrl-B decrease display factor
+					if (Actions.valide ("dec_display_factor"))
+					{
+						displayHourDelta *= 0.90f;
+					}
+					// Ctrl-J increase display factor
+					if (Actions.valide ("inc_display_factor"))
+					{
+						displayHourDelta *= 1.1f;
+						displayHourDelta = std::min(1000.f, displayHourDelta);
 					}
 				}
-			}
 
-			// Ctrl+ & Ctrl- change the weather value
-			if (Actions.valide ("inc_time"))
-			{
-				ManualWeatherValue += DT * 0.04f;
-			}
-			if (Actions.valide ("dec_time"))
-			{
-				ManualWeatherValue -= DT * 0.04f;
-			}
-			NLMISC::clamp(ManualWeatherValue, 0.f, 1.f);
-
-			if (ForcedDayNightCycleHour < 0) // if time is forced then can't change it manually ...
-			{
-				// Ctrl-K increase hour
-				if (Actions.valide ("inc_hour"))
+				// Ctrl-AltGR-Z show timed FXs
+				if (ShowTimedFX)
 				{
-					RT.increaseTickOffset( (uint32)(2000 * displayHourDelta) );
-					RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
-				}
-
-				// Ctrl-L decrease hour
-				if (Actions.valide ("dec_hour"))
-				{
-					RT.decreaseTickOffset( (uint32)(2000 * displayHourDelta) );
-					RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
-					CTimedFXManager::getInstance().setDate(CClientDate(RT.getRyzomDay(), (float) RT.getRyzomTime()));
-					if (IGCallbacks)
+					if (!Driver->isLost())
 					{
-						IGCallbacks->changeSeason(); // the season doesn't change, but this force fxs to be recreated
+						CTimedFXManager::getInstance().displayFXBoxes(ShowTimedFXMode);
 					}
 				}
-			}
 
-			// Ctrl-M generate statistics in a file
-				/*
-			if (Actions.valide ("weather_stats"))
-			{
-				// Only usable if there is a continent loaded.
-				if(ContinentMngr.cur())
-					CPredictWeather::generateWeatherStats("weather_stats.csv", WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
-			}*/
+		#if !FINAL_VERSION
+					CVector2f camPos(Scene->getCam().getPos().x, Scene->getCam().getPos().y);
+					if (!ClientCfg.Light)
+					{
+						if (DisplayMicroLifeZones)
+						{
+							CMicroLifeManager::getInstance().renderMLZones(camPos);
+						}
+					}
+					if (DisplayWaterMap)
+					{
+						if (ContinentMngr.cur())
+						{
+							ContinentMngr.cur()->WaterMap.render(camPos);
+						}
+					}
+				#endif
 
-			// Ctrl-B decrease display factor
-			if (Actions.valide ("dec_display_factor"))
-			{
-				displayHourDelta *= 0.90f;
-			}
-			// Ctrl-J increase display factor
-			if (Actions.valide ("inc_display_factor"))
-			{
-				displayHourDelta *= 1.1f;
-				displayHourDelta = std::min(1000.f, displayHourDelta);
-			}
-		}
+				#ifdef NL_DEBUG
+					if (!ClientCfg.Light)
+					{
+						if (DisplayMicroLifeActiveTiles)
+						{
+							CMicroLifeManager::getInstance().renderActiveTiles();
+						}
+					}
+				#endif
+				// tmp : debug of ground fxs
+				//TestGroundFX.displayFXBoxes();
 
-		// Ctrl-AltGR-Z show timed FXs
-		if (ShowTimedFX)
-		{
-			if (!Driver->isLost())
-			{
-				CTimedFXManager::getInstance().displayFXBoxes(ShowTimedFXMode);
-			}
-		}
-
-#if !FINAL_VERSION
-			CVector2f camPos(Scene->getCam().getPos().x, Scene->getCam().getPos().y);
-			if (!ClientCfg.Light)
-			{
-				if (DisplayMicroLifeZones)
+				// Temp for sound debug
 				{
-					CMicroLifeManager::getInstance().renderMLZones(camPos);
-				}
-			}
-			if (DisplayWaterMap)
-			{
-				if (ContinentMngr.cur())
-				{
-					ContinentMngr.cur()->WaterMap.render(camPos);
-				}
-			}
+					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
+
+					if (SoundMngr != 0)
+					{
+						static bool drawSound = false;
+		 				static float camHeigh = 150.0f;
+
+		#if FINAL_VERSION
+						if (ClientCfg.ExtendedCommands)
 		#endif
+							if (Actions.valide ("draw_sound"))
+								drawSound = !drawSound;
 
-		#ifdef NL_DEBUG
-			if (!ClientCfg.Light)
-			{
-				if (DisplayMicroLifeActiveTiles)
-				{
-					CMicroLifeManager::getInstance().renderActiveTiles();
+						if (Actions.valide ("inc_camera_height"))
+							camHeigh -= 10.0f;
+						if (Actions.valide ("dec_camera_height"))
+							camHeigh += 10.0f;
+
+						if (drawSound)
+							SoundMngr->drawSounds(camHeigh);
+					}
 				}
-			}
-		#endif
-		// tmp : debug of ground fxs
-		//TestGroundFX.displayFXBoxes();
+			} /* if (!StereoDisplay || StereoDisplay->wantInterface2D()) */
 
-		// Temp for sound debug
-		{
-			H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
-
-			if (SoundMngr != 0)
+			if (StereoDisplay)
 			{
-				static bool drawSound = false;
-		 		static float camHeigh = 150.0f;
-
-#if FINAL_VERSION
-				if (ClientCfg.ExtendedCommands)
-#endif
-					if (Actions.valide ("draw_sound"))
-						drawSound = !drawSound;
-
-				if (Actions.valide ("inc_camera_height"))
-					camHeigh -= 10.0f;
-				if (Actions.valide ("dec_camera_height"))
-					camHeigh += 10.0f;
-
-				if (drawSound)
-					SoundMngr->drawSounds(camHeigh);
+				StereoDisplay->endRenderTarget();
 			}
-		}
+		} /* stereo pass */
 
 		// Draw to screen.
 		static CQuat MainCamOri;
@@ -2581,169 +2201,11 @@ bool mainLoop()
 
 			// TMP TMP
 			static volatile bool dumpValidPolys = false;
-			if (dumpValidPolys)
-			{
-				struct CPolyDisp : public CInterfaceElementVisitor
-				{
-					virtual void visitCtrl(CCtrlBase *ctrl)
-					{
-						CCtrlPolygon *cp = dynamic_cast<CCtrlPolygon *>(ctrl);
-						if (cp)
-						{
-							sint32 cornerX, cornerY;
-							cp->getParent()->getCorner(cornerX, cornerY, cp->getParentPosRef());
-							for(sint32 y = 0; y < (sint32) Screen.getHeight(); ++y)
-							{
-								for(sint32 x = 0; x < (sint32) Screen.getWidth(); ++x)
-								{
-									if (cp->contains(CVector2f((float) (x - cornerX), (float) (y - cornerY))))
-									{
-										((CRGBA *) &Screen.getPixels()[0])[x + (Screen.getHeight() - 1 - y) * Screen.getWidth()] = CRGBA::Magenta;
-									}
-								}
-							}
-						}
-					}
-					CBitmap Screen;
-				} polyDisp;
-				Driver->getBuffer(polyDisp.Screen);
-				CInterfaceManager::getInstance()->visit(&polyDisp);
-				COFile output("poly.tga");
-				polyDisp.Screen.writeTGA(output);
-				dumpValidPolys = false;
-			};
+			if (dumpValidPolys) { tempDumpValidPolys(); dumpValidPolys = false; }
 
 			// TMP TMP
 			static volatile bool dumpColPolys = false;
-			if (dumpColPolys)
-			{
-				CPackedWorld *pw = R2::getEditor().getIslandCollision().getPackedIsland();
-				if (pw)
-				{
-					static CMaterial material;
-					static CMaterial wiredMaterial;
-					static CMaterial texturedMaterial;
-					static CVertexBuffer vb;
-					static bool initDone = false;
-					if (!initDone)
-					{
-						vb.setVertexFormat(CVertexBuffer::PositionFlag);
-						vb.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
-						material.initUnlit();
-						material.setDoubleSided(true);
-						material.setZFunc(CMaterial::lessequal);
-						wiredMaterial.initUnlit();
-						wiredMaterial.setDoubleSided(true);
-						wiredMaterial.setZFunc(CMaterial::lessequal);
-						wiredMaterial.setColor(CRGBA(255, 255, 255, 250));
-						wiredMaterial.texEnvOpAlpha(0, CMaterial::Replace);
-						wiredMaterial.texEnvArg0Alpha(0, CMaterial::Diffuse, CMaterial::SrcAlpha);
-						wiredMaterial.setBlend(true);
-						wiredMaterial.setBlendFunc(CMaterial::srcalpha, CMaterial::invsrcalpha);
-						texturedMaterial.initUnlit();
-						texturedMaterial.setDoubleSided(true);
-						texturedMaterial.setZFunc(CMaterial::lessequal);
-						initDone = true;
-					}
-					// just add a projected texture
-					R2::getEditor().getIslandCollision().loadEntryPoints();
-					R2::CScenarioEntryPoints &sep = R2::CScenarioEntryPoints::getInstance();
-					CVectorD playerPos = UserEntity->pos();
-					R2::CScenarioEntryPoints::CCompleteIsland *island = sep.getCompleteIslandFromCoords(CVector2f((float) playerPos.x, (float) playerPos.y));
-					static CSString currIsland;
-					if (island && island->Island != currIsland)
-					{
-						currIsland = island->Island;
-						CTextureFile *newTex = new CTextureFile(currIsland + "_sp.tga");
-						newTex->setWrapS(ITexture::Clamp);
-						newTex->setWrapT(ITexture::Clamp);
-						texturedMaterial.setTexture(0, newTex);
-						texturedMaterial.texEnvOpRGB(0, CMaterial::Replace);
-						texturedMaterial.texEnvArg0RGB(0, CMaterial::Texture, CMaterial::SrcColor);
-						texturedMaterial.setTexCoordGen(0, true);
-						texturedMaterial.setTexCoordGenMode(0, CMaterial::TexCoordGenObjectSpace);
-						CMatrix mat;
-						CVector scale((float) (island->XMax -  island->XMin),
-									  (float) (island->YMax -  island->YMin), 0.f);
-						scale.x = 1.f / favoid0(scale.x);
-						scale.y = 1.f / favoid0(scale.y);
-						scale.z = 0.f;
-						mat.setScale(scale);
-						mat.setPos(CVector(- island->XMin * scale.x, - island->YMin * scale.y, 0.f));
-						//
-						CMatrix uvScaleMat;
-						//
-						uint texWidth = (uint) (island->XMax -  island->XMin);
-						uint texHeight = (uint) (island->YMax -  island->YMin);
-						float UScale = (float) texWidth / 	raiseToNextPowerOf2(texWidth);
-						float VScale = (float) texHeight / raiseToNextPowerOf2(texHeight);
-						//
-						uvScaleMat.setScale(CVector(UScale, - VScale, 0.f));
-						uvScaleMat.setPos(CVector(0.f, VScale, 0.f));
-						//
-						texturedMaterial.enableUserTexMat(0, true);
-						texturedMaterial.setUserTexMat(0, uvScaleMat * mat);
-					}
-					const CFrustum &frust = MainCam.getFrustum();
-
-					//
-					IDriver *driver = ((CDriverUser  *) Driver)->getDriver();
-
-					driver->enableFog(true);
-					const CRGBA clearColor = CRGBA(0, 0, 127, 0);
-					driver->setupFog(frust.Far * 0.8f, frust.Far, clearColor);
-					CViewport vp;
-					vp.init(0.f, 0.f, 1.f, 1.f);
-					driver->setupViewport(vp);
-					CScissor scissor;
-					viewportToScissor(vp, scissor);
-					driver->setupScissor(scissor);
-					//
-					driver->setFrustum(frust.Left, frust.Right, frust.Bottom, frust.Top, frust.Near, frust.Far, frust.Perspective);
-					driver->setupViewMatrix(MainCam.getMatrix().inverted());
-					driver->setupModelMatrix(CMatrix::Identity);
-					//
-					//
-					const CVector localFrustCorners[8] =
-					{
-						CVector(frust.Left, frust.Near, frust.Top),
-						CVector(frust.Right, frust.Near, frust.Top),
-						CVector(frust.Right, frust.Near, frust.Bottom),
-						CVector(frust.Left, frust.Near, frust.Bottom),
-						CVector(frust.Left  * frust.Far / frust.Near, frust.Far, frust.Top * frust.Far / frust.Near),
-						CVector(frust.Right * frust.Far / frust.Near, frust.Far, frust.Top * frust.Far / frust.Near),
-						CVector(frust.Right * frust.Far / frust.Near, frust.Far, frust.Bottom * frust.Far / frust.Near),
-						CVector(frust.Left  * frust.Far / frust.Near, frust.Far, frust.Bottom * frust.Far / frust.Near)
-					};
-					// roughly compute covered zones
-					//
-					/*
-					sint frustZoneMinX = INT_MAX;
-					sint frustZoneMaxX = INT_MIN;
-					sint frustZoneMinY = INT_MAX;
-					sint frustZoneMaxY = INT_MIN;
-					for(uint k = 0; k < sizeofarray(localFrustCorners); ++k)
-					{
-						CVector corner = camMat * localFrustCorners[k];
-						sint zoneX = (sint) (corner.x / 160.f) - zoneMinX;
-						sint zoneY = (sint) floorf(corner.y / 160.f) - zoneMinY;
-						frustZoneMinX = std::min(frustZoneMinX, zoneX);
-						frustZoneMinY = std::min(frustZoneMinY, zoneY);
-						frustZoneMaxX = std::max(frustZoneMaxX, zoneX);
-						frustZoneMaxY = std::max(frustZoneMaxY, zoneY);
-					}
-					*/
-
-					const uint TRI_BATCH_SIZE = 10000; // batch size for rendering
-					static std::vector<TPackedZoneBaseSPtr> zones;
-					zones.clear();
-					pw->getZones(zones);
-					for(uint k = 0; k < zones.size(); ++k)
-					{
-						zones[k]->render(vb, *driver, texturedMaterial, wiredMaterial, MainCam.getMatrix(), TRI_BATCH_SIZE, localFrustCorners);
-					}
-				}
-			}
+			if (dumpColPolys) { tempDumpColPolys(); }
 
 			if (ClientCfg.R2EDEnabled)
 			{
@@ -2898,6 +2360,9 @@ bool mainLoop()
 				frameToSkip--;
 		}
 
+		///////////////
+		// FAR_TP -> //
+		///////////////
 		// Enter a network loop during the FarTP process, without doing the whole real main loop.
 		// This code must remain at the very end of the main loop.
 		if(LoginSM.getCurrentState() == CLoginStateMachine::st_enter_far_tp_main_loop)
@@ -2981,7 +2446,10 @@ bool mainLoop()
 			connectionState = NetMngr.getConnectionState();
 
 			CLuaManager::getInstance().executeLuaScript("game:onFarTpEnd()");
-		}
+		} 
+		///////////////
+		// <- FAR_TP //
+		///////////////
 
 	} // end of main loop
 
@@ -3048,690 +2516,6 @@ bool mainLoop()
 
 	return ryzom_exit || (Driver == NULL) || (!Driver->isActive ());
 }// mainLoop //
-
-//---------------------------------------------------
-// displayDebug :
-// Display some debug infos.
-//---------------------------------------------------
-void displayDebugFps()
-{
-	float lineStep = ClientCfg.DebugLineStep;
-	float line;
-
-	// Initialize Pen //
-	//----------------//
-	// Create a shadow when displaying a text.
-	TextContext->setShaded(true);
-	// Set the font size.
-	TextContext->setFontSize(ClientCfg.DebugFontSize);
-	// Set the text color
-	TextContext->setColor(ClientCfg.DebugFontColor);
-
-	// TOP LEFT //
-	//----------//
-	TextContext->setHotSpot(UTextContext::TopLeft);
-	line = 0.9f;
-	// Ms per frame
-	{
-		float spf = smoothFPS.getSmoothValue ();
-		// Ms per frame
-		TextContext->printfAt(0.1f, line, "FPS %.1f ms - %.1f fps", spf*1000, 1.f/spf);
-		line-= lineStep;
-		// More Smoothed Ms per frame
-		spf = moreSmoothFPS.getSmoothValue ();
-		TextContext->printfAt(0.1f, line, "Smoothed FPS %.1f ms - %.1f fps", spf*1000, 1.f/spf);
-		line-= lineStep;
-	}
-}
-
-static NLMISC::CRefPtr<CInterfaceElement> HighlightedDebugUI;
-
-// displayDebug :
-// Display information about ui elements that are under the mouse
-//---------------------------------------------------
-void displayDebugUIUnderMouse()
-{
-	float lineStep = ClientCfg.DebugLineStep;
-	float line;
-
-	// Initialize Pen //
-	//----------------//
-	// Create a shadow when displaying a text.
-	TextContext->setShaded(true);
-	// Set the font size.
-	TextContext->setFontSize(ClientCfg.DebugFontSize);
-
-
-
-	// TOP LEFT //
-	//----------//
-	TextContext->setHotSpot(UTextContext::TopLeft);
-	line = 0.9f;
-
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	// for now only accessible with R2ED
-	if (ClientCfg.R2EDEnabled)
-	{
-		TextContext->setColor(CRGBA::Cyan);
-		TextContext->printfAt(0.1f, line, "Press default key (ctrl+shift+A) to cycle prev");
-		line-= lineStep;
-		TextContext->printfAt(0.1f, line, "Press default key (ctrl+shift+Q) to cycle next");
-		line-= lineStep;
-		TextContext->printfAt(0.1f, line, "Press default key (ctrl+shift+W) to inspect element");
-		line-= 2 * lineStep;
-	}
-	//
-	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
-	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer ();
-	// If previous highlighted element is found in the list, then keep it, else reset to first element
-	if (std::find(rICL.begin(), rICL.end(), HighlightedDebugUI) == rICL.end() &&
-		std::find(rIGL.begin(), rIGL.end(), HighlightedDebugUI) == rIGL.end())
-	{
-		if (!rICL.empty())
-		{
-			HighlightedDebugUI = rICL[0];
-		}
-		else
-		if (!rIGL.empty())
-		{
-			HighlightedDebugUI = rIGL[0];
-		}
-		else
-		{
-			HighlightedDebugUI = NULL;
-		}
-	}
-	//
-	TextContext->setColor(CRGBA::Green);
-	TextContext->printfAt(0.1f, line, "Controls under cursor ");
-	line -= lineStep * 1.4f;
-	TextContext->printfAt(0.1f, line, "----------------------");
-	line -= lineStep;
-	for(uint k = 0; k < rICL.size(); ++k)
-	{
-		if (rICL[k])
-		{
-			TextContext->setColor(rICL[k] != HighlightedDebugUI ? ClientCfg.DebugFontColor : CRGBA::Red);
-			TextContext->printfAt(0.1f, line, "id = %s, address = 0x%p, parent = 0x%p", rICL[k]->getId().c_str(), rICL[k], rICL[k]->getParent());
-		}
-		else
-		{
-			TextContext->setColor(CRGBA::Blue);
-			TextContext->printfAt(0.1f, line, "<NULL> control found !!!");
-		}
-		line-= lineStep;
-	}
-	//
-	TextContext->setColor(CRGBA::Green);
-	TextContext->printfAt(0.1f, line, "Groups under cursor ");
-	line -= lineStep * 1.4f;
-	TextContext->printfAt(0.1f, line, "----------------------");
-	line-= lineStep;
-	for(uint k = 0; k < rIGL.size(); ++k)
-	{
-		if (rIGL[k])
-		{
-			TextContext->setColor(rIGL[k] != HighlightedDebugUI ? ClientCfg.DebugFontColor : CRGBA::Red);
-			TextContext->printfAt(0.1f, line, "id = %s, address = 0x%p, parent = 0x%p", rIGL[k]->getId().c_str(), rIGL[k], rIGL[k]->getParent());
-		}
-		else
-		{
-			TextContext->setColor(CRGBA::Blue);
-			TextContext->printfAt(0.1f, line, "<NULL> group found !!!");
-		}
-		line-= lineStep;
-	}
-}
-
-
-
-// get all element under the mouse in a single vector
-static void getElementsUnderMouse(vector<CInterfaceElement *> &ielem)
-{
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	const vector<CCtrlBase *> &rICL = CWidgetManager::getInstance()->getCtrlsUnderPointer();
-	const vector<CInterfaceGroup *> &rIGL = CWidgetManager::getInstance()->getGroupsUnderPointer();
-	ielem.clear();
-	ielem.insert(ielem.end(), rICL.begin(), rICL.end());
-	ielem.insert(ielem.end(), rIGL.begin(), rIGL.end());
-}
-
-class CHandlerDebugUiPrevElementUnderMouse : public IActionHandler
-{
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
-	{
-		vector<CInterfaceElement *> ielem;
-		getElementsUnderMouse(ielem);
-		for(uint k = 0; k < ielem.size(); ++k)
-		{
-			if (HighlightedDebugUI == ielem[k])
-			{
-				HighlightedDebugUI = ielem[k == 0 ? ielem.size() - 1 : k - 1];
-				return;
-			}
-		}
-	}
-};
-REGISTER_ACTION_HANDLER( CHandlerDebugUiPrevElementUnderMouse, "debug_ui_prev_element_under_mouse");
-
-class CHandlerDebugUiNextElementUnderMouse : public IActionHandler
-{
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
-	{
-		vector<CInterfaceElement *> ielem;
-		getElementsUnderMouse(ielem);
-		for(uint k = 0; k < ielem.size(); ++k)
-		{
-			if (HighlightedDebugUI == ielem[k])
-			{
-				HighlightedDebugUI = ielem[(k + 1) % ielem.size()];
-				return;
-			}
-		}
-	}
-};
-REGISTER_ACTION_HANDLER( CHandlerDebugUiNextElementUnderMouse, "debug_ui_next_element_under_mouse");
-
-class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
-{
-	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
-	{
-		if (HighlightedDebugUI == NULL) return;
-		CLuaState *lua = CLuaManager::getInstance().getLuaState();
-		if (!lua) return;
-		CLuaStackRestorer lsr(lua, 0);
-		CLuaIHM::pushUIOnStack(*lua, HighlightedDebugUI);
-		lua->pushGlobalTable();
-		CLuaObject env(*lua);
-		env["inspect"].callNoThrow(1, 0);
-	}
-};
-REGISTER_ACTION_HANDLER( CHandlerDebugUiDumpElementUnderMouse, "debug_ui_inspect_element_under_mouse");
-
-
-//---------------------------------------------------
-// displayDebug :
-// Display some debug infos.
-//---------------------------------------------------
-void displayDebug()
-{
-	float lineStep = ClientCfg.DebugLineStep;
-	float line;
-
-	// Initialize Pen //
-	//----------------//
-	// Create a shadow when displaying a text.
-	TextContext->setShaded(true);
-	// Set the font size.
-	TextContext->setFontSize(ClientCfg.DebugFontSize);
-	// Set the text color
-	TextContext->setColor(ClientCfg.DebugFontColor);
-
-	// TOP LEFT //
-	//----------//
-	TextContext->setHotSpot(UTextContext::TopLeft);
-	line = 0.9f;
-	// FPS and Ms per frame
-	{
-		// smooth across frames.
-		double deltaTime = smoothFPS.getSmoothValue ();
-		// FPS and Ms per frame
-		if(deltaTime != 0.f)
-			TextContext->printfAt(0.f, line,"%.1f fps", 1.f/deltaTime);
-		else
-			TextContext->printfAt(0.f, line,"%.1f fps", 0.f);
-		TextContext->printfAt(0.1f, line, "%d ms", (uint)(deltaTime*1000));
-	}
-	line -= lineStep;
-	line -= lineStep;
-
-	// USER
-	// Front
-	TextContext->printfAt(0.0f, line, "  %f (%f,%f,%f) front", atan2(UserEntity->front().y, UserEntity->front().x), UserEntity->front().x, UserEntity->front().y, UserEntity->front().z);
-	line -= lineStep;
-	// Dir
-	TextContext->printfAt(0.0f, line, "  %f (%f,%f,%f) dir", atan2(UserEntity->dir().y, UserEntity->dir().x), UserEntity->dir().x, UserEntity->dir().y, UserEntity->dir().z);
-	line -= lineStep;
-	// NB Stage
-	TextContext->printfAt(0.0f, line, "  NB Stage: %d", UserEntity->nbStage());
-	line -= lineStep;
-	// NB Animation FXs still remaining in the remove list.
-	TextContext->printfAt(0.0f, line, "  NB FXs to remove: %d", UserEntity->nbAnimFXToRemove());
-	line -= lineStep;
-	// Mode.
-	TextContext->printfAt(0.0f, line, "  Mode: %d (%s)", (sint)UserEntity->mode(), MBEHAV::modeToString(UserEntity->mode()).c_str());
-	line -= lineStep;
-	// Behaviour.
-	TextContext->printfAt(0.0f, line, "  Behaviour: %d (%s)", (sint)UserEntity->behaviour(), MBEHAV::behaviourToString(UserEntity->behaviour()).c_str());
-	line -= lineStep;
-	// Display the target mount.
-	TextContext->printfAt(0.0f, line, "  Mount: %d", UserEntity->mount());
-	line -= lineStep;
-	// Display the target rider.
-	TextContext->printfAt(0.0f, line, "  Rider: %d", UserEntity->rider());
-	line -= lineStep;
-	// Display the current animation name.
-	TextContext->printfAt(0.0f, line, "  Current Animation Name: %s", UserEntity->currentAnimationName().c_str());
-	line -= lineStep;
-	// Display the current move animation set name.
-	TextContext->printfAt(0.0f, line, "  Current AnimationSet Name (MOVE): %s", UserEntity->currentAnimationSetName(MOVE).c_str());
-	line -= lineStep;
-	// Display Missing Animations
-	if(::CAnimation::MissingAnim.empty() == false)
-	{
-		TextContext->printfAt(0.0f, line, "  '%u' Missing Animations, 1st: '%s'", ::CAnimation::MissingAnim.size(), (*(::CAnimation::MissingAnim.begin())).c_str());
-		line -= lineStep;
-	}
-	// Display Missing LoD
-	if(LodCharactersNotFound.empty() == false)
-	{
-		TextContext->printfAt(0.0f, line, "  '%u' Missing LoD, 1st: '%s'", LodCharactersNotFound.size(), (*(LodCharactersNotFound.begin())).c_str());
-		line -= lineStep;
-	}
-
-	// Watched Entity
-	line -= lineStep;
-	// Now Displaying the selection.
-	TextContext->printfAt(0.0f, line, "--*** Watched entity ***--");
-	line -= lineStep;
-	// Display information about the debug entity slot.
-	if(WatchedEntitySlot != CLFECOMMON::INVALID_SLOT)
-	{
-		// Get a pointer on the target.
-		CEntityCL *watchedEntity = EntitiesMngr.entity(WatchedEntitySlot);
-		if(watchedEntity)
-		{
-			// Display Debug Information about the Selection.
-			watchedEntity->displayDebug(0.0f, line, -lineStep);
-
-			// Distance of the target
-			CVectorD diffvector = UserEntity->pos() - watchedEntity->pos();
-			TextContext->printfAt(0.0f, line, "  Distance: %10.2f (Manhattan: %.2f)", diffvector.norm(), fabs(diffvector.x) + fabs(diffvector.y) );
-			line -= lineStep;
-		}
-		// Target not allocated
-		else
-		{
-			TextContext->printfAt(0.0f, line, "Not allocated (%d)", WatchedEntitySlot);
-			line -= lineStep;
-		}
-	}
-	// No Target
-	else
-	{
-		TextContext->printfAt(0.0f, line, "None");
-		line -= lineStep;
-	}
-
-	/* Ca rame grave !
-
-	  uint nMem = NLMEMORY::GetAllocatedMemory();
-	line -= lineStep;
-	TextContext->printfAt(0.0f, line, "Mem Used: %d",nMem);*/
-
-	// 3D Filters information:
-#ifdef _PROFILE_ON_
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "3D Filters:");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "MeshNoVP: %s", Filter3D[FilterMeshNoVP]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "MeshVP: %s", Filter3D[FilterMeshVP]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "FXs: %s", Filter3D[FilterFXs]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	if (Landscape)
-	{
-		TextContext->printfAt(0.0f, line, "Landscape: %s", Filter3D[FilterLandscape]?"Ok":"NOT RENDERED!");
-		line-= lineStep;
-	}
-	else
-	{
-		TextContext->printfAt(0.0f, line, "Landscape not enabled");
-	}
-	TextContext->printfAt(0.0f, line, "Vegetable: %s", Filter3D[FilterVegetable]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "Skeleton: %s", Filter3D[FilterSkeleton]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "Water: %s", Filter3D[FilterWater]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "Cloud: %s", Filter3D[FilterCloud]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "CoarseMesh: %s", Filter3D[FilterCoarseMesh]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "Sky: %s", Filter3D[FilterSky]?"Ok":"NOT RENDERED!");
-	line-= lineStep;
-	// Materials Infos
-	TextContext->printfAt(0.0f, line, "SetupedMatrix: %d", Driver->profileSetupedModelMatrix() );
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "SetupedMaterials: %d", Driver->profileSetupedMaterials() );
-	line-= lineStep;
-	// Display camera cluster system
-	TextContext->printfAt(0.0f, line, "ClusterSystem: %p", MainCam.getClusterSystem() );
-	line-= 2 * lineStep;
-	// Lua stuffs
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	TextContext->printfAt(0.0f, line, "Lua mem (kb) : %d / %d", CLuaManager::getInstance().getLuaState()->getGCCount(),  CLuaManager::getInstance().getLuaState()->getGCThreshold());
-	line-= lineStep;
-	TextContext->printfAt(0.0f, line, "Lua stack size = %d", CLuaManager::getInstance().getLuaState()->getTop());
-	line-= lineStep;
-
-#endif
-
-	// TOP LEFT //
-	//-----------//
-	TextContext->setHotSpot(UTextContext::TopLeft);
-	line = 1.f;
-	string str;
-#if FINAL_VERSION
-	str = "FV";
-#else
-	str = "DEV";
-#endif
-	if(ClientCfg.ExtendedCommands)
-		str += "_E";
-	str += " "RYZOM_VERSION;
-	TextContext->printfAt(0.f, line, "Version %s", str.c_str());
-
-	// TOP MIDDLE //
-	//------------//
-	TextContext->setHotSpot(UTextContext::MiddleTop);
-	line = 1.f;
-	// Motion Mode
-	TextContext->printfAt(0.5f, line, "%s", UserControls.modeStr().c_str());
-	line -= lineStep;
-
-	// TOP RIGHT //
-	//-----------//
-	TextContext->setHotSpot(UTextContext::TopRight);
-	line = 1.f;
-	//// 3D Infos
-	// Video mem allocated.
-	TextContext->printfAt(1.f, line, "Video mem. : %f", Driver->profileAllocatedTextureMemory()/(1024.f*1024.f));
-	line -= lineStep;
-	// Video mem used since last swapBuffers().
-	TextContext->printfAt(1.f, line, "Video mem. since last swap buffer: %f", Driver->getUsedTextureMemory()/(1024.f*1024.f));
-	line -= lineStep;
-	// Get the last face count asked from the main scene before reduction.
-	TextContext->printfAt(1.f, line, "Nb Skin Face Asked: %f", Scene->getGroupNbFaceAsked("Skin"));
-	line -= lineStep;
-	TextContext->printfAt(1.f, line, "Nb Fx Face Asked: %f", Scene->getGroupNbFaceAsked("Fx"));
-	line -= lineStep;
-	// All Triangles In
-	CPrimitiveProfile pIn;
-	CPrimitiveProfile pOut;
-	Driver->profileRenderedPrimitives(pIn, pOut);
-	TextContext->printfAt(1.f, line, "Tri In : %d", pIn.NTriangles+2*pIn.NQuads);
-	line -= lineStep;
-	// All Triangles Out
-	TextContext->printfAt(1.f, line, "Tri Out : %d", pOut.NTriangles+2*pIn.NQuads);
-	line -= lineStep;
-	// Current Cluster
-	string strPos;
-	// Check there is a PACS Primitive before using it.
-	if(UserEntity->getPrimitive() && GR)
-	{
-		UGlobalPosition gPos;
-		UserEntity->getPrimitive()->getGlobalPosition(gPos, dynamicWI);
-		string strPos = GR->getIdentifier(gPos);
-	}
-	else
-		strPos = "No Primitive";
-	TextContext->printfAt(1.f, line, "Cluster : %s", strPos.c_str());
-	line -= lineStep;
-	//// SOUND Infos
-	line -= lineStep;
-	if(SoundMngr)
-	{
-		TextContext->printfAt(1.f, line, "Sound source instance: %u", SoundMngr->getSourcesInstanceCount());
-		line -= lineStep;
-		TextContext->printfAt(1.f, line, "Logical playing SoundSource: %u", SoundMngr->getMixer()->getPlayingSourcesCount ());
-		line -= lineStep;
-		TextContext->printfAt(1.f, line, "Audio tracks: %u/%u", SoundMngr->getMixer()->getUsedTracksCount(), SoundMngr->getMixer()->getPolyphony());
-		line -= lineStep;
-		if (SoundMngr->getMixer()->getMutedPlayingSourcesCount() > 0)
-		{
-			TextContext->printfAt(1.f, line, "Source muted: %u !", SoundMngr->getMixer()->getMutedPlayingSourcesCount());
-			line -= lineStep;
-		}
-		TextContext->printfAt(1.f, line, "Samples in memory: %g MB", SoundMngr->getLoadingSamplesSize() / (1024.0f*1024.0f));
-		line -= lineStep;
-
-	}
-
-	// BOTTOM RIGHT //
-	//--------------//
-	TextContext->setHotSpot(UTextContext::BottomRight);
-	line = 0.f;
-	//// POSITION
-	CVector postmp = View.viewPos();
-	// Pos
-	TextContext->printfAt(1.f, line, "Position : %d %d %d",(int)postmp.x,(int)postmp.y,(int)postmp.z);
-	line += lineStep;
-	// Body Heading
-	TextContext->printfAt(1.f, line, "Front : %.2f %.2f %.2f", UserEntity->front().x, UserEntity->front().y, UserEntity->front().z);
-	line += lineStep;
-	// Speed
-	TextContext->printfAt(1.f, line, "Speed : %.2f", (float) UserEntity->speed());
-	line += lineStep;
-	// Zone
-	if (!ClientCfg.Light)
-	{
-		if (Landscape)
-		{
-			TextContext->printfAt(1.f, line, "Zone: %s", Landscape->getZoneName(postmp).c_str());
-			line += lineStep;
-		}
-	}
-	// Prim File
-	string primFile = PrimFiles.getCurrentPrimitive ();
-	if (!primFile.empty ())
-	{
-		TextContext->printfAt(1.f, line, "Prim File: %s", primFile.c_str ());
-		line += lineStep;
-	}
-
-	//// CONNECTION
-	line += lineStep;
-	// Ryzom Day.
-	TextContext->printfAt(1.f, line, "Ryzom Day : %d", RT.getRyzomDay());
-	line += lineStep;
-	// hour in the game
-	float dayNightCycleHour = (float)RT.getRyzomTime();
-	TextContext->printfAt(1.f, line, "Ryzom Time : %2u:%02u", int(dayNightCycleHour), int((dayNightCycleHour-int(dayNightCycleHour))*60.0f));
-	line += lineStep;
-	// light hour in the game, used to display te day/night
-	TextContext->printfAt(1.f, line, "Ryzom Light Time : %2u:%02u (%s)", int(DayNightCycleHour), int((DayNightCycleHour-int(DayNightCycleHour))*60.0f), LightCycleManager.getStateString().c_str());
-	line += lineStep;
-	// Server GameCycle
-	TextContext->printfAt(1.f, line, "Server GameCycle : %u", (uint)NetMngr.getCurrentServerTick());
-	line += lineStep;
-	// Current GameCycle
-	TextContext->printfAt(1.f, line, "Current GameCycle : %u", (uint)NetMngr.getCurrentClientTick());
-	line += lineStep;
-	// Current GameCycle
-	TextContext->printfAt(1.f, line, "Ms per Cycle : %d", NetMngr.getMsPerTick());
-	line += lineStep;
-	// Packet Loss
-	TextContext->printfAt(1.f, line, "Packet Loss : %.1f %%", NetMngr.getMeanPacketLoss()*100.0f);
-	line += lineStep;
-	// Packet Loss
-	TextContext->printfAt(1.f, line, "Packets Lost : %u", NetMngr.getTotalLostPackets());
-	line += lineStep;
-	// Mean Upload
-	TextContext->printfAt(1.f, line, "Mean Upld : %.3f kbps", NetMngr.getMeanUpload());
-	line += lineStep;
-	// Mean Download
-	TextContext->printfAt(1.f, line, "Mean Dnld : %.3f kbps", NetMngr.getMeanDownload());
-	line += lineStep;
-
-	// Mean Download
-	TextContext->printfAt(1.f, line, "Nb in Vision : %d(%d,%d,%d)",
-		EntitiesMngr.nbEntitiesAllocated(),
-		EntitiesMngr.nbUser(),
-		EntitiesMngr.nbPlayer(),
-		EntitiesMngr.nbChar());
-	line += lineStep;
-
-	// Number of database changes
-	TextContext->printfAt(1.f, line, "DB Changes : %u", NbDatabaseChanges );
-	line += lineStep;
-
-	// Ping
-	TextContext->printfAt(1.f, line, "DB Ping : %u ms", Ping.getValue());
-	line += lineStep;
-
-
-
-
-
-	// Manual weather setup
-	{
-		if(ContinentMngr.cur())	// Only usable if there is a continent loaded.
-		{
-			if (!ForceTrueWeatherValue)
-			{
-				const CWeatherFunction &wf = ContinentMngr.cur()->WeatherFunction[CurrSeason];
-				float wv;
-				if (ClientCfg.ManualWeatherSetup)
-				{
-					wv = std::max(wf.getNumWeatherSetups() - 1, 0u) * ManualWeatherValue;
-				}
-				else
-				{
-					wv = std::max(wf.getNumWeatherSetups() - 1, 0u) * ::getBlendedWeather(RT.getRyzomDay(), RT.getRyzomTime(), *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
-				}
-				const CWeatherSetup *ws = wf.getWeatherSetup((uint) floorf(wv));
-				std::string name0 = ws ? NLMISC::CStringMapper::unmap(ws->SetupName) : "???";
-				ws = wf.getWeatherSetup(std::min((uint) (floorf(wv) + 1), wf.getNumWeatherSetups() - 1));
-				std::string name1 = ws ? NLMISC::CStringMapper::unmap(ws->SetupName) : "???";
-				TextContext->printfAt(1.f, line, "Weather value : %.02f : %s -> %s", ws ? wv : 0.f, name0.c_str(), name1.c_str());
-				line += lineStep;
-			}
-			else
-			{
-				TextContext->printfAt(1.f, line, "Weather value : %.02f", WeatherManager.getWeatherValue() * std::max(ContinentMngr.cur()->WeatherFunction[CurrSeason].getNumWeatherSetups() - 1, 0u));
-				line += lineStep;
-				TextContext->printfAt(1.f, line, "TEST WEATHER FUNCTION");
-				line += lineStep;
-			}
-			// season
-			TextContext->printfAt(1.f, line, "Season : %s", EGSPD::CSeason::toString(CurrSeason).c_str());
-			line += lineStep;
-		}
-	}
-
-	// fog dist
-	if (ContinentMngr.cur())
-	{
-		TextContext->printfAt(1.f, line, "Continent fog min near = %.1f, max far = %.1f", ContinentMngr.cur()->FogStart, ContinentMngr.cur()->FogEnd);
-		line += lineStep;
-		CFogState tmpFog;
-		ContinentMngr.getFogState(MainFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), tmpFog);
-		TextContext->printfAt(1.f, line, "Continent fog curr near = %.1f, curr far = %.1f", tmpFog.FogStartDist, tmpFog.FogEndDist);
-		line += lineStep;
-	}
-	const CWeatherState &ws = WeatherManager.getCurrWeatherState();
-	TextContext->printfAt(1.f, line, "Weather fog near = %.1f, far = %.1f", ws.FogNear[MainFog], ws.FogFar[MainFog]);
-	line += lineStep;
-	TextContext->printfAt(1.f, line, "Final fog near = %.1f, far = %.1f", MainFogState.FogStartDist, MainFogState.FogEndDist);
-	line += lineStep;
-	float left, right, bottom, top, znear, zfar;
-	Scene->getCam().getFrustum(left, right, bottom, top, znear, zfar);
-	TextContext->printfAt(1.f, line, "Clip near = %.1f, far = %.1f", znear, zfar);
-	line += lineStep;
-
-	// Connection states
-	TextContext->printfAt(1.f, line, "State : %s", NetMngr.getConnectionStateCStr() );
-	line += lineStep;
-
-//	UGlobalPosition globalPos;
-//	UserEntity->getPrimitive()->getGlobalPosition(globalPos, dynamicWI);
-//	uint32 material = GR->getMaterial( globalPos );
-//	TextContext->printfAt(0.5f,0.5f,"Material : %d Gpos=(inst=%d,surf=%d,x=%.2f,y=%.2f",material, globalPos.InstanceId, globalPos.LocalPosition.Surface, globalPos.LocalPosition.Estimation.x, globalPos.LocalPosition.Estimation.y);
-
-	// No more shadow when displaying a text.
-	TextContext->setShaded(false);
-}// displayDebug //
-
-//-----------------------------------------------
-// Macro to Display a Text
-//-----------------------------------------------
-#define DISP_TEXT(x, text)                    \
-	/* Display the text at the right place */ \
-	TextContext->printfAt(x, line, text);     \
-	/* Change the line */                     \
-	line += lineStep;                         \
-
-//---------------------------------------------------
-// displayHelp :
-// Display an Help.
-//---------------------------------------------------
-void displayHelp()
-{
-	float line     = 1.f;
-	float lineStep = -ClientCfg.HelpLineStep;
-
-	// Create a shadow when displaying a text.
-	TextContext->setShaded(true);
-	// Set the font size.
-	TextContext->setFontSize(ClientCfg.HelpFontSize);
-	// Set the text color
-	TextContext->setColor(ClientCfg.HelpFontColor);
-
-
-	line = 1.f;
-	TextContext->setHotSpot(UTextContext::TopLeft);
-	DISP_TEXT(0.0f, "SHIFT + F1 : This Menu")
-	DISP_TEXT(0.0f, "SHIFT + F2 : Display Debug Infos")
-	DISP_TEXT(0.0f, "SHIFT + F3 : Wire mode");
-	DISP_TEXT(0.0f, "SHIFT + F4 : Do not Render the Scene");
-	DISP_TEXT(0.0f, "SHIFT + F5 : Toogle Display OSD interfaces");
-//	DISP_TEXT(0.0f, "SHIFT + F6 : Not used");
-	DISP_TEXT(0.0f, "SHIFT + F7 : Compass Mode (User/Camera)");
-	DISP_TEXT(0.0f, "SHIFT + F8 : Camera Mode (INSERT to change your position)");
-	DISP_TEXT(0.0f, "SHIFT + F9 : Free Mouse");
-	DISP_TEXT(0.0f, "SHIFT + F10 : Take a Screen Shot (+CTRL) for jpg");
-//	DISP_TEXT(0.0f, "SHIFT + F11 : Test");
-	DISP_TEXT(0.0f, "SHIFT + ESCAPE : Quit");
-	DISP_TEXT(0.0f, "SHIFT + C : First/Third Person View");
-
-	line = 1.f;
-	TextContext->setHotSpot(UTextContext::TopRight);
-	DISP_TEXT(1.0f, "UP : FORWARD");
-	DISP_TEXT(1.0f, "DOWN : BACKWARD");
-	DISP_TEXT(1.0f, "LEFT : ROTATE LEFT");
-	DISP_TEXT(1.0f, "RIGHT : ROTATE RIGHT");
-	DISP_TEXT(1.0f, "CTRL + LEFT : STRAFE LEFT");
-	DISP_TEXT(1.0f, "CTRL + RIGHT : STRAFE RIGHT");
-	DISP_TEXT(1.0f, "END : Auto Walk");
-	DISP_TEXT(1.0f, "DELETE : Walk/Run");
-	DISP_TEXT(1.0f, "PG UP : Look Up");
-	DISP_TEXT(1.0f, "PG DOWN : Look Down");
-//	DISP_TEXT(1.0f, "CTRL + I : Inventory");
-//	DISP_TEXT(1.0f, "CTRL + C : Spells composition interface");
-//	DISP_TEXT(1.0f, "CTRL + S : Memorized Spells interface");
-	DISP_TEXT(1.0f, "CTRL + B : Show/Hide PACS Borders");
-	DISP_TEXT(1.0f, "CTRL + P : Player target himself");
-	DISP_TEXT(1.0f, "CTRL + D : Unselect target");
-	DISP_TEXT(1.0f, "CTRL + TAB : Next Chat Mode (say/shout");
-	DISP_TEXT(1.0f, "CTRL + R : Reload Client.cfg File");
-//	DISP_TEXT(1.0f, "CTRL + N : Toggle Night / Day lighting");
-	DISP_TEXT(1.0f, "CTRL + F2 : Profile on / off");
-	DISP_TEXT(1.0f, "CTRL + F3 : Movie Shooter record / stop");
-	DISP_TEXT(1.0f, "CTRL + F4 : Movie Shooter replay");
-	DISP_TEXT(1.0f, "CTRL + F5 : Movie Shooter save");
-#ifndef NL_USE_DEFAULT_MEMORY_MANAGER
-	DISP_TEXT(1.0f, "CTRL + F6 : Save memory stat report");
-#endif // NL_USE_DEFAULT_MEMORY_MANAGER
-	DISP_TEXT(1.0f, "CTRL + F7 : Show / hide prim file");
-	DISP_TEXT(1.0f, "CTRL + F8 : Change prim file UP");
-	DISP_TEXT(1.0f, "CTRL + F9 : Change prim file DOWN");
-
-	// No more shadow when displaying a text.
-	TextContext->setShaded(false);
-}// displayHelp //
-
 
 //---------------------------------------------------
 // Just Display some text with ... anim at some place.

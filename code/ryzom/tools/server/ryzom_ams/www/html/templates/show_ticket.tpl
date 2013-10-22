@@ -224,6 +224,7 @@
 			<li class="divider"></li>
 			{if isset($isMod) and $isMod eq "TRUE"}<li><a href="index.php?page=show_ticket_log&id={$ticket_tId}">Show Ticket Log</a></li>{/if}
 			<li><a href="index.php?page=createticket&user_id={$ticket_author}">Send Other Ticket</a></li>
+			{if $hasInfo}<li><a href="index.php?page=show_ticket_info&id={$ticket_tId}">Show ticket Info</a></li>{/if}
 			<li class="divider"></li>
 		    </ul>
 		</div>

@@ -1,5 +1,10 @@
 <?php
-
+/**
+* This function is beign used to load info that's needed for the show_reply page.
+* check if the person is allowed to see the reply, if not he'll be redirected to an error page.
+* data regarding to the reply will be returned by this function that will be used by the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function show_reply(){
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
@@ -12,7 +17,8 @@ function show_reply(){
         $ticket = new Ticket();
         $ticket->load_With_TId($reply->getTicket());
         
-        if(( $ticket->getAuthor() ==   $_SESSION['ticket_user']->getTUserId() && ! $reply->getHidden())  ||  Ticket_User::isMod($_SESSION['ticket_user'] )){
+        //check if the user is allowed to see the reply
+        if(( $ticket->getAuthor() ==   unserialize($_SESSION['ticket_user'])->getTUserId() && ! $reply->getHidden())  ||  Ticket_User::isMod(unserialize($_SESSION['ticket_user']) )){
             $content = new Ticket_Content();
             $content->load_With_TContentId($reply->getContent());
             
@@ -27,9 +33,11 @@ function show_reply(){
             $result['author'] = $author->getExternId();
             $webUser = new WebUsers($author->getExternId());
             $result['authorName'] = $webUser->getUsername();
-            if(Ticket_User::isMod($_SESSION['ticket_user'])){
+            if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $result['isMod'] = "TRUE";
             }
+            global $INGAME_WEBPATH;
+            $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
             
         }else{

@@ -6,7 +6,7 @@
   <div>
     {$welcome_message}
   </div>
-<a href="index.php">click hereeeee</a>
+
   <form name="Page1"
         method="post"
         >
@@ -23,7 +23,7 @@
                "javascript:showTooltip('{$username_tooltip}', this);" />
         </td>
         
-        <td id="comment-Username" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($Username)}{$Username}{/if}</td>
+        <td id="comment-Username" {if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($USERNAME_ERROR) && $USERNAME_ERROR eq "TRUE"}{$USERNAME}{/if}</td>
       </tr>
 
       <tr>
@@ -39,7 +39,7 @@
                onfocus="javascript:showTooltip('{$password_message}', this);" />
         </td>
 
-        <td id="comment-Password" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}{$Password}{/if}</td>
+        <td id="comment-Password" {if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($PASSWORD_ERROR) && $PASSWORD_ERROR eq "TRUE"}{$PASSWORD}{/if}</td>
       </tr>
 
       <tr>
@@ -52,11 +52,11 @@
                onfocus="javascript:showTooltip('{$cpassword_message}', this);" />
         </td>
 
-        <td id="comment-ConfirmPass" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}{$ConfirmPass}{/if}</td>
+        <td id="comment-ConfirmPass" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}{$CPASSWORD}{/if}</td>
       </tr>
 
       <tr>
-        <td width="33%" {if isset($CPASSWORD_ERROR) && $CPASSWORD_ERROR eq "TRUE"}class="error"{/if} id="caption-Email">{$email_tag}</td>
+        <td width="33%" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} id="caption-Email">{$email_tag}</td>
 
         <td width="25%">
           <input type="text"
@@ -67,7 +67,7 @@
                "javascript:showTooltip('{$email_message}', this);" />
         </td>
 
-        <td id="comment-Email" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}{$Email}{/if}</td>
+        <td id="comment-Email" {if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}class="error"{/if} width="42%">{if isset($EMAIL_ERROR) && $EMAIL_ERROR eq "TRUE"}{$EMAIL}{/if}</td>
       </tr>
 
       <tr>
@@ -78,17 +78,16 @@
                value="1"
                onfocus="javascript:showTooltip('', this);" /><span id=
                "caption-TaC">{$tac_tag}</span></td>
-                                <td id="comment-TaC" {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}class="error"{/if} width="42%">{$tac_message}</td>
+                                {if isset($TAC_ERROR) && $TAC_ERROR eq "TRUE"}<td id="comment-TaC" class="error" width="42%">{$tac_message}</td>{/if}
 
       </tr>
     </table>
-
     <div class="c1">
       <input type="submit"
            name="Submit"
            value="Continue" />
     </div>
-    <input type="hidden" name="function" value="add_user">
+
   </form>
 
   <div id="signupTooltip"

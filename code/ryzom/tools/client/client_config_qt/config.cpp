@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "Config.h"
+#include "stdpch.h"
+#include "config.h"
 
 CConfig::CConfig()
 {
@@ -237,7 +238,7 @@ void CConfig::setFloat( const char *key, float value )
 	}
 }
 
-void CConfig::setString( const char *key, std::string &value )
+void CConfig::setString( const char *key, const std::string &value )
 {
 	NLMISC::CConfigFile::CVar *var = cf.getVarPtr( key );
 

@@ -101,6 +101,7 @@
 							</div>
 						</div>
 						
+						
 						{if isset($SUCCESS_MAIL) and $SUCCESS_MAIL eq "OK"}
 						<div class="alert alert-success">
 							The email has been changed!
@@ -123,6 +124,40 @@
 						</div>
 					</form>
 				</div>                   
+			</div>
+			<div class="box-header well" data-original-title="">
+				<h2><i class="icon-envelope"></i> Ticket updates</h2>
+				<div class="box-icon">
+					<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
+				</div>
+			</div>
+			<div class="box-content">
+				<div class="row-fluid">
+					<form id="changeReceiveMail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
+						<legend>Ticket-Update Mail Settings</legend>
+						
+						<div class="control-group">
+							<label class="control-label">Receive ticket updates</label>
+							<div class="controls">
+								 <select name="ReceiveMail">	
+									<option value="1" {if isset($ReceiveMail) and $ReceiveMail eq 1}selected="selected"{/if}>Yes</option>
+									<option value="0" {if isset($ReceiveMail) and $ReceiveMail eq 0}selected="selected"{/if}>No</option>
+								</select>	
+							</div>
+
+						</div>
+						
+						<input type="hidden" name="function" value="change_receivemail">
+						<input type="hidden" name="target_id" value="{$target_id}">
+						<div class="control-group">
+							<label class="control-label"></label>
+							<div class="controls">
+								<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Change Updates</button>
+							</div>
+						</div>
+					</form>
+				</div>
 			</div>
 		</div><!--/span-->
 				

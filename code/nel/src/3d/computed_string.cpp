@@ -21,6 +21,7 @@
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/material.h"
 #include "nel/3d/frustum.h"
+#include "nel/3d/viewport.h"
 
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/debug.h"
@@ -85,6 +86,10 @@ void CComputedString::render2D (IDriver& driver,
 	// get window size
 	uint32	wndWidth, wndHeight;
 	driver.getWindowSize(wndWidth, wndHeight);
+	CViewport vp;
+	driver.getViewport(vp);
+	wndWidth = (uint32)((float)wndWidth * vp.getWidth());
+	wndHeight = (uint32)((float)wndHeight * vp.getHeight());
 	// scale to window size.
 	x*= wndWidth;
 	z*= wndHeight;
@@ -242,8 +247,8 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 		uint lastIndex = 0;
 		for(uint i=0;i<numVerts;i++)
 		{
-			if(count==4){
-
+			if(count==4)
+			{
 				if(!LetterColors.empty())
 				{
 					if(LetterColors.getIndex(lastIndex)==i/4)

@@ -3,13 +3,12 @@
 		<div class="alert alert-info">
 			<h3>{$login_info}</h3>
 		</div>
-		<form method="post" action="index.php" class="form-horizontal">
+		<form method="post" action="{$ingame_webpath}?page=login" class="form-horizontal">
 			<br/>
 			<p>
 				Username:
 				<input type="text" value="" id="Username" name="Username" class="input-large span10" placeholder="Username">
 			</p>
-
 
 			<p>
 				Password:
@@ -34,7 +33,7 @@
 		</p>
 		{/if}
 		<p>
-		<font color="green">{$login_register_message} <a href="?page=register">{$login_register_message_here}</a></font>!
+		<font color="green">{$login_register_message} <a href="{$ingame_webpath}?page=register">{$login_register_message_here}</a></font>!
 		</p>
 		</td></tr>
 		</table>

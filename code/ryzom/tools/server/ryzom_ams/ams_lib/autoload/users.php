@@ -1,10 +1,15 @@
 <?php
+/**
+* handles basic user registration & management functions (shard related).
+* The Users class is the basis class of WebUsers, this class provides functions being used by all CMS's and our own www version. The WebUsers class however needs to be reimplemented
+* by using the CMS's it's funcionality. This class handles the writing to the shard db mainly, and in case it's offline: writing to the ams_querycache.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 class Users{
      
      /**
-     * Function check_register
-     *
-     * @takes $array with username,password and email
+     * checks if entered values before registering are valid.
+     * @param $values array with Username,Password, ConfirmPass and Email.
      * @return string Info: Returns a string, if input data is valid then "success" is returned, else an array with errors
      */ 
      public function check_Register($values){
@@ -63,16 +68,13 @@ class Users{
 
      }
      
-     
-
-
-    /**
-     * Function checkUser
-     *
-     * @takes $username
+    
+     /**
+     * checks if entered username is valid.
+     * @param $username the username that the user wants to use.
      * @return string Info: Returns a string based on if the username is valid, if valid then "success" is returned
-     */
-     private function checkUser( $username )
+     */ 
+     public function checkUser( $username )
      {
           if ( isset( $username ) ){
                if ( strlen( $username ) > 12 ){
@@ -93,9 +95,9 @@ class Users{
      }
          
      /**
-     * Function checkUserNameExists
-     *
-     * @takes $username
+     * check if username already exists.
+     * This is the base function, it should be overwritten by the WebUsers class.
+     * @param $username the username
      * @return string Info: Returns true or false if the user is in the www db.
      */
      protected function checkUserNameExists($username){
@@ -106,12 +108,11 @@ class Users{
          
          
     /**
-     * Function checkPassword
-     *
-     * @takes $pass
+     * checks if the password is valid.
+     * @param $pass the password willing to be used.
      * @return string Info: Returns a string based on if the password is valid, if valid then "success" is returned
      */
-     private function checkPassword( $pass )
+     public function checkPassword( $pass )
     {
          if ( isset( $pass ) ){
              if ( strlen( $pass ) > 20 ){
@@ -129,9 +130,10 @@ class Users{
          
          
     /**
-     * Function confirmPassword
-     *
-     * @takes $pass
+     * checks if the confirmPassword matches the original.
+     * @param $pass_result the result of the previous password check.
+     * @param $pass the original pass.
+     * @param $confirmpass the confirmation password.
      * @return string Info: Verify's $_POST["Password"] is the same as $_POST["ConfirmPass"]
      */
      private function confirmPassword($pass_result,$pass,$confirmpass)
@@ -151,10 +153,9 @@ class Users{
      
      
     /**
-     * Function checkEmail
-     *
-     * @takes $email
-     * @return
+     * wrapper to check if the email address is valid.
+     * @param $email the email address
+     * @return "success", else in case it isn't valid an error will be returned.
      */
      public function checkEmail( $email )
     {
@@ -174,10 +175,10 @@ class Users{
 
 
      /**
-     * Function checkEmailExists
-     *
-     * @takes $username
-     * @return string Info: Returns true or false if the user is in the www db.
+     * check if email already exists.
+     * This is the base function, it should be overwritten by the WebUsers class.
+     * @param $email the email address
+     * @return string Info: Returns true or false if the email is in the www db.
      */
      protected function checkEmailExists($email){
           //TODO: You should overwrite this method with your own version!
@@ -186,13 +187,12 @@ class Users{
      }
          
          
-    /**
-     * Function validEmail
-     *
-     * @takes $email
-     * @return true or false depending on if its a valid email format.
+     /**
+     * check if the emailaddress structure is valid.
+     * @param $email the email address
+     * @return true or false
      */
-     private function validEmail( $email ){
+     public function validEmail( $email ){
           $isValid = true;
           $atIndex = strrpos( $email, "@" );
           if ( is_bool( $atIndex ) && !$atIndex ){
@@ -238,9 +238,8 @@ class Users{
 
 
      /**
-     * Function generateSALT
-     *
-     * @takes $length, which is by default 2
+     * generate a SALT.
+     * @param $length the length of the SALT which is by default 2
      * @return a random salt of 2 chars
      */
      public static function generateSALT( $length = 2 )
@@ -278,10 +277,11 @@ class Users{
      
 
 
-    /**
-     * Function create
-     *
-     * @takes $array with name,pass and mail
+     /**
+     * creates a user in the shard.
+     * incase the shard is offline it will place it in the ams_querycache. You have to create a user first in the CMS/WWW and use the id for this function.
+     * @param $values with name,pass and mail
+     * @param $user_id the extern id of the user (the id given by the www/CMS)
      * @return ok if it's get correctly added to the shard, else return lib offline and put in libDB, if libDB is also offline return liboffline.
      */
      public static function createUser($values, $user_id){     
@@ -308,11 +308,52 @@ class Users{
 
      }
      
+     /**
+     * creates permissions in the shard db for a user.
+     * incase the shard is offline it will place it in the ams_querycache.
+     * @param $pvalues with username
+     */
+     public static function createPermissions($pvalues) {
+          
+          try {
+               $values = array('username' =>  $pvalues[0]);
+               $dbs = new DBLayer("shard");
+               $sth = $dbs->execute("SELECT UId FROM user WHERE Login= :username;", $values);
+               $result = $sth->fetchAll();
+               foreach ($result as $UId) {
+                   $ins_values = array('id' => $UId['UId']);
+                   $dbs->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id, 'r2', 'OPEN');", $ins_values);
+                   $dbs->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id , 'ryzom_open', 'OPEN');", $ins_values);
+               }
+          }
+          catch (PDOException $e) {
+               //oh noooz, the shard is offline! Put it in query queue at ams_lib db!
+               $dbl = new DBLayer("lib");
+               $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "createPermissions",
+               "query" => json_encode(array($pvalues[0])), "db" => "shard"));
+                    
+            
+          } 
+          return true;
+     }
      
+     
+     /**
+     * check if username and password matches.
+     * This is the base function, it should be overwritten by the WebUsers class.
+     * @param $user the inserted username
+     * @param $pass the inserted password
+     */
      protected function checkLoginMatch($user,$pass){
           print('This is the base class!');
      }
      
+     /**
+     * check if the changing of a password is valid.
+     * a mod/admin doesn't has to fill in the previous password when he wants to change the password, however for changing his own password he has to fill it in.
+     * @param $values an array containing the CurrentPass, ConfirmNewPass, NewPass and adminChangesOthers
+     * @return if it is valid "success will be returned, else an array with errors will be returned.
+     */
      public function check_change_password($values){
           //if admin isn't changing others
           if(!$values['adminChangesOther']){
@@ -366,6 +407,13 @@ class Users{
           }
      }
      
+     /**
+     * sets the shards password.
+     * in case the shard is offline, the entry will be stored in the ams_querycache.
+     * @param $user the usersname of the account of which we want to change the password.
+     * @param $pass the new password.
+     * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
+     */
      protected function setAmsPassword($user, $pass){
           
            $values = Array('user' => $user, 'pass' => $pass);
@@ -389,6 +437,13 @@ class Users{
           } 
      }
      
+     /**
+     * sets the shards email.
+     * in case the shard is offline, the entry will be stored in the ams_querycache.
+     * @param $user the usersname of the account of which we want to change the emailaddress.
+     * @param $mail the new email address
+     * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
+     */
      protected function setAmsEmail($user, $mail){
           
            $values = Array('user' => $user, 'mail' => $mail);

@@ -152,7 +152,7 @@ void CPackedWorld::getZones(std::vector<TPackedZoneBaseSPtr> &zones)
 void CPackedWorld::serialZoneNames(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	f.serialVersion(1);
-	f.serialCheck((uint32) 'OWPA');
+	f.serialCheck(NELID("OWPA"));
 	f.serialCont(ZoneNames);
 }
 

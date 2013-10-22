@@ -64,7 +64,7 @@
 			isset($TAC) and $TAC eq "success"}success{else}{/if}">
 				<div class="controls">
 				    <div class="input-prepend">
-						<input type="checkbox" class="input-xlarge" id="TaC" name="TaC" placeholder="Email">{$tac_tag1}<a href='toc.php'>{$tac_tag2}</a>
+						<input type="checkbox" class="input-xlarge" id="TaC" name="TaC" placeholder="Email">{$tac_tag1}<a href='{$tos_url}'>{$tac_tag2}</a>
 						
 					</div>
 				</div>
@@ -106,17 +106,9 @@
 			{/if}
 			
 			<input type="hidden" name="function" value="add_user">
-			<div class="control-group">
-			<label class="control-label"></label>
-		      <div class="controls">
-		       <button type="submit" class="btn btn-large btn-primary" >Create My Account</button>
-	
-		      </div>
-		       
-			
-		 
-
-		</div>
+			<p class="center span5">
+				<button type="submit" class="btn btn-primary" >Create My Account</button>
+			</p>
 	
 		</form>
 

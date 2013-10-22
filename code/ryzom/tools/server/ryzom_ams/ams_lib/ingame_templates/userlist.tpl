@@ -44,24 +44,24 @@
 				                       {foreach from=$userlist item=element}
 							<tr>
 								<td>{$element.id}</td>
-								<td class="center"><a href="index.php?page=show_user&id={$element.id}">{$element.username}</a></td>
+								<td class="center"><a href="{$ingame_webpath}?page=show_user&id={$element.id}">{$element.username}</a></td>
 								<td class="center">{$element.email}</td>
 								{if $element.permission eq 1}<td class="center"><font color="{$user_color}">User</font></td>{/if}
 								{if $element.permission eq 2}<td class="center"><font color="{$mod_color}">Moderator</font></td>{/if}
 								{if $element.permission eq 3}<td class="center"><font color="{$admin_color}">Admin</font></td>{/if}
 								<td class="center">
-								  <a href="index.php?page=show_user&id={$element.id}">Show User</a>
-								  <a href="index.php?page=settings&id={$element.id}">Edit User</a>
+								  <a href="{$ingame_webpath}?page=show_user&id={$element.id}">Show User</a>
+								  <a href="{$ingame_webpath}?page=settings&id={$element.id}">Edit User</a>
 								  {if isset($isAdmin) and $isAdmin eq 'TRUE' and $element.id neq 1}
 								     {if $element.permission eq 1}
-								         <a href="index.php?page=change_permission&user_id={$element.id}&value=2">Make Moderator</a>
-									 <a href="index.php?page=change_permission&user_id={$element.id}&value=3">Make Admin</a>
+								         <a href="{$ingame_webpath}?page=change_permission&user_id={$element.id}&value=2">Make Moderator</a>
+									 <a href="{$ingame_webpath}?page=change_permission&user_id={$element.id}&value=3">Make Admin</a>
 								     {else if $element.permission eq 2 }
-								         <a href="index.php?page=change_permission&user_id={$element.id}&value=1">Demote to User</a>
-									 <a href="index.php?page=change_permission&user_id={$element.id}&value=3">Make Admin</a>
+								         <a href="{$ingame_webpath}?page=change_permission&user_id={$element.id}&value=1">Demote to User</a>
+									 <a href="{$ingame_webpath}?page=change_permission&user_id={$element.id}&value=3">Make Admin</a>
 								     {else if $element.permission eq 3 }
-									 <a href="index.php?page=change_permission&user_id={$element.id}&value=1">Demote to User</a>
-									 <a href="index.php?page=change_permission&user_id={$element.id}&value=2">Demote to Moderator</a>
+									 <a href="{$ingame_webpath}?page=change_permission&user_id={$element.id}&value=1">Demote to User</a>
+									 <a href="{$ingame_webpath}?page=change_permission&user_id={$element.id}&value=2">Demote to Moderator</a>
 								     {/if}		
 								   {/if}
 								</td>
@@ -73,11 +73,11 @@
 				      <tr><td align = "center">
 					 <table>
 				           <tr>
-				              <td><a href="index.php?page=userlist&pagenum=1">&laquo;</a></td>
+				              <td><a href="{$ingame_webpath}?page=userlist&pagenum=1">&laquo;</a></td>
 					      {foreach from=$links item=link}
-				                 <td {if $link == $currentPage}bgcolor="{$pagination_current_page_bg}"{/if}><a href="index.php?page=userlist&pagenum={$link}">{$link}</a></td>
+				                 <td {if $link == $currentPage}bgcolor="{$pagination_current_page_bg}"{/if}><a href="{$ingame_webpath}?page=userlist&pagenum={$link}">{$link}</a></td>
 				              {/foreach}
-					      <td><a href="index.php?page=userlist&pagenum={$lastPage}">&raquo;</a></td>
+					      <td><a href="{$ingame_webpath}?page=userlist&pagenum={$lastPage}">&raquo;</a></td>
 					   </tr>
 					 </table>
 				      </td></tr>

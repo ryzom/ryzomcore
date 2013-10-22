@@ -8,18 +8,18 @@
 	      <td>
 		<table cellspacing="0" cellpadding="4">
 		  <tr>		    
-		    <td valign="middle" nowrap><a href="index.php?page=show_user&id={$target_id}"><h7>Browse User</h7></a></td>
-		    <td valign="middle" nowrap><a href="index.php?page=createticket&user_id={$target_id}"><h7>Send Ticket</h7></a></td>
+		    <td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_user&id={$target_id}"><h7>Browse User</h7></a></td>
+		    <td valign="middle" nowrap><a href="{$ingame_webpath}?page=createticket&user_id={$target_id}"><h7>Send Ticket</h7></a></td>
 		    {if isset($isAdmin) and $isAdmin eq 'TRUE' and $target_id neq 1}
 			{if $userPermission eq 1}
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=2"><h7>Make Moderator</h7></a></td>
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=2"><h7>Make Moderator</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
 			{else if $userPermission eq 2 }
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=3"><h7>Make Admin</h7></a></td>
 			{else if $userPermission eq 3 }
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
-			<td valign="middle" nowrap><a href="index.php?page=change_permission&user_id={$target_id}&value=2"><h7>Demote to Moderator</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=1"><h7>Demote to User</h7></a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=change_permission&user_id={$target_id}&value=2"><h7>Demote to Moderator</h7></a></td>
 			{/if}
 		    {/if}
 		  </tr>
@@ -40,7 +40,7 @@
 	<tr><td height="7"></td><td></td></tr>
 	<tr>
 		<td width="3%"></td>
-		<td width="100%" height="12" valign="middle"><h1>Change Settings</h1></td>
+		<td width="100%" height="12" valign="middle"><h1>Change Settings of {$target_username}</h1></td>
 	</tr>
 	<tr>
 	  <td height="5"></td><td></td>
@@ -70,7 +70,7 @@
 						
 					<p><h3>Change Password</h3></p>
 					
-					<form id="changePassword" method="post" action="index.php?page=settings&id={$target_id}">
+					<form id="changePassword" method="post" action="{$ingame_webpath}?page=settings&id={$target_id}">
 						<table cellpadding="1">
 						{if !isset($changesOther) or $changesOther eq "FALSE"}
 						<tr>
@@ -124,12 +124,12 @@
 					<tr><td>
 						<p><h3>Change Email</h3></p>
 						
-						<form id="changeEmail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
+						<form id="changeEmail" class="form-vertical" method="post" action="{$ingame_webpath}?page=settings&id={$target_id}">
 						<table>
 							<tr><td valign="middle">
 							New Email:
 							</td><td>
-							<input type="text" class="input-xlarge" id="NewEmail" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
+							<input type="text" class="input-xlarge" id="NewEmail" size="200" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
 							{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}<font color="red">{$EMAIL}</font>{/if}
 							</td></tr>
 						</table>
@@ -156,7 +156,7 @@
 				<table cellpadding="10">
 					<tr><td>
 						<p><h3>Change Info</h3></p>
-						<form id="changeEmail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
+						<form id="changeEmail" class="form-vertical" method="post" action="{$ingame_webpath}?page=settings&id={$target_id}">
 						<table>
 						<tr>
 							<td valign="middle">Firstname: </td>
@@ -200,6 +200,36 @@
 						<input type="submit" value="Change Info"/>
 						</p>
 					</form>
+						
+					</td></tr>
+				</table>
+			</td></tr>
+		</table>
+	      </td></tr>
+		<tr><td>
+		<table width="100%" bgcolor="{$main_tbl_color}" border="2">
+			<tr><td>
+				<table cellpadding="10">
+					<tr><td>
+						<p><h3>Ticket-Update Mail Settings</h3></p>
+						<form id="changeReceiveMail" class="form-vertical" method="post" action="{$ingame_webpath}?page=settings&id={$target_id}">
+							<table>
+								<tr><td valign="middle">
+									Receive ticket updates
+								</td><td>
+									 <select name="ReceiveMail">	
+										<option value="1" {if isset($ReceiveMail) and $ReceiveMail eq 1}selected="selected"{/if}>Yes</option>
+										<option value="0" {if isset($ReceiveMail) and $ReceiveMail eq 0}selected="selected"{/if}>No</option>
+									</select>
+								</td></tr>
+							</table>
+							
+							<input type="hidden" name="function" value="change_receivemail">
+							<input type="hidden" name="target_id" value="{$target_id}">
+							<p>
+								<input type="submit" value="Change Updates"/>
+							</p>
+						</form>
 						
 					</td></tr>
 				</table>

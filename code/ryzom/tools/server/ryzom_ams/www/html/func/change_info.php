@@ -1,5 +1,11 @@
 <?php
-
+/**
+* This function is beign used to change the users personal info.
+* It will first check if the user who executed this function is the person of whom the information is or if it's a mod/admin. If this is not the case the page will be redirected to an error page.
+* afterwards the current info will be loaded, which will be used to determine what to update. After updating the information, the settings template will be reloaded. Errors made by invalid data will be shown
+* also after reloading the template.
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 function change_info(){
     
  try{
@@ -8,11 +14,13 @@ function change_info(){
             
             if(isset($_POST['target_id'])){
 		
-                
-                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod($_SESSION['ticket_user'] ) ){
+                // check if the user who executed this function is the person of whom the information is or if it's a mod/admin. 
+                if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user']) ) ){
                     if($_POST['target_id'] == $_SESSION['id']){
+			//if the info is of the executing user himself
                         $target_username = $_SESSION['user'];
                     }else{
+			//if the info is from someone else.
 			$webUser = new WebUsers($_POST['target_id']);
                         $target_username = $webUser->getUsername();
                     }
@@ -20,8 +28,7 @@ function change_info(){
                     $webUser = new WebUsers($_POST['target_id']);
                     //use current info to check for changes
                     $current_info = $webUser->getInfo();
-		    
-       
+		        
 		    $current_info['FirstName'] = filter_var($current_info['FirstName'], FILTER_SANITIZE_STRING);
 		    $current_info['LastName'] = filter_var($current_info['LastName'], FILTER_SANITIZE_STRING);
 		    $current_info['Country'] = filter_var($current_info['Country'], FILTER_SANITIZE_STRING);
@@ -76,16 +83,19 @@ function change_info(){
                         $dbw->execute($query,$values);  
                     }
 
+		    //reload the settings inc function before recalling the settings template.
                     global $SITEBASE;
-                    require_once($SITEBASE . 'inc/settings.php');
+                    require_once($SITEBASE . '/inc/settings.php');
                     $result = settings();
                     if($updated){
                         $result['info_updated'] = "OK";
                     }
-                    $result['permission'] = $_SESSION['ticket_user']->getPermission();
+                    $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
                     $result['username'] = $_SESSION['user'];
                     $result['no_visible_elements'] = 'FALSE';
                     $result['target_id'] = $_POST['target_id'];
+		    global $INGAME_WEBPATH;
+                    $result['ingame_webpath'] = $INGAME_WEBPATH;
                     helpers :: loadtemplate( 'settings', $result);
                     exit;
                     

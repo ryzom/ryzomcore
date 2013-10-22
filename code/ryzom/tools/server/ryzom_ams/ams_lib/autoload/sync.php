@@ -1,16 +1,17 @@
 <?php
-
+/**
+* handler for performing changes when shard is back online after being offline.
+* the sync class is responsible for the syncdata function, which will synchronise the website with the shard
+* (when the shard is offline, users can still change their password, email or even register)
+* @author Daan Janssens, mentored by Matthew Lagoe
+*/
 class Sync{
     
     /**
-     *
-     * Function syncdata
-     *
-     * @takes        Nothing
-     * @return      array $values
-     *
-     * Info: Runs functions to finish syncing data when shard is offline
-     *
+     * performs the actions listed in the querycache.
+     * All entries in the querycache will be read and performed depending on their type.
+     * This is done because the shard could have been offline and we want changes made on the website (which is still online) to eventually hit the shard.
+     * These changes are: createPermissions, createUser, change_pass, change_mail
      */
     static public function syncdata () {
 
@@ -23,6 +24,17 @@ class Sync{
                 $db = new DBLayer($record['db']);
                 switch($record['type']) {
                     case 'createPermissions':
+                        $decode = json_decode($record['query']);
+                        $values = array('username' => $decode[0]);
+                        //make connection with and put into shard db & delete from the lib
+                        $sth = $db->execute("SELECT UId FROM user WHERE Login= :username;", $values);
+                        $result = $sth->fetchAll();
+                        foreach ($result as $UId) {
+                            $ins_values = array('id' => $UId['UId']);
+                            $db->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id, 'r2', 'OPEN');", $ins_values);
+                            $db->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id , 'ryzom_open', 'OPEN');", $ins_values);
+                        }
+                        break;
                     case 'change_pass':
                         $decode = json_decode($record['query']);
                         $values = array('user' => $decode[0], 'pass' => $decode[1]);
@@ -47,7 +59,7 @@ class Sync{
             print('Syncing completed');
         }
         catch (PDOException $e) {
-            print('Something went wrong!');
+            print('Something went wrong! The shard is probably still offline!');
             print_r($e);
         }
 

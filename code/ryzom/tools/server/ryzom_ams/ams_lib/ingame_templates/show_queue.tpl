@@ -8,11 +8,11 @@
 	      <td>
 		<table cellspacing="0" cellpadding="4">
 		  <tr>		    
-			<td valign="middle" nowrap><a href="index.php?page=show_queue&get=todo">Todo tickets</a></td>
-			<td valign="middle" nowrap><a href="index.php?page=show_queue&get=all">All tickets</a></td>
-			<td valign="middle" nowrap><a href="index.php?page=show_queue&get=all_open">All open tickets</a></td>
-			<td valign="middle" nowrap><a href="index.php?page=show_queue&get=archive">Ticket Archive</a></td>
-			<td valign="middle" nowrap><a href="index.php?page=show_queue&get=not_assigned">Not Assigned Tickets</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_queue&get=todo">Todo tickets</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_queue&get=all">All tickets</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_queue&get=all_open">All open tickets</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_queue&get=archive">Ticket Archive</a></td>
+			<td valign="middle" nowrap><a href="{$ingame_webpath}?page=show_queue&get=not_assigned">Not Assigned Tickets</a></td>
 		  </tr>
 		</table>
 	      </td>
@@ -60,7 +60,7 @@
 				      <tr><td>
 					      <p><h3>Tickets</h3></p>
 					      <p>
-						<form id="create_queue"  method="post" action="index.php?page=show_queue&get=create">
+						<form id="create_queue"  method="post" action="{$ingame_webpath}?page=show_queue&get=create">
 						<table width="100%" bgcolor="#00000060" border="1">
 						    <tr>
 							<td width="5"></td>
@@ -129,8 +129,8 @@
 							{foreach from=$tickets item=ticket}
 							  <tr>
 								<td>{$ticket.tId}</td>
-								<td><a href ="index.php?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
-								<td>{if $ticket.assignedText neq ""} <a href="index.php?page=show_user&id={$ticket.assigned}">{$ticket.assignedText}</a>{else} {$not_assigned} {/if}</td>
+								<td><a href ="{$ingame_webpath}?page=show_ticket&id={$ticket.tId}">{$ticket.title}</a></td>
+								<td>{if $ticket.assignedText neq ""} <a href="{$ingame_webpath}?page=show_user&id={$ticket.assigned}">{$ticket.assignedText}</a>{else} {$not_assigned} {/if}</td>
 								<td class="center"><span title="{$ticket.timestamp_elapsed}" data-rel="tooltip"  data-placement="right">{$ticket.timestamp}</span></td>
 								<td class="center">{$ticket.category}</td>
 								<td class="center">{if $ticket.status eq 0}<font color="green">{else if $ticket.status eq 1}<font color="orange">{else if $ticket.status eq 2}<font color="red">{/if}{$ticket.statusText}</font></td>  
@@ -139,19 +139,19 @@
 								    {if $ticket.forwardedGroupName eq "0"}
 									{$public_sgroup}
 								    {else}
-									<a href="index.php?page=show_sgroup&id={$ticket.forwardedGroupId}">{$ticket.forwardedGroupName}</a>
+									<a href="{$ingame_webpath}?page=show_sgroup&id={$ticket.forwardedGroupId}">{$ticket.forwardedGroupName}</a>
 								    {/if}
 								      
 								</td>  
 								<td>
 								    {if $ticket.assigned eq 0}
-									<form id="assign_ticket" class="form-vertical" method="post" action="index.php?page=show_queue&get=todo" style="margin:0px 0px 0px;">
+									<form id="assign_ticket" class="form-vertical" method="post" action="{$ingame_webpath}?page=show_queue&get=todo" style="margin:0px 0px 0px;">
 									    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 									    <input type="hidden" name="action" value="assignTicket">
 									    <input type="submit" value="Assign Ticket"/>
 									</form>
 								    {else if $ticket.assigned eq $user_id}
-									<form id="assign_ticket" class="form-vertical" method="post" action="index.php?page=show_queue&get=todo" style="margin:0px 0px 0px;">
+									<form id="assign_ticket" class="form-vertical" method="post" action="{$ingame_webpath}?page=show_queue&get=todo" style="margin:0px 0px 0px;">
 									    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 									    <input type="hidden" name="action" value="unAssignTicket">
 									    <input type="submit" value="Remove Assign"/>
