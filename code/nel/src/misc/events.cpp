@@ -19,6 +19,9 @@
 #include "nel/misc/events.h"
 #include "nel/misc/string_conversion.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 
@@ -178,7 +181,7 @@ static const CStringConversion<TKey>::CPair stringTable [] =
 	{ "KeyZOOM", KeyZOOM },
 	{ "KeyNONAME", KeyNONAME },
 	{ "KeyPA1", KeyPA1 },
-	{ "KeyOEM_CLEAR", KeyOEM_CLEAR },
+	{ "KeyOEM_CLEAR", KeyOEM_CLEAR }
 };
 
 

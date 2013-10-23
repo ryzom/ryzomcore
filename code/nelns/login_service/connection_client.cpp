@@ -152,7 +152,7 @@ retry:
 		CLoginCookie c;
 		c.set((uint32)(uintptr_t)from, rand(), uid);
 
-		reason = sqlQuery("update user set state='Authorized', Cookie='"+c.setToString()+"' where UId="+uid);
+		reason = sqlQuery("update user set state='Authorized', Cookie='"+c.setToString()+"' where UId=" + NLMISC::toString(uid));
 		if(!reason.empty()) break;
 
 		reason = sqlQuery("select * from shard where Online>0 and ClientApplication='"+application+"'", nbrow, row, result);

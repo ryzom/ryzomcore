@@ -61,7 +61,7 @@ enum TUI
 class IGeorges
 {
 public:
-	virtual ~IGeorges() {};
+	virtual ~IGeorges() {}
 
 	// Init the UI
 	virtual void initUI (int m_nCmdShow, bool exeStandalone, HWND parent=NULL)=0;

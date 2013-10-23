@@ -37,7 +37,7 @@ class CChatInputFilter : public NLMISC::CRefCount, public CChatWindow::IObserver
 {
 public:
 	CChatInputFilter() {FilterType= CChatGroup::say; DynamicChatDbIndex= 0;}
-	~CChatInputFilter();
+	virtual ~CChatInputFilter();
 	/** Display a msg in the chat. The msg will be forwarded to all the listening windows
 	  * Listening windows will blick only if there isnt a single visible listening window, so that the player can know if there's a message
 	  * \param windowVisible is not NULL, points a bool that will be filled with true if one of the window on the which the msg was displayed is visible.

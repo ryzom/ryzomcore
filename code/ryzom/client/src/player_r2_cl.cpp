@@ -122,7 +122,7 @@ CPlayerR2CL::~CPlayerR2CL()
 CGenderInfo * CPlayerR2CL::getGenderInfo()
 {
 	string propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPB);
-	sint64 vA = CInterfaceManager::getInstance ()->getDbProp(propName)->getValue64();
+	sint64 vA = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 	SPropVisualA visualA = *(SPropVisualA *)(&vA);
 	EGSPD::CPeople::TPeople ePeople = _Sheet->Race;
 	bool bMale = (_Sheet->Gender == GSGENDER::male);
@@ -321,7 +321,7 @@ void CPlayerR2CL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName
 	}
 
 	/* If the object is sticked (ie not a skin), decide to delete the Current instance. Why? because the animation
-		is changed according to the equiped item.
+		is changed according to the equipped item.
 
 		Hence, For example, if a sword would be changed for a gun, then the new gun animation would take place,
 		while Keeping the old sword shape. BAD.
@@ -624,9 +624,9 @@ void CPlayerR2CL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle
 		sint64 vB, vC;
 		string propName;
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPB);
-		vB = IM->getDbProp(propName)->getValue64();
+		vB = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPC);
-		vC = IM->getDbProp(propName)->getValue64();
+		vC = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		updateVisualPropertyVpb(0, vB);
 		updateVisualPropertyVpc(0, vC);
 
@@ -1033,7 +1033,7 @@ void CPlayerR2CL::load()	// virtual
 	if(!_WaitForAppearance)
 	{
 		// Visual properties A
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);	// Vpa udapte vpb and vpc too.
 	}
 }// load //
@@ -1132,7 +1132,4 @@ void CPlayerR2CL::setDiffuse(bool onOff, NLMISC::CRGBA diffuse)
 	CCharacterCL::setDiffuse(onOff, diffuse);
 	_Face.setDiffuse(onOff, diffuse);
 }
-
-
-
 

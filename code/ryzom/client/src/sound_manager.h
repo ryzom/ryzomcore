@@ -26,11 +26,13 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/config_file.h"
+#include "nel/misc/fast_id_map.h"
 // game_share
 #include "nel/misc/entity_id.h"
 // sound
 #include "nel/sound/u_audio_mixer.h"
 #include "nel/sound/u_listener.h"
+#include "nel/misc/sheet_id.h"
 
 extern class CSoundManager *SoundMngr;
 
@@ -45,8 +47,6 @@ namespace NLMISC
 	class IProgressCallback;
 }
 
-
-
 /**
  * class managing all the sounds for the client
  * \author David Fleury
@@ -55,9 +55,12 @@ namespace NLMISC
  */
 class CSoundManager
 {
+public:
+	typedef uint32 TSourceId;
 
-	typedef CHashMultiMap<NLMISC::CEntityId , NLSOUND::USource*, NLMISC::CEntityIdHashMapTraits > TMultiMapEntityToSource;
-	typedef std::map<uint32, NLSOUND::USource*>	TMapIdToSource;
+private:
+	typedef CHashMultiMap<NLMISC::CEntityId, TSourceId, NLMISC::CEntityIdHashMapTraits> TMultiMapEntityToSource;
+	typedef NLMISC::CFastIdMap<TSourceId, NLSOUND::USource *> TMapIdToSource;
 
 	/// Load the properties for this sound and aplly them.
 	void loadProperties(const string &soundName, USource *source);
@@ -86,19 +89,19 @@ public:
 	/// Return the audio mixer instance pointer.
 	NLSOUND::UAudioMixer *getMixer();
 
-	uint32	addSource( const NLMISC::TStringId &soundName, const NLMISC::CVector &position, bool play = true , bool loop = false,  const NLMISC::CEntityId &id = NLMISC::CEntityId::Unknown );
+	TSourceId	addSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position, bool play = true , bool loop = false,  const NLMISC::CEntityId &id = NLMISC::CEntityId::Unknown );
 
 	/// spawn a new source to the world but sound manager don't keep any link and the sound will be automatically deleted when finnished
-	bool	spawnSource (const NLMISC::TStringId &soundName, NLSOUND::CSoundContext &context);
+	bool	spawnSource (const NLMISC::CSheetId &soundName, NLSOUND::CSoundContext &context);
 
 	/// spawn a new source to the world but sound manager don't keep any link and the sound will be automatically deleted when finnished
-	bool	spawnSource( const NLMISC::TStringId &soundName, const NLMISC::CVector &position );
+	bool	spawnSource( const NLMISC::CSheetId &soundName, const NLMISC::CVector &position );
 
 	/**
 	 * remove a source
 	 * \param uint32 source id
 	 */
-	void removeSource( uint32 sourceId );
+	void removeSource( TSourceId sourceId );
 
 
 	/**
@@ -190,28 +193,28 @@ public:
 	 * \param uint32 source id
 	 * \param CVector& new position
 	 */
-	void setSoundPosition( uint32 sourceId, const NLMISC::CVector &position);
+	void setSoundPosition( TSourceId sourceId, const NLMISC::CVector &position);
 
 	/**
 	 * loop a sound (or stop looping)
 	 * \param uint32 source id
 	 * \param bool loop (true = loop)
 	 */
-	void loopSound( uint32 sourceId, bool loop);
+	void loopSound( TSourceId sourceId, bool loop);
 
 	/**
 	 * play or stop a sound
 	 * \param uint32 source id
 	 * \param bool play (true = play, false = stop)
 	 */
-	void playSound( uint32 sourceId, bool play);
+	void playSound( TSourceId sourceId, bool play);
 
 	/**
 	 * test whether the sepcified source is playing or not
 	 * \param uint32 source id
 	 * \return bool true if the source is playing
 	 */
-	bool isPlaying( uint32 sourceId );
+	bool isPlaying( TSourceId sourceId );
 
 	/**
 	 * select the env effect corresponding to tag
@@ -236,14 +239,14 @@ public:
 	 * \param uint32 sourceId
 	 * \param float new gain (0-1)
 	 */
-	void setSourceGain(  uint32 sourceId, float gain);
+	void setSourceGain(  TSourceId sourceId, float gain);
 
 	/**
 	 * get source Gain
 	 * \param uint32 sourceId
 	 * \return float new gain (0-1) (-1 if source not found)
 	 */
-	float getSourceGain( uint32 sourceId );
+	float getSourceGain( TSourceId sourceId );
 
 	/**
 	 * set source Pitch
@@ -251,14 +254,14 @@ public:
 	 * \param uint32 sourceId
 	 * \param float new Pitch (0-1)
 	 */
-	void setSourcePitch(  uint32 sourceId, float gain);
+	void setSourcePitch(  TSourceId sourceId, float gain);
 
 	/**
 	 * get source Pitch
 	 * \param uint32 sourceId
 	 * \return float new Pitch (0-1) (>0) (-1 if source not found)
 	 */
-	float getSourcePitch( uint32 sourceId );
+	float getSourcePitch( TSourceId sourceId );
 
 	/**
 	 * Play all the positioned sounds which are near the given position
@@ -330,6 +333,12 @@ private:
 	/// Pointer on the audio mixer object
 	NLSOUND::UAudioMixer		*_AudioMixer;
 
+	/// The root effects group controller for effects volume settings by the user
+	NLSOUND::UGroupController	*_GroupControllerEffects;
+
+	/// The root effects group controller for effects fading by the game
+	NLSOUND::UGroupController	*_GroupControllerEffectsGame;
+
 	/// Pointer on the root of the environmental sounds tree (if any)
 	NLSOUND::UEnvSound			*_EnvSoundRoot;
 
@@ -346,10 +355,7 @@ private:
 	//CStepSounds					_StepSounds;
 
 	/// list of positioned sounds
-	std::list<uint32>			_PositionedSounds;
-
-	/// the next value that will be used as id for the next sound to be created
-	uint32						_NextId;
+	std::list<TSourceId>		_PositionedSounds;
 
 	/// Gain value for user entity sound.
 	float						_UserEntitySoundLevel;

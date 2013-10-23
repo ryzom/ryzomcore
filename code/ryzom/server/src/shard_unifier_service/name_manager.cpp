@@ -1187,9 +1187,14 @@ bool CNameManager::loadForbiddenNames()
 	while (true)
 	{
 		char str[512];
-		fgets(str, 511, fp);
+		char *fgres = fgets(str, 511, fp);
 		if(feof(fp))
 			break;
+		if (fgres == NULL)
+		{
+			nlwarning("NAMEMGR: Error reading file");
+			break;
+		}
 		if (strlen(str) > 0)
 		{
 			str[strlen(str)-1] = '\0';

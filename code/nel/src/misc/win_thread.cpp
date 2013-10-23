@@ -15,15 +15,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
+#include "nel/misc/win_thread.h"
 
 #ifdef NL_OS_WINDOWS
 
-#include "nel/misc/win_thread.h"
 #include "nel/misc/path.h"
 #define NOMINMAX
 #include <windows.h>
 
 #include <typeinfo>
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 
@@ -73,6 +77,20 @@ CWinThread::CWinThread (IRunnable *runnable, uint32 stackSize)
 	_MainThread = false;
 }
 
+namespace {
+class CWinCriticalSection
+{
+private:
+	CRITICAL_SECTION cs;
+public:
+	CWinCriticalSection() { InitializeCriticalSection(&cs); }
+	~CWinCriticalSection() { DeleteCriticalSection(&cs); }
+	inline void enter() { EnterCriticalSection(&cs); }
+	inline void leave() { LeaveCriticalSection(&cs); }
+};
+CWinCriticalSection s_CS;
+}/* anonymous namespace */
+
 CWinThread::CWinThread (void* threadHandle, uint32 threadId)
 {
 	// Main thread
@@ -99,14 +117,11 @@ CWinThread::CWinThread (void* threadHandle, uint32 threadId)
 		nlassert(0); // WARNING: following code has not tested! don't know if it work fo real ...
 					 // This is just a suggestion of a possible solution, should this situation one day occur ...
 		// Ensure that this thread don't get deleted, or we could suspend the main thread
-		CRITICAL_SECTION cs;
-		InitializeCriticalSection(&cs);
-		EnterCriticalSection(&cs);
+		s_CS.enter();
 		// the 2 following statement must be executed atomicaly among the threads of the current process !
 		SuspendThread(threadHandle);
 		_SuspendCount = ResumeThread(threadHandle);
-		LeaveCriticalSection(&cs);
-		DeleteCriticalSection(&cs);
+		s_CS.leave();
 	}
 }
 
@@ -148,10 +163,10 @@ void CWinThread::resume()
 	}
 }
 
-void CWinThread::setPriority(int priority)
+void CWinThread::setPriority(TThreadPriority priority)
 {
 	nlassert(ThreadHandle); // 'start' was not called !!
-	BOOL result = SetThreadPriority(ThreadHandle, priority);
+	BOOL result = SetThreadPriority(ThreadHandle, (int)priority);
 	nlassert(result);
 }
 
@@ -179,6 +194,9 @@ CWinThread::~CWinThread ()
 
 void CWinThread::start ()
 {
+	if (isRunning())
+		throw EThread("Starting a thread that is already started, existing thread will continue running, this should not happen");	
+	
 //	ThreadHandle = (void *) ::CreateThread (NULL, _StackSize, ProxyFunc, this, 0, (DWORD *)&ThreadId);
 	ThreadHandle = (void *) ::CreateThread (NULL, 0, ProxyFunc, this, 0, (DWORD *)&ThreadId);
 //	nldebug("NLMISC: thread %x started for runnable '%x'", typeid( Runnable ).name());

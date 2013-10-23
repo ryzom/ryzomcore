@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision$" State="modified">
+  <STRUCT>
+    <VSTRUCT DfnName="stream_file_sound.dfn" Name="SoundType">
+      <ATOM Name="MinDistance" Value="100000"/>
+      <ATOM Name="MaxDistance" Value="200000"/>
+	  <ATOM Name="Async" Value ="true"/>
+	  <ATOM Name="FilePath" Value="Pyr Entrance.ogg"/>
+    </VSTRUCT>
+    <ATOM Name="AbsolutePosition" Value="false"/>
+    <ATOM Name="Priority" Value="Highest"/>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>

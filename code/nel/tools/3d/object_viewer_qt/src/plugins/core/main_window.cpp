@@ -128,6 +128,11 @@ QSettings *MainWindow::settings() const
 	return m_settings;
 }
 
+QUndoGroup *MainWindow::undoGroup() const
+{
+	return m_undoGroup;
+}
+
 ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 {
 	return m_pluginManager;
@@ -135,12 +140,16 @@ ExtensionSystem::IPluginManager *MainWindow::pluginManager() const
 
 void MainWindow::addContextObject(IContext *context)
 {
-	m_undoGroup->addStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->addStack(stack);
 }
 
 void MainWindow::removeContextObject(IContext *context)
 {
-	m_undoGroup->removeStack(context->undoStack());
+	QUndoStack *stack = context->undoStack();
+	if (stack)
+		m_undoGroup->removeStack(stack);
 }
 
 void MainWindow::open()
@@ -150,19 +159,28 @@ void MainWindow::open()
 
 void MainWindow::newFile()
 {
+	m_contextManager->currentContext()->newDocument();
 }
 
 void MainWindow::save()
 {
+	m_contextManager->currentContext()->save();
 }
 
 void MainWindow::saveAs()
 {
+	m_contextManager->currentContext()->saveAs();
 }
 
 void MainWindow::saveAll()
 {
 }
+
+void MainWindow::closeDocument()
+{
+	m_contextManager->currentContext()->close();
+}
+
 
 void MainWindow::cut()
 {
@@ -277,6 +295,12 @@ void MainWindow::createActions()
 	connect(m_saveAllAction, SIGNAL(triggered()), this, SLOT(saveAll()));
 	m_saveAllAction->setEnabled(false);
 
+	m_closeAction = new QAction(tr("Close"), this);
+	m_closeAction->setShortcut(QKeySequence::Close);
+	menuManager()->registerAction(m_closeAction, Constants::CLOSE);
+	connect(m_closeAction, SIGNAL(triggered()), this, SLOT(closeDocument()));
+	m_closeAction->setEnabled(false);
+
 	m_exitAction = new QAction(tr("E&xit"), this);
 	m_exitAction->setShortcut(QKeySequence(tr("Ctrl+Q")));
 	m_exitAction->setStatusTip(tr("Exit the application"));
@@ -372,6 +396,7 @@ void MainWindow::createMenus()
 	m_fileMenu->addAction(m_saveAction);
 	m_fileMenu->addAction(m_saveAsAction);
 	m_fileMenu->addAction(m_saveAllAction);
+	m_fileMenu->addAction(m_closeAction);
 	m_fileMenu->addSeparator();
 
 	m_recentFilesMenu = m_fileMenu->addMenu(tr("Recent &Files"));

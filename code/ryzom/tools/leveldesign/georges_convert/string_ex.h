@@ -26,9 +26,9 @@ class CStringEx : public std::basic_string<char, std::char_traits<char>, std::al
 {
 
 public:
-	CStringEx()						: std::basic_string<char, std::char_traits<char>, std::allocator<char> >() {;} 
-	CStringEx( char* _pc ) 			: std::basic_string<char, std::char_traits<char>, std::allocator<char> >( (char *)_pc ) {};
-	CStringEx( std::string _s ) 	: std::basic_string<char, std::char_traits<char>, std::allocator<char> >( (std::string)_s) {}; 
+	CStringEx()						: std::basic_string<char, std::char_traits<char>, std::allocator<char> >() {} 
+	CStringEx( char* _pc ) 			: std::basic_string<char, std::char_traits<char>, std::allocator<char> >( (char *)_pc ) {}
+	CStringEx( std::string _s ) 	: std::basic_string<char, std::char_traits<char>, std::allocator<char> >( (std::string)_s) {}
 	CStringEx( const char _c, int _i ) 	{ append( _i, _c ); }
 	
 	virtual ~CStringEx();

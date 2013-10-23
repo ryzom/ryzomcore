@@ -46,26 +46,28 @@
 
 #include "editor.h"
 //
-#include "../interface_v3/lua_helper.h"
-#include "../interface_v3/group_tree.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
+#include "nel/gui/group_tree.h"
 #include "../interface_v3/interface_manager.h"
 #include "../contextual_cursor.h"
 #include "../cursor_functions.h"
 #include "../entities.h"
 #include "../events_listener.h"
-#include "../interface_v3/group_list.h"
-#include "../interface_v3/event_descriptor.h"
-#include "../interface_v3/group_tree.h"
+#include "nel/gui/group_list.h"
+#include "nel/gui/event_descriptor.h"
+#include "nel/gui/group_tree.h"
 #include "../client_cfg.h"
-#include "../interface_v3/lua_ihm.h"
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_ihm.h"
+#include "../interface_v3/lua_ihm_ryzom.h"
+#include "nel/gui/lua_object.h"
 #include "../global.h"
 #include "../connection.h"
 #include "../main_loop.h"
 #include "../interface_v3/people_interraction.h"
 #include "../time_client.h"
 #include "../pacs_client.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../actions.h"
 #include "../actions_client.h"
 #include "object_factory_client.h"
@@ -79,7 +81,7 @@
 #include "../interface_v3/input_handler_manager.h"
 #include "../connection.h"
 #include "../init_main_loop.h"
-#include "../interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "../landscape_poly_drawer.h"
 #include "../input.h"
 #include "../motion/user_controls.h"
@@ -111,6 +113,7 @@
 
 #include "../session_browser_impl.h"
 #include "../far_tp.h"
+#include "nel/gui/lua_manager.h"
 
 
 using namespace NLMISC;
@@ -585,7 +588,7 @@ CLuaState &CEditor::getLua()
 {
 	//H_AUTO(R2_CEditor_getLua)
 	CHECK_EDITOR
-	CLuaState *ls = getUI().getLuaState();
+	CLuaState *ls = CLuaManager::getInstance().getLuaState();
 	nlassert(ls);
 	return *ls;
 }
@@ -612,7 +615,7 @@ void CEditor::clearDebugWindow()
 	//H_AUTO(R2_CEditor_clearDebugWindow)
 	CHECK_EDITOR
 	getUI().flushDebugWindow();
-	CGroupList *gl = dynamic_cast<CGroupList *>(getUI().getElementFromId("ui:interface:debug_info:content:cb:text_list"));
+	CGroupList *gl = dynamic_cast<CGroupList *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:debug_info:content:cb:text_list"));
 	if (gl)
 	{
 		gl->deleteAllChildren();
@@ -1644,12 +1647,12 @@ void CEditor::waitScenarioScreen()
 	{
 		setMode(GoingToEditionMode);
 	}
-	getUI().hideAllWindows();
-	CInterfaceGroup *waitScreen = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_connecting"));
+	CWidgetManager::getInstance()->hideAllWindows();
+	CInterfaceGroup *waitScreen = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting"));
 	if (waitScreen)
 	{
 		waitScreen->setActive(true);
-		getUI().setTopWindow(waitScreen);
+		CWidgetManager::getInstance()->setTopWindow(waitScreen);
 	}
 	//
 	enum TState { WaitingScenario, WaitingTP, DoExit };
@@ -1661,12 +1664,12 @@ void CEditor::waitScenarioScreen()
 	//
 	ActionsContext.setContext("waiting_network");
 	TGameCycle serverTick = NetMngr.getCurrentServerTick();
-	getUI().setCaptureKeyboard(NULL);
-	getUI().setDefaultCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setDefaultCaptureKeyboard(NULL);
 	loadBackgroundBitmap (StartBackground);
 
 	// patch for the 'sys info that pop' prb (cause unknown for now ...)
-	CInterfaceElement *sysInfo = getUI().getElementFromId("ui:interface:system_info");
+	CInterfaceElement *sysInfo = CWidgetManager::getInstance()->getElementFromId("ui:interface:system_info");
 	bool sysInfoActive = false;
 	if (sysInfo) sysInfoActive = sysInfo->getActive();
 
@@ -1715,7 +1718,7 @@ void CEditor::waitScenarioScreen()
 			else
 			{
 				// Display the firewall alert string
-				CViewText *pVT = dynamic_cast<CViewText*>(getUI().getElementFromId("ui:interface:r2ed_connecting:title"));
+				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
 				if (pVT != NULL)
 					pVT->setText(CI18N::get("uiFirewallAlert")+ucstring("..."));
 
@@ -1724,7 +1727,8 @@ void CEditor::waitScenarioScreen()
 			}
 
 		}
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// check if we can send another dated block
 		if (NetMngr.getCurrentServerTick() != serverTick)
@@ -1763,13 +1767,14 @@ void CEditor::waitScenarioScreen()
 
 		if (waitScreen)
 		{
-			getUI().setTopWindow(waitScreen);
+			CWidgetManager::getInstance()->setTopWindow(waitScreen);
 		}
 
 		if (sysInfo) sysInfo->setActive(false);
 
 		getUI().updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// Movie shooter
 		globalMenuMovieShooter();
@@ -1802,7 +1807,7 @@ void CEditor::waitScenarioScreen()
 			if ( firewallTimeout )
 			{
 				// Display the firewall error string instead of the normal failure string
-				CViewText *pVT = dynamic_cast<CViewText*>(getUI().getElementFromId("ui:interface:r2ed_connecting:title"));
+				CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connecting:title"));
 				if (pVT != NULL)
 				{
 					pVT->setMultiLine( true );
@@ -2226,7 +2231,7 @@ void CEditor::loadStandardUI()
 	ClientCfg.R2EDEnabled = false;
 	loadUIConfig("");
 	ClientCfg.R2EDEnabled = true;
-	getUI().updateAllLocalisedElements();
+	CWidgetManager::getInstance()->updateAllLocalisedElements();
 }
 
 // *********************************************************************************************************
@@ -2345,10 +2350,10 @@ void CEditor::setMode(TMode mode)
 	ContextCur.release();
 	_Mode = mode;
 	loadKeySet(getKeySetPrefix(_Mode));
-	getUI().disableModalWindow();
-	getUI().setCapturePointerLeft(NULL);
-	getUI().setCapturePointerRight(NULL);
-	getUI().setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->disableModalWindow();
+	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 	// Season is now unknown, until server force it (in test mode), or first set act set it (in edit mode)
 	_Season = UnknownSeason;
 	//
@@ -2573,7 +2578,7 @@ void CEditor::hideRingWindows()
 	for (uint k = 0; k < sizeofarray(ringWindows); ++k)
 	{
 		std::string id = "ui:interface:" + std::string(ringWindows[k]);
-		CInterfaceElement *grp = getUI().getElementFromId(id);
+		CInterfaceElement *grp = CWidgetManager::getInstance()->getElementFromId(id);
 		if (grp)
 		{
 			grp->setActive(false);
@@ -2608,7 +2613,7 @@ void CEditor::init(TMode initialMode, TAccessMode accessMode)
 	}
 	//
 	CLuaStackChecker lsc(&getLua());
-	getLua().pushValue(LUA_GLOBALSINDEX);
+	getLua().pushGlobalTable();
 	_Globals.pop(getLua());
 	getLua().pushValue(LUA_REGISTRYINDEX);
 	_Registry.pop(getLua());
@@ -2703,7 +2708,7 @@ void CEditor::init(TMode initialMode, TAccessMode accessMode)
 
 	{
 		CVerboseClock clock("Update of localized elements");
-		getUI().updateAllLocalisedElements();
+		CWidgetManager::getInstance()->updateAllLocalisedElements();
 	}
 
 }
@@ -2728,7 +2733,7 @@ uint CEditor::getMaxNumPlotItems()
 {
 	//H_AUTO(R2_CEditor_getMaxNumPlotItems)
 	uint ret;
-	fromString(getUI().getDefine("r2ed_max_num_plot_item_sheets"), ret);
+	fromString( CWidgetManager::getInstance()->getParser()->getDefine("r2ed_max_num_plot_item_sheets"), ret);
 	return ret;
 }
 
@@ -2736,14 +2741,14 @@ uint CEditor::getMaxNumPlotItems()
 CCDBNodeLeaf *CEditor::getRefPlotItemSheetDBLeaf(uint index)
 {
 	//H_AUTO(R2_CEditor_getRefPlotItemSheetDBLeaf)
-	return getUI().getDbProp(toString("LOCAL:R2:REFERENCE_PLOT_ITEMS:%d:SHEET", (int) index), false);
+	return NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:REFERENCE_PLOT_ITEMS:%d:SHEET", (int) index), false);
 }
 
 // *********************************************************************************************************
 CCDBNodeLeaf *CEditor::getPlotItemSheetDBLeaf(uint index)
 {
 	//H_AUTO(R2_CEditor_getPlotItemSheetDBLeaf)
-	return getUI().getDbProp(toString("LOCAL:R2:PLOT_ITEMS:%d:SHEET", (int) index), false);
+	return NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:PLOT_ITEMS:%d:SHEET", (int) index), false);
 }
 
 
@@ -2756,7 +2761,7 @@ void CEditor::setReferencePlotItemSheet(uint index, uint32 sheetId)
 	{
 		leaf->setValue32(sheetId);
 	}
-	leaf = getUI().getDbProp(toString("LOCAL:R2:AVAILABLE_PLOT_ITEMS:%d:SHEET", (int) index), false);
+	leaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:AVAILABLE_PLOT_ITEMS:%d:SHEET", (int) index), false);
 	if (leaf)
 	{
 		leaf->setValue32(sheetId);
@@ -3210,7 +3215,7 @@ void CEditor::initObjectProjectionMetatable()
 					ls.push(true);
 					return 1;
 				}
-				CLuaIHM::dumpCallStack();
+				CLuaIHMRyzom::dumpCallStack();
 				// object has been deleted but the script maintains a reference on it
 				throw ELuaWrappedFunctionException(&ls, "Attempt to access an erased object");
 			}
@@ -3227,14 +3232,14 @@ void CEditor::initObjectProjectionMetatable()
 				else
 				{
 					// 'bad index' message already printed by CObject::getValue
-					CLuaIHM::dumpCallStack();
+					CLuaIHMRyzom::dumpCallStack();
 				}
 			}
 
 			if (!ls.isString(2))
 			{
 				nlwarning("String expected when accessing an object property, %s found instead", ls.getTypename(2));
-				CLuaIHM::dumpCallStack(0);
+				CLuaIHMRyzom::dumpCallStack(0);
 				return 0;
 			}
 
@@ -3551,7 +3556,7 @@ void CEditor::initObjectProjectionMetatable()
 							{
 								nlwarning("Duplicated key of type string found while attempting to enumerate an instance content.");
 								nlwarning("key is %s", key.c_str());
-								CLuaIHM::dumpCallStack(1);
+								CLuaIHMRyzom::dumpCallStack(1);
 								CLuaIHM::fails(ls, "Aborting to avoid infinite loop.");
 							}
 							keys.insert(key);
@@ -3620,7 +3625,7 @@ void CEditor::initObjectProjectionMetatable()
 			static volatile bool from = false;
 			if (from)
 			{
-				CLuaIHM::dumpCallStack(0);
+				CLuaIHMRyzom::dumpCallStack(0);
 			}
 			nlassert(ls.getTop() == 2);
 			if (!checkTag(ls)) return false;
@@ -3937,7 +3942,7 @@ void CEditor::release()
 		saveCurrentKeySet();
 		saveUIConfig();
 	}
-	getUI().hideAllWindows(); // make sure all action handlers are called while the r2 lua environment is still active
+	CWidgetManager::getInstance()->hideAllWindows(); // make sure all action handlers are called while the r2 lua environment is still active
 	clearContent();
 	_EntityCustomSelectBoxMap.clear();
 
@@ -3949,11 +3954,13 @@ void CEditor::release()
 	}
 
 	// clear the environment
-	if (getUI().getLuaState())
+	if (CLuaManager::getInstance().getLuaState())
 	{
+		getLua().pushGlobalTable();
 		getLua().push(R2_LUA_PATH);
 		getLua().pushNil();
-		getLua().setTable(LUA_GLOBALSINDEX);
+		getLua().setTable(-3); // pop pop
+		getLua().pop();
 		_Globals.release();
 		_Registry.release();
 		_ObjectProjectionMetatable.release();	// AJM
@@ -4392,7 +4399,7 @@ bool CEditor::doLuaScript(const char *filename, const char *fileDescText)
 		return false;
 	}
 
-	if( 0 && FINAL_VERSION == 1) // deactivated for the moment because there are lua file that must be loaded from example
+	if( 0 && FINAL_VERSION == 1) // disabled for the moment because there are lua file that must be loaded from example
 	{
 		const static std::string path = "data_common.bnp@";
 		const static std::string::size_type len= path.size();
@@ -4429,7 +4436,7 @@ bool CEditor::doLuaScript(const char *filename, const char *fileDescText)
 			std::string filename = msg.substr(0, extPos + 4); // extract filename including extension
 			int line;
 			fromString(&*(msg.begin() + extPos + 5), line); // line number follows
-			nlwarning((CLuaIHM::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
+			nlwarning((CLuaIHMRyzom::createGotoFileButtonTag(filename.c_str(), line) + e.what()).c_str());
 		}
 		else
 		{
@@ -4737,17 +4744,17 @@ void CEditor::autoSave()
 }
 
 // *********************************************************************************************************
-bool CEditor::handleEvent (const CEventDescriptor &eventDesc)
+bool CEditor::handleEvent (const NLGUI::CEventDescriptor &eventDesc)
 {
 	//H_AUTO(R2_CEditor_handleEvent )
 	CHECK_EDITOR
 	if (ConnectionWanted || !_CurrentTool) return false; // TMP special case for connection
-	if (eventDesc.getType() == CEventDescriptor::system)
+	if (eventDesc.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) eventDesc;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+		const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) eventDesc;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 		{
-			const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == false)
 			{
 				// cancel current tool
@@ -4836,24 +4843,24 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	sint64       *prop = 0;
 	CCDBNodeLeaf *node = 0;
 	// Set The property 'CLFECOMMON::PROPERTY_POSITION'.
-	node = im->getDbProp("SERVER:Entities:E" + NLMISC::toString("%d", slot)+":P" + NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSX), false);
+	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E" + NLMISC::toString("%d", slot)+":P" + NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSX), false);
 	if(node)
 	{
 		sint64 x = (sint64)(pos.x*1000.0);
 		sint64 y = (sint64)(pos.y*1000.0);
 		sint64 z = (sint64)(pos.z*1000.0);
 		node->setValue64(x);
-		node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSY), false);
+		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSY), false);
 		if(node)
 		{
 			node->setValue64(y);
-			node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
 			if(node)
 				node->setValue64(z);
 		}
 	}
 	// Set The property 'PROPERTY_ORIENTATION'.
-	node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
+	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 	if(node)
 	{
 		union
@@ -4865,7 +4872,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 		node->setValue64(heading64);
 	}
 	// Set Mode
-	node = im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
+	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 	if(node)
 	{
 		MBEHAV::EMode m = MBEHAV::NORMAL;
@@ -4910,7 +4917,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	}
 
 	// Set the database.
-	im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
 
 	// Set Visual Properties
 	SPropVisualB visualB;
@@ -4919,7 +4926,7 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	sint64       *propB = 0;
 	propB = (sint64 *)&visualB;
 	// Set the database.
-	im->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*propB);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*propB);
 
 	// Apply Changes.
 	EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_VPA);
@@ -5186,7 +5193,7 @@ void CEditor::onEditionModeConnected( uint32 userSlotId, uint32 adventureId, COb
 	{
 		setMode(EditionMode);
 	}
-	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_current_session"));
+	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_current_session"));
 	if (currentSessionGroup)
 	{
 		CViewText *text = dynamic_cast<CViewText *>(currentSessionGroup->getView("current_session"));
@@ -5237,7 +5244,7 @@ void CEditor::onAnimationModeConnected(const CClientMessageAdventureUserConnecti
 
 	}
 
-	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_current_session"));
+	CInterfaceGroup *currentSessionGroup = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_current_session"));
 	if (currentSessionGroup)
 	{
 		CViewText *text = dynamic_cast<CViewText *>(currentSessionGroup->getView("current_session"));
@@ -5276,7 +5283,7 @@ void  CEditor::onTestModeConnected()
 	CHECK_EDITOR
 	// TODO nico : change the name of the function : should rather be 'onAnimationModeConnected'
 	// start as a GM
-	getUI().runActionHandler("r2ed_anim_dm_mode", NULL, "");
+	CAHManager::getInstance()->runActionHandler("r2ed_anim_dm_mode", NULL, "");
 	_DMC->CDynamicMapClient::onTestModeConnected();
 }
 
@@ -6381,7 +6388,7 @@ void CEditor::connexionMsg(const std::string &stringId)
 	// ignore if current ui desktop is not the third
 	if (getUI().getMode() != 3) return;
 	// show the connection window
-	CInterfaceGroup *r2ConnectWindow = dynamic_cast<CInterfaceGroup *>(getUI().getElementFromId("ui:interface:r2ed_connect"));
+	CInterfaceGroup *r2ConnectWindow = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_connect"));
 	if (!r2ConnectWindow) return;
 	if (stringId.empty())
 	{
@@ -6603,7 +6610,7 @@ NLMISC::CVectorD getVectorD(const CObject *obj)
 CObject *buildVector(const NLMISC::CVectorD &vector, const std::string &instanceId /*= ""*/)
 {
 	CObject *table;
-	if (instanceId == "")
+	if (instanceId.empty() )
 	{
 		table = getEditor().getDMC().newComponent("Position");
 		table->set("x", vector.x);
@@ -7186,13 +7193,13 @@ class CAHCreateEntity : public IActionHandler
 				}
 
 				prop = (sint64 *)&vA;
-				im->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
+				NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
 
 				prop = (sint64 *)&vB;
-				im->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
+				NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
 
 				prop = (sint64 *)&vC;
-				im->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
+				NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", entity->slot())+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
 
 				EntitiesMngr.updateVisualProperty(0, entity->slot(), CLFECOMMON::PROPERTY_VPA);
 				EntitiesMngr.updateVisualProperty(0, entity->slot(), CLFECOMMON::PROPERTY_VPB);
@@ -7200,7 +7207,7 @@ class CAHCreateEntity : public IActionHandler
 			}
 		}
 
-		getEditor().setCurrentTool(new CToolCreateEntity(ghostSlot, paletteId, im->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->getValueBool()));
+		getEditor().setCurrentTool(new CToolCreateEntity(ghostSlot, paletteId, NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:R2_DRAW_ARRAY")->getValueBool()));
 	}
 };
 REGISTER_ACTION_HANDLER(CAHCreateEntity, "r2ed_create_entity");
@@ -7325,9 +7332,9 @@ class CAHOpenScenarioControl : public IActionHandler
 		CInterfaceGroup* wnd = NULL;
 
 		if(!R2::getEditor().isInitialized())
-			wnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:ring_scenario_loading_window"));
+			wnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:ring_scenario_loading_window"));
 		else
-			wnd = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface:r2ed_scenario_control"));
+			wnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_scenario_control"));
 
 		if(wnd)
 		{
@@ -7389,7 +7396,7 @@ class CAHInviteCharacter : public IActionHandler
 		CHECK_EDITOR
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("leave_modal", pCaller, "");
+		CAHManager::getInstance()->runActionHandler("leave_modal", pCaller, "");
 
 		if(pCaller)
 		{
@@ -7420,15 +7427,15 @@ class CAHInviteCharacter : public IActionHandler
 
 					if(sessionBrowser._LastInvokeResult == 14)
 					{
-						CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+						CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 						if (pVT != NULL)
 							pVT->setText(CI18N::get("uiRingWarningInviteFreeTrial"));
 
-						pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
+						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_free_trial");
 					}
 					else if(sessionBrowser._LastInvokeResult == 12)
 					{
-						pIM->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
+						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, "group=ui:interface:warning_newcomer");
 					}
 
 					geb->setInputString(ucstring(""));
@@ -7536,7 +7543,7 @@ class CAHR2Undo : public IActionHandler
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		// if an edit box currently has focus, then try undo on it first
-		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(getEditor().getUI().getCaptureKeyboard());
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>( CWidgetManager::getInstance()->getCaptureKeyboard());
 		if (eb && eb->undo())
 		{
 			return;
@@ -7565,7 +7572,7 @@ class CAHR2Redo : public IActionHandler
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		// if an edit box currently has focus, then try redo on it first
-		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(getEditor().getUI().getCaptureKeyboard());
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(CWidgetManager::getInstance()->getCaptureKeyboard());
 		if (eb && eb->redo())
 		{
 			return;
@@ -7619,9 +7626,9 @@ class CAHR2DMGiftValidate : public IActionHandler
 			{
 				uint32 sheetId = 0;
 				uint8  quantity = 0;
-				CCDBNodeLeaf *sheetLeaf = im->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:SHEET", (int) k));
+				CCDBNodeLeaf *sheetLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:SHEET", (int) k));
 				if (sheetLeaf) sheetId = (uint32) sheetLeaf->getValue32();
-				CCDBNodeLeaf *quantityLeaf = im->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:QUANTITY", (int) k));
+				CCDBNodeLeaf *quantityLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:R2:DM_GIFT:%d:QUANTITY", (int) k));
 				if (quantityLeaf) quantity = (uint8) quantityLeaf->getValue8();
 				out.serial(sheetId);
 				out.serial(quantity);
@@ -7641,8 +7648,7 @@ class CAHR2FreezeUnfreezeBotObjects : public IActionHandler
 {
 	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->executeLuaScript("r2:freezeUnfreezeBotObjects()");
+		CLuaManager::getInstance().executeLuaScript("r2:freezeUnfreezeBotObjects()");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHR2FreezeUnfreezeBotObjects, "r2ed_freeze_unfreeze_botobjects");

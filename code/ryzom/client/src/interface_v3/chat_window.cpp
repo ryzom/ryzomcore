@@ -30,11 +30,11 @@
 #include "people_interraction.h"
 #include "../connection.h"
 //
-#include "group_container.h"
-#include "group_editbox.h"
-#include "group_tab.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/group_tab.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"
 //
 #include "../session_browser_impl.h"
@@ -92,7 +92,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 	{
 		if (desc.FatherContainer != "ui:interface" )
 		{
-			fatherContainer = dynamic_cast<CGroupContainer *>(im->getElementFromId(desc.FatherContainer));
+			fatherContainer = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(desc.FatherContainer));
 			if (!fatherContainer)
 			{
 				nlwarning("<CChatWindow::create> Can't get father group, or bad type");
@@ -119,7 +119,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 	params.insert(params.end(), desc.ChatTemplateParams.begin(), desc.ChatTemplateParams.end());
 
 	// create a chat container from the template
-	CInterfaceGroup *chatGroup = im->createGroupInstance(chatTemplate, "ui:interface", params);
+	CInterfaceGroup *chatGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(chatTemplate, "ui:interface", params);
 	if (chatGroup)
 	{
 		_Chat = dynamic_cast<CGroupContainer *>(chatGroup);
@@ -143,7 +143,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 			_EB->setAHOnEnter("chat_box_entry");
 		}
 
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 
 		if (fatherContainer)
 		{
@@ -153,7 +153,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 		// If root container
 		if (desc.FatherContainer == "ui:interface")
 		{
-			im->addWindowToMasterGroup("ui:interface", _Chat);
+			CWidgetManager::getInstance()->addWindowToMasterGroup("ui:interface", _Chat);
 			_Chat->setParent(pRoot);
 			_Chat->setMovable(true);
 			_Chat->setActive(false);
@@ -289,12 +289,12 @@ void CChatWindow::deleteContainer()
 			proprietaryContainer->detachContainer(_Chat); // just detach
 		}
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(im->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		pRoot->delGroup (_Chat);
 	}
 	else
 	{
-		CInterfaceManager::getInstance()->unMakeWindow(_Chat);
+		CWidgetManager::getInstance()->unMakeWindow(_Chat);
 		if (_Chat->getParent())
 		{
 			_Chat->getParent()->delGroup(_Chat);
@@ -315,7 +315,7 @@ bool CChatWindow::rename(const ucstring &newName, bool newNameLocalize)
 void CChatWindow::setKeyboardFocus()
 {
 	if (!_EB || !_Chat) return;
-	CInterfaceManager::getInstance()->setCaptureKeyboard(_EB);
+	CWidgetManager::getInstance()->setCaptureKeyboard(_EB);
 	if (!_Chat->isOpenable() || _Chat->isOpenWhenPopup())
 	{
 		if (_Chat->isPopable() && !_Chat->isPopuped())
@@ -472,15 +472,9 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstrin
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, false);
-	ucstring cur_time;
-	CCDBNodeLeaf *pNL = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-	if (pNL && pNL->getValueBool())
-	{
-		cur_time = CInterfaceManager::getTimestampHuman();
-	}
-	ucstring csr;
-	if (CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw())) csr += ucstring("(CSR) ");
-	finalMsg += cur_time + csr + CI18N::get("youTell") + ": ";
+
+	ucstring csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+	finalMsg += csr + CI18N::get("youTell") + ": ";
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, true);
 	finalMsg += msg;
@@ -560,7 +554,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 
 	// on a new message, change the Tab color
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CRGBA	newMsgColor= stringToRGBA(pIM->getDefine("chat_group_tab_color_newmsg").c_str());
+	CRGBA	newMsgColor= CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_group_tab_color_newmsg").c_str());
 
 	ucstring newmsg = msg;
 	ucstring prefix;
@@ -613,7 +607,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					newmsg = newmsg.substr(0, pos + 1) + prefix + newmsg.substr(pos + 1);
 
 					// Add dynchannel number and optionally name before text if user channel
-					CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
+					CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
 					if (node && node->getValueBool())
 					{
 						uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(dynamicChatDbIndex);
@@ -673,7 +667,7 @@ void CChatGroupWindow::displayTellMessage(const ucstring &msg, NLMISC::CRGBA col
 
 	gcChat->requireAttention();
 
-	CInterfaceManager::getInstance()->setTopWindow(gcChat);
+	CWidgetManager::getInstance()->setTopWindow(gcChat);
 
 	// add the text to this window
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
@@ -760,7 +754,7 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 		std::string templateName = "contact_chat_friend";
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *pIG = pIM->createGroupInstance(templateName, "ui:interface", properties);
+		CInterfaceGroup *pIG = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, "ui:interface", properties);
 		if (!pIG) return NULL;
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(pIG);
 		if (!pGC)
@@ -775,10 +769,10 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const ucstring &winNameIn, c
 		pGC->setSavable(true);
 		pGC->setEscapable(true);
 
-		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
+		CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 		pRoot->addGroup (pGC);
 		pGC->setParent(pRoot); // must be done before makeWindow
-		pIM->makeWindow(pGC);
+		CWidgetManager::getInstance()->makeWindow(pGC);
 		pGC->open();
 		pGC->updateCoords();
 		pGC->center();
@@ -902,8 +896,8 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 	{
 		pIM->removeGroupContainerImage(_FreeTellers[i]->getId(), m);
 	}
-	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:interface"));
-	pIM->unMakeWindow(_FreeTellers[i]);
+	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
+	CWidgetManager::getInstance()->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
 	_FreeTellers[i] = NULL;
 	_FreeTellers.erase(_FreeTellers.begin()+i);
@@ -1294,8 +1288,18 @@ public:
 			CChatWindow::_ChatWindowLaunchingCommand = chat;
 			string str = text.toUtf8();
 			string cmdWithArgs = str.substr(1);
-			/* In the chat context, only ' ' is a possible separator */
+
+			// Get the command name from the string, can contain spaces
 			string cmd = cmdWithArgs.substr(0, cmdWithArgs.find(' '));
+			if (cmdWithArgs.find('"') == 0)
+			{
+				string::size_type pos = cmdWithArgs.find('"', 1);
+				if (string::npos != pos)
+				{
+					cmd = cmdWithArgs.substr(1, pos - 1);
+				}
+			}
+
 			if ( NLMISC::ICommand::exists( cmd ) )
 			{
 				NLMISC::ICommand::execute( cmdWithArgs, g_log );
@@ -1314,8 +1318,9 @@ public:
 			}
 		}
 		// Clear input string
-		pEB->setInputString (string(""));
-		CGroupContainer *gc = pEB->getEnclosingContainer();
+		pEB->setInputString (ucstring(""));
+		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
+
 		if (gc)
 		{
 			// Restore position of enclosing container if it hasn't been moved/scaled/poped by the user
@@ -1335,9 +1340,9 @@ static ucstring getFreeTellerName(CInterfaceElement *pCaller)
 	if (!pCaller) return ucstring();
 	CChatGroupWindow *cgw = PeopleInterraction.getChatGroupWindow();
 	if (!cgw) return ucstring();
-	CGroupContainer *freeTeller = pCaller->getParentContainer();
+	CInterfaceGroup *freeTeller = pCaller->getParentContainer();
 	if (!freeTeller) return ucstring();
-	return cgw->getFreeTellerName(freeTeller->getId());
+	return cgw->getFreeTellerName( freeTeller->getId() );
 }
 
 // ***************************************************************************************
@@ -1373,7 +1378,7 @@ public:
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		std::string callerId = getParam(sParams, "id");
-		CInterfaceElement *prevCaller = im->getElementFromId(callerId);
+		CInterfaceElement *prevCaller = CWidgetManager::getInstance()->getElementFromId(callerId);
 		ucstring playerName = ::getFreeTellerName(prevCaller);
 		if (!playerName.empty())
 		{
@@ -1389,10 +1394,10 @@ public:
 			}
 			if (pCaller)
 			{
-				CGroupContainer *win = prevCaller->getParentContainer();
+				CInterfaceGroup *win = prevCaller->getParentContainer();
 				if (win)
 				{
-					win->setActive(false);
+					static_cast< CGroupContainer* >( win )->setActive(false);
 				}
 			}
 		}
@@ -1417,12 +1422,9 @@ public:
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			im->displaySystemInfo(ucstring("@{6F6F}") +  playerName +ucstring(" @{FFFF}") + CI18N::get("uiRingInvitationSent"), "BC");
 			// force a refresh of the ui
-			im->executeLuaScript("CharTracking:forceRefresh()");
+			CLuaManager::getInstance().executeLuaScript("CharTracking:forceRefresh()");
 		}
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerInviteToRingSession, "invite_to_ring_session");
-
-
-
 

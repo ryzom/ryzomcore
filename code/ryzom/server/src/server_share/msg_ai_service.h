@@ -49,7 +49,7 @@ public:
 		propertyCont ("Character", PropDataSetRow, Character);
 		propertyCont ("Creature", PropDataSetRow, Creature);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ public:
 		propertyCont ("Content", PropString, Content);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ public:
 		propertyCont ("Params", PropString, Params);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ public:
 		propertyCont ("GrpAlias", PropUInt32, GrpAlias);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -138,7 +138,7 @@ public:
 		property ("TeamId", PropUInt16, CTEAM::InvalidTeamId, TeamId);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -160,7 +160,7 @@ public:
 //		propertyCont ("OutpostNames", PropString, OutpostNames);
 //	}
 //	
-//	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+//	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 //};
 
 //----------------------------------------------------------------------------
@@ -198,7 +198,7 @@ public:
 ////		propertyCont ("Fames", PropString, DutyNames);
 //	}
 //	
-//	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+//	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 //};
 
 //----------------------------------------------------------------------------
@@ -227,7 +227,7 @@ public:
 		propertyCont ("Parameters", PropString, Parameters);
 	}
 	
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -253,7 +253,7 @@ public:
 //		property ("GuildIndex", PropDataSetRow, TDataSetRow() ,GuildIndex);
 //	}
 //	
-//	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+//	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 //};
 
 
@@ -280,7 +280,7 @@ public:
 //		property ("GuildId", PropDataSetRow, TDataSetRow() ,GuildId);
 //	}
 //	
-//	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+//	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 //};
 
 //----------------------------------------------------------------------------
@@ -299,7 +299,7 @@ public:
 		property ("BotRowId", PropDataSetRow, TDataSetRow() , BotRowId);
 		property ("Heading", PropFloat,0.0f,Heading);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -317,7 +317,7 @@ public:
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -336,7 +336,7 @@ public:
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("CreatureRowId", PropDataSetRow, TDataSetRow(), CreatureRowId);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -365,7 +365,7 @@ public:
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -394,7 +394,7 @@ public:
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 		property ("TargetRowId", PropDataSetRow, TDataSetRow(), TargetRowId);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -410,7 +410,7 @@ public:
 		className ("CAIPlayerRespawnMsg");
 		property ("PlayerRowId", PropDataSetRow, TDataSetRow(), PlayerRowId);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -428,7 +428,7 @@ public:
 		property ("EntityRowId", PropDataSetRow, TDataSetRow(), EntityRowId);
 		property ("AskerRowID", PropDataSetRow, TDataSetRow(), AskerRowID);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -448,7 +448,7 @@ public:
 		property ("AskerRowID", PropDataSetRow, TDataSetRow(), AskerRowID);
 		propertyCont ("Infos", PropString, Infos);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -466,7 +466,7 @@ public:
 		property ("EntityRowId", PropDataSetRow, TDataSetRow(), EntityRowId);
 		property ("EnableAggro", PropBool, true, EnableAggro);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -482,7 +482,7 @@ public:
 		className ("CReportAICollisionAvailableMsg");
 		propertyCont ("ContinentsCollision", PropString, ContinentsCollision);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -500,7 +500,27 @@ public:
 		property ("InstanceNumber", PropUInt32, uint32(0), InstanceNumber);
 		property ("InstanceContinent", PropString, std::string(), InstanceContinent);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+};
+
+//----------------------------------------------------------------------------
+// AIS -> EGS send bot url information
+//----------------------------------------------------------------------------
+class CCreatureSetUrlMsg : public CMirrorTransportClass
+{
+public:
+	std::vector<TDataSetRow>	Entities;
+	std::string		ActionName;
+	std::string		Url;
+	
+	virtual void description ()
+	{
+		className ("CCreatureSetUrlMsg");
+		propertyCont ("Entities", PropDataSetRow, Entities);
+		property ("ActionName", PropString, std::string(), ActionName);
+		property ("Url", PropString, std::string(), Url);
+	}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -516,7 +536,7 @@ public:
 		className ("CReportAIInstanceDespawnMsg");
 		propertyCont ("InstanceNumbers", PropUInt32, InstanceNumbers);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 
@@ -535,7 +555,7 @@ public:
 		className ("CWarnBadInstanceMsg");
 		property ("InstanceNumber", PropUInt32, uint32(0), InstanceNumber);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -555,7 +575,7 @@ public:
 		propertyCont ("ActionFlags", PropUInt8, ActionFlags);
 		propertyVector ("Values", PropBool, Values);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 
 	inline void push(TDataSetRow entity, uint8 flag, bool value)
 	{
@@ -579,7 +599,28 @@ public:
 		propertyCont ("Entities", PropDataSetRow, Entities);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+};
+
+//----------------------------------------------------------------------------
+// AIS -> EGS ais change creature Max HP
+//----------------------------------------------------------------------------
+class CChangeCreatureMaxHPMsg : public CMirrorTransportClass
+{
+public:
+	std::vector<TDataSetRow>    Entities;
+	std::vector<uint32>         MaxHp;
+	std::vector<uint8>          SetFull;
+	
+	virtual void description ()
+	{
+		className ("CChangeCreatureMaxHPMsg");
+		propertyCont ("Entities", PropDataSetRow, Entities);
+		propertyCont ("MaxHp", PropUInt32, MaxHp);
+		propertyCont ("SetFull", PropUInt8, SetFull);
+	}
+	
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -598,7 +639,7 @@ public:
 		propertyCont ("DeltaHp", PropSInt32, DeltaHp);
 	}
 	
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -616,7 +657,7 @@ public:
 		property ("CreatureId", PropDataSetRow, TDataSetRow(), CreatureId);
 		property ("NewMode", PropUInt8, (uint8)0, NewMode);	}
 	
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -632,7 +673,7 @@ public:
 		className ("CCreatureDespawnMsg");
 		propertyCont ("Entities", PropDataSetRow, Entities);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -893,7 +934,7 @@ public:
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 		property ("DespawnTimeInTick", PropUInt32, uint32(0), DespawnTimeInTick);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -913,7 +954,7 @@ public:
 		property ("GroupAlias", PropUInt32, uint32(0xffffffff), GroupAlias);
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -933,7 +974,7 @@ public:
 		property ("GroupAlias", PropUInt32, uint32(0xffffffff), GroupAlias);
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -953,7 +994,7 @@ public:
 		property ("GroupAlias", PropUInt32, uint32(0xffffffff), GroupAlias);
 		property ("MissionAlias", PropUInt32, uint32(0xffffffff), MissionAlias);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 
@@ -1005,7 +1046,7 @@ public:
 		propertyCont ("Quantities", PropUInt32, Quantities);
 		property ("MissionText", PropString, std::string(), MissionText);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 //----------------------------------------------------------------------------
@@ -1041,7 +1082,7 @@ public:
 		propertyCont ("Quantities", PropUInt32, Quantities);
 		property ("MissionText", PropString, std::string(), MissionText);
 	}
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 };
 
 
@@ -1089,7 +1130,7 @@ public:
 		propertyCont ("Params", PropString, Params);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id) {};
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
 	
 	TFunEnum getFunEnum(const std::string& funName) const;
 	

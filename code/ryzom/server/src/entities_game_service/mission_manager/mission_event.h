@@ -94,7 +94,7 @@ public:
 	static bool simMissionEvent(const std::vector< std::string > & script, NLMISC::CLog & log );
 	
 protected:
-	CMissionEvent(){};
+	CMissionEvent(){}
 	/// build an event from a script
 	virtual bool buildFromScript( const std::vector< std::string > & script,NLMISC::CLog& log ) = 0;
 	
@@ -114,7 +114,7 @@ public:
 	uint32 Mission;
 protected:
 	friend class CMissionEvent;
-	CMissionEventMissionDone(){};
+	CMissionEventMissionDone(){}
 	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
 };
 
@@ -130,7 +130,7 @@ public:
 	std::string ScenarioTag;
 protected:
 	friend class CMissionEvent;
-	CMissionEventTaggedRingScenarioDone(){};
+	CMissionEventTaggedRingScenarioDone(){}
 	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
 };
 
@@ -158,7 +158,7 @@ public:
 	uint32 Amount;
 protected:
 	friend class CMissionEvent;
-	CMissionEventGiveMoney(){};
+	CMissionEventGiveMoney(){}
 	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
 };
 
@@ -171,7 +171,7 @@ public:
 	uint32 PlaceId;
 protected:
 	friend class CMissionEvent;
-	CMissionEventVisitPlace(){};
+	CMissionEventVisitPlace(){}
 	bool buildFromScript( const std::vector< std::string > & script  ,NLMISC::CLog& log);
 };
 
@@ -184,7 +184,7 @@ public:
 	std::vector<NLMISC::CSheetId> Bricks;
 protected:
 	friend class CMissionEvent;
-	CMissionEventCast(){};
+	CMissionEventCast(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -196,7 +196,7 @@ public:
 		:CMissionEvent(Kill, targetEntity, restriction){}
 protected:
 	friend class CMissionEvent;
-	CMissionEventKill(){};
+	CMissionEventKill(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 	
 };
@@ -209,7 +209,7 @@ public:
 		:CMissionEvent(KillPlayer, victimId){}
 protected:
 	friend class CMissionEvent;
-	CMissionEventKillPlayer(){};
+	CMissionEventKillPlayer(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -225,7 +225,7 @@ public:
 	uint16				Quality;
 protected:
 	friend class CMissionEvent;
-	CMissionEventBuyItem(){};
+	CMissionEventBuyItem(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -241,7 +241,7 @@ public:
 	uint16				Quality;
 protected:
 	friend class CMissionEvent;
-	CMissionEventSellItem(){};
+	CMissionEventSellItem(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -257,7 +257,7 @@ public:
 	uint16				Quality;
 protected:
 	friend class CMissionEvent;
-	CMissionEventForage(){};
+	CMissionEventForage(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -283,7 +283,7 @@ public:
 	uint			Level;
 protected:
 	friend class CMissionEvent;
-	CMissionEventSkillProgress(){};
+	CMissionEventSkillProgress(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -295,7 +295,7 @@ public:
 		:CMissionEvent(Target,targetEntity ){}
 protected:
 	friend class CMissionEvent;
-	CMissionEventTarget(){};
+	CMissionEventTarget(){}
 	bool buildFromScript( const std::vector< std::string > & script,NLMISC::CLog& log );
 };
 
@@ -311,7 +311,7 @@ public:
 	uint16				Quality;
 protected:
 	friend class CMissionEvent;
-	CMissionEventCraft(){};
+	CMissionEventCraft(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -351,7 +351,7 @@ public:
 	uint16				Quality;
 protected:
 	friend class CMissionEvent;
-	CMissionEventLootItem(){};
+	CMissionEventLootItem(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -366,7 +366,7 @@ public:
 	uint16				Quality;
 protected:
 	friend class CMissionEvent;
-	CMissionEventLootRm(){};
+	CMissionEventLootRm(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -379,7 +379,7 @@ public:
 	TAIAlias Alias;
 protected:
 	friend class CMissionEvent;
-	CMissionEventKillGroup(){};
+	CMissionEventKillGroup(){}
 	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log);
 };
 
@@ -390,7 +390,7 @@ public:
 		:CMissionEvent(EndDynChat,TDataSetRow()){}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log){return false;};
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 class CMissionEventDebug : public CMissionEvent
@@ -400,7 +400,7 @@ public:
 		:CMissionEvent(Debug,TDataSetRow()){}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log){return false;};
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 
@@ -412,7 +412,7 @@ public:
 	uint32 Points;
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log){return false;};
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 class CMissionEventOutpostGain : public CMissionEvent
@@ -422,7 +422,7 @@ public:
 		:CMissionEvent(OutpostGain,TDataSetRow()){}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log){return false;};
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 
@@ -437,7 +437,7 @@ public:
 	bool Guild;
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log){return false;}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 class CMissionEventQueueEntryOk: public CMissionEvent
@@ -447,7 +447,7 @@ public:
 		:CMissionEvent(QueueEntryOk, TDataSetRow()) {}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) { return false; }
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 
@@ -458,7 +458,7 @@ public:
 		:CMissionEvent(QueueExit, TDataSetRow()) {}
 protected:
 	friend class CMissionEvent;
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) { return false; }
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 class CMissionEventGroupSpawned : public CMissionEvent
@@ -470,8 +470,8 @@ public:
 	TAIAlias Alias;
 protected:
 	friend class CMissionEvent;
-	CMissionEventGroupSpawned(){};
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) { return false; }
+	CMissionEventGroupSpawned(){}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 class CMissionEventGroupDespawned : public CMissionEvent
@@ -483,8 +483,8 @@ public:
 	TAIAlias Alias;
 protected:
 	friend class CMissionEvent;
-	CMissionEventGroupDespawned(){};
-	bool buildFromScript( const std::vector< std::string > & script ,NLMISC::CLog& log) { return false; }
+	CMissionEventGroupDespawned(){}
+	bool buildFromScript( const std::vector< std::string > & /* script */, NLMISC::CLog& /* log */){return false;}
 };
 
 #endif // RY_MISSION_EVENT_H

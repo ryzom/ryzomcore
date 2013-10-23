@@ -39,7 +39,7 @@
 #include "nel/pacs/u_retriever_bank.h"
 #include "nel/pacs/u_primitive_block.h"
 
-#include "nel/../../src/pacs/global_retriever.h"
+#include "nel/pacs/global_retriever.h"
 
 
 // Nel Ligo
@@ -2277,7 +2277,7 @@ public:
 		sint32 xmax = (sint32) max.x();
 		sint32 ymin = (sint32) (sint16) min.y();
 		sint32 ymax = (sint32) (sint16) max.y();
-		output.serialCheck((uint32) 'OBSI');
+		output.serialCheck(NELID("OBSI"));
 		output.serial(xmin);
 		output.serial(xmax);
 		output.serial(ymin);

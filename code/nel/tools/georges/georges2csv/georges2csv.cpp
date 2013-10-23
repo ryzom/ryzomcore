@@ -289,7 +289,7 @@ void	addQuotesRoundString	(std::string	&valueString)
 	std::string hold=valueString;
 	valueString.erase();
 	valueString='\"';
-	for (unsigned i=0;i<hold.size();i++)
+	for (uint i=0;i<hold.size();i++)
 	{
 		if (hold[i]=='\"')
 			valueString+="\"\"";
@@ -337,7 +337,7 @@ void scanFiles(const CSString &filespec)
 
 	// display the table header line
 	fprintf(Outf,"FILE");
-	for (unsigned i=0;i<fields.size();i++)
+	for (uint i=0;i<fields.size();i++)
 		fprintf(Outf,"%s%s",SEPARATOR, fields[i]._name.c_str());
 	fprintf(Outf,"\n");
 
@@ -379,7 +379,7 @@ void scanFiles(const CSString &filespec)
 			// the form was found so read the true values from George
 //			std::string s;
 			fprintf(Outf,"%s",CFile::getFilenameWithoutExtension(filenames[j]).c_str());
-			for	(unsigned i=0;i<fields.size();i++)
+			for	(uint i=0;i<fields.size();i++)
 			{
 				UFormElm::TWhereIsValue where;
 				UFormElm	*fieldForm=NULL;
@@ -452,7 +452,7 @@ void scanFiles(const CSString &filespec)
 //					std::string hold=s;
 //					s.erase();
 //					s='\"';
-//					for (unsigned i=0;i<hold.size();i++)
+//					for (uint i=0;i<hold.size();i++)
 //					{
 //						if (hold[i]=='\"')
 //							s+="\"\"";

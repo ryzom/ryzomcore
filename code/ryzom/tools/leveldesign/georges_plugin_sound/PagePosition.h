@@ -41,7 +41,7 @@ class CPagePosition : public CPageBase
 
 // Construction
 public:
-	CPagePosition(){};
+	CPagePosition(){}
 	CPagePosition(NLGEORGES::CSoundDialog *soundDialog);
 	~CPagePosition();
 

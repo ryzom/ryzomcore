@@ -147,7 +147,7 @@ public:
 	static void addTriangles (const IShape &shape, const NLMISC::CMatrix& modelMT, std::vector<CTriangle>& triangleArray, sint instanceId);
 
 	// Progress callback
-	virtual void progress (const char *message, float progress) {}
+	virtual void progress (const char * /* message */, float /* progress */) {}
 
 
 	/// \name Static PointLights mgt.

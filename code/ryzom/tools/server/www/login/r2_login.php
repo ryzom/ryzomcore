@@ -31,7 +31,7 @@
 
 			if ($resultCode == 0 && $cookie != "")
 			{
-				// gather the domain informations (server version, patch urls and backup patch url
+				// gather the domain information (server version, patch urls and backup patch url
 				global $DBHost, $DBUserName, $DBPassword, $DBName, $AutoInsertInRing;
 
 				$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));

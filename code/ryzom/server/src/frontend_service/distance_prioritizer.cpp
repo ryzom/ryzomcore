@@ -858,13 +858,13 @@ void		CDistancePrioritizer::arbitrateForageSourceDiscreetProperties(const CPrope
 inline void		CDistancePrioritizer::arbitrateCommonPosAndMode(const CPropertyHistory::CEntityEntry& entry)
 {
 	// Position if changed enough (if not carried by mode)
-	// Orientation if changed > 60° (it's head angle only) or in first block (useful for static entities such as bot objects)
+	// Orientation if changed > 60 degrees (it's head angle only) or in first block (useful for static entities such as bot objects)
 	bool	modeIsChanging = GET_VP_NODE(MODE)->BranchHasPayload;
 	bool	sheetIsChanging = GET_VP_NODE(SHEET)->BranchHasPayload;
 	bool	posIsReady = TVPNodeServer::PrioContext.Sentity->positionIsInitialized();
 
 	GET_VP_NODE(POSITION)->BranchHasPayload = (!modeIsChanging) && posIsReady && positionHasChangedEnough();
-	GET_VP_NODE(ORIENTATION)->BranchHasPayload = (sheetIsChanging && posIsReady) || orientationHasChangedEnough( entry.Properties[PROPERTY_ORIENTATION],  36.0f ); // 5°
+	GET_VP_NODE(ORIENTATION)->BranchHasPayload = (sheetIsChanging && posIsReady) || orientationHasChangedEnough( entry.Properties[PROPERTY_ORIENTATION],  36.0f ); // 5 degrees
 }
 
 /*

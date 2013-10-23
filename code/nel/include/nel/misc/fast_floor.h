@@ -19,6 +19,7 @@
 
 #include "types_nl.h"
 #include <cmath>
+#include <nel/misc/debug.h>
 
 namespace NLMISC
 {
@@ -29,7 +30,7 @@ extern int      *OptFastFloorCWStackPtr;
 extern int      *OptFastFloorCWStackEnd;
 
 // fastFloor function.
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM) && defined(NL_USE_FASTFLOOR)
 
 #include <cfloat>
 

@@ -42,7 +42,7 @@ const NLMISC::CClassId		LandscapeModelId=NLMISC::CClassId(0x5a573b55, 0x6b395829
 class	CLandscapeModel : public CTransform
 {
 public:
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 public:

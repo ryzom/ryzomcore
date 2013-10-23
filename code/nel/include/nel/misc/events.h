@@ -65,6 +65,7 @@ const CClassId EventStringId (0x49b5af8f, 0x7f52cd26);
 const CClassId EventActivateId (0x7da66b0a, 0x1ef74519);
 const CClassId EventSetFocusId (0x17650fac, 0x19f85dde);
 const CClassId EventDestroyWindowId (0x69be73fe, 0x4b07603b);
+const CClassId EventCloseWindowId (0xb5cb1333, 0xd092e63a);
 
 // Mouse events
 const CClassId EventMouseMoveId (0x3dd12fdb, 0x472f548b);
@@ -502,6 +503,19 @@ public:
 	}
 
 	virtual	CEvent			*clone() const {return new CEventDestroyWindow(*this);}
+};
+
+/**
+ * CEventCloseWindow
+ */
+class CEventCloseWindow : public CEvent
+{
+public:
+	CEventCloseWindow (IEventEmitter* emitter) : CEvent (emitter, EventCloseWindowId)
+	{
+	}
+
+	virtual	CEvent			*clone() const {return new CEventCloseWindow(*this);}
 };
 
 /**

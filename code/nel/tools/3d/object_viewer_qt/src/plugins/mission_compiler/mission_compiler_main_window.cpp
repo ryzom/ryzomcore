@@ -26,6 +26,8 @@
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/ligo_config.h>
 
+#include <string.h>
+
 using namespace MissionCompiler::Constants;
 
 MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
@@ -237,11 +239,11 @@ void MissionCompilerMainWindow::compileMission(bool publish)
 		try
 		{
 			CMissionCompiler mc;
-			mc.compileMissions(primDoc.RootNode, filename.toStdString());
+			mc.compileMissions(primDoc.RootNode, filename.toUtf8().constData());
 			m_compileLog.append("Found "+QString::number(mc.getMissionsCount())+" valid missions\n");
 			updateCompileLog();
 
-			mc.installCompiledMission(m_ligoConfig, filename.toStdString());
+			mc.installCompiledMission(m_ligoConfig, filename.toUtf8().constData());
 			nbMission += mc.getMissionsCount();
 
 			// publish files to selected servers
@@ -294,7 +296,7 @@ void MissionCompilerMainWindow::compileMission(bool publish)
 							{
 								m_compileLog.append("   "+QString(NLMISC::CFile::getFilename(mc.getFileToPublish(j)).c_str())+"\n");
 							}
-							mc.publishFiles(primPath.toStdString(), textPath.toStdString(), localPath.toStdString());
+							mc.publishFiles(primPath.toUtf8().constData(), textPath.toUtf8().constData(), localPath.toUtf8().constData());
 						}
 						
 						column++;
@@ -379,7 +381,7 @@ bool MissionCompilerMainWindow::parsePrimForMissions(NLLIGO::IPrimitive const *p
 {
 	std::string value;
 	// if the node is a mission parse it
-	if (prim->getPropertyByName("class",value) && !stricmp(value.c_str(),"mission") )
+	if (prim->getPropertyByName("class",value) && !NLMISC::nlstricmp(value.c_str(),"mission") )
 	{
 		std::string name;
 		prim->getPropertyByName("name",name);

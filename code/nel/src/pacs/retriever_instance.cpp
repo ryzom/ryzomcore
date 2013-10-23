@@ -16,8 +16,8 @@
 
 #include "stdpacs.h"
 
-#include "retriever_instance.h"
-#include "global_retriever.h"
+#include "nel/pacs/retriever_instance.h"
+#include "nel/pacs/global_retriever.h"
 
 using namespace std;
 using namespace NLMISC;

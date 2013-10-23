@@ -76,7 +76,7 @@
 #include "user_entity.h"
 #include "projectile_manager.h"
 #include "init_main_loop.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb_branch.h"
 #include "animation_fx_misc.h"
 #include "attack_list.h"
 #include "animation_fx_id_array.h"
@@ -358,17 +358,8 @@ CCharacterCL::CCharacterCL()
 
 	_EventFactionId = 0;
 	_PvpMode = PVP_MODE::None;
-	_PvpClan = PVP_CLAN::None;
 
-	for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
-	{
-		_PvpAllies[i] = false;
-		_PvpEnemies[i] = false;
-	}
-
-	_ClanCivMaxFame  = PVP_CLAN::None;
-	_ClanCultMaxFame = PVP_CLAN::None;
-
+	_LeagueId = 0;
 	_OutpostId = 0;
 	_OutpostSide = OUTPOSTENUMS::UnknownPVPSide;
 
@@ -461,7 +452,7 @@ void CCharacterCL::releaseInSceneInterfaces()
 {
 	if (_InSceneUserInterface)
 	{
-		CInterfaceManager::getInstance()->unMakeWindow(_InSceneUserInterface);
+		CWidgetManager::getInstance()->unMakeWindow(_InSceneUserInterface);
 		if (_InSceneUserInterface->getParent())
 		{
 			_InSceneUserInterface->getParent()->delGroup(_InSceneUserInterface);
@@ -497,7 +488,7 @@ void CCharacterCL::stopAttachedFXForCurrrentAnim(bool stopLoopingFX)
 			{
 				if(!(*tmpItAttached)->FX.empty())
 				{
-					if (!(*tmpItAttached)->FX.removeByID('STOP') && !(*tmpItAttached)->FX.removeByID('main'))
+					if (!(*tmpItAttached)->FX.removeByID(NELID("STOP")) && !(*tmpItAttached)->FX.removeByID(NELID("main")))
 					{
 						(*tmpItAttached)->FX.activateEmitters(false);
 					}
@@ -1842,9 +1833,30 @@ void CCharacterCL::updateVisualPropertyGuildNameID(const NLMISC::TGameCycle &/* 
 //-----------------------------------------------
 void CCharacterCL::updateVisualPropertyEventFactionID(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	_EventFactionId = uint32(prop);
+	// ODD Hack by Ulukyn
+	//_EventFactionId = uint32(prop);
+	_PvpMode = uint32(prop);
+
 	buildInSceneInterface();
 
+	if (isUser())
+	{
+		uint i;
+		uint numEntity = (uint)EntitiesMngr.entities().size();
+		for (i=0; i<numEntity; i++)
+		{
+			CEntityCL *entity = EntitiesMngr.entity(i);
+			if (entity)
+			{
+				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
+				if (character)
+				{
+					if( character->getPvpMode() != 0 && !character->isUser())
+						character->buildInSceneInterface ();
+				}
+			}
+		}
+	}
 } // updateVisualPropertyEventFactionID //
 
 //-----------------------------------------------
@@ -1853,8 +1865,8 @@ void CCharacterCL::updateVisualPropertyEventFactionID(const NLMISC::TGameCycle &
 //-----------------------------------------------
 void CCharacterCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	_PvpMode = (uint8)prop;
-	buildInSceneInterface();
+	//_PvpMode = uint32(prop);
+	//buildInSceneInterface();
 
 } // updateVisualPropertyPvpMode //
 
@@ -1864,18 +1876,28 @@ void CCharacterCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &/* game
 //-----------------------------------------------
 void CCharacterCL::updateVisualPropertyPvpClan(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop)
 {
-	// get fames signs from prop
-	for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
-	{
-		_PvpAllies[fameIdx] = (prop & (SINT64_CONSTANT(1) << (2*fameIdx))) != 0;
-		_PvpEnemies[fameIdx] = (prop & (SINT64_CONSTANT(1) << (2*fameIdx+1))) != 0;
-	}
-
-	_ClanCivMaxFame = PVP_CLAN::TPVPClan((prop & (0x03 << 2*7)) >> 2*7);
-	_ClanCultMaxFame = PVP_CLAN::TPVPClan(4 + ((prop & (0x03 << 2*8)) >> 2*8));
+	_LeagueId = uint32(prop);
 
 	buildInSceneInterface();
 
+	if (isUser())
+	{
+		uint i;
+		uint numEntity = (uint)EntitiesMngr.entities().size();
+		for (i=0; i<numEntity; i++)
+		{
+			CEntityCL *entity = EntitiesMngr.entity(i);
+			if (entity)
+			{
+				CCharacterCL *character = dynamic_cast<CCharacterCL*>(entity);
+				if (character)
+				{
+					if( character->getPvpMode() != 0 && !character->isUser())
+						character->buildInSceneInterface ();
+				}
+			}
+		}
+	}
 } // updateVisualPropertyPvpClan //
 
 //-----------------------------------------------
@@ -3323,7 +3345,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 	{
 		// Right Hand
 		if(rHandInstIdx<_Instances.size())
-			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquiped ) )
+			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[rHandInstIdx].Current.empty())
 				{
 					_Instances[rHandInstIdx].Current.hide();
@@ -3331,7 +3353,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 				}
 		// Left Hand
 		if(lHandInstIdx <_Instances.size())
-			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquiped ) )
+			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[lHandInstIdx].Current.empty())
 				{
 					_Instances[lHandInstIdx].Current.hide();
@@ -4500,7 +4522,7 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 	{
 		if(behaviour.DeltaHP != 0)
 		{
-			CRGBA deltaHPColor;
+			CRGBA deltaHPColor( 0, 0, 0 );
 			// if it's a hit
 			if( behaviour.DeltaHP < 0 )
 			{
@@ -4521,10 +4543,6 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 								deltaHPColor = ClientCfg.SystemInfoParams["dgp"].Color;
 							else
 								deltaHPColor = ClientCfg.SystemInfoParams["dg"].Color;
-						}
-						else
-						{
-							deltaHPColor = CRGBA(127,127,127);
 						}
 					}
 					else
@@ -6165,8 +6183,7 @@ void CCharacterCL::updateVisiblePostPos(const NLMISC::TTime &currentTimeInMs, CE
 		if (_InSceneUserInterface)
 		{
 			// Activate
-			if (_InSceneUserInterface->getActive() != showIS)
-				_InSceneUserInterface->setActive (showIS);
+			_InSceneUserInterface->setActive (showIS);
 
 			if (showIS)
 			{
@@ -8369,7 +8386,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	TextContext->printfAt(x, y, "Mount: %3u(Theoretical: %3u) Rider: %3u(Theoretical: %3u)", mount(), _TheoreticalMount, rider(), _TheoreticalRider);
 	y += lineStep;
 	// VPA
-	sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualA visualA = *(SPropVisualA *)(&prop);
@@ -8385,7 +8402,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "VPA: %"NL_I64"X", prop);
 	y += lineStep;
 	// VPB
-	prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualB visualB = *(SPropVisualB *)(&prop);
@@ -8397,7 +8414,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "VPB: %"NL_I64"X", prop);
 	y += lineStep;
 	// VPC
-	prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
+	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualC visualC = *(SPropVisualC *)(&prop);
@@ -8529,7 +8546,7 @@ void CCharacterCL::load()	// virtual
 		_LookRdy = false;
 		// Visual properties A
 		_HeadIdx = CEntityCL::BadIndex;
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);
 	}
 }// load //
@@ -9356,7 +9373,7 @@ void CCharacterCL::CWornItem::enableAdvantageFX(NL3D::UInstance parent)
 	if (!enabled)
 	{
 		// well, it is unlikely that player will loses its ability to master an item after he gained it, but manage the case anyway.
-		if (!AdvantageFX.removeByID('STOP') && !AdvantageFX.removeByID('main'))
+		if (!AdvantageFX.removeByID(NELID("STOP")) && !AdvantageFX.removeByID(NELID("main")))
 		{
 			AdvantageFX.activateEmitters(false);
 		}
@@ -9780,11 +9797,11 @@ NLMISC_COMMAND(weapon, "change the weapon in hand", "<slot> <hand> <weapon>")
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	uint slot;
 	fromString(args[0], slot);
-	CCDBNodeLeaf *propA = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *propA = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!propA) return false;
 	sint64 valueA = propA->getValue64();
 
-	CCDBNodeLeaf *propB = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
+	CCDBNodeLeaf *propB = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
 	if (!propB) return false;
 	sint64 valueB = propB->getValue64();
 
@@ -9851,7 +9868,7 @@ NLMISC_COMMAND(advantageFX, "turn on / off the advantage fx for an item in hand"
 	fromString(args[0], slot);
 
 	/*
-	CCDBNodeLeaf *prop = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!prop) return false;
 	sint64 value = prop->getValue64();
 	uint hand;
@@ -9899,11 +9916,11 @@ NLMISC_COMMAND(trailLength, "set length of trail for one weapon in hand", "<slot
 	uint slot;
 	fromString(args[0], slot);
 
-	CCDBNodeLeaf *propA = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *propA = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!propA) return false;
 	sint64 valueA = propA->getValue64();
 
-	CCDBNodeLeaf *propB = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
+	CCDBNodeLeaf *propB = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
 	if (!propB) return false;
 	sint64 valueB = propB->getValue64();
 
@@ -10252,7 +10269,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 
 	if( args.size() == 0 )
 	{
-		uint8 pvpMode = playerTarget->getPvpMode();
+		uint16 pvpMode = playerTarget->getPvpMode();
 		string str;
 		if( pvpMode&PVP_MODE::PvpDuel )
 			str+="duel ";
@@ -10270,6 +10287,10 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 			str+="faction ";
 		if( pvpMode&PVP_MODE::PvpFactionFlagged)
 			str+="faction_flagged ";
+		if( pvpMode&PVP_MODE::PvpZoneSafe)
+			str+="in_safe_zone ";
+		if( pvpMode&PVP_MODE::PvpSafe)
+			str+="safe ";
 		IM->displaySystemInfo(ucstring(str));
 		nlinfo("<pvpMode> %s",str.c_str());
 	}
@@ -10280,14 +10301,14 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 		fromString(args[1], state);
 		if( state )
 		{
-			uint8 currentPVPMode = playerTarget->getPvpMode();
+			uint16 currentPVPMode = playerTarget->getPvpMode();
 			currentPVPMode |= pvpMode;
 			playerTarget->setPvpMode(currentPVPMode);
 			IM->displaySystemInfo(toString("<pvpMode> adding pvp mode %s",args[0].c_str()));
 		}
 		else
 		{
-			uint8 currentPVPMode = playerTarget->getPvpMode();
+			uint16 currentPVPMode = playerTarget->getPvpMode();
 			currentPVPMode &= ~pvpMode;
 			playerTarget->setPvpMode(currentPVPMode);
 			IM->displaySystemInfo(toString("<pvpMode> removing pvp mode %s",args[0].c_str()));
@@ -10297,7 +10318,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 	return true;
 }
 
-
+/*
 NLMISC_COMMAND(pvpClan, "modify pvp clan", "<pvp clan>")
 {
 	if (args.size() != 1) return false;
@@ -10319,13 +10340,13 @@ NLMISC_COMMAND(pvpClan, "modify pvp clan", "<pvp clan>")
 	if (!playerTarget)
 		return false;
 
-	PVP_CLAN::TPVPClan clan = PVP_CLAN::fromString(args[0]);
-	playerTarget->setPvpClan(clan);
+//	PVP_CLAN::TPVPClan clan = PVP_CLAN::fromString(args[0]);
+//	playerTarget->setPvpClan(clan);
 	playerTarget->buildInSceneInterface();
 
 	return true;
 }
-
+*/
 #endif // !FINAL_VERSION
 
 #include "r2/editor.h"

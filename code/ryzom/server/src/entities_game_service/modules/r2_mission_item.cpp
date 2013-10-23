@@ -26,6 +26,7 @@
 #include "player_manager/player_manager.h"
 #include "player_manager/character.h"
 #include "server_share/log_item_gen.h"
+#include "egs_sheets/egs_sheets.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -155,46 +156,58 @@ void CR2MissionItem::giveMissionItem(const NLMISC::CEntityId &eid, TSessionId se
 		std::vector< CGameItemPtr > itemDropToEgg;
 		for( uint32 j = 0; j < items.size(); ++j )
 		{
-			CGameItemPtr item = c->createItem(1, items[j].Quantity, items[j].SheetId);
-
-			if( item != NULL )
+			const CStaticItem* sitem = CSheets::getForm(items[j].SheetId);
+			if (sitem == NULL)
 			{
-				if( c->addItemToInventory(INVENTORIES::bag, item) )
-				{
-/*					// check eid is registered as character have instantiated mission item for this scenario
-					TMissionItemInstanciatedOwner::iterator it = _OwnerOfInstanciatedItemFromScenario.find(scenarioId);
-					if( it == _OwnerOfInstanciatedItemFromScenario.end() )
-					{
-						pair< TMissionItemInstanciatedOwner::iterator, bool > ret = _OwnerOfInstanciatedItemFromScenario.insert( make_pair( scenarioId, vector< CEntityId >() ) );
-						if( ret.second )
-						{
-							(*ret.first).second.push_back( eid );
-						}
-					}
-					else
-					{
-						bool found = false;
-						for( uint32 i = 0; i < (*it).second.size(); ++ i )
-						{
-							if( (*it).second[i] == eid )
-							{
-								found = true;
-								break;
-							}
-						}
-						if ( ! found) { (*it).second.push_back(eid); }
-					}
-*/
-					keepR2ItemAssociation(eid, scenarioId);
-				}
-				else
-				{
-					itemDropToEgg.push_back(item);
-				}
+				nlwarning("Attempted to give deprecated sitem sheet %s to player character %s in session %i", items[j].SheetId.toString().c_str(), c->getName().toUtf8().c_str(), sessionId.asInt());
+			}
+			else if (sitem->Family != ITEMFAMILY::SCROLL_R2)
+			{
+				nlwarning("Attempted hack to give non-R2 item %s to player character %s in session %i", items[j].SheetId.toString().c_str(), c->getName().toUtf8().c_str(), sessionId.asInt());
 			}
 			else
 			{
-				nlwarning("CR2MissionItem::giveMissionItem: can't create item %s", items[j].SheetId.toString().c_str());
+				CGameItemPtr item = c->createItem(1, items[j].Quantity, items[j].SheetId);
+
+				if( item != NULL )
+				{
+					if( c->addItemToInventory(INVENTORIES::bag, item) )
+					{
+	/*					// check eid is registered as character have instantiated mission item for this scenario
+						TMissionItemInstanciatedOwner::iterator it = _OwnerOfInstanciatedItemFromScenario.find(scenarioId);
+						if( it == _OwnerOfInstanciatedItemFromScenario.end() )
+						{
+							pair< TMissionItemInstanciatedOwner::iterator, bool > ret = _OwnerOfInstanciatedItemFromScenario.insert( make_pair( scenarioId, vector< CEntityId >() ) );
+							if( ret.second )
+							{
+								(*ret.first).second.push_back( eid );
+							}
+						}
+						else
+						{
+							bool found = false;
+							for( uint32 i = 0; i < (*it).second.size(); ++ i )
+							{
+								if( (*it).second[i] == eid )
+								{
+									found = true;
+									break;
+								}
+							}
+							if ( ! found) { (*it).second.push_back(eid); }
+						}
+	*/
+						keepR2ItemAssociation(eid, scenarioId);
+					}
+					else
+					{
+						itemDropToEgg.push_back(item);
+					}
+				}
+				else
+				{
+					nlwarning("CR2MissionItem::giveMissionItem: can't create item %s", items[j].SheetId.toString().c_str());
+				}
 			}
 		}
 		if(itemDropToEgg.size() != 0)
@@ -273,24 +286,36 @@ void CR2MissionItem::destroyMissionItem(const NLMISC::CEntityId &eid, const std:
 			CSheetId itemSheetId = items[j].SheetId;
 			uint32 quantity = items[j].Quantity;
 
-			CInventoryPtr inv = c->getInventory(INVENTORIES::bag);
-			nlassert( inv != NULL );
-			_destroyMissionItem( inv, itemSheetId, quantity );
-			if( quantity > 0)
+			const CStaticItem* sitem = CSheets::getForm(items[j].SheetId);
+			if (sitem == NULL)
 			{
-				for( uint32 j = INVENTORIES::pet_animal; j < INVENTORIES::max_pet_animal; ++j )
-				{
-					inv = c->getInventory((INVENTORIES::TInventory)j);
-					nlassert(inv != NULL);
-					_destroyMissionItem( inv, itemSheetId, quantity );
-					if(quantity == 0)
-						break;
-				}
+				nlwarning("Attempted to take deprecated sitem sheet %s from player character %s", items[j].SheetId.toString().c_str(), c->getName().toUtf8().c_str());
 			}
-			// TODO: if we can't found enough quantity of item to destroy, we need decide if we must manage that as an error
-//			if(quantity > 0)
-//			{
-//			}
+			else if (sitem->Family != ITEMFAMILY::SCROLL_R2)
+			{
+				nlwarning("Attempted hack to take non-R2 item %s from player character %s", items[j].SheetId.toString().c_str(), c->getName().toUtf8().c_str());
+			}
+			else
+			{
+				CInventoryPtr inv = c->getInventory(INVENTORIES::bag);
+				nlassert( inv != NULL );
+				_destroyMissionItem( inv, itemSheetId, quantity );
+				if( quantity > 0)
+				{
+					for( uint32 j = INVENTORIES::pet_animal; j < INVENTORIES::max_pet_animal; ++j )
+					{
+						inv = c->getInventory((INVENTORIES::TInventory)j);
+						nlassert(inv != NULL);
+						_destroyMissionItem( inv, itemSheetId, quantity );
+						if(quantity == 0)
+							break;
+					}
+				}
+				// TODO: if we can't found enough quantity of item to destroy, we need decide if we must manage that as an error
+	//			if(quantity > 0)
+	//			{
+	//			}
+			}
 		}
 	}
 }

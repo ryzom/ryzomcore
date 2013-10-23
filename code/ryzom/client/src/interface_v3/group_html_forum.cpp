@@ -22,7 +22,7 @@
 #include "stdpch.h"
 
 #include "group_html_forum.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "../user_entity.h"
 #include "guild_manager.h"
@@ -51,9 +51,9 @@ CGroupHTMLForum::~CGroupHTMLForum()
 
 // ***************************************************************************
 
-void CGroupHTMLForum::addHTTPGetParams (string &url)
+void CGroupHTMLForum::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 {
- 	ucstring user_name = UserEntity->getDisplayName ();
+ 	ucstring user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
 	string	gname = guild.Name.toUtf8();
 
@@ -83,9 +83,9 @@ void CGroupHTMLForum::addHTTPGetParams (string &url)
 
 // ***************************************************************************
 
-void CGroupHTMLForum::addHTTPPostParams (HTAssocList *formfields)
+void CGroupHTMLForum::addHTTPPostParams (HTAssocList *formfields, bool /*trustedDomain*/)
 {
-	ucstring user_name = UserEntity->getDisplayName ();
+	ucstring user_name = UserEntity->getLoginName ();
 	const SGuild &guild = CGuildManager::getInstance()->getGuild();
 	string	gname = guild.Name.toUtf8();
 
@@ -107,7 +107,7 @@ void CGroupHTMLForum::addHTTPPostParams (HTAssocList *formfields)
 string	CGroupHTMLForum::home ()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:FORUM_UPDATED")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED")->setValue32(0);
 	return Home;
 }
 
@@ -115,12 +115,13 @@ string	CGroupHTMLForum::home ()
 
 void CGroupHTMLForum::handle ()
 {
-	// Do nothing if WebServer is not initialized
+/*	// Do nothing if WebServer is not initialized
 	if (!WebServer.empty())
 	{
 		Home = WebServer+"forum.php";
 		CGroupHTML::handle ();
 	}
+*/
 }
 
 // ***************************************************************************

@@ -586,7 +586,7 @@ extern uint32 NbMutexes;
 
 
 /**
- * This class ensure that the Value is accessed by only one thread. First you have to create a CSynchronized class with you type.
+ * This class ensure that the Value is accessed by only one thread. First you have to create a CSynchronized class with your type.
  * Then, if a thread want to modify or do anything on it, you create a CAccessor in a \b sub \b scope. You can modify the value
  * of the CUnfairSynchronized using the value() function \b until the end of the scope. So you have to put the smaller scope as you can.
  *
@@ -717,11 +717,11 @@ class CAutoMutex
 	TMutex	&_Mutex;
 
 	// forbeden copy or assignent
-	CAutoMutex(const CAutoMutex &other)
+	CAutoMutex(const CAutoMutex &/* other */)
 	{
 	}
 
-	CAutoMutex &operator = (const CAutoMutex &other)
+	CAutoMutex &operator = (const CAutoMutex &/* other */)
 	{
 		return *this;
 	}

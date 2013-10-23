@@ -177,8 +177,8 @@ GenderExtractor::GenderExtractor(const std::string & literal, const std::string&
 
 	
 	static const char * es[] ={"e", "e1", "e2", "e3"};
-	static char * fs[] ={"f", "f1", "f2", "f3"};
-	static char * hs[] ={"h", "h1", "h2", "h3"};
+	static const char * fs[] ={"f", "f1", "f2", "f3"};
+	static const char * hs[] ={"h", "h1", "h2", "h3"};
 
 	const char * e = es[level];
 	const char * f = fs[level];
@@ -223,7 +223,7 @@ GenderExtractor::GenderExtractor(const std::string & literal, const std::string&
 	{
 		std::string goodMarkup = isMale ? std::string("") +"<" + h + "></" + h + ">" : std::string("")+"<"+f+"></"+f+">";
 		std::string badMarkup  = isFemale ? std::string("") +"<" + h + "></" + h + ">" : std::string("")+"<"+f+"></"+f+">";
-		std::string exceptionText = std::string("La phrase ") + identifier + " qui contient une balise " + goodMarkup + " nécessite aussi les balises " + badMarkup + " même vide.";		
+		std::string exceptionText = std::string("Expression ") + identifier + " that contains a tag " + goodMarkup + " needs also tags " + badMarkup + " even empty.";		
 		throw EParseException(0, exceptionText.c_str());
 	}
 

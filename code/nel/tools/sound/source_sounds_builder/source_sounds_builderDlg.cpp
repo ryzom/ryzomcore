@@ -364,7 +364,7 @@ CString CSource_sounds_builderDlg::SoundName( HTREEITEM hitem )
 {
 	CString s = m_Tree.GetItemText( hitem );
 	sint last;
-	if ( s != "" )
+	if ( !s.empty() )
 	{
 		if ( s[s.GetLength()-1] == '*' )
 		{
@@ -425,13 +425,13 @@ void CSource_sounds_builderDlg::OnSave()
 				}
 				nameset.insert( (*ips)->getName() );
 			}
-			if ( duplicates != "" )
+			if ( !duplicates.empty() )
 			{
 				CString s;
 				s.Format( "Warning: the following names are duplicates. The first occurence of each one was not written in the output file. Correct the names and save again:\n\n%s", duplicates.c_str() );
 				AfxMessageBox( s, MB_ICONWARNING );
 			}
-			if ( blanksounds != "" )
+			if ( !blanksounds.empty() )
 			{
 				CString s;
 				s.Format( "Warning: the following sounds have no wave file specified:\n\n%s", blanksounds.c_str() );
@@ -569,7 +569,7 @@ void CSource_sounds_builderDlg::OnImport()
 			if ( hitem == NULL )
 			{
 				string sname = string(name);
-				if ( sname != "" ) // prevent from taking blank names
+				if ( !sname.empty() ) // prevent from taking blank names
 				{
 					AddSound( sname.c_str() );
 				}

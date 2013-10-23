@@ -989,7 +989,7 @@ bool CScenarioValidator::setScenarioToSave(const std::string& filename, CObject*
 	return true;
 }
 
-std::string CScenarioValidator::AutoSaveSignature = "";
+std::string CScenarioValidator::AutoSaveSignature;
 
 bool CScenarioValidator::applySave(const std::string& signature)
 {
@@ -1252,7 +1252,7 @@ bool CUserComponentValidator::setUserComponentToSave(const std::string& filename
 	return true;
 }
 
-std::string CUserComponentValidator::AutoSaveSignature = "";
+std::string CUserComponentValidator::AutoSaveSignature;
 
 bool CUserComponentValidator::applySave(const std::string& signature)
 {

@@ -1,0 +1,31 @@
+1. Web-Based Translation Tool use ryzom translation pipeline, so you need to setup it first.
+
+2. Change path/to/translation to your translation pipeline path in app/config/database.php
+
+3. Add following VirtualHost config to your apache configuration.
+
+<VirtualHost *:80>
+  DocumentRoot /path/to/webtt
+        <Directory /path/to/webtt>
+                php_admin_value open_basedir none
+                php_flag short_open_tag on
+                php_value memory_limit 256M
+                php_flag output_buffering on
+        </Directory>
+  ServerName webtt.your.domain
+</VirtualHost>
+
+4. Change permissions to tmp directory.
+
+# chmod -R o+w webtt/app/tmp
+
+5. Create MySQL database with default user and WebTT tables.
+
+# mysql -uroot
+CREATE DATABASE webtt2;
+GRANT ALL ON webtt2.* TO webtt@localhost IDENTIFIED BY 'webtt77';
+# cat db/webtt2.db | mysql -uwebtt -pwebtt77 webtt2
+
+6. Go to http://webtt.your.domain and register new user for user access.
+
+7. For administrator access, go to http://webtt.your.domain/admin and log in as admin/newpass

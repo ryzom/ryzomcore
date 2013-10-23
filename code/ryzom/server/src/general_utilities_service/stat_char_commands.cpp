@@ -128,7 +128,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,listCharNames,"display the names of the charact
 
 	std::vector<std::string> files;
 	NLMISC::CPath::getPathContent(STAT_GLOBALS::getInputFilePath().c_str(),false,false,true,files);
-	for (uint32 i=files.size();i--;)
+	for (uint32 i=(uint32)files.size();i--;)
 	{
 		if (!NLMISC::testWildCard(NLMISC::CFile::getFilename(files[i]),wildcard))
 		{
@@ -227,7 +227,8 @@ NLMISC_CATEGORISED_COMMAND(Stats,jobsPromote,"pause execution of jobs","<jobId>"
 	if (args.size()!=1)
 		return false;
 
-	uint32 idx= atoi(args[0].c_str());
+	uint32 idx;
+	NLMISC::fromString(args[0], idx);
 	if ( (idx==0 && args[0]!="0") )
 	{
 		nlwarning("Argument is not a valid job id - should be a number");
@@ -249,7 +250,8 @@ NLMISC_CATEGORISED_COMMAND(Stats,JobUpdatesPerUpdate,"set or display the number 
 
 	if (args.size()==1)
 	{
-		uint32 count= atoi(args[0].c_str());
+		uint32 count;
+		NLMISC::fromString(args[0], count);
 		if ( (count==0 && args[0]!="0") )
 		{
 			nlwarning("Argument is not a valid number");
@@ -311,7 +313,8 @@ NLMISC_CATEGORISED_COMMAND(Stats,jobsDisplayDetails,"display detailed info for t
 
 	case 1:
 		{
-			uint32 idx= atoi(args[0].c_str());
+			uint32 idx;
+			NLMISC::fromString(args[0], idx);
 			if ( (idx==0 && args[0]!="0") )
 			{
 				nlwarning("Argument is not a valid job id - should be a number");
@@ -346,13 +349,13 @@ static std::string getActiveOutputPath()
 	if (TheCharScanScriptFile==NULL)
 	{
 		nlwarning("There is no active script file right now from which to extract output directory");
-		return false;
+		return "";
 	}
 	bool isOK=true;
 
 	// write the current script file to a tmp file
 	isOK=TheCharScanScriptFile->writeToFile(TmpScriptFileName);
-	if (!isOK) return false;
+	if (!isOK) return "";
 
 	// create a new script object and assign the tmp file to it
 	CCharScanScript script;
@@ -476,8 +479,11 @@ NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptDeleteLine,"","<line_number>")
 		return false;
 	}
 
+	uint32 line;
+	NLMISC::fromString(args[0], line);
+
 	// line numbering starts at 1 so an invalid number will be inored anyway
-	return TheCharScanScriptFile->deleteLine(atoi(args[0].c_str()));
+	return TheCharScanScriptFile->deleteLine(line);
 }
 
 NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptAddInfoExtractor,"","<infoExtractorName> [<args>]")
@@ -761,7 +767,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptTestFilteredFileList,"list the se
 		return false;
 
 	// generating a new file list
-	if (args[0]==CSString("generate").left(args[0].size()))
+	if (args[0]==CSString("generate").left((uint)args[0].size()))
 	{
 		if (TheCharScanScriptFile==NULL)
 		{
@@ -796,7 +802,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,charScanScriptTestFilteredFileList,"list the se
 	}
 
 	// displaying the last generated file list
-	if (args[0]==CSString("display").left(args[0].size()))
+	if (args[0]==CSString("display").left((uint)args[0].size()))
 	{
 		nlinfo("Filtered file list for the current job");
 		fdc.display(&log);

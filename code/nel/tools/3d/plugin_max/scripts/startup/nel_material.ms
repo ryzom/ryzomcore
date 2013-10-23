@@ -574,36 +574,6 @@ plugin material NelMaterial
 			CheckBox cbUseSelfIllumColor "Use Color" checked:false align:#right
 		)
 		
-		on cbTwoSided changed bval do
-			updateUI false
-		
-		on cpAmbient changed cval do
-			updateUI false
-		
-		on cpDiffuse changed cval do
-			updateUI false
-		
-		on spOpacity changed pval do
-			updateUI false
-		
-		on cpSpecular changed cval do
-			updateUI false
-		
-		on spSpecularLevel changed pval do
-			updateUI false
-		
-		on spGlossiness changed pval do
-			updateUI false
-		
-		on cpSelfIllumColor changed cval do
-			updateUI false
-		
-		on spSelfIllumAmount changed bval do
-			updateUI false
-		
-		on cbUseSelfIllumColor changed bval do
-			updateUI false
-		
 		Fn updateUI update =
 		(
 			if (version >= 14) then
@@ -654,6 +624,36 @@ plugin material NelMaterial
 				delegate.dsLock = false
 			)
 		)
+		
+		on cbTwoSided changed bval do
+			updateUI false
+		
+		on cpAmbient changed cval do
+			updateUI false
+		
+		on cpDiffuse changed cval do
+			updateUI false
+		
+		on spOpacity changed pval do
+			updateUI false
+		
+		on cpSpecular changed cval do
+			updateUI false
+		
+		on spSpecularLevel changed pval do
+			updateUI false
+		
+		on spGlossiness changed pval do
+			updateUI false
+		
+		on cpSelfIllumColor changed cval do
+			updateUI false
+		
+		on spSelfIllumAmount changed bval do
+			updateUI false
+		
+		on cbUseSelfIllumColor changed bval do
+			updateUI false
 		
 		on nelBasicParameters open do
 		(

@@ -2118,7 +2118,7 @@ bool CPrimAlias::read (xmlNodePtr xmlNode, const char *filename, uint version, C
 	xmlNodePtr ptNode = CIXml::getFirstChildNode (xmlNode, "ALIAS");
 	if (ptNode)
 	{
-		int val;
+		sint val = 0;
 		if (ReadInt ("VALUE", val, filename, ptNode))
 		{
 			_Alias = uint32(val);

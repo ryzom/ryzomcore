@@ -18,8 +18,11 @@
 // includes
 //-----------------------------------------------------------------------------
 
+#include <cstdio>
+
 #include "game_share/bnp_patch.h"
 #include "nel/misc/path.h"
+#include "nel/misc/file.h"
 #include "nel/misc/command.h"
 #include "nel/misc/sstring.h"
 #include "game_share/singleton_registry.h"
@@ -320,7 +323,6 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 
 	for (uint32 i=packageIndex.fileCount();i--;)
 	{
-		bool deleteRefAfterDelta= true;
 		// generate file name root
 		std::string bnpFileName= _BnpDirectory+packageIndex.getFile(i).getFileName();
 		std::string refNameRoot= _RefDirectory+NLMISC::CFile::getFilenameWithoutExtension(bnpFileName);
@@ -340,8 +342,9 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		std::string prevVersionFileName;
 		if (packageIndex.getFile(i).versionCount()==1)
 		{
-			prevVersionFileName= "nul";
-			deleteRefAfterDelta= false;
+			prevVersionFileName= _RootDirectory + "empty";
+			NLMISC::COFile tmpFile(prevVersionFileName);
+			tmpFile.close();
 		}
 		else
 		{
@@ -400,7 +403,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		}
 
 		// if we have a ref file still hanging about from the previous patch then delete it
-		if (prevVersionFileName!= "nul" && NLMISC::CFile::fileExists(prevVersionFileName))
+		if (NLMISC::CFile::fileExists(prevVersionFileName))
 		{
 			NLMISC::CFile::deleteFile(prevVersionFileName);
 		}

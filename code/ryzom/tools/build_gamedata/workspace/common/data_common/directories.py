@@ -57,7 +57,17 @@ CopyDatabaseSourceDirectories = [ ]
 CopyDatabaseSourceFiles = [ ]
 
 
+# *** SOURCE DIRECTORIES IN THE EXPORT/BUILD ***
+
+# Pacs prim list source directories
+PacsPrimExportSourceDirectories = [ ]
+PacsPrimExportSourceDirectories += [ "ecosystems/desert/pacs_prim" ]
+PacsPrimExportSourceDirectories += [ "ecosystems/jungle/pacs_prim" ]
+PacsPrimExportSourceDirectories += [ "ecosystems/lacustre/pacs_prim" ]
+PacsPrimExportSourceDirectories += [ "ecosystems/primes_racines/pacs_prim" ]
+
+
 # *** INSTALL DIRECTORIES IN THE CLIENT DATA ***
 
-# Particule system directory
+# Common data install directory
 CopyInstallDirectory = CommonName

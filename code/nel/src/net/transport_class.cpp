@@ -77,7 +77,7 @@ string typeToString (CTransportClass::TProp type)
 	string conv[] = {
 		"PropUInt8", "PropUInt16", "PropUInt32", "PropUInt64",
 		"PropSInt8", "PropSInt16", "PropSInt32", "PropSInt64",
-		"PropBool", "PropFloat", "PropDouble", "PropString", "PropDataSetRow", "PropSheetId", "PropUKN" };
+		"PropBool", "PropFloat", "PropDouble", "PropString", "PropDataSetRow", "PropSheetId", "PropUCString", "PropUKN" };
 //		"PropBool", "PropFloat", "PropDouble", "PropString", "PropDataSetRow", "PropEntityId", "PropSheetId", "PropUKN" };
 
 	if (type > CTransportClass::PropUKN)
@@ -352,6 +352,7 @@ void CTransportClass::init ()
 //	nlassert (PropDataSetRow < PropUKN); DummyProp[PropDataSetRow] = new CTransportClass::CRegisteredProp<TDataSetRow>;
 //	nlassert (PropEntityId < PropUKN); DummyProp[PropEntityId] = new CTransportClass::CRegisteredProp<CEntityId>;
 	nlassert (PropSheetId < PropUKN); DummyProp[PropSheetId] = new CTransportClass::CRegisteredProp<CSheetId>;
+	nlassert (PropUCString < PropUKN); DummyProp[PropUCString] = new CTransportClass::CRegisteredProp<ucstring>;
 
 	// we have to know when a service comes, so add callback (put the callback before all other one because we have to send this message first)
 	CUnifiedNetwork::getInstance()->setServiceUpCallback("*", cbTCUpService, NULL, false);

@@ -1,0 +1,13 @@
+FILE(GLOB SRC *.cpp *.h)
+
+ADD_EXECUTABLE(build_samplebank ${SRC})
+
+ADD_DEFINITIONS( ${LIBXML2_DEFINITIONS})
+
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
+
+TARGET_LINK_LIBRARIES(build_samplebank nelmisc nelsound)
+NL_DEFAULT_PROPS(build_samplebank "NeL, Tools, Sound: build_samplebank")
+NL_ADD_RUNTIME_FLAGS(build_samplebank)
+
+INSTALL(TARGETS build_samplebank RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT toolssound)

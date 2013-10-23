@@ -459,9 +459,9 @@ namespace PATCHMAN
 		NLMISC::CPath::getPathContent(_Root+directoryName,false,true,false,pathContents);
 
 		// run through the directories we found...
-		for (uint32 i=pathContents.size();i--;)
+		for (uint32 i=(uint32)pathContents.size();i--;)
 		{
-			NLMISC::CSString childDirectoryName= NLMISC::CSString(pathContents[i]).leftCrop(_Root.size());
+			NLMISC::CSString childDirectoryName= NLMISC::CSString(pathContents[i]).leftCrop((uint32)_Root.size());
 
 			// make sure they exist in the '_DirectoryTree' map
 			_DirectoryTree[childDirectoryName];
@@ -484,14 +484,14 @@ namespace PATCHMAN
 		NLMISC::CPath::getPathContent(_Root+directoryName,false,false,true,pathContents);
 
 		// run through the files adding them to ourself
-		for (uint32 i=pathContents.size();i--;)
+		for (uint32 i=(uint32)pathContents.size();i--;)
 		{
 			// if the file is system file then skip it
 			if (pathContents[i].find("/.")!=std::string::npos)
 				continue;
 
 			// construct the file name
-			NLMISC::CSString fileName= NLMISC::CSString(pathContents[i]).leftCrop(_Root.size()); 
+			NLMISC::CSString fileName= NLMISC::CSString(pathContents[i]).leftCrop((uint32)_Root.size()); 
 			// get hold of the directory entry for this file (or create a new one if not exist) and update it
 			_IndexFileIsUpToDate&= _DirectoryTree[directoryName][fileName].updateFileInfo(fileName,pathContents[i],SFileInfo::RECALCULATE_IF_CHANGED,updateListener);
 		}
@@ -601,7 +601,7 @@ namespace PATCHMAN
 			// read in the file
 			FILE* inf= fopen(fileName.c_str(),"rb");
 			BOMB_IF(inf==NULL,"Failed to open input file for reading: "+fileName,return false);
-			uint32 bytesRead=fread(&_CacheBuffer[newFileEntry.StartOffset],1,fileSize,inf);
+			uint32 bytesRead=(uint32)fread(&_CacheBuffer[newFileEntry.StartOffset],1,fileSize,inf);
 			fclose(inf);
 			BOMB_IF(bytesRead!=fileSize,"Failed to read data from input file: "+fileName,return false);
 
@@ -732,7 +732,7 @@ NLMISC_CATEGORISED_COMMAND(patchman,fileManagerSave,"Save a file via the file ma
 
 	CSString fileName= args[0];
 	CMemStream data;
-	data.serialBuffer((uint8*)(&args[1][0]),args[1].size());
+	data.serialBuffer((uint8*)(&args[1][0]),(uint32)args[1].size());
 	CFileManager::getInstance().save(fileName,data);
 
 	return true;

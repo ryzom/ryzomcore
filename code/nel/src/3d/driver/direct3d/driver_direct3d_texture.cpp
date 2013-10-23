@@ -442,7 +442,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 	if (d3dtext->Texture == NULL)
 	{
 		// profiling: count TextureMemory usage.
-		uint32 textureMeory = computeTextureMemoryUsage (width, height, levels, destFormat, cube);
+		uint32 textureMemory = computeTextureMemoryUsage (width, height, levels, destFormat, cube);
 
 		// Create the texture
 		bool createSuccess;
@@ -454,6 +454,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 		}
 		else
 		{
+/*
 			// textures with mipmaps doesn't support not power of two sizes
 			// only DXTC formats are beginning with a 'D'
 			if (supportNonPowerOfTwoTextures() && (!isPowerOf2(width) || !isPowerOf2(height)) && levels == 1)
@@ -464,8 +465,16 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 				_DeviceInterface->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 				_DeviceInterface->SetSamplerState(0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 			}
+*/
 
-			createSuccess = _DeviceInterface->CreateTexture (width, height, levels, renderTarget?D3DUSAGE_RENDERTARGET:0, destFormat, renderTarget?D3DPOOL_DEFAULT:D3DPOOL_MANAGED, &(d3dtext->Texture2d), NULL) == D3D_OK;
+			HRESULT hr = _DeviceInterface->CreateTexture (width, height, levels, renderTarget?D3DUSAGE_RENDERTARGET:0, destFormat, renderTarget?D3DPOOL_DEFAULT:D3DPOOL_MANAGED, &(d3dtext->Texture2d), NULL);
+
+			if (hr != D3D_OK)
+			{
+				nlwarning("CreateTexture failed with code 0x%x for texture %s in %ux%u", hr, tex.getShareName().c_str(), width, height);
+			}
+
+			createSuccess = hr == D3D_OK;
 			d3dtext->Texture = d3dtext->Texture2d;
 		}
 
@@ -473,7 +482,7 @@ bool CDriverD3D::generateD3DTexture (ITexture& tex, bool textureDegradation, D3D
 			return false;
 
 		// Stats
-		d3dtext->TextureMemory = textureMeory;
+		d3dtext->TextureMemory = textureMemory;
 		_AllocatedTextureMemory += d3dtext->TextureMemory;
 
 		// Copy parameters
@@ -499,6 +508,19 @@ inline void CDriverD3D::setupTextureWrapMode(ITexture& tex)
 	d3dtext->MagFilter = RemapMagTextureFilterTypeNeL2D3D[tex.getMagFilter()];
 	d3dtext->MinFilter = RemapMinTextureFilterTypeNeL2D3D[tex.getMinFilter()];
 	d3dtext->MipFilter = RemapMipTextureFilterTypeNeL2D3D[tex.getMinFilter()];
+
+	// only enable for min filter, because it's never supported for mag filter
+	if (_AnisotropicFilter > 1 && tex.getMinFilter() > ITexture::NearestMipMapLinear)
+	{
+		if (tex.isTextureCube())
+		{
+			if (_AnisotropicMinCubeSupported) d3dtext->MinFilter = D3DTEXF_ANISOTROPIC;
+		}
+		else
+		{
+			if (_AnisotropicMinSupported) d3dtext->MinFilter = D3DTEXF_ANISOTROPIC;
+		}
+	}
 }
 
 
@@ -868,6 +890,13 @@ bool CDriverD3D::uploadTextureInternal (ITexture& tex, CRect& rect, uint8 destMi
 										D3DFORMAT destFormat, D3DFORMAT srcFormat)
 {
 	H_AUTO_D3D(CDriverD3D_uploadTextureInternal)
+
+	if (rect.Width == 0 || rect.Height == 0)
+	{
+		nlwarning("Rectangle width or height cannot be 0");
+		return false;
+	}
+
 	// The D3D texture
 	CTextureDrvInfosD3D*	d3dtext = getTextureD3D(tex);
 
@@ -1156,6 +1185,11 @@ bool CDriverD3D::setRenderTarget (ITexture *tex, uint32 /* x */, uint32 /* y */,
 	}
 
 	return true;
+}
+
+ITexture *CDriverD3D::getRenderTarget() const
+{
+	return _RenderTarget.Texture;
 }
 
 // ***************************************************************************

@@ -25,6 +25,7 @@
 #include "nel/misc/common.h"
 //#endif
 
+#include <limits>
 
 /*
  * Activate this define if you want to set a value into the mirror only if it is different from the previous value
@@ -937,7 +938,7 @@ CMirrorPropValueAlice<T,CPropLocationClass>&	CMirrorPropValueAlice<T,CPropLocati
 	}
 	else
 	{
-		tempReassign( srcValue );
+		this->tempReassign( srcValue );
 	}
 	return *this;
 }
@@ -1005,7 +1006,7 @@ NLNET::TServiceId8					CMirrorPropValueAlice<T,CPropLocationClass>::getWriterSer
 	if ( _InMirror )
 		return CMirrorPropValue<T,CPropLocationClass>::getWriterServiceId();
 	else
-		return ~0;
+		return NLNET::TServiceId8(std::numeric_limits<uint8>::max());
 }
 #endif
 

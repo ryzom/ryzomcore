@@ -2357,7 +2357,7 @@ void CPlayerManager::broadcastMessageUpdate()
 		msg= msg.replace("$seconds$",secondsStr.c_str());
 		msg= msg.replace("$minutes$",minutesStr.c_str());
 		msg= msg.replace("$hours$",hoursStr.c_str());
-		nlinfo("braodcasting message: %s",msg.c_str());
+		nlinfo("broadcasting message: %s",msg.c_str());
 
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 		params[0].Literal.fromUtf8(msg);
@@ -2597,6 +2597,7 @@ NLMISC_COMMAND(setPriv,"set a privilege to a user using his user id, must be in 
 			else if (p->havePriv(AlwaysInvisiblePriv))
 			{
 				c->setWhoSeesMe(uint64(0));
+				c->setInvisibility(true);
 			}
 		}
 	}

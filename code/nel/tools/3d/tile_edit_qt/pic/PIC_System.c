@@ -8,8 +8,8 @@
 
 #define PIC_ERRSIZE		256
 
-static unsigned long	PIC_Sys_MEM_Allocated;
-static unsigned long	PIC_Sys_MEM_NbAllocs;
+static size_t	PIC_Sys_MEM_Allocated;
+static size_t	PIC_Sys_MEM_NbAllocs;
 
 #if defined(__APPLE__)
 #define _msize malloc_size
@@ -31,7 +31,7 @@ void *Pic_malloc(unsigned long size)
 	return(mem);
 }
 /* ----- */
-void *Pic_calloc(unsigned long count, unsigned long size)
+void *Pic_calloc(size_t count, size_t size)
 {
 	void	*mem;
 	mem=calloc(count,size);
@@ -45,24 +45,24 @@ void *Pic_calloc(unsigned long count, unsigned long size)
 /* ----- */
 void Pic_free(void *memblock)
 {
-	unsigned long	size;
+	size_t	size;
 	size=_msize(memblock);
 	PIC_Sys_MEM_Allocated-=size;
 	PIC_Sys_MEM_NbAllocs--;
 	free(memblock);
 }
 /* ----- */
-unsigned long Pic__msize(void *memblock)
+size_t Pic__msize(void *memblock)
 {
 	return(_msize(memblock));
 }
 /* ----- */
-unsigned long PIC_GetMemNbAllocs(void)
+size_t PIC_GetMemNbAllocs(void)
 {
 	return(PIC_Sys_MEM_NbAllocs);
 }
 /* ----- */
-unsigned long PIC_GetMemAllocated(void)
+size_t PIC_GetMemAllocated(void)
 {
 	return(PIC_Sys_MEM_Allocated);
 }
@@ -74,7 +74,7 @@ static unsigned char	PIC_ErrorString[PIC_ERRSIZE];
 static unsigned char	PIC_Sys_FnctActive=0;
 static void				(*PIC_Sys_Fnct)(void);
 
-void Pic_SetError(unsigned char *msg, ...)
+void Pic_SetError(const char *msg, ...)
 {
 	unsigned char	curerr[PIC_ERRSIZE],olderr[PIC_ERRSIZE];
 	va_list			args;

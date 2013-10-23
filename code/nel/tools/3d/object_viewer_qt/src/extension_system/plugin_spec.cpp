@@ -31,6 +31,14 @@
 #include <QtCore/QPluginLoader>
 #include <QtCore/QCoreApplication>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_OVQT_CONFIG_H
+#include "ovqt_config.h"
+#endif
+
 namespace ExtensionSystem
 {
 const char *const PLUGIN_SPEC_NAME = "name";
@@ -61,14 +69,20 @@ PluginSpec::PluginSpec()
 	  m_plugin(0),
 	  m_pluginManager(0)
 {
-#ifdef Q_OS_WIN
-#	ifdef DEBUG
+// Compilation mode specific suffixes
+#ifdef NL_OS_WINDOWS
+#	if defined(NL_DEBUG)
 	m_suffix = "_d.dll";
-#	else
+#	elif defined(NL_RELEASE)
 	m_suffix = "_r.dll";
+#	else
+#		error "Unknown compilation mode, can't build suffix"
 #	endif
-#else
+#elif defined (NL_OS_UNIX)
+	m_prefix = "lib";
 	m_suffix = ".so";
+#else
+#	error "You must define the lib suffix for your platform"
 #endif
 }
 
@@ -134,12 +148,47 @@ QList<PluginSpec *> PluginSpec::dependencySpecs() const
 
 bool PluginSpec::setFileName(const QString &fileName)
 {
-	m_fileName = fileName + m_suffix;
+	m_fileName = m_prefix + fileName + m_suffix;
 	m_filePath = m_location + "/" + m_fileName;
 
-	nlinfo(m_filePath.toStdString().c_str());
-	QFile file(m_filePath);
-	if (!file.exists())
+	QFile file;
+	file.setFileName(m_filePath);
+
+	bool exists = file.exists();
+
+#ifdef NL_OS_UNIX
+
+#ifdef PLUGINS_DIR
+	if (!exists)
+	{
+		// if plugin can't be found in the same directory as spec file,
+		// looks for it in PLUGINS_DIR
+		m_filePath = QString("%1/%2").arg(PLUGINS_DIR).arg(m_fileName);
+
+		file.setFileName(m_filePath);
+
+		exists = file.exists();
+	}
+#endif
+
+#ifdef NL_LIB_PREFIX
+	if (!exists)
+	{
+		// if plugin can't be found in the same directory as spec file or PLUGINS_DIR,
+		// looks for it in NL_LIB_PREFIX
+		m_filePath = QString("%1/%2").arg(NL_LIB_PREFIX).arg(m_fileName);
+
+		file.setFileName(m_filePath);
+
+		exists = file.exists();
+	}
+#endif
+
+#endif
+
+	nlinfo(m_filePath.toUtf8().constData());
+
+	if (!exists)
 		return reportError(QCoreApplication::translate("PluginSpec", "File does not exist: %1").arg(file.fileName()));
 	if (!file.open(QIODevice::ReadOnly))
 		return reportError(QCoreApplication::translate("PluginSpec", "Could not open file for read: %1").arg(file.fileName()));

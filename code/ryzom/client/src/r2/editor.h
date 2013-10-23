@@ -17,7 +17,7 @@
 #ifndef R2_EDITOR_H
 #define R2_EDITOR_H
 
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "instance.h"
 #include "tool.h"
 #include "../decal.h"
@@ -41,8 +41,11 @@
 
 
 
+namespace NLGUI
+{
+	class CGroupTree;
+}
 
-class CGroupTree;
 class CEntityCL;
 
 namespace NL3D
@@ -250,7 +253,7 @@ public:
 	  * Handle an user input event
 	  * \return true if the event was handled by the editor
 	  */
-	bool handleEvent (const CEventDescriptor &eventDesc);
+	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 
 	// Handle copy, reaches the editor if no edit box is currently active
 	void copy();
@@ -887,7 +890,7 @@ private:
 
 public:
 	static uint		   getMaxNumPlotItems();
-	static CCDBNodeLeaf	   *getPlotItemSheetDBLeaf(uint index);
+	static NLMISC::CCDBNodeLeaf	   *getPlotItemSheetDBLeaf(uint index);
 	static bool				getIsStartingScenario() { return _IsStartingScenario; }
 	bool				isClearingContent() const { return _ClearingContent; }
 
@@ -897,7 +900,7 @@ private:
 	static void		   initDummyPlotItems();
 	void				resetPlotItems();
 	static void		   setReferencePlotItemSheet(uint index, uint32 sheetId);
-	static CCDBNodeLeaf	   *getRefPlotItemSheetDBLeaf(uint index);
+	static NLMISC::CCDBNodeLeaf	   *getRefPlotItemSheetDBLeaf(uint index);
 
 	//////////
 	// MISC //

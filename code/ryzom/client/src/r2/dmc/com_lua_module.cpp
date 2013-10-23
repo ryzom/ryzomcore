@@ -36,7 +36,8 @@
 #include "../object_factory_client.h"
 #include "../editor.h"
 #include "../../net_manager.h"
-#include "../../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
+#include "../../interface_v3/lua_ihm_ryzom.h"
 
 #include "game_share/object.h"
 #include "../r2_lua.h"
@@ -48,8 +49,9 @@
 #include <string>
 
 
-#include "../../interface_v3/lua_helper.h"
-#include "../../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_helper.h"
+using namespace NLGUI;
+#include "nel/gui/lua_ihm.h"
 
 #include "../../entities.h"
 
@@ -75,7 +77,7 @@ CComLuaModule::CComLuaModule(CDynamicMapClient* client, lua_State *luaState /*= 
 		#ifdef LUA_NEVRAX_VERSION
 			_LuaState = lua_open(NULL, NULL);
 		#else
-			_LuaState = lua_open();
+			_LuaState = luaL_newstate();
 		#endif
 		_LuaOwnerShip = false;
 		luaopen_base(_LuaState);
@@ -103,7 +105,7 @@ CComLuaModule::CComLuaModule(CDynamicMapClient* client, lua_State *luaState /*= 
 void CComLuaModule::initLuaLib()
 {
 	//H_AUTO(R2_CComLuaModule_initLuaLib)
-	const luaL_reg methods[] =
+	const luaL_Reg methods[] =
 	{
 		{"updateScenario", CComLuaModule::luaUpdateScenario},
 		{"requestUpdateRtScenario", CComLuaModule::luaRequestUpdateRtScenario},
@@ -235,7 +237,12 @@ void CComLuaModule::initLuaLib()
 
 	};
 	int initialStackSize = lua_gettop(_LuaState);
+#if LUA_VERSION_NUM >= 502
+	luaL_newlib(_LuaState, methods);
+	lua_setglobal(_LuaState, R2_LUA_PATH);
+#else
 	luaL_openlib(_LuaState, R2_LUA_PATH, methods, 0);
+#endif
 	lua_settop(_LuaState, initialStackSize);
 }
 
@@ -796,7 +803,7 @@ sint CComLuaModule::luaRequestSetNode(lua_State* state)
 	static volatile bool dumpCallstack = false;
 	if (dumpCallstack)
 	{
-		CLuaIHM::dumpCallStack();
+		CLuaIHMRyzom::dumpCallStack();
 	}
 	return requestSetNode(state, false);
 }
@@ -1044,7 +1051,11 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 	{
 		int initialStackSize = lua_gettop(state);
 
+#if LUA_VERSION_NUM >= 502
+		lua_pushglobaltable(state); // _G
+#else
 		lua_pushvalue(state, LUA_GLOBALSINDEX); // _G
+#endif
 
 		lua_pushstring(state, "r2");			// _G, "r2"
 		lua_gettable(state, -2);                // G, r2
@@ -1104,6 +1115,8 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 			}
 		}
 
+#if 0
+		// okay!
 		if (0)
 		{
 
@@ -1126,6 +1139,7 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 				}
 			}
 		}
+#endif
 	}
 	else
 	{
@@ -1145,8 +1159,11 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 	{
 		if (lua_getmetatable(state, -1))
 		{
-
+#if LUA_VERSION_NUM >= 502
+			lua_pushglobaltable(state); // obj, mt, _G
+#else
 			lua_pushvalue(state, LUA_GLOBALSINDEX); // obj, mt, _G
+#endif
 
 			lua_pushstring(state, "r2");					// obj, mt, _G, "r2"
 

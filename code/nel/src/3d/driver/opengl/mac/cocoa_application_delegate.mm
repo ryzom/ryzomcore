@@ -14,37 +14,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../stdopengl.h"
 #include "../driver_opengl.h"
 
 #include "cocoa_application_delegate.h"
 #include "cocoa_event_emitter.h"
 
-namespace NL3D 
+static NSApplicationTerminateReply applicationShouldTerminate(CDriverGL* driver)
 {
-	NSApplicationTerminateReply applicationShouldTerminate(CDriverGL* driver)
+	// cancel if there is a driver and a custom exit handler set up
+	if(driver && driver->ExitFunc)
 	{
-		// cancel if there is a driver and a custom exit handler set up
-		if(driver && driver->ExitFunc)
-		{
-			driver->ExitFunc();
-			return NSTerminateCancel;
-		}
-
-		NLMISC::CCocoaEventEmitter* eventEmitter = 
-			NLMISC::safe_cast<NLMISC::CCocoaEventEmitter*>(&(driver->_EventEmitter));
-
-		// cancel if there is a driver and cocoa event emitter handles the quit 
-		if(driver && eventEmitter && eventEmitter->handleQuitRequest())
-			return NSTerminateCancel;
-
-		// just let the app terminate if no custom quit handling worked
-		return NSTerminateNow;
+		driver->ExitFunc();
+		return NSTerminateCancel;
 	}
+
+	NLMISC::CCocoaEventEmitter* eventEmitter = 
+		NLMISC::safe_cast<NLMISC::CCocoaEventEmitter*>(&(driver->_EventEmitter));
+
+	// cancel if there is a driver and cocoa event emitter handles the quit 
+	if(driver && eventEmitter && eventEmitter->handleQuitRequest())
+		return NSTerminateCancel;
+
+	// just let the app terminate if no custom quit handling worked
+	return NSTerminateNow;
 }
 
 @implementation CocoaApplicationDelegate
 
--(id)initWithDriver:(NL3D::CDriverGL*)driver
+-(id)initWithDriver:(CDriverGL*)driver
 {
 	if((self = [super init]))
 	{
@@ -56,7 +54,7 @@ namespace NL3D
 
 -(NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication*)sender 
 {
-	return NL3D::applicationShouldTerminate(_driver);
+	return applicationShouldTerminate(_driver);
 }
 
 @end

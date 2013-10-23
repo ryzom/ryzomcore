@@ -16,7 +16,6 @@
 
 #include "stdopenal.h"
 #include "sound_driver_al.h"
-#include "music_channel_al.h"
 #include "buffer_al.h"
 #include "listener_al.h"
 #include "source_al.h"
@@ -174,7 +173,7 @@ uint32 NLSOUND_interfaceVersion ()
  */
 CSoundDriverAL::CSoundDriverAL(ISoundDriver::IStringMapperProvider *stringMapper) 
 : _StringMapper(stringMapper), _AlDevice(NULL), _AlContext(NULL), 
-_NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f), _MasterGain(1.f)
+_NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f)
 {
 	alExtInit();
 }
@@ -184,21 +183,16 @@ _NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f), _MasterGain(1.f)
  */
 CSoundDriverAL::~CSoundDriverAL()
 {
-	// Release internal resources of all remaining IMusicChannel instances
-	if (_MusicChannels.size())
-	{
-		nlwarning("AL: _MusicChannels.size(): '%u'", (uint32)_MusicChannels.size());
-		set<CMusicChannelAL *>::iterator it(_MusicChannels.begin()), end(_MusicChannels.end());
-		for (; it != end; ++it) delete *it;
-		_MusicChannels.clear();
-	}
+	// WARNING: Only internal resources are released here, 
+	// the created instances must still be released by the user!
+	
 	// Remove the allocated (but not exported) source and buffer names-
 	// Release internal resources of all remaining ISource instances
 	if (_Sources.size())
 	{
 		nlwarning("AL: _Sources.size(): '%u'", (uint32)_Sources.size());
 		set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end());
-		for (; it != end; ++it) delete *it;
+		for (; it != end; ++it) (*it)->release(); // CSourceAL will be deleted by user
 		_Sources.clear();
 	}
 	if (!_Buffers.empty()) alDeleteBuffers(compactAliveNames(_Buffers, alIsBuffer), &*_Buffers.begin());	
@@ -207,7 +201,7 @@ CSoundDriverAL::~CSoundDriverAL()
 	{
 		nlwarning("AL: _Effects.size(): '%u'", (uint32)_Effects.size());
 		set<CEffectAL *>::iterator it(_Effects.begin()), end(_Effects.end());
-		for (; it != end; ++it) delete *it;
+		for (; it != end; ++it) (*it)->release(); // CEffectAL will be deleted by user
 		_Effects.clear();
 	}
 
@@ -252,7 +246,6 @@ static const ALchar *getDeviceInternal(const std::string &device)
 	if (AlEnumerateAllExt)
 	{	
 		const ALchar* deviceNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-		// const ALchar* defaultDevice = NULL;
 		if(!strlen(deviceNames))
 		{
 			nldebug("AL: No audio devices");
@@ -297,6 +290,7 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 
 	// OpenAL initialization
 	const ALchar *dev = getDeviceInternal(device);
+	if (!dev) dev = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
 	nldebug("AL: Opening device: '%s'", dev == NULL ? "NULL" : dev);
 	_AlDevice = alcOpenDevice(dev);
 	if (!_AlDevice) throw ESoundDriver("AL: Failed to open device");
@@ -619,16 +613,9 @@ void CSoundDriverAL::commit3DChanges()
 	// Sync up sources & listener 3d position.
 	if (getOption(OptionManualRolloff))
 	{
-		set<CSourceAL*>::iterator it = _Sources.begin(), iend = _Sources.end();
-		while(it != iend)
-		{
+		for (std::set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end()); it != end; ++it)
 			(*it)->updateManualRolloff();
-			++it;
-		}
 	}
-
-	// update the music (XFade etc...)
-	updateMusic();
 }
 
 /// Write information about the driver to the output stream.
@@ -656,23 +643,6 @@ void CSoundDriverAL::displayBench(NLMISC::CLog *log)
 	NLMISC::CHTimer::display(log, CHTimer::TotalTime);
 }
 
-/** Get music info. Returns false if the song is not found or the function is not implemented.
- *  \param filepath path to file, CPath::lookup done by driver
- *  \param artist returns the song artist (empty if not available)
- *  \param title returns the title (empty if not available)
- */
-bool CSoundDriverAL::getMusicInfo(const std::string &filepath, std::string &artist, std::string &title)
-{
-	// add support for additional non-standard music file types info here
-	return IMusicBuffer::getInfo(filepath, artist, title);
-}
-
-void CSoundDriverAL::updateMusic()
-{
-	set<CMusicChannelAL *>::iterator it(_MusicChannels.begin()), end(_MusicChannels.end());
-	for (; it != end; ++it) (*it)->update();
-}
-
 /// Remove a buffer
 void CSoundDriverAL::removeBuffer(CBufferAL *buffer)
 {
@@ -693,35 +663,6 @@ void CSoundDriverAL::removeEffect(CEffectAL *effect)
 {
 	if (_Effects.find(effect) != _Effects.end()) _Effects.erase(effect);
 	else nlwarning("AL: removeEffect already called");
-}
-
-/// Create a music channel
-IMusicChannel *CSoundDriverAL::createMusicChannel()
-{
-	CMusicChannelAL *music_channel = new CMusicChannelAL(this);
-	_MusicChannels.insert(music_channel);
-	return static_cast<IMusicChannel *>(music_channel);
-}
-
-/// (Internal) Remove a music channel (should be called by the destructor of the music channel class).
-void CSoundDriverAL::removeMusicChannel(CMusicChannelAL *musicChannel)
-{
-	if (_MusicChannels.find(musicChannel) != _MusicChannels.end()) _MusicChannels.erase(musicChannel);
-	else nlwarning("AL: removeMusicChannel already called");
-}
-
-/// Set the gain
-void CSoundDriverAL::setGain( float gain )
-{
-	clamp(gain, 0.f, 1.f);
-	_MasterGain= gain;
-	// TODO: update all sources in not using manual rollof ?
-}
-
-/// Get the gain
-float CSoundDriverAL::getGain()
-{
-	return _MasterGain;
 }
 
 /// Delete a buffer or a source

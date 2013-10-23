@@ -19,14 +19,17 @@
 #ifndef RY_INVENTORY_MANAGER_H
 #define RY_INVENTORY_MANAGER_H
 
-#include "../cdb_leaf.h"
+#include "nel/misc/cdb_leaf.h"
 #include "dbgroup_list_sheet_text.h"
 #include "dbgroup_list_sheet.h"
 #include "game_share/item_infos.h"
 #include "game_share/temp_inventory_mode.h"
 #include "game_share/inventories.h"
+#include "game_share/bot_chat_types.h"
 
+namespace NLMISC{
 class CCDBNodeBranch;
+}
 class CDBCtrlSheet;
 
 
@@ -54,20 +57,21 @@ const uint MAX_PLAYER_INV_ENTRIES = std::max(MAX_BAGINV_ENTRIES, MAX_ANIMALINV_E
 class CItemImage
 {
 public:
-	CCDBNodeLeaf *Sheet;
-	CCDBNodeLeaf *Quality;
-	CCDBNodeLeaf *Quantity;
-	CCDBNodeLeaf *UserColor;
-	CCDBNodeLeaf *Price;
-	CCDBNodeLeaf *Weight;
-	CCDBNodeLeaf *NameId;
-	CCDBNodeLeaf *InfoVersion;
+	NLMISC::CCDBNodeLeaf *Sheet;
+	NLMISC::CCDBNodeLeaf *Quality;
+	NLMISC::CCDBNodeLeaf *Quantity;
+	NLMISC::CCDBNodeLeaf *UserColor;
+	NLMISC::CCDBNodeLeaf *Price;
+	NLMISC::CCDBNodeLeaf *Weight;
+	NLMISC::CCDBNodeLeaf *NameId;
+	NLMISC::CCDBNodeLeaf *InfoVersion;
+	NLMISC::CCDBNodeLeaf *ResaleFlag;
 
 public:
 	// ctor
 	CItemImage();
 	// build from a branch
-	void build(CCDBNodeBranch *branch);
+	void build(NLMISC::CCDBNodeBranch *branch);
 	// shortcuts to avoid NULL pointer tests
 	uint32 getSheetID() const						{ return (uint32)			(Sheet ? Sheet->getValue32() : 0); }
 	uint16 getQuality() const						{ return (uint16)			(Quality ? Quality->getValue16() : 0); }
@@ -77,6 +81,8 @@ public:
 	uint32 getWeight() const						{ return (uint32)			(Weight ? Weight->getValue32() : 0); }
 	uint32 getNameId() const						{ return (uint32)			(NameId ? NameId->getValue32() : 0); }
 	uint8  getInfoVersion() const					{ return (uint8)			(InfoVersion ? (uint8) InfoVersion->getValue8() : 0); }
+	uint8  getResaleFlag() const					{ return (uint8)			(ResaleFlag ? (uint8) ResaleFlag->getValue8() : 0); }
+	bool   getLockedByOwner() const                 { return (bool)             (ResaleFlag ? (ResaleFlag->getValue8() == BOTCHATTYPE::ResaleKOLockedByOwner) : false); }
 	//
 	void   setSheetID(uint32 si)					{ if (Sheet) Sheet->setValue32((sint32) si); }
 	void   setQuality(uint16 quality)				{ if (Quality) Quality->setValue16((sint16) quality); }
@@ -86,6 +92,7 @@ public:
 	void   setWeight(uint32 wgt)					{ if (Weight) Weight->setValue32((sint32) wgt); }
 	void   setNameId(uint32 nid)					{ if (NameId) NameId->setValue32((sint32) nid); }
 	void   setInfoVersion(uint8 iv)					{ if (InfoVersion) InfoVersion->setValue8((sint8) iv); }
+	void   setResaleFlag(uint8 resale)				{ if (ResaleFlag) ResaleFlag->setValue8(resale); }
 };
 
 
@@ -237,7 +244,7 @@ public:
 		void equip(const std::string &bagPath, const std::string &invPath);
 		// UnEquip a part of the player (same format as equip method)
 		void unequip(const std::string &invPath);
-		// auto equip an item (given by index) from the bag (return true if equiped)
+		// auto equip an item (given by index) from the bag (return true if equipped)
 		bool autoEquip(sint bagEntryIndex, bool allowReplace);
 
 		void dropOrDestroyItem(CDBCtrlSheet *item, NLMISC::CBitMemStream &out, uint16 quantity);
@@ -297,14 +304,14 @@ private:
 		sint32 Equip[MAX_EQUIPINV_ENTRIES];
 		CDBCtrlSheet *UIEquip[MAX_EQUIPINV_ENTRIES];
 		CDBCtrlSheet *UIEquip2[MAX_EQUIPINV_ENTRIES];
-		CCDBNodeLeaf *Money;
+		NLMISC::CCDBNodeLeaf *Money;
 		CItemImage PAInv[MAX_INVENTORY_ANIMAL][MAX_ANIMALINV_ENTRIES];
 	// SERVER INVENTORY
 		CItemImage ServerBag[MAX_BAGINV_ENTRIES];
 		CItemImage ServerTempInv[MAX_TEMPINV_ENTRIES];
 		sint32 ServerHands[MAX_HANDINV_ENTRIES];
 		sint32 ServerEquip[MAX_EQUIPINV_ENTRIES];
-		CCDBNodeLeaf *ServerMoney;
+		NLMISC::CCDBNodeLeaf *ServerMoney;
 		CItemImage ServerPAInv[MAX_INVENTORY_ANIMAL][MAX_ANIMALINV_ENTRIES];
 	// Drag'n'Drop
 		TFrom			DNDFrom;
@@ -338,24 +345,24 @@ private:
 
 	// ItemExtraInfo management.
 		void			onTradeChangeSession();
-		void			onReceiveItemSheet(ICDBNode* node);
-		void			onReceiveItemInfoSlotVersion(ICDBNode* node);
+		void			onReceiveItemSheet(NLMISC::ICDBNode* node);
+		void			onReceiveItemInfoSlotVersion(NLMISC::ICDBNode* node);
 		void			updateItemInfoQueue();
 		void			updateItemInfoWaiters(uint slotId);
-		class	CItemInfoSlotVersionObs : public ICDBNode::IPropertyObserver
+		class	CItemInfoSlotVersionObs : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
-			virtual void update(ICDBNode* node);
+			virtual void update(NLMISC::ICDBNode* node);
 		};
-		class	CItemSheetObs : public ICDBNode::IPropertyObserver
+		class	CItemSheetObs : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
-			virtual void update(ICDBNode* node);
+			virtual void update(NLMISC::ICDBNode* node);
 		};
-		class	CItemInfoTradeObs : public ICDBNode::IPropertyObserver
+		class	CItemInfoTradeObs : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
-			virtual void update(ICDBNode* node);
+			virtual void update(NLMISC::ICDBNode* node);
 		};
 		CItemInfoTradeObs			_DBTradeInfoObs;
 		CItemInfoSlotVersionObs		_DBInfoSlotVersionObs;
@@ -365,19 +372,19 @@ private:
 		friend class CItemSheetObs;
 
 	// Equipment observer
-		class CDBEquipObs : public ICDBNode::IPropertyObserver
+		class CDBEquipObs : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
-			virtual void update(ICDBNode* node);
+			virtual void update(NLMISC::ICDBNode* node);
 		};
 		CDBEquipObs _DBEquipObs;
 		friend class CDBEquipObs;
 
 	// Bag observer for auto equipment (put only on the sheet leaf)
-		class CDBBagObs : public ICDBNode::IPropertyObserver
+		class CDBBagObs : public NLMISC::ICDBNode::IPropertyObserver
 		{
 		public:
-			virtual void update(ICDBNode* node);
+			virtual void update(NLMISC::ICDBNode* node);
 		};
 		CDBBagObs _DBBagObs;
 };
@@ -436,24 +443,24 @@ private:
 	CTempInvManager();
 
 	// Database management stuff
-	class CDBObs : public ICDBNode::IPropertyObserver
+	class CDBObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 
-	class CDBObsType : public ICDBNode::IPropertyObserver
+	class CDBObsType : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 
 	// Database management stuff, specialized for forage progress
-	class CDBForageQQObs : public ICDBNode::IPropertyObserver
+	class CDBForageQQObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		CDBForageQQObs() : ICDBNode::IPropertyObserver(), WhichOne(~0), FullValue(0.0f) {}
-		virtual void update(ICDBNode *node);
+		CDBForageQQObs() : NLMISC::ICDBNode::IPropertyObserver(), WhichOne(~0), FullValue(0.0f) {}
+		virtual void update(NLMISC::ICDBNode *node);
 		uint	WhichOne;
 		float	FullValue;
 	};
@@ -499,23 +506,25 @@ struct SBagOptions
 {
 	CInventoryManager::TInvType		InvType;
 
-	CCDBNodeLeaf *DbFilterArmor;
-	CCDBNodeLeaf *DbFilterWeapon;
-	CCDBNodeLeaf *DbFilterTool;
-	CCDBNodeLeaf *DbFilterMP;
-	CCDBNodeLeaf *DbFilterMissMP;
+	NLMISC::CCDBNodeLeaf *DbFilterArmor;
+	NLMISC::CCDBNodeLeaf *DbFilterWeapon;
+	NLMISC::CCDBNodeLeaf *DbFilterTool;
+	NLMISC::CCDBNodeLeaf *DbFilterMP;
+	NLMISC::CCDBNodeLeaf *DbFilterMissMP;
+	NLMISC::CCDBNodeLeaf *DbFilterTP;
 
 	bool LastDbFilterArmor;
 	bool LastDbFilterWeapon;
 	bool LastDbFilterTool;
 	bool LastDbFilterMP;
 	bool LastDbFilterMissMP;
+	bool LastDbFilterTP;
 	// -----------------------
 	SBagOptions()
 	{
 		InvType = CInventoryManager::InvUnknown;
-		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = NULL;
-		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = false;
+		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
+		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
 	}
 
 	bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
@@ -550,6 +559,12 @@ struct SBagOptions
 	{
 		if (DbFilterMissMP == NULL) return true;
 		return (DbFilterMissMP->getValue8()!=0);
+	}
+
+	bool getFilterTP() const
+	{
+		if (DbFilterTP == NULL) return true;
+		return (DbFilterTP->getValue8() != 0);
 	}
 
 	// Return true if the sheet can be displayed due to filters

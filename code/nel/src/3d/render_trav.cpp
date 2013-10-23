@@ -623,7 +623,7 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 	uint		i;
 
 	// if same lightContribution, no-op.
-	if(_CacheLightContribution == lightContribution &&  _LastLocalAttenuation == useLocalAttenuation)
+	if (_CacheLightContribution == lightContribution && (lightContribution == NULL || _LastLocalAttenuation == useLocalAttenuation))
 		return;
 	// else, must setup the lights into driver.
 	else
@@ -760,15 +760,24 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 // ***************************************************************************
 // ***************************************************************************
 
-
-// ***************************************************************************
-void		CRenderTrav::beginVPLightSetup(uint ctStart, bool supportSpecular, const CMatrix &invObjectWM)
+void		CRenderTrav::prepareVPLightSetup()
 {
-	uint	i;
 	nlassert(MaxVPLight==4);
 	_VPNumLights= min(_NumLightEnabled, (uint)MaxVPLight);
-	_VPCurrentCtStart= ctStart;
-	_VPSupportSpecular= supportSpecular;
+	// Must force real light setup at least the first time, in changeVPLightSetupMaterial()
+	_VPMaterialCacheDirty= true;
+}
+
+// ***************************************************************************
+void		CRenderTrav::beginVPLightSetup(CVertexProgramLighted *program, const CMatrix &invObjectWM)
+{
+	uint	i;
+	// nlassert(MaxVPLight==4);
+	// _VPNumLights= min(_NumLightEnabled, (uint)MaxVPLight);
+	// _VPCurrentCtStart= ctStart;
+	// _VPSupportSpecular= supportSpecular;
+	_VPCurrent = program;
+	bool supportSpecular = program->featuresLighted().SupportSpecular;
 
 	// Prepare Colors (to be multiplied by material)
 	//================
@@ -786,8 +795,11 @@ void		CRenderTrav::beginVPLightSetup(uint ctStart, bool supportSpecular, const C
 	// reset other to 0.
 	for(; i<MaxVPLight; i++)
 	{
-		_VPLightDiffuse[i]= CRGBA::Black;
-		Driver->setConstant(_VPCurrentCtStart+1+i, 0.f, 0.f, 0.f, 0.f);
+		_VPLightDiffuse[i] = CRGBA::Black;
+		if (program->idxLighted().Diffuse[i] != ~0)
+		{
+			Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Diffuse[i], 0.f, 0.f, 0.f, 0.f);
+		}
 	}
 	// Specular. _VPCurrentCtStart+5 to 8 (only if supportSpecular)
 	if(supportSpecular)
@@ -800,7 +812,10 @@ void		CRenderTrav::beginVPLightSetup(uint ctStart, bool supportSpecular, const C
 		for(; i<MaxVPLight; i++)
 		{
 			_VPLightSpecular[i]= CRGBA::Black;
-			Driver->setConstant(_VPCurrentCtStart+5+i, 0.f, 0.f, 0.f, 0.f);
+			if (program->idxLighted().Specular[i] != ~0)
+			{
+				Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Specular[i], 0.f, 0.f, 0.f, 0.f);
+			}
 		}
 	}
 
@@ -816,40 +831,24 @@ void		CRenderTrav::beginVPLightSetup(uint ctStart, bool supportSpecular, const C
 	lightDir= invObjectWM.mulVector(_DriverLight[0].getDirection());
 	lightDir.normalize();
 	lightDir= -lightDir;
-	if(supportSpecular)
-	{
-		// Setup lightDir.
-		Driver->setConstant(_VPCurrentCtStart+9, lightDir);
-	}
-	else
-	{
-		// Setup lightDir. NB: no specular color!
-		Driver->setConstant(_VPCurrentCtStart+5, lightDir);
-	}
+	Driver->setUniform3f(IDriver::VertexProgram, program->idxLighted().DirOrPos[0], lightDir); // The sun is the same for every instance.
 
 
 	// Setup PointLights
 	//================
 	uint		startPLPos;
-	if(supportSpecular)
+	if (supportSpecular)
 	{
 		// Setup eye in objectSpace for localViewer
-		Driver->setConstant(_VPCurrentCtStart+11, eye);
-		// Start at 12.
-		startPLPos= 12;
-	}
-	else
-	{
-		// Start at 6.
-		startPLPos= 6;
+		Driver->setUniform3f(IDriver::VertexProgram, program->idxLighted().EyePosition, eye);
 	}
 	// For all pointLight enabled (other are black: don't matter)
 	for(i=1; i<_VPNumLights; i++)
 	{
 		// Setup position of light.
 		CVector		lightPos;
-		lightPos= invObjectWM * _DriverLight[i].getPosition();
-		Driver->setConstant(_VPCurrentCtStart+startPLPos+(i-1), lightPos);
+		lightPos = invObjectWM * _DriverLight[i].getPosition();
+		Driver->setUniform3f(IDriver::VertexProgram, program->idxLighted().DirOrPos[i], lightPos);
 	}
 
 
@@ -860,6 +859,9 @@ void		CRenderTrav::beginVPLightSetup(uint ctStart, bool supportSpecular, const C
 // ***************************************************************************
 void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool excludeStrongest)
 {
+	CVertexProgramLighted *program = _VPCurrent;
+	nlassert(program);
+
 	// Must test if at least done one time.
 	if(!_VPMaterialCacheDirty)
 	{
@@ -869,7 +871,7 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 			_VPMaterialCacheDiffuse == mat.getDiffuse().getPacked() )
 		{
 			// Same Diffuse part, test if same specular if necessary
-			if( !_VPSupportSpecular ||
+			if( !program->featuresLighted().SupportSpecular ||
 				( _VPMaterialCacheSpecular == mat.getSpecular().getPacked() &&
 				  _VPMaterialCacheShininess == mat.getShininess() )  )
 			{
@@ -899,7 +901,7 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 	// setup Ambient + Emissive
 	color= _VPFinalAmbient * mat.getAmbient();
 	color+= mat.getEmissive();
-	Driver->setConstant(_VPCurrentCtStart+0, 1, &color.R);
+	Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Ambient, color);
 
 
 	// is the strongest light is not excluded, its index should have been setup to _VPNumLights
@@ -908,7 +910,7 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 	for(i = 0; i < strongestLightIndex; ++i)
 	{
 		color= _VPLightDiffuse[i] * matDiff;
-		Driver->setConstant(_VPCurrentCtStart+1+i, 1, &color.R);
+		Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Diffuse[i], color);
 	}
 
 
@@ -917,24 +919,24 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 		color= _VPLightDiffuse[i] * matDiff;
 		_StrongestLightDiffuse.set((uint8) (255.f * color.R), (uint8) (255.f * color.G), (uint8) (255.f * color.B), (uint8) (255.f * color.A));
 		// setup strongest light to black for the gouraud part
-		Driver->setConstant(_VPCurrentCtStart + 1 + i, 0.f, 0.f, 0.f, 0.f);
+		Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Diffuse[i], 0.f, 0.f, 0.f, 0.f);
 		++i;
 		// setup other lights
 		for(; i < _VPNumLights; i++)
 		{
 			color= _VPLightDiffuse[i] * matDiff;
-			Driver->setConstant(_VPCurrentCtStart + 1 + i, 1, &color.R);
+			Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Diffuse[i], color);
 		}
 	}
 
 	// setup Specular
-	if(_VPSupportSpecular)
+	if (program->featuresLighted().SupportSpecular)
 	{
 		for(i = 0; i < strongestLightIndex; ++i)
 		{
 			color= _VPLightSpecular[i] * matSpec;
 			color.A= specExp;
-			Driver->setConstant(_VPCurrentCtStart+5+i, 1, &color.R);
+			Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Specular[i], color);
 		}
 
 		if (i != _VPNumLights)
@@ -943,14 +945,14 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 			_StrongestLightSpecular.set((uint8) (255.f * color.R), (uint8) (255.f * color.G), (uint8) (255.f * color.B), (uint8) (255.f * color.A));
 
 			// setup strongest light to black (for gouraud part)
-			Driver->setConstant(_VPCurrentCtStart + 5 + i, 0.f, 0.f, 0.f, 0.f);
+			Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Specular[i], 0.f, 0.f, 0.f, 0.f);
 			++i;
 			// setup other lights
 			for(; i < _VPNumLights; i++)
 			{
 				color= _VPLightSpecular[i] * matSpec;
 				color.A= specExp;
-				Driver->setConstant(_VPCurrentCtStart + 5 + i, 1, &color.R);
+				Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Specular[i], color);
 			}
 		}
 	}
@@ -959,10 +961,7 @@ void		CRenderTrav::changeVPLightSetupMaterial(const CMaterial &mat, bool exclude
 	static	float	alphaCte[4]= {0,0,1,0};
 	alphaCte[3]= matDiff.A;
 	// setup at good place
-	if(_VPSupportSpecular)
-			Driver->setConstant(_VPCurrentCtStart+10, 1, alphaCte);
-	else
-			Driver->setConstant(_VPCurrentCtStart+9, 1, alphaCte);
+	Driver->setUniform4fv(IDriver::VertexProgram, program->idxLighted().DiffuseAlpha, 1, alphaCte);
 }
 
 // ***************************************************************************
@@ -1071,9 +1070,9 @@ static const char*	LightingVPFragmentSpecular_Begin=
 																						\n\
 	# Compute vertex-to-eye vector normed.												\n\
 	ADD	R4, c[CTS+11], -R5;																\n\
-	DP3	R4.w, R4, R4;																	\n\
-	RSQ	R4.w, R4.w;																		\n\
-	MUL R4, R4, R4.w;																	\n\
+	DP3	R1.w, R4, R4;																	\n\
+	RSQ	R1.w, R1.w;																		\n\
+	MUL	R4, R4, R1.w;																	\n\
 																						\n\
 	# Diffuse-Specular Sun																\n\
 	# Compute R1= halfAngleVector= (lightDir+R4).normed().								\n\
@@ -1168,8 +1167,66 @@ static	void	strReplaceAll(string &strInOut, const string &tokenSrc, const string
 	}
 }
 
+void CVertexProgramLighted::buildInfo()
+{
+	CVertexProgram::buildInfo();
+	if (profile() == nelvp)
+	{
+		// Fixed uniform locations
+		m_IdxLighted.Ambient = m_FeaturesLighted.CtStartNeLVP + 0;
+		for (uint i = 0; i < MaxLight; ++i)
+		{
+			m_IdxLighted.Diffuse[i] = m_FeaturesLighted.CtStartNeLVP + 1 + i;
+		}
+		if (m_FeaturesLighted.SupportSpecular)
+		{
+			for (uint i = 0; i < MaxLight; ++i)
+			{
+				m_IdxLighted.Specular[i] = m_FeaturesLighted.CtStartNeLVP + 5 + i;
+			}
+			m_IdxLighted.DirOrPos[0] = 9;
+			for (uint i = 1; i < MaxLight; ++i)
+			{
+				m_IdxLighted.DirOrPos[i] = m_FeaturesLighted.CtStartNeLVP + (12 - 1) + i;
+			}
+			m_IdxLighted.DiffuseAlpha = m_FeaturesLighted.CtStartNeLVP + 10;
+			m_IdxLighted.EyePosition = m_FeaturesLighted.CtStartNeLVP + 11;
+		}
+		else
+		{
+			for (uint i = 0; i < MaxLight; ++i)
+			{
+				m_IdxLighted.Specular[i] = ~0;
+			}
+			for (uint i = 0; i < MaxLight; ++i)
+			{
+				m_IdxLighted.DirOrPos[i] = m_FeaturesLighted.CtStartNeLVP + 5 + i;
+			}
+			m_IdxLighted.DiffuseAlpha = m_FeaturesLighted.CtStartNeLVP + 9;
+			m_IdxLighted.EyePosition = ~0;
+		}
+	}
+	else
+	{
+		// Named uniform locations
+		// TODO_VP_GLSL
+		// m_IdxLighted.Ambient = getUniformIndex("ambient");
+		// etc
+	}
+
+	nlassert(m_IdxLighted.Diffuse[0] != ~0);
+	if (m_FeaturesLighted.SupportSpecular)
+	{
+		nlassert(m_IdxLighted.Specular[0] != ~0);
+		nlassert(m_IdxLighted.EyePosition != ~0);
+	}
+	nlassert(m_IdxLighted.DirOrPos[0] != ~0);
+	nlassert(m_IdxLighted.DiffuseAlpha != ~0);
+}
+
+// generates the lighting part of a vertex program, nelvp profile
 // ***************************************************************************
-std::string		CRenderTrav::getLightVPFragment(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize)
+std::string		CRenderTrav::getLightVPFragmentNeLVP(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize)
 {
 	string	ret;
 

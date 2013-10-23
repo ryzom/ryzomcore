@@ -22,24 +22,20 @@
 // by default, we disable the windows menu keys (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
 #define NL_DISABLE_MENU
 
-#ifdef NL_OS_WINDOWS
-# include <windowsx.h>
-#elif defined(NL_OS_MAC)
+#ifdef NL_OS_MAC
 #	import "mac/cocoa_window_delegate.h"
 #	import "mac/cocoa_application_delegate.h"
 #	import <OpenGL/OpenGL.h>
 #elif defined (NL_OS_UNIX)
-# include <GL/gl.h>
-# include <GL/glx.h>
-# ifdef HAVE_XRANDR
-#  include <X11/extensions/Xrandr.h>
-# endif // HAVE_XRANDR
-# ifdef HAVE_XRENDER
-#  include <X11/extensions/Xrender.h>
-# endif // HAVE_XRENDER
-# include <X11/Xatom.h>
-# define _NET_WM_STATE_REMOVE	0
-# define _NET_WM_STATE_ADD		1
+#	ifdef HAVE_XRANDR
+#		include <X11/extensions/Xrandr.h>
+#	endif // HAVE_XRANDR
+#	ifdef HAVE_XRENDER
+#		include <X11/extensions/Xrender.h>
+#	endif // HAVE_XRENDER
+#	include <X11/Xatom.h>
+#	define _NET_WM_STATE_REMOVE	0
+#	define _NET_WM_STATE_ADD	1
 #endif // NL_OS_UNIX
 
 #include "nel/misc/mouse_device.h"
@@ -50,8 +46,15 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NL3D
-{
+namespace NL3D {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 #ifdef NL_OS_WINDOWS
 
@@ -110,7 +113,8 @@ bool GlWndProc(CDriverGL *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	H_AUTO_OGL(DriverGL_WndProc)
+	H_AUTO_OGL(DriverGL_WndProc);
+
 	// Get the driver pointer..
 	CDriverGL *pDriver=(CDriverGL*)GetWindowLongPtr (hWnd, GWLP_USERDATA);
 	bool trapMessage = false;
@@ -188,6 +192,9 @@ bool GlWndProc(CDriverGL *driver, const void* e)
 static Atom XA_WM_STATE = 0;
 static Atom XA_WM_STATE_FULLSCREEN = 0;
 static Atom XA_WM_ICON = 0;
+static Atom XA_WM_WINDOW_TYPE = 0;
+static Atom XA_WM_WINDOW_TYPE_NORMAL = 0;
+static Atom XA_FRAME_EXTENTS = 0;
 
 sint nelXErrorsHandler(Display *dpy, XErrorEvent *e)
 {
@@ -233,7 +240,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 		break;
 
 		case Expose:
-		nlwarning("Expose event");
+//		nlwarning("Expose event");
 		break;
 
 		case ConfigureNotify:
@@ -243,20 +250,36 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 			// first time setting decoration sizes
 			if ((driver->_DecorationWidth == -1) || (driver->_DecorationWidth == 0))
 			{
-				driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
-				driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
+				Atom type_return = 0;
+				int format_return = 0;
+				unsigned long nitems_return = 0;
+				unsigned long bytes_after_return = 0;
+				long *data = NULL;
+			
+				int status = XGetWindowProperty(driver->_dpy, driver->_win, XA_FRAME_EXTENTS, 0, 4, False, XA_CARDINAL, &type_return, &format_return, &nitems_return, &bytes_after_return, (unsigned char**)&data);
 
-				nlwarning("Decoration size x = %d, y = %d", driver->_DecorationWidth, driver->_DecorationHeight);
+				// succeeded to retrieve decoration size
+				if (status == Success && type_return == XA_CARDINAL && format_return == 32 && nitems_return == 4 && data)
+				{
+					driver->_DecorationWidth = data[0];
+					driver->_DecorationHeight = data[2];
+				}
+				else
+				{
+					// use difference between current position and previous one (set by application)
+					driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
+					driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
+				}
+				
+				// don't allow negative decoration sizes
+				if (driver->_DecorationWidth < 0) driver->_DecorationWidth = 0;
+				if (driver->_DecorationHeight < 0) driver->_DecorationHeight = 0;
 			}
 
 			driver->_CurrentMode.Width = e.xconfigure.width;
 			driver->_CurrentMode.Height = e.xconfigure.height;
 			driver->_WindowX = e.xconfigure.x - driver->_DecorationWidth;
 			driver->_WindowY = e.xconfigure.y - driver->_DecorationHeight;
-
-			XConfigureEvent event = e.xconfigure;
-
-			nlwarning("Configure x = %d, y = %d, width = %d, height = %d, send event = %d", event.x, event.y, event.width, event.height, event.send_event);
 		}
 
 		break;
@@ -323,8 +346,11 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 #elif defined(NL_OS_MAC)
 
 	// nothing to do
+	nlunreferenced(windowIcon);
 
 #elif defined (NL_OS_UNIX)
+
+	nlunreferenced(windowIcon);
 
 	_dpy = XOpenDisplay(NULL);
 
@@ -401,6 +427,9 @@ bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
 	XA_WM_STATE = XInternAtom(_dpy, "_NET_WM_STATE", False);
 	XA_WM_STATE_FULLSCREEN = XInternAtom(_dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	XA_WM_ICON = XInternAtom(_dpy, "_NET_WM_ICON", False);
+	XA_WM_WINDOW_TYPE = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE", False);
+	XA_WM_WINDOW_TYPE_NORMAL = XInternAtom(_dpy, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+	XA_FRAME_EXTENTS = XInternAtom(_dpy, "_NET_FRAME_EXTENTS", False);
 
 #endif
 
@@ -422,6 +451,7 @@ bool CDriverGL::unInit()
 
 #ifdef NL_OS_WINDOWS
 
+#ifndef USE_OPENGLES
 	// Off-screen rendering ?
 	if (_PBuffer)
 	{
@@ -429,6 +459,7 @@ bool CDriverGL::unInit()
 		nwglDestroyPbufferARB(_PBuffer);
 		_PBuffer = NULL;
 	}
+#endif
 
 	if (_Registered && !UnregisterClassW(L"NLClass", GetModuleHandle(NULL)))
 	{
@@ -584,14 +615,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 #ifdef NL_OS_WINDOWS
 
 	// Init pointers
+#ifndef USE_OPENGLES
 	_PBuffer = NULL;
 	_hRC = NULL;
 	_hDC = NULL;
+#endif
 
 	// Driver caps.
 	//=============
 	// Retrieve the WGL extensions before init the driver.
-	int						pf;
 
 	// Offscreen mode ?
 	if (_CurrentMode.OffScreen)
@@ -630,7 +662,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_pfd.cAlphaBits	= 8;
 		}
 		_pfd.iLayerType	  = PFD_MAIN_PLANE;
-		pf=ChoosePixelFormat(tempHDC,&_pfd);
+		int pf=ChoosePixelFormat(tempHDC,&_pfd);
 		if (!pf)
 		{
 			nlwarning ("CDriverGL::setDisplay: ChoosePixelFormat failed");
@@ -673,7 +705,11 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		}
 
 		// Register WGL functions
+#ifdef USE_OPENGLES
+		registerEGlExtensions (_Extensions, tempHDC);
+#else
 		registerWGlExtensions (_Extensions, tempHDC);
+#endif
 
 		HDC hdc = wglGetCurrentDC ();
 
@@ -832,11 +868,19 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		_CurrentMode.Depth = uint8(GetDeviceCaps (_hDC, BITSPIXEL));
 
 		// Destroy the temp gl context
+#ifdef USE_OPENGLES
+		if (!eglDestroyContext(_EglDisplay, _EglContext);)
+		{
+			DWORD error = GetLastError ();
+			nlwarning ("CDriverGL::setDisplay: wglDeleteContext failed: 0x%x", error);
+		}
+#else
 		if (!wglDeleteContext (tempGLRC))
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL::setDisplay: wglDeleteContext failed: 0x%x", error);
 		}
+#endif
 
 		// Destroy the temp windows
 		if (!DestroyWindow (tmpHWND))
@@ -849,9 +893,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL::setDisplay: wglMakeCurrent failed: 0x%x", error);
+
+#ifdef USE_OPENGLES
+			eglDestroyContext(_EglDisplay, _EglContext);
+#else
 			wglDeleteContext (_hRC);
 			nwglReleasePbufferDCARB( _PBuffer, _hDC );
 			nwglDestroyPbufferARB( _PBuffer );
+#endif
+
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
 			_win = EmptyWindow;
@@ -876,43 +926,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		// associate OpenGL driver to window
 		SetWindowLongPtr(_win, GWLP_USERDATA, (LONG_PTR)this);
 
-
-		_hDC=GetDC(_win);
-		wglMakeCurrent(_hDC,NULL);
-
-		_CurrentMode.Depth = uint8(GetDeviceCaps(_hDC,BITSPIXEL));
-		// ---
-		memset(&_pfd,0,sizeof(_pfd));
-		_pfd.nSize        = sizeof(_pfd);
-		_pfd.nVersion     = 1;
-		_pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-		_pfd.iPixelType   = PFD_TYPE_RGBA;
-		_pfd.cColorBits   = _CurrentMode.Depth;
-		// Choose best suited Depth Buffer.
-		if(_CurrentMode.Depth <= 16)
-		{
-			_pfd.cDepthBits   = 16;
-		}
-		else
-		{
-			_pfd.cDepthBits = 24;
-			_pfd.cAlphaBits	= 8;
-			_pfd.cStencilBits = 8;
-		}
-		_pfd.iLayerType	  = PFD_MAIN_PLANE;
-		pf=ChoosePixelFormat(_hDC,&_pfd);
-		if (!pf)
-		{
-			return false;
-		}
-
-		if ( !SetPixelFormat(_hDC,pf,&_pfd) )
-		{
-			return false;
-		}
-		_hRC=wglCreateContext(_hDC);
-
-		wglMakeCurrent(_hDC,_hRC);
+		createContext();
 	}
 
 	/// release old emitter
@@ -1528,6 +1542,42 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		return false;
 	}
 
+	// normal window type
+	XChangeProperty(_dpy, window, XA_WM_WINDOW_TYPE, XA_ATOM, 32, PropModeReplace, (const unsigned char*)&XA_WM_WINDOW_TYPE_NORMAL, 1);
+
+	// set WM hints
+	XWMHints *wm_hints = XAllocWMHints();
+
+	if (wm_hints)
+	{
+		wm_hints->flags = StateHint | InputHint;
+		wm_hints->initial_state = NormalState;
+		wm_hints->input = True;
+
+		XSetWMHints(_dpy, window, wm_hints);
+		XFree(wm_hints);
+	}
+	else
+	{
+		nlwarning("3D: Couldn't allocate XWMHints");
+	}
+
+	// set class hints
+	XClassHint *class_hints = XAllocClassHint();
+
+	if (class_hints)
+	{
+		class_hints->res_name = (char*)"NeL";
+		class_hints->res_class = (char*)"nel";
+
+		XSetClassHint(_dpy, window, class_hints);
+		XFree(class_hints);
+	}
+	else
+	{
+		nlwarning("3D: Couldn't allocate XClassHint");
+	}
+
 #endif // NL_OS_UNIX
 
 	_win = window;
@@ -1557,7 +1607,19 @@ bool CDriverGL::destroyWindow()
 	std::vector<NLMISC::CBitmap> bitmaps;
 	setWindowIcon(bitmaps);
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+
+	if (_EglDisplay && _EglContext)
+	{
+		eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext);
+
+		if (_DestroyWindow)
+		{
+			eglDestroyContext(_EglDisplay, _EglContext);
+		}
+	}
+
+#elif defined(NL_OS_WINDOWS)
 
 	// Then delete.
 	// wglMakeCurrent(NULL,NULL);
@@ -1575,11 +1637,23 @@ bool CDriverGL::destroyWindow()
 	{
 		ReleaseDC(_win, _hDC);
 		_hDC = NULL;
-
-		// don't destroy window if it hasn't been created by our driver
-		if (_DestroyWindow)
-			DestroyWindow(_win);
 	}
+
+#elif defined(NL_OS_MAC)
+#elif defined(NL_OS_UNIX)
+
+	if (_DestroyWindow && _ctx)
+		glXDestroyContext(_dpy, _ctx);
+
+	_ctx = NULL;
+
+#endif
+
+#ifdef NL_OS_WINDOWS
+
+	// don't destroy window if it hasn't been created by our driver
+	if (_win && _DestroyWindow)
+		DestroyWindow(_win);
 
 #elif defined(NL_OS_MAC)
 
@@ -1596,16 +1670,8 @@ bool CDriverGL::destroyWindow()
 
 	_EventEmitter.closeIM();
 
-	if (_DestroyWindow)
-	{
-		if (_ctx)
-			glXDestroyContext(_dpy, _ctx);
-
-		if (_win)
-			XDestroyWindow(_dpy, _win);
-	}
-
-	_ctx = NULL;
+	if (_DestroyWindow && _win)
+		XDestroyWindow(_dpy, _win);
 
 	// Ungrab the keyboard (probably not necessary);
 //	XUnmapWindow(_dpy, _win);
@@ -2201,11 +2267,19 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 #elif defined (NL_OS_UNIX)
 
 #ifdef X_HAVE_UTF8_STRING
+	// UTF8 properties
 	Xutf8SetWMProperties (_dpy, _win, (char*)title.toUtf8().c_str(), (char*)title.toUtf8().c_str(), NULL, 0, NULL, NULL, NULL);
 #else
+	// standard properties
 	XTextProperty text_property;
-	XStringListToTextProperty((char**)&title.toUtf8().c_str(), 1, &text_property);
-	XSetWMProperties (_dpy, _win, &text_property, &text_property,  0, 0, NULL, 0, 0);
+	if (XStringListToTextProperty((char**)&title.toUtf8().c_str(), 1, &text_property) != 0)
+	{
+		XSetWMProperties (_dpy, _win, &text_property, &text_property,  NULL, 0, NULL, NULL, NULL);
+	}
+	else
+	{
+		nlwarning("3D: Can't convert title to TextProperty");
+	}
 #endif
 
 #endif // NL_OS_WINDOWS
@@ -2301,6 +2375,150 @@ emptyProc CDriverGL::getWindowProc()
 }
 
 // --------------------------------------------------
+bool CDriverGL::createContext()
+{
+#ifdef USE_OPENGLES
+	uint samples = 0;
+
+	if (_CurrentMode.AntiAlias > -1)
+	{
+		if (_CurrentMode.AntiAlias == 0)
+		{
+			samples = 4;
+		}
+		else
+		{
+			samples = _CurrentMode.AntiAlias;
+		}
+	}
+
+	EGLint attribList[] =
+	{
+		EGL_RED_SIZE,		8,
+		EGL_GREEN_SIZE,		8,
+		EGL_BLUE_SIZE,		8,
+		EGL_ALPHA_SIZE,		8,
+		EGL_DEPTH_SIZE,		16,
+		EGL_STENCIL_SIZE,	8,
+//		EGL_SAMPLE_BUFFERS,	_CurrentMode.AntiAlias > -1 ? 1:0,
+//		EGL_SAMPLES,		samples,
+		EGL_RENDERABLE_TYPE,
+		EGL_OPENGL_ES_BIT,
+		EGL_NONE
+	};
+
+	// Get Display
+	_EglDisplay = EGL_NO_DISPLAY; // eglGetDisplay(_hDC);
+
+	if (_EglDisplay == EGL_NO_DISPLAY)
+	{
+		_EglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+		if (_EglDisplay == EGL_NO_DISPLAY)
+		{
+			nlwarning("3D: failed to get display 0x%x", eglGetError());
+			return false;
+		}
+	}
+
+	// Initialize EGL
+	EGLint majorVersion;
+	EGLint minorVersion;
+
+	if (!eglInitialize(_EglDisplay, &majorVersion, &minorVersion))
+	{
+		return EGL_FALSE;
+	}
+
+	const char *extensions = eglQueryString(_EglDisplay, EGL_EXTENSIONS);
+
+
+	// Get configs
+	EGLint numConfigs;
+
+	if (!eglGetConfigs(_EglDisplay, NULL, 0, &numConfigs))
+	{
+		return false;
+	}
+
+	// Choose config
+	EGLConfig config = NULL;
+
+	if (!eglChooseConfig(_EglDisplay, attribList, &config, 1, &numConfigs))
+	{
+		return false;
+	}
+
+	// Create a surface
+	_EglSurface = eglCreateWindowSurface(_EglDisplay, config, (EGLNativeWindowType)_win, NULL);
+
+	if (_EglSurface == EGL_NO_SURFACE)
+	{
+		return false;
+	}
+
+	// Create a GL context
+	EGLint contextAttribs[] =
+	{
+		EGL_CONTEXT_CLIENT_VERSION, 1,
+		EGL_NONE
+	};
+
+	_EglContext = eglCreateContext(_EglDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+
+	if (_EglContext == EGL_NO_CONTEXT)
+	{
+		return false;
+	}   
+
+	// Make the context current
+	if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
+	{
+		return false;
+	}
+#elif defined(NL_OS_WINDOWS)
+	_hDC = GetDC(_win);
+	_CurrentMode.Depth = uint8(GetDeviceCaps(_hDC,BITSPIXEL));
+
+	wglMakeCurrent(_hDC,NULL);
+	// ---
+	memset(&_pfd,0,sizeof(_pfd));
+	_pfd.nSize        = sizeof(_pfd);
+	_pfd.nVersion     = 1;
+	_pfd.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+	_pfd.iPixelType   = PFD_TYPE_RGBA;
+	_pfd.cColorBits   = _CurrentMode.Depth;
+	// Choose best suited Depth Buffer.
+	if(_CurrentMode.Depth <= 16)
+	{
+		_pfd.cDepthBits   = 16;
+	}
+	else
+	{
+		_pfd.cDepthBits = 24;
+		_pfd.cAlphaBits	= 8;
+		_pfd.cStencilBits = 8;
+	}
+	_pfd.iLayerType	  = PFD_MAIN_PLANE;
+	int pf=ChoosePixelFormat(_hDC,&_pfd);
+	if (!pf)
+	{
+		return false;
+	}
+
+	if ( !SetPixelFormat(_hDC,pf,&_pfd) )
+	{
+		return false;
+	}
+	_hRC=wglCreateContext(_hDC);
+
+	wglMakeCurrent(_hDC,_hRC);
+#endif
+
+	return true;
+}
+
+// --------------------------------------------------
 bool CDriverGL::activate()
 {
 	H_AUTO_OGL(CDriverGL_activate);
@@ -2308,7 +2526,20 @@ bool CDriverGL::activate()
 	if (_win == EmptyWindow)
 		return false;
 
-#ifdef NL_OS_WINDOWS
+#ifdef USE_OPENGLES
+
+	EGLContext ctx = eglGetCurrentContext();
+
+	if (ctx != _EglContext)
+	{
+		// Make the context current
+		if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
+		{
+			return false;
+		}
+	}
+
+#elif defined(NL_OS_WINDOWS)
 
 	HGLRC hglrc = wglGetCurrentContext();
 
@@ -2327,7 +2558,7 @@ bool CDriverGL::activate()
 	if (nctx != NULL && nctx != _ctx)
 		glXMakeCurrent(_dpy, _win, _ctx);
 
-#endif // NL_OS_WINDOWS
+#endif // USE_OPENGLES
 
 	return true;
 }
@@ -2792,6 +3023,10 @@ bool CDriverGL::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<l
 	return true;
 }
 
+#endif
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
 #endif
 
 } // NL3D

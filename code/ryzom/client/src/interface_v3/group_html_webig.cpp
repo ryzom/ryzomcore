@@ -17,9 +17,10 @@
 #include "stdpch.h"
 
 #include "group_html_webig.h"
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "../client_cfg.h"
 #include "../user_entity.h"
+#include "../entities.h"
 #include "interface_manager.h"
 
 // used for login cookie to be sent to the web server
@@ -37,7 +38,7 @@ public:
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		string container = getParam (sParams, "name");
-		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(container));
+		CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(container));
 		if (groupHtml)
 		{
 			groupHtml->browse(groupHtml->Home.c_str());
@@ -55,7 +56,7 @@ static string getWebAuthKey()
 	// authkey = <sharid><name><cid><cookie>
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	string rawKey = toString(CharacterHomeSessionId) +
-		UserEntity->getDisplayName().toString() +
+		UserEntity->getLoginName().toString() +
 		toString(cid) +
 		NetMngr.getLoginCookie().toString();
 	string key = getMD5((const uint8*)rawKey.c_str(), (uint32)rawKey.size()).toString();
@@ -64,18 +65,72 @@ static string getWebAuthKey()
 	return key;
 }
 
-void addWebIGParams (string &url)
+void addWebIGParams (string &url, bool trustedDomain)
 {
 	if(!UserEntity || !NetMngr.getLoginCookie().isValid()) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
 	url += ((url.find('?') != string::npos) ? "&" : "?") +
 		string("shardid=") + toString(CharacterHomeSessionId) +
-		string("&name=") + UserEntity->getDisplayName().toUtf8() +
-		string("&cid=") + toString(cid) + 
-		string("&authkey=") + getWebAuthKey() +
-		string("&ig=1") +
-		string("&lang=") + CI18N::getCurrentLanguageCode();
+		string("&name=") + UserEntity->getLoginName().toUtf8() +
+		string("&lang=") + CI18N::getCurrentLanguageCode() +
+		string("&datasetid=") + toString(UserEntity->dataSetId()) +
+		string("&ig=1");
+	if (trustedDomain)
+	{
+		url += string("&cid=") + toString(cid) +
+		string("&authkey=") + getWebAuthKey();
+		
+		if (url.find('$') != string::npos)
+		{
+			strFindReplace(url, "$gender$", GSGENDER::toString(UserEntity->getGender()));
+			strFindReplace(url, "$displayName$", UserEntity->getDisplayName().toString());
+			strFindReplace(url, "$posx$", toString(UserEntity->pos().x));
+			strFindReplace(url, "$posy$", toString(UserEntity->pos().y));
+			strFindReplace(url, "$posz$", toString(UserEntity->pos().z));
+			strFindReplace(url, "$post$", toString(atan2(UserEntity->front().y, UserEntity->front().x)));
+			
+			// Target fields
+			const char *dbPath = "UI:VARIABLES:TARGET:SLOT";
+			CInterfaceManager *im = CInterfaceManager::getInstance();
+			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
+			if (node && (uint8)node->getValue32() != (uint8) CLFECOMMON::INVALID_SLOT)
+			{
+				CEntityCL *target = EntitiesMngr.entity((uint) node->getValue32());
+				if (target)
+				{
+					strFindReplace(url, "$tdatasetid$", toString(target->dataSetId()));
+					strFindReplace(url, "$tdisplayName$", target->getDisplayName().toString());
+					strFindReplace(url, "$tposx$", toString(target->pos().x));
+					strFindReplace(url, "$tposy$", toString(target->pos().y));
+					strFindReplace(url, "$tposz$", toString(target->pos().z));
+					strFindReplace(url, "$tpost$", toString(atan2(target->front().y, target->front().x)));
+					strFindReplace(url, "$tsheet$", target->sheetId().toString());
+					string type;
+					if (target->isFauna())
+						type = "fauna";
+					else if (target->isNPC())
+						type = "npc";
+					else if (target->isPlayer())
+						type = "player";
+					else if (target->isUser())
+						type = "user";
+					strFindReplace(url, "$ttype$", target->sheetId().toString());
+				}
+				else
+				{
+					strFindReplace(url, "$tdatasetid$", "");
+					strFindReplace(url, "$tdisplayName$", "");
+					strFindReplace(url, "$tposx$", "");
+					strFindReplace(url, "$tposy$", "");
+					strFindReplace(url, "$tposz$", "");
+					strFindReplace(url, "$tpost$", "");
+					strFindReplace(url, "$tsheet$", "");
+					strFindReplace(url, "$ttype$", "");
+				}
+			}
+		}
+	}
 }
 
 // ***************************************************************************
@@ -140,11 +195,11 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if(pIM)
 			{
-				CCDBNodeLeaf *_CheckMailNode = pIM->getDbProp("UI:VARIABLES:MAIL_WAITING");
+				CCDBNodeLeaf *_CheckMailNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIL_WAITING");
 				if(_CheckMailNode)
 				{
 					_CheckMailNode->setValue32(nbmail==0?0:1);
-					CInterfaceElement *elm = pIM->getElementFromId("ui:interface:compass:mail:mail_nb");
+					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:mail:mail_nb");
 					if (elm)
 					{
 						CViewText *vt = dynamic_cast<CViewText*>(elm);
@@ -167,11 +222,11 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			if(pIM)
 			{
-				CCDBNodeLeaf *_CheckForumNode = pIM->getDbProp("UI:VARIABLES:FORUM_UPDATED");
+				CCDBNodeLeaf *_CheckForumNode = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:FORUM_UPDATED");
 				if(_CheckForumNode)
 				{
 					_CheckForumNode->setValue32(nbforum==0?0:1);
-					CInterfaceElement *elm = pIM->getElementFromId("ui:interface:compass:forum:forum_nb");
+					CInterfaceElement *elm = CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:forum:forum_nb");
 					if (elm)
 					{
 						CViewText *vt = dynamic_cast<CViewText*>(elm);
@@ -203,9 +258,8 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		nlSleep(1*60*1000);
 		while (true)
 		{
-			string url = "http://atys.ryzom.com/start/index.php?app=notif&rnd="+randomString();
-			//string url = "http://ryapp.bmsite.net/app_mail.php?page=ajax/inbox/unread&rnd="+randomString();
-			addWebIGParams(url);
+			string url = "http://"+ClientCfg.WebIgMainDomain+"/index.php?app=notif&rnd="+randomString();
+			addWebIGParams(url, true);
 			get(url);
 			nlSleep(10*60*1000);
 		}
@@ -232,10 +286,65 @@ void startWebigNotificationThread()
 
 
 // ***************************************************************************
+NLMISC_REGISTER_OBJECT(CViewBase, CGroupHTMLAuth, std::string, "auth_html");
+
+CGroupHTMLAuth::CGroupHTMLAuth(const TCtorParam &param)
+: CGroupHTML(param)
+{
+}
+
+// ***************************************************************************
+
+CGroupHTMLAuth::~CGroupHTMLAuth()
+{
+}
+
+void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
+{
+	addWebIGParams(url, trustedDomain);
+}
+
+// ***************************************************************************
+
+void CGroupHTMLAuth::addHTTPPostParams (HTAssocList *formfields, bool trustedDomain)
+{
+	if(!UserEntity) return;
+
+	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
+	HTParseFormInput(formfields, ("shardid="+toString(CharacterHomeSessionId)).c_str());
+	HTParseFormInput(formfields, ("name="+UserEntity->getLoginName().toUtf8()).c_str());
+	HTParseFormInput(formfields, ("lang="+CI18N::getCurrentLanguageCode()).c_str());
+	HTParseFormInput(formfields, "ig=1");
+	if (trustedDomain)
+	{
+		HTParseFormInput(formfields, ("cid="+toString(cid)).c_str());
+		HTParseFormInput(formfields, ("authkey="+getWebAuthKey()).c_str());
+	}
+}
+
+// ***************************************************************************
+
+string CGroupHTMLAuth::home ()
+{
+	return Home;
+}
+
+// ***************************************************************************
+
+void CGroupHTMLAuth::handle ()
+{
+	CGroupHTML::handle ();
+}
+
+// ***************************************************************************
+// ***************************************************************************
+
+
+// ***************************************************************************
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupHTMLWebIG, std::string, "webig_html");
 
 CGroupHTMLWebIG::CGroupHTMLWebIG(const TCtorParam &param)
-: CGroupHTML(param)
+: CGroupHTMLAuth(param)
 {
 	startWebigNotificationThread();
 }
@@ -246,24 +355,18 @@ CGroupHTMLWebIG::~CGroupHTMLWebIG()
 {
 }
 
-void CGroupHTMLWebIG::addHTTPGetParams (string &url)
+// ***************************************************************************
+
+void CGroupHTMLWebIG::addHTTPGetParams (string &url, bool trustedDomain)
 {
-	addWebIGParams(url);
+	CGroupHTMLAuth::addHTTPGetParams(url, trustedDomain);
 }
 
 // ***************************************************************************
 
-void CGroupHTMLWebIG::addHTTPPostParams (HTAssocList *formfields)
+void CGroupHTMLWebIG::addHTTPPostParams (HTAssocList *formfields, bool trustedDomain)
 {
-	if(!UserEntity) return;
-
-	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
-	HTParseFormInput(formfields, ("shardid="+toString(CharacterHomeSessionId)).c_str());
-	HTParseFormInput(formfields, ("name="+UserEntity->getDisplayName().toUtf8()).c_str());
-	HTParseFormInput(formfields, ("cid="+toString(cid)).c_str());
-	HTParseFormInput(formfields, ("authkey="+getWebAuthKey()).c_str());
-	HTParseFormInput(formfields, "ig=1");
-	HTParseFormInput(formfields, ("lang="+CI18N::getCurrentLanguageCode()).c_str());
+	CGroupHTMLAuth::addHTTPPostParams(formfields, trustedDomain);
 }
 
 // ***************************************************************************
@@ -277,8 +380,6 @@ string CGroupHTMLWebIG::home ()
 
 void CGroupHTMLWebIG::handle ()
 {
-//	Home = "http://atys.ryzom.com/start/index.php";
-	CGroupHTML::handle ();
+	CGroupHTMLAuth::handle ();
 }
 
-// ***************************************************************************

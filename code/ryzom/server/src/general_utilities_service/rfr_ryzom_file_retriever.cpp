@@ -472,7 +472,11 @@ bool CRyzomFileRetrieverImplementation::downloadBackupFiles(const CSString& shar
 			continue;
 
 		// generate a local filename for the downloaded file
-		CSString localFileName= NLMISC::CPath::standardizePath(localDirectory)+(fileName+"_"+fdc[i].FileName.replace("/","_")).replace(".","_");
+		CSString fdcFileNameUnderscore = fdc[i].FileName;
+		fdcFileNameUnderscore = fdcFileNameUnderscore.replace("/","_");
+		CSString localFileNameWithoutPath = fileName + "_" + fdcFileNameUnderscore;
+		localFileNameWithoutPath = localFileNameWithoutPath.replace(".","_");
+		CSString localFileName = NLMISC::CPath::standardizePath(localDirectory) + localFileNameWithoutPath;
 		nlinfo("Requesting file download: REMOTE:%s => LOCAL:%s",fdc[i].FileName.c_str(),localFileName.c_str());
 
 		// put in a request for the file to be retrieved

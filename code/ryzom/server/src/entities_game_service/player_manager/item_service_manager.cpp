@@ -48,7 +48,7 @@ CItemServiceManager * CItemServiceManager::_Instance = NULL;
 /**
  * Base class for persistent item service providers (ISP)
  * WARNING: this class should never modify client->getPersistentItemServices() vector (only CItemServiceManager should do)
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2005
  */
@@ -76,7 +76,7 @@ private:
 /**
  * Base class for item service providers
  * WARNING: this class should never modify client->getPersistentItemServices() vector (only CItemServiceManager should do)
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2005
  */

@@ -15,7 +15,7 @@ extern int		sbmParams[4];
 extern DWORD	sbsParams[3];
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-BOOL CALLBACK SelectByMatDlgProc(
+INT_PTR CALLBACK SelectByMatDlgProc(
 		HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
 	static int *param;
@@ -84,7 +84,7 @@ void SetSmoothButtonState(HWND hWnd, DWORD bits, DWORD invalid, DWORD unused = 0
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-BOOL CALLBACK SelectBySmoothDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
+INT_PTR CALLBACK SelectBySmoothDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 {
 	static DWORD *param;
 	switch (msg)
@@ -137,9 +137,9 @@ BOOL CALLBACK SelectBySmoothDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-BOOL CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	EditPatchMod *ep =(EditPatchMod *)GetWindowLong(hDlg, GWL_USERDATA);
+	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
 	
@@ -150,7 +150,7 @@ BOOL CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hTilePanel = hDlg;
-			SetWindowLong(hDlg, GWL_USERDATA, (LONG)ep);
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 			ep->tileNum = SetupIntSpinner(hDlg, IDC_TILE_MAT_SPIN, IDC_TILE_MAT, 0, 65535, 0);
 			ep->tileRot = SetupIntSpinner(hDlg, IDC_TILE_ROT_SPIN, IDC_TILE_ROT, 0, 3, 0);
 			ep->SetTileDlgEnables();
@@ -249,9 +249,9 @@ BOOL CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-BOOL CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	EditPatchMod *ep =(EditPatchMod *)GetWindowLong(hDlg, GWL_USERDATA);
+	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
 	
@@ -262,7 +262,7 @@ BOOL CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hEdgePanel = hDlg;
-			SetWindowLong(hDlg, GWL_USERDATA, (LONG)ep);
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 			ep->SetEdgeDlgEnables();
 			return TRUE;
 			}
@@ -324,9 +324,9 @@ BOOL CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-BOOL CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	EditPatchMod *ep =(EditPatchMod *)GetWindowLong(hDlg, GWL_USERDATA);
+	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
 	
@@ -339,7 +339,7 @@ BOOL CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
 			for (int i = IDC_SMOOTH_GRP1; i < IDC_SMOOTH_GRP1 + 32; i++)
  				SendMessage(GetDlgItem(hDlg, i), CC_COMMAND, CC_CMD_SET_TYPE, CBT_CHECK);
- 			SetWindowLong(hDlg, GWL_USERDATA, (LONG)ep);		 	
+ 			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
  			ep->matSpin = SetupIntSpinner(hDlg, IDC_MAT_IDSPIN, IDC_MAT_ID, 1, MAX_MATID, 0);
  			ep->tessUSpin = SetupIntSpinner(hDlg, IDC_TESS_U_SPIN, IDC_TESS_U2, 1, 4, RPO_DEFAULT_TESSEL);
  			ep->tessVSpin = SetupIntSpinner(hDlg, IDC_TESS_V_SPIN, IDC_TESS_V2, 1, 4, RPO_DEFAULT_TESSEL);

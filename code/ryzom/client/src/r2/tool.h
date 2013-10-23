@@ -21,13 +21,19 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/array_2d.h"
 //
-#include "../interface_v3/interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "game_share/scenario_entry_points.h"
 //
 
 class CInterfaceManager;
-class CEventDescriptor;
-class CLuaObject;
+
+namespace NLGUI
+{
+	class CEventDescriptor;
+	class CLuaObject;
+	class CGroupContainer;
+}
+
 class CGroupMap;
 
 namespace NLMISC
@@ -119,7 +125,7 @@ public:
 	  *
 	  * \return true if the event has been handled by the tool
 	  */
-	virtual	bool handleEvent (const CEventDescriptor &eventDesc);
+	virtual	bool handleEvent (const NLGUI::CEventDescriptor &eventDesc);
 	//
 	virtual void onFocusGained() {} // the app window gained the focus (there's no 'focus lost' event here because it reset current tool, so 'CTooll::cancel' will be called instead)
 									// IMPORTANT :  Reacting to this should be unnecessary, as lost focus reset the current tool,
@@ -278,6 +284,7 @@ private:
 	sint64  _AutoPanDelay;
 	sint64  _NumPans;
 	static bool _MouseCaptured;
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _UserCharFade;
 private:
 	/** compute the nearest valid surface at a given position from the island heightmap
 	  * (heightmap must not be empty or an assertion is raised)

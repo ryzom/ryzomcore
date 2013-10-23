@@ -20,7 +20,7 @@
 
 #include "dbctrl_sheet.h"
 #include "interface_manager.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "../sheet_manager.h"
 #include "../client_sheets/entity_sheet.h"
 #include "../client_sheets/pact_sheet.h"
@@ -30,7 +30,7 @@
 #include "game_share/inventories.h"
 #include "list_sheet_base.h"
 #include "../string_manager_client.h"
-#include "interface_options.h"
+#include "nel/gui/interface_options.h"
 #include "inventory_manager.h"
 #include "skill_manager.h"
 #include "../user_entity.h"
@@ -43,10 +43,14 @@
 #include "sbrick_manager.h"
 #include "sphrase_manager.h"
 #include "../client_sheets/sphrase_sheet.h"
-#include "game_share/xml_auto_ptr.h"
-#include "lua_ihm.h"
+#include "nel/misc/xml_auto_ptr.h"
+#include "nel/gui/lua_ihm.h"
+#include "lua_ihm_ryzom.h"
+#include "game_share/bot_chat_types.h"
 
 #include "../r2/editor.h"
+
+#include "nel/gui/lua_manager.h"
 
 extern CSheetManager SheetMngr;
 
@@ -58,7 +62,6 @@ using namespace STRING_MANAGER;
 NLMISC::CSmartPtr<CSPhraseComAdpater> CDBCtrlSheet::_PhraseAdapter;
 
 CDBCtrlSheet *CDBCtrlSheet::_CurrSelection = NULL;
-CDBCtrlSheet *CDBCtrlSheet::_LastDraggedSheet = NULL;
 CDBCtrlSheet *CDBCtrlSheet::_CurrMenuSheet = NULL;
 UMaterial CDBCtrlSheet::_GuildMat;
 
@@ -100,12 +103,12 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 
 	// delegate setup of context he help ( & window ) to lua		
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CLuaState *ls= im->getLuaState();
+	CLuaState *ls= CLuaManager::getInstance().getLuaState();
 	{
 		CLuaStackRestorer lsr(ls, 0);
 
 		CLuaIHM::pushReflectableOnStack(*ls, (CReflectableRefPtrTarget *)ctrlSheet);
-		ls->pushValue(LUA_GLOBALSINDEX);	
+		ls->pushGlobalTable();
 		CLuaObject game(*ls);
 		game = game["game"];		
 		game.callMethodByNameNoThrow(luaMethodName.c_str(), 1, 1);
@@ -123,6 +126,14 @@ ucstring CControlSheetTooltipInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet, 
 
 	return help;
 }
+
+// ***************************************************************************
+int CDBCtrlSheet::luaGetDraggedSheet(CLuaState &ls)
+{
+	CLuaIHM::pushUIOnStack(ls, dynamic_cast<CInterfaceElement *>( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) ));
+	return 1;
+}
+
 // ***************************************************************************
 int CDBCtrlSheet::luaGetHpBuff(CLuaState &ls)
 {
@@ -179,6 +190,62 @@ int CDBCtrlSheet::luaGetName(CLuaState &ls)
 	return 1;
 }
 
+// **********************************************************************************************************
+class LuaInfoWaiter : public IItemInfoWaiter
+{
+public:
+	volatile bool done;
+
+public:
+	virtual void infoReceived();
+};
+
+
+void LuaInfoWaiter::infoReceived()
+{
+	getInventory().removeItemInfoWaiter(this);
+	this->done = true;
+}
+
+static LuaInfoWaiter luaInfoWaiter;
+
+// ***************************************************************************
+int CDBCtrlSheet::luaGetCreatorName(CLuaState &ls)
+{
+	uint32	itemSlotId = getInventory().getItemSlotId(this);
+	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
+	ucstring creatorName;
+	STRING_MANAGER::CStringManagerClient::instance()->getString(itemInfo.CreatorName, creatorName);
+	CLuaIHM::push(ls, creatorName);
+	
+	return 1;
+}
+
+// ***************************************************************************
+int CDBCtrlSheet::luaWaitInfo(CLuaState &ls)
+{
+	static bool sent = false;
+	CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
+	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
+	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
+
+	if (sent || itemInfo.versionInfo != 0)
+	{
+		ls.push((bool)(luaInfoWaiter.done));
+		if (luaInfoWaiter.done)
+			sent = false;
+		return luaInfoWaiter.done ? 1 : 0;
+	}
+	else
+	{
+		luaInfoWaiter.ItemSlotId = itemSlotId;
+		luaInfoWaiter.ItemSheet = this->getSheetId();
+		luaInfoWaiter.done = false;
+		getInventory().addItemInfoWaiter(&luaInfoWaiter);
+		sent = true;
+	}
+	return 0;
+}
 
 // ***************************************************************************
 int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
@@ -198,7 +265,7 @@ int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 	{
 		//if ( ! (pBM->getBrick(itemInfo.Enchantment.Bricks[i])->isCredit() || pBM->getBrick(itemInfo.Enchantment.Bricks[i])->isParameter()))
 		{
-			CCDBNodeLeaf	*node= pIM->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick++));
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick++));
 			if(node)
 				node->setValue32(itemInfo.Enchantment.Bricks[i].asInt());
 		}
@@ -208,7 +275,7 @@ int CDBCtrlSheet::luaBuildCrystallizedSpellListBrick(CLuaState &ls)
 	// Reset other to 0.
 	for(;;currentBrick++)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:VARIABLES:CRYSTALBRICKS:%d:SHEET", currentBrick), false);
 		if(node)
 			node->setValue32(0);
 		else
@@ -225,7 +292,6 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 {
 	_Type = CCtrlSheetInfo::SheetType_Item;
 	_DispNoSheetBmpId = -1;
-	_Dragable = false;
 	_InterfaceColor= true;
 	_SheetSelectionGroup = -1;
 	_UseQuality = true;
@@ -250,6 +316,7 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 
 void CDBCtrlSheet::release ()
 {
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	if (Driver)
 		Driver->deleteMaterial(_GuildMat);
 
@@ -298,7 +365,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	{
 		string TxName = (const char *) prop;
 		TxName = strlwr (TxName);
-		CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
 
@@ -310,22 +377,19 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	if (prop)
 		_HasTradeSlotType= CInterfaceElement::convertBool(prop);
 
-	prop = (char*) xmlGetProp( cur, (xmlChar*)"dragable" );
-	if (prop) _Dragable = CInterfaceElement::convertBool(prop);
-
 	// Read Action handlers
-	parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
-	parseAH(cur, "onclick_r", "params_r", _AHOnRightClick, _AHRightClickParams);
-	parseAH(cur, "oncandrop", "params_candrop", _AHOnCanDrop, _AHCanDropParams);
-	parseAH(cur, "ondrop", "params_drop", _AHOnDrop, _AHDropParams);
-	parseAH(cur, "oncannotdrop", "params_cannotdrop", _AHOnCannotDrop, _AHCannotDropParams);
-	parseAH(cur, "oncandrag", "params_candrag", _AHOnCanDrag, _AHCanDragParams);
-	parseAH(cur, "ondrag", "params_drag", _AHOnDrag, _AHDragParams);
+	CAHManager::getInstance()->parseAH(cur, "onclick_l", "params_l", _AHOnLeftClick, _AHLeftClickParams);
+	CAHManager::getInstance()->parseAH(cur, "onclick_r", "params_r", _AHOnRightClick, _AHRightClickParams);
+	CAHManager::getInstance()->parseAH(cur, "oncandrop", "params_candrop", _AHOnCanDrop, _AHCanDropParams);
+	CAHManager::getInstance()->parseAH(cur, "ondrop", "params_drop", _AHOnDrop, _AHDropParams);
+	CAHManager::getInstance()->parseAH(cur, "oncannotdrop", "params_cannotdrop", _AHOnCannotDrop, _AHCannotDropParams);
+	CAHManager::getInstance()->parseAH(cur, "oncandrag", "params_candrag", _AHOnCanDrag, _AHCanDragParams);
+	CAHManager::getInstance()->parseAH(cur, "ondrag", "params_drag", _AHOnDrag, _AHDragParams);
 
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"selection_group" );
 	if (prop)
 	{
-		const CCtrlSheetSelection &css = CInterfaceManager::getInstance()->getCtrlSheetSelection();
+		const CCtrlSheetSelection &css = CWidgetManager::getInstance()->getParser()->getCtrlSheetSelection();
 		_SheetSelectionGroup = css.getGroupIndex((const char *) prop);
 		if (_SheetSelectionGroup == -1)
 		{
@@ -433,8 +497,8 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 NLMISC_REGISTER_OBJECT(CViewBase, CDBCtrlSheet, std::string, "sheet");
 
 // ----------------------------------------------------------------------------
-CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param)
-:	CCtrlBase(param)
+CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param) :
+CCtrlDraggable(param)
 {
 	_LastSheetId = 0;
 	_DispSlotBmpId= -1;
@@ -442,7 +506,6 @@ CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param)
 	_DispSheetBmpId = -1;
 	_DispOverBmpId = -1;
 	_DispOver2BmpId= -1;
-	_Draging = false;
 	_CanDrop = false;
 	_Stackable= 1;
 	_DispQuality= -1;
@@ -489,6 +552,8 @@ CDBCtrlSheet::CDBCtrlSheet(const TCtorParam &param)
 // ----------------------------------------------------------------------------
 CDBCtrlSheet::~CDBCtrlSheet()
 {
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
+
 	if (_GuildBack)
 	{
 		if (Driver)
@@ -504,7 +569,8 @@ CDBCtrlSheet::~CDBCtrlSheet()
 
 	// ensure erase static
 	if(this==_CurrMenuSheet)		_CurrMenuSheet = NULL;
-	if(this==_LastDraggedSheet)		_LastDraggedSheet = NULL;
+	if(this == dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) )
+		setDraggedSheet( NULL );
 	if(this==_CurrSelection)		_CurrSelection = NULL;
 }
 
@@ -523,6 +589,12 @@ bool CDBCtrlSheet::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	// parse the common ctrl info
 	if(!parseCtrlInfo(cur, parentGroup))
 		return false;
+
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"dragable" );
+	if (prop)
+		setDraggable( CInterfaceElement::convertBool(prop) );
+	else
+		setDraggable( false );
 
 	if (_Type != SheetType_Macro)
 	{
@@ -585,7 +657,7 @@ void CDBCtrlSheet::initSheet(const std::string &dbBranchId, const CCtrlSheetInfo
 
 		// get over for spell
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		_TextureIdOver = pIM->getViewRenderer().getTextureIdFromName ("w_slot_spell_over.tga");
+		_TextureIdOver = CViewRenderer::getInstance()->getTextureIdFromName ("w_slot_spell_over.tga");
 	}
 
 	// Init size.
@@ -611,7 +683,7 @@ void CDBCtrlSheet::initSheetFast( const std::string &dbParentBranchId, int sheet
 
 		// get over for spell
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		_TextureIdOver = pIM->getViewRenderer().getTextureIdFromName ("w_slot_spell_over.tga");
+		_TextureIdOver = CViewRenderer::getInstance()->getTextureIdFromName ("w_slot_spell_over.tga");
 	}
 
 	// Init size.
@@ -676,7 +748,7 @@ void CDBCtrlSheet::setupSheetDbLinks ()
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 	// link to the DBBranch (NB: none for macros)
-	CCDBNodeBranch *dbBranch = pIM->getDbBranch( _DbBranchName );
+	CCDBNodeBranch *dbBranch = NLGUI::CDBManager::getInstance()->getDbBranch( _DbBranchName );
 	//nlassert(dbBranch || _DbBranchName.empty());
 
 	// link if possible with the database, else dummy link to the interface
@@ -873,7 +945,7 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 void CDBCtrlSheet::initSheetSize()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	// If the user type is auto, then select always item slot.
 	if(_Type==SheetType_Auto)
 	{
@@ -959,7 +1031,7 @@ void CDBCtrlSheet::updateCoords ()
 void CDBCtrlSheet::updateIconSize()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	if (_DispSheetBmpId != -1)
 	{
 		rVR.getTextureSizeFromId(_DispSheetBmpId, _IconW, _IconH);
@@ -991,7 +1063,7 @@ void CDBCtrlSheet::setupPact()
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_LastSheetId = sheet;
 		CSheetId sheetId(sheet);
@@ -1034,7 +1106,7 @@ void CDBCtrlSheet::setupItem ()
 	// If this is the same sheet, need to resetup
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_NeedSetup= false;
 		_LastSheetId = sheet;
@@ -1231,7 +1303,7 @@ void CDBCtrlSheet::setupMacro()
 	if (!_NeedSetup) return;
 
 	// compute from OptString
-	setupCharBitmaps(24, 4);
+	setupCharBitmaps(26, 4, 5);
 
 	_NeedSetup = false;
 
@@ -1253,7 +1325,7 @@ void CDBCtrlSheet::setupMission()
 		CMissionIconSheet *pMIS = (CMissionIconSheet*)pES;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_DispBackBmpId  = rVR.getTextureIdFromName(pMIS->MainIconBg);
 		_DispSheetBmpId = rVR.getTextureIdFromName(pMIS->MainIconFg);
@@ -1303,6 +1375,8 @@ void CDBCtrlSheet::setupGuildFlag ()
 
 		sint8 nLastGuildBack =	(sint8)(_MacroID&15);		// 4 bits en pos 0
 		sint8 nLastGuildSymbol = (sint8)((_MacroID>>4)&63);	// 6 bits en pos 4
+
+		NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 
 		if (_GuildMat.empty())
 		{
@@ -1381,7 +1455,7 @@ void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet)
 {
 	// Setup with the param sheet
 	CSBrickManager *pBM = CSBrickManager::getInstance();
-	CViewRenderer &rVR = CInterfaceManager::getInstance()->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
  	CSBrickSheet *pBR = pBM->getBrick (CSheetId(sheet));
 	CSBrickSheet *pBROpt = pBM->getBrick (CSheetId(optSheet));
@@ -1495,8 +1569,8 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 		{
 			// recompute text
 			_OptString= iconName;
-			// compute from OptString. Allow only 1 line and 4 chars
-			setupCharBitmaps(24, 1, 4);
+			// compute from OptString. Allow only 1 line and 5 chars
+			setupCharBitmaps(26, 1, 5);
 		}
 	}
 }
@@ -1589,7 +1663,7 @@ void CDBCtrlSheet::setupOutpostBuilding()
 	// If this is the same sheet, need to resetup
 	if (_LastSheetId != sheet || _NeedSetup)
 	{
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 		_NeedSetup= false;
 		_LastSheetId = sheet;
@@ -1674,7 +1748,7 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar
 	// Use the optString for the Macro name
 	_OptString = strlwr(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	_CharBitmaps.clear();
 
@@ -1731,7 +1805,7 @@ void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar
 void CDBCtrlSheet::displayCharBitmaps(sint32 rdrLayer, sint32 x, sint32 y, CRGBA color)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	for (uint i = 0; i < _CharBitmaps.size(); ++i)
 	{
@@ -1747,7 +1821,7 @@ void CDBCtrlSheet::draw()
 	H_AUTO( RZ_Interface_CDBCtrlSheet_draw )
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CRGBA color = CRGBA(255,255,255,255);
 
 	if (_Type != SheetType_Macro)
@@ -1763,7 +1837,7 @@ void CDBCtrlSheet::draw()
 	// Manage over for brick
 	if( _BrickOverable && (isMacro() || isSBrickOrSPhraseId() || isSPhrase()) )
 	{
-		const vector<CCtrlBase*> &rVB = pIM->getCtrlsUnderPointer ();
+		const vector<CCtrlBase*> &rVB = CWidgetManager::getInstance()->getCtrlsUnderPointer ();
 		uint32 i;
 		for (i = 0; i < rVB.size(); ++i)
 		if (rVB[i] == this)
@@ -1778,40 +1852,48 @@ void CDBCtrlSheet::draw()
 
 	// Display slot
 	if (_DrawSlot)
-		rVR.draw11RotFlipBitmap (_RenderLayer, _XReal, _YReal, 0, false, _DispSlotBmpId, pIM->getGlobalColorForContent());
+		rVR.draw11RotFlipBitmap (_RenderLayer, _XReal, _YReal, 0, false, _DispSlotBmpId, CWidgetManager::getInstance()->getGlobalColorForContent());
 
 	// Drag'N'Drop : display the selected slot bitmap if this slot accept the currently dragged element
 	_CanDrop = false;
 	if (_AHOnCanDrop != NULL)
-	if ((pIM->getCapturePointerLeft() != NULL) && (pIM->getCapturePointerLeft() != this))
+	if ((CWidgetManager::getInstance()->getCapturePointerLeft() != NULL) && (CWidgetManager::getInstance()->getCapturePointerLeft() != this))
 	{
-		if ((pIM->getPointer()->getX() >= _XReal) &&
-			(pIM->getPointer()->getX() < (_XReal + _WReal))&&
-			(pIM->getPointer()->getY() > _YReal) &&
-			(pIM->getPointer()->getY() <= (_YReal+ _HReal)))
-		if (pIM->getCurrentWindowUnder() == pIM->getWindow(this))
+		if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
+			(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
+			(CWidgetManager::getInstance()->getPointer()->getY() > _YReal) &&
+			(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
+		if (CWidgetManager::getInstance()->getCurrentWindowUnder() == CWidgetManager::getInstance()->getWindow(this))
 		{
-			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pIM->getCapturePointerLeft());
-			if ((pCSSrc != NULL) && pCSSrc->isDraging())
+			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
+			if ((pCSSrc != NULL) && pCSSrc->isDragged())
 			{
 				string params = string("src=") + pCSSrc->getId();
 				if (!_AHCanDropParams.empty())
 				{
-					string sTmp = _AHCanDropParams;
-					params = sTmp + "|" + params;
+					if ( CAHManager::getInstance()->getAHName(_AHOnCanDrop) == "lua")
+					{
+						params = _AHCanDropParams;
+						strFindReplace(params, "%src", pCSSrc->getId());
+					}
+					else
+					{
+						string sTmp = _AHCanDropParams;
+						params = sTmp + "|" + params;
+					}
 				}
-				pIM->runActionHandler (_AHOnCanDrop, this, params);
+				CAHManager::getInstance()->runActionHandler (_AHOnCanDrop, this, params);
 			}
 		}
 	}
 
-	drawSheet (_XReal+1, _YReal+1, _Draging);
+	drawSheet (_XReal+1, _YReal+1, isDragged() );
 
 	// Draw the selection after the sheet. Important for spells because selection border is same size as spell square
 	if (_CanDrop)
 	{
 		// decal layer because must drawn after Items/Brick in DXTC
-		rVR.draw11RotFlipBitmap (_RenderLayer+1, _XReal, _YReal, 0, false, _DispSelSlotId, pIM->getGlobalColorForContent());
+		rVR.draw11RotFlipBitmap (_RenderLayer+1, _XReal, _YReal, 0, false, _DispSelSlotId, CWidgetManager::getInstance()->getGlobalColorForContent());
 	}
 
 	if (_RegenTickRange.EndTick != _RegenTickRange.StartTick)
@@ -2010,24 +2092,24 @@ static inline CRGBA	fastMulRGB(CRGBA sheetColor, CRGBA iconColor)
 void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelectionBorder /*= true*/)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	// The sheet is the slot-2
 	sint32	wSheet= _WReal-2;
 	sint32	hSheet= _HReal-2;
 
 	// the sheet color is modulated by GlobalAlpha, but not by global RGB
 	CRGBA	curSheetColor= _SheetColor;
-	curSheetColor.A= ( (pIM->getGlobalColorForContent().A+1) * _SheetColor.A )>>8;
+	curSheetColor.A= ( (CWidgetManager::getInstance()->getGlobalColorForContent().A+1) * _SheetColor.A )>>8;
 	// The "disp with no sheet" case is a bit different
 	CRGBA	curNoSheetColor;
 	if(_InterfaceColor)
-		curNoSheetColor= pIM->getGlobalColorForContent();
+		curNoSheetColor= CWidgetManager::getInstance()->getGlobalColorForContent();
 	else
-		curNoSheetColor= CRGBA(255,255,255, pIM->getGlobalColorForContent().A);
+		curNoSheetColor= CRGBA(255,255,255, CWidgetManager::getInstance()->getGlobalColorForContent().A);
 
 	// The gray color
-	CRGBA	grayColor= pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetGrayColor).getValColor();
-	CRGBA	redifyColor= pIM->getSystemOption(CInterfaceManager::OptionCtrlSheetRedifyColor).getValColor();
+	CRGBA	grayColor= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetGrayColor).getValColor();
+	CRGBA	redifyColor= CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionCtrlSheetRedifyColor).getValColor();
 
 	// The color of the number.
 	CRGBA	numberColor;
@@ -2035,12 +2117,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 	{
 		// do not modulate color for redifyed color
 		numberColor= redifyColor;
-		numberColor.A= (uint8)(((uint32)redifyColor.A * (pIM->getGlobalColorForContent().A+1))>>8);
+		numberColor.A= (uint8)(((uint32)redifyColor.A * (CWidgetManager::getInstance()->getGlobalColorForContent().A+1))>>8);
 	}
 	else if(_Grayed)
-		numberColor.modulateFromColor(grayColor, pIM->getGlobalColorForContent());
+		numberColor.modulateFromColor(grayColor, CWidgetManager::getInstance()->getGlobalColorForContent());
 	else
-		numberColor= pIM->getGlobalColorForContent();
+		numberColor= CWidgetManager::getInstance()->getGlobalColorForContent();
 
 	// Different draws according to Sheet Type.
 	switch (_ActualType)
@@ -2138,6 +2220,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 				// if a raw material for example, must add special icon text.
 				displayCharBitmaps(_RenderLayer+2, x, y, curSheetColor);
+
+				// Add the lock overlay if needed
+				if (getLockedByOwner())
+				{
+					rVR.draw11RotFlipBitmap (_RenderLayer+1, x - 2, y + 8, 0, false, rVR.getSystemTextureId(CViewRenderer::ItemLockedByOwnerTexture), curSheetColor);
+				}
 			}
 			break;
 		// Action
@@ -2425,12 +2513,12 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 
 	if (showSelectionBorder)
 	{
-		if (!_Draging || (_Draging && _DuplicateOnDrag))
+		if (!isDragged() || (isDragged() && _DuplicateOnDrag))
 		{
 			// draw selection border if this sheet is selected
 			if (_SheetSelectionGroup != -1) // is this sheet selectable ?
 			{   // yes, check if it is selected
-				const CCtrlSheetSelection &css = pIM->getCtrlSheetSelection();
+				const CCtrlSheetSelection &css = CWidgetManager::getInstance()->getParser()->getCtrlSheetSelection();
 				const CSheetSelectionGroup *ssg = css.getGroup(_SheetSelectionGroup);
 				if (ssg)
 				{
@@ -2446,7 +2534,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 						CRGBA color = ssg->getColor();
 						if (ssg->isGlobalColorEnabled())
 						{
-							color.modulateFromColor(color, pIM->getGlobalColorForContent());
+							color.modulateFromColor(color, CWidgetManager::getInstance()->getGlobalColorForContent());
 						}
 						// decal layer because must drawn after Items/Brick in DXTC
 						rVR.draw11RotFlipBitmap (_RenderLayer+1, middleX - (tw >> 1), middleY - (th >> 1), 0, false, ssg->getTextureIndex(), color);
@@ -2461,7 +2549,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 sint32 CDBCtrlSheet::drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 /* hSheet */, CRGBA color, sint32 value, bool rightAlign)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	sint32	wDigit= rVR.getFigurTextureW();
 	sint32	hDigit= rVR.getFigurTextureH();
 
@@ -2506,18 +2594,18 @@ sint32 CDBCtrlSheet::drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 /* hSh
 }
 
 // ----------------------------------------------------------------------------
-bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
+bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
 		// Handle drag'n'drop
-		if (pIM->getCapturePointerLeft() == this)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown && !_Draging)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !isDragged())
 			{
 				_DragX = eventDesc.getX();
 				_DragY = eventDesc.getY();
@@ -2529,24 +2617,24 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 				// Cannot drag if grayed (LOCKED or LATENT)!. Still can drag a shortcut
 				if (asItemSheet() && asItemSheet()->Stackable > 1 && _UseQuantity)
 				{
-					validClic = _Dragable && !_Draging && (getQuantity() > 0);
+					validClic = isDraggable() && !isDragged() && (getQuantity() > 0);
 					validClic = validClic && (!getItemWeared());
 				}
 				else
 				{
-					validClic = _Dragable && !_Draging && ((!getItemWeared()&&!getGrayed()) || isShortCut());
+					validClic = isDraggable() && !isDragged() && ((!getItemWeared()&&!getGrayed()) || isShortCut());
 				}
 			}
 			if (_Type == SheetType_Macro)
 			{
-				validClic = _Dragable;
+				validClic = isDraggable();
 			}
 
 			// posssibly check AH to see if really can draging
 			if (validClic && _AHOnCanDrag != NULL)
 			{
 				_TempCanDrag= true;
-				pIM->runActionHandler (_AHOnCanDrag, this, _AHCanDragParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnCanDrag, this, _AHCanDragParams);
 				validClic= _TempCanDrag;
 			}
 
@@ -2558,24 +2646,24 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 					_DeltaDragY= _DragY-(_YReal+1);
 					if (_DeltaDragX > _WReal) _DeltaDragX = _WReal;
 					if (_DeltaDragY > _HReal) _DeltaDragY = _HReal;
-					_Draging = true;
-					_LastDraggedSheet = this;
+					setDragged( true );
+					setDraggedSheet( this );
 
 					if (_AHOnDrag != NULL)
 					{
-						pIM->runActionHandler (_AHOnDrag, this, _AHDragParams);
+						CAHManager::getInstance()->runActionHandler (_AHOnDrag, this, _AHDragParams);
 					}
 				}
 			}
 
-			if (_Draging)
+			if (isDragged())
 			{
 				// If mouse left up, must end the Drag
-				if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+				if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 				{
 					bool handled = false;
 					// get the ctrl under the drop
-					const vector<CCtrlBase*> &rCUP = pIM->getCtrlsUnderPointer();
+					const vector<CCtrlBase*> &rCUP = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 					CDBCtrlSheet *pCSdest = NULL;
 					for (uint32 i = 0; i < rCUP.size(); ++i)
 					{
@@ -2600,10 +2688,18 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 							string params = string("src=") + _Id;
 							if (!pCSdest->_AHCanDropParams.empty())
 							{
-								string sTmp = pCSdest->_AHCanDropParams;
-								params = sTmp + "|" + params;
+								if (CAHManager::getInstance()->getAHName(pCSdest->_AHOnCanDrop) == "lua")
+								{
+									params = pCSdest->_AHCanDropParams;
+									strFindReplace(params, "%src", _Id);
+								}
+								else
+								{
+									string sTmp = pCSdest->_AHCanDropParams;
+									params = sTmp + "|" + params;
+								}
 							}
-							pIM->runActionHandler (pCSdest->_AHOnCanDrop, pCSdest, params);
+							CAHManager::getInstance()->runActionHandler (pCSdest->_AHOnCanDrop, pCSdest, params);
 
 							// Drop only if canDrop.
 							if(pCSdest->_CanDrop)
@@ -2612,11 +2708,19 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 								string params = string("src=") + _Id;
 								if (!pCSdest->_AHDropParams.empty())
 								{
-									string sTmp = pCSdest->_AHDropParams;
-									params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
+									if (CAHManager::getInstance()->getAHName(pCSdest->_AHOnDrop) == "lua")
+									{
+										params = pCSdest->_AHDropParams;
+										strFindReplace(params, "%src", _Id);
+									}
+									else
+									{
+										string sTmp = pCSdest->_AHDropParams;
+										params = sTmp + "|" + params;// must copy 'drop' params at start because it could be the name of a procedure
+									}
 								}
 								// call action
-								pIM->runActionHandler (pCSdest->_AHOnDrop, pCSdest, params);
+								CAHManager::getInstance()->runActionHandler (pCSdest->_AHOnDrop, pCSdest, params);
 								handled = true;
 							}
 						}
@@ -2624,7 +2728,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 					else // If slot not found try to drop on a list
 					{
 						// get the list under the drop
-						const vector<CInterfaceGroup*> &rGUP = pIM->getGroupsUnderPointer();
+						const vector<CInterfaceGroup*> &rGUP = CWidgetManager::getInstance()->getGroupsUnderPointer();
 						CDBGroupListSheet *pList = NULL;
 						CDBGroupListSheetText *pTextList = NULL;
 						for (uint32 i = 0; i < rGUP.size(); ++i)
@@ -2649,10 +2753,18 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 								string params = string("src=") + _Id;
 								if (!pList->getCtrlSheetInfo()._AHCanDropParams.empty())
 								{
-									string sTmp = pList->getCtrlSheetInfo()._AHCanDropParams;
-									params = sTmp + "|" + params;
+									if (CAHManager::getInstance()->getAHName(pList->getCtrlSheetInfo()._AHOnCanDrop) == "lua")
+									{
+										params = pList->getCtrlSheetInfo()._AHCanDropParams;
+										strFindReplace(params, "%src", _Id);
+									}
+									else
+									{
+										string sTmp = pList->getCtrlSheetInfo()._AHCanDropParams;
+										params = sTmp + "|" + params;
+									}
 								}
-								pIM->runActionHandler (pList->getCtrlSheetInfo()._AHOnCanDrop, pList, params);
+								CAHManager::getInstance()->runActionHandler (pList->getCtrlSheetInfo()._AHOnCanDrop, pList, params);
 
 								// Drop only if canDrop.
 								if(pList->getCanDrop())
@@ -2661,11 +2773,19 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 									string params = string("src=") + _Id;
 									if (!pList->getCtrlSheetInfo()._AHDropParams.empty())
 									{
-										string sTmp = pList->getCtrlSheetInfo()._AHDropParams;
-										params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
+										if (CAHManager::getInstance()->getAHName(pList->getCtrlSheetInfo()._AHOnDrop) == "lua")
+										{
+											params = pList->getCtrlSheetInfo()._AHDropParams;
+											strFindReplace(params, "%src", _Id);
+										}
+										else
+										{
+											string sTmp = pList->getCtrlSheetInfo()._AHDropParams;
+											params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
+										}
 									}
 									// call action
-									pIM->runActionHandler (pList->getCtrlSheetInfo()._AHOnDrop, pList, params);
+									CAHManager::getInstance()->runActionHandler (pList->getCtrlSheetInfo()._AHOnDrop, pList, params);
 									handled = true;
 								}
 							}
@@ -2680,7 +2800,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 									string sTmp = pTextList->getCtrlSheetInfo()._AHCanDropParams;
 									params = sTmp + "|" + params;
 								}
-								pIM->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnCanDrop, pTextList, params);
+								CAHManager::getInstance()->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnCanDrop, pTextList, params);
 
 								// Drop only if canDrop.
 								if(pTextList->getCanDrop())
@@ -2693,7 +2813,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 										params = sTmp + "|" + params; // must copy 'drop' params at start because it could be the name of a procedure
 									}
 									// call action
-									pIM->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnDrop, pTextList, params);
+									CAHManager::getInstance()->runActionHandler (pTextList->getCtrlSheetInfo()._AHOnDrop, pTextList, params);
 									handled = true;
 								}
 							}
@@ -2703,13 +2823,13 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 
 					if (!handled && _AHOnCannotDrop != NULL )
 					{
-						pIM->runActionHandler (_AHOnCannotDrop, this, _AHCannotDropParams);
+						CAHManager::getInstance()->runActionHandler (_AHOnCannotDrop, this, _AHCannotDropParams);
 						handled = true;
 					}
 
 					// In all case, quit
-					_Draging = false;
-					_LastDraggedSheet = NULL;
+					setDragged( false );
+					setDraggedSheet( NULL );
 					// In call case, end of drag => consider handled to not call another action
 					return true;
 				}
@@ -2717,7 +2837,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 		}
 
 		// If we are dragging, no more event on us
-		if(_Draging)
+		if(isDragged())
 			return false; // true;
 
 		// Mouse events that must be done over the control
@@ -2727,52 +2847,52 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 			(eventDesc.getY() <= (_YReal+ _HReal))))
 			return false;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (pIM->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 				return false;
 
 			// RunAction
 			if(_AHOnLeftClick != NULL)
-				pIM->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
 			// Run Menu (if item is not being dragged)
-			if (!_ListMenuLeft.empty() && _LastDraggedSheet == NULL)
+			if (!_ListMenuLeft.empty() && dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == NULL)
 			{
 				if (getSheetId() != 0)
 				{
 					_CurrMenuSheet = this;
-					pIM->enableModalWindow (this, _ListMenuLeft);
+					CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuLeft);
 				}
 			}
 			// Always return true on LeftClick.
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			bool	handled= false;
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if (pIM->getCapturePointerRight() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerRight() != this)
 				return false;
 
 			// RunAction
 			if(_AHOnRightClick != NULL)
 			{
 				handled= true;
-				pIM->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
+				CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
 			}
 			// Run Menu (if item is not being dragged)
 			if (!_ListMenuRight.empty() || !_ListMenuRightEmptySlot.empty())
 			{
 				handled= true;
 				// There must be no dragged sheet
-				if(_LastDraggedSheet == NULL)
+				if( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == NULL)
 				{
 					// if a macro, don't test if Sheet==0
 					if ( isMacro() || getSheetId() != 0)
@@ -2780,7 +2900,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 						if(!_ListMenuRight.empty())
 						{
 							_CurrMenuSheet = this;
-							pIM->enableModalWindow (this, _ListMenuRight);
+							CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRight);
 						}
 					}
 					// if sheetId==0, then may open the other menu
@@ -2789,7 +2909,7 @@ bool CDBCtrlSheet::handleEvent (const CEventDescriptor &event)
 						if(!_ListMenuRightEmptySlot.empty())
 						{
 							_CurrMenuSheet = this;
-							pIM->enableModalWindow (this, _ListMenuRightEmptySlot);
+							CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRightEmptySlot);
 						}
 					}
 				}
@@ -2854,19 +2974,18 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 void CDBCtrlSheet::setCurrSelection(CDBCtrlSheet *selected)
 {
 	_CurrSelection = selected;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SHEET")->setValue64(selected ? selected->getSheetId() : 0);
-	im->getDbProp("UI:SELECTED_ITEM_SHEET_ID:QUALITY")->setValue64(selected ? selected->getQuality() : 0);
-	im->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SLOT_TYPE")->setValue64(selected ? selected->getBehaviour() : 0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SHEET")->setValue64(selected ? selected->getSheetId() : 0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:QUALITY")->setValue64(selected ? selected->getQuality() : 0);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SHEET_ID:SLOT_TYPE")->setValue64(selected ? selected->getBehaviour() : 0);
 	// set the selection group in the db
-	im->getDbProp("UI:SELECTED_ITEM_SELECTION_GROUP")->setValue64(selected ? selected->getSelectionGroup() : -1);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:SELECTED_ITEM_SELECTION_GROUP")->setValue64(selected ? selected->getSelectionGroup() : -1);
 }
 
 // ***************************************************************************
 const std::string &CDBCtrlSheet::getSelectionGroupAsString() const
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	const CCtrlSheetSelection &css = im->getCtrlSheetSelection();
+	const CCtrlSheetSelection &css = CWidgetManager::getInstance()->getParser()->getCtrlSheetSelection();
 	const CSheetSelectionGroup *csg = css.getGroup(_SheetSelectionGroup);
 	static const string emptyStr;
 	return csg ? csg->getName() : emptyStr;
@@ -2975,9 +3094,32 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 	}
 	else if(getType() == CCtrlSheetInfo::SheetType_Item)
 	{
-		const CItemSheet *item = asItemSheet();
-		if (item)
-			help = getItemActualName();
+		const CItemSheet	*item= asItemSheet();
+		if(item)
+		{
+			if (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || item->Family == ITEMFAMILY::JEWELRY || item->Family == ITEMFAMILY::ARMOR)
+			{
+				string luaMethodName = ( (item->Family == ITEMFAMILY::CRYSTALLIZED_SPELL) ? "updateCrystallizedSpellTooltip" : "updateBuffItemTooltip");
+				CDBCtrlSheet *ctrlSheet = const_cast<CDBCtrlSheet*>(this);
+				if ( ! getInventory().isItemInfoUpToDate(getInventory().getItemSlotId(ctrlSheet)))
+				{
+					// Prepare the waiter
+					ControlSheetTooltipUpdater.ItemSheet= ctrlSheet->getSheetId();
+					ControlSheetTooltipUpdater.LuaMethodName = luaMethodName;
+					ControlSheetTooltipUpdater.ItemSlotId= getInventory().getItemSlotId(ctrlSheet);
+					ControlSheetTooltipUpdater.CtrlSheet = ctrlSheet;
+
+					// Add the waiter
+					getInventory().addItemInfoWaiter(&ControlSheetTooltipUpdater);
+				}
+
+				help = ControlSheetTooltipUpdater.infoValidated(ctrlSheet, luaMethodName);
+
+			}
+			else
+				help= getItemActualName();
+
+		}
 		else
 			help= _ContextHelp;
 	}
@@ -3021,14 +3163,14 @@ void	CDBCtrlSheet::getContextHelp(ucstring &help) const
 		{
 			// delegate setup of context he help ( & window ) to lua		
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CLuaState *ls= im->getLuaState();
+			CLuaState *ls= CLuaManager::getInstance().getLuaState();
 			{
 				CLuaStackRestorer lsr(ls, 0);
 				CSPhraseManager	*pPM= CSPhraseManager::getInstance();					
 				_PhraseAdapter = new CSPhraseComAdpater;
 				_PhraseAdapter->Phrase = pPM->getPhrase(phraseId);
 				CLuaIHM::pushReflectableOnStack(*ls, _PhraseAdapter);
-				ls->pushValue(LUA_GLOBALSINDEX);	
+				ls->pushGlobalTable();	
 				CLuaObject game(*ls);
 				game = game["game"];		
 				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
@@ -3496,7 +3638,7 @@ void	CDBCtrlSheet::setupInit()
 	{
 		// typically replace "handl" with "handr" or vice versa
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CInterfaceElement	*pElt = pIM->getElementFromId (_Id, _OptString);
+		CInterfaceElement	*pElt = CWidgetManager::getInstance()->getElementFromId (_Id, _OptString);
 		CDBCtrlSheet		*pOtherHand = dynamic_cast<CDBCtrlSheet*>(pElt);
 		if( !pOtherHand  || pOtherHand ->getType() != CCtrlSheetInfo::SheetType_Item )
 		{
@@ -3785,7 +3927,7 @@ void CDBCtrlSheet::setInvertGuildSymbol(bool b)
 void CDBCtrlSheet::setSlot(const std::string &textureName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	_DispSlotBmpId = rVR.getTextureIdFromName (textureName);
 	rVR.getTextureSizeFromId (_DispSlotBmpId, _W, _H);
 	_DrawSlot = true;
@@ -3936,6 +4078,17 @@ void CDBCtrlSheet::setItemResaleFlag(sint32 rf)
 	node->setValue32(rf);
 }
 
+// ***************************************************************************
+bool CDBCtrlSheet::getLockedByOwner() const
+{
+	return (getItemResaleFlag() == BOTCHATTYPE::ResaleKOLockedByOwner);
+}
+
+// ***************************************************************************
+bool CDBCtrlSheet::canOwnerLock() const
+{
+	return (NULL != getItemResaleFlagPtr());
+}
 
 // ***************************************************************************
 sint32 CDBCtrlSheet::getItemSellerType() const
@@ -4023,7 +4176,7 @@ void CDBCtrlSheet::initArmourColors()
 	{
 		_ArmourColor[col] = CRGBA::White;
 		std::string defineName= "armour_color_" + toString(col);
-		std::string	colVal= pIM->getDefine(defineName);
+		std::string	colVal= CWidgetManager::getInstance()->getParser()->getDefine(defineName);
 		if(!colVal.empty())
 			_ArmourColor[col] = convertColor(colVal.c_str());
 	}
@@ -4094,13 +4247,6 @@ ucstring CDBCtrlSheet::getItemActualName() const
 }
 
 // ***************************************************************************
-void	CDBCtrlSheet::abortDraging()
-{
-	_Draging = false;
-	_LastDraggedSheet = NULL;
-}
-
-// ***************************************************************************
 void	CDBCtrlSheet::updateArmourColor(sint8 col)
 {
 	// bkup index cache (bkup -1 too)
@@ -4109,7 +4255,7 @@ void	CDBCtrlSheet::updateArmourColor(sint8 col)
 	if(_ArmourColorIndex>=0 && _ArmourColorIndex<=7)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CViewRenderer		&rVR= pIM->getViewRenderer();
+		CViewRenderer		&rVR= *CViewRenderer::getInstance();
 
 		// if the BMP have not been correctly setuped
 		if(!_ArmourColorBmpOk)

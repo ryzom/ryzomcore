@@ -64,6 +64,15 @@ void refreshItemHelp(CSheetHelpSetup &setup);
 // refresh help for a mission
 void refreshMissionHelp(CSheetHelpSetup &setup, const CPrerequisitInfos &infos);
 
+class CPetAnimalItemInfoWaiter : public IItemInfoWaiter
+{
+	void infoReceived()
+	{
+		//ItemSheet
+		//ItemSlotId
+		CClientItemInfo info = getInventory().getItemInfo(ItemSlotId);
+	}
+};
 
 
 // ***************************************************************************
@@ -132,10 +141,10 @@ private:
 	};
 
 	// update the brick help window when weight of hands has changed
-	class CFittedWeaponWeightObserver : public ICDBNode::IPropertyObserver
+	class CFittedWeaponWeightObserver : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 
 

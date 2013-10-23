@@ -1497,6 +1497,44 @@ void setAutoSpawn_f_(CStateInstance* entity, CScriptStack& stack)
 // HP related methods
 /** @page code
 
+@subsection setMaxHP_ff_
+Sets the Max HP level of each bot of the group.
+
+Arguments: f(MaxHp) f(SetFull) ->
+@param[in] MaxHP is the new maximum HP for each bot
+@param[in] SetFull if not 0, will set the HP to the new maximum
+
+@code
+()setMaxHP(50000,1);
+@endcode
+
+*/
+// CGroup
+void setMaxHP_ff_(CStateInstance* entity, CScriptStack& stack)
+{
+	bool  setFull = ((float)stack.top() != 0.f); stack.pop();
+	float maxHp = ((float)stack.top()); stack.pop();
+	
+	CChangeCreatureMaxHPMsg& msgList = CAIS::instance().getCreatureChangeMaxHP();
+	
+	FOREACH(bot, CCont<CBot>, entity->getGroup()->bots())
+	{
+		if (!bot->isSpawned())
+			continue;
+		
+		if (maxHp > 0)
+		{
+			CSpawnBot* const sbot = bot->getSpawnObj();
+			msgList.Entities.push_back(sbot->dataSetRow());
+			msgList.MaxHp.push_back((uint32)(maxHp));
+			msgList.SetFull.push_back((uint8)(setFull?1:0));
+		}
+		bot->setCustomMaxHp((uint32)maxHp);
+	}
+}
+
+/** @page code
+
 @subsection setHPLevel_f_
 Sets the current HP level of each bot of the group.
 
@@ -1573,10 +1611,42 @@ void setHPScale_f_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+//----------------------------------------------------------------------------
+// Url related method
+/** @page code
 
+@subsection setUrl_ss_
+Sets the name and url of right-click action
 
+Arguments: s(actionName),s(url) ->
+@param[in] actionName of action when player mouse over
+@param[in] url of action when player mouse over
 
+@code
+()setUrl("Click on Me", "http://www.domain.com/script.php");
+@endcode
 
+*/
+// CGroup
+void setUrl_ss_(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string url = (std::string)stack.top();stack.pop();	
+	std::string actionName = (std::string)stack.top();stack.pop();	
+	
+	CCreatureSetUrlMsg msg;
+	FOREACH(botIt, CCont<CBot>,	entity->getGroup()->bots())
+	{
+		CSpawnBot* pbot = botIt->getSpawnObj();
+		if (pbot!=NULL)
+		{		
+			msg.Entities.push_back(pbot->dataSetRow());
+		}
+	}
+	
+	msg.ActionName = actionName;
+	msg.Url = url;
+	msg.send(egsString);
+}
 
 
 
@@ -1870,7 +1940,7 @@ Arguments: s(parameterName) ->
 @param[in] parameterName is a the id of the parameter to add
 
 @code
-()addProfileParameter("running"); // équivalent à un parameter "running" dans la primitive du groupe
+()addProfileParameter("running"); // equivalent to "running" parameter in group primitive
 @endcode
 
 */
@@ -1898,7 +1968,7 @@ Arguments: s(parameterName),s(parameterContent) ->
 @param[in] parameterContent is the value of the parameter
 
 @code
-()addProfileParameter("foo", "bar"); // équivalent à un parameter "foo:bar" dans la primitive du groupe
+()addProfileParameter("foo", "bar"); // equivalent to "foo:bar" parameter in group primitive
 @endcode
 
 */
@@ -1927,7 +1997,7 @@ Arguments: s(parameterName),f(parameterContent) ->
 @param[in] parameterContent is the value of the parameter
 
 @code
-()addProfileParameter("foo", 0.5); // équivalent à un parameter "foo:0.5" dans la primitive du groupe
+()addProfileParameter("foo", 0.5); // equivalent to "foo:0.5" parameter in group primitive
 @endcode
 
 */
@@ -1955,7 +2025,7 @@ Arguments: s(parameterName) ->
 @param[in] parameterName is a the id of the parameter to remove
 
 @code
-()removeProfileParameter("running"); // retire le paramètre "running" ou "running:<*>" du groupe
+()removeProfileParameter("running"); // remove "running" or "running:<*>" parameter from group
 @endcode
 
 */
@@ -1981,7 +2051,7 @@ Arguments: s(parameterName) ->
 @param[in] parameterName is a the id of the parameter to add
 
 @code
-()addProfileParameter("running"); // équivalent à un parameter "running" dans la primitive du groupe
+()addProfileParameter("running"); // equivalent to "running" parameter in group primitive
 @endcode
 
 */
@@ -2010,7 +2080,7 @@ Arguments: s(parameterName),s(parameterContent) ->
 @param[in] parameterContent is the value of the parameter
 
 @code
-()addPersistentProfileParameter("foo", "bar"); // équivalent à un parameter "foo:bar" dans la primitive du groupe
+()addPersistentProfileParameter("foo", "bar"); // equivalent to "foo:bar" parameter in group primitive
 @endcode
 
 */
@@ -2041,7 +2111,7 @@ Arguments: s(parameterName),f(parameterContent) ->
 @param[in] parameterContent is the value of the parameter
 
 @code
-()addPersistentProfileParameter("foo", 0.5); // équivalent à un parameter "foo:0.5" dans la primitive du groupe
+()addPersistentProfileParameter("foo", 0.5); // equivalent to "foo:0.5" parameter in group primitive
 @endcode
 
 */
@@ -2070,7 +2140,7 @@ Arguments: s(parameterName) ->
 @param[in] parameterName is a the id of the parameter to remove
 
 @code
-()removeProfileParameter("running"); // retire le paramètre "running" ou "running:<*>" du groupe
+()removeProfileParameter("running"); // remove "running" or "running:<*>" parameters from group
 @endcode
 
 */
@@ -4456,6 +4526,37 @@ void setSheet_s_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection setClientSheet_s_
+Change the client sheet of a creature
+
+Arguments: -> s(sheetName)
+
+@code
+()setClientSheet('ccdeb2');
+
+@endcode
+
+*/
+void setClientSheet_s_(CStateInstance* entity, CScriptStack& stack)
+{
+	string sheetname = stack.top();
+	stack.pop();
+	
+	if (sheetname.find(".creature") == string::npos)
+		sheetname += ".creature";
+
+	FOREACH(itBot, CCont<CBot>, entity->getGroup()->bots())
+	{
+		CBot* bot = *itBot;
+		if (bot)
+		{
+			bot->setClientSheet(sheetname);
+		}
+	}
+}
 
 /****************************************************************************/
 
@@ -4581,6 +4682,62 @@ void setConditionSuccess_f_(CStateInstance* entity, CScriptStack& stack)
 	CAILogicDynamicIfHelper::setConditionSuccess(conditionState);
 }
 
+inline
+static float randomAngle()
+{
+	uint32 const maxLimit = CAngle::PI*2;
+	float val = (float)CAIS::rand32(maxLimit);
+	return val;
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection facing_f_
+
+The npc will face the given direction
+
+
+Arguments: f(direction)
+@param[in] direction is the new angle of the bot in radians
+
+@code
+()facing(3.14);
+@endcode
+
+*/
+
+// CStateInstance
+void facing_f_(CStateInstance* entity, CScriptStack& stack)
+{
+	float const theta = (float)stack.top(); stack.pop();
+	CGroup* group = entity->getGroup();
+
+	bool bRandomAngle = false;
+	if (theta > (NLMISC::Pi * 2.0) || theta < (-NLMISC::Pi * 2.0))
+		bRandomAngle = true;
+
+	if (group->isSpawned())
+	{
+		FOREACH(itBot, CCont<CBot>, group->bots())
+		{
+			CBot* bot = *itBot;
+			if (bot)
+			{
+				if (bot->isSpawned())
+				{
+					CSpawnBot *spawnBot = bot->getSpawnObj();
+
+					if (bRandomAngle)
+						spawnBot->setTheta(randomAngle());
+					else
+						spawnBot->setTheta(theta);
+					
+				}
+			}
+		}
+	}
+}
 
 std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 {
@@ -4628,6 +4785,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, clearAggroList__);
 	REGISTER_NATIVE_FUNC(functions, setMode_s_);
 	REGISTER_NATIVE_FUNC(functions, setAutoSpawn_f_);
+	REGISTER_NATIVE_FUNC(functions, setMaxHP_ff_);
 	REGISTER_NATIVE_FUNC(functions, setHPLevel_f_);
 	REGISTER_NATIVE_FUNC(functions, setHPScale_f_);
 	REGISTER_NATIVE_FUNC(functions, scaleHP_f_);
@@ -4651,10 +4809,11 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, getEventParam_f_f);
 	REGISTER_NATIVE_FUNC(functions, getEventParam_f_s);
 	REGISTER_NATIVE_FUNC(functions, setSheet_s_);
+	REGISTER_NATIVE_FUNC(functions, setClientSheet_s_);
 	REGISTER_NATIVE_FUNC(functions, setHealer_f_);
 	REGISTER_NATIVE_FUNC(functions, setConditionSuccess_f_);
-
-
+	REGISTER_NATIVE_FUNC(functions, facing_f_);
+	REGISTER_NATIVE_FUNC(functions, setUrl_ss_);
 
 	// Boss functions (custom text)
 	REGISTER_NATIVE_FUNC(functions, phraseBegin__);
@@ -4699,10 +4858,7 @@ std::map<std::string, FScrptNativeFunc> nfGetGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, teleportPlayer_sffff_);
 	REGISTER_NATIVE_FUNC(functions, summonPlayer_fs_);
 
-	
 
-	
-	
 #undef REGISTER_NATIVE_FUNC
 	
 	return functions;

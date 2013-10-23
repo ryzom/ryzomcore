@@ -21,6 +21,7 @@
 #include	"ucstring.h"
 #include	"class_registry.h"
 #include	"common.h"
+
 #include	<utility>
 #include	<string>
 #include	<vector>
@@ -51,6 +52,13 @@ class	CMemStream;
 #    define NLMISC_BSWAP32(src) (src) = (((src)>>24)&0xFF) | ((((src)>>16)&0xFF)<<8) | ((((src)>>8)&0xFF)<<16) | (((src)&0xFF)<<24)
 #  endif
 #  define NLMISC_BSWAP64(src) (src) = (((src)>>56)&0xFF) | ((((src)>>48)&0xFF)<<8) | ((((src)>>40)&0xFF)<<16) | ((((src)>>32)&0xFF)<<24) | ((((src)>>24)&0xFF)<<32) | ((((src)>>16)&0xFF)<<40) | ((((src)>>8)&0xFF)<<48) | (((src)&0xFF)<<56)
+
+// convert a 4 characters string to uint32
+#ifdef NL_LITTLE_ENDIAN
+#	define NELID(x) (uint32((x[0] << 24) | (x[1] << 16) | (x[2] << 8) | (x[3])))
+#else
+#	define NELID(x) (uint32((x[3] << 24) | (x[2] << 16) | (x[1] << 8) | (x[0])))
+#endif
 
 // ======================================================================================================
 /**

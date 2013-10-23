@@ -82,6 +82,15 @@ void cbJoinTeamProposal( NLNET::CMessage& msgin, const std::string &serviceName,
 // kick your target from your team
 void cbKickTeammate( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 
+
+/// callback for JOIN_LEAGUE message
+void cbJoinLeague( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+/// callback for JOIN_LEAGUE_DECLINE message
+void cbJoinLeagueDecline( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+/// callback for JOIN_LEAGUE_PROPOSAL message
+void cbJoinLeagueProposal( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+
+
 // toogle god mode on / off for testing
 //void cbGodMode( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 

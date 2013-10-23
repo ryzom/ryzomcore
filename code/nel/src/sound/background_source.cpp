@@ -16,7 +16,6 @@
 
 #include "stdsound.h"
 #include "nel/sound/background_sound_manager.h"
-
 #include "nel/sound/background_source.h"
 
 using namespace std;
@@ -26,8 +25,8 @@ namespace NLSOUND
 {
 
 
-CBackgroundSource::CBackgroundSource(CBackgroundSound *backgroundSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
-:	CSourceCommon(backgroundSound, spawn, cb, cbUserParam, cluster)
+CBackgroundSource::CBackgroundSource(CBackgroundSound *backgroundSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
+:	CSourceCommon(backgroundSound, spawn, cb, cbUserParam, cluster, groupController)
 {
 	_BackgroundSound = backgroundSound;
 }
@@ -119,7 +118,7 @@ void CBackgroundSource::play()
 	for (; first != last; ++first)
 	{
 		TSubSource subSource;
-		subSource.Source = mixer->createSource(first->SoundName, false, 0, 0, _Cluster, 0);
+		subSource.Source = mixer->createSource(first->SoundName, false, 0, 0, _Cluster, NULL, _GroupController);
 		if (subSource.Source != NULL)
 			subSource.Source->setPriority(_Priority);
 		subSource.Filter = first->Filter;

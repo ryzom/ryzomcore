@@ -321,8 +321,8 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	H_AUTO(CCharacterStore);\
 	CFameManager::getInstance().savePlayerFame(_Id, const_cast<EGSPD::CFameContainerPD &>(*_Fames));\
 	/* Update the current playing session duration */ \
-	if (_LastLogStats.size() > 0) _LastLogStats.begin()->Duration = CTime::getSecondsSince1970() - _LastLogStats.begin()->LoginTime; \
-	else nlwarning("Cannot update play session duration, _LastLogStats is empty, new character?"); \
+	if (!_LastLogStats.empty()) _LastLogStats.begin()->Duration = CTime::getSecondsSince1970() - _LastLogStats.begin()->LoginTime;\
+	else nlwarning("Cannot update play session duration, _LastLogStats is empty, new character?");\
 	\
 	/* Unless the top of the position stack is locked, */ \
 	/* update the stored position stack with the current position */ \
@@ -414,6 +414,11 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	_FactionPoint[i],\
 	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _FactionPoint[k-PVP_CLAN::BeginClans]=val)\
 \
+	PROP(uint32,_PvpPoint)\
+	PROP2(_LangChannel,string,_LangChannel,_LangChannel=val)\
+	PROP(uint32,_Organization)\
+	PROP(uint32,_OrganizationStatus)\
+	PROP(uint32,_OrganizationPoints)\
 	PROP2(DeclaredCult,string,PVP_CLAN::toString(_DeclaredCult),_DeclaredCult=PVP_CLAN::fromString(val))\
 	PROP2(DeclaredCiv,string,PVP_CLAN::toString(_DeclaredCiv),_DeclaredCiv=PVP_CLAN::fromString(val))\
 \
@@ -434,6 +439,11 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP_GAME_CYCLE_COMP(_ForbidAuraUseStartDate)\
 	PROP_GAME_CYCLE_COMP(_ForbidAuraUseEndDate)\
 	PROP2(_Title, string, CHARACTER_TITLE::toString(getTitle()), setTitle(CHARACTER_TITLE::toCharacterTitle(val)))\
+	PROP2(_NewTitle, string, _NewTitle, _NewTitle=val)\
+	PROP2(_TagPvPA, string, _TagPvPA, _TagPvPA=val)\
+	PROP2(_TagPvPB, string, _TagPvPB, _TagPvPB=val)\
+	PROP2(_TagA, string, _TagA, _TagA=val)\
+	PROP2(_TagB, string, _TagB, _TagB=val)\
 \
 	/* Visual Properties */\
 	PROP2(HairType,				uint8, _VisualPropertyA().PropertySubData.HatModel,			SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatModel,val))\
@@ -566,6 +576,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	PROP2(Invisible, bool, getInvisibility(), setInvisibility(val)) \
 	PROP2(Aggroable, sint8, getAggroableSave(), setAggroableSave(val)) \
 	PROP2(GodMode, bool, getGodModeSave(), setGodModeSave(val)) \
+	PROP2(FriendVisibility, uint8, getFriendVisibilitySave(), setFriendVisibilitySave(val)) \
 
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
@@ -688,6 +699,7 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	LPROP(bool,IsMounted,if(IsMounted))\
 	PROP(bool,IsTpAllowed)\
 	PROP(TSatiety,Satiety)\
+	PROP2(CustomName, ucstring, CustomName, CustomName = val)\
 
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"
@@ -1183,7 +1195,7 @@ static void displayWarning(const std::string& s)
 //-----------------------------------------------------------------------------
 /**
  * This class is used to load old player room inventory, DO NOT BREAK IT!
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */
@@ -1345,6 +1357,7 @@ private:
 	STRUCT_VECT(_TypeSkillMods)\
 	LPROP_VECT(CSheetId, _Enchantment, VECT_LOGIC(_Enchantment) if (_Enchantment[i]!=CSheetId::Unknown))\
 	PROP2(_CustomText,					ucstring,	_CustomText,				_CustomText=val)\
+	PROP(bool, _LockedByOwner)\
 	
 //#pragma message( PERSISTENT_GENERATION_MESSAGE )
 #include "game_share/persistent_data_template.h"

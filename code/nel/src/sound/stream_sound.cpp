@@ -17,6 +17,10 @@
 #include "stdsound.h"
 #include "nel/sound/stream_sound.h"
 
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+#	include "nel/sound/group_controller_root.h"
+#endif
+
 namespace NLSOUND {
 
 CStreamSound::CStreamSound()
@@ -31,14 +35,15 @@ CStreamSound::~CStreamSound()
 
 void CStreamSound::importForm(const std::string &filename, NLGEORGES::UFormElm &root)
 {
-	NLGEORGES::UFormElm *psoundType;
+	// cannot do this debug check because used also by CStreamFileSound
+	/*NLGEORGES::UFormElm *psoundType;
 	std::string dfnName;
 
 	// some basic checking.
 	root.getNodeByName(&psoundType, ".SoundType");
 	nlassert(psoundType != NULL);
 	psoundType->getDfnName(dfnName);
-	nlassert(dfnName == "stream_sound.dfn");
+	nlassert(dfnName == "stream_sound.dfn");*/
 
 	// Call the base class
 	CSound::importForm(filename, root);
@@ -51,6 +56,11 @@ void CStreamSound::importForm(const std::string &filename, NLGEORGES::UFormElm &
 
 	// Alpha
 	root.getValueByName(m_Alpha, ".SoundType.Alpha");
+
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER);
+#endif
+
 }
 
 void CStreamSound::serial(NLMISC::IStream &s)
@@ -59,6 +69,11 @@ void CStreamSound::serial(NLMISC::IStream &s)
 
 	s.serial(_MinDist);
 	s.serial(m_Alpha);
+
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_STREAM_GROUP_CONTROLLER);
+#endif
+
 }
 
 } /* namespace NLSOUND */

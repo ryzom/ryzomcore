@@ -26,7 +26,7 @@
 
 /**
  * A PVP safe zone
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2004
  */

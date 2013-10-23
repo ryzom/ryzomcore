@@ -55,7 +55,7 @@
 #include "main_loop.h"
 #include "interface_v3/group_in_scene_bubble.h"
 #include "interface_v3/inventory_manager.h"
-#include "interface_v3/group_html.h"
+#include "nel/gui/group_html.h"
 #include "interface_v3/people_interraction.h"
 #include "init_main_loop.h"
 #include "view.h"
@@ -200,7 +200,7 @@ CUserEntity::~CUserEntity()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	
 	{
-		CCDBNodeLeaf *node = pIM->getDbProp("SERVER:USER:IS_INVISIBLE", false);
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_INVISIBLE", false);
 		if (node)
 		{
 			ICDBNode::CTextId textId;
@@ -210,7 +210,7 @@ CUserEntity::~CUserEntity()
 
 	for(uint i=0;i<EGSPD::CSPType::EndSPType;i++)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
 		if(node)
 		{
 			ICDBNode::CTextId textId;
@@ -224,7 +224,7 @@ CUserEntity::~CUserEntity()
 		uint32 fameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex(factionIndex);
 		string sDBPath = toString("SERVER:FAME:PLAYER%d:VALUE",fameIndexInDatabase);
 
-		CCDBNodeLeaf * node = pIM->getDbProp(sDBPath, false);
+		CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp(sDBPath, false);
 		if(node)
 		{
 			ICDBNode::CTextId textId;
@@ -340,11 +340,11 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 		visualC.PropertySubData.BreastSize      = 7;
 		// Set the Database
 		sint64 *prop = (sint64 *)&visualA;
-		CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);	// Set the database
+		NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);	// Set the database
 		prop = (sint64 *)&visualB;
-		CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);	// Set the database
+		NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);	// Set the database
 		prop = (sint64 *)&visualC;
-		CInterfaceManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);	// Set the database
+		NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E0:P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);	// Set the database
 		// Apply Changes.
 		updateVisualProperty(0, CLFECOMMON::PROPERTY_VPA);
 	}
@@ -360,7 +360,7 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 	// Add observer on invisible property
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	{
-		CCDBNodeLeaf *node = pIM->getDbProp("SERVER:USER:IS_INVISIBLE", false);
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:IS_INVISIBLE", false);
 		if (node)
 		{
 			ICDBNode::CTextId textId;
@@ -372,7 +372,7 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 	for(uint i=0;i<EGSPD::CSPType::EndSPType;i++)
 	{
 		_SkillPointObs[i].SpType= i;
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
 		if(node)
 		{
 			ICDBNode::CTextId textId;
@@ -391,7 +391,7 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 		if( fameObs )
 		{
 			fameObs->FactionIndex = factionIndex;
-			CCDBNodeLeaf * node = pIM->getDbProp(sDBPath, false);
+			CCDBNodeLeaf * node = NLGUI::CDBManager::getInstance()->getDbProp(sDBPath, false);
 			if(node)
 			{
 				ICDBNode::CTextId textId;
@@ -507,10 +507,10 @@ void CUserEntity::updateVisualPropertyName(const NLMISC::TGameCycle &gameCycle, 
 	CPlayerCL::updateVisualPropertyName(gameCycle, prop);
 
 	// Name changed ?
-	if (oldNameId != _NameId)
+/*	if (oldNameId != _NameId)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceElement *element = pIM->getElementFromId("ui:interface:mailbox:content:html");
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId("ui:interface:mailbox:content:html");
 		if (element)
 		{
 			CGroupHTML *html = dynamic_cast<CGroupHTML*>(element);
@@ -518,7 +518,7 @@ void CUserEntity::updateVisualPropertyName(const NLMISC::TGameCycle &gameCycle, 
 				html->browse("home");
 		}
 	}
-
+*/	
 }// updateVisualPropertyName //
 
 //-----------------------------------------------
@@ -619,14 +619,14 @@ void CUserEntity::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &gameCycl
 	// Additionaly, inform interface of the change
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// For PVP ZoneFaction
-	CCDBNodeLeaf *pDB= pIM->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_MODE");
+	CCDBNodeLeaf *pDB= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_MODE");
 	if(pDB)
 	{
 		sint32	val= pDB->getValue32();
 		pDB->setValue32(val+1);
 	}
 	// For Any PVP change
-	pDB= pIM->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_ANY");
+	pDB= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_ANY");
 	if(pDB)
 	{
 		sint32	val= pDB->getValue32();
@@ -641,7 +641,7 @@ void CUserEntity::updateVisualPropertyOutpostInfos(const NLMISC::TGameCycle &gam
 	CPlayerCL::updateVisualPropertyOutpostInfos(gameCycle, prop);
 	// For Any PVP change
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pDB= pIM->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_ANY");
+	CCDBNodeLeaf *pDB= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_ANY");
 	if(pDB)
 	{
 		sint32	val= pDB->getValue32();
@@ -656,7 +656,7 @@ void CUserEntity::updateVisualPropertyPvpClan(const NLMISC::TGameCycle &gameCycl
 	CPlayerCL::updateVisualPropertyPvpClan(gameCycle, prop);
 	// For Any PVP change
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pDB= pIM->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_ANY");
+	CCDBNodeLeaf *pDB= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:TRACK_PVP_CHANGE_ANY");
 	if(pDB)
 	{
 		sint32	val= pDB->getValue32();
@@ -791,7 +791,7 @@ bool CUserEntity::mode(MBEHAV::EMode m)
 	{
 		// Compute the angle
 		const string propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_ORIENTATION);
-		sint64 ang = CInterfaceManager::getInstance()->getDbProp(propName)->getValue64();
+		sint64 ang = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		_TargetAngle = *(float *)(&ang);
 
 		// Initialize controls for the combat.
@@ -1571,12 +1571,12 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	// Quartering
 	case CUserEntity::Quarter:
 		if((ent->properties()).harvestable())
-			IM->runActionHandler("context_quartering", 0);
+			CAHManager::getInstance()->runActionHandler("context_quartering", 0);
 		break;
 	// Loot
 	case CUserEntity::Loot:
 		if((ent->properties()).lootable())
-			IM->runActionHandler("context_loot", 0);
+			CAHManager::getInstance()->runActionHandler("context_loot", 0);
 		break;
 	// Pick Up
 	case CUserEntity::PickUp:
@@ -1587,57 +1587,57 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		break;
 	// Trade Item
 	case CUserEntity::TradeItem:
-		IM->runActionHandler("context_trade_item", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_item", 0);
 		break;
 	// Trade Phrase
 	case CUserEntity::TradePhrase:
-		IM->runActionHandler("context_trade_phrase", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_phrase", 0);
 		break;
 	// Trade Pact
 	case CUserEntity::TradePact:
-		IM->runActionHandler("context_trade_pact", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_pact", 0);
 		break;
 	// Mission
 	case CUserEntity::Mission:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			IM->runActionHandler("mission_option", 0, param);
+			CAHManager::getInstance()->runActionHandler("mission_option", 0, param);
 		}
 		break;
 	// Dynamic Mission
 	case CUserEntity::DynamicMission:
-		IM->runActionHandler("context_dynamic_mission", 0);
+		CAHManager::getInstance()->runActionHandler("context_dynamic_mission", 0);
 		break;
 	// Static Mission
 	case CUserEntity::StaticMission:
-		IM->runActionHandler("context_choose_mission", 0);
+		CAHManager::getInstance()->runActionHandler("context_choose_mission", 0);
 		break;
 	// Mission
 	case CUserEntity::MissionRing:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			IM->runActionHandler("mission_ring", 0, param);
+			CAHManager::getInstance()->runActionHandler("mission_ring", 0, param);
 		}
 		break;
 	// Create Guild
 	case CUserEntity::CreateGuild:
-		IM->runActionHandler("context_create_guild", 0);
+		CAHManager::getInstance()->runActionHandler("context_create_guild", 0);
 		break;
 	// News
 	case CUserEntity::News:
-		IM->runActionHandler("context_talk", 0);
+		CAHManager::getInstance()->runActionHandler("context_talk", 0);
 		break;
 	// Trade Teleport
 	case CUserEntity::TradeTeleport:
-		IM->runActionHandler("context_trade_teleport", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_teleport", 0);
 		break;
 	// Trade Faction items
 	case CUserEntity::TradeFaction:
-		IM->runActionHandler("context_trade_faction", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_faction", 0);
 		break;
 	// Trade Cosmetic
 	case CUserEntity::TradeCosmetic:
-		IM->runActionHandler("context_trade_cosmetic", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_cosmetic", 0);
 		break;
 	// Talk
 	case CUserEntity::Talk:
@@ -1658,11 +1658,11 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		}
 	// WebPage
 	case CUserEntity::WebPage:
-		IM->runActionHandler("context_web_page", 0);
+		CAHManager::getInstance()->runActionHandler("context_web_page", 0);
 		break;
 	// Outpost
 	case CUserEntity::Outpost:
-		IM->executeLuaScript("game:outpostBCOpenStateWindow()", 0);
+		CLuaManager::getInstance().executeLuaScript("game:outpostBCOpenStateWindow()", 0);
 		break;
 	// BuildTotem
 	case CUserEntity::BuildTotem:
@@ -2220,7 +2220,7 @@ void CUserEntity::setDead()	// virtual
 	uint kamiFameIndex = CStaticFames::getInstance().getFactionIndex("kami");
 	if (pIM && kamiFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
-		CCDBNodeLeaf *pLeafKamiFame = pIM->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", kamiFameIndex - 1), false);
+		CCDBNodeLeaf *pLeafKamiFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", kamiFameIndex - 1), false);
 		if (pLeafKamiFame != NULL)
 			kamiFame = pLeafKamiFame->getValue8();
 	}
@@ -2230,7 +2230,7 @@ void CUserEntity::setDead()	// virtual
 	uint karavanFameIndex = CStaticFames::getInstance().getFactionIndex("karavan");
 	if (pIM && karavanFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
-		CCDBNodeLeaf *pLeafKaravanFame = pIM->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", karavanFameIndex - 1), false);
+		CCDBNodeLeaf *pLeafKaravanFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", karavanFameIndex - 1), false);
 		if (pLeafKaravanFame != NULL)
 			karavanFame = pLeafKaravanFame->getValue8();
 	}
@@ -2248,7 +2248,7 @@ void CUserEntity::setDead()	// virtual
 	//CInterfaceManager * pIM = CInterfaceManager::getInstance();
 	if( pIM )
 	{
-		pIM->runActionHandler("set",NULL,"dblink=UI:VARIABLES:DEATH_WARNING_WANTED|value=1");
+		CAHManager::getInstance()->runActionHandler("set",NULL,"dblink=UI:VARIABLES:DEATH_WARNING_WANTED|value=1");
 	}
 }// setDead //
 
@@ -2610,7 +2610,7 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 	// **** Update Target interface
 	//get the new target slot and set it in the database
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:TARGET:SLOT")->setValue64(slot);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TARGET:SLOT")->setValue64(slot);
 
 	// Get the new target UID, and set in Database
 	uint	tgtSlot= _Selection;
@@ -2624,7 +2624,7 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 	}
 
 	// Set the User Target
-	CCDBNodeLeaf *prop = pIM->getDbProp("UI:VARIABLES:TARGET:UID", false);
+	CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TARGET:UID", false);
 	if(prop)
 		prop->setValue32(tgtEntityId);
 
@@ -2635,78 +2635,81 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 	// clear the entries for mission option
 	for(uint k = 0; k < NUM_MISSION_OPTIONS; ++k)
 	{
-		CCDBNodeLeaf *missionOption = pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
+		CCDBNodeLeaf *missionOption = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
 		if (missionOption)
 		{
 			missionOption->setValue32(0);
 		}
-		CCDBNodeLeaf *playerGiftNeeded = pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PLAYER_GIFT_NEEDED", (int) k), false);
+		CCDBNodeLeaf *playerGiftNeeded = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PLAYER_GIFT_NEEDED", (int) k), false);
 		if (playerGiftNeeded)
 		{
 			playerGiftNeeded->setValue32(0);
 		}
 		//
-		missionOption = pIM->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
+		missionOption = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k), false);
 		if (missionOption)
 		{
 			missionOption->setValue32(0);
 		}
-		playerGiftNeeded = pIM->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PLAYER_GIFT_NEEDED", (int) k), false);
+		playerGiftNeeded = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PLAYER_GIFT_NEEDED", (int) k), false);
 		if (playerGiftNeeded)
 		{
 			playerGiftNeeded->setValue32(0);
 		}
 	}
+/* TODO ULU : Add RP tags */
 
 	// update pvp tags
-	CViewBase * tagView = dynamic_cast<CViewBase*>(pIM->getElementFromId("ui:interface:target:pvp_tags"));
-	CViewBase * contentView = dynamic_cast<CViewBase*>(pIM->getElementFromId("ui:interface:target:content"));
-
 	if ((tgtSlot!=CLFECOMMON::INVALID_SLOT) && entity)
 	{
 		CPlayerCL *pPlayer = dynamic_cast<CPlayerCL*>(entity);
 
 		if (pPlayer)
 		{
-			for (uint8 i = 0; i < 7; i++)
+			/*// Pvp Mode
+			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:pvp_tags:mode"));
+			if (tagMode)
 			{
-				CViewBitmap * tag = dynamic_cast<CViewBitmap*>(pIM->getElementFromId("ui:interface:target:pvp_tags:tag_"+toString(i)));
-				if (tag)
-				{
-					if ((pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged) && pPlayer->isPvpAlly(i))
-					{
-						tag->setTexture("pvp_ally_"+toString(i)+".tga");
-					}
-					else if ((pPlayer->getPvpMode()&PVP_MODE::PvpFaction || pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged) && pPlayer->isPvpEnnemy(i))
-					{
-						tag->setTexture("pvp_enemy_"+toString(i)+".tga");
-					}
-					else
-					{
-						tag->setTexture("alpha_10.tga");
-					}
-				}
+				if (pPlayer->getPvpMode()&PVP_MODE::PvpFaction)
+					tagMode->setTexture("pvp_orange.tga");
+				else if (pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged)
+					tagMode->setTexture("pvp_red.tga");
+				else
+					tagMode->setTexture("alpha_10.tga");
 			}
+*/
+			/*// Pvp available actions (attack, heal, both)
+			CViewBitmap * tagMode = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:pvp_tags:actions"));
+			if (tagMode)
+			{
+				if (pPlayer->getPvpMode()&PVP_MODE::PvpFaction)
+					tag->setTexture("pvp_orange.tga");
+				else if (pPlayer->getPvpMode()&PVP_MODE::PvpFactionFlagged)
+					tag->setTexture("pvp_red.tga");
+				else
+					tag->setTexture("alpha_10.tga");
+			}*/
+
 		}
 	}
 
 	// clear web page
-	prop= pIM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_URL", false);
+	prop= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_URL", false);
 	if(prop)	prop->setValue32(0);
-	prop= pIM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
+	prop= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
 	if(prop)	prop->setValue32(0);
 
 	// clear mission ring
 	for(uint k = 0; k < BOTCHATTYPE::MaxR2MissionEntryDatabase; ++k)
 	{
-		prop= pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", k), false);
+		prop= NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", k), false);
 		if(prop)	prop->setValue32(0);
 	}
 
 	// clear programs
-	prop= pIM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES", false);
+	prop= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES", false);
 	if(prop)	prop->setValue32(0);
-	prop= pIM->getDbProp("SERVER:TARGET:CONTEXT_MENU:PROGRAMMES");
+	prop= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_MENU:PROGRAMMES");
 	if(prop)	prop->setValue32(0);
 	// increment db counter for context menu
 	pIM->incLocalSyncActionCounter();
@@ -2974,7 +2977,7 @@ bool CUserEntity::sit(bool s)
 	if(ok)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf	*node= pIM->getDbProp("UI:VARIABLES:PLAYER_STAND", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PLAYER_STAND", false);
 		if(node)
 			node->setValue32(_Mode != MBEHAV::SIT);
 	}
@@ -3011,13 +3014,13 @@ void CUserEntity::setAFK(bool b, string afkTxt)
 			return;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		//sint64 start = pIM->getDbProp("SERVER:USER:ACT_TSTART")->getValue64();
-		//sint64 end = pIM->getDbProp("SERVER:USER:ACT_TEND")->getValue64();
-		//sint64 type = pIM->getDbProp("SERVER:USER:ACT_TYPE")->getValue64();
-		//sint64 num = pIM->getDbProp("SERVER:USER:ACT_NUMBER")->getValue64();
+		//sint64 start = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TSTART")->getValue64();
+		//sint64 end = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TEND")->getValue64();
+		//sint64 type = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TYPE")->getValue64();
+		//sint64 num = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_NUMBER")->getValue64();
 		if( pIM )
 		{
-			if( pIM->getDbProp("SERVER:USER:ACT_TYPE")->getValue64() != 0 )
+			if( NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TYPE")->getValue64() != 0 )
 				return;
 		}
 
@@ -3265,7 +3268,7 @@ bool CUserEntity::isBusy() const
 
 	// TODO : put the right DB entry !
 
-	CCDBNodeLeaf *nod = IM->getDbProp("SERVER:INVENTORY:EXCHANGE:BEGUN", false);
+	CCDBNodeLeaf *nod = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INVENTORY:EXCHANGE:BEGUN", false);
 	if(nod)
 	{
 		if(nod->getValueBool())
@@ -3280,7 +3283,7 @@ bool CUserEntity::isBusy() const
 	uint i;
 	for(i=0; i<nbSlot; ++i)
 	{
-		nod = IM->getDbProp(NLMISC::toString("SERVER:INVENTORY:%d:%d:SHEET", INVENTORIES::pickup, i), false);
+		nod = NLGUI::CDBManager::getInstance()->getDbProp(NLMISC::toString("SERVER:INVENTORY:%d:%d:SHEET", INVENTORIES::pickup, i), false);
 		if(nod)
 		{
 			if(nod->getValue32() != 0)
@@ -3293,7 +3296,7 @@ bool CUserEntity::isBusy() const
 	// Check Harvest
 	for(i=0; i<nbSlot; ++i)
 	{
-		nod = IM->getDbProp(NLMISC::toString("SERVER:INVENTORY:%d:%d:SHEET", INVENTORIES::harvest, i), false);
+		nod = NLGUI::CDBManager::getInstance()->getDbProp(NLMISC::toString("SERVER:INVENTORY:%d:%d:SHEET", INVENTORIES::harvest, i), false);
 		if(nod)
 		{
 			if(nod->getValue32() != 0)
@@ -3454,7 +3457,7 @@ void CUserEntity::CSpeedFactor::init()
 {
 	_Value = 1.0f; // Default speed factor is 1.
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
-	CCDBNodeLeaf *pNodeLeaf = IM->getDbProp("SERVER:USER:SPEED_FACTOR", false);
+	CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 	if(pNodeLeaf)
 	{
 		/* if(!pNodeLeaf->addToLeaves(this))
@@ -3480,7 +3483,7 @@ void CUserEntity::CMountHunger::init()
 void CUserEntity::CMountSpeeds::init()
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
-	CCDBNodeLeaf *pNodeLeaf = IM->getDbProp( "SERVER:USER:MOUNT_WALK_SPEED", false );
+	CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp( "SERVER:USER:MOUNT_WALK_SPEED", false );
 	BOMB_IF( ! pNodeLeaf, "MOUNT_WALK_SPEED not found", return );
 	if(pNodeLeaf)
 	{
@@ -3488,7 +3491,7 @@ void CUserEntity::CMountSpeeds::init()
 		pNodeLeaf->addObserver(this, textId);
 		_WalkSpeed = ((float)pNodeLeaf->getValue32()) / 1000.0f; // may have been received before
 	}
-	pNodeLeaf = IM->getDbProp( "SERVER:USER:MOUNT_RUN_SPEED", false );
+	pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp( "SERVER:USER:MOUNT_RUN_SPEED", false );
 	BOMB_IF( ! pNodeLeaf, "MOUNT_RUN_SPEED not found", return );
 	if(pNodeLeaf)
 	{
@@ -3503,7 +3506,7 @@ void CUserEntity::CMountSpeeds::init()
 void CUserEntity::CSpeedFactor::release()
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
-	CCDBNodeLeaf *pNodeLeaf = IM->getDbProp("SERVER:USER:SPEED_FACTOR", false);
+	CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 	if(pNodeLeaf)
 	{
 		/* if(!pNodeLeaf->addToLeaves(this))
@@ -3521,14 +3524,14 @@ void CUserEntity::CMountHunger::release()
 void CUserEntity::CMountSpeeds::release()
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
-	CCDBNodeLeaf *pNodeLeaf = IM->getDbProp( "SERVER:USER:MOUNT_WALK_SPEED", false );
+	CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp( "SERVER:USER:MOUNT_WALK_SPEED", false );
 	BOMB_IF( ! pNodeLeaf, "MOUNT_WALK_SPEED not found", return );
 	if(pNodeLeaf)
 	{
 		ICDBNode::CTextId textId;
 		pNodeLeaf->removeObserver(this, textId);
 	}
-	pNodeLeaf = IM->getDbProp( "SERVER:USER:MOUNT_RUN_SPEED", false );
+	pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp( "SERVER:USER:MOUNT_RUN_SPEED", false );
 	BOMB_IF( ! pNodeLeaf, "MOUNT_RUN_SPEED not found", return );
 	if(pNodeLeaf)
 	{
@@ -3549,12 +3552,13 @@ void CUserEntity::CSpeedFactor::update(ICDBNode *node) // virtual
 	//nlinfo("SpeedFactor changed to %f / %"NL_I64"u", _Value, leaf->getValue64());
 	
 	// clamp the value (2.0 is the egg item or the level 6 speed up power up, nothing should be faster)
-	if(_Value > 2.0f)
-	{
+	// commented because ring editor speed is in fact faster
+	//if(_Value > 2.0f)
+	//{
 		//nlwarning("HACK: you try to change the speed factor to %f", _Value);
-		nlstop;
-		_Value = 2.0f;
-	}
+		//nlstop;
+		//_Value = 2.0f;
+	//}
 }// CSpeedFactor::update //
 
 
@@ -3569,7 +3573,7 @@ bool CUserEntity::CMountHunger::canRun() const
 
 	// Find the mount's db leaf and check hunger
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(pIM->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
+	CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(NLGUI::CDBManager::getInstance()->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
 	BOMB_IF( ! animalsNode, "! animalsNode", return false; );
 	uint nbAnimals = (uint)animalsNode->getNbNodes();
 	for ( uint i=0; i!=nbAnimals; ++i )
@@ -3594,8 +3598,8 @@ bool CUserEntity::CMountHunger::canRun() const
 void CUserEntity::CMountSpeeds::update(ICDBNode * /* node */) // virtual
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	_WalkSpeed = ((float)(pIM->getDbProp("SERVER:USER:MOUNT_WALK_SPEED")->getValue32())) / 1000.0f;
-	_RunSpeed = ((float)(pIM->getDbProp("SERVER:USER:MOUNT_RUN_SPEED")->getValue32())) / 1000.0f;
+	_WalkSpeed = ((float)(NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:MOUNT_WALK_SPEED")->getValue32())) / 1000.0f;
+	_RunSpeed = ((float)(NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:MOUNT_RUN_SPEED")->getValue32())) / 1000.0f;
 }
 
 
@@ -3618,7 +3622,7 @@ CCDBNodeBranch *CUserEntity::getBeastDBEntry( CLFECOMMON::TClientDataSetIndex ui
 {
 	// Find animal entry corresponding to datasetId
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(pIM->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
+	CCDBNodeBranch *animalsNode = safe_cast<CCDBNodeBranch*>(NLGUI::CDBManager::getInstance()->getDB()->getNode( ICDBNode::CTextId( "SERVER:PACK_ANIMAL" ), false ));
 	BOMB_IF( ! animalsNode, "! animalsNode", return NULL );
 	uint nbAnimals = (uint)animalsNode->getNbNodes();
 	for ( uint i=0; i!=nbAnimals; ++i )
@@ -3710,7 +3714,7 @@ void CUserEntity::load()	// virtual
 	if(!_WaitForAppearance)
 	{
 		// Visual properties A
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);	// Vpa udapte vpb and vpc too.
 	}
 }// load //
@@ -3743,7 +3747,7 @@ void CUserEntity::CSkillPointsObserver::update(ICDBNode* node )
 			spTitle= CI18N::get(toString("uiSkillPointsBold%d",SpType));
 
 			// run the popup
-			pIM->runActionHandler("message_popup", NULL, "text1="+deltaStr+"|text0="+spTitle.toUtf8());
+			CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+deltaStr+"|text0="+spTitle.toUtf8());
 
 			// Context help
 			contextHelp ("skill_point");
@@ -4060,7 +4064,7 @@ void CUserEntity::switchVelocity(bool userRequest)
 	pIM->displaySystemInfo(msg, cat);
 
 	// Write to the UI database, to update views
-	CCDBNodeLeaf	*node= pIM->getDbProp("UI:VARIABLES:PLAYER_RUNNING", false);
+	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PLAYER_RUNNING", false);
 	if(node)
 		node->setValue32(_Run);
 }
@@ -4289,7 +4293,7 @@ void	CUserEntity::setR2CharMode(R2::TCharMode mode)
 bool CUserEntity::isInNpcControl() const
 {
 	CInterfaceManager* pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*sheet = pIM->getDbProp("SERVER:USER:NPC_CONTROL:SHEET", false);
+	CCDBNodeLeaf	*sheet = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:NPC_CONTROL:SHEET", false);
 	return sheet && NLMISC::CSheetId(sheet->getValue32())!=NLMISC::CSheetId::Unknown;
 }
 
@@ -4297,9 +4301,9 @@ bool CUserEntity::isInNpcControl() const
 void	CUserEntity::updateNpcContolSpeed()
 {
 	CInterfaceManager* pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf	*sheet = pIM->getDbProp("SERVER:USER:NPC_CONTROL:SHEET", false);
-	CCDBNodeLeaf	*walk  = pIM->getDbProp("SERVER:USER:NPC_CONTROL:WALK",  false);
-	CCDBNodeLeaf	*run   = pIM->getDbProp("SERVER:USER:NPC_CONTROL:RUN",   false);
+	CCDBNodeLeaf	*sheet = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:NPC_CONTROL:SHEET", false);
+	CCDBNodeLeaf	*walk  = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:NPC_CONTROL:WALK",  false);
+	CCDBNodeLeaf	*run   = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:NPC_CONTROL:RUN",   false);
 	if (!sheet || !walk || !run)
 	{
 		return;
@@ -4419,7 +4423,7 @@ sint CUserEntity::getLevel() const
 	sint level = -1;
 	for(uint i=0;i<EGSPD::CSPType::EndSPType;i++)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:USER:SKILL_POINTS_%d:VALUE", i), false);
 		if(node)
 		{
 			level = std::max(level, (sint) node->getValue32());
@@ -4457,3 +4461,4 @@ void CUserEntity::trader(const CLFECOMMON::TCLEntityId &slot)
 	if (_Trader != CLFECOMMON::INVALID_SLOT)
 		EntitiesMngr.refreshInsceneInterfaceOfFriendNPC(_Trader);
 }
+

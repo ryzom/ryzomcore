@@ -17,13 +17,13 @@
 
 #include "action_handler_misc.h"
 #include "interface_manager.h"
-#include "ctrl_button.h"
-#include "group_container.h"
-#include "group_editbox.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_editbox.h"
 #include "people_interraction.h"
 #include "nel/misc/algo.h"
-#include "interface_expr.h"
-#include "interface_link.h"
+#include "nel/gui/interface_expr.h"
+#include "nel/gui/interface_link.h"
 #include "../client_chat_manager.h"
 #include "../motion/user_controls.h"
 #include "../entity_cl.h"
@@ -99,13 +99,13 @@ void CActionHandlerShowOne::execute (CCtrlBase * /* pCaller */, const std::strin
 	// hide all window from the list.
 	for(uint i=0;i<wndList.size();i++)
 	{
-		CInterfaceElement	*wnd= mngr->getElementFromId(wndList[i]);
+		CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(wndList[i]);
 		if(wnd)
 			wnd->setActive(false);
 	}
 
 	// show the one needed
-	CInterfaceElement	*wnd= mngr->getElementFromId(wndShow);
+	CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(wndShow);
 	if(wnd)
 		wnd->setActive(true);
 }
@@ -127,7 +127,7 @@ void CActionHandlerActive::execute (CCtrlBase * /* pCaller */, const std::string
 			return;
 		}
 		CInterfaceManager	*mngr = CInterfaceManager::getInstance();
-		CInterfaceElement	*wnd = mngr->getElementFromId(target);
+		CInterfaceElement	*wnd = CWidgetManager::getInstance()->getElementFromId(target);
 		if(!wnd)
 		{
 			nlwarning("<CActionHandlerActive::execute> Can't get window %s", target.c_str());
@@ -158,7 +158,7 @@ void CActionHandlerSetOpen::execute (CCtrlBase * /* pCaller */, const std::strin
 			return;
 		}
 		CInterfaceManager	*mngr = CInterfaceManager::getInstance();
-		CGroupContainer		*wnd = dynamic_cast<CGroupContainer*>(mngr->getElementFromId(target));
+		CGroupContainer		*wnd = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(target));
 		if(!wnd)
 		{
 			nlwarning("<CActionHandlerActive::execute> Can't get window %s", target.c_str());
@@ -199,7 +199,7 @@ void CActionHandlerHideClose::execute (CCtrlBase * /* pCaller */, const std::str
 	uint i;
 	for(i=0;i<hideList.size();i++)
 	{
-		CInterfaceElement	*wnd= mngr->getElementFromId(hideList[i]);
+		CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(hideList[i]);
 		if(wnd)
 			wnd->setActive(false);
 	}
@@ -208,7 +208,7 @@ void CActionHandlerHideClose::execute (CCtrlBase * /* pCaller */, const std::str
 	for(i=0;i<closeList.size();i++)
 	{
 		// get a container if possible
-		CInterfaceElement	*wnd= mngr->getElementFromId(closeList[i]);
+		CInterfaceElement	*wnd= CWidgetManager::getInstance()->getElementFromId(closeList[i]);
 		CGroupContainer		*pIC = dynamic_cast<CGroupContainer*>(wnd);
 		if(pIC)
 			pIC->close();
@@ -236,13 +236,13 @@ void	CActionHandlerEnterModal::execute(CCtrlBase *pCaller, const std::string &pa
 
 	// get the group from param
 	string	groupName= getParam(params, "group");
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( pIM->getElementFromId(groupName) );
+	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(groupName) );
 	if(group)
 	{
 		UserControls.stopFreeLook();
 
 		// enable the modal
-		pIM->enableModalWindow(pCaller, group);
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, group);
 	}
 	else
 	{
@@ -257,11 +257,11 @@ void	CActionHandlerPushModal::execute(CCtrlBase *pCaller, const std::string &par
 
 	// get the group from param
 	string	groupName= getParam(params, "group");
-	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( mngr->getElementFromId(groupName) );
+	CInterfaceGroup	*group= dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId(groupName) );
 	if(group)
 	{
 		// enable the modal
-		mngr->pushModalWindow(pCaller, group);
+		CWidgetManager::getInstance()->pushModalWindow(pCaller, group);
 	}
 	else
 	{
@@ -276,7 +276,7 @@ void	CActionHandlerLeaveModal::execute(CCtrlBase * /* pCaller */, const std::str
 	CInterfaceManager	*mngr= CInterfaceManager::getInstance();
 
 	// quit the modal
-	mngr->popModalWindow();
+	CWidgetManager::getInstance()->popModalWindow();
 }
 
 
@@ -288,8 +288,6 @@ class CActionHandlerProc : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &params)
 	{
-		CInterfaceManager	*mngr= CInterfaceManager::getInstance();
-
 		// split the parameters
 		vector<string>		paramList;
 		splitString(params, "|", paramList);
@@ -297,7 +295,7 @@ public:
 			return;
 
 		// execute the procedure
-		mngr->runProcedure(paramList[0], pCaller, paramList);
+		CWidgetManager::getInstance()->runProcedure(paramList[0], pCaller, paramList);
 	}
 };
 REGISTER_ACTION_HANDLER (CActionHandlerProc, "proc");
@@ -427,16 +425,17 @@ class CActionHandlerAddLink : public IActionHandler
 		}
 
 		std::vector<CInterfaceLink::CTargetInfo> targetsVect;
-		bool result = CInterfaceParser::splitLinkTargets(targets, parentGroup, targetsVect);
+		std::vector<CInterfaceLink::CCDBTargetInfo> cdbTargetsVect;
+		bool result = CInterfaceLink::splitLinkTargetsExt(targets, parentGroup, targetsVect, cdbTargetsVect);
 		if (!result)
 		{
 			nlwarning("<CActionHandlerAddLink> Couldn't parse all links");
 		}
 		// add the link
 		CInterfaceLink *il = new CInterfaceLink;
-		il->init(targetsVect, expr, ah, ahparam, ahcond, parentGroup);
+		il->init(targetsVect, cdbTargetsVect, expr, ah, ahparam, ahcond, parentGroup);
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->addLink(il, id);
+		CWidgetManager::getInstance()->getParser()->addLink(il, id);
 		il->update();
 	}
 };
@@ -455,7 +454,7 @@ class CActionHandlerRemoveLink : public IActionHandler
 			return;
 		}
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		im->removeLink(id);
+		CWidgetManager::getInstance()->getParser()->removeLink(id);
 	}
 };
 REGISTER_ACTION_HANDLER (CActionHandlerRemoveLink, "remove_link");
@@ -491,7 +490,7 @@ CInterfaceGroup *createMenuColorWidget(const string &colDbEntry,
 		make_pair(string("tooltip"), toolTipTextID),
 		make_pair(string("ccd_title"), ccdTitle),
 	};
-	return im->createGroupInstance("menu_color_widget", "", params, 3);
+	return CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_color_widget", "", params, 3);
 }
 
 // ***************************************************************************
@@ -520,7 +519,8 @@ CCameraBackup setupCameraForScreenshot(UScene &scene, uint left, uint right, uin
 
 	// Build a viewport
 	CViewport viewport;
-	viewport.init (0, 0, (float)(right-left)/Driver->getWindowWidth(), (float)(bottom-top)/Driver->getWindowHeight());
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
+	viewport.init (0, 0, (float)(right-left)/Driver->getWindowWidth(),(float)(bottom-top)/Driver->getWindowHeight());
 
 	// Activate all this
 	scene.getCam().setFrustum (frustumPart);
@@ -542,16 +542,19 @@ void renderSceneScreenShot (uint left, uint right, uint top, uint bottom, uint s
 {
 	CCameraBackup cbScene = setupCameraForScreenshot(*Scene, left, right, top, bottom, screenShotWidth, screenShotHeight);
 	CCameraBackup cbCanopy = setupCameraForScreenshot(*SceneRoot, left, right, top, bottom, screenShotWidth, screenShotHeight);
+	commitCamera();
 	// sky setup are copied from main scene before rendering so no setup done here
-	renderAll(ClientCfg.ScreenShotFullDetail);
+	renderScene(ClientCfg.ScreenShotFullDetail, ClientCfg.Bloom);
 	restoreCamera(*Scene, cbScene);
 	restoreCamera(*SceneRoot, cbCanopy);
+	commitCamera();
 }
 
 // ***************************************************************************
 
 void getBuffer (CBitmap &btm)
 {
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
 	//
 	if (ClientCfg.ScreenShotWidth && ClientCfg.ScreenShotHeight)
 	{
@@ -611,6 +614,8 @@ bool screenshotZBuffer(const std::string &filename)
 	std::string ext = filename.substr(pos+1);
 
 	std::vector<float> z;
+	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
+
 	Driver->getZBuffer(z);
 
 	float min = std::numeric_limits<float>::max();
@@ -884,11 +889,21 @@ NLMISC_COMMAND(slsn, "Temp : set the name of the last sender.", "<name>")
 bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 {
 	// extract the replacement id
-	std::string strNewTitle = CEntityCL::getTitleFromName(inOut);
+	ucstring strNewTitle = CEntityCL::getTitleFromName(inOut);
 
 	// retrieve the translated string
 	if (!strNewTitle.empty())
-		inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle,Woman);
+	{
+		inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(strNewTitle, Woman);
+		{
+			// Sometimes translation contains another title
+			ucstring::size_type pos = inOut.find('$');
+			if (pos != ucstring::npos)
+			{
+				inOut = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(inOut), Woman);
+			}
+		}
+	}
 	else
 		inOut = "";
 
@@ -920,6 +935,29 @@ bool CStringPostProcessNPCRemoveTitle::cbIDStringReceived(ucstring &inOut)
 
 
 
+// ***************************************************************************
+class CAHAnimStart : public IActionHandler
+{
+public:
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	{
+		string sAnim = getParam(Params, "anim");
+		CWidgetManager::getInstance()->startAnim(sAnim);
+	}
+};
+REGISTER_ACTION_HANDLER (CAHAnimStart, "anim_start");
+
+// ***************************************************************************
+class CAHAnimStop : public IActionHandler
+{
+public:
+	virtual void execute (CCtrlBase * /* pCaller */, const std::string &Params)
+	{
+		string sAnim = getParam(Params, "anim");
+		CWidgetManager::getInstance()->stopAnim(sAnim);
+	}
+};
+REGISTER_ACTION_HANDLER (CAHAnimStop, "anim_stop");
 
 
 

@@ -18,12 +18,12 @@
 
 #include "stdpch.h"
 //
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 //
 #include "group_compas.h"
 #include "interface_3d_scene.h"
 #include "../entities.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "group_map.h"
 #include "../continent.h"
 #include "../continent_manager.h"
@@ -68,7 +68,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 			return;
 		}
 	}
-	f.serialCheck((uint32) 'CTAR');
+	f.serialCheck(NELID("CTAR"));
 	f.serialVersion(0);
 	f.serial(Pos);
 	// for the name, try to save a string identifier if possible, because language may be changed between
@@ -95,7 +95,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 			_PositionState = NULL;
 		}
 	}
-	f.serialCheck((uint32) '_END');
+	f.serialCheck(NELID("_END"));
 	// if language has been modified, then we are not able to display correctly the name, so just
 	// reset the compass to north to avoid incoherency
 	if (f.isReading())
@@ -279,7 +279,7 @@ void CGroupCompas::draw()
 		case CCompassTarget::Home:
 		{
 			// get pos
-			CCDBNodeLeaf *pos = im->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
+			CCDBNodeLeaf *pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
 			sint32 px = (sint32) (pos->getValue64() >> 32);
 			sint32 py = pos->getValue32();
 			if (px != 0 || py != 0)
@@ -399,18 +399,18 @@ void CGroupCompas::draw()
 
 // ***************************************************************************
 
-bool CGroupCompas::handleEvent (const CEventDescriptor &event)
+bool CGroupCompas::handleEvent (const NLGUI::CEventDescriptor &event)
 {
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		//
 		if ((_RadarView != NULL) && (_RadarRangeView != NULL))
 		{
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel)
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				_RadarPos = pIM->getDbProp("UI:SAVE:RADARZOOM")->getValue32();
+				_RadarPos = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RADARZOOM")->getValue32();
 				if (eventDesc.getWheel() > 0)
 				{
 					// Zoom out
@@ -422,7 +422,7 @@ bool CGroupCompas::handleEvent (const CEventDescriptor &event)
 					if (_RadarPos < 3) _RadarPos++;
 				}
 
-				pIM->getDbProp("UI:SAVE:RADARZOOM")->setValue32(_RadarPos);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RADARZOOM")->setValue32(_RadarPos);
 			}
 		}
 	}
@@ -491,7 +491,7 @@ bool CGroupCompas::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (ptr) _NewTargetSelectedColor = convertColor(ptr);
 	//
 
-	_DynamicTargetPos = CInterfaceManager::getInstance()->getDbProp(COMPASS_DB_PATH ":TARGET");
+	_DynamicTargetPos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":TARGET");
 
 	return true;
 }
@@ -501,8 +501,8 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	CCDBNodeLeaf	*entityNode = pIM->getDbProp(toString(TEAM_DB_PATH ":%d:UID", teamMemberId), false);
-	CCDBNodeLeaf	*nameNode = pIM->getDbProp(toString(TEAM_DB_PATH ":%d:NAME", teamMemberId), false);
+	CCDBNodeLeaf	*entityNode = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:UID", teamMemberId), false);
+	CCDBNodeLeaf	*nameNode = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:NAME", teamMemberId), false);
 	if (nameNode && nameNode->getValueBool() && entityNode && entityNode->getValue32()!=0 && nameNode)
 	{
 		CSmartPtr<CTeammatePositionState> tracker = new CTeammatePositionState;
@@ -532,7 +532,7 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 	if(animalMemberId<MAX_INVENTORY_ANIMAL+1)
 	{
 		ANIMAL_TYPE::EAnimalType at;
-		at = (ANIMAL_TYPE::EAnimalType)pIM->getDbProp("SERVER:PACK_ANIMAL:BEAST"+toString(animalMemberId-1)+":TYPE")->getValue32();
+		at = (ANIMAL_TYPE::EAnimalType)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST"+toString(animalMemberId-1)+":TYPE")->getValue32();
 		string sPrefix;
 		switch(at)
 		{
@@ -551,7 +551,7 @@ bool	buildCompassTargetFromTeamMember(CCompassTarget &ct, uint teamMemberId)
 		return false;
 
 	// get if present or not
-	CCDBNodeLeaf	*statusNode = pIM->getDbProp(dbBase + ":STATUS", false);
+	CCDBNodeLeaf	*statusNode = NLGUI::CDBManager::getInstance()->getDbProp(dbBase + ":STATUS", false);
 	if (statusNode && ANIMAL_STATUS::isSpawned((ANIMAL_STATUS::EAnimalStatus)statusNode->getValue32()) )
 	{
 		CSmartPtr<CAnimalPositionState> tracker = new CAnimalPositionState;
@@ -585,6 +585,12 @@ bool CGroupCompasMenu::parse(xmlNodePtr cur, CInterfaceGroup *parent /*=NULL*/)
 	CXMLAutoPtr compass((const char*) xmlGetProp (cur,  (xmlChar*)"compass"));
 	if (compass) _TargetCompass = (const char *) compass;
 	return true;
+}
+
+// Helper for sorting landmarks
+static inline bool UserLandMarksSortPredicate(const CUserLandMark& lm1, const CUserLandMark& lm2)
+{
+	return toLower(lm1.Title) < toLower(lm2.Title);
 }
 
 // ***************************************************************************
@@ -659,7 +665,7 @@ void CGroupCompasMenu::setActive (bool state)
 			Targets.push_back(ct);
 			getRootMenu()->addLineAtIndex(lineIndex ++, ct.Name, "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 			// Home
-			CCDBNodeLeaf *pos = im->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
+			CCDBNodeLeaf *pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
 			sint32 px = (sint32) (pos->getValue64() >> 32);
 			sint32 py = pos->getValue32();
 			if (px != 0 || py != 0)
@@ -670,7 +676,7 @@ void CGroupCompasMenu::setActive (bool state)
 				getRootMenu()->addLineAtIndex(lineIndex ++,  ct.Name, "set_compas", toString ("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 			}
 			// Respawn
-			pos = im->getDbProp(COMPASS_DB_PATH ":BIND_POINT");
+			pos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":BIND_POINT");
 			px = (sint32) (pos->getValue64() >> 32);
 			py = pos->getValue32();
 			if (px != 0 || py != 0)
@@ -720,14 +726,14 @@ void CGroupCompasMenu::setActive (bool state)
 				{
 					for(uint l = 0; l <MAX_NUM_MISSION_TARGETS; ++l)
 					{
-						CCDBNodeLeaf *textIDLeaf = im->getDbProp(baseDbPath + toString(":%d:TARGET%d:TITLE", (int) k, (int) l), false);
+						CCDBNodeLeaf *textIDLeaf = NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath + toString(":%d:TARGET%d:TITLE", (int) k, (int) l), false);
 						if (textIDLeaf)
 						{
 							ucstring name;
 							if (CStringManagerClient::instance()->getDynString(textIDLeaf->getValue32(), name))
 							{
-								CCDBNodeLeaf *leafPosX= im->getDbProp(baseDbPath +  toString(":%d:TARGET%d:X", (int) k, (int) l), false);
-								CCDBNodeLeaf *leafPosY = im->getDbProp(baseDbPath +  toString(":%d:TARGET%d:Y", (int) k, (int) l), false);
+								CCDBNodeLeaf *leafPosX= NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath +  toString(":%d:TARGET%d:X", (int) k, (int) l), false);
+								CCDBNodeLeaf *leafPosY = NLGUI::CDBManager::getInstance()->getDbProp(baseDbPath +  toString(":%d:TARGET%d:Y", (int) k, (int) l), false);
 								if (leafPosX && leafPosY)
 								{
 									CCompassTarget ct;
@@ -803,16 +809,21 @@ void CGroupCompasMenu::setActive (bool state)
 				}
 				// User landmarks
 				uint nbUserLandMarks = std::min( uint(currCont->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks() );
+
+				// Sort the landmarks
+				std::vector<CUserLandMark> sortedLandmarks(currCont->UserLandMarks);
+				std::sort(sortedLandmarks.begin(), sortedLandmarks.end(), UserLandMarksSortPredicate);
+
 				for(k = 0; k < nbUserLandMarks; ++k)
 				{
-					if (currCont->UserLandMarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
+					if (sortedLandmarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
 					{
 						CCompassTarget ct;
 						ct.setType(CCompassTarget::UserLandMark);
-						ct.Pos = currCont->UserLandMarks[k].Pos;
-						ct.Name = currCont->UserLandMarks[k].Title;
+						ct.Pos = sortedLandmarks[k].Pos;
+						ct.Name = sortedLandmarks[k].Title;
 						Targets.push_back(ct);
-						landMarkSubMenus[currCont->UserLandMarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+						landMarkSubMenus[sortedLandmarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 						selectable= true;
 					}
 				}
@@ -916,9 +927,9 @@ class CHandlerSetCompas : public IActionHandler
 		std::string compassID = getParam(sParams, "compass");
 		std::string menuID = getParam(sParams, "menu");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId(compassID));
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(compassID));
 		if (!gc) return;
-		CGroupCompasMenu *gcm = dynamic_cast<CGroupCompasMenu *>(im->getElementFromId(menuID));
+		CGroupCompasMenu *gcm = dynamic_cast<CGroupCompasMenu *>(CWidgetManager::getInstance()->getElementFromId(menuID));
 		if (!gcm) return;
 		int index;
 		std::string id = getParam(sParams, "id");
@@ -928,7 +939,7 @@ class CHandlerSetCompas : public IActionHandler
 			gc->setTarget(gcm->Targets[index]);
 			gc->setActive(true);
 			gc->blink();
-			im->setTopWindow(gc);
+			CWidgetManager::getInstance()->setTopWindow(gc);
 		}
 	}
 };
@@ -957,13 +968,13 @@ class CHandlerSetTeamCompas : public IActionHandler
 				CCompassTarget	ct;
 				if(buildCompassTargetFromTeamMember(ct, peopleIndex))
 				{
-					CGroupCompas	*gc= dynamic_cast<CGroupCompas*>(pIM->getElementFromId(compassID));
+					CGroupCompas	*gc= dynamic_cast<CGroupCompas*>(CWidgetManager::getInstance()->getElementFromId(compassID));
 					if(gc)
 					{
 						gc->setTarget(ct);
 						gc->setActive(true);
 						gc->blink();
-						pIM->setTopWindow(gc);
+						CWidgetManager::getInstance()->setTopWindow(gc);
 					}
 				}
 			}
@@ -979,7 +990,7 @@ class CHandlerSetCompassNorth : public IActionHandler
 	{
 		std::string compassID = getParam(sParams, "compass");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId(compassID));
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(compassID));
 		if (!gc) return;
 		gc->setTarget(CCompassTarget());
 	}

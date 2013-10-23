@@ -56,7 +56,7 @@ bool CDBGroupListSheetBonusMalus::parse (xmlNodePtr cur, CInterfaceGroup *parent
 	if (prop)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewRenderer &rVR = pIM->getViewRenderer();
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_TextId= rVR.getTextureIdFromName ((const char *)prop);
 	}
 
@@ -65,7 +65,7 @@ bool CDBGroupListSheetBonusMalus::parse (xmlNodePtr cur, CInterfaceGroup *parent
 	for(;;)
 	{
 		string	db= toString("%s:%d:" DISABLE_LEAF, _DbBranchName.c_str(), i);
-		CCDBNodeLeaf	*node= pIM->getDbProp(db, false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(db, false);
 		if(!node)
 		{
 			break;
@@ -86,7 +86,7 @@ void CDBGroupListSheetBonusMalus::draw ()
 	CDBGroupListSheet::draw();
 
 //	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-//	CViewRenderer		&rVR= pIM->getViewRenderer();
+//	CViewRenderer		&rVR= *CViewRenderer::getInstance();
 
 //	sint32	drl= getRenderLayer()+1;
 

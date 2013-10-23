@@ -175,18 +175,58 @@
 #include "nel/misc/hierarchical_timer.h"
 inline uint32 saveGameCycleToSecond(NLMISC::TGameCycle tick)
 {
+    // Evaluate the UTC of this event (with the current date of save). Suppose that 1 second==10 tick
+    // NB: result should be positive since no event should have been launched before 1970!
+    if (tick < CTickEventHandler::getGameCycle())
+    {
+        NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle() - tick;
+        uint32 s_dt = tick_dt / 10;
+        return NLMISC::CTime::getSecondsSince1970() - s_dt;
+    }
+    else
+    {
+        NLMISC::TGameCycle tick_dt = tick - CTickEventHandler::getGameCycle();
+        uint32 s_dt = tick_dt / 10;
+        return NLMISC::CTime::getSecondsSince1970() + s_dt;
+    }
+}
+inline NLMISC::TGameCycle loadSecondToGameCycle(uint32 second)
+{
+    if (second < NLMISC::CTime::getSecondsSince1970())
+    {
+        uint32 s_dt = NLMISC::CTime::getSecondsSince1970() - second;
+        NLMISC::TGameCycle tick_dt = s_dt * 10;
+        return CTickEventHandler::getGameCycle() - tick_dt;
+    }
+    else
+    {
+        uint32 s_dt = second - NLMISC::CTime::getSecondsSince1970();
+        NLMISC::TGameCycle tick_dt = s_dt * 10;
+        return CTickEventHandler::getGameCycle() + tick_dt;
+    }
+}
+
+/*inline uint32 saveGameCycleToSecond(NLMISC::TGameCycle tick)
+{
+	sint32 dt = CTickEventHandler::getGameCycle() - tick;
+
+
 	// Evaluate the UTC of this event (with the current date of save). Suppose that 1 second==10 tick
-	return  sint32(NLMISC::CTime::getSecondsSince1970()) + (sint32(tick) - sint32(CTickEventHandler::getGameCycle()))/10;
+	if (tick < CTickEventHandler::getGameCycle())
+		return NLMISC::CTime::getSecondsSince1970();
+	else
+		return  NLMISC::CTime::getSecondsSince1970() + (tick - CTickEventHandler::getGameCycle())/10;
 	// NB: result should be positive since no event should have been launched before 1970!
 }
 
 inline NLMISC::TGameCycle loadSecondToGameCycle(uint32 second)
 {
+	if (second < NLMISC::CTime::getSecondsSince1970())
+		return 0;
+	
 	// Convert UTC of the event to game cycle. Suppose that 1 second==10 tick
-	sint32	newTick= CTickEventHandler::getGameCycle() + (sint32(second) - sint32(NLMISC::CTime::getSecondsSince1970()))*10;
-	// If game cycle is loaded on a server where current game cycle is too young, we can have here negative values => avoid them
-	return std::max(newTick, sint32(0));
-}
+	return CTickEventHandler::getGameCycle() + (second - NLMISC::CTime::getSecondsSince1970())*10;
+}*/
 #endif
 
 // GameCycle property (saved as a UTC of the current game cycle, support server migration)
@@ -285,9 +325,11 @@ static _TOKENS_CLASSNAME _TOKENS_OBJNAME;
 
 #else
 
+#ifdef NL_OS_WINDOWS
 	#pragma message( " ")
 	#pragma message( "NON-OPTIMISED: Persistent data class " NL_MACRO_TO_STR(PERSISTENT_CLASS) " not using a token family")
 	#pragma message( " ")
+#endif
 
 #endif
 

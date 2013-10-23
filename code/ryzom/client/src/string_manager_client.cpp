@@ -25,6 +25,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/algo.h"
 #include "misc.h"
+#include "entity_cl.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -34,6 +35,8 @@ namespace STRING_MANAGER
 
 	// ***************************************************************************
 	map<string, CStringManagerClient::CItem> CStringManagerClient::_SpecItem_TempMap;
+	map<ucstring, ucstring> CStringManagerClient::_DynStrings;
+	vector<ucstring> CStringManagerClient::_TitleWords;
 	bool CStringManagerClient::_SpecItem_MemoryCompressed = false;
 	char *CStringManagerClient::_SpecItem_Labels = NULL;
 	ucchar *CStringManagerClient::_SpecItem_NameDesc = NULL;
@@ -381,7 +384,15 @@ restartLoop4:
 				result = ucstring(tmp) + it->second;
 			}
 			else
+			{
 				result = it->second;
+				if (result.size() > 9 && result.substr(0, 9) == ucstring("<missing:")) 
+				{
+					map<ucstring, ucstring>::iterator itds = _DynStrings.find(result.substr(9, result.size()-10));
+					if (itds != _DynStrings.end())
+						result = itds->second;
+				}
+			}
 		}
 
 		return true;
@@ -717,6 +728,13 @@ restartLoop:
 										str.resize(start);
 								}
 							}
+						}
+
+						// If the string contains a title, then remove it
+						ucstring::size_type pos = str.find('$');
+						if ( ! str.empty() && pos != ucstring::npos)
+						{
+							str = CEntityCL::removeTitleFromName(str);
 						}
 
 						// append this string
@@ -1593,9 +1611,36 @@ const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CShee
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getTitleLocalizedName(const std::string &titleId, bool women)
+const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleId, bool women)
 {
-	return getSpecialWord(titleId,women);
+	vector<ucstring> listInfos = getTitleInfos(titleId, women);
+
+	if (listInfos.size() > 0)
+	{
+		_TitleWords.push_back(listInfos[0]);
+		return _TitleWords.back().c_str();
+	}
+	
+	return titleId.c_str();
+}
+
+// ***************************************************************************
+vector<ucstring> CStringManagerClient::getTitleInfos(const ucstring &titleId, bool women)
+{
+	//ucstring infosUC;
+	//infosUC.fromUtf8(titleId);
+	vector<ucstring> listInfos;
+	splitUCString(titleId, ucstring("#"), listInfos);
+
+	if (listInfos.size() > 0)
+	{
+		if (titleId[0] != '#')
+		{
+			listInfos[0] = getSpecialWord(listInfos[0].toUtf8(), women);
+		}
+	}
+
+	return listInfos;
 }
 
 // ***************************************************************************
@@ -1641,7 +1686,14 @@ const ucchar *CStringManagerClient::getSquadLocalizedDescription(NLMISC::CSheetI
 }
 
 // ***************************************************************************
-void		CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2)
+void CStringManagerClient::replaceDynString(const ucstring &name, const ucstring &text)
+{
+	_DynStrings[name] = text;
+}
+
+
+// ***************************************************************************
+void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2)
 {
 	std::string	label= id.toString();
 	if (label.empty())

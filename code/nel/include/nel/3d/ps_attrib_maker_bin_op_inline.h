@@ -57,13 +57,13 @@ inline CPlaneBasis PSBinOpModulate(CPlaneBasis p1, CPlaneBasis p2)
 
 }
 template <>
-inline CPlaneBasis PSBinOpAdd(CPlaneBasis p1, CPlaneBasis p2)
+inline CPlaneBasis PSBinOpAdd(CPlaneBasis /* p1 */, CPlaneBasis /* p2 */)
 {
 	nlassert(0); // not allowed for now
 	return CPlaneBasis(NLMISC::CVector::Null);
 }
 template <>
-inline CPlaneBasis PSBinOpSubtract(CPlaneBasis p1, CPlaneBasis p2)
+inline CPlaneBasis PSBinOpSubtract(CPlaneBasis /* p1 */, CPlaneBasis /* p2 */)
 {
 	nlassert(0); // not allowed for now
 	return CPlaneBasis(NLMISC::CVector::Null);
@@ -128,7 +128,7 @@ inline uint32 CPSAttribMakerBinOp<uint32>::getMinValue(void) const
 		{
 			uint32 lhs = _Arg[0]->getMinValue();
 			uint32 rhs = _Arg[1]->getMaxValue();
-			return rhs > rhs ? 0 : lhs - rhs;
+			return lhs > rhs ? 0 : lhs - rhs;
 		}
 		break;
 		default:
@@ -153,7 +153,7 @@ inline uint32 CPSAttribMakerBinOp<uint32>::getMaxValue(void) const
 		{
 			uint32 lhs = _Arg[0]->getMaxValue();
 			uint32 rhs = _Arg[1]->getMinValue();
-			return rhs > rhs ? 0 : lhs - rhs;
+			return lhs > rhs ? 0 : lhs - rhs;
 		}
 		break;
 		default:

@@ -29,8 +29,12 @@ const uint NUM_MISSION_OPTIONS = 8;
 bool mainLoop();
 
 // render all
-void renderAll(bool forceFullDetail = false);
+void renderScene();
+void renderScene(bool forceFullDetail, bool bloom);
 void setDefaultChatWindow(CChatWindow *defaultChatWindow);
+
+// Commit sky scene camera for rendering
+void commitCamera();
 
 void updateDayNightCycleHour();
 

@@ -62,6 +62,8 @@ void CSpawnBotNpc::sendInfoToEGS() const
 	if (!EGSHasMirrorReady)
 		return;
 	
+	CSpawnBot::sendInfoToEGS();
+
 	TGenNpcDescMsgImp msg;
 	msg.setEntityIndex(dataSetRow());
 	
@@ -274,9 +276,12 @@ std::vector<std::string> CSpawnBotNpc::getMultiLineInfoString() const
 	else
 	{
 		vector<uint32> const& missions = _CurrentChatProfile.getMissions();
-		pushEntry(container, "missions: " + NLMISC::toString("%u", missions[0]));
-		for (size_t i=1; i<missions.size(); ++i)
-			container.back() += ", " + NLMISC::toString("%u", missions[i]);
+		pushEntry(container, "missions:");
+		for (size_t i=0; i<missions.size(); ++i)
+		{
+			string name = getAIInstance()->findMissionName(missions[i]);
+			pushEntry(container, NLMISC::toString("          %u (%s)", missions[i], name.c_str()));
+		}
 	}
 	pushFooter(container);
 	
@@ -870,9 +875,9 @@ Colors are something like that:
 2:	VERT CITRON		VERT CITRON			GREEN 
 3:	VERT			VERT				TURQUOISE 
 4:	BLEU			BLEU				BLUE 
-5:	ROUGE foncé		ROUGE (tout court)	CRIMSON 
+5:	ROUGE fonce		ROUGE (tout court)	CRIMSON 
 6:	BLANC			JAUNE				WHITE 
-7:	NOIR			BLEU très foncé		BLACK
+7:	NOIR			BLEU tres fonce		BLACK
 
 3D column is (probably) used for equipment
 */

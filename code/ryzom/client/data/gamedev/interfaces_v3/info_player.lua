@@ -283,17 +283,14 @@ function game:onDrawNpcWebPage()
 			local utf8Url = ucUrl:toUtf8()
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil			
 			if isRing then
-				-- when in ring mode, add the parameters ourselves. 60 sec timeout because of zope...
-				-- browseNpcWebPage(uiStr, utf8Url .. game.RingAccessPointFilter:getURLParameters(), false, 60)
-				-- Use new window after revamp
-				--RingAccessPoint:getWindow().active = 1
-				--RingAccessPoint:getWindow():center()
-				--RingAccessPoint:getWindow():blink(1)
-				--RingAccessPoint:show()
 				getUI("ui:interface:npc_web_browser").active = false
 				runAH(nil, "context_ring_sessions", "")
 				return
 			else
+				local hideWindow = string.find(utf8Url, "_hideWindow=1") ~= nil			
+				if hideWindow then
+					getUI("ui:interface:npc_web_browser").active = false
+				end
 				self.NpcWebPage.BrowseDone= true;
 				browseNpcWebPage(uiStr, utf8Url, true, 10); -- 'true' is for 'add parameters' here. 10 is standard timeout
 			end
@@ -302,9 +299,9 @@ function game:onDrawNpcWebPage()
 			-- if this is a ring window, then only the refresh button to access to filter will be available
 			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			local browser = getUI("ui:interface:npc_web_browser")
-			browser:find("browse_redo").active = not isRing
-			browser:find("browse_undo").active = not isRing
-			browser:find("browse_refresh").active = isRing
+			browser:find("browse_redo").active = true
+			browser:find("browse_undo").active = true
+			browser:find("browse_refresh").active = true
 		end
 	end
 end
@@ -978,6 +975,7 @@ function RingPlayerInfo:tooltipRRPs(dbBase, ttFormat)
 	setContextHelpText(fmt);
 end
 
+
 --------------------------------------------------------------------------------------------------------------
 --
 function RingPlayerInfo:tooltipRingRating(level, progress, ttFormat)
@@ -1010,6 +1008,27 @@ function RingPlayerInfo:getLevelRatingAndImprovementRate(val)
 	local progress = (val-minRatingInLevel)/(maxRatingInLevel-minRatingInLevel)
 
 	return level, progress
+end
+
+--------------------------------------------------------------------------------------------------------------
+--
+function game:updateOrganization(path, uiOrgText, uiStatusText, uiPointsText)
+	
+	local org = getDbProp(path.."1:VALUE")
+	getUICaller()[uiOrgText].uc_hardtext =  i18n.get('uiOrganization_' .. org)
+
+	local status = getDbProp(path.."2:VALUE")
+	getUICaller()[uiStatusText].uc_hardtext= status
+
+	local points = getDbProp(path.."3:VALUE")
+	getUICaller()[uiPointsText].uc_hardtext= points
+	
+end
+
+------------------------------------------------------------------------------------------------------------
+function game:organizationTooltip()
+	-- set the tooltip in InterfaceManager
+	setContextHelpText( i18n.get('uittOrganization') );
 end
 
 
@@ -1392,7 +1411,9 @@ end
 -- handler called by C++ to tell that the main loop is about to begin
 function game:onMainLoopBegin()	
 	game.InGameDbInitialized = false			
-	game.PrevSessionMission = getDbProp("UI:VARIABLES:MISSION_SELECTED_PREV_SESSION")	
+	game.PrevSessionMission = getDbProp("UI:VARIABLES:MISSION_SELECTED_PREV_SESSION")
+	
+	debugInfo("onMainLoopBegin()")
 end
 
 
@@ -1408,6 +1429,29 @@ function game:onInGameDbInitialized()
 	if game.PrevSessionMission ~= -1  then
 		self:setCurrentMission(game.PrevSessionMission)		
 	end
+	
+	game:setInfoPlayerCharacterRace()
+end
+
+function game:onWebIgReady()
+	-- Call init webig
+	getUI("ui:interface:web_transactions:content:html"):browse("home")
+	getUI("ui:interface:webig:content:html"):browse("home")
+	
+end
+
+--------------------------------------------------------------------------------------------------------------
+-- handler called by C++ at the start of a far TP (log to char selection or far tp)
+function game:onFarTpStart()
+	debugInfo("game:onFarTpStart()")
+	--game:deinitWebIgApps()
+end
+
+--------------------------------------------------------------------------------------------------------------
+-- handler called by C++ after characer reselection or the end of a far TP
+function game:onFarTpEnd()
+	debugInfo("game:onFarTpEnd()")
+	--game:preInitWebIgApps()
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1415,8 +1459,8 @@ end
 function game:onMainLoopEnd()
 	game.InGameDbInitialized = false
 	game:updateMissionJournalFixedEntry()
-end
 
+end
 
 --------------------------------------------------------------------------------------------------------------
 -- ring journal on / off
@@ -1471,6 +1515,11 @@ function game:onNewMissionStepAdded(stepIndex)
 	local missionWnd = getMissionWindow()
 	local missionIndex = getDbProp("UI:SAVE:MISSION_SELECTED")
 	local dbPath
+
+	if missionIndex < 0 then
+		return
+	end
+
 	-- debugInfo("New Step")
 	if missionIndex < 15 then		
 		dbPath = "SERVER:MISSIONS:" .. tostring(missionIndex) .. ":GOALS:" .. tostring(stepIndex) .. ":TEXT"
@@ -1651,3 +1700,64 @@ function game:getRPJobs()
 
 end
 
+--------------------------------------------------------------------------------------------------------------
+function game:setInfoPlayerCharacterRace()
+	getUI("ui:interface:info_player_skills:content:basics_skills:character_race_name").uc_hardtext = i18n.get("io"..getUserRace())
+end
+
+
+-- --------------------------------------------------------------------------------------------------------------
+-- game.preInitTimer = 0
+-- function game:preInitWebIgAppsLoop()
+	-- if game.preInitTimer == nil then game.preInitTimer = 0 end
+
+	-- game.preInitTimer = game.preInitTimer - 1
+	-- if (not game.preWebIgAppsInitialized) and game.preInitTimer < 0 then
+		-- debugInfo("initWebIgAppsLoop(): calling app_ig_preinit.php")
+		-- getUI("ui:interface:web_transactions:content:html"):browse("http://atys.ryzom.com/start/app_ig_preinit.php")
+		-- game.preInitTimer = getDbProp("UI:SAVE:WEBIG_RETRY_DELAY")
+	-- end
+
+	-- if game.preWebIgAppsInitialized then
+		-- debugInfo("preInitWebIgAppsLoop(): Calling removeOnDbChange()")
+		-- removeOnDbChange(getUI("ui:interface"), "@UI:VARIABLES:CURRENT_SERVER_TICK")
+	-- end
+-- end
+
+-- --------------------------------------------------------------------------------------------------------------
+-- function game:preInitWebIgApps()
+	-- debugInfo("game:preInitWebIgApps()")
+	-- addOnDbChange(getUI("ui:interface"), "@UI:VARIABLES:CURRENT_SERVER_TICK", "game:preInitWebIgAppsLoop()")
+-- end
+
+-- --------------------------------------------------------------------------------------------------------------
+-- game.postInitTimer = 0
+-- function game:postInitWebIgAppsLoop()
+	-- if game.postInitTimer == nil then game.postInitTimer = 0 end
+
+	-- game.postInitTimer = game.postInitTimer - 1
+	-- if game.postInitTimer < 0 then
+		-- debugInfo("initWebIgAppsLoop(): calling app_ig_postinit.php")
+		-- getUI("ui:interface:web_transactions:content:html"):browse("http://atys.ryzom.com/start/app_ig_postinit.php")
+		-- game.postInitTimer = getDbProp("UI:SAVE:WEBIG_RETRY_DELAY")
+	-- end
+
+	-- if game.postWebIgAppsInitialized then
+		-- debugInfo("postInitWebIgAppsLoop(): Calling removeOnDbChange()")
+		-- removeOnDbChange(getUI("ui:interface:milko_pad"), "@UI:VARIABLES:CURRENT_SERVER_TICK")
+	-- end
+-- end
+
+-- --------------------------------------------------------------------------------------------------------------
+-- function game:postInitWebIgApps()
+	-- debugInfo("game:postInitWebIgApps()")
+	-- addOnDbChange(getUI("ui:interface:milko_pad"), "@UI:VARIABLES:CURRENT_SERVER_TICK", "game:postInitWebIgAppsLoop()")
+-- end
+
+-- --------------------------------------------------------------------------------------------------------------
+-- function game:deinitWebIgApps()
+	-- debugInfo("game:deinitWebIgApps()")
+	-- game.preWebIgAppsInitialized = nil
+	-- game.postWebIgAppsInitialized = nil
+	-- titleSetted = nil
+-- end

@@ -209,6 +209,8 @@ public:
 	{
 #ifdef NL_DEBUG
 		std::swap(_DbgData, other._DbgData);
+#else
+		nlunreferenced(other);
 #endif
 	}
 
@@ -225,6 +227,10 @@ public:
 		TBMSSerialInfo serialItem( bitpos, size, type, _DbgData->NextSymbol );
 		_DbgData->List.push_back( serialItem );
 		_DbgData->NextSymbol = NULL;
+#else
+		nlunreferenced(bitpos);
+		nlunreferenced(size);
+		nlunreferenced(type);
 #endif
 	}
 
@@ -258,6 +264,10 @@ public:
 			nlwarning( "Missing reserve() corresponding to poke()" );
 		}
 		_DbgData->NextSymbol = NULL;
+#else
+		nlunreferenced(bitpos);
+		nlunreferenced(size);
+		nlunreferenced(type);
 #endif
 	}
 
@@ -266,6 +276,8 @@ public:
 	{
 #ifdef NL_DEBUG
 		_DbgData->NextSymbol = symbol;
+#else
+		nlunreferenced(symbol);
 #endif
 	}
 
@@ -308,6 +320,8 @@ public:
 			}
 			//nlassert( bitpos < (*_List)[_CurrentBrowsedItem].BitPos ); // occurs if stream overflow
 		}
+#else
+		nlunreferenced(bitpos);
 #endif
 		*eventId = -1;
 		return std::string();
@@ -380,7 +394,7 @@ public:
 	 * If you are using the stream only in output mode, you can use this method as a faster version
 	 * of clear() *if you don't serialize pointers*.
 	 */
-	void			resetBufPos()
+	virtual void		resetBufPos()
 	{
 		// This is ensured in CMemStream::CMemStream() and CMemStream::clear()
 		//if ( (!isReading()) && _Buffer.empty() )
@@ -463,7 +477,7 @@ public:
 	}
 
 	/// See doc in CMemStream::bufferToFill()
-	uint8			*bufferToFill( uint32 msgsize )
+	virtual uint8		*bufferToFill( uint32 msgsize )
 	{
 		_FreeBits = 8;
 		_DbgInfo.clear();
@@ -640,7 +654,7 @@ public:
 	virtual void	serial(ucstring &b);
 
 	virtual void	serial(CBitMemStream &b) { serialMemStream(b); }
-	virtual void	serialMemStream(CBitMemStream &b);
+	virtual void	serialMemStream(CMemStream &b);
 
 
 	//@}
@@ -787,11 +801,7 @@ void	displayBitStream( const CBitMemStream& msg, sint beginbitpos, sint endbitpo
 inline std::string CBMSDbgInfo::getEventLegendAtBitPos( CBitMemStream& bms, sint32 eventId )
 {
 #ifdef NL_DEBUG
-	if ( eventId == -1 )
-	{
-		return std::string();
-	}
-	else
+	if ( eventId != -1 )
 	{
 		nlassert( eventId < (sint32)_DbgData->List.size() );
 		TBMSSerialInfo& serialItem = _DbgData->List[eventId]; // works only with a vector!
@@ -800,8 +810,11 @@ inline std::string CBMSDbgInfo::getEventLegendAtBitPos( CBitMemStream& bms, sint
 					bms.getSerialItem( serialItem ).c_str(), (serialItem.Symbol!=NULL)?serialItem.Symbol:"" );
 	}
 #else
-	return std::string();
+	nlunreferenced(bms);
+	nlunreferenced(eventId);
 #endif
+
+	return std::string();
 }
 
 

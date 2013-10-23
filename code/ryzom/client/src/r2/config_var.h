@@ -17,7 +17,7 @@
 #ifndef R2_CONFIG_VAR_H
 #define R2_CONFIG_VAR_H
 
-#include "../interface_v3/lua_object.h"
+#include "nel/gui/lua_object.h"
 #include "editor.h"
 
 namespace R2
@@ -65,6 +65,22 @@ private:
 	mutable T	  _Value;
 	const   T     _Default;
 };
+
+// forward declarations for specialisations
+std::string getConfigVarTypename(const float &dummy);
+bool getConfigVarValue(CLuaObject &luaValue, float &dest);
+
+std::string getConfigVarTypename(const double &dummy);
+bool getConfigVarValue(CLuaObject &luaValue, double &dest);
+
+std::string getConfigVarTypename(const sint32 &dummy);
+bool getConfigVarValue(CLuaObject &luaValue, sint32 &dest);
+
+std::string getConfigVarTypename(const std::string &dummy);
+bool getConfigVarValue(CLuaObject &luaValue, std::string &dest);
+
+std::string getConfigVarTypename(const NLMISC::CRGBA &dummy);
+bool getConfigVarValue(CLuaObject &luaValue, NLMISC::CRGBA &dest);
 
 template <class T> const T &CConfigVar<T>::get() const
 {

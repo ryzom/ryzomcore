@@ -16,8 +16,8 @@
 
 #include "ig_lighter_lib.h"
 #include "nel/misc/path.h"
-#include "nel/../../src/pacs/retriever_bank.h"
-#include "nel/../../src/pacs/global_retriever.h"
+#include "nel/pacs/retriever_bank.h"
+#include "nel/pacs/global_retriever.h"
 #include "nel/3d/scene_group.h"
 
 

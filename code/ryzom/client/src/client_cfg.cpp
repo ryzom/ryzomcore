@@ -302,6 +302,10 @@ CClientConfig::CClientConfig()
 	Contrast			= 0.f;						// Default Monitor Contrast.
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
+	
+	VREnable			= false;
+	VRDisplayDevice		= "Auto";
+	VRDisplayDeviceId	= "";
 
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
@@ -380,6 +384,7 @@ CClientConfig::CClientConfig()
 	ScreenAspectRatio	= 0.f;						// Default commmon Screen Aspect Ratio (no relation with the resolution) - 0.f = auto
 	FoV					= 75.f;						// Default value for the FoV.
 	ForceDXTC			= false;					// Default is no DXTC Compression.
+	AnisotropicFilter	= 0;						// Default is disabled (-1 = maximum value, 0 = disabled, 1+ = enabled)
 	DivideTextureSizeBy2= false;					// Divide texture by 2
 	DisableVtxProgram	= false;					// Disable Hardware Vertex Program.
 	DisableVtxAGP		= false;					// Disable Hardware Vertex AGP.
@@ -424,10 +429,16 @@ CClientConfig::CClientConfig()
 	PatchWanted = false;
 #endif
 	PatchUrl = "";
+	PatchletUrl = "";
 	PatchVersion = "";
 	PatchServer = "";
-	RingReleaseNotePath = "http://atys.ryzom.com/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://atys.ryzom.com/releasenotes/index.php";
+
+	WebIgMainDomain = "atys.ryzom.com";
+	WebIgTrustedDomains.push_back(WebIgMainDomain);
+
+	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
+	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
+
 
 	///////////////
 	// ANIMATION //
@@ -835,10 +846,14 @@ void CClientConfig::setValues()
 		if (nlstricmp(varPtr->asString(), "Auto") == 0 || nlstricmp(varPtr->asString(), "0") == 0) ClientCfg.Driver3D = CClientConfig::DrvAuto;
 		else if (nlstricmp(varPtr->asString(), "OpenGL") == 0 || nlstricmp(varPtr->asString(), "1") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL;
 		else if (nlstricmp(varPtr->asString(), "Direct3D") == 0 || nlstricmp(varPtr->asString(), "2") == 0) ClientCfg.Driver3D = CClientConfig::Direct3D;
+		else if (nlstricmp(varPtr->asString(), "OpenGLES") == 0 || nlstricmp(varPtr->asString(), "3") == 0) ClientCfg.Driver3D = CClientConfig::OpenGLES;
 	}
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
 
+	READ_BOOL_FV(VREnable)
+	READ_STRING_FV(VRDisplayDevice)
+	READ_STRING_FV(VRDisplayDeviceId)
 
 	////////////
 	// INPUTS //
@@ -972,6 +987,8 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(FoV)
 	// ForceDXTC
 	READ_BOOL_FV(ForceDXTC)
+	// AnisotropicFilter
+	READ_INT_FV(AnisotropicFilter)
 	// DivideTextureSizeBy2
 	READ_BOOL_FV(DivideTextureSizeBy2)
 	// DisableVtxProgram
@@ -1033,12 +1050,21 @@ void CClientConfig::setValues()
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
-	READ_BOOL_DEV(PatchWanted)
+	READ_BOOL_FV(PatchWanted)
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
 	READ_STRING_FV(PatchServer)
+
+	/////////////////////////
+	// NEW PATCHLET SYSTEM //	
+	READ_STRING_FV(PatchletUrl)
+
+	////////////////////////
+	// WEBIG //
+	READ_STRING_FV(WebIgMainDomain);
+	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 
 	///////////////
 	// ANIMATION //
@@ -1332,6 +1358,7 @@ void CClientConfig::setValues()
 				if (stricmp(mode, "over") == 0)	p.Mode = SSysInfoParam::Over;
 				else if (stricmp(mode, "overonly") == 0) p.Mode = SSysInfoParam::OverOnly;
 				else if (stricmp(mode, "center") == 0)	p.Mode = SSysInfoParam::Center;
+				else if (stricmp(mode, "centeraround") == 0)	p.Mode = SSysInfoParam::CenterAround;
 				else if (stricmp(mode, "around") == 0)	p.Mode = SSysInfoParam::Around;
 
 				ClientCfg.SystemInfoParams[toLower(sic->asString(2 * k))] = p;
@@ -1358,7 +1385,7 @@ void CClientConfig::setValues()
 					SPrintfCommand pcom;
 					pcom.X = pc->asInt(i);
 					pcom.Y = pc->asInt(i+1);
-					pcom.Color = stringToRGBA( pc->asString(i+2).c_str() );
+					pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
 					pcom.FontSize = pc->asInt(i+3);
 					pcom.Text = pc->asString(i+4);
 

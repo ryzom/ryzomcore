@@ -44,7 +44,7 @@ public:
 	CScrollBar(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, bool vertical = true,CScrollableControl *ctrl = NULL);
 
 	/// destructor
-	virtual ~CScrollBar() {};
+	virtual ~CScrollBar() {}
 
 	/// Display the control
 	virtual void display();

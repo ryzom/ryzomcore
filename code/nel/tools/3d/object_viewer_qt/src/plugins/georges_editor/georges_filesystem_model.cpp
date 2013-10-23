@@ -14,12 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "georges_filesystem_model.h"
 
 #include <QApplication>
 #include <QStyle>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 CGeorgesFileSystemModel::CGeorgesFileSystemModel(QString ldPath, QObject *parent)
@@ -159,6 +160,6 @@ void CGeorgesFileSystemModel::checkLDPath()
 //	}
 //	return QSortFilterProxyModel::data(index, role);
 //}
-} /* namespace NLQT */
+} /* namespace GeorgesQt */
 
 /* end of file */

@@ -42,7 +42,7 @@ using namespace NLMISC;
 //////////////////////////////////////////////////////////////////////////
 // A Small Custom Compiler For AI.
 // (Token and Grammar are Upgradable, Error returns have to be upgraded).
-// Ask to Stéphane Le Dorze for Explanations.
+// Ask to Stephane Le Dorze for Explanations.
 //////////////////////////////////////////////////////////////////////////
 
 namespace AICOMP
@@ -898,7 +898,7 @@ CCompiler::CCompiler()
 		while (!file.eof())
 		{
 			file.getline(buffer, bufferSize);
-			if (buffer[0]=='#' || buffer[0]=='\0') // Skip lines begining with a # and empty lines
+			if (buffer[0]=='#' || buffer[0]=='\0') // Skip lines beginning with a # and empty lines
 				continue;
 			string line = buffer;
 			const string sep1 = ": ";
@@ -1083,25 +1083,33 @@ CSmartPtr<const AIVM::CByteCode> CCompiler::compileCode (const std::vector<std::
 	FOREACHC(itArg, TList, sourceCodeLines)
 	{
 		const string &str=*itArg;
-		size_t firstIndex=str.find_first_of("/",0);
-		while (firstIndex!=string::npos)
-		{
-			firstIndex++;
-			if (firstIndex>=str.size())
+		size_t index = str.find("//",0);
+		if (index == string::npos)
+			code += str;
+		else {
+			// We have a potential comment. Now check if it is quoted or not
+			bool inQuote = false;
+			uint i = 0;
+			for (;;)
 			{
-				firstIndex=string::npos;
-				break;
-			}
+				if ('"' == str[i])
+					inQuote = !inQuote;
 
-			if (str.at(firstIndex)=='/')
-			{
-				code+=str.substr(0, firstIndex-1);
-				break;
+				if ( !inQuote && ('/' == str[i]) )
+				{
+					++i;
+					if ('/' == str[i])
+						break;
+
+					code += '/';
+				}
+				code += str[i];
+				++i;
+				if (str.size() == i)
+					break;
 			}
-			firstIndex=str.find_first_of("/",firstIndex);
 		}
-		if (firstIndex==string::npos)
-			code+=str;
+
 		code+="\n "; // additional ..
 	}
 	code+="}";
@@ -1925,7 +1933,7 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 				case CScriptVM::JUMP:
 					byteCode.push_back(op); // + Jump offset.
 
-					size_t index;
+					uint32 index;
 					NLMISC::fromString(param, index);
 					jumpTable.add(CJumpRememberer(index));
 					byteCode.push_back(0); // Invalid
@@ -1942,7 +1950,7 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 			{
 				if (str.find("Atof")!=string::npos)
 				{
-					size_t index;
+					uint32 index;
 					NLMISC::fromString(param, index);
 					--index;
 					string &strRef=_childTracers[index]->_TextValue;
@@ -1954,7 +1962,7 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 				
 				if (str.find("String")!=string::npos)
 				{
-					size_t index;
+					uint32 index;
 					NLMISC::fromString(param, index);
 					--index;
 					string &strRef=_childTracers[index]->_TextValue;
@@ -2013,7 +2021,7 @@ void CSubRuleTracer::generateCode(CSmartPtr<AIVM::CByteCode> &cByteCode) const
 				
 				if (str.find("Code")!=string::npos)
 				{
-					size_t index;
+					uint32 index;
 					NLMISC::fromString(param, index);
 					--index;
 					if (byteCode.size()==0)

@@ -254,7 +254,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	}
 
 	srand(NLMISC::CTime::getSecondsSince1970());
-	UsedServer = (sint)((float)(rand() / (RAND_MAX+1)) * (sint)PatchServers.size());
+	UsedServer = (sint)(((double)rand() / ((double)RAND_MAX+1.0)) * (double)PatchServers.size());
 
 	ServerPath = CPath::standardizePath (sServerPath);
 	ServerVersion = sServerVersion;
@@ -1701,18 +1701,18 @@ bool CPatchManager::readBNPHeader(const string &SourceName, vector<SBNPFile> &Fi
 	uint32 nFileSize = NLMISC::CFile::getFileSize (SourceName);
 	nlfseek64 (f, nFileSize-sizeof(uint32), SEEK_SET);
 
-	uint32 nOffsetFromBegining;
-	if (fread (&nOffsetFromBegining, sizeof(uint32), 1, f) != 1)
+	uint32 nOffsetFromBeginning;
+	if (fread (&nOffsetFromBeginning, sizeof(uint32), 1, f) != 1)
 	{
 		fclose(f);
 		return false;
 	}
 
 #ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nOffsetFromBegining);
+	NLMISC_BSWAP32(nOffsetFromBeginning);
 #endif
 
-	if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
+	if (nlfseek64 (f, nOffsetFromBeginning, SEEK_SET) != 0)
 	{
 		fclose(f);
 		return false;

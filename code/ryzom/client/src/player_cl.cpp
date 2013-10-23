@@ -164,7 +164,7 @@ bool CPlayerCL::isNeutral() const
 //-----------------------------------------------
 bool CPlayerCL::isFriend () const
 {
-	return isNeutral() || isNeutralPVP() || isAlly();
+	return isNeutral() || isAlly();
 }
 
 
@@ -174,11 +174,43 @@ bool CPlayerCL::isFriend () const
 //-----------------------------------------------
 bool CPlayerCL::isEnemy () const
 {
+	// Challenge i.e. SOLO FULL PVP
+	if( getPvpMode()&PVP_MODE::PvpChallenge  ||
+		UserEntity->getPvpMode()&PVP_MODE::PvpChallenge )
+	{
+		return true;
+	}
+
+
 	// if one of 2 players is not in pvp they can't be enemies
 	if( UserEntity->getPvpMode() == PVP_MODE::None ||
 		getPvpMode() == PVP_MODE::None )
 	{
 		return false;
+	}
+	
+	// if one of 2 players is safe they can't be enemies
+	if( UserEntity->getPvpMode()&PVP_MODE::PvpSafe ||
+		getPvpMode()&PVP_MODE::PvpSafe )
+	{
+		return false;
+	}
+
+	// if one of 2 players are in safe zone and not flagged they can't be enemies
+	if ((UserEntity->getPvpMode()&PVP_MODE::PvpZoneSafe &&
+		((UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged) == 0))
+		||
+		(getPvpMode()&PVP_MODE::PvpZoneSafe &&
+		((getPvpMode()&PVP_MODE::PvpFactionFlagged) == 0)))
+	{
+		return false;
+	}
+
+	// Duel
+	if( getPvpMode()&PVP_MODE::PvpDuel &&
+		UserEntity->getPvpMode()&PVP_MODE::PvpDuel )
+	{
+		return true; // TODO
 	}
 
 	// Outpost
@@ -187,19 +219,12 @@ bool CPlayerCL::isEnemy () const
 		return true;
 	}
 
-	// Challenge
-	if( getPvpMode()&PVP_MODE::PvpChallenge &&
-		UserEntity->getPvpMode()&PVP_MODE::PvpChallenge )
-	{
-		if( !isInTeam() )
-			return true;
-	}
-
 	// Zone Free
 	if( getPvpMode()&PVP_MODE::PvpZoneFree &&
 		UserEntity->getPvpMode()&PVP_MODE::PvpZoneFree )
 	{
-		if( !isInTeam() && !isInGuild() )
+		// If not in same Team and not in same League => ennemy
+		if( !isInTeam() && !isInSameLeague() )
 			return true;
 	}
 
@@ -207,7 +232,11 @@ bool CPlayerCL::isEnemy () const
 	if( getPvpMode()&PVP_MODE::PvpZoneGuild &&
 		UserEntity->getPvpMode()&PVP_MODE::PvpZoneGuild )
 	{
-		if( !isInTeam() && !isInGuild() )
+		// If in same Guild but different Leagues => ennemy
+		if ( isInSameGuild() && oneInLeague() && !isInSameLeague() )
+			return true;
+
+		if( !isInTeam() && !isInSameLeague() )
 			return true;
 	}
 
@@ -219,29 +248,18 @@ bool CPlayerCL::isEnemy () const
 			return true;
 	}
 
-	// Duel
-	if( getPvpMode()&PVP_MODE::PvpDuel &&
-		UserEntity->getPvpMode()&PVP_MODE::PvpDuel )
-	{
-		return true; // TODO
-	}
-
-	// Faction
+	// Free PVP : Ennemis are not in team AND not in league
 	if ((getPvpMode()&PVP_MODE::PvpFaction || getPvpMode()&PVP_MODE::PvpFactionFlagged) &&
 		(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged))
 	{
-		// Check if is not ally
-		if (!isInTeam() && !isInGuild())
-		{
-			// Check for each Clan if is in opposition
-			for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
-			{
-				if ((isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) || (isPvpAlly(i) && UserEntity->isPvpEnnemy(i)))
-					return true;
-			}
-		}
-			
+		// If in same Guild but different Leagues => ennemy
+		if ( isInSameGuild() && oneInLeague() && !isInSameLeague() )
+			return true;
+
+		if (!isInTeam() && !isInSameLeague())
+			return true;
 	}
+
 	return false;
 
 } // isEnemy //
@@ -253,9 +271,23 @@ bool CPlayerCL::isEnemy () const
 //-----------------------------------------------
 bool CPlayerCL::isAlly() const
 {
-	// if one of 2 players is not in pvp they can't be enemies
+
+	// Challenge i.e. SOLO FULL PVP
+	if( getPvpMode()&PVP_MODE::PvpChallenge  ||
+		UserEntity->getPvpMode()&PVP_MODE::PvpChallenge )
+	{
+		return false;
+	}
+
+	// if one of 2 players is not in pvp they can't be allies
 	if( UserEntity->getPvpMode() == PVP_MODE::None ||
 		getPvpMode() == PVP_MODE::None )
+	{
+		return false;
+	}
+
+	// if one of 2 players is in safe zone and not other they can't be allies
+	if ((UserEntity->getPvpMode()&PVP_MODE::PvpSafe) != (getPvpMode()&PVP_MODE::PvpSafe))
 	{
 		return false;
 	}
@@ -266,19 +298,11 @@ bool CPlayerCL::isAlly() const
 		return true;
 	}
 
-	// Challenge
-	if( getPvpMode()&PVP_MODE::PvpChallenge &&
-		UserEntity->getPvpMode()&PVP_MODE::PvpChallenge )
-	{
-		if( isInTeam() )
-			return true;
-	}
-
 	// Zone Free
 	if( getPvpMode()&PVP_MODE::PvpZoneFree &&
 		UserEntity->getPvpMode()&PVP_MODE::PvpZoneFree )
 	{
-		if( isInTeam() || isInGuild() )
+		if( isInTeam() || isInSameLeague() )
 			return true;
 	}
 
@@ -286,8 +310,12 @@ bool CPlayerCL::isAlly() const
 	if( getPvpMode()&PVP_MODE::PvpZoneGuild &&
 		UserEntity->getPvpMode()&PVP_MODE::PvpZoneGuild )
 	{
-		if( isInTeam() || isInGuild() )
+		if( isInTeam() || isInSameLeague() )
 			return true;
+
+		if ( isInSameGuild() && !oneInLeague() )
+			return true;
+
 	}
 
 	// Zone Faction
@@ -298,26 +326,15 @@ bool CPlayerCL::isAlly() const
 			return true;
 	}
 
-	// Faction
+	// Free PVP : Allies are in team OR in league
 	if ((getPvpMode()&PVP_MODE::PvpFaction || getPvpMode()&PVP_MODE::PvpFactionFlagged) &&
 		(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged))
 	{
-		if (isInTeam() && isInGuild())
+		if (isInTeam() || isInSameLeague())
 			return true;
-	
-		// Check for each Clan if is in opposition
-		for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
-		{
-			if ((isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) || (isPvpAlly(i) && UserEntity->isPvpEnnemy(i)))
-				return false;
-		}
 
-		// Check for each Clan if is in same clan
-		for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
-		{
-			if ((isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) || (isPvpAlly(i) && UserEntity->isPvpAlly(i)))
-				return true;
-		}
+		if ( isInSameGuild() && !oneInLeague() )
+			return true;
 	}
 
 	return false;
@@ -336,66 +353,12 @@ bool CPlayerCL::isNeutralPVP() const
 		return false;
 	}
 
-	// Outpost
-	if ( getOutpostId() != 0 )
+	if( UserEntity->getPvpMode() == PVP_MODE::None )
 	{
-		if( UserEntity->getOutpostId() != getOutpostId() )
-		{
-			return true;
-		}
+		return false;
 	}
 
-	// Challenge
-	if( getPvpMode()&PVP_MODE::PvpChallenge &&
-		!(UserEntity->getPvpMode()&PVP_MODE::PvpChallenge) )
-	{
-		return true;
-	}
-
-	// Zone Free
-	if( getPvpMode()&PVP_MODE::PvpZoneFree &&
-		!(UserEntity->getPvpMode()&PVP_MODE::PvpZoneFree) )
-	{
-		return true;
-	}
-
-	// Zone Guild
-	if( getPvpMode()&PVP_MODE::PvpZoneGuild &&
-		!(UserEntity->getPvpMode()&PVP_MODE::PvpZoneGuild) )
-	{
-		return true;
-	}
-
-	// Zone Faction
-	if( getPvpMode()&PVP_MODE::PvpZoneFaction &&
-		!(UserEntity->getPvpMode()&PVP_MODE::PvpZoneFaction) )
-	{
-		return true;
-	}
-
-	// Duel
-	if( getPvpMode()&PVP_MODE::PvpDuel &&
-		!(UserEntity->getPvpMode()&PVP_MODE::PvpDuel) )
-	{
-		return true;
-	}
-
-	if ((getPvpMode()&PVP_MODE::PvpFaction || getPvpMode()&PVP_MODE::PvpFactionFlagged) &&
-		(UserEntity->getPvpMode()&PVP_MODE::PvpFaction || UserEntity->getPvpMode()&PVP_MODE::PvpFactionFlagged))
-	{
-		// Check for each Clan if is in opposition or same
-		for (uint8 i = 0; i < PVP_CLAN::NbClans; i++)
-		{
-			if ((isPvpEnnemy(i) && UserEntity->isPvpAlly(i)) ||
-				(isPvpAlly(i) && UserEntity->isPvpEnnemy(i)) ||
-				(isPvpEnnemy(i) && UserEntity->isPvpEnnemy(i)) ||
-				(isPvpAlly(i) && UserEntity->isPvpAlly(i)))
-				return false;
-		}
-		return true;
-	}
-
-	return false;
+	return (!isEnemy() && !isAlly());
 }
 
 
@@ -532,7 +495,7 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 	}
 
 	/* If the object is sticked (ie not a skin), decide to delete the Current instance. Why? because the animation
-		is changed according to the equiped item.
+		is changed according to the equipped item.
 
 		Hence, For example, if a sword would be changed for a gun, then the new gun animation would take place,
 		while Keeping the old sword shape. BAD.
@@ -720,7 +683,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		// display the new title in player interface
 		if (_Slot == 0)
 		{
-			CViewText *pVT = dynamic_cast<CViewText*>(IM->getElementFromId("ui:interface:player:header_opened:player_title"));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
 			if (pVT != NULL) pVT->setText(_Title);
 		}
 
@@ -881,9 +844,9 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		sint64 vB, vC;
 		string propName;
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPB);
-		vB = IM->getDbProp(propName)->getValue64();
+		vB = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPC);
-		vC = IM->getDbProp(propName)->getValue64();
+		vC = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
 		updateVisualPropertyVpb(0, vB);
 		updateVisualPropertyVpc(0, vC);
 
@@ -1052,7 +1015,7 @@ void CPlayerCL::updateVisualPropertyPvpMode(const NLMISC::TGameCycle &gameCycle,
 	if(isTarget())
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-		CCDBNodeLeaf *pDB= pIM->getDbProp("UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE");
+		CCDBNodeLeaf *pDB= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:TRACK_TARGET_PVP_CHANGE_MODE");
 		if(pDB)
 		{
 			sint32	val= pDB->getValue32();
@@ -1302,7 +1265,7 @@ void CPlayerCL::load()	// virtual
 	if(!_WaitForAppearance)
 	{
 		// Visual properties A
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);	// Vpa udapte vpb and vpc too.
 	}
 }// load //
@@ -1397,5 +1360,4 @@ void CPlayerCL::computePrimitive()
 	// Set the position.
 	pacsPos(pos());
 }// computePrimitive //
-
 

@@ -48,32 +48,44 @@
 #	define NL_OS_WINDOWS
 #	define NL_LITTLE_ENDIAN
 #	define NL_CPU_INTEL
-#   ifndef _WIN32_WINNT
+#	ifndef _WIN32_WINNT
 #		define _WIN32_WINNT 0x0500	// Minimal OS = Windows 2000 (NeL is not supported on Windows 95/98)
-#   endif
-#	if _MSC_VER >= 1600
-#		define NL_COMP_VC10
-#	elif _MSC_VER >= 1500
-#		define NL_COMP_VC9
-#	elif _MSC_VER >= 1400
-#		define NL_COMP_VC8
-#		undef nl_time
-#		define nl_time _time32		// use the old 32 bit time function
-#		undef nl_mktime
-#		define nl_mktime _mktime32	// use the old 32 bit time function
-#		undef nl_gmtime
-#		define nl_gmtime _gmtime32	// use the old 32 bit time function
-#		undef nl_localtime
-#		define nl_localtime _localtime32	// use the old 32 bit time function
-#		undef nl_difftime
-#		define nl_difftime _difftime32	// use the old 32 bit time function
-#	elif _MSC_VER >= 1310
-#		define NL_COMP_VC71
-#	elif _MSC_VER >= 1300
-#		define NL_COMP_VC7
-#	elif _MSC_VER >= 1200
-#		define NL_COMP_VC6
-#		define NL_COMP_NEED_PARAM_ON_METHOD
+#	endif
+#	ifdef _MSC_VER
+#		define NL_COMP_VC
+#		if _MSC_VER >= 1700
+#			define NL_COMP_VC11
+#			define NL_COMP_VC_VERSION 110
+#		elif _MSC_VER >= 1600
+#			define NL_COMP_VC10
+#			define NL_COMP_VC_VERSION 100
+#		elif _MSC_VER >= 1500
+#			define NL_COMP_VC9
+#			define NL_COMP_VC_VERSION 90
+#		elif _MSC_VER >= 1400
+#			define NL_COMP_VC8
+#			define NL_COMP_VC_VERSION 80
+#			undef nl_time
+#			define nl_time _time32		// use the old 32 bit time function
+#			undef nl_mktime
+#			define nl_mktime _mktime32	// use the old 32 bit time function
+#			undef nl_gmtime
+#			define nl_gmtime _gmtime32	// use the old 32 bit time function
+#			undef nl_localtime
+#			define nl_localtime _localtime32	// use the old 32 bit time function
+#			undef nl_difftime
+#			define nl_difftime _difftime32	// use the old 32 bit time function
+#		elif _MSC_VER >= 1310
+#			define NL_COMP_VC71
+#			define NL_COMP_VC_VERSION 71
+#		elif _MSC_VER >= 1300
+#			define NL_COMP_VC7
+#			define NL_COMP_VC_VERSION 70
+#		elif _MSC_VER >= 1200
+#			define NL_COMP_VC6
+#			define NL_COMP_VC_VERSION 60
+#			define NL_COMP_NEED_PARAM_ON_METHOD
+#		endif
 #	endif
 #	if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack or later
 #		define NL_ISO_STDTR1_AVAILABLE
@@ -92,6 +104,8 @@
 			// Windows 64bits platform SDK compilers doesn't support inline assembler
 #			define NL_NO_ASM
 #		endif
+#		undef _WIN32_WINNT
+#		define _WIN32_WINNT 0x0600 // force VISTA minimal version in 64 bits
 #	endif
 	// define NOMINMAX to be sure that windows includes will not define min max macros, but instead, use the stl template
 #	define NOMINMAX
@@ -320,7 +334,7 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #	define CHashMap std::tr1::unordered_map
 #	define CHashSet std::tr1::unordered_set
 #	define CHashMultiMap std::tr1::unordered_multimap
-#elif defined(NL_COMP_VC7) || defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) // VC7 through 9
+#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 70 && NL_COMP_VC_VERSION <= 90) // VC7 through 9
 #	include <hash_map>
 #	include <hash_set>
 #	define CHashMap stdext::hash_map
@@ -366,7 +380,7 @@ typedef	uint16	ucchar;
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_OS_WINDOWS
-#	if defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
+#	if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 80)
 #		define INT64_CONSTANT(c)	(c##LL)
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##LL)

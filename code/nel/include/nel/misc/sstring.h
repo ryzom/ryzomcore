@@ -55,7 +55,7 @@ public:
 	///	ctor
 	CSString(int i,const char *fmt="%d");
 	///	ctor
-	CSString(unsigned u,const char *fmt="%u");
+	CSString(uint32 u,const char *fmt="%u");
 	/// ctor
 	CSString(double d,const char *fmt="%f");
 	///	ctor
@@ -76,14 +76,14 @@ public:
 	char back() const;
 
 	/// Return the n left hand most characters of a string
-	CSString left(unsigned count) const;
+	CSString left(uint32 count) const;
 	/// Return the n right hand most characters of a string
-	CSString right(unsigned count) const;
+	CSString right(uint32 count) const;
 
 	/// Return the string minus the n left hand most characters of a string
-	CSString leftCrop(unsigned count) const;
+	CSString leftCrop(uint32 count) const;
 	/// Return the string minus the n right hand most characters of a string
-	CSString rightCrop(unsigned count) const;
+	CSString rightCrop(uint32 count) const;
 
 	/// Return sub string up to but not including first instance of given character, starting at 'iterator'
 	/// on exit 'iterator' indexes first character after extracted string segment
@@ -116,9 +116,9 @@ public:
 	/// Return sub string remaining after the first word
 	CSString tailFromFirstWord() const;
 	/// Count the number of words in a string
-	unsigned countWords() const;
+	uint32 countWords() const;
 	/// Extract the given word
-	CSString word(unsigned idx) const;
+	CSString word(uint32 idx) const;
 
 	/// Return first word or quote-encompassed sub-string - can remove extracted sub-string from source string
 	CSString firstWordOrWords(bool truncateThis=false,bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true);
@@ -127,9 +127,9 @@ public:
 	/// Return sub string following first word (or quote-encompassed sub-string)
 	CSString tailFromFirstWordOrWords(bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
 	/// Count the number of words (or quote delimited sub-strings) in a string
-	unsigned countWordOrWords(bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
+	uint32 countWordOrWords(bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
 	/// Extract the given words (or quote delimited sub-strings)
-	CSString wordOrWords(unsigned idx,bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
+	CSString wordOrWords(uint32 idx,bool useSlashStringEscape=true,bool useRepeatQuoteStringEscape=true) const;
 
 	/// Return first line - can remove extracted line from source string
 	CSString firstLine(bool truncateThis=false);
@@ -138,9 +138,9 @@ public:
 	/// Return sub string remaining after the first line
 	CSString tailFromFirstLine() const;
 	/// Count the number of lines in a string
-	unsigned countLines() const;
+	uint32 countLines() const;
 	/// Extract the given line
-	CSString line(unsigned idx) const;
+	CSString line(uint32 idx) const;
 
 	/// A handy utility routine for knowing if a character is a white space character or not (' ','\t','\n','\r',26)
 	static bool isWhiteSpace(char c);
@@ -377,7 +377,7 @@ public:
 	/// assignment operator
 	CSString& operator=(int i);
 	/// assignment operator
-	CSString& operator=(unsigned u);
+	CSString& operator=(uint32 u);
 	/// assignment operator
 	CSString& operator=(double d);
 
@@ -561,7 +561,7 @@ inline CSString::CSString(int i,const char *fmt)
 	*this=buf;
 }
 
-inline CSString::CSString(unsigned u,const char *fmt)
+inline CSString::CSString(uint32 u,const char *fmt)
 {
 	char buf[1024];
 	sprintf(buf,fmt,u);
@@ -611,26 +611,26 @@ inline char CSString::back() const
 	return (*this)[size()-1];
 }
 
-inline CSString CSString::right(unsigned count) const
+inline CSString CSString::right(uint32 count) const
 {
 	if (count>=size())
 		return *this;
 	return substr(size()-count);
 }
 
-inline CSString CSString::rightCrop(unsigned count) const
+inline CSString CSString::rightCrop(uint32 count) const
 {
 	if (count>=size())
 		return CSString();
 	return substr(0,size()-count);
 }
 
-inline CSString CSString::left(unsigned count) const
+inline CSString CSString::left(uint32 count) const
 {
 	return substr(0,count);
 }
 
-inline CSString CSString::leftCrop(unsigned count) const
+inline CSString CSString::leftCrop(uint32 count) const
 {
 	if (count>=size())
 		return CSString();
@@ -639,7 +639,7 @@ inline CSString CSString::leftCrop(unsigned count) const
 
 inline CSString CSString::splitToWithIterator(char c,uint32& iterator) const
 {
-	unsigned i;
+	uint32 i;
 	CSString result;
 	for (i=iterator;i<size() && (*this)[i]!=c;++i)
 		result+=(*this)[i];
@@ -713,7 +713,7 @@ inline bool CSString::isPrintable(char c)
 	if (c==',') return true;
 	if (c==';') return true;
 	if (c=='$') return true;
-	if ((unsigned char)c==156) return true; // Sterling Pound char causing error in gcc 4.1.2
+	if ((uint8)c==156) return true; // Sterling Pound char causing error in gcc 4.1.2
 	if (c=='^') return true;
 	if (c=='~') return true;
 	if (c=='\'') return true;
@@ -784,7 +784,7 @@ inline CSString& CSString::operator=(int i)
 	return *this;
 }
 
-inline CSString& CSString::operator=(unsigned u)
+inline CSString& CSString::operator=(uint32 u)
 {
 	CSString other(u);
 	*this = other;

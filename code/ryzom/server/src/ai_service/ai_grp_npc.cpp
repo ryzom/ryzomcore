@@ -1113,6 +1113,29 @@ void CGroupNpc::setOutpostSide(OUTPOSTENUMS::TPVPSide side)
 	}
 }
 
+void CGroupNpc::setOutpostFactions(OUTPOSTENUMS::TPVPSide side)
+{
+	// Attack only the declared ennemies of the outpost
+	if (side == OUTPOSTENUMS::OutpostOwner)
+	{
+		// Bots factions
+		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		// Players faction
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
+	}
+	if (side == OUTPOSTENUMS::OutpostAttacker)
+	{
+		// Bots factions
+		faction      ().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		friendFaction().addProperty(NLMISC::toString("outpost:%s:bot_attacker", getAliasString().c_str()));
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:bot_defender", getAliasString().c_str()));
+		// Players faction
+		ennemyFaction().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
+	}
+}
+
 void CGroupNpc::setFactionAttackableAbove(std::string faction, sint32 threshold, bool botAttackable)
 {
 	if (botAttackable)

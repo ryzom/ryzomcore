@@ -19,7 +19,9 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/string_mapper.h"
+#include "nel/misc/sheet_id.h"
 #include "nel/sound/u_source.h"
+#include "nel/sound/u_group_controller.h"
 #include "nel/ligo/primitive.h"
 #include <vector>
 
@@ -283,7 +285,11 @@ public:
 	//@}
 
 	/// Get a TSoundId from a name (returns NULL if not found)
-	virtual TSoundId	getSoundId( const NLMISC::TStringId &name ) = 0;
+	virtual TSoundId	getSoundId( const NLMISC::CSheetId &name ) = 0;
+
+	/// Gets the group controller for the given group tree path with separator '/', if it doesn't exist yet it will be created.
+	/// Examples: "music", "effects", "dialog", "music/background", "music/loading", "music/player", etcetera
+	virtual UGroupController *getGroupController(const std::string &path) = 0;
 
 	/** Add a logical sound source (returns NULL if name not found).
 	 * If spawn is true, the source will auto-delete after playing. If so, the return USource* pointer
@@ -291,9 +297,9 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource		*createSource( const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context=0) = 0;
+	virtual USource		*createSource(const NLMISC::CSheetId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context  = 0, UGroupController *groupController = NULL) = 0;
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
-	virtual USource		*createSource( TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam  = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context=0 ) = 0;
+	virtual USource		*createSource(TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam  = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL) = 0;
 
 	/** Use this method to set the listener position instead of using getListener->setPos();
 	 * It's because we have to update the background sounds in this case.
@@ -315,7 +321,7 @@ public:
 	//@{
 	//@name Statistic and utility methods
 	/// Fill a vector with the names of all loaded sounds.
-	virtual void		getSoundNames( std::vector<NLMISC::TStringId> &names ) const = 0;
+	virtual void		getSoundNames( std::vector<NLMISC::CSheetId> &names ) const = 0;
 	/// Return the number of mixing tracks (voices)
 	virtual uint		getPolyphony() const = 0;
 	/// Return the number of sources

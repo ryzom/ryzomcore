@@ -24,11 +24,12 @@
 #include "../continent.h"
 #include "../zone_util.h"
 #include "../user_entity.h"
-#include "ctrl_button.h"
-#include "group_editbox.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "../string_manager_client.h"
-#include "group_container.h"
-#include "action_handler.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/action_handler.h"
 #include "../dummy_progress.h"
 #include "group_compas.h"
 #include "../connection.h"
@@ -36,9 +37,9 @@
 #include "people_interraction.h" // for MaxNumPeopleInTeam
 #include "../sheet_manager.h" // for MaxNumPeopleInTeam
 #include "../global.h"
-#include "ctrl_quad.h"
+#include "nel/gui/ctrl_quad.h"
 //
-#include "game_share/xml_auto_ptr.h"
+#include "nel/misc/xml_auto_ptr.h"
 #include "game_share/mission_desc.h"
 #include "game_share/inventories.h"
 #include "game_share/animal_type.h"
@@ -80,6 +81,8 @@ static CCtrlButton *LastSelectedLandMark = NULL;
 static bool		   UseUserPositionForLandMark = false;
 static const char  *WIN_LANDMARK_NAME="ui:interface:enter_landmark_name";
 
+// Loaded position of user landmark types
+static std::vector<uint>  LoadedPosition;
 
 ////////////
 // GLOBAL //
@@ -98,17 +101,21 @@ static void popupLandMarkNameDialog()
 {
 	// pop the rename dialog
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_LANDMARK_NAME));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
 
 	gc->setActive(true);
 	gc->updateCoords();
 	gc->center();
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->enableBlink(1);
 	
 	CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 	if (!eb) return; 
+	
+	// Load ComboBox for Landmarks & sort entries
+	CDBGroupComboBox *cb = dynamic_cast<CDBGroupComboBox *>(gc->getGroup("landmarktypes"));
+	cb->sortText();
 
 	if (LastSelectedLandMark)
 	{
@@ -117,23 +124,24 @@ static void popupLandMarkNameDialog()
 		
 		const CUserLandMark userLM = map->getUserLandMark(LastSelectedLandMark);
 
-		im->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(userLM.Type);
+		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(userLM.Type));
 		eb->setInputString(userLM.Title);
 	}
 	else
 	{
-		im->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(CUserLandMark::Misc);
+		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
 		eb->setInputString(ucstring());
 	}
 
-	im->setCaptureKeyboard(eb);
+	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 	eb->setSelectionAll();
 }
 
 static void closeLandMarkNameDialog()
 {
+	LoadedPosition.clear();
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_LANDMARK_NAME));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 	if (!gc) return;
 	gc->setActive(false);
 }
@@ -171,17 +179,17 @@ CGroupMap::CPolyButton::CPolyButton()
 
 
 //============================================================================================================
-bool CGroupMap::CPolyButton::handleEvent (const CEventDescriptor &event)
+bool CGroupMap::CPolyButton::handleEvent (const NLGUI::CEventDescriptor &event)
 {
 	if (CCtrlBase::handleEvent(event)) return true;
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
-			if (im->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 				return false;
 
 			// Set the map !!!
@@ -198,18 +206,18 @@ bool CGroupMap::CPolyButton::handleEvent (const CEventDescriptor &event)
 					}
 				}
 
-				im->setCapturePointerLeft(NULL);
+				CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 				if (bFound)
 					Map->setMap(Map->getCurMap()->Children[i].Name);
 				return true;
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			if (contains(CVector2f((float)eventDesc.getX(), (float)eventDesc.getY())))
 			{
-				im->setCapturePointerLeft(this);
+				CWidgetManager::getInstance()->setCapturePointerLeft(this);
 				return true;
 			}
 		}
@@ -257,13 +265,13 @@ float CGroupMap::getActualMaxScale() const
 void CGroupMap::CPolyButton::drawPolyButton()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = pIM->getViewRenderer();
+	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
 	float oow, ooh;
 	rVR.getScreenOOSize(oow, ooh);
 
 	bool bOver = false;
-	const std::vector<CCtrlBase*> &rCUP = pIM->getCtrlsUnderPointer();
+	const std::vector<CCtrlBase*> &rCUP = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 	for (uint32 i = 0; i < rCUP.size(); ++i)
 		if (rCUP[i] == this)
 		{
@@ -721,11 +729,12 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		_RespawnSelectedBitmap->setPosRef(Hotspot_MM);
 		addView(_RespawnSelectedBitmap);
 
-		//CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CInterfaceManager::getInstance()->getElementFromId(_RespawnButton));
+		//CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(_RespawnButton));
 		//if (pCB != NULL) pCB->setActive(false);
 	}
 	nlassert(!_FrustumView);
-	_FrustumView = new CCtrlQuad;
+	CViewBase::TCtorParam param;
+	_FrustumView = new CCtrlQuad( param );
 	_FrustumView->setActive(false);
 	addView(_FrustumView);
 	_FrustumView->setParent(this);
@@ -858,7 +867,8 @@ void CGroupMap::updateCoords()
 {
 	updateSelectionAxisSize();
 	//
-	CGroupContainer *enclosingContainer = getEnclosingContainer();
+	CGroupContainer *enclosingContainer = static_cast< CGroupContainer* >( getEnclosingContainer() );
+
 	if (!enclosingContainer || !enclosingContainer->getActive()) return;
 	// update position of landmarks
 	updateScale();
@@ -1060,9 +1070,9 @@ void CGroupMap::updateLMPosFromDBPos(CLandMarkButton *dest ,sint32 px, sint32 py
 static CSmartPtr<CNamedEntityPositionState> buildMissionPositionState(CInterfaceManager *im, const std::string &baseDBpath, uint missionIndex, uint targetIndex)
 {
 	nlassert(im);
-	CCDBNodeLeaf *name = im->getDbProp(baseDBpath + NLMISC::toString(":%d:TARGET%d:TITLE", (int) missionIndex, (int) targetIndex));
-	CCDBNodeLeaf *x = im->getDbProp(baseDBpath + NLMISC::toString(":%d:TARGET%d:X", (int) missionIndex, (int) targetIndex));
-	CCDBNodeLeaf *y = im->getDbProp(baseDBpath +NLMISC::toString(":%d:TARGET%d:Y", (int) missionIndex, (int) targetIndex));
+	CCDBNodeLeaf *name = NLGUI::CDBManager::getInstance()->getDbProp(baseDBpath + NLMISC::toString(":%d:TARGET%d:TITLE", (int) missionIndex, (int) targetIndex));
+	CCDBNodeLeaf *x = NLGUI::CDBManager::getInstance()->getDbProp(baseDBpath + NLMISC::toString(":%d:TARGET%d:X", (int) missionIndex, (int) targetIndex));
+	CCDBNodeLeaf *y = NLGUI::CDBManager::getInstance()->getDbProp(baseDBpath +NLMISC::toString(":%d:TARGET%d:Y", (int) missionIndex, (int) targetIndex));
 	CSmartPtr<CNamedEntityPositionState> ps = new CNamedEntityPositionState;
 	ps->build(name, x, y);
 	return ps;
@@ -1096,8 +1106,8 @@ void CGroupMap::checkCoords()
 			}
 		}
 		// also fill ptr for special landmarks (target, home & respawn)
-		_TargetPos = pIM->getDbProp(COMPASS_DB_PATH ":TARGET");
-		_HomePos = pIM->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
+		_TargetPos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":TARGET");
+		_HomePos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":HOME_POINT");
 	}
 	//
 //	bool mustInvalidateCoords = false;
@@ -1218,9 +1228,9 @@ void CGroupMap::checkCoords()
 			// Reset selection
 			_RespawnSelected = 0;
 			if (_MapMode == MapMode_Death)
-				pIM->getDbProp("UI:SAVE:RESPAWN_PT")->setValue32(_RespawnSelected);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT")->setValue32(_RespawnSelected);
 			else if (_MapMode == MapMode_SpawnSquad)
-				pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
 			if (_RespawnLM.size() > 0)
 				_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
 		}
@@ -1259,7 +1269,7 @@ void CGroupMap::checkCoords()
 				_AnimalLM[i]->setActive(true);
 				// update texture from animal status
 				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-				CCDBNodeLeaf	*statusNode = pIM->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
+				CCDBNodeLeaf	*statusNode = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d", i) + ":STATUS", false);
 				if (statusNode && ANIMAL_STATUS::isInStable((ANIMAL_STATUS::EAnimalStatus)statusNode->getValue32()) )
 				{
 					_AnimalLM[i]->setTexture(_AnimalStableLMOptions.LandMarkTexNormal);
@@ -1278,7 +1288,7 @@ void CGroupMap::checkCoords()
 
 				// update tooltip text
 				ANIMAL_TYPE::EAnimalType at;
-				at = (ANIMAL_TYPE::EAnimalType)pIM->getDbProp("SERVER:PACK_ANIMAL:BEAST"+toString(i)+":TYPE")->getValue32();
+				at = (ANIMAL_TYPE::EAnimalType)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST"+toString(i)+":TYPE")->getValue32();
 				string sPrefix;
 				switch(at)
 				{
@@ -1320,7 +1330,7 @@ void CGroupMap::checkCoords()
 			if (_TeammatePosStates[i]->getPos(px, py))
 			{
 				CInterfaceManager *im = CInterfaceManager::getInstance();
-				uint32 val = im->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
+				uint32 val = NLGUI::CDBManager::getInstance()->getDbProp(NLMISC::toString("SERVER:GROUP:%d:NAME",i))->getValue32();
 				STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 				ucstring res;
 
@@ -1470,8 +1480,8 @@ void CGroupMap::draw()
 	sint32 oldSciX, oldSciY, oldSciW, oldSciH;
 	makeNewClip (oldSciX, oldSciY, oldSciW, oldSciH);
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CViewRenderer &vr = im->getViewRenderer();
-	uint8 alpha = im->getGlobalColorForContent().A;
+	CViewRenderer &vr = *CViewRenderer::getInstance();
+	uint8 alpha = CWidgetManager::getInstance()->getGlobalColorForContent().A;
 	updateScale();
 
 	// No Op if screen minimized
@@ -1578,13 +1588,13 @@ void CGroupMap::draw()
 				_FrustumView->setQuad(fruQuad);
 				_FrustumView->updateCoords();
 				// handle mouse over
-				if (im->getPointer())
+				if (CWidgetManager::getInstance()->getPointer())
 				{
 					sint32 originX, originY;
 					getCorner(originX, originY, getPosRef());
 					CVector delta((float) originX, (float) originY, 0.f);
 					fruTri = CTriangle(fruQuad.V0, fruQuad.V1, fruQuad.V2);
-					CVector mousePos((float) im->getPointer()->getXReal(), (float) im->getPointer()->getYReal(), 0.f);
+					CVector mousePos((float) CWidgetManager::getInstance()->getPointer()->getXReal(), (float) CWidgetManager::getInstance()->getPointer()->getYReal(), 0.f);
 					mousePos -= delta;
 					CVector dummyHit;
 					float deltaBlend = DT / (0.001f * (float) _FrustumViewBlendTimeInMs);
@@ -1703,7 +1713,7 @@ void CGroupMap::draw()
 }
 
 //============================================================================================================
-bool CGroupMap::handleEvent(const CEventDescriptor &event)
+bool CGroupMap::handleEvent(const NLGUI::CEventDescriptor &event)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// if R2 editor editor is on, give it a chance to handle the event first
@@ -1712,13 +1722,13 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 		bool handled = false;
 		bool panEnd = false;
 		// handle standard clicks
-		if (event.getType() == CEventDescriptor::mouse)
+		if (event.getType() == NLGUI::CEventDescriptor::mouse)
 		{
-			const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
-			panEnd = eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup && _Panning && _HasMoved;
-			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup && !panEnd)
+			const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
+			panEnd = eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && _Panning && _HasMoved;
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !panEnd)
 			{
-				//if (im->getCapturePointerLeft() == this)
+				//if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 				// NB : don't test capture of mouse here, because
 				// some R2 tool may begin outside of this window
 				// example : clicking in the palette window and doing a drag-and-drop to the
@@ -1736,7 +1746,7 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 					{
 						if (!R2::getEditor().getCurrentTool()->getPreviousToolClickEndFlag())
 						{
-							if (im->getCapturePointerLeft() == this)
+							if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 							{
 								// unselected unless tool has been changed before last mouse left up (happens when one's finish a route using double click -> should not unselect then)
 								R2::getEditor().setSelectedInstance(NULL);
@@ -1745,9 +1755,9 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 					}
 				}
 			}
-			else if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+			else if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
-				if (im->getCapturePointerRight() == this)
+				if (CWidgetManager::getInstance()->getCapturePointerRight() == this)
 				{
 					if (isIn(eventDesc.getX(), eventDesc.getY()))
 					{
@@ -1784,15 +1794,15 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 
 	// left button can be used to 'pan' the map
 	// mouse wheel can be used to zoom in/out
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
 		if (!_Active)
 			return false;
-		const CEventDescriptorMouse &eventDesc = (const CEventDescriptorMouse &)event;
+		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 		{
-			if (im->getCapturePointerLeft() != this)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 			{
 				return false;
 			}
@@ -1801,17 +1811,17 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 		{
-			im->setCapturePointerRight(this);
+			CWidgetManager::getInstance()->setCapturePointerRight(this);
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 		{
 			if (isIn(eventDesc.getX(), eventDesc.getY()))
 			{
-				im->setCapturePointerLeft(this);
+				CWidgetManager::getInstance()->setCapturePointerLeft(this);
 				_StartXForPaning = eventDesc.getX();
 				_StartYForPaning = eventDesc.getY();
 				_StartWorldOffsetForPaning = _WorldOffset;
@@ -1843,9 +1853,9 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			}
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousemove)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousemove)
 		{
-			if (im->getCapturePointerLeft() != this || !_Panning)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this || !_Panning)
 				return CInterfaceGroup::handleEvent(event);
 
 			if (_MapTexW != 0 && _MapTexH != 0)
@@ -1873,7 +1883,7 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 		}
 
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mousewheel && !_Panning)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel && !_Panning)
 		{
 			sint32 wheel = eventDesc.getWheel();
 			float newScale = _UserScale;
@@ -1907,7 +1917,7 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			return true;
 		}
 
-		if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
+		if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 		{
 			// convert click pos into map pos
 			if (_MapTexW == 0 || _MapTexH == 0)
@@ -1931,10 +1941,10 @@ bool CGroupMap::handleEvent(const CEventDescriptor &event)
 			}
 		}
 	}
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		CEventDescriptorSystem &es = (CEventDescriptorSystem &) event;
-		if (es.getEventTypeExtended() == CEventDescriptorSystem::activecalledonparent)
+		NLGUI::CEventDescriptorSystem &es = (NLGUI::CEventDescriptorSystem &) event;
+		if (es.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::activecalledonparent)
 		{
 			bool visible = getActive();
 			if (visible)
@@ -2164,7 +2174,7 @@ void CGroupMap::setMap(SMap *map)
 		_MapMaterial.setTexture(1, NULL);
 
 	// disable the map_back button for islands (islands can't be seen on the world map)
-	CGroupContainer *gc = getParentContainer();
+	CInterfaceGroup *gc = getParentContainer();
 	if (gc)
 	{
 		CCtrlBase *mapBack = gc->getCtrl("map_back");
@@ -2396,13 +2406,13 @@ static void hideTeleportButtonsInPopupMenuIfNotEnoughPriv()
 	bool showTeleport = (hasPrivilegeDEV() || hasPrivilegeSGM() || hasPrivilegeGM() || hasPrivilegeVG() || hasPrivilegeSG() || hasPrivilegeEM() || hasPrivilegeEG());
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
-	CInterfaceElement *ie = im->getElementFromId("ui:interface:map_menu:teleport");
+	CInterfaceElement *ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:map_menu:teleport");
 	if(ie) ie->setActive(showTeleport);
 
-	ie = im->getElementFromId("ui:interface:land_mark_menu:lmteleport");
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
 
-	ie = im->getElementFromId("ui:interface:user_land_mark_menu:lmteleport");
+	ie = CWidgetManager::getInstance()->getElementFromId("ui:interface:user_land_mark_menu:lmteleport");
 	if(ie) ie->setActive(showTeleport);
 }
 
@@ -2873,12 +2883,12 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 					fromString(sTmp, _RespawnSelected);
 					CInterfaceManager *pIM = CInterfaceManager::getInstance();
 					if (_MapMode == MapMode_Death)
-						pIM->getDbProp("UI:SAVE:RESPAWN_PT")->setValue32(_RespawnSelected);
+						NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT")->setValue32(_RespawnSelected);
 					else if (_MapMode == MapMode_SpawnSquad)
 					{
-						pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
+						NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
 						// Close window containing the map
-						CInterfaceGroup *pGrp = pIM->getWindow(this);
+						CInterfaceGroup *pGrp = CWidgetManager::getInstance()->getWindow(this);
 						if (pGrp != NULL) pGrp->setActive(false);
 					}
 					invalidateCoords();
@@ -2936,13 +2946,13 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 	if (found)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId(_CompassId));
+		CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId(_CompassId));
 		if (gc)
 		{
 			gc->setActive(true);
 			gc->setTarget(ct);
 			gc->blink();
-			im->setTopWindow(gc);
+			CWidgetManager::getInstance()->setTopWindow(gc);
 		}
 	}
 }
@@ -3086,9 +3096,9 @@ sint32 CGroupMap::getRespawnSelected() const
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pNL = NULL;
 	if (_MapMode == MapMode_Death)
-		pNL = pIM->getDbProp("UI:SAVE:RESPAWN_PT",false);
+		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT",false);
 	else if (_MapMode == MapMode_SpawnSquad)
-		pNL = pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT",false);
+		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT",false);
 	if (pNL != NULL)
 		return pNL->getValue32();
 	return 0;
@@ -3103,9 +3113,9 @@ void CGroupMap::setRespawnSelected(sint32 nSpawnPointIndex)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pNL = NULL;
 	if (_MapMode == MapMode_Death)
-		pNL = pIM->getDbProp("UI:SAVE:RESPAWN_PT",false);
+		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT",false);
 	else if (_MapMode == MapMode_SpawnSquad)
-		pNL = pIM->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT",false);
+		pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT",false);
 	if (pNL != NULL)
 		pNL->setValue32(nSpawnPointIndex);
 	_RespawnSelected = nSpawnPointIndex;
@@ -3197,15 +3207,19 @@ class CAHValidateUserLandMarkName : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(im->getElementFromId(WIN_LANDMARK_NAME));
+		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 		if (!ig) return;
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("eb"));
 		if (!eb) return;
 		ig->setActive(false);
-
+		
+		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
+		if (!gc) return;
+		// Retrieve ComboBox to get the position(ordered landmark type) of the selected item
+		CDBGroupComboBox *cb = dynamic_cast<CDBGroupComboBox *>(gc->getGroup("landmarktypes"));
 
 		CUserLandMark::EUserLandMarkType landMarkType = CUserLandMark::Misc;
-		sint8 nLandMarkType = im->getDbProp( "UI:TEMP:LANDMARKTYPE" )->getValue8();
+		sint8 nLandMarkType = cb->getTextId( CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->getValue8());
 		if (nLandMarkType>=0 && nLandMarkType<=CUserLandMark::UserLandMarkTypeCount)
 		{
 			landMarkType = (CUserLandMark::EUserLandMarkType)nLandMarkType;
@@ -3241,7 +3255,7 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// pop the rename dialog
-	LastClickedMap = dynamic_cast<CGroupMap *>(im->getCtrlLaunchingModal());
+	LastClickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 	if (LastClickedMap->isInDeathMode()) return;
 	if (LastClickedMap->getNumUserLandMarks() >= CContinent::getMaxNbUserLandMarks() )
 	{
@@ -3284,7 +3298,7 @@ class CAHMapZoomIn : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		NLMISC::CVector2f center;
 		gm->windowToMap(center, gm->getWReal() / 2, gm->getHReal() / 2);
@@ -3301,7 +3315,7 @@ class CAHMapZoomOut : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		NLMISC::CVector2f center;
 		gm->windowToMap(center, gm->getWReal() / 2, gm->getHReal() / 2);
@@ -3318,7 +3332,7 @@ class CAHMapCenter : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		gm->centerOnPlayer();
 	}
@@ -3333,7 +3347,7 @@ class CAHMapBack : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *pGM = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (pGM == NULL) return;
 		SMap *pMap = pGM->getParentMap(pGM->getCurMap());
 		if (pMap != NULL)
@@ -3350,7 +3364,7 @@ class CAHRespawnMapValid : public IActionHandler
 	{
 		std::string map = getParam(params, "map");
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		if (gm->getRespawnSelected() == -1) return;
 
@@ -3382,14 +3396,14 @@ class CAHRespawnMapValid : public IActionHandler
 				- the user cannot reswpan....
 			Instead, I chose to hide the timer text in map.xml
 		*/
-		/*sint64 val = im->getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK")->getValue64();
-		im->getDbProp("UI:VARIABLES:RESPAWN:END_DATE")->setValue64(val+10*10);
-		im->getDbProp("UI:VARIABLES:OPEN_RESPAWN_AT_TIME")->setValue64(0);
+		/*sint64 val = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK")->getValue64();
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:RESPAWN:END_DATE")->setValue64(val+10*10);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:OPEN_RESPAWN_AT_TIME")->setValue64(0);
 		// must hide the window which contains this map, not the map itself!!
 		CInterfaceGroup		*rootWindow= gm->getRootWindow();
 		if(rootWindow)	rootWindow->setActive(false);
 		*/
-		im->getDbProp("UI:VARIABLES:RESPAWN:MSG_SENT")->setValue64(1);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:RESPAWN:MSG_SENT")->setValue64(1);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHRespawnMapValid, "respawn_map_valid");
@@ -3406,15 +3420,15 @@ class CAHWorldMapRightClick : public IActionHandler
 
 		hideTeleportButtonsInPopupMenuIfNotEnoughPriv();
 
-		CGroupMap *gm = dynamic_cast<CGroupMap *>(im->getElementFromId(map));
+		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 		if (!gm->isIsland())
 		{
-			im->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu");
+			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu");
 		}
 		else
 		{
-			im->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
+			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
 		}
 	}
 };
@@ -3457,7 +3471,7 @@ class CAHMapTeleport : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupMap   *clickedMap = dynamic_cast<CGroupMap *>(im->getCtrlLaunchingModal());
+		CGroupMap   *clickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		closeLandMarkNameDialog();
 		NLMISC::CVector2f pos = clickedMap->getRightClickLastPos();
 		clickedMap->mapToWorld(pos, pos);
@@ -3479,40 +3493,40 @@ class CUpdateLandMarksColor : public IActionHandler{public:	virtual void execute
 {		
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();		
 
-	CUserLandMark::_LandMarksColor[CUserLandMark::Misc] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:MISC")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Tribe] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:TRIBE")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Bandit] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:BANDIT")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Citizen] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:CITIZEN")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Fauna] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FAUNA")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::FaunaExcel] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FAUNAEXCEL")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::FaunaSup] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FAUNASUP")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Forage] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FORAGE")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::ForageExcel] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FORAGEEXCEL")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::ForageSup] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FORAGESUP")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Sap] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:SAP")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Amber] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:AMBER")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Node] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:NODE")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Fiber] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FIBER")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Bark] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:BARK")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Seed] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:SEED")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Shell] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:SHELL")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Resin] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:RESIN")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Wood] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:WOOD")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Oil] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:OIL")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Mission] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:MISSION")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Food] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:FOOD")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Construction] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:CONSTRUCTION")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Goo] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:GOO")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Insect] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:INSECT")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Kitin] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:KITIN")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Nocive] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:NOCIVE")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Preservative] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:PRESERVATIVE")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Passage] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:PASSAGE")->getValueRGBA();
-	CUserLandMark::_LandMarksColor[CUserLandMark::Teleporter] = pIM->getDbProp("UI:SAVE:LANDMARK:COLORS:TELEPORTER")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Misc] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:MISC")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Tribe] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:TRIBE")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Bandit] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:BANDIT")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Citizen] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:CITIZEN")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Fauna] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FAUNA")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::FaunaExcel] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FAUNAEXCEL")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::FaunaSup] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FAUNASUP")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Forage] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FORAGE")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::ForageExcel] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FORAGEEXCEL")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::ForageSup] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FORAGESUP")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Sap] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:SAP")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Amber] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:AMBER")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Node] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:NODE")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Fiber] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FIBER")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Bark] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:BARK")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Seed] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:SEED")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Shell] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:SHELL")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Resin] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:RESIN")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Wood] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:WOOD")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Oil] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:OIL")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Mission] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:MISSION")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Food] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:FOOD")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Construction] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:CONSTRUCTION")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Goo] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:GOO")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Insect] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:INSECT")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Kitin] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:KITIN")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Nocive] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:NOCIVE")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Preservative] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:PRESERVATIVE")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Passage] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:PASSAGE")->getValueRGBA();
+	CUserLandMark::_LandMarksColor[CUserLandMark::Teleporter] = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:LANDMARK:COLORS:TELEPORTER")->getValueRGBA();
 
 
 	
-	CGroupMap *pGM = dynamic_cast<CGroupMap *>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));		
+	CGroupMap *pGM = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));		
 	if (pGM == NULL) return;		
 	pGM->updateUserLandMarks();	
 
@@ -3531,7 +3545,7 @@ NLMISC_COMMAND( testMapHome, "Debug : test display of home on map", "" )
 {
 	if (!args.empty()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp(COMPASS_DB_PATH ":HOME_POINT")->setValue64((((sint64) 4787 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3661 * 1000));
+	NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":HOME_POINT")->setValue64((((sint64) 4787 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3661 * 1000));
 	return true;
 }
 /*
@@ -3539,7 +3553,7 @@ NLMISC_COMMAND( testMapRespawn, "Debug : test display of respawn point on map", 
 {
 	if (!args.empty()) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp(COMPASS_DB_PATH ":BIND_POINT")->setValue64((((sint64) 4687 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3561 * 1000));
+	NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":BIND_POINT")->setValue64((((sint64) 4687 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3561 * 1000));
 	return true;
 }
 */
@@ -3555,7 +3569,7 @@ NLMISC_COMMAND( testRespawn, "Debug : test respawn map", "" )
 	rpm.RespawnPoints.push_back(CRespawnPointsMsg::SRespawnPoint(4050*1000,-4200*1000));
 	rpm.RespawnPoints.push_back(CRespawnPointsMsg::SRespawnPoint(4200*1000,-4150*1000));
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
 	if (pMap == NULL)
 	{
 		nlwarning("problem cannot find ui:interface:respawn_map:content:map_content:actual_map");
@@ -3564,7 +3578,7 @@ NLMISC_COMMAND( testRespawn, "Debug : test respawn map", "" )
 	pMap->addRespawnPoints(rpm);
 
 
-	pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	if (pMap == NULL)
 	{
 		nlwarning("problem cannot find ui:interface:map:content:map_content:actual_map");
@@ -3574,7 +3588,7 @@ NLMISC_COMMAND( testRespawn, "Debug : test respawn map", "" )
 
 /*
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->getDbProp(COMPASS_DB_PATH ":BIND_POINT")->setValue64((((sint64) 4687 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3561 * 1000));
+	NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":BIND_POINT")->setValue64((((sint64) 4687 * 1000) << 32 )| (sint64) (uint32) ((sint64) -3561 * 1000));
 */
 	return true;
 }
@@ -3584,7 +3598,7 @@ NLMISC_COMMAND( setMap, "Debug : test respawn map", "" )
 	if (args.size() != 1) return false;
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupMap *pMap = dynamic_cast<CGroupMap*>(pIM->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	if (pMap != NULL)
 		pMap->setMap(args[0]);
 

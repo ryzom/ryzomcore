@@ -73,7 +73,7 @@ struct _player
 typedef map<uint32, _player> _pmap;
 _pmap playerList;
 
-// Define informations used for the snowballs management
+// Define information used for the snowballs management
 struct _snowball
 {
 	_snowball( uint32 Id, uint32 Owner, CTrajectory Traj, float ExplosionRadius ) :
@@ -434,7 +434,7 @@ void cbSnowball (CMessage &msgin, const std::string &serviceName, TServiceId sid
 	msgin.serial( explosionRadius );
 	nldebug( "SB: Received SNOWBALL line." );
 
-	// Store new snowballs informations
+	// Store new snowballs information
 	CTrajectory traj;
 	traj.init( start, target, speed, CTime::getLocalTime() + THROW_ANIM_OFFSET );
 	_snowball snowball = _snowball( snowballId, playerId, traj, explosionRadius );

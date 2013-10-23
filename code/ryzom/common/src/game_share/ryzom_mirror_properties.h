@@ -138,7 +138,7 @@ void	initRyzomVisualPropertyIndices( CMirroredDataSet& dataset );
 #define TYPE_BOT_TRADE_SELECTOR2 uint64
 
 #define TYPE_EVENT_FACTION_ID uint32
-#define TYPE_PVP_MODE uint8
+#define TYPE_PVP_MODE uint32
 #define TYPE_PVP_CLAN uint32
 
 #define TYPE_FUEL bool

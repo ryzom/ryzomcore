@@ -14,13 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "app_bundle_utils.h"
 
 #if defined(NL_OS_MAC)
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
-std::string getAppBundlePath() 
+std::string getAppBundlePath()
 {
 	static std::string cachedPathToBundle;
 

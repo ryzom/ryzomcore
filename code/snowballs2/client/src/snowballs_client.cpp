@@ -51,6 +51,7 @@
 #if SBCLIENT_DEV_STEREO
 #	include <nel/3d/stereo_render.h>
 #endif /* #if SBCLIENT_DEV_STEREO */
+#include <nel/3d/stereo_hmd.h>
 
 // Project includes
 #include "pacs.h"
@@ -151,6 +152,8 @@ LoadedOnline = false, LoadedOffline = false; // state
 static IStereoRender *_StereoRender = NULL;
 #endif /* #if SBCLIENT_DEV_STEREO */
 
+static bool s_EnableBloom = false;
+
 //
 // Prototypes
 //
@@ -179,6 +182,9 @@ void releaseIngame();
 void releaseOnline();
 void releaseOffline();
 void cbGraphicsDriver(CConfigFile::CVar &var);
+void cbSquareBloom(CConfigFile::CVar &var);
+void cbDensityBloom(CConfigFile::CVar &var);
+void cbEnableBloom(CConfigFile::CVar &var);
 
 //
 // Functions
@@ -306,11 +312,16 @@ void initCore()
 		Driver->setDisplay(UDriver::CMode(ConfigFile->getVar("ScreenWidth").asInt(),
 			ConfigFile->getVar("ScreenHeight").asInt(),
 			ConfigFile->getVar("ScreenDepth").asInt(),
-			ConfigFile->getVar("ScreenFull").asInt()==0));
+			(ConfigFile->getVar("OpenGL").asInt() == 1 ? true : ConfigFile->getVar("ScreenFull").asInt()==0)));
 		// Set the cache size for the font manager(in bytes)
 		Driver->setFontManagerMaxMemory(2097152);
 		// Create a Text context for later text rendering
 		displayLoadingState("Initialize Text");
+		if (ConfigFile->getVar("OpenGL").asInt() == 1)
+			Driver->setMode(UDriver::CMode(ConfigFile->getVar("ScreenWidth").asInt(),
+				ConfigFile->getVar("ScreenHeight").asInt(),
+				ConfigFile->getVar("ScreenDepth").asInt(),
+				ConfigFile->getVar("ScreenFull").asInt()==0));
 		TextContext = Driver->createTextContext(CPath::lookup(ConfigFile->getVar("FontName").asString()));
 		TextContext->setShaded(true);
 		TextContext->setKeep800x600Ratio(false);
@@ -354,6 +365,7 @@ void initIngame()
 //#ifdef NL_OS_WINDOWS
 //		playMusic(SBCLIENT_MUSIC_WAIT);
 //#endif
+		displayLoadingState("Initialize");
 
 		// Create a scene
 		Scene = Driver->createScene(false);
@@ -362,7 +374,9 @@ void initIngame()
 		CBloomEffect::instance().setDriver(Driver);
 		CBloomEffect::instance().setScene(Scene);
 		CBloomEffect::instance().init(ConfigFile->getVar("OpenGL").asInt() == 1);
-
+		CConfiguration::setAndCallback("SquareBloom", cbSquareBloom);
+		CConfiguration::setAndCallback("DensityBloom", cbDensityBloom);
+		CConfiguration::setAndCallback("EnableBloom", cbEnableBloom);
 		// Init the landscape using the previously created UScene
 		displayLoadingState("Initialize Landscape");
 		initLandscape();
@@ -562,6 +576,8 @@ void releaseIngame()
 		MouseListener = NULL;
 
 		// release bloom effect
+		CConfiguration::dropCallback("SquareBloom");
+		CConfiguration::dropCallback("DensityBloom");
 		CBloomEffect::instance().releaseInstance();
 
 		Driver->deleteScene(Scene);
@@ -673,14 +689,15 @@ void loopIngame()
 
 		// 02. Update Time (deltas)
 		CGameTime::updateTime();
+		CGameTime::advanceTime(1.0);
 
-		// 03. Update Input (keyboard controls, etc)
+		// 03. Update Incoming (network, receive messages)
+		updateNetwork();
+
+		// 04. Update Input (keyboard controls, etc)
 		Driver->EventServer.pump(); // Pump user input messages
 		MouseListener->update();
 		MouseListener->updateCamera();
-
-		// 04. Update Incoming (network, receive messages)
-		updateNetwork();
 
 		// 05. Update Weather (sky, snow, wind, fog, sun)
 		animateSky(LocalTimeDelta);
@@ -689,7 +706,7 @@ void loopIngame()
 		updateLandscape(); // Update the landscape
 
 		// ... Update Animations (TEST)
-		// ...
+		updateAnimation();
 
 		// 07. Update Entities (collisions and actions)
 		//                           - Move Other Entities (move//, animations, etc)
@@ -702,6 +719,7 @@ void loopIngame()
 
 		// 09. Update Camera (depends on entities)
 		updateCamera();
+		if (StereoHMD) StereoHMD->updateCamera(0, &Camera);
 
 		// 10. Update Interface (login, ui, etc)
 		// ...
@@ -721,52 +739,98 @@ void loopIngame()
 		if (Driver->isLost()) nlSleep(10);
 		else
 		{
-			// call all 3d render thingies
-			Driver->clearBuffers(CRGBA(127, 0, 0)); // if you see red, there's a problem with bloom or stereo render
-#if SBCLIENT_DEV_STEREO
-			_StereoRender->calculateCameras(Camera.getObjectPtr()); // calculate modified matrices for the current camera
-			for (uint cameraId = 0; cameraId < _StereoRender->getCameraCount(); ++cameraId)
+			uint i = 0;
+			uint bloomStage = 0;
+			while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 			{
-				_StereoRender->getCamera(cameraId, Camera.getObjectPtr()); // get the matrix details for this camera
-#endif /* #if SBCLIENT_DEV_STEREO */
+				++i;
+				if (StereoDisplay)
+				{
+					const CViewport &vp = StereoDisplay->getCurrentViewport();
+					Driver->setViewport(vp);
+					Scene->setViewport(vp);
+					SkyScene->setViewport(vp);
+					StereoDisplay->getCurrentFrustum(0, &Camera);
+					StereoDisplay->getCurrentFrustum(0, &SkyCamera);
+					StereoDisplay->getCurrentMatrix(0, &Camera);
+				}
 
-				// 01. Render Driver (background color)
-				CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
-				Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
+				if (StereoDisplay)
+				{
+					StereoDisplay->beginRenderTarget();
+				}
+				
+				if (!StereoDisplay || StereoDisplay->wantClear())
+				{
 
-				// 02. Render Sky (sky scene)
-				updateSky(); // Render the sky scene before the main scene
+					if (s_EnableBloom)
+					{
+						nlassert(bloomStage == 0);
+						CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
+						bloomStage = 1;
+					}
 
-				// 04. Render Scene (entity scene)
-				Scene->render(); // Render
+					// 01. Render Driver (background color)
+					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
+				}
 
-				// 05. Render Effects (flare)
-				updateLensFlare(); // Render the lens flare
-				CBloomEffect::instance().endBloom(); // end the actual bloom effect visible in the scene
+				if (!StereoDisplay || StereoDisplay->wantScene())
+				{				
+					// 02. Render Sky (sky scene)
+					updateSky(); // Render the sky scene before the main scene
 
-				// 06. Render Interface 3D (player names)
-				CBloomEffect::instance().endInterfacesDisplayBloom(); // end bloom effect system after drawing the 3d interface (z buffer related)
+					// 04. Render Scene (entity scene)
+					Scene->render(); // Render
 
-#if SBCLIENT_DEV_STEREO
-				_StereoRender->copyBufferToTexture(cameraId); // copy current buffer to the active stereorender texture
+					// 05. Render Effects (flare)
+					if (!StereoHMD) updateLensFlare(); // Render the lens flare (left eye stretched with stereo...)
+				}
+
+				if (!StereoDisplay || StereoDisplay->wantInterface3D())
+				{
+					if (s_EnableBloom && bloomStage == 1)
+					{
+						// End the actual bloom effect visible in the scene.
+						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+						CBloomEffect::instance().endBloom();
+						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+						bloomStage = 2;
+					}
+
+					// 06. Render Interface 3D (player names)
+					// ... 
+				}
+
+				if (!StereoDisplay || StereoDisplay->wantInterface2D())
+				{
+					if (s_EnableBloom && bloomStage == 2)
+					{
+						// End bloom effect system after drawing the 3d interface (z buffer related).
+						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+						CBloomEffect::instance().endInterfacesDisplayBloom();
+						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
+						bloomStage = 0;
+					}
+
+					// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
+					updateCompass(); // Update the compass
+					updateRadar(); // Update the radar
+					updateGraph(); // Update the radar
+					if (ShowCommands) updateCommands(); // Update the commands panel
+					renderEntitiesNames(); // Render the name on top of the other players
+					updateInterface(); // Update interface
+					renderInformation();
+					if (!StereoDisplay) update3dLogo(); // broken with stereo
+
+					// 08. Render Debug (stuff for dev)
+					// ...
+				}
+
+				if (StereoDisplay)
+				{
+					StereoDisplay->endRenderTarget();
+				}
 			}
-			_StereoRender->restoreCamera(Camera.getObjectPtr()); // restore the camera
-			_StereoRender->render(); // render everything together in the current mode
-#endif /* #if SBCLIENT_DEV_STEREO */
-
-			// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
-			updateCompass(); // Update the compass
-			updateRadar(); // Update the radar
-			updateGraph(); // Update the radar
-			if (ShowCommands) updateCommands(); // Update the commands panel
-			updateAnimation();
-			renderEntitiesNames(); // Render the name on top of the other players
-			updateInterface(); // Update interface
-			renderInformation();
-			update3dLogo();
-
-			// 08. Render Debug (stuff for dev)
-			// ...
 
 			// 09. Render Buffer
 			Driver->swapBuffers();
@@ -868,6 +932,8 @@ void renderInformation()
 	TextContext->setColor(CRGBA(255, 255, 255, 255));
 	TextContext->setFontSize(14);
 	TextContext->printfAt(0.01f, 0.99f, "%.2f(%.2f)fps %.3fs", FramesPerSecondSmooth, FramesPerSecond, (float)LocalTimeDelta);
+	CVector camPos = Camera.getMatrix().getPos();
+	TextContext->printfAt(0.01f, 0.89f, "CAM POS: %.3f %.3f %.3f", camPos.x, camPos.y, camPos.z);
 
 	// one more frame
 	FpsGraph.addValue(1.0f);
@@ -882,6 +948,21 @@ void cbGraphicsDriver(CConfigFile::CVar &var)
 {
 	// -- give ingame warning or something instead =)
 	NextGameState = GameStateReset;
+}
+
+void cbSquareBloom(CConfigFile::CVar &var)
+{
+	CBloomEffect::instance().setSquareBloom(var.asBool());
+}
+
+void cbDensityBloom(CConfigFile::CVar &var)
+{
+	CBloomEffect::instance().setDensityBloom((uint8)(var.asInt() & 0xFF));
+}
+
+void cbEnableBloom(CConfigFile::CVar &var)
+{
+	s_EnableBloom = var.asBool();
 }
 
 //
@@ -1124,21 +1205,29 @@ sint main(int argc, char **argv)
 		FILE *f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
 		if (!f)
 		{
-			OutputDebugString("    ********************************    \n");
-			OutputDebugString("    *  CHANGING WORKING DIRECTORY  *    \n");
-			OutputDebugString("    ********************************    \n\n");
-			char cwd[256];
-			_tgetcwd(cwd, 256);
-			tstring workdir(cwd);
-			workdir += "\\..\\bin\\";
-			_tchdir(workdir.c_str());
-			f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
+			f = _tfopen(_T(SBCLIENT_CONFIG_FILE), _T("r"));
 			if (!f)
 			{
 				OutputDebugString("    ********************************    \n");
-				OutputDebugString("    *    DEFAULT CONFIG MISSING    *    \n");
+				OutputDebugString("    *  CHANGING WORKING DIRECTORY  *    \n");
 				OutputDebugString("    ********************************    \n\n");
-				return EXIT_FAILURE;
+				char cwd[256];
+				_tgetcwd(cwd, 256);
+				tstring workdir(cwd);
+				workdir = "R:\\build\\devw_x86\\bin\\Debug\\";
+				_tchdir(workdir.c_str());
+				f = _tfopen(_T(SBCLIENT_CONFIG_FILE_DEFAULT), _T("r"));
+				if (!f)
+				{
+					f = _tfopen(_T(SBCLIENT_CONFIG_FILE), _T("r"));
+					if (!f)
+					{
+						OutputDebugString("    ********************************    \n");
+						OutputDebugString("    *    DEFAULT CONFIG MISSING    *    \n");
+						OutputDebugString("    ********************************    \n\n");
+						return EXIT_FAILURE;
+					}
+				}
 			}
 		}
 		fclose(f);

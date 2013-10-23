@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "formitem.h"
 
 // Qt includes
@@ -23,7 +24,7 @@
 #include <nel/georges/u_type.h>
 #include <nel/georges/form.h>
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	CFormItem::CFormItem(NLGEORGES::UFormElm* elm, const QList<QVariant> &data, CFormItem *parent,
@@ -118,10 +119,10 @@ namespace Plugin
 							{
 								if (elmt->isAtom()) 
 								{
-									((NLGEORGES::CFormElmAtom*)elmt)->setValue(value.toString().toStdString().c_str());
+									((NLGEORGES::CFormElmAtom*)elmt)->setValue(value.toString().toUtf8().constData());
 									nldebug(QString("array element string %1 %2")
 									.arg(itemData[0].toString()).arg(value.toString())
-									.toStdString().c_str());
+									.toUtf8().constData());
 								}
 							}
 						}
@@ -129,18 +130,18 @@ namespace Plugin
 					else
 					{
 						if(parentItem->formElm->setValueByName(
-							value.toString().toStdString().c_str(),
-							itemData[0].toString().toStdString().c_str()))
+							value.toString().toUtf8().constData(),
+							itemData[0].toString().toUtf8().constData()))
 						{
 							nldebug(QString("string %1 %2")
 							.arg(itemData[0].toString()).arg(value.toString())
-							.toStdString().c_str());
+							.toUtf8().constData());
 						}
 						else
 						{
 							nldebug(QString("FAILED string %1 %2")
 							.arg(itemData[0].toString()).arg(value.toString())
-							.toStdString().c_str());
+							.toUtf8().constData());
 						}
 					}
 					break;

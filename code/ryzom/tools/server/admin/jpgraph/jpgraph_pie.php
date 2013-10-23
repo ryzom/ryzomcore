@@ -567,7 +567,7 @@ class PiePlot {
 	//-----------------------------------------------------------------------
 	// Step 1 of the algorithm is to construct a number of clusters
 	// a cluster is defined as all slices within the same quadrant (almost)
-	// that has an angualr distance less than the treshold
+	// that has an angular distance less than the threshold
 	//-----------------------------------------------------------------------
 	$tresh_hold=25 * M_PI/180; // 25 degrees difference to be in a cluster
 	$incluster=false;	// flag if we are currently in a cluster or not

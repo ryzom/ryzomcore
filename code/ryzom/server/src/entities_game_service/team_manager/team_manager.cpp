@@ -72,6 +72,195 @@ void CTeamManager::addAllTeamsToChatGroup()
 } // addAllTeamsToChatGroup //
 
 //---------------------------------------------------
+// leagueJoinProposal :
+//---------------------------------------------------
+void CTeamManager::joinLeagueProposal( CCharacter * leader, const CEntityId &targetId)
+{
+	//check already done
+	nlassert(leader);
+
+	const NLMISC::CEntityId &leaderId = leader->getId();
+	if (targetId == leaderId )
+	{
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"INVALID_LEAGUE_TARGET" );
+		return;
+	}
+
+	// get targeted player
+	CCharacter *invitedPlayer = PlayerManager.getOnlineChar( targetId );
+	if ( invitedPlayer == NULL )
+	{
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"INVALID_LEAGUE_TARGET" );
+		return;
+	}
+	
+	// god player are forbidden to team
+	if (leader->godMode() || invitedPlayer->godMode())
+	{
+		nlwarning("<CTeamManager joinLeagueProposal> Player %s invited %s, but at least on of them is god, forbidden", 
+			leaderId.toString().c_str(),
+			targetId.toString().c_str());
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"TEAM_GOD_FORBIDDEN" );
+		return;
+	}
+
+	TInviteRetCode code = isLeagueInvitableBy(invitedPlayer,leader);
+	if ( code == AlreadyInvited )
+	{
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"LEAGUE_ALREADY_INVITED" );
+		return;
+	}
+	else if ( code == AlreadyInLeague )
+	{
+		CTeam * team = getRealTeam( invitedPlayer->getTeamId() );
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"LEAGUE_ALREADY_IN_LEAGUE" );
+		return;
+	}
+	else if ( code == NotLeader )
+	{
+		CTeam * team = getRealTeam( invitedPlayer->getTeamId() );
+		joinLeagueProposal(leader, team->getLeader());
+		return;
+	}
+	else if ( code == CantInvite )
+	{
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"LEAGUE_INVITOR_NOT_LEADER" );
+		return;
+	}
+
+	/// the invitor must not be in the ignore list of the target
+	if(invitedPlayer->hasInIgnoreList(leaderId))
+	{
+		SM_STATIC_PARAMS_1( params1, STRING_MANAGER::player );
+		params1[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias( targetId) );
+		// Use the standard "player declines your offer". Don't use specific message because
+		// maybe not a good idea to inform a player that someone ignores him
+		CCharacter::sendDynamicSystemMessage( leaderId, "TEAM_DECLINE", params1 );
+		return;
+	}
+
+	//set the target's invitor
+	invitedPlayer->setLeagueInvitor(leaderId);
+
+	CEntityId msgTargetEId = targetId;
+	
+	//send the appropriate string to the client
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
+	params[0].setEIdAIAlias( leaderId, CAIAliasTranslator::getInstance()->getAIAlias(leaderId) );
+	uint32 txt = STRING_MANAGER::sendStringToClient(TheDataset.getDataSetRow(targetId), "LEAGUE_PROPOSAL", params );
+	
+	CMessage msgout( "IMPULSION_ID" );
+	msgout.serial( const_cast<CEntityId&>(msgTargetEId) );
+	CBitMemStream bms;
+	nlverify ( GenericMsgManager.pushNameToStream( "PVP_CHALLENGE:INVITATION", bms) );
+	bms.serial( txt );
+	msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
+	sendMessageViaMirror( NLNET::TServiceId(msgTargetEId.getDynamicId()), msgout );
+
+	params[0].setEIdAIAlias( targetId, CAIAliasTranslator::getInstance()->getAIAlias( targetId ) );
+	PHRASE_UTILITIES::sendDynamicSystemMessage(leader->getEntityRowId(), "LEAGUE_INVITE", params);
+	
+	leader->updateTarget();	
+}
+
+//---------------------------------------------------
+// joinLeagueDecline :
+//---------------------------------------------------
+void CTeamManager::joinLeagueDecline( const NLMISC::CEntityId &charId)
+{
+	CCharacter * invited = PlayerManager.getOnlineChar(charId);
+	if ( invited == NULL )
+	{
+		nlwarning("<CTeamManager joinLeagueDecline>Invalid char %s",charId.toString().c_str());
+		return;
+	}
+	invited->setAfkState(false);
+	if ( invited->getLeagueInvitor() == CEntityId::Unknown )
+	{
+		nlwarning("<CTeamManager joinLeagueDecline>character %s has an Invalid invitor",charId.toString().c_str());
+		return;
+	}
+
+	//inform both players
+	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);	
+	params[0].setEIdAIAlias( charId, CAIAliasTranslator::getInstance()->getAIAlias( charId) );
+	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(invited->getTeamInvitor()), "LEAGUE_DECLINE", params);
+	
+	params[0].setEIdAIAlias( invited->getTeamInvitor(), CAIAliasTranslator::getInstance()->getAIAlias( invited->getTeamInvitor() ) );
+	PHRASE_UTILITIES::sendDynamicSystemMessage(invited->getEntityRowId(), "LEAGUE_YOU_DECLINE", params);
+
+	//cancel the proposal
+	invited->setLeagueInvitor( CEntityId::Unknown );
+} // joinLeagueDecline //
+
+//---------------------------------------------------
+// joinLeagueAccept :
+//---------------------------------------------------
+void CTeamManager::joinLeagueAccept( const NLMISC::CEntityId &charId)
+{
+	// get the invited char
+	CCharacter * invited = PlayerManager.getOnlineChar(charId);
+	if ( invited == NULL )
+	{
+		nlwarning("<CTeamManager joinLeagueAccept>Invalid char %s",charId.toString().c_str());
+		return;
+	}
+
+	// get the invitor id
+	const NLMISC::CEntityId & invitorId = invited->getLeagueInvitor();
+
+	if ( invitorId == CEntityId::Unknown )
+	{
+		nlwarning("<CTeamManager joinLeagueAccept>character %s has an Invalid invitor",charId.toString().c_str());
+		return;
+	}
+	//get the invitor char
+	CCharacter * invitor = PlayerManager.getOnlineChar(invitorId);
+	if ( invitor == NULL  )
+	{
+		nlwarning("<CTeamManager joinLeagueAccept>character %s, Invalid invitor id %s",charId.toString().c_str(),invitorId.toString().c_str());
+		invited->setLeagueInvitor( CEntityId::Unknown );
+		return;
+	}
+	invitor->setAfkState(false);
+	
+	//cancel the proposal
+	invited->setLeagueInvitor( CEntityId::Unknown );
+
+	CTeam *teamInvitor;
+	CTeam *teamInvited;
+	//if the invited player had a fake team, remove it
+	teamInvited = getRealTeam(invited->getTeamId());
+	teamInvitor = getRealTeam(invitor->getTeamId());
+	
+	if ( !teamInvitor )
+	{
+		nlwarning("<CTeamManager joinLeagueAccept>character %s, invitor id %s, the invited or invitor player is not in a valid team. ",charId.toString().c_str(),invitor->getId().toString().c_str() );
+		return;
+	}
+	
+	
+	// check that the invitor team have league else create them
+	if (teamInvitor->getLeagueId() == DYN_CHAT_INVALID_CHAN )
+	{
+		teamInvitor->setLeague("League");
+	}
+	
+	if (teamInvited) {
+		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(invited->getId()).toString();
+		CPVPManager2::getInstance()->broadcastMessage(teamInvitor->getLeagueId(), string("<TEAM>"), "<-- "+playerName);
+		teamInvited->setLeagueId(teamInvitor->getLeagueId());
+		teamInvited->updateLeague();
+	} else {
+		const string playerName = CEntityIdTranslator::getInstance()->getByEntity(invited->getId()).toString();
+		CPVPManager2::getInstance()->broadcastMessage(teamInvitor->getLeagueId(), string("<PLAYER>"), "<-- "+playerName);
+		invited->setLeagueId(teamInvitor->getLeagueId(), true);
+	}
+	
+} // joinLeagueAccept //
+
+
+//---------------------------------------------------
 // joinProposal :
 //---------------------------------------------------
 void CTeamManager::joinProposal( CCharacter * leader, const CEntityId &targetId)
@@ -90,7 +279,7 @@ void CTeamManager::joinProposal( CCharacter * leader, const CEntityId &targetId)
 	CCharacter *invitedPlayer = PlayerManager.getOnlineChar( targetId );
 	if ( invitedPlayer == NULL )
 	{
-		CCharacter::sendDynamicSystemMessage( leader->getId(),"INVALID_TEAM_TARGET" );
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"INVALID_LEAGUE_TARGET" );
 		return;
 	}
 	
@@ -117,7 +306,7 @@ void CTeamManager::joinProposal( CCharacter * leader, const CEntityId &targetId)
 	}
 	else if ( code == CantInviteEnemy )
 	{
-		CCharacter::sendDynamicSystemMessage( leader->getId(),"TEAM_CANT_INVITE_ENEMIE" );
+		CCharacter::sendDynamicSystemMessage( leader->getId(),"TEAM_CANT_INVITE_ENEMY" );
 		return;
 	}
 	else if ( code == CantInvite )
@@ -423,7 +612,7 @@ void CTeamManager::removeCharacter( const CEntityId &charId )
 		{
 			const list<CEntityId> &members = team->getTeamMembers();
 			
-			CEntityId eId(*(++members.begin()));
+			CEntityId eId(team->getSuccessor());
 			params[0].setEIdAIAlias( eId, CAIAliasTranslator::getInstance()->getAIAlias(eId) );
 			PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(charId), "TEAM_YOU_LEAVE_LEADER", params);
 		}
@@ -506,6 +695,48 @@ void CTeamManager::removeFakeTeam(CCharacter * player)
 }// removeFakeTeam
 
 //---------------------------------------------------
+// isLeagueInvitableBy :
+//---------------------------------------------------
+CTeamManager::TInviteRetCode CTeamManager::isLeagueInvitableBy(CCharacter * invited, CCharacter * invitor )
+{
+	// check must be done before
+	nlassert( invited );
+	nlassert( invitor );
+
+	if ( !TheDataset.isAccessible(invited->getEntityRowId()) || !TheDataset.isAccessible(invitor->getEntityRowId()))
+		return CantInvite;
+	
+	// check that the invitor is in team
+	CTeam * team = getRealTeam( invitor->getTeamId() );
+	if (!team)
+		return CantInvite;
+	
+	// check that the invitor is the leader
+	if (team->getLeader() != invitor->getId() )
+		return CantInvite;
+		
+	// check that the invited don't have league
+	if (invited->getLeagueId() !=  DYN_CHAT_INVALID_CHAN)
+		return AlreadyInLeague;
+	  
+	// check if target is not already invited
+	if( invited->getLeagueInvitor() != CEntityId::Unknown )
+		return AlreadyInvited;	
+
+	// get the target team
+	team = getRealTeam( invited->getTeamId() );
+	if (!team)
+		return NotInTeam;
+
+	// check that the invited is the leader
+	if (team->getLeader() != invited->getId() )
+		return NotLeader;
+
+	return Ok;
+}
+
+
+//---------------------------------------------------
 // processMissionTeamEvent :
 //---------------------------------------------------
 CTeamManager::TInviteRetCode CTeamManager::isInvitableBy(CCharacter * invited, CCharacter * invitor )
@@ -519,6 +750,7 @@ CTeamManager::TInviteRetCode CTeamManager::isInvitableBy(CCharacter * invited, C
 	{
 		return AlreadyInvited;
 	}
+
 	// get the target team, which must be fake
 	CTeam * team = getRealTeam( invited->getTeamId() );
 	if( team )
@@ -528,7 +760,8 @@ CTeamManager::TInviteRetCode CTeamManager::isInvitableBy(CCharacter * invited, C
 	
 	// check that the invitor is alone or a group leader
 	team = getRealTeam( invitor->getTeamId() );
-	if ( team && team->getLeader()!= invitor->getId() )
+	
+	if (team && team->getLeader()!= invitor->getId())
 	{
 		return CantInvite;
 	}
@@ -538,9 +771,9 @@ CTeamManager::TInviteRetCode CTeamManager::isInvitableBy(CCharacter * invited, C
 		return CantInvite;
 
 	// cannot invite enemy in faction PvP zones
-	if( CPVPManager2::getInstance()->isOffensiveActionValid( invited, invitor, true ) )
+/*	if( CPVPManager2::getInstance()->isOffensiveActionValid( invited, invitor, true ) )
 		if( invited->getPvPRecentActionFlag() || invitor->getPvPRecentActionFlag() )
-			return CantInviteEnemy;
+			return CantInviteEnemy;*/
 	return Ok;
 }
 

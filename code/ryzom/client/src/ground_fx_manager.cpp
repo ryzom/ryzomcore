@@ -64,7 +64,7 @@ CGroundFXManager::CGroundFXManager() :
 					   _MinSpeed(1.5f),
 					   _MaxSpeed(6.f),
 					   _SpeedWaterWalkFast(3.f),
-					   _SpeedWaterSwimFast(3.f),
+					   _SpeedWaterSwimFast(2.f),
 					   _MaxDist(50.f),
 					   _MaxNumFX(10),
 					   _NumFX(0),
@@ -495,7 +495,7 @@ void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 			break;
 			case CInstance::Swim:
 				if (speed == 0.f) fxName = "StepSwimIdle.ps";
-				else if (speed > _SpeedWaterWalkFast)
+				else if (speed > _SpeedWaterSwimFast)
 				{
 					fxName = "StepSwimSpeed.ps";
 					fxNameUnderWater = "StepSwimSpeedUnderWater.ps";
@@ -919,7 +919,7 @@ NLMISC_COMMAND(gfxAdd, "gfxAdd", "<>")
 
 		CInterfaceManager *IM = CInterfaceManager::getInstance();
 		// Set Position
-		node = IM->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSX), false);
+		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSX), false);
 		NLMISC::CVectorD pos;
 		pos = UserEntity->pos() + 2.f * UserEntity->front();
 		if(node)
@@ -928,11 +928,11 @@ NLMISC_COMMAND(gfxAdd, "gfxAdd", "<>")
 			sint64 y = (sint64)(pos.y * 1000.0);
 			sint64 z = (sint64)(pos.z * 1000.0);
 			node->setValue64(x);
-			node = IM->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSY), false);
+			node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSY), false);
 			if(node)
 			{
 				node->setValue64(y);
-				node = IM->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
+				node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_POSZ), false);
 				if(node)
 				{
 					node->setValue64(z);
@@ -944,7 +944,7 @@ NLMISC_COMMAND(gfxAdd, "gfxAdd", "<>")
 		entity->front(UserEntity->front());
 		entity->dir(UserEntity->front());
 		// Set Mode
-		node = IM->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_MODE), false);
+		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 		if(node)
 		{
 			MBEHAV::EMode m = MBEHAV::NORMAL;
@@ -967,11 +967,11 @@ NLMISC_COMMAND(gfxAdd, "gfxAdd", "<>")
 			visualC.PropertySubData.BreastSize		= 7;
 			// Set The Database
 			prop = (sint64 *)&visualB;
-			IM->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
+			NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_VPB))->setValue64(*prop);
 			prop = (sint64 *)&visualC;
-			IM->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
+			NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_VPC))->setValue64(*prop);
 			prop = (sint64 *)&visualA;
-			IM->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
+			NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+NLMISC::toString("%d", slot)+":P"+NLMISC::toString("%d", CLFECOMMON::PROPERTY_VPA))->setValue64(*prop);
 			// Apply Changes.
 			EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_VPA);
 		}

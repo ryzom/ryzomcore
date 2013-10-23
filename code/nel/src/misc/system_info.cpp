@@ -16,6 +16,8 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/system_info.h"
+
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
 #	include <windows.h>
@@ -41,6 +43,10 @@
 #include "nel/misc/variable.h"
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 
@@ -225,7 +231,14 @@ string CSystemInfo::getOS()
 		}
 		else if ( osvi.dwMajorVersion == 6 )
 		{
-			if ( osvi.dwMinorVersion == 1 )
+			if ( osvi.dwMinorVersion == 2 )
+			{
+				if( osvi.wProductType == VER_NT_WORKSTATION )
+					OSString += " Windows 8";
+				else
+					OSString += " Windows Server 2012";
+			}
+			else if ( osvi.dwMinorVersion == 1 )
 			{
 				if( osvi.wProductType == VER_NT_WORKSTATION )
 					OSString += " Windows 7";

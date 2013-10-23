@@ -34,7 +34,7 @@ class CCell
 {
 public:
 	/// default constructor
-	CCell() : _LastVisionUpdate(0) {};
+	CCell() : _LastVisionUpdate(0) {}
 
 	/// initialisation
 	void	init( sint32 cellId )

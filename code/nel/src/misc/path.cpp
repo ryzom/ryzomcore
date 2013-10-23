@@ -17,8 +17,8 @@
 
 #include "stdmisc.h"
 
-#include "nel/misc/big_file.h"
 #include "nel/misc/path.h"
+#include "nel/misc/big_file.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/progress_callback.h"
 #include "nel/misc/file.h"
@@ -47,6 +47,10 @@
 #endif // NL_OS_WINDOWS
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 
@@ -83,7 +87,7 @@ CFileContainer::~CFileContainer()
 {
 	if( _AllFileNames )
 	{
-		delete _AllFileNames;
+		delete[] _AllFileNames;
 		_AllFileNames = NULL;
 	}
 }
@@ -1218,18 +1222,18 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 		//nlfseek64 (Handle, 0, SEEK_END);
 		//uint32 nFileSize = ftell (Handle);
 		nlfseek64 (Handle, nFileSize-4, SEEK_SET);
-		uint32 nOffsetFromBegining;
-		if (fread (&nOffsetFromBegining, sizeof(uint32), 1, Handle) != 1)
+		uint32 nOffsetFromBeginning;
+		if (fread (&nOffsetFromBeginning, sizeof(uint32), 1, Handle) != 1)
 		{
 			fclose(Handle);
 			return;
 		}
 
 #ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(nOffsetFromBegining);
+		NLMISC_BSWAP32(nOffsetFromBeginning);
 #endif
 
-		nlfseek64 (Handle, nOffsetFromBegining, SEEK_SET);
+		nlfseek64 (Handle, nOffsetFromBeginning, SEEK_SET);
 		uint32 nNbFile;
 		if (fread (&nNbFile, sizeof(uint32), 1, Handle) != 1)
 		{

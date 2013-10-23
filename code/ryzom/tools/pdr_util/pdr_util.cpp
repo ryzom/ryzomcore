@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'o':
 				outputFileName = paramValue;
+				break;
 			default:
 				fprintf(stderr, "Unknown parameter '%s'", args[i].c_str());
 				return -1;

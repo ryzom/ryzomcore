@@ -25,7 +25,7 @@
 
 /**
  * Database Node which contains a set of properties
- * \author Stéphane Coutelas, Olivier Cado
+ * \author Stephane Coutelas, Olivier Cado
  * \author Nevrax France
  * \date 2002, 2003
  */

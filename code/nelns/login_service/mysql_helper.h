@@ -25,7 +25,9 @@
 // we have to include windows.h because mysql.h uses it but not include it
 #ifdef NL_OS_WINDOWS
 #	define NOMINMAX
+#	include <winsock2.h>
 #	include <windows.h>
+typedef unsigned long ulong;
 #endif
 
 #include <mysql.h>
@@ -70,7 +72,7 @@ public:
 
 private:
 	//we don't want user to do a copy
-	CMysqlResult(const CMysqlResult &mysqlResult){};
+	CMysqlResult(const CMysqlResult &mysqlResult){}
 	MYSQL_RES *Result;
 };
 

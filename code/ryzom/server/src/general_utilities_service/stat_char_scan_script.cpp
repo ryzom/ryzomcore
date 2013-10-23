@@ -298,7 +298,7 @@ void CCharScanScriptCommandRegistry::displayScriptCommands(NLMISC::CLog* log)
 	{
 		std::string s= _ScriptCommands[i]->getName();
 		if (s.size()>longestName)
-			longestName=s.size();
+			longestName=(uint32)s.size();
 	}
 
 	// iterate over the script commands displaying names and description

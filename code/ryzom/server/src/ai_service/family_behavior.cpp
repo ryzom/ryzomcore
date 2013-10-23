@@ -421,7 +421,7 @@ void	CFamilyBehavior::update(uint32 nbTicks)
 			||	!grp->isSpawned())
 			break;
 
-//		rajouter un test sur la validité du groupe par rapport aux flags des zones occupées pour savoir s'il faut le despawner .. :)
+//		add a check if group is valid related to used regions flags to know if we need to despawn it
 
 		bool	alreadyDespawned=false;
 		breakable
@@ -506,9 +506,9 @@ void	CFamilyBehavior::update(uint32 nbTicks)
 
 		const	EGSPD::CSeason::TSeason	season=CTimeInterface::season();
 
-		if	(	season<EGSPD::CSeason::Invalid	//	et si on est à une saison valide ..
+		if	(	season<EGSPD::CSeason::Invalid	//	if valid season
 			&&	gd->isValidForSeason(season)	)
-			break;												//	pas de raison de despawner.
+			break;												//	no reason to despawn
 
 		if	(!alreadyDespawned)
 			grp->getSpawnObj()->despawnBots(false);	//	not ok, despawn this group ..

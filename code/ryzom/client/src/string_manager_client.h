@@ -77,6 +77,7 @@ public:
 	static void				specialWordsMemoryCompress();
 	// Yoyo: Replace the Brick Name with Filled stats (CSBrickManager work). No-Op if not found
 	static void				replaceSBrickName(NLMISC::CSheetId id, const ucstring &name, const ucstring &desc, const ucstring &desc2);
+	static void				replaceDynString(const ucstring &name, const ucstring &text);
 
 	// Get the Localized Name of the Places.
 	static const ucchar *getPlaceLocalizedName(const std::string &placeNameID);
@@ -105,7 +106,9 @@ public:
 	static const ucchar *getSPhraseLocalizedDescription(NLMISC::CSheetId id);
 
 	// Get the Localized Title name
-	static const ucchar *getTitleLocalizedName(const std::string &titleId, bool women);
+	static const ucchar *getTitleLocalizedName(const ucstring &titleId, bool women);
+	static std::vector<ucstring> getTitleInfos(const ucstring &titleId, bool women);
+
 	// Get the Localized name of a classification type
 	static const ucchar *getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type);
 
@@ -215,8 +218,6 @@ private:
 	// Callback for dyn string value from the server
 	TStringCallbacksContainer	_DynStringsCallbacks;
 
-
-
 	// Return value for waiting string..
 	static ucstring			_WaitString;
 
@@ -273,6 +274,9 @@ private:
 	static bool _SpecItem_MemoryCompressed;
 
 	static	std::map<std::string, CItem> _SpecItem_TempMap;
+	static std::vector<ucstring> _TitleWords;
+	static std::map<ucstring, ucstring> _DynStrings;
+
 
 	static char *_SpecItem_Labels;
 	static ucchar *_SpecItem_NameDesc;
@@ -337,8 +341,8 @@ private:
 
 		void	serial(NLMISC::IStream &f)
 		{
-			f.serialCheck((uint32)'_RTS');
-			f.serialCheck((uint32)'KCAP');
+			f.serialCheck(NELID("_RTS"));
+			f.serialCheck(NELID("KCAP"));
 			f.serialVersion(0);
 			f.serial(PackedVersion);
 			f.serial(LanguageCode);

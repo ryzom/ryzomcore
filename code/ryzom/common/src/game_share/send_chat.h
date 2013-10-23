@@ -115,7 +115,7 @@ inline void npcChatToChannelEx(const TDataSetRow &senderId, CChatGroup::TGroupTy
  *	Chat group can be constructed from CChatGroup class.
  *	sentence is the sentence to be sent.
  */
-inline void npcChatToChannelSentence(const TDataSetRow &senderId, CChatGroup::TGroupType groupType, std::string& sentence)
+inline void npcChatToChannelSentence(const TDataSetRow &senderId, CChatGroup::TGroupType groupType, ucstring& sentence)
 {
 	NLNET::CMessage	msgout("NPC_CHAT_SENTENCE");
 	msgout.serial(const_cast<TDataSetRow&>(senderId));

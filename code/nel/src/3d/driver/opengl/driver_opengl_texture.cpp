@@ -41,9 +41,15 @@ using	namespace std;
 	#define NEL_MEASURE_UPLOAD_TIME_END
 #endif
 
-namespace NL3D
-{
+namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL *drvGl, bool isRectangleTexture) : ITextureDrvInfos(drv, it)
@@ -60,7 +66,11 @@ CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDri
 	// Nb: at Driver dtor, all tex infos are deleted, so _Driver is always valid.
 	_Driver= drvGl;
 
+#ifdef USE_OPENGLES
+	TextureMode = GL_TEXTURE_2D;
+#else
 	TextureMode = isRectangleTexture?GL_TEXTURE_RECTANGLE_NV:GL_TEXTURE_2D;
+#endif
 
 	FBOId = 0;
 	DepthFBOId = 0;
@@ -69,6 +79,8 @@ CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDri
 	InitFBO = false;
 	AttachDepthStencil = true;
 	UsePackedDepthStencil = drvGl->supportPackedDepthStencil();
+
+	TextureUsedIdx = 0;
 }
 // ***************************************************************************
 CTextureDrvInfosGL::~CTextureDrvInfosGL()
@@ -81,10 +93,22 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 	_Driver->_AllocatedTextureMemory-= TextureMemory;
 
 	// release in TextureUsed.
-	_Driver->_TextureUsed.erase (this);
+	if (TextureUsedIdx < _Driver->_TextureUsed.size() && _Driver->_TextureUsed[TextureUsedIdx] == this)
+	{
+		_Driver->_TextureUsed[TextureUsedIdx] = NULL;
+	}
 
 	if(InitFBO)
 	{
+#ifdef USE_OPENGLES
+		nglDeleteFramebuffersOES(1, &FBOId);
+		if(AttachDepthStencil)
+		{
+			nglDeleteRenderbuffersOES(1, &DepthFBOId);
+			if(!UsePackedDepthStencil)
+				nglDeleteRenderbuffersOES(1, &StencilFBOId);
+		}
+#else
 		nglDeleteFramebuffersEXT(1, &FBOId);
 		if(AttachDepthStencil)
 		{
@@ -92,6 +116,7 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 			if(!UsePackedDepthStencil)
 				nglDeleteRenderbuffersEXT(1, &StencilFBOId);
 		}
+#endif
 	}
 }
 
@@ -104,6 +129,54 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 		{
 			AttachDepthStencil = !((CTextureBloom*)tex)->isMode2D();
 		}
+
+#ifdef USE_OPENGLES
+		// generate IDs
+		nglGenFramebuffersOES(1, &FBOId);
+		if(AttachDepthStencil)
+		{
+			nglGenRenderbuffersOES(1, &DepthFBOId);
+			if(UsePackedDepthStencil)
+				StencilFBOId = DepthFBOId;
+			else
+				nglGenRenderbuffersOES(1, &StencilFBOId);
+		}
+
+		//nldebug("3D: using depth %d and stencil %d", DepthFBOId, StencilFBOId);
+
+		// initialize FBO
+		nglBindFramebufferOES(GL_FRAMEBUFFER_OES, FBOId);
+		nglFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, TextureMode, ID, 0);
+
+		// attach depth/stencil render to FBO
+		// note: for some still unkown reason it's impossible to add
+		// a stencil buffer as shown in the respective docs (see
+		// opengl.org extension registry). Until a safe approach to add
+		// them is found, there will be no attached stencil for the time
+		// being, aside of using packed depth+stencil buffers.
+		if(AttachDepthStencil)
+		{
+			if(UsePackedDepthStencil)
+			{
+				//nldebug("3D: using packed depth stencil");
+				nglBindRenderbufferOES(GL_RENDERBUFFER_OES, StencilFBOId);
+				nglRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH24_STENCIL8_OES, tex->getWidth(), tex->getHeight());
+			}
+			else
+			{
+				nglBindRenderbufferOES(GL_RENDERBUFFER_OES, DepthFBOId);
+				nglRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT24_OES, tex->getWidth(), tex->getHeight());
+				/*
+				nglBindRenderbufferEXT(GL_RENDERBUFFER_OES, StencilFBOId);
+				nglRenderbufferStorageEXT(GL_RENDERBUFFER_OES, GL_STENCIL_INDEX8_EXT, tex->getWidth(), tex->getHeight());
+				*/
+			}
+			nglFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, DepthFBOId);
+			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
+			nglFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, StencilFBOId);
+			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
+		}
+#else
 		// generate IDs
 		nglGenFramebuffersEXT(1, &FBOId);
 		if(AttachDepthStencil)
@@ -119,8 +192,7 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 
 		// initialize FBO
 		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FBOId);
-		nglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-								  TextureMode, ID, 0);
+		nglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, TextureMode, ID, 0);
 
 		// attach depth/stencil render to FBO
 		// note: for some still unkown reason it's impossible to add
@@ -152,6 +224,7 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 										 GL_RENDERBUFFER_EXT, StencilFBOId);
 			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 		}
+#endif
 
 		// check status
 		GLenum status;
@@ -161,43 +234,94 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 		status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 #endif
 		switch(status) {
+#ifdef GL_FRAMEBUFFER_COMPLETE_EXT
 			case GL_FRAMEBUFFER_COMPLETE_EXT:
 				InitFBO = true;
 				break;
+#endif
+#ifdef GL_FRAMEBUFFER_COMPLETE_OES
+			case GL_FRAMEBUFFER_COMPLETE_OES:
+				InitFBO = true;
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_UNSUPPORTED_EXT
 			case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
 				nlwarning("Unsupported framebuffer format");
 				break;
+#endif
+#ifdef GL_FRAMEBUFFER_UNSUPPORTED_OES
+			case GL_FRAMEBUFFER_UNSUPPORTED_OES:
+				nlwarning("Unsupported framebuffer format");
+				break;
+#endif
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
 				nlwarning("Framebuffer incomplete attachment");
 				break;
 #endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES
+			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES:
+				nlwarning("Framebuffer incomplete attachment");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
 				nlwarning("Framebuffer incomplete, missing attachment");
 				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES
+			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES:
+				nlwarning("Framebuffer incomplete, missing attachment");
+				break;
+#endif
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
 				nlwarning("Framebuffer incomplete, duplicate attachment");
 				break;
 #endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
 				nlwarning("Framebuffer incomplete, attached images must have same dimensions");
 				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES
+			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES:
+				nlwarning("Framebuffer incomplete, attached images must have same dimensions");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
 				nlwarning("Framebuffer incomplete, attached images must have same format");
 				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES
+			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES:
+				nlwarning("Framebuffer incomplete, attached images must have same format");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
 				nlwarning("Framebuffer incomplete, missing draw buffer");
 				break;
+#endif
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT
 			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
 				nlwarning("Framebuffer incomplete, missing read buffer");
 				break;
+#endif
+#ifdef GL_FRAMEBUFFER_BINDING_EXT
 			case GL_FRAMEBUFFER_BINDING_EXT:
 				nlwarning("Framebuffer BINDING_EXT");
 				break;
+#endif
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
 			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
 				nlwarning("Framebuffer incomplete multisample");
+				break;
+#endif
+#ifdef GL_FRAMEBUFFER_BINDING_OES
+			case GL_FRAMEBUFFER_BINDING_OES:
+				nlwarning("Framebuffer BINDING_EXT");
 				break;
 #endif
 			default:
@@ -265,7 +389,7 @@ bool CTextureDrvInfosGL::activeFrameBufferObject(ITexture * tex)
 
 // ***************************************************************************
 // Get the glText mirror of an existing setuped texture.
-static	inline CTextureDrvInfosGL*	getTextureGl(ITexture& tex)
+static inline CTextureDrvInfosGL* getTextureGl(ITexture& tex)
 {
 	H_AUTO_OGL(getTextureGl)
 	CTextureDrvInfosGL*	gltex;
@@ -310,10 +434,18 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 		// Try Compressed ones.
 		switch(texfmt)
 		{
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 			case ITexture::DXTC1:		return GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
 			case ITexture::DXTC1Alpha:	return GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
 			case ITexture::DXTC3:		return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 			case ITexture::DXTC5:		return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+#endif
 			default: break;
 		}
 	}
@@ -322,6 +454,16 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 	compressed= false;
 	switch(texfmt)
 	{
+#ifdef USE_OPENGLES
+		case ITexture::RGBA8888: return GL_RGBA;
+//		case ITexture::RGBA4444: return GL_RGBA4_OES;
+//		case ITexture::RGBA5551: return GL_RGB5_A1_OES;
+		case ITexture::RGB888: return GL_RGB;
+//		case ITexture::RGB565: return GL_RGB5_OES;
+		case ITexture::Luminance: return GL_LUMINANCE;
+		case ITexture::Alpha: return GL_ALPHA;
+		case ITexture::AlphaLuminance: return GL_LUMINANCE_ALPHA;
+#else
 		case ITexture::RGBA8888: return GL_RGBA8;
 		case ITexture::RGBA4444: return GL_RGBA4;
 		case ITexture::RGBA5551: return GL_RGB5_A1;
@@ -342,8 +484,16 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 				return 0;
 			}
 		break;
-		default: return GL_RGBA8;
+#endif
+		default:
+		break;
 	}
+
+#ifdef USE_OPENGLES
+	return GL_RGBA;
+#else
+	return GL_RGBA8;
+#endif
 }
 
 // ***************************************************************************
@@ -352,7 +502,11 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 	H_AUTO_OGL(getGlSrcTextureFormat)
 
 	// Is destination format is alpha or lumiance ?
+#ifdef USE_OPENGLES
+	if ((glfmt==GL_ALPHA)||(glfmt==GL_LUMINANCE_ALPHA)||(glfmt==GL_LUMINANCE))
+#else
 	if ((glfmt==GL_ALPHA8)||(glfmt==GL_LUMINANCE8_ALPHA8)||(glfmt==GL_LUMINANCE8))
+#endif
 	{
 		switch(tex.getPixelFormat())
 		{
@@ -363,6 +517,7 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 		}
 	}
 
+#ifndef USE_OPENGLES
 	if (glfmt == GL_DSDT_NV)
 	{
 		return GL_DSDT_NV;
@@ -372,6 +527,7 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 	{
 		return GL_DUDV_ATI;
 	}
+#endif
 
 	// Else, not a Src format for upload, or RGBA.
 	return GL_RGBA;
@@ -380,7 +536,9 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 // ***************************************************************************
 static GLenum getGlSrcTextureComponentType(GLint texSrcFormat)
 {
-	H_AUTO_OGL(getGlSrcTextureComponentType)
+	H_AUTO_OGL(getGlSrcTextureComponentType);
+
+#ifndef USE_OPENGLES
 	switch (texSrcFormat)
 	{
 		case GL_DSDT_NV:
@@ -388,10 +546,11 @@ static GLenum getGlSrcTextureComponentType(GLint texSrcFormat)
 			return GL_BYTE; // these are signed format
 		break;
 		default:
-			return GL_UNSIGNED_BYTE;
 		break;
-
 	}
+#endif
+
+	return GL_UNSIGNED_BYTE;
 }
 
 // ***************************************************************************
@@ -400,22 +559,65 @@ uint				CDriverGL::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 	H_AUTO_OGL(CDriverGL_computeMipMapMemoryUsage)
 	switch(glfmt)
 	{
+#ifdef GL_RGBA8
 	case GL_RGBA8:		return w*h* 4;
+#endif
+#ifdef GL_RGBA
+	case GL_RGBA:		return w*h* 4;
+#endif
 	// Well this is ugly, but simple :). GeForce 888 is stored as 32 bits.
+#ifdef GL_RGB8
 	case GL_RGB8:		return w*h* 4;
+#endif
+#ifdef GL_RGB
+	case GL_RGB:		return w*h* 4;
+#endif
+#ifdef GL_RGBA4
 	case GL_RGBA4:		return w*h* 2;
+#endif
+#ifdef GL_RGB5_A1
 	case GL_RGB5_A1:	return w*h* 2;
+#endif
+#ifdef GL_RGB5
 	case GL_RGB5:		return w*h* 2;
+#endif
+#ifdef GL_LUMINANCE8
 	case GL_LUMINANCE8:	return w*h* 1;
+#endif
+#ifdef GL_LUMINANCE
+	case GL_LUMINANCE:	return w*h* 1;
+#endif
+#ifdef GL_ALPHA8
 	case GL_ALPHA8:		return w*h* 1;
+#endif
+#ifdef GL_ALPHA
+	case GL_ALPHA:		return w*h* 1;
+#endif
+#ifdef GL_LUMINANCE8_ALPHA8
 	case GL_LUMINANCE8_ALPHA8:	return w*h* 2;
+#endif
+#ifdef GL_LUMINANCE_ALPHA
+	case GL_LUMINANCE_ALPHA:	return w*h* 2;
+#endif
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:	return w*h /2;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
 	case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:	return w*h /2;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
 	case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:	return w*h* 1;
+#endif
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:	return w*h* 1;
+#endif
+#ifdef GL_DU8DV8_ATI
 	case GL_DU8DV8_ATI:
+#endif
+#ifdef GL_DSDT_NV
 	case GL_DSDT_NV:						return w*h* 2;
-	};
+#endif
+	}
 
 	// One format has not been coded.
 	nlstop;
@@ -431,13 +633,15 @@ static inline GLenum	translateWrapToGl(ITexture::TWrapMode mode, const CGlExtens
 	H_AUTO_OGL(translateWrapToGl)
 	if(mode== ITexture::Repeat)
 		return GL_REPEAT;
-	else
-	{
-		if(extensions.Version1_2)
-			return GL_CLAMP_TO_EDGE;
-		else
-			return GL_CLAMP;
-	}
+
+#ifdef USE_OPENGLES
+	return GL_CLAMP_TO_EDGE;
+#else
+	if(extensions.Version1_2)
+		return GL_CLAMP_TO_EDGE;
+
+	return GL_CLAMP;
+#endif
 }
 
 // ***************************************************************************
@@ -506,14 +710,26 @@ static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL *glText)
 static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 {
 	H_AUTO_OGL(sameDXTCFormat);
+
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1)
 		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1Alpha)
 		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && tex.PixelFormat==CBitmap::DXTC3)
 		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT && tex.PixelFormat==CBitmap::DXTC5)
 		return true;
+#endif
 
 	return false;
 }
@@ -522,14 +738,26 @@ static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 static inline bool		isDXTCFormat(GLint glfmt)
 {
 	H_AUTO_OGL(isDXTCFormat);
+
+#ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
 		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
 		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
 		return true;
+#endif
+
+#ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
 		return true;
+#endif
 
 	return false;
 }
@@ -564,8 +792,10 @@ void CDriverGL::bindTextureWithMode(ITexture &tex)
 	else
 	{
 		CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+#ifndef USE_OPENGLES
 		if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 			textureMode = CDriverGLStates::TextureRect;
+#endif
 
 		_DriverGLStates.setTextureMode(textureMode);
 		// Bind this texture
@@ -593,9 +823,14 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 		{
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
+#ifndef USE_OPENGLES
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
+#endif
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+
+			if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+				glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 		}
 	}
 	else
@@ -604,6 +839,9 @@ void CDriverGL::setupTextureBasicParameters(ITexture &tex)
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_T, translateWrapToGl(gltext->WrapT, _Extensions));
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 		glTexParameteri(gltext->TextureMode,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+
+		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+			glTexParameteri(gltext->TextureMode, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 	}
 	//
 	tex.clearFilterOrWrapModeTouched();
@@ -1005,6 +1243,23 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 						clamp(x1, x0, w);
 						clamp(y1, y0, h);
 
+#ifdef USE_OPENGLES
+						glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+						if (!bUpload)
+							ptr = NULL;
+
+						sint pixelSize = 4;
+
+						if (glSrcFmt == GL_ALPHA)
+							pixelSize = 1;
+
+						for(sint yy = 0; yy < (y1-y0); yy++)
+						{
+							char *row = (char*)ptr + ((yy + y0)*w + x0) * pixelSize;
+							glTexSubImage2D (GL_TEXTURE_2D, i, x0, y0+yy, x1-x0, 1, glSrcFmt, glSrcType, row );
+						}
+#else
 						glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
 						glPixelStorei(GL_UNPACK_SKIP_ROWS, y0);
 						glPixelStorei(GL_UNPACK_SKIP_PIXELS, x0);
@@ -1012,6 +1267,7 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 							glTexSubImage2D (GL_TEXTURE_2D, i, x0, y0, x1-x0, y1-y0, glSrcFmt,glSrcType, ptr);
 						else
 							glTexSubImage2D (GL_TEXTURE_2D, i, x0, y0, x1-x0, y1-y0, glSrcFmt,glSrcType, NULL);
+#endif
 
 						// Next mipmap!!
 						// floor .
@@ -1024,9 +1280,13 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 				}
 
 				// Reset the transfer mode...
+#ifdef USE_OPENGLES
+				glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+#else
 				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+#endif
 			}
 		}
 
@@ -1081,8 +1341,11 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	// system of "backup the previous binded texture" seems to not work with some drivers....
 	_DriverGLStates.activeTextureARB (0);
 	CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+
+#ifndef USE_OPENGLES
 	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 		textureMode = CDriverGLStates::TextureRect;
+#endif
 
 	_DriverGLStates.setTextureMode (textureMode);
 	// Bind this texture, for reload...
@@ -1139,8 +1402,13 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		nlassert (((x0&3) == 0) && ((y0&3) == 0));
 		if ((w>=4) && (h>=4))
 		{
-			nglCompressedTexSubImage2DARB (	GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
-											x0, y0, (x1-x0), (y1-y0), glfmt, imageSize, ptr );
+#ifdef USE_OPENGLES
+			glCompressedTexSubImage2D (
+#else
+			nglCompressedTexSubImage2DARB (
+#endif
+				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
+				x0, y0, (x1-x0), (y1-y0), glfmt, imageSize, ptr );
 		}
 		else
 		{
@@ -1148,7 +1416,12 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 			// of the mipmap is less than 4 pixel so we use the other form. (its not really time critical
 			// to upload 16 bytes so we can do it twice if texture is cut)
 			imageSize = tex.getPixels(nNumMipMap).size();
-			nglCompressedTexImage2DARB (GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
+#ifdef USE_OPENGLES
+			glCompressedTexImage2D (
+#else
+			nglCompressedTexImage2DARB (
+#endif
+				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
 										glfmt, w, h, 0, imageSize, ptr);
 		}
 	}
@@ -1158,6 +1431,22 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		nlassert (glSrcFmt!=GL_RGBA || tex.getPixelFormat()==CBitmap::RGBA);
 
 		void	*ptr= tex.getPixels(nNumMipMap).getPtr();
+
+#ifdef USE_OPENGLES
+		sint pixelSize = 4;
+
+		if (glSrcFmt == GL_ALPHA)
+			pixelSize = 1;
+
+		for(sint yy = 0; yy < (y1-y0); yy++)
+		{
+			char *row = (char*)ptr + ((yy + y0)*w + x0) * pixelSize;
+			glTexSubImage2D (GL_TEXTURE_2D, nNumMipMap, x0, y0+yy, x1-x0, 1, glSrcFmt, glSrcType, row );
+		}
+
+		// Reset the transfer mode...
+//		glPixelStorei (GL_UNPACK_ALIGNMENT, 0);
+#else
 		glPixelStorei (GL_UNPACK_ROW_LENGTH, w);
 		glPixelStorei (GL_UNPACK_SKIP_ROWS, y0);
 		glPixelStorei (GL_UNPACK_SKIP_PIXELS, x0);
@@ -1167,6 +1456,7 @@ bool CDriverGL::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		glPixelStorei (GL_UNPACK_ROW_LENGTH, 0);
 		glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
 		glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+#endif
 	}
 
 	// Disable texture 0
@@ -1207,7 +1497,11 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			if (_SumTextureMemoryUsed)
 			{
 				// Insert the pointer of this texture
-				_TextureUsed.insert (gltext);
+				if (gltext->TextureUsedIdx >= _TextureUsed.size() || _TextureUsed[gltext->TextureUsedIdx] != gltext)
+				{
+					gltext->TextureUsedIdx = _TextureUsed.size();
+					_TextureUsed.push_back(gltext);
+				}
 			}
 
 			if(tex->isTextureCube())
@@ -1248,8 +1542,10 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			{
 				// setup texture mode, after activeTextureARB()
 				CDriverGLStates::TTextureMode textureMode= CDriverGLStates::Texture2D;
+#ifndef USE_OPENGLES
 				if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 					textureMode = CDriverGLStates::TextureRect;
+#endif
 				_DriverGLStates.setTextureMode(/*CDriverGLStates::Texture2D*/textureMode);
 
 				// Activate texture...
@@ -1296,11 +1592,14 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			_CurrentTextureInfoGL[stage]= NULL;
 			// setup texture mode, after activeTextureARB()
 			_DriverGLStates.setTextureMode(CDriverGLStates::TextureDisabled);
+
+#ifndef USE_OPENGLES
 			if (_Extensions.ATITextureEnvCombine3)
 			{
 				// very strange bug with ATI cards : when a texture is set to NULL at a stage, the stage is still active sometimes...
 				activateTexEnvMode(stage, _TexEnvReplace); // set the whole stage to replace fix the problem
 			}
+#endif
 		}
 
 		this->_CurrentTexture[stage]= tex;
@@ -1311,8 +1610,7 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 
 
 // This maps the CMaterial::TTexOperator
-static	const	GLenum	OperatorLUT[9]= { GL_REPLACE, GL_MODULATE, GL_ADD, GL_ADD_SIGNED_EXT,
-                                          GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_BUMP_ENVMAP_ATI };
+static	const	GLenum	OperatorLUT[9]= { GL_REPLACE, GL_MODULATE, GL_ADD, GL_ADD_SIGNED_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_INTERPOLATE_EXT, GL_BUMP_ENVMAP_ATI };
 
 // This maps the CMaterial::TTexSource
 static	const	GLenum	SourceLUT[4]= { GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
@@ -1321,14 +1619,16 @@ static	const	GLenum	SourceLUT[4]= { GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLO
 static	const	GLenum	OperandLUT[4]= { GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA };
 
 // This maps the CMaterial::TTexOperator, used for openGL Arg2 setup.
-static	const	GLenum	InterpolateSrcLUT[8]= { GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE,
-                                                GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
+static	const	GLenum	InterpolateSrcLUT[8]= { GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
+
+#ifndef USE_OPENGLES
 
 // ***************************************************************************
 // Set general tex env using ENV_COMBINE4 for the current setupped stage (used by forceActivateTexEnvMode)
 static void	forceActivateTexEnvModeEnvCombine4(const CMaterial::CTexEnv  &env)
 {
-	H_AUTO_OGL(forceActivateTexEnvModeEnvCombine4)
+	H_AUTO_OGL(forceActivateTexEnvModeEnvCombine4);
+
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE4_NV);
 
 	//== RGB ==
@@ -1613,6 +1913,7 @@ static void	forceActivateTexEnvModeEnvCombine4(const CMaterial::CTexEnv  &env)
 	}
 }
 
+#endif
 
 // ***************************************************************************
 void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
@@ -1626,6 +1927,114 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 
 	// Setup the gl env mode.
 	_DriverGLStates.activeTextureARB(stage);
+
+#ifdef USE_OPENGLES
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+
+	// RGB.
+	//=====
+	if (env.Env.OpRGB == CMaterial::Mad)
+	{
+		//
+		if (false)
+		{
+			// GL_MODULATE_ADD_ATI
+			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
+			// Arg0.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, SourceLUT[env.Env.SrcArg0RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, OperandLUT[env.Env.OpArg0RGB]);
+			// Arg1.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_RGB, SourceLUT[env.Env.SrcArg1RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, OperandLUT[env.Env.OpArg1RGB]);
+			// Arg2.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, SourceLUT[env.Env.SrcArg2RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, OperandLUT[env.Env.OpArg2RGB]);
+		}
+		else
+		{
+			// fallback to modulate ..
+			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+			//
+			// Arg0.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, SourceLUT[env.Env.SrcArg0RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, OperandLUT[env.Env.OpArg0RGB]);
+			// Arg1.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, SourceLUT[env.Env.SrcArg1RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, OperandLUT[env.Env.OpArg1RGB]);
+		}
+	}
+	else
+	{
+		// Operator.
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, OperatorLUT[env.Env.OpRGB] );
+		// Arg0.
+		glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, SourceLUT[env.Env.SrcArg0RGB] );
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, OperandLUT[env.Env.OpArg0RGB]);
+		// Arg1.
+		if(env.Env.OpRGB > CMaterial::Replace)
+		{
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_RGB, SourceLUT[env.Env.SrcArg1RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, OperandLUT[env.Env.OpArg1RGB]);
+			// Arg2.
+			if(env.Env.OpRGB >= CMaterial::InterpolateTexture )
+			{
+				glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_RGB, InterpolateSrcLUT[env.Env.OpRGB] );
+				glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_ALPHA);
+			}
+		}
+	}
+	// Alpha.
+	//=====
+	if (env.Env.OpAlpha == CMaterial::Mad)
+	{
+		if (true)
+		{
+			// GL_MODULATE_ADD_ATI
+			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
+			// Arg0.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0Alpha]);
+			// Arg1.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_ALPHA, SourceLUT[env.Env.SrcArg1Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA, OperandLUT[env.Env.OpArg1Alpha]);
+			// Arg2.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, SourceLUT[env.Env.SrcArg2Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, OperandLUT[env.Env.OpArg2Alpha]);
+		}
+		else
+		{
+			// fallback to modulate ..
+			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
+			//
+			// Arg0.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0RGB]);
+			// Arg1.
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, SourceLUT[env.Env.SrcArg1RGB] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, OperandLUT[env.Env.OpArg1RGB]);
+		}
+	}
+	else
+	{
+		// Operator.
+		glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, OperatorLUT[env.Env.OpAlpha] );
+		// Arg0.
+		glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0Alpha] );
+		glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0Alpha]);
+		// Arg1.
+		if(env.Env.OpAlpha > CMaterial::Replace)
+		{
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, SourceLUT[env.Env.SrcArg1Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, OperandLUT[env.Env.OpArg1Alpha]);
+			// Arg2.
+			if(env.Env.OpAlpha >= CMaterial::InterpolateTexture )
+			{
+				glTexEnvi(GL_TEXTURE_ENV, GL_SRC2_ALPHA, InterpolateSrcLUT[env.Env.OpAlpha] );
+				glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA, GL_SRC_ALPHA);
+			}
+		}
+	}
+#else
 	// if the Mad operator is used, then
 	// "Normal drivers", setup EnvCombine.
 	if(_Extensions.EXTTextureEnvCombine)
@@ -1746,6 +2155,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 	{
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	}
+#endif
 }
 
 // ***************************************************************************
@@ -1787,6 +2197,25 @@ void		CDriverGL::forceDXTCCompression(bool dxtcComp)
 {
 	H_AUTO_OGL(CDriverGL_forceDXTCCompression)
 	_ForceDXTCCompression= dxtcComp;
+}
+
+// ***************************************************************************
+void		CDriverGL::setAnisotropicFilter(sint filtering)
+{
+	H_AUTO_OGL(CDriverGL_setAnisotropicFiltering);
+
+	if (!_Extensions.EXTTextureFilterAnisotropic) return;
+
+	if (filtering < 0 || filtering > _Extensions.EXTTextureFilterAnisotropicMaximum)
+	{
+		// set maximum value for anisotropic filter
+		_AnisotropicFilter = _Extensions.EXTTextureFilterAnisotropicMaximum;
+	}
+	else
+	{
+		// set specified value for anisotropic filter
+		_AnisotropicFilter = filtering;
+	}
 }
 
 // ***************************************************************************
@@ -1894,7 +2323,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 			newVP.init(0, 0, ((float)width/(float)w), ((float)height/(float)h));
 			setupViewport(newVP);
 
-			_RenderTargetFBO = true;
+			_RenderTargetFBO = tex;
 
 			return activeFrameBufferObject(tex);
 		}
@@ -1914,7 +2343,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 		setupViewport(_OldViewport);
 		_OldViewport = _CurrViewport;
 
-		_RenderTargetFBO = false;
+		_RenderTargetFBO = NULL;
 		return false;
 	}
 
@@ -1927,10 +2356,15 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 	// Update the scissor
 	setupScissor (_CurrScissor);
 
-	_RenderTargetFBO = false;
+	_RenderTargetFBO = NULL;
 	_OldViewport = _CurrViewport;
 
 	return true;
+}
+
+ITexture *CDriverGL::getRenderTarget() const
+{
+	return _RenderTargetFBO ? _RenderTargetFBO : _TextureTarget;
 }
 
 // ***************************************************************************
@@ -1981,5 +2415,9 @@ bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 }
 
 // ***************************************************************************
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

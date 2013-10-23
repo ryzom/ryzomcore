@@ -18,7 +18,7 @@
 
 #include "bar_manager.h"
 #include "interface_manager.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "../time_client.h"
 
 
@@ -107,30 +107,30 @@ void	CBarManager::CBarDataEntry::connectDB(const std::string &baseDBin, const st
 	// try to connect each input entry (don't create)
 	if(!baseDBin.empty())
 	{
-		UIDIn= pIM->getDbProp(baseDBin+"UID", false);
+		UIDIn= NLGUI::CDBManager::getInstance()->getDbProp(baseDBin+"UID", false);
 		if(!presentDB.empty())
-			PresentIn= pIM->getDbProp(baseDBin+presentDB, false);
+			PresentIn= NLGUI::CDBManager::getInstance()->getDbProp(baseDBin+presentDB, false);
 		if(!hpDB.empty())
-			ScoreIn[SCORES::hit_points]= pIM->getDbProp(baseDBin+hpDB, false);
+			ScoreIn[SCORES::hit_points]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBin+hpDB, false);
 		if(!sapDB.empty())
-			ScoreIn[SCORES::sap]= pIM->getDbProp(baseDBin+sapDB, false);
+			ScoreIn[SCORES::sap]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBin+sapDB, false);
 		if(!staDB.empty())
-			ScoreIn[SCORES::stamina]= pIM->getDbProp(baseDBin+staDB, false);
+			ScoreIn[SCORES::stamina]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBin+staDB, false);
 		if(!focusDB.empty())
-			ScoreIn[SCORES::focus]= pIM->getDbProp(baseDBin+focusDB, false);
+			ScoreIn[SCORES::focus]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBin+focusDB, false);
 	}
 
 	// try to connect each output entry (don't create)
 	if(!baseDBout.empty())
 	{
 		if(!hpDB.empty())
-			ScoreOut[SCORES::hit_points]= pIM->getDbProp(baseDBout+hpDB, false);
+			ScoreOut[SCORES::hit_points]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBout+hpDB, false);
 		if(!sapDB.empty())
-			ScoreOut[SCORES::sap]= pIM->getDbProp(baseDBout+sapDB, false);
+			ScoreOut[SCORES::sap]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBout+sapDB, false);
 		if(!staDB.empty())
-			ScoreOut[SCORES::stamina]= pIM->getDbProp(baseDBout+staDB, false);
+			ScoreOut[SCORES::stamina]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBout+staDB, false);
 		if(!focusDB.empty())
-			ScoreOut[SCORES::focus]= pIM->getDbProp(baseDBout+focusDB, false);
+			ScoreOut[SCORES::focus]= NLGUI::CDBManager::getInstance()->getDbProp(baseDBout+focusDB, false);
 	}
 }
 
@@ -199,7 +199,7 @@ void		CBarManager::initInGame()
 		change MaxTeamMember if no more the case
 	*/
 	uint	i=0;
-	while( pIM->getDbProp(toString("SERVER:GROUP:%d:NAME", i), false) )
+	while( NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GROUP:%d:NAME", i), false) )
 		i++;
 	nlassert(i==MaxTeamMember);
 
@@ -247,20 +247,20 @@ void		CBarManager::initInGame()
 	// user now can only manage 4 scores
 	nlctassert(SCORES::NUM_SCORES==4);
 	// Input max values
-	_UserScores[SCORES::hit_points].DBInMax= pIM->getDbProp("SERVER:CHARACTER_INFO:SCORES0:Max", false);
-	_UserScores[SCORES::sap].DBInMax= pIM->getDbProp("SERVER:CHARACTER_INFO:SCORES2:Max", false);
-	_UserScores[SCORES::stamina].DBInMax= pIM->getDbProp("SERVER:CHARACTER_INFO:SCORES1:Max", false);
-	_UserScores[SCORES::focus].DBInMax= pIM->getDbProp("SERVER:CHARACTER_INFO:SCORES3:Max", false);
+	_UserScores[SCORES::hit_points].DBInMax= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SCORES0:Max", false);
+	_UserScores[SCORES::sap].DBInMax= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SCORES2:Max", false);
+	_UserScores[SCORES::stamina].DBInMax= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SCORES1:Max", false);
+	_UserScores[SCORES::focus].DBInMax= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SCORES3:Max", false);
 	// Output real values
-	_UserScores[SCORES::hit_points].DBOutVal= pIM->getDbProp("UI:VARIABLES:USER:HP", false);
-	_UserScores[SCORES::sap].DBOutVal= pIM->getDbProp("UI:VARIABLES:USER:SAP", false);
-	_UserScores[SCORES::stamina].DBOutVal= pIM->getDbProp("UI:VARIABLES:USER:STA", false);
-	_UserScores[SCORES::focus].DBOutVal= pIM->getDbProp("UI:VARIABLES:USER:FOCUS", false);
+	_UserScores[SCORES::hit_points].DBOutVal= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:HP", false);
+	_UserScores[SCORES::sap].DBOutVal= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:SAP", false);
+	_UserScores[SCORES::stamina].DBOutVal= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:STA", false);
+	_UserScores[SCORES::focus].DBOutVal= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:FOCUS", false);
 	// Output ratio values
-	_UserScores[SCORES::hit_points].DBOutRatio= pIM->getDbProp("UI:VARIABLES:USER:HP_RATIO", false);
-	_UserScores[SCORES::sap].DBOutRatio= pIM->getDbProp("UI:VARIABLES:USER:SAP_RATIO", false);
-	_UserScores[SCORES::stamina].DBOutRatio= pIM->getDbProp("UI:VARIABLES:USER:STA_RATIO", false);
-	_UserScores[SCORES::focus].DBOutRatio= pIM->getDbProp("UI:VARIABLES:USER:FOCUS_RATIO", false);
+	_UserScores[SCORES::hit_points].DBOutRatio= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:HP_RATIO", false);
+	_UserScores[SCORES::sap].DBOutRatio= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:SAP_RATIO", false);
+	_UserScores[SCORES::stamina].DBOutRatio= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:STA_RATIO", false);
+	_UserScores[SCORES::focus].DBOutRatio= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:FOCUS_RATIO", false);
 }
 
 // ***************************************************************************

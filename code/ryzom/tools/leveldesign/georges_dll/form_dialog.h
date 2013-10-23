@@ -66,7 +66,7 @@ public:
 	IFormWidget (CFormDialog *dialog, uint structId, const char *formName, TTypeSrc typeSrc, uint slot);
 
 	// Destructor
-	virtual ~IFormWidget () {};
+	virtual ~IFormWidget () {}
 
 	// Update the text of the base label
 	void updateLabel ();
@@ -90,8 +90,8 @@ public:
 	virtual bool extendableHeight () const;
 
 	// Ok / cancel hit
-	virtual void onOk () {};
-	virtual void onCancel () {};
+	virtual void onOk () {}
+	virtual void onCancel () {}
 
 	// Update widget date
 	virtual void updateData (bool update = true) = 0;

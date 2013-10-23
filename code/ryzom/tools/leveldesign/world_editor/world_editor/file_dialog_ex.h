@@ -41,7 +41,7 @@ public:
 		LPCTSTR lpszFilter = NULL,
 		CWnd* pParentWnd = NULL);
 
-	virtual int DoModal( );
+	virtual INT_PTR DoModal( );
 
 	virtual BOOL OnCommand( WPARAM wParam, LPARAM lParam );
 

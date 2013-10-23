@@ -6,25 +6,30 @@
 #  DXSDK_FOUND       - True if MAX SDK found.
 
 IF(DXSDK_DIR)
-    # Already in cache, be silent
-    SET(DXSDK_FIND_QUIETLY TRUE)
+  # Already in cache, be silent
+  SET(DXSDK_FIND_QUIETLY TRUE)
 ENDIF(DXSDK_DIR)
 
 FIND_PATH(DXSDK_DIR
   "Include/dxsdkver.h"
   PATHS
   "$ENV{DXSDK_DIR}"
+  "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)"
+  "C:/Program Files/Microsoft DirectX SDK (June 2010)"
+  "C:/Program Files (x86)/Microsoft DirectX SDK (February 2010)"
+  "C:/Program Files/Microsoft DirectX SDK (February 2010)"
+  "C:/Program Files (x86)/Microsoft DirectX SDK (November 2007)"
+  "C:/Program Files/Microsoft DirectX SDK (November 2007)"
+  "C:/Program Files (x86)/Microsoft DirectX SDK"
+  "C:/Program Files/Microsoft DirectX SDK"
 )
 
 MACRO(FIND_DXSDK_LIBRARY MYLIBRARY MYLIBRARYNAME)        
   FIND_LIBRARY(${MYLIBRARY}
-               NAMES ${MYLIBRARYNAME}
-               PATHS
-			   "${DXSDK_LIBRARY_DIR}"
-               "$ENV{DXSDK_DIR}"
-               "$ENV{DXSDK_DIR}/Lib"
-               "$ENV{DXSDK_DIR}/Lib/x86"
-               )               
+    NAMES ${MYLIBRARYNAME}
+    PATHS
+    "${DXSDK_LIBRARY_DIR}"
+    )
 ENDMACRO(FIND_DXSDK_LIBRARY MYLIBRARY MYLIBRARYNAME)
 
 IF(DXSDK_DIR)

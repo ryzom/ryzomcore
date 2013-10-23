@@ -147,8 +147,9 @@ void readFormId( string& outputFileName )
 		// get the file type from form name
 		TFormId fid = (*itIF).first;
 		string fileType;
+		bool fileTypeGet = getFileType((*itIF).second, fileType);
 
-		if((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || (*itIF).second[0]=='_' || (*itIF).second.find(".#")==0)
+		if((*itIF).second.empty() || (*itIF).second=="." || (*itIF).second==".." || ((*itIF).second[0]=='_' && fileType != "sound") || (*itIF).second.find(".#")==0)
 		{
 			map<TFormId,string>::iterator itErase = itIF;
 			++itIF;
@@ -156,7 +157,7 @@ void readFormId( string& outputFileName )
 		}
 		else
 		{
-			if( getFileType( (*itIF).second, fileType ) )
+			if(fileTypeGet)
 			{	
 				// insert the association (file type/file type id)
 				map<string,uint8>::iterator itFT = FileTypeToId.find(fileType);
@@ -290,7 +291,8 @@ void makeId( list<string>& dirs )
 //-----------------------------------------------
 void addId( string fileName )
 {
-	if(fileName.empty() || fileName=="." || fileName==".." || fileName[0]=='_' || fileName.find(".#")==0)
+	string extStr = CFile::getExtension( fileName );
+	if(fileName.empty() || fileName=="." || fileName==".." || (fileName[0]=='_' && extStr != "sound") || fileName.find(".#")==0)
 	{
 	  //nlinfo("Discarding file '%s'", fileName.c_str());
 	  NbFilesDiscarded++;
@@ -300,7 +302,6 @@ void addId( string fileName )
 	{
 		if( !ExtensionsAllowed.empty() )
 		{
-			string extStr = CFile::getExtension( fileName );
 			if( ExtensionsAllowed.find(extStr) == ExtensionsAllowed.end() )
 			{
 				NbFilesDiscarded++;
@@ -335,16 +336,27 @@ void addId( string fileName )
 				if( firstFreeFileTypeId == -1 )
 				{
 					nlwarning("MORE THAN 256 FILE TYPES!!!!");
+					return;
 				}
 				else
 				{
 					FileTypeToId.insert( make_pair(fileType,(uint8)firstFreeFileTypeId) );
 					IdToFileType.insert( make_pair((uint8)firstFreeFileTypeId,fileType) );
-					TypeToLastId.insert( make_pair((uint8)firstFreeFileTypeId,0) );
 
+					// Reserve id 0 for unknown.newtype.
+					// User may supply a sheet called unknown.newtype
+					// that can safely be used as a fallback when a
+					// requested sheet does not exist.
+					// Only for newly added sheet types.
 					fid.FormIDInfos.Type = (uint8)firstFreeFileTypeId;
 					fid.FormIDInfos.Id = 0;
-					
+					std::string unknownNewType = std::string("unknown." + fileType);
+					FormToId.insert(make_pair(unknownNewType, fid));
+					IdToForm.insert(make_pair(fid, unknownNewType));
+
+					TypeToLastId.insert( make_pair((uint8)firstFreeFileTypeId,1) );
+					fid.FormIDInfos.Id = 1;
+
 					nlinfo("Adding file type '%s' with id %d", fileType.c_str(), firstFreeFileTypeId);
 					NbTypesAdded++;
 				}
@@ -517,10 +529,10 @@ int main( int argc, char ** argv )
 
 	// output path
 	sint lastSeparator = CFile::getLastSeparator(outputFileName);
-	string ouputPath;
+	string outputPath;
 	if( lastSeparator != -1 )
 	{
-		ouputPath = outputFileName.substr(0,lastSeparator+1);
+		outputPath = outputFileName.substr(0,lastSeparator+1);
 	}
 
 	// erase the unwanted extensions from map (modify the map, save it, and quit)
@@ -556,7 +568,7 @@ int main( int argc, char ** argv )
 	if( dumpExtensions )
 	{
 		FILE *  extListOutput;
-		string extListFileName = ouputPath + "sheet_ext.txt";
+		string extListFileName = outputPath + "sheet_ext.txt";
 		if( !(extListOutput = fopen(extListFileName.c_str(),"w")) )
 		{
 			nlwarning("Can't open output file %s",extListFileName.c_str());
@@ -596,7 +608,7 @@ int main( int argc, char ** argv )
 	// display the map
 	//display();
 
-	string sheetListFileName = ouputPath + "sheets.txt";
+	string sheetListFileName = outputPath + "sheets.txt";
 	COFile output;
 	if( !output.open(sheetListFileName,false,true) )
 	{

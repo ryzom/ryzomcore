@@ -14,21 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "georges_treeview_dialog.h"
-
-// Qt includes
-#include <QtGui/QWidget>
-#include <QSettings>
-#include <QFileDialog>
-#include <QDebug>
-
-// NeL includes
-#include <nel/misc/path.h>
-#include <nel/misc/file.h>
-#include <nel/misc/o_xml.h>
-#include <nel/georges/form.h>
-
-// Project includes
 #include "georges.h"
 #include "georgesform_model.h"
 #include "georgesform_proxy_model.h"
@@ -36,10 +23,30 @@
 #include "formdelegate.h"
 #include "expandable_headerview.h"
 
+// Qt includes
+#include <QtGui/QWidget>
+#include <QSettings>
+#include <QFileDialog>
+#include <QDebug>
+#include <QMenu>
+
+// NeL includes
+#include <nel/misc/path.h>
+#include <nel/misc/file.h>
+#include <nel/misc/o_xml.h>
+#include <nel/georges/u_form_loader.h>
+#include <nel/georges/form.h>
+#include <nel/georges/u_form.h>
+#include <nel/georges/u_type.h>
+
+// OVQT Includes
+#include "../core/icore.h"
+#include "../core/core_constants.h"
+
 using namespace NLMISC;
 using namespace NLGEORGES;
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/)
@@ -50,6 +57,12 @@ namespace Plugin
 		m_georges = new CGeorges;
 
 		loadedForm = "";
+		// Set the default sheet dir dir to the level design path.
+		m_lastSheetDir = ".";
+		QSettings *settings = Core::ICore::instance()->settings();
+        settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+		m_lastSheetDir = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
+		settings->endGroup();
 
 		m_ui.setupUi(this);
 		m_header = new ExpandableHeaderView(Qt::Horizontal, m_ui.treeView);
@@ -64,6 +77,10 @@ namespace Plugin
 
 		FormDelegate *formdelegate = new FormDelegate(this);
 		m_ui.treeView->setItemDelegateForColumn(1, formdelegate);
+
+		// Set up custom context menu.
+		setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(showContextMenu(const QPoint&)));
 
 		connect(m_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
 			this, SLOT(doubleClicked (QModelIndex)));
@@ -84,10 +101,12 @@ namespace Plugin
 	void CGeorgesTreeViewDialog::headerClicked(int section)
 	{
 		if (section == 0)
+        {
 			if (*(m_header->expanded()))
 				m_ui.treeView->expandAll();
 			else
 				m_ui.treeView->collapseAll();
+        }
 	}
 
 	void CGeorgesTreeViewDialog::setForm(const CForm *form) 
@@ -95,31 +114,32 @@ namespace Plugin
 		m_form = (UForm*)form;
 	}
 
-	CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName) 
+    NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName)
 	{
-		if(NLMISC::CPath::exists(formName.toStdString()))
+		if(NLMISC::CPath::exists(formName.toUtf8().constData()))
 		{
-			return (CForm*)m_georges->loadForm(formName.toStdString());
+            //NLGEORGES::CForm *form = dynamic_cast<NLGEORGES::CForm*>(m_georges->loadForm(formName.toUtf8()));
+            return (NLGEORGES::CForm *)m_georges->loadForm(formName.toUtf8().constData());
 		}
 		//else
 		//{
 		//	CForm *form = 0;
 		//	// Load the DFN
-		//	std::string extStr = NLMISC::CFile::getExtension( formName.toStdString() );
+		//	std::string extStr = NLMISC::CFile::getExtension( formName.toUtf8() );
 		//	QString dfnName = QString("%1.dfn").arg(extStr.c_str());
 		//	UFormDfn *formdfn;
-		//	if (NLMISC::CPath::exists(dfnName.toStdString()))
+		//	if (NLMISC::CPath::exists(dfnName.toUtf8()))
 		//	{
-		//		formdfn = _georges->loadFormDfn (dfnName.toStdString());
+		//		formdfn = _georges->loadFormDfn (dfnName.toUtf8());
 		//		if (!formdfn)
 		//		{
-		//			nlwarning("Failed to load dfn: %s", dfnName.toStdString().c_str());
+		//			nlwarning("Failed to load dfn: %s", dfnName.toUtf8());
 		//			return 0;
 		//		}
 		//	}
 		//	else
 		//	{
-		//		nlwarning("Cannot find dfn: %s", dfnName.toStdString().c_str());
+		//		nlwarning("Cannot find dfn: %s", dfnName.toUtf8());
 		//		return 0;
 		//	}
 
@@ -135,8 +155,57 @@ namespace Plugin
 		//	}
 		//	return form;
 		//}
+        nlinfo("File '%s' does not exist!", formName.toUtf8().constData());
 		return 0;
 	}
+
+    NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByDfnName(const QString dfnName)
+    {
+        if(NLMISC::CPath::exists(dfnName.toUtf8().constData()))
+        {
+            // Create a new form object.
+            NLGEORGES::CForm *form = new NLGEORGES::CForm();
+            m_form = form;
+
+            // Retrieve a copy of the root definition.
+            NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toUtf8().constData()));
+
+            // Next we'll use the root node to build a new form.
+            NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
+            fes->build(formDfn);
+
+            // And then initialize the held elements;
+            for(uint i = 0; i<NLGEORGES::CForm::HeldElementCount; i++)
+            {
+                fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(i+1));
+                fes->build(formDfn);
+            }
+
+            return form;
+        }
+        nlinfo("File '%s' does not exist!", dfnName.toUtf8().constData());
+        return NULL;
+    }
+
+    NLGEORGES::CFormElm *CGeorgesTreeViewDialog::getRootNode(uint slot)
+    {
+        NLGEORGES::CForm *form = getFormPtr();
+
+        if(slot == 0)
+        {
+            const NLGEORGES::UFormElm &formElm = form->getRootNode();
+            return (NLGEORGES::CFormElm *)&formElm;
+        }
+
+        // Make sure the slot value is valid and then return the corresponding element.
+        nlassert(slot < NLGEORGES::CForm::HeldElementCount+1);
+        return getFormPtr()->HeldElements[slot-1];
+    }
+
+    NLGEORGES::CForm *CGeorgesTreeViewDialog::getFormPtr()
+    {
+        return dynamic_cast<NLGEORGES::CForm *>(m_form);
+    }
 
 	void CGeorgesTreeViewDialog::loadFormIntoDialog(CForm *form) 
 	{
@@ -150,7 +219,8 @@ namespace Plugin
 		root = &m_form->getRootNode();
 
 		QStringList parents;
-		for (uint i = 0; i < m_form->getNumParent(); i++) 
+        uint cnt = form->getParentCount();
+        for (uint i = 0; i < cnt /*form->getParentCount()*/; i++)
 		{
 			UForm *u = m_form->getParentForm(i);
 			parents << u->getFilename().c_str();
@@ -179,7 +249,7 @@ namespace Plugin
 		nlinfo("typ's %d",deps["typ"].count());
 		nlinfo("dfn's %d",deps["dfn"].count());
 
-		//nlwarning(strList.join(";").toStdString().c_str());
+		//nlwarning(strList.join(";").toUtf8());
 		if (root) 
 		{
 			loadedForm = m_form->getFilename().c_str();
@@ -203,9 +273,34 @@ namespace Plugin
 		}
 	}
 
-	void CGeorgesTreeViewDialog::addParentForm(CForm *form) 
+	void CGeorgesTreeViewDialog::addParentForm(QString parentFormNm)
 	{
-		//((CForm*)_form)->insertParent(((CForm*)_form)->getParentCount(), form->getFilename().c_str(), form);
+		// Try to load the form
+		NLGEORGES::UForm *uParentForm = m_georges->loadForm(parentFormNm.toUtf8().constData());
+		NLGEORGES::CForm *parentForm = dynamic_cast<NLGEORGES::CForm*>(uParentForm);
+		NLGEORGES::CForm *mainForm = static_cast<NLGEORGES::CForm*>(m_form);
+
+		CGeorgesFormProxyModel * proxyModel = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
+		CGeorgesFormModel *model = dynamic_cast<CGeorgesFormModel *>(proxyModel->sourceModel());
+
+		if(parentForm)
+		{
+			if (mainForm != parentForm)
+			{
+				// Check it is the same dfn
+				if (parentForm->Elements.FormDfn ==  mainForm->Elements.FormDfn)
+				{
+					// This is the parent form selector
+					if(!mainForm->insertParent(mainForm->getParentCount(),parentFormNm.toUtf8(), parentForm))
+						nlwarning("Failed to add parent form: %s", parentFormNm.toUtf8().constData());
+					else
+					{
+						nlinfo("Successfullyadded parent form: %s", parentFormNm.toUtf8().constData());
+						model->addParentForm(parentFormNm);
+					}
+				}
+			}
+		}
 	}
 
 	void CGeorgesTreeViewDialog::modifiedFile( ) 
@@ -221,12 +316,12 @@ namespace Plugin
 	void CGeorgesTreeViewDialog::write( ) 
 	{
 
-		//COFile file;
-		//std::string s = CPath::lookup(loadedForm.toStdString(), false);
-		//if (file.open (s)) 
-		//{
-		//	try	
-		//	{
+        NLMISC::COFile file;
+        std::string s = NLMISC::CPath::lookup(loadedForm.toUtf8().constData(), false);
+        if(file.open (s))
+        {
+            try
+            {
 		//		if (loadedForm.contains(".typ")) 
 		//		{
 		//			//nlassert (Type != NULL);
@@ -239,7 +334,7 @@ namespace Plugin
 		//			//	flushValueChange ();
 		//			//}
 		//			//Type->write (xmlStream.getDocument (), theApp.Georges4CVS);
-		//			//modify (NULL, NULL, false);
+        //			//modify (NULL, NULL, false);
 		//			//flushValueChange ();
 		//			//UpdateAllViews (NULL);
 		//			//return TRUE;
@@ -261,17 +356,17 @@ namespace Plugin
 		//		}
 		//		else 
 		//		{
-		//			nlassert (_form != NULL);
+                    nlassert (m_form != NULL);
 
-		//			// Write the file
+                    // Write the file
 		//			/*if (IsModified ())
 		//			{
 		//			((CForm*)(UForm*)Form)->Header.MinorVersion++;
 		//			}*/
 		//			//((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
-		//			_form->write(file, false);
-		//			setWindowTitle(windowTitle().remove("*"));
-		//			_modified = false;
+                    m_form->write(file, false);
+                    setWindowTitle(windowTitle().remove("*"));
+                    m_modified = false;
 		//			//if (strcmp (xmlStream.getErrorString (), "") != 0)
 		//			//{
 		//			//	char message[512];
@@ -285,16 +380,16 @@ namespace Plugin
 		//			// Get the left view
 		//			//CView* pView = getLeftView ();
 		//		}
-		//	}
-		//	catch (Exception &e)
-		//	{
-		//		nlerror("Error while loading file: %s", e.what());
-		//	}
-		//}
-		//else
-		//{ //if (!file.open())
-		//	nlerror("Can't open the file %s for writing.", s.c_str());
-		//}
+            }
+            catch (Exception &e)
+            {
+                nlerror("Error while loading file: %s", e.what());
+            }
+        }
+        else
+        {
+            nlerror("Can't open the file %s for writing.", s.c_str());
+        }
 	}
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
@@ -310,7 +405,7 @@ namespace Plugin
 
 		if (item->parent() && item->parent()->data(0) == "parents")
 		{
-			Q_EMIT changeFile(CPath::lookup(item->data(0).toString().toStdString(),false).c_str());
+			Q_EMIT changeFile(CPath::lookup(item->data(0).toString().toUtf8().constData(),false).c_str());
 		}
 
 		//// col containing additional stuff like icons
@@ -320,7 +415,7 @@ namespace Plugin
 		//	CFormItem *item = m->getItem(in2);
 		//	QString value = item->data(1).toString();
 
-		//	QString path = CPath::lookup(value.toStdString(),false).c_str();
+		//	QString path = CPath::lookup(value.toUtf8(),false).c_str();
 
 		//	if(value.contains(".tga") || value.contains(".png")) 
 		//	{
@@ -348,7 +443,7 @@ namespace Plugin
 		//			{
 		//				Modules::objViewInt()->resetScene();
 		//				//Modules::config().configRemapExtensions();
-		//				Modules::objViewInt()->loadMesh(path.toStdString(),"");
+		//				Modules::objViewInt()->loadMesh(path.toUtf8(),"");
 		//			}
 		//			return;
 		//		}
@@ -385,4 +480,121 @@ namespace Plugin
 		}
 	}
 
-} /* namespace NLQT */
+	void CGeorgesTreeViewDialog::showContextMenu(const QPoint &pos)
+	{
+		QMenu contextMenu;
+		QMenu *structContext = NULL;
+		QPoint globalPos = this->mapToGlobal(pos);
+		
+		// Fisrt we're going to see if we've right clicked on a new item and select it.
+		const QModelIndex &index = this->m_ui.treeView->currentIndex();
+
+		if(!index.isValid())
+			return;
+
+		CGeorgesFormProxyModel * mp = dynamic_cast<CGeorgesFormProxyModel *>(m_ui.treeView->model());
+		CGeorgesFormModel *m = dynamic_cast<CGeorgesFormModel *>(mp->sourceModel());
+		QModelIndex sourceIndex = mp->mapToSource(index);
+
+		if (m) 
+		{
+			
+			CFormItem *item = m->getItem(sourceIndex);
+
+			// Right click on the "parents" item
+			if (item->data(0) == "parents")
+				contextMenu.addAction("Add parent...");
+			// Right click on a parent item
+			else if(item->parent() && item->parent()->data(0) == "parents")
+			{
+				contextMenu.addAction("Add parent...");
+				contextMenu.addAction("Remove parent");
+			}
+			else if(item->getFormElm()->isArray())
+				contextMenu.addAction("Add array entry...");
+			else if(item->getFormElm()->isStruct())
+			{
+				QMenu *structContext = new QMenu("Add struct element...", this);
+				contextMenu.addMenu(structContext);
+
+				NLGEORGES::UFormDfn *defn = item->getFormElm()->getStructDfn();
+				if(defn)
+				{
+					for(uint defnNum=0; defnNum < defn->getNumEntry(); defnNum++)
+					{
+						std::string entryName;
+						std::string dummy;
+						UFormElm::TWhereIsValue *whereV = new UFormElm::TWhereIsValue;
+						bool result = defn->getEntryName(defnNum, entryName);
+						bool result2 = item->getFormElm()->getValueByName(dummy, entryName.c_str(), NLGEORGES::UFormElm::Eval, whereV);
+
+						
+						if(result2 && *whereV != UFormElm::ValueForm)
+						{
+							structContext->addAction(entryName.c_str());
+						}
+						delete whereV;
+					}
+				}
+			}
+			else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
+				contextMenu.addAction("Revert to parent/default...");
+
+			QAction *selectedItem = contextMenu.exec(globalPos);
+			if(selectedItem)
+			{
+				if(selectedItem->text() == "Add parent...")
+				{
+					// Get the file extension of the form so we can build a dialog pattern.
+					QString file = m_form->getFilename().c_str();
+					file = file.remove(0,file.indexOf(".")+1);
+					QString filePattern = "Parent Sheets (*."+file+")";
+					
+					nlinfo("parent defn name '%s'", file.toUtf8().constData());
+					QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select parent sheets..."), m_lastSheetDir, filePattern);
+					if(!fileNames.isEmpty())
+					{
+						Q_FOREACH(QString fileToParent, fileNames)
+						{
+							// Get just the filename. Georges doesn't want the path.
+							QFileInfo pathInfo( fileToParent );
+							QString tmpFileName( pathInfo.fileName() );
+
+							nlinfo("requesting to add parent form '%s'", tmpFileName.toUtf8().constData());
+							
+							// Call to add the form and load it into the Georges form.
+							addParentForm(tmpFileName);
+
+							// Save the file lookup path for future dialog boxes.
+							m_lastSheetDir = pathInfo.absolutePath();
+						}						
+					}
+					m_ui.treeView->expandAll();
+				}
+				else if(selectedItem->text() == "Remove parent")
+				{
+					NLGEORGES::CForm *form = static_cast<NLGEORGES::CForm *>(m_form);
+					QString parentFileName = item->data(0).toString();
+
+					for(uint num = 0; num < form->getParentCount(); num++)
+					{
+						QString curParentName = form->getParent(num)->getFilename().c_str();
+						if(parentFileName == curParentName)
+						{
+							form->removeParent(num);
+							m->removeParentForm(parentFileName);
+							break;
+						}
+					}
+
+					m_ui.treeView->expandAll();
+				}
+
+			} // if selected context menu item is valid.
+		} // if 'm' model valid.
+
+		if(structContext)
+			delete structContext;
+	}
+
+} /* namespace GeorgesQt */

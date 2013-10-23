@@ -1,5 +1,18 @@
 -- In this file we define functions that serves for player windows
 
+function getDbPropU(dbEntry)
+	value = getDbProp(dbEntry)
+	if (value < 0) then
+		value = 4294967296+value
+	end
+	return value
+end
+
+if string.find(_VERSION, "Lua 5.0") then
+	function math.fmod(a, b)
+		return math.mod(a, b)
+	end
+end
 
 ------------------------------------------------------------------------------------------------------------
 -- create the game namespace without reseting if already created in an other file.
@@ -109,9 +122,9 @@ end
 ------------------------------------------------------------------------------------------------------------
 -- Update player pvp tag
 function game:pvpTagUpdateDisplay()
-	local currentServerTick = getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
-	local pvpServerTagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
-	local pvpServerFlagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
+	local currentServerTick = getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
+	local pvpServerTagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
+	local pvpServerFlagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
 	local uiPlayer= getUI('ui:interface:player:header_opened');
 
 	-- get the current state
@@ -222,9 +235,9 @@ function game:updatePvpTag()
 	setDbProp('UI:TEMP:PVP_FACTION:TAG_PVP', booleanToNumber(pvpServerTag));
 
 	-- launch timer DB if necessary
-	local currentServerTick = getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
-	local pvpServerTagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
-	local pvpServerFlagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
+	local currentServerTick = getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
+	local pvpServerTagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
+	local pvpServerFlagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
 
 	if(pvpServerTagTimer > currentServerTick) or (pvpServerFlagTimer > currentServerTick) then
 		local ui = getUI('ui:interface:player');
@@ -252,9 +265,9 @@ function game:updatePvpTimer()
 	self:pvpTagUpdateDisplay();
 
 	-- try to stop
-	local currentServerTick = getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
-	local pvpServerTagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
-	local pvpServerFlagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
+	local currentServerTick = getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
+	local pvpServerTagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
+	local pvpServerFlagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
 
 	-- Manage Tag Timer display
 	if(pvpServerTagTimer <= currentServerTick) then
@@ -299,8 +312,8 @@ function game:playerTTPvp()
 
 	-- Flag mode?
 	if(buttonMode==2) then
-		local pvpServerFlagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
-		local currentServerTick = getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
+		local pvpServerFlagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:FLAG_PVP_TIME_LEFT');
+		local currentServerTick = getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
 		local tempsString = game:formatTime( pvpServerFlagTimer - currentServerTick ); 
 		text = i18n.get('uittPvPModeFlag');
 		text = findReplaceAll(text, '%temps', tempsString); 
@@ -320,8 +333,8 @@ function game:playerTTPvp()
 		end
 		-- timer
 		if(buttonTimer) then
-			local pvpServerTagTimer = getDbProp('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
-			local currentServerTick = getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
+			local pvpServerTagTimer = getDbPropU('SERVER:CHARACTER_INFO:PVP_FACTION_TAG:ACTIVATION_TIME');
+			local currentServerTick = getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
 			local tempsString = game:formatTime( pvpServerTagTimer - currentServerTick ); 
 			local timeFmt= i18n.get('uittPvPTagTimer');
 			timeFmt= findReplaceAll(timeFmt, '%temps', tempsString);
@@ -402,7 +415,7 @@ function game:outpostUpdatePVPTimer(textSlot, ui)
 
 	-- Get the timer of interest (priority to player leaving the zone)
 	local	endTimer= 0;
-	local	endOfPvpTimer= getDbProp('SERVER:CHARACTER_INFO:PVP_OUTPOST:FLAG_PVP_TIME_END');
+	local	endOfPvpTimer= getDbPropU('SERVER:CHARACTER_INFO:PVP_OUTPOST:FLAG_PVP_TIME_END');
 	if( endOfPvpTimer>0 ) then
 		endTimer= endOfPvpTimer;
 	else
@@ -415,7 +428,7 @@ function game:outpostUpdatePVPTimer(textSlot, ui)
 	-- Use a text with a timer?
 	if( endTimer>0 ) then
 		-- compute the time that lefts in sec (suppose a smooth server tick is 1 ms)
-		local curTick= getDbProp('UI:VARIABLES:CURRENT_SERVER_TICK');
+		local curTick= getDbPropU('UI:VARIABLES:CURRENT_SERVER_TICK');
 		local timeSec= (endTimer- curTick)/10;
 		-- replace in str
 		local	text= "@{FF6F}" .. runFct('secondsToTimeStringShort', timeSec);
@@ -619,8 +632,8 @@ function game:updatePlayerBonusMalus()
 	local	pvpOutpostEndOfRound= 0;
 	if(pvpOutpostPresent~=0) then
 		local	pvpOutpostLevel= 0;
-		pvpOutpostEndOfPVPFlag= getDbProp('SERVER:CHARACTER_INFO:PVP_OUTPOST:FLAG_PVP_TIME_END');
-		pvpOutpostEndOfRound= getDbProp('SERVER:CHARACTER_INFO:PVP_OUTPOST:ROUND_END_DATE');
+		pvpOutpostEndOfPVPFlag= getDbPropU('SERVER:CHARACTER_INFO:PVP_OUTPOST:FLAG_PVP_TIME_END');
+		pvpOutpostEndOfRound= getDbPropU('SERVER:CHARACTER_INFO:PVP_OUTPOST:ROUND_END_DATE');
 		-- set a level only if we have some round, and if the out timer is not set
 		if(pvpOutpostEndOfRound~=0 and pvpOutpostEndOfPVPFlag==0) then
 			pvpOutpostLevel= 1 + getDbProp('SERVER:CHARACTER_INFO:PVP_OUTPOST:ROUND_LVL_CUR');
@@ -796,8 +809,8 @@ end
 
 
 function game:timeInSecondsToReadableTime(regenTime)			
-	local seconds = math.mod(regenTime, 60)	
-	local minutes = math.mod(math.floor(regenTime / 60), 60)	
+	local seconds = math.fmod(regenTime, 60)	
+	local minutes = math.fmod(math.floor(regenTime / 60), 60)	
 	local hours = math.floor(regenTime / 3600)	
 	local result = ""
 	if seconds > 0 then result = concatUCString(tostring(seconds), i18n.get("uittSecondsShort"))	end

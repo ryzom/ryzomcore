@@ -1066,6 +1066,12 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 		getCharacter()->queryItemPrice( item, price );
 		itemBestStat = item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat();
 
+		BOTCHATTYPE::TBotChatResaleFlag resaleFlag = (item->durability() == item->maxDurability() ? BOTCHATTYPE::ResaleOk : BOTCHATTYPE::ResaleKOBroken);
+		if (item->getLockedByOwner())
+		{
+			resaleFlag = BOTCHATTYPE::ResaleKOLockedByOwner;
+		}
+
 		INVENTORIES::CItemSlot itemSlot( slot );
 		itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
 		itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );
@@ -1076,7 +1082,7 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 		itemSlot.setItemProp( INVENTORIES::NameId, item->sendNameId(getCharacter()) );
 		itemSlot.setItemProp( INVENTORIES::Enchant, item->getClientEnchantValue() );
 		itemSlot.setItemProp( INVENTORIES::Price, price );
-		itemSlot.setItemProp( INVENTORIES::ResaleFlag, item->durability() == item->maxDurability() ? BOTCHATTYPE::ResaleOk : BOTCHATTYPE::ResaleKOBroken );
+		itemSlot.setItemProp( INVENTORIES::ResaleFlag, resaleFlag );
 		itemSlot.setItemProp( INVENTORIES::ItemClass, item->getItemClass() );
 		itemSlot.setItemProp( INVENTORIES::ItemBestStat, itemBestStat );
 		itemSlot.setItemProp( INVENTORIES::PrerequisitValid, getCharacter()->checkPreRequired( item ) );

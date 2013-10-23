@@ -149,14 +149,28 @@ static NLMISC::TKey virtualKeycodeToNelKey(unsigned short keycode)
 
 bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
 {
-#warning "OpenGL Driver: Missing Mac Implementation for pasteTextFromClipboard"
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
+	NSDictionary *options = [NSDictionary dictionary];
+	
+	BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
+	if (ok) 
+	{
+		NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
+		NSString *nstext = [objectsToPaste objectAtIndex:0];
+		text.fromUtf8([nstext UTF8String]);
+		return true;
+	}
 	return false;
 }
 
 bool CCocoaEventEmitter::copyTextToClipboard(const ucstring &text)
 {
-#warning "OpenGL Driver: Missing Mac Implementation for copyTextToClipboard"
-	return false;
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	[pasteboard clearContents];
+	NSArray *copiedObjects = [NSArray arrayWithObject:[NSString stringWithUTF8String:text.toUtf8().c_str()]];
+	[pasteboard writeObjects:copiedObjects];
+	return true;
 }
 
 /// convert modifier key state to nel internal modifier key state
@@ -195,7 +209,7 @@ static bool isTextKeyEvent(NSEvent* event)
 
 	/*
 		TODO check why iswprint(character) does not solve it.
-			it always returns false, even for π, é, ...
+			it always returns false, even for non-ASCII characters
 	*/
 	// characters > 127 but not printable
 	if( nelKey == NLMISC::KeyF1    || nelKey == NLMISC::KeyF2    ||

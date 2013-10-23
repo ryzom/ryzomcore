@@ -22,7 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/stream.h"
 #include "mirrored_data_set.h"
-
+#include <stddef.h>
 
 /**
  * Read-only handler of a value of a property.

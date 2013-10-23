@@ -216,7 +216,7 @@ void CDialogProperties::removeWidgets ()
 		else if (widget.Parameter.Type == CPrimitiveClass::CParameter::StringArray)
 		{
 			widget.MultiLineEditBox.DestroyWindow ();
-			if (widget.Parameter.Folder != "" || !widget.Parameter.FileExtension.empty())
+			if (!widget.Parameter.Folder.empty() || !widget.Parameter.FileExtension.empty())
 			{
 				widget.CheckBox.DestroyWindow ();
 			}

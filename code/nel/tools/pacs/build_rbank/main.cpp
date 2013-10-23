@@ -29,11 +29,11 @@
 #include "build_rbank.h"
 #include "prim_checker.h"
 
-#include "nel/../../src/pacs/global_retriever.h"
-#include "nel/../../src/pacs/retriever_bank.h"
-#include "nel/../../src/pacs/surface_quad.h"
-#include "nel/../../src/pacs/local_retriever.h"
-#include "nel/../../src/pacs/retriever_instance.h"
+#include "nel/pacs/global_retriever.h"
+#include "nel/pacs/retriever_bank.h"
+#include "nel/pacs/surface_quad.h"
+#include "nel/pacs/local_retriever.h"
+#include "nel/pacs/retriever_instance.h"
 
 #include <string>
 #include <deque>

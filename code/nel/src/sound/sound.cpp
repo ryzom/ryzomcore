@@ -26,6 +26,10 @@
 #include "nel/sound/context_sound.h"
 #include "nel/sound/music_sound.h"
 #include "nel/sound/stream_sound.h"
+#include "nel/sound/stream_file_sound.h"
+
+#include "nel/sound/group_controller.h"
+#include "nel/sound/group_controller_root.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -81,6 +85,11 @@ CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& fo
 			ret = new CStreamSound();
 			ret->importForm(filename, formRoot);
 		}
+		else if (dfnName == "stream_file_sound.dfn")
+		{
+			ret = new CStreamFileSound();
+			ret->importForm(filename, formRoot);
+		}
 		else
 		{
 			nlassertex(false, ("SoundType unsuported : %s", dfnName.c_str()));
@@ -106,7 +115,8 @@ CSound::CSound() :
 	_Looping(false),
 	_MinDist(1.0f),
 	_MaxDist(1000000.0f),
-	_UserVarControler(CStringMapper::emptyId())
+	_UserVarControler(CStringMapper::emptyId()),
+	_GroupController(NULL)
 {
 }
 
@@ -123,17 +133,25 @@ void	CSound::serial(NLMISC::IStream &s)
 	s.serial(_Direction);
 	s.serial(_Looping);
 	s.serial(_MaxDist);
+
+	_Name.serialString(s, "sound");
+
+	nlassert(CGroupControllerRoot::isInitialized()); // not sure
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	if (s.isReading()) _GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
+#else
 	if (s.isReading())
 	{
-		std::string name;
-		s.serial(name);
-		_Name = CStringMapper::map(name);
+		std::string groupControllerPath;
+		s.serial(groupControllerPath);
+		_GroupController = CGroupControllerRoot::getInstance()->getGroupController(groupControllerPath);
 	}
 	else
 	{
-		std::string name = CStringMapper::unmap(_Name);
-		s.serial(name);
+		std::string groupControllerPath = _GroupController->getPath();
+		s.serial(groupControllerPath);
 	}
+#endif
 }
 
 
@@ -143,7 +161,8 @@ void	CSound::serial(NLMISC::IStream &s)
 void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& root)
 {
 	// Name
-	_Name = CStringMapper::map(CFile::getFilenameWithoutExtension(filename));
+	nlassert(filename.find(".sound") != std::string::npos);
+	_Name = NLMISC::CSheetId(filename);
 
 	// InternalConeAngle
 	uint32 inner;
@@ -225,6 +244,16 @@ void				CSound::importForm(const std::string& filename, NLGEORGES::UFormElm& roo
 	default:
 		_Priority = MidPri;
 	}
+
+	nlassert(CGroupControllerRoot::isInitialized()); // not sure
+#if NLSOUND_SHEET_VERSION_BUILT < 2
+	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(NLSOUND_SHEET_V1_DEFAULT_SOUND_GROUP_CONTROLLER);
+#else
+	std::string groupControllerPath;
+	root.getValueByName(groupControllerPath, ".GroupControllerPath");
+	_GroupController = CGroupControllerRoot::getInstance()->getGroupController(groupControllerPath);
+#endif
+
 }
 
 

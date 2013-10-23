@@ -175,6 +175,8 @@
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:FOCUS|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MESSAGES|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:PVP_LOGO|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:NPCNAME|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:NPCTITLE|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MISSION_ICON|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:FRIEND:MINI_MISSION_ICON|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INSCENE:ENEMY:GUILD_SYMBOL|value=1" />
@@ -261,6 +263,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_TOOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_BAG:FILTER_TP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA0:SORT_TYPE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA0:ICON_LIST|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA0:FILTER_ARMOR|value=1" />
@@ -275,6 +278,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_TOOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA1:FILTER_TP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA2:SORT_TYPE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA2:ICON_LIST|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_ARMOR|value=1" />
@@ -282,6 +286,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_TOOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA2:FILTER_TP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:SORT_TYPE|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:ICON_LIST|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_ARMOR|value=1" />
@@ -289,6 +294,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_TOOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_PA3:FILTER_TP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:SORT_TYPE|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:ICON_LIST|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_ARMOR|value=1" />
@@ -296,6 +302,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_TOOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_GUILD:FILTER_TP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:SORT_TYPE|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:ICON_LIST|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_ARMOR|value=1" />
@@ -303,6 +310,7 @@
 	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_TOOL|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_MP|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_MISSMP|value=1" />
+	<action handler="set" params="dblink=UI:SAVE:INV_ROOM:FILTER_TP|value=1" />
 
 	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:MAIN_CHAT|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:GUILD_CHAT|value=0" />

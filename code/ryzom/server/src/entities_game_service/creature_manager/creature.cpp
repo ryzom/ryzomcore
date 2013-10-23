@@ -145,6 +145,7 @@ CCreature::CCreature() : CEntityBase(true)
 	_TicketFameRestrictionValue = 0;
 	_MaxHitRangeForPC = -1.f;
 
+	_Organization = 0;
 //	_MissionIconFlags.IsMissionStepIconDisplayable = true;
 //	_MissionIconFlags.IsMissionGiverIconDisplayable = true;
 }
@@ -941,6 +942,8 @@ void CCreature::setBotDescription( const CGenNpcDescMsgImp& description )
 
 	_BotChatOutpost = description.getOutpost();
 	
+	_Organization = description.getOrganization();
+
 	bool cosmeticCategory = false;
 	bool tradeCategory = false;
 	bool tpCategory = false;
@@ -2057,9 +2060,9 @@ uint32 CCreature::tickUpdate()
 		setBars();
 	}
 
-   	// test again as effects can kill the entity (dots...)
-   	if (isDead())
-   	{
+	// test again as effects can kill the entity (dots...)
+	if (isDead())
+	{
 		deathOccurs();
 	}
 

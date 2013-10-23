@@ -138,6 +138,8 @@ private:
 	NLMISC::CSmartPtr<NL3D::ITexture>  _BlurFinalTex;
 	// used as render target in first blur pass, and as displayed texture on second blur pass.
 	NLMISC::CSmartPtr<NL3D::ITexture>  _BlurHorizontalTex;
+	// original render target
+	NLMISC::CSmartPtr<NL3D::ITexture>  _OriginalRenderTarget;
 
 
 	// materials

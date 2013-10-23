@@ -68,6 +68,16 @@ public:
 	}
 };
 
+/// Thread priorities, numbering follows Win32 for now
+enum TThreadPriority
+{
+	ThreadPriorityLowest = -2,
+	ThreadPriorityLow = -1,
+	ThreadPriorityNormal = 0,
+	ThreadPriorityHigh = 1,
+	ThreadPriorityHighest = 2,
+};
+
 /**
  * Thread base interface, must be implemented for all OS
  * \author Vianney Lecroart
@@ -118,6 +128,9 @@ public:
 	  * The mask should be a subset of the CPU mask returned by IProcess::getCPUMask() thread process.
 	  */
 	virtual uint64 getCPUMask()=0;
+
+	/// Set the thread priority. Thread must have been started before.
+	virtual void setPriority(TThreadPriority priority) = 0;
 
 	/**
 	  * Get the thread user name.

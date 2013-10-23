@@ -729,7 +729,7 @@ void CStringManager::broadcastSystemMessage(NLNET::CMessage &message, bool debug
 //		{
 //			// In ring shard, it is possible that the client autologin and 
 //			// autochoose the character rapidly, and if a string need to be resolved 
-//			// to dîsplay the char summary, it is possible client receive the 
+//			// to display the char summary, it is possible client receive the 
 //			// dynamic string from IOS after the EGS has passed the frontend in 
 //			// entityId mode.
 //			// So, the IOS receive a stringId request with a Eid not registered yet.
@@ -1108,6 +1108,30 @@ void CStringManager::setPhrase(NLNET::CMessage &message)
 		return;
 	}
 	setPhrase(phraseName, phraseContent);
+}
+
+/*
+ * Replace a phrase in specified language (message handler)
+ */
+void CStringManager::setPhraseLang(NLNET::CMessage &message)
+{
+	std::string phraseName;
+	ucstring phraseContent;
+	std::string langString;
+	try
+	{
+		message.serial(phraseName);
+		message.serial(phraseContent);
+		message.serial(langString);
+	}
+	catch( Exception& e )
+	{
+		nlwarning("<setPhrase> %s",e.what());
+		return;
+	}
+
+	TLanguages lang = checkLanguageCode(langString);
+	setPhrase(phraseName, phraseContent, lang);
 }
 
 /*

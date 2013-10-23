@@ -20,7 +20,9 @@
 #pragma conform(forScope, push)
 #pragma conform(forScope, off)
 
+#ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
+#endif
 
 #include <assert.h>
 #include <Max.h>

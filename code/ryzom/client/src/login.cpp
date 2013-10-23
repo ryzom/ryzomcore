@@ -35,11 +35,12 @@
 
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/input_handler_manager.h"
-#include "interface_v3/group_editbox.h"
+#include "nel/gui/group_editbox.h"
 #include "interface_v3/group_quick_help.h"
-#include "interface_v3/view_text.h"
-#include "interface_v3/ctrl_button.h"
-#include "interface_v3/ctrl_text_button.h"
+#include "nel/gui/view_text.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/ctrl_text_button.h"
+#include "nel/gui/dbgroup_combo_box.h"
 #include "sound_manager.h"
 #include "far_tp.h"
 
@@ -48,8 +49,7 @@
 #include "client_cfg.h"
 #include "global.h"
 #include "input.h"
-#include "libwww.h"
-#include "http_client.h"
+#include "nel/gui/libwww.h"
 #include "http_client_curl.h"
 #include "login_progress_post_thread.h"
 
@@ -59,6 +59,8 @@
 
 #include "game_share/crypt.h"
 #include "game_share/bg_downloader_msg.h"
+
+#include "misc.h"
 
 void ConnectToShard();
 
@@ -141,6 +143,45 @@ uint32 TotalPatchSize;
 
 CLoginStateMachine LoginSM;
 
+// TODO : nico : put this in an external file, this way it isn't included by the background downloader
+#ifndef RY_BG_DOWNLOADER
+
+bool CStartupHttpClient::connectToLogin()
+{
+	return connect(ClientCfg.ConfigFile.getVar("StartupHost").asString(0));
+}
+
+CStartupHttpClient HttpClient;
+#endif // RY_BG_DOWNLOADER
+
+
+// ***************************************************************************
+#define	WIN_COMBO_BOX_SELECT_MENU	"ui:interface:combo_box_select_menu"
+#define	WIN_COMBO_BOX_MEASURE_MENU	"ui:interface:combo_box_measure_menu"
+#define	WIN_COMBO_BOX_SELECT_MENU_OUTGAME	"ui:outgame:combo_box_select_menu"
+#define	WIN_COMBO_BOX_SELECT_MENU_LOGIN	"ui:login:combo_box_select_menu"
+#define	WIN_COMBO_BOX_MEASURE_MENU_LOGIN	"ui:login:combo_box_measure_menu"
+
+bool isLoginFinished()
+{
+	return loginFinished;
+}
+
+void setLoginFinished( bool f )
+{
+	loginFinished = f;
+	if( loginFinished )
+	{
+		CDBGroupComboBox::measureMenu.assign( WIN_COMBO_BOX_MEASURE_MENU );
+		CDBGroupComboBox::selectMenu.assign( WIN_COMBO_BOX_SELECT_MENU );
+	}
+	else
+	{
+		CDBGroupComboBox::measureMenu.assign( WIN_COMBO_BOX_MEASURE_MENU_LOGIN );
+		CDBGroupComboBox::selectMenu.assign( WIN_COMBO_BOX_SELECT_MENU_LOGIN );
+	}
+}
+
 
 // ***************************************************************************
 // Pop a fatal error message box, giving the option to 'quit' the client, plus a help button
@@ -162,7 +203,7 @@ static void errorMessageBox(const ucstring &msg)
 void createOptionalCatUI()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 	if (pList == NULL)
 	{
 		nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
@@ -180,7 +221,7 @@ void createOptionalCatUI()
 		if (i>0)
 			params.push_back(pair<string,string>("posref", "BL TL"));
 
-		CInterfaceGroup *pNewLine = pIM->createGroupInstance("t_cat", GROUP_LIST_CAT, params);
+		CInterfaceGroup *pNewLine = CWidgetManager::getInstance()->getParser()->createGroupInstance("t_cat", GROUP_LIST_CAT, params);
 		if (pNewLine != NULL)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
@@ -209,7 +250,7 @@ void initEula()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (!ClientCfg.SkipEULA && CFile::fileExists(getLogDirectory() + "show_eula"))
 	{
-		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_EULA);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_EULA);
 
 		// if we display the eula, it means we make a patch so we clean the cache directory
 		// (clear cache after each patch)
@@ -221,7 +262,7 @@ void initEula()
 	}
 	else
 	{
-		pIM->runActionHandler("accept_eula", NULL);
+		CAHManager::getInstance()->runActionHandler("accept_eula", NULL);
 	}
 }
 
@@ -229,7 +270,7 @@ void initEula()
 static void setDataScanLog(const ucstring &text)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:datascan:content:log_txt:log"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:log_txt:log"));
 	if (pVT != NULL)
 	{
 		pVT->setText(text);
@@ -240,10 +281,10 @@ static void setDataScanLog(const ucstring &text)
 static void setDataScanState(const ucstring &text, ucstring progress= ucstring())
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:datascan:content:state"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:state"));
 	if (pVT != NULL) pVT->setText(text);
 
-	pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:datascan:content:progress"));
+	pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:datascan:content:progress"));
 	if (pVT != NULL) pVT->setText(progress);
 }
 
@@ -260,19 +301,19 @@ void initCatDisplay()
 		(InfoOnPatch.ReqCat.size() > 0))
 	{
 		createOptionalCatUI();
-		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
 	}
 	else
 	{
 		LoginSM.pushEvent(CLoginStateMachine::ev_run_patch);
-//		pIM->runActionHandler("login_patch", NULL);
+//		CAHManager::getInstance()->runActionHandler("login_patch", NULL);
 	}
 }
 
 void initReboot()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_REBOOT);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_REBOOT);
 }
 
 
@@ -280,7 +321,7 @@ void initReboot()
 static void setPatcherStateText(const std::string &baseUIPath, const ucstring &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(baseUIPath + ":content:state"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:state"));
 	if (pVT != NULL)
 	{
 		pVT->setText(str);
@@ -291,7 +332,7 @@ static void setPatcherStateText(const std::string &baseUIPath, const ucstring &s
 static void setPatcherProgressText(const std::string &baseUIPath, const ucstring &str)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(baseUIPath + ":content:progress"));
+	CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(baseUIPath + ":content:progress"));
 	if (pVT != NULL)
 	{
 		pVT->setText(str);
@@ -347,6 +388,7 @@ static void updatePatchingInfoText(const std::string &baseUIPath)
 // Main loop of the login step
 void loginMainLoop()
 {
+	CDBGroupComboBox::selectMenuOut.assign( WIN_COMBO_BOX_SELECT_MENU_OUTGAME );
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
 
@@ -360,7 +402,8 @@ void loginMainLoop()
 			&& LoginSM.getCurrentState() != CLoginStateMachine::st_ingame)
 //	while (loginFinished == false)
 	{
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 		// Update the DT T0 and T1 global variables
 		updateClientTime();
@@ -378,7 +421,8 @@ void loginMainLoop()
 		// Interface handling & displaying
 		pIM->updateFrameEvents();
 		pIM->updateFrameViews(NULL);
-		CCDBNodeBranch::flushObserversCalls();
+		IngameDbMngr.flushObserverCalls();
+		NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 
 
@@ -397,7 +441,7 @@ void loginMainLoop()
 		// Display
 		Driver->swapBuffers();
 
-//		sint32 screen = pIM->getDbProp("UI:VARIABLES:SCREEN")->getValue32();
+//		sint32 screen = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32();
 		if (LoginSM.getCurrentState() == CLoginStateMachine::st_check_patch)
 //		if (screen == UI_VARIABLES_SCREEN_CHECKING) // If we are in checking mode
 		{
@@ -485,12 +529,12 @@ void loginMainLoop()
 						{
 							LoginSM.pushEvent(CLoginStateMachine::ev_patch_needed);
 							//	createOptionalCatUI();
-							//	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
+							//	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
 						}
 						else
 						{
 							LoginSM.pushEvent(CLoginStateMachine::ev_no_patch);
-							//	pIM->runActionHandler("login_patch", NULL);
+							//	CAHManager::getInstance()->runActionHandler("login_patch", NULL);
 						}
 					}
 					else
@@ -523,10 +567,10 @@ void loginMainLoop()
 			if (pPM->isScanDataThreadEnded(res))
 			{
 				// if interface consider it was running before
-				if(pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
+				if(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
 				{
 					// no more running
-					pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(0);
+					NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(0);
 
 					if(res)
 					{
@@ -655,7 +699,7 @@ void loginMainLoop()
 				}
 			}
 
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_TOTAL_SIZE_PATCH));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE_PATCH));
 			ucstring sTmp;
 			sTmp = BGDownloader::getWrittenSize(currentPatchingSize);
 			sTmp += " / " + BGDownloader::getWrittenSize(totalPatchSize);
@@ -670,7 +714,7 @@ void loginMainLoop()
 			uint32 nNonOptSize = 0;
 			TotalPatchSize = 0;
 			vector<sint32> ReqCat;
-			CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+			CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 			if (pList != NULL)
 			{
 				for(uint i = 0; i < InfoOnPatch.OptCat.size(); i++)
@@ -707,10 +751,10 @@ void loginMainLoop()
 			TotalPatchSize += nNonOptSize;
 			// Total size of the patches is optional cats + required cat (f(optCat)) + non opt cat
 
-			CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_TOTAL_SIZE));
+			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TOTAL_SIZE));
 			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(TotalPatchSize));
 
-			pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_NON_OPTIONAL_SIZE));
+			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NON_OPTIONAL_SIZE));
 			if (pVT != NULL) pVT->setText(BGDownloader::getWrittenSize(nNonOptSize));
 		}
 	}
@@ -720,8 +764,8 @@ void initLoginScreen()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CPatchManager *pPM = CPatchManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
-	pIM->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
 
 	// Active inputs
 	Actions.enable(true);
@@ -737,32 +781,34 @@ void initLoginScreen()
 
 	if(!l.empty())
 	{
-		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-		if (pGEB != NULL)
+		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+		if (pGEB != NULL && (pGEB->getInputString().empty()))
+		{
 			pGEB->setInputString(l);
-		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+		}
+		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 	}
 	else
 	{
-		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 	}
 
 
-	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId(CTRL_BUTTON_CONNECT));
+	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 	if (pCB != NULL) pCB->setActive(false);
 
-	loginFinished = false;
+	setLoginFinished( false );
 	loginOK = false;
 }
 
 void initAutoLogin()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+	CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+	CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 	pGEBLog->setInputString(LoginLogin);
 	pGEBPwd->setInputString(LoginPassword);
-	pIM->runActionHandler("on_login", NULL, "");
+	CAHManager::getInstance()->runActionHandler("on_login", NULL, "");
 
 	if (ClientCfg.R2Mode)
 	{
@@ -789,7 +835,7 @@ void initAutoLogin()
 		else
 		{
 			LoginSM.pushEvent(CLoginStateMachine::ev_login_ok);
-			//		pIM->runActionHandler("login_connect_2", NULL);
+			//		CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 		}
 	}
 }
@@ -808,7 +854,8 @@ bool login()
 		loginIntro();
 
 	pIM->initLogin();
-	CCDBNodeBranch::flushObserversCalls();
+	IngameDbMngr.flushObserverCalls();
+	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
 	bool tmpDI = ClientCfg.DisableDirectInput;
 	ClientCfg.DisableDirectInput = true;
@@ -823,28 +870,28 @@ bool login()
 
 //	if (ClientCfg.TestBrowser)
 //	{
-//		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //		// hide 'back to login' button
-//		CInterfaceElement *backToLogin = pIM->getElementFromId(CTRL_BUTTON_BACKTOLOGIN);
+//		CInterfaceElement *backToLogin = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_BACKTOLOGIN);
 //		if (backToLogin)
 //			backToLogin->setActive(false);
 //
 //		// show 'reload test page' button
-//		CInterfaceElement *reloadTest = pIM->getElementFromId(CTRL_BUTTON_RELOADTESTPAGE);
+//		CInterfaceElement *reloadTest = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_RELOADTESTPAGE);
 //		if (reloadTest)
 //			reloadTest->setActive(true);
 //
 //		// start the browser
-//		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+//		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 //
 //		pGH->browse(ClientCfg.TestBrowserUrl.c_str());
 //
 //	}
 //	else
 //	{
-////		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
-////		pIM->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
+////		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+////		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DISPLAY_ACCOUNT_BUTTONS")->setValue32(ClientCfg.DisplayAccountButtons);
 //	}
 
 	// Active inputs
@@ -861,20 +908,21 @@ bool login()
 //
 //	if(!l.empty())
 //	{
-//		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
+//		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 //		if (pGEB != NULL)
 //			pGEB->setInputString(l);
-//		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+//		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 //	}
 //	else
 //	{
-//		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+//		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 //	}
 
 	ShardSelected = -1;
-//	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId(CTRL_BUTTON_CONNECT));
+//	CCtrlTextButton *pCB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 //	if (pCB != NULL) pCB->setActive(false);
 //
+//  setLoginFinished( false );
 //	loginFinished = false;
 //	loginOK = false;
 
@@ -882,11 +930,11 @@ bool login()
 //	if (!LoginLogin.empty())
 //	{
 //		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-//		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+//		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+//		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 //		pGEBLog->setInputString(LoginLogin);
 //		pGEBPwd->setInputString(LoginPassword);
-//		pIM->runActionHandler("on_login", NULL, "");
+//		CAHManager::getInstance()->runActionHandler("on_login", NULL, "");
 //		// Select good shard
 //		ShardSelected = -1;
 //		for (uint32 i = 0; i < Shards.size(); ++i)
@@ -901,7 +949,7 @@ bool login()
 //		if (ShardSelected == -1)
 //			pIM->messageBox(CI18N::get("uiErrServerLost"), "ui:login");
 //		else
-//			pIM->runActionHandler("login_connect_2", NULL);
+//			CAHManager::getInstance()->runActionHandler("login_connect_2", NULL);
 //	}
 
 	// start the login state machine
@@ -1015,7 +1063,7 @@ void initPatchCheck()
 		CBGDownloaderAccess::getInstance().requestDownloadThreadPriority(BGDownloader::ThreadPriority_Normal, false);
 		CBGDownloaderAccess::getInstance().startTask(taskDesc, getBGDownloaderCommandLine(), true /* showDownloader */);
 	}
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 
 	setPatcherStateText("ui:login:checking", ucstring());
 	setPatcherProgressText("ui:login:checking", ucstring());
@@ -1024,9 +1072,9 @@ void initPatchCheck()
 void initShardDisplay()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
 
-	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_SHARD));
+	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
 	if (pList == NULL)
 	{
 		nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
@@ -1049,7 +1097,7 @@ void initShardDisplay()
 		if (i>0)
 			params.push_back(pair<string,string>("posref", "BL TL"));
 
-		CInterfaceGroup *pNewLine =pIM->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
+		CInterfaceGroup *pNewLine = CWidgetManager::getInstance()->getParser()->createGroupInstance("t_shard", GROUP_LIST_SHARD, params);
 		if (pNewLine != NULL)
 		{
 			CViewText *pVT = dynamic_cast<CViewText*>(pNewLine->getView("name"));
@@ -1082,10 +1130,10 @@ void initShardDisplay()
 	// UI Patch
 	if (!Shards.empty())
 	{
-		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
+		CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
 		if (pCB != NULL)
 			pCB->setPushed(true);
-		pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+		CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 
 	}
 	pList->invalidateCoords();
@@ -1108,7 +1156,7 @@ void onlogin(bool vanishScreen = true)
 	}
 
 	if(vanishScreen)
-		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(-1);
 
 	// Check the login/pass
 
@@ -1133,16 +1181,16 @@ void onlogin(bool vanishScreen = true)
 //				pPM->init(R2PatchURLs, R2BackupPatchURL, R2ServerVersion);
 //
 //				pPM->startCheckThread();
-//				pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 //			}
 //			else
 //			{
 //				// go directly to web browser
-//				pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+//				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //				// start the browser
-//				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+//				CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 //
 //				pGH->browse(RingMainURL.c_str());
 //			}
@@ -1150,10 +1198,10 @@ void onlogin(bool vanishScreen = true)
 		}
 		else
 		{
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_SHARDDISP);
 		}
 
-//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_SHARD));
+//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
 //		if (pList == NULL)
 //		{
 //			nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
@@ -1209,10 +1257,10 @@ void onlogin(bool vanishScreen = true)
 //		// UI Patch
 //		if (!Shards.empty())
 //		{
-//			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
+//			CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s0:but"));
 //			if (pCB != NULL)
 //				pCB->setPushed(true);
-//			pIM->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
+//			CAHManager::getInstance()->runActionHandler (pCB->getActionOnLeftClick(), pCB, pCB->getParamsOnLeftClick());
 //
 //		}
 //		pList->invalidateCoords();
@@ -1225,12 +1273,12 @@ void onlogin(bool vanishScreen = true)
 		pIM->messageBoxWithHelp("Error : " + res, "ui:login");
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_bad_login);
-//		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
 //
 //		if (LoginLogin.empty())
-//			pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 //		else
-//			pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+//			CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 
 	}
 }
@@ -1243,8 +1291,8 @@ class CAHOnLogin : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+		CGroupEditBox *pGEBLog = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 		if ((pGEBLog == NULL) || (pGEBPwd == NULL))
 		{
 			nlwarning("element "CTRL_EDITBOX_LOGIN" or "CTRL_EDITBOX_PASSWORD" not found probably bad login_main.xml");
@@ -1273,7 +1321,7 @@ class CAHOnGameConfiguration : public IActionHandler
 		{
 			// launch the ryzom configurator
 			launchProgram(Configurator, "");
-			loginFinished = true;
+			setLoginFinished( true );
 			loginOK = false;
 
 			LoginSM.pushEvent(CLoginStateMachine::ev_quit);
@@ -1294,7 +1342,7 @@ class CAHLoginQuit : public IActionHandler
 	{
 		nlinfo("CAHLoginQuit called");
 
-		loginFinished = true;
+		setLoginFinished( true );
 		loginOK = false;
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_quit);
@@ -1312,36 +1360,36 @@ class CAHLoginTab : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		if (pIM->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CHECKPASS)
+		if (NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CHECKPASS)
 		{
-			CCtrlBase *pCB = pIM->getCaptureKeyboard();
+			CCtrlBase *pCB = CWidgetManager::getInstance()->getCaptureKeyboard();
 			if (pCB != NULL)
 			{
 				CCtrlBase *pNewCB;
 				string sID = pCB->getId();
 				if (sID == CTRL_EDITBOX_LOGIN)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_PASSWORD));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 				else
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
-				pIM->setCaptureKeyboard(pNewCB);
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
+				CWidgetManager::getInstance()->setCaptureKeyboard(pNewCB);
 			}
 		}
-		else if (pIM->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CREATE_ACCOUNT)
+		else if (NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->getValue32() == UI_VARIABLES_SCREEN_CREATE_ACCOUNT)
 		{
-			CCtrlBase *pCB = pIM->getCaptureKeyboard();
+			CCtrlBase *pCB = CWidgetManager::getInstance()->getCaptureKeyboard();
 			if (pCB != NULL)
 			{
 				CCtrlBase *pNewCB;
 				string sID = pCB->getId();
 				if (sID == CTRL_EDITBOX_CREATEACCOUNT_LOGIN)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_PASSWORD));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_PASSWORD));
 				else if (sID == CTRL_EDITBOX_CREATEACCOUNT_PASSWORD)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_CONFIRMPASSWORD));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_CONFIRMPASSWORD));
 				else if (sID == CTRL_EDITBOX_CREATEACCOUNT_CONFIRMPASSWORD)
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_EMAIL));
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_EMAIL));
 				else
-					pNewCB = dynamic_cast<CCtrlBase*>(pIM->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_LOGIN));
-				pIM->setCaptureKeyboard(pNewCB);
+					pNewCB = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_CREATEACCOUNT_LOGIN));
+				CWidgetManager::getInstance()->setCaptureKeyboard(pNewCB);
 			}
 		}
 	}
@@ -1362,7 +1410,7 @@ class CAHShardSelect : public IActionHandler
 		// Unselect
 		if (ShardSelected != -1)
 		{
-			pCB = dynamic_cast<CCtrlButton*>(pIM->getElementFromId(GROUP_LIST_SHARD ":s"+toString(ShardSelected)+":but"));
+			pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD ":s"+toString(ShardSelected)+":but"));
 			if (pCB != NULL)
 				pCB->setPushed(false);
 		}
@@ -1378,7 +1426,7 @@ class CAHShardSelect : public IActionHandler
 			pCB->setPushed(true);
 		}
 
-		CCtrlTextButton *pCTB = dynamic_cast<CCtrlTextButton*>(pIM->getElementFromId(CTRL_BUTTON_CONNECT));
+		CCtrlTextButton *pCTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CONNECT));
 		if (pCTB != NULL)
 			pCTB->setActive(true);
 	}
@@ -1393,7 +1441,7 @@ void ConnectToShard()
 	if (ClientCfg.R2Mode)
 	{
 		// r2 mode
-		loginFinished = true;
+		setLoginFinished( true );
 		loginOK = true;
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
@@ -1407,7 +1455,7 @@ void ConnectToShard()
 
 		if(res.empty())
 		{
-			loginFinished = true;
+			setLoginFinished( true );
 			loginOK = true;
 
 			LoginSM.pushEvent(CLoginStateMachine::ev_enter_game);
@@ -1461,11 +1509,11 @@ class CAHLoginConnect : public IActionHandler
 //		if (ClientCfg.PatchWanted)
 //		{
 //			pPM->startCheckThread();
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 //		}
 //		else
 //		{
-//			pIM->runActionHandler("login_patch",NULL);
+//			CAHManager::getInstance()->runActionHandler("login_patch",NULL);
 //		}
 	}
 };
@@ -1506,7 +1554,7 @@ class CAHLoginConnect2 : public IActionHandler
 //			(Shards[ShardSelected].Version != pPM->getClientVersion()))
 //		{
 //			pPM->startCheckThread();
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKING);
 //		}
 //		else
 //		{
@@ -1528,7 +1576,7 @@ void initPatch()
 		// Get the list of optional categories to patch
 		vector<string> vCategories;
 
-		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 		if (pList == NULL)
 		{
 			nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
@@ -1566,9 +1614,9 @@ void initPatch()
 		// release lock on bnp, so that they can be written
 		NLMISC::CBigFile::getInstance().removeAll();
 	}
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 
-	CInterfaceElement *closeBtn = pIM->getElementFromId(CTRL_BUTTON_CLOSE_PATCH);
+	CInterfaceElement *closeBtn = CWidgetManager::getInstance()->getElementFromId(CTRL_BUTTON_CLOSE_PATCH);
 	if (closeBtn)
 		closeBtn->setActive(false);
 
@@ -1592,7 +1640,7 @@ class CAHLoginPatch : public IActionHandler
 //		// Get the list of optional categories to patch
 //		vector<string> vCategories;
 //
-//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId(GROUP_LIST_CAT));
+//		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 //		if (pList == NULL)
 //		{
 //			nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
@@ -1624,7 +1672,7 @@ class CAHLoginPatch : public IActionHandler
 //		if (ClientCfg.PatchWanted)
 //		{
 //			pPM->startPatchThread(vCategories);
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 //		}
 //		else
 //		{
@@ -1661,7 +1709,7 @@ class CAHSetReleaseNote : public IActionHandler
 		string sShard = getParam(sParams, "shard");
 		string sGroupHtml = getParam(sParams, "group");
 
-		CGroupHTML *pQH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(sGroupHtml));
+		CGroupHTML *pQH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(sGroupHtml));
 		if (pQH == NULL)
 			return;
 
@@ -1753,10 +1801,10 @@ class CAHAcceptEula : public IActionHandler
 //		{
 //			// open web browser
 //			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_WEBSTART);
 //
 //			// start the browser
-//			CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(pIM->getElementFromId(GROUP_BROWSER));
+//			CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
 //
 //			pGH->browse(RingMainURL.c_str());
 //		}
@@ -1895,9 +1943,11 @@ class CAHInitResLod : public IActionHandler
 
 		VideoModes.clear();
 		StringModeList.clear();
-		StringModeList.push_back("uiConfigWindowed");
 
 		CurrentMode = getRyzomModes(VideoModes, StringModeList);
+
+		// getRyzomModes() expects empty list, so we need to insert 'Windowed' after mode list is filled
+		StringModeList.insert(StringModeList.begin(), "uiConfigWindowed");
 
 		// If the client is in windowed mode, still in windowed mode and do not change anything
 		if (ClientCfg.Windowed)
@@ -1905,9 +1955,12 @@ class CAHInitResLod : public IActionHandler
 		// If we have not found the mode so it can be an error or machine change, so propose the first available
 		else if (CurrentMode == -1)
 			CurrentMode = 1;
+		// We inserted 'Windowed' as first mode, so index needs to move too
+		else
+			++CurrentMode;
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:res_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:res_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringModeList[CurrentMode]);
 
@@ -1922,21 +1975,21 @@ class CAHInitResLod : public IActionHandler
 		// first indicates the preset-able cfg-variable
 		// second indicates if its a double variable (else it's an int)
 		CfgPresetList.clear();
-		CfgPresetList.push_back(pair<string,bool>("LandscapeTileNear",	true));
-		CfgPresetList.push_back(pair<string,bool>("LandscapeThreshold",	true));
-		CfgPresetList.push_back(pair<string,bool>("Vision",				true));
-		CfgPresetList.push_back(pair<string,bool>("MicroVeget",			false));
-		CfgPresetList.push_back(pair<string,bool>("MicroVegetDensity",	true));
+		CfgPresetList.push_back(pair<string,bool>("LandscapeTileNear",		true));
+		CfgPresetList.push_back(pair<string,bool>("LandscapeThreshold",		true));
+		CfgPresetList.push_back(pair<string,bool>("Vision",					true));
+		CfgPresetList.push_back(pair<string,bool>("MicroVeget",				false));
+		CfgPresetList.push_back(pair<string,bool>("MicroVegetDensity",		true));
 		CfgPresetList.push_back(pair<string,bool>("FxNbMaxPoly",			false));
-		CfgPresetList.push_back(pair<string,bool>("Cloud",				false));
+		CfgPresetList.push_back(pair<string,bool>("Cloud",					false));
 		CfgPresetList.push_back(pair<string,bool>("CloudQuality",			true));
 		CfgPresetList.push_back(pair<string,bool>("CloudUpdate",			false));
 		CfgPresetList.push_back(pair<string,bool>("Shadows",				false));
-		CfgPresetList.push_back(pair<string,bool>("SkinNbMaxPoly",		false));
+		CfgPresetList.push_back(pair<string,bool>("SkinNbMaxPoly",			false));
 		CfgPresetList.push_back(pair<string,bool>("NbMaxSkeletonNotCLod",	false));
 		CfgPresetList.push_back(pair<string,bool>("CharacterFarClip",		true));
 
-		CfgPresetList.push_back(pair<string,bool>("Bloom",				false));
+		CfgPresetList.push_back(pair<string,bool>("Bloom",					false));
 		CfgPresetList.push_back(pair<string,bool>("SquareBloom",			false));
 		CfgPresetList.push_back(pair<string,bool>("DensityBloom",			true));
 
@@ -1984,7 +2037,7 @@ class CAHInitResLod : public IActionHandler
 			else if (nPreset&8)	CurrentPreset = 3;
 		}
 
-		pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:lod_value"));
+		pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:lod_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringPresetList[CurrentPreset]);
 	}
@@ -2000,7 +2053,7 @@ class CAHMoreRes : public IActionHandler
 		if (CurrentMode < ((sint)StringModeList.size()-1))
 			CurrentMode++;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:res_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:res_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringModeList[CurrentMode]);
 	}
@@ -2016,7 +2069,7 @@ class CAHLessRes : public IActionHandler
 		if (CurrentMode > 0)
 			CurrentMode--;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:res_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:res_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringModeList[CurrentMode]);
 	}
@@ -2032,7 +2085,7 @@ class CAHMoreLod : public IActionHandler
 		if (CurrentPreset < ((sint)StringPresetList.size()-1))
 			CurrentPreset++;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:lod_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:lod_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringPresetList[CurrentPreset]);
 	}
@@ -2048,7 +2101,7 @@ class CAHLessLod : public IActionHandler
 		if (CurrentPreset > 0)
 			CurrentPreset--;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:login:checkpass:content:lod_value"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:login:checkpass:content:lod_value"));
 		if (pVT != NULL)
 			pVT->setHardText(StringPresetList[CurrentPreset]);
 	}
@@ -2063,7 +2116,12 @@ class CAHUninitResLod : public IActionHandler
 		//nlinfo("CAHUninitResLod called");
 
 		// If the mode requested is a windowed mode do nothnig
-		if (CurrentMode != 0)
+		if (CurrentMode == 0)
+		{
+			ClientCfg.Windowed = true;
+			ClientCfg.writeBool("FullScreen", false);
+		}
+		else
 		{
 			ClientCfg.Windowed = false;
 			// Get W, H
@@ -2077,6 +2135,10 @@ class CAHUninitResLod : public IActionHandler
 			}
 			ClientCfg.Width = w;
 			ClientCfg.Height = h;
+
+			ClientCfg.writeBool("FullScreen", true);
+			ClientCfg.writeInt("Width", w);
+			ClientCfg.writeInt("Height", h);
 		}
 
 		if (CurrentPreset != 4) // CInterfaceDDX::CustomPreset
@@ -2117,8 +2179,8 @@ void initDataScan()
 
 	// Start Scanning
 	pPM->startScanDataThread();
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_DATASCAN);
-	pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_DATASCAN);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(1);
 
 }
 
@@ -2147,7 +2209,7 @@ class CAHOnScanDataClose : public IActionHandler
 		CPatchManager *pPM = CPatchManager::getInstance();
 
 		// if the scan is still running
-		if(pIM->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
+		if(NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->getValue32()!=0)
 		{
 			// request to stop the thread
 			pPM->askForStopScanDataThread();
@@ -2159,18 +2221,18 @@ class CAHOnScanDataClose : public IActionHandler
 		{
 			LoginSM.pushEvent(CLoginStateMachine::ev_close_data_scan);
 			// Come Back to Login Screen.
-//			pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+//			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
 //
 //			// Give focus to password if some login entered
 //			string	loginEB;
-//			CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(pIM->getElementFromId(CTRL_EDITBOX_LOGIN));
+//			CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_LOGIN));
 //			if(pGEB)
 //				loginEB= pGEB->getInputStringAsStdString();
 //			// if none entered
 //			if (loginEB.empty())
-//				pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
+//				CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_LOGIN "|select_all=false");
 //			else
-//				pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
+//				CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_PASSWORD "|select_all=false");
 		}
 	}
 };
@@ -2229,7 +2291,7 @@ bool initCreateAccount()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// reset UI
-	CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+	CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 	if(createAccountUI)
 	{
 		// show "submit interface", hide "login interface"
@@ -2327,7 +2389,6 @@ bool initCreateAccount()
 		if(text)
 		{
 			text->setHardText(toString(CI18N::get("uiCreateAccountWelcome")));
-			text->setMultiLineSpace(20);
 			text->setColor(CRGBA(255, 255, 255, 255));
 
 			CInterfaceGroup * group = dynamic_cast<CInterfaceGroup*>(createAccountUI->findFromShortId("erros_txt"));
@@ -2349,11 +2410,11 @@ bool initCreateAccount()
 			rulesGr->setActive(false);
 
 		// must be done after hide rules
-		pIM->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_CREATEACCOUNT_LOGIN "|select_all=false"); 
+		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_CREATEACCOUNT_LOGIN "|select_all=false"); 
 	}
 
 
-	pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CREATE_ACCOUNT);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CREATE_ACCOUNT);
 
 	return true;
 }
@@ -2367,7 +2428,7 @@ class CAHCreateAccountRules : public IActionHandler
 		nlinfo("CAHCreateAccountRules called");
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 		if(createAccountUI)
 		{
 			CInterfaceGroup * rulesGr = dynamic_cast<CInterfaceGroup*>(createAccountUI->findFromShortId("rules_gr"));
@@ -2421,7 +2482,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 		if(createAccountUI)
 		{
 			// recover data from UI
@@ -2523,9 +2584,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 				CViewText * text = dynamic_cast<CViewText*>(createAccountUI->findFromShortId("errors_list"));
 				if(text)
 				{
-					text->setMultiLineSpace(10);
 					text->setColor(CRGBA(250, 30, 30, 255));
-
 
 					std::vector< std::string > errors(5);
 					errors[0] = "id=\"comment-Username\"";
@@ -2584,7 +2643,7 @@ class CAHCreateAccountLogin : public IActionHandler
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
-		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(pIM->getElementFromId("ui:login:create_account"));
+		CInterfaceGroup *createAccountUI = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:login:create_account"));
 		if(createAccountUI)
 		{
 			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(createAccountUI->findFromShortId("eb_login:eb"));
@@ -2618,7 +2677,7 @@ class CAHOnConnectToShard: public IActionHandler
 				Cookie[i] = '|';
 		}
 
-		loginFinished = true;
+		setLoginFinished( true );
 		loginOK = true;
 
 		LoginSM.pushEvent(CLoginStateMachine::ev_connect);
@@ -2632,13 +2691,13 @@ class CAHOnBackToLogin: public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		loginFinished = false;
+		setLoginFinished( false );
 		loginOK = false;
 		LoginSM.pushEvent(CLoginStateMachine::ev_relog);
 
 //		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //		// need to reset password and current screen
-//		pIM->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
+//		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CHECKPASS);
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOnBackToLogin, "on_back_to_login");
@@ -3029,8 +3088,8 @@ void loginIntro()
 
 			const ucstring nmsg("");
 			ProgressBar.newMessage (nmsg);
-
-			CCDBNodeBranch::flushObserversCalls();
+			IngameDbMngr.flushObserverCalls();
+			NLGUI::CDBManager::getInstance()->flushObserverCalls();
 		}
 	}
 	beginLoading(StartBackground);

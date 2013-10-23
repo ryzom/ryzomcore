@@ -144,6 +144,9 @@ external
 external_stlport
 3rdParty
 .svn
+thumbs.db
+Thumbs.db
+.Sync*
 
 # build
 code/nel/build/*
@@ -151,6 +154,7 @@ code/nelns/build/*
 code/snowballs/build/*
 code/ryzom/build/*
 code/build/*
+code/build-2010/*
 build/*
 install/*
 
@@ -206,3 +210,5 @@ code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
 code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
 code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
 code/ryzom/server/src/tick_service/tick_service
+# WebTT temp dir
+code/ryzom/tools/server/www/webtt/app/tmp

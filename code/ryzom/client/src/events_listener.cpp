@@ -90,6 +90,7 @@ void CEventsListener::addToServer(CEventServer& server)
 	server.addListener(EventKeyDownId,		this);
 	server.addListener(EventKeyUpId,		this);
 	server.addListener(EventDestroyWindowId,this);
+	server.addListener(EventCloseWindowId,	this);
 	server.addListener(EventSetFocusId,		this);
 	server.addListener(EventDisplayChangeId,	this);
 }// addToServer //
@@ -108,6 +109,7 @@ void CEventsListener::removeFromServer (CEventServer& server)
 	server.removeListener(EventKeyDownId,	this);
 	server.removeListener(EventKeyUpId,		this);
 	server.removeListener(EventDestroyWindowId,this);
+	server.removeListener(EventCloseWindowId,	this);
 	server.removeListener(EventSetFocusId,		this);
 }// removeFromServer //
 
@@ -140,6 +142,11 @@ void CEventsListener::operator()(const CEvent& event)
 
 		// kill process
 		exit(EXIT_SUCCESS);
+	}
+	// Window close button pressed.
+	if(event == EventCloseWindowId)
+	{
+		CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:quit_dialog");
 	}
 	// Event from the Mouse (ANGLE)
 	if(event == EventGDMouseMove)

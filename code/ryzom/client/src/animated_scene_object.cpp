@@ -105,7 +105,7 @@ CAnimatedSceneObject::CAnimatedSceneObject( const string& ObjectName, const stri
 	}
 
 	// load skeleton, bind mesh and init position, rotation, cluster
-	if(_SkeletonName != "" )
+	if(!_SkeletonName.empty())
 	{
 		_Skeleton = Scene->createSkeleton(_SkeletonName);
 		if( _Skeleton == NULL )
@@ -209,7 +209,7 @@ CAnimatedSceneObject::CAnimatedSceneObject( const CEntityId& Id, const list < st
 		current.identity ();
 		current.setRot (_Rotation);
 
-		// Rotation 90°
+		// Rotation 90 degrees
 		CMatrix rot90;
 		rot90.identity ();
 		rot90.rotateZ (-(float)Pi/2);
@@ -322,7 +322,7 @@ void CAnimatedSceneObject::resetInitialPos( void )
 	current.identity ();
 	current.setRot (_Rotation);
 
-	// Rotation 90°
+	// Rotation 90 degrees
 	CMatrix rot90;
 	rot90.identity ();
 	rot90.rotateZ (-(float)Pi/2);
@@ -340,12 +340,12 @@ void CAnimatedSceneObject::resetInitialPos( void )
 // Destructor
 CAnimatedSceneObject::~CAnimatedSceneObject()
 {
-	if( _Instance != NULL && _MeshName != "" )
+	if( _Instance != NULL && !_MeshName.empty() )
 	{
 		Scene->deleteInstance( _Instance );
 	}
 
-	if( _Skeleton != NULL && _SkeletonName != "" )
+	if( _Skeleton != NULL && !_SkeletonName.empty() )
 	{
 		Scene->deleteSkeleton( _Skeleton );
 	}
@@ -741,7 +741,7 @@ void CAnimatedSceneObject::removeOffsetAnimation ()
 	// Remove the first frame animation
 	current *= firstFrame;
 
-	// Rotation 90°
+	// Rotation 90 degrees
 	CMatrix rot90;
 	rot90.identity ();
 	rot90.rotateZ (-(float)Pi/2);

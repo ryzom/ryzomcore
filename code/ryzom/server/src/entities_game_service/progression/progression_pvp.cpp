@@ -1095,14 +1095,14 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 
 	nlassert(victimChar != NULL);
 
-	PVP_CLAN::TPVPClan victimFaction;
-	bool victimLosesFactionPoints;
-	if (!playerInFactionPvP(victimChar, &victimFaction, &victimLosesFactionPoints))
-		return;
+//	PVP_CLAN::TPVPClan victimFaction;
+	bool victimLosesFactionPoints = false;
+//	if (!playerInFactionPvP(victimChar, &victimFaction, &victimLosesFactionPoints))
+//		return;
 
-	PVP_CLAN::TPVPClan finalBlowerFaction;
-	if (!playerInFactionPvP(finalBlower, &finalBlowerFaction))
-		return;
+//	PVP_CLAN::TPVPClan finalBlowerFaction;
+//	if (!playerInFactionPvP(finalBlower, &finalBlowerFaction))
+//		return;
 
 	// check if victim and final blower are in PvP Faction (by tag or by a pvp versus zone)
 	/* if(!CPVPManager2::getInstance()->factionWarOccurs(victimFaction, finalBlowerFaction))
@@ -1203,10 +1203,14 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 			CCharacter * winnerChar = PlayerManager.getChar(players[k]);
 			BOMB_IF(winnerChar == NULL, "invalid winner!", continue);
 
-			PVP_CLAN::TPVPClan winnerFaction;
-			bool winnerGainFactionPoints;
-			if(!playerInFactionPvP(winnerChar, &winnerFaction, &winnerGainFactionPoints))
-				continue; // can be in Duel or in other pvp mode.
+			PVP_CLAN::TPVPClan winnerFaction = PVP_CLAN::None;
+			bool winnerGainFactionPoints = true;
+
+			if (!canPlayerWinPoints(winnerChar, victimChar))
+				continue;
+
+			//if(!playerInFactionPvP(winnerChar, &winnerFaction, &winnerGainFactionPoints))
+			//	continue; // can be in Duel or in other pvp mode.
 
 			CRewardedKills::CRewardedKiller * noPointPlayer = getRewardedKiller(winnerChar->getId(), noPointPlayers);
 			if (noPointPlayer != NULL)
@@ -1227,9 +1231,27 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 
 			if (winnerGainFactionPoints)
 			{
+				// Compute Fames delta
+				sint32 fameFactor = 0;
+				for (uint8 fameIdx = 0; fameIdx < 7; fameIdx++)
+				{
+					sint32 victimFame = CFameInterface::getInstance().getFameIndexed(victimChar->getId(), fameIdx);
+					sint32 winnerFame = CFameInterface::getInstance().getFameIndexed(winnerChar->getId(), fameIdx);
+
+					if ( (victimFame >= 25*6000 && winnerFame <= -25*6000) || 
+						 (winnerFame >= 25*6000 && victimFame <= -25*6000) )
+						fameFactor++;
+
+					if ( (victimFame >= 25*6000 && winnerFame >= 25*6000) || 
+						 (victimFame <= -25*6000 && winnerFame <= -25*6000) )
+						fameFactor--;						
+				}
+				clamp(fameFactor, 0, 3);
+				nlinfo("points = %d * %d", fpPerPlayer, fameFactor);
+
 				// player gains faction points
-				changePlayerFactionPoints(winnerChar, winnerFaction, sint32(fpPerPlayer));
-				winnerChar->sendFactionPointGainKillMessage(winnerFaction, fpPerPlayer, victimChar->getId());
+				changePlayerPvpPoints(winnerChar, sint32(fpPerPlayer) * fameFactor);
+				winnerChar->sendFactionPointGainKillMessage(winnerFaction, fpPerPlayer * fameFactor, victimChar->getId());
 			}
 
 			// player gains HoF points
@@ -1237,13 +1259,14 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 			// and a way for known if an episode occurs (and specs for known if other episode pemrti to win HoF point...)
 			//changePlayerHoFPoints(winnerChar, sint32(hofpPerPlayer));
 
+			/*
 			// PvP faction winner HOF reward
 			CPVPManager2::getInstance()->characterKillerInPvPFaction( winnerChar, winnerFaction, (sint32)fpPerPlayer );
 			if( finalBlower == winnerChar )
 			{
 				CPVPManager2::getInstance()->finalBlowerKillerInPvPFaction( winnerChar, winnerFaction, victimChar );
 			}
-
+			*/
 			rewardedKillers.push_back(winnerChar->getId());
 			nbRewardedMembers++;
 		}
@@ -1273,7 +1296,7 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 	hofpLoss = uint32(double(hofpLoss) * PVPHoFPointLossFactor.get() + 0.5);
 
 	// keep the point loss to apply if the victim respawn
-	CPointLoss pointLoss;
+	/*CPointLoss pointLoss;
 	pointLoss.PlayerLosesFactionPoints	= victimLosesFactionPoints;
 	pointLoss.PlayerFaction				= victimFaction;
 	pointLoss.FactionPointLoss			= fpLoss;
@@ -1282,8 +1305,8 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 	_PointLossByPlayer[victimChar->getId()] = pointLoss;
 
 	// PvP faction looser lost
-	CPVPManager2::getInstance()->characterKilledInPvPFaction( victimChar, victimFaction, -(sint32) fpLoss );
-
+	//CPVPManager2::getInstance()->characterKilledInPvPFaction( victimChar, victimFaction, -(sint32) fpLoss );
+*/
 	// delete the score table of the victim
 	removeDamageScoreTable(victimChar->getEntityRowId());
 }
@@ -1429,6 +1452,7 @@ void CDamageScoreManager::playerRespawn(CCharacter * victimChar)
 
 	const CPointLoss & pointLoss = (*it).second;
 
+	/*
 	if (pointLoss.PlayerLosesFactionPoints)
 	{
 		// victim loses faction points
@@ -1438,6 +1462,7 @@ void CDamageScoreManager::playerRespawn(CCharacter * victimChar)
 
 	// victim loses HoF points
 	changePlayerHoFPoints(victimChar, -sint32(pointLoss.HoFPointLoss));
+	*/
 
 	// remove the applied entry
 	_PointLossByPlayer.erase(it);
@@ -1684,9 +1709,9 @@ bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_
 			return true;
 		}
 	}
-	else if( playerChar->getPVPFlag() )
+	else if( playerChar->getPVPFlag(false) )
 	{ 
-		pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance = playerChar->getAllegiance();
+		/*pair<PVP_CLAN::TPVPClan, PVP_CLAN::TPVPClan> allegiance = playerChar->getAllegiance();
 		if( (allegiance.first != PVP_CLAN::Neutral) && (allegiance.first != PVP_CLAN::None) )
 		{
 			if (faction)
@@ -1695,7 +1720,7 @@ bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_
 				*withFactionPoints = true;
 			return true;
 		}
-		/*if ( allegiance.second != PVP_CLAN::Neutral)
+		if ( allegiance.second != PVP_CLAN::Neutral)
 		{
 			if (faction)
 				*faction = allegiance.second;
@@ -1703,7 +1728,42 @@ bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_
 				*withFactionPoints = true;
 			return true;
 		}*/
+		return true;
 	}
+	return false;
+}
+
+bool CDamageScoreManager::canPlayerWinPoints(const CCharacter * winnerChar,  CCharacter * victimeChar) const
+{
+	// Don't win points if in duel
+	if ( winnerChar->getDuelOpponent() && (winnerChar->getDuelOpponent()->getId() == victimeChar->getId()) )
+		return false;
+
+	if (victimeChar->getPVPRecentActionFlag())
+		nlinfo("PVP recent flag");
+	// Only win points if victime is Flag
+	if( winnerChar->getPVPFlag(false))
+	{
+		 if ( true/*victimeChar->getPVPRecentActionFlag()*/ )
+		 {
+			nlinfo("Teams : %d, %d", winnerChar->getTeamId(), victimeChar->getTeamId());
+			// Don't win points if in same Team
+			if ( winnerChar->getTeamId() != CTEAM::InvalidTeamId && victimeChar->getTeamId() != CTEAM::InvalidTeamId && (winnerChar->getTeamId() == victimeChar->getTeamId()) )
+				return false;
+
+			// Don't win points if in same Guild
+			nlinfo("Guild : %d, %d", winnerChar->getGuildId(), victimeChar->getGuildId());
+			if ( winnerChar->getGuildId() != 0 && victimeChar->getGuildId() != 0 && (winnerChar->getGuildId() == victimeChar->getGuildId()) )
+				return false;
+
+			// Don't win points if in same League
+			if ( winnerChar->getLeagueId() != DYN_CHAT_INVALID_CHAN && victimeChar->getLeagueId() != DYN_CHAT_INVALID_CHAN && (winnerChar->getLeagueId() == victimeChar->getLeagueId()) )
+				return false;
+
+			return true;
+		 }
+	}
+
 	return false;
 }
 
@@ -1794,6 +1854,28 @@ sint32 CDamageScoreManager::changePlayerFactionPoints(CCharacter * playerChar, P
 
 	return fpDelta;
 }
+
+//-----------------------------------------------------------------------------
+sint32 CDamageScoreManager::changePlayerPvpPoints(CCharacter * playerChar, sint32 fpDelta)
+{
+	nlassert(playerChar != NULL);
+
+	if (fpDelta == 0)
+		return 0;
+
+	uint32 points = playerChar->getPvpPoint();
+
+	// player cannot have negative pvp points
+	fpDelta = max(fpDelta, -sint32(points));
+
+	points += fpDelta;
+
+	// set the new pvp points
+	playerChar->setPvpPoint(points);
+
+	return fpDelta;
+}
+
 
 //-----------------------------------------------------------------------------
 void CDamageScoreManager::changePlayerHoFPoints(CCharacter * playerChar, sint32 hofpDelta)

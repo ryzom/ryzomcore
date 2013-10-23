@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<DFN Revision="$Revision: 1.1 $" State="modified">
+  <ELEMENT Name="Sound" Type="Type" Filename="filename.typ" FilenameExt="*.sound"/>
+  <ELEMENT Name="Filter00" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter01" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter02" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter03" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter04" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter05" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter06" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter07" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter08" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter09" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter10" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter11" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter12" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter13" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter14" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter15" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter16" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter17" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter18" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter19" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter20" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter21" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter22" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter23" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter24" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter25" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter26" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter27" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter28" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter29" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter30" Type="Type" Filename="boolean.typ" Default="false"/>
+  <ELEMENT Name="Filter31" Type="Type" Filename="boolean.typ" Default="false"/>
+  <LOG>Tue Oct 08 14:39:12 2002 (boucher) Dfn Structure = 
+Tue Oct 08 15:03:40 2002 (boucher) Dfn Structure = 
+Mon Oct 14 16:09:48 2002 (boucher) Dfn Structure = 
+Wed Oct 16 18:22:30 2002 (boucher) Dfn Structure = 
+Thu Dec 19 16:26:49 2002 (boucher) Dfn Structure = 
+Wed Apr 09 19:38:51 2003 (AmazingSound) Dfn Structure = </LOG>
+</DFN>

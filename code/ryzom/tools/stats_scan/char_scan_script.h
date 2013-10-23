@@ -97,6 +97,7 @@ private:
 class ICharScanScriptCommand: public NLMISC::CRefCount
 {
 public:
+	virtual ~ICharScanScriptCommand() {}
 	virtual const char* getName()=0;
 	virtual const char* getSyntax()=0;
 	virtual const char* getDescription()=0;

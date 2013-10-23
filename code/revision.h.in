@@ -1,0 +1,7 @@
+#ifndef REVISION_H
+#define REVISION_H
+
+#cmakedefine REVISION "${REVISION}"
+#cmakedefine BUILD_DATE "${BUILD_DATE}"
+
+#endif

@@ -81,7 +81,7 @@ public:
 	typedef std::map< TCreatureRowId, TCreatureItemRequest > TPendingRequest;
 
 	// constructor
-	CR2GiveItem() {};
+	CR2GiveItem() {}
 	// destructor
 	~CR2GiveItem() {}
 

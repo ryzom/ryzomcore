@@ -6,7 +6,7 @@
 # 
 # \file 1_export.py
 # \brief Export skel
-# \date 2010-09-19-14-19-GMT
+# \date 2011-09-28-07-42-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export skel

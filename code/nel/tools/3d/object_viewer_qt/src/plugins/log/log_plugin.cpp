@@ -21,7 +21,7 @@
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
-#include "../core/imenu_manager.h"
+#include "../core/menu_manager.h"
 #include "../../extension_system/iplugin_spec.h"
 
 // Qt includes
@@ -78,7 +78,7 @@ namespace Plugin
 		setDisplayers();
 
 		Core::ICore *core = Core::ICore::instance();
-		Core::IMenuManager *menuManager = core->menuManager();
+		Core::MenuManager *menuManager = core->menuManager();
 		QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
 
 		QMainWindow *wnd = Core::ICore::instance()->mainWindow();

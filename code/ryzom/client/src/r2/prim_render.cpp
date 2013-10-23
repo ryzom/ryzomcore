@@ -22,11 +22,11 @@
 #include "nel/misc/vector_2f.h"
 #include "nel/misc/time_nl.h"
 //
-#include "../interface_v3/view_bitmap.h"
-#include "../interface_v3/ctrl_quad.h"
-#include "../interface_v3/ctrl_polygon.h"
+#include "nel/gui/view_bitmap.h"
+#include "nel/gui/ctrl_quad.h"
+#include "nel/gui/ctrl_polygon.h"
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/view_renderer.h"
+#include "nel/gui/view_renderer.h"
 #include "../interface_v3/group_map.h"
 
 
@@ -157,7 +157,7 @@ void CPrimRender::setLook(const CPrimLook &look)
 	if (!look.EdgeLook.WorldMapTexture.empty())
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CViewRenderer &vr = im->getViewRenderer();
+		CViewRenderer &vr = *CViewRenderer::getInstance();
 		sint32 width, height;
 		sint32 id = vr.getTextureIdFromName(look.EdgeLook.WorldMapTexture);
 		vr.getTextureSizeFromId(id, width, height);
@@ -188,6 +188,8 @@ CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 	//H_AUTO(R2_CPrimRender_newCtrlPolygon)
 	class CCtrlMapPolygon : public CCtrlPolygon
 	{
+	public:
+		CCtrlMapPolygon( CViewBase::TCtorParam &param ) : CCtrlPolygon( param ){}
 	protected:
 		// from CCtrlPolygon
 		void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src)
@@ -197,14 +199,16 @@ CCtrlPolygon *CPrimRender::newCtrlPolygon() const
 			gm->worldToWindow(dest, src);
 		}
 	};
-	return new CCtrlMapPolygon;
+	CViewBase::TCtorParam param;
+	return new CCtrlMapPolygon( param );
 }
 
 // *********************************************************
 CCtrlQuad *CPrimRender::newCtrlQuad(uint /* edgeIndex */) const
 {
 	//H_AUTO(R2_CPrimRender_newCtrlQuad)
-	return new CCtrlQuad;
+	CViewBase::TCtorParam param;
+	return new CCtrlQuad( param );
 }
 
 // *********************************************************

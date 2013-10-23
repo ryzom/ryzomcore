@@ -234,9 +234,10 @@
              </item>
              <item>
               <widget class="QLineEdit" name="filterEdit">
+               <!-- Removed due to incompatibility with Qt 4.6 and uic still adding it to the source.
                <property name="placeholderText">
                 <string>type filter here</string>
-               </property>
+               </property> -->
               </widget>
              </item>
              <item>
@@ -252,10 +253,7 @@
             </layout>
            </item>
           </layout>
-          <zorder>horizontalLayoutWidget</zorder>
           <zorder>dataDirLabel</zorder>
-          <zorder>horizontalLayoutWidget</zorder>
-          <zorder></zorder>
          </widget>
         </item>
        </layout>

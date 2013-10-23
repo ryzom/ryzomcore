@@ -123,7 +123,7 @@ public:
 
 	/// \name Object
 	// @{
-	CDriverUser (uint windowIcon = 0, bool direct3d = false, emptyProc exitFunc = 0);
+	CDriverUser (uint windowIcon, UDriver::TDriver driver, emptyProc exitFunc = 0);
 	virtual	~CDriverUser();
 	// @}
 
@@ -133,6 +133,7 @@ public:
 	// @{
 
 	virtual void			disableHardwareVertexProgram();
+	virtual void			disableHardwarePixelProgram();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
@@ -471,8 +472,8 @@ public:
 	virtual void delete3dMouseListener (U3dMouseListener *listener);
 	virtual TPolygonMode 	getPolygonMode ();
 	virtual void			forceDXTCCompression(bool dxtcComp);
+	virtual void			setAnisotropicFilter(sint filter);
 	virtual void			forceTextureResize(uint divisor);
-	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
 	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	// @}
 

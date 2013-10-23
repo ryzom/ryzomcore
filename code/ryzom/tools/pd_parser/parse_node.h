@@ -870,7 +870,7 @@ public:
 
 	std::string		getIndexName(uint32 value) const
 	{
-		std::string	result = "";
+		std::string	result;
 
 		uint	i;
 		for (i=0; i<Values.size(); ++i)
@@ -1055,7 +1055,7 @@ public:
 	std::string				getCallString()
 	{
 		uint	i;
-		std::string	res = "";
+		std::string	res;
 		for (i=0; i<Context.size(); ++i)
 			res += Context[i]->Name;
 		return res;
@@ -1078,7 +1078,7 @@ public:
 	std::string				getDebugCallStringFmt()
 	{
 		uint		i, idx=0;
-		std::string	res = "";
+		std::string	res;
 
 		for (i=0; i<Context.size(); ++i)
 		{
@@ -1105,7 +1105,7 @@ public:
 	std::string				getDebugCallStringVal()
 	{
 		uint		i, idx=0;
-		std::string	res = "";
+		std::string	res;
 
 		for (i=0; i<Context.size(); ++i)
 		{
@@ -1131,7 +1131,7 @@ public:
 	 */
 	std::string				getCallArgList()
 	{
-		std::string	res = "";
+		std::string	res;
 		uint		i, idx=0;
 
 		for (i=0; i<Context.size(); ++i)
@@ -1156,7 +1156,7 @@ public:
 	 */
 	std::string				getCallPath()
 	{
-		std::string	res = "";
+		std::string	res;
 		uint		i, idx=0;
 
 		for (i=0; i<Context.size(); ++i)
@@ -1182,7 +1182,7 @@ public:
 	 */
 	std::string				getUserCodeContext()
 	{
-		std::string	res = "";
+		std::string	res;
 		uint		i;
 
 		if (Context.empty())
@@ -1245,7 +1245,7 @@ public:
 
 	std::string				getColumn()
 	{
-		std::string	res = "";
+		std::string	res;
 		uint		i, idx=0;
 
 		for (i=0; i<Context.size(); ++i)

@@ -141,6 +141,9 @@ namespace SAVES
 		// ctor
 		ISavesUnitElement();
 
+		// dtor
+		virtual ~ISavesUnitElement() {}
+
 		// perform the 'rescan' operation for this element - verify whether anything has changed
 		// the parent parameter is used to supply addNew(), addChange() and addDeleted() methods
 		// to signal any detected changes

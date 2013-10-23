@@ -419,7 +419,7 @@ reStartFollowTopo:
 		
 		bool idealIsValid = true;
 
-		if (absDeltaIdealAngle>(32768*67.5/180))	// /*97*/ si un peu plus de 95 degrés de difference.
+		if (absDeltaIdealAngle>(32768*67.5/180))	// /*97*/ if a difference of slightly more than 95 degrees.
 		{
 			idealIsValid = false;
 		}

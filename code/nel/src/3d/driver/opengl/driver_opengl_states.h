@@ -20,20 +20,15 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/vertex_buffer.h"
 
+namespace NL3D {
+
+#ifdef NL_STATIC
 #ifdef USE_OPENGLES
-#	include <GLES/gl.h>
+namespace NLDRIVERGLES {
 #else
-#	ifdef NL_OS_MAC
-#		define GL_GLEXT_LEGACY
-#		include <OpenGL/gl.h>
-#	else
-#		include <GL/gl.h>
-#	endif
+namespace NLDRIVERGL {
 #endif
-
-
-namespace NL3D
-{
+#endif
 
 // ***************************************************************************
 /**
@@ -49,6 +44,7 @@ namespace NL3D
 			- GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R
 			- GL_COLOR_MATERIAL
 			- GL_FOG
+			- GL_MULTISAMPLE_ARB
 		- glActiveTextureARB()
 		- glClientActiveTextureARB()
 		- glEnableClientState() glDisableClientState() with:
@@ -104,6 +100,9 @@ public:
 	/// enable/disable stencil test
 	void			enableStencilTest(bool enable);
 	bool			isStencilTestEnabled() const { return _CurStencilTest; }
+	/// enable/disable multisample
+	void			enableMultisample(bool enable);
+	bool			isMultisampleEnabled() const { return _CurMultisample; }
 	// @}
 
 	/// glBlendFunc.
@@ -202,6 +201,7 @@ private:
 	bool			_CurLighting;
 	bool			_CurZWrite;
 	bool			_CurStencilTest;
+	bool			_CurMultisample;
 
 	GLenum			_CurBlendSrc;
 	GLenum			_CurBlendDst;
@@ -255,6 +255,9 @@ private:
 	bool			_CurLight[MaxLight];
 };
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D
 

@@ -23,6 +23,7 @@
 
 // game share
 #include "game_share/utils.h"
+#include "game_share/deployment_configuration.h"
 
 // local
 #include "deployment_configuration_synchroniser.h"

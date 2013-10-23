@@ -41,6 +41,7 @@ class CStatsScanCharacter;
 class ICharInfoExtractor: public NLMISC::CRefCount
 {
 public:
+	virtual ~ICharInfoExtractor() {}
 	virtual std::string toString() const=0;
 	virtual void execute(CCharacterScanJob* job,const CStatsScanCharacter* c)=0;
 };
@@ -53,6 +54,7 @@ public:
 class ICharInfoExtractorBuilder: public NLMISC::CRefCount
 {
 public:
+	virtual ~ICharInfoExtractorBuilder() {}
 	virtual const char* getName()=0;
 	virtual const char* getDescription()=0;
 	virtual const char* getFields()=0;

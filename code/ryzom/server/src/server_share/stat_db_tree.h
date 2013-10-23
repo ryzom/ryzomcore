@@ -95,13 +95,13 @@ class CStatDBLeaf : public IStatDBNode
 public:
 	virtual ~CStatDBLeaf() {}
 
-	bool setNode(const std::string & path, IStatDBNodePtr node) { return false; }
-	IStatDBNodePtr getNode(const std::string & path) { return NULL; }
-	void getNodes(const std::string & pathPattern, std::vector<CMatchingNode> & matchingNodes,
-		const std::string & currentPath) {}
-	IStatDBNodePtr removeNode(const std::string & path) { return NULL; }
+	bool setNode(const std::string & /* path */, IStatDBNodePtr  /* node */) { return false; }
+	IStatDBNodePtr getNode(const std::string & /* path */) { return NULL; }
+	void getNodes(const std::string & /* pathPattern */, std::vector<CMatchingNode> & /* matchingNodes */,
+		const std::string & /* currentPath */) {}
+	IStatDBNodePtr removeNode(const std::string & /* path */) { return NULL; }
 	
-	virtual void acceptVisitor(CStatDBNodeVisitor & visitor, const std::string & currentPath) {}
+	virtual void acceptVisitor(CStatDBNodeVisitor & /* visitor */, const std::string & /* currentPath */) {}
 };
 
 /**
@@ -229,7 +229,7 @@ private:
 /**
  * This class removes entities (players and guilds) through a SDB node
  * 
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */

@@ -259,7 +259,7 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 	std::string botsName;
 	if (args.size()>8) botsName = args[8];
 
-	aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawnBots, orientation, botsName);
+	aiInstance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(x, y), dispersionRadius, spawnBots, orientation, botsName, "");
 	
 	return true;
 }
@@ -844,7 +844,7 @@ public:
 	}
 protected:	
 private:
-	size_t	_index;
+	uint32	_index;
 	float	_value;
 	bool	_detailled;
 	mutable	CLogStringWriter	_stringWriter;
@@ -1700,7 +1700,7 @@ NLMISC_COMMAND(scriptHex,"execute a hex-encoded script for a group in the given 
 	return	true;
 }
 
-static char* hexEncoderTcl =
+static const char* hexEncoderTcl =
 "proc copy_encoded {} {"
 "	# Get the args from the text fields"
 "	set group [ .group.name get 1.0 end ]"
@@ -2513,10 +2513,10 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 	log.displayNL("value means the number of attacker sensitivity of the bot, equals to zero means the bot never mind the number of attackers on the target");
 
 	log.displayNL("- ScoreModulator     [0 1]:   %f score>ScoreModulator",	sheet->ScoreModulator());
-	log.displayNL("value means the minimum value (treshold) needed for the bot to attack, 0 means always, 1 never (also impossible)");
+	log.displayNL("value means the minimum value (threshold) needed for the bot to attack, 0 means always, 1 never (also impossible)");
 	
 	log.displayNL("- FearModulator      [0 1]:   %f score>FearModulator",	sheet->FearModulator());
-	log.displayNL("value means the minimum value (treshold) needed for the bot to flee, 0 means always, 1 never (also impossible)");
+	log.displayNL("value means the minimum value (threshold) needed for the bot to flee, 0 means always, 1 never (also impossible)");
 	
 	log.displayNL("- LifeLevelModulator [0 1]:   %f value=LifeLevelModulator*lifeCoef+(1.f-LifeLevelModulator)*levelCoef",	sheet->LifeLevelModulator());
 	log.displayNL("value means the ratio between the life and level ratio, 1 means life is only take in count, 0 means level only take in count");
@@ -2545,10 +2545,10 @@ NLMISC_COMMAND(displayFightSheet,"display the sheet","<sheet name>")
 // value means the number of attacker sensitivity of the bot, equals to zero means the bot never mind the number of attackers on the target
 // 
 // - ScoreModulator     [0 1]:   score>ScoreModulator
-// value means the minimum value (treshold) needed for the bot to attack, 0 means always, 1 never (also impossible)
+// value means the minimum value (threshold) needed for the bot to attack, 0 means always, 1 never (also impossible)
 // 
 // - FearModulator      [0 1]:   score>FearModulator
-// value means the minimum value (treshold) needed for the bot to flee, 0 means always, 1 never (also impossible)
+// value means the minimum value (threshold) needed for the bot to flee, 0 means always, 1 never (also impossible)
 // 
 // - LifeLevelModulator [0 1]:   value=LifeLevelModulator*lifeCoef+(1.f-LifeLevelModulator)*levelCoef
 // value means the ratio between the life and level ratio, 1 means life is only take in count, 0 means level only take in count

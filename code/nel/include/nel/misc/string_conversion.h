@@ -19,6 +19,7 @@
 
 #include "types_nl.h"
 #include "common.h"
+
 #include <map>
 
 namespace NLMISC

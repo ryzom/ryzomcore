@@ -35,6 +35,7 @@
 #include "nel/3d/u_scene.h"
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_shape_bank.h"
+#include "nel/3d/stereo_hmd.h"
 // Client
 #include "global.h"
 #include "release.h"
@@ -69,7 +70,7 @@
 #include "string_manager_client.h"
 #include "precipitation_clip_grid.h"
 #include "interface_v3/music_player.h"
-#include "http_client.h"
+#include "login.h"
 #include "actions_client.h"
 #include "login_progress_post_thread.h"
 //
@@ -90,6 +91,7 @@
 #include "faction_war_manager.h"
 #include "interface_v3/interface_ddx.h"
 #include "bg_downloader_access.h"
+#include "nel/gui/lua_manager.h"
 
 
 ///////////
@@ -240,10 +242,10 @@ void	releaseMainLoopReselect()
 	ActionsContext.removeAllCombos();
 	EditActions.releaseAllKeyNoRunning();
 	Actions.releaseAllKeyNoRunning();
-	pIM->removeAllTemplates();
-	pIM->setCaptureKeyboard(NULL);
-	pIM->setCapturePointerLeft(NULL);
-	pIM->setCapturePointerRight(NULL);
+	CWidgetManager::getInstance()->getParser()->removeAllTemplates();
+	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
 
 	// Yoyo: Don't release attack list manager, because I think it only owns static data (and 3D data created from Driver, not Scenes)
 	// Note that in initMainLoop(), CAttackListManager::getInstance().init() will do nothing (since already created and not released here)
@@ -334,8 +336,8 @@ void	releaseMainLoopReselect()
 	pIM->releaseServerToLocalAutoCopyObservers();
 	// Then remove the SERVER and LOCAL database (NB: "UI" node was removed by uninitIngame1())
 	ICDBNode::CTextId serverId("SERVER"), localId("LOCAL");
-	pIM->getDB()->removeNode(serverId);
-	pIM->getDB()->removeNode(localId);
+	NLGUI::CDBManager::getInstance()->getDB()->removeNode(serverId);
+	NLGUI::CDBManager::getInstance()->getDB()->removeNode(localId);
 	nlassert(IngameDbMngr.getNodePtr()==NULL);	// actually it is the "SERVER" node kept by CRefPtr => should be NULL
 	IngameDbMngr.clear();						// still important for CDBBranch statics data release
 	// NB: "SERVER" and "LOCAL" node will be recreated by initMainLoop
@@ -431,9 +433,6 @@ void releaseMainLoop(bool closeConnection)
 	// Unlink the net manager
 	NetMngr.setDataBase (NULL);
 
-	// Destroy interface manager
-	CInterfaceManager::destroy ();
-
 	// Send a msg to server
 	if(!ClientCfg.Local)
 	{
@@ -468,8 +467,6 @@ void releaseOutGame()
 
 	// flush the server string cache
 	STRING_MANAGER::CStringManagerClient::instance()->flushStringCache();
-
-	ClientCfg.release ();
 
 	// Disconnect the client from the server.
 	NetMngr.disconnect();
@@ -561,6 +558,15 @@ void release()
 	CEntityAnimationManager::delInstance();
 	EAM= NULL;
 
+	nldebug("VR [C]: VR Shutting down");
+	if (StereoDisplay)
+	{
+		delete StereoDisplay;
+		StereoDisplay = NULL;
+		StereoHMD = NULL;
+	}
+	IStereoDisplay::releaseAllLibraries();
+
 	// Delete the driver.
 	if(Driver)
 	{
@@ -636,6 +642,10 @@ void release()
 	CInterfaceExpr::release();
 	CPdrTokenRegistry::releaseInstance();
 	NLNET::IModuleManager::releaseInstance();
+	delete &CLuaManager::getInstance();
+	NLGUI::CDBManager::release();
+	CWidgetManager::release();
+	
 
 
 

@@ -91,6 +91,14 @@ sint8 ExplosionResetPeriod = 50; // 5 s
 CHarvestSource AutoSpawnSourceIniProperties;
 
 /*
+ * Access to singleton
+ */
+CHarvestSourceManager *CHarvestSourceManager::getInstance()
+{
+	return (CHarvestSourceManager*)_Instance;
+}
+
+/*
  * Initialization of source manager
  */
 void CHarvestSourceManager::init( TDataSetIndex baseRowIndex, TDataSetIndex size )
@@ -103,7 +111,10 @@ void CHarvestSourceManager::init( TDataSetIndex baseRowIndex, TDataSetIndex size
 	//AutoSpawnSourceIniProperties.setDistVis( 100 );
 }
 
-
+void CHarvestSourceManager::release()
+{
+	delete (CHarvestSourceManager*)_Instance;
+}
 
 /*
  * HarvestSource constructor
@@ -1259,7 +1270,7 @@ bool forageTestDoExtract(
 		testSource->extractMaterial( req, abs, ForageQualityCeilingFactor.get(), ForageQualitySlowFactor.get(), res, successFactor, 0, row, propDrop );
 		fprintf( f, "%g;%g;%g;%g;%g;%g;%g;%g;%g;%u;%u;\n",
 			res[CHarvestSource::A], res[CHarvestSource::Q],
-			testSource->getD(), testSource->getE(), 0 /*testSource->getC()*/,
+			testSource->getD(), testSource->getE(), 0.f /*testSource->getC()*/,
 			reqS, reqA, reqQ,
 			testSource->quantity(), testSource->getImpactScheme()*5, 127 );
 		if ( (!eventD) && (testSource->getD() > 127) )

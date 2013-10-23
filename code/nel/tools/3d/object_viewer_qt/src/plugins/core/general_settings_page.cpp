@@ -31,6 +31,10 @@
 #include <QtGui/QStyleFactory>
 #include <QtGui/QStyle>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 namespace Core
 {
 
@@ -83,15 +87,22 @@ void GeneralSettingsPage::applyGeneralSettings()
 		QApplication::setPalette(m_originalPalette);
 	settings->endGroup();
 
+	QString levelDesignPrefix;
+#if defined(_DEBUG) && defined(NL_OS_WINDOWS)
+	levelDesignPrefix = "l:";
+#else
+	levelDesignPrefix = QString("%1/data_leveldesign").arg(RYZOM_SHARE_PREFIX);
+#endif
+
 	// Add primitives path and ligo config file to CPath
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
-	QString primitivePath = settings->value(Core::Constants::PRIMITIVES_PATH, "l:/primitives").toString();
-	QString ligoConfigFile = settings->value(Core::Constants::LIGOCONFIG_FILE, "l:/leveldesign/world_editor_files/world_editor_classes.xml").toString();
-	QString leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, "l:/leveldesign").toString();
-	NLMISC::CPath::addSearchPath(primitivePath.toStdString(), true, false);
+	QString primitivePath = settings->value(Core::Constants::PRIMITIVES_PATH, QString("%1/primitives").arg(levelDesignPrefix)).toString();
+	QString ligoConfigFile = settings->value(Core::Constants::LIGOCONFIG_FILE, QString("%1/leveldesign/world_editor_files/world_editor_classes.xml").arg(levelDesignPrefix)).toString();
+	QString leveldesignPath = settings->value(Core::Constants::LEVELDESIGN_PATH, QString("%1/leveldesign").arg(levelDesignPrefix)).toString();
+	NLMISC::CPath::addSearchPath(primitivePath.toUtf8().constData(), true, false);
 	NLMISC::CPath::display();
-	NLMISC::CPath::addSearchFile(ligoConfigFile.toStdString());
-	NLMISC::CPath::addSearchPath(leveldesignPath.toStdString(), true, false);
+	NLMISC::CPath::addSearchFile(ligoConfigFile.toUtf8().constData());
+	NLMISC::CPath::addSearchPath(leveldesignPath.toUtf8().constData(), true, false);
 	settings->endGroup();
 }
 

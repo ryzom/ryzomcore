@@ -23,6 +23,7 @@
 #include "game_share/misc_const.h"
 #include "game_share/string_manager_sender.h"
 #include "game_share/scores.h"
+#include "game_share/dyn_chat.h"
 #include "mission_manager/mission_event.h"
 #include "mission_manager/ai_alias_translator.h"
 #include "team_manager/reward_sharing.h"
@@ -73,16 +74,53 @@ public:
 	void removeCharacter( CCharacter * newChar );
 
 	/**
-	 * set the successor of the team leader
-	 * \param memberIdx is the index of the member in hte team
+	 * return the index of team leader successor
+	 * 
 	 */
-	void setSuccessor( uint8 memberIdx );
+	uint8 getSuccessorIndex(void);
+
+	/**
+	 * set the League
+	 * \param leagueName is the name of League
+	 */
+	void setLeague(const std::string &leagueName);
+	/**
+	 * update the League (set LeagueId to all teammates)
+	 */
+	void updateLeague();
 	
+	/**
+	 * set the team leader
+	 * \param id is the Entity ID of the member in the team
+	 * \param bMessage whether to show the message
+	 */
+	void setLeader(NLMISC::CEntityId id, bool bMessage = true);
+	
+	/**
+	 * set the team leader
+	 * \param memberIdx is the index of the member in the team
+	 * \param bMessage whether to show the message
+	 */
+	void setLeader(uint8 memberIdx, bool bMessage = true);
+
+	/**
+	 * set the successor of the team leader
+	 * \param memberIdx is the index of the member in the team
+	 * \param bMessage whether to show the message
+	 */
+	void setSuccessor( uint8 memberIdx, bool bMessage = true );
+
 	/**
 	 * get the leader of the team
 	 * \return team leader Id
 	 */
 	inline const NLMISC::CEntityId & getLeader() const { return _LeaderId; }
+
+	/**
+	 * get the successor of the team
+	 * \return successor Id
+	 */
+	inline const NLMISC::CEntityId & getSuccessor() const { return _SuccessorId; }
 
 	///\return number of team members
 	inline uint8 getTeamSize() const { return _NbMembers; }
@@ -107,6 +145,12 @@ public:
 
 	///\return the team id
 	inline uint16 getTeamId() const { return _TeamId; }
+
+	///\return the League id
+	inline TChanID getLeagueId() const { return _LeagueId; }
+
+	///\return the League id
+	inline void setLeagueId(TChanID id) { _LeagueId = id; }
 
 	/// send a message to the team
 	void sendDynamicMessageToMembers(const std::string &msgName, const TVectorParamCheck &params, const std::set<NLMISC::CEntityId> &excluded) const;
@@ -171,7 +215,8 @@ public:
 
 	CMissionTeam* getMissionByAlias( TAIAlias missionAlias );
 	
-		/*
+	void updateMembersDb();
+/*
 	bool processMissionStepEvent(std::list< const CMissionEvent* > & eventList, uint missionIndex, uint32 stepIndex );
 	bool processMissionEvent( std::list< const CMissionEvent* > & eventList, uint missionIndex, uint32 stepIndex );
 */
@@ -204,6 +249,9 @@ private:
 	///\id of the team
 	uint16								_TeamId;
 	
+	///\id of the League (it's id of channel)
+	TChanID							_LeagueId;
+
 	/// Team Members. The index of an entity in the container is its position
 	std::list<NLMISC::CEntityId>		_TeamMembers;
 
@@ -212,6 +260,7 @@ private:
 
 	/// id of the team leader
 	NLMISC::CEntityId					_LeaderId;
+
 	/// successor id
 	NLMISC::CEntityId					_SuccessorId;
 

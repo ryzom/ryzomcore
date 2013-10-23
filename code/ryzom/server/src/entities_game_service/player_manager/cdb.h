@@ -216,7 +216,7 @@ public :
 	/**
 	 * Inform a node of its parenthood
 	 */
-	virtual void setParent(CCDBStructNodeBranch *parent) { nlassertex(0,("setParent() not overloaded for given node type!")); }
+	virtual void setParent(CCDBStructNodeBranch * /* parent */) { nlassertex(0,("setParent() not overloaded for given node type!")); }
 
 	/**
 	 * get the parent of a node
@@ -248,7 +248,7 @@ public :
 	 * Browse the tree, and for each atom branch encountered, call the callback passing the argument
 	 * provided and the index of the atom branch.
 	 */
-	virtual void			foreachAtomBranchCall( void (*callback)(void*,TCDBDataIndex), void *arg ) const {};
+	virtual void			foreachAtomBranchCall( void (*callback)(void*,TCDBDataIndex), void *arg ) const {}
 
 	/**
 	 * Browse the tree, building the text id, and for each leaf encountered, call the callback
@@ -288,10 +288,10 @@ public :
 	TCDBDataIndex	getDataIndex() const { return _DataIndex; }
 
 	/// Set the atomic branch flag (when all the modified nodes of a branch should be tranmitted at the same time)
-	void			setAtomic( bool atomicBranch ) { _Atomic = atomicBranch; }
+	void			setAtomic( bool atomicBranch ) { _AtomicFlag = atomicBranch; }
 
 	/// Return true if the branch has the atomic flag
-	bool			isAtomic() const { return _Atomic; }
+	bool			isAtomic() const { return _AtomicFlag; }
 
 	/** Attach callback. Allow to attach a callback function that some code could call
 	 *	when an instance of this node is changed.
@@ -307,7 +307,7 @@ protected:
 	ICDBStructNode() 
 		: _BankLabels(NULL), 
 		  _DataIndex(CDB_INVALID_DATA_INDEX), 
-		  _Atomic(false),
+		  _AtomicFlag(false),
 		  _ChangeCallback(NULL)
 	{}
 
@@ -325,7 +325,7 @@ protected:
 	TCDBDataIndex			_DataIndex;
 
 	/// Atomic flag: is the branch an atomic group, or is the leaf a member of an atomic group
-	bool					_Atomic;
+	bool					_AtomicFlag;
 
 	/// Optional callback pointer.
 	TNodeChangeCallback		_ChangeCallback;

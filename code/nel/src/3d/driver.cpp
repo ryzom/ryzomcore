@@ -20,7 +20,6 @@
 
 #include "nel/misc/types_nl.h"
 #include "nel/3d/driver.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/misc/algo.h"
 
@@ -33,7 +32,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x6a; // added cursors methods
+const uint32 IDriver::InterfaceVersion = 0x6d; // gpu program interface
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
@@ -58,7 +57,7 @@ IDriver::~IDriver()
 	nlassert(_MatDrvInfos.size()==0);
 	nlassert(_VBDrvInfos.size()==0);
 	nlassert(_IBDrvInfos.size()==0);
-	nlassert(_VtxPrgDrvInfos.size()==0);
+	nlassert(_GPUPrgDrvInfos.size()==0);
 }
 
 
@@ -95,14 +94,6 @@ bool		IDriver::release(void)
 		delete *itmat;
 	}
 
-	// Release Shader drv.
-	ItShaderDrvInfoPtrList		itshd;
-	while( (itshd = _ShaderDrvInfos.begin()) != _ShaderDrvInfos.end() )
-	{
-		// NB: at IShader deletion, this->_MatDrvInfos is updated (entry deleted);
-		delete *itshd;
-	}
-
 	// Release VBs drv.
 	ItVBDrvInfoPtrList		itvb;
 	while( (itvb = _VBDrvInfos.begin()) != _VBDrvInfos.end() )
@@ -119,12 +110,12 @@ bool		IDriver::release(void)
 		delete *itib;
 	}
 
-	// Release VtxPrg drv.
-	ItVtxPrgDrvInfoPtrList		itVtxPrg;
-	while( (itVtxPrg = _VtxPrgDrvInfos.begin()) != _VtxPrgDrvInfos.end() )
+	// Release GPUPrg drv.
+	ItGPUPrgDrvInfoPtrList		itGPUPrg;
+	while( (itGPUPrg = _GPUPrgDrvInfos.begin()) != _GPUPrgDrvInfos.end() )
 	{
-		// NB: at IVertexProgramDrvInfos deletion, this->_VtxPrgDrvInfos is updated (entry deleted);
-		delete *itVtxPrg;
+		// NB: at IVertexProgramDrvInfos deletion, this->_GPUPrgDrvInfos is updated (entry deleted);
+		delete *itGPUPrg;
 	}
 
 	return true;
@@ -249,14 +240,9 @@ void			IDriver::removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt)
 	_MatDrvInfos.erase(shaderIt);
 }
 // ***************************************************************************
-void			IDriver::removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt)
+void			IDriver::removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt)
 {
-	_ShaderDrvInfos.erase(shaderIt);
-}
-// ***************************************************************************
-void			IDriver::removeVtxPrgDrvInfoPtr(ItVtxPrgDrvInfoPtrList vtxPrgDrvInfoIt)
-{
-	_VtxPrgDrvInfos.erase(vtxPrgDrvInfoIt);
+	_GPUPrgDrvInfos.erase(gpuPrgDrvInfoIt);
 }
 
 // ***************************************************************************

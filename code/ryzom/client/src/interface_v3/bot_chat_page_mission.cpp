@@ -19,14 +19,14 @@
 #include "stdpch.h"
 #include "bot_chat_page_mission.h"
 #include "interface_manager.h"
-#include "interface_group.h"
+#include "nel/gui/interface_group.h"
 #include "bot_chat_manager.h"
 #include "bot_chat_page_all.h"
 #include "dbgroup_list_sheet_trade.h"
-#include "action_handler.h"
-#include "group_container.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_container.h"
 #include "dbctrl_sheet.h"
-#include "view_text_id.h"
+#include "nel/gui/view_text_id.h"
 #include "../net_manager.h"
 
 using namespace std;
@@ -49,8 +49,8 @@ CBotChatPageMission::CBotChatPageMission()
 void CBotChatPageMission::init()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	if (im->getDbBranch("SERVER:CHOOSE_MISSIONS"))
-		im->getDbBranch("SERVER:CHOOSE_MISSIONS")->addBranchObserver(&_MissionPagesObs);
+	if (NLGUI::CDBManager::getInstance()->getDbBranch("SERVER:CHOOSE_MISSIONS"))
+		NLGUI::CDBManager::getInstance()->addBranchObserver("SERVER:CHOOSE_MISSIONS", &_MissionPagesObs);
 }
 
 
@@ -60,14 +60,14 @@ void CBotChatPageMission::begin()
 	CBotChatPage::begin();
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// clear intro text
-	im->getDbProp(BOT_CHAT_BASE_DB_PATH ":CHOOSE_MISSION")->setValue32(0);
+	NLGUI::CDBManager::getInstance()->getDbProp(BOT_CHAT_BASE_DB_PATH ":CHOOSE_MISSION")->setValue32(0);
 	_MissionPagesObs.setMissionClientType(_MType);
 	_MissionPagesObs.start();
 
 	// Select the Mission Aspect according to mission type
-	im->getDbProp("UI:TEMP:MISSION:MISSION_TYPE")->setValue32(_MType);
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION:MISSION_TYPE")->setValue32(_MType);
 
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_MISSION));
 	if (gc)
 	{
 		// show the ui
@@ -96,7 +96,7 @@ void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 	if (missionSheet->getGrayed()) return;
 	// show the dialog with good infos
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(WIN_BOT_CHAT_ACCEPT_MISSION));
+	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_ACCEPT_MISSION));
 
 	// copy text id for title
 	{
@@ -116,14 +116,14 @@ void CBotChatPageMission::selectMission(CDBCtrlSheet *missionSheet)
 		viewTextID->setTextId(detailTextLeaf->getValue32());
 	}
 	// copy icon
-	CCDBNodeLeaf *iconLeaf = im->getDbProp("UI:TEMP:MISSION:ICON");
+	CCDBNodeLeaf *iconLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION:ICON");
 	if (iconLeaf)
 	{
 		iconLeaf->setValue32(missionSheet->getSheetId());
 	}
 	//
 	if (!gc) return;
-	im->setTopWindow(gc);
+	CWidgetManager::getInstance()->setTopWindow(gc);
 	gc->setActive(true);
 	gc->updateCoords();
 	gc->center();
@@ -156,8 +156,8 @@ void CBotChatPageMission::acceptMission()
 	}
 	// close the selection box
 	activateWindow(WIN_BOT_CHAT_ACCEPT_MISSION, false);
-	// close the botchat
-	CBotChatManager::getInstance()->setCurrPage(NULL);
+	/// close the botchat
+	//CBotChatManager::getInstance()->setCurrPage(NULL);
 	_CurrSel = NULL;
 }
 
@@ -196,43 +196,43 @@ NLMISC_COMMAND( testMissionPage, "<tmp> debug mission page", "")
 	if (args.size() != 1) return false;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	//
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:0:ICON")->setValue32(CSheetId("generic_craft.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:0:TEXT")->setValue32(1);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:0:DETAIL_TEXT")->setValue32(11);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:0:ICON")->setValue32(CSheetId("generic_craft.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:0:TEXT")->setValue32(1);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:0:DETAIL_TEXT")->setValue32(11);
 
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:1:ICON")->setValue32(CSheetId("generic_fight.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:1:TEXT")->setValue32(2);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:1:DETAIL_TEXT")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:1:ICON")->setValue32(CSheetId("generic_fight.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:1:TEXT")->setValue32(2);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:1:DETAIL_TEXT")->setValue32(12);
 	//
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:2:ICON")->setValue32(CSheetId("generic_forage.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:2:TEXT")->setValue32(3);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:2:DETAIL_TEXT")->setValue32(13);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:2:ICON")->setValue32(CSheetId("generic_forage.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:2:TEXT")->setValue32(3);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:2:DETAIL_TEXT")->setValue32(13);
 	//
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:3:ICON")->setValue32(CSheetId("generic_generic.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:3:TEXT")->setValue32(4);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:3:DETAIL_TEXT")->setValue32(14);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:3:ICON")->setValue32(CSheetId("generic_generic.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:3:TEXT")->setValue32(4);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:3:DETAIL_TEXT")->setValue32(14);
 
 	//
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:4:ICON")->setValue32(CSheetId("generic_rite.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:4:TEXT")->setValue32(5);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:4:DETAIL_TEXT")->setValue32(15);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:4:ICON")->setValue32(CSheetId("generic_rite.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:4:TEXT")->setValue32(5);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:4:DETAIL_TEXT")->setValue32(15);
 	//
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:5:ICON")->setValue32(CSheetId("generic_travel.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:5:TEXT")->setValue32(6);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:5:DETAIL_TEXT")->setValue32(16);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:5:ICON")->setValue32(CSheetId("generic_travel.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:5:TEXT")->setValue32(6);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:5:DETAIL_TEXT")->setValue32(16);
 	//
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:6:ICON")->setValue32(CSheetId("generic_craft.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:6:TEXT")->setValue32(7);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:6:DETAIL_TEXT")->setValue32(17);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:6:ICON")->setValue32(CSheetId("generic_craft.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:6:TEXT")->setValue32(7);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:6:DETAIL_TEXT")->setValue32(17);
 	//
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:7:ICON")->setValue32(CSheetId("generic_fight.mission_icon").asInt());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:7:TEXT")->setValue32(8);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:7:DETAIL_TEXT")->setValue32(18);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:7:ICON")->setValue32(CSheetId("generic_fight.mission_icon").asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:7:TEXT")->setValue32(8);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:7:DETAIL_TEXT")->setValue32(18);
 	//
 	sint32 pageId;
 	fromString(args[0], pageId);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:PAGE_ID")->setValue32(pageId);
-	im->getDbProp("SERVER:CHOOSE_MISSIONS:HAS_NEXT")->setValue32(0); // not relevant for test ..
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:SESSION")->setValue32(CBotChatManager::getInstance()->getSessionID());
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:PAGE_ID")->setValue32(pageId);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHOOSE_MISSIONS:HAS_NEXT")->setValue32(0); // not relevant for test ..
 	return true;
 }

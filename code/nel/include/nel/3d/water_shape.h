@@ -49,6 +49,29 @@ const NLMISC::CClassId WaveMakerModelClassId =  NLMISC::CClassId(0x16da3356, 0x7
 const uint WATER_VERTEX_HARD_SIZE = sizeof(float[3]);
 const uint WATER_VERTEX_SOFT_SIZE = sizeof(float[5]);
 
+// VP Water No Wave
+class CVertexProgramWaterVPNoWave : public CVertexProgram
+{
+public:
+	struct CIdx
+	{
+		uint BumpMap0Scale;
+		uint BumpMap0Offset;
+		uint BumpMap1Scale;
+		uint BumpMap1Offset;
+		uint ObserverHeight;
+		uint ScaleReflectedRay;
+		uint DiffuseMapVector0;
+		uint DiffuseMapVector1;
+	};
+	CVertexProgramWaterVPNoWave(bool diffuse);
+	virtual ~CVertexProgramWaterVPNoWave() { }
+	virtual void buildInfo();
+	inline const CIdx &idx() const { return m_Idx; }
+private:
+	CIdx m_Idx;
+	bool m_Diffuse;
+};
 
 /**
  * A water shape.
@@ -247,17 +270,17 @@ private:
 	static bool								_GridSizeTouched;
 
 	//
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump1;
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump2;
+	/*static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump1;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump2;
 	//
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump1Diffuse;
-	static std::auto_ptr<CVertexProgram>	_VertexProgramBump2Diffuse;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump1Diffuse;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramBump2Diffuse;
 	//
-	static std::auto_ptr<CVertexProgram>	_VertexProgramNoBump;
-	static std::auto_ptr<CVertexProgram>	_VertexProgramNoBumpDiffuse;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBump;
+	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBumpDiffuse;*/
 	//
-	static std::auto_ptr<CVertexProgram>    _VertexProgramNoWave;
-	static std::auto_ptr<CVertexProgram>    _VertexProgramNoWaveDiffuse;
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWave;
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveDiffuse;
 };
 
 

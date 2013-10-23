@@ -16,7 +16,7 @@
 
 // CJ60Lib.cpp : Defines the initialization routines for the DLL.
 //
-// Copyright © 1998-99 Kirk Stowell   
+// Copyright (c) 1998-99 Kirk Stowell   
 //		mailto:kstowell@codejockeys.com
 //		http://www.codejockeys.com/kstowell/
 //
@@ -27,7 +27,7 @@
 // notices remain intact. If the source code is used in any commercial
 // applications then a statement along the lines of:
 //
-// "Portions Copyright © 1998-99 Kirk Stowell" must be included in the
+// "Portions Copyright (c) 1998-99 Kirk Stowell" must be included in the
 // startup banner, "About" box or printed documentation. An email letting
 // me know that you are using it would be nice as well. That's not much to ask
 // considering the amount of work that went into this.
@@ -127,7 +127,7 @@ bool GetVerComCtl32()
 	if (iVerComCtl32 < 471)
 	{
 		CString str;
-		str.Format(_T("Copyright © 1998-99 Kirk Stowell\nmailto:kstowell@codejockeys.com - http://www.codejockeys.com/kstowell/\n\nCode Jockey's CJ60 extension library requires ComCtl32.dll, version 4.71 or later. The curent version found on this system is %d.%d.%d. To get the latest version of ComCtl32.dll visit Microsoft's site at:\n\nhttp://www.microsoft.com/msdn/downloads/files/40comupd.htm"), dvi.dwMajorVersion, dvi.dwMinorVersion, dvi.dwBuildNumber);
+		str.Format(_T("Copyright (c) 1998-99 Kirk Stowell\nmailto:kstowell@codejockeys.com - http://www.codejockeys.com/kstowell/\n\nCode Jockey's CJ60 extension library requires ComCtl32.dll, version 4.71 or later. The curent version found on this system is %d.%d.%d. To get the latest version of ComCtl32.dll visit Microsoft's site at:\n\nhttp://www.microsoft.com/msdn/downloads/files/40comupd.htm"), dvi.dwMajorVersion, dvi.dwMinorVersion, dvi.dwBuildNumber);
 		AfxMessageBox(str, MB_ICONSTOP);
 		return false;
 	}

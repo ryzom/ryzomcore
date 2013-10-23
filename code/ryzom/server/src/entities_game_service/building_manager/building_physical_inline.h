@@ -109,7 +109,6 @@ void CBuildingPhysicalGuild::addGuild( uint32 guildId )
 {
 	if ( std::find(_Guilds.begin(), _Guilds.end(), guildId) != _Guilds.end() )
 	{
-		nlwarning("<BUILDING> trying to add a guild that is already present in the building, guild id = %u", guildId);
 		return;
 	}
 

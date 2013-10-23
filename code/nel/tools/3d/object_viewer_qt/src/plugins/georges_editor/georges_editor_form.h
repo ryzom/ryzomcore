@@ -23,7 +23,7 @@
 // Qt includes
 #include <QtGui/QUndoStack>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 class CGeorgesDirTreeDialog;
@@ -41,6 +41,7 @@ public:
 public Q_SLOTS:
 	void open();
 	void loadFile(const QString fileName);
+    void loadFile(const QString fileName, bool loadFromDfn);
 	void newFile();
 	void save();
 	void settingsChanged();
@@ -66,10 +67,17 @@ private:
 
 	QMainWindow *m_mainDock;
 		
+    /// Contains a list of all of the open forms.
 	QList<CGeorgesTreeViewDialog*> m_dockedWidgets;
+
+    /// Contains a pointer to the last known focal change for active documents.
 	CGeorgesTreeViewDialog *m_lastActiveDock;
+
+    /// Contains a record of the last directory a sheet file dialog was opened for.
+    QString m_lastSheetDir;
+
 }; /* class GeorgesEditorForm */
 
-} /* namespace Plugin */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_EDITOR_FORM_H

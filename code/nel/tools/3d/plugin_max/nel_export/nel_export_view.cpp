@@ -25,8 +25,8 @@
 #include "nel/3d/water_pool_manager.h"
 #include "nel/3d/instance_lighter.h"
 
-#include "nel/../../src/pacs/retriever_bank.h"
-#include "nel/../../src/pacs/global_retriever.h"
+#include "nel/pacs/retriever_bank.h"
+#include "nel/pacs/global_retriever.h"
 
 #include "../../object_viewer/object_viewer_interface.h"
 
@@ -714,7 +714,7 @@ void CNelExport::viewMesh (TimeValue time)
 		// Delete the pointer
 		IObjectViewer::releaseInterface (view);
 
-		// Collisions informations are no more used.
+		// Collisions information are no more used.
 		delete slInfo.RetrieverBank;
 		delete slInfo.GlobalRetriever;
 	}

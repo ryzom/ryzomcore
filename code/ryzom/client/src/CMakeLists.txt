@@ -1,10 +1,15 @@
+
+# Need clientsheets lib for sheets packer tool
+ADD_SUBDIRECTORY(client_sheets)
+
+IF(WITH_RYZOM_CLIENT)
+
 # These are Windows/MFC apps
 IF(WIN32)
 #  ADD_SUBDIRECTORY(bug_report)
   SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
 ENDIF(WIN32)
 
-ADD_SUBDIRECTORY(client_sheets)
 ADD_SUBDIRECTORY(seven_zip)
 
 FILE(GLOB CFG ../*.cfg ../*.cfg.in)
@@ -42,29 +47,38 @@ SOURCE_GROUP("r2" FILES ${SRC_R2})
 
 # on Mac, create a .App Bundle
 if(APPLE)
+  IF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
+  ENDIF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+
   SET(MACOSX_BUNDLE_INFO_STRING "Ryzom Core Client")
-  SET(MACOSX_BUNDLE_ICON_FILE "atys.icns")
+  SET(MACOSX_BUNDLE_ICON_FILE "ryzom.icns")
   SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
   SET(MACOSX_BUNDLE_LONG_VERSION_STRING ${NL_VERSION})
   SET(MACOSX_BUNDLE_BUNDLE_NAME "Ryzom Core Client")
   SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "0.8")
   SET(MACOSX_BUNDLE_BUNDLE_VERSION "1.0")
   SET(MACOSX_BUNDLE_COPYRIGHT "Winchgate and The Ryzom Core Community")
-
-  # TODO: in release mode, cmake could copy all the dylibs into the .app
-  # bundle for redistribution... should some part of cpack handle that?
-  # ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD
-  #   # make frameworks directory in app bundle
-  #   COMMAND ${CMAKE_COMMAND} -E make_directory
-  #     ${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.app/Contents/Frameworks
-  #   # copy framework into app bundle
-  #   COMMAND ${CMAKE_COMMAND} -E copy ${SOME_LIBRARY}
-  #     ${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.app/Contents/Frameworks
-  #   # ...
-  #   # install_name_tool the lib pathes
+  SET(RYZOM_OUTPUT_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${MACOSX_BUNDLE_BUNDLE_NAME}.app)
+  SET(RYZOM_CONTENTS_DIR ${RYZOM_OUTPUT_DIR}/Contents)
+  SET(RYZOM_RESOURCES_DIR ${RYZOM_CONTENTS_DIR}/Resources)
+  SET(MAC_RESOURCES_DIR ${CMAKE_SOURCE_DIR}/ryzom/client/macosx)
 ENDIF(APPLE)
 
 ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC} ${SRC_INTERFACE} ${SRC_MODE} ${SRC_R2})
+
+IF(APPLE)
+  SET_TARGET_PROPERTIES(ryzom_client PROPERTIES OUTPUT_NAME ${MACOSX_BUNDLE_BUNDLE_NAME})
+  SET_TARGET_PROPERTIES(ryzom_client PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${MAC_RESOURCES_DIR}/Info.plist)
+  ADD_CUSTOM_COMMAND(TARGET ryzom_client PRE_BUILD COMMAND mkdir -p ${RYZOM_RESOURCES_DIR})
+  ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS ${MAC_RESOURCES_DIR}/PkgInfo ${RYZOM_CONTENTS_DIR})
+  ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS ${MAC_RESOURCES_DIR}/ryzom.icns ${RYZOM_RESOURCES_DIR})
+  ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS ${CMAKE_SOURCE_DIR}/ryzom/client/client_default.cfg ${RYZOM_RESOURCES_DIR})
+
+  IF(RYZOM_DATA_DIR)
+    ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -R ARGS ${RYZOM_DATA_DIR} ${RYZOM_RESOURCES_DIR})
+  ENDIF(RYZOM_DATA_DIR)
+ENDIF(APPLE)
 
 INCLUDE_DIRECTORIES(
 			${CMAKE_CURRENT_SOURCE_DIR}
@@ -81,6 +95,7 @@ TARGET_LINK_LIBRARIES(ryzom_client
 						nelligo
 						nelgeorges
 						nel3d
+						nelgui
 						nelsound
 						ryzom_clientsheets
 						ryzom_gameshare
@@ -114,3 +129,5 @@ IF(WITH_PCH)
 ENDIF(WITH_PCH)
 
 INSTALL(TARGETS ryzom_client RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)
+
+ENDIF(WITH_RYZOM_CLIENT)

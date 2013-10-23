@@ -44,8 +44,8 @@ ProjectsToProcess += [ "common/characters_maps_hr" ]
 # Common client data and leveldesign projects
 ProjectsToProcess += [ "common/fonts" ]
 ProjectsToProcess += [ "common/gamedev" ]
-ProjectsToProcess += [ "common/data_common" ]
 ProjectsToProcess += [ "common/leveldesign" ]
+ProjectsToProcess += [ "common/data_common" ]
 ProjectsToProcess += [ "common/exedll" ]
 ProjectsToProcess += [ "common/cfg" ]
 

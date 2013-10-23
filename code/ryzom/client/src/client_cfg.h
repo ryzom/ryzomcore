@@ -53,7 +53,7 @@ using std::string;
 //---------------------------------------------------
 struct CClientConfig
 {
-	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D };
+	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES };
 	enum TDriverSound { SoundDrvAuto = 0, SoundDrvFMod, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
 	enum TStageLCTUsage { StageUseNoLCT = 0, StageUseAllLCT, StageUsePosOnlyLCT };
 
@@ -146,6 +146,11 @@ struct CClientConfig
 	/// Monitor Gamma [-1 ~ 1], default 0
 	float			Gamma;
 
+	// VR
+	bool			VREnable;
+	std::string		VRDisplayDevice;
+	std::string		VRDisplayDeviceId;
+
 	/// Client in Local mode or not.
 	bool			Local;
 	/// Host.
@@ -230,6 +235,8 @@ struct CClientConfig
 	float			FoV;
 	/// Force the DXTC Compression.
 	bool			ForceDXTC;
+	/// Set the anisotropic filter
+	sint			AnisotropicFilter;
 	/// Divide texture size by 2
 	bool			DivideTextureSizeBy2;
 	/// Disable Hardware Vertex Program.
@@ -286,11 +293,15 @@ struct CClientConfig
 	// NEW PATCHING SYSTEM //
 	bool			PatchWanted;
 	std::string		PatchUrl;
+	std::string		PatchletUrl;
 	std::string		PatchVersion;
 	std::string		PatchServer;
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
+
+	std::string		WebIgMainDomain;
+	std::vector<string>	WebIgTrustedDomains;
 
 
 	///////////////
@@ -631,12 +642,15 @@ struct CClientConfig
 	// Mode is the display settings :
 	// Normal	: just display in the system info window
 	// Over		: must be displayed at bottom of the screen and in system info window
+	// OverOnly		: must be displayed at bottom of the screen
 	// Center	; must be displayed at the center of the screen and in system info window
+	// Around	; must be displayed in the around chat window
+	// CenterAround	; must be displayed at the center of the screen and in around chat window
 	struct SSysInfoParam
 	{
 		CRGBA Color;
 		std::string SysInfoFxName;
-		enum TMode { Normal, Over, OverOnly, Center, Around };
+		enum TMode { Normal, Over, OverOnly, Center, Around, CenterAround };
 		TMode Mode;
 		SSysInfoParam()
 		{
@@ -748,7 +762,7 @@ struct CClientConfig
 	// LUA //
 	/////////
 
-	/// Allow Lua commands (commands begining with Lua)
+	/// Allow Lua commands (commands beginning with Lua)
 	bool			AllowDebugLua;
 	bool			LoadLuaDebugger;
 

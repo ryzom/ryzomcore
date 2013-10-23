@@ -63,7 +63,7 @@ CREATE TABLE `shard` (
   `DynPatchURL` varchar(255) default NULL,
   `FixedSessionId` int(10) unsigned default '0',
   PRIMARY KEY  (`ShardId`)
-) TYPE=MyISAM COMMENT='contains all shards informations for login system';
+) TYPE=MyISAM COMMENT='contains all shards information for login system';
 
 
 

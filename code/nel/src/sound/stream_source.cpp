@@ -26,29 +26,37 @@
 // using namespace std;
 using namespace NLMISC;
 
+// #define NLSOUND_DEBUG_STREAM
+
 namespace NLSOUND {
 
-CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster)
-	: CSourceCommon(streamSound, spawn, cb, cbUserParam, cluster), 
+CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
+	: CSourceCommon(streamSound, spawn, cb, cbUserParam, cluster, groupController), 
 	m_StreamSound(streamSound), 
 	m_Alpha(0.0f), 
 	m_Track(NULL), 
 	m_FreeBuffers(3),
 	m_NextBuffer(0),
 	m_LastSize(0),
-	m_BytesPerSecond(0)
+	m_BytesPerSecond(0),
+	m_WaitingForPlay(false),
+	m_PitchInv(1.0f)
 {
 	nlassert(m_StreamSound != 0);
 
 	// get a local copy of the stream sound parameter
 	m_Alpha = m_StreamSound->getAlpha();//m_Buffers
+	m_PitchInv = 1.0f / _Pitch;
 	
 	// create the three buffer objects
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	ISoundDriver *driver = mixer->getSoundDriver();
 	m_Buffers[0] = driver->createBuffer();
+	m_Buffers[0]->setStorageMode(IBuffer::StorageSoftware);
 	m_Buffers[1] = driver->createBuffer();
+	m_Buffers[1]->setStorageMode(IBuffer::StorageSoftware);
 	m_Buffers[2] = driver->createBuffer();
+	m_Buffers[2]->setStorageMode(IBuffer::StorageSoftware);
 }
 
 CStreamSource::~CStreamSource()
@@ -107,6 +115,8 @@ bool CStreamSource::isPlaying()
 /// Set looping on/off for future playbacks (default: off)
 void CStreamSource::setLooping(bool l)
 {
+	CSourceCommon::setLooping(l);
+
 	//CAutoMutex<CMutex> autoMutex(m_BufferMutex);
 	//
 	//CSourceCommon::setLooping(l);
@@ -146,13 +156,16 @@ void CStreamSource::play()
 		if ((_RelativeMode ? getPos().sqrnorm() : (mixer->getListenPosVector() - getPos()).sqrnorm()) > m_StreamSound->getMaxDistance() * m_StreamSound->getMaxDistance())
 		{
 			// Source is too far to play
+			m_WaitingForPlay = false;
 			if (_Spawn)
 			{
 				if (_SpawnEndCb != NULL)
 					_SpawnEndCb(this, _CbUserParam);
 				delete this;
 			}
-			// nldebug("CStreamSource %p : play FAILED !", (CAudioMixerUser::IMixerEvent*)this);
+#ifdef NLSOUND_DEBUG_STREAM
+			nldebug("CStreamSource %p : play FAILED, source is too far away !", (CAudioMixerUser::IMixerEvent*)this);
+#endif
 			return;
 		}
 		
@@ -166,24 +179,33 @@ void CStreamSource::play()
 			ISource *pSource = getPhysicalSource();
 			nlassert(pSource != NULL);
 			
-			for (uint i = 0; i < m_NextBuffer; ++i)
+			uint nbS = m_NextBuffer;
+			if (!m_NextBuffer && !m_FreeBuffers) nbS = 3;
+			for (uint i = 0; i < nbS; ++i)
 				pSource->submitStreamingBuffer(m_Buffers[i]);
 			
 			// pSource->setPos( _Position, false);
 			pSource->setPos(getVirtualPos(), false);
+			pSource->setMinMaxDistances(m_StreamSound->getMinDistance(), m_StreamSound->getMaxDistance(), false);
 			if (!m_Buffers[0]->isStereo())
 			{
-				pSource->setMinMaxDistances(m_StreamSound->getMinDistance(), m_StreamSound->getMaxDistance(), false);
 				setDirection(_Direction); // because there is a workaround inside
 				pSource->setVelocity(_Velocity);
 			}
-			pSource->setGain(_Gain);
+			else
+			{
+				pSource->setDirection(NLMISC::CVector::I);
+				pSource->setCone(float(Pi * 2), float(Pi * 2), 1.0f);
+				pSource->setVelocity(NLMISC::CVector::Null);
+			}
+			pSource->setGain(getFinalGain());
 			pSource->setSourceRelativeMode(_RelativeMode);
 			// pSource->setLooping(_Looping);
 			pSource->setPitch(_Pitch);
 			pSource->setAlpha(m_Alpha);
 			
 			// and play the sound
+			nlassert(nbS); // must have buffered already!
 			play = pSource->play();
 			// nldebug("CStreamSource %p : REAL play done", (CAudioMixerUser::IMixerEvent*)this);
 		}
@@ -193,11 +215,13 @@ void CStreamSource::play()
 			{
 				// This sound is not discardable, add it in waiting playlist
 				mixer->addSourceWaitingForPlay(this);
+				m_WaitingForPlay = true;
 				return;
 			}
 			else
 			{
 				// No source available, kill.
+				m_WaitingForPlay = false;
 				if (_Spawn)
 				{
 					if (_SpawnEndCb != NULL)
@@ -209,22 +233,67 @@ void CStreamSource::play()
 		}
 		
 		if (play)
+		{
 			CSourceCommon::play();
+			m_WaitingForPlay = false;
+#ifdef NLSOUND_DEBUG_STREAM
+			// Dump source info
+			nlwarning("--- DUMP SOURCE INFO ---");
+			nlwarning(" * getLooping: %s", getPhysicalSource()->getLooping() ? "YES" : "NO");
+			nlwarning(" * isPlaying: %s", getPhysicalSource()->isPlaying() ? "YES" : "NO");
+			nlwarning(" * isStopped: %s", getPhysicalSource()->isStopped() ? "YES" : "NO");
+			nlwarning(" * isPaused: %s", getPhysicalSource()->isPaused() ? "YES" : "NO");
+			nlwarning(" * getPos: %f, %f, %f", getPhysicalSource()->getPos().x, getPhysicalSource()->getPos().y, getPhysicalSource()->getPos().z);
+			NLMISC::CVector v;
+			getPhysicalSource()->getVelocity(v);
+			nlwarning(" * getVelocity: %f, %f, %f", v.x, v.y, v.z);
+			getPhysicalSource()->getDirection(v);
+			nlwarning(" * getDirection: %f, %f, %f", v.x, v.y, v.z);
+			nlwarning(" * getGain: %f", getPhysicalSource()->getGain());
+			nlwarning(" * getPitch: %f", getPhysicalSource()->getPitch());
+			nlwarning(" * getSourceRelativeMode: %s", getPhysicalSource()->getSourceRelativeMode() ? "YES" : "NO");
+			float a, b, c;
+			getPhysicalSource()->getMinMaxDistances(a, b);
+			nlwarning(" * getMinMaxDistances: %f, %f", a, b);
+			getPhysicalSource()->getCone(a, b, c);
+			nlwarning(" * getCone: %f, %f", a, b, c);
+			nlwarning(" * getDirect: %s", getPhysicalSource()->getDirect() ? "YES" : "NO");
+			nlwarning(" * getDirectGain: %f", getPhysicalSource()->getDirectGain());
+			nlwarning(" * isDirectFilterEnabled: %s", getPhysicalSource()->isDirectFilterEnabled() ? "YES" : "NO");
+			nlwarning(" * getEffect: %s", getPhysicalSource()->getEffect() ? "YES" : "NO");
+			nlwarning(" * getEffectGain: %f", getPhysicalSource()->getEffectGain());
+			nlwarning(" * isEffectFilterEnabled: %s", getPhysicalSource()->isEffectFilterEnabled() ? "YES" : "NO");
+#endif
+		}
 	}
 
+#ifdef NL_DEBUG
 	nlassert(play);
+#else
+	if (!play)
+		nlwarning("Failed to play physical sound source. This is a serious error");
+#endif
 }
 
-/// Stop playing
-void CStreamSource::stop()
+void CStreamSource::stopInt()
 {
 	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
 	
 	// nldebug("CStreamSource %p : stop", (CAudioMixerUser::IMixerEvent*)this);
 	// nlassert(_Playing);
+
+	if (m_WaitingForPlay)
+	{
+		nlassert(!_Playing); // cannot already be playing if waiting for play
+		CAudioMixerUser *mixer = CAudioMixerUser::instance();
+		mixer->removeSourceWaitingForPlay(this);
+	}
 	
 	if (!_Playing)
+	{
+		m_WaitingForPlay = false;
 		return;
+	}
 	
 	if (hasPhysicalSource())
 		releasePhysicalSource();
@@ -233,6 +302,14 @@ void CStreamSource::stop()
 
 	m_FreeBuffers = 3;
 	m_NextBuffer = 0;
+	
+	m_WaitingForPlay = false;
+}
+
+/// Stop playing
+void CStreamSource::stop()
+{
+	stopInt();
 	
 	if (_Spawn)
 	{
@@ -294,28 +371,18 @@ void CStreamSource::setDirection(const NLMISC::CVector& dir)
 	}
 }
 
-void CStreamSource::setGain(float gain)
+void CStreamSource::updateFinalGain()
 {
 	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
-
-	CSourceCommon::setGain(gain);
+	
 	if (hasPhysicalSource())
-		getPhysicalSource()->setGain(gain);
-}
-
-void CStreamSource::setRelativeGain(float gain)
-{
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
-
-	CSourceCommon::setRelativeGain(gain);
-	if (hasPhysicalSource())
-		getPhysicalSource()->setGain(_Gain);
+		getPhysicalSource()->setGain(getFinalGain());
 }
 
 void CStreamSource::setPitch(float pitch)
 {
 	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
-
+	m_PitchInv = 1.0f / pitch;
 	CSourceCommon::setPitch(pitch);
 	if (hasPhysicalSource())
 		getPhysicalSource()->setPitch(pitch);
@@ -382,7 +449,9 @@ bool CStreamSource::unlock(uint size)
 		++m_NextBuffer; m_NextBuffer %= 3;
 		--m_FreeBuffers;
 		if (hasPhysicalSource())
+		{
 			getPhysicalSource()->submitStreamingBuffer(buffer);
+		}
 		m_LastSize = size;
 	}
 
@@ -406,8 +475,8 @@ void CStreamSource::getRecommendedBufferSize(uint &samples, uint &bytes) const
 uint32 CStreamSource::getRecommendedSleepTime() const
 {
 	if (m_FreeBuffers > 0) return 0;
-	uint32 sleepTime = (uint32)((1000.0f * ((float)m_LastSize) / (float)m_BytesPerSecond) / _Pitch);
-	clamp(sleepTime, (uint32)0, (uint32)1000);
+	uint32 sleepTime = (uint32)((1000.0f * ((float)m_LastSize) / (float)m_BytesPerSecond) * m_PitchInv);
+	clamp(sleepTime, (uint32)0, (uint32)80);
 	return sleepTime;
 }
 
@@ -416,6 +485,19 @@ bool CStreamSource::hasFilledBuffersAvailable() const
 {
 	const_cast<CStreamSource *>(this)->updateAvailableBuffers();
 	return m_FreeBuffers < 3;
+}
+
+void CStreamSource::preAllocate(uint capacity)
+{
+	uint8 *b0 = m_Buffers[0]->lock(capacity);
+	memset(b0, 0, capacity);
+	m_Buffers[0]->unlock(capacity);
+	uint8 *b1 = m_Buffers[1]->lock(capacity);
+	memset(b1, 0, capacity);
+	m_Buffers[1]->unlock(capacity);
+	uint8 *b2 = m_Buffers[2]->lock(capacity);
+	memset(b2, 0, capacity);
+	m_Buffers[2]->unlock(capacity);
 }
 
 } /* namespace NLSOUND */

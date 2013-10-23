@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 // Project includes
 #include "georges_dirtree_dialog.h"
 
@@ -23,7 +24,7 @@
 
 // NeL includes
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 CGeorgesDirTreeDialog::CGeorgesDirTreeDialog(QString ldPath, QWidget *parent)
@@ -109,4 +110,4 @@ void CGeorgesDirTreeDialog::ldPathChanged(QString path)
 	}
 }
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */

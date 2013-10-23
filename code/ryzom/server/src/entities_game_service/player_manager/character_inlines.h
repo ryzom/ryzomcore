@@ -131,6 +131,13 @@ inline const NLMISC::CEntityId & CCharacter::getTeamInvitor() const
 
 //------------------------------------------------------------------------------
 
+inline const NLMISC::CEntityId & CCharacter::getLeagueInvitor() const
+{
+	return _LeagueInvitor; 
+}
+
+//------------------------------------------------------------------------------
+
 inline const NLMISC::CEntityId &CCharacter::harvestedEntity() const
 {
 	return _MpSourceId; 
@@ -161,7 +168,7 @@ inline uint16 CCharacter::harvestedMpQuantity() const
 
 inline HARVEST_INFOS::CHarvestInfos& CCharacter::getHarvestInfos()
 {
-	return  _DepositHarvestInformations; 
+	return  _DepositHarvestInformation;
 }
 
 //------------------------------------------------------------------------------
@@ -847,7 +854,7 @@ inline uint16 CCharacter::getKilledPvPRegion()
 
 //------------------------------------------------------------------------------
 
-inline bool CCharacter::getSafeInPvPSafeZone()
+inline bool CCharacter::getSafeInPvPSafeZone() const
 {
 	return _PvPSafeZoneActive; 
 }
@@ -875,10 +882,92 @@ inline uint32 CCharacter::getLastConnectedTime() const
 
 //------------------------------------------------------------------------------
 
+inline uint32 CCharacter::getLastConnectedDate() const
+{
+	return _LastConnectedDate; 
+}
+
+//------------------------------------------------------------------------------
+
 inline uint32 CCharacter::getPlayedTime() const
 {
 	return _PlayedTime; 
 }
+
+//------------------------------------------------------------------------------
+inline const std::string& CCharacter::getLangChannel() const
+
+{
+	return _LangChannel; 
+}
+
+//------------------------------------------------------------------------------
+inline const std::string& CCharacter::getNewTitle() const
+
+{
+	return _NewTitle;
+}
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getTagA() const
+
+{
+	if (_TagA.empty())
+		return "_";
+	return _TagA;
+}
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getTagB() const
+
+{
+	if (_TagB.empty())
+		return "_";
+	return _TagB;
+}
+
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getTagPvPA() const
+
+{
+	if (_TagPvPA.empty())
+		return "_";
+	return _TagPvPA;
+}
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getTagPvPB() const
+
+{
+	if (_TagPvPB.empty())
+		return "_";
+	return _TagPvPB;
+}
+
+
+//------------------------------------------------------------------------------
+inline std::string CCharacter::getFullTitle() const
+{
+	if (!_TagA.empty() || !_TagB.empty() || !_TagPvPA.empty() || !_TagPvPB.empty())
+		return _NewTitle+"#"+getTagPvPA()+"#"+getTagPvPB()+"#"+getTagA()+"#"+getTagB();
+	else
+		return _NewTitle;
+}
+
+//------------------------------------------------------------------------------
+
+inline uint32 CCharacter::getOrganization() const
+{
+	return _Organization; 
+}
+
+
+inline uint32 CCharacter::getOrganizationStatus() const
+{
+	return _OrganizationStatus; 
+}
+
 
 //------------------------------------------------------------------------------
 
@@ -889,7 +978,7 @@ inline const std::list<TCharacterLogTime>& CCharacter::getLastLogStats() const
 
 //------------------------------------------------------------------------------
 
-inline bool CCharacter::isChannelAdded()
+inline bool CCharacter::isChannelAdded() const
 {
 	return _ChannelAdded; 
 }

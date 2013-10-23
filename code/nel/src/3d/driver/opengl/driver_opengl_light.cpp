@@ -19,9 +19,15 @@
 #include "driver_opengl.h"
 #include "nel/3d/light.h"
 
-namespace NL3D
-{
+namespace NL3D {
 
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
 
 // ***************************************************************************
 uint	CDriverGL::getMaxLight () const
@@ -138,7 +144,7 @@ void	CDriverGL::setLightInternal(uint8 num, const CLight& light)
 		}
 		else
 		{
-			// Deactivate spot properties
+			// Disable spot properties
 #ifdef USE_OPENGLES
 			glLightf (lightNum, GL_SPOT_CUTOFF, 180.f);
 			glLightf (lightNum, GL_SPOT_EXPONENT, 0.f);
@@ -357,5 +363,8 @@ void			CDriverGL::setupLightMapDynamicLighting(bool enable)
 	refreshRenderSetup();
 }
 
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
 
 } // NL3D

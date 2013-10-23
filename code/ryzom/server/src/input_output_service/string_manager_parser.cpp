@@ -1799,8 +1799,8 @@ void CStringManager::reloadEventFactions(NLMISC::CLog * log, std::string fileNam
 		{
 			if ( TheDataset.isAccessible(ci->DataSetIndex) )
 			{
-				CMirrorPropValue<TYPE_EVENT_FACTION_ID> propEventFactionId( TheDataset, ci->DataSetIndex, DSPropertyEVENT_FACTION_ID );
-				propEventFactionId = SM->translateEventFaction( ci->UntranslatedEventFactionId );
+//				CMirrorPropValue<TYPE_EVENT_FACTION_ID> propEventFactionId( TheDataset, ci->DataSetIndex, DSPropertyEVENT_FACTION_ID );
+//				propEventFactionId = SM->translateEventFaction( ci->UntranslatedEventFactionId );
 			}
 		}
 	}
