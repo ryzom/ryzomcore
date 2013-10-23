@@ -13,7 +13,7 @@ class Sync{
      * This is done because the shard could have been offline and we want changes made on the website (which is still online) to eventually hit the shard.
      * These changes are: createPermissions, createUser, change_pass, change_mail
      */
-    static public function syncdata () {
+    static public function syncdata ($display = true) {
 
         try {
             $dbl = new DBLayer("lib");
@@ -56,11 +56,15 @@ class Sync{
                 }
                 $dbl->execute("DELETE FROM ams_querycache WHERE SID=:SID",array('SID' => $record['SID']));
             }
-            print('Syncing completed');
+            if ($display == true) {
+                print('Syncing completed');
+            }
         }
         catch (PDOException $e) {
-            print('Something went wrong! The shard is probably still offline!');
-            print_r($e);
+            if ($display == true) {
+                print('Something went wrong! The shard is probably still offline!');
+                print_r($e);
+            }
         }
 
     }
