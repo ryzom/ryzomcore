@@ -25,4 +25,10 @@ function show_help(help_tip)
 
 }
 
-$("#sync").click(function() {alert("Handler for .click() called.");});
+function syncRun()
+{
+	$.get("index.php?cron=true");
+	alert("Sync function called.");
+}
+
+$("#sync").click(function() {syncRun();});
