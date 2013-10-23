@@ -66,7 +66,7 @@ $MAIL_DIR = "/home/username/mail";
 $MAIL_LOG_PATH = "/home/username/mail/cron_mail.log";
 
 //terms of service url location
-$TOS_URL ="http://heregoesyourtos.com";
+$TOS_URL ="http://www.gnu.org/licenses/agpl-3.0.html";
 
 //crypt is being used by encrypting & decrypting of the IMAP password of the supportgroups
 $cfg['crypt']['key']    = 'Sup3rS3cr3tStuff';
@@ -88,8 +88,8 @@ $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 
 //the paths to your website url
-$BASE_WEBPATH = 'http://localhost:40917';
-$IMAGELOC_WEBPATH = 'http://localhost:40917/img';
+$BASE_WEBPATH = dirname($_SERVER['PHP_SELF']);
+$IMAGELOC_WEBPATH = $_SERVER['REQUEST_URI'].'/img';
 $WEBPATH = $BASE_WEBPATH . '/index.php';
 $INGAME_WEBPATH = $BASE_WEBPATH . '/index.php';
 $CONFIG_PATH = dirname( __FILE__ );

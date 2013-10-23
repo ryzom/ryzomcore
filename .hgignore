@@ -223,3 +223,6 @@ code/ryzom/server/src/tick_service/tick_service
 # WebTT temp dir
 code/ryzom/tools/server/www/webtt/app/tmp
 code\ryzom\tools\server\ryzom_ams\old
+
+# AMS ignore
+code/ryzom/tools/server/ryzom_ams/www/config.php
