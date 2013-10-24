@@ -1,3 +1,19 @@
+.box-content {
+    background: white;
+}
+
+.box-header {
+    background-color: white;
+}
+	
+.top-block {
+    background-color: white;
+}	
+	
+.row-fluid [class*="span"] {
+    min-height: 69px;
+}	
+	
 .login-header
 {
 	height:190px;
