@@ -64,7 +64,7 @@
 			isset($TAC) and $TAC eq "success"}success{else}{/if}">
 				<div class="controls">
 				    <div class="input-prepend">
-						<input type="checkbox" class="input-xlarge" id="TaC" name="TaC" placeholder="Email">{$tac_tag1}<a href='{$tos_url}'>{$tac_tag2}</a>
+						<input type="checkbox" class="input-xlarge" id="TaC" name="TaC" placeholder="Email">{$tac_tag1}<a href='{$TOS_URL}'>{$tac_tag2}</a>
 						
 					</div>
 				</div>

@@ -29,13 +29,15 @@ class Users{
           if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success" ) and ( $email == "success" ) and (  isset( $_POST["TaC"] ) ) ){
                return "success";
           }else{
+               global $TOS_URL;
                $pageElements = array(
                //'GAME_NAME' => $GAME_NAME,
                // 'WELCOME_MESSAGE' => $WELCOME_MESSAGE,
                 'USERNAME' => $user,
                 'PASSWORD' => $pass,
                 'CPASSWORD' => $cpass,
-                'EMAIL' => $email
+                'EMAIL' => $email,
+                'TOS_URL' => $TOS_URL
                 );
                if ( $user != "success" ){
                     $pageElements['USERNAME_ERROR'] = 'TRUE';
@@ -344,7 +346,7 @@ class Users{
      * @param $user the inserted username
      * @param $pass the inserted password
      */
-     protected function checkLoginMatch($user,$pass){
+     protected static function checkLoginMatch($user,$pass){
           print('This is the base class!');
      }
      

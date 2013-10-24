@@ -75,7 +75,7 @@ class WebUsers extends Users{
        * @param $password the inserted password (unhashed)
        * @return the logged in user's db row as array if login was a success, else "fail" will be returned.
        */
-       public function checkLoginMatch($username,$password){
+       public static function checkLoginMatch($username,$password){
   
           $dbw = new DBLayer("web");
           $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:user", array('user' => $username));
