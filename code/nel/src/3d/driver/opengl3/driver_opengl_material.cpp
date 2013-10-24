@@ -1604,54 +1604,6 @@ void		CDriverGL3::setupCloudPass (uint /* pass */)
 
 	activateTexture(0, mat.getTexture(0));
 	activateTexture(1, mat.getTexture(0));
-
-	if (_CurrentTexEnvSpecial[0] != TexEnvSpecialCloudStage0)
-	{
-		{
-			// TODO : for now the state is not cached in _CurrentTexEnvSpecial
-			nglBindFragmentShaderATI(ATICloudShaderHandle);
-			glEnable(GL_FRAGMENT_SHADER_ATI);
-			float cst[4] = { 0.f, 0.f, 0.f, mat.getColor().A / 255.f };
-			nglSetFragmentShaderConstantATI(GL_CON_0_ATI, cst);
-			/*
-			_DriverGLStates.activeTextureARB(0);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-			// Operator.
-			glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_INTERPOLATE_EXT);
-			glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_INTERPOLATE_EXT);
-			// Arg0.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, GL_SRC_COLOR);
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_TEXTURE0_ARB );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, GL_SRC_ALPHA);
-			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_TEXTURE1_ARB );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, GL_SRC_ALPHA);
-			// Arg2.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_EXT, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_EXT, GL_SRC_COLOR);
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_ALPHA_EXT, GL_PRIMARY_COLOR_EXT );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA_EXT, GL_SRC_ALPHA);
-			_DriverGLStates.activeTextureARB(1);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-			// Operator.
-			glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
-			glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
-			// Arg0.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, GL_SRC_COLOR);
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_PREVIOUS_EXT );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, GL_SRC_ALPHA);
-			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_ZERO );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_CONSTANT_EXT );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, GL_SRC_ALPHA);
-			*/
-		}
-	}
 }
 
 // ***************************************************************************
@@ -1659,8 +1611,6 @@ void		CDriverGL3::endCloudMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endCloudMultiPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
-	if (ATICloudShaderHandle)
-		glDisable(GL_FRAGMENT_SHADER_ATI);
 }
 
 // ***************************************************************************
@@ -1669,167 +1619,6 @@ sint CDriverGL3::beginWaterMultiPass()
 	H_AUTO_OGL(CDriverGL3_beginWaterMultiPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	return 1;
-}
-
-
-// ***************************************************************************
-/** water setup for ATI
-  */
-void CDriverGL3::setupWaterPassR200(const CMaterial &mat)
-{
-	H_AUTO_OGL(CDriverGL3_setupWaterPassR200);
-
-	uint k;
-	ITexture *tex = mat.getTexture(0);
-	if (tex)
-	{
-//		if (tex->isBumpMap())
-//		{
-//			CTextureBump *tb = static_cast<CTextureBump *>(tex);
-//		}
-		setupTexture(*tex);
-		activateTexture(0, tex);
-	}
-	tex = mat.getTexture(1);
-	if (tex)
-	{
-//		if (tex->isBumpMap())
-//		{
-//			CTextureBump *tb = static_cast<CTextureBump *>(tex);
-//		}
-		setupTexture(*tex);
-		activateTexture(1, tex);
-	}
-	tex = mat.getTexture(2);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(2, tex);
-	}
-	tex = mat.getTexture(3);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(3, tex);
-	}
-	for (k = 4; k < inlGetNumTextStages(); ++k)
-	{
-		activateTexture(k, NULL);
-	}
-	if (mat.getTexture(3) != NULL) // is there a diffuse map ?
-	{
-		nglBindFragmentShaderATI(ATIWaterShaderHandle);
-	}
-	else
-	{
-		nglBindFragmentShaderATI(ATIWaterShaderHandleNoDiffuseMap);
-	}
-	glEnable(GL_FRAGMENT_SHADER_ATI);
-
-	// set constants
-	if (mat.getTexture(0) && mat.getTexture(0)->isBumpMap())
-	{
-		float factor = NLMISC::safe_cast<CTextureBump *>(mat.getTexture(0))->getNormalizationFactor();
-		float cst[4] = { factor, factor, factor, 0.f };
-		nglSetFragmentShaderConstantATI(GL_CON_0_ATI, cst);
-	}
-	else
-	{
-		float cst[4] = { 1.f, 1.f, 1.f, 0.f };
-		nglSetFragmentShaderConstantATI(GL_CON_0_ATI, cst);
-	}
-	//
-	if (mat.getTexture(1) && mat.getTexture(1)->isBumpMap())
-	{
-		float factor = NLMISC::safe_cast<CTextureBump *>(mat.getTexture(1))->getNormalizationFactor();
-		float cst[4] = { factor, factor, factor, 0.f };
-		nglSetFragmentShaderConstantATI(GL_CON_1_ATI, cst);
-	}
-	else
-	{
-		float cst[4] = { 1.f, 1.f, 1.f, 0.f };
-		nglSetFragmentShaderConstantATI(GL_CON_0_ATI, cst);
-	}
-}
-
-// ***************************************************************************
-/** water setup for ARB_fragment_program
-  */
-void CDriverGL3::setupWaterPassARB(const CMaterial &mat)
-{
-	H_AUTO_OGL(CDriverGL3_setupWaterPassARB);
-
-	uint k;
-	ITexture *tex = mat.getTexture(0);
-	if (tex)
-	{
-		tex->setUploadFormat(ITexture::RGBA8888);
-		setupTexture(*tex);
-		activateTexture(0, tex);
-	}
-	tex = mat.getTexture(1);
-	if (tex)
-	{
-		tex->setUploadFormat(ITexture::RGBA8888);
-		setupTexture(*tex);
-		activateTexture(1, tex);
-	}
-	tex = mat.getTexture(2);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(2, tex);
-	}
-	tex = mat.getTexture(3);
-	if (tex)
-	{
-		setupTexture(*tex);
-		activateTexture(3, tex);
-	}
-	for (k = 4; k < inlGetNumTextStages(); ++k)
-	{
-		activateTexture(k, NULL);
-	}
-	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBWaterShader[(_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0)]);
-	glEnable(GL_FRAGMENT_PROGRAM_ARB);
-
-	// setup the constant
-	if (mat.getTexture(0) && mat.getTexture(0)->isBumpMap())
-	{
-		float factor = 0.25f * NLMISC::safe_cast<CTextureBump *>(mat.getTexture(0))->getNormalizationFactor();
-		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, 2.f * factor, -1.f * factor, 0.f, 0.f); // scale_bias from [0, 1] to [-1, 1] and factor applied
-	}
-	else
-	{
-		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, 2.f, -1.f, 0.f, 0.f); // scale_bias from [0, 1] to [-1, 1] and factor applied
-	}
-
-	// setup the constant
-	if (mat.getTexture(1) && mat.getTexture(1)->isBumpMap())
-	{
-		float factor = NLMISC::safe_cast<CTextureBump *>(mat.getTexture(1))->getNormalizationFactor();
-		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1, 2.f * factor, -1.f * factor, 0.f, 0.f); // scale_bias from [0, 1] to [-1, 1] and factor applied
-	}
-	else
-	{
-		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1, 2.f, -1.f, 0.f, 0.f); // scale_bias from [0, 1] to [-1, 1] and factor applied
-	}
-
-	if (_FogEnabled)
-	{
-		if (_FogStart == _FogEnd)
-		{
-			nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, 0.f, 0.f, 0.f, 0.f);
-		}
-		else
-		{
-			/** Unfortunately, the EXT_vertex_shader extension has to output the fog values in the [0, 1] range to work with the standard pipeline.
-			  * So we must add a special path for this case, where the fog coordinate is 'unscaled' again.
-			  * NB : this is fixed in later drivers (from 6.14.10.6343), so check this
-			  */
-			nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 2, - 1.f/  (_FogEnd - _FogStart), _FogEnd / (_FogEnd - _FogStart), 0.f, 0.f);
-		}
-	}
 }
 
 // ***************************************************************************
@@ -1861,14 +1650,38 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 	CMaterial &mat = *_CurrentMaterial;
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 
-	if (ARBWaterShader[0])
+	uint k;
+	ITexture *tex = mat.getTexture(0);
+	if (tex)
 	{
-		setupWaterPassARB(mat);
+		tex->setUploadFormat(ITexture::RGBA8888);
+		setupTexture(*tex);
+		activateTexture(0, tex);
 	}
-	else if (ATIWaterShaderHandleNoDiffuseMap)
+	tex = mat.getTexture(1);
+	if (tex)
 	{
-		setupWaterPassR200(mat);
+		tex->setUploadFormat(ITexture::RGBA8888);
+		setupTexture(*tex);
+		activateTexture(1, tex);
 	}
+	tex = mat.getTexture(2);
+	if (tex)
+	{
+		setupTexture(*tex);
+		activateTexture(2, tex);
+	}
+	tex = mat.getTexture(3);
+	if (tex)
+	{
+		setupTexture(*tex);
+		activateTexture(3, tex);
+	}
+	for (k = 4; k < inlGetNumTextStages(); ++k)
+	{
+		activateTexture(k, NULL);
+	}
+
 }
 
 // ***************************************************************************
@@ -1878,14 +1691,7 @@ void CDriverGL3::endWaterMultiPass()
 
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	// NB : as fragment shaders / programs bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
-	if (ARBWaterShader[0])
-	{
-		glDisable(GL_FRAGMENT_PROGRAM_ARB);
-	}
-	else if (ATIWaterShaderHandleNoDiffuseMap)
-	{
-		glDisable(GL_FRAGMENT_SHADER_ATI);
-	}
+
 }
 
 #ifdef NL_STATIC

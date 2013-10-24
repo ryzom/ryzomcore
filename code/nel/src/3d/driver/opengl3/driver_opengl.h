@@ -1319,9 +1319,6 @@ private:
 	bool							_ForceDXTCCompression;
 	/// Divisor for textureResize (power).
 	uint							_ForceTextureResizePower;
-	// enforcement of native fragment program check
-	bool							_ForceNativeFragmentPrograms;
-
 
 	// user texture matrix
 	NLMISC::CMatrix		_UserTexMat[IDRV_MAT_MAXTEXTURES];
@@ -1365,26 +1362,6 @@ private:
 	// Monitor color parameters backup
 	bool							_NeedToRestaureGammaRamp;
 	uint16							_GammaRampBackuped[3*256];
-
-
-	/// \fragment shaders
-	// @{
-
-			GLuint ATIWaterShaderHandleNoDiffuseMap; // water support on R200
-			GLuint ATIWaterShaderHandle; // water support on R200
-			GLuint ATICloudShaderHandle; // cloud support for R200 and more
-
-			GLuint ARBWaterShader[4]; // water support on R300, NV30 & the like
-
-
-			void   initFragmentShaders();
-			void   deleteFragmentShaders();
-			void   deleteARBFragmentPrograms();
-
-			void   setupWaterPassR200(const CMaterial &mat);
-			void   setupWaterPassARB(const CMaterial &mat);
-	// @}
-
 
 	bool				_PolygonSmooth;
 

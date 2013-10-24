@@ -249,7 +249,6 @@ CDriverGL3::CDriverGL3()
 
 	_ForceDXTCCompression= false;
 	_ForceTextureResizePower= 0;
-	_ForceNativeFragmentPrograms = true;
 
 	_SumTextureMemoryUsed = false;
 
@@ -278,12 +277,6 @@ CDriverGL3::CDriverGL3()
 	_LightMapLastStageEnv.Env.OpAlpha= CMaterial::Replace;
 	_LightMapLastStageEnv.Env.SrcArg0Alpha= CMaterial::Texture;
 	_LightMapLastStageEnv.Env.OpArg0Alpha= CMaterial::SrcAlpha;
-
-	ATIWaterShaderHandleNoDiffuseMap = 0;
-	ATIWaterShaderHandle = 0;
-	ATICloudShaderHandle = 0;
-
-	std::fill(ARBWaterShader, ARBWaterShader + 4, 0);
 
 ///	buildCausticCubeMapTex();
 
@@ -451,10 +444,6 @@ bool CDriverGL3::setupDisplay()
 	// Init embm if present
 	//===========================================================
 	initEMBM();
-
-	// Init fragment shaders if present
-	//===========================================================
-	initFragmentShaders();
 
 	// Activate the default texture environnments for all stages.
 	//===========================================================
@@ -732,8 +721,6 @@ bool CDriverGL3::release()
 	{
 		deleteOcclusionQuery(_OcclusionQueryList.front());
 	}
-
-	deleteFragmentShaders();
 
 	// release caustic cube map
 //	_CauticCubeMap = NULL;
@@ -1296,259 +1283,8 @@ void CDriverGL3::initEMBM()
 }
 
 // ***************************************************************************
-/** Water fragment program with extension ARB_fragment_program
-  */
-static const char *WaterCodeNoDiffuseForARBFragmentProgram =
-"!!ARBfp1.0																			\n\
-OPTION ARB_precision_hint_nicest;													\n\
-PARAM  bump0ScaleBias = program.env[0];												\n\
-PARAM  bump1ScaleBias = program.env[1];												\n\
-ATTRIB bump0TexCoord  = fragment.texcoord[0];										\n\
-ATTRIB bump1TexCoord  = fragment.texcoord[1];										\n\
-ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
-OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;																		\n\
-#read bump map 0																	\n\
-TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;												\n\
-#read bump map 1																	\n\
-TEX    bmValue, bmValue, texture[1], 2D;											\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump1ScaleBias.xxxx, bump1ScaleBias.yyzz;					\n\
-#add envmap coord																	\n\
-ADD	   bmValue, bmValue, envMapTexCoord;											\n\
-#read envmap																		\n\
-TEX    oCol, bmValue, texture[2], 2D;												\n\
-END ";
-
-static const char *WaterCodeNoDiffuseWithFogForARBFragmentProgram =
-"!!ARBfp1.0																			\n\
-OPTION ARB_precision_hint_nicest;													\n\
-PARAM  bump0ScaleBias = program.env[0];												\n\
-PARAM  bump1ScaleBias = program.env[1];												\n\
-PARAM  fogColor       = state.fog.color;											\n\
-PARAM  fogFactor      = program.env[2];												\n\
-ATTRIB bump0TexCoord  = fragment.texcoord[0];										\n\
-ATTRIB bump1TexCoord  = fragment.texcoord[1];										\n\
-ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
-ATTRIB fogValue		  = fragment.fogcoord;											\n\
-OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;																		\n\
-TEMP   envMap;																		\n\
-TEMP   tmpFog;																		\n\
-#read bump map 0																	\n\
-TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;												\n\
-#read bump map 1																	\n\
-TEX    bmValue, bmValue, texture[1], 2D;											\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump1ScaleBias.xxxx, bump1ScaleBias.yyzz;					\n\
-#add envmap coord																	\n\
-ADD	   bmValue, bmValue, envMapTexCoord;											\n\
-#read envmap																		\n\
-TEX    envMap, bmValue, texture[2], 2D;												\n\
-#compute fog																		\n\
-MAD_SAT tmpFog, fogValue.x, fogFactor.x, fogFactor.y;								\n\
-LRP    oCol, tmpFog.x, envMap, fogColor;											\n\
-END ";
-
-// **************************************************************************************
-/** Water fragment program with extension ARB_fragment_program and a diffuse map applied
-  */
-static const char *WaterCodeForARBFragmentProgram =
-"!!ARBfp1.0																			\n\
-OPTION ARB_precision_hint_nicest;													\n\
-PARAM  bump0ScaleBias = program.env[0];												\n\
-PARAM  bump1ScaleBias = program.env[1];												\n\
-ATTRIB bump0TexCoord  = fragment.texcoord[0];										\n\
-ATTRIB bump1TexCoord  = fragment.texcoord[1];										\n\
-ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
-ATTRIB diffuseTexCoord = fragment.texcoord[3];										\n\
-OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;																		\n\
-TEMP   diffuse;																		\n\
-TEMP   envMap;																		\n\
-#read bump map 0																	\n\
-TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;												\n\
-#read bump map 1																	\n\
-TEX    bmValue, bmValue, texture[1], 2D;											\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump1ScaleBias.xxxx, bump1ScaleBias.yyzz;					\n\
-#add envmap coord																	\n\
-ADD	   bmValue, bmValue, envMapTexCoord;											\n\
-#read envmap																		\n\
-TEX    envMap, bmValue, texture[2], 2D;												\n\
-#read diffuse																		\n\
-TEX    diffuse, diffuseTexCoord, texture[3], 2D;									\n\
-#modulate diffuse and envmap to get result											\n\
-MUL    oCol, diffuse, envMap;														\n\
-END ";
-
-static const char *WaterCodeWithFogForARBFragmentProgram =
-"!!ARBfp1.0																			\n\
-OPTION ARB_precision_hint_nicest;													\n\
-PARAM  bump0ScaleBias = program.env[0];												\n\
-PARAM  bump1ScaleBias = program.env[1];												\n\
-PARAM  fogColor       = state.fog.color;											\n\
-PARAM  fogFactor      = program.env[2];												\n\
-ATTRIB bump0TexCoord  = fragment.texcoord[0];										\n\
-ATTRIB bump1TexCoord  = fragment.texcoord[1];										\n\
-ATTRIB envMapTexCoord = fragment.texcoord[2];										\n\
-ATTRIB diffuseTexCoord = fragment.texcoord[3];										\n\
-ATTRIB fogValue		   = fragment.fogcoord;											\n\
-OUTPUT oCol  = result.color;														\n\
-TEMP   bmValue;																		\n\
-TEMP   diffuse;																		\n\
-TEMP   envMap;																		\n\
-TEMP   tmpFog;																		\n\
-#read bump map 0																	\n\
-TEX    bmValue, bump0TexCoord, texture[0], 2D;										\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump0ScaleBias.xxxx, bump0ScaleBias.yyzz;					\n\
-ADD    bmValue, bmValue, bump1TexCoord;												\n\
-#read bump map 1																	\n\
-TEX    bmValue, bmValue, texture[1], 2D;											\n\
-#bias result (include scaling)														\n\
-MAD    bmValue, bmValue, bump1ScaleBias.xxxx, bump1ScaleBias.yyzz;					\n\
-#add envmap coord																	\n\
-ADD	   bmValue, bmValue, envMapTexCoord;											\n\
-TEX    envMap, bmValue, texture[2], 2D;												\n\
-TEX    diffuse, diffuseTexCoord, texture[3], 2D;									\n\
-MAD_SAT tmpFog, fogValue.x, fogFactor.x, fogFactor.y;								\n\
-#modulate diffuse and envmap to get result											\n\
-MUL    diffuse, diffuse, envMap;													\n\
-LRP    oCol, tmpFog.x, diffuse, fogColor;											\n\
-END ";
-
-// ***************************************************************************
-/** Load a ARB_fragment_program_code, and ensure it is loaded natively
-  */
-uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativePrograms)
-{
-	H_AUTO_OGL(loadARBFragmentProgramStringNative);
-	if (!prog)
-	{
-		nlwarning("The param 'prog' is null, cannot load");
-		return 0;
-	}
-
-	GLuint progID;
-	nglGenProgramsARB(1, &progID);
-	if (!progID)
-	{
-		nlwarning("glGenProgramsARB returns a progID NULL");
-		return 0;
-	}
-	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, progID);
-	GLint errorPos, isNative;
-	nglProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)strlen(prog), prog);
-	nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-	glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errorPos);
-	nglGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &isNative);
-	if (errorPos == -1)
-	{
-		if (!isNative && forceNativePrograms)
-		{
-			nlwarning("Fragment program isn't supported natively; purging program");
-			nglDeleteProgramsARB(1, &progID);
-			return 0;
-		}
-		return progID;
-	}
-	else
-	{
-		nlwarning("init fragment program failed: errorPos: %d isNative: %d: %s", errorPos, isNative, (const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-	}
-
-	return 0;
-}
-
-// ***************************************************************************
 void CDriverGL3::forceNativeFragmentPrograms(bool nativeOnly)
 {
-	_ForceNativeFragmentPrograms = nativeOnly;
-}
-
-// ***************************************************************************
-void CDriverGL3::initFragmentShaders()
-{
-	H_AUTO_OGL(CDriverGL3_initFragmentShaders);
-
-	///////////////////
-	// WATER SHADERS //
-	///////////////////
-
-	// the ARB_fragment_program is prioritary over other extensions when present
-	{
-		nlinfo("WATER: Try ARB_fragment_program");
-		ARBWaterShader[0] = loadARBFragmentProgramStringNative(WaterCodeNoDiffuseForARBFragmentProgram, _ForceNativeFragmentPrograms);
-		ARBWaterShader[1] = loadARBFragmentProgramStringNative(WaterCodeNoDiffuseWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
-		ARBWaterShader[2] = loadARBFragmentProgramStringNative(WaterCodeForARBFragmentProgram, _ForceNativeFragmentPrograms);
-		ARBWaterShader[3] = loadARBFragmentProgramStringNative(WaterCodeWithFogForARBFragmentProgram, _ForceNativeFragmentPrograms);
-		bool ok = true;
-		for(uint k = 0; k < 4; ++k)
-		{
-			if (!ARBWaterShader[k])
-			{
-				ok = false;
-				deleteARBFragmentPrograms();
-				nlwarning("WATER: fragment %d is not loaded, not using ARB_fragment_program at all", k);
-				break;
-			}
-		}
-		if (ok)
-		{
-			nlinfo("WATER: ARB_fragment_program OK, Use it");
-			return;
-		}
-	}
-}
-
-// ***************************************************************************
-void CDriverGL3::deleteARBFragmentPrograms()
-{
-	H_AUTO_OGL(CDriverGL3_deleteARBFragmentPrograms);
-
-	for(uint k = 0; k < 4; ++k)
-	{
-		if (ARBWaterShader[k])
-		{
-			GLuint progId = (GLuint) ARBWaterShader[k];
-			nglDeleteProgramsARB(1, &progId);
-			ARBWaterShader[k] = 0;
-		}
-	}
-}
-
-// ***************************************************************************
-void CDriverGL3::deleteFragmentShaders()
-{
-	H_AUTO_OGL(CDriverGL3_deleteFragmentShaders)
-
-	deleteARBFragmentPrograms();
-
-	if (ATIWaterShaderHandleNoDiffuseMap)
-	{
-		nglDeleteFragmentShaderATI((GLuint) ATIWaterShaderHandleNoDiffuseMap);
-		ATIWaterShaderHandleNoDiffuseMap = 0;
-	}
-	if (ATIWaterShaderHandle)
-	{
-		nglDeleteFragmentShaderATI((GLuint) ATIWaterShaderHandle);
-		ATIWaterShaderHandle = 0;
-	}
-	if (ATICloudShaderHandle)
-	{
-		nglDeleteFragmentShaderATI((GLuint) ATICloudShaderHandle);
-		ATICloudShaderHandle = 0;
-	}
 }
 
 // ***************************************************************************
