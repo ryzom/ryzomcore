@@ -125,6 +125,10 @@
 					</form>
 				</div>                   
 			</div>
+		</div>
+		
+		<div class="box span4">
+			
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-envelope"></i> Ticket updates</h2>
 				<div class="box-icon">
@@ -132,6 +136,8 @@
 					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
 				</div>
 			</div>
+			
+			
 			<div class="box-content">
 				<div class="row-fluid">
 					<form id="changeReceiveMail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">

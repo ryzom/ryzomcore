@@ -16,32 +16,33 @@
 		    <form id="create_queue" class="form-vertical" method="post" action="index.php?page=show_queue&get=create" style="margin:0px 0px 0px;">
 		    Show
 		    <select style="width: 136px;" name="what">
-			<option value="all" {if isset($prev_created_what) eq "all"}selected="selected"{/if}>all</option>
-			<option value="waiting_for_support" {if isset($prev_created_what) eq "waiting_for_support"}selected="selected"{/if}>waiting for support</option>
-			<option value="waiting_for_users" {if isset($prev_created_what) eq "waiting_for_users"}selected="selected"{/if}>waiting for user</option>
-			<option value="closed" {if isset($prev_created_what) eq "closed"}selected="selected"{/if}>closed</option>
+			<option value="all" {if isset($prev_created_what) AND $prev_created_what eq "all"}selected="selected"{/if}>all</option>
+			<option value="waiting_for_support" {if isset($prev_created_what) AND $prev_created_what eq "waiting_for_support"}selected="selected"{/if}>waiting for support</option>
+			<option value="waiting_for_users" {if isset($prev_created_what) AND $prev_created_what eq "waiting_for_users"}selected="selected"{/if}>waiting for user</option>
+			<option value="closed" {if isset($prev_created_what) AND $prev_created_what eq "closed"}selected="selected"{/if}>closed</option>
 		    </select>
 		    tickets
 		    <select style="width: 110px;" name="how">
-			<option value="assigned" {if isset($prev_created_how) eq "assigned"}selected="selected"{/if}>assigned</option>
-			<option value="not_assigned" {if isset($prev_created_how) eq "not_assigned"}selected="selected"{/if}>not assigned</option>
+			<option value="assigned" {if isset($prev_created_how) AND $prev_created_how eq "assigned"}selected="selected"{/if}>assigned</option>
+			<option value="not_assigned" {if isset($prev_created_how) AND $prev_created_how eq "not_assigned"}selected="selected"{/if}>not assigned</option>
+			<option value="both" {if isset($prev_created_how) AND $prev_created_how eq "both"}selected="selected"{/if}>both</option>
 		    </select>
 		    to
 		    <select style="width: 140px;" name="who" onchange="aimedforwhochanged(this.value);">
-			<option value="user" {if isset($prev_created_who) eq "user"}selected="selected"{/if}>user</option>
-			<option value="support_group" {if isset($prev_created_who) eq "support_group"}selected="selected"{/if}>support group</option>
+			<option value="user" {if isset($prev_created_who) AND $prev_created_who eq "user"}selected="selected"{/if}>user</option>
+			<option value="support_group" {if isset($prev_created_who) AND $prev_created_who eq "support_group"}selected="selected"{/if}>support group</option>
 		    </select>
-		    <span id="userList" {if isset($prev_created_who) eq "user"}style="display:inline;"{else if isset($prev_created_who) eq "support_group"}style="display:none;"{else}style="display:inline;"{/if}>
+		    <span id="userList" {if isset($prev_created_who) AND $prev_created_who eq "user"}style="display:inline;"{else if isset($prev_created_who) AND $prev_created_who eq "support_group"}style="display:none;"{else}style="display:inline;"{/if}>
 		    <select style="width: 140px;" name="userid">
 			{foreach from=$teamlist item=member}
 			    <option value="{$member.tUserId}" {if isset($prev_created_userid)} {if $prev_created_userid eq $member.tUserId}selected="selected"{/if}{else if $user_id eq $member.tUserId}selected="selected"{/if}>{$member.name}</option>
 			{/foreach}
 		    </select>
 		    </span>
-		    <span id="supportGroupList" {if isset($prev_created_who) eq "user"}style="display:none;"{else if isset($prev_created_who) eq "support_group"}style="display:inline;"{else}style="display:none;"{/if}>
+		    <span id="supportGroupList" {if isset($prev_created_who) AND $prev_created_who eq "user"}style="display:none;"{else if isset($prev_created_who) AND $prev_created_who eq "support_group"}style="display:inline;"{else}style="display:none;"{/if}>
 		    <select style="width: 140px;" name="groupid">
 			{foreach from=$grouplist item=group}
-			    <option value="{$group.sGroupId}" {if $prev_created_groupid eq $group.sGroupId}selected="selected"{/if}>{$group.name}</option>
+			    <option value="{$group.sGroupId}" {if isset($prev_created_groupid) AND $prev_created_groupid eq $group.sGroupId}selected="selected"{/if}>{$group.name}</option>
 			{/foreach}
 		    </select>
 		    </span>

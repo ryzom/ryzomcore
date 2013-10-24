@@ -47,6 +47,16 @@ function show_sgroup(){
                 }
                 global $INGAME_WEBPATH;
                 $result['ingame_webpath'] = $INGAME_WEBPATH;
+                $result['teamlist'] = Gui_Elements::make_table(Ticket_User::getModsAndAdmins(), Array("getTUserId","getExternId"), Array("tUserId","externId"));
+                $i = 0;
+                foreach( $result['teamlist'] as $member){
+                    $web_teammember = new Webusers($member['externId']);
+                    if (!In_Support_Group::userExistsInSGroup($member['externId'], $result['target_id'])) {
+                        $result['users'][$i]['name'] = $web_teammember->getUsername();
+                    }
+                    $i++;
+                }
+
                 return $result;
                 
             

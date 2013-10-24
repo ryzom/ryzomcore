@@ -54,9 +54,11 @@
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">username</label>
 		    <div class="controls">
-			<div class="input-prepend">
-			    <input type="text" maxlength="15"   id="Name" name="Name">
-			</div>
+		    <select style="width: 140px;" name="Name">
+			{foreach from=$users item=member}
+			    <option value="{$member.name}" >{$member.name}</option>
+			{/foreach}
+		    </select>
 		    </div>
 		</div>
 		
@@ -95,6 +97,9 @@
 		
 	    </div>                   
         </div>
+
+    </div><!--/span-->
+	<div class="box span3">
 	<div class="box-header well" data-original-title="">
             <h2><i class="icon-pencil"></i> Modify Email Settings</h2>
             <div class="box-icon">
@@ -172,7 +177,8 @@
 		</form>
 	    </div>
 	 </div>
-    </div><!--/span-->
+</div>	 
+
     {/if}
 </div><!--/row-->
 
