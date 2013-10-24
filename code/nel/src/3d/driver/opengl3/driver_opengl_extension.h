@@ -73,7 +73,6 @@ struct	CGlExtensions
 
 	// ATI Extensions.
 	bool	ATITextureEnvCombine3;
-	bool	ATIEnvMapBumpMap;
 	bool	ATIFragmentShader;
 	bool	ATIXTextureEnvRoute;
 
@@ -104,7 +103,6 @@ public:
 		GLXSGISwapControl= false;
 		GLXMESASwapControl= false;
 		EXTBlendColor= false;
-		ATIEnvMapBumpMap = false;
 		ATIFragmentShader = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
@@ -135,7 +133,6 @@ public:
 		result += ATITextureEnvCombine3 ? "ATITextureEnvCombine3 " : "";
 		result += ATIXTextureEnvRoute ? "ATITextureEnvRoute " : "";
 		result += ARBTextureCubeMap ? "ARBTextureCubeMap " : "";
-		result += ATIEnvMapBumpMap ? "ATIEnvMapBumpMap " : "";
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
 		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
 		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";

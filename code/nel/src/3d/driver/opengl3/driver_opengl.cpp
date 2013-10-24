@@ -279,8 +279,6 @@ CDriverGL3::CDriverGL3()
 	_LightMapLastStageEnv.Env.SrcArg0Alpha= CMaterial::Texture;
 	_LightMapLastStageEnv.Env.OpArg0Alpha= CMaterial::SrcAlpha;
 
-	std::fill(_StageSupportEMBM, _StageSupportEMBM + IDRV_MAT_MAXTEXTURES, false);
-
 	ATIWaterShaderHandleNoDiffuseMap = 0;
 	ATIWaterShaderHandle = 0;
 	ATICloudShaderHandle = 0;
@@ -1273,8 +1271,7 @@ bool CDriverGL3::supportEMBM() const
 {
 	H_AUTO_OGL(CDriverGL3_supportEMBM);
 
-	// For now, supported via ATI extension
-	return _Extensions.ATIEnvMapBumpMap;
+	return true;
 }
 
 // ***************************************************************************
@@ -1282,9 +1279,8 @@ bool CDriverGL3::isEMBMSupportedAtStage(uint stage) const
 {
 	H_AUTO_OGL(CDriverGL3_isEMBMSupportedAtStage)
 
-	nlassert(supportEMBM());
 	nlassert(stage < IDRV_MAT_MAXTEXTURES);
-	return _StageSupportEMBM[stage];
+	return true;
 }
 
 // ***************************************************************************
@@ -1292,14 +1288,7 @@ void CDriverGL3::setEMBMMatrix(const uint stage,const float mat[4])
 {
 	H_AUTO_OGL(CDriverGL3_setEMBMMatrix)
 
-	nlassert(supportEMBM());
 	nlassert(stage < IDRV_MAT_MAXTEXTURES);
-	//
-	if (_Extensions.ATIEnvMapBumpMap)
-	{
-		_DriverGLStates.activeTextureARB(stage);
-		nglTexBumpParameterfvATI(GL_BUMP_ROT_MATRIX_ATI, const_cast<float *>(mat));
-	}
 }
 
 // ***************************************************************************
@@ -1307,55 +1296,6 @@ void CDriverGL3::initEMBM()
 {
 	H_AUTO_OGL(CDriverGL3_initEMBM);
 
-	if (supportEMBM())
-	{
-		std::fill(_StageSupportEMBM, _StageSupportEMBM + IDRV_MAT_MAXTEXTURES, false);
-		if (_Extensions.ATIEnvMapBumpMap)
-		{
-			// Test which stage support EMBM
-			GLint numEMBMUnits;
-
-			nglGetTexBumpParameterivATI(GL_BUMP_NUM_TEX_UNITS_ATI, &numEMBMUnits);
-
-			std::vector<GLint> EMBMUnits(numEMBMUnits);
-
-			// get array of units that supports EMBM
-			nglGetTexBumpParameterivATI(GL_BUMP_TEX_UNITS_ATI, &EMBMUnits[0]);
-
-			numEMBMUnits = std::min(numEMBMUnits, (GLint) _Extensions.NbTextureStages);
-
-			EMBMUnits.resize(numEMBMUnits);
-
-			uint k;
-			for(k = 0; k < EMBMUnits.size(); ++k)
-			{
-				uint stage = EMBMUnits[k] - GL_TEXTURE0_ARB;
-				if (stage < (IDRV_MAT_MAXTEXTURES - 1))
-				{
-					_StageSupportEMBM[stage] = true;
-				}
-			}
-			// setup each stage to apply the bump map to the next stage (or previous if there's an unit at the last stage)
-			for(k = 0; k < (uint) _Extensions.NbTextureStages; ++k)
-			{
-				if (_StageSupportEMBM[k])
-				{
-					// setup each stage so that it apply EMBM on the next stage
-					_DriverGLStates.activeTextureARB(k);
-					glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-					if (k != (uint) (_Extensions.NbTextureStages - 1))
-					{
-						glTexEnvi(GL_TEXTURE_ENV, GL_BUMP_TARGET_ATI, GL_TEXTURE0_ARB + k + 1);
-					}
-					else
-					{
-						glTexEnvi(GL_TEXTURE_ENV, GL_BUMP_TARGET_ATI, GL_TEXTURE0_ARB);
-					}
-				}
-			}
-			_DriverGLStates.activeTextureARB(0);
-		}
-	}
 }
 
 // ***************************************************************************

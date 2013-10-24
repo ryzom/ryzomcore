@@ -610,25 +610,6 @@ static bool	setupATIXTextureEnvRoute(const char * /* glext */)
 //	return true;
 }
 
-// *********************************
-static bool	setupATIEnvMapBumpMap(const char	*glext)
-{
-	H_AUTO_OGL(setupATIEnvMapBumpMap);
-	CHECK_EXT("GL_ATI_envmap_bumpmap");
-
-	GLint num = -1;
-
-	CHECK_ADDRESS(PFNGLTEXBUMPPARAMETERIVATIPROC, glTexBumpParameterivATI);
-	CHECK_ADDRESS(PFNGLTEXBUMPPARAMETERFVATIPROC, glTexBumpParameterfvATI);
-	CHECK_ADDRESS(PFNGLGETTEXBUMPPARAMETERIVATIPROC, glGetTexBumpParameterivATI);
-	CHECK_ADDRESS(PFNGLGETTEXBUMPPARAMETERFVATIPROC, glGetTexBumpParameterfvATI);
-
-	// Check for broken ATI drivers and disable EMBM if we caught one.
-	// Reminder: This code crashes with Catalyst 7.11 fglrx drivers!
-	nglGetTexBumpParameterivATI(GL_BUMP_NUM_TEX_UNITS_ATI, &num);
-
-	return num > 0;
-}
 
 // *********************************
 static bool	setupARBTextureCubeMap(const char	*glext)
@@ -1174,7 +1155,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	setupARBVertexProgram(glext);
 
-	ext.ATIEnvMapBumpMap = setupATIEnvMapBumpMap(glext);
 	ext.ATIFragmentShader = setupATIFragmentShader(glext);
 	setupARBFragmentProgram(glext);
 

@@ -953,8 +953,6 @@ private:
 	CTexEnvSpecial			_CurrentTexEnvSpecial[IDRV_MAT_MAXTEXTURES];
 	// Texture addressing mode
 	GLenum					_CurrentTexAddrMode[IDRV_MAT_MAXTEXTURES];
-	// Which stages support EMBM
-	bool					_StageSupportEMBM[IDRV_MAT_MAXTEXTURES];
 	// Anisotropic filtering value
 	float					_AnisotropicFilter;
 
