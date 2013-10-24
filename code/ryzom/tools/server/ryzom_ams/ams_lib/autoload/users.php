@@ -414,7 +414,7 @@ class Users{
      * @param $pass the new password.
      * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
      */
-     protected function setAmsPassword($user, $pass){
+     protected static function setAmsPassword($user, $pass){
           
            $values = Array('user' => $user, 'pass' => $pass);
            
@@ -444,7 +444,7 @@ class Users{
      * @param $mail the new email address
      * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
      */
-     protected function setAmsEmail($user, $mail){
+     protected static function setAmsEmail($user, $mail){
           
            $values = Array('user' => $user, 'mail' => $mail);
            
