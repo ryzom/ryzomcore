@@ -42,7 +42,7 @@
 		    <span id="supportGroupList" {if isset($prev_created_who) AND $prev_created_who eq "user"}style="display:none;"{else if isset($prev_created_who) AND $prev_created_who eq "support_group"}style="display:inline;"{else}style="display:none;"{/if}>
 		    <select style="width: 140px;" name="groupid">
 			{foreach from=$grouplist item=group}
-			    <option value="{$group.sGroupId}" {if $prev_created_groupid eq $group.sGroupId}selected="selected"{/if}>{$group.name}</option>
+			    <option value="{$group.sGroupId}" {if isset($prev_created_groupid) AND $prev_created_groupid eq $group.sGroupId}selected="selected"{/if}>{$group.name}</option>
 			{/foreach}
 		    </select>
 		    </span>

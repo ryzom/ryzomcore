@@ -51,7 +51,7 @@
         <div class="box-content">
             <div class="row-fluid">
 		
-		<form id="addSGroup" class="form-vertical" method="post" action="index.php">
+		<form id="addSGroup" class="form-vertical" method="post" action="index.php?page=sgroup_list">
 		    
 		<legend>Add  a support group</legend>
 		

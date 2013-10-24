@@ -35,7 +35,7 @@
 					<tr><td>
 						<p><h3>Add a Support group</h3></p>
 							    
-						<form id="addSGroup" class="form-vertical" method="post" action="{$ingame_webpath}">
+						<form id="addSGroup" class="form-vertical" method="post" action="{$ingame_webpath}?page=sgroup_list">
 						    <table cellpadding="1">
 							<tr>
 							    <td>

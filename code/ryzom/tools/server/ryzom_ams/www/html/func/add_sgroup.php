@@ -23,20 +23,20 @@ function add_sgroup(){
             
             //create a new support group
             $result['RESULT_OF_ADDING'] = Support_Group::createSupportGroup($name, $tag, $groupemail, $imap_mailserver, $imap_username, $imap_password);
-            //$result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
-            //$result['no_visible_elements'] = 'FALSE';
-            //$result['username'] = $_SESSION['user'];
-            //global $SITEBASE;
-            //require($SITEBASE . '/inc/sgroup_list.php');
-            //$result= array_merge($result, sgroup_list());
-            //return helpers :: loadtemplate( 'sgroup_list', $result, true);
-            if (Helpers::check_if_game_client()) {
+            $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+            $result['no_visible_elements'] = 'FALSE';
+            $result['username'] = $_SESSION['user'];
+            global $SITEBASE;
+            require($SITEBASE . '/inc/sgroup_list.php');
+            $result= array_merge($result, sgroup_list());
+            return $result;
+            /*if (Helpers::check_if_game_client()) {
                 header("Location: ".$INGAME_WEBPATH."?page=sgroup_list");
             }else{
                 header("Location: ".$WEBPATH."?page=sgroup_list");
             }
             exit;
-            
+            */
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
