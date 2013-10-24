@@ -283,9 +283,6 @@ CDriverGL3::CDriverGL3()
 	ATIWaterShaderHandle = 0;
 	ATICloudShaderHandle = 0;
 
-	_ATIDriverVersion = 0;
-	_ATIFogRangeFixed = true;
-
 	std::fill(ARBWaterShader, ARBWaterShader + 4, 0);
 
 ///	buildCausticCubeMapTex();
@@ -1474,31 +1471,6 @@ uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativeProgra
 }
 
 // ***************************************************************************
-/** R200 Fragment Shader :
-  * Send fragment shader to fetch a perturbed envmap from the addition of 2 bumpmap
-  * The result is in R2 after the 2nd pass
-  */
-static void fetchPerturbedEnvMapR200()
-{
-	H_AUTO_OGL(CDriverGL3_fetchPerturbedEnvMapR200);
-
-	////////////
-	// PASS 1 //
-	////////////
-	nglSampleMapATI(GL_REG_0_ATI, GL_TEXTURE0_ARB, GL_SWIZZLE_STR_ATI); // sample bump map 0
-	nglSampleMapATI(GL_REG_1_ATI, GL_TEXTURE1_ARB, GL_SWIZZLE_STR_ATI); // sample bump map 1
-	nglPassTexCoordATI(GL_REG_2_ATI, GL_TEXTURE2_ARB, GL_SWIZZLE_STR_ATI);	// get texcoord for envmap
-
-	nglColorFragmentOp3ATI(GL_MAD_ATI, GL_REG_2_ATI, GL_NONE, GL_NONE, GL_REG_0_ATI, GL_NONE, GL_BIAS_BIT_ATI|GL_2X_BIT_ATI, GL_CON_0_ATI, GL_NONE, GL_NONE, GL_REG_2_ATI, GL_NONE, GL_NONE); // scale bumpmap 1 & add envmap coords
-	nglColorFragmentOp3ATI(GL_MAD_ATI, GL_REG_2_ATI, GL_NONE, GL_NONE, GL_REG_1_ATI, GL_NONE, GL_BIAS_BIT_ATI|GL_2X_BIT_ATI, GL_CON_1_ATI, GL_NONE, GL_NONE, GL_REG_2_ATI, GL_NONE, GL_NONE); // scale bumpmap 2 & add to bump map 1
-
-	////////////
-	// PASS 2 //
-	////////////
-	nglSampleMapATI(GL_REG_2_ATI, GL_REG_2_ATI, GL_SWIZZLE_STR_ATI); // fetch envmap at perturbed texcoords
-}
-
-// ***************************************************************************
 void CDriverGL3::forceNativeFragmentPrograms(bool nativeOnly)
 {
 	_ForceNativeFragmentPrograms = nativeOnly;
@@ -1537,85 +1509,6 @@ void CDriverGL3::initFragmentShaders()
 			return;
 		}
 	}
-
-	if (_Extensions.ATIFragmentShader)
-	{
-		nlinfo("WATER: Try ATI_fragment_program");
-		///////////
-		// WATER //
-		///////////
-		ATIWaterShaderHandleNoDiffuseMap = nglGenFragmentShadersATI(1);
-
-		ATIWaterShaderHandle = nglGenFragmentShadersATI(1);
-
-		if (!ATIWaterShaderHandle || !ATIWaterShaderHandleNoDiffuseMap)
-		{
-			ATIWaterShaderHandleNoDiffuseMap = ATIWaterShaderHandle = 0;
-			nlwarning("Couldn't generate water shader using ATI_fragment_shader !");
-		}
-		else
-		{
-			glGetError();
-			// Water shader for R200 : we just add the 2 bump map contributions (du, dv). We then use this contribution to perturbate the envmap
-			nglBindFragmentShaderATI(ATIWaterShaderHandleNoDiffuseMap);
-			nglBeginFragmentShaderATI();
-			//
-			fetchPerturbedEnvMapR200();
-			nglColorFragmentOp1ATI(GL_MOV_ATI, GL_REG_0_ATI, GL_NONE, GL_NONE, GL_REG_2_ATI, GL_NONE, GL_NONE);
-			nglAlphaFragmentOp1ATI(GL_MOV_ATI, GL_REG_0_ATI, GL_NONE, GL_REG_2_ATI, GL_NONE, GL_NONE);
-			//
-			nglEndFragmentShaderATI();
-			GLenum error = glGetError();
-			nlassert(error == GL_NONE);
-
-			// The same but with a diffuse map added
-			nglBindFragmentShaderATI(ATIWaterShaderHandle);
-			nglBeginFragmentShaderATI();
-			//
-			fetchPerturbedEnvMapR200();
-
-			nglSampleMapATI(GL_REG_3_ATI, GL_TEXTURE3_ARB, GL_SWIZZLE_STR_ATI); // fetch envmap at perturbed texcoords
-			nglColorFragmentOp2ATI(GL_MUL_ATI, GL_REG_0_ATI, GL_NONE, GL_NONE, GL_REG_3_ATI, GL_NONE, GL_NONE, GL_REG_2_ATI, GL_NONE, GL_NONE); // scale bumpmap 1 & add envmap coords
-			nglAlphaFragmentOp2ATI(GL_MUL_ATI, GL_REG_0_ATI, GL_NONE, GL_REG_3_ATI, GL_NONE, GL_NONE, GL_REG_2_ATI, GL_NONE, GL_NONE);
-
-			nglEndFragmentShaderATI();
-			error = glGetError();
-			nlassert(error == GL_NONE);
-			nglBindFragmentShaderATI(0);
-		}
-
-		////////////
-		// CLOUDS //
-		////////////
-		ATICloudShaderHandle = nglGenFragmentShadersATI(1);
-
-		if (!ATICloudShaderHandle)
-		{
-			nlwarning("Couldn't generate cloud shader using ATI_fragment_shader !");
-		}
-		else
-		{
-			glGetError();
-			nglBindFragmentShaderATI(ATICloudShaderHandle);
-			nglBeginFragmentShaderATI();
-			//
-			nglSampleMapATI(GL_REG_0_ATI, GL_TEXTURE0_ARB, GL_SWIZZLE_STR_ATI); // sample texture 0
-			nglSampleMapATI(GL_REG_1_ATI, GL_TEXTURE1_ARB, GL_SWIZZLE_STR_ATI); // sample texture 1
-			// lerp between tex 0 & tex 1 using diffuse alpha
-			nglAlphaFragmentOp3ATI(GL_LERP_ATI, GL_REG_0_ATI, GL_NONE, GL_PRIMARY_COLOR_ARB, GL_NONE, GL_NONE, GL_REG_0_ATI, GL_NONE, GL_NONE, GL_REG_1_ATI, GL_NONE, GL_NONE);
-			//nglAlphaFragmentOp1ATI(GL_MOV_ATI, GL_REG_0_ATI, GL_NONE, GL_REG_0_ATI, GL_NONE, GL_NONE);
-			// output 0 as RGB
-			//nglColorFragmentOp1ATI(GL_MOV_ATI, GL_REG_0_ATI, GL_NONE, GL_NONE, GL_ZERO, GL_NONE, GL_NONE);
-			// output alpha multiplied by constant 0
-			nglAlphaFragmentOp2ATI(GL_MUL_ATI, GL_REG_0_ATI, GL_NONE, GL_REG_0_ATI, GL_NONE, GL_NONE, GL_CON_0_ATI, GL_NONE, GL_NONE);
-			nglEndFragmentShaderATI();
-			GLenum error = glGetError();
-			nlassert(error == GL_NONE);
-			nglBindFragmentShaderATI(0);
-		}
-	}
-
-	// if none of the previous programs worked, fallback on NV_texture_shader, or (todo) simpler shader
 }
 
 // ***************************************************************************
@@ -1900,115 +1793,7 @@ bool CDriverGL3::supportCloudRenderSinglePass() const
 	H_AUTO_OGL(CDriverGL3_supportCloudRenderSinglePass)
 
 	// there are slowdown for now with ati fragment shader... don't know why
-	return _Extensions.ATIFragmentShader;
-}
-
-// ***************************************************************************
-void CDriverGL3::retrieveATIDriverVersion()
-{
-	H_AUTO_OGL(CDriverGL3_retrieveATIDriverVersion)
-	_ATIDriverVersion = 0;
-	// we may need this driver version to fix flaws of previous ati drivers version (fog issue with V.P)
-#ifdef NL_OS_WINDOWS
-	// get from the registry
-	HKEY parentKey;
-	// open key about current video card
-	LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}", 0, KEY_READ, &parentKey);
-	if (result == ERROR_SUCCESS)
-	{
-		// find last config
-		DWORD keyIndex = 0;
-		uint latestConfigVersion = 0;
-		char subKeyName[256];
-		char latestSubKeyName[256] = "";
-		DWORD nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
-		FILETIME lastWriteTime;
-		bool configFound = false;
-		for(;;)
-		{
-			nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
-			result = RegEnumKeyEx(parentKey, keyIndex, subKeyName, &nameBufferSize, NULL, NULL, NULL, &lastWriteTime);
-			if (result == ERROR_NO_MORE_ITEMS) break;
-			if (result == ERROR_SUCCESS)
-			{
-				// see if the name is numerical.
-				bool isNumerical = true;
-				for(uint k = 0; k < nameBufferSize; ++k)
-				{
-					if (!isdigit(subKeyName[k]))
-					{
-						isNumerical = false;
-						break;
-					}
-				}
-				if (isNumerical)
-				{
-					uint configVersion;
-					fromString((const char*)subKeyName, configVersion);
-					if (configVersion >= latestConfigVersion)
-					{
-						configFound = true;
-						latestConfigVersion = configVersion;
-						strcpy(latestSubKeyName, subKeyName);
-					}
-				}
-				++ keyIndex;
-			}
-			else
-			{
-				RegCloseKey(parentKey);
-				return;
-			}
-		}
-		if (configFound)
-		{
-			HKEY subKey;
-			result = RegOpenKeyEx(parentKey, latestSubKeyName, 0, KEY_READ, &subKey);
-			if (result == ERROR_SUCCESS)
-			{
-				// see if it is a radeon card
-				DWORD valueType;
-				char driverDesc[256];
-				DWORD driverDescBufSize = sizeof(driverDesc) / sizeof(driverDesc[0]);
-				result = RegQueryValueEx(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
-				if (result == ERROR_SUCCESS && valueType == REG_SZ)
-				{
-					toLower(driverDesc);
-					if (strstr(driverDesc, "radeon")) // is it a radeon card ?
-					{
-						char driverVersion[256];
-						DWORD driverVersionBufSize = sizeof(driverVersion) / sizeof(driverVersion[0]);
-						result = RegQueryValueEx(subKey, "DriverVersion", NULL, &valueType, (unsigned char *) driverVersion, &driverVersionBufSize);
-						if (result == ERROR_SUCCESS && valueType == REG_SZ)
-						{
-							int subVersionNumber[4];
-							if (sscanf(driverVersion, "%d.%d.%d.%d", &subVersionNumber[0], &subVersionNumber[1], &subVersionNumber[2], &subVersionNumber[3]) == 4)
-							{
-								_ATIDriverVersion = (uint) subVersionNumber[3];
-								/** see if fog range for V.P is bad in that driver version (is so, do a fix during vertex program conversion to EXT_vertex_shader
-								  * In earlier versions of the driver, fog coordinates had to be output in the [0, 1] range
-								  * From the 6.14.10.6343 driver, fog output must be in world units
-								  */
-								if (_ATIDriverVersion < 6343)
-								{
-									_ATIFogRangeFixed = false;
-								}
-							}
-						}
-					}
-				}
-			}
-			RegCloseKey(subKey);
-		}
-		RegCloseKey(parentKey);
-	}
-#elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for ATI version retrieval"
-	nlwarning("OpenGL Driver: Missing Mac Implementation for ATI version retrieval");
-
-#elif defined (NL_OS_UNIX)
-	// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different
-#endif
+	return true;
 }
 
 // ***************************************************************************

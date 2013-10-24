@@ -703,30 +703,6 @@ static bool	setupEXTBlendColor(const char	*glext)
 }
 
 // *********************************
-static bool	setupATIFragmentShader(const char *glext)
-{
-	H_AUTO_OGL(setupATIFragmentShader);
-	CHECK_EXT("GL_ATI_fragment_shader");
-
-	CHECK_ADDRESS(NEL_PFNGLGENFRAGMENTSHADERSATIPROC, glGenFragmentShadersATI);
-	CHECK_ADDRESS(NEL_PFNGLBINDFRAGMENTSHADERATIPROC, glBindFragmentShaderATI);
-	CHECK_ADDRESS(NEL_PFNGLDELETEFRAGMENTSHADERATIPROC, glDeleteFragmentShaderATI);
-	CHECK_ADDRESS(NEL_PFNGLBEGINFRAGMENTSHADERATIPROC, glBeginFragmentShaderATI);
-	CHECK_ADDRESS(NEL_PFNGLENDFRAGMENTSHADERATIPROC, glEndFragmentShaderATI);
-	CHECK_ADDRESS(NEL_PFNGLPASSTEXCOORDATIPROC, glPassTexCoordATI);
-	CHECK_ADDRESS(NEL_PFNGLSAMPLEMAPATIPROC, glSampleMapATI);
-	CHECK_ADDRESS(NEL_PFNGLCOLORFRAGMENTOP1ATIPROC, glColorFragmentOp1ATI);
-	CHECK_ADDRESS(NEL_PFNGLCOLORFRAGMENTOP2ATIPROC, glColorFragmentOp2ATI);
-	CHECK_ADDRESS(NEL_PFNGLCOLORFRAGMENTOP3ATIPROC, glColorFragmentOp3ATI);
-	CHECK_ADDRESS(NEL_PFNGLALPHAFRAGMENTOP1ATIPROC, glAlphaFragmentOp1ATI);
-	CHECK_ADDRESS(NEL_PFNGLALPHAFRAGMENTOP2ATIPROC, glAlphaFragmentOp2ATI);
-	CHECK_ADDRESS(NEL_PFNGLALPHAFRAGMENTOP3ATIPROC, glAlphaFragmentOp3ATI);
-	CHECK_ADDRESS(NEL_PFNGLSETFRAGMENTSHADERCONSTANTATIPROC, glSetFragmentShaderConstantATI);
-
-	return true;
-}
-
-// *********************************
 static bool	setupARBFragmentProgram(const char *glext)
 {
 	H_AUTO_OGL(setupARBFragmentProgram);
@@ -1155,7 +1131,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	setupARBVertexProgram(glext);
 
-	ext.ATIFragmentShader = setupATIFragmentShader(glext);
 	setupARBFragmentProgram(glext);
 
 	// Check EXTSecondaryColor

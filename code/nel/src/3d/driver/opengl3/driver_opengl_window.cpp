@@ -337,8 +337,6 @@ bool CDriverGL3::init (uint windowIcon, emptyProc exitFunc)
 		nlwarning ("(CDriverGL3::init): can't create DC");
 	}
 
-	// ati specific : try to retrieve driver version
-	retrieveATIDriverVersion();
 #elif defined(NL_OS_MAC)
 
 	// nothing to do

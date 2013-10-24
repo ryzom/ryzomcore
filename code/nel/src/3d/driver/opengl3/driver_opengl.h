@@ -1388,12 +1388,6 @@ private:
 
 	bool				_PolygonSmooth;
 
-	// driver version for ATI hardware (0 if unknown)
-	uint				_ATIDriverVersion;
-	bool                _ATIFogRangeFixed;
-
-	void		retrieveATIDriverVersion();
-
 	/// \Render to texture
 	// @{
 	CSmartPtr<ITexture>		_TextureTarget;

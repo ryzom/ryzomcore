@@ -73,7 +73,6 @@ struct	CGlExtensions
 
 	// ATI Extensions.
 	bool	ATITextureEnvCombine3;
-	bool	ATIFragmentShader;
 	bool	ATIXTextureEnvRoute;
 
 	// ARB Extensions
@@ -103,7 +102,6 @@ public:
 		GLXSGISwapControl= false;
 		GLXMESASwapControl= false;
 		EXTBlendColor= false;
-		ATIFragmentShader = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
@@ -142,7 +140,6 @@ public:
 		result += NLMISC::toString(NbTextureStages);
 
 		result += "\n  Programs:  ";
-		result += ATIFragmentShader ? "ATIFragmentShader " : "";
 		result += "ARBFragmentProgram ";
 		result += "ARBVertexProgram";
 
