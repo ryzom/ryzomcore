@@ -215,7 +215,7 @@ class WebUsers extends Users{
        * check if the user is logged in.
        * @return true or false
        */
-       public function isLoggedIn(){
+       public static function isLoggedIn(){
            if(isset($_SESSION['user'])){
                return true;
            }
