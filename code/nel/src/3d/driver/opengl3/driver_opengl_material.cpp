@@ -1325,22 +1325,6 @@ void			CDriverGL3::setupPPLPass(uint pass)
 
 	nlassert(pass == 0);
 
-/*	ITexture *tex0 = getSpecularCubeMap(1);
-	if (tex0) setupTexture(*tex0);
-	activateTexture(0, tex0);
-
-
-	static CMaterial::CTexEnv	env;
-	env.Env.SrcArg0Alpha = CMaterial::Diffuse;
-	env.Env.SrcArg1Alpha = CMaterial::Constant;
-	env.Env.SrcArg0RGB = CMaterial::Diffuse;
-	env.Env.SrcArg1RGB = CMaterial::Constant;
-	env.Env.OpRGB = CMaterial::Replace;
-	env.Env.OpAlpha = CMaterial::Replace;
-	activateTexEnvMode(0, env);
-
-	return;*/
-
 	ITexture *tex0 = getSpecularCubeMap(1);
 	if (tex0) setupTexture(*tex0);
 	ITexture *tex2 = getSpecularCubeMap((uint) mat.getShininess());
@@ -1363,70 +1347,15 @@ void			CDriverGL3::setupPPLPass(uint pass)
 	// setup the tex envs
 
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1
-	if(_CurrentTexEnvSpecial[0] != TexEnvSpecialPPLStage0)
-	{
-		// TexEnv is special.
-		_CurrentTexEnvSpecial[0] = TexEnvSpecialPPLStage0;
-		_DriverGLStates.activeTextureARB(0);
 
-		{
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
-			// Arg0 = Diffuse read in cube map
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, GL_SRC_COLOR);
-			// Arg1 = Light color
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_EXT, GL_CONSTANT_EXT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_EXT, GL_SRC_COLOR);
-			// Arg2 = Primary color (other light diffuse and
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PRIMARY_COLOR_EXT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
-		}
-	}
 	activateTexEnvColor(0, _PPLightDiffuseColor);
 
 	// Stage 1
-	static CMaterial::CTexEnv	env;
-	env.Env.SrcArg1Alpha = CMaterial::Diffuse;
-	activateTexEnvMode(1, env);
+	// alpha = diffuse alpha
 
 	// Stage 2 is rgb = SpecularCubeMap * SpecularLightColor + Prec * 1
 	// alpha = prec alpha
 
-	if(_CurrentTexEnvSpecial[2] != TexEnvSpecialPPLStage2)
-	{
-		// TexEnv is special.
-		_CurrentTexEnvSpecial[2] = TexEnvSpecialPPLStage2;
-		_DriverGLStates.activeTextureARB(2);
-
-		{
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-			//== colors ==
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
-			// Arg0 = Specular read in cube map
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, GL_SRC_COLOR);
-			// Arg2 = Light color
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_EXT, GL_CONSTANT_EXT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_EXT, GL_SRC_COLOR);
-			// Arg1 = Primary color ( + other light diffuse)
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PREVIOUS_EXT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
-
-			//== alpha ==
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE_ADD_ATI);
-			// Arg0 = PREVIOUS ALPHA
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, GL_PREVIOUS_EXT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, GL_SRC_COLOR);
-			// Arg2 = 1
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_ALPHA_EXT, GL_ZERO);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_ALPHA_EXT, GL_ONE_MINUS_SRC_COLOR);
-			// Arg1 = 0
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_ZERO);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, GL_SRC_COLOR);
-		}
-	}
 	activateTexEnvColor(2, _PPLightSpecularColor);
 
 }
@@ -1475,27 +1404,7 @@ void			CDriverGL3::setupPPLNoSpecPass(uint pass)
 	// setup the tex envs
 
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1 (TODO : EnvCombine3)
-	if(_CurrentTexEnvSpecial[0] != TexEnvSpecialPPLStage0)
-	{
-		// TexEnv is special.
-		_CurrentTexEnvSpecial[0] = TexEnvSpecialPPLStage0;
-		_DriverGLStates.activeTextureARB(0);
 
-		{
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
-
-			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
-			// Arg0 = Diffuse read in cube map alpha
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, GL_TEXTURE);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, GL_SRC_COLOR);
-			// Arg2 = Light color
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_EXT, GL_CONSTANT_EXT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_EXT, GL_SRC_COLOR);
-			// Arg1 = Primary color (other light diffuse and
-			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_EXT, GL_PRIMARY_COLOR_EXT);
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
-		}
-	}
 	activateTexEnvColor(0, _PPLightDiffuseColor);
 
 	// Stage 1

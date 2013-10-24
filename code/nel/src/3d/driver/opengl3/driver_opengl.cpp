@@ -1052,16 +1052,11 @@ void CDriverGL3::enableFog(bool enable)
 void CDriverGL3::setupFog(float start, float end, CRGBA color)
 {
 	H_AUTO_OGL(CDriverGL3_setupFog)
-	glFogf(GL_FOG_MODE, GL_LINEAR);
-	glFogf(GL_FOG_START, start);
-	glFogf(GL_FOG_END, end);
 
 	_CurrentFogColor[0]= color.R/255.0f;
 	_CurrentFogColor[1]= color.G/255.0f;
 	_CurrentFogColor[2]= color.B/255.0f;
 	_CurrentFogColor[3]= color.A/255.0f;
-
-	glFogfv(GL_FOG_COLOR, _CurrentFogColor);
 
 	_FogStart = start;
 	_FogEnd = end;
@@ -1177,7 +1172,7 @@ void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const flo
 	nlassert(stage < inlGetNumTextStages() );
 	_DriverGLStates.activeTextureARB(stage);
 
-	glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
+	//glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
 }
 
 
