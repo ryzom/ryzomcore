@@ -84,6 +84,7 @@ namespace NL3D
 
 		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert( _GPUPrgDrvInfos.end(),(NL3D::IProgramDrvInfos*)NULL );
 		CVertexProgramDrvInfosGL3 *drvInfo = new CVertexProgramDrvInfosGL3( this, it );
+		*it = drvInfo;
 
 		program->m_DrvInfo = drvInfo;
 
@@ -169,6 +170,7 @@ namespace NL3D
 
 		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert( _GPUPrgDrvInfos.end(), ( NL3D::IProgramDrvInfos* )NULL );
 		CPixelProgramDrvInfosGL3 *drvInfo = new CPixelProgramDrvInfosGL3( this, it );
+		*it = drvInfo;
 		drvInfo->setProgramId( id );
 		program->m_DrvInfo = drvInfo;
 
@@ -659,21 +661,11 @@ namespace NL3D
 		}
 
 		if( currentProgram.dynmatVP != NULL )
-		{
-			ItGPUPrgDrvInfoPtrList itr = std::find( _GPUPrgDrvInfos.begin(), _GPUPrgDrvInfos.end(), currentProgram.dynmatVP->m_DrvInfo );
-			if( itr != _GPUPrgDrvInfos.end() )
-				_GPUPrgDrvInfos.erase( itr );
 			delete currentProgram.dynmatVP;
-		}
 		currentProgram.dynmatVP = vp;
 
 		if( currentProgram.dynmatPP != NULL )
-		{
-			ItGPUPrgDrvInfoPtrList itr = std::find( _GPUPrgDrvInfos.begin(), _GPUPrgDrvInfos.end(), currentProgram.dynmatPP->m_DrvInfo );
-			if( itr != _GPUPrgDrvInfos.end() )
-				_GPUPrgDrvInfos.erase( itr );
 			delete currentProgram.dynmatPP;
-		}
 		currentProgram.dynmatPP = pp;
 
 		return true;
