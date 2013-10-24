@@ -3,7 +3,7 @@
 
 <div class="row-fluid">
 	<div class="span12 center login-header">
-		<img src="img/mainlogo.png"/>
+		<a href="?"><img src="img/mainlogo.png"/></a> 
 	</div><!--/span-->
 </div><!--/row-->
 
