@@ -200,7 +200,7 @@ class WebUsers extends Users{
        * @param $pass the new password.
        * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
        */
-       public function setPassword($user, $pass){
+       public static function setPassword($user, $pass){
            $hashpass = crypt($pass, WebUsers::generateSALT());
            $reply = WebUsers::setAmsPassword($user, $hashpass);
            $drupal_pass = user_hash_password($pass);
@@ -223,7 +223,7 @@ class WebUsers extends Users{
        * @param $mail the new emailaddress.
        * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
        */
-       public function setEmail($user, $mail){
+       public static function setEmail($user, $mail){
           $reply = WebUsers::setAmsEmail($user, $mail);
           $values = Array('user' => $user, 'mail' => $mail);
            try {

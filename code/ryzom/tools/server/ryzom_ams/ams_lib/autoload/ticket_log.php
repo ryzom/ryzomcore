@@ -221,7 +221,7 @@ class Ticket_Log{
     * get the action text(string) array.
     * this is being read from the language .ini files.
     */
-    public function getActionTextArray(){
+    public static function getActionTextArray(){
        $variables = Helpers::handle_language();
        $result = array();
        foreach ( $variables['ticket_log'] as $key => $value ){
