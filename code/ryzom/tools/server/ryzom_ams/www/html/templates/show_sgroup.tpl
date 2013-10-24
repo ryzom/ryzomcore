@@ -54,9 +54,11 @@
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">username</label>
 		    <div class="controls">
-			<div class="input-prepend">
-			    <input type="text" maxlength="15"   id="Name" name="Name">
-			</div>
+		    <select style="width: 140px;" name="Name">
+			{foreach from=$users item=member}
+			    <option value="{$member.name}" >{$member.name}</option>
+			{/foreach}
+		    </select>
 		    </div>
 		</div>
 		
