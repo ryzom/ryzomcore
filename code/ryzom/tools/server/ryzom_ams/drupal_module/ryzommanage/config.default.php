@@ -71,7 +71,7 @@ $cfg['crypt']['enc_method']    = 'AES-256-CBC';
 $cfg['crypt']['hash_method'] = "SHA512";
 
 //terms of service url location
-$TOS_URL = variable_get('ryzommanage_TOS', 'www.mytosurlhere.com');
+$TOS_URL = variable_get('ryzommanage_TOS', 'http://www.gnu.org/licenses/agpl-3.0.html');
 //-----------------------------------------------------------------------------------------
 // If true= the server will add automatically unknown user in the database
 // (in nel.user= nel.permission= ring.ring_user and ring.characters

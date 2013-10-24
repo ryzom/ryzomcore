@@ -55,9 +55,11 @@
 		    <label class="control-label">username</label>
 		    <div class="controls">
 		    <select style="width: 140px;" name="Name">
-			{foreach from=$users item=member}
-			    <option value="{$member.name}" >{$member.name}</option>
-			{/foreach}
+			{if isset($users)}
+				{foreach from=$users item=member}
+					<option value="{$member.name}" >{$member.name}</option>
+				{/foreach}
+			{/if}
 		    </select>
 		    </div>
 		</div>
