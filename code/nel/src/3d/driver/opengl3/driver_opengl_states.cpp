@@ -657,13 +657,14 @@ void CDriverGLStates3::enableVertexAttribArrayARB(uint glIndex,bool enable)
 		if(_VertexAttribArrayEnabled[glIndex] != enable)
 	#endif
 	{
-		if(enable)
-			nglEnableVertexAttribArrayARB(glIndex);
+		if( enable )
+			nglEnableVertexAttribArray(glIndex);
 		else
-			nglDisableVertexAttribArrayARB(glIndex);
+			nglDisableVertexAttribArray(glIndex);
 
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}
+
 }
 
 // ***************************************************************************

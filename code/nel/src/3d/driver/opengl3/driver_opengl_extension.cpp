@@ -890,15 +890,6 @@ static bool setupGLSL( const char *glext )
 	return true;
 }
 
-static bool setupVA( const char *glext )
-{
-	CHECK_ADDRESS(PFNGLENABLEVERTEXATTRIBARRAYARBPROC, glEnableVertexAttribArrayARB);
-	CHECK_ADDRESS(PFNGLDISABLEVERTEXATTRIBARRAYARBPROC, glDisableVertexAttribArrayARB);
-	CHECK_ADDRESS(PFNGLVERTEXATTRIBPOINTERARBPROC, glVertexAttribPointerARB);
-
-	return true;
-}
-
 static bool setupSeparateShaderObjects( const char *glext )
 {
 	CHECK_EXT( "GL_ARB_separate_shader_objects" );
@@ -1085,8 +1076,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.ATIXTextureEnvRoute= setupATIXTextureEnvRoute(glext);
 
 	setupARBVertexBufferObject(glext);
-
-	setupVA( glext );
 
 	if( !setupGLSL( glext ) )
 	{
