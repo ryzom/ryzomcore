@@ -82,7 +82,11 @@ function show_queue(){
                     
                         case "create_queue":
                         $userid = filter_var($_POST['userid'], FILTER_SANITIZE_NUMBER_INT);
-                        $groupid = filter_var($_POST['groupid'], FILTER_SANITIZE_NUMBER_INT);
+                        if (isset($_POST['groupid'])) {
+                            $groupid = filter_var($_POST['groupid'], FILTER_SANITIZE_NUMBER_INT);
+                        } else {
+                            $groupid = 0;
+                        }
                         $what = filter_var($_POST['what'], FILTER_SANITIZE_STRING);
                         $how = filter_var($_POST['how'], FILTER_SANITIZE_STRING);
                         $who = filter_var($_POST['who'], FILTER_SANITIZE_STRING);
