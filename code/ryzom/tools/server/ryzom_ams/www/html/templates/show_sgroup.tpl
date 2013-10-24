@@ -95,6 +95,9 @@
 		
 	    </div>                   
         </div>
+
+    </div><!--/span-->
+	<div class="box span3">
 	<div class="box-header well" data-original-title="">
             <h2><i class="icon-pencil"></i> Modify Email Settings</h2>
             <div class="box-icon">
@@ -172,7 +175,8 @@
 		</form>
 	    </div>
 	 </div>
-    </div><!--/span-->
+</div>	 
+
     {/if}
 </div><!--/row-->
 
