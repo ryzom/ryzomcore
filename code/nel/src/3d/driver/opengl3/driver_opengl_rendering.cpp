@@ -73,6 +73,8 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	_PrimitiveProfileIn.NLines+= nlines;
 	_PrimitiveProfileOut.NLines+= nlines;
 
+	nullPrograms();
+
 	return true;
 }
 
@@ -127,6 +129,8 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	_PrimitiveProfileIn.NTriangles+= ntris;
 	_PrimitiveProfileOut.NTriangles+= ntris * nPass;
 
+	nullPrograms();
+
 	return true;
 }
 
@@ -159,6 +163,8 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 	// Profiling.
 	_PrimitiveProfileIn.NTriangles+= ntris;
 	_PrimitiveProfileOut.NTriangles+= ntris;
+
+	nullPrograms();
 
 	return true;
 }
@@ -201,6 +207,8 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	_PrimitiveProfileIn.NPoints+= numPoints;
 	_PrimitiveProfileOut.NPoints+= numPoints * nPass;
 
+	nullPrograms();
+
 	return true;
 }
 
@@ -241,6 +249,8 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	// Profiling.
 	_PrimitiveProfileIn.NLines  += numLines ;
 	_PrimitiveProfileOut.NLines += numLines  * nPass;
+
+	nullPrograms();
 
 	return true;
 }
@@ -284,6 +294,8 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	// Profiling.
 	_PrimitiveProfileIn.NTriangles  += numTris ;
 	_PrimitiveProfileOut.NTriangles += numTris  * nPass;
+
+	nullPrograms();
 
 	return true;
 }
@@ -407,6 +419,8 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	// Profiling.
 	_PrimitiveProfileIn.NQuads  += numQuads ;
 	_PrimitiveProfileOut.NQuads += numQuads  * nPass;
+
+	nullPrograms();
 
 	return true;
 }

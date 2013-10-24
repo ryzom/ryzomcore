@@ -708,6 +708,14 @@ private:
 	friend class					CVertexProgamDrvInfosGL3;
 
 private:
+	/// Simply sets the current programs to NULL
+	void nullPrograms()
+	{
+		currentProgram.vp = NULL;
+		currentProgram.pp = NULL;
+		currentProgram.gp = NULL;
+	}
+
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
 	static const uint32			ReleaseVersion;
 

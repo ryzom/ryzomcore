@@ -513,11 +513,17 @@ namespace NL3D
 
 		if( !sp.empty() )
 		{
-			if( !activeVertexProgram( sp.vp ) )
-				return false;
+			if( currentProgram.vp == NULL )
+			{
+				if( !activeVertexProgram( sp.vp ) )
+					return false;
+			}
 
-			if( !activePixelProgram( sp.pp ) )
-				return false;
+			if( currentProgram.pp == NULL )
+			{
+				if( !activePixelProgram( sp.pp ) )
+					return false;
+			}
 		}
 		else
 		{
@@ -565,22 +571,28 @@ namespace NL3D
 				return false;
 			}
 
-			if( !activeVertexProgram( vp ) )
+			if( currentProgram.vp == NULL )
 			{
-				delete vp;
-				vp = NULL;
-				delete pp;
-				pp = NULL;
-				return false;
+				if( !activeVertexProgram( vp ) )
+				{
+					delete vp;
+					vp = NULL;
+					delete pp;
+					pp = NULL;
+					return false;
+				}
 			}
 
-			if( !activePixelProgram( pp ) )
+			if( currentProgram.pp == NULL )
 			{
-				delete vp;
-				vp = NULL;
-				delete pp;
-				pp = NULL;
-				return false;
+				if( !activePixelProgram( pp ) )
+				{
+					delete vp;
+					vp = NULL;
+					delete pp;
+					pp = NULL;
+					return false;
+				}
 			}
 			
 			sp.vp = vp;
@@ -596,6 +608,9 @@ namespace NL3D
 
 	bool CDriverGL3::setupDynMatProgram( CMaterial& mat, uint pass )
 	{
+		if( ( currentProgram.vp != NULL ) && ( currentProgram.pp != NULL ) )
+			return true;
+
 		CDynMaterial *m = mat.getDynMat();
 		const SRenderPass *rp = m->getPass( pass );
 		std::string shaderRef;
@@ -606,67 +621,73 @@ namespace NL3D
 		if( !usrShaderManager->getShader( shaderRef, &prg ) )
 			return false;
 		
-		CVertexProgram *vp = new CVertexProgram();
-		CPixelProgram *pp = new CPixelProgram();
-
 		std::string shaderSource;
 		std::string log;
 		std::string name;
-		prg.getVP( shaderSource );
-		prg.getName( name );
+
+		if( currentProgram.vp == NULL )
+		{
+			prg.getVP( shaderSource );
+			prg.getName( name );
+
+			CVertexProgram *vp = new CVertexProgram();		
+			{
+				IProgram::CSource *src = new IProgram::CSource();
+				src->Profile = IProgram::glsl330v;			
+				src->DisplayName = name;
+				src->setSource( shaderSource.c_str() );
+				vp->addSource( src );
+			}
 		
-		{
-			IProgram::CSource *src = new IProgram::CSource();
-			src->Profile = IProgram::glsl330v;			
-			src->DisplayName = name;
-			src->setSource( shaderSource.c_str() );
-			vp->addSource( src );
+			if( !compileVertexProgram( vp ) )
+			{
+				delete vp;
+				return false;
+			}
+
+			if( !activeVertexProgram( vp ) )
+			{
+				delete vp;
+				return false;
+			}
+
+			if( currentProgram.dynmatVP != NULL )
+				delete currentProgram.dynmatVP;
+			currentProgram.dynmatVP = vp;
+
 		}
+
+		if( currentProgram.pp == NULL )
+		{
 		
-		if( !compileVertexProgram( vp ) )
-		{
-			delete vp;
-			delete pp;
-			return false;
-		}
+			CPixelProgram *pp = new CPixelProgram();
 
-		prg.getFP( shaderSource );
-		{
-			IProgram::CSource *src = new IProgram::CSource();
-			src->Profile = IProgram::glsl330f;			
-			src->DisplayName = name;
-			src->setSource( shaderSource.c_str() );
-			pp->addSource( src );
-		}
+			prg.getFP( shaderSource );
+			{
+				IProgram::CSource *src = new IProgram::CSource();
+				src->Profile = IProgram::glsl330f;			
+				src->DisplayName = name;
+				src->setSource( shaderSource.c_str() );
+				pp->addSource( src );
+			}
 		
-		if( !compilePixelProgram( pp ) )
-		{
-			delete vp;
-			delete pp;
-			return false;
+			if( !compilePixelProgram( pp ) )
+			{
+				delete pp;
+				return false;
+			}
+
+			if( !activePixelProgram( pp ) )
+			{
+				delete pp;
+				return false;
+			}
+
+			if( currentProgram.dynmatPP != NULL )
+				delete currentProgram.dynmatPP;
+			currentProgram.dynmatPP = pp;
+
 		}
-
-		if( !activeVertexProgram( vp ) )
-		{
-			delete vp;
-			delete pp;
-			return false;
-		}
-
-		if( !activePixelProgram( pp ) )
-		{
-			delete vp;
-			delete pp;
-			return false;
-		}
-
-		if( currentProgram.dynmatVP != NULL )
-			delete currentProgram.dynmatVP;
-		currentProgram.dynmatVP = vp;
-
-		if( currentProgram.dynmatPP != NULL )
-			delete currentProgram.dynmatPP;
-		currentProgram.dynmatPP = pp;
 
 		return true;
 	}
