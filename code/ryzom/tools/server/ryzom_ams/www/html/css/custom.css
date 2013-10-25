@@ -11,7 +11,7 @@
 }	
 	
 .row-fluid [class*="span"] {
-    min-height: 69px;
+    min-height: 28px;
 }	
 	
 .login-header

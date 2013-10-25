@@ -32,6 +32,13 @@ $cfg['db']['ring']['name']    = 'ring_open';
 $cfg['db']['ring']['user']    = 'shard';
 $cfg['db']['ring']['pass']    = '';
 
+// Variables for database access to the nel_tool database
+$cfg['db']['tool']['host']    = 'localhost';
+$cfg['db']['tool']['port']    = '3306';
+$cfg['db']['tool']['name']    = 'nel_tool';
+$cfg['db']['tool']['user']    = 'shard';
+$cfg['db']['tool']['pass']    = '';
+
 // To connect to an IMAP server running on port 143 on the local machine,
 // do the following: $mbox = imap_open("{localhost:143}INBOX", "user_id", "password");       
 // POP3 server on port 110: $mbox = imap_open ("{localhost:110/pop3}INBOX", "user_id", "password");      
