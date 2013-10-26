@@ -95,8 +95,8 @@ $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $SITEBASE = dirname( __FILE__ ) . '/html/' ;
 
 //the paths to your website url
-$BASE_WEBPATH = dirname($_SERVER['PHP_SELF']);
-$IMAGELOC_WEBPATH = $_SERVER['REQUEST_URI'].'/img';
+$BASE_WEBPATH = '';
+$IMAGELOC_WEBPATH = $BASE_WEBPATH.'img';
 $WEBPATH = $BASE_WEBPATH . '/index.php';
 $INGAME_WEBPATH = $BASE_WEBPATH . '/index.php';
 $CONFIG_PATH = dirname( __FILE__ );
