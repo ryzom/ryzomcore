@@ -226,3 +226,14 @@ code\ryzom\tools\server\ryzom_ams\old
 
 # AMS ignore
 code/ryzom/tools/server/ryzom_ams/www/config.php
+
+#tools and external dir's 
+external
+external_stlport
+nel_tools*
+ryzom_tools*
+
+#Dumps
+*.dmp
+
+
