@@ -9,6 +9,8 @@ ReleaseDebug
 DebugFast
 ReleaseDebugStatic
 DebugFastStatic
+nel_tools_win*
+ryzom_tools_win*
 
 # Test and application directories
 screenshots
