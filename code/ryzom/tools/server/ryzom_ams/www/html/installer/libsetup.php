@@ -13,6 +13,7 @@
         error_reporting( E_ALL );
 
         $return = array();
+        $return['no_visible_elements'] = false;
             
         helpers :: loadTemplate( "install" , $return );
         exit;
