@@ -33,7 +33,7 @@ class Helpers{
          $smarty -> debugging = false;
          // caching must be disabled for multi-language support
          $smarty -> caching = false;
-         $smarty -> cache_lifetime = 120;
+         $smarty -> cache_lifetime = 5;
 
           //needed by smarty.
          helpers :: create_folders ();
