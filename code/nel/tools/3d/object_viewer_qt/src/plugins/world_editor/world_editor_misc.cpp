@@ -50,7 +50,7 @@ void syntaxError(const char *filename, xmlNodePtr xmlNode, const char *format, .
 		strcpy(buffer, "Unknown error");
 	}
 
-	nlerror("(%s), node (%s), line (%d) :\n%s", filename, xmlNode->name, (int)xmlNode->content, buffer);
+	nlerror("(%s), node (%s), line (%s) :\n%s", filename, xmlNode->name, xmlNode->content, buffer);
 }
 
 bool getPropertyString(std::string &result, const char *filename, xmlNodePtr xmlNode, const char *propName)
