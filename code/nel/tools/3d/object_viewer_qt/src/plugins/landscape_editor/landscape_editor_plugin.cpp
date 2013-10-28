@@ -68,33 +68,6 @@ void LandscapeEditorPlugin::setNelContext(NLMISC::INelContext *nelContext)
 	m_libContext = new NLMISC::CLibraryContext(*nelContext);
 }
 
-QString LandscapeEditorPlugin::name() const
-{
-	return tr("LandscapeEditor");
-}
-
-QString LandscapeEditorPlugin::version() const
-{
-	return "0.0.1";
-}
-
-QString LandscapeEditorPlugin::vendor() const
-{
-	return "GSoC2011_dnk-88";
-}
-
-QString LandscapeEditorPlugin::description() const
-{
-	return "Landscape editor ovqt plugin.";
-}
-
-QStringList LandscapeEditorPlugin::dependencies() const
-{
-	QStringList list;
-	list.append(Core::Constants::OVQT_CORE_PLUGIN);
-	return list;
-}
-
 void LandscapeEditorPlugin::addAutoReleasedObject(QObject *obj)
 {
 	m_plugMan->addObject(obj);
