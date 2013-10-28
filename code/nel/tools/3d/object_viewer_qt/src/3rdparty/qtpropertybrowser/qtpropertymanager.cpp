@@ -99,6 +99,7 @@
 #include <QtGui/QApplication>
 #include <QtGui/QPainter>
 #include <QtGui/QLabel>
+#include <QStringRef>
 
 #include <limits.h>
 #include <float.h>
@@ -6455,6 +6456,20 @@ void QtCursorPropertyManager::initializeProperty(QtProperty *property)
 void QtCursorPropertyManager::uninitializeProperty(QtProperty *property)
 {
     d_ptr->m_values.remove(property);
+}
+
+QString QtTextPropertyManager::valueText(const QtProperty *property) const
+{
+	QString text = QtStringPropertyManager::valueText(property);
+	for (int i = 0; i < text.size(); i++)
+	{
+		if (text.at(i) == '\n')
+		{
+			QStringRef ret(&text, 0, i);
+			return ret.toString() + " ...";
+		}
+	}
+	return text;
 }
 
 #if QT_VERSION >= 0x040400
