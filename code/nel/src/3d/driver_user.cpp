@@ -1400,6 +1400,21 @@ void			CDriverUser::setupFog(float start, float end, CRGBA color)
 	_Driver->setupFog(start, end, color);
 }
 
+float			CDriverUser::getFogStart()
+{
+	return _Driver->getFogStart();
+}
+
+float			CDriverUser::getFogEnd()
+{
+	return _Driver->getFogEnd();
+}
+
+CRGBA			CDriverUser::getFogColor()
+{
+	return _Driver->getFogColor();
+}
+
 
 // ***************************************************************************
 void			CDriverUser::setLight (uint8 num, const ULight& light)

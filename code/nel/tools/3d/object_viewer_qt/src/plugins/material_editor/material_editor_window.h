@@ -27,6 +27,7 @@ namespace MaterialEditor
 	class CNel3DInterface;
 	class MaterialSplitter;
 	class ViewPortWidget;
+	class FogWidget;
 
 	class MaterialEditorWindow: public QMainWindow
 	{
@@ -52,6 +53,8 @@ private Q_SLOTS:
 		void onAddTeaPotClicked();
 
 		void onClearSceneClicked();
+		void onFogClicked();
+		void onLightsClicked();
 	
 private:
 		void createMenus();
@@ -64,6 +67,7 @@ private:
 		RenderPassesWidget *passesWidget;
 		MaterialSplitter *materialSplitter;
 		ViewPortWidget *viewPort;
+		FogWidget *fogWidget;
 
 		Ui::MaterialEditorWindow m_ui;
 

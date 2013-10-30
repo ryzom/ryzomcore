@@ -24,6 +24,8 @@ SET(OVQT_PLUGIN_MATERIAL_EDITOR_HDR
 	shader_widget.h
 	prop_browser_ctrl.h
 	viewport_widget.h
+	fog_widget.h
+	lights_widget.h
 	)
 	
 SET(OVQT_PLUGIN_MATERIAL_EDITOR_UIS
@@ -34,6 +36,8 @@ SET(OVQT_PLUGIN_MATERIAL_EDITOR_UIS
 	render_passes.ui
 	shader_editor.ui
 	shader_widget.ui
+	fog_widget.ui
+	lights_widget.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)

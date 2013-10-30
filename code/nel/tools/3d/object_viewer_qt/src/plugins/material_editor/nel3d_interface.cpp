@@ -234,6 +234,7 @@ namespace MaterialEditor
 		scene = NULL;
 		mouseListener = NULL;
 		subMatId = 0;
+		std::fill( bgColor, bgColor + 4, 255 );
 	}
 
 	CNel3DInterface::~CNel3DInterface()
@@ -425,7 +426,8 @@ namespace MaterialEditor
 
 
 		driver->enableFog( true );
-		driver->setupFog( 1.0f, 5.0f, NLMISC::CRGBA::White );
+		driver->setupFog( 5.0f, 15.0f, NLMISC::CRGBA::White );
+		
 
 		NL3D::ULight *ld;
 		
@@ -533,7 +535,13 @@ namespace MaterialEditor
 		if( driver == NULL )
 			return;
 
-		driver->clearBuffers();
+		NLMISC::CRGBA c;
+		c.R = bgColor[ 0 ];
+		c.G = bgColor[ 1 ];
+		c.B = bgColor[ 2 ];
+		c.A = bgColor[ 3 ];
+
+		driver->clearBuffers( c );
 		driver->swapBuffers();
 	}
 
@@ -548,8 +556,14 @@ namespace MaterialEditor
 		{
 			scene->getCam().setTransformMode( NL3D::UTransformable::DirectMatrix );
 			scene->getCam().setMatrix( mouseListener->getViewMatrix() );
-
-			driver->clearBuffers();
+			
+			NLMISC::CRGBA c;
+			c.R = bgColor[ 0 ];
+			c.G = bgColor[ 1 ];
+			c.B = bgColor[ 2 ];
+			c.A = bgColor[ 3 ];
+			
+			driver->clearBuffers( c );
 			scene->render();
 			driver->swapBuffers();
 		}
@@ -561,6 +575,31 @@ namespace MaterialEditor
 			return 0;
 
 		return currentShape.getNumMaterials();
+	}
+
+	void CNel3DInterface::getFogSettings( SFogSettings &s )
+	{
+		s.enable = driver->fogEnabled();
+		s.start = driver->getFogStart();
+		s.end = driver->getFogEnd();
+		
+		NLMISC::CRGBA c = driver->getFogColor();
+		s.color[ 0 ] = c.R;
+		s.color[ 1 ] = c.G;
+		s.color[ 2 ] = c.B;
+		s.color[ 3 ] = c.A;
+	}
+
+	void CNel3DInterface::setFogSettings( const SFogSettings &s )
+	{
+		driver->enableFog( s.enable );
+		NLMISC::CRGBA c;
+		c.R = s.color[ 0 ];
+		c.G = s.color[ 1 ];
+		c.B = s.color[ 2 ];
+		c.A = 255;
+		driver->setupFog( s.start, s.end, c );
+		setBGColor( c.R, c.G, c.B, c.A );
 	}
 
 	void CNel3DInterface::setupCamera()

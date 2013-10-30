@@ -21,6 +21,7 @@
 #include "render_passes.h"
 #include "nel3d_interface.h"
 #include "viewport_widget.h"
+#include "fog_widget.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -53,6 +54,8 @@ namespace MaterialEditor
 		passesWidget = new RenderPassesWidget();
 		passesWidget->setMaterialObserver( materialSplitter );
 		passesWidget->setNel3dIface( nl3dIface );
+		fogWidget = new FogWidget();
+		fogWidget->setNl3DIface( nl3dIface );
 		//passesWidget->onMaterialLoaded();
 		//materialSplitter->onMaterialLoaded();
 		
@@ -67,6 +70,8 @@ namespace MaterialEditor
 	
 	MaterialEditorWindow::~MaterialEditorWindow()
 	{
+		delete fogWidget;
+		fogWidget = NULL;
 		delete shaderWidget;
 		shaderWidget = NULL;
 		delete passesWidget;
@@ -267,6 +272,16 @@ namespace MaterialEditor
 		viewPort->stopTimedUpdates();
 	}
 
+	void MaterialEditorWindow::onFogClicked()
+	{
+		fogWidget->loadValues();
+		fogWidget->show();
+	}
+
+	void MaterialEditorWindow::onLightsClicked()
+	{
+	}
+
 	void MaterialEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
@@ -315,6 +330,14 @@ namespace MaterialEditor
 
 				a = new QAction( tr( "Clear scene" ), NULL );
 				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onClearSceneClicked() ) );
+				mm->addAction( a );
+
+				a = new QAction( tr( "Fog" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onFogClicked() ) );
+				mm->addAction( a );
+
+				a = new QAction( tr( "Lights" ), NULL );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onLightsSceneClicked() ) );
 				mm->addAction( a );
 			}
 

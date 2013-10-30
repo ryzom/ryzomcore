@@ -265,6 +265,9 @@ public:
 	virtual	void			enableFog(bool enable)=0;
 	/// $ fog parameters. fog must enabled to see result. start and end are in [0,1] range.
 	virtual	void			setupFog(float start, float end, CRGBA color)=0;
+	virtual float			getFogStart() = 0;
+	virtual float			getFogEnd() = 0;
+	virtual CRGBA			getFogColor() = 0;
 	// @}
 
 	/// \name Light support.

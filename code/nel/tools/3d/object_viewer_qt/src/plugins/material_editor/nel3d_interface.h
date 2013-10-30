@@ -159,6 +159,26 @@ namespace MaterialEditor
 		std::string fp;
 	};
 
+	struct SFogSettings
+	{
+		bool enable;
+		float start;
+		float end;
+		unsigned char color[ 4 ];
+
+		SFogSettings()
+		{
+			enable = false;
+			start = 0.0f;
+			end = 0.0f;
+			color[ 0 ] = 0.0f;
+			color[ 1 ] = 0.0f;
+			color[ 2 ] = 0.0f;
+			color[ 3 ] = 0.0f;
+		}
+
+	};
+
 	/// Proxy class for Nel3D, so the material editor and Nel3D can interface
 	class CNel3DInterface
 	{
@@ -245,6 +265,16 @@ namespace MaterialEditor
 
 		unsigned long getShapeMatCount() const;
 
+		void getFogSettings( SFogSettings &s );
+		void setFogSettings( const SFogSettings &s );
+
+		void setBGColor( unsigned char R, unsigned char G, unsigned char B, unsigned char A ){
+			bgColor[ 0 ] = R;
+			bgColor[ 1 ] = G;
+			bgColor[ 2 ] = B;
+			bgColor[ 3 ] = A;
+		}
+
 	private:
 		void setupCamera();
 
@@ -254,6 +284,7 @@ namespace MaterialEditor
 		NL3D::UDriver *driver;
 		NL3D::UScene *scene;
 		NL3D::U3dMouseListener *mouseListener;
+		unsigned char bgColor[ 4 ];
 	};
 }
 
