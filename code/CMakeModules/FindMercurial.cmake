@@ -49,7 +49,11 @@
 
 FIND_PROGRAM(Mercurial_HG_EXECUTABLE hg
   DOC "mercurial command line client"
-  HINTS /opt/local/bin)
+  PATHS
+    /opt/local/bin
+    "C:/Program Files/TortoiseHg"
+    "C:/Program Files (x86)/TortoiseHg"
+  )
 MARK_AS_ADVANCED(Mercurial_HG_EXECUTABLE)
 
 IF(Mercurial_HG_EXECUTABLE)
