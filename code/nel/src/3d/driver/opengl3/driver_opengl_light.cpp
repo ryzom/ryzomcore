@@ -50,6 +50,12 @@ void	CDriverGL3::setLight (uint8 num, const CLight& light)
 }
 
 
+CLight	CDriverGL3::getLight (uint8 num)
+{
+	return _UserLight[ num ];
+}
+
+
 // ***************************************************************************
 void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 {
@@ -112,6 +118,14 @@ void	CDriverGL3::enableLight (uint8 num, bool enable)
 
 	// because the GL setup has changed, must dirt lightmap rendering
 	_LightMapDynamicLightDirty= true;
+}
+
+bool	CDriverGL3::isLightEnabled (uint8 num)
+{
+	if(num<_MaxDriverLight)
+		return _UserLightEnable[num];
+
+	return false;
 }
 
 

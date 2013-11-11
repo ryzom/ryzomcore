@@ -18,9 +18,52 @@
 #ifndef LIGHTS_WIDGET_H
 #define LIGHTS_WIDGET_H
 
+#include "ui_lights_widget.h"
 
 namespace MaterialEditor
 {
+	class CNel3DInterface;
+
+	class LightsWidget : public QWidget, public Ui::LightsWidget
+	{
+		Q_OBJECT
+
+	private:
+		void setButtonColor( unsigned char butt, int r, int g, int b );
+
+	public:
+		LightsWidget( QWidget *parent = NULL );
+		~LightsWidget();
+		void setNL3DIface( CNel3DInterface *iface ){ this->iface = iface; }
+		void loadValues();
+
+	private Q_SLOTS:
+		void onAmbButtonClicked();
+		void onDiffButtonClicked();
+		void onSpecButtonClicked();
+		void onLightChanged( int light );
+		void onChanges();
+
+	private:
+		void setupConnections();
+		void setupChangeConnections();
+		void disableChangeConnections();
+		void loadLight( unsigned char light );
+		void saveLight( unsigned char light );
+		void applyChanges();
+
+		CNel3DInterface *iface;
+
+		enum LightType
+		{
+			Directional,
+			Point,
+			Spot
+		};
+
+		int buttonColors[ 3 ][ 3 ];
+	};
+
 }
 
 

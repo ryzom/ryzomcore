@@ -53,6 +53,10 @@ SET(NL_VERSION_MINOR 9)
 SET(NL_VERSION_PATCH 0)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 
+IF(POLICY CMP0020)
+	CMAKE_POLICY(SET CMP0020 NEW)
+ENDIF()
+
 #-----------------------------------------------------------------------------
 # Redirect output files
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

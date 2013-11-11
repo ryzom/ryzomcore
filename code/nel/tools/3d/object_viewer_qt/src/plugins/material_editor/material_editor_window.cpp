@@ -22,6 +22,7 @@
 #include "nel3d_interface.h"
 #include "viewport_widget.h"
 #include "fog_widget.h"
+#include "lights_widget.h"
 
 #include "../core/icore.h"
 #include "../core/core_constants.h"
@@ -56,6 +57,9 @@ namespace MaterialEditor
 		passesWidget->setNel3dIface( nl3dIface );
 		fogWidget = new FogWidget();
 		fogWidget->setNl3DIface( nl3dIface );
+		lightsWidget = new LightsWidget();
+		lightsWidget->setNL3DIface( nl3dIface );
+
 		//passesWidget->onMaterialLoaded();
 		//materialSplitter->onMaterialLoaded();
 		
@@ -72,6 +76,8 @@ namespace MaterialEditor
 	{
 		delete fogWidget;
 		fogWidget = NULL;
+		delete lightsWidget;
+		lightsWidget = NULL;
 		delete shaderWidget;
 		shaderWidget = NULL;
 		delete passesWidget;
@@ -280,6 +286,8 @@ namespace MaterialEditor
 
 	void MaterialEditorWindow::onLightsClicked()
 	{
+		lightsWidget->loadValues();
+		lightsWidget->show();
 	}
 
 	void MaterialEditorWindow::createMenus()
@@ -337,7 +345,7 @@ namespace MaterialEditor
 				mm->addAction( a );
 
 				a = new QAction( tr( "Lights" ), NULL );
-				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onLightsSceneClicked() ) );
+				connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onLightsClicked() ) );
 				mm->addAction( a );
 			}
 

@@ -1424,6 +1424,23 @@ void			CDriverUser::setLight (uint8 num, const ULight& light)
 	CLightUser	*plight= (CLightUser*)&light;
 	_Driver->setLight (num, plight->_Light);
 }
+
+
+// ***************************************************************************
+ULight*			CDriverUser::getLight (uint8 num)
+{
+	ULight *l = ULight::createLight();
+	CLightUser *lu = dynamic_cast< CLightUser* >( l );
+	nlassert( lu != NULL );
+	lu->_Light =_Driver->getLight( num );
+	return l;
+}
+
+uint8			CDriverUser::getMaxDriverLights() const
+{
+	return static_cast< uint8 >( _Driver->getMaxLight() );
+}
+
 // ***************************************************************************
 void			CDriverUser::enableLight (uint8 num, bool enable)
 {
@@ -1431,6 +1448,13 @@ void			CDriverUser::enableLight (uint8 num, bool enable)
 
 	_Driver->enableLight (num, enable);
 }
+
+// ***************************************************************************
+bool			CDriverUser::isLightEnabled (uint8 num)
+{
+	return _Driver->isLightEnabled (num);
+}
+
 // ***************************************************************************
 void			CDriverUser::setAmbientColor (CRGBA color)
 {

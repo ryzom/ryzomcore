@@ -1055,6 +1055,9 @@ public:
 	  */
 	virtual void			setLight(uint8 num, const CLight &light) = 0;
 
+	/// Get light data for the specified light
+	virtual CLight			getLight(uint8 num) = 0;
+
 	/**
 	  * Enable / disable light.
 	  *
@@ -1065,6 +1068,8 @@ public:
 	  * \see setLight()
 	  */
 	virtual void			enableLight(uint8 num, bool enable = true) = 0;
+
+	virtual bool			isLightEnabled(uint8 num) = 0;
 
 	/**
 	  * Set ambient.

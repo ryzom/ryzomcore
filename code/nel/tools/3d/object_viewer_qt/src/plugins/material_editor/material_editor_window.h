@@ -28,6 +28,7 @@ namespace MaterialEditor
 	class MaterialSplitter;
 	class ViewPortWidget;
 	class FogWidget;
+	class LightsWidget;
 
 	class MaterialEditorWindow: public QMainWindow
 	{
@@ -68,6 +69,7 @@ private:
 		MaterialSplitter *materialSplitter;
 		ViewPortWidget *viewPort;
 		FogWidget *fogWidget;
+		LightsWidget *lightsWidget;
 
 		Ui::MaterialEditorWindow m_ui;
 

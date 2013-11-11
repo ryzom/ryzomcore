@@ -179,6 +179,39 @@ namespace MaterialEditor
 
 	};
 
+	struct SLightInfo
+	{
+		enum LightType
+		{
+			Directional,
+			Point,
+			Spot
+		};
+
+		bool enabled;
+		unsigned char type;
+		float posOrDir[ 3 ];
+		float ambColor[ 3 ];
+		float diffColor[ 3 ];
+		float specColor[ 3 ];
+		float constAttn;
+		float linAttn;
+		float quadAttn;
+
+		SLightInfo()
+		{
+			enabled = true;
+			type = Directional;
+			posOrDir[ 0 ] = posOrDir[ 1 ] = posOrDir[ 2 ] = 0.0f;
+			ambColor[ 0 ] = ambColor[ 1 ] = ambColor[ 2 ] = 255;
+			diffColor[ 0 ] = diffColor[ 1 ] = diffColor[ 2 ] = 255;
+			specColor[ 0 ] = specColor[ 1 ] = specColor[ 2 ] = 255;
+			constAttn = 1.0f;
+			linAttn = quadAttn = 0.0f;
+		}
+
+	};
+
 	/// Proxy class for Nel3D, so the material editor and Nel3D can interface
 	class CNel3DInterface
 	{
@@ -267,6 +300,10 @@ namespace MaterialEditor
 
 		void getFogSettings( SFogSettings &s );
 		void setFogSettings( const SFogSettings &s );
+
+		unsigned char getMaxLights() const;
+		void getLightInfo( unsigned char light, SLightInfo &info );
+		void setLightInfo( unsigned char light, const SLightInfo &info );
 
 		void setBGColor( unsigned char R, unsigned char G, unsigned char B, unsigned char A ){
 			bgColor[ 0 ] = R;

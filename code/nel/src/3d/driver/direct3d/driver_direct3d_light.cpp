@@ -59,6 +59,15 @@ void CDriverD3D::setLight (uint8 index, const CLight &light)
 }
 
 
+CLight CDriverD3D::getLight (uint8 index)
+{
+	// Not yet implemented
+	nlinfo( "This feature isn't yet implemented in this driver!" );
+	nlassert( false );
+	return CLight();
+}
+
+
 // ***************************************************************************
 void CDriverD3D::enableLight (uint8 index, bool enable)
 {
@@ -74,6 +83,14 @@ void CDriverD3D::enableLight (uint8 index, bool enable)
 
 	// because the D3D setup has changed, must dirt lightmap rendering
 	_LightMapDynamicLightDirty= true;
+}
+
+bool CDriverD3D::isLightEnabled (uint8 num)
+{
+	if(num<MaxLight)
+		return _UserLightEnable[num];
+
+	return false;
 }
 
 static const float sqrtFLT_MAX = (float) sqrtf(FLT_MAX);

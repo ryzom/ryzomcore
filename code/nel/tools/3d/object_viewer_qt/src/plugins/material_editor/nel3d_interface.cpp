@@ -454,8 +454,8 @@ namespace MaterialEditor
 		ld->setConstantAttenuation( 1.0f );
 		ld->setLinearAttenuation( 0.0f );
 		ld->setQuadraticAttenuation( 0.0f );
-		driver->setLight( 1, *ld );
-		driver->enableLight( 1, true );
+		driver->setLight( 0, *ld );
+		driver->enableLight( 0, true );
 		delete ld;
 		ld = NULL;
 
@@ -600,6 +600,116 @@ namespace MaterialEditor
 		c.A = 255;
 		driver->setupFog( s.start, s.end, c );
 		setBGColor( c.R, c.G, c.B, c.A );
+	}
+
+	unsigned char CNel3DInterface::getMaxLights() const
+	{
+		return driver->getMaxDriverLights();
+	}
+
+	void CNel3DInterface::getLightInfo( unsigned char light, SLightInfo &info )
+	{
+		info.enabled = driver->isLightEnabled( light );		
+
+		NL3D::ULight *u = driver->getLight( light );
+		info.ambColor[ 0 ] = u->getAmbiant().R / 255.0f;
+		info.ambColor[ 1 ] = u->getAmbiant().G / 255.0f;
+		info.ambColor[ 2 ] = u->getAmbiant().B / 255.0f;
+		info.ambColor[ 3 ] = u->getAmbiant().A / 255.0f;
+
+		info.diffColor[ 0 ] = u->getDiffuse().R / 255.0f;
+		info.diffColor[ 1 ] = u->getDiffuse().G / 255.0f;
+		info.diffColor[ 2 ] = u->getDiffuse().B / 255.0f;
+		info.diffColor[ 3 ] = u->getDiffuse().A / 255.0f;
+
+		info.specColor[ 0 ] = u->getSpecular().R / 255.0f;
+		info.specColor[ 1 ] = u->getSpecular().G / 255.0f;
+		info.specColor[ 2 ] = u->getSpecular().B / 255.0f;
+		info.specColor[ 3 ] = u->getSpecular().A / 255.0f;
+
+		info.constAttn = u->getConstantAttenuation();
+		info.linAttn = u->getLinearAttenuation();
+		info.quadAttn = u->getQuadraticAttenuation();
+
+		switch( u->getMode() )
+		{
+		case NL3D::ULight::DirectionalLight:
+			info.type = SLightInfo::Directional;
+			break;
+
+		case NL3D::ULight::PointLight:
+			info.type = SLightInfo::Point;
+			break;
+
+		case NL3D::ULight::SpotLight:
+			info.type = SLightInfo::Spot;
+			break;
+		}
+
+		if( info.type == SLightInfo::Directional )
+		{
+			info.posOrDir[ 0 ] = u->getDirection().x;
+			info.posOrDir[ 1 ] = u->getDirection().y;
+			info.posOrDir[ 2 ] = u->getDirection().z;
+		}
+		else
+		{
+			info.posOrDir[ 0 ] = u->getPosition().x;
+			info.posOrDir[ 1 ] = u->getPosition().y;
+			info.posOrDir[ 2 ] = u->getPosition().z;
+		}
+
+		delete u;
+	}
+
+	void CNel3DInterface::setLightInfo( unsigned char light, const SLightInfo &info )
+	{
+		NL3D::ULight *u = NL3D::ULight::createLight();
+		
+		NLMISC::CRGBA c;
+		c.R = info.ambColor[ 0 ] * 255.0f;
+		c.G = info.ambColor[ 1 ] * 255.0f;
+		c.B = info.ambColor[ 2 ] * 255.0f;
+		c.A = 255;
+		u->setAmbiant( c );
+
+		c.R = info.diffColor[ 0 ] * 255.0f;
+		c.G = info.diffColor[ 1 ] * 255.0f;
+		c.B = info.diffColor[ 2 ] * 255.0f;
+		u->setDiffuse( c );
+
+		c.R = info.specColor[ 0 ] * 255.0f;
+		c.G = info.specColor[ 1 ] * 255.0f;
+		c.B = info.specColor[ 2 ] * 255.0f;
+		u->setSpecular( c );
+
+		switch( info.type )
+		{
+		case SLightInfo::Directional:
+			u->setMode( NL3D::ULight::DirectionalLight );
+			break;
+		case SLightInfo::Point:
+			u->setMode( NL3D::ULight::PointLight );
+			break;
+		case SLightInfo::Spot:
+			u->setMode( NL3D::ULight::SpotLight );
+			break;
+		}
+
+		if( info.type == SLightInfo::Directional )
+			u->setDirection( NLMISC::CVector( info.posOrDir[ 0 ], info.posOrDir[ 1 ], info.posOrDir[ 2 ] ) );
+		else
+			u->setPosition( NLMISC::CVector( info.posOrDir[ 0 ], info.posOrDir[ 1 ], info.posOrDir[ 2 ] ) );
+
+		u->setConstantAttenuation( info.constAttn );
+		u->setLinearAttenuation( info.linAttn );
+		u->setQuadraticAttenuation( info.quadAttn );
+
+		driver->setLight( light, *u );
+		driver->enableLight( light, info.enabled );
+
+		delete u;
+		u = NULL;
 	}
 
 	void CNel3DInterface::setupCamera()

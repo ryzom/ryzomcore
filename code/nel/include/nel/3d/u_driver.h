@@ -273,7 +273,10 @@ public:
 	/// \name Light support.
 	// @{
 	virtual void			setLight (uint8 num, const ULight& light) = 0;
+	virtual ULight*         getLight (uint8 num) = 0;
+	virtual uint8			getMaxDriverLights() const = 0;
 	virtual void			enableLight (uint8 num, bool enable=true) = 0;
+	virtual bool			isLightEnabled (uint8 num) = 0;
 	virtual void			setAmbientColor (CRGBA color) = 0;
 	// @}
 
