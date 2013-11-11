@@ -63,7 +63,7 @@
                 
                 );     
 
-                GRANT ALL ON `" . $cfg['db']['web']['name'] ."`.* TO `" . $cfg['db']['web']['user'] ."`@localhost;
+                GRANT ALL ON `" . $cfg['db']['web']['name'] ."`.* TO `" . $cfg['db']['web']['user'] ."`@".$cfg['db']['web']['host'].";
             ";
             $dbw->executeWithoutParams($sql);
             
@@ -469,7 +469,7 @@
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB;
-            GRANT ALL ON `" . $cfg['db']['lib']['name'] ."`.* TO `" . $cfg['db']['lib']['user'] ."`@localhost;
+            GRANT ALL ON `" . $cfg['db']['lib']['name'] ."`.* TO `" . $cfg['db']['lib']['user'] ."`@".$cfg['db']['lib']['host'].";
             ";
             $dbl->executeWithoutParams($sql);
             print "The Lib & Web database were correctly installed! <br />";
@@ -584,7 +584,7 @@
                   KEY `GMId` (`GMId`)
                 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users informations for login system' AUTO_INCREMENT=1 ;     
 
-                GRANT ALL ON `" . $cfg['db']['shard']['name'] ."`.* TO `" . $cfg['db']['shard']['user'] ."`@localhost;
+                GRANT ALL ON `" . $cfg['db']['shard']['name'] ."`.* TO `" . $cfg['db']['shard']['user'] ."`@".$cfg['db']['shard']['host'].";
             ";
             $dbs->executeWithoutParams($sql);
             print "The shard database was correctly installed! <br />";
@@ -1367,7 +1367,7 @@
                 (164, 31, 104, 9),
                 (165, 31, 103, 9);   
 
-                GRANT ALL ON `" . $cfg['db']['tool']['name'] ."`.* TO `" . $cfg['db']['tool']['user'] ."`@localhost;
+                GRANT ALL ON `" . $cfg['db']['tool']['name'] ."`.* TO `" . $cfg['db']['tool']['user'] ."`@".$cfg['db']['tool']['host'].";
             ";
             $dbn->executeWithoutParams($sql);
             print "The nel_tool database was correctly installed! <br />";
