@@ -29,6 +29,7 @@
             if (!file_exists('../config.php')) {
                 if (!copy('../config.default.php', '../config.php')) {
                     echo "failed to copy ../config.php ...\n";
+                    echo '<br><a href="'.$_SERVER['REQUEST_URI'].'" >Reload!</a> ';
                     exit;
                 }
             }
