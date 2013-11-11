@@ -19,10 +19,19 @@
         exit;
     } else {
     
+        ini_set( "display_errors", true );
+        error_reporting( E_ALL );
+        
         if (file_exists('../config.php')) {
             require( '../config.php' );
         } else {
-            require( '../config.default.php' );
+            //copy config.default.php to config.php!
+            if (!file_exists('../config.php')) {
+                if (!copy('../config.default.php', '../config.php')) {
+                    echo "failed to copy ../config.php ...\n";
+                    exit;
+                }
+            }
         }
 
         //var used to access the DB;
@@ -1383,14 +1392,7 @@
             }catch (PDOException $e){
                 print "There was an error while creating the admin account! ";
             }
-            
-            
-            //copy config.default.php to config.php!
-            if (!file_exists('../config.php')) {
-                if (!copy('../config.default.php', '../config.php')) {
-                    echo "failed to copy ../config.php ...\n";
-                }
-            }
+
             echo '<br><a href="'.$_SERVER['REQUEST_URI'].'" >Reload!</a> ';
             exit;
             
