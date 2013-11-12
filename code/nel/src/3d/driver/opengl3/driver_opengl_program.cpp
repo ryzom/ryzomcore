@@ -791,7 +791,7 @@ namespace NL3D
 				int ld = p->getUniformIndex( CProgramIndex::TName( CProgramIndex::Light0DirOrPos + i ) );
 				if( ld != -1 )
 				{
-					CVector v = _UserLight[ i ].getDirection();
+					CVector v = -1 * _UserLight[ i ].getDirection();
 					setUniform3f( program, ld, v.x, v.y, v.z );
 				}
 			}

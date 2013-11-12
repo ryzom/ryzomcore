@@ -420,7 +420,7 @@ namespace NL3D
 	{
 		ss << "float getIntensity" << num << "( vec3 normal3, vec3 lightDir )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "float angle = dot( normalize( -lightDir ), normal3 );" << std::endl;
+		ss << "float angle = dot( lightDir, normal3 );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "return angle;" << std::endl;
 		ss << "}" << std::endl;
@@ -440,8 +440,10 @@ namespace NL3D
 		ss << "{" << std::endl;
 		ss << "vec4 lightDir4 = modelView * vec4( light" << num << "DirOrPos, 1.0 );" << std::endl;
 		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
+		ss << "lightDir = normalize( lightDir );" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
+		ss << "normal3 = normalize( normal3 );" << std::endl;
 		ss << "vec4 lc = getIntensity" << num << "( normal3, lightDir ) * light" << num << "ColDiff + ";
 		ss << "getSpecIntensity" << num << "( normal3, lightDir ) * light" << num << "ColSpec + ";
 		ss << "light" << num << "ColAmb;" << std::endl;
@@ -454,7 +456,7 @@ namespace NL3D
 	{
 		ss << "float getIntensity" << num << "( vec3 normal3, vec3 direction3 )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "float angle = dot( normalize( direction3 ), normal3 );" << std::endl;
+		ss << "float angle = dot( direction3, normal3 );" << std::endl;
 		ss << "angle = max( 0.0, angle );" << std::endl;
 		ss << "return angle;" << std::endl;
 		ss << "}" << std::endl;
@@ -485,6 +487,7 @@ namespace NL3D
 		
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
+		ss << "normal3 = normalize( normal3 );" << std::endl;
 
 		ss << "vec4 lc = getIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColDiff + ";
 		ss << "getSpecIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColSpec + ";
