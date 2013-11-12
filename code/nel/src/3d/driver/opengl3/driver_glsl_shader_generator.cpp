@@ -266,12 +266,12 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addDiffuse()
 	{
-		ss << "uniform vec4 diffuse;" << std::endl;
+		ss << "uniform vec4 diffuseColor;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addColor()
 	{
-		ss << "uniform vec4 mcolor;" << std::endl;
+		ss << "uniform vec4 materialColor;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addConstants()
@@ -979,7 +979,7 @@ namespace NL3D
 				buildArg( stage, 0, false, arg0 );
 				buildArg( stage, 1, false, arg1 );
 
-				std::string As = "diffuse.a";
+				std::string As = "diffuseColor.a";
 
 				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
@@ -1082,7 +1082,7 @@ namespace NL3D
 				buildArg( stage, 0, true, arg0 );
 				buildArg( stage, 1, true, arg1 );
 
-				std::string As = "diffuse.a";
+				std::string As = "diffuseColor.a";
 
 				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
 				ss << "texel.a = texel.a + " << arg1 << " * " << "( 1.0 - " << As << " );" << std::endl;
@@ -1178,19 +1178,19 @@ namespace NL3D
 				switch( op )
 				{
 				case CMaterial::SrcColor:
-					ds << "mcolor.rgb";
+					ds << "materialColor.rgb";
 					break;
 
 				case CMaterial::InvSrcColor:
-					ds << "( vec3( 1.0, 1.0, 1.0 ) - mcolor.rgb )";
+					ds << "( vec3( 1.0, 1.0, 1.0 ) - materialColor.rgb )";
 					break;
 
 				case CMaterial::SrcAlpha:
-					ds << "mcolor.a";
+					ds << "materialColor.a";
 					break;
 
 				case CMaterial::InvSrcAlpha:
-					ds << "( 1.0 - mcolor.a )";
+					ds << "( 1.0 - materialColor.a )";
 					break;
 				}
 			break;
@@ -1279,7 +1279,7 @@ namespace NL3D
 		// Color map UV coords are at position 0
 		ss << "vec4 texel" << ntextures - 1 << " = texture2D( sampler" << ntextures - 1 << ", " << attribNames[ TexCoord0 ] << " );" << std::endl;
 		
-		//ss << "vec4 texel = diffuse;" << std::endl;
+		//ss << "vec4 texel = diffuseColor;" << std::endl;
 		//ss << "vec4 texel = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
 		ss << "vec4 texel = vec4( 0.0, 0.0, 0.0, 1.0 );" << std::endl;
 
@@ -1346,7 +1346,7 @@ namespace NL3D
 		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
 		ss << "vec4 texel1 = textureCube( sampler1, cubeTexCoords );" << std::endl;
 		ss << "vec4 texel;" << std::endl;
-		ss << "texel.rgb = texel0.rgb * diffuse;" << std::endl;
+		ss << "texel.rgb = texel0.rgb * diffuseColor;" << std::endl;
 		ss << "texel.a = texel0.a;" << std::endl;
 		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
 		ss << "texel.a = texel1.a;" << std::endl;
@@ -1400,15 +1400,15 @@ namespace NL3D
 			ss << "texel.rgb = texel0.rgb * constant0.rgb + constant0.rgb;" << std::endl;
 			ss << "texel.rgb = texel1.rgb * texel.rgb;" << std::endl;
 			ss << "texel.rgb = texel2.rgb * constant2.rgb + texel.rgb;" << std::endl;
-			ss << "texel.a = texel0.a * diffuse.a" << std::endl;
+			ss << "texel.a = texel0.a * diffuseColor.a" << std::endl;
 			ss << "texel.a = texel1.a * texel.a;" << std::endl;
 		}
 		else
 		{
 			ss << "texel.rgb = texel0.rgb * constant0.rgb + color.rgb;" << std::endl;
 			ss << "texel.rgb = texel1.rgb * texel.rgb;" << std::endl;
-			ss << "texel.a = texel0.a * diffuse.a;" << std::endl;
-			ss << "texel.a = texel1.a * diffuse.a;" << std::endl;
+			ss << "texel.a = texel0.a * diffuseColor.a;" << std::endl;
+			ss << "texel.a = texel1.a * diffuseColor.a;" << std::endl;
 		}
 
 		ss << "fragColor = texel;" << std::endl;
