@@ -93,7 +93,7 @@ namespace NL3D
 		"texCoord7"
 	};
 
-	const char *texelNames[ 4 ] =
+	const char *texelNames[ SHADER_MAX_TEXTURES ] =
 	{
 		"texel0",
 		"texel1",
@@ -802,16 +802,13 @@ namespace NL3D
 	void CGLSLShaderGenerator::generateNormalPS()
 	{
 		uint sampler = 0;
-		for( int i = TexCoord0; i < NumOffsets; i++ )
+		for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
 		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
-			{
-				ss << "uniform sampler2D sampler" << sampler;
-				ss << ";";
-				ss << std::endl;
-			}
+			if( desc->getUseTexStage( i ) )
+				ss << "uniform sampler2D sampler" << sampler << ";" << std::endl;
 			sampler++;
 		}
+
 		addColor();
 		addConstants();
 		addAlphaTreshold();
@@ -840,13 +837,19 @@ namespace NL3D
 
 		bool textures = false;
 		sampler = 0;
-		for( int i = TexCoord0; i < NumOffsets; i++ )
+		for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
 		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			if( desc->getUseTexStage( i ) )
 			{
-				ss << "vec4 texel" << sampler;
-				ss << " = texture2D( sampler" << sampler << ",";
-				ss << attribNames[ i ] << " );" << std::endl;
+				ss << "vec4 texel" << sampler << " = texture2D( sampler" << sampler << ",";
+				
+				if( !desc->getUseFirstTexCoords() )
+					ss << attribNames[ TexCoord0 + i ] << " );";
+				else
+					ss << attribNames[ TexCoord0 ] << " );";
+
+				ss << std::endl;
+
 				textures = true;
 			}
 			sampler++;
@@ -888,14 +891,13 @@ namespace NL3D
 	void CGLSLShaderGenerator::generateTexEnv()
 	{
 		uint32 stage = 0;
-		for( int i = TexCoord0; i < TexCoord4; i++ )
+		for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
 		{
-			if( hasFlag( vbFormat, vertexFlags[ i ] ) )
+			if( desc->getUseTexStage( i ) )
 			{
 				generateTexEnvRGB( stage );
 				generateTexEnvAlpha( stage );
 			}
-
 			stage++;
 		}
 	}

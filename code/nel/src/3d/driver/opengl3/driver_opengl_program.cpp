@@ -31,6 +31,47 @@ namespace
 		"constant3"
 	};
 
+
+	uint16 vertexFlags[ NL3D::CVertexBuffer::NumValue ] = 
+	{
+		NL3D::CVertexBuffer::PositionFlag,
+		NL3D::CVertexBuffer::WeightFlag,
+		NL3D::CVertexBuffer::NormalFlag,
+		NL3D::CVertexBuffer::PrimaryColorFlag,
+		NL3D::CVertexBuffer::SecondaryColorFlag,
+		NL3D::CVertexBuffer::FogFlag,
+		NL3D::CVertexBuffer::PaletteSkinFlag,
+		0,
+		NL3D::CVertexBuffer::TexCoord0Flag,
+		NL3D::CVertexBuffer::TexCoord1Flag,
+		NL3D::CVertexBuffer::TexCoord2Flag,
+		NL3D::CVertexBuffer::TexCoord3Flag,
+		NL3D::CVertexBuffer::TexCoord4Flag,
+		NL3D::CVertexBuffer::TexCoord5Flag,
+		NL3D::CVertexBuffer::TexCoord6Flag,
+		NL3D::CVertexBuffer::TexCoord7Flag
+	};
+
+	enum AttribOffset
+	{
+		Position,
+		Weight,
+		Normal,
+		PrimaryColor,
+		SecondaryColor,
+		Fog,
+		PaletteSkin,
+		Empty,
+		TexCoord0,
+		TexCoord1,
+		TexCoord2,
+		TexCoord3,
+		TexCoord4,
+		TexCoord5,
+		TexCoord6,
+		TexCoord7,
+		NumOffsets
+	};
 }
 
 namespace NL3D
@@ -443,14 +484,34 @@ namespace NL3D
 		if( mat.getShader() == CMaterial::LightMap )
 			desc.setNLightMaps( mat._LightMaps.size() );
 		
-		int i = 0;
+		//int i = 0;
 
 		if( mat.getShader() == CMaterial::Normal )
 		{
 			int maxTextures = std::min( int( SHADER_MAX_TEXTURES ), int( IDRV_MAT_MAXTEXTURES ) );
-			for( i = 0; i < maxTextures; i++ )
+			for( int i = 0; i < maxTextures; i++ )
 			{
 				desc.setTexEnvMode( i, mat.getTexEnvMode( i ) );
+			}
+
+			for( int i = 0; i < maxTextures; i++ )
+			{
+				if( desc.hasVBFlags( vertexFlags[ TexCoord0 + i ] ) )
+				{
+					desc.setUseTexStage( i, true );
+				}
+			}
+
+			if( !desc.getUseTexStage( 1 ) )
+			{
+				for( int i = 1; i < maxTextures; i++ )
+				{
+					if( mat.getTexture( i ) != NULL )
+					{
+						desc.setUseTexStage( i, true );
+						desc.setUseFirstTexCoords( true );
+					}
+				}
 			}
 		}
 

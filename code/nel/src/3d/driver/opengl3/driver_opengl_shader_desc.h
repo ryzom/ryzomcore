@@ -92,6 +92,10 @@ namespace NL3D
 			for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
 				lightMode[ i ] = Nolight;
 			
+			for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
+				useTextureStage[ i ] = false;
+			useFirstTextureCoordSet = false;
+			
 			features = None;
 			shaderType = Normal;
 			vbFlags = 0;
@@ -135,8 +139,15 @@ namespace NL3D
 
 			if( shaderType == Normal )
 			{
+				if( useFirstTextureCoordSet != o.useFirstTextureCoordSet )
+					return false;
+
 				for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
 					if( texEnvMode[ i ] != o.texEnvMode[ i ] )
+						return false;
+
+				for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
+					if( useTextureStage[ i ] != o.useTextureStage[ i ] )
 						return false;
 			}
 
@@ -151,7 +162,21 @@ namespace NL3D
 		}
 
 		void setTexEnvMode( uint32 index, uint32 mode ){ texEnvMode[ index ] = mode; }
+		
+		void setUseFirstTexCoords( bool b ){ useFirstTextureCoordSet = b; }
+		bool getUseFirstTexCoords() const{ return useFirstTextureCoordSet; }
+
+		void setUseTexStage( uint8 stage, bool b ){ useTextureStage[ stage ] = b; }
+		bool getUseTexStage( uint8 stage ) const{ return useTextureStage[ stage ]; }
+
 		void setVBFlags( uint32 flags ){ vbFlags = flags; }
+		bool hasVBFlags( uint32 flags ) const{
+			if( ( vbFlags & flags ) != 0 )
+				return true;
+			else
+				return false;
+		}
+
 		void setShaderType( uint32 type ){ shaderType = type; }
 		void setNLightMaps( uint32 n ){ nlightmaps = n; }
 		
@@ -227,6 +252,8 @@ namespace NL3D
 
 		uint32 features;
 		uint32 texEnvMode[ SHADER_MAX_TEXTURES ];
+		bool useTextureStage[ SHADER_MAX_TEXTURES ];
+		bool useFirstTextureCoordSet;
 		uint32 vbFlags;
 		uint32 shaderType;
 		uint32 nlightmaps;
