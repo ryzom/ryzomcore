@@ -1287,6 +1287,7 @@ private:
 	void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v);
 	void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3);
 	void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba);
+	void			setUniform3x3f(TProgram program, uint index, const float *src );
 	void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m);
 	void			setUniform4x4f(TProgram program, uint index, const float *src );
 	void			setUniform4fv(TProgram program, uint index, size_t num, const float *src);

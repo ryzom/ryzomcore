@@ -284,21 +284,7 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addNormalMatrix()
 	{
-		ss << "mat3 normalMatrix;" << std::endl;
-	}
-
-	void CGLSLShaderGenerator::addNormalFromMVFunction()
-	{
-		ss << "// Calculates the normal matrix from the modelview matrix" << std::endl;
-		ss << "void calcNMFromMV()" << std::endl;
-		ss << "{" << std::endl;
-		ss << "normalMatrix[ 0 ] = modelView[ 0 ].xyz;" << std::endl;
-		ss << "normalMatrix[ 1 ] = modelView[ 1 ].xyz;" << std::endl;
-		ss << "normalMatrix[ 2 ] = modelView[ 2 ].xyz;" << std::endl;
-		ss << "normalMatrix = inverse( normalMatrix );" << std::endl;
-		ss << "normalMatrix = transpose( normalMatrix );" << std::endl;
-		ss << "}" << std::endl;
-		ss << std::endl;
+		ss << "uniform mat3 normalMatrix;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addAlphaTreshold()
@@ -573,8 +559,6 @@ namespace NL3D
 			addLightOutsVS();
 			ss << std::endl;
 
-			addNormalFromMVFunction();
-
 			addLightsFunctionVS();
 			ss << std::endl;
 		}
@@ -582,9 +566,6 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 
-		if( desc->lightingEnabled() )
-			ss << "calcNMFromMV();" << std::endl;
-		
 		ss << "gl_Position = modelViewProjection * " << "v" << attribNames[ 0 ] << ";" << std::endl;
 
 		if( desc->fogEnabled() || desc->hasPointLight() )
@@ -632,8 +613,6 @@ namespace NL3D
 			addLightOutsVS();
 			ss << std::endl;
 
-			addNormalFromMVFunction();
-
 			addLightsFunctionVS();
 			ss << std::endl;
 		}
@@ -648,9 +627,6 @@ namespace NL3D
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec4 eyePosition = modelView * v" << attribNames[ 0 ] << ";" << std::endl;
-
-		if( desc->lightingEnabled() )
-			ss << "calcNMFromMV();" << std::endl;
 
 		if( desc->hasPointLight() )
 			ss << "ecPos4 = eyePosition;" << std::endl;

@@ -119,6 +119,8 @@ struct CProgramIndex
 		ModelViewProjectionTranspose, 
 		ModelViewProjectionInverseTranspose,
 
+		NormalMatrix,
+
 		Fog,
 
 		FogStart,

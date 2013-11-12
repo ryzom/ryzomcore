@@ -59,9 +59,6 @@ namespace NL3D
 		/// Adds the normal matrix declaration to the program
 		void addNormalMatrix();
 
-		/// Adds the normal matrix calculating function to the program ( calculated from the inverse transpose of the upper left 3x3 part )
-		void addNormalFromMVFunction();
-		
 		//////////////////////////// Alpha Threshold //////////////////
 		
 		/// Adds the alpha threshold uniform to the program

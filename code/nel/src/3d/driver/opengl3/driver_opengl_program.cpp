@@ -402,6 +402,12 @@ namespace NL3D
 		nglProgramUniform4f( id, index, rgba.R, rgba.G, rgba.B, rgba.A );
 	}
 
+	void CDriverGL3::setUniform3x3f( TProgram program, uint index, const float *src )
+	{
+		uint32 id = getProgramId( program );
+		nglProgramUniformMatrix3fv( id, index, 1, false, src );
+	}
+
 	void CDriverGL3::setUniform4x4f( TProgram program, uint index, const CMatrix &m )
 	{
 		uint32 id = getProgramId( program );
@@ -778,12 +784,25 @@ namespace NL3D
 			setUniform4x4f( program, mvIndex, _ModelViewMatrix );
 		}
 
-		/*
-		int nmIdx = currentProgram->getUniformIndex( IProgram::NormalMatrix );
+		int nmIdx = p->getUniformIndex( CProgramIndex::NormalMatrix );
 		if( nmIdx != -1 )
 		{
+			// normal matrix is the inverse-transpose of the rotation part of the modelview matrix
+			// Inverse-transpose of the rotation matrix, is itself
+			const float *mv = _ModelViewMatrix.get();
+			float nm[ 3 * 3 ];
+			nm[ 0 ] = mv[ 0 ];
+			nm[ 1 ] = mv[ 1 ];
+			nm[ 2 ] = mv[ 2 ];
+			nm[ 3 ] = mv[ 4 ];
+			nm[ 4 ] = mv[ 5 ];
+			nm[ 5 ] = mv[ 6 ];
+			nm[ 6 ] = mv[ 8 ];
+			nm[ 7 ] = mv[ 9 ];
+			nm[ 8 ] = mv[ 10 ];
+
+			setUniform3x3f( program, nmIdx, nm );
 		}
-		*/
 
 		int fogStartIdx = p->getUniformIndex( CProgramIndex::FogStart );
 		if( fogStartIdx != -1 )

@@ -87,7 +87,9 @@ const char *CProgramIndex::Names[NUM_UNIFORMS] =
 	"modelViewProjection", 
 	"modelViewProjectionInverse", 
 	"modelViewProjectionTranspose", 
-	"modelViewProjectionInverseTranspose", 
+	"modelViewProjectionInverseTranspose",
+
+	"normalMatrix",
 
 	"fog",
 
