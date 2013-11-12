@@ -778,6 +778,12 @@ namespace NL3D
 			setUniform4x4f( program, mvpIndex, mvp );
 		}
 
+		int vmIndex = p->getUniformIndex( CProgramIndex::ViewMatrix );
+		if( vmIndex != -1 )
+		{
+			setUniform4x4f( program, vmIndex, _ViewMtx );
+		}
+
 		int mvIndex = p->getUniformIndex( CProgramIndex::ModelView );
 		if( mvIndex != -1 )
 		{
@@ -881,7 +887,11 @@ namespace NL3D
 				if( lp != -1 )
 				{
 					CVector v = _UserLight[ i ].getPosition();
-					setUniform3f( program, lp, v.x, v.y, v.z );
+					float pos[ 3 ];
+					pos[ 0 ] = v.x - _PZBCameraPos.x;
+					pos[ 1 ] = v.y - _PZBCameraPos.y;
+					pos[ 2 ] = v.z - _PZBCameraPos.z;
+					setUniform3f( program, lp, pos[ 0 ], pos[ 1 ], pos[ 2 ] );
 				}
 			}
 

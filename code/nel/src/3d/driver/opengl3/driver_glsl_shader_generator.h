@@ -59,6 +59,8 @@ namespace NL3D
 		/// Adds the normal matrix declaration to the program
 		void addNormalMatrix();
 
+		void addViewMatrix();
+
 		//////////////////////////// Alpha Threshold //////////////////
 		
 		/// Adds the alpha threshold uniform to the program

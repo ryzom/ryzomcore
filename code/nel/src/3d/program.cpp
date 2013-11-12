@@ -90,9 +90,9 @@ const char *CProgramIndex::Names[NUM_UNIFORMS] =
 	"modelViewProjectionInverseTranspose",
 
 	"normalMatrix",
+	"viewMatrix",
 
 	"fog",
-
 	"fogStart",
 	"fogEnd",
 	"fogColor",

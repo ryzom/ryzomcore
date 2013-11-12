@@ -287,6 +287,11 @@ namespace NL3D
 		ss << "uniform mat3 normalMatrix;" << std::endl;
 	}
 
+	void CGLSLShaderGenerator::addViewMatrix()
+	{
+		ss << "uniform mat4 viewMatrix;" << std::endl;
+	}
+
 	void CGLSLShaderGenerator::addAlphaTreshold()
 	{
 		ss << "uniform float alphaTreshold;" << std::endl;
@@ -424,7 +429,7 @@ namespace NL3D
 
 		ss << "vec4 getLight" << num << "Color()" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 lightDir4 = modelView * vec4( light" << num << "DirOrPos, 1.0 );" << std::endl;
+		ss << "vec4 lightDir4 = viewMatrix * vec4( light" << num << "DirOrPos, 1.0 );" << std::endl;
 		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
 		ss << "lightDir = normalize( lightDir );" << std::endl;
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
@@ -461,7 +466,7 @@ namespace NL3D
 		ss << "vec4 getLight" << num << "Color()" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
-		ss << "vec4 lightPos4 = modelView * vec4( light" << num << "DirOrPos, 1.0 );" << std::endl;
+		ss << "vec4 lightPos4 = viewMatrix * vec4( light" << num << "DirOrPos, 1.0 );" << std::endl;
 		ss << "vec3 lightPos = lightPos4.xyz / lightPos4.w;" << std::endl;
 		ss << "vec3 lightDirection = lightPos - ecPos3;" << std::endl;
 		ss << "float lightDistance = length( lightDirection );" << std::endl;
@@ -538,9 +543,13 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::generateNormalVS()
 	{
-		if( desc->fogEnabled() || desc->lightingEnabled() )
+		if( desc->fogEnabled() || desc->hasPointLight() )
 		{
 			ss << "uniform mat4 modelView;" << std::endl;
+		}
+		if( desc->lightingEnabled() )
+		{
+			addViewMatrix();
 		}
 		if( desc->fogEnabled() || desc->hasPointLight() )
 		{
@@ -608,6 +617,7 @@ namespace NL3D
 
 		if( desc->lightingEnabled() )
 		{
+			addViewMatrix();
 			addNormalMatrix();
 			addLightUniformsVS();
 			addLightOutsVS();

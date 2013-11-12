@@ -120,9 +120,9 @@ struct CProgramIndex
 		ModelViewProjectionInverseTranspose,
 
 		NormalMatrix,
+		ViewMatrix,
 
 		Fog,
-
 		FogStart,
 		FogEnd,
 		FogColor,
