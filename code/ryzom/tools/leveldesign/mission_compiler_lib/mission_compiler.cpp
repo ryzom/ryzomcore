@@ -1835,11 +1835,11 @@ void CMissionData::parseMissionHeader(NLLIGO::IPrimitive *prim)
 //	_MissionTitle.init(*this, prim, vs); 
 	_MissionDescriptionRaw = getPropertyArray(prim, "mission_description", false, false);
 //	_MissionDescription.init(*this, prim, vs);
-	_MonoInstance = strlwr(getProperty(prim, "mono_instance", true, false)) == "true";
-	_RunOnce = strlwr(getProperty(prim, "run_only_once", true, false)) == "true";
-	_Replayable = strlwr(getProperty(prim, "replayable", true, false)) == "true";
+	_MonoInstance = toLower(getProperty(prim, "mono_instance", true, false)) == "true";
+	_RunOnce = toLower(getProperty(prim, "run_only_once", true, false)) == "true";
+	_Replayable = toLower(getProperty(prim, "replayable", true, false)) == "true";
 	
-	_NeedValidation = strlwr(getProperty(prim, "need_validation", true, false)) == "true";
+	_NeedValidation = toLower(getProperty(prim, "need_validation", true, false)) == "true";
 	
 	_MissionAutoMenuRaw = getPropertyArray(prim, "phrase_auto_menu", false, false);
 
