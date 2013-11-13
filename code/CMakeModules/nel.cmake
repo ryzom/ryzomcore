@@ -789,12 +789,7 @@ MACRO(NL_SETUP_BUILD)
             SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
           ENDIF(CMAKE_IOS_SIMULATOR_SYSROOT AND TARGET_X86)
         ELSE(IOS)
-          IF(CMAKE_OSX_SYSROOT)
-            ADD_PLATFORM_FLAGS("-isysroot ${CMAKE_OSX_SYSROOT}")
-          ENDIF(CMAKE_OSX_SYSROOT)
-
           # Always force -mmacosx-version-min to override environement variable
-          ADD_PLATFORM_FLAGS("-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
           SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
         ENDIF(IOS)
 
