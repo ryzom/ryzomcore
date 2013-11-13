@@ -2252,6 +2252,8 @@ void	CDriverGL::enablePolygonSmoothing(bool smooth)
 {
 	H_AUTO_OGL(CDriverGL_enablePolygonSmoothing);
 
+	if (_PolygonSmooth == smooth) return;
+
 #ifndef USE_OPENGLES
 	if(smooth)
 		glEnable(GL_POLYGON_SMOOTH);
