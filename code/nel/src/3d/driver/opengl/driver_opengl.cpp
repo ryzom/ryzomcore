@@ -2191,6 +2191,7 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 		res = nwglSwapIntervalEXT(_Interval) == TRUE;
 	}
 #elif defined(NL_OS_MAC)
+	[_ctx setValues:&interval forParameter:NSOpenGLCPSwapInterval];
 #elif defined(NL_OS_UNIX)
 	if (_win && _Extensions.GLXEXTSwapControl)
 	{
