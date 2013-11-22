@@ -346,7 +346,7 @@ void LoadRootPrimitiveCommand::redo()
 	// set the primitive context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = primitives;
 
-	NLLIGO::loadXmlPrimitiveFile(*primitives, m_fileName.toStdString(), *Utils::ligoConfig());
+	NLLIGO::loadXmlPrimitiveFile(*primitives, m_fileName.toUtf8().constData(), *Utils::ligoConfig());
 
 	// unset the context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
@@ -358,7 +358,7 @@ void LoadRootPrimitiveCommand::redo()
 	// Check property types
 	if (Utils::recursiveUpdateDefaultValues(primitives->RootNode))
 	{
-		nlwarning("In file (%s) : Some primitives have been modified to initialise their default values\nor to change their properties type.", m_fileName.toStdString().c_str());
+		nlwarning("In file (%s) : Some primitives have been modified to initialise their default values\nor to change their properties type.", m_fileName.toUtf8().constData());
 	}
 
 	m_rootPrimIndex = m_model->createRootPrimitiveNode(m_fileName, primitives);
@@ -460,15 +460,17 @@ void AddPrimitiveByClassCommand::redo()
 	PrimitiveNode *parentNode = static_cast<PrimitiveNode *>(parentIndex.internalPointer());
 	const NLLIGO::CPrimitiveClass *primClass = parentNode->primitiveClass();
 
+	std::string className = m_className.toUtf8().constData();
+
 	int id = 0;
-	while (primClass->DynamicChildren[id].ClassName != m_className.toStdString())
+	while (primClass->DynamicChildren[id].ClassName != className)
 		++id;
 
 	// set the primitive context
 	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = parentNode->rootPrimitiveNode()->primitives();
 
 	QString namePrimititve = QString("%1_%2").arg(m_className).arg(parentNode->childCount());
-	NLLIGO::IPrimitive *newPrimitive = Utils::createPrimitive(m_className.toStdString().c_str(), namePrimititve.toStdString().c_str(),
+	NLLIGO::IPrimitive *newPrimitive = Utils::createPrimitive(m_className.toUtf8().constData(), namePrimititve.toUtf8().constData(),
 									   NLMISC::CVector(m_initPos.x(), -m_initPos.y(), 0.0), m_delta, primClass->DynamicChildren[id].Parameters, parentNode->primitive());
 
 	// unset the context

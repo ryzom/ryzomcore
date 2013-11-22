@@ -191,7 +191,7 @@ void ListZonesWidget::updateFilters_1(const QString &value)
 {
 	disableSignals(true);
 	std::vector<std::string> allCategoryValues;
-	m_zoneBuilder->getZoneBank().getCategoryValues(value.toStdString(), allCategoryValues);
+	m_zoneBuilder->getZoneBank().getCategoryValues(value.toUtf8().constData(), allCategoryValues);
 	m_ui.categoryValueComboBox_1->clear();
 	for(size_t i = 0; i < allCategoryValues.size(); ++i)
 		m_ui.categoryValueComboBox_1->addItem(QString(allCategoryValues[i].c_str()));
@@ -204,7 +204,7 @@ void ListZonesWidget::updateFilters_2(const QString &value)
 {
 	disableSignals(true);
 	std::vector<std::string> allCategoryValues;
-	m_zoneBuilder->getZoneBank().getCategoryValues(value.toStdString(), allCategoryValues);
+	m_zoneBuilder->getZoneBank().getCategoryValues(value.toUtf8().constData(), allCategoryValues);
 
 	m_ui.categoryValueComboBox_2->clear();
 	for(size_t i = 0; i < allCategoryValues.size(); ++i)
@@ -218,7 +218,7 @@ void ListZonesWidget::updateFilters_3(const QString &value)
 {
 	disableSignals(true);
 	std::vector<std::string> allCategoryValues;
-	m_zoneBuilder->getZoneBank().getCategoryValues(value.toStdString(), allCategoryValues);
+	m_zoneBuilder->getZoneBank().getCategoryValues(value.toUtf8().constData(), allCategoryValues);
 
 	m_ui.categoryValueComboBox_3->clear();
 	for(size_t i = 0; i < allCategoryValues.size(); ++i)
@@ -232,7 +232,7 @@ void ListZonesWidget::updateFilters_4(const QString &value)
 {
 	disableSignals(true);
 	std::vector<std::string> allCategoryValues;
-	m_zoneBuilder->getZoneBank().getCategoryValues(value.toStdString(), allCategoryValues);
+	m_zoneBuilder->getZoneBank().getCategoryValues(value.toUtf8().constData(), allCategoryValues);
 
 	m_ui.categoryValueComboBox_4->clear();
 	for(size_t i = 0; i < allCategoryValues.size(); ++i)
@@ -249,37 +249,37 @@ void ListZonesWidget::updateListZones()
 	zoneBank.resetSelection ();
 
 	if(m_ui.categoryTypeComboBox_1->currentIndex() > 0 )
-		zoneBank.addOrSwitch (m_ui.categoryTypeComboBox_1->currentText().toStdString()
-							  , m_ui.categoryValueComboBox_1->currentText().toStdString());
+		zoneBank.addOrSwitch (m_ui.categoryTypeComboBox_1->currentText().toUtf8().constData()
+							  , m_ui.categoryValueComboBox_1->currentText().toUtf8().constData());
 
 	if(m_ui.categoryTypeComboBox_2->currentIndex() > 0 )
 	{
 		if (m_ui.logicComboBox_2->currentIndex() == 0) // AND switch wanted
-			zoneBank.addAndSwitch(m_ui.categoryTypeComboBox_2->currentText().toStdString()
-								  ,m_ui.categoryValueComboBox_2->currentText().toStdString());
+			zoneBank.addAndSwitch(m_ui.categoryTypeComboBox_2->currentText().toUtf8().constData()
+								  ,m_ui.categoryValueComboBox_2->currentText().toUtf8().constData());
 		else // OR switch wanted
-			zoneBank.addOrSwitch(m_ui.categoryTypeComboBox_2->currentText().toStdString()
-								 ,m_ui.categoryValueComboBox_2->currentText().toStdString());
+			zoneBank.addOrSwitch(m_ui.categoryTypeComboBox_2->currentText().toUtf8().constData()
+								 ,m_ui.categoryValueComboBox_2->currentText().toUtf8().constData());
 	}
 
 	if(m_ui.categoryTypeComboBox_3->currentIndex() > 0 )
 	{
 		if (m_ui.logicComboBox_3->currentIndex() == 0) // AND switch wanted
-			zoneBank.addAndSwitch(m_ui.categoryTypeComboBox_3->currentText().toStdString()
-								  ,m_ui.categoryValueComboBox_3->currentText().toStdString());
+			zoneBank.addAndSwitch(m_ui.categoryTypeComboBox_3->currentText().toUtf8().constData()
+								  ,m_ui.categoryValueComboBox_3->currentText().toUtf8().constData());
 		else // OR switch wanted
-			zoneBank.addOrSwitch(m_ui.categoryTypeComboBox_3->currentText().toStdString()
-								 ,m_ui.categoryValueComboBox_3->currentText().toStdString());
+			zoneBank.addOrSwitch(m_ui.categoryTypeComboBox_3->currentText().toUtf8().constData()
+								 ,m_ui.categoryValueComboBox_3->currentText().toUtf8().constData());
 	}
 
 	if(m_ui.categoryTypeComboBox_4->currentIndex() > 0 )
 	{
 		if (m_ui.logicComboBox_4->currentIndex() == 0) // AND switch wanted
-			zoneBank.addAndSwitch(m_ui.categoryTypeComboBox_4->currentText().toStdString()
-								  ,m_ui.categoryValueComboBox_4->currentText().toStdString());
+			zoneBank.addAndSwitch(m_ui.categoryTypeComboBox_4->currentText().toUtf8().constData()
+								  ,m_ui.categoryValueComboBox_4->currentText().toUtf8().constData());
 		else // OR switch wanted
-			zoneBank.addOrSwitch(m_ui.categoryTypeComboBox_4->currentText().toStdString()
-								 ,m_ui.categoryValueComboBox_4->currentText().toStdString());
+			zoneBank.addOrSwitch(m_ui.categoryTypeComboBox_4->currentText().toUtf8().constData()
+								 ,m_ui.categoryValueComboBox_4->currentText().toUtf8().constData());
 	}
 
 	std::vector<NLLIGO::CZoneBankElement *> currentSelection;

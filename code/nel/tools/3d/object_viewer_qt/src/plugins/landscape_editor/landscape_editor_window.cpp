@@ -311,7 +311,7 @@ void LandscapeEditorWindow::saveLandscape(int row, bool force)
 							   tr("NeL Ligo land file (*.land)"));
 			if (!fileName.isEmpty())
 			{
-				regionObject->setFileName(fileName.toStdString());
+				regionObject->setFileName(fileName.toUtf8().constData());
 				regionObject->save();
 				regionObject->setModified(false);
 				item->setText(fileName);

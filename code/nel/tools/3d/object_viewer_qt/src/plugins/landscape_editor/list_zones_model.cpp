@@ -128,7 +128,7 @@ QPixmap *ListZonesModel::getPixmap(const QString &zoneName) const
 {
 	QPixmap *result = 0;
 	if (!m_pixmapMap.contains(zoneName))
-		nlwarning("QPixmap %s not found", zoneName.toStdString().c_str());
+		nlwarning("QPixmap %s not found", zoneName.toUtf8().constData());
 	else
 		result = m_pixmapMap.value(zoneName);
 	return result;

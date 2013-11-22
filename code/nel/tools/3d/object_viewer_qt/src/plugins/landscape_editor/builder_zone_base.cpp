@@ -81,7 +81,7 @@ int ZoneBuilderBase::loadZoneRegion(const QString &fileName, int defaultId)
 {
 	LandscapeItem landItem;
 	landItem.zoneRegionObject = new ZoneRegionObject();
-	landItem.zoneRegionObject->load(fileName.toStdString());
+	landItem.zoneRegionObject->load(fileName.toUtf8().constData());
 
 	if (!checkOverlaps(landItem.zoneRegionObject->ligoZoneRegion()))
 	{
@@ -138,8 +138,8 @@ bool ZoneBuilderBase::initZoneBank (const QString &pathName)
 	std::string error;
 	Q_FOREACH(QString file, listFiles)
 	{
-		//nlinfo(file.toStdString().c_str());
-		if (!m_zoneBank.addElement((pathName + file).toStdString(), error))
+		//nlinfo(file.toUtf8().constData());
+		if (!m_zoneBank.addElement((pathName + file).toUtf8().constData(), error))
 			QMessageBox::critical(0, QObject::tr("Landscape editor"), QString(error.c_str()), QMessageBox::Ok);
 	}
 	delete dir;
