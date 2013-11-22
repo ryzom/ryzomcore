@@ -190,12 +190,12 @@ void PropertyEditorWidget::updateSelection(Node *node)
 
 void PropertyEditorWidget::propertyChanged(QtProperty *property)
 {
-	nlinfo(QString("property %1 changed").arg(property->propertyName()).toStdString().c_str());
+	nlinfo(QString("property %1 changed").arg(property->propertyName()).toUtf8().constData());
 }
 
 void PropertyEditorWidget::resetProperty(QtProperty *property)
 {
-	nlinfo(QString("property %1 reset").arg(property->propertyName()).toStdString().c_str());
+	nlinfo(QString("property %1 reset").arg(property->propertyName()).toUtf8().constData());
 }
 
 QtProperty *PropertyEditorWidget::addBoolProperty(const NLLIGO::IProperty *property,
@@ -248,7 +248,7 @@ QtProperty *PropertyEditorWidget::addConstStringProperty(const NLLIGO::IProperty
 		// Find index of current value
 		for (int i = 0; i < listEnums.size(); i++)
 		{
-			if (value == listEnums[i].toStdString())
+			if (value == std::string(listEnums[i].toUtf8().constData()))
 			{
 				m_enumManager->setValue(prop, i);
 				break;
@@ -346,7 +346,7 @@ QtProperty *PropertyEditorWidget::addConstStringArrayProperty(const NLLIGO::IPro
 		// Find index of current value
 		//for (int i = 0; i < listEnums.size(); i++)
 		//{
-		//	if (value == listEnums[i].toStdString())
+		//	if (value == std::string(listEnums[i].toUtf8().constData()))
 		//	{
 		//		m_enumManager->setValue(prop, i);
 		//		break;
