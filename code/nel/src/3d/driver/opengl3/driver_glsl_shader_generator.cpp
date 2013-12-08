@@ -183,6 +183,13 @@ namespace NL3D
 		}
 		ss << std::endl;
 
+		if( !desc->useTextures() )
+		{
+			addAmbient();
+			addDiffuse();
+			addSpecular();
+		}
+
 		switch( material->getShader() )
 		{
 		case CMaterial::Normal:
@@ -264,9 +271,19 @@ namespace NL3D
 		ps.assign( ss.str() );
 	}
 
+	void CGLSLShaderGenerator::addAmbient()
+	{
+		ss << "uniform vec4 ambientColor;" << std::endl;
+	}
+
 	void CGLSLShaderGenerator::addDiffuse()
 	{
 		ss << "uniform vec4 diffuseColor;" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::addSpecular()
+	{
+		ss << "uniform vec4 specularColor;" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::addColor()
@@ -435,9 +452,20 @@ namespace NL3D
 		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "normal3 = normalize( normal3 );" << std::endl;
-		ss << "vec4 lc = getIntensity" << num << "( normal3, lightDir ) * light" << num << "ColDiff + ";
-		ss << "getSpecIntensity" << num << "( normal3, lightDir ) * light" << num << "ColSpec + ";
-		ss << "light" << num << "ColAmb;" << std::endl;
+
+		if( desc->useTextures() || ( material->getShader() == CMaterial::LightMap ) )
+		{
+			ss << "vec4 lc = getIntensity" << num << "( normal3, lightDir ) * light" << num << "ColDiff + ";
+			ss << "getSpecIntensity" << num << "( normal3, lightDir ) * light" << num << "ColSpec + ";
+			ss << "light" << num << "ColAmb;" << std::endl;
+		}
+		else
+		{
+			ss << "vec4 lc = getIntensity" << num << "( normal3, lightDir ) * light" << num << "ColDiff * diffuseColor + ";
+			ss << "getSpecIntensity" << num << "( normal3, lightDir ) * light" << num << "ColSpec * specularColor + ";
+			ss << "light" << num << "ColAmb * ambientColor;" << std::endl;
+		}
+
 		ss << "return lc;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
@@ -480,9 +508,18 @@ namespace NL3D
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "normal3 = normalize( normal3 );" << std::endl;
 
-		ss << "vec4 lc = getIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColDiff + ";
-		ss << "getSpecIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColSpec + ";
-		ss << "light" << num << "ColAmb;" << std::endl;
+		if( desc->useTextures() || ( material->getShader() == CMaterial::LightMap ) )
+		{
+			ss << "vec4 lc = getIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColDiff + ";
+			ss << "getSpecIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColSpec + ";
+			ss << "light" << num << "ColAmb;" << std::endl;
+		}
+		else
+		{
+			ss << "vec4 lc = getIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColDiff * diffuseColor+ ";
+			ss << "getSpecIntensity" << num << "( normal3, lightDirection ) * light" << num << "ColSpec * specularColor + ";
+			ss << "light" << num << "ColAmb * ambientColor;" << std::endl;
+		}
 
 		ss << "lc = lc / attenuation;" << std::endl;
 		ss << "return lc;" << std::endl;

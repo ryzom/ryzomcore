@@ -47,8 +47,14 @@ namespace NL3D
 		void setShaderDesc( CShaderDesc *d ){ desc = d; }
 
 	private:
+		/// Adds ambient color constant uniform declaration to the program
+		void addAmbient();
+
 		/// Adds diffuse constant uniform declaration  to the program
 		void addDiffuse();
+
+		/// Adds specular color constant uniform declaration to the program
+		void addSpecular();
 
 		/// Adds Color constant uniform declaration to the program
 		void addColor();

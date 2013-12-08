@@ -494,6 +494,8 @@ namespace NL3D
 
 		if( mat.getShader() == CMaterial::Normal )
 		{
+			bool useTextures = false;
+
 			int maxTextures = std::min( int( SHADER_MAX_TEXTURES ), int( IDRV_MAT_MAXTEXTURES ) );
 			for( int i = 0; i < maxTextures; i++ )
 			{
@@ -505,10 +507,11 @@ namespace NL3D
 				if( desc.hasVBFlags( vertexFlags[ TexCoord0 + i ] ) )
 				{
 					desc.setUseTexStage( i, true );
+					useTextures = true;
 				}
 			}
 
-			if( !desc.getUseTexStage( 1 ) )
+			if( useTextures && !desc.getUseTexStage( 1 ) )
 			{
 				for( int i = 1; i < maxTextures; i++ )
 				{
@@ -518,6 +521,11 @@ namespace NL3D
 						desc.setUseFirstTexCoords( true );
 					}
 				}
+			}
+			else
+			if( !useTextures )
+			{
+				desc.setNoTextures( true );
 			}
 		}
 

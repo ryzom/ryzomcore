@@ -95,6 +95,7 @@ namespace NL3D
 			for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
 				useTextureStage[ i ] = false;
 			useFirstTextureCoordSet = false;
+			noTextures = true;
 			
 			features = None;
 			shaderType = Normal;
@@ -110,6 +111,9 @@ namespace NL3D
 
 		bool operator==( const CShaderDesc &o ) const
 		{
+			if( noTextures != o.noTextures )
+				return false;
+
 			if( shaderType != o.shaderType )
 				return false;
 
@@ -168,6 +172,9 @@ namespace NL3D
 
 		void setUseTexStage( uint8 stage, bool b ){ useTextureStage[ stage ] = b; }
 		bool getUseTexStage( uint8 stage ) const{ return useTextureStage[ stage ]; }
+
+		void setNoTextures( bool b ){ noTextures = b; }
+		bool useTextures() const{ return !noTextures; }
 
 		void setVBFlags( uint32 flags ){ vbFlags = flags; }
 		bool hasVBFlags( uint32 flags ) const{
@@ -254,6 +261,7 @@ namespace NL3D
 		uint32 texEnvMode[ SHADER_MAX_TEXTURES ];
 		bool useTextureStage[ SHADER_MAX_TEXTURES ];
 		bool useFirstTextureCoordSet;
+		bool noTextures;
 		uint32 vbFlags;
 		uint32 shaderType;
 		uint32 nlightmaps;
