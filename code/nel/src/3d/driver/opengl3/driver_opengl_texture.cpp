@@ -372,9 +372,10 @@ GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
 		case ITexture::AlphaLuminance: return GL_LUMINANCE8_ALPHA8;
 		case ITexture::DsDt:
 			{
+				return GL_RG8;
 				// Used to check for ATI EMBM stuff
-				nlassert(0);
-				return 0;
+				//nlassert(0);
+				//return 0;
 			}
 		break;
 		default:
@@ -401,34 +402,20 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 		}
 	}
 
-	if (glfmt == GL_DSDT_NV)
-	{
-		return GL_DSDT_NV;
-	}
-
-	if (glfmt == GL_DU8DV8_ATI)
-	{
-		return GL_DUDV_ATI;
-	}
+	if( glfmt == GL_RG8 )
+		return GL_RG;
 
 	// Else, not a Src format for upload, or RGBA.
 	return GL_RGBA;
 }
 
 // ***************************************************************************
-static GLenum getGlSrcTextureComponentType(GLint texSrcFormat)
+static GLenum getGlSrcTextureComponentType( ITexture &tex, GLint texSrcFormat)
 {
 	H_AUTO_OGL(getGlSrcTextureComponentType);
 
-	switch (texSrcFormat)
-	{
-		case GL_DSDT_NV:
-		case GL_DUDV_ATI:
-			return GL_BYTE; // these are signed format
-		break;
-		default:
-		break;
-	}
+	if( tex.getPixelFormat() == CBitmap::DsDt )
+		return GL_BYTE;
 
 	return GL_UNSIGNED_BYTE;
 }
@@ -491,12 +478,9 @@ uint				CDriverGL3::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:	return w*h* 1;
 #endif
-#ifdef GL_DU8DV8_ATI
-	case GL_DU8DV8_ATI:
-#endif
-#ifdef GL_DSDT_NV
-	case GL_DSDT_NV:						return w*h* 2;
-#endif
+
+	case GL_RG8:
+		return w * h * 2;
 	}
 
 	// One format has not been coded.
@@ -893,7 +877,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					// Get the correct texture format from texture...
 					GLint	glfmt= getGlTextureFormat(*pTInTC, gltext->Compressed);
 					GLint	glSrcFmt= getGlSrcTextureFormat(*pTInTC, glfmt);
-					GLenum  glSrcType= getGlSrcTextureComponentType(glSrcFmt);
+					GLenum  glSrcType= getGlSrcTextureComponentType(*pTInTC,glSrcFmt);
 
 					sint	nMipMaps;
 					if(glSrcFmt==GL_RGBA && pTInTC->getPixelFormat()!=CBitmap::RGBA )
@@ -943,7 +927,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					// Get the correct texture format from texture...
 					GLint	glfmt= getGlTextureFormat(tex, gltext->Compressed);
 					GLint	glSrcFmt= getGlSrcTextureFormat(tex, glfmt);
-					GLenum  glSrcType= getGlSrcTextureComponentType(glSrcFmt);
+					GLenum  glSrcType= getGlSrcTextureComponentType(tex,glSrcFmt);
 
 					// DXTC: if same format, and same mipmapOn/Off, use glTexCompressedImage*.
 					// We cannot build the mipmaps if they are not here.
@@ -1067,7 +1051,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				bool	dummy;
 				GLint	glfmt= getGlTextureFormat(tex, dummy);
 				GLint	glSrcFmt= getGlSrcTextureFormat(tex, glfmt);
-				GLenum  glSrcType= getGlSrcTextureComponentType(glSrcFmt);
+				GLenum  glSrcType= getGlSrcTextureComponentType(tex,glSrcFmt);
 
 				sint	nMipMaps;
 				if(glSrcFmt==GL_RGBA && tex.getPixelFormat()!=CBitmap::RGBA )
@@ -1197,7 +1181,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	bool dummy;
 	GLint glfmt = getGlTextureFormat (tex, dummy);
 	GLint glSrcFmt = getGlSrcTextureFormat (tex, glfmt);
-	GLenum  glSrcType= getGlSrcTextureComponentType(glSrcFmt);
+	GLenum  glSrcType= getGlSrcTextureComponentType(tex,glSrcFmt);
 
 	// If DXTC format
 	if (_Extensions.EXTTextureCompressionS3TC && sameDXTCFormat(tex, glfmt))
