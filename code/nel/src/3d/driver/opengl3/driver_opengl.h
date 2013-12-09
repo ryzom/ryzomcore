@@ -1181,6 +1181,7 @@ private:
 	void			setLightInternal(uint8 num, const CLight& light);
 	void			enableLightInternal(uint8 num, bool enable);
 	void			setupLightMapDynamicLighting(bool enable);
+	void			disableAllLights();
 
 
 	/// \name VertexBufferHard

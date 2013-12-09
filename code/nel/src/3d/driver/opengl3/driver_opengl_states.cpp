@@ -261,13 +261,6 @@ void			CDriverGLStates3::enableLighting(uint enable)
 	{
 		// new state.
 		_CurLighting= enabled;
-		// Setup GLState.
-		if(_CurLighting)
-			glEnable(GL_LIGHTING);
-		else
-		{
-			glDisable(GL_LIGHTING);
-		}
 	}
 }
 

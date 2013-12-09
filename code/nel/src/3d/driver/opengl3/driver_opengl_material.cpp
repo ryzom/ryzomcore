@@ -433,6 +433,9 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		// Light Part.
 
 		_DriverGLStates.enableLighting(mat.getFlags()&IDRV_MAT_LIGHTING);
+		if( ( mat.getFlags() & IDRV_MAT_LIGHTING ) == 0 )
+			disableAllLights();
+
 		if(mat.getFlags()&IDRV_MAT_LIGHTING)
 		{
 			_DriverGLStates.setEmissive(pShader->PackedEmissive, pShader->Emissive);
