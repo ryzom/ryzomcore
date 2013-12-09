@@ -107,11 +107,6 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 void	CDriverGL3::enableLight (uint8 num, bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_enableLight )
-	// User call => set the User flag
-	if(num<_MaxDriverLight)
-	{
-		_UserLightEnable[num]= enable;
-	}
 
 	// enable the light in GL
 	enableLightInternal(num, enable);
@@ -140,7 +135,7 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 	if (num<_MaxDriverLight)
 	{
 		_DriverGLStates.enableLight(num, enable);
-
+		_UserLightEnable[ num ] = enable;
 	}
 }
 
