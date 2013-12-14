@@ -688,26 +688,22 @@ void updateWeather()
 	}
 	#endif
 	
+	// FIXME: temporary fix for teleportation crash
 	// Update new sky
-	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
+	if (ContinentMngr.cur() && Driver->getPolygonMode() == UDriver::Filled && Filter3D[FilterSky])
 	{
-		if(Driver->getPolygonMode() == UDriver::Filled)
+		CSky &sky = ContinentMngr.cur()->CurrentSky;
+
+		if (!ContinentMngr.cur()->Indoor && sky.getScene())
 		{
-			if (Filter3D[FilterSky])
-			{
-				CSky &sky = ContinentMngr.cur()->CurrentSky;
-				if (sky.getScene())
-				{
-					s_SkyMode = NewSky;
-					sky.getScene()->animate(TimeInSec-FirstTimeInSec);
-					// Setup the sky camera
-					preRenderNewSky();
-				}
-				else
-				{
-					s_SkyMode = OldSky;
-				}
-			}
+			s_SkyMode = NewSky;
+			sky.getScene()->animate(TimeInSec-FirstTimeInSec);
+			// Setup the sky camera
+			preRenderNewSky();
+		}
+		else
+		{
+			s_SkyMode = OldSky;
 		}
 	}
 }
