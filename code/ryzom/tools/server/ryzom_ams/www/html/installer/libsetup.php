@@ -23,7 +23,7 @@
         error_reporting( E_ALL );
         
         if (file_exists('../config.php')) {
-            require( '../config.php' );
+            require_once( '../config.php' );
         } else {
             //copy config.default.php to config.php!
             if (!file_exists('../config.php')) {
@@ -31,6 +31,8 @@
                     echo "failed to copy ../config.php ...\n";
                     echo '<br><a href="'.$_SERVER['REQUEST_URI'].'" >Reload!</a> ';
                     exit;
+                } else {
+                    require_once( '../config.php' );
                 }
             }
         }
