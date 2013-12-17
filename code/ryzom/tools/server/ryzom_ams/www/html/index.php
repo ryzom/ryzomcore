@@ -14,8 +14,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 require_once( '../../ams_lib/libinclude.php' );
-if (!@include '../config.php') {
-    //if config doesnt exist run setup
+if (!file_exists('../is_installed')) {
+    //if is_installed doesnt exist run setup
     require( 'installer/libsetup.php' );
 } elseif ($_POST["function"] == "do_install") {
     echo "Can't run setup while file '../is_installed' exists, please remove that file if you wish to run the install";
