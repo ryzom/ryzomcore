@@ -18,8 +18,8 @@ if (!@include '../config.php') {
     //if config doesnt exist run setup
     require( 'installer/libsetup.php' );
 } elseif ($_POST["function"] == "do_install") {
-    echo "Can't run setup while file '../is_installed' exists, please remove that file if you wish to run the install"
-    exit
+    echo "Can't run setup while file '../is_installed' exists, please remove that file if you wish to run the install";
+    exit;
 } else {
     //if config exists then include it
     require( '../config.php' );
