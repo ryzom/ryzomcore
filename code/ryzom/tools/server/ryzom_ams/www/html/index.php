@@ -17,7 +17,7 @@ require_once( '../../ams_lib/libinclude.php' );
 if (!file_exists('../is_installed')) {
     //if is_installed doesnt exist run setup
     require( 'installer/libsetup.php' );
-} elseif (isset($_POST["function"]) == "do_install") {
+} elseif (isset($_POST["function"]) && $_POST["function"] == "do_install") {
     echo "Can't run setup while file '../is_installed' exists, please remove that file if you wish to run the install";
     exit;
 } else {
