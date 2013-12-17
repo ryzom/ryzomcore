@@ -1692,6 +1692,7 @@
                 $dbw = new DBLayer("web");
                 $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Permission, Language) VALUES (:name, :pass, :mail, :permission, :lang)",$params);
                 Users::createUser($params, $user_id);
+                Users::createPermissions($params);
                 $dbl = new DBLayer("lib");
                 $dbl->execute("UPDATE ticket_user SET Permission = 3 WHERE TUserId = :user_id",array('user_id' => $user_id));
                 print "The admin account is created, you can login with id: admin, pass: admin!";
