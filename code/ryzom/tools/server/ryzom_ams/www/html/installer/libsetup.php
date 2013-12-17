@@ -62,11 +62,8 @@
                 `ReceiveMail` int(1) NOT NULL DEFAULT 1,
                 `Language` varchar(3) DEFAULT NULL,
                 PRIMARY KEY (`UId`)
-                ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users information for ryzom_ams';
-                
-                );     
-
-                GRANT ALL ON `" . $cfg['db']['web']['name'] ."`.* TO `" . $cfg['db']['web']['user'] ."`@".$cfg['db']['web']['host'].";
+                ) ENGINE = InnoDB;
+            GRANT ALL ON `" . $cfg['db']['web']['name'] ."`.* TO `" . $cfg['db']['web']['user'] ."`@".$cfg['db']['web']['host']." identified by '".$cfg['db']['web']['pass']."';
             ";
             $dbw->executeWithoutParams($sql);
             
@@ -472,7 +469,7 @@
                 ON DELETE NO ACTION
                 ON UPDATE NO ACTION)
             ENGINE = InnoDB;
-            GRANT ALL ON `" . $cfg['db']['lib']['name'] ."`.* TO `" . $cfg['db']['lib']['user'] ."`@".$cfg['db']['lib']['host'].";
+            GRANT ALL ON `" . $cfg['db']['lib']['name'] ."`.* TO `" . $cfg['db']['lib']['user'] ."`@".$cfg['db']['lib']['host']." identified by '".$cfg['db']['lib']['pass']."';
             ";
             $dbl->executeWithoutParams($sql);
             print "The Lib & Web database were correctly installed! <br />";
@@ -587,7 +584,7 @@
                   KEY `GMId` (`GMId`)
                 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users informations for login system' AUTO_INCREMENT=1 ;     
 
-                GRANT ALL ON `" . $cfg['db']['shard']['name'] ."`.* TO `" . $cfg['db']['shard']['user'] ."`@".$cfg['db']['shard']['host'].";
+                GRANT ALL ON `" . $cfg['db']['shard']['name'] ."`.* TO `" . $cfg['db']['shard']['user'] ."`@".$cfg['db']['shard']['host']." identified by '".$cfg['db']['shard']['pass']."';
             ";
             $dbs->executeWithoutParams($sql);
             print "The shard database was correctly installed! <br />";
@@ -1370,7 +1367,7 @@
                 (164, 31, 104, 9),
                 (165, 31, 103, 9);   
 
-                GRANT ALL ON `" . $cfg['db']['tool']['name'] ."`.* TO `" . $cfg['db']['tool']['user'] ."`@".$cfg['db']['tool']['host'].";
+                GRANT ALL ON `" . $cfg['db']['tool']['name'] ."`.* TO `" . $cfg['db']['tool']['user'] ."`@".$cfg['db']['tool']['host']." identified by '".$cfg['db']['tool']['pass']."';
             ";
             $dbn->executeWithoutParams($sql);
             print "The nel_tool database was correctly installed! <br />";
@@ -1394,9 +1391,13 @@
                 print "The admin account is created, you can login with id: admin, pass: admin!";
             }catch (PDOException $e){
                 print "There was an error while creating the admin account! ";
+                print_r($e);
             }
 
             echo '<br><a href="'.$_SERVER['REQUEST_URI'].'" >Reload!</a> ';
+            
+            touch("../is_installed");
+            
             exit;
             
 
