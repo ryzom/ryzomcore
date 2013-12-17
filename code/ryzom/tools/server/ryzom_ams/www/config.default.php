@@ -25,7 +25,7 @@ $cfg['db']['shard']['name']    = 'nel';
 $cfg['db']['shard']['user']    = 'shard';
 $cfg['db']['shard']['pass']    = '';
 
-// Variables for database access to the open_ring database
+// Variables for database access to the ring_open database
 $cfg['db']['ring']['host']    = 'localhost';
 $cfg['db']['ring']['port']    = '3306';
 $cfg['db']['ring']['name']    = 'ring_open';
