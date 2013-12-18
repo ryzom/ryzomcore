@@ -226,6 +226,7 @@ code\ryzom\tools\server\ryzom_ams\old
 
 # AMS ignore
 code/ryzom/tools/server/ryzom_ams/www/config.php
+code/ryzom/tools/server/ryzom_ams/www/is_installed
 
 #tools and external dir's 
 external
