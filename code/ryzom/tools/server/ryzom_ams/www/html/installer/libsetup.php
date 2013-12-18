@@ -1685,14 +1685,11 @@
               'name' => "admin",
               'pass' => $hashpass,
               'mail' => "admin@admin.com",
-              'permission' => 3,
-              'lang' => "en"
             );
             try{
-                $dbw = new DBLayer("web");
-                $user_id = $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Permission, Language) VALUES (:name, :pass, :mail, :permission, :lang)",$params);
-                Users::createUser($params, $user_id);
-                Users::createPermissions($params);
+                $user_id = WebUsers::createWebuser($params['name'], $params['pass'],$params['mail']);
+                $result = Webusers::createUser($params, $user_id);
+                Users::createPermissions(array($params['name']));
                 $dbl = new DBLayer("lib");
                 $dbl->execute("UPDATE ticket_user SET Permission = 3 WHERE TUserId = :user_id",array('user_id' => $user_id));
                 print "The admin account is created, you can login with id: admin, pass: admin!";
@@ -1700,6 +1697,7 @@
                 print "There was an error while creating the admin account! ";
                 print_r($e);
             }
+
 
             echo '<br><a href="'.$_SERVER['REQUEST_URI'].'" >Reload!</a> ';
             
