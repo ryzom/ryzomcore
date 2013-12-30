@@ -146,7 +146,8 @@ if not args.noconf:
 	try:
 		MaxUserDirectory
 	except NameError:
-		MaxUserDirectory = "C:/Users/Kaetemi/AppData/Local/Autodesk/3dsMax/2010 - 32bit/enu"
+		import os
+		MaxUserDirectory = os.path.normpath(os.environ["LOCALAPPDATA"] + "/Autodesk/3dsMax/2010 - 32bit/enu")
 	try:
 		MaxExecutable
 	except NameError:
