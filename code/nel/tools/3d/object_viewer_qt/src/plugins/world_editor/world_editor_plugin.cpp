@@ -62,7 +62,7 @@ bool WorldEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManage
 	try
 	{
 		// Search path of file world_editor_classes.xml
-		std::string ligoPath = NLMISC::CPath::lookup(fileName.toStdString());
+		std::string ligoPath = NLMISC::CPath::lookup(fileName.toUtf8().constData());
 		// Init LIGO
 		m_ligoConfig.readPrimitiveClass(ligoPath.c_str(), true);
 		NLLIGO::Register();

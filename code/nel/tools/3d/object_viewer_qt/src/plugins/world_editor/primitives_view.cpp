@@ -205,7 +205,7 @@ void PrimitivesView::save()
 
 	if (node->data(Constants::PRIMITIVE_FILE_IS_CREATED).toBool())
 	{
-		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), node->fileName().toStdString()))
+		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), node->fileName().toUtf8().constData()))
 			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(node->fileName()));
 		else
 			node->setData(Constants::PRIMITIVE_IS_MODIFIED, false);
@@ -230,7 +230,7 @@ void PrimitivesView::saveAs()
 
 		RootPrimitiveNode *node = static_cast<RootPrimitiveNode *>(index.internalPointer());
 
-		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), fileName.toStdString()))
+		if (!NLLIGO::saveXmlPrimitiveFile(*node->primitives(), fileName.toUtf8().constData()))
 			QMessageBox::warning(this, "World Editor Qt", tr("Error writing output file: %1").arg(fileName));
 		else
 		{

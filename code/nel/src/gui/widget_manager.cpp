@@ -2880,7 +2880,7 @@ namespace NLGUI
 	bool CWidgetManager::serializeTreeData( xmlNodePtr parentNode ) const
 	{
 		if( parentNode == NULL )
-			return NULL;
+			return false;
 
 		std::vector< SMasterGroup >::size_type i;
 		for( i = 0; i < _MasterGroups.size(); i++ )

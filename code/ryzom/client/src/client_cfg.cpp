@@ -888,6 +888,12 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ForgetPwdURL)
 	READ_STRING_DEV(FreeTrialURL)
 	READ_STRING_DEV(LoginSupportURL)
+	
+	READ_STRING_FV(CreateAccountURL)
+	READ_STRING_FV(EditAccountURL)
+	READ_STRING_FV(ConditionsTermsURL)
+	READ_STRING_FV(ForgetPwdURL)
+	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
 	// if cookie is not empty, it means that the client was launch

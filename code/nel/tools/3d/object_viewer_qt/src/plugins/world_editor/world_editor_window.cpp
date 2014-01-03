@@ -168,7 +168,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 		return;
 
 	Utils::WorldEditList worldEditList;
-	if (!Utils::loadWorldEditFile(fileName.toStdString(), worldEditList))
+	if (!Utils::loadWorldEditFile(fileName.toUtf8().constData(), worldEditList))
 	{
 		// TODO: add the message box
 		return;

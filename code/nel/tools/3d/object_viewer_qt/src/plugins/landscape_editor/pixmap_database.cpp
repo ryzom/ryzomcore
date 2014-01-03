@@ -96,7 +96,7 @@ bool PixmapDatabase::loadPixmaps(const QString &zonePath, NLLIGO::CZoneBank &zon
 			painter.end();
 			delete pixmap;
 			m_pixmapMap.insert(zonePixmapName, emptyPixmap);
-			nlwarning(QString("not found " + zonePath + zonePixmapName + ".png").toStdString().c_str());
+			nlwarning(QString("not found " + zonePath + zonePixmapName + ".png").toUtf8().constData());
 		}
 		// All pixmaps must be have same size
 		else if (pixmap->width() != sizeX * m_textureSize)
@@ -140,7 +140,7 @@ QPixmap *PixmapDatabase::pixmap(const QString &zoneName) const
 {
 	QPixmap *result = m_errorPixmap;
 	if (!m_pixmapMap.contains(zoneName))
-		nlwarning("QPixmap %s not found", zoneName.toStdString().c_str());
+		nlwarning("QPixmap %s not found", zoneName.toUtf8().constData());
 	else
 		result = m_pixmapMap.value(zoneName);
 	return result;

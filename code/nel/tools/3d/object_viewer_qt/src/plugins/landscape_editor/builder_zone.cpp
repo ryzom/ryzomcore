@@ -85,7 +85,7 @@ void ZoneBuilder::actionLigoTile(const LigoData &data, const ZonePosition &zoneP
 		return;
 
 	checkBeginMacro();
-	// nlinfo(QString("%1 %2 %3 (%4 %5)").arg(data.zoneName.c_str()).arg(zonePos.x).arg(zonePos.y).arg(data.posX).arg(data.posY).toStdString().c_str());
+	// nlinfo(QString("%1 %2 %3 (%4 %5)").arg(data.zoneName.c_str()).arg(zonePos.x).arg(zonePos.y).arg(data.posX).arg(data.posY).toUtf8().constData());
 	m_zonePositionList.push_back(zonePos);
 	m_undoStack->push(new LigoTileCommand(data, zonePos, this, m_landscapeScene));
 }
@@ -105,7 +105,7 @@ void ZoneBuilder::actionLigoResize(uint index, sint32 newMinX, sint32 newMaxX, s
 		return;
 
 	checkBeginMacro();
-	// nlinfo(QString("minX=%1 maxX=%2 minY=%3 maxY=%4").arg(newMinX).arg(newMaxX).arg(newMinY).arg(newMaxY).toStdString().c_str());
+	// nlinfo(QString("minX=%1 maxX=%2 minY=%3 maxY=%4").arg(newMinX).arg(newMaxX).arg(newMinY).arg(newMaxY).toUtf8().constData());
 	m_undoStack->push(new LigoResizeCommand(index, newMinX, newMaxX, newMinY, newMaxY, this));
 }
 
@@ -119,7 +119,7 @@ void ZoneBuilder::addZone(sint32 posX, sint32 posY)
 		return;
 
 	// Check zone name
-	std::string zoneName = m_listZonesWidget->currentZoneName().toStdString();
+	std::string zoneName = m_listZonesWidget->currentZoneName().toUtf8().constData();
 	if (zoneName.empty())
 		return;
 
@@ -161,7 +161,7 @@ void ZoneBuilder::addTransition(const sint32 posX, const sint32 posY)
 	m_createdAction = false;
 	m_zonePositionList.clear();
 
-	nlinfo(QString("trans %1,%2").arg(posX).arg(posY).toStdString().c_str());
+	nlinfo(QString("trans %1,%2").arg(posX).arg(posY).toUtf8().constData());
 
 	sint32 x = (sint32)floor(float(posX) / m_landscapeScene->cellSize());
 	sint32 y = (sint32)floor(float(posY) / m_landscapeScene->cellSize());
@@ -271,7 +271,7 @@ int ZoneBuilder::createZoneRegion(const QString &fileName)
 {
 	LandscapeItem landItem;
 	landItem.zoneRegionObject = new ZoneRegionObject();
-	landItem.zoneRegionObject->load(fileName.toStdString());
+	landItem.zoneRegionObject->load(fileName.toUtf8().constData());
 
 	if (checkOverlaps(landItem.zoneRegionObject->ligoZoneRegion()))
 	{
@@ -382,8 +382,8 @@ bool ZoneBuilder::initZoneBank (const QString &pathName)
 	std::string error;
 	Q_FOREACH(QString file, listFiles)
 	{
-		//nlinfo(file.toStdString().c_str());
-		if (!m_zoneBank.addElement((pathName + file).toStdString(), error))
+		//nlinfo(file.toUtf8().constData());
+		if (!m_zoneBank.addElement((pathName + file).toUtf8().constData(), error))
 			QMessageBox::critical(0, QObject::tr("Landscape editor"), QString(error.c_str()), QMessageBox::Ok);
 	}
 	delete dir;
