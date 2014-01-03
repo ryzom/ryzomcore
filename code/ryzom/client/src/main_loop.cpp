@@ -997,7 +997,6 @@ bool mainLoop()
 
 
 	// Init GameContextMenu.
-	GameContextMenu;
 	GameContextMenu.init("");
 
 	// Active inputs

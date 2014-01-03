@@ -350,7 +350,7 @@ public:
 				{
 					i++;
 					// Set the result
-					result = atof (filename.c_str () + i);
+					NLMISC::fromString(filename.substr(i), result);
 				}
 				else
 				{
