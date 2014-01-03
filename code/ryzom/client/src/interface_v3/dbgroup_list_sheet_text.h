@@ -224,6 +224,7 @@ protected:
 	bool						_GrayTextWithCtrlState;
 
 	bool						_CanDrop;
+	bool						_Draggable;
 
 	// Common Info for ctrl and group
 	CCtrlSheetInfo				_CtrlInfo;
