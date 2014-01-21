@@ -147,6 +147,9 @@ external_stlport
 thumbs.db
 Thumbs.db
 *.tpl.php
+.SyncID
+.SyncIgnore
+.SyncArchive
 
 # build
 code/nel/build/*
