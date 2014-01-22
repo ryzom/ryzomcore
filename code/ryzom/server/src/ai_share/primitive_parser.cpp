@@ -2332,7 +2332,7 @@ static void parsePrimDynFaunaZone(const CAIAliasDescriptionNode *aliasNode, cons
 	y = prim->getPrimVector()->y;
 	string s;
 	prim->getPropertyByName("radius", s);
-	r = float(atof(s.c_str()));
+	NLMISC::fromString(s, r);
 
 	vector<string>	*params = &EmptyStringVector;	
 	prim->getPropertyByName("properties", params);
@@ -2361,7 +2361,7 @@ static void parsePrimDynNpcZonePlace(const CAIAliasDescriptionNode *aliasNode, c
 	y = prim->getPrimVector()->y;
 	string s;
 	prim->getPropertyByName("radius", s);
-	r = float(atof(s.c_str()));
+	NLMISC::fromString(s, r);
 
 	vector<string>	*params=&EmptyStringVector;
 	prim->getPropertyByName("properties", params);
@@ -2425,19 +2425,19 @@ static void parsePrimRoadTrigger(const CAIAliasDescriptionNode *aliasNode, const
 			{
 				t1 = *child->getPrimVector();
 				child->getPropertyByName("radius", s);
-				t1r = float(atof(s.c_str()));
+				NLMISC::fromString(s, t1r);
 			}
 			else if (nodeName(child) == "trigger 2")
 			{
 				t2 = *child->getPrimVector();
 				child->getPropertyByName("radius", s);
-				t2r = float(atof(s.c_str()));
+				NLMISC::fromString(s, t2r);
 			}
 			else if (nodeName(child) == "spawn")
 			{
 				sp = *child->getPrimVector();
 				child->getPropertyByName("radius", s);
-				spr = float(atof(s.c_str()));
+				NLMISC::fromString(s, spr);
 			}
 		}
 	}
@@ -2468,7 +2468,8 @@ static void parsePrimDynRoad(const CAIAliasDescriptionNode *aliasNode, const IPr
 	// road dificulty
 	string s;
 	prim->getPropertyByName("difficulty", s);
-	float difficulty = float(atof(s.c_str()));
+	float difficulty;
+	NLMISC::fromString(s, difficulty);
 
 	uint32	verticalPos;
 	parseVerticalPos(prim, verticalPos);
@@ -3169,7 +3170,7 @@ static void parsePrimOutpostSpawnZone(const CAIAliasDescriptionNode *aliasNode, 
 	y = prim->getPrimVector()->y;
 	string s;
 	prim->getPropertyByName("radius", s);
-	r = float(atof(s.c_str()));
+	NLMISC::fromString(s, r);
 	
 	uint32 verticalPos;
 	parseVerticalPos(prim, verticalPos);
@@ -3428,7 +3429,8 @@ static void parsePrimSafeZone(const IPrimitive *prim, const std::string &mapName
 	float y=(float)(prim->getPrimVector()->y);
 	string	radiusString;
 	prim->getPropertyByName("radius",radiusString);
-	float	radius=(float)atof(radiusString.c_str());
+	float radius;
+	NLMISC::fromString(radiusString, radius);
 	
 	CAIActions::exec("SAFEZONE", x, y, radius);
 }

@@ -158,6 +158,8 @@ public:
 			case FLOAT :
 				fromString((*itt).second, value);
 				break;
+			default:
+				break;
 		}
 	}
 

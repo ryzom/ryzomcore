@@ -14,18 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 #include "system.h"
-#include <sstream>
+
 #include <nel/3d/driver.h>
 #include <nel/3d/dru.h>
 #include <QtOpenGL/QGLWidget>
 
-CSystem *CSystem::instance = NULL;
-
 CSystem::CSystem()
 {
 	GatherSysInfo();
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 	GatherD3DInfo();
 #endif
 	GatherOpenGLInfo();
@@ -33,9 +32,32 @@ CSystem::CSystem()
 
 CSystem::~CSystem()
 {
-	instance = 0;
 }
 
+bool CSystem::parseDriverVersion(const std::string &device, uint64 driver, std::string &version)
+{
+	// file version
+	uint32 version1 = driver >> 48;
+	uint32 version2 = (driver >> 32) & 0xffff;
+	uint32 version3 = (driver >> 16) & 0xffff;
+	uint32 version4 = driver & 0xffff;
+
+	if (device.find("NVIDIA") != std::string::npos)
+	{
+		// nvidia should be something like 9.18.13.2018 and 9.18.13.1422
+		// which respectively corresponds to drivers 320.18 and 314.22
+		uint32 nvVersionMajor = (version3 % 10) * 100 + (version4 / 100);
+		uint32 nvVersionMinor = version4 % 100;
+
+		version = NLMISC::toString("%u.%u", nvVersionMajor, nvVersionMinor);
+	}
+	else
+	{
+		version = NLMISC::toString("%u.%u.%u.%u", version1, version2, version3, version4);
+	}
+
+	return true;
+}
 
 void CSystem::GatherSysInfo()
 {
@@ -46,24 +68,7 @@ void CSystem::GatherSysInfo()
 	{
 		sysInfo.videoDevice = device;
 
-		//////////////////////////////////////////////////////////////
-		// FIXME
-		// This is taken from the original configuration tool, and
-		// it generates the same *wrong* version number
-		//////////////////////////////////////////////////////////////
-		uint32 version = static_cast< uint32 >( driver & 0xffff );
-		std::stringstream ss;
-
-		ss << ( version / 1000 % 10 );
-		ss << ".";
-		ss << ( version / 100 % 10 );
-		ss << ".";
-		ss << ( version / 10 % 10 );
-		ss << ".";
-		ss << ( version % 10 );
-
-		sysInfo.videoDriverVersion = ss.str();
-		//////////////////////////////////////////////////////////////
+		CSystem::parseDriverVersion(device, driver, sysInfo.videoDriverVersion);
 	}
 	else
 	{
@@ -77,7 +82,7 @@ void CSystem::GatherSysInfo()
 	sysInfo.totalRAM /= ( 1024 * 1024 );
 }
 
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 void CSystem::GatherD3DInfo()
 {
 	NL3D::IDriver *driver = NULL;
@@ -92,16 +97,7 @@ void CSystem::GatherD3DInfo()
 			d3dInfo.device        = adapter.Description;
 			d3dInfo.driver        = adapter.Driver;
 
-			sint64 ver = adapter.DriverVersion;
-			std::stringstream ss;
-			ss << static_cast< uint16 >( ver >> 48 );
-			ss << ".";
-			ss << static_cast< uint16 >( ver >> 32 );
-			ss << ".";
-			ss << static_cast< uint16 >( ver >> 16 );
-			ss << ".";
-			ss << static_cast< uint16 >( ver & 0xFFFF );
-			d3dInfo.driverVersion = ss.str();
+			CSystem::parseDriverVersion(d3dInfo.device, adapter.DriverVersion, d3dInfo.driverVersion);
 		}
 
 		GetVideoModes( d3dInfo.modes, driver );
@@ -109,7 +105,7 @@ void CSystem::GatherD3DInfo()
 		driver->release();
 	}
 
-	catch( NLMISC::Exception &e )
+	catch(const NLMISC::Exception &e)
 	{
 		nlwarning( e.what() );
 	}
@@ -146,15 +142,13 @@ void CSystem::GatherOpenGLInfo()
 
 	delete gl;
 
-	NL3D::IDriver *driver = NULL;
 	try
 	{
-		driver = NL3D::CDRU::createGlDriver();
+		NL3D::IDriver *driver = NL3D::CDRU::createGlDriver();
 		GetVideoModes( openglInfo.modes, driver );
 		driver->release();
 	}
-
-	catch( NLMISC::Exception &e )
+	catch(const NLMISC::Exception &e)
 	{
 		nlwarning( e.what() );
 	}
@@ -171,7 +165,7 @@ void CSystem::GetVideoModes( std::vector< CVideoMode > &dst, NL3D::IDriver *driv
 		{
 			CVideoMode mode;
 			mode.depth = itr->Depth;
-			mode.widht = itr->Width;
+			mode.width = itr->Width;
 			mode.height = itr->Height;
 			mode.frequency = itr->Frequency;
 

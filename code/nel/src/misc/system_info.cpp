@@ -231,7 +231,14 @@ string CSystemInfo::getOS()
 		}
 		else if ( osvi.dwMajorVersion == 6 )
 		{
-			if ( osvi.dwMinorVersion == 1 )
+			if ( osvi.dwMinorVersion == 2 )
+			{
+				if( osvi.wProductType == VER_NT_WORKSTATION )
+					OSString += " Windows 8";
+				else
+					OSString += " Windows Server 2012";
+			}
+			else if ( osvi.dwMinorVersion == 1 )
 			{
 				if( osvi.wProductType == VER_NT_WORKSTATION )
 					OSString += " Windows 7";

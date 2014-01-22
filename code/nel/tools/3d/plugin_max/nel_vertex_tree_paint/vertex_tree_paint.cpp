@@ -217,7 +217,7 @@ LRESULT APIENTRY colorSwatchSubclassWndProc(
 		case WM_LBUTTONUP:
 		case WM_LBUTTONDBLCLK: {
 			HWND hPanel = GetParent(hwnd);
-			LONG mod = GetWindowLongPtr(hPanel,GWLP_USERDATA);
+			LONG_PTR mod = GetWindowLongPtr(hPanel,GWLP_USERDATA);
 			if (mod) {
 				((VertexPaint*)mod)->PaletteButton(hwnd);
 				}
@@ -424,9 +424,10 @@ void VertexPaint::BeginEditParams( IObjParam *ip, ULONG flags,Animatable *prev )
 
 		SendMessage(hParams, WM_POSTINIT, 0, 0);
 		}
-	else {
+	else
+	{
 		SetWindowLongPtr(hParams,GWLP_USERDATA,(LONG_PTR)this);
-		}
+	}
 
 	iTint = SetupIntSpinner (hParams, IDC_TINT_SPIN, IDC_TINT, 0, 100, (int) (fTint*100.0f));
 
@@ -440,7 +441,7 @@ void VertexPaint::BeginEditParams( IObjParam *ip, ULONG flags,Animatable *prev )
 
 	// Force an eval to update caches.
 	NotifyDependents(FOREVER, PART_VERTCOLOR, REFMSG_CHANGE);
-	}
+}
 
 void VertexPaint::EndEditParams( IObjParam *ip, ULONG flags,Animatable *next)
 	{

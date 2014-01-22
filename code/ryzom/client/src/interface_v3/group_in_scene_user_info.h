@@ -72,7 +72,7 @@ protected:
 	};
 
 	/// Fill NumBars elements into bars and set dbEntry
-	static void	getBarSettings( CInterfaceManager* pIM, bool isUser, bool isPlayer, bool isFriend, std::string& dbEntry, bool *bars );
+	static void	getBarSettings( CInterfaceManager* pIM, bool isUser, bool isPlayer, bool isFriend, int &dbEntry, bool *bars );
 
 	// The entity (character or forage source)
 	CEntityCL	*_Entity;
@@ -96,6 +96,9 @@ protected:
 	static NLMISC::CCDBNodeLeaf	*_Value;
 	static NLMISC::CCDBNodeLeaf	*_ValueBegin;
 	static NLMISC::CCDBNodeLeaf	*_ValueEnd;
+
+	// Guild icon leafs
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GuildIconLeaf[256];
 
 	// Special guild
 	bool		_NeedGuildNameId;

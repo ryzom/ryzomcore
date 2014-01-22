@@ -253,10 +253,7 @@
             </layout>
            </item>
           </layout>
-          <zorder>horizontalLayoutWidget</zorder>
           <zorder>dataDirLabel</zorder>
-          <zorder>horizontalLayoutWidget</zorder>
-          <zorder></zorder>
          </widget>
         </item>
        </layout>

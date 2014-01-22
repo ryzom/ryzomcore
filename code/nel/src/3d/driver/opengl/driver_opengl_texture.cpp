@@ -79,6 +79,8 @@ CTextureDrvInfosGL::CTextureDrvInfosGL(IDriver *drv, ItTexDrvInfoPtrMap it, CDri
 	InitFBO = false;
 	AttachDepthStencil = true;
 	UsePackedDepthStencil = drvGl->supportPackedDepthStencil();
+
+	TextureUsedIdx = 0;
 }
 // ***************************************************************************
 CTextureDrvInfosGL::~CTextureDrvInfosGL()
@@ -91,7 +93,10 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 	_Driver->_AllocatedTextureMemory-= TextureMemory;
 
 	// release in TextureUsed.
-	_Driver->_TextureUsed.erase (this);
+	if (TextureUsedIdx < _Driver->_TextureUsed.size() && _Driver->_TextureUsed[TextureUsedIdx] == this)
+	{
+		_Driver->_TextureUsed[TextureUsedIdx] = NULL;
+	}
 
 	if(InitFBO)
 	{
@@ -1492,7 +1497,11 @@ bool CDriverGL::activateTexture(uint stage, ITexture *tex)
 			if (_SumTextureMemoryUsed)
 			{
 				// Insert the pointer of this texture
-				_TextureUsed.insert (gltext);
+				if (gltext->TextureUsedIdx >= _TextureUsed.size() || _TextureUsed[gltext->TextureUsedIdx] != gltext)
+				{
+					gltext->TextureUsedIdx = _TextureUsed.size();
+					_TextureUsed.push_back(gltext);
+				}
 			}
 
 			if(tex->isTextureCube())
@@ -2314,7 +2323,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 			newVP.init(0, 0, ((float)width/(float)w), ((float)height/(float)h));
 			setupViewport(newVP);
 
-			_RenderTargetFBO = true;
+			_RenderTargetFBO = tex;
 
 			return activeFrameBufferObject(tex);
 		}
@@ -2334,7 +2343,7 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 		setupViewport(_OldViewport);
 		_OldViewport = _CurrViewport;
 
-		_RenderTargetFBO = false;
+		_RenderTargetFBO = NULL;
 		return false;
 	}
 
@@ -2347,10 +2356,15 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 	// Update the scissor
 	setupScissor (_CurrScissor);
 
-	_RenderTargetFBO = false;
+	_RenderTargetFBO = NULL;
 	_OldViewport = _CurrViewport;
 
 	return true;
+}
+
+ITexture *CDriverGL::getRenderTarget() const
+{
+	return _RenderTargetFBO ? _RenderTargetFBO : _TextureTarget;
 }
 
 // ***************************************************************************

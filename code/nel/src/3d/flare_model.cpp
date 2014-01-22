@@ -363,6 +363,8 @@ void	CFlareModel::traverseRender()
 	}
 	// setup driver
 	drv->activeVertexProgram(NULL);
+	drv->activePixelProgram(NULL);
+	drv->activeGeometryProgram(NULL);
 	drv->setupModelMatrix(fs->getLookAtMode() ? CMatrix::Identity : getWorldMatrix());
 	// we don't change the fustrum to draw 2d shapes : it is costly, and we need to restore it after the drawing has been done
 	// we setup Z to be (near + far) / 2, and setup x and y to get the screen coordinates we want
@@ -565,6 +567,8 @@ void CFlareModel::updateOcclusionQueryBegin(IDriver *drv)
 {
 	nlassert(drv);
 	drv->activeVertexProgram(NULL);
+	drv->activePixelProgram(NULL);
+	drv->activeGeometryProgram(NULL);
 	drv->setupModelMatrix(CMatrix::Identity);
 	initStatics();
 	drv->setColorMask(false, false, false, false); // don't write any pixel during the test
@@ -661,6 +665,8 @@ void CFlareModel::occlusionTest(CMesh &mesh, IDriver &drv)
 	}
 	drv.setColorMask(false, false, false, false); // don't write any pixel during the test
 	drv.activeVertexProgram(NULL);
+	drv.activePixelProgram(NULL);
+	drv.activeGeometryProgram(NULL);
 	setupOcclusionMeshMatrix(drv, *_Scene);
 	drv.activeVertexBuffer(const_cast<CVertexBuffer &>(mesh.getVertexBuffer()));
 	// query drawn count

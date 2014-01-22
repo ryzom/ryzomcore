@@ -3552,12 +3552,13 @@ void CUserEntity::CSpeedFactor::update(ICDBNode *node) // virtual
 	//nlinfo("SpeedFactor changed to %f / %"NL_I64"u", _Value, leaf->getValue64());
 	
 	// clamp the value (2.0 is the egg item or the level 6 speed up power up, nothing should be faster)
-	if(_Value > 2.0f)
-	{
+	// commented because ring editor speed is in fact faster
+	//if(_Value > 2.0f)
+	//{
 		//nlwarning("HACK: you try to change the speed factor to %f", _Value);
 		//nlstop;
 		//_Value = 2.0f;
-	}
+	//}
 }// CSpeedFactor::update //
 
 

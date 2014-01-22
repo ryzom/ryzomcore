@@ -108,7 +108,7 @@ public:
 	// The state of this entity
 	TState							State;
 	// The date of the beginning of this state
-	NLMISC::TTime					StateStartTime;
+	NLMISC::TLocalTime				StateStartTime;
 
 	// The type enum of the entity
 	enum TType	{ Self, Other, Snowball };

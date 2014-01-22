@@ -103,6 +103,9 @@ struct	CGlExtensions
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
 
+	// NV Pixel Programs
+	bool	NVFragmentProgram2;
+
 	bool	OESDrawTexture;
 	bool	OESMapBuffer;
 
@@ -111,6 +114,7 @@ public:
 	/// \name Disable Hardware feature. False by default. setuped by IDriver
 	// @{
 	bool				DisableHardwareVertexProgram;
+	bool				DisableHardwarePixelProgram;
 	bool				DisableHardwareVertexArrayAGP;
 	bool				DisableHardwareTextureShader;
 	// @}
@@ -174,6 +178,7 @@ public:
 
 		/// \name Disable Hardware feature. False by default. setuped by IDriver
 		DisableHardwareVertexProgram= false;
+		DisableHardwarePixelProgram= false;
 		DisableHardwareVertexArrayAGP= false;
 		DisableHardwareTextureShader= false;
 	}
@@ -206,6 +211,7 @@ public:
 		result += NVTextureShader ? "NVTextureShader " : "";
 		result += ATIFragmentShader ? "ATIFragmentShader " : "";
 		result += ARBFragmentProgram ? "ARBFragmentProgram " : "";
+		result += NVFragmentProgram2 ? "NVFragmentProgram2 " : "";
 		result += ARBVertexProgram ? "ARBVertexProgram " : "";
 		result += NVVertexProgram ? "NVVertexProgram " : "";
 		result += EXTVertexShader ? "EXTVertexShader " : "";

@@ -29,11 +29,8 @@ CCombatAction * CCombatAIActionFactory::buildAiAction(const CStaticAiAction *aiA
 	nlassert(phrase);
 #endif
 	const AI_ACTION::TAiActionType actionType = aiAction->getType();
-	if (actionType != AI_ACTION::Melee && actionType != AI_ACTION::Range)
-	{
-		return false;
-	}
-	
+	if (actionType != AI_ACTION::Melee && actionType != AI_ACTION::Range) return NULL;
+
 	AI_ACTION::TAiEffectType effectType = aiAction->getData().Combat.EffectFamily;
 	
 	//get appropriate factory

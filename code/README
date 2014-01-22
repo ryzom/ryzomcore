@@ -12,7 +12,7 @@ each other so you can use only the parts you really need in your project.
 If you want know more about the library content and functionalities, you
 should take a look on the documents present in the doc directory.
 
-Ryzom Core is currently developped and tested under GNU/Linux and Windows
+Ryzom Core is currently developed and tested under GNU/Linux and Windows
 environments. 
 
 
@@ -29,4 +29,7 @@ file for for more details on license terms and other legal issues.
 Installation
 ------------
 
-Please visit http://dev.ryzom.com for more information.
+Please visit https://ryzomcore.atlassian.net/wiki/display/RC/Ryzom+Core+Home for more information.
+In particular the Getting Started section on the right side of the webpage includes build
+instructions for Windows, Linux and Mac.
+

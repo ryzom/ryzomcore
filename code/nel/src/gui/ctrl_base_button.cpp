@@ -549,27 +549,27 @@ namespace NLGUI
 		if( editorMode )
 		{
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onover" );
-			if( prop != NULL )
+			if (prop)
 				mapAHString( "onover", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onclick_l" );
-			if( prop != NULL )
+			if (prop)
 				mapAHString( "onclick_l", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "ondblclick_l" );
-			if( prop != NULL )
+			if (prop)
 				mapAHString( "ondblclick_l", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onclick_r" );
-			if( prop != NULL )
+			if (prop)
 				mapAHString( "onclick_r", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onlongclick_l" );
-			if( prop != NULL )
+			if (prop)
 				mapAHString( "onlongclick_l", std::string( (const char*)prop ) );
 
 			prop = (char*) xmlGetProp( cur, BAD_CAST "onclock_tick" );
-			if( prop != NULL )
+			if (prop)
 				mapAHString( "onclock_tick", std::string( (const char*)prop ) );
 		}
 

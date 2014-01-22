@@ -51,7 +51,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 	{
 		nlassert(ls);
 		_Lua = ls;
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject game(*_Lua);
 		game = game["game"];
 		game.setValue("getRingSessionList", luaGetRingSessionList);
@@ -759,7 +759,7 @@ void CSessionBrowserImpl::callRingAccessPointMethod(const char *name, int numArg
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["RingAccessPoint"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);
@@ -774,7 +774,7 @@ void CSessionBrowserImpl::callRingCharTrackingMethod(const char *name, int numAr
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["CharTracking"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);
@@ -789,7 +789,7 @@ void CSessionBrowserImpl::callRingPlayerInfoMethod(const char *name, int numArg,
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["RingPlayerInfo"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);
@@ -804,7 +804,7 @@ void CSessionBrowserImpl::callScenarioScoresMethod(const char *name, int numArg,
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["ScenarioScores"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);

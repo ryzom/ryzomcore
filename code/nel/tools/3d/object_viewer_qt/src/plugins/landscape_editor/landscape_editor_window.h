@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -23,16 +22,22 @@
 
 // Qt includes
 #include <QtGui/QUndoStack>
+#include <QtOpenGL/QGLWidget>
+#include <QtGui/QLabel>
+#include <QtCore/QTimer>
 
 namespace LandscapeEditor
 {
+
+class LandscapeScene;
+class ZoneBuilder;
 
 class LandscapeEditorWindow: public QMainWindow
 {
 	Q_OBJECT
 
 public:
-	LandscapeEditorWindow(QWidget *parent = 0);
+	explicit LandscapeEditorWindow(QWidget *parent = 0);
 	~LandscapeEditorWindow();
 
 	QUndoStack *undoStack() const;
@@ -40,14 +45,41 @@ public:
 Q_SIGNALS:
 public Q_SLOTS:
 	void open();
+	void save();
 
 private Q_SLOTS:
+	void openProjectSettings();
+	void openSnapshotDialog();
+	void customContextMenu();
+	void updateStatusBar();
+	void newLand();
+	void setActiveLand();
+	void saveSelectedLand();
+	void saveAsSelectedLand();
+	void deleteSelectedLand();
+
+protected:
+	virtual void showEvent(QShowEvent *showEvent);
+	virtual void hideEvent(QHideEvent *hideEvent);
+
 private:
 	void createMenus();
+	void createToolBars();
 	void readSettings();
 	void writeSettings();
 
+	void setActiveLandscape(int row);
+	void saveLandscape(int row, bool force);
+	int createLandscape(const QString &fileName);
+
+	QLabel *m_statusInfo;
+	QTimer *m_statusBarTimer;
+
+	QListWidgetItem *m_currentItem;
+	LandscapeScene *m_landscapeScene;
+	ZoneBuilder *m_zoneBuilder;
 	QUndoStack *m_undoStack;
+	QGLWidget *m_oglWidget;
 	Ui::LandscapeEditorWindow m_ui;
 }; /* class LandscapeEditorWindow */
 

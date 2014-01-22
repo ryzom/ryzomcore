@@ -43,6 +43,7 @@ void initializeNetwork();
 namespace NLMISC
 {
 	class CBitMemStream;
+	class CCDBNodeLeaf;
 };
 
 
@@ -126,6 +127,13 @@ public:
 protected:
 	bool _IsReplayStarting;
 #endif
+
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_PingLeaf;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_UploadLeaf;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_DownloadLeaf;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_PacketLostLeaf;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ServerStateLeaf;
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_ConnectionQualityLeaf;
 };
 
 

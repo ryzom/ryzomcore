@@ -425,14 +425,15 @@ class CActionHandlerAddLink : public IActionHandler
 		}
 
 		std::vector<CInterfaceLink::CTargetInfo> targetsVect;
-		bool result = CInterfaceLink::splitLinkTargets(targets, parentGroup, targetsVect);
+		std::vector<CInterfaceLink::CCDBTargetInfo> cdbTargetsVect;
+		bool result = CInterfaceLink::splitLinkTargetsExt(targets, parentGroup, targetsVect, cdbTargetsVect);
 		if (!result)
 		{
 			nlwarning("<CActionHandlerAddLink> Couldn't parse all links");
 		}
 		// add the link
 		CInterfaceLink *il = new CInterfaceLink;
-		il->init(targetsVect, expr, ah, ahparam, ahcond, parentGroup);
+		il->init(targetsVect, cdbTargetsVect, expr, ah, ahparam, ahcond, parentGroup);
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CWidgetManager::getInstance()->getParser()->addLink(il, id);
 		il->update();
@@ -541,10 +542,12 @@ void renderSceneScreenShot (uint left, uint right, uint top, uint bottom, uint s
 {
 	CCameraBackup cbScene = setupCameraForScreenshot(*Scene, left, right, top, bottom, screenShotWidth, screenShotHeight);
 	CCameraBackup cbCanopy = setupCameraForScreenshot(*SceneRoot, left, right, top, bottom, screenShotWidth, screenShotHeight);
+	commitCamera();
 	// sky setup are copied from main scene before rendering so no setup done here
-	renderAll(ClientCfg.ScreenShotFullDetail);
+	renderScene(ClientCfg.ScreenShotFullDetail, ClientCfg.Bloom);
 	restoreCamera(*Scene, cbScene);
 	restoreCamera(*SceneRoot, cbCanopy);
+	commitCamera();
 }
 
 // ***************************************************************************

@@ -283,14 +283,15 @@ void CDriverGL::setTextureShaders(const uint8 *addressingModes, const CSmartPtr<
 bool CDriverGL::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL_setupMaterial)
-	CShaderGL*	pShader;
-	GLenum		glenum = GL_ZERO;
-	uint32		touched = mat.getTouched();
-	uint		stage;
 
 	// profile.
 	_NbSetupMaterialCall++;
 
+	CMaterial::TShader matShader;
+	
+	CShaderGL*	pShader;
+	GLenum		glenum = GL_ZERO;
+	uint32		touched = mat.getTouched();
 
 	// 0. Retrieve/Create driver shader.
 	//==================================
@@ -359,9 +360,29 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		mat.clearTouched(0xFFFFFFFF);
 	}
 
-	// Now we can get the supported shader from the cache.
-	CMaterial::TShader matShader = pShader->SupportedShader;
+	// 2b. User supplied pixel shader overrides material
+	//==================================
+	/*if (_VertexProgramEnabled)
+	{
+		if (!setUniformDriver(VertexProgram)) return false;
+		if (!setUniformMaterialInternal(VertexProgram, mat)) return false;
+	}*/
+	if (_PixelProgramEnabled)
+	{
+		matShader = CMaterial::Program;
 
+		// if (!setUniformDriver(PixelProgram)) return false;
+		// if (!setUniformMaterialInternal(PixelProgram, mat)) return false;
+		if (!_LastSetuppedPP) return false;
+	}
+	else
+	{
+		// Now we can get the supported shader from the cache.
+		matShader = pShader->SupportedShader;
+	}
+
+	// 2b. Update more shader state
+	//==================================
 	// if the shader has changed since last time
 	if(matShader != _CurrentMaterialSupportedShader)
 	{
@@ -382,9 +403,11 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	// Must setup textures each frame. (need to test if touched).
 	// Must separate texture setup and texture activation in 2 "for"...
 	// because setupTexture() may disable all stage.
-	if (matShader != CMaterial::Water)
+	if (matShader != CMaterial::Water 
+		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureStages))
+		)
 	{
-		for(stage=0 ; stage<inlGetNumTextStages() ; stage++)
+		for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
 		{
 			ITexture	*text= mat.getTexture(uint8(stage));
 			if (text != NULL && !setupTexture(*text))
@@ -394,7 +417,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	// Here, for Lightmap materials, setup the lightmaps.
 	if(matShader == CMaterial::LightMap)
 	{
-		for(stage = 0; stage < mat._LightMaps.size(); stage++)
+		for (uint stage = 0; stage < mat._LightMaps.size(); ++stage)
 		{
 			ITexture *text = mat._LightMaps[stage].Texture;
 			if (text != NULL && !setupTexture(*text))
@@ -418,9 +441,10 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		&& matShader != CMaterial::Cloud
 		&& matShader != CMaterial::Water
 		&& matShader != CMaterial::Specular
+		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureStages))
 	   )
 	{
-		for(stage=0 ; stage<inlGetNumTextStages() ; stage++)
+		for(uint stage=0 ; stage<inlGetNumTextStages() ; stage++)
 		{
 			ITexture	*text= mat.getTexture(uint8(stage));
 
@@ -548,11 +572,13 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		resetLightMapVertexSetup();
 
 	// Textures user matrix
-	if (matShader == CMaterial::Normal)
+	if (matShader == CMaterial::Normal
+		|| ((matShader == CMaterial::Program) && (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureMatrices))
+		)
 	{
 		setupUserTextureMatrix(inlGetNumTextStages(), mat);
 	}
-	else // deactivate texture matrix
+	else
 	{
 		disableUserTextureMatrix();
 	}
@@ -1476,7 +1502,7 @@ CTextureCube	*CDriverGL::getSpecularCubeMap(uint exp)
 	{
 		1.f, 4.f, 8.f, 24.f, 48.f, 128.f, 256.f, 511.f
 	};
-	const uint numCubeMap = sizeof(expToCubeMap) / sizeof(float);
+	const uint numCubeMap = sizeof(cubeMapExp) / sizeof(float);
 	static bool tableBuilt = false;
 
 	if (!tableBuilt)

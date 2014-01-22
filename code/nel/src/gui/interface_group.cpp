@@ -349,27 +349,27 @@ namespace NLGUI
 		if( editorMode )
 		{
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_active" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_active", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_deactive" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_deactive", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "group_onclick_r" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "group_onclick_r", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "group_onclick_l" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "group_onclick_l", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_enter" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_enter", std::string( (const char*)ptr ) );
 
 			ptr = (char*) xmlGetProp( cur, BAD_CAST "on_escape" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_escape", std::string( (const char*)ptr ) );
 		}
 
@@ -2325,7 +2325,8 @@ namespace NLGUI
 		_LUAOnDbChange[dbList]= newLink;
 		// Init and attach to list of untargeted links
 		std::vector<CInterfaceLink::CTargetInfo> noTargets;
-		newLink->init(noTargets, NLMISC::toString("depends(%s)", dbList.c_str()), "lua", script, "", this);
+		std::vector<CInterfaceLink::CCDBTargetInfo> noCdbTargets;
+		newLink->init(noTargets, noCdbTargets, NLMISC::toString("depends(%s)", dbList.c_str()), "lua", script, "", this);
 	}
 
 	// ------------------------------------------------------------------------------------------------

@@ -27,22 +27,22 @@ class IDriver;
 
 struct CVideoMode
 {
-	unsigned int widht;
-	unsigned int height;
-	unsigned int depth;
-	unsigned int frequency;
+	uint16 width;
+	uint16 height;
+	uint8 depth;
+	uint8 frequency;
 
 	CVideoMode()
 	{
-		widht = 0;
+		width = 0;
 		height = 0;
 		depth = 0;
 		frequency = 0;
 	}
 
-	bool operator==( CVideoMode &o )
+	bool operator== (const CVideoMode &o)
 	{
-		if( ( o.widht == widht ) && ( o.height == height ) && ( o.depth == depth ) && ( o.frequency == frequency ) )
+		if ((o.width == width) && (o.height == height) && (o.depth == depth) && (o.frequency == frequency))
 			return true;
 		else
 			return false;
@@ -60,11 +60,8 @@ public:
 
 	static CSystem &GetInstance()
 	{
-		if( instance == 0 )
-		{
-			instance = new CSystem;
-		}
-		return *instance;
+		static CSystem sInstance;
+		return sInstance;
 	}
 
 	struct CSysInfo
@@ -74,16 +71,18 @@ public:
 		std::string osName;
 		std::string cpuName;
 		uint64 totalRAM;
-	} sysInfo;
+	}
+	sysInfo;
 
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 	struct CD3DInfo
 	{
 		std::string device;
 		std::string driver;
 		std::string driverVersion;
 		std::vector< CVideoMode > modes;
-	} d3dInfo;
+	}
+	d3dInfo;
 #endif
 
 	struct COpenGLInfo
@@ -93,20 +92,22 @@ public:
 		std::string driverVersion;
 		std::string extensions;
 		std::vector< CVideoMode > modes;
-	} openglInfo;
+	}
+	openglInfo;
 
 	CConfig config;
 
 private:
 	void GatherSysInfo();
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 	void GatherD3DInfo();
 #endif
 	void GatherOpenGLInfo();
 
-	void GetVideoModes( std::vector< CVideoMode > &dst, NL3D::IDriver *driver ) const;
+	void GetVideoModes(std::vector<CVideoMode> &dst, NL3D::IDriver *driver) const;
 
-	static CSystem *instance;
+	static bool parseDriverVersion(const std::string &device, uint64 driver, std::string &version);
 };
 
 #endif // SYSTEM_H
+

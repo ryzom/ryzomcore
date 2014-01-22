@@ -35,10 +35,19 @@
 #include <nel/3d/u_3d_mouse_listener.h>
 #include <nel/3d/u_material.h>
 #include <nel/3d/u_landscape.h>
+#include <nel/3d/stereo_hmd.h>
 
 #include "network.h"
 #include "snowballs_client.h"
 #include "interface.h"
+
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+#include <nel/3d/driver_user.h>
+#include <nel/3d/driver.h>
+#include <nel/3d/pixel_program.h>
+#include <nel/3d/material.h>
+#include <nel/3d/u_texture.h>
+#endif
 
 //
 // Namespaces
@@ -237,6 +246,13 @@ void cbUpdateCommands (CConfigFile::CVar &var)
 	else nlwarning ("Unknown variable update %s", var.Name.c_str());
 }
 
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+namespace {
+CPixelProgram *a_DevPixelProgram = NULL;
+UTextureFile *a_NelLogo;
+}
+#endif
+
 void	initCommands()
 {
 	// Add the keyboard listener in the event server
@@ -278,6 +294,79 @@ void	initCommands()
     CommandsMaterial.initUnlit();
     CommandsMaterial.setBlendFunc(UMaterial::srcalpha, UMaterial::invsrcalpha);
     CommandsMaterial.setBlend(true);
+
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	CommandsMaterial.getObjectPtr()->setShader(NL3D::CMaterial::PostProcessing);
+	a_NelLogo = Driver->createTextureFile("nel128.tga");
+	CommandsMaterial.setTexture(dynamic_cast<NL3D::UTexture *>(a_NelLogo));
+	static const char *program_arbfp1 =
+		"!!ARBfp1.0\n"
+		"PARAM c[1] = { { 1, 0 } };\n"
+		"MOV result.color.xzw, c[0].xyyx;\n"
+		"TEX result.color.y, fragment.texcoord[0], texture[0], 2D;\n"
+		"END\n";
+	static const char *program_fp40 =
+		"!!ARBfp1.0\n"
+		"OPTION NV_fragment_program2;\n"
+		"PARAM c[1] = { { 1, 0 } };\n"
+		"TEMP RC;\n"
+		"TEMP HC;\n"
+		"OUTPUT oCol = result.color;\n"
+		"MOVR  oCol.xzw, c[0].xyyx;\n"
+		"TEX   oCol.y, fragment.texcoord[0], texture[0], 2D;\n"
+		"END\n";
+	static const char *program_ps_1_1 = 
+		"ps.1.1\n"
+		"def c0, 0.000000, 0.000000, 1.000000, 0.000000\n"
+		"def c1, 1.000000, 0.000000, 0.000000, 0.000000\n"
+		"def c2, 0.000000, 1.000000, 0.000000, 0.000000\n"
+		"tex t0\n"
+		"mad r0.rgb, c2, t0, c1\n"
+		"mov r0.a, c0.b\n";
+	static const char *program_ps_2_0 = 
+		"ps_2_0\n"
+		"dcl_2d s0\n"
+		"def c0, 1.00000000, 0.00000000, 0, 0\n"
+		"dcl t0.xy\n"
+		"texld r0, t0, s0\n"
+		"mov r0.z, c0.y\n"
+		"mov r0.xw, c0.x\n"
+		"mov oC0, r0\n";
+	static const char *program_ps_3_0 =
+		"ps_3_0\n"
+		"dcl_2d s0\n"
+		"def c0, 1.00000000, 0.00000000, 0, 0\n"
+		"dcl_texcoord0 v0.xy\n"
+		"mov oC0.xzw, c0.xyyx\n"
+		"texld oC0.y, v0, s0\n";
+	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
+	if (d->supportPixelProgram(CPixelProgram::fp40))
+	{
+		nldebug("fp40");
+		a_DevPixelProgram = new CPixelProgram(program_fp40);
+	}
+	else if (d->supportPixelProgram(CPixelProgram::arbfp1))
+	{
+		nldebug("arbfp1");
+		a_DevPixelProgram = new CPixelProgram(program_arbfp1);
+	}
+	/*else if (d->supportPixelProgram(CPixelProgram::ps_3_0))
+	{
+		nldebug("ps_3_0");
+		a_DevPixelProgram = new CPixelProgram(program_ps_3_0);
+		// Textures do not seem to work with ps_3_0...
+	}*/
+	else if (d->supportPixelProgram(CPixelProgram::ps_2_0))
+	{
+		nldebug("ps_2_0");
+		a_DevPixelProgram = new CPixelProgram(program_ps_2_0);
+	}
+	else if (d->supportPixelProgram(CPixelProgram::ps_1_1))
+	{
+		nldebug("ps_1_1");
+		a_DevPixelProgram = new CPixelProgram(program_ps_1_1);
+	}
+#endif
 }
 
 void	updateCommands()
@@ -286,6 +375,9 @@ void	updateCommands()
 	uint32 _width, _height;
 	Driver->getWindowSize(_width, _height);
 	float width = (float)_width, height = (float)_height;
+	NL3D::CViewport vp = Driver->getViewport();
+	width *= vp.getWidth();
+	height *= vp.getHeight();
 	float CommandsLineHeight = CommandsFontSize / height;
 	float CommandsBoxX = ((float)(sint32)(SBCLIENT::CommandsBoxX * width)) / width;
 	float CommandsBoxWidth = ((float)(sint32)(SBCLIENT::CommandsBoxWidth * width)) / width;
@@ -293,15 +385,56 @@ void	updateCommands()
 	float CommandsBoxHeight = ((float)(sint32)((CommandsNbLines + 1) * CommandsLineHeight * width)) / width;
 	float CommandsBoxBorderX = ((float)(sint32)(SBCLIENT::CommandsBoxBorder * width)) / width;
 	float CommandsBoxBorderY = ((float)(sint32)(SBCLIENT::CommandsBoxBorder * height)) / height;
+	if (StereoHMD)
+	{
+		float xshift, yshift;
+		StereoHMD->getInterface2DShift(0, xshift, yshift, 4.f);
+		// snap to pixels
+		xshift = ((float)(sint32)(xshift * width)) / width;
+		yshift = ((float)(sint32)(yshift * height)) / height;
+		// adjust
+		CommandsBoxX += xshift;
+		CommandsBoxY += yshift;
+	}
 
 	// Display the background
 	Driver->setMatrixMode2D11 ();
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	CommandsMaterial.setColor(CRGBA::Blue); // Test to check which shader is displaying.
+#else
 	CommandsMaterial.setColor(CommandsBackColor);
+#endif
 	float x0 = CommandsBoxX - CommandsBoxBorderX;
 	float y0 = CommandsBoxY - CommandsBoxBorderY;
 	float x1 = CommandsBoxX + CommandsBoxWidth + CommandsBoxBorderX;
 	float y1 = CommandsBoxY + CommandsBoxHeight + CommandsBoxBorderY;
+
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
+	d->activePixelProgram(a_DevPixelProgram);
+	bool fogEnabled = d->fogEnabled();
+	d->enableFog(false);
+
+	// Driver->drawQuad(CQuad(CVector(x0, y0, 0), CVector(x1, y0, 0), CVector(x1, y1, 0), CVector(x0, y1, 0)), CommandsMaterial);
+	CQuadUV quadUV;
+	quadUV.V0 = CVector(x0, y0, 0);
+	quadUV.V1 = CVector(x1, y0, 0);
+	quadUV.V2 = CVector(x1, y1, 0);
+	quadUV.V3 = CVector(x0, y1, 0);
+	quadUV.Uv0 = CUV(0, 1);
+	quadUV.Uv1 = CUV(1, 1);
+	quadUV.Uv2 = CUV(1, 0);
+	quadUV.Uv3 = CUV(0, 0);
+	Driver->drawQuad(quadUV, CommandsMaterial);
+	//Driver->drawBitmap(x0, y0, x1 - x0, y1 - y0, *a_NelLogo);
+
+	d->enableFog(fogEnabled);
+	d->activePixelProgram(NULL);
+#else
+
 	Driver->drawQuad(CQuad(CVector(x0, y0, 0), CVector(x1, y0, 0), CVector(x1, y1, 0), CVector(x0, y1, 0)), CommandsMaterial);
+
+#endif
 
 	// Set the text context
 	TextContext->setHotSpot (UTextContext::BottomLeft);
@@ -334,6 +467,10 @@ void	clearCommands ()
 
 void releaseCommands()
 {
+#if SBCLIENT_DEV_PIXEL_PROGRAM
+	delete a_DevPixelProgram;
+	a_DevPixelProgram = NULL;
+#endif
 	// Remove the displayers
 	CommandsLog.removeDisplayer(&CommandsDisplayer);
 #ifndef NL_RELEASE

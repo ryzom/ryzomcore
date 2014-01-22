@@ -1,0 +1,10 @@
+-Make Permission www dependend, so it can be implemented in drupal with hook_permission();
+-in helpers make_folders  mkdir($value); should be drupal_mkdir();
+-fix the callback in add_user_to_sgroup.php and show_sgroup.php in the func dir
+-put mycrypt stuff from func/modify_email_of_sgroup in the setPassword itself.
+-fix the error paths by making them use the ingame_path & outgame paths too
+
+module related:
+-put the install.php stuff into the module.install file
+-add extra data fields that can be changed like the gender, country
+
