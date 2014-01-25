@@ -29,7 +29,7 @@ using namespace std;
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 
-#include <freetype/freetype.h>
+#include <freetype.h>
 
 // for freetype 2.0
 #ifdef FTERRORS_H
@@ -51,7 +51,7 @@ int          err_code;
 const char*  err_msg;
 } ft_errors[] =
 
-#include <freetype/fterrors.h>
+#include <fterrors.h>
 
 using namespace NLMISC;
 
