@@ -32,7 +32,16 @@
 #include "nel/3d/texture_file.h"
 #include "nel/3d/register_3d.h"
 
-#include "windows.h"
+#ifdef NL_OS_WINDOWS
+	#include <windows.h>
+#else
+	#include <dirent.h> /* for directories functions */
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <unistd.h> /* getcwd, chdir -- replacement for getCurDiretory & setCurDirectory on windows */
+#endif
+
+
 
 #include <vector>
 #include <string>
@@ -42,20 +51,20 @@
 using namespace std;
 using namespace NL3D;
 
-// ---------------------------------------------------------------------------
-char sExeDir[MAX_PATH];
 
-void outString (const string &sText)
+void outString (const string &sText) ;
+
+// ---------------------------------------------------------------------------
+#ifdef NL_OS_WINDOWS  // win32 code
+void GetCWD (int length,char *dir)
 {
-	char sCurDir[MAX_PATH];
-	GetCurrentDirectory (MAX_PATH, sCurDir);
-	SetCurrentDirectory (sExeDir);
-	NLMISC::createDebug ();
-	NLMISC::InfoLog->displayRaw(sText.c_str());
-	SetCurrentDirectory (sCurDir);
+	GetCurrentDirectoryA (length, dir);
 }
 
-// ---------------------------------------------------------------------------
+bool ChDir(const char *path)
+{
+	return SetCurrentDirectoryA (path);
+}
 void dir (const std::string &sFilter, std::vector<std::string> &sAllFiles, bool bFullPath)
 {
 	WIN32_FIND_DATA findData;
@@ -63,7 +72,7 @@ void dir (const std::string &sFilter, std::vector<std::string> &sAllFiles, bool 
 	char sCurDir[MAX_PATH];
 	sAllFiles.clear ();
 	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile (sFilter.c_str(), &findData);	
+	hFind = FindFirstFile ("*"+sFilter.c_str(), &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		DWORD res = GetFileAttributes(findData.cFileName);
@@ -79,16 +88,74 @@ void dir (const std::string &sFilter, std::vector<std::string> &sAllFiles, bool 
 	}
 	FindClose (hFind);
 }
+#else   // posix version  of the void dir(...) function.
+void GetCWD (int length, char* directory)
+{
+	getcwd (directory,length);
+}
+bool ChDir(const char *path)
+{
+	return ( chdir (path) == 0 ? true : false );
+}
+void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
+{
+	char sCurDir[MAX_PATH];
+	DIR* dp = NULL;
+	struct dirent *dirp= NULL;
+
+	GetCWD ( MAX_PATH,sCurDir ) ;
+	sAllFiles.clear ();
+	if ( (dp = opendir( sCurDir )) == NULL)
+	{
+		string sTmp = string("ERROR :  Can't open the dir : \"")+string(sCurDir)+string("\"") ;
+		outString ( sTmp ) ;
+		return ;
+	}
+
+	while ( (dirp = readdir(dp)) != NULL)
+	{
+		std:string sFileName = std::string(dirp->d_name) ;
+		if (sFileName.substr((sFileName.length()-sFilter.length()),sFilter.length()).find(sFilter)!= std::string::npos )
+		{
+			if (bFullPath)
+				sAllFiles.push_back(string(sCurDir) + "/" + sFileName);
+			else
+				sAllFiles.push_back(sFileName);
+		}
+
+	}
+	closedir(dp);
+}
+bool DeleteFile(const char* filename){
+    if ( int res = unlink (filename) == -1 )
+    	return false;
+    return true;
+}
+#endif
+
+
+// ---------------------------------------------------------------------------
+char sExeDir[MAX_PATH];
+
+void outString (const string &sText)
+{
+	char sCurDir[MAX_PATH];
+	GetCWD (MAX_PATH, sCurDir);
+	ChDir (sExeDir);
+	NLMISC::createDebug ();
+	NLMISC::InfoLog->displayRaw(sText.c_str());
+	ChDir (sCurDir);
+}
 
 // ---------------------------------------------------------------------------
 bool fileExist (const std::string &sFileName)
 {
-	HANDLE hFile = CreateFile (sFileName.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
-				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile == INVALID_HANDLE_VALUE)
-		return false;
-	CloseHandle (hFile);
-	return true;
+#ifdef NL_OS_WINDOWS
+	return (GetFileAttributes(sFileName.c_str()) != INVALID_FILE_ATTRIBUTES);
+#else // NL_OS_WINDOWS
+	struct stat buf;
+	return stat (sFileName.c_str (), &buf) == 0;
+#endif // NL_OS_WINDOWS
 }
 
 // -----------------------------------------------------------------------------------------------
@@ -332,25 +399,25 @@ int main(int nNbArg, char **ppArgs)
 	char sSHPDir[MAX_PATH];
 
 	
-	GetCurrentDirectory (MAX_PATH, sExeDir);
+	GetCWD (MAX_PATH, sExeDir);
 
 	
 	// Get absolute directory for lightmaps
-	if (!SetCurrentDirectory(ppArgs[1]))
+	if (!ChDir(ppArgs[1]))
 	{
-		outString (string("ERROR : directory ") + ppArgs[1] + " do not exists\n");
+		outString (string("ERROR : directory ") + ppArgs[1] + " do not exists or access is denied\n");
 		return -1;
 	}
-	GetCurrentDirectory (MAX_PATH, sLMPDir);
-	SetCurrentDirectory (sExeDir);
+	GetCWD (MAX_PATH, sLMPDir);
+	ChDir (sExeDir);
 	// Get absolute directory for shapes
-	if (!SetCurrentDirectory(ppArgs[2]))
+	if (!ChDir(ppArgs[2]))
 	{
-		outString (string("ERROR : directory ") + ppArgs[2] + " do not exists\n");
+		outString (string("ERROR : directory ") + ppArgs[2] + " do not exists or access is denied\n");
 		return -1;
 	}
-	GetCurrentDirectory (MAX_PATH, sSHPDir);
-	dir ("*.shape", AllShapeNames, false);
+	GetCWD (MAX_PATH, sSHPDir);
+	dir (".shape", AllShapeNames, false);
 	registerSerial3d ();
 	for (uint32 nShp = 0; nShp < AllShapeNames.size(); ++nShp)
 	{
@@ -374,13 +441,13 @@ int main(int nNbArg, char **ppArgs)
 
 	if (nNbArg > 3 && ppArgs[3] && strlen(ppArgs[3]) > 0)
 	{
-		SetCurrentDirectory (sExeDir);
-		if (!SetCurrentDirectory(ppArgs[3]))
+		ChDir (sExeDir);
+		if (!ChDir(ppArgs[3]))
 		{
 			outString (string("ERROR : directory ") + ppArgs[3] + " do not exists\n");
 			return -1;
 		}
-		dir ("*.tag", tags, false);
+		dir (".tag", tags, false);
 		for(uint k = 0; k < tags.size(); ++k)
 		{
 			std::string::size_type pos = tags[k].find('.');
@@ -426,7 +493,7 @@ int main(int nNbArg, char **ppArgs)
 
 
 	// **** Parse all lightmaps, sorted by layer, and 8 or 16 bit mode
-	SetCurrentDirectory (sExeDir);
+	ChDir (sExeDir);
 	for (uint32 lmc8bitMode = 0; lmc8bitMode < 2; ++lmc8bitMode)
 	for (uint32 nNbLayer = 0; nNbLayer < 256; ++nNbLayer)
 	{
@@ -440,8 +507,8 @@ int main(int nNbArg, char **ppArgs)
 		string sFilter;
 
 		// **** Get All Lightmaps that have this number of layer, and this mode
-		sFilter = "*_" + NLMISC::toString(nNbLayer) + ".tga";
-		SetCurrentDirectory (sLMPDir);
+		sFilter = "_" + NLMISC::toString(nNbLayer) + ".tga";
+		ChDir (sLMPDir);
 		dir (sFilter, AllLightmapNames, false);
 
 		// filter by layer
@@ -564,7 +631,7 @@ int main(int nNbArg, char **ppArgs)
 				outString(string("ERROR: lightmaps ")+sTmp2+"*.tga not all the same size\n");
 				for (k = 0; k < (sint32)AllLightmapNames.size(); ++k)
 				{
-					if (strnicmp(AllLightmapNames[k].c_str(), sTmp2.c_str(), sTmp2.size()) == 0)
+					if (NLMISC::strnicmp(AllLightmapNames[k].c_str(), sTmp2.c_str(), sTmp2.size()) == 0)
 					{
 						for (j = k+1; j < (sint32)AllLightmapNames.size(); ++j)
 						{
@@ -697,7 +764,7 @@ int main(int nNbArg, char **ppArgs)
 					// Change shapes uvs related and names to the lightmap
 					// ---------------------------------------------------
 
-					SetCurrentDirectory (sSHPDir);
+					ChDir (sSHPDir);
 
 					for (k = 0; k < (sint32)AllShapes.size(); ++k)
 					{
@@ -891,7 +958,7 @@ int main(int nNbArg, char **ppArgs)
 						}
 					}
 
-					SetCurrentDirectory (sLMPDir);
+					ChDir (sLMPDir);
 
 					// Get out of the j loop
 					break;
@@ -923,7 +990,7 @@ int main(int nNbArg, char **ppArgs)
 	// **** Additionally, output or clear a "flag file" in a dir to info if a 8bit lihgtmap or not
 	if (nNbArg >=5 && ppArgs[4] && strlen(ppArgs[4]) > 0)
 	{
-		SetCurrentDirectory (sExeDir);
+		ChDir (sExeDir);
 
 		// out a text file, with list of
 		FILE	*out= fopen(ppArgs[4], "wt");
