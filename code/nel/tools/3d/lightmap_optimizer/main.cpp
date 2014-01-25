@@ -150,12 +150,7 @@ void outString (const string &sText)
 // ---------------------------------------------------------------------------
 bool fileExist (const std::string &sFileName)
 {
-#ifdef NL_OS_WINDOWS
-	return (GetFileAttributes(sFileName.c_str()) != INVALID_FILE_ATTRIBUTES);
-#else // NL_OS_WINDOWS
-	struct stat buf;
-	return stat (sFileName.c_str (), &buf) == 0;
-#endif // NL_OS_WINDOWS
+	return NLMISC::CFile::isExists(sFileName) ;
 }
 
 // -----------------------------------------------------------------------------------------------
