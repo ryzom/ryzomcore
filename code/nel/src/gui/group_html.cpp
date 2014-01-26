@@ -3857,6 +3857,7 @@ namespace NLGUI
 					else
 					{
 						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
+						/* FIX ME - every connection is appending a new callback to the list, and its never removed (Vinicius Arroyo)*/
 						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 						/* Set the timeout for long we are going to wait for a response */
@@ -4003,6 +4004,7 @@ namespace NLGUI
 					else
 					{
 						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
+						/* FIX ME - every connection is appending a new callback to the list, and its never removed (Vinicius Arroyo)*/
 						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
 
 						/* Start the first request */
@@ -4089,17 +4091,19 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::requestTerminated(HTRequest * /* request */)
+	void CGroupHTML::requestTerminated(HTRequest * request )
 	{
-		// set the browser as complete
-		_Browsing = false;
-		updateRefreshButton();
-		// check that the title is set, or reset it (in the case the page
-		// does not provide a title)
-		if (_TitleString.empty())
-		{
-			setTitle(_TitlePrefix);
-		}
+		// this callback is being called for every request terminated
+		if( request == _LibWWW->Request ){
+			// set the browser as complete
+			_Browsing = false;
+			updateRefreshButton();
+			// check that the title is set, or reset it (in the case the page
+			// does not provide a title)
+			if (_TitleString.empty())
+			{
+				setTitle(_TitlePrefix);
+			}
 	}
 
 	// ***************************************************************************
