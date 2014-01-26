@@ -108,23 +108,19 @@ function inviteOwnerInSession($charId, $domainId, $sessionId)
 	$RSMPort = $addr[1];
 	
 	global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, $RingDBName, /*$SessionId,*/ $SessionToolsResult;
-	global $DBHost, $RingDBUserName, $RingDBPassword;
 
 	$SessionId = $sessionId;
 	$DomainId = $domainId;
-
-	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die("Can't connect to ring database");
-	mysqli_select_db($link, $RingDBName) or die ("Can't access to the db dbname:$RingDBName");
-
-	$sessionId = (int) $sessionId;
+	
+	mysql_select_db ($RingDBName) or die ("Can't access to the db dbname:$RingDBName");
 	$query = "select session_type from sessions where session_id=".$sessionId;
-	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
-	if (mysqli_num_rows($result) != 1)
+	$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+	if (mysql_num_rows ($result) != 1)
 	{
 		echo "Can't find 1 row for ring session ".$sessionId."<br>";
 		die();
 	}
-	$row = mysqli_fetch_row($result);
+	$row = mysql_fetch_row($result);
 	$session_type = $row[0];
 	$mode = ($session_type == "st_edit") ? "sps_edit_invited" : "sps_anim_invited";
 	echo "Inviting character ".$charId." of user ".$userId." in session ".$sessionId."<br>";
@@ -188,4 +184,4 @@ class InviteOwnerCb extends CRingSessionManagerWeb
 		echo '<p><p><a href="web_start.php">Back to menu</a>';
 	}
 }
-
+?>

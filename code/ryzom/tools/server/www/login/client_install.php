@@ -74,21 +74,19 @@
 			die2();
 		}
 		$domainName = getPost("domain");
-		$nelLink = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$DBHost user:$DBUserName");
-		mysqli_select_db ($nelLink, $DBName) or die2 (__FILE__. " " .__LINE__." Can't access to the table dbname:$DBName");
-
-		$domainName = mysqli_real_escape_string($nelLink, $domainName);
+		$nelLink = mysql_connect($DBHost, $DBUserName, $DBPassword) or die2 (__FILE__. " " .__LINE__." Can't connect to database host:$DBHost user:$DBUserName");
+		mysql_select_db ($DBName, $nelLink) or die2 (__FILE__. " " .__LINE__." Can't access to the table dbname:$DBName");
 		$query = "SELECT backup_patch_url, patch_urls FROM domain WHERE domain_name='$domainName'";	
-		$result = mysqli_query ($nelLink, $query) or die2 (__FILE__. " " .__LINE__." Can't execute the query: ".$query);
+		$result = mysql_query ($query, $nelLink) or die2 (__FILE__. " " .__LINE__." Can't execute the query: ".$query);
 			
-		if (mysqli_num_rows($result) != 1)
+		if (mysql_num_rows($result) != 1)
 		{
 			// unrecoverable error, we must giveup
 			$reason = "Can't find domain '".$domainName."' (error code x)";
 			$res = false;
 		}
 
-		$req = mysqli_fetch_array($result);
+		$req = mysql_fetch_array($result);
 		
 		$backup_patch_url = $req["backup_patch_url"];
 		$patch_urls = $req["patch_urls"];
@@ -116,7 +114,7 @@
 		}
 		echo "</version>\n";
 
-		mysqli_close($nelLink);
+		mysql_close($nelLink);
 		unset($nelLink);
 		break;
 		
@@ -126,3 +124,4 @@
 	}
 			
 
+?>

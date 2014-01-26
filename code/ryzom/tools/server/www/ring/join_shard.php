@@ -184,17 +184,13 @@ function displayAllShards(&$onlineShardsBySessionId)
 	}
 	
 	// List all shards of the domain, including offline ones
-	global $DBName, $DBHost, $DBUserName, $DBPassword;
-	$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die("Can't connect to nel database");
-	mysqli_select_db($link, $DBName) or die ("Can't access to the db dbname:$DBName");
-
-	$domainId = (int) $domainId;
+	global $DBName;
+	mysql_select_db ($DBName) or die ("Can't access to the db dbname:$DBName");
 	$query = "select * from shard where domain_id = $domainId";
-	$resShards = mysqli_query($link, $query) or die ("Can't execute the query: ".$query." ".mysqli_error($link));
-
+	$resShards = mysql_query ($query) or die ("Can't execute the query: ".$query." ".mysql_error());
 	echo "Select a shard to join:<br>";
 	//echo "<form name='far_tp' action='join_shard.php' method='post'>";
-	while ($rowShard = mysqli_fetch_assoc($resShards))
+	while ($rowShard = mysql_fetch_array($resShards))
 	{
 		$mainlandSessionId = $rowShard['FixedSessionId'];
 		$isOnline = isset($onlineShardsBySessionId[$mainlandSessionId]);
@@ -249,4 +245,4 @@ function joinMainland($userId, $domainId)
 	global $FSHostResult;
 	return $FSHostResult;
 }
-
+?>

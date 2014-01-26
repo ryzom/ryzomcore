@@ -34,16 +34,16 @@
 				// gather the domain information (server version, patch urls and backup patch url
 				global $DBHost, $DBUserName, $DBPassword, $DBName, $AutoInsertInRing;
 
-				$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
-				mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
+				$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+				mysql_select_db ($DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 				$query = "SELECT * FROM domain WHERE domain_id=$domainId";
-				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+				$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
-				if( mysqli_num_rows($result) != 1)
+				if( mysql_num_rows($result) != 1)
 				{
 					die(errorMsgBlock(3001, $domainId));
 				}
-				$row = mysqli_fetch_array($result);
+				$row = mysql_fetch_array($result);
 
 				// set the cookie
 				setcookie ( "ryzomId" , $cookie, 0, "/");
@@ -178,28 +178,27 @@
 			{
 				////////////// Temporary code alpha 0 only /////////////////////////////////////
 				// check if the ring user exist, and create it if not
-				$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die(errorMsgBlock(3004, 'Ring', $DBHost, $RingDBUserName));
-				mysqli_select_db ($ringDb, $domainInfo['ring_db_name']) or die(errorMsgBlock(3005, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName));
+				$ringDb = mysql_connect($DBHost, $RingDBUserName, $RingDBPassword) or die(errorMsgBlock(3004, 'Ring', $DBHost, $RingDBUserName));
+				mysql_select_db ($domainInfo['ring_db_name'], $ringDb) or die(errorMsgBlock(3005, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName));
 				$query = "SELECT user_id FROM ring_users where user_id = '".$id."'";
-				$result = mysqli_query ($ringDb, $query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysqli_error($ringDb)));
+				$result = mysql_query ($query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysql_error()));
 
-				if (mysqli_num_rows($result) == 0)
+				if (mysql_num_rows($result) == 0)
 				{
 					// no ring user record, build one
-					$login = mysqli_real_escape_string($ringDb, $login);
-					$query = "INSERT INTO ring_users SET user_id = '$id', user_name = '$login', user_type='ut_pioneer'";
-					$result = mysqli_query ($ringDb, $query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysqli_error($ringDb)));
+					$query = "INSERT INTO ring_users SET user_id = '".$id."', user_name = '".$_GET["login"]."', user_type='ut_pioneer'";
+					$result = mysql_query ($query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysql_error()));
 				}
 
 //				// check that there is a character record (deprecated)
 //				$query = "SELECT user_id FROM characters where user_id = '".$id."'";
-//				$result = mysqli_query ($ringDb, $query) or die("Query ".$query." failed");
-//				if (mysqli_num_rows($result) == 0)
+//				$result = mysql_query ($query) or die("Query ".$query." failed");
+//				if (mysql_num_rows($result) == 0)
 //				{
 //					// no characters record, build a default one
 //					$charId = ($id * 16);
 //					$query = "INSERT INTO characters SET char_id='".$charId."', char_name='".$_GET["login"]."_default', user_id = '".$id."'";
-//					$result = mysqli_query ($ringDb, $query) or die("Query ".$query." failed");
+//					$result = mysql_query ($query) or die("Query ".$query." failed");
 //				}
 			}
 
@@ -270,25 +269,24 @@
 
 		setMsgLanguage($lang);
 
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
-		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
-
 		// we map the client application to the domain name
-		$domainName = mysqli_real_escape_string($link, $clientApplication);
+		$domainName = $clientApplication;
 
+		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		mysql_select_db ($DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 		// retreive the domain id
 		$query = "SELECT domain_id FROM domain WHERE domain_name='$domainName'";
-		$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+		$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
-		if (mysqli_num_rows($result) == 0)
+		if (mysql_num_rows($result) == 0)
 		{
 			// unrecoverable error, we must giveup
 			$reason = errorMsg(3007, $domainName);
-			mysqli_close($link);
+			mysql_close($link);
 			return false;
 		}
 
-		$row = mysqli_fetch_array($result);
+		$row = mysql_fetch_array($result);
 		$domainId = $row[0];
 
 		// retreive the domain info
@@ -298,34 +296,32 @@
 		$accessPriv = strtoupper(substr($domainInfo['status'], 3));
 
 		// now, retrieve the user infos
-		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT * FROM user where Login='$login'";
-		$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+		$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
-		if (mysqli_num_rows ($result) == 0)
+		if (mysql_num_rows ($result) == 0)
 		{
 			if ($AcceptUnknownUser)
 			{
 				// login doesn't exist, create it
-				$password = mysqli_real_escape_string($link, $password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
-				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+				$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
 				// get the user to have his UId
 				$query = "SELECT * FROM user WHERE Login='$login'";
-				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+				$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
-				if (mysqli_num_rows ($result) == 1)
+				if (mysql_num_rows ($result) == 1)
 				{
 					$reason = errorMsg(3008, $login);
-					$row = mysqli_fetch_assoc ($result);
+					$row = mysql_fetch_array ($result);
 					$id = $row["UId"];
 					$priv = $row["Privilege"];
 					$extended = $row["ExtendedPrivilege"];
 
 					// add the default permission
 					$query = "INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES ('$id', 'r2', '$accessPriv')";
-					$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+					$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
 					$res = false;
 				}
@@ -339,9 +335,9 @@
 			{
 				// Check if this is not an unconfirmed account
 				$query = "SELECT GamePassword, Email, Language FROM signup_data WHERE login='$login'";
-				$result = mysqli_query($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+				$result = mysql_query($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
-				if (mysqli_num_rows($result) == 0)
+				if (mysql_num_rows($result) == 0)
 				{
 					$reason = errorMsg(2001, $login, 'checkUserValidity');
 					$res = false;
@@ -350,7 +346,7 @@
 				{
 					// Check password to avoid revealing email address to third-party
 					$passwordMatchedRow = false;
-					while ($row = mysqli_fetch_assoc($result))
+					while ($row = mysql_fetch_array($result))
 					{
 						$salt = substr($row['GamePassword'],0,2);
 						if (($cp && $row['GamePassword'] == $password) || (!$cp && $row['GamePassword'] == crypt($password, $salt)))
@@ -373,7 +369,7 @@
 		}
 		else
 		{
-			$row = mysqli_fetch_assoc ($result);
+			$row = mysql_fetch_array ($result);
 			$salt = substr($row["Password"],0,2);
 			if (($cp && $row["Password"] == $password) || (!$cp && $row["Password"] == crypt($password, $salt)))
 			{
@@ -381,16 +377,15 @@
 				$_GET['login'] = $row['Login'];
 				// check if the user can use this application
 
-				$clientApplication = mysqli_real_escape_string($link, $clientApplication);
 				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND ClientApplication='$clientApplication'";
-				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
-				if (mysqli_num_rows ($result) == 0)
+				$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
+				if (mysql_num_rows ($result) == 0)
 				{
 					if ($AcceptUnknownUser)
 					{
 						// add default permission
 						$query = "INSERT INTO permission (UId, ClientApplication, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$clientApplication', -1, '$domainStatus')";
-						$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+						$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
 						$reason = errorMsg(3010);
 						$res = false;
@@ -405,7 +400,7 @@
 				else
 				{
 					// check that the access privilege for the domain
-					$permission = mysqli_fetch_assoc($result);
+					$permission = mysql_fetch_array($result);
 
 					if (!strstr($permission['AccessPrivilege'], $accessPriv))
 					{
@@ -414,7 +409,7 @@
 						{
 							// set an additionnal privilege for this player
 							$query = "UPDATE permission set AccessPrivilege='".$permission['AccessPrivilege'].",$accessPriv' WHERE prim=".$permission['prim'];
-							$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+							$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
 							$reason = errorMsg(3012, $accessPriv);
 							$res = false;
@@ -440,10 +435,10 @@
 //								$reason =  $reason."was just disconnected. Now you can retry the identification (error code 54)";
 //
 //								$query = "update shard set NbPlayers=NbPlayers-1 where ShardId=".$row["ShardId"];
-//								$result = mysqli_query ($link, $query) or die ("Can't execute the query: '$query' errno:".mysqli_errno($link).": ".mysqli_error($link));
+//								$result = mysql_query ($query) or die ("Can't execute the query: '$query' errno:".mysql_errno().": ".mysql_error());
 //
 //								$query = "update user set ShardId=-1, State='Offline' where UId=".$row["UId"];
-//								$result = mysqli_query ($link, $query) or die ("Can't execute the query: '$query' errno:".mysqli_errno($link).": ".mysqli_error($link));
+//								$result = mysql_query ($query) or die ("Can't execute the query: '$query' errno:".mysql_errno().": ".mysql_error());
 //							}
 //							else
 //							{
@@ -467,7 +462,7 @@
 				$res = false;
 			}
 		}
-		mysqli_close($link);
+		mysql_close($link);
 		return $res;
 	}
 
@@ -479,14 +474,13 @@
 
 		setMsgLanguage($lang);
 
-		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
-		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
+		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		mysql_select_db ($DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 
-		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT Password FROM user WHERE Login='$login'";
-		$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+		$result = mysql_query ($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
-		if (mysqli_num_rows ($result) != 1)
+		if (mysql_num_rows ($result) != 1)
 		{
 			if ($AcceptUnknownUser)
 			{
@@ -498,17 +492,17 @@
 			{
 				// Check if this is not an unconfirmed account
 				$query = "SELECT GamePassword, Language FROM signup_data WHERE login='$login'";
-				$result = mysqli_query($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
+				$result = mysql_query($query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysql_error()));
 
-				if (mysqli_num_rows($result) == 0)
+				if (mysql_num_rows($result) == 0)
 				{
 					// no user record, reject it
 					die (errorMsgBlock(2001, $login, 'askSalt'));
 				}
-				else if (mysqli_num_rows($result) == 1)
+				else if (mysql_num_rows($result) == 1)
 				{
 					// one unconfirmed record, let the client send the encrypted password to get the corresponding email address
-					$row = mysqli_fetch_assoc($result);
+					$row = mysql_fetch_array($result);
 					$salt = substr($row['GamePassword'], 0, 2);
 				}
 				else
@@ -517,7 +511,7 @@
 					{
 						// several matching records => display a multi-language message now
 						$languages = array();
-						while ($row = mysqli_fetch_assoc($result))
+						while ($row = mysql_fetch_array($result))
 						{
 							$languages[$row['Language']] = true;
 						}
@@ -529,11 +523,12 @@
 		}
 		else
 		{
-			$res_array = mysqli_fetch_assoc($result);
+			$res_array = mysql_fetch_array($result);
 			$salt = substr($res_array['Password'], 0, 2);
 		}
 
 		echo "1:".$salt;
-		mysqli_close($link);
+		mysql_close($link);
 	}
 
+?>
