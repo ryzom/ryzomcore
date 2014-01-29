@@ -109,10 +109,6 @@ class sql_db
 			nt_common_add_debug($query);
 			$this->num_queries++;
 			$this->query_result = mysqli_query($this->db_connect_id, $query);
-			if (!($this->db_connect_id instanceof mysqli)) {
-				var_dump($this->db_connect_id);
-				var_dump($query, $this);
-			}
 		}
 		if($this->query_result)
 		{
