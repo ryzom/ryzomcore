@@ -41,8 +41,8 @@ INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
-# To be able to specify a different deployment target on Mac OS X, specify :
-# -DCMAKE_OSX_DEPLOYMENT_TARGET=10.6 -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk
+# To be able to specify a different deployment target on Mac OS X :
+# export MACOSX_DEPLOYMENT_TARGET=10.6
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
