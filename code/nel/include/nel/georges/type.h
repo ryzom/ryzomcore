@@ -55,7 +55,7 @@ public:
 	static bool uiCompatible (TType type, TUI ui);
 
 	// ** IO functions
-	void				write (xmlDocPtr doc, bool georges4CVS) const;
+	void				write (xmlDocPtr doc) const;
 
 	// Header
 	CFileHeader			Header;

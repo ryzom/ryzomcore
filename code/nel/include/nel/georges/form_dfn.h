@@ -161,7 +161,7 @@ public:
 	};
 
 	// ** IO functions
-	void							write (xmlDocPtr root, const char *filename, bool georges4CVS);
+	void							write (xmlDocPtr root, const char *filename);
 
 	// Count parent DFN
 	uint							countParentDfn (uint32 round=0) const;
