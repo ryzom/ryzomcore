@@ -96,7 +96,6 @@ BOOL CHeaderDialog::OnInitDialog()
 	IncrementVersion.Create ("Increment Version", WS_VISIBLE|WS_TABSTOP, currentPos, this, BtIncrement);
 	initWidget (IncrementVersion);
 	getNextPos (currentPos);
-	IncrementVersion.EnableWindow ( theApp.Georges4CVS ? FALSE : TRUE );
 
 	// Create the state combo
 	setStaticSize (currentPos);
@@ -243,55 +242,11 @@ void CHeaderDialog::getFromDocument (const NLGEORGES::CFileHeader &header)
 {
 	if (View)
 	{
-		if (theApp.Georges4CVS)
-		{
-			// CVS revision number
-			IncrementVersion.EnableWindow ( theApp.Georges4CVS ? FALSE : TRUE );
-
-			// Performs some checks
-			bool ok = false;
-			const char *revision = header.Revision.c_str ();
-			char name[32];
-			char name2[512];
-			if (strncmp (revision, "$Revision: ", 11) == 0)
-			{
-				// String start
-				const char *start = revision + 11;
-
-				// String end
-				const char *end = strchr (start, '$');
-				if (end)
-				{
-					// Build a string
-					int length = std::min (31, (int)(end-start));
-					memcpy (name, start, length);
-					name[length] = 0;
-
-					// Nice version
-					smprintf (name2, 512, "CVS Revision %s", name);
-
-					// Set the label
-					LabelVersion.SetWindowText (name2);
-
-					// Success
-					ok = true;
-				}
-			}
-
-			// Revision not found ?
-			if (!ok)
-			{
-				LabelVersion.SetWindowText ("CVS Revision number not found");
-			}
-		}
-		else
-		{
-			// Nel standard version number
-			ComboState.SetCurSel (header.State);
-			char name[512];
-			smprintf (name, 512, "Version %d.%d", header.MajorVersion, header.MinorVersion);
-			LabelVersion.SetWindowText (name);
-		}
+		// Nel standard version number
+		ComboState.SetCurSel (header.State);
+		char name[512];
+		smprintf (name, 512, "Version %d.%d", header.MajorVersion, header.MinorVersion);
+		LabelVersion.SetWindowText (name);
 
 		// Set comments
 		setEditTextMultiLine (Comments, header.Comments.c_str());

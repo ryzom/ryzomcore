@@ -863,8 +863,10 @@
       </group>
     </group>
   </group>
+  <!--<define id="cs_url"
+          value="http://app.ryzom.com/ticket_system/index.php?mode=load" />-->
   <define id="cs_url"
-          value="http://app.ryzom.com/ticket_system/index.php?mode=load" />
+          value="http://shard.ryzomcore.org/ams/index.php" />
   <group type="container"
          id="cs_browser"
          w="410"
@@ -905,6 +907,22 @@
            group_params_r="menu=ui:interface:base_menu_with_color"
            on_active="lua"
            on_active_params="help:openCSBrowserHeader('cs_browser')">
+      
+      
+      <!--Quitta start-->
+          <ctrl style="text_button_header"
+            button_type="push_button"
+            id="browse_home"
+            posref="MR MR"
+            x="-16"
+            y="0"
+            hardtext="AMS-HOME"
+            tooltip="uittBrowseHome"
+            onclick_l="browse_home"
+            params_l="name=ui:interface:cs_browser:content:html"
+            frozen="false" />
+          <!--Quitta end-->
+      
            </group>
     <group id="content"
            x="0"
@@ -919,9 +937,9 @@
              url="home"
              title_prefix="uiHelpTitle"
              sizeref="wh"
-             x="184"
+             x="2"
              y="0"
-             w="-190"
+             w="-4"
              h="0"
              background_color="0 0 0 255"
              error_color="255 240 48 255"
@@ -942,7 +960,7 @@
              h6_font_size="12"
              paragraph_begin_space="12"
              multi_line_space_factor="0.25"
-             td_begin_space="0"
+             td_begin_space="10"
              li_begin_space="4"
              ul_begin_space="12"
              li_indent="-10"
@@ -988,43 +1006,6 @@
                maxelements="2000" />
         <ctrl style="skin_scroll"
               id="scroll_bar" />
-      </group>
-      <group id="sbtree"
-             posref="TL TL"
-             x="0"
-             y="-12"
-             sizeref="h"
-             w="180"
-             h="-12">
-        <group id="black"
-               posref="BR BR"
-               sizeref="hw"
-               w="-12"
-               h="0"
-               inherit_gc_alpha="true" />
-        <instance template="inner_thin_border"
-                  posparent="black"
-                  inherit_gc_alpha="true" />
-        <group id="tree_list"
-               type="tree"
-               posref="TL TL"
-               x="16"
-               y="-4"
-               col_over="255 255 255 48"
-               col_select="255 255 255 80"
-               fontsize="10"
-               max_sizeparent="parent"
-               max_sizeref="wh"
-               max_w="-20"
-               max_h="-10">
-          <node name="uiCSBase"
-                handler="launch_help"
-                params="help_container=ui:interface:cs_browser|url=%cs_url" />
-        </group>
-        <ctrl style="skin_scroll"
-              id="scroll_bar"
-              align="T"
-              target="tree_list" />
       </group>
     </group>
   </group>

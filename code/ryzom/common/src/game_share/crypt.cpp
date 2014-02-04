@@ -79,6 +79,10 @@ static char rz_sccsid[] = "@(#)crypt.c	8.1 (Berkeley) 6/4/93";
 #include <limits.h>
 #define RZ__PASSWORD_EFMT1 '-'
 
+#if DEBUG_CRYPT
+void prtab(char *s, unsigned char *t, int num_rows);
+#endif
+
 /*
  * UNIX password, and DES, encryption.
  * By Tom Truscott, trt@rti.rti.org,
@@ -785,7 +789,7 @@ int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
 		}
 		perm[i] = (unsigned char) k;
 	}
-#ifdef DEBUG
+#ifdef DEBUG_CRYPT
 	prtab("pc1tab", perm, 8);
 #endif
 	rz_init_perm(PC1ROT, perm, 8, 8);
@@ -809,7 +813,7 @@ int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
 			if ((k%28) <= j) k -= 28;
 			perm[i] = pc2inv[k];
 		}
-#ifdef DEBUG
+#ifdef DEBUG_CRYPT
 		prtab("pc2tab", perm, 8);
 #endif
 		rz_init_perm(PC2ROT[j], perm, 8, 8);
@@ -833,7 +837,7 @@ int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
 			perm[i*8+j] = (unsigned char) k;
 		}
 	}
-#ifdef DEBUG
+#ifdef DEBUG_CRYPT
 	prtab("ietab", perm, 8);
 #endif
 	rz_init_perm(IE3264, perm, 4, 8);
@@ -850,7 +854,7 @@ int rz_des_cipher(const char *in, char *out, long salt, int num_iter) {
 		}
 		perm[k-1] = i+1;
 	}
-#ifdef DEBUG
+#ifdef DEBUG_CRYPT
 	prtab("cftab", perm, 8);
 #endif
 	rz_init_perm(CF6464, perm, 8, 8);
@@ -959,12 +963,8 @@ int rz_encrypt(register char *block, int flag) {
 	return (0);
 }
 
-#ifdef DEBUG
-STATIC
-prtab(s, t, num_rows)
-	char *s;
-	unsigned char *t;
-	int num_rows;
+#ifdef DEBUG_CRYPT
+void prtab(char *s, unsigned char *t, int num_rows)
 {
 	register int i, j;
 

@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ListZonesWidget</class>
+ <widget class="QWidget" name="ListZonesWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>359</width>
+    <height>579</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <property name="margin">
+    <number>3</number>
+   </property>
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Filter</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="categoryTypeComboBox_1"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="categoryValueComboBox_1"/>
+      </item>
+      <item row="0" column="3">
+       <widget class="QComboBox" name="zoneSelectComboBox">
+        <item>
+         <property name="text">
+          <string>Select</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Random</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Fyll cycle</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="categoryTypeComboBox_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QComboBox" name="categoryValueComboBox_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QComboBox" name="logicComboBox_2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>And</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Or</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="categoryTypeComboBox_3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QComboBox" name="categoryValueComboBox_3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QComboBox" name="logicComboBox_3">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>And</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Or</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="categoryTypeComboBox_4">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QComboBox" name="categoryValueComboBox_4">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QComboBox" name="logicComboBox_4">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>And</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Or</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QToolButton" name="addFilterButton_1">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../core/core.qrc">
+          <normaloff>:/core/icons/ic_nel_add_item.png</normaloff>
+          <normalon>:/core/icons/ic_nel_delete_item.png</normalon>:/core/icons/ic_nel_add_item.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QToolButton" name="addFilterButton_2">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../core/core.qrc">
+          <normaloff>:/core/icons/ic_nel_add_item.png</normaloff>
+          <normalon>:/core/icons/ic_nel_delete_item.png</normalon>:/core/icons/ic_nel_add_item.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QToolButton" name="addFilterButton_3">
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../core/core.qrc">
+          <normaloff>:/core/icons/ic_nel_add_item.png</normaloff>
+          <normalon>:/core/icons/ic_nel_delete_item.png</normalon>:/core/icons/ic_nel_add_item.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Placement</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="margin">
+       <number>6</number>
+      </property>
+      <property name="spacing">
+       <number>3</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="rotComboBox">
+        <item>
+         <property name="text">
+          <string>0°</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>90°</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>180°</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>270°</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Random</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Full cycle</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="flipComboBox">
+        <item>
+         <property name="text">
+          <string>NoFlip</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Flip</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Random</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Fyll cycle</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="forceCheckBox">
+        <property name="text">
+         <string>Force</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QCheckBox" name="propogateCheckBox">
+        <property name="text">
+         <string>Not propogate</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QListView" name="listView">
+     <property name="alternatingRowColors">
+      <bool>false</bool>
+     </property>
+     <property name="verticalScrollMode">
+      <enum>QAbstractItemView::ScrollPerPixel</enum>
+     </property>
+     <property name="spacing">
+      <number>1</number>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../core/core.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>addFilterButton_1</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>categoryTypeComboBox_2</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>36</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>81</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_1</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>categoryValueComboBox_2</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>24</x>
+     <y>32</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>181</x>
+     <y>50</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_1</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>logicComboBox_2</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>20</x>
+     <y>31</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>301</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>categoryTypeComboBox_3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>27</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>57</x>
+     <y>75</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>categoryValueComboBox_3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>23</x>
+     <y>58</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>156</x>
+     <y>76</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>logicComboBox_3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>23</x>
+     <y>53</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>255</x>
+     <y>77</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_3</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>categoryTypeComboBox_4</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>32</x>
+     <y>94</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>44</x>
+     <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_3</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>categoryValueComboBox_4</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>32</x>
+     <y>94</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>207</x>
+     <y>103</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_3</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>logicComboBox_4</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>21</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>278</x>
+     <y>104</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>addFilterButton_3</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>15</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>16</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>addFilterButton_1</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>addFilterButton_2</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>13</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>17</x>
+     <y>60</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -44,7 +44,7 @@ public:
 	UFormElm&		getRootNode ();
 	const UFormElm& getRootNode () const;
 	const std::string &getComment () const;
-	void			write (class NLMISC::IStream &stream, bool georges4CVS);
+	void			write (class NLMISC::IStream &stream);
 	void			getDependencies (std::set<std::string> &dependencies) const;
 	uint			getNumParent () const;
 	UForm			*getParentForm (uint parent) const;
@@ -73,7 +73,7 @@ public:
 
 	// ** IO functions
 	// Set the filename before saving the form
-	void				write (xmlDocPtr doc, const char *filename, bool georges4CVS);
+	void				write (xmlDocPtr doc, const char *filename);
 
 	// ** Parent access
 

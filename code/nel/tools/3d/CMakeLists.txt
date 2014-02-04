@@ -6,6 +6,7 @@ IF(WITH_NEL_TOOLS)
     build_far_bank
     build_smallbank
     ig_lighter
+    ig_elevation
     zone_dependencies
     zone_ig_lighter 
     zone_lighter
@@ -25,7 +26,7 @@ IF(WITH_NEL_TOOLS)
     shapes_exporter
     tga_cut
     tga_resize
-		shape2obj
+    shape2obj
     zone_check_bind
     zone_dump
     zviewer)
@@ -46,9 +47,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(WITH_NEL_TOOLS)
-
   IF(WIN32)
-    ADD_SUBDIRECTORY(ig_elevation)
     ADD_SUBDIRECTORY(lightmap_optimizer)  
     IF(MFC_FOUND)
       ADD_SUBDIRECTORY(object_viewer_exe)
@@ -63,6 +62,7 @@ IF(WITH_NEL_TOOLS)
   ENDIF(WITH_QT)
   
   IF(SQUISH_FOUND)
+    ADD_SUBDIRECTORY(s3tc_compressor_lib)
     ADD_SUBDIRECTORY(panoply_maker)
     ADD_SUBDIRECTORY(tga_2_dds)
     ADD_SUBDIRECTORY(hls_bank_maker)

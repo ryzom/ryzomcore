@@ -109,7 +109,7 @@ struct TLoadFormDicoEntry
 	}
 };
 */
-const uint32		PACKED_SHEET_HEADER = 'PKSH';
+const uint32		PACKED_SHEET_HEADER = NELID("PKSH");
 const uint32		PACKED_SHEET_VERSION = 5;
 // This Version may be used if you want to use the serialVersion() system in loadForm()
 const uint32		PACKED_SHEET_VERSION_COMPATIBLE = 0;

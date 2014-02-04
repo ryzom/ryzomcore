@@ -153,7 +153,7 @@ void CZoneRegion::serial (NLMISC::IStream &f)
 	f.xmlPush ("LAND");
 
 		sint32 version = f.serialVersion (1);
-		f.serialCheck ((uint32)'DNAL');
+		f.serialCheck (NELID("DNAL"));
 
 		f.xmlSerial (_MinX, "MIN_X");
 		f.xmlSerial (_MinY, "MIN_Y");

@@ -93,7 +93,7 @@ if MaxAvailable:
 				mrt.write("moe-moe-kyun")
 				mrt.close()
 				printLog(log, "MAXSCRIPT " + scriptDst)
-				subprocess.call([ Max, "-U", "MAXScript", "anim_export.ms", "-q", "-mi", "-vn" ])
+				subprocess.call([ Max, "-U", "MAXScript", "anim_export.ms", "-q", "-mi", "-mip" ])
 				if os.path.exists(outputLogfile):
 					try:
 						lSrc = open(outputLogfile, "r")

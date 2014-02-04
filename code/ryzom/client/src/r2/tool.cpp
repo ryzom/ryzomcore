@@ -55,6 +55,7 @@ const uint32 DEFAULT_ENTITY_MIN_OPACITY = 128;
 
 
 bool CTool::_MouseCaptured = false;
+NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> CTool::_UserCharFade;
 
 static const CVector cardinals[] =
 {
@@ -551,7 +552,8 @@ void CTool::handleMouseOverPlayer(bool over)
 {
 	//H_AUTO(R2_CTool_handleMouseOverPlayer)
 	// If the mouse is over the player make the player transparent
-	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false);
+	CCDBNodeLeaf *pNL = _UserCharFade ? &*_UserCharFade
+		: &*(_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
 	if ((pNL != NULL) && (pNL->getValue32() == 1) && UserEntity->selectable())
 	{
 		// If the nearest entity is the player, hide!

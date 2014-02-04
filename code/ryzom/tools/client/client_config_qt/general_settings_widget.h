@@ -19,7 +19,6 @@
 
 #include "ui_general_settings_widget.h"
 #include "widget_base.h"
-#include <nel/misc/types_nl.h>
 
 class QTranslator;
 
@@ -37,7 +36,7 @@ class CGeneralSettingsWidget : public CWidgetBase, public Ui::general_settings_w
 
 public:
 	CGeneralSettingsWidget( QWidget *parent = NULL );
-	~CGeneralSettingsWidget();
+	virtual	~CGeneralSettingsWidget();
 
 	void load();
 	void save();
@@ -54,7 +53,7 @@ private:
 	 @param  languageCode  -  Reference to the language code, we are trying to find.
 	 @return Returns the index on success, returns -1 if the language code cannot be found.
     */
-	sint32 getIndexForLanguageCode( QString &languageCode );
+	sint32 getIndexForLanguageCode(const QString &languageCode);
 
 	// Contains the language codes used in the config file
 	// They are in the same order as the options in languageComboBox

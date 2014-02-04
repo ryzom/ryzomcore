@@ -208,7 +208,7 @@ namespace RSMGR
 	public:
 		CRingSessionManager() 
 			:	_DontUsePerm(false),
-				_CharSync(false)
+				_CharSync(NULL)
 		{
 			CRingSessionManagerSkel::init(this);
 			CWelcomeServiceClientSkel::init(this);

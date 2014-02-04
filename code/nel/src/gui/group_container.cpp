@@ -2233,35 +2233,35 @@ namespace NLGUI
 		if( editorMode )
 		{
 			ptr = xmlGetProp( cur, BAD_CAST "on_open" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_open", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_close" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_close", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_close_button" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_close_button", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_move" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_move", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_deactive_check" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_deactive_check", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_resize" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_resize", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_alpha_settings_changed" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_alpha_settings_changed", std::string( (const char*)ptr ) );
 
 			ptr = xmlGetProp( cur, BAD_CAST "on_begin_move" );
-			if( ptr != NULL )
+			if( ptr )
 				mapAHString( "on_begin_move", std::string( (const char*)ptr ) );
 		}
 

@@ -16,6 +16,7 @@
 
 #include "stdpacs.h"
 #include "nel/misc/i_xml.h"
+#include "nel/misc/stream.h"
 #include "nel/pacs/primitive_block.h"
 
 
@@ -85,7 +86,7 @@ void CPrimitiveBlock::serial (NLMISC::IStream &s)
 	s.xmlPush ("PRIMITIVE_BLOCK");
 
 	// Serial checks
-	s.serialCheck ((uint32)'KBRP');
+	s.serialCheck (NELID("KBRP"));
 
 	// Serial the version
 	(void)s.serialVersion (0);

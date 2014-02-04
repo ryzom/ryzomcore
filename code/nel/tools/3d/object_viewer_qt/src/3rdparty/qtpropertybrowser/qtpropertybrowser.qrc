@@ -18,6 +18,7 @@
         <file>images/cursor-vsplit.png</file>
         <file>images/cursor-wait.png</file>
         <file>images/cursor-whatsthis.png</file>
+	<file>images/resetproperty.png</file>
     </qresource>
 </RCC>
   

@@ -41,7 +41,7 @@ void warning (bool exception, const char *format, ... );
 
 // ***************************************************************************
 
-void CFormDfn::write (xmlDocPtr doc, const char *filename, bool georges4CVS)
+void CFormDfn::write (xmlDocPtr doc, const char *filename)
 {
 	// Save filename
 	_Filename = CFile::getFilename (filename);
@@ -101,7 +101,7 @@ void CFormDfn::write (xmlDocPtr doc, const char *filename, bool georges4CVS)
 	}
 
 	// Header
-	Header.write (node, georges4CVS);
+	Header.write (node);
 }
 
 // ***************************************************************************

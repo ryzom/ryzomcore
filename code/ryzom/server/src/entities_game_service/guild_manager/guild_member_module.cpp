@@ -494,7 +494,7 @@ bool CGuildMemberModule::canAffectGrade(EGSPD::CGuildGrade::TGuildGrade)const
 CMissionGuild * CGuildMemberModule::pickMission( TAIAlias alias )
 {
 	/// todo guild mission
-	return false;
+	return NULL;
 }
 
 //----------------------------------------------------------------------------

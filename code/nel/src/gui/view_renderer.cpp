@@ -354,6 +354,9 @@ namespace NLGUI
 		// start to draw at the reference corner
 		getTextureSizeFromId (nTxId, txw, txh);
 
+		// to avoid a division by zero crash later
+		if (txw < 0 || txh < 0) return;
+
 		if (rot > 3) rot = 3;
 
 		sint32 startX = x, startY = y;

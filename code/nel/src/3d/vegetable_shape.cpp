@@ -192,10 +192,10 @@ void		CVegetableShape::serial(NLMISC::IStream &f)
 		- BestSidedPreComputeLighting
 	*/
 	sint	ver= f.serialVersion(1);
-	f.serialCheck((uint32)'_LEN');
-	f.serialCheck((uint32)'GEV_');
-	f.serialCheck((uint32)'BATE');
-	f.serialCheck((uint32)'__EL');
+	f.serialCheck(NELID("_LEN"));
+	f.serialCheck(NELID("GEV_"));
+	f.serialCheck(NELID("BATE"));
+	f.serialCheck(NELID("__EL"));
 
 	f.serial(Lighted);
 	f.serial(DoubleSided);

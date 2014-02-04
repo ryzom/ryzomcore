@@ -168,6 +168,7 @@ public:
 	 */
 	// @{
 	virtual void			disableHardwareVertexProgram()=0;
+	virtual void			disableHardwarePixelProgram()=0;
 	virtual void			disableHardwareVertexArrayAGP()=0;
 	virtual void			disableHardwareTextureShader()=0;
 	// @}
@@ -671,13 +672,6 @@ public:
 	 *	NB: this is done only on TextureFile
 	 */
 	virtual void			forceTextureResize(uint divisor)=0;
-
-	/** Sets enforcement of native fragment programs. This is by default enabled.
-	 *
-	 * \param nativeOnly If set to false, fragment programs don't need to be native to stay loaded,
-	 * 	                 otherwise (aka if true) they will be purged.
-	 */
-	virtual void			forceNativeFragmentPrograms(bool nativeOnly) = 0;
 
 	/** Setup monitor color properties.
 	  *

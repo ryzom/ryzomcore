@@ -2390,8 +2390,9 @@ void CGroupMap::createContinentLandMarks()
 
 	// Continent Landmarks
 	createLMWidgets(_CurContinent->ContLandMarks);
+	uint nbUserLandMarks = std::min( uint(_CurContinent->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks());
 	// User Landmarks
-	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
+	for(k = 0; k < nbUserLandMarks; ++k)
 	{
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
@@ -2429,7 +2430,8 @@ void CGroupMap::updateUserLandMarks()
 	removeLandMarks(_UserLM);
 
 	// Re create User Landmarks
-	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
+	uint nbUserLandMarks = std::min( uint(_CurContinent->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks());
+	for(k = 0; k < nbUserLandMarks; ++k)
 	{
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
@@ -2520,7 +2522,7 @@ CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucst
 void CGroupMap::removeUserLandMark(CCtrlButton *button)
 {
 	if (_CurContinent == NULL) return;
-	nlassert(_CurContinent->UserLandMarks.size() == _UserLM.size());
+	nlassert(_CurContinent->UserLandMarks.size() >= _UserLM.size());
 	for(uint k = 0; k < _UserLM.size(); ++k)
 	{
 		if (_UserLM[k] == button)
@@ -2528,6 +2530,13 @@ void CGroupMap::removeUserLandMark(CCtrlButton *button)
 			delCtrl(_UserLM[k]);
 			_UserLM.erase(_UserLM.begin() + k);
 			_CurContinent->UserLandMarks.erase(_CurContinent->UserLandMarks.begin() + k);
+
+			if (_CurContinent->UserLandMarks.size() > _UserLM.size())
+			{
+				// if user has over the limit landmarks, then rebuild visible markers
+				updateUserLandMarks();
+			}
+
 			return;
 		}
 	}
@@ -2537,7 +2546,7 @@ void CGroupMap::removeUserLandMark(CCtrlButton *button)
 void CGroupMap::updateUserLandMark(CCtrlButton *button, const ucstring &newTitle, const CUserLandMark::EUserLandMarkType lmType)
 {
 	if (_CurContinent == NULL) return;
-	nlassert(_CurContinent->UserLandMarks.size() == _UserLM.size());
+	nlassert(_CurContinent->UserLandMarks.size() >= _UserLM.size());
 	for(uint k = 0; k < _UserLM.size(); ++k)
 	{
 		if (_UserLM[k] == button)
@@ -2557,7 +2566,7 @@ CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 {
 	CUserLandMark ulm;
 	if (_CurContinent == NULL) return ulm;
-	nlassert(_CurContinent->UserLandMarks.size() == _UserLM.size());
+	nlassert(_CurContinent->UserLandMarks.size() >= _UserLM.size());
 	for(uint k = 0; k < _UserLM.size(); ++k)
 	{
 		if (_UserLM[k] == button)
@@ -2569,15 +2578,6 @@ CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 	
 	return ulm;
 }
-//============================================================================================================
-void CGroupMap::removeExceedingUserLandMarks(uint maxNumber)
-{
-	while (_UserLM.size() > maxNumber)
-	{
-		removeUserLandMark(_UserLM.back());
-	}
-}
-
 
 //============================================================================================================
 uint CGroupMap::getNumUserLandMarks() const

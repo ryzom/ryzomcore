@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>ovqt_plugin_landscape_editor</library-name>
+    <name>LandscapeEditor</name>
+    <version>0.8</version>
+    <vendor>GSoC2011_dnk-88</vendor>
+    <description>Landscape editor ovqt plugin.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>

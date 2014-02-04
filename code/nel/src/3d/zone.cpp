@@ -458,7 +458,7 @@ void			CZone::serial(NLMISC::IStream &f)
 		throw EOlderStream(f);
 	}
 
-	f.serialCheck((uint32)'ENOZ');
+	f.serialCheck(NELID("ENOZ"));
 
 	f.xmlSerial (ZoneId, "ZONE_ID");
 	f.xmlSerial (ZoneBB, "BB");

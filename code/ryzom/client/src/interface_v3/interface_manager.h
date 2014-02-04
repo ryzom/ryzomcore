@@ -633,7 +633,8 @@ private:
 	std::vector<CEmoteCmd*>		_EmoteCmds;
 
 	// Item Carac requirement
-	sint32		_CurrentPlayerCharac[CHARACTERISTICS::NUM_CHARACTERISTICS];
+	sint32 _CurrentPlayerCharac[CHARACTERISTICS::NUM_CHARACTERISTICS];
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _CurrentPlayerCharacLeaf[CHARACTERISTICS::NUM_CHARACTERISTICS];
 
 	// observers for copying database branch changes
 	CServerToLocalAutoCopy ServerToLocalAutoCopyInventory;

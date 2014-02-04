@@ -32,8 +32,6 @@
 #include <nel/misc/mem_stream.h>
 #include <nel/misc/sheet_id.h>
 
-//#include <nel/3d/u_driver.h>
-
 #ifdef NL_OS_WINDOWS
 #define NOMINMAX
 #include	<WinSock2.h>

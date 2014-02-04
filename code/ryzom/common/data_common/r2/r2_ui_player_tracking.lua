@@ -613,7 +613,7 @@ function PlayerTracking:onDraw()
 		
 	local timeInSec = nltime.getLocalTime() / 1000
 	if self.WaitingList then		
-		local waitText = i18n.get("uiRAP_WaitMsg" .. math.mod(os.time(), 3))
+		local waitText = i18n.get("uiRAP_WaitMsg" .. math.fmod(os.time(), 3))
 		if not self.ListReceived then
 			self:setInfoMessage(waitText)
 			waitTextColor.A = 127 + 127 * (0.5 + 0.5 * math.cos(6 * timeInSec))

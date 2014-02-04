@@ -40,6 +40,9 @@ public:
 
 	static void updateTime();
 
+	/// Advance time to target time by factor f.
+	static void advanceTime(double f);
+
 	/// Used when loading, this will skip changing animation time on the next update
 	/// (updates aren't called during loading)
 	static void skipAnimationOnce();
