@@ -21,6 +21,7 @@
 #include "std_sound_plugin.h"
 #include "listener_view.h"
 #include "nel/sound/u_audio_mixer.h"
+#include "resource.h"
 
 #include "../georges_dll/plugin_interface.h"
 
