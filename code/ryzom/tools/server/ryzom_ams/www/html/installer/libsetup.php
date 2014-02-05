@@ -40,7 +40,6 @@
         //var used to access the DB;
         global $cfg;
         
-        sleep(15);
         try{
             //SETUP THE WWW DB
             $dbw = new DBLayer("install", "web");
