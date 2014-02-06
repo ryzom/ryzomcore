@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<FORM Revision="$Revision: 1.2 $" State="modified">
-  <STRUCT>
-    <ATOM Name="Title" Value="ENCY_THM_00_01"/>
-    <ATOM Name="RewardText" Value="ENCY_THM_TXT_00_01"/>
-    <ATOM Name="Rite" Value="R_00_01"/>
-    <ATOM Name="ThemaNumber" Value="1"/>
-  </STRUCT>
-</FORM>

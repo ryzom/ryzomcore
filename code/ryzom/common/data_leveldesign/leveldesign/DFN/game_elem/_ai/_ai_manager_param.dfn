@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.12" State="modified">
-  <ELEMENT Name="PrimName" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="SpawnName" Type="Type" Filename="string.typ" Array="true"/>
-  <ELEMENT Name="Creature" Type="Dfn" Filename="_ai_creature_spawn.dfn" Array="true"/>
-  <ELEMENT Name="Object" Type="Dfn" Filename="_ai_static_type.dfn" Array="true"/>
-  <LOG>Tue Jul 02 18:40:27 2002 (Administrateur) Dfn Structure = </LOG>
-</DFN>

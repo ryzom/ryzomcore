@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="Modifier" Type="Type" Filename="float.typ"/>
-  <LOG>Tue Jan 28 14:02:27 2003 (brigand) Dfn Structure = </LOG>
-</DFN>

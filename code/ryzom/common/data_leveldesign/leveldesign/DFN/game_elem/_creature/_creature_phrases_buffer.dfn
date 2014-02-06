@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.1" State="modified">
-  <ELEMENT Name="action 1" Type="Type" Filename="bot_buffer_attack_phrases.typ"/>
-  <ELEMENT Name="action 2" Type="Type" Filename="bot_buffer_attack_phrases.typ"/>
-  <ELEMENT Name="action 3" Type="Type" Filename="bot_buffer_defence_phrases.typ"/>
-  <ELEMENT Name="action 4" Type="Type" Filename="bot_buffer_defence_phrases.typ"/>
-  <LOG>Tue Jul 23 20:35:14 2002 (miller) Dfn Structure = </LOG>
-</DFN>

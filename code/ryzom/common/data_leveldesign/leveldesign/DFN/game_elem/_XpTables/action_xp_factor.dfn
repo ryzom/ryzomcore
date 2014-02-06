@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="XpFactor" Type="Type" Filename="float.typ" Array="true"/>
-  <LOG>Mon May 24 11:06:42 2004 (fleury) Dfn Structure = </LOG>
-</DFN>

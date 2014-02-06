@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="MainIconBg" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="MainIconFg" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="SmallIcon" Type="Type" Filename="string.typ"/>
-  <LOG>Mon Dec 13 13:41:33 2004 (besson) Dfn Structure = </LOG>
-</DFN>

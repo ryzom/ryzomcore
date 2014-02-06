@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="Effect1" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="Effect2" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="Effect3" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="Effect4" Type="Type" Filename="string.typ"/>
-  <LOG>Mon Oct 10 16:55:54 2005 (vuarand) Dfn Structure = 
-Mon Oct 10 16:56:02 2005 (vuarand) Dfn Structure = </LOG>
-</DFN>

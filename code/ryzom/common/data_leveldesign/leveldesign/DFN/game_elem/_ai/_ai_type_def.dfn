@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.3" State="modified">
-  <ELEMENT Name="Type" Type="Type" Filename="_ai_type.typ" Default="sint32"/>
-  <ELEMENT Name="Value" Type="Type" Filename="string.typ" Default="100.0"/>
-  <LOG>Wed Jul 24 16:38:53 2002 (chafik) Dfn Structure = </LOG>
-</DFN>
