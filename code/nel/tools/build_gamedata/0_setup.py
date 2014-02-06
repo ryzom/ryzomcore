@@ -92,10 +92,6 @@ if not args.noconf:
 	except NameError:
 		InstallDirectory = "W:/install"
 	try:
-		DataShardDirectory
-	except NameError:
-		DataShardDirectory = "L:/shard"
-	try:
 		ClientDevDirectory
 	except NameError:
 		ClientDevDirectory = "W:/client_dev"
@@ -107,6 +103,10 @@ if not args.noconf:
 		ClientInstallDirectory
 	except NameError:
 		ClientInstallDirectory = "W:/client_install"
+	try:
+		ShardInstallDirectory
+	except NameError:
+		ShardInstallDirectory = "W:/shard_install"
 	try:
 		LeveldesignDirectory
 	except NameError:
@@ -123,6 +123,10 @@ if not args.noconf:
 		PrimitivesDirectory
 	except NameError:
 		PrimitivesDirectory = "L:/primitives"
+	try:
+		DataShardDirectory
+	except NameError:
+		DataShardDirectory = "L:/shard"
 	try:
 		GamedevDirectory
 	except NameError:
@@ -172,13 +176,14 @@ if not args.noconf:
 	DatabaseDirectory = askVar(log, "Database Directory", DatabaseDirectory).replace("\\", "/")
 	ExportBuildDirectory = askVar(log, "Export Build Directory", ExportBuildDirectory).replace("\\", "/")
 	InstallDirectory = askVar(log, "Install Directory", InstallDirectory).replace("\\", "/")
-	DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
 	ClientDevDirectory = askVar(log, "Client Dev Directory", ClientDevDirectory).replace("\\", "/")
 	ClientPatchDirectory = askVar(log, "Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
 	ClientInstallDirectory = askVar(log, "Client Install Directory", ClientInstallDirectory).replace("\\", "/")
+	ShardInstallDirectory = askVar(log, "Shard Install Directory", ShardInstallDirectory).replace("\\", "/")
 	LeveldesignDirectory = askVar(log, "Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
 	LeveldesignDfnDirectory = askVar(log, "Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
 	LeveldesignWorldDirectory = askVar(log, "Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
+	DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
 	PrimitivesDirectory = askVar(log, "Primitives Directory", PrimitivesDirectory).replace("\\", "/")
 	GamedevDirectory = askVar(log, "Gamedev Directory", GamedevDirectory).replace("\\", "/")
 	DataCommonDirectory = askVar(log, "Data Common Directory", DataCommonDirectory).replace("\\", "/")
@@ -246,10 +251,10 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("# Install directories\n")
 	sf.write("InstallDirectory = \"" + str(InstallDirectory) + "\"\n")
-	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("ClientDevDirectory = \"" + str(ClientDevDirectory) + "\"\n")
 	sf.write("ClientPatchDirectory = \"" + str(ClientPatchDirectory) + "\"\n")
 	sf.write("ClientInstallDirectory = \"" + str(ClientInstallDirectory) + "\"\n")
+	sf.write("ShardInstallDirectory = \"" + str(ShardInstallDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# TODO: NETWORK RECONNECT NOT IMPLEMENTED :)\n")
 	sf.write("\n")
@@ -258,6 +263,7 @@ if not args.noconf:
 	sf.write("LeveldesignDfnDirectory = \"" + str(LeveldesignDfnDirectory) + "\"\n")
 	sf.write("LeveldesignWorldDirectory = \"" + str(LeveldesignWorldDirectory) + "\"\n")
 	sf.write("PrimitivesDirectory = \"" + str(PrimitivesDirectory) + "\"\n")
+	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Misc data directories\n")
 	sf.write("GamedevDirectory = \"" + str(GamedevDirectory) + "\"\n")
