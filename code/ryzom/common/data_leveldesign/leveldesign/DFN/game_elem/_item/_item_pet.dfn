@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.3 $" State="modified">
-  <ELEMENT Name="Pet Sheet" Type="Type" Filename="filename.typ" FilenameExt="*.creature"/>
-  <ELEMENT Name="Pet Price" Type="Type" Filename="int.typ" Default="1"/>
-  <ELEMENT Name="Pet Slot"  Type="Type" Filename="int.typ" Default="0"/>
-  <ELEMENT Name="Hunger Count" Type="Type" Filename="float.typ" Default="1000"/>
-  <LOG>Thu Jan 15 15:14:35 2004 (saffray) Dfn Structure = </LOG>
-</DFN>
