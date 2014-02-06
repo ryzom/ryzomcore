@@ -78,7 +78,7 @@ if not args.noconf:
 	try:
 		WorkspaceDirectory
 	except NameError:
-		WorkspaceDirectory = "R:/code/ryzom/tools/build_gamedata/workspace"
+		WorkspaceDirectory = "L:/workspace"
 	try:
 		DatabaseDirectory
 	except NameError:
@@ -94,7 +94,7 @@ if not args.noconf:
 	try:
 		DataShardDirectory
 	except NameError:
-		DataShardDirectory = "R:/code/ryzom/server/data_shard"
+		DataShardDirectory = "L:/shard"
 	try:
 		ClientDevDirectory
 	except NameError:
@@ -114,7 +114,7 @@ if not args.noconf:
 	try:
 		LeveldesignDfnDirectory
 	except NameError:
-		LeveldesignDfnDirectory = "L:/leveldesign/dfn"
+		LeveldesignDfnDirectory = "L:/leveldesign/DFN"
 	try:
 		LeveldesignWorldDirectory
 	except NameError:
