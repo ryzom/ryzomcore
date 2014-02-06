@@ -1,0 +1,31 @@
+<?php
+// $id$
+
+/**
+ * @file
+ * Medals module install file.
+ */
+
+function ryzommanage_install() {
+  $vocab = array(
+    'name' => 'Ryzom Manager',
+    'machine_name' => 'ryzommanage',
+    'description' => 'Ryzom Login Service integration - inserts and updates users and manages accounts.',
+    'module' => 'ryzommanage',
+  );
+  $vocab = (object) $vocab;
+  db_query("CREATE TABLE ryzommanage_querycache (
+    `SID` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+    `type` VARCHAR( 64 ) NOT NULL ,
+    `query` VARCHAR( 512 ) NOT NULL 
+    );");
+  
+}
+
+function ryzommanage_uninstall() {
+  db_query("DROP TABLE ryzommanage_querycache;");
+}
+
+function _ryzommanage_vocab_fields() {
+
+}

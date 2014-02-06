@@ -32,13 +32,12 @@
 
 namespace NL3D
 {
-std::auto_ptr<CVertexProgram>	CMeshVPPerPixelLight::_VertexProgram[NumVp];
+
+NLMISC::CSmartPtr<CVertexProgramPerPixelLight>	CMeshVPPerPixelLight::_VertexProgram[NumVp];
 
 // ***************************************************************************
 // Light VP fragment constants start at 24
 static	const uint	VPLightConstantStart = 24;
-
-
 
 // ***************************************************************************
 // ***************************************************************************
@@ -355,18 +354,36 @@ static const char*	PPLightingVPCodeTest =
 ";
 ***************************************************************/
 
-
-
-
-//=================================================================================
-void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
+class CVertexProgramPerPixelLight : public CVertexProgramLighted
 {
-	// init the vertexProgram code.
-	static	bool	vpCreated= false;
-	if(!vpCreated)
+public:
+	struct CIdx
 	{
-		vpCreated= true;
+		/// Position or direction of strongest light
+		uint StrongestLight;
+		/// Viewer position
+		uint ViewerPos;
+	};
+	CVertexProgramPerPixelLight(uint vp);
+	virtual ~CVertexProgramPerPixelLight() { };
+	virtual void buildInfo();
+	const CIdx &idx() const { return m_Idx; }
 
+private:
+	CIdx m_Idx;
+
+};
+
+CVertexProgramPerPixelLight::CVertexProgramPerPixelLight(uint vp)
+{
+	// lighted settings
+	m_FeaturesLighted.SupportSpecular = (vp & 2) != 0;
+	m_FeaturesLighted.NumActivePointLights = MaxLight - 1;
+	m_FeaturesLighted.Normalize = false;
+	m_FeaturesLighted.CtStartNeLVP = VPLightConstantStart;
+
+	// nelvp
+	{
 		// Gives each vp name
 		// Bit 0 : 1 when it is a directionnal light
 		// Bit 1 : 1 when specular is needed
@@ -389,34 +406,89 @@ void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
 		};
 
 		uint numvp  = sizeof(vpName) / sizeof(const char *);
-		nlassert(NumVp == numvp); // make sure that it is in sync with header..todo : compile time assert :)
+		nlassert(CMeshVPPerPixelLight::NumVp == numvp); // make sure that it is in sync with header..todo : compile time assert :)
+
+		// \todo yoyo TODO_OPTIM Manage different number of pointLights
+		// NB: never call getLightVPFragmentNeLVP() with normalize, because already done by PerPixel fragment before.
+		std::string vpCode	= std::string(vpName[vp])
+							  + std::string("# ***************") // temp for debug
+							  + CRenderTrav::getLightVPFragmentNeLVP(
+									m_FeaturesLighted.NumActivePointLights, 
+									m_FeaturesLighted.CtStartNeLVP, 
+									m_FeaturesLighted.SupportSpecular,  
+									m_FeaturesLighted.Normalize)
+							  + std::string("# ***************") // temp for debug
+							  + std::string(PPLightingVPCodeEnd);
+		#ifdef NL_DEBUG
+			/** For test : parse those programs before they are used.
+			  * As a matter of fact some program will works with the NV_VERTEX_PROGRAM extension,
+			  * but won't with EXT_vertex_shader, because there are some limitations (can't read a temp
+			  * register that hasn't been written before..)
+			  */
+			CVPParser			vpParser;
+			CVPParser::TProgram result;
+			std::string          parseOutput;
+			if (!vpParser.parse(vpCode.c_str(), result, parseOutput))
+			{
+				nlwarning(parseOutput.c_str());
+				nlassert(0);
+			}
+		#endif
+
+		CSource *source = new CSource();
+		source->DisplayName = NLMISC::toString("nelvp/MeshVPPerPixel/%i", vp);
+		source->Profile = CVertexProgram::nelvp;
+		source->setSource(vpCode);
+		source->ParamIndices["modelViewProjection"] = 0;
+		addSource(source);
+	}
+
+	// glsl
+	{
+		// TODO_VP_GLSL
+	}
+}
+
+void CVertexProgramPerPixelLight::buildInfo()
+{
+	CVertexProgramLighted::buildInfo();
+	if (profile() == nelvp)
+	{
+		m_Idx.StrongestLight = 4;
+		if (m_FeaturesLighted.SupportSpecular)
+		{
+			m_Idx.ViewerPos = 5;
+		}
+		else
+		{
+			m_Idx.ViewerPos = ~0;
+		}
+	}
+	else
+	{
+		// TODO_VP_GLSL
+	}
+	nlassert(m_Idx.StrongestLight != ~0);
+	if (m_FeaturesLighted.SupportSpecular)
+	{
+		nlassert(m_Idx.ViewerPos != ~0);
+	}
+}
+
+
+//=================================================================================
+void	CMeshVPPerPixelLight::initInstance(CMeshBaseInstance *mbi)
+{
+	// init the vertexProgram code.
+	static	bool	vpCreated= false;
+	if (!vpCreated)
+	{
+		vpCreated = true;
+		
 		for (uint vp = 0; vp < NumVp; ++vp)
 		{
-			// \todo yoyo TODO_OPTIM Manage different number of pointLights
-			// NB: never call getLightVPFragment() with normalize, because already done by PerPixel fragment before.
-			std::string vpCode	= std::string(vpName[vp])
-								  + std::string("# ***************") // temp for debug
-								  + CRenderTrav::getLightVPFragment(CRenderTrav::MaxVPLight-1, VPLightConstantStart, (vp & 2) != 0, false)
-								  + std::string("# ***************") // temp for debug
-								  + std::string(PPLightingVPCodeEnd);
-			#ifdef NL_DEBUG
-				/** For test : parse those programs before they are used.
-				  * As a matter of fact some program will works with the NV_VERTEX_PROGRAM extension,
-				  * but won't with EXT_vertex_shader, because there are some limitations (can't read a temp
-				  * register that hasn't been written before..)
-				  */
-				CVPParser			vpParser;
-				CVPParser::TProgram result;
-				std::string          parseOutput;
-				if (!vpParser.parse(vpCode.c_str(), result, parseOutput))
-				{
-					nlwarning(parseOutput.c_str());
-					nlassert(0);
-				}
-			#endif
-			_VertexProgram[vp]= std::auto_ptr<CVertexProgram>(new CVertexProgram(vpCode.c_str()));
+			_VertexProgram[vp] = new CVertexProgramPerPixelLight(vp);
 		}
-
 	}
 }
 
@@ -427,21 +499,24 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 									const NLMISC::CVector &viewerPos)
 {
 	// test if supported by driver
-	if (!
-		 (drv->isVertexProgramSupported()
-		  && !drv->isVertexProgramEmulated()
-		  &&  drv->supportPerPixelLighting(SpecularLighting)
-		 )
-	   )
+	if (drv->isVertexProgramEmulated()
+		|| !drv->supportPerPixelLighting(SpecularLighting))
 	{
+		return false;
+	}
+	//
+	enable(true, drv); // must enable the vertex program before the vb is activated
+	CVertexProgramPerPixelLight *program = _ActiveVertexProgram;
+	if (!program)
+	{
+		// failed to compile vertex program
 		return false;
 	}
 	//
 	CRenderTrav		*renderTrav= &scene->getRenderTrav();
 	/// Setup for gouraud lighting
-	renderTrav->beginVPLightSetup(VPLightConstantStart,
-								  SpecularLighting,
-								  invertedModelMat);
+	renderTrav->prepareVPLightSetup();
+	renderTrav->beginVPLightSetup(program, invertedModelMat);
 	//
 	sint strongestLightIndex = renderTrav->getStrongestLightIndex();
 	if (strongestLightIndex == -1) return false; // if no strongest light, disable this vertex program
@@ -455,7 +530,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 		{
 			// put light direction in object space
 			NLMISC::CVector lPos = invertedModelMat.mulVector(strongestLight.getDirection());
-			drv->setConstant(4, lPos);
+			drv->setUniform3f(IDriver::VertexProgram, program->idx().StrongestLight, lPos);
 			_IsPointLight = false;
 		}
 		break;
@@ -463,7 +538,7 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 		{
 			// put light in object space
 			NLMISC::CVector lPos = invertedModelMat * strongestLight.getPosition();
-			drv->setConstant(4, lPos);
+			drv->setUniform3f(IDriver::VertexProgram, program->idx().StrongestLight, lPos);
 			_IsPointLight = true;
 		}
 		break;
@@ -477,14 +552,12 @@ bool	CMeshVPPerPixelLight::begin(IDriver *drv,
 	{
 		// viewer pos in object space
 		NLMISC::CVector vPos = invertedModelMat * viewerPos;
-		drv->setConstant(5, vPos);
+		drv->setUniform3f(IDriver::VertexProgram, program->idx().ViewerPos, vPos);
 	}
 
 	// c[0..3] take the ModelViewProjection Matrix. After setupModelMatrix();
-	drv->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
-	//
-	enable(true, drv); // must enable the vertex program before the vb is activated
-	//
+	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+
 	return true;
 }
 
@@ -521,11 +594,19 @@ void	CMeshVPPerPixelLight::enable(bool enabled, IDriver *drv)
 						   | (SpecularLighting	      ? 2 : 0)
 						   | (_IsPointLight		      ? 1 : 0);
 			//
-			drv->activeVertexProgram(_VertexProgram[idVP].get());
+			if (drv->activeVertexProgram((CVertexProgramPerPixelLight *)_VertexProgram[idVP]))
+			{
+				_ActiveVertexProgram = _VertexProgram[idVP];
+			}
+			else
+			{
+				_ActiveVertexProgram = NULL;
+			}
 		}
 		else
 		{
 			drv->activeVertexProgram(NULL);
+			_ActiveVertexProgram = NULL;
 		}
 		_Enabled = enabled;
 	}
@@ -538,6 +619,8 @@ bool  CMeshVPPerPixelLight::setupForMaterial(const CMaterial &mat,
 											)
 {
 	bool enabled = (mat.getShader() == CMaterial::PerPixelLighting || mat.getShader() == CMaterial::PerPixelLightingNoSpec);
+	bool change = (enabled != _Enabled);
+	enable(enabled, drv); // enable disable the vertex program (for material that don't have the right shader)
 	if (enabled)
 	{
 		CRenderTrav		*renderTrav= &scene->getRenderTrav();
@@ -547,8 +630,6 @@ bool  CMeshVPPerPixelLight::setupForMaterial(const CMaterial &mat,
 		renderTrav->getStrongestLightColors(pplDiffuse, pplSpecular);
 		drv->setPerPixelLightingLight(pplDiffuse, pplSpecular, mat.getShininess());
 	}
-	bool change = (enabled != _Enabled);
-	enable(enabled, drv); // enable disable the vertex program (for material that don't have the right shader)
 	return change;
 }
 //=================================================================================

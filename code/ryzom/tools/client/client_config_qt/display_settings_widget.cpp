@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string>
-#include <sstream>
+#include "stdpch.h"
 #include "display_settings_widget.h"
+
 #include "system.h"
 #include <QRegExpValidator>
 
@@ -29,6 +29,10 @@ CDisplaySettingsWidget::CDisplaySettingsWidget( QWidget *parent ) :
 	xpositionLineEdit->setValidator( new QRegExpValidator( QRegExp( "[0-9]{1,6}" ), xpositionLineEdit ) );
 	ypositionLineEdit->setValidator( new QRegExpValidator( QRegExp( "[0-9]{1,6}" ), ypositionLineEdit ) );
 	load();
+
+#ifndef Q_OS_WIN32
+	direct3dRadioButton->setEnabled(false);
+#endif
 
 	connect( autoRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( openglRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
@@ -71,7 +75,7 @@ void CDisplaySettingsWidget::load()
 
 
 	CVideoMode mode;
-	mode.widht = s.config.getInt( "Width" );
+	mode.width = s.config.getInt( "Width" );
 	mode.height = s.config.getInt( "Height" );
 	mode.depth = s.config.getInt( "Depth" );
 	mode.frequency = s.config.getInt( "Frequency" );
@@ -86,7 +90,7 @@ void CDisplaySettingsWidget::load()
 		windowedRadioButton->setChecked( true );
 	}
 
-	widthLineEdit->setText( QString( "%1" ).arg( mode.widht ) );
+	widthLineEdit->setText( QString( "%1" ).arg( mode.width ) );
 	heightLineEdit->setText( QString( "%1" ).arg( mode.height ) );
 	xpositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionX" ) ) );
 	ypositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionY" ) ) );
@@ -99,8 +103,10 @@ void CDisplaySettingsWidget::save()
 
 	if( openglRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "OpenGL" ) );
+#ifdef Q_OS_WIN32
 	else if( direct3dRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "Direct3D" ) );
+#endif
 	else
 		s.config.setString( "Driver3D", std::string( "Auto" ) );
 
@@ -112,12 +118,14 @@ void CDisplaySettingsWidget::save()
 		CVideoMode mode;
 
 		// OpenGL should be available everywhere!
+#ifdef Q_OS_WIN32
 		if( direct3dRadioButton->isChecked() )
 			mode = s.d3dInfo.modes[ index ];
 		else
+#endif
 			mode = s.openglInfo.modes[ index ];
 
-		s.config.setInt( "Width", mode.widht );
+		s.config.setInt( "Width", mode.width );
 		s.config.setInt( "Height", mode.height );
 		s.config.setInt( "Depth", mode.depth );
 		s.config.setInt( "Frequency", mode.frequency );
@@ -151,24 +159,27 @@ void CDisplaySettingsWidget::updateVideoModes()
 
 	videomodeComboBox->clear();
 
+	std::vector< CVideoMode >::iterator itr, iend;
+
+#ifdef Q_OS_WIN32
 	if( direct3dRadioButton->isChecked() )
 	{
-		for( std::vector< CVideoMode >::iterator itr = s.d3dInfo.modes.begin(); itr != s.d3dInfo.modes.end(); ++itr )
-		{
-			std::stringstream ss;
-			ss << itr->widht << "x" << itr->height << " " << itr->depth << " bit @" << itr->frequency;
-			videomodeComboBox->addItem( ss.str().c_str() );
-		}
+		itr = s.d3dInfo.modes.begin();
+		iend = s.d3dInfo.modes.end();
 	}
 	else
+#endif
 	{
 		// OpenGL should be available everywhere!
-		for( std::vector< CVideoMode >::iterator itr = s.openglInfo.modes.begin(); itr != s.openglInfo.modes.end(); ++itr )
-		{
-			std::stringstream ss;
-			ss << itr->widht << "x" << itr->height << " " << itr->depth << " bit @" << itr->frequency;
-			videomodeComboBox->addItem( ss.str().c_str() );
-		}
+		itr = s.openglInfo.modes.begin();
+		iend = s.openglInfo.modes.end();
+	}
+
+	while(itr != iend)
+	{
+		videomodeComboBox->addItem(QString("%1x%2 %3 bit @%4").arg(itr->width).arg(itr->height).arg(itr->depth).arg(itr->frequency));
+
+		++itr;
 	}
 }
 
@@ -192,6 +203,7 @@ uint32 CDisplaySettingsWidget::findVideoModeIndex( CVideoMode *mode )
 	CVideoMode &m = *mode;
 	CSystem &s = CSystem::GetInstance();
 
+#ifdef Q_OS_WIN32
 	if( direct3dRadioButton->isChecked() )
 	{
 		for( uint32 i = 0; i < s.d3dInfo.modes.size(); i++ )
@@ -199,6 +211,7 @@ uint32 CDisplaySettingsWidget::findVideoModeIndex( CVideoMode *mode )
 				return i;
 	}
 	else
+#endif
 	{
 		// Again OpenGL should be available everywhere!
 		for( uint32 i = 0; i < s.openglInfo.modes.size(); i++ )

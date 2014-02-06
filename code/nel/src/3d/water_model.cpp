@@ -61,7 +61,7 @@ void CWaterModel::setupVertexBuffer(CVertexBuffer &vb, uint numWantedVertices, I
 		vb.setNumVertices(0);
 		vb.setName("Water");
 		vb.setPreferredMemory(CVertexBuffer::AGPPreferred, false);
-		if (drv->isWaterShaderSupported())
+		if (drv->supportWaterShader())
 		{
 			vb.setVertexFormat(CVertexBuffer::PositionFlag);
 		}
@@ -377,7 +377,7 @@ void	CWaterModel::traverseRender()
 
 
 	#ifndef FORCE_SIMPLE_WATER_RENDER
-		if (!drv->isWaterShaderSupported())
+		if (!drv->supportWaterShader())
 	#endif
 	{
 		doSimpleRender(drv);
@@ -903,11 +903,12 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 		_WaterMat.setZWrite(true);
 		_WaterMat.setShader(CMaterial::Water);
 	}
-	const uint cstOffset = 5; // 4 places for the matrix
-	NLMISC::CVectorH cst[13];
 	//=========================//
 	//	setup Water material   //
 	//=========================//
+	shape->initVertexProgram();
+	CVertexProgramWaterVPNoWave *program = shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse : CWaterShape::_VertexProgramNoWave;
+	drv->activeVertexProgram(program);
 	CWaterModel::_WaterMat.setTexture(0, shape->_BumpMap[0]);
 	CWaterModel::_WaterMat.setTexture(1, shape->_BumpMap[1]);
 	CWaterModel::_WaterMat.setTexture(3, shape->_ColorMap);
@@ -953,25 +954,21 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	{
 		// setup 2x3 matrix for lookup in diffuse map
 		updateDiffuseMapMatrix();
-		cst[11].set(_ColorMapMatColumn0.x, _ColorMapMatColumn1.x, 0, _ColorMapMatColumn0.x * obsPos.x + _ColorMapMatColumn1.x * obsPos.y + _ColorMapMatPos.x);
-		cst[12].set(_ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0, _ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector0, _ColorMapMatColumn0.x, _ColorMapMatColumn1.x, 0, _ColorMapMatColumn0.x * obsPos.x + _ColorMapMatColumn1.x * obsPos.y + _ColorMapMatPos.x);
+		drv->setUniform4f(IDriver::VertexProgram, program->idx().DiffuseMapVector1, _ColorMapMatColumn0.y, _ColorMapMatColumn1.y, 0, _ColorMapMatColumn0.y * obsPos.x + _ColorMapMatColumn1.y * obsPos.y + _ColorMapMatPos.y);
 	}
-	/// set matrix
-	drv->setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
+	// set builtins
+	drv->setUniformMatrix(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+	drv->setUniformFog(IDriver::VertexProgram, program->getUniformIndex(CProgramIndex::Fog));
 	// retrieve current time
 	double date  = scene->getCurrentTime();
 	// set bumpmaps pos
-	cst[6].set(fmodf(obsPos.x * shape->_HeightMapScale[0].x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].x, 1), fmodf(shape->_HeightMapScale[0].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].y, 1), 0.f, 1.f); // bump map 0 offset
-	cst[5].set(shape->_HeightMapScale[0].x, shape->_HeightMapScale[0].y, 0, 0); // bump map 0 scale
-	cst[8].set(fmodf(shape->_HeightMapScale[1].x * obsPos.x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].x, 1), fmodf(shape->_HeightMapScale[1].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].y, 1), 0.f, 1.f); // bump map 1 offset
-	cst[7].set(shape->_HeightMapScale[1].x, shape->_HeightMapScale[1].y, 0, 0); // bump map 1 scale
-	cst[9].set(0, 0, obsPos.z - zHeight, 1.f);
-	cst[10].set(0.5f, 0.5f, 0.f, 1.f); // used to scale reflected ray into the envmap
-	/// set all our constants in one call
-	drv->setConstant(cstOffset, sizeof(cst) / sizeof(cst[0]) - cstOffset, (float *) &cst[cstOffset]);
-	shape->initVertexProgram();
-	drv->activeVertexProgram(shape->_ColorMap ? CWaterShape::_VertexProgramNoWaveDiffuse.get() : CWaterShape::_VertexProgramNoWave.get());
-	drv->setConstantFog(4);
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Offset, fmodf(obsPos.x * shape->_HeightMapScale[0].x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].x, 1), fmodf(shape->_HeightMapScale[0].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[0].y, 1), 0.f, 1.f); // bump map 0 offset
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap0Scale, shape->_HeightMapScale[0].x, shape->_HeightMapScale[0].y, 0, 0); // bump map 0 scale
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Offset, fmodf(shape->_HeightMapScale[1].x * obsPos.x, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].x, 1), fmodf(shape->_HeightMapScale[1].y * obsPos.y, 1.f) + (float) fmod(date * shape->_HeightMapSpeed[1].y, 1), 0.f, 1.f); // bump map 1 offset
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().BumpMap1Scale, shape->_HeightMapScale[1].x, shape->_HeightMapScale[1].y, 0, 0); // bump map 1 scale
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().ObserverHeight, 0, 0, obsPos.z - zHeight, 1.f);
+	drv->setUniform4f(IDriver::VertexProgram, program->idx().ScaleReflectedRay, 0.5f, 0.5f, 0.f, 1.f); // used to scale reflected ray into the envmap
 }
 
 //================================================
@@ -1363,7 +1360,7 @@ uint CWaterModel::getNumWantedVertices()
 uint CWaterModel::fillVB(void *datas, uint startTri, IDriver &drv)
 {
 	H_AUTO( NL3D_Water_Render );
-	if (drv.isWaterShaderSupported())
+	if (drv.supportWaterShader())
 	{
 		return fillVBHard(datas, startTri);
 	}
@@ -1657,7 +1654,7 @@ void	CWaterModel::traverseRender()
 		drv->setupModelMatrix(modelMat);
 		bool isAbove = obsPos.z > getWorldMatrix().getPos().z;
 		CVertexBuffer &vb = renderTrav.Scene->getWaterVB();
-		if (drv->isWaterShaderSupported())
+		if (drv->supportWaterShader())
 		{
 			setupMaterialNVertexShader(drv, shape, obsPos, isAbove, zHeight);
 			nlassert(vb.getNumVertices() > 0);

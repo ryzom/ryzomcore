@@ -105,7 +105,7 @@ bool _TestCLS = false;
 void CEntity::setState (TState state)
 {
 	State = state;
-	StateStartTime = CTime::getLocalTime ();
+	StateStartTime = LocalTime;
 }
 
 
@@ -376,7 +376,7 @@ void deleteAllEntities()
 void stateAppear (CEntity &entity)
 {
 	// after 1 second, show the instance
-	if (CTime::getLocalTime () > entity.StateStartTime + 1000)
+	if (LocalTime > entity.StateStartTime + 1.0)
 	{
 		if (entity.Instance.getVisibility () != UTransform::Show)
 			entity.Instance.show ();
@@ -384,7 +384,7 @@ void stateAppear (CEntity &entity)
 
 	// after 5 seconds, delete the particle system (if any)
 	// and pass the entity into the Normal state
-	if (CTime::getLocalTime () > entity.StateStartTime + 3000)
+	if (LocalTime > entity.StateStartTime + 3.0)
 	{
 		if (!entity.Particule.empty())
 		{
@@ -403,7 +403,7 @@ void stateAppear (CEntity &entity)
 void stateDisappear (CEntity &entity)
 {
 	// after 1 second, remove the mesh and all collision stuff
-	if (CTime::getLocalTime () > entity.StateStartTime + 1000)
+	if (LocalTime > entity.StateStartTime + 1.0)
 	{
 		if (entity.Instance.getVisibility () != UTransform::Hide)
 		{
@@ -419,7 +419,7 @@ void stateDisappear (CEntity &entity)
 	}
 
 	// after 5 seconds, remove the particle system and the entity entry
-	if (CTime::getLocalTime () > entity.StateStartTime + 3000)
+	if (LocalTime > entity.StateStartTime + 3.0)
 	{
 		deleteEntity (entity);
 	}

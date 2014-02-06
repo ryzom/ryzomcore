@@ -22,13 +22,17 @@ class CEntityState;
 class COfflineEntityState;
 class CCharacterRespawnPoints;
 class CFarPosition;
-class NLNET::CMessage;
 class CModuleParent;
+
+namespace NLNET
+{
+	class CMessage;
+}
 
 namespace R2
 {
 	struct TUserRole; 
-};
+}
 
 class CRingRewardPoints;
 

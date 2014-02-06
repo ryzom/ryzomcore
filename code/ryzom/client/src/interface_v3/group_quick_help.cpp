@@ -163,7 +163,7 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 {
 	bool globalColor = selected ? TextColorGlobalColor : _NonSelectedGlobalColor;
 	bool linkGlobalColor = selected ? LinkColorGlobalColor : _NonSelectedGlobalColor;
-	uint fontSize = selected ? TextFontSize : _NonSelectedSize;_NonSelectedSize;
+	uint fontSize = selected ? TextFontSize : _NonSelectedSize;
 	NLMISC::CRGBA color = selected ? TextColor : _NonSelectedColor;
 	NLMISC::CRGBA linkColor = selected ? LinkColor : _NonSelectedLinkColor;
 

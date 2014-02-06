@@ -194,10 +194,13 @@ bool  ServerDrivenWeather = false;
 
 const float WEATHER_BLEND_SPEED = 1.f / 8.f; // number of seconds to blend betwen weather states
 
+static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> s_ServerWeatherValueDB;
+
 // ***************************************************************************
 static uint16 getServerWeather()
 {
-	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:WEATHER:VALUE");
+	CCDBNodeLeaf *node = s_ServerWeatherValueDB ? &*s_ServerWeatherValueDB
+		: &*(s_ServerWeatherValueDB = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:WEATHER:VALUE"));
 	if (!node) return 0;
 	return (uint16) node->getValue16();
 }

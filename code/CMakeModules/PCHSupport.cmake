@@ -10,7 +10,6 @@
 
 IF(MSVC)
   SET(PCHSupport_FOUND TRUE)
-  SET(_PCH_include_prefix "/I")
 ELSE(MSVC)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
@@ -26,8 +25,6 @@ ELSE(MSVC)
     # TODO: make tests for other compilers than GCC
     SET(PCHSupport_FOUND TRUE)
   ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-
-  SET(_PCH_include_prefix "-I")
 ENDIF(MSVC)
 
 # Set PCH_FLAGS for common flags, PCH_ARCH_XXX_FLAGS for specific archs flags and PCH_ARCHS for archs
@@ -35,35 +32,43 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   SET(PCH_FLAGS)
   SET(PCH_ARCHS)
 
-  SET(FLAGS)
+  SET(_FLAGS)
   LIST(APPEND _FLAGS ${CMAKE_CXX_FLAGS})
 
   STRING(TOUPPER "${CMAKE_BUILD_TYPE}" _UPPER_BUILD)
   LIST(APPEND _FLAGS " ${CMAKE_CXX_FLAGS_${_UPPER_BUILD}}")
 
-  IF(NOT MSVC)
-    GET_TARGET_PROPERTY(_targetType ${_target} TYPE)
-    IF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
-      LIST(APPEND _FLAGS " -fPIC")
-    ENDIF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
-  ENDIF(NOT MSVC)
+  GET_TARGET_PROPERTY(_targetType ${_target} TYPE)
+
+  IF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
+    LIST(APPEND _FLAGS " ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+  ELSE(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
+    GET_TARGET_PROPERTY(_pic ${_target} POSITION_INDEPENDENT_CODE)
+    IF(_pic)
+      LIST(APPEND _FLAGS " ${CMAKE_CXX_COMPILE_OPTIONS_PIE}")
+    ENDIF(_pic)
+  ENDIF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
 
   GET_DIRECTORY_PROPERTY(DIRINC INCLUDE_DIRECTORIES)
   FOREACH(item ${DIRINC})
-    LIST(APPEND _FLAGS " ${_PCH_include_prefix}\"${item}\"")
+    LIST(APPEND _FLAGS " -I\"${item}\"")
   ENDFOREACH(item)
 
   # Required for CMake 2.6
   SET(GLOBAL_DEFINITIONS)
   GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS)
-  FOREACH(item ${DEFINITIONS})
-    LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
-  ENDFOREACH(item)
+  IF(DEFINITIONS)
+    FOREACH(item ${DEFINITIONS})
+      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+    ENDFOREACH(item)
+  ENDIF(DEFINITIONS)
 
   GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS_${_UPPER_BUILD})
-  FOREACH(item ${DEFINITIONS})
-    LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
-  ENDFOREACH(item)
+  IF(DEFINITIONS)
+    FOREACH(item ${DEFINITIONS})
+      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+    ENDFOREACH(item)
+  ENDIF(DEFINITIONS)
 
   GET_TARGET_PROPERTY(oldProps ${_target} COMPILE_FLAGS)
   IF(oldProps)
@@ -75,16 +80,41 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
     LIST(APPEND _FLAGS " ${oldPropsBuild}")
   ENDIF(oldPropsBuild)
 
+  GET_TARGET_PROPERTY(DIRINC ${_target} INCLUDE_DIRECTORIES)
+  IF(DIRINC)
+    FOREACH(item ${DIRINC})
+      LIST(APPEND _FLAGS " -I\"${item}\"")
+    ENDFOREACH(item)
+  ENDIF(DIRINC)
+
+  GET_TARGET_PROPERTY(DEFINITIONS ${_target} COMPILE_DEFINITIONS)
+  IF(DEFINITIONS)
+    FOREACH(item ${DEFINITIONS})
+      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+    ENDFOREACH(item)
+  ENDIF(DEFINITIONS)
+
+  GET_TARGET_PROPERTY(DEFINITIONS ${_target} COMPILE_DEFINITIONS_${_UPPER_BUILD})
+  IF(DEFINITIONS)
+    FOREACH(item ${DEFINITIONS})
+      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+    ENDFOREACH(item)
+  ENDIF(DEFINITIONS)
+
   GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
   GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
   LIST(APPEND _FLAGS " ${GLOBAL_DEFINITIONS}")
   LIST(APPEND _FLAGS " ${_directory_flags}")
   LIST(APPEND _FLAGS " ${_directory_definitions}")
 
-  STRING(REGEX REPLACE " +" " " _FLAGS ${_FLAGS})
-
   # Format definitions
-  SEPARATE_ARGUMENTS(_FLAGS)
+  IF(MSVC)
+    # Fix path with space
+    SEPARATE_ARGUMENTS(_FLAGS UNIX_COMMAND "${_FLAGS}")
+  ELSE(MSVC)
+    STRING(REGEX REPLACE " +" " " _FLAGS ${_FLAGS})
+    SEPARATE_ARGUMENTS(_FLAGS)
+  ENDIF(MSVC)
 
   IF(CLANG)
     # Determining all architectures and get common flags
@@ -178,6 +208,9 @@ MACRO(PCH_SET_COMPILE_COMMAND _inputcpp _compile_FLAGS)
   IF(MSVC)
     GET_PDB_FILENAME(PDB_FILE ${_PCH_current_target})
     SET(PCH_COMMAND ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS} /Yc /Fp"${PCH_OUTPUT}" ${_inputcpp} /Fd"${PDB_FILE}" /c /Fo"${PCH_OUTPUT}.obj")
+    # Ninja PCH Support
+    # http://public.kitware.com/pipermail/cmake-developers/2012-March/003653.html
+    SET_SOURCE_FILES_PROPERTIES(${_inputcpp} PROPERTIES OBJECT_OUTPUTS "${PCH_OUTPUT}.obj")
   ELSE(MSVC)
     SET(HEADER_FORMAT "c++-header")
     SET(_FLAGS "")
@@ -237,6 +270,25 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName)
 
   IF(MSVC)
     SET(_target_cflags "${oldProps} /Yu\"${PCH_INPUT}\" /FI\"${PCH_INPUT}\" /Fp\"${PCH_OUTPUT}\"")
+    # Ninja PCH Support
+    # http://public.kitware.com/pipermail/cmake-developers/2012-March/003653.html
+    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES OBJECT_DEPENDS "${PCH_OUTPUT}")
+
+    # NMAKE-VS2012 Error LNK2011 (NMAKE-VS2010 do not complain)
+    # we need to link the pch.obj file, see http://msdn.microsoft.com/en-us/library/3ay26wa2(v=vs.110).aspx
+    GET_TARGET_PROPERTY(_STATIC_LIBRARY_FLAGS ${_targetName} STATIC_LIBRARY_FLAGS)
+    IF(NOT _STATIC_LIBRARY_FLAGS)
+      SET(_STATIC_LIBRARY_FLAGS)
+    ENDIF(NOT _STATIC_LIBRARY_FLAGS)
+    SET(_STATIC_LIBRARY_FLAGS "${PCH_OUTPUT}.obj ${_STATIC_LIBRARY_FLAGS}")
+
+    GET_TARGET_PROPERTY(_LINK_FLAGS ${_targetName} LINK_FLAGS)
+    IF(NOT _LINK_FLAGS)
+      SET(_LINK_FLAGS)
+    ENDIF(NOT _LINK_FLAGS)
+    SET(_LINK_FLAGS "${PCH_OUTPUT}.obj ${_LINK_FLAGS}")
+
+    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES STATIC_LIBRARY_FLAGS ${_STATIC_LIBRARY_FLAGS} LINK_FLAGS ${_LINK_FLAGS})
   ELSE(MSVC)
     # for use with distcc and gcc >4.0.1 if preprocessed files are accessible
     # on all remote machines set
@@ -324,17 +376,6 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PCH_OUTPUTS}")
 ENDMACRO(ADD_PRECOMPILED_HEADER)
 
-# Macro to move PCH creation file to the front of files list
-# or remove .cpp from library/executable to avoid warning
-MACRO(FIX_PRECOMPILED_HEADER _files _pch)
-  # Remove .cpp creating PCH from the list
-  LIST(REMOVE_ITEM ${_files} ${_pch})
-  IF(MSVC)
-    # Prepend .cpp creating PCH to the list
-    LIST(INSERT ${_files} 0 ${_pch})
-  ENDIF(MSVC)
-ENDMACRO(FIX_PRECOMPILED_HEADER)
-
 MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   IF(NOT PCHSupport_FOUND)
     MESSAGE(STATUS "PCH disabled because compiler doesn't support them")
@@ -346,10 +387,6 @@ MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   # 2 => setting PCH for XCode project, works for XCode projects
   IF(CMAKE_GENERATOR MATCHES "Visual Studio")
     SET(PCH_METHOD 1)
-  ELSEIF(CMAKE_GENERATOR MATCHES "NMake Makefiles" AND MFC_FOUND AND CMAKE_MFC_FLAG)
-    # To fix a bug with MFC
-    # Don't forget to use FIX_PRECOMPILED_HEADER before creating the target
-#    SET(PCH_METHOD 1)
   ELSEIF(CMAKE_GENERATOR MATCHES "Xcode")
     SET(PCH_METHOD 2)
   ELSE(CMAKE_GENERATOR MATCHES "Visual Studio")

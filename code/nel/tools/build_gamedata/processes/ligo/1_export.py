@@ -93,7 +93,7 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 		sDst.close()
 		
 		printLog(log, "MAXSCRIPT " + scriptDst)
-		subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-vn" ])
+		subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-mip" ])
 		
 		os.remove(scriptDst)
 	printLog(log, "")

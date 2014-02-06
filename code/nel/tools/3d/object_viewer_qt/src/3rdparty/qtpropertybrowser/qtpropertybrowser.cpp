@@ -808,6 +808,11 @@ QtProperty *QtAbstractPropertyManager::addProperty(const QString &name)
     return property;
 }
 
+void QtAbstractPropertyManager::emitResetProperty(QtProperty *property)
+{
+    emit resetProperty(property);
+}
+
 /*!
     Creates a property.
 

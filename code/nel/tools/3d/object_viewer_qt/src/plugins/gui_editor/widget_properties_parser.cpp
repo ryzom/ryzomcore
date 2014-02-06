@@ -138,7 +138,7 @@ namespace GUIEditor
 						info.description = value.toUtf8().constData();
 					else
 					if( key == "icon" )
-						info.icon == value.toUtf8().constData();
+						info.icon = value.toUtf8().constData();
 					else
 					if( key == "abstract" )
 					{

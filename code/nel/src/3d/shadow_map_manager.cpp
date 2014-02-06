@@ -244,11 +244,12 @@ void			CShadowMapManager::addShadowReceiver(CTransform *model)
 void			CShadowMapManager::renderGenerate(CScene *scene)
 {
 	H_AUTO( NL3D_ShadowManager_Generate );
-
+	
 	// Each frame, do a small garbage collector for unused free textures.
 	garbageShadowTextures(scene);
 
 	IDriver *driverForShadowGeneration= scene->getRenderTrav().getAuxDriver();
+	CSmartPtr<NL3D::ITexture> previousRenderTarget = driverForShadowGeneration->getRenderTarget();
 
 	// Init
 	// ********
@@ -488,7 +489,7 @@ void			CShadowMapManager::renderGenerate(CScene *scene)
 	}
 
 	// Set default render target
-	driverForShadowGeneration->setRenderTarget (NULL);
+	driverForShadowGeneration->setRenderTarget (previousRenderTarget);
 
 	// Allow Writing on all.
 	driverForShadowGeneration->setColorMask(true, true, true, true);

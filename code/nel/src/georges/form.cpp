@@ -104,7 +104,7 @@ CForm::~CForm ()
 
 // ***************************************************************************
 
-void CForm::write (xmlDocPtr doc, const char *filename, bool georges4CVS)
+void CForm::write (xmlDocPtr doc, const char *filename)
 {
 	// Save the filename
 	if (filename)
@@ -137,7 +137,7 @@ void CForm::write (xmlDocPtr doc, const char *filename, bool georges4CVS)
 	}
 
 	// Header
-	Header.write (node, georges4CVS);
+	Header.write (node);
 }
 
 // ***************************************************************************
@@ -259,14 +259,14 @@ const std::string &CForm::getComment () const
 
 // ***************************************************************************
 
-void CForm::write (class NLMISC::IStream &stream, bool georges4CVS)
+void CForm::write (class NLMISC::IStream &stream)
 {
 	// Xml stream
 	COXml xmlStream;
 	xmlStream.init (&stream);
 
 	// Write the file
-	write (xmlStream.getDocument (), NULL, georges4CVS);
+	write (xmlStream.getDocument (), NULL);
 }
 
 // ***************************************************************************

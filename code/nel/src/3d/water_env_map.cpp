@@ -226,9 +226,8 @@ void CWaterEnvMap::doInit()
 		_MaterialPassThru.setZFunc(CMaterial::always);
 	}
 }
-
-
-static CVertexProgram testMeshVP(
+/*
+static const char *testMeshVPstr =
 "!!VP1.0\n\
  DP4 o[HPOS].x, c[0], v[0]; \n\
  DP4 o[HPOS].y, c[1], v[0]; \n\
@@ -236,14 +235,56 @@ static CVertexProgram testMeshVP(
  DP4 o[HPOS].w, c[3], v[0]; \n\
  MAD o[COL0], v[8], c[4].xxxx, c[4].yyyy;   \n\
  MOV o[TEX0], v[8];         \n\
- END"
-);
+ END";
+
+
+class CVertexProgramTestMeshVP : public CVertexProgram
+{
+public:
+	struct CIdx
+	{
+		uint ProgramConstant0;
+	};
+	CVertexProgramTestMeshVP()
+	{
+		// nelvp
+		{
+			CSource *source = new CSource();
+			source->Profile = nelvp;
+			source->DisplayName = "testMeshVP/nelvp";
+			source->setSourcePtr(testMeshVPstr);
+			source->ParamIndices["modelViewProjection"] = 0;
+			source->ParamIndices["programConstant0"] = 4;
+			addSource(source);
+		}
+	}
+	virtual ~CVertexProgramTestMeshVP()
+	{
+		
+	}
+	virtual void buildInfo()
+	{
+		m_Idx.ProgramConstant0 = getUniformIndex("programConstant0");
+		nlassert(m_Idx.ProgramConstant0 != ~0);
+	}
+	inline const CIdx &idx() { return m_Idx; }
+private:
+	CIdx m_Idx;
+};
+
+
+static NLMISC::CSmartPtr<CVertexProgramTestMeshVP> testMeshVP;
 
 
 
 // *******************************************************************************
 void CWaterEnvMap::renderTestMesh(IDriver &driver)
 {
+	if (!testMeshVP)
+	{
+		testMeshVP = new CVertexProgramTestMeshVP();
+	}
+
 	doInit();
 	CMaterial testMat;
 	testMat.setLighting(false);
@@ -257,18 +298,17 @@ void CWaterEnvMap::renderTestMesh(IDriver &driver)
 	testMat.setZWrite(false);
 	testMat.setZFunc(CMaterial::always);
 	// tmp : test cubemap
-	driver.activeVertexProgram(&testMeshVP);
+	driver.activeVertexProgram(testMeshVP);
 	driver.activeVertexBuffer(_TestVB);
 	driver.activeIndexBuffer(_TestIB);
-	driver.setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity); // tmp
 	_MaterialPassThruZTest.setTexture(0, _EnvCubic);
-	driver.setConstantMatrix(0, IDriver::ModelViewProjection, IDriver::Identity);
-	driver.setConstant(4, 2.f, 1.f, 0.f, 0.f);
+	driver.setUniformMatrix(IDriver::VertexProgram, testMeshVP->getUniformIndex(CProgramIndex::ModelViewProjection), IDriver::ModelViewProjection, IDriver::Identity);
+	driver.setUniform2f(IDriver::VertexProgram, testMeshVP->idx().ProgramConstant0, 2.f, 1.f);
 	//driver.renderTriangles(testMat, 0, TEST_VB_NUM_TRIS);
 	driver.renderTriangles(_MaterialPassThruZTest, 0, TEST_VB_NUM_TRIS);
 	driver.activeVertexProgram(NULL);
 }
-
+*/
 // *******************************************************************************
 void CWaterEnvMap::initFlattenVB()
 {

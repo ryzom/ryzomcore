@@ -176,7 +176,7 @@ CTimestamp					CDbManager::_LastUpdateTime;
  */
 CDatabase*	CDbManager::createDatabase(TDatabaseId id, CLog* log)
 {
-	CHECK_DB_MGR_INIT(createDatabase, false);
+	CHECK_DB_MGR_INIT(createDatabase, NULL);
 
 	// check db doesn't exist yet
 	CDatabase*	db = getDatabase(id);
@@ -229,7 +229,7 @@ bool	CDbManager::deleteDatabase(TDatabaseId id, CLog* log)
  */
 CDatabase*	CDbManager::loadDatabase(TDatabaseId id, const string& description, CLog* log)
 {
-	CHECK_DB_MGR_INIT(loadDatabase, false);
+	CHECK_DB_MGR_INIT(loadDatabase, NULL);
 
 	nlinfo("CDbManager::loadDatabase(): load/setup database '%d'", id);
 

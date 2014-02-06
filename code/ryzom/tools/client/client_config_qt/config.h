@@ -108,7 +108,7 @@ public:
 	 @param key    -  the key we want to alter
 	 @param value  -  the value we want to set
     */
-	void setString( const char *key, std::string &value );
+	void setString( const char *key, const std::string &value );
 
 private:
 	// config file

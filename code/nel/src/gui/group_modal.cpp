@@ -244,29 +244,29 @@ namespace NLGUI
 		// read modal option
 		CXMLAutoPtr	prop;
 		prop = xmlGetProp (cur, (xmlChar*)"mouse_pos");
-		if ( prop )	SpawnOnMousePos= convertBool(prop);
+		if (prop)	SpawnOnMousePos= convertBool(prop);
 		prop = xmlGetProp (cur, (xmlChar*)"exit_click_out");
-		if ( prop )	ExitClickOut= convertBool(prop);
+		if (prop)	ExitClickOut= convertBool(prop);
 		prop = xmlGetProp (cur, (xmlChar*)"exit_click_l");
-		if ( prop )	ExitClickL= convertBool(prop);
+		if (prop)	ExitClickL= convertBool(prop);
 		prop = xmlGetProp (cur, (xmlChar*)"exit_click_r");
-		if ( prop )	ExitClickR= convertBool(prop);
+		if (prop)	ExitClickR= convertBool(prop);
 		prop = xmlGetProp (cur, (xmlChar*)"exit_click_b");
-		if ( prop )	ExitClickR= ExitClickL= convertBool(prop);
+		if (prop)	ExitClickR= ExitClickL= convertBool(prop);
 		prop = xmlGetProp (cur, (xmlChar*)"force_inside_screen");
-		if ( prop )	ForceInsideScreen= convertBool(prop);
+		if (prop)	ForceInsideScreen= convertBool(prop);
 		prop = xmlGetProp (cur, (xmlChar*)"category");
-		if ( prop )	Category= (const char *) prop;
+		if (prop)	Category= (const char *) prop;
 		prop = xmlGetProp (cur, (xmlChar*)"onclick_out");
-		if ( prop )	OnClickOut = (const char *) prop;
+		if (prop)	OnClickOut = (const char *) prop;
 		prop = xmlGetProp (cur, (xmlChar*)"onclick_out_params");
-		if ( prop )	OnClickOutParams = (const char *) prop;
+		if (prop)	OnClickOutParams = (const char *) prop;
 		prop = xmlGetProp (cur, (xmlChar*)"onpostclick_out");
-		if ( prop )	OnPostClickOut = (const char *) prop;
+		if (prop)	OnPostClickOut = (const char *) prop;
 		prop = xmlGetProp (cur, (xmlChar*)"onpostclick_out_params");
-		if ( prop )	OnPostClickOutParams = (const char *) prop;
+		if (prop)	OnPostClickOutParams = (const char *) prop;
 		prop = xmlGetProp (cur, (xmlChar*)"exit_key_pushed");
-		if ( prop )	ExitKeyPushed= convertBool(prop);
+		if (prop)	ExitKeyPushed= convertBool(prop);
 
 		// Force parent hotspot for spawn on mouse
 		if(SpawnOnMousePos)

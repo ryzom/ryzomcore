@@ -24,34 +24,28 @@
 namespace NL3D
 {
 
-
 // ***************************************************************************
-IVertexProgramDrvInfos::IVertexProgramDrvInfos (IDriver *drv, ItVtxPrgDrvInfoPtrList it)
+
+CVertexProgram::CVertexProgram()
 {
-	_Driver= drv;
-	_DriverIterator= it;
+	
 }
 
-
 // ***************************************************************************
-IVertexProgramDrvInfos::~IVertexProgramDrvInfos ()
+
+CVertexProgram::CVertexProgram(const char *nelvp)
 {
-	_Driver->removeVtxPrgDrvInfoPtr (_DriverIterator);
+	CSource *source = new CSource();
+	source->Profile = IProgram::nelvp;
+	source->setSource(nelvp);
+	addSource(source);
 }
 
-
 // ***************************************************************************
-CVertexProgram::CVertexProgram (const char* program)
-{
-	_Program=program;
-}
 
-
-// ***************************************************************************
 CVertexProgram::~CVertexProgram ()
 {
-	// Must kill the drv mirror of this VB.
-	_DrvInfo.kill();
+	
 }
 
 } // NL3D

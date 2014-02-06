@@ -74,14 +74,14 @@ namespace NLGUI
 			REFLECT_SINT32("rollover_container_alpha", getRolloverAlphaContainerAsSInt32, setRolloverAlphaContainer);
 			REFLECT_BOOL("use_global_alpha_settings", isUsingGlobalAlpha, setUseGlobalAlpha);
 			REFLECT_STRING("on_alpha_settings_changed", getAHOnAlphaSettingsChanged, setAHOnAlphaSettingsChanged);
-			REFLECT_STRING("on_alpha_settings_changed_aparams", getAHOnAlphaSettingsChangedParams, setAHOnAlphaSettingsChangedParams);
+			REFLECT_STRING("on_alpha_settings_changed_params", getAHOnAlphaSettingsChangedParams, setAHOnAlphaSettingsChangedParams);
 		REFLECT_EXPORT_END
 
 		virtual bool isMoving() const{ return false; }
 
 		// Get the header color draw. NB: depends if grayed, and if active.
 		virtual NLMISC::CRGBA getDrawnHeaderColor () const{ return NLMISC::CRGBA(); };
-		
+
 		uint8 getCurrentContainerAlpha() const{ return _CurrentContainerAlpha; }
 		uint8 getCurrentContentAlpha() const{ return _CurrentContentAlpha; }
 
@@ -92,7 +92,7 @@ namespace NLGUI
 
 	protected:
 		void triggerAlphaSettingsChangedAH();
-		
+
 		uint8 _CurrentContainerAlpha;
 		uint8 _CurrentContentAlpha;
 		uint8 _ContainerAlpha;

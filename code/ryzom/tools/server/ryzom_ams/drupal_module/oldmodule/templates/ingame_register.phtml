@@ -1,0 +1,116 @@
+  <div class="title">
+    RYZOM CORE INGAME REGISTRATION
+  </div>
+
+  <div>
+    <?php echo $WELCOME_MESSAGE; ?>
+  </div>
+
+  <form name="Page1"
+        method="post"
+        action="register">
+    <table>
+      <tr>
+        <td width="33%" <?php if ($USERNAME_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-Username">Desired Username: </td>
+
+        <td width="25%">
+          <input type="text"
+               name="Username"
+               value=""
+               maxlength="12"
+               onfocus=
+               "javascript:showTooltip('5-12 lower-case characters and numbers. The login (username) you create here will be your login name. The name of your game characters will be chosen later on.', this);" />
+        </td>
+        
+        <td id="comment-Username" <?php if ($USERNAME_ERROR == "TRUE"){ echo 'class="error"';}?> width="42%"><?php if ($USERNAME_ERROR == "TRUE"){ echo $USERNAME;}?></td>
+      </tr>
+
+      <tr>
+        <td width="33%" <?php if ($PASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-Password">Desired Password:</td>
+
+        <td width="25%">
+          <input type="password"
+               name="Password"
+               value=""
+               maxlength="20"
+               onkeyup=
+               "testPassword(document.Page1.Password.value, 'comment-Password')"
+               onfocus="javascript:showTooltip(' 5-20 characters.', this);" />
+        </td>
+
+        <td id="comment-Password" <?php if ($PASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?> width="42%"><?php if ($PASSWORD_ERROR == "TRUE"){ echo $PASSWORD;}?></td>
+      </tr>
+
+      <tr>
+        <td width="33%"<?php if ($CPASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-ConfirmPass">Confirm Password:</td>
+
+        <td width="25%"><input type="password"
+               name="ConfirmPass"
+               value=""
+               maxlength="20"
+               onfocus="javascript:showTooltip('Retype your Password', this);" />
+        </td>
+
+        <td id="comment-ConfirmPass" <?php if ($CPASSWORD_ERROR == "TRUE"){ echo 'class="error"';}?>width="42%"><?php if ($CPASSWORD_ERROR == "TRUE"){ echo $CPASSWORD;}?></td>
+      </tr>
+
+      <tr>
+        <td width="33%" <?php if ($EMAIL_ERROR == "TRUE"){ echo 'class="error"';}?> id="caption-Email">Email Address (to which a confirmation email will be sent):</td>
+
+        <td width="25%">
+          <input type="text"
+               name="Email"
+               value=""
+               maxlength="255"
+               onfocus=
+               "javascript:showTooltip('Please verify that the e-mail address you enter here is valid and will remain valid in the future. It will only be used to manage your <?php echo $GAME_NAME; ?> account.', this);" />
+        </td>
+
+        <td id="comment-Email" <?php if ($EMAIL_ERROR == "TRUE"){ echo 'class="error"';}?> width="42%"><?php if ($EMAIL_ERROR == "TRUE"){ echo $EMAIL;}?></td>
+      </tr>
+
+      <tr>
+        <td width=
+        "33%" <?php if ($TAC_ERROR == "TRUE"){ echo 'class="error"';}?>
+            colspan="2"><input type="checkbox"
+               name="TaC"
+               value="1"
+               onfocus="javascript:showTooltip('', this);" /><span id=
+               "caption-TaC">YES, I agree to the terms of
+               service</span></td><?php if ($TAC_ERROR == "TRUE"){
+                                echo '<td id="comment-TaC" class="error" width="42%">You must accept the Terms of Service</td>';}
+                                else {
+                                    echo '<td width="42%" id="comment-TaC" >';}; ?>
+      </tr>
+    </table>
+
+    <div class="c1">
+      <input type="submit"
+           name="Submit"
+           value="Continue" />
+    </div>
+  </form>
+
+  <div id="signupTooltip"
+       class="c2"
+       inset=""></div>
+
+  <div id="tooltip-Username">
+    5-12 lower-case characters and numbers. The login (username) you create here will be
+    your login name. The name of your game characters will be chosen later on.
+  </div>
+
+  <div id="tooltip-Password">
+    5-20 characters.
+  </div>
+
+  <div id="tooltip-ConfirmPass">
+    Retype your Password
+  </div>
+
+  <div id="tooltip-Email">
+    Please verify that the e-mail address you enter here is valid and will remain valid
+    in the future. It will be used to manage your <?php echo $GAME_NAME; ?> account.
+  </div>
+
+  <div id="tooltip-TaC"></div>

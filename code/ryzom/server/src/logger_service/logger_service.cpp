@@ -521,9 +521,7 @@ public:
 											BsiGlobal);
 				saveFile.FileName = threadResult.OutputFilename;
 
-				char *newLine="\n";
-
-
+				const char *newLine="\n";
 
 				list<string>::const_iterator first(threadResult.Lines->begin()), last(threadResult.Lines->end());
 				for (uint32 localCounter = 0; first != last; ++first, ++localCounter)

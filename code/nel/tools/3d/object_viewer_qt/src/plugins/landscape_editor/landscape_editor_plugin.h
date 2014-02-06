@@ -1,5 +1,4 @@
 // Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
 // Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
 //
 // This program is free software: you can redistribute it and/or modify
@@ -35,11 +34,6 @@ namespace NLMISC
 class CLibraryContext;
 }
 
-namespace ExtensionSystem
-{
-class IPluginSpec;
-}
-
 namespace LandscapeEditor
 {
 class LandscapeEditorWindow;
@@ -55,14 +49,7 @@ public:
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
 	void shutdown();
-
 	void setNelContext(NLMISC::INelContext *nelContext);
-
-	QString name() const;
-	QString version() const;
-	QString vendor() const;
-	QString description() const;
-	QStringList dependencies() const;
 
 	void addAutoReleasedObject(QObject *obj);
 
@@ -78,7 +65,7 @@ class LandscapeEditorContext: public Core::IContext
 {
 	Q_OBJECT
 public:
-	LandscapeEditorContext(QObject *parent = 0);
+	explicit LandscapeEditorContext(QObject *parent = 0);
 	virtual ~LandscapeEditorContext() {}
 
 	virtual QString id() const
@@ -91,7 +78,7 @@ public:
 	}
 	virtual QIcon icon() const
 	{
-		return QIcon();
+		return QIcon(Constants::ICON_LANDSCAPE_ITEM);
 	}
 
 	virtual void open();

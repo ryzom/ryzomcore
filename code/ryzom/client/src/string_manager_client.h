@@ -341,8 +341,8 @@ private:
 
 		void	serial(NLMISC::IStream &f)
 		{
-			f.serialCheck((uint32)'_RTS');
-			f.serialCheck((uint32)'KCAP');
+			f.serialCheck(NELID("_RTS"));
+			f.serialCheck(NELID("KCAP"));
 			f.serialVersion(0);
 			f.serial(PackedVersion);
 			f.serial(LanguageCode);

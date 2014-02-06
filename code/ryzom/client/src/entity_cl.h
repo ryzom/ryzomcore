@@ -1111,7 +1111,8 @@ protected:
 	// for localSelectBox() computing
 	sint64										_LastLocalSelectBoxComputeTime;
 
-	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf>		_OpacityMinNodeLeaf;
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _OpacityMinNodeLeaf;
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _ShowReticleLeaf;
 
 protected:
 	/**

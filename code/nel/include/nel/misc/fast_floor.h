@@ -19,6 +19,7 @@
 
 #include "types_nl.h"
 #include <cmath>
+#include <nel/misc/debug.h>
 
 namespace NLMISC
 {

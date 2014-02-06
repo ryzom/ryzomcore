@@ -193,6 +193,11 @@ CDriverD3D::CDriverD3D()
 #else // NL_DISABLE_HARDWARE_VERTEX_PROGAM
 	_DisableHardwareVertexProgram = false;
 #endif // NL_DISABLE_HARDWARE_VERTEX_PROGAM
+#ifdef NL_DISABLE_HARDWARE_PIXEL_PROGAM
+	_DisableHardwarePixelProgram = true;
+#else // NL_DISABLE_HARDWARE_PIXEL_PROGAM
+	_DisableHardwarePixelProgram = false;
+#endif // NL_DISABLE_HARDWARE_PIXEL_PROGAM
 #ifdef NL_DISABLE_HARDWARE_VERTEX_ARRAY_AGP
 	_DisableHardwareVertexArrayAGP = true;
 #else // NL_DISABLE_HARDWARE_VERTEX_ARRAY_AGP
@@ -1546,13 +1551,15 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 #endif // NL_FORCE_TEXTURE_STAGE_COUNT
 
 	_VertexProgram = !_DisableHardwareVertexProgram && ((caps.VertexShaderVersion&0xffff) >= 0x0100);
-	_PixelShader = !_DisableHardwarePixelShader && (caps.PixelShaderVersion&0xffff) >= 0x0101;
+	_PixelProgramVersion = _DisableHardwareVertexProgram ? 0x0000 : caps.PixelShaderVersion & 0xffff;
+	nldebug("Pixel Program Version: %i.%i", (uint32)((_PixelProgramVersion & 0xFF00) >> 8), (uint32)(_PixelProgramVersion & 0xFF));
+	_PixelProgram = _PixelProgramVersion >= 0x0101;
 	_MaxVerticesByVertexBufferHard = caps.MaxVertexIndex;
 	_MaxLight = caps.MaxActiveLights;
 
 	if(_MaxLight > 0xFF) _MaxLight = 3;
 
-	if (_PixelShader)
+	if (_PixelProgram)
 	{
 		_MaxNumPerStageConstantLighted = _NbNeLTextureStages;
 		_MaxNumPerStageConstantUnlighted = _NbNeLTextureStages;
@@ -1702,6 +1709,13 @@ bool CDriverD3D::release()
 	H_AUTO_D3D(CDriver3D_release);
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
+
+	ItShaderDrvInfoPtrList		itshd;
+	while( (itshd = _ShaderDrvInfos.begin()) != _ShaderDrvInfos.end() )
+	{
+		// NB: at IShader deletion, this->_MatDrvInfos is updated (entry deleted);
+		delete *itshd;
+	}
 
 	_SwapBufferCounter = 0;
 
@@ -2016,6 +2030,8 @@ bool CDriverD3D::swapBuffers()
 
 	// Reset vertex program
 	setVertexProgram (NULL, NULL);
+	// Reset pixel program
+	setPixelShader (NULL);
 
 	if (_VBHardProfiling)
 	{
@@ -2987,7 +3003,7 @@ bool CDriverD3D::stretchRect(ITexture * srcText, NLMISC::CRect &srcRect, ITextur
 
 bool CDriverD3D::supportBloomEffect() const
 {
-	return isVertexProgramSupported();
+	return supportVertexProgram(CVertexProgram::nelvp);
 }
 
 // ***************************************************************************
@@ -3330,9 +3346,9 @@ uint COcclusionQueryD3D::getVisibleCount()
 }
 
 // ***************************************************************************
-bool CDriverD3D::isWaterShaderSupported() const
+bool CDriverD3D::supportWaterShader() const
 {
-	H_AUTO_D3D(CDriverD3D_isWaterShaderSupported);
+	H_AUTO_D3D(CDriverD3D_supportWaterShader);
 	return _PixelShaderVersion >= D3DPS_VERSION(1, 1);
 }
 
@@ -3618,7 +3634,7 @@ void CDriverD3D::CVertexProgramPtrState::apply(CDriverD3D *driver)
 void CDriverD3D::CPixelShaderPtrState::apply(CDriverD3D *driver)
 {
 	H_AUTO_D3D(CDriverD3D_CPixelShaderPtrState);
-	if (!driver->supportPixelShaders()) return;
+	if (!driver->_PixelProgram) return;
 	driver->_DeviceInterface->SetPixelShader(PixelShader);
 }
 

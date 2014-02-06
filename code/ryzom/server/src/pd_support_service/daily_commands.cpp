@@ -104,7 +104,7 @@ public:
 		FILE* fileHandle= fopen(DailyActivityLogFileName,"ab");
 		nlassert(fileHandle!=NULL);
 		fprintf(fileHandle,"%02u/%02u/%u CDailyTaskScheduler: Started: %02u:%02u, Finished: %02u:%02u, Executed %u commands Started %u Jobs\n",
-			ptm->tm_mday, ptm->tm_mon+1, ptm->tm_year+1900, startTime/3600%24, startTime/60%60, endTime/3600%24, endTime/60%60, commandsVar==NULL?0:commandsVar->size(), jobsRemaining );
+			ptm->tm_mday, ptm->tm_mon+1, ptm->tm_year+1900, (uint)startTime/3600%24, (uint)startTime/60%60, (uint)endTime/3600%24, (uint)endTime/60%60, commandsVar==NULL?0:commandsVar->size(), jobsRemaining );
 		nlinfo("JobManager state: %s",CJobManager::getInstance()->getStatus().c_str());
 		fclose(fileHandle);
 	}

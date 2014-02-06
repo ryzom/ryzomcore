@@ -153,8 +153,6 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/scene.h
         scene_group.cpp
         ../../include/nel/3d/scene_group.h
-        shader.cpp
-        ../../include/nel/3d/shader.h
         texture.cpp
         ../../include/nel/3d/texture.h
         vertex_buffer.cpp
@@ -164,7 +162,15 @@ SOURCE_GROUP(Driver FILES
         vertex_program.cpp
         ../../include/nel/3d/vertex_program.h
         vertex_program_parse.cpp
-        ../../include/nel/3d/vertex_program_parse.h)
+        ../../include/nel/3d/vertex_program_parse.h
+        pixel_program.cpp
+        ../../include/nel/3d/pixel_program.h
+        geometry_program.cpp
+        ../../include/nel/3d/geometry_program.h
+        program.cpp
+        ../../include/nel/3d/program.h
+        gpu_program_params.cpp
+        ../../include/nel/3d/gpu_program_params.h)
 
 SOURCE_GROUP(Font FILES
         computed_string.cpp
@@ -686,12 +692,24 @@ SOURCE_GROUP(Shadows FILES
         ../../include/nel/3d/shadow_map_manager.h
         shadow_poly_receiver.cpp
         ../../include/nel/3d/shadow_poly_receiver.h)
+SOURCE_GROUP(Stereo FILES
+		stereo_display.cpp
+        ../../include/nel/3d/stereo_display.h
+		stereo_hmd.cpp
+        ../../include/nel/3d/stereo_hmd.h
+		stereo_ovr.cpp
+		stereo_ovr_fp.cpp
+        ../../include/nel/3d/stereo_ovr.h
+		stereo_libvr.cpp
+        ../../include/nel/3d/stereo_libvr.h
+		stereo_debugger.cpp
+		../../include/nel/3d/stereo_debugger.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${FREETYPE_INCLUDE_DIRS} ${LIBOVR_INCLUDE_DIR} ${LIBVR_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(nel3d nelmisc ${FREETYPE_LIBRARY})
+TARGET_LINK_LIBRARIES(nel3d nelmisc ${FREETYPE_LIBRARIES} ${LIBOVR_LIBRARIES} ${LIBVR_LIBRARY})
 SET_TARGET_PROPERTIES(nel3d PROPERTIES LINK_INTERFACE_LIBRARIES "")
 NL_DEFAULT_PROPS(nel3d "NeL, Library: NeL 3D")
 NL_ADD_RUNTIME_FLAGS(nel3d)
@@ -700,6 +718,9 @@ NL_ADD_STATIC_VID_DRIVERS(nel3d)
 NL_ADD_LIB_SUFFIX(nel3d)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+
+ADD_DEFINITIONS(${LIBOVR_DEFINITIONS})
+ADD_DEFINITIONS(${LIBVR_DEFINITIONS})
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nel3d ${CMAKE_CURRENT_SOURCE_DIR}/std3d.h ${CMAKE_CURRENT_SOURCE_DIR}/std3d.cpp)
