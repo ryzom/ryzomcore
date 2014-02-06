@@ -232,7 +232,7 @@ code\ryzom\tools\server\ryzom_ams\old
 code/ryzom/tools/server/ryzom_ams/www/config.php
 code/ryzom/tools/server/ryzom_ams/www/is_installed
 
-#tools and external dir's 
+#tools and external dir's
 external
 external_stlport
 nel_tools*
@@ -241,4 +241,5 @@ ryzom_tools*
 #Dumps
 *.dmp
 
-
+code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
+code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
