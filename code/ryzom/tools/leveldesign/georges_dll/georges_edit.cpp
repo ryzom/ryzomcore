@@ -73,7 +73,6 @@ CGeorgesEditApp::CGeorgesEditApp() : MemStream (false, false, 1024*1024)
 	ResizeMain = true;
 	ExeStandalone = false;
 	StartExpanded = true;
-	Georges4CVS = true;
 
 	FormClipBoardFormatStruct = RegisterClipboardFormat ("GeorgesFormStruct");
 	FormClipBoardFormatVirtualStruct = RegisterClipboardFormat ("GeorgesFormVirtualStruct");
@@ -547,11 +546,6 @@ bool CGeorgesEditApp::loadCfg ()
 		if (start_expanded)
 			StartExpanded = start_expanded->asInt () != 0;
 
-		// Georges4CVS
-		CConfigFile::CVar *georges_for_cvs = cf.getVarPtr ("GeorgesForCvs");
-		if (georges_for_cvs)
-			Georges4CVS = georges_for_cvs->asInt () != 0;
-
 		// MaxUndo
 		CConfigFile::CVar *max_undo = cf.getVarPtr ("MaxUndo");
 		if (max_undo)
@@ -632,11 +626,6 @@ bool CGeorgesEditApp::saveCfg ()
 		CConfigFile::CVar *start_expanded= cf.getVarPtr ("StartExpanded");
 		if (start_expanded)
 			start_expanded->setAsInt (StartExpanded);
-
-		// Georges4CVS
-		CConfigFile::CVar *georges_for_cvs= cf.getVarPtr ("GeorgesForCvs");
-		if (georges_for_cvs)
-			georges_for_cvs->setAsInt (Georges4CVS);
 
 		// MaxUndo
 		CConfigFile::CVar *max_undo= cf.getVarPtr ("MaxUndo");

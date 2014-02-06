@@ -408,7 +408,6 @@ namespace NLGUI
 				splitString(tooltipInfos, "@", tooltipInfosList);
 				texName = tooltipInfosList[0];
 				tooltip = tooltipInfosList[1];
-				nlinfo(tooltip.c_str());
 				setString(ucstring(tooltip));
 				CViewRenderer &rVR = *CViewRenderer::getInstance();
 				sint32 texId = rVR.getTextureIdFromName (texName);

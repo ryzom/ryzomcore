@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
 		try
 		{
 			CIFile f(builderConfig.CWMapCachePath + "/" + shortname + ".cw_height");
-			f.serialCheck((uint32) 'OBSI');
+			f.serialCheck(NELID("OBSI"));
 			f.serial(xmin);
 			f.serial(xmax);
 			f.serial(ymin);
@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
 				// now extract each island height
 				// read back coordinates
 				CIFile f(builderConfig.CWMapCachePath + "/" + shortname + ".cw_height");
-				f.serialCheck((uint32) 'OBSI');
+				f.serialCheck(NELID("OBSI"));
 				f.serial(xmin);
 				f.serial(xmax);
 				f.serial(ymin);
@@ -349,7 +349,7 @@ int main(int argc, char* argv[])
 						try
 						{
 							COFile f(builderConfig.OutputPath + "/" + completeIslands[l]->Island + ".island_hm");
-							f.serialCheck((uint32) 'MHSI');
+							f.serialCheck(NELID("MHSI"));
 							f.serial(island);
 							// export tga for check
 							if (builderConfig.HeightMapsAsTga)

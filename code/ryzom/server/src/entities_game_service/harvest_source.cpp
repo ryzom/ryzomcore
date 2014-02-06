@@ -1270,7 +1270,7 @@ bool forageTestDoExtract(
 		testSource->extractMaterial( req, abs, ForageQualityCeilingFactor.get(), ForageQualitySlowFactor.get(), res, successFactor, 0, row, propDrop );
 		fprintf( f, "%g;%g;%g;%g;%g;%g;%g;%g;%g;%u;%u;\n",
 			res[CHarvestSource::A], res[CHarvestSource::Q],
-			testSource->getD(), testSource->getE(), 0 /*testSource->getC()*/,
+			testSource->getD(), testSource->getE(), 0.f /*testSource->getC()*/,
 			reqS, reqA, reqQ,
 			testSource->quantity(), testSource->getImpactScheme()*5, 127 );
 		if ( (!eventD) && (testSource->getD() > 127) )

@@ -1225,6 +1225,15 @@ static bool	setupARBFragmentProgram(const char *glext)
 	return true;
 }
 
+// *********************************
+static bool	setupNVFragmentProgram2(const char *glext)
+{
+	H_AUTO_OGL(setupNVFragmentProgram2);
+	CHECK_EXT("GL_NV_fragment_program2");
+	
+	return true;
+}
+
 // ***************************************************************************
 static bool	setupARBVertexBufferObject(const char	*glext)
 {
@@ -1560,6 +1569,19 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.EXTVertexShader = false;
 		ext.ARBVertexProgram = false;
 	}
+	
+	// Check pixel program
+	// Disable feature ???
+	if (!ext.DisableHardwarePixelProgram)
+	{		
+		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
+		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
+	}
+	else
+	{
+		ext.ARBFragmentProgram = false;
+		ext.NVFragmentProgram2 = false;
+	}
 
 	ext.OESDrawTexture = setupOESDrawTexture(glext);
 	ext.OESMapBuffer = setupOESMapBuffer(glext);
@@ -1571,14 +1593,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.NVTextureShader = setupNVTextureShader(glext);
 		ext.ATIEnvMapBumpMap = setupATIEnvMapBumpMap(glext);
 		ext.ATIFragmentShader = setupATIFragmentShader(glext);
-		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);
 	}
 	else
 	{
 		ext.ATIEnvMapBumpMap = false;
 		ext.NVTextureShader = false;
 		ext.ATIFragmentShader = false;
-		ext.ARBFragmentProgram = false;
 	}
 
 	// For now, the only way to know if emulation, is to test some extension which exist only on GeForce3.

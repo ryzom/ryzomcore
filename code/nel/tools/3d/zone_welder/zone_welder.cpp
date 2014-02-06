@@ -991,7 +991,7 @@ int main(sint argc, char **argv)
 
 	if(argc == 4)
 	{
-		weldRadius = (float) atof(argv[3]);
+		NLMISC::fromString(argv[3], weldRadius);
 	}
 
 	std::string center=getName(argv[1]).c_str();

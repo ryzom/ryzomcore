@@ -37,7 +37,11 @@
 #define SBCLIENT_ERASE_LOG true
 
 // version number
-#define SBCLIENT_VERSION "2.1.551"
+// 2.1
+// - Bloom
+// 2.2
+// - OculusVR support
+#define SBCLIENT_VERSION "2.2"
 
 
 
@@ -45,6 +49,7 @@
 #define SBCLIENT_DEV_SOUND 0
 #define SBCLIENT_DEV_STEREO 0
 #define SBCLIENT_DEV_MEMLEAK 0
+#define SBCLIENT_DEV_PIXEL_PROGRAM 0
 
 
 
@@ -70,7 +75,7 @@
 #	ifndef SNOWBALLS_CONFIG
 #		define SBCLIENT_CONFIG_FILE "snowballs_client.cfg"
 #	else
-#		define SBCLIENT_CONFIG_FILE SNOWBALLS_CONFIG "client.cfg"
+#		define SBCLIENT_CONFIG_FILE SNOWBALLS_CONFIG "snowballs_client.cfg"
 #	endif
 #endif
 

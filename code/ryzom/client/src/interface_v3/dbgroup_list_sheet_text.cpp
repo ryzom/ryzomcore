@@ -69,6 +69,7 @@ CDBGroupListSheetText::CDBGroupListSheetText(const TCtorParam &param)
 	_AnimalStatus= NULL;
 	_CacheAnimalStatus= -1;
 	_CanDrop= false;
+	_Draggable= false;
 
 	for(uint i=0;i<CHARACTERISTICS::NUM_CHARACTERISTICS;i++)
 		_LastPlayerCharac[i]= 0;
@@ -94,7 +95,7 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	// value
 	prop = xmlGetProp (cur, (xmlChar*)"value");
-	if ( prop )
+	if (prop)
 	{
 		// get a branch in the database.
 		CCDBNodeBranch *branch= NLGUI::CDBManager::getInstance()->getDbBranch(prop);
@@ -213,6 +214,10 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
 		_AnimalStatus= NLGUI::CDBManager::getInstance()->getDbProp((const char*)prop, false);
 	}
+
+	// issue #78: dragable is not parsed by _CtrlInfo, need to do it here.
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"dragable" );
+	if (prop)	_Draggable = convertBool(prop);
 
 	return true;
 }
@@ -855,6 +860,7 @@ void CDBGroupListSheetText::setup()
 		ctrl->setParamsOnLeftClick(toString(i));
 		ctrl->setActionOnRightClick("lst_rclick");
 		ctrl->setParamsOnRightClick(toString(i));
+		ctrl->setDraggable(_Draggable);
 
 		// Add it to the list.
 		_List->addCtrl(ctrl);

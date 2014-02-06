@@ -966,7 +966,7 @@ uint32	CStringManager::translateTitle(const std::string  &title, TLanguages lang
 {
 	const std::string colName("name");
 	const CStringManager::CEntityWords &ew = getEntityWords(language, STRING_MANAGER::title);
-	std::string rowName = NLMISC::strlwr(title);
+	std::string rowName = NLMISC::toLower(title);
 	uint32 stringId;
 	stringId = ew.getStringId(rowName, colName);
 

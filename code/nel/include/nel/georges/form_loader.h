@@ -63,7 +63,7 @@ private:
 	TTypeMap		_MapType;
 
 	// Map of filename / CRefPtr<CFormDfnCFormDfn>
-	TFormDfnMap	_MapFormDfn;
+	TFormDfnMap		_MapFormDfn;
 
 	// Map of form / CRefPtr<CForm>
 	TFormMap		_MapForm;

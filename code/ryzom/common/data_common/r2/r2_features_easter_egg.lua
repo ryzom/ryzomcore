@@ -78,7 +78,7 @@ feature.Components.EasterEgg =
 				function(value)
 					local angle = value
 					if angle == nil then angle = 0 end						
-					local result = math.mod(math.floor(180 * angle / math.pi), 360)
+					local result = math.fmod(math.floor(180 * angle / math.pi), 360)
 					if result < 0 then result = 360 + result end
 					return result
 				end,

@@ -171,8 +171,6 @@ public:
 	void				targetLandmark(CCtrlButton *lm);
 	// get the world position of a landmark or return vector Null if not found
 	void				getLandmarkPosition(const CCtrlButton *lm, NLMISC::CVector2f &worldPos);
-	// remove some landmarks if there are too many
-	void				removeExceedingUserLandMarks(uint maxNumber);
 
 	//Remove and re-create UserLandMarks
 	void updateUserLandMarks();

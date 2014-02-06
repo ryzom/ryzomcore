@@ -47,8 +47,8 @@ void CHairSet::init (NLMISC::IProgressCallback &progress)
 		const CItemSheet *item = SheetMngr.getItem(SLOTTYPE::HEAD_SLOT, k);
 		if( (item) && (!item->getShape().empty()) )
 		{
-			std::string itemName = item->getShape();
-			itemName = NLMISC::strlwr(itemName);
+			std::string itemName = NLMISC::toLower(item->getShape());
+
 			if (item->getShape().find("cheveux", 0) != std::string::npos)
 			{
 				// get race

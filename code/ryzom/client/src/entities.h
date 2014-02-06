@@ -29,6 +29,9 @@
 #include "ground_fx_manager.h"
 #include "projectile_manager.h"
 #include "user_entity.h"
+// Some constants
+#include "game_share/mission_desc.h"
+#include "game_share/inventories.h"
 // Misc.
 #include "nel/misc/types_nl.h"
 #include "nel/misc/stream.h"
@@ -36,6 +39,7 @@
 #include "nel/misc/vector.h"
 #include "nel/misc/file.h"
 #include "nel/misc/aabbox.h"
+#include "nel/misc/cdb_leaf.h"
 // 3D
 #include "nel/3d/u_instance.h"
 // Std.
@@ -148,6 +152,14 @@ private:
 	CEntityCL				*_LastEntityUnderPos;
 
 	NL3D::UInstance _LastInstanceUnderPos;
+
+	// DB node pointers used to update some entity flags
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _MissionTargetTitleDB[MAX_NUM_MISSIONS][MAX_NUM_MISSION_TARGETS];
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GroupMemberUidDB[8]; // MaxNumPeopleInTeam in people_interaction.h
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _GroupMemberNameDB[8]; // MaxNumPeopleInTeam in people_interaction.h
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _BeastUidDB[MAX_INVENTORY_ANIMAL];
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _BeastStatusDB[MAX_INVENTORY_ANIMAL];
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _BeastTypeDB[MAX_INVENTORY_ANIMAL];
 
 	//////////////
 	//// DEBUG ///
@@ -343,6 +355,13 @@ public:
 	 * Otherwise, do nothing.
 	 */
 	void refreshInsceneInterfaceOfFriendNPC(uint slot);
+
+	inline NLMISC::CCDBNodeLeaf *getMissionTargetTitleDB(int mission, int target) { return _MissionTargetTitleDB[mission][target]; }
+	inline NLMISC::CCDBNodeLeaf *getGroupMemberUidDB(int member) { return _GroupMemberUidDB[member]; }
+	inline NLMISC::CCDBNodeLeaf *getGroupMemberNameDB(int member) { return _GroupMemberNameDB[member]; }
+	inline NLMISC::CCDBNodeLeaf *getBeastUidDB(int beast) { return _BeastUidDB[beast]; }
+	inline NLMISC::CCDBNodeLeaf *getBeastStatusDB(int beast) { return _BeastStatusDB[beast]; }
+	inline NLMISC::CCDBNodeLeaf *getBeastTypeDB(int beast) { return _BeastTypeDB[beast]; }
 
 private:
 

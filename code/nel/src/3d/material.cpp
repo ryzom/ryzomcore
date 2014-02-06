@@ -18,7 +18,6 @@
 
 #include "nel/3d/material.h"
 #include "nel/3d/texture.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/driver.h"
 #include "nel/misc/stream.h"
 

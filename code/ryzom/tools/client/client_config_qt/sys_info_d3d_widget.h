@@ -17,7 +17,7 @@
 #ifndef SYSINFOD3DWIDGET_H
 #define SYSINFOD3DWIDGET_H
 
-#include "ui_sys_Info_d3d_widget.h"
+#include "ui_sys_info_d3d_widget.h"
 
 
 /**
@@ -28,7 +28,7 @@ class CSysInfoD3DWidget : public QWidget, public Ui::sys_info_d3d_widget
 	Q_OBJECT
 public:
 	CSysInfoD3DWidget( QWidget *parent = NULL );
-	~CSysInfoD3DWidget();
+	virtual ~CSysInfoD3DWidget();
 
 protected:
 	void changeEvent( QEvent *event );

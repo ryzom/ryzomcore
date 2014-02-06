@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QtGui>
+#include "stdpch.h"
+
 #include "client_config_dialog.h"
 #include "system.h"
 

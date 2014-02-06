@@ -1200,7 +1200,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 				}
 				else
 				{
-					form->write(output, true);
+					form->write(output);
 					output.close();
 					
 					if	(!CPath::exists(filename + ext))

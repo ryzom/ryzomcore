@@ -20,8 +20,8 @@ $RingDBPassword = "";
 
 // If true, the server will add automatically unknown user in the database
 // (in nel.user, nel.permission, ring.ring_user and ring.characters
-$AcceptUnknownUser = true;
+$AcceptUnknownUser = false;
 // if true, the login service automaticaly create a ring user and a editor character if needed
-$AutoCreateRingInfo = true;
+$AutoCreateRingInfo = false;
 
 ?>

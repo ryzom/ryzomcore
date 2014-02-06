@@ -171,6 +171,7 @@ protected:
 	bool						_Squarify           : 1;
 
 	bool						_CanDrop			: 1;
+	bool						_Draggable          : 1;
 
 	// Children
 	bool						_Setuped;

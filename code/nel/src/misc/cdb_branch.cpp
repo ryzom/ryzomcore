@@ -232,6 +232,9 @@ void CCDBNodeBranch::attachChild( ICDBNode * node, string nodeName )
 		//nldebug ( "CDB: Attaching node" );
 		_NodesByName.push_back( node );
 		_Sorted = false;
+#if NL_CDB_OPTIMIZE_PREDICT
+		_PredictNode = node;
+#endif
 	}
 
 } // attachChild //
@@ -799,6 +802,18 @@ public:
 //-----------------------------------------------
 ICDBNode *CCDBNodeBranch::find(const std::string &nodeName)
 {
+#if NL_CDB_OPTIMIZE_PREDICT
+	ICDBNode *predictNode = _PredictNode;
+	if (predictNode)
+	{
+		if (predictNode->getParent() == this 
+			&& *predictNode->getName() == nodeName)
+		{
+			return predictNode;
+		}
+	}
+#endif
+
 	if (!_Sorted)
 	{
 		_Sorted = true;
@@ -812,7 +827,15 @@ ICDBNode *CCDBNodeBranch::find(const std::string &nodeName)
 	else
 	{
 		if (*(*it)->getName() == nodeName)
+		{
+#if NL_CDB_OPTIMIZE_PREDICT
+			ICDBNode *node = *it;
+			_PredictNode = node;
+			return node;
+#else
 			return *it;
+#endif
+		}
 		else
 			return NULL;
 	}

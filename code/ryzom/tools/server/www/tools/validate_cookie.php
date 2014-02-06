@@ -16,7 +16,7 @@
 
 	function validateCookie(&$userId, &$domainId, &$charId)
 	{
-		global $DBHost, $DBUserName, $DBPassword, $DBName, $RingDBName, $AcceptUnknownUser;
+		global $DBHost, $RingDBUserName, $RingDBPassword, $RingDBName, $AcceptUnknownUser;
 		
 		if (!isset($_COOKIE["ryzomId"]))
 		{
@@ -40,18 +40,20 @@
 		}
 
 		// check the cookie in the database		
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($RingDBName) or die ("Can't access to the table dbname:$RingDBName");
-		$query = "SELECT user_id, current_status, current_domain_id FROM ring_users where cookie='$cookie'";
-		$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
+		mysqli_select_db($link, $RingDBName) or die ("Can't access to the table dbname:$RingDBName");
 
-		if (mysql_num_rows ($result) == 0)
+		$cookie = mysqli_real_escape_string($link, $cookie);
+		$query = "SELECT user_id, current_status, current_domain_id FROM ring_users where cookie='$cookie'";
+		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+
+		if (mysqli_num_rows($result) == 0)
 		{
 			echo "Can't find cookie $cookie in database<BR>";
 			return false;
 		}
 		
-		$row = mysql_fetch_array($result);
+		$row = mysqli_fetch_assoc($result);
 		
 		if ($row["current_status"] != "cs_logged" && $row["current_status"] != "cs_online" )
 		{
@@ -77,4 +79,4 @@
 		else
 			return 0; // temp dev: use 0 as the "ring character"
 	}
-?>
+

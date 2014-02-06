@@ -428,7 +428,7 @@ CStringManager::CEntityWords CStringManager::parseEntityWords(const ucstring &st
 	for (i=1; i<ws.size(); ++i)
 	{
 		// on the first col, we uncapitalize the id
-		ws.setData(i, 0, ucstring(NLMISC::strlwr(ws.getData(i, 0).toString())));
+		ws.setData(i, 0, ucstring(NLMISC::toLower(ws.getData(i, 0).toString())));
 
 		ew._RowInfo.insert(make_pair(ws.getData(i, 0).toString(), i-1));
 		for (uint j=0; j<ws.ColCount; ++j)
@@ -802,7 +802,7 @@ bool CStringManager::parseTag(const CPhrase &phrase, const ucstring &tag, TRepla
 			nlwarning("Error reading tag property in the tag [%s]", tag.toString().c_str());
 			return false;
 		}
-		spec = NLMISC::strlwr(spec);
+		spec = NLMISC::toLower(spec);
 	}
 	else
 		spec = "name";
@@ -1098,7 +1098,7 @@ bool CStringManager::parseParamList(ucstring::const_iterator &it, ucstring::cons
 				nlwarning("Error parsing parameter %u type in param list", count);
 				return false;
 			}
-			type = NLMISC::strlwr(type);
+			type = NLMISC::toLower(type);
 
 			NLMISC::CI18N::skipWhiteSpace(it, last);
 			if (!NLMISC::CI18N::parseLabel(it, last, name))

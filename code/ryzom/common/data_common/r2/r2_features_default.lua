@@ -371,7 +371,7 @@ local registerFeature = function ()
 					--------------------
 					convertToWidgetValue = 
 					function(value)						
-						local result = math.mod(math.floor(180 * value / math.pi), 360)
+						local result = math.fmod(math.floor(180 * value / math.pi), 360)
 						if result < 0 then result = 360 + result end
 						return result
 					end,

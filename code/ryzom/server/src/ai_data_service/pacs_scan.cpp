@@ -2277,7 +2277,7 @@ public:
 		sint32 xmax = (sint32) max.x();
 		sint32 ymin = (sint32) (sint16) min.y();
 		sint32 ymax = (sint32) (sint16) max.y();
-		output.serialCheck((uint32) 'OBSI');
+		output.serialCheck(NELID("OBSI"));
 		output.serial(xmin);
 		output.serial(xmax);
 		output.serial(ymin);
@@ -2401,9 +2401,17 @@ NLMISC_COMMAND(setStartPoint,"Set the start point for a continent","<continent> 
 
 	CVectorD	startPoint;
 
-	startPoint.x = atof(args[1].c_str());
-	startPoint.y = atof(args[2].c_str());
-	startPoint.z = (args.size() < 4 ? 0.0 : atof(args[3].c_str()));
+	NLMISC::fromString(args[1], startPoint.x);
+	NLMISC::fromString(args[2], startPoint.y);
+
+	if (args.size() < 4)
+	{
+		startPoint.z = 0.0;
+	}
+	else
+	{
+		NLMISC::fromString(args[3], startPoint.z);
+	}
 
 	StartPoints.insert(multimap<string, CVectorD>::value_type(args[0], startPoint));
 
@@ -2417,10 +2425,10 @@ NLMISC_COMMAND(setBoundingBox, "Set the working bounding box", "<minx> <miny> <m
 	if (args.size() < 4)
 		return false;
 
-	BoxMin.x = atof(args[0].c_str());
-	BoxMin.y = atof(args[1].c_str());
-	BoxMax.x = atof(args[2].c_str());
-	BoxMax.y = atof(args[3].c_str());
+	NLMISC::fromString(args[0], BoxMin.x);
+	NLMISC::fromString(args[1], BoxMin.y);
+	NLMISC::fromString(args[2], BoxMax.x);
+	NLMISC::fromString(args[3], BoxMax.y);
 
 	return true;
 }

@@ -1,0 +1,1034 @@
+<?php
+/*
+Here is the current code and progress on the drupal 7 ryzom core module
+//////////////////////////
+todo
+//////////////////////////
+disable user hook
+delete user hook   --- ring_open -> ring users ---- nel user & nel permission ---- hook_user_cancel  ---- remove character data on server
+menu items that do stuff
+
+*/
+error_reporting(E_ALL);
+ini_set('display_errors', 'on');
+ini_set('display_startup_errors', TRUE);
+
+//load globals before requiring them
+global $TOS_URL;
+global $AMS_LIB;
+global $SITEBASE;
+global $AMS_TRANS;
+global $DEFAULT_LANGUAGE;
+global $cfg;
+global $TICKET_LOGGING;
+global $TIME_FORMAT;
+global $TICKET_MAILING_SUPPORT;
+global $IMAGELOC_WEBPATH;
+global $WEBPATH;
+global $INGAME_WEBPATH;
+global $BASE_WEBPATH;
+global $INGAME_LAYOUT;
+global $FORCE_INGAME;
+
+//require additional pages & register the autoload function.
+require 'config.php';
+require 'ams_lib/libinclude.php';
+spl_autoload_register('__autoload');
+
+/*
+Drupal 7 ryzom core module
+Copyright (C) 2013 Matthew Lagoe (Botanic)  & Paige Offerdahl (Tobi)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+//output template
+
+function loadTemplate($template,$vars)
+{
+    extract($vars);
+    include($template);
+}
+
+//validate registration webpage
+function ryzommanage_form_alter(&$form, &$form_state, $form_id)
+{
+    if($form_id == "user_register_form")
+    {
+        $form['#validate'][] = '_webpage_registration';
+    } elseif($form_id == "user_profile_form") {
+        $form['#validate'][] = '_webpage_profile';
+    }
+}
+
+function _webpage_registration(&$form_state)
+{
+    $webUser = new WebUsers();
+    $user  = $webUser->checkUser($form_state['account']['name']['#value']);
+    $email = $webUser->validEmail($form_state['account']['mail']['#value']);
+
+    if ($user != "success") {
+        form_set_error('name', t($user));
+    }
+    if ($email != "success") {
+        form_set_error('mail', t('Not a valid email address, please check it and try again.'));
+    }
+
+}
+
+function _webpage_profile(&$form_state)
+{
+    $webUser = new WebUsers();
+    $email = $webUser->validEmail($form_state['account']['mail']['#value']);
+
+    if ($email != "success") {
+        form_set_error('mail', t('Not a valid email address, please check it and try again.'));
+    }
+    if (($webUser->checkPassword($form_state['account']['pass']['#value']['pass1']) == "success" ) and ( $form_state['account']['pass']['#value']['pass1'] == 
+        $form_state['account']['pass']['#value']['pass2'] )) {
+    }
+}
+
+/**
+ *
+ * Function ryzommanage_menu 
+ *
+ * @takes        Nothing
+ * @return      array $items
+ *
+ * Info: Creates the menu item in the admin interface
+ *
+ */
+function ryzommanage_menu()
+{
+    $items = array();
+    //page for client registration
+    $items['register'] = array(
+        'title' => 'register',
+        'page callback' => '_collect_register',
+        'page arguments' => array(1, 2),
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+	);
+    
+    $items['login'] = array(
+        'title' => 'Login',
+        'page callback' => '_collect_login',
+        'page arguments' => array(1, 2),
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+	);
+    
+    $items['ams'] = array(
+        'title' => 'Ryzom Account Management System',
+        'page callback' => '_ams_callback',
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'type' => MENU_NORMAL_ITEM
+	);
+    
+     $items['ingame'] = array(
+        'title' => 'Ingame AMS',
+        'page callback' => '_collect_ingame_ams',
+        'page arguments' => array(1, 2),
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK
+	);
+    
+    //main menu item
+    $items['admin/config/ryzommanage'] = array(
+        'title' => 'Ryzom Server Integration',
+        'description' => 'Ryzom integration information.',
+        'page callback' => 'system_admin_menu_block_page',
+        'access arguments' => array(
+            'administer site configuration'
+        ),
+        'file' => 'system.admin.inc',
+        'file path' => drupal_get_path('module', 'system')
+    );
+    // First submenu item
+    $items['admin/config/ryzommanage/serversettings'] = array(
+        'title' => 'Ryzom Server Settings',
+        'description' => 'This is the first child item in the section',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(
+            'ryzommanage_admin'
+        ),
+        'access arguments' => array(
+            'administer site configuration'
+        )
+    );
+    // Second submenu item
+    $items['admin/config/ryzommanage/nameregister']   = array(
+        'title' => 'Name Registration Settings',
+        'description' => 'Configure default behavior of name registration module.',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array(
+            'name_registration_admin_settings'
+        ),
+        'access arguments' => array(
+            'administer site configuration'
+        )
+    );
+    return $items;
+}
+
+//an empty call back function, because we need an empty page!
+//without this the page gets access denied, perhaps for later use..
+function _ams_callback(){
+   return array();
+}
+
+/**
+ *
+ * Function ryzommanage_menu 
+ *
+ * @takes        Int $element, &$form_state
+ * @return      Nothing
+ *
+ * Info: Used by ryzommanage_mysqlport to validate ryzommanage_admin will run form_error if port is not between 1 and 65535.
+ *
+ */
+function _check_port_value($element, &$form_state)
+{
+    if ((!is_numeric(parse_size($element['#value']))) or ((parse_size($element['#value']) > 65535) or (parse_size($element['#value']) < 1))) {
+        form_error($element, t($element['#value'] . ' is not a valid value for the MySQL port, it must be a valid value. You must choose a number between 1 and 65535.'));
+    }
+}
+/**
+ *
+ * Function ryzommanage_block_info 
+ *
+ * @takes        Nothing
+ * @return      array $blocks
+ *
+ * Info: Info for block that shows the user menu
+ *
+ */
+function ryzommanage_block_info()
+{
+    $blocks['ryzommanage_usersblock'] = array(
+        // info: The name of the block.
+        'info' => t('Ryzom Manage User Block'),
+        'status' => TRUE,
+        'region' => '-1', // Not usually provided. 
+        'visibility' => BLOCK_VISIBILITY_LISTED // Not usually provided. 
+    );
+    
+    $blocks['ryzommanage_amsblock'] = array(
+        // info: The name of the block.
+        'info' => t('Ryzom AMS Block'),
+        'status' => TRUE,
+        'region' => '-1', // Not usually provided. 
+        'visibility' => BLOCK_VISIBILITY_LISTED, 
+        'pages' => 'ams'
+    );
+    return $blocks;
+}
+/**
+ *
+ * Function ryzommanage_block_view 
+ *
+ * @takes        Nothing
+ * @return      array $block
+ *
+ * Info: View for block
+ *
+ */
+function ryzommanage_block_view($delta = '')
+{
+    $block = array();
+    //The $delta parameter tells us which block is being requested.
+    switch ($delta) {
+        case 'ryzommanage_usersblock':
+            $block['subject'] = t("uppercase this please");
+            $block['content'] = top_bar();
+            break;
+        
+        case 'ryzommanage_amsblock':
+            //$block['subject'] = t("Ryzom Account Management System");
+            $block['content'] = _ams_handler();
+            break;
+    }
+    return $block;
+}
+
+
+
+/*
+* Core function, similar to the www index.php version.
+*/
+function _ams_handler($ingame = false)
+{
+    global $BASE_WEBPATH;
+    global $SITEBASE;
+    global $INGAME_WEBPATH;
+    
+    //Decide what page to load
+    if ( ! isset( $_GET["page"]) ){
+         if(isset($_SESSION['user'])){
+              if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
+                   $page = 'dashboard';
+              }else{
+                   $page = 'show_user';
+              }
+         }else{
+              //default page
+              if($ingame){
+                header("Location: ".$INGAME_WEBPATH."?page=login");
+              }else{
+                header("Location: ".$BASE_WEBPATH."/user/login");
+              }
+              exit;
+         }
+    }else{
+         $page = $_GET["page"];
+    }
+
+    //perform an action in case one is specified
+    //else check if a php page is included in the inc folder, else just set page to the get param
+    if ( isset( $_POST["function"] ) ){
+        $filename = $SITEBASE . '/func/' . $_POST["function"] . '.php';
+        if(is_file($filename)){
+            require($filename);
+            $return = $_POST["function"]();
+        }
+    }else{
+        $filename = $SITEBASE . '/inc/' . $page . '.php';
+        if(is_file($filename)){
+            require_once($filename);
+            $return = $page();
+        }
+    }
+    
+    //add username to the return array in case logged in.
+    if(isset($_SESSION['user'])){
+         $return['username'] = $_SESSION['user'];
+    }
+         
+    //Set permission
+    if(isset($_SESSION['ticket_user'])){
+         $return['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+    }else{
+         //default permission
+         $return['permission'] = 0; 
+    }
+    
+    //handle error page
+    if($page == 'error'){
+         $return['permission'] = 0;
+         $return['no_visible_elements'] = 'FALSE';
+    }
+    
+    //return $page;
+    if ($ingame){
+        helpers :: loadTemplate( $page , $return );
+    }else{
+        return helpers :: loadTemplate( $page , $return, true);
+    }
+    
+}
+
+
+
+/**
+ *
+ * Function _collect_register 
+ *
+ * @takes        
+ * @return      Nothing
+ *
+ * Info: Determins what to send back to client, if the client is ryzom core then send the http data if its a browser send to /
+ *
+ */
+function _collect_register($nids, $collection)
+{
+    Sync::syncdata();
+    //if not using ryzom core client show registration page
+    if (Helpers::check_if_game_client()) {
+        return_client_httpdata();
+    } else {
+        //redirect to registration page
+        global $BASE_WEBPATH;
+        header("Location: ".$BASE_WEBPATH. "/user/register");
+    }
+}
+
+
+
+/**
+ *
+ * Function _collect_ingame_ams
+ *
+ * @takes        
+ * @return      Nothing
+ *
+ * Info: Determins what to send back to client, if the client is ryzom core then send the http data if its a browser send to /
+ *
+ */
+function _collect_ingame_ams($nids, $collection)
+{
+    //if not using ryzom core client show registration page
+    if (Helpers::check_if_game_client()) {
+        _ams_handler(true);
+    } else {
+        //redirect to registration page
+        global $WEBPATH;
+        header("Location: ". $WEBPATH);
+    }
+}
+
+
+/**
+ *
+ * Function _collect_register 
+ *
+ * @takes        
+ * @return      Nothing
+ *
+ * Info: Determins what to send back to client, if the client is ryzom core then send the http data if its a browser send to /
+ *
+ */
+function _collect_login($nids, $collection)
+{
+    global $WEBPATH;
+    global $BASE_WEBPATH;
+    $result = Helpers::check_login_ingame();	
+    if ($result != "FALSE") {
+        //handle successful ingame login
+        $_SESSION['user'] = $result['name'];
+        $_SESSION['id'] = WebUsers::getId($result['name']);
+        $_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
+        
+        if ($account = user_load( $_SESSION['id'])) {
+            global $user;
+            $user->uid =  $_SESSION['id'];
+            $user->name = $account->name;
+            $user->timezone = $account->timezone;
+            user_login_finalize();
+        }
+        header( 'Location: '.$WEBPATH );      
+    } else {
+        //redirect to registration page
+        header("Location: ".$BASE_WEBPATH."/user/login");
+    }
+}
+
+
+/**
+ *
+ * Function confirmPassword 
+ *
+ * @takes        $pass
+ * @return      string
+ *
+ * Info: Verify's $_POST["Password"] is the same as $_POST["ConfirmPass"]
+ *
+ */
+function confirmPassword()
+{
+    if (($_POST["Password"]) != ($_POST["ConfirmPass"])) {
+        return "Passwords do not match.";
+    } else {
+        return "success";
+    }
+    return "fail";
+}
+
+
+/**
+ *
+ * Function ryzommanage_user_insert
+ *
+ * @takes        $pass
+ * @return      string
+ *
+ * Info: Hook that's being called after creating a drupal user, we need to do it like this to access the drupals newly created user's id.
+ *
+ */
+function ryzommanage_user_insert(&$edit, $account, $category){
+    if (isset($edit['unhashpass'])) {
+        $pass = $edit['unhashpass'];
+    } elseif (isset($_POST['pass']['pass1'])) {
+        $pass = $_POST['pass']['pass1'];
+    }
+    createUser(array($edit['name'], $pass, $edit['mail']), $account->uid);
+}
+
+function createUser($values, $user_id)
+{
+
+    $login = $values[0];
+    $pass = $values[1];
+    $email = $values[2];
+
+    /*$salt = generateSALT();
+    $hashpass = crypt($pass, $salt);*/
+    
+    $hashpass = crypt($pass, WebUsers::generateSALT());
+    
+    $params = array(
+        'name' => $login,
+        'pass' => $hashpass,
+        'mail' => $email     
+    );
+    
+    //Create the user on the shard + in case shard is offline put copy of query in query db
+    //returns: ok, shardoffline or liboffline
+    $result = WebUsers::createUser($params, $user_id);
+    Users::createPermissions(array($login));
+}
+
+/*function createPermissions($values) {
+        
+    try {
+        $hostname = variable_get('ryzommanage_serverurl', 'localhost');
+        $port     = variable_get('ryzommanage_mysqlport', '3306');
+        $dbname   = variable_get('ryzommanage_dbname', 'nel');
+        $username = variable_get('ryzommanage_username', 'root');
+        $password = variable_get('ryzommanage_password', '');
+        $dbh      = new PDO("mysql:host=$hostname;port=$port;dbname=$dbname", $username, $password);
+        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    catch (PDOException $e) {
+        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
+        $nid = db_insert('ryzommanage_querycache')->fields(array(
+            "SID" => NULL,
+            "type" => "createPermissions",
+            "query" => json_encode(array(
+                $values[0]
+            ))
+        ))->execute();
+        return true;
+    }  
+    
+    try {
+        $sth = $dbh->prepare("SELECT UId FROM user WHERE Login='" . $values[0] . "';");
+        $sth->execute();
+        $result = $sth->fetchAll();
+        foreach ($result as $UId) {
+            $statement = $dbh->prepare("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES ('" . $UId['UId'] . "', 'r2', 'OPEN');");
+            $statement->execute($values);
+            $statement = $dbh->prepare("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES ('" . $UId['UId'] . "', 'ryzom_open', 'OPEN');");
+            $statement->execute($values);
+        }
+    }
+    catch (PDOException $e) {
+        watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);
+        $nid = db_insert('ryzommanage_querycache')->fields(array(
+            "SID" => NULL,
+            "type" => "createPermissions",
+            "query" => json_encode(array(
+                $values[0]
+            ))
+        ))->execute();
+        return true;
+    }  
+    
+    return true;
+}*/
+
+function ryzommanage_user_login(&$edit, $account){
+    $_SESSION['user'] = $account->name;
+    $_SESSION['id'] = $account->uid;
+    $_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
+}
+
+function login_form($login_form)
+{
+    $login_form['#action']   = url(current_path(), array(
+        'query' => drupal_get_destination(),
+        'external' => FALSE
+    ));
+    $login_form['#id']       = 'user-login-form';
+    $login_form['#validate'] = user_login_default_validators();
+    $login_form['#submit'][] = 'user_login_submit';
+    $login_form['name']      = array(
+        '#type' => 'textfield',
+        '#title' => t('Username'),
+        '#maxlength' => 12,
+        '#size' => 15,
+        '#required' => TRUE
+    );
+    $login_form['pass']      = array(
+        '#type' => 'password',
+        '#title' => t('Password'),
+        '#maxlength' => 20,
+        '#size' => 15,
+        '#required' => TRUE
+    );
+    $items                   = array();
+    if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
+        $items[] = l(t('Create new account'), 'user/register', array(
+            'attributes' => array(
+                'title' => t('Create a new user account.')
+            )
+        ));
+    }
+    $items[]                         = l(t('Request new password'), 'user/password', array(
+        'attributes' => array(
+            'title' => t('Request new password via e-mail.')
+        )
+    ));
+    $login_form['links']             = array(
+        '#markup' => theme('item_list', array(
+            'items' => $items
+        ))
+    );
+    $login_form['remember_me']       = array(
+        '#type' => 'checkbox',
+        '#title' => t('Remember Me'),
+        '#default_value' => 0
+    );
+    $login_form['actions']           = array(
+        '#type' => 'actions'
+    );
+    $login_form['actions']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Log in')
+    );
+    return $login_form;
+}
+
+function top_bar()
+{
+    global $user;
+    global $WEBPATH;
+    global $BASE_WEBPATH;
+    $userId = $user->uid;
+    if (user_is_logged_in()) {
+        // Logged in user
+        //check permission, if user
+        if(ticket_user::isMod(unserialize($_SESSION['ticket_user']))){
+              return "<div class='ryzomuserbar'><a href='".$WEBPATH."?page=dashboard'>Dashboard</a> | <a href='".$WEBPATH."?page=show_user&id=".$userId."'>Profile</a> |
+        <a href='".$WEBPATH."?page=createticket&id=".$userId."'>Create Ticket</a> | 
+        <a href='".$BASE_WEBPATH."/user/".$userId."/edit'>Settings</a> | <a href='".$WEBPATH."?page=userlist'>Users</a> |
+        <a href='".$WEBPATH."?page=show_queue&get=todo'>Queues</a> |
+        <a href='".$WEBPATH."?page=sgroup_list'>Support Groups</a> | <a href='".$BASE_WEBPATH."/user/logout'>Logout</a></div>";
+        
+        }else{
+            return "<div class='ryzomuserbar'><a href='".$WEBPATH."?page=show_user&id=".$userId."'>Profile</a> |
+        <a href='".$WEBPATH."?page=createticket&id=".$userId."'>Create Ticket</a> | 
+        <a href='".$BASE_WEBPATH."/user/".$userId."/edit'>Settings</a> | <a href='".$BASE_WEBPATH."/user/logout'>Logout</a></div>";
+        }
+       
+    } else {
+        return drupal_get_form('login_form');
+        // Not logged in
+    }
+}
+
+
+
+function ryzommanage_user_presave(&$edit, $account, $category)
+{
+    if (isset($edit['unhashpass'])) {
+        $pass = $edit['unhashpass'];
+    } elseif (isset($_POST['pass']['pass1'])) {
+        $pass = $_POST['pass']['pass1'];
+    }
+    
+    if (!isset($edit['name'])) {
+        $name =  $user->name;
+    } else {
+        $name = $edit['name'];
+    }
+    
+    if ($account->is_new == 1 ) {
+        //createUser(array($edit['name'], $pass, $edit['mail']));
+    } else {
+        user_edit( array($edit['name'], $pass));
+    }
+}
+
+function ryzommanage_form_user_register_form_alter(&$form, &$form_state, $form_id) {
+  // Modification for the form with the given form ID goes here. For example, if
+  // FORM_ID is "user_register_form" this code would run only on the user
+  // registration form.
+  
+  // Change the data for the username and email fields
+  $form['account']['name']['#maxlength'] = '12';
+  $form['account']['name']['#description'] = '5-12 lower-case characters and numbers. The login (username) you create here will be your login name.<br />The name of your game characters will be chosen later on.<br />';
+  $form['account']['mail']['#description'] = 'Please verify that the e-mail address you enter here is valid and will remain valid in the future.<br />It will be used to manage your Tempest in the Aether account.<br />';
+  // Add a checkbox to registration form about agreeing to terms of use.
+  $form['terms_of_use'] = array(
+    '#type' => 'checkbox', 
+    '#title' => t("I agree with the <a href='".variable_get('ryzommanage_TOS', '')."'>terms and conditions</a>."), 
+    '#required' => TRUE,
+  );
+  
+}
+
+function ryzommanage_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
+  // Modification for the form with the given form ID goes here. For example, if
+  // FORM_ID is "user_register_form" this code would run only on the user
+  // registration form.
+  
+  // Change the data for the password field
+  $form['account']['pass']['#description'] = 'Password must be 5-20 characters.<br />';
+}
+
+function user_edit($values) {
+        
+    $username = $values[0];
+    $newpassword = $values[1];
+        
+    $salt = WebUsers::generateSALT();
+    $pass = crypt($newpassword, $salt);
+    
+    $webUser = new WebUsers();
+    $webUser->setAmsPassword($username,$pass);
+    return true;
+}
+
+
+/**
+ *
+ * Function ryzommanage_cron
+ *
+ * @takes        
+ * @return      
+ *
+ * Info: Runs the syncdata function with the drupal cron
+ *
+ */
+function ryzommanage_cron() {
+    
+    Sync::syncdata();
+ 
+}
+
+function name_registration_admin_settings() {
+    global $TOS_URL;
+    $form = array();
+    $form['ryzommanage_game-name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Game Name'),
+        '#default_value' => variable_get('ryzommanage_game-name', ''),
+        '#description' => t("Name of game used on registration pages."),
+        '#required' => TRUE
+    );
+    //this is not the TOS url used in the create account page, you change that in the config of the client with the ConditionsTermsURL value
+    $form['ryzommanage_TOS'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Terms of Service URL'),
+        '#default_value' => $TOS_URL,
+        '#description' => t("The url of the TOS for your server."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_register-welcome'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Registration Welcome Message'),
+        '#default_value' => variable_get('ryzommanage_register-welcome', ''),
+        '#description' => t("Registration welcome message on first page of create account."),
+        '#required' => TRUE
+    );
+
+    return system_settings_form($form);
+}
+
+
+/**
+ *
+ * Function ryzommanage_admin 
+ *
+ * @takes        Nothing
+ * @return      array $form
+ *
+ * Info: Creates the box's etc that go in the ryzom admin menu
+ *
+ */
+function ryzommanage_admin()
+{
+    $form = array();
+    //admin menu items
+    global $cfg;
+    
+    $form['ryzommanage_shardserverurl'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Shard server url'),
+        '#default_value' => $cfg['db']['shard']['host'],
+        '#description' => t("The url of the ryzom server to integrate with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_shardmysqlport'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Port for MySQL of the Shard'),
+        '#size' => 5,
+        '#maxlength' => 5,
+        '#default_value' => $cfg['db']['shard']['port'],
+        '#description' => t("The MySQL port of the ryzom server to integrate with."),
+        '#required' => TRUE,
+        '#element_validate' => array(
+            '_check_port_value'
+        )
+    );
+    $form['ryzommanage_sharddbname'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Shard Database Name'),
+        '#default_value' => $cfg['db']['shard']['name'],
+        '#description' => t("The MySQL database name to connect to."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_shardusername'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Shard MySQL Username'),
+        '#default_value' => $cfg['db']['shard']['user'],
+        '#description' => t("The MySQL username to connect with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_shardpassword'] = array(
+        '#type' => 'password_confirm',
+        '#title' => t('Shard MySQL Password'),
+        '#description' => t("Confirm the MySQL password."),
+        '#suffix' => '<hr/>'
+    );
+    
+    $form['ryzommanage_libserverurl'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Lib server url'),
+        '#default_value' => $cfg['db']['lib']['host'],
+        '#description' => t("The url of the ryzom's lib db to integrate with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_libmysqlport'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Port for MySQL of the Lib'),
+        '#size' => 5,
+        '#maxlength' => 5,
+        '#default_value' => $cfg['db']['lib']['port'],
+        '#description' => t("The MySQL port of the ryzom's lib db to integrate with."),
+        '#required' => TRUE,
+        '#element_validate' => array(
+            '_check_port_value'
+        )
+    );
+    $form['ryzommanage_libdbname'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Lib Database Name'),
+        '#default_value' => $cfg['db']['lib']['name'],
+        '#description' => t("The MySQL database name to connect to."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_libusername'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Lib MySQL Username'),
+        '#default_value' => $cfg['db']['lib']['user'],
+        '#description' => t("The MySQL username to connect with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_libpassword'] = array(
+        '#type' => 'password_confirm',
+        '#title' => t('Lib MySQL Password'),
+        '#description' => t("Confirm the MySQL password."),
+        '#suffix' => '<hr/>'
+    );
+    
+    
+    $form['ryzommanage_ringserverurl'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Ring server url'),
+        '#default_value' => $cfg['db']['ring']['host'],
+        '#description' => t("The url of the ryzom's ring db to integrate with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_ringmysqlport'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Port for MySQL of the Lib'),
+        '#size' => 5,
+        '#maxlength' => 5,
+        '#default_value' => $cfg['db']['ring']['port'],
+        '#description' => t("The MySQL port of the ryzom ring db to integrate with."),
+        '#required' => TRUE,
+        '#element_validate' => array(
+            '_check_port_value'
+        )
+    );
+    $form['ryzommanage_ringdbname'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Ring Database Name'),
+        '#default_value' => $cfg['db']['ring']['name'],
+        '#description' => t("The MySQL database name to connect to."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_ringusername'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Ring MySQL Username'),
+        '#default_value' => $cfg['db']['ring']['user'],
+        '#description' => t("The MySQL username to connect with."),
+        '#required' => TRUE
+    );
+    $form['ryzommanage_ringpassword'] = array(
+        '#type' => 'password_confirm',
+        '#title' => t('Ring MySQL Password'),
+        '#description' => t("Confirm the MySQL password.")
+    );
+    return system_settings_form($form);
+}
+
+/**
+ *
+ * Function return_client_httpdata 
+ *
+ * @takes        
+ * @return      
+ *
+ * Info: Returns ryzom core formatted html for use in registration via client
+ *
+ */
+function return_client_httpdata()
+{
+    //needs $cpass = confirmPassword(($_POST["Password"]) != ($_POST["ConfirmPass"])); !!!!!!
+    //check if values exist
+    if (isset($_POST["Username"]) and isset($_POST["Password"]) and isset($_POST["Email"]) )
+    {
+        //check values
+        $user  = checkUser($_POST["Username"]);
+        $pass  = checkPassword($_POST["Password"]);
+        $cpass = confirmPassword(($_POST["Password"]) != ($_POST["ConfirmPass"]));
+        $email = checkEmail($_POST["Email"]);   
+    } else {
+        $user  = "";
+        $pass  = "";
+        $cpass = "";
+        $email = ""; 
+    }
+    //if all are good then create user
+    if (($user == "success") and ($pass == "success") and ($cpass == "success") and ($email == "success") and (isset($_POST["TaC"]))) {
+        $edit = array(
+            'name' => $_POST["Username"],
+            'pass' => $_POST["Password"],
+            'mail' => $_POST["Email"],
+            'init' => $_POST["Email"],
+            'unhashpass' => $_POST["Password"],
+            'status' => 1,
+            'access' => REQUEST_TIME
+        );
+        user_save(NULL, $edit);
+        header('Location: email_sent.php');
+        exit;
+    } else {
+            $pageElements = array(
+                        'GAME_NAME' => variable_get('ryzommanage_game-name', ''),
+                        'WELCOME_MESSAGE' => variable_get('ryzommanage_register-welcome', ''),
+                        'USERNAME' => $user,
+                        'PASSWORD' => $pass,
+                        'CPASSWORD' => $cpass,
+                        'EMAIL' => $email
+                     );
+            if ($user != "success") {
+                $pageElements['USERNAME_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['USERNAME_ERROR'] = 'FALSE';
+            }
+            
+            if ($pass != "success") {
+                $pageElements['PASSWORD_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['PASSWORD_ERROR'] = 'FALSE';
+            }
+            if ($cpass != "success") {
+                $pageElements['CPASSWORD_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['CPASSWORD_ERROR'] = 'FALSE';
+            }
+            if ($email != "success") {
+                $pageElements['EMAIL_ERROR'] = 'TRUE';
+            } else {
+                $pageElements['EMAIL_ERROR'] = 'FALSE';
+            }
+            if (isset($_POST["TaC"])) {
+                $pageElements['TAC_ERROR'] = 'FALSE';
+            } else {
+                $pageElements['TAC_ERROR'] = 'TRUE';
+            }
+            loadTemplate('templates/ingame_register.phtml',$pageElements);
+    }
+}
+
+/**
+* Implements hook_help.
+*
+* Displays help and module information.
+*
+* @param path
+*   Which path of the site we're using to display help
+* @param arg
+*   Array that holds the current path as returned from arg() function
+*/
+function ryzommanage_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#ryzommanage":
+      return '<p>' . t("A module that handles account registration and a ticketing service regarding ryzomcore.") . '</p>';
+      break;
+  }
+}
+
+function ryzommanage_enable() {
+  // Check if our field is not already created.
+  if (!field_info_field('firstname')) {
+    $field = array(
+        'field_name' => 'firstname', 
+        'type' => 'text', 
+    );
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+        'field_name' => 'firstname', 
+        'entity_type' => 'user', 
+        'label' => 'First Name', 
+        'bundle' => 'user', 
+        // If you don't set the "required" property then the field wont be required by default.
+        'required' => FALSE,
+        'settings' => array(
+           // Here you inform either or not you want this field showing up on the registration form.
+            
+        ),
+        'widget' => array(
+            'type' => 'textfield',
+            'weight' => '1',
+        ), 
+    );
+    field_create_instance($instance);
+  }
+  
+  if (!field_info_field('secondname')) {
+    $field = array(
+        'field_name' => 'secondname', 
+        'type' => 'text', 
+    );
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+        'field_name' => 'secondname', 
+        'entity_type' => 'user', 
+        'label' => 'Second Name', 
+        'bundle' => 'user', 
+        // If you don't set the "required" property then the field wont be required by default.
+        'required' => FALSE,
+        'settings' => array(
+           // Here you inform either or not you want this field showing up on the registration form.
+        ),
+        'widget' => array(
+            'type' => 'textfield',
+            'weight' => '1',
+        ), 
+    );
+    field_create_instance($instance);
+  }
+}

@@ -529,36 +529,18 @@ void CContinentManager::serialUserLandMarks(NLMISC::IStream &f)
 				f.serialCont(dummy);
 			}
 		}
-
-		// The number of stored landmarks is not checked at this time, but if we receive a
-		// lower value in the server database, we will cut down using checkNumberOfUserLandmarks()
 	}
 }
 
 
 //-----------------------------------------------
-// checkNumberOfLandmarks
+// updateUserLandMarks
 //-----------------------------------------------
-void CContinentManager::checkNumberOfUserLandmarks( uint maxNumber )
+void CContinentManager::updateUserLandMarks()
 {
-	for ( TContinents::iterator it=_Continents.begin(); it!=_Continents.end(); ++it )
-	{
-		CContinent *cont = (*it).second;
-		if ( cont->UserLandMarks.size() > maxNumber )
-		{
-			// Just cut down the last landmarks (in case of hacked file)
-			if ( cont == _Current )
-			{
-				CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
-				if ( pMap )
-					pMap->removeExceedingUserLandMarks( maxNumber );
-			}
-			else
-			{
-				cont->UserLandMarks.resize( maxNumber );
-			}
-		}
-	}
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if ( pMap )
+		pMap->updateUserLandMarks();
 }
 
 

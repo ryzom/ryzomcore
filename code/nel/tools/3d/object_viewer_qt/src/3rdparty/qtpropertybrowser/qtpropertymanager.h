@@ -160,8 +160,10 @@ public:
 
 public Q_SLOTS:
     void setValue(QtProperty *property, bool val);
+
 Q_SIGNALS:
     void valueChanged(QtProperty *property, bool val);
+
 protected:
     QString valueText(const QtProperty *property) const;
     QIcon valueIcon(const QtProperty *property) const;
@@ -787,6 +789,16 @@ private:
     QtCursorPropertyManagerPrivate *d_ptr;
     Q_DECLARE_PRIVATE(QtCursorPropertyManager)
     Q_DISABLE_COPY(QtCursorPropertyManager)
+};
+
+class QT_QTPROPERTYBROWSER_EXPORT QtTextPropertyManager : public QtStringPropertyManager
+{
+    Q_OBJECT
+public:
+    QtTextPropertyManager(QObject *parent = 0):QtStringPropertyManager(parent) {}
+
+protected:
+    virtual QString valueText(const QtProperty *property) const;
 };
 
 #if QT_VERSION >= 0x040400

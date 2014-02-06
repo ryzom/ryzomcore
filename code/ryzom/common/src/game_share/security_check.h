@@ -61,9 +61,9 @@ public:
 	/// Set cookie
 	void setCookie(const NLNET::CLoginCookie& cookie) { Block.Cookie.set(cookie.getUserAddr(), cookie.getUserKey(), cookie.getUserId()); } // don't use the default generated bitwise assignment operator, because of padding junk that would be copied
 	/// Return the security code
-	CSecurityCode encode(char *passPhrase);
+	CSecurityCode encode(const char *passPhrase);
 	/// Check  the security code
-	void check(char *passPhrase);
+	void check(const char *passPhrase);
 
 	/// Read some data from stream
 	void receiveSecurityCode(NLMISC::IStream& msgin);

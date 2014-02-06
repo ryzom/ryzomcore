@@ -429,7 +429,7 @@ CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::C
 			try
 			{
 				CIFile f(CPath::lookup(islandDesc.Island + ".island_hm"));
-				f.serialCheck((uint32) 'MHSI');
+				f.serialCheck(NELID("MHSI"));
 				f.serial(_HeightMap);
 			}
 			catch(const Exception &e)

@@ -61,7 +61,7 @@ public:
 	// Get envmap 2D texture (after projection of cube map)
 	ITexture			*getEnvMap2D() const { return _Env2D; }
 	// tmp for debug : render test mesh with current model / view matrixs
-	void				renderTestMesh(IDriver &driver);
+	// void				renderTestMesh(IDriver &driver);
 	// set constant alpha of envmap
 	void				setAlpha(uint8 alpha) { _Alpha = alpha; }
 	uint8				getAlpha() const { return _Alpha; }
