@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # 
-# \file 8_upload.py
+# \file 9_upload.py
 # \brief Upload data to servers
 # \date 2009-02-18 16:19GMT
 # \author Jan Boon (Kaetemi)
@@ -175,7 +175,7 @@ for target in UploadPrimitives:
 	uploadSftp(target[0], target[1], target[2], target[3], PrimitivesDirectory, [ ])
 
 log.close()
-if os.path.isfile("8_upload.log"):
-	os.remove("8_upload.log")
+if os.path.isfile("9_upload.log"):
+	os.remove("9_upload.log")
 shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_upload.log")
-shutil.move("log.log", "8_upload.log")
+shutil.move("log.log", "9_upload.log")

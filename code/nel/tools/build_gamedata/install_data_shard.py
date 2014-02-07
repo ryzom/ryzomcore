@@ -27,5 +27,5 @@
 import shutil, subprocess
 
 subprocess.call([ "python", "3_install.py" ])
-subprocess.call([ "python", "4_data_shard.py" ])
+subprocess.call([ "python", "8_shard_data.py" ])
 

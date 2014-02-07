@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
-# \file 4_shard_install.py
+# \file 8_shard_data.py
 # \brief Install shard data
 # \date 2009-02-18 16:19GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Install to data shard
+# Install shard data
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2010  Winch Gate Property Limited
@@ -40,7 +40,7 @@ from projects import *
 # Log error
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Install to shard")
+printLog(log, "--- Install shard data")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
@@ -58,7 +58,7 @@ for dir in InstallShardDataCollisionsDirectories:
 printLog(log, "")
 
 log.close()
-if os.path.isfile("4_shard_install.log"):
-	os.remove("4_shard_install.log")
+if os.path.isfile("8_shard_data.log"):
+	os.remove("8_shard_data.log")
 shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_shard_install.log")
-shutil.move("log.log", "4_shard_install.log")
+shutil.move("log.log", "8_shard_data.log")
