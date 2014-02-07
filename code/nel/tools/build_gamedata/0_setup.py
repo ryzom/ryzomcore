@@ -106,7 +106,11 @@ if not args.noconf:
 	try:
 		ShardInstallDirectory
 	except NameError:
-		ShardInstallDirectory = "W:/shard_install"
+		ShardInstallDirectory = "W:/shard"
+	try:
+		WorldEditInstallDirectory
+	except NameError:
+		WorldEditInstallDirectory = "W:/worldedit"
 	try:
 		LeveldesignDirectory
 	except NameError:
@@ -191,7 +195,8 @@ if not args.noconf:
 	ClientDevDirectory = askVar(log, "Client Dev Directory", ClientDevDirectory).replace("\\", "/")
 	ClientPatchDirectory = askVar(log, "Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
 	ClientInstallDirectory = askVar(log, "Client Install Directory", ClientInstallDirectory).replace("\\", "/")
-	ShardInstallDirectory = askVar(log, "Shard Install Directory", ShardInstallDirectory).replace("\\", "/")
+	ShardInstallDirectory = askVar(log, "Shard Data Install Directory", ShardInstallDirectory).replace("\\", "/")
+	WorldEditInstallDirectory = askVar(log, "World Edit Data Install Directory", WorldEditInstallDirectory).replace("\\", "/")
 	LeveldesignDirectory = askVar(log, "Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
 	LeveldesignDfnDirectory = askVar(log, "Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
 	LeveldesignWorldDirectory = askVar(log, "Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
@@ -270,6 +275,7 @@ if not args.noconf:
 	sf.write("ClientPatchDirectory = \"" + str(ClientPatchDirectory) + "\"\n")
 	sf.write("ClientInstallDirectory = \"" + str(ClientInstallDirectory) + "\"\n")
 	sf.write("ShardInstallDirectory = \"" + str(ShardInstallDirectory) + "\"\n")
+	sf.write("WorldEditInstallDirectory = \"" + str(WorldEditInstallDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Utility directories\n")
 	sf.write("WorldEditorFilesDirectory = \"" + str(WorldEditorFilesDirectory) + "\"\n")
