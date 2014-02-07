@@ -148,6 +148,10 @@ if not args.noconf:
 	except NameError:
 		LeveldesignDataCommonDirectory = "L:/data_common"
 	try:
+		TranslationDirectory
+	except NameError:
+		TranslationDirectory = "L:/translation"
+	try:
 		WorldEditorFilesDirectory
 	except NameError:
 		WorldEditorFilesDirectory = "R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files"
@@ -204,6 +208,7 @@ if not args.noconf:
 	GamedevDirectory = askVar(log, "Gamedev Directory", GamedevDirectory).replace("\\", "/")
 	DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
 	DataCommonDirectory = askVar(log, "Data Common Directory", DataCommonDirectory).replace("\\", "/")
+	TranslationDirectory = askVar(log, "Translation Directory", TranslationDirectory).replace("\\", "/")
 	LeveldesignDataShardDirectory = askVar(log, "Leveldesign Data Shard Directory", LeveldesignDataShardDirectory).replace("\\", "/")
 	LeveldesignDataCommonDirectory = askVar(log, "Leveldesign Data Common Directory", LeveldesignDataCommonDirectory).replace("\\", "/")
 	WorldEditorFilesDirectory = askVar(log, "World Editor Files Directory", WorldEditorFilesDirectory).replace("\\", "/")
@@ -287,6 +292,7 @@ if not args.noconf:
 	sf.write("PrimitivesDirectory = \"" + str(PrimitivesDirectory) + "\"\n")
 	sf.write("LeveldesignDataCommonDirectory = \"" + str(LeveldesignDataCommonDirectory) + "\"\n")
 	sf.write("LeveldesignDataShardDirectory = \"" + str(LeveldesignDataShardDirectory) + "\"\n")
+	sf.write("TranslationDirectory = \"" + str(TranslationDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Misc data directories\n")
 	sf.write("GamedevDirectory = \"" + str(GamedevDirectory) + "\"\n")
@@ -391,6 +397,7 @@ if not args.noverify:
 	findTool(log, ToolDirectories, AiBuildWmapTool, ToolSuffix)
 	findTool(log, ToolDirectories, TgaCutTool, ToolSuffix)
 	findTool(log, ToolDirectories, PatchGenTool, ToolSuffix)
+	findTool(log, ToolDirectories, TranslationToolsTool, ToolSuffix)
 
 log.close()
 if os.path.isfile("0_setup.log"):
