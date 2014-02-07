@@ -44,7 +44,7 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 printLog(log, ">>> List pacs_prim <<<")
-listPath = DataCommonDirectory + "/landscape_col_prim_pacs_list.txt"
+listPath = ExportBuildDirectory + "/" + PacsPrimListBuildDirectory + "/landscape_col_prim_pacs_list.txt"
 if os.path.isfile(listPath):
 	os.remove(listPath)
 listFile = open(listPath, "w")

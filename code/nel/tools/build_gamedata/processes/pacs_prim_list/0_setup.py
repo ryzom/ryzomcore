@@ -50,7 +50,11 @@ for dir in PacsPrimExportSourceDirectories:
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
-mkPath(log, DataCommonDirectory) # no choice
+mkPath(log, ExportBuildDirectory + "/" + PacsPrimListBuildDirectory)
+
+# Setup client directories
+printLog(log, ">>> Setup client directories <<<")
+mkPath(log, InstallDirectory + "/" + PacsPrimListInstallDirectory)
 
 log.close()
 

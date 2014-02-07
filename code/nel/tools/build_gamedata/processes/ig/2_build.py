@@ -101,6 +101,8 @@ if (ContinentLeveldesignWorldDirectory != "") or (len(IgOtherSourceDirectories) 
 	mkPath(log, continentDir)
 	formDir = LeveldesignDirectory
 	mkPath(log, LeveldesignDirectory)
+	worldEditorFiles = WorldEditorFilesDirectory
+	mkPath(log, WorldEditorFilesDirectory)
 	
 	printLog(log, "CONFIG " + configFile)
 	cf = open(configFile, "w")
@@ -123,6 +125,7 @@ if (ContinentLeveldesignWorldDirectory != "") or (len(IgOtherSourceDirectories) 
 	cf.write("};\n")
 	cf.write("\n")
 	cf.write("FormDir = \"" + formDir + "\";\n")
+	cf.write("WorldEditorFiles = \"" + worldEditorFiles + "\";\n")
 	cf.write("\n")
 	cf.close()
 	subprocess.call([ PrimExport, configFile ])

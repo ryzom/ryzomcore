@@ -78,7 +78,7 @@ if not args.noconf:
 	try:
 		WorkspaceDirectory
 	except NameError:
-		WorkspaceDirectory = "R:/code/ryzom/tools/build_gamedata/workspace"
+		WorkspaceDirectory = "L:/workspace"
 	try:
 		DatabaseDirectory
 	except NameError:
@@ -92,10 +92,6 @@ if not args.noconf:
 	except NameError:
 		InstallDirectory = "W:/install"
 	try:
-		DataShardDirectory
-	except NameError:
-		DataShardDirectory = "R:/code/ryzom/server/data_shard"
-	try:
 		ClientDevDirectory
 	except NameError:
 		ClientDevDirectory = "W:/client_dev"
@@ -108,13 +104,17 @@ if not args.noconf:
 	except NameError:
 		ClientInstallDirectory = "W:/client_install"
 	try:
+		ShardInstallDirectory
+	except NameError:
+		ShardInstallDirectory = "W:/shard_install"
+	try:
 		LeveldesignDirectory
 	except NameError:
 		LeveldesignDirectory = "L:/leveldesign"
 	try:
 		LeveldesignDfnDirectory
 	except NameError:
-		LeveldesignDfnDirectory = "L:/leveldesign/dfn"
+		LeveldesignDfnDirectory = "L:/leveldesign/DFN"
 	try:
 		LeveldesignWorldDirectory
 	except NameError:
@@ -128,9 +128,25 @@ if not args.noconf:
 	except NameError:
 		GamedevDirectory = "R:/code/ryzom/client/data/gamedev"
 	try:
+		DataShardDirectory
+	except NameError:
+		DataShardDirectory = "R:/code/ryzom/common/data_shard"
+	try:
 		DataCommonDirectory
 	except NameError:
 		DataCommonDirectory = "R:/code/ryzom/common/data_common"
+	try:
+		LeveldesignDataShardDirectory
+	except NameError:
+		LeveldesignDataShardDirectory = "L:/data_shard"
+	try:
+		LeveldesignDataCommonDirectory
+	except NameError:
+		LeveldesignDataCommonDirectory = "L:/data_common"
+	try:
+		WorldEditorFilesDirectory
+	except NameError:
+		WorldEditorFilesDirectory = "R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files"
 	try:
 		WindowsExeDllCfgDirectories
 	except NameError:
@@ -172,16 +188,20 @@ if not args.noconf:
 	DatabaseDirectory = askVar(log, "Database Directory", DatabaseDirectory).replace("\\", "/")
 	ExportBuildDirectory = askVar(log, "Export Build Directory", ExportBuildDirectory).replace("\\", "/")
 	InstallDirectory = askVar(log, "Install Directory", InstallDirectory).replace("\\", "/")
-	DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
 	ClientDevDirectory = askVar(log, "Client Dev Directory", ClientDevDirectory).replace("\\", "/")
 	ClientPatchDirectory = askVar(log, "Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
 	ClientInstallDirectory = askVar(log, "Client Install Directory", ClientInstallDirectory).replace("\\", "/")
+	ShardInstallDirectory = askVar(log, "Shard Install Directory", ShardInstallDirectory).replace("\\", "/")
 	LeveldesignDirectory = askVar(log, "Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
 	LeveldesignDfnDirectory = askVar(log, "Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
 	LeveldesignWorldDirectory = askVar(log, "Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
 	PrimitivesDirectory = askVar(log, "Primitives Directory", PrimitivesDirectory).replace("\\", "/")
 	GamedevDirectory = askVar(log, "Gamedev Directory", GamedevDirectory).replace("\\", "/")
+	DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
 	DataCommonDirectory = askVar(log, "Data Common Directory", DataCommonDirectory).replace("\\", "/")
+	LeveldesignDataShardDirectory = askVar(log, "Leveldesign Data Shard Directory", LeveldesignDataShardDirectory).replace("\\", "/")
+	LeveldesignDataCommonDirectory = askVar(log, "Leveldesign Data Common Directory", LeveldesignDataCommonDirectory).replace("\\", "/")
+	WorldEditorFilesDirectory = askVar(log, "World Editor Files Directory", WorldEditorFilesDirectory).replace("\\", "/")
 	WindowsExeDllCfgDirectories[0] = askVar(log, "Primary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[0]).replace("\\", "/")
 	WindowsExeDllCfgDirectories[1] = askVar(log, "Secondary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[1]).replace("\\", "/")
 	WindowsExeDllCfgDirectories[2] = askVar(log, "Tertiary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[2]).replace("\\", "/")
@@ -246,22 +266,26 @@ if not args.noconf:
 	sf.write("\n")
 	sf.write("# Install directories\n")
 	sf.write("InstallDirectory = \"" + str(InstallDirectory) + "\"\n")
-	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("ClientDevDirectory = \"" + str(ClientDevDirectory) + "\"\n")
 	sf.write("ClientPatchDirectory = \"" + str(ClientPatchDirectory) + "\"\n")
 	sf.write("ClientInstallDirectory = \"" + str(ClientInstallDirectory) + "\"\n")
+	sf.write("ShardInstallDirectory = \"" + str(ShardInstallDirectory) + "\"\n")
 	sf.write("\n")
-	sf.write("# TODO: NETWORK RECONNECT NOT IMPLEMENTED :)\n")
+	sf.write("# Utility directories\n")
+	sf.write("WorldEditorFilesDirectory = \"" + str(WorldEditorFilesDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Leveldesign directories\n")
 	sf.write("LeveldesignDirectory = \"" + str(LeveldesignDirectory) + "\"\n")
 	sf.write("LeveldesignDfnDirectory = \"" + str(LeveldesignDfnDirectory) + "\"\n")
 	sf.write("LeveldesignWorldDirectory = \"" + str(LeveldesignWorldDirectory) + "\"\n")
 	sf.write("PrimitivesDirectory = \"" + str(PrimitivesDirectory) + "\"\n")
+	sf.write("LeveldesignDataCommonDirectory = \"" + str(LeveldesignDataCommonDirectory) + "\"\n")
+	sf.write("LeveldesignDataShardDirectory = \"" + str(LeveldesignDataShardDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# Misc data directories\n")
 	sf.write("GamedevDirectory = \"" + str(GamedevDirectory) + "\"\n")
 	sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
+	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
 	sf.write("\n")
 	sf.write("# 3dsMax directives\n")
