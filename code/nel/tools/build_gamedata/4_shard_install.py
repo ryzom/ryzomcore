@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # 
-# \file 4_data_shard.py
-# \brief Install to data shard
+# \file 4_shard_install.py
+# \brief Install shard data
 # \date 2009-02-18 16:19GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
@@ -40,7 +40,7 @@ from projects import *
 # Log error
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Install to data shard")
+printLog(log, "--- Install to shard")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
@@ -48,17 +48,17 @@ printLog(log, "")
 for dir in InstallShardDataDirectories:
 	printLog(log, "SHARD DIRECTORY " + dir)
 	mkPath(log, InstallDirectory + "/" + dir)
-	mkPath(log, DataShardDirectory + "/" + dir)
-	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, DataShardDirectory + "/" + dir)
+	mkPath(log, ShardInstallDirectory + "/" + dir)
+	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, ShardInstallDirectory + "/" + dir)
 for dir in InstallShardDataCollisionsDirectories:
 	printLog(log, "SHARD COLLISIONS " + dir)
 	mkPath(log, InstallDirectory + "/" + dir)
-	mkPath(log, DataShardDirectory + "/collisions/" + dir)
-	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, DataShardDirectory + "/collisions/" + dir)
+	mkPath(log, ShardInstallDirectory + "/" + InstallShardDataCollisionsDirectory + "/" + dir)
+	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, ShardInstallDirectory + "/" + InstallShardDataCollisionsDirectory + "/" + dir)
 printLog(log, "")
 
 log.close()
-if os.path.isfile("4_data_shard.log"):
-	os.remove("4_data_shard.log")
-shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_data_shard.log")
-shutil.move("log.log", "4_data_shard.log")
+if os.path.isfile("4_shard_install.log"):
+	os.remove("4_shard_install.log")
+shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_shard_install.log")
+shutil.move("log.log", "4_shard_install.log")
