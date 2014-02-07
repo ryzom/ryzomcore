@@ -50,7 +50,7 @@ if not os.path.isfile(ClientDevDirectory + "/client.cfg"):
 	cfg = open(ClientDevDirectory + "/client.cfg", "w")
 	cfg.write("RootConfigFilename   = \"client_default.cfg\";\n")
 	cfg.write("PreDataPath          = {\n")
-	cfg.write("\t\"" + InstallDirectory + "", \"user\", \"patch\", \"data\", \"examples\" \n")
+	cfg.write("\t\"" + InstallDirectory + "\", \"user\", \"patch\", \"data\", \"examples\" \n")
 	cfg.write("};\n")
 	printLog(log, "")
 
