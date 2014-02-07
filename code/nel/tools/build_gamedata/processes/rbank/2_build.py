@@ -159,6 +159,8 @@ cf.write("\n")
 cf.write("Pathes = {\n")
 mkPath(log, WorldEditorFilesDirectory);
 cf.write("\t\"" + WorldEditorFilesDirectory + "\", \n");
+mkPath(log, PrimitivesDirectory);
+cf.write("\t\"" + PrimitivesDirectory + "\", \n");
 for dir in IgLookupDirectories:
 	mkPath(log, ExportBuildDirectory + "/" + dir)
 	cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
