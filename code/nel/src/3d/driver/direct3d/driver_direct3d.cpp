@@ -1464,6 +1464,24 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		return false;
 	}
 
+	#if WITH_PERFHUD
+		// Look for 'NVIDIA PerfHUD' adapter
+		// If it is present, override default settings
+		for (UINT gAdapter=0;gAdapter<_D3D->GetAdapterCount();gAdapter++)
+		{
+			D3DADAPTER_IDENTIFIER9 Identifier;
+			HRESULT Res;
+			Res = _D3D->GetAdapterIdentifier(gAdapter,0,&Identifier);
+			
+			if (strstr(Identifier.Description,"PerfHUD") != 0)
+			{
+				nlinfo ("Setting up with PerfHUD");
+				adapter=gAdapter;
+				_Rasterizer=D3DDEVTYPE_REF;
+				break;
+			}
+		}
+	#endif WITH_PERFHUD
 	// Create the D3D device
 	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
 	if (result != D3D_OK)
@@ -1487,6 +1505,8 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		}
 	}
 
+
+	
 //	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 
 	// Check some caps
@@ -2635,13 +2655,15 @@ bool CDriverD3D::reset (const GfxMode& mode)
 #ifndef NL_NO_ASM
 		CFpuRestorer fpuRestorer; // fpu control word is changed by "Reset"
 #endif
-		HRESULT hr = _DeviceInterface->Reset (&parameters);
-		if (hr != D3D_OK)
-		{
-			nlwarning("CDriverD3D::reset: Reset on _DeviceInterface error 0x%x", hr);
-			// tmp
-			nlstopex(("CDriverD3D::reset: Reset on _DeviceInterface"));
-			return false;
+		if (_Rasterizer!=D3DDEVTYPE_REF) {
+			HRESULT hr = _DeviceInterface->Reset (&parameters);
+			if (hr != D3D_OK)
+			{
+				nlwarning("CDriverD3D::reset: Reset on _DeviceInterface error 0x%x", hr);
+				// tmp
+				nlstopex(("CDriverD3D::reset: Reset on _DeviceInterface"));
+				return false;
+			}
 		}
 	}
 

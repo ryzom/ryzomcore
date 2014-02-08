@@ -5,10 +5,7 @@ ADD_SUBDIRECTORY(client_sheets)
 IF(WITH_RYZOM_CLIENT)
 
 # These are Windows/MFC apps
-IF(WIN32)
-#  ADD_SUBDIRECTORY(bug_report)
   SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
-ENDIF(WIN32)
 
 ADD_SUBDIRECTORY(seven_zip)
 

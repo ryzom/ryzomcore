@@ -18,6 +18,14 @@
 // Includes
 //
 
+#include <sys/stat.h>
+
+#ifdef NL_OS_WINDOWS
+	//windows doesnt have unistd.h
+#else
+	#include <unistd.h>
+#endif
+
 #include "stdpch.h"
 
 #include <memory>
@@ -38,9 +46,7 @@
 #include "nel/misc/big_file.h"
 #include "nel/misc/i18n.h"
 
-#ifdef NL_OS_WINOWS
-	#define NL_USE_SEVENZIP 1
-#endif
+#define NL_USE_SEVENZIP 1
 
 // 7 zip includes
 #ifdef NL_USE_SEVENZIP
@@ -740,6 +746,7 @@ void CPatchManager::deleteBatchFile()
 // ****************************************************************************
 void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool wantRyzomRestart, bool useBatchFile)
 {
+
 	uint nblab = 0;
 
 	FILE *fp = NULL;
@@ -753,7 +760,14 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", UpdateBatchFilename.c_str(), errno, strerror(errno));
 			throw Exception (err);
 		}
-		fprintf(fp, "@echo off\n");
+		//use bat if windows if not use sh
+		#ifdef NL_OS_WINDOWS
+			fprintf(fp, "@echo off\n");
+		#else NL_OS_MAC
+			//mac patcher doesn't work yet
+		#else
+			fprintf(fp, "#!/bin/sh\npwd\n");
+		#endif
 	}
 
 	// Unpack files with category ExtractPath non empty
@@ -808,8 +822,15 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 					if (useBatchFile)
 					{
-						SrcPath = CPath::standardizeDosPath(SrcPath);
-						DstPath = CPath::standardizeDosPath(DstPath);
+						#ifdef NL_OS_WINDOWS
+							SrcPath = CPath::standardizeDosPath(SrcPath);
+							DstPath = CPath::standardizeDosPath(DstPath);
+						#elseif NL_OS_MAC
+							//no patcher on mac yet
+						#else
+							SrcPath = CPath::standardizePath(SrcPath);
+							DstPath = CPath::standardizePath(DstPath);
+						#endif
 					}
 
 					std::string SrcName = SrcPath + vFilenames[fff];
@@ -817,11 +838,21 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 					if (useBatchFile)
 					{
-						fprintf(fp, ":loop%u\n", nblab);
-						fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
-						fprintf(fp, "del %s\n", DstName.c_str());
-						fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
-						fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
+						//write windows .bat format else write sh format
+						#ifdef NL_OS_WINDOWS
+							fprintf(fp, ":loop%u\n", nblab);
+							fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
+							fprintf(fp, "del %s\n", DstName.c_str());
+							fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
+							fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
+						#elseif NL_OS_MAC
+							//no patcher on osx
+						#else
+							fprintf(fp, "chmod 777 %s\n", DstName.c_str());
+							fprintf(fp, "rm -rf %s\n", DstName.c_str());
+							fprintf(fp, "mv %s %s\n", SrcName.c_str(), DstPath.c_str());
+						#endif
+						
 					}
 					else
 					{
@@ -838,18 +869,26 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	// Finalize batch file
 	if (NLMISC::CFile::isExists("patch") && NLMISC::CFile::isDirectory("patch"))
 	{
+		#ifdef NL_OS_WINDOWS
 		if (useBatchFile)
 		{
 			fprintf(fp, ":looppatch\n");
 		}
-
+		#endif
+		
 		vector<string> vFileList;
 		CPath::getPathContent ("patch", false, false, true, vFileList, NULL, false);
 		for(uint32 i = 0; i < vFileList.size(); ++i)
 		{
 			if (useBatchFile)
 			{
-				fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+				#ifdef NL_OS_WINDOWS
+					fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+				#elseif NL_OS_MAC
+					//no patcher on MAC yet
+				#else
+					fprintf(fp, "rm -f %s\n", CPath::standardizePath(vFileList[i]).c_str());
+				#endif
 			}
 			else
 			{
@@ -859,8 +898,14 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 		if (useBatchFile)
 		{
-			fprintf(fp, "rd /Q /S patch\n");
-			fprintf(fp, "if exist patch goto looppatch\n");
+			#ifdef NL_OS_WINDOWS
+				fprintf(fp, "rd /Q /S patch\n");
+				fprintf(fp, "if exist patch goto looppatch\n");
+			#elseif NL_OS_MAC
+				//no patcher on mac yet
+			#else
+				fprintf(fp, "rm -rf patch\n");
+			#endif
 		}
 		else
 		{
@@ -872,7 +917,11 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	{
 		if (wantRyzomRestart)
 		{
+			#ifdef NL_OS_WINDOWS
 			fprintf(fp, "start %s %%1 %%2 %%3\n", RyzomFilename.c_str());
+			#else
+			fprintf(fp, "/opt/tita/%s $1 $2 $3\n", RyzomFilename.c_str());
+			#endif
 		}
 
 		bool writeError = ferror(fp) != 0;
@@ -887,6 +936,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			throw NLMISC::EWriteError(UpdateBatchFilename.c_str());
 		}
 	}
+
 }
 
 // ****************************************************************************
@@ -944,7 +994,36 @@ void CPatchManager::executeBatchFile()
 //	CloseHandle( pi.hThread );
 
 #else
-	// TODO for Linux and Mac OS
+	// Start the child process.
+	bool r2Mode = false;
+	#ifndef RY_BG_DOWNLOADER
+		r2Mode = ClientCfg.R2Mode;
+	#endif
+	string strCmdLine;
+
+	strCmdLine = "./" + UpdateBatchFilename;
+
+	chmod(strCmdLine.c_str(), S_IRWXU);
+	if (r2Mode)
+	{
+		if (execl(strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str()) == -1)
+		{
+			int errsv = errno;
+			nlerror("Execl Error: %d %s", errsv, strCmdLine.c_str(), (char *) NULL);
+		} else {
+			nlinfo("Ran batch file r2Mode Success");
+		}
+	}
+	else
+	{
+		if (execl(strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str(), LoginShardId, (char *) NULL) == -1)
+		{
+			int errsv = errno;
+			nlerror("Execl r2mode Error: %d %s", errsv, strCmdLine.c_str());
+		} else {
+			nlinfo("Ran batch file Success");
+		}
+	}
 #endif
 
 //	exit(0);
