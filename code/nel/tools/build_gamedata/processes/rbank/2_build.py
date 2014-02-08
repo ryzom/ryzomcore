@@ -54,33 +54,49 @@ printLog(log, "")
 
 # Build rbank bbox
 printLog(log, ">>> Build rbank bbox <<<")
+tempBbox = ExportBuildDirectory + "/" + RbankBboxBuildDirectory + "/temp.bbox"
 if BuildIgBoxes == "":
 	toolLogFail(log, BuildIgBoxesTool, ToolSuffix)
 else:
 	mkPath(log, ExportBuildDirectory + "/" + RbankBboxBuildDirectory)
-	cf = open("build_ig_boxes.cfg", "w")
-	cf.write("\n")
-	cf.write("Pathes = {\n")
-	for dir in IgLookupDirectories:
-		mkPath(log, ExportBuildDirectory + "/" + dir)
-		cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
-	for dir in ShapeLookupDirectories:
-		mkPath(log, ExportBuildDirectory + "/" + dir)
-		cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
-	cf.write("};\n")
-	cf.write("\n")
-	cf.write("IGs = {\n")
-	for dir in IgLookupDirectories:
-		files = findFiles(log, ExportBuildDirectory + "/" + dir, "", ".ig")
-		for file in files:
-			cf.write("\t\"" + os.path.basename(file)[0:-len(".ig")] + "\", \n")
-	cf.write("};\n")
-	cf.write("\n")
-	cf.write("Output = \"" + ExportBuildDirectory + "/" + RbankBboxBuildDirectory + "/temp.bbox\";\n")
-	cf.write("\n")
-	cf.close()
-	subprocess.call([ BuildIgBoxes ])
-	os.remove("build_ig_boxes.cfg")
+	needUpdateIg = needUpdateMultiDirNoSubdirFile(log, ExportBuildDirectory, IgLookupDirectories, tempBbox)
+	if needUpdateIg:
+		printLog(log, "DETECT UPDATE IG->Bbox")
+	else:
+		printLog(log, "DETECT SKIP IG->Bbox")
+	needUpdateShape = needUpdateMultiDirNoSubdirFile(log, ExportBuildDirectory, ShapeLookupDirectories, tempBbox)
+	if needUpdateShape:
+		printLog(log, "DETECT UPDATE Shape->Bbox")
+	else:
+		printLog(log, "DETECT SKIP Shape->Bbox")
+	if needUpdateIg or needUpdateShape:
+		printLog(log, "DETECT DECIDE UPDATE")
+		cf = open("build_ig_boxes.cfg", "w")
+		cf.write("\n")
+		cf.write("Pathes = {\n")
+		for dir in IgLookupDirectories:
+			mkPath(log, ExportBuildDirectory + "/" + dir)
+			cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
+		for dir in ShapeLookupDirectories:
+			mkPath(log, ExportBuildDirectory + "/" + dir)
+			cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
+		cf.write("};\n")
+		cf.write("\n")
+		cf.write("IGs = {\n")
+		for dir in IgLookupDirectories:
+			files = findFiles(log, ExportBuildDirectory + "/" + dir, "", ".ig")
+			for file in files:
+				cf.write("\t\"" + os.path.basename(file)[0:-len(".ig")] + "\", \n")
+		cf.write("};\n")
+		cf.write("\n")
+		cf.write("Output = \"" + tempBbox + "\";\n")
+		cf.write("\n")
+		cf.close()
+		subprocess.call([ BuildIgBoxes ])
+		os.remove("build_ig_boxes.cfg")
+	else:
+		printLog(log, "DETECT DECIDE SKIP")
+		printLog(log, "SKIP *")
 printLog(log, "")
 
 printLog(log, ">>> Build rbank build config <<<")
@@ -97,7 +113,7 @@ cf.write("BanksPath = \"" + ExportBuildDirectory + "/" + SmallbankExportDirector
 cf.write("Bank = \"" + ExportBuildDirectory + "/" + SmallbankExportDirectory + "/" + BankTileBankName + ".smallbank\";\n")
 cf.write("ZoneExt = \".zonew\";\n")
 cf.write("ZoneNHExt = \".zonenhw\";\n")
-cf.write("IGBoxes = \"" + ExportBuildDirectory + "/" + RbankBboxBuildDirectory + "/temp.bbox\";\n")
+cf.write("IGBoxes = \"" + tempBbox + "\";\n")
 mkPath(log, LeveldesignWorldDirectory)
 cf.write("LevelDesignWorldPath = \"" + LeveldesignWorldDirectory + "\";\n")
 mkPath(log, ExportBuildDirectory + "/" + IgLandBuildDirectory)
@@ -207,69 +223,96 @@ else:
 			printLog(log, "SKIP " + lr1)
 printLog(log, "")
 
-printLog(log, ">>> Build rbank process global <<<") # TODO: Check if the LR changed?
-if BuildRbank == "":
-	toolLogFail(log, BuildRbankTool, ToolSuffix)
-elif ExecTimeout == "":
-	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
+printLog(log, ">>> Detect modifications to rebuild lr <<<")
+needUpdateCmbLr = needUpdateDirByTagLog(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory, ".cmb", ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory, ".lr")
+if needUpdateCmbLr:
+	printLog(log, "DETECT UPDATE Cmb->Lr")
 else:
-	subprocess.call([ ExecTimeout, str(RbankBuildProcglobalTimeout), BuildRbank, "-c", "-P", "-G" ])
-printLog(log, "")
-os.remove("build_rbank.cfg")
+	printLog(log, "DETECT SKIP Cmb->Lr")
+needUpdateCmbRbank = needUpdateDirNoSubdirFile(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory, ExportBuildDirectory + "/" + RbankOutputBuildDirectory + "/" + RbankRbankName + ".rbank")
+if needUpdateCmbRbank:
+	printLog(log, "DETECT UPDATE Cmb->Rbank")
+else:
+	printLog(log, "DETECT SKIP Cmb->Rbank")
+needUpdateLrRbank = needUpdateDirNoSubdirFile(log, ExportBuildDirectory + "/" + RbankSmoothBuildDirectory, ExportBuildDirectory + "/" + RbankOutputBuildDirectory + "/" + RbankRbankName + ".rbank")
+if needUpdateLrRbank:
+	printLog(log, "DETECT UPDATE Lr->Rbank")
+else:
+	printLog(log, "DETECT SKIP Lr->Rbank")
+needUpdateBboxRbank = needUpdate(log, tempBbox, ExportBuildDirectory + "/" + RbankOutputBuildDirectory + "/" + RbankRbankName + ".rbank")
+if needUpdateBboxRbank:
+	printLog(log, "DETECT UPDATE Lr->Rbank")
+else:
+	printLog(log, "DETECT SKIP Lr->Rbank")
 
-printLog(log, ">>> Build rbank indoor <<<")
-if BuildIndoorRbank == "":
-	toolLogFail(log, BuildIndoorRbankTool, ToolSuffix)
-elif ExecTimeout == "":
-	toolLogFail(log, ExecTimeoutTool, ToolSuffix)
-else:
+if needUpdateCmbLr or needUpdateCmbRbank or needUpdateLrRbank or needUpdateBboxRbank:
+	printLog(log, "DETECT DECIDE UPDATE")
+	printLog(log, ">>> Build rbank process global <<<") # This generates temp lr files. TODO: Check if the LR changed?
+	if BuildRbank == "":
+		toolLogFail(log, BuildRbankTool, ToolSuffix)
+	elif ExecTimeout == "":
+		toolLogFail(log, ExecTimeoutTool, ToolSuffix)
+	else:
+		subprocess.call([ ExecTimeout, str(RbankBuildProcglobalTimeout), BuildRbank, "-c", "-P", "-G" ])
+	printLog(log, "")
+	os.remove("build_rbank.cfg")
+
+	printLog(log, ">>> Build rbank indoor <<<") # This generates the retrievers for the ig that have the cmb export
+	if BuildIndoorRbank == "":
+		toolLogFail(log, BuildIndoorRbankTool, ToolSuffix)
+	elif ExecTimeout == "":
+		toolLogFail(log, ExecTimeoutTool, ToolSuffix)
+	else:
+		retrieversDir = ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory
+		mkPath(log, retrieversDir)
+		removeFilesRecursiveExt(log, retrieversDir, ".rbank")
+		removeFilesRecursiveExt(log, retrieversDir, ".gr")
+		removeFilesRecursiveExt(log, retrieversDir, ".lr")
+		cf = open("build_indoor_rbank.cfg", "w")
+		cf.write("\n")
+		mkPath(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory)
+		cf.write("MeshPath = \"" + ExportBuildDirectory + "/" + RBankCmbExportDirectory + "/\";\n")
+		# cf.write("Meshes = { };\n")
+		cf.write("Meshes = \n")
+		cf.write("{\n")
+		meshFiles = findFilesNoSubdir(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory, ".cmb")
+		lenCmbExt = len(".cmb")
+		for file in meshFiles:
+			cf.write("\t\"" + file[0:-lenCmbExt] + "\", \n")
+		cf.write("};\n")
+		cf.write("OutputPath = \"" + retrieversDir + "/\";\n")
+		# mkPath(log, ExportBuildDirectory + "/" + RbankOutputBuildDirectory)
+		# cf.write("OutputPath = \"" + ExportBuildDirectory + "/" + RbankOutputBuildDirectory + "/\";\n")
+		cf.write("OutputPrefix = \"unused\";\n")
+		cf.write("Merge = 1;\n")
+		mkPath(log, ExportBuildDirectory + "/" + RbankSmoothBuildDirectory)
+		cf.write("MergePath = \"" + ExportBuildDirectory + "/" + RbankSmoothBuildDirectory + "/\";\n")
+		cf.write("MergeInputPrefix = \"temp\";\n")
+		cf.write("MergeOutputPrefix = \"tempMerged\";\n")
+		# cf.write("MergeOutputPrefix = \"" + RbankRbankName + "\";\n")
+		cf.write("AddToRetriever = 1;\n")
+		cf.write("\n")
+		cf.close()
+		subprocess.call([ ExecTimeout, str(RbankBuildIndoorTimeout), BuildIndoorRbank ])
+		os.remove("build_indoor_rbank.cfg")
+	printLog(log, "")
+
 	retrieversDir = ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory
 	mkPath(log, retrieversDir)
-	removeFilesRecursiveExt(log, retrieversDir, ".rbank")
-	removeFilesRecursiveExt(log, retrieversDir, ".gr")
-	removeFilesRecursiveExt(log, retrieversDir, ".lr")
-	cf = open("build_indoor_rbank.cfg", "w")
-	cf.write("\n")
-	mkPath(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory)
-	cf.write("MeshPath = \"" + ExportBuildDirectory + "/" + RBankCmbExportDirectory + "/\";\n")
-	# cf.write("Meshes = { };\n")
-	cf.write("Meshes = \n")
-	cf.write("{\n")
-	meshFiles = findFilesNoSubdir(log, ExportBuildDirectory + "/" + RBankCmbExportDirectory, ".cmb")
-	lenCmbExt = len(".cmb")
-	for file in meshFiles:
-		cf.write("\t\"" + file[0:-lenCmbExt] + "\", \n")
-	cf.write("};\n")
-	cf.write("OutputPath = \"" + retrieversDir + "/\";\n")
-	# mkPath(log, ExportBuildDirectory + "/" + RbankOutputBuildDirectory)
-	# cf.write("OutputPath = \"" + ExportBuildDirectory + "/" + RbankOutputBuildDirectory + "/\";\n")
-	cf.write("OutputPrefix = \"unused\";\n")
-	cf.write("Merge = 1;\n")
-	mkPath(log, ExportBuildDirectory + "/" + RbankSmoothBuildDirectory)
-	cf.write("MergePath = \"" + ExportBuildDirectory + "/" + RbankSmoothBuildDirectory + "/\";\n")
-	cf.write("MergeInputPrefix = \"temp\";\n")
-	cf.write("MergeOutputPrefix = \"tempMerged\";\n")
-	# cf.write("MergeOutputPrefix = \"" + RbankRbankName + "\";\n")
-	cf.write("AddToRetriever = 1;\n")
-	cf.write("\n")
-	cf.close()
-	subprocess.call([ ExecTimeout, str(RbankBuildIndoorTimeout), BuildIndoorRbank ])
-	os.remove("build_indoor_rbank.cfg")
-printLog(log, "")
-
-retrieversDir = ExportBuildDirectory + "/" + RbankRetrieversBuildDirectory
-mkPath(log, retrieversDir)
-outputDir = ExportBuildDirectory + "/" + RbankOutputBuildDirectory
-mkPath(log, outputDir)
-printLog(log, ">>> Move gr, rbank and lr <<<")
-if needUpdateDirNoSubdir(log, retrieversDir, outputDir):
-	removeFilesRecursiveExt(log, outputDir, ".rbank")
-	removeFilesRecursiveExt(log, outputDir, ".gr")
-	removeFilesRecursiveExt(log, outputDir, ".lr")
-	copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged", RbankRbankName, ".rbank")
-	copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged", RbankRbankName, ".gr")
-	copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged_", RbankRbankName + "_", ".lr")
+	outputDir = ExportBuildDirectory + "/" + RbankOutputBuildDirectory
+	mkPath(log, outputDir)
+	printLog(log, ">>> Move gr, rbank and lr <<<") # This simply renames everything
+	if needUpdateDirNoSubdir(log, retrieversDir, outputDir):
+		removeFilesRecursiveExt(log, outputDir, ".rbank")
+		removeFilesRecursiveExt(log, outputDir, ".gr")
+		removeFilesRecursiveExt(log, outputDir, ".lr")
+		copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged", RbankRbankName, ".rbank")
+		copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged", RbankRbankName, ".gr")
+		copyFilesRenamePrefixExt(log, retrieversDir, outputDir, "tempMerged_", RbankRbankName + "_", ".lr")
+	else:
+		printLog(log, "SKIP *")
 else:
+	printLog(log, "DETECT DECIDE SKIP")
 	printLog(log, "SKIP *")
 
 log.close()

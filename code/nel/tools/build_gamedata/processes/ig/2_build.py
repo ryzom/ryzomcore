@@ -246,13 +246,16 @@ for igFile in igFilesAll:
 # Write land IGs TXT
 printLog(log, ">>> Write land IGs TXT <<<")
 igTxtFile = ExportBuildDirectory + "/" + IgLandBuildDirectory + "/" + LandscapeName + "_ig.txt"
-printLog(log, "WRITE " + ExportBuildDirectory + "/" + IgLandBuildDirectory + "/" + LandscapeName + "_ig.txt")
-if os.path.isfile(igTxtFile):
-	os.remove(igTxtFile)
-igTxt = open(igTxtFile, "w")
-for igFile in igFilesAll:
-	igTxt.write(igFile + "\n")
-igTxt.close()
+if needUpdateDirNoSubdirFile(log, ExportBuildDirectory + "/" + IgLandBuildDirectory, igTxtFile):
+	printLog(log, "WRITE " + ExportBuildDirectory + "/" + IgLandBuildDirectory + "/" + LandscapeName + "_ig.txt")
+	if os.path.isfile(igTxtFile):
+		os.remove(igTxtFile)
+	igTxt = open(igTxtFile, "w")
+	for igFile in igFilesAll:
+		igTxt.write(igFile + "\n")
+	igTxt.close()
+else:
+	printLog(log, "SKIP *")
 
 # Merge other IGs
 printLog(log, ">>> Merge other IGs <<<") # (not true merge, since not necesserary)
