@@ -763,7 +763,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		//use bat if windows if not use sh
 		#ifdef NL_OS_WINDOWS
 			fprintf(fp, "@echo off\n");
-		#else NL_OS_MAC
+		#elif NL_OS_MAC
 			//mac patcher doesn't work yet
 		#else
 			fprintf(fp, "#!/bin/sh\npwd\n");
@@ -825,7 +825,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						#ifdef NL_OS_WINDOWS
 							SrcPath = CPath::standardizeDosPath(SrcPath);
 							DstPath = CPath::standardizeDosPath(DstPath);
-						#elseif NL_OS_MAC
+						#elif NL_OS_MAC
 							//no patcher on mac yet
 						#else
 							SrcPath = CPath::standardizePath(SrcPath);
@@ -845,7 +845,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 							fprintf(fp, "del %s\n", DstName.c_str());
 							fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
 							fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
-						#elseif NL_OS_MAC
+						#elif NL_OS_MAC
 							//no patcher on osx
 						#else
 							fprintf(fp, "chmod 777 %s\n", DstName.c_str());
@@ -884,7 +884,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			{
 				#ifdef NL_OS_WINDOWS
 					fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
-				#elseif NL_OS_MAC
+				#elif NL_OS_MAC
 					//no patcher on MAC yet
 				#else
 					fprintf(fp, "rm -f %s\n", CPath::standardizePath(vFileList[i]).c_str());
@@ -901,7 +901,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			#ifdef NL_OS_WINDOWS
 				fprintf(fp, "rd /Q /S patch\n");
 				fprintf(fp, "if exist patch goto looppatch\n");
-			#elseif NL_OS_MAC
+			#elif NL_OS_MAC
 				//no patcher on mac yet
 			#else
 				fprintf(fp, "rm -rf patch\n");
