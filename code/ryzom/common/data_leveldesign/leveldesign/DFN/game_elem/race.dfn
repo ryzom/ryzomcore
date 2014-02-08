@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.0" State="modified">
-  <ELEMENT Name="Skel" Type="Type" Filename="filename.typ"/>
-  <ELEMENT Name="Automaton" Type="Type" Filename="filename.typ"/>
-  <ELEMENT Name="AnimList" Type="Type" Filename="filename.typ"/>
-  <ELEMENT Name="Gender" Type="Type" Filename="gender.typ"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:10 2002 (corvazier) File converted from old format</LOG>
-</DFN>

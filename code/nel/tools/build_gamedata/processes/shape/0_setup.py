@@ -62,6 +62,8 @@ mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirector
 mkPath(log, ExportBuildDirectory + "/" + ShapeAnimExportDirectory)
 if ClodConfigFile != "":
 	mkPath(log, ExportBuildDirectory + "/" + ClodExportDirectory)
+if BuildShadowSkinEnabled:
+	mkPath(log, ExportBuildDirectory + "/" + ShapeShadowSkinBuildDirectory)
 
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")

@@ -1,17 +1,17 @@
 /****************************************************************************
 **
 ** This file is part of a Qt Solutions component.
-** 
+**
 ** Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
-** 
+**
 ** Contact:  Qt Software Information (qt-info@nokia.com)
-** 
-** Commercial Usage  
+**
+** Commercial Usage
 ** Licensees holding valid Qt Commercial licenses may use this file in
 ** accordance with the Qt Solutions Commercial License Agreement provided
 ** with the Software or, alternatively, in accordance with the terms
 ** contained in a written agreement between you and Nokia.
-** 
+**
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
 ** General Public License version 2.1 as published by the Free Software
@@ -19,29 +19,29 @@
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU Lesser General Public License version 2.1 requirements
 ** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-** 
+**
 ** In addition, as a special exception, Nokia gives you certain
 ** additional rights. These rights are described in the Nokia Qt LGPL
 ** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
 ** package.
-** 
-** GNU General Public License Usage 
+**
+** GNU General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU
 ** General Public License version 3.0 as published by the Free Software
 ** Foundation and appearing in the file LICENSE.GPL included in the
 ** packaging of this file.  Please review the following information to
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
-** 
+**
 ** Please note Third Party Software included with Qt Solutions may impose
 ** additional restrictions and it is the user's responsibility to ensure
 ** that they have met the licensing requirements of the GPL, LGPL, or Qt
 ** Solutions Commercial license and the relevant license of the Third
 ** Party Software they are using.
-** 
+**
 ** If you are unsure which license is appropriate for your use, please
 ** contact the sales department at qt-sales@nokia.com.
-** 
+**
 ****************************************************************************/
 
 /****************************************************************************
@@ -101,6 +101,13 @@
 #include <QtGui/QToolButton>
 #include <QtGui/QColorDialog>
 #include <QtGui/QFontDialog>
+#include <QtGui/QDialog>
+#include <QtGui/QPlainTextEdit>
+#include <QtGui/QTextEdit>
+#include <QCompleter>
+#include <QColumnView>
+#include <QStandardItemModel>
+#include <QtGui/QDialogButtonBox>
 #include <QtGui/QSpacerItem>
 #include <QtCore/QMap>
 
@@ -652,6 +659,7 @@ class QtCheckBoxFactoryPrivate : public EditorFactoryPrivate<QtBoolEdit>
 public:
     void slotPropertyChanged(QtProperty *property, bool value);
     void slotSetValue(bool value);
+    void slotResetProperty();
 };
 
 void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool value)
@@ -662,6 +670,7 @@ void QtCheckBoxFactoryPrivate::slotPropertyChanged(QtProperty *property, bool va
     QListIterator<QtBoolEdit *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
         QtBoolEdit *editor = itEditor.next();
+        editor->setStateResetButton(property->isModified());
         editor->blockCheckBoxSignals(true);
         editor->setChecked(value);
         editor->blockCheckBoxSignals(false);
@@ -680,6 +689,22 @@ void QtCheckBoxFactoryPrivate::slotSetValue(bool value)
             if (!manager)
                 return;
             manager->setValue(property, value);
+            return;
+        }
+}
+
+void QtCheckBoxFactoryPrivate::slotResetProperty()
+{
+    QObject *object = q_ptr->sender();
+
+    const QMap<QtBoolEdit *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (QMap<QtBoolEdit *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend;  ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtBoolPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->emitResetProperty(property);
             return;
         }
 }
@@ -733,8 +758,10 @@ QWidget *QtCheckBoxFactory::createEditor(QtBoolPropertyManager *manager, QtPrope
         QWidget *parent)
 {
     QtBoolEdit *editor = d_ptr->createEditor(property, parent);
+    editor->setStateResetButton(property->isModified());
     editor->setChecked(manager->value(property));
 
+    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotResetProperty()));
     connect(editor, SIGNAL(toggled(bool)), this, SLOT(slotSetValue(bool)));
     connect(editor, SIGNAL(destroyed(QObject *)),
                 this, SLOT(slotEditorDestroyed(QObject *)));
@@ -1853,9 +1880,87 @@ void QtCharEditorFactory::disconnectPropertyManager(QtCharPropertyManager *manag
                 this, SLOT(slotPropertyChanged(QtProperty *, const QChar &)));
 }
 
+
+class QtEnumEditWidget : public QWidget {
+    Q_OBJECT
+
+public:
+    QtEnumEditWidget(QWidget *parent);
+
+    bool blockComboBoxSignals(bool block);
+    void addItems(const QStringList &texts);
+    void clearComboBox();
+    void setItemIcon(int index, const QIcon &icon);
+
+public Q_SLOTS:
+    void setValue(int value);
+    void setStateResetButton(bool enabled);
+
+Q_SIGNALS:
+    void valueChanged(int value);
+    void resetProperty();
+
+private:
+    QComboBox *m_comboBox;
+    QToolButton *m_defaultButton;
+};
+
+QtEnumEditWidget::QtEnumEditWidget(QWidget *parent) :
+    QWidget(parent),
+    m_comboBox(new QComboBox),
+    m_defaultButton(new QToolButton)
+{
+	m_comboBox->view()->setTextElideMode(Qt::ElideRight);
+
+    QHBoxLayout *lt = new QHBoxLayout(this);
+    lt->setContentsMargins(0, 0, 0, 0);
+    lt->setSpacing(0);
+    lt->addWidget(m_comboBox);
+
+    m_defaultButton->setIcon(QIcon(":/trolltech/qtpropertybrowser/images/resetproperty.png"));
+    m_defaultButton->setMaximumWidth(16);
+
+    connect(m_comboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(valueChanged(int)));
+    connect(m_defaultButton, SIGNAL(clicked()), this, SIGNAL(resetProperty()));
+    lt->addWidget(m_defaultButton);
+    m_defaultButton->setEnabled(false);
+    setFocusProxy(m_comboBox);
+}
+
+void QtEnumEditWidget::setValue(int value)
+{
+    if (m_comboBox->currentIndex() != value)
+        m_comboBox->setCurrentIndex(value);
+}
+
+void QtEnumEditWidget::setStateResetButton(bool enabled)
+{
+    m_defaultButton->setEnabled(enabled);
+}
+
+bool QtEnumEditWidget::blockComboBoxSignals(bool block)
+{
+    return m_comboBox->blockSignals(block);
+}
+
+void QtEnumEditWidget::addItems(const QStringList &texts)
+{
+    m_comboBox->addItems(texts);
+}
+
+void QtEnumEditWidget::clearComboBox()
+{
+    m_comboBox->clear();
+}
+
+void QtEnumEditWidget::setItemIcon(int index, const QIcon &icon)
+{
+    m_comboBox->setItemIcon(index, icon);
+}
+
 // QtEnumEditorFactory
 
-class QtEnumEditorFactoryPrivate : public EditorFactoryPrivate<QComboBox>
+class QtEnumEditorFactoryPrivate : public EditorFactoryPrivate<QtEnumEditWidget>
 {
     QtEnumEditorFactory *q_ptr;
     Q_DECLARE_PUBLIC(QtEnumEditorFactory)
@@ -1865,19 +1970,36 @@ public:
     void slotEnumNamesChanged(QtProperty *property, const QStringList &);
     void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &);
     void slotSetValue(int value);
+    void slotResetProperty();
 };
+
+void QtEnumEditorFactoryPrivate::slotResetProperty()
+{
+    QObject *object = q_ptr->sender();
+    const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtEnumPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->emitResetProperty(property);
+            return;
+        }
+}
 
 void QtEnumEditorFactoryPrivate::slotPropertyChanged(QtProperty *property, int value)
 {
     if (!m_createdEditors.contains(property))
         return;
 
-    QListIterator<QComboBox *> itEditor(m_createdEditors[property]);
+    QListIterator<QtEnumEditWidget *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
-        QComboBox *editor = itEditor.next();
-        editor->blockSignals(true);
-        editor->setCurrentIndex(value);
-        editor->blockSignals(false);
+        QtEnumEditWidget *editor = itEditor.next();
+        editor->setStateResetButton(property->isModified());
+        editor->blockComboBoxSignals(true);
+        editor->setValue(value);
+        editor->blockComboBoxSignals(false);
     }
 }
 
@@ -1893,17 +2015,17 @@ void QtEnumEditorFactoryPrivate::slotEnumNamesChanged(QtProperty *property,
 
     QMap<int, QIcon> enumIcons = manager->enumIcons(property);
 
-    QListIterator<QComboBox *> itEditor(m_createdEditors[property]);
+    QListIterator<QtEnumEditWidget *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
-        QComboBox *editor = itEditor.next();
-        editor->blockSignals(true);
-        editor->clear();
+        QtEnumEditWidget *editor = itEditor.next();
+        editor->blockComboBoxSignals(true);
+        editor->clearComboBox();
         editor->addItems(enumNames);
         const int nameCount = enumNames.count();
         for (int i = 0; i < nameCount; i++)
             editor->setItemIcon(i, enumIcons.value(i));
-        editor->setCurrentIndex(manager->value(property));
-        editor->blockSignals(false);
+        editor->setValue(manager->value(property));
+        editor->blockComboBoxSignals(false);
     }
 }
 
@@ -1918,23 +2040,23 @@ void QtEnumEditorFactoryPrivate::slotEnumIconsChanged(QtProperty *property,
         return;
 
     const QStringList enumNames = manager->enumNames(property);
-    QListIterator<QComboBox *> itEditor(m_createdEditors[property]);
+    QListIterator<QtEnumEditWidget *> itEditor(m_createdEditors[property]);
     while (itEditor.hasNext()) {
-        QComboBox *editor = itEditor.next();
-        editor->blockSignals(true);
+        QtEnumEditWidget *editor = itEditor.next();
+        editor->blockComboBoxSignals(true);
         const int nameCount = enumNames.count();
         for (int i = 0; i < nameCount; i++)
             editor->setItemIcon(i, enumIcons.value(i));
-        editor->setCurrentIndex(manager->value(property));
-        editor->blockSignals(false);
+        editor->setValue(manager->value(property));
+        editor->blockComboBoxSignals(false);
     }
 }
 
 void QtEnumEditorFactoryPrivate::slotSetValue(int value)
 {
     QObject *object = q_ptr->sender();
-    const  QMap<QComboBox *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
-    for (QMap<QComboBox *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+    const  QMap<QtEnumEditWidget *, QtProperty *>::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (QMap<QtEnumEditWidget *, QtProperty *>::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
         if (itEditor.key() == object) {
             QtProperty *property = itEditor.value();
             QtEnumPropertyManager *manager = q_ptr->propertyManager(property);
@@ -1995,18 +2117,19 @@ void QtEnumEditorFactory::connectPropertyManager(QtEnumPropertyManager *manager)
 QWidget *QtEnumEditorFactory::createEditor(QtEnumPropertyManager *manager, QtProperty *property,
         QWidget *parent)
 {
-    QComboBox *editor = d_ptr->createEditor(property, parent);
+    QtEnumEditWidget *editor = d_ptr->createEditor(property, parent);
     editor->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    editor->view()->setTextElideMode(Qt::ElideRight);
     QStringList enumNames = manager->enumNames(property);
     editor->addItems(enumNames);
     QMap<int, QIcon> enumIcons = manager->enumIcons(property);
     const int enumNamesCount = enumNames.count();
     for (int i = 0; i < enumNamesCount; i++)
         editor->setItemIcon(i, enumIcons.value(i));
-    editor->setCurrentIndex(manager->value(property));
+    editor->setValue(manager->value(property));
+    editor->setStateResetButton(property->isModified());
 
-    connect(editor, SIGNAL(currentIndexChanged(int)), this, SLOT(slotSetValue(int)));
+    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotResetProperty()));
+    connect(editor, SIGNAL(valueChanged(int)), this, SLOT(slotSetValue(int)));
     connect(editor, SIGNAL(destroyed(QObject *)),
                 this, SLOT(slotEditorDestroyed(QObject *)));
     return editor;
@@ -2599,6 +2722,267 @@ QWidget *QtFontEditorFactory::createEditor(QtFontPropertyManager *manager,
 void QtFontEditorFactory::disconnectPropertyManager(QtFontPropertyManager *manager)
 {
     disconnect(manager, SIGNAL(valueChanged(QtProperty*,QFont)), this, SLOT(slotPropertyChanged(QtProperty*,QFont)));
+}
+
+class QtTextEditWidget : public QWidget {
+    Q_OBJECT
+
+public:
+    QtTextEditWidget(QWidget *parent);
+
+    bool eventFilter(QObject *obj, QEvent *ev);
+
+public Q_SLOTS:
+    void setValue(const QString &value);
+    void setStateResetButton(bool enabled);
+
+private Q_SLOTS:
+    void buttonClicked();
+
+Q_SIGNALS:
+    void valueChanged(const QString &value);
+    void resetProperty();
+
+private:
+    QLineEdit *m_lineEdit;
+    QToolButton *m_defaultButton;
+    QToolButton *m_button;
+};
+
+QtTextEditWidget::QtTextEditWidget(QWidget *parent) :
+    QWidget(parent),
+    m_lineEdit(new QLineEdit),
+    m_defaultButton(new QToolButton),
+    m_button(new QToolButton)
+{
+    QHBoxLayout *lt = new QHBoxLayout(this);
+    lt->setContentsMargins(0, 0, 0, 0);
+    lt->setSpacing(0);
+    lt->addWidget(m_lineEdit);
+    m_lineEdit->setReadOnly(true);
+
+    m_button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Ignored);
+    m_button->setFixedWidth(20);
+    m_button->setText(tr("..."));
+    m_button->installEventFilter(this);
+
+    setFocusProxy(m_button);
+    setFocusPolicy(m_button->focusPolicy());
+
+    m_defaultButton->setIcon(QIcon(":/trolltech/qtpropertybrowser/images/resetproperty.png"));
+    m_defaultButton->setMaximumWidth(16);
+
+    connect(m_button, SIGNAL(clicked()), this, SLOT(buttonClicked()));
+    connect(m_defaultButton, SIGNAL(clicked()), this, SIGNAL(resetProperty()));
+    lt->addWidget(m_button);
+    lt->addWidget(m_defaultButton);
+    m_defaultButton->setEnabled(false);
+}
+
+void QtTextEditWidget::setValue(const QString &value)
+{
+    if (m_lineEdit->text() != value)
+        m_lineEdit->setText(value);
+}
+
+void QtTextEditWidget::setStateResetButton(bool enabled)
+{
+    m_defaultButton->setEnabled(enabled);
+}
+
+void QtTextEditWidget::buttonClicked()
+{
+    QGridLayout *gridLayout;
+    QPlainTextEdit *plainTextEdit;
+    QDialogButtonBox *buttonBox;
+    QDialog *dialog;
+
+    dialog = new QDialog(this);
+    dialog->resize(400, 300);
+    gridLayout = new QGridLayout(dialog);
+    plainTextEdit = new QPlainTextEdit(dialog);
+
+    gridLayout->addWidget(plainTextEdit, 0, 0, 1, 1);
+
+    buttonBox = new QDialogButtonBox(dialog);
+    buttonBox->setOrientation(Qt::Horizontal);
+    buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+
+    gridLayout->addWidget(buttonBox, 1, 0, 1, 1);
+
+    QObject::connect(buttonBox, SIGNAL(accepted()), dialog, SLOT(accept()));
+    QObject::connect(buttonBox, SIGNAL(rejected()), dialog, SLOT(reject()));
+
+    plainTextEdit->textCursor().insertText(m_lineEdit->text());
+
+    dialog->setModal(true);
+    dialog->show();
+    int result = dialog->exec();
+
+    if (result == QDialog::Accepted)
+    {
+        QString newText = plainTextEdit->document()->toPlainText();
+
+        setValue(newText);
+        if (plainTextEdit->document()->isModified())
+            Q_EMIT valueChanged(newText);
+    }
+
+    delete dialog;
+}
+
+bool QtTextEditWidget::eventFilter(QObject *obj, QEvent *ev)
+{
+    if (obj == m_button) {
+        switch (ev->type()) {
+        case QEvent::KeyPress:
+        case QEvent::KeyRelease: { // Prevent the QToolButton from handling Enter/Escape meant control the delegate
+            switch (static_cast<const QKeyEvent*>(ev)->key()) {
+            case Qt::Key_Escape:
+            case Qt::Key_Enter:
+            case Qt::Key_Return:
+                ev->ignore();
+                return true;
+            default:
+                break;
+            }
+        }
+            break;
+        default:
+            break;
+        }
+    }
+    return QWidget::eventFilter(obj, ev);
+}
+
+// QtLineEditFactory
+
+class QtTextEditorFactoryPrivate : public EditorFactoryPrivate<QtTextEditWidget>
+{
+    QtTextEditorFactory *q_ptr;
+    Q_DECLARE_PUBLIC(QtTextEditorFactory)
+public:
+
+    void slotPropertyChanged(QtProperty *property, const QString &value);
+    void slotSetValue(const QString &value);
+    void slotResetProperty();
+};
+
+void QtTextEditorFactoryPrivate::slotPropertyChanged(QtProperty *property,
+                const QString &value)
+{
+    const PropertyToEditorListMap::iterator it = m_createdEditors.find(property);
+    if (it == m_createdEditors.end())
+        return;
+    QListIterator<QtTextEditWidget *> itEditor(it.value());
+
+    while (itEditor.hasNext())
+    {
+        QtTextEditWidget *editor = itEditor.next();
+        editor->setValue(value);
+        editor->setStateResetButton(property->isModified());
+    }
+}
+
+void QtTextEditorFactoryPrivate::slotSetValue(const QString &value)
+{
+    QObject *object = q_ptr->sender();
+    const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtTextPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->setValue(property, value);
+            return;
+        }
+}
+
+void QtTextEditorFactoryPrivate::slotResetProperty()
+{
+    QObject *object = q_ptr->sender();
+    const EditorToPropertyMap::ConstIterator ecend = m_editorToProperty.constEnd();
+    for (EditorToPropertyMap::ConstIterator itEditor = m_editorToProperty.constBegin(); itEditor != ecend; ++itEditor)
+        if (itEditor.key() == object) {
+            QtProperty *property = itEditor.value();
+            QtTextPropertyManager *manager = q_ptr->propertyManager(property);
+            if (!manager)
+                return;
+            manager->emitResetProperty(property);
+            return;
+        }
+}
+
+/*!
+    \class QtTextEditFactory
+
+    \brief The QtTextEditFactory class provides QTextEdit widgets for
+    properties created by QtStringPropertyManager objects.
+
+    \sa QtAbstractEditorFactory, QtStringPropertyManager
+*/
+
+/*!
+    Creates a factory with the given \a parent.
+*/
+QtTextEditorFactory::QtTextEditorFactory(QObject *parent)
+    : QtAbstractEditorFactory<QtTextPropertyManager>(parent)
+{
+    d_ptr = new QtTextEditorFactoryPrivate();
+    d_ptr->q_ptr = this;
+
+}
+
+/*!
+    Destroys this factory, and all the widgets it has created.
+*/
+QtTextEditorFactory::~QtTextEditorFactory()
+{
+    qDeleteAll(d_ptr->m_editorToProperty.keys());
+    delete d_ptr;
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtTextEditorFactory::connectPropertyManager(QtTextPropertyManager *manager)
+{
+    connect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)),
+                this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+QWidget *QtTextEditorFactory::createEditor(QtTextPropertyManager *manager,
+        QtProperty *property, QWidget *parent)
+{
+
+    QtTextEditWidget *editor = d_ptr->createEditor(property, parent);
+
+    editor->setValue(manager->value(property));
+    editor->setStateResetButton(property->isModified());
+
+    connect(editor, SIGNAL(resetProperty()), this, SLOT(slotResetProperty()));
+    connect(editor, SIGNAL(valueChanged(QString)), this, SLOT(slotSetValue(QString)));
+    connect(editor, SIGNAL(destroyed(QObject *)), this, SLOT(slotEditorDestroyed(QObject *)));
+    return editor;
+}
+
+/*!
+    \internal
+
+    Reimplemented from the QtAbstractEditorFactory class.
+*/
+void QtTextEditorFactory::disconnectPropertyManager(QtTextPropertyManager *manager)
+{
+    disconnect(manager, SIGNAL(valueChanged(QtProperty *, const QString &)),
+                this, SLOT(slotPropertyChanged(QtProperty *, const QString &)));
 }
 
 #if QT_VERSION >= 0x040400

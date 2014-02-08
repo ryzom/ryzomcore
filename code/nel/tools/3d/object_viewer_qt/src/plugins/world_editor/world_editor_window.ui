@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WorldEditorWindow</class>
+ <widget class="QMainWindow" name="WorldEditorWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>819</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="world_editor.qrc">
+    <normaloff>:/icons/ic_nel_world_editor.png</normaloff>:/icons/ic_nel_world_editor.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="LandscapeEditor::LandscapeView" name="graphicsView">
+      <property name="interactive">
+       <bool>true</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
+      <property name="renderHints">
+       <set>QPainter::SmoothPixmapTransform</set>
+      </property>
+      <property name="dragMode">
+       <enum>QGraphicsView::NoDrag</enum>
+      </property>
+      <property name="transformationAnchor">
+       <enum>QGraphicsView::AnchorUnderMouse</enum>
+      </property>
+      <property name="resizeAnchor">
+       <enum>QGraphicsView::AnchorUnderMouse</enum>
+      </property>
+      <property name="viewportUpdateMode">
+       <enum>QGraphicsView::FullViewportUpdate</enum>
+      </property>
+      <property name="optimizationFlags">
+       <set>QGraphicsView::DontAdjustForAntialiasing|QGraphicsView::DontClipPainter</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="fileToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="worldEditToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="selectAction"/>
+   <addaction name="moveAction"/>
+   <addaction name="rotateAction"/>
+   <addaction name="scaleAction"/>
+   <addaction name="turnAction"/>
+   <addaction name="separator"/>
+   <addaction name="pointsAction"/>
+  </widget>
+  <widget class="QDockWidget" name="treePrimitivesDockWidget">
+   <property name="windowTitle">
+    <string>Primitives</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <property name="margin">
+      <number>3</number>
+     </property>
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="WorldEditor::PrimitivesView" name="treePrimitivesView">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
+       <attribute name="headerCascadingSectionResizes">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="headerDefaultSectionSize">
+        <number>250</number>
+       </attribute>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="shToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="visibleLandAction"/>
+   <addaction name="visibleZonePrimitivesAction"/>
+   <addaction name="visiblePathPrimitivesAction"/>
+   <addaction name="vidiblePointPrimitives"/>
+   <addaction name="visibleDetailsAction"/>
+   <addaction name="visibleGridAction"/>
+   <addaction name="visibleGridPointsAction"/>
+   <addaction name="separator"/>
+   <addaction name="settingsAction"/>
+  </widget>
+  <widget class="QDockWidget" name="propertyEditDockWidget">
+   <property name="windowTitle">
+    <string>Property Editor</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="WorldEditor::PropertyEditorWidget" name="propertyEditWidget"/>
+  </widget>
+  <action name="loadPrimitiveAction">
+   <property name="text">
+    <string>loadPrimitive</string>
+   </property>
+  </action>
+  <action name="newPrimitiveAction">
+   <property name="text">
+    <string>newPrimitive</string>
+   </property>
+  </action>
+  <action name="loadLandAction">
+   <property name="icon">
+    <iconset resource="../landscape_editor/landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_zonel.png</normaloff>:/icons/ic_nel_zonel.png</iconset>
+   </property>
+   <property name="text">
+    <string>loadLand</string>
+   </property>
+  </action>
+  <action name="settingsAction">
+   <property name="icon">
+    <iconset resource="../landscape_editor/landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_landscape_settings.png</normaloff>:/icons/ic_nel_landscape_settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="visibleLandAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>S/H Land</string>
+   </property>
+  </action>
+  <action name="visibleZonePrimitivesAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>S/H Zone primitives</string>
+   </property>
+   <property name="toolTip">
+    <string>S/H Zone Primitives</string>
+   </property>
+  </action>
+  <action name="visiblePathPrimitivesAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>S/H Path primitives</string>
+   </property>
+  </action>
+  <action name="visibleDetailsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>S/H Details</string>
+   </property>
+  </action>
+  <action name="visibleGridAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../landscape_editor/landscape_editor.qrc">
+     <normaloff>:/icons/ic_grid.png</normaloff>:/icons/ic_grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>S/H Grid</string>
+   </property>
+  </action>
+  <action name="visibleGridPointsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>S/H Grid points</string>
+   </property>
+  </action>
+  <action name="newWorldEditAction">
+   <property name="text">
+    <string>New World Edit file</string>
+   </property>
+  </action>
+  <action name="saveWorldEditAction">
+   <property name="text">
+    <string>Save World Edit file</string>
+   </property>
+  </action>
+  <action name="selectAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="world_editor.qrc">
+     <normaloff>:/icons/ic_nel_select.png</normaloff>:/icons/ic_nel_select.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select</string>
+   </property>
+  </action>
+  <action name="moveAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="world_editor.qrc">
+     <normaloff>:/icons/ic_nel_move.png</normaloff>:/icons/ic_nel_move.png</iconset>
+   </property>
+   <property name="text">
+    <string>Move</string>
+   </property>
+  </action>
+  <action name="rotateAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="world_editor.qrc">
+     <normaloff>:/icons/ic_nel_rotate.png</normaloff>:/icons/ic_nel_rotate.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotate</string>
+   </property>
+  </action>
+  <action name="scaleAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="world_editor.qrc">
+     <normaloff>:/icons/ic_nel_scale.png</normaloff>:/icons/ic_nel_scale.png</iconset>
+   </property>
+   <property name="text">
+    <string>Scale</string>
+   </property>
+  </action>
+  <action name="turnAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="world_editor.qrc">
+     <normaloff>:/icons/ic_nel_turn.png</normaloff>:/icons/ic_nel_turn.png</iconset>
+   </property>
+   <property name="text">
+    <string>Turn</string>
+   </property>
+  </action>
+  <action name="pointsAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Edit points</string>
+   </property>
+  </action>
+  <action name="projectSettingsAction">
+   <property name="icon">
+    <iconset resource="../landscape_editor/landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_landscape_settings.png</normaloff>:/icons/ic_nel_landscape_settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Project settings</string>
+   </property>
+  </action>
+  <action name="vidiblePointPrimitives">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>S/H Points primitives</string>
+   </property>
+   <property name="toolTip">
+    <string>S/H Points primitives</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LandscapeEditor::LandscapeView</class>
+   <extends>QGraphicsView</extends>
+   <header>../landscape_editor/landscape_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>WorldEditor::PrimitivesView</class>
+   <extends>QTreeView</extends>
+   <header>primitives_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>WorldEditor::PropertyEditorWidget</class>
+   <extends>QWidget</extends>
+   <header>property_editor_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="world_editor.qrc"/>
+  <include location="../landscape_editor/landscape_editor.qrc"/>
+ </resources>
+ <connections/>
+</ui>

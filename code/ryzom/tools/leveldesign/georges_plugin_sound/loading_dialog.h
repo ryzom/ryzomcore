@@ -22,6 +22,7 @@
 #endif // _MSC_VER > 1000
 // LoadingDialog.h : header file
 //
+#include "resource.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CLoadingDialog dialog

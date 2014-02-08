@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="ServiceType" Type="Type" Filename="item_service.typ"/>
-  <ELEMENT Name="DPLossDuration" Type="Type" Filename="float.typ" Default="0.0"/>
-  <LOG>Thu Feb 03 15:39:39 2005 (guignot) Dfn Structure = 
-Thu Feb 03 15:41:35 2005 (guignot) Dfn Structure = </LOG>
-</DFN>

@@ -87,9 +87,18 @@ void messageHandler(QtMsgType p_type, const char* p_msg)
 #	endif
 #endif
 
-sint main(int argc, char **argv)
+#ifdef NL_OS_WINDOWS
+int __stdcall WinMain(void *hInstance, void *hPrevInstance, void *lpCmdLine, int nShowCmd)
+#else // NL_OS_WINDOWS
+int main(int argc, char **argv)
+#endif // NL_OS_WINDOWS
 {
+#ifdef NL_OS_WINDOWS
+
+	QApplication app(__argc, __argv);
+#else // NL_OS_WINDOWS
 	QApplication app(argc, argv);
+#endif // NL_OS_WINDOWS
 	QPixmap pixmap(":/images/georges_logo.png");
 	NLQT::CGeorgesSplash splash;
     splash.show();

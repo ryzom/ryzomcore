@@ -48,6 +48,7 @@ printLog(log, ">>> Setup source directories <<<")
 for dir in RBankCmbSourceDirectories:
 	mkPath(log, DatabaseDirectory + "/" + dir)
 mkPath(log, LeveldesignWorldDirectory)
+mkPath(log, WorldEditorFilesDirectory)
 
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")

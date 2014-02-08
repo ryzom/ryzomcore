@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="WalkSpeed" Type="Type" Filename="float.typ" Default="1.3"/>
-  <ELEMENT Name="RunSpeed" Type="Type" Filename="float.typ" Default="6.0"/>
-  <ELEMENT Name="GroupDispersion" Type="Type" Filename="float.typ" Default="0.5"/>
-  <LOG>Mon Sep 01 15:57:53 2003 (ledorze) Dfn Structure = </LOG>
-</DFN>

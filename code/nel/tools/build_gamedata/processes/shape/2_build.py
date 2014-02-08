@@ -51,21 +51,28 @@ LightmapOptimizer = findTool(log, ToolDirectories, LightmapOptimizerTool, ToolSu
 TgaToDds = findTool(log, ToolDirectories, TgaToDdsTool, ToolSuffix)
 BuildCoarseMesh = findTool(log, ToolDirectories, BuildCoarseMeshTool, ToolSuffix)
 
-if DoBuildShadowSkin:
+shapeDirectory = ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory
+if BuildShadowSkinEnabled:
+	mkPath(log, shapeDirectory)
+	shadowSkinBuildDirectory = ExportBuildDirectory + "/" + ShapeShadowSkinBuildDirectory
 	printLog(log, ">>> BuildShadowSkin <<<")
-	printLog(log, "********************************")
-	printLog(log, "********      TODO      ********")
-	printLog(log, "********************************")
+	shadowSkinShapes = findFilesNoSubdir(log, shapeDirectory, ".shape")
+	for shadowSkinShape in shadowSkinShapes:
+		srcShape = shapeDirectory + "/" + shadowSkinShape
+		dstShape = shadowSkinBuildDirectory + "/" + shadowSkinShape
+		if needUpdateLogRemoveDest(log, srcShape, dstShape):
+			subprocess.call([ BuildShadowSkin, srcShape, dstShape, str(BuildShadowSkinRatio), str(BuildShadowSkinMaxface) ])
+	shapeDirectory = shadowSkinBuildDirectory
 
-mkPath(log, ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory)
+mkPath(log, shapeDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
 if ClodConfigFile != "":
 	mkPath(log, ExportBuildDirectory + "/" + ClodExportDirectory)
 	printLog(log, ">>> Build CLodTex <<<")
-	subprocess.call([ BuildClodtex, "-d", DatabaseDirectory + "/" + ClodConfigFile, ExportBuildDirectory + "/" + ClodExportDirectory, ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory ])
+	subprocess.call([ BuildClodtex, "-d", DatabaseDirectory + "/" + ClodConfigFile, ExportBuildDirectory + "/" + ClodExportDirectory, shapeDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory ])
 else:
 	printLog(log, ">>> Copy Shape <<<")
-	copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + ShapeNotOptimizedExportDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, ".shape")
+	copyFilesExtNoTreeIfNeeded(log, shapeDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, ".shape")
 
 # copy lightmap_not_optimized to lightmap
 printLog(log, ">>> Optimize lightmaps <<<")

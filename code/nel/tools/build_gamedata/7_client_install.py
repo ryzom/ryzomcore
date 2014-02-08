@@ -69,6 +69,11 @@ for category in InstallClientData:
 				targetBnp = targetPath + "/" + package[1][0]
 				printLog(log, "TARGET " + package[1][0])
 			copyFileIfNeeded(log, sourceBnp, targetBnp)
+		for ref in category["Refs"]:
+			printLog(log, "REFERENCE " + ref)
+			sourceRef = sourcePath + "/" + ref + "_.ref"
+			targetRef = targetPath + "/" + ref + "_.ref"
+			copyFileIfNeeded(log, sourceRef, targetRef)
 printLog(log, "")
 
 log.close()

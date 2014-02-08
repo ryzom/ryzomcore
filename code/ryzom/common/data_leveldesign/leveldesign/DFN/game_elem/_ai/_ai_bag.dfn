@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.3" State="modified">
-  <PARENT Name="_ai_object.dfn"/>
-  <ELEMENT Name="ClassName" Type="Type" Filename="string.typ" Default="BaseBagItem"/>
-  <LOG>Mon Aug 12 15:33:33 2002 (chafik) Dfn Parents = 
-Mon Aug 12 15:33:33 2002 (chafik) Dfn Structure = 
-Mon Aug 12 15:34:05 2002 (chafik) Dfn Structure = 
-Mon Aug 12 15:36:13 2002 (chafik) Dfn Structure = </LOG>
-</DFN>

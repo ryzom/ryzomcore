@@ -1,0 +1,2 @@
+{block name=content}{/block}
+				

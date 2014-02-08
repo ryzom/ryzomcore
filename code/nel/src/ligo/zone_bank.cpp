@@ -19,14 +19,15 @@
 
 #include "nel/ligo/zone_bank.h"
 
-#ifdef NL_OS_WINDOWS
-
 #include "nel/misc/debug.h"
 #include "nel/misc/file.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
+
+#ifdef NL_OS_WINDOWS
 #define NOMINMAX
 #include <windows.h>
+#endif // NL_OS_WINDOWS
 
 using namespace std;
 using namespace NLMISC;
@@ -496,8 +497,9 @@ void CZoneBank::reset ()
 	_Selection.clear ();
 }
 
+#ifdef NL_OS_WINDOWS
 // ---------------------------------------------------------------------------
-bool CZoneBank::initFromPath(const string &sPathName, std::string &error)
+bool CZoneBank::initFromPath(const std::string &sPathName, std::string &error)
 {
 	char sDirBackup[512];
 	GetCurrentDirectory (512, sDirBackup);
@@ -520,6 +522,7 @@ bool CZoneBank::initFromPath(const string &sPathName, std::string &error)
 	SetCurrentDirectory (sDirBackup);
 	return true;
 }
+#endif // NL_OS_WINDOWS
 
 // ---------------------------------------------------------------------------
 bool CZoneBank::addElement (const std::string &elementName, std::string &error)
@@ -695,5 +698,3 @@ void CZoneBank::getSelection (std::vector<CZoneBankElement*> &SelectedElements)
 // ***************************************************************************
 
 } // namespace NLLIGO
-
-#endif // NL_OS_WINDOWS

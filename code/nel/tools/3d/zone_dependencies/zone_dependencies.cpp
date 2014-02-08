@@ -610,7 +610,7 @@ static void computeIGBBox(const NL3D::CInstanceGroup &ig, CLightingBBox &result,
 
 			if (shapePathName.empty())
 			{
-				nlwarning("Unable to find shape %s", it->Name.c_str());				
+				nlwarning("Unable to find shape '%s'", it->Name.c_str());				
 			}
 			else
 			{

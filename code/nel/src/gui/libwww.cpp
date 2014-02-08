@@ -699,10 +699,15 @@ namespace NLGUI
 			HTML_DTD->tags[HTML_DIV].number_of_attributes = sizeof(div_attr) / sizeof(HTAttr) - 1;
 
 			// Set a request timeout
-	//		HTHost_setEventTimeout (30000);
-	//		HTHost_setActiveTimeout (30000);
-	//		HTHost_setPersistTimeout (30000);
+			//		HTHost_setEventTimeout (30000);
+			//		HTHost_setActiveTimeout (30000);
+			//		HTHost_setPersistTimeout (30000);
 
+			// libwww default value is 2000ms for POST/PUT requests on the first and 3000 on the second, smallest allowed value is 21ms
+			// too small values may create timeout problems but we want it low as possible
+			// second value is the timeout for the second try to we set that high
+			HTTP_setBodyWriteDelay(250, 3000);
+	
 			// Initialized
 			initialized = true;
 		}

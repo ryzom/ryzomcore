@@ -373,7 +373,9 @@ public:
 		setCPUMask (Thread, _Process);
 
 		_ZoneLighter->processCalc (_Process, *_Description);
+		_ZoneLighter->_ProcessExitedMutex.enter();
 		_ZoneLighter->_ProcessExited++;
+		_ZoneLighter->_ProcessExitedMutex.leave();
 	}
 };
 
@@ -649,7 +651,9 @@ void NL3D::CRenderZBuffer::run()
 	}
 
 	// Exit
+	_ZoneLighter->_ProcessExitedMutex.enter();
 	_ZoneLighter->_ProcessExited++;
+	_ZoneLighter->_ProcessExitedMutex.leave();
 }
 
 // ***************************************************************************
@@ -676,7 +680,9 @@ public:
 	void run()
 	{
 		_ZoneLighter->processLightableShapeCalc(_Process, _ShapesToLit, _FirstShape, _LastShape, *_Description);
+		_ZoneLighter->_ProcessExitedMutex.enter();
 		_ZoneLighter->_ProcessExited++;
+		_ZoneLighter->_ProcessExitedMutex.leave();
 	}
 private:
 	CZoneLighter						*_ZoneLighter;

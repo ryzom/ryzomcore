@@ -2191,6 +2191,7 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 		res = nwglSwapIntervalEXT(_Interval) == TRUE;
 	}
 #elif defined(NL_OS_MAC)
+	[_ctx setValues:(GLint*)&interval forParameter:NSOpenGLCPSwapInterval];
 #elif defined(NL_OS_UNIX)
 	if (_win && _Extensions.GLXEXTSwapControl)
 	{
@@ -2250,6 +2251,8 @@ uint	CDriverGL::getSwapVBLInterval()
 void	CDriverGL::enablePolygonSmoothing(bool smooth)
 {
 	H_AUTO_OGL(CDriverGL_enablePolygonSmoothing);
+
+	if (_PolygonSmooth == smooth) return;
 
 #ifndef USE_OPENGLES
 	if(smooth)

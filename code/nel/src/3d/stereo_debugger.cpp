@@ -453,6 +453,7 @@ void CStereoDebugger::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 	devInfo.Manufacturer = "NeL";
 	devInfo.ProductName = "Stereo Debugger";
 	devInfo.Serial = "NL-3D-DEBUG";
+	devInfo.AllowAuto = false;
 	devicesOut.push_back(devInfo);
 }
 

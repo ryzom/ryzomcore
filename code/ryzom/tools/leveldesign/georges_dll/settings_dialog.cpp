@@ -39,7 +39,6 @@ CSettingsDialog::CSettingsDialog(CWnd* pParent /*=NULL*/)
 	TypeDfnSubDirectory = _T("");
 	MaxUndo = 0;
 	StartExpanded = TRUE;
-	Georges4CVS = TRUE;
 	//}}AFX_DATA_INIT
 }
 
@@ -55,7 +54,6 @@ void CSettingsDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_TYP_DFN_PATH, TypeDfnSubDirectory);
 	DDX_Text(pDX, IDC_MAX_UNDO, MaxUndo);
 	DDX_Check(pDX, IDC_START_EXPANDED, StartExpanded);
-	DDX_Check(pDX, IDC_GEORGES_4_CVS, Georges4CVS);
 	//}}AFX_DATA_MAP
 }
 
@@ -93,7 +91,6 @@ BOOL CSettingsDialog::OnInitDialog()
 	DefaultDfn = theApp.DefaultDfn.c_str ();
 	DefaultType = theApp.DefaultType.c_str ();
 	StartExpanded = theApp.StartExpanded;
-	Georges4CVS = theApp.Georges4CVS;
 
 	UpdateData (FALSE);
 
@@ -110,7 +107,6 @@ void CSettingsDialog::OnOK()
 	theApp.TypeDfnSubDirectory = TypeDfnSubDirectory;
 	theApp.RememberListSize = RememberListSize;
 	theApp.StartExpanded = StartExpanded ? TRUE : FALSE;
-	theApp.Georges4CVS = Georges4CVS ? TRUE : FALSE;
 	theApp.MaxUndo = MaxUndo;
 	theApp.DefaultDfn = DefaultDfn;
 	theApp.DefaultType = DefaultType;

@@ -103,6 +103,9 @@ bool	CPrimChecker::build(const string &primitivesPath, const string &igLandPath,
 			// load ig associated to the zone
 			string	igname = files[i];
 
+			if (CFile::getExtension(igname) != "ig")
+				continue;
+
 			string	ignamelookup = CPath::lookup(igname);
 			//nlinfo("Reading ig '%s'", ignamelookup.c_str());
 			CIFile			igStream(ignamelookup);

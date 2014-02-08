@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/ic_nel_select.png</file>
+    <file>icons/ic_nel_scale.png</file>
+    <file>icons/ic_nel_rotate.png</file>
+    <file>icons/ic_nel_move.png</file>
+    <file>icons/ic_nel_turn.png</file>
+    <file>icons/ic_nel_world_editor.png</file>
+  </qresource>
+</RCC>
