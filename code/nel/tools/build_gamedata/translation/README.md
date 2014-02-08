@@ -15,3 +15,12 @@ Now run the make diff tool again, this will create the diff between the translat
 Translate the diff files and remove the NOT TRANSLATED tag.
 
 Run the merge diff tool to merge the translations in.
+
+----
+
+Or the easy way:
+
+Run make_merge_wk.py to merge in changes from work/wk to translation/wk automatically.
+
+Run make_merge_all.py afterwards to make diffs and merge in any translated diffs automatically.
+
