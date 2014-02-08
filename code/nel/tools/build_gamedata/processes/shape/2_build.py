@@ -84,7 +84,7 @@ loPathTags = ExportBuildDirectory + "/" + ShapeTagExportDirectory
 mkPath(log, loPathLightmaps)
 mkPath(log, loPathShapes)
 mkPath(log, loPathTags)
-if needUpdateDirNoSubdir(log, loPathLightmapsOriginal, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathShapes, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathTags, loPathLightmaps):
+if needUpdateDirByTagLog(log, loPathLightmapsOriginal, ".txt", loPathLightmaps, ".txt") or needUpdateDirNoSubdir(log, loPathLightmapsOriginal, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathShapes, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathTags, loPathLightmaps):
 	removeFilesRecursive(log, loPathLightmaps)
 	copyFiles(log, loPathLightmapsOriginal, loPathLightmaps)
 	# Optimize lightmaps if any. Additionnaly, output a file indicating which lightmaps are 8 bits
