@@ -76,14 +76,22 @@ else:
 
 # copy lightmap_not_optimized to lightmap
 printLog(log, ">>> Optimize lightmaps <<<")
-mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory)
-mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
-mkPath(log, ExportBuildDirectory + "/" + ShapeTagExportDirectory)
-mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
-removeFilesRecursive(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
-copyFiles(log, ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
-# Optimize lightmaps if any. Additionnaly, output a file indicating which lightmaps are 8 bits
-subprocess.call([ LightmapOptimizer, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory, ExportBuildDirectory + "/" + ShapeTagExportDirectory, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/list_lm_8bit.txt" ])
+loPathLightmapsOriginal = ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory
+mkPath(log, loPathLightmapsOriginal)
+loPathLightmaps = ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory
+loPathShapes = ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory
+loPathTags = ExportBuildDirectory + "/" + ShapeTagExportDirectory
+mkPath(log, loPathLightmaps)
+mkPath(log, loPathShapes)
+mkPath(log, loPathTags)
+if needUpdateDirNoSubdir(log, loPathLightmapsOriginal, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathShapes, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathTags, loPathLightmaps):
+	removeFilesRecursive(log, loPathLightmaps)
+	copyFiles(log, loPathLightmapsOriginal, loPathLightmaps)
+	# Optimize lightmaps if any. Additionnaly, output a file indicating which lightmaps are 8 bits
+	# lightmap_optimizer <path_lightmaps> <path_shapes> [path_tags] [path_flag8bit]
+	subprocess.call([ LightmapOptimizer, loPathLightmaps, loPathShapes, loPathTags, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/list_lm_8bit.txt" ])
+else:
+	printLog(log, "SKIP *")
 
 # Convert lightmap in 16 bits mode if they are not 8 bits lightmap
 printLog(log, ">>> Convert lightmaps in 16 or 8 bits <<<")

@@ -335,7 +335,7 @@ def needUpdateMultiDirNoSubdirFile(log, root_dir, dirs_source, file_dest):
 
 def needUpdateDirNoSubdir(log, dir_source, dir_dest):
 	latestSourceFile = 0
-	oldestDestFile = 0
+	latestDestFile = 0
 	sourceFiles = os.listdir(dir_source)
 	destFiles = os.listdir(dir_dest)
 	for file in sourceFiles:
@@ -348,9 +348,9 @@ def needUpdateDirNoSubdir(log, dir_source, dir_dest):
 		filePath = dir_dest + "/" + file
 		if os.path.isfile(filePath):
 			fileTime = os.stat(filePath).st_mtime
-			if oldestDestFile == 0 or fileTime < oldestDestFile:
-				oldestDestFile = fileTime
-	if latestSourceFile > oldestDestFile:
+			if (fileTime > latestDestFile):
+				latestDestFile = fileTime
+	if latestSourceFile > latestDestFile:
 		return 1
 	else:
 		return 0
