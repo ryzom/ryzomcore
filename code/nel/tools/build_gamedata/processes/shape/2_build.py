@@ -120,39 +120,65 @@ if len(CoarseMeshTextureNames) > 0:
 	mkPath(log, shapeWithCoarseMesh)
 	shapeWithCoarseMeshBuilded = ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory
 	mkPath(log, shapeWithCoarseMeshBuilded)
-	cf = open("config_generated.cfg", "w")
-	cf.write("texture_mul_size = " + TextureMulSizeValue + ";\n")
-	cf.write("\n")
-	cf.write("search_path = \n")
-	cf.write("{\n")
-	cf.write("\t\"" + shapeWithCoarseMesh + "\", \n")
-	for dir in MapLookupDirectories:
-		cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
-	cf.write("};\n")
-	cf.write("\n")
-	cf.write("list_mesh = \n")
-	cf.write("{\n")
-	# For each shape with coarse mesh
-	files = findFiles(log, shapeWithCoarseMesh, "", ".shape")
-	for file in files:
-		sourceFile = shapeWithCoarseMesh + "/" + file
-		if os.path.isfile(sourceFile):
-			destFile = shapeWithCoarseMeshBuilded + "/" + file
-			cf.write("\t\"" + file + "\", \"" + destFile + "\", \n")
-	cf.write("};\n")
-	cf.write("\n")
-	cf.write("output_textures = \n")
-	cf.write("{\n")
-	# For each shape with coarse mesh
-	for tn in CoarseMeshTextureNames:
-		cf.write("\t\"" + shapeWithCoarseMesh + "/" + tn + ".tga\", \n")
-	cf.write("};\n")
-	cf.close()
-	subprocess.call([ BuildCoarseMesh, "config_generated.cfg" ])
-	os.remove("config_generated.cfg")
+	# This builds from shapeWithCoarseMesh .shape to shapeWithCoarseMesh .tga
+	# And from shapeWithCoarseMesh .shape to shapeWithCoarseMeshBuilded .shape
+	# Then builds from shapeWithCoarseMesh .tga to shapeWithCoarseMeshBuilded .tga
+	# Depends on MapLookupDirectories
+	needUpdateMaps = needUpdateMultiDirNoSubdirMultiFileExt(log, ExportBuildDirectory, MapLookupDirectories, shapeWithCoarseMesh, CoarseMeshTextureNames, ".tga") or needUpdateMultiDirNoSubdir(log, ExportBuildDirectory, MapLookupDirectories, shapeWithCoarseMeshBuilded)
+	if needUpdateMaps:
+		printLog(log, "DETECT UPDATE Maps->*")
+	else:
+		printLog(log, "DETECT SKIP Maps->*")
+	needUpdateShapeShape = needUpdateDirByTagLog(log, shapeWithCoarseMesh, ".shape", shapeWithCoarseMeshBuilded, ".shape")
+	if needUpdateShapeShape:
+		printLog(log, "DETECT UPDATE Shape->Shape")
+	else:
+		printLog(log, "DETECT SKIP Shape->Shape")
+	needUpdateShapeCoarse = needUpdateDirNoSubdirExtMultiFileExt(log, shapeWithCoarseMesh, ".shape", shapeWithCoarseMesh, CoarseMeshTextureNames, ".tga")
+	if needUpdateShapeCoarse:
+		printLog(log, "DETECT UPDATE Shape->Coarse")
+	else:
+		printLog(log, "DETECT SKIP Shape->Coarse")
+	if needUpdateMaps or needUpdateShapeShape or needUpdateShapeCoarse:
+		cf = open("config_generated.cfg", "w")
+		cf.write("texture_mul_size = " + TextureMulSizeValue + ";\n")
+		cf.write("\n")
+		cf.write("search_path = \n")
+		cf.write("{\n")
+		cf.write("\t\"" + shapeWithCoarseMesh + "\", \n")
+		for dir in MapLookupDirectories:
+			cf.write("\t\"" + ExportBuildDirectory + "/" + dir + "\", \n")
+		cf.write("};\n")
+		cf.write("\n")
+		cf.write("list_mesh = \n")
+		cf.write("{\n")
+		# For each shape with coarse mesh
+		files = findFiles(log, shapeWithCoarseMesh, "", ".shape")
+		for file in files:
+			sourceFile = shapeWithCoarseMesh + "/" + file
+			if os.path.isfile(sourceFile):
+				destFile = shapeWithCoarseMeshBuilded + "/" + file
+				cf.write("\t\"" + file + "\", \"" + destFile + "\", \n")
+		cf.write("};\n")
+		cf.write("\n")
+		cf.write("output_textures = \n")
+		cf.write("{\n")
+		# For each shape with coarse mesh
+		for tn in CoarseMeshTextureNames:
+			cf.write("\t\"" + shapeWithCoarseMesh + "/" + tn + ".tga\", \n")
+		cf.write("};\n")
+		cf.close()
+		subprocess.call([ BuildCoarseMesh, "config_generated.cfg" ])
+		os.remove("config_generated.cfg")
+	needUpdateCoarse = needUpdateDirNoSubdirExtMultiFileExt(log, shapeWithCoarseMesh, ".tga", shapeWithCoarseMeshBuilded, CoarseMeshTextureNames, ".dds")
+	if needUpdateCoarse:
+		printLog(log, "DETECT UPDATE Coarse->DDS")
+	else:
+		printLog(log, "DETECT SKIP Coarse->DDS")
 	# Convert the coarse texture to dds
-	for tn in CoarseMeshTextureNames:
-		subprocess.call([ TgaToDds, shapeWithCoarseMesh + "/" + tn + ".tga", "-o", shapeWithCoarseMeshBuilded + "/" + tn + ".dds", "-a", "5" ])
+	if needUpdateCoarse:
+		for tn in CoarseMeshTextureNames:
+			subprocess.call([ TgaToDds, shapeWithCoarseMesh + "/" + tn + ".tga", "-o", shapeWithCoarseMeshBuilded + "/" + tn + ".dds", "-a", "5" ])
 else:
 	printLog(log, ">>> No coarse meshes <<<")
 
