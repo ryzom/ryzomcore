@@ -236,6 +236,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
   OPTION(FINAL_VERSION            "Build in Final Version mode"                   ON )
+  OPTION(WITH_PERFHUD            "Build with NVIDIA PerfHUD support"                   OFF )
 
   # Default to static building on Windows.
   IF(WIN32)
