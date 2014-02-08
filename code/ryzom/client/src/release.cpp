@@ -512,6 +512,17 @@ void releaseOutGame()
 	ContinentMngr.reset();
 }
 
+void releaseStereoDisplayDevice()
+{
+	if (StereoDisplay)
+	{
+		delete StereoDisplay;
+		StereoDisplay = NULL;
+		StereoHMD = NULL;
+	}
+	IStereoDisplay::releaseAllLibraries();
+}
+
 // ***************************************************************************
 // final release : Release before exit.
 void release()
@@ -559,13 +570,7 @@ void release()
 	EAM= NULL;
 
 	nldebug("VR [C]: VR Shutting down");
-	if (StereoDisplay)
-	{
-		delete StereoDisplay;
-		StereoDisplay = NULL;
-		StereoHMD = NULL;
-	}
-	IStereoDisplay::releaseAllLibraries();
+	releaseStereoDisplayDevice();
 
 	// Delete the driver.
 	if(Driver)
