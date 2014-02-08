@@ -142,11 +142,11 @@ if not args.noconf:
 	try:
 		LeveldesignDataShardDirectory
 	except NameError:
-		LeveldesignDataShardDirectory = "L:/data_shard"
+		LeveldesignDataShardDirectory = "L:/shard"
 	try:
 		LeveldesignDataCommonDirectory
 	except NameError:
-		LeveldesignDataCommonDirectory = "L:/data_common"
+		LeveldesignDataCommonDirectory = "L:/common"
 	try:
 		TranslationDirectory
 	except NameError:
