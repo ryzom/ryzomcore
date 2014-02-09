@@ -91,6 +91,7 @@
 #include "faction_war_manager.h"
 #include "interface_v3/interface_ddx.h"
 #include "bg_downloader_access.h"
+#include "nel/gui/lua_manager.h"
 #include "camera_animation_manager/camera_animation_player.h"
 
 
