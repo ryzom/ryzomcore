@@ -345,6 +345,23 @@ void CSpawnBot::sheetChanged()
 //	CMirrors::initSheet(dataSetRow(), getPersistent().getSheet()->SheetId());
 }
 
+void CSpawnBot::sendInfoToEGS() const
+{
+	if (!EGSHasMirrorReady)
+		return;
+
+	const uint32& maxHp = getPersistent().getCustomMaxHp();
+	if (maxHp > 0.f)
+	{
+		CChangeCreatureMaxHPMsg& msgList = CAIS::instance().getCreatureChangeMaxHP();
+		
+		msgList.Entities.push_back(dataSetRow());
+		msgList.MaxHp.push_back((uint32)(maxHp));
+		msgList.SetFull.push_back((uint8)(1));
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // CBot                                                                     //
 //////////////////////////////////////////////////////////////////////////////
@@ -359,6 +376,7 @@ CBot::CBot(CGroup* owner, CAIAliasDescriptionNode* alias)
 , _SetSheetData(NULL)
 , _Observers(NULL)
 , _ProfileData(NULL)
+, _CustomMaxHp(0)
 {
 }
 
@@ -372,6 +390,7 @@ CBot::CBot(CGroup* owner, uint32 alias, std::string const& name)
 , _SetSheetData(NULL)
 , _Observers(NULL)
 , _ProfileData(NULL)
+, _CustomMaxHp(0.f)
 {
 }
 

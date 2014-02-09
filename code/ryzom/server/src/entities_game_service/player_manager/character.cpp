@@ -147,6 +147,8 @@
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
 
+#include "player_manager/character_achievements.h"
+
 ///////////
 // USING //
 ///////////
@@ -187,7 +189,7 @@ extern float						CarriedItemsDecayRate;
 extern uint8						TeamMembersStatusMaxValue;
 extern CCharacterBotChatBeginEnd	CharacterBotChatBeginEnd;
 //*** Removed by Sadge ***
-//extern CCreatureAskInformationMsg	CreatureNpcInformations;
+//extern CCreatureAskInformationMsg	CreatureNpcInformation;
 //*** ***
 extern float						MaxHarvestDistance;
 extern float						MaxMountDistance;
@@ -501,7 +503,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_TeamId= CTEAM::InvalidTeamId;
 
 	///init LeagueId
-	_LeagueId = TChanID::Unknown;
+	_LeagueId = DYN_CHAT_INVALID_CHAN;
 
 	// init combat flags
 	_CombatEventFlagTicks.resize(32);
@@ -596,10 +598,13 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_CurrentParryLevel = 1;
 	_BaseParryLevel = 1;
 
+	_BaseResistance = 1;
+
 	_SkillUsedForDodge = SKILLS::SF;
 	_CurrentParrySkill = BarehandCombatSkill;
 
 	_EncycloChar = new CCharacterEncyclopedia(*this);
+	_AchievementsChar = new CCharacterAchievements(*this);
 	_GameEvent = new CCharacterGameEvent(*this);
 	_RespawnPoints = new CCharacterRespawnPoints(*this);
 	_PlayerRoom = new CPlayerRoomInterface;
@@ -671,6 +676,11 @@ CCharacter::CCharacter():	CEntityBase(false),
 
 	_CustomMissionsParams.clear();
 
+	_FriendVisibility = VisibleToAll;
+
+	_LangChannel = "en";
+	_NewTitle = "Refugee";
+
 	initDatabase();
 } // CCharacter  //
 
@@ -695,6 +705,7 @@ void CCharacter::clear()
 	_ForbidAuraUseStartDate=0;
 	_ForbidAuraUseEndDate=0;
 	_Title= CHARACTER_TITLE::Refugee;
+	_NewTitle = "Refugee";
 
 	SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatModel,0);
 	SET_STRUCT_MEMBER(_VisualPropertyA,PropertySubData.HatColor,0);
@@ -1414,6 +1425,7 @@ uint32 CCharacter::tickUpdate()
 		}
 	}
 
+	bool updatePVP = false;
 	{
 		H_AUTO(CharacterUpdateOutpost);
 
@@ -1425,6 +1437,7 @@ uint32 CCharacter::tickUpdate()
 			{
 				stopOutpostLeavingTimer();
 				setOutpostAlias(0);
+				updatePVP = true;
 			}
 
 			CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias( outpostAlias );
@@ -1435,10 +1448,12 @@ uint32 CCharacter::tickUpdate()
 				{
 					stopOutpostLeavingTimer();
 					setOutpostAlias(0);
+					updatePVP = true;
 				}
 				else
 				{
 					outpost->fillCharacterOutpostDB(this);
+					updatePVP = true;
 				}
 			}
 		}
@@ -1447,26 +1462,27 @@ uint32 CCharacter::tickUpdate()
 	{
 		H_AUTO(CharacterUpdatePVPMode);
 
-		if (_PVPSafeLastTimeChange + 20 < CTickEventHandler::getGameCycle())
+		if (_PVPSafeLastTimeChange + 20 < CTickEventHandler::getGameCycle() || updatePVP)
 		{
-			bool update = false;
 			_PVPSafeLastTimeChange = CTickEventHandler::getGameCycle();
 
 			if (_PVPSafeLastTime != getSafeInPvPSafeZone())
 			{
 				_PVPSafeLastTime = !_PVPSafeLastTime;
-				update = true;
+				updatePVP = true;
 			}
 
 			if (_PVPInSafeZoneLastTime != CPVPManager2::getInstance()->inSafeZone(getPosition()))
 			{
 				_PVPInSafeZoneLastTime = !_PVPInSafeZoneLastTime;
-				update = true;
+				updatePVP = true;
 			}
 			
-			if (update) {
+			if (updatePVP)
+			{
 				CPVPManager2::getInstance()->setPVPModeInMirror(this);
 				updatePVPClanVP();
+				_HaveToUpdatePVPMode = false;
 			}
 		}
 
@@ -1484,7 +1500,7 @@ uint32 CCharacter::tickUpdate()
 
 		if( getPvPRecentActionFlag() == false )
 		{
-			CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, TheDataset.getDataSetRow(_Id), DSPropertyPVP_MODE );
+			CMirrorPropValue<TYPE_EVENT_FACTION_ID> propPvpMode( TheDataset, TheDataset.getDataSetRow(_Id), DSPropertyEVENT_FACTION_ID );
 			if( propPvpMode.getValue()&PVP_MODE::PvpFactionFlagged )
 			{
 				CPVPManager2::getInstance()->setPVPModeInMirror(this);
@@ -1519,6 +1535,8 @@ uint32 CCharacter::tickUpdate()
 	{
 		nextUpdate = 8;
 	}
+
+	//_AchievementsPlayer->tickUpdate();
 
 	return nextUpdate;
 } // tickUpdate //
@@ -1720,6 +1738,8 @@ void CCharacter::deathOccurs( void )
 	}
 
 	CPVPManager2::getInstance()->playerDies(this);
+
+	CBuildingManager::getInstance()->removeTriggerRequest(getEntityRowId());
 
 	if( _TimeDeath < CTickEventHandler::getGameTime() )
 	{
@@ -2777,6 +2797,7 @@ CCharacter::~CCharacter()
 	_BarUpdateTimer.reset();
 
 	delete _EncycloChar;
+	delete _AchievementsChar;
 	delete _GameEvent;
 	delete _RespawnPoints;
 	delete _PlayerRoom;
@@ -2792,6 +2813,12 @@ CCharacter::~CCharacter()
 
 //	NLMEMORY::StatisticsReport( "egs_memory_report.csv", false );
 } // destructor //
+
+
+void CCharacter::mobKill(TDataSetRow creatureRowId)
+{
+	_AchievementsChar->mobKill(creatureRowId);
+}
 
 //---------------------------------------------------
 // prepareToLoad: method called before applying a pdr save record
@@ -2878,14 +2905,7 @@ void CCharacter::postLoadTreatment()
 			{
 				tickets[ slot ] =  true;
 
-				// init pet inventory
-				const uint32 petMaxWeight = 0xFFFFFFFF; // no weight limit
-				const uint32 petMaxBulk = _PlayerPets[ i ].getAnimalMaxBulk();
-
-				const INVENTORIES::TInventory petInvId = (INVENTORIES::TInventory)(i + INVENTORIES::pet_animal);
-				CPetInventory *petInventory = dynamic_cast<CPetInventory*> ((CInventoryBase*)_Inventory[petInvId]);
-				if (petInventory)
-					petInventory->initPetInventory( i, petMaxWeight, petMaxBulk );
+				initPetInventory(i);
 			}
 		}
 	}
@@ -2998,6 +3018,13 @@ void CCharacter::postLoadTreatment()
 		H_AUTO(ComputeMiscBonus);
 		/* compute misc bonuses */
 		computeMiscBonus();
+	}
+
+	CPlayer * p = PlayerManager.getPlayer(PlayerManager.getPlayerId( getId() ));
+	if (!p->isTrialPlayer())
+	{
+		CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setLevel(_PropertyDatabase, 250);
+		CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setCount(_PropertyDatabase, 999);
 	}
 
 	{
@@ -3488,8 +3515,8 @@ void CCharacter::setTarget( const CEntityId &targetId, bool sendMessage )
 
 //*** Removed by Sadge ***
 //		// Ask information about target to AI service
-//		CreatureNpcInformations.Character.push_back( _EntityRowId );
-//		CreatureNpcInformations.Creature.push_back( target->getEntityRowId() );
+//		CreatureNpcInformation.Character.push_back( _EntityRowId );
+//		CreatureNpcInformation.Creature.push_back( target->getEntityRowId() );
 //*** ***
 	}
 	else // target == NULL
@@ -3840,9 +3867,9 @@ void CCharacter::sendBetaTesterStatus()
 
 	sendReservedTitleStatus( CHARACTER_TITLE::FBT, p->isBetaTester() );
 
-	if (!p->isBetaTester() && _Title == CHARACTER_TITLE::FBT)
+	if (!p->isBetaTester() && _NewTitle == "FBT")
 	{
-		_Title = CHARACTER_TITLE::Refugee;
+		_NewTitle = "Refugee";
 		registerName();
 	}
 }
@@ -3858,9 +3885,9 @@ void CCharacter::sendWindermeerStatus()
 
 	sendReservedTitleStatus( CHARACTER_TITLE::WIND, p->isWindermeerCommunity() );
 
-	if ( !p->isWindermeerCommunity() && _Title == CHARACTER_TITLE::WIND)
+	if ( !p->isWindermeerCommunity() && _NewTitle == "WIND")
 	{
-		_Title = CHARACTER_TITLE::Refugee;
+		_NewTitle = "Refugee";
 		registerName();
 	}
 }
@@ -5200,15 +5227,10 @@ bool CCharacter::addCharacterAnimal( const CSheetId& PetTicket, uint32 Price, CG
 			pet.Slot = ptr->getInventorySlot();
 
 			// init pet inventory
-			const uint32 petMaxWeight = 0xFFFFFFFF; // no weight limit
-			const uint32 petMaxBulk = _PlayerPets[ i ].getAnimalMaxBulk();
-
-			const INVENTORIES::TInventory petInvId = (INVENTORIES::TInventory)(i + INVENTORIES::pet_animal);
-			CPetInventory *petInventory = dynamic_cast<CPetInventory*> ((CInventoryBase*)_Inventory[petInvId]);
-			if (petInventory)
-				petInventory->initPetInventory( i, petMaxWeight, petMaxBulk );
-			else
+			if ( ! initPetInventory( i ))
+			{
 				return false;
+			}
 
 			return spawnCharacterAnimal( i );
 		}
@@ -6356,7 +6378,7 @@ void CCharacter::removePetCharacterAfterDeath( uint32 index )
 {
 	TLogContext_Item_PetDespawn logContext(_Id);
 	// pet founded
-	if( index < MAX_PACK_ANIMAL )
+	if( index < MAX_INVENTORY_ANIMAL )
 	{
 		// reset despawn timer
 //		_PropertyDatabase.setProp( _DataIndexReminder->PACK_ANIMAL.BEAST[index].DESPAWN, 0 );
@@ -6765,12 +6787,15 @@ void CCharacter::setAnimalName( uint8 petIndex, ucstring customName )
 
 	animal.setCustomName(customName);
 	sendPetCustomNameToClient(petIndex);
-	
-	TDataSetRow row = animal.SpawnedPets;
-	NLNET::CMessage	msgout("CHARACTER_NAME");
-	msgout.serial(row);
-	msgout.serial(customName);
-	sendMessageViaMirror("IOS", msgout);
+
+	if ( ! customName.empty())
+	{
+		TDataSetRow row = animal.SpawnedPets;
+		NLNET::CMessage	msgout("CHARACTER_NAME");
+		msgout.serial(row);
+		msgout.serial(customName);
+		sendMessageViaMirror("IOS", msgout);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -6932,7 +6957,10 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 	uint32 ringCatalyserLvl = 0;
 	uint32 ringCatalyserCount = 0;
 
-	if( addXpMode != AddXpToSkillBranch )
+	// Don't take away cats if free trial limit reached and there is no DP.
+	bool bConsumeCats = ! ( bFreeTrialLimitReached && _DeathPenalties->isNull() );
+
+	if( bConsumeCats && (addXpMode != AddXpToSkillBranch) )
 	{
 		if( _XpCatalyserSlot != INVENTORIES::INVALID_INVENTORY_SLOT )
 		{
@@ -6951,7 +6979,13 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 				CBankAccessor_PLR::getCHARACTER_INFO().getRING_XP_CATALYSER().setCount(_PropertyDatabase, checkedCast<uint16>(ringCatalyserCount) );
 			}
 		}
+
+		if (!p->isTrialPlayer())
+		{
+			xpBonus = XpGain;
+		}
 	}
+
 	XpGain += xpBonus + ringXpBonus;
 
 	// update death penalty
@@ -7063,7 +7097,7 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 			SM_STATIC_PARAMS_3(paramsP, STRING_MANAGER::skill, STRING_MANAGER::integer, STRING_MANAGER::integer);
 			paramsP[0].Enum = skillEnum;
 			paramsP[1].Int = max((sint32)1, sint32(100*XpGain) );
-			paramsP[2].Int = max((sint32)1, sint32(100*(XpGain - (xpBonus+ringXpBonus))) );
+			paramsP[2].Int = max((sint32)1, sint32(100*(XpGain - xpBonus - ringXpBonus)));
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "XP_CATALYSER_PROGRESS_NORMAL_GAIN", paramsP);
 
 			if( xpBonus > 0 )
@@ -7311,11 +7345,18 @@ double CCharacter::addXpToSkillInternal( double XpGain, const std::string& ContS
 	return XpGainRemainder;
 }
 
-
 //-----------------------------------------------
 // CCharacter::setSkillTreeToMaxValue Set skill tree of character to max value of each skill
 //-----------------------------------------------
 void CCharacter::setSkillsToMaxValue()
+{
+	setSkillsToValue(-1);
+}
+
+//-----------------------------------------------
+// CCharacter::setSkillTreeToMaxValue Set skill tree of character to max value of each skill
+//-----------------------------------------------
+void CCharacter::setSkillsToValue(const sint32& value)
 {
 	// get pointer on static skills tree definition
 	CSheetId sheet("skills.skill_tree");
@@ -7324,15 +7365,30 @@ void CCharacter::setSkillsToMaxValue()
 
 	for( uint i = 0; i < SKILLS::NUM_SKILLS; ++i )
 	{
-		_Skills._Skills[ i ].Base = SkillsTree->SkillsTree[ i ].MaxSkillValue;
+		_Skills._Skills[ i ].Base = (value < 0) ? SkillsTree->SkillsTree[ i ].MaxSkillValue : min( value, (sint32)SkillsTree->SkillsTree[ i ].MaxSkillValue );
 		_Skills._Skills[ i ].Current = SkillsTree->SkillsTree[ i ].MaxSkillValue + _Skills._Skills[ i ].Modifier;
-//		_PropertyDatabase.setProp( _DataIndexReminder->CHARACTER_INFO.SKILLS.Skill[i], _Skills._Skills[ i ].Current );
-		CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setSKILL(_PropertyDatabase, checkedCast<uint16>(_Skills._Skills[ i ].Current) );
-//		_PropertyDatabase.setProp( _DataIndexReminder->CHARACTER_INFO.SKILLS.BaseSkill[i], _Skills._Skills[ i ].Base );
+		_Skills._Skills[ i ].MaxLvlReached = _Skills._Skills[ i ].Current;
+
 		CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setBaseSKILL(_PropertyDatabase, checkedCast<uint16>(_Skills._Skills[ i ].Base) );
+		CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setSKILL(_PropertyDatabase, checkedCast<uint16>(_Skills._Skills[ i ].Current) );
+
+		// update all parent skill with new max children
+		SKILLS::ESkills skillUpdated = (SKILLS::ESkills)i;
+		while( SkillsTree->SkillsTree[ skillUpdated ].ParentSkill != SKILLS::unknown )
+		{
+			if( _Skills._Skills[ i ].Base > _Skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxLvlReached )
+			{
+				_Skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxLvlReached = _Skills._Skills[ i ].Base;
+				_Skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].Base = min( _Skills._Skills[ skillUpdated ].Base, (sint32)SkillsTree->SkillsTree[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxSkillValue );
+				skillUpdated = SkillsTree->SkillsTree[ skillUpdated ].ParentSkill;
+			}
+			else
+			{
+				break;
+			}
+		}
 	}
 }
-
 
 //-----------------------------------------------
 // CCharacter::sendDynamicSystemMessage
@@ -7456,7 +7512,6 @@ void CCharacter::sendUserChar( uint32 userId, uint8 scenarioSeason, const R2::TU
 		_RingSeason = scenarioSeason;
 	}
 }
-
 
 //-----------------------------------------------
 // Return the home mainland session id for a character
@@ -7768,9 +7823,9 @@ void CCharacter::endHarvest(bool sendCloseTempImpulsion)
 	_HarvestOpened = false;
 	_DepositSearchSkill = SKILLS::unknown;
 	_MpIndex = 0xff;
-	_DepositHarvestInformations.DepositIndex = 0xffffffff;
+	_DepositHarvestInformation.DepositIndex = 0xffffffff;
 
-	if ( _DepositHarvestInformations.Sheet != CSheetId::Unknown/*_DepositHarvestInformations.EndCherchingTime != 0xffffffff && _DepositHarvestInformations.EndCherchingTime > CTickEventHandler::getGameCycle()*/ )
+	if ( _DepositHarvestInformation.Sheet != CSheetId::Unknown/*_DepositHarvestInformation.EndCherchingTime != 0xffffffff && _DepositHarvestInformation.EndCherchingTime > CTickEventHandler::getGameCycle()*/ )
 	{
 		if ( sendCloseTempImpulsion )
 		{
@@ -7931,6 +7986,7 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	_Race				= (EGSPD::CPeople::TPeople) createCharMsg.People;
 	_Gender				= createCharMsg.Sex;
 	_Title				= CHARACTER_TITLE::Refugee;
+	_NewTitle			= "Refugee";
 
 	// fame information
 	// Players start out as Neutral in their declared clans
@@ -8869,7 +8925,7 @@ void CCharacter::setDatabase()
 	_IneffectiveAuras.activate();
 	_ConsumableOverdoseEndDates.activate();
 	// init the RRPs
-	//RingRewarsdPoints.initDb();
+	//RingRewardPoints.initDb();
 
 }// setDatabase //
 
@@ -8931,7 +8987,8 @@ void CCharacter::startTradeItemSession( uint16 session )
 		nlwarning("fame %u is INVALID",(uint)bot->getRace() );
 		fame = MinFameToTrade;
 	}
-	else if ( fame < MinFameToTrade && bot->getOrganization() != getOrganization() )
+	
+	if ( (bot->getOrganization() == 0 && fame < MinFameToTrade) || (bot->getOrganization() != 0 && bot->getOrganization() != getOrganization()) )
 	{
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
 		params[0].setEIdAIAlias( _CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor) );
@@ -8939,6 +8996,9 @@ void CCharacter::startTradeItemSession( uint16 session )
 		npcTellToPlayerEx( bot->getEntityRowId(),_EntityRowId,txt );
 		return;
 	}
+	else if (bot->getOrganization() != 0 && bot->getOrganization() == getOrganization())
+		fame = 0;
+
 
 	float fameFactor = 1.0f;
 	if(bot->getForm()->getFaction() != CStaticFames::INVALID_FACTION_INDEX)
@@ -9036,7 +9096,8 @@ void CCharacter::startTradePhrases(uint16 session)
 	{
 		nlwarning("fame %u is INVALID",(uint)bot->getRace() );
 	}
-	if ( fame < MinFameToTrade && bot->getOrganization() != getOrganization() )
+	
+	if ( (bot->getOrganization() == 0 && fame < MinFameToTrade) || (bot->getOrganization() != 0 && bot->getOrganization() != getOrganization()) )
 	{
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
 		params[0].setEIdAIAlias( _CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor) );
@@ -9044,7 +9105,6 @@ void CCharacter::startTradePhrases(uint16 session)
 		npcTellToPlayerEx( bot->getEntityRowId(),_EntityRowId,txt );
 		return;
 	}
-
 
 	// *** Set right rolemaster flags and race in Database
 	uint8 flags = 0;
@@ -9765,7 +9825,7 @@ bool CCharacter::queryItemPrice( const CGameItemPtr item, uint32& price )
 	quality = theItem->quality();
 	if ( theItem->maxDurability() )
 		wornFactor = float(theItem->durability()) / float(theItem->maxDurability());
-	price = (uint32) ( CShopTypeManager::computeBasePrice( theItem, quality ) * wornFactor );
+	price = (uint32) ( CShopTypeManager::computeBasePrice( theItem, quality ) * wornFactor * 0.02 );
 	return true;
 }
 
@@ -9806,7 +9866,8 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		nlwarning("fame %u is INVALID",(uint)bot->getRace() );
 		fame = MinFameToTrade;
 	}
-	else if ( fame < MinFameToTrade && bot->getOrganization() != getOrganization() )
+
+	if ( (bot->getOrganization() == 0 && fame < MinFameToTrade) || (bot->getOrganization() != 0 && bot->getOrganization() != getOrganization()) )
 	{
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::bot);
 		params[0].setEIdAIAlias( _CurrentInterlocutor, CAIAliasTranslator::getInstance()->getAIAlias(_CurrentInterlocutor) );
@@ -9818,6 +9879,8 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 
 		return;
 	}
+	else if (bot->getOrganization() != 0 && bot->getOrganization() == getOrganization())
+		fame = 0;
 
 	CInventoryPtr child = _Inventory[ inv ];
 	if( child->getSlotCount() > slot && child->getItem( slot ) != NULL )
@@ -9853,6 +9916,13 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 			return;
 		}
 
+		// You cannot exchange genesis named items
+		if (item->getPhraseId().find("genesis_") == 0)
+		{
+			nlwarning("Character %s tries to sell '%s'", _Id.toString().c_str(), item->getPhraseId().c_str() );
+			return;
+		}
+
 		if( ! ITEMFAMILY::isSellableByPlayer( itemForm->Family ) )
 		{
 			nlwarning("<CCharacter sellItem> character %s try to sell an unsealable item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
@@ -9880,7 +9950,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 
 		if (item->getRefInventory() == _Inventory[INVENTORIES::equipment])
 		{
-			nlwarning("<CCharacter sellItem> character %s try to sell an equiped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
+			nlwarning("<CCharacter sellItem> character %s try to sell an equipped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
 			return;
 		}
 
@@ -10182,6 +10252,35 @@ void CCharacter::initPvpPointDb()
 	CBankAccessor_PLR::getUSER().getRRPS_LEVELS(0).setVALUE(_PropertyDatabase, _PvpPoint );
 }
 
+//-----------------------------------------------------------------------------
+void CCharacter::setLangChannel(const string &lang) {
+	_LangChannel = lang;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setNewTitle(const string &title) {
+	_NewTitle = title;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagPvPA(const string &tag) {
+	_TagPvPA = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagPvPB(const string &tag) {
+	_TagPvPB = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagA(const string &tag) {
+	_TagA = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagB(const string &tag) {
+	_TagB = tag;
+}
 
 //-----------------------------------------------------------------------------
 void CCharacter::setOrganization(uint32 org)
@@ -10206,7 +10305,7 @@ void CCharacter::setOrganizationStatus(uint32 status)
 //-----------------------------------------------------------------------------
 void CCharacter::changeOrganizationStatus(sint32 status)
 {
-	if (status < 0 && abs(status) > _OrganizationStatus)
+	if (status < 0 && abs(status) > (sint32)_OrganizationStatus)
 		_OrganizationStatus = 0;
 	else
 		_OrganizationStatus += status;
@@ -10216,7 +10315,7 @@ void CCharacter::changeOrganizationStatus(sint32 status)
 //-----------------------------------------------------------------------------
 void CCharacter::changeOrganizationPoints(sint32 points)
 {
-	if (points < 0 && abs(points) > _OrganizationPoints)
+	if (points < 0 && abs(points) > (sint32)_OrganizationPoints)
 		_OrganizationPoints = 0;
 	else
 		_OrganizationPoints += points;
@@ -11161,14 +11260,14 @@ bool CCharacter::validateExchange()
 		sint32 ticketDelta = c->_ExchangeView->getPetTicketExchanged( ITEM_TYPE::MEKTOUB_PACKER_TICKET ) - _ExchangeView->getPetTicketExchanged( ITEM_TYPE::MEKTOUB_PACKER_TICKET );
 		if( !checkAnimalCount( packerSheet, false, ticketDelta ) )
 		{
-			sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX()");
+			sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
 			c->sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
 		}
 		if( !c->checkAnimalCount( packerSheet, false, -ticketDelta ) )
 		{
-			c->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX()");
+			c->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
 			sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
@@ -11180,14 +11279,14 @@ bool CCharacter::validateExchange()
 		sint32 ticketDelta = c->_ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_MOUNT_TICKET) - _ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_MOUNT_TICKET);
 		if( !checkAnimalCount( mountSheet, false, ticketDelta ) )
 		{
-			sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX()");
+			sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
 			c->sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
 		}
 		if( !c->checkAnimalCount( mountSheet, false, -ticketDelta ) )
 		{
-			c->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX()");
+			c->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
 			sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
@@ -11285,20 +11384,22 @@ void CCharacter::removeExchangeItems(vector<CGameItemPtr >& itemRemoved, vector<
 // addExchangeItems
 //
 //-----------------------------------------------
-void CCharacter::addExchangeItems(CCharacter* trader,vector<CGameItemPtr >& itemToAdd, vector< CPetAnimal >& playerPetsAdd)
+void CCharacter::addExchangeItems(CCharacter* trader,vector<CGameItemPtr >& itemToAdd, vector< CPetAnimal >& playerPetsAdded)
 {
 	// inform AI
 	CPetSetOwner msgAI;
 
 	bool updatePetDataBase = false;
 
-	for( uint32 p = 0; p < playerPetsAdd.size(); ++p )
+	for( uint32 p = 0; p < playerPetsAdded.size(); ++p )
 	{
 		sint32 i = getFreePetSlot();
 		if( i >= 0 )
 		{
-			_PlayerPets[ i ] = playerPetsAdd[ p ];
+			_PlayerPets[ i ] = playerPetsAdded[ p ];
 			_PlayerPets[ i ].OwnerId = _Id;
+
+			initPetInventory(i);
 
 			if( _PlayerPets[ i ].PetStatus == CPetAnimal::waiting_spawn )
 			{
@@ -12393,10 +12494,15 @@ bool CCharacter::autoFillExchangeView()
 			{
 				invItem = playerBagInvPointer->getItem(inventoryIndex);
 				if (invItem == NULL)
-				continue;
+					continue;
+
+				if (invItem->getLockedByOwner())
+					continue;
+
+				if (invItem->getRefInventory() != NULL)
+					continue;
 
 				itemsSeenCount++;
-
 				// Changed to support comparisons on sheetID masks
 				if (invItem->getSheetId() == validateSteps[stepCounter].Sheet)
 				{
@@ -12861,7 +12967,7 @@ void CCharacter::registerName(const ucstring &newName)
 	CMessage msgName("CHARACTER_NAME_LANG");
 	msgName.serial(_EntityRowId);
 
-	string sTitle = CHARACTER_TITLE::toString(_Title);
+	string sTitle = getFullTitle();
 	ucstring RegisteredName;
 	if (newName.empty())
 		RegisteredName = getName() + string("$") + sTitle + string("$");
@@ -13030,7 +13136,10 @@ void CCharacter::setPlaces(const std::vector<const CPlace*> & places)
 	const uint size = (uint)places.size();
 	_Places.resize(places.size());
 	for ( uint i = 0; i < size; i++ )
+	{
 		_Places[i] = places[i]->getId();
+		_AchievementsChar->inPlace(places[i]);
+	}
 }
 
 //-----------------------------------------------
@@ -13566,8 +13675,12 @@ void CCharacter::sendUrl(const string &url, const string &salt)
 	string control;
 	if (!salt.empty())
 	{
-		string checksum = salt+url;
-		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();;
+		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&salt[0], (uint32)salt.size()).toString();
+	}
+	else
+	{
+		string defaultSalt = toString(getLastConnectedDate());
+		control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
 	}
 
 	nlinfo(url.c_str());
@@ -13943,7 +14056,7 @@ bool CCharacter::pickUpRawMaterial( uint32 indexInTempInv, bool * lastMaterial )
 				}
 
 				clearHarvestDB();
-				//CZoneManager::getInstance().removeRmFromDeposit( this, _DepositHarvestInformations.DepositIndex, _DepositHarvestInformations.DepositIndexContent,_HarvestedQuantity);
+				//CZoneManager::getInstance().removeRmFromDeposit( this, _DepositHarvestInformation.DepositIndex, _DepositHarvestInformation.DepositIndexContent,_HarvestedQuantity);
 			}
 		}
 	}
@@ -14087,6 +14200,11 @@ void CCharacter::sendCloseTempInventoryImpulsion()
 //-----------------------------------------------
 void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint32 fameMax, uint16 fameTrend)
 {
+	if (playerFame != NO_FAME)
+	{
+		_AchievementsChar->fameValue(factionIndex, playerFame);
+	}
+
 	uint32 firstTribeFameIndex = CStaticFames::getInstance().getFirstTribeFameIndex();
 	uint32 firstTribeDbIndex = CStaticFames::getInstance().getDatabaseIndex( firstTribeFameIndex );
 	uint32 fameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex( factionIndex );
@@ -14309,16 +14427,14 @@ void CCharacter::setAuraFlagDates()
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
 
 	uint32 flag = BRICK_FLAGS::Aura - BRICK_FLAGS::BeginPowerFlags;
-	if ( (_ForbidAuraUseEndDate > time) && (_ForbidAuraUseEndDate - time < 72000) )
-	{
-		_PowerFlagTicks[flag].StartTick = _ForbidAuraUseStartDate;
-		_PowerFlagTicks[flag].EndTick = _ForbidAuraUseEndDate;
+	if ( (_ForbidAuraUseEndDate < time) || (_ForbidAuraUseEndDate - time > 72000) )
+ 	{
+		_ForbidAuraUseStartDate = 0;
+		_ForbidAuraUseEndDate = 0;
 	}
-	else
-	{
-		_PowerFlagTicks[flag].StartTick = 0;
-		_PowerFlagTicks[flag].EndTick = 0;
-	}
+	_PowerFlagTicks[flag].StartTick = _ForbidAuraUseStartDate;
+	_PowerFlagTicks[flag].EndTick = _ForbidAuraUseEndDate;
+
 } // setAuraFlagDates //
 
 
@@ -14605,28 +14721,32 @@ uint32 CCharacter::getCarriedWeight()
 }
 
 //--------------------------------------------------------------
-//	CCharacter::getResistScore()
+//	CCharacter::getMagicResistance()
+//--------------------------------------------------------------
+uint32 CCharacter::getMagicResistance(RESISTANCE_TYPE::TResistanceType magicResistanceType) const
+{
+	uint32 val = getUnclampedMagicResistance(magicResistanceType);
+	NLMISC::clamp( val, (uint32)0, (uint32)((_BaseResistance + MaxMagicResistanceBonus) * 100) );
+	return val;
+}
+
+//--------------------------------------------------------------
+//	CCharacter::getMagicResistance()
 //--------------------------------------------------------------
 uint32 CCharacter::getMagicResistance(EFFECT_FAMILIES::TEffectFamily effectFamily)
 {
 	RESISTANCE_TYPE::TResistanceType resistanceType = EFFECT_FAMILIES::getAssociatedResistanceType(effectFamily);
-	if(resistanceType==RESISTANCE_TYPE::None)
-		return 0;
-	else
-		return _MagicResistance[resistanceType];
-} // getResistScore //
+	return getMagicResistance(resistanceType);
+}
 
 //--------------------------------------------------------------
-//	CCharacter::getResistScore()
+//	CCharacter::getMagicResistance()
 //--------------------------------------------------------------
 uint32 CCharacter::getMagicResistance(DMGTYPE::EDamageType dmgType)
 {
 	RESISTANCE_TYPE::TResistanceType resistanceType = DMGTYPE::getAssociatedResistanceType(dmgType);
-	if(resistanceType==RESISTANCE_TYPE::None)
-		return 0;
-	else
-		return _MagicResistance[resistanceType];
-} // getResistScore //
+	return getMagicResistance(resistanceType);
+}
 
 //--------------------------------------------------------------
 // addPlayerToFriendList
@@ -14650,20 +14770,52 @@ void CCharacter::addPlayerToIgnoreList(const ucstring &name)
 TCharConnectionState CCharacter::isFriendCharVisualyOnline(const NLMISC::CEntityId &friendId)
 {
 	TCharConnectionState ret = ccs_offline;
+
 	if (CEntityIdTranslator::getInstance()->isEntityOnline(friendId))
 	{
 		if ( PlayerManager.hasBetterCSRGrade(friendId, _Id, true))
+		{
 			// better CSR grade return always 'offline' status
 			return ccs_offline;
+		}
 
 		ret = ccs_online;
+	}
+
+	// Handle friend preference setting
+	CCharacter *friendChar = PlayerManager.getChar(friendId);
+	if (friendChar != NULL)
+	{
+		volatile TFriendVisibility friendMode = friendChar->getFriendVisibility();
+		switch (friendMode)
+		{
+			case VisibleToGuildOnly:
+				{
+					uint32 fgid = friendChar->getGuildId();
+					uint32 mgid = this->getGuildId();
+					bool inSameGuild = (mgid != 0) && (fgid == mgid);
+					if ( ! inSameGuild)
+					{
+						return ccs_offline;
+					}
+				}
+				break;
+			case VisibleToGuildAndFriends:
+				if (this->isIgnoredBy(friendId))
+				{
+					return ccs_offline;
+				}
+				break;
+			case VisibleToAll: // fallthrough
+			default:
+				break; // no-op
+		}
 	}
 
 	// Additional online check for ring shard :
 	//   - a contact is online only if it is in the same ring session
 	if (ret == ccs_online && IsRingShard)
 	{
-		CCharacter *friendChar = PlayerManager.getChar(friendId);
 		if (friendChar == NULL)	// not found ! set offline
 			ret = ccs_offline;
 		else
@@ -14849,7 +15001,7 @@ void CCharacter::addPlayerToFriendList(const NLMISC::CEntityId &id)
 	// if player not found
 	if (id == CEntityId::Unknown)
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_OFFLINE");
+		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_NOTEXIST");
 		return;
 	}
 
@@ -14921,12 +15073,12 @@ void CCharacter::addPlayerToLeagueList(const NLMISC::CEntityId &id)
 	// if player not found
 	if (id == CEntityId::Unknown)
 	{
-		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_OFFLINE");
+		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_NOTEXIST");
 		return;
 	}
 
 	// check not already in list
-	const uint size = _LeagueList.size();
+	const uint size = (uint)_LeagueList.size();
 	for ( uint i =0 ; i < size ; ++i)
 	{
 		if ( _LeagueList[i].EntityId.getShortId() == id.getShortId())
@@ -14990,14 +15142,12 @@ void CCharacter::addPlayerToLeagueList(const NLMISC::CEntityId &id)
 //--------------------------------------------------------------
 void CCharacter::addPlayerToIgnoreList(const NLMISC::CEntityId &id)
 {
-	// if player not found
-	// Boris 2006-09-19 : allow adding offline player to ignore list
-//	if (id == CEntityId::Unknown || PlayerManager.getChar(id)==NULL)
-//	{
-//		// player not found => message
-//		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_OFFLINE");
-//		return;
-//	}
+	if (id == CEntityId::Unknown)
+	{
+		// player not found => message
+		PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, "OPERATION_NOTEXIST");
+		return;
+	}
 
 	// check not already ignored
 	const uint size = (uint)_IgnoreList.size();
@@ -15416,25 +15566,50 @@ void CCharacter::contactListRefChange(const NLMISC::CEntityId &id, TConctactList
 
 }
 
+//--------------------------------------------------------------
+//	CCharacter::isIgnoredBy()
+//--------------------------------------------------------------
+bool CCharacter::isIgnoredBy(const NLMISC::CEntityId &id)
+{
+	const uint size = (uint)_IsIgnoredBy.size();
+	for (uint i = 0; i < size; ++i)
+	{
+		if (_IsIgnoredBy[i].getShortId() == id.getShortId())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+//--------------------------------------------------------------
+//	CCharacter::isFriendOf()
+//--------------------------------------------------------------
+bool CCharacter::isFriendOf(const NLMISC::CEntityId &id)
+{
+	const uint size = (uint)_IsFriendOf.size();
+	for (uint i = 0 ; i < size ; ++i)
+	{
+		if (_IsFriendOf[i].getShortId() == id.getShortId())
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
 //--------------------------------------------------------------
 //	CCharacter::referencedAsFriendBy()
 //--------------------------------------------------------------
 void CCharacter::referencedAsFriendBy( const NLMISC::CEntityId &id)
 {
-	// check this entity isn't already in the list
-	const uint size = (uint)_IsFriendOf.size();
-	for ( uint i =0 ; i < size ; ++i)
+	if (isFriendOf(id))
 	{
-		if ( _IsFriendOf[i].getShortId() == id.getShortId())
-		{
-			return;
-		}
+		return;
 	}
 
 	// not found -> add it
 	_IsFriendOf.push_back(id);
-
 }
 
 //--------------------------------------------------------------
@@ -16070,15 +16245,30 @@ void CCharacter::applyGooDamage( float gooDistance )
 						if (hpLost < 1) hpLost = 1;
 						if( hpLost > _PhysScores._PhysicalScores[ SCORES::hit_points ].Current )
 						{
-							_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = 0;
-							// send message to player for inform is dead by goo
-							sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_GOO");
+							_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = 0;	
+							
+							// send message to player for inform is dead by goo or other
+							if (_CurrentContinent == CONTINENT::FYROS)
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_FIRE");
+							else if (_CurrentContinent == CONTINENT::TRYKER)
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_STEAM");
+							else if (_CurrentContinent == CONTINENT::MATIS)
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_POISON");
+							else
+								sendDynamicSystemMessage(_EntityRowId, "KILLED_BY_GOO");
 						}
 						else
 						{
 							_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = _PhysScores._PhysicalScores[ SCORES::hit_points ].Current - hpLost;
 							// send message to player for inform is suffer goo damage
-							sendDynamicSystemMessage(_EntityRowId, "SUFFER_GOO_DAMAGE");
+							if (_CurrentContinent == CONTINENT::FYROS)
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_FIRE_DAMAGE");
+							else if (_CurrentContinent == CONTINENT::TRYKER)
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_STEAM_DAMAGE");
+							else if (_CurrentContinent == CONTINENT::MATIS)
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_POISON_DAMAGE");
+							else
+								sendDynamicSystemMessage(_EntityRowId, "SUFFER_GOO_DAMAGE");
 						}
 					}
 				}
@@ -17454,6 +17644,18 @@ void CCharacter::pvpActionMade()
 //-----------------------------------------------------------------------------
 void CCharacter::setPVPFlagDatabase()
 {
+	// Fix for when negative ticks were saved
+	if (   (_PVPRecentActionTime > CTickEventHandler::getGameCycle())
+		|| (_PVPFlagLastTimeChange > CTickEventHandler::getGameCycle())
+		|| (_PVPFlagTimeSettedOn > CTickEventHandler::getGameCycle() + TimeForSetPVPFlag)  )
+	{
+		_PVPRecentActionTime   = 0;
+		_PVPFlagLastTimeChange = 0;
+		_PVPFlagTimeSettedOn   = 0;
+		_PVPSafeLastTimeChange = 0;
+		_PVPFlag = false;
+	}
+
 	uint32 activationTime;
 	if( _PVPFlag == true )
 		activationTime = _PVPFlagLastTimeChange + TimeForSetPVPFlag;
@@ -17788,6 +17990,7 @@ void CCharacter::setOutpostAlias( uint32 id )
 	CBankAccessor_PLR::getCHARACTER_INFO().getPVP_OUTPOST().setRIGHT_TO_BANISH(_PropertyDatabase, hasRightToBanish );
 
 	CPVPManager2::getInstance()->setPVPModeInMirror(this);
+	updatePVPClanVP();	
 }
 
 //-----------------------------------------------------------------------------
@@ -18539,48 +18742,49 @@ void CCharacter::updateMagicProtectionAndResistance()
 	_MaxAbsorption = (getSkillBaseValue(getBestSkill()) * MaxAbsorptionFactor) / 100;
 
 	// magic resistance
-	sint32 baseResistance = (sint32)(_Skills._Skills[SKILLS::SF].MaxLvlReached * MagicResistFactorForCombatSkills) + MagicResistSkillDelta;
-	if( baseResistance < ((sint32)(_Skills._Skills[SKILLS::SM].MaxLvlReached * MagicResistFactorForMagicSkills) + MagicResistSkillDelta) )
-		baseResistance = (sint32)(_Skills._Skills[SKILLS::SM].MaxLvlReached * MagicResistFactorForMagicSkills) + MagicResistSkillDelta;
-	if( baseResistance < ((sint32)(_Skills._Skills[SKILLS::SH].MaxLvlReached * MagicResistFactorForForageSkills) + MagicResistSkillDelta) )
-		baseResistance = (sint32)(_Skills._Skills[SKILLS::SH].MaxLvlReached * MagicResistFactorForForageSkills) + MagicResistSkillDelta;
-	clamp(baseResistance, 0, 225);
+	_BaseResistance = (sint32)(_Skills._Skills[SKILLS::SF].MaxLvlReached * MagicResistFactorForCombatSkills) + MagicResistSkillDelta;
+	
+	sint32 magicResist = ((sint32)(_Skills._Skills[SKILLS::SM].MaxLvlReached * MagicResistFactorForMagicSkills) + MagicResistSkillDelta);
+	_BaseResistance = max(_BaseResistance, magicResist);
+	
+	sint32 forageResist = ((sint32)(_Skills._Skills[SKILLS::SH].MaxLvlReached * MagicResistFactorForForageSkills) + MagicResistSkillDelta);
+	_BaseResistance = max(_BaseResistance, forageResist);
 
+	clamp(_BaseResistance, 0, 225);
+
+	// set up base
 	for( uint32 i = 0; i < RESISTANCE_TYPE::NB_RESISTANCE_TYPE; ++i )
 	{
-		_MagicResistance[i]= (uint32)baseResistance * 100;
+		_MagicResistance[i]= (uint32)_BaseResistance * 100;
+	}
 
-		switch(i)
-		{
-		case RESISTANCE_TYPE::Desert:
-			if( _Race == EGSPD::CPeople::Fyros )
-			{
-				_MagicResistance[i] += HominRacialResistance * 100;
-			}
+	// correct for race
+	switch ( _Race)
+	{
+		case EGSPD::CPeople::Fyros:
+			_MagicResistance[RESISTANCE_TYPE::Desert] += HominRacialResistance * 100;
 			break;
-		case RESISTANCE_TYPE::Forest:
-			if( _Race == EGSPD::CPeople::Matis )
-			{
-				_MagicResistance[i] += HominRacialResistance * 100;
-			}
+
+		case EGSPD::CPeople::Matis:
+			_MagicResistance[RESISTANCE_TYPE::Forest] += HominRacialResistance * 100;
 			break;
-		case RESISTANCE_TYPE::Lacustre:
-			if( _Race == EGSPD::CPeople::Tryker )
-			{
-				_MagicResistance[i] += HominRacialResistance * 100;
-			}
+
+		case EGSPD::CPeople::Tryker:
+			_MagicResistance[RESISTANCE_TYPE::Lacustre] += HominRacialResistance * 100;
 			break;
-		case RESISTANCE_TYPE::Jungle:
-			if( _Race == EGSPD::CPeople::Zorai )
-			{
-				_MagicResistance[i] += HominRacialResistance * 100;
-			}
+
+		case EGSPD::CPeople::Zorai:
+			_MagicResistance[RESISTANCE_TYPE::Jungle] += HominRacialResistance * 100;
 			break;
+
 		default:
 			break;
-		}
+	}
+
+	// correct for current region
+	for( uint32 i = 0; i < RESISTANCE_TYPE::NB_RESISTANCE_TYPE; ++i )
+	{
 		_MagicResistance[i] = (uint32)((sint32)max( (sint32)0, ((sint32)_MagicResistance[i]) + getRegionResistanceModifier((RESISTANCE_TYPE::TResistanceType)i) * (sint32)100));
-		clamp( _MagicResistance[i], (uint32)0, (uint32)((baseResistance + MaxMagicResistanceBonus) * 100) );
 	}
 
 	// protection
@@ -18663,7 +18867,7 @@ void CCharacter::updateMagicProtectionAndResistance()
 
 	for (uint i=0; i<RESISTANCE_TYPE::NB_RESISTANCE_TYPE; ++i)
 	{
-		CBankAccessor_PLR::getCHARACTER_INFO().getMAGIC_RESISTANCE().getArray(i).setVALUE(_PropertyDatabase, checkedCast<uint16>(_MagicResistance[i]));
+		CBankAccessor_PLR::getCHARACTER_INFO().getMAGIC_RESISTANCE().getArray(i).setVALUE(_PropertyDatabase, checkedCast<uint16>(getUnclampedMagicResistance((RESISTANCE_TYPE::TResistanceType)i)));
 	}
 //	_PropertyDatabase.setProp("CHARACTER_INFO:MAGIC_RESISTANCE:Desert", _MagicResistance[RESISTANCE_TYPE::Desert]);
 //	_PropertyDatabase.setProp("CHARACTER_INFO:MAGIC_RESISTANCE:Forest", _MagicResistance[RESISTANCE_TYPE::Forest]);
@@ -18952,7 +19156,7 @@ void CCharacter::setStartupInstance(uint32 instanceId)
 
 void CCharacter::setTitle( CHARACTER_TITLE::ECharacterTitle title )
 {
-	_Title = title;
+	setNewTitle(CHARACTER_TITLE::toString(title));
 }
 
 
@@ -20120,7 +20324,9 @@ void CCharacter::setEnterCriticalZoneProposalQueueId(uint32 queueId)
 
 uint32 CCharacter::getMagicProtection( PROTECTION_TYPE::TProtectionType magicProtectionType ) const
 {
-	uint32 val = getUnclampedMagicProtection(magicProtectionType); NLMISC::clamp( val, (uint32)0, MaxMagicProtection ); return val;
+	uint32 val = getUnclampedMagicProtection(magicProtectionType);
+	NLMISC::clamp( val, (uint32)0, MaxMagicProtection );
+	return val;
 }
 
 
@@ -20611,4 +20817,22 @@ void CCharacter::sendNpcMissionGiverTimer(bool force)
 		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 		CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(_Id.getDynamicId()), msgout );
 	}
+}
+
+//------------------------------------------------------------------------------
+
+bool CCharacter::initPetInventory(uint8 index)
+{
+	// init pet inventory
+	const uint32 petMaxWeight = 0xFFFFFFFF; // no weight limit
+	const uint32 petMaxBulk = _PlayerPets[ index ].getAnimalMaxBulk();
+
+	const INVENTORIES::TInventory petInvId = (INVENTORIES::TInventory)(index + INVENTORIES::pet_animal);
+	CPetInventory *petInventory = dynamic_cast<CPetInventory*> ((CInventoryBase*)_Inventory[petInvId]);
+	if (petInventory)
+	{
+		petInventory->initPetInventory( index, petMaxWeight, petMaxBulk );
+		return true;
+	}
+	return false;
 }

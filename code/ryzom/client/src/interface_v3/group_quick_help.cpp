@@ -22,13 +22,13 @@
 #include "stdpch.h"
 
 #include "group_quick_help.h"
-#include "group_list.h"
-#include "group_paragraph.h"
-#include "../libwww.h"
+#include "nel/gui/group_list.h"
+#include "nel/gui/group_paragraph.h"
+#include "nel/gui/libwww.h"
 #include "interface_manager.h"
-#include "action_handler.h"
-#include "game_share/xml_auto_ptr.h"
-
+#include "nel/gui/action_handler.h"
+#include "nel/misc/xml_auto_ptr.h"
+#include "../actions.h"
 #include "../client_cfg.h"
 
 using namespace std;
@@ -213,6 +213,8 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 
 // ***************************************************************************
 
+extern CActionsContext ActionsContext;
+
 void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, const char **value)
 {
 	CGroupHTML::beginElement (element_number, present, value);
@@ -220,6 +222,34 @@ void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, co
 	// Paragraph ?
 	switch(element_number)
 	{
+	case HTML_A:
+			// Quick help
+			if (_TrustedDomain && present[MY_HTML_A_Z_ACTION_SHORTCUT] && value[MY_HTML_A_Z_ACTION_SHORTCUT])
+			{
+				// Get the action category
+				string category;
+				if (present[MY_HTML_A_Z_ACTION_CATEGORY] && value[MY_HTML_A_Z_ACTION_CATEGORY])
+					category = value[MY_HTML_A_Z_ACTION_CATEGORY];
+
+				// Get the action params
+				string params;
+				if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
+					params = value[MY_HTML_A_Z_ACTION_PARAMS];
+
+				// Get the action descriptor
+				CActionsManager *actionManager = ActionsContext.getActionsManager (category);
+				if (actionManager)
+				{
+					const CActionsManager::TActionComboMap &actionCombo = actionManager->getActionComboMap ();
+					CActionsManager::TActionComboMap::const_iterator ite = actionCombo.find (CAction::CName (value[MY_HTML_A_Z_ACTION_SHORTCUT], params.c_str()));
+					if (ite != actionCombo.end())
+					{
+						addString (ite->second.toUCString());
+					}
+				}
+			}
+			break;
+
 	case HTML_P:
 		// Get the action name
 		if (present[MY_HTML_P_QUICK_HELP_EVENTS])
@@ -326,7 +356,7 @@ void CGroupQuickHelp::activateCurrentStep ()
 
 			// A link to follow ?
 			if (!step.URL.empty())
-				pIM->runActionHandler("browse", NULL, "url="+step.URL);
+				CAHManager::getInstance()->runActionHandler("browse", NULL, "url="+step.URL);
 
 			// Test a skip condition
 			if (!step.Condition.empty() && evalExpression (step.Condition))
@@ -359,7 +389,7 @@ class CHandlerSubmitQuickHelp : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
-		CInterfaceElement *element = CInterfaceManager::getInstance()->getElementFromId("ui:interface:quick_help:content:html");
+		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId("ui:interface:quick_help:content:html");
 		if (element)
 		{
 			// Group HTML ?
@@ -370,7 +400,7 @@ class CHandlerSubmitQuickHelp : public IActionHandler
 				groupQH->submitEvent (sParams.c_str());
 			}
 		}
-		element = CInterfaceManager::getInstance()->getElementFromId("ui:interface:help_browser:content:html");
+		element = CWidgetManager::getInstance()->getElementFromId("ui:interface:help_browser:content:html");
 		if (element)
 		{
 			// Group HTML ?
@@ -396,11 +426,11 @@ class CHandlerRunQuickHelp : public IActionHandler
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 		// Get the quick help radio buttons base id
-		string buttonId = pIM->getDefine("quick_help_buttons");
+		string buttonId = CWidgetManager::getInstance()->getParser()->getDefine("quick_help_buttons");
 		if (!buttonId.empty())
 		{
 			// Get the button id
-			CInterfaceElement *element = pIM->getElementFromId(buttonId+":"+sParams);
+			CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(buttonId+":"+sParams);
 			if (element)
 			{
 				// Button Ctrl ?
@@ -411,7 +441,7 @@ class CHandlerRunQuickHelp : public IActionHandler
 					button->setPushed(true);
 
 					// Run the left click action handler
-					pIM->runActionHandler(button->getActionOnLeftClick(), button, button->getParamsOnLeftClick());
+					CAHManager::getInstance()->runActionHandler(button->getActionOnLeftClick(), button, button->getParamsOnLeftClick());
 				}
 			}
 		}

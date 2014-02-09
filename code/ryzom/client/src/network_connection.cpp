@@ -41,9 +41,9 @@
 
 #include "game_share/simlag.h"
 
-#include "cdb.h"
-#include "cdb_leaf.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb.h"
+#include "nel/misc/cdb_leaf.h"
+#include "nel/misc/cdb_branch.h"
 #include "cdb_synchronised.h"
 
 #include "nel/misc/variable.h"

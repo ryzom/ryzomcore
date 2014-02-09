@@ -28,7 +28,7 @@
 #         $ build snowballs all install
 #
 #     As you can see there is no need to specify the installed directory
-#     of NeL, etc ... These informations are automaticly provided to the
+#     of NeL, etc ... These information are automaticly provided to the
 #     configure script.
 #
 #     Check the following variables to get an idea of the place of the
@@ -410,7 +410,7 @@ case $1 in
                 && cp -Rfdp $NEL_SRC/include $BUILD_DIR/nel
 
             # Remove from the compilation directory the useless CVS
-            # informations
+            # information
             cd $BUILD_DIR/nel/include \
                 && find . -prune -type d -name CVS -exec rm -rf \{\} \;
 

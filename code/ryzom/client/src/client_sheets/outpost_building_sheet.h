@@ -18,7 +18,7 @@
 #define RY_OUTPOST_BUILDING_H
 
 #include "entity_sheet.h"
-
+#include "client_sheets.h"
 
 /**
  * Outpost building definition for client side management (buy building upgrades ...)

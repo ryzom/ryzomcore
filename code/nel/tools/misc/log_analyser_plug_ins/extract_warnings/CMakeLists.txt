@@ -8,4 +8,4 @@ NL_ADD_RUNTIME_FLAGS(extract_warnings)
 
 NL_ADD_LIB_SUFFIX(extract_warnings)
 
-INSTALL(TARGETS extract_warnings RUNTIME DESTINATION bin LIBRARY DESTINATION lib/log_analyser COMPONENT toolsmisc)
+INSTALL(TARGETS extract_warnings RUNTIME DESTINATION ${NL_BIN_PREFIX} LIBRARY DESTINATION lib/log_analyser COMPONENT toolsmisc)

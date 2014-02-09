@@ -19,6 +19,7 @@
 #ifndef ID_IMPULSIONS_H
 #define ID_IMPULSIONS_H
 
+#include "fe_types.h"
 
 // misc
 #include "nel/misc/types_nl.h"

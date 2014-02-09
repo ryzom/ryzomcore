@@ -383,6 +383,7 @@ CClientConfig::CClientConfig()
 	ScreenAspectRatio	= 0.f;						// Default commmon Screen Aspect Ratio (no relation with the resolution) - 0.f = auto
 	FoV					= 75.f;						// Default value for the FoV.
 	ForceDXTC			= false;					// Default is no DXTC Compression.
+	AnisotropicFilter	= 0;						// Default is disabled (-1 = maximum value, 0 = disabled, 1+ = enabled)
 	DivideTextureSizeBy2= false;					// Divide texture by 2
 	DisableVtxProgram	= false;					// Disable Hardware Vertex Program.
 	DisableVtxAGP		= false;					// Disable Hardware Vertex AGP.
@@ -987,6 +988,8 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(FoV)
 	// ForceDXTC
 	READ_BOOL_FV(ForceDXTC)
+	// AnisotropicFilter
+	READ_INT_FV(AnisotropicFilter)
 	// DivideTextureSizeBy2
 	READ_BOOL_FV(DivideTextureSizeBy2)
 	// DisableVtxProgram
@@ -1048,7 +1051,7 @@ void CClientConfig::setValues()
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
-	READ_BOOL_DEV(PatchWanted)
+	READ_BOOL_FV(PatchWanted)
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
@@ -1383,7 +1386,7 @@ void CClientConfig::setValues()
 					SPrintfCommand pcom;
 					pcom.X = pc->asInt(i);
 					pcom.Y = pc->asInt(i+1);
-					pcom.Color = stringToRGBA( pc->asString(i+2).c_str() );
+					pcom.Color = CRGBA::stringToRGBA( pc->asString(i+2).c_str() );
 					pcom.FontSize = pc->asInt(i+3);
 					pcom.Text = pc->asString(i+4);
 

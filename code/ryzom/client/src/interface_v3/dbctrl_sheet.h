@@ -23,10 +23,10 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/smart_ptr.h"
 // client
-#include "reflect.h"
-#include "ctrl_base.h"
-#include "interface_expr.h"
-#include "action_handler.h"
+#include "nel/gui/reflect.h"
+#include "nel/gui/ctrl_draggable.h"
+#include "nel/gui/interface_expr.h"
+#include "nel/gui/action_handler.h"
 #include "sphrase_manager.h"
 // game share
 #include "game_share/brick_types.h"
@@ -46,7 +46,12 @@ class IListSheetBase;
 class CSBrickSheet;
 class CSPhraseSheet;
 class COutpostBuildingSheet;
-class CViewRenderer;
+
+namespace NLGUI
+{
+	class CViewRenderer;
+}
+
 
 // ***************************************************************************
 /** Common info for CDBCtrlSheet and CDBGroupListSheet
@@ -130,7 +135,6 @@ public:
 
 	//
 	bool				_InterfaceColor        : 1; // Color given by the interface ?
-	bool				_Dragable	           : 1;
 	bool				_UseQuantity	       : 1; // is the quantity read and displayed ?
 	bool				_ReadQuantityFromSheet : 1; // Read quantity from sheet rather than from database
 	bool				_UseQuality            : 1; // is the quality read and displayed ?
@@ -169,7 +173,7 @@ public:
  * \author Nevrax France
  * \date 2002
  */
-class CDBCtrlSheet : public CCtrlBase, protected CCtrlSheetInfo
+class CDBCtrlSheet : public CCtrlDraggable, protected CCtrlSheetInfo
 {
 public:
 	DECLARE_UI_CLASS(CDBCtrlSheet)
@@ -189,21 +193,21 @@ public:
 	virtual void draw();
 	void drawSheet (sint32 scrX, sint32 scrY, bool draging, bool showSelectionBorder = true);
 
-	virtual bool handleEvent (const CEventDescriptor &event);
+	virtual bool handleEvent (const NLGUI::CEventDescriptor &event);
 
-	void setActionOnLeftClick (const std::string &ActionHandlerName) { _AHOnLeftClick = getAH(ActionHandlerName, _AHLeftClickParams); }
-	void setActionOnRightClick (const std::string &ActionHandlerName) { _AHOnRightClick = getAH(ActionHandlerName, _AHRightClickParams); }
-	void setActionOnDrop (const std::string &ActionHandlerName) { _AHOnDrop = getAH(ActionHandlerName, _AHDropParams); }
-	void setActionOnCanDrop (const std::string &ActionHandlerName) { _AHOnCanDrop = getAH(ActionHandlerName, _AHCanDropParams); }
+	void setActionOnLeftClick (const std::string &ActionHandlerName) { _AHOnLeftClick = CAHManager::getInstance()->getAH(ActionHandlerName, _AHLeftClickParams); }
+	void setActionOnRightClick (const std::string &ActionHandlerName) { _AHOnRightClick = CAHManager::getInstance()->getAH(ActionHandlerName, _AHRightClickParams); }
+	void setActionOnDrop (const std::string &ActionHandlerName) { _AHOnDrop = CAHManager::getInstance()->getAH(ActionHandlerName, _AHDropParams); }
+	void setActionOnCanDrop (const std::string &ActionHandlerName) { _AHOnCanDrop = CAHManager::getInstance()->getAH(ActionHandlerName, _AHCanDropParams); }
 	void setParamsOnLeftClick (const std::string &ParamsHandlerName) { _AHLeftClickParams = ParamsHandlerName; }
 	void setParamsOnRightClick (const std::string &ParamsHandlerName) { _AHRightClickParams = ParamsHandlerName; }
 	void setParamsOnDrop (const std::string &ParamsHandlerName) { _AHDropParams = ParamsHandlerName; }
 	void setParamsOnCanDrop (const std::string &ParamsHandlerName) { _AHCanDropParams = ParamsHandlerName; }
 
-	const std::string &getActionOnLeftClick () const { return getAHName(_AHOnLeftClick); }
-	const std::string &getActionOnRightClick () const { return getAHName(_AHOnRightClick); }
-	const std::string &getActionOnDrop () const { return getAHName(_AHOnDrop); }
-	const std::string &getActionOnCanDrop () const { return getAHName(_AHOnCanDrop); }
+	const std::string &getActionOnLeftClick () const { return CAHManager::getInstance()->getAHName(_AHOnLeftClick); }
+	const std::string &getActionOnRightClick () const { return CAHManager::getInstance()->getAHName(_AHOnRightClick); }
+	const std::string &getActionOnDrop () const { return CAHManager::getInstance()->getAHName(_AHOnDrop); }
+	const std::string &getActionOnCanDrop () const { return CAHManager::getInstance()->getAHName(_AHOnCanDrop); }
 	const std::string &getParamsOnLeftClick () const { return _AHLeftClickParams; }
 	const std::string &getParamsOnRightClick () const { return _AHRightClickParams; }
 	const std::string &getParamsOnDrop () const { return _AHDropParams; }
@@ -218,15 +222,11 @@ public:
 
 	void	setCanDrop (bool cd) { _CanDrop = cd; }
 	bool	getCanDrop () const { return _CanDrop; }
-	bool	isDragable() { return _Dragable; }
-	void	setDragable(bool dragable) {  _Dragable = dragable; }
-	bool	isDraging() { return _Draging; }
 	sint32	getDeltaDragX() {return _DeltaDragX;}
 	sint32	getDeltaDragY() {return _DeltaDragY;}
 	// For "oncandrag" action handlers only, which would want to avoid the drag
 	void	setTempCanDrag(bool cd) {_TempCanDrag= cd;}
 	// called when a setCapturePointerLeft(NULL) is made for instance
-	void	abortDraging();
 
 	CCtrlSheetInfo::TSheetType getType () const;
 	void  setType (CCtrlSheetInfo::TSheetType type);
@@ -262,7 +262,7 @@ public:
 	void	    setSheet (const std::string &dbBranchId);
 	void		setSheetFast( const std::string &dbParentBranchId, int sheetNum, int slotNum );
 
-	REFLECT_EXPORT_START(CDBCtrlSheet, CCtrlBase)
+	REFLECT_EXPORT_START(CDBCtrlSheet, CCtrlDraggable)
 		REFLECT_STRING("sheet", getSheet, setSheet);
 		REFLECT_RGBA("color", getSheetColor, setSheetColor);
 		REFLECT_RGBA("color1", getGuildColor1, setGuildColor1);
@@ -270,7 +270,6 @@ public:
 		REFLECT_SINT32("back", getGuildBack, setGuildBack);
 		REFLECT_SINT32("symbol", getGuildSymbol, setGuildSymbol);
 		REFLECT_BOOL("invert_symbol", getInvertGuildSymbol, setInvertGuildSymbol);
-		REFLECT_BOOL("dragable", isDragable, setDragable);
 		REFLECT_BOOL("can_drop", getCanDrop, setCanDrop);
 		REFLECT_STRING ("left_click", getActionOnLeftClick, setActionOnLeftClick);
 		REFLECT_STRING ("right_click", getActionOnRightClick, setActionOnRightClick);
@@ -318,7 +317,7 @@ public:
 	static	void		   setCurrSelection(CDBCtrlSheet *selected);
 
 	// get the root branch containing the properties for that sheet
-	CCDBNodeBranch        *getRootBranch() const;
+	NLMISC::CCDBNodeBranch        *getRootBranch() const;
 
 	/** If the branch in setSheet(branch) is of the form ...:# (where # is a number), return this number.
 	 *	The value is hence modified by setSheet(). return 0 if not of this form.
@@ -336,7 +335,7 @@ public:
 	static uint getInventorySlot( const std::string &dbBranchId );
 
 	// Get the last dropped sheet. The pointer is only valid during the call of the event handler
-	static CDBCtrlSheet	  *getDraggedSheet() { return _LastDraggedSheet; }
+	//static CDBCtrlSheet	  *getDraggedSheet() { return _LastDraggedSheet; }
 
 	/* Get the last selected sheet that have been draged or right clicked (should be use by menu to get their caller)
 	 * It is used by the item actions like destroy, move etc..
@@ -443,7 +442,7 @@ public:
 	sint							getIndexInParent() const;
 
 	// get the 'LOCKED' field in the db
-	CCDBNodeLeaf		*getLockValuePtr() { return _GrayedLink; }
+	NLMISC::CCDBNodeLeaf		*getLockValuePtr() { return _GrayedLink; }
 
 	/// \name Macro
 	// @{
@@ -483,35 +482,35 @@ public:
 	void initSheetSize();
 	// @}
 
-	CCDBNodeLeaf *getSlotType() const { return _TradeSlotType.getNodePtr(); }
+	NLMISC::CCDBNodeLeaf *getSlotType() const { return _TradeSlotType.getNodePtr(); }
 
 	// get item weight
 	uint16 getItemWeight() const;
-	CCDBNodeLeaf *getItemWeightPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemWeightPtr() const;
 	// set item weight
 	void setItemWeight(uint16 weight);
 
 	// get item info version
 	uint8 getItemInfoVersion() const;
-	CCDBNodeLeaf *getItemInfoVersionPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemInfoVersionPtr() const;
 	// set item info version
 	void setItemInfoVersion(uint8 infoVersion);
 
 	// get item Locked state
 	uint16 getItemLocked() const;
-	CCDBNodeLeaf *getItemLockedPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemLockedPtr() const;
 	// set item locked state
 	void setItemLocked(uint16 lock);
 
 	// get item PRICE. 0 if no DB
 	sint32 getItemPrice() const;
-	CCDBNodeLeaf *getItemPricePtr() const;
+	NLMISC::CCDBNodeLeaf *getItemPricePtr() const;
 	// set item PRICE
 	void setItemPrice(sint32 price);
 
 	// get item RESALE_FLAG. 0 if no DB
 	sint32 getItemResaleFlag() const;
-	CCDBNodeLeaf *getItemResaleFlagPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemResaleFlagPtr() const;
 	// set item RESALE_FLAG
 	void setItemResaleFlag(sint32 rf);
 
@@ -523,25 +522,25 @@ public:
 
 	// get item SELLER_TYPE. 0 if no DB
 	sint32 getItemSellerType() const;
-	CCDBNodeLeaf *getItemSellerTypePtr() const;
+	NLMISC::CCDBNodeLeaf *getItemSellerTypePtr() const;
 	// set item SELLER_TYPE
 	void setItemSellerType(sint32 rf);
 
 	// get item FABER_QUALITY. 0 if no DB
 	RM_CLASS_TYPE::TRMClassType getItemRMClassType() const;
-	CCDBNodeLeaf *getItemRMClassTypePtr() const {return _ItemRMClassType;}
+	NLMISC::CCDBNodeLeaf *getItemRMClassTypePtr() const {return _ItemRMClassType;}
 	// set item FABER_QUALITY
 	void setItemRMClassType(sint32 fq);
 
 	// get item FABER_STAT_TYPE. 0 if no DB
 	RM_FABER_STAT_TYPE::TRMStatType getItemRMFaberStatType() const;
-	CCDBNodeLeaf *getItemRMFaberStatTypePtr() const {return _ItemRMFaberStatType;}
+	NLMISC::CCDBNodeLeaf *getItemRMFaberStatTypePtr() const {return _ItemRMFaberStatType;}
 	// set item FABER_STAT_TYPE
 	void setItemRMFaberStatType(sint32 fss);
 
 	// get item PREREQUISIT_VALID. true of no DB
 	bool getItemPrerequisitValid() const;
-	CCDBNodeLeaf *getItemPrerequisitValidPtr() const;
+	NLMISC::CCDBNodeLeaf *getItemPrerequisitValidPtr() const;
 	// set item PREREQUISIT_VALID
 	void setItemPrerequisitValid(bool prv);
 
@@ -610,8 +609,8 @@ protected:
 	CInterfaceProperty	_Worned; // if true means that item is worned (red cross, no longer usable unless it's a tool)
 
 	// As node leaf for backward compatibilities
-	CCDBNodeLeaf		*_ItemRMClassType;
-	CCDBNodeLeaf		*_ItemRMFaberStatType;
+	NLMISC::CCDBNodeLeaf		*_ItemRMClassType;
+	NLMISC::CCDBNodeLeaf		*_ItemRMFaberStatType;
 
 	mutable sint32		_LastSheetId;
 
@@ -644,7 +643,6 @@ protected:
 
 	/// Events
 
-	bool		_Draging			: 1;
 	bool		_CanDrop			: 1;
 	bool		_Over				: 1;
 
@@ -703,7 +701,7 @@ protected:
 	// This String is optional and usage dependent for Item, Macro, or Sentence
 	std::string			_OptString;
 
-	CCDBNodeLeaf		*_GrayedLink;
+	NLMISC::CCDBNodeLeaf		*_GrayedLink;
 
 	// Macro or sentence String compiled as texture Ids and positions, from the _OptString.
 	struct	CCharBitmap
@@ -734,7 +732,7 @@ protected:
 	sint32								_ItemCaracReqValue;
 
 	// Special for Armour
-	CCDBNodeLeaf		*_UserColor;
+	NLMISC::CCDBNodeLeaf		*_UserColor;
 
 	// keep pointer on item sheet
 	const CItemSheet	*_ItemSheet;
@@ -748,7 +746,6 @@ private:
 	mutable TSheetType			_ActualType;
 
 	static		CDBCtrlSheet *_CurrSelection;
-	static		CDBCtrlSheet *_LastDraggedSheet;
 	static		CDBCtrlSheet *_CurrMenuSheet;
 private:
 	void		updateActualType() const;

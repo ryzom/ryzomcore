@@ -517,7 +517,7 @@ void CGeorgesImpl::MakeTyp( const std::string& filename, TType type, TUI ui, con
 		}
 		catch (Exception &e)
 		{
-			nlwarning ("Error during writting file '%s' : ", filename.c_str (), e.what ());
+			nlwarning ("Error during writing file '%s' : ", filename.c_str (), e.what ());
 		}
 	}
 	else

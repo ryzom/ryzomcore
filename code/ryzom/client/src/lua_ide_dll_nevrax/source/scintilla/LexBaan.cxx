@@ -135,7 +135,7 @@ static void ColouriseBaanDoc(unsigned int startPos, int length, int initStyle, W
 			}
 		}
 		if (sc.atLineEnd) {
-			// Reset states to begining of colourise so no surprises
+			// Reset states to beginning of colourise so no surprises
 			// if different sets of lines lexed.
 			visibleChars = 0;
 		}

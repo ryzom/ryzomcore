@@ -26,9 +26,9 @@ namespace NLOLDGEORGES
 
 class CFormBodyElt;
 
-// La classe CForm représente une fiche. 
-// Elle comprend Head et Body.
-// Elle comporte des opérateurs qui permettent de l'additionner ou de la soustraire dans le cadre des historiques.
+// CForm class represents a sheet.
+// It has a Head and a Body.
+// It has operators that allows to add or subtract from history.
 class CForm  
 {
 public:

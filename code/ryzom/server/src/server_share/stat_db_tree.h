@@ -229,7 +229,7 @@ private:
 /**
  * This class removes entities (players and guilds) through a SDB node
  * 
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */

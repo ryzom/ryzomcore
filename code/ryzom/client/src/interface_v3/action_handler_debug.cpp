@@ -20,7 +20,7 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../misc.h"
 #include "../prim_file.h"
 #include "../graph.h"
@@ -32,6 +32,8 @@ using namespace NL3D;
 #include "../continent_manager.h"
 #include "../user_entity.h"
 #include "../connection.h"
+
+using namespace NLGUI;
 
 ////////////
 // GLOBAL //

@@ -18,6 +18,28 @@
 
 session_start();
 
+/*
+function my_session_start()
+{
+	if (isset($_COOKIE['PHPSESSID'])) {
+		$sessid = $_COOKIE['PHPSESSID'];
+	} else if (isset($_GET['PHPSESSID'])) {
+		$sessid = $_GET['PHPSESSID'];
+	} else {
+		session_start();
+		return false;
+	}
+
+	if (!preg_match('/^[a-z0-9]{32}$/', $sessid)) {
+		return false;
+	}
+	session_start();
+
+	return true;
+}
+*/
+
+
 // Global defines
 if (!defined('ON_IPHONE')) {
 	if(isset($_SERVER['HTTP_USER_AGENT']))
@@ -26,18 +48,24 @@ if (!defined('ON_IPHONE')) {
 		define('ON_IPHONE', false);
 }
 
-$includes = array('auth', 'config', 'utils', 'user');
+require_once("common/config.php");
+
+$includes = array('auth', 'utils', 'user', 'time');
 
 foreach ($includes as $include) {
-	if ($_SERVER['HTTP_HOST'] == 'shard.nuneo.org' || $_SERVER['HTTP_HOST'] == 'app.ryzom.com')
+	if (RYAPI_MODE == 'server') {
+		require_once('server/config.php');
 		require_once("server/$include.php");
-	else
+	} else {
+		require_once('client/config.php');
 		require_once("client/$include.php");
+	}
 
 	require_once("common/$include.php");
 }
 
 require_once("common/db_lib.php");
+require_once("common/db_defs.php");
 require_once("common/render.php");
 
 ?>

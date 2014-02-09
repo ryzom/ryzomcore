@@ -173,7 +173,7 @@ void	CParticleSystemShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 ///===========================================================================
 void CParticleSystemShape::buildFromPS(const CParticleSystem &ps)
 {
-	// must be sure that we are writting in the stream
+	// must be sure that we are writing in the stream
 	if (_ParticleSystemProto.isReading())
 	{
 		_ParticleSystemProto.invert();

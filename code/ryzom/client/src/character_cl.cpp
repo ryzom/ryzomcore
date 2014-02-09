@@ -76,7 +76,7 @@
 #include "user_entity.h"
 #include "projectile_manager.h"
 #include "init_main_loop.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb_branch.h"
 #include "animation_fx_misc.h"
 #include "attack_list.h"
 #include "animation_fx_id_array.h"
@@ -452,7 +452,7 @@ void CCharacterCL::releaseInSceneInterfaces()
 {
 	if (_InSceneUserInterface)
 	{
-		CInterfaceManager::getInstance()->unMakeWindow(_InSceneUserInterface);
+		CWidgetManager::getInstance()->unMakeWindow(_InSceneUserInterface);
 		if (_InSceneUserInterface->getParent())
 		{
 			_InSceneUserInterface->getParent()->delGroup(_InSceneUserInterface);
@@ -3345,7 +3345,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 	{
 		// Right Hand
 		if(rHandInstIdx<_Instances.size())
-			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquiped ) )
+			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[rHandInstIdx].Current.empty())
 				{
 					_Instances[rHandInstIdx].Current.hide();
@@ -3353,7 +3353,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 				}
 		// Left Hand
 		if(lHandInstIdx <_Instances.size())
-			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquiped ) )
+			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[lHandInstIdx].Current.empty())
 				{
 					_Instances[lHandInstIdx].Current.hide();
@@ -4522,7 +4522,7 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 	{
 		if(behaviour.DeltaHP != 0)
 		{
-			CRGBA deltaHPColor;
+			CRGBA deltaHPColor( 0, 0, 0 );
 			// if it's a hit
 			if( behaviour.DeltaHP < 0 )
 			{
@@ -6183,8 +6183,7 @@ void CCharacterCL::updateVisiblePostPos(const NLMISC::TTime &currentTimeInMs, CE
 		if (_InSceneUserInterface)
 		{
 			// Activate
-			if (_InSceneUserInterface->getActive() != showIS)
-				_InSceneUserInterface->setActive (showIS);
+			_InSceneUserInterface->setActive (showIS);
 
 			if (showIS)
 			{
@@ -8387,7 +8386,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	TextContext->printfAt(x, y, "Mount: %3u(Theoretical: %3u) Rider: %3u(Theoretical: %3u)", mount(), _TheoreticalMount, rider(), _TheoreticalRider);
 	y += lineStep;
 	// VPA
-	sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualA visualA = *(SPropVisualA *)(&prop);
@@ -8403,7 +8402,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "VPA: %"NL_I64"X", prop);
 	y += lineStep;
 	// VPB
-	prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualB visualB = *(SPropVisualB *)(&prop);
@@ -8415,7 +8414,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "VPB: %"NL_I64"X", prop);
 	y += lineStep;
 	// VPC
-	prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
+	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualC visualC = *(SPropVisualC *)(&prop);
@@ -8547,7 +8546,7 @@ void CCharacterCL::load()	// virtual
 		_LookRdy = false;
 		// Visual properties A
 		_HeadIdx = CEntityCL::BadIndex;
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);
 	}
 }// load //
@@ -9798,11 +9797,11 @@ NLMISC_COMMAND(weapon, "change the weapon in hand", "<slot> <hand> <weapon>")
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	uint slot;
 	fromString(args[0], slot);
-	CCDBNodeLeaf *propA = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *propA = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!propA) return false;
 	sint64 valueA = propA->getValue64();
 
-	CCDBNodeLeaf *propB = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
+	CCDBNodeLeaf *propB = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
 	if (!propB) return false;
 	sint64 valueB = propB->getValue64();
 
@@ -9869,7 +9868,7 @@ NLMISC_COMMAND(advantageFX, "turn on / off the advantage fx for an item in hand"
 	fromString(args[0], slot);
 
 	/*
-	CCDBNodeLeaf *prop = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!prop) return false;
 	sint64 value = prop->getValue64();
 	uint hand;
@@ -9917,11 +9916,11 @@ NLMISC_COMMAND(trailLength, "set length of trail for one weapon in hand", "<slot
 	uint slot;
 	fromString(args[0], slot);
 
-	CCDBNodeLeaf *propA = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *propA = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!propA) return false;
 	sint64 valueA = propA->getValue64();
 
-	CCDBNodeLeaf *propB = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
+	CCDBNodeLeaf *propB = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
 	if (!propB) return false;
 	sint64 valueB = propB->getValue64();
 

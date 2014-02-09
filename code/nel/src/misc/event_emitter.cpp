@@ -19,6 +19,10 @@
 // remove stupid VC6 warnings
 void foo_event_emitter_cpp() {}
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 

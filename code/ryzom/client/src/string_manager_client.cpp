@@ -25,6 +25,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/algo.h"
 #include "misc.h"
+#include "entity_cl.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -727,6 +728,13 @@ restartLoop:
 										str.resize(start);
 								}
 							}
+						}
+
+						// If the string contains a title, then remove it
+						ucstring::size_type pos = str.find('$');
+						if ( ! str.empty() && pos != ucstring::npos)
+						{
+							str = CEntityCL::removeTitleFromName(str);
 						}
 
 						// append this string
@@ -1603,7 +1611,7 @@ const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CShee
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getTitleLocalizedName(const std::string &titleId, bool women)
+const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleId, bool women)
 {
 	vector<ucstring> listInfos = getTitleInfos(titleId, women);
 
@@ -1613,18 +1621,16 @@ const ucchar *CStringManagerClient::getTitleLocalizedName(const std::string &tit
 		return _TitleWords.back().c_str();
 	}
 	
-	ucstring ucId;
-	ucId.fromUtf8(titleId);
-	return ucId.c_str();
+	return titleId.c_str();
 }
 
 // ***************************************************************************
-vector<ucstring> CStringManagerClient::getTitleInfos(const std::string &titleId, bool women)
+vector<ucstring> CStringManagerClient::getTitleInfos(const ucstring &titleId, bool women)
 {
-	ucstring infosUC;
-	infosUC.fromUtf8(titleId);
+	//ucstring infosUC;
+	//infosUC.fromUtf8(titleId);
 	vector<ucstring> listInfos;
-	splitUCString(infosUC, ucstring("#"), listInfos);
+	splitUCString(titleId, ucstring("#"), listInfos);
 
 	if (listInfos.size() > 0)
 	{

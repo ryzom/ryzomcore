@@ -6,4 +6,4 @@ TARGET_LINK_LIBRARIES(ig_lighter nelmisc nel3d nelpacs)
 NL_DEFAULT_PROPS(ig_lighter "NeL, Tools, 3D: ig_lighter")
 NL_ADD_RUNTIME_FLAGS(ig_lighter)
 
-INSTALL(TARGETS ig_lighter RUNTIME DESTINATION bin COMPONENT tools3d)
+INSTALL(TARGETS ig_lighter RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)

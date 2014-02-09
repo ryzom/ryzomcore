@@ -16,7 +16,7 @@
 
 #include "stdpacs.h"
 
-#include "edge_collide.h"
+#include "nel/pacs/edge_collide.h"
 
 using namespace NLMISC;
 using namespace std;

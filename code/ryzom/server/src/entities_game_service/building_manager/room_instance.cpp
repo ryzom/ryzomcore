@@ -91,6 +91,8 @@ void CRoomInstanceGuild::removeUser( CCharacter* user )
 		return;
 	}
 
+	user->sendUrl("app_ryzhome action=quit_guild_room&room_name="+guildBuilding->getName(), "");
+
 	--_RefCount;
 	if ( _RefCount == 0 )
 	{
@@ -104,8 +106,13 @@ void CRoomInstanceGuild::addUser( CCharacter* user, CCharacter* owner )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
+	CBuildingPhysicalGuild * guildBuilding = dynamic_cast<CBuildingPhysicalGuild *>( _Building );
+	BOMB_IF( !guildBuilding, "<BUILDING> building type does not match with room type", return );
+
 	// open guild inventory window
 	PlayerManager.sendImpulseToClient(user->getId(), "GUILD:OPEN_INVENTORY");
+
+	user->sendUrl("app_ryzhome action=open_guild_room&owner="+ owner->getName().toString()+"&room_name="+guildBuilding->getName(), "");
 
 	++_RefCount;
 }
@@ -141,21 +148,8 @@ void CRoomInstancePlayer::removeUser( CCharacter* user )
 		return;
 	}
 
-	TVectorParamCheck titleParams;
-	TVectorParamCheck textParams;
-	uint32 userId = PlayerManager.getPlayerId( user->getId() );
-	std::string name = "CLOSE_URL";
-	//send command to close webig
-	ucstring phrase = ucstring("CLOSE_URL(){[WEB : app_ryzhome action=quit_room]}");
-	NLNET::CMessage	msgout("SET_PHRASE");
-	msgout.serial(name);
-	msgout.serial(phrase);
-	sendMessageViaMirror("IOS", msgout);
-
-	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "web_transactions", titleParams);
-	uint32 textId = STRING_MANAGER::sendStringToUser(userId, "CLOSE_URL", textParams);
-	PlayerManager.sendImpulseToClient(user->getId(), "USER:POPUP", titleId, textId);
-
+	user->sendUrl("app_ryzhome action=quit_player_room&room_name="+playerBuilding->getName(), "");
+	
 	--_RefCount;
 	if ( _RefCount == 0 )
 	{
@@ -170,6 +164,9 @@ void CRoomInstancePlayer::addUser( CCharacter* user, CCharacter* owner )
 {
 	BOMB_IF( !user, "<BUILDING> null character!", return );
 
+	CBuildingPhysicalPlayer * playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>( _Building );
+	BOMB_IF( !playerBuilding, "<BUILDING> building type does not match with room type", return );
+
 	// open room inventory window
 	PlayerManager.sendImpulseToClient(user->getId(), "ITEM:OPEN_ROOM_INVENTORY");
 	if (owner)
@@ -182,23 +179,7 @@ void CRoomInstancePlayer::addUser( CCharacter* user, CCharacter* owner )
 		// Very rare case
 		owner = user;
 	}
-	// solve bot names for title and text
-	TVectorParamCheck titleParams;
-	TVectorParamCheck textParams;
-	// send the popup message
-	uint32 userId = PlayerManager.getPlayerId( user->getId() );
-	
-	std::string name = "RYZHOME_URL";
-	ucstring phrase = "RYZHOME_URL(){[WEB : app_ryzhome user=" + owner->getName().toString() + "]}";
-	NLNET::CMessage	msgout("SET_PHRASE");
-	msgout.serial(name);
-	msgout.serial(phrase);
-	sendMessageViaMirror("IOS", msgout);
-
-	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "web_transactions", titleParams);
-	uint32 textId = STRING_MANAGER::sendStringToUser(userId, "RYZHOME_URL", textParams);
-	PlayerManager.sendImpulseToClient(user->getId(), "USER:POPUP", titleId, textId);
-
+	user->sendUrl("app_ryzhome action=open_player_room&owner="+ owner->getName().toString()+"&room_name="+playerBuilding->getName(), "");
 
 	++_RefCount;
 }

@@ -210,6 +210,21 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 	std::vector<TChanID> result;
 	result.clear();
 
+	// Add lang channel, should be first.
+	if (!user->getLangChannel().empty()) {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(user->getLangChannel());
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}
+	} else {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}		
+	}
+
 	PVP_CLAN::TPVPClan faction = user->getAllegiance().first;
 	if( faction != PVP_CLAN::Neutral )
 	{
@@ -230,6 +245,7 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 		}
 	}
 
+	/*
 	bool matis = CFameInterface::getInstance().getFameIndexed(user->getId(), 0) >= PVPFameRequired*6000;
 	bool fyros = CFameInterface::getInstance().getFameIndexed(user->getId(), 1) >= PVPFameRequired*6000;
 	bool tryker = CFameInterface::getInstance().getFameIndexed(user->getId(), 2) >= PVPFameRequired*6000;
@@ -279,7 +295,7 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 			result.push_back((*it).second);
 		}
 	}
-//	}
+*/
 	return result;
 }
 
@@ -393,9 +409,10 @@ void CPVPManager2::sendChannelUsers(TChanID channel, CCharacter * user, bool out
 		TDataSetRow senderRow = TheDataset.getDataSetRow(user->getId());
 		if (outputToSys)
 		{
-			CCharacter::sendDynamicSystemMessage( user->getId(), "WHO_CHANNEL_INTRO" );
-			//players = "Players in channel \"" + getUserDynChannel(channel) + "\": " + players;
+			string channelName = DynChatEGS.getChanNameFromID(channel);
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal = channelName;
+			CCharacter::sendDynamicSystemMessage( user->getId(), "WHO_CHANNEL_INTRO" );
 			params[0].Literal = players;
 			CCharacter::sendDynamicSystemMessage( user->getId(), "LITERAL", params );
 		}
@@ -522,14 +539,14 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 					_CharacterUserChannels.insert(make_pair(user->getId(), currentChannels));
 				}
 			}
+		}
 
-			TChannelsCharacter::iterator cit = _UserChannelCharacters.find(channel);
-			if (cit != _UserChannelCharacters.end())
-			{
-				std::vector<NLMISC::CEntityId> lst = _UserChannelCharacters[channel];
-				lst.erase(find(lst.begin(), lst.end(), user->getId()));
-				_UserChannelCharacters[channel] = lst;
-			}
+		TChannelsCharacter::iterator cit = _UserChannelCharacters.find(channel);
+		if (cit != _UserChannelCharacters.end())
+		{
+			std::vector<NLMISC::CEntityId> lst = _UserChannelCharacters[channel];
+			lst.erase(find(lst.begin(), lst.end(), user->getId()));
+			_UserChannelCharacters[channel] = lst;
 		}
 	}
 }
@@ -642,13 +659,11 @@ void CPVPManager2::setPVPModeInMirror( const CCharacter * user ) const
 		}
 	}
 
-	CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyPVP_MODE );
-	CMirrorPropValue<TYPE_EVENT_FACTION_ID> propPvpMode2( TheDataset, user->getEntityRowId(), DSPropertyEVENT_FACTION_ID );
+	//CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyPVP_MODE );
+	CMirrorPropValue<TYPE_EVENT_FACTION_ID> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyEVENT_FACTION_ID );
 	if (propPvpMode.getValue() != pvpMode)
 	{
-		nlinfo("New pvp Mode : %d", pvpMode);
 		propPvpMode = pvpMode;
-		propPvpMode2 = pvpMode;
 	}
 }
 
@@ -775,7 +790,6 @@ bool CPVPManager2::isCurativeActionValid( CCharacter * actor, CEntityBase * targ
 
 	PVP_RELATION::TPVPRelation pvpRelation = getPVPRelation( actor, target, true );
 	bool actionValid;
-	nlinfo("Pvp relation = %d", pvpRelation);
 	switch( pvpRelation )
 	{
 		case PVP_RELATION::Ally :
@@ -1090,10 +1104,19 @@ bool CPVPManager2::addFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan c
 void CPVPManager2::onIOSMirrorUp()
 {
 	// create extra factions channels
+	/*
 	createExtraFactionChannel("hominists");
 	createExtraFactionChannel("urasies");
 	createExtraFactionChannel("marauders");
 	createExtraFactionChannel("agnos");
+	*/
+
+	// Community Channels
+	createExtraFactionChannel("en", true);
+	createExtraFactionChannel("fr", true);
+	createExtraFactionChannel("de", true);
+	createExtraFactionChannel("ru", true);
+	createExtraFactionChannel("es", true);
 
 	for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 	{
@@ -1138,7 +1161,7 @@ void CPVPManager2::createFactionChannel(PVP_CLAN::TPVPClan clan)
 	}
 }
 
-void CPVPManager2::createExtraFactionChannel(const std::string & channelName)
+void CPVPManager2::createExtraFactionChannel(const std::string & channelName, bool universalChannel)
 {
 
 	TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(channelName);
@@ -1148,6 +1171,7 @@ void CPVPManager2::createExtraFactionChannel(const std::string & channelName)
 		TChanID factionChannelId = DynChatEGS.addLocalizedChan(name);
 		// set historic size of the newly created channel
 		DynChatEGS.setHistoricSize( factionChannelId, FactionChannelHistoricSize );
+		DynChatEGS.setUniversalChannel( factionChannelId, universalChannel );
 
 		_ExtraFactionChannel.insert( make_pair(channelName, factionChannelId) );
 	}

@@ -179,7 +179,8 @@ void CEntityAnimationManager::load(NLMISC::IProgressCallback &/* progress */, bo
 	release();
 
 	// Log in the animation file.
-	setDebugOutput(getLogDirectory() + "animation.dbg");
+	//setDebugOutput(getLogDirectory() + "animation.dbg");
+	setDebugOutput("");	// no log
 
 	// Create the animation set for all entities.
 	_AnimationSet = Driver->createAnimationSet();

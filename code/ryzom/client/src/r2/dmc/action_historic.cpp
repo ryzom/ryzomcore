@@ -19,7 +19,7 @@
 #include "property_accessor.h"
 #include "../object_factory_client.h"
 #include "../editor.h"
-#include "../../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 
 namespace R2
 {

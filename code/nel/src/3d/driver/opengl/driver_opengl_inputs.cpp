@@ -17,7 +17,7 @@
 #include "stdopengl.h"
 #include "driver_opengl.h"
 
-#ifdef NL_OS_UNIX
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 # include <X11/Xatom.h>
 # ifdef HAVE_XRENDER
 #  include <X11/extensions/Xrender.h>
@@ -25,7 +25,7 @@
 # ifdef HAVE_XCURSOR
 #  include <X11/Xcursor/Xcursor.h>
 # endif // HAVE_XCURSOR
-#endif // NL_OS_UNIX
+#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
 #include "nel/misc/mouse_device.h"
 #include "nel/misc/di_event_emitter.h"

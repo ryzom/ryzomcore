@@ -71,6 +71,7 @@ private Q_SLOTS:
 	void save();
 	void saveAs();
 	void saveAll();
+	void closeDocument();
 	void cut();
 	void copy();
 	void paste();
@@ -124,6 +125,7 @@ private:
 	QAction *m_saveAction;
 	QAction *m_saveAsAction;
 	QAction *m_saveAllAction;
+	QAction *m_closeAction;
 	QAction *m_exitAction;
 	QAction *m_cutAction;
 	QAction *m_copyAction;

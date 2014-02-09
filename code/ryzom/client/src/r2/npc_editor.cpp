@@ -21,9 +21,9 @@
 #include "../interface_v3/character_3d.h"
 #include "editor.h"
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "displayer_visual_entity.h"
-#include "../interface_v3/dbgroup_combo_box.h"
+#include "nel/gui/dbgroup_combo_box.h"
 
 #include "../sheet_manager.h"
 
@@ -52,7 +52,7 @@ CNPCEditor::~CNPCEditor()
 void CNPCEditor::updateNPCView(uint slot)
 {
 	_NPCWindow = dynamic_cast<CGroupContainer *>(
-		CEditor::getUI().getElementFromId("ui:interface:r2ed_npc"));
+		CWidgetManager::getInstance()->getElementFromId("ui:interface:r2ed_npc"));
 	if (!_NPCWindow)
 	{
 		nlwarning("<CNPCEditor::updateNPCView> can't retrieve npc window, or bad type");

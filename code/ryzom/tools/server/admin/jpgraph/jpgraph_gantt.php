@@ -524,7 +524,7 @@ class GanttGraph extends Graph {
     // automtically determined from the input data)
     function SetDateRange($aStart,$aEnd) {
 	// Adjust the start and end so that the indicate the
-	// begining and end of respective start and end days
+	// beginning and end of respective start and end days
 	if( strpos($aStart,':') === false )
 	    $aStart = date('Y-m-d 00:00',strtotime($aStart));
 	if( strpos($aEnd,':') === false )

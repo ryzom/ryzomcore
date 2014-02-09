@@ -483,7 +483,7 @@ bool CObject::getShortestName(std::string &instanceId, std::string &attrName, si
 		nlassert(index != -1);
 		instanceId = parent->getAttr("InstanceId")->toString();
 		attrName = parent->getKey(index);
-		if (attrName == "")
+		if (attrName.empty())
 		{
 			position = index;
 		}
@@ -501,13 +501,13 @@ bool CObject::getShortestName(std::string &instanceId, std::string &attrName, si
 		nlassert(index2 != -1);
 		sint32 index = parent->findIndex(this);
 		nlassert(index != -1);
-		if (parent2->getKey(index2) == "")
+		if (parent2->getKey(index2).empty())
 		{
 			nlassert(0); // TMP : want to see if may possibly happen
 			return false;
 		}
 		instanceId = parent2->getAttr("InstanceId")->toString();
-		attrName == parent2->getKey(index2);
+		attrName = parent2->getKey(index2);
 		position = index;
 		return true;
 	}
@@ -602,7 +602,7 @@ bool CObjectString::set(const std::string& key,  const std::string & value)
 bool CObjectString::setObject(const std::string& key,  CObject* value)
 {
 	//H_AUTO(R2_CObjectString_setObject)
-	BOMB_IF( key != "" || ! (value->isString() || value->isNumber()) , "Try to set the a sub value of an object that does not allowed it", return false);
+	BOMB_IF( !key.empty() || ! (value->isString() || value->isNumber()) , "Try to set the a sub value of an object that does not allowed it", return false);
 	bool canSet = set(key, value->toString());
 	if (canSet)
 	{
@@ -1092,7 +1092,7 @@ void CObjectTable::doSerialize(std::string& out,  CSerializeContext& context) co
 				if ( _Value[i].second->isString("Name")
 					&&  _Value[i].second->isString("LocationId")
 					&& _Value[i].second->toString("Name") == "Permanent"
-					&& _Value[i].second->toString("LocationId") == "")
+					&& _Value[i].second->toString("LocationId").empty())
 				{
 					isDefault = true;
 				}
@@ -1248,7 +1248,7 @@ bool CObjectTable::setObject(const std::string& key,  CObject* value)
 	//H_AUTO(R2_CObjectTable_setObject)
 	CHECK_TABLE_INTEGRITY
 	value->setGhost(this->getGhost());
-	if (key == "")
+	if (key.empty())
 	{
 
 		clear();

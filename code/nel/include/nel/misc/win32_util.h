@@ -17,6 +17,7 @@
 #ifndef NL_WIN32_UTIL_H
 #define NL_WIN32_UTIL_H
 
+#include "types_nl.h"
 
 #ifdef NL_OS_WINDOWS
 

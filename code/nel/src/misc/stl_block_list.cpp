@@ -21,6 +21,10 @@
 // remove stupid VC6 warnings
 void foo_stl_block_list_cpp() {}
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 

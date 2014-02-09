@@ -241,7 +241,7 @@ private:
 		LogicalXor,		// ^^
 		OperatorCount,	//
 		NotOperator, // This is not an operator
-		ExtOperator, // This is a 2 charcters operator
+		ExtOperator, // This is a 2 characters operator
 	};
 
 	// Functions

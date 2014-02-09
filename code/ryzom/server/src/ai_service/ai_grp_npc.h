@@ -231,6 +231,7 @@ public:
 	void setColour(uint8 colour);
 	
 	void setOutpostSide(OUTPOSTENUMS::TPVPSide side);
+	void setOutpostFactions(OUTPOSTENUMS::TPVPSide side);
 	bool isRingGrp() const { return _RingGrp;}
 	
 private:

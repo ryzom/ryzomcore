@@ -79,7 +79,7 @@ CMessage::CMessage (NLMISC::CMemStream &memstr) :
 	else
 		invert(); // calls readType()
 	if ( ! reading )
-		invert(); // set ouput mode back if necessary
+		invert(); // set output mode back if necessary
 	seek( pos, begin ); // sets the same position as the one in the memstream
 }
 

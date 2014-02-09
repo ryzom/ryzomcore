@@ -278,7 +278,7 @@ void CStageSet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 
 //-----------------------------------------------
 // removePosWithNoMode :
-// Remove ¨Positions except for those with a mode.
+// Remove Positions except for those with a mode.
 //-----------------------------------------------
 void CStageSet::removePosWithNoMode()
 {

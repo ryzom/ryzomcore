@@ -23,10 +23,10 @@
 namespace NLOLDGEORGES
 {
 
-// La classe CFormLoader est le point d'entrée des classes CForm pour charger une fiche.
-// Il y a deux fonctions load:
-//    Sans date: donne directement la dernière fiche historiquement parlant
-//    Avec date: donne une fiche composée de la dernière additionnés des historiques postérieurs ou égaux à la date.
+// CFormLoader class is CForm entry point to load a sheet.
+// There are two load functions:
+//    Without date: give directly the last sheet
+//    With date: give a sheet and all previous ones until this date
 class CFormLoader  
 {
 protected:

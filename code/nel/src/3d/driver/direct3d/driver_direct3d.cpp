@@ -292,6 +292,11 @@ CDriverD3D::CDriverD3D()
 	_CurrIndexBufferFormat = CIndexBuffer::IndicesUnknownFormat;
 	_IsGeforce = false;
 	_NonPowerOfTwoTexturesSupported = false;
+	_MaxAnisotropy = 0;
+	_AnisotropicMinSupported = false;
+	_AnisotropicMagSupported = false;
+	_AnisotropicMinCubeSupported = false;
+	_AnisotropicMagCubeSupported = false;
 
 	_FrustumLeft= -1.f;
 	_FrustumRight= 1.f;
@@ -1493,6 +1498,11 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		_MaxVertexIndex = caps.MaxVertexIndex;
 		_IsGeforce = !(caps.DevCaps & D3DDEVCAPS_NPATCHES) && (caps.PixelShaderVersion >= D3DPS_VERSION(2, 0) || caps.PixelShaderVersion < D3DPS_VERSION(1, 4));
 		_NonPowerOfTwoTexturesSupported = !(caps.TextureCaps & D3DPTEXTURECAPS_POW2) || (caps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL);
+		_MaxAnisotropy = caps.MaxAnisotropy;
+		_AnisotropicMinSupported = (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC) != 0;
+		_AnisotropicMagSupported = (caps.TextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC) != 0;
+		_AnisotropicMinCubeSupported = (caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC) != 0;
+		_AnisotropicMagCubeSupported = (caps.CubeTextureFilterCaps & D3DPTFILTERCAPS_MAGFANISOTROPIC) != 0;
 	}
 	else
 	{
@@ -1506,6 +1516,11 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		_MaxVertexIndex = 0xffff;
 		_IsGeforce = false;
 		_NonPowerOfTwoTexturesSupported = false;
+		_MaxAnisotropy = 0;
+		_AnisotropicMinSupported = false;
+		_AnisotropicMagSupported = false;
+		_AnisotropicMinCubeSupported = false;
+		_AnisotropicMagCubeSupported = false;
 	}
 	// If 16 bits vertices only, build a vb for quads rendering
 	if (_MaxVertexIndex <= 0xffff)
@@ -1607,6 +1622,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 
 	// Init some variables
 	_ForceDXTCCompression = false;
+	_AnisotropicFilter = 0;
 	_ForceTextureResizePower = 0;
 	_FogEnabled = false;
 
@@ -2045,6 +2061,25 @@ void CDriverD3D::forceDXTCCompression(bool dxtcComp)
 {
 	H_AUTO_D3D(CDriverD3D_forceDXTCCompression);
 	_ForceDXTCCompression = dxtcComp;
+}
+
+// ***************************************************************************
+
+void CDriverD3D::setAnisotropicFilter(sint filter)
+{
+	H_AUTO_D3D(CDriverD3D_setAnisotropicFilter);
+
+	// anisotropic filter not supported
+	if (_MaxAnisotropy < 2) return;
+
+	if (filter < 0 || filter > _MaxAnisotropy)
+	{
+		_AnisotropicFilter = _MaxAnisotropy;
+	}
+	else
+	{
+		_AnisotropicFilter = filter;
+	}
 }
 
 // ***************************************************************************
@@ -2715,6 +2750,8 @@ bool CDriverD3D::fillPresentParameter (D3DPRESENT_PARAMETERS &parameters, D3DFOR
 	// Choose a zbuffer format
 	D3DFORMAT zbufferFormats[]=
 	{
+		//uncomment to save zbuffer D3DFMT_D32F_LOCKABLE,
+		//uncomment to save zbuffer D3DFMT_D16_LOCKABLE,
 		/*D3DFMT_D32,
 		D3DFMT_D24X8,*/
 		D3DFMT_D24S8,

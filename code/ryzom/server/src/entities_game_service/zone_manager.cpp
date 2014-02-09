@@ -1508,7 +1508,7 @@ bool CZoneManager::getPlace( sint32 x, sint32 y, float& gooDistance, const CPlac
 					}
 					for (uint k = 0; k < _Continents[i].getRegions()[j]->getPlaces().size(); k++ )
 					{
-						if( _Continents[i].getRegions()[j]->getPlaces()[k]->isGooPath() == false )
+						if(!_Continents[i].getRegions()[j]->getPlaces()[k]->isGooActive())
 						{
 							if ( _Continents[i].getRegions()[j]->getPlaces()[k]->contains( vect ) )
 							{

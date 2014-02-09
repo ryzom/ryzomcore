@@ -20,11 +20,11 @@
 #define NL_VIEW_BITMAP_MP_FABER_H
 
 #include "nel/misc/types_nl.h"
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 
 
 ///\todo nico : do the real display when item icons are available
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 
 /**
  * class used to display mps for faber interface

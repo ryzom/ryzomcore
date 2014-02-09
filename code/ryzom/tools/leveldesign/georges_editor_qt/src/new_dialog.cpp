@@ -87,9 +87,9 @@ namespace NLQT
 		QString path = Modules::mainWin().leveldesignPath();
 		QStringList typelist;
 		//nlinfo ("Searching files in directory '%s'...", dir.c_str());
-		NLMISC::CPath::getPathContent(path.toStdString(),true,false,true,_files);
+		NLMISC::CPath::getPathContent(path.toUtf8().constData(),true,false,true,_files);
 
-		getTypes( /* path.toStdString() // incompatible parameter type */ );
+		getTypes( /* path.toUtf8() // incompatible parameter type */ );
 		//nlinfo ("%d supported file types :",FileTypeToId.size());
 		for ( std::map<std::string,uint8>::iterator it = FileTypeToId.begin(); it != FileTypeToId.end(); ++it )
 		{
@@ -103,8 +103,8 @@ namespace NLQT
 			std::string extStr = NLMISC::CFile::getExtension( _files[i] );
 
 			// filter files without existing dfn
-			if (!NLMISC::CPath::exists(QString("%1.dfn").arg(extStr.c_str()).toStdString()) &&
-				!NLMISC::CPath::exists(QString("%1.typ").arg(extStr.c_str()).toStdString()))
+			if (!NLMISC::CPath::exists(extStr + ".dfn") &&
+				!NLMISC::CPath::exists(extStr + ".typ"))
 			{
 				continue;
 			}
@@ -253,7 +253,7 @@ namespace NLQT
 		{
 			std::string extStr = NLMISC::CFile::getExtension( fileName );
 
-			if (!NLMISC::CPath::exists(QString("%1.dfn").arg(extStr.c_str()).toStdString()))
+			if (!NLMISC::CPath::exists(extStr + ".dfn"))
 			{
 				return;
 			}

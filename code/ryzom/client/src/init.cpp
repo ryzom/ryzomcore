@@ -62,12 +62,14 @@
 #include "ingame_database_manager.h"
 #include "client_chat_manager.h"
 #include "interface_v3/input_handler_manager.h"
+#include "interface_v3/interface_manager.h"
 //#include "crtdbg.h"
 #include "sound_manager.h"
 #include "net_manager.h"
 #include "sheet_manager.h"
 
 #include "interface_v3/sbrick_manager.h"
+#include "nel/gui/widget_manager.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -533,31 +535,6 @@ void checkDriverVersion()
 		nlwarning ("Can't check video driver version");
 }
 
-void checkNoATIOpenGL()
-{
-	string deviceName;
-	uint64 driverVersion;
-	if (CSystemInfo::getVideoInfo (deviceName, driverVersion))
-	{
-		string lwr = deviceName;
-		strlwr(lwr);
-		if (lwr.find (ATI_RECOMMANDED_DRIVERS_STRING_TEST)!=string::npos && ClientCfg.Driver3D==CClientConfig::OpenGL)
-		{
-			// special case for radeon 7500 or less : doesn't issue message since doesn't work with Direct3D for now
-			if (!(strstr(lwr.c_str() , "radeon 7000") || strstr(lwr.c_str() , "radeon 7200") || strstr(lwr.c_str() , "radeon 7500")))
-			{
-				ucstring	message= CI18N::get("uiUseATID3D");
-				if (ClientQuestion (message))
-				{
-					ClientCfg.Driver3D= CClientConfig::DrvAuto;
-					ClientCfg.writeString("Driver3D", "Auto");
-					ClientCfg.ConfigFile.save();
-				}
-			}
-		}
-	}
-}
-
 void checkDriverDepth ()
 {
 	// Check desktop is in 32 bit else no window mode allowed.
@@ -691,7 +668,7 @@ void prelogInit()
 		NLMISC::CTime::probeTimerInfo(timerInfo);
 		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
 			setCPUMask();
-
+		
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -787,7 +764,6 @@ void prelogInit()
 		CPath::remapExtension ("png", "tga", true);
 		FPU_CHECKER_ONCE
 
-		uint i;
 		addPreDataPaths(ProgressBar);
 
 		FPU_CHECKER_ONCE
@@ -816,8 +792,6 @@ void prelogInit()
 		// Check driver version
 		checkDriverVersion();
 
-		// Check ATI not in OpenGL
-		 checkNoATIOpenGL();
 		// Create the driver (most important part of the client).
 		nmsg = "Creating 3d driver...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
@@ -832,21 +806,13 @@ void prelogInit()
 
 		switch(ClientCfg.Driver3D)
 		{
-			case  CClientConfig::DrvAuto:
 #ifdef NL_OS_WINDOWS
-			{
-				// Fallback to D3D for card other than nVidia
-				std::string deviceName;
-				uint64 drvVersion;
-				CSystemInfo::getVideoInfo(deviceName, drvVersion);
-				strlwr(deviceName);
-				driver = strstr(deviceName.c_str(), NVIDIA_RECOMMANDED_DRIVERS_STRING_TEST) == NULL ? UDriver::Direct3d:UDriver::OpenGl;
-			}
-			break;
+
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
 #endif // NL_OS_WINDOWS
+			case CClientConfig::DrvAuto:
 			case CClientConfig::OpenGL:
 				driver = UDriver::OpenGl;
 			break;
@@ -1045,7 +1011,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for (i=0; i<3; i++)
+		for ( uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;
@@ -1068,6 +1034,9 @@ void prelogInit()
 		// Init the DXTCCompression.
 		Driver->forceDXTCCompression(ClientCfg.ForceDXTC);
 
+		// Set the anisotropic filter
+		Driver->setAnisotropicFilter(ClientCfg.AnisotropicFilter);
+
 		// Divide the texture size.
 		if (ClientCfg.DivideTextureSizeBy2)
 			Driver->forceTextureResize(2);
@@ -1079,13 +1048,21 @@ void prelogInit()
 		if(GenericMat.empty())
 			nlerror("init: Cannot Create the generic material.");
 
-		// Yoyo: initialize NOW the InputHandler for Event filtering.
-		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
-		InputHandlerManager->addToServer (&Driver->EventServer);
 
 		// Create a text context. We need to put the full path because we not already add search path
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
+
+		
+		CInterfaceManager::getInstance();
+
+		// Yoyo: initialize NOW the InputHandler for Event filtering.
+		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
+		InputHandlerManager->addToServer (&Driver->EventServer);
+
+		std::string filename = CPath::lookup( ClientCfg.XMLInputFile, false );
+		if( !filename.empty() )
+			InputHandlerManager->readInputConfigFile( filename );
 
 		ProgressBar.setFontFactor(0.85f);
 

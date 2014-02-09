@@ -20,8 +20,8 @@
 #include "r2_config.h"
 #include "tool.h"
 //
-#include "../interface_v3/ctrl_quad.h"
-#include "../interface_v3/group_container.h"
+#include "nel/gui/ctrl_quad.h"
+#include "nel/gui/group_container.h"
 //
 #include "nel/misc/i18n.h"
 //
@@ -41,7 +41,7 @@ void CInstanceMapDeco::CCtrlButtonEntity::getContextHelp(ucstring &help) const
 }
 
 // *********************************************************************************************************
-bool CInstanceMapDeco::CCtrlButtonEntity::handleEvent(const CEventDescriptor &/* event */)
+bool CInstanceMapDeco::CCtrlButtonEntity::handleEvent(const NLGUI::CEventDescriptor &/* event */)
 {
 	//H_AUTO(R2_CCtrlButtonEntity_handleEvent)
 	return false; // just a display with tooltip capability
@@ -110,7 +110,8 @@ CCtrlQuad *CInstanceMapDeco::newQuad(CGroupMap &owner)
 {
 	//H_AUTO(R2_CInstanceMapDeco_newQuad)
 	nlassert(_Instance);
-	CCtrlQuad *q = new CCtrlQuad;
+	CViewBase::TCtorParam param;
+	CCtrlQuad *q = new CCtrlQuad( param );
 	q->setActive(false);
 	q->setModulateGlobalColor(false);
 	owner.addCtrl(q);
@@ -156,9 +157,11 @@ void CInstanceMapDeco::onAdd(CGroupMap &owner)
 	CInterfaceGroup *window = owner.getParentContainer();
 	if (window)
 	{
+		CViewBase::TCtorParam param;
+
 		for(uint k = 0; k < 2; ++k)
 		{
-			_GlowStar[k] = new CCtrlQuad;
+			_GlowStar[k] = new CCtrlQuad( param );
 			_GlowStar[k]->setActive(false);
 			_GlowStar[k]->setModulateGlobalColor(false);
 			window->addCtrl(_GlowStar[k]);

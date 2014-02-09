@@ -297,7 +297,7 @@ public:
 	virtual void deleteRootPluginPrimitive (void);
 	virtual void getAllRootPluginPrimitive (std::vector<NLLIGO::IPrimitive*> &prims);
 	/*
-	 *	The players or informations coming from the server are considered as primitives by the WorldEditor
+	 *	The players or information coming from the server are considered as primitives by the WorldEditor
 	 *   so we need to create/delete/modify these primitives
 	 */
 	// Create a plugin primitive
@@ -470,7 +470,7 @@ public:
 	afx_msg void OnUpdateEditCollapse(CCmdUI* pCmdUI);
 	afx_msg void OnEditSelectChildren();
 	afx_msg void OnUpdateEditSelectChildren(CCmdUI* pCmdUI);
-	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnEditExpand ();
 	afx_msg void OnEditCollapse ();
 	afx_msg void OnHelpFinder();

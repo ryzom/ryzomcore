@@ -355,11 +355,11 @@
     <leaf name="EQUIP"
           sendto="EGS"
           format="u16 u16 u16"
-          description="the client equip character (equiped inventory, equiped inventory slot, bag slot)" />
+          description="the client equip character (equipped inventory, equipped inventory slot, bag slot)" />
     <leaf name="UNEQUIP"
           sendto="EGS"
           format="u16 u16"
-          description="the client unequip character (equiped inventory, equiped inventory slot)" />
+          description="the client unequip character (equipped inventory, equipped inventory slot)" />
     <leaf name="TEMP_TO_BAG"
           sendto="EGS"
           format="u16"

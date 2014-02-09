@@ -33,8 +33,8 @@
 #include "../global.h"
 #include "../misc.h"
 #include "../landscape_poly_drawer.h"
-#include "../interface_v3/ctrl_polygon.h"
-#include "../interface_v3/ctrl_quad.h"
+#include "nel/gui/ctrl_polygon.h"
+#include "nel/gui/ctrl_quad.h"
 #include "../time_client.h"
 //
 
@@ -54,7 +54,7 @@ namespace R2
 class CCtrlPolygonSelectable : public CCtrlPolygon, public IDisplayerUIHandle
 {
 public:
-	CCtrlPolygonSelectable(CInstance &instance) : Instance(instance) {}
+	CCtrlPolygonSelectable( CViewBase::TCtorParam &param, CInstance &instance) : Instance(instance), CCtrlPolygon( param ) {}
 	// from IDisplayerUIHandle
 	virtual CInstance &getDisplayedInstance() { return Instance; }
 	// from IDisplayerUIHandle
@@ -99,7 +99,7 @@ protected:
 class CCtrlQuadSelectable : public CCtrlQuad, public IDisplayerUIHandle
 {
 public:
-	CCtrlQuadSelectable(CInstance &instance, uint edgeIndex) : Instance(instance), EdgeIndex(edgeIndex) {}
+	CCtrlQuadSelectable( CViewBase::TCtorParam &param, CInstance &instance, uint edgeIndex) : Instance(instance), EdgeIndex(edgeIndex), CCtrlQuad( param ){}
 	// from IDisplayerUIHandle
 	virtual CInstance &getDisplayedInstance() { return Instance; }
 	// from IDisplayerUIHandle
@@ -131,7 +131,7 @@ public:
 		_Parent->getCorner(winX, winY, _ParentPosRef);
 		return contains(x - winX, y - winY);
 	}
-	virtual bool		handleEvent (const CEventDescriptor &/* event */)
+	virtual bool		handleEvent (const NLGUI::CEventDescriptor &/* event */)
 	{
 		return false;
 	}
@@ -179,7 +179,8 @@ CCtrlPolygon *CDisplayerVisualGroup::CSelectablePrimRender::newCtrlPolygon() con
 {
 	//H_AUTO(R2_CDisplayerVisualGroup_CSelectablePrimRender)
 	nlassert(DisplayedInstance);
-	CCtrlPolygonSelectable *result = new CCtrlPolygonSelectable(*DisplayedInstance);
+	CViewBase::TCtorParam param;
+	CCtrlPolygonSelectable *result = new CCtrlPolygonSelectable( param, *DisplayedInstance);
 	result->setId(DisplayedInstance->getId());
 	result->setToolTipParent(CCtrlBase::TTMouse);
 	result->setToolTipParentPosRef(Hotspot_BR);
@@ -192,7 +193,8 @@ CCtrlQuad *CDisplayerVisualGroup::CSelectablePrimRender::newCtrlQuad(uint edgeIn
 {
 	//H_AUTO(R2_CDisplayerVisualGroup_CSelectablePrimRender)
 	nlassert(DisplayedInstance);
-	CCtrlQuadSelectable *result = new CCtrlQuadSelectable(*DisplayedInstance, edgeIndex);
+	CViewBase::TCtorParam param;
+	CCtrlQuadSelectable *result = new CCtrlQuadSelectable( param, *DisplayedInstance, edgeIndex);
 	result->setToolTipParent(CCtrlBase::TTMouse);
 	result->setToolTipParentPosRef(Hotspot_BR);
 	result->setToolTipPosRef(Hotspot_TL);

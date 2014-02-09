@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
 						// Get the current pos
 						sint32 curPos=output.getPos ();
 
-						// File at the begining
+						// File at the beginning
 						output.seek (0, NLMISC::IStream::begin);
 
 						// Write the triangle count

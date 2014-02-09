@@ -10,7 +10,7 @@
 #define PROMPT_TIME	2000
 
 extern AdvParams sParams;
-BOOL CALLBACK AdvParametersDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam); 
+INT_PTR CALLBACK AdvParametersDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam); 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -210,9 +210,9 @@ void EditPatchMod::SetTessUI(HWND hDlg, TessApprox *tess)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-	EditPatchMod *ep =(EditPatchMod *)GetWindowLong(hDlg, GWL_USERDATA);
+	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
 	
@@ -223,7 +223,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hSurfPanel = hDlg;
-			SetWindowLong(hDlg, GWL_USERDATA, (LONG)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
 			if (!ep->settingViewportTess  && ep->settingDisp && ep->GetProdTess().type == TESS_SET)
 				ep->settingDisp = FALSE;
 			TessApprox t;
@@ -599,7 +599,7 @@ static ISpinnerControl* psMaxTrisSpin = NULL;
 // this max matches the MI max.
 #define MAX_SUBDIV 7
 static BOOL initing = FALSE; // this is a hack but CenterWindow causes bad commands
-BOOL CALLBACK
+INT_PTR CALLBACK
 AdvParametersDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)

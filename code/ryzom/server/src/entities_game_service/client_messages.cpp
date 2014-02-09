@@ -108,12 +108,12 @@ void cbClientItemEquip( NLNET::CMessage& msgin, const std::string &serviceName, 
 {
 	H_AUTO(cbClientItemEquip);
 
-	uint16 equipedInventory, equipedSlot, bagSlot;
+	uint16 equippedInventory, equippedSlot, bagSlot;
 	CEntityId id;
 
 	msgin.serial( id );
-	msgin.serial( equipedInventory );
-	msgin.serial( equipedSlot );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
 	msgin.serial( bagSlot );
 
 	CCharacter *c = (CCharacter * ) CEntityBaseManager::getEntityBasePtr( id );
@@ -125,7 +125,7 @@ void cbClientItemEquip( NLNET::CMessage& msgin, const std::string &serviceName, 
 		// if player is stunned or dead cancel action
 		if (c->isDead() || c->isStunned())
 			return;
-		c->equipCharacter( INVENTORIES::TInventory(equipedInventory), equipedSlot, bagSlot, true );
+		c->equipCharacter( INVENTORIES::TInventory(equippedInventory), equippedSlot, bagSlot, true );
 	}
 }
 
@@ -134,12 +134,12 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 {
 	H_AUTO(cbClientItemUnequip);
 
-	uint16 equipedInventory, equipedSlot;
+	uint16 equippedInventory, equippedSlot;
 	CEntityId id;
 
 	msgin.serial( id );
-	msgin.serial( equipedInventory );
-	msgin.serial( equipedSlot );
+	msgin.serial( equippedInventory );
+	msgin.serial( equippedSlot );
 
 	CCharacter *c = (CCharacter * ) CEntityBaseManager::getEntityBasePtr( id );
 	if( c )
@@ -151,7 +151,7 @@ void cbClientItemUnequip( NLNET::CMessage& msgin, const std::string &serviceName
 		if (c->isDead() || c->isStunned())
 			return;
 
-		c->unequipCharacter( INVENTORIES::TInventory(equipedInventory), equipedSlot, true );
+		c->unequipCharacter( INVENTORIES::TInventory(equippedInventory), equippedSlot, true );
 	}
 }
 
@@ -1114,9 +1114,8 @@ void cbClientMoveInContactLists( NLNET::CMessage& msgin, const std::string &serv
 		if (listOrigin == 0)
 		{
 			NLMISC::CEntityId	eid= c->getFriendByContactId(contactIdOrigin);
-			// allows the whole operation or nothing if player is not present
-			CCharacter * other = PlayerManager.getChar( eid );
-			if(other)
+			// allows the whole operation or nothing if player does not exist
+			if (eid != CEntityId::Unknown)
 			{
 				c->removePlayerFromFriendListByEntityId(eid);
 				c->addPlayerToIgnoreList(eid);
@@ -1124,15 +1123,14 @@ void cbClientMoveInContactLists( NLNET::CMessage& msgin, const std::string &serv
 			else
 			{
 				// player not found => message
-				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_OFFLINE");
+				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_NOTEXIST");
 			}
 		}
 		else
 		{
 			NLMISC::CEntityId	eid= c->getIgnoreByContactId(contactIdOrigin);
 			// allows the whole operation or nothing if player is not present
-			CCharacter * other = PlayerManager.getChar( eid );
-			if(other)
+			if(eid != CEntityId::Unknown)
 			{
 				c->removePlayerFromIgnoreListByEntityId(eid);
 				c->addPlayerToFriendList(eid);
@@ -1140,7 +1138,7 @@ void cbClientMoveInContactLists( NLNET::CMessage& msgin, const std::string &serv
 			else
 			{
 				// player not found => message
-				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_OFFLINE");
+				PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "OPERATION_NOTEXIST");
 			}
 		}
 	}
@@ -2080,7 +2078,7 @@ void cbClientSit( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 }
 
 
-// client send a command to chang guild motd
+// client send a command to change guild motd
 void cbClientGuildMotd( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId )
 {
 	H_AUTO(cbClientGuildMotd);
@@ -2417,7 +2415,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 	msgin.serial( id,opt );
 	const std::vector<CEntityId> * gms = NULL;
 
-	// Make sure opt is not like "A(c)" for "é"
+	// Make sure opt is not like "A(c)" for e acute
 	ucstring ucopt;
 	ucopt.fromUtf8(opt);
 	opt = ucopt.toString();
@@ -2544,7 +2542,7 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 			return;
 		}
 
-		bool havePriv = p->havePriv(":DEV:SGM:GM:");
+		bool havePriv = p->havePriv(":DEV:SGM:GM:EM:");
 		bool hasChannel = false;
 		nbAnswers = 0;
 
@@ -2578,9 +2576,10 @@ void cbClientWho( NLNET::CMessage& msgin, const std::string &serviceName, NLNET:
 
 		if (!playerNames.empty())
 		{
-			CCharacter::sendDynamicSystemMessage( id, "WHO_CHANNEL_INTRO" );
-			//playerNames = "Players in channel \"" + opt + "\":" + playerNames;
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal = opt;
+			CCharacter::sendDynamicSystemMessage( id, "WHO_CHANNEL_INTRO", params);
+			//playerNames = "Players in channel \"" + opt + "\":" + playerNames;
 			params[0].Literal = playerNames;
 			CCharacter::sendDynamicSystemMessage( id, "LITERAL", params );
 			return;
@@ -2738,7 +2737,7 @@ void cbClientSetCharacterTitle( NLNET::CMessage& msgin, const std::string & serv
 	}
 
 	// kxu: TODO: check validity of title chosen by player
-	c->setTitle( (CHARACTER_TITLE::ECharacterTitle) title );
+	c->setNewTitle(CHARACTER_TITLE::toString((CHARACTER_TITLE::ECharacterTitle)title));
 	c->registerName();
 }
 

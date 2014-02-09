@@ -121,7 +121,7 @@ BEGIN
                     8
     PUSHBUTTON      "Interrupt",IDC_BUTTONCANCEL,129,23,50,14,BS_NOTIFY
     LTEXT           "Object progression",IDC_STATIC,7,28,79,8
-    LTEXT           "Lightmaps Informations...",IDC_STATICINFO,7,60,172,114
+    LTEXT           "Lightmaps Information...",IDC_STATICINFO,7,60,172,114
 END
 
 IDD_LOD DIALOG DISCARDABLE  0, 0, 360, 200

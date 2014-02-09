@@ -27,7 +27,7 @@ typedef struct TGA_HEADER
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 
-unsigned long Pic_TGA_Read(	unsigned char *FileName,
+unsigned long Pic_TGA_Read(	const char *FileName,
 							unsigned char **ppPal, unsigned char **ppDatas,
 							unsigned long *pWidth, unsigned long *pHeight, 
 							unsigned long *pDepth)
@@ -140,7 +140,7 @@ unsigned long Pic_TGA_Read(	unsigned char *FileName,
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 
-unsigned long Pic_TGA_Write(	unsigned char *FileName, 
+unsigned long Pic_TGA_Write(	const char *FileName, 
 								unsigned char *pPal,unsigned char *pDatas, 
 								unsigned long w, unsigned long h, unsigned long d)
 {

@@ -27,7 +27,7 @@
 
 extern "C"
 {
-	#include "../../interface_v3/lua_loadlib.h"
+	#include "nel/gui/lua_loadlib.h"
 }
 
 
@@ -65,7 +65,7 @@ namespace R2
 
 		void loadFeatures();
 
-		~CDynamicMapClient();
+		virtual ~CDynamicMapClient();
 
 		void loadDefaultPalette();
 

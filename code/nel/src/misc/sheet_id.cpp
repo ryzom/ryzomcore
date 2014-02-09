@@ -29,6 +29,10 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 CSheetId::CChar CSheetId::_AllStrings;
@@ -157,19 +161,22 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 			{
 				_FileExtensions.push_back(sheetType);
 				_DevSheetIdToName.push_back(std::vector<std::string>());
-				typeId = _FileExtensions.size() - 1;
+				typeId = (uint32)_FileExtensions.size() - 1;
 				_DevTypeNameToId[sheetType] = typeId;
 				std::string unknownNewType = std::string("unknown." + sheetType);
 				_DevSheetIdToName[typeId].push_back(unknownNewType);
 				_Id.IdInfos.Type = typeId;
 				_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
 				_DevSheetNameToId[unknownNewType] = _Id.Id;
+				if (sheetName == "unknown")
+					return true; // Return with the unknown sheet id of this type
 			}
 			else
 			{
 				typeId = tit->second;
 				_Id.IdInfos.Type = typeId;
 			}
+			// Add a new sheet name to the type
 			_DevSheetIdToName[typeId].push_back(sheetNameLc);
 			_Id.IdInfos.Id = _DevSheetIdToName[typeId].size() - 1;
 			// nldebug("SHEETID: Type %i, id %i, sheetid %i", _Id.IdInfos.Type, _Id.IdInfos.Id, _Id.Id);
@@ -389,7 +396,7 @@ void CSheetId::init(bool removeUnknownSheet)
 		nlwarning("SHEETID: Loading without known sound sheet id, please update sheet_id.bin with .sound sheets");
 		nlassert(_FileExtensions.size() == 1 << (NL_SHEET_ID_TYPE_BITS));
 		nlassert(_FileExtensions[a_NoSoundSheetType].empty());
-		_FileExtensions[a_NoSoundSheetType] == "sound";
+		_FileExtensions[a_NoSoundSheetType] = "sound";
 		_DevSheetIdToName.push_back(std::vector<std::string>());
 		_DevSheetIdToName[0].push_back("unknown.sound");
 		TSheetId id;

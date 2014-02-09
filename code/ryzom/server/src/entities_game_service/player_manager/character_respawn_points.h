@@ -34,7 +34,7 @@ class CCharacter;
 /**
  * CCharacterRespawnPoints
  * This class contains code and data relative to the player respawn points.
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */

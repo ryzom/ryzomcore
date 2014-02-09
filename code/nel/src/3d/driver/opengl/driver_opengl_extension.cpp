@@ -628,7 +628,7 @@ static bool	setupARBTextureNonPowerOfTwo(const char	*glext)
 {
 	H_AUTO_OGL(setupARBTextureCompression);
 
-#ifndef USE_OPENGL_ES
+#ifndef USE_OPENGLES
 	CHECK_EXT("GL_ARB_texture_non_power_of_two");
 #endif
 
@@ -805,19 +805,19 @@ static bool	setupARBTextureCubeMap(const char	*glext)
 
 #ifdef USE_OPENGLES
 	CHECK_EXT("OES_texture_cube_map");
+
+	CHECK_ADDRESS(NEL_PFNGLTEXGENFOESPROC, glTexGenfOES);
+	CHECK_ADDRESS(NEL_PFNGLTEXGENFVOESPROC, glTexGenfvOES);
+	CHECK_ADDRESS(NEL_PFNGLTEXGENIOESPROC, glTexGeniOES);
+	CHECK_ADDRESS(NEL_PFNGLTEXGENIVOESPROC, glTexGenivOES);
+	CHECK_ADDRESS(NEL_PFNGLTEXGENXOESPROC, glTexGenxOES);
+	CHECK_ADDRESS(NEL_PFNGLTEXGENXVOESPROC, glTexGenxvOES);
+	CHECK_ADDRESS(NEL_PFNGLGETTEXGENFVOESPROC, glGetTexGenfvOES);
+	CHECK_ADDRESS(NEL_PFNGLGETTEXGENIVOESPROC, glGetTexGenivOES);
+	CHECK_ADDRESS(NEL_PFNGLGETTEXGENXVOESPROC, glGetTexGenxvOES);
 #else
 	CHECK_EXT("GL_ARB_texture_cube_map");
 #endif
-
-//	CHECK_ADDRESS(NEL_PFNGLTEXGENFOESPROC, glTexGenfOES);
-//	CHECK_ADDRESS(NEL_PFNGLTEXGENFVOESPROC, glTexGenfvOES);
-//	CHECK_ADDRESS(NEL_PFNGLTEXGENIOESPROC, glTexGeniOES);
-//	CHECK_ADDRESS(NEL_PFNGLTEXGENIVOESPROC, glTexGenivOES);
-//	CHECK_ADDRESS(NEL_PFNGLTEXGENXOESPROC, glTexGenxOES);
-//	CHECK_ADDRESS(NEL_PFNGLTEXGENXVOESPROC, glTexGenxvOES);
-//	CHECK_ADDRESS(NEL_PFNGLGETTEXGENFVOESPROC, glGetTexGenfvOES);
-//	CHECK_ADDRESS(NEL_PFNGLGETTEXGENIVOESPROC, glGetTexGenivOES);
-//	CHECK_ADDRESS(NEL_PFNGLGETTEXGENXVOESPROC, glGetTexGenxvOES);
 
 	return true;
 }
@@ -1499,11 +1499,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
 	if(ext.ARBMultiTexture)
 	{
-#ifdef USE_OPENGLES
-		glGetIntegerv(GL_MAX_TEXTURE_UNITS, &ntext);
-#else
 		glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &ntext);
-#endif
 		// We could have more than IDRV_MAT_MAXTEXTURES but the interface only
 		// support IDRV_MAT_MAXTEXTURES texture stages so take min
 		ext.NbTextureStages= (ntext<((GLint)IDRV_MAT_MAXTEXTURES)?ntext:IDRV_MAT_MAXTEXTURES);

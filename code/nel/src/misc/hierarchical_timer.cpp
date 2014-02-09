@@ -26,6 +26,10 @@
 #include "nel/misc/time_nl.h"
 #endif
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 

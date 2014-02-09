@@ -52,7 +52,7 @@ bool CEditListCtrl::create (DWORD wStyle, RECT &rect, CWnd *parent, uint dialog_
 		subRect.top = 0;
 		subRect.right = rect.right-rect.left;
 		subRect.bottom = rect.bottom-rect.top;
-#if defined(NL_COMP_VC8) || defined(NL_COMP_VC9)
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 80
 		if (ListCtrl.CreateEx ( WS_EX_CLIENTEDGE, /*WC_LISTVIEW, "",*/ WS_CHILD|LVS_REPORT, subRect, this, 0))
 #else
 		if (ListCtrl.CreateEx ( WS_EX_CLIENTEDGE, WC_LISTVIEW, "", WS_CHILD|LVS_REPORT, subRect, this, 0))

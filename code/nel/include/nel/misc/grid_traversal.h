@@ -17,6 +17,8 @@
 #ifndef _GRID_TRAVERSAL_H
 #define _GRID_TRAVERSAL_H
 
+#include "types_nl.h"
+
 namespace NLMISC
 {
 

@@ -91,7 +91,10 @@ class CItemSheet;
 
 class CPhysicalDamage;
 
+namespace NLMISC{
 class CCDBNodeLeaf;
+class CCDBNodeBranch;
+}
 
 extern CLFECOMMON::TCLEntityId	SlotUnderCursor;
 
@@ -329,7 +332,7 @@ public:
 	/// Return the Name of the entity. There may be a specification in it (guard, trader, etc ...). It is then surrounded by '$'
 	const ucstring &getEntityName() const {return _EntityName;}
 	/// Return the title from a name. The specification is surrounded by '$', and tells the title of the entity (guard, matis merchant, etc ..)
-	static std::string getTitleFromName(const ucstring &name);
+	static ucstring getTitleFromName(const ucstring &name);
 	/// Remove the specification from a name. The specification is surrounded by '$', and tells the title of the entity (guard, matis merchant, etc ..)
 	static ucstring removeTitleFromName(const ucstring &name);
 	/// Remove the shard from a name (if player from the same shard). The shard is surrounded by (), and tells the incoming shard of the entity (aniro, leanon etc...)
@@ -809,7 +812,7 @@ public:
 	virtual void setDiffuse(bool onOff, NLMISC::CRGBA diffuse);
 
 
-	static CCDBNodeLeaf *getOpacityDBNode();
+	static NLMISC::CCDBNodeLeaf *getOpacityDBNode();
 	static uint32 getOpacityMin();
 	static void setOpacityMin(uint32 value);
 
@@ -884,7 +887,7 @@ protected:
 	// Persistent NPC Alias of the entity
 	uint32							_NPCAlias;
 	// Local DB Branch for this entity
-	class CCDBNodeBranch			*_DBEntry;
+	class NLMISC::CCDBNodeBranch			*_DBEntry;
 	// Playlist
 	NL3D::UPlayList					*_PlayList;
 	NL3D::UPlayList					*_FacePlayList;
@@ -930,7 +933,7 @@ protected:
 	// Current entity tags
 	std::vector<ucstring>			_Tags;
 	// Current entity title string id
-	std::string						_TitleRaw;
+	ucstring						_TitleRaw;
 	// Current permanent content symbol for the entity
 	std::string						_PermanentStatutIcon;
 	// Has reserved title?
@@ -1108,7 +1111,7 @@ protected:
 	// for localSelectBox() computing
 	sint64										_LastLocalSelectBoxComputeTime;
 
-	static NLMISC::CRefPtr<CCDBNodeLeaf>		_OpacityMinNodeLeaf;
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf>		_OpacityMinNodeLeaf;
 
 protected:
 	/**

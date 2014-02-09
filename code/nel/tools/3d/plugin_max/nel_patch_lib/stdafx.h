@@ -17,7 +17,9 @@
 #pragma conform(forScope, push)
 #pragma conform(forScope, off)
 
+#ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
+#endif
 
 #pragma warning (disable : 4786)
 #include <assert.h>

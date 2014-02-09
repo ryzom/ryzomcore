@@ -19,6 +19,7 @@
 #define CL_LOGIN_H
 
 #include "nel/misc/types_nl.h"
+#include "game_share/http_client.h"
 #include <string>
 #include <vector>
 
@@ -67,6 +68,22 @@ void mainLandPatch();
 extern std::vector<CShard> Shards;
 extern sint32		ShardSelected;
 
+// TODO : nico : put this in an external file, this way it isn't included by the background downloader
+#ifndef RY_BG_DOWNLOADER
+
+/*
+ * HTTP client preconfigured to connect to the startup login host
+ */
+class CStartupHttpClient : public CHttpClient
+{
+public:
+
+	bool connectToLogin();
+};
+
+extern CStartupHttpClient HttpClient;
+
+#endif // RY_BG_DOWNLOADER
 
 #endif // CL_LOGIN_H
 

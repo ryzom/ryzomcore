@@ -1,0 +1,19 @@
+<widget>
+    <header>
+        <name>ViewTextIDFormated</name>
+        <guiname>CViewTextIDFormated</guiname>
+        <ancestor>ViewTextID</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>format</name>
+            <type>string</type>
+            <default></default>
+        </property>
+
+
+    </properties>
+</widget>

@@ -50,7 +50,7 @@ extern bool VerboseAliasDescriptionNodeLog;
 
 class	CAIAliasDescriptionNode;
 
-//	à faire ..
+//	TODO...
 class CAIAliasDescriptionNode : public NLMISC::CRefCount
 {
 public:

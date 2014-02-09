@@ -92,6 +92,7 @@ TARGET_LINK_LIBRARIES(ryzom_client
 						nelligo
 						nelgeorges
 						nel3d
+						nelgui
 						nelsound
 						ryzom_clientsheets
 						ryzom_gameshare

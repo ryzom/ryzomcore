@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../stdmisc.h"
 #include "nel/misc/config_file.h"
 
 #include <ctime>
@@ -26,6 +27,10 @@
 #include "nel/misc/i18n.h"
 #include "nel/misc/mem_stream.h"
 #include "locale.h"
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 using namespace std;
 using namespace NLMISC;

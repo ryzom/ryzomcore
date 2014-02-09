@@ -255,7 +255,7 @@ CCharacterBotChatBeginEnd	CharacterBotChatBeginEnd;
 CCharacterDynChatBeginEnd	CharacterDynChatBeginEnd;
 //*** Removed by Sadge ***
 //// Transport class for EGS asking information about creatures/Npc
-//CCreatureAskInformationMsg	CreatureNpcInformations;
+//CCreatureAskInformationMsg	CreatureNpcInformation;
 //*** ***
 //	Transport class sent to AIS to set bot mode as death.
 CBSAIDeathReport			BotDeathReport;
@@ -4329,41 +4329,7 @@ NLMISC_COMMAND(setAllSkillsToValue,"set all skills to value","<entity id(id:type
 		if( e )
 		{
 			log.displayNL("Player %s skills are all set to value %u", id.toString().c_str(), value);
-			// get pointer on static skills tree definition
-
-			CSheetId sheet("skills.skill_tree");
-			const CStaticSkillsTree * SkillsTree = CSheets::getSkillsTreeForm( sheet );
-			nlassert( SkillsTree );
-
-
-			for(int i = 0; i < SKILLS::NUM_SKILLS; ++i )
-			{
-				CSkills &skills = e->getSkills();
-				skills._Skills[ i ].Base = min( value, (sint32)SkillsTree->SkillsTree[ i ].MaxSkillValue );
-				skills._Skills[ i ].Current = skills._Skills[ i ].Base;
-				skills._Skills[ i ].MaxLvlReached = skills._Skills[ i ].Base;
-
-				// update all parent skill with new max children
-				SKILLS::ESkills skillUpdated = (SKILLS::ESkills)i;
-				while( SkillsTree->SkillsTree[ skillUpdated ].ParentSkill != SKILLS::unknown )
-				{
-					if( skills._Skills[ i ].Base > skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxLvlReached )
-					{
-						skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxLvlReached = skills._Skills[ i ].Base;
-						skills._Skills[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].Base = min( skills._Skills[ skillUpdated ].Base, (sint32)SkillsTree->SkillsTree[ SkillsTree->SkillsTree[ skillUpdated ].ParentSkill ].MaxSkillValue );
-						skillUpdated = SkillsTree->SkillsTree[ skillUpdated ].ParentSkill;
-					}
-					else
-					{
-						break;
-					}
-				}
-
-//				e->_PropertyDatabase.x_setProp( string("CHARACTER_INFO:SKILLS:") + NLMISC::toStringEnum( i ) + string(":SKILL"), skills._Skills[ i ].Base );
-				CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setSKILL(e->_PropertyDatabase, checkedCast<uint16>(skills._Skills[ i ].Base) );
-//				e->_PropertyDatabase.x_setProp( string("CHARACTER_INFO:SKILLS:") + NLMISC::toStringEnum( i ) + string(":BaseSKILL"), skills._Skills[ i ].Base );
-				CBankAccessor_PLR::getCHARACTER_INFO().getSKILLS().getArray(i).setBaseSKILL(e->_PropertyDatabase, checkedCast<uint16>(skills._Skills[ i ].Base) );
-			}
+			e->setSkillsToValue(value);
 		}
 		else
 		{

@@ -162,6 +162,13 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 	CBufferAL *bufferAL = static_cast<CBufferAL *>(buffer);
 	ALuint bufferName = bufferAL->bufferName();
 	nlassert(bufferName);
+	
+	if (!bufferAL->isBufferLoaded())
+	{
+		nlwarning("AL: MUSICBUG: Streaming buffer was not loaded, skipping buffer. This should not happen.");
+		return;
+	}
+	
 	alSourceQueueBuffers(_Source, 1, &bufferName);
 	alTestError();
 	_QueuedBuffers.push(bufferAL);
@@ -242,11 +249,31 @@ bool CSourceAL::play()
 	else if (_IsStreaming)
 	{
 		_IsPaused = false;
+		/* NEW */
+		// called by user as well as by code to resume after buffer underrun
+		if (!_IsPlaying) // set start time if not playing yet
+			_StartTime = CTime::getLocalTime();
+		_IsPlaying = true; // this play always virtually succeed but may not actually be playing
+		if (_QueuedBuffers.size()) // ensure buffers have actually queued
+		{
+			alSourcePlay(_Source);
+			if (alGetError() != AL_NO_ERROR)
+			{
+				nlwarning("AL: MUSICBUG: Unknown error while trying to play streaming source.");
+			}
+		}
+		else
+		{
+			nlwarning("AL: MUSICBUG: Trying to play stream with no buffers queued.");
+		}
+		return true;
+		/* OLD
 		alSourcePlay(_Source);
 		_IsPlaying = (alGetError() == AL_NO_ERROR);
 		if (_IsPlaying)
 			_StartTime = CTime::getLocalTime(); // TODO: Played time should freeze when buffering fails, and be calculated based on the number of buffers played plus passed time. This is necessary for synchronizing animation with sound.
 		return _IsPlaying;
+		*/
 		// Streaming mode
 		//nlwarning("AL: Cannot play null buffer; streaming not implemented" );
 		//nlstop;
@@ -375,7 +402,7 @@ bool CSourceAL::isPaused() const
 uint32 CSourceAL::getTime()
 {
 	if (!_StartTime) return 0;
- 	 return (uint32)(CTime::getLocalTime() - _StartTime);
+	return (uint32)(CTime::getLocalTime() - _StartTime);
 }
 
 /// Set the position vector.

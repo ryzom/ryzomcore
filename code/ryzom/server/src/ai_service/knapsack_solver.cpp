@@ -77,7 +77,7 @@ void CKnapsackSolver::optimize(float wMax, Algorithm algorithm)
 }
 
 /// Algorithm is taken from http://eleves.ensmp.fr/P00/00rouaul/sacados/sacados_swp.html
-/// This algorithm complexity is O(N²)
+/// This algorithm complexity is O(N^2)
 void CKnapsackSolver::optimizeOptimal()
 {
 	H_AUTO(CKnapsackSolver_optimizeOptimal);
@@ -187,7 +187,7 @@ void CKnapsackSolver::optimizeFastAddCheck()
 }
 
 /// First try FullAddCheck, then try to replace the already taken elements with not taken ones.
-/// This algorithm complexity is Theta(N²)
+/// This algorithm complexity is Theta(N^2)
 void CKnapsackSolver::optimizeFullSingleReplace()
 {
 	optimizeFullAddCheck();
@@ -231,7 +231,7 @@ void CKnapsackSolver::optimizeFullSingleReplace()
 /// First try FastAddCheck, and if it fails optimizing try to replace a not
 /// taken one with an already taken element (the worst one) until a
 /// replacement occurs.
-/// This algorithm complexity is Theta(N²) and O(N²) for CTargetable
+/// This algorithm complexity is Theta(N^2) and O(N^2) for CTargetable
 void CKnapsackSolver::optimizeSingleReplace()
 {
 	float vBest = _VBest;
@@ -278,7 +278,7 @@ void CKnapsackSolver::optimizeSingleReplace()
 
 /// First try FastAddCheck, and if it fails optimizing try to replace the
 /// first not taken element with an already taken element (the worst one).
-/// This algorithm complexity is O(N²) and Theta(N) for CTargetable
+/// This algorithm complexity is O(N^2) and Theta(N) for CTargetable
 void CKnapsackSolver::optimizeFastSingleReplace()
 {
 	float vBest = _VBest;
@@ -326,7 +326,7 @@ void CKnapsackSolver::optimizeFastSingleReplace()
 /// First try FastAddCheck, and if it fails optimizing try to replace the
 /// first not taken element with an already taken one (the first worst that
 /// the not taken one).
-/// This algorithm complexity is O(N²) and O(N) for CTargetable
+/// This algorithm complexity is O(N^2) and O(N) for CTargetable
 void CKnapsackSolver::optimizeVeryFastSingleReplace()
 {
 	float vBest = _VBest;

@@ -150,18 +150,18 @@ static void markBNPFile(std::string &path)
 		return;
 	}
 
-	uint32 nOffsetFromBegining;
-	if (fread (&nOffsetFromBegining, sizeof(uint32), 1, f) != 1)
+	uint32 nOffsetFromBeginning;
+	if (fread (&nOffsetFromBeginning, sizeof(uint32), 1, f) != 1)
 	{
 		fclose (f);
 		return;
 	}
 
 #ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nOffsetFromBegining);
+	NLMISC_BSWAP32(nOffsetFromBeginning);
 #endif
 
-	if (nlfseek64 (f, nOffsetFromBegining, SEEK_SET) != 0)
+	if (nlfseek64 (f, nOffsetFromBeginning, SEEK_SET) != 0)
 	{
 		fclose (f);
 		return;

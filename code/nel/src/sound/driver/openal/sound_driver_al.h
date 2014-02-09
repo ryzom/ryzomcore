@@ -17,7 +17,7 @@
 #ifndef NL_SOUND_DRIVER_AL_H
 #define NL_SOUND_DRIVER_AL_H
 
-#include <nel/sound/driver/sound_driver.h>
+#include "nel/sound/driver/sound_driver.h"
 
 namespace NLSOUND {
 	class CBufferAL;
@@ -126,7 +126,7 @@ public:
 	
 	virtual void startBench();
 	virtual void endBench();
-	virtual void displayBench(NLMISC::CLog * /* log */);
+	virtual void displayBench(NLMISC::CLog *log);
 
 
 	/// Change the rolloff factor and apply to all sources
@@ -136,7 +136,7 @@ public:
 	virtual void commit3DChanges();
 
 	/// Write information about the driver to the output stream.
-	virtual void writeProfile(std::string& /* out */);
+	virtual void writeProfile(std::string& out);
 
 	/// Remove a buffer
 	void removeBuffer(CBufferAL *buffer);

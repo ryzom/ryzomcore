@@ -82,7 +82,7 @@ public:
 
 private:
 	/// check entity is a valid target
-	bool isEntityValidTarget(CEntityBase *entity) const;
+	bool isEntityValidTarget(CEntityBase *entity, CEntityBase *actor) const;
 
 private:
 	/// cycle lenght in ticks

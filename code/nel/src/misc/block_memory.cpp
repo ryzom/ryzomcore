@@ -21,6 +21,9 @@
 // remove stupid VC6 warnings
 void foo_block_memory_cpp() {}
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

@@ -27,7 +27,7 @@ class CStatDBTableLeaf;
 /**
  * SDB node visitor (visitor design pattern).
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005 July
  */
