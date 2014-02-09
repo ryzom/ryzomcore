@@ -315,6 +315,10 @@ else:
 	printLog(log, "DETECT DECIDE SKIP")
 	printLog(log, "SKIP *")
 
+# Remove pacs.packed_prims when done
+if os.path.isfile("pacs.packed_prims"):
+	os.remove("pacs.packed_prims")
+
 log.close()
 
 
