@@ -110,7 +110,7 @@ CMesh::CMeshBuild*	CExportNel::createMeshBuild(INode& node, TimeValue tvTime, CM
 
 				// Delete the triObject if we should...
 				if (deleteIt)
-					tri->MaybeAutoDelete();
+					tri->DeleteThis();
 				tri = NULL;
 			}
 		}
@@ -449,7 +449,7 @@ NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodeP
 
 				// Delete the triObject if we should...
 				if (deleteIt)
-					tri->MaybeAutoDelete();
+					tri->DeleteThis();
 				tri = NULL;
 			}
 		}
@@ -1406,7 +1406,7 @@ IMeshGeom *CExportNel::buildMeshGeom (INode& node, TimeValue time, const TInodeP
 
 				// Delete the triObject if we should...
 				if (deleteIt)
-					tri->MaybeAutoDelete();
+					tri->DeleteThis();
 				tri = NULL;
 			}
 		}
@@ -2058,7 +2058,7 @@ NL3D::IShape				*CExportNel::buildWaterShape(INode& node, TimeValue time)
 
 		// Delete the triObject if we should...
 		if (deleteIt)
-			tri->MaybeAutoDelete();
+			tri->DeleteThis();
 		tri = NULL;
 		nlinfo("WaterShape : build succesful");
 		return ws;
@@ -2100,11 +2100,8 @@ bool CExportNel::buildMeshAABBox(INode &node, NLMISC::CAABBox &dest, TimeValue t
 	dest.setMinMax(nelMin, nelMax);
 	//
 	if (deleteIt)
-	{
-#ifdef NL_DONT_FIND_MAX_CRASH
-		tri->MaybeAutoDelete();
-#endif // NL_DEBUG
-	}
+		tri->DeleteThis();
+
 	tri = NULL;
 	return true;
 }

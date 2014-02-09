@@ -1272,7 +1272,7 @@ void CExportNel::buildCamera(NL3D::CCameraInfo &cameraInfo, INode& node, TimeVal
 				cameraInfo.Fov = genCamera->GetFOV(time);
 
 				if (deleteIt)
-					genCamera->MaybeAutoDelete();
+					genCamera->DeleteThis();
 				genCamera = NULL;
 			}
 		}
