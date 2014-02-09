@@ -448,7 +448,7 @@ bool CExportNel::getValueByNameUsingParamBlock2 (Animatable& node, const char* s
 	}
 	else
 	{
-		nlwarning ("FAILED Can't find ParamBlock named '%s'", sName);
+		// nlwarning ("FAILED Can't find ParamBlock named '%s'", sName);
 		return false;
 	}
 }
