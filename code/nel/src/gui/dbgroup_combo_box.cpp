@@ -28,10 +28,12 @@
 using namespace std;
 using namespace NLMISC;
 
-NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupComboBox, std::string, "combo_box");
-
 namespace NLGUI
 {
+	NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupComboBox, std::string, "combo_box");
+
+	void force_link_dbgroup_combo_box_cpp() { }
+
 	// Compare strings
 	static inline bool lt_text(const std::pair<int,ucstring> &s1, const std::pair<int,ucstring> &s2)
 	{

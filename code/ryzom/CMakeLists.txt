@@ -46,6 +46,12 @@ IF(WITH_RYZOM_CLIENT)
   ENDIF(CURL_STATIC)
 
   ADD_SUBDIRECTORY(client)
+  
+ELSEIF(WITH_RYZOM_TOOLS)
+
+  # Need clientsheets lib for sheets packer tool
+  ADD_SUBDIRECTORY(client)
+  
 ENDIF(WITH_RYZOM_CLIENT)
 
 IF(WITH_RYZOM_TOOLS)
@@ -53,6 +59,14 @@ IF(WITH_RYZOM_TOOLS)
 ENDIF(WITH_RYZOM_TOOLS)
 
 IF(WITH_RYZOM_SERVER)
+
   FIND_PACKAGE(MySQL REQUIRED)
   ADD_SUBDIRECTORY(server)
+  
+ELSEIF(WITH_RYZOM_TOOLS)
+
+  # Need servershare for build packed collision tool
+  # Need aishare for build wmap tool
+  ADD_SUBDIRECTORY(server)
+
 ENDIF(WITH_RYZOM_SERVER)

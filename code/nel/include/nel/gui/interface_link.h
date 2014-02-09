@@ -66,6 +66,11 @@ namespace NLGUI
 			  */
 			bool affect(const CInterfaceExprValue &value);
 		};
+		struct CCDBTargetInfo
+		{
+			NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> Leaf;
+			std::string LeafName;
+		};
 
 
 		/// Updates triggered interface links when triggered by the observed branch
@@ -85,7 +90,7 @@ namespace NLGUI
 		  * If there are no target element, the link is permanent (removed at exit)
 		  * NB : The target is not updated during this call.
 		  */
-		bool				init(const std::vector<CTargetInfo> &targets, const std::string &expr, const std::string &actionHandler, const std::string &ahParams, const std::string &ahCond, CInterfaceGroup *parent);
+		bool				init(const std::vector<CTargetInfo> &targets, const std::vector<CCDBTargetInfo> &cdbTargets, const std::string &expr, const std::string &actionHandler, const std::string &ahParams, const std::string &ahCond, CInterfaceGroup *parent);
 		// force all the links that have been created to update their targets. This can be called when the interface has been loaded, and when the databse entries have been retrieved.
 		static void			updateAllLinks();
 		// force all trigered links to be updated
@@ -119,6 +124,7 @@ namespace NLGUI
 		  * \return true if all targets are valid
 		  */
 		static bool splitLinkTargets(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CInterfaceLink::CTargetInfo> &targetsVect);
+		static bool splitLinkTargetsExt(const std::string &targets, CInterfaceGroup *parentGroup, std::vector<CInterfaceLink::CTargetInfo> &targetsVect, std::vector<CInterfaceLink::CCDBTargetInfo> &cdbTargetsVect);
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private:
 		friend struct CRemoveTargetPred;
@@ -135,12 +141,14 @@ namespace NLGUI
 		typedef std::vector<NLMISC::ICDBNode *> TNodeVect;
 	private:
 		std::vector<CTarget>         _Targets;
+		std::vector<CCDBTargetInfo>	 _CDBTargets;
 		TNodeVect					 _ObservedNodes;
 		std::string					 _Expr;
 		CInterfaceExprNode			 *_ParseTree;
 		std::string					 _ActionHandler;
 		std::string					 _AHParams;
 		std::string					 _AHCond;
+		CInterfaceExprNode			*_AHCondParsed;
 		CInterfaceGroup				*_AHParent;
 		static TLinkList             _LinkList;
 		TLinkList::iterator			 _ListEntry;

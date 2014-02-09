@@ -558,7 +558,8 @@ void CPeopleInterraction::createTeamList()
 	{
 		CInterfaceLink *il = new CInterfaceLink;
 		vector<CInterfaceLink::CTargetInfo> targets;
-		il->init(targets, sExpr, sAction, sParams, sCond, TeamChat->getContainer());
+		vector<CInterfaceLink::CCDBTargetInfo> cdbTargets;
+		il->init(targets, cdbTargets, sExpr, sAction, sParams, sCond, TeamChat->getContainer());
 	}
 }
 

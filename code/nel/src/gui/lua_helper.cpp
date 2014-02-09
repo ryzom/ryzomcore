@@ -197,6 +197,8 @@ namespace NLGUI
 		{
 			#ifdef LUA_NEVRAX_VERSION
 				_State = lua_open(l_realloc_func, l_free_func);
+			#elif defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+				_State = luaL_newstate();
 			#else
 				_State = lua_open();
 			#endif

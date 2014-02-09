@@ -1170,8 +1170,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	{
 		// Last patch
 		uint lastPatch=firstPatch+patchCountByThread;
-		if (lastPatch>patchCount)
-			lastPatch=patchCount;
+		lastPatch %= patchCount;
 
 		// Last patch computed
 		_LastPatchComputed[process] = firstPatch;
@@ -3771,6 +3770,8 @@ uint CZoneLighter::getAPatch (uint process)
 	// Current index
 	uint index = _LastPatchComputed[process];
 	uint firstIndex = index;
+
+	nlassert(index < _PatchInfo.size());
 
 	if (access.value().size() == 0)
 		// no more patches

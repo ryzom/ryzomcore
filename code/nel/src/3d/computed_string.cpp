@@ -242,8 +242,8 @@ void CComputedString::render2DClip (IDriver& driver, CRenderStringBuffer &rdrBuf
 		uint lastIndex = 0;
 		for(uint i=0;i<numVerts;i++)
 		{
-			if(count==4){
-
+			if(count==4)
+			{
 				if(!LetterColors.empty())
 				{
 					if(LetterColors.getIndex(lastIndex)==i/4)

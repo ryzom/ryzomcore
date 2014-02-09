@@ -31,6 +31,8 @@ namespace NLGUI
 {
 	NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupSelectNumber, std::string, "select_number");
 
+	void force_link_dbgroup_select_number_cpp() { }
+
 	// ***************************************************************************
 	CDBGroupSelectNumber::CDBGroupSelectNumber(const TCtorParam &param) :
 	CInterfaceGroup(param)
