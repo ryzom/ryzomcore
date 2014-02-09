@@ -263,8 +263,6 @@ CDriverGL::CDriverGL()
 	_CurrentFogColor[2]= 0;
 	_CurrentFogColor[3]= 0;
 
-	_RenderTargetFBO = false;
-
 	_LightSetupDirty= false;
 	_ModelViewMatrixDirty= false;
 	_RenderSetupDirty= false;
@@ -482,6 +480,7 @@ bool CDriverGL::setupDisplay()
 	}
 
 	_VertexProgramEnabled= false;
+	_PixelProgramEnabled= false;
 	_LastSetupGLArrayVertexProgram= false;
 
 	// Init VertexArrayRange according to supported extenstion.
@@ -690,7 +689,7 @@ bool CDriverGL::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect 
 // ***************************************************************************
 bool CDriverGL::supportBloomEffect() const
 {
-	return (isVertexProgramSupported() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
+	return (supportVertexProgram(CVertexProgram::nelvp) && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
 }
 
 // ***************************************************************************
@@ -702,7 +701,7 @@ bool CDriverGL::supportNonPowerOfTwoTextures() const
 // ***************************************************************************
 bool CDriverGL::isTextureRectangle(ITexture * tex) const
 {
-	return (supportTextureRectangle() && tex->isBloomTexture() && tex->mipMapOff()
+	return (!supportNonPowerOfTwoTextures() && supportTextureRectangle() && tex->isBloomTexture() && tex->mipMapOff()
 			&& (!isPowerOf2(tex->getWidth()) || !isPowerOf2(tex->getHeight())));
 }
 
@@ -735,6 +734,12 @@ void CDriverGL::disableHardwareVertexProgram()
 {
 	H_AUTO_OGL(CDriverGL_disableHardwareVertexProgram)
 	_Extensions.DisableHardwareVertexProgram= true;
+}
+
+void CDriverGL::disableHardwarePixelProgram()
+{
+	H_AUTO_OGL(CDriverGL_disableHardwarePixelProgram)
+	_Extensions.DisableHardwarePixelProgram= true;
 }
 
 // ***************************************************************************
@@ -854,6 +859,7 @@ bool CDriverGL::swapBuffers()
 	// Reset texture shaders
 	//resetTextureShaders();
 	activeVertexProgram(NULL);
+	activePixelProgram(NULL);
 
 #ifndef USE_OPENGLES
 	/* Yoyo: must do this (GeForce bug ??) else weird results if end render with a VBHard.
@@ -1400,6 +1406,7 @@ void CDriverGL::setupFog(float start, float end, CRGBA color)
 
 	glFogfv(GL_FOG_COLOR, _CurrentFogColor);
 
+#ifndef USE_OPENGLES
 	/** Special : with vertex program, using the extension EXT_vertex_shader, fog is emulated using 1 more constant to scale result to [0, 1]
 	  */
 	if (_Extensions.EXTVertexShader && !_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram)
@@ -1409,14 +1416,18 @@ void CDriverGL::setupFog(float start, float end, CRGBA color)
 			// last constant is used to store fog information (fog must be rescaled to [0, 1], because of a driver bug)
 			if (start != end)
 			{
-				setConstant(_EVSNumConstant, 1.f / (start - end), - end / (start - end), 0, 0);
+				float datas[] = { 1.f / (start - end), - end / (start - end), 0, 0 };
+				nglSetInvariantEXT(_EVSConstantHandle + _EVSNumConstant, GL_FLOAT, datas);
 			}
 			else
 			{
-				setConstant(_EVSNumConstant, 0.f, 0, 0, 0);
+				float datas[] = { 0.f, 0, 0, 0 };
+				nglSetInvariantEXT(_EVSConstantHandle + _EVSNumConstant, GL_FLOAT, datas);
 			}
 		}
 	}
+#endif
+
 	_FogStart = start;
 	_FogEnd = end;
 }
@@ -1535,9 +1546,9 @@ bool CDriverGL::supportTextureShaders() const
 }
 
 // ***************************************************************************
-bool CDriverGL::isWaterShaderSupported() const
+bool CDriverGL::supportWaterShader() const
 {
-	H_AUTO_OGL(CDriverGL_isWaterShaderSupported);
+	H_AUTO_OGL(CDriverGL_supportWaterShader);
 
 	if(_Extensions.ARBFragmentProgram && ARBWaterShader[0] != 0) return true;
 
@@ -1547,9 +1558,9 @@ bool CDriverGL::isWaterShaderSupported() const
 }
 
 // ***************************************************************************
-bool CDriverGL::isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const
+bool CDriverGL::supportTextureAddrMode(CMaterial::TTexAddressingMode /* mode */) const
 {
-	H_AUTO_OGL(CDriverGL_isTextureAddrModeSupported)
+	H_AUTO_OGL(CDriverGL_supportTextureAddrMode)
 
 	if (_Extensions.NVTextureShader)
 	{
@@ -1985,12 +1996,6 @@ static void fetchPerturbedEnvMapR200()
 	////////////
 	nglSampleMapATI(GL_REG_2_ATI, GL_REG_2_ATI, GL_SWIZZLE_STR_ATI); // fetch envmap at perturbed texcoords
 #endif
-}
-
-// ***************************************************************************
-void CDriverGL::forceNativeFragmentPrograms(bool nativeOnly)
-{
-	_ForceNativeFragmentPrograms = nativeOnly;
 }
 
 // ***************************************************************************
@@ -2565,14 +2570,6 @@ CVertexBuffer::TVertexColorType CDriverGL::getVertexColorFormat() const
 	H_AUTO_OGL(CDriverGL_CDriverGL)
 
 	return CVertexBuffer::TRGBA;
-}
-
-// ***************************************************************************
-bool CDriverGL::activeShader(CShader * /* shd */)
-{
-	H_AUTO_OGL(CDriverGL_activeShader)
-
-	return false;
 }
 
 // ***************************************************************************

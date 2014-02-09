@@ -208,6 +208,9 @@ MACRO(PCH_SET_COMPILE_COMMAND _inputcpp _compile_FLAGS)
   IF(MSVC)
     GET_PDB_FILENAME(PDB_FILE ${_PCH_current_target})
     SET(PCH_COMMAND ${CMAKE_CXX_COMPILER} ${pchsupport_compiler_cxx_arg1} ${_compile_FLAGS} /Yc /Fp"${PCH_OUTPUT}" ${_inputcpp} /Fd"${PDB_FILE}" /c /Fo"${PCH_OUTPUT}.obj")
+    # Ninja PCH Support
+    # http://public.kitware.com/pipermail/cmake-developers/2012-March/003653.html
+    SET_SOURCE_FILES_PROPERTIES(${_inputcpp} PROPERTIES OBJECT_OUTPUTS "${PCH_OUTPUT}.obj")
   ELSE(MSVC)
     SET(HEADER_FORMAT "c++-header")
     SET(_FLAGS "")
@@ -267,6 +270,25 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName)
 
   IF(MSVC)
     SET(_target_cflags "${oldProps} /Yu\"${PCH_INPUT}\" /FI\"${PCH_INPUT}\" /Fp\"${PCH_OUTPUT}\"")
+    # Ninja PCH Support
+    # http://public.kitware.com/pipermail/cmake-developers/2012-March/003653.html
+    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES OBJECT_DEPENDS "${PCH_OUTPUT}")
+
+    # NMAKE-VS2012 Error LNK2011 (NMAKE-VS2010 do not complain)
+    # we need to link the pch.obj file, see http://msdn.microsoft.com/en-us/library/3ay26wa2(v=vs.110).aspx
+    GET_TARGET_PROPERTY(_STATIC_LIBRARY_FLAGS ${_targetName} STATIC_LIBRARY_FLAGS)
+    IF(NOT _STATIC_LIBRARY_FLAGS)
+      SET(_STATIC_LIBRARY_FLAGS)
+    ENDIF(NOT _STATIC_LIBRARY_FLAGS)
+    SET(_STATIC_LIBRARY_FLAGS "${PCH_OUTPUT}.obj ${_STATIC_LIBRARY_FLAGS}")
+
+    GET_TARGET_PROPERTY(_LINK_FLAGS ${_targetName} LINK_FLAGS)
+    IF(NOT _LINK_FLAGS)
+      SET(_LINK_FLAGS)
+    ENDIF(NOT _LINK_FLAGS)
+    SET(_LINK_FLAGS "${PCH_OUTPUT}.obj ${_LINK_FLAGS}")
+
+    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES STATIC_LIBRARY_FLAGS ${_STATIC_LIBRARY_FLAGS} LINK_FLAGS ${_LINK_FLAGS})
   ELSE(MSVC)
     # for use with distcc and gcc >4.0.1 if preprocessed files are accessible
     # on all remote machines set
@@ -354,17 +376,6 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PCH_OUTPUTS}")
 ENDMACRO(ADD_PRECOMPILED_HEADER)
 
-# Macro to move PCH creation file to the front of files list
-# or remove .cpp from library/executable to avoid warning
-MACRO(FIX_PRECOMPILED_HEADER _files _pch)
-  # Remove .cpp creating PCH from the list
-  LIST(REMOVE_ITEM ${_files} ${_pch})
-  IF(MSVC)
-    # Prepend .cpp creating PCH to the list
-    LIST(INSERT ${_files} 0 ${_pch})
-  ENDIF(MSVC)
-ENDMACRO(FIX_PRECOMPILED_HEADER)
-
 MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   IF(NOT PCHSupport_FOUND)
     MESSAGE(STATUS "PCH disabled because compiler doesn't support them")
@@ -376,10 +387,6 @@ MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
   # 2 => setting PCH for XCode project, works for XCode projects
   IF(CMAKE_GENERATOR MATCHES "Visual Studio")
     SET(PCH_METHOD 1)
-  ELSEIF(CMAKE_GENERATOR MATCHES "NMake Makefiles" AND MFC_FOUND AND CMAKE_MFC_FLAG)
-    # To fix a bug with MFC
-    # Don't forget to use FIX_PRECOMPILED_HEADER before creating the target
-#    SET(PCH_METHOD 1)
   ELSEIF(CMAKE_GENERATOR MATCHES "Xcode")
     SET(PCH_METHOD 2)
   ELSE(CMAKE_GENERATOR MATCHES "Visual Studio")

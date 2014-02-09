@@ -264,9 +264,9 @@ void	CLodCharacterShapeBuild::compile(const std::vector<bool> &triangleSelection
 void	CLodCharacterShapeBuild::serial(NLMISC::IStream &f)
 {
 	// NEL_CLODBULD
-	f.serialCheck((uint32)'_LEN');
-	f.serialCheck((uint32)'DOLC');
-	f.serialCheck((uint32)'DLUB');
+	f.serialCheck(NELID("_LEN"));
+	f.serialCheck(NELID("DOLC"));
+	f.serialCheck(NELID("DLUB"));
 
 	/*
 	Version 1:
@@ -525,9 +525,9 @@ void			CLodCharacterShape::CBoneInfluence::serial(NLMISC::IStream &f)
 void			CLodCharacterShape::serial(NLMISC::IStream &f)
 {
 	// NEL_CLODSHAP
-	f.serialCheck((uint32)'_LEN');
-	f.serialCheck((uint32)'DOLC');
-	f.serialCheck((uint32)'PAHS');
+	f.serialCheck(NELID("_LEN"));
+	f.serialCheck(NELID("DOLC"));
+	f.serialCheck(NELID("PAHS"));
 
 	/*
 	Version 1:

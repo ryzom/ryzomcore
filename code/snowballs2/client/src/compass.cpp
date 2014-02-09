@@ -28,6 +28,7 @@
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_text_context.h>
 #include <nel/3d/u_texture.h>
+#include <nel/3d/stereo_hmd.h>
 
 #include "mouse_listener.h"
 #include "camera.h"
@@ -94,6 +95,13 @@ void updateCompass ()
 {
 	float x = CompassPosX;
 	float y = CompassPosY;
+	if (StereoHMD)
+	{
+		float xshift, yshift;
+		StereoHMD->getInterface2DShift(0, xshift, yshift, 4.f);
+		x += xshift;
+		y += yshift;
+	}
 	float radius = CompassRadius;
 
 	// tri
@@ -109,7 +117,8 @@ void updateCompass ()
 	quad.V2.set ( radius,  radius, 0);
 	quad.V3.set (-radius,  radius, 0);
 
-	Driver->setMatrixMode2D43 ();
+	if (StereoHMD) Driver->setMatrixMode2D11();
+	else Driver->setMatrixMode2D43();
 
 	CMatrix mtx;
 
@@ -152,7 +161,7 @@ void updateCompass ()
 	Driver->setModelMatrix (mtx);
 	Driver->drawQuad (quad,  CompassMaterial);
 
-	x *= 3.0/4.0f;
+	if (!StereoHMD) x *= 3.0/4.0f;
 
 	// Print position
 	TextContext->setHotSpot(UTextContext::MiddleTop);

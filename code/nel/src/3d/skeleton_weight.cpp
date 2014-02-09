@@ -60,7 +60,7 @@ void CSkeletonWeight::build (const TNodeArray& array)
 void CSkeletonWeight::serial (NLMISC::IStream& f)
 {
 	// Serial a header
-	f.serialCheck ((uint32)'TWKS');
+	f.serialCheck (NELID("TWKS"));
 
 	// Serial a version number
 	(void)f.serialVersion (0);

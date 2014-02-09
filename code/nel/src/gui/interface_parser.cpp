@@ -41,7 +41,7 @@
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
 #endif
-const uint32 UI_CACHE_SERIAL_CHECK = (uint32) 'IUG_';
+const uint32 UI_CACHE_SERIAL_CHECK = NELID("IUG_");
 
 using namespace NLMISC;
 using namespace std;
@@ -1001,7 +1001,7 @@ namespace NLGUI
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"target");
 		std::string target;
-		if( ptr != NULL )
+		if( ptr )
 		{
 			target = std::string( (const char*)ptr );
 			if( !editorMode )
@@ -1136,17 +1136,17 @@ namespace NLGUI
 			VariableData data;
 
 			ptr = xmlGetProp( cur, BAD_CAST "entry" );
-			if( ptr != NULL )
+			if( ptr )
 				data.entry = std::string( (const char*)ptr );
 
 			data.type = type;
 
 			ptr = xmlGetProp( cur, BAD_CAST "value" );
-			if( ptr != NULL )
+			if( ptr )
 				data.value = std::string( (const char*)ptr );
 
 			ptr = xmlGetProp( cur, BAD_CAST "size" );
-			if( ptr != NULL )
+			if( ptr )
 				fromString( std::string( (const char*)ptr ), data.size );
 			
 			variableCache[ data.entry ] = data;

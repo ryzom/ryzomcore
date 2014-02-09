@@ -146,6 +146,11 @@ struct CClientConfig
 	/// Monitor Gamma [-1 ~ 1], default 0
 	float			Gamma;
 
+	// VR
+	bool			VREnable;
+	std::string		VRDisplayDevice;
+	std::string		VRDisplayDeviceId;
+
 	/// Client in Local mode or not.
 	bool			Local;
 	/// Host.

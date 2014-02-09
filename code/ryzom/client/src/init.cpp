@@ -39,6 +39,7 @@
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
+#include "nel/3d/stereo_hmd.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -46,6 +47,7 @@
 
 // Std.
 #include <fstream>
+#include <sstream>
 // Game Share
 #include "game_share/ryzom_version.h"
 // Client
@@ -792,6 +794,59 @@ void prelogInit()
 		// Check driver version
 		checkDriverVersion();
 
+		// Initialize the VR devices (even more important than the most important part of the client)
+		nmsg = "Initializing VR devices...";
+		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+		if (ClientCfg.VREnable)
+		{
+			nldebug("VR [C]: Enabled");
+			std::vector<NL3D::CStereoDeviceInfo> devices;
+			IStereoDisplay::listDevices(devices);
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				std::stringstream name;
+				name << std::string("[") << it->Serial << "] [" << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName << "]";
+				nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
+			}
+			CStereoDeviceInfo *deviceInfo = NULL;
+			if (ClientCfg.VRDisplayDevice == std::string("Auto")
+				&& devices.begin() != devices.end())
+			{
+				deviceInfo = &devices[0];
+			}
+			else
+			{
+				for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+				{
+					std::stringstream name;
+					name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
+					if (name.str() == ClientCfg.VRDisplayDevice)
+						deviceInfo = &(*it);
+					if (ClientCfg.VRDisplayDeviceId == it->Serial)
+						break;
+				}
+			}
+			if (deviceInfo)
+			{
+				nlinfo("VR [C]: Create VR stereo display device");
+				StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
+				if (StereoDisplay)
+				{
+					if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
+					{
+						nlinfo("VR [C]: Stereo display device is a HMD");
+						StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+					}
+				}
+			}
+		}
+		else
+		{
+			nldebug("VR [C]: NOT Enabled");
+		}
+		IStereoDisplay::releaseUnusedLibraries();
+
+
 		// Create the driver (most important part of the client).
 		nmsg = "Creating 3d driver...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
@@ -860,6 +915,11 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
+		
+		if (StereoDisplay)
+		{
+			// override mode TODO
+		}
 
 		// Set the mode of the window.
 		if (!Driver->setDisplay (mode, false))
@@ -1102,6 +1162,12 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
+		
+		if (StereoDisplay)
+		{
+			// Init stereo display resources
+			StereoDisplay->setDriver(Driver);
+		}
 
 		nlinfo ("PROFILE: %d seconds for prelogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 

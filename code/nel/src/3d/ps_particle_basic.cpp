@@ -786,7 +786,7 @@ void CPSMultiTexturedParticle::setupMaterial(ITexture *primary, IDriver *driver,
 	/// if bump is used, the matrix must be setupped each time (not a material field)
 	if (!_ForceBasicCaps && isMultiTextureEnabled() && _MainOp  == EnvBumpMap)
 	{
-		if (driver->isTextureAddrModeSupported(CMaterial::OffsetTexture))
+		if (driver->supportTextureAddrMode(CMaterial::OffsetTexture))
 		{
 			CTextureBump *tb = dynamic_cast<CTextureBump *>((ITexture *) _Texture2);
 			if (tb != NULL)
@@ -858,7 +858,7 @@ void CPSMultiTexturedParticle::setupMaterial(ITexture *primary, IDriver *driver,
 		}
 		else
 		{
-			if (!_ForceBasicCaps && (driver->isTextureAddrModeSupported(CMaterial::OffsetTexture) || driver->supportEMBM())) // envbumpmap supported ?
+			if (!_ForceBasicCaps && (driver->supportTextureAddrMode(CMaterial::OffsetTexture) || driver->supportEMBM())) // envbumpmap supported ?
 			{
 				CTextureBump *tb = dynamic_cast<CTextureBump *>((ITexture *) _Texture2);
 				if (tb != NULL)
@@ -917,7 +917,7 @@ void	CPSMultiTexturedParticle::setupMultiTexEnv(TOperator op, ITexture *tex1, IT
 			mat.enableTexAddrMode(false);
 			break;
 		case EnvBumpMap:
-			if (drv.isTextureAddrModeSupported(CMaterial::OffsetTexture))
+			if (drv.supportTextureAddrMode(CMaterial::OffsetTexture))
 			{
 				mat.setTexture(0, tex2);
 				mat.setTexture(1, tex1);
@@ -1113,7 +1113,7 @@ void CPSMultiTexturedParticle::enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> 
 	NL_PS_FUNC(CPSMultiTexturedParticle_enumTexs)
 	if (_MainOp  == EnvBumpMap && !_ForceBasicCaps)
 	{
-		if (drv.isTextureAddrModeSupported(CMaterial::OffsetTexture) || drv.supportEMBM())
+		if (drv.supportTextureAddrMode(CMaterial::OffsetTexture) || drv.supportEMBM())
 		{
 			if (_Texture2) dest.push_back(_Texture2);
 		}
@@ -1132,7 +1132,7 @@ bool CPSMultiTexturedParticle::isAlternateTextureUsed(IDriver &driver) const
 	NL_PS_FUNC(CPSMultiTexturedParticle_isAlternateTextureUsed)
 	if (!isTouched() && areBasicCapsForcedLocal() == areBasicCapsForced()) return (_MultiTexState & AlternateTextureUsed) != 0;
 	if (_MainOp  != EnvBumpMap) return false;
-	return _ForceBasicCaps || (!driver.isTextureAddrModeSupported(CMaterial::OffsetTexture) && !driver.supportEMBM());
+	return _ForceBasicCaps || (!driver.supportTextureAddrMode(CMaterial::OffsetTexture) && !driver.supportEMBM());
 }
 
 } // NL3D

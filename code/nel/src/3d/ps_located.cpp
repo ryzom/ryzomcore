@@ -73,7 +73,7 @@ CPSLocated::CPSLocated() : /*_MaxNumFaces(0),*/
 						   _ParametricMotion(false),
 						   _TriggerOnDeath(false),
 						   _LastForever(true),
-						   _TriggerID((uint32) 'NONE'),
+						   _TriggerID(NELID("NONE")),
 						   _NonIntegrableForceNbRefs(0),
 						   _NumIntegrableForceWithDifferentBasis(0)
 {

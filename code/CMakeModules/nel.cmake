@@ -320,6 +320,9 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_NEL_MAXPLUGIN       "Build NeL 3dsMax Plugin"                       OFF)
   OPTION(WITH_NEL_SAMPLES         "Build NeL Samples"                             ON )
   OPTION(WITH_NEL_TESTS           "Build NeL Unit Tests"                          ON )
+
+  OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
+  OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)
@@ -342,7 +345,8 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   ###
   # Optional support
   ###
-  OPTION(WITH_LUA51               "Build Ryzom Core using Lua51"                  ON )
+  OPTION(WITH_LUA51               "Build Ryzom Core using Lua 5.1"                ON )
+  OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)

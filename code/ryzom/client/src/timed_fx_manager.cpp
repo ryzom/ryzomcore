@@ -544,7 +544,7 @@ void CTimedFXManager::CManagedFX::shutDown(NL3D::UScene *scene, CFXManager &fxMa
 			// fx isn't spwaned, so must tell fx to stop its emitters
 			if (Instance.isSystemPresent() && Instance.isValid())
 			{
-				if (!Instance.removeByID('main') && !Instance.removeByID('STOP'))
+				if (!Instance.removeByID(NELID("main")) && !Instance.removeByID(NELID("STOP")))
 				{
 					// if a specific emitter has not be tagged, just stop all emitters if there's no better solution
 					Instance.activateEmitters(false);

@@ -331,7 +331,7 @@ REGISTER_VAR_INDIRECT(CVarSBrick, "var_sbrick");
 
 
 /* for special item */
-char	*SpecialItemProp[] =
+const char	*SpecialItemProp[] =
 {
 	"Durability",
 	"Weight",

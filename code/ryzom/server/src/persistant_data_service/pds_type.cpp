@@ -194,7 +194,7 @@ string	CType::getIndexName(TEnumValue value, bool verbose) const
 	if (!isIndex())
 	{
 		PDS_WARNING("getIndexName(): type is not an index");
-		return false;
+		return "";
 	}
 
 	if (isEnum())
