@@ -4,32 +4,6 @@
     * This script will install all databases related to the Ryzom AMS and it will generate an admin account..
     * @author Daan Janssens, mentored by Matthew Lagoe
     */
-
-    //set permissions
-    if(chmod('../../../www/login/logs', 0660)) {
-        echo "failed to set permissions on logs";
-        exit;
-    }
-    if(chmod('../../../admin/graphs_output', 0660)) {
-        echo "failed to set permissions on graphs_output";
-        exit;
-    }
-    if(chmod('../../../templates/default_c', 0660)) {
-        echo "failed to set permissions on default_c";
-        exit;
-    }
-    if(chmod('../../www', 0660)) {
-        echo "failed to set permissions on www";
-        exit;
-    }
-    if(chmod('../../www/html/cache', 0660)) {
-        echo "failed to set permissions on cache";
-        exit;
-    }
-    if(chmod('../../www/html/templates_c', 0660)) {
-        echo "failed to set permissions on templates_c";
-        exit;
-    }
     
     if (!isset($_POST['function'])) { 
         //require the pages that are being needed.
