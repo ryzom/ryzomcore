@@ -53,7 +53,7 @@ do
       CTRL_COMMAND=_$(cat $CTRL_FILE)_
 
       # do we have a 'launch' command?
-      if [ $CTRL_COMMAND == _LAUNCH_ ]
+      if [ $CTRL_COMMAND = _LAUNCH_ ]
           then
 
 		  # update the start counter
@@ -90,12 +90,11 @@ do
       # we have some kind of relaunch directive lined up so deal with it
       mv $NEXT_CTRL_FILE $CTRL_FILE
   else
-      # give the terminal user a chance to press enter to provoke a re-launch
-      HOLD=HOLD
-      read -t2 HOLD
-      if [ _${HOLD}_ != _HOLD_ ]
-	  then
-	  printf LAUNCH > $CTRL_FILE
+      # give the terminal user a chance to press enter to provoke a re-launch when auto-relaunch in AES is disabled
+      HOLD=`sh -ic '{ read a; echo "ENTER" 1>&3; kill 0; } | { sleep 2; kill 0; }' 3>&1 2>/dev/null`
+      if [ "${HOLD}" = "ENTER" ]
+      then
+          printf LAUNCH > $CTRL_FILE
       fi
   fi
 

@@ -289,8 +289,11 @@ class Users{
      public static function createUser($values, $user_id){     
           try {
                //make connection with and put into shard db
+               $values['user_id']= $user_id;
                $dbs = new DBLayer("shard");
                $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values);
+               $dbr = new DBLayer("ring");
+               $dbr->execute("INSERT INTO ring_users (user_id, user_name, user_type) VALUES (:user_id, :name, 'ut_pioneer')",$values);
                ticket_user::createTicketUser( $user_id, 1);
                return "ok";
           }
