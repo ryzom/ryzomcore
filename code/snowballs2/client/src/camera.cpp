@@ -94,7 +94,13 @@ void	initCamera()
 		if (hmdDeviceCfg == std::string("Auto")
 			&& devices.begin() != devices.end())
 		{
-			deviceInfo = &devices[0];
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				if (it->AllowAuto)
+				{
+					deviceInfo = &devices[0];
+				}
+			}
 		}
 		else
 		{

@@ -1094,7 +1094,10 @@ namespace NLGUI
 							bool		updateCoordCalled= false;
 							// updateCoords the window only if the master group is his parent and if need it
 							// do it until updateCoords() no more invalidate coordinates!!
-							while (pIG->getParent()==rMG.Group && (pIG->getInvalidCoords()>0))
+
+							// add deadlock counter to prevent endless loop (Issue #73: web browser long scroll lockup)
+							int deadlock = 10;
+							while (--deadlock > 0 && pIG->getParent()==rMG.Group && (pIG->getInvalidCoords()>0))
 							{
 								bRecomputeCtrlUnderPtr = true;
 								// Update as many pass wanted (3 time for complex resizing, 1 for scroll for example)
@@ -2880,7 +2883,7 @@ namespace NLGUI
 	bool CWidgetManager::serializeTreeData( xmlNodePtr parentNode ) const
 	{
 		if( parentNode == NULL )
-			return NULL;
+			return false;
 
 		std::vector< SMasterGroup >::size_type i;
 		for( i = 0; i < _MasterGroups.size(); i++ )
@@ -3184,7 +3187,6 @@ namespace NLGUI
 	CWidgetManager::CWidgetManager()
 	{
 		LinkHack();
-		
 		CStringShared::createStringMapper();
 
 		CReflectableRegister::registerClasses();

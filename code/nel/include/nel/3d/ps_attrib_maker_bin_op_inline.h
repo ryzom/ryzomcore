@@ -128,7 +128,7 @@ inline uint32 CPSAttribMakerBinOp<uint32>::getMinValue(void) const
 		{
 			uint32 lhs = _Arg[0]->getMinValue();
 			uint32 rhs = _Arg[1]->getMaxValue();
-			return lhs > rhs ? 0 : lhs - rhs;
+			return rhs > lhs ? 0 : lhs - rhs;
 		}
 		break;
 		default:
@@ -153,7 +153,7 @@ inline uint32 CPSAttribMakerBinOp<uint32>::getMaxValue(void) const
 		{
 			uint32 lhs = _Arg[0]->getMaxValue();
 			uint32 rhs = _Arg[1]->getMinValue();
-			return lhs > rhs ? 0 : lhs - rhs;
+			return rhs > lhs ? 0 : lhs - rhs;
 		}
 		break;
 		default:

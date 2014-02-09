@@ -16,7 +16,7 @@
 	//assert_options(ASSERT_QUIET_EVAL, 1);
 	//assert_options(ASSERT_CALLBACK, 'nt_common_assert');
 
-	require_once(NELTOOL_SYSTEMBASE .'functions_mysql.php');
+	require_once(NELTOOL_SYSTEMBASE .'functions_mysqli.php');
 	require_once(NELTOOL_SYSTEMBASE .'smarty/Smarty.class.php');
 	require_once(NELTOOL_SYSTEMBASE. 'functions_tool_administration.php');
 	require_once(NELTOOL_SYSTEMBASE. 'nel/admin_modules_itf.php');

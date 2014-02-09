@@ -269,7 +269,7 @@ namespace NLQT
 					((CForm*)(UForm*)Form)->Header.MinorVersion++;
 					}*/
 					//((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
-					_form->write(file, false);
+					_form->write(file);
 					setWindowTitle(windowTitle().remove("*"));
 					_modified = false;
 					//if (strcmp (xmlStream.getErrorString (), "") != 0)

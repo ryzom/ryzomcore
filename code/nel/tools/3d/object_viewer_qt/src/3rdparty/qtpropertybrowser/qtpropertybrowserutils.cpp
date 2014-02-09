@@ -91,6 +91,7 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QMouseEvent>
 #include <QtGui/QCheckBox>
+#include <QtGui/QToolButton>
 #include <QtGui/QLineEdit>
 #include <QtGui/QMenu>
 
@@ -260,16 +261,25 @@ QString QtPropertyBrowserUtils::fontValueText(const QFont &f)
 QtBoolEdit::QtBoolEdit(QWidget *parent) :
     QWidget(parent),
     m_checkBox(new QCheckBox(this)),
+    m_defaultButton(new QToolButton(this)),
     m_textVisible(true)
 {
+    m_defaultButton->setIcon(QIcon(":/trolltech/qtpropertybrowser/images/resetproperty.png"));
+    m_defaultButton->setMaximumWidth(16);
+    m_defaultButton->setEnabled(false);
+
     QHBoxLayout *lt = new QHBoxLayout;
     if (QApplication::layoutDirection() == Qt::LeftToRight)
         lt->setContentsMargins(4, 0, 0, 0);
     else
         lt->setContentsMargins(0, 0, 4, 0);
     lt->addWidget(m_checkBox);
+    lt->addWidget(m_defaultButton);
     setLayout(lt);
+    
     connect(m_checkBox, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+    connect(m_defaultButton, SIGNAL(clicked()), this, SIGNAL(resetProperty()));
+
     setFocusProxy(m_checkBox);
     m_checkBox->setText(QString());
 }
@@ -291,6 +301,11 @@ Qt::CheckState QtBoolEdit::checkState() const
 void QtBoolEdit::setCheckState(Qt::CheckState state)
 {
     m_checkBox->setCheckState(state);
+}
+
+void QtBoolEdit::setStateResetButton(bool enabled)
+{
+    m_defaultButton->setEnabled(enabled);
 }
 
 bool QtBoolEdit::isChecked() const

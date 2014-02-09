@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="Resist Modifier Min" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="Resist Modifier Max" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="Effect Boost Min" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="Effect Boost Max" Type="Type" Filename="int.typ"/>
-  <LOG>Wed Feb 05 11:52:21 2003 (brigand) Dfn Structure = 
-Wed Feb 05 11:53:36 2003 (brigand) Dfn Structure = </LOG>
-</DFN>

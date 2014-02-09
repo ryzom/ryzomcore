@@ -1100,7 +1100,7 @@ void CTimedFXManager::setMaxNumFXInstances(uint maxNumInstances)
 	FPU_CHECKER
 	H_AUTO_USE(RZ_TimedFX)
 	_MaxNumberOfFXInstances = maxNumInstances;
-	_CandidateFXListTouched;
+	_CandidateFXListTouched = true;
 }
 
 // *******************************************************************************************

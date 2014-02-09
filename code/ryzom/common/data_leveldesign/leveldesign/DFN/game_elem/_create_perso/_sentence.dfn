@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="Sabrina Phrase" Type="Type" Filename="filename.typ" FilenameExt="*.sphrase"/>
-  <ELEMENT Name="Memory Type" Type="Type" Filename="item_memorization_slot_types.typ"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:16 2002 (corvazier) File converted from old format
-Wed Oct 09 12:05:17 2002 (fleury) Dfn Structure = 
-Fri Dec 06 17:09:42 2002 (fleury) Dfn Structure = </LOG>
-</DFN>

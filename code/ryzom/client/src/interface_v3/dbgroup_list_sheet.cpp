@@ -84,6 +84,8 @@ CDBGroupListSheet::CDBGroupListSheet(const TCtorParam &param)
 	_CacheAnimalStatus= -1;
 
 	_ListLeaveSpace= false;
+
+	_Draggable = false;
 }
 
 // ***************************************************************************
@@ -226,6 +228,10 @@ bool CDBGroupListSheet::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	{
 		_AnimalStatus= NLGUI::CDBManager::getInstance()->getDbProp((const char*)prop, false);
 	}
+
+	// issue #78: dragable is not parsed by _CtrlInfo, need to do it here.
+	prop = (char*) xmlGetProp( cur, (xmlChar*)"dragable" );
+	if (prop)	_Draggable = convertBool(prop);
 
 	return true;
 }
@@ -864,6 +870,7 @@ void CDBGroupListSheet::setup()
 		ctrl->setToolTipParent(getToolTipParent());
 		ctrl->setToolTipParentPosRef(getToolTipParentPosRef());
 		ctrl->setToolTipPosRef(getToolTipPosRef());
+		ctrl->setDraggable(_Draggable);
 		// link on the element i+_StartDbIdx
 		if (_DisplayEmptySlot)
 		{

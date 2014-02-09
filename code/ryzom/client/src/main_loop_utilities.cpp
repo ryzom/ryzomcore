@@ -38,6 +38,10 @@
 using namespace NLMISC;
 using namespace NL3D;
 
+void updateVRDevicesComboUI(); // from action_handler_game.cpp
+void initStereoDisplayDevice(); // from init.cpp
+void releaseStereoDisplayDevice(); // from release.cpp
+
 //---------------------------------------------------
 // Compare ClientCfg and LastClientCfg to know what we must update
 //---------------------------------------------------
@@ -45,6 +49,17 @@ void updateFromClientCfg()
 {
 	CClientConfig::setValues();
 	ClientCfg.IsInvalidated = false;
+	
+	if ((ClientCfg.VREnable != LastClientCfg.VREnable)
+		|| (ClientCfg.VREnable && (
+			ClientCfg.VRDisplayDevice != LastClientCfg.VRDisplayDevice
+			|| ClientCfg.VRDisplayDeviceId != LastClientCfg.VRDisplayDeviceId
+			)))
+	{
+		nldebug("Apply VR device change");
+		releaseStereoDisplayDevice();
+		initStereoDisplayDevice();
+	}
 
 	// GRAPHICS - GENERAL
 	//---------------------------------------------------

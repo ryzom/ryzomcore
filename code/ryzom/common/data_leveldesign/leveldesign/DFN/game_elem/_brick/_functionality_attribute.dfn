@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.2" State="modified">
-  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="Value" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="NumericValue" Type="Type" Filename="int.typ"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:12 2002 (corvazier) File converted from old format</LOG>
-</DFN>

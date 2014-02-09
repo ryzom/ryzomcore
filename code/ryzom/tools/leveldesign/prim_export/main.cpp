@@ -329,6 +329,7 @@ struct CExportOptions
 	std::vector<std::string> PrimDirs;			// Directory to parse for .flora and .prim associated
 									// This is here we get continent.cfg file
 	std::string FormDir;				// Directory to get georges dfn
+	std::string WorldEditorFiles;
 
 	CExportOptions ();
 	bool loadcf (NLMISC::CConfigFile &cf);
@@ -371,6 +372,9 @@ bool CExportOptions::loadcf (CConfigFile &cf)
 
 	CConfigFile::CVar &cvFormDir = cf.getVar("FormDir");
 	FormDir = cvFormDir.asString();
+
+	CConfigFile::CVar &cvWorldEditorFiles = cf.getVar("WorldEditorFiles");
+	WorldEditorFiles = cvWorldEditorFiles.asString();
 
 	return true;
 }
@@ -774,6 +778,7 @@ int main (int argc, char**argv)
 		// *** Add pathes in the search path for georges forms
 
 		CPath::addSearchPath (options.FormDir, true, true);
+		CPath::addSearchPath (options.WorldEditorFiles, true, true);
 
 		// Ligo config
 		CLigoConfig config;

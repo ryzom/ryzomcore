@@ -236,6 +236,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
   OPTION(FINAL_VERSION            "Build in Final Version mode"                   ON )
+  OPTION(WITH_PERFHUD            "Build with NVIDIA PerfHUD support"                   OFF )
+  OPTION(WITH_PATCH_SUPPORT            "Build with in-game Patch Support"                   OFF )
 
   # Default to static building on Windows.
   IF(WIN32)
@@ -595,7 +597,7 @@ MACRO(NL_SETUP_BUILD)
 
     SET(NL_DEBUG_CFLAGS "/Zi /MDd /RTC1 /D_DEBUG ${DEBUG_CFLAGS} ${NL_DEBUG_CFLAGS}")
     SET(NL_RELEASE_CFLAGS "/MD /DNDEBUG ${RELEASE_CFLAGS} ${NL_RELEASE_CFLAGS}")
-    SET(NL_DEBUG_LINKFLAGS "/DEBUG /OPT:NOREF /OPT:NOICF /NODEFAULTLIB:msvcrt /INCREMENTAL:YES ${NL_DEBUG_LINKFLAGS}")
+    SET(NL_DEBUG_LINKFLAGS "/DEBUG /OPT:NOREF /OPT:NOICF /NODEFAULTLIB:msvcrt ${MSVC_INCREMENTAL_YES_FLAG} ${NL_DEBUG_LINKFLAGS}")
     SET(NL_RELEASE_LINKFLAGS "/OPT:REF /OPT:ICF /INCREMENTAL:NO ${NL_RELEASE_LINKFLAGS}")
 
     IF(WITH_WARNINGS)
@@ -786,16 +788,15 @@ MACRO(NL_SETUP_BUILD)
 
             ADD_PLATFORM_FLAGS("${XARCH}-isysroot${CMAKE_IOS_SIMULATOR_SYSROOT}")
             ADD_PLATFORM_FLAGS("${XARCH}-mios-simulator-version-min=${IOS_VERSION}")
-            SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+            IF(CMAKE_OSX_DEPLOYMENT_TARGET)
+              SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+            ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET)
           ENDIF(CMAKE_IOS_SIMULATOR_SYSROOT AND TARGET_X86)
         ELSE(IOS)
-          IF(CMAKE_OSX_SYSROOT)
-            ADD_PLATFORM_FLAGS("-isysroot ${CMAKE_OSX_SYSROOT}")
-          ENDIF(CMAKE_OSX_SYSROOT)
-
           # Always force -mmacosx-version-min to override environement variable
-          ADD_PLATFORM_FLAGS("-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
-          SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+          IF(CMAKE_OSX_DEPLOYMENT_TARGET)
+            SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+          ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET)
         ENDIF(IOS)
 
         SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-headerpad_max_install_names")

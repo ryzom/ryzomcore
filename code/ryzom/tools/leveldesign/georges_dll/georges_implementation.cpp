@@ -513,7 +513,7 @@ void CGeorgesImpl::MakeTyp( const std::string& filename, TType type, TUI ui, con
 			outputXml.init (&output);
 
 			// Write
-			t.write (outputXml.getDocument (), theApp.Georges4CVS);
+			t.write (outputXml.getDocument ());
 		}
 		catch (Exception &e)
 		{
@@ -560,7 +560,7 @@ void CGeorgesImpl::createInstanceFile (const std::string &_sxFullnameWithoutExt,
 	if (f.open (fullName))
 	{
 		ox.init(&f);
-		((NLGEORGES::CForm*)((UForm*)Form))->write (ox.getDocument(), _sxFullnameWithoutExt.c_str (), theApp.Georges4CVS);
+		((NLGEORGES::CForm*)((UForm*)Form))->write (ox.getDocument(), _sxFullnameWithoutExt.c_str ());
 		ox.flush();
 		f.close();
 	}

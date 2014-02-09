@@ -48,7 +48,7 @@ ADD_EXECUTABLE( ryzom_configuration_qt WIN32 MACOSX_BUNDLE ${SRC} ${CLIENT_CONFI
 NL_DEFAULT_PROPS( ryzom_configuration_qt "Ryzom, Tools: Ryzom Configuration Qt" )
 NL_ADD_RUNTIME_FLAGS( ryzom_configuration_qt )
 NL_ADD_LIB_SUFFIX( ryzom_configuration_qt )
-TARGET_LINK_LIBRARIES( ryzom_configuration_qt nelmisc nel3d ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES( ryzom_configuration_qt nelmisc nel3d ${QT_LIBRARIES} ${OPENGL_gl_LIBRARY})
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_configuration_qt ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)

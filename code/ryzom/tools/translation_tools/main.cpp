@@ -2022,10 +2022,13 @@ void assertUniq(const vector<TPhrase>& reference)
 			phraseIdentifier.insert(first->Identifier);
 			vector<TClause>::const_iterator first2( first->Clauses.begin() );
 			vector<TClause>::const_iterator last2(  first->Clauses.end() );
-			if (clauseIdentifier.find(first2->Identifier) != clauseIdentifier.end() )
+			for( ; first2 != last2; ++first2)
 			{
-				nlwarning("Clause %s defined more than once.", first2->Identifier.c_str());
-				exit(-1);
+				if (clauseIdentifier.find(first2->Identifier) != clauseIdentifier.end() )
+				{
+					nlwarning("Clause %s defined more than once.", first2->Identifier.c_str());
+					exit(-1);
+				}
 			}
 		}
 	}
@@ -2034,7 +2037,7 @@ void assertUniq(const vector<TPhrase>& reference)
 
 
 void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& addition)
-{	
+{
 	assertUniq(reference);
 	assertUniq(addition);
 
@@ -2046,11 +2049,11 @@ void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& add
 		vector<TPhrase>::const_iterator first( reference.begin() );
 		vector<TPhrase>::const_iterator last(  reference.end() );
 		for( ; first != last ; ++first )
-		{ 
+		{
 			std::string identifier = first->Identifier;
-			phrases[identifier] = *first; 
+			phrases[identifier] = *first;
 		}
-	}	
+	}
 
 	{
 		vector<TPhrase>::const_iterator first( addition.begin() );
@@ -2079,7 +2082,7 @@ void mergePhraseDiff2Impl(vector<TPhrase>& reference, const vector<TPhrase>& add
 			}	
 		}
 	}
-	
+
 	{
 		reference.clear();
 		reference.reserve(phrases.size());		

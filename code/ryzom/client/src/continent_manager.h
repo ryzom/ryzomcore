@@ -112,8 +112,8 @@ public:
 	// load / saves all user landMarks
 	void serialUserLandMarks(NLMISC::IStream &f);
 
-	// ensure the number of landmarks per continent does not exceed maxNumber
-	void checkNumberOfUserLandmarks( uint maxNumber );
+	// rebuild visible landmarks on current map
+	void updateUserLandMarks();
 
 	// load / saves all fow maps
 	void serialFOWMaps();

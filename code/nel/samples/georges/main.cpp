@@ -289,7 +289,7 @@ int main(void)
 			// and finally save the form out in case we made changes.
 			// if you're accessing a form read-only (not using set*) you can skip this.
 			NLMISC::COFile saveSample(sampleConfigFile);
-			form->write(saveSample, false);
+			form->write(saveSample);
 			nlinfo("Saved sample config file.");
 		} else {
 			// CPath didn't find the file, just print an error and exit.

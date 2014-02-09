@@ -816,6 +816,7 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 			deviceInfoOut.Library = CStereoDeviceInfo::OVR; // "Oculus SDK";
 			deviceInfoOut.Manufacturer = deviceInfo.Manufacturer;
 			deviceInfoOut.ProductName = deviceInfo.ProductName;
+			deviceInfoOut.AllowAuto = true;
 			stringstream ser;
 			ser << id;
 			deviceInfoOut.Serial = ser.str(); // can't get the real serial from the sdk...

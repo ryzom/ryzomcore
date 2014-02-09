@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.2" State="modified">
-  <ELEMENT Name="AttackerSze" Type="Type" Filename="_creature_size.typ"/>
-  <ELEMENT Name="DefenderSize" Type="Type" Filename="_creature_size.typ"/>
-  <ELEMENT Name="Adjustment" Type="Type" Filename="int.typ"/>
-  <LOG>Wed Jun 26 11:54:52 2002 (fleury) Dfn Structure = 
-Wed Jun 26 11:57:07 2002 (fleury) Dfn Structure = </LOG>
-</DFN>
