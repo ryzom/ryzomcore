@@ -72,7 +72,7 @@ except Exception, e:
 printLog(log, ">>> Mark diffs as translated <<<")
 diffFiles = os.listdir("diff")
 for diffFile in diffFiles:
-	if "_wk_diff_" in diffFile:
+	if "wk_diff_" in diffFile:
 		printLog(log, "DIFF " + "diff/" + diffFile)
 		subprocess.call([ TranslationTools, "crop_lines", "diff/" + diffFile, "3" ])
 
