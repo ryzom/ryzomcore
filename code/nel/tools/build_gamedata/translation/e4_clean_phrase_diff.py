@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # 
-# \author Jan Boon (Kaetemi)
+# \author Lukasz Kolasa (Maczuga)
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2014  by authors
@@ -31,7 +31,7 @@ log = open("log.log", "w")
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Make and merge all translations")
+printLog(log, "--- Clean phrase diff")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
@@ -39,29 +39,16 @@ printLog(log, "")
 
 TranslationTools = findTool(log, ToolDirectories, TranslationToolsTool, ToolSuffix)
 try:
-	subprocess.call([ TranslationTools, "make_phrase_diff" ])
-	subprocess.call([ TranslationTools, "merge_phrase_diff" ])
-	subprocess.call([ TranslationTools, "make_clause_diff" ])
-	subprocess.call([ TranslationTools, "merge_clause_diff" ])
-	subprocess.call([ TranslationTools, "make_words_diff" ])
-	subprocess.call([ TranslationTools, "merge_words_diff" ])
-	subprocess.call([ TranslationTools, "make_string_diff" ])
-	subprocess.call([ TranslationTools, "merge_string_diff" ])
-	subprocess.call([ TranslationTools, "clean_string_diff" ])
-	subprocess.call([ TranslationTools, "clean_words_diff" ])
-	subprocess.call([ TranslationTools, "clean_clause_diff" ])
 	subprocess.call([ TranslationTools, "clean_phrase_diff" ])
-	subprocess.call([ TranslationTools, "make_worksheet_diff", "bot_names.txt" ])
-	subprocess.call([ TranslationTools, "merge_worksheet_diff", "bot_names.txt" ])
 except Exception, e:
 	printLog(log, "<" + processName + "> " + str(e))
 printLog(log, "")
 
 
 log.close()
-if os.path.isfile("make_merge_all.log"):
-	os.remove("make_merge_all.log")
-shutil.copy("log.log", "make_merge_all_" + time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + ".log")
-shutil.move("log.log", "make_merge_all.log")
+if os.path.isfile("e4_clean_phrase_diff.log"):
+	os.remove("e4_clean_phrase_diff.log")
+shutil.copy("log.log", "e4_clean_phrase_diff_" + time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + ".log")
+shutil.move("log.log", "e4_clean_phrase_diff.log")
 
 raw_input("PRESS ANY KEY TO EXIT")
