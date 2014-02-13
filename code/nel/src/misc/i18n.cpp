@@ -323,6 +323,23 @@ bool CI18N::parseLabel(ucstring::const_iterator &it, ucstring::const_iterator &l
 	ucstring::const_iterator rewind = it;
 	label.erase();
 
+	// first char must be A-Za-z@_
+	if (it != last &&
+			(
+				(*it >= '0' && *it <= '9')
+			||	(*it >= 'A' && *it <= 'Z')
+			||	(*it >= 'a' && *it <= 'z')
+			||	(*it == '_')
+			||	(*it == '@')
+			)
+		)
+		label.push_back(char(*it++));
+	else
+	{
+		it = rewind;
+		return false;
+	}
+
 	// other char must be [0-9A-Za-z@_]*
 	while (it != last &&
 			(
