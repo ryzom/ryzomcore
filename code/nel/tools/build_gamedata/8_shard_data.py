@@ -47,14 +47,28 @@ printLog(log, "")
 
 for dir in InstallShardDataDirectories:
 	printLog(log, "SHARD DIRECTORY " + dir)
-	mkPath(log, InstallDirectory + "/" + dir)
 	mkPath(log, ShardInstallDirectory + "/" + dir)
-	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, ShardInstallDirectory + "/" + dir)
-for dir in InstallShardDataCollisionsDirectories:
-	printLog(log, "SHARD COLLISIONS " + dir)
+	printLog(log, "FROM " + dir)
 	mkPath(log, InstallDirectory + "/" + dir)
-	mkPath(log, ShardInstallDirectory + "/" + InstallShardDataCollisionsDirectory + "/" + dir)
-	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, ShardInstallDirectory + "/" + InstallShardDataCollisionsDirectory + "/" + dir)
+	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, ShardInstallDirectory + "/" + dir)
+for multiDir in InstallShardDataMultiDirectories:
+	dstDir = multiDir[0]
+	mkPath(log, ShardInstallDirectory + "/" + dstDir)
+	printLog(log, "SHARD DIRECTORY " + dstDir)
+	for srcDir in multiDir[1]:
+		printLog(log, "FROM " + srcDir)
+		mkPath(log, InstallDirectory + "/" + srcDir)
+		mkPath(log, ShardInstallDirectory + "/" + dstDir + "/" + srcDir)
+		copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + srcDir, ShardInstallDirectory + "/" + dstDir + "/" + srcDir)
+for multiDir in InstallShardDataPrimitivesDirectories:
+	dstDir = multiDir[0]
+	mkPath(log, ShardInstallDirectory + "/" + dstDir)
+	printLog(log, "SHARD DIRECTORY " + dstDir)
+	for srcDir in multiDir[1]:
+		printLog(log, "FROM PRIMITIVES " + srcDir)
+		mkPath(log, PrimitivesDirectory + "/" + srcDir)
+		mkPath(log, ShardInstallDirectory + "/" + dstDir + "/" + srcDir)
+		copyFilesNoTreeIfNeeded(log, PrimitivesDirectory + "/" + srcDir, ShardInstallDirectory + "/" + dstDir + "/" + srcDir)
 printLog(log, "")
 
 log.close()
