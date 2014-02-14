@@ -1,0 +1,365 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.37 $" State="modified">
+  <STRUCT>
+    <ARRAY Name="properties">
+      <STRUCT>
+        <ATOM Name="name" Value="Sheet"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="10"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="SheetServer"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="10"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="X"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Y"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Z"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Theta"/>
+        <ATOM Name="type" Value="float"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="AIInstance"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Mode"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="8"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Behaviour"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="5"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="NameIndex"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="2"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Target"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="2"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="VisualPropertyA"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="VisualPropertyB"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="VisualPropertyC"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="EntityMounted"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="RiderEntity"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TickPos"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="LocalX"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="4"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="LocalY"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="4"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="LocalZ"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="4"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ContextualProperty"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="AvailableImpulseBitSize"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Cell"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="VisionCounter"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CombatState"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="MaxHitPoints"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BestRole"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="BestRoleLevel"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentRunSpeed"/>
+        <ATOM Name="type" Value="float"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="CurrentWalkSpeed"/>
+        <ATOM Name="type" Value="float"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Stunned"/>
+        <ATOM Name="type" Value="boolean"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="WhoSeesMe"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Bars"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TeamId"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="ActionFlags"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="TargetList"/>
+        <ATOM Name="type" Value="sint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+        <ATOM Name="is a list" Value="true"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="VisualFX"/>
+        <ATOM Name="type" Value="sint16"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="GuildSymbol"/>
+        <ATOM Name="type" Value="uint64"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="GuildNameId"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="EventFactionId"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="PvpMode"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="PvpClan"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="Fuel"/>
+        <ATOM Name="type" Value="boolean"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="InOutpostZoneAlias"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="InOutpostZoneSide"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="true"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="OwnerPeople"/>
+        <ATOM Name="type" Value="uint8"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="3"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="OutpostInfos"/>
+        <ATOM Name="type" Value="uint16"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+      <STRUCT>
+        <ATOM Name="name" Value="NPCAlias"/>
+        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="persistant" Value="false"/>
+        <ATOM Name="mirror" Value="true"/>
+        <ATOM Name="weight" Value="1"/>
+      </STRUCT>
+    </ARRAY>
+    <ATOM Name="max number of rows or entities" Value="15000"/>
+    <ARRAY Name="entity types">
+      <ATOM Value="player"/>
+      <ATOM Value="object"/>
+      <ATOM Value="npc"/>
+      <ATOM Value="creature"/>
+      <ATOM Value="forageSource"/>
+      <ATOM Value="fx_entity"/>
+    </ARRAY>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG></LOG>
+</FORM>
