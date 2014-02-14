@@ -145,7 +145,7 @@ void				CRangeMirrorManager::init()
 
 	// Load datasets into temporary map to get the names
 	TSDataSetSheets sDataSetSheets;
-	loadForm( "dataset", "data_shard/datasets.packed_sheets", sDataSetSheets );
+	loadForm( "dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", sDataSetSheets );
 	TSDataSetSheets::iterator ism;
 	for ( ism=sDataSetSheets.begin(); ism!=sDataSetSheets.end(); ++ism )
 	{
