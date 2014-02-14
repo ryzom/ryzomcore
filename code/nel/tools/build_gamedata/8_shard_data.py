@@ -69,6 +69,16 @@ for multiDir in InstallShardDataPrimitivesDirectories:
 		mkPath(log, PrimitivesDirectory + "/" + srcDir)
 		mkPath(log, ShardInstallDirectory + "/" + dstDir + "/" + srcDir)
 		copyFilesNoTreeIfNeeded(log, PrimitivesDirectory + "/" + srcDir, ShardInstallDirectory + "/" + dstDir + "/" + srcDir)
+for execDir in InstallShardDataExecutables:
+	dstDir = execDir[0]
+	mkPath(log, LinuxServiceExecutableDirectory)
+	mkPath(log, PatchmanCfgDefaultDirectory)
+	mkPath(log, InstallDirectory)
+	mkPath(log, ShardInstallDirectory + "/" + dstDir)
+	printLog(log, "SHARD DIRECTORY " + dstDir)
+	copyFileIfNeeded(log, LinuxServiceExecutableDirectory + "/" + execDir[1][1], ShardInstallDirectory + "/" + dstDir + "/" + execDir[1][0])
+	copyFileListNoTree(log, PatchmanCfgDefaultDirectory, ShardInstallDirectory + "/" + dstDir, execDir[2])
+	copyFileListNoTree(log, InstallDirectory, ShardInstallDirectory + "/" + dstDir, execDir[3])
 printLog(log, "")
 
 log.close()
