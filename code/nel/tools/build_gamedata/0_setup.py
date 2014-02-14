@@ -134,7 +134,7 @@ if not args.noconf:
 	try:
 		DataShardDirectory
 	except NameError:
-		DataShardDirectory = "R:/code/ryzom/common/data_shard"
+		DataShardDirectory = "R:/code/ryzom/server/data_shard"
 	try:
 		DataCommonDirectory
 	except NameError:
