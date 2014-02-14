@@ -77,8 +77,8 @@ for execDir in InstallShardDataExecutables:
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
 	printLog(log, "SHARD DIRECTORY " + dstDir)
 	copyFileIfNeeded(log, LinuxServiceExecutableDirectory + "/" + execDir[1][1], ShardInstallDirectory + "/" + dstDir + "/" + execDir[1][0])
-	copyFileListNoTree(log, PatchmanCfgDefaultDirectory, ShardInstallDirectory + "/" + dstDir, execDir[2])
-	copyFileListNoTree(log, InstallDirectory, ShardInstallDirectory + "/" + dstDir, execDir[3])
+	copyFileListNoTreeIfNeeded(log, PatchmanCfgDefaultDirectory, ShardInstallDirectory + "/" + dstDir, execDir[2])
+	copyFileListNoTreeIfNeeded(log, InstallDirectory, ShardInstallDirectory + "/" + dstDir, execDir[3])
 printLog(log, "")
 
 log.close()
