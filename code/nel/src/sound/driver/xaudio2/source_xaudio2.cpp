@@ -397,30 +397,16 @@ void CSourceXAudio2::submitStreamingBuffer(IBuffer *buffer)
 	// nldebug(NLSOUND_XAUDIO2_PREFIX "submitStreamingBuffer");
 
 	nlassert(_BufferStreaming);
-	
-	IBuffer::TBufferFormat bufferFormat;
-	uint8 channels;
-	uint8 bitsPerSample;
-	uint32 frequency;
-	buffer->getFormat(bufferFormat, channels, bitsPerSample, frequency);
+
 	// allow to change the format if not playing
 	if (!_IsPlaying)
 	{
-		if (!_SourceVoice)
-		{
-			// if no source yet, prepare the format
-			preparePlay(bufferFormat, channels, bitsPerSample, frequency);
-		}
-		else
-		{
-			XAUDIO2_VOICE_STATE voice_state;
-			_SourceVoice->GetState(&voice_state);
-			// if no buffers queued, prepare the format
-			if (!voice_state.BuffersQueued)
-			{
-				preparePlay(bufferFormat, channels, bitsPerSample, frequency);
-			}
-		}
+		IBuffer::TBufferFormat bufferFormat;
+		uint8 channels;
+		uint8 bitsPerSample;
+		uint32 frequency;
+		buffer->getFormat(bufferFormat, channels, bitsPerSample, frequency);
+		preparePlay(bufferFormat, channels, bitsPerSample, frequency);
 	}
 	
 	submitBuffer(static_cast<CBufferXAudio2 *>(buffer));
@@ -636,6 +622,7 @@ bool CSourceXAudio2::play()
 			// preparePlay already called, 
 			// stop already called before going into buffer streaming
 			nlassert(!_IsPlaying);
+			nlassert(_SourceVoice);
 			_PlayStart = CTime::getLocalTime();
 			if (SUCCEEDED(_SourceVoice->Start(0))) _IsPlaying = true;
 			else nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Play (_BufferStreaming)");
