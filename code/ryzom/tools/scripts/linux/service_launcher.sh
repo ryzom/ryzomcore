@@ -78,7 +78,7 @@ do
 		  printf STOPPED > $STATE_FILE
 
 		  # consume (remove) the control file to allow start once
-		  rm $CTRL_FILE
+		  rm -f $CTRL_FILE
 
 		  echo Press ENTER to relaunch
        fi
