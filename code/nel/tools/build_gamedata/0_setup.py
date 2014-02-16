@@ -134,7 +134,7 @@ if not args.noconf:
 	try:
 		DataShardDirectory
 	except NameError:
-		DataShardDirectory = "R:/code/ryzom/common/data_shard"
+		DataShardDirectory = "R:/code/ryzom/server/data_shard"
 	try:
 		DataCommonDirectory
 	except NameError:
@@ -159,6 +159,22 @@ if not args.noconf:
 		WindowsExeDllCfgDirectories
 	except NameError:
 		WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/libraries/external/bin', 'R:/build/dev/bin/Release', 'R:/code/ryzom/client', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/tools/client/client_config/bin' ]
+	try:
+		LinuxServiceExecutableDirectory
+	except NameError:
+		LinuxServiceExecutableDirectory = "S:/devls_x64/bin"
+	try:
+		LinuxClientExecutableDirectory
+	except NameError:
+		LinuxClientExecutableDirectory = "S:/devl_x64/bin"
+	try:
+		PatchmanCfgAdminDirectory
+	except NameError:
+		PatchmanCfgAdminDirectory = "S:/notes/patchman_cfg/admin_install"
+	try:
+		PatchmanCfgDefaultDirectory
+	except NameError:
+		PatchmanCfgDefaultDirectory = "S:/notes/patchman_cfg/default"
 	try:
 		MaxAvailable
 	except NameError:
@@ -219,6 +235,10 @@ if not args.noconf:
 	WindowsExeDllCfgDirectories[4] = askVar(log, "Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
 	WindowsExeDllCfgDirectories[5] = askVar(log, "Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
 	WindowsExeDllCfgDirectories[6] = askVar(log, "Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
+	LinuxServiceExecutableDirectory = askVar(log, "Linux Service Executable Directory", LinuxServiceExecutableDirectory).replace("\\", "/")
+	LinuxClientExecutableDirectory = askVar(log, "Linux Client Executable Directory", LinuxClientExecutableDirectory).replace("\\", "/")
+	PatchmanCfgAdminDirectory = askVar(log, "Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
+	PatchmanCfgDefaultDirectory = askVar(log, "Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
 	MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
 	if MaxAvailable:
 		MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
@@ -299,6 +319,10 @@ if not args.noconf:
 	sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
+	sf.write("LinuxServiceExecutableDirectory = \"" + str(LinuxServiceExecutableDirectory) + "\"\n")
+	sf.write("LinuxClientExecutableDirectory = \"" + str(LinuxClientExecutableDirectory) + "\"\n")
+	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
+	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# 3dsMax directives\n")
 	sf.write("MaxAvailable = " + str(MaxAvailable) + "\n")
