@@ -244,7 +244,7 @@ void CSourceXAudio2::updateState()
 				_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
 				if (!_BufferStreaming)
 				{
-					nlinfo(NLSOUND_XAUDIO2_PREFIX "Stop");
+					// nldebug(NLSOUND_XAUDIO2_PREFIX "Stop");
 					if (FAILED(_SourceVoice->Stop(0))) 
 						nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
 					_IsPlaying = false;
@@ -260,7 +260,7 @@ void CSourceXAudio2::updateState()
 				_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
 				if (!_BufferStreaming)
 				{
-					nlinfo(NLSOUND_XAUDIO2_PREFIX "Stop");
+					// nldebug(NLSOUND_XAUDIO2_PREFIX "Stop");
 					if (FAILED(_SourceVoice->Stop(0))) 
 						nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
 					_IsPlaying = false;
