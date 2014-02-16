@@ -242,9 +242,13 @@ void CSourceXAudio2::updateState()
 			if (!_AdpcmUtility->getSourceData())
 			{
 				_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-				if (FAILED(_SourceVoice->Stop(0))) 
-					nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
-				_IsPlaying = false;
+				if (!_BufferStreaming)
+				{
+					nlinfo(NLSOUND_XAUDIO2_PREFIX "Stop");
+					if (FAILED(_SourceVoice->Stop(0))) 
+						nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
+					_IsPlaying = false;
+				}
 			}
 		}
 		else
@@ -254,9 +258,13 @@ void CSourceXAudio2::updateState()
 			if (!voice_state.BuffersQueued)
 			{
 				_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-				if (FAILED(_SourceVoice->Stop(0))) 
-					nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
-				_IsPlaying = false;
+				if (!_BufferStreaming)
+				{
+					nlinfo(NLSOUND_XAUDIO2_PREFIX "Stop");
+					if (FAILED(_SourceVoice->Stop(0))) 
+						nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
+					_IsPlaying = false;
+				}
 			}
 		}
 	}
@@ -265,6 +273,8 @@ void CSourceXAudio2::updateState()
 /// (Internal) Submit a buffer to the XAudio2 source voice.
 void CSourceXAudio2::submitBuffer(CBufferXAudio2 *ibuffer)
 {
+	// nldebug(NLSOUND_XAUDIO2_PREFIX "submitBuffer %u", (uint32)(void *)this);
+
 	nlassert(_SourceVoice);
 	nlassert(ibuffer->getFormat() == _Format
 		&& ibuffer->getChannels() == _Channels
@@ -278,9 +288,9 @@ void CSourceXAudio2::submitBuffer(CBufferXAudio2 *ibuffer)
 	{
 		XAUDIO2_BUFFER buffer;
 		buffer.AudioBytes = ibuffer->getSize();
-		buffer.Flags = _IsLooping || _BufferStreaming ? 0 : XAUDIO2_END_OF_STREAM;
+		buffer.Flags = (_IsLooping || _BufferStreaming) ? 0 : XAUDIO2_END_OF_STREAM;
 		buffer.LoopBegin = 0;
-		buffer.LoopCount = _IsLooping ? XAUDIO2_LOOP_INFINITE : 0;
+		buffer.LoopCount = (_IsLooping && !_BufferStreaming) ? XAUDIO2_LOOP_INFINITE : 0;
 		buffer.LoopLength = 0;
 		buffer.pAudioData = const_cast<BYTE *>(ibuffer->getData());
 		buffer.pContext = ibuffer;
@@ -336,13 +346,33 @@ void CSourceXAudio2::setupVoiceSends()
 void CSourceXAudio2::setStreaming(bool streaming)
 {
 	nlassert(!_IsPlaying);
+
+	// nldebug(NLSOUND_XAUDIO2_PREFIX "setStreaming %i", (uint32)streaming);
+
+	if (_SourceVoice)
+	{
+		XAUDIO2_VOICE_STATE voice_state;
+		_SourceVoice->GetState(&voice_state);
+		if (!voice_state.BuffersQueued)
+		{
+			nlwarning(NLSOUND_XAUDIO2_PREFIX "Switched streaming mode while buffer still queued!?! Flush");
+			_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
+			if (FAILED(_SourceVoice->FlushSourceBuffers())) 
+				nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
+		}
+	}
+
 	_BufferStreaming = streaming;
+
+	// nldebug(NLSOUND_XAUDIO2_PREFIX "setStreaming done %i", (uint32)streaming);
 }
 
 /// Set the buffer that will be played (no streaming)
 void CSourceXAudio2::setStaticBuffer(IBuffer *buffer)
 {
 	nlassert(!_BufferStreaming);
+
+	// nldebug(NLSOUND_XAUDIO2_PREFIX "setStaticBuffer");
 
 	// if (buffer) // nldebug(NLSOUND_XAUDIO2_PREFIX "setStaticBuffer %s", _SoundDriver->getStringMapper()->unmap(buffer->getName()).c_str());
 	// else // nldebug(NLSOUND_XAUDIO2_PREFIX "setStaticBuffer NULL");
@@ -364,6 +394,8 @@ IBuffer *CSourceXAudio2::getStaticBuffer()
 /// Should be called by a thread which checks countStreamingBuffers every 100ms.
 void CSourceXAudio2::submitStreamingBuffer(IBuffer *buffer)
 {
+	// nldebug(NLSOUND_XAUDIO2_PREFIX "submitStreamingBuffer");
+
 	nlassert(_BufferStreaming);
 	
 	IBuffer::TBufferFormat bufferFormat;
@@ -414,9 +446,10 @@ uint CSourceXAudio2::countStreamingBuffers() const
 /// Set looping on/off for future playbacks (default: off)
 void CSourceXAudio2::setLooping(bool l)
 {
+	// nldebug(NLSOUND_XAUDIO2_PREFIX "setLooping %u", (uint32)l);
+
 	nlassert(!_BufferStreaming);
 
-	// nldebug(NLSOUND_XAUDIO2_PREFIX "setLooping %u", (uint32)l);
 	if (_IsLooping != l)
 	{
 		_IsLooping = l;
@@ -455,7 +488,7 @@ void CSourceXAudio2::setLooping(bool l)
 					_SourceVoice->GetState(&voice_state);
 					if (voice_state.BuffersQueued)
 					{
-						nlwarning(NLSOUND_XAUDIO2_PREFIX "not playing but buffer already queued???");
+						nlwarning(NLSOUND_XAUDIO2_PREFIX "Not playing but buffer already queued while switching loop mode!?! Flush and requeue");
 						if (FAILED(_SourceVoice->FlushSourceBuffers())) 
 							nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
 						// queue buffer with correct looping parameters
@@ -580,7 +613,7 @@ bool CSourceXAudio2::preparePlay(IBuffer::TBufferFormat bufferFormat, uint8 chan
 
 /// Play the static buffer (or stream in and play).
 bool CSourceXAudio2::play()
-{	
+{
 	// nldebug(NLSOUND_XAUDIO2_PREFIX "play");
 
 	// Commit 3D changes before starting play
