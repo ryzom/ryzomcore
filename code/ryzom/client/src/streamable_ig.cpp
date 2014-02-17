@@ -144,12 +144,14 @@ CStreamableIG::~CStreamableIG()
 		#ifdef NL_DEBUG
 			//nlinfo("Loading : %s", Name.c_str());
 		#endif
+		std::vector<bool> waitForIg;
+		waitForIg.resize(_IGs.size());
 		for(uint k = 0; k < _IGs.size(); ++k)
 		{
 			#ifdef NL_DEBUG
 				//nlinfo("Loading ig %s", _IGs[k].Name.c_str());
 			#endif
-			progress.progress((float)k/(float)_IGs.size());
+			progress.progress((float)k/((float)_IGs.size()*2.f));
 
 			if (!_IGs[k].IG)
 			{
@@ -161,19 +163,15 @@ CStreamableIG::~CStreamableIG()
 
 					//nlinfo("start blocking load");
 					// blocking load
+					// block after queueing all
 					_Callback.Owner = this;
 					_Scene->createInstanceGroupAndAddToSceneAsync(_IGs[k].Name + ".ig", &_IGs[k].IG, _IGs[k].Pos, _IGs[k].Rot, season, &_Callback);
+					_IGs[k].Loading = true;
 				}
+				
+				_Scene->updateWaitingInstances(1000); /* set a high value to upload texture at a fast rate */
 
-				//nlinfo("wait for end of blockin load");
-				// blocking call
-				while (!_IGs[k].IG)
-				{
-					NLMISC::nlSleep(0);
-					// wait till loaded...
-					_Scene->updateWaitingInstances(1000); /* set a high value to upload texture at a fast rate */
-				}
-				_IGs[k].Loading = false;
+				waitForIg[k] = true;
 			}
 			else
 			{
@@ -181,6 +179,25 @@ CStreamableIG::~CStreamableIG()
 				{
 					_IGs[k].Loading = false;
 				}
+
+				waitForIg[k] = false;
+			}
+		}
+		for(uint k = 0; k < _IGs.size(); ++k)
+		{
+			progress.progress(((float)k + (float)_IGs.size())/((float)_IGs.size()*2.f));
+
+			if (waitForIg[k])
+			{
+				//nlinfo("wait for end of blockin load");
+				// blocking call
+				while (!_IGs[k].IG)
+				{
+					NLMISC::nlSleep(1);
+					// wait till loaded...
+					_Scene->updateWaitingInstances(1000); /* set a high value to upload texture at a fast rate */
+				}
+				_IGs[k].Loading = false;
 			}
 		}
 		linkInstances();
