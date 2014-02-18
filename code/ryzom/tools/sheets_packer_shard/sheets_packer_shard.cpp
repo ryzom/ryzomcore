@@ -30,11 +30,13 @@
 #include <nel/misc/file.h>
 #include <nel/misc/log.h>
 #include <nel/misc/path.h>
+#include <nel/misc/sheet_id.h>
 #include <nel/georges/load_form.h>
 #include <game_share/data_set_base.h>
 #include <input_output_service/string_manager.h>
 #include <gpm_service/sheets.h>
 #include <server_share/continent_container.h>
+#include <entities_game_service/egs_sheets/egs_sheets.h>
 
 // Project includes
 // ...
@@ -42,6 +44,15 @@
 namespace {
 
 } /* anonymous namespace */
+
+// EGS
+NLMISC::CVariable<bool> EGSLight("egs","EGSLight", "Load EGS with a minimal set of feature loaded", false, 0, true);
+NLMISC::CVariable<bool> LoadOutposts("egs", "LoadOutposts", "If false outposts won't be loaded", true, 0, true );
+static std::string s_WriteDirectory;
+std::string writeDirectory()
+{
+	return s_WriteDirectory;
+}
 
 ////////////////////////////////////////////////////////////////////////
 // note: *.packed_sheets files are placed in <build_packed_sheets>    //
@@ -55,10 +66,12 @@ int main(int nNbArg, char **ppArgs)
 	NLMISC::createDebug();
 
 	// verify all params
-	if (nNbArg < 5)
+	if (nNbArg < 6)
 	{
+		// >sheets_packer_shard.exe L:\leveldesign L:\leveldesign\DFN R:\code\ryzom\server\data_shard\mirror_sheets T:\export\common\leveldesign\visual_slot_tab T:\test_shard
 		nlinfo("ERROR : Wrong number of arguments\n");
-		nlinfo("USAGE : sheets_packer_shard  <leveldesign> <dfn> <datasets> <build_packed_sheets>\n");
+		nlinfo("USAGE : sheets_packer_shard  <leveldesign> <dfn> <datasets> <tab> <build_packed_sheets>\n");
+		nlinfo("<tab> : Directory containing visual_slots.tab");
 		return EXIT_FAILURE;
 	}
 	std::string leveldesignDir = std::string(ppArgs[1]);
@@ -79,18 +92,29 @@ int main(int nNbArg, char **ppArgs)
 		nlerrornoex("Directory datasets '%s' does not exist", datasetsDir.c_str());
 		return EXIT_FAILURE;
 	}
-	std::string exportDir = std::string(ppArgs[4]);
+	std::string tabDir = std::string(ppArgs[4]);
+	if (!NLMISC::CFile::isDirectory(tabDir))
+	{
+		nlerrornoex("Directory tab '%s' does not exist", tabDir.c_str());
+		return EXIT_FAILURE;
+	}
+	std::string exportDir = std::string(ppArgs[5]);
 	if (!NLMISC::CFile::isDirectory(exportDir))
 	{
 		nlerrornoex("Directory build_packed_sheets '%s' does not exist", exportDir.c_str());
 		return EXIT_FAILURE;
 	}
+	s_WriteDirectory = exportDir + "/";
 	
 	// add search paths
 	NLMISC::CPath::addSearchPath(leveldesignDir, true, false);
 	NLMISC::CPath::addSearchPath(dfnDir, true, false);
-	NLMISC::CPath::addSearchPath(datasetsDir, true, false);
+	NLMISC::CPath::addSearchPath(datasetsDir, false, false);
+	NLMISC::CPath::addSearchPath(tabDir, false, false);
 	
+	// init sheet_id.bin
+	NLMISC::CSheetId::init(false);
+
 	// this here does the magic
 	// MS
 	{
@@ -123,7 +147,12 @@ int main(int nNbArg, char **ppArgs)
 	// CContinentContainer
 	{
 		CContinentContainer continents;
-		continents.buildSheets(exportDir + "/");
+		continents.buildSheets(s_WriteDirectory);
+	}
+
+	// EGS
+	{
+		CSheets::init();
 	}
 	
 	// and that's all folks
