@@ -2,11 +2,14 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(sheets_packer_shard	${SRC}
 				${CMAKE_SOURCE_DIR}/ryzom/server/src/input_output_service/string_manager_sheet.cpp
-				${CMAKE_SOURCE_DIR}/ryzom/server/src/input_output_service/string_manager.h)
+				${CMAKE_SOURCE_DIR}/ryzom/server/src/input_output_service/string_manager.h
+				${CMAKE_SOURCE_DIR}/ryzom/server/src/gpm_service/sheets.cpp
+				${CMAKE_SOURCE_DIR}/ryzom/server/src/gpm_service/sheets.h)
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src)
 TARGET_LINK_LIBRARIES(sheets_packer_shard
 					ryzom_gameshare
+					ryzom_servershare
 					nelmisc
 					nelgeorges
 					nelnet

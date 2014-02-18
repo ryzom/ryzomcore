@@ -33,6 +33,8 @@
 #include <nel/georges/load_form.h>
 #include <game_share/data_set_base.h>
 #include <input_output_service/string_manager.h>
+#include <gpm_service/sheets.h>
+#include <server_share/continent_container.h>
 
 // Project includes
 // ...
@@ -107,6 +109,21 @@ int main(int nNbArg, char **ppArgs)
 		exts.push_back("creature");
 		exts.push_back("race_stats");
 		loadForm(exts, exportDir + "/ios_sheets.packed_sheets", container);
+	}
+
+	// GPMS
+	{
+		std::map<NLMISC::CSheetId, CSheets::CSheet> container;
+		std::vector<std::string> filters;
+		filters.push_back("creature");
+		filters.push_back("player");
+		loadForm(filters, exportDir + "/gpms.packed_sheets", container);
+	}
+
+	// CContinentContainer
+	{
+		CContinentContainer continents;
+		continents.buildSheets(exportDir + "/");
 	}
 	
 	// and that's all folks
