@@ -38,6 +38,8 @@
 #include <server_share/continent_container.h>
 #include <entities_game_service/egs_sheets/egs_sheets.h>
 #include <game_share/time_weather_season/time_date_season_manager.h>
+#include <ai_service/stdpch.h>
+#include <ai_service/sheets.h>
 
 // Project includes
 // ...
@@ -159,6 +161,12 @@ int main(int nNbArg, char **ppArgs)
 	// CTimeDateSeasonManager
 	{
 		CTimeDateSeasonManager::packSheets(s_WriteDirectory);
+	}
+
+	// AIS
+	{
+		AISHEETS::CSheets::getInstance()->packSheets(s_WriteDirectory);
+		AISHEETS::CSheets::destroyInstance();
 	}
 	
 	// and that's all folks
