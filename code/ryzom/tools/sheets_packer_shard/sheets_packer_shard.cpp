@@ -113,7 +113,7 @@ int main(int nNbArg, char **ppArgs)
 
 	// GPMS
 	{
-		std::map<NLMISC::CSheetId, CSheets::CSheet> container;
+		std::map<NLMISC::CSheetId, CGpmSheets::CSheet> container;
 		std::vector<std::string> filters;
 		filters.push_back("creature");
 		filters.push_back("player");
