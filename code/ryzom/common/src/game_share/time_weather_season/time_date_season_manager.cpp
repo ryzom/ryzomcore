@@ -42,9 +42,12 @@ std::map< NLMISC::CSheetId, CStaticLightCycle > CTimeDateSeasonManager::_StaticL
 void CTimeDateSeasonManager::init( uint32 /* startDay */, float /* startTime */)
 {
 	// load light cycle sheet
-	string lightCycleFile = IService::getInstance()->WriteFilesDirectory;
-	lightCycleFile = lightCycleFile + string("light_cycles.packed_sheets");
-	loadForm( "light_cycle", lightCycleFile, _StaticLightCyclesHours );
+	packSheets(IService::getInstance()->WriteFilesDirectory);
+}
+
+void CTimeDateSeasonManager::packSheets(const std::string &writeDirectory)
+{
+	loadForm("light_cycle", writeDirectory + "light_cycles.packed_sheets", _StaticLightCyclesHours);
 }
 
 

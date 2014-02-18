@@ -37,6 +37,7 @@
 #include <gpm_service/sheets.h>
 #include <server_share/continent_container.h>
 #include <entities_game_service/egs_sheets/egs_sheets.h>
+#include <game_share/time_weather_season/time_date_season_manager.h>
 
 // Project includes
 // ...
@@ -68,7 +69,7 @@ int main(int nNbArg, char **ppArgs)
 	// verify all params
 	if (nNbArg < 6)
 	{
-		// >sheets_packer_shard.exe L:\leveldesign L:\leveldesign\DFN R:\code\ryzom\server\data_shard\mirror_sheets T:\export\common\leveldesign\visual_slot_tab T:\test_shard
+		// sheets_packer_shard.exe L:\leveldesign L:\leveldesign\DFN R:\code\ryzom\server\data_shard\mirror_sheets T:\export\common\leveldesign\visual_slot_tab T:\test_shard
 		nlinfo("ERROR : Wrong number of arguments\n");
 		nlinfo("USAGE : sheets_packer_shard  <leveldesign> <dfn> <datasets> <tab> <build_packed_sheets>\n");
 		nlinfo("<tab> : Directory containing visual_slots.tab");
@@ -153,6 +154,11 @@ int main(int nNbArg, char **ppArgs)
 	// EGS
 	{
 		CSheets::init();
+	}
+
+	// CTimeDateSeasonManager
+	{
+		CTimeDateSeasonManager::packSheets(s_WriteDirectory);
 	}
 	
 	// and that's all folks
