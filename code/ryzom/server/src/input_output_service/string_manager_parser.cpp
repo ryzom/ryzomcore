@@ -1864,7 +1864,7 @@ void CStringManager::init(NLMISC::CLog *log)
 	
 	if (_SheetInfo.empty())
 	{
-		std::map<std::string, TSheetInfo> container;
+		// std::map<std::string, TSheetInfo> container;
 		// Load the sheet
 		std::vector<std::string> exts;
 		exts.push_back("creature");
