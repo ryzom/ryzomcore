@@ -1,14 +1,14 @@
 #!/usr/bin/python
 # 
-# \file 2_build.py
-# \brief Build sheet_id
-# \date 2009-06-03 10:47GMT
+# \file 0_setup.py
+# \brief Setup sheets
+# \date 2014-02-19 22:39GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Build sheet_id
+# Setup shard sheets
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2010-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -38,24 +38,28 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Build sheet_id")
+printLog(log, "--- Setup shard sheets")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-# Find tools
-MakeSheetId = findTool(log, ToolDirectories, MakeSheetIdTool, ToolSuffix)
-printLog(log, "")
+# Setup source directories
+printLog(log, ">>> Setup source directories <<<")
+mkPath(log, LeveldesignDirectory)
+mkPath(log, LeveldesignDfnDirectory)
+mkPath(log, ExportBuildDirectory + "/" + VisualSlotTabBuildDirectory)
+mkPath(log, DataShardDirectory + "/mirror_sheets") # FIXME: Hardcoded path mirror_sheets
 
-# For each sheet_id directory
-printLog(log, ">>> Build sheet_id <<<")
-if MakeSheetId == "":
-	toolLogFail(log, MakeSheetIdTool, ToolSuffix)
-else:
-	mkPath(log, LeveldesignDirectory)
-	mkPath(log, LeveldesignWorldDirectory)
-	subprocess.call([ MakeSheetId, "-o" + LeveldesignDirectory + "/game_elem/sheet_id.bin", LeveldesignDirectory + "/game_elem", LeveldesignDirectory + "/game_element", LeveldesignWorldDirectory, DataShardDirectory + "/mirror_sheets" ]) # FIXME: Hardcoded path mirror_sheets
-printLog(log, "")
+# Setup export directories
+printLog(log, ">>> Setup export directories <<<")
+
+# Setup build directories
+printLog(log, ">>> Setup build directories <<<")
+mkPath(log, ExportBuildDirectory + "/" + SheetsShardBuildDirectory)
+
+# Setup client directories
+printLog(log, ">>> Setup client directories <<<")
+mkPath(log, InstallDirectory + "/" + SheetsShardInstallDirectory)
 
 log.close()
 
