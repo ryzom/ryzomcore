@@ -63,7 +63,17 @@ void CGpmSheets::init()
 	filters.push_back("creature");
 	filters.push_back("player");
 
-	loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets);
+	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	{
+		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets, false, false);
+	}
+
+	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
+	if (_sheets.empty())
+	{
+		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets, true);
+	}
 
 	_initialised=true;
 }
