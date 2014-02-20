@@ -61,6 +61,10 @@ done
 
 # make the ryzom services executable
 chmod 775 live/service_*/*_service 2> /dev/null
+chmod 775 live/service_*/*_server 2> /dev/null
+
+# make directory for rrd_graphs
+mkdir -p rrd_graphs
 
 # special case to deal with www files that need a local cfg file to be properly setup
 if [ -e ./live/data_www/config.php ]
