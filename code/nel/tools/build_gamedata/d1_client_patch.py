@@ -151,7 +151,7 @@ else:
 
 
 log.close()
-if os.path.isfile("6_client_patch.log"):
-	os.remove("6_client_patch.log")
+if os.path.isfile("d1_client_patch.log"):
+	os.remove("d1_client_patch.log")
 shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_client_patch.log")
-shutil.move("log.log", "6_client_patch.log")
+shutil.move("log.log", "d1_client_patch.log")

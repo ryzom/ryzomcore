@@ -46,15 +46,20 @@ printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
 for dir in InstallShardDataDirectories:
-	printLog(log, "SHARD DIRECTORY " + dir)
+	printLog(log, "SHARD PACKAGE " + dir)
 	mkPath(log, ShardInstallDirectory + "/" + dir)
 	printLog(log, "FROM " + dir)
 	mkPath(log, InstallDirectory + "/" + dir)
 	copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + dir, ShardInstallDirectory + "/" + dir)
+for package in InstallShardDataFiles:
+	dstDir = package[0]
+	mkPath(log, ShardInstallDirectory + "/" + dstDir)
+	printLog(log, "SHARD PACKAGE " + dstDir)
+	copyFileListNoTreeIfNeeded(log, InstallDirectory, ShardInstallDirectory + "/" + dstDir, package[1])
 for multiDir in InstallShardDataMultiDirectories:
 	dstDir = multiDir[0]
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
-	printLog(log, "SHARD DIRECTORY " + dstDir)
+	printLog(log, "SHARD PACKAGE " + dstDir)
 	for srcDir in multiDir[1]:
 		printLog(log, "FROM " + srcDir)
 		mkPath(log, InstallDirectory + "/" + srcDir)
@@ -63,7 +68,7 @@ for multiDir in InstallShardDataMultiDirectories:
 for multiDir in InstallShardDataPrimitivesDirectories:
 	dstDir = multiDir[0]
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
-	printLog(log, "SHARD DIRECTORY " + dstDir)
+	printLog(log, "SHARD PACKAGE " + dstDir)
 	for srcDir in multiDir[1]:
 		printLog(log, "FROM PRIMITIVES " + srcDir)
 		mkPath(log, PrimitivesDirectory + "/" + srcDir)
@@ -75,14 +80,14 @@ for execDir in InstallShardDataExecutables:
 	mkPath(log, PatchmanCfgDefaultDirectory)
 	mkPath(log, InstallDirectory)
 	mkPath(log, ShardInstallDirectory + "/" + dstDir)
-	printLog(log, "SHARD DIRECTORY " + dstDir)
+	printLog(log, "SHARD PACKAGE " + dstDir)
 	copyFileIfNeeded(log, LinuxServiceExecutableDirectory + "/" + execDir[1][1], ShardInstallDirectory + "/" + dstDir + "/" + execDir[1][0])
 	copyFileListNoTreeIfNeeded(log, PatchmanCfgDefaultDirectory, ShardInstallDirectory + "/" + dstDir, execDir[2])
 	copyFileListNoTreeIfNeeded(log, InstallDirectory, ShardInstallDirectory + "/" + dstDir, execDir[3])
 printLog(log, "")
 
 log.close()
-if os.path.isfile("8_shard_data.log"):
-	os.remove("8_shard_data.log")
-shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_shard_install.log")
-shutil.move("log.log", "8_shard_data.log")
+if os.path.isfile("b2_shard_data.log"):
+	os.remove("b2_shard_data.log")
+shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_shard_data.log")
+shutil.move("log.log", "b2_shard_data.log")

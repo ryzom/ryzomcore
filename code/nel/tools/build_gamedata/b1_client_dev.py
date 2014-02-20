@@ -69,7 +69,7 @@ for category in InstallClientData:
 printLog(log, "")
 
 log.close()
-if os.path.isfile("5_client_dev.log"):
-	os.remove("5_client_dev.log")
+if os.path.isfile("b1_client_dev.log"):
+	os.remove("b1_client_dev.log")
 shutil.copy("log.log", time.strftime("%Y-%m-%d-%H-%M-GMT", time.gmtime(time.time())) + "_client_dev.log")
-shutil.move("log.log", "5_client_dev.log")
+shutil.move("log.log", "b1_client_dev.log")
