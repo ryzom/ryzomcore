@@ -170,11 +170,11 @@ if not args.noconf:
 	try:
 		PatchmanCfgAdminDirectory
 	except NameError:
-		PatchmanCfgAdminDirectory = "S:/notes/patchman_cfg/admin_install"
+		PatchmanCfgAdminDirectory = "R:/code/ryzom/server/patchman_cfg/admin_install"
 	try:
 		PatchmanCfgDefaultDirectory
 	except NameError:
-		PatchmanCfgDefaultDirectory = "S:/notes/patchman_cfg/default"
+		PatchmanCfgDefaultDirectory = "R:/code/ryzom/server/patchman_cfg/default"
 	try:
 		PatchmanBridgeServerDirectory
 	except NameError:
