@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # 
-# \file 8_shard_data.py
+# \file b2_shard_data.py
 # \brief Install shard data
 # \date 2009-02-18 16:19GMT
 # \author Jan Boon (Kaetemi)

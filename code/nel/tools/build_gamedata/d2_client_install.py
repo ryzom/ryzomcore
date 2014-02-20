@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # 
-# \file 7_client_install.py
+# \file d2_client_install.py
 # \brief Install to client install
 # \date 2009-02-18 16:19GMT
 # \author Jan Boon (Kaetemi)

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # 
-# \file 6_client_patch.py
+# \file d1_client_patch.py
 # \brief Install to client patch
 # \date 2009-02-18 16:19GMT
 # \author Jan Boon (Kaetemi)

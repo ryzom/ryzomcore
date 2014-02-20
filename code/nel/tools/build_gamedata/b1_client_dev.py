@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # 
-# \file 5_client_dev.py
+# \file b1_client_dev.py
 # \brief Install to client dev
 # \date 2009-02-18 16:19GMT
 # \author Jan Boon (Kaetemi)
