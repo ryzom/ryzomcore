@@ -1,0 +1,717 @@
+//-----------------------------------------------------------------------------
+// Common Definitions
+//-----------------------------------------------------------------------------
+
+// ---------------------------------
+// shard types & exe sets
+
+// mini ring -----------------------
+
+define exe_set_mini_ring
+	use raes
+	use ms_mini_ring
+	use ais_ring
+	use egs_ring
+	use dss_ring
+	use gpms_ring
+	use ios_ring
+	use rns_ring
+	use fes_solo
+	use ts_std
+	use rws_std
+	cfg NSHost="localhost";
+
+// mini mainland -------------------
+
+define exe_set_mini_mainland
+	use raes
+	use ms_mini_mainland
+	use ais_newbyland
+	use egs_mainland
+	use gpms_mainland
+	use ios_mainland
+	use rns_mainland
+	use fes_solo
+	use ts_std
+	use rws_std
+	cfg NSHost="localhost";
+
+
+// full ring -----------------------
+
+define exe_set_std_ring_be
+	use raes
+	use ms_std_ring
+	use ais_ring
+	use egs_ring
+	use dss_ring
+	use gpms_ring
+	use ios_ring
+	use rns_ring
+	use ts_std
+	use rws_std
+
+define exe_set_std_ring_fe
+	use raes
+	use ms_std_ring
+	use fes_std_pair01
+	use fes_std_pair02
+
+
+// full mainland -------------------
+
+define exe_set_std_mainland_fe
+	use raes
+	use ms_std_mainland
+	use exe_set_std_mainland_fe_basics
+
+define exe_set_std_mainland_fe_basics
+	use fes_std_pair01
+	use fes_std_pair02
+
+define exe_set_std_mainland_be01
+	use raes
+	use ms_std_mainland
+	use exe_set_std_mainland_be01_basics
+
+define exe_set_std_mainland_be01_basics
+	use egs_mainland
+	use gpms_mainland
+	use ios_mainland
+	use rns_mainland
+	use ts_std
+	use rws_std
+
+define exe_set_std_mainland_be02
+	use raes
+	use ms_std_mainland
+//	use exe_set_std_mainland_be02_basics
+
+define exe_set_std_mainland_be02_basics
+//	use ais_fyros
+//	use ais_zorai
+//	use ais_roots
+
+define exe_set_std_mainland_be03
+	use raes
+	use ms_std_mainland
+	use exe_set_std_mainland_be03_basics
+
+define exe_set_std_mainland_be03_basics
+//	use ais_matis
+//	use ais_tryker
+	use ais_newbyland
+
+// unifier and co ------------------
+
+define exe_set_mini_unifier
+	use raes
+	use su_mini
+
+define exe_set_std_unifier
+	use raes
+	use su_std
+	use mfs_std
+
+define exe_set_std_backup_master
+	use raes
+	use bms_master
+	use pdss
+
+define exe_set_std_backup_slave
+	use raes
+	use bms_slave
+	use pdss
+
+define exe_set_std_lgs_master
+	use lgs_master
+
+define exe_set_std_lgs_slave
+	use lgs_slave
+
+
+// ---------------------------------
+// standard data packs
+
+define common
+	cfg DontLog = 1;
+	data cfg
+//	data scripts
+
+define shard_common
+	use common
+	data data_common
+	data data_game_share
+	data data_leveldesign
+
+
+// ---------------------------------
+// executables
+
+// ais -----------------------------
+
+define ais
+	use shard_common
+	cfg #include "../live/service_ai_service/ai_service.cfg"
+	cfg WriteFilesDirectory= "../live/service_ai_service/";
+	cfgAfter GraphVars += {	"TickSpeedLoop", "0" };
+	cfgAfter GraphVars += {	"TickSpeedLoop", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "0" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "0" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "60000" };
+
+define ais_ring
+	name ais
+	cmdLine ai_service -C. -L. --nobreak --writepid -mCommon:Ring
+	use ais
+	data data_r2_desert
+	data data_r2_forest
+	data data_r2_jungle
+	data data_r2_lakes
+	data data_r2_roots
+
+define ais_mainland
+	use ais
+	data data_mainland_common_primitives
+	data data_newbieland_primitives
+	data data_newbieland
+	data data_indoors
+
+
+define ais_mini_mainland
+	name ais
+	cmdLine ai_service -C. -L. --nobreak --writepid -mCommon:Indoors:Newbieland:Post
+	use ais_mainland
+
+define ais_newbyland
+	name ais_newbyland
+	cmdLine ai_service -C. -L. --nobreak --writepid -mCommon:Indoors:Newbieland:Post
+	use ais
+	data data_mainland_common_primitives
+	data data_newbieland_primitives
+	data data_newbieland
+	data data_indoors
+
+
+// bms -----------------------------
+
+define bms
+	use common
+	data data_leveldesign
+//	cmdLine backup_module_service
+//	cfg #include "../live/cfg/backup_module_service.cfg"
+	cfg #include "../live/service_backup_service/backup_service.cfg"
+//	cfg #include "../live/cfg/backup_service.cfg"
+	cfg WriteFilesDirectory= "../live/service_backup_service/";
+
+define bms_master
+	use bms
+	cmdLine backup_service -C. -L. --nobreak --writepid -P49990
+	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfgAfter ListeningPort = 49990;
+	cfgAfter L3ListeningPort = 49950;
+	cfgAfter WebPort = 49970;
+	cfgAfter BSReadState = 1;
+	cfgAfter SaveShardRoot = "../save_shard/";
+
+define bms_master2
+	use bms
+	cmdLine backup_service -C. -L. --nobreak --writepid -P49994
+	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfgAfter ListeningPort = 49994;
+	cfgAfter L3ListeningPort = 49954;
+	cfgAfter WebPort = 49974;
+	cfgAfter BSReadState = 1;
+	cfgAfter SaveShardRoot = "../save_shard/";
+
+define bms_slave
+	use bms
+	cmdLine backup_service -C. -L. --nobreak --writepid -P49991
+	cfg #include "../live/cfg/backup_module_service_slave.cfg"
+	cfgAfter ListeningPort = 49991;
+	cfgAfter L3ListeningPort = 49951;
+	cfgAfter WebPort = 49971;
+	cfgAfter BSReadState = 0;
+	cfgAfter SaveShardRoot = "../save_shard/";
+
+define bms_pd_master
+	use bms
+	cmdLine backup_service -C. -L. --nobreak --writepid -P49992
+	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfgAfter ListeningPort = 49992;
+	cfgAfter L3ListeningPort = 49952;
+	cfgAfter WebPort = 49972;
+	cfgAfter BSReadState = 1;
+	cfgAfter SaveShardRoot = "../save_shard_pd/";
+
+define bms_pd_slave
+	use bms
+	cmdLine backup_service -C. -L. --nobreak --writepid -P49993
+	cfg #include "../live/cfg/backup_module_service_slave.cfg"
+	cfgAfter ListeningPort = 49993;
+	cfgAfter L3ListeningPort = 49953;
+	cfgAfter WebPort = 49973;
+	cfgAfter BSReadState = 0;
+	cfgAfter SaveShardRoot = "../save_shard_pd/";
+
+define backup_lgs
+	use bms
+	cmdLine backup_service -C. -L. --nobreak --writepid -P49994
+	//cfg #include "../live/cfg/backup_module_service_master.cfg"
+	cfgAfter ListeningPort = 49994;
+	cfgAfter L3ListeningPort = 49995;
+	cfgAfter WebPort = 49972;
+	cfgAfter BSReadState = 1;
+	cfgAfter SaveShardRoot = "../save_shard_lgs/";
+	cfgAfter UseTempFile = 0;
+
+// lgs -----------------------------
+define lgs
+	use common
+	data data_leveldesign
+
+	cmdLine logger_service -C. -L. --nobreak --writepid
+	cfg #include "../live/cfg/logger_service.cfg"
+
+    	cfg LogQueryResultFile = "log_query_result.txt";
+	cfg SaveFilesDirectory = "save_shard/";
+	cfg BSHost = LGSBSHost+":"+LGSBSPort;
+	cfg L3BSPort = LGSBSPort;
+	cfg DontUseNS = 1;
+	
+	cfgAfter StartCommands +=
+	cfgAfter {
+	cfgAfter	"moduleManager.createModule LoggerService ls",
+	cfgAfter	"moduleManager.createModule StandardGateway lgs_gw",
+	cfgAfter	"ls.plug lgs_gw",
+	cfgAfter	"lgs_gw.transportAdd L3Server l3s",
+    	cfgAfter	"lgs_gw.transportOptions l3s(PeerInvisible)",
+	cfgAfter	"lgs_gw.transportCmd l3s(open port="+ LGSL3Port +")",
+	cfgAfter };
+	cfgAfter SaveShardRoot = "../save_shard_lgs/";
+	cfgAfter SaveFilesDirectory = "../save_shard_lgs/";
+    
+define lgs_master
+	use lgs
+	cfg LGSL3Port = L3MasterLGSPort;
+
+
+define lgs_slave
+	use lgs
+	cfg LGSL3Port = L3SlaveLGSPort;
+
+
+// dss -----------------------------
+
+define dss
+	use shard_common
+	cmdLine dynamic_scenario_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_dynamic_scenario_service/dynamic_scenario_service.cfg"
+	cfg WriteFilesDirectory="../live/service_dynamic_scenario_service/";
+
+//define dss_mainland
+//	use dss
+//	cfg #include "../live/cfg/dynamic_scenario_service_mainland.cfg"
+
+define dss_ring
+	use dss
+	cfg #include "../live/cfg/dynamic_scenario_service_ring.cfg"
+
+
+// egs -----------------------------
+
+define egs
+	use shard_common
+	cmdLine entities_game_service -C. -L. --nobreak --writepid
+	data data_language
+	cfg #include "../live/service_entities_game_service/entities_game_service.cfg"
+	cfg PathsNoRecurse= {"."};
+	cfg WriteFilesDirectory="../live/service_entities_game_service/";
+	cfg NeverAggroPriv = ":OBSERVER:G:SG:GM:SGM:EM:";
+	cfg AlwaysInvisiblePriv = ":OBSERVER:EM:";
+	cfg TimeBeforeDisconnection = 300;
+	cfg 
+	cfg UsedContinents +=
+	cfg {
+	cfg 	"indoors",		"4",	// NB : this is for uninstanciated indoors building.
+	cfg 	"newbieland",	"20",
+	cfg };
+	cfg 
+	cfg // define the primitives configuration used.
+	cfg UsedPrimitives =
+	cfg {
+	cfg 	"newbieland_all",
+	cfg };
+	cfgAfter StartCommands += {
+	cfgAfter 	"moduleManager.createModule AnimSessionManager asm",
+	cfgAfter 	"asm.plug gw",
+	cfgAfter };
+	cfgAfter GraphVars += {	"NbPlayers", "60000" };
+	cfgAfter GraphVars += {	"CharacterLoadPerTick", "0" };
+	cfgAfter GraphVars += {	"CharacterLoadPerTick", "60000" };
+	cfgAfter GraphVars += {	"CharacterSavePerTick", "0" };
+	cfgAfter GraphVars += {	"CharacterSavePerTick", "60000" };
+	cfgAfter GraphVars += {	"TickSpeedLoop", "0" };
+	cfgAfter GraphVars += {	"TickSpeedLoop", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "0" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "0" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "60000" };
+	cfgAfter RingRPXPRequiredPerAction=700;
+	cfgAfter RingRPXPRequiredPerTimeSlice=700;
+
+
+define egs_mainland
+	use egs
+	data data_mainland_common_primitives
+	data data_newbieland_primitives
+	data data_newbieland
+	data data_indoors
+	//cfg #include "../live/cfg/entities_game_service_mainland.cfg"
+	cfg UsedContinents = { "dummy", "10000" };
+	cfgAfter MaxXPGainPerPlayer = 30.0;
+	cfgAfter DeathXPFactor = 0.1;
+	cfgAfter CachePrims = 1;
+	cfgAfter CorrectInvalidPlayerPositions = 1;
+
+define egs_ring
+	use egs
+	data data_mainland_common_primitives
+	data data_newbieland_primitives
+	data data_newbieland
+	data data_indoors
+	cfg #include "../live/cfg/entities_game_service_ring.cfg"
+	cfg UsedContinents = 
+	cfg {
+	cfg	"r2_desert", "10000",
+	cfg	"r2_forest", "10001",
+	cfg	"r2_jungle", "10002",
+	cfg	"r2_lakes",  "10003",
+	cfg	"r2_roots",  "10004",
+	cfg };
+	cfgAfter MaxXPGainPerPlayer = 30.0;
+	cfgAfter DeathXPFactor = 0.0;
+	cfgAfter CachePrims = 1;
+	cfgAfter CorrectInvalidPlayerPositions = 0;
+	cfgAfter RingRPEnabled = 0;
+
+
+// fes -----------------------------
+
+define fes
+	use shard_common
+	cmdLine frontend_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_frontend_service/frontend_service.cfg"
+	cfg WriteFilesDirectory="../live/service_frontend_service/";
+	cfgAfter GraphVars += {	"TickSpeedLoop", "0" };
+	cfgAfter GraphVars += {	"TickSpeedLoop", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "0" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "0" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "60000" };
+
+define fes_solo
+	use fes
+	use sbs
+	cfg FSUDPPort = 47860;
+
+define fes_std_pair01
+	use fes
+	use sbs
+	cfg FSUDPPort = 47851;
+
+define fes_std_pair02
+	use fes
+	use sbs
+	cfg FSUDPPort = 47852;
+
+define fes_std_pair03
+	use fes
+	use sbs
+	cfg FSUDPPort = 47853;
+
+define fes_std_pair04
+	use fes
+	use sbs
+	cfg FSUDPPort = 47854;
+
+
+// gpms ----------------------------
+
+define gpms
+	use shard_common
+	cmdLine gpm_service -C. -L. --nobreak --writepid
+	data data_pacs_prim
+	cfg #include "../live/service_gpm_service/gpm_service.cfg"
+	cfg WriteFilesDirectory="../live/service_gpm_service/";
+	cfgAfter GraphVars += {	"TickSpeedLoop", "0" };
+	cfgAfter GraphVars += {	"TickSpeedLoop", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "0" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "0" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackCount", "60000" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "0" };
+	cfgAfter GraphVars += {	"MirrorCallbackTime", "60000" };
+
+define gpms_mainland
+	use gpms
+	data data_newbieland
+	data data_indoors
+	cfg #include "../live/cfg/gpm_service_mainland.cfg"
+
+define gpms_ring
+	use gpms
+	data data_r2_desert
+	data data_r2_forest
+	data data_r2_jungle
+	data data_r2_lakes
+	data data_r2_roots
+	cfg #include "../live/cfg/gpm_service_ring.cfg"
+
+
+// pdss ----------------------------
+
+define pdss
+	name pdss
+	use common
+	data data_leveldesign
+	cmdLine pd_support_service -C. -L. --nobreak --writepid
+	cfg
+	cfg NSHost="localhost";
+	cfg
+	cfg HourlyCommands =
+	cfg {
+	cfg	"system /srv/core/bin/hourly_script.sh",
+	cfg };
+	cfg
+	cfg DailyCommands =
+	cfg {
+	cfg	"system /srv/core/bin/daily_script.sh",
+	cfg
+	cfg	"fdcCacheClear",
+	cfg	"fdcCacheAddFileSpecRecurse /srv/core/save_shard_backups/latest/characters/account_*_?_pdr.bin",
+	cfg
+	cfg	"JobUpdatesPerUpdate 10",
+	cfg };
+	cfg
+	cfg InputFileDirectory="/srv/core/save_shard_backups/latest/characters/";
+	cfg OutputFileDirectory="../stats/";
+	cfg ScriptDirectory="../live/service_pd_support_service/scripts/";
+	cfg DontUseNS=1;
+	cfg DontUseTS=1;
+	cfg DontUseAES=1;
+
+
+// ios -----------------------------
+
+define ios
+	use shard_common
+	cmdLine input_output_service -C. -L. --nobreak --writepid
+	data data_language
+	cfg #include "../live/service_input_output_service/input_output_service.cfg"
+	cfg WriteFilesDirectory="../live/service_input_output_service/";
+	cfgAfter VerboseStringManager = 0;
+	cfgAfter VerboseStringManagerParser = 0;
+	cfgAfter VerboseChat = 0;
+	cfgAfter VerboseChatManagement = 0;
+	cfgAfter VerboseNameTranslation = 0;
+	cfgAfter // Create a char name mapper
+	cfgAfter StartCommands +=
+	cfgAfter {
+	cfgAfter 	"moduleManager.createModule CharNameMapper cnm",
+	cfgAfter 	"cnm.plug gw",
+	cfgAfter 	"moduleManager.createModule IOSRingModule iosrm",
+	cfgAfter 	"iosrm.plug gw",
+	cfgAfter };
+
+
+define ios_mainland
+	use ios
+	//cfg #include "../live/cfg/input_output_service_mainland.cfg"
+
+define ios_ring
+	use ios
+	cfg #include "../live/cfg/input_output_service_ring.cfg"
+
+
+// las -----------------------------
+
+define las
+	use common
+	cmdLine log_analyser_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_log_analyser_service/log_analyser_service.cfg"
+	cfg WriteFilesDirectory="../";
+
+
+// mfs -----------------------------
+
+define mfs
+	use common
+	cmdLine mail_forum_service -C. -L. --nobreak --writepid
+	data data_www
+	cfg #include "../live/service_mail_forum_service/mail_forum_service.cfg"
+	cfg WriteFilesDirectory="../live/service_mail_forum_service/";
+
+define mfs_std
+	use mfs
+
+
+// mos -----------------------------
+
+define mos
+	use shard_common
+	cmdLine monitor_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_monitor_service/monitor_service.cfg"
+	cfg WriteFilesDirectory="../live/service_monitor_service/";
+
+
+// ms ------------------------------
+
+define ms
+	use shard_common
+	cmdLine mirror_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_mirror_service/mirror_service.cfg"
+	cfg WriteFilesDirectory="../live/service_mirror_service/";
+	cfgAfter GraphVars += {	"UserSpeedLoop", "0" };
+	cfgAfter GraphVars += {	"UserSpeedLoop", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "0" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "0" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "60000" };
+
+define ms_mini_ring
+	use ms
+
+define ms_mini_mainland
+	use ms
+
+define ms_std_ring
+	use ms
+
+define ms_std_mainland
+	use ms
+
+
+// raes -----------------------------
+
+define raes
+	cmdLine none
+	data service_ryzom_admin_service
+
+
+// ras -----------------------------
+
+define ras
+	use common
+	data data_www
+	cmdLine ryzom_admin_service --fulladminname=ryzom_admin_service --shortadminname=AS -C. -L. --nobreak --writepid
+	cfg #include "../live/service_ryzom_admin_service/ryzom_as.cfg"
+	cfg WriteFilesDirectory="../";
+
+
+// rns ------------------------------
+
+define rns
+	use common
+	cmdLine ryzom_naming_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_ryzom_naming_service/naming_service.cfg"
+	cfg WriteFilesDirectory="../live/service_ryzom_naming_service/";
+
+define rns_ring
+	use rns
+
+define rns_mainland
+	use rns
+
+
+// rws ------------------------------
+
+define rws
+	use common
+	cmdLine ryzom_welcome_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_ryzom_welcome_service/welcome_service.cfg"
+	cfg WriteFilesDirectory="../live/service_ryzom_welcome_service/";
+
+define rws_std
+	use rws
+
+// sbs ------------------------------
+
+define sbs
+	use common
+	cmdLine session_browser_server -C. -L. --nobreak --writepid
+	cfg SBSPort = FSUDPPort+1000;
+	cfg WriteFilesDirectory="../live/service_session_browser_server/";
+	cfg DontUseNS = 0;
+	cfg StartCommands += 
+	cfg {
+	cfg		"moduleManager.createModule SessionBrowserServerMod sbs suAddr="+SUHost+":49999 listenPort="+SBSPort+" ring_db(host="+DBHost+" user="+DBRingUser+" password="+DBRingPass+" base="+DBRingName+")",
+	cfg		"sbs.plug gw",
+	cfg };
+	cfgAfter GraphVars += {	"NetSpeedLoop", "0" };
+	cfgAfter GraphVars += {	"NetSpeedLoop", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "0" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "0" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "60000" };
+
+
+define sbs_std
+	use sbs
+
+// su ------------------------------
+
+define su
+	use common
+	cmdLine shard_unifier_service -C. -L. --nobreak --writepid
+	data data_www
+	cfg #include "../live/service_shard_unifier_service/shard_unifier_service.cfg"
+	cfg WriteFilesDirectory="../live/service_shard_unifier_service/";
+	cfgAfter // Create a command executor
+	cfgAfter StartCommands +=
+	cfgAfter {
+	cfgAfter 	"moduleManager.createModule CommandExecutor ce",
+	cfgAfter 	"ce.plug gw",
+//	cfgAfter	"addNegativeFilterDebug NOPE",
+	cfgAfter };
+	cfgAfter GraphVars += {	"TotalConcurentUser", "60000" };
+	cfgAfter GraphVars += {	"NetSpeedLoop", "0" };
+	cfgAfter GraphVars += {	"NetSpeedLoop", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "0" };
+	cfgAfter GraphVars += {	"L5CallbackCount", "60000" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "0" };
+	cfgAfter GraphVars += {	"L5CallbackTime", "60000" };
+	
+
+define su_std
+	use su
+
+define su_mini
+	use su
+
+
+// ts ------------------------------
+
+define ts
+	use shard_common
+	cmdLine tick_service -C. -L. --nobreak --writepid
+	cfg #include "../live/service_tick_service/tick_service.cfg"
+	cfg WriteFilesDirectory="../live/service_tick_service/";
+
+define ts_std
+	use ts

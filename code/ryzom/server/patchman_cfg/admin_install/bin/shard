@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd /srv/core/mini01
+/bin/sh /srv/core/bin/ryzom_domain_screen_wrapper.sh $*
