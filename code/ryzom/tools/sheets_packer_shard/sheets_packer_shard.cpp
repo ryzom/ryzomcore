@@ -124,8 +124,9 @@ int main(int nNbArg, char **ppArgs)
 		// Used by mirror_service.cpp
 		// Used by range_mirror_manager.cpp
 		// Used by mirror.cpp
-		TSDataSetSheets sDataSetSheets;
-		loadForm("dataset", exportDir + "/datasets.packed_sheets", sDataSetSheets);
+		// TSDataSetSheets sDataSetSheets;
+		// loadForm("dataset", exportDir + "/datasets.packed_sheets", sDataSetSheets);
+		// FIXME: Somehow mirror.cpp overwrites the packed_sheets with an empty one... (the other cpp's don't do this, though.)
 	}
 
 	// IOS
