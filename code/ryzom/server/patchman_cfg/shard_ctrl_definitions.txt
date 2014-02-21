@@ -336,17 +336,6 @@ define egs
 	cfg AlwaysInvisiblePriv = ":OBSERVER:EM:";
 	cfg TimeBeforeDisconnection = 300;
 	cfg 
-	cfg UsedContinents +=
-	cfg {
-	cfg 	"indoors",		"4",	// NB : this is for uninstanciated indoors building.
-	cfg 	"newbieland",	"20",
-	cfg };
-	cfg 
-	cfg // define the primitives configuration used.
-	cfg UsedPrimitives =
-	cfg {
-	cfg 	"newbieland_all",
-	cfg };
 	cfgAfter StartCommands += {
 	cfgAfter 	"moduleManager.createModule AnimSessionManager asm",
 	cfgAfter 	"asm.plug gw",
@@ -377,7 +366,6 @@ define egs_mainland
 	data data_newbieland
 	data data_indoors
 	//cfg #include "../live/cfg/entities_game_service_mainland.cfg"
-	cfg UsedContinents = { "dummy", "10000" };
 	cfgAfter MaxXPGainPerPlayer = 30.0;
 	cfgAfter DeathXPFactor = 0.1;
 	cfgAfter CachePrims = 1;
