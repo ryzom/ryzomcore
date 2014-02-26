@@ -22,6 +22,6 @@ $RingDBPassword = "";
 // (in nel.user, nel.permission, ring.ring_user and ring.characters
 $AcceptUnknownUser = false;
 // if true, the login service automaticaly create a ring user and a editor character if needed
-$AutoCreateRingInfo = false;
+$AutoCreateRingInfo = true;
 
 ?>

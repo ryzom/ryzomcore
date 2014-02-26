@@ -1696,6 +1696,8 @@
 
                 INSERT INTO `shard` (`shard_id`, `WSOnline`, `MOTD`, `OldState`, `RequiredState`) VALUES
                 (302, 1, 'Shard up', 'ds_restricted', 'ds_open');
+                
+                INSERT INTO `sessions` (`session_id`, `session_type`, `title`, `owner`, `plan_date`, `start_date`, `description`, `orientation`, `level`, `rule_type`, `access_type`, `state`, `host_shard_id`, `subscription_slots`, `reserved_slots`, `free_slots`, `estimated_duration`, `final_duration`, `folder_id`, `lang`, `icone`, `anim_mode`, `race_filter`, `religion_filter`, `guild_filter`, `shard_filter`, `level_filter`, `subscription_closed`, `newcomer`) VALUES (302, 'st_mainland', 'open shard mainland', 0, '2005-09-21 12:41:33', '2005-08-31 00:00:00', '', 'so_other', 'sl_a', 'rt_strict', 'at_public', 'ss_planned', 0, 0, 0, 0, 'et_short', 0, 0, 'lang_en', '', 'am_dm', 'rf_fyros,rf_matis,rf_tryker,rf_zorai', 'rf_kami,rf_karavan,rf_neutral', 'gf_any_player', '', 'lf_a,lf_b,lf_c,lf_d,lf_e,lf_f', 0, 0);
 
             GRANT ALL ON `" . $cfg['db']['ring']['name'] ."`.* TO `" . $cfg['db']['ring']['user'] ."`@".$cfg['db']['ring']['host']." identified by '".$cfg['db']['ring']['pass']."';
             ";
