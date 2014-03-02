@@ -8,4 +8,3 @@ mini01_bridge ep1.mini01.ryzomcore.org
 // std01 - std manager
 
 std01_spm ep1.std01.ryzomcore.org
-std01_bridge ep1.std01.ryzomcore.org
