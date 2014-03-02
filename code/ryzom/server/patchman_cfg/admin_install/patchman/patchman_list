@@ -1,6 +1,23 @@
 // default values for different sites
 
-mini01 mini01.ryzomcore.org
 mini01 ep1.mini01.ryzomcore.org
-std01 std01.ryzomcore.org
-std01 core.ryzomcore.org
+std01 ep1.std01.ryzomcore.org
+std01 su1.std01.ryzomcore.org
+std01 pd1.std01.ryzomcore.org
+std01 pd2.std01.ryzomcore.org
+std01 pd3.std01.ryzomcore.org
+std01 pd4.std01.ryzomcore.org
+std01 mla1.std01.ryzomcore.org
+std01 mla2.std01.ryzomcore.org
+std01 mla3.std01.ryzomcore.org
+std01 mla4.std01.ryzomcore.org
+std01 mla5.std01.ryzomcore.org
+std01 mlb1.std01.ryzomcore.org
+std01 mlb2.std01.ryzomcore.org
+std01 mlb3.std01.ryzomcore.org
+std01 mlb4.std01.ryzomcore.org
+std01 mlb5.std01.ryzomcore.org
+std01 rra1.std01.ryzomcore.org
+std01 rra2.std01.ryzomcore.org
+std01 rrb1.std01.ryzomcore.org
+std01 rrb2.std01.ryzomcore.org
