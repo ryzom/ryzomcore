@@ -91,7 +91,7 @@ define shard_exe_set_std01_ras
 define shard_exe_set_std01_unifier
 	use exe_set_std_unifier
 	host su1.std01.ryzomcore.org
-	cfg DBPass = "p4ssw0rd";
+	cfg DBPass = DBNelPass;
 
 
 // shard mainland01 ----------------

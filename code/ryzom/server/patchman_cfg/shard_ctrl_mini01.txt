@@ -83,7 +83,7 @@ define shard_mini01_unifier
 	use exe_set_std_lgs_master
 	use exe_set_std_lgs_slave
 	use backup_lgs
-	cfg DBPass = "p4ssw0rd";
+	cfg DBPass = DBNelPass;
 	host ep1.mini01.ryzomcore.org
 
 
