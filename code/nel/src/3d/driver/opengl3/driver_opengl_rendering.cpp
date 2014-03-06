@@ -36,9 +36,6 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
 		return false;
 
-	if( !setupProgram( mat ) )
-		return false;
-
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
 	//==============================
@@ -86,9 +83,6 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 
 	// setup material
 	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
-		return false;
-
-	if( !setupProgram( mat ) )
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -179,9 +173,6 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	if ( !setupMaterial(mat) )
 		return false;
 
-	if( !setupProgram( mat ) )
-		return false;
-
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
 	//==============================
@@ -222,9 +213,6 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	if ( !setupMaterial(mat) )
 		return false;
 
-	if( !setupProgram( mat ) )
-		return false;
-
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
 	// render primitives.
 	//==============================
@@ -263,9 +251,6 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 
 	// setup material
 	if ( !setupMaterial(mat) )
-		return false;
-
-	if( !setupProgram( mat ) )
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -309,9 +294,6 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 
 	// setup material
 	if ( !setupMaterial(mat) )
-		return false;
-
-	if( !setupProgram( mat ) )
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;

@@ -482,7 +482,10 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		disableUserTextureMatrix();
 	}
 
-	return true;
+	// 5. Set up the program
+	// =====================
+	bool programOK = setupProgram( mat );
+	return programOK;
 }
 
 // ***************************************************************************
