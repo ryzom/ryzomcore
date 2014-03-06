@@ -584,8 +584,10 @@ namespace NL3D
 
 		generateShaderDesc( desc, mat );
 
+		// See if we've already generated and compiled this shader
 		sp = shaderCache.findShader( desc );
 
+		// Yes we have!
 		if( !sp.empty() )
 		{
 			if( currentProgram.vp == NULL )
@@ -600,55 +602,62 @@ namespace NL3D
 					return false;
 			}
 		}
+		// No we need to generate it now
 		else
 		{
 			std::string vs;
 			std::string ps;
+			bool cacheShaders = true;
 
 			shaderGenerator->reset();
 			shaderGenerator->setMaterial( &mat );
 			shaderGenerator->setVBFormat( _CurrentVertexBufferHard->VB->getVertexFormat() );
 			shaderGenerator->setShaderDesc( &desc );
-			shaderGenerator->generateVS( vs );
-			shaderGenerator->generatePS( ps );
-
-			vp = new CVertexProgram();
-			{
-				IProgram::CSource *src = new IProgram::CSource();
-				src->Profile = IProgram::glsl330v;
-				src->DisplayName = "";
-				src->setSource( vs );
-				vp->addSource( src );
-			}
-
-			if( !compileVertexProgram( vp ) )
-			{
-				delete vp;
-				vp = NULL;
-				return false;
-			}
-		
-			pp = new CPixelProgram();
-			{
-				IProgram::CSource *src = new IProgram::CSource();
-				src->Profile = IProgram::glsl330f;
-				src->DisplayName = "";
-				src->setSource( ps );
-				pp->addSource( src );
-			}
 			
-			if( !compilePixelProgram( pp ) )
-			{
-				delete vp;
-				vp = NULL;
-				delete pp;
-				pp = NULL;
-				return false;
-			}
-
+			// If we don't already have a vertex program attached, we'll generate it now
 			if( currentProgram.vp == NULL )
 			{
+				shaderGenerator->generateVS( vs );
+				vp = new CVertexProgram();
+				{
+					IProgram::CSource *src = new IProgram::CSource();
+					src->Profile = IProgram::glsl330v;
+					src->DisplayName = "";
+					src->setSource( vs );
+					vp->addSource( src );
+				}
+
+				if( !compileVertexProgram( vp ) )
+				{
+					delete vp;
+					vp = NULL;
+					return false;
+				}
+
 				if( !activeVertexProgram( vp ) )
+				{
+					delete vp;
+					vp = NULL;
+					return false;
+				}
+			}
+			else
+				cacheShaders = false;
+		
+			// If we don't already have a pixel program attached, we'll generate it now
+			if( currentProgram.pp == NULL )
+			{
+				shaderGenerator->generatePS( ps );
+				pp = new CPixelProgram();
+				{
+					IProgram::CSource *src = new IProgram::CSource();
+					src->Profile = IProgram::glsl330f;
+					src->DisplayName = "";
+					src->setSource( ps );
+					pp->addSource( src );
+				}
+			
+				if( !compilePixelProgram( pp ) )
 				{
 					delete vp;
 					vp = NULL;
@@ -656,10 +665,7 @@ namespace NL3D
 					pp = NULL;
 					return false;
 				}
-			}
 
-			if( currentProgram.pp == NULL )
-			{
 				if( !activePixelProgram( pp ) )
 				{
 					delete vp;
@@ -669,11 +675,18 @@ namespace NL3D
 					return false;
 				}
 			}
-			
-			sp.vp = vp;
-			sp.pp = pp;
-			desc.setShaders( sp );
-			shaderCache.cacheShader( desc );
+			else
+				cacheShaders = false;
+
+		
+			// If we already have a shader attached we won't cache this shaderpair, since we didn't generate it
+			if( cacheShaders )
+			{
+				sp.vp = vp;
+				sp.pp = pp;
+				desc.setShaders( sp );
+				shaderCache.cacheShader( desc );
+			}
 		}
 
 		setupUniforms();
