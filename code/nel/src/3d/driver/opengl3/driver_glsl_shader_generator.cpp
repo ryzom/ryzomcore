@@ -1374,7 +1374,7 @@ namespace NL3D
 		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
 		ss << "vec4 texel1 = textureCube( sampler1, cubeTexCoords );" << std::endl;
 		ss << "vec4 texel;" << std::endl;
-		ss << "texel.rgb = texel0.rgb * diffuseColor;" << std::endl;
+		ss << "texel.rgb = texel0.rgb * diffuseColor.rgb;" << std::endl;
 		ss << "texel.a = texel0.a;" << std::endl;
 		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
 		ss << "texel.a = texel1.a;" << std::endl;
