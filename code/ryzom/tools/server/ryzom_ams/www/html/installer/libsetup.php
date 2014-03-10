@@ -6,28 +6,28 @@
     */
 
     //set permissions
-    if(chmod('../../../www/login/logs', 0660)) {
-        echo "failed to set permissions on logs";
+    if(writable('../../../www/login/logs')) {
+        echo "failed to get write permissions on logs";
         exit;
     }
-    if(chmod('../../../admin/graphs_output', 0660)) {
-        echo "failed to set permissions on graphs_output";
+    if(writable('../../../admin/graphs_output')) {
+        echo "failed to get write permissions on graphs_output";
         exit;
     }
-    if(chmod('../../../templates/default_c', 0660)) {
-        echo "failed to set permissions on default_c";
+    if(writable('../../../templates/default_c')) {
+        echo "failed to get write permissions on default_c";
         exit;
     }
-    if(chmod('../../www', 0660)) {
-        echo "failed to set permissions on www";
+    if(writable('../../www')) {
+        echo "failed to get write permissions on www";
         exit;
     }
-    if(chmod('../../www/html/cache', 0660)) {
-        echo "failed to set permissions on cache";
+    if(writable('../../www/html/cache')) {
+        echo "failed to get write permissions on cache";
         exit;
     }
-    if(chmod('../../www/html/templates_c', 0660)) {
-        echo "failed to set permissions on templates_c";
+    if(writable('../../www/html/templates_c')) {
+        echo "failed to get write permissions on templates_c";
         exit;
     }
     
