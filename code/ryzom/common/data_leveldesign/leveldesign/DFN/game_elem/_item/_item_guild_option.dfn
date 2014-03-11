@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="Type" Type="Type" Filename="item_guild_option_type.typ"/>
-  <ELEMENT Name="Money Cost" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="Guild XP Cost" Type="Type" Filename="int.typ"/>
-  <LOG>Mon Mar 15 14:19:49 2004 (nouveau) Dfn Structure = 
-Mon Mar 15 17:54:19 2004 (nouveau) Dfn Structure = </LOG>
-</DFN>

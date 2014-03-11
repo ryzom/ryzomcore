@@ -2291,6 +2291,21 @@ void CCharacterCL::endAnimTransition()
 	// If the next mode in the automaton != Current Mode
 	if(_CurrentState->NextMode != _Mode)
 	{
+		// Undo previous behaviour
+		switch(_Mode)
+		{
+		case MBEHAV::DEATH:
+			// Restore collisions.
+			if(_Primitive)
+			{
+				// TODO: Without this dynamic cast
+				if(dynamic_cast<CPlayerCL *>(this))
+					_Primitive->setOcclusionMask(MaskColPlayer);
+				else
+					_Primitive->setOcclusionMask(MaskColNpc);
+			}
+			break;
+		}
 		if(ClientCfg.UsePACSForAll && _Primitive)
 			_Primitive->setCollisionMask(MaskColNone);
 		//// AJOUT ////

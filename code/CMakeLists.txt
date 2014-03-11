@@ -41,10 +41,8 @@ INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
 
-# Specify Mac OS X deployment target before including Darwin.cmake
-IF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-  SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
-ENDIF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+# To be able to specify a different deployment target on Mac OS X :
+# export MACOSX_DEPLOYMENT_TARGET=10.6
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)

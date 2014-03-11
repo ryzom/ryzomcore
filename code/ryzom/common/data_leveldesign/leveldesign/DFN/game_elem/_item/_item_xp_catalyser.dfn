@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="IsRing" Type="Type" Filename="boolean.typ" Default="false"/>
-  <ELEMENT Name="Xp Bonus" Type="Type" Filename="int.typ" Default="100"/>
-  <LOG>Tue Sep 19 10:47:45 2006 (coutelas) Dfn Structure = </LOG>
-</DFN>

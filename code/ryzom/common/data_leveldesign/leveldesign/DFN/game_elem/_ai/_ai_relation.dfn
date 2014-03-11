@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.2" State="modified">
-  <ELEMENT Name="Name" Type="Type" Filename="filename.typ"/>
-  <ELEMENT Name="Weight" Type="Type" Filename="float.typ" Default="0.0"/>
-  <LOG>Mon Jul 22 17:02:37 2002 (chafik) Dfn Structure = 
-Tue Jul 23 11:25:57 2002 (chafik) Dfn Structure = </LOG>
-</DFN>

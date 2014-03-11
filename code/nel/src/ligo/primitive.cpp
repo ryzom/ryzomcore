@@ -139,7 +139,7 @@ bool ReadFloat (const char *propName, float &result, const char *filename, xmlNo
 	string value;
 	if (GetPropertyString (value, filename, xmlNode, propName))
 	{
-		result = (float)atof (value.c_str ());
+		NLMISC::fromString(value, result);
 		return true;
 	}
 	return false;

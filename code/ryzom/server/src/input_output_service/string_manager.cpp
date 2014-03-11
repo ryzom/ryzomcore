@@ -246,60 +246,6 @@ void CStringManager::clearCache(NLMISC::CLog *log)
 
 
 
-// load the values using the george sheet
-void CStringManager::TSheetInfo::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId)
-{
-	if (form)
-	{
-		SheetName = sheetId.toString();
-
-		std::string ext = NLMISC::CSheetId::fileExtensionFromType(sheetId.getSheetType());
-
-		SheetName = SheetName.substr(0, SheetName.find(ext));
-		// remove ending '.'
-		if (!SheetName.empty() && *SheetName.rbegin() == '.')
-			SheetName.resize(SheetName.size()-1);
-
-		std::string gender;
-
-		if (sheetId.getSheetType() == NLMISC::CSheetId::typeFromFileExtension("creature"))
-		{
-			form->getRootNode ().getValueByName (gender, "Basics.Gender");
-			sint genderId;
-			NLMISC::fromString(gender, genderId);
-			Gender = GSGENDER::EGender(genderId);
-
-			form->getRootNode ().getValueByName (Race, "Basics.Race");
-
-//			form->getRootNode ().getValueByName (DisplayName, "Basics.First Name");
-//			std::string s;
-//			form->getRootNode ().getValueByName (s, "Basics.CharacterName");
-//			if (!DisplayName.empty())
-//				DisplayName+=' ';
-//			DisplayName+=s;
-
-			form->getRootNode ().getValueByName (Profile, "Basics.Profile");
-			form->getRootNode ().getValueByName (ChatProfile, "Basics.ChatProfile");
-		}
-		else if (sheetId.getSheetType() == NLMISC::CSheetId::typeFromFileExtension("race_stats"))
-		{
-			form->getRootNode ().getValueByName (Race, "Race");
-		}
-/*		else if (sheetId.getType() == NLMISC::CSheetId::typeFromFileExtension("sitem"))
-		{
-			// read any item specific data
-		}
-*/		else
-		{
-			nlwarning("CStringManager::TEntityInfo : Do not know the type of the sheet '%s'.", sheetId.toString().c_str());
-			return;
-		}
-	}
-}
-
-
-
-
 const CStringManager::CEntityWords &CStringManager::getEntityWords(TLanguages lang, STRING_MANAGER::TParamType type) const
 {
 	nlassert(lang < NB_LANGUAGES);
@@ -966,7 +912,7 @@ uint32	CStringManager::translateTitle(const std::string  &title, TLanguages lang
 {
 	const std::string colName("name");
 	const CStringManager::CEntityWords &ew = getEntityWords(language, STRING_MANAGER::title);
-	std::string rowName = NLMISC::strlwr(title);
+	std::string rowName = NLMISC::toLower(title);
 	uint32 stringId;
 	stringId = ew.getStringId(rowName, colName);
 

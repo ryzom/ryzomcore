@@ -107,6 +107,7 @@ struct SExportOptions
 	
 	
 	// Options not saved
+	std::string				ZoneRegionFile;
 	NLLIGO::CZoneRegion		*ZoneRegion; // The region to make
 	float					CellSize;
 	float					Threshold;

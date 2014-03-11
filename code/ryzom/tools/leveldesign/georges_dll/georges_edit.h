@@ -99,9 +99,6 @@ public:
 	// If true, expand document's content node at loading
 	bool			StartExpanded;
 
-	// Georges for CVS
-	bool			Georges4CVS;
-
 	// Clipboards ID
 	UINT			FormClipBoardFormatStruct;
 	UINT			FormClipBoardFormatVirtualStruct;

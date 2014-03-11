@@ -1446,7 +1446,7 @@ bool CExportNel::mirrorPhysiqueSelection(INode &node, TimeValue tvTime, const st
 
 				// Delete the triObject if we should...
 				if (deleteIt)
-					tri->MaybeAutoDelete();
+					tri->DeleteThis();
 				tri = NULL;
 
 				// ok!

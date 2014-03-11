@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="Modifier" Type="Type" Filename="formulae.typ"/>
-  <LOG>Mon Feb 03 13:58:09 2003 (brigand) Dfn Structure = 
-Mon Feb 03 13:59:51 2003 (brigand) Dfn Structure = </LOG>
-</DFN>

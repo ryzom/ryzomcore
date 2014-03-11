@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="list" Type="Type" Filename="filename.typ" Array="true"/>
-  <LOG>Tue Dec 10 17:27:40 2002 (puzin) Dfn Structure = 
-Tue Dec 10 17:32:06 2002 (puzin) Dfn Structure = </LOG>
-</DFN>

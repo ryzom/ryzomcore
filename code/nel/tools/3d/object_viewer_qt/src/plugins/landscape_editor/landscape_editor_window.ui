@@ -19,12 +19,42 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>3</number>
+    </property>
+    <property name="spacing">
+     <number>3</number>
+    </property>
     <item row="0" column="0">
-     <widget class="QGraphicsView" name="graphicsView"/>
+     <widget class="LandscapeEditor::LandscapeView" name="graphicsView">
+      <property name="sceneRect">
+       <rectf>
+        <x>0.000000000000000</x>
+        <y>0.000000000000000</y>
+        <width>0.000000000000000</width>
+        <height>0.000000000000000</height>
+       </rectf>
+      </property>
+      <property name="dragMode">
+       <enum>QGraphicsView::NoDrag</enum>
+      </property>
+      <property name="transformationAnchor">
+       <enum>QGraphicsView::AnchorUnderMouse</enum>
+      </property>
+      <property name="resizeAnchor">
+       <enum>QGraphicsView::AnchorUnderMouse</enum>
+      </property>
+      <property name="viewportUpdateMode">
+       <enum>QGraphicsView::FullViewportUpdate</enum>
+      </property>
+      <property name="optimizationFlags">
+       <set>QGraphicsView::DontSavePainterState</set>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="toolBar">
+  <widget class="QToolBar" name="fileToolBar">
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -35,7 +65,177 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QDockWidget" name="zonesDockWidget">
+   <property name="windowIcon">
+    <iconset resource="landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_zones.png</normaloff>:/icons/ic_nel_zones.png</iconset>
+   </property>
+   <property name="windowTitle">
+    <string>Zones</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="LandscapeEditor::ListZonesWidget" name="zoneListWidget"/>
+  </widget>
+  <widget class="QDockWidget" name="landscapesDockWidget">
+   <property name="windowIcon">
+    <iconset resource="landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_zone.png</normaloff>:/icons/ic_nel_zone.png</iconset>
+   </property>
+   <property name="windowTitle">
+    <string>Landscapes</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <property name="margin">
+      <number>3</number>
+     </property>
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QListWidget" name="landscapesListWidget"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="zoneToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="transitionModeAction"/>
+   <addaction name="enableGridAction"/>
+   <addaction name="projectSettingsAction"/>
+   <addaction name="snapshotAction"/>
+  </widget>
+  <action name="projectSettingsAction">
+   <property name="icon">
+    <iconset resource="landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_landscape_settings.png</normaloff>:/icons/ic_nel_landscape_settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Project settings</string>
+   </property>
+  </action>
+  <action name="enableGridAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="landscape_editor.qrc">
+     <normaloff>:/icons/ic_grid.png</normaloff>:/icons/ic_grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>EnableGrid</string>
+   </property>
+   <property name="toolTip">
+    <string>Show/Hide Grid</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="snapshotAction">
+   <property name="icon">
+    <iconset resource="landscape_editor.qrc">
+     <normaloff>:/icons/ic_snapshot.png</normaloff>:/icons/ic_snapshot.png</iconset>
+   </property>
+   <property name="text">
+    <string>snapshot</string>
+   </property>
+  </action>
+  <action name="saveAction">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="setActiveLandAction">
+   <property name="icon">
+    <iconset resource="landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_zone.png</normaloff>:/icons/ic_nel_zone.png</iconset>
+   </property>
+   <property name="text">
+    <string>Set active</string>
+   </property>
+   <property name="toolTip">
+    <string>Set active selected landscape</string>
+   </property>
+  </action>
+  <action name="saveLandAction">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save selected landscape</string>
+   </property>
+  </action>
+  <action name="saveAsLandAction">
+   <property name="text">
+    <string>Save As landscape</string>
+   </property>
+   <property name="toolTip">
+    <string>Save as selected landscape</string>
+   </property>
+  </action>
+  <action name="deleteLandAction">
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete selected landscape</string>
+   </property>
+  </action>
+  <action name="newLandAction">
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="toolTip">
+    <string>Create new landscape</string>
+   </property>
+  </action>
+  <action name="transitionModeAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="landscape_editor.qrc">
+     <normaloff>:/icons/ic_nel_landscape_item.png</normaloff>
+     <normalon>:/icons/ic_nel_transition_land.png</normalon>:/icons/ic_nel_landscape_item.png</iconset>
+   </property>
+   <property name="text">
+    <string>Transition mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable transition mode</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LandscapeEditor::ListZonesWidget</class>
+   <extends>QWidget</extends>
+   <header>list_zones_widget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LandscapeEditor::LandscapeView</class>
+   <extends>QGraphicsView</extends>
+   <header>landscape_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="landscape_editor.qrc"/>
  </resources>

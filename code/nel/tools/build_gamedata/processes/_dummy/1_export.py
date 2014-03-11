@@ -99,7 +99,7 @@ if MaxAvailable:
 	#	sDst.close()
 	#	while tagDiff > 0:
 	#		printLog(log, "MAXSCRIPT " + scriptDst)
-	#		subprocess.call([ Max, "-U", "MAXScript", "dummy_export.ms", "-q", "-mi", "-vn" ])
+	#		subprocess.call([ Max, "-U", "MAXScript", "dummy_export.ms", "-q", "-mi", "-mip" ])
 	#		tagList = findFiles(log, outDirTag, "", ".tag")
 	#		newTagLen = len(tagList)
 	#		tagDiff = newTagLen - tagLen

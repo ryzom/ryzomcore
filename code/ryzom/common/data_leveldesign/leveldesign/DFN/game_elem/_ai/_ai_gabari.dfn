@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.2" State="modified">
-  <ELEMENT Name="X" Type="Type" Filename="float.typ"/>
-  <ELEMENT Name="Y" Type="Type" Filename="float.typ"/>
-</DFN>

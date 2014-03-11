@@ -57,6 +57,7 @@ printLog(log, ">>> Setup export directories <<<")
 # Setup build directories
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + SheetsBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + VisualSlotTabBuildDirectory)
 
 # Setup client directories
 printLog(log, ">>> Setup client directories <<<")

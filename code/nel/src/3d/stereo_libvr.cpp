@@ -612,6 +612,7 @@ void CStereoLibVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 		deviceInfoOut.Factory = static_cast<IStereoDeviceFactory *>(handle);
 		deviceInfoOut.Class = CStereoDeviceInfo::StereoHMD;
 		deviceInfoOut.Library = CStereoDeviceInfo::LibVR;
+		deviceInfoOut.AllowAuto = true;
 		//TODO: manufacturer, produc name
 		//TODO: serial
 		devicesOut.push_back(deviceInfoOut);

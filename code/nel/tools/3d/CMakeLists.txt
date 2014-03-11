@@ -6,6 +6,7 @@ IF(WITH_NEL_TOOLS)
     build_far_bank
     build_smallbank
     ig_lighter
+    ig_elevation
     zone_dependencies
     zone_ig_lighter 
     zone_lighter
@@ -45,9 +46,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 IF(WITH_NEL_TOOLS)
-
   IF(WIN32)
-    ADD_SUBDIRECTORY(ig_elevation)
     ADD_SUBDIRECTORY(lightmap_optimizer)  
     IF(MFC_FOUND)
       ADD_SUBDIRECTORY(object_viewer_exe)

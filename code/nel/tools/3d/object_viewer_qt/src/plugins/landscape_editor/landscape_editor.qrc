@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="/">
+    <file>icons/ic_nel_zones.png</file>
+    <file>icons/ic_snapshot.png</file>
+    <file>icons/ic_grid.png</file>
+    <file>icons/ic_nel_transition_land.png</file>
     <file>icons/ic_nel_landscape_item.png</file>
     <file>icons/ic_nel_landscape_settings.png</file>
     <file>icons/ic_nel_world_editor.png</file>

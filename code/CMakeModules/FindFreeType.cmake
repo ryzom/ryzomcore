@@ -19,8 +19,12 @@ FIND_PATH(FREETYPE_INCLUDE_DIRS
   /opt/local/include
   /opt/csw/include
   /opt/include
-  PATH_SUFFIXES freetype freetype2
+  PATH_SUFFIXES freetype2
 )
+
+IF(NOT FREETYPE_INCLUDE_DIRS)
+  SET(FREETYPE_INCLUDE_DIRS "")
+ENDIF(NOT FREETYPE_INCLUDE_DIRS)
 
 # ft2build.h does not reside in the freetype include dir
 FIND_PATH(FREETYPE_ADDITIONAL_INCLUDE_DIR
@@ -32,6 +36,7 @@ FIND_PATH(FREETYPE_ADDITIONAL_INCLUDE_DIR
   /opt/local/include
   /opt/csw/include
   /opt/include
+  PATH_SUFFIXES freetype2
 )
 
 # combine both include directories into one variable

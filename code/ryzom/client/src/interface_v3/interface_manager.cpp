@@ -355,7 +355,7 @@ public:
 				case 't': // add text ID
 					formatedResult += paramString;
 					break;
-				
+
 				case 'P':
 				case 'p':  // add player name
 					if (ClientCfg.Local)
@@ -578,7 +578,7 @@ CInterfaceManager::~CInterfaceManager()
 
 	// release the database observers
 	releaseServerToLocalAutoCopyObservers();
-	
+
 	/*
 	removeFlushObserver( interfaceLinkUpdater );
 	delete interfaceLinkUpdater;
@@ -601,7 +601,7 @@ void CInterfaceManager::reset()
 	_NeutralColor			= NULL;
 	_WarningColor			= NULL;
 	_ErrorColor				= NULL;
-	
+
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -744,7 +744,7 @@ void CInterfaceManager::initOutGame()
 	// Init LUA Scripting
 	initLUA();
 
-	if (ClientCfg.SelectCharacter != -1) 
+	if (ClientCfg.SelectCharacter != -1)
 		return;
 
 	{
@@ -836,7 +836,7 @@ void CInterfaceManager::uninitOutGame()
 
 	initStart = ryzomGetLocalTime ();
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", false);
-	
+
 	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 	//nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	initStart = ryzomGetLocalTime ();
@@ -1575,10 +1575,10 @@ void CInterfaceManager::setupOptions()
 {
 	CWidgetManager *wm = CWidgetManager::getInstance();
 	wm->setupOptions();
-	
+
 	// Try to change font if any
 	string sFont = wm->getSystemOption( CWidgetManager::OptionFont ).getValStr();
-	
+
 	if ((!sFont.empty()) && (Driver != NULL))
 		resetTextContext(sFont.c_str(), true);
 	// Continue to parse the rest of the interface
@@ -1810,8 +1810,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::CDBLandmarkObs::update(ICDBNode *node)
 {
-	uint nbBonusLandmarks = ((CCDBNodeLeaf*)node)->getValue32();
-	ContinentMngr.checkNumberOfUserLandmarks( STANDARD_NUM_USER_LANDMARKS + nbBonusLandmarks );
+	ContinentMngr.updateUserLandMarks();
 }
 
 
@@ -2326,7 +2325,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	// If over popup a string at the bottom of the screen
 	if ((mode == CClientConfig::SSysInfoParam::Over) || (mode == CClientConfig::SSysInfoParam::OverOnly))
 		InSceneBubbleManager.addMessagePopup(str, color);
-	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround) 
+	else if ( (mode == CClientConfig::SSysInfoParam::Around || mode == CClientConfig::SSysInfoParam::CenterAround)
 		&& PeopleInterraction.AroundMe.Window)
 		PeopleInterraction.ChatInput.AroundMe.displayMessage(str, color, 2);
 }
@@ -3560,7 +3559,7 @@ void CInterfaceManager::CServerToLocalAutoCopy::init(const std::string &dbPath)
 	if(_ServerCounter)
 	{
 		ICDBNode::CTextId textId;
-		
+
 		// **** Add Observers on all nodes
 		// add the observers when server node change
 		textId = ICDBNode::CTextId( string("SERVER:") + dbPath );
@@ -3737,23 +3736,23 @@ char* CInterfaceManager::getTimestampHuman(const char* format /* "[%H:%M:%S] " *
 
 /*
  * Parse tokens in a chatmessage or emote
- * 
+ *
  * Valid subjects:
  * $me$
  * $t$
  * $tt$
  * $tm1$..$tm8$
- * 
+ *
  * Valid parameters:
  * $<subject>.name$
  * $<subject>.title$
- * $<subject>.race$ 
- * $<subject>.guild$ 
+ * $<subject>.race$
+ * $<subject>.guild$
  * $<subject>.gs(m/f/n)$
  *
  * Default parameter if parameter result is empty:
  * $<subject>.<parameter>/<default>$
- * 
+ *
  * All \d's in default parameter remove a following character.
  */
 bool CInterfaceManager::parseTokens(ucstring& ucstr)
@@ -3771,14 +3770,14 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		endless_loop_protector++;
 		if (endless_loop_protector > 100)
 		{
-			break; 
+			break;
 		}
 
 		// Get the whole token substring first
 		end_pos = str.find(end_token, start_pos + 1);
 
-		if ((start_pos == ucstring::npos) || 
-			(end_pos   == ucstring::npos) || 
+		if ((start_pos == ucstring::npos) ||
+			(end_pos   == ucstring::npos) ||
 			(end_pos   <= start_pos + 1))
 		{
 			// Wrong formatting; give up on this one.
@@ -3894,7 +3893,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 				// Index is the database index (serverIndex() not used for team list)
 				CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp( NLMISC::toString(TEAM_DB_PATH ":%hu:NAME", indexInTeam ), false);
 				if (pNL && pNL->getValueBool() )
-				{	
+				{
 					// There is a character corresponding to this index
 					pNL = NLGUI::CDBManager::getInstance()->getDbProp( NLMISC::toString( TEAM_DB_PATH ":%hu:UID", indexInTeam ), false );
 					if (pNL)
