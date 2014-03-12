@@ -86,31 +86,31 @@ if not args.noconf:
 	try:
 		ExportBuildDirectory
 	except NameError:
-		ExportBuildDirectory = "W:/export"
+		ExportBuildDirectory = "T:/export"
 	try:
 		InstallDirectory
 	except NameError:
-		InstallDirectory = "W:/install"
+		InstallDirectory = "T:/install"
 	try:
 		ClientDevDirectory
 	except NameError:
-		ClientDevDirectory = "W:/client_dev"
+		ClientDevDirectory = "T:/client_dev"
 	try:
 		ClientPatchDirectory
 	except NameError:
-		ClientPatchDirectory = "W:/client_patch"
+		ClientPatchDirectory = "T:/client_patch"
 	try:
 		ClientInstallDirectory
 	except NameError:
-		ClientInstallDirectory = "W:/client_install"
+		ClientInstallDirectory = "T:/client_install"
 	try:
 		ShardInstallDirectory
 	except NameError:
-		ShardInstallDirectory = "W:/shard"
+		ShardInstallDirectory = "T:/shard"
 	try:
 		WorldEditInstallDirectory
 	except NameError:
-		WorldEditInstallDirectory = "W:/worldedit"
+		WorldEditInstallDirectory = "T:/worldedit"
 	try:
 		LeveldesignDirectory
 	except NameError:
@@ -178,7 +178,7 @@ if not args.noconf:
 	try:
 		PatchmanBridgeServerDirectory
 	except NameError:
-		PatchmanBridgeServerDirectory = "W:/bridge_server"
+		PatchmanBridgeServerDirectory = "T:/bridge_server"
 	try:
 		MaxAvailable
 	except NameError:
