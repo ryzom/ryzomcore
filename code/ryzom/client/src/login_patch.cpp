@@ -79,35 +79,6 @@
 static std::vector<std::string> ForceMainlandPatchCategories;
 static std::vector<std::string> ForceRemovePatchCategories;
 
-// TMP for debug : force some category in the patch to be flagged as 'mainland' until
-// the actual file is updated
-void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf)
-{
-	NLMISC::CConfigFile::CVar *catList = cf.getVarPtr("ForceMainlandPatchCategories");
-	if (catList)
-	{
-		for (uint k = 0; k < catList->size(); ++k)
-		{
-			ForceMainlandPatchCategories.push_back(catList->asString(k));
-		}
-	}
-}
-
-// TMP for debug : force some category in the patch to be flagged as 'mainland' until
-// the actual file is updated
-void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf)
-{
-	NLMISC::CConfigFile::CVar *catList = cf.getVarPtr("RemovePatchCategories");
-	if (catList)
-	{
-		for (uint k = 0; k < catList->size(); ++k)
-		{
-			ForceRemovePatchCategories.push_back(catList->asString(k));
-		}
-	}
-}
-
-
 using namespace std;
 using namespace NLMISC;
 
@@ -219,6 +190,13 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	_AsyncDownloader = NULL;
 	_StateListener = NULL;
 	_StartRyzomAtEnd = true;
+
+#ifdef NL_OS_UNIX
+	// don't use cfg, exe and dll from Windows version
+	ForceRemovePatchCategories.clear();
+	ForceRemovePatchCategories.push_back("main_exedll");
+	ForceRemovePatchCategories.push_back("main_cfg");
+#endif
 }
 
 // ****************************************************************************
