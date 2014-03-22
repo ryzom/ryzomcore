@@ -1397,7 +1397,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		fclose(fp);
 		curl_global_cleanup();
 
-		CurrentFile = "";
+		CurrentFile.clear();
 
 		if (diskFull)
 		{
@@ -2346,6 +2346,7 @@ void CCheckThread::run ()
 		uint32 i, j, k;
 		// Check if the client version is the same as the server version
 		string sClientVersion = pPM->getClientVersion();
+		string sClientNewVersion = ClientCfg.BuildName;
 		string sServerVersion = pPM->getServerVersion();
 		ucstring sTranslate = CI18N::get("uiClientVersion") + " (" + sClientVersion + ") ";
 		sTranslate += CI18N::get("uiServerVersion") + " (" + sServerVersion + ")";
@@ -2359,10 +2360,20 @@ void CCheckThread::run ()
 			return;
 		}
 
-		sint32 nServerVersion;
+		sint32 nServerVersion, nClientVersion, nClientNewVersion;
 		fromString(sServerVersion, nServerVersion);
+		fromString(sClientVersion, nClientVersion);
+		fromString(sClientNewVersion, nClientNewVersion);
 
-		if (sClientVersion != sServerVersion)
+#ifdef NL_OS_UNIX
+		// servers files are not compatible with current client, use last client version
+		if (nClientNewVersion && nServerVersion > nClientNewVersion)
+		{
+			nServerVersion = nClientNewVersion;
+		}
+#endif
+
+		if (nClientVersion != nServerVersion)
 		{
 			// first, try in the version subdirectory
 			try
