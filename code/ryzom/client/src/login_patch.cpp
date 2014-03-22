@@ -139,7 +139,7 @@ struct EPatchDownloadException : public Exception
 
 CPatchManager *CPatchManager::_Instance = NULL;
 
-#ifdef NL_USE_SEVENZIP
+#ifdef RZ_USE_SEVENZIP
 /// Input stream class for 7zip archive
 class CNel7ZipInStream : public _ISzInStream
 {
@@ -420,6 +420,7 @@ void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 	nlassert (thread != NULL);
 	thread->start ();
 }
+
 // ****************************************************************************
 bool CPatchManager::isCheckThreadEnded(bool &ok)
 {
@@ -761,7 +762,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		#ifdef NL_OS_WINDOWS
 			fprintf(fp, "@echo off\n");
 		#elif NL_OS_MAC
-			//mac patcher doesn't work yet
+			// mac patcher doesn't work yet
 		#else
 			fprintf(fp, "#!/bin/sh\npwd\n");
 		#endif
@@ -2154,7 +2155,7 @@ void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTra
 
 bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName)
 {
-#ifdef NL_USE_SEVENZIP
+#ifdef RZ_USE_SEVENZIP
 	nlinfo("Uncompressing 7zip archive '%s' to '%s'",
 		sevenZipFile.c_str(),
 		destFileName.c_str());
@@ -2246,7 +2247,7 @@ bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::strin
 
 bool CPatchManager::unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 {
-#ifdef NL_USE_SEVENZIP
+#ifdef RZ_USE_SEVENZIP
 	nldebug("unpackLZMA : decompression the lzma file '%s' into output file '%s", lzmaFile.c_str(), destFileName.c_str());
 	CIFile inStream(lzmaFile);
 	uint32 inSize = inStream.getFileSize();
