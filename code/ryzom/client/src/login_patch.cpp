@@ -18,15 +18,13 @@
 // Includes
 //
 
+#include "stdpch.h"
+
 #include <sys/stat.h>
 
-#ifdef NL_OS_WINDOWS
-	//windows doesnt have unistd.h
-#else
+#ifndef NL_OS_WINDOWS
 	#include <unistd.h>
 #endif
-
-#include "stdpch.h"
 
 #include <memory>
 #include <errno.h>
@@ -46,10 +44,10 @@
 #include "nel/misc/big_file.h"
 #include "nel/misc/i18n.h"
 
-#define NL_USE_SEVENZIP 1
+#define RZ_USE_SEVENZIP 1
 
 // 7 zip includes
-#ifdef NL_USE_SEVENZIP
+#ifdef RZ_USE_SEVENZIP
 	#include "seven_zip/7zCrc.h"
 	#include "seven_zip/7zIn.h"
 	#include "seven_zip/7zExtract.h"
@@ -746,7 +744,6 @@ void CPatchManager::deleteBatchFile()
 // ****************************************************************************
 void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool wantRyzomRestart, bool useBatchFile)
 {
-
 	uint nblab = 0;
 
 	FILE *fp = NULL;
@@ -920,7 +917,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			#ifdef NL_OS_WINDOWS
 			fprintf(fp, "start %s %%1 %%2 %%3\n", RyzomFilename.c_str());
 			#else
-			fprintf(fp, "/opt/tita/%s $1 $2 $3\n", RyzomFilename.c_str());
+			fprintf(fp, "%s $1 $2 $3\n", RyzomFilename.c_str());
 			#endif
 		}
 
@@ -1010,7 +1007,9 @@ void CPatchManager::executeBatchFile()
 		{
 			int errsv = errno;
 			nlerror("Execl Error: %d %s", errsv, strCmdLine.c_str(), (char *) NULL);
-		} else {
+		}
+		else
+		{
 			nlinfo("Ran batch file r2Mode Success");
 		}
 	}
@@ -1020,7 +1019,9 @@ void CPatchManager::executeBatchFile()
 		{
 			int errsv = errno;
 			nlerror("Execl r2mode Error: %d %s", errsv, strCmdLine.c_str());
-		} else {
+		}
+		else
+		{
 			nlinfo("Ran batch file Success");
 		}
 	}
