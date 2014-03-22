@@ -422,16 +422,16 @@ CClientConfig::CClientConfig()
 	MouseOverFX = "sfx_selection_mouseover.ps";
 	SelectionFXSize = 0.8f;
 
-	// only force patching under Windows by default
-	#if WITH_PATCH_SUPPORT
-		PatchWanted = true;
-	#else 
-		PatchWanted = false;
-	#endif 
-	PatchUrl = "";
-	PatchletUrl = "";
-	PatchVersion = "";
-	PatchServer = "";
+#if RZ_PATCH
+	PatchWanted = true;
+#else 
+	PatchWanted = false;
+#endif 
+
+	PatchUrl.clear();
+	PatchletUrl.clear();
+	PatchVersion.clear();
+	PatchServer.clear();
 
 	WebIgMainDomain = "atys.ryzom.com";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
