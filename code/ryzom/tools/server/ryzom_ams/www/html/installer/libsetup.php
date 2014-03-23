@@ -70,7 +70,7 @@
             //SETUP THE WWW DB
             $dbw = new DBLayer("install", "web");
             $sql = "
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['web']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['web']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `". $cfg['db']['web']['name'] . "`;
                 DROP TABLE IF EXISTS ams_user;
                 
@@ -96,7 +96,7 @@
             $dbl = new DBLayer("install", "lib");
 
             $sql = "
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `" . $cfg['db']['lib']['name'] ."`;
                 DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ams_querycache`;
                 
@@ -620,7 +620,7 @@
                 CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['tool']['name'] ."`;
                 USE `". $cfg['db']['tool']['name'] . "`;
                                 
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['tool']['name'] ."`  DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['tool']['name'] ."`  DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `" . $cfg['db']['tool']['name'] ."`;
 
                 CREATE TABLE IF NOT EXISTS `neltool_annotations` (
@@ -1400,7 +1400,7 @@
                         //SETUP THE OPEN_SHARD DB
             $dbw = new DBLayer("install", "ring");
             $sql = "
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['ring']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['ring']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `" . $cfg['db']['ring']['name'] ."`;
 
                 CREATE TABLE IF NOT EXISTS `characters` (
