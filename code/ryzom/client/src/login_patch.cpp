@@ -986,7 +986,7 @@ void CPatchManager::executeBatchFile()
 	chmod(strCmdLine.c_str(), S_IRWXU);
 	if (r2Mode)
 	{
-		if (execl(strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str()) == -1)
+		if (execl(strCmdLine.c_str(), strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str(), (char *) NULL) == -1)
 		{
 			int errsv = errno;
 			nlerror("Execl Error: %d %s", errsv, strCmdLine.c_str(), (char *) NULL);
@@ -998,7 +998,7 @@ void CPatchManager::executeBatchFile()
 	}
 	else
 	{
-		if (execl(strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str(), LoginShardId, (char *) NULL) == -1)
+		if (execl(strCmdLine.c_str(), strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str(), toString(LoginShardId).c_str(), (char *) NULL) == -1)
 		{
 			int errsv = errno;
 			nlerror("Execl r2mode Error: %d %s", errsv, strCmdLine.c_str());
