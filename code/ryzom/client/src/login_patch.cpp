@@ -34,8 +34,8 @@
 #ifdef USE_CURL
 	#include <curl/curl.h>
 #endif
-#include <zlib.h>
 
+#include <zlib.h>
 
 #include "nel/misc/debug.h"
 #include "nel/misc/path.h"
@@ -68,7 +68,7 @@
 #endif
 
 #ifdef NL_OS_WINDOWS
-#include <direct.h>
+	#include <direct.h>
 #endif
 
 //
@@ -87,11 +87,12 @@ extern string VersionName;
 extern string R2ServerVersion;
 
 #ifdef __CLIENT_INSTALL_EXE__
-extern std::string TheTmpInstallDirectory;
-extern std::string ClientLauncherUrl;
+	extern std::string TheTmpInstallDirectory;
+	extern std::string ClientLauncherUrl;
 #else
-std::string TheTmpInstallDirectory ="patch/client_install";
+	std::string TheTmpInstallDirectory = "patch/client_install";
 #endif
+
 // ****************************************************************************
 // ****************************************************************************
 // ****************************************************************************
@@ -259,16 +260,20 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 	try
 	{
 		CConfigFile *cf;
-		#ifdef RY_BG_DOWNLOADER
-			cf = &theApp.ConfigFile;
-		#else
-			cf = &ClientCfg.ConfigFile;
-		#endif
+
+#ifdef RY_BG_DOWNLOADER
+		cf = &theApp.ConfigFile;
+#else
+		cf = &ClientCfg.ConfigFile;
+#endif
+
 		std::string appName = "ryzom_live";
+
 		if (cf->getVarPtr("Application"))
 		{
 			appName = cf->getVar("Application").asString(0);
 		}
+
 		std::string versionFileName = appName + ".version";
 		getServerFile(versionFileName);
 
@@ -280,13 +285,14 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 		versionFile.getline(buffer, 1024);
 		CSString line(buffer);
 
-		#ifdef NL_DEBUG
-			CConfigFile::CVar *forceVersion = cf->getVarPtr("ForceVersion");
-			if (forceVersion != NULL)
-			{
-					line = forceVersion->asString();
-			}
-		#endif
+#ifdef NL_DEBUG
+		CConfigFile::CVar *forceVersion = cf->getVarPtr("ForceVersion");
+
+		if (forceVersion != NULL)
+		{
+			line = forceVersion->asString();
+		}
+#endif
 
 		ServerVersion = line.firstWord(true);
 		VersionName = line.firstWord(true);
@@ -294,7 +300,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 		// force the R2ServerVersion
 		R2ServerVersion = ServerVersion;
 
-		#ifdef __CLIENT_INSTALL_EXE__
+#ifdef __CLIENT_INSTALL_EXE__
 		{
 			//The install program load a the url of the mini web site in the patch directory
 
@@ -332,7 +338,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 				}
 			}
 		}
-		#endif
+#endif
 	}
 	catch (...)
 	{
@@ -740,6 +746,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", UpdateBatchFilename.c_str(), errno, strerror(errno));
 			throw Exception (err);
 		}
+
 		//use bat if windows if not use sh
 #ifdef NL_OS_WINDOWS
 		fprintf(fp, "@echo off\n");
@@ -777,6 +784,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 				throw;
 			}
+
 			if (!result)
 			{
 //:TODO: handle exception?
@@ -796,19 +804,17 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					string SrcPath = ClientPatchPath;
 					string DstPath = rCat.getUnpackTo();
 					NLMISC::CFile::createDirectoryTree(DstPath);
-					// this file must be moved
 
+					// this file must be moved
 					if (useBatchFile)
 					{
-						#ifdef NL_OS_WINDOWS
-							SrcPath = CPath::standardizeDosPath(SrcPath);
-							DstPath = CPath::standardizeDosPath(DstPath);
-						#elif NL_OS_MAC
-							//no patcher on mac yet
-						#else
-							SrcPath = CPath::standardizePath(SrcPath);
-							DstPath = CPath::standardizePath(DstPath);
-						#endif
+#ifdef NL_OS_WINDOWS
+						SrcPath = CPath::standardizeDosPath(SrcPath);
+						DstPath = CPath::standardizeDosPath(DstPath);
+#else
+						SrcPath = CPath::standardizePath(SrcPath);
+						DstPath = CPath::standardizePath(DstPath);
+#endif
 					}
 
 					std::string SrcName = SrcPath + vFilenames[fff];
@@ -843,26 +849,25 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	// Finalize batch file
 	if (NLMISC::CFile::isExists("patch") && NLMISC::CFile::isDirectory("patch"))
 	{
-		#ifdef NL_OS_WINDOWS
+#ifdef NL_OS_WINDOWS
 		if (useBatchFile)
 		{
 			fprintf(fp, ":looppatch\n");
 		}
-		#endif
+#endif
 		
 		vector<string> vFileList;
 		CPath::getPathContent ("patch", false, false, true, vFileList, NULL, false);
+
 		for(uint32 i = 0; i < vFileList.size(); ++i)
 		{
 			if (useBatchFile)
 			{
-				#ifdef NL_OS_WINDOWS
-					fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
-				#elif NL_OS_MAC
-					//no patcher on MAC yet
-				#else
-					fprintf(fp, "rm -f %s\n", CPath::standardizePath(vFileList[i]).c_str());
-				#endif
+#ifdef NL_OS_WINDOWS
+				fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+#else
+				fprintf(fp, "rm -f %s\n", CPath::standardizePath(vFileList[i]).c_str());
+#endif
 			}
 			else
 			{
@@ -872,14 +877,12 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 		if (useBatchFile)
 		{
-			#ifdef NL_OS_WINDOWS
-				fprintf(fp, "rd /Q /S patch\n");
-				fprintf(fp, "if exist patch goto looppatch\n");
-			#elif NL_OS_MAC
-				//no patcher on mac yet
-			#else
-				fprintf(fp, "rm -rf patch\n");
-			#endif
+#ifdef NL_OS_WINDOWS
+			fprintf(fp, "rd /Q /S patch\n");
+			fprintf(fp, "if exist patch goto looppatch\n");
+#else
+			fprintf(fp, "rm -rf patch\n");
+#endif
 		}
 		else
 		{
@@ -891,11 +894,11 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	{
 		if (wantRyzomRestart)
 		{
-			#ifdef NL_OS_WINDOWS
+#ifdef NL_OS_WINDOWS
 			fprintf(fp, "start %s %%1 %%2 %%3\n", RyzomFilename.c_str());
-			#else
+#else
 			fprintf(fp, "%s $1 $2 $3\n", RyzomFilename.c_str());
-			#endif
+#endif
 		}
 
 		bool writeError = ferror(fp) != 0;
@@ -970,9 +973,11 @@ void CPatchManager::executeBatchFile()
 #else
 	// Start the child process.
 	bool r2Mode = false;
-	#ifndef RY_BG_DOWNLOADER
-		r2Mode = ClientCfg.R2Mode;
-	#endif
+
+#ifndef RY_BG_DOWNLOADER
+	r2Mode = ClientCfg.R2Mode;
+#endif
+
 	string strCmdLine;
 
 	strCmdLine = "./" + UpdateBatchFilename;
@@ -1318,7 +1323,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 	DownloadInProgress = true;
 	try
 	{
-	#ifdef USE_CURL
+#ifdef USE_CURL
 		ucstring s = CI18N::get("uiDLWithCurl") + " " + dest;
 		setState(true, s);
 
@@ -1415,9 +1420,9 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			throw EPatchDownloadException (NLMISC::toString("curl download failed: (ec %d %d)", res, r));
 		}
 
-	#else
+#else
 		throw Exception("USE_CURL is not defined, no curl method");
-	#endif
+#endif
 	}
 	catch(...)
 	{
@@ -2132,9 +2137,7 @@ void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTra
 bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName)
 {
 #ifdef RZ_USE_SEVENZIP
-	nlinfo("Uncompressing 7zip archive '%s' to '%s'",
-		sevenZipFile.c_str(),
-		destFileName.c_str());
+	nlinfo("Uncompressing 7zip archive '%s' to '%s'", sevenZipFile.c_str(),	destFileName.c_str());
 
 	// init seven zip
 	ISzAlloc allocImp;
