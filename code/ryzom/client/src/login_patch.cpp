@@ -168,7 +168,11 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 {
 	DescFilename = "ryzom_xxxxx.idx";
 
+#ifdef NL_OS_WINDOWS
 	UpdateBatchFilename = "updt_nl.bat";
+#else
+	UpdateBatchFilename = "updt_nl.sh";
+#endif
 
 	// use current directory by default
 	setClientRootPath("./");
