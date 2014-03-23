@@ -2328,7 +2328,6 @@ void CCheckThread::run ()
 		uint32 i, j, k;
 		// Check if the client version is the same as the server version
 		string sClientVersion = pPM->getClientVersion();
-		string sClientNewVersion = ClientCfg.BuildName;
 		string sServerVersion = pPM->getServerVersion();
 		ucstring sTranslate = CI18N::get("uiClientVersion") + " (" + sClientVersion + ") ";
 		sTranslate += CI18N::get("uiServerVersion") + " (" + sServerVersion + ")";
@@ -2342,12 +2341,16 @@ void CCheckThread::run ()
 			return;
 		}
 
-		sint32 nServerVersion, nClientVersion, nClientNewVersion;
+		sint32 nServerVersion, nClientVersion;
 		fromString(sServerVersion, nServerVersion);
 		fromString(sClientVersion, nClientVersion);
-		fromString(sClientNewVersion, nClientNewVersion);
 
 #ifdef NL_OS_UNIX
+		string sClientNewVersion = ClientCfg.BuildName;
+
+		sint32 nClientNewVersion;
+		fromString(sClientNewVersion, nClientNewVersion);
+
 		// servers files are not compatible with current client, use last client version
 		if (nClientNewVersion && nServerVersion > nClientNewVersion)
 		{
