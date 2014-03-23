@@ -741,13 +741,11 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			throw Exception (err);
 		}
 		//use bat if windows if not use sh
-		#ifdef NL_OS_WINDOWS
-			fprintf(fp, "@echo off\n");
-		#elif NL_OS_MAC
-			// mac patcher doesn't work yet
-		#else
-			fprintf(fp, "#!/bin/sh\npwd\n");
-		#endif
+#ifdef NL_OS_WINDOWS
+		fprintf(fp, "@echo off\n");
+#else
+		fprintf(fp, "#!/bin/sh\n");
+#endif
 	}
 
 	// Unpack files with category ExtractPath non empty
