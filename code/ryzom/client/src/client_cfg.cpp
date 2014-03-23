@@ -422,11 +422,11 @@ CClientConfig::CClientConfig()
 	MouseOverFX = "sfx_selection_mouseover.ps";
 	SelectionFXSize = 0.8f;
 
-#if RZ_PATCH
+#if RZ_USE_PATCH
 	PatchWanted = true;
-#else 
+#else
 	PatchWanted = false;
-#endif 
+#endif
 
 	PatchUrl.clear();
 	PatchletUrl.clear();

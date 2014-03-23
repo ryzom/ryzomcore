@@ -4,14 +4,14 @@ ADD_SUBDIRECTORY(client_sheets)
 
 IF(WITH_RYZOM_CLIENT)
 
-IF(WITH_RYZOM_PATCH)
-  ADD_DEFINITIONS(-DRZ_USE_PATCH)
-ENDIF(WITH_RYZOM_PATCH)
-
 # These are Windows/MFC apps
 SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
 
 ADD_SUBDIRECTORY(seven_zip)
+
+IF(WITH_RYZOM_PATCH)
+  ADD_DEFINITIONS(-DRZ_USE_PATCH)
+ENDIF(WITH_RYZOM_PATCH)
 
 FILE(GLOB CFG ../*.cfg ../*.cfg.in)
 FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc)
