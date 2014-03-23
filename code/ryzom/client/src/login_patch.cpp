@@ -818,21 +818,17 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 					if (useBatchFile)
 					{
-						//write windows .bat format else write sh format
-						#ifdef NL_OS_WINDOWS
-							fprintf(fp, ":loop%u\n", nblab);
-							fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
-							fprintf(fp, "del %s\n", DstName.c_str());
-							fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
-							fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
-						#elif NL_OS_MAC
-							//no patcher on osx
-						#else
-							fprintf(fp, "chmod 777 %s\n", DstName.c_str());
-							fprintf(fp, "rm -rf %s\n", DstName.c_str());
-							fprintf(fp, "mv %s %s\n", SrcName.c_str(), DstPath.c_str());
-						#endif
-						
+						// write windows .bat format else write sh format
+#ifdef NL_OS_WINDOWS
+						fprintf(fp, ":loop%u\n", nblab);
+						fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
+						fprintf(fp, "del %s\n", DstName.c_str());
+						fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
+						fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
+#else
+						fprintf(fp, "rm -rf %s\n", DstName.c_str());
+						fprintf(fp, "mv %s %s\n", SrcName.c_str(), DstPath.c_str());
+#endif
 					}
 					else
 					{
