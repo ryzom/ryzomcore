@@ -12,31 +12,13 @@ function login(){
 		$login_value = filter_var($_POST['LoginValue'],FILTER_SANITIZE_STRING);
 		$password = filter_var($_POST['Password'],FILTER_SANITIZE_STRING);
 
-		//check login type if email or username
-		$login_type = WebUsers::checkLoginType($login_value);
-
 		//check if the filtered sent POST data returns a match with the DB
-
-		if($login_type == 'Login')
-		{
-			$result = WebUsers::checkLoginMatch($login_value, $password);
-		}else
-		{
-			$result = WebUsers::checkLoginMatchUsingEmail($login_value, $password);
-		}
-	
+		$result = WebUsers::checkLoginMatch($login_value, $password);
+		
 		if( $result != "fail"){
 			//handle successful login
-
-			if($login_type == 'Login')
-			{
-				$_SESSION['user'] = $login_value;
-				$_SESSION['id'] = WebUsers::getId($login_value);
-			}else{
-				$_SESSION['user'] = WebUsers::getUsernameFromEmail($login_value);
-				$_SESSION['id'] = WebUsers::getIdFromEmail($login_value);
-			}	
-
+			$_SESSION['user'] = $result['Login'];
+			$_SESSION['id'] = $result['UId'];
 			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
 			$user = new WebUsers($_SESSION['id']);
 			$_SESSION['Language'] = $user->getLanguage();
