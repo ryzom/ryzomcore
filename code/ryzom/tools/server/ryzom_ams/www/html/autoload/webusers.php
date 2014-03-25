@@ -70,15 +70,15 @@ class WebUsers extends Users{
      
      
        /**
-       * check if the login username and password match the db.
-       * @param $username the inserted username
+       * check if the login username/email and password match the db.
+       * @param $value the inserted username or email
        * @param $password the inserted password (unhashed)
        * @return the logged in user's db row as array if login was a success, else "fail" will be returned.
        */
-       public static function checkLoginMatch($username,$password){
+       public static function checkLoginMatch($value,$password){
   
           $dbw = new DBLayer("web");
-          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:user", array('user' => $username));
+          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:value OR Email:value", array('value' => $value));
           $row = $statement->fetch();
           $salt = substr($row['Password'],0,2);
           $hashed_input_pass = crypt($password, $salt);
@@ -89,50 +89,9 @@ class WebUsers extends Users{
           }	
        }
        
-       
-		
-		/**
-       * check if the login email and password match the db.
-       * @param $email the inserted email id
-       * @param $password the inserted password (unhashed)
-       * @return the logged in user's db row as array if login was a success, else "fail" will be returned.
-       */
-       public static function checkLoginMatchUsingEmail($email,$password){
-  
-          $dbw = new DBLayer("web");
-          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Email=:emailid", array('emailid' => $email));
-          $row = $statement->fetch();
-          $salt = substr($row['Password'],0,2);
-          $hashed_input_pass = crypt($password, $salt);
-          if($hashed_input_pass == $row['Password']){
-                return $row;
-          }else{
-                return "fail";
-          }	
-       }
-
-	   /**
-       * check for the login type email or username.
-       * @param $value the inserted value
-       * @return the type email or username will be returned.
-       */
-       public static function checkLoginType($login_value){
-
-		   $dbl = new DBLayer("web");
-           $statement = $dbl->executeWithoutParams("SELECT * FROM ams_user");
-		   $row = $statement->fetch();
-	
-		   foreach( $row as $key => $value)
-		   {
-			  if($login_value == $value){
-					return $key;
-				}
-	       }
-        }
-     
-       
+	   
        /**
-       * returns te id for a given username
+       * returns the id for a given username
        * @param $username the username
        * @return the user's id linked to the username
        */
@@ -145,7 +104,7 @@ class WebUsers extends Users{
     
     
        /**
-       * returns te id for a given emailaddress
+       * returns the id for a given emailaddress
        * @param $email the emailaddress
        * @return the user's id linked to the emailaddress
        */
@@ -160,23 +119,6 @@ class WebUsers extends Users{
           }
        }
 	   
-	   /**
-       * returns the username for a given emailaddress
-       * @param $email the emailaddress
-       * @return the username linked to the emailaddress
-       */
-       public static function getUsernameFromEmail($email){
-          $dbw = new DBLayer("web");  
-          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Email=:email", array('email' => $email));
-          $row = $statement->fetch();
-          if(!empty($row)){
-              return $row['Login'];
-          }else{
-              return "FALSE";
-          }
-       }
-    	
-    
     
        /**
        * get uId attribute of the object.
