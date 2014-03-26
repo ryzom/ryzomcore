@@ -1475,6 +1475,22 @@ static bool	setupPackedDepthStencil(const char	*glext)
 }
 
 // ***************************************************************************
+static bool	setupNVXGPUMemoryInfo(const char *glext)
+{
+	H_AUTO_OGL(setupNVXGPUMemoryInfo);
+	CHECK_EXT("GL_NVX_gpu_memory_info");
+	return true;
+}
+
+// ***************************************************************************
+static bool	setupATIMeminfo(const char *glext)
+{
+	H_AUTO_OGL(setupATIMeminfo);
+	CHECK_EXT("GL_ATI_meminfo");
+	return true;
+}
+
+// ***************************************************************************
 // Extension Check.
 void	registerGlExtensions(CGlExtensions &ext)
 {
@@ -1689,6 +1705,35 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.ATIMapObjectBuffer = false;
 		ext.ATIVertexAttribArrayObject = false;
 	}
+
+#ifndef USE_OPENGLES
+	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);
+
+	if (ext.NVXGPUMemoryInfo)
+	{
+//      GPU_MEMORY_INFO_EVICTION_COUNT_NVX;
+//      GPU_MEMORY_INFO_EVICTED_MEMORY_NVX;
+
+		GLint nDedicatedMemoryInKB = 0;
+		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedMemoryInKB);
+
+		GLint nTotalMemoryInKB = 0;
+		glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nTotalMemoryInKB);
+
+		GLint nCurAvailMemoryInKB = 0;
+		glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurAvailMemoryInKB);
+
+		nlinfo("Memory: total: %d available: %d dedicated: %d", nTotalMemoryInKB, nCurAvailMemoryInKB, nDedicatedMemoryInKB);
+	}
+
+	ext.ATIMeminfo = setupATIMeminfo(glext);
+
+	if (ext.ATIMeminfo)
+	{
+		GLint nCurAvailMemoryInKB = 0;
+		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, &nCurAvailMemoryInKB);
+	}
+#endif
 }
 
 
@@ -1703,6 +1748,27 @@ static bool	setupWGLEXTSwapControl(const char	*glext)
 	CHECK_ADDRESS(PFNWGLSWAPINTERVALEXTPROC, wglSwapIntervalEXT);
 	CHECK_ADDRESS(PFNWGLGETSWAPINTERVALEXTPROC, wglGetSwapIntervalEXT);
 #endif
+#endif
+
+	return true;
+}
+
+// ***************************************************************************
+static bool	setupWGLAMDGPUAssociation(const char *glext)
+{
+	H_AUTO_OGL(setupWGLAMDGPUAssociation);
+	CHECK_EXT("WGL_AMD_gpu_association");
+
+#if !defined(USE_OPENGLES) && defined(NL_OS_WINDOWS)
+	CHECK_ADDRESS(PFNWGLGETGPUIDSAMDPROC, wglGetGPUIDsAMD);
+	CHECK_ADDRESS(PFNWGLGETGPUINFOAMDPROC, wglGetGPUInfoAMD);
+	CHECK_ADDRESS(PFNWGLGETCONTEXTGPUIDAMDPROC, wglGetContextGPUIDAMD);
+	CHECK_ADDRESS(PFNWGLCREATEASSOCIATEDCONTEXTAMDPROC, wglCreateAssociatedContextAMD);
+	CHECK_ADDRESS(PFNWGLCREATEASSOCIATEDCONTEXTATTRIBSAMDPROC, wglCreateAssociatedContextAttribsAMD);
+	CHECK_ADDRESS(PFNWGLDELETEASSOCIATEDCONTEXTAMDPROC, wglDeleteAssociatedContextAMD);
+	CHECK_ADDRESS(PFNWGLMAKEASSOCIATEDCONTEXTCURRENTAMDPROC, wglMakeAssociatedContextCurrentAMD);
+	CHECK_ADDRESS(PFNWGLGETCURRENTASSOCIATEDCONTEXTAMDPROC, wglGetCurrentAssociatedContextAMD);
+	CHECK_ADDRESS(PFNWGLBLITCONTEXTFRAMEBUFFERAMDPROC, wglBlitContextFramebufferAMD);
 #endif
 
 	return true;
@@ -1819,6 +1885,20 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 
 	// Check for swap control
 	ext.WGLEXTSwapControl= setupWGLEXTSwapControl(glext);
+
+	ext.WGLAMDGPUAssociation = setupWGLAMDGPUAssociation(glext);
+
+	if (ext.WGLAMDGPUAssociation)
+	{
+		GLuint uNoOfGPUs = nwglGetGPUIDsAMD(0, 0);
+		GLuint *uGPUIDs = new GLuint[uNoOfGPUs];
+		nwglGetGPUIDsAMD(uNoOfGPUs, uGPUIDs);
+
+		GLuint uTotalMemoryInMB = 0;
+		nwglGetGPUInfoAMD(uGPUIDs[0], WGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof(GLuint), &uTotalMemoryInMB);
+
+		delete [] uGPUIDs;
+	}
 
 	return true;
 }
