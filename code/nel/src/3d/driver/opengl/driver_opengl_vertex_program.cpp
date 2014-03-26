@@ -46,20 +46,20 @@ CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL(CDriverGL *drv, ItGPUPrgDrvInfo
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_CVertexProgamDrvInfosGL);
 
 	// Extension must exist
-	nlassert (drv->_Extensions.NVVertexProgram
+	nlassert (drv->_Extensions.ARBVertexProgram
+	          || drv->_Extensions.NVVertexProgram
 		      || drv->_Extensions.EXTVertexShader
-			  || drv->_Extensions.ARBVertexProgram
 		     );
 
 #ifndef USE_OPENGLES
-	if (drv->_Extensions.NVVertexProgram) // NVIDIA implemntation
-	{
-		// Generate a program
-		nglGenProgramsNV (1, &ID);
-	}
-	else if (drv->_Extensions.ARBVertexProgram) // ARB implementation
+	// Generate a program
+	if (drv->_Extensions.ARBVertexProgram) // ARB implementation
 	{
 		nglGenProgramsARB(1, &ID);
+	}
+	else if (drv->_Extensions.NVVertexProgram) // NVIDIA implementation
+	{
+		nglGenProgramsNV(1, &ID);
 	}
 	else
 	{
@@ -74,7 +74,7 @@ bool CDriverGL::supportVertexProgram(CVertexProgram::TProfile profile) const
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_supportVertexProgram)
 	return (profile == CVertexProgram::nelvp)
-		&& (_Extensions.NVVertexProgram || _Extensions.EXTVertexShader || _Extensions.ARBVertexProgram);
+		&& (_Extensions.ARBVertexProgram || _Extensions.NVVertexProgram || _Extensions.EXTVertexShader);
 }
 
 // ***************************************************************************
@@ -1774,7 +1774,6 @@ bool CDriverGL::compileVertexProgram(NL3D::CVertexProgram *program)
 }
 
 // ***************************************************************************
-
 bool CDriverGL::activeVertexProgram(CVertexProgram *program)
 {
 	H_AUTO_OGL(CDriverGL_activeVertexProgram)
@@ -1783,13 +1782,13 @@ bool CDriverGL::activeVertexProgram(CVertexProgram *program)
 	if (program && !CDriverGL::compileVertexProgram(program)) return false;
 
 	// Extension
-	if (_Extensions.NVVertexProgram)
-	{
-		return activeNVVertexProgram(program);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		return activeARBVertexProgram(program);
+	}
+	else if (_Extensions.NVVertexProgram)
+	{
+		return activeNVVertexProgram(program);
 	}
 	else if (_Extensions.EXTVertexShader)
 	{
@@ -1808,15 +1807,7 @@ void CDriverGL::enableVertexProgramDoubleSidedColor(bool doubleSided)
 
 #ifndef USE_OPENGLES
 	// Vertex program exist ?
-	if (_Extensions.NVVertexProgram)
-	{
-		// change mode (not cached because supposed to be rare)
-		if(doubleSided)
-			glEnable (GL_VERTEX_PROGRAM_TWO_SIDE_NV);
-		else
-			glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_NV);
-	}
-	else if (_Extensions.ARBVertexProgram)
+	if (_Extensions.ARBVertexProgram)
 	{
 		// change mode (not cached because supposed to be rare)
 		if(doubleSided)
@@ -1824,16 +1815,23 @@ void CDriverGL::enableVertexProgramDoubleSidedColor(bool doubleSided)
 		else
 			glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_ARB);
 	}
+	else if (_Extensions.NVVertexProgram)
+	{
+		// change mode (not cached because supposed to be rare)
+		if(doubleSided)
+			glEnable (GL_VERTEX_PROGRAM_TWO_SIDE_NV);
+		else
+			glDisable (GL_VERTEX_PROGRAM_TWO_SIDE_NV);
+	}
 #endif
 }
-
 
 // ***************************************************************************
 bool CDriverGL::supportVertexProgramDoubleSidedColor() const
 {
 	H_AUTO_OGL(CDriverGL_supportVertexProgramDoubleSidedColor)
 	// currently only supported by NV_VERTEX_PROGRAM && ARB_VERTEX_PROGRAM
-	return _Extensions.NVVertexProgram || _Extensions.ARBVertexProgram;
+	return _Extensions.ARBVertexProgram || _Extensions.NVVertexProgram;
 }
 
 #ifdef NL_STATIC
