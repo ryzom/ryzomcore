@@ -109,6 +109,17 @@ struct	CGlExtensions
 	bool	OESDrawTexture;
 	bool	OESMapBuffer;
 
+	// extensions to get memory info
+
+	// GL_NVX_gpu_memory_info
+	bool	NVXGPUMemoryInfo;
+
+	// GL_ATI_meminfo
+	bool	ATIMeminfo;
+
+	// WGL_AMD_gpu_association
+	bool	WGLAMDGPUAssociation;
+
 public:
 
 	/// \name Disable Hardware feature. False by default. setuped by IDriver
@@ -175,6 +186,10 @@ public:
 		OESDrawTexture = false;
 		OESMapBuffer = false;
 
+		NVXGPUMemoryInfo = false;
+		ATIMeminfo = false;
+		WGLAMDGPUAssociation = false;
+
 		/// \name Disable Hardware feature. False by default. setuped by IDriver
 		DisableHardwareVertexProgram= false;
 		DisableHardwarePixelProgram= false;
@@ -224,12 +239,15 @@ public:
 		result += NVOcclusionQuery ? "NVOcclusionQuery " : "";
 		result += NVStateVARWithoutFlush ? "NVStateVARWithoutFlush " : "";
 		result += ARBMultisample ? "ARBMultisample " : "";
+		result += NVXGPUMemoryInfo ? "NVXGPUMemoryInfo " : "";
+		result += ATIMeminfo ? "ATIMeminfo " : "";
 
 #ifdef NL_OS_WINDOWS
 		result += "\n  WindowsGL: ";
 		result += WGLARBPBuffer ? "WGLARBPBuffer " : "";
 		result += WGLARBPixelFormat ? "WGLARBPixelFormat " : "";
 		result += WGLEXTSwapControl ? "WGLEXTSwapControl " : "";
+		result += WGLAMDGPUAssociation ? "WGLAMDGPUAssociation " : "";
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
 		result += "\n  GLX: ";
