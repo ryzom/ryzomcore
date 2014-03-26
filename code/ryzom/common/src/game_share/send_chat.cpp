@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/misc/types_nl.h"
+#include "stdpch.h"
 #include "send_chat.h"
 
 /**
@@ -80,7 +80,6 @@ void npcChatToChannel(const TDataSetRow &senderId, CChatGroup::TGroupType groupT
 	msgout.serial(const_cast<std::string&>(phraseId));
 	sendMessageViaMirror("IOS", msgout);
 }
-
 
 /**
  *	Send a chat line from a bot (mainly NPC) in a chat channel (know as chat group).
@@ -168,7 +167,6 @@ void npcTellToPlayer(const TDataSetRow &senderId, const TDataSetRow &receiverId,
 	msgout.serial(const_cast<std::string&>(phraseId));
 	sendMessageViaMirror("IOS", msgout);
 }
-
 
 /**
  *	Send a tell line from a bot (mainly NPC) to a player. Accept parametered strings
