@@ -208,6 +208,9 @@ namespace NLGUI
 			case PlayerName:
 				return "playername";
 				break;
+
+			default:
+				break;
 			}
 			
 			return "text";
@@ -496,6 +499,9 @@ namespace NLGUI
 
 		case PlayerName:
 			e = "playername";
+			break;
+
+		default:
 			break;
 		}
 

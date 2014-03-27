@@ -78,6 +78,9 @@ namespace NLGUI
 		case TTSpecialWindow:
 			return "special";
 			break;
+
+		default:
+			break;
 		}
 
 		return "";
