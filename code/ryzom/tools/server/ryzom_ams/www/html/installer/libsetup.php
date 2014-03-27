@@ -34,7 +34,7 @@
     if (!isset($_POST['function'])) { 
         //require the pages that are being needed.
         require_once( '../config.default.php' );
-        require_once( '../../ams_lib/libinclude.php' );
+        require_once( $AMS_LIB.'/libinclude.php' );
         ini_set( "display_errors", true );
         error_reporting( E_ALL );
 

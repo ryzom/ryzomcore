@@ -13,7 +13,6 @@
 //load required pages and turn error reporting on/off
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
-require_once( '../../ams_lib/libinclude.php' );
 if (!file_exists('../is_installed')) {
     //if is_installed doesnt exist run setup
     require( 'installer/libsetup.php' );
@@ -24,6 +23,7 @@ if (!file_exists('../is_installed')) {
     //if config exists then include it
     require( '../config.php' );
 }
+require_once( $AMS_LIB'/libinclude.php' );
 session_start();
 
 //Running Cron?
