@@ -2513,9 +2513,7 @@ void CDriverGL::retrieveATIDriverVersion()
 		RegCloseKey(parentKey);
 	}
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for ATI version retrieval"
-	nlwarning("OpenGL Driver: Missing Mac Implementation for ATI version retrieval");
-
+	// TODO: Missing Mac Implementation for ATI version retrieval
 #elif defined (NL_OS_UNIX)
 	// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different
 #endif
