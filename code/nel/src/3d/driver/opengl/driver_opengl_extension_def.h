@@ -50,20 +50,6 @@ extern "C" {
 
 #else
 
-// ***************************************************************************
-// ***************************************************************************
-// The NEL Functions Typedefs.
-// Must do it for compatibilities with futures version of gl.h
-// eg: version 1.2 does not define PFNGLACTIVETEXTUREARBPROC. Hence, do it now, with our special name
-// ***************************************************************************
-// ***************************************************************************
-
-#define GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX          0x9047
-#define GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX    0x9048
-#define GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX  0x9049
-#define GL_GPU_MEMORY_INFO_EVICTION_COUNT_NVX            0x904A
-#define GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX            0x904B
-
 #if defined(NL_OS_MAC)
 
 // Mac GL extensions
@@ -71,18 +57,6 @@ extern "C" {
 #elif defined(NL_OS_UNIX)
 
 // GLX extensions
-#ifndef NL_GLX_EXT_swap_control
-#define NL_GLX_EXT_swap_control 1
-
-#ifndef GLX_EXT_swap_control
-#define GLX_SWAP_INTERVAL_EXT              0x20F1
-#define GLX_MAX_SWAP_INTERVAL_EXT          0x20F2
-#endif
-
-typedef GLint (APIENTRY * NEL_PFNGLXSWAPINTERVALEXTPROC) (Display *dpy, GLXDrawable drawable, GLint interval);
-
-#endif // NL_GLX_EXT_swap_control
-
 #ifndef NL_GLX_MESA_swap_control
 #define NL_GLX_MESA_swap_control 1
 
