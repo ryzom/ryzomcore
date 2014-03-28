@@ -895,7 +895,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 
 				{
 					// Here, we are sure that texEnvCombine4 or texEnvCombine3 is OK.
-					nlassert( _Extensions.ATITextureEnvCombine3);
+					// nlassert( _Extensions.ATITextureEnvCombine3);
 
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
