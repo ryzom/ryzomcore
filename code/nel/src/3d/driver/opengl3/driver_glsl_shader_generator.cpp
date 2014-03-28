@@ -867,9 +867,9 @@ namespace NL3D
 				ss << "vec4 texel" << sampler << " = texture2D( sampler" << sampler << ",";
 				
 				if( !desc->getUseFirstTexCoords() )
-					ss << attribNames[ TexCoord0 + i ] << " );";
+					ss << attribNames[ TexCoord0 + i ] << ".st );";
 				else
-					ss << attribNames[ TexCoord0 ] << " );";
+					ss << attribNames[ TexCoord0 ] << ".st );";
 
 				ss << std::endl;
 
@@ -1301,11 +1301,11 @@ namespace NL3D
 		{
 			ss << "vec4 texel" << i;
 			ss << " = texture2D( sampler" << i;
-			ss << ", " << attribNames[ TexCoord1 ] << " );" << std::endl;
+			ss << ", " << attribNames[ TexCoord1 ] << ".st );" << std::endl;
 		}
 
 		// Color map UV coords are at position 0
-		ss << "vec4 texel" << ntextures - 1 << " = texture2D( sampler" << ntextures - 1 << ", " << attribNames[ TexCoord0 ] << " );" << std::endl;
+		ss << "vec4 texel" << ntextures - 1 << " = texture2D( sampler" << ntextures - 1 << ", " << attribNames[ TexCoord0 ] << ".st );" << std::endl;
 		
 		//ss << "vec4 texel = diffuseColor;" << std::endl;
 		//ss << "vec4 texel = vec4( 1.0, 1.0, 1.0, 1.0 );" << std::endl;
@@ -1371,7 +1371,7 @@ namespace NL3D
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;		
-		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
+		ss << "vec4 texel0 = texture2D( sampler0, texCoord0.st );" << std::endl;
 		ss << "vec4 texel1 = textureCube( sampler1, cubeTexCoords );" << std::endl;
 		ss << "vec4 texel;" << std::endl;
 		ss << "texel.rgb = texel0.rgb * diffuseColor.rgb;" << std::endl;
@@ -1416,7 +1416,7 @@ namespace NL3D
 		ss << "{" << std::endl;
 		
 		ss << "vec4 texel0 = textureCube( cubeSampler0, cubeTexCoords0 );" << std::endl;
-		ss << "vec4 texel1 = texture2D( sampler1, texCoord1 );" << std::endl;
+		ss << "vec4 texel1 = texture2D( sampler1, texCoord1.st );" << std::endl;
 
 		if( material->getShader() == CMaterial::PerPixelLighting )
 			ss << "vec4 texel2 = textureCube( cubeSampler2, cubeTexCoords2 );" << std::endl;
@@ -1476,17 +1476,17 @@ namespace NL3D
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 texel0 = texture2D( sampler0, texCoord0 );" << std::endl;
+		ss << "vec4 texel0 = texture2D( sampler0, texCoord0.st );" << std::endl;
 		ss << "texel0 = texel0 * bump0ScaleBias.xxxx + bump0ScaleBias.yyzz;" << std::endl;
 		ss << "texel0 = texel0 + texCoord1;" << std::endl;
-		ss << "vec4 texel1 = texture2D( sampler1, texel0 );" << std::endl;
+		ss << "vec4 texel1 = texture2D( sampler1, texel0.st );" << std::endl;
 		ss << "texel1 = texel1 * bump1ScaleBias.xxxx + bump1ScaleBias.yyzz;" << std::endl;
 		ss << "texel1 = texel1 + texCoord2;" << std::endl;
-		ss << "vec4 texel2 = texture2D( sampler2, texel1 );" << std::endl;
+		ss << "vec4 texel2 = texture2D( sampler2, texel1.st );" << std::endl;
 
 		if( diffuse )
 		{
-			ss << "vec4 texel3 = texture2D( sampler3, texCoord3 );" << std::endl;
+			ss << "vec4 texel3 = texture2D( sampler3, texCoord3.st );" << std::endl;
 			ss << "texel3 = texel3 * texel2;" << std::endl;
 		}
 		
@@ -1516,8 +1516,8 @@ namespace NL3D
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 tex0 = texture2D( sampler0, texCoord0 );" << std::endl;
-		ss << "vec4 tex1 = texture2D( sampler1, texCoord1 );" << std::endl;
+		ss << "vec4 tex0 = texture2D( sampler0, texCoord0.st );" << std::endl;
+		ss << "vec4 tex1 = texture2D( sampler1, texCoord1.st );" << std::endl;
 		ss << "vec4 tex = mix( tex0, tex1, diffuse.a );" << std::endl;
 		ss << "tex.a = 0;" << std::endl;
 		ss << "fragColor = tex;" << std::endl;

@@ -201,7 +201,13 @@ namespace NL3D
 		{
 			char errorLog[ 1024 ];
 			nglGetProgramInfoLog( id, 1024, NULL, errorLog );
-			nlinfo( "%s", errorLog );
+			nlwarning( "GL3: %s", errorLog );
+			std::vector<std::string> lines;
+			NLMISC::explode(std::string(src->SourcePtr), std::string("\n"), lines);
+			for (std::vector<std::string>::size_type i = 0; i < lines.size(); ++i)
+			{
+				nldebug( "GL3: %i: %s", i, lines[i].c_str());
+			}
 			return false;
 		}
 
