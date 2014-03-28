@@ -1452,12 +1452,12 @@ namespace NL3D
 		if( material->getTexture( 3 ) != NULL )
 			diffuse = true;
 
-		ss << "smooth in texCoord0;" << std::endl;
-		ss << "smooth in texCoord1;" << std::endl;
-		ss << "smooth in texCoord2;" << std::endl;
+		ss << "smooth in vec4 texCoord0;" << std::endl;
+		ss << "smooth in vec4 texCoord1;" << std::endl;
+		ss << "smooth in vec4 texCoord2;" << std::endl;
 
 		if( diffuse )
-			ss << "smooth in texCoord3;" << std::endl;
+			ss << "smooth in vec4 texCoord3;" << std::endl;
 
 		ss << "flat in vec4 bump0ScaleBias;" << std::endl;
 		ss << "flat in vec4 bump1ScaleBias;" << std::endl;
@@ -1498,7 +1498,7 @@ namespace NL3D
 		if( diffuse )
 			ss << "fragColor = texel3;" << std::endl;
 		else
-			ss << "fragColor = texel2" << std::endl;
+			ss << "fragColor = texel2;" << std::endl;
 
 		addAlphaTest();
 
