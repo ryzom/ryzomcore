@@ -112,6 +112,8 @@
     </layout>
    </item>
   </layout>
+  <zorder>verticalSpacer</zorder>
+  <zorder></zorder>
  </widget>
  <resources/>
  <connections/>
