@@ -473,7 +473,7 @@ void		CGameContextMenu::update()
 		// Action possible only if the client is not already busy and the selection is able to do this with you..
 		_TextFollow->setActive(
 			selection &&
-			(! selection->slot() == UserEntity->slot()) &&
+			(selection->slot() != UserEntity->slot()) &&
 			(!selection->isForageSource()) &&
 			(selection->isDead()==false) &&
 			(((availablePrograms & (1 << BOTCHATTYPE::DontFollow)) == 0)));
@@ -484,7 +484,7 @@ void		CGameContextMenu::update()
 	if(_TextAssist)
 	{
 		// Action possible only if the client is not already busy and the selection is able to do this with you..
-		_TextAssist->setActive(!R2::getEditor().isDMing() && selection && (! selection->slot() == UserEntity->slot()) && (!selection->isForageSource()) && (selection->isDead()==false));
+		_TextAssist->setActive(!R2::getEditor().isDMing() && selection && (selection->slot() != UserEntity->slot()) && (!selection->isForageSource()) && (selection->isDead()==false));
 		// See also below for mount/packer
 	}
 

@@ -62,6 +62,11 @@ class Helpers{
              $smarty -> assign( $key, $value );
              }
 
+		 //load ams content variables that are language dependent
+		 foreach ( $variables['ams_content'] as $key => $value){
+			 $smarty -> assign( $key, $value);
+			 }
+
           //smarty inheritance for loading the matching wrapper layout (with the matching menu bar)
           if( isset($vars['permission']) && $vars['permission'] == 3 ){
                $inherited = "extends:layout_admin.tpl|";

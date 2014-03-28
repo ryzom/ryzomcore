@@ -829,13 +829,6 @@ void prelogInit()
 
 		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
 
-		// tmp for patcher debug
-		extern void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf);
-		extern void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf);
-		tmpFlagMainlandPatchCategories(ClientCfg.ConfigFile);
-		tmpFlagRemovedPatchCategories(ClientCfg.ConfigFile);
-
-
 		// check "BuildName" in ClientCfg
 		//nlassert(!ClientCfg.BuildName.empty()); // TMP comment by nico do not commit
 
