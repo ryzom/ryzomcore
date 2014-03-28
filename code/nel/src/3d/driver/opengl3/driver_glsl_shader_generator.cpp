@@ -798,7 +798,8 @@ namespace NL3D
 
 		ss << "void main( void )" << std::endl;
 		ss << "{" << std::endl;
-		ss << "position = vposition;" << std::endl;
+		ss << "vec4 eye = vposition;" << std::endl; // FIXME
+		ss << "vec4 position = vposition;" << std::endl; // FIXME
 		ss << "gl_Position = modelViewProjection * position;" << std::endl;
 		ss << "bump0ScaleBias = bumpMap0Scale;" << std::endl;
 		ss << "bump1ScaleBias = bumpMap1Scale;" << std::endl;
