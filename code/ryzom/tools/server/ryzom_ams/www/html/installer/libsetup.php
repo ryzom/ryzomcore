@@ -6,28 +6,28 @@
     */
 
     //set permissions
-    if(chmod('../../../www/login/logs', 0660)) {
-        echo "failed to set permissions on logs";
+    if(is_writable('../../../www/login/logs')) {
+        echo "failed to get write permissions on logs";
         exit;
     }
-    if(chmod('../../../admin/graphs_output', 0660)) {
-        echo "failed to set permissions on graphs_output";
+    if(is_writable('../../../admin/graphs_output')) {
+        echo "failed to get write permissions on graphs_output";
         exit;
     }
-    if(chmod('../../../templates/default_c', 0660)) {
-        echo "failed to set permissions on default_c";
+    if(is_writable('../../../admin/templates/default_c')) {
+        echo "failed to get write permissions on default_c";
         exit;
     }
-    if(chmod('../../www', 0660)) {
-        echo "failed to set permissions on www";
+    if(is_writable('../../www')) {
+        echo "failed to get write permissions on www";
         exit;
     }
-    if(chmod('../../www/html/cache', 0660)) {
-        echo "failed to set permissions on cache";
+    if(is_writable('../../www/html/cache')) {
+        echo "failed to get write permissions on cache";
         exit;
     }
-    if(chmod('../../www/html/templates_c', 0660)) {
-        echo "failed to set permissions on templates_c";
+    if(is_writable('../../www/html/templates_c')) {
+        echo "failed to get write permissions on templates_c";
         exit;
     }
     
@@ -1696,6 +1696,8 @@
 
                 INSERT INTO `shard` (`shard_id`, `WSOnline`, `MOTD`, `OldState`, `RequiredState`) VALUES
                 (302, 1, 'Shard up', 'ds_restricted', 'ds_open');
+                
+                INSERT INTO `sessions` (`session_id`, `session_type`, `title`, `owner`, `plan_date`, `start_date`, `description`, `orientation`, `level`, `rule_type`, `access_type`, `state`, `host_shard_id`, `subscription_slots`, `reserved_slots`, `free_slots`, `estimated_duration`, `final_duration`, `folder_id`, `lang`, `icone`, `anim_mode`, `race_filter`, `religion_filter`, `guild_filter`, `shard_filter`, `level_filter`, `subscription_closed`, `newcomer`) VALUES (302, 'st_mainland', 'open shard mainland', 0, '2005-09-21 12:41:33', '2005-08-31 00:00:00', '', 'so_other', 'sl_a', 'rt_strict', 'at_public', 'ss_planned', 0, 0, 0, 0, 'et_short', 0, 0, 'lang_en', '', 'am_dm', 'rf_fyros,rf_matis,rf_tryker,rf_zorai', 'rf_kami,rf_karavan,rf_neutral', 'gf_any_player', '', 'lf_a,lf_b,lf_c,lf_d,lf_e,lf_f', 0, 0);
 
             GRANT ALL ON `" . $cfg['db']['ring']['name'] ."`.* TO `" . $cfg['db']['ring']['user'] ."`@".$cfg['db']['ring']['host']." identified by '".$cfg['db']['ring']['pass']."';
             ";

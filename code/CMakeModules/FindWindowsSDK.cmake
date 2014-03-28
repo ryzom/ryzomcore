@@ -71,11 +71,14 @@ SET(WINSDKENV_DIR $ENV{WINSDK_DIR})
 MACRO(FIND_WINSDK_VERSION_HEADERS)
   IF(WINSDK_DIR AND NOT WINSDK_VERSION)
     # Search version in headers
-    IF(EXISTS ${WINSDK_DIR}/include/Msi.h)
-      SET(_MSI_FILE ${WINSDK_DIR}/include/Msi.h)
-    ENDIF(EXISTS ${WINSDK_DIR}/include/Msi.h)
+    FIND_FILE(_MSI_FILE Msi.h
+      PATHS
+      ${WINSDK_DIR}/Include/um
+      ${WINSDK_DIR}/Include
+    )
 
     IF(_MSI_FILE)
+
       # Look for Windows SDK 8.0
       FILE(STRINGS ${_MSI_FILE} _CONTENT REGEX "^#ifndef NTDDI_WIN8")
 
@@ -88,11 +91,11 @@ MACRO(FIND_WINSDK_VERSION_HEADERS)
         FILE(STRINGS ${_MSI_FILE} _CONTENT REGEX "^#ifndef NTDDI_WIN7")
         
         IF(_CONTENT)
-          IF(EXISTS ${WINSDK_DIR}/include/winsdkver.h)
-            SET(_WINSDKVER_FILE ${WINSDK_DIR}/include/winsdkver.h)
-          ELSEIF(EXISTS ${WINSDK_DIR}/include/WinSDKVer.h)
-            SET(_WINSDKVER_FILE ${WINSDK_DIR}/include/WinSDKVer.h)
-          ENDIF(EXISTS ${WINSDK_DIR}/include/winsdkver.h)
+          FIND_FILE(_WINSDKVER_FILE winsdkver.h WinSDKVer.h
+            PATHS
+            ${WINSDK_DIR}/Include/um
+            ${WINSDK_DIR}/Include
+          )
 
           IF(_WINSDKVER_FILE)
             # Load WinSDKVer.h content
@@ -162,9 +165,13 @@ MACRO(USE_CURRENT_WINSDK)
   SET(WINSDK_VERSION_FULL "")
 
   # Use WINSDK environment variable
-  IF(WINSDKENV_DIR AND EXISTS ${WINSDKENV_DIR}/include/Windows.h)
-    SET(WINSDK_DIR ${WINSDKENV_DIR})
-  ENDIF(WINSDKENV_DIR AND EXISTS ${WINSDKENV_DIR}/include/Windows.h)
+  IF(WINSDKENV_DIR)
+    FIND_PATH(WINSDK_DIR Windows.h
+      HINTS
+      ${WINSDKENV_DIR}/Include/um
+      ${WINSDKENV_DIR}/Include
+    )
+  ENDIF(WINSDKENV_DIR)
 
   # Use INCLUDE environment variable
   IF(NOT WINSDK_DIR AND WINSDKCURRENT_VERSION_INCLUDE)
@@ -173,8 +180,8 @@ MACRO(USE_CURRENT_WINSDK)
 
       # Look for Windows.h because there are several paths
       IF(EXISTS ${_INCLUDE}/Windows.h)
-        STRING(REGEX REPLACE "/(include|INCLUDE|Include)" "" WINSDK_DIR ${_INCLUDE})
-        MESSAGE(STATUS "Found Windows SDK environment variable in ${WINSDK_DIR}")
+        STRING(REGEX REPLACE "/(include|INCLUDE|Include)(.*)" "" WINSDK_DIR ${_INCLUDE})
+        MESSAGE(STATUS "Found Windows SDK from include environment variable in ${WINSDK_DIR}")
         BREAK()
       ENDIF(EXISTS ${_INCLUDE}/Windows.h)
     ENDFOREACH(_INCLUDE)

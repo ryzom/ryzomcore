@@ -138,7 +138,12 @@ public:
 		float& getFloat();
 		float const& getFloat() const;
 		
-		int	_val;
+		union
+		{
+			int	_vali;
+			uintptr_t _valp;
+		};
+
 		TStackTypes	_type;
 	};
 	
@@ -346,7 +351,7 @@ inline
 CScriptStack::CStackEntry& CScriptStack::CStackEntry::operator=(float const& f)
 {
 	clean();
-	_val = *((int*)&f);
+	_vali = *((int*)&f);
 	_type = EFloat;
 	return *this;
 }
@@ -354,7 +359,7 @@ inline
 CScriptStack::CStackEntry& CScriptStack::CStackEntry::operator=(int const& i)
 {
 	clean();
-	_val = i;
+	_vali = i;
 	_type = EOther;
 	return *this;
 }
@@ -363,7 +368,7 @@ CScriptStack::CStackEntry& CScriptStack::CStackEntry::operator=(std::string cons
 {
 	clean();
 	std::string* const strPt = new std::string(str);
-	_val = *((int*)&strPt);
+	_valp = *((int*)&strPt);
 	_type = EString;
 	return *this;
 }
@@ -371,7 +376,7 @@ inline
 CScriptStack::CStackEntry& CScriptStack::CStackEntry::operator=(IScriptContext* sc)
 {
 	clean();
-	_val = *((int*)&sc);
+	_valp = *((int*)&sc);
 	_type = EContext;
 	return *this;
 }
@@ -386,9 +391,11 @@ bool CScriptStack::CStackEntry::operator==(CStackEntry const& other) const
 		return getString()==other.getString();
 	case EFloat:
 		return getFloat()==other.getFloat();
+	case EContext:
+		return _valp==other._valp;
 	case EOther:
 	default:
-		return _val==other._val;
+		return _vali==other._vali;
 	}
 }
 
@@ -420,9 +427,11 @@ bool CScriptStack::CStackEntry::operator<(CStackEntry const& other) const
 		return getString()<other.getString();
 	case EFloat:
 		return getFloat()<other.getFloat();
+	case EContext:
+		return _valp<other._valp;
 	case EOther:
 	default:
-		return _val<other._val;
+		return _vali<other._vali;
 	}
 }
 
@@ -436,9 +445,11 @@ bool CScriptStack::CStackEntry::operator>(CStackEntry const& other) const
 		return getString()>other.getString();
 	case EFloat:
 		return getFloat()>other.getFloat();
+	case EContext:
+		return _valp>other._valp;
 	case EOther:
 	default:
-		return _val>other._val;
+		return _vali>other._vali;
 	}
 }
 
@@ -473,43 +484,43 @@ inline
 std::string& CScriptStack::CStackEntry::getString()
 {
 	nlassert(_type==EString);
-	return *(*((std::string**)&_val));
+	return *(*((std::string**)&_valp));
 }
 inline
 std::string const& CScriptStack::CStackEntry::getString() const
 {
 	nlassert(_type==EString);
-	return *(*((std::string**)&_val));
+	return *(*((std::string**)&_valp));
 }
 inline
 IScriptContext* CScriptStack::CStackEntry::getIScriptContext()
 {
 	nlassert(_type==EContext);
-	return *((IScriptContext**)&_val);
+	return *((IScriptContext**)&_valp);
 }
 inline
 int& CScriptStack::CStackEntry::getInt()
 {
 	nlassert(_type==EOther);
-	return _val;
+	return _vali;
 }
 inline
 int const& CScriptStack::CStackEntry::getInt() const
 {
 	nlassert(_type==EOther);
-	return _val;
+	return _vali;
 }
 inline
 float& CScriptStack::CStackEntry::getFloat()
 {
 	nlassert(_type==EFloat);
-	return *((float*)&_val);
+	return *((float*)&_vali);
 }
 inline
 float const& CScriptStack::CStackEntry::getFloat() const
 {
 	nlassert(_type==EFloat);
-	return *((float const*)&_val);
+	return *((float const*)&_vali);
 }
 
 inline

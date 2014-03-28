@@ -236,8 +236,6 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
   OPTION(FINAL_VERSION            "Build in Final Version mode"                   ON )
-  OPTION(WITH_PERFHUD            "Build with NVIDIA PerfHUD support"                   OFF )
-  OPTION(WITH_PATCH_SUPPORT            "Build with in-game Patch Support"                   OFF )
 
   # Default to static building on Windows.
   IF(WIN32)
@@ -325,6 +323,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
+  OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)
@@ -343,6 +342,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM_TOOLS         "Build Ryzom Core Tools"                        ON )
   OPTION(WITH_RYZOM_SERVER        "Build Ryzom Core Services"                     ON )
   OPTION(WITH_RYZOM_SOUND         "Enable Ryzom Core Sound"                       ON )
+  OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
 
   ###
   # Optional support
@@ -889,7 +889,7 @@ MACRO(NL_SETUP_BUILD)
       SET(NL_RELEASE_CFLAGS "${NL_RELEASE_CFLAGS} -g")
     ELSE(WITH_SYMBOLS)
       IF(APPLE)
-        SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip -Wl,-x ${NL_RELEASE_LINKFLAGS}")
+        SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip ${NL_RELEASE_LINKFLAGS}")
       ELSE(APPLE)
         SET(NL_RELEASE_LINKFLAGS "-Wl,-s ${NL_RELEASE_LINKFLAGS}")
       ENDIF(APPLE)

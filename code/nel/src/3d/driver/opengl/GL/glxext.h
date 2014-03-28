@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 /*
-** Copyright (c) 2013 The Khronos Group Inc.
+** Copyright (c) 2013-2014 The Khronos Group Inc.
 **
 ** Permission is hereby granted, free of charge, to any person obtaining a
 ** copy of this software and/or associated documentation files (the
@@ -33,10 +33,10 @@ extern "C" {
 ** used to make the header, and the header can be found at
 **   http://www.opengl.org/registry/
 **
-** Khronos $Revision: 23730 $ on $Date: 2013-10-28 15:16:34 -0700 (Mon, 28 Oct 2013) $
+** Khronos $Revision: 25923 $ on $Date: 2014-03-17 03:54:56 -0700 (Mon, 17 Mar 2014) $
 */
 
-#define GLX_GLXEXT_VERSION 20131028
+#define GLX_GLXEXT_VERSION 20140317
 
 /* Generated C header for:
  * API: glx
@@ -49,6 +49,7 @@ extern "C" {
 
 #ifndef GLX_VERSION_1_3
 #define GLX_VERSION_1_3 1
+typedef XID GLXContextID;
 typedef struct __GLXFBConfigRec *GLXFBConfig;
 typedef XID GLXWindow;
 typedef XID GLXPbuffer;
@@ -272,7 +273,6 @@ __GLXextFuncPtr glXGetProcAddressARB (const GLubyte *procName);
 
 #ifndef GLX_EXT_import_context
 #define GLX_EXT_import_context 1
-typedef XID GLXContextID;
 #define GLX_SHARE_CONTEXT_EXT             0x800A
 #define GLX_VISUAL_ID_EXT                 0x800B
 #define GLX_SCREEN_EXT                    0x800C
@@ -407,6 +407,32 @@ GLXPixmap glXCreateGLXPixmapMESA (Display *dpy, XVisualInfo *visual, Pixmap pixm
 #endif
 #endif /* GLX_MESA_pixmap_colormap */
 
+#ifndef GLX_MESA_query_renderer
+#define GLX_MESA_query_renderer 1
+#define GLX_RENDERER_VENDOR_ID_MESA       0x8183
+#define GLX_RENDERER_DEVICE_ID_MESA       0x8184
+#define GLX_RENDERER_VERSION_MESA         0x8185
+#define GLX_RENDERER_ACCELERATED_MESA     0x8186
+#define GLX_RENDERER_VIDEO_MEMORY_MESA    0x8187
+#define GLX_RENDERER_UNIFIED_MEMORY_ARCHITECTURE_MESA 0x8188
+#define GLX_RENDERER_PREFERRED_PROFILE_MESA 0x8189
+#define GLX_RENDERER_OPENGL_CORE_PROFILE_VERSION_MESA 0x818A
+#define GLX_RENDERER_OPENGL_COMPATIBILITY_PROFILE_VERSION_MESA 0x818B
+#define GLX_RENDERER_OPENGL_ES_PROFILE_VERSION_MESA 0x818C
+#define GLX_RENDERER_OPENGL_ES2_PROFILE_VERSION_MESA 0x818D
+#define GLX_RENDERER_ID_MESA              0x818E
+typedef Bool ( *PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC) (int attribute, unsigned int *value);
+typedef const char *( *PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC) (int attribute);
+typedef Bool ( *PFNGLXQUERYRENDERERINTEGERMESAPROC) (Display *dpy, int screen, int renderer, int attribute, unsigned int *value);
+typedef const char *( *PFNGLXQUERYRENDERERSTRINGMESAPROC) (Display *dpy, int screen, int renderer, int attribute);
+#ifdef GLX_GLXEXT_PROTOTYPES
+Bool glXQueryCurrentRendererIntegerMESA (int attribute, unsigned int *value);
+const char *glXQueryCurrentRendererStringMESA (int attribute);
+Bool glXQueryRendererIntegerMESA (Display *dpy, int screen, int renderer, int attribute, unsigned int *value);
+const char *glXQueryRendererStringMESA (Display *dpy, int screen, int renderer, int attribute);
+#endif
+#endif /* GLX_MESA_query_renderer */
+
 #ifndef GLX_MESA_release_buffers
 #define GLX_MESA_release_buffers 1
 typedef Bool ( *PFNGLXRELEASEBUFFERSMESAPROC) (Display *dpy, GLXDrawable drawable);
@@ -432,6 +458,14 @@ typedef void ( *PFNGLXCOPYIMAGESUBDATANVPROC) (Display *dpy, GLXContext srcCtx, 
 void glXCopyImageSubDataNV (Display *dpy, GLXContext srcCtx, GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLXContext dstCtx, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei width, GLsizei height, GLsizei depth);
 #endif
 #endif /* GLX_NV_copy_image */
+
+#ifndef GLX_NV_delay_before_swap
+#define GLX_NV_delay_before_swap 1
+typedef Bool ( *PFNGLXDELAYBEFORESWAPNVPROC) (Display *dpy, GLXDrawable drawable, GLfloat seconds);
+#ifdef GLX_GLXEXT_PROTOTYPES
+Bool glXDelayBeforeSwapNV (Display *dpy, GLXDrawable drawable, GLfloat seconds);
+#endif
+#endif /* GLX_NV_delay_before_swap */
 
 #ifndef GLX_NV_float_buffer
 #define GLX_NV_float_buffer 1

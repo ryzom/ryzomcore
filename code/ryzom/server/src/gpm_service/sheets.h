@@ -34,7 +34,7 @@
  * \author Nevrax France
  * \date 2002
  */
-class CSheets
+class CGpmSheets
 {
 public:
 	class CSheet
@@ -85,7 +85,7 @@ public:
 
 private:
 	// prohibit cnstructor as this is a singleton
-	CSheets();
+	CGpmSheets();
 
 	static std::map<NLMISC::CSheetId,CSheet> _sheets;
 	static bool _initialised;

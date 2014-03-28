@@ -31,7 +31,7 @@ log = open("log.log", "w")
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Make and merge work")
+printLog(log, "--- Make, merge and clean work")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
@@ -72,10 +72,19 @@ except Exception, e:
 printLog(log, ">>> Mark diffs as translated <<<")
 diffFiles = os.listdir("diff")
 for diffFile in diffFiles:
-	if "_wk_diff_" in diffFile:
+	if "wk_diff_" in diffFile:
 		printLog(log, "DIFF " + "diff/" + diffFile)
 		subprocess.call([ TranslationTools, "crop_lines", "diff/" + diffFile, "3" ])
 
+#printLog(log, ">>> Clean diff <<<")
+#try:
+#	subprocess.call([ TranslationTools, "clean_string_diff" ])
+#	subprocess.call([ TranslationTools, "clean_phrase_diff" ])
+#	subprocess.call([ TranslationTools, "clean_clause_diff" ])
+#	subprocess.call([ TranslationTools, "clean_words_diff" ])
+#except Exception, e:
+#	printLog(log, "<" + processName + "> " + str(e))
+#printLog(log, "")
 
 printLog(log, ">>> Merge diff <<<")
 try:
