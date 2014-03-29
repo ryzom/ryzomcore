@@ -42,7 +42,6 @@ struct	CGlExtensions
 
 	bool	ARBMultiTexture;
 	uint	NbTextureStages;
-	bool	EXTTextureEnvCombine;
 
 	// Optional Extensions.
 	bool	EXTTextureCompressionS3TC;
@@ -90,7 +89,6 @@ public:
 		// Fill all false by default.
 		ARBMultiTexture= false;
 		NbTextureStages= 1;
-		EXTTextureEnvCombine= false;
 		ARBTextureCompression= false;
 		EXTTextureCompressionS3TC= false;
 		EXTVertexWeighting= false;
@@ -129,7 +127,6 @@ public:
 
 		result += "\n  Texturing: ";
 		result += ARBMultiTexture ? "ARBMultiTexture " : "";
-		result += EXTTextureEnvCombine ? "EXTTextureEnvCombine(*) " : "";
 		result += ARBTextureCompression ? "ARBTextureCompression " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
 		result += ATITextureEnvCombine3 ? "ATITextureEnvCombine3 " : "";

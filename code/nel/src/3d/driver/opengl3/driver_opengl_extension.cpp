@@ -516,15 +516,6 @@ static bool setupARBMultiTexture(const char	*glext)
 }
 
 // *********************************
-static bool setupEXTTextureEnvCombine(const char	*glext)
-{
-	H_AUTO_OGL(setupEXTTextureEnvCombine);
-
-	return (strstr(glext, "GL_EXT_texture_env_combine")!=NULL || strstr(glext, "GL_ARB_texture_env_combine")!=NULL);
-}
-
-
-// *********************************
 static bool	setupARBTextureCompression(const char	*glext)
 {
 	H_AUTO_OGL(setupARBTextureCompression);
@@ -1012,9 +1003,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 		// support IDRV_MAT_MAXTEXTURES texture stages so take min
 		ext.NbTextureStages= (ntext<((GLint)IDRV_MAT_MAXTEXTURES)?ntext:IDRV_MAT_MAXTEXTURES);
 	}
-
-	// Check EXTTextureEnvCombine
-	ext.EXTTextureEnvCombine= setupEXTTextureEnvCombine(glext);
 
 	// Check ARBTextureCompression
 	ext.ARBTextureCompression= setupARBTextureCompression(glext);
