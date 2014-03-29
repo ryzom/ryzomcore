@@ -52,7 +52,7 @@ public:
 
 	/**
 	 * sends all events to server
-	 * (should call CEventServer method postEvent() )
+	 * (should call CEventServer method postEvent())
 	 */
 	virtual void submitEvents(CEventServer & server, bool allWindows);
 

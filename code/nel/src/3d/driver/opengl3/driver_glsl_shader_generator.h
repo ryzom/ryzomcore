@@ -37,14 +37,14 @@ namespace NL3D
 		void reset();
 
 		/// Generate Vertex Shader based on the data provided in material, descriptor and vertexbuffer flags
-		void generateVS( std::string &vs );
+		void generateVS(std::string &vs);
 
 		/// Generate Pixel Shader based on the data provided in material, descriptor and vertexbuffer flags
-		void generatePS( std::string &ps );
+		void generatePS(std::string &ps);
 
-		void setMaterial( CMaterial *mat ){ material = mat; }
-		void setVBFormat( uint16 format ){ vbFormat = format; }
-		void setShaderDesc( CShaderDesc *d ){ desc = d; }
+		void setMaterial(CMaterial *mat) { material = mat; }
+		void setVBFormat(uint16 format) { vbFormat = format; }
+		void setShaderDesc(CShaderDesc *d) { desc = d; }
 
 	private:
 		/// Adds ambient color constant uniform declaration to the program
@@ -72,7 +72,7 @@ namespace NL3D
 		/// Adds the alpha threshold uniform to the program
 		void addAlphaTreshold();
 
-		/// Adds the actual alpha test to the program ( discards fragment if below threshold )
+		/// Adds the actual alpha test to the program (discards fragment if below threshold)
 		void addAlphaTest();
 
 		//////////////////////////////////////////////////////////////
@@ -105,10 +105,10 @@ namespace NL3D
 		void addLightInsFS();
 
 		/// Adds the directional light Vertex Shader function, num is the light number
-		void addDirectionalFunctionVS( int num );
+		void addDirectionalFunctionVS(int num);
 
 		/// Adds the point-light Vertex Shader function, num is the light number
-		void addPointLightFunctionVS( int num );
+		void addPointLightFunctionVS(int num);
 
 		/// Adds the appropriate light functions to the Vertex Shader
 		void addLightsFunctionVS();
@@ -116,10 +116,10 @@ namespace NL3D
 		/// Adds the appropriate light functions to the Pixel Shader
 		void addLightsFunctionFS();
 
-		/// Adds the lights to the Vertex Shader ( calls the appropriate functions )
+		/// Adds the lights to the Vertex Shader (calls the appropriate functions)
 		void addLightsVS();
 
-		/// Adds the lights to the Fragment Shader ( calls the appropriate functions )
+		/// Adds the lights to the Fragment Shader (calls the appropriate functions)
 		void addLightsFS();
 
 		//////////////////////////////////////////////////////////////
@@ -147,9 +147,9 @@ namespace NL3D
 		
 
 		void generateTexEnv();
-		void generateTexEnvRGB( unsigned int stage );
-		void generateTexEnvAlpha( unsigned int stage );
-		void buildArg( unsigned int stage, unsigned int n, bool alpha, std::string &arg );
+		void generateTexEnvRGB(unsigned int stage);
+		void generateTexEnvAlpha(unsigned int stage);
+		void buildArg(unsigned int stage, unsigned int n, bool alpha, std::string &arg);
 
 		void generateLightMapPS();
 		void generateSpecularPS();

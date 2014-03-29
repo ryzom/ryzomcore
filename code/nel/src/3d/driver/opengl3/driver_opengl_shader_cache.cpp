@@ -28,26 +28,26 @@ namespace NL3D
 		clearCache();
 	}
 
-	SShaderPair CShaderCache::findShader( const CShaderDesc &desc ) const
+	SShaderPair CShaderCache::findShader(const CShaderDesc &desc) const
 	{
-		for( int i = 0; i < shaders.size(); i++ )
+		for (int i = 0; i < shaders.size(); i++)
 		{
-			if( shaders[ i ] == desc )
+			if (shaders[ i ] == desc)
 				return shaders[ i ].getShaders();
 		}
 
 		return SShaderPair();
 	}
 
-	void CShaderCache::cacheShader( CShaderDesc &desc )
+	void CShaderCache::cacheShader(CShaderDesc &desc)
 	{
-		shaders.push_back( desc );
+		shaders.push_back(desc);
 	}
 
 	void CShaderCache::clearCache()
 	{
 		std::vector< CShaderDesc >::iterator itr = shaders.begin();
-		while( itr != shaders.end() )
+		while (itr != shaders.end())
 		{
 			SShaderPair sp;
 			sp = itr->getShaders();

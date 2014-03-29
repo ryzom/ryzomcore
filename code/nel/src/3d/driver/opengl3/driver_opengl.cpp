@@ -256,7 +256,7 @@ CDriverGL3::CDriverGL3()
 
 	// Compute the Flag which say if one texture has been changed in CMaterial.
 	_MaterialAllTextureTouchedFlag= 0;
-	for(i=0; i < IDRV_MAT_MAXTEXTURES; i++)
+	for (i=0; i < IDRV_MAT_MAXTEXTURES; i++)
 	{
 		_MaterialAllTextureTouchedFlag|= IDRV_TOUCHED_TEX[i];
 #ifdef GL_NONE
@@ -266,7 +266,7 @@ CDriverGL3::CDriverGL3()
 #endif
 	}
 
-	for( i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+	for (i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 		_UserTexMat[ i ].identity();
 
 	_UserTexMatEnabled = 0;
@@ -318,8 +318,8 @@ CDriverGL3::CDriverGL3()
 	usrShaderManager = new CUsrShaderManager();
 
 	CUsrShaderLoader loader;
-	loader.setManager( usrShaderManager );
-	loader.loadShaders( "./shaders" );
+	loader.setManager(usrShaderManager);
+	loader.loadShaders("./shaders");
 }
 
 // ***************************************************************************
@@ -333,11 +333,11 @@ CDriverGL3::~CDriverGL3()
 	currentProgram.pp = NULL;
 	currentProgram.gp = NULL;
 	
-	if( currentProgram.dynmatVP != NULL )
+	if (currentProgram.dynmatVP != NULL)
 		delete currentProgram.dynmatVP;
 	currentProgram.dynmatVP = NULL;
 
-	if( currentProgram.dynmatPP != NULL )
+	if (currentProgram.dynmatPP != NULL)
 		delete currentProgram.dynmatPP;
 	currentProgram.dynmatPP = NULL;
 
@@ -362,7 +362,7 @@ bool CDriverGL3::setupDisplay()
 	registerGlExtensions (_Extensions);
 	vector<string> lines;
 	explode(_Extensions.toString(), string("\n"), lines);
-	for(uint i = 0; i < lines.size(); i++)
+	for (uint i = 0; i < lines.size(); i++)
 		nlinfo("3D: %s", lines[i].c_str());
 
 #if defined(NL_OS_WINDOWS)
@@ -374,13 +374,13 @@ bool CDriverGL3::setupDisplay()
 
 	// Check required extensions!!
 	// ARBMultiTexture is a OpenGL 1.2 required extension.
-	if(!_Extensions.ARBMultiTexture)
+	if (!_Extensions.ARBMultiTexture)
 	{
 		nlwarning("Missing Required GL extension: GL_ARB_multitexture. Update your driver");
 		throw EBadDisplay("Missing Required GL extension: GL_ARB_multitexture. Update your driver");
 	}
 
-	if(!_Extensions.EXTTextureEnvCombine)
+	if (!_Extensions.EXTTextureEnvCombine)
 	{
 		nlwarning("Missing Important GL extension: GL_EXT_texture_env_combine => All envcombine are setup to GL_MODULATE!!!");
 	}
@@ -394,7 +394,7 @@ bool CDriverGL3::setupDisplay()
 
 	// All User Light are disabled by Default
 	uint i;
-	for(i=0;i<MaxLight;i++)
+	for (i=0;i<MaxLight;i++)
 		_UserLightEnable[i]= false;
 
 	// init _DriverGLStates
@@ -423,7 +423,7 @@ bool CDriverGL3::setupDisplay()
 	_PZBCameraPos= CVector::Null;
 
 	// Be always in EXTSeparateSpecularColor.
-	if(_Extensions.EXTSeparateSpecularColor)
+	if (_Extensions.EXTSeparateSpecularColor)
 	{
 	}
 
@@ -447,7 +447,7 @@ bool CDriverGL3::setupDisplay()
 
 	// Activate the default texture environnments for all stages.
 	//===========================================================
-	for(uint stage=0;stage<inlGetNumTextStages(); stage++)
+	for (uint stage=0;stage<inlGetNumTextStages(); stage++)
 	{
 		// init no texture.
 		_CurrentTexture[stage]= NULL;
@@ -496,10 +496,10 @@ bool CDriverGL3::setupDisplay()
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
 
-	if( !initPipeline() )
+	if (!initPipeline())
 	{
-		nlinfo( "Failed to create Pipeline Object" );
-		nlassert( false );
+		nlinfo("Failed to create Pipeline Object");
+		nlassert(false);
 	}
 
 	return true;
@@ -535,9 +535,9 @@ bool CDriverGL3::isTextureRectangle(ITexture * tex) const
 // ***************************************************************************
 bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 {
-	if(supportFrameBufferObject()/* && supportPackedDepthStencil()*/)
+	if (supportFrameBufferObject()/* && supportPackedDepthStencil()*/)
 	{
-		if(tex)
+		if (tex)
 		{
 			CTextureDrvInfosGL3*	gltext = (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
 			return gltext->activeFrameBufferObject(tex);
@@ -608,7 +608,7 @@ bool CDriverGL3::clearStencilBuffer(float stencilval)
 // --------------------------------------------------
 void CDriverGL3::setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha)
 {
-	H_AUTO_OGL(CDriverGL3_setColorMask )
+	H_AUTO_OGL(CDriverGL3_setColorMask)
 	glColorMask (bRed, bGreen, bBlue, bAlpha);
 }
 
@@ -640,7 +640,7 @@ bool CDriverGL3::swapBuffers()
 #elif defined(NL_OS_MAC)
 
 	// TODO: maybe do this somewhere else?
-	if(_DestroyWindow)
+	if (_DestroyWindow)
 	{
 		[_autoreleasePool release];
 		_autoreleasePool = [[NSAutoreleasePool alloc] init];
@@ -657,8 +657,8 @@ bool CDriverGL3::swapBuffers()
 	// Activate the default texture environnments for all stages.
 	//===========================================================
 	// This is not a requirement, but it ensure a more stable state each frame.
-	// (well, maybe the good reason is "it hides much more the bugs"  :o) ).
-	for(uint stage=0;stage<inlGetNumTextStages(); stage++)
+	// (well, maybe the good reason is "it hides much more the bugs"  :o)).
+	for (uint stage=0;stage<inlGetNumTextStages(); stage++)
 	{
 		// init no texture.
 		_CurrentTexture[stage]= NULL;
@@ -689,7 +689,7 @@ bool CDriverGL3::swapBuffers()
 	_TextureUsed.clear();
 
 	// Reset Profile VBHardLock
-	if(_VBHardProfiling)
+	if (_VBHardProfiling)
 	{
 		_CurVBHardLockCount= 0;
 		_NumVBHardProfileFrame++;
@@ -749,7 +749,7 @@ bool CDriverGL3::release()
 // --------------------------------------------------
 void CDriverGL3::setupViewport (const class CViewport& viewport)
 {
-	H_AUTO_OGL(CDriverGL3_setupViewport )
+	H_AUTO_OGL(CDriverGL3_setupViewport)
 
 	if (_win == EmptyWindow) return;
 
@@ -772,9 +772,9 @@ void CDriverGL3::setupViewport (const class CViewport& viewport)
 	{
 		float factorX = 1;
 		float factorY = 1;
-		if(clientWidth)
+		if (clientWidth)
 			factorX = (float)_TextureTarget->getWidth() / (float)clientWidth;
-		if(clientHeight)
+		if (clientHeight)
 			factorY = (float)_TextureTarget->getHeight() / (float)clientHeight;
 		x *= factorX;
 		y *= factorY;
@@ -804,7 +804,7 @@ void CDriverGL3::getViewport(CViewport &viewport)
 // --------------------------------------------------
 void CDriverGL3::setupScissor (const class CScissor& scissor)
 {
-	H_AUTO_OGL(CDriverGL3_setupScissor )
+	H_AUTO_OGL(CDriverGL3_setupScissor)
 
 	if (_win == EmptyWindow) return;
 
@@ -826,9 +826,9 @@ void CDriverGL3::setupScissor (const class CScissor& scissor)
 	{
 		float factorX = 1;
 		float factorY = 1;
-		if(clientWidth)
+		if (clientWidth)
 			factorX = (float) _TextureTarget->getWidth() / (float)clientWidth;
-		if(clientHeight)
+		if (clientHeight)
 			factorY = (float) _TextureTarget->getHeight() / (float)clientHeight;
 		x *= factorX;
 		y *= factorY;
@@ -837,7 +837,7 @@ void CDriverGL3::setupScissor (const class CScissor& scissor)
 	}
 
 	// enable or disable Scissor, but AFTER textureTarget adjust
-	if(x==0.f && y==0.f && width>=1.f && height>=1.f)
+	if (x==0.f && y==0.f && width>=1.f && height>=1.f)
 	{
 		glDisable(GL_SCISSOR_TEST);
 	}
@@ -849,9 +849,9 @@ void CDriverGL3::setupScissor (const class CScissor& scissor)
 		sint iy0=(sint)floor((float)clientHeight* y + 0.5f);
 		clamp (iy0, 0, (sint)clientHeight);
 
-		sint ix1=(sint)floor((float)clientWidth * (x+width) + 0.5f );
+		sint ix1=(sint)floor((float)clientWidth * (x+width) + 0.5f);
 		clamp (ix1, 0, (sint)clientWidth);
-		sint iy1=(sint)floor((float)clientHeight* (y+height) + 0.5f );
+		sint iy1=(sint)floor((float)clientHeight* (y+height) + 0.5f);
 		clamp (iy1, 0, (sint)clientHeight);
 
 		sint iwidth= ix1 - ix0;
@@ -866,7 +866,7 @@ void CDriverGL3::setupScissor (const class CScissor& scissor)
 
 uint8 CDriverGL3::getBitPerPixel ()
 {
-	H_AUTO_OGL(CDriverGL3_getBitPerPixel )
+	H_AUTO_OGL(CDriverGL3_getBitPerPixel)
 	return _CurrentMode.Depth;
 }
 
@@ -906,10 +906,10 @@ bool CDriverGL3::clipRect(NLMISC::CRect &rect)
 
 void CDriverGL3::getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect)
 {
-	H_AUTO_OGL(CDriverGL3_getBufferPart )
+	H_AUTO_OGL(CDriverGL3_getBufferPart)
 	bitmap.reset();
 
-	if(clipRect(rect))
+	if (clipRect(rect))
 	{
 		bitmap.resize(rect.Width, rect.Height, CBitmap::RGBA);
 		glReadPixels (rect.X, rect.Y, rect.Width, rect.Height, GL_RGBA, GL_UNSIGNED_BYTE, bitmap.getPixels ().getPtr());
@@ -918,10 +918,10 @@ void CDriverGL3::getBufferPart (CBitmap &bitmap, NLMISC::CRect &rect)
 
 void CDriverGL3::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect)
 {
-	H_AUTO_OGL(CDriverGL3_getZBufferPart )
+	H_AUTO_OGL(CDriverGL3_getZBufferPart)
 	zbuffer.clear();
 
-	if(clipRect(rect))
+	if (clipRect(rect))
 	{
 		zbuffer.resize(rect.Width*rect.Height);
 
@@ -933,7 +933,7 @@ void CDriverGL3::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &re
 
 void CDriverGL3::getZBuffer (std::vector<float>  &zbuffer)
 {
-	H_AUTO_OGL(CDriverGL3_getZBuffer )
+	H_AUTO_OGL(CDriverGL3_getZBuffer)
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	getZBufferPart(zbuffer, rect);
@@ -941,7 +941,7 @@ void CDriverGL3::getZBuffer (std::vector<float>  &zbuffer)
 
 void CDriverGL3::getBuffer (CBitmap &bitmap)
 {
-	H_AUTO_OGL(CDriverGL3_getBuffer )
+	H_AUTO_OGL(CDriverGL3_getBuffer)
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
 	getBufferPart(bitmap, rect);
@@ -950,14 +950,14 @@ void CDriverGL3::getBuffer (CBitmap &bitmap)
 
 bool CDriverGL3::fillBuffer (CBitmap &bitmap)
 {
-	H_AUTO_OGL(CDriverGL3_fillBuffer )
+	H_AUTO_OGL(CDriverGL3_fillBuffer)
 	CRect	rect(0,0);
 	getWindowSize(rect.Width, rect.Height);
-	if( rect.Width!=bitmap.getWidth() || rect.Height!=bitmap.getHeight() || bitmap.getPixelFormat()!=CBitmap::RGBA )
+	if (rect.Width!=bitmap.getWidth() || rect.Height!=bitmap.getHeight() || bitmap.getPixelFormat()!=CBitmap::RGBA)
 		return false;
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-	glDrawPixels (rect.Width, rect.Height, GL_RGBA, GL_UNSIGNED_BYTE, &(bitmap.getPixels()[0]) );
+	glDrawPixels (rect.Width, rect.Height, GL_RGBA, GL_UNSIGNED_BYTE, &(bitmap.getPixels()[0]));
 
 	return true;
 }
@@ -987,13 +987,13 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 	// setup texture mode, after activeTextureARB()
 	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 		textureMode = CDriverGLStates3::TextureRect;
 
 	_DriverGLStates.setTextureMode(textureMode);
 	if (tex->isTextureCube())
 	{
-		if(_Extensions.ARBTextureCubeMap)
+		if (_Extensions.ARBTextureCubeMap)
 		{
 			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
 			glCopyTexSubImage2D(NLCubeFaceToGLCubeFace[cubeFace], level, offsetx, offsety, x, y, width, height);
@@ -1015,7 +1015,7 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 // ***************************************************************************
 void CDriverGL3::setPolygonMode (TPolygonMode mode)
 {
-	H_AUTO_OGL(CDriverGL3_setPolygonMode )
+	H_AUTO_OGL(CDriverGL3_setPolygonMode)
 	IDriver::setPolygonMode (mode);
 
 	// Set the polygon mode
@@ -1126,7 +1126,7 @@ uint32			CDriverGL3::profileSetupedModelMatrix() const
 // ***************************************************************************
 void			CDriverGL3::enableUsedTextureMemorySum (bool enable)
 {
-	H_AUTO_OGL(CDriverGL3_enableUsedTextureMemorySum )
+	H_AUTO_OGL(CDriverGL3_enableUsedTextureMemorySum)
 
 	if (enable)
 		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL");
@@ -1169,7 +1169,7 @@ void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const flo
 
 	if (!supportTextureShaders()) return;
 	//nlassert(supportTextureShaders());
-	nlassert(stage < inlGetNumTextStages() );
+	nlassert(stage < inlGetNumTextStages());
 	_DriverGLStates.activeTextureARB(stage);
 
 	//glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
@@ -1223,7 +1223,7 @@ void CDriverGL3::setBlendConstantColor(NLMISC::CRGBA col)
 	_CurrentBlendConstantColor= col;
 
 	// update GL
-	if(!_Extensions.EXTBlendColor)
+	if (!_Extensions.EXTBlendColor)
 		return;
 
 	static const	float	OO255= 1.0f/255;
@@ -1307,7 +1307,7 @@ void	CDriverGL3::setSwapVBLInterval(uint interval)
 	bool res = true;
 
 #if defined(NL_OS_WINDOWS)
-	if(_Extensions.WGLEXTSwapControl)
+	if (_Extensions.WGLEXTSwapControl)
 	{
 		res = nwglSwapIntervalEXT(_Interval) == TRUE;
 	}
@@ -1343,7 +1343,7 @@ uint	CDriverGL3::getSwapVBLInterval()
 	H_AUTO_OGL(CDriverGL3_getSwapVBLInterval)
 
 #if defined(NL_OS_WINDOWS)
-	if(_Extensions.WGLEXTSwapControl)
+	if (_Extensions.WGLEXTSwapControl)
 	{
 		return nwglGetSwapIntervalEXT();
 	}
@@ -1371,7 +1371,7 @@ void	CDriverGL3::enablePolygonSmoothing(bool smooth)
 {
 	H_AUTO_OGL(CDriverGL3_enablePolygonSmoothing);
 
-	if(smooth)
+	if (smooth)
 		glEnable(GL_POLYGON_SMOOTH);
 	else
 		glDisable(GL_POLYGON_SMOOTH);
@@ -1390,7 +1390,7 @@ bool	CDriverGL3::isPolygonSmoothingEnabled() const
 // ***************************************************************************
 void	CDriverGL3::startProfileVBHardLock()
 {
-	if(_VBHardProfiling)
+	if (_VBHardProfiling)
 		return;
 
 	// start
@@ -1404,20 +1404,20 @@ void	CDriverGL3::startProfileVBHardLock()
 // ***************************************************************************
 void	CDriverGL3::endProfileVBHardLock(vector<std::string> &result)
 {
-	if(!_VBHardProfiling)
+	if (!_VBHardProfiling)
 		return;
 
 	// Fill infos.
 	result.clear();
 	result.resize(_VBHardProfiles.size() + 1);
 	float	total= 0;
-	for(uint i=0;i<_VBHardProfiles.size();i++)
+	for (uint i=0;i<_VBHardProfiles.size();i++)
 	{
 		const	uint tmpSize= 256;
 		char	tmp[tmpSize];
 		CVBHardProfile	&vbProf= _VBHardProfiles[i];
 		const char	*vbName;
-		if(vbProf.VBHard && !vbProf.VBHard->getName().empty())
+		if (vbProf.VBHard && !vbProf.VBHard->getName().empty())
 		{
 			vbName= vbProf.VBHard->getName().c_str();
 		}
@@ -1427,7 +1427,7 @@ void	CDriverGL3::endProfileVBHardLock(vector<std::string> &result)
 		}
 		// Display in ms.
 		float	timeLock= (float)CTime::ticksToSecond(vbProf.AccumTime)*1000 / max(_NumVBHardProfileFrame,1U);
-		smprintf(tmp, tmpSize, "%16s%c: %2.3f ms", vbName, vbProf.Change?'*':' ', timeLock );
+		smprintf(tmp, tmpSize, "%16s%c: %2.3f ms", vbName, vbProf.Change?'*':' ', timeLock);
 		total+= timeLock;
 
 		result[i]= tmp;
@@ -1443,7 +1443,7 @@ void	CDriverGL3::endProfileVBHardLock(vector<std::string> &result)
 void	CDriverGL3::appendVBHardLockProfile(NLMISC::TTicks time, CVertexBuffer *vb)
 {
 	// must allocate a new place?
-	if(_CurVBHardLockCount>=_VBHardProfiles.size())
+	if (_CurVBHardLockCount>=_VBHardProfiles.size())
 	{
 		_VBHardProfiles.resize(_VBHardProfiles.size()+1);
 		// set the original VBHard
@@ -1453,7 +1453,7 @@ void	CDriverGL3::appendVBHardLockProfile(NLMISC::TTicks time, CVertexBuffer *vb)
 	// Accumulate.
 	_VBHardProfiles[_CurVBHardLockCount].AccumTime+= time;
 	// if change of VBHard for this chrono place
-	if(_VBHardProfiles[_CurVBHardLockCount].VBHard != vb)
+	if (_VBHardProfiles[_CurVBHardLockCount].VBHard != vb)
 	{
 		// flag, and set new
 		_VBHardProfiles[_CurVBHardLockCount].VBHard= vb;
@@ -1488,32 +1488,32 @@ void	CDriverGL3::profileVBHardAllocation(std::vector<std::string> &result)
 	result.clear();
 	result.reserve(1000);
 	result.push_back(toString("Memory Allocated: %4d Ko in AGP / %4d Ko in VRAM",
-		getAvailableVertexAGPMemory()/1000, getAvailableVertexVRAMMemory()/1000 ));
+		getAvailableVertexAGPMemory()/1000, getAvailableVertexVRAMMemory()/1000));
 	result.push_back(toString("Num VBHard: %d", _VertexBufferHardSet.Set.size()));
 
 	uint	totalMemUsed= 0;
 	set<IVertexBufferHardGL*>::iterator	it;
-	for(it= _VertexBufferHardSet.Set.begin(); it!=_VertexBufferHardSet.Set.end(); it++)
+	for (it= _VertexBufferHardSet.Set.begin(); it!=_VertexBufferHardSet.Set.end(); it++)
 	{
 		IVertexBufferHardGL	*vbHard= *it;
-		if(vbHard)
+		if (vbHard)
 		{
 			uint	vSize= vbHard->VB->getVertexSize();
 			uint	numVerts= vbHard->VB->getNumVertices();
 			totalMemUsed+= vSize*numVerts;
 		}
 	}
-	result.push_back(toString("Mem Used: %4d Ko", totalMemUsed/1000) );
+	result.push_back(toString("Mem Used: %4d Ko", totalMemUsed/1000));
 
-	for(it= _VertexBufferHardSet.Set.begin(); it!=_VertexBufferHardSet.Set.end(); it++)
+	for (it= _VertexBufferHardSet.Set.begin(); it!=_VertexBufferHardSet.Set.end(); it++)
 	{
 		IVertexBufferHardGL	*vbHard= *it;
-		if(vbHard)
+		if (vbHard)
 		{
 			uint	vSize= vbHard->VB->getVertexSize();
 			uint	numVerts= vbHard->VB->getNumVertices();
 			result.push_back(toString("  %16s: %4d ko (format: %d / numVerts: %d)",
-				vbHard->VB->getName().c_str(), vSize*numVerts/1000, vSize, numVerts ));
+				vbHard->VB->getName().c_str(), vSize*numVerts/1000, vSize, numVerts));
 		}
 	}
 }
@@ -1618,7 +1618,7 @@ void CDriverGL3::checkTextureOn() const
 	// tmp for debug
 	CDriverGLStates3 &dgs = const_cast<CDriverGLStates3 &>(_DriverGLStates);
 	uint currTexStage = dgs.getActiveTextureARB();
-	for(uint k = 0; k < this->getNbTextureStages(); ++k)
+	for (uint k = 0; k < this->getNbTextureStages(); ++k)
 	{
 		dgs.activeTextureARB(k);
 		GLboolean flag2D;
@@ -1928,12 +1928,12 @@ void CDriverGL3::reloadUserShaders()
 {
 	usrShaderManager->clear();
 	NL3D::CUsrShaderLoader loader;
-	loader.setManager( usrShaderManager );
-	loader.loadShaders( "./shaders" );
+	loader.setManager(usrShaderManager);
+	loader.loadShaders("./shaders");
 }
 
-CVertexProgramDrvInfosGL3::CVertexProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it ) :
-IProgramDrvInfos( drv, it )
+CVertexProgramDrvInfosGL3::CVertexProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it) :
+IProgramDrvInfos(drv, it)
 {
 	programId = 0;
 }
@@ -1943,17 +1943,17 @@ CVertexProgramDrvInfosGL3::~CVertexProgramDrvInfosGL3()
 	programId = 0;
 }
 
-uint CVertexProgramDrvInfosGL3::getUniformIndex( const char *name ) const
+uint CVertexProgramDrvInfosGL3::getUniformIndex(const char *name) const
 {
-	int idx = nglGetUniformLocation( programId, name );	
-	if( idx == -1 )
+	int idx = nglGetUniformLocation(programId, name);	
+	if (idx == -1)
 		return ~0;
 	else
 		return idx;
 }
 
-CPixelProgramDrvInfosGL3::CPixelProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it ) :
-IProgramDrvInfos( drv, it )
+CPixelProgramDrvInfosGL3::CPixelProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it) :
+IProgramDrvInfos(drv, it)
 {
 	programId = 0;
 }
@@ -1963,10 +1963,10 @@ CPixelProgramDrvInfosGL3::~CPixelProgramDrvInfosGL3()
 	programId = 0;
 }
 
-uint CPixelProgramDrvInfosGL3::getUniformIndex( const char *name ) const
+uint CPixelProgramDrvInfosGL3::getUniformIndex(const char *name) const
 {
-	int idx = nglGetUniformLocation( programId, name );
-	if( idx == -1 )
+	int idx = nglGetUniformLocation(programId, name);
+	if (idx == -1)
 		return ~0;
 	else
 		return idx;

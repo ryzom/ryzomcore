@@ -118,7 +118,7 @@ void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL3_setTextureEnvFunction)
 	ITexture	*text= mat.getTexture(uint8(stage));
-	if(text)
+	if (text)
 	{
 		CMaterial::CTexEnv	&env= mat._TexEnvs[stage];
 
@@ -133,7 +133,7 @@ void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
 		{
 			// set mode and enable.
 			CMaterial::TTexCoordGenMode	mode= mat.getTexCoordGenMode(stage);
-			if(mode==CMaterial::TexCoordGenReflect)
+			if (mode==CMaterial::TexCoordGenReflect)
 			{
 				// Cubic or normal ?
 				if (text->isTextureCube ())
@@ -141,11 +141,11 @@ void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
 				else
 					_DriverGLStates.setTexGenMode (stage, GL_SPHERE_MAP);
 			}
-			else if(mode==CMaterial::TexCoordGenObjectSpace)
+			else if (mode==CMaterial::TexCoordGenObjectSpace)
 			{
 				_DriverGLStates.setTexGenMode (stage, GL_OBJECT_LINEAR);
 			}
-			else if(mode==CMaterial::TexCoordGenEyeSpace)
+			else if (mode==CMaterial::TexCoordGenEyeSpace)
 			{
 				_DriverGLStates.setTexGenMode (stage, GL_EYE_LINEAR);
 			}
@@ -165,7 +165,7 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 	if (
 		(_UserTexMatEnabled != 0 && (mat.getFlags() & IDRV_MAT_USER_TEX_MAT_ALL) == 0)
 		|| (mat.getFlags() & IDRV_MAT_USER_TEX_MAT_ALL) != 0
-	   )
+	  )
 	{
 		// for each stage, setup the texture matrix if needed
 		uint newMask = (mat.getFlags() & IDRV_MAT_USER_TEX_MAT_ALL) >> IDRV_MAT_USER_TEX_FIRST_BIT;
@@ -174,7 +174,7 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 		{
 			if (newMask & shiftMask) // user matrix for this stage
 			{
-				_UserTexMat[ k ] = mat.getUserTexMat( k );
+				_UserTexMat[ k ] = mat.getUserTexMat(k);
 				_UserTexMatEnabled |= shiftMask;
 			}
 			else
@@ -182,7 +182,7 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 				/// check if matrix disabled
 				if (
 					(newMask & shiftMask) != (_UserTexMatEnabled & shiftMask)
-				   )
+				  )
 				{
 					_UserTexMat[ k ].identity();
 					_UserTexMatEnabled &= ~shiftMask;
@@ -232,7 +232,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL3_setupMaterial)
 
-	if( mat.getDynMat() != NULL )
+	if (mat.getDynMat() != NULL)
 	{
 		_CurrentMaterial = &mat; 
 		return true;
@@ -263,26 +263,26 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 1. Setup modified fields of material.
 	//=====================================
-	if( touched )
+	if (touched)
 	{
 		/* Exception: if only Textures are modified in the material, no need to "Bind OpenGL States", or even to test
 			for change, because textures are activated alone, see below.
 			No problem with delete/new problem (see below), because in this case, IDRV_TOUCHED_ALL is set (see above).
 		*/
 		// If any flag is set (but a flag of texture)
-		if( touched & (~_MaterialAllTextureTouchedFlag) )
+		if (touched & (~_MaterialAllTextureTouchedFlag))
 		{
 			// Convert Material to driver shader.
 			if (touched & IDRV_TOUCHED_BLENDFUNC)
 			{
-				convBlend( mat.getSrcBlend(),glenum );
+				convBlend(mat.getSrcBlend(),glenum);
 				pShader->SrcBlend=glenum;
-				convBlend( mat.getDstBlend(),glenum );
+				convBlend(mat.getDstBlend(),glenum);
 				pShader->DstBlend=glenum;
 			}
 			if (touched & IDRV_TOUCHED_ZFUNC)
 			{
-				convZFunction( mat.getZFunc(),glenum);
+				convZFunction(mat.getZFunc(),glenum);
 				pShader->ZComp= glenum;
 			}
 			if (touched & IDRV_TOUCHED_LIGHTING)
@@ -318,14 +318,14 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	CMaterial::TShader matShader = pShader->SupportedShader;
 
 	// if the shader has changed since last time
-	if(matShader != _CurrentMaterialSupportedShader)
+	if (matShader != _CurrentMaterialSupportedShader)
 	{
 		// if old was lightmap, restore standard lighting
-		if(_CurrentMaterialSupportedShader==CMaterial::LightMap)
+		if (_CurrentMaterialSupportedShader==CMaterial::LightMap)
 			setupLightMapDynamicLighting(false);
 
 		// if new is lightmap, setup dynamic lighting
-		if(matShader==CMaterial::LightMap)
+		if (matShader==CMaterial::LightMap)
 			setupLightMapDynamicLighting(true);
 	}
 
@@ -339,7 +339,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// because setupTexture() may disable all stage.
 	if (matShader != CMaterial::Water)
 	{
-		for(stage=0 ; stage<inlGetNumTextStages() ; stage++)
+		for (stage=0 ; stage<inlGetNumTextStages() ; stage++)
 		{
 			ITexture	*text= mat.getTexture(uint8(stage));
 			if (text != NULL && !setupTexture(*text))
@@ -347,9 +347,9 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		}
 	}
 	// Here, for Lightmap materials, setup the lightmaps.
-	if(matShader == CMaterial::LightMap)
+	if (matShader == CMaterial::LightMap)
 	{
-		for(stage = 0; stage < mat._LightMaps.size(); stage++)
+		for (stage = 0; stage < mat._LightMaps.size(); stage++)
 		{
 			ITexture *text = mat._LightMaps[stage].Texture;
 			if (text != NULL && !setupTexture(*text))
@@ -367,15 +367,15 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// Do not do it for Lightmap and per pixel lighting , because done in multipass in a very special fashion.
 	// This avoid the useless multiple change of texture states per lightmapped object.
 	// Don't do it also for Specular because the EnvFunction and the TexGen may be special.
-	if(matShader != CMaterial::LightMap
+	if (matShader != CMaterial::LightMap
 		&& matShader != CMaterial::PerPixelLighting
 		/* && matShader != CMaterial::Caustics	*/
 		&& matShader != CMaterial::Cloud
 		&& matShader != CMaterial::Water
 		&& matShader != CMaterial::Specular
-	   )
+	  )
 	{
-		for(stage=0 ; stage<inlGetNumTextStages() ; stage++)
+		for (stage=0 ; stage<inlGetNumTextStages() ; stage++)
 		{
 			ITexture	*text= mat.getTexture(uint8(stage));
 
@@ -393,21 +393,21 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		//=================
 		bool blend = (mat.getFlags()&IDRV_MAT_BLEND)!=0;
 		_DriverGLStates.enableBlend(blend);
-		if(blend)
+		if (blend)
 			_DriverGLStates.blendFunc(pShader->SrcBlend, pShader->DstBlend);
 
 		// Double Sided Part.
 		//===================
 		// NB: inverse state: DoubleSided <=> !CullFace.
 		uint32	twoSided= mat.getFlags()&IDRV_MAT_DOUBLE_SIDED;
-		_DriverGLStates.enableCullFace( twoSided==0 );
+		_DriverGLStates.enableCullFace(twoSided==0);
 
 
 		// Alpha Test Part.
 		//=================
 		uint32	alphaTest= mat.getFlags()&IDRV_MAT_ALPHA_TEST;
 		_DriverGLStates.enableAlphaTest(alphaTest);
-		if(alphaTest)
+		if (alphaTest)
 		{
 			// setup alphaTest threshold.
 			_DriverGLStates.alphaFunc(mat.getAlphaTestThreshold());
@@ -433,10 +433,10 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		// Light Part.
 
 		_DriverGLStates.enableLighting(mat.getFlags()&IDRV_MAT_LIGHTING);
-		if( ( mat.getFlags() & IDRV_MAT_LIGHTING ) == 0 )
+		if ((mat.getFlags() & IDRV_MAT_LIGHTING) == 0)
 			disableAllLights();
 
-		if(mat.getFlags()&IDRV_MAT_LIGHTING)
+		if (mat.getFlags()&IDRV_MAT_LIGHTING)
 		{
 			_DriverGLStates.setEmissive(pShader->PackedEmissive, pShader->Emissive);
 			_DriverGLStates.setAmbient(pShader->PackedAmbient, pShader->Ambient);
@@ -484,7 +484,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 5. Set up the program
 	// =====================
-	bool programOK = setupProgram( mat );
+	bool programOK = setupProgram(mat);
 	return programOK;
 }
 
@@ -493,7 +493,7 @@ sint			CDriverGL3::beginMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginMultiPass)
 
-	if( _CurrentMaterial->getDynMat() != NULL )
+	if (_CurrentMaterial->getDynMat() != NULL)
 		return _CurrentMaterial->getDynMat()->getPassCount();
 
 	// Depending on material type and hardware, return number of pass required to draw this material.
@@ -524,8 +524,8 @@ bool CDriverGL3::setupPass(uint pass)
 {
 	H_AUTO_OGL(CDriverGL3_setupPass)
 	
-	if( _CurrentMaterial->getDynMat() != NULL )
-		return setupDynMatPass( pass );
+	if (_CurrentMaterial->getDynMat() != NULL)
+		return setupDynMatPass(pass);
 	
 	switch(_CurrentMaterialSupportedShader)
 	{
@@ -563,7 +563,7 @@ void			CDriverGL3::endMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endMultiPass)
 	
-	if( _CurrentMaterial->getDynMat() != NULL )
+	if (_CurrentMaterial->getDynMat() != NULL)
 		return;
 
 	switch(_CurrentMaterialSupportedShader)
@@ -594,19 +594,19 @@ void			CDriverGL3::endMultiPass()
 	}
 }
 
-bool CDriverGL3::setupDynMatPass( uint pass )
+bool CDriverGL3::setupDynMatPass(uint pass)
 {
 
-	if( !setupDynMatProgram( *_CurrentMaterial, pass ) )
+	if (!setupDynMatProgram(*_CurrentMaterial, pass))
 		return false;
 	
-	if( ( _CurrentMaterial->getFlags() & IDRV_MAT_DOUBLE_SIDED ) != 0 )
-		_DriverGLStates.enableCullFace( false );
+	if ((_CurrentMaterial->getFlags() & IDRV_MAT_DOUBLE_SIDED) != 0)
+		_DriverGLStates.enableCullFace(false);
 	else
-		_DriverGLStates.enableCullFace( true );
+		_DriverGLStates.enableCullFace(true);
 
 	CDynMaterial *m = _CurrentMaterial->getDynMat();
-	SRenderPass *currentPass = m->getPass( pass );
+	SRenderPass *currentPass = m->getPass(pass);
 
 	IProgram *p;
 
@@ -618,56 +618,56 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 	type[ 0 ] = IDriver::VertexProgram;
 	type[ 1 ] = IDriver::PixelProgram;
 
-	for( uint32 j = 0; j < 2; j++ )
+	for (uint32 j = 0; j < 2; j++)
 	{
 		p = programs[ j ];
 
-		for( uint32 i = 0; i < currentPass->count(); i++ )
+		for (uint32 i = 0; i < currentPass->count(); i++)
 		{
-			const SDynMaterialProp *prop = currentPass->getProperty( i );		
-			int loc = getUniformLocation( type[ j ], prop->prop.c_str() );
-			if( loc == -1 )
+			const SDynMaterialProp *prop = currentPass->getProperty(i);		
+			int loc = getUniformLocation(type[ j ], prop->prop.c_str());
+			if (loc == -1)
 				continue;
 
-			switch( prop->type )
+			switch(prop->type)
 			{
 			case SDynMaterialProp::Float:
-				setUniform1f( type[ j ], loc, prop->value.toFloat() );
+				setUniform1f(type[ j ], loc, prop->value.toFloat());
 				break;
 
 			case SDynMaterialProp::Int:
-				setUniform1i( type[ j ], loc, prop->value.toInt() );
+				setUniform1i(type[ j ], loc, prop->value.toInt());
 				break;
 
 			case SDynMaterialProp::Uint:
-				setUniform1ui( type[ j ], loc, prop->value.toUInt() );
+				setUniform1ui(type[ j ], loc, prop->value.toUInt());
 				break;
 
 			case SDynMaterialProp::Color:
 				{
 					float v[ 4 ];
-					prop->value.getVector4( v );
+					prop->value.getVector4(v);
 				
-					for( int k = 0; k < 4; k++ )
+					for (int k = 0; k < 4; k++)
 						v[ k ] = v[ k ] / 255.0f;
 				
-					setUniform4f( type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+					setUniform4f(type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ]);
 				}
 				break;
 
 			case SDynMaterialProp::Vector4:
 				{
 					float v[ 4 ];
-					prop->value.getVector4( v );
-					setUniform4f( type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ] );
+					prop->value.getVector4(v);
+					setUniform4f(type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ]);
 				}
 				break;
 
 			case SDynMaterialProp::Matrix4:
 				{
 					float m[ 16 ];
-					prop->value.getMatrix4( m );
-					setUniform4x4f( type[ j ], loc, m );
+					prop->value.getMatrix4(m);
+					setUniform4x4f(type[ j ], loc, m);
 					break;
 				}
 
@@ -679,17 +679,17 @@ bool CDriverGL3::setupDynMatPass( uint pass )
 		////////////////////////////////// Set up some standard uniforms //////////////////////////////////
 
 		int loc = -1;
-		loc = getUniformLocation( type[ j ], "mvpMatrix" );
-		if( loc != -1 )
+		loc = getUniformLocation(type[ j ], "mvpMatrix");
+		if (loc != -1)
 		{
 			CMatrix mat = _GLProjMat * _ModelViewMatrix;
-			setUniform4x4f( type[ j ], loc, mat );
+			setUniform4x4f(type[ j ], loc, mat);
 		}
 
-		loc = getUniformLocation( type[ j ], "mvMatrix" );
-		if( loc != -1 )
+		loc = getUniformLocation(type[ j ], "mvMatrix");
+		if (loc != -1)
 		{
-			setUniform4x4f( type[ j ], loc, _ModelViewMatrix );
+			setUniform4x4f(type[ j ], loc, _ModelViewMatrix);
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -703,34 +703,34 @@ void CDriverGL3::setupNormalPass()
 {
 	const CMaterial &mat = *_CurrentMaterial;
 	
-	for( int i = 0; i < IDRV_MAT_MAXTEXTURES; i++ )
+	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 	{
 		// Set constant
-		int cl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Constant0 + i ) );
-		if( cl != -1 )
+		int cl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
+		if (cl != -1)
 		{
 			GLfloat glCol[ 4 ];
-			convColor( mat._TexEnvs[ i ].ConstantColor, glCol );
-			setUniform4f( IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+			convColor(mat._TexEnvs[ i ].ConstantColor, glCol);
+			setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 		}
 
 		// Set texture
-		ITexture *t = mat.getTexture( i );
-		if( t == NULL )
+		ITexture *t = mat.getTexture(i);
+		if (t == NULL)
 			continue;
 		
-		int index = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Sampler0 + i ) );
-		if( index == -1 )
+		int index = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + i));
+		if (index == -1)
 			continue;
 		
-		setUniform1i( IDriver::PixelProgram, index, i );
+		setUniform1i(IDriver::PixelProgram, index, i);
 	}
 }
 
 // ***************************************************************************
 void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 {
-	H_AUTO_OGL(CDriverGL3_computeLightMapInfos )
+	H_AUTO_OGL(CDriverGL3_computeLightMapInfos)
 	static const uint32 RGBMaskPacked = CRGBA(255,255,255,0).getPacked();
 
 	// For optimisation consideration, suppose there is not too much lightmap.
@@ -761,7 +761,7 @@ void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 // ***************************************************************************
 sint CDriverGL3::beginLightMapMultiPass ()
 {
-	H_AUTO_OGL(CDriverGL3_beginLightMapMultiPass )
+	H_AUTO_OGL(CDriverGL3_beginLightMapMultiPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// compute how many lightmap and pass we must process.
@@ -772,7 +772,7 @@ sint CDriverGL3::beginLightMapMultiPass ()
 
 	// if the dynamic lightmap light has changed since the last render (should not happen), resetup
 	// normal way is that setupLightMapDynamicLighting() is called in setupMaterial() if shader different from prec
-	if(_LightMapDynamicLightDirty)
+	if (_LightMapDynamicLightDirty)
 		setupLightMapDynamicLighting(true);
 
 	// reset Ambient and specular lighting
@@ -801,7 +801,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	static	GLfloat glcolGrey[4]= {0.5f,0.5f,0.5f,1.f};
 
 	// No lightmap or all blacks??, just setup "black texture" for stage 0.
-	if(_NLightMaps==0)
+	if (_NLightMaps==0)
 	{
 		ITexture	*text= mat.getTexture(0);
 		activateTexture(0,text);
@@ -819,7 +819,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		_DriverGLStates.setTexGenMode(0, 0);
 
 		// And disable other stages.
-		for(uint stage = 1; stage < inlGetNumTextStages(); stage++)
+		for (uint stage = 1; stage < inlGetNumTextStages(); stage++)
 		{
 			// disable texturing.
 			activateTexture(stage, NULL);
@@ -845,7 +845,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		uint32	g=0;
 		uint32	b=0;
 		// sum only the ambient of lightmaps that will be drawn this pass
-		for(uint sa=0;sa<nstages-1;sa++)
+		for (uint sa=0;sa<nstages-1;sa++)
 		{
 			uint	wla= _LightMapLUT[lmapId+sa];
 			// must mul them by their respective mapFactor too
@@ -867,10 +867,10 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	}
 
 	// setup all stages.
-	for(uint stage= 0; stage<inlGetNumTextStages(); stage++)
+	for (uint stage= 0; stage<inlGetNumTextStages(); stage++)
 	{
 		// if must setup a lightmap stage.
-		if(stage<nstages-1)
+		if (stage<nstages-1)
 		{
 			// setup lightMap.
 			uint	whichLightMap= _LightMapLUT[lmapId];
@@ -889,29 +889,29 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 
 			// If texture not NULL, Change texture env fonction.
 			//==================================================
-			if(text)
+			if (text)
 			{
 				static CMaterial::CTexEnv	stdEnv;
 
 				{
 					// Here, we are sure that texEnvCombine4 or texEnvCombine3 is OK.
-					// nlassert( _Extensions.ATITextureEnvCombine3);
+					// nlassert(_Extensions.ATITextureEnvCombine3);
 
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
 
-					int cl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Constant0 + stage ) );
-					if( cl != -1 )
+					int cl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
+					if (cl != -1)
 					{
 						GLfloat glCol[ 4 ];
-						convColor( lmapFactor, glCol );
-						setUniform4f( IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ] );
+						convColor(lmapFactor, glCol);
+						setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 					}
 
-					int tl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Sampler0 + stage ) );
-					if( tl != -1 )
+					int tl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
+					if (tl != -1)
 					{
-						setUniform1i( IDriver::PixelProgram, tl, stage );
+						setUniform1i(IDriver::PixelProgram, tl, stage);
 					}
 
 					activateTexEnvColor(stage, stdEnv);
@@ -921,7 +921,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					_DriverGLStates.setTexGenMode(stage, 0);
 
 					// setup TexEnvCombine4 (ignore alpha part).
-					if(_CurrentTexEnvSpecial[stage] != TexEnvSpecialLightMap)
+					if (_CurrentTexEnvSpecial[stage] != TexEnvSpecialLightMap)
 					{
 						// TexEnv is special.
 						_CurrentTexEnvSpecial[stage] = TexEnvSpecialLightMap;
@@ -932,11 +932,11 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 			// Next lightmap.
 			lmapId++;
 		}
-		else if(stage<nstages)
+		else if (stage<nstages)
 		{
 			// optim: do this only for first pass, and last pass only if stage!=nLMapPerPass
 			// (meaning not the same stage as preceding passes).
-			if(pass==0 || (pass==_NLightMapPass-1 && stage!=_NLightMapPerPass))
+			if (pass==0 || (pass==_NLightMapPass-1 && stage!=_NLightMapPerPass))
 			{
 				// activate the texture at last stage.
 				ITexture	*text= mat.getTexture(0);
@@ -949,10 +949,10 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				_DriverGLStates.activeTextureARB(stage);
 				_DriverGLStates.setTexGenMode(stage, 0);
 
-				int tl = currentProgram.pp->getUniformIndex( CProgramIndex::TName( CProgramIndex::Sampler0 + stage ) );
-				if( tl != -1 )
+				int tl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
+				if (tl != -1)
 				{
-					setUniform1i( IDriver::PixelProgram, tl, stage );
+					setUniform1i(IDriver::PixelProgram, tl, stage);
 				}
 
 			}
@@ -972,15 +972,15 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	*/
 
 	// Blend is different if the material is blended or not
-	if( !mat.getBlend() )
+	if (!mat.getBlend())
 	{
 		// Not blended, std case.
-		if(pass==0)
+		if (pass==0)
 		{
 			// no transparency for first pass.
 			_DriverGLStates.enableBlend(false);
 		}
-		else if(pass==1)
+		else if (pass==1)
 		{
 			// setup an Additive transparency (only for pass 1, will be kept for successives pass).
 			_DriverGLStates.enableBlend(true);
@@ -1003,13 +1003,13 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				finalResult=	T*l1 * A + fint = T*l1 * A + T*l0 * A + B * (1-A)=
 					T* (l0+l1) * A + B * (1-A)
 		*/
-		if(pass==0)
+		if (pass==0)
 		{
 			// no transparency for first pass.
 			_DriverGLStates.enableBlend(true);
 			_DriverGLStates.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
-		else if(pass==1)
+		else if (pass==1)
 		{
 			// setup an Additive transparency (only for pass 1, will be kept for successives pass).
 			_DriverGLStates.enableBlend(true);
@@ -1018,7 +1018,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	}
 
 	// Dynamic lighting: The influence of the dynamic light must be added only in the first pass (only one time)
-	if(pass==0)
+	if (pass==0)
 	{
 		// If the lightmap is in x2 mode, then must divide effect of the dynamic light too
 		if (mat._LightMapsMulx2)
@@ -1027,7 +1027,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 			_DriverGLStates.setDiffuse(packedColorWhite, glcolWhite);
 	}
 	// no need to reset for pass after 1, since same than prec pass (black)!
-	else if(pass==1)
+	else if (pass==1)
 		_DriverGLStates.setDiffuse(packedColorBlack, glcolBlack);
 }
 
@@ -1061,7 +1061,7 @@ void			CDriverGL3::setupSpecularBegin()
 	H_AUTO_OGL(CDriverGL3_setupSpecularBegin)
 	// ---- Reset any textures with id>=2
 	uint stage = 2;
-	for(; stage < inlGetNumTextStages(); stage++)
+	for (; stage < inlGetNumTextStages(); stage++)
 	{
 		// disable texturing
 		activateTexture(stage, NULL);
@@ -1109,7 +1109,7 @@ sint			CDriverGL3::beginSpecularMultiPass()
 	// activate the 2 textures here
 	uint	stage;
 	uint	numStages= std::min((uint)2, inlGetNumTextStages());
-	for(stage=0 ; stage<numStages; stage++)
+	for (stage=0 ; stage<numStages; stage++)
 	{
 		ITexture	*text= mat.getTexture(uint8(stage));
 
@@ -1118,14 +1118,14 @@ sint			CDriverGL3::beginSpecularMultiPass()
 	}
 
 	// End specular , only if not Batching mode.
-	if(!_SpecularBatchOn)
+	if (!_SpecularBatchOn)
 		setupSpecularBegin();
 
 	// Manage the rare case when the SpecularMap is not provided (fault of graphist).
-	if(mat.getTexture(1)==NULL)
+	if (mat.getTexture(1)==NULL)
 		return 1;
 
-	if(!_Extensions.ARBTextureCubeMap)
+	if (!_Extensions.ARBTextureCubeMap)
 		return 1;
 	
 	return 1;
@@ -1138,29 +1138,29 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// Manage the rare case when the SpecularMap is not provided (error of a graphist).
-	if(mat.getTexture(1)==NULL)
+	if (mat.getTexture(1)==NULL)
 	{
 		// Just display the texture
 		// NB: setupMaterial() code has correclty setuped textures.
 		return;
 	}
 
-	int sl0 = currentProgram.pp->getUniformIndex( CProgramIndex::Sampler0 );
-	if( sl0 != -1 )
+	int sl0 = currentProgram.pp->getUniformIndex(CProgramIndex::Sampler0);
+	if (sl0 != -1)
 	{
-		setUniform1i( IDriver::PixelProgram, sl0, 0 );
+		setUniform1i(IDriver::PixelProgram, sl0, 0);
 	}
 
-	int sl1 = currentProgram.pp->getUniformIndex( CProgramIndex::Sampler1 );
-	if( sl1 != -1 )
+	int sl1 = currentProgram.pp->getUniformIndex(CProgramIndex::Sampler1);
+	if (sl1 != -1)
 	{
-		setUniform1i( IDriver::PixelProgram, sl1, 1 );
+		setUniform1i(IDriver::PixelProgram, sl1, 1);
 	}
 
-	int tml = currentProgram.vp->getUniformIndex( CProgramIndex::TexMatrix0 );
-	if( tml != -1 )
+	int tml = currentProgram.vp->getUniformIndex(CProgramIndex::TexMatrix0);
+	if (tml != -1)
 	{
-		setUniform4x4f( IDriver::VertexProgram, tml, _UserTexMat[ 1 ] );
+		setUniform4x4f(IDriver::VertexProgram, tml, _UserTexMat[ 1 ]);
 	}
 
 	{
@@ -1169,12 +1169,12 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		// Set Stage 1
 		// Special: not the same special env if there is or not texture in stage 0.
 		CTexEnvSpecial		newEnvStage1;
-		if( mat.getTexture(0) == NULL )
+		if (mat.getTexture(0) == NULL)
 			newEnvStage1= TexEnvSpecialSpecularStage1NoText;
 		else
 			newEnvStage1= TexEnvSpecialSpecularStage1;
 		// Test if same env as prec.
-		if(_CurrentTexEnvSpecial[1] != newEnvStage1)
+		if (_CurrentTexEnvSpecial[1] != newEnvStage1)
 		{
 			// TexEnv is special.
 			_CurrentTexEnvSpecial[1] = newEnvStage1;
@@ -1190,7 +1190,7 @@ void			CDriverGL3::endSpecularMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endSpecularMultiPass)
 	// End specular , only if not Batching mode.
-	if(!_SpecularBatchOn)
+	if (!_SpecularBatchOn)
 		setupSpecularEnd();
 }
 
@@ -1504,7 +1504,7 @@ void		CDriverGL3::endCausticsMultiPass(const CMaterial &mat)
 // ***************************************************************************
 sint		CDriverGL3::beginCloudMultiPass ()
 {
-	H_AUTO_OGL(CDriverGL3_beginCloudMultiPass )
+	H_AUTO_OGL(CDriverGL3_beginCloudMultiPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 	return 1;
 }
@@ -1512,7 +1512,7 @@ sint		CDriverGL3::beginCloudMultiPass ()
 // ***************************************************************************
 void		CDriverGL3::setupCloudPass (uint /* pass */)
 {
-	H_AUTO_OGL(CDriverGL3_setupCloudPass )
+	H_AUTO_OGL(CDriverGL3_setupCloudPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 
 	const CMaterial &mat= *_CurrentMaterial;

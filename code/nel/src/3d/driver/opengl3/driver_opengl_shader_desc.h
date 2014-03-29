@@ -42,7 +42,7 @@ namespace NL3D
 		}
 
 		bool empty() const{
-			if( ( vp == NULL ) && ( pp == NULL ) )
+			if ((vp == NULL) && (pp == NULL))
 				return true;
 			else
 				return false;
@@ -85,14 +85,14 @@ namespace NL3D
 			Spot
 		};
 
-		CShaderDesc(){
-			for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
+		CShaderDesc() {
+			for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
 				texEnvMode[ i ] = 0;
 
-			for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
+			for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
 				lightMode[ i ] = Nolight;
 			
-			for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
+			for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
 				useTextureStage[ i ] = false;
 			useFirstTextureCoordSet = false;
 			noTextures = true;
@@ -106,100 +106,100 @@ namespace NL3D
 			pointLight = false;
 		}
 
-		~CShaderDesc(){
+		~CShaderDesc() {
 		}
 
-		bool operator==( const CShaderDesc &o ) const
+		bool operator==(const CShaderDesc &o) const
 		{
-			if( noTextures != o.noTextures )
+			if (noTextures != o.noTextures)
 				return false;
 
-			if( shaderType != o.shaderType )
+			if (shaderType != o.shaderType)
 				return false;
 
-			if( vbFlags != o.vbFlags )
+			if (vbFlags != o.vbFlags)
 				return false;
 
-			if( nlightmaps != o.nlightmaps )
+			if (nlightmaps != o.nlightmaps)
 				return false;
 
-			if( features != o.features )
+			if (features != o.features)
 				return false;
 
-			if( ( features & AlphaTest ) != 0 )
+			if ((features & AlphaTest) != 0)
 			{
-				if( alphaTestTreshold > o.alphaTestTreshold + 0.0001f )
+				if (alphaTestTreshold > o.alphaTestTreshold + 0.0001f)
 					return false;
 
-				if( alphaTestTreshold < o.alphaTestTreshold - 0.0001f )
+				if (alphaTestTreshold < o.alphaTestTreshold - 0.0001f)
 					return false;
 			}
 
-			if( fogEnabled() )
+			if (fogEnabled())
 			{
-				if( fogMode != o.fogMode )
+				if (fogMode != o.fogMode)
 					return false;
 			}
 
-			if( shaderType == Normal )
+			if (shaderType == Normal)
 			{
-				if( useFirstTextureCoordSet != o.useFirstTextureCoordSet )
+				if (useFirstTextureCoordSet != o.useFirstTextureCoordSet)
 					return false;
 
-				for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
-					if( texEnvMode[ i ] != o.texEnvMode[ i ] )
+				for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+					if (texEnvMode[ i ] != o.texEnvMode[ i ])
 						return false;
 
-				for( int i = 0; i < SHADER_MAX_TEXTURES; i++ )
-					if( useTextureStage[ i ] != o.useTextureStage[ i ] )
+				for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+					if (useTextureStage[ i ] != o.useTextureStage[ i ])
 						return false;
 			}
 
-			if( lightingEnabled() )
+			if (lightingEnabled())
 			{
-				for( int i = 0; i < SHADER_MAX_LIGHTS; i++ )
-					if( lightMode[ i ] != o.lightMode[ i ] )
+				for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
+					if (lightMode[ i ] != o.lightMode[ i ])
 						return false;
 			}
 		
 			return true;
 		}
 
-		void setTexEnvMode( uint32 index, uint32 mode ){ texEnvMode[ index ] = mode; }
+		void setTexEnvMode(uint32 index, uint32 mode) { texEnvMode[ index ] = mode; }
 		
-		void setUseFirstTexCoords( bool b ){ useFirstTextureCoordSet = b; }
+		void setUseFirstTexCoords(bool b) { useFirstTextureCoordSet = b; }
 		bool getUseFirstTexCoords() const{ return useFirstTextureCoordSet; }
 
-		void setUseTexStage( uint8 stage, bool b ){ useTextureStage[ stage ] = b; }
-		bool getUseTexStage( uint8 stage ) const{ return useTextureStage[ stage ]; }
+		void setUseTexStage(uint8 stage, bool b) { useTextureStage[ stage ] = b; }
+		bool getUseTexStage(uint8 stage) const{ return useTextureStage[ stage ]; }
 
-		void setNoTextures( bool b ){ noTextures = b; }
+		void setNoTextures(bool b) { noTextures = b; }
 		bool useTextures() const{ return !noTextures; }
 
-		void setVBFlags( uint32 flags ){ vbFlags = flags; }
-		bool hasVBFlags( uint32 flags ) const{
-			if( ( vbFlags & flags ) != 0 )
+		void setVBFlags(uint32 flags) { vbFlags = flags; }
+		bool hasVBFlags(uint32 flags) const{
+			if ((vbFlags & flags) != 0)
 				return true;
 			else
 				return false;
 		}
 
-		void setShaderType( uint32 type ){ shaderType = type; }
-		void setNLightMaps( uint32 n ){ nlightmaps = n; }
+		void setShaderType(uint32 type) { shaderType = type; }
+		void setNLightMaps(uint32 n) { nlightmaps = n; }
 		
-		void setAlphaTest( bool b )
+		void setAlphaTest(bool b)
 		{
-			if( b )
+			if (b)
 				features |= AlphaTest;
 			else
 				features &= ~AlphaTest;
 		}
 
-		void setAlphaTestThreshold( float t ){ alphaTestTreshold = t; }
+		void setAlphaTestThreshold(float t) { alphaTestTreshold = t; }
 
-		void setFog( bool b )
+		void setFog(bool b)
 		{
-			if( b )
+			if (b)
 				features |= Fog;
 			else
 				features &= ~Fog;
@@ -207,19 +207,19 @@ namespace NL3D
 
 		bool fogEnabled() const
 		{
-			if( ( features & Fog ) != 0 )
+			if ((features & Fog) != 0)
 				return true;
 			else
 				return false;
 		}
 
-		void setFogMode( TFogMode mode ){ fogMode = mode; }
+		void setFogMode(TFogMode mode) { fogMode = mode; }
 
 		uint32 getFogMode() const{ return fogMode; }
 
-		void setLighting( bool b )
+		void setLighting(bool b)
 		{
-			if( b )
+			if (b)
 				features |= Lighting;
 			else
 				features &= ~Lighting;
@@ -227,24 +227,24 @@ namespace NL3D
 
 		bool lightingEnabled() const
 		{
-			if( ( features & Lighting ) != 0 )
+			if ((features & Lighting) != 0)
 				return true;
 			else
 				return false;
 		}
 
-		void setLight( int idx, TLightMode mode )
+		void setLight(int idx, TLightMode mode)
 		{
 			lightMode[ idx ] = mode;
-			if( mode == Point )
+			if (mode == Point)
 				pointLight = true;
 		}
 
-		TLightMode getLight( int idx ) const{ return lightMode[ idx ]; }
+		TLightMode getLight(int idx) const{ return lightMode[ idx ]; }
 
 		bool hasPointLight() const{ return pointLight; }
 
-		void setShaders( SShaderPair sp ){ shaderPair = sp; }
+		void setShaders(SShaderPair sp) { shaderPair = sp; }
 		SShaderPair getShaders() const{ return shaderPair; }
 
 	private:

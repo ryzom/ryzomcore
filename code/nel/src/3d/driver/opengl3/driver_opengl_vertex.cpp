@@ -103,15 +103,15 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 	// 2. If necessary, do modifications.
 	//==================================
 	const bool touched = (VB.getTouchFlags() & (CVertexBuffer::TouchedReserve|CVertexBuffer::TouchedVertexFormat)) != 0;
-	if( touched || (VB.DrvInfos == NULL))
+	if (touched || (VB.DrvInfos == NULL))
 	{
 		// delete first
-		if(VB.DrvInfos)
+		if (VB.DrvInfos)
 			delete VB.DrvInfos;
 		VB.DrvInfos = NULL;
 
 		// create only if some vertices
-		if(VB.getNumVertices())
+		if (VB.getNumVertices())
 		{
 			// 1. Retrieve/Create driver shader.
 			//==================================
@@ -125,7 +125,7 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			CVertexBuffer::TPreferredMemory preferred = VB.getPreferredMemory ();
 			if ((preferred == CVertexBuffer::RAMVolatile) ||
 				(preferred == CVertexBuffer::AGPVolatile) ||
-				(preferred == CVertexBuffer::RAMPreferred ) )
+				(preferred == CVertexBuffer::RAMPreferred))
 				preferred = CVertexBuffer::AGPPreferred;
 
 			const uint size = VB.capacity()*VB.getVertexSize();
@@ -173,7 +173,7 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	if (info->_VBHard == NULL)
 	{
 		// Disable the current vertexBufferHard if setuped.
-		if(_CurrentVertexBufferHard)
+		if (_CurrentVertexBufferHard)
 			_CurrentVertexBufferHard->disable();
 	}
 	else
@@ -252,7 +252,7 @@ IVertexBufferHardGL	*CDriverGL3::createVertexBufferHard(uint size, uint numVerti
 	}
 
 	// If this one at least created (an extension support it).
-	if( !vertexArrayRange )
+	if (!vertexArrayRange)
 		return NULL;
 	else
 	{
@@ -261,7 +261,7 @@ IVertexBufferHardGL	*CDriverGL3::createVertexBufferHard(uint size, uint numVerti
 		// let the VAR create the vbhard.
 		vbHard= vertexArrayRange->createVBHardGL(size, vb);
 		// if fails
-		if(!vbHard)
+		if (!vbHard)
 		{
 			return NULL;
 		}
@@ -404,7 +404,7 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 					{
 						mustNormalize = ARBVertexProgramMustNormalizeAttrib[value];
 					}
-					nglVertexAttribPointer( glIndex, NumCoordinatesType[type], GLType[ type ], mustNormalize, vb.VertexSize, vb.ValuePtr[value] );
+					nglVertexAttribPointer(glIndex, NumCoordinatesType[type], GLType[ type ], mustNormalize, vb.VertexSize, vb.ValuePtr[value]);
 				}
 				else
 				{
@@ -461,7 +461,7 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 void			CDriverGL3::resetVertexArrayRange()
 {
 	H_AUTO_OGL(CDriverGL3_resetVertexArrayRange)
-	if(_CurrentVertexBufferHard)
+	if (_CurrentVertexBufferHard)
 	{
 		// Must ensure it has ended any drawing
 		_CurrentVertexBufferHard->lock();
@@ -480,7 +480,7 @@ bool			CDriverGL3::initVertexBufferHard(uint agpMem, uint vramMem)
 	H_AUTO_OGL(CDriverGL3_initVertexBufferHard)
 
 	// must be supported
-	if(!_AGPVertexArrayRange || !_VRAMVertexArrayRange)
+	if (!_AGPVertexArrayRange || !_VRAMVertexArrayRange)
 		return false;
 
 	// First, reset any VBHard created.

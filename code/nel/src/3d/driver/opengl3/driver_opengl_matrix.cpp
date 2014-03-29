@@ -28,12 +28,12 @@ void CDriverGL3::setFrustum(float left, float right, float bottom, float top, fl
 {
 	H_AUTO_OGL(CDriverGL3_setFrustum);
 
-	if( perspective )
-		_GLProjMat.frustum( left, right, bottom, top, znear, zfar );
+	if (perspective)
+		_GLProjMat.frustum(left, right, bottom, top, znear, zfar);
 	else
-		_GLProjMat.ortho( left, right, bottom, top, znear, zfar );
+		_GLProjMat.ortho(left, right, bottom, top, znear, zfar);
 
-	_OODeltaZ = 1 / ( zfar - znear );
+	_OODeltaZ = 1 / (zfar - znear);
 
 }
 

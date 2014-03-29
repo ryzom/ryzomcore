@@ -33,7 +33,7 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	H_AUTO_OGL(CDriverGL3_renderLines)
 
 	// setup material
-	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
+	if (!setupMaterial(mat) || _LastIB._Values == NULL)
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -43,14 +43,14 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	uint	nPass;
 	nPass= beginMultiPass();
 	// draw all passes.
-	for(uint pass=0;pass<nPass; pass++)
+	for (uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		if( !setupPass(pass) )
+		if (!setupPass(pass))
 			return false;
 
 		// draw the primitives.
-		if(nlines)
+		if (nlines)
 		{
 			if (_LastIB._Format == CIndexBuffer::Indices16)
 			{
@@ -82,7 +82,7 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	H_AUTO_OGL(CDriverGL3_renderTriangles);
 
 	// setup material
-	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
+	if (!setupMaterial(mat) || _LastIB._Values == NULL)
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -95,14 +95,14 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	nPass= beginMultiPass();
 
 	// draw all passes.
-	for(uint pass=0;pass<nPass; pass++)
+	for (uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		if( !setupPass(pass) )
+		if (!setupPass(pass))
 			return false;
 
 		// draw the primitives.
-		if(ntris)
+		if (ntris)
 		{
 			if (_LastIB._Format == CIndexBuffer::Indices16)
 			{
@@ -170,7 +170,7 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	H_AUTO_OGL(CDriverGL3_renderRawPoints)
 
 	// setup material
-	if ( !setupMaterial(mat) )
+	if (!setupMaterial(mat))
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -180,14 +180,14 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	uint	nPass;
 	nPass= beginMultiPass();
 	// draw all passes.
-	for(uint pass=0;pass<nPass; pass++)
+	for (uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		if( !setupPass(pass) )
+		if (!setupPass(pass))
 			return false;
 
 		// draw the primitives.
-		if(numPoints)
+		if (numPoints)
 			glDrawArrays(GL_POINTS, startIndex, numPoints);
 	}
 	// end multipass.
@@ -210,7 +210,7 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	H_AUTO_OGL(CDriverGL3_renderRawLines)
 
 	// setup material
-	if ( !setupMaterial(mat) )
+	if (!setupMaterial(mat))
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -220,14 +220,14 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	uint	nPass;
 	nPass= beginMultiPass();
 	// draw all passes.
-	for(uint pass=0;pass<nPass; pass++)
+	for (uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		if( !setupPass(pass) )
+		if (!setupPass(pass))
 			return false;
 
 		// draw the primitives.
-		if(numLines)
+		if (numLines)
 			glDrawArrays(GL_LINES, startIndex << 1, numLines << 1);
 	}
 	// end multipass.
@@ -250,7 +250,7 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	H_AUTO_OGL(CDriverGL3_renderRawTriangles)
 
 	// setup material
-	if ( !setupMaterial(mat) )
+	if (!setupMaterial(mat))
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -260,14 +260,14 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	uint	nPass;
 	nPass= beginMultiPass();
 	// draw all passes.
-	for(uint pass=0;pass<nPass; pass++)
+	for (uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		if( !setupPass(pass) )
+		if (!setupPass(pass))
 			return false;
 
 		// draw the primitives.
-		if(numTris)
+		if (numTris)
 		{
 			glDrawArrays(GL_TRIANGLES, startIndex*3, numTris*3);
 		}
@@ -293,7 +293,7 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	if (!numQuads) return true;
 
 	// setup material
-	if ( !setupMaterial(mat) )
+	if (!setupMaterial(mat))
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -304,7 +304,7 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	if (!init)
 	{
 		// setup the base index buffer
-		for(uint k = 0; k < QUAD_BATCH_SIZE; ++k)
+		for (uint k = 0; k < QUAD_BATCH_SIZE; ++k)
 		{
 			// first tri
 			defaultIndices[k * 6] = (GLshort) (k * 4);
@@ -325,10 +325,10 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	uint	nPass;
 	nPass= beginMultiPass();
 	// draw all passes.
-	for(uint pass=0;pass<nPass; pass++)
+	for (uint pass=0;pass<nPass; pass++)
 	{
 		// setup the pass.
-		if( !setupPass(pass) )
+		if (!setupPass(pass))
 			return false;
 
 		uint32 currIndex = startIndex;
@@ -367,7 +367,7 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 					*curr++ = vertexIndex + 3;
 					vertexIndex += 4;
 				}
-				while(curr != end);
+				while (curr != end);
 				glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_SHORT, indices);
 			}
 			else
@@ -387,7 +387,7 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 					*curr++ = vertexIndex + 3;
 					vertexIndex += 4;
 				}
-				while(curr != end);
+				while (curr != end);
 				glDrawElements(GL_TRIANGLES, 6 * numQuadsToDraw, GL_UNSIGNED_INT, indices);
 			}
 			numLeftQuads -= numQuadsToDraw;

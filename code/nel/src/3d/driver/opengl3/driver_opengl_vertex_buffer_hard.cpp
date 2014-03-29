@@ -111,7 +111,7 @@ IVertexBufferHardGL *CVertexArrayRange::createVBHardGL(uint size, CVertexBuffer 
 void CVertexArrayRange::enable()
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_enable)
-	if(_Driver->_CurrentVertexArrayRange != this)
+	if (_Driver->_CurrentVertexArrayRange != this)
 	{
 		_Driver->_CurrentVertexArrayRange= this;
 	}
@@ -121,7 +121,7 @@ void CVertexArrayRange::enable()
 void CVertexArrayRange::disable()
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_disbale)
-	if(_Driver->_CurrentVertexBufferHard != NULL)
+	if (_Driver->_CurrentVertexBufferHard != NULL)
 	{
 		_Driver->_CurrentVertexBufferHard= NULL;
 	}
@@ -136,7 +136,7 @@ void CVertexArrayRange::updateLostBuffers()
 	nlassert(_Driver);
 	if (_Driver->isWndActive())
 	{
-		for(std::list<CVertexBufferHard *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
+		for (std::list<CVertexBufferHard *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
 			nlassert((*it)->_VertexObjectId);
 			GLuint id = (GLuint) (*it)->_VertexObjectId;
@@ -261,7 +261,7 @@ void *CVertexBufferHard::lock()
 		// continue to standard mapping code below ..
 	}
 	TTicks	beforeLock = 0;
-	if(_Driver->_VBHardProfiling)
+	if (_Driver->_VBHardProfiling)
 	{
 		beforeLock= CTime::getPerformanceTime();
 	}
@@ -283,7 +283,7 @@ void *CVertexBufferHard::lock()
 	#endif
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 	// Lock Profile?
-	if(_Driver->_VBHardProfiling)
+	if (_Driver->_VBHardProfiling)
 	{
 		TTicks	afterLock;
 		afterLock= CTime::getPerformanceTime();
@@ -301,7 +301,7 @@ void CVertexBufferHard::unlock()
 	if (_Invalid) return;
 	if (!_VertexObjectId) return;
 	TTicks	beforeLock = 0;
-	if(_Driver->_VBHardProfiling)
+	if (_Driver->_VBHardProfiling)
 	{
 		beforeLock= CTime::getPerformanceTime();
 	}
@@ -318,7 +318,7 @@ void CVertexBufferHard::unlock()
 		_Unmapping = false;
 	#endif
 	// Lock Profile?
-	if(_Driver->_VBHardProfiling)
+	if (_Driver->_VBHardProfiling)
 	{
 		TTicks	afterLock;
 		afterLock= CTime::getPerformanceTime();
@@ -354,7 +354,7 @@ void CVertexBufferHard::unlock(uint /* startVert */,uint /* endVert */)
 void CVertexBufferHard::enable()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_enable)
-	if(_Driver->_CurrentVertexBufferHard != this)
+	if (_Driver->_CurrentVertexBufferHard != this)
 	{
 		/* nlassert(_VertexArrayRange);
 		_VertexArrayRange->enable(); */
@@ -366,7 +366,7 @@ void CVertexBufferHard::enable()
 void CVertexBufferHard::disable()
 {
 	H_AUTO_OGL(CVertexBufferHardARB_disable)
-	if(_Driver->_CurrentVertexBufferHard != NULL)
+	if (_Driver->_CurrentVertexBufferHard != NULL)
 	{
 		/* nlassert(_VertexArrayRange);
 		_VertexArrayRange->disable(); */
@@ -418,7 +418,7 @@ void CVertexBufferHard::invalidate()
 	{
 		nlwarning("*****************************************************");
 		nlwarning("Mapped buffers :");
-		for(std::list<CVertexBufferHard *>::iterator it = _MappedVBList.begin(); it != _MappedVBList.end(); ++it)
+		for (std::list<CVertexBufferHard *>::iterator it = _MappedVBList.begin(); it != _MappedVBList.end(); ++it)
 		{
 			CVertexBufferHard &vbarb = **it;
 			nlwarning("Buffer id = %u, size = %u, address = %p", vbarb._VertexObjectId, vbarb.VB->getVertexSize() * vbarb.VB->getNumVertices(), vbarb.getPointer());

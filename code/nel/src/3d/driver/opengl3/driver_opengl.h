@@ -314,10 +314,10 @@ public:
 
 	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
 
-	virtual void			disableHardwareVertexProgram(){}
-	virtual void			disableHardwarePixelProgram(){}
-	virtual void			disableHardwareVertexArrayAGP(){}
-	virtual void			disableHardwareTextureShader(){}
+	virtual void			disableHardwareVertexProgram() {}
+	virtual void			disableHardwarePixelProgram() {}
+	virtual void			disableHardwareVertexArrayAGP() {}
+	virtual void			disableHardwareTextureShader() {}
 	
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
 	virtual bool			setMode(const GfxMode& mode);
@@ -346,8 +346,8 @@ public:
 	virtual bool			copyTextToClipboard(const ucstring &text);
 	virtual bool			pasteTextFromClipboard(ucstring &text);
 
-	uint32 getAvailableVertexAGPMemory (){ return uint32( -1 ); };
-	uint32 getAvailableVertexVRAMMemory (){ return uint32( -1 ); };
+	uint32 getAvailableVertexAGPMemory () { return uint32(-1); };
+	uint32 getAvailableVertexVRAMMemory () { return uint32(-1); };
 
 	virtual emptyProc		getWindowProc();
 
@@ -400,7 +400,7 @@ public:
 	bool					setupProgram(CMaterial& mat);
 	bool					setupDynMatProgram(CMaterial& mat, uint pass);
 	void					setupUniforms();
-	void					setupUniforms( TProgram program );
+	void					setupUniforms(TProgram program);
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -422,7 +422,7 @@ public:
 	{
 		_ForceNormalize= normalize;
 		// if ForceNormalize, must enable GLNormalize now.
-		if(normalize)
+		if (normalize)
 			enableGlNormalize(true);
 	}
 
@@ -452,7 +452,7 @@ public:
 
 	virtual bool			activeIndexBuffer(CIndexBuffer& IB);
 
-	virtual	void			mapTextureStageToUV(uint stage, uint uv){}
+	virtual	void			mapTextureStageToUV(uint stage, uint uv) {}
 
 	virtual bool			renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines);
 	virtual bool			renderTriangles(CMaterial& Mat, uint32 firstIndex, uint32 ntris);
@@ -595,7 +595,7 @@ public:
 
 	virtual void			enableLight (uint8 num, bool enable=true);
 
-	virtual bool			isLightEnabled (uint8 num );
+	virtual bool			isLightEnabled (uint8 num);
 
 	virtual void			setPerPixelLightingLight(CRGBA diffuse, CRGBA specular, float shininess);
 
@@ -1074,7 +1074,7 @@ private:
 	// @}
 
 	// Sets up a rendering pass from the dynamic material
-	bool setupDynMatPass( uint pass );
+	bool setupDynMatPass(uint pass);
 
 	/// LastVB for UV setup.
 	CVertexBufferInfo		_LastVB;
@@ -1168,10 +1168,10 @@ private:
 	/// Test/activate normalisation of normal.
 	void			enableGlNormalize(bool normalize)
 	{
-		if(_CurrentGlNormalize!=normalize)
+		if (_CurrentGlNormalize!=normalize)
 		{
 			_CurrentGlNormalize= normalize;
-			if(normalize)
+			if (normalize)
 				glEnable(GL_NORMALIZE);
 			else
 				glDisable(GL_NORMALIZE);
@@ -1265,14 +1265,14 @@ private:
 
 	bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const{ return false; }
 
-	bool			compileGeometryProgram(CGeometryProgram *program){ return false; }
+	bool			compileGeometryProgram(CGeometryProgram *program) { return false; }
 
-	bool			activeGeometryProgram(CGeometryProgram *program){ return false; }
+	bool			activeGeometryProgram(CGeometryProgram *program) { return false; }
 
-	uint32			getProgramId( TProgram program ) const;
-	IProgram*		getProgram( TProgram program ) const;
+	uint32			getProgramId(TProgram program) const;
+	IProgram*		getProgram(TProgram program) const;
 
-	int				getUniformLocation( TProgram program, const char *name );
+	int				getUniformLocation(TProgram program, const char *name);
 	void			setUniform1f(TProgram program, uint index, float f0);
 	void			setUniform2f(TProgram program, uint index, float f0, float f1);
 	void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2);
@@ -1288,9 +1288,9 @@ private:
 	void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v);
 	void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3);
 	void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba);
-	void			setUniform3x3f(TProgram program, uint index, const float *src );
+	void			setUniform3x3f(TProgram program, uint index, const float *src);
 	void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m);
-	void			setUniform4x4f(TProgram program, uint index, const float *src );
+	void			setUniform4x4f(TProgram program, uint index, const float *src);
 	void			setUniform4fv(TProgram program, uint index, size_t num, const float *src);
 	void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src);
 	void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src);
@@ -1298,9 +1298,9 @@ private:
 	void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform);
 	void			setUniformFog(TProgram program, uint index);
 
-	bool			isUniformProgramState(){ return false; }
+	bool			isUniformProgramState() { return false; }
 
-	void			enableVertexProgramDoubleSidedColor(bool doubleSided){}
+	void			enableVertexProgramDoubleSidedColor(bool doubleSided) {}
 	bool		    supportVertexProgramDoubleSidedColor() const{ return true; };
 
 	virtual	bool			supportMADOperator() const ;
@@ -1430,11 +1430,11 @@ public:
 class CVertexProgramDrvInfosGL3 : public IProgramDrvInfos
 {
 public:
-	CVertexProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it );
+	CVertexProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
 	~CVertexProgramDrvInfosGL3();
-	uint getUniformIndex( const char *name ) const;
+	uint getUniformIndex(const char *name) const;
 	uint getProgramId() const{ return programId; }
-	void setProgramId( uint id ){ programId = id; }
+	void setProgramId(uint id) { programId = id; }
 
 private:
 	uint programId;
@@ -1443,11 +1443,11 @@ private:
 class CPixelProgramDrvInfosGL3 : public IProgramDrvInfos
 {
 public:
-	CPixelProgramDrvInfosGL3( CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it );
+	CPixelProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
 	~CPixelProgramDrvInfosGL3();
-	uint getUniformIndex( const char *name ) const;
+	uint getUniformIndex(const char *name) const;
 	uint getProgramId() const{ return programId; }
-	void setProgramId( uint id ){ programId = id; }
+	void setProgramId(uint id) { programId = id; }
 
 private:
 	uint programId;

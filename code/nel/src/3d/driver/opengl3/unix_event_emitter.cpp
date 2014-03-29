@@ -161,7 +161,7 @@ void CUnixEventEmitter::emulateMouseRawMode(bool enable)
 {
 	_emulateRawMode = enable;
 
-	if(_emulateRawMode)
+	if (_emulateRawMode)
 	{
 		XWindowAttributes xwa;
 		XGetWindowAttributes(_dpy, _win, &xwa);
@@ -172,7 +172,7 @@ void CUnixEventEmitter::emulateMouseRawMode(bool enable)
 		// was pulled back to 0.5 / 0.5, so a wrong movement delta would be
 		// reported otherwise
 		XEvent event;
-		while(XCheckIfEvent(_dpy, &event, &isMouseMoveEvent, NULL)) { };
+		while (XCheckIfEvent(_dpy, &event, &isMouseMoveEvent, NULL)) { };
 	}
 }
 
@@ -512,10 +512,10 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		TMouseButton button=getMouseButton (event.xbutton.state);
 
 		// if raw mode should be emulated
-		if(_emulateRawMode)
+		if (_emulateRawMode)
 		{
 			// when we just wrapped back the pointer to 0.5 / 0.5, ignore event
-			if(event.xbutton.x == xwa.width / 2 && event.xbutton.y == xwa.height / 2)
+			if (event.xbutton.x == xwa.width / 2 && event.xbutton.y == xwa.height / 2)
 				break;
 
 			// post a CGDMouseMove with the movement delta to the event server
@@ -573,7 +573,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		if (keyCode)
 		{
 			TKey key = getKeyFromKeySym(k);
-			if(key == KeyNOKEY)
+			if (key == KeyNOKEY)
 				key = getKeyFromKeycode(keyCode);
 
 			// search for key in map
@@ -591,7 +591,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		}
 
 		Text[c] = '\0';
-		if(c>0)
+		if (c>0)
 		{
 #ifdef X_HAVE_UTF8_STRING
 			ucstring ucstr;
@@ -626,7 +626,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			int c = XLookupString(&event.xkey, NULL, 0, &k, NULL);
 
 			TKey key = getKeyFromKeySym(k);
-			if(key == KeyNOKEY)
+			if (key == KeyNOKEY)
 				key = getKeyFromKeycode(event.xkey.keycode);
 
 			server->postEvent (new CEventKeyUp (key, getKeyButton(event.xbutton.state), this));
@@ -719,7 +719,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			for (uint i=0; i < nitems; i++)
 			{
 				// nlwarning(" - Type=%s (%u)", XGetAtomName(_dpy, supportedTargets[i]), (uint)supportedTargets[i]);
-				if (supportedTargets[i] == XA_UTF8_STRING )
+				if (supportedTargets[i] == XA_UTF8_STRING)
 				{
 					if (bestTargetElect < 2)
 					{
@@ -727,7 +727,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 						bestTargetElect = 2;
 					}
 				}
-				else if (supportedTargets[i] == XA_STRING )
+				else if (supportedTargets[i] == XA_STRING)
 				{
 					if (bestTargetElect < 1)
 					{

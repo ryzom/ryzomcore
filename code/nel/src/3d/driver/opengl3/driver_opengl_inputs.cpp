@@ -159,7 +159,7 @@ void CDriverGL3::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 		minX = x;
 		for (uint y = 0; y < height; ++y)
 		{
-			if(pixels[x + y * width].A != 0)
+			if (pixels[x + y * width].A != 0)
 			{
 				stop = true;
 				break;
@@ -175,7 +175,7 @@ void CDriverGL3::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 		maxX = (uint) x;
 		for (uint y = 0; y < height; ++y)
 		{
-			if(pixels[x + y * width].A != 0)
+			if (pixels[x + y * width].A != 0)
 			{
 				stop = true;
 				break;
@@ -191,7 +191,7 @@ void CDriverGL3::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 		minY = y;
 		for (uint x = 0; x < width; ++x)
 		{
-			if(pixels[x + y * width].A != 0)
+			if (pixels[x + y * width].A != 0)
 			{
 				stop = true;
 				break;
@@ -207,7 +207,7 @@ void CDriverGL3::addCursor(const std::string &name, const NLMISC::CBitmap &curso
 		maxY = (uint) y;
 		for (uint x = 0; x < width; ++x)
 		{
-			if(pixels[x + y * width].A != 0)
+			if (pixels[x + y * width].A != 0)
 			{
 				stop = true;
 				break;
@@ -342,7 +342,7 @@ void CDriverGL3::setCursor(const std::string &name, NLMISC::CRGBA col, uint8 rot
 			curs.Rot != rot ||
 			curs.ColorDepth != _ColorDepth ||
 			forceRebuild
-		   )
+		  )
 		{
 			curs.reset();
 			curs.Cursor = buildCursor(curs.Src, col, rot, hotSpotX, hotSpotY);
@@ -466,18 +466,18 @@ void CDriverGL3::showCursor(bool b)
 	CGDisplayErr error  = kCGErrorSuccess;
 	static bool visible = true;
 
-	if(b && !visible)
+	if (b && !visible)
 	{
 		error = CGDisplayShowCursor(kCGDirectMainDisplay);
 		visible = true;
 	}
-	else if(!b && visible)
+	else if (!b && visible)
 	{
 		error = CGDisplayHideCursor(kCGDirectMainDisplay);
 		visible = false;
 	}
 
-	if(error != kCGErrorSuccess)
+	if (error != kCGErrorSuccess)
 		nlerror("cannot show / hide cursor");
 
 #elif defined (NL_OS_UNIX)
@@ -527,7 +527,7 @@ void CDriverGL3::setMousePos(float x, float y)
 
 	// get the rect (position, size) of the window
 	NSRect windowRect;
-	if([containerView() isInFullScreenMode])
+	if ([containerView() isInFullScreenMode])
 		windowRect = [[[containerView() window] screen] frame];
 	else
 		windowRect = [[containerView() window] frame];
@@ -542,7 +542,7 @@ void CDriverGL3::setMousePos(float x, float y)
 			firstScreenRect.size.height - windowRect.origin.y -
 				viewRect.size.height + ((1.0 - y) * viewRect.size.height)));
 
-	if(error != kCGErrorSuccess)
+	if (error != kCGErrorSuccess)
 		nlerror("cannot set mouse position");
 
 #elif defined (NL_OS_UNIX)
@@ -582,7 +582,7 @@ void CDriverGL3::setCapture (bool b)
 
 #elif defined (NL_OS_UNIX)
 
-	if(b /* && isSystemCursorInClientArea() && !isSystemCursorCaptured()*/) // capture the cursor.
+	if (b /* && isSystemCursorInClientArea() && !isSystemCursorCaptured()*/) // capture the cursor.
 	{
 		// capture the cursor
 		XGrabPointer(_dpy, _win, True, 0, GrabModeAsync, GrabModeAsync, _win, None, CurrentTime);

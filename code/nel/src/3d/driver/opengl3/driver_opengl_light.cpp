@@ -28,7 +28,7 @@ namespace NLDRIVERGL3 {
 // ***************************************************************************
 uint	CDriverGL3::getMaxLight () const
 {
-	H_AUTO_OGL(CDriverGL3_getMaxLight )
+	H_AUTO_OGL(CDriverGL3_getMaxLight)
 	// return min(maxLight supported by openGL, MaxLight=8).
 	return _MaxDriverLight;
 }
@@ -37,9 +37,9 @@ uint	CDriverGL3::getMaxLight () const
 // ***************************************************************************
 void	CDriverGL3::setLight (uint8 num, const CLight& light)
 {
-	H_AUTO_OGL(CDriverGL3_setLight )
+	H_AUTO_OGL(CDriverGL3_setLight)
 	// bkup real light, for lightmap dynamic lighting purpose
-	if(num==0)
+	if (num==0)
 	{
 		_UserLight0= light;
 		// because the GL setup change, must dirt lightmap rendering
@@ -106,7 +106,7 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 // ***************************************************************************
 void	CDriverGL3::enableLight (uint8 num, bool enable)
 {
-	H_AUTO_OGL(CDriverGL3_enableLight )
+	H_AUTO_OGL(CDriverGL3_enableLight)
 
 	// enable the light in GL
 	enableLightInternal(num, enable);
@@ -117,7 +117,7 @@ void	CDriverGL3::enableLight (uint8 num, bool enable)
 
 bool	CDriverGL3::isLightEnabled (uint8 num)
 {
-	if(num<_MaxDriverLight)
+	if (num<_MaxDriverLight)
 		return _UserLightEnable[num];
 
 	return false;
@@ -144,7 +144,7 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 
 void	CDriverGL3::setAmbientColor (CRGBA color)
 {
-	H_AUTO_OGL(CDriverGL3_setAmbientColor )
+	H_AUTO_OGL(CDriverGL3_setAmbientColor)
 	
 }
 
@@ -152,7 +152,7 @@ void	CDriverGL3::setAmbientColor (CRGBA color)
 // ***************************************************************************
 void			CDriverGL3::setLightMapDynamicLight (bool enable, const CLight& light)
 {
-	H_AUTO_OGL(CDriverGL3_setLightMapDynamicLight )
+	H_AUTO_OGL(CDriverGL3_setLightMapDynamicLight)
 	// just store, for future setup in lightmap material rendering
 	_LightMapDynamicLightEnabled= enable;
 	_LightMapDynamicLight= light;
@@ -165,14 +165,14 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_setupLightMapDynamicLighting)
 	// start lightmap dynamic lighting
-	if(enable)
+	if (enable)
 	{
 		// disable all lights but the 0th.
-		for(uint i=1;i<_MaxDriverLight;i++)
+		for (uint i=1;i<_MaxDriverLight;i++)
 			enableLightInternal(i, false);
 
 		// if the dynamic light is really enabled
-		if(_LightMapDynamicLightEnabled)
+		if (_LightMapDynamicLightEnabled)
 		{
 			// then setup and enable
 			setLightInternal(0, _LightMapDynamicLight);
@@ -194,14 +194,14 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 		setLightInternal(0, _UserLight0);
 
 		// restore all standard light enable states
-		for(uint i=0;i<_MaxDriverLight;i++)
+		for (uint i=0;i<_MaxDriverLight;i++)
 			enableLightInternal(i, _UserLightEnable[i]);
 	}
 }
 
 void CDriverGL3::disableAllLights()
 {
-	for( int i = 0; i < MaxLight; i++ )
+	for (int i = 0; i < MaxLight; i++)
 	{
 		_UserLightEnable[ i ] = false;
 	}

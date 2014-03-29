@@ -457,13 +457,13 @@ namespace NLDRIVERGL3 {
 #endif
 
 #define CHECK_EXT(ext_str) \
-	if(strstr(glext, ext_str)==NULL) { nlwarning("3D: OpengGL extension '%s' was not found", ext_str); return false; } else { nldebug("3D: OpengGL Extension '%s' found", ext_str); }
+	if (strstr(glext, ext_str)==NULL) { nlwarning("3D: OpengGL extension '%s' was not found", ext_str); return false; } else { nldebug("3D: OpengGL Extension '%s' found", ext_str); }
 
 // Debug: don't return false if the procaddr returns 0
 // It means that it can crash if nel calls this extension but at least we have a warning to know why the extension is available but not the procaddr
 #define CHECK_ADDRESS(type, ext) \
 	n##ext=(type)nglGetProcAddress(#ext); \
-	if(!n##ext) { nlwarning("3D: GetProcAddress(\"%s\") returns NULL", #ext); return false; } else { /*nldebug("3D: GetProcAddress(\"%s\") succeed", #ext);*/ }
+	if (!n##ext) { nlwarning("3D: GetProcAddress(\"%s\") returns NULL", #ext); return false; } else { /*nldebug("3D: GetProcAddress(\"%s\") succeed", #ext);*/ }
 
 // ***************************************************************************
 // Extensions registrations, and Windows function Registration.
@@ -833,127 +833,127 @@ static bool	setupPackedDepthStencil(const char	*glext)
 	return true;
 }
 
-static bool setupGLSL( const char *glext )
+static bool setupGLSL(const char *glext)
 {
-	CHECK_EXT( "GL_ARB_shader_objects" );
+	CHECK_EXT("GL_ARB_shader_objects");
 
-	CHECK_ADDRESS( PFNGLATTACHSHADERPROC, glAttachShader );
-	CHECK_ADDRESS( PFNGLCOMPILESHADERPROC, glCompileShader );
-	CHECK_ADDRESS( PFNGLCREATEPROGRAMPROC, glCreateProgram );
-	CHECK_ADDRESS( PFNGLCREATESHADERPROC, glCreateShader );
-	CHECK_ADDRESS( PFNGLDELETEPROGRAMPROC, glDeleteProgram );
-	CHECK_ADDRESS( PFNGLDELETESHADERPROC, glDeleteShader );
-	CHECK_ADDRESS( PFNGLDETACHSHADERPROC, glDetachShader );
-	CHECK_ADDRESS( PFNGLDISABLEVERTEXATTRIBARRAYPROC, glDisableVertexAttribArray );
-	CHECK_ADDRESS( PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray );
-	CHECK_ADDRESS( PFNGLGETATTACHEDSHADERSPROC, glGetAttachedShaders );
-	CHECK_ADDRESS( PFNGLGETPROGRAMIVPROC, glGetProgramiv );
-	CHECK_ADDRESS( PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog );
-	CHECK_ADDRESS( PFNGLGETSHADERIVPROC, glGetShaderiv );
-	CHECK_ADDRESS( PFNGLGETSHADERINFOLOGPROC, glGetShaderInfoLog );
-	CHECK_ADDRESS( PFNGLGETUNIFORMLOCATIONPROC, glGetUniformLocation );
-	CHECK_ADDRESS( PFNGLISPROGRAMPROC, glIsProgram );
-	CHECK_ADDRESS( PFNGLISSHADERPROC, glIsShader );
-	CHECK_ADDRESS( PFNGLLINKPROGRAMPROC, glLinkProgram );
-	CHECK_ADDRESS( PFNGLSHADERSOURCEPROC, glShaderSource );
-	CHECK_ADDRESS( PFNGLUSEPROGRAMPROC, glUseProgram );
-	CHECK_ADDRESS( PFNGLVALIDATEPROGRAMPROC, glValidateProgram );
-	CHECK_ADDRESS( PFNGLUNIFORM1FPROC, glUniform1f );
-	CHECK_ADDRESS( PFNGLUNIFORM2FPROC, glUniform2f );
-	CHECK_ADDRESS( PFNGLUNIFORM3FPROC, glUniform3f );
-	CHECK_ADDRESS( PFNGLUNIFORM4FPROC, glUniform4f );
-	CHECK_ADDRESS( PFNGLUNIFORM1IPROC, glUniform1i );
-	CHECK_ADDRESS( PFNGLUNIFORM2IPROC, glUniform2i );
-	CHECK_ADDRESS( PFNGLUNIFORM3IPROC, glUniform3i );
-	CHECK_ADDRESS( PFNGLUNIFORM4IPROC, glUniform4i );
-	CHECK_ADDRESS( PFNGLUNIFORM1FVPROC, glUniform1fv );
-	CHECK_ADDRESS( PFNGLUNIFORM2FVPROC, glUniform2fv );
-	CHECK_ADDRESS( PFNGLUNIFORM3FVPROC, glUniform3fv );
-	CHECK_ADDRESS( PFNGLUNIFORM4FVPROC, glUniform4fv );
-	CHECK_ADDRESS( PFNGLUNIFORM1IVPROC, glUniform1iv );
-	CHECK_ADDRESS( PFNGLUNIFORM2IVPROC, glUniform2iv );
-	CHECK_ADDRESS( PFNGLUNIFORM3IVPROC, glUniform3iv );
-	CHECK_ADDRESS( PFNGLUNIFORM4IVPROC, glUniform4iv );
-	CHECK_ADDRESS( PFNGLUNIFORMMATRIX2FVPROC, glUniformMatrix2fv );
-	CHECK_ADDRESS( PFNGLUNIFORMMATRIX3FVPROC, glUniformMatrix3fv );
-	CHECK_ADDRESS( PFNGLUNIFORMMATRIX4FVPROC, glUniformMatrix4fv );
-	CHECK_ADDRESS( PFNGLVERTEXATTRIBPOINTERPROC, glVertexAttribPointer );
-	CHECK_ADDRESS( PFNGLUNIFORM1UIPROC, glUniform1ui );
-	CHECK_ADDRESS( PFNGLUNIFORM2UIPROC, glUniform2ui );
-	CHECK_ADDRESS( PFNGLUNIFORM3UIPROC, glUniform3ui );
-	CHECK_ADDRESS( PFNGLUNIFORM4UIPROC, glUniform4ui );
-	CHECK_ADDRESS( PFNGLUNIFORM1UIVPROC, glUniform1uiv );
-	CHECK_ADDRESS( PFNGLUNIFORM2UIVPROC, glUniform2uiv );
-	CHECK_ADDRESS( PFNGLUNIFORM3UIVPROC, glUniform3uiv );
-	CHECK_ADDRESS( PFNGLUNIFORM4UIVPROC, glUniform4uiv );
+	CHECK_ADDRESS(PFNGLATTACHSHADERPROC, glAttachShader);
+	CHECK_ADDRESS(PFNGLCOMPILESHADERPROC, glCompileShader);
+	CHECK_ADDRESS(PFNGLCREATEPROGRAMPROC, glCreateProgram);
+	CHECK_ADDRESS(PFNGLCREATESHADERPROC, glCreateShader);
+	CHECK_ADDRESS(PFNGLDELETEPROGRAMPROC, glDeleteProgram);
+	CHECK_ADDRESS(PFNGLDELETESHADERPROC, glDeleteShader);
+	CHECK_ADDRESS(PFNGLDETACHSHADERPROC, glDetachShader);
+	CHECK_ADDRESS(PFNGLDISABLEVERTEXATTRIBARRAYPROC, glDisableVertexAttribArray);
+	CHECK_ADDRESS(PFNGLENABLEVERTEXATTRIBARRAYPROC, glEnableVertexAttribArray);
+	CHECK_ADDRESS(PFNGLGETATTACHEDSHADERSPROC, glGetAttachedShaders);
+	CHECK_ADDRESS(PFNGLGETPROGRAMIVPROC, glGetProgramiv);
+	CHECK_ADDRESS(PFNGLGETPROGRAMINFOLOGPROC, glGetProgramInfoLog);
+	CHECK_ADDRESS(PFNGLGETSHADERIVPROC, glGetShaderiv);
+	CHECK_ADDRESS(PFNGLGETSHADERINFOLOGPROC, glGetShaderInfoLog);
+	CHECK_ADDRESS(PFNGLGETUNIFORMLOCATIONPROC, glGetUniformLocation);
+	CHECK_ADDRESS(PFNGLISPROGRAMPROC, glIsProgram);
+	CHECK_ADDRESS(PFNGLISSHADERPROC, glIsShader);
+	CHECK_ADDRESS(PFNGLLINKPROGRAMPROC, glLinkProgram);
+	CHECK_ADDRESS(PFNGLSHADERSOURCEPROC, glShaderSource);
+	CHECK_ADDRESS(PFNGLUSEPROGRAMPROC, glUseProgram);
+	CHECK_ADDRESS(PFNGLVALIDATEPROGRAMPROC, glValidateProgram);
+	CHECK_ADDRESS(PFNGLUNIFORM1FPROC, glUniform1f);
+	CHECK_ADDRESS(PFNGLUNIFORM2FPROC, glUniform2f);
+	CHECK_ADDRESS(PFNGLUNIFORM3FPROC, glUniform3f);
+	CHECK_ADDRESS(PFNGLUNIFORM4FPROC, glUniform4f);
+	CHECK_ADDRESS(PFNGLUNIFORM1IPROC, glUniform1i);
+	CHECK_ADDRESS(PFNGLUNIFORM2IPROC, glUniform2i);
+	CHECK_ADDRESS(PFNGLUNIFORM3IPROC, glUniform3i);
+	CHECK_ADDRESS(PFNGLUNIFORM4IPROC, glUniform4i);
+	CHECK_ADDRESS(PFNGLUNIFORM1FVPROC, glUniform1fv);
+	CHECK_ADDRESS(PFNGLUNIFORM2FVPROC, glUniform2fv);
+	CHECK_ADDRESS(PFNGLUNIFORM3FVPROC, glUniform3fv);
+	CHECK_ADDRESS(PFNGLUNIFORM4FVPROC, glUniform4fv);
+	CHECK_ADDRESS(PFNGLUNIFORM1IVPROC, glUniform1iv);
+	CHECK_ADDRESS(PFNGLUNIFORM2IVPROC, glUniform2iv);
+	CHECK_ADDRESS(PFNGLUNIFORM3IVPROC, glUniform3iv);
+	CHECK_ADDRESS(PFNGLUNIFORM4IVPROC, glUniform4iv);
+	CHECK_ADDRESS(PFNGLUNIFORMMATRIX2FVPROC, glUniformMatrix2fv);
+	CHECK_ADDRESS(PFNGLUNIFORMMATRIX3FVPROC, glUniformMatrix3fv);
+	CHECK_ADDRESS(PFNGLUNIFORMMATRIX4FVPROC, glUniformMatrix4fv);
+	CHECK_ADDRESS(PFNGLVERTEXATTRIBPOINTERPROC, glVertexAttribPointer);
+	CHECK_ADDRESS(PFNGLUNIFORM1UIPROC, glUniform1ui);
+	CHECK_ADDRESS(PFNGLUNIFORM2UIPROC, glUniform2ui);
+	CHECK_ADDRESS(PFNGLUNIFORM3UIPROC, glUniform3ui);
+	CHECK_ADDRESS(PFNGLUNIFORM4UIPROC, glUniform4ui);
+	CHECK_ADDRESS(PFNGLUNIFORM1UIVPROC, glUniform1uiv);
+	CHECK_ADDRESS(PFNGLUNIFORM2UIVPROC, glUniform2uiv);
+	CHECK_ADDRESS(PFNGLUNIFORM3UIVPROC, glUniform3uiv);
+	CHECK_ADDRESS(PFNGLUNIFORM4UIVPROC, glUniform4uiv);
 	
 	return true;
 }
 
-static bool setupSeparateShaderObjects( const char *glext )
+static bool setupSeparateShaderObjects(const char *glext)
 {
-	CHECK_EXT( "GL_ARB_separate_shader_objects" );
+	CHECK_EXT("GL_ARB_separate_shader_objects");
 
-	CHECK_ADDRESS( PFNGLUSEPROGRAMSTAGESPROC, glUseProgramStages );
-	CHECK_ADDRESS( PFNGLACTIVESHADERPROGRAMPROC, glActiveShaderProgram );
-	CHECK_ADDRESS( PFNGLCREATESHADERPROGRAMVPROC, glCreateShaderProgramv );
-	CHECK_ADDRESS( PFNGLBINDPROGRAMPIPELINEPROC, glBindProgramPipeline );
-	CHECK_ADDRESS( PFNGLDELETEPROGRAMPIPELINESPROC, glDeleteProgramPipelines );
-	CHECK_ADDRESS( PFNGLGENPROGRAMPIPELINESPROC, glGenProgramPipelines );
-	CHECK_ADDRESS( PFNGLISPROGRAMPIPELINEPROC, glIsProgramPipeline );
-	CHECK_ADDRESS( PFNGLGETPROGRAMPIPELINEIVPROC, glGetProgramPipelineiv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1IPROC, glProgramUniform1i );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1IVPROC, glProgramUniform1iv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1FPROC, glProgramUniform1f );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1FVPROC, glProgramUniform1fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1DPROC, glProgramUniform1d );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1DVPROC, glProgramUniform1dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1UIPROC, glProgramUniform1ui );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM1UIVPROC, glProgramUniform1uiv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2IPROC, glProgramUniform2i );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2IVPROC, glProgramUniform2iv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2FPROC, glProgramUniform2f );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2FVPROC, glProgramUniform2fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2DPROC, glProgramUniform2d );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2DVPROC, glProgramUniform2dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2UIPROC, glProgramUniform2ui );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM2UIVPROC, glProgramUniform2uiv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3IPROC, glProgramUniform3i );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3IVPROC, glProgramUniform3iv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3FPROC, glProgramUniform3f );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3FVPROC, glProgramUniform3fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3DPROC, glProgramUniform3d );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3DVPROC, glProgramUniform3dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3UIPROC, glProgramUniform3ui );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM3UIVPROC, glProgramUniform3uiv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4IPROC, glProgramUniform4i );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4IVPROC, glProgramUniform4iv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4FPROC, glProgramUniform4f );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4FVPROC, glProgramUniform4fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4DPROC, glProgramUniform4d );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4DVPROC, glProgramUniform4dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4UIPROC, glProgramUniform4ui );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORM4UIVPROC, glProgramUniform4uiv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX2FVPROC, glProgramUniformMatrix2fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX3FVPROC, glProgramUniformMatrix3fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX4FVPROC, glProgramUniformMatrix4fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX2DVPROC, glProgramUniformMatrix2dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX3DVPROC, glProgramUniformMatrix3dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX4DVPROC, glProgramUniformMatrix4dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX2X3FVPROC, glProgramUniformMatrix2x3fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX3X2FVPROC, glProgramUniformMatrix3x2fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX2X4FVPROC, glProgramUniformMatrix2x4fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX4X2FVPROC, glProgramUniformMatrix4x2fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX3X4FVPROC, glProgramUniformMatrix3x4fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX4X3FVPROC, glProgramUniformMatrix4x3fv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX2X3DVPROC, glProgramUniformMatrix2x3dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX3X2DVPROC, glProgramUniformMatrix3x2dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX2X4DVPROC, glProgramUniformMatrix2x4dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX4X2DVPROC, glProgramUniformMatrix4x2dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC, glProgramUniformMatrix3x4dv );
-	CHECK_ADDRESS( PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC, glProgramUniformMatrix4x3dv );
-	CHECK_ADDRESS( PFNGLVALIDATEPROGRAMPIPELINEPROC, glValidateProgramPipeline );
-	CHECK_ADDRESS( PFNGLGETPROGRAMPIPELINEINFOLOGPROC, glGetProgramPipelineInfoLog );
+	CHECK_ADDRESS(PFNGLUSEPROGRAMSTAGESPROC, glUseProgramStages);
+	CHECK_ADDRESS(PFNGLACTIVESHADERPROGRAMPROC, glActiveShaderProgram);
+	CHECK_ADDRESS(PFNGLCREATESHADERPROGRAMVPROC, glCreateShaderProgramv);
+	CHECK_ADDRESS(PFNGLBINDPROGRAMPIPELINEPROC, glBindProgramPipeline);
+	CHECK_ADDRESS(PFNGLDELETEPROGRAMPIPELINESPROC, glDeleteProgramPipelines);
+	CHECK_ADDRESS(PFNGLGENPROGRAMPIPELINESPROC, glGenProgramPipelines);
+	CHECK_ADDRESS(PFNGLISPROGRAMPIPELINEPROC, glIsProgramPipeline);
+	CHECK_ADDRESS(PFNGLGETPROGRAMPIPELINEIVPROC, glGetProgramPipelineiv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1IPROC, glProgramUniform1i);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1IVPROC, glProgramUniform1iv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1FPROC, glProgramUniform1f);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1FVPROC, glProgramUniform1fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1DPROC, glProgramUniform1d);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1DVPROC, glProgramUniform1dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1UIPROC, glProgramUniform1ui);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM1UIVPROC, glProgramUniform1uiv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2IPROC, glProgramUniform2i);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2IVPROC, glProgramUniform2iv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2FPROC, glProgramUniform2f);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2FVPROC, glProgramUniform2fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2DPROC, glProgramUniform2d);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2DVPROC, glProgramUniform2dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2UIPROC, glProgramUniform2ui);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM2UIVPROC, glProgramUniform2uiv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3IPROC, glProgramUniform3i);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3IVPROC, glProgramUniform3iv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3FPROC, glProgramUniform3f);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3FVPROC, glProgramUniform3fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3DPROC, glProgramUniform3d);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3DVPROC, glProgramUniform3dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3UIPROC, glProgramUniform3ui);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM3UIVPROC, glProgramUniform3uiv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4IPROC, glProgramUniform4i);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4IVPROC, glProgramUniform4iv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4FPROC, glProgramUniform4f);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4FVPROC, glProgramUniform4fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4DPROC, glProgramUniform4d);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4DVPROC, glProgramUniform4dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4UIPROC, glProgramUniform4ui);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORM4UIVPROC, glProgramUniform4uiv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX2FVPROC, glProgramUniformMatrix2fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX3FVPROC, glProgramUniformMatrix3fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX4FVPROC, glProgramUniformMatrix4fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX2DVPROC, glProgramUniformMatrix2dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX3DVPROC, glProgramUniformMatrix3dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX4DVPROC, glProgramUniformMatrix4dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX2X3FVPROC, glProgramUniformMatrix2x3fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX3X2FVPROC, glProgramUniformMatrix3x2fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX2X4FVPROC, glProgramUniformMatrix2x4fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX4X2FVPROC, glProgramUniformMatrix4x2fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX3X4FVPROC, glProgramUniformMatrix3x4fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX4X3FVPROC, glProgramUniformMatrix4x3fv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX2X3DVPROC, glProgramUniformMatrix2x3dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX3X2DVPROC, glProgramUniformMatrix3x2dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX2X4DVPROC, glProgramUniformMatrix2x4dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX4X2DVPROC, glProgramUniformMatrix4x2dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC, glProgramUniformMatrix3x4dv);
+	CHECK_ADDRESS(PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC, glProgramUniformMatrix4x3dv);
+	CHECK_ADDRESS(PFNGLVALIDATEPROGRAMPIPELINEPROC, glValidateProgramPipeline);
+	CHECK_ADDRESS(PFNGLGETPROGRAMPIPELINEINFOLOGPROC, glGetProgramPipelineInfoLog);
 
 	return true;
 }
@@ -968,11 +968,11 @@ void	registerGlExtensions(CGlExtensions &ext)
 	sint	a=0, b=0;
 
 	sscanf(nglVersion, "%d.%d", &a, &b);
-	if( ( a < 3 ) || ( ( a == 3 ) && ( b < 3 ) ) )
+	if ((a < 3) || ((a == 3) && (b < 3)))
 	{
-		nlinfo( "OpenGL version is less than 3.3!" );
-		nlinfo( "Version string: %s",nglVersion );
-		nlassert( false );
+		nlinfo("OpenGL version is less than 3.3!");
+		nlinfo("Version string: %s",nglVersion);
+		nlassert(false);
 	}
 	
 	// Extensions.
@@ -985,18 +985,18 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{
 		vector<string> exts;
 		explode(string(glext), string(" "), exts);
-		for(uint i = 0; i < exts.size(); i++)
+		for (uint i = 0; i < exts.size(); i++)
 		{
-			if(i%5==0) DebugLog->displayRaw("3D:     ");
+			if (i%5==0) DebugLog->displayRaw("3D:     ");
 			DebugLog->displayRaw(string(exts[i]+" ").c_str());
-			if(i%5==4) DebugLog->displayRaw("\n");
+			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
 	}
 
 	// Check ARBMultiTexture
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
-	if(ext.ARBMultiTexture)
+	if (ext.ARBMultiTexture)
 	{
 		glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &ntext);
 		// We could have more than IDRV_MAT_MAXTEXTURES but the interface only
@@ -1077,16 +1077,16 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	setupARBVertexBufferObject(glext);
 
-	if( !setupGLSL( glext ) )
+	if (!setupGLSL(glext))
 	{
-		nlinfo( "Failed to set up GLSL related calls!" );
-		nlassert( false );
+		nlinfo("Failed to set up GLSL related calls!");
+		nlassert(false);
 	}
 
-	if( !setupSeparateShaderObjects( glext ) )
+	if (!setupSeparateShaderObjects(glext))
 	{
-		nlinfo( "Failed to set up separate shader object calls!" );
-		nlassert( false );
+		nlinfo("Failed to set up separate shader object calls!");
+		nlassert(false);
 	}
 }
 
@@ -1168,11 +1168,11 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 	{
 		vector<string> exts;
 		explode(string(glext), string(" "), exts);
-		for(uint i = 0; i < exts.size(); i++)
+		for (uint i = 0; i < exts.size(); i++)
 		{
-			if(i%5==0) DebugLog->displayRaw("3D:     ");
+			if (i%5==0) DebugLog->displayRaw("3D:     ");
 			DebugLog->displayRaw(string(exts[i]+" ").c_str());
-			if(i%5==4) DebugLog->displayRaw("\n");
+			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
 	}
@@ -1209,11 +1209,11 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 	{
 		vector<string> exts;
 		explode(string(glext), string(" "), exts);
-		for(uint i = 0; i < exts.size(); i++)
+		for (uint i = 0; i < exts.size(); i++)
 		{
-			if(i%5==0) DebugLog->displayRaw("3D:     ");
+			if (i%5==0) DebugLog->displayRaw("3D:     ");
 			DebugLog->displayRaw(string(exts[i]+" ").c_str());
-			if(i%5==4) DebugLog->displayRaw("\n");
+			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
 	}

@@ -61,7 +61,7 @@ bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARA
 	if (!driver)
 		return false;
 
-	if(message == WM_SIZE)
+	if (message == WM_SIZE)
 	{
 		if (driver->_CurrentMode.Windowed)
 		{
@@ -73,7 +73,7 @@ bool GlWndProc(CDriverGL3 *driver, HWND hWnd, UINT message, WPARAM wParam, LPARA
 			driver->_CurrentMode.Height = (uint16)(rect.bottom-rect.top);
 		}
 	}
-	else if(message == WM_MOVE)
+	else if (message == WM_MOVE)
 	{
 		if (driver->_CurrentMode.Windowed)
 		{
@@ -151,7 +151,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	// disable menu (default ALT-F4 behavior is disabled)
 	if (message == WM_CLOSE)
 	{
-		if(pDriver && pDriver->ExitFunc)
+		if (pDriver && pDriver->ExitFunc)
 		{
 			pDriver->ExitFunc();
 		}
@@ -174,7 +174,7 @@ bool GlWndProc(CDriverGL3 *driver, const void* e)
 {
 	H_AUTO_OGL(GlWndProc)
 
-	if(!driver)
+	if (!driver)
 		return false;
 
 	NSEvent* event = [NSEvent eventWithEventRef:e];
@@ -214,7 +214,7 @@ bool GlWndProc(CDriverGL3 *driver, XEvent &e)
 	{
 		case DestroyNotify:
 
-		if(driver && driver->ExitFunc)
+		if (driver && driver->ExitFunc)
 		{
 			driver->ExitFunc();
 		}
@@ -316,7 +316,7 @@ bool CDriverGL3::init (uint windowIcon, emptyProc exitFunc)
 		wc.hbrBackground	= WHITE_BRUSH;
 		wc.lpszClassName	= L"NLClass";
 		wc.lpszMenuName		= NULL;
-		if ( !RegisterClassW(&wc) )
+		if (!RegisterClassW(&wc))
 		{
 			return false;
 		}
@@ -402,11 +402,11 @@ bool CDriverGL3::init (uint windowIcon, emptyProc exitFunc)
 		sint nextensions = 0;
 		char **extensions = XListExtensions(_dpy, &nextensions);
 
-		for(sint i = 0; i < nextensions; ++i)
+		for (sint i = 0; i < nextensions; ++i)
 		{
-			if(i%5==0) DebugLog->displayRaw("3D:     ");
+			if (i%5==0) DebugLog->displayRaw("3D:     ");
 			DebugLog->displayRaw(NLMISC::toString("%s ", extensions[i]).c_str());
-			if(i%5==4) DebugLog->displayRaw("\n");
+			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 
 		DebugLog->displayRaw("\n");
@@ -524,7 +524,7 @@ void CDriverGL3::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 	uint bigHeight = GetSystemMetrics(SM_CYICON);
 
 	// find icons with the exact size
-	for(uint i = 0; i < bitmaps.size(); ++i)
+	for (uint i = 0; i < bitmaps.size(); ++i)
 	{
 		if (smallIndex == -1 &&	bitmaps[i].getWidth() == smallWidth &&	bitmaps[i].getHeight() == smallHeight)
 			smallIndex = i;
@@ -534,7 +534,7 @@ void CDriverGL3::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 	}
 
 	// find icons with taller size (we will resize them)
-	for(uint i = 0; i < bitmaps.size(); ++i)
+	for (uint i = 0; i < bitmaps.size(); ++i)
 	{
 		if (smallIndex == -1 && bitmaps[i].getWidth() >= smallWidth && bitmaps[i].getHeight() >= smallHeight)
 			smallIndex = i;
@@ -571,7 +571,7 @@ void CDriverGL3::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 	if (!bitmaps.empty())
 	{
 		// process each bitmap
-		for(uint i = 0; i < bitmaps.size(); ++i)
+		for (uint i = 0; i < bitmaps.size(); ++i)
 		{
 			convertBitmapToIcon(bitmaps[i], icon_data);
 		}
@@ -626,7 +626,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		RECT rc;
 		SetRect (&rc, 0, 0, width, height);
 		AdjustWindowRectEx (&rc, GetWindowStyle (_win), GetMenu (_win) != NULL, GetWindowExStyle (_win));
-		SetWindowPos (_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE );
+		SetWindowPos (_win, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 
 		// Get the
 		HDC tempHDC = GetDC(tmpHWND);
@@ -642,7 +642,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		_pfd.cColorBits   = _CurrentMode.Depth;
 
 		// Choose best suited Depth Buffer.
-		if(_CurrentMode.Depth<=16)
+		if (_CurrentMode.Depth<=16)
 		{
 			_pfd.cDepthBits   = 16;
 		}
@@ -659,7 +659,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 			DestroyWindow (tmpHWND);
 			return false;
 		}
-		if ( !SetPixelFormat(tempHDC,pf,&_pfd) )
+		if (!SetPixelFormat(tempHDC,pf,&_pfd))
 		{
 			nlwarning ("CDriverGL3::setDisplay: SetPixelFormat failed");
 			DestroyWindow (tmpHWND);
@@ -719,7 +719,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 		// Attribute arrays must be "0" terminated - for simplicity, first
 		// just zero-out the array then fill from left to right.
-		for ( int a = 0; a < 2*20; a++ )
+		for (int a = 0; a < 2*20; a++)
 		{
 			iattributes[a] = 0;
 			fattributes[a] = 0;
@@ -754,10 +754,10 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		// requirements.
 		int pformat[20];
 		unsigned int nformats;
-		if ( !nwglChoosePixelFormatARB ( hdc, iattributes, fattributes,
-			20, pformat, &nformats ) )
+		if (!nwglChoosePixelFormatARB (hdc, iattributes, fattributes,
+			20, pformat, &nformats))
 		{
-			nlwarning ( "pbuffer creation error: Couldn't find a suitable pixel format." );
+			nlwarning ("pbuffer creation error: Couldn't find a suitable pixel format.");
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			return false;
@@ -768,7 +768,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 			returned in the list in step #2 and call the function: */
 		int iattributes2[1] = {0};
 		// int iattributes2[] = {WGL_PBUFFER_LARGEST_ARB, 1, 0};
-		_PBuffer = nwglCreatePbufferARB( hdc, pformat[0], width, height, iattributes2 );
+		_PBuffer = nwglCreatePbufferARB(hdc, pformat[0], width, height, iattributes2);
 		if (_PBuffer == NULL)
 		{
 			DWORD error = GetLastError ();
@@ -784,7 +784,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		}
 
 		/* After creating a pbuffer, you may use this functions to determine the dimensions of the pbuffer actually created. */
-		if ( !nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width ) )
+		if (!nwglQueryPbufferARB(_PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width))
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL3::setDisplay: wglQueryPbufferARB failed: 0x%x", error);
@@ -797,7 +797,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 			return false;
 		}
 
-		if ( !nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height ) )
+		if (!nwglQueryPbufferARB(_PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height))
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL3::setDisplay: wglQueryPbufferARB failed: 0x%x", error);
@@ -815,12 +815,12 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 		/* The next step is to create a device context for the newly created pbuffer. To do this,
 			call to the function: */
-		_hDC = nwglGetPbufferDCARB( _PBuffer );
+		_hDC = nwglGetPbufferDCARB(_PBuffer);
 		if (_hDC == NULL)
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL3::setDisplay: wglGetPbufferDCARB failed: 0x%x", error);
-			nwglDestroyPbufferARB( _PBuffer );
+			nwglDestroyPbufferARB(_PBuffer);
 
 			wglDeleteContext (tempGLRC);
 
@@ -834,13 +834,13 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 		/* The final step of pbuffer creation is to create an OpenGL rendering context and
 			associate it with the handle for the pbuffer's device context created in step #4. This is done as follows */
-		_hRC = wglCreateContext( _hDC );
+		_hRC = wglCreateContext(_hDC);
 		if (_hRC == NULL)
 		{
 			DWORD error = GetLastError ();
 			nlwarning ("CDriverGL3::setDisplay: wglCreateContext failed: 0x%x", error);
-			nwglReleasePbufferDCARB( _PBuffer, _hDC );
-			nwglDestroyPbufferARB( _PBuffer );
+			nwglReleasePbufferDCARB(_PBuffer, _hDC);
+			nwglDestroyPbufferARB(_PBuffer);
 			wglDeleteContext (tempGLRC);
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
@@ -873,8 +873,8 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 			nlwarning ("CDriverGL3::setDisplay: wglMakeCurrent failed: 0x%x", error);
 
 			wglDeleteContext (_hRC);
-			nwglReleasePbufferDCARB( _PBuffer, _hDC );
-			nwglDestroyPbufferARB( _PBuffer );
+			nwglReleasePbufferDCARB(_PBuffer, _hDC);
+			nwglDestroyPbufferARB(_PBuffer);
 
 			DestroyWindow (tmpHWND);
 			_PBuffer = NULL;
@@ -951,7 +951,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		 *   (http://dev.ryzom.com/issues/1013)
 		 */
 		NSView* view = (NSView*)wnd;
-		if(view.frame.origin.x != 0 || view.frame.origin.y != 0) {
+		if (view.frame.origin.x != 0 || view.frame.origin.y != 0) {
 			[view setBoundsOrigin:view.frame.origin];
 		}
 	}
@@ -974,7 +974,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 	NSOpenGLPixelFormat* format =
 		[[NSOpenGLPixelFormat alloc] initWithAttributes:att];
 
-	if(!format)
+	if (!format)
 		nlerror("cannot create NSOpenGLPixelFormat");
 
 	// intially set height/width, further updates through CocoaOpenGLView
@@ -986,7 +986,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		initWithFrame:NSMakeRect(0, 0, mode.Width, mode.Height)
 		pixelFormat:format];
 
-	if(!_glView)
+	if (!_glView)
 		nlerror("cannot create view");
 
 	// tell the view about the driver so the view is able to update "window" size
@@ -1004,7 +1004,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 	// create a opengl context for the view
 	_ctx = [_glView openGLContext];
 
-	if(!_ctx)
+	if (!_ctx)
 		nlerror("cannot create context");
 
 	// free the pixel format object
@@ -1051,7 +1051,7 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 	XVisualInfo *visual_info = glXChooseVisual (_dpy, DefaultScreen(_dpy), sAttribList24bpp);
 	if (visual_info == NULL)
 		visual_info = glXChooseVisual(_dpy, DefaultScreen(_dpy), sAttribList16bpp);
-	if(visual_info == NULL)
+	if (visual_info == NULL)
 	{
 		nlerror("glXChooseVisual() failed");
 	}
@@ -1297,13 +1297,13 @@ bool CDriverGL3::setScreenMode(const GfxMode &mode)
 	devMode.dmPelsWidth   = mode.Width;
 	devMode.dmPelsHeight  = mode.Height;
 
-	if(mode.Depth > 0)
+	if (mode.Depth > 0)
 	{
 		devMode.dmBitsPerPel  = mode.Depth;
 		devMode.dmFields     |= DM_BITSPERPEL;
 	}
 
-	if(mode.Frequency > 0)
+	if (mode.Frequency > 0)
 	{
 		devMode.dmDisplayFrequency  = mode.Frequency;
 		devMode.dmFields           |= DM_DISPLAYFREQUENCY;
@@ -1447,7 +1447,7 @@ bool CDriverGL3::createWindow(const GfxMode &mode)
 		initWithContentRect:NSMakeRect(0, 0, mode.Width, mode.Height)
 		styleMask:styleMask backing:NSBackingStoreBuffered defer:NO];
 
-	if(!cocoa_window)
+	if (!cocoa_window)
 	{
 		nlerror("cannot create cocoa window");
 		return false;
@@ -1490,7 +1490,7 @@ bool CDriverGL3::createWindow(const GfxMode &mode)
 
 	[cocoa_window setContentView: (NSView*)window];
 
-	if(window == EmptyWindow)
+	if (window == EmptyWindow)
 	{
 		nldebug("cannot create cocoa view for cocoa window");
 		return false;
@@ -1716,14 +1716,14 @@ bool CDriverGL3::setWindowStyle(EWindowStyle windowStyle)
 #elif defined(NL_OS_MAC)
 
 	// leave fullscreen mode, enter windowed mode
-	if(windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
+	if (windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
 		CGLError error = CGLDisable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
@@ -1738,13 +1738,13 @@ bool CDriverGL3::setWindowStyle(EWindowStyle windowStyle)
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if(windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
+	else if (windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
 	{
 		// enable manual back buffer size for mode setting in fullscreen
 		CGLError error = CGLEnable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
@@ -1859,11 +1859,11 @@ static int bppFromDisplayMode(CGDisplayModeRef mode)
 {
 	CFStringRef pixelEncoding = CGDisplayModeCopyPixelEncoding(mode);
 
-	if(CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels),
+	if (CFStringCompare(pixelEncoding, CFSTR(IO32BitDirectPixels),
 			kCFCompareCaseInsensitive) == kCFCompareEqualTo)
 		return 32;
 
-	else if(CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels),
+	else if (CFStringCompare(pixelEncoding, CFSTR(IO16BitDirectPixels),
 			kCFCompareCaseInsensitive) == kCFCompareEqualTo)
 		return 16;
 
@@ -1900,7 +1900,7 @@ bool CDriverGL3::getModes(std::vector<GfxMode> &modes)
 	while (EnumDisplaySettings (NULL, modeIndex, &devMode))
 	{
 		// Keep only 16 and 32 bits
-		if ((devMode.dmBitsPerPel == 16 ) || (devMode.dmBitsPerPel == 32))
+		if ((devMode.dmBitsPerPel == 16) || (devMode.dmBitsPerPel == 32))
 		{
 			// Add this mode
 			GfxMode mode;
@@ -1922,7 +1922,7 @@ bool CDriverGL3::getModes(std::vector<GfxMode> &modes)
 	CGDisplayCount numDisplays;
 
 	CGDisplayErr err = CGGetActiveDisplayList(kMaxDisplays, display, &numDisplays);
-	if(err != CGDisplayNoErr)
+	if (err != CGDisplayNoErr)
 	{
 		nlwarning("Cannot get displays (%d)", err);
 		return false;
@@ -2100,7 +2100,7 @@ bool CDriverGL3::getCurrentScreenMode(GfxMode &mode)
 	mode.Depth     = NSBitsPerPixelFromDepth([screen depth]);
 
 	// in fullscreen mode
-	if([containerView() isInFullScreenMode])
+	if ([containerView() isInFullScreenMode])
 	{
 		// return the size of the back buffer (like having switched monitor mode)
 		mode.Windowed  = false;
@@ -2352,7 +2352,7 @@ bool CDriverGL3::createContext()
 	_pfd.iPixelType   = PFD_TYPE_RGBA;
 	_pfd.cColorBits   = _CurrentMode.Depth;
 	// Choose best suited Depth Buffer.
-	if(_CurrentMode.Depth <= 16)
+	if (_CurrentMode.Depth <= 16)
 	{
 		_pfd.cDepthBits   = 16;
 	}
@@ -2369,7 +2369,7 @@ bool CDriverGL3::createContext()
 		return false;
 	}
 
-	if ( !SetPixelFormat(_hDC,pf,&_pfd) )
+	if (!SetPixelFormat(_hDC,pf,&_pfd))
 	{
 		return false;
 	}
@@ -2398,7 +2398,7 @@ bool CDriverGL3::activate()
 
 #elif defined(NL_OS_MAC)
 
-	if([NSOpenGLContext currentContext] != _ctx)
+	if ([NSOpenGLContext currentContext] != _ctx)
 		[_ctx makeCurrentContext];
 
 #elif defined (NL_OS_UNIX)
@@ -2466,15 +2466,15 @@ void CDriverGL3::getWindowSize(uint32 &width, uint32 &height)
 
 		if (_PBuffer)
 		{
-			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width );
-			nwglQueryPbufferARB( _PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height );
+			nwglQueryPbufferARB(_PBuffer, WGL_PBUFFER_WIDTH_ARB, (int*)&width);
+			nwglQueryPbufferARB(_PBuffer, WGL_PBUFFER_HEIGHT_ARB, (int*)&height);
 		}
 #endif
 	}
 	else
 	{
 #ifdef NL_OS_MAC
-		if([containerView() isInFullScreenMode])
+		if ([containerView() isInFullScreenMode])
 		{
 			width = _backBufferWidth;
 			height = _backBufferHeight;
@@ -2517,7 +2517,7 @@ void CDriverGL3::setWindowSize(uint32 width, uint32 height)
 #elif defined(NL_OS_MAC)
 
 	// for fullscreen mode, adjust the back buffer size to desired resolution
-	if([containerView() isInFullScreenMode])
+	if ([containerView() isInFullScreenMode])
 	{
 		// disable and re-enable fullscreen
 		// fixes #1062 (http://dev.ryzom.com/issues/1062)
@@ -2530,7 +2530,7 @@ void CDriverGL3::setWindowSize(uint32 width, uint32 height)
 			(CGLContextObj)[_ctx CGLContextObj],
 			kCGLCPSurfaceBackingSize, dim);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot set kCGLCPSurfaceBackingSize parameter (%s)",
 				CGLErrorString(error));
 
@@ -2540,7 +2540,7 @@ void CDriverGL3::setWindowSize(uint32 width, uint32 height)
 	else
 	{
 		// only change the window size if the driver created the window itself
-		if(_DestroyWindow)
+		if (_DestroyWindow)
 		{
 			// get the windows current frame
 			NSRect rect = [[containerView() window] frame];
@@ -2635,7 +2635,7 @@ bool CDriverGL3::isActive()
 // ***************************************************************************
 bool CDriverGL3::setMonitorColorProperties (const CMonitorColorProperties &properties)
 {
-	H_AUTO_OGL(CDriverGL3_setMonitorColorProperties )
+	H_AUTO_OGL(CDriverGL3_setMonitorColorProperties)
 
 #ifdef NL_OS_WINDOWS
 
@@ -2648,19 +2648,19 @@ bool CDriverGL3::setMonitorColorProperties (const CMonitorColorProperties &prope
 
 		// For each composant
 		uint c;
-		for( c=0; c<3; c++ )
+		for (c=0; c<3; c++)
 		{
 			uint i;
-			for( i=0; i<256; i++ )
+			for (i=0; i<256; i++)
 			{
 				// Floating value
 				float value = (float)i / 256;
 
 				// Contrast
-				value = (float) max (0.0f, (value-0.5f) * (float) pow (3.f, properties.Contrast[c]) + 0.5f );
+				value = (float) max (0.0f, (value-0.5f) * (float) pow (3.f, properties.Contrast[c]) + 0.5f);
 
 				// Gamma
-				value = (float) pow (value, (properties.Gamma[c]>0) ? 1 - 3 * properties.Gamma[c] / 4 : 1 - properties.Gamma[c] );
+				value = (float) pow (value, (properties.Gamma[c]>0) ? 1 - 3 * properties.Gamma[c] / 4 : 1 - properties.Gamma[c]);
 
 				// Luminosity
 				value = value + properties.Luminosity[c] / 2.f;
@@ -2864,7 +2864,7 @@ bool CDriverGL3::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<
 
 	// convert RGBA to ARGB
 	CObjectVector<uint8> pixels = bitmap.getPixels();
-	for(uint j = 0; j < pixels.size(); j+=4)
+	for (uint j = 0; j < pixels.size(); j+=4)
 		icon[pos++] = pixels[j] << 16 | pixels[j+1] << 8 | pixels[j+2] | pixels[j+3] << 24;
 
 	return true;

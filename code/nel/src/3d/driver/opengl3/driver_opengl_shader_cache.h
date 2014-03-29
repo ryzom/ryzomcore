@@ -31,10 +31,10 @@ namespace NL3D
 		~CShaderCache();
 
 		/// Checks if there's a shader cached that was generated from the specified descriptor
-		SShaderPair findShader( const CShaderDesc &desc ) const;
+		SShaderPair findShader(const CShaderDesc &desc) const;
 
 		/// Caches a shader with the specified descriptor as key
-		void cacheShader( CShaderDesc &desc );
+		void cacheShader(CShaderDesc &desc);
 
 		/// Clears the caches, removes the cached shaders
 		void clearCache();

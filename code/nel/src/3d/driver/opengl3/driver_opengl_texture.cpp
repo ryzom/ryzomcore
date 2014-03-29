@@ -85,13 +85,13 @@ CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 	// release in TextureUsed.
 	_Driver->_TextureUsed.erase (this);
 
-	if(InitFBO)
+	if (InitFBO)
 	{
 		nglDeleteFramebuffersEXT(1, &FBOId);
-		if(AttachDepthStencil)
+		if (AttachDepthStencil)
 		{
 			nglDeleteRenderbuffersEXT(1, &DepthFBOId);
-			if(!UsePackedDepthStencil)
+			if (!UsePackedDepthStencil)
 				nglDeleteRenderbuffersEXT(1, &StencilFBOId);
 		}
 	}
@@ -100,19 +100,19 @@ CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 // ***************************************************************************
 bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 {
-	if(!InitFBO)
+	if (!InitFBO)
 	{
-		if(tex->isBloomTexture())
+		if (tex->isBloomTexture())
 		{
 			AttachDepthStencil = !((CTextureBloom*)tex)->isMode2D();
 		}
 
 		// generate IDs
 		nglGenFramebuffersEXT(1, &FBOId);
-		if(AttachDepthStencil)
+		if (AttachDepthStencil)
 		{
 			nglGenRenderbuffersEXT(1, &DepthFBOId);
-			if(UsePackedDepthStencil)
+			if (UsePackedDepthStencil)
 				StencilFBOId = DepthFBOId;
 			else
 				nglGenRenderbuffersEXT(1, &StencilFBOId);
@@ -130,9 +130,9 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 		// opengl.org extension registry). Until a safe approach to add
 		// them is found, there will be no attached stencil for the time
 		// being, aside of using packed depth+stencil buffers.
-		if(AttachDepthStencil)
+		if (AttachDepthStencil)
 		{
-			if(UsePackedDepthStencil)
+			if (UsePackedDepthStencil)
 			{
 				//nldebug("3D: using packed depth stencil");
 				nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, StencilFBOId);
@@ -264,7 +264,7 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 			{
 				nglDeleteRenderbuffersEXT(1, &DepthFBOId);
 
-				if(!UsePackedDepthStencil)
+				if (!UsePackedDepthStencil)
 					nglDeleteRenderbuffersEXT(1, &StencilFBOId);
 			}
 		}
@@ -277,9 +277,9 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 // ***************************************************************************
 bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 {
-	if(tex)
+	if (tex)
 	{
-		if(initFrameBufferObject(tex))
+		if (initFrameBufferObject(tex))
 		{
 			glBindTexture(TextureMode, 0);
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FBOId);
@@ -313,12 +313,12 @@ GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
 	ITexture::TUploadFormat		texfmt= tex.getUploadFormat();
 
 	// If auto, retrieve the pixel format of the bitmap.
-	if(texfmt== ITexture::Auto)
+	if (texfmt== ITexture::Auto)
 	{
 		switch(tex.getPixelFormat())
 		{
 			case CBitmap::RGBA:
-				if(_ForceDXTCCompression && tex.allowDegradation() )
+				if (_ForceDXTCCompression && tex.allowDegradation())
 					texfmt= ITexture::DXTC5;
 				else
 					texfmt= ITexture::RGBA8888;
@@ -336,7 +336,7 @@ GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
 	}
 
 	// Get gl tex format, try S3TC compressed ones.
-	if(_Extensions.EXTTextureCompressionS3TC)
+	if (_Extensions.EXTTextureCompressionS3TC)
 	{
 		compressed= true;
 		// Try Compressed ones.
@@ -402,7 +402,7 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 		}
 	}
 
-	if( glfmt == GL_RG8 )
+	if (glfmt == GL_RG8)
 		return GL_RG;
 
 	// Else, not a Src format for upload, or RGBA.
@@ -410,11 +410,11 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 }
 
 // ***************************************************************************
-static GLenum getGlSrcTextureComponentType( ITexture &tex, GLint texSrcFormat)
+static GLenum getGlSrcTextureComponentType(ITexture &tex, GLint texSrcFormat)
 {
 	H_AUTO_OGL(getGlSrcTextureComponentType);
 
-	if( tex.getPixelFormat() == CBitmap::DsDt )
+	if (tex.getPixelFormat() == CBitmap::DsDt)
 		return GL_BYTE;
 
 	return GL_UNSIGNED_BYTE;
@@ -495,7 +495,7 @@ uint				CDriverGL3::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 static inline GLenum	translateWrapToGl(ITexture::TWrapMode mode, const CGlExtensions	&extensions)
 {
 	H_AUTO_OGL(translateWrapToGl)
-	if(mode== ITexture::Repeat)
+	if (mode== ITexture::Repeat)
 		return GL_REPEAT;
 	
 	return GL_CLAMP_TO_EDGE;
@@ -529,7 +529,7 @@ static inline GLenum	translateMinFilterToGl(CTextureDrvInfosGL3 *glText)
 	return GL_NEAREST;
 #else // NEL_FORCE_NEAREST
 
-	if(glText->MipMap)
+	if (glText->MipMap)
 	{
 		switch(glText->MinFilter)
 		{
@@ -569,22 +569,22 @@ static inline bool		sameDXTCFormat(ITexture &tex, GLint glfmt)
 	H_AUTO_OGL(sameDXTCFormat);
 
 #ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1)
+	if (glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1)
 		return true;
 #endif
 
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1Alpha)
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT && tex.PixelFormat==CBitmap::DXTC1Alpha)
 		return true;
 #endif
 
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && tex.PixelFormat==CBitmap::DXTC3)
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT && tex.PixelFormat==CBitmap::DXTC3)
 		return true;
 #endif
 
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT && tex.PixelFormat==CBitmap::DXTC5)
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT && tex.PixelFormat==CBitmap::DXTC5)
 		return true;
 #endif
 
@@ -597,22 +597,22 @@ static inline bool		isDXTCFormat(GLint glfmt)
 	H_AUTO_OGL(isDXTCFormat);
 
 #ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-	if(glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
+	if (glfmt==GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
 		return true;
 #endif
 
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)
 		return true;
 #endif
 
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT3_EXT)
 		return true;
 #endif
 
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-	if(glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
+	if (glfmt==GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)
 		return true;
 #endif
 
@@ -637,7 +637,7 @@ void CDriverGL3::bindTextureWithMode(ITexture &tex)
 	gltext= getTextureGl(tex);
 	// system of "backup the previous binded texture" seems to not work with some drivers....
 	_DriverGLStates.activeTextureARB(0);
-	if(tex.isTextureCube())
+	if (tex.isTextureCube())
 	{
 		if (_Extensions.ARBTextureCubeMap)
 		{
@@ -650,7 +650,7 @@ void CDriverGL3::bindTextureWithMode(ITexture &tex)
 	{
 		CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-		if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+		if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 			textureMode = CDriverGLStates3::TextureRect;
 
 		_DriverGLStates.setTextureMode(textureMode);
@@ -673,7 +673,7 @@ void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 	gltext->WrapT= tex.getWrapT();
 	gltext->MagFilter= tex.getMagFilter();
 	gltext->MinFilter= tex.getMinFilter();
-	if(tex.isTextureCube())
+	if (tex.isTextureCube())
 	{
 		if (_Extensions.ARBTextureCubeMap)
 		{
@@ -708,13 +708,13 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 	//nldebug("3D: CDriverGL3::setupTextureEx(%016p, %d, %d, %d)", &tex, bUpload, bAllUploaded, bMustRecreateSharedTexture);
 	bAllUploaded = false;
 
-	if(tex.isTextureCube() && (!_Extensions.ARBTextureCubeMap))
+	if (tex.isTextureCube() && (!_Extensions.ARBTextureCubeMap))
 		return true;
 
 	// 0. Create/Retrieve the driver texture.
 	//=======================================
 	bool mustCreate = false;
-	if ( !tex.TextureDrvShare )
+	if (!tex.TextureDrvShare)
 	{
 		//nldebug("3D:   creating CTextureDrvShare()");
 		// insert into driver list. (so it is deleted when driver is deleted).
@@ -727,7 +727,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 	}
 
 	// Does the texture has been touched ?
-	if ( (!tex.touched()) && (!mustCreate) )
+	if ((!tex.touched()) && (!mustCreate))
 	{
 		// if wrap mode or filter mode is touched, update it here
 		if (tex.filterOrWrapModeTouched())
@@ -758,14 +758,14 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 		But this is grave only if a new texture is created, with the same pointer (bad luck).
 		Since an newly allocated texture always pass here before use, we are sure to avoid any problems.
 	*/
-	for(uint stage = 0; stage < inlGetNumTextStages(); stage++)
+	for (uint stage = 0; stage < inlGetNumTextStages(); stage++)
 	{
 		activateTexture(stage, NULL);
 	}
 
 	// A. Share mgt.
 	//==============
-	if(tex.supportSharing())
+	if (tex.supportSharing())
 	{
 		// Try to get the shared texture.
 
@@ -782,7 +782,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			itTex= rTexDrvInfos.find(name);
 
 			// texture not found?
-			if( itTex==rTexDrvInfos.end() )
+			if (itTex==rTexDrvInfos.end())
 			{
 				// insert into driver map. (so it is deleted when driver is deleted).
 				itTex= (rTexDrvInfos.insert(make_pair(name, (ITextureDrvInfos*)NULL))).first;
@@ -796,7 +796,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			{
 				tex.TextureDrvShare->DrvTexture= itTex->second;
 
-				if(bMustRecreateSharedTexture)
+				if (bMustRecreateSharedTexture)
 					// reload this shared texture (user request)
 					mustLoadAll= true;
 				else
@@ -811,7 +811,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 	else
 	{
 		// If texture not already created.
-		if(!tex.TextureDrvShare->DrvTexture)
+		if (!tex.TextureDrvShare->DrvTexture)
 		{
 			// Must create it. Create auto a GL id (in constructor).
 			// Do not insert into the map. This un-shared texture will be deleted at deletion of the texture.
@@ -821,15 +821,15 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			// need to load ALL this texture.
 			mustLoadAll= true;
 		}
-		else if(tex.isAllInvalidated())
+		else if (tex.isAllInvalidated())
 			mustLoadAll= true;
-		else if(tex.touched())
+		else if (tex.touched())
 			mustLoadPart= true;
 	}
 
 	// B. Setup texture.
 	//==================
-	if(mustLoadAll || mustLoadPart)
+	if (mustLoadAll || mustLoadPart)
 	{
 		// system of "backup the previous binded texture" seems to not work with some drivers....
 		bindTextureWithMode(tex);
@@ -848,30 +848,30 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			gltext->TextureMemory= 0;
 
 
-			if(tex.isTextureCube())
+			if (tex.isTextureCube())
 			{
 				CTextureCube *pTC = NLMISC::safe_cast<CTextureCube *>(&tex);
 
 				// Regenerate all the texture.
 				tex.generate();
 
-				for(uint nText = 0; nText < 6; ++nText)
-				if(pTC->getTexture((CTextureCube::TFace)nText) != NULL)
+				for (uint nText = 0; nText < 6; ++nText)
+				if (pTC->getTexture((CTextureCube::TFace)nText) != NULL)
 				{
 					ITexture *pTInTC = pTC->getTexture((CTextureCube::TFace)nText);
 
 					// In open GL, we have to flip the faces of the cube map
-					if( ((CTextureCube::TFace)nText) == CTextureCube::positive_x )
+					if (((CTextureCube::TFace)nText) == CTextureCube::positive_x)
 						pTInTC->flipH();
-					if( ((CTextureCube::TFace)nText) == CTextureCube::negative_x )
+					if (((CTextureCube::TFace)nText) == CTextureCube::negative_x)
 						pTInTC->flipH();
-					if( ((CTextureCube::TFace)nText) == CTextureCube::positive_y )
+					if (((CTextureCube::TFace)nText) == CTextureCube::positive_y)
 						pTInTC->flipH();
-					if( ((CTextureCube::TFace)nText) == CTextureCube::negative_y )
+					if (((CTextureCube::TFace)nText) == CTextureCube::negative_y)
 						pTInTC->flipH();
-					if( ((CTextureCube::TFace)nText) == CTextureCube::positive_z )
+					if (((CTextureCube::TFace)nText) == CTextureCube::positive_z)
 						pTInTC->flipV();
-					if( ((CTextureCube::TFace)nText) == CTextureCube::negative_z )
+					if (((CTextureCube::TFace)nText) == CTextureCube::negative_z)
 						pTInTC->flipV();
 
 					// Get the correct texture format from texture...
@@ -880,9 +880,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					GLenum  glSrcType= getGlSrcTextureComponentType(*pTInTC,glSrcFmt);
 
 					sint	nMipMaps;
-					if(glSrcFmt==GL_RGBA && pTInTC->getPixelFormat()!=CBitmap::RGBA )
+					if (glSrcFmt==GL_RGBA && pTInTC->getPixelFormat()!=CBitmap::RGBA)
 						pTInTC->convertToType(CBitmap::RGBA);
-					if(tex.mipMapOn())
+					if (tex.mipMapOn())
 					{
 						pTInTC->buildMipMaps();
 						nMipMaps= pTInTC->getMipMapCount();
@@ -894,7 +894,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					gltext->MipMap= nMipMaps>1;
 
 					// Fill mipmaps.
-					for(sint i=0;i<nMipMaps;i++)
+					for (sint i=0;i<nMipMaps;i++)
 					{
 						void	*ptr= pTInTC->getPixels(i).getPtr();
 						uint	w= pTInTC->getWidth(i);
@@ -922,7 +922,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				// Regenerate all the texture.
 				tex.generate();
 
-				if(tex.getSize()>0)
+				if (tex.getSize()>0)
 				{
 					// Get the correct texture format from texture...
 					GLint	glfmt= getGlTextureFormat(tex, gltext->Compressed);
@@ -931,11 +931,11 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 
 					// DXTC: if same format, and same mipmapOn/Off, use glTexCompressedImage*.
 					// We cannot build the mipmaps if they are not here.
-					if(_Extensions.EXTTextureCompressionS3TC && sameDXTCFormat(tex, glfmt))
+					if (_Extensions.EXTTextureCompressionS3TC && sameDXTCFormat(tex, glfmt))
 					{
 						sint	nMipMaps = 1;
 
-						if(tex.mipMapOn())
+						if (tex.mipMapOn())
 							nMipMaps= tex.getMipMapCount();
 
 						// MipMap upload?
@@ -944,13 +944,13 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 						// Degradation in Size allowed only if DXTC texture are provided with mipmaps.
 						// Because use them to resize !!!
 						uint	decalMipMapResize= 0;
-						if(_ForceTextureResizePower>0 && tex.allowDegradation() && nMipMaps>1)
+						if (_ForceTextureResizePower>0 && tex.allowDegradation() && nMipMaps>1)
 						{
 							decalMipMapResize= min(_ForceTextureResizePower, (uint)(nMipMaps-1));
 						}
 
 						// Fill mipmaps.
-						for(sint i=decalMipMapResize;i<nMipMaps;i++)
+						for (sint i=decalMipMapResize;i<nMipMaps;i++)
 						{
 							void	*ptr= tex.getPixels(i).getPtr();
 							sint	size= tex.getPixels(i).size();
@@ -978,14 +978,14 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					else
 					{
 						sint	nMipMaps;
-						if(glSrcFmt==GL_RGBA && tex.getPixelFormat()!=CBitmap::RGBA )
+						if (glSrcFmt==GL_RGBA && tex.getPixelFormat()!=CBitmap::RGBA)
 						{
 							bUpload = true; // Force all upload
 							tex.convertToType(CBitmap::RGBA);
 						}
 
 						// Degradation in Size.
-						if(_ForceTextureResizePower>0 && tex.allowDegradation())
+						if (_ForceTextureResizePower>0 && tex.allowDegradation())
 						{
 							uint	w= tex.getWidth(0) >> _ForceTextureResizePower;
 							uint	h= tex.getHeight(0) >> _ForceTextureResizePower;
@@ -994,7 +994,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 							tex.resample(w, h);
 						}
 
-						if(tex.mipMapOn())
+						if (tex.mipMapOn())
 						{
 							tex.buildMipMaps();
 							nMipMaps= tex.getMipMapCount();
@@ -1006,7 +1006,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 						gltext->MipMap= nMipMaps>1;
 
 						// Fill mipmaps.
-						for(sint i=0;i<nMipMaps;i++)
+						for (sint i=0;i<nMipMaps;i++)
 						{
 							void	*ptr= tex.getPixels(i).getPtr();
 							uint	w= tex.getWidth(i);
@@ -1044,7 +1044,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			// Regenerate wanted part of the texture.
 			tex.generate();
 
-			if(tex.getSize()>0)
+			if (tex.getSize()>0)
 			{
 				// Get the correct texture format from texture...
 				//===============================================
@@ -1054,15 +1054,15 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				GLenum  glSrcType= getGlSrcTextureComponentType(tex,glSrcFmt);
 
 				sint	nMipMaps;
-				if(glSrcFmt==GL_RGBA && tex.getPixelFormat()!=CBitmap::RGBA )
+				if (glSrcFmt==GL_RGBA && tex.getPixelFormat()!=CBitmap::RGBA)
 					tex.convertToType(CBitmap::RGBA);
-				if(tex.mipMapOn())
+				if (tex.mipMapOn())
 				{
 					bool	hadMipMap= tex.getMipMapCount()>1;
 					tex.buildMipMaps();
 					nMipMaps= tex.getMipMapCount();
 					// If the texture had no mipmap before, release them.
-					if(!hadMipMap)
+					if (!hadMipMap)
 					{
 						tex.releaseMipMaps();
 					}
@@ -1073,7 +1073,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				// For all rect, update the texture/mipmap.
 				//===============================================
 				list<NLMISC::CRect>::iterator	itRect;
-				for(itRect=tex._ListInvalidRect.begin(); itRect!=tex._ListInvalidRect.end(); itRect++)
+				for (itRect=tex._ListInvalidRect.begin(); itRect!=tex._ListInvalidRect.end(); itRect++)
 				{
 					CRect	&rect= *itRect;
 					sint	x0= rect.X;
@@ -1082,7 +1082,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 					sint	y1= rect.Y+rect.Height;
 
 					// Fill mipmaps.
-					for(sint i=0;i<nMipMaps;i++)
+					for (sint i=0;i<nMipMaps;i++)
 					{
 						void	*ptr= tex.getPixels(i).getPtr();
 						sint	w= tex.getWidth(i);
@@ -1118,7 +1118,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 		}
 
 		// Release, if wanted.
-		if(tex.getReleasable())
+		if (tex.getReleasable())
 			tex.release();
 
 		// Basic parameters.
@@ -1169,7 +1169,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	_DriverGLStates.activeTextureARB (0);
 	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-	if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 		textureMode = CDriverGLStates3::TextureRect;
 
 	_DriverGLStates.setTextureMode (textureMode);
@@ -1229,7 +1229,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		{
 			nglCompressedTexSubImage2DARB (
 				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
-				x0, y0, (x1-x0), (y1-y0), glfmt, imageSize, ptr );
+				x0, y0, (x1-x0), (y1-y0), glfmt, imageSize, ptr);
 		}
 		else
 		{
@@ -1287,7 +1287,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 	if (this->_CurrentTexture[stage]!=tex)
 	{
 		_DriverGLStates.activeTextureARB(stage);
-		if(tex && tex->TextureDrvShare)
+		if (tex && tex->TextureDrvShare)
 		{
 			// get the drv info. should be not NULL.
 			CTextureDrvInfosGL3*	gltext;
@@ -1301,18 +1301,18 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 				_TextureUsed.insert (gltext);
 			}
 
-			if(tex->isTextureCube())
+			if (tex->isTextureCube())
 			{
 				// setup texture mode, after activeTextureARB()
 				_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 
-				if(_Extensions.ARBTextureCubeMap)
+				if (_Extensions.ARBTextureCubeMap)
 				{
 					// Activate texturing...
 					//======================
 
 					// If the shared texture is the same than before, no op.
-					if(_CurrentTextureInfoGL[stage] != gltext)
+					if (_CurrentTextureInfoGL[stage] != gltext)
 					{
 						// Cache setup.
 						_CurrentTextureInfoGL[stage]= gltext;
@@ -1322,12 +1322,12 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 
 						// Change parameters of texture, if necessary.
 						//============================================
-						if(gltext->MagFilter!= tex->getMagFilter())
+						if (gltext->MagFilter!= tex->getMagFilter())
 						{
 							gltext->MagFilter= tex->getMagFilter();
 							glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 						}
-						if(gltext->MinFilter!= tex->getMinFilter())
+						if (gltext->MinFilter!= tex->getMinFilter())
 						{
 							gltext->MinFilter= tex->getMinFilter();
 							glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
@@ -1339,7 +1339,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			{
 				// setup texture mode, after activeTextureARB()
 				CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
-				if(gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+				if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
 					textureMode = CDriverGLStates3::TextureRect;
 				_DriverGLStates.setTextureMode(/*CDriverGLStates3::Texture2D*/textureMode);
 
@@ -1347,7 +1347,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 				//======================
 
 				// If the shared texture is the same than before, no op.
-				if(_CurrentTextureInfoGL[stage] != gltext)
+				if (_CurrentTextureInfoGL[stage] != gltext)
 				{
 					// Cache setup.
 					_CurrentTextureInfoGL[stage]= gltext;
@@ -1358,22 +1358,22 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 
 					// Change parameters of texture, if necessary.
 					//============================================
-					if(gltext->WrapS!= tex->getWrapS())
+					if (gltext->WrapS!= tex->getWrapS())
 					{
 						gltext->WrapS= tex->getWrapS();
 						glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_S, translateWrapToGl(gltext->WrapS, _Extensions));
 					}
-					if(gltext->WrapT!= tex->getWrapT())
+					if (gltext->WrapT!= tex->getWrapT())
 					{
 						gltext->WrapT= tex->getWrapT();
 						glTexParameteri(gltext->TextureMode,GL_TEXTURE_WRAP_T, translateWrapToGl(gltext->WrapT, _Extensions));
 					}
-					if(gltext->MagFilter!= tex->getMagFilter())
+					if (gltext->MagFilter!= tex->getMagFilter())
 					{
 						gltext->MagFilter= tex->getMagFilter();
 						glTexParameteri(gltext->TextureMode,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
 					}
-					if(gltext->MinFilter!= tex->getMinFilter())
+					if (gltext->MinFilter!= tex->getMinFilter())
 					{
 						gltext->MinFilter= tex->getMinFilter();
 						glTexParameteri(gltext->TextureMode,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
@@ -1440,7 +1440,7 @@ void		CDriverGL3::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 	H_AUTO_OGL(CDriverGL3_activateTexEnvMode)
 	// If a special Texture environnement is setuped, or if not the same normal texture environnement,
 	// must setup a new normal Texture environnement.
-	if(_CurrentTexEnvSpecial[stage] != TexEnvSpecialDisabled || _CurrentTexEnv[stage].EnvPacked!= env.EnvPacked)
+	if (_CurrentTexEnvSpecial[stage] != TexEnvSpecialDisabled || _CurrentTexEnv[stage].EnvPacked!= env.EnvPacked)
 	{
 		forceActivateTexEnvMode(stage, env);
 	}
@@ -1451,7 +1451,7 @@ void		CDriverGL3::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 void		CDriverGL3::activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 {
 	H_AUTO_OGL(CDriverGL3_activateTexEnvColor)
-	if(_CurrentTexEnv[stage].ConstantColor!= env.ConstantColor)
+	if (_CurrentTexEnv[stage].ConstantColor!= env.ConstantColor)
 	{
 		forceActivateTexEnvColor(stage, env);
 	}
@@ -1504,7 +1504,7 @@ void		CDriverGL3::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 	setupTexture(tex1);
 
 	// avoid any problem, disable all textures
-	for(uint stage = 0; stage < inlGetNumTextStages(); stage++)
+	for (uint stage = 0; stage < inlGetNumTextStages(); stage++)
 	{
 		activateTexture(stage, NULL);
 	}
@@ -1539,12 +1539,12 @@ uint CDriverGL3::getTextureHandle(const ITexture &tex)
 {
 	H_AUTO_OGL(CDriverGL3_getTextureHandle)
 	// If DrvShare not setuped
-	if(!tex.TextureDrvShare)
+	if (!tex.TextureDrvShare)
 		return 0;
 
 	// If DrvInfo not setuped
 	const CTextureDrvInfosGL3	*t0= (const CTextureDrvInfosGL3*)(const ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
-	if(!t0)
+	if (!t0)
 		return 0;
 
 	return t0->ID;
@@ -1562,7 +1562,7 @@ uint CDriverGL3::getTextureHandle(const ITexture &tex)
 
 bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height, uint32 mipmapLevel, uint32 cubeFace)
 {
-	H_AUTO_OGL(CDriverGL3_setRenderTarget )
+	H_AUTO_OGL(CDriverGL3_setRenderTarget)
 
 	// make backup of offscreen buffer to old texture if not using FBOs
 	if (!_RenderTargetFBO && _TextureTarget && _TextureTargetUpload && (_TextureTarget != tex || _TextureTargetCubeFace != cubeFace))
@@ -1578,7 +1578,7 @@ bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 widt
 		// Check the texture is a render target
 		nlassertex (tex->getRenderTarget(), ("The texture must be a render target. Call ITexture::setRenderTarget(true)."));
 
-		if(tex->isBloomTexture() && supportBloomEffect())
+		if (tex->isBloomTexture() && supportBloomEffect())
 		{
 			uint32 w, h;
 			getWindowSize(w, h);
