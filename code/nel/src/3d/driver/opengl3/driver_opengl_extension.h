@@ -36,6 +36,7 @@ struct	CGlExtensions
 	std::string GLVersion;
 
 	// Required Extensions.
+	bool	GLCore;
 	bool	ARBSeparateShaderObjects;
 
 	bool	ARBMultiTexture;
@@ -49,10 +50,6 @@ struct	CGlExtensions
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
 	bool	ARBTextureRectangle;
-	bool	FrameBufferObject;
-	bool	FrameBufferBlit;
-	bool	FrameBufferMultisample;
-	bool	PackedDepthStencil;
 	bool	EXTTextureFilterAnisotropic;
 	float	EXTTextureFilterAnisotropicMaximum;
 
@@ -102,10 +99,6 @@ public:
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
-		FrameBufferObject = false;
-		FrameBufferBlit = false;
-		FrameBufferMultisample = false;
-		PackedDepthStencil = false;
 		NVStateVARWithoutFlush = 0;
 	}
 
@@ -128,10 +121,6 @@ public:
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbTextureStages);
 
-		result += "\n  Programs:  ";
-		result += "ARBFragmentProgram ";
-		result += "ARBVertexProgram";
-
 		result += "\n  Misc:      ";
 		result += EXTVertexWeighting ? "EXTVertexWeighting " : "";
 		result += EXTSeparateSpecularColor ? "EXTSeparateSpecularColor " : "";
@@ -152,15 +141,6 @@ public:
 		result += GLXSGISwapControl ? "GLXSGISwapControl " : "";
 		result += GLXMESASwapControl ? "GLXMESASwapControl " : "";
 #endif
-
-		result += "\n  Array/VBO: ";
-		result += "VertexBufferObject";
-
-		result += "\n  FBO:       ";
-		result += FrameBufferObject ? "FramebufferObject " : "";
-		result += FrameBufferBlit ? "FrameBufferBlit " : "";
-		result += FrameBufferMultisample ? "FrameBufferMultisample " : "";
-		result += PackedDepthStencil ? "PackedDepthStencil " : "";
 
 		return result;
 	}
@@ -394,7 +374,7 @@ extern PFNGLGETVERTEXATTRIBIVARBPROC nglGetVertexAttribivARB;
 extern PFNGLGETVERTEXATTRIBPOINTERVARBPROC nglGetVertexAttribPointervARB;
 extern PFNGLISPROGRAMARBPROC nglIsProgramARB;
 
-// Core
+// Core 3.30
 extern PFNGLATTACHSHADERPROC							nglAttachShader;
 extern PFNGLCOMPILESHADERPROC							nglCompileShader;
 extern PFNGLCREATEPROGRAMPROC							nglCreateProgram;
@@ -465,6 +445,27 @@ extern PFNGLENDQUERYPROC								nglEndQuery;
 extern PFNGLGETQUERYIVPROC								nglGetQueryiv;
 extern PFNGLGETQUERYOBJECTIVPROC						nglGetQueryObjectiv;
 extern PFNGLGETQUERYOBJECTUIVPROC						nglGetQueryObjectuiv;
+
+extern PFNGLISRENDERBUFFERPROC							nglIsRenderbuffer;
+extern PFNGLBINDRENDERBUFFERPROC						nglBindRenderbuffer;
+extern PFNGLDELETERENDERBUFFERSPROC						nglDeleteRenderbuffers;
+extern PFNGLGENRENDERBUFFERSPROC						nglGenRenderbuffers;
+extern PFNGLRENDERBUFFERSTORAGEPROC						nglRenderbufferStorage;
+extern PFNGLGETRENDERBUFFERPARAMETERIVPROC				nglGetRenderbufferParameteriv;
+extern PFNGLISFRAMEBUFFERPROC							nglIsFramebuffer;
+extern PFNGLBINDFRAMEBUFFERPROC							nglBindFramebuffer;
+extern PFNGLDELETEFRAMEBUFFERSPROC						nglDeleteFramebuffers;
+extern PFNGLGENFRAMEBUFFERSPROC							nglGenFramebuffers;
+extern PFNGLCHECKFRAMEBUFFERSTATUSPROC					nglCheckFramebufferStatus;
+extern PFNGLFRAMEBUFFERTEXTURE1DPROC					nglFramebufferTexture1D;
+extern PFNGLFRAMEBUFFERTEXTURE2DPROC					nglFramebufferTexture2D;
+extern PFNGLFRAMEBUFFERTEXTURE3DPROC					nglFramebufferTexture3D;
+extern PFNGLFRAMEBUFFERRENDERBUFFERPROC					nglFramebufferRenderbuffer;
+extern PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC		nglGetFramebufferAttachmentParameteriv;
+extern PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
+extern PFNGLBLITFRAMEBUFFERPROC							nglBlitFramebuffer;
+extern PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
+extern PFNGLFRAMEBUFFERTEXTURELAYERPROC					nglFramebufferTextureLayer;
 
 // GL_ARB_separate_shader_objects
 extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
@@ -568,28 +569,6 @@ extern NEL_PFNGLXSWAPINTERVALMESAPROC			nglXSwapIntervalMESA;
 extern NEL_PFNGLXGETSWAPINTERVALMESAPROC		nglXGetSwapIntervalMESA;
 
 #endif
-
-// GL_EXT_framebuffer_object
-extern NEL_PFNGLISRENDERBUFFEREXTPROC			nglIsRenderbufferEXT;
-extern NEL_PFNGLISFRAMEBUFFEREXTPROC			nglIsFramebufferEXT;
-extern NEL_PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC	nglCheckFramebufferStatusEXT;
-extern NEL_PFNGLGENFRAMEBUFFERSEXTPROC			nglGenFramebuffersEXT;
-extern NEL_PFNGLBINDFRAMEBUFFEREXTPROC			nglBindFramebufferEXT;
-extern NEL_PFNGLFRAMEBUFFERTEXTURE2DEXTPROC		nglFramebufferTexture2DEXT;
-extern NEL_PFNGLGENRENDERBUFFERSEXTPROC			nglGenRenderbuffersEXT;
-extern NEL_PFNGLBINDRENDERBUFFEREXTPROC			nglBindRenderbufferEXT;
-extern NEL_PFNGLRENDERBUFFERSTORAGEEXTPROC		nglRenderbufferStorageEXT;
-extern NEL_PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC	nglFramebufferRenderbufferEXT;
-extern NEL_PFNGLDELETERENDERBUFFERSEXTPROC		nglDeleteRenderbuffersEXT;
-extern NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC		nglDeleteFramebuffersEXT;
-extern NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC	nglGetRenderbufferParameterivEXT;
-extern NEL_PFNGENERATEMIPMAPEXTPROC				nglGenerateMipmapEXT;
-
-// GL_EXT_framebuffer_blit
-extern NEL_PFNGLBLITFRAMEBUFFEREXTPROC			nglBlitFramebufferEXT;
-
-// GL_EXT_framebuffer_multisample
-extern NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC		nglRenderbufferStorageMultisampleEXT;
 
 // GL_ARB_multisample
 extern NEL_PFNGLSAMPLECOVERAGEARBPROC			nglSampleCoverageARB;

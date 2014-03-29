@@ -318,6 +318,27 @@ PFNGLGETQUERYIVPROC								nglGetQueryiv;
 PFNGLGETQUERYOBJECTIVPROC						nglGetQueryObjectiv;
 PFNGLGETQUERYOBJECTUIVPROC						nglGetQueryObjectuiv;
 
+PFNGLISRENDERBUFFERPROC							nglIsRenderbuffer;
+PFNGLBINDRENDERBUFFERPROC						nglBindRenderbuffer;
+PFNGLDELETERENDERBUFFERSPROC					nglDeleteRenderbuffers;
+PFNGLGENRENDERBUFFERSPROC						nglGenRenderbuffers;
+PFNGLRENDERBUFFERSTORAGEPROC					nglRenderbufferStorage;
+PFNGLGETRENDERBUFFERPARAMETERIVPROC				nglGetRenderbufferParameteriv;
+PFNGLISFRAMEBUFFERPROC							nglIsFramebuffer;
+PFNGLBINDFRAMEBUFFERPROC						nglBindFramebuffer;
+PFNGLDELETEFRAMEBUFFERSPROC						nglDeleteFramebuffers;
+PFNGLGENFRAMEBUFFERSPROC						nglGenFramebuffers;
+PFNGLCHECKFRAMEBUFFERSTATUSPROC					nglCheckFramebufferStatus;
+PFNGLFRAMEBUFFERTEXTURE1DPROC					nglFramebufferTexture1D;
+PFNGLFRAMEBUFFERTEXTURE2DPROC					nglFramebufferTexture2D;
+PFNGLFRAMEBUFFERTEXTURE3DPROC					nglFramebufferTexture3D;
+PFNGLFRAMEBUFFERRENDERBUFFERPROC				nglFramebufferRenderbuffer;
+PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC	nglGetFramebufferAttachmentParameteriv;
+PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
+PFNGLBLITFRAMEBUFFERPROC						nglBlitFramebuffer;
+PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
+PFNGLFRAMEBUFFERTEXTURELAYERPROC				nglFramebufferTextureLayer;
+
 // GL_ARB_separate_shader_objects
 PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
 PFNGLACTIVESHADERPROGRAMPROC					nglActiveShaderProgram;
@@ -379,28 +400,6 @@ PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC				nglProgramUniformMatrix3x4dv;
 PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC				nglProgramUniformMatrix4x3dv;
 PFNGLVALIDATEPROGRAMPIPELINEPROC				nglValidateProgramPipeline;
 PFNGLGETPROGRAMPIPELINEINFOLOGPROC				nglGetProgramPipelineInfoLog;
-
-// GL_EXT_framebuffer_object
-NEL_PFNGLISRENDERBUFFEREXTPROC					nglIsRenderbufferEXT;
-NEL_PFNGLISFRAMEBUFFEREXTPROC					nglIsFramebufferEXT;
-NEL_PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC			nglCheckFramebufferStatusEXT;
-NEL_PFNGLGENFRAMEBUFFERSEXTPROC					nglGenFramebuffersEXT;
-NEL_PFNGLBINDFRAMEBUFFEREXTPROC					nglBindFramebufferEXT;
-NEL_PFNGLFRAMEBUFFERTEXTURE2DEXTPROC			nglFramebufferTexture2DEXT;
-NEL_PFNGLGENRENDERBUFFERSEXTPROC				nglGenRenderbuffersEXT;
-NEL_PFNGLBINDRENDERBUFFEREXTPROC				nglBindRenderbufferEXT;
-NEL_PFNGLRENDERBUFFERSTORAGEEXTPROC				nglRenderbufferStorageEXT;
-NEL_PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC			nglFramebufferRenderbufferEXT;
-NEL_PFNGLDELETERENDERBUFFERSEXTPROC				nglDeleteRenderbuffersEXT;
-NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC				nglDeleteFramebuffersEXT;
-NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC		nglGetRenderbufferParameterivEXT;
-NEL_PFNGENERATEMIPMAPEXTPROC					nglGenerateMipmapEXT;
-
-// GL_EXT_framebuffer_blit
-NEL_PFNGLBLITFRAMEBUFFEREXTPROC					nglBlitFramebufferEXT;
-
-// GL_EXT_framebuffer_multisample
-NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC	nglRenderbufferStorageMultisampleEXT;
 
 // GL_ARB_multisample
 NEL_PFNGLSAMPLECOVERAGEARBPROC					nglSampleCoverageARB;
@@ -701,64 +700,7 @@ static bool	setupEXTTextureFilterAnisotropic(const char	*glext)
 	return true;
 }
 
-// ***************************************************************************
-static bool	setupFrameBufferObject(const char	*glext)
-{
-	H_AUTO_OGL(setupFrameBufferObject);
-
-	CHECK_EXT("GL_EXT_framebuffer_object");
-
-	CHECK_ADDRESS(NEL_PFNGLISRENDERBUFFEREXTPROC, glIsRenderbufferEXT);
-	CHECK_ADDRESS(NEL_PFNGLISFRAMEBUFFEREXTPROC, glIsFramebufferEXT);
-	CHECK_ADDRESS(NEL_PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC, glCheckFramebufferStatusEXT);
-	CHECK_ADDRESS(NEL_PFNGLGENFRAMEBUFFERSEXTPROC, glGenFramebuffersEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDFRAMEBUFFEREXTPROC, glBindFramebufferEXT);
-	CHECK_ADDRESS(NEL_PFNGLFRAMEBUFFERTEXTURE2DEXTPROC, glFramebufferTexture2DEXT);
-	CHECK_ADDRESS(NEL_PFNGLGENRENDERBUFFERSEXTPROC, glGenRenderbuffersEXT);
-	CHECK_ADDRESS(NEL_PFNGLBINDRENDERBUFFEREXTPROC, glBindRenderbufferEXT);
-	CHECK_ADDRESS(NEL_PFNGLRENDERBUFFERSTORAGEEXTPROC, glRenderbufferStorageEXT);
-	CHECK_ADDRESS(NEL_PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC, glFramebufferRenderbufferEXT);
-	CHECK_ADDRESS(NEL_PFNGLDELETERENDERBUFFERSEXTPROC, glDeleteRenderbuffersEXT);
-	CHECK_ADDRESS(NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC, glDeleteFramebuffersEXT);
-	CHECK_ADDRESS(NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC, glGetRenderbufferParameterivEXT);
-	CHECK_ADDRESS(NEL_PFNGENERATEMIPMAPEXTPROC, glGenerateMipmapEXT);
-
-	return true;
-}
-
-// ***************************************************************************
-static bool	setupFrameBufferBlit(const char	*glext)
-{
-	H_AUTO_OGL(setupFrameBufferBlit);
-	CHECK_EXT("GL_EXT_framebuffer_blit");
-
-	CHECK_ADDRESS(NEL_PFNGLBLITFRAMEBUFFEREXTPROC, glBlitFramebufferEXT);
-
-	return true;
-}
-
-// ***************************************************************************
-static bool	setupFrameBufferMultisample(const char	*glext)
-{
-	H_AUTO_OGL(setupFrameBufferMultisample);
-	CHECK_EXT("GL_EXT_framebuffer_multisample");
-
-	CHECK_ADDRESS(NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC, glRenderbufferStorageMultisampleEXT);
-
-	return true;
-}
-
-// ***************************************************************************
-static bool	setupPackedDepthStencil(const char	*glext)
-{
-	H_AUTO_OGL(setupPackedDepthStencil);
-
-	CHECK_EXT("GL_EXT_packed_depth_stencil");
-
-	return true;
-}
-
-static bool setupCore(const char *glext)
+static bool setupGLCore(const char *glext)
 {
 	CHECK_ADDRESS(PFNGLATTACHSHADERPROC, glAttachShader);
 	CHECK_ADDRESS(PFNGLCOMPILESHADERPROC, glCompileShader);
@@ -830,6 +772,27 @@ static bool setupCore(const char *glext)
 	CHECK_ADDRESS(PFNGLGETQUERYIVPROC, glGetQueryiv);
 	CHECK_ADDRESS(PFNGLGETQUERYOBJECTIVPROC, glGetQueryObjectiv);
 	CHECK_ADDRESS(PFNGLGETQUERYOBJECTUIVPROC, glGetQueryObjectuiv);
+
+	CHECK_ADDRESS(PFNGLISRENDERBUFFERPROC, glIsRenderbuffer);
+	CHECK_ADDRESS(PFNGLBINDRENDERBUFFERPROC, glBindRenderbuffer);
+	CHECK_ADDRESS(PFNGLDELETERENDERBUFFERSPROC, glDeleteRenderbuffers);
+	CHECK_ADDRESS(PFNGLGENRENDERBUFFERSPROC, glGenRenderbuffers);
+	CHECK_ADDRESS(PFNGLRENDERBUFFERSTORAGEPROC, glRenderbufferStorage);
+	CHECK_ADDRESS(PFNGLGETRENDERBUFFERPARAMETERIVPROC, glGetRenderbufferParameteriv);
+	CHECK_ADDRESS(PFNGLISFRAMEBUFFERPROC, glIsFramebuffer);
+	CHECK_ADDRESS(PFNGLBINDFRAMEBUFFERPROC, glBindFramebuffer);
+	CHECK_ADDRESS(PFNGLDELETEFRAMEBUFFERSPROC, glDeleteFramebuffers);
+	CHECK_ADDRESS(PFNGLGENFRAMEBUFFERSPROC, glGenFramebuffers);
+	CHECK_ADDRESS(PFNGLCHECKFRAMEBUFFERSTATUSPROC, glCheckFramebufferStatus);
+	CHECK_ADDRESS(PFNGLFRAMEBUFFERTEXTURE1DPROC, glFramebufferTexture1D);
+	CHECK_ADDRESS(PFNGLFRAMEBUFFERTEXTURE2DPROC, glFramebufferTexture2D);
+	CHECK_ADDRESS(PFNGLFRAMEBUFFERTEXTURE3DPROC, glFramebufferTexture3D);
+	CHECK_ADDRESS(PFNGLFRAMEBUFFERRENDERBUFFERPROC, glFramebufferRenderbuffer);
+	CHECK_ADDRESS(PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC, glGetFramebufferAttachmentParameteriv);
+	CHECK_ADDRESS(PFNGLGENERATEMIPMAPPROC, glGenerateMipmap);
+	CHECK_ADDRESS(PFNGLBLITFRAMEBUFFERPROC, glBlitFramebuffer);
+	CHECK_ADDRESS(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC, glRenderbufferStorageMultisample);
+	CHECK_ADDRESS(PFNGLFRAMEBUFFERTEXTURELAYERPROC, glFramebufferTextureLayer);
 	
 	return true;
 }
@@ -939,7 +902,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	}
 
 	// Check 3.30 Core
-	setupCore(glext);
+	ext.GLCore = setupGLCore(glext);
 
 	// Check GL_ARB_separate_shader_objects
 	ext.ARBSeparateShaderObjects = setupARBSeparateShaderObjects(glext);
@@ -998,18 +961,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 		// get the maximum value
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
 	}
-
-	// Check GL_EXT_framebuffer_object
-	ext.FrameBufferObject = setupFrameBufferObject(glext);
-
-	// Check GL_EXT_framebuffer_blit
-	ext.FrameBufferBlit = setupFrameBufferBlit(glext);
-
-	// Check GL_EXT_framebuffer_multisample
-	ext.FrameBufferMultisample = setupFrameBufferMultisample(glext);
-
-	// Check GL_EXT_packed_depth_stencil
-	ext.PackedDepthStencil = setupPackedDepthStencil(glext);
 }
 
 

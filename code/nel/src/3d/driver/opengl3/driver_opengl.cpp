@@ -373,10 +373,15 @@ bool CDriverGL3::setupDisplay()
 #endif // NL_OS_WINDOWS
 
 	// Check required extensions!!
+	if (!_Extensions.GLCore)
+	{
+		nlwarning("Missing required GL 3.30 Core features. Update your driver");
+		throw EBadDisplay("Missing required GL 3.30 Core features. Update your driver");
+	}
 	if (!_Extensions.ARBSeparateShaderObjects)
 	{
-		nlwarning("Missing Required GL extension: GL_ARB_separate_shader_objects. Update your driver");
-		throw EBadDisplay("Missing Required GL extension: GL_ARB_separate_shader_objects. Update your driver");
+		nlwarning("Missing required GL extension: GL_ARB_separate_shader_objects. Update your driver");
+		throw EBadDisplay("Missing required GL extension: GL_ARB_separate_shader_objects. Update your driver");
 	}
 
 	// ARBMultiTexture is a OpenGL 1.2 required extension.
@@ -550,7 +555,7 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+			nglBindFramebuffer(GL_FRAMEBUFFER, 0);
 			return true;
 		}
 	}
@@ -1680,7 +1685,7 @@ bool CDriverGL3::supportPackedDepthStencil() const
 {
 	H_AUTO_OGL(CDriverGL3_supportPackedDepthStencil);
 
-	return _Extensions.PackedDepthStencil;
+	return true;
 }
 
 // ***************************************************************************
@@ -1688,7 +1693,7 @@ bool CDriverGL3::supportFrameBufferObject() const
 {
 	H_AUTO_OGL(CDriverGL3_supportFrameBufferObject);
 
-	return _Extensions.FrameBufferObject;
+	return true;
 }
 
 // ***************************************************************************

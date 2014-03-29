@@ -87,12 +87,12 @@ CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 
 	if (InitFBO)
 	{
-		nglDeleteFramebuffersEXT(1, &FBOId);
+		nglDeleteFramebuffers(1, &FBOId);
 		if (AttachDepthStencil)
 		{
-			nglDeleteRenderbuffersEXT(1, &DepthFBOId);
+			nglDeleteRenderbuffers(1, &DepthFBOId);
 			if (!UsePackedDepthStencil)
-				nglDeleteRenderbuffersEXT(1, &StencilFBOId);
+				nglDeleteRenderbuffers(1, &StencilFBOId);
 		}
 	}
 }
@@ -108,21 +108,21 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 		}
 
 		// generate IDs
-		nglGenFramebuffersEXT(1, &FBOId);
+		nglGenFramebuffers(1, &FBOId);
 		if (AttachDepthStencil)
 		{
-			nglGenRenderbuffersEXT(1, &DepthFBOId);
+			nglGenRenderbuffers(1, &DepthFBOId);
 			if (UsePackedDepthStencil)
 				StencilFBOId = DepthFBOId;
 			else
-				nglGenRenderbuffersEXT(1, &StencilFBOId);
+				nglGenRenderbuffers(1, &StencilFBOId);
 		}
 
 		//nldebug("3D: using depth %d and stencil %d", DepthFBOId, StencilFBOId);
 
 		// initialize FBO
-		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FBOId);
-		nglFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, TextureMode, ID, 0);
+		nglBindFramebuffer(GL_FRAMEBUFFER, FBOId);
+		nglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, TextureMode, ID, 0);
 
 		// attach depth/stencil render to FBO
 		// note: for some still unkown reason it's impossible to add
@@ -130,124 +130,85 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 		// opengl.org extension registry). Until a safe approach to add
 		// them is found, there will be no attached stencil for the time
 		// being, aside of using packed depth+stencil buffers.
+		// FIXME GL3
 		if (AttachDepthStencil)
 		{
 			if (UsePackedDepthStencil)
 			{
 				//nldebug("3D: using packed depth stencil");
-				nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, StencilFBOId);
-				nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, tex->getWidth(), tex->getHeight());
+				nglBindRenderbuffer(GL_RENDERBUFFER, StencilFBOId);
+				nglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, tex->getWidth(), tex->getHeight());
 			}
 			else
 			{
-				nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthFBOId);
-				nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, tex->getWidth(), tex->getHeight());
+				nglBindRenderbuffer(GL_RENDERBUFFER, DepthFBOId);
+				nglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, tex->getWidth(), tex->getHeight());
 				/*
-				nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, StencilFBOId);
-				nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_STENCIL_INDEX8_EXT, tex->getWidth(), tex->getHeight());
+				nglBindRenderbuffer(GL_RENDERBUFFER, StencilFBOId);
+				nglRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, tex->getWidth(), tex->getHeight());
 				*/
 			}
-			nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-										 GL_RENDERBUFFER_EXT, DepthFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
-			nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
-										 GL_RENDERBUFFER_EXT, StencilFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+			nglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+										 GL_RENDERBUFFER, DepthFBOId);
+			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatus(GL_FRAMEBUFFER));
+			nglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+										 GL_RENDERBUFFER, StencilFBOId);
+			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatus(GL_FRAMEBUFFER));
 		}
 
 		// check status
 		GLenum status;
-		status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		status = (GLenum) nglCheckFramebufferStatus(GL_FRAMEBUFFER);
 
 		switch(status) {
-#ifdef GL_FRAMEBUFFER_COMPLETE_EXT
-			case GL_FRAMEBUFFER_COMPLETE_EXT:
+#ifdef GL_FRAMEBUFFER_COMPLETE
+			case GL_FRAMEBUFFER_COMPLETE:
 				InitFBO = true;
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_COMPLETE_OES
-			case GL_FRAMEBUFFER_COMPLETE_OES:
-				InitFBO = true;
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_UNSUPPORTED_EXT
-			case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
+#ifdef GL_FRAMEBUFFER_UNSUPPORTED
+			case GL_FRAMEBUFFER_UNSUPPORTED:
 				nlwarning("Unsupported framebuffer format");
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_UNSUPPORTED_OES
-			case GL_FRAMEBUFFER_UNSUPPORTED_OES:
-				nlwarning("Unsupported framebuffer format");
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT
-			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT
+			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
 				nlwarning("Framebuffer incomplete attachment");
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES
-			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES:
-				nlwarning("Framebuffer incomplete attachment");
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT
-			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT
+			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
 				nlwarning("Framebuffer incomplete, missing attachment");
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES
-			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES:
-				nlwarning("Framebuffer incomplete, missing attachment");
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT
-			case GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT:
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT
+			case GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT:
 				nlwarning("Framebuffer incomplete, duplicate attachment");
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT
-			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS
+			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
 				nlwarning("Framebuffer incomplete, attached images must have same dimensions");
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES
-			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES:
-				nlwarning("Framebuffer incomplete, attached images must have same dimensions");
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT
-			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_FORMATS
+			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
 				nlwarning("Framebuffer incomplete, attached images must have same format");
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES
-			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES:
-				nlwarning("Framebuffer incomplete, attached images must have same format");
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT
-			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
+#ifdef GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER
+			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
 				nlwarning("Framebuffer incomplete, missing draw buffer");
 				break;
 #endif
-#ifdef GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT
-			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-				nlwarning("Framebuffer incomplete, missing read buffer");
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_BINDING_EXT
-			case GL_FRAMEBUFFER_BINDING_EXT:
+#ifdef GL_FRAMEBUFFER_BINDING
+			case GL_FRAMEBUFFER_BINDING:
 				nlwarning("Framebuffer BINDING_EXT");
 				break;
 #endif
 #ifdef GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE
 			case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
 				nlwarning("Framebuffer incomplete multisample");
-				break;
-#endif
-#ifdef GL_FRAMEBUFFER_BINDING_OES
-			case GL_FRAMEBUFFER_BINDING_OES:
-				nlwarning("Framebuffer BINDING_EXT");
 				break;
 #endif
 			default:
@@ -258,14 +219,14 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 		// clean up resources if allocation failed
 		if (!InitFBO)
 		{
-			nglDeleteFramebuffersEXT(1, &FBOId);
+			nglDeleteFramebuffers(1, &FBOId);
 
 			if (AttachDepthStencil)
 			{
-				nglDeleteRenderbuffersEXT(1, &DepthFBOId);
+				nglDeleteRenderbuffers(1, &DepthFBOId);
 
 				if (!UsePackedDepthStencil)
-					nglDeleteRenderbuffersEXT(1, &StencilFBOId);
+					nglDeleteRenderbuffers(1, &StencilFBOId);
 			}
 		}
 
@@ -282,14 +243,14 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 		if (initFrameBufferObject(tex))
 		{
 			glBindTexture(TextureMode, 0);
-			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FBOId);
+			nglBindFramebuffer(GL_FRAMEBUFFER, FBOId);
 		}
 		else
 			return false;
 	}
 	else
 	{
-		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+		nglBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	return true;

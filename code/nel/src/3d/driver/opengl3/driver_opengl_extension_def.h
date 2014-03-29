@@ -173,24 +173,6 @@ typedef GLvoid (APIENTRY *NEL_PFNGLGETPROGRAMIVARBPROC)(GLenum target, GLenum pn
 typedef GLvoid (APIENTRY *NEL_PFNGLGETPROGRAMSTRINGARBPROC)(GLenum target, GLenum pname, GLvoid *string);
 typedef GLboolean (APIENTRY *NEL_PFNGLISPROGRAMARBPROC)(GLuint program);
 
-
-typedef GLboolean (APIENTRY * NEL_PFNGLISRENDERBUFFEREXTPROC) (GLuint renderbuffer);
-typedef GLboolean (APIENTRY * NEL_PFNGLISFRAMEBUFFEREXTPROC) (GLuint framebuffer);
-typedef GLenum (APIENTRY * NEL_PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC) (GLenum pname);
-typedef GLvoid (APIENTRY * NEL_PFNGLGENFRAMEBUFFERSEXTPROC) (GLsizei n, GLuint *framebuffers);
-typedef GLvoid (APIENTRY * NEL_PFNGLBINDFRAMEBUFFEREXTPROC) (GLenum target, GLuint framebuffer);
-typedef GLvoid (APIENTRY * NEL_PFNGLFRAMEBUFFERTEXTURE2DEXTPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
-typedef GLvoid (APIENTRY * NEL_PFNGLGENRENDERBUFFERSEXTPROC) (GLsizei n, GLuint *renderbuffers);
-typedef GLvoid (APIENTRY * NEL_PFNGLBINDRENDERBUFFEREXTPROC) (GLenum target, GLuint renderbuffer);
-typedef GLvoid (APIENTRY * NEL_PFNGLRENDERBUFFERSTORAGEEXTPROC) (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
-typedef GLvoid (APIENTRY * NEL_PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC) (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
-typedef GLvoid (APIENTRY * NEL_PFNGLDELETERENDERBUFFERSEXTPROC) (GLsizei n, const GLuint *renderbuffers);
-typedef GLvoid (APIENTRY * NEL_PFNGLDELETEFRAMEBUFFERSEXTPROC) (GLsizei n, const GLuint *framebuffers);
-typedef GLvoid (APIENTRY * NEL_PFNGETRENDERBUFFERPARAMETERIVEXTPROC) (GLenum target, GLenum pname, GLint *params);
-typedef GLvoid (APIENTRY * NEL_PFNGENERATEMIPMAPEXTPROC) (GLenum target);
-
-typedef GLvoid (APIENTRY * NEL_PFNGLBLITFRAMEBUFFEREXTPROC) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
-
 typedef GLvoid (APIENTRY * NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 
 #ifndef NL_GL_ARB_multisample
