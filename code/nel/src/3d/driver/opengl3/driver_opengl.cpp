@@ -1664,7 +1664,7 @@ void CDriverGL3::checkTextureOn() const
 bool CDriverGL3::supportOcclusionQuery() const
 {
 	H_AUTO_OGL(CDriverGL3_supportOcclusionQuery)
-	return _Extensions.NVOcclusionQuery;
+	return true;
 }
 
 // ***************************************************************************
@@ -1695,10 +1695,9 @@ bool CDriverGL3::supportFrameBufferObject() const
 IOcclusionQuery *CDriverGL3::createOcclusionQuery()
 {
 	H_AUTO_OGL(CDriverGL3_createOcclusionQuery)
-	nlassert(_Extensions.NVOcclusionQuery);
 
 	GLuint id;
-	nglGenOcclusionQueriesNV(1, &id);
+	nglGenQueries(1, &id);
 	if (id == 0) return NULL;
 	COcclusionQueryGL3 *oqgl = new COcclusionQueryGL3;
 	oqgl->Driver = this;
@@ -1722,7 +1721,7 @@ void CDriverGL3::deleteOcclusionQuery(IOcclusionQuery *oq)
 	oqgl->Driver = NULL;
 	nlassert(oqgl->ID != 0);
 	GLuint id = oqgl->ID;
-	nglDeleteOcclusionQueriesNV(1, &id);
+	nglDeleteQueries(1, &id);
 	_OcclusionQueryList.erase(oqgl->Iterator);
 	if (oqgl == _CurrentOcclusionQuery)
 	{
@@ -1740,7 +1739,7 @@ void COcclusionQueryGL3::begin()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == NULL); // only one query at a time
 	nlassert(ID);
-	nglBeginOcclusionQueryNV(ID);
+	nglBeginQuery(GL_SAMPLES_PASSED, ID); // FIXME or GL_ANY_SAMPLES_PASSED
 	Driver->_CurrentOcclusionQuery = this;
 	OcclusionType = NotAvailable;
 	VisibleCount = 0;
@@ -1755,7 +1754,7 @@ void COcclusionQueryGL3::end()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == this); // only one query at a time
 	nlassert(ID);
-	nglEndOcclusionQueryNV();
+	nglEndQuery(GL_SAMPLES_PASSED);
 	Driver->_CurrentOcclusionQuery = NULL;
 
 }
@@ -1768,18 +1767,13 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL3::getOcclusionType()
 	nlassert(Driver);
 	nlassert(ID);
 	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
+
 	if (OcclusionType == NotAvailable)
 	{
 		GLuint result;
-		// retrieve result
-		nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_AVAILABLE_NV, &result);
-		if (result != GL_FALSE)
-		{
-			nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_NV, &result);
-			OcclusionType = result != 0 ? NotOccluded : Occluded;
-			VisibleCount = (uint) result;
-			// Note : we could return the exact number of pixels that passed the z-test, but this value is not supported by all implementation (Direct3D ...)
-		}
+		nglGetQueryObjectuiv(ID, GL_QUERY_RESULT, &result);
+		OcclusionType = result != 0 ? NotOccluded : Occluded;
+		VisibleCount = (uint) result;
 	}
 
 	return OcclusionType;

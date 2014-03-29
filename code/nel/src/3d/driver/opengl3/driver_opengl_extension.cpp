@@ -181,18 +181,6 @@ NEL_PFNGLPROGRAMLOCALPARAMETER4FVARBPROC		nglGetProgramLocalParameter4fvARB;
 //NEL_PFNGLGETPROGRAMSTRINGARBPROC				nglGetProgramStringARB;
 //NEL_PFNGLISPROGRAMARBPROC						nglIsProgramARB;
 
-// GL_ARB_vertex_buffer_object
-PFNGLBINDBUFFERPROC							nglBindBuffer;
-PFNGLDELETEBUFFERSPROC						nglDeleteBuffers;
-PFNGLGENBUFFERSPROC							nglGenBuffers;
-PFNGLISBUFFERPROC 							nglIsBuffer;
-PFNGLBUFFERDATAPROC 							nglBufferData;
-PFNGLBUFFERSUBDATAPROC 						nglBufferSubData;
-PFNGLGETBUFFERSUBDATAPROC 					nglGetBufferSubData;
-PFNGLMAPBUFFERPROC 							nglMapBuffer;
-PFNGLUNMAPBUFFERPROC 						nglUnmapBuffer;
-PFNGLGETBUFFERPARAMETERIVPROC 				nglGetBufferParameteriv;
-PFNGLGETBUFFERPOINTERVPROC 					nglGetBufferPointerv;
 
 // GL_ARB_vertex_program
 PFNGLVERTEXATTRIB1SARBPROC						nglVertexAttrib1sARB;
@@ -258,7 +246,7 @@ PFNGLGETVERTEXATTRIBIVARBPROC					nglGetVertexAttribivARB;
 PFNGLGETVERTEXATTRIBPOINTERVARBPROC				nglGetVertexAttribPointervARB;
 PFNGLISPROGRAMARBPROC							nglIsProgramARB;
 
-// GL_ARB_Shader_Object
+// Core
 PFNGLATTACHSHADERPROC							nglAttachShader;
 PFNGLCOMPILESHADERPROC							nglCompileShader;
 PFNGLCREATEPROGRAMPROC							nglCreateProgram;
@@ -308,6 +296,27 @@ PFNGLUNIFORM1UIVPROC							nglUniform1uiv;
 PFNGLUNIFORM2UIVPROC							nglUniform2uiv;
 PFNGLUNIFORM3UIVPROC							nglUniform3uiv;
 PFNGLUNIFORM4UIVPROC							nglUniform4uiv;
+
+PFNGLBINDBUFFERPROC								nglBindBuffer;
+PFNGLDELETEBUFFERSPROC							nglDeleteBuffers;
+PFNGLGENBUFFERSPROC								nglGenBuffers;
+PFNGLISBUFFERPROC 								nglIsBuffer;
+PFNGLBUFFERDATAPROC 							nglBufferData;
+PFNGLBUFFERSUBDATAPROC 							nglBufferSubData;
+PFNGLGETBUFFERSUBDATAPROC 						nglGetBufferSubData;
+PFNGLMAPBUFFERPROC 								nglMapBuffer;
+PFNGLUNMAPBUFFERPROC 							nglUnmapBuffer;
+PFNGLGETBUFFERPARAMETERIVPROC 					nglGetBufferParameteriv;
+PFNGLGETBUFFERPOINTERVPROC 						nglGetBufferPointerv;
+
+PFNGLGENQUERIESPROC								nglGenQueries;
+PFNGLDELETEQUERIESPROC							nglDeleteQueries;
+PFNGLISQUERYPROC								nglIsQuery;
+PFNGLBEGINQUERYPROC								nglBeginQuery;
+PFNGLENDQUERYPROC								nglEndQuery;
+PFNGLGETQUERYIVPROC								nglGetQueryiv;
+PFNGLGETQUERYOBJECTIVPROC						nglGetQueryObjectiv;
+PFNGLGETQUERYOBJECTUIVPROC						nglGetQueryObjectuiv;
 
 // GL_ARB_separate_shader_objects
 PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
@@ -370,15 +379,6 @@ PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC				nglProgramUniformMatrix3x4dv;
 PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC				nglProgramUniformMatrix4x3dv;
 PFNGLVALIDATEPROGRAMPIPELINEPROC				nglValidateProgramPipeline;
 PFNGLGETPROGRAMPIPELINEINFOLOGPROC				nglGetProgramPipelineInfoLog;
-
-// NV_occlusion_query
-NEL_PFNGLGENOCCLUSIONQUERIESNVPROC				nglGenOcclusionQueriesNV;
-NEL_PFNGLDELETEOCCLUSIONQUERIESNVPROC			nglDeleteOcclusionQueriesNV;
-NEL_PFNGLISOCCLUSIONQUERYNVPROC					nglIsOcclusionQueryNV;
-NEL_PFNGLBEGINOCCLUSIONQUERYNVPROC				nglBeginOcclusionQueryNV;
-NEL_PFNGLENDOCCLUSIONQUERYNVPROC				nglEndOcclusionQueryNV;
-NEL_PFNGLGETOCCLUSIONQUERYIVNVPROC				nglGetOcclusionQueryivNV;
-NEL_PFNGLGETOCCLUSIONQUERYUIVNVPROC				nglGetOcclusionQueryuivNV;
 
 // GL_EXT_framebuffer_object
 NEL_PFNGLISRENDERBUFFEREXTPROC					nglIsRenderbufferEXT;
@@ -694,46 +694,6 @@ static bool	setupEXTBlendColor(const char	*glext)
 }
 
 // ***************************************************************************
-static bool	setupARBVertexBufferObject(const char	*glext)
-{
-	H_AUTO_OGL(setupARBVertexBufferObject);
-
-	CHECK_EXT("GL_ARB_vertex_buffer_object");
-
-	CHECK_ADDRESS(PFNGLBINDBUFFERPROC, glBindBuffer);
-	CHECK_ADDRESS(PFNGLDELETEBUFFERSPROC, glDeleteBuffers);
-	CHECK_ADDRESS(PFNGLGENBUFFERSPROC, glGenBuffers);
-	CHECK_ADDRESS(PFNGLISBUFFERPROC, glIsBuffer);
-	CHECK_ADDRESS(PFNGLBUFFERDATAPROC, glBufferData);
-	CHECK_ADDRESS(PFNGLBUFFERSUBDATAPROC, glBufferSubData);
-	CHECK_ADDRESS(PFNGLGETBUFFERSUBDATAPROC, glGetBufferSubData);
-	CHECK_ADDRESS(PFNGLMAPBUFFERPROC, glMapBuffer);
-	CHECK_ADDRESS(PFNGLUNMAPBUFFERPROC, glUnmapBuffer);
-	CHECK_ADDRESS(PFNGLGETBUFFERPARAMETERIVPROC, glGetBufferParameteriv);
-	CHECK_ADDRESS(PFNGLGETBUFFERPOINTERVPROC, glGetBufferPointerv);
-
-	return true;
-}
-
-// ***************************************************************************
-static bool	setupNVOcclusionQuery(const char	*glext)
-{
-	H_AUTO_OGL(setupNVOcclusionQuery);
-	CHECK_EXT("GL_NV_occlusion_query");
-
-	CHECK_ADDRESS(NEL_PFNGLGENOCCLUSIONQUERIESNVPROC, glGenOcclusionQueriesNV);
-	CHECK_ADDRESS(NEL_PFNGLDELETEOCCLUSIONQUERIESNVPROC, glDeleteOcclusionQueriesNV);
-	CHECK_ADDRESS(NEL_PFNGLISOCCLUSIONQUERYNVPROC, glIsOcclusionQueryNV);
-	CHECK_ADDRESS(NEL_PFNGLBEGINOCCLUSIONQUERYNVPROC, glBeginOcclusionQueryNV);
-	CHECK_ADDRESS(NEL_PFNGLENDOCCLUSIONQUERYNVPROC, glEndOcclusionQueryNV);
-	CHECK_ADDRESS(NEL_PFNGLGETOCCLUSIONQUERYIVNVPROC, glGetOcclusionQueryivNV);
-	CHECK_ADDRESS(NEL_PFNGLGETOCCLUSIONQUERYUIVNVPROC, glGetOcclusionQueryuivNV);
-
-	return true;
-}
-
-
-// ***************************************************************************
 static bool	setupNVTextureRectangle(const char	*glext)
 {
 	H_AUTO_OGL(setupNVTextureRectangle);
@@ -824,10 +784,8 @@ static bool	setupPackedDepthStencil(const char	*glext)
 	return true;
 }
 
-static bool setupARBShaderObjects(const char *glext)
+static bool setupCore(const char *glext)
 {
-	CHECK_EXT("GL_ARB_shader_objects");
-
 	CHECK_ADDRESS(PFNGLATTACHSHADERPROC, glAttachShader);
 	CHECK_ADDRESS(PFNGLCOMPILESHADERPROC, glCompileShader);
 	CHECK_ADDRESS(PFNGLCREATEPROGRAMPROC, glCreateProgram);
@@ -877,6 +835,27 @@ static bool setupARBShaderObjects(const char *glext)
 	CHECK_ADDRESS(PFNGLUNIFORM2UIVPROC, glUniform2uiv);
 	CHECK_ADDRESS(PFNGLUNIFORM3UIVPROC, glUniform3uiv);
 	CHECK_ADDRESS(PFNGLUNIFORM4UIVPROC, glUniform4uiv);
+
+	CHECK_ADDRESS(PFNGLBINDBUFFERPROC, glBindBuffer);
+	CHECK_ADDRESS(PFNGLDELETEBUFFERSPROC, glDeleteBuffers);
+	CHECK_ADDRESS(PFNGLGENBUFFERSPROC, glGenBuffers);
+	CHECK_ADDRESS(PFNGLISBUFFERPROC, glIsBuffer);
+	CHECK_ADDRESS(PFNGLBUFFERDATAPROC, glBufferData);
+	CHECK_ADDRESS(PFNGLBUFFERSUBDATAPROC, glBufferSubData);
+	CHECK_ADDRESS(PFNGLGETBUFFERSUBDATAPROC, glGetBufferSubData);
+	CHECK_ADDRESS(PFNGLMAPBUFFERPROC, glMapBuffer);
+	CHECK_ADDRESS(PFNGLUNMAPBUFFERPROC, glUnmapBuffer);
+	CHECK_ADDRESS(PFNGLGETBUFFERPARAMETERIVPROC, glGetBufferParameteriv);
+	CHECK_ADDRESS(PFNGLGETBUFFERPOINTERVPROC, glGetBufferPointerv);
+
+	CHECK_ADDRESS(PFNGLGENQUERIESPROC, glGenQueries);
+	CHECK_ADDRESS(PFNGLDELETEQUERIESPROC, glDeleteQueries);
+	CHECK_ADDRESS(PFNGLISQUERYPROC, glIsQuery);
+	CHECK_ADDRESS(PFNGLBEGINQUERYPROC, glBeginQuery);
+	CHECK_ADDRESS(PFNGLENDQUERYPROC, glEndQuery);
+	CHECK_ADDRESS(PFNGLGETQUERYIVPROC, glGetQueryiv);
+	CHECK_ADDRESS(PFNGLGETQUERYOBJECTIVPROC, glGetQueryObjectiv);
+	CHECK_ADDRESS(PFNGLGETQUERYOBJECTUIVPROC, glGetQueryObjectuiv);
 	
 	return true;
 }
@@ -985,14 +964,11 @@ void	registerGlExtensions(CGlExtensions &ext)
 		DebugLog->displayRaw("\n");
 	}
 
-	// Check GL_ARB_shader_objects
-	ext.ARBShaderObjects = setupARBShaderObjects(glext);
+	// Check 3.30 Core
+	setupCore(glext);
 
 	// Check GL_ARB_separate_shader_objects
 	ext.ARBSeparateShaderObjects = setupARBSeparateShaderObjects(glext);
-
-	// Check GL_ARB_vertex_buffer_object
-	ext.ARBVertexBufferObject = setupARBVertexBufferObject(glext);
 
 	// Check ARBMultiTexture
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
@@ -1030,9 +1006,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check EXTBlendColor
 	ext.EXTBlendColor= setupEXTBlendColor(glext);
-
-	// Check NV_occlusion_query
-	ext.NVOcclusionQuery = setupNVOcclusionQuery(glext);
 
 	// Check GL_NV_texture_rectangle
 	ext.NVTextureRectangle = setupNVTextureRectangle(glext);

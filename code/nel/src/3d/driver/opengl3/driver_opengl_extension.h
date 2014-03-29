@@ -36,9 +36,7 @@ struct	CGlExtensions
 	std::string GLVersion;
 
 	// Required Extensions.
-	bool	ARBShaderObjects;
 	bool	ARBSeparateShaderObjects;
-	bool	ARBVertexBufferObject;
 
 	bool	ARBMultiTexture;
 	uint	NbTextureStages;
@@ -48,7 +46,6 @@ struct	CGlExtensions
 	bool	EXTVertexWeighting;
 	bool	EXTSeparateSpecularColor;
 	bool	ARBTextureCubeMap;
-	bool	NVOcclusionQuery;
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
 	bool	ARBTextureRectangle;
@@ -111,7 +108,6 @@ public:
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
-		NVOcclusionQuery = false;
 		FrameBufferObject = false;
 		FrameBufferBlit = false;
 		FrameBufferMultisample = false;
@@ -149,7 +145,6 @@ public:
 		result += EXTSeparateSpecularColor ? "EXTSeparateSpecularColor " : "";
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
 		result += EXTBlendColor ? "EXTBlendColor " : "";
-		result += NVOcclusionQuery ? "NVOcclusionQuery " : "";
 		result += NVStateVARWithoutFlush ? "NVStateVARWithoutFlush " : "";
 		result += ARBMultisample ? "ARBMultisample " : "";
 
@@ -342,22 +337,6 @@ extern NEL_PFNGLGETPROGRAMIVARBPROC nglGetProgramivARB;
 extern NEL_PFNGLGETPROGRAMSTRINGARBPROC nglGetProgramStringARB;
 extern NEL_PFNGLISPROGRAMARBPROC nglIsProgramARB;
 
-// GL_ARB_vertex_buffer_object
-//==================================
-extern PFNGLBINDBUFFERPROC nglBindBuffer;
-extern PFNGLDELETEBUFFERSPROC nglDeleteBuffers;
-extern PFNGLGENBUFFERSPROC nglGenBuffers;
-extern PFNGLISBUFFERPROC nglIsBuffer;
-extern PFNGLBUFFERDATAPROC nglBufferData;
-extern PFNGLBUFFERSUBDATAPROC nglBufferSubData;
-extern PFNGLGETBUFFERSUBDATAPROC nglGetBufferSubData;
-extern PFNGLMAPBUFFERPROC nglMapBuffer;
-extern PFNGLUNMAPBUFFERPROC nglUnmapBuffer;
-extern PFNGLGETBUFFERPARAMETERIVPROC nglGetBufferParameteriv;
-extern PFNGLGETBUFFERPOINTERVPROC nglGetBufferPointerv;
-
-
-
 // GL_ARB_vertex_program
 //==================================
 extern PFNGLVERTEXATTRIB1SARBPROC nglVertexAttrib1sARB;
@@ -423,7 +402,7 @@ extern PFNGLGETVERTEXATTRIBIVARBPROC nglGetVertexAttribivARB;
 extern PFNGLGETVERTEXATTRIBPOINTERVARBPROC nglGetVertexAttribPointervARB;
 extern PFNGLISPROGRAMARBPROC nglIsProgramARB;
 
-// GL_ARB_Shader_Object
+// Core
 extern PFNGLATTACHSHADERPROC							nglAttachShader;
 extern PFNGLCOMPILESHADERPROC							nglCompileShader;
 extern PFNGLCREATEPROGRAMPROC							nglCreateProgram;
@@ -473,6 +452,27 @@ extern PFNGLUNIFORM1UIVPROC								nglUniform1uiv;
 extern PFNGLUNIFORM2UIVPROC								nglUniform2uiv;
 extern PFNGLUNIFORM3UIVPROC								nglUniform3uiv;
 extern PFNGLUNIFORM4UIVPROC								nglUniform4uiv;
+
+extern PFNGLBINDBUFFERPROC								nglBindBuffer;
+extern PFNGLDELETEBUFFERSPROC							nglDeleteBuffers;
+extern PFNGLGENBUFFERSPROC								nglGenBuffers;
+extern PFNGLISBUFFERPROC								nglIsBuffer;
+extern PFNGLBUFFERDATAPROC								nglBufferData;
+extern PFNGLBUFFERSUBDATAPROC							nglBufferSubData;
+extern PFNGLGETBUFFERSUBDATAPROC						nglGetBufferSubData;
+extern PFNGLMAPBUFFERPROC								nglMapBuffer;
+extern PFNGLUNMAPBUFFERPROC								nglUnmapBuffer;
+extern PFNGLGETBUFFERPARAMETERIVPROC					nglGetBufferParameteriv;
+extern PFNGLGETBUFFERPOINTERVPROC						nglGetBufferPointerv;
+
+extern PFNGLGENQUERIESPROC								nglGenQueries;
+extern PFNGLDELETEQUERIESPROC							nglDeleteQueries;
+extern PFNGLISQUERYPROC									nglIsQuery;
+extern PFNGLBEGINQUERYPROC								nglBeginQuery;
+extern PFNGLENDQUERYPROC								nglEndQuery;
+extern PFNGLGETQUERYIVPROC								nglGetQueryiv;
+extern PFNGLGETQUERYOBJECTIVPROC						nglGetQueryObjectiv;
+extern PFNGLGETQUERYOBJECTUIVPROC						nglGetQueryObjectuiv;
 
 // GL_ARB_separate_shader_objects
 extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
@@ -535,18 +535,6 @@ extern PFNGLPROGRAMUNIFORMMATRIX3X4DVPROC				nglProgramUniformMatrix3x4dv;
 extern PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC				nglProgramUniformMatrix4x3dv;
 extern PFNGLVALIDATEPROGRAMPIPELINEPROC					nglValidateProgramPipeline;
 extern PFNGLGETPROGRAMPIPELINEINFOLOGPROC				nglGetProgramPipelineInfoLog;
-
-// GL_NV_occlusion_query
-//==================================
-extern NEL_PFNGLGENOCCLUSIONQUERIESNVPROC nglGenOcclusionQueriesNV;
-extern NEL_PFNGLDELETEOCCLUSIONQUERIESNVPROC nglDeleteOcclusionQueriesNV;
-extern NEL_PFNGLISOCCLUSIONQUERYNVPROC nglIsOcclusionQueryNV;
-extern NEL_PFNGLBEGINOCCLUSIONQUERYNVPROC nglBeginOcclusionQueryNV;
-extern NEL_PFNGLENDOCCLUSIONQUERYNVPROC nglEndOcclusionQueryNV;
-extern NEL_PFNGLGETOCCLUSIONQUERYIVNVPROC nglGetOcclusionQueryivNV;
-extern NEL_PFNGLGETOCCLUSIONQUERYUIVNVPROC nglGetOcclusionQueryuivNV;
-
-
 
 #ifdef NL_OS_WINDOWS
 

@@ -193,19 +193,6 @@ typedef GLvoid (APIENTRY * NEL_PFNGLBLITFRAMEBUFFEREXTPROC) (GLint srcX0, GLint 
 
 typedef GLvoid (APIENTRY * NEL_PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC) (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 
-#ifndef NL_GL_NV_occlusion_query
-#define NL_GL_NV_occlusion_query              1
-
-typedef GLvoid    (APIENTRY * NEL_PFNGLGENOCCLUSIONQUERIESNVPROC) (GLsizei n, GLuint *ids);
-typedef GLvoid    (APIENTRY * NEL_PFNGLDELETEOCCLUSIONQUERIESNVPROC) (GLsizei n, const GLuint *ids);
-typedef GLboolean (APIENTRY * NEL_PFNGLISOCCLUSIONQUERYNVPROC) (GLuint id);
-typedef GLvoid    (APIENTRY * NEL_PFNGLBEGINOCCLUSIONQUERYNVPROC) (GLuint id);
-typedef GLvoid    (APIENTRY * NEL_PFNGLENDOCCLUSIONQUERYNVPROC) ();
-typedef GLvoid    (APIENTRY * NEL_PFNGLGETOCCLUSIONQUERYIVNVPROC) (GLuint id, GLenum pname, GLint *params);
-typedef GLvoid    (APIENTRY * NEL_PFNGLGETOCCLUSIONQUERYUIVNVPROC) (GLuint id, GLenum pname, GLuint *params);
-
-#endif /* GL_NV_occlusion_query */
-
 #ifndef NL_GL_ARB_multisample
 #define NL_GL_ARB_multisample 1
 typedef GLvoid    (APIENTRY * NEL_PFNGLSAMPLECOVERAGEARBPROC) (GLclampf value, GLboolean invert);
