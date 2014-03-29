@@ -1000,6 +1000,9 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check GL_ARB_separate_shader_objects
 	ext.ARBSeparateShaderObjects = setupARBSeparateShaderObjects(glext);
 
+	// Check GL_ARB_vertex_buffer_object
+	ext.ARBVertexBufferObject = setupARBVertexBufferObject(glext);
+
 	// Check ARBMultiTexture
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
 	if (ext.ARBMultiTexture)
@@ -1080,8 +1083,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.ATITextureEnvCombine3= setupATITextureEnvCombine3(glext);
 	// Check ATIXTextureEnvRoute
 	ext.ATIXTextureEnvRoute= setupATIXTextureEnvRoute(glext);
-
-	setupARBVertexBufferObject(glext);
 }
 
 

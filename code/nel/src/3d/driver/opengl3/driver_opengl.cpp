@@ -373,11 +373,6 @@ bool CDriverGL3::setupDisplay()
 #endif // NL_OS_WINDOWS
 
 	// Check required extensions!!
-	if (!_Extensions.ARBShaderObjects)
-	{
-		nlwarning("Missing Required GL extension: GL_ARB_shader_objects. Update your driver");
-		throw EBadDisplay("Missing Required GL extension: GL_ARB_shader_objects. Update your driver");
-	}
 	if (!_Extensions.ARBSeparateShaderObjects)
 	{
 		nlwarning("Missing Required GL extension: GL_ARB_separate_shader_objects. Update your driver");
@@ -385,7 +380,7 @@ bool CDriverGL3::setupDisplay()
 	}
 
 	// ARBMultiTexture is a OpenGL 1.2 required extension.
-	if (!_Extensions.ARBMultiTexture)
+	/*if (!_Extensions.ARBMultiTexture)
 	{
 		nlwarning("Missing Required GL extension: GL_ARB_multitexture. Update your driver");
 		throw EBadDisplay("Missing Required GL extension: GL_ARB_multitexture. Update your driver");
@@ -394,7 +389,7 @@ bool CDriverGL3::setupDisplay()
 	if (!_Extensions.EXTTextureEnvCombine)
 	{
 		nlwarning("Missing Important GL extension: GL_EXT_texture_env_combine => All envcombine are setup to GL_MODULATE!!!");
-	}
+	}*/
 
 	// Get num of light for this driver
 	int numLight;

@@ -38,6 +38,8 @@ struct	CGlExtensions
 	// Required Extensions.
 	bool	ARBShaderObjects;
 	bool	ARBSeparateShaderObjects;
+	bool	ARBVertexBufferObject;
+
 	bool	ARBMultiTexture;
 	uint	NbTextureStages;
 	bool	EXTTextureEnvCombine;
