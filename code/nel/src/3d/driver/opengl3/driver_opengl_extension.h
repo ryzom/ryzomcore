@@ -71,10 +71,6 @@ struct	CGlExtensions
 	bool	GLXSGISwapControl;
 	bool	GLXMESASwapControl;
 
-	// ATI Extensions.
-	bool	ATITextureEnvCombine3;
-	bool	ATIXTextureEnvRoute;
-
 	// ARB Extensions
 	bool	ARBTextureCompression;
 	bool	ARBTextureNonPowerOfTwo;
@@ -90,8 +86,6 @@ public:
 		EXTTextureCompressionS3TC= false;
 		EXTVertexWeighting= false;
 		EXTSeparateSpecularColor= false;
-		ATITextureEnvCombine3= false;
-		ATIXTextureEnvRoute= false;
 		ARBTextureCubeMap= false;
 		EXTSecondaryColor= false;
 		WGLARBPBuffer= false;
@@ -125,8 +119,6 @@ public:
 		result += ARBMultiTexture ? "ARBMultiTexture " : "";
 		result += ARBTextureCompression ? "ARBTextureCompression " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
-		result += ATITextureEnvCombine3 ? "ATITextureEnvCombine3 " : "";
-		result += ATIXTextureEnvRoute ? "ATITextureEnvRoute " : "";
 		result += ARBTextureCubeMap ? "ARBTextureCubeMap " : "";
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
 		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";

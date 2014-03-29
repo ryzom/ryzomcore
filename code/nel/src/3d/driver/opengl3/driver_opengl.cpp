@@ -1191,8 +1191,8 @@ void CDriverGL3::checkForPerPixelLightingSupport()
 	// TODO : support for EnvCombine3
 	// TODO : support for less than 3 stages
 
-	_SupportPerPixelShaderNoSpec = _Extensions.ATITextureEnvCombine3 && _Extensions.ARBTextureCubeMap && _Extensions.NbTextureStages >= 3;
-	_SupportPerPixelShader = _Extensions.ATITextureEnvCombine3 && _Extensions.ARBTextureCubeMap && _Extensions.NbTextureStages >= 2;
+	_SupportPerPixelShaderNoSpec = true; // FIXME GL3
+	_SupportPerPixelShader = true; // FIXME GL3
 }
 
 // ***************************************************************************
@@ -1538,7 +1538,7 @@ bool CDriverGL3::supportMADOperator() const
 {
 	H_AUTO_OGL(CDriverGL3_supportMADOperator)
 
-	return _Extensions.ATITextureEnvCombine3;
+	return true;
 }
 
 // ***************************************************************************

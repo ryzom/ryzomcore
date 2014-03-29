@@ -577,32 +577,6 @@ static bool	setupEXTSeparateSpecularColor(const char	*glext)
 }
 
 // *********************************
-static bool	setupATITextureEnvCombine3(const char	*glext)
-{
-	H_AUTO_OGL(setupATITextureEnvCombine3);
-
-// reenabled to allow bloom on mac, TODO: cleanly fix the water issue
-// i think this issue was mtp target related - is this the case in ryzom too?
-// #ifdef NL_OS_MAC
-// // Water doesn't render on GeForce 8600M GT (on MAC OS X) if this extension is enabled
-// 	return false;
-// #endif
-
-	CHECK_EXT("GL_ATI_texture_env_combine3");
-	return true;
-}
-
-// *********************************
-static bool	setupATIXTextureEnvRoute(const char * /* glext */)
-{
-	H_AUTO_OGL(setupATIXTextureEnvRoute);
-	return false;
-//	CHECK_EXT("GL_ATIX_texture_env_route");
-//	return true;
-}
-
-
-// *********************************
 static bool	setupARBTextureCubeMap(const char	*glext)
 {
 	H_AUTO_OGL(setupARBTextureCubeMap);
@@ -1036,14 +1010,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_EXT_packed_depth_stencil
 	ext.PackedDepthStencil = setupPackedDepthStencil(glext);
-
-	// ATI extensions
-	// -------------
-
-	// Check ATIXTextureEnvCombine3.
-	ext.ATITextureEnvCombine3= setupATITextureEnvCombine3(glext);
-	// Check ATIXTextureEnvRoute
-	ext.ATIXTextureEnvRoute= setupATIXTextureEnvRoute(glext);
 }
 
 

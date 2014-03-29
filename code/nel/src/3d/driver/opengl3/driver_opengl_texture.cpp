@@ -1388,11 +1388,11 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			// setup texture mode, after activeTextureARB()
 			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 
-			if (_Extensions.ATITextureEnvCombine3)
+			/*if (_Extensions.ATITextureEnvCombine3)
 			{
 				// very strange bug with ATI cards : when a texture is set to NULL at a stage, the stage is still active sometimes...
 				activateTexEnvMode(stage, _TexEnvReplace); // set the whole stage to replace fix the problem
-			}
+			}*/
 		}
 
 		this->_CurrentTexture[stage]= tex;
