@@ -427,7 +427,7 @@ void CVertexBufferHard::invalidate()
 #endif
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D

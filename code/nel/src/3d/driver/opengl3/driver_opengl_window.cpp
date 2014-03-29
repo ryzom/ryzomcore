@@ -2873,7 +2873,7 @@ bool CDriverGL3::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<
 #endif
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D

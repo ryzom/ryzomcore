@@ -194,7 +194,7 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen);
 void registerGlExtensions(CGlExtensions &ext);
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D

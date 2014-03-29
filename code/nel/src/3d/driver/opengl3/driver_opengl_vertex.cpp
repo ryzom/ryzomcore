@@ -512,7 +512,7 @@ void CIndexBufferInfo::setupIndexBuffer(CIndexBuffer &ib)
 // ***************************************************************************
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D

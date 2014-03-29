@@ -1610,7 +1610,7 @@ void CDriverGL3::endWaterMultiPass()
 }
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D

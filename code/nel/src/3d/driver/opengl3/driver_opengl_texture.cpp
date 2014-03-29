@@ -1678,7 +1678,7 @@ bool CDriverGL3::getRenderTargetSize (uint32 &width, uint32 &height)
 // ***************************************************************************
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D

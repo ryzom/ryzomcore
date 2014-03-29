@@ -718,7 +718,7 @@ CDriverGLStates3::TCullMode CDriverGLStates3::getCullMode() const
 }
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D

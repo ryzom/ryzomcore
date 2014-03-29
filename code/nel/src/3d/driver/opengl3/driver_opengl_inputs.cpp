@@ -1010,7 +1010,7 @@ bool CDriverGL3::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &
 }
 
 #ifdef NL_STATIC
-} // NLDRIVERGL/ES
+} // NLDRIVERGL3
 #endif
 
 } // NL3D
