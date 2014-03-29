@@ -373,6 +373,17 @@ bool CDriverGL3::setupDisplay()
 #endif // NL_OS_WINDOWS
 
 	// Check required extensions!!
+	if (!_Extensions.ARBShaderObjects)
+	{
+		nlwarning("Missing Required GL extension: GL_ARB_shader_objects. Update your driver");
+		throw EBadDisplay("Missing Required GL extension: GL_ARB_shader_objects. Update your driver");
+	}
+	if (!_Extensions.ARBSeparateShaderObjects)
+	{
+		nlwarning("Missing Required GL extension: GL_ARB_separate_shader_objects. Update your driver");
+		throw EBadDisplay("Missing Required GL extension: GL_ARB_separate_shader_objects. Update your driver");
+	}
+
 	// ARBMultiTexture is a OpenGL 1.2 required extension.
 	if (!_Extensions.ARBMultiTexture)
 	{

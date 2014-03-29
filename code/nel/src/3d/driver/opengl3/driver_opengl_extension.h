@@ -36,6 +36,8 @@ struct	CGlExtensions
 	std::string GLVersion;
 
 	// Required Extensions.
+	bool	ARBShaderObjects;
+	bool	ARBSeparateShaderObjects;
 	bool	ARBMultiTexture;
 	uint	NbTextureStages;
 	bool	EXTTextureEnvCombine;

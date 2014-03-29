@@ -833,7 +833,7 @@ static bool	setupPackedDepthStencil(const char	*glext)
 	return true;
 }
 
-static bool setupGLSL(const char *glext)
+static bool setupARBShaderObjects(const char *glext)
 {
 	CHECK_EXT("GL_ARB_shader_objects");
 
@@ -890,7 +890,7 @@ static bool setupGLSL(const char *glext)
 	return true;
 }
 
-static bool setupSeparateShaderObjects(const char *glext)
+static bool setupARBSeparateShaderObjects(const char *glext)
 {
 	CHECK_EXT("GL_ARB_separate_shader_objects");
 
@@ -994,6 +994,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 		DebugLog->displayRaw("\n");
 	}
 
+	// Check GL_ARB_shader_objects
+	ext.ARBShaderObjects = setupARBShaderObjects(glext);
+
+	// Check GL_ARB_separate_shader_objects
+	ext.ARBSeparateShaderObjects = setupARBSeparateShaderObjects(glext);
+
 	// Check ARBMultiTexture
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
 	if (ext.ARBMultiTexture)
@@ -1076,18 +1082,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.ATIXTextureEnvRoute= setupATIXTextureEnvRoute(glext);
 
 	setupARBVertexBufferObject(glext);
-
-	if (!setupGLSL(glext))
-	{
-		nlinfo("Failed to set up GLSL related calls!");
-		nlassert(false);
-	}
-
-	if (!setupSeparateShaderObjects(glext))
-	{
-		nlinfo("Failed to set up separate shader object calls!");
-		nlassert(false);
-	}
 }
 
 
