@@ -49,7 +49,6 @@ struct	CGlExtensions
 	uint	NbTextureStages;
 
 	// Optional Extensions. (old)
-	bool	EXTSeparateSpecularColor;
 	bool	ARBTextureCubeMap;
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
@@ -75,7 +74,6 @@ public:
 		ARBMultiTexture= false;
 		NbTextureStages= 1;
 		EXTTextureCompressionS3TC= false;
-		EXTSeparateSpecularColor= false;
 		ARBTextureCubeMap= false;
 		EXTSecondaryColor= false;
 		WGLARBPBuffer= false;
@@ -111,7 +109,6 @@ public:
 		result += NLMISC::toString(NbTextureStages);
 
 		result += "\n  Misc:      ";
-		result += EXTSeparateSpecularColor ? "EXTSeparateSpecularColor " : "";
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
 		result += EXTBlendColor ? "EXTBlendColor " : "";
 		result += ARBMultisample ? "ARBMultisample " : "";

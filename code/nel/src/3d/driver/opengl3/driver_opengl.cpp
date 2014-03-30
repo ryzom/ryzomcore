@@ -433,11 +433,6 @@ bool CDriverGL3::setupDisplay()
 	// Default delta camera pos.
 	_PZBCameraPos= CVector::Null;
 
-	// Be always in EXTSeparateSpecularColor.
-	if (_Extensions.EXTSeparateSpecularColor)
-	{
-	}
-
 	// Init VertexArrayRange according to supported extenstion.
 	_SlowUnlockVBHard= false;
 
