@@ -19,9 +19,6 @@
 
 #include "nel/misc/types_nl.h"
 
-#define SHADER_MAX_TEXTURES 4
-#define SHADER_MAX_LIGHTS   8
-
 namespace NL3D
 {
 	class CVertexProgram;
@@ -86,13 +83,13 @@ namespace NL3D
 		};
 
 		CShaderDesc() {
-			for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+			for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 				texEnvMode[ i ] = 0;
 
-			for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
+			for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
 				lightMode[ i ] = Nolight;
 			
-			for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+			for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 				useTextureStage[ i ] = false;
 			useFirstTextureCoordSet = false;
 			noTextures = true;
@@ -146,18 +143,18 @@ namespace NL3D
 				if (useFirstTextureCoordSet != o.useFirstTextureCoordSet)
 					return false;
 
-				for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+				for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 					if (texEnvMode[ i ] != o.texEnvMode[ i ])
 						return false;
 
-				for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+				for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 					if (useTextureStage[ i ] != o.useTextureStage[ i ])
 						return false;
 			}
 
 			if (lightingEnabled())
 			{
-				for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
+				for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
 					if (lightMode[ i ] != o.lightMode[ i ])
 						return false;
 			}
@@ -258,8 +255,8 @@ namespace NL3D
 		};
 
 		uint32 features;
-		uint32 texEnvMode[ SHADER_MAX_TEXTURES ];
-		bool useTextureStage[ SHADER_MAX_TEXTURES ];
+		uint32 texEnvMode[ IDRV_MAT_MAXTEXTURES ];
+		bool useTextureStage[ IDRV_MAT_MAXTEXTURES ];
 		bool useFirstTextureCoordSet;
 		bool noTextures;
 		uint32 vbFlags;
@@ -267,7 +264,7 @@ namespace NL3D
 		uint32 nlightmaps;
 		float alphaTestTreshold;
 		uint32 fogMode;
-		TLightMode lightMode[ SHADER_MAX_LIGHTS ];
+		TLightMode lightMode[ NL_OPENGL3_MAX_LIGHT ];
 		bool pointLight;
 
 		SShaderPair shaderPair;

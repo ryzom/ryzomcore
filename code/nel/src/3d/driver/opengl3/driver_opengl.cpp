@@ -487,7 +487,7 @@ bool CDriverGL3::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect
 // ***************************************************************************
 bool CDriverGL3::supportBloomEffect() const
 {
-	return false; // FIXME GL3
+	return false; // FIXME GL3 // _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1156,7 +1156,7 @@ bool CDriverGL3::supportPerPixelLighting(bool specular) const
 {
 	H_AUTO_OGL(CDriverGL3_supportPerPixelLighting)
 
-	return _Extensions.GLCore;
+	return false; // FIXME GL3 // _Extensions.GLCore;
 }
 
 // ***************************************************************************

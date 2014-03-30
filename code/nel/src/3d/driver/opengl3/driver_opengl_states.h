@@ -26,8 +26,6 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 #endif
 
-#define NL_OPENGL3_MAX_LIGHT 8
-
 // ***************************************************************************
 /**
  * Class for optimizing calls to openGL states, by caching old ones.

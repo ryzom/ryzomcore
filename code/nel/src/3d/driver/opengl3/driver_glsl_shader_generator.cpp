@@ -14,101 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "sstream"
+#include "stdopengl.h"
 #include "driver_glsl_shader_generator.h"
+
+#include <sstream>
+
 #include "nel/3d/vertex_buffer.h"
+#include "driver_opengl_program.h"
 #include "driver_opengl_shader_desc.h"
-
-namespace
-{
-	inline bool hasFlag(uint32 data, uint32 flag)
-	{
-		if ((data & flag) != 0)
-			return true;
-		else
-			return false;
-	}
-
-	enum AttribOffset
-	{
-		Position,
-		Weight,
-		Normal,
-		PrimaryColor,
-		SecondaryColor,
-		Fog,
-		PaletteSkin,
-		Empty,
-		TexCoord0,
-		TexCoord1,
-		TexCoord2,
-		TexCoord3,
-		TexCoord4,
-		TexCoord5,
-		TexCoord6,
-		TexCoord7,
-		NumOffsets
-	};
-}
 
 namespace NL3D
 {
-	uint16 vertexFlags[ CVertexBuffer::NumValue ] = 
-	{
-		CVertexBuffer::PositionFlag,
-		CVertexBuffer::WeightFlag,
-		CVertexBuffer::NormalFlag,
-		CVertexBuffer::PrimaryColorFlag,
-		CVertexBuffer::SecondaryColorFlag,
-		CVertexBuffer::FogFlag,
-		CVertexBuffer::PaletteSkinFlag,
-		0,
-		CVertexBuffer::TexCoord0Flag,
-		CVertexBuffer::TexCoord1Flag,
-		CVertexBuffer::TexCoord2Flag,
-		CVertexBuffer::TexCoord3Flag,
-		CVertexBuffer::TexCoord4Flag,
-		CVertexBuffer::TexCoord5Flag,
-		CVertexBuffer::TexCoord6Flag,
-		CVertexBuffer::TexCoord7Flag
-	};
-
-	const char *attribNames[ CVertexBuffer::NumValue ] =
-	{
-		"position",
-		"weight",
-		"normal",
-		"color",
-		"color2",
-		"fog",
-		"paletteSkin",
-		"none",
-		"texCoord0",
-		"texCoord1",
-		"texCoord2",
-		"texCoord3",
-		"texCoord4",
-		"texCoord5",
-		"texCoord6",
-		"texCoord7"
-	};
-
-	const char *texelNames[ SHADER_MAX_TEXTURES ] =
-	{
-		"texel0",
-		"texel1",
-		"texel2",
-		"texel3"
-	};
-
-	const char *constantNames[ 4 ] =
-	{
-		"constant0",
-		"constant1",
-		"constant2",
-		"constant3"
-	};
-
 	const char *shaderNames[] = 
 	{
 		"Normal",
@@ -130,6 +46,7 @@ namespace NL3D
 
 	CGLSLShaderGenerator::~CGLSLShaderGenerator()
 	{
+
 	}
 
 	void CGLSLShaderGenerator::reset()
@@ -156,14 +73,23 @@ namespace NL3D
 
 		for (int i = Weight; i < NumOffsets; i++)
 		{
-			if (hasFlag(vbFormat, vertexFlags[ i ]))
+			if (hasFlag(vbFormat, g_VertexFlags[i]))
 			{
 				ss << "smooth in vec4 ";
-				ss << attribNames[ i ] << ";" << std::endl;
+				ss << g_AttribNames[i] << ";" << std::endl;
 			}
 		}
 		ss << std::endl;
 		
+		/*if (desc->lightingEnabled()) // LIGHTING DEBUG
+		{
+			generateInvalidPS();
+		}
+		else
+		{
+			generateNormalPS();
+		}*/
+
 		switch(material->getShader())
 		{
 		case CMaterial::Normal:
@@ -292,7 +218,7 @@ namespace NL3D
 
 	void CGLSLShaderGenerator::addLightUniformsFS()
 	{
-		for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
+		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
 		{
 			switch(desc->getLight(i))
 			{
@@ -364,7 +290,7 @@ namespace NL3D
 
 		ss << "void main(void)" << std::endl;
 		ss << "{" << std::endl;
-		ss << "vec4 eyePosition = modelView * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "vec4 eyePosition = modelView * v" << g_AttribNames[ 0 ] << ";" << std::endl;
 
 		if (desc->hasPointLight())
 			ss << "ecPos4 = eyePosition;" << std::endl;
@@ -378,18 +304,18 @@ namespace NL3D
 		ss << "vec4 t = vec4(cubeTexCoords, 1.0);" << std::endl;
 		ss << "t = t * texMatrix0;" << std::endl;
 		ss << "cubeTexCoords = t.xyz;" << std::endl;
-		ss << "gl_Position = modelViewProjection * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "gl_Position = modelViewProjection * v" << g_AttribNames[ 0 ] << ";" << std::endl;
 
 		if (desc->lightingEnabled())
 			addLightsVS();
 
 		for (int i = Weight; i < NumOffsets; i++)
 		{
-			if (hasFlag(vbFormat, vertexFlags[ i ]))
+			if (hasFlag(vbFormat, g_VertexFlags[i]))
 			{
-				ss << attribNames[ i ];
+				ss << g_AttribNames[i];
 				ss << " = ";
-				ss << "v" << attribNames[ i ] << ";" << std::endl;
+				ss << "v" << g_AttribNames[i] << ";" << std::endl;
 			}
 		}
 
@@ -415,15 +341,15 @@ namespace NL3D
 
 		ss << "void main(void)" << std::endl;
 		ss << "{" << std::endl;
-		ss << "gl_Position = modelViewProjection * v" << attribNames[ 0 ] << ";" << std::endl;
+		ss << "gl_Position = modelViewProjection * v" << g_AttribNames[ 0 ] << ";" << std::endl;
 		
 		for (int i = Weight; i < NumOffsets; i++)
 		{
-			if (hasFlag(vbFormat, vertexFlags[ i ]))
+			if (hasFlag(vbFormat, g_VertexFlags[i]))
 			{
-				ss << attribNames[ i ];
+				ss << g_AttribNames[i];
 				ss << " = ";
-				ss << "v" << attribNames[ i ] << ";" << std::endl;
+				ss << "v" << g_AttribNames[i] << ";" << std::endl;
 			}
 		}
 
@@ -514,10 +440,101 @@ namespace NL3D
 		ss << "}" << std::endl;
 	}*/
 
+	void CGLSLShaderGenerator::generateInvalidPS()
+	{
+		/*uint sampler = 0;
+		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+		{
+			if (desc->getUseTexStage(i))
+				ss << "uniform sampler2D sampler" << sampler << ";" << std::endl;
+			sampler++;
+		}
+
+		addColor();
+		addConstants();
+		addAlphaTreshold();
+		addFogUniform();*/
+
+		if (desc->fogEnabled())
+			ss << "smooth in vec4 ecPos;" << std::endl;
+
+		ss << std::endl;
+
+		if (desc->lightingEnabled())
+		{
+			addLightUniformsFS();
+			addLightInsFS();
+			ss << std::endl;
+			
+			addLightsFunctionFS();
+			ss << std::endl;
+		}
+
+		/*if (desc->fogEnabled())
+			addFogFunction();*/
+		
+		ss << "void main(void)" << std::endl;
+		ss << "{" << std::endl;
+
+		/*bool textures = false;
+		sampler = 0;
+		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+		{
+			if (desc->getUseTexStage(i))
+			{
+				ss << "vec4 texel" << sampler << " = texture(sampler" << sampler << ",";
+				
+				if (!desc->getUseFirstTexCoords())
+					ss << g_AttribNames[ TexCoord0 + i ] << ".st);";
+				else
+					ss << g_AttribNames[ TexCoord0 ] << ".st);";
+
+				ss << std::endl;
+
+				textures = true;
+			}
+			sampler++;
+		}
+
+		bool vertexColor = false;
+		if (hasFlag(vbFormat, g_VertexFlags[ PrimaryColor ]))
+			vertexColor = true;
+
+		if (textures && !vertexColor)
+			ss << "vec4 texel = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
+		else
+		if (vertexColor)
+			ss << "vec4 texel = color;" << std::endl;
+		else
+			ss << "vec4 texel = vec4(0.5, 0.5, 0.5, 1.0);" << std::endl;
+
+		generateTexEnv();
+
+		// This is just an idea I had, but it seems to be working.
+		// Unfortunately it's not documented anywhere I looked in the GL spec, but if I don't have this modulation here,
+		// the Ryzom UI looks horrific.
+		if (vertexColor)
+			ss << "texel = color * texel;" << std::endl;*/
+
+		ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
+
+		if (desc->lightingEnabled())
+			addLightsFS();
+
+		ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
+
+		/*if (desc->fogEnabled())
+			addFog();
+
+		addAlphaTest();*/
+
+		ss << "}" << std::endl;
+	}
+
 	void CGLSLShaderGenerator::generateNormalPS()
 	{
 		uint sampler = 0;
-		for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 		{
 			if (desc->getUseTexStage(i))
 				ss << "uniform sampler2D sampler" << sampler << ";" << std::endl;
@@ -552,16 +569,16 @@ namespace NL3D
 
 		bool textures = false;
 		sampler = 0;
-		for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 		{
 			if (desc->getUseTexStage(i))
 			{
 				ss << "vec4 texel" << sampler << " = texture(sampler" << sampler << ",";
 				
 				if (!desc->getUseFirstTexCoords())
-					ss << attribNames[ TexCoord0 + i ] << ".st);";
+					ss << g_AttribNames[ TexCoord0 + i ] << ".st);";
 				else
-					ss << attribNames[ TexCoord0 ] << ".st);";
+					ss << g_AttribNames[ TexCoord0 ] << ".st);";
 
 				ss << std::endl;
 
@@ -571,7 +588,7 @@ namespace NL3D
 		}
 
 		bool vertexColor = false;
-		if (hasFlag(vbFormat, vertexFlags[ PrimaryColor ]))
+		if (hasFlag(vbFormat, g_VertexFlags[ PrimaryColor ]))
 			vertexColor = true;
 
 		if (textures && !vertexColor)
@@ -606,7 +623,7 @@ namespace NL3D
 	void CGLSLShaderGenerator::generateTexEnv()
 	{
 		uint32 stage = 0;
-		for (int i = 0; i < SHADER_MAX_TEXTURES; i++)
+		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 		{
 			if (desc->getUseTexStage(i))
 			{
@@ -623,7 +640,7 @@ namespace NL3D
 		std::string arg1;
 		std::string arg2;
 	
-		switch(material->_TexEnvs[ stage ].Env.OpRGB)
+		switch(material->_TexEnvs[stage].Env.OpRGB)
 		{
 		case CMaterial::Replace:
 			{
@@ -674,7 +691,7 @@ namespace NL3D
 				buildArg(stage, 0, false, arg0);
 				buildArg(stage, 1, false, arg1);
 
-				std::string As = texelNames[ stage ];
+				std::string As = g_TexelNames[stage];
 				As.append(".a");
 
 				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
@@ -711,7 +728,7 @@ namespace NL3D
 				buildArg(stage, 0, false, arg0);
 				buildArg(stage, 1, false, arg1);
 
-				std::string As = constantNames[ stage ];
+				std::string As = g_ConstantNames[stage];
 				As.append(".a");
 
 				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
@@ -727,7 +744,7 @@ namespace NL3D
 		std::string arg1;
 		std::string arg2;
 	
-		switch(material->_TexEnvs[ stage ].Env.OpRGB)
+		switch(material->_TexEnvs[stage].Env.OpRGB)
 		{
 		case CMaterial::Replace:
 			{
@@ -777,7 +794,7 @@ namespace NL3D
 				buildArg(stage, 0, true, arg0);
 				buildArg(stage, 1, true, arg1);
 
-				std::string As = texelNames[ stage ];
+				std::string As = g_TexelNames[stage];
 				As.append(".a");
 
 				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
@@ -814,7 +831,7 @@ namespace NL3D
 				buildArg(stage, 0, true, arg0);
 				buildArg(stage, 1, true, arg1);
 
-				std::string As = constantNames[ stage ];
+				std::string As = g_ConstantNames[stage];
 				As.append(".a");
 
 				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
@@ -851,21 +868,21 @@ namespace NL3D
 				switch(op)
 				{
 				case CMaterial::SrcColor:
-					ds << texelNames[ stage ] << ".rgb";
+					ds << g_TexelNames[stage] << ".rgb";
 					break;
 
 				case CMaterial::InvSrcColor:
 					ds << "(vec3(1.0, 1.0, 1.0) - ";
-					ds << texelNames[ stage ] << ".rgb)";
+					ds << g_TexelNames[stage] << ".rgb)";
 					break;
 
 				case CMaterial::SrcAlpha:
-					ds << texelNames[ stage ] << ".a";
+					ds << g_TexelNames[stage] << ".a";
 					break;
 
 				case CMaterial::InvSrcAlpha:
 					ds << "(1.0 - ";
-					ds << texelNames[ stage ] << ".a)";
+					ds << g_TexelNames[stage] << ".a)";
 					break;
 				}
 			}
@@ -920,19 +937,19 @@ namespace NL3D
 				switch(op)
 				{
 				case CMaterial::SrcColor:
-					ds << constantNames[ stage ] << ".rgb";
+					ds << g_ConstantNames[stage] << ".rgb";
 					break;
 
 				case CMaterial::InvSrcColor:
-					ds << "(vec3(1.0, 1.0, 1.0) - " << constantNames[ stage ] << ".rgb)";
+					ds << "(vec3(1.0, 1.0, 1.0) - " << g_ConstantNames[stage] << ".rgb)";
 					break;
 
 				case CMaterial::SrcAlpha:
-					ds << constantNames[ stage ] << ".a";
+					ds << g_ConstantNames[stage] << ".a";
 					break;
 
 				case CMaterial::InvSrcAlpha:
-					ds << "(1.0 - " << constantNames[ stage ] << ".a)";
+					ds << "(1.0 - " << g_ConstantNames[stage] << ".a)";
 					break;
 				}
 			break;
@@ -950,7 +967,7 @@ namespace NL3D
 		int ntextures = 0;
 		for (int i = TexCoord0; i < TexCoord4; i++)
 		{
-			if (hasFlag(vbFormat, vertexFlags[ i ]))
+			if (hasFlag(vbFormat, g_VertexFlags[i]))
 				ntextures++;
 		}
 
@@ -993,11 +1010,11 @@ namespace NL3D
 		{
 			ss << "vec4 texel" << i;
 			ss << " = texture(sampler" << i;
-			ss << ", " << attribNames[ TexCoord1 ] << ".st);" << std::endl;
+			ss << ", " << g_AttribNames[ TexCoord1 ] << ".st);" << std::endl;
 		}
 
 		// Color map UV coords are at position 0
-		ss << "vec4 texel" << ntextures - 1 << " = texture(sampler" << ntextures - 1 << ", " << attribNames[ TexCoord0 ] << ".st);" << std::endl;
+		ss << "vec4 texel" << ntextures - 1 << " = texture(sampler" << ntextures - 1 << ", " << g_AttribNames[ TexCoord0 ] << ".st);" << std::endl;
 		
 		//ss << "vec4 texel = diffuseColor;" << std::endl;
 		//ss << "vec4 texel = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
@@ -1006,13 +1023,13 @@ namespace NL3D
 		// Lightmaps
 		for (int i = 0; i < ntextures - 1; i++)
 		{
-			ss << "texel.rgb = " << texelNames[ i ] << ".rgb * " << constantNames[ i ] << ".rgb + texel.rgb;" << std::endl;
-			ss << "texel.a = " << texelNames[ i ] << ".a * texel.a + texel.a;" << std::endl;
+			ss << "texel.rgb = " << g_TexelNames[i] << ".rgb * " << g_ConstantNames[i] << ".rgb + texel.rgb;" << std::endl;
+			ss << "texel.a = " << g_TexelNames[i] << ".a * texel.a + texel.a;" << std::endl;
 		}
 
 		// Texture
-		ss << "texel.rgb = " << texelNames[ ntextures - 1 ] << ".rgb * texel.rgb;" << std::endl;
-		ss << "texel.a = " << texelNames[ ntextures - 1] << ".a;" << std::endl;
+		ss << "texel.rgb = " << g_TexelNames[ ntextures - 1 ] << ".rgb * texel.rgb;" << std::endl;
+		ss << "texel.a = " << g_TexelNames[ ntextures - 1] << ".a;" << std::endl;
 
 		if (material->_LightMapsMulx2)
 		{

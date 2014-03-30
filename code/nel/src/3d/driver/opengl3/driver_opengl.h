@@ -1311,9 +1311,6 @@ private:
 
 	private:
 
-	// The last vertex program that was setupped
-	NLMISC::CRefPtr<CVertexProgram> _LastSetuppedVP;
-
 	bool							_ForceDXTCCompression;
 	/// Divisor for textureResize (power).
 	uint							_ForceTextureResizePower;
@@ -1351,13 +1348,13 @@ private:
 
 	uint32 ppoId;
 	
-	CVertexProgram *m_UserVertexProgram;
-	CGeometryProgram *m_UserGeometryProgram;
-	CPixelProgram *m_UserPixelProgram;
+	NLMISC::CRefPtr<CVertexProgram> m_UserVertexProgram;
+	NLMISC::CRefPtr<CGeometryProgram> m_UserGeometryProgram;
+	NLMISC::CRefPtr<CPixelProgram> m_UserPixelProgram;
 
-	CVertexProgram *m_DriverVertexProgram;
-	CGeometryProgram *m_DriverGeometryProgram;
-	CPixelProgram *m_DriverPixelProgram;
+	NLMISC::CRefPtr<CVertexProgram> m_DriverVertexProgram;
+	NLMISC::CRefPtr<CGeometryProgram> m_DriverGeometryProgram;
+	NLMISC::CRefPtr<CPixelProgram> m_DriverPixelProgram;
 
 	std::set<CVPBuiltin> m_VPBuiltinCache;
 	CVPBuiltin m_VPBuiltinCurrent;

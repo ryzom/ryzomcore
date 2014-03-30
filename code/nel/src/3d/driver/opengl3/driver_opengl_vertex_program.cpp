@@ -23,6 +23,7 @@
 #include "nel/3d/light.h"
 
 #include "driver_opengl.h"
+#include "driver_opengl_program.h"
 #include "driver_opengl_vertex_buffer_hard.h"
 
 namespace NL3D {
@@ -51,91 +52,6 @@ bool operator<(const CVPBuiltin &left, const CVPBuiltin &right)
 
 namespace
 {
-	inline bool hasFlag(uint32 data, uint32 flag)
-	{
-		if ((data & flag) != 0)
-			return true;
-		else
-			return false;
-	}
-
-	enum TAttribOffset
-	{
-		Position,
-		Weight,
-		Normal,
-		PrimaryColor,
-		SecondaryColor,
-		Fog,
-		PaletteSkin,
-		Empty,
-		TexCoord0,
-		TexCoord1,
-		TexCoord2,
-		TexCoord3,
-		TexCoord4,
-		TexCoord5,
-		TexCoord6,
-		TexCoord7,
-		NumOffsets
-	};
-
-	const uint16 s_VertexFlags[CVertexBuffer::NumValue] = 
-	{
-		CVertexBuffer::PositionFlag,
-		CVertexBuffer::WeightFlag,
-		CVertexBuffer::NormalFlag,
-		CVertexBuffer::PrimaryColorFlag,
-		CVertexBuffer::SecondaryColorFlag,
-		CVertexBuffer::FogFlag,
-		CVertexBuffer::PaletteSkinFlag,
-		0,
-		CVertexBuffer::TexCoord0Flag,
-		CVertexBuffer::TexCoord1Flag,
-		CVertexBuffer::TexCoord2Flag,
-		CVertexBuffer::TexCoord3Flag,
-		CVertexBuffer::TexCoord4Flag,
-		CVertexBuffer::TexCoord5Flag,
-		CVertexBuffer::TexCoord6Flag,
-		CVertexBuffer::TexCoord7Flag
-	};
-
-	const char *s_AttribNames[ CVertexBuffer::NumValue ] =
-	{
-		"position",
-		"weight",
-		"normal",
-		"color",
-		"color2",
-		"fog",
-		"paletteSkin",
-		"none",
-		"texCoord0",
-		"texCoord1",
-		"texCoord2",
-		"texCoord3",
-		"texCoord4",
-		"texCoord5",
-		"texCoord6",
-		"texCoord7"
-	};
-
-	const char *s_TexelNames[ SHADER_MAX_TEXTURES ] =
-	{
-		"texel0",
-		"texel1",
-		"texel2",
-		"texel3"
-	};
-
-	const char *s_ConstantNames[ 4 ] =
-	{
-		"constant0",
-		"constant1",
-		"constant2",
-		"constant3"
-	};
-
 	void vpLightUniforms(std::stringstream &ss, const CVPBuiltin &desc, int i)
 	{
 		switch (desc.LightMode[i])
@@ -288,13 +204,13 @@ namespace
 		ss << std::endl;
 
 		for (int i = Position; i < NumOffsets; ++i)
-			if (hasFlag(desc.VertexFormat, s_VertexFlags[i]))
-				ss << "layout (location = " << i << ") " << "in vec4 " << "v" << s_AttribNames[i] << ";" << std::endl;
+			if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+				ss << "layout (location = " << i << ") " << "in vec4 " << "v" << g_AttribNames[i] << ";" << std::endl;
 		ss << std::endl;
 
 		for (int i = Weight; i < NumOffsets; ++i)
-			if (hasFlag(desc.VertexFormat, s_VertexFlags[i]))
-				ss << "smooth out vec4 " << s_AttribNames[i] << ";" << std::endl;
+			if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+				ss << "smooth out vec4 " << g_AttribNames[i] << ";" << std::endl;
 		ss << std::endl;
 		
 		// if (!useTextures) {
@@ -327,10 +243,10 @@ namespace
 	
 		ss << "void main(void)" << std::endl;
 		ss << "{" << std::endl;
-		ss << "gl_Position = modelViewProjection * " << "v" << s_AttribNames[0] << ";" << std::endl;
+		ss << "gl_Position = modelViewProjection * " << "v" << g_AttribNames[0] << ";" << std::endl;
 
 		if (desc.Fog || desc.Lighting)
-			ss << "ecPos4 = modelView * v" << s_AttribNames[0] << ";" << std::endl;
+			ss << "ecPos4 = modelView * v" << g_AttribNames[0] << ";" << std::endl;
 		if (desc.Fog)
 			ss << "ecPos = ecPos4;" << std::endl;
 
@@ -344,9 +260,9 @@ namespace
 
 		for (int i = Weight; i < NumOffsets; i++)
 		{
-			if (hasFlag(desc.VertexFormat, s_VertexFlags[i]))
+			if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
 			{
-				ss << s_AttribNames[i] << " = " << "v" << s_AttribNames[i] << ";" << std::endl;
+				ss << g_AttribNames[i] << " = " << "v" << g_AttribNames[i] << ";" << std::endl;
 			}
 		}
 

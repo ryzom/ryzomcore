@@ -62,3 +62,5 @@
 #include "nel/misc/command.h"
 
 #include "nel/3d/driver.h"
+
+#define NL_OPENGL3_MAX_LIGHT 8

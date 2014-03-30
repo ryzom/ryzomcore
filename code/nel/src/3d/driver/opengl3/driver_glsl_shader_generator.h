@@ -124,6 +124,7 @@ namespace NL3D
 
 		/////////////////////////////////////// Pixel Shader generation ///////////////////////////////////////
 		
+		void generateInvalidPS();
 		void generateNormalPS();
 		
 

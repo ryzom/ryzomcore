@@ -244,6 +244,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	}
 
 	CShaderGL3*	pShader;
+	CMaterial::TShader matShader;
 	GLenum		glenum = GL_ZERO;
 	uint32		touched = mat.getTouched();
 	uint		stage;
@@ -319,14 +320,25 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		mat.clearTouched(0xFFFFFFFF);
 	}
 
-	// Now we can get the supported shader from the cache.
-	CMaterial::TShader matShader = pShader->SupportedShader;
+	// 2b. User supplied pixel shader overrides material
+	//==================================
+	if (m_UserPixelProgram)
+	{
+		matShader = CMaterial::Program;
+	}
+	else
+	{
+		// Now we can get the supported shader from the cache.
+		matShader = pShader->SupportedShader;
+	}
 
+	// 2b. Update more shader state
+	//==================================
 	// if the shader has changed since last time
 	if (matShader != _CurrentMaterialSupportedShader)
 	{
 		// if old was lightmap, restore standard lighting
-		if (_CurrentMaterialSupportedShader==CMaterial::LightMap)
+		if (_CurrentMaterialSupportedShader == CMaterial::LightMap)
 			setupLightMapDynamicLighting(false);
 
 		// if new is lightmap, setup dynamic lighting
@@ -335,14 +347,14 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	}
 
 	// setup the global
-	_CurrentMaterialSupportedShader= matShader;
+	_CurrentMaterialSupportedShader = matShader;
 
 	// 2. Setup / Bind Textures.
 	//==========================
 	// Must setup textures each frame. (need to test if touched).
 	// Must separate texture setup and texture activation in 2 "for"...
 	// because setupTexture() may disable all stage.
-	if (matShader != CMaterial::Water)
+	if (matShader != CMaterial::Water && matShader != CMaterial::Program)
 	{
 		for (stage=0 ; stage<inlGetNumTextStages() ; stage++)
 		{
@@ -378,6 +390,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		&& matShader != CMaterial::Cloud
 		&& matShader != CMaterial::Water
 		&& matShader != CMaterial::Specular
+		&& matShader != CMaterial::Program
 	  )
 	{
 		for (stage=0 ; stage<inlGetNumTextStages() ; stage++)
@@ -404,13 +417,13 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		// Double Sided Part.
 		//===================
 		// NB: inverse state: DoubleSided <=> !CullFace.
-		uint32	twoSided= mat.getFlags()&IDRV_MAT_DOUBLE_SIDED;
-		_DriverGLStates.enableCullFace(twoSided==0);
+		uint32 twoSided = mat.getFlags() & IDRV_MAT_DOUBLE_SIDED;
+		_DriverGLStates.enableCullFace(twoSided == 0);
 
 
 		// Alpha Test Part.
 		//=================
-		uint32	alphaTest= mat.getFlags()&IDRV_MAT_ALPHA_TEST;
+		uint32 alphaTest = mat.getFlags() & IDRV_MAT_ALPHA_TEST;
 		_DriverGLStates.enableAlphaTest(alphaTest);
 		if (alphaTest)
 		{
@@ -420,9 +433,9 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 		// Bind ZBuffer Part.
 		//===================
-		_DriverGLStates.enableZWrite(mat.getFlags()&IDRV_MAT_ZWRITE);
+		_DriverGLStates.enableZWrite(mat.getFlags() & IDRV_MAT_ZWRITE);
 		_DriverGLStates.depthFunc(pShader->ZComp);
-		_DriverGLStates.setZBias (mat.getZBias () * _OODeltaZ);
+		_DriverGLStates.setZBias(mat.getZBias() * _OODeltaZ);
 
 		// Bind Stencil Buffer Part.
 		//===================
@@ -436,12 +449,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		//=====================
 
 		// Light Part.
-
 		enableLightingVP(mat.getFlags() & IDRV_MAT_LIGHTING);
-
-		if ((mat.getFlags() & IDRV_MAT_LIGHTING) == 0)
-			disableAllLights();
-
 		if (mat.getFlags()&IDRV_MAT_LIGHTING)
 		{
 			_DriverGLStates.setEmissive(pShader->PackedEmissive, pShader->Emissive);
@@ -454,6 +462,10 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		}
 		else
 		{
+			// Color unlit
+			// CRGBA	col= mat.getColor();
+			// glColor4ub(col.R, col.G, col.B, col.A);
+
 			_DriverGLStates.setVertexColorLighted(false);
 		}
 
@@ -479,7 +491,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	//=====================================
 
 	// Textures user matrix
-	if (matShader == CMaterial::Normal)
+	if (matShader == CMaterial::Normal || matShader == CMaterial::Program)
 	{
 		setupUserTextureMatrix(inlGetNumTextStages(), mat);
 	}

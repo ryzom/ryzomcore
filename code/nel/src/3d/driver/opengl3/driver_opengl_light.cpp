@@ -200,15 +200,6 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 	}
 }
 
-void CDriverGL3::disableAllLights()
-{
-	for (int i = 0; i < MaxLight; ++i)
-	{
-		_UserLightEnable[i] = false;
-		touchLightVP(i);
-	}
-}
-
 #ifdef NL_STATIC
 } // NLDRIVERGL3
 #endif
