@@ -49,7 +49,6 @@ struct	CGlExtensions
 	uint	NbTextureStages;
 
 	// Optional Extensions. (old)
-	bool	EXTVertexWeighting;
 	bool	EXTSeparateSpecularColor;
 	bool	ARBTextureCubeMap;
 	bool	NVTextureRectangle;
@@ -76,7 +75,6 @@ public:
 		ARBMultiTexture= false;
 		NbTextureStages= 1;
 		EXTTextureCompressionS3TC= false;
-		EXTVertexWeighting= false;
 		EXTSeparateSpecularColor= false;
 		ARBTextureCubeMap= false;
 		EXTSecondaryColor= false;
@@ -113,7 +111,6 @@ public:
 		result += NLMISC::toString(NbTextureStages);
 
 		result += "\n  Misc:      ";
-		result += EXTVertexWeighting ? "EXTVertexWeighting " : "";
 		result += EXTSeparateSpecularColor ? "EXTSeparateSpecularColor " : "";
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
 		result += EXTBlendColor ? "EXTBlendColor " : "";
@@ -205,13 +202,6 @@ extern NEL_PFNGLMULTITEXCOORD4SVARBPROC nglMultiTexCoord4svARB;
 extern NEL_PFNGLMULTITEXCOORD4IVARBPROC nglMultiTexCoord4ivARB;
 extern NEL_PFNGLMULTITEXCOORD4FVARBPROC nglMultiTexCoord4fvARB;
 extern NEL_PFNGLMULTITEXCOORD4DVARBPROC nglMultiTexCoord4dvARB;
-
-
-// VertexWeighting.
-//==================
-extern NEL_PFNGLVERTEXWEIGHTFEXTPROC			nglVertexWeightfEXT;
-extern NEL_PFNGLVERTEXWEIGHTFVEXTPROC			nglVertexWeightfvEXT;
-extern NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC		nglVertexWeightPointerEXT;
 
 
 // ATI_envmap_bumpmap extension

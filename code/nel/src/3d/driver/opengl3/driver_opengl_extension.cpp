@@ -101,11 +101,6 @@ NEL_PFNGLMULTITEXCOORD4IVARBPROC				nglMultiTexCoord4ivARB;
 NEL_PFNGLMULTITEXCOORD4FVARBPROC				nglMultiTexCoord4fvARB;
 NEL_PFNGLMULTITEXCOORD4DVARBPROC				nglMultiTexCoord4dvARB;
 
-// VertexWeighting.
-NEL_PFNGLVERTEXWEIGHTFEXTPROC					nglVertexWeightfEXT;
-NEL_PFNGLVERTEXWEIGHTFVEXTPROC					nglVertexWeightfvEXT;
-NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC				nglVertexWeightPointerEXT;
-
 // SecondaryColor extension
 NEL_PFNGLSECONDARYCOLOR3BEXTPROC				nglSecondaryColor3bEXT;
 NEL_PFNGLSECONDARYCOLOR3BVEXTPROC				nglSecondaryColor3bvEXT;
@@ -524,19 +519,6 @@ static bool	setupEXTTextureCompressionS3TC(const char	*glext)
 	return true;
 }
 
-// *********************************
-static bool	setupEXTVertexWeighting(const char	*glext)
-{
-	H_AUTO_OGL(setupEXTVertexWeighting);
-	CHECK_EXT("GL_EXT_vertex_weighting");
-
-	CHECK_ADDRESS(NEL_PFNGLVERTEXWEIGHTFEXTPROC, glVertexWeightfEXT);
-	CHECK_ADDRESS(NEL_PFNGLVERTEXWEIGHTFVEXTPROC, glVertexWeightfvEXT);
-	CHECK_ADDRESS(NEL_PFNGLVERTEXWEIGHTPOINTEREXTPROC, glVertexWeightPointerEXT);
-
-	return true;
-}
-
 
 // *********************************
 static bool	setupEXTSeparateSpecularColor(const char	*glext)
@@ -904,9 +886,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check ARBMultisample
 	ext.ARBMultisample = setupARBMultisample(glext);
-
-	// Check if NVidia GL_EXT_vertex_weighting is available.
-	ext.EXTVertexWeighting= setupEXTVertexWeighting(glext);
 
 	// Check EXTSeparateSpecularColor.
 	ext.EXTSeparateSpecularColor= setupEXTSeparateSpecularColor(glext);
