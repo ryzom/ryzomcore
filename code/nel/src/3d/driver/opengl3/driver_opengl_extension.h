@@ -47,12 +47,10 @@ struct	CGlExtensions
 
 	// Required Extensions. (old)
 	bool	ARBMultiTexture;
-	// uint	NbTextureStages;
 
 	// Optional Extensions. (old)
 	bool	EXTSecondaryColor;
 	bool	EXTBlendColor;
-	bool	ARBMultisample;
 
 	// WGL ARB extensions, true if supported
 	bool	WGLARBPBuffer;
@@ -79,7 +77,6 @@ public:
 		ARBMultiTexture= false;
 		EXTSecondaryColor= false;
 		EXTBlendColor= false;
-		ARBMultisample = false;
 
 		WGLARBPBuffer = false;
 		WGLARBPixelFormat = false;
@@ -96,8 +93,10 @@ public:
 		result += GLVersion;
 		result += "; Available extensions:";
 
-		result += "\n  Required: ";
+		result += "\n  Core: ";
 		result += GLCore ? "GLCore " : "";
+
+		result += "\n  Programs: ";
 		result += ARBSeparateShaderObjects ? "ARBSeparateShaderObjects " : "";
 
 		result += "\n  Texturing: ";
@@ -110,7 +109,6 @@ public:
 		result += "\n  Misc:      ";
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
 		result += EXTBlendColor ? "EXTBlendColor " : "";
-		result += ARBMultisample ? "ARBMultisample " : "";
 
 #ifdef NL_OS_WINDOWS
 		result += "\n  WindowsGL: ";
@@ -542,11 +540,6 @@ extern NEL_PFNGLXSWAPINTERVALMESAPROC			nglXSwapIntervalMESA;
 extern NEL_PFNGLXGETSWAPINTERVALMESAPROC		nglXGetSwapIntervalMESA;
 
 #endif
-
-// GL_ARB_multisample
-extern NEL_PFNGLSAMPLECOVERAGEARBPROC			nglSampleCoverageARB;
-
-
 
 
 

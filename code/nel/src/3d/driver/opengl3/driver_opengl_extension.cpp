@@ -395,9 +395,6 @@ PFNGLPROGRAMUNIFORMMATRIX4X3DVPROC				nglProgramUniformMatrix4x3dv;
 PFNGLVALIDATEPROGRAMPIPELINEPROC				nglValidateProgramPipeline;
 PFNGLGETPROGRAMPIPELINEINFOLOGPROC				nglGetProgramPipelineInfoLog;
 
-// GL_ARB_multisample
-NEL_PFNGLSAMPLECOVERAGEARBPROC					nglSampleCoverageARB;
-
 #ifdef NL_OS_WINDOWS
 PFNWGLALLOCATEMEMORYNVPROC						nwglAllocateMemoryNV;
 PFNWGLFREEMEMORYNVPROC							nwglFreeMemoryNV;
@@ -559,17 +556,6 @@ static bool	setupWGLARBPBuffer(const char	*glext)
 	CHECK_ADDRESS(PFNWGLDESTROYPBUFFERARBPROC, wglDestroyPbufferARB);
 	CHECK_ADDRESS(PFNWGLQUERYPBUFFERARBPROC, wglQueryPbufferARB);
 #endif
-
-	return true;
-}
-
-// *********************************
-static bool	setupARBMultisample(const char	*glext)
-{
-	H_AUTO_OGL(setupARBMultisample);
-	CHECK_EXT("GL_ARB_multisample");
-
-	CHECK_ADDRESS(NEL_PFNGLSAMPLECOVERAGEARBPROC, glSampleCoverageARB);
 
 	return true;
 }
@@ -840,12 +826,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.NbFragmentTextureUnits = (nbFragmentTextureUnits > IDRV_MAT_MAXTEXTURES) ? IDRV_MAT_MAXTEXTURES : nbFragmentTextureUnits; // FIXME GL3
 
 	// ---
-
-	// Check ARBMultiTexture
-	ext.ARBMultiTexture= setupARBMultiTexture(glext);
-
-	// Check ARBMultisample
-	ext.ARBMultisample = setupARBMultisample(glext);
 
 	// Check EXTSecondaryColor
 	ext.EXTSecondaryColor= setupEXTSecondaryColor(glext);
