@@ -308,11 +308,12 @@ CDriverGL3::CDriverGL3()
 	_TextureTargetCubeFace = 0;
 	_TextureTargetUpload = false;
 
-	currentProgram.vp = NULL;
-	currentProgram.pp = NULL;
-	currentProgram.gp = NULL;
-	currentProgram.dynmatVP = NULL;
-	currentProgram.dynmatPP = NULL;
+	m_UserVertexProgram = NULL;
+	m_UserGeometryProgram = NULL;
+	m_UserPixelProgram = NULL;
+	m_DriverVertexProgram = NULL;
+	m_DriverGeometryProgram = NULL;
+	m_DriverPixelProgram = NULL;
 
 	shaderGenerator = new CGLSLShaderGenerator();
 	usrShaderManager = new CUsrShaderManager();
@@ -328,18 +329,6 @@ CDriverGL3::~CDriverGL3()
 	H_AUTO_OGL(CDriverGL3_CDriverGLDtor)
 
 	release();
-
-	currentProgram.vp = NULL;
-	currentProgram.pp = NULL;
-	currentProgram.gp = NULL;
-	
-	if (currentProgram.dynmatVP != NULL)
-		delete currentProgram.dynmatVP;
-	currentProgram.dynmatVP = NULL;
-
-	if (currentProgram.dynmatPP != NULL)
-		delete currentProgram.dynmatPP;
-	currentProgram.dynmatPP = NULL;
 
 	delete shaderGenerator;
 	shaderGenerator = NULL;
@@ -701,6 +690,14 @@ bool CDriverGL3::release()
 
 	// hide window
 	showWindow(false);
+
+	m_DriverVertexProgram = NULL;
+	m_DriverGeometryProgram = NULL;
+	m_DriverPixelProgram = NULL;
+
+	m_UserVertexProgram = NULL;
+	m_UserGeometryProgram = NULL;
+	m_UserPixelProgram = NULL;
 
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();

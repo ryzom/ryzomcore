@@ -144,26 +144,34 @@ namespace NL3D
 
 	bool CDriverGL3::activeVertexProgram(CVertexProgram *program)
 	{
+		return activeVertexProgram(program, false);
+	}
+
+	bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
+	{
+		if (driver) nlassert(m_UserVertexProgram == NULL);
+
 		if (program == NULL)
+		{
+			nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, 0);
+			m_UserVertexProgram = NULL;
+			m_DriverVertexProgram = NULL;
 			return true;
+		}
 
 		IProgramDrvInfos *di = program->m_DrvInfo;
 		CVertexProgramDrvInfosGL3 *drvInfo = dynamic_cast< CVertexProgramDrvInfosGL3* >(di);
 		if (drvInfo == NULL)
 			return false;
-
 		glGetError();
 
 		nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, drvInfo->getProgramId());
-
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
-		{
-			
 			return false;
-		}
 
-		currentProgram.vp = program;
+		if (!driver) m_UserVertexProgram = program;
+		m_DriverVertexProgram = program;
 
 		return true;
 	}
@@ -234,8 +242,20 @@ namespace NL3D
 
 	bool CDriverGL3::activePixelProgram(CPixelProgram *program)
 	{
+		return activePixelProgram(program, false);
+	}
+
+	bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
+	{
+		if (driver) nlassert(m_UserPixelProgram == NULL);
+
 		if (program == NULL)
+		{
+			nglUseProgramStages(ppoId, GL_FRAGMENT_SHADER_BIT, 0);
+			m_UserPixelProgram = NULL;
+			m_DriverPixelProgram = NULL;
 			return true;
+		}
 
 		if (program->m_DrvInfo == NULL)
 			return false;
@@ -244,18 +264,15 @@ namespace NL3D
 		CPixelProgramDrvInfosGL3 *drvInfo = dynamic_cast< CPixelProgramDrvInfosGL3* >(di);
 		if (drvInfo == NULL)
 			return false;
-
 		glGetError();
 
 		nglUseProgramStages(ppoId, GL_FRAGMENT_SHADER_BIT, drvInfo->getProgramId());
-
 		GLenum error = glGetError();
 		if (error != GL_NO_ERROR)
-		{
 			return false;
-		}
 
-		currentProgram.pp = program;
+		if (!driver) m_UserPixelProgram = program;
+		m_DriverPixelProgram = program;
 
 		return true;
 	}
@@ -268,21 +285,19 @@ namespace NL3D
 		switch(program)
 		{
 		case IDriver::VertexProgram:
+			if (m_DriverVertexProgram)
 			{
-				if (currentProgram.vp != NULL)
-				{
-					IProgramDrvInfos *di = currentProgram.vp->m_DrvInfo;
-					CVertexProgramDrvInfosGL3 *drvInfo = dynamic_cast< CVertexProgramDrvInfosGL3* >(di);
-					if (drvInfo != NULL)
-						id = drvInfo->getProgramId();
-				}
+				IProgramDrvInfos *di = m_DriverVertexProgram->m_DrvInfo;
+				CVertexProgramDrvInfosGL3 *drvInfo = dynamic_cast< CVertexProgramDrvInfosGL3* >(di);
+				if (drvInfo != NULL)
+					id = drvInfo->getProgramId();
 			}
 			break;
 
 		case IDriver::PixelProgram:
-			if (currentProgram.pp != NULL)
+			if (m_DriverPixelProgram)
 			{
-				IProgramDrvInfos *di = currentProgram.pp->m_DrvInfo;
+				IProgramDrvInfos *di = m_DriverPixelProgram->m_DrvInfo;
 				CPixelProgramDrvInfosGL3 *drvInfo = dynamic_cast< CPixelProgramDrvInfosGL3* >(di);
 				if (drvInfo != NULL)
 					id = drvInfo->getProgramId();
@@ -298,24 +313,17 @@ namespace NL3D
 
 	IProgram* CDriverGL3::getProgram(TProgram program) const
 	{
-		IProgram *p = NULL;
-
 		switch(program)
 		{
 		case IDriver::VertexProgram:
-			p = currentProgram.vp;
-			break;
-
+			return m_DriverVertexProgram;
 		case IDriver::PixelProgram:
-			p = currentProgram.pp;
-			break;
-
+			return m_DriverPixelProgram;
 		case IDriver::GeometryProgram:
-			p = currentProgram.gp;
-			break;
+			return m_DriverGeometryProgram;
 		}
 
-		return p;
+		return NULL;
 	}
 
 	int CDriverGL3::getUniformLocation(TProgram program, const char *name)
@@ -585,6 +593,9 @@ namespace NL3D
 
 	bool CDriverGL3::setupProgram(CMaterial &mat)
 	{
+		// nlassert(!m_UserVertexProgram); // TEMP
+		// nlassert(!m_UserPixelProgram); // TEMP
+
 		if (mat.getDynMat() != NULL)
 			return true;
 		
@@ -602,15 +613,15 @@ namespace NL3D
 		// Yes we have!
 		if (!sp.empty())
 		{
-			if (currentProgram.vp == NULL)
+			if (m_UserVertexProgram == NULL)
 			{
-				if (!activeVertexProgram(sp.vp))
+				if (!activeVertexProgram(sp.vp, true))
 					return false;
 			}
 
-			if (currentProgram.pp == NULL)
+			if (m_UserPixelProgram == NULL)
 			{
-				if (!activePixelProgram(sp.pp))
+				if (!activePixelProgram(sp.pp, true))
 					return false;
 			}
 		}
@@ -627,7 +638,7 @@ namespace NL3D
 			shaderGenerator->setShaderDesc(&desc);
 			
 			// If we don't already have a vertex program attached, we'll generate it now
-			if (currentProgram.vp == NULL)
+			if (m_UserVertexProgram == NULL)
 			{
 				shaderGenerator->generateVS(vs);
 				vp = new CVertexProgram();
@@ -646,7 +657,7 @@ namespace NL3D
 					return false;
 				}
 
-				if (!activeVertexProgram(vp))
+				if (!activeVertexProgram(vp, true))
 				{
 					delete vp;
 					vp = NULL;
@@ -657,7 +668,7 @@ namespace NL3D
 				cacheShaders = false;
 		
 			// If we don't already have a pixel program attached, we'll generate it now
-			if (currentProgram.pp == NULL)
+			if (m_UserPixelProgram == NULL)
 			{
 				shaderGenerator->generatePS(ps);
 				pp = new CPixelProgram();
@@ -678,7 +689,7 @@ namespace NL3D
 					return false;
 				}
 
-				if (!activePixelProgram(pp))
+				if (!activePixelProgram(pp, true))
 				{
 					delete vp;
 					vp = NULL;
@@ -708,6 +719,7 @@ namespace NL3D
 
 	bool CDriverGL3::setupDynMatProgram(CMaterial& mat, uint pass)
 	{
+		/*
 		if ((currentProgram.vp != NULL) && (currentProgram.pp != NULL))
 			return true;
 
@@ -790,6 +802,8 @@ namespace NL3D
 		}
 
 		return true;
+		*/
+		return false;
 	}
 
 

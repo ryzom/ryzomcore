@@ -602,7 +602,9 @@ void			CDriverGL3::endMultiPass()
 
 bool CDriverGL3::setupDynMatPass(uint pass)
 {
+	return false;
 
+/*
 	if (!setupDynMatProgram(*_CurrentMaterial, pass))
 		return false;
 	
@@ -703,21 +705,27 @@ bool CDriverGL3::setupDynMatPass(uint pass)
 	}
 
 	return true;
+	*/
 }
 
 void CDriverGL3::setupNormalPass()
 {
+	nlassert(m_DriverPixelProgram);
+
 	const CMaterial &mat = *_CurrentMaterial;
 	
-	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+	for (int i = 0; i < _Extensions.NbFragmentTextureUnits; i++)
 	{
-		// Set constant
-		int cl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
-		if (cl != -1)
+		if (!m_UserPixelProgram)
 		{
-			GLfloat glCol[ 4 ];
-			convColor(mat._TexEnvs[ i ].ConstantColor, glCol);
-			setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+			// Set constant
+			int cl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
+			if (cl != -1)
+			{
+				GLfloat glCol[ 4 ];
+				convColor(mat._TexEnvs[ i ].ConstantColor, glCol);
+				setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+			}
 		}
 
 		// Set texture
@@ -725,7 +733,7 @@ void CDriverGL3::setupNormalPass()
 		if (t == NULL)
 			continue;
 		
-		int index = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + i));
+		int index = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + i));
 		if (index == -1)
 			continue;
 		
@@ -795,6 +803,9 @@ sint CDriverGL3::beginLightMapMultiPass ()
 // ***************************************************************************
 void			CDriverGL3::setupLightMapPass(uint pass)
 {
+	nlassert(m_DriverPixelProgram);
+	nlassert(!m_UserPixelProgram);
+
 	H_AUTO_OGL(CDriverGL3_setupLightMapPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
@@ -906,7 +917,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
 
-					int cl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
+					int cl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
 					if (cl != -1)
 					{
 						GLfloat glCol[ 4 ];
@@ -914,7 +925,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 						setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 					}
 
-					int tl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
+					int tl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
 					if (tl != -1)
 					{
 						setUniform1i(IDriver::PixelProgram, tl, stage);
@@ -955,7 +966,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				_DriverGLStates.activeTexture(stage);
 				_DriverGLStates.setTexGenMode(stage, 0);
 
-				int tl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
+				int tl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
 				if (tl != -1)
 				{
 					setUniform1i(IDriver::PixelProgram, tl, stage);
@@ -966,7 +977,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		else
 		{
 			// else all other stages are disabled.
-			activateTexture(stage,NULL);
+			activateTexture(stage, NULL);
 		}
 	}
 
@@ -1137,6 +1148,10 @@ sint			CDriverGL3::beginSpecularMultiPass()
 // ***************************************************************************
 void			CDriverGL3::setupSpecularPass(uint pass)
 {
+	nlassert(m_DriverPixelProgram);
+	nlassert(!m_UserPixelProgram);
+	nlassert(m_DriverVertexProgram);
+
 	H_AUTO_OGL(CDriverGL3_setupSpecularPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
@@ -1148,19 +1163,19 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		return;
 	}
 
-	int sl0 = currentProgram.pp->getUniformIndex(CProgramIndex::Sampler0);
+	int sl0 = m_DriverPixelProgram->getUniformIndex(CProgramIndex::Sampler0);
 	if (sl0 != -1)
 	{
 		setUniform1i(IDriver::PixelProgram, sl0, 0);
 	}
 
-	int sl1 = currentProgram.pp->getUniformIndex(CProgramIndex::Sampler1);
+	int sl1 = m_DriverPixelProgram->getUniformIndex(CProgramIndex::Sampler1);
 	if (sl1 != -1)
 	{
 		setUniform1i(IDriver::PixelProgram, sl1, 1);
 	}
 
-	int tml = currentProgram.vp->getUniformIndex(CProgramIndex::TexMatrix0);
+	int tml = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix0); // FIXME GL3 VERTEX PROGRAM
 	if (tml != -1)
 	{
 		setUniform4x4f(IDriver::VertexProgram, tml, _UserTexMat[ 1 ]);

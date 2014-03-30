@@ -279,26 +279,6 @@ public:
 class CGLSLShaderGenerator;
 class CUsrShaderManager;
 
-struct SProgram
-{
-	CVertexProgram    *vp;
-	CPixelProgram     *pp;
-	CGeometryProgram  *gp;
-
-	CVertexProgram    *dynmatVP;
-	CPixelProgram     *dynmatPP;
-
-	SProgram()
-	{
-		vp = NULL;
-		pp = NULL;
-		gp = NULL;
-		dynmatVP = NULL;
-		dynmatPP = NULL;
-	}
-};
-
-
 // ***************************************************************************
 class CDriverGL3 : public IDriver
 {
@@ -712,13 +692,6 @@ private:
 	friend class					CVertexProgamDrvInfosGL3;
 
 private:
-	/// Simply sets the current programs to NULL
-	void nullPrograms()
-	{
-		currentProgram.vp = NULL;
-		currentProgram.pp = NULL;
-		currentProgram.gp = NULL;
-	}
 
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
 	static const uint32			ReleaseVersion;
@@ -1251,14 +1224,16 @@ private:
 	bool			compileVertexProgram(CVertexProgram *program);
 
 	bool			activeVertexProgram(CVertexProgram *program);
+	bool			activeVertexProgram(CVertexProgram *program, bool driver);
 
 	bool			supportPixelProgram(CPixelProgram::TProfile profile) const;
 
 	bool			compilePixelProgram(CPixelProgram *program);
 
 	bool			activePixelProgram(CPixelProgram *program);
+	bool			activePixelProgram(CPixelProgram *program, bool driver);
 
-	bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const{ return false; }
+	bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const { return false; }
 
 	bool			compileGeometryProgram(CGeometryProgram *program) { return false; }
 
@@ -1347,13 +1322,20 @@ private:
 
 	private:
 
-		CGLSLShaderGenerator *shaderGenerator;
-		CUsrShaderManager    *usrShaderManager;
-		
-		bool initProgramPipeline();
+	CGLSLShaderGenerator *shaderGenerator;
+	CUsrShaderManager    *usrShaderManager;
+	
+	bool initProgramPipeline();
 
-		uint32 ppoId;
-		SProgram currentProgram;
+	uint32 ppoId;
+	
+	CVertexProgram *m_UserVertexProgram;
+	CGeometryProgram *m_UserGeometryProgram;
+	CPixelProgram *m_UserPixelProgram;
+
+	CVertexProgram *m_DriverVertexProgram;
+	CGeometryProgram *m_DriverGeometryProgram;
+	CPixelProgram *m_DriverPixelProgram;
 
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();
