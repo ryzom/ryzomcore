@@ -137,7 +137,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	for (stage=0;stage<nbStages; stage++)
 	{
 		// disable texturing.
-		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
+		// nglActiveTextureARB(GL_TEXTURE0_ARB+stage); // FIXME GL3 TEXTURE
 		glDisable(GL_TEXTURE_2D);
 
 		glDisable(GL_TEXTURE_CUBE_MAP);
@@ -156,8 +156,8 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	}
 
 	// ActiveTexture current texture to 0.
-	nglActiveTextureARB(GL_TEXTURE0_ARB);
-	nglClientActiveTextureARB(GL_TEXTURE0_ARB);
+	// nglActiveTextureARB(GL_TEXTURE0_ARB); // FIXME GL3 TEXTURE
+	// nglClientActiveTextureARB(GL_TEXTURE0_ARB); // FIXME GL3 TEXTURE
 
 	_CurrentActiveTextureARB= 0;
 	_CurrentClientActiveTextureARB= 0;
@@ -617,7 +617,7 @@ void			CDriverGLStates3::activeTextureARB(uint stage)
 
 	if (_CurrentActiveTextureARB != stage)
 	{
-		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
+		// nglActiveTextureARB(GL_TEXTURE0_ARB+stage); // FIXME GL3 TEXTURE
 
 		_CurrentActiveTextureARB= stage;
 	}
@@ -628,7 +628,7 @@ void			CDriverGLStates3::forceActiveTextureARB(uint stage)
 {
 	H_AUTO_OGL(CDriverGLStates3_forceActiveTextureARB);
 
-	nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
+	// nglActiveTextureARB(GL_TEXTURE0_ARB+stage); // FIXME GL3 TEXTURE
 
 	_CurrentActiveTextureARB= stage;
 }
