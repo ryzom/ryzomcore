@@ -601,32 +601,6 @@ static bool	setupEXTBlendColor(const char	*glext)
 }
 
 // ***************************************************************************
-static bool	setupNVTextureRectangle(const char	*glext)
-{
-	H_AUTO_OGL(setupNVTextureRectangle);
-	CHECK_EXT("GL_NV_texture_rectangle");
-	return true;
-}
-
-// ***************************************************************************
-static bool	setupEXTTextureRectangle(const char	*glext)
-{
-	H_AUTO_OGL(setupEXTTextureRectangle);
-	CHECK_EXT("GL_EXT_texture_rectangle");
-	return true;
-}
-
-// ***************************************************************************
-static bool	setupARBTextureRectangle(const char	*glext)
-{
-	H_AUTO_OGL(setupARBTextureRectangle);
-
-	CHECK_EXT("GL_ARB_texture_rectangle");
-
-	return true;
-}
-
-// ***************************************************************************
 static bool	setupEXTTextureFilterAnisotropic(const char	*glext)
 {
 	H_AUTO_OGL(setupEXTTextureFilterAnisotropic);
@@ -855,6 +829,14 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check GL_EXT_texture_filter_anisotropic
 	ext.EXTTextureFilterAnisotropic = setupEXTTextureFilterAnisotropic(glext);
 
+	if (ext.EXTTextureFilterAnisotropic)
+	{
+		// get the maximum value
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
+	}
+
+	// ---
+
 	// Check ARBMultiTexture
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
 	if (ext.ARBMultiTexture)
@@ -873,21 +855,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check EXTBlendColor
 	ext.EXTBlendColor= setupEXTBlendColor(glext);
-
-	// Check GL_NV_texture_rectangle
-	ext.NVTextureRectangle = setupNVTextureRectangle(glext);
-
-	// Check GL_EXT_texture_rectangle
-	ext.EXTTextureRectangle = setupEXTTextureRectangle(glext);
-
-	// Check GL_ARB_texture_rectangle
-	ext.ARBTextureRectangle = setupARBTextureRectangle(glext);
-
-	if (ext.EXTTextureFilterAnisotropic)
-	{
-		// get the maximum value
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
-	}
 }
 
 

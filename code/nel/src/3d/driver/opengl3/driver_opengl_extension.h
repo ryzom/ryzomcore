@@ -49,9 +49,6 @@ struct	CGlExtensions
 	uint	NbTextureStages;
 
 	// Optional Extensions. (old)
-	bool	NVTextureRectangle;
-	bool	EXTTextureRectangle;
-	bool	ARBTextureRectangle;
 	bool	EXTSecondaryColor;
 	bool	EXTBlendColor;
 	bool	ARBMultisample;
@@ -81,11 +78,8 @@ public:
 		GLXSGISwapControl= false;
 		GLXMESASwapControl= false;
 		EXTBlendColor= false;
-		NVTextureRectangle = false;
-		EXTTextureRectangle = false;
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 0.f;
-		ARBTextureRectangle = false;
 		ARBMultisample = false;
 	}
 
@@ -98,9 +92,6 @@ public:
 		result += "\n  Texturing: ";
 		result += ARBMultiTexture ? "ARBMultiTexture " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
-		result += NVTextureRectangle ? "NVTextureRectangle " : "";
-		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
-		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";
 		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic (Maximum = " + NLMISC::toString(EXTTextureFilterAnisotropicMaximum) + ") " : "";
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbTextureStages);

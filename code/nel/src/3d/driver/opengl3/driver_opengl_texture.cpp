@@ -62,7 +62,7 @@ CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CD
 	// Nb: at Driver dtor, all tex infos are deleted, so _Driver is always valid.
 	_Driver= drvGl;
 
-	TextureMode = isRectangleTexture?GL_TEXTURE_RECTANGLE_NV:GL_TEXTURE_2D;
+	TextureMode = isRectangleTexture?GL_TEXTURE_RECTANGLE:GL_TEXTURE_2D;
 
 	FBOId = 0;
 	DepthFBOId = 0;
@@ -608,7 +608,7 @@ void CDriverGL3::bindTextureWithMode(ITexture &tex)
 	{
 		CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-		if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+		if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
 			textureMode = CDriverGLStates3::TextureRect;
 
 		_DriverGLStates.setTextureMode(textureMode);
@@ -1121,7 +1121,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	_DriverGLStates.activeTextureARB (0);
 	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
 		textureMode = CDriverGLStates3::TextureRect;
 
 	_DriverGLStates.setTextureMode (textureMode);
@@ -1288,7 +1288,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			{
 				// setup texture mode, after activeTextureARB()
 				CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
-				if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+				if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
 					textureMode = CDriverGLStates3::TextureRect;
 				_DriverGLStates.setTextureMode(/*CDriverGLStates3::Texture2D*/textureMode);
 

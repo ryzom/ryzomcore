@@ -74,7 +74,7 @@ public:
 	/// Constructor. no-op.
 	CDriverGLStates3();
 	// init. Do it just after setDisplay()
-	void			init(bool supportTextureRectangle, uint maxLight);
+	void			init(uint maxLight);
 
 	/// Reset all OpenGL states of interest to default, and update caching. This don't apply to light.
 	void			forceDefaults(uint nbTextureStages);
@@ -195,7 +195,6 @@ private:
 	float			_CurShininess;
 	bool			_VertexColorLighted;
 
-	bool			_TextureRectangleSupported;
 	uint			_CurrentActiveTextureARB;
 	TTextureMode	_TextureMode[8];
 

@@ -163,7 +163,7 @@ public:
 	// This is the owner driver.
 	CDriverGL3				*_Driver;
 
-	// enum to use for this texture (GL_TEXTURE_2D, GL_TEXTURE_RECTANGLE_NV..)
+	// enum to use for this texture (GL_TEXTURE_2D, GL_TEXTURE_RECTANGLE..)
 	GLenum					TextureMode;
 
 	// FBO Id

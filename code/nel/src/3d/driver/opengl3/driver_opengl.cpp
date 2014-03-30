@@ -409,7 +409,7 @@ bool CDriverGL3::setupDisplay()
 		_UserLightEnable[i]= false;
 
 	// init _DriverGLStates
-	_DriverGLStates.init((_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle), _MaxDriverLight);
+	_DriverGLStates.init(_MaxDriverLight);
 
 	// Init OpenGL/Driver defaults.
 	//=============================
@@ -522,13 +522,13 @@ bool CDriverGL3::stretchRect(ITexture * /* srcText */, NLMISC::CRect &/* srcRect
 // ***************************************************************************
 bool CDriverGL3::supportBloomEffect() const
 {
-	return (isVertexProgramSupported() && supportFrameBufferObject() && supportPackedDepthStencil() && supportTextureRectangle());
+	return false; // FIXME GL3
 }
 
 // ***************************************************************************
 bool CDriverGL3::supportNonPowerOfTwoTextures() const
 {
-	return true;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -993,7 +993,7 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 	// setup texture mode, after activeTextureARB()
 	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE_NV)
+	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
 		textureMode = CDriverGLStates3::TextureRect;
 
 	_DriverGLStates.setTextureMode(textureMode);
@@ -1253,7 +1253,7 @@ bool CDriverGL3::supportEMBM() const
 {
 	H_AUTO_OGL(CDriverGL3_supportEMBM);
 
-	return true;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1526,8 +1526,7 @@ bool CDriverGL3::supportCloudRenderSinglePass() const
 {
 	H_AUTO_OGL(CDriverGL3_supportCloudRenderSinglePass)
 
-	// there are slowdown for now with ati fragment shader... don't know why
-	return true;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1535,7 +1534,7 @@ bool CDriverGL3::supportMADOperator() const
 {
 	H_AUTO_OGL(CDriverGL3_supportMADOperator)
 
-	return true;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1630,7 +1629,7 @@ void CDriverGL3::checkTextureOn() const
 		glGetBooleanv(GL_TEXTURE_2D, &flag2D);
 		glGetBooleanv(GL_TEXTURE_CUBE_MAP, &flagCM);
 
-		glGetBooleanv(GL_TEXTURE_RECTANGLE_NV, &flagTR);
+		glGetBooleanv(GL_TEXTURE_RECTANGLE, &flagTR);
 
 		switch(dgs.getTextureMode())
 		{
@@ -1661,7 +1660,8 @@ void CDriverGL3::checkTextureOn() const
 bool CDriverGL3::supportOcclusionQuery() const
 {
 	H_AUTO_OGL(CDriverGL3_supportOcclusionQuery)
-	return true;
+
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1669,7 +1669,7 @@ bool CDriverGL3::supportTextureRectangle() const
 {
 	H_AUTO_OGL(CDriverGL3_supportTextureRectangle);
 
-	return (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle);
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1677,7 +1677,7 @@ bool CDriverGL3::supportPackedDepthStencil() const
 {
 	H_AUTO_OGL(CDriverGL3_supportPackedDepthStencil);
 
-	return true;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1685,7 +1685,7 @@ bool CDriverGL3::supportFrameBufferObject() const
 {
 	H_AUTO_OGL(CDriverGL3_supportFrameBufferObject);
 
-	return true;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************

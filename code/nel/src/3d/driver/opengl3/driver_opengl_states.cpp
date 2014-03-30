@@ -42,10 +42,9 @@ CDriverGLStates3::CDriverGLStates3()
 
 
 // ***************************************************************************
-void			CDriverGLStates3::init(bool supportTextureRectangle, uint maxLight)
+void			CDriverGLStates3::init(uint maxLight)
 {
 	H_AUTO_OGL(CDriverGLStates3_init)
-	_TextureRectangleSupported= supportTextureRectangle;
 	_MaxDriverLight= maxLight;
 	_MaxDriverLight= std::min(_MaxDriverLight, uint(MaxLight));
 
@@ -151,8 +150,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 		// Tex gen init
 		_TexGenMode[stage] = 0;
 
-		if (_TextureRectangleSupported)
-			glDisable(GL_TEXTURE_RECTANGLE_NV);
+		glDisable(GL_TEXTURE_RECTANGLE);
 
 		glDisable(GL_TEXTURE_GEN_S);
 		glDisable(GL_TEXTURE_GEN_T);
