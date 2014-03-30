@@ -298,7 +298,7 @@ namespace
 		ss << std::endl;
 		
 		// if (!useTextures) {
-		ss << "uniform vec4 ambientColor;" << std::endl;
+		ss << "uniform vec4 ambientColor;" << std::endl; // FIXME: ambient color of all lights is precalculated and added with self illumination!
 		ss << "uniform vec4 diffuseColor;" << std::endl;
 		ss << "uniform vec4 specularColor;" << std::endl; // }
 
