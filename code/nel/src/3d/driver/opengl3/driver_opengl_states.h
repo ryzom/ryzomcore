@@ -89,12 +89,6 @@ public:
 	/// enable and set good AlphaFunc.
 	void			enableAlphaTest(uint enable);
 	void			enableZWrite(uint enable);
-	// overall lighting enabled
-	void			enableLighting(uint enable);
-	bool			isLightingEnabled() const { return _CurLighting; }
-	/// enable/disable specific light. num must be < "maxLight" param set in init()
-	void			enableLight(uint num, uint enable);
-	bool			isLightEnabled(uint num) const;
 	/// enable/disable stencil test
 	void			enableStencilTest(bool enable);
 	bool			isStencilTestEnabled() const { return _CurStencilTest; }
@@ -170,7 +164,6 @@ private:
 	bool			_CurFog;
 	bool			_CurCullFace;
 	bool			_CurAlphaTest;
-	bool			_CurLighting;
 	bool			_CurZWrite;
 	bool			_CurStencilTest;
 
@@ -217,10 +210,6 @@ private:
 
 private:
 	void			updateDepthRange();
-
-	// Mirror of glEnable() and GL_LIGHT0+i
-	enum			{ MaxLight = NL_OPENGL3_MAX_LIGHT };
-	bool			_CurLight[MaxLight];
 };
 
 #ifdef NL_STATIC

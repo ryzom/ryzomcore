@@ -63,11 +63,6 @@ void			CDriverGLStates3::init()
 	_DepthRangeNear = 0.f;
 	_DepthRangeFar = 1.f;
 	_ZBias = 0.f;
-	// by default all lights are disabled (not reseted in forceDefaults)
-	for (i=0; i<MaxLight; i++)
-	{
-		_CurLight[i]= false;
-	}
 }
 
 
@@ -77,26 +72,24 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	H_AUTO_OGL(CDriverGLStates3_forceDefaults);
 
 	// Enable / disable.
-	_CurFog= false;
-	_CurBlend= false;
-	_CurCullFace= true;
-	_CurAlphaTest= false;
-	_CurLighting= false;
-	_CurZWrite= true;
-	_CurStencilTest=false;
+	_CurFog = false;
+	_CurBlend = false;
+	_CurCullFace = true;
+	_CurAlphaTest = false;
+	_CurZWrite = true;
+	_CurStencilTest =false;
 
 	// setup GLStates.
 	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_ALPHA_TEST);
-	glDisable(GL_LIGHTING);
 	glDepthMask(GL_TRUE);
 
 	// Func.
-	_CurBlendSrc= GL_SRC_ALPHA;
-	_CurBlendDst= GL_ONE_MINUS_SRC_ALPHA;
-	_CurDepthFunc= GL_LEQUAL;
+	_CurBlendSrc = GL_SRC_ALPHA;
+	_CurBlendDst = GL_ONE_MINUS_SRC_ALPHA;
+	_CurDepthFunc = GL_LEQUAL;
 	_CurStencilFunc = GL_ALWAYS;
 	_CurStencilRef = 0;
 	_CurStencilMask = std::numeric_limits<GLuint>::max();
@@ -104,7 +97,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	_CurStencilOpZFail = GL_KEEP;
 	_CurStencilOpZPass = GL_KEEP;
 	_CurStencilWriteMask = std::numeric_limits<GLuint>::max();
-	_CurAlphaTestThreshold= 0.5f;
+	_CurAlphaTestThreshold = 0.5f;
 
 	// setup GLStates.
 	glBlendFunc(_CurBlendSrc, _CurBlendDst);
@@ -114,25 +107,24 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	glStencilMask(_CurStencilWriteMask);
 
 	// Materials.
-	uint32			packedOne= (CRGBA(255,255,255,255)).getPacked();
-	uint32			packedZero= (CRGBA(0,0,0,255)).getPacked();
-	_CurEmissive= packedZero;
-	_CurAmbient= packedOne;
-	_CurDiffuse= packedOne;
-	_CurSpecular= packedZero;
-	_CurShininess= 1;
+	uint32 packedOne = (CRGBA(255, 255, 255, 255)).getPacked();
+	uint32 packedZero = (CRGBA(0, 0, 0, 255)).getPacked();
+	_CurEmissive = packedZero;
+	_CurAmbient = packedOne;
+	_CurDiffuse = packedOne;
+	_CurSpecular = packedZero;
+	_CurShininess = 1;
 
 	// Lighted vertex color
-	_VertexColorLighted=false;
+	_VertexColorLighted = false;
 	glDisable(GL_COLOR_MATERIAL);
 
 	// setup GLStates.
-	static const GLfloat		one[4]= {1,1,1,1};
-	static const GLfloat		zero[4]= {0,0,0,1};
+	static const GLfloat one[4] = { 1, 1, 1, 1 };
+	static const GLfloat zero[4] = { 0, 0, 0, 1 };
 
 	// TexModes
-	uint stage;
-	for (stage=0;stage<nbStages; stage++)
+	for (uint stage = 0; stage < nbStages; ++stage)
 	{
 		// disable texturing.
 		nglActiveTexture(GL_TEXTURE0 + stage);
@@ -156,8 +148,8 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	// ActiveTexture current texture to 0.
 	nglActiveTexture(GL_TEXTURE0);
 
-	_CurrentActiveTexture= 0;
-	_CurrentClientActiveTexture= 0;
+	_CurrentActiveTexture = 0;
+	_CurrentClientActiveTexture = 0;
 
 	// Depth range
 	_DepthRangeNear = 0.f;
@@ -235,52 +227,6 @@ void			CDriverGLStates3::enableAlphaTest(uint enable)
 		}
 	}
 }
-
-
-
-// ***************************************************************************
-void			CDriverGLStates3::enableLighting(uint enable)
-{
-	H_AUTO_OGL(CDriverGLStates3_enableLighting)
-	// If different from current setup, update.
-	bool	enabled= (enable!=0);
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (enabled != _CurLighting)
-#endif
-	{
-		// new state.
-		_CurLighting= enabled;
-	}
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableLight(uint num, uint enable)
-{
-	H_AUTO_OGL(CDriverGLStates3_enableLight)
-	if (num >= MaxLight)
-		return;
-
-	// If different from current setup, update.
-	bool	enabled= (enable!=0);
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (enabled != _CurLight[num])
-#endif
-	{
-		// new state.
-		_CurLight[num]= enabled;
-	}
-}
-
-// ***************************************************************************
-bool			CDriverGLStates3::isLightEnabled(uint num) const
-{
-	H_AUTO_OGL(CDriverGLStates3_isLightEnabled)
-	if (num >= MaxLight)
-		return false;
-	else
-		return _CurLight[num];
-}
-
 
 // ***************************************************************************
 void			CDriverGLStates3::enableZWrite(uint enable)

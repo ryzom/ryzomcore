@@ -134,7 +134,7 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 	// Enable glLight
 	if (num < MaxLight)
 	{
-		_DriverGLStates.enableLight(num, enable); // FIXME GL3 FIXED
+		// _DriverGLStates.enableLight(num, enable); // FIXME GL3 VERTEX PROGRAM
 		_UserLightEnable[num] = enable;
 	}
 }
