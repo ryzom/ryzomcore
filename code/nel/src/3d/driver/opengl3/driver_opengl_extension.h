@@ -140,9 +140,9 @@ void registerGlExtensions(CGlExtensions &ext);
 
 // ***************************************************************************
 // The exported function names
-/* NB: We named all like nglActiveTextureARB (n for NEL :)
+/* NB: We named all like nglActiveTexture (n for NEL :)
 	to avoid compilation conflict with future version of gl.h
-	eg: gl.h Version 1.2 define glActiveTextureARB so we can't use it.
+	eg: gl.h Version 1.2 define glActiveTexture so we can't use it.
 
 	NB: we do it for all (EXT, NV, ARB extension) even it should be useful only for ARB ones.
 */
@@ -239,6 +239,8 @@ extern PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
 extern PFNGLBLITFRAMEBUFFERPROC							nglBlitFramebuffer;
 extern PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
 extern PFNGLFRAMEBUFFERTEXTURELAYERPROC					nglFramebufferTextureLayer;
+
+extern PFNGLACTIVETEXTUREPROC							nglActiveTexture;
 
 extern PFNGLCOMPRESSEDTEXIMAGE3DPROC					nglCompressedTexImage3D;
 extern PFNGLCOMPRESSEDTEXIMAGE2DPROC					nglCompressedTexImage2D;

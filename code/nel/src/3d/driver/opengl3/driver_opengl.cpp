@@ -460,7 +460,7 @@ bool CDriverGL3::setupDisplay()
 		_CurrentTexEnvSpecial[stage] = TexEnvSpecialDisabled;
 
 		// set All TexGen by default to identity matrix (prefer use the textureMatrix scheme)
-		_DriverGLStates.activeTextureARB(stage);
+		_DriverGLStates.activeTexture(stage);
 	}
 
 	if (!initProgramPipeline())
@@ -974,8 +974,8 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 	CTextureDrvInfosGL3*	gltext = (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(tex->TextureDrvShare->DrvTexture);
 	//if (_RenderTargetFBO)
 	//	gltext->activeFrameBufferObject(NULL);
-	_DriverGLStates.activeTextureARB(0);
-	// setup texture mode, after activeTextureARB()
+	_DriverGLStates.activeTexture(0);
+	// setup texture mode, after activeTexture()
 	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
 	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
@@ -1158,7 +1158,7 @@ void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const flo
 	if (!supportTextureShaders()) return;
 	//nlassert(supportTextureShaders());
 	nlassert(stage < inlGetNumTextStages());
-	_DriverGLStates.activeTextureARB(stage);
+	_DriverGLStates.activeTexture(stage);
 
 	//glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
 }
@@ -1586,10 +1586,10 @@ void CDriverGL3::checkTextureOn() const
 	H_AUTO_OGL(CDriverGL3_checkTextureOn)
 	// tmp for debug
 	CDriverGLStates3 &dgs = const_cast<CDriverGLStates3 &>(_DriverGLStates);
-	uint currTexStage = dgs.getActiveTextureARB();
+	uint currTexStage = dgs.getActiveTexture();
 	for (uint k = 0; k < this->getNbTextureStages(); ++k)
 	{
-		dgs.activeTextureARB(k);
+		dgs.activeTexture(k);
 		GLboolean flag2D;
 		GLboolean flagCM;
 		GLboolean flagTR;
@@ -1620,7 +1620,7 @@ void CDriverGL3::checkTextureOn() const
 			break;
 		}
 	}
-	dgs.activeTextureARB(currTexStage);
+	dgs.activeTexture(currTexStage);
 }
 
 // ***************************************************************************

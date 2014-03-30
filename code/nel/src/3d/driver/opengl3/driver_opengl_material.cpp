@@ -128,7 +128,7 @@ void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
 		activateTexEnvColor(stage, env);
 
 		// Activate texture generation mapping
-		_DriverGLStates.activeTextureARB(stage);
+		_DriverGLStates.activeTexture(stage);
 		if (mat.getTexCoordGen (stage))
 		{
 			// set mode and enable.
@@ -820,7 +820,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		_DriverGLStates.setEmissive(packedColorBlack, glcolBlack);
 
 		// Setup gen tex off
-		_DriverGLStates.activeTextureARB(0);
+		_DriverGLStates.activeTexture(0);
 		_DriverGLStates.setTexGenMode(0, 0);
 
 		// And disable other stages.
@@ -922,7 +922,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					activateTexEnvColor(stage, stdEnv);
 
 					// Setup env for texture stage.
-					_DriverGLStates.activeTextureARB(stage);
+					_DriverGLStates.activeTexture(stage);
 					_DriverGLStates.setTexGenMode(stage, 0);
 
 					// setup TexEnvCombine4 (ignore alpha part).
@@ -951,7 +951,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				activateTexEnvMode(stage, _LightMapLastStageEnv);
 
 				// Setup gen tex off
-				_DriverGLStates.activeTextureARB(stage);
+				_DriverGLStates.activeTexture(stage);
 				_DriverGLStates.setTexGenMode(stage, 0);
 
 				int tl = currentProgram.pp->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
@@ -1080,13 +1080,13 @@ void			CDriverGL3::setupSpecularBegin()
 	activateTexEnvMode(0, env);
 
 	// Disable texGen for stage 0
-	_DriverGLStates.activeTextureARB(0);
+	_DriverGLStates.activeTexture(0);
 	_DriverGLStates.setTexGenMode(0, 0);
 
 	// ---- Stage 1 Common Setup.
 	// NB don't setup the TexEnv here (stage1 setuped in setupSpecularPass() according to extensions)
 	// For all cases, setup the TexCoord gen for stage1
-	_DriverGLStates.activeTextureARB(1);
+	_DriverGLStates.activeTexture(1);
 
 	// setup the good matrix for stage 1.
 	_UserTexMat[ 1 ] = _SpecularTexMtx;
@@ -1098,7 +1098,7 @@ void			CDriverGL3::setupSpecularEnd()
 {
 	H_AUTO_OGL(CDriverGL3_setupSpecularEnd)
 	// Disable Texture coord generation.
-	_DriverGLStates.activeTextureARB(1);
+	_DriverGLStates.activeTexture(1);
 	_DriverGLStates.setTexGenMode(1, 0);
 
 	// Happiness !!! we have already enabled the stage 1
@@ -1181,7 +1181,7 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 			// TexEnv is special.
 			_CurrentTexEnvSpecial[1] = newEnvStage1;
 
-			_DriverGLStates.activeTextureARB(1);
+			_DriverGLStates.activeTexture(1);
 
 		}
 	}

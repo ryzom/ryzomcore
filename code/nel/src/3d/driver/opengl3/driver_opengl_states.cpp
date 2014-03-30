@@ -84,7 +84,6 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	_CurLighting= false;
 	_CurZWrite= true;
 	_CurStencilTest=false;
-	_CurMultisample= false;
 
 	// setup GLStates.
 	glDisable(GL_FOG);
@@ -93,7 +92,6 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	glDisable(GL_ALPHA_TEST);
 	glDisable(GL_LIGHTING);
 	glDepthMask(GL_TRUE);
-	glDisable(GL_MULTISAMPLE_ARB);
 
 	// Func.
 	_CurBlendSrc= GL_SRC_ALPHA;
@@ -137,7 +135,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	for (stage=0;stage<nbStages; stage++)
 	{
 		// disable texturing.
-		// nglActiveTextureARB(GL_TEXTURE0_ARB+stage); // FIXME GL3 TEXTURE
+		nglActiveTexture(GL_TEXTURE0 + stage);
 		glDisable(GL_TEXTURE_2D);
 
 		glDisable(GL_TEXTURE_CUBE_MAP);
@@ -156,11 +154,10 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	}
 
 	// ActiveTexture current texture to 0.
-	// nglActiveTextureARB(GL_TEXTURE0_ARB); // FIXME GL3 TEXTURE
-	// nglClientActiveTextureARB(GL_TEXTURE0_ARB); // FIXME GL3 TEXTURE
+	nglActiveTexture(GL_TEXTURE0);
 
-	_CurrentActiveTextureARB= 0;
-	_CurrentClientActiveTextureARB= 0;
+	_CurrentActiveTexture= 0;
+	_CurrentClientActiveTexture= 0;
 
 	// Depth range
 	_DepthRangeNear = 0.f;
@@ -323,27 +320,6 @@ void			CDriverGLStates3::enableStencilTest(bool enable)
 			glEnable(GL_STENCIL_TEST);
 		else
 			glDisable(GL_STENCIL_TEST);
-	}
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableMultisample(bool enable)
-{
-	H_AUTO_OGL(CDriverGLStates3_enableMultisample);
-
-	// If different from current setup, update.
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (enable != _CurMultisample)
-#endif
-	{
-		// new state.
-		_CurMultisample= enable;
-
-		// Setup GLState.
-		if (_CurMultisample)
-			glEnable(GL_MULTISAMPLE_ARB);
-		else
-			glDisable(GL_MULTISAMPLE_ARB);
 	}
 }
 
@@ -592,7 +568,7 @@ void			CDriverGLStates3::resetTextureMode()
 {
 	H_AUTO_OGL(CDriverGLStates3_resetTextureMode);
 
-	_TextureMode[_CurrentActiveTextureARB]= TextureDisabled;
+	_TextureMode[_CurrentActiveTexture]= TextureDisabled;
 }
 
 
@@ -600,37 +576,37 @@ void			CDriverGLStates3::resetTextureMode()
 void			CDriverGLStates3::setTextureMode(TTextureMode texMode)
 {
 	H_AUTO_OGL(CDriverGLStates3_setTextureMode)
-	TTextureMode	oldTexMode = _TextureMode[_CurrentActiveTextureARB];
+	TTextureMode	oldTexMode = _TextureMode[_CurrentActiveTexture];
 	if (oldTexMode != texMode)
 	{
 
 	// new mode.
-		_TextureMode[_CurrentActiveTextureARB]= texMode;
+		_TextureMode[_CurrentActiveTexture]= texMode;
 	}
 }
 
 
 // ***************************************************************************
-void			CDriverGLStates3::activeTextureARB(uint stage)
+void			CDriverGLStates3::activeTexture(uint stage)
 {
-	H_AUTO_OGL(CDriverGLStates3_activeTextureARB);
+	H_AUTO_OGL(CDriverGLStates3_activeTexture);
 
-	if (_CurrentActiveTextureARB != stage)
+	if (_CurrentActiveTexture != stage)
 	{
-		// nglActiveTextureARB(GL_TEXTURE0_ARB+stage); // FIXME GL3 TEXTURE
+		nglActiveTexture(GL_TEXTURE0 + stage);
 
-		_CurrentActiveTextureARB= stage;
+		_CurrentActiveTexture = stage;
 	}
 }
 
 // ***************************************************************************
-void			CDriverGLStates3::forceActiveTextureARB(uint stage)
+void			CDriverGLStates3::forceActiveTexture(uint stage)
 {
-	H_AUTO_OGL(CDriverGLStates3_forceActiveTextureARB);
+	H_AUTO_OGL(CDriverGLStates3_forceActiveTexture);
 
-	// nglActiveTextureARB(GL_TEXTURE0_ARB+stage); // FIXME GL3 TEXTURE
+	nglActiveTexture(GL_TEXTURE0 + stage);
 
-	_CurrentActiveTextureARB= stage;
+	_CurrentActiveTexture= stage;
 }
 
 // ***************************************************************************

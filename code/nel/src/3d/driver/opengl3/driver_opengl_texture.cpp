@@ -597,7 +597,7 @@ void CDriverGL3::bindTextureWithMode(ITexture &tex)
 	CTextureDrvInfosGL3*	gltext;
 	gltext= getTextureGl(tex);
 	// system of "backup the previous binded texture" seems to not work with some drivers....
-	_DriverGLStates.activeTextureARB(0);
+	_DriverGLStates.activeTexture(0);
 	if (tex.isTextureCube())
 	{
 		_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
@@ -1118,7 +1118,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	gltext = getTextureGl (tex);
 
 	// system of "backup the previous binded texture" seems to not work with some drivers....
-	_DriverGLStates.activeTextureARB (0);
+	_DriverGLStates.activeTexture (0);
 	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
 	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
@@ -1238,7 +1238,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 	H_AUTO_OGL(activateTexture)
 	if (this->_CurrentTexture[stage]!=tex)
 	{
-		_DriverGLStates.activeTextureARB(stage);
+		_DriverGLStates.activeTexture(stage);
 		if (tex && tex->TextureDrvShare)
 		{
 			// get the drv info. should be not NULL.
@@ -1255,7 +1255,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 
 			if (tex->isTextureCube())
 			{
-				// setup texture mode, after activeTextureARB()
+				// setup texture mode, after activeTexture()
 				_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 
 				// Activate texturing...
@@ -1286,7 +1286,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			}
 			else
 			{
-				// setup texture mode, after activeTextureARB()
+				// setup texture mode, after activeTexture()
 				CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 				if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
 					textureMode = CDriverGLStates3::TextureRect;
@@ -1334,7 +1334,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 		{
 			// Force no texturing for this stage.
 			_CurrentTextureInfoGL[stage]= NULL;
-			// setup texture mode, after activeTextureARB()
+			// setup texture mode, after activeTexture()
 			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 
 			/*if (_Extensions.ATITextureEnvCombine3)

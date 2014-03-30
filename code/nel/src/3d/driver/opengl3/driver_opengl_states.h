@@ -43,8 +43,8 @@ namespace NLDRIVERGL3 {
 			- GL_COLOR_MATERIAL
 			- GL_FOG
 			- GL_MULTISAMPLE_ARB
-		- glActiveTextureARB()
-		- glClientActiveTextureARB()
+		- glActiveTexture()
+		- glClientActiveTexture()
 		- glEnableClientState() glDisableClientState() with:
 			- GL_VERTEX_ARRAY
 			- GL_NORMAL_ARRAY
@@ -98,9 +98,6 @@ public:
 	/// enable/disable stencil test
 	void			enableStencilTest(bool enable);
 	bool			isStencilTestEnabled() const { return _CurStencilTest; }
-	/// enable/disable multisample
-	void			enableMultisample(bool enable);
-	bool			isMultisampleEnabled() const { return _CurMultisample; }
 	// @}
 
 	/// glBlendFunc.
@@ -140,17 +137,17 @@ public:
 	/// \name Texture Mode setting.
 	// @{
 	enum			TTextureMode {TextureDisabled, Texture2D, TextureRect, TextureCubeMap, TextureModeCount};
-	/// same as glActiveTextureARB(). useful for setTextureMode.
-	void			activeTextureARB(uint stage);
+	/// same as glActiveTexture(). useful for setTextureMode.
+	void			activeTexture(uint stage);
 	/// same as active texture arb, but with no cache check
-	void			forceActiveTextureARB(uint stage);
+	void			forceActiveTexture(uint stage);
 	/// get active texture
-	uint			getActiveTextureARB() const { return _CurrentActiveTextureARB; }
+	uint			getActiveTexture() const { return _CurrentActiveTexture; }
 	/** change if needed the texture mode of the current active Texture ARB.
 	 *	NB: if CubeMap extension not supported, TextureCubeMap <=> TextureDisabled.
 	 */
 	void			setTextureMode(TTextureMode texMode);
-	TTextureMode	getTextureMode() const { return _TextureMode[_CurrentActiveTextureARB]; }
+	TTextureMode	getTextureMode() const { return _TextureMode[_CurrentActiveTexture]; }
 	// reset texture mode to the default (disabled) for the current stage. It forces the state (useful after texture shaders)
 	void			resetTextureMode();
 	// @}
@@ -176,7 +173,6 @@ private:
 	bool			_CurLighting;
 	bool			_CurZWrite;
 	bool			_CurStencilTest;
-	bool			_CurMultisample;
 
 	GLenum			_CurBlendSrc;
 	GLenum			_CurBlendDst;
@@ -197,7 +193,7 @@ private:
 	float			_CurShininess;
 	bool			_VertexColorLighted;
 
-	uint			_CurrentActiveTextureARB;
+	uint			_CurrentActiveTexture;
 	TTextureMode	_TextureMode[8];
 
 	bool			_VertexArrayEnabled;
@@ -205,7 +201,7 @@ private:
 	bool			_WeightArrayEnabled;
 	bool			_ColorArrayEnabled;
 	bool			_SecondaryColorArrayEnabled;
-	uint			_CurrentClientActiveTextureARB;
+	uint			_CurrentClientActiveTexture;
 	bool			_TexCoordArrayEnabled[8];
 	bool			_VertexAttribArrayEnabled[CVertexBuffer::NumValue];
 
