@@ -72,11 +72,9 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	H_AUTO_OGL(CDriverGLStates3_forceDefaults);
 
 	// Enable / disable.
-	_CurFog = false;
 	_CurBlend = false;
 	_CurCullFace = true;
 	_CurAlphaTest = false;
-	_CurLighting = false;
 	_CurZWrite = true;
 	_CurStencilTest =false;
 
@@ -227,14 +225,6 @@ void			CDriverGLStates3::enableAlphaTest(uint enable)
 			glDisable(GL_ALPHA_TEST);
 		}
 	}
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableLighting(uint enable)
-{
-	H_AUTO_OGL(CDriverGLStates3_enableLighting)
-
-	_CurLighting = (enable != 0);
 }
 
 // ***************************************************************************
@@ -581,21 +571,6 @@ void CDriverGLStates3::enableVertexAttribArrayARB(uint glIndex,bool enable)
 		_VertexAttribArrayEnabled[glIndex]= enable;
 	}
 
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::enableFog(uint enable)
-{
-	H_AUTO_OGL(CDriverGLStates3_enableFog)
-	// If different from current setup, update.
-	bool	enabled= (enable!=0);
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (enabled != _CurFog)
-#endif
-	{
-		// new state.
-		_CurFog= enabled;
-	}
 }
 
 // ***************************************************************************

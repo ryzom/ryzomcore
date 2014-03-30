@@ -151,6 +151,9 @@ namespace NL3D
 	{
 		if (driver) nlassert(m_UserVertexProgram == NULL);
 
+		if (m_DriverVertexProgram == program)
+			return true;
+
 		if (program == NULL)
 		{
 			nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, 0);
@@ -248,6 +251,9 @@ namespace NL3D
 	bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
 	{
 		if (driver) nlassert(m_UserPixelProgram == NULL);
+
+		if (m_DriverPixelProgram == program)
+			return true;
 
 		if (program == NULL)
 		{
@@ -601,10 +607,15 @@ namespace NL3D
 	{
 		if (m_UserVertexProgram) return true;
 
-		CVertexProgram *vertexProgram = generateBuiltinVertexProgram();
-		nlassert(vertexProgram);
+		touchVertexFormatVP(); // TODO
 
-		if (!activeVertexProgram(vertexProgram, true))
+		if (m_VPBuiltinTouched)
+		{
+			generateBuiltinVertexProgram();
+			nlassert(m_VPBuiltinCurrent.VertexProgram);
+		}
+
+		if (!activeVertexProgram(m_VPBuiltinCurrent.VertexProgram, true))
 			return false;
 
 		// GL3 TODO: Here we set the uniforms of the vertex program!

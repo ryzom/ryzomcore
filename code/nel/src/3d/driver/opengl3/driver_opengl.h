@@ -398,7 +398,11 @@ public:
 	bool					setupUniforms();
 	void					setupUniforms(TProgram program);
 
-	CVertexProgram			*generateBuiltinVertexProgram();
+	void					generateBuiltinVertexProgram();
+	void					enableFogVP(bool enable);
+	void					enableLightingVP(bool enable);
+	void					touchLightVP(int i);
+	void					touchVertexFormatVP();
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -1356,6 +1360,8 @@ private:
 	CPixelProgram *m_DriverPixelProgram;
 
 	std::set<CVPBuiltin> m_VPBuiltinCache;
+	CVPBuiltin m_VPBuiltinCurrent;
+	bool m_VPBuiltinTouched;
 
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();

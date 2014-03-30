@@ -387,7 +387,10 @@ bool CDriverGL3::setupDisplay()
 
 	// All User Light are disabled by Default
 	for (uint i = 0; i < MaxLight; ++i)
+	{
 		_UserLightEnable[i] = false;
+		touchLightVP(i);
+	}
 
 	// init _DriverGLStates
 	_DriverGLStates.init();
@@ -1029,8 +1032,8 @@ bool CDriverGL3::fogEnabled()
 void CDriverGL3::enableFog(bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_enableFog)
-	_DriverGLStates.enableFog(enable);
-	_FogEnabled= enable;
+	_FogEnabled = enable;
+	enableFogVP(enable);
 }
 
 // ***************************************************************************

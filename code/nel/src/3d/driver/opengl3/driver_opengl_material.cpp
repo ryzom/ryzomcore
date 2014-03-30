@@ -437,7 +437,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 		// Light Part.
 
-		_DriverGLStates.enableLighting(mat.getFlags() & IDRV_MAT_LIGHTING);
+		enableLightingVP(mat.getFlags() & IDRV_MAT_LIGHTING);
 
 		if ((mat.getFlags() & IDRV_MAT_LIGHTING) == 0)
 			disableAllLights();
@@ -463,12 +463,12 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		// Disable fog if dest blend is ONE
 		if (blend && (pShader->DstBlend == GL_ONE))
 		{
-			_DriverGLStates.enableFog(false);
+			enableFogVP(false);
 		}
 		else
 		{
 			// Restaure fog state to its current value
-			_DriverGLStates.enableFog(_FogEnabled);
+			enableFogVP(_FogEnabled);
 		}
 
 
@@ -781,7 +781,7 @@ sint CDriverGL3::beginLightMapMultiPass ()
 	computeLightMapInfos (mat);
 
 	// always enable lighting for lightmap (because of dynamic light)
-	_DriverGLStates.enableLighting(true);
+	enableLightingVP(true);
 
 	// if the dynamic lightmap light has changed since the last render (should not happen), resetup
 	// normal way is that setupLightMapDynamicLighting() is called in setupMaterial() if shader different from prec

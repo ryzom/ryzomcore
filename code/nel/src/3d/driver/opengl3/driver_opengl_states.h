@@ -84,15 +84,10 @@ public:
 	/// \name enable if !0
 	// @{
 	void			enableBlend(uint enable);
-	void			enableFog(uint enable);
-	bool			isFogEnabled() const { return _CurFog; }
 	void			enableCullFace(uint enable);
 	/// enable and set good AlphaFunc.
 	void			enableAlphaTest(uint enable);
 	void			enableZWrite(uint enable);
-	// overall lighting enabled
-	void			enableLighting(uint enable);
-	bool			isLightingEnabled() const { return _CurLighting; }
 	/// enable/disable stencil test
 	void			enableStencilTest(bool enable);
 	bool			isStencilTestEnabled() const { return _CurStencilTest; }
@@ -165,10 +160,8 @@ public:
 
 private:
 	bool			_CurBlend;
-	bool			_CurFog;
 	bool			_CurCullFace;
 	bool			_CurAlphaTest;
-	bool			_CurLighting;
 	bool			_CurZWrite;
 	bool			_CurStencilTest;
 

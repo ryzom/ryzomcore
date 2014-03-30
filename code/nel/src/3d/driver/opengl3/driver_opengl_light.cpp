@@ -74,8 +74,8 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 
 		// Copy the mode
 		_LightMode[num] = mode;
-
 		_UserLight[num] = light;
+		touchLightVP(num);
 
 		// Set the position
 		if ((mode == CLight::DirectionalLight) || (mode == CLight::SpotLight))
@@ -136,6 +136,7 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 	{
 		// _DriverGLStates.enableLight(num, enable); // FIXME GL3 VERTEX PROGRAM
 		_UserLightEnable[num] = enable;
+		touchLightVP(num);
 	}
 }
 
@@ -201,9 +202,10 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 
 void CDriverGL3::disableAllLights()
 {
-	for (int i = 0; i < MaxLight; i++)
+	for (int i = 0; i < MaxLight; ++i)
 	{
-		_UserLightEnable[ i ] = false;
+		_UserLightEnable[i] = false;
+		touchLightVP(i);
 	}
 }
 

@@ -355,23 +355,17 @@ namespace
 	}
 }
 
-CVertexProgram *CDriverGL3::generateBuiltinVertexProgram()
+void CDriverGL3::generateBuiltinVertexProgram()
 {
-	CVPBuiltin desc;
-	desc.VertexFormat = _CurrentVertexBufferHard->VB->getVertexFormat();
-	desc.Fog = _DriverGLStates.isFogEnabled();
-	desc.Lighting = _DriverGLStates.isLightingEnabled();
-	if (desc.Lighting)
-		for (sint i = 0; i < MaxLight; ++i)
-			desc.LightMode[i] = _UserLightEnable[i] ? _LightMode[i] : -1;
-	desc.VertexColorLighted = false; // _DriverGLStates._VertexColorLighted;
-
-	std::set<CVPBuiltin>::iterator it = m_VPBuiltinCache.find(desc);
+	std::set<CVPBuiltin>::iterator it = m_VPBuiltinCache.find(m_VPBuiltinCurrent);
 	if (it != m_VPBuiltinCache.end())
-		return it->VertexProgram;
+	{
+		m_VPBuiltinCurrent.VertexProgram = it->VertexProgram;
+		return;
+	}
 
 	std::string result;
-	vpGenerate(result, desc);
+	vpGenerate(result, m_VPBuiltinCurrent);
 
 	CVertexProgram *vertexProgram = new CVertexProgram();
 	IProgram::CSource *src = new IProgram::CSource();
@@ -387,10 +381,50 @@ CVertexProgram *CDriverGL3::generateBuiltinVertexProgram()
 		delete vertexProgram; vertexProgram = NULL;
 	}
 
-	desc.VertexProgram = vertexProgram;
-	m_VPBuiltinCache.insert(desc);
+	m_VPBuiltinCurrent.VertexProgram = vertexProgram;
+	m_VPBuiltinCache.insert(m_VPBuiltinCurrent);
+}
 
-	return desc.VertexProgram;
+void CDriverGL3::enableFogVP(bool enable)
+{
+	H_AUTO_OGL(CDriverGL3_enableFogInternal)
+	if (m_VPBuiltinCurrent.Fog != enable)
+	{
+		m_VPBuiltinCurrent.Fog = enable;
+		m_VPBuiltinTouched = true;
+	}
+}
+
+void CDriverGL3::enableLightingVP(bool enable)
+{
+	H_AUTO_OGL(CDriverGL3_enableLightingVP)
+	if (m_VPBuiltinCurrent.Lighting != enable)
+	{
+		m_VPBuiltinCurrent.Lighting = enable;
+		m_VPBuiltinTouched = true;
+	}
+}
+
+void CDriverGL3::touchLightVP(int i)
+{
+	H_AUTO_OGL(CDriverGL3_touchLightVP)
+	sint mode = _UserLightEnable[i] ? _LightMode[i] : -1;
+	if (m_VPBuiltinCurrent.LightMode[i] != mode)
+	{
+		m_VPBuiltinCurrent.LightMode[i] = mode;
+		m_VPBuiltinTouched = true;
+	}
+}
+
+void CDriverGL3::touchVertexFormatVP()
+{
+	H_AUTO_OGL(CDriverGL3_touchLightVP)
+	uint16 format = _CurrentVertexBufferHard->VB->getVertexFormat();
+	if (m_VPBuiltinCurrent.VertexFormat != format)
+	{
+		m_VPBuiltinCurrent.VertexFormat = format;
+		m_VPBuiltinTouched = true;
+	}
 }
 
 #ifdef NL_STATIC
