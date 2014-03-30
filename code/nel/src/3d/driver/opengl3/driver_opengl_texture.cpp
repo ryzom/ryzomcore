@@ -600,12 +600,9 @@ void CDriverGL3::bindTextureWithMode(ITexture &tex)
 	_DriverGLStates.activeTextureARB(0);
 	if (tex.isTextureCube())
 	{
-		if (_Extensions.ARBTextureCubeMap)
-		{
-			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
-			// Bind this texture
-			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
-		}
+		_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
+		// Bind this texture
+		glBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
 	}
 	else
 	{
@@ -627,26 +624,23 @@ void CDriverGL3::bindTextureWithMode(ITexture &tex)
 void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 {
 	CTextureDrvInfosGL3*	gltext;
-	gltext= getTextureGl(tex);
+	gltext = getTextureGl(tex);
 	// TODO: possible cache here, but beware, this is called just after texture creation as well, so these fields
 	// haven't ever been filled.
-	gltext->WrapS= tex.getWrapS();
-	gltext->WrapT= tex.getWrapT();
-	gltext->MagFilter= tex.getMagFilter();
-	gltext->MinFilter= tex.getMinFilter();
+	gltext->WrapS = tex.getWrapS();
+	gltext->WrapT = tex.getWrapT();
+	gltext->MagFilter = tex.getMagFilter();
+	gltext->MinFilter = tex.getMinFilter();
 	if (tex.isTextureCube())
 	{
-		if (_Extensions.ARBTextureCubeMap)
-		{
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
-			glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, translateWrapToGl(ITexture::Clamp, _Extensions));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, translateWrapToGl(ITexture::Clamp, _Extensions));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, translateWrapToGl(ITexture::Clamp, _Extensions));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
 
-			if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
-				glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
-		}
+		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 	}
 	else
 	{
@@ -669,9 +663,6 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 	//nldebug("3D: CDriverGL3::setupTextureEx(%016p, %d, %d, %d)", &tex, bUpload, bAllUploaded, bMustRecreateSharedTexture);
 	bAllUploaded = false;
 
-	if (tex.isTextureCube() && (!_Extensions.ARBTextureCubeMap))
-		return true;
-
 	// 0. Create/Retrieve the driver texture.
 	//=======================================
 	bool mustCreate = false;
@@ -679,9 +670,9 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 	{
 		//nldebug("3D:   creating CTextureDrvShare()");
 		// insert into driver list. (so it is deleted when driver is deleted).
-		ItTexDrvSharePtrList	it= _TexDrvShares.insert(_TexDrvShares.end(), (NL3D::CTextureDrvShare*)NULL);
+		ItTexDrvSharePtrList it = _TexDrvShares.insert(_TexDrvShares.end(), (NL3D::CTextureDrvShare*)NULL);
 		// create and set iterator, for future deletion.
-		*it= tex.TextureDrvShare= new CTextureDrvShare(this, it, &tex);
+		*it = tex.TextureDrvShare = new CTextureDrvShare(this, it, &tex);
 
 		// Must (re)-create the texture.
 		mustCreate = true;
@@ -699,8 +690,8 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			setupTextureBasicParameters(tex); // setup what has changed (will reset the touch flag)
 
 			// Disable texture 0
-			_CurrentTexture[0]= NULL;
-			_CurrentTextureInfoGL[0]= NULL;
+			_CurrentTexture[0] = NULL;
+			_CurrentTextureInfoGL[0] = NULL;
 			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 			//
 		}
@@ -711,8 +702,8 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 	// 1. If modified, may (re)load texture part or all of the texture.
 	//=================================================================
 
-	bool	mustLoadAll= false;
-	bool	mustLoadPart= false;
+	bool mustLoadAll = false;
+	bool mustLoadPart = false;
 
 	// To avoid any delete/new ptr problem, disable all texturing.
 	/* If an old texture is deleted, _CurrentTexture[*] and _CurrentTextureInfoGL[*] are invalid.
@@ -1267,32 +1258,29 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 				// setup texture mode, after activeTextureARB()
 				_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 
-				if (_Extensions.ARBTextureCubeMap)
+				// Activate texturing...
+				//======================
+
+				// If the shared texture is the same than before, no op.
+				if (_CurrentTextureInfoGL[stage] != gltext)
 				{
-					// Activate texturing...
-					//======================
+					// Cache setup.
+					_CurrentTextureInfoGL[stage]= gltext;
 
-					// If the shared texture is the same than before, no op.
-					if (_CurrentTextureInfoGL[stage] != gltext)
+					// setup this texture
+					glBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+
+					// Change parameters of texture, if necessary.
+					//============================================
+					if (gltext->MagFilter!= tex->getMagFilter())
 					{
-						// Cache setup.
-						_CurrentTextureInfoGL[stage]= gltext;
-
-						// setup this texture
-						glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
-
-						// Change parameters of texture, if necessary.
-						//============================================
-						if (gltext->MagFilter!= tex->getMagFilter())
-						{
-							gltext->MagFilter= tex->getMagFilter();
-							glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
-						}
-						if (gltext->MinFilter!= tex->getMinFilter())
-						{
-							gltext->MinFilter= tex->getMinFilter();
-							glTexParameteri(GL_TEXTURE_CUBE_MAP_ARB,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
-						}
+						gltext->MagFilter= tex->getMagFilter();
+						glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER, translateMagFilterToGl(gltext));
+					}
+					if (gltext->MinFilter!= tex->getMinFilter())
+					{
+						gltext->MinFilter= tex->getMinFilter();
+						glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER, translateMinFilterToGl(gltext));
 					}
 				}
 			}

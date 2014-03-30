@@ -520,16 +520,6 @@ static bool	setupEXTTextureCompressionS3TC(const char	*glext)
 }
 
 // *********************************
-static bool	setupARBTextureCubeMap(const char	*glext)
-{
-	H_AUTO_OGL(setupARBTextureCubeMap);
-
-	CHECK_EXT("GL_ARB_texture_cube_map");
-
-	return true;
-}
-
-// *********************************
 static bool	setupEXTSecondaryColor(const char	*glext)
 {
 	H_AUTO_OGL(setupEXTSecondaryColor);
@@ -877,9 +867,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check ARBMultisample
 	ext.ARBMultisample = setupARBMultisample(glext);
-
-	// Check for cube mapping
-	ext.ARBTextureCubeMap = setupARBTextureCubeMap(glext);
 
 	// Check EXTSecondaryColor
 	ext.EXTSecondaryColor= setupEXTSecondaryColor(glext);

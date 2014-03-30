@@ -32,7 +32,6 @@ namespace NLDRIVERGL3 {
 CDriverGLStates3::CDriverGLStates3()
 {
 	H_AUTO_OGL(CDriverGLStates3_CDriverGLStates)
-	_TextureCubeMapSupported= false;
 	_CurrARBVertexBuffer = 0;
 	_DepthRangeNear = 0.f;
 	_DepthRangeFar = 1.f;
@@ -43,10 +42,9 @@ CDriverGLStates3::CDriverGLStates3()
 
 
 // ***************************************************************************
-void			CDriverGLStates3::init(bool supportTextureCubeMap, bool supportTextureRectangle, uint maxLight)
+void			CDriverGLStates3::init(bool supportTextureRectangle, uint maxLight)
 {
 	H_AUTO_OGL(CDriverGLStates3_init)
-	_TextureCubeMapSupported= supportTextureCubeMap;
 	_TextureRectangleSupported= supportTextureRectangle;
 	_MaxDriverLight= maxLight;
 	_MaxDriverLight= std::min(_MaxDriverLight, uint(MaxLight));
@@ -146,8 +144,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
 		glDisable(GL_TEXTURE_2D);
 
-		if (_TextureCubeMapSupported)
-			glDisable(GL_TEXTURE_CUBE_MAP_ARB);
+		glDisable(GL_TEXTURE_CUBE_MAP);
 
 		_TextureMode[stage]= TextureDisabled;
 

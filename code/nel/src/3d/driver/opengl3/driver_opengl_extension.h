@@ -49,7 +49,6 @@ struct	CGlExtensions
 	uint	NbTextureStages;
 
 	// Optional Extensions. (old)
-	bool	ARBTextureCubeMap;
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
 	bool	ARBTextureRectangle;
@@ -74,7 +73,6 @@ public:
 		ARBMultiTexture= false;
 		NbTextureStages= 1;
 		EXTTextureCompressionS3TC= false;
-		ARBTextureCubeMap= false;
 		EXTSecondaryColor= false;
 		WGLARBPBuffer= false;
 		WGLARBPixelFormat= false;
@@ -100,7 +98,6 @@ public:
 		result += "\n  Texturing: ";
 		result += ARBMultiTexture ? "ARBMultiTexture " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
-		result += ARBTextureCubeMap ? "ARBTextureCubeMap " : "";
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
 		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
 		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";

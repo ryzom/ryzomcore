@@ -36,7 +36,7 @@ namespace NLDRIVERGL3 {
 			- GL_ALPHA_TEST
 			- GL_LIGHTING
 			- GL_LIGHT0 + i .....
-			- GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP_ARB/OES.
+			- GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP/OES.
 			- GL_TEXTURE_GEN_S, GL_TEXTURE_GEN_T, GL_TEXTURE_GEN_R
 			- GL_COLOR_MATERIAL
 			- GL_FOG
@@ -74,7 +74,7 @@ public:
 	/// Constructor. no-op.
 	CDriverGLStates3();
 	// init. Do it just after setDisplay()
-	void			init(bool supportTextureCubeMap, bool supportTextureRectangle, uint maxLight);
+	void			init(bool supportTextureRectangle, uint maxLight);
 
 	/// Reset all OpenGL states of interest to default, and update caching. This don't apply to light.
 	void			forceDefaults(uint nbTextureStages);
@@ -195,7 +195,6 @@ private:
 	float			_CurShininess;
 	bool			_VertexColorLighted;
 
-	bool			_TextureCubeMapSupported;
 	bool			_TextureRectangleSupported;
 	uint			_CurrentActiveTextureARB;
 	TTextureMode	_TextureMode[8];

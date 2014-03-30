@@ -409,7 +409,7 @@ bool CDriverGL3::setupDisplay()
 		_UserLightEnable[i]= false;
 
 	// init _DriverGLStates
-	_DriverGLStates.init(_Extensions.ARBTextureCubeMap, (_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle), _MaxDriverLight);
+	_DriverGLStates.init((_Extensions.NVTextureRectangle || _Extensions.EXTTextureRectangle || _Extensions.ARBTextureRectangle), _MaxDriverLight);
 
 	// Init OpenGL/Driver defaults.
 	//=============================
@@ -999,11 +999,8 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 	_DriverGLStates.setTextureMode(textureMode);
 	if (tex->isTextureCube())
 	{
-		if (_Extensions.ARBTextureCubeMap)
-		{
-			glBindTexture(GL_TEXTURE_CUBE_MAP_ARB, gltext->ID);
-			glCopyTexSubImage2D(NLCubeFaceToGLCubeFace[cubeFace], level, offsetx, offsety, x, y, width, height);
-		}
+		glBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
+		glCopyTexSubImage2D(NLCubeFaceToGLCubeFace[cubeFace], level, offsetx, offsety, x, y, width, height);
 	}
 	else
 	{
@@ -1631,7 +1628,7 @@ void CDriverGL3::checkTextureOn() const
 		GLboolean flagCM;
 		GLboolean flagTR;
 		glGetBooleanv(GL_TEXTURE_2D, &flag2D);
-		glGetBooleanv(GL_TEXTURE_CUBE_MAP_ARB, &flagCM);
+		glGetBooleanv(GL_TEXTURE_CUBE_MAP, &flagCM);
 
 		glGetBooleanv(GL_TEXTURE_RECTANGLE_NV, &flagTR);
 

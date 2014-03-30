@@ -94,7 +94,7 @@ static inline void convTexAddr(ITexture *tex, CMaterial::TTexAddressingMode mode
 
 	static const GLenum glTexCubeAddrModesNV[] =
 	{
-		GL_NONE, GL_TEXTURE_CUBE_MAP_ARB,
+		GL_NONE, GL_TEXTURE_CUBE_MAP,
 		GL_PASS_THROUGH_NV, GL_CULL_FRAGMENT_NV,
 		GL_OFFSET_TEXTURE_2D_NV, GL_OFFSET_TEXTURE_2D_SCALE_NV,
 		GL_DEPENDENT_AR_TEXTURE_2D_NV, GL_DEPENDENT_GB_TEXTURE_2D_NV,
@@ -1123,9 +1123,6 @@ sint			CDriverGL3::beginSpecularMultiPass()
 
 	// Manage the rare case when the SpecularMap is not provided (fault of graphist).
 	if (mat.getTexture(1)==NULL)
-		return 1;
-
-	if (!_Extensions.ARBTextureCubeMap)
 		return 1;
 	
 	return 1;
