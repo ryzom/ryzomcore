@@ -48,10 +48,6 @@ struct	CGlExtensions
 	// Required Extensions. (old)
 	bool	ARBMultiTexture;
 
-	// Optional Extensions. (old)
-	bool	EXTSecondaryColor;
-	bool	EXTBlendColor;
-
 	// WGL ARB extensions, true if supported
 	bool	WGLARBPBuffer;
 	bool	WGLARBPixelFormat;
@@ -75,8 +71,6 @@ public:
 		EXTTextureFilterAnisotropicMaximum = 0.f;
 
 		ARBMultiTexture= false;
-		EXTSecondaryColor= false;
-		EXTBlendColor= false;
 
 		WGLARBPBuffer = false;
 		WGLARBPixelFormat = false;
@@ -105,10 +99,6 @@ public:
 		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic (Maximum = " + NLMISC::toString(EXTTextureFilterAnisotropicMaximum) + ") " : "";
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbFragmentTextureUnits);
-
-		result += "\n  Misc:      ";
-		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
-		result += EXTBlendColor ? "EXTBlendColor " : "";
 
 #ifdef NL_OS_WINDOWS
 		result += "\n  WindowsGL: ";
@@ -196,146 +186,6 @@ extern NEL_PFNGLMULTITEXCOORD4SVARBPROC nglMultiTexCoord4svARB;
 extern NEL_PFNGLMULTITEXCOORD4IVARBPROC nglMultiTexCoord4ivARB;
 extern NEL_PFNGLMULTITEXCOORD4FVARBPROC nglMultiTexCoord4fvARB;
 extern NEL_PFNGLMULTITEXCOORD4DVARBPROC nglMultiTexCoord4dvARB;
-
-
-// ATI_envmap_bumpmap extension
-
-extern  PFNGLTEXBUMPPARAMETERIVATIPROC nglTexBumpParameterivATI;
-extern  PFNGLTEXBUMPPARAMETERFVATIPROC nglTexBumpParameterfvATI;
-extern  PFNGLGETTEXBUMPPARAMETERIVATIPROC nglGetTexBumpParameterivATI;
-extern  PFNGLGETTEXBUMPPARAMETERFVATIPROC nglGetTexBumpParameterfvATI;
-
-
-// SecondaryColor extension
-//========================
-extern NEL_PFNGLSECONDARYCOLOR3BEXTPROC			nglSecondaryColor3bEXT;
-extern NEL_PFNGLSECONDARYCOLOR3BVEXTPROC		nglSecondaryColor3bvEXT;
-extern NEL_PFNGLSECONDARYCOLOR3DEXTPROC			nglSecondaryColor3dEXT;
-extern NEL_PFNGLSECONDARYCOLOR3DVEXTPROC		nglSecondaryColor3dvEXT;
-extern NEL_PFNGLSECONDARYCOLOR3FEXTPROC			nglSecondaryColor3fEXT;
-extern NEL_PFNGLSECONDARYCOLOR3FVEXTPROC		nglSecondaryColor3fvEXT;
-extern NEL_PFNGLSECONDARYCOLOR3IEXTPROC			nglSecondaryColor3iEXT;
-extern NEL_PFNGLSECONDARYCOLOR3IVEXTPROC		nglSecondaryColor3ivEXT;
-extern NEL_PFNGLSECONDARYCOLOR3SEXTPROC			nglSecondaryColor3sEXT;
-extern NEL_PFNGLSECONDARYCOLOR3SVEXTPROC		nglSecondaryColor3svEXT;
-extern NEL_PFNGLSECONDARYCOLOR3UBEXTPROC		nglSecondaryColor3ubEXT;
-extern NEL_PFNGLSECONDARYCOLOR3UBVEXTPROC		nglSecondaryColor3ubvEXT;
-extern NEL_PFNGLSECONDARYCOLOR3UIEXTPROC		nglSecondaryColor3uiEXT;
-extern NEL_PFNGLSECONDARYCOLOR3UIVEXTPROC		nglSecondaryColor3uivEXT;
-extern NEL_PFNGLSECONDARYCOLOR3USEXTPROC		nglSecondaryColor3usEXT;
-extern NEL_PFNGLSECONDARYCOLOR3USVEXTPROC		nglSecondaryColor3usvEXT;
-extern NEL_PFNGLSECONDARYCOLORPOINTEREXTPROC	nglSecondaryColorPointerEXT;
-
-
-// BlendColor extension
-//========================
-extern NEL_PFNGLBLENDCOLOREXTPROC				nglBlendColorEXT;
-
-
-// GL_ATI_fragment_shader extension
-//===================================
-
-extern NEL_PFNGLGENFRAGMENTSHADERSATIPROC			nglGenFragmentShadersATI;
-extern NEL_PFNGLBINDFRAGMENTSHADERATIPROC			nglBindFragmentShaderATI;
-extern NEL_PFNGLDELETEFRAGMENTSHADERATIPROC			nglDeleteFragmentShaderATI;
-extern NEL_PFNGLBEGINFRAGMENTSHADERATIPROC			nglBeginFragmentShaderATI;
-extern NEL_PFNGLENDFRAGMENTSHADERATIPROC			nglEndFragmentShaderATI;
-extern NEL_PFNGLPASSTEXCOORDATIPROC					nglPassTexCoordATI;
-extern NEL_PFNGLSAMPLEMAPATIPROC					nglSampleMapATI;
-extern NEL_PFNGLCOLORFRAGMENTOP1ATIPROC				nglColorFragmentOp1ATI;
-extern NEL_PFNGLCOLORFRAGMENTOP2ATIPROC				nglColorFragmentOp2ATI;
-extern NEL_PFNGLCOLORFRAGMENTOP3ATIPROC				nglColorFragmentOp3ATI;
-extern NEL_PFNGLALPHAFRAGMENTOP1ATIPROC				nglAlphaFragmentOp1ATI;
-extern NEL_PFNGLALPHAFRAGMENTOP2ATIPROC				nglAlphaFragmentOp2ATI;
-extern NEL_PFNGLALPHAFRAGMENTOP3ATIPROC				nglAlphaFragmentOp3ATI;
-extern NEL_PFNGLSETFRAGMENTSHADERCONSTANTATIPROC	nglSetFragmentShaderConstantATI;
-
-// GL_ARB_fragment_shader_extension
-//==================================
-extern NEL_PFNGLPROGRAMSTRINGARBPROC nglProgramStringARB;
-extern NEL_PFNGLBINDPROGRAMARBPROC nglBindProgramARB;
-extern NEL_PFNGLDELETEPROGRAMSARBPROC nglDeleteProgramsARB;
-extern NEL_PFNGLGENPROGRAMSARBPROC nglGenProgramsARB;
-extern NEL_PFNGLPROGRAMENVPARAMETER4DARBPROC nglProgramEnvParameter4dARB;
-extern NEL_PFNGLPROGRAMENVPARAMETER4DVARBPROC nglProgramEnvParameter4dvARB;
-extern NEL_PFNGLPROGRAMENVPARAMETER4FARBPROC nglProgramEnvParameter4fARB;
-extern NEL_PFNGLPROGRAMENVPARAMETER4FVARBPROC nglProgramEnvParameter4fvARB;
-extern NEL_PFNGLPROGRAMLOCALPARAMETER4DARBPROC nglGetProgramLocalParameter4dARB;
-extern NEL_PFNGLPROGRAMLOCALPARAMETER4DVARBPROC nglGetProgramLocalParameter4dvARB;
-extern NEL_PFNGLPROGRAMLOCALPARAMETER4FARBPROC nglGetProgramLocalParameter4fARB;
-extern NEL_PFNGLPROGRAMLOCALPARAMETER4FVARBPROC nglGetProgramLocalParameter4fvARB;
-extern NEL_PFNGLGETPROGRAMENVPARAMETERDVARBPROC nglGetProgramEnvParameterdvARB;
-extern NEL_PFNGLGETPROGRAMENVPARAMETERFVARBPROC nglGetProgramEnvParameterfvARB;
-extern NEL_PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC nglGetProgramLocalParameterdvARB;
-extern NEL_PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC nglGetProgramLocalParameterfvARB;
-extern NEL_PFNGLGETPROGRAMIVARBPROC nglGetProgramivARB;
-extern NEL_PFNGLGETPROGRAMSTRINGARBPROC nglGetProgramStringARB;
-extern NEL_PFNGLISPROGRAMARBPROC nglIsProgramARB;
-
-// GL_ARB_vertex_program
-//==================================
-extern PFNGLVERTEXATTRIB1SARBPROC nglVertexAttrib1sARB;
-extern PFNGLVERTEXATTRIB1FARBPROC nglVertexAttrib1fARB;
-extern PFNGLVERTEXATTRIB1DARBPROC nglVertexAttrib1dARB;
-extern PFNGLVERTEXATTRIB2SARBPROC nglVertexAttrib2sARB;
-extern PFNGLVERTEXATTRIB2FARBPROC nglVertexAttrib2fARB;
-extern PFNGLVERTEXATTRIB2DARBPROC nglVertexAttrib2dARB;
-extern PFNGLVERTEXATTRIB3SARBPROC nglVertexAttrib3sARB;
-extern PFNGLVERTEXATTRIB3FARBPROC nglVertexAttrib3fARB;
-extern PFNGLVERTEXATTRIB3DARBPROC nglVertexAttrib3dARB;
-extern PFNGLVERTEXATTRIB4SARBPROC nglVertexAttrib4sARB;
-extern PFNGLVERTEXATTRIB4FARBPROC nglVertexAttrib4fARB;
-extern PFNGLVERTEXATTRIB4DARBPROC nglVertexAttrib4dARB;
-extern PFNGLVERTEXATTRIB4NUBARBPROC nglVertexAttrib4NubARB;
-extern PFNGLVERTEXATTRIB1SVARBPROC nglVertexAttrib1svARB;
-extern PFNGLVERTEXATTRIB1FVARBPROC nglVertexAttrib1fvARB;
-extern PFNGLVERTEXATTRIB1DVARBPROC nglVertexAttrib1dvARB;
-extern PFNGLVERTEXATTRIB2SVARBPROC nglVertexAttrib2svARB;
-extern PFNGLVERTEXATTRIB2FVARBPROC nglVertexAttrib2fvARB;
-extern PFNGLVERTEXATTRIB2DVARBPROC nglVertexAttrib2dvARB;
-extern PFNGLVERTEXATTRIB3SVARBPROC nglVertexAttrib3svARB;
-extern PFNGLVERTEXATTRIB3FVARBPROC nglVertexAttrib3fvARB;
-extern PFNGLVERTEXATTRIB3DVARBPROC nglVertexAttrib3dvARB;
-extern PFNGLVERTEXATTRIB4BVARBPROC nglVertexAttrib4bvARB;
-extern PFNGLVERTEXATTRIB4SVARBPROC nglVertexAttrib4svARB;
-extern PFNGLVERTEXATTRIB4IVARBPROC nglVertexAttrib4ivARB;
-extern PFNGLVERTEXATTRIB4UBVARBPROC nglVertexAttrib4ubvARB;
-extern PFNGLVERTEXATTRIB4USVARBPROC nglVertexAttrib4usvARB;
-extern PFNGLVERTEXATTRIB4UIVARBPROC nglVertexAttrib4uivARB;
-extern PFNGLVERTEXATTRIB4FVARBPROC nglVertexAttrib4fvARB;
-extern PFNGLVERTEXATTRIB4DVARBPROC nglVertexAttrib4dvARB;
-extern PFNGLVERTEXATTRIB4NBVARBPROC nglVertexAttrib4NbvARB;
-extern PFNGLVERTEXATTRIB4NSVARBPROC nglVertexAttrib4NsvARB;
-extern PFNGLVERTEXATTRIB4NIVARBPROC nglVertexAttrib4NivARB;
-extern PFNGLVERTEXATTRIB4NUBVARBPROC nglVertexAttrib4NubvARB;
-extern PFNGLVERTEXATTRIB4NUSVARBPROC nglVertexAttrib4NusvARB;
-extern PFNGLVERTEXATTRIB4NUIVARBPROC nglVertexAttrib4NuivARB;
-extern PFNGLVERTEXATTRIBPOINTERARBPROC nglVertexAttribPointerARB;
-extern PFNGLENABLEVERTEXATTRIBARRAYARBPROC nglEnableVertexAttribArrayARB;
-extern PFNGLDISABLEVERTEXATTRIBARRAYARBPROC nglDisableVertexAttribArrayARB;
-extern PFNGLPROGRAMSTRINGARBPROC nglProgramStringARB;
-extern PFNGLBINDPROGRAMARBPROC nglBindProgramARB;
-extern PFNGLDELETEPROGRAMSARBPROC nglDeleteProgramsARB;
-extern PFNGLGENPROGRAMSARBPROC nglGenProgramsARB;
-extern PFNGLPROGRAMENVPARAMETER4FARBPROC nglProgramEnvParameter4fARB;
-extern PFNGLPROGRAMENVPARAMETER4DARBPROC nglProgramEnvParameter4dARB;
-extern PFNGLPROGRAMENVPARAMETER4FVARBPROC nglProgramEnvParameter4fvARB;
-extern PFNGLPROGRAMENVPARAMETER4DVARBPROC nglProgramEnvParameter4dvARB;
-extern PFNGLPROGRAMLOCALPARAMETER4FARBPROC nglProgramLocalParameter4fARB;
-extern PFNGLPROGRAMLOCALPARAMETER4DARBPROC nglProgramLocalParameter4dARB;
-extern PFNGLPROGRAMLOCALPARAMETER4FVARBPROC nglProgramLocalParameter4fvARB;
-extern PFNGLPROGRAMLOCALPARAMETER4DVARBPROC nglProgramLocalParameter4dvARB;
-extern PFNGLGETPROGRAMENVPARAMETERFVARBPROC nglGetProgramEnvParameterfvARB;
-extern PFNGLGETPROGRAMENVPARAMETERDVARBPROC nglGetProgramEnvParameterdvARB;
-extern PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC nglGetProgramLocalParameterfvARB;
-extern PFNGLGETPROGRAMLOCALPARAMETERDVARBPROC nglGetProgramLocalParameterdvARB;
-extern PFNGLGETPROGRAMIVARBPROC nglGetProgramivARB;
-extern PFNGLGETPROGRAMSTRINGARBPROC nglGetProgramStringARB;
-extern PFNGLGETVERTEXATTRIBDVARBPROC nglGetVertexAttribdvARB;
-extern PFNGLGETVERTEXATTRIBFVARBPROC nglGetVertexAttribfvARB;
-extern PFNGLGETVERTEXATTRIBIVARBPROC nglGetVertexAttribivARB;
-extern PFNGLGETVERTEXATTRIBPOINTERVARBPROC nglGetVertexAttribPointervARB;
-extern PFNGLISPROGRAMARBPROC nglIsProgramARB;
 
 // Core 3.30
 extern PFNGLATTACHSHADERPROC							nglAttachShader;
@@ -437,6 +287,8 @@ extern PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC					nglCompressedTexSubImage3D;
 extern PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC					nglCompressedTexSubImage2D;
 extern PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC					nglCompressedTexSubImage1D;
 extern PFNGLGETCOMPRESSEDTEXIMAGEPROC					nglGetCompressedTexImage;
+
+extern PFNGLBLENDCOLORPROC								nglBlendColor;
 
 // GL_ARB_separate_shader_objects
 extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;

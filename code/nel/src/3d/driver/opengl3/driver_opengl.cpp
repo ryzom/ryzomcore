@@ -1185,7 +1185,7 @@ void CDriverGL3::setPerPixelLightingLight(CRGBA diffuse, CRGBA specular, float s
 bool CDriverGL3::supportBlendConstantColor() const
 {
 	H_AUTO_OGL(CDriverGL3_supportBlendConstantColor)
-	return _Extensions.EXTBlendColor;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************
@@ -1194,14 +1194,10 @@ void CDriverGL3::setBlendConstantColor(NLMISC::CRGBA col)
 	H_AUTO_OGL(CDriverGL3_setBlendConstantColor)
 
 	// bkup
-	_CurrentBlendConstantColor= col;
+	_CurrentBlendConstantColor = col;
 
-	// update GL
-	if (!_Extensions.EXTBlendColor)
-		return;
-
-	static const	float	OO255= 1.0f/255;
-	nglBlendColorEXT(col.R*OO255, col.G*OO255, col.B*OO255, col.A*OO255);
+	static const float OO255 = 1.0f / 255.0f;
+	nglBlendColor(col.R * OO255, col.G * OO255, col.B * OO255, col.A * OO255);
 }
 
 // ***************************************************************************
