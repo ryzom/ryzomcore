@@ -36,17 +36,14 @@ CDriverGLStates3::CDriverGLStates3()
 	_DepthRangeNear = 0.f;
 	_DepthRangeFar = 1.f;
 	_ZBias = 0.f;
-	_MaxDriverLight= 0;
 	_CullMode = CCW;
 }
 
 
 // ***************************************************************************
-void			CDriverGLStates3::init(uint maxLight)
+void			CDriverGLStates3::init()
 {
 	H_AUTO_OGL(CDriverGLStates3_init)
-	_MaxDriverLight= maxLight;
-	_MaxDriverLight= std::min(_MaxDriverLight, uint(MaxLight));
 
 	// By default all arrays are disabled.
 	_VertexArrayEnabled= false;
@@ -263,7 +260,7 @@ void			CDriverGLStates3::enableLighting(uint enable)
 void			CDriverGLStates3::enableLight(uint num, uint enable)
 {
 	H_AUTO_OGL(CDriverGLStates3_enableLight)
-	if (num>=_MaxDriverLight)
+	if (num >= MaxLight)
 		return;
 
 	// If different from current setup, update.
@@ -281,7 +278,7 @@ void			CDriverGLStates3::enableLight(uint num, uint enable)
 bool			CDriverGLStates3::isLightEnabled(uint num) const
 {
 	H_AUTO_OGL(CDriverGLStates3_isLightEnabled)
-	if (num>=_MaxDriverLight)
+	if (num >= MaxLight)
 		return false;
 	else
 		return _CurLight[num];

@@ -305,7 +305,7 @@ class CDriverGL3 : public IDriver
 public:
 
 	// Some constants
-	enum { MaxLight=8 };
+	enum					{ MaxLight = NL_OPENGL3_MAX_LIGHT };
 
 							CDriverGL3();
 	virtual					~CDriverGL3();
@@ -900,8 +900,6 @@ private:
 	bool					_RenderTargetFBO;
 
 
-	// Num lights return by GL_MAX_LIGHTS
-	uint						_MaxDriverLight;
 	// real mirror of GL state
 	uint						_LightMode[MaxLight];				// Light mode.
 	CVector						_WorldLightPos[MaxLight];			// World position of the lights.
@@ -1352,7 +1350,7 @@ private:
 		CGLSLShaderGenerator *shaderGenerator;
 		CUsrShaderManager    *usrShaderManager;
 		
-		bool initPipeline();
+		bool initProgramPipeline();
 
 		uint32 ppoId;
 		SProgram currentProgram;

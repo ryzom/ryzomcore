@@ -396,20 +396,12 @@ bool CDriverGL3::setupDisplay()
 		nlwarning("Missing Important GL extension: GL_EXT_texture_env_combine => All envcombine are setup to GL_MODULATE!!!");
 	}*/
 
-	// Get num of light for this driver
-	int numLight;
-	glGetIntegerv (GL_MAX_LIGHTS, &numLight);
-	_MaxDriverLight=(uint)numLight;
-	if (_MaxDriverLight>MaxLight)
-		_MaxDriverLight=MaxLight;
-
 	// All User Light are disabled by Default
-	uint i;
-	for (i=0;i<MaxLight;i++)
-		_UserLightEnable[i]= false;
+	for (uint i = 0; i < MaxLight; ++i)
+		_UserLightEnable[i] = false;
 
 	// init _DriverGLStates
-	_DriverGLStates.init(_MaxDriverLight);
+	_DriverGLStates.init();
 
 	// Init OpenGL/Driver defaults.
 	//=============================
@@ -426,24 +418,24 @@ bool CDriverGL3::setupDisplay()
 
 	_CurrViewport.init(0.f, 0.f, 1.f, 1.f);
 	_CurrScissor.initFullScreen();
-	_CurrentGlNormalize= false;
-	_ForceNormalize= false;
+	_CurrentGlNormalize = false;
+	_ForceNormalize = false;
 	// Setup defaults for blend, lighting ...
 	_DriverGLStates.forceDefaults(inlGetNumTextStages());
 	// Default delta camera pos.
-	_PZBCameraPos= CVector::Null;
+	_PZBCameraPos = CVector::Null;
 
 	// Init VertexArrayRange according to supported extenstion.
-	_SlowUnlockVBHard= false;
+	_SlowUnlockVBHard = false;
 
-	_AGPVertexArrayRange= new CVertexArrayRange(this);
-	_VRAMVertexArrayRange= new CVertexArrayRange(this);
+	_AGPVertexArrayRange = new CVertexArrayRange(this);
+	_VRAMVertexArrayRange = new CVertexArrayRange(this);
 
 	// Reset VertexArrayRange.
-	_CurrentVertexArrayRange= NULL;
-	_CurrentVertexBufferHard= NULL;
-	_NVCurrentVARPtr= NULL;
-	_NVCurrentVARSize= 0;
+	_CurrentVertexArrayRange = NULL;
+	_CurrentVertexBufferHard = NULL;
+	_NVCurrentVARPtr = NULL;
+	_NVCurrentVARSize = 0;
 
 	initVertexBufferHard(NL3D_DRV_VERTEXARRAY_AGP_INIT_SIZE, 0);
 
@@ -456,21 +448,23 @@ bool CDriverGL3::setupDisplay()
 	for (uint stage=0;stage<inlGetNumTextStages(); stage++)
 	{
 		// init no texture.
-		_CurrentTexture[stage]= NULL;
-		_CurrentTextureInfoGL[stage]= NULL;
+		_CurrentTexture[stage] = NULL;
+		_CurrentTextureInfoGL[stage] = NULL;
 		// texture are disabled in DriverGLStates.forceDefaults().
 
 		// init default env.
-		CMaterial::CTexEnv	env;	// envmode init to default.
+		CMaterial::CTexEnv env;	// envmode init to default.
 		env.ConstantColor.set(255,255,255,255);
 
 		// Not special TexEnv.
-		_CurrentTexEnvSpecial[stage]= TexEnvSpecialDisabled;
+		_CurrentTexEnvSpecial[stage] = TexEnvSpecialDisabled;
 
 		// set All TexGen by default to identity matrix (prefer use the textureMatrix scheme)
 		_DriverGLStates.activeTextureARB(stage);
-
 	}
+
+	if (!initProgramPipeline())
+		nlerror("Failed to create Pipeline Object");
 
 	_PPLExponent = 1.f;
 	_PPLightDiffuseColor = NLMISC::CRGBA::White;
@@ -498,12 +492,6 @@ bool CDriverGL3::setupDisplay()
 
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
-
-	if (!initPipeline())
-	{
-		nlinfo("Failed to create Pipeline Object");
-		nlassert(false);
-	}
 
 	return true;
 }

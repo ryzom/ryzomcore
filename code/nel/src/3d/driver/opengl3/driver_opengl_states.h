@@ -26,6 +26,8 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 #endif
 
+#define NL_OPENGL3_MAX_LIGHT 8
+
 // ***************************************************************************
 /**
  * Class for optimizing calls to openGL states, by caching old ones.
@@ -74,7 +76,7 @@ public:
 	/// Constructor. no-op.
 	CDriverGLStates3();
 	// init. Do it just after setDisplay()
-	void			init(uint maxLight);
+	void			init();
 
 	/// Reset all OpenGL states of interest to default, and update caching. This don't apply to light.
 	void			forceDefaults(uint nbTextureStages);
@@ -218,11 +220,10 @@ private:
 	TCullMode		_CullMode;
 
 private:
-	void updateDepthRange();
+	void			updateDepthRange();
 
 	// Mirror of glEnable() and GL_LIGHT0+i
-	enum	{MaxLight=8};
-	uint			_MaxDriverLight;
+	enum			{ MaxLight = NL_OPENGL3_MAX_LIGHT };
 	bool			_CurLight[MaxLight];
 };
 

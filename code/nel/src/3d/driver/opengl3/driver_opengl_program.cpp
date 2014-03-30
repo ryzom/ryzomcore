@@ -1018,7 +1018,7 @@ namespace NL3D
 		}
 	}
 
-	bool CDriverGL3::initPipeline()
+	bool CDriverGL3::initProgramPipeline()
 	{
 		ppoId = 0;
 

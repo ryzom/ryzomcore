@@ -29,8 +29,8 @@ namespace NLDRIVERGL3 {
 uint	CDriverGL3::getMaxLight () const
 {
 	H_AUTO_OGL(CDriverGL3_getMaxLight)
-	// return min(maxLight supported by openGL, MaxLight=8).
-	return _MaxDriverLight;
+	// return MaxLight=8.
+	return MaxLight;
 }
 
 
@@ -61,42 +61,42 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 {
 	H_AUTO_OGL(CDriverGL3_setLightInternal)
 	// Check light count is good
-//	nlassert (num<_MaxDriverLight);
+	// nlassert(num < MaxLight);
 
 	// Set the light
-	if (num<_MaxDriverLight)
+	if (num < MaxLight)
 	{
 		// GL light number
-		GLenum lightNum=(GLenum)(GL_LIGHT0+num);
+		GLenum lightNum = (GLenum)(GL_LIGHT0+num);
 
 		// Get light mode
-		CLight::TLightMode mode=light.getMode ();
+		CLight::TLightMode mode = light.getMode ();
 
 		// Copy the mode
-		_LightMode[num]=mode;
+		_LightMode[num] = mode;
 
 		_UserLight[num] = light;
 
 		// Set the position
-		if ((mode==CLight::DirectionalLight)||(mode==CLight::SpotLight))
+		if ((mode == CLight::DirectionalLight) || (mode == CLight::SpotLight))
 		{
 			// Get the direction of the light
-			_WorldLightDirection[num]=light.getDirection ();
+			_WorldLightDirection[num] = light.getDirection();
 		}
 
-		if (mode!=CLight::DirectionalLight)
+		if (mode != CLight::DirectionalLight)
 		{
 			// Get the position of the light
-			_WorldLightPos[num]=light.getPosition ();
+			_WorldLightPos[num] = light.getPosition();
 		}
 
-		if (mode==CLight::SpotLight)
+		if (mode == CLight::SpotLight)
 		{
 			// Get the exponent of the spot
-			float exponent=light.getExponent ();
+			float exponent = light.getExponent();
 
 			// Get the cutoff of the spot
-			float cutoff=180.f*(light.getCutoff ()/(float)NLMISC::Pi);
+			float cutoff = 180.f * (light.getCutoff() / (float)NLMISC::Pi);
 
 		}
 
@@ -104,7 +104,7 @@ void	CDriverGL3::setLightInternal(uint8 num, const CLight& light)
 }
 
 // ***************************************************************************
-void	CDriverGL3::enableLight (uint8 num, bool enable)
+void	CDriverGL3::enableLight(uint8 num, bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_enableLight)
 
@@ -112,12 +112,12 @@ void	CDriverGL3::enableLight (uint8 num, bool enable)
 	enableLightInternal(num, enable);
 
 	// because the GL setup has changed, must dirt lightmap rendering
-	_LightMapDynamicLightDirty= true;
+	_LightMapDynamicLightDirty = true;
 }
 
 bool	CDriverGL3::isLightEnabled (uint8 num)
 {
-	if (num<_MaxDriverLight)
+	if (num < MaxLight)
 		return _UserLightEnable[num];
 
 	return false;
@@ -129,13 +129,13 @@ void	CDriverGL3::enableLightInternal(uint8 num, bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_enableLightInternal)
 	// Check light count is good
-	//	nlassert (num<_MaxDriverLight);
+	// nlassert(num < MaxLight);
 
 	// Enable glLight
-	if (num<_MaxDriverLight)
+	if (num < MaxLight)
 	{
-		_DriverGLStates.enableLight(num, enable);
-		_UserLightEnable[ num ] = enable;
+		_DriverGLStates.enableLight(num, enable); // FIXME GL3 FIXED
+		_UserLightEnable[num] = enable;
 	}
 }
 
@@ -168,7 +168,7 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 	if (enable)
 	{
 		// disable all lights but the 0th.
-		for (uint i=1;i<_MaxDriverLight;i++)
+		for (uint i = 1; i < MaxLight; ++i)
 			enableLightInternal(i, false);
 
 		// if the dynamic light is really enabled
@@ -185,7 +185,7 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 		}
 
 		// ok it has been setup
-		_LightMapDynamicLightDirty= false;
+		_LightMapDynamicLightDirty = false;
 	}
 	// restore old lighting
 	else
@@ -194,7 +194,7 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 		setLightInternal(0, _UserLight0);
 
 		// restore all standard light enable states
-		for (uint i=0;i<_MaxDriverLight;i++)
+		for (uint i = 0; i < MaxLight; ++i)
 			enableLightInternal(i, _UserLightEnable[i]);
 	}
 }
