@@ -613,6 +613,7 @@ namespace NL3D
 		{
 			generateBuiltinVertexProgram();
 			nlassert(m_VPBuiltinCurrent.VertexProgram);
+			m_VPBuiltinTouched = false;
 		}
 
 		if (!activeVertexProgram(m_VPBuiltinCurrent.VertexProgram, true))
