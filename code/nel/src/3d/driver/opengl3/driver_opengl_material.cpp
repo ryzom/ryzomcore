@@ -218,12 +218,17 @@ CMaterial::TShader	CDriverGL3::getSupportedShader(CMaterial::TShader shader)
 	H_AUTO_OGL(CDriverGL3_CDriverGL)
 	switch (shader)
 	{
-	case CMaterial::PerPixelLighting: return _SupportPerPixelShader ? CMaterial::PerPixelLighting : CMaterial::Normal;
-	case CMaterial::PerPixelLightingNoSpec: return _SupportPerPixelShaderNoSpec ? CMaterial::PerPixelLightingNoSpec : CMaterial::Normal;
+	case CMaterial::PerPixelLighting:
+		return CMaterial::Normal; // FIXME GL3
+	case CMaterial::PerPixelLightingNoSpec:
+		return CMaterial::Normal; // FIXME GL3
 	// Lightmap and Specular work only if at least 2 text stages.
-	case CMaterial::LightMap: return (inlGetNumTextStages()>=2) ? CMaterial::LightMap : CMaterial::Normal;
-	case CMaterial::Specular: return (inlGetNumTextStages()>=2) ? CMaterial::Specular : CMaterial::Normal;
-		default: return shader;
+	case CMaterial::LightMap:
+		return (inlGetNumTextStages() >= 2) ? CMaterial::LightMap : CMaterial::Normal;
+	case CMaterial::Specular:
+		return (inlGetNumTextStages() >= 2) ? CMaterial::Specular : CMaterial::Normal;
+	default:
+		return shader;
 	}
 }
 

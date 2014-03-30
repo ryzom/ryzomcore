@@ -485,19 +485,16 @@ bool CDriverGL3::setupDisplay()
 
 	_Initialized = true;
 
-	_ForceDXTCCompression= false;
-	_ForceTextureResizePower= 0;
+	_ForceDXTCCompression = false;
+	_ForceTextureResizePower = 0;
 
 	// Reset profiling.
-	_AllocatedTextureMemory= 0;
+	_AllocatedTextureMemory = 0;
 	_TextureUsed.clear();
 	_PrimitiveProfileIn.reset();
 	_PrimitiveProfileOut.reset();
-	_NbSetupMaterialCall= 0;
-	_NbSetupModelMatrixCall= 0;
-
-	// check whether per pixel lighting shader is supported
-	checkForPerPixelLightingSupport();
+	_NbSetupMaterialCall = 0;
+	_NbSetupModelMatrixCall = 0;
 
 	// Reset the vbl interval
 	setSwapVBLInterval(_Interval);
@@ -1178,26 +1175,12 @@ void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const flo
 	//glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
 }
 
-
-// ***************************************************************************
-void CDriverGL3::checkForPerPixelLightingSupport()
-{
-	H_AUTO_OGL(CDriverGL3_checkForPerPixelLightingSupport)
-
-	// we need at least 3 texture stages and cube map support + EnvCombine4 or 3 support
-	// TODO : support for EnvCombine3
-	// TODO : support for less than 3 stages
-
-	_SupportPerPixelShaderNoSpec = true; // FIXME GL3
-	_SupportPerPixelShader = true; // FIXME GL3
-}
-
 // ***************************************************************************
 bool CDriverGL3::supportPerPixelLighting(bool specular) const
 {
 	H_AUTO_OGL(CDriverGL3_supportPerPixelLighting)
 
-	return specular ? _SupportPerPixelShader : _SupportPerPixelShaderNoSpec;
+	return _Extensions.GLCore;
 }
 
 // ***************************************************************************

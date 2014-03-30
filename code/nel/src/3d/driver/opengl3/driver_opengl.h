@@ -918,9 +918,6 @@ private:
 
 	//\name description of the per pixel light
 	// @{
-		void checkForPerPixelLightingSupport();
-		bool						_SupportPerPixelShader;
-		bool						_SupportPerPixelShaderNoSpec;
 		float						_PPLExponent;
 		NLMISC::CRGBA				_PPLightDiffuseColor;
 		NLMISC::CRGBA				_PPLightSpecularColor;
