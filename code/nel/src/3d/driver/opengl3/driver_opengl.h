@@ -276,6 +276,20 @@ public:
 	void					setupIndexBuffer(CIndexBuffer &vb);
 };
 
+/// Builtin vertex program description
+struct CVPBuiltin
+{
+	uint16 VertexFormat;
+	bool Lighting;
+	sint LightMode[NL_OPENGL3_MAX_LIGHT]; // -1 when disabled
+	bool Fog;
+	bool VertexColorLighted;
+
+	CVertexProgram *VertexProgram;
+};
+
+bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
+
 class CGLSLShaderGenerator;
 class CUsrShaderManager;
 
@@ -377,10 +391,14 @@ public:
 
 	virtual bool			setupMaterial(CMaterial& mat);
 	void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
-	bool					setupProgram(CMaterial& mat);
+	bool					setupBuiltinPrograms(CMaterial& mat);
+	bool					setupBuiltinVertexProgram();
+	bool					setupBuiltinPixelProgram(CMaterial& mat);
 	bool					setupDynMatProgram(CMaterial& mat, uint pass);
-	void					setupUniforms();
+	bool					setupUniforms();
 	void					setupUniforms(TProgram program);
+
+	CVertexProgram			*generateBuiltinVertexProgram();
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -1336,6 +1354,8 @@ private:
 	CVertexProgram *m_DriverVertexProgram;
 	CGeometryProgram *m_DriverGeometryProgram;
 	CPixelProgram *m_DriverPixelProgram;
+
+	std::set<CVPBuiltin> m_VPBuiltinCache;
 
 	// init EMBM settings (set each stage to modify the next)
 	void	initEMBM();

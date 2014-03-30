@@ -590,16 +590,39 @@ namespace NL3D
 		desc.setLighting(enableLights);			
 	}
 
-
-	bool CDriverGL3::setupProgram(CMaterial &mat)
+	bool CDriverGL3::setupBuiltinPrograms(CMaterial &mat)
 	{
+		return setupBuiltinVertexProgram()
+			&& setupBuiltinPixelProgram(mat)
+			&& setupUniforms();
+	}
+
+	bool CDriverGL3::setupBuiltinVertexProgram()
+	{
+		if (m_UserVertexProgram) return true;
+
+		CVertexProgram *vertexProgram = generateBuiltinVertexProgram();
+		nlassert(vertexProgram);
+
+		if (!activeVertexProgram(vertexProgram, true))
+			return false;
+
+		// GL3 TODO: Here we set the uniforms of the vertex program!
+
+		return true;
+	}
+
+	bool CDriverGL3::setupBuiltinPixelProgram(CMaterial &mat)
+	{
+		if (m_UserPixelProgram) return true;
+
 		// nlassert(!m_UserVertexProgram); // TEMP
 		// nlassert(!m_UserPixelProgram); // TEMP
 
 		if (mat.getDynMat() != NULL)
 			return true;
 		
-		CVertexProgram *vp = NULL;
+		// CVertexProgram *vp = NULL; // REMOVED
 		CPixelProgram *pp = NULL;
 		SShaderPair sp;
 
@@ -613,11 +636,11 @@ namespace NL3D
 		// Yes we have!
 		if (!sp.empty())
 		{
-			if (m_UserVertexProgram == NULL)
+			/*if (m_UserVertexProgram == NULL)
 			{
 				if (!activeVertexProgram(sp.vp, true))
 					return false;
-			}
+			}*/
 
 			if (m_UserPixelProgram == NULL)
 			{
@@ -628,7 +651,7 @@ namespace NL3D
 		// No we need to generate it now
 		else
 		{
-			std::string vs;
+			// std::string vs;
 			std::string ps;
 			bool cacheShaders = true;
 
@@ -638,7 +661,7 @@ namespace NL3D
 			shaderGenerator->setShaderDesc(&desc);
 			
 			// If we don't already have a vertex program attached, we'll generate it now
-			if (m_UserVertexProgram == NULL)
+			/* if (m_UserVertexProgram == NULL)
 			{
 				shaderGenerator->generateVS(vs);
 				vp = new CVertexProgram();
@@ -666,6 +689,7 @@ namespace NL3D
 			}
 			else
 				cacheShaders = false;
+			*/
 		
 			// If we don't already have a pixel program attached, we'll generate it now
 			if (m_UserPixelProgram == NULL)
@@ -682,8 +706,8 @@ namespace NL3D
 			
 				if (!compilePixelProgram(pp))
 				{
-					delete vp;
-					vp = NULL;
+					// delete vp;
+					// vp = NULL;
 					delete pp;
 					pp = NULL;
 					return false;
@@ -691,8 +715,8 @@ namespace NL3D
 
 				if (!activePixelProgram(pp, true))
 				{
-					delete vp;
-					vp = NULL;
+					// delete vp;
+					// vp = NULL;
 					delete pp;
 					pp = NULL;
 					return false;
@@ -705,14 +729,12 @@ namespace NL3D
 			// If we already have a shader attached we won't cache this shaderpair, since we didn't generate it
 			if (cacheShaders)
 			{
-				sp.vp = vp;
+				sp.vp = NULL;
 				sp.pp = pp;
 				desc.setShaders(sp);
 				shaderCache.cacheShader(desc);
 			}
 		}
-
-		setupUniforms();
 
 		return true;
 	}
@@ -806,11 +828,11 @@ namespace NL3D
 		return false;
 	}
 
-
-	void CDriverGL3::setupUniforms()
+	bool CDriverGL3::setupUniforms()
 	{
 		setupUniforms(IDriver::VertexProgram);
 		setupUniforms(IDriver::PixelProgram);
+		return true;
 	}
 
 	void CDriverGL3::setupUniforms(TProgram program)

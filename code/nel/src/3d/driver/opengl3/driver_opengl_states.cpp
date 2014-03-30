@@ -76,6 +76,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	_CurBlend = false;
 	_CurCullFace = true;
 	_CurAlphaTest = false;
+	_CurLighting = false;
 	_CurZWrite = true;
 	_CurStencilTest =false;
 
@@ -226,6 +227,14 @@ void			CDriverGLStates3::enableAlphaTest(uint enable)
 			glDisable(GL_ALPHA_TEST);
 		}
 	}
+}
+
+// ***************************************************************************
+void			CDriverGLStates3::enableLighting(uint enable)
+{
+	H_AUTO_OGL(CDriverGLStates3_enableLighting)
+
+	_CurLighting = (enable != 0);
 }
 
 // ***************************************************************************

@@ -437,7 +437,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 		// Light Part.
 
-		// _DriverGLStates.enableLighting(mat.getFlags()&IDRV_MAT_LIGHTING); // FIXME GL3 VERTEX PROGRAM
+		_DriverGLStates.enableLighting(mat.getFlags() & IDRV_MAT_LIGHTING);
 
 		if ((mat.getFlags() & IDRV_MAT_LIGHTING) == 0)
 			disableAllLights();
@@ -490,8 +490,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 5. Set up the program
 	// =====================
-	bool programOK = setupProgram(mat);
-	return programOK;
+	return setupBuiltinPrograms(mat);
 }
 
 // ***************************************************************************
@@ -782,7 +781,7 @@ sint CDriverGL3::beginLightMapMultiPass ()
 	computeLightMapInfos (mat);
 
 	// always enable lighting for lightmap (because of dynamic light)
-	// _DriverGLStates.enableLighting(true); // FIXME GL3 VERTEX PROGRAM
+	_DriverGLStates.enableLighting(true);
 
 	// if the dynamic lightmap light has changed since the last render (should not happen), resetup
 	// normal way is that setupLightMapDynamicLighting() is called in setupMaterial() if shader different from prec
