@@ -55,8 +55,6 @@ struct	CGlExtensions
 
 	bool	EXTSecondaryColor;
 	bool	EXTBlendColor;
-	// equal to GL_VERTEX_ARRAY_RANGE_WITHOUT_FLUSH_NV if possible, or GL_VERTEX_ARRAY_RANGE_NV
-	uint	NVStateVARWithoutFlush;
 
 	// WGL ARB extensions, true if supported
 	bool	WGLARBPBuffer;
@@ -99,7 +97,6 @@ public:
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
-		NVStateVARWithoutFlush = 0;
 	}
 
 	std::string toString()
@@ -126,7 +123,6 @@ public:
 		result += EXTSeparateSpecularColor ? "EXTSeparateSpecularColor " : "";
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
 		result += EXTBlendColor ? "EXTBlendColor " : "";
-		result += NVStateVARWithoutFlush ? "NVStateVARWithoutFlush " : "";
 		result += ARBMultisample ? "ARBMultisample " : "";
 
 #ifdef NL_OS_WINDOWS
