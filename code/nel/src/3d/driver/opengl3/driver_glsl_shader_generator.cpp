@@ -141,81 +141,6 @@ namespace NL3D
 		ss.clear();
 	}
 
-	void CGLSLShaderGenerator::generateVS(std::string &vs)
-	{
-		ss.str("");
-		ss.clear();
-		ss << "// " << shaderNames[ material->getShader() ] << " Vertex Shader" << std::endl;
-		ss << std::endl;
-
-		ss << "#version 330" << std::endl;
-		ss << "#extension GL_ARB_separate_shader_objects : enable" << std::endl;
-		ss << "out gl_PerVertex" << std::endl;
-		ss << "{" << std::endl;
-		ss << "vec4 gl_Position;" << std::endl;
-		ss << "};" << std::endl;
-		ss << std::endl;
-		ss << "uniform mat4 modelViewProjection;" << std::endl;
-		ss << std::endl;
-
-		for (int i = Position; i < NumOffsets; i++)
-		{
-			if (hasFlag(vbFormat, vertexFlags[ i ]))
-			{
-				ss << "layout (location = ";
-				ss << i;
-				ss << ") ";
-				ss << "in vec4 ";
-				ss << "v" << attribNames[ i ];
-				ss << ";";
-				ss << std::endl;
-			}
-		}
-		ss << std::endl;
-
-		for (int i = Weight; i < NumOffsets; i++)
-		{
-			if (hasFlag(vbFormat, vertexFlags[ i ]))
-			{
-				ss << "smooth out vec4 ";
-				ss << attribNames[ i ] << ";" << std::endl;
-			}
-		}
-		ss << std::endl;
-
-		if (!desc->useTextures())
-		{
-			addAmbient();
-			addDiffuse();
-			addSpecular();
-		}
-
-		switch(material->getShader())
-		{
-		case CMaterial::Normal:
-		case CMaterial::UserColor:
-		case CMaterial::LightMap:
-		case CMaterial::Cloud:
-			generateNormalVS();
-			break;
-
-		case CMaterial::Specular:
-			generateSpecularVS();
-			break;
-
-		case CMaterial::PerPixelLighting:
-		case CMaterial::PerPixelLightingNoSpec:
-			generatePPLVS();
-			break;
-
-		case CMaterial::Water:
-			generateWaterVS();
-			break;
-		}
-		
-		vs.assign(ss.str());
-	}
-
 	void CGLSLShaderGenerator::generatePS(std::string &ps)
 	{
 		ss.str("");
@@ -365,38 +290,6 @@ namespace NL3D
 
 	/////////////////////////////////////////////////////////// Lights ////////////////////////////////////////////////////////////////////
 
-	void CGLSLShaderGenerator::addLightUniformsVS()
-	{
-		for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
-		{
-			switch(desc->getLight(i))
-			{
-			case CShaderDesc::Nolight:
-				continue;
-				break;
-
-			case CShaderDesc::Directional:
-				ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
-				ss << "uniform float light" << i << "Shininess;" << std::endl;
-				break;
-
-			case CShaderDesc::Point:
-				ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
-				ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
-				ss << "uniform float light" << i << "Shininess;" << std::endl;
-				ss << "uniform float light" << i << "ConstAttn;" << std::endl;
-				ss << "uniform float light" << i << "LinAttn;" << std::endl;
-				ss << "uniform float light" << i << "QuadAttn;" << std::endl;
-				break;
-			}
-		}
-	}
-
 	void CGLSLShaderGenerator::addLightUniformsFS()
 	{
 		for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
@@ -414,140 +307,9 @@ namespace NL3D
 
 	}
 
-	void CGLSLShaderGenerator::addLightOutsVS()
-	{
-		ss << "smooth out vec4 lightColor;" << std::endl;
-	}
-
 	void CGLSLShaderGenerator::addLightInsFS()
 	{
 		ss << "smooth in vec4 lightColor;" << std::endl;
-	}
-
-	void CGLSLShaderGenerator::addDirectionalFunctionVS(int num)
-	{
-		ss << "float getIntensity" << num << "(vec3 normal3, vec3 lightDir)" << std::endl;
-		ss << "{" << std::endl;
-		ss << "float angle = dot(lightDir, normal3);" << std::endl;
-		ss << "angle = max(0.0, angle);" << std::endl;
-		ss << "return angle;" << std::endl;
-		ss << "}" << std::endl;
-		ss << std::endl;
-
-		ss << "float getSpecIntensity" << num << "(vec3 normal3, vec3 lightDir)" << std::endl;
-		ss << "{" << std::endl;
-		ss << "vec3 halfVector = normalize(lightDir + normal3);" << std::endl;
-		ss << "float angle = dot(normal3, halfVector);" << std::endl;
-		ss << "angle = max(0.0, angle);" << std::endl;
-		ss << "float si = pow(angle, light" << num << "Shininess);" << std::endl;
-		ss << "return si;" << std::endl;
-		ss << "}" << std::endl;
-		ss << std::endl;
-
-		ss << "vec4 getLight" << num << "Color()" << std::endl;
-		ss << "{" << std::endl;
-		ss << "vec4 lightDir4 = viewMatrix * vec4(light" << num << "DirOrPos, 1.0);" << std::endl;
-		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
-		ss << "lightDir = normalize(lightDir);" << std::endl;
-		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
-		ss << "normal3 = normalMatrix * normal3;" << std::endl;
-		ss << "normal3 = normalize(normal3);" << std::endl;
-
-		if (desc->useTextures() || (material->getShader() == CMaterial::LightMap))
-		{
-			ss << "vec4 lc = getIntensity" << num << "(normal3, lightDir) * light" << num << "ColDiff + ";
-			ss << "getSpecIntensity" << num << "(normal3, lightDir) * light" << num << "ColSpec + ";
-			ss << "light" << num << "ColAmb;" << std::endl;
-		}
-		else
-		{
-			ss << "vec4 lc = getIntensity" << num << "(normal3, lightDir) * light" << num << "ColDiff * diffuseColor + ";
-			ss << "getSpecIntensity" << num << "(normal3, lightDir) * light" << num << "ColSpec * specularColor + ";
-			ss << "light" << num << "ColAmb * ambientColor;" << std::endl;
-		}
-
-		ss << "return lc;" << std::endl;
-		ss << "}" << std::endl;
-		ss << std::endl;
-	}
-
-	void CGLSLShaderGenerator::addPointLightFunctionVS(int num)
-	{
-		ss << "float getIntensity" << num << "(vec3 normal3, vec3 direction3)" << std::endl;
-		ss << "{" << std::endl;
-		ss << "float angle = dot(direction3, normal3);" << std::endl;
-		ss << "angle = max(0.0, angle);" << std::endl;
-		ss << "return angle;" << std::endl;
-		ss << "}" << std::endl;
-		ss << std::endl;
-
-		ss << "float getSpecIntensity" << num << "(vec3 normal3, vec3 direction3)" << std::endl;
-		ss << "{" << std::endl;
-		ss << "vec3 halfVector = normalize(direction3 + normal3);" << std::endl;
-		ss << "float angle = dot(normal3, halfVector);" << std::endl;
-		ss << "angle = max(0.0, angle);" << std::endl;
-		ss << "float si = pow(angle, light" << num << "Shininess);" << std::endl;
-		ss << "return si;" << std::endl;
-		ss << "}" << std::endl;
-		ss << std::endl;
-
-		ss << "vec4 getLight" << num << "Color()" << std::endl;
-		ss << "{" << std::endl;
-		ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
-		ss << "vec4 lightPos4 = viewMatrix * vec4(light" << num << "DirOrPos, 1.0);" << std::endl;
-		ss << "vec3 lightPos = lightPos4.xyz / lightPos4.w;" << std::endl;
-		ss << "vec3 lightDirection = lightPos - ecPos3;" << std::endl;
-		ss << "float lightDistance = length(lightDirection);" << std::endl;
-		ss << "lightDirection = normalize(lightDirection);" << std::endl;
-
-		ss << "float attenuation = light" << num << "ConstAttn + ";
-		ss << "light" << num << "LinAttn * lightDistance +";
-		ss << "light" << num << "QuadAttn * lightDistance * lightDistance;" << std::endl;
-		
-		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
-		ss << "normal3 = normalMatrix * normal3;" << std::endl;
-		ss << "normal3 = normalize(normal3);" << std::endl;
-
-		if (desc->useTextures() || (material->getShader() == CMaterial::LightMap))
-		{
-			ss << "vec4 lc = getIntensity" << num << "(normal3, lightDirection) * light" << num << "ColDiff + ";
-			ss << "getSpecIntensity" << num << "(normal3, lightDirection) * light" << num << "ColSpec + ";
-			ss << "light" << num << "ColAmb;" << std::endl;
-		}
-		else
-		{
-			ss << "vec4 lc = getIntensity" << num << "(normal3, lightDirection) * light" << num << "ColDiff * diffuseColor+ ";
-			ss << "getSpecIntensity" << num << "(normal3, lightDirection) * light" << num << "ColSpec * specularColor + ";
-			ss << "light" << num << "ColAmb * ambientColor;" << std::endl;
-		}
-
-		ss << "lc = lc / attenuation;" << std::endl;
-		ss << "return lc;" << std::endl;
-		ss << "}" << std::endl;
-		ss << std::endl;
-	}
-
-	void CGLSLShaderGenerator::addLightsFunctionVS()
-	{
-		for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
-		{
-			switch(desc->getLight(i))
-			{
-			case CShaderDesc::Nolight:
-				continue;
-				break;
-
-			case CShaderDesc::Directional:
-				addDirectionalFunctionVS(i);
-				break;
-
-			case CShaderDesc::Point:
-				addPointLightFunctionVS(i);
-				break;
-
-			}
-
-		}
 	}
 
 	void CGLSLShaderGenerator::addLightsFunctionFS()
@@ -558,19 +320,6 @@ namespace NL3D
 		ss << "}" << std::endl;
 	}
 
-	void CGLSLShaderGenerator::addLightsVS()
-	{
-		ss << "lightColor = vec4(0.0, 0.0, 0.0, 1.0);" << std::endl;
-
-		for (int i = 0; i < SHADER_MAX_LIGHTS; i++)
-		{
-			if (desc->getLight(i) == CShaderDesc::Nolight)
-				continue;
-
-			ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
-		}
-	}
-
 	void CGLSLShaderGenerator::addLightsFS()
 	{
 		ss << "fragColor = applyLights(fragColor);" << std::endl;
@@ -578,65 +327,7 @@ namespace NL3D
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CGLSLShaderGenerator::generateNormalVS()
-	{
-		if (desc->fogEnabled() || desc->hasPointLight())
-		{
-			ss << "uniform mat4 modelView;" << std::endl;
-		}
-		if (desc->lightingEnabled())
-		{
-			addViewMatrix();
-		}
-		if (desc->fogEnabled() || desc->hasPointLight())
-		{
-			ss << "vec4 ecPos4;" << std::endl;
-		}
-
-		if (desc->fogEnabled())
-			ss << "smooth out vec4 ecPos;" << std::endl;
-
-		ss << std::endl;
-
-		if (desc->lightingEnabled())
-		{
-			addNormalMatrix();
-			addLightUniformsVS();
-			addLightOutsVS();
-			ss << std::endl;
-
-			addLightsFunctionVS();
-			ss << std::endl;
-		}
-		
-		ss << "void main(void)" << std::endl;
-		ss << "{" << std::endl;
-
-		ss << "gl_Position = modelViewProjection * " << "v" << attribNames[ 0 ] << ";" << std::endl;
-
-		if (desc->fogEnabled() || desc->hasPointLight())
-			ss << "ecPos4 = modelView * v" << attribNames[ 0 ] << ";" << std::endl;
-
-		if (desc->fogEnabled())
-			ss << "ecPos = ecPos4;" << std::endl;
-
-		if (desc->lightingEnabled())
-			addLightsVS();
-
-		for (int i = Weight; i < NumOffsets; i++)
-		{
-			if (hasFlag(vbFormat, vertexFlags[ i ]))
-			{
-				ss << attribNames[ i ];
-				ss << " = ";
-				ss << "v" << attribNames[ i ] << ";" << std::endl;
-			}
-		}
-
-		ss << "}" << std::endl;
-	}
-
-	void CGLSLShaderGenerator::generateSpecularVS()
+	/*void CGLSLShaderGenerator::generateSpecularVS()
 	{
 		
 		ss << "uniform mat4 modelView;" << std::endl;
@@ -821,7 +512,7 @@ namespace NL3D
 		}
 
 		ss << "}" << std::endl;
-	}
+	}*/
 
 	void CGLSLShaderGenerator::generateNormalPS()
 	{

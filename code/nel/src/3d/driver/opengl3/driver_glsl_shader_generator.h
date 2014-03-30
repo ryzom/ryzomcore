@@ -36,9 +36,6 @@ namespace NL3D
 		/// Resets the generator to 0.
 		void reset();
 
-		/// Generate Vertex Shader based on the data provided in material, descriptor and vertexbuffer flags
-		void generateVS(std::string &vs);
-
 		/// Generate Pixel Shader based on the data provided in material, descriptor and vertexbuffer flags
 		void generatePS(std::string &ps);
 
@@ -98,26 +95,11 @@ namespace NL3D
 		/// Adds the Pixel Shader light uniforms to the program
 		void addLightUniformsFS();
 
-		/// Adds the Vertex Shader light output variables to the program
-		void addLightOutsVS();
-
 		/// Adds the Pixel Shader light output variables to the program
 		void addLightInsFS();
 
-		/// Adds the directional light Vertex Shader function, num is the light number
-		void addDirectionalFunctionVS(int num);
-
-		/// Adds the point-light Vertex Shader function, num is the light number
-		void addPointLightFunctionVS(int num);
-
-		/// Adds the appropriate light functions to the Vertex Shader
-		void addLightsFunctionVS();
-
 		/// Adds the appropriate light functions to the Pixel Shader
 		void addLightsFunctionFS();
-
-		/// Adds the lights to the Vertex Shader (calls the appropriate functions)
-		void addLightsVS();
 
 		/// Adds the lights to the Fragment Shader (calls the appropriate functions)
 		void addLightsFS();
@@ -129,7 +111,6 @@ namespace NL3D
 		//////////////////////////////////////// Vertex Shader generation ////////////////////////////////////
 
 
-		void generateNormalVS();
 		void generateSpecularVS();
 
 		/// Per-Pixel Lighting
