@@ -101,15 +101,6 @@ NEL_PFNGLMULTITEXCOORD4IVARBPROC				nglMultiTexCoord4ivARB;
 NEL_PFNGLMULTITEXCOORD4FVARBPROC				nglMultiTexCoord4fvARB;
 NEL_PFNGLMULTITEXCOORD4DVARBPROC				nglMultiTexCoord4dvARB;
 
-// ARB_TextureCompression.
-NEL_PFNGLCOMPRESSEDTEXIMAGE3DARBPROC			nglCompressedTexImage3DARB;
-NEL_PFNGLCOMPRESSEDTEXIMAGE2DARBPROC			nglCompressedTexImage2DARB;
-NEL_PFNGLCOMPRESSEDTEXIMAGE1DARBPROC			nglCompressedTexImage1DARB;
-NEL_PFNGLCOMPRESSEDTEXSUBIMAGE3DARBPROC			nglCompressedTexSubImage3DARB;
-NEL_PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC			nglCompressedTexSubImage2DARB;
-NEL_PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC			nglCompressedTexSubImage1DARB;
-NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC			nglGetCompressedTexImageARB;
-
 // VertexWeighting.
 NEL_PFNGLVERTEXWEIGHTFEXTPROC					nglVertexWeightfEXT;
 NEL_PFNGLVERTEXWEIGHTFVEXTPROC					nglVertexWeightfvEXT;
@@ -339,6 +330,14 @@ PFNGLBLITFRAMEBUFFERPROC						nglBlitFramebuffer;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
 PFNGLFRAMEBUFFERTEXTURELAYERPROC				nglFramebufferTextureLayer;
 
+PFNGLCOMPRESSEDTEXIMAGE3DPROC					nglCompressedTexImage3D;
+PFNGLCOMPRESSEDTEXIMAGE2DPROC					nglCompressedTexImage2D;
+PFNGLCOMPRESSEDTEXIMAGE1DPROC					nglCompressedTexImage1D;
+PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC				nglCompressedTexSubImage3D;
+PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC				nglCompressedTexSubImage2D;
+PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC				nglCompressedTexSubImage1D;
+PFNGLGETCOMPRESSEDTEXIMAGEPROC					nglGetCompressedTexImage;
+
 // GL_ARB_separate_shader_objects
 PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
 PFNGLACTIVESHADERPROGRAMPROC					nglActiveShaderProgram;
@@ -510,24 +509,6 @@ static bool setupARBMultiTexture(const char	*glext)
 	CHECK_ADDRESS(NEL_PFNGLMULTITEXCOORD4IVARBPROC, glMultiTexCoord4ivARB);
 	CHECK_ADDRESS(NEL_PFNGLMULTITEXCOORD4FVARBPROC, glMultiTexCoord4fvARB);
 	CHECK_ADDRESS(NEL_PFNGLMULTITEXCOORD4DVARBPROC, glMultiTexCoord4dvARB);
-
-	return true;
-}
-
-// *********************************
-static bool	setupARBTextureCompression(const char	*glext)
-{
-	H_AUTO_OGL(setupARBTextureCompression);
-
-	CHECK_EXT("GL_ARB_texture_compression");
-
-	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXIMAGE3DARBPROC, glCompressedTexImage3DARB);
-	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXIMAGE2DARBPROC, glCompressedTexImage2DARB);
-	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXIMAGE1DARBPROC, glCompressedTexImage1DARB);
-	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXSUBIMAGE3DARBPROC, glCompressedTexSubImage3DARB);
-	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC, glCompressedTexSubImage2DARB);
-	CHECK_ADDRESS(NEL_PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC, glCompressedTexSubImage1DARB);
-	CHECK_ADDRESS(NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC, glGetCompressedTexImageARB);
 
 	return true;
 }
@@ -793,7 +774,15 @@ static bool setupGLCore(const char *glext)
 	CHECK_ADDRESS(PFNGLBLITFRAMEBUFFERPROC, glBlitFramebuffer);
 	CHECK_ADDRESS(PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC, glRenderbufferStorageMultisample);
 	CHECK_ADDRESS(PFNGLFRAMEBUFFERTEXTURELAYERPROC, glFramebufferTextureLayer);
-	
+
+	CHECK_ADDRESS(PFNGLCOMPRESSEDTEXIMAGE3DPROC, glCompressedTexImage3D);
+	CHECK_ADDRESS(PFNGLCOMPRESSEDTEXIMAGE2DPROC, glCompressedTexImage2D);
+	CHECK_ADDRESS(PFNGLCOMPRESSEDTEXIMAGE1DPROC, glCompressedTexImage1D);
+	CHECK_ADDRESS(PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC, glCompressedTexSubImage3D);
+	CHECK_ADDRESS(PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC, glCompressedTexSubImage2D);
+	CHECK_ADDRESS(PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC, glCompressedTexSubImage1D);
+	CHECK_ADDRESS(PFNGLGETCOMPRESSEDTEXIMAGEPROC, glGetCompressedTexImage);
+
 	return true;
 }
 
@@ -917,9 +906,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.NbTextureStages= (ntext<((GLint)IDRV_MAT_MAXTEXTURES)?ntext:IDRV_MAT_MAXTEXTURES);
 	}
 
-	// Check ARBTextureCompression
-	ext.ARBTextureCompression= setupARBTextureCompression(glext);
-
 	// Check ARBTextureNonPowerOfTwo
 	ext.ARBTextureNonPowerOfTwo= setupARBTextureNonPowerOfTwo(glext);
 
@@ -927,7 +913,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	ext.ARBMultisample = setupARBMultisample(glext);
 
 	// Compression S3TC OK iff ARBTextureCompression.
-	ext.EXTTextureCompressionS3TC= (ext.ARBTextureCompression && setupEXTTextureCompressionS3TC(glext));
+	ext.EXTTextureCompressionS3TC= setupEXTTextureCompressionS3TC(glext);
 
 	// Check if NVidia GL_EXT_vertex_weighting is available.
 	ext.EXTVertexWeighting= setupEXTVertexWeighting(glext);

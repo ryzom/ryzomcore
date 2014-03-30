@@ -917,7 +917,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 							sint	size= tex.getPixels(i).size();
 							if (bUpload)
 							{
-								nglCompressedTexImage2DARB (GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
+								nglCompressedTexImage2D(GL_TEXTURE_2D, i-decalMipMapResize, glfmt,
 															tex.getWidth(i),tex.getHeight(i), 0, size, ptr);
 								bAllUploaded = true;
 							}
@@ -1188,7 +1188,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		nlassert (((x0&3) == 0) && ((y0&3) == 0));
 		if ((w>=4) && (h>=4))
 		{
-			nglCompressedTexSubImage2DARB (
+			nglCompressedTexSubImage2D(
 				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
 				x0, y0, (x1-x0), (y1-y0), glfmt, imageSize, ptr);
 		}
@@ -1198,7 +1198,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 			// of the mipmap is less than 4 pixel so we use the other form. (its not really time critical
 			// to upload 16 bytes so we can do it twice if texture is cut)
 			imageSize = tex.getPixels(nNumMipMap).size();
-			nglCompressedTexImage2DARB (
+			nglCompressedTexImage2D(
 				GL_TEXTURE_2D, nNumMipMap-decalMipMapResize,
 										glfmt, w, h, 0, imageSize, ptr);
 		}

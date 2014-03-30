@@ -35,26 +35,30 @@ struct	CGlExtensions
 {
 	std::string GLVersion;
 
-	// Required Extensions.
+	// Required extensions
 	bool	GLCore;
 	bool	ARBSeparateShaderObjects;
 
+	// Optional extensions
+	bool	EXTTextureCompressionS3TC;
+	bool	EXTTextureFilterAnisotropic;
+	float	EXTTextureFilterAnisotropicMaximum;
+
+	// Required Extensions. (old)
 	bool	ARBMultiTexture;
 	uint	NbTextureStages;
 
-	// Optional Extensions.
-	bool	EXTTextureCompressionS3TC;
+	// Optional Extensions. (old)
 	bool	EXTVertexWeighting;
 	bool	EXTSeparateSpecularColor;
 	bool	ARBTextureCubeMap;
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
 	bool	ARBTextureRectangle;
-	bool	EXTTextureFilterAnisotropic;
-	float	EXTTextureFilterAnisotropicMaximum;
-
 	bool	EXTSecondaryColor;
 	bool	EXTBlendColor;
+	bool	ARBTextureNonPowerOfTwo;
+	bool	ARBMultisample;
 
 	// WGL ARB extensions, true if supported
 	bool	WGLARBPBuffer;
@@ -66,18 +70,12 @@ struct	CGlExtensions
 	bool	GLXSGISwapControl;
 	bool	GLXMESASwapControl;
 
-	// ARB Extensions
-	bool	ARBTextureCompression;
-	bool	ARBTextureNonPowerOfTwo;
-	bool	ARBMultisample;
-
 public:
 	CGlExtensions()
 	{
 		// Fill all false by default.
 		ARBMultiTexture= false;
 		NbTextureStages= 1;
-		ARBTextureCompression= false;
 		EXTTextureCompressionS3TC= false;
 		EXTVertexWeighting= false;
 		EXTSeparateSpecularColor= false;
@@ -107,7 +105,6 @@ public:
 
 		result += "\n  Texturing: ";
 		result += ARBMultiTexture ? "ARBMultiTexture " : "";
-		result += ARBTextureCompression ? "ARBTextureCompression " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
 		result += ARBTextureCubeMap ? "ARBTextureCubeMap " : "";
 		result += NVTextureRectangle ? "NVTextureRectangle " : "";
@@ -211,17 +208,6 @@ extern NEL_PFNGLMULTITEXCOORD4SVARBPROC nglMultiTexCoord4svARB;
 extern NEL_PFNGLMULTITEXCOORD4IVARBPROC nglMultiTexCoord4ivARB;
 extern NEL_PFNGLMULTITEXCOORD4FVARBPROC nglMultiTexCoord4fvARB;
 extern NEL_PFNGLMULTITEXCOORD4DVARBPROC nglMultiTexCoord4dvARB;
-
-
-// ARB_TextureCompression.
-//========================
-extern NEL_PFNGLCOMPRESSEDTEXIMAGE3DARBPROC		nglCompressedTexImage3DARB;
-extern NEL_PFNGLCOMPRESSEDTEXIMAGE2DARBPROC		nglCompressedTexImage2DARB;
-extern NEL_PFNGLCOMPRESSEDTEXIMAGE1DARBPROC		nglCompressedTexImage1DARB;
-extern NEL_PFNGLCOMPRESSEDTEXSUBIMAGE3DARBPROC	nglCompressedTexSubImage3DARB;
-extern NEL_PFNGLCOMPRESSEDTEXSUBIMAGE2DARBPROC	nglCompressedTexSubImage2DARB;
-extern NEL_PFNGLCOMPRESSEDTEXSUBIMAGE1DARBPROC	nglCompressedTexSubImage1DARB;
-extern NEL_PFNGLGETCOMPRESSEDTEXIMAGEARBPROC	nglGetCompressedTexImageARB;
 
 
 // VertexWeighting.
@@ -462,6 +448,14 @@ extern PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
 extern PFNGLBLITFRAMEBUFFERPROC							nglBlitFramebuffer;
 extern PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
 extern PFNGLFRAMEBUFFERTEXTURELAYERPROC					nglFramebufferTextureLayer;
+
+extern PFNGLCOMPRESSEDTEXIMAGE3DPROC					nglCompressedTexImage3D;
+extern PFNGLCOMPRESSEDTEXIMAGE2DPROC					nglCompressedTexImage2D;
+extern PFNGLCOMPRESSEDTEXIMAGE1DPROC					nglCompressedTexImage1D;
+extern PFNGLCOMPRESSEDTEXSUBIMAGE3DPROC					nglCompressedTexSubImage3D;
+extern PFNGLCOMPRESSEDTEXSUBIMAGE2DPROC					nglCompressedTexSubImage2D;
+extern PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC					nglCompressedTexSubImage1D;
+extern PFNGLGETCOMPRESSEDTEXIMAGEPROC					nglGetCompressedTexImage;
 
 // GL_ARB_separate_shader_objects
 extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
