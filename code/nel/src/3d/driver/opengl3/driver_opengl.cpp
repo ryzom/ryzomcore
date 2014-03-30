@@ -533,7 +533,7 @@ bool CDriverGL3::supportBloomEffect() const
 // ***************************************************************************
 bool CDriverGL3::supportNonPowerOfTwoTextures() const
 {
-	return _Extensions.ARBTextureNonPowerOfTwo;
+	return true;
 }
 
 // ***************************************************************************

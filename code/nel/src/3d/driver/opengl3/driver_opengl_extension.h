@@ -57,7 +57,6 @@ struct	CGlExtensions
 	bool	ARBTextureRectangle;
 	bool	EXTSecondaryColor;
 	bool	EXTBlendColor;
-	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
 
 	// WGL ARB extensions, true if supported
@@ -93,7 +92,6 @@ public:
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 0.f;
 		ARBTextureRectangle = false;
-		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
 	}
 
@@ -111,7 +109,6 @@ public:
 		result += EXTTextureRectangle ? "EXTTextureRectangle " : "";
 		result += ARBTextureRectangle ? "ARBTextureRectangle " : "";
 		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic (Maximum = " + NLMISC::toString(EXTTextureFilterAnisotropicMaximum) + ") " : "";
-		result += ARBTextureNonPowerOfTwo ? "ARBTextureNonPowerOfTwo " : "";
 		result += "texture stages(*) = ";
 		result += NLMISC::toString(NbTextureStages);
 

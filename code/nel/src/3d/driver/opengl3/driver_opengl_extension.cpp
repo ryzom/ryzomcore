@@ -514,16 +514,6 @@ static bool setupARBMultiTexture(const char	*glext)
 }
 
 // *********************************
-static bool	setupARBTextureNonPowerOfTwo(const char	*glext)
-{
-	H_AUTO_OGL(setupARBTextureCompression);
-
-	CHECK_EXT("GL_ARB_texture_non_power_of_two");
-
-	return true;
-}
-
-// *********************************
 static bool	setupEXTTextureCompressionS3TC(const char	*glext)
 {
 	H_AUTO_OGL(setupEXTTextureCompressionS3TC);
@@ -896,6 +886,12 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check GL_ARB_separate_shader_objects
 	ext.ARBSeparateShaderObjects = setupARBSeparateShaderObjects(glext);
 
+	// Compression S3TC
+	ext.EXTTextureCompressionS3TC = setupEXTTextureCompressionS3TC(glext);
+
+	// Check GL_EXT_texture_filter_anisotropic
+	ext.EXTTextureFilterAnisotropic = setupEXTTextureFilterAnisotropic(glext);
+
 	// Check ARBMultiTexture
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
 	if (ext.ARBMultiTexture)
@@ -906,14 +902,8 @@ void	registerGlExtensions(CGlExtensions &ext)
 		ext.NbTextureStages= (ntext<((GLint)IDRV_MAT_MAXTEXTURES)?ntext:IDRV_MAT_MAXTEXTURES);
 	}
 
-	// Check ARBTextureNonPowerOfTwo
-	ext.ARBTextureNonPowerOfTwo= setupARBTextureNonPowerOfTwo(glext);
-
 	// Check ARBMultisample
 	ext.ARBMultisample = setupARBMultisample(glext);
-
-	// Compression S3TC OK iff ARBTextureCompression.
-	ext.EXTTextureCompressionS3TC= setupEXTTextureCompressionS3TC(glext);
 
 	// Check if NVidia GL_EXT_vertex_weighting is available.
 	ext.EXTVertexWeighting= setupEXTVertexWeighting(glext);
@@ -938,9 +928,6 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check GL_ARB_texture_rectangle
 	ext.ARBTextureRectangle = setupARBTextureRectangle(glext);
-
-	// Check GL_EXT_texture_filter_anisotropic
-	ext.EXTTextureFilterAnisotropic = setupEXTTextureFilterAnisotropic(glext);
 
 	if (ext.EXTTextureFilterAnisotropic)
 	{
