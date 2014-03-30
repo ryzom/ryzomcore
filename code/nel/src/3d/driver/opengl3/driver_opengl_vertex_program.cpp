@@ -412,7 +412,8 @@ void CDriverGL3::touchLightVP(int i)
 	if (m_VPBuiltinCurrent.LightMode[i] != mode)
 	{
 		m_VPBuiltinCurrent.LightMode[i] = mode;
-		m_VPBuiltinTouched = true;
+		if (m_VPBuiltinCurrent.Lighting)
+			m_VPBuiltinTouched = true;
 	}
 }
 
