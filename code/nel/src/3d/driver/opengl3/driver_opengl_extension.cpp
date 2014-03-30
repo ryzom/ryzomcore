@@ -835,17 +835,14 @@ void	registerGlExtensions(CGlExtensions &ext)
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
 	}
 
+	GLint nbFragmentTextureUnits;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &nbFragmentTextureUnits);
+	ext.NbFragmentTextureUnits = (nbFragmentTextureUnits > IDRV_MAT_MAXTEXTURES) ? IDRV_MAT_MAXTEXTURES : nbFragmentTextureUnits; // FIXME GL3
+
 	// ---
 
 	// Check ARBMultiTexture
 	ext.ARBMultiTexture= setupARBMultiTexture(glext);
-	if (ext.ARBMultiTexture)
-	{
-		glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &ntext);
-		// We could have more than IDRV_MAT_MAXTEXTURES but the interface only
-		// support IDRV_MAT_MAXTEXTURES texture stages so take min
-		ext.NbTextureStages= (ntext<((GLint)IDRV_MAT_MAXTEXTURES)?ntext:IDRV_MAT_MAXTEXTURES);
-	}
 
 	// Check ARBMultisample
 	ext.ARBMultisample = setupARBMultisample(glext);

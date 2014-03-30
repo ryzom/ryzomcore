@@ -1340,7 +1340,7 @@ private:
 	// @}
 
 	/// Same as getNbTextureStages(), but faster because inline, and not virtual!!
-	uint			inlGetNumTextStages() const { return _Extensions.NbTextureStages; }
+	uint inlGetNumTextStages() const { return _Extensions.NbFragmentTextureUnits; }
 
 
 	NLMISC::CRGBA					_CurrentBlendConstantColor;

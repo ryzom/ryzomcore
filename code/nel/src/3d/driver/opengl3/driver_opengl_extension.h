@@ -38,6 +38,7 @@ struct	CGlExtensions
 	// Required extensions
 	bool	GLCore;
 	bool	ARBSeparateShaderObjects;
+	uint	NbFragmentTextureUnits;
 
 	// Optional extensions
 	bool	EXTTextureCompressionS3TC;
@@ -46,7 +47,7 @@ struct	CGlExtensions
 
 	// Required Extensions. (old)
 	bool	ARBMultiTexture;
-	uint	NbTextureStages;
+	// uint	NbTextureStages;
 
 	// Optional Extensions. (old)
 	bool	EXTSecondaryColor;
@@ -67,20 +68,26 @@ public:
 	CGlExtensions()
 	{
 		// Fill all false by default.
-		ARBMultiTexture= false;
-		NbTextureStages= 1;
-		EXTTextureCompressionS3TC= false;
-		EXTSecondaryColor= false;
-		WGLARBPBuffer= false;
-		WGLARBPixelFormat= false;
-		WGLEXTSwapControl= false;
-		GLXEXTSwapControl= false;
-		GLXSGISwapControl= false;
-		GLXMESASwapControl= false;
-		EXTBlendColor= false;
+		GLCore = false;
+		ARBSeparateShaderObjects = false;
+		NbFragmentTextureUnits = 0;
+
+		EXTTextureCompressionS3TC = false;
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 0.f;
+
+		ARBMultiTexture= false;
+		EXTSecondaryColor= false;
+		EXTBlendColor= false;
 		ARBMultisample = false;
+
+		WGLARBPBuffer = false;
+		WGLARBPixelFormat = false;
+		WGLEXTSwapControl = false;
+
+		GLXEXTSwapControl = false;
+		GLXSGISwapControl = false;
+		GLXMESASwapControl = false;
 	}
 
 	std::string toString()
@@ -89,12 +96,16 @@ public:
 		result += GLVersion;
 		result += "; Available extensions:";
 
+		result += "\n  Required: ";
+		result += GLCore ? "GLCore " : "";
+		result += ARBSeparateShaderObjects ? "ARBSeparateShaderObjects " : "";
+
 		result += "\n  Texturing: ";
 		result += ARBMultiTexture ? "ARBMultiTexture " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
 		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic (Maximum = " + NLMISC::toString(EXTTextureFilterAnisotropicMaximum) + ") " : "";
 		result += "texture stages(*) = ";
-		result += NLMISC::toString(NbTextureStages);
+		result += NLMISC::toString(NbFragmentTextureUnits);
 
 		result += "\n  Misc:      ";
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
