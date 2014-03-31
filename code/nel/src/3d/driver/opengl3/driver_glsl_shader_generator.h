@@ -127,7 +127,10 @@ namespace NL3D
 		void generateNormalPS();
 		
 
+		// output texop3
 		void generateTexEnv();
+		void generateSpecular();
+
 
 		void generateLightMapPS();
 		void generateSpecularPS();

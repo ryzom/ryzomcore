@@ -270,6 +270,7 @@ namespace
 			if (desc.TexGenMode[i] >= 0)
 				ss << "texCoord" << i << " = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
 
+			// FIXME GL3 SPECULAR: TEXGEN REFLECTION CUBE
 			// TODO: Texgen calculation
 		}
 

@@ -606,9 +606,15 @@ namespace NL3D
 		else
 			ss << "vec4 texel = vec4(0.5, 0.5, 0.5, 1.0);" << std::endl;*/
 
-		generateTexEnv();
-
-		ss << "fragColor = texop" << (IDRV_MAT_MAXTEXTURES - 1) << ";" << std::endl;
+		switch (material->getShader())
+		{
+		case CMaterial::Specular:
+			generateSpecular();
+			break;
+		default:
+			generateTexEnv();
+			break;
+		}
 
 		if (desc->fogEnabled())
 			addFog();
@@ -816,6 +822,22 @@ namespace NL3D
 				ss << "vec4 texop" << stage << " = texop" << (stage - 1) << ";" << std::endl;
 			}
 		}
+		ss << "fragColor = texop" << (IDRV_MAT_MAXTEXTURES - 1) << ";" << std::endl;
+	}
+
+	void CGLSLShaderGenerator::generateSpecular()
+	{
+		/*s << "vec4 texel;" << std::endl;
+		ss << "texel.rgb = texel0.rgb * diffuseColor.rgb;" << std::endl;
+		ss << "texel.a = texel0.a;" << std::endl;
+		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
+		ss << "texel.a = texel1.a;" << std::endl;*/
+
+		// FIXME GL3 SPECULAR: VERIFY IF THIS WORKS
+
+		ss << "vec3 specop0 = texel0.rgb * diffuse.rgb;" << std::endl;
+		ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, texel0.a);" << std::endl;
+		ss << "fragColor = specop1;" << std::endl;
 	}
 
 
