@@ -103,20 +103,9 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 		// disable texturing.
 		nglActiveTexture(GL_TEXTURE0 + stage);
 		glDisable(GL_TEXTURE_2D);
-
 		glDisable(GL_TEXTURE_CUBE_MAP);
-
-		_TextureMode[stage]= TextureDisabled;
-
-		// Tex gen init
-		_TexGenMode[stage] = 0;
-
 		glDisable(GL_TEXTURE_RECTANGLE);
-
-		glDisable(GL_TEXTURE_GEN_S);
-		glDisable(GL_TEXTURE_GEN_T);
-		glDisable(GL_TEXTURE_GEN_R);
-		glDisable(GL_TEXTURE_GEN_Q);
+		_TextureMode[stage]= TextureDisabled;
 	}
 
 	// ActiveTexture current texture to 0.
@@ -392,7 +381,7 @@ void CDriverGLStates3::setDepthRange(float znear, float zfar)
 		updateDepthRange();
 	}
 }
-
+/*
 // ***************************************************************************
 void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 {
@@ -405,7 +394,7 @@ void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
 		_TexGenMode[stage] = mode;
 	}
 }
-
+*/
 // ***************************************************************************
 void			CDriverGLStates3::resetTextureMode()
 {

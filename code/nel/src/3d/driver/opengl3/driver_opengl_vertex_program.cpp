@@ -41,6 +41,9 @@ bool operator<(const CVPBuiltin &left, const CVPBuiltin &right)
 		for (sint i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 			if (left.LightMode[i] != right.LightMode[i])
 				return left.LightMode[i] < right.LightMode[i];
+	for (sint i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+		if (left.TexGenMode[i] != right.TexGenMode[i])
+			return left.TexGenMode[i] < right.TexGenMode[i];
 	if (left.Specular != right.Specular)
 		return right.Specular;
 	if (left.Fog != right.Fog)
@@ -330,6 +333,16 @@ void CDriverGL3::touchVertexFormatVP()
 	if (m_VPBuiltinCurrent.VertexFormat != format)
 	{
 		m_VPBuiltinCurrent.VertexFormat = format;
+		m_VPBuiltinTouched = true;
+	}
+}
+
+void CDriverGL3::setTexGenModeVP(uint stage, sint mode)
+{
+	H_AUTO_OGL(CDriverGL3_setTexGenModeVP)
+	if (m_VPBuiltinCurrent.TexGenMode[stage] != mode)
+	{
+		m_VPBuiltinCurrent.TexGenMode[stage] = mode;
 		m_VPBuiltinTouched = true;
 	}
 }

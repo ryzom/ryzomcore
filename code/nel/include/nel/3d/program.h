@@ -145,6 +145,46 @@ struct CProgramIndex
 		TexMatrix2,
 		TexMatrix3,
 
+		TexGen0ObjectPlaneS,
+		TexGen1ObjectPlaneS,
+		TexGen2ObjectPlaneS,
+		TexGen3ObjectPlaneS,
+
+		TexGen0ObjectPlaneT,
+		TexGen1ObjectPlaneT,
+		TexGen2ObjectPlaneT,
+		TexGen3ObjectPlaneT,
+
+		TexGen0ObjectPlaneP,
+		TexGen1ObjectPlaneP,
+		TexGen2ObjectPlaneP,
+		TexGen3ObjectPlaneP,
+
+		TexGen0ObjectPlaneQ,
+		TexGen1ObjectPlaneQ,
+		TexGen2ObjectPlaneQ,
+		TexGen3ObjectPlaneQ,
+
+		TexGen0EyePlaneS,
+		TexGen1EyePlaneS,
+		TexGen2EyePlaneS,
+		TexGen3EyePlaneS,
+
+		TexGen0EyePlaneT,
+		TexGen1EyePlaneT,
+		TexGen2EyePlaneT,
+		TexGen3EyePlaneT,
+
+		TexGen0EyePlaneP,
+		TexGen1EyePlaneP,
+		TexGen2EyePlaneP,
+		TexGen3EyePlaneP,
+
+		TexGen0EyePlaneQ,
+		TexGen1EyePlaneQ,
+		TexGen2EyePlaneQ,
+		TexGen3EyePlaneQ,
+
 		SelfIllumination,
 
 		Light0DirOrPos,

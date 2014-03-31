@@ -113,8 +113,6 @@ public:
       * NB : this is done in window coordinate, not in world coordinate as with CMaterial
 	  */
 	void			setZBias(float zbias);
-	// NB: set 0 to reset TexGen.
-	void			setTexGenMode (uint stage, GLint mode);
 	// @}
 
 
@@ -173,8 +171,6 @@ private:
 	TTextureMode	_TextureMode[8];
 
 	bool			_VertexAttribArrayEnabled[CVertexBuffer::NumValue];
-
-	GLint			_TexGenMode[8];
 
 	uint			_CurrARBVertexBuffer;
 

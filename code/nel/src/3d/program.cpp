@@ -114,6 +114,46 @@ const char *CProgramIndex::Names[NUM_UNIFORMS] =
 	"texMatrix1",
 	"texMatrix2",
 	"texMatrix3",
+
+	"texGen0ObjectPlaneS",
+	"texGen1ObjectPlaneS",
+	"texGen2ObjectPlaneS",
+	"texGen3ObjectPlaneS",
+
+	"texGen0ObjectPlaneT",
+	"texGen1ObjectPlaneT",
+	"texGen2ObjectPlaneT",
+	"texGen3ObjectPlaneT",
+
+	"texGen0ObjectPlaneP",
+	"texGen1ObjectPlaneP",
+	"texGen2ObjectPlaneP",
+	"texGen3ObjectPlaneP",
+
+	"texGen0ObjectPlaneQ",
+	"texGen1ObjectPlaneQ",
+	"texGen2ObjectPlaneQ",
+	"texGen3ObjectPlaneQ",
+
+	"texGen0EyePlaneS",
+	"texGen1EyePlaneS",
+	"texGen2EyePlaneS",
+	"texGen3EyePlaneS",
+
+	"texGen0EyePlaneT",
+	"texGen1EyePlaneT",
+	"texGen2EyePlaneT",
+	"texGen3EyePlaneT",
+
+	"texGen0EyePlaneP",
+	"texGen1EyePlaneP",
+	"texGen2EyePlaneP",
+	"texGen3EyePlaneP",
+
+	"texGen0EyePlaneQ",
+	"texGen1EyePlaneQ",
+	"texGen2EyePlaneQ",
+	"texGen3EyePlaneQ",
 	
 	"selfIllumination",
 

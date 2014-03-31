@@ -128,32 +128,32 @@ void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
 		activateTexEnvColor(stage, env);
 
 		// Activate texture generation mapping
-		_DriverGLStates.activeTexture(stage);
-		if (mat.getTexCoordGen (stage))
+		//_DriverGLStates.activeTexture(stage);
+		if (mat.getTexCoordGen(stage))
 		{
 			// set mode and enable.
 			CMaterial::TTexCoordGenMode	mode= mat.getTexCoordGenMode(stage);
 			if (mode==CMaterial::TexCoordGenReflect)
 			{
 				// Cubic or normal ?
-				if (text->isTextureCube ())
-					_DriverGLStates.setTexGenMode (stage, GL_REFLECTION_MAP_ARB);
+				if (text->isTextureCube())
+					setTexGenModeVP(stage, TexGenReflectionMap);
 				else
-					_DriverGLStates.setTexGenMode (stage, GL_SPHERE_MAP);
+					setTexGenModeVP(stage, TexGenSphereMap);
 			}
 			else if (mode==CMaterial::TexCoordGenObjectSpace)
 			{
-				_DriverGLStates.setTexGenMode (stage, GL_OBJECT_LINEAR);
+				setTexGenModeVP(stage, TexGenObjectLinear);
 			}
 			else if (mode==CMaterial::TexCoordGenEyeSpace)
 			{
-				_DriverGLStates.setTexGenMode (stage, GL_EYE_LINEAR);
+				setTexGenModeVP(stage, TexGenEyeLinear);
 			}
 		}
 		else
 		{
 			// Disable.
-			_DriverGLStates.setTexGenMode(stage, 0);
+			setTexGenModeVP(stage, TexGenDisabled);
 		}
 	}
 }
@@ -835,8 +835,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		// FIXME GL3 LIGHTMAP
 
 		// Setup gen tex off
-		_DriverGLStates.activeTexture(0);
-		_DriverGLStates.setTexGenMode(0, 0);
+		setTexGenModeVP(0, TexGenDisabled);
 
 		// And disable other stages.
 		for (uint stage = 1; stage < inlGetNumTextStages(); stage++)
@@ -932,8 +931,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 					activateTexEnvColor(stage, stdEnv);
 
 					// Setup env for texture stage.
-					_DriverGLStates.activeTexture(stage);
-					_DriverGLStates.setTexGenMode(stage, 0);
+					setTexGenModeVP(stage, TexGenDisabled);
 
 					// setup TexEnvCombine4 (ignore alpha part).
 					if (_CurrentTexEnvSpecial[stage] != TexEnvSpecialLightMap)
@@ -961,8 +959,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				activateTexEnvMode(stage, _LightMapLastStageEnv);
 
 				// Setup gen tex off
-				_DriverGLStates.activeTexture(stage);
-				_DriverGLStates.setTexGenMode(stage, 0);
+				setTexGenModeVP(stage, TexGenDisabled);
 			}
 		}
 		else
@@ -1087,8 +1084,7 @@ void			CDriverGL3::setupSpecularBegin()
 	activateTexEnvMode(0, env);
 
 	// Disable texGen for stage 0
-	_DriverGLStates.activeTexture(0);
-	_DriverGLStates.setTexGenMode(0, 0);
+	setTexGenModeVP(0, TexGenDisabled);
 
 	// ---- Stage 1 Common Setup.
 	// NB don't setup the TexEnv here (stage1 setuped in setupSpecularPass() according to extensions)
@@ -1105,8 +1101,7 @@ void			CDriverGL3::setupSpecularEnd()
 {
 	H_AUTO_OGL(CDriverGL3_setupSpecularEnd)
 	// Disable Texture coord generation.
-	_DriverGLStates.activeTexture(1);
-	_DriverGLStates.setTexGenMode(1, 0);
+	setTexGenModeVP(1, TexGenDisabled);
 
 	// Happiness !!! we have already enabled the stage 1
 	_UserTexMat[ 1 ].identity();

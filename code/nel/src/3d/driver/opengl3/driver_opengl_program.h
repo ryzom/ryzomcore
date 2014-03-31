@@ -25,12 +25,19 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 #endif
 
+static sint TexGenDisabled = -1;
+static sint TexGenReflectionMap = 0; // GL_REFLECTION_MAP_ARB
+static sint TexGenSphereMap = 1; // GL_SPHERE_MAP
+static sint TexGenObjectLinear = 2; // GL_OBJECT_LINEAR
+static sint TexGenEyeLinear = 3; // GL_EYE_LINEAR
+
 /// Builtin vertex program description
 struct CVPBuiltin
 {
 	uint16 VertexFormat;
 	bool Lighting;
 	sint LightMode[NL_OPENGL3_MAX_LIGHT]; // -1 when disabled
+	sint TexGenMode[IDRV_MAT_MAXTEXTURES]; // -1 when disabled
 	bool Specular; // Reflection
 	bool Fog;
 	// bool VertexColorLighted;

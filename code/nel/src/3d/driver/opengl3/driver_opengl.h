@@ -391,6 +391,7 @@ public:
 	void					enableLightingVP(bool enable);
 	void					touchLightVP(int i);
 	void					touchVertexFormatVP();
+	void					setTexGenModeVP(uint stage, sint mode);
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
