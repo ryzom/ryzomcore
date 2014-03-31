@@ -40,7 +40,6 @@ namespace NL3D
 		void generatePS(std::string &ps);
 
 		void setMaterial(CMaterial *mat) { material = mat; }
-		void setVBFormat(uint16 format) { vbFormat = format; }
 		void setShaderDesc(CShaderDesc *d) { desc = d; }
 
 	private:
@@ -143,7 +142,6 @@ namespace NL3D
 		////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		std::stringstream ss;
-		uint16 vbFormat;
 		CMaterial const *material;
 		CShaderDesc const *desc;
 	};

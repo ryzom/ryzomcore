@@ -154,6 +154,10 @@ namespace NL3D
 						return false;
 
 				for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+					if (textureSamplerMode[ i ] != o.textureSamplerMode[ i ])
+						return false;
+
+				for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 					if (useTextureStage[ i ] != o.useTextureStage[ i ])
 						return false;
 			}
@@ -250,7 +254,7 @@ namespace NL3D
 		void setShaders(SShaderPair sp) { shaderPair = sp; }
 		SShaderPair getShaders() const{ return shaderPair; }
 
-	private:
+	public:
 
 		enum TShaderFeatures
 		{

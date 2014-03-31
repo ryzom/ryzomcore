@@ -1091,9 +1091,12 @@ void			CDriverGL3::setupSpecularBegin()
 	// For all cases, setup the TexCoord gen for stage1
 	_DriverGLStates.activeTexture(1);
 
-	// setup the good matrix for stage 1.
-	_UserTexMat[ 1 ] = _SpecularTexMtx;
+	// todo hulud remove - lol
+	// _DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
+	setTexGenModeVP(1, TexGenReflectionMap);
 
+	// setup the good matrix for stage 1.
+	_UserTexMat[1] = _SpecularTexMtx;
 }
 
 // ***************************************************************************
@@ -1103,8 +1106,8 @@ void			CDriverGL3::setupSpecularEnd()
 	// Disable Texture coord generation.
 	setTexGenModeVP(1, TexGenDisabled);
 
-	// Happiness !!! we have already enabled the stage 1
-	_UserTexMat[ 1 ].identity();
+	// Happiness !!! we have already enabled the stage 1 - lolwhat
+	_UserTexMat[1].identity();
 }
 
 // ***************************************************************************

@@ -556,8 +556,13 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 	desc.setShaderType(mat.getShader());
 	uint16 vbFlags = _CurrentVertexBufferHard->VB->getVertexFormat();
 	for (sint i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
-		if (m_VPBuiltinCurrent.TexGenMode[0] >= 0)
-			vbFlags |= g_VertexFlags[TexCoord0 + i]; // texgen hack for keeping pp simpler
+	{
+		if (m_VPBuiltinCurrent.TexGenMode[i] >= 0)
+		{
+			//nldebug("texgen hack for keeping pp simpler, stage %i, tex %s valid", i, mat.getTexture(i) ? "IS" : "NOT");
+			vbFlags |= g_VertexFlags[TexCoord0 + i];
+		}
+	}
 	desc.setVBFlags(vbFlags);
 	
 	if (mat.getShader() == CMaterial::LightMap)
@@ -565,14 +570,20 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 	
 	//int i = 0;
 
-	if (mat.getShader() == CMaterial::Normal)
+	if (mat.getShader() == CMaterial::Normal
+		|| mat.getShader() == CMaterial::UserColor
+		|| mat.getShader() == CMaterial::Specular)
 	{
 		bool useTextures = false;
 
 		int maxTextures = std::min(int(IDRV_MAT_MAXTEXTURES), int(IDRV_MAT_MAXTEXTURES));
-		for (int i = 0; i < maxTextures; i++)
+
+		if (mat.getShader() == CMaterial::Normal)
 		{
-			desc.setTexEnvMode(i, mat.getTexEnvMode(i));
+			for (int i = 0; i < maxTextures; i++)
+			{
+				desc.setTexEnvMode(i, mat.getTexEnvMode(i));
+			} // todo specular env mode..
 		}
 
 		for (int i = 0; i < maxTextures; i++)
@@ -582,8 +593,18 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 				&& (desc.hasVBFlags(g_VertexFlags[TexCoord0]) || desc.hasVBFlags(g_VertexFlags[TexCoord0 + i]))
 				)
 			{
+				//nldebug("use stage %i", i);
+
 				desc.setUseTexStage(i, true);
 				useTextures = true;
+
+				desc.textureSamplerMode[i] = mat.getTexture(i)->isTextureCube() ? SamplerCube : Sampler2D; // Driver state
+			}
+			else
+			{
+				/*nldebug("stage fail %i, tex %s, tc0 %s, tci, %s", i, mat.getTexture(i) ? "VALID" : "NO", 
+					desc.hasVBFlags(g_VertexFlags[TexCoord0]) ? "YES" : "NO",
+					desc.hasVBFlags(g_VertexFlags[TexCoord0 + i]) ? "YES" : "NO");*/
 			}
 		}
 
@@ -599,7 +620,7 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 		desc.setAlphaTestThreshold(mat.getAlphaTestThreshold());
 	}
 
-	if (m_VPBuiltinCurrent.Fog)
+	if (m_VPBuiltinCurrent.Fog) // Driver state
 	{
 		desc.setFog(true);
 		desc.setFogMode(CShaderDesc::Linear);
@@ -711,7 +732,6 @@ bool CDriverGL3::setupBuiltinPixelProgram(CMaterial &mat)
 
 		shaderGenerator->reset();
 		shaderGenerator->setMaterial(&mat);
-		shaderGenerator->setVBFormat(_CurrentVertexBufferHard->VB->getVertexFormat());
 		shaderGenerator->setShaderDesc(&desc);
 		
 		// If we don't already have a vertex program attached, we'll generate it now

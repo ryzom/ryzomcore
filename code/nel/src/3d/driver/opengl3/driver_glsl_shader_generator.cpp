@@ -52,7 +52,6 @@ namespace NL3D
 	void CGLSLShaderGenerator::reset()
 	{
 		material = NULL;
-		vbFormat = 0;
 		desc = NULL;
 		ss.str("");
 		ss.clear();
@@ -73,7 +72,7 @@ namespace NL3D
 
 		for (int i = Weight; i < NumOffsets; i++)
 		{
-			if (hasFlag(vbFormat, g_VertexFlags[i]))
+			if (hasFlag(desc->vbFlags, g_VertexFlags[i]))
 			{
 				ss << "smooth in vec4 ";
 				ss << g_AttribNames[i] << ";" << std::endl;
@@ -540,7 +539,11 @@ namespace NL3D
 		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 		{
 			if (desc->getUseTexStage(i))
-				ss << "uniform sampler2D sampler" << sampler << ";" << std::endl;
+			{
+				ss << "uniform "
+					<< ((desc->textureSamplerMode[i] == SamplerCube) ? "samplerCube" : "sampler2D")
+					<< " sampler" << sampler << ";" << std::endl;
+			}
 			sampler++;
 		}
 
@@ -577,7 +580,7 @@ namespace NL3D
 			ss << "diffuse = applyLights(diffuse);" << std::endl;
 			ss << "diffuse.a = 1.0;" << std::endl;
 		}
-		if (hasFlag(vbFormat, g_VertexFlags[PrimaryColor]))
+		if (hasFlag(desc->vbFlags, g_VertexFlags[PrimaryColor]))
 			ss << "diffuse = color * diffuse;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
 
 		bool textures = false;
@@ -587,9 +590,10 @@ namespace NL3D
 			{
 				ss << "vec4 texel" << i << " = texture(sampler" << i << ", ";				
 				if (desc->hasVBFlags(g_VertexFlags[TexCoord0 + i]))
-					ss << g_AttribNames[TexCoord0 + i] << ".st);";
+					ss << g_AttribNames[TexCoord0 + i];
 				else
-					ss << g_AttribNames[TexCoord0] << ".st);";
+					ss << g_AttribNames[TexCoord0];
+				ss << ((desc->textureSamplerMode[i] == SamplerCube) ? ".str);" : ".st);");
 				ss << std::endl;
 				textures = true;
 			}
@@ -823,7 +827,7 @@ namespace NL3D
 		int ntextures = 0;
 		for (int i = TexCoord0; i < TexCoord4; i++)
 		{
-			if (hasFlag(vbFormat, g_VertexFlags[i]))
+			if (hasFlag(desc->vbFlags, g_VertexFlags[i]))
 				ntextures++;
 		}
 

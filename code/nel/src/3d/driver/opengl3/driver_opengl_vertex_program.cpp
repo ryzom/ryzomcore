@@ -356,8 +356,8 @@ void CDriverGL3::setTexGenModeVP(uint stage, sint mode)
 	H_AUTO_OGL(CDriverGL3_setTexGenModeVP)
 	if (m_VPBuiltinCurrent.TexGenMode[stage] != mode)
 	{
-		if (mode >= 0)
-			nlwarning("enable texgen %i, %i, not implemented", stage, mode);
+		//if (mode >= 0)
+		//	nlwarning("enable texgen %i, %i, not implemented", stage, mode);
 		m_VPBuiltinCurrent.TexGenMode[stage] = mode;
 		m_VPBuiltinTouched = true;
 	}
