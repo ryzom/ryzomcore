@@ -107,12 +107,6 @@ public:
 	/// \name Material setting.
 	/// Each f() get an uint32 for fast comparison, and OpenGL colors.
 	// @{
-	void			setEmissive(uint32 packedColor, const GLfloat color[4]);
-	void			setAmbient(uint32 packedColor, const GLfloat color[4]);
-	void			setDiffuse(uint32 packedColor, const GLfloat color[4]);
-	void			setSpecular(uint32 packedColor, const GLfloat color[4]);
-	void			setShininess(float shin);
-	void			setVertexColorLighted(bool enable);
 	void			setDepthRange (float znear, float zfar);
 	void			getDepthRange(float &znear, float &zfar) const { znear = _DepthRangeNear; zfar = _DepthRangeFar; }
 	/** Set z-bias
@@ -174,13 +168,6 @@ private:
 	GLenum			_CurStencilOpZPass;
 	GLuint			_CurStencilWriteMask;
 	float			_CurAlphaTestThreshold;
-
-	uint32			_CurEmissive;
-	uint32			_CurAmbient;
-	uint32			_CurDiffuse;
-	uint32			_CurSpecular;
-	float			_CurShininess;
-	bool			_VertexColorLighted;
 
 	uint			_CurrentActiveTexture;
 	TTextureMode	_TextureMode[8];

@@ -105,19 +105,6 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	glStencilOp(_CurStencilOpFail, _CurStencilOpZFail, _CurStencilOpZPass);
 	glStencilMask(_CurStencilWriteMask);
 
-	// Materials.
-	uint32 packedOne = (CRGBA(255, 255, 255, 255)).getPacked();
-	uint32 packedZero = (CRGBA(0, 0, 0, 255)).getPacked();
-	_CurEmissive = packedZero;
-	_CurAmbient = packedOne;
-	_CurDiffuse = packedOne;
-	_CurSpecular = packedZero;
-	_CurShininess = 1;
-
-	// Lighted vertex color
-	_VertexColorLighted = false;
-	glDisable(GL_COLOR_MATERIAL);
-
 	// setup GLStates.
 	static const GLfloat one[4] = { 1, 1, 1, 1 };
 	static const GLfloat zero[4] = { 0, 0, 0, 1 };
@@ -369,68 +356,6 @@ void			CDriverGLStates3::stencilMask(GLuint mask)
 	}
 }
 
-
-// ***************************************************************************
-void			CDriverGLStates3::setEmissive(uint32 packedColor, const GLfloat color[4])
-{
-	H_AUTO_OGL(CDriverGLStates3_setEmissive)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (packedColor!=_CurEmissive)
-#endif
-	{
-		_CurEmissive= packedColor;
-	}
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::setAmbient(uint32 packedColor, const GLfloat color[4])
-{
-	H_AUTO_OGL(CDriverGLStates3_setAmbient)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (packedColor!=_CurAmbient)
-#endif
-	{
-		_CurAmbient= packedColor;
-	}
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::setDiffuse(uint32 packedColor, const GLfloat color[4])
-{
-	H_AUTO_OGL(CDriverGLStates3_setDiffuse)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (packedColor!=_CurDiffuse)
-#endif
-	{
-		_CurDiffuse= packedColor;
-	}
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::setSpecular(uint32 packedColor, const GLfloat color[4])
-{
-	H_AUTO_OGL(CDriverGLStates3_setSpecular)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (packedColor!=_CurSpecular)
-#endif
-	{
-		_CurSpecular= packedColor;
-	}
-}
-
-// ***************************************************************************
-void			CDriverGLStates3::setShininess(float shin)
-{
-	H_AUTO_OGL(CDriverGLStates3_setShininess)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (shin != _CurShininess)
-#endif
-	{
-		_CurShininess= shin;
-	}
-}
-
-
 // ***************************************************************************
 static void	convColor(CRGBA col, GLfloat glcol[4])
 {
@@ -441,19 +366,6 @@ static void	convColor(CRGBA col, GLfloat glcol[4])
 	glcol[2]= col.B*OO255;
 	glcol[3]= col.A*OO255;
 }
-
-// ***************************************************************************
-void			CDriverGLStates3::setVertexColorLighted(bool enable)
-{
-	H_AUTO_OGL(CDriverGLStates3_setVertexColorLighted)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (enable != _VertexColorLighted)
-#endif
-	{
-		_VertexColorLighted= enable;
-	}
-}
-
 
 // ***************************************************************************
 void CDriverGLStates3::updateDepthRange()

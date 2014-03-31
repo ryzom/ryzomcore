@@ -602,12 +602,14 @@ namespace NL3D
 
 		ss << "fragColor = texop" << (IDRV_MAT_MAXTEXTURES - 1) << ";" << std::endl;
 
-		if (desc->fogEnabled())
-			addFog();
+		//if (desc->fogEnabled())
+		//	addFog();
 
 		addAlphaTest();
 
 		// ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
+
+		// ss << "fragColor.b = diffuse.b;" << std::endl;
 
 		ss << "}" << std::endl;
 	}
@@ -706,6 +708,24 @@ namespace NL3D
 				ss << "vec4 texop" << stage << ";" << std::endl;
 
 				// RGB
+				switch (material->_TexEnvs[stage].Env.OpRGB)
+				{
+				case CMaterial::InterpolateConstant:
+					ss << "float texop" << stage << "rgbAs = constant" << stage << ".a;" << std::endl;
+					break;
+				case CMaterial::InterpolatePrevious:
+					if (stage > 0)
+					{
+						ss << "float texop" << stage << "rgbAs = texop" << stage << ".a;" << std::endl;
+						break;
+					}
+				case CMaterial::InterpolateDiffuse:
+					ss << "float texop" << stage << "rgbAs = diffuse.a;" << std::endl;
+					break;
+				case CMaterial::InterpolateTexture:
+					ss << "float texop" << stage << "rgbAs = texel" << stage << ".a;" << std::endl;
+					break;
+				}
 				ss << "texop" << stage << ".rgb = ";
 				switch (material->_TexEnvs[stage].Env.OpRGB)
 				{
@@ -725,7 +745,7 @@ namespace NL3D
 				case CMaterial::InterpolateDiffuse:
 				case CMaterial::InterpolatePrevious:
 				case CMaterial::InterpolateTexture:
-					ss << "texop" << stage << "arg0.rgb * vec3(0.5, 0.5, 0.5)"; // TODO !!!!
+					ss << "texop" << stage << "arg0.rgb * texop" << stage << "rgbAs + texop" << stage << "arg1.rgb * (1.0 - texop" << stage << "rgbAs)";
 					break;
 				case CMaterial::Mad:
 					ss << "texop" << stage << "arg0.rgb * texop" << stage << "arg1.rgb + texop" << stage << "arg2.rgb";
@@ -734,6 +754,24 @@ namespace NL3D
 				ss << ";" << std::endl;
 
 				// Alpha
+				switch (material->_TexEnvs[stage].Env.OpAlpha)
+				{
+				case CMaterial::InterpolateConstant:
+					ss << "float texop" << stage << "alphaAs = constant" << stage << ".a;" << std::endl;
+					break;
+				case CMaterial::InterpolatePrevious:
+					if (stage > 0)
+					{
+						ss << "float texop" << stage << "alphaAs = texop" << stage << ".a;" << std::endl;
+						break;
+					}
+				case CMaterial::InterpolateDiffuse:
+					ss << "float texop" << stage << "alphaAs = diffuse.a;" << std::endl;
+					break;
+				case CMaterial::InterpolateTexture:
+					ss << "float texop" << stage << "alphaAs = texel" << stage << ".a;" << std::endl;
+					break;
+				}
 				ss << "texop" << stage << ".a = ";
 				switch (material->_TexEnvs[stage].Env.OpAlpha)
 				{
@@ -753,7 +791,7 @@ namespace NL3D
 				case CMaterial::InterpolateDiffuse:
 				case CMaterial::InterpolatePrevious:
 				case CMaterial::InterpolateTexture:
-					ss << "texop" << stage << "arg0.a * 0.5"; // TODO !!!!
+					ss << "texop" << stage << "arg0.a * texop" << stage << "rgbAs + texop" << stage << "arg1.a * (1.0 - texop" << stage << "rgbAs)";
 					break;
 				case CMaterial::Mad:
 					ss << "texop" << stage << "arg0.a * texop" << stage << "arg1.a + texop" << stage << "arg2.a";
@@ -860,6 +898,8 @@ namespace NL3D
 			addFog();
 
 		addAlphaTest();
+
+		// ss << "fragColor.r = 0.5;" << std::endl;
 
 		ss << "}" << std::endl;
 		ss << std::endl;

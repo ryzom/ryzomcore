@@ -452,13 +452,13 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		enableLightingVP(mat.getFlags() & IDRV_MAT_LIGHTING);
 		if (mat.getFlags()&IDRV_MAT_LIGHTING)
 		{
-			_DriverGLStates.setEmissive(pShader->PackedEmissive, pShader->Emissive);
+			/*_DriverGLStates.setEmissive(pShader->PackedEmissive, pShader->Emissive);
 			_DriverGLStates.setAmbient(pShader->PackedAmbient, pShader->Ambient);
 			_DriverGLStates.setDiffuse(pShader->PackedDiffuse, pShader->Diffuse);
 			_DriverGLStates.setSpecular(pShader->PackedSpecular, pShader->Specular);
 			_DriverGLStates.setShininess(mat.getShininess());
-			_DriverGLStates.setVertexColorLighted(mat.isLightedVertexColor ());
-
+			_DriverGLStates.setVertexColorLighted(mat.isLightedVertexColor ());*/
+			// FIXME GL3 VERTEX COLOR VP
 		}
 		else
 		{
@@ -466,7 +466,8 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			// CRGBA	col= mat.getColor();
 			// glColor4ub(col.R, col.G, col.B, col.A);
 
-			_DriverGLStates.setVertexColorLighted(false);
+			// _DriverGLStates.setVertexColorLighted(false);
+			// FIXME GL3 VERTEX COLOR VP
 		}
 
 		// Fog Part.
@@ -790,11 +791,12 @@ sint CDriverGL3::beginLightMapMultiPass ()
 		setupLightMapDynamicLighting(true);
 
 	// reset Ambient and specular lighting
-	static	uint32	packedColorBlack= CRGBA(0,0,0,255).getPacked();
-	static	GLfloat glcolBlack[4]= {0,0,0,1};
+	// static	uint32	packedColorBlack= CRGBA(0,0,0,255).getPacked();
+	// static	GLfloat glcolBlack[4]= {0,0,0,1};
 	// lightmap get no specular/ambient. Emissive and Diffuse are setuped in setupLightMapPass()
-	_DriverGLStates.setAmbient(packedColorBlack, glcolBlack);
-	_DriverGLStates.setSpecular(packedColorBlack, glcolBlack);
+	// _DriverGLStates.setAmbient(packedColorBlack, glcolBlack);
+	// _DriverGLStates.setSpecular(packedColorBlack, glcolBlack);
+	// FIXME GL3 LIGHTMAP
 
 	// Manage too if no lightmaps.
 	return	std::max (_NLightMapPass, (uint)1);
@@ -829,7 +831,8 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 
 		// Since Lighting is disabled, as well as colorArray, must setup alpha.
 		// setup color to 0 => blackness. in emissive cause texture can still be lighted by dynamic light
-		_DriverGLStates.setEmissive(packedColorBlack, glcolBlack);
+		// _DriverGLStates.setEmissive(packedColorBlack, glcolBlack);
+		// FIXME GL3 LIGHTMAP
 
 		// Setup gen tex off
 		_DriverGLStates.activeTexture(0);
@@ -877,10 +880,11 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		b= std::min(b, (uint32)255);
 
 		// this color will be added to the first lightmap (with help of emissive)
-		CRGBA	col((uint8)r,(uint8)g,(uint8)b,255);
-		GLfloat	glcol[4];
-		convColor(col, glcol);
-		_DriverGLStates.setEmissive(col.getPacked(), glcol);
+		// CRGBA	col((uint8)r,(uint8)g,(uint8)b,255);
+		// GLfloat	glcol[4];
+		// convColor(col, glcol);
+		// _DriverGLStates.setEmissive(col.getPacked(), glcol);
+		// FIXME GL3 LIGHTMAP
 	}
 
 	// setup all stages.
@@ -1025,14 +1029,18 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	if (pass==0)
 	{
 		// If the lightmap is in x2 mode, then must divide effect of the dynamic light too
-		if (mat._LightMapsMulx2)
-			_DriverGLStates.setDiffuse(packedColorGrey, glcolGrey);
-		else
-			_DriverGLStates.setDiffuse(packedColorWhite, glcolWhite);
+		// if (mat._LightMapsMulx2)
+		// 	_DriverGLStates.setDiffuse(packedColorGrey, glcolGrey);
+		// else
+		// 	_DriverGLStates.setDiffuse(packedColorWhite, glcolWhite);
+		// FIXME GL3 LIGHTMAP
 	}
 	// no need to reset for pass after 1, since same than prec pass (black)!
 	else if (pass==1)
-		_DriverGLStates.setDiffuse(packedColorBlack, glcolBlack);
+	{
+		// _DriverGLStates.setDiffuse(packedColorBlack, glcolBlack);
+		// FIXME GL3 LIGHTMAP
+	}
 }
 
 // ***************************************************************************
