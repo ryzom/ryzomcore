@@ -570,9 +570,11 @@ namespace NL3D
 		ss << "{" << std::endl;
 
 		// Light color
-		ss << "vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl; // FIXME: vertex color?
+		ss << "vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
 		if (desc->lightingEnabled())
 			ss << "diffuse = applyLights(diffuse);" << std::endl;
+		if (hasFlag(vbFormat, g_VertexFlags[PrimaryColor]))
+			ss << "diffuse = color * diffuse;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
 
 		bool textures = false;
 		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
@@ -589,10 +591,6 @@ namespace NL3D
 			}
 		}
 
-		bool vertexColor = false;
-		if (hasFlag(vbFormat, g_VertexFlags[ PrimaryColor ]))
-			vertexColor = true;
-
 		/*if (textures && !vertexColor)
 			ss << "vec4 texel = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
 		else if (vertexColor)
@@ -603,15 +601,6 @@ namespace NL3D
 		generateTexEnv();
 
 		ss << "fragColor = texop" << (IDRV_MAT_MAXTEXTURES - 1) << ";" << std::endl;
-
-		// This is just an idea I had, but it seems to be working.
-		// Unfortunately it's not documented anywhere I looked in the GL spec, but if I don't have this modulation here,
-		// the Ryzom UI looks horrific.
-		if (vertexColor)
-			ss << "fragColor = color * fragColor;" << std::endl;
-
-		//if (desc->lightingEnabled())
-		//	addLightsFS();
 
 		if (desc->fogEnabled())
 			addFog();
