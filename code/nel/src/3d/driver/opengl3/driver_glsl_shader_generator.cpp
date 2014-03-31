@@ -81,7 +81,7 @@ namespace NL3D
 		}
 		ss << std::endl;
 		
-#if 1 // LIGHTING DEBUG
+#if 0 // LIGHTING DEBUG
 		if (desc->lightingEnabled() || material->getShader() != CMaterial::Normal)
 		{
 			generateInvalidPS();
@@ -569,397 +569,218 @@ namespace NL3D
 		ss << "void main(void)" << std::endl;
 		ss << "{" << std::endl;
 
+		// Light color
+		ss << "vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl; // FIXME: vertex color?
+		if (desc->lightingEnabled())
+			ss << "diffuse = applyLights(diffuse);" << std::endl;
+
 		bool textures = false;
-		sampler = 0;
 		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 		{
 			if (desc->getUseTexStage(i))
 			{
-				ss << "vec4 texel" << sampler << " = texture(sampler" << sampler << ",";
-				
-				if (!desc->getUseFirstTexCoords())
+				ss << "vec4 texel" << i << " = texture(sampler" << i << ", ";				
+				if (!desc->getUseFirstTexCoords()) // FIXME: What is this???
 					ss << g_AttribNames[ TexCoord0 + i ] << ".st);";
 				else
 					ss << g_AttribNames[ TexCoord0 ] << ".st);";
-
 				ss << std::endl;
-
 				textures = true;
 			}
-			sampler++;
 		}
 
 		bool vertexColor = false;
 		if (hasFlag(vbFormat, g_VertexFlags[ PrimaryColor ]))
 			vertexColor = true;
 
-		if (textures && !vertexColor)
+		/*if (textures && !vertexColor)
 			ss << "vec4 texel = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-		else
-		if (vertexColor)
+		else if (vertexColor)
 			ss << "vec4 texel = color;" << std::endl;
 		else
-			ss << "vec4 texel = vec4(0.5, 0.5, 0.5, 1.0);" << std::endl;
+			ss << "vec4 texel = vec4(0.5, 0.5, 0.5, 1.0);" << std::endl;*/
 
 		generateTexEnv();
+
+		ss << "fragColor = texop" << (IDRV_MAT_MAXTEXTURES - 1) << ";" << std::endl;
 
 		// This is just an idea I had, but it seems to be working.
 		// Unfortunately it's not documented anywhere I looked in the GL spec, but if I don't have this modulation here,
 		// the Ryzom UI looks horrific.
 		if (vertexColor)
-			ss << "texel = color * texel;" << std::endl;
+			ss << "fragColor = color * fragColor;" << std::endl;
 
-		ss << "fragColor = texel;" << std::endl;
-
-		if (desc->lightingEnabled())
-			addLightsFS();
+		//if (desc->lightingEnabled())
+		//	addLightsFS();
 
 		if (desc->fogEnabled())
 			addFog();
 
 		addAlphaTest();
 
-		ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
+		// ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
 
 		ss << "}" << std::endl;
 	}
 
 	void CGLSLShaderGenerator::generateTexEnv()
 	{
-		uint32 stage = 0;
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		{
-			if (desc->getUseTexStage(i))
+			if (desc->getUseTexStage(stage))
 			{
-				generateTexEnvRGB(stage);
-				generateTexEnvAlpha(stage);
-			}
-			stage++;
-		}
-	}
-
-	void CGLSLShaderGenerator::generateTexEnvRGB(unsigned int stage)
-	{
-		std::string arg0;
-		std::string arg1;
-		std::string arg2;
-	
-		switch(material->_TexEnvs[stage].Env.OpRGB)
-		{
-		case CMaterial::Replace:
-			{
-				buildArg(stage, 0, false, arg0);
-				ss << "texel.rgb = " << arg0 << ";" << std::endl;
-			}
-			break;
-		
-		case CMaterial::Modulate:
-			{
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-				ss << "texel.rgb = " << arg0 << " * " << arg1 << ";" << std::endl;
-				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb * " << arg1 << ";" << std::endl;
-			}
-			break;
-		
-		case CMaterial::Add:
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-				ss << "texel.rgb = " << arg0 << " + " << arg1 << ";" << std::endl;
-				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
-			break;
-		
-		case CMaterial::AddSigned:
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-				ss << "texel.rgb = " << arg0 << " + " << arg1 << " - vec3(0.5, 0.5, 0.5);" << std::endl;
-				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb - vec3(0.5, 0.5, 0.5);" << std::endl;
-			break;
-
-		case CMaterial::Mad:
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-				buildArg(stage, 2, false, arg2);
-				ss << "texel.rgb = " << arg0 << " * " << arg1 << " + " << arg2 << ";" << std::endl;
-				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb * " << arg1 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb + " << arg2 << ";" << std::endl;
-			break;
-
-		case CMaterial::InterpolateTexture:
-			{
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-
-				std::string As = g_TexelNames[stage];
-				As.append(".a");
-
-				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-
-		case CMaterial::InterpolatePrevious:
-			{
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-
-				std::string As = "texel.a";
-
-				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-
-		case CMaterial::InterpolateDiffuse:
-			{
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-
-				std::string As = "diffuseColor.a";
-
-				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-
-		case CMaterial::InterpolateConstant:
-			{
-				buildArg(stage, 0, false, arg0);
-				buildArg(stage, 1, false, arg1);
-
-				std::string As = g_ConstantNames[stage];
-				As.append(".a");
-
-				ss << "texel.rgb = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.rgb = texel.rgb + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-		}
-	}
-
-	void CGLSLShaderGenerator::generateTexEnvAlpha(unsigned int stage)
-	{
-		std::string arg0;
-		std::string arg1;
-		std::string arg2;
-	
-		switch(material->_TexEnvs[stage].Env.OpRGB)
-		{
-		case CMaterial::Replace:
-			{
-				buildArg(stage, 0, true, arg0);
-				ss << "texel.a = " << arg0 << ";" << std::endl;
-			}
-			break;
-		
-		case CMaterial::Modulate:
-			{
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-				ss << "texel.a = " << arg0 << " * " << arg1 << ";" << std::endl;
-				//ss << "texel.a = " << arg0 << ";" << std::endl;
-				//ss << "texel.a = texel.a * " << arg1 << ";" << std::endl;
-			}
-			break;
-		
-		case CMaterial::Add:
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-				ss << "texel.a = " << arg0 << " + " << arg1 << ";" << std::endl;
-				//ss << "texel.a = " << arg0 << ";" << std::endl;
-				//ss << "texel.a = texel.a + " << arg1 << ";" << std::endl;
-			break;
-		
-		case CMaterial::AddSigned:
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-				ss << "texel.a = " << arg0 << " * " << arg1 << " - vec3(0.5, 0.5, 0.5);" << std::endl;
-				//ss << "texel.rgb = " << arg0 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb + " << arg1 << ";" << std::endl;
-				//ss << "texel.rgb = texel.rgb - vec3(0.5, 0.5, 0.5);" << std::endl;
-			break;
-
-		case CMaterial::Mad:
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-				buildArg(stage, 2, true, arg2);
-				ss << "texel.a = " << arg0 << ";" << std::endl;
-				ss << "texel.a = texel.a * " << arg1 << ";" << std::endl;
-				ss << "texel.a = texel.a + " << arg2 << ";" << std::endl;
-			break;
-
-		case CMaterial::InterpolateTexture:
-			{
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-
-				std::string As = g_TexelNames[stage];
-				As.append(".a");
-
-				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.a = texel.a + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-
-		case CMaterial::InterpolatePrevious:
-			{
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-
-				std::string As = "texel.a";
-
-				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.a = texel.a + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-
-		case CMaterial::InterpolateDiffuse:
-			{
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-
-				std::string As = "diffuseColor.a";
-
-				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.a = texel.a + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-
-		case CMaterial::InterpolateConstant:
-			{
-				buildArg(stage, 0, true, arg0);
-				buildArg(stage, 1, true, arg1);
-
-				std::string As = g_ConstantNames[stage];
-				As.append(".a");
-
-				ss << "texel.a = " << arg0 << " * " << As << ";" << std::endl;
-				ss << "texel.a = texel.a + " << arg1 << " * " << "(1.0 - " << As << ");" << std::endl;
-			}
-			break;
-		}
-	}
-
-
-	void CGLSLShaderGenerator::buildArg(unsigned int stage, unsigned int n, bool alpha, std::string &arg)
-	{
-		uint32 src;
-		uint32 op;
-		
-		if (!alpha)
-		{
-			src = material->_TexEnvs[ n ].getColorArg(n);
-			op  = material->_TexEnvs[ n ].getColorOperand(n);
-		}
-		else
-		{
-			src = material->_TexEnvs[ n ].getAlphaArg(n);
-			op  = material->_TexEnvs[ n ].getAlphaOperand(n);
-		}
-
-		std::stringstream ds;
-
-		switch(src)
-		{
-		case CMaterial::Texture:
-			{
-
-				switch(op)
+				for (uint arg = 0; arg < 3; ++arg)
 				{
-				case CMaterial::SrcColor:
-					ds << g_TexelNames[stage] << ".rgb";
-					break;
+					// Texop arg
+					ss << "vec4 texop" << stage << "arg" << arg << ";" << std::endl;
 
-				case CMaterial::InvSrcColor:
-					ds << "(vec3(1.0, 1.0, 1.0) - ";
-					ds << g_TexelNames[stage] << ".rgb)";
-					break;
+					// RGB
+					uint rgbArg = material->_TexEnvs[stage].getColorArg(arg);
+					uint rgbOp = material->_TexEnvs[stage].getColorOperand(arg);
+					std::stringstream rgbArgVec;
+					switch (rgbArg)
+					{
+					case CMaterial::Texture:
+						rgbArgVec << "texel" << stage;
+						break;
+					case CMaterial::Previous:
+						if (stage > 0)
+						{
+							rgbArgVec << "texop" << (stage - 1);
+							break;
+						}
+					case CMaterial::Diffuse:
+						rgbArgVec << "diffuse";
+						break;
+					case CMaterial::Constant:
+						rgbArgVec << "constant" << stage;
+						break;
+					}
+					ss << "texop" << stage << "arg" << arg << ".rgb = ";
+					switch (rgbOp) // SrcColor=0, InvSrcColor, SrcAlpha, InvSrcAlpha
+					{
+					case CMaterial::SrcColor:
+						ss << rgbArgVec.str() << ".rgb";
+						break;
+					case CMaterial::InvSrcColor:
+						ss << "vec3(1.0, 1.0, 1.0) - " << rgbArgVec.str() << ".rgb";
+						break;
+					case CMaterial::SrcAlpha:
+						ss << rgbArgVec.str() << ".aaa";
+						break;
+					case CMaterial::InvSrcAlpha:
+						ss << "(1.0 - " << rgbArgVec.str() << ").aaa";
+						break;
+					}
+					ss << ";" << std::endl;
 
-				case CMaterial::SrcAlpha:
-					ds << g_TexelNames[stage] << ".a";
-					break;
+					// Alpha
+					uint alphaArg = material->_TexEnvs[stage].getAlphaArg(arg);
+					uint alphaOp = material->_TexEnvs[stage].getAlphaOperand(arg);
+					std::stringstream alphaArgVec;
+					switch (alphaArg)
+					{
+					case CMaterial::Texture:
+						alphaArgVec << "texel" << stage;
+						break;
+					case CMaterial::Previous:
+						if (stage > 0)
+						{
+							alphaArgVec << "texop" << (stage - 1);
+							break;
+						}
+					case CMaterial::Diffuse:
+						alphaArgVec << "diffuse";
+						break;
+					case CMaterial::Constant:
+						alphaArgVec << "constant" << stage;
+						break;
+					}
+					ss << "texop" << stage << "arg" << arg << ".a = ";
+					switch (alphaOp) // SrcColor=0, InvSrcColor, SrcAlpha, InvSrcAlpha
+					{
+					case CMaterial::SrcColor:
+						ss << alphaArgVec.str() << ".r";
+						break;
+					case CMaterial::InvSrcColor:
+						ss << "1.0 - " << alphaArgVec.str() << ".r";
+						break;
+					case CMaterial::SrcAlpha:
+						ss << alphaArgVec.str() << ".a";
+						break;
+					case CMaterial::InvSrcAlpha:
+						ss << "1.0 - " << alphaArgVec.str() << ".a";
+						break;
+					}
+					ss << ";" << std::endl;
+				}
+				ss << "vec4 texop" << stage << ";" << std::endl;
 
-				case CMaterial::InvSrcAlpha:
-					ds << "(1.0 - ";
-					ds << g_TexelNames[stage] << ".a)";
+				// RGB
+				ss << "texop" << stage << ".rgb = ";
+				switch (material->_TexEnvs[stage].Env.OpRGB)
+				{
+				case CMaterial::Replace:
+					ss << "texop" << stage << "arg0.rgb";
+					break;
+				case CMaterial::Modulate:
+					ss << "texop" << stage << "arg0.rgb * texop" << stage << "arg1.rgb";
+					break;
+				case CMaterial::Add:
+					ss << "texop" << stage << "arg0.rgb + texop" << stage << "arg1.rgb";
+					break;
+				case CMaterial::AddSigned:
+					ss << "texop" << stage << "arg0.rgb + texop" << stage << "arg1.rgb - vec3(0.5, 0.5, 0.5)";
+					break;
+				case CMaterial::InterpolateConstant:
+				case CMaterial::InterpolateDiffuse:
+				case CMaterial::InterpolatePrevious:
+				case CMaterial::InterpolateTexture:
+					ss << "texop" << stage << "arg0.rgb * vec3(0.5, 0.5, 0.5)"; // TODO !!!!
+					break;
+				case CMaterial::Mad:
+					ss << "texop" << stage << "arg0.rgb * texop" << stage << "arg1.rgb + texop" << stage << "arg2.rgb";
 					break;
 				}
+				ss << ";" << std::endl;
+
+				// Alpha
+				ss << "texop" << stage << ".a = ";
+				switch (material->_TexEnvs[stage].Env.OpAlpha)
+				{
+				case CMaterial::Replace:
+					ss << "texop" << stage << "arg0.a";
+					break;
+				case CMaterial::Modulate:
+					ss << "texop" << stage << "arg0.a * texop" << stage << "arg1.a";
+					break;
+				case CMaterial::Add:
+					ss << "texop" << stage << "arg0.a + texop" << stage << "arg1.a";
+					break;
+				case CMaterial::AddSigned:
+					ss << "texop" << stage << "arg0.a + texop" << stage << "arg1.a - 0.5";
+					break;
+				case CMaterial::InterpolateConstant:
+				case CMaterial::InterpolateDiffuse:
+				case CMaterial::InterpolatePrevious:
+				case CMaterial::InterpolateTexture:
+					ss << "texop" << stage << "arg0.a * 0.5"; // TODO !!!!
+					break;
+				case CMaterial::Mad:
+					ss << "texop" << stage << "arg0.a * texop" << stage << "arg1.a + texop" << stage << "arg2.a";
+					break;
+				}
+				ss << ";" << std::endl;
 			}
-			break;
-
-		case CMaterial::Previous:
-
-				switch(op)
-				{
-				case CMaterial::SrcColor:
-					ds << "texel.rgb";
-					break;
-
-				case CMaterial::InvSrcColor:
-					ds << "(vec3(1.0, 1.0, 1.0) - texel.rgb)";
-					break;
-
-				case CMaterial::SrcAlpha:
-					ds << "texel.a";
-					break;
-
-				case CMaterial::InvSrcAlpha:
-					ds << "(1.0 - texel.a)";
-					break;
-				}
-			break;
-
-		case CMaterial::Diffuse:
-
-				switch(op)
-				{
-				case CMaterial::SrcColor:
-					ds << "materialColor.rgb";
-					break;
-
-				case CMaterial::InvSrcColor:
-					ds << "(vec3(1.0, 1.0, 1.0) - materialColor.rgb)";
-					break;
-
-				case CMaterial::SrcAlpha:
-					ds << "materialColor.a";
-					break;
-
-				case CMaterial::InvSrcAlpha:
-					ds << "(1.0 - materialColor.a)";
-					break;
-				}
-			break;
-
-		case CMaterial::Constant:
-
-				switch(op)
-				{
-				case CMaterial::SrcColor:
-					ds << g_ConstantNames[stage] << ".rgb";
-					break;
-
-				case CMaterial::InvSrcColor:
-					ds << "(vec3(1.0, 1.0, 1.0) - " << g_ConstantNames[stage] << ".rgb)";
-					break;
-
-				case CMaterial::SrcAlpha:
-					ds << g_ConstantNames[stage] << ".a";
-					break;
-
-				case CMaterial::InvSrcAlpha:
-					ds << "(1.0 - " << g_ConstantNames[stage] << ".a)";
-					break;
-				}
-			break;
+			else if (stage == 0)
+			{
+				ss << "vec4 texop" << stage << " = diffuse;" << std::endl;
+			}
+			else
+			{
+				ss << "vec4 texop" << stage << " = texop" << (stage - 1) << ";" << std::endl;
+			}
 		}
-
-		arg.assign(ds.str());
 	}
 
 

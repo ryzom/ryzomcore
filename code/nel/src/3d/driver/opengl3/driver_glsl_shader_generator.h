@@ -129,9 +129,6 @@ namespace NL3D
 		
 
 		void generateTexEnv();
-		void generateTexEnvRGB(unsigned int stage);
-		void generateTexEnvAlpha(unsigned int stage);
-		void buildArg(unsigned int stage, unsigned int n, bool alpha, std::string &arg);
 
 		void generateLightMapPS();
 		void generateSpecularPS();

@@ -248,6 +248,15 @@ bool CDriverGL3::compilePixelProgram(CPixelProgram *program)
 		}
 		return false;
 	}
+	else // debug
+	{
+		std::vector<std::string> lines;
+		NLMISC::explode(std::string(src->SourcePtr), std::string("\n"), lines);
+		for (std::vector<std::string>::size_type i = 0; i < lines.size(); ++i)
+		{
+			nldebug("GL3: %i: %s", i, lines[i].c_str());
+		}
+	}
 
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
