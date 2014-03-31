@@ -572,7 +572,10 @@ namespace NL3D
 		// Light color
 		ss << "vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
 		if (desc->lightingEnabled())
+		{
 			ss << "diffuse = applyLights(diffuse);" << std::endl;
+			ss << "diffuse.a = 1.0;" << std::endl;
+		}
 		if (hasFlag(vbFormat, g_VertexFlags[PrimaryColor]))
 			ss << "diffuse = color * diffuse;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
 
@@ -582,10 +585,10 @@ namespace NL3D
 			if (desc->getUseTexStage(i))
 			{
 				ss << "vec4 texel" << i << " = texture(sampler" << i << ", ";				
-				if (!desc->getUseFirstTexCoords()) // FIXME: What is this???
-					ss << g_AttribNames[ TexCoord0 + i ] << ".st);";
+				if (desc->hasVBFlags(g_VertexFlags[TexCoord0 + i]))
+					ss << g_AttribNames[TexCoord0 + i] << ".st);";
 				else
-					ss << g_AttribNames[ TexCoord0 ] << ".st);";
+					ss << g_AttribNames[TexCoord0] << ".st);";
 				ss << std::endl;
 				textures = true;
 			}

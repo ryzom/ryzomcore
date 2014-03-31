@@ -91,7 +91,7 @@ namespace NL3D
 			
 			for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 				useTextureStage[ i ] = false;
-			useFirstTextureCoordSet = false;
+			//useFirstTextureCoordSet = false;
 			noTextures = true;
 			
 			features = None;
@@ -140,8 +140,8 @@ namespace NL3D
 
 			if (shaderType == Normal)
 			{
-				if (useFirstTextureCoordSet != o.useFirstTextureCoordSet)
-					return false;
+				//if (useFirstTextureCoordSet != o.useFirstTextureCoordSet)
+				//	return false;
 
 				for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 					if (texEnvMode[ i ] != o.texEnvMode[ i ])
@@ -164,8 +164,8 @@ namespace NL3D
 
 		void setTexEnvMode(uint32 index, uint32 mode) { texEnvMode[ index ] = mode; }
 		
-		void setUseFirstTexCoords(bool b) { useFirstTextureCoordSet = b; }
-		bool getUseFirstTexCoords() const{ return useFirstTextureCoordSet; }
+		//void setUseFirstTexCoords(bool b) { useFirstTextureCoordSet = b; }
+		//bool getUseFirstTexCoords() const{ return useFirstTextureCoordSet; }
 
 		void setUseTexStage(uint8 stage, bool b) { useTextureStage[ stage ] = b; }
 		bool getUseTexStage(uint8 stage) const{ return useTextureStage[ stage ]; }
@@ -257,7 +257,7 @@ namespace NL3D
 		uint32 features;
 		uint32 texEnvMode[ IDRV_MAT_MAXTEXTURES ];
 		bool useTextureStage[ IDRV_MAT_MAXTEXTURES ];
-		bool useFirstTextureCoordSet;
+		//bool useFirstTextureCoordSet;
 		bool noTextures;
 		uint32 vbFlags;
 		uint32 shaderType;

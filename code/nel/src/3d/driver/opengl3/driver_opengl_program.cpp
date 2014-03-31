@@ -573,25 +573,14 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 
 		for (int i = 0; i < maxTextures; i++)
 		{
-			if (desc.hasVBFlags(g_VertexFlags[ TexCoord0 + i ]))
+			// GL3 TEX COORD
+			if (mat.getTexture(i) != NULL && (desc.hasVBFlags(g_VertexFlags[TexCoord0]) || desc.hasVBFlags(g_VertexFlags[TexCoord0 + i])))
 			{
 				desc.setUseTexStage(i, true);
 				useTextures = true;
 			}
 		}
 
-		if (useTextures && !desc.getUseTexStage(1))
-		{
-			for (int i = 1; i < maxTextures; i++)
-			{
-				if (mat.getTexture(i) != NULL)
-				{
-					desc.setUseTexStage(i, true);
-					desc.setUseFirstTexCoords(true);
-				}
-			}
-		}
-		else
 		if (!useTextures)
 		{
 			desc.setNoTextures(true);
