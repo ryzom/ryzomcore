@@ -172,13 +172,6 @@ private:
 	uint			_CurrentActiveTexture;
 	TTextureMode	_TextureMode[8];
 
-	bool			_VertexArrayEnabled;
-	bool			_NormalArrayEnabled;
-	bool			_WeightArrayEnabled;
-	bool			_ColorArrayEnabled;
-	bool			_SecondaryColorArrayEnabled;
-	uint			_CurrentClientActiveTexture;
-	bool			_TexCoordArrayEnabled[8];
 	bool			_VertexAttribArrayEnabled[CVertexBuffer::NumValue];
 
 	GLint			_TexGenMode[8];

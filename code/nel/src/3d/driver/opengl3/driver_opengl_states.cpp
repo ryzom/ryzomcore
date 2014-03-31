@@ -46,20 +46,8 @@ void			CDriverGLStates3::init()
 	H_AUTO_OGL(CDriverGLStates3_init)
 
 	// By default all arrays are disabled.
-	_VertexArrayEnabled= false;
-	_NormalArrayEnabled= false;
-	_WeightArrayEnabled= false;
-	_ColorArrayEnabled= false;
-	_SecondaryColorArrayEnabled= false;
-	uint	i;
-	for (i=0; i<sizeof(_TexCoordArrayEnabled)/sizeof(_TexCoordArrayEnabled[0]); i++)
-	{
-		_TexCoordArrayEnabled[i]= false;
-	}
-	for (i=0; i<CVertexBuffer::NumValue; i++)
-	{
-		_VertexAttribArrayEnabled[i]= false;
-	}
+	for (uint i = 0; i < CVertexBuffer::NumValue; ++i)
+		_VertexAttribArrayEnabled[i] = false;
 	_DepthRangeNear = 0.f;
 	_DepthRangeFar = 1.f;
 	_ZBias = 0.f;
@@ -133,9 +121,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 
 	// ActiveTexture current texture to 0.
 	nglActiveTexture(GL_TEXTURE0);
-
 	_CurrentActiveTexture = 0;
-	_CurrentClientActiveTexture = 0;
 
 	// Depth range
 	_DepthRangeNear = 0.f;
