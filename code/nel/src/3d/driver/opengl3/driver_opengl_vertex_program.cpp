@@ -205,8 +205,6 @@ namespace
 		// Ambient color of all lights is precalculated and added with self illumination, and multiplied with the material ambient.
 		if (desc.Lighting)
 			ss << "uniform vec4 selfIllumination;" << std::endl;
-		// ss << "uniform vec4 diffuseColor;" << std::endl;
-		// ss << "uniform vec4 specularColor;" << std::endl; // }
 
 		if (desc.Fog || desc.Lighting)
 			ss << "uniform mat4 modelView;" << std::endl;

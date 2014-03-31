@@ -87,10 +87,7 @@ const char *g_ConstantNames[4] =
 
 bool CDriverGL3::supportVertexProgram(CVertexProgram::TProfile profile) const
 {
-	if (profile == IProgram::glsl330v)
-		return true;
-	else
-		return false;
+	return (profile == IProgram::glsl330v);
 }
 
 bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
@@ -142,20 +139,19 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 		}
 	}
 
-
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 		return false;
 
 	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(),(NL3D::IProgramDrvInfos*)NULL);
-	CVertexProgramDrvInfosGL3 *drvInfo = new CVertexProgramDrvInfosGL3(this, it);
+	CProgramDrvInfosGL3 *drvInfo = new CProgramDrvInfosGL3(this, it);
 	*it = drvInfo;
-
 	program->m_DrvInfo = drvInfo;
-
 	drvInfo->setProgramId(id);
 
 	program->buildInfo(src);
+
+	setupInitialUniforms(program);
 
 	return true;
 }
@@ -181,7 +177,7 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 	}
 
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	CVertexProgramDrvInfosGL3 *drvInfo = dynamic_cast< CVertexProgramDrvInfosGL3* >(di);
+	CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
 	if (drvInfo == NULL)
 	{
 		m_UserVertexProgram = NULL;
@@ -258,12 +254,14 @@ bool CDriverGL3::compilePixelProgram(CPixelProgram *program)
 		return false;
 
 	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
-	CPixelProgramDrvInfosGL3 *drvInfo = new CPixelProgramDrvInfosGL3(this, it);
+	CProgramDrvInfosGL3 *drvInfo = new CProgramDrvInfosGL3(this, it);
 	*it = drvInfo;
 	drvInfo->setProgramId(id);
 	program->m_DrvInfo = drvInfo;
 
 	program->buildInfo(src);
+
+	setupInitialUniforms(program);
 
 	return true;
 }
@@ -296,7 +294,7 @@ bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
 	}
 	
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	CPixelProgramDrvInfosGL3 *drvInfo = dynamic_cast< CPixelProgramDrvInfosGL3* >(di);
+	CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
 	if (drvInfo == NULL)
 	{
 		m_UserPixelProgram = NULL;
@@ -330,7 +328,7 @@ uint32 CDriverGL3::getProgramId(TProgram program) const
 		if (m_DriverVertexProgram)
 		{
 			IProgramDrvInfos *di = m_DriverVertexProgram->m_DrvInfo;
-			CVertexProgramDrvInfosGL3 *drvInfo = dynamic_cast< CVertexProgramDrvInfosGL3* >(di);
+			CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
 			if (drvInfo != NULL)
 				id = drvInfo->getProgramId();
 		}
@@ -340,7 +338,7 @@ uint32 CDriverGL3::getProgramId(TProgram program) const
 		if (m_DriverPixelProgram)
 		{
 			IProgramDrvInfos *di = m_DriverPixelProgram->m_DrvInfo;
-			CPixelProgramDrvInfosGL3 *drvInfo = dynamic_cast< CPixelProgramDrvInfosGL3* >(di);
+			CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
 			if (drvInfo != NULL)
 				id = drvInfo->getProgramId();
 		}
@@ -1102,6 +1100,23 @@ void CDriverGL3::setupUniforms(TProgram program)
 
 				setUniform4f(program, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 			}
+		}
+	}
+}
+
+void CDriverGL3::setupInitialUniforms(IProgram *program)
+{
+	IProgramDrvInfos *di = program->m_DrvInfo;
+	CProgramDrvInfosGL3 *drvInfo = dynamic_cast<CProgramDrvInfosGL3 *>(di);
+	if (drvInfo != NULL)
+	{
+		GLuint id = drvInfo->getProgramId();
+	
+		for (uint i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+		{
+			uint samplerIdx = program->getUniformIndex((CProgramIndex::TName)(CProgramIndex::Sampler0 + i));
+			if (samplerIdx >= 0)
+				nglProgramUniform1i(id, samplerIdx, i);
 		}
 	}
 }

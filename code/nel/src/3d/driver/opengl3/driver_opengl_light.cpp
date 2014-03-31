@@ -165,6 +165,7 @@ void			CDriverGL3::setLightMapDynamicLight (bool enable, const CLight& light)
 void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 {
 	H_AUTO_OGL(CDriverGL3_setupLightMapDynamicLighting)
+	
 	// start lightmap dynamic lighting
 	if (enable)
 	{

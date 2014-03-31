@@ -384,6 +384,7 @@ public:
 	bool					setupDynMatProgram(CMaterial& mat, uint pass);
 	bool					setupUniforms();
 	void					setupUniforms(TProgram program);
+	void					setupInitialUniforms(IProgram *program);
 
 	void					generateBuiltinVertexProgram();
 	void					enableFogVP(bool enable);
@@ -1414,11 +1415,25 @@ public:
 };
 
 
-class CVertexProgramDrvInfosGL3 : public IProgramDrvInfos
+class CProgramDrvInfosGL3 : public IProgramDrvInfos
 {
 public:
-	CVertexProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
-	~CVertexProgramDrvInfosGL3();
+	CProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
+	~CProgramDrvInfosGL3();
+	uint getUniformIndex(const char *name) const;
+	GLuint getProgramId() const{ return programId; }
+	void setProgramId(GLuint id) { programId = id; }
+
+private:
+	GLuint programId;
+};
+
+/*
+class CProgramDrvInfosGL3 : public IProgramDrvInfos
+{
+public:
+	CProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
+	~CProgramDrvInfosGL3();
 	uint getUniformIndex(const char *name) const;
 	uint getProgramId() const{ return programId; }
 	void setProgramId(uint id) { programId = id; }
@@ -1427,11 +1442,11 @@ private:
 	uint programId;
 };
 
-class CPixelProgramDrvInfosGL3 : public IProgramDrvInfos
+class CProgramDrvInfosGL3 : public IProgramDrvInfos
 {
 public:
-	CPixelProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
-	~CPixelProgramDrvInfosGL3();
+	CProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it);
+	~CProgramDrvInfosGL3();
 	uint getUniformIndex(const char *name) const;
 	uint getProgramId() const{ return programId; }
 	void setProgramId(uint id) { programId = id; }
@@ -1440,6 +1455,7 @@ private:
 	uint programId;
 
 };
+*/
 
 #ifdef NL_STATIC
 } // NLDRIVERGL3

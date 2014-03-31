@@ -1884,38 +1884,18 @@ void CDriverGL3::reloadUserShaders()
 	loader.loadShaders("./shaders");
 }
 
-CVertexProgramDrvInfosGL3::CVertexProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it) :
+CProgramDrvInfosGL3::CProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it) :
 IProgramDrvInfos(drv, it)
 {
 	programId = 0;
 }
 
-CVertexProgramDrvInfosGL3::~CVertexProgramDrvInfosGL3()
+CProgramDrvInfosGL3::~CProgramDrvInfosGL3()
 {
 	programId = 0;
 }
 
-uint CVertexProgramDrvInfosGL3::getUniformIndex(const char *name) const
-{
-	int idx = nglGetUniformLocation(programId, name);	
-	if (idx == -1)
-		return ~0;
-	else
-		return idx;
-}
-
-CPixelProgramDrvInfosGL3::CPixelProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it) :
-IProgramDrvInfos(drv, it)
-{
-	programId = 0;
-}
-
-CPixelProgramDrvInfosGL3::~CPixelProgramDrvInfosGL3()
-{
-	programId = 0;
-}
-
-uint CPixelProgramDrvInfosGL3::getUniformIndex(const char *name) const
+uint CProgramDrvInfosGL3::getUniformIndex(const char *name) const
 {
 	int idx = nglGetUniformLocation(programId, name);
 	if (idx == -1)
@@ -1923,7 +1903,6 @@ uint CPixelProgramDrvInfosGL3::getUniformIndex(const char *name) const
 	else
 		return idx;
 }
-
 
 // ***************************************************************************
 void displayGLError(GLenum error)

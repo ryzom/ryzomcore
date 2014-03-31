@@ -738,17 +738,6 @@ void CDriverGL3::setupNormalPass()
 				setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 			}
 		}
-
-		// Set texture
-		ITexture *t = mat.getTexture(i);
-		if (t == NULL)
-			continue;
-		
-		int index = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + i));
-		if (index == -1)
-			continue;
-		
-		setUniform1i(IDriver::PixelProgram, index, i);
 	}
 }
 
@@ -936,12 +925,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 						setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 					}
 
-					int tl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
-					if (tl != -1)
-					{
-						setUniform1i(IDriver::PixelProgram, tl, stage);
-					}
-
 					activateTexEnvColor(stage, stdEnv);
 
 					// Setup env for texture stage.
@@ -976,13 +959,6 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				// Setup gen tex off
 				_DriverGLStates.activeTexture(stage);
 				_DriverGLStates.setTexGenMode(stage, 0);
-
-				int tl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Sampler0 + stage));
-				if (tl != -1)
-				{
-					setUniform1i(IDriver::PixelProgram, tl, stage);
-				}
-
 			}
 		}
 		else
@@ -1174,22 +1150,22 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 		return;
 	}
 
-	int sl0 = m_DriverPixelProgram->getUniformIndex(CProgramIndex::Sampler0);
-	if (sl0 != -1)
+	int tm0 = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix0); // FIXME GL3 VERTEX PROGRAM
+	if (tm0 != -1)
 	{
-		setUniform1i(IDriver::PixelProgram, sl0, 0);
+		setUniform4x4f(IDriver::VertexProgram, tm0, _UserTexMat[ 0 ]); // OR is it just 1 (and not 0 2 3)?
 	}
 
-	int sl1 = m_DriverPixelProgram->getUniformIndex(CProgramIndex::Sampler1);
-	if (sl1 != -1)
+	int tm2 = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix2); // FIXME GL3 VERTEX PROGRAM
+	if (tm2 != -1)
 	{
-		setUniform1i(IDriver::PixelProgram, sl1, 1);
+		setUniform4x4f(IDriver::VertexProgram, tm2, _UserTexMat[ 2 ]);
 	}
 
-	int tml = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix0); // FIXME GL3 VERTEX PROGRAM
-	if (tml != -1)
+	int tm3 = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix3); // FIXME GL3 VERTEX PROGRAM
+	if (tm3 != -1)
 	{
-		setUniform4x4f(IDriver::VertexProgram, tml, _UserTexMat[ 1 ]);
+		setUniform4x4f(IDriver::VertexProgram, tm3, _UserTexMat[ 3 ]);
 	}
 
 	{

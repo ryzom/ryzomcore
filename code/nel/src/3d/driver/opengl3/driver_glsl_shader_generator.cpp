@@ -81,8 +81,8 @@ namespace NL3D
 		}
 		ss << std::endl;
 		
-#if 0 // LIGHTING DEBUG
-		if (desc->lightingEnabled())
+#if 1 // LIGHTING DEBUG
+		if (desc->lightingEnabled() || material->getShader() != CMaterial::Normal)
 		{
 			generateInvalidPS();
 		}
@@ -523,7 +523,7 @@ namespace NL3D
 		if (desc->lightingEnabled())
 			addLightsFS();
 
-		//ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
+		ss << "fragColor = fragColor + vec4(0.25, 0.0, 0.0, 0.0);" << std::endl;
 
 		/*if (desc->fogEnabled())
 			addFog();
@@ -618,6 +618,8 @@ namespace NL3D
 			addFog();
 
 		addAlphaTest();
+
+		ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
 
 		ss << "}" << std::endl;
 	}
@@ -1109,11 +1111,11 @@ namespace NL3D
 			ss << "smooth in vec3 cubeTexCoords2;" << std::endl;
 		ss << std::endl;
 
-		ss << "uniform samplerCube cubeSampler0;" << std::endl;
+		ss << "uniform samplerCube sampler0;" << std::endl;
 		ss << "uniform sampler2D sampler1;" << std::endl;
 
 		if (material->getShader() == CMaterial::PerPixelLighting)
-			ss << "uniform samplerCube cubeSampler2;" << std::endl;
+			ss << "uniform samplerCube sampler2;" << std::endl;
 
 		addDiffuse();
 
@@ -1126,11 +1128,11 @@ namespace NL3D
 		ss << "void main(void)" << std::endl;
 		ss << "{" << std::endl;
 		
-		ss << "vec4 texel0 = texture(cubeSampler0, cubeTexCoords0);" << std::endl;
+		ss << "vec4 texel0 = texture(sampler0, cubeTexCoords0);" << std::endl;
 		ss << "vec4 texel1 = texture(sampler1, texCoord1.st);" << std::endl;
 
 		if (material->getShader() == CMaterial::PerPixelLighting)
-			ss << "vec4 texel2 = texture(cubeSampler2, cubeTexCoords2);" << std::endl;
+			ss << "vec4 texel2 = texture(sampler2, cubeTexCoords2);" << std::endl;
 
 		ss << "vec4 texel;" << std::endl;
 
