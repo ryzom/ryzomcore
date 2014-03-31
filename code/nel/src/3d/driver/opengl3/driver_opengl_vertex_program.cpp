@@ -42,10 +42,12 @@ bool operator<(const CVPBuiltin &left, const CVPBuiltin &right)
 		for (sint i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 			if (left.LightMode[i] != right.LightMode[i])
 				return left.LightMode[i] < right.LightMode[i];
+	if (left.Specular != right.Specular)
+		return right.Specular;
 	if (left.Fog != right.Fog)
 		return right.Fog;
-	if (left.VertexColorLighted != right.VertexColorLighted)
-		return right.VertexColorLighted;
+//	if (left.VertexColorLighted != right.VertexColorLighted)
+//		return right.VertexColorLighted;
 
 	return false;
 }
@@ -59,14 +61,14 @@ namespace
 		case CLight::DirectionalLight:
 			ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
 			ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
-			ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
+			//ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
 			ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
 			ss << "uniform float light" << i << "Shininess;" << std::endl;
 			break;
 		case CLight::PointLight:
 			ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
 			ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
-			ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
+			//ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
 			ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
 			ss << "uniform float light" << i << "Shininess;" << std::endl;
 			ss << "uniform float light" << i << "ConstAttn;" << std::endl;
@@ -108,18 +110,10 @@ namespace
 			ss << "normal3 = normalMatrix * normal3;" << std::endl;
 			ss << "normal3 = normalize(normal3);" << std::endl;
 
-			//if (desc->useTextures() || (material->getShader() == CMaterial::LightMap))
-			//{
-				ss << "vec4 lc = getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff + ";
-				ss << "getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec + ";
-				ss << "light" << i << "ColAmb;" << std::endl;
-			//} // FIXME: Ambient color is not correctly implemented
-			/*else
-			{
-				ss << "vec4 lc = getIntensity" << num << "(normal3, lightDir) * light" << num << "ColDiff * diffuseColor + ";
-				ss << "getSpecIntensity" << num << "(normal3, lightDir) * light" << num << "ColSpec * specularColor + ";
-				ss << "light" << num << "ColAmb * ambientColor;" << std::endl;
-			}*/
+			ss << "vec4 lc = getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff + ";
+			ss << "getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec;" << std::endl;
+
+			// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE DIR LIGHT
 
 			ss << "return lc;" << std::endl;
 			ss << "}" << std::endl;
@@ -156,26 +150,19 @@ namespace
 			ss << "float attenuation = light" << i << "ConstAttn + ";
 			ss << "light" << i << "LinAttn * lightDistance +";
 			ss << "light" << i << "QuadAttn * lightDistance * lightDistance;" << std::endl;
-			
+			// ss << "attenuation = max(attenuation, 1.0);" << std::endl; // TEST
+
 			ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
 			ss << "normal3 = normalMatrix * normal3;" << std::endl;
 			ss << "normal3 = normalize(normal3);" << std::endl;
 
-			/*if (desc->useTextures() || (material->getShader() == CMaterial::LightMap))
-			{*/
-				ss << "vec4 lc = getIntensity" << i << "(normal3, lightDirection) * light" << i << "ColDiff + ";
-				ss << "getSpecIntensity" << i << "(normal3, lightDirection) * light" << i << "ColSpec + ";
-				ss << "light" << i << "ColAmb;" << std::endl;
-				// FIXME: Ambient stuff
-			/*}
-			else
-			{
-				ss << "vec4 lc = getIntensity" << num << "(normal3, lightDirection) * light" << num << "ColDiff * diffuseColor+ ";
-				ss << "getSpecIntensity" << num << "(normal3, lightDirection) * light" << num << "ColSpec * specularColor + ";
-				ss << "light" << num << "ColAmb * ambientColor;" << std::endl;
-			}*/
+			ss << "vec4 lc = getIntensity" << i << "(normal3, lightDirection) * light" << i << "ColDiff + ";
+			ss << "getSpecIntensity" << i << "(normal3, lightDirection) * light" << i << "ColSpec;" << std::endl;
 
 			ss << "lc = lc / attenuation;" << std::endl;
+
+			// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE POINT LIGHT
+
 			ss << "return lc;" << std::endl;
 			ss << "}" << std::endl;
 			ss << std::endl;
@@ -214,9 +201,12 @@ namespace
 		ss << std::endl;
 		
 		// if (!useTextures) {
-		ss << "uniform vec4 ambientColor;" << std::endl; // FIXME: ambient color of all lights is precalculated and added with self illumination!
-		ss << "uniform vec4 diffuseColor;" << std::endl;
-		ss << "uniform vec4 specularColor;" << std::endl; // }
+
+		// Ambient color of all lights is precalculated and added with self illumination, and multiplied with the material ambient.
+		if (desc.Lighting)
+			ss << "uniform vec4 selfIllumination;" << std::endl;
+		// ss << "uniform vec4 diffuseColor;" << std::endl;
+		// ss << "uniform vec4 specularColor;" << std::endl; // }
 
 		if (desc.Fog || desc.Lighting)
 			ss << "uniform mat4 modelView;" << std::endl;
@@ -256,6 +246,9 @@ namespace
 			for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
 				if (desc.LightMode[i] == CLight::DirectionalLight || desc.LightMode[i] == CLight::PointLight)
 					ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
+			ss << "lightColor = lightColor + selfIllumination;" << std::endl;
+			//ss << "lightColor = selfIllumination;" << std::endl; // DEBUG
+			ss << "lightColor.a = 1.0;" << std::endl; // ...
 		}
 
 		for (int i = Weight; i < NumOffsets; i++)

@@ -61,6 +61,7 @@
 #include "driver_opengl_states.h"
 #include "driver_opengl_extension.h"
 #include "driver_opengl_shader_cache.h"
+#include "driver_opengl_program.h"
 
 
 #ifdef NL_OS_WINDOWS
@@ -275,20 +276,6 @@ public:
 	CIndexBufferInfo ();
 	void					setupIndexBuffer(CIndexBuffer &vb);
 };
-
-/// Builtin vertex program description
-struct CVPBuiltin
-{
-	uint16 VertexFormat;
-	bool Lighting;
-	sint LightMode[NL_OPENGL3_MAX_LIGHT]; // -1 when disabled
-	bool Fog;
-	bool VertexColorLighted;
-
-	CVertexProgram *VertexProgram;
-};
-
-bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
 
 class CGLSLShaderGenerator;
 class CUsrShaderManager;

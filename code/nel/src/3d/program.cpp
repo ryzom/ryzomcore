@@ -114,6 +114,8 @@ const char *CProgramIndex::Names[NUM_UNIFORMS] =
 	"texMatrix1",
 	"texMatrix2",
 	"texMatrix3",
+	
+	"selfIllumination",
 
 	"light0DirOrPos",
 	"light1DirOrPos",

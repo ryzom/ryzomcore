@@ -145,6 +145,8 @@ struct CProgramIndex
 		TexMatrix2,
 		TexMatrix3,
 
+		SelfIllumination,
+
 		Light0DirOrPos,
 		Light1DirOrPos,
 		Light2DirOrPos,

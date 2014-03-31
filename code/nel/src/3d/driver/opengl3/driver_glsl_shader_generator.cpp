@@ -81,15 +81,16 @@ namespace NL3D
 		}
 		ss << std::endl;
 		
-		/*if (desc->lightingEnabled()) // LIGHTING DEBUG
+#if 0 // LIGHTING DEBUG
+		if (desc->lightingEnabled())
 		{
 			generateInvalidPS();
 		}
 		else
 		{
 			generateNormalPS();
-		}*/
-
+		}
+#else
 		switch(material->getShader())
 		{
 		case CMaterial::Normal:
@@ -118,6 +119,7 @@ namespace NL3D
 			generateCloudPS();
 			break;
 		}
+#endif
 
 		ps.assign(ss.str());
 	}
@@ -521,7 +523,7 @@ namespace NL3D
 		if (desc->lightingEnabled())
 			addLightsFS();
 
-		ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
+		//ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
 
 		/*if (desc->fogEnabled())
 			addFog();

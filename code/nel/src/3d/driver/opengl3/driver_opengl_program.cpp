@@ -132,6 +132,15 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 		}
 		return false;
 	}
+	else // debug
+	{
+		std::vector<std::string> lines;
+		NLMISC::explode(std::string(src->SourcePtr), std::string("\n"), lines);
+		for (std::vector<std::string>::size_type i = 0; i < lines.size(); ++i)
+		{
+			nldebug("GL3: %i: %s", i, lines[i].c_str());
+		}
+	}
 
 
 	GLenum error = glGetError();
@@ -962,22 +971,26 @@ void CDriverGL3::setupUniforms(TProgram program)
 	int diffuseIndex = p->getUniformIndex(CProgramIndex::DiffuseColor);
 	if (diffuseIndex != -1)
 	{
-		GLfloat glCol[ 4 ];
+		/*GLfloat glCol[ 4 ];
 		CRGBA col = mat.getDiffuse();
 		glCol[ 0 ] = col.R / 255.0f;
 		glCol[ 1 ] = col.G / 255.0f;
 		glCol[ 2 ] = col.B / 255.0f;
-		glCol[ 3 ] = col.A / 255.0f;
+		glCol[ 3 ] = col.A / 255.0f;*/
 
-		setUniform4f(program, diffuseIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+		setUniform4f(program, diffuseIndex, 1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
+	NLMISC::CRGBAF selfIllumination = NLMISC::CRGBAF(0.0f, 0.0f, 0.0f);
+	NLMISC::CRGBAF matDiffuse = NLMISC::CRGBAF(mat.getDiffuse());
+	NLMISC::CRGBAF matSpecular = NLMISC::CRGBAF(mat.getSpecular());
 
-	int maxLights = std::min(int(MaxLight), int(NL_OPENGL3_MAX_LIGHT));
-	for (int i = 0; i < maxLights; i++)
+	for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 	{
 		if (!_UserLightEnable[ i ])
 			continue;
+
+		selfIllumination += NLMISC::CRGBAF(_UserLight[i].getAmbiant());
 		
 		////////////////// Temporary insanity  ///////////////////////////////
 		if ((_LightMode[ i ] != CLight::DirectionalLight) && (_LightMode[ i ] != CLight::PointLight))
@@ -1010,25 +1023,15 @@ void CDriverGL3::setupUniforms(TProgram program)
 		int ldc = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColDiff + i));
 		if (ldc != -1)
 		{
-			GLfloat glCol[ 4 ];
-			CRGBA col = _UserLight[ i ].getDiffuse();
-			glCol[ 0 ] = col.R / 255.0f;
-			glCol[ 1 ] = col.G / 255.0f;
-			glCol[ 2 ] = col.B / 255.0f;
-			glCol[ 3 ] = col.A / 255.0f;
-			setUniform4f(program, ldc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+			NLMISC::CRGBAF diffuse = NLMISC::CRGBAF(_UserLight[i].getDiffuse()) * matDiffuse;
+			setUniform4f(program, ldc, diffuse.R, diffuse.G, diffuse.B, 0.0f); // 1.0f?
 		}
 
 		int lsc = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColSpec + i));
 		if (lsc != -1)
 		{
-			GLfloat glCol[ 4 ];
-			CRGBA col = _UserLight[ i ].getSpecular();
-			glCol[ 0 ] = col.R / 255.0f;
-			glCol[ 1 ] = col.G / 255.0f;
-			glCol[ 2 ] = col.B / 255.0f;
-			glCol[ 3 ] = col.A / 255.0f;
-			setUniform4f(program, lsc, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+			NLMISC::CRGBAF specular = NLMISC::CRGBAF(_UserLight[i].getSpecular()) * matSpecular;
+			setUniform4f(program, lsc, specular.R, specular.G, specular.B, 0.0f); // 1.0f?
 		}
 
 		int shl = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0Shininess + i));
@@ -1037,7 +1040,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 			setUniform1f(program, shl, mat.getShininess());
 		}
 
-		int lac = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColAmb + i));
+		/*int lac = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColAmb + i));
 		if (lac != -1)
 		{
 			GLfloat glCol[ 4 ];
@@ -1052,7 +1055,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 			glCol[ 2 ] = col.B / 255.0f;
 			glCol[ 3 ] = col.A / 255.0f;
 			setUniform4f(program, lac, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
-		}
+		}*/
 
 		int lca = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ConstAttn + i));
 		if (lca != -1)
@@ -1073,11 +1076,18 @@ void CDriverGL3::setupUniforms(TProgram program)
 		}
 	}
 
+	selfIllumination *= NLMISC::CRGBAF(mat.getAmbient());
+	if (mat.getShader() != CMaterial::LightMap) // Really?
+		selfIllumination += NLMISC::CRGBAF(mat.getEmissive());
+	int selfIlluminationId = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::SelfIllumination));
+	if (selfIlluminationId != -1)
+	{
+		setUniform4f(program, selfIlluminationId, selfIllumination.R, selfIllumination.G, selfIllumination.B, 0.0f);
+	}
 
 	// Lightmaps have special constants
 	if (mat.getShader() != CMaterial::LightMap)
 	{
-	
 		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 		{
 			int cl = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
@@ -1093,7 +1103,6 @@ void CDriverGL3::setupUniforms(TProgram program)
 				setUniform4f(program, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 			}
 		}
-
 	}
 }
 

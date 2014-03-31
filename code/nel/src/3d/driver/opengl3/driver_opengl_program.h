@@ -25,6 +25,21 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 #endif
 
+/// Builtin vertex program description
+struct CVPBuiltin
+{
+	uint16 VertexFormat;
+	bool Lighting;
+	sint LightMode[NL_OPENGL3_MAX_LIGHT]; // -1 when disabled
+	bool Specular; // Reflection
+	bool Fog;
+	// bool VertexColorLighted;
+
+	CVertexProgram *VertexProgram;
+};
+
+bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
+
 enum TAttribOffset
 {
 	Position,
