@@ -605,8 +605,8 @@ namespace NL3D
 
 		ss << "fragColor = texop" << (IDRV_MAT_MAXTEXTURES - 1) << ";" << std::endl;
 
-		//if (desc->fogEnabled())
-		//	addFog();
+		if (desc->fogEnabled())
+			addFog();
 
 		addAlphaTest();
 

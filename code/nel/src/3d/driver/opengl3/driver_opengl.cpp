@@ -1640,7 +1640,7 @@ bool CDriverGL3::supportFrameBufferObject() const
 {
 	H_AUTO_OGL(CDriverGL3_supportFrameBufferObject);
 
-	return _Extensions.GLCore;
+	return false; // TODO GL _Extensions.GLCore;
 }
 
 // ***************************************************************************

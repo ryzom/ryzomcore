@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopengl.h"
-#include "driver_opengl_vertex_program.h"
 
 #include <sstream>
 
