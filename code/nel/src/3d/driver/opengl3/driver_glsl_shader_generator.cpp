@@ -95,6 +95,7 @@ namespace NL3D
 		{
 		case CMaterial::Normal:
 		case CMaterial::UserColor:
+		case CMaterial::Specular:
 			generateNormalPS();
 			break;
 
@@ -102,9 +103,9 @@ namespace NL3D
 			generateLightMapPS();
 			break;
 
-		case CMaterial::Specular:
+		/*case CMaterial::Specular:
 			generateSpecularPS();
-			break;
+			break;*/
 
 		case CMaterial::PerPixelLighting:
 		case CMaterial::PerPixelLightingNoSpec:

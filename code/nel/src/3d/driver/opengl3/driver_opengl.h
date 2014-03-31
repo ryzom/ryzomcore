@@ -1392,9 +1392,6 @@ public:
 	#endif
 
 	emptyProc ExitFunc;
-
-	// tmp for debug
-	void checkTextureOn() const;
 private:
 	/** Bind a texture at stage 0 for the good texture mode(2d or cube)
 	  * Parameters / part of the texture are ready to be changed in the gl after that

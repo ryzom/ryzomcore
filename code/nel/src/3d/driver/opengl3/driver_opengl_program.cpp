@@ -554,7 +554,11 @@ void CDriverGL3::setUniformFog(TProgram program, uint index)
 void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 {
 	desc.setShaderType(mat.getShader());
-	desc.setVBFlags(_CurrentVertexBufferHard->VB->getVertexFormat());
+	uint16 vbFlags = _CurrentVertexBufferHard->VB->getVertexFormat();
+	for (sint i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+		if (m_VPBuiltinCurrent.TexGenMode[0] >= 0)
+			vbFlags |= g_VertexFlags[TexCoord0 + i]; // texgen hack for keeping pp simpler
+	desc.setVBFlags(vbFlags);
 	
 	if (mat.getShader() == CMaterial::LightMap)
 		desc.setNLightMaps(mat._LightMaps.size());
@@ -574,7 +578,9 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 		for (int i = 0; i < maxTextures; i++)
 		{
 			// GL3 TEX COORD
-			if (mat.getTexture(i) != NULL && (desc.hasVBFlags(g_VertexFlags[TexCoord0]) || desc.hasVBFlags(g_VertexFlags[TexCoord0 + i])))
+			if (mat.getTexture(i) != NULL 
+				&& (desc.hasVBFlags(g_VertexFlags[TexCoord0]) || desc.hasVBFlags(g_VertexFlags[TexCoord0 + i]))
+				)
 			{
 				desc.setUseTexStage(i, true);
 				useTextures = true;

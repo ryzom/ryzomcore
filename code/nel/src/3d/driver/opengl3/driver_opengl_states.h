@@ -119,20 +119,12 @@ public:
 
 	/// \name Texture Mode setting.
 	// @{
-	enum			TTextureMode {TextureDisabled, Texture2D, TextureRect, TextureCubeMap, TextureModeCount};
 	/// same as glActiveTexture(). useful for setTextureMode.
 	void			activeTexture(uint stage);
 	/// same as active texture arb, but with no cache check
 	void			forceActiveTexture(uint stage);
 	/// get active texture
 	uint			getActiveTexture() const { return _CurrentActiveTexture; }
-	/** change if needed the texture mode of the current active Texture ARB.
-	 *	NB: if CubeMap extension not supported, TextureCubeMap <=> TextureDisabled.
-	 */
-	void			setTextureMode(TTextureMode texMode);
-	TTextureMode	getTextureMode() const { return _TextureMode[_CurrentActiveTexture]; }
-	// reset texture mode to the default (disabled) for the current stage. It forces the state (useful after texture shaders)
-	void			resetTextureMode();
 	// @}
 
 	// special version for ARB_vertex_program used with ARB_vertex_buffer or ATI_vertex_attrib_array_object
@@ -168,7 +160,6 @@ private:
 	float			_CurAlphaTestThreshold;
 
 	uint			_CurrentActiveTexture;
-	TTextureMode	_TextureMode[8];
 
 	bool			_VertexAttribArrayEnabled[CVertexBuffer::NumValue];
 

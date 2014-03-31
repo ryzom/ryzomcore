@@ -98,15 +98,15 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	static const GLfloat zero[4] = { 0, 0, 0, 1 };
 
 	// TexModes
-	for (uint stage = 0; stage < nbStages; ++stage)
-	{
+	// FIXME GL3 TEXTUREMODE for (uint stage = 0; stage < nbStages; ++stage)
+	// FIXME GL3 TEXTUREMODE {
 		// disable texturing.
-		nglActiveTexture(GL_TEXTURE0 + stage);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_TEXTURE_CUBE_MAP);
-		glDisable(GL_TEXTURE_RECTANGLE);
-		_TextureMode[stage]= TextureDisabled;
-	}
+		// FIXME GL3 TEXTUREMODE nglActiveTexture(GL_TEXTURE0 + stage);
+		// FIXME GL3 TEXTUREMODE glDisable(GL_TEXTURE_2D);
+		// FIXME GL3 TEXTUREMODE glDisable(GL_TEXTURE_CUBE_MAP);
+		// FIXME GL3 TEXTUREMODE glDisable(GL_TEXTURE_RECTANGLE);
+		// FIXME GL3 TEXTUREMODE _TextureMode[stage]= TextureDisabled;
+	// FIXME GL3 TEXTUREMODE }
 
 	// ActiveTexture current texture to 0.
 	nglActiveTexture(GL_TEXTURE0);
@@ -381,42 +381,6 @@ void CDriverGLStates3::setDepthRange(float znear, float zfar)
 		updateDepthRange();
 	}
 }
-/*
-// ***************************************************************************
-void		CDriverGLStates3::setTexGenMode (uint stage, GLint mode)
-{
-	H_AUTO_OGL(CDriverGLStates3_setTexGenMode);
-
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (mode != _TexGenMode[stage])
-#endif
-	{
-		_TexGenMode[stage] = mode;
-	}
-}
-*/
-// ***************************************************************************
-void			CDriverGLStates3::resetTextureMode()
-{
-	H_AUTO_OGL(CDriverGLStates3_resetTextureMode);
-
-	_TextureMode[_CurrentActiveTexture]= TextureDisabled;
-}
-
-
-// ***************************************************************************
-void			CDriverGLStates3::setTextureMode(TTextureMode texMode)
-{
-	H_AUTO_OGL(CDriverGLStates3_setTextureMode)
-	TTextureMode	oldTexMode = _TextureMode[_CurrentActiveTexture];
-	if (oldTexMode != texMode)
-	{
-
-	// new mode.
-		_TextureMode[_CurrentActiveTexture]= texMode;
-	}
-}
-
 
 // ***************************************************************************
 void			CDriverGLStates3::activeTexture(uint stage)

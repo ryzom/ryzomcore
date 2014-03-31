@@ -440,7 +440,7 @@ bool CDriverGL3::setupDisplay()
 		_CurrentTexEnvSpecial[stage] = TexEnvSpecialDisabled;
 
 		// set All TexGen by default to identity matrix (prefer use the textureMatrix scheme)
-		_DriverGLStates.activeTexture(stage);
+		setTexGenModeVP(stage, TexGenDisabled); // FIXME GL3 TEXGEN
 	}
 
 	if (!initProgramPipeline())
@@ -964,12 +964,12 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 	//	gltext->activeFrameBufferObject(NULL);
 	_DriverGLStates.activeTexture(0);
 	// setup texture mode, after activeTexture()
-	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
+	// FIXME GL3 TEXTUREMODE CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
-		textureMode = CDriverGLStates3::TextureRect;
+	// FIXME GL3 TEXTUREMODE if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
+	// FIXME GL3 TEXTUREMODE 	textureMode = CDriverGLStates3::TextureRect;
 
-	_DriverGLStates.setTextureMode(textureMode);
+	// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(textureMode);
 	if (tex->isTextureCube())
 	{
 		glBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
@@ -981,7 +981,7 @@ void CDriverGL3::copyFrameBufferToTexture(ITexture *tex,
 		glCopyTexSubImage2D(gltext->TextureMode, level, offsetx, offsety, x, y, width, height);
 	}
 	// disable texturing.
-	_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+	// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 	_CurrentTexture[0] = NULL;
 	_CurrentTextureInfoGL[0] = NULL;
 	//if (_RenderTargetFBO)
@@ -1569,49 +1569,6 @@ void CDriverGL3::dumpMappedBuffers()
 #endif
 
 // ***************************************************************************
-void CDriverGL3::checkTextureOn() const
-{
-	H_AUTO_OGL(CDriverGL3_checkTextureOn)
-	// tmp for debug
-	CDriverGLStates3 &dgs = const_cast<CDriverGLStates3 &>(_DriverGLStates);
-	uint currTexStage = dgs.getActiveTexture();
-	for (uint k = 0; k < this->getNbTextureStages(); ++k)
-	{
-		dgs.activeTexture(k);
-		GLboolean flag2D;
-		GLboolean flagCM;
-		GLboolean flagTR;
-		glGetBooleanv(GL_TEXTURE_2D, &flag2D);
-		glGetBooleanv(GL_TEXTURE_CUBE_MAP, &flagCM);
-
-		glGetBooleanv(GL_TEXTURE_RECTANGLE, &flagTR);
-
-		switch(dgs.getTextureMode())
-		{
-			case CDriverGLStates3::TextureDisabled:
-				nlassert(!flag2D);
-				nlassert(!flagCM);
-			break;
-			case CDriverGLStates3::Texture2D:
-				nlassert(flag2D);
-				nlassert(!flagCM);
-			break;
-			case CDriverGLStates3::TextureRect:
-				nlassert(flagTR);
-				nlassert(!flagCM);
-			break;
-			case CDriverGLStates3::TextureCubeMap:
-				nlassert(!flag2D);
-				nlassert(flagCM);
-			break;
-			default:
-			break;
-		}
-	}
-	dgs.activeTexture(currTexStage);
-}
-
-// ***************************************************************************
 bool CDriverGL3::supportOcclusionQuery() const
 {
 	H_AUTO_OGL(CDriverGL3_supportOcclusionQuery)
@@ -1624,7 +1581,7 @@ bool CDriverGL3::supportTextureRectangle() const
 {
 	H_AUTO_OGL(CDriverGL3_supportTextureRectangle);
 
-	return _Extensions.GLCore;
+	return false; // FIXME GL3 _Extensions.GLCore;
 }
 
 // ***************************************************************************

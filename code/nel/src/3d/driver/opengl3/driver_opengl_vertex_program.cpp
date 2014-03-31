@@ -199,10 +199,16 @@ namespace
 
 		for (int i = Weight; i < NumOffsets; ++i)
 			if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
-				ss << "smooth out vec4 " << g_AttribNames[i] << ";" << std::endl;
+				ss << "smooth out vec4 " << g_AttribNames[i] << "; // vertex buffer" << std::endl;
 		ss << std::endl;
-		
-		// if (!useTextures) {
+
+		// For now shader will fail to compile if both texgen and vertex buffer tex coord are provided! This is by design.
+		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+			if (desc.TexGenMode[i] >= 0)
+				ss << "smooth out vec4 texCoord" << i << "; // texgen (not implemented)" << std::endl;
+		ss << std::endl;
+
+		// TODO: Texgen parameters
 
 		// Ambient color of all lights is precalculated and added with self illumination, and multiplied with the material ambient.
 		if (desc.Lighting)
@@ -257,6 +263,14 @@ namespace
 			{
 				ss << g_AttribNames[i] << " = " << "v" << g_AttribNames[i] << ";" << std::endl;
 			}
+		}
+
+		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+		{
+			if (desc.TexGenMode[i] >= 0)
+				ss << "texCoord" << i << " = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+
+			// TODO: Texgen calculation
 		}
 
 		ss << "}" << std::endl;
@@ -342,6 +356,8 @@ void CDriverGL3::setTexGenModeVP(uint stage, sint mode)
 	H_AUTO_OGL(CDriverGL3_setTexGenModeVP)
 	if (m_VPBuiltinCurrent.TexGenMode[stage] != mode)
 	{
+		if (mode >= 0)
+			nlwarning("enable texgen %i, %i, not implemented", stage, mode);
 		m_VPBuiltinCurrent.TexGenMode[stage] = mode;
 		m_VPBuiltinTouched = true;
 	}

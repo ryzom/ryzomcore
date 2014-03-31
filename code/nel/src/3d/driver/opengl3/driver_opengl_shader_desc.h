@@ -24,6 +24,9 @@ namespace NL3D
 	class CVertexProgram;
 	class CPixelProgram;
 
+	static uint8 Sampler2D = 0;
+	static uint8 SamplerCube = 1;
+
 	struct SShaderPair
 	{
 		SShaderPair()
@@ -84,13 +87,16 @@ namespace NL3D
 
 		CShaderDesc() {
 			for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
-				texEnvMode[ i ] = 0;
+				texEnvMode[i] = 0;
 
 			for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
-				lightMode[ i ] = Nolight;
+				lightMode[i] = Nolight;
 			
 			for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
-				useTextureStage[ i ] = false;
+			{
+				useTextureStage[i] = false;
+				textureSamplerMode[i] = Sampler2D;
+			}
 			//useFirstTextureCoordSet = false;
 			noTextures = true;
 			
@@ -255,8 +261,9 @@ namespace NL3D
 		};
 
 		uint32 features;
-		uint32 texEnvMode[ IDRV_MAT_MAXTEXTURES ];
-		bool useTextureStage[ IDRV_MAT_MAXTEXTURES ];
+		uint32 texEnvMode[IDRV_MAT_MAXTEXTURES];
+		bool useTextureStage[IDRV_MAT_MAXTEXTURES];
+		uint8 textureSamplerMode[IDRV_MAT_MAXTEXTURES];
 		//bool useFirstTextureCoordSet;
 		bool noTextures;
 		uint32 vbFlags;
@@ -264,7 +271,7 @@ namespace NL3D
 		uint32 nlightmaps;
 		float alphaTestTreshold;
 		uint32 fogMode;
-		TLightMode lightMode[ NL_OPENGL3_MAX_LIGHT ];
+		TLightMode lightMode[NL_OPENGL3_MAX_LIGHT];
 		bool pointLight;
 
 		SShaderPair shaderPair;

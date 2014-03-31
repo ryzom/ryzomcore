@@ -600,18 +600,18 @@ void CDriverGL3::bindTextureWithMode(ITexture &tex)
 	_DriverGLStates.activeTexture(0);
 	if (tex.isTextureCube())
 	{
-		_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
+		// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 		// Bind this texture
 		glBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
 	}
 	else
 	{
-		CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
+		// FIXME GL3 TEXTUREMODE CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-		if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
-			textureMode = CDriverGLStates3::TextureRect;
+		// FIXME GL3 TEXTUREMODE if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
+		// FIXME GL3 TEXTUREMODE 	textureMode = CDriverGLStates3::TextureRect;
 
-		_DriverGLStates.setTextureMode(textureMode);
+		// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(textureMode);
 		// Bind this texture
 		glBindTexture(gltext->TextureMode, gltext->ID);
 	}
@@ -692,7 +692,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 			// Disable texture 0
 			_CurrentTexture[0] = NULL;
 			_CurrentTextureInfoGL[0] = NULL;
-			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 			//
 		}
 		//
@@ -1080,7 +1080,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 		// Disable texture 0
 		_CurrentTexture[0]= NULL;
 		_CurrentTextureInfoGL[0]= NULL;
-		_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+		// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 	}
 
 	// The texture is correctly setuped.
@@ -1119,12 +1119,12 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 
 	// system of "backup the previous binded texture" seems to not work with some drivers....
 	_DriverGLStates.activeTexture (0);
-	CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
+	// FIXME GL3 TEXTUREMODE CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
 
-	if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
-		textureMode = CDriverGLStates3::TextureRect;
+	// FIXME GL3 TEXTUREMODE if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
+	// FIXME GL3 TEXTUREMODE 	textureMode = CDriverGLStates3::TextureRect;
 
-	_DriverGLStates.setTextureMode (textureMode);
+	// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode (textureMode);
 	// Bind this texture, for reload...
 	glBindTexture (gltext->TextureMode, gltext->ID);
 
@@ -1172,7 +1172,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 		{
 			_CurrentTexture[0]= NULL;
 			_CurrentTextureInfoGL[0]= NULL;
-			_DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
+			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
 			return false;
 		}
 
@@ -1215,7 +1215,7 @@ bool CDriverGL3::uploadTexture (ITexture& tex, CRect& rect, uint8 nNumMipMap)
 	// Disable texture 0
 	_CurrentTexture[0]= NULL;
 	_CurrentTextureInfoGL[0]= NULL;
-	_DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
+	// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode (CDriverGLStates3::TextureDisabled);
 
 	return true;
 }
@@ -1256,7 +1256,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			if (tex->isTextureCube())
 			{
 				// setup texture mode, after activeTexture()
-				_DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
+				// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureCubeMap);
 
 				// Activate texturing...
 				//======================
@@ -1287,10 +1287,10 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			else
 			{
 				// setup texture mode, after activeTexture()
-				CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
-				if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
-					textureMode = CDriverGLStates3::TextureRect;
-				_DriverGLStates.setTextureMode(/*CDriverGLStates3::Texture2D*/textureMode);
+				// FIXME GL3 TEXTUREMODE CDriverGLStates3::TTextureMode textureMode= CDriverGLStates3::Texture2D;
+				// FIXME GL3 TEXTUREMODE if (gltext->TextureMode == GL_TEXTURE_RECTANGLE)
+				// FIXME GL3 TEXTUREMODE 	textureMode = CDriverGLStates3::TextureRect;
+				// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(/*CDriverGLStates3::Texture2D*/textureMode);
 
 				// Activate texture...
 				//======================
@@ -1335,7 +1335,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			// Force no texturing for this stage.
 			_CurrentTextureInfoGL[stage]= NULL;
 			// setup texture mode, after activeTexture()
-			_DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
+			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 
 			/*if (_Extensions.ATITextureEnvCombine3)
 			{
