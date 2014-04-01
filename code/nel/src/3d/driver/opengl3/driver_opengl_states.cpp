@@ -62,15 +62,12 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	// Enable / disable.
 	_CurBlend = false;
 	_CurCullFace = true;
-	_CurAlphaTest = false;
 	_CurZWrite = true;
 	_CurStencilTest =false;
 
 	// setup GLStates.
-	glDisable(GL_FOG);
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
-	glDisable(GL_ALPHA_TEST);
 	glDepthMask(GL_TRUE);
 
 	// Func.
@@ -84,7 +81,6 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 	_CurStencilOpZFail = GL_KEEP;
 	_CurStencilOpZPass = GL_KEEP;
 	_CurStencilWriteMask = std::numeric_limits<GLuint>::max();
-	_CurAlphaTestThreshold = 0.5f;
 
 	// setup GLStates.
 	glBlendFunc(_CurBlendSrc, _CurBlendDst);
@@ -165,31 +161,6 @@ void			CDriverGLStates3::enableCullFace(uint enable)
 }
 
 // ***************************************************************************
-void			CDriverGLStates3::enableAlphaTest(uint enable)
-{
-	H_AUTO_OGL(CDriverGLStates3_enableAlphaTest)
-	// If different from current setup, update.
-	bool	enabled= (enable!=0);
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (enabled != _CurAlphaTest)
-#endif
-	{
-		// new state.
-		_CurAlphaTest= enabled;
-
-		// Setup GLState.
-		if (_CurAlphaTest)
-		{
-			glEnable(GL_ALPHA_TEST);
-		}
-		else
-		{
-			glDisable(GL_ALPHA_TEST);
-		}
-	}
-}
-
-// ***************************************************************************
 void			CDriverGLStates3::enableZWrite(uint enable)
 {
 	H_AUTO_OGL(CDriverGLStates3_enableZWrite)
@@ -262,21 +233,6 @@ void			CDriverGLStates3::depthFunc(GLenum zcomp)
 		glDepthFunc(_CurDepthFunc);
 	}
 }
-
-
-// ***************************************************************************
-void			CDriverGLStates3::alphaFunc(float threshold)
-{
-	H_AUTO_OGL(CDriverGLStates3_alphaFunc)
-#ifndef NL3D_GLSTATE_DISABLE_CACHE
-	if (threshold != _CurAlphaTestThreshold)
-#endif
-	{
-		// new state
-		_CurAlphaTestThreshold= threshold;
-	}
-}
-
 
 // ***************************************************************************
 void			CDriverGLStates3::stencilFunc(GLenum func, GLint ref, GLuint mask)

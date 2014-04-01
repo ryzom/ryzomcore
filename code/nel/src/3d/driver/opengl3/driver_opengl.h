@@ -405,8 +405,9 @@ public:
 	{
 		_ForceNormalize= normalize;
 		// if ForceNormalize, must enable GLNormalize now.
-		if (normalize)
-			enableGlNormalize(true);
+		//if (normalize)
+		//	enableGlNormalize(true);
+		// FIXME GL3 FORCE NORMALIZE NOT IMPLEMENTED (VP STATE GL_NORMALIZE)
 	}
 
 	virtual	bool			isForceNormalize() const
@@ -938,8 +939,6 @@ private:
 
 	// @}
 
-	bool					_CurrentGlNormalize;
-
 private:
 	bool					createContext();
 	bool					setupDisplay();
@@ -1135,19 +1134,6 @@ private:
 
 	/// setup GL arrays, with a vb info.
 	void			setupGlArrays(CVertexBufferInfo &vb);
-
-	/// Test/activate normalisation of normal.
-	void			enableGlNormalize(bool normalize)
-	{
-		if (_CurrentGlNormalize!=normalize)
-		{
-			_CurrentGlNormalize= normalize;
-			if (normalize)
-				glEnable(GL_NORMALIZE);
-			else
-				glDisable(GL_NORMALIZE);
-		}
-	}
 
 	void			setLightInternal(uint8 num, const CLight& light);
 	void			enableLightInternal(uint8 num, bool enable);

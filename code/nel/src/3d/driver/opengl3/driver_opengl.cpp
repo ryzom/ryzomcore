@@ -234,7 +234,6 @@ CDriverGL3::CDriverGL3()
 
 	uint i;
 
-	_CurrentGlNormalize= false;
 	_ForceNormalize= false;
 
 	_AGPVertexArrayRange= NULL;
@@ -388,19 +387,18 @@ bool CDriverGL3::setupDisplay()
 	// Init OpenGL/Driver defaults.
 	//=============================
 	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
-	glDisable(GL_AUTO_NORMAL);
-	glDisable(GL_COLOR_MATERIAL);
+	//glDisable(GL_AUTO_NORMAL); // FIXME GL3
+	//glDisable(GL_COLOR_MATERIAL); // FIXME GL3
 	glEnable(GL_DITHER);
-	glDisable(GL_FOG);
+	//glDisable(GL_FOG);
 	glDisable(GL_LINE_SMOOTH);
 	glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_NORMALIZE);
-	glDisable(GL_COLOR_SUM_EXT);
+	//glDisable(GL_NORMALIZE);
+	//glDisable(GL_COLOR_SUM_EXT); // FIXME GL3
 
 	_CurrViewport.init(0.f, 0.f, 1.f, 1.f);
 	_CurrScissor.initFullScreen();
-	_CurrentGlNormalize = false;
 	_ForceNormalize = false;
 	// Setup defaults for blend, lighting ...
 	_DriverGLStates.forceDefaults(inlGetNumTextStages());

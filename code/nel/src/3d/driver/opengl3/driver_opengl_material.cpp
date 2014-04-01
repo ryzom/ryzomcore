@@ -423,13 +423,14 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 		// Alpha Test Part.
 		//=================
-		uint32 alphaTest = mat.getFlags() & IDRV_MAT_ALPHA_TEST;
+		/*uint32 alphaTest = mat.getFlags() & IDRV_MAT_ALPHA_TEST;
 		_DriverGLStates.enableAlphaTest(alphaTest);
 		if (alphaTest)
 		{
 			// setup alphaTest threshold.
 			_DriverGLStates.alphaFunc(mat.getAlphaTestThreshold());
-		}
+			// GL3 PART OF MATERIAL PARAMETERS
+		}*/
 
 		// Bind ZBuffer Part.
 		//===================

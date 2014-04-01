@@ -84,7 +84,6 @@ public:
 	void			enableBlend(uint enable);
 	void			enableCullFace(uint enable);
 	/// enable and set good AlphaFunc.
-	void			enableAlphaTest(uint enable);
 	void			enableZWrite(uint enable);
 	/// enable/disable stencil test
 	void			enableStencilTest(bool enable);
@@ -95,8 +94,6 @@ public:
 	void			blendFunc(GLenum src, GLenum dst);
 	/// glDepthFunc.
 	void			depthFunc(GLenum zcomp);
-	/// glAlphaFunc
-	void			alphaFunc(float threshold);
 	/// glStencilFunc
 	void			stencilFunc(GLenum stencilFunc, GLint ref, GLuint mask);
 	/// glStencilOp
@@ -143,7 +140,6 @@ public:
 private:
 	bool			_CurBlend;
 	bool			_CurCullFace;
-	bool			_CurAlphaTest;
 	bool			_CurZWrite;
 	bool			_CurStencilTest;
 
@@ -157,7 +153,6 @@ private:
 	GLenum			_CurStencilOpZFail;
 	GLenum			_CurStencilOpZPass;
 	GLuint			_CurStencilWriteMask;
-	float			_CurAlphaTestThreshold;
 
 	uint			_CurrentActiveTexture;
 
