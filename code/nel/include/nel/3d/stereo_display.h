@@ -60,6 +60,7 @@ public:
 	{
 		StereoDisplay, 
 		StereoHMD, 
+		StereoNGHMD, 
 	};
 	
 	enum TStereoDeviceLibrary

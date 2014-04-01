@@ -519,6 +519,7 @@ void releaseStereoDisplayDevice()
 		delete StereoDisplay;
 		StereoDisplay = NULL;
 		StereoHMD = NULL;
+		StereoNGHMD = NULL;
 	}
 	IStereoDisplay::releaseAllLibraries();
 }

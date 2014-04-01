@@ -42,6 +42,7 @@ namespace NL3D
 	class UWaterEnvMap;
 	class IStereoDisplay;
 	class IStereoHMD;
+	class IStereoNGHMD;
 }
 
 class CEntityAnimationManager;
@@ -81,6 +82,7 @@ const float		ExtraZoneLoadingVision	= 100.f;
 extern NL3D::UDriver				*Driver;		// The main 3D Driver
 extern NL3D::IStereoDisplay			*StereoDisplay; // Stereo display
 extern NL3D::IStereoHMD				*StereoHMD;		// Head mount display
+extern NL3D::IStereoNGHMD			*StereoNGHMD;		// HMD with player death support
 extern CSoundManager				*SoundMngr;		// the sound manager
 extern NL3D::UMaterial				GenericMat;	// Generic Material
 extern NL3D::UTextContext			*TextContext;	// Context for all the text in the client.
