@@ -335,9 +335,9 @@ GLint	CDriverGL3::getGlTextureFormat(ITexture& tex, bool &compressed)
 		case ITexture::RGBA5551: return GL_RGB5_A1;
 		case ITexture::RGB888: return GL_RGB8;
 		case ITexture::RGB565: return GL_RGB5;
-		case ITexture::Luminance: return GL_LUMINANCE8;
-		case ITexture::Alpha: return GL_ALPHA8;
-		case ITexture::AlphaLuminance: return GL_LUMINANCE8_ALPHA8;
+		case ITexture::Luminance: return GL_R8; // GL_LUMINANCE8;
+		case ITexture::Alpha: return GL_R8; // GL_ALPHA8;
+		case ITexture::AlphaLuminance: return GL_RG8; // GL_LUMINANCE8_ALPHA8;
 		case ITexture::DsDt:
 			{
 				return GL_RG8;
@@ -363,9 +363,9 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 	{
 		switch(tex.getPixelFormat())
 		{
-		case CBitmap::Alpha:	return GL_ALPHA;
-		case CBitmap::AlphaLuminance:	return GL_LUMINANCE_ALPHA;
-		case CBitmap::Luminance:	return GL_LUMINANCE;
+		case CBitmap::Alpha:	return GL_RED; // GL_ALPHA;
+		case CBitmap::AlphaLuminance:	return GL_RG; // GL_LUMINANCE_ALPHA;
+		case CBitmap::Luminance:	return GL_RED; // GL_LUMINANCE;
 		default: break;
 		}
 	}
@@ -658,6 +658,23 @@ void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 
 		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
 			glTexParameteri(gltext->TextureMode, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
+	}
+	switch (tex.getUploadFormat())
+	{
+		case ITexture::Luminance:
+		case ITexture::Alpha:
+		{
+			static const GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_RED };
+			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+			break;
+		}
+		case ITexture::AlphaLuminance:
+		case ITexture::DsDt:
+		{
+			static const GLint swizzleMask[] = { GL_RED, GL_GREEN, GL_RED, GL_GREEN };
+			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+			break;
+		}
 	}
 	//
 	tex.clearFilterOrWrapModeTouched();
