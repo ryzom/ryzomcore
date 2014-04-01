@@ -1050,7 +1050,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 			if (ld != ~0)
 			{
 				CVector v = -1 * _UserLight[i].getDirection();
-				nglProgramUniform4f(progId, ld, v.x, v.y, v.z, 0.0f);
+				nglProgramUniform3f(progId, ld, v.x, v.y, v.z);
 			}
 		}
 		else
@@ -1059,7 +1059,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 			if (lp != ~0)
 			{
 				CVector v = _UserLight[i].getPosition() - _PZBCameraPos;
-				nglProgramUniform4f(progId, lp, v.x, v.y, v.z, 0.0f);
+				nglProgramUniform3f(progId, lp, v.x, v.y, v.z);
 			}
 		}
 
