@@ -107,7 +107,6 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 		return false;
 
 	const char *s = src->SourcePtr;
-	glGetError();
 	unsigned int id = nglCreateShaderProgramv(GL_VERTEX_SHADER, 1, &s);
 
 	if (id == 0)
@@ -137,10 +136,6 @@ bool CDriverGL3::compileVertexProgram(CVertexProgram *program)
 			nldebug("GL3: %i: %s", i, lines[i].c_str());
 		}
 	}
-
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-		return false;
 
 	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(),(NL3D::IProgramDrvInfos*)NULL);
 	CProgramDrvInfosGL3 *drvInfo = new CProgramDrvInfosGL3(this, it);
@@ -183,16 +178,8 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 		m_DriverVertexProgram = NULL;
 		return false;
 	}
-	glGetError();
 
 	nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, drvInfo->getProgramId());
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		m_UserVertexProgram = NULL;
-		m_DriverVertexProgram = NULL;
-		return false;
-	}
 
 	if (!driver) m_UserVertexProgram = program;
 	m_DriverVertexProgram = program;
@@ -227,7 +214,6 @@ bool CDriverGL3::compilePixelProgram(CPixelProgram *program)
 		return false;
 
 	const char *s = src->SourcePtr;
-	glGetError();
 	unsigned int id = nglCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, &s);
 	if (id == 0)
 		return false;
@@ -256,10 +242,6 @@ bool CDriverGL3::compilePixelProgram(CPixelProgram *program)
 			nldebug("GL3: %i: %s", i, lines[i].c_str());
 		}
 	}
-
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-		return false;
 
 	ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
 	CProgramDrvInfosGL3 *drvInfo = new CProgramDrvInfosGL3(this, it);
@@ -309,16 +291,8 @@ bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
 		m_DriverPixelProgram = NULL;
 		return false;
 	}
-	glGetError();
 
 	nglUseProgramStages(ppoId, GL_FRAGMENT_SHADER_BIT, drvInfo->getProgramId());
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		m_UserPixelProgram = NULL;
-		m_DriverPixelProgram = NULL;
-		return false;
-	}
 
 	if (!driver) m_UserPixelProgram = program;
 	m_DriverPixelProgram = program;

@@ -64,6 +64,8 @@ void (*nglGetProcAddress(const char *procName))()
 // The exported function names
 
 // Core 3.30
+PFNGLGETSTRINGIPROC								nglGetStringi;
+
 PFNGLATTACHSHADERPROC							nglAttachShader;
 PFNGLCOMPILESHADERPROC							nglCompileShader;
 PFNGLCREATEPROGRAMPROC							nglCreateProgram;
@@ -245,6 +247,9 @@ PFNWGLGETSWAPINTERVALEXTPROC					nwglGetSwapIntervalEXT;
 // WGL_ARB_extensions_string
 PFNWGLGETEXTENSIONSSTRINGARBPROC				nwglGetExtensionsStringARB;
 
+// WGL_ARB_create_context_profile
+PFNWGLCREATECONTEXTATTRIBSARBPROC				nwglCreateContextAttribsARB;
+
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
 
@@ -276,6 +281,19 @@ namespace NLDRIVERGL3 {
 #define CHECK_EXT(ext_str) \
 	if (strstr(glext, ext_str)==NULL) { nlwarning("3D: OpengGL extension '%s' was not found", ext_str); return false; } else { nldebug("3D: OpengGL Extension '%s' found", ext_str); }
 
+bool checkExt2(std::vector<const char *> &glext, const char *ext_str)
+{
+	for (int i = 0; i < glext.size(); ++i)
+	{
+		if (strcmp(glext[i], ext_str) == 0)
+			return true;
+	}
+	return false;
+}
+
+#define CHECK_EXT_2(ext_str) \
+	if (!checkExt2(glext, ext_str)) { nlwarning("3D: OpengGL extension '%s' was not found", ext_str); return false; } else { nldebug("3D: OpengGL Extension '%s' found", ext_str); }
+
 // Debug: don't return false if the procaddr returns 0
 // It means that it can crash if nel calls this extension but at least we have a warning to know why the extension is available but not the procaddr
 #define CHECK_ADDRESS(type, ext) \
@@ -286,11 +304,11 @@ namespace NLDRIVERGL3 {
 // Extensions registrations, and Windows function Registration.
 
 // *********************************
-static bool	setupEXTTextureCompressionS3TC(const char	*glext)
+static bool	setupEXTTextureCompressionS3TC(std::vector<const char *> &glext)
 {
 	H_AUTO_OGL(setupEXTTextureCompressionS3TC);
 
-	CHECK_EXT("GL_EXT_texture_compression_s3tc");
+	CHECK_EXT_2("GL_EXT_texture_compression_s3tc");
 	// TODO: check also for GL_S3_s3tc, GL_EXT_texture_compression_dxt1
 
 	return true;
@@ -329,14 +347,14 @@ static bool	setupWGLARBPixelFormat (const char	*glext)
 #endif
 
 // ***************************************************************************
-static bool	setupEXTTextureFilterAnisotropic(const char	*glext)
+static bool	setupEXTTextureFilterAnisotropic(std::vector<const char *> &glext)
 {
 	H_AUTO_OGL(setupEXTTextureFilterAnisotropic);
-	CHECK_EXT("GL_EXT_texture_filter_anisotropic");
+	CHECK_EXT_2("GL_EXT_texture_filter_anisotropic");
 	return true;
 }
 
-static bool setupGLCore(const char *glext)
+static bool setupGLCore(std::vector<const char *> &glext)
 {
 	CHECK_ADDRESS(PFNGLATTACHSHADERPROC, glAttachShader);
 	CHECK_ADDRESS(PFNGLCOMPILESHADERPROC, glCompileShader);
@@ -437,9 +455,9 @@ static bool setupGLCore(const char *glext)
 	return true;
 }
 
-static bool setupARBSeparateShaderObjects(const char *glext)
+static bool setupARBSeparateShaderObjects(std::vector<const char *> &glext)
 {
-	CHECK_EXT("GL_ARB_separate_shader_objects");
+	CHECK_EXT_2("GL_ARB_separate_shader_objects");
 
 	CHECK_ADDRESS(PFNGLUSEPROGRAMSTAGESPROC, glUseProgramStages);
 	CHECK_ADDRESS(PFNGLACTIVESHADERPROGRAMPROC, glActiveShaderProgram);
@@ -507,9 +525,11 @@ static bool setupARBSeparateShaderObjects(const char *glext)
 
 // ***************************************************************************
 // Extension Check.
-void	registerGlExtensions(CGlExtensions &ext)
+bool	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
+
+	nldebug("Register OpenGL extensions");
 
 	const char	*nglVersion= (const char *)glGetString (GL_VERSION);
 	sint	a=0, b=0;
@@ -521,21 +541,37 @@ void	registerGlExtensions(CGlExtensions &ext)
 		nlinfo("Version string: %s",nglVersion);
 		nlassert(false);
 	}
+
+	nldebug("OpenGL version is OK");
 	
 	// Extensions.
-	const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
-	GLint	ntext;
+	/*const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
+	GLint	ntext;*/
+
+	// Get proc address
+	CHECK_ADDRESS(PFNGLGETSTRINGIPROC, glGetStringi);
+	nldebug("GL3: glGetStringi found!");
+
+	std::vector<const char *> glext;
+	GLint numExt;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExt);
+	nldebug("GL3: GL_NUM_EXTENSIONS = %i", numExt);
+	glext.resize(numExt);
+	for (GLint i = 0; i < numExt; ++i)
+	{
+		glext[i] = static_cast<const char *>(static_cast<const void *>(nglGetStringi(GL_EXTENSIONS, i)));
+	}
 
 	nldebug("3D: Available OpenGL Extensions:");
 
 	if (DebugLog)
 	{
-		vector<string> exts;
-		explode(string(glext), string(" "), exts);
-		for (uint i = 0; i < exts.size(); i++)
+		//vector<string> exts;
+		//explode(string(glext), string(" "), exts);
+		for (uint i = 0; i < glext.size(); i++)
 		{
 			if (i%5==0) DebugLog->displayRaw("3D:     ");
-			DebugLog->displayRaw(string(exts[i]+" ").c_str());
+			DebugLog->displayRaw(string(string(glext[i]) + " ").c_str());
 			if (i%5==4) DebugLog->displayRaw("\n");
 		}
 		DebugLog->displayRaw("\n");
@@ -562,6 +598,8 @@ void	registerGlExtensions(CGlExtensions &ext)
 	GLint nbFragmentTextureUnits;
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &nbFragmentTextureUnits);
 	ext.NbFragmentTextureUnits = (nbFragmentTextureUnits > IDRV_MAT_MAXTEXTURES) ? IDRV_MAT_MAXTEXTURES : nbFragmentTextureUnits; // FIXME GL3
+
+	return true;
 }
 
 
@@ -574,6 +612,19 @@ static bool	setupWGLEXTSwapControl(const char	*glext)
 #ifdef NL_OS_WINDOWS
 	CHECK_ADDRESS(PFNWGLSWAPINTERVALEXTPROC, wglSwapIntervalEXT);
 	CHECK_ADDRESS(PFNWGLGETSWAPINTERVALEXTPROC, wglGetSwapIntervalEXT);
+#endif
+
+	return true;
+}
+
+// *********************************
+static bool setupWGLARBCreateContextProfile(const char	*glext)
+{
+	H_AUTO_OGL(setupWGLARBCreateContextProfile);
+	CHECK_EXT("WGL_ARB_create_context_profile");
+
+#ifdef NL_OS_WINDOWS
+	CHECK_ADDRESS(PFNWGLCREATECONTEXTATTRIBSARBPROC, wglCreateContextAttribsARB);
 #endif
 
 	return true;
@@ -652,13 +703,16 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 	}
 
 	// Check for pbuffer
-	ext.WGLARBPBuffer= setupWGLARBPBuffer(glext);
+	ext.WGLARBPBuffer = setupWGLARBPBuffer(glext);
 
 	// Check for pixel format
-	ext.WGLARBPixelFormat= setupWGLARBPixelFormat(glext);
+	ext.WGLARBPixelFormat = setupWGLARBPixelFormat(glext);
 
 	// Check for swap control
-	ext.WGLEXTSwapControl= setupWGLEXTSwapControl(glext);
+	ext.WGLEXTSwapControl = setupWGLEXTSwapControl(glext);
+
+	// Check for create context profile
+	ext.WGLARBCreateContextProfile = setupWGLARBCreateContextProfile(glext);
 
 	return true;
 }
