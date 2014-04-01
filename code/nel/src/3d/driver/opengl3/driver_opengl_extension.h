@@ -52,7 +52,6 @@ struct	CGlExtensions
 	bool	WGLARBPBuffer;
 	bool	WGLARBPixelFormat;
 	bool	WGLEXTSwapControl;
-	bool	WGLARBCreateContextProfile;
 
 	// GLX extensions, true if supported
 	bool	GLXEXTSwapControl;
@@ -76,7 +75,6 @@ public:
 		WGLARBPBuffer = false;
 		WGLARBPixelFormat = false;
 		WGLEXTSwapControl = false;
-		WGLARBCreateContextProfile = false;
 
 		GLXEXTSwapControl = false;
 		GLXSGISwapControl = false;
@@ -107,7 +105,6 @@ public:
 		result += WGLARBPBuffer ? "WGLARBPBuffer " : "";
 		result += WGLARBPixelFormat ? "WGLARBPixelFormat " : "";
 		result += WGLEXTSwapControl ? "WGLEXTSwapControl " : "";
-		result += WGLARBCreateContextProfile ? "WGLARBCreateContextProfile" : "";
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
 		result += "\n  GLX: ";
@@ -133,7 +130,7 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen);
 #endif // NL_OS_WINDOWS
 
 /// This function test and register the extensions for the current GL context.
-bool registerGlExtensions(CGlExtensions &ext);
+void registerGlExtensions(CGlExtensions &ext);
 
 #ifdef NL_STATIC
 } // NLDRIVERGL3
@@ -151,8 +148,6 @@ bool registerGlExtensions(CGlExtensions &ext);
 */
 
 // Core 3.30
-extern PFNGLGETSTRINGIPROC								nglGetStringi;
-
 extern PFNGLATTACHSHADERPROC							nglAttachShader;
 extern PFNGLCOMPILESHADERPROC							nglCompileShader;
 extern PFNGLCREATEPROGRAMPROC							nglCreateProgram;
@@ -334,12 +329,9 @@ extern PFNWGLCHOOSEPIXELFORMATARBPROC		nwglChoosePixelFormatARB;
 extern PFNWGLSWAPINTERVALEXTPROC			nwglSwapIntervalEXT;
 extern PFNWGLGETSWAPINTERVALEXTPROC			nwglGetSwapIntervalEXT;
 
+
 // WGL_ARB_extensions_string
-extern PFNWGLGETEXTENSIONSSTRINGARBPROC		nwglGetExtensionsStringARB;
-
-// WGL_ARB_create_context_profile
-extern PFNWGLCREATECONTEXTATTRIBSARBPROC	nwglCreateContextAttribsARB;
-
+extern PFNWGLGETEXTENSIONSSTRINGARBPROC			nwglGetExtensionsStringARB;
 
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)

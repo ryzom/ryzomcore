@@ -75,7 +75,11 @@ IVertexBufferHardGL *CVertexArrayRange::createVBHardGL(uint size, CVertexBuffer 
 
 	// create a ARB VBHard
 	GLuint vertexBufferID;
+	glGetError();
+
 	nglGenBuffers(1, &vertexBufferID);
+
+	if (glGetError() != GL_NO_ERROR) return NULL;
 	_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
 	switch(_VBType)
 	{
@@ -91,6 +95,11 @@ IVertexBufferHardGL *CVertexArrayRange::createVBHardGL(uint size, CVertexBuffer 
 		default:
 			nlassert(0);
 			break;
+	}
+	if (glGetError() != GL_NO_ERROR)
+	{
+		nglDeleteBuffers(1, &vertexBufferID);
+		return NULL;
 	}
 	CVertexBufferHard *newVbHard= new CVertexBufferHard(_Driver, vb);
 	newVbHard->initGL(vertexBufferID, this, _VBType);
@@ -213,8 +222,7 @@ void *CVertexBufferHard::lock()
 		}
 		// recreate a vb
 		GLuint vertexBufferID;
-		
-		glGetError();
+
 		nglGenBuffers(1, &vertexBufferID);
 
 		if (glGetError() != GL_NO_ERROR)

@@ -2373,37 +2373,9 @@ bool CDriverGL3::createContext()
 	{
 		return false;
 	}
+	_hRC=wglCreateContext(_hDC);
 
-	bool hasRegularHRC = !_Extensions.WGLARBCreateContextProfile;
-	if (hasRegularHRC)
-	{
-		nldebug("Create regular OpenGL context");
-		_hRC = wglCreateContext(_hDC);
-		wglMakeCurrent(_hDC,_hRC);
-	}
-
-	nldebug("Register WGL extensions");
-	registerWGlExtensions(_Extensions, _hDC);
-	if (_Extensions.WGLARBCreateContextProfile)
-	{
-		if (hasRegularHRC)
-		{
-			nldebug("Delete regular OpenGL context");
-			wglMakeCurrent(_hDC, NULL);
-			wglDeleteContext(_hRC);
-			_hRC = NULL;
-		}
-		nldebug("Create OpenGL context for Core 3.30 profile");
-		int attribList[] = {
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 3, 
-			WGL_CONTEXT_MINOR_VERSION_ARB, 3, 
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB, 
-			0, 0
-		};
-		_hRC = nwglCreateContextAttribsARB(_hDC, 0, attribList);
-		nldebug("Make current");
-		wglMakeCurrent(_hDC,_hRC);
-	}
+	wglMakeCurrent(_hDC,_hRC);
 #endif
 
 	return true;

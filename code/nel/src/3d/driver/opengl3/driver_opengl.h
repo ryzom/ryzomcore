@@ -75,6 +75,19 @@
 
 // For optimisation consideration, allow 256 lightmaps at max.
 #define	NL3D_DRV_MAX_LIGHTMAP		256
+
+
+/*
+#define CHECK_GL_ERROR { \
+	GLenum error = glGetError(); \
+	if (error != GL_NO_ERROR)\
+	{\
+		displayGLError(error);\
+		nlassert(0);\
+	}\
+}
+*/
+
 #define UNSUPPORTED_INDEX_OFFSET_MSG "Unsupported by driver, check IDriver::supportIndexOffset."
 
 using NLMISC::CMatrix;
