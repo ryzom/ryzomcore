@@ -38,6 +38,7 @@ uint maxTextures(CMaterial::TShader shader)
 	switch (shader)
 	{
 	case CMaterial::Specular:
+	case CMaterial::UserColor: // UserColor has the same texture set up twice
 		return 2;
 	default:
 		return IDRV_MAT_MAXTEXTURES;
@@ -108,9 +109,10 @@ CMaterial::TShader getSupportedShader(CMaterial::TShader shader)
 {
 	switch (shader)
 	{
-	case CMaterial::UserColor:
 	case CMaterial::Normal:
+	case CMaterial::UserColor:
 	case CMaterial::Specular:
+	case CMaterial::LightMap:
 		return shader;
 	default:
 		return CMaterial::Normal;
@@ -349,6 +351,10 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 	uint maxTex = maxTextures(desc.Shader);
 	for (uint stage = 0; stage < maxTex; ++stage)
 	{
+		if (stage == 1 && desc.Shader == CMaterial::UserColor)
+		{
+			ss << "// user color" << std::endl;
+		}
 		if (useTex(desc, stage))
 		{
 			ss << "uniform "
@@ -384,15 +390,15 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		ss << "uniform vec4 fogColor;" << std::endl;
 
 		/*if (desc->getFogMode() == CShaderDesc::Linear)
-		{
+		{*/
 			ss << "uniform float fogDensity;" << std::endl;
-		}*/
+		/*}*/
 
 		ss << "smooth in vec4 ecPos;" << std::endl;
 		
 		/*switch(desc->getFogMode())
-		{
-		case CShaderDesc::Linear:
+		{*/
+		//case CShaderDesc::Linear:
 			ss << "vec4 applyFog(vec4 col)" << std::endl;
 			ss << "{" << std::endl;
 			ss << "float z = ecPos.z / ecPos.w;" << std::endl;
@@ -403,8 +409,8 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 			ss << "return fColor;" << std::endl;
 			ss << "}" << std::endl;
 			ss << std::endl;
-			break;
-		}*/
+		//	break;
+		/*}*/
 
 		ss << std::endl;
 	}
@@ -432,7 +438,11 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 
 	for (uint stage = 0; stage < maxTex; ++stage)
 	{
-		if (useTex(desc, stage))
+		if (stage == 1 && desc.Shader == CMaterial::UserColor)
+		{
+			ss << "vec4 texel1 = texel0;" << std::endl; // UserColor has one single texture set up in two textures, we optimize this away here
+		}
+		else if (useTex(desc, stage))
 		{
 			ss << "vec4 texel" << stage << " = texture(sampler" << stage << ", ";				
 			if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
@@ -571,7 +581,7 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 		uint8 textureActive = 0x00;
 		for (uint stage = 0; stage < maxTex; ++stage)
 		{
-			NL3D::ITexture *tex = mat.getTexture(stage);
+			NL3D::ITexture *tex = mat._Textures[stage];
 			if (tex)
 			{
 				textureActive |= (1 << stage);
@@ -595,9 +605,9 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 	{
 		for (uint stage = 0; stage < maxTex; ++stage)
 		{
-			if (TexEnvMode[stage] != mat.getTexEnvMode(stage))
+			if (TexEnvMode[stage] != mat._TexEnvs[stage].EnvPacked)
 			{
-				TexEnvMode[stage] = mat.getTexEnvMode(stage);
+				TexEnvMode[stage] = mat._TexEnvs[stage].EnvPacked;
 				Touched = true;
 			}
 		}

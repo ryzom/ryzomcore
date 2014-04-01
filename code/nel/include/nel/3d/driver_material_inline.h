@@ -307,7 +307,7 @@ inline void					CMaterial::texConstantColor(uint stage, CRGBA color)
 // ***************************************************************************
 inline uint32				CMaterial::getTexEnvMode(uint stage)
 {
-	nlassert(_ShaderType==CMaterial::Normal);
+	// nlassert(_ShaderType==CMaterial::Normal); // GL3 DEBUG
 	nlassert(stage<IDRV_MAT_MAXTEXTURES);
 	return _TexEnvs[stage].EnvPacked;
 }
