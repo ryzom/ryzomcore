@@ -359,7 +359,7 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 	H_AUTO_OGL(getGlSrcTextureFormat)
 
 	// Is destination format is alpha or lumiance ?
-	if ((glfmt==GL_ALPHA8)||(glfmt==GL_LUMINANCE8_ALPHA8)||(glfmt==GL_LUMINANCE8))
+	if ((glfmt==GL_R8)||(glfmt==GL_RG8))
 	{
 		switch(tex.getPixelFormat())
 		{
@@ -416,23 +416,17 @@ uint				CDriverGL3::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 #ifdef GL_RGB5
 	case GL_RGB5:		return w*h* 2;
 #endif
-#ifdef GL_LUMINANCE8
-	case GL_LUMINANCE8:	return w*h* 1;
+#ifdef GL_R8
+	case GL_R8:	return w*h* 1;
 #endif
-#ifdef GL_LUMINANCE
-	case GL_LUMINANCE:	return w*h* 1;
+#ifdef GL_RED
+	case GL_RED:	return w*h* 1;
 #endif
-#ifdef GL_ALPHA8
-	case GL_ALPHA8:		return w*h* 1;
+#ifdef GL_RG8
+	case GL_RG8:	return w*h* 2;
 #endif
-#ifdef GL_ALPHA
-	case GL_ALPHA:		return w*h* 1;
-#endif
-#ifdef GL_LUMINANCE8_ALPHA8
-	case GL_LUMINANCE8_ALPHA8:	return w*h* 2;
-#endif
-#ifdef GL_LUMINANCE_ALPHA
-	case GL_LUMINANCE_ALPHA:	return w*h* 2;
+#ifdef GL_RG
+	case GL_RG:	return w*h* 2;
 #endif
 #ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:	return w*h /2;
@@ -446,9 +440,6 @@ uint				CDriverGL3::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 #ifdef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
 	case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:	return w*h* 1;
 #endif
-
-	case GL_RG8:
-		return w * h * 2;
 	}
 
 	// One format has not been coded.
