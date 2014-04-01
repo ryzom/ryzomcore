@@ -169,7 +169,7 @@ extern PFNGLLINKPROGRAMPROC								nglLinkProgram;
 extern PFNGLSHADERSOURCEPROC							nglShaderSource;
 extern PFNGLUSEPROGRAMPROC								nglUseProgram;
 extern PFNGLVALIDATEPROGRAMPROC							nglValidateProgram;
-extern PFNGLUNIFORM1FPROC								nglUniform1f;
+/*extern PFNGLUNIFORM1FPROC								nglUniform1f;
 extern PFNGLUNIFORM2FPROC								nglUniform2f;
 extern PFNGLUNIFORM3FPROC								nglUniform3f;
 extern PFNGLUNIFORM4FPROC								nglUniform4f;
@@ -187,16 +187,8 @@ extern PFNGLUNIFORM3IVPROC								nglUniform3iv;
 extern PFNGLUNIFORM4IVPROC								nglUniform4iv;
 extern PFNGLUNIFORMMATRIX2FVPROC						nglUniformMatrix2fv;
 extern PFNGLUNIFORMMATRIX3FVPROC						nglUniformMatrix3fv;
-extern PFNGLUNIFORMMATRIX4FVPROC						nglUniformMatrix4fv;
+extern PFNGLUNIFORMMATRIX4FVPROC						nglUniformMatrix4fv;*/
 extern PFNGLVERTEXATTRIBPOINTERPROC						nglVertexAttribPointer;
-extern PFNGLUNIFORM1UIPROC								nglUniform1ui;
-extern PFNGLUNIFORM2UIPROC								nglUniform2ui;
-extern PFNGLUNIFORM3UIPROC								nglUniform3ui;
-extern PFNGLUNIFORM4UIPROC								nglUniform4ui;
-extern PFNGLUNIFORM1UIVPROC								nglUniform1uiv;
-extern PFNGLUNIFORM2UIVPROC								nglUniform2uiv;
-extern PFNGLUNIFORM3UIVPROC								nglUniform3uiv;
-extern PFNGLUNIFORM4UIVPROC								nglUniform4uiv;
 
 extern PFNGLBINDBUFFERPROC								nglBindBuffer;
 extern PFNGLDELETEBUFFERSPROC							nglDeleteBuffers;
@@ -219,7 +211,7 @@ extern PFNGLGETQUERYIVPROC								nglGetQueryiv;
 extern PFNGLGETQUERYOBJECTIVPROC						nglGetQueryObjectiv;
 extern PFNGLGETQUERYOBJECTUIVPROC						nglGetQueryObjectuiv;
 
-extern PFNGLISRENDERBUFFERPROC							nglIsRenderbuffer;
+/*extern PFNGLISRENDERBUFFERPROC							nglIsRenderbuffer;
 extern PFNGLBINDRENDERBUFFERPROC						nglBindRenderbuffer;
 extern PFNGLDELETERENDERBUFFERSPROC						nglDeleteRenderbuffers;
 extern PFNGLGENRENDERBUFFERSPROC						nglGenRenderbuffers;
@@ -238,7 +230,7 @@ extern PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVPROC		nglGetFramebufferAttachment
 extern PFNGLGENERATEMIPMAPPROC							nglGenerateMipmap;
 extern PFNGLBLITFRAMEBUFFERPROC							nglBlitFramebuffer;
 extern PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC			nglRenderbufferStorageMultisample;
-extern PFNGLFRAMEBUFFERTEXTURELAYERPROC					nglFramebufferTextureLayer;
+extern PFNGLFRAMEBUFFERTEXTURELAYERPROC					nglFramebufferTextureLayer;*/
 
 extern PFNGLACTIVETEXTUREPROC							nglActiveTexture;
 

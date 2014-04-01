@@ -85,7 +85,7 @@ CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 	// release in TextureUsed.
 	_Driver->_TextureUsed.erase (this);
 
-	if (InitFBO)
+	/*if (InitFBO)
 	{
 		nglDeleteFramebuffers(1, &FBOId);
 		if (AttachDepthStencil)
@@ -94,12 +94,15 @@ CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 			if (!UsePackedDepthStencil)
 				nglDeleteRenderbuffers(1, &StencilFBOId);
 		}
-	}
+	}*/
 }
 
 // ***************************************************************************
 bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 {
+	return false; // FIXME GL3 FBO
+
+#if 0
 	if (!InitFBO)
 	{
 		if (tex->isBloomTexture())
@@ -233,11 +236,14 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 	}
 
 	return InitFBO;
+#endif
 }
 
 // ***************************************************************************
 bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 {
+	return false; // FIXME GL3 FBO
+#if 0
 	if (tex)
 	{
 		if (initFrameBufferObject(tex))
@@ -254,6 +260,7 @@ bool CTextureDrvInfosGL3::activeFrameBufferObject(ITexture * tex)
 	}
 
 	return true;
+#endif
 }
 
 // ***************************************************************************

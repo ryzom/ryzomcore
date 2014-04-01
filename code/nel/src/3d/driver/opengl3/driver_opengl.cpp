@@ -508,6 +508,8 @@ bool CDriverGL3::isTextureRectangle(ITexture * tex) const
 // ***************************************************************************
 bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 {
+	return false; // TODO GL3 FBO
+#if 0
 	if (supportFrameBufferObject()/* && supportPackedDepthStencil()*/)
 	{
 		if (tex)
@@ -523,6 +525,7 @@ bool CDriverGL3::activeFrameBufferObject(ITexture * tex)
 	}
 
 	return false;
+#endif
 }
 
 // --------------------------------------------------
