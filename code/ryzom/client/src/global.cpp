@@ -69,6 +69,8 @@ bool						PermanentlyBanned = false;
 bool						IgnoreEntityDbUpdates = false;
 bool						FreeTrial = false;
 
+bool						NoLogout = false;
+
 std::vector<std::pair<
 	std::string, std::string> >		VRDeviceCache;
 

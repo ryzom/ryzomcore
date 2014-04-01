@@ -130,6 +130,8 @@ extern std::string					Cookie, FSAddr;
 extern std::string					RingMainURL;
 extern bool							FreeTrial;
 
+extern bool							NoLogout;
+
 void resetTextContext (const char *font, bool resetInterfaceManager);
 
 #endif // CL_GLOBAL_H
