@@ -321,9 +321,31 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 
 void ppSpecular(std::stringstream &ss, const CPPBuiltin &desc)
 {
-	ss << "vec3 specop0 = texel0.rgb * fragColor.rgb;" << std::endl;
-	ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, fragColor.a);" << std::endl;
-	ss << "fragColor = specop1;" << std::endl;
+	if (useTex(desc, 0))
+	{
+		ss << "vec3 specop0 = texel0.rgb * fragColor.rgb;" << std::endl;
+		if (useTex(desc, 1))
+		{
+			ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, fragColor.a);" << std::endl;
+		}
+		else
+		{
+			nlwarning("Texture stage 1 (reflection) missing in Specular shader");
+			ss << "vec4 specop1 = vec4(specop0, fragColor.a);" << std::endl;
+		}
+		ss << "fragColor = specop1;" << std::endl;
+	}
+	else if (useTex(desc, 1))
+	{
+		nlwarning("Texture stage 0 (color) missing in Specular shader");
+		ss << "vec4 specop1 = vec4(texel1.rgb + fragColor.rgb, 1.0);" << std::endl;
+		ss << "fragColor = specop1;" << std::endl;
+	}
+	else
+	{
+		nlwarning("No textures defined in Specular shader");
+		// do nothing
+	}
 }
 
 void ppGenerate(std::string &result, const CPPBuiltin &desc)
