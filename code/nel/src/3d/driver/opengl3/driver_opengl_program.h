@@ -36,6 +36,8 @@ static sint TexGenEyeLinear = 3; // GL_EYE_LINEAR
 /// Builtin vertex program description
 struct CVPBuiltin
 {
+	CVPBuiltin() : VertexProgram(NULL) { }
+
 	uint16 VertexFormat;
 	bool Lighting;
 	sint LightMode[NL_OPENGL3_MAX_LIGHT]; // -1 when disabled
@@ -44,7 +46,7 @@ struct CVPBuiltin
 	bool Fog;
 	// bool VertexColorLighted;
 
-	CVertexProgram *VertexProgram;
+	NLMISC::CRefPtr<CVertexProgram> VertexProgram;
 };
 
 bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
@@ -55,15 +57,19 @@ static const uint8 SamplerCube = 1;
 /// Builtin pixel program description
 struct CPPBuiltin
 {
+	CPPBuiltin() : Touched(true) { }
+
 	uint16 VertexFormat;
+	bool Lighting;
 	bool Fog;
 
 	CMaterial::TShader Shader;
+	uint32 Flags;
 	uint8 TextureActive;
 	uint8 TexSamplerMode[IDRV_MAT_MAXTEXTURES];
 	uint32 TexEnvMode[IDRV_MAT_MAXTEXTURES]; // Normal, UserColor
 
-	CPixelProgram *PixelProgram;
+	NLMISC::CRefPtr<CPixelProgram> PixelProgram;
 
 	bool Touched;
 

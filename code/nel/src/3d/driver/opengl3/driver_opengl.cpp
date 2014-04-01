@@ -315,6 +315,8 @@ CDriverGL3::CDriverGL3()
 	m_DriverGeometryProgram = NULL;
 	m_DriverPixelProgram = NULL;
 
+	m_VPBuiltinTouched = true;
+
 	shaderGenerator = new CGLSLShaderGenerator();
 	usrShaderManager = new CUsrShaderManager();
 
@@ -689,6 +691,14 @@ bool CDriverGL3::release()
 	m_UserVertexProgram = NULL;
 	m_UserGeometryProgram = NULL;
 	m_UserPixelProgram = NULL;
+
+	// Delete all cached programs
+	for (std::set<CVPBuiltin>::iterator it(m_VPBuiltinCache.begin()), end(m_VPBuiltinCache.end()); it != end; ++it)
+		delete it->VertexProgram;
+	m_VPBuiltinCache.clear();
+	for (std::set<CPPBuiltin>::iterator it(m_PPBuiltinCache.begin()), end(m_PPBuiltinCache.end()); it != end; ++it)
+		delete it->PixelProgram;
+	m_PPBuiltinCache.clear();
 
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();

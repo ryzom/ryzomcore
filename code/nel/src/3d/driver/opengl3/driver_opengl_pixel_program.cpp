@@ -62,6 +62,8 @@ bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
 	// Material state
 	if (left.Shader != right.Shader)
 		return left.Shader < right.Shader;
+	if (left.Flags != right.Flags)
+		return left.Flags < right.Flags;
 	if (left.TextureActive != right.TextureActive)
 		return left.TextureActive < right.TextureActive;
 	uint maxTex = maxTextures(left.Shader);
@@ -78,6 +80,8 @@ bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
 	// Driver state
 	if (left.VertexFormat != right.VertexFormat)
 		return left.VertexFormat < right.VertexFormat;
+	if (left.Lighting != right.Lighting)
+		return left.Lighting < right.Lighting;
 	if (left.Fog != right.Fog)
 		return right.Fog;
 
@@ -143,7 +147,7 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 						break;
 					}
 				case CMaterial::Diffuse:
-					rgbArgVec << "diffuse";
+					rgbArgVec << "fragColor";
 					break;
 				case CMaterial::Constant:
 					rgbArgVec << "constant" << stage;
@@ -183,7 +187,7 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 						break;
 					}
 				case CMaterial::Diffuse:
-					alphaArgVec << "diffuse";
+					alphaArgVec << "fragColor";
 					break;
 				case CMaterial::Constant:
 					alphaArgVec << "constant" << stage;
@@ -222,7 +226,7 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 					break;
 				}
 			case CMaterial::InterpolateDiffuse:
-				ss << "float texop" << stage << "rgbAs = diffuse.a;" << std::endl;
+				ss << "float texop" << stage << "rgbAs = fragColor.a;" << std::endl;
 				break;
 			case CMaterial::InterpolateTexture:
 				ss << "float texop" << stage << "rgbAs = texel" << stage << ".a;" << std::endl;
@@ -268,7 +272,7 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 					break;
 				}
 			case CMaterial::InterpolateDiffuse:
-				ss << "float texop" << stage << "alphaAs = diffuse.a;" << std::endl;
+				ss << "float texop" << stage << "alphaAs = fragColor.a;" << std::endl;
 				break;
 			case CMaterial::InterpolateTexture:
 				ss << "float texop" << stage << "alphaAs = texel" << stage << ".a;" << std::endl;
@@ -303,7 +307,7 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 		}
 		else if (stage == 0)
 		{
-			ss << "vec4 texop" << stage << " = diffuse; // no active texture in stage" << std::endl;
+			ss << "vec4 texop" << stage << " = fragColor; // no active texture in stage" << std::endl;
 		}
 		else
 		{
@@ -315,8 +319,8 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 
 void ppSpecular(std::stringstream &ss, const CPPBuiltin &desc)
 {
-	ss << "vec3 specop0 = texel0.rgb * diffuse.rgb;" << std::endl;
-	ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, diffuse.a);" << std::endl;
+	ss << "vec3 specop0 = texel0.rgb * fragColor.rgb;" << std::endl;
+	ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, fragColor.a);" << std::endl;
 	ss << "fragColor = specop1;" << std::endl;
 }
 
@@ -352,18 +356,25 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 				<< " sampler" << stage << ";" << std::endl;
 		}
 	}
+	ss << std::endl;
 
 	// ???
 	ss << "uniform vec4 materialColor;" << std::endl; // ?! what is this doing in PP
+	ss << std::endl;
 
 	// TexEnv
-	ss << "uniform vec4 constant0;" << std::endl; // todo: we can optimize this by env!...
+	ss << "uniform vec4 constant0;" << std::endl; // FIXME: we must optimize this by texenv!...
 	ss << "uniform vec4 constant1;" << std::endl;
 	ss << "uniform vec4 constant2;" << std::endl;
 	ss << "uniform vec4 constant3;" << std::endl;
+	ss << std::endl;
 
 	// Alpha test
-	ss << "uniform float alphaTreshold;" << std::endl; // FIXME: only when driver state has alpha test.... oooh
+	if (desc.Flags & IDRV_MAT_ALPHA_TEST)
+	{
+		ss << "uniform float alphaTreshold;" << std::endl;
+		ss << std::endl;
+	}
 
 	// Fog
 	if (desc.Fog) // FIXME: FogMode!
@@ -378,74 +389,94 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		}*/
 
 		ss << "smooth in vec4 ecPos;" << std::endl;
-	}
-	ss << std::endl;
-
-	/*if (desc->lightingEnabled())
-	{
-		addLightUniformsFS();
-		addLightInsFS();
-		ss << std::endl;
 		
-		addLightsFunctionFS();
+		/*switch(desc->getFogMode())
+		{
+		case CShaderDesc::Linear:
+			ss << "vec4 applyFog(vec4 col)" << std::endl;
+			ss << "{" << std::endl;
+			ss << "float z = ecPos.z / ecPos.w;" << std::endl;
+			ss << "z = abs(z);" << std::endl;
+			ss << "float fogFactor = (fogEnd - z) / (fogEnd - fogStart);" << std::endl;
+			ss << "fogFactor = clamp(fogFactor, 0.0, 1.0);" << std::endl;
+			ss << "vec4 fColor = mix(fogColor, col, fogFactor);" << std::endl;
+			ss << "return fColor;" << std::endl;
+			ss << "}" << std::endl;
+			ss << std::endl;
+			break;
+		}*/
+
 		ss << std::endl;
 	}
 
-	if (desc->fogEnabled())
-		addFogFunction();*/
+	if (desc.Lighting)
+	{
+		ss << "smooth in vec4 lightColor;" << std::endl; // TODO: We probably will always have an incoming vertex color with vertex and light etc premixed.
+		ss << std::endl;
+	}
 	
 	ss << "void main(void)" << std::endl;
 	ss << "{" << std::endl;
 
 	// Light color
-	/*ss << "vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-	if (desc->lightingEnabled())
+	ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
+	if (desc.Lighting)
 	{
-		ss << "diffuse = applyLights(diffuse);" << std::endl;
-		ss << "diffuse.a = 1.0;" << std::endl;
+		ss << "fragColor = lightColor;" << std::endl;
+		ss << "fragColor.a = 1.0;" << std::endl;
 	}
-	if (hasFlag(desc->vbFlags, g_VertexFlags[PrimaryColor]))
-		ss << "diffuse = color * diffuse;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
-
-	bool textures = false;
-	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+	if (hasFlag(desc.VertexFormat, g_VertexFlags[PrimaryColor])) // TODO: What about secondary color?
 	{
-		if (desc->getUseTexStage(i))
+		ss << "fragColor = primaryColor * fragColor;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
+	}
+
+	for (uint stage = 0; stage < maxTex; ++stage)
+	{
+		if (useTex(desc, stage))
 		{
-			ss << "vec4 texel" << i << " = texture(sampler" << i << ", ";				
-			if (desc->hasVBFlags(g_VertexFlags[TexCoord0 + i]))
-				ss << g_AttribNames[TexCoord0 + i];
-			else if (desc->hasVBFlags(g_VertexFlags[TexCoord0]))
+			ss << "vec4 texel" << stage << " = texture(sampler" << stage << ", ";				
+			if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
+			{
+				ss << g_AttribNames[TexCoord0 + stage];
+			}
+			else if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0]))
+			{
 				ss << g_AttribNames[TexCoord0];
+			}
 			else
 			{
 				nlwarning("GL3: Pixel Program generated for material with coordinateless texture");
 				ss << "vec4(0.0, 0.0, 0.0, 0.0)";
 			}
-			ss << ((desc->textureSamplerMode[i] == SamplerCube) ? ".str);" : ".st);");
+			ss << ((desc.TexSamplerMode[stage] == SamplerCube) ? ".stp);" : ".st);");
 			ss << std::endl;
-			textures = true;
 		}
-	}*/
+	}
 
-	/*switch (material->getShader())
+	switch (desc.Shader)
 	{
+	case CMaterial::Normal:
+	case CMaterial::UserColor:
+		ppTexEnv(ss, desc);
+		break;
 	case CMaterial::Specular:
-		generateSpecular();
+		ppSpecular(ss, desc);
 		break;
 	default:
-		generateTexEnv();
+		nlwarning("GL3: Try to generate unknown shader type (%s)", s_ShaderNames[desc.Shader]);
+		// ss << "fragColor = vec(1.0, 0.0, 0.5, 1.0);" << std::endl;
 		break;
 	}
 
-	if (desc->fogEnabled())
-		addFog();
+	if (desc.Flags & IDRV_MAT_ALPHA_TEST)
+	{
+		ss << "if (fragColor.a < alphaTreshold) discard;" << std::endl; // TODO: VERIFY < or <= ?
+	}
 
-	addAlphaTest();*/
-
-	// ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
-
-	// ss << "fragColor.b = diffuse.b;" << std::endl;
+	if (desc.Fog)
+	{
+		ss << "fragColor = applyFog(fragColor);" << std::endl;
+	}
 
 	ss << "}" << std::endl;
 
@@ -490,7 +521,7 @@ void CDriverGL3::generateBuiltinPixelProgram(CMaterial &mat)
 
 void CPPBuiltin::checkDriverStateTouched(CDriverGL3 *driver) // MUST NOT depend on any state set by checkMaterialStateTouched
 {
-	// Add generated texture coordinates to vertex format
+	// Add generated texture coordinates to vertex format // TODO: Eliminate unused flags
 	uint16 vertexFormat = driver->m_VPBuiltinCurrent.VertexFormat;
 	for (sint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		if (driver->m_VPBuiltinCurrent.TexGenMode[stage] >= 0)
@@ -500,6 +531,11 @@ void CPPBuiltin::checkDriverStateTouched(CDriverGL3 *driver) // MUST NOT depend 
 	if (VertexFormat != vertexFormat)
 	{
 		VertexFormat = vertexFormat;
+		Touched = true;
+	}
+	if (Lighting != driver->m_VPBuiltinCurrent.Lighting)
+	{
+		Lighting = driver->m_VPBuiltinCurrent.Lighting;
 		Touched = true;
 	}
 	if (Fog != driver->m_VPBuiltinCurrent.Fog)
@@ -520,6 +556,13 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 	if (Shader != shader)
 	{
 		Shader = shader;
+		Touched = true;
+	}
+	uint32 flags = mat.getFlags();
+	flags &= IDRV_MAT_ALPHA_TEST; // TODO: |= with the wanted flags from the VP when flags are added to the VP
+	if (Flags != flags)
+	{
+		Flags = flags;
 		Touched = true;
 	}
 	uint maxTex = maxTextures(shader);

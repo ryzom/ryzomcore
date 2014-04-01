@@ -22,7 +22,6 @@
 #include "nel/3d/usr_shader_manager.h"
 #include "nel/3d/usr_shader_program.h"
 
-
 namespace NL3D {
 
 #ifdef NL_STATIC
@@ -54,8 +53,8 @@ const char *g_AttribNames[CVertexBuffer::NumValue] =
 	"position",
 	"weight",
 	"normal",
-	"color",
-	"color2",
+	"primaryColor",
+	"secondaryColor",
 	"fog",
 	"paletteSkin",
 	"none",
