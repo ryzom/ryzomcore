@@ -55,6 +55,10 @@ struct CPPBuiltin
 	uint16 VertexFormat;
 	bool Fog;
 
+	CMaterial::TShader Shader;
+	uint8 TextureActive;
+	uint32 TexEnvMode[IDRV_MAT_MAXTEXTURES]; // Normal, UserColor
+
 	CPixelProgram *PixelProgram;
 
 	bool Touched;

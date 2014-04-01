@@ -317,7 +317,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		}
 
 		// Optimize: reset all flags at the end.
-		mat.clearTouched(0xFFFFFFFF);
+		// mat.clearTouched(0xFFFFFFFF); // FIXME GL3 THIS IS NOW DONE IN GENERATE OF PP DESC, THIS NEED RESTRUCTURING
 	}
 
 	// 2b. User supplied pixel shader overrides material

@@ -691,6 +691,28 @@ bool CDriverGL3::setupBuiltinPixelProgram(CMaterial &mat)
 {
 	if (m_UserPixelProgram) return true;
 
+	CMaterialDrvInfosGL3 *matDrv = static_cast<CMaterialDrvInfosGL3 *>((IMaterialDrvInfos *)(mat._MatDrvInfo));
+	nlassert(matDrv);
+
+	matDrv->PPBuiltin.checkDriverStateTouched(this);
+	matDrv->PPBuiltin.checkMaterialStateTouched(mat);
+
+	if (matDrv->PPBuiltin.Touched)
+	{
+		generateBuiltinPixelProgram(mat);
+		nlassert(matDrv->PPBuiltin.PixelProgram);
+		matDrv->PPBuiltin.Touched = false;
+	}
+
+	if (!activePixelProgram(matDrv->PPBuiltin.PixelProgram, true))
+		return false;
+
+	// GL3 TODO: Here we set the uniforms of the vertex program!
+
+	return true;
+
+
+#if 0
 	// nlassert(!m_UserVertexProgram); // TEMP
 	// nlassert(!m_UserPixelProgram); // TEMP
 
@@ -811,6 +833,7 @@ bool CDriverGL3::setupBuiltinPixelProgram(CMaterial &mat)
 	}
 
 	return true;
+#endif
 }
 
 bool CDriverGL3::setupDynMatProgram(CMaterial& mat, uint pass)
