@@ -1581,7 +1581,9 @@ bool CDriverGL3::supportTextureRectangle() const
 {
 	H_AUTO_OGL(CDriverGL3_supportTextureRectangle);
 
-	return false; // FIXME GL3 _Extensions.GLCore;
+	// This is deprecated in favour of NPOT, 
+	// see supportNonPowerOfTwoTextures
+	return false;
 }
 
 // ***************************************************************************

@@ -33,19 +33,6 @@ namespace NLDRIVERGL3 {
 
 namespace /* anonymous */ {
 
-CMaterial::TShader getSupportedShader(CMaterial::TShader shader)
-{
-	switch (shader)
-	{
-	case CMaterial::UserColor:
-	case CMaterial::Normal:
-	case CMaterial::Specular:
-		return shader;
-	default:
-		return CMaterial::Normal;
-	}
-}
-
 uint maxTextures(CMaterial::TShader shader)
 {
 	switch (shader)
@@ -63,6 +50,11 @@ bool useTexEnv(CMaterial::TShader shader)
 		|| shader == CMaterial::UserColor;
 }
 
+bool useTex(const CPPBuiltin &desc, uint stage)
+{
+	return (desc.TextureActive & (1 << stage)) != 0;
+}
+
 } /* anonymous namespace */
 
 bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
@@ -73,6 +65,11 @@ bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
 	if (left.TextureActive != right.TextureActive)
 		return left.TextureActive < right.TextureActive;
 	uint maxTex = maxTextures(left.Shader);
+	if (left.TextureActive)
+		for (uint stage = 0; stage < maxTex; ++stage)
+			if (useTex(left, stage))
+				if (left.TexSamplerMode[stage] != right.TexSamplerMode[stage])
+					return left.TexSamplerMode[stage] < right.TexSamplerMode[stage];
 	if (useTexEnv(left.Shader))
 		for (uint stage = 0; stage < maxTex; ++stage)
 			if (left.TexEnvMode[stage] != right.TexEnvMode[stage])
@@ -89,12 +86,34 @@ bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
 
 namespace /* anonymous */ {
 
-bool useTex(CPPBuiltin &desc, uint stage)
+const char *s_ShaderNames[] = 
 {
-	return (desc.TextureActive & (1 << stage)) != 0;
+	"Normal",
+	"Bump",
+	"Usercolor",
+	"Lightmap",
+	"Specular",
+	"Caustics",
+	"Per-Pixel Lighting",
+	"Per-Pixel Lighting, no specular",
+	"Cloud",
+	"Water"
+};
+
+CMaterial::TShader getSupportedShader(CMaterial::TShader shader)
+{
+	switch (shader)
+	{
+	case CMaterial::UserColor:
+	case CMaterial::Normal:
+	case CMaterial::Specular:
+		return shader;
+	default:
+		return CMaterial::Normal;
+	}
 }
 	
-void ppTexEnv(std::stringstream &ss, CPPBuiltin &desc)
+void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 {
 	uint maxTex = maxTextures(desc.Shader);
 	CMaterial::CTexEnv texEnv;
@@ -294,16 +313,143 @@ void ppTexEnv(std::stringstream &ss, CPPBuiltin &desc)
 	ss << "fragColor = texop" << (maxTex - 1) << ";" << std::endl;
 }
 
-void ppSpecular(std::stringstream &ss, CPPBuiltin &desc)
+void ppSpecular(std::stringstream &ss, const CPPBuiltin &desc)
 {
 	ss << "vec3 specop0 = texel0.rgb * diffuse.rgb;" << std::endl;
 	ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, diffuse.a);" << std::endl;
 	ss << "fragColor = specop1;" << std::endl;
 }
 
-void ppGenerate(std::string &result, CPPBuiltin &desc)
+void ppGenerate(std::string &result, const CPPBuiltin &desc)
 {
+	std::stringstream ss;
+	ss << "// Builtin Pixel Shader: " << s_ShaderNames[desc.Shader] << std::endl;
+	ss << std::endl;
 
+	ss << "#version 330" << std::endl;
+	ss << "#extension GL_ARB_separate_shader_objects : enable" << std::endl;
+	ss << std::endl;
+
+	ss << "out vec4 fragColor;" << std::endl;
+
+	for (int i = Weight; i < NumOffsets; i++)
+	{
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+		{
+			ss << "smooth in vec4 ";
+			ss << g_AttribNames[i] << ";" << std::endl;
+		}
+	}
+	ss << std::endl;
+	
+	uint maxTex = maxTextures(desc.Shader);
+	for (uint stage = 0; stage < maxTex; ++stage)
+	{
+		if (useTex(desc, stage))
+		{
+			ss << "uniform "
+				<< ((desc.TexSamplerMode[stage] == SamplerCube) ? "samplerCube" : "sampler2D")
+				<< " sampler" << stage << ";" << std::endl;
+		}
+	}
+
+	// ???
+	ss << "uniform vec4 materialColor;" << std::endl; // ?! what is this doing in PP
+
+	// TexEnv
+	ss << "uniform vec4 constant0;" << std::endl; // todo: we can optimize this by env!...
+	ss << "uniform vec4 constant1;" << std::endl;
+	ss << "uniform vec4 constant2;" << std::endl;
+	ss << "uniform vec4 constant3;" << std::endl;
+
+	// Alpha test
+	ss << "uniform float alphaTreshold;" << std::endl; // FIXME: only when driver state has alpha test.... oooh
+
+	// Fog
+	if (desc.Fog) // FIXME: FogMode!
+	{
+		ss << "uniform float fogStart;" << std::endl;
+		ss << "uniform float fogEnd;" << std::endl;
+		ss << "uniform vec4 fogColor;" << std::endl;
+
+		/*if (desc->getFogMode() == CShaderDesc::Linear)
+		{
+			ss << "uniform float fogDensity;" << std::endl;
+		}*/
+
+		ss << "smooth in vec4 ecPos;" << std::endl;
+	}
+	ss << std::endl;
+
+	/*if (desc->lightingEnabled())
+	{
+		addLightUniformsFS();
+		addLightInsFS();
+		ss << std::endl;
+		
+		addLightsFunctionFS();
+		ss << std::endl;
+	}
+
+	if (desc->fogEnabled())
+		addFogFunction();*/
+	
+	ss << "void main(void)" << std::endl;
+	ss << "{" << std::endl;
+
+	// Light color
+	/*ss << "vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
+	if (desc->lightingEnabled())
+	{
+		ss << "diffuse = applyLights(diffuse);" << std::endl;
+		ss << "diffuse.a = 1.0;" << std::endl;
+	}
+	if (hasFlag(desc->vbFlags, g_VertexFlags[PrimaryColor]))
+		ss << "diffuse = color * diffuse;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
+
+	bool textures = false;
+	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+	{
+		if (desc->getUseTexStage(i))
+		{
+			ss << "vec4 texel" << i << " = texture(sampler" << i << ", ";				
+			if (desc->hasVBFlags(g_VertexFlags[TexCoord0 + i]))
+				ss << g_AttribNames[TexCoord0 + i];
+			else if (desc->hasVBFlags(g_VertexFlags[TexCoord0]))
+				ss << g_AttribNames[TexCoord0];
+			else
+			{
+				nlwarning("GL3: Pixel Program generated for material with coordinateless texture");
+				ss << "vec4(0.0, 0.0, 0.0, 0.0)";
+			}
+			ss << ((desc->textureSamplerMode[i] == SamplerCube) ? ".str);" : ".st);");
+			ss << std::endl;
+			textures = true;
+		}
+	}*/
+
+	/*switch (material->getShader())
+	{
+	case CMaterial::Specular:
+		generateSpecular();
+		break;
+	default:
+		generateTexEnv();
+		break;
+	}
+
+	if (desc->fogEnabled())
+		addFog();
+
+	addAlphaTest();*/
+
+	// ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
+
+	// ss << "fragColor.b = diffuse.b;" << std::endl;
+
+	ss << "}" << std::endl;
+
+	result = ss.str();
 }
 
 } /* anonymous namespace */
@@ -377,14 +523,30 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 		Touched = true;
 	}
 	uint maxTex = maxTextures(shader);
-	if (touched & IDRV_TOUCHED_ALLTEX) // Note: There is a case where textures are provided where no texture coordinates are provided, this is handled gracefully by the pixel program generation (it will use a vec(0) texture coordinate). The inverse is an optimization issue.
+	if (touched & IDRV_TOUCHED_ALLTEX) // Note: There is a case where textures are provided where no texture coordinates are provided, this is handled gracefully by the pixel program generation (it will use a vec(0) texture coordinate). The inverse is an optimization issue
 	{
 		uint8 textureActive = 0x00;
-		for (uint i = 0; i < maxTex; ++i)
-			if (mat.getTexture(i))
-				textureActive |= (1 << i);
-		TextureActive = textureActive;
-		Touched = true;
+		for (uint stage = 0; stage < maxTex; ++stage)
+		{
+			NL3D::ITexture *tex = mat.getTexture(stage);
+			if (tex)
+			{
+				textureActive |= (1 << stage);
+
+				// Issue: Due to the IDRV_TOUCHED_ALLTEX check, the sampler mode of an ITexture cannot be modified after it has been added to the CMaterial
+				uint8 texSamplerMode = tex->isTextureCube() ? SamplerCube : Sampler2D;
+				if (TexSamplerMode[stage] != texSamplerMode)
+				{
+					TexSamplerMode[stage] = texSamplerMode;
+					Touched = true;
+				}
+			}
+		}
+		if (TextureActive != textureActive)
+		{
+			TextureActive = textureActive;
+			Touched = true;
+		}
 	}
 	if (useTexEnv(shader) && (touched & IDRV_TOUCHED_TEXENV))
 	{

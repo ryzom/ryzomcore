@@ -19,13 +19,15 @@
 
 #include "nel/misc/types_nl.h"
 
+#include "driver_opengl_program.h"
+
 namespace NL3D
 {
 	class CVertexProgram;
 	class CPixelProgram;
 
-	static uint8 Sampler2D = 0;
-	static uint8 SamplerCube = 1;
+	//static uint8 Sampler2D = 0;
+	//static uint8 SamplerCube = 1;
 
 	struct SShaderPair
 	{

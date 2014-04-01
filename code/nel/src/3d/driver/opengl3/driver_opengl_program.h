@@ -49,6 +49,9 @@ struct CVPBuiltin
 
 bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
 
+static const uint8 Sampler2D = 0;
+static const uint8 SamplerCube = 1;
+
 /// Builtin pixel program description
 struct CPPBuiltin
 {
@@ -57,6 +60,7 @@ struct CPPBuiltin
 
 	CMaterial::TShader Shader;
 	uint8 TextureActive;
+	uint8 TexSamplerMode[IDRV_MAT_MAXTEXTURES];
 	uint32 TexEnvMode[IDRV_MAT_MAXTEXTURES]; // Normal, UserColor
 
 	CPixelProgram *PixelProgram;
