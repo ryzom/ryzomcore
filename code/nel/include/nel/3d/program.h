@@ -383,15 +383,15 @@ public:
 
 protected:
 	/// The progam source
-	std::vector<NLMISC::CSmartPtr<CSource> >				m_Sources;
+	std::vector<NLMISC::CSmartPtr<CSource> > m_Sources;
 
 	/// The source used for compilation
-	NLMISC::CSmartPtr<CSource>								m_Source;
-	CProgramIndex										m_Index;
+	NLMISC::CSmartPtr<CSource> m_Source;
+	CProgramIndex m_Index;
 
 public:
 	/// The driver information. For the driver implementation only.
-	NLMISC::CRefPtr<IProgramDrvInfos>					m_DrvInfo;
+	NLMISC::CRefPtr<IProgramDrvInfos> m_DrvInfo;
 
 }; /* class IProgram */
 

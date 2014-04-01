@@ -935,28 +935,31 @@ void CDriverGL3::setupUniforms(TProgram program)
 {
 	CMaterial &mat = *_CurrentMaterial;
 	IProgram *p = getProgram(program);
+	CProgramDrvInfosGL3 *drvInfo = dynamic_cast<CProgramDrvInfosGL3 *>(&*p->m_DrvInfo);
+	if (drvInfo == NULL) return;
+	GLuint progId = drvInfo->getProgramId();
 
-	int mvpIndex = p->getUniformIndex(CProgramIndex::ModelViewProjection);
-	if (mvpIndex != -1)
+	uint mvpIndex = p->getUniformIndex(CProgramIndex::ModelViewProjection);
+	if (mvpIndex != ~0)
 	{
 		CMatrix mvp = _GLProjMat * _ModelViewMatrix;
 		setUniform4x4f(program, mvpIndex, mvp);
 	}
 
-	int vmIndex = p->getUniformIndex(CProgramIndex::ViewMatrix);
-	if (vmIndex != -1)
+	uint vmIndex = p->getUniformIndex(CProgramIndex::ViewMatrix);
+	if (vmIndex != ~0)
 	{
 		setUniform4x4f(program, vmIndex, _ViewMtx);
 	}
 
-	int mvIndex = p->getUniformIndex(CProgramIndex::ModelView);
-	if (mvIndex != -1)
+	uint mvIndex = p->getUniformIndex(CProgramIndex::ModelView);
+	if (mvIndex != ~0)
 	{
 		setUniform4x4f(program, mvIndex, _ModelViewMatrix);
 	}
 
-	int nmIdx = p->getUniformIndex(CProgramIndex::NormalMatrix);
-	if (nmIdx != -1)
+	uint nmIdx = p->getUniformIndex(CProgramIndex::NormalMatrix);
+	if (nmIdx != ~0)
 	{
 		// normal matrix is the inverse-transpose of the rotation part of the modelview matrix
 		// Inverse-transpose of the rotation matrix, is itself
@@ -975,20 +978,20 @@ void CDriverGL3::setupUniforms(TProgram program)
 		setUniform3x3f(program, nmIdx, nm);
 	}
 
-	int fogStartIdx = p->getUniformIndex(CProgramIndex::FogStart);
-	if (fogStartIdx != -1)
+	uint fogStartIdx = p->getUniformIndex(CProgramIndex::FogStart);
+	if (fogStartIdx != ~0)
 	{
-		setUniform1f(program, fogStartIdx, getFogStart());
+		nglProgramUniform1f(progId, fogStartIdx, _FogStart);
 	}
 
-	int fogEndIdx = p->getUniformIndex(CProgramIndex::FogEnd);
-	if (fogEndIdx != -1)
+	uint fogEndIdx = p->getUniformIndex(CProgramIndex::FogEnd);
+	if (fogEndIdx != ~0)
 	{
-		setUniform1f(program, fogEndIdx, getFogEnd());
+		nglProgramUniform1f(progId, fogEndIdx, _FogEnd);
 	}
 
-	int fogColorIdx = p->getUniformIndex(CProgramIndex::FogColor);
-	if (fogColorIdx != -1)
+	uint fogColorIdx = p->getUniformIndex(CProgramIndex::FogColor);
+	if (fogColorIdx != ~0)
 	{
 		GLfloat glCol[ 4 ];
 		CRGBA col = getFogColor();
@@ -996,11 +999,11 @@ void CDriverGL3::setupUniforms(TProgram program)
 		glCol[ 1 ] = col.G / 255.0f;
 		glCol[ 2 ] = col.B / 255.0f;
 		glCol[ 3 ] = col.A / 255.0f;
-		setUniform4f(program, fogColorIdx, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+		nglProgramUniform4f(progId, fogColorIdx, glCol[0], glCol[1], glCol[2], glCol[3]);
 	}
 
-	int colorIndex = p->getUniformIndex(CProgramIndex::Color);
-	if (colorIndex != -1)
+	uint colorIndex = p->getUniformIndex(CProgramIndex::Color);
+	if (colorIndex != ~0)
 	{
 		GLfloat glCol[ 4 ];
 		CRGBA col = mat.getColor();
@@ -1009,11 +1012,11 @@ void CDriverGL3::setupUniforms(TProgram program)
 		glCol[ 2 ] = col.B / 255.0f;
 		glCol[ 3 ] = col.A / 255.0f;
 
-		setUniform4f(program, colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+		nglProgramUniform4f(progId, colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 	}
 
-	int diffuseIndex = p->getUniformIndex(CProgramIndex::DiffuseColor);
-	if (diffuseIndex != -1)
+	uint diffuseIndex = p->getUniformIndex(CProgramIndex::DiffuseColor);
+	if (diffuseIndex != ~0)
 	{
 		/*GLfloat glCol[ 4 ];
 		CRGBA col = mat.getDiffuse();
@@ -1022,70 +1025,66 @@ void CDriverGL3::setupUniforms(TProgram program)
 		glCol[ 2 ] = col.B / 255.0f;
 		glCol[ 3 ] = col.A / 255.0f;*/
 
-		setUniform4f(program, diffuseIndex, 1.0f, 1.0f, 1.0f, 0.0f);
+		nglProgramUniform4f(progId, diffuseIndex, 1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
 	NLMISC::CRGBAF selfIllumination = NLMISC::CRGBAF(0.0f, 0.0f, 0.0f);
 	NLMISC::CRGBAF matDiffuse = NLMISC::CRGBAF(mat.getDiffuse());
 	NLMISC::CRGBAF matSpecular = NLMISC::CRGBAF(mat.getSpecular());
 
-	for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
+	for (uint i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 	{
-		if (!_UserLightEnable[ i ])
+		if (!_UserLightEnable[i])
 			continue;
 
 		selfIllumination += NLMISC::CRGBAF(_UserLight[i].getAmbiant());
 		
 		////////////////// Temporary insanity  ///////////////////////////////
-		if ((_LightMode[ i ] != CLight::DirectionalLight) && (_LightMode[ i ] != CLight::PointLight))
+		if ((_LightMode[i] != CLight::DirectionalLight) && (_LightMode[i] != CLight::PointLight))
 			continue;
 		//////////////////////////////////////////////////////////////////////
 		
-		if (_LightMode[ i ] == CLight::DirectionalLight)
+		if (_LightMode[i] == CLight::DirectionalLight)
 		{
-			int ld = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0DirOrPos + i));
-			if (ld != -1)
+			uint ld = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0DirOrPos + i));
+			if (ld != ~0)
 			{
-				CVector v = -1 * _UserLight[ i ].getDirection();
-				setUniform3f(program, ld, v.x, v.y, v.z);
+				CVector v = -1 * _UserLight[i].getDirection();
+				nglProgramUniform4f(progId, ld, v.x, v.y, v.z, 0.0f);
 			}
 		}
 		else
 		{
-			int lp = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0DirOrPos + i));
-			if (lp != -1)
+			uint lp = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0DirOrPos + i));
+			if (lp != ~0)
 			{
-				CVector v = _UserLight[ i ].getPosition();
-				float pos[ 3 ];
-				pos[ 0 ] = v.x - _PZBCameraPos.x;
-				pos[ 1 ] = v.y - _PZBCameraPos.y;
-				pos[ 2 ] = v.z - _PZBCameraPos.z;
-				setUniform3f(program, lp, pos[ 0 ], pos[ 1 ], pos[ 2 ]);
+				CVector v = _UserLight[i].getPosition() - _PZBCameraPos;
+				nglProgramUniform4f(progId, lp, v.x, v.y, v.z, 0.0f);
 			}
 		}
 
-		int ldc = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColDiff + i));
-		if (ldc != -1)
+		uint ldc = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColDiff + i));
+		if (ldc != ~0)
 		{
 			NLMISC::CRGBAF diffuse = NLMISC::CRGBAF(_UserLight[i].getDiffuse()) * matDiffuse;
-			setUniform4f(program, ldc, diffuse.R, diffuse.G, diffuse.B, 0.0f); // 1.0f?
+			nglProgramUniform4f(progId, ldc, diffuse.R, diffuse.G, diffuse.B, 0.0f); // 1.0f?
 		}
 
-		int lsc = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColSpec + i));
-		if (lsc != -1)
+		uint lsc = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColSpec + i));
+		if (lsc != ~0)
 		{
 			NLMISC::CRGBAF specular = NLMISC::CRGBAF(_UserLight[i].getSpecular()) * matSpecular;
-			setUniform4f(program, lsc, specular.R, specular.G, specular.B, 0.0f); // 1.0f?
+			nglProgramUniform4f(progId, lsc, specular.R, specular.G, specular.B, 0.0f); // 1.0f?
 		}
 
-		int shl = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0Shininess + i));
-		if (shl != -1)
+		uint shl = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0Shininess + i));
+		if (shl != ~0)
 		{
-			setUniform1f(program, shl, mat.getShininess());
+			nglProgramUniform1f(progId, shl, mat.getShininess());
 		}
 
 		/*int lac = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColAmb + i));
-		if (lac != -1)
+		if (lac >= 0)
 		{
 			GLfloat glCol[ 4 ];
 			CRGBA col;
@@ -1101,22 +1100,22 @@ void CDriverGL3::setupUniforms(TProgram program)
 			setUniform4f(program, lac, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 		}*/
 
-		int lca = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ConstAttn + i));
-		if (lca != -1)
+		uint lca = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ConstAttn + i));
+		if (lca != ~0)
 		{
-			setUniform1f(program, lca, _UserLight[ i ].getConstantAttenuation());
+			nglProgramUniform1f(progId, lca, _UserLight[ i ].getConstantAttenuation());
 		}
 
-		int lla = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0LinAttn + i));
-		if (lla != -1)
+		uint lla = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0LinAttn + i));
+		if (lla != ~0)
 		{
-			setUniform1f(program, lla, _UserLight[ i ].getLinearAttenuation());
+			nglProgramUniform1f(progId, lla, _UserLight[ i ].getLinearAttenuation());
 		}
 
-		int lqa = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0QuadAttn + i));
-		if (lqa != -1)
+		uint lqa = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0QuadAttn + i));
+		if (lqa != ~0)
 		{
-			setUniform1f(program, lqa, _UserLight[ i ].getQuadraticAttenuation());
+			nglProgramUniform1f(progId, lqa, _UserLight[ i ].getQuadraticAttenuation());
 		}
 	}
 
@@ -1126,25 +1125,26 @@ void CDriverGL3::setupUniforms(TProgram program)
 	int selfIlluminationId = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::SelfIllumination));
 	if (selfIlluminationId != -1)
 	{
-		setUniform4f(program, selfIlluminationId, selfIllumination.R, selfIllumination.G, selfIllumination.B, 0.0f);
+		nglProgramUniform4f(progId, selfIlluminationId, selfIllumination.R, selfIllumination.G, selfIllumination.B, 0.0f);
 	}
 
 	// Lightmaps have special constants
-	if (mat.getShader() != CMaterial::LightMap)
+	if (mat.getShader() == CMaterial::Normal
+		|| mat.getShader() == CMaterial::UserColor)
 	{
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		{
-			int cl = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
+			int cl = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
 			if (cl != -1)
 			{
-				CRGBA col = mat._TexEnvs[ i ].ConstantColor;
-				GLfloat glCol[ 4 ];
-				glCol[ 0 ] = col.R / 255.0f;
-				glCol[ 1 ] = col.G / 255.0f;
-				glCol[ 2 ] = col.B / 255.0f;
-				glCol[ 3 ] = col.A / 255.0f;
+				CRGBA col = mat._TexEnvs[stage].ConstantColor;
+				GLfloat glCol[4];
+				glCol[0] = col.R / 255.0f;
+				glCol[1] = col.G / 255.0f;
+				glCol[2] = col.B / 255.0f;
+				glCol[3] = col.A / 255.0f;
 
-				setUniform4f(program, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
+				nglProgramUniform4f(progId, cl, glCol[0], glCol[1], glCol[2], glCol[3]);
 			}
 		}
 	}

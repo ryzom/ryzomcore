@@ -39,7 +39,7 @@ CPixelProgram::CPixelProgram()
 
 // ***************************************************************************
 
-CPixelProgram::~CPixelProgram ()
+CPixelProgram::~CPixelProgram()
 {
 	
 }
