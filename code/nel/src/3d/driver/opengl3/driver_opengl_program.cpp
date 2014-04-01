@@ -992,15 +992,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 
 	uint fogColorIdx = p->getUniformIndex(CProgramIndex::FogColor);
 	if (fogColorIdx != ~0)
-	{
-		GLfloat glCol[ 4 ];
-		CRGBA col = getFogColor();
-		glCol[ 0 ] = col.R / 255.0f;
-		glCol[ 1 ] = col.G / 255.0f;
-		glCol[ 2 ] = col.B / 255.0f;
-		glCol[ 3 ] = col.A / 255.0f;
-		nglProgramUniform4f(progId, fogColorIdx, glCol[0], glCol[1], glCol[2], glCol[3]);
-	}
+		nglProgramUniform4fv(progId, fogColorIdx, 1, _CurrentFogColor);
 
 	uint colorIndex = p->getUniformIndex(CProgramIndex::Color);
 	if (colorIndex != ~0)
