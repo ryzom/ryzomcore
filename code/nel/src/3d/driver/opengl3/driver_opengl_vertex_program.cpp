@@ -54,230 +54,226 @@ bool operator<(const CVPBuiltin &left, const CVPBuiltin &right)
 	return false;
 }
 
-namespace
+namespace /* anonymous */ {
+
+void vpLightUniforms(std::stringstream &ss, const CVPBuiltin &desc, int i)
 {
-	void vpLightUniforms(std::stringstream &ss, const CVPBuiltin &desc, int i)
+	switch (desc.LightMode[i])
 	{
-		switch (desc.LightMode[i])
-		{
-		case CLight::DirectionalLight:
-			ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
-			ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
-			//ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
-			ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
-			ss << "uniform float light" << i << "Shininess;" << std::endl;
-			break;
-		case CLight::PointLight:
-			ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
-			ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
-			//ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
-			ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
-			ss << "uniform float light" << i << "Shininess;" << std::endl;
-			ss << "uniform float light" << i << "ConstAttn;" << std::endl;
-			ss << "uniform float light" << i << "LinAttn;" << std::endl;
-			ss << "uniform float light" << i << "QuadAttn;" << std::endl;
-			break;
-		}
-	}
-
-	void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
-	{
-		switch (desc.LightMode[i])
-		{
-		case CLight::DirectionalLight:
-			ss << "float getIntensity" << i << "(vec3 normal3, vec3 lightDir)" << std::endl;
-			ss << "{" << std::endl;
-			ss << "float angle = dot(lightDir, normal3);" << std::endl;
-			ss << "angle = max(0.0, angle);" << std::endl;
-			ss << "return angle;" << std::endl;
-			ss << "}" << std::endl;
-			ss << std::endl;
-
-			ss << "float getSpecIntensity" << i << "(vec3 normal3, vec3 lightDir)" << std::endl;
-			ss << "{" << std::endl;
-			ss << "vec3 halfVector = normalize(lightDir + normal3);" << std::endl;
-			ss << "float angle = dot(normal3, halfVector);" << std::endl;
-			ss << "angle = max(0.0, angle);" << std::endl;
-			ss << "float si = pow(angle, light" << i << "Shininess);" << std::endl;
-			ss << "return si;" << std::endl;
-			ss << "}" << std::endl;
-			ss << std::endl;
-
-			ss << "vec4 getLight" << i << "Color()" << std::endl;
-			ss << "{" << std::endl;
-			ss << "vec4 lightDir4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
-			ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
-			ss << "lightDir = normalize(lightDir);" << std::endl;
-			ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
-			ss << "normal3 = normalMatrix * normal3;" << std::endl;
-			ss << "normal3 = normalize(normal3);" << std::endl;
-
-			ss << "vec4 lc = getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff + ";
-			ss << "getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec;" << std::endl;
-
-			// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE DIR LIGHT
-
-			ss << "return lc;" << std::endl;
-			ss << "}" << std::endl;
-			ss << std::endl;
-			break;
-		case CLight::PointLight:
-			ss << "float getIntensity" << i << "(vec3 normal3, vec3 direction3)" << std::endl;
-			ss << "{" << std::endl;
-			ss << "float angle = dot(direction3, normal3);" << std::endl;
-			ss << "angle = max(0.0, angle);" << std::endl;
-			ss << "return angle;" << std::endl;
-			ss << "}" << std::endl;
-			ss << std::endl;
-
-			ss << "float getSpecIntensity" << i << "(vec3 normal3, vec3 direction3)" << std::endl;
-			ss << "{" << std::endl;
-			ss << "vec3 halfVector = normalize(direction3 + normal3);" << std::endl;
-			ss << "float angle = dot(normal3, halfVector);" << std::endl;
-			ss << "angle = max(0.0, angle);" << std::endl;
-			ss << "float si = pow(angle, light" << i << "Shininess);" << std::endl;
-			ss << "return si;" << std::endl;
-			ss << "}" << std::endl;
-			ss << std::endl;
-
-			ss << "vec4 getLight" << i << "Color()" << std::endl;
-			ss << "{" << std::endl;
-			ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
-			ss << "vec4 lightPos4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
-			ss << "vec3 lightPos = lightPos4.xyz / lightPos4.w;" << std::endl;
-			ss << "vec3 lightDirection = lightPos - ecPos3;" << std::endl;
-			ss << "float lightDistance = length(lightDirection);" << std::endl;
-			ss << "lightDirection = normalize(lightDirection);" << std::endl;
-
-			ss << "float attenuation = light" << i << "ConstAttn + ";
-			ss << "light" << i << "LinAttn * lightDistance +";
-			ss << "light" << i << "QuadAttn * lightDistance * lightDistance;" << std::endl;
-			// ss << "attenuation = max(attenuation, 1.0);" << std::endl; // TEST
-
-			ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
-			ss << "normal3 = normalMatrix * normal3;" << std::endl;
-			ss << "normal3 = normalize(normal3);" << std::endl;
-
-			ss << "vec4 lc = getIntensity" << i << "(normal3, lightDirection) * light" << i << "ColDiff + ";
-			ss << "getSpecIntensity" << i << "(normal3, lightDirection) * light" << i << "ColSpec;" << std::endl;
-
-			ss << "lc = lc / attenuation;" << std::endl;
-
-			// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE POINT LIGHT
-
-			ss << "return lc;" << std::endl;
-			ss << "}" << std::endl;
-			ss << std::endl;
-			break;
-		}
-	}
-
-	void vsLighting(std::stringstream &ss, const CVPBuiltin &desc, int i)
-	{
-
-	}
-
-	void vpGenerate(std::string &result, const CVPBuiltin &desc)
-	{
-		std::stringstream ss;
-		ss << "// Builtin Vertex Shader" << std::endl;
-		ss << std::endl;
-		ss << "#version 330" << std::endl;
-		ss << "#extension GL_ARB_separate_shader_objects : enable" << std::endl;
-		ss << "out gl_PerVertex" << std::endl;
-		ss << "{" << std::endl;
-		ss << "vec4 gl_Position;" << std::endl;
-		ss << "};" << std::endl;
-		ss << std::endl;
-		ss << "uniform mat4 modelViewProjection;" << std::endl;
-		ss << std::endl;
-
-		for (int i = Position; i < NumOffsets; ++i)
-			if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
-				ss << "layout (location = " << i << ") " << "in vec4 " << "v" << g_AttribNames[i] << ";" << std::endl;
-		ss << std::endl;
-
-		for (int i = Weight; i < NumOffsets; ++i)
-			if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
-				ss << "smooth out vec4 " << g_AttribNames[i] << "; // vertex buffer" << std::endl;
-		ss << std::endl;
-
-		// For now shader will fail to compile if both texgen and vertex buffer tex coord are provided! This is by design.
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
-			if (desc.TexGenMode[i] >= 0)
-				ss << "smooth out vec4 texCoord" << i << "; // texgen (not implemented)" << std::endl;
-		ss << std::endl;
-
-		// TODO: Texgen parameters
-
-		// Ambient color of all lights is precalculated and added with self illumination, and multiplied with the material ambient.
-		if (desc.Lighting)
-			ss << "uniform vec4 selfIllumination;" << std::endl;
-
-		if (desc.Fog || desc.Lighting)
-			ss << "uniform mat4 modelView;" << std::endl;
-		if (desc.Lighting)
-			ss << "uniform mat4 viewMatrix;" << std::endl;
-		if (desc.Fog || desc.Lighting)
-			ss << "vec4 ecPos4;" << std::endl;
-		if (desc.Fog)
-			ss << "smooth out vec4 ecPos;" << std::endl;
-		ss << std::endl;
-
-		if (desc.Lighting)
-		{
-			ss << "uniform mat3 normalMatrix;" << std::endl;
-			for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
-				vpLightUniforms(ss, desc, i);
-			ss << "smooth out vec4 lightColor;" << std::endl;
-			ss << std::endl;
-			
-			for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
-				vpLightFunctions(ss, desc, i);
-			ss << std::endl;
-		}
-	
-		ss << "void main(void)" << std::endl;
-		ss << "{" << std::endl;
-		ss << "gl_Position = modelViewProjection * " << "v" << g_AttribNames[0] << ";" << std::endl;
-
-		if (desc.Fog || desc.Lighting)
-			ss << "ecPos4 = modelView * v" << g_AttribNames[0] << ";" << std::endl;
-		if (desc.Fog)
-			ss << "ecPos = ecPos4;" << std::endl;
-
-		if (desc.Lighting)
-		{
-			ss << "lightColor = vec4(0.0, 0.0, 0.0, 1.0);" << std::endl;
-			for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
-				if (desc.LightMode[i] == CLight::DirectionalLight || desc.LightMode[i] == CLight::PointLight)
-					ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
-			ss << "lightColor = lightColor + selfIllumination;" << std::endl;
-			//ss << "lightColor = selfIllumination;" << std::endl; // DEBUG
-			ss << "lightColor.a = 1.0;" << std::endl; // ...
-		}
-
-		for (int i = Weight; i < NumOffsets; i++)
-		{
-			if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
-			{
-				ss << g_AttribNames[i] << " = " << "v" << g_AttribNames[i] << ";" << std::endl;
-			}
-		}
-
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
-		{
-			if (desc.TexGenMode[i] >= 0)
-				ss << "texCoord" << i << " = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
-
-			// FIXME GL3 SPECULAR: TEXGEN REFLECTION CUBE
-			// TODO: Texgen calculation
-		}
-
-		ss << "}" << std::endl;
-		result = ss.str();
+	case CLight::DirectionalLight:
+		ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
+		ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
+		//ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
+		ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
+		ss << "uniform float light" << i << "Shininess;" << std::endl;
+		break;
+	case CLight::PointLight:
+		ss << "uniform vec3 light" << i << "DirOrPos;" << std::endl;
+		ss << "uniform vec4 light" << i << "ColDiff;" << std::endl;
+		//ss << "uniform vec4 light" << i << "ColAmb;" << std::endl;
+		ss << "uniform vec4 light" << i << "ColSpec;" << std::endl;
+		ss << "uniform float light" << i << "Shininess;" << std::endl;
+		ss << "uniform float light" << i << "ConstAttn;" << std::endl;
+		ss << "uniform float light" << i << "LinAttn;" << std::endl;
+		ss << "uniform float light" << i << "QuadAttn;" << std::endl;
+		break;
 	}
 }
+
+void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
+{
+	switch (desc.LightMode[i])
+	{
+	case CLight::DirectionalLight:
+		ss << "float getIntensity" << i << "(vec3 normal3, vec3 lightDir)" << std::endl;
+		ss << "{" << std::endl;
+		ss << "float angle = dot(lightDir, normal3);" << std::endl;
+		ss << "angle = max(0.0, angle);" << std::endl;
+		ss << "return angle;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "float getSpecIntensity" << i << "(vec3 normal3, vec3 lightDir)" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 halfVector = normalize(lightDir + normal3);" << std::endl;
+		ss << "float angle = dot(normal3, halfVector);" << std::endl;
+		ss << "angle = max(0.0, angle);" << std::endl;
+		ss << "float si = pow(angle, light" << i << "Shininess);" << std::endl;
+		ss << "return si;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "vec4 getLight" << i << "Color()" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec4 lightDir4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
+		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
+		ss << "lightDir = normalize(lightDir);" << std::endl;
+		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
+		ss << "normal3 = normalMatrix * normal3;" << std::endl;
+		ss << "normal3 = normalize(normal3);" << std::endl;
+
+		ss << "vec4 lc = getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff + ";
+		ss << "getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec;" << std::endl;
+
+		// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE DIR LIGHT
+
+		ss << "return lc;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+		break;
+	case CLight::PointLight:
+		ss << "float getIntensity" << i << "(vec3 normal3, vec3 direction3)" << std::endl;
+		ss << "{" << std::endl;
+		ss << "float angle = dot(direction3, normal3);" << std::endl;
+		ss << "angle = max(0.0, angle);" << std::endl;
+		ss << "return angle;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "float getSpecIntensity" << i << "(vec3 normal3, vec3 direction3)" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 halfVector = normalize(direction3 + normal3);" << std::endl;
+		ss << "float angle = dot(normal3, halfVector);" << std::endl;
+		ss << "angle = max(0.0, angle);" << std::endl;
+		ss << "float si = pow(angle, light" << i << "Shininess);" << std::endl;
+		ss << "return si;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+
+		ss << "vec4 getLight" << i << "Color()" << std::endl;
+		ss << "{" << std::endl;
+		ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
+		ss << "vec4 lightPos4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
+		ss << "vec3 lightPos = lightPos4.xyz / lightPos4.w;" << std::endl;
+		ss << "vec3 lightDirection = lightPos - ecPos3;" << std::endl;
+		ss << "float lightDistance = length(lightDirection);" << std::endl;
+		ss << "lightDirection = normalize(lightDirection);" << std::endl;
+
+		ss << "float attenuation = light" << i << "ConstAttn + ";
+		ss << "light" << i << "LinAttn * lightDistance +";
+		ss << "light" << i << "QuadAttn * lightDistance * lightDistance;" << std::endl;
+		// ss << "attenuation = max(attenuation, 1.0);" << std::endl; // TEST
+
+		ss << "vec3 normal3 = vnormal.xyz / vnormal.w;" << std::endl;
+		ss << "normal3 = normalMatrix * normal3;" << std::endl;
+		ss << "normal3 = normalize(normal3);" << std::endl;
+
+		ss << "vec4 lc = getIntensity" << i << "(normal3, lightDirection) * light" << i << "ColDiff + ";
+		ss << "getSpecIntensity" << i << "(normal3, lightDirection) * light" << i << "ColSpec;" << std::endl;
+
+		ss << "lc = lc / attenuation;" << std::endl;
+
+		// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE POINT LIGHT
+
+		ss << "return lc;" << std::endl;
+		ss << "}" << std::endl;
+		ss << std::endl;
+		break;
+	}
+}
+
+void vpGenerate(std::string &result, const CVPBuiltin &desc)
+{
+	std::stringstream ss;
+	ss << "// Builtin Vertex Shader" << std::endl;
+	ss << std::endl;
+	ss << "#version 330" << std::endl;
+	ss << "#extension GL_ARB_separate_shader_objects : enable" << std::endl;
+	ss << "out gl_PerVertex" << std::endl;
+	ss << "{" << std::endl;
+	ss << "vec4 gl_Position;" << std::endl;
+	ss << "};" << std::endl;
+	ss << std::endl;
+	ss << "uniform mat4 modelViewProjection;" << std::endl;
+	ss << std::endl;
+
+	for (int i = Position; i < NumOffsets; ++i)
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+			ss << "layout (location = " << i << ") " << "in vec4 " << "v" << g_AttribNames[i] << ";" << std::endl;
+	ss << std::endl;
+
+	for (int i = Weight; i < NumOffsets; ++i)
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+			ss << "smooth out vec4 " << g_AttribNames[i] << "; // vertex buffer" << std::endl;
+	ss << std::endl;
+
+	// For now shader will fail to compile if both texgen and vertex buffer tex coord are provided! This is by design.
+	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+		if (desc.TexGenMode[i] >= 0)
+			ss << "smooth out vec4 texCoord" << i << "; // texgen (not implemented)" << std::endl;
+	ss << std::endl;
+
+	// TODO: Texgen parameters
+
+	// Ambient color of all lights is precalculated and added with self illumination, and multiplied with the material ambient.
+	if (desc.Lighting)
+		ss << "uniform vec4 selfIllumination;" << std::endl;
+
+	if (desc.Fog || desc.Lighting)
+		ss << "uniform mat4 modelView;" << std::endl;
+	if (desc.Lighting)
+		ss << "uniform mat4 viewMatrix;" << std::endl;
+	if (desc.Fog || desc.Lighting)
+		ss << "vec4 ecPos4;" << std::endl;
+	if (desc.Fog)
+		ss << "smooth out vec4 ecPos;" << std::endl;
+	ss << std::endl;
+
+	if (desc.Lighting)
+	{
+		ss << "uniform mat3 normalMatrix;" << std::endl;
+		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
+			vpLightUniforms(ss, desc, i);
+		ss << "smooth out vec4 lightColor;" << std::endl;
+		ss << std::endl;
+		
+		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
+			vpLightFunctions(ss, desc, i);
+		ss << std::endl;
+	}
+
+	ss << "void main(void)" << std::endl;
+	ss << "{" << std::endl;
+	ss << "gl_Position = modelViewProjection * " << "v" << g_AttribNames[0] << ";" << std::endl;
+
+	if (desc.Fog || desc.Lighting)
+		ss << "ecPos4 = modelView * v" << g_AttribNames[0] << ";" << std::endl;
+	if (desc.Fog)
+		ss << "ecPos = ecPos4;" << std::endl;
+
+	if (desc.Lighting)
+	{
+		ss << "lightColor = vec4(0.0, 0.0, 0.0, 1.0);" << std::endl;
+		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
+			if (desc.LightMode[i] == CLight::DirectionalLight || desc.LightMode[i] == CLight::PointLight)
+				ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
+		ss << "lightColor = lightColor + selfIllumination;" << std::endl;
+		//ss << "lightColor = selfIllumination;" << std::endl; // DEBUG
+		ss << "lightColor.a = 1.0;" << std::endl; // ...
+	}
+
+	for (int i = Weight; i < NumOffsets; i++)
+	{
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+		{
+			ss << g_AttribNames[i] << " = " << "v" << g_AttribNames[i] << ";" << std::endl;
+		}
+	}
+
+	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+	{
+		if (desc.TexGenMode[i] >= 0)
+			ss << "texCoord" << i << " = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+
+		// FIXME GL3 SPECULAR: TEXGEN REFLECTION CUBE
+		// TODO: Texgen calculation
+	}
+
+	ss << "}" << std::endl;
+	result = ss.str();
+}
+
+} /* anonymous namespace */
 
 void CDriverGL3::generateBuiltinVertexProgram()
 {

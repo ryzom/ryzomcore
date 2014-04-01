@@ -214,7 +214,7 @@ public:
 
 
 // ***************************************************************************
-class CShaderGL3 : public IMaterialDrvInfos
+class CMaterialDrvInfosGL3 : public IMaterialDrvInfos
 {
 public:
 	GLenum		SrcBlend;
@@ -234,7 +234,10 @@ public:
 	// The supported Shader type.
 	CMaterial::TShader	SupportedShader;
 
-	CShaderGL3(IDriver *drv, ItMatDrvInfoPtrList it) : IMaterialDrvInfos(drv, it) {}
+	// PP builtin
+	CPPBuiltin	PPBuiltin;
+
+	CMaterialDrvInfosGL3(IDriver *drv, ItMatDrvInfoPtrList it) : IMaterialDrvInfos(drv, it) {}
 };
 
 
@@ -392,6 +395,8 @@ public:
 	void					touchLightVP(int i);
 	void					touchVertexFormatVP();
 	void					setTexGenModeVP(uint stage, sint mode);
+
+	void					generateBuiltinPixelProgram(CMaterial &mat);
 
 	virtual void			startSpecularBatch();
 	virtual void			endSpecularBatch();
@@ -1344,6 +1349,9 @@ private:
 	NLMISC::CRefPtr<CVertexProgram> m_DriverVertexProgram;
 	NLMISC::CRefPtr<CGeometryProgram> m_DriverGeometryProgram;
 	NLMISC::CRefPtr<CPixelProgram> m_DriverPixelProgram;
+
+	friend class CPPBuiltin;
+	std::set<CPPBuiltin> m_PPBuiltinCache;
 
 	std::set<CVPBuiltin> m_VPBuiltinCache;
 	CVPBuiltin m_VPBuiltinCurrent;

@@ -243,7 +243,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		return true;
 	}
 
-	CShaderGL3*	pShader;
+	CMaterialDrvInfosGL3*	pShader;
 	CMaterial::TShader matShader;
 	GLenum		glenum = GL_ZERO;
 	uint32		touched = mat.getTouched();
@@ -260,12 +260,12 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		// insert into driver list. (so it is deleted when driver is deleted).
 		ItMatDrvInfoPtrList		it= _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos*)NULL);
 		// create and set iterator, for future deletion.
-		*it= mat._MatDrvInfo= new CShaderGL3(this, it);
+		*it= mat._MatDrvInfo= new CMaterialDrvInfosGL3(this, it);
 
 		// Must create all OpenGL shader states.
 		touched= IDRV_TOUCHED_ALL;
 	}
-	pShader=static_cast<CShaderGL3*>((IMaterialDrvInfos*)(mat._MatDrvInfo));
+	pShader=static_cast<CMaterialDrvInfosGL3*>((IMaterialDrvInfos*)(mat._MatDrvInfo));
 
 	// 1. Setup modified fields of material.
 	//=====================================

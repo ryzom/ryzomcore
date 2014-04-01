@@ -25,6 +25,8 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 #endif
 
+class CDriverGL3;
+
 static sint TexGenDisabled = -1;
 static sint TexGenReflectionMap = 0; // GL_REFLECTION_MAP_ARB
 static sint TexGenSphereMap = 1; // GL_SPHERE_MAP
@@ -46,6 +48,22 @@ struct CVPBuiltin
 };
 
 bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
+
+/// Builtin pixel program description
+struct CPPBuiltin
+{
+	uint16 VertexFormat;
+	bool Fog;
+
+	CPixelProgram *PixelProgram;
+
+	bool Touched;
+
+	void checkDriverStateTouched(CDriverGL3 *driver);
+	void checkMaterialStateTouched(CMaterial &mat);
+};
+
+bool operator<(const CPPBuiltin &left, const CPPBuiltin &right);
 
 enum TAttribOffset
 {
