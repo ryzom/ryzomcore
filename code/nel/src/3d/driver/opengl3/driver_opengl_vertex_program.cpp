@@ -212,13 +212,11 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 		ss << "smooth out vec4 ecPos;" << std::endl;
 	ss << std::endl;
 
-	bool vertexColor = desc.Lighting
-		|| desc.VertexFormat & (g_VertexFlags[PrimaryColor] | g_VertexFlags[SecondaryColor]);
-	if (vertexColor)
-	{
-		ss << "smooth out vec4 vertexColor;" << std::endl;
-		ss << std::endl;
-	}
+	if (!desc.Lighting)
+		ss << "uniform vec4 materialColor;" << std::endl; // Verify
+
+	ss << "smooth out vec4 vertexColor;" << std::endl;
+	ss << std::endl;
 
 	if (desc.Lighting)
 	{
@@ -242,17 +240,16 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 		ss << "ecPos = ecPos4;" << std::endl;
 	ss << std::endl;
 
-	bool diffuseColor = desc.Lighting || desc.VertexFormat & g_VertexFlags[PrimaryColor];
-	bool specularColor = desc.Lighting || desc.VertexFormat & g_VertexFlags[SecondaryColor];
-	if (diffuseColor) ss << "vec4 diffuseColor;" << std::endl;
-	if (specularColor) ss << "vec4 specularColor;" << std::endl;
+	bool specularVertex = desc.Lighting || desc.VertexFormat & g_VertexFlags[SecondaryColor];
+	ss << "vec4 diffuseVertex;" << std::endl;
+	if (specularVertex) ss << "vec4 specularVertex;" << std::endl;
 	ss << std::endl;
 
 	if (desc.Lighting)
 	{
 		// Calculate lights
-		ss << "diffuseColor = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
-		ss << "specularColor = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+		ss << "diffuseVertex = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+		ss << "specularVertex = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
 		ss << "vec4 diffuseLight;" << std::endl;
 		ss << "vec4 specularLight;" << std::endl;
 		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
@@ -260,48 +257,42 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 			if (desc.LightMode[i] == CLight::DirectionalLight || desc.LightMode[i] == CLight::PointLight)
 			{
 				ss << "getLight" << i << "Color(diffuseLight, specularLight);" << std::endl;
-				ss << "diffuseColor = diffuseColor + diffuseLight;" << std::endl;
-				ss << "specularColor = specularColor + specularLight;" << std::endl;
+				ss << "diffuseVertex = diffuseVertex + diffuseLight;" << std::endl;
+				ss << "specularVertex = specularVertex + specularLight;" << std::endl;
 			}
 		}
-		ss << "diffuseColor.a = 1.0;" << std::endl; // ...
-		ss << "specularColor.a = 1.0;" << std::endl; // ...
-		// Multiply with vertex colors
-		if (desc.VertexFormat & g_VertexFlags[PrimaryColor])
-			ss << "diffuseColor = diffuseColor * vprimaryColor;" << std::endl;
-		if (desc.VertexFormat & g_VertexFlags[SecondaryColor])
-			ss << "specularColor = specularColor * vsecondaryColor;" << std::endl;
-	}
-	else
-	{
-		if (desc.VertexFormat & g_VertexFlags[PrimaryColor])
-			ss << "diffuseColor = vprimaryColor;" << std::endl;
+		ss << "diffuseVertex.a = 1.0;" << std::endl; // ...
+		ss << "specularVertex.a = 1.0;" << std::endl; // ...
+
+		// Secondary color (lighted)
 		if (desc.VertexFormat & g_VertexFlags[SecondaryColor])
 		{
-			nlwarning("VP: Secondary color in vertex buffer without lighting");
-			ss << "specularColor = vsecondaryColor;" << std::endl;
+			ss << "specularVertex = specularVertex * vsecondaryColor;" << std::endl;
 		}
-	}
-	// Add diffuse and specular color
-	if (diffuseColor)
-	{
-		ss << "vertexColor = diffuseColor;" << std::endl;
-		if (specularColor) ss << "vertexColor.rgb = vertexColor.rgb + (specularColor.rgb * specularColor.a);" << std::endl; // Verify
-	}
-	else if (specularColor)
-	{
-		nlwarning("VP: Vertex color only consists of specular color");
-		ss << "vertexColor = specularColor;" << std::endl;
 	}
 	else
 	{
-		nlassert(!vertexColor);
+		// Unlit
+		ss << "diffuseVertex = materialColor;" << std::endl;
+
+		// Secondary color (unlit)
+		if (desc.VertexFormat & g_VertexFlags[SecondaryColor])
+		{
+			nlwarning("VP: Secondary color in vertex buffer using material without lighting");
+			ss << "specularVertex = vsecondaryColor;" << std::endl;
+		}
 	}
+
+	// Primary color
+	if (desc.VertexFormat & g_VertexFlags[PrimaryColor])
+		ss << "diffuseVertex = diffuseVertex * vprimaryColor;" << std::endl; // Note: Might need to replace materialColor if PrimaryColor exists
+	
+	// Add diffuse and specular color
+	ss << "vertexColor = diffuseVertex;" << std::endl;
+	if (specularVertex)
+		ss << "vertexColor.rgb = vertexColor.rgb + (specularVertex.rgb * specularVertex.a);" << std::endl; // Verify
 	if (desc.Lighting)
-	{
 		ss << "vertexColor.rgb = vertexColor.rgb + selfIllumination.rgb;" << std::endl; // Note: Alpha of self illumination is ignored
-		// ss << "vertexColor.r = 1.0; // DEBUG" << std::endl;
-	}
 	ss << std::endl;
 
 	for (int i = Weight; i < NumOffsets; i++)

@@ -98,7 +98,7 @@ const char *CProgramIndex::Names[NUM_UNIFORMS] =
 	"fogColor",
 
 	"materialColor",
-	"diffuseColor",
+	//"diffuseColor",
 
 	"constant0",
 	"constant1",

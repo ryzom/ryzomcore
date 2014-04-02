@@ -1004,7 +1004,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 		nglProgramUniform4f(progId, colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 	}
 
-	uint diffuseIndex = p->getUniformIndex(CProgramIndex::DiffuseColor);
+	/*uint diffuseIndex = p->getUniformIndex(CProgramIndex::DiffuseColor);
 	if (diffuseIndex != ~0)
 	{
 		/*GLfloat glCol[ 4 ];
@@ -1014,8 +1014,8 @@ void CDriverGL3::setupUniforms(TProgram program)
 		glCol[ 2 ] = col.B / 255.0f;
 		glCol[ 3 ] = col.A / 255.0f;*/
 
-		nglProgramUniform4f(progId, diffuseIndex, 1.0f, 1.0f, 1.0f, 0.0f);
-	}
+		/*nglProgramUniform4f(progId, diffuseIndex, 1.0f, 1.0f, 1.0f, 0.0f);
+	}*/
 
 	NLMISC::CRGBAF selfIllumination = NLMISC::CRGBAF(0.0f, 0.0f, 0.0f);
 	NLMISC::CRGBAF matDiffuse = NLMISC::CRGBAF(mat.getDiffuse());

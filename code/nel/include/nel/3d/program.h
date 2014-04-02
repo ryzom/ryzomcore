@@ -128,7 +128,7 @@ struct CProgramIndex
 		FogColor,
 
 		Color,
-		DiffuseColor,
+		//DiffuseColor,
 
 		Constant0,
 		Constant1,

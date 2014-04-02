@@ -360,7 +360,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 
 	for (int i = Weight; i < NumOffsets; i++)
 	{
-		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]) && (i != PrimaryColor))
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
 		{
 			ss << "smooth in vec4 ";
 			ss << g_AttribNames[i] << ";" << std::endl;
@@ -435,25 +435,14 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		ss << std::endl;
 	}
 
-	if (desc.VertexFormat & (g_VertexFlags[PrimaryColor])) // Note: Lighting and secondary are presented by primary flag
-	{
-		ss << "smooth in vec4 vertexColor;" << std::endl;
-		ss << std::endl;
-	}
+	ss << "smooth in vec4 vertexColor;" << std::endl;
+	ss << std::endl;
 	
 	ss << "void main(void)" << std::endl;
 	ss << "{" << std::endl;
 
-	// Vertex color (light, primary and secondary)
-	if (desc.VertexFormat & (g_VertexFlags[PrimaryColor]))
-	{
-		ss << "fragColor = vertexColor;" << std::endl;
-		// ss << "fragColor.g = 1.0; // DEBUG" << std::endl;
-	}
-	else
-	{
-		ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-	}
+	// Vertex color (light or unlit diffuse, primary and secondary)
+	ss << "fragColor = vertexColor;" << std::endl;
 
 	for (uint stage = 0; stage < maxTex; ++stage)
 	{
@@ -555,13 +544,8 @@ void CPPBuiltin::checkDriverStateTouched(CDriverGL3 *driver) // MUST NOT depend 
 	for (sint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		if (driver->m_VPBuiltinCurrent.TexGenMode[stage] >= 0)
 			vertexFormat |= g_VertexFlags[TexCoord0 + stage];
-	if (driver->m_VPBuiltinCurrent.Lighting) // Present secondary by primary (vertexColor)
-		vertexFormat |= g_VertexFlags[PrimaryColor];
-	if (vertexFormat & g_VertexFlags[SecondaryColor]) // Present secondary by primary (vertexColor)
-	{
-		vertexFormat |= g_VertexFlags[PrimaryColor];
-		vertexFormat &= ~g_VertexFlags[SecondaryColor];
-	}
+	vertexFormat &= ~g_VertexFlags[PrimaryColor];
+	vertexFormat &= ~g_VertexFlags[SecondaryColor];
 
 	// Compare values
 	if (VertexFormat != vertexFormat)
