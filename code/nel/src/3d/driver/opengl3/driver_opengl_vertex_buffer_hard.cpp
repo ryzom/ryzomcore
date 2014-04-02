@@ -94,7 +94,7 @@ IVertexBufferHardGL *CVertexArrayRange::createVBHardGL(uint size, CVertexBuffer 
 	}
 	CVertexBufferHard *newVbHard= new CVertexBufferHard(_Driver, vb);
 	newVbHard->initGL(vertexBufferID, this, _VBType);
-	_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+	// _Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 	return newVbHard;
 }
 
@@ -169,7 +169,7 @@ CVertexBufferHard::~CVertexBufferHard()
 	{
 		if (_Driver->_DriverGLStates.getCurrBoundARBVertexBuffer() == _VertexObjectId)
 		{
-			_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+			// _Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 		}
 	}
 	if (_VertexObjectId)
@@ -273,7 +273,7 @@ void *CVertexBufferHard::lock()
 		_VertexArrayRange->_MappedVBList.push_front(this);
 		_IteratorInMappedVBList = _VertexArrayRange->_MappedVBList.begin();
 	#endif
-	_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+	// _Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 	// Lock Profile?
 	if (_Driver->_VBHardProfiling)
 	{
@@ -319,7 +319,7 @@ void CVertexBufferHard::unlock()
 	#ifdef NL_DEBUG
 		_VertexArrayRange->_MappedVBList.erase(_IteratorInMappedVBList);
 	#endif
-	_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+	// _Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 	if (!unmapOk)
 	{
 		invalidate();
