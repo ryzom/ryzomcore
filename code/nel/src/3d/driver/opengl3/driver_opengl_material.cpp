@@ -20,6 +20,7 @@
 #include "nel/3d/texture_mem.h"
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
+#include "driver_opengl_vertex_buffer_hard.h"
 
 namespace NL3D {
 
@@ -351,6 +352,10 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		if (mat.getTexture(stage))
 	}*/
 
+	// NOTE: A vertex buffer MUST be enabled before calling setupMaterial!
+	nlassert(_CurrentVertexBufferHard);
+	uint16 vertexFormat = _CurrentVertexBufferHard->VB->getVertexFormat();
+
 	// Activate the textures.
 	// Do not do it for Lightmap and per pixel lighting , because done in multipass in a very special fashion.
 	// This avoid the useless multiple change of texture states per lightmapped object.
@@ -359,7 +364,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		/* && matShader != CMaterial::Caustics	*/
 		&& matShader != CMaterial::Cloud
 		&& matShader != CMaterial::Water
-		&& matShader != CMaterial::Program
 	  )
 	{
 		uint maxTex = matShader == CMaterial::Specular ? 2 : inlGetNumTextStages();
@@ -370,8 +374,12 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			// activate the texture, or disable texturing if NULL.
 			activateTexture(stage, text);
 			
-			// Specular has it's own env function setup by startSpecularBatch
-			if (matShader != CMaterial::Specular)
+			if (vertexFormat & g_VertexFlags[TexCoord0 + stage])
+			{
+				// Do not allow TexGen when vertex flags set
+				setTexGenModeVP(stage, TexGenDisabled);
+			}
+			else if (matShader != CMaterial::Specular) // Specular has it's own env function setup by startSpecularBatch
 			{
 				setTexGenFunction(stage, mat);
 			}
@@ -384,7 +392,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		activateTexture(1, mat.getTexture(0));
 		setTexGenModeVP(1, TexGenDisabled);
 	}
-	else //if (matShader != CMaterial::Specular) // TEMP BUGFIX
+	else if (matShader != CMaterial::Specular) // TEMP BUGFIX
 	{// TEMP BUGFIX
 		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		{
@@ -395,13 +403,21 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	if (matShader == CMaterial::Specular)
 	{
 		setTexGenModeVP(0, TexGenDisabled);
-		ITexture *text = mat.getTexture(1);
-		if (text)
+		if (vertexFormat & g_VertexFlags[TexCoord1])
 		{
-			if (text->isTextureCube())
-				setTexGenModeVP(1, TexGenReflectionMap);
-			else
-				setTexGenModeVP(1, TexGenSphereMap);
+			// nlwarning("GL3: Specular material with TexCoord1 provided in vertex buffer");
+			setTexGenModeVP(1, TexGenDisabled);
+		}
+		else
+		{
+			ITexture *text = mat.getTexture(1);
+			if (text)
+			{
+				if (text->isTextureCube())
+					setTexGenModeVP(1, TexGenReflectionMap);
+				else
+					setTexGenModeVP(1, TexGenSphereMap);
+			}
 		}
 	}
 
@@ -443,24 +459,17 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 		// Fog Part.
 		//=================
-		// Disable fog if dest blend is ONE
-		if (blend && (pShader->DstBlend == GL_ONE))
-		{
-			enableFogVP(false);
-		}
-		else
-		{
-			// Restaure fog state to its current value
-			enableFogVP(_FogEnabled);
-		}
+		// Disable fog if dest blend is ONE or restore fog state to its current value
+		enableFogVP((blend && (pShader->DstBlend == GL_ONE)) ? false : _FogEnabled);
 
+		// Done.
 		_CurrentMaterial = &mat;
 	}
 
 	// 4. Misc
 	//=====================================
 	// Textures user matrix
-	if (matShader == CMaterial::Normal || matShader == CMaterial::Program)
+	if (matShader == CMaterial::Normal)
 	{
 		setupUserTextureMatrix(inlGetNumTextStages(), mat);
 	}
@@ -471,11 +480,15 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 5. Set up the program
 	// =====================
-	return setupBuiltinPrograms();
+	switch (matShader)
+	{
+	default:
+		return setupBuiltinPrograms();
+	}
 }
 
 // ***************************************************************************
-sint			CDriverGL3::beginMultiPass()
+sint CDriverGL3::beginMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginMultiPass)
 
@@ -913,6 +926,7 @@ void			CDriverGL3::setupSpecularBegin()
 	H_AUTO_OGL(CDriverGL3_setupSpecularBegin)
 
 	// setup the good matrix for stage 1.
+	// NB: Cannot set uniforms here directly, because the program does not exist yet
 	_UserTexMat[1] = _SpecularTexMtx;
 }
 
@@ -920,7 +934,8 @@ void			CDriverGL3::setupSpecularBegin()
 void			CDriverGL3::setupSpecularEnd()
 {
 	H_AUTO_OGL(CDriverGL3_setupSpecularEnd)
-	// Disable Texture coord generation.
+
+	// Disable Texture coord generation // FIXME GL3: This should not be necessary...
 	setTexGenModeVP(1, TexGenDisabled);
 
 	// Happiness !!! we have already enabled the stage 1 - lolwhat
