@@ -2379,6 +2379,8 @@ bool CDriverGL3::createContext()
 	{
 		nldebug("Create regular OpenGL context");
 		_hRC = wglCreateContext(_hDC);
+		if (!_hRC)
+			return false;
 		wglMakeCurrent(_hDC,_hRC);
 		nldebug("Register WGL extensions");
 		registerWGlExtensions(_Extensions, _hDC);
@@ -2397,11 +2399,14 @@ bool CDriverGL3::createContext()
 		int attribList[] = {
 			WGL_CONTEXT_MAJOR_VERSION_ARB, 3, 
 			WGL_CONTEXT_MINOR_VERSION_ARB, 3, 
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB, 
+			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, // WGL_CONTEXT_CORE_PROFILE_BIT_ARB, 
 			0, 0
 		};
 		_hRC = nwglCreateContextAttribsARB(_hDC, 0, attribList);
-		nldebug("Make current");
+		if (!_hRC)
+			return false;
+
+		nldebug("Make current %p", _hRC);
 		wglMakeCurrent(_hDC,_hRC);
 	}
 #endif
