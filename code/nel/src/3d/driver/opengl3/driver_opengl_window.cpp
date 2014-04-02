@@ -2380,10 +2380,10 @@ bool CDriverGL3::createContext()
 		nldebug("Create regular OpenGL context");
 		_hRC = wglCreateContext(_hDC);
 		wglMakeCurrent(_hDC,_hRC);
+		nldebug("Register WGL extensions");
+		registerWGlExtensions(_Extensions, _hDC);
 	}
 
-	nldebug("Register WGL extensions");
-	registerWGlExtensions(_Extensions, _hDC);
 	if (_Extensions.WGLARBCreateContextProfile)
 	{
 		if (hasRegularHRC)
