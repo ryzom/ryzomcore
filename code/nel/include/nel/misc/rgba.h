@@ -338,15 +338,6 @@ public:
 		std::swap(R,B);
 	}
 
-	/// Write the RGBA values to a float vector
-	void toFloatVector( float *v ) const
-	{
-		v[ 0 ] = R;
-		v[ 1 ] = G;
-		v[ 2 ] = B;
-		v[ 3 ] = A;
-	}
-
 
 	/// Red componant.
 	uint8	R;

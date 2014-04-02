@@ -106,8 +106,6 @@ struct EBadDisplay : public NLMISC::Exception
 // ****************************************************************************
 typedef void (*emptyProc)(void);
 
-class IProgram;
-
 // ****************************************************************************
 // *** IMPORTANT ********************
 // *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
@@ -1055,9 +1053,6 @@ public:
 	  */
 	virtual void			setLight(uint8 num, const CLight &light) = 0;
 
-	/// Get light data for the specified light
-	virtual CLight			getLight(uint8 num) = 0;
-
 	/**
 	  * Enable / disable light.
 	  *
@@ -1068,8 +1063,6 @@ public:
 	  * \see setLight()
 	  */
 	virtual void			enableLight(uint8 num, bool enable = true) = 0;
-
-	virtual bool			isLightEnabled(uint8 num) = 0;
 
 	/**
 	  * Set ambient.
@@ -1456,10 +1449,6 @@ protected:
 
 private:
 	bool					_StaticMemoryToVRAM;
-
-public:
-	/// Reloads the user shaders
-	virtual void reloadUserShaders(){}
 
 };
 

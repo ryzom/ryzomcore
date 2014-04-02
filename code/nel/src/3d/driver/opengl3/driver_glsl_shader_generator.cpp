@@ -57,73 +57,6 @@ namespace NL3D
 		ss.clear();
 	}
 
-	void CGLSLShaderGenerator::generatePS(std::string &ps)
-	{
-		ss.str("");
-		ss.clear();
-
-		ss << "// " << shaderNames[ material->getShader() ] << " Pixel Shader" << std::endl;
-		ss << std::endl;
-
-		ss << "#version 330" << std::endl;
-		ss << std::endl;
-
-		ss << "out vec4 fragColor;" << std::endl;
-
-		for (int i = Weight; i < NumOffsets; i++)
-		{
-			if (hasFlag(desc->vbFlags, g_VertexFlags[i]))
-			{
-				ss << "smooth in vec4 ";
-				ss << g_AttribNames[i] << ";" << std::endl;
-			}
-		}
-		ss << std::endl;
-		
-#if 0 // LIGHTING DEBUG
-		if (desc->lightingEnabled() || material->getShader() != CMaterial::Normal)
-		{
-			generateInvalidPS();
-		}
-		else
-		{
-			generateNormalPS();
-		}
-#else
-		switch(material->getShader())
-		{
-		case CMaterial::Normal:
-		case CMaterial::UserColor:
-		case CMaterial::Specular:
-			generateNormalPS();
-			break;
-
-		case CMaterial::LightMap:
-			generateLightMapPS();
-			break;
-
-		/*case CMaterial::Specular:
-			generateSpecularPS();
-			break;*/
-
-		case CMaterial::PerPixelLighting:
-		case CMaterial::PerPixelLightingNoSpec:
-			generatePPLPS();
-			break;
-
-		case CMaterial::Water:
-			generateWaterPS();
-			break;
-
-		case CMaterial::Cloud:
-			generateCloudPS();
-			break;
-		}
-#endif
-
-		ps.assign(ss.str());
-	}
-
 	void CGLSLShaderGenerator::addAmbient()
 	{
 		ss << "uniform vec4 ambientColor;" << std::endl;
@@ -442,399 +375,9 @@ namespace NL3D
 		ss << "}" << std::endl;
 	}*/
 
-	void CGLSLShaderGenerator::generateInvalidPS()
-	{
-		/*uint sampler = 0;
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
-		{
-			if (desc->getUseTexStage(i))
-				ss << "uniform sampler2D sampler" << sampler << ";" << std::endl;
-			sampler++;
-		}
-
-		addColor();
-		addConstants();
-		addAlphaTreshold();
-		addFogUniform();*/
-
-		if (desc->fogEnabled())
-			ss << "smooth in vec4 ecPos;" << std::endl;
-
-		ss << std::endl;
-
-		if (desc->lightingEnabled())
-		{
-			addLightUniformsFS();
-			addLightInsFS();
-			ss << std::endl;
-			
-			addLightsFunctionFS();
-			ss << std::endl;
-		}
-
-		/*if (desc->fogEnabled())
-			addFogFunction();*/
-		
-		ss << "void main(void)" << std::endl;
-		ss << "{" << std::endl;
-
-		/*bool textures = false;
-		sampler = 0;
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
-		{
-			if (desc->getUseTexStage(i))
-			{
-				ss << "vec4 texel" << sampler << " = texture(sampler" << sampler << ",";
-				
-				if (!desc->getUseFirstTexCoords())
-					ss << g_AttribNames[ TexCoord0 + i ] << ".st);";
-				else
-					ss << g_AttribNames[ TexCoord0 ] << ".st);";
-
-				ss << std::endl;
-
-				textures = true;
-			}
-			sampler++;
-		}
-
-		bool vertexColor = false;
-		if (hasFlag(vbFormat, g_VertexFlags[ PrimaryColor ]))
-			vertexColor = true;
-
-		if (textures && !vertexColor)
-			ss << "vec4 texel = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-		else
-		if (vertexColor)
-			ss << "vec4 texel = color;" << std::endl;
-		else
-			ss << "vec4 texel = vec4(0.5, 0.5, 0.5, 1.0);" << std::endl;
-
-		generateTexEnv();
-
-		// This is just an idea I had, but it seems to be working.
-		// Unfortunately it's not documented anywhere I looked in the GL spec, but if I don't have this modulation here,
-		// the Ryzom UI looks horrific.
-		if (vertexColor)
-			ss << "texel = color * texel;" << std::endl;*/
-
-		ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-
-		if (desc->lightingEnabled())
-			addLightsFS();
-
-		ss << "fragColor = fragColor + vec4(0.25, 0.0, 0.0, 0.0);" << std::endl;
-
-		/*if (desc->fogEnabled())
-			addFog();
-
-		addAlphaTest();*/
-
-		ss << "}" << std::endl;
-	}
-
-	void CGLSLShaderGenerator::generateNormalPS()
-	{
-		uint sampler = 0;
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
-		{
-			if (desc->getUseTexStage(i))
-			{
-				ss << "uniform "
-					<< ((desc->textureSamplerMode[i] == SamplerCube) ? "samplerCube" : "sampler2D")
-					<< " sampler" << sampler << ";" << std::endl;
-			}
-			sampler++;
-		}
-
-		addColor();
-		addConstants();
-		addAlphaTreshold();
-		addFogUniform();
-
-		if (desc->fogEnabled())
-			ss << "smooth in vec4 ecPos;" << std::endl;
-
-		ss << std::endl;
-
-		if (desc->lightingEnabled())
-		{
-			addLightUniformsFS();
-			addLightInsFS();
-			ss << std::endl;
-			
-			addLightsFunctionFS();
-			ss << std::endl;
-		}
-
-		if (desc->fogEnabled())
-			addFogFunction();
-		
-		ss << "void main(void)" << std::endl;
-		ss << "{" << std::endl;
-
-		// Light color
-		ss << "vec4 diffuse = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-		if (desc->lightingEnabled())
-		{
-			ss << "diffuse = applyLights(diffuse);" << std::endl;
-			ss << "diffuse.a = 1.0;" << std::endl;
-		}
-		if (hasFlag(desc->vbFlags, g_VertexFlags[PrimaryColor]))
-			ss << "diffuse = color * diffuse;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
-
-		bool textures = false;
-		for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
-		{
-			if (desc->getUseTexStage(i))
-			{
-				ss << "vec4 texel" << i << " = texture(sampler" << i << ", ";				
-				if (desc->hasVBFlags(g_VertexFlags[TexCoord0 + i]))
-					ss << g_AttribNames[TexCoord0 + i];
-				else
-					ss << g_AttribNames[TexCoord0];
-				ss << ((desc->textureSamplerMode[i] == SamplerCube) ? ".str);" : ".st);");
-				ss << std::endl;
-				textures = true;
-			}
-		}
-
-		/*if (textures && !vertexColor)
-			ss << "vec4 texel = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-		else if (vertexColor)
-			ss << "vec4 texel = color;" << std::endl;
-		else
-			ss << "vec4 texel = vec4(0.5, 0.5, 0.5, 1.0);" << std::endl;*/
-
-		switch (material->getShader())
-		{
-		case CMaterial::Specular:
-			generateSpecular();
-			break;
-		default:
-			generateTexEnv();
-			break;
-		}
-
-		if (desc->fogEnabled())
-			addFog();
-
-		addAlphaTest();
-
-		// ss << "fragColor = fragColor + vec4(0.0, 0.25, 0.0, 0.0);" << std::endl;
-
-		// ss << "fragColor.b = diffuse.b;" << std::endl;
-
-		ss << "}" << std::endl;
-	}
-
-	void CGLSLShaderGenerator::generateTexEnv()
-	{
-		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
-		{
-			if (desc->getUseTexStage(stage))
-			{
-				for (uint arg = 0; arg < 3; ++arg)
-				{
-					// Texop arg
-					ss << "vec4 texop" << stage << "arg" << arg << ";" << std::endl;
-
-					// RGB
-					uint rgbArg = material->_TexEnvs[stage].getColorArg(arg);
-					uint rgbOp = material->_TexEnvs[stage].getColorOperand(arg);
-					std::stringstream rgbArgVec;
-					switch (rgbArg)
-					{
-					case CMaterial::Texture:
-						rgbArgVec << "texel" << stage;
-						break;
-					case CMaterial::Previous:
-						if (stage > 0)
-						{
-							rgbArgVec << "texop" << (stage - 1);
-							break;
-						}
-					case CMaterial::Diffuse:
-						rgbArgVec << "diffuse";
-						break;
-					case CMaterial::Constant:
-						rgbArgVec << "constant" << stage;
-						break;
-					}
-					ss << "texop" << stage << "arg" << arg << ".rgb = ";
-					switch (rgbOp) // SrcColor=0, InvSrcColor, SrcAlpha, InvSrcAlpha
-					{
-					case CMaterial::SrcColor:
-						ss << rgbArgVec.str() << ".rgb";
-						break;
-					case CMaterial::InvSrcColor:
-						ss << "vec3(1.0, 1.0, 1.0) - " << rgbArgVec.str() << ".rgb";
-						break;
-					case CMaterial::SrcAlpha:
-						ss << rgbArgVec.str() << ".aaa";
-						break;
-					case CMaterial::InvSrcAlpha:
-						ss << "(1.0 - " << rgbArgVec.str() << ").aaa";
-						break;
-					}
-					ss << ";" << std::endl;
-
-					// Alpha
-					uint alphaArg = material->_TexEnvs[stage].getAlphaArg(arg);
-					uint alphaOp = material->_TexEnvs[stage].getAlphaOperand(arg);
-					std::stringstream alphaArgVec;
-					switch (alphaArg)
-					{
-					case CMaterial::Texture:
-						alphaArgVec << "texel" << stage;
-						break;
-					case CMaterial::Previous:
-						if (stage > 0)
-						{
-							alphaArgVec << "texop" << (stage - 1);
-							break;
-						}
-					case CMaterial::Diffuse:
-						alphaArgVec << "diffuse";
-						break;
-					case CMaterial::Constant:
-						alphaArgVec << "constant" << stage;
-						break;
-					}
-					ss << "texop" << stage << "arg" << arg << ".a = ";
-					switch (alphaOp) // SrcColor=0, InvSrcColor, SrcAlpha, InvSrcAlpha
-					{
-					case CMaterial::SrcColor:
-						ss << alphaArgVec.str() << ".r";
-						break;
-					case CMaterial::InvSrcColor:
-						ss << "1.0 - " << alphaArgVec.str() << ".r";
-						break;
-					case CMaterial::SrcAlpha:
-						ss << alphaArgVec.str() << ".a";
-						break;
-					case CMaterial::InvSrcAlpha:
-						ss << "1.0 - " << alphaArgVec.str() << ".a";
-						break;
-					}
-					ss << ";" << std::endl;
-				}
-				ss << "vec4 texop" << stage << ";" << std::endl;
-
-				// RGB
-				switch (material->_TexEnvs[stage].Env.OpRGB)
-				{
-				case CMaterial::InterpolateConstant:
-					ss << "float texop" << stage << "rgbAs = constant" << stage << ".a;" << std::endl;
-					break;
-				case CMaterial::InterpolatePrevious:
-					if (stage > 0)
-					{
-						ss << "float texop" << stage << "rgbAs = texop" << stage << ".a;" << std::endl;
-						break;
-					}
-				case CMaterial::InterpolateDiffuse:
-					ss << "float texop" << stage << "rgbAs = diffuse.a;" << std::endl;
-					break;
-				case CMaterial::InterpolateTexture:
-					ss << "float texop" << stage << "rgbAs = texel" << stage << ".a;" << std::endl;
-					break;
-				}
-				ss << "texop" << stage << ".rgb = ";
-				switch (material->_TexEnvs[stage].Env.OpRGB)
-				{
-				case CMaterial::Replace:
-					ss << "texop" << stage << "arg0.rgb";
-					break;
-				case CMaterial::Modulate:
-					ss << "texop" << stage << "arg0.rgb * texop" << stage << "arg1.rgb";
-					break;
-				case CMaterial::Add:
-					ss << "texop" << stage << "arg0.rgb + texop" << stage << "arg1.rgb";
-					break;
-				case CMaterial::AddSigned:
-					ss << "texop" << stage << "arg0.rgb + texop" << stage << "arg1.rgb - vec3(0.5, 0.5, 0.5)";
-					break;
-				case CMaterial::InterpolateConstant:
-				case CMaterial::InterpolateDiffuse:
-				case CMaterial::InterpolatePrevious:
-				case CMaterial::InterpolateTexture:
-					ss << "texop" << stage << "arg0.rgb * texop" << stage << "rgbAs + texop" << stage << "arg1.rgb * (1.0 - texop" << stage << "rgbAs)";
-					break;
-				case CMaterial::Mad:
-					ss << "texop" << stage << "arg0.rgb * texop" << stage << "arg1.rgb + texop" << stage << "arg2.rgb";
-					break;
-				}
-				ss << ";" << std::endl;
-
-				// Alpha
-				switch (material->_TexEnvs[stage].Env.OpAlpha)
-				{
-				case CMaterial::InterpolateConstant:
-					ss << "float texop" << stage << "alphaAs = constant" << stage << ".a;" << std::endl;
-					break;
-				case CMaterial::InterpolatePrevious:
-					if (stage > 0)
-					{
-						ss << "float texop" << stage << "alphaAs = texop" << stage << ".a;" << std::endl;
-						break;
-					}
-				case CMaterial::InterpolateDiffuse:
-					ss << "float texop" << stage << "alphaAs = diffuse.a;" << std::endl;
-					break;
-				case CMaterial::InterpolateTexture:
-					ss << "float texop" << stage << "alphaAs = texel" << stage << ".a;" << std::endl;
-					break;
-				}
-				ss << "texop" << stage << ".a = ";
-				switch (material->_TexEnvs[stage].Env.OpAlpha)
-				{
-				case CMaterial::Replace:
-					ss << "texop" << stage << "arg0.a";
-					break;
-				case CMaterial::Modulate:
-					ss << "texop" << stage << "arg0.a * texop" << stage << "arg1.a";
-					break;
-				case CMaterial::Add:
-					ss << "texop" << stage << "arg0.a + texop" << stage << "arg1.a";
-					break;
-				case CMaterial::AddSigned:
-					ss << "texop" << stage << "arg0.a + texop" << stage << "arg1.a - 0.5";
-					break;
-				case CMaterial::InterpolateConstant:
-				case CMaterial::InterpolateDiffuse:
-				case CMaterial::InterpolatePrevious:
-				case CMaterial::InterpolateTexture:
-					ss << "texop" << stage << "arg0.a * texop" << stage << "rgbAs + texop" << stage << "arg1.a * (1.0 - texop" << stage << "rgbAs)";
-					break;
-				case CMaterial::Mad:
-					ss << "texop" << stage << "arg0.a * texop" << stage << "arg1.a + texop" << stage << "arg2.a";
-					break;
-				}
-				ss << ";" << std::endl;
-			}
-			else if (stage == 0)
-			{
-				ss << "vec4 texop" << stage << " = diffuse;" << std::endl;
-			}
-			else
-			{
-				ss << "vec4 texop" << stage << " = texop" << (stage - 1) << ";" << std::endl;
-			}
-		}
-		ss << "fragColor = texop" << (IDRV_MAT_MAXTEXTURES - 1) << ";" << std::endl;
-	}
-
-	void CGLSLShaderGenerator::generateSpecular()
-	{
-		ss << "vec3 specop0 = texel0.rgb * diffuse.rgb;" << std::endl;
-		ss << "vec4 specop1 = vec4(texel1.rgb * texel0.a + specop0, diffuse.a);" << std::endl;
-		ss << "fragColor = specop1;" << std::endl;
-	}
-
-
 	void CGLSLShaderGenerator::generateLightMapPS()
 	{
+#if 0
 		int ls = material->_LightMaps.size();
 		ls++; // lightmaps + color texture
 
@@ -925,59 +468,12 @@ namespace NL3D
 
 		ss << "}" << std::endl;
 		ss << std::endl;
-	}
-
-	void CGLSLShaderGenerator::generateSpecularPS()
-	{
-		ss << "smooth in vec3 cubeTexCoords;" << std::endl;
-		ss << "uniform sampler2D sampler0;" << std::endl;
-		ss << "uniform samplerCube sampler1;" << std::endl;
-		addDiffuse();
-		addAlphaTreshold();
-		addFogUniform();
-
-		if (desc->lightingEnabled())
-		{
-			addLightUniformsFS();
-			addLightInsFS();
-			ss << std::endl;
-			
-			addLightsFunctionFS();
-			ss << std::endl;
-		}
-
-		if (desc->fogEnabled())
-			ss << "smooth in vec4 ecPos;" << std::endl;
-
-		ss << std::endl;
-
-		if (desc->fogEnabled())
-			addFogFunction();
-
-		ss << "void main(void)" << std::endl;
-		ss << "{" << std::endl;		
-		ss << "vec4 texel0 = texture(sampler0, texCoord0.st);" << std::endl;
-		ss << "vec4 texel1 = texture(sampler1, cubeTexCoords);" << std::endl;
-		ss << "vec4 texel;" << std::endl;
-		ss << "texel.rgb = texel0.rgb * diffuseColor.rgb;" << std::endl;
-		ss << "texel.a = texel0.a;" << std::endl;
-		ss << "texel.rgb = texel1.rgb * texel.a + texel.rgb;" << std::endl;
-		ss << "texel.a = texel1.a;" << std::endl;
-		ss << "fragColor = texel;" << std::endl;
-
-		if (desc->lightingEnabled())
-			addLightsFS();
-		
-		if (desc->fogEnabled())
-			addFog();
-		
-		addAlphaTest();
-
-		ss << "}" << std::endl;
+#endif
 	}
 
 	void CGLSLShaderGenerator::generatePPLPS()
 	{
+#if 0
 		ss << "smooth in vec3 cubeTexCoords0;" << std::endl;
 		if (material->getShader() == CMaterial::PerPixelLighting)
 			ss << "smooth in vec3 cubeTexCoords2;" << std::endl;
@@ -1027,11 +523,13 @@ namespace NL3D
 		ss << "fragColor = texel;" << std::endl;
 		addAlphaTest();
 		ss << "}" << std::endl;
+#endif
 	}
 
 
 	void CGLSLShaderGenerator::generateWaterPS()
 	{
+#if 0
 		bool diffuse = false;
 		if (material->getTexture(3) != NULL)
 			diffuse = true;
@@ -1089,10 +587,12 @@ namespace NL3D
 		ss << "}" << std::endl;
 
 		ss << std::endl;
+#endif
 	}
 
 	void CGLSLShaderGenerator::generateCloudPS()
 	{
+#if 0
 		ss << "uniform sampler2D sampler0;" << std::endl;
 		ss << "uniform sampler2D sampler1;" << std::endl;
 		addDiffuse();
@@ -1109,7 +609,7 @@ namespace NL3D
 		addAlphaTest();
 		ss << "}" << std::endl;
 		ss << std::endl;
-
+#endif
 	}
 }
 

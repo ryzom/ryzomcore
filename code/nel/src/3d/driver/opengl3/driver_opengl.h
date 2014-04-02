@@ -1319,11 +1319,7 @@ private:
 
 	NLMISC::CRGBA					_CurrentBlendConstantColor;
 
-	private:
-
-	CGLSLShaderGenerator *shaderGenerator;
-	CUsrShaderManager    *usrShaderManager;
-	
+private:	
 	bool initProgramPipeline();
 
 	uint32 ppoId;
@@ -1396,13 +1392,6 @@ private:
 	  * Setup is done for texture currently bind to the gl, so calling bindTextureWithMode is necessary
 	  */
 	inline void setupTextureBasicParameters(ITexture &tex);
-
-
-private:
-	CShaderCache shaderCache;
-
-public:
-	void reloadUserShaders();
 
 };
 

@@ -18,9 +18,6 @@
 #include "driver_opengl_program.h"
 #include "driver_glsl_shader_generator.h"
 #include "driver_opengl_vertex_buffer_hard.h"
-#include "nel/3d/dynamic_material.h"
-#include "nel/3d/usr_shader_manager.h"
-#include "nel/3d/usr_shader_program.h"
 
 namespace NL3D {
 

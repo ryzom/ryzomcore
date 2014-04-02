@@ -20,7 +20,6 @@
 #include "nel/3d/texture_mem.h"
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/material.h"
-#include "nel/3d/dynamic_material.h"
 
 namespace NL3D {
 
@@ -236,12 +235,6 @@ CMaterial::TShader	CDriverGL3::getSupportedShader(CMaterial::TShader shader)
 bool CDriverGL3::setupMaterial(CMaterial& mat)
 {
 	H_AUTO_OGL(CDriverGL3_setupMaterial)
-
-	if (mat.getDynMat() != NULL)
-	{
-		_CurrentMaterial = &mat; 
-		return true;
-	}
 
 	CMaterialDrvInfosGL3*	pShader;
 	CMaterial::TShader matShader;
@@ -512,9 +505,6 @@ sint			CDriverGL3::beginMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginMultiPass)
 
-	if (_CurrentMaterial->getDynMat() != NULL)
-		return _CurrentMaterial->getDynMat()->getPassCount();
-
 	// Depending on material type and hardware, return number of pass required to draw this material.
 	switch(_CurrentMaterialSupportedShader)
 	{
@@ -542,9 +532,6 @@ sint			CDriverGL3::beginMultiPass()
 bool CDriverGL3::setupPass(uint pass)
 {
 	H_AUTO_OGL(CDriverGL3_setupPass)
-	
-	if (_CurrentMaterial->getDynMat() != NULL)
-		return setupDynMatPass(pass);
 	
 	switch(_CurrentMaterialSupportedShader)
 	{
@@ -581,9 +568,6 @@ bool CDriverGL3::setupPass(uint pass)
 void			CDriverGL3::endMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endMultiPass)
-	
-	if (_CurrentMaterial->getDynMat() != NULL)
-		return;
 
 	switch(_CurrentMaterialSupportedShader)
 	{

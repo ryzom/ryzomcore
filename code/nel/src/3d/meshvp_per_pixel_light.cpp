@@ -97,7 +97,7 @@ MUL R6, v[2], R1;																			\n\
 																						\n\
 #normalize the second vector															\n\
 DP3	R1, R6, v[9];																		\n\
-MAD	R1, R6, -R1, v[9]; #subtract the normal component, Gramm-Schmidt process			\n\
+MAD	R1, R6, -R1, v[9]; #subtract the normal component									\n\
 DP3 R2, R1, R1;																			\n\
 RSQ	R2, R2.x;																			\n\
 MUL R5, R1, R2;	#second basis vector in R5												\n\

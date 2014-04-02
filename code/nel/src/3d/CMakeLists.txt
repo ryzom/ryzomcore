@@ -144,10 +144,6 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/light.h
         material.cpp
         ../../include/nel/3d/material.h
-        dynamic_material.cpp
-        ../../include/nel/3d/dynamic_material.h
-        dyn_mat_loader.cpp
-        ../../include/nel/3d/dyb_mat_loader.h
         nelu.cpp
         ../../include/nel/3d/nelu.h
         ../../include/nel/3d/occlusion_query.h
@@ -157,17 +153,6 @@ SOURCE_GROUP(Driver FILES
         ../../include/nel/3d/scene.h
         scene_group.cpp
         ../../include/nel/3d/scene_group.h
-        shader.cpp
-        ../../include/nel/3d/shader.h
-        shader_loader.cpp
-        ../../include/nel/3d/shader_loader.h
-        shader_manager.cpp
-        ../../include/nel/3d/shader_manager.h
-        shader_program.cpp
-        ../../include/nel/3d/shader_program.h
-        shader_saver.cpp
-        ../../include/nel/3d/shader_saver.h
-        ../../include/nel/3d/shader_visitor.h
         texture.cpp
         ../../include/nel/3d/texture.h
         vertex_buffer.cpp
@@ -269,8 +254,6 @@ SOURCE_GROUP(Shapes FILES
         ../../include/nel/3d/shape.h
         shape_bank.cpp
         ../../include/nel/3d/shape_bank.h
-		shape_material_serializer.cpp
-		../../include/nel/3d/shape_material_serializer.h
         shifted_triangle_cache.cpp
         ../../include/nel/3d/shifted_triangle_cache.h
         skeleton_shape.cpp

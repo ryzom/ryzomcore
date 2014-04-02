@@ -27,8 +27,6 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
-#include "nel/3d/usr_shader_manager.h"
-#include "nel/3d/usr_shader_loader.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/di_event_emitter.h"
 #include "nel/misc/mouse_device.h"
@@ -315,13 +313,6 @@ CDriverGL3::CDriverGL3()
 	m_DriverPixelProgram = NULL;
 
 	m_VPBuiltinTouched = true;
-
-	shaderGenerator = new CGLSLShaderGenerator();
-	usrShaderManager = new CUsrShaderManager();
-
-	CUsrShaderLoader loader;
-	loader.setManager(usrShaderManager);
-	loader.loadShaders("./shaders");
 }
 
 // ***************************************************************************
@@ -330,11 +321,6 @@ CDriverGL3::~CDriverGL3()
 	H_AUTO_OGL(CDriverGL3_CDriverGLDtor)
 
 	release();
-
-	delete shaderGenerator;
-	shaderGenerator = NULL;
-	delete usrShaderManager;
-	usrShaderManager = NULL;
 
 #if defined(NL_OS_MAC)
 	[_autoreleasePool release];
@@ -1845,15 +1831,6 @@ void CDriverGL3::endDialogMode()
 {
 }
 
-// ***************************************************************************
-void CDriverGL3::reloadUserShaders()
-{
-	usrShaderManager->clear();
-	NL3D::CUsrShaderLoader loader;
-	loader.setManager(usrShaderManager);
-	loader.loadShaders("./shaders");
-}
-
 CProgramDrvInfosGL3::CProgramDrvInfosGL3(CDriverGL3 *drv, ItGPUPrgDrvInfoPtrList it) :
 IProgramDrvInfos(drv, it)
 {
@@ -1862,6 +1839,7 @@ IProgramDrvInfos(drv, it)
 
 CProgramDrvInfosGL3::~CProgramDrvInfosGL3()
 {
+	// FIXME GL3: Is this not released?!
 	programId = 0;
 }
 

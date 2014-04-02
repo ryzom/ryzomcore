@@ -197,18 +197,12 @@ public:
 	virtual	void			enableFog(bool enable);
 	/// setup fog parameters. fog must enabled to see result. start and end are in [0,1] range.
 	virtual	void			setupFog(float start, float end, CRGBA color);
-	virtual float			getFogStart();
-	virtual float			getFogEnd();
-	virtual CRGBA			getFogColor();
 	// @}
 
 	/// \name Light support.
 	// @{
 	virtual void			setLight (uint8 num, const ULight& light);
-	virtual ULight*			getLight (uint8 num);
-	virtual uint8			getMaxDriverLights() const;
 	virtual void			enableLight (uint8 num, bool enable=true);
-	virtual bool			isLightEnabled (uint8 num);
 	virtual void			setAmbientColor (CRGBA color);
 	// @}
 

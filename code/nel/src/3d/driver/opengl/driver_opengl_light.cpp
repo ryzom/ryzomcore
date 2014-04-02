@@ -54,14 +54,6 @@ void	CDriverGL::setLight (uint8 num, const CLight& light)
 }
 
 
-CLight	CDriverGL::getLight (uint8 num)
-{
-	nlinfo( "This feature isn't yet implemented in this driver!" );
-	nlassert( false );
-	return CLight();
-}
-
-
 // ***************************************************************************
 void	CDriverGL::setLightInternal(uint8 num, const CLight& light)
 {
@@ -186,14 +178,6 @@ void	CDriverGL::enableLight (uint8 num, bool enable)
 
 	// because the GL setup has changed, must dirt lightmap rendering
 	_LightMapDynamicLightDirty= true;
-}
-
-bool	CDriverGL::isLightEnabled (uint8 num)
-{
-	if(num<_MaxDriverLight)
-		return _UserLightEnable[num];
-
-	return false;
 }
 
 

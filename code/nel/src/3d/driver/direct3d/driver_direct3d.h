@@ -1041,9 +1041,7 @@ public:
 	// Lights
 	virtual uint			getMaxLight () const;
 	virtual void			setLight (uint8 num, const CLight& light);
-	virtual CLight			getLight (uint8 num);
 	virtual void			enableLight (uint8 num, bool enable=true);
-	virtual bool			isLightEnabled (uint8 num);
 	virtual void			setLightMapDynamicLight (bool enable, const CLight& light);
 	// todo hulud d3d light
 	virtual void			setPerPixelLightingLight(CRGBA /* diffuse */, CRGBA /* specular */, float /* shininess */) {}
