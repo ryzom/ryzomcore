@@ -103,7 +103,7 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "}" << std::endl;
 		ss << std::endl;
 
-		ss << "vec4 getLight" << i << "Color()" << std::endl;
+		ss << "void getLight" << i << "Color(out vec4 lightDiffuse, out vec4 lightSpecular)" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec4 lightDir4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
 		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
@@ -112,12 +112,8 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "normal3 = normalize(normal3);" << std::endl;
 
-		ss << "vec4 lc = getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff + ";
-		ss << "getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec;" << std::endl;
-
-		// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE DIR LIGHT
-
-		ss << "return lc;" << std::endl;
+		ss << "lightDiffuse = getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff;" << std::endl;
+		ss << "lightSpecular = getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 		break;
@@ -140,7 +136,7 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "}" << std::endl;
 		ss << std::endl;
 
-		ss << "vec4 getLight" << i << "Color()" << std::endl;
+		ss << "void getLight" << i << "Color(out vec4 lightDiffuse, out vec4 lightSpecular)" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
 		ss << "vec4 lightPos4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
@@ -158,14 +154,9 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "normal3 = normalize(normal3);" << std::endl;
 
-		ss << "vec4 lc = getIntensity" << i << "(normal3, lightDirection) * light" << i << "ColDiff + ";
-		ss << "getSpecIntensity" << i << "(normal3, lightDirection) * light" << i << "ColSpec;" << std::endl;
-
-		ss << "lc = lc / attenuation;" << std::endl;
-
-		// ss << "return vec4(0.0, 0.0, 0.0, 0.0);" << std::endl; // DISABLE POINT LIGHT
-
-		ss << "return lc;" << std::endl;
+		ss << "float invattn = 1.0 / attenuation;" << std::endl;
+		ss << "lightDiffuse = getIntensity" << i << "(normal3, lightDirection) * invattn * light" << i << "ColDiff;" << std::endl;
+		ss << "lightSpecular = getSpecIntensity" << i << "(normal3, lightDirection) * invattn * light" << i << "ColSpec;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 		break;
@@ -195,7 +186,7 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 	ss << std::endl;
 
 	for (int i = Weight; i < NumOffsets; ++i)
-		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]) && (i != PrimaryColor) && (i != SecondaryColor))
 			ss << "smooth out vec4 " << g_AttribNames[i] << "; // vertex buffer" << std::endl;
 	ss << std::endl;
 
@@ -221,13 +212,19 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 		ss << "smooth out vec4 ecPos;" << std::endl;
 	ss << std::endl;
 
+	bool vertexColor = desc.Lighting
+		|| desc.VertexFormat & (g_VertexFlags[PrimaryColor] | g_VertexFlags[SecondaryColor]);
+	if (vertexColor)
+	{
+		ss << "smooth out vec4 vertexColor;" << std::endl;
+		ss << std::endl;
+	}
+
 	if (desc.Lighting)
 	{
 		ss << "uniform mat3 normalMatrix;" << std::endl;
 		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 			vpLightUniforms(ss, desc, i);
-		ss << "smooth out vec4 lightColor;" << std::endl;
-		ss << std::endl;
 		
 		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
 			vpLightFunctions(ss, desc, i);
@@ -237,26 +234,79 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 	ss << "void main(void)" << std::endl;
 	ss << "{" << std::endl;
 	ss << "gl_Position = modelViewProjection * " << "v" << g_AttribNames[0] << ";" << std::endl;
+	ss << std::endl;
 
 	if (desc.Fog || desc.Lighting)
 		ss << "ecPos4 = modelView * v" << g_AttribNames[0] << ";" << std::endl;
 	if (desc.Fog)
 		ss << "ecPos = ecPos4;" << std::endl;
+	ss << std::endl;
+
+	bool diffuseColor = desc.Lighting || desc.VertexFormat & g_VertexFlags[PrimaryColor];
+	bool specularColor = desc.Lighting || desc.VertexFormat & g_VertexFlags[SecondaryColor];
+	if (diffuseColor) ss << "vec4 diffuseColor;" << std::endl;
+	if (specularColor) ss << "vec4 specularColor;" << std::endl;
+	ss << std::endl;
 
 	if (desc.Lighting)
 	{
-		ss << "lightColor = vec4(0.0, 0.0, 0.0, 1.0);" << std::endl;
+		// Calculate lights
+		ss << "diffuseColor = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+		ss << "specularColor = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+		ss << "vec4 diffuseLight;" << std::endl;
+		ss << "vec4 specularLight;" << std::endl;
 		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
+		{
 			if (desc.LightMode[i] == CLight::DirectionalLight || desc.LightMode[i] == CLight::PointLight)
-				ss << "lightColor = lightColor + getLight" << i << "Color();" << std::endl;
-		ss << "lightColor = lightColor + selfIllumination;" << std::endl;
-		//ss << "lightColor = selfIllumination;" << std::endl; // DEBUG
-		ss << "lightColor.a = 1.0;" << std::endl; // ...
+			{
+				ss << "getLight" << i << "Color(diffuseLight, specularLight);" << std::endl;
+				ss << "diffuseColor = diffuseColor + diffuseLight;" << std::endl;
+				ss << "specularColor = specularColor + specularLight;" << std::endl;
+			}
+		}
+		ss << "diffuseColor.a = 1.0;" << std::endl; // ...
+		ss << "specularColor.a = 1.0;" << std::endl; // ...
+		// Multiply with vertex colors
+		if (desc.VertexFormat & g_VertexFlags[PrimaryColor])
+			ss << "diffuseColor = diffuseColor * vprimaryColor;" << std::endl;
+		if (desc.VertexFormat & g_VertexFlags[SecondaryColor])
+			ss << "specularColor = specularColor * vsecondaryColor;" << std::endl;
 	}
+	else
+	{
+		if (desc.VertexFormat & g_VertexFlags[PrimaryColor])
+			ss << "diffuseColor = vprimaryColor;" << std::endl;
+		if (desc.VertexFormat & g_VertexFlags[SecondaryColor])
+		{
+			nlwarning("VP: Secondary color in vertex buffer without lighting");
+			ss << "specularColor = vsecondaryColor;" << std::endl;
+		}
+	}
+	// Add diffuse and specular color
+	if (diffuseColor)
+	{
+		ss << "vertexColor = diffuseColor;" << std::endl;
+		if (specularColor) ss << "vertexColor.rgb = vertexColor.rgb + (specularColor.rgb * specularColor.a);" << std::endl; // Verify
+	}
+	else if (specularColor)
+	{
+		nlwarning("VP: Vertex color only consists of specular color");
+		ss << "vertexColor = specularColor;" << std::endl;
+	}
+	else
+	{
+		nlassert(!vertexColor);
+	}
+	if (desc.Lighting)
+	{
+		ss << "vertexColor.rgb = vertexColor.rgb + selfIllumination.rgb;" << std::endl; // Note: Alpha of self illumination is ignored
+		// ss << "vertexColor.r = 1.0; // DEBUG" << std::endl;
+	}
+	ss << std::endl;
 
 	for (int i = Weight; i < NumOffsets; i++)
 	{
-		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]) && (i != PrimaryColor) && (i != SecondaryColor))
 		{
 			ss << g_AttribNames[i] << " = " << "v" << g_AttribNames[i] << ";" << std::endl;
 		}

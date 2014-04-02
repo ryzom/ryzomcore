@@ -60,7 +60,6 @@ struct CPPBuiltin
 	CPPBuiltin() : Touched(true) { }
 
 	uint16 VertexFormat;
-	bool Lighting;
 	bool Fog;
 
 	CMaterial::TShader Shader;

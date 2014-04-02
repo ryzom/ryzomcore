@@ -81,8 +81,6 @@ bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
 	// Driver state
 	if (left.VertexFormat != right.VertexFormat)
 		return left.VertexFormat < right.VertexFormat;
-	if (left.Lighting != right.Lighting)
-		return left.Lighting < right.Lighting;
 	if (left.Fog != right.Fog)
 		return right.Fog;
 
@@ -362,7 +360,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 
 	for (int i = Weight; i < NumOffsets; i++)
 	{
-		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]))
+		if (hasFlag(desc.VertexFormat, g_VertexFlags[i]) && (i != PrimaryColor))
 		{
 			ss << "smooth in vec4 ";
 			ss << g_AttribNames[i] << ";" << std::endl;
@@ -437,25 +435,24 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		ss << std::endl;
 	}
 
-	if (desc.Lighting)
+	if (desc.VertexFormat & (g_VertexFlags[PrimaryColor])) // Note: Lighting and secondary are presented by primary flag
 	{
-		ss << "smooth in vec4 lightColor;" << std::endl; // TODO: We probably will always have an incoming vertex color with vertex and light etc premixed.
+		ss << "smooth in vec4 vertexColor;" << std::endl;
 		ss << std::endl;
 	}
 	
 	ss << "void main(void)" << std::endl;
 	ss << "{" << std::endl;
 
-	// Light color
-	ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
-	if (desc.Lighting)
+	// Vertex color (light, primary and secondary)
+	if (desc.VertexFormat & (g_VertexFlags[PrimaryColor]))
 	{
-		ss << "fragColor = lightColor;" << std::endl;
-		ss << "fragColor.a = 1.0;" << std::endl;
+		ss << "fragColor = vertexColor;" << std::endl;
+		// ss << "fragColor.g = 1.0; // DEBUG" << std::endl;
 	}
-	if (hasFlag(desc.VertexFormat, g_VertexFlags[PrimaryColor])) // TODO: What about secondary color?
+	else
 	{
-		ss << "fragColor = primaryColor * fragColor;" << std::endl; // TODO: If this is the correct location, we should premultiply light and color in VS.
+		ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl;
 	}
 
 	for (uint stage = 0; stage < maxTex; ++stage)
@@ -558,16 +555,18 @@ void CPPBuiltin::checkDriverStateTouched(CDriverGL3 *driver) // MUST NOT depend 
 	for (sint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		if (driver->m_VPBuiltinCurrent.TexGenMode[stage] >= 0)
 			vertexFormat |= g_VertexFlags[TexCoord0 + stage];
+	if (driver->m_VPBuiltinCurrent.Lighting) // Present secondary by primary (vertexColor)
+		vertexFormat |= g_VertexFlags[PrimaryColor];
+	if (vertexFormat & g_VertexFlags[SecondaryColor]) // Present secondary by primary (vertexColor)
+	{
+		vertexFormat |= g_VertexFlags[PrimaryColor];
+		vertexFormat &= ~g_VertexFlags[SecondaryColor];
+	}
 
 	// Compare values
 	if (VertexFormat != vertexFormat)
 	{
 		VertexFormat = vertexFormat;
-		Touched = true;
-	}
-	if (Lighting != driver->m_VPBuiltinCurrent.Lighting)
-	{
-		Lighting = driver->m_VPBuiltinCurrent.Lighting;
 		Touched = true;
 	}
 	if (Fog != driver->m_VPBuiltinCurrent.Fog)
