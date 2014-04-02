@@ -415,6 +415,21 @@ void		CDriverGL3::setupGlArrays(CVertexBufferInfo &vb)
 	}
 }
 
+// ***************************************************************************
+void		CDriverGL3::mapTextureStageToUV(uint stage, uint uvId)
+{
+	H_AUTO_OGL(CDriverGL3_mapTextureStageToUV)
+
+	// Just call it for last VertexBuffer setuped... (hack)
+	CVertexBufferInfo &VB = _LastVB;	
+	if (VB.VertexFormat & (CVertexBuffer::TexCoord0Flag<<uvId))
+	{
+		CVertexBuffer::TType uvType = VB.Type[CVertexBuffer::TexCoord0 + uvId];
+		nglVertexAttribPointer(GLVertexAttribIndex[CVertexBuffer::TexCoord0 + stage], NumCoordinatesType[uvType], GLType[uvType], 
+			false, VB.VertexSize, VB.ValuePtr[CVertexBuffer::TexCoord0 + uvId]);
+	}
+}
+
 
 // ***************************************************************************
 void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)

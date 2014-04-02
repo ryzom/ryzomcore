@@ -436,7 +436,7 @@ public:
 
 	virtual bool			activeIndexBuffer(CIndexBuffer& IB);
 
-	virtual	void			mapTextureStageToUV(uint stage, uint uv) {}
+	virtual	void			mapTextureStageToUV(uint stage, uint uv);
 
 	virtual bool			renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines);
 	virtual bool			renderTriangles(CMaterial& Mat, uint32 firstIndex, uint32 ntris);
