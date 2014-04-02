@@ -73,6 +73,7 @@ struct CPPBuiltin
 	bool Touched;
 
 	void checkDriverStateTouched(CDriverGL3 *driver);
+	void checkDriverMaterialStateTouched(CDriverGL3 *driver, CMaterial &mat);
 	void checkMaterialStateTouched(CMaterial &mat);
 };
 

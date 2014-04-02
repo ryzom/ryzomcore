@@ -667,6 +667,7 @@ bool CDriverGL3::setupBuiltinPixelProgram()
 	nlassert(matDrv);
 
 	matDrv->PPBuiltin.checkDriverStateTouched(this);
+	matDrv->PPBuiltin.checkDriverMaterialStateTouched(this, mat);
 	matDrv->PPBuiltin.checkMaterialStateTouched(mat);
 
 	if (matDrv->PPBuiltin.Touched)

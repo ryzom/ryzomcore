@@ -482,6 +482,9 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// =====================
 	switch (matShader)
 	{
+	case CMaterial::LightMap:
+		// Programs are setup in multipass
+		return true;
 	default:
 		return setupBuiltinPrograms();
 	}
@@ -596,7 +599,7 @@ void CDriverGL3::setupNormalPass()
 }
 
 // ***************************************************************************
-void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
+void CDriverGL3::computeLightMapInfos(const CMaterial &mat)
 {
 	H_AUTO_OGL(CDriverGL3_computeLightMapInfos)
 	static const uint32 RGBMaskPacked = CRGBA(255,255,255,0).getPacked();
@@ -627,7 +630,7 @@ void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 }
 
 // ***************************************************************************
-sint CDriverGL3::beginLightMapMultiPass ()
+sint CDriverGL3::beginLightMapMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginLightMapMultiPass)
 
@@ -655,11 +658,11 @@ sint CDriverGL3::beginLightMapMultiPass ()
 	// FIXME GL3 LIGHTMAP
 
 	// Manage too if no lightmaps.
-	return	std::max (_NLightMapPass, (uint)1);
+	return std::max(_NLightMapPass, (uint)1);
 }
 
 // ***************************************************************************
-void			CDriverGL3::setupLightMapPass(uint pass)
+void CDriverGL3::setupLightMapPass(uint pass)
 {
 	nlassert(m_DriverPixelProgram);
 	nlassert(!m_UserPixelProgram);
@@ -668,22 +671,21 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// common colors
-	static	uint32	packedColorBlack= CRGBA(0,0,0,255).getPacked();
-	static	GLfloat glcolBlack[4]= {0.f,0.f,0.f,1.f};
-	static	uint32	packedColorWhite= CRGBA(255,255,255,255).getPacked();
-	static	GLfloat glcolWhite[4]= {1.f,1.f,1.f,1.f};
-	static	uint32	packedColorGrey= CRGBA(128,128,128,128).getPacked();
-	static	GLfloat glcolGrey[4]= {0.5f,0.5f,0.5f,1.f};
+	static const GLfloat glcolBlack[4] = { 0.f, 0.f, 0.f, 1.f };
+	static const GLfloat glcolWhite[4] = { 1.f, 1.f, 1.f, 1.f };
+	static const GLfloat glcolGrey[4] = { 0.5f, 0.5f, 0.5f, 1.f };
 
 	// No lightmap or all blacks??, just setup "black texture" for stage 0.
-	if (_NLightMaps==0)
+	if (_NLightMaps == 0)
 	{
-		ITexture	*text= mat.getTexture(0);
-		activateTexture(0,text);
+		nldebug("No lightmaps");
+
+		ITexture *text = mat.getTexture(0);
+		activateTexture(0, text);
 
 		// setup std modulate env
-		//CMaterial::CTexEnv	env;
-		//activateTexEnvMode(0, env); // FIXME GL3
+		// CMaterial::CTexEnv	env;
+		// activateTexEnvMode(0, env); // FIXME GL3: standard modulate env
 
 		// Since Lighting is disabled, as well as colorArray, must setup alpha.
 		// setup color to 0 => blackness. in emissive cause texture can still be lighted by dynamic light
@@ -691,7 +693,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		// FIXME GL3 LIGHTMAP
 
 		// Setup gen tex off
-		// setTexGenModeVP(0, TexGenDisabled); // FIXME GL3
+		setTexGenModeVP(0, TexGenDisabled);
 
 		// And disable other stages.
 		for (uint stage = 1; stage < IDRV_MAT_MAXTEXTURES; stage++)
@@ -700,58 +702,59 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 			activateTexture(stage, NULL);
 		}
 
+		// Setup the programs now
+		setupBuiltinPrograms();
+
 		return;
 	}
 
-	nlassert(pass<_NLightMapPass);
+	nlassert(pass < _NLightMapPass);
 
 	// setup Texture Pass.
 	//=========================
 	uint	lmapId;
 	uint	nstages;
-	lmapId= pass * _NLightMapPerPass; // Nb lightmaps already processed
+	lmapId = pass * _NLightMapPerPass; // Nb lightmaps already processed
 	// N lightmaps for this pass, plus the texture.
-	nstages= std::min(_NLightMapPerPass, _NLightMaps-lmapId) + 1;
+	nstages = std::min(_NLightMapPerPass, _NLightMaps - lmapId) + 1; // at most 4
 
 	// For LMC (lightmap 8Bit compression) compute the total AmbientColor in vertex diffuse
 	// need only if standard MulADD version
+	uint32 r = 0;
+	uint32 g = 0;
+	uint32 b = 0;
+	// sum only the ambient of lightmaps that will be drawn this pass
+	for (uint sa = 0; sa < nstages - 1; ++sa)
 	{
-		uint32	r=0;
-		uint32	g=0;
-		uint32	b=0;
-		// sum only the ambient of lightmaps that will be drawn this pass
-		for (uint sa=0;sa<nstages-1;sa++)
-		{
-			uint	wla= _LightMapLUT[lmapId+sa];
-			// must mul them by their respective mapFactor too
-			CRGBA ambFactor = mat._LightMaps[wla].Factor;
-			CRGBA lmcAmb= mat._LightMaps[wla].LMCAmbient;
-			r+= ((uint32)ambFactor.R  * ((uint32)lmcAmb.R+(lmcAmb.R>>7))) >>8;
-			g+= ((uint32)ambFactor.G  * ((uint32)lmcAmb.G+(lmcAmb.G>>7))) >>8;
-			b+= ((uint32)ambFactor.B  * ((uint32)lmcAmb.B+(lmcAmb.B>>7))) >>8;
-		}
-		r= std::min(r, (uint32)255);
-		g= std::min(g, (uint32)255);
-		b= std::min(b, (uint32)255);
-
-		// this color will be added to the first lightmap (with help of emissive)
-		// CRGBA	col((uint8)r,(uint8)g,(uint8)b,255);
-		// GLfloat	glcol[4];
-		// convColor(col, glcol);
-		// _DriverGLStates.setEmissive(col.getPacked(), glcol);
-		// FIXME GL3 LIGHTMAP
+		uint wla = _LightMapLUT[lmapId + sa];
+		// must mul them by their respective mapFactor too
+		CRGBA ambFactor = mat._LightMaps[wla].Factor;
+		CRGBA lmcAmb = mat._LightMaps[wla].LMCAmbient;
+		r += ((uint32)ambFactor.R * ((uint32)lmcAmb.R + (lmcAmb.R >> 7))) >> 8;
+		g += ((uint32)ambFactor.G * ((uint32)lmcAmb.G + (lmcAmb.G >> 7))) >> 8;
+		b += ((uint32)ambFactor.B * ((uint32)lmcAmb.B + (lmcAmb.B >> 7))) >> 8;
 	}
+	r = std::min(r, (uint32)255);
+	g = std::min(g, (uint32)255);
+	b = std::min(b, (uint32)255);
+
+	// this color will be added to the first lightmap (with help of emissive)
+	CRGBA col((uint8)r,(uint8)g,(uint8)b,255);
+
+	// Lightmap factors
+	NLMISC::CRGBAF selfIllumination(col);
+	NLMISC::CRGBAF constant[IDRV_MAT_MAXTEXTURES];
 
 	// setup all stages.
-	for (uint stage= 0; stage<IDRV_MAT_MAXTEXTURES; stage++)
+	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 	{
-		// if must setup a lightmap stage.
-		if (stage<nstages-1)
+		// if must setup a lightmap stage
+		if (stage < nstages - 1) // last stage is user texture
 		{
 			// setup lightMap.
-			uint	whichLightMap= _LightMapLUT[lmapId];
+			uint whichLightMap = _LightMapLUT[lmapId];
 			// get text and factor.
-			ITexture *text	 = mat._LightMaps[whichLightMap].Texture;
+			ITexture *text = mat._LightMaps[whichLightMap].Texture;
 			CRGBA lmapFactor = mat._LightMaps[whichLightMap].Factor;
 			// Modulate the factor with LightMap compression Diffuse
 			CRGBA lmcDiff= mat._LightMaps[whichLightMap].LMCDiffuse;
@@ -761,20 +764,24 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 			lmapFactor.B = (uint8)(((uint32)lmapFactor.B  * ((uint32)lmcDiff.B+(lmcDiff.B>>7))) >>8);
 			lmapFactor.A = 255;
 
-			activateTexture(stage,text);
+			activateTexture(stage, text);
 
 			// If texture not NULL, Change texture env fonction.
 			//==================================================
 			if (text)
 			{
-				static CMaterial::CTexEnv	stdEnv;
+				// Setup env for texture stage.
+				setTexGenModeVP(stage, TexGenDisabled);
 
+				// FIXME GL3: builtin TexEnv[stage] = TexEnvSpecialLightMap
+
+				// Setup constant color with Lightmap factor.
+				constant[stage] = NLMISC::CRGBAF(lmapFactor);
+
+				/*static CMaterial::CTexEnv	stdEnv;
 				{
-					// Here, we are sure that texEnvCombine4 or texEnvCombine3 is OK.
-					// nlassert(_Extensions.ATITextureEnvCombine3);
-
 					// setup constant color with Lightmap factor.
-					stdEnv.ConstantColor=lmapFactor;
+					stdEnv.ConstantColor = lmapFactor;
 
 					int cl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
 					if (cl != -1)
@@ -786,36 +793,33 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 
 					// activateTexEnvColor(stage, stdEnv); // FIXME GL3
 
-					// Setup env for texture stage.
-					// setTexGenModeVP(stage, TexGenDisabled); // FIXME GL3
-
 					// setup TexEnvCombine4 (ignore alpha part).
 					/*if (_CurrentTexEnvSpecial[stage] != TexEnvSpecialLightMap)
 					{
 						// TexEnv is special.
 						_CurrentTexEnvSpecial[stage] = TexEnvSpecialLightMap;
 					}*/ // FIXME GL3
-				}
+				/*}*/
 			}
 
 			// Next lightmap.
 			lmapId++;
 		}
-		else if (stage<nstages)
+		else if (stage < nstages)
 		{
-			// optim: do this only for first pass, and last pass only if stage!=nLMapPerPass
+			// optim: do this only for first pass, and last pass only if stage != nLMapPerPass
 			// (meaning not the same stage as preceding passes).
-			if (pass==0 || (pass==_NLightMapPass-1 && stage!=_NLightMapPerPass))
+			if (pass == 0 || (pass == _NLightMapPass - 1 && stage != _NLightMapPerPass))
 			{
 				// activate the texture at last stage.
-				ITexture	*text= mat.getTexture(0);
-				activateTexture(stage,text);
+				ITexture *text = mat.getTexture(0);
+				activateTexture(stage, text);
 
 				// setup ModulateRGB/ReplaceAlpha env. (this may disable possible COMBINE4_NV setup).
-				// activateTexEnvMode(stage, _LightMapLastStageEnv); // FIXME GL3
+				// activateTexEnvMode(stage, _LightMapLastStageEnv); // SHADER BUILTIN
 
 				// Setup gen tex off
-				// setTexGenModeVP(stage, TexGenDisabled); // FIXME GL3
+				setTexGenModeVP(stage, TexGenDisabled);
 			}
 		}
 		else
@@ -894,6 +898,22 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		// _DriverGLStates.setDiffuse(packedColorBlack, glcolBlack);
 		// FIXME GL3 LIGHTMAP
 	}
+
+	// Setup the programs now
+	setupBuiltinPrograms();
+
+	// Set constants
+	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
+	{
+		uint constantIdx = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
+		if (constantIdx != ~0)
+		{
+			setUniform4f(IDriver::PixelProgram, constantIdx, constant[stage].R, constant[stage].G, constant[stage].B, constant[stage].A);
+		}
+	}
+
+	// Set self illumination
+	// FIXME GL3: selfIllumination
 }
 
 // ***************************************************************************

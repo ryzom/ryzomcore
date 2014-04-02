@@ -341,8 +341,36 @@ void ppSpecular(std::stringstream &ss, const CPPBuiltin &desc)
 	}
 	else
 	{
-		nlwarning("No textures defined in Specular shader");
+		nlwarning("PP: No textures defined in Specular shader");
 		// do nothing
+	}
+}
+
+void ppLightmap(std::stringstream &ss, const CPPBuiltin &desc)
+{
+	uint nstages;
+	for (nstages = 0; nstages < IDRV_MAT_MAXTEXTURES; ++nstages)
+		if (!useTex(desc, nstages))
+			break;
+	if (nstages == 0)
+	{
+		// do nothing
+		nlwarning("PP: Lightmap without textures setup");
+	}
+	else if (nstages == 1)
+	{
+		// single map (doesn't support alpha)
+		nlwarning("PP: Lightmap material without lightmaps setup %i %i %i %i", useTex(desc, 0), useTex(desc, 1), useTex(desc, 2), useTex(desc, 3));
+		ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl; // HACK FIXME GL3
+		ss << "fragColor = texel" << (nstages - 1) << " * fragColor;" << std::endl;
+	}
+	else
+	{
+		ss << "fragColor = vec4(1.0, 1.0, 1.0, 1.0);" << std::endl; // HACK FIXME GL3
+		ss << "vec4 lightmapop = vec4(0.0, 0.0, 0.0, 0.0);" << std::endl;
+		for (uint stage = 0; stage < (nstages - 1); ++stage)
+			ss << "lightmapop = lightmapop + texel" << stage << " * constant" << stage << " * texel" << (nstages - 1) << ";" << std::endl;
+		ss << "fragColor = fragColor * lightmapop;" << std::endl;
 	}
 }
 
@@ -451,8 +479,16 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		}
 		else if (useTex(desc, stage))
 		{
-			ss << "vec4 texel" << stage << " = texture(sampler" << stage << ", ";				
-			if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
+			ss << "vec4 texel" << stage << " = texture(sampler" << stage << ", ";	
+			if (desc.Shader == CMaterial::LightMap && stage != (maxTex - 1) && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord1]))
+			{
+				ss << g_AttribNames[TexCoord1];
+			}
+			else if (desc.Shader == CMaterial::LightMap && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0]))
+			{
+				ss << g_AttribNames[TexCoord0];
+			}
+			else if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
 			{
 				ss << g_AttribNames[TexCoord0 + stage];
 			}
@@ -478,6 +514,9 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		break;
 	case CMaterial::Specular:
 		ppSpecular(ss, desc);
+		break;
+	case CMaterial::LightMap:
+		ppLightmap(ss, desc);
 		break;
 	default:
 		nlwarning("GL3: Try to generate unknown shader type (%s)", s_ShaderNames[desc.Shader]);
@@ -559,6 +598,41 @@ void CPPBuiltin::checkDriverStateTouched(CDriverGL3 *driver) // MUST NOT depend 
 	}
 }
 
+void CPPBuiltin::checkDriverMaterialStateTouched(CDriverGL3 *driver, CMaterial &mat)
+{
+	CMaterial::TShader shader = getSupportedShader(mat.getShader());
+	switch (shader)
+	{
+	case CMaterial::LightMap:
+		// Use Textures from current driver state
+		// NB: Might be necessary to use this for every material type and remove the one from the other function
+		uint maxTex = maxTextures(shader);
+		uint8 textureActive = 0x00;
+		for (uint stage = 0; stage < maxTex; ++stage)
+		{
+			NL3D::ITexture *tex = driver->_CurrentTexture[stage];
+			if (tex)
+			{
+				textureActive |= (1 << stage);
+
+				uint8 texSamplerMode = tex->isTextureCube() ? SamplerCube : Sampler2D;
+				if (TexSamplerMode[stage] != texSamplerMode)
+				{
+					TexSamplerMode[stage] = texSamplerMode;
+					Touched = true;
+				}
+			}
+		}
+		if (TextureActive != textureActive)
+		{
+			TextureActive = textureActive;
+			Touched = true;
+		}
+		// nldebug("TextureActive: %i", TextureActive);
+		break;
+	}
+}
+
 void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on any state set by checkDriverStateTouched
 {
 	// Optimize
@@ -582,27 +656,34 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 	uint maxTex = maxTextures(shader);
 	if (touched & IDRV_TOUCHED_ALLTEX) // Note: There is a case where textures are provided where no texture coordinates are provided, this is handled gracefully by the pixel program generation (it will use a vec(0) texture coordinate). The inverse is an optimization issue
 	{
-		uint8 textureActive = 0x00;
-		for (uint stage = 0; stage < maxTex; ++stage)
+		switch (shader)
 		{
-			NL3D::ITexture *tex = mat._Textures[stage];
-			if (tex)
+		case CMaterial::LightMap:
+		default:
+			// Use textures directly from the CMaterial
+			uint8 textureActive = 0x00;
+			for (uint stage = 0; stage < maxTex; ++stage)
 			{
-				textureActive |= (1 << stage);
-
-				// Issue: Due to the IDRV_TOUCHED_ALLTEX check, the sampler mode of an ITexture cannot be modified after it has been added to the CMaterial
-				uint8 texSamplerMode = tex->isTextureCube() ? SamplerCube : Sampler2D;
-				if (TexSamplerMode[stage] != texSamplerMode)
+				NL3D::ITexture *tex = mat._Textures[stage];
+				if (tex)
 				{
-					TexSamplerMode[stage] = texSamplerMode;
-					Touched = true;
+					textureActive |= (1 << stage);
+
+					// Issue: Due to the IDRV_TOUCHED_ALLTEX check, the sampler mode of an ITexture cannot be modified after it has been added to the CMaterial
+					uint8 texSamplerMode = tex->isTextureCube() ? SamplerCube : Sampler2D;
+					if (TexSamplerMode[stage] != texSamplerMode)
+					{
+						TexSamplerMode[stage] = texSamplerMode;
+						Touched = true;
+					}
 				}
 			}
-		}
-		if (TextureActive != textureActive)
-		{
-			TextureActive = textureActive;
-			Touched = true;
+			if (TextureActive != textureActive)
+			{
+				TextureActive = textureActive;
+				Touched = true;
+			}
+			break;
 		}
 	}
 	if (useTexEnv(shader) && (touched & IDRV_TOUCHED_TEXENV))
