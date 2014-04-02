@@ -164,7 +164,7 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 		{
 			if (newMask & shiftMask) // user matrix for this stage
 			{
-				_UserTexMat[ k ] = mat.getUserTexMat(k);
+				_UserTexMat[k] = mat.getUserTexMat(k);
 				_UserTexMatEnabled |= shiftMask;
 			}
 			else
@@ -174,7 +174,7 @@ void CDriverGL3::setupUserTextureMatrix(uint numStages, CMaterial& mat)
 					(newMask & shiftMask) != (_UserTexMatEnabled & shiftMask)
 				  )
 				{
-					_UserTexMat[ k ].identity();
+					_UserTexMat[k].identity();
 					_UserTexMatEnabled &= ~shiftMask;
 				}
 			}
@@ -193,7 +193,7 @@ void CDriverGL3::disableUserTextureMatrix()
 		{
 			if (_UserTexMatEnabled & (1 << k)) // user matrix for this stage
 			{
-				_UserTexMat[ k ].identity();
+				_UserTexMat[k].identity();
 				_UserTexMatEnabled &= ~ (1 << k);
 			}
 			++k;
@@ -212,11 +212,6 @@ CMaterial::TShader	CDriverGL3::getSupportedShader(CMaterial::TShader shader)
 		return CMaterial::Normal; // FIXME GL3
 	case CMaterial::PerPixelLightingNoSpec:
 		return CMaterial::Normal; // FIXME GL3
-	// Lightmap and Specular work only if at least 2 text stages.
-	case CMaterial::LightMap:
-		return (inlGetNumTextStages() >= 2) ? CMaterial::LightMap : CMaterial::Normal;
-	case CMaterial::Specular:
-		return (inlGetNumTextStages() >= 2) ? CMaterial::Specular : CMaterial::Normal;
 	default:
 		return shader;
 	}
@@ -250,7 +245,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	}
 	pShader=static_cast<CMaterialDrvInfosGL3*>((IMaterialDrvInfos*)(mat._MatDrvInfo));
 
-	// 1. Setup modified fields of material.
+	// 1. Setup modified fields of material conversion cache (FIXME GL3)
 	//=====================================
 	if (touched)
 	{
@@ -318,7 +313,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			setupLightMapDynamicLighting(false);
 
 		// if new is lightmap, setup dynamic lighting
-		if (matShader==CMaterial::LightMap)
+		if (matShader == CMaterial::LightMap)
 			setupLightMapDynamicLighting(true);
 	}
 
@@ -327,7 +322,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 2. Setup / Bind Textures.
 	//==========================
-	// Must setup textures each frame. (need to test if touched).
+	// Must setup textures each frame, even when the same CMaterial applied. (need to test if touched).
 	// Must separate texture setup and texture activation in 2 "for"...
 	// because setupTexture() may disable all stage.
 	if (matShader != CMaterial::Water && matShader != CMaterial::Program)
@@ -382,6 +377,13 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			}
 		}
 	}
+	else if (matShader == CMaterial::Cloud)
+	{
+		activateTexture(0, mat.getTexture(0));
+		setTexGenModeVP(0, TexGenDisabled);
+		activateTexture(1, mat.getTexture(0));
+		setTexGenModeVP(1, TexGenDisabled);
+	}
 	else //if (matShader != CMaterial::Specular) // TEMP BUGFIX
 	{// TEMP BUGFIX
 		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
@@ -389,6 +391,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			setTexGenModeVP(stage, TexGenDisabled);
 		}
 	}// TEMP BUGFIX
+
 	if (matShader == CMaterial::Specular)
 	{
 		setTexGenModeVP(0, TexGenDisabled);
@@ -404,11 +407,11 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 3. Bind OpenGL States.
 	//=======================
-	if (_CurrentMaterial!=&mat)
+	if (_CurrentMaterial != &mat) // FIXME GL3: CMaterial may be touched...
 	{
 		// Bind Blend Part.
 		//=================
-		bool blend = (mat.getFlags()&IDRV_MAT_BLEND)!=0;
+		bool blend = (mat.getFlags() & IDRV_MAT_BLEND)!=0;
 		_DriverGLStates.enableBlend(blend);
 		if (blend)
 			_DriverGLStates.blendFunc(pShader->SrcBlend, pShader->DstBlend);
@@ -419,25 +422,13 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		uint32 twoSided = mat.getFlags() & IDRV_MAT_DOUBLE_SIDED;
 		_DriverGLStates.enableCullFace(twoSided == 0);
 
-
-		// Alpha Test Part.
-		//=================
-		/*uint32 alphaTest = mat.getFlags() & IDRV_MAT_ALPHA_TEST;
-		_DriverGLStates.enableAlphaTest(alphaTest);
-		if (alphaTest)
-		{
-			// setup alphaTest threshold.
-			_DriverGLStates.alphaFunc(mat.getAlphaTestThreshold());
-			// GL3 PART OF MATERIAL PARAMETERS
-		}*/
-
 		// Bind ZBuffer Part.
 		//===================
 		_DriverGLStates.enableZWrite(mat.getFlags() & IDRV_MAT_ZWRITE);
 		_DriverGLStates.depthFunc(pShader->ZComp);
 		_DriverGLStates.setZBias(mat.getZBias() * _OODeltaZ);
 
-		// Bind Stencil Buffer Part.
+		// Bind Stencil Buffer Part. // FIXME GL3: STENCIL TEST
 		//===================
 		/*
 		_DriverGLStates.enableStencilTest();
@@ -447,32 +438,11 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 		// Color-Lighting Part.
 		//=====================
-
 		// Light Part.
 		enableLightingVP(mat.getFlags() & IDRV_MAT_LIGHTING);
-		if (mat.getFlags()&IDRV_MAT_LIGHTING)
-		{
-			/*_DriverGLStates.setEmissive(pShader->PackedEmissive, pShader->Emissive);
-			_DriverGLStates.setAmbient(pShader->PackedAmbient, pShader->Ambient);
-			_DriverGLStates.setDiffuse(pShader->PackedDiffuse, pShader->Diffuse);
-			_DriverGLStates.setSpecular(pShader->PackedSpecular, pShader->Specular);
-			_DriverGLStates.setShininess(mat.getShininess());
-			_DriverGLStates.setVertexColorLighted(mat.isLightedVertexColor ());*/
-			// FIXME GL3 VERTEX COLOR VP
-		}
-		else
-		{
-			// Color unlit
-			// CRGBA	col= mat.getColor();
-			// glColor4ub(col.R, col.G, col.B, col.A);
-
-			// _DriverGLStates.setVertexColorLighted(false);
-			// FIXME GL3 VERTEX COLOR VP
-		}
 
 		// Fog Part.
 		//=================
-
 		// Disable fog if dest blend is ONE
 		if (blend && (pShader->DstBlend == GL_ONE))
 		{
@@ -484,12 +454,11 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			enableFogVP(_FogEnabled);
 		}
 
-		_CurrentMaterial=&mat;
+		_CurrentMaterial = &mat;
 	}
 
 	// 4. Misc
 	//=====================================
-
 	// Textures user matrix
 	if (matShader == CMaterial::Normal || matShader == CMaterial::Program)
 	{
@@ -523,12 +492,6 @@ sint			CDriverGL3::beginMultiPass()
 		return  beginPPLMultiPass();
 	case CMaterial::PerPixelLightingNoSpec:
 		return  beginPPLNoSpecMultiPass();
-	/* case CMaterial::Caustics:
-		return  beginCausticsMultiPass(); */
-	case CMaterial::Cloud:
-		return  beginCloudMultiPass();
-
-	// All others materials require just 1 pass.
 	default: 
 		return 1;
 	}
@@ -545,25 +508,22 @@ bool CDriverGL3::setupPass(uint pass)
 		setupNormalPass();
 		break;
 	case CMaterial::LightMap:
-		setupLightMapPass (pass);
+		setupLightMapPass(pass);
 		break;
 	case CMaterial::Specular:
-		setupSpecularPass (pass);
+		setupSpecularPass(pass);
 		break;
 	case CMaterial::Water:
 		setupWaterPass(pass);
 		break;
 	case CMaterial::PerPixelLighting:
-		setupPPLPass (pass);
+		setupPPLPass(pass);
 		break;
 	case CMaterial::PerPixelLightingNoSpec:
-		setupPPLNoSpecPass (pass);
+		setupPPLNoSpecPass(pass);
 		break;
-	/* case CMaterial::Caustics:
-		case CMaterial::Caustics:
-		break; */
 	case CMaterial::Cloud:
-		setupCloudPass (pass);
+		setupCloudPass();
 		break;
 	}
 
@@ -592,13 +552,6 @@ void			CDriverGL3::endMultiPass()
 	case CMaterial::PerPixelLightingNoSpec:
 		endPPLNoSpecMultiPass();
 		break;
-	/* case CMaterial::Caustics:
-		endCausticsMultiPass();
-		break; */
-	case CMaterial::Cloud:
-		endCloudMultiPass();
-		break;
-	// All others materials do not require multi pass.
 	default: return;
 	}
 }
@@ -609,15 +562,22 @@ void CDriverGL3::setupNormalPass()
 
 	const CMaterial &mat = *_CurrentMaterial;
 	
-	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
+	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 	{
-		// Set constants for TexEnv
-		uint cl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
-		if (cl != ~0)
+		// Set pixel program constants for TexEnv
+		uint constantIdx = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
+		if (constantIdx != ~0)
 		{
 			GLfloat glCol[4];
-			convColor(mat._TexEnvs[i].ConstantColor, glCol);
-			setUniform4f(IDriver::PixelProgram, cl, glCol[0], glCol[1], glCol[2], glCol[3]);
+			convColor(mat._TexEnvs[stage].ConstantColor, glCol);
+			setUniform4f(IDriver::PixelProgram, constantIdx, glCol[0], glCol[1], glCol[2], glCol[3]);
+		}
+
+		// Set vertex program constants for TexMatrix
+		uint texMatrixIdx = m_DriverVertexProgram->getUniformIndex((CProgramIndex::TName)(CProgramIndex::TexMatrix0 + stage));
+		if (texMatrixIdx != ~0)
+		{
+			setUniform4x4f(IDriver::VertexProgram, texMatrixIdx, _UserTexMat[stage]);
 		}
 	}
 }
@@ -663,7 +623,7 @@ sint CDriverGL3::beginLightMapMultiPass ()
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// compute how many lightmap and pass we must process.
-	computeLightMapInfos (mat);
+	computeLightMapInfos(mat);
 
 	// always enable lighting for lightmap (because of dynamic light)
 	enableLightingVP(true);
@@ -952,10 +912,6 @@ void			CDriverGL3::setupSpecularBegin()
 {
 	H_AUTO_OGL(CDriverGL3_setupSpecularBegin)
 
-	// Disable texGen for stage 0
-	// setTexGenModeVP(0, TexGenDisabled); // FIXME THIS IS NOT VALID HERE WHEN NOT IN BATCHING MODE!
-	// setTexGenModeVP(1, TexGenReflectionMap);
-
 	// setup the good matrix for stage 1.
 	_UserTexMat[1] = _SpecularTexMtx;
 }
@@ -981,8 +937,11 @@ sint			CDriverGL3::beginSpecularMultiPass()
 	if (!_SpecularBatchOn)
 		setupSpecularBegin();
 
-	// Setup programs
-	//setupBuiltinPrograms();
+	// Set shader values
+	// OPTIMIZE GL3: Only need to do this when program changed since it was last set
+	uint idx = m_DriverVertexProgram->getUniformIndex((CProgramIndex::TName)(CProgramIndex::TexMatrix1));
+	if (idx != ~0)
+		setUniform4x4f(IDriver::VertexProgram, idx, _UserTexMat[1]);
 
 	// Only need one pass for specular
 	return 1;
@@ -995,13 +954,6 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 	nlassert(m_DriverVertexProgram);
 
 	H_AUTO_OGL(CDriverGL3_setupSpecularPass)
-
-	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage) // Verify: Is it really only Specular that uses TexMatrix?
-	{
-		uint idx = m_DriverVertexProgram->getUniformIndex((CProgramIndex::TName)(CProgramIndex::TexMatrix0 + stage));
-		if (idx != ~0)
-			setUniform4x4f(IDriver::VertexProgram, idx, _UserTexMat[stage]);
-	}
 }
 
 // ***************************************************************************
@@ -1012,125 +964,6 @@ void			CDriverGL3::endSpecularMultiPass()
 	// End specular , only if not Batching mode.
 	if (!_SpecularBatchOn)
 		setupSpecularEnd();
-}
-
-// a functor that can is used to generate a cube map used for specular / diffuse lighting
-struct CSpecCubeMapFunctor : ICubeMapFunctor
-{
-	CSpecCubeMapFunctor(float exp) : Exp(exp) {}
-	virtual NLMISC::CRGBA operator()(const NLMISC::CVector &v)
-	{
-		H_AUTO_OGL(CSpecCubeMapFunctor_operator_parenthesis)
-		uint8 intensity = (uint8) (255.f * ::powf(std::max(v.normed().z, 0.f), Exp));
-		return NLMISC::CRGBA(intensity, intensity, intensity, intensity);
-		//return Exp == 1.f ? CRGBA((uint8)(v.x*127+127), (uint8)(v.y*127+127), (uint8)(v.z*127+127), 0): CRGBA::Black;
-	}
-	virtual ~CSpecCubeMapFunctor() {}
-	float Exp;
-};
-
-/* /// parameters for specular cube map generation
-const uint MaxSpecularExp = 64;
-const uint SpecularExpStep = 8;
-const uint SpecularMapSize = 32; */
-
-// ***************************************************************************
-CTextureCube	*CDriverGL3::getSpecularCubeMap(uint exp)
-{
-	H_AUTO_OGL(CDriverGL3__getSpecularCubeMap)
-	const uint DiffuseMapSize = 64;
-	const uint SpecularMapSize = 32;
-	const uint SpecularMapSizeHighExponent = 64;
-	const float HighExponent = 128.f;
-	const uint MaxExponent = 512;
-	// this gives the cube map to use given an exponent (from 0 to 128)
-	static uint16 expToCubeMap[MaxExponent];
-	// this gives the exponent used by a given cube map (not necessarily ordered)
-	static float cubeMapExp[] =
-	{
-		1.f, 4.f, 8.f, 24.f, 48.f, 128.f, 256.f, 511.f
-	};
-	const uint numCubeMap = sizeof(expToCubeMap) / sizeof(float);
-	static bool tableBuilt = false;
-
-	if (!tableBuilt)
-	{
-		for (uint k = 0; k < MaxExponent; ++k)
-		{
-			uint nearest = 0;
-			float diff = (float) MaxExponent;
-			// look for the nearest exponent
-			for (uint l = 0; l < numCubeMap; ++l)
-			{
-				float newDiff = ::fabsf(k - cubeMapExp[l]);
-				if (newDiff < diff)
-				{
-					diff = newDiff;
-					nearest = l;
-				}
-			}
-			expToCubeMap[k] = uint16(nearest);
-		}
-		tableBuilt = true;
-	}
-
-	if (_SpecularTextureCubes.empty())
-	{
-		_SpecularTextureCubes.resize(MaxExponent);
-	}
-
-	NLMISC::clamp(exp, 1u, (MaxExponent - 1));
-
-	uint cubeMapIndex = expToCubeMap[exp];
-	nlassert(cubeMapIndex < numCubeMap);
-
-	if (_SpecularTextureCubes[cubeMapIndex] != NULL) // has the cube map already been cted ?
-	{
-		return _SpecularTextureCubes[cubeMapIndex];
-	}
-	else // build the cube map
-	{
-		float exponent	  = cubeMapExp[cubeMapIndex];
-		CSpecCubeMapFunctor scmf(exponent);
-		const uint bufSize = 128;
-		char name[bufSize];
-		NLMISC::smprintf(name, bufSize, "#SM%d", cubeMapIndex);
-		CTextureCube *tc;
-		if (exponent == 1)
-		{
-			tc = BuildCubeMap(DiffuseMapSize,  scmf, false, name);
-		}
-		else
-		{
-			tc = BuildCubeMap(exponent >= HighExponent ? SpecularMapSizeHighExponent
-													  : SpecularMapSize,
-							  scmf,
-							  false,
-							  name);
-		}
-
-		static const CTextureCube::TFace numToFace[] =
-		{ CTextureCube::positive_x,
-		  CTextureCube::negative_x,
-		  CTextureCube::positive_y,
-		  CTextureCube::negative_y,
-		  CTextureCube::positive_z,
-		  CTextureCube::negative_z
-		};
-
-		if (exponent != 1.f)
-		{
-			// force 16 bit for specular part, 32 bit if exponent is 1 (diffuse part)
-			for (uint k = 0; k < 6; ++k)
-			{
-				nlassert(tc->getTexture(numToFace[k]));
-				tc->getTexture(numToFace[k])->setUploadFormat(ITexture::RGB565);
-			}
-		}
-
-		_SpecularTextureCubes[cubeMapIndex] = tc;
-		return tc;
-	}
 }
 
 // ***************************************************************************
@@ -1154,24 +987,24 @@ void			CDriverGL3::setupPPLPass(uint pass)
 
 	nlassert(pass == 0);
 
-	ITexture *tex0 = getSpecularCubeMap(1);
+	/*ITexture *tex0 = getSpecularCubeMap(1);
 	if (tex0) setupTexture(*tex0);
 	ITexture *tex2 = getSpecularCubeMap((uint) mat.getShininess());
 	if (tex2) setupTexture(*tex2);
-	if (mat.getTexture(0)) setupTexture(*mat.getTexture(0));
+	if (mat.getTexture(0)) setupTexture(*mat.getTexture(0));*/
 
 	// tex coord 0 = texture coordinates
 	// tex coord 1 = normal in tangent space
 	// tex coord 2 = half angle vector in tangent space
 
-	activateTexture(0, tex0);
+	/*activateTexture(0, tex0);
 	activateTexture(1, mat.getTexture(0));
-	activateTexture(2, tex2);
+	activateTexture(2, tex2);*/
 
-	for (uint k = 3; k < inlGetNumTextStages(); ++k)
+	/*for (uint k = 3; k < inlGetNumTextStages(); ++k)
 	{
 		activateTexture(k, NULL);
-	}
+	}*/
 
 	// setup the tex envs
 
@@ -1217,21 +1050,21 @@ void			CDriverGL3::setupPPLNoSpecPass(uint pass)
 
 	nlassert(pass == 0);
 
-	ITexture *tex0 = getSpecularCubeMap(1);
+/*	ITexture *tex0 = getSpecularCubeMap(1);
 	if (tex0) setupTexture(*tex0);
 
-	if (mat.getTexture(0)) setupTexture(*mat.getTexture(0));
+	if (mat.getTexture(0)) setupTexture(*mat.getTexture(0));*/
 
 	// tex coord 0 = texture coordinates
 	// tex coord 1 = normal in tangent space
 
-	activateTexture(0, tex0);
+/*	activateTexture(0, tex0);
 	activateTexture(1, mat.getTexture(0));
-
-	for (uint k = 2; k < inlGetNumTextStages(); ++k)
+*/
+	/*for (uint k = 2; k < inlGetNumTextStages(); ++k)
 	{
 		activateTexture(k, NULL);
-	}
+	}*/
 
 	// setup the tex envs
 
@@ -1254,106 +1087,9 @@ void			CDriverGL3::endPPLNoSpecMultiPass()
 }
 
 // ***************************************************************************
-/* sint		CDriverGL3::beginCausticsMultiPass(const CMaterial &mat)
-{
-	nlassert(mat.getShader() == CMaterial::Caustics);
-	if (!_Extensions.ARBTextureCubeMap) return 1;
-	switch (inlGetNumTextStages())
-	{
-		case 1: return 3;
-		case 2: return 2;
-		default:
-				return 1;
-	}
-}*/
-
-// ***************************************************************************
-/*inline void		CDriverGL3::setupCausticsFirstTex(const CMaterial &mat)
-{
-	/// setup texture 0
-	activateTexture(0, mat.getTexture(0));
-
-	/// texture environment 0
-	setTexGenFunction(0, mat);
-
-	/// texture matrix 0
-	setupUserTextureMatrix(0, mat);
-}
-
-// ***************************************************************************
-inline void		CDriverGL3::setupCausticsSecondTex(uint stage)
-{
-	activateTexture(stage, mat.getTexture(0));
-	_CausticCubeMap
-}
-
-// ***************************************************************************
-void		CDriverGL3::setupCausticsPass(const CMaterial &mat, uint pass)
-{
-	nlassert(mat.getShader() == CMaterial::Caustics);
-
-	if (inlGetNumTextStages() == 1 || !_Extensions.ARBTextureCubeMap)
-	{
-		setupCausticsFirstTex(mat);
-	}
-	else
-	if (inlGetNumTextStages() >= 3) /// do it in one pass
-	{
-		nlassert(pass == 0);
-
-		setupCausticsFirstTex(mat);
-	}
-	else if (inlGetNumTextStages() == 2) /// do in in 2 pass
-	{
-		nlassert(pass < 2);
-		if (pass == 0)
-		{
-			setupCausticsFirstTex(mat);
-		}
-		else /// caustics setup
-		{
-			/// setup additif blending
-			_DriverGLStates.enableBlend();
-			_DriverGLStates.blendFunc(pShader->SrcBlend, pShader->DstBlend);
-		}
-	}
-}
-
-// ***************************************************************************
-void		CDriverGL3::endCausticsMultiPass(const CMaterial &mat)
-{
-	nlassert(mat.getShader() == CMaterial::Caustics);
-
-}
-*/
-
-// ***************************************************************************
-sint		CDriverGL3::beginCloudMultiPass ()
-{
-	H_AUTO_OGL(CDriverGL3_beginCloudMultiPass)
-	
-	//setupBuiltinPrograms(); // FIXME GL3
-
-	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
-	return 1;
-}
-
-// ***************************************************************************
-void		CDriverGL3::setupCloudPass (uint /* pass */)
+void		CDriverGL3::setupCloudPass()
 {
 	H_AUTO_OGL(CDriverGL3_setupCloudPass)
-	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
-
-	const CMaterial &mat= *_CurrentMaterial;
-
-	activateTexture(0, mat.getTexture(0));
-	activateTexture(1, mat.getTexture(0));
-}
-
-// ***************************************************************************
-void		CDriverGL3::endCloudMultiPass()
-{
-	H_AUTO_OGL(CDriverGL3_endCloudMultiPass)
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 }
 
@@ -1437,8 +1173,6 @@ void CDriverGL3::endWaterMultiPass()
 	H_AUTO_OGL(CDriverGL3_endWaterMultiPass);
 
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
-	// NB : as fragment shaders / programs bypass the texture envs, no special env enum is added (c.f CTexEnvSpecial)
-
 }
 
 #ifdef NL_STATIC

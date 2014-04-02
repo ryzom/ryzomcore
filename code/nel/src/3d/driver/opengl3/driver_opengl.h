@@ -1104,15 +1104,6 @@ private:
 
 	typedef NLMISC::CSmartPtr<CTextureCube> TSPTextureCube;
 	typedef std::vector<TSPTextureCube> TTexCubeVect;
-	TTexCubeVect   _SpecularTextureCubes; // the cube maps used to compute the specular lighting.
-
-
-	/// get (and if necessary, build) a cube map used for specular lighting. The range for exponent is limited, and only the best fit is used
-	CTextureCube   *getSpecularCubeMap(uint exp);
-
-	// get (and if necessary, build) the cube map used for diffuse lighting
-	CTextureCube   *getDiffuseCubeMap() { return getSpecularCubeMap(1); }
-
 
 
 	// @}
@@ -1125,9 +1116,7 @@ private:
 	// @}
 
 	/// \name Cloud Shader
-	sint			beginCloudMultiPass ();
-	void			setupCloudPass (uint pass);
-	void			endCloudMultiPass ();
+	void			setupCloudPass();
 	// @}
 
 
