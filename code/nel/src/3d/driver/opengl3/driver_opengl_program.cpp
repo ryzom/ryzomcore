@@ -629,10 +629,10 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 	desc.setLighting(/*enableLights && mat.isLighted() &&*/ m_VPBuiltinCurrent.Lighting);			
 }
 
-bool CDriverGL3::setupBuiltinPrograms(CMaterial &mat)
+bool CDriverGL3::setupBuiltinPrograms()
 {
 	return setupBuiltinVertexProgram()
-		&& setupBuiltinPixelProgram(mat)
+		&& setupBuiltinPixelProgram()
 		&& setupUniforms();
 }
 
@@ -657,10 +657,12 @@ bool CDriverGL3::setupBuiltinVertexProgram()
 	return true;
 }
 
-bool CDriverGL3::setupBuiltinPixelProgram(CMaterial &mat)
+bool CDriverGL3::setupBuiltinPixelProgram()
 {
 	if (m_UserPixelProgram) return true;
 
+	nlassert(_CurrentMaterial);
+	CMaterial &mat = *_CurrentMaterial;
 	CMaterialDrvInfosGL3 *matDrv = static_cast<CMaterialDrvInfosGL3 *>((IMaterialDrvInfos *)(mat._MatDrvInfo));
 	nlassert(matDrv);
 
@@ -680,219 +682,6 @@ bool CDriverGL3::setupBuiltinPixelProgram(CMaterial &mat)
 	// GL3 TODO: Here we set the uniforms of the vertex program!
 
 	return true;
-
-
-#if 0
-	// nlassert(!m_UserVertexProgram); // TEMP
-	// nlassert(!m_UserPixelProgram); // TEMP
-
-	if (mat.getDynMat() != NULL)
-		return true;
-	
-	// CVertexProgram *vp = NULL; // REMOVED
-	CPixelProgram *pp = NULL;
-	SShaderPair sp;
-
-	CShaderDesc desc;
-
-	generateShaderDesc(desc, mat);
-
-	// See if we've already generated and compiled this shader
-	sp = shaderCache.findShader(desc);
-
-	// Yes we have!
-	if (!sp.empty())
-	{
-		/*if (m_UserVertexProgram == NULL)
-		{
-			if (!activeVertexProgram(sp.vp, true))
-				return false;
-		}*/
-
-		if (m_UserPixelProgram == NULL)
-		{
-			if (!activePixelProgram(sp.pp, true))
-				return false;
-		}
-	}
-	// No we need to generate it now
-	else
-	{
-		// std::string vs;
-		std::string ps;
-		bool cacheShaders = true;
-
-		shaderGenerator->reset();
-		shaderGenerator->setMaterial(&mat);
-		shaderGenerator->setShaderDesc(&desc);
-		
-		// If we don't already have a vertex program attached, we'll generate it now
-		/* if (m_UserVertexProgram == NULL)
-		{
-			shaderGenerator->generateVS(vs);
-			vp = new CVertexProgram();
-			{
-				IProgram::CSource *src = new IProgram::CSource();
-				src->Profile = IProgram::glsl330v;
-				src->DisplayName = "";
-				src->setSource(vs);
-				vp->addSource(src);
-			}
-
-			if (!compileVertexProgram(vp))
-			{
-				delete vp;
-				vp = NULL;
-				return false;
-			}
-
-			if (!activeVertexProgram(vp, true))
-			{
-				delete vp;
-				vp = NULL;
-				return false;
-			}
-		}
-		else
-			cacheShaders = false;
-		*/
-	
-		// If we don't already have a pixel program attached, we'll generate it now
-		if (m_UserPixelProgram == NULL)
-		{
-			shaderGenerator->generatePS(ps);
-			pp = new CPixelProgram();
-			{
-				IProgram::CSource *src = new IProgram::CSource();
-				src->Profile = IProgram::glsl330f;
-				src->DisplayName = "";
-				src->setSource(ps);
-				pp->addSource(src);
-			}
-		
-			if (!compilePixelProgram(pp))
-			{
-				// delete vp;
-				// vp = NULL;
-				delete pp;
-				pp = NULL;
-				return false;
-			}
-
-			if (!activePixelProgram(pp, true))
-			{
-				// delete vp;
-				// vp = NULL;
-				delete pp;
-				pp = NULL;
-				return false;
-			}
-		}
-		else
-			cacheShaders = false;
-
-	
-		// If we already have a shader attached we won't cache this shaderpair, since we didn't generate it
-		if (cacheShaders)
-		{
-			sp.vp = NULL;
-			sp.pp = pp;
-			desc.setShaders(sp);
-			shaderCache.cacheShader(desc);
-		}
-	}
-
-	return true;
-#endif
-}
-
-bool CDriverGL3::setupDynMatProgram(CMaterial& mat, uint pass)
-{
-	/*
-	if ((currentProgram.vp != NULL) && (currentProgram.pp != NULL))
-		return true;
-
-	CDynMaterial *m = mat.getDynMat();
-	const SRenderPass *rp = m->getPass(pass);
-	std::string shaderRef;
-	rp->getShaderRef(shaderRef);
-
-	NL3D::CUsrShaderProgram prg;
-
-	if (!usrShaderManager->getShader(shaderRef, &prg))
-		return false;
-	
-	std::string shaderSource;
-	std::string log;
-	std::string name;
-
-	if (currentProgram.vp == NULL)
-	{
-		prg.getVP(shaderSource);
-		prg.getName(name);
-
-		CVertexProgram *vp = new CVertexProgram();		
-		{
-			IProgram::CSource *src = new IProgram::CSource();
-			src->Profile = IProgram::glsl330v;			
-			src->DisplayName = name;
-			src->setSource(shaderSource.c_str());
-			vp->addSource(src);
-		}
-	
-		if (!compileVertexProgram(vp))
-		{
-			delete vp;
-			return false;
-		}
-
-		if (!activeVertexProgram(vp))
-		{
-			delete vp;
-			return false;
-		}
-
-		if (currentProgram.dynmatVP != NULL)
-			delete currentProgram.dynmatVP;
-		currentProgram.dynmatVP = vp;
-
-	}
-
-	if (currentProgram.pp == NULL)
-	{
-	
-		CPixelProgram *pp = new CPixelProgram();
-
-		prg.getFP(shaderSource);
-		{
-			IProgram::CSource *src = new IProgram::CSource();
-			src->Profile = IProgram::glsl330f;			
-			src->DisplayName = name;
-			src->setSource(shaderSource.c_str());
-			pp->addSource(src);
-		}
-	
-		if (!compilePixelProgram(pp))
-		{
-			delete pp;
-			return false;
-		}
-
-		if (!activePixelProgram(pp))
-		{
-			delete pp;
-			return false;
-		}
-
-		if (currentProgram.dynmatPP != NULL)
-			delete currentProgram.dynmatPP;
-		currentProgram.dynmatPP = pp;
-
-	}
-
-	return true;
-	*/
-	return false;
 }
 
 bool CDriverGL3::setupUniforms()
@@ -1055,27 +844,6 @@ void CDriverGL3::setupUniforms(TProgram program)
 	if (selfIlluminationId != -1)
 	{
 		nglProgramUniform4f(progId, selfIlluminationId, selfIllumination.R, selfIllumination.G, selfIllumination.B, 0.0f);
-	}
-
-	// Lightmaps have special constants
-	if (mat.getShader() == CMaterial::Normal
-		|| mat.getShader() == CMaterial::UserColor)
-	{
-		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
-		{
-			int cl = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
-			if (cl != -1)
-			{
-				CRGBA col = mat._TexEnvs[stage].ConstantColor;
-				GLfloat glCol[4];
-				glCol[0] = col.R / 255.0f;
-				glCol[1] = col.G / 255.0f;
-				glCol[2] = col.B / 255.0f;
-				glCol[3] = col.A / 255.0f;
-
-				nglProgramUniform4f(progId, cl, glCol[0], glCol[1], glCol[2], glCol[3]);
-			}
-		}
 	}
 }
 

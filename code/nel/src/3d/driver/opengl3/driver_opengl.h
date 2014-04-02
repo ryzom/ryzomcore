@@ -352,7 +352,7 @@ public:
 	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
 
 	/// Setup texture env functions. Used by setupMaterial
-	void					setTextureEnvFunction(uint stage, CMaterial& mat);
+	void					setTexGenFunction(uint stage, CMaterial& mat);
 
 	/// setup the texture matrix for a given number of stages (starting from 0)
 	void					setupUserTextureMatrix(uint numStages, CMaterial& mat);
@@ -368,10 +368,9 @@ public:
 
 	virtual bool			setupMaterial(CMaterial& mat);
 	void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
-	bool					setupBuiltinPrograms(CMaterial& mat);
+	bool					setupBuiltinPrograms();
 	bool					setupBuiltinVertexProgram();
-	bool					setupBuiltinPixelProgram(CMaterial& mat);
-	bool					setupDynMatProgram(CMaterial& mat, uint pass);
+	bool					setupBuiltinPixelProgram();
 	bool					setupUniforms();
 	void					setupUniforms(TProgram program);
 	void					setupInitialUniforms(IProgram *program);
@@ -904,7 +903,7 @@ private:
 	// @{
 
 	// Special Texture environnements.
-	enum	CTexEnvSpecial {
+	/*enum	CTexEnvSpecial {
 		TexEnvSpecialDisabled= 0,
 		TexEnvSpecialLightMap,
 		TexEnvSpecialSpecularStage1,
@@ -913,7 +912,7 @@ private:
 		TexEnvSpecialPPLStage2,
 		TexEnvSpecialCloudStage0,
 		TexEnvSpecialCloudStage1
-	};
+	};*/
 
 	// NB: CRefPtr are not used for mem/spped optimisation. setupMaterial() and setupTexture() reset those states.
 	CMaterial*				_CurrentMaterial;
@@ -924,9 +923,9 @@ private:
 	ITexture*				_CurrentTexture[IDRV_MAT_MAXTEXTURES];
 
 	CTextureDrvInfosGL3*		_CurrentTextureInfoGL[IDRV_MAT_MAXTEXTURES];
-	CMaterial::CTexEnv		_CurrentTexEnv[IDRV_MAT_MAXTEXTURES];
+	//CMaterial::CTexEnv		_CurrentTexEnv[IDRV_MAT_MAXTEXTURES];
 	// Special Texture Environnement.
-	CTexEnvSpecial			_CurrentTexEnvSpecial[IDRV_MAT_MAXTEXTURES];
+	//CTexEnvSpecial			_CurrentTexEnvSpecial[IDRV_MAT_MAXTEXTURES];
 	// Texture addressing mode
 	GLenum					_CurrentTexAddrMode[IDRV_MAT_MAXTEXTURES];
 	// Anisotropic filtering value
@@ -992,23 +991,23 @@ private:
 	// Activate Texture Environnement. Do it with caching.
 	bool					activateTexture(uint stage, ITexture *tex);
 	// NB: this test _CurrentTexEnv[] and _CurrentTexEnvSpecial[].
-	void					activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env);
-	void					activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env);
+	//void					activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env);
+	//void					activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env);
 	// Force Activate Texture Environnement. no caching here. TexEnvSpecial is disabled.
-	void					forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env);
-	void					activateTexEnvColor(uint stage, NLMISC::CRGBA col);
+	//void					forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env);
+	//void					activateTexEnvColor(uint stage, NLMISC::CRGBA col);
 	
-	void					forceActivateTexEnvColor(uint stage, NLMISC::CRGBA col)
+	/*void					forceActivateTexEnvColor(uint stage, NLMISC::CRGBA col)
 	{
 		static	const float	OO255= 1.0f/255;
 		_CurrentTexEnv[stage].ConstantColor= col;
-	}
-
+	}*/
+/*
 	void					forceActivateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 	{
 		H_AUTO_OGL(CDriverGL3_forceActivateTexEnvColor)
 		forceActivateTexEnvColor(stage, env.ConstantColor);
-	}
+	}*/
 
 	// According to extensions, retrieve GL tex format of the texture.
 	GLint					getGlTextureFormat(ITexture& tex, bool &compressed);

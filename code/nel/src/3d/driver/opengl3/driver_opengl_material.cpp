@@ -113,26 +113,17 @@ static inline void convTexAddr(ITexture *tex, CMaterial::TTexAddressingMode mode
 }
 
 // --------------------------------------------------
-void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
+void CDriverGL3::setTexGenFunction(uint stage, CMaterial& mat)
 {
-	H_AUTO_OGL(CDriverGL3_setTextureEnvFunction)
-	ITexture	*text= mat.getTexture(uint8(stage));
+	H_AUTO_OGL(CDriverGL3_setTexGenFunction)
+	ITexture *text = mat.getTexture(uint8(stage));
 	if (text)
 	{
-		CMaterial::CTexEnv	&env= mat._TexEnvs[stage];
-
-		// Activate the env for this stage.
-		// NB: Thoses calls use caching.
-		activateTexEnvMode(stage, env);
-		activateTexEnvColor(stage, env);
-
-		// Activate texture generation mapping
-		//_DriverGLStates.activeTexture(stage);
 		if (mat.getTexCoordGen(stage))
 		{
 			// set mode and enable.
-			CMaterial::TTexCoordGenMode	mode= mat.getTexCoordGenMode(stage);
-			if (mode==CMaterial::TexCoordGenReflect)
+			CMaterial::TTexCoordGenMode	mode = mat.getTexCoordGenMode(stage);
+			if (mode == CMaterial::TexCoordGenReflect)
 			{
 				// Cubic or normal ?
 				if (text->isTextureCube())
@@ -140,11 +131,11 @@ void CDriverGL3::setTextureEnvFunction(uint stage, CMaterial& mat)
 				else
 					setTexGenModeVP(stage, TexGenSphereMap);
 			}
-			else if (mode==CMaterial::TexCoordGenObjectSpace)
+			else if (mode == CMaterial::TexCoordGenObjectSpace)
 			{
 				setTexGenModeVP(stage, TexGenObjectLinear);
 			}
-			else if (mode==CMaterial::TexCoordGenEyeSpace)
+			else if (mode == CMaterial::TexCoordGenEyeSpace)
 			{
 				setTexGenModeVP(stage, TexGenEyeLinear);
 			}
@@ -240,7 +231,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	CMaterial::TShader matShader;
 	GLenum		glenum = GL_ZERO;
 	uint32		touched = mat.getTouched();
-	uint		stage;
 
 	// profile.
 	_NbSetupMaterialCall++;
@@ -315,15 +305,8 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 2b. User supplied pixel shader overrides material
 	//==================================
-	if (m_UserPixelProgram)
-	{
-		matShader = CMaterial::Program;
-	}
-	else
-	{
-		// Now we can get the supported shader from the cache.
-		matShader = pShader->SupportedShader;
-	}
+	// Now we can get the supported shader from the cache.
+	matShader = pShader->SupportedShader;
 
 	// 2b. Update more shader state
 	//==================================
@@ -349,9 +332,9 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// because setupTexture() may disable all stage.
 	if (matShader != CMaterial::Water && matShader != CMaterial::Program)
 	{
-		for (stage=0 ; stage<inlGetNumTextStages() ; stage++)
+		for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
 		{
-			ITexture	*text= mat.getTexture(uint8(stage));
+			ITexture *text = mat.getTexture(uint8(stage));
 			if (text != NULL && !setupTexture(*text))
 				return false;
 		}
@@ -359,11 +342,11 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// Here, for Lightmap materials, setup the lightmaps.
 	if (matShader == CMaterial::LightMap)
 	{
-		for (stage = 0; stage < mat._LightMaps.size(); stage++)
+		for (uint stage = 0; stage < mat._LightMaps.size(); stage++)
 		{
 			ITexture *text = mat._LightMaps[stage].Texture;
 			if (text != NULL && !setupTexture(*text))
-				return(false);
+				return false;
 		}
 	}
 
@@ -376,23 +359,27 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// Activate the textures.
 	// Do not do it for Lightmap and per pixel lighting , because done in multipass in a very special fashion.
 	// This avoid the useless multiple change of texture states per lightmapped object.
-	// Don't do it also for Specular because the EnvFunction and the TexGen may be special.
 	if (matShader != CMaterial::LightMap
 		&& matShader != CMaterial::PerPixelLighting
 		/* && matShader != CMaterial::Caustics	*/
 		&& matShader != CMaterial::Cloud
 		&& matShader != CMaterial::Water
-		&& matShader != CMaterial::Specular
 		&& matShader != CMaterial::Program
 	  )
 	{
-		for (stage=0 ; stage<inlGetNumTextStages() ; stage++)
+		uint maxTex = matShader == CMaterial::Specular ? 2 : inlGetNumTextStages();
+		for (uint stage = 0; stage < maxTex; ++stage)
 		{
-			ITexture	*text= mat.getTexture(uint8(stage));
+			ITexture *text = mat.getTexture(uint8(stage));
 
 			// activate the texture, or disable texturing if NULL.
-			activateTexture(stage,text);
-
+			activateTexture(stage, text);
+			
+			// Specular has it's own env function setup by startSpecularBatch
+			if (matShader != CMaterial::Specular)
+			{
+				setTexGenFunction(stage, mat);
+			}
 		}
 	}
 
@@ -497,7 +484,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 
 	// 5. Set up the program
 	// =====================
-	return setupBuiltinPrograms(mat);
+	return setupBuiltinPrograms();
 }
 
 // ***************************************************************************
@@ -524,7 +511,8 @@ sint			CDriverGL3::beginMultiPass()
 		return  beginCloudMultiPass();
 
 	// All others materials require just 1 pass.
-	default: return 1;
+	default: 
+		return 1;
 	}
 }
 
@@ -597,132 +585,21 @@ void			CDriverGL3::endMultiPass()
 	}
 }
 
-bool CDriverGL3::setupDynMatPass(uint pass)
-{
-	return false;
-
-/*
-	if (!setupDynMatProgram(*_CurrentMaterial, pass))
-		return false;
-	
-	if ((_CurrentMaterial->getFlags() & IDRV_MAT_DOUBLE_SIDED) != 0)
-		_DriverGLStates.enableCullFace(false);
-	else
-		_DriverGLStates.enableCullFace(true);
-
-	CDynMaterial *m = _CurrentMaterial->getDynMat();
-	SRenderPass *currentPass = m->getPass(pass);
-
-	IProgram *p;
-
-	IProgram* programs[ 2 ];
-	programs[ 0 ] = currentProgram.vp;
-	programs[ 1 ] = currentProgram.pp;
-	
-	IDriver::TProgram type[ 2 ];
-	type[ 0 ] = IDriver::VertexProgram;
-	type[ 1 ] = IDriver::PixelProgram;
-
-	for (uint32 j = 0; j < 2; j++)
-	{
-		p = programs[ j ];
-
-		for (uint32 i = 0; i < currentPass->count(); i++)
-		{
-			const SDynMaterialProp *prop = currentPass->getProperty(i);		
-			int loc = getUniformLocation(type[ j ], prop->prop.c_str());
-			if (loc == -1)
-				continue;
-
-			switch(prop->type)
-			{
-			case SDynMaterialProp::Float:
-				setUniform1f(type[ j ], loc, prop->value.toFloat());
-				break;
-
-			case SDynMaterialProp::Int:
-				setUniform1i(type[ j ], loc, prop->value.toInt());
-				break;
-
-			case SDynMaterialProp::Uint:
-				setUniform1ui(type[ j ], loc, prop->value.toUInt());
-				break;
-
-			case SDynMaterialProp::Color:
-				{
-					float v[ 4 ];
-					prop->value.getVector4(v);
-				
-					for (int k = 0; k < 4; k++)
-						v[ k ] = v[ k ] / 255.0f;
-				
-					setUniform4f(type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ]);
-				}
-				break;
-
-			case SDynMaterialProp::Vector4:
-				{
-					float v[ 4 ];
-					prop->value.getVector4(v);
-					setUniform4f(type[ j ], loc, v[ 0 ], v[ 1 ], v[ 2 ], v[ 3 ]);
-				}
-				break;
-
-			case SDynMaterialProp::Matrix4:
-				{
-					float m[ 16 ];
-					prop->value.getMatrix4(m);
-					setUniform4x4f(type[ j ], loc, m);
-					break;
-				}
-
-			case SDynMaterialProp::Texture:
-				break;
-			}
-		}
-
-		////////////////////////////////// Set up some standard uniforms //////////////////////////////////
-
-		int loc = -1;
-		loc = getUniformLocation(type[ j ], "mvpMatrix");
-		if (loc != -1)
-		{
-			CMatrix mat = _GLProjMat * _ModelViewMatrix;
-			setUniform4x4f(type[ j ], loc, mat);
-		}
-
-		loc = getUniformLocation(type[ j ], "mvMatrix");
-		if (loc != -1)
-		{
-			setUniform4x4f(type[ j ], loc, _ModelViewMatrix);
-		}
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	}
-
-	return true;
-	*/
-}
-
 void CDriverGL3::setupNormalPass()
 {
 	nlassert(m_DriverPixelProgram);
 
 	const CMaterial &mat = *_CurrentMaterial;
 	
-	for (int i = 0; i < _Extensions.NbFragmentTextureUnits; i++)
+	for (int i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 	{
-		if (!m_UserPixelProgram)
+		// Set constants for TexEnv
+		uint cl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
+		if (cl != ~0)
 		{
-			// Set constant
-			int cl = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + i));
-			if (cl != -1)
-			{
-				GLfloat glCol[ 4 ];
-				convColor(mat._TexEnvs[ i ].ConstantColor, glCol);
-				setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
-			}
+			GLfloat glCol[4];
+			convColor(mat._TexEnvs[i].ConstantColor, glCol);
+			setUniform4f(IDriver::PixelProgram, cl, glCol[0], glCol[1], glCol[2], glCol[3]);
 		}
 	}
 }
@@ -762,6 +639,9 @@ void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 sint CDriverGL3::beginLightMapMultiPass ()
 {
 	H_AUTO_OGL(CDriverGL3_beginLightMapMultiPass)
+
+	//setupBuiltinPrograms(); // FIXME GL3
+
 	const CMaterial &mat= *_CurrentMaterial;
 
 	// compute how many lightmap and pass we must process.
@@ -811,8 +691,8 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		activateTexture(0,text);
 
 		// setup std modulate env
-		CMaterial::CTexEnv	env;
-		activateTexEnvMode(0, env);
+		//CMaterial::CTexEnv	env;
+		//activateTexEnvMode(0, env); // FIXME GL3
 
 		// Since Lighting is disabled, as well as colorArray, must setup alpha.
 		// setup color to 0 => blackness. in emissive cause texture can still be lighted by dynamic light
@@ -820,7 +700,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		// FIXME GL3 LIGHTMAP
 
 		// Setup gen tex off
-		setTexGenModeVP(0, TexGenDisabled);
+		// setTexGenModeVP(0, TexGenDisabled); // FIXME GL3
 
 		// And disable other stages.
 		for (uint stage = 1; stage < inlGetNumTextStages(); stage++)
@@ -913,17 +793,17 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 						setUniform4f(IDriver::PixelProgram, cl, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 					}
 
-					activateTexEnvColor(stage, stdEnv);
+					// activateTexEnvColor(stage, stdEnv); // FIXME GL3
 
 					// Setup env for texture stage.
-					setTexGenModeVP(stage, TexGenDisabled);
+					// setTexGenModeVP(stage, TexGenDisabled); // FIXME GL3
 
 					// setup TexEnvCombine4 (ignore alpha part).
-					if (_CurrentTexEnvSpecial[stage] != TexEnvSpecialLightMap)
+					/*if (_CurrentTexEnvSpecial[stage] != TexEnvSpecialLightMap)
 					{
 						// TexEnv is special.
 						_CurrentTexEnvSpecial[stage] = TexEnvSpecialLightMap;
-					}
+					}*/ // FIXME GL3
 				}
 			}
 
@@ -941,10 +821,10 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 				activateTexture(stage,text);
 
 				// setup ModulateRGB/ReplaceAlpha env. (this may disable possible COMBINE4_NV setup).
-				activateTexEnvMode(stage, _LightMapLastStageEnv);
+				// activateTexEnvMode(stage, _LightMapLastStageEnv); // FIXME GL3
 
 				// Setup gen tex off
-				setTexGenModeVP(stage, TexGenDisabled);
+				// setTexGenModeVP(stage, TexGenDisabled); // FIXME GL3
 			}
 		}
 		else
@@ -1053,31 +933,9 @@ void			CDriverGL3::endSpecularBatch()
 void			CDriverGL3::setupSpecularBegin()
 {
 	H_AUTO_OGL(CDriverGL3_setupSpecularBegin)
-	// ---- Reset any textures with id>=2
-	uint stage = 2;
-	for (; stage < inlGetNumTextStages(); stage++)
-	{
-		// disable texturing
-		activateTexture(stage, NULL);
-	}
-
-	// ---- Stage 0 Common Setup.
-	// Setup the env for stage 0 only.
-	// Result RGB : Texture*Diffuse, Alpha : Texture
-	CMaterial::CTexEnv	env;
-	env.Env.OpAlpha= CMaterial::Replace;
-	activateTexEnvMode(0, env);
 
 	// Disable texGen for stage 0
 	setTexGenModeVP(0, TexGenDisabled);
-
-	// ---- Stage 1 Common Setup.
-	// NB don't setup the TexEnv here (stage1 setuped in setupSpecularPass() according to extensions)
-	// For all cases, setup the TexCoord gen for stage1
-	_DriverGLStates.activeTexture(1);
-
-	// todo hulud remove - lol
-	// _DriverGLStates.setTextureMode(CDriverGLStates::TextureCubeMap);
 	setTexGenModeVP(1, TexGenReflectionMap);
 
 	// setup the good matrix for stage 1.
@@ -1101,25 +959,14 @@ sint			CDriverGL3::beginSpecularMultiPass()
 	H_AUTO_OGL(CDriverGL3_beginSpecularMultiPass)
 	const CMaterial &mat= *_CurrentMaterial;
 
-	// activate the 2 textures here
-	uint	stage;
-	uint	numStages= std::min((uint)2, inlGetNumTextStages());
-	for (stage=0 ; stage<numStages; stage++)
-	{
-		ITexture	*text= mat.getTexture(uint8(stage));
-
-		// activate the texture, or disable texturing if NULL.
-		activateTexture(stage,text);
-	}
-
 	// End specular , only if not Batching mode.
 	if (!_SpecularBatchOn)
 		setupSpecularBegin();
 
-	// Manage the rare case when the SpecularMap is not provided (fault of graphist).
-	if (mat.getTexture(1)==NULL)
-		return 1;
-	
+	// Setup programs
+	//setupBuiltinPrograms();
+
+	// Only need one pass for specular
 	return 1;
 }
 
@@ -1127,57 +974,15 @@ sint			CDriverGL3::beginSpecularMultiPass()
 void			CDriverGL3::setupSpecularPass(uint pass)
 {
 	nlassert(m_DriverPixelProgram);
-	nlassert(!m_UserPixelProgram);
 	nlassert(m_DriverVertexProgram);
 
 	H_AUTO_OGL(CDriverGL3_setupSpecularPass)
-	const CMaterial &mat= *_CurrentMaterial;
 
-	// Manage the rare case when the SpecularMap is not provided (error of a graphist).
-	if (mat.getTexture(1)==NULL)
+	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage) // Verify: Is it really only Specular that uses TexMatrix?
 	{
-		// Just display the texture
-		// NB: setupMaterial() code has correclty setuped textures.
-		return;
-	}
-
-	int tm0 = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix0); // FIXME GL3 VERTEX PROGRAM
-	if (tm0 != -1)
-	{
-		setUniform4x4f(IDriver::VertexProgram, tm0, _UserTexMat[ 0 ]); // OR is it just 1 (and not 0 2 3)?
-	}
-
-	int tm2 = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix2); // FIXME GL3 VERTEX PROGRAM
-	if (tm2 != -1)
-	{
-		setUniform4x4f(IDriver::VertexProgram, tm2, _UserTexMat[ 2 ]);
-	}
-
-	int tm3 = m_DriverVertexProgram->getUniformIndex(CProgramIndex::TexMatrix3); // FIXME GL3 VERTEX PROGRAM
-	if (tm3 != -1)
-	{
-		setUniform4x4f(IDriver::VertexProgram, tm3, _UserTexMat[ 3 ]);
-	}
-
-	{
-		// Ok we can do it in a single pass
-
-		// Set Stage 1
-		// Special: not the same special env if there is or not texture in stage 0.
-		CTexEnvSpecial		newEnvStage1;
-		if (mat.getTexture(0) == NULL)
-			newEnvStage1= TexEnvSpecialSpecularStage1NoText;
-		else
-			newEnvStage1= TexEnvSpecialSpecularStage1;
-		// Test if same env as prec.
-		if (_CurrentTexEnvSpecial[1] != newEnvStage1)
-		{
-			// TexEnv is special.
-			_CurrentTexEnvSpecial[1] = newEnvStage1;
-
-			_DriverGLStates.activeTexture(1);
-
-		}
+		uint idx = m_DriverVertexProgram->getUniformIndex((CProgramIndex::TName)(CProgramIndex::TexMatrix0 + stage));
+		if (idx != ~0)
+			setUniform4x4f(IDriver::VertexProgram, idx, _UserTexMat[stage]);
 	}
 }
 
@@ -1185,6 +990,7 @@ void			CDriverGL3::setupSpecularPass(uint pass)
 void			CDriverGL3::endSpecularMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_endSpecularMultiPass)
+
 	// End specular , only if not Batching mode.
 	if (!_SpecularBatchOn)
 		setupSpecularEnd();
@@ -1313,6 +1119,9 @@ CTextureCube	*CDriverGL3::getSpecularCubeMap(uint exp)
 sint			CDriverGL3::beginPPLMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginPPLMultiPass)
+
+	//setupBuiltinPrograms(); // FIXME GL3
+
 	#ifdef NL_DEBUG
 		nlassert(supportPerPixelLighting(true)); // make sure the hardware can do that
 	#endif
@@ -1350,7 +1159,7 @@ void			CDriverGL3::setupPPLPass(uint pass)
 
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1
 
-	activateTexEnvColor(0, _PPLightDiffuseColor);
+	// activateTexEnvColor(0, _PPLightDiffuseColor); // FIXME GL3
 
 	// Stage 1
 	// alpha = diffuse alpha
@@ -1358,7 +1167,7 @@ void			CDriverGL3::setupPPLPass(uint pass)
 	// Stage 2 is rgb = SpecularCubeMap * SpecularLightColor + Prec * 1
 	// alpha = prec alpha
 
-	activateTexEnvColor(2, _PPLightSpecularColor);
+	// activateTexEnvColor(2, _PPLightSpecularColor); // FIXME GL3
 
 }
 
@@ -1373,6 +1182,9 @@ void			CDriverGL3::endPPLMultiPass()
 sint			CDriverGL3::beginPPLNoSpecMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginPPLNoSpecMultiPass)
+
+	//setupBuiltinPrograms(); // FIXME GL3
+
 	#ifdef NL_DEBUG
 		nlassert(supportPerPixelLighting(false)); // make sure the hardware can do that
 	#endif
@@ -1407,12 +1219,12 @@ void			CDriverGL3::setupPPLNoSpecPass(uint pass)
 
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1 (TODO : EnvCombine3)
 
-	activateTexEnvColor(0, _PPLightDiffuseColor);
+	// activateTexEnvColor(0, _PPLightDiffuseColor); // FIXME GL3
 
 	// Stage 1
-	static CMaterial::CTexEnv	env;
+	/*static CMaterial::CTexEnv	env;
 	env.Env.SrcArg1Alpha = CMaterial::Diffuse;
-	activateTexEnvMode(1, env);
+	activateTexEnvMode(1, env);*/ // FIXME GL3
 
 }
 
@@ -1444,7 +1256,7 @@ void			CDriverGL3::endPPLNoSpecMultiPass()
 	activateTexture(0, mat.getTexture(0));
 
 	/// texture environment 0
-	setTextureEnvFunction(0, mat);
+	setTexGenFunction(0, mat);
 
 	/// texture matrix 0
 	setupUserTextureMatrix(0, mat);
@@ -1501,6 +1313,9 @@ void		CDriverGL3::endCausticsMultiPass(const CMaterial &mat)
 sint		CDriverGL3::beginCloudMultiPass ()
 {
 	H_AUTO_OGL(CDriverGL3_beginCloudMultiPass)
+	
+	//setupBuiltinPrograms(); // FIXME GL3
+
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Cloud);
 	return 1;
 }
@@ -1528,6 +1343,9 @@ void		CDriverGL3::endCloudMultiPass()
 sint CDriverGL3::beginWaterMultiPass()
 {
 	H_AUTO_OGL(CDriverGL3_beginWaterMultiPass)
+
+	//setupBuiltinPrograms(); // FIXME GL3
+
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 	return 1;
 }

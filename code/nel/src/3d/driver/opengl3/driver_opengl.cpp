@@ -411,7 +411,7 @@ bool CDriverGL3::setupDisplay()
 
 	// Activate the default texture environnments for all stages.
 	//===========================================================
-	for (uint stage=0;stage<inlGetNumTextStages(); stage++)
+	for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
 	{
 		// init no texture.
 		_CurrentTexture[stage] = NULL;
@@ -422,11 +422,8 @@ bool CDriverGL3::setupDisplay()
 		CMaterial::CTexEnv env;	// envmode init to default.
 		env.ConstantColor.set(255,255,255,255);
 
-		// Not special TexEnv.
-		_CurrentTexEnvSpecial[stage] = TexEnvSpecialDisabled;
-
 		// set All TexGen by default to identity matrix (prefer use the textureMatrix scheme)
-		setTexGenModeVP(stage, TexGenDisabled); // FIXME GL3 TEXGEN
+		setTexGenModeVP(stage, TexGenDisabled);
 	}
 
 	if (!initProgramPipeline())
@@ -616,18 +613,13 @@ bool CDriverGL3::swapBuffers()
 	//===========================================================
 	// This is not a requirement, but it ensure a more stable state each frame.
 	// (well, maybe the good reason is "it hides much more the bugs"  :o)).
-	for (uint stage=0;stage<inlGetNumTextStages(); stage++)
+	for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
 	{
 		// init no texture.
 		_CurrentTexture[stage]= NULL;
 		_CurrentTextureInfoGL[stage]= NULL;
 		// texture are disabled in DriverGLStates.forceDefaults().
-
-		// init default env.
-		CMaterial::CTexEnv	env;	// envmode init to default.
-		env.ConstantColor.set(255,255,255,255);
-		forceActivateTexEnvMode(stage, env);
-		forceActivateTexEnvColor(stage, env);
+		setTexGenModeVP(stage, TexGenDisabled);
 	}
 
 	// Activate the default material.

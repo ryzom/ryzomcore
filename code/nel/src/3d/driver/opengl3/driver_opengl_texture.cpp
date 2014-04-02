@@ -1377,7 +1377,7 @@ static	const	GLenum	OperandLUT[4]= { GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SR
 
 // This maps the CMaterial::TTexOperator, used for openGL Arg2 setup.
 static	const	GLenum	InterpolateSrcLUT[8]= { GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_TEXTURE, GL_PREVIOUS_EXT, GL_PRIMARY_COLOR_EXT, GL_CONSTANT_EXT };
-
+/*
 // ***************************************************************************
 void		CDriverGL3::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 {
@@ -1385,9 +1385,9 @@ void		CDriverGL3::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  
 	// cache mgt.
 	_CurrentTexEnv[stage].EnvPacked= env.EnvPacked;
 	// Disable Special tex env f().
-	_CurrentTexEnvSpecial[stage]= TexEnvSpecialDisabled;
+	//_CurrentTexEnvSpecial[stage]= TexEnvSpecialDisabled;
 }
-
+*//*
 // ***************************************************************************
 void		CDriverGL3::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
 {
@@ -1396,8 +1396,8 @@ void		CDriverGL3::activateTexEnvColor(uint stage, NLMISC::CRGBA col)
 	{
 		forceActivateTexEnvColor(stage, col);
 	}
-}
-
+}*/
+/*
 // ***************************************************************************
 void		CDriverGL3::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 {
@@ -1408,9 +1408,9 @@ void		CDriverGL3::activateTexEnvMode(uint stage, const CMaterial::CTexEnv  &env)
 	{
 		forceActivateTexEnvMode(stage, env);
 	}
-}
+}*/
 
-
+/*
 // ***************************************************************************
 void		CDriverGL3::activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env)
 {
@@ -1420,7 +1420,7 @@ void		CDriverGL3::activateTexEnvColor(uint stage, const CMaterial::CTexEnv  &env
 		forceActivateTexEnvColor(stage, env);
 	}
 }
-
+*/
 
 // ***************************************************************************
 void		CDriverGL3::forceDXTCCompression(bool dxtcComp)

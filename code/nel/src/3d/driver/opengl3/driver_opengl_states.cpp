@@ -103,6 +103,7 @@ void			CDriverGLStates3::forceDefaults(uint nbStages)
 		// FIXME GL3 TEXTUREMODE glDisable(GL_TEXTURE_RECTANGLE);
 		// FIXME GL3 TEXTUREMODE _TextureMode[stage]= TextureDisabled;
 	// FIXME GL3 TEXTUREMODE }
+	//	 etc
 
 	// ActiveTexture current texture to 0.
 	nglActiveTexture(GL_TEXTURE0);
