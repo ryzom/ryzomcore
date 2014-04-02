@@ -103,7 +103,7 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "}" << std::endl;
 		ss << std::endl;
 
-		ss << "void getLight" << i << "Color(out vec4 lightDiffuse, out vec4 lightSpecular)" << std::endl;
+		ss << "void addLight" << i << "Color(inout vec4 lightDiffuse, inout vec4 lightSpecular)" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec4 lightDir4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
 		ss << "vec3 lightDir = lightDir4.xyz / lightDir4.w;" << std::endl;
@@ -112,8 +112,8 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "normal3 = normalMatrix * normal3;" << std::endl;
 		ss << "normal3 = normalize(normal3);" << std::endl;
 
-		ss << "lightDiffuse = getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff;" << std::endl;
-		ss << "lightSpecular = getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec;" << std::endl;
+		ss << "lightDiffuse = lightDiffuse + getIntensity" << i << "(normal3, lightDir) * light" << i << "ColDiff;" << std::endl;
+		ss << "lightSpecular = lightSpecular + getSpecIntensity" << i << "(normal3, lightDir) * light" << i << "ColSpec;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 		break;
@@ -136,7 +136,7 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "}" << std::endl;
 		ss << std::endl;
 
-		ss << "void getLight" << i << "Color(out vec4 lightDiffuse, out vec4 lightSpecular)" << std::endl;
+		ss << "void addLight" << i << "Color(inout vec4 lightDiffuse, inout vec4 lightSpecular)" << std::endl;
 		ss << "{" << std::endl;
 		ss << "vec3 ecPos3 = ecPos4.xyz / ecPos4.w;" << std::endl;
 		ss << "vec4 lightPos4 = viewMatrix * vec4(light" << i << "DirOrPos, 1.0);" << std::endl;
@@ -155,8 +155,8 @@ void vpLightFunctions(std::stringstream &ss, const CVPBuiltin &desc, int i)
 		ss << "normal3 = normalize(normal3);" << std::endl;
 
 		ss << "float invattn = 1.0 / attenuation;" << std::endl;
-		ss << "lightDiffuse = getIntensity" << i << "(normal3, lightDirection) * invattn * light" << i << "ColDiff;" << std::endl;
-		ss << "lightSpecular = getSpecIntensity" << i << "(normal3, lightDirection) * invattn * light" << i << "ColSpec;" << std::endl;
+		ss << "lightDiffuse = lightDiffuse + getIntensity" << i << "(normal3, lightDirection) * invattn * light" << i << "ColDiff;" << std::endl;
+		ss << "lightSpecular = lightSpecular + getSpecIntensity" << i << "(normal3, lightDirection) * invattn * light" << i << "ColSpec;" << std::endl;
 		ss << "}" << std::endl;
 		ss << std::endl;
 		break;
@@ -253,16 +253,10 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 		ss << "vec4 diffuseLight;" << std::endl;
 		ss << "vec4 specularLight;" << std::endl;
 		for (int i = 0; i < NL_OPENGL3_MAX_LIGHT; i++)
-		{
 			if (desc.LightMode[i] == CLight::DirectionalLight || desc.LightMode[i] == CLight::PointLight)
-			{
-				ss << "getLight" << i << "Color(diffuseLight, specularLight);" << std::endl;
-				ss << "diffuseVertex = diffuseVertex + diffuseLight;" << std::endl;
-				ss << "specularVertex = specularVertex + specularLight;" << std::endl;
-			}
-		}
-		ss << "diffuseVertex.a = 1.0;" << std::endl; // ...
-		ss << "specularVertex.a = 1.0;" << std::endl; // ...
+				ss << "addLight" << i << "Color(diffuseVertex, specularVertex);" << std::endl;
+		ss << "diffuseVertex.a = 1.0;" << std::endl;
+		ss << "specularVertex.a = 1.0;" << std::endl;
 
 		// Secondary color (lighted)
 		if (desc.VertexFormat & g_VertexFlags[SecondaryColor])
@@ -285,7 +279,9 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 
 	// Primary color
 	if (desc.VertexFormat & g_VertexFlags[PrimaryColor])
+	{
 		ss << "diffuseVertex = diffuseVertex * vprimaryColor;" << std::endl; // Note: Might need to replace materialColor if PrimaryColor exists
+	}
 	
 	// Add diffuse and specular color
 	ss << "vertexColor = diffuseVertex;" << std::endl;

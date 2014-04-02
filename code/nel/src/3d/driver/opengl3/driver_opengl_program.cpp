@@ -949,17 +949,9 @@ void CDriverGL3::setupUniforms(TProgram program)
 		setUniform3x3f(program, nmIdx, nm);
 	}
 
-	uint fogStartIdx = p->getUniformIndex(CProgramIndex::FogStart);
-	if (fogStartIdx != ~0)
-	{
-		nglProgramUniform1f(progId, fogStartIdx, _FogStart);
-	}
-
-	uint fogEndIdx = p->getUniformIndex(CProgramIndex::FogEnd);
-	if (fogEndIdx != ~0)
-	{
-		nglProgramUniform1f(progId, fogEndIdx, _FogEnd);
-	}
+	uint fogParamsIdx = p->getUniformIndex(CProgramIndex::FogParams);
+	if (fogParamsIdx != ~0)
+		nglProgramUniform2f(progId, fogParamsIdx, _FogStart, _FogEnd);
 
 	uint fogColorIdx = p->getUniformIndex(CProgramIndex::FogColor);
 	if (fogColorIdx != ~0)
@@ -978,18 +970,9 @@ void CDriverGL3::setupUniforms(TProgram program)
 		nglProgramUniform4f(progId, colorIndex, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
 	}
 
-	/*uint diffuseIndex = p->getUniformIndex(CProgramIndex::DiffuseColor);
-	if (diffuseIndex != ~0)
-	{
-		/*GLfloat glCol[ 4 ];
-		CRGBA col = mat.getDiffuse();
-		glCol[ 0 ] = col.R / 255.0f;
-		glCol[ 1 ] = col.G / 255.0f;
-		glCol[ 2 ] = col.B / 255.0f;
-		glCol[ 3 ] = col.A / 255.0f;*/
-
-		/*nglProgramUniform4f(progId, diffuseIndex, 1.0f, 1.0f, 1.0f, 0.0f);
-	}*/
+	uint alphaRefIdx = p->getUniformIndex(CProgramIndex::AlphaRef);
+	if (alphaRefIdx)
+		nglProgramUniform1f(progId, alphaRefIdx, mat.getAlphaTestThreshold());
 
 	NLMISC::CRGBAF selfIllumination = NLMISC::CRGBAF(0.0f, 0.0f, 0.0f);
 	NLMISC::CRGBAF matDiffuse = NLMISC::CRGBAF(mat.getDiffuse());
@@ -1045,23 +1028,6 @@ void CDriverGL3::setupUniforms(TProgram program)
 		{
 			nglProgramUniform1f(progId, shl, mat.getShininess());
 		}
-
-		/*int lac = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ColAmb + i));
-		if (lac >= 0)
-		{
-			GLfloat glCol[ 4 ];
-			CRGBA col;
-			if (mat.getShader() == CMaterial::LightMap)
-				col = _UserLight[ i ].getAmbiant();
-			else
-				col.add(_UserLight[ i ].getAmbiant(), mat.getEmissive());
-
-			glCol[ 0 ] = col.R / 255.0f;
-			glCol[ 1 ] = col.G / 255.0f;
-			glCol[ 2 ] = col.B / 255.0f;
-			glCol[ 3 ] = col.A / 255.0f;
-			setUniform4f(program, lac, glCol[ 0 ], glCol[ 1 ], glCol[ 2 ], glCol[ 3 ]);
-		}*/
 
 		uint lca = p->getUniformIndex(CProgramIndex::TName(CProgramIndex::Light0ConstAttn + i));
 		if (lca != ~0)

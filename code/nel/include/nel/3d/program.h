@@ -123,12 +123,13 @@ struct CProgramIndex
 		ViewMatrix,
 
 		Fog,
-		FogStart,
-		FogEnd,
+		FogParams,
 		FogColor,
 
 		Color,
 		//DiffuseColor,
+
+		AlphaRef,
 
 		Constant0,
 		Constant1,

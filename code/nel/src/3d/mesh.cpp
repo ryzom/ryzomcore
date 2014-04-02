@@ -598,6 +598,8 @@ void	CMeshGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount,
 	bool	useMeshVP= _MeshVertexProgram != NULL;
 	if( useMeshVP )
 	{
+		nlassert(_VBuffer.getVertexFormat() == (CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::PrimaryColorFlag));
+		
 		CMatrix		invertedObjectMatrix;
 		invertedObjectMatrix = trans->getWorldMatrix().inverted();
 		// really ok if success to begin VP

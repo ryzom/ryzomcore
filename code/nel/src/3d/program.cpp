@@ -93,12 +93,13 @@ const char *CProgramIndex::Names[NUM_UNIFORMS] =
 	"viewMatrix",
 
 	"fog",
-	"fogStart",
-	"fogEnd",
+	"fogParams",
 	"fogColor",
 
 	"materialColor",
 	//"diffuseColor",
+
+	"alphaRef",
 
 	"constant0",
 	"constant1",

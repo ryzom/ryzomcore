@@ -398,20 +398,19 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 	// Alpha test
 	if (desc.Flags & IDRV_MAT_ALPHA_TEST)
 	{
-		ss << "uniform float alphaTreshold;" << std::endl;
+		ss << "uniform float alphaRef;" << std::endl;
 		ss << std::endl;
 	}
 
 	// Fog
 	if (desc.Fog) // FIXME: FogMode!
 	{
-		ss << "uniform float fogStart;" << std::endl;
-		ss << "uniform float fogEnd;" << std::endl;
+		ss << "uniform vec2 fogParams;" << std::endl; // s = start, t = end
 		ss << "uniform vec4 fogColor;" << std::endl;
 
 		/*if (desc->getFogMode() == CShaderDesc::Linear)
 		{*/
-			ss << "uniform float fogDensity;" << std::endl;
+			//ss << "uniform float fogDensity;" << std::endl;
 		/*}*/
 
 		ss << "smooth in vec4 ecPos;" << std::endl;
@@ -423,7 +422,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 			ss << "{" << std::endl;
 			ss << "float z = ecPos.z / ecPos.w;" << std::endl;
 			ss << "z = abs(z);" << std::endl;
-			ss << "float fogFactor = (fogEnd - z) / (fogEnd - fogStart);" << std::endl;
+			ss << "float fogFactor = (fogParams.t - z) / (fogParams.t - fogParams.s);" << std::endl;
 			ss << "fogFactor = clamp(fogFactor, 0.0, 1.0);" << std::endl;
 			ss << "vec4 fColor = mix(fogColor, col, fogFactor);" << std::endl;
 			ss << "return fColor;" << std::endl;
@@ -488,7 +487,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 
 	if (desc.Flags & IDRV_MAT_ALPHA_TEST)
 	{
-		ss << "if (fragColor.a < alphaTreshold) discard;" << std::endl; // TODO: VERIFY < or <= ?
+		ss << "if (fragColor.a < alphaRef) discard;" << std::endl; // TODO: VERIFY < or <= ?
 	}
 
 	if (desc.Fog)
