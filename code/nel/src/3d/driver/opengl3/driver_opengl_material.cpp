@@ -382,6 +382,25 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			}
 		}
 	}
+	else //if (matShader != CMaterial::Specular) // TEMP BUGFIX
+	{// TEMP BUGFIX
+		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
+		{
+			setTexGenModeVP(stage, TexGenDisabled);
+		}
+	}// TEMP BUGFIX
+	if (matShader == CMaterial::Specular)
+	{
+		setTexGenModeVP(0, TexGenDisabled);
+		ITexture *text = mat.getTexture(1);
+		if (text)
+		{
+			if (text->isTextureCube())
+				setTexGenModeVP(1, TexGenReflectionMap);
+			else
+				setTexGenModeVP(1, TexGenSphereMap);
+		}
+	}
 
 	// 3. Bind OpenGL States.
 	//=======================
@@ -464,7 +483,6 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 			// Restaure fog state to its current value
 			enableFogVP(_FogEnabled);
 		}
-
 
 		_CurrentMaterial=&mat;
 	}
@@ -935,8 +953,8 @@ void			CDriverGL3::setupSpecularBegin()
 	H_AUTO_OGL(CDriverGL3_setupSpecularBegin)
 
 	// Disable texGen for stage 0
-	setTexGenModeVP(0, TexGenDisabled);
-	setTexGenModeVP(1, TexGenReflectionMap);
+	// setTexGenModeVP(0, TexGenDisabled); // FIXME THIS IS NOT VALID HERE WHEN NOT IN BATCHING MODE!
+	// setTexGenModeVP(1, TexGenReflectionMap);
 
 	// setup the good matrix for stage 1.
 	_UserTexMat[1] = _SpecularTexMtx;
