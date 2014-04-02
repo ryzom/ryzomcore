@@ -222,7 +222,7 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 			case CMaterial::InterpolatePrevious:
 				if (stage > 0)
 				{
-					ss << "float texop" << stage << "rgbAs = texop" << stage << ".a;" << std::endl;
+					ss << "float texop" << stage << "rgbAs = texop" << (stage - 1) << ".a;" << std::endl;
 					break;
 				}
 			case CMaterial::InterpolateDiffuse:
@@ -268,7 +268,7 @@ void ppTexEnv(std::stringstream &ss, const CPPBuiltin &desc)
 			case CMaterial::InterpolatePrevious:
 				if (stage > 0)
 				{
-					ss << "float texop" << stage << "alphaAs = texop" << stage << ".a;" << std::endl;
+					ss << "float texop" << stage << "alphaAs = texop" << (stage - 1) << ".a;" << std::endl;
 					break;
 				}
 			case CMaterial::InterpolateDiffuse:
