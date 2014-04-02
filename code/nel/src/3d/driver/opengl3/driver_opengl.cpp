@@ -387,7 +387,7 @@ bool CDriverGL3::setupDisplay()
 	_CurrScissor.initFullScreen();
 	_ForceNormalize = false;
 	// Setup defaults for blend, lighting ...
-	_DriverGLStates.forceDefaults(inlGetNumTextStages());
+	_DriverGLStates.forceDefaults(IDRV_MAT_MAXTEXTURES);
 	// Default delta camera pos.
 	_PZBCameraPos = CVector::Null;
 
@@ -411,7 +411,7 @@ bool CDriverGL3::setupDisplay()
 
 	// Activate the default texture environnments for all stages.
 	//===========================================================
-	for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
+	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 	{
 		// init no texture.
 		_CurrentTexture[stage] = NULL;
@@ -613,7 +613,7 @@ bool CDriverGL3::swapBuffers()
 	//===========================================================
 	// This is not a requirement, but it ensure a more stable state each frame.
 	// (well, maybe the good reason is "it hides much more the bugs"  :o)).
-	for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
+	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 	{
 		// init no texture.
 		_CurrentTexture[stage]= NULL;
@@ -625,7 +625,7 @@ bool CDriverGL3::swapBuffers()
 	// Activate the default material.
 	//===========================================================
 	// Same reasoning as textures :)
-	_DriverGLStates.forceDefaults(inlGetNumTextStages());
+	_DriverGLStates.forceDefaults(IDRV_MAT_MAXTEXTURES);
 
 	_CurrentMaterial= NULL;
 
@@ -1132,7 +1132,7 @@ void CDriverGL3::setMatrix2DForTextureOffsetAddrMode(const uint stage, const flo
 
 	if (!supportTextureShaders()) return;
 	//nlassert(supportTextureShaders());
-	nlassert(stage < inlGetNumTextStages());
+	nlassert(stage < IDRV_MAT_MAXTEXTURES);
 	_DriverGLStates.activeTexture(stage);
 
 	//glTexEnvfv(GL_TEXTURE_SHADER_NV, GL_OFFSET_TEXTURE_MATRIX_NV, mat);
@@ -1187,7 +1187,7 @@ NLMISC::CRGBA CDriverGL3::getBlendConstantColor() const
 uint			CDriverGL3::getNbTextureStages() const
 {
 	H_AUTO_OGL(CDriverGL3_getNbTextureStages)
-	return inlGetNumTextStages();
+	return IDRV_MAT_MAXTEXTURES;
 }
 
 // ***************************************************************************
@@ -1807,8 +1807,8 @@ void CDriverGL3::stencilMask(uint mask)
 // ***************************************************************************
 void CDriverGL3::getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const
 {
-	lightedMaterial = inlGetNumTextStages();
-	unlightedMaterial = inlGetNumTextStages();
+	lightedMaterial = IDRV_MAT_MAXTEXTURES;
+	unlightedMaterial = IDRV_MAT_MAXTEXTURES;
 }
 
 // ***************************************************************************

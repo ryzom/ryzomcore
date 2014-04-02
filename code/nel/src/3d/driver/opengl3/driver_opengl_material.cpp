@@ -328,7 +328,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// because setupTexture() may disable all stage.
 	if (matShader != CMaterial::Water && matShader != CMaterial::Program)
 	{
-		for (uint stage = 0; stage < inlGetNumTextStages(); ++stage)
+		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		{
 			ITexture *text = mat.getTexture(uint8(stage));
 			if (text != NULL && !setupTexture(*text))
@@ -366,7 +366,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 		&& matShader != CMaterial::Water
 	  )
 	{
-		uint maxTex = matShader == CMaterial::Specular ? 2 : inlGetNumTextStages();
+		uint maxTex = matShader == CMaterial::Specular ? 2 : IDRV_MAT_MAXTEXTURES;
 		for (uint stage = 0; stage < maxTex; ++stage)
 		{
 			ITexture *text = mat.getTexture(uint8(stage));
@@ -471,7 +471,7 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	// Textures user matrix
 	if (matShader == CMaterial::Normal)
 	{
-		setupUserTextureMatrix(inlGetNumTextStages(), mat);
+		setupUserTextureMatrix(IDRV_MAT_MAXTEXTURES, mat);
 	}
 	else // deactivate texture matrix
 	{
@@ -602,7 +602,7 @@ void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 	static const uint32 RGBMaskPacked = CRGBA(255,255,255,0).getPacked();
 
 	// For optimisation consideration, suppose there is not too much lightmap.
-	nlassert(mat._LightMaps.size()<=NL3D_DRV_MAX_LIGHTMAP);
+	nlassert(mat._LightMaps.size() <= NL3D_DRV_MAX_LIGHTMAP);
 
 	// Compute number of lightmaps really used (ie factor not NULL), and build the LUT.
 	_NLightMaps = 0;
@@ -618,10 +618,10 @@ void CDriverGL3::computeLightMapInfos (const CMaterial &mat)
 	}
 
 	// Compute how many pass, according to driver caps.
-	_NLightMapPerPass = inlGetNumTextStages()-1;
+	_NLightMapPerPass = IDRV_MAT_MAXTEXTURES - 1;
 
 	// Number of pass.
-	_NLightMapPass = (_NLightMaps + _NLightMapPerPass-1)/(_NLightMapPerPass);
+	_NLightMapPass = (_NLightMaps + _NLightMapPerPass - 1) / (_NLightMapPerPass);
 
 	// NB: _NLightMaps==0 means there is no lightmaps at all.
 }
@@ -694,7 +694,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 		// setTexGenModeVP(0, TexGenDisabled); // FIXME GL3
 
 		// And disable other stages.
-		for (uint stage = 1; stage < inlGetNumTextStages(); stage++)
+		for (uint stage = 1; stage < IDRV_MAT_MAXTEXTURES; stage++)
 		{
 			// disable texturing.
 			activateTexture(stage, NULL);
@@ -743,7 +743,7 @@ void			CDriverGL3::setupLightMapPass(uint pass)
 	}
 
 	// setup all stages.
-	for (uint stage= 0; stage<inlGetNumTextStages(); stage++)
+	for (uint stage= 0; stage<IDRV_MAT_MAXTEXTURES; stage++)
 	{
 		// if must setup a lightmap stage.
 		if (stage<nstages-1)
@@ -1016,7 +1016,7 @@ void			CDriverGL3::setupPPLPass(uint pass)
 	activateTexture(1, mat.getTexture(0));
 	activateTexture(2, tex2);*/
 
-	/*for (uint k = 3; k < inlGetNumTextStages(); ++k)
+	/*for (uint k = 3; k < IDRV_MAT_MAXTEXTURES; ++k)
 	{
 		activateTexture(k, NULL);
 	}*/
@@ -1076,7 +1076,7 @@ void			CDriverGL3::setupPPLNoSpecPass(uint pass)
 /*	activateTexture(0, tex0);
 	activateTexture(1, mat.getTexture(0));
 */
-	/*for (uint k = 2; k < inlGetNumTextStages(); ++k)
+	/*for (uint k = 2; k < IDRV_MAT_MAXTEXTURES; ++k)
 	{
 		activateTexture(k, NULL);
 	}*/
@@ -1175,7 +1175,7 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 		setupTexture(*tex);
 		activateTexture(3, tex);
 	}
-	for (k = 4; k < inlGetNumTextStages(); ++k)
+	for (k = 4; k < IDRV_MAT_MAXTEXTURES; ++k)
 	{
 		activateTexture(k, NULL);
 	}
