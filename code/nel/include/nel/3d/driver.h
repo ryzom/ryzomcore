@@ -297,7 +297,7 @@ public:
 	virtual bool			clearZBuffer(float zval=1) = 0;
 
 	/// Clear the current target surface stencil buffer. The function ignores the viewport settings but uses the scissor.
-	virtual bool			clearStencilBuffer(float stencilval=0) = 0;
+	virtual bool			clearStencilBuffer(sint stencilval=0) = 0;
 
 	/// Set the color mask filter through where the operation done will pass
 	virtual void			setColorMask(bool bRed, bool bGreen, bool bBlue, bool bAlpha) = 0;

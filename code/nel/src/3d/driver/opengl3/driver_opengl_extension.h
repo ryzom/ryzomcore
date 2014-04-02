@@ -153,6 +153,11 @@ bool registerGlExtensions(CGlExtensions &ext);
 // Core 3.30
 extern PFNGLGETSTRINGIPROC								nglGetStringi;
 
+extern PFNGLCLEARBUFFERIVPROC							nglClearBufferiv;
+extern PFNGLCLEARBUFFERUIVPROC							nglClearBufferuiv;
+extern PFNGLCLEARBUFFERFVPROC							nglClearBufferfv;
+extern PFNGLCLEARBUFFERFIPROC							nglClearBufferfi;
+
 extern PFNGLATTACHSHADERPROC							nglAttachShader;
 extern PFNGLCOMPILESHADERPROC							nglCompileShader;
 extern PFNGLCREATEPROGRAMPROC							nglCreateProgram;

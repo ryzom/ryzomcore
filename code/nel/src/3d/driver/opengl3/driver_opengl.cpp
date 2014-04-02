@@ -534,9 +534,10 @@ bool CDriverGL3::isTextureExist(const ITexture&tex)
 bool CDriverGL3::clear2D(CRGBA rgba)
 {
 	H_AUTO_OGL(CDriverGL3_clear2D)
-	glClearColor((float)rgba.R/255.0f,(float)rgba.G/255.0f,(float)rgba.B/255.0f,(float)rgba.A/255.0f);
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	NLMISC::CRGBAF rgbaf(rgba);
+	GLfloat fv[] = { rgbaf.R, rgbaf.G, rgbaf.B, rgbaf.A };
+	nglClearBufferfv(GL_COLOR, 0, fv);
 
 	return true;
 }
@@ -546,21 +547,18 @@ bool CDriverGL3::clearZBuffer(float zval)
 {
 	H_AUTO_OGL(CDriverGL3_clearZBuffer);
 
-	glClearDepth(zval);
-
 	_DriverGLStates.enableZWrite(true);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	nglClearBufferfv(GL_DEPTH, 0, &zval);
 
 	return true;
 }
 
 // --------------------------------------------------
-bool CDriverGL3::clearStencilBuffer(float stencilval)
+bool CDriverGL3::clearStencilBuffer(sint stencilval)
 {
 	H_AUTO_OGL(CDriverGL3_clearStencilBuffer)
-	glClearStencil((int)stencilval);
 
-	glClear(GL_STENCIL_BUFFER_BIT);
+	nglClearBufferiv(GL_STENCIL, 0, &stencilval);
 
 	return true;
 }

@@ -833,10 +833,10 @@ bool CDriverGL::clearZBuffer(float zval)
 }
 
 // --------------------------------------------------
-bool CDriverGL::clearStencilBuffer(float stencilval)
+bool CDriverGL::clearStencilBuffer(sint stencilval)
 {
 	H_AUTO_OGL(CDriverGL_clearStencilBuffer)
-	glClearStencil((int)stencilval);
+	glClearStencil(stencilval);
 
 	glClear(GL_STENCIL_BUFFER_BIT);
 

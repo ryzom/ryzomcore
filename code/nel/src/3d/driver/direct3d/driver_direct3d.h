@@ -916,7 +916,7 @@ public:
 	// Buffer
 	virtual bool			clear2D(CRGBA rgba);
 	virtual bool			clearZBuffer(float zval=1);
-	virtual bool			clearStencilBuffer(float stencilval=0);
+	virtual bool			clearStencilBuffer(sint stencilval=0);
 	virtual void			setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha);
 	virtual bool			swapBuffers();
 	virtual void			getBuffer (CBitmap &bitmap);	// Only 32 bits back buffer supported

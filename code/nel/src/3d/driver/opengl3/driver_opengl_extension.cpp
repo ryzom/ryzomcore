@@ -66,6 +66,11 @@ void (*nglGetProcAddress(const char *procName))()
 // Core 3.30
 PFNGLGETSTRINGIPROC								nglGetStringi;
 
+PFNGLCLEARBUFFERIVPROC							nglClearBufferiv;
+PFNGLCLEARBUFFERUIVPROC							nglClearBufferuiv;
+PFNGLCLEARBUFFERFVPROC							nglClearBufferfv;
+PFNGLCLEARBUFFERFIPROC							nglClearBufferfi;
+
 PFNGLATTACHSHADERPROC							nglAttachShader;
 PFNGLCOMPILESHADERPROC							nglCompileShader;
 PFNGLCREATEPROGRAMPROC							nglCreateProgram;
@@ -356,6 +361,11 @@ static bool	setupEXTTextureFilterAnisotropic(std::vector<const char *> &glext)
 
 static bool setupGLCore(std::vector<const char *> &glext)
 {
+	CHECK_ADDRESS(PFNGLCLEARBUFFERIVPROC, glClearBufferiv);
+	CHECK_ADDRESS(PFNGLCLEARBUFFERUIVPROC, glClearBufferuiv);
+	CHECK_ADDRESS(PFNGLCLEARBUFFERFVPROC, glClearBufferfv);
+	CHECK_ADDRESS(PFNGLCLEARBUFFERFIPROC, glClearBufferfi);
+
 	CHECK_ADDRESS(PFNGLATTACHSHADERPROC, glAttachShader);
 	CHECK_ADDRESS(PFNGLCOMPILESHADERPROC, glCompileShader);
 	CHECK_ADDRESS(PFNGLCREATEPROGRAMPROC, glCreateProgram);

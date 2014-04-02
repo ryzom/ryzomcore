@@ -354,7 +354,7 @@ public:
 	virtual bool			clear2D(CRGBA rgba);
 
 	virtual bool			clearZBuffer(float zval=1);
-	virtual bool			clearStencilBuffer(float stencilval=0);
+	virtual bool			clearStencilBuffer(sint stencilval=0);
 	virtual void			setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha);
 	virtual void			setDepthRange(float znear, float zfar);
 	virtual	void			getDepthRange(float &znear, float &zfar) const;
