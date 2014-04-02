@@ -761,7 +761,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 	}
 
 	uint alphaRefIdx = p->getUniformIndex(CProgramIndex::AlphaRef);
-	if (alphaRefIdx)
+	if (alphaRefIdx != ~0)
 		nglProgramUniform1f(progId, alphaRefIdx, mat.getAlphaTestThreshold());
 
 	NLMISC::CRGBAF selfIllumination = NLMISC::CRGBAF(0.0f, 0.0f, 0.0f);
