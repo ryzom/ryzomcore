@@ -480,7 +480,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		else if (useTex(desc, stage))
 		{
 			ss << "vec4 texel" << stage << " = texture(sampler" << stage << ", ";	
-			if (desc.Shader == CMaterial::LightMap && stage != (maxTex - 1) && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord1]))
+			if (desc.Shader == CMaterial::LightMap && stage != (maxTex - 1) && useTex(desc, stage + 1) && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord1]))
 			{
 				ss << g_AttribNames[TexCoord1];
 			}
