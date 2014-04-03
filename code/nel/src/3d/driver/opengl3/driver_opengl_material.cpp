@@ -621,7 +621,7 @@ void CDriverGL3::computeLightMapInfos(const CMaterial &mat)
 	}
 
 	// Compute how many pass, according to driver caps.
-	_NLightMapPerPass = IDRV_MAT_MAXTEXTURES - 1;
+	_NLightMapPerPass = std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS) - 1;
 
 	// Number of pass.
 	_NLightMapPass = (_NLightMaps + _NLightMapPerPass - 1) / (_NLightMapPerPass);
@@ -678,7 +678,7 @@ void CDriverGL3::setupLightMapPass(uint pass)
 	// No lightmap or all blacks??, just setup "black texture" for stage 0.
 	if (_NLightMaps == 0)
 	{
-		nldebug("No lightmaps");
+		// nldebug("No lightmaps");
 
 		ITexture *text = mat.getTexture(0);
 		activateTexture(0, text);
@@ -743,10 +743,10 @@ void CDriverGL3::setupLightMapPass(uint pass)
 
 	// Lightmap factors
 	NLMISC::CRGBAF selfIllumination(col);
-	NLMISC::CRGBAF constant[IDRV_MAT_MAXTEXTURES];
+	NLMISC::CRGBAF constant[IDRV_PROGRAM_MAXSAMPLERS];
 
 	// setup all stages.
-	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
+	for (uint stage = 0; stage < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++stage)
 	{
 		// if must setup a lightmap stage
 		if (stage < nstages - 1) // last stage is user texture
@@ -770,8 +770,11 @@ void CDriverGL3::setupLightMapPass(uint pass)
 			//==================================================
 			if (text)
 			{
-				// Setup env for texture stage.
-				setTexGenModeVP(stage, TexGenDisabled);
+				if (stage < IDRV_MAT_MAXTEXTURES)
+				{
+					// Setup env for texture stage.
+					setTexGenModeVP(stage, TexGenDisabled);
+				}
 
 				// FIXME GL3: builtin TexEnv[stage] = TexEnvSpecialLightMap
 
@@ -818,8 +821,11 @@ void CDriverGL3::setupLightMapPass(uint pass)
 				// setup ModulateRGB/ReplaceAlpha env. (this may disable possible COMBINE4_NV setup).
 				// activateTexEnvMode(stage, _LightMapLastStageEnv); // SHADER BUILTIN
 
-				// Setup gen tex off
-				setTexGenModeVP(stage, TexGenDisabled);
+				if (stage < IDRV_MAT_MAXTEXTURES)
+				{
+					// Setup gen tex off
+					setTexGenModeVP(stage, TexGenDisabled);
+				}
 			}
 		}
 		else
@@ -903,7 +909,7 @@ void CDriverGL3::setupLightMapPass(uint pass)
 	setupBuiltinPrograms();
 
 	// Set constants
-	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
+	for (uint stage = 0; stage < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++stage)
 	{
 		uint constantIdx = m_DriverPixelProgram->getUniformIndex(CProgramIndex::TName(CProgramIndex::Constant0 + stage));
 		if (constantIdx != ~0)

@@ -354,10 +354,10 @@ void ppSpecular(std::stringstream &ss, const CPPBuiltin &desc)
 	}
 }
 
-void ppLightmap(std::stringstream &ss, const CPPBuiltin &desc)
+void ppLightmap(std::stringstream &ss, const CPPBuiltin &desc, CGlExtensions &glext)
 {
 	uint nstages;
-	for (nstages = 0; nstages < IDRV_MAT_MAXTEXTURES; ++nstages)
+	for (nstages = 0; nstages < std::min(glext.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++nstages)
 		if (!useTex(desc, nstages))
 			break;
 	if (nstages == 0)
@@ -382,7 +382,7 @@ void ppLightmap(std::stringstream &ss, const CPPBuiltin &desc)
 	}
 }
 
-void ppGenerate(std::string &result, const CPPBuiltin &desc)
+void ppGenerate(std::string &result, const CPPBuiltin &desc, CGlExtensions &glext)
 {
 	std::stringstream ss;
 	ss << "// Builtin Pixel Shader: " << s_ShaderNames[desc.Shader] << std::endl;
@@ -405,7 +405,9 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 	ss << std::endl;
 	
 	uint maxTex = maxTextures(desc.Shader);
-	for (uint stage = 0; stage < maxTex; ++stage)
+	uint maxSam = maxSamplers(desc.Shader, glext);
+
+	for (uint stage = 0; stage < maxSam; ++stage)
 	{
 		if (stage == 1 && desc.Shader == CMaterial::UserColor)
 		{
@@ -426,11 +428,21 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 	ss << std::endl;
 
 	// TexEnv
-	ss << "uniform vec4 constant0;" << std::endl; // FIXME: we must optimize this by texenv!...
-	ss << "uniform vec4 constant1;" << std::endl;
-	ss << "uniform vec4 constant2;" << std::endl;
-	ss << "uniform vec4 constant3;" << std::endl;
-	ss << std::endl;
+	switch (desc.Shader)
+	{
+	case CMaterial::Normal:
+	case CMaterial::UserColor:
+	case CMaterial::LightMap:
+		for (uint stage = 0; stage < maxSam; ++stage)
+		{
+			if (useTex(desc, stage))
+			{
+				ss << "uniform vec4 constant" << stage << ";" << std::endl;
+				ss << std::endl;
+			}
+		}
+		break;
+	}
 
 	// Alpha test
 	if (desc.Flags & IDRV_MAT_ALPHA_TEST)
@@ -480,7 +492,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 	// Vertex color (light or unlit diffuse, primary and secondary)
 	ss << "fragColor = vertexColor;" << std::endl;
 
-	for (uint stage = 0; stage < maxTex; ++stage)
+	for (uint stage = 0; stage < maxSam; ++stage)
 	{
 		if (stage == 1 && desc.Shader == CMaterial::UserColor)
 		{
@@ -489,7 +501,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		else if (useTex(desc, stage))
 		{
 			ss << "vec4 texel" << stage << " = texture(sampler" << stage << ", ";	
-			if (desc.Shader == CMaterial::LightMap && stage != (maxTex - 1) && useTex(desc, stage + 1) && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord1]))
+			if (desc.Shader == CMaterial::LightMap && stage != (maxSam - 1) && useTex(desc, stage + 1) && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord1]))
 			{
 				ss << g_AttribNames[TexCoord1];
 			}
@@ -497,7 +509,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 			{
 				ss << g_AttribNames[TexCoord0];
 			}
-			else if (hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
+			else if (stage < maxTex && hasFlag(desc.VertexFormat, g_VertexFlags[TexCoord0 + stage]))
 			{
 				ss << g_AttribNames[TexCoord0 + stage];
 			}
@@ -526,7 +538,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		ppSpecular(ss, desc);
 		break;
 	case CMaterial::LightMap:
-		ppLightmap(ss, desc);
+		ppLightmap(ss, desc, glext);
 		break;
 	default:
 		nlwarning("GL3: Try to generate unknown shader type (%s)", s_ShaderNames[desc.Shader]);
@@ -564,7 +576,7 @@ void CDriverGL3::generateBuiltinPixelProgram(CMaterial &mat)
 	}
 
 	std::string result;
-	ppGenerate(result, matDrv->PPBuiltin);
+	ppGenerate(result, matDrv->PPBuiltin, _Extensions);
 
 	CPixelProgram *program = new CPixelProgram();
 	IProgram::CSource *src = new IProgram::CSource();
