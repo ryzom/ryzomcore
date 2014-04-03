@@ -298,14 +298,9 @@ CDriverGL::CDriverGL()
 
 	// Compute the Flag which say if one texture has been changed in CMaterial.
 	_MaterialAllTextureTouchedFlag= 0;
-	for(i=0; i < IDRV_MAT_MAXTEXTURES; i++)
+	for(i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
 	{
-		_MaterialAllTextureTouchedFlag|= IDRV_TOUCHED_TEX[i];
-#ifdef GL_NONE
-		_CurrentTexAddrMode[i] = GL_NONE;
-#else
-		_CurrentTexAddrMode[i] = 0;
-#endif
+		_MaterialAllTextureTouchedFlag |= IDRV_TOUCHED_TEX[i];
 	}
 
 	_UserTexMatEnabled = 0;

@@ -920,14 +920,8 @@ private:
 
 	/* NB : this pointers handles the caching of glBindTexture() and setTextureMode() calls.
 	*/
-	ITexture*				_CurrentTexture[IDRV_MAT_MAXTEXTURES];
-
-	CTextureDrvInfosGL3*		_CurrentTextureInfoGL[IDRV_MAT_MAXTEXTURES];
-	//CMaterial::CTexEnv		_CurrentTexEnv[IDRV_MAT_MAXTEXTURES];
-	// Special Texture Environnement.
-	//CTexEnvSpecial			_CurrentTexEnvSpecial[IDRV_MAT_MAXTEXTURES];
-	// Texture addressing mode
-	GLenum					_CurrentTexAddrMode[IDRV_MAT_MAXTEXTURES];
+	ITexture*				_CurrentTexture[IDRV_PROGRAM_MAXSAMPLERS];
+	CTextureDrvInfosGL3*		_CurrentTextureInfoGL[IDRV_PROGRAM_MAXSAMPLERS];
 	// Anisotropic filtering value
 	float					_AnisotropicFilter;
 

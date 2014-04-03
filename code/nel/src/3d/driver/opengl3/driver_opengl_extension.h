@@ -38,7 +38,7 @@ struct	CGlExtensions
 	// Required extensions
 	bool	GLCore;
 	bool	ARBSeparateShaderObjects;
-	uint	NbFragmentTextureUnits;
+	GLint	MaxFragmentTextureImageUnits;
 
 	// Optional extensions
 	bool	EXTTextureCompressionS3TC;
@@ -65,7 +65,7 @@ public:
 		// Fill all false by default.
 		GLCore = false;
 		ARBSeparateShaderObjects = false;
-		NbFragmentTextureUnits = 0;
+		MaxFragmentTextureImageUnits = 0;
 
 		EXTTextureCompressionS3TC = false;
 		EXTTextureFilterAnisotropic = false;
@@ -99,8 +99,8 @@ public:
 		result += ARBMultiTexture ? "ARBMultiTexture " : "";
 		result += EXTTextureCompressionS3TC ? "EXTTextureCompressionS3TC " : "";
 		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic (Maximum = " + NLMISC::toString(EXTTextureFilterAnisotropicMaximum) + ") " : "";
-		result += "texture stages(*) = ";
-		result += NLMISC::toString(NbFragmentTextureUnits);
+		result += "fragment texture units(*) = ";
+		result += NLMISC::toString(MaxFragmentTextureImageUnits);
 
 #ifdef NL_OS_WINDOWS
 		result += "\n  WindowsGL: ";

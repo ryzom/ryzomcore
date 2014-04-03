@@ -725,7 +725,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 		But this is grave only if a new texture is created, with the same pointer (bad luck).
 		Since an newly allocated texture always pass here before use, we are sure to avoid any problems.
 	*/
-	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; stage++)
+	for (uint stage = 0; stage < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++stage)
 	{
 		activateTexture(stage, NULL);
 	}
@@ -1251,14 +1251,14 @@ bool CDriverGL3::uploadTextureCube (ITexture& tex, CRect& /* rect */, uint8 /* n
 bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 {
 	H_AUTO_OGL(activateTexture)
-	if (this->_CurrentTexture[stage]!=tex)
+	if (_CurrentTexture[stage] != tex)
 	{
 		_DriverGLStates.activeTexture(stage);
 		if (tex && tex->TextureDrvShare)
 		{
 			// get the drv info. should be not NULL.
-			CTextureDrvInfosGL3*	gltext;
-			gltext= getTextureGl(*tex);
+			CTextureDrvInfosGL3 *gltext;
+			gltext = getTextureGl(*tex);
 
 			// Profile, log the use of this texture
 			//=========================================
@@ -1280,7 +1280,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 				if (_CurrentTextureInfoGL[stage] != gltext)
 				{
 					// Cache setup.
-					_CurrentTextureInfoGL[stage]= gltext;
+					_CurrentTextureInfoGL[stage] = gltext;
 
 					// setup this texture
 					glBindTexture(GL_TEXTURE_CUBE_MAP, gltext->ID);
@@ -1348,7 +1348,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 		else
 		{
 			// Force no texturing for this stage.
-			_CurrentTextureInfoGL[stage]= NULL;
+			_CurrentTextureInfoGL[stage] = NULL;
 			// setup texture mode, after activeTexture()
 			// FIXME GL3 TEXTUREMODE _DriverGLStates.setTextureMode(CDriverGLStates3::TextureDisabled);
 
@@ -1359,7 +1359,7 @@ bool CDriverGL3::activateTexture(uint stage, ITexture *tex)
 			}*/
 		}
 
-		this->_CurrentTexture[stage]= tex;
+		_CurrentTexture[stage]= tex;
 	}
 
 	return true;
@@ -1468,7 +1468,7 @@ void		CDriverGL3::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 	setupTexture(tex1);
 
 	// avoid any problem, disable all textures
-	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; stage++)
+	for (uint stage = 0; stage < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++stage)
 	{
 		activateTexture(stage, NULL);
 	}

@@ -256,15 +256,10 @@ CDriverGL3::CDriverGL3()
 	for (i=0; i < IDRV_MAT_MAXTEXTURES; i++)
 	{
 		_MaterialAllTextureTouchedFlag|= IDRV_TOUCHED_TEX[i];
-#ifdef GL_NONE
-		_CurrentTexAddrMode[i] = GL_NONE;
-#else
-		_CurrentTexAddrMode[i] = 0;
-#endif
 	}
 
 	for (i = 0; i < IDRV_MAT_MAXTEXTURES; i++)
-		_UserTexMat[ i ].identity();
+		_UserTexMat[i].identity();
 
 	_UserTexMatEnabled = 0;
 
@@ -411,13 +406,15 @@ bool CDriverGL3::setupDisplay()
 
 	// Activate the default texture environnments for all stages.
 	//===========================================================
-	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
+	for (uint stage = 0; stage < IDRV_PROGRAM_MAXSAMPLERS; ++stage)
 	{
 		// init no texture.
 		_CurrentTexture[stage] = NULL;
 		_CurrentTextureInfoGL[stage] = NULL;
 		// texture are disabled in DriverGLStates.forceDefaults().
-
+	}
+	for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
+	{
 		// init default env.
 		CMaterial::CTexEnv env;	// envmode init to default.
 		env.ConstantColor.set(255,255,255,255);
@@ -1187,7 +1184,8 @@ NLMISC::CRGBA CDriverGL3::getBlendConstantColor() const
 uint			CDriverGL3::getNbTextureStages() const
 {
 	H_AUTO_OGL(CDriverGL3_getNbTextureStages)
-	return IDRV_MAT_MAXTEXTURES;
+
+	return IDRV_MAT_MAXTEXTURES; // Must return this for compatibility
 }
 
 // ***************************************************************************

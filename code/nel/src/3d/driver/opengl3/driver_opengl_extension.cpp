@@ -605,9 +605,12 @@ bool	registerGlExtensions(CGlExtensions &ext)
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
 	}
 
-	GLint nbFragmentTextureUnits;
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &nbFragmentTextureUnits);
-	ext.NbFragmentTextureUnits = (nbFragmentTextureUnits > IDRV_MAT_MAXTEXTURES) ? IDRV_MAT_MAXTEXTURES : nbFragmentTextureUnits; // FIXME GL3
+	// Get the maximum fragment texture unites
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &ext.MaxFragmentTextureImageUnits);
+	if (ext.MaxFragmentTextureImageUnits < 8)
+	{
+		nlwarning("GL_MAX_TEXTURE_IMAGE_UNITS must be greater than or equal to 8, value returned by driver is %i", ext.MaxFragmentTextureImageUnits);
+	}
 
 	return true;
 }

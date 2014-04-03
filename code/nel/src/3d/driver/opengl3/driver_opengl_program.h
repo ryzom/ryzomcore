@@ -51,8 +51,8 @@ struct CVPBuiltin
 
 bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
 
-static const uint8 Sampler2D = 0;
-static const uint8 SamplerCube = 1;
+static const uint64 Sampler2D = 0;
+static const uint64 SamplerCube = 1;
 
 /// Builtin pixel program description
 struct CPPBuiltin
@@ -64,8 +64,8 @@ struct CPPBuiltin
 
 	CMaterial::TShader Shader;
 	uint32 Flags;
-	uint8 TextureActive;
-	uint8 TexSamplerMode[IDRV_MAT_MAXTEXTURES];
+	uint32 TextureActive;
+	uint64 TexSamplerMode;
 	uint32 TexEnvMode[IDRV_MAT_MAXTEXTURES]; // Normal, UserColor
 
 	NLMISC::CRefPtr<CPixelProgram> PixelProgram;
@@ -102,8 +102,8 @@ enum TAttribOffset
 
 extern const uint16 g_VertexFlags[CVertexBuffer::NumValue];
 extern const char *g_AttribNames[CVertexBuffer::NumValue];
-extern const char *g_TexelNames[IDRV_MAT_MAXTEXTURES];
-extern const char *g_ConstantNames[4];
+extern const char *g_TexelNames[IDRV_PROGRAM_MAXSAMPLERS];
+extern const char *g_ConstantNames[IDRV_PROGRAM_MAXSAMPLERS];
 
 namespace /* anonymous */ {
 

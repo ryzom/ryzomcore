@@ -45,6 +45,17 @@ uint maxTextures(CMaterial::TShader shader)
 	}
 }
 
+uint maxSamplers(CMaterial::TShader shader, CGlExtensions &glext)
+{
+	switch (shader)
+	{
+	case CMaterial::LightMap:
+		return std::min((GLint)IDRV_PROGRAM_MAXSAMPLERS, glext.MaxFragmentTextureImageUnits);
+	default:
+		return maxTextures(shader);
+	}
+}
+
 bool useTexEnv(CMaterial::TShader shader)
 {
 	return shader == CMaterial::Normal
@@ -67,12 +78,9 @@ bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
 		return left.Flags < right.Flags;
 	if (left.TextureActive != right.TextureActive)
 		return left.TextureActive < right.TextureActive;
+	if (left.TexSamplerMode != right.TexSamplerMode)
+		return left.TexSamplerMode < right.TexSamplerMode;					
 	uint maxTex = maxTextures(left.Shader);
-	if (left.TextureActive)
-		for (uint stage = 0; stage < maxTex; ++stage)
-			if (useTex(left, stage))
-				if (left.TexSamplerMode[stage] != right.TexSamplerMode[stage])
-					return left.TexSamplerMode[stage] < right.TexSamplerMode[stage];
 	if (useTexEnv(left.Shader))
 		for (uint stage = 0; stage < maxTex; ++stage)
 			if (left.TexEnvMode[stage] != right.TexEnvMode[stage])
@@ -405,8 +413,9 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 		}
 		if (useTex(desc, stage))
 		{
+			uint64 samplerMode = (desc.TexSamplerMode >> (stage * 2)) & 0x3;
 			ss << "uniform "
-				<< ((desc.TexSamplerMode[stage] == SamplerCube) ? "samplerCube" : "sampler2D")
+				<< ((samplerMode == SamplerCube) ? "samplerCube" : "sampler2D")
 				<< " sampler" << stage << ";" << std::endl;
 		}
 	}
@@ -501,7 +510,8 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc)
 				nlwarning("GL3: Pixel Program generated for material with coordinateless texture");
 				ss << "vec4(0.0, 0.0, 0.0, 0.0)";
 			}
-			ss << ((desc.TexSamplerMode[stage] == SamplerCube) ? ".stp);" : ".st);");
+			uint64 samplerMode = (desc.TexSamplerMode >> (stage * 2)) & 0x3;
+			ss << ((samplerMode == SamplerCube) ? ".stp);" : ".st);");
 			ss << std::endl;
 		}
 	}
@@ -605,22 +615,16 @@ void CPPBuiltin::checkDriverMaterialStateTouched(CDriverGL3 *driver, CMaterial &
 	{
 	case CMaterial::LightMap:
 		// Use Textures from current driver state
-		// NB: Might be necessary to use this for every material type and remove the one from the other function
-		uint maxTex = maxTextures(shader);
-		uint8 textureActive = 0x00;
-		for (uint stage = 0; stage < maxTex; ++stage)
+		uint maxSam = maxSamplers(shader, driver->_Extensions);
+		uint32 textureActive = 0;
+		uint64 texSamplerMode = 0;
+		for (uint stage = 0; stage < maxSam; ++stage) // NB: Limited to IDRV_PROGRAM_MAXSAMPLERS here
 		{
 			NL3D::ITexture *tex = driver->_CurrentTexture[stage];
 			if (tex)
 			{
 				textureActive |= (1 << stage);
-
-				uint8 texSamplerMode = tex->isTextureCube() ? SamplerCube : Sampler2D;
-				if (TexSamplerMode[stage] != texSamplerMode)
-				{
-					TexSamplerMode[stage] = texSamplerMode;
-					Touched = true;
-				}
+				texSamplerMode |= (tex->isTextureCube() ? SamplerCube : Sampler2D) << (stage * 2);
 			}
 		}
 		if (TextureActive != textureActive)
@@ -628,7 +632,11 @@ void CPPBuiltin::checkDriverMaterialStateTouched(CDriverGL3 *driver, CMaterial &
 			TextureActive = textureActive;
 			Touched = true;
 		}
-		// nldebug("TextureActive: %i", TextureActive);
+		if (TexSamplerMode != texSamplerMode)
+		{
+			TexSamplerMode = texSamplerMode;
+			Touched = true;
+		}
 		break;
 	}
 }
@@ -659,28 +667,29 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 		switch (shader)
 		{
 		case CMaterial::LightMap:
+			break;
 		default:
 			// Use textures directly from the CMaterial
-			uint8 textureActive = 0x00;
-			for (uint stage = 0; stage < maxTex; ++stage)
+			uint32 textureActive = 0;
+			uint64 texSamplerMode = 0;
+			for (uint stage = 0; stage < maxTex; ++stage) // NB: Limited to IDRV_MAT_MAXTEXTURES here
 			{
 				NL3D::ITexture *tex = mat._Textures[stage];
 				if (tex)
 				{
 					textureActive |= (1 << stage);
-
 					// Issue: Due to the IDRV_TOUCHED_ALLTEX check, the sampler mode of an ITexture cannot be modified after it has been added to the CMaterial
-					uint8 texSamplerMode = tex->isTextureCube() ? SamplerCube : Sampler2D;
-					if (TexSamplerMode[stage] != texSamplerMode)
-					{
-						TexSamplerMode[stage] = texSamplerMode;
-						Touched = true;
-					}
+					texSamplerMode |= (tex->isTextureCube() ? SamplerCube : Sampler2D) << (stage * 2);
 				}
 			}
 			if (TextureActive != textureActive)
 			{
 				TextureActive = textureActive;
+				Touched = true;
+			}
+			if (TexSamplerMode != texSamplerMode)
+			{
+				TexSamplerMode = texSamplerMode;
 				Touched = true;
 			}
 			break;

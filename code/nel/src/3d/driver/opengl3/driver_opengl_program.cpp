@@ -65,20 +65,76 @@ const char *g_AttribNames[CVertexBuffer::NumValue] =
 	"texCoord7"
 };
 
-const char *g_TexelNames[IDRV_MAT_MAXTEXTURES] =
+const char *g_TexelNames[IDRV_PROGRAM_MAXSAMPLERS] =
 {
 	"texel0",
 	"texel1",
 	"texel2",
-	"texel3"
+	"texel3",
+	"texel4",
+	"texel5",
+	"texel6",
+	"texel7",
+	"texel8",
+	"texel9",
+	"texel10",
+	"texel11",
+	"texel12",
+	"texel13",
+	"texel14",
+	"texel15",
+	"texel16",
+	"texel17",
+	"texel18",
+	"texel19",
+	"texel20",
+	"texel21",
+	"texel22",
+	"texel23",
+	"texel24",
+	"texel25",
+	"texel26",
+	"texel27",
+	"texel28",
+	"texel29",
+	"texel30",
+	"texel31",
 };
 
-const char *g_ConstantNames[4] =
+const char *g_ConstantNames[IDRV_PROGRAM_MAXSAMPLERS] =
 {
 	"constant0",
 	"constant1",
 	"constant2",
-	"constant3"
+	"constant3",
+	"constant4",
+	"constant5",
+	"constant6",
+	"constant7",
+	"constant8",
+	"constant9",
+	"constant10",
+	"constant11",
+	"constant12",
+	"constant13",
+	"constant14",
+	"constant15",
+	"constant16",
+	"constant17",
+	"constant18",
+	"constant19",
+	"constant20",
+	"constant21",
+	"constant22",
+	"constant23",
+	"constant24",
+	"constant25",
+	"constant26",
+	"constant27",
+	"constant28",
+	"constant29",
+	"constant30",
+	"constant31",
 };
 
 bool CDriverGL3::supportVertexProgram(CVertexProgram::TProfile profile) const
@@ -856,7 +912,7 @@ void CDriverGL3::setupInitialUniforms(IProgram *program)
 	{
 		GLuint id = drvInfo->getProgramId();
 	
-		for (uint i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+		for (uint i = 0; i < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++i)
 		{
 			uint samplerIdx = program->getUniformIndex((CProgramIndex::TName)(CProgramIndex::Sampler0 + i));
 			if (samplerIdx >= 0)
