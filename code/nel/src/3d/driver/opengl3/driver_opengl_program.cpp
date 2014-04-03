@@ -224,13 +224,13 @@ bool CDriverGL3::activeVertexProgram(CVertexProgram *program, bool driver)
 	}
 
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
-	if (drvInfo == NULL)
+	if (di == NULL)
 	{
 		m_UserVertexProgram = NULL;
 		m_DriverVertexProgram = NULL;
 		return false;
 	}
+	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 
 	nglUseProgramStages(ppoId, GL_VERTEX_SHADER_BIT, drvInfo->getProgramId());
 
@@ -337,13 +337,13 @@ bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
 	}
 	
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
-	if (drvInfo == NULL)
+	if (di == NULL)
 	{
 		m_UserPixelProgram = NULL;
 		m_DriverPixelProgram = NULL;
 		return false;
 	}
+	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 
 	nglUseProgramStages(ppoId, GL_FRAGMENT_SHADER_BIT, drvInfo->getProgramId());
 
@@ -355,35 +355,31 @@ bool CDriverGL3::activePixelProgram(CPixelProgram *program, bool driver)
 
 uint32 CDriverGL3::getProgramId(TProgram program) const
 {
-	uint32 id = 0;
-
+	IProgramDrvInfos *di;
 	switch(program)
 	{
 	case IDriver::VertexProgram:
 		if (m_DriverVertexProgram)
-		{
-			IProgramDrvInfos *di = m_DriverVertexProgram->m_DrvInfo;
-			CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
-			if (drvInfo != NULL)
-				id = drvInfo->getProgramId();
-		}
+			di = m_DriverVertexProgram->m_DrvInfo;
+		else
+			di = NULL;
 		break;
-
 	case IDriver::PixelProgram:
 		if (m_DriverPixelProgram)
-		{
-			IProgramDrvInfos *di = m_DriverPixelProgram->m_DrvInfo;
-			CProgramDrvInfosGL3 *drvInfo = dynamic_cast< CProgramDrvInfosGL3* >(di);
-			if (drvInfo != NULL)
-				id = drvInfo->getProgramId();
-		}
+			di = m_DriverPixelProgram->m_DrvInfo;
+		else
+			di = NULL;
 		break;
-
-	case IDriver::GeometryProgram:
+	default:
+		di = NULL;
 		break;
 	}
-
-	return id;
+	
+	if (di == NULL)
+		return 0;
+	
+	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
+	return drvInfo->getProgramId();
 }
 
 IProgram* CDriverGL3::getProgram(TProgram program) const
@@ -752,8 +748,11 @@ void CDriverGL3::setupUniforms(TProgram program)
 {
 	CMaterial &mat = *_CurrentMaterial;
 	IProgram *p = getProgram(program);
-	CProgramDrvInfosGL3 *drvInfo = dynamic_cast<CProgramDrvInfosGL3 *>(&*p->m_DrvInfo);
-	if (drvInfo == NULL) return;
+	if (p == NULL) return;
+	IProgramDrvInfos *di = p->m_DrvInfo;
+	if (di == NULL) return;
+
+	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 	GLuint progId = drvInfo->getProgramId();
 
 	uint mvpIndex = p->getUniformIndex(CProgramIndex::ModelViewProjection);
@@ -907,9 +906,9 @@ void CDriverGL3::setupUniforms(TProgram program)
 void CDriverGL3::setupInitialUniforms(IProgram *program)
 {
 	IProgramDrvInfos *di = program->m_DrvInfo;
-	CProgramDrvInfosGL3 *drvInfo = dynamic_cast<CProgramDrvInfosGL3 *>(di);
-	if (drvInfo != NULL)
+	if (di != NULL)
 	{
+		CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 		GLuint id = drvInfo->getProgramId();
 	
 		for (uint i = 0; i < std::min(_Extensions.MaxFragmentTextureImageUnits, (GLint)IDRV_PROGRAM_MAXSAMPLERS); ++i)
