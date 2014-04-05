@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="Array" Type="Dfn" Filename="id_to_string.dfn" Array="true"/>
-  <LOG>Tue Dec 09 19:23:11 2003 (vizerie) Dfn Structure = </LOG>
-</DFN>

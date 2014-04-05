@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.11" State="modified">
-  <ELEMENT Name="Population" Type="Type" Filename="float.typ" Default="20"/>
-  <ELEMENT Name="SpawnTime" Type="Type" Filename="float.typ" Default="20"/>
-  <ELEMENT Name="Type" Type="Type" Filename="filename.typ"/>
-  <ELEMENT Name="Class" Type="Type" Filename="_ai_creature_type.typ"/>
-  <ELEMENT Name="Name" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="UserType" Type="Type" Filename="game_creature.typ" Default="1"/>
-</DFN>

@@ -36,6 +36,7 @@
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/stereo_ng_hmd.h"
 // Client
 #include "global.h"
 #include "release.h"
@@ -512,6 +513,21 @@ void releaseOutGame()
 	ContinentMngr.reset();
 }
 
+void releaseStereoDisplayDevice()
+{
+	if (StereoDisplay)
+	{
+		if (NoLogout && StereoNGHMD)
+			StereoNGHMD->killUser();
+
+		delete StereoDisplay;
+		StereoDisplay = NULL;
+		StereoHMD = NULL;
+		StereoNGHMD = NULL;
+	}
+	IStereoDisplay::releaseAllLibraries();
+}
+
 // ***************************************************************************
 // final release : Release before exit.
 void release()
@@ -559,13 +575,7 @@ void release()
 	EAM= NULL;
 
 	nldebug("VR [C]: VR Shutting down");
-	if (StereoDisplay)
-	{
-		delete StereoDisplay;
-		StereoDisplay = NULL;
-		StereoHMD = NULL;
-	}
-	IStereoDisplay::releaseAllLibraries();
+	releaseStereoDisplayDevice();
 
 	// Delete the driver.
 	if(Driver)

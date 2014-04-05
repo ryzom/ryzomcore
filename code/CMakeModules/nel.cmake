@@ -323,6 +323,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
+  OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)
@@ -341,6 +342,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM_TOOLS         "Build Ryzom Core Tools"                        ON )
   OPTION(WITH_RYZOM_SERVER        "Build Ryzom Core Services"                     ON )
   OPTION(WITH_RYZOM_SOUND         "Enable Ryzom Core Sound"                       ON )
+  OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
 
   ###
   # Optional support
@@ -786,11 +788,15 @@ MACRO(NL_SETUP_BUILD)
 
             ADD_PLATFORM_FLAGS("${XARCH}-isysroot${CMAKE_IOS_SIMULATOR_SYSROOT}")
             ADD_PLATFORM_FLAGS("${XARCH}-mios-simulator-version-min=${IOS_VERSION}")
-            SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+            IF(CMAKE_OSX_DEPLOYMENT_TARGET)
+              SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+            ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET)
           ENDIF(CMAKE_IOS_SIMULATOR_SYSROOT AND TARGET_X86)
         ELSE(IOS)
           # Always force -mmacosx-version-min to override environement variable
-          SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+          IF(CMAKE_OSX_DEPLOYMENT_TARGET)
+            SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+          ENDIF(CMAKE_OSX_DEPLOYMENT_TARGET)
         ENDIF(IOS)
 
         SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-headerpad_max_install_names")
@@ -883,7 +889,7 @@ MACRO(NL_SETUP_BUILD)
       SET(NL_RELEASE_CFLAGS "${NL_RELEASE_CFLAGS} -g")
     ELSE(WITH_SYMBOLS)
       IF(APPLE)
-        SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip -Wl,-x ${NL_RELEASE_LINKFLAGS}")
+        SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip ${NL_RELEASE_LINKFLAGS}")
       ELSE(APPLE)
         SET(NL_RELEASE_LINKFLAGS "-Wl,-s ${NL_RELEASE_LINKFLAGS}")
       ENDIF(APPLE)

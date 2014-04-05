@@ -21,6 +21,9 @@
 // INCLUDES //
 //////////////
 #include "stdpch.h"
+
+#include "nel/3d/stereo_ng_hmd.h"
+
 // Client.
 #include "../../input.h"
 #include "../user_controls.h"
@@ -28,6 +31,7 @@
 #include "../../view.h"
 #include "../../interface_v3/interface_manager.h"
 #include "../../entities.h"
+#include "global.h"
 
 
 ///////////
@@ -61,6 +65,9 @@ void CUserControls::deathModeStart()
 	_InternalView = false;
 	// Show/hide all or parts of the user body (after _InternaView is set).
 	UserEntity->updateVisualDisplay();
+	// Kill the player
+	if (StereoNGHMD)
+		StereoNGHMD->killUser();
 }// deathModeStart //
 
 //-----------------------------------------------

@@ -19,6 +19,7 @@
 
 #include <afxdlgs.h>
 #include <set>
+#include "resource.h"
 
 namespace  NLGEORGES
 {

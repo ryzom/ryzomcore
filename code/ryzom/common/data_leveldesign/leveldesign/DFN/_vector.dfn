@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.0" State="modified">
-  <ELEMENT Name="X" Type="Type" Filename="float.typ"/>
-  <ELEMENT Name="Y" Type="Type" Filename="float.typ"/>
-  <ELEMENT Name="Z" Type="Type" Filename="float.typ"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:02 2002 (corvazier) File converted from old format</LOG>
-</DFN>

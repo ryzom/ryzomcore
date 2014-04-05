@@ -60,6 +60,7 @@ public:
 	{
 		StereoDisplay, 
 		StereoHMD, 
+		StereoNGHMD, 
 	};
 	
 	enum TStereoDeviceLibrary
@@ -77,6 +78,7 @@ public:
 	std::string Manufacturer;
 	std::string ProductName;
 	std::string Serial; // A unique device identifier
+	bool AllowAuto; // Allow this device to be automatically selected when no device is configured
 };
 
 /**

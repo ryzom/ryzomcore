@@ -21,8 +21,6 @@
 // Memory
 #include <memory>
 
-#include "game_share/ryzom_version.h"
-
 #include "nel/misc/i_xml.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/algo.h"
@@ -131,29 +129,7 @@ using namespace NLGUI;
 #include "parser_modules.h"
 
 #include "../global.h"
-
-#ifdef HAVE_REVISION_H
-#include "revision.h"
-#endif
-
-#if defined(HAVE_X86_64)
-#define RYZOM_ARCH "x64"
-#elif defined(HAVE_X86)
-#define RYZOM_ARCH "x86"
-#elif defined(HAVE_ARM)
-#define RYZOM_ARCH "arm"
-#else
-#define RYZOM_ARCH "unknow"
-#endif
-#if defined(NL_OS_WINDOWS)
-#define RYZOM_SYSTEM "windows"
-#elif defined(NL_OS_MAC)
-#define RYZOM_SYSTEM "mac"
-#elif defined(NL_OS_UNIX)
-#define RYZOM_SYSTEM "unix"
-#else
-#define RYZOM_SYSTEM "unkown"
-#endif
+#include "user_agent.h"
 
 using namespace NLMISC;
 
@@ -489,18 +465,10 @@ CInterfaceManager::CInterfaceManager()
 	CViewTextID::setTextProvider( &SMTextProvider );
 	CViewTextFormated::setFormatter( &RyzomTextFormatter );
 
-	char buffer[256];
-
-#ifdef REVISION
-	sprintf(buffer, "%s.%s-%s-%s", RYZOM_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
-#else
-	sprintf(buffer, "%s-%s-%s", RYZOM_VERSION, RYZOM_SYSTEM, RYZOM_ARCH);
-#endif
-
 	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
 	CGroupHTML::options.appName = "Ryzom";
-	CGroupHTML::options.appVersion = buffer;
+	CGroupHTML::options.appVersion = getUserAgent();
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
@@ -1121,6 +1089,7 @@ void CInterfaceManager::configureQuitDialogBox()
 		// Show Launch Editor if not in editor mode
 		CInterfaceElement *eltCancel = quitDlg->getElement(quitDialogStr+":cancel");
 		CInterfaceElement *eltEdit = quitDlg->getElement(quitDialogStr+":launch_editor");
+
 		if (eltEdit)
 		{
 			if (UserRoleInSession != R2::TUserRole::ur_editor && !sessionOwner)
@@ -1190,6 +1159,18 @@ void CInterfaceManager::configureQuitDialogBox()
 				eltQuitNow->setY(0);
 				eltQuitNow->setActive(false);
 			}
+		}
+
+		if (NoLogout)
+		{
+			eltEdit->setY(0);
+			eltEdit->setActive(false);
+			eltQuit->setY(0);
+			eltQuit->setActive(false);
+			eltQuitNow->setY(0);
+			eltQuitNow->setActive(false);
+			eltRet->setY(0);
+			eltRet->setActive(false);
 		}
 	}
 

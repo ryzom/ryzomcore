@@ -186,7 +186,7 @@
 				if (mysqli_num_rows($result) == 0)
 				{
 					// no ring user record, build one
-					$login = mysqli_real_escape_string($ringDb, $login);
+					$login = mysqli_real_escape_string($ringDb, $_GET['login']);
 					$query = "INSERT INTO ring_users SET user_id = '$id', user_name = '$login', user_type='ut_pioneer'";
 					$result = mysqli_query ($ringDb, $query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysqli_error($ringDb)));
 				}

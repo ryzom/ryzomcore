@@ -47,6 +47,14 @@ printLog(log, "")
 
 mkPath(log, ActiveProjectDirectory + "/generated")
 zlp = open(ActiveProjectDirectory + "/generated/properties.cfg", "w")
+zlp.write("\n")
+zlp.write("// Search pathes\n")
+zlp.write("search_pathes = \n")
+zlp.write("{\n")
+for searchPath in PropertiesExportBuildSearchPaths:
+	zlp.write("\t\"" + ExportBuildDirectory + "/" + searchPath + "\",\n")
+zlp.write("};\n")
+zlp.write("\n")
 ps = open(ActiveProjectDirectory + "/properties_base.cfg", "r")
 for line in ps:
 	try:

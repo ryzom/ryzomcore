@@ -10,7 +10,7 @@ IF(FREETYPE_LIBRARIES AND FREETYPE_INCLUDE_DIRS)
 ENDIF(FREETYPE_LIBRARIES AND FREETYPE_INCLUDE_DIRS)
 
 FIND_PATH(FREETYPE_INCLUDE_DIRS
-  freetype.h
+  freetype
   PATHS
   $ENV{FREETYPE_DIR}/include
   /usr/local/include
@@ -19,8 +19,12 @@ FIND_PATH(FREETYPE_INCLUDE_DIRS
   /opt/local/include
   /opt/csw/include
   /opt/include
-  PATH_SUFFIXES freetype2/freetype freetype freetype2
+  PATH_SUFFIXES freetype2
 )
+
+IF(NOT FREETYPE_INCLUDE_DIRS)
+  SET(FREETYPE_INCLUDE_DIRS "")
+ENDIF(NOT FREETYPE_INCLUDE_DIRS)
 
 # ft2build.h does not reside in the freetype include dir
 FIND_PATH(FREETYPE_ADDITIONAL_INCLUDE_DIR

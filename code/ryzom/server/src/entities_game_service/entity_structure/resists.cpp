@@ -22,8 +22,6 @@
 #include "stdpch.h"
 //
 #include "resists.h"
-#include "player_manager/character.h"
-#include "game_item_manager/game_item.h"
 
 //////////////
 //	USING	//

@@ -1,0 +1,442 @@
+//-----------------------------------------------------------------------------
+// The set of std01 domains
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// std01 Domain
+//-----------------------------------------------------------------------------
+
+// the std01 domain -----------------
+
+define domain_std01
+	domain std01
+	use shard_std01_unifier
+	use shard_std01_mainland01
+	use shard_std01_mainland02
+	use shard_std01_ring01
+	use shard_std01_ring02
+
+	// domain ports
+	cfg ASWebPort="46700";
+	cfg ASPort="46701";
+	cfg AESPort="46702";
+	cfg SUPort = 50505;
+	cfg SUGlobalPort = 50503;
+	cfg L3BSPort = "49950";
+	cfg L3SlaveBSPort = "49951";
+	cfg L3MasterLGSPort = 49992;
+	cfg L3SlaveLGSPort = 49993;
+	cfg LGSBSPort = 49994;
+	cfg L3LGSBSPort = 49995;
+
+	// domain hosts
+	cfg AESHost = "localhost";
+	cfg SUHost = "su1.std01.ryzomcore.org";
+	cfg MFSHost = "su1.std01.ryzomcore.org";
+	cfg BSHost = "pd1.std01.ryzomcore.org:49990"; // Backup service host for domain
+	cfg SlaveBSHost= "pd2.std01.ryzomcore.org:49991";
+	cfg MasterLGSHost = "pd3.std01.ryzomcore.org";
+	cfg SlaveLGSHost = "pd4.std01.ryzomcore.org";
+	cfg LGSBSHost = "csr.core.ryzomcore.org"; // Backup service host for log service
+	cfg DBHost = "sql.core.ryzomcore.org";
+	cfgAfter WebSrvHost = "http://su1.std01.ryzomcore.org:50000/";
+
+	// initial config files
+	cfgFile ../cfg/00_base.cfg
+	cfgFile ../cfg/01_domain_std01.cfg
+
+	// shard names and ids
+	cfgAfter Mainlands = {
+	cfgAfter 	"101", "Mainland 01", "(Mainland 01)", "en",
+	cfgAfter 	"102", "Mainland 02", "(Mainland 02)", "en",
+	cfgAfter };
+	cfgAfter HomeMainlandNames =
+	cfgAfter {
+	cfgAfter 	"101", "Mainland 01", "mla",
+	cfgAfter 	"102", "Mainland 02", "mlb",
+	cfgAfter };
+	cfgAfter RRDVarPath = "../rrd_graphs";
+
+	// addition of extra filters for this domain
+//	cfgAfter NegFiltersDebug+= {"DEFAULT_CB", "NET","ADMIN","MIRROR","CDB_MULTI_IMPULSION"};
+	cfgAfter NegFiltersInfo+= {"FESTATS", "FETIME", "FERECV", "FESEND: sent SYNC message to client 1", "EIT: Register EId"};
+	cfgAfter NegFiltersWarning+= {"PIPO_SESSION1", "casino_session_matis01", "invalid damage type 10", "_log_Item_Delete", 
+	cfgAfter "_log_Item_Money", "_log_Item_Create", "_log_Item_Move", "botChatMissionAdvance> invalid index 0", 
+	cfgAfter "_MaxRange(0) < _MinRange(1)", "Can't find craft plan sheet 'unknown.unknown'"};
+	cfgAfter DontUseAES=1;
+//	cfgAfter RingAccessLimits="d3:j2:f2:l2:p2";
+	cfgAfter RingRPEnabled=0;
+	cfgAfter DomainName = "std01";
+	cfgAfter EnableStlAllocatorChecker = 0;
+
+	cfgAfter // start commands for setting up the exchange level caps of different std01 shards
+	cfgAfter StartCommands += { "setShardExchangeLimit 101 250" };
+	cfgAfter StartCommands += { "setShardExchangeLimit 102 250" };
+	cfgAfter StartCommands += { "displayShardExchangeLimits" };
+
+
+// shard unifier -------------------
+
+define shard_std01_unifier
+	shard unifier
+	cfg ShardId = 100;
+	use shard_exe_set_std01_ras
+	use shard_exe_set_std01_unifier
+
+define shard_exe_set_std01_ras
+	use ras
+	host ep1.std01.ryzomcore.org
+	
+define shard_exe_set_std01_unifier
+	use exe_set_std_unifier
+	host su1.std01.ryzomcore.org
+	cfg DBPass = DBNelPass;
+
+
+// shard mainland01 ----------------
+
+define shard_std01_mainland01
+	shard mainland01
+	use shard_exe_set_std01_mainland01_be01
+	use shard_exe_set_std01_mainland01_be02
+	use shard_exe_set_std01_mainland01_be03
+	use shard_exe_set_std01_mainland01_fe01
+	use shard_exe_set_std01_mainland01_fe02
+	cfg ShardId = 101;
+	cfg BasePort = 51000;
+	cfg SaveFilesDirectory="std01_mainland01/";
+	cfg NSHost = "mla1.std01.ryzomcore.org";
+	cfgFile ../cfg/02_shard_type_std_mainland.cfg
+
+define shard_exe_set_std01_mainland01_be01
+	use exe_set_std_mainland_be01
+	host mla1.std01.ryzomcore.org
+
+define shard_exe_set_std01_mainland01_be02
+	use exe_set_std_mainland_be02
+	host mla2.std01.ryzomcore.org
+
+define shard_exe_set_std01_mainland01_be03
+	use exe_set_std_mainland_be03
+	host mla3.std01.ryzomcore.org
+
+define shard_exe_set_std01_mainland01_fe01
+	use exe_set_std_mainland_fe
+	host mla4.std01.ryzomcore.org
+	cfg FSListenHost = "mla4.std01.ryzomcore.org";
+
+define shard_exe_set_std01_mainland01_fe02
+	use exe_set_std_mainland_fe
+	host mla5.std01.ryzomcore.org
+	cfg FSListenHost = "mla5.std01.ryzomcore.org";
+
+
+// shard mainland02 ----------------
+
+define shard_std01_mainland02
+	shard mainland02
+	use shard_exe_set_std01_mainland02_be01
+	use shard_exe_set_std01_mainland02_be02
+	use shard_exe_set_std01_mainland02_be03
+	use shard_exe_set_std01_mainland02_fe01
+	use shard_exe_set_std01_mainland02_fe02
+	cfg ShardId = 102;
+	cfg BasePort = 51100;
+	cfg SaveFilesDirectory="std01_mainland02/";
+	cfg NSHost = "mlb1.std01.ryzomcore.org";
+	cfgFile ../cfg/02_shard_type_std_mainland.cfg
+
+define shard_exe_set_std01_mainland02_be01
+	use exe_set_std_mainland_be01
+	host mlb1.std01.ryzomcore.org
+
+define shard_exe_set_std01_mainland02_be02
+	use exe_set_std_mainland_be02
+	host mlb2.std01.ryzomcore.org
+
+define shard_exe_set_std01_mainland02_be03
+	use exe_set_std_mainland_be03
+	host mlb3.std01.ryzomcore.org
+
+define shard_exe_set_std01_mainland02_fe01
+	use exe_set_std_mainland_fe
+	host mlb4.std01.ryzomcore.org
+	cfg FSListenHost = "mlb4.std01.ryzomcore.org";
+
+define shard_exe_set_std01_mainland02_fe02
+	use exe_set_std_mainland_fe
+	host mlb5.std01.ryzomcore.org
+	cfg FSListenHost = "mlb5.std01.ryzomcore.org";
+
+
+// shard ring01 --------------------
+
+define shard_std01_ring01
+	shard ring01
+	use shard_exe_set_std01_ring01_be
+	use shard_exe_set_std01_ring01_fe
+	cfg ShardId = 201;
+	cfg BasePort = 51400;
+	cfg SaveFilesDirectory="std01_ring01/";
+	cfg NSHost = "rra1.std01.ryzomcore.org";
+	cfgFile ../cfg/02_shard_type_std_ring.cfg
+
+define shard_exe_set_std01_ring01_be
+	use exe_set_std_ring_be
+	host rra1.std01.ryzomcore.org
+
+define shard_exe_set_std01_ring01_fe
+	use exe_set_std_ring_fe
+	host rra2.std01.ryzomcore.org
+	cfg FSListenHost = "rra2.std01.ryzomcore.org";
+
+
+// shard ring02 --------------------
+
+define shard_std01_ring02
+	shard ring02
+	use shard_exe_set_std01_ring02_be
+	use shard_exe_set_std01_ring02_fe
+	cfg ShardId = 202;
+	cfg BasePort = 51500;
+	cfg SaveFilesDirectory="std01_ring02/";
+	cfg NSHost = "rrb1.std01.ryzomcore.org";
+	cfgFile ../cfg/02_shard_type_std_ring.cfg
+
+define shard_exe_set_std01_ring02_be
+	use exe_set_std_ring_be
+	host rrb1.std01.ryzomcore.org
+
+define shard_exe_set_std01_ring02_fe
+	use exe_set_std_ring_fe
+	host rrb2.std01.ryzomcore.org
+	cfg FSListenHost = "rrb2.std01.ryzomcore.org";
+
+
+// the std01 backup domain ----------
+
+define domain_std01_backup
+	domain backup01
+	use shard_std01_backup_ras
+	use shard_std01_backup
+	use shard_std01_lgs
+
+	// domain ports
+	cfg ASWebPort="46710";
+	cfg ASPort="46711";
+	cfg AESPort="46712";
+
+	// initial config files
+	cfgFile ../cfg/00_base.cfg
+	cfgFile ../cfg/01_domain_std01.cfg
+
+	// addition of extra filters for this domain
+	cfgAfter NegFiltersDebug+= {"DEFAULT_CB", "NET","ADMIN","MIRROR","CDB_MULTI_IMPULSION"};
+	cfgAfter NegFiltersInfo+= {"NET", "FETIME","TimerManagerUpdate"};
+	cfgAfter NegFiltersWarning+= {"AES"};
+
+	// Force all backup services to launch in write only mode
+	cfgAfter BSReadState = 0;
+	cfgAfter RRDVarPath = "../rrd_graphs";
+	cfgAfter DontUseAES=1;
+	cfgAfter DontUseNS=1;
+	
+	// shard names and ids
+	cfgAfter Mainlands = {
+	cfgAfter 	"101", "Mainland 01", "(Mainland 01)", "en",
+	cfgAfter 	"102", "Mainland 02", "(Mainland 02)", "en",
+	cfgAfter };
+	cfgAfter HomeMainlandNames =
+	cfgAfter {
+	cfgAfter 	"101", "Mainland 01", "mla",
+	cfgAfter 	"102", "Mainland 02", "mlb",
+	cfgAfter };
+
+
+// backup domain ras ---------------
+
+define shard_std01_backup_ras
+	shard std01_backup_ras
+	cfg ShardId = 100;
+	use ras
+	host ep1.std01.ryzomcore.org
+
+
+// the main backup pair ------------
+
+define shard_std01_backup
+	shard backup
+	use shard_exe_set_std01_backup_master
+	use shard_exe_set_std01_backup_slave
+
+define shard_exe_set_std01_backup_master
+	name bs_master
+	use exe_set_std_backup_master
+	host pd1.std01.ryzomcore.org
+
+define shard_exe_set_std01_backup_slave
+	name bs_slave
+	// hack to workaround bug in backup service
+//	use exe_set_std_backup_slave
+	use exe_set_std01_backup_slave
+	host pd2.std01.ryzomcore.org
+	cfgAfter MasterBSHost = "pd1.std01.ryzomcore.org:49990";
+
+// hack to workaround bug in backup service
+define exe_set_std01_backup_slave
+	use raes
+	use std01_backup_slave
+	use pdss
+
+// hack to workaround bug in backup service
+define std01_backup_slave
+	use bms
+	cmdLine backup_service -C. -L. --nobreak --writepid -P49991
+	cfg #include "../std01/cfg/backup_module_service_slave.cfg"
+	cfgAfter ListeningPort = 49991;
+	cfgAfter L3ListeningPort = 49951;
+	cfgAfter WebPort = 49971;
+	cfgAfter BSReadState = 0;
+	cfgAfter SaveShardRoot = "../save_shard/";
+
+
+// lgs pair & relates bs ------------
+
+define shard_std01_lgs
+	shard lgs
+	use shard_exe_set_std01_lgs_primary
+	use shard_exe_set_std01_lgs_secondary
+	use shard_exe_set_std01_lgs_bs
+	cfg L3MasterLGSPort = 49992;
+	cfg L3SlaveLGSPort = 49993;
+	cfg LGSBSPort = 49994;
+	cfg L3LGSBSPort = 49995;
+	cfg MasterLGSHost = "pd3.std01.ryzomcore.org";
+	cfg SlaveLGSHost = "pd4.std01.ryzomcore.org";
+	cfg LGSBSHost = "csr.core.ryzomcore.org";
+
+define shard_exe_set_std01_lgs_primary
+	name lgs_primary
+	use raes
+	use exe_set_std_lgs_master
+	host pd3.std01.ryzomcore.org
+	
+define shard_exe_set_std01_lgs_secondary
+	name lgs_secondary
+	use raes
+	use exe_set_std_lgs_slave
+	host pd4.std01.ryzomcore.org
+
+define shard_exe_set_std01_lgs_bs
+	name lgs_bs
+	use raes
+	use backup_lgs
+	host csr.core.ryzomcore.org
+
+
+// the std01 las domain -------------
+
+define domain_std01_las
+	domain las01
+	use shard_std01_las_ras
+	use shard_std01_las_master
+	use shard_std01_las_slave
+
+	// domain ports
+	cfg ASWebPort="46720";
+	cfg ASPort="46721";
+	cfg AESPort="46722";
+
+	// initial config files
+	cfgFile ../cfg/00_base.cfg
+//	cfgFile ../cfg/01_domain_std01.cfg
+
+	// addition of extra filters for this domain
+	cfgAfter NegFiltersDebug+= {"DEFAULT_CB", "NET","ADMIN","MIRROR","CDB_MULTI_IMPULSION"};
+	cfgAfter NegFiltersInfo+= {"NET", "FETIME","TimerManagerUpdate"};
+	cfgAfter NegFiltersWarning+= {"AES"};
+	cfgAfter DontUseAES=1;
+	
+
+// las domain ras ------------------
+
+define shard_std01_las_ras
+	shard std01_las_ras
+	cfg ShardId = 100;
+	use ras
+	host ep1.std01.ryzomcore.org
+
+
+// master las ----------------------
+
+define shard_std01_las_master
+	shard std01_las_master
+	cfg ShardId = 99;
+	use raes
+	use las_mainland01
+	use las_mainland02
+	use las_ring01
+	use las_ring02
+	host pd3.std01.ryzomcore.org
+
+define las_mainland01
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_mainland01/pds"};
+	cfgAfter WebPort = 49899;
+	name las_mainland01
+	use las
+
+define las_mainland02
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_mainland02/pds"};
+	cfgAfter WebPort = 49898;
+	name las_mainland02
+	use las
+
+define las_ring01
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_ring01/pds"};
+	cfgAfter WebPort = 49894;
+	name las_ring01
+	use las
+
+define las_ring02
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_ring02/pds"};
+	cfgAfter WebPort = 49893;
+	name las_ring02
+	use las
+
+
+// slave las ------------------------
+
+define shard_std01_las_slave
+	shard std01_las_slave
+	cfg ShardId = 98;
+	use raes
+	use las_mainland01_slave
+	use las_mainland02_slave
+	use las_ring01_slave
+	use las_ring02_slave
+	host pd4.std01.ryzomcore.org
+
+define las_mainland01_slave
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_mainland01/pds"};
+	cfgAfter WebPort = 49899;
+	name las2_mainland01
+	use las
+
+define las_mainland02_slave
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_mainland02/pds"};
+	cfgAfter WebPort = 49898;
+	name las2_mainland02
+	use las
+
+define las_ring01_slave
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_ring01/pds"};
+	cfgAfter WebPort = 49894;
+	name las2_ring01
+	use las
+
+define las_ring02_slave
+	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_ring02/pds"};
+	cfgAfter WebPort = 49893;
+	name las2_ring02
+	use las

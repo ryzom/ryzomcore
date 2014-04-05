@@ -1,0 +1,129 @@
+#!/bin/sh
+
+CMD=$*
+
+if [ "$CMD" = "" ]
+then
+
+    echo
+    echo Screen sessions currently running:
+    screen -list
+    echo
+    echo "Commands:"
+    echo "  'start' to start the admin"
+    echo "  'stop'  to stop the admin"
+    echo "  'join'  to join the admin's screen session"
+    echo "  'share' to join the admin if session is shared mode"
+    echo
+    printf "Enter a command: "
+    read CMD
+fi
+
+if [ "$CMD" = "stop" ]
+then
+	for s in $(screen -list | grep "\.admin.*" | awk '{ print $1 }'); do screen -drR $s -X quit; done
+fi
+
+if [ "$CMD" = "start" ]
+then
+	# force the ulimit just in case (so that we can generate cores)
+	ulimit -c unlimited
+
+	# stop any admin sessions that were already up
+	for s in $(screen -list | grep "\.admin.*" | awk '{ print $1 }'); do screen -drR $s -X quit; done
+
+	# start the main admin session
+    screen -d -m -S admin -c /srv/core/bin/admin.screen.rc
+
+	# decide which hostname to use...
+	HOSTNAME=$(hostname)
+	if [ $(grep $HOSTNAME /srv/core/patchman/special_patchman_list | wc -w) = 0 ]
+	then
+		HOSTNAME=$(hostname -s)
+	fi
+	
+	# if this machine has associated special admin functins then start the appropriate admin sessions
+	echo Looking for sessions for host: $HOSTNAME
+	for ROLE in $(grep $HOSTNAME /srv/core/patchman/special_patchman_list | awk '{ print $1 }')
+	do
+	  ROLE_DIR=/srv/core/$ROLE
+	  SRC_CFG_FILE=/srv/core/patchman/patchman_service.$ROLE.cfg
+
+	  # make sure the cfg file exists for the patchman we're to launch
+	  if [ -e $SRC_CFG_FILE ]
+	  then
+		  # preliminary setup prior to launching special admin patchman
+		  CFG_FILE=$ROLE_DIR/patchman_service.cfg
+		  SCREEN_NAME=admin_$ROLE
+		  mkdir -p $ROLE_DIR
+		  cp -v $SRC_CFG_FILE $CFG_FILE
+	
+          # wait 2 seconds before launching the next admin to reduce system conflict
+		  sleep 2
+
+		  # start the next patchman in its own screen session
+		  pushd $ROLE_DIR > /dev/null
+		  echo STARTING $SCREEN_NAME \($ROLE\)
+		  screen -d -m -S $SCREEN_NAME /bin/sh /srv/core/patchman/loop_special_patchman.sh /srv/core/patchman/ryzom_patchman_service -L. -C.
+		  popd > /dev/null
+
+	  else
+		  # the patchman\'s cfg couln\'t be found so complain and ignore
+		  echo FILE NOT FOUND: $SRC_CFG_FILE
+	  fi
+	done
+	
+
+	# try launching the screen sessions that correspond to the machine type that we have...
+	
+	# get the domain list
+	cd /srv/core/patchman/
+	if [ $(grep $(hostname) auto_start_domain_list |wc -l) -gt 0 ]
+		then
+		DOMAIN_LIST=$(grep $(hostname) auto_start_domain_list | cut -d\  -f2-)
+	elif [ $(grep $(hostname -s) auto_start_domain_list |wc -l) -gt 0 ]
+		then
+		DOMAIN_LIST=$(grep $(hostname -s) auto_start_domain_list | cut -d\  -f2-)
+	elif [ $(grep $(hostname -d) auto_start_domain_list |wc -l) -gt 0 ]
+		then
+		DOMAIN_LIST=$(grep $(hostname -d) auto_start_domain_list | cut -d\  -f2-)
+	else
+		echo "There are no domains to be autostarted here"
+		DOMAIN_LIST=none
+	fi
+	
+	# if we have a domain list for this machine then deal with it...
+	if [ "$DOMAIN_LIST" != none ]
+	then
+		# iterate over the domain list...
+		for f in $DOMAIN_LIST
+		do
+			# see if we're setup to run this domain
+			if [ -e /srv/core/${f}.screen.rc ] && [ -e /srv/core/bin/${f} ]
+			then
+				# see whether the domain is alredy running
+				if [ $( screen -list | grep \( | cut  -f2 | cut -d. -f2| grep \^$f\$ | wc -l) == 0 ]
+				then
+					# the domain isn't running yet so start it
+					echo '****' starting domain: $f '****'
+					/srv/core/bin/$f batchstart
+				else
+					echo '****' Domain is already running: $f '****'
+				fi
+			else
+				echo skipping domain: $f
+			fi
+		done
+	fi
+fi
+
+if [ "$CMD" = "join" ]
+then
+    screen -r -S admin
+fi
+
+if [ "$CMD" = "share" ]
+then
+    screen -r -x -S admin
+fi
+

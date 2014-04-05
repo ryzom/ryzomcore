@@ -1,8 +1,0 @@
-<xml>
-	<UTC__Date type="UINT32" value="0"/>
-	<_Name type="STRING" value=""/>
-	<_EventFaction1Name type="STRING" value=""/>
-	<_EventFaction2Name type="STRING" value=""/>
-	<_EventFaction1ChannelName type="STRING" value=""/>
-	<_EventFaction2ChannelName type="STRING" value=""/>
-</xml>

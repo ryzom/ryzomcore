@@ -422,16 +422,16 @@ CClientConfig::CClientConfig()
 	MouseOverFX = "sfx_selection_mouseover.ps";
 	SelectionFXSize = 0.8f;
 
-	// only force patching under Windows by default
-#ifdef NL_OS_WINDOWS
+#if RZ_USE_PATCH
 	PatchWanted = true;
 #else
 	PatchWanted = false;
 #endif
-	PatchUrl = "";
-	PatchletUrl = "";
-	PatchVersion = "";
-	PatchServer = "";
+
+	PatchUrl.clear();
+	PatchletUrl.clear();
+	PatchVersion.clear();
+	PatchServer.clear();
 
 	WebIgMainDomain = "atys.ryzom.com";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
@@ -846,7 +846,6 @@ void CClientConfig::setValues()
 		if (nlstricmp(varPtr->asString(), "Auto") == 0 || nlstricmp(varPtr->asString(), "0") == 0) ClientCfg.Driver3D = CClientConfig::DrvAuto;
 		else if (nlstricmp(varPtr->asString(), "OpenGL") == 0 || nlstricmp(varPtr->asString(), "1") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL;
 		else if (nlstricmp(varPtr->asString(), "Direct3D") == 0 || nlstricmp(varPtr->asString(), "2") == 0) ClientCfg.Driver3D = CClientConfig::Direct3D;
-		else if (nlstricmp(varPtr->asString(), "OpenGLES") == 0 || nlstricmp(varPtr->asString(), "3") == 0) ClientCfg.Driver3D = CClientConfig::OpenGLES;
 	}
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
@@ -892,7 +891,9 @@ void CClientConfig::setValues()
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ConditionsTermsURL)
+	READ_STRING_FV(BetaAccountURL)
 	READ_STRING_FV(ForgetPwdURL)
+	READ_STRING_FV(FreeTrialURL)
 	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
@@ -1057,11 +1058,18 @@ void CClientConfig::setValues()
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
 	READ_BOOL_FV(PatchWanted)
+	READ_STRING_FV(PatchServer)
+	READ_STRING_FV(PatchUrl)
+	READ_STRING_FV(PatchVersion)
+	READ_STRING_FV(RingReleaseNotePath)
+	READ_STRING_FV(ReleaseNotePath)
+	READ_BOOL_DEV(PatchWanted)
+	READ_STRING_DEV(PatchServer)
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
-	READ_STRING_FV(PatchServer)
+
 
 	/////////////////////////
 	// NEW PATCHLET SYSTEM //	

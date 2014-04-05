@@ -206,14 +206,14 @@ CDynamicMapClient(eid, clientGateway, luaState)
 void CDynamicMapClientEventForwarder::nodeErased(const std::string& instanceId, const std::string& attrName, sint32 position)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeErased)
-	if (!getEditor().getMode() == CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode) return;
 	getEditor().nodeErased(instanceId, attrName, position);
 }
 
 void CDynamicMapClientEventForwarder::nodeSet(const std::string& instanceId, const std::string& attrName, CObject* value)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeSet)
-	if (!getEditor().getMode() == CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode) return;
 	getEditor().nodeSet(instanceId, attrName, value);
 }
 
@@ -221,7 +221,7 @@ void CDynamicMapClientEventForwarder::nodeInserted(const std::string& instanceId
 							  const std::string& key, CObject* value)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeInserted)
-	if (!getEditor().getMode() == CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode) return;
 	getEditor().nodeInserted(instanceId, attrName, position, key, value);
 }
 
@@ -230,14 +230,14 @@ void CDynamicMapClientEventForwarder::nodeMoved(
 				const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_nodeMoved)
-	if (!getEditor().getMode() == CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode) return;
 	getEditor().nodeMoved(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
 }
 
 void CDynamicMapClientEventForwarder::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialActIndex)
 {
 	//H_AUTO(R2_CDynamicMapClientEventForwarder_scenarioUpdated)
-	if (!getEditor().getMode() == CEditor::EditionMode) return;
+	if (getEditor().getMode() != CEditor::EditionMode) return;
 	getEditor().scenarioUpdated(highLevel, willTP, initialActIndex);
 }
 

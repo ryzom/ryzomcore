@@ -53,9 +53,8 @@ public:
 	/** Write the form in a stream.
 	  *
 	  * \param stream is the stream used to write the form
-	  * \param georges4CVS should be true if you use Georges with CVS false else
 	  */
-	virtual void			write (NLMISC::IStream &stream, bool georges4CVS) = 0;
+	virtual void			write (NLMISC::IStream &stream) = 0;
 
 	/**
 	  * Access form parents

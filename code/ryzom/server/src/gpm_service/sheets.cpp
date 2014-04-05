@@ -45,14 +45,14 @@ using namespace NLGEORGES;
 //-------------------------------------------------------------------------
 // the singleton data
 
-std::map<CSheetId,CSheets::CSheet> CSheets::_sheets;
-bool CSheets::_initialised=false;
+std::map<CSheetId,CGpmSheets::CSheet> CGpmSheets::_sheets;
+bool CGpmSheets::_initialised=false;
 
 
 //-------------------------------------------------------------------------
 // init
 
-void CSheets::init()
+void CGpmSheets::init()
 {
 	if (_initialised)
 		return;
@@ -63,7 +63,17 @@ void CSheets::init()
 	filters.push_back("creature");
 	filters.push_back("player");
 
-	loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets);
+	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	{
+		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets, false, false);
+	}
+
+	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
+	if (_sheets.empty())
+	{
+		loadForm(filters, IService::getInstance()->WriteFilesDirectory.toString()+"gpms.packed_sheets", _sheets, true);
+	}
 
 	_initialised=true;
 }
@@ -72,11 +82,11 @@ void CSheets::init()
 //-------------------------------------------------------------------------
 // display
 
-void CSheets::display()
+void CGpmSheets::display()
 {
 	nlassert(_initialised);
 
-	std::map<CSheetId,CSheets::CSheet>::iterator it;
+	std::map<CSheetId,CGpmSheets::CSheet>::iterator it;
 	for(it=_sheets.begin();it!=_sheets.end();++it)
 	{
 		nlinfo("SHEET:%s Walk:%f Run:%f Radius:%f Height:%f Bounding:%f Scale:%f",(*it).first.toString().c_str(),
@@ -88,12 +98,12 @@ void CSheets::display()
 //-------------------------------------------------------------------------
 // lookup
 
-const CSheets::CSheet *CSheets::lookup( CSheetId id )
+const CGpmSheets::CSheet *CGpmSheets::lookup( CSheetId id )
 {
 	nlassert(_initialised);
 
 	// setup an iterator and lookup the sheet id in the map
-	std::map<CSheetId,CSheets::CSheet>::iterator it;
+	std::map<CSheetId,CGpmSheets::CSheet>::iterator it;
 	it=_sheets.find(id);
 
 	// if we found a valid entry return a pointer to the creature record otherwise 0

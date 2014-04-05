@@ -59,23 +59,43 @@ if BuildQuality == 1:
 	else:
 		mkPath(log, ExportBuildDirectory + "/" + ZoneExportDirectory)
 		mkPath(log, ExportBuildDirectory + "/" + ZoneDependBuildDirectory)
-		mkPath(log, ActiveProjectDirectory + "/generated")
-		configFile = ActiveProjectDirectory + "/generated/zone_dependencies.cfg"
-		templateCf = open(ActiveProjectDirectory + "/generated/properties.cfg", "r")
-		cf = open(configFile, "w")
-		for line in templateCf:
-			cf.write(line)
-		cf.write("\n");
-		cf.write("level_design_directory = \"" + LeveldesignDirectory + "\";\n");
-		cf.write("level_design_world_directory = \"" + LeveldesignWorldDirectory + "\";\n");
-		cf.write("level_design_dfn_directory = \"" + LeveldesignDfnDirectory + "\";\n");
-		cf.write("continent_name = \"" + ContinentName + "\";\n");
-		cf.write("\n");
-		cf.close()
-		
-		for zoneRegion in ZoneRegions:
-			subprocess.call([ ExecTimeout, str(ZoneBuildDependTimeout), ZoneDependencies, configFile, ExportBuildDirectory + "/" + ZoneExportDirectory + "/" + zoneRegion[0] + ".zone", ExportBuildDirectory + "/" + ZoneExportDirectory + "/" + zoneRegion[1] + ".zone", ExportBuildDirectory + "/" + ZoneDependBuildDirectory + "/doomy.depend" ])
-		
+		needUpdateZoneDepend = needUpdateDirByLowercaseTagLog(log, ExportBuildDirectory + "/" + ZoneExportDirectory, ".zone", ExportBuildDirectory + "/" + ZoneDependBuildDirectory, ".depend")
+		if needUpdateZoneDepend:
+			printLog(log, "DETECT UPDATE Zone->Depend")
+		else:
+			printLog(log, "DETECT SKIP Zone->Depend")
+		needUpdateContinentDepend = needUpdateFileDirNoSubdir(log, LeveldesignWorldDirectory + "/" + ContinentFile, ExportBuildDirectory + "/" + ZoneDependBuildDirectory)
+		if needUpdateContinentDepend:
+			printLog(log, "DETECT UPDATE Continent->Depend")
+		else:
+			printLog(log, "DETECT SKIP Continent->Depend")
+		needUpdateSearchPaths = needUpdateMultiDirNoSubdir(log, ExportBuildDirectory, PropertiesExportBuildSearchPaths, ExportBuildDirectory + "/" + ZoneDependBuildDirectory)
+		if needUpdateSearchPaths:
+			printLog(log, "DETECT UPDATE SearchPaths->Depend")
+		else:
+			printLog(log, "DETECT SKIP SearchPaths->Depend")
+		if needUpdateZoneDepend or needUpdateContinentDepend or needUpdateSearchPaths:
+			printLog(log, "DETECT DECIDE UPDATE")
+			mkPath(log, ActiveProjectDirectory + "/generated")
+			configFile = ActiveProjectDirectory + "/generated/zone_dependencies.cfg"
+			templateCf = open(ActiveProjectDirectory + "/generated/properties.cfg", "r")
+			cf = open(configFile, "w")
+			for line in templateCf:
+				cf.write(line)
+			cf.write("\n");
+			cf.write("level_design_directory = \"" + LeveldesignDirectory + "\";\n");
+			cf.write("level_design_world_directory = \"" + LeveldesignWorldDirectory + "\";\n");
+			cf.write("level_design_dfn_directory = \"" + LeveldesignDfnDirectory + "\";\n");
+			cf.write("continent_name = \"" + ContinentName + "\";\n");
+			cf.write("\n");
+			cf.close()
+			
+			for zoneRegion in ZoneRegions:
+				# zone_dependencies [properties.cfg] [firstZone.zone] [lastzone.zone] [output_dependencies.cfg]
+				subprocess.call([ ExecTimeout, str(ZoneBuildDependTimeout), ZoneDependencies, configFile, ExportBuildDirectory + "/" + ZoneExportDirectory + "/" + zoneRegion[0] + ".zone", ExportBuildDirectory + "/" + ZoneExportDirectory + "/" + zoneRegion[1] + ".zone", ExportBuildDirectory + "/" + ZoneDependBuildDirectory + "/doomy.depend" ])
+		else:
+			printLog(log, "DETECT DECIDE SKIP")
+			printLog(log, "SKIP *")
 	printLog(log, "")
 
 # For each zone directory

@@ -38,27 +38,16 @@ CFileHeader::CFileHeader ()
 	MajorVersion = 0;
 	MinorVersion = 0;
 	State = Modified;
-	Revision = "$R";
-	Revision += "evision$";
 }
 
 // ***************************************************************************
 
-void CFileHeader::write (xmlNodePtr node, bool georges4CVS) const
+void CFileHeader::write (xmlNodePtr node) const
 {
-	// Version for CVS ?
-	if (georges4CVS)
-	{
-		// Georges version system
-		xmlSetProp (node, (const xmlChar*)"Revision", (const xmlChar*)Revision.c_str ());
-	}
-	else
-	{
-		// Georges version system
-		char tmp[512];
-		smprintf (tmp, 512, "%d.%d", MajorVersion, MinorVersion);
-		xmlSetProp (node, (const xmlChar*)"Version", (const xmlChar*)tmp);
-	}
+	// Georges version system
+	char tmp[512];
+	smprintf (tmp, 512, "%d.%d", MajorVersion, MinorVersion);
+	xmlSetProp (node, (const xmlChar*)"Version", (const xmlChar*)tmp);
 
 	// State
 	if (State == Modified)
@@ -135,23 +124,6 @@ void CFileHeader::read (xmlNodePtr root)
 		// Set default
 		MajorVersion = 0;
 		MinorVersion = 0;
-	}
-
-	// Get the revision
-	value = (const char*)xmlGetProp (root, (xmlChar*)"Revision");
-	if (value)
-	{
-		// Set the value
-		Revision = value;
-
-		// Delete the value
-		xmlFree ((void*)value);
-	}
-	else
-	{
-		// Set default
-		Revision = "$R";
-		Revision += "evision$";
 	}
 
 	// Get the version
