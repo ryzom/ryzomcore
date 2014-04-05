@@ -162,7 +162,7 @@ void getcwd (char *dir, int length)
 {
 	GetCurrentDirectoryA (length, dir);
 }
-d
+
 void chdir(const char *path)
 {
 	SetCurrentDirectoryA (path);
