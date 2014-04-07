@@ -40,6 +40,7 @@
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/stereo_ng_hmd.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -639,10 +640,15 @@ void initStereoDisplayDevice()
 			StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
 			if (StereoDisplay)
 			{
-				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
+				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD
+					|| deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
 				{
 					nlinfo("VR [C]: Stereo display device is a HMD");
 					StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+					if (deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
+					{
+						StereoNGHMD = static_cast<IStereoNGHMD *>(StereoDisplay);
+					}
 				}
 				if (Driver) // VR_DRIVER
 				{
@@ -828,13 +834,6 @@ void prelogInit()
 		ClientCfg.init(ConfigFileName);
 
 		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
-
-		// tmp for patcher debug
-		extern void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf);
-		extern void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf);
-		tmpFlagMainlandPatchCategories(ClientCfg.ConfigFile);
-		tmpFlagRemovedPatchCategories(ClientCfg.ConfigFile);
-
 
 		// check "BuildName" in ClientCfg
 		//nlassert(!ClientCfg.BuildName.empty()); // TMP comment by nico do not commit

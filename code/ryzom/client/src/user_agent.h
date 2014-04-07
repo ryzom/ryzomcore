@@ -14,21 +14,74 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CL_BOT_CHAT_PAGE_RING_SESSIONS_H
-#define CL_BOT_CHAT_PAGE_RING_SESSIONS_H
+#ifndef CL_USER_AGENT_H
+#define CL_USER_AGENT_H
 
-#include "bot_chat_page.h"
-#include "../entity_cl.h"
-#include "nel/misc/vectord.h"
+std::string getUserAgent();
 
-class CBotChatPageRingSessions : public CBotChatPage
-{
-public:
-	CBotChatPageRingSessions();
-	virtual void begin();
-	virtual void end();
-	NLMISC::CVectorD RingAccessPointPos;
-};
+#endif // CL_USER_AGENT_H
+
+/* End of user_agent.h */
 
 
-#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

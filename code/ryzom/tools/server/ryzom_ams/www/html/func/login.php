@@ -9,15 +9,16 @@ function login(){
 	global $INGAME_WEBPATH;
 	global $WEBPATH;
 	try{
-		$username = filter_var($_POST['Username'],FILTER_SANITIZE_STRING);
+		$login_value = filter_var($_POST['LoginValue'],FILTER_SANITIZE_STRING);
 		$password = filter_var($_POST['Password'],FILTER_SANITIZE_STRING);
-		//check if the filtered sent POST data returns a match with the DB
-		$result = WebUsers::checkLoginMatch($username, $password);
 
+		//check if the filtered sent POST data returns a match with the DB
+		$result = WebUsers::checkLoginMatch($login_value, $password);
+		
 		if( $result != "fail"){
 			//handle successful login
-			$_SESSION['user'] = $username;
-			$_SESSION['id'] = WebUsers::getId($username);
+			$_SESSION['user'] = $result['Login'];
+			$_SESSION['id'] = $result['UId'];
 			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
 			$user = new WebUsers($_SESSION['id']);
 			$_SESSION['Language'] = $user->getLanguage();
