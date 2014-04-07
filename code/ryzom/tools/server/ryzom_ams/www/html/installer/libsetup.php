@@ -4,6 +4,9 @@
     * This script will install all databases related to the Ryzom AMS and it will generate an admin account..
     * @author Daan Janssens, mentored by Matthew Lagoe
     */
+    
+    ini_set('display_errors', 1); 
+    error_reporting(E_ALL);
 
     //set permissions
     if(is_writable('../../../../www/login/logs')) {
