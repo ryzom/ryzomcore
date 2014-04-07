@@ -10,23 +10,23 @@
         echo "failed to get write permissions on logs";
         exit;
     }
-    if(is_writable('../../../admin/graphs_output')) {
+    if(is_writable('../../../../admin/graphs_output')) {
         echo "failed to get write permissions on graphs_output";
         exit;
     }
-    if(is_writable('../../../admin/templates/default_c')) {
+    if(is_writable('../../../../admin/templates/default_c')) {
         echo "failed to get write permissions on default_c";
         exit;
     }
-    if(is_writable('../../www')) {
+    if(is_writable('../../../www')) {
         echo "failed to get write permissions on www";
         exit;
     }
-    if(is_writable('../../www/html/cache')) {
+    if(is_writable('../../../www/html/cache')) {
         echo "failed to get write permissions on cache";
         exit;
     }
-    if(is_writable('../../www/html/templates_c')) {
+    if(is_writable('../../../www/html/templates_c')) {
         echo "failed to get write permissions on templates_c";
         exit;
     }
