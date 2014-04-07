@@ -6,7 +6,7 @@
     */
 
     //set permissions
-    if(is_writable('../../../www/login/logs')) {
+    if(is_writable('../../../../www/login/logs')) {
         echo "failed to get write permissions on logs";
         exit;
     }
