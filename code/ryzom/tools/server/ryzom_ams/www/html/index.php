@@ -23,7 +23,7 @@ if (!file_exists('../is_installed')) {
     //if config exists then include it
     require( '../config.php' );
 }
-require_once( $AMS_LIB'/libinclude.php' );
+require_once( $AMS_LIB.'/libinclude.php' );
 session_start();
 
 //Running Cron?
