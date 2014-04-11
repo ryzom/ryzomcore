@@ -14,8 +14,8 @@
 		</div>
 		<form method="post" action="index.php{if isset($getstring)}{$getstring}{/if}" class="form-horizontal">
 			<fieldset>
-				<div data-rel="tooltip" class="input-prepend" data-original-title="Username">
-					<span class="add-on"><i class="icon-user"></i></span><input type="text" value="" id="Username" name="Username" class="input-large span10" placeholder="Username">
+				<div data-rel="tooltip" class="input-prepend" data-original-title="Username/Email">
+					<span class="add-on"><i class="icon-user"></i></span><input type="text" value="" id="LoginValue" name="LoginValue" class="input-large span10" placeholder="Username or Email">
 				</div>
 				<div class="clearfix"></div>
 

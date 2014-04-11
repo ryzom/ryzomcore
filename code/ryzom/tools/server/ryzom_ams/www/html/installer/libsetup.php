@@ -4,6 +4,9 @@
     * This script will install all databases related to the Ryzom AMS and it will generate an admin account..
     * @author Daan Janssens, mentored by Matthew Lagoe
     */
+    
+    ini_set('display_errors', 1); 
+    error_reporting(E_ALL);
 
     //set permissions
     if(is_writable('../../../www/login/logs')) {
@@ -34,7 +37,7 @@
     if (!isset($_POST['function'])) { 
         //require the pages that are being needed.
         require_once( '../config.default.php' );
-        require_once( '../../ams_lib/libinclude.php' );
+        require_once( $AMS_LIB.'/libinclude.php' );
         ini_set( "display_errors", true );
         error_reporting( E_ALL );
 
