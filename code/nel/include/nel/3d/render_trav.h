@@ -27,6 +27,7 @@
 #include "nel/3d/mesh_block_manager.h"
 #include "nel/3d/shadow_map_manager.h"
 #include "nel/3d/u_scene.h"
+#include "nel/3d/vertex_program.h"
 #include <vector>
 
 
@@ -68,6 +69,41 @@ class   CWaterModel;
 #define	NL3D_SHADOW_MESH_SKIN_MANAGER_MAXVERTICES		3000
 #define	NL3D_SHADOW_MESH_SKIN_MANAGER_NUMVB				8
 
+/// Container for lighted vertex program.
+class CVertexProgramLighted : public CVertexProgram
+{
+public:
+	static const uint MaxLight = 4;
+	static const uint MaxPointLight = (MaxLight - 1);
+	struct CIdxLighted
+	{
+		uint Ambient;
+		uint Diffuse[MaxLight];
+		uint Specular[MaxLight];
+		uint DirOrPos[MaxLight]; // light 0, directional sun; light 1,2,3, omni point light
+		uint EyePosition;
+		uint DiffuseAlpha;
+	};
+	struct CFeaturesLighted
+	{
+		/// Number of point lights that this program is generated for, varies from 0 to 3.
+		uint NumActivePointLights;
+		bool SupportSpecular;
+		bool Normalize;
+		/// Start of constants to use for lighting with assembly shaders.
+		uint CtStartNeLVP;
+	};
+	CVertexProgramLighted() { }
+	virtual ~CVertexProgramLighted() { }
+	virtual void buildInfo();
+	const CIdxLighted &idxLighted() const { return m_IdxLighted; }
+	const CFeaturesLighted &featuresLighted() const { return m_FeaturesLighted; }
+
+protected:
+	CIdxLighted m_IdxLighted;
+	CFeaturesLighted m_FeaturesLighted;
+
+};
 
 
 // ***************************************************************************
@@ -224,7 +260,7 @@ public:
 	// @{
 
 	// Max VP Light setup Infos.
-	enum	{MaxVPLight= 4};
+	enum	{MaxVPLight = CVertexProgramLighted::MaxLight};
 
 	/** reset the lighting setup in the driver (all lights are disabled).
 	 *	called at beginning of traverse(). Must be called by any model (before and after rendering)
@@ -244,7 +280,8 @@ public:
 	 */
 	void		changeLightSetup(CLightContribution	*lightContribution, bool useLocalAttenuation);
 
-
+	/// Must call before beginVPLightSetup
+	void		prepareVPLightSetup();
 	/** setup the driver VP constants to get info from current LightSetup.
 	 *	Only 0..3 Light + SunLights are supported. The VP do NOT support distance/Spot attenuation
 	 *	Also it does not handle World Matrix with non uniform scale correctly since lighting is made in ObjectSpace
@@ -253,7 +290,7 @@ public:
 	 *	\param supportSpecular asitsounds. PointLights and dirLight are localViewer
 	 *	\param invObjectWM the inverse of object matrix: lights are mul by this. Vp compute in object space.
 	 */
-	void		beginVPLightSetup(uint ctStart, bool supportSpecular, const CMatrix &invObjectWM);
+	void		beginVPLightSetup(CVertexProgramLighted *program, const CMatrix &invObjectWM);
 
 	/** change the driver VP LightSetup constants which depends on material.
 	 *  \param excludeStrongest This remove the strongest light from the setup. The typical use is to have it computed by using perpixel lighting.
@@ -299,7 +336,8 @@ public:
 	 *  \param numActivePoinLights tells how many point light from 0 to 3 this VP must handle. NB: the Sun directionnal is not option
 	 *		NB: nlassert(numActiveLights<=MaxVPLight-1).
 	 */
-	static	std::string		getLightVPFragment(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize);
+	static	std::string		getLightVPFragmentNeLVP(uint numActivePointLights, uint ctStart, bool supportSpecular, bool normalize);
+	// TODO_VP_GLSL
 
 	/** This returns a reference to a driver light, by its index
 	  * \see getStrongestLightIndex
@@ -381,12 +419,14 @@ private:
 	mutable uint				_StrongestLightIndex;
 	mutable bool				_StrongestLightTouched;
 
+	// Current vp setuped with beginVPLightSetup()
+	NLMISC::CRefPtr<CVertexProgramLighted> _VPCurrent;
 	// Current ctStart setuped with beginVPLightSetup()
-	uint						_VPCurrentCtStart;
+	//uint						_VPCurrentCtStart;
 	// Current num of VP lights enabled.
 	uint						_VPNumLights;
 	// Current support of specular
-	bool						_VPSupportSpecular;
+	// bool						_VPSupportSpecular;
 	// Sum of all ambiant of all lights + ambiantGlobal.
 	NLMISC::CRGBAF				_VPFinalAmbient;
 	// Diffuse/Spec comp of all light / 255.

@@ -183,7 +183,6 @@ CVector CView::currentViewPos() const
 
 //-----------------------------------------------
 // currentView :
-// Set the user position.
 //-----------------------------------------------
 CVector CView::currentView() const
 {
@@ -199,6 +198,14 @@ CVector CView::currentView() const
 	else
 		return _View;
 }// currentView //
+
+NLMISC::CQuat CView::currentViewQuat() const
+{
+	CMatrix mat;
+	mat.setRot(CVector::I, currentView(), CVector::K);
+	mat.normalize(CMatrix::YZX);
+	return mat.getRot();
+}
 
 //-----------------------------------------------
 // currentCameraTarget :

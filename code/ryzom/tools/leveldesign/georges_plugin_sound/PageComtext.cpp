@@ -21,6 +21,7 @@
 #include "georges_plugin_sound.h"
 #include <map>
 #include "PageComtext.h"
+#include "resource.h"
 
 using namespace std;
 

@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="combatif" Type="DfnPointer"/>
-  <ELEMENT Name="chair" Type="DfnPointer"/>
-  <LOG>Thu Sep 12 15:23:56 2002 (robert) Dfn Structure = 
-Thu Sep 12 16:10:52 2002 (robert) Dfn Structure = </LOG>
-</DFN>

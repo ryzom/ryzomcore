@@ -41,7 +41,7 @@
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
 #endif
-const uint32 UI_CACHE_SERIAL_CHECK = (uint32) 'IUG_';
+const uint32 UI_CACHE_SERIAL_CHECK = NELID("IUG_");
 
 using namespace NLMISC;
 using namespace std;
@@ -997,14 +997,15 @@ namespace NLGUI
 
 
 		std::vector<CInterfaceLink::CTargetInfo> targets;
+		std::vector<CInterfaceLink::CCDBTargetInfo> cdbTargets;
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"target");
 		std::string target;
-		if( ptr != NULL )
+		if( ptr )
 		{
 			target = std::string( (const char*)ptr );
 			if( !editorMode )
-				CInterfaceLink::splitLinkTargets(std::string((const char*)ptr), parentGroup, targets);
+				CInterfaceLink::splitLinkTargetsExt(std::string((const char*)ptr), parentGroup, targets, cdbTargets);
 		}
 
 		// optional action handler
@@ -1022,7 +1023,7 @@ namespace NLGUI
 		if( !editorMode )
 		{
 			CInterfaceLink *il = new CInterfaceLink;
-			il->init(targets, expr, action, params, cond, parentGroup); // init will add 'il' in the list of link present in 'elm'
+			il->init(targets, cdbTargets, expr, action, params, cond, parentGroup); // init will add 'il' in the list of link present in 'elm'
 		}
 		else
 		{
@@ -1135,17 +1136,17 @@ namespace NLGUI
 			VariableData data;
 
 			ptr = xmlGetProp( cur, BAD_CAST "entry" );
-			if( ptr != NULL )
+			if( ptr )
 				data.entry = std::string( (const char*)ptr );
 
 			data.type = type;
 
 			ptr = xmlGetProp( cur, BAD_CAST "value" );
-			if( ptr != NULL )
+			if( ptr )
 				data.value = std::string( (const char*)ptr );
 
 			ptr = xmlGetProp( cur, BAD_CAST "size" );
-			if( ptr != NULL )
+			if( ptr )
 				fromString( std::string( (const char*)ptr ), data.size );
 			
 			variableCache[ data.entry ] = data;
@@ -2050,10 +2051,10 @@ namespace NLGUI
 
 
 		// Clear all structures used only for init
-		//NLMISC::contReset (_ParentPositionsMap);
-		//NLMISC::contReset (_ParentSizesMap);
-		//NLMISC::contReset (_ParentSizesMaxMap);
-		//NLMISC::contReset (_LuaClassAssociation);
+		NLMISC::contReset (_ParentPositionsMap);
+		NLMISC::contReset (_ParentSizesMap);
+		NLMISC::contReset (_ParentSizesMaxMap);
+		NLMISC::contReset (_LuaClassAssociation);
 		return true;
 	}
 

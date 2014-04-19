@@ -586,7 +586,7 @@ template<class T, class U>	inline T	type_cast(U o)
 #ifdef NL_ISO_CPP0X_AVAILABLE
 #	define nlctassert(cond) static_assert(cond, "Compile time assert in "#cond)
 #else
-#	define nlctassert(cond) sizeof(uint[(cond) ? 1 : 0])
+#	define nlctassert(cond) (void)sizeof(uint[(cond) ? 1 : 0])
 #endif
 
 /**

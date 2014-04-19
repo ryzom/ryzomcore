@@ -133,6 +133,7 @@ public:
 	// @{
 
 	virtual void			disableHardwareVertexProgram();
+	virtual void			disableHardwarePixelProgram();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 
@@ -473,7 +474,6 @@ public:
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
 	virtual void			forceTextureResize(uint divisor);
-	virtual void			forceNativeFragmentPrograms(bool nativeOnly);
 	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	// @}
 

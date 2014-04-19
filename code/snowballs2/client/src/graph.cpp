@@ -115,7 +115,7 @@ void CGraph::addValue (float value)
 //
 
 CGraph FpsGraph ("fps", 10.0f, 10.0f, 100.0f, 100.0f, CRGBA(128,0,0,128), 1000, 40.0f);
-CGraph SpfGraph ("spf", 10.0f, 110.0f, 100.0f, 100.0f, CRGBA(0,128,0,128), 0, 200.0f);
+CGraph SpfGraph ("spf", 10.0f, 110.0f, 100.0f, 100.0f, CRGBA(0,128,0,128), 0, 0.1f);
 
 CGraph DownloadGraph ("download", 10.0f, 260.0f, 100.0f, 100.0f, CRGBA(0,0,128,128), 1000, 1000.0f);
 CGraph UploadGraph ("upload", 10.0f, 360.0f, 100.0f, 100.0f, CRGBA(0,128,128,128), 1000, 1000.0f);

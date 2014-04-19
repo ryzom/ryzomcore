@@ -1,11 +1,17 @@
-# These are Windows/MFC apps
-IF(WIN32)
-#  ADD_SUBDIRECTORY(bug_report)
-  SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
-ENDIF(WIN32)
 
+# Need clientsheets lib for sheets packer tool
 ADD_SUBDIRECTORY(client_sheets)
+
+IF(WITH_RYZOM_CLIENT)
+
+# These are Windows/MFC apps
+SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
+
 ADD_SUBDIRECTORY(seven_zip)
+
+IF(WITH_RYZOM_PATCH)
+  ADD_DEFINITIONS(-DRZ_USE_PATCH)
+ENDIF(WITH_RYZOM_PATCH)
 
 FILE(GLOB CFG ../*.cfg ../*.cfg.in)
 FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc)
@@ -42,10 +48,6 @@ SOURCE_GROUP("r2" FILES ${SRC_R2})
 
 # on Mac, create a .App Bundle
 if(APPLE)
-  IF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    SET(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
-  ENDIF(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-
   SET(MACOSX_BUNDLE_INFO_STRING "Ryzom Core Client")
   SET(MACOSX_BUNDLE_ICON_FILE "ryzom.icns")
   SET(MACOSX_BUNDLE_GUI_IDENTIFIER "")
@@ -124,3 +126,5 @@ IF(WITH_PCH)
 ENDIF(WITH_PCH)
 
 INSTALL(TARGETS ryzom_client RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)
+
+ENDIF(WITH_RYZOM_CLIENT)

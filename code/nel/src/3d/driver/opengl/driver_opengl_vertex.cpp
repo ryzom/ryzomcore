@@ -1151,7 +1151,7 @@ void		CDriverGL::toggleGlArraysForEXTVertexShader()
 		CVertexProgram *vp = _LastSetuppedVP;
 		if (vp)
 		{
-			CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IVertexProgramDrvInfos *) vp->_DrvInfo);
+			CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IProgramDrvInfos *) vp->m_DrvInfo);
 			if (drvInfo)
 			{
 				// Disable all VertexAttribs.
@@ -1396,7 +1396,7 @@ void		CDriverGL::setupGlArraysForEXTVertexShader(CVertexBufferInfo &vb)
 
 	CVertexProgram *vp = _LastSetuppedVP;
 	if (!vp) return;
-	CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IVertexProgramDrvInfos *) vp->_DrvInfo);
+	CVertexProgamDrvInfosGL *drvInfo = NLMISC::safe_cast<CVertexProgamDrvInfosGL *>((IProgramDrvInfos *) vp->m_DrvInfo);
 	if (!drvInfo) return;
 
 	uint32	flags= vb.VertexFormat;
@@ -1809,7 +1809,7 @@ void				CDriverGL::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
 
 #ifndef USE_OPENGLES
 	// If old is not a VBHard, or if not a NVidia VBHard, no-op.
-	if( _CurrentVertexBufferHard==NULL || !_CurrentVertexBufferHard->VBType == IVertexBufferHardGL::NVidiaVB)
+	if( _CurrentVertexBufferHard==NULL || _CurrentVertexBufferHard->VBType != IVertexBufferHardGL::NVidiaVB)
 		return;
 
 	// if we do not activate the same (NB: newVBHard==NULL if not a VBHard).

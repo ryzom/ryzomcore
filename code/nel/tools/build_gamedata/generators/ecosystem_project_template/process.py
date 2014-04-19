@@ -82,8 +82,6 @@ ShapeExportOptLightmapLog = "%PreGenShapeExportOptLightmapLog%"
 # Coarse mesh texture mul size
 TextureMulSizeValue = "%PreGenTextureMulSizeValue%"
 
-DoBuildShadowSkin = 0
-
 ClodConfigFile = ""
 
 # *** COARSE MESH TEXTURE NAME ***
@@ -117,7 +115,7 @@ MapHlsBankFileName = None
 
 # *** SHAPE BUILD OPTIONS *
 
-DoBuildShadowSkin = False
+BuildShadowSkinEnabled = False
 ClodConfigFile = ""
 
 # *** PACS_PRIM OPTIONS ***

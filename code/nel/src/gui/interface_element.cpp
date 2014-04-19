@@ -884,38 +884,32 @@ namespace NLGUI
 		{
 		case Hotspot_TL:
 			return "TL";
-			break;
 
 		case Hotspot_TM:
 			return "TM";
-			break;
 
 		case Hotspot_TR:
 			return "TR";
-			break;
 
 		case Hotspot_ML:
 			return "ML";
-			break;
 
 		case Hotspot_MM:
 			return "MM";
-			break;
 
 		case Hotspot_MR:
 			return "MR";
-			break;
 
 		case Hotspot_BL:
 			return "BL";
-			break;
 
 		case Hotspot_BM:
 			return "BM";
-			break;
 
 		case Hotspot_BR:
 			return "BR";
+
+		default:
 			break;
 		}
 

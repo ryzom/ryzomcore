@@ -97,7 +97,7 @@ Anim AnimIdArray[][2] =
 void	computeAnimation (CEntity &entity, EAnim anim)
 {
 	// Get the current time
-	double currentTime = double (CTime::getLocalTime ())/1000.0f;
+	double currentTime = AnimationTime;
 
 //	nlinfo ("%d playing animation", anim);
 //	nlinfo ("%d playing animation %s ct%f st%f et%f", anim, AnimIdArray[anim][0].Name, currentTime, AnimIdArray[anim][0].Animation->getBeginTime (), AnimIdArray[anim][0].Animation->getEndTime ());
@@ -153,7 +153,7 @@ void	playAnimation (CEntity &entity, EAnim anim, bool force)
 //	nlinfo ("playAnimation() %d", anim);
 
 	// Get the current time
-	CAnimationTime currentTime = CAnimationTime(CTime::getLocalTime ())/1000.0f;
+	CAnimationTime currentTime = AnimationTime;
 
 	// Can't do animation without skeleton
 	if (entity.Skeleton.empty())
@@ -224,7 +224,7 @@ void	initAnimation()
 void	updateAnimation()
 {
 	// Get the current time
-	CAnimationTime currentTime = CAnimationTime(CTime::getLocalTime ())/1000.0f;
+	CAnimationTime currentTime = AnimationTime;
 
 	for (EIT eit = Entities.begin (); eit != Entities.end (); eit++)
 	{
@@ -270,7 +270,7 @@ void	updateAnimation()
 	}
 
 	// compute new animation position depending of the current time
-	PlayListManager->animate (double(CTime::getLocalTime ())/1000.0f);
+	PlayListManager->animate (AnimationTime);
 }
 
 void	releaseAnimation()

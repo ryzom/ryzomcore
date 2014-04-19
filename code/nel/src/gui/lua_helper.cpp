@@ -197,6 +197,8 @@ namespace NLGUI
 		{
 			#ifdef LUA_NEVRAX_VERSION
 				_State = lua_open(l_realloc_func, l_free_func);
+			#elif defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
+				_State = luaL_newstate();
 			#else
 				_State = lua_open();
 			#endif
@@ -361,7 +363,11 @@ namespace NLGUI
 		rd.Str = &code;
 		rd.Done = false;
 
-		int result = lua_load(_State,   CHelper::luaChunkReaderFromString,   (void *) &rd,   dbgSrc.c_str());
+		int result = lua_load(_State,   CHelper::luaChunkReaderFromString,   (void *) &rd,   dbgSrc.c_str()
+#if LUA_VERSION_NUM >= 502
+			, NULL
+#endif
+			);
 		if (result !=0)
 		{
 			// pop the error code
@@ -569,9 +575,17 @@ namespace NLGUI
 		//H_AUTO(Lua_CLuaState_registerFunc)
 		nlassert(function);
 		CLuaStackChecker lsc(this);
+#if LUA_VERSION_NUM >= 502
+		pushGlobalTable();
+#endif
 		push(name);
 		push(function);
+#if LUA_VERSION_NUM >= 502
+		setTable(-3); // -3 is the pushGlobalTable
+		pop(1); // pop the pushGlobalTable value (setTable popped the 2 pushes)
+#else
 		setTable(LUA_GLOBALSINDEX);
+#endif
 	}
 
 
@@ -643,13 +657,31 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	int CLuaState::pcallByName(const char *functionName,   int nargs,   int nresults,   int funcTableIndex /*=LUA_GLOBALSINDEX*/,  int errfunc /*= 0*/)
+	int CLuaState::pcallByNameGlobal(const char *functionName, int nargs, int nresults, int errfunc /*= 0*/)
 	{
-		//H_AUTO(Lua_CLuaState_pcallByName)
+		int initialStackSize = getTop();
+		nlassert(functionName);
+#if LUA_VERSION_NUM >= 502
+		pushGlobalTable();
+#else
+		nlassert(isTable(LUA_GLOBALSINDEX));
+		pushValue(LUA_GLOBALSINDEX);
+#endif
+		return pcallByNameInternal(functionName, nargs, nresults, errfunc, initialStackSize);
+	}
+
+	int CLuaState::pcallByName(const char *functionName,   int nargs,   int nresults,   int funcTableIndex,  int errfunc /*= 0*/)
+	{
 		int initialStackSize = getTop();
 		nlassert(functionName);
 		nlassert(isTable(funcTableIndex));
 		pushValue(funcTableIndex);
+		return pcallByNameInternal(functionName, nargs, nresults, errfunc, initialStackSize);
+	}
+
+	int CLuaState::pcallByNameInternal(const char *functionName,   int nargs,   int nresults,  int errfunc /*= 0*/, int initialStackSize)
+	{
+		//H_AUTO(Lua_CLuaState_pcallByName)
 		push(functionName);
 		getTable(-2);
 		remove(-2); // get rid of the table
@@ -782,7 +814,12 @@ namespace NLGUI
 	int          CLuaState::getGCCount()
 	{
 		//H_AUTO(Lua_CLuaState_getGCCount)
+#if LUA_VERSION_NUM >= 502
+		// deprecated
+		return 0;
+#else
 		return lua_getgccount(_State);
+#endif
 	}
 
 	//================================================================================

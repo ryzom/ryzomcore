@@ -39,6 +39,8 @@
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
+#include "nel/3d/stereo_hmd.h"
+#include "nel/3d/stereo_ng_hmd.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -46,6 +48,7 @@
 
 // Std.
 #include <fstream>
+#include <sstream>
 // Game Share
 #include "game_share/ryzom_version.h"
 // Client
@@ -573,6 +576,94 @@ static std::string replaceApplicationDirToken(const std::string &dir)
 	return dir;
 }
 
+void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
+{
+	bool cache = VRDeviceCache.empty();
+	nldebug("VR [C]: List devices");
+	if (cache)
+	{
+		VRDeviceCache.push_back(std::pair<std::string, std::string>("Auto", "0"));
+	}
+	IStereoDisplay::listDevices(devices);
+	for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+	{
+		std::stringstream name;
+		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
+		std::stringstream fullname;
+		fullname << std::string("[") << name << "] [" << it->Serial << "]";
+		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
+		if (cache)
+		{
+			VRDeviceCache.push_back(std::pair<std::string, std::string>(name.str(), it->Serial)); // VR_CONFIG
+		}
+	}
+}
+
+void cacheStereoDisplayDevices() // VR_CONFIG
+{
+	if (VRDeviceCache.empty())
+	{
+		std::vector<NL3D::CStereoDeviceInfo> devices;
+		listStereoDisplayDevices(devices);
+	}
+}
+
+void initStereoDisplayDevice()
+{
+	if (ClientCfg.VREnable)
+	{
+		// VR_CONFIG
+		nldebug("VR [C]: Enabled");
+		std::vector<NL3D::CStereoDeviceInfo> devices;
+		listStereoDisplayDevices(devices);
+		CStereoDeviceInfo *deviceInfo = NULL;
+		if (ClientCfg.VRDisplayDevice == std::string("Auto")
+			&& devices.begin() != devices.end())
+		{
+			deviceInfo = &devices[0];
+		}
+		else
+		{
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				std::stringstream name;
+				name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
+				if (name.str() == ClientCfg.VRDisplayDevice)
+					deviceInfo = &(*it);
+				if (ClientCfg.VRDisplayDeviceId == it->Serial)
+					break;
+			}
+		}
+		if (deviceInfo)
+		{
+			nlinfo("VR [C]: Create VR stereo display device");
+			StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
+			if (StereoDisplay)
+			{
+				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD
+					|| deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
+				{
+					nlinfo("VR [C]: Stereo display device is a HMD");
+					StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+					if (deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
+					{
+						StereoNGHMD = static_cast<IStereoNGHMD *>(StereoDisplay);
+					}
+				}
+				if (Driver) // VR_DRIVER
+				{
+					StereoDisplay->setDriver(Driver);
+				}
+			}
+		}
+	}
+	else
+	{
+		nldebug("VR [C]: NOT Enabled");
+	}
+	IStereoDisplay::releaseUnusedLibraries();
+}
+
 void addSearchPaths(IProgressCallback &progress)
 {
 	// Add search path of UI addon. Allow only a subset of files.
@@ -744,13 +835,6 @@ void prelogInit()
 
 		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
 
-		// tmp for patcher debug
-		extern void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf);
-		extern void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf);
-		tmpFlagMainlandPatchCategories(ClientCfg.ConfigFile);
-		tmpFlagRemovedPatchCategories(ClientCfg.ConfigFile);
-
-
 		// check "BuildName" in ClientCfg
 		//nlassert(!ClientCfg.BuildName.empty()); // TMP comment by nico do not commit
 
@@ -791,6 +875,11 @@ void prelogInit()
 
 		// Check driver version
 		checkDriverVersion();
+
+		// Initialize the VR devices (even more important than the most important part of the client)
+		nmsg = "Initializing VR devices...";
+		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+		initStereoDisplayDevice(); // VR_CONFIG
 
 		// Create the driver (most important part of the client).
 		nmsg = "Creating 3d driver...";
@@ -860,6 +949,11 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
+		
+		if (StereoDisplay) // VR_CONFIG  // VR_DRIVER
+		{
+			// override mode TODO
+		}
 
 		// Set the mode of the window.
 		if (!Driver->setDisplay (mode, false))
@@ -1102,6 +1196,12 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
+		
+		if (StereoDisplay) // VR_CONFIG
+		{
+			// Init stereo display resources
+			StereoDisplay->setDriver(Driver); // VR_DRIVER
+		}
 
 		nlinfo ("PROFILE: %d seconds for prelogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 

@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="Items" Type="Dfn" Filename="_loot_table_row.dfn" Array="true"/>
-  <ELEMENT Name="Money" Type="Dfn" Filename="_loot_money.dfn"/>
-  <LOG>Thu Aug 22 18:42:42 2002 (saffray) Dfn Structure = 
-Mon Nov 22 18:35:19 2004 (coutelas) Dfn Structure = 
-Tue Nov 23 14:08:07 2004 (coutelas) Dfn Structure = 
-Wed Oct 25 11:46:22 2006 (coutelas) Dfn Structure = </LOG>
-</DFN>

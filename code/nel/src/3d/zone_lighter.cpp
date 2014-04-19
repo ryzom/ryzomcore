@@ -373,7 +373,9 @@ public:
 		setCPUMask (Thread, _Process);
 
 		_ZoneLighter->processCalc (_Process, *_Description);
+		_ZoneLighter->_ProcessExitedMutex.enter();
 		_ZoneLighter->_ProcessExited++;
+		_ZoneLighter->_ProcessExitedMutex.leave();
 	}
 };
 
@@ -649,7 +651,9 @@ void NL3D::CRenderZBuffer::run()
 	}
 
 	// Exit
+	_ZoneLighter->_ProcessExitedMutex.enter();
 	_ZoneLighter->_ProcessExited++;
+	_ZoneLighter->_ProcessExitedMutex.leave();
 }
 
 // ***************************************************************************
@@ -676,7 +680,9 @@ public:
 	void run()
 	{
 		_ZoneLighter->processLightableShapeCalc(_Process, _ShapesToLit, _FirstShape, _LastShape, *_Description);
+		_ZoneLighter->_ProcessExitedMutex.enter();
 		_ZoneLighter->_ProcessExited++;
+		_ZoneLighter->_ProcessExitedMutex.leave();
 	}
 private:
 	CZoneLighter						*_ZoneLighter;
@@ -1170,8 +1176,7 @@ void CZoneLighter::light (CLandscape &landscape, CZone& output, uint zoneToLight
 	{
 		// Last patch
 		uint lastPatch=firstPatch+patchCountByThread;
-		if (lastPatch>patchCount)
-			lastPatch=patchCount;
+		lastPatch %= patchCount;
 
 		// Last patch computed
 		_LastPatchComputed[process] = firstPatch;
@@ -3771,6 +3776,8 @@ uint CZoneLighter::getAPatch (uint process)
 	// Current index
 	uint index = _LastPatchComputed[process];
 	uint firstIndex = index;
+
+	nlassert(index < _PatchInfo.size());
 
 	if (access.value().size() == 0)
 		// no more patches

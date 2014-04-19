@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.0" State="modified">
-  <ELEMENT Name="LevelAdjustment" Type="Dfn" Filename="_brick_level_adjustment_line.dfn" Array="true"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:07 2002 (corvazier) File converted from old format</LOG>
-</DFN>

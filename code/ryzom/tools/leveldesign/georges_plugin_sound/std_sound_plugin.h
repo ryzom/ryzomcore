@@ -14,16 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef STDAFX_H
+#define STDAFX_H
+
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #define NOMINMAX
 #define _WIN32_WINNT 0x0500
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
-#include "resource.h"
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/debug.h"
 #include "nel/georges/u_form_elm.h"
 
-#include "georges_plugin_sound.h"
+#endif

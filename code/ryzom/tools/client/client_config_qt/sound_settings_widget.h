@@ -19,7 +19,6 @@
 
 #include "ui_sound_settings_widget.h"
 #include "widget_base.h"
-#include <nel/misc/types_nl.h>
 
 /**
  @brief The sound settings page of the configuration tool

@@ -217,6 +217,7 @@ namespace NLGUI
 		void				clear() { setTop(0); }
 		int					getTop();
 		bool				empty() { return getTop() == 0; }
+		void				pushGlobalTable();		
 		void				pushValue(int index);  // copie nth element of stack to the top of the stack
 		void				remove(int index);     // remove nth element of stack
 		void				insert(int index);     // insert last element of the stack before the given position
@@ -301,7 +302,8 @@ namespace NLGUI
 		/** Helper : Execute a function by name. Lookup for the function is done in the table at the index 'funcTableIndex'
 		  * the behaviour is the same than with call of pcall.
 		  */
-		int                 pcallByName(const char *functionName, int nargs, int nresults, int funcTableIndex = LUA_GLOBALSINDEX, int errfunc = 0);
+		int                 pcallByNameGlobal(const char *functionName, int nargs, int nresults, int errfunc = 0);
+		int                 pcallByName(const char *functionName, int nargs, int nresults, int funcTableIndex, int errfunc = 0);
 
 		// push a C closure (pop n element from the stack and associate with the function)
 		void				pushCClosure(lua_CFunction function, int n);
@@ -367,6 +369,7 @@ namespace NLGUI
 		CLuaState &operator=(const CLuaState &/* other */) { nlassert(0); return *this; }
 
 		void				executeScriptInternal(const std::string &code, const std::string &dbgSrc, int numRet = 0);
+		int                 pcallByNameInternal(const char *functionName, int nargs, int nresults, int errfunc, int initialStackSize);
 
 	};
 

@@ -68,7 +68,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 			return;
 		}
 	}
-	f.serialCheck((uint32) 'CTAR');
+	f.serialCheck(NELID("CTAR"));
 	f.serialVersion(0);
 	f.serial(Pos);
 	// for the name, try to save a string identifier if possible, because language may be changed between
@@ -95,7 +95,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 			_PositionState = NULL;
 		}
 	}
-	f.serialCheck((uint32) '_END');
+	f.serialCheck(NELID("_END"));
 	// if language has been modified, then we are not able to display correctly the name, so just
 	// reset the compass to north to avoid incoherency
 	if (f.isReading())
@@ -811,18 +811,19 @@ void CGroupCompasMenu::setActive (bool state)
 				uint nbUserLandMarks = std::min( uint(currCont->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks() );
 
 				// Sort the landmarks
-				std::sort(currCont->UserLandMarks.begin(), currCont->UserLandMarks.end(), UserLandMarksSortPredicate);
+				std::vector<CUserLandMark> sortedLandmarks(currCont->UserLandMarks);
+				std::sort(sortedLandmarks.begin(), sortedLandmarks.end(), UserLandMarksSortPredicate);
 
 				for(k = 0; k < nbUserLandMarks; ++k)
 				{
-					if (currCont->UserLandMarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
+					if (sortedLandmarks[k].Type < CUserLandMark::UserLandMarkTypeCount)
 					{
 						CCompassTarget ct;
 						ct.setType(CCompassTarget::UserLandMark);
-						ct.Pos = currCont->UserLandMarks[k].Pos;
-						ct.Name = currCont->UserLandMarks[k].Title;
+						ct.Pos = sortedLandmarks[k].Pos;
+						ct.Name = sortedLandmarks[k].Title;
 						Targets.push_back(ct);
-						landMarkSubMenus[currCont->UserLandMarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
+						landMarkSubMenus[sortedLandmarks[k].Type]->addLine(ct.Name, "set_compas", toString("compass=%s|id=%d|menu=%s", _TargetCompass.c_str(), (int) Targets.size() - 1, _Id.c_str()));
 						selectable= true;
 					}
 				}

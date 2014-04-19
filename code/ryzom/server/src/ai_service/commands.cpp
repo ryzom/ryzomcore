@@ -1700,7 +1700,7 @@ NLMISC_COMMAND(scriptHex,"execute a hex-encoded script for a group in the given 
 	return	true;
 }
 
-static char* hexEncoderTcl =
+static const char* hexEncoderTcl =
 "proc copy_encoded {} {"
 "	# Get the args from the text fields"
 "	set group [ .group.name get 1.0 end ]"
@@ -2887,35 +2887,6 @@ NLMISC_COMMAND(unloadPrimitiveFile,"unload a primitive file","<file name>")
 		log.displayNL("unloadPrimitiveFile failed : no active ai instance");
 
 	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// MULTI_LINE_FORMATER                                                      //
-//////////////////////////////////////////////////////////////////////////////
-
-static int const MULTI_LINE_FORMATER_maxn = 78;
-void MULTI_LINE_FORMATER::pushTitle(std::vector<std::string>& container, std::string const& text)
-{
-	const sint maxn = MULTI_LINE_FORMATER_maxn;
-	sint n = maxn - (sint)text.length() - 4;
-	container.push_back(" _/");
-	container.back() += text;
-	container.back() += "\\" + std::string(n, '_');
-	container.push_back("/");
-	container.back() += std::string(maxn - 1, ' ');
-}
-
-void MULTI_LINE_FORMATER::pushEntry(std::vector<std::string>& container, std::string const& text)
-{
-	container.push_back("| ");
-	container.back() += text;
-}
-
-void MULTI_LINE_FORMATER::pushFooter(std::vector<std::string>& container)
-{
-	int const maxn = MULTI_LINE_FORMATER_maxn;
-	container.push_back("\\");
-		container.back() += std::string(maxn - 1, '_');
 }
 
 //////////////////////////////////////////////////////////////////////////////

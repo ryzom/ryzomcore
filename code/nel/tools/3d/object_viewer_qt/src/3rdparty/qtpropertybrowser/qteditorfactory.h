@@ -186,6 +186,7 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, bool))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(bool))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
 };
 
 class QtDoubleSpinBoxFactoryPrivate;
@@ -373,6 +374,7 @@ private:
                         const QMap<int, QIcon> &))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(int))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
 };
 
 class QtCursorEditorFactoryPrivate;
@@ -439,6 +441,29 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QFont &))
     Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
     Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QFont &))
+};
+
+class QtTextEditorFactoryPrivate;
+
+class QT_QTPROPERTYBROWSER_EXPORT QtTextEditorFactory : public QtAbstractEditorFactory<QtTextPropertyManager>
+{
+    Q_OBJECT
+public:
+    QtTextEditorFactory(QObject *parent = 0);
+    ~QtTextEditorFactory();
+protected:
+    void connectPropertyManager(QtTextPropertyManager *manager);
+    QWidget *createEditor(QtTextPropertyManager *manager, QtProperty *property,
+                QWidget *parent);
+    void disconnectPropertyManager(QtTextPropertyManager *manager);
+private:
+    QtTextEditorFactoryPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(QtTextEditorFactory)
+    Q_DISABLE_COPY(QtTextEditorFactory)
+    Q_PRIVATE_SLOT(d_func(), void slotPropertyChanged(QtProperty *, const QString &))
+    Q_PRIVATE_SLOT(d_func(), void slotSetValue(const QString &))
+    Q_PRIVATE_SLOT(d_func(), void slotEditorDestroyed(QObject *))
+    Q_PRIVATE_SLOT(d_func(), void slotResetProperty())
 };
 
 #if QT_VERSION >= 0x040400

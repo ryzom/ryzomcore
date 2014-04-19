@@ -564,7 +564,7 @@ CCharacter3D::CCharacter3D()
 	_CurrentSetup.ArmsWidth = _CurrentSetup.LegsWidth = _CurrentSetup.BreastSize = -20.0f;
 	_PelvisPos.set(0.f,0.f,-20.0f);
 	_CurPosX = _CurPosY = _CurPosZ = 0.0f;
-	_CurRotX, _CurRotY, _CurRotZ = 0.0f;
+	_CurRotX = _CurRotY = _CurRotZ = 0.0f;
 	_NextBlinkTime = 0;
 	_CopyAnim=false;
 }

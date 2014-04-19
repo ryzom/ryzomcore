@@ -309,7 +309,7 @@ void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8
 	Primitive = NULL;
 	MoveContainer = NULL;
 
-	const CSheets::CSheet	*sheet = CSheets::lookup(CSheetId(Sheet()));
+	const CGpmSheets::CSheet	*sheet = CGpmSheets::lookup(CSheetId(Sheet()));
 
 	float	primRadius = 0.5f;
 	float	primHeight = 2.0f;

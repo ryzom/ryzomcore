@@ -425,9 +425,7 @@
 <link expr="@UI:VARIABLES:OPEN_RESPAWN" target="ui:interface:respawn_map:active" />
 
 <!-- Set the Open Flag when the delay has expired -->
-<link expr="depends(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, @UI:VARIABLES:CURRENT_TIME)" action="set" 
-	params="dblink=UI:VARIABLES:OPEN_RESPAWN|
-			value=and(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, le(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, @UI:VARIABLES:CURRENT_TIME) )" />
+<link expr="and(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, le(@UI:VARIABLES:OPEN_RESPAWN_AT_TIME, @UI:VARIABLES:CURRENT_TIME))" target="@UI:VARIABLES:OPEN_RESPAWN" />
 
 <!-- 
 	Verify player mode. because at init, mode == 0, => the window won't be opened by default 

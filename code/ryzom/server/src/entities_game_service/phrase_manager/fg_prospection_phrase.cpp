@@ -1936,7 +1936,7 @@ void CDepositMapsBatchTask::run()
 	CSString res;
 	disp.write( res );
 	res = res.replace( "\n", "<BR>\n" );
-	fprintf( outputF, res.c_str() );
+	fprintf( outputF, "%s", res.c_str() );
 
 	// Close files
 	fclose( inputF );

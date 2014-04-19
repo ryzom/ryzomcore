@@ -26,6 +26,9 @@ using namespace NLMISC;
 // ***************************************************************************
 // Main System
 NL3D::UDriver				*Driver = 0;		// The main 3D Driver
+NL3D::IStereoDisplay		*StereoDisplay = NULL; // Stereo display
+NL3D::IStereoHMD			*StereoHMD = NULL;	// Head mount display
+NL3D::IStereoNGHMD			*StereoNGHMD = NULL;	// HMD with player death support
 CSoundManager				*SoundMngr = 0;		// the sound manager
 NL3D::UMaterial				GenericMat;	// Generic Material
 NL3D::UTextContext			*TextContext = 0;	// Context for all the text in the client.
@@ -65,6 +68,11 @@ bool						ConnectionReadySent= false;
 bool						PermanentlyBanned = false;
 bool						IgnoreEntityDbUpdates = false;
 bool						FreeTrial = false;
+
+bool						NoLogout = false;
+
+std::vector<std::pair<
+	std::string, std::string> >		VRDeviceCache;
 
 /// Ring main page
 string						RingMainURL;

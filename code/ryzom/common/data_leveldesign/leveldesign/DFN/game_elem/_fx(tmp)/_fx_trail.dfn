@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.3" State="modified">
-  <ELEMENT Name="Shape" Type="Type" Filename="filename.typ" FilenameExt="*.shape"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:22 2002 (corvazier) File converted from old format
-Thu Aug 01 18:12:44 2002 (puzin) Dfn Structure = 
-Thu Aug 01 18:14:10 2002 (puzin) Dfn Structure = 
-Thu Aug 01 18:17:02 2002 (puzin) Dfn Structure = </LOG>
-</DFN>

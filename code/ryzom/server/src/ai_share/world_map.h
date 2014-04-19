@@ -1633,18 +1633,27 @@ CTopology::CTopology()
 {
 }
 
+// convert a 2 characters string to uint16
+#ifdef NL_LITTLE_ENDIAN
+#	define NELID16(x) (uint16((x[0] << 8) | (x[1])))
+#else
+#	define NELID16(x) (uint16((x[1] << 8) | (x[0])))
+#endif
+
+
+
 inline
 void CTopology::serial(NLMISC::IStream& f)
 {
 	
 	uint version = 0;
 	
-	uint16	check = (uint16)'Tp';
+	uint16	check = NELID16("Tp");
 	f.serial(check);
 	
-	if (check != (uint16)'TP')
+	if (check != NELID16("TP"))
 	{
-		nlassert(check == (uint16)'Tp');
+		nlassert(check == NELID16("Tp"));
 		version = f.serialVersion(3);
 	}
 	
@@ -2285,7 +2294,7 @@ sint CWhiteCell::getHeight(CWorldPosition const& wpos) const
 inline
 void CWhiteCell::serial(NLMISC::IStream& f)
 {
-	f.serialCheck((uint16)'WC');
+	f.serialCheck(NELID16("WC"));
 	if (f.isReading())
 		_HeightMap = I16x16Layer::load(f);
 	else

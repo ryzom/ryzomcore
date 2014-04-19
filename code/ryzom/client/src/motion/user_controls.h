@@ -31,6 +31,9 @@
 // Std.
 #include <string>
 
+namespace NLMISC {
+	class CCDBNodeLeaf;
+}
 
 ///////////
 // CLASS //
@@ -305,6 +308,8 @@ private:
 
 	/// when true the next forward action will cancel any moveto
 	bool _NextForwardCancelMoveTo;
+
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _UiVarMkMoveDB;
 };
 
 /// User Controls (mouse, keyboard, interfaces, ...)

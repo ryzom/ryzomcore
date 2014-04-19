@@ -488,7 +488,7 @@ void CCharacterCL::stopAttachedFXForCurrrentAnim(bool stopLoopingFX)
 			{
 				if(!(*tmpItAttached)->FX.empty())
 				{
-					if (!(*tmpItAttached)->FX.removeByID('STOP') && !(*tmpItAttached)->FX.removeByID('main'))
+					if (!(*tmpItAttached)->FX.removeByID(NELID("STOP")) && !(*tmpItAttached)->FX.removeByID(NELID("main")))
 					{
 						(*tmpItAttached)->FX.activateEmitters(false);
 					}
@@ -2291,6 +2291,21 @@ void CCharacterCL::endAnimTransition()
 	// If the next mode in the automaton != Current Mode
 	if(_CurrentState->NextMode != _Mode)
 	{
+		// Undo previous behaviour
+		switch(_Mode)
+		{
+		case MBEHAV::DEATH:
+			// Restore collisions.
+			if(_Primitive)
+			{
+				// TODO: Without this dynamic cast
+				if(dynamic_cast<CPlayerCL *>(this))
+					_Primitive->setOcclusionMask(MaskColPlayer);
+				else
+					_Primitive->setOcclusionMask(MaskColNpc);
+			}
+			break;
+		}
 		if(ClientCfg.UsePACSForAll && _Primitive)
 			_Primitive->setCollisionMask(MaskColNone);
 		//// AJOUT ////
@@ -9373,7 +9388,7 @@ void CCharacterCL::CWornItem::enableAdvantageFX(NL3D::UInstance parent)
 	if (!enabled)
 	{
 		// well, it is unlikely that player will loses its ability to master an item after he gained it, but manage the case anyway.
-		if (!AdvantageFX.removeByID('STOP') && !AdvantageFX.removeByID('main'))
+		if (!AdvantageFX.removeByID(NELID("STOP")) && !AdvantageFX.removeByID(NELID("main")))
 		{
 			AdvantageFX.activateEmitters(false);
 		}

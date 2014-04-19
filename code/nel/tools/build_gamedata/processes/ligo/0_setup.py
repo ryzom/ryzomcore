@@ -52,12 +52,12 @@ mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory[0])
 # Setup export directories
 printLog(log, ">>> Setup export directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + SmallbankExportDirectory)
-mkPath(log, DatabaseDirectory + "/" + LigoDatabaseExportDirectory)
-mkPath(log, DatabaseDirectory + "/" + LigoDatabaseIgExportDirectory)
-mkPath(log, DatabaseDirectory + "/" + LigoDatabaseZoneExportDirectory)
-mkPath(log, DatabaseDirectory + "/" + LigoDatabaseZoneLigoExportDirectory)
-mkPath(log, DatabaseDirectory + "/" + LigoDatabaseCmbExportDirectory)
-mkPath(log, ExportBuildDirectory + "/" + LigoTagExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemIgExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemZoneExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemZoneLigoExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemCmbExportDirectory)
+mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ZoneExportDirectory)
 
 # Setup build directories
@@ -83,11 +83,11 @@ if LigoExportLand != "":
 	cf.write("OutIGDir  = \"" + ExportBuildDirectory + "/" + LigoIgLandBuildDirectory + "\";\n")
 	cf.write("AdditionnalIGOutDir = \"" + ExportBuildDirectory + "/" + LigoIgOtherBuildDirectory + "\";\n")
 	cf.write("\n")
-	cf.write("RefZoneDir = \"" + DatabaseDirectory + "/" + LigoDatabaseZoneExportDirectory+ "\";\n") # FIXME
-	cf.write("RefIGDir  = \"" + DatabaseDirectory + "/" + LigoDatabaseIgExportDirectory + "\";\n")
-	cf.write("AdditionnalIGInDir = \"" + DatabaseDirectory + "/" + LigoDatabaseIgExportDirectory + "\";\n") # FIXME
+	cf.write("RefZoneDir = \"" + ExportBuildDirectory + "/" + LigoEcosystemZoneExportDirectory+ "\";\n") # FIXME
+	cf.write("RefIGDir  = \"" + ExportBuildDirectory + "/" + LigoEcosystemIgExportDirectory + "\";\n")
+	cf.write("AdditionnalIGInDir = \"" + ExportBuildDirectory + "/" + LigoEcosystemIgExportDirectory + "\";\n") # FIXME
 	cf.write("ContinentsDir = \"" + LeveldesignWorldDirectory + "\";\n")
-	cf.write("LigoBankDir = \"" + DatabaseDirectory + "/" + LigoDatabaseZoneLigoExportDirectory + "\";\n") # FIXME
+	cf.write("LigoBankDir = \"" + ExportBuildDirectory + "/" + LigoEcosystemZoneLigoExportDirectory + "\";\n") # FIXME
 	cf.write("\n")
 	cf.write("TileBankFile = \"" + DatabaseDirectory + "/" + LigoTileBankFile + "\";\n")
 	cf.write("\n")
@@ -102,7 +102,7 @@ if LigoExportLand != "":
 	cf.write("Threshold = 1;\n")
 	cf.write("\n")
 	cf.write("DFNDir = \"" + LeveldesignDfnDirectory + "\";\n")
-	cf.write("RefCMBDir = \"" + DatabaseDirectory + "/" + LigoDatabaseCmbExportDirectory + "\";\n") # FIXME
+	cf.write("RefCMBDir = \"" + ExportBuildDirectory + "/" + LigoEcosystemCmbExportDirectory + "\";\n") # FIXME
 	cf.write("OutCMBDir = \"" + ExportBuildDirectory + "/" + RBankCmbExportDirectory + "\";\n")
 	cf.write("\n")
 	cf.write("ContinentFile = \"" + LeveldesignWorldDirectory + "/" + ContinentFile + "\";\n")

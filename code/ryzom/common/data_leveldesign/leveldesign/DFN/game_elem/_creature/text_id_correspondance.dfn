@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="TextIDIn" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="TextIDOut" Type="Type" Filename="string.typ"/>
-  <LOG>Mon Jan 27 14:42:50 2003 (Nicolas Vizerie) Dfn Structure = 
-Mon Jan 27 17:03:52 2003 (Nicolas Vizerie) Dfn Structure = </LOG>
-</DFN>

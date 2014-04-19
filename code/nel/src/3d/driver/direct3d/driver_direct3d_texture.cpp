@@ -1187,6 +1187,11 @@ bool CDriverD3D::setRenderTarget (ITexture *tex, uint32 /* x */, uint32 /* y */,
 	return true;
 }
 
+ITexture *CDriverD3D::getRenderTarget() const
+{
+	return _RenderTarget.Texture;
+}
+
 // ***************************************************************************
 
 bool CDriverD3D::copyTargetToTexture (ITexture * /* tex */, uint32 /* offsetx */, uint32 /* offsety */, uint32 /* x */, uint32 /* y */, uint32 /* width */,

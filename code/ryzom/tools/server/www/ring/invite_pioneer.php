@@ -42,24 +42,25 @@
 	if (isset($_POST["execute"]))
 	{
 		// lookup in the database to convert character name into
-		global $DBHost, $DBUserName, $DBPassword, $RingDBName;
+		global $DBHost, $RingDBUserName, $RingDBPassword, $RingDBName;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($RingDBName) or die ("Can't access to the table dbname:$RingDBName");
+		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
+		mysqli_select_db($link, $RingDBName) or die ("Can't access to the table dbname:$RingDBName");
 		
 		// extract the character that have the specified name
-		$query = "select * from characters where char_name = '".$_POST["charName"]."'";
-		$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+		$charName = mysqli_real_escape_string($link, $_POST['charName']);
+		$query = "select char_id, char_name from characters where char_name = '$charName'";
+		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
 
-		if (mysql_num_rows ($result) == 0)
+		if (mysqli_num_rows($result) == 0)
 		{
 			echo "<h1>Can't find the character ".$_POST["charName"]."<h1>";
 		}
 		else
 		{
-			$row = mysql_fetch_row($result);
-			$currentSession = $row[0];
-			$currentchar = $row[1];
+			$row = mysqli_fetch_assoc($result);
+			$currentSession = $row['char_id'];
+			$currentchar = $row['char_name'];
 
 			// send the invitation info to the session manager
 			$invitePioneer = new InvitePioneerCb;

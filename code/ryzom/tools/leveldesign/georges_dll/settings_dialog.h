@@ -44,7 +44,6 @@ public:
 	CString	TypeDfnSubDirectory;
 	UINT	MaxUndo;
 	BOOL	StartExpanded;
-	BOOL	Georges4CVS;
 	//}}AFX_DATA
 
 	NLMISC::CConfigFile		ConfigFile;

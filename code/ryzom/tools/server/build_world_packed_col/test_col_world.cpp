@@ -607,7 +607,7 @@ int main(int argc, char* argv[])
 	// fly into scene	
 	try
 	{	
-		CNELU::init(1024, 768, CViewport(), 32, true, NULL, false, true);
+		CNELU::init(1024, 768, CViewport(), 32, true, EmptyWindow, false, true);
 	}
 	catch(const Exception &e)
 	{		

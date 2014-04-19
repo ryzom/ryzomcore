@@ -447,7 +447,7 @@ namespace NLGUI
 		}
 
 		float getAlphaRolloverSpeed();
-		void resetAlphaRolloverSpeed();
+		void resetAlphaRolloverSpeedProps();
 
 		void setContainerAlpha( uint8 alpha );
 		uint8 getContainerAlpha() const { return _ContainerAlpha; }
@@ -457,6 +457,7 @@ namespace NLGUI
 		uint8 getGlobalRolloverFactorContainer() const { return _GlobalRolloverFactorContainer; }
 
 		void updateGlobalAlphas();
+		void resetGlobalAlphasProps();
 
 		const SInterfaceTimes& getInterfaceTimes() const{ return interfaceTimes; }
 		void updateInterfaceTimes( const SInterfaceTimes &times ){ interfaceTimes = times; }
@@ -542,6 +543,11 @@ namespace NLGUI
 		NLMISC::CCDBNodeLeaf *_BProp;
 		NLMISC::CCDBNodeLeaf *_AProp;
 		NLMISC::CCDBNodeLeaf *_AlphaRolloverSpeedDB;
+
+		NLMISC::CCDBNodeLeaf *_GlobalContentAlphaDB;
+		NLMISC::CCDBNodeLeaf *_GlobalContainerAlphaDB;
+		NLMISC::CCDBNodeLeaf *_GlobalContentRolloverFactorDB;
+		NLMISC::CCDBNodeLeaf *_GlobalContainerRolloverFactorDB;
 		
 		uint8 _ContainerAlpha;
 		uint8 _GlobalContentAlpha;

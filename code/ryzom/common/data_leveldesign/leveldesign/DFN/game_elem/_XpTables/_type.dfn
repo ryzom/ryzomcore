@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.2" State="modified">
-  <ELEMENT Name="Type" Type="Dfn" Filename="_paliers.dfn" Array="true"/>
-  <LOG>Mon Jun 17 21:25:16 2002 (saffray) Dfn Structure = 
-Mon Jun 17 21:25:27 2002 (saffray) Dfn Structure = </LOG>
-</DFN>

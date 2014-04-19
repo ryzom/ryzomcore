@@ -9,7 +9,7 @@
 	$tpl->assign("tool_v_login",		$nel_user['user_name']);
 	$tpl->assign("tool_v_user_id",		$nel_user['user_id']);
 	$tpl->assign("tool_v_menu",			$nel_user['user_menu_style']);
-	$tpl->assign("tool_v_application",	$nel_user['user_default_application_id']);
+	$tpl->assign("tool_v_application",	isset($nel_user['user_default_application_id']) ? $nel_user['user_default_application_id']:'') ;
 
 	if (isset($NELTOOL['POST_VARS']['tool_form_user_id']))
 	{
