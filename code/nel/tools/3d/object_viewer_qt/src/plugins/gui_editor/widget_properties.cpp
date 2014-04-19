@@ -84,6 +84,7 @@ namespace GUIEditor{
 			return;
 
 		tree->removeNode( widgetName.toUtf8().constData() );
+		Q_EMIT treeChanged();
 		widgetPropTree->clear();
 		buildWidgetList();
 	}
@@ -156,6 +157,7 @@ namespace GUIEditor{
 	void CWidgetProperties::onWidgetAdded()
 	{
 		buildWidgetList();
+		Q_EMIT treeChanged();
 	}
 
 	void CWidgetProperties::buildWidgetList()

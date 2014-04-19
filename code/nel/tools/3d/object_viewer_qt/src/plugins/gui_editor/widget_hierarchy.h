@@ -18,6 +18,8 @@
 #define WIDGET_HA_H
 
 #include "ui_widget_hierarchy.h"
+#include <string>
+#include <map>
 
 namespace NLGUI
 {
@@ -40,11 +42,17 @@ namespace GUIEditor
 		void clearHierarchy();
 		void buildHierarchy( std::string &masterGroup );
 
+		void onWidgetDeleted( const std::string &id );
+		void onWidgetAdded( const std::string &id );
+
+		void getCurrentGroup( QString &g );
+
 	private:
 		void buildHierarchy( QTreeWidgetItem *parent, NLGUI::CInterfaceGroup *group );
 
 	public Q_SLOTS:
 		void onGUILoaded();
+		void onSelectionChanged( std::string &newSelection );
 
 	private Q_SLOTS:
 		void onItemDblClicked( QTreeWidgetItem *item );
@@ -52,9 +60,7 @@ namespace GUIEditor
 	private:
 		std::string currentSelection;
 		std::string masterGroup;
-
-	Q_SIGNALS:
-		void selectionChanged( std::string &id );
+		std::map< std::string, QTreeWidgetItem* > widgetHierarchyMap;
 	};
 }
 

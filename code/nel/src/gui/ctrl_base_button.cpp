@@ -669,12 +669,6 @@ namespace NLGUI
 				if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 					return false;
 
-				if( editorMode )
-				{
-					CWidgetManager::getInstance()->setCurrentEditorSelection( getId() );
-					return true;
-				}
-
 				if (_LeftDblClickHandled)  // no effect on mouse up after double click has been handled
 				{
 					_LeftDblClickHandled = false;

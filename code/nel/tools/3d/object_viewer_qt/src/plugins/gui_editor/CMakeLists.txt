@@ -28,6 +28,9 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	nelgui_widget.h
 	new_property_widget.h
 	new_widget_widget.h
+	add_widget_widget.h
+	editor_selection_watcher.h
+	editor_message_processor.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
@@ -42,6 +45,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	project_window.ui
 	new_property_widget.ui
 	new_widget_widget.ui
+	add_widget_widget.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)
