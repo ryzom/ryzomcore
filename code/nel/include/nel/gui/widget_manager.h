@@ -332,7 +332,13 @@ namespace NLGUI
 		void drawViews( NL3D::UCamera camera );
 
 		bool handleEvent( const CEventDescriptor &evnt );
-		
+
+		bool handleSystemEvent( const CEventDescriptor &evnt );
+
+		bool handleKeyboardEvent( const CEventDescriptor &evnt );
+
+		bool handleMouseEvent( const CEventDescriptor &evnt );
+
 		bool handleMouseMoveEvent( const CEventDescriptor &eventDesc );
 
 		// Relative move of pointer
