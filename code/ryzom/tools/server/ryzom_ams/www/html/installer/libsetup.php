@@ -7,29 +7,48 @@
     
     ini_set('display_errors', 1); 
     error_reporting(E_ALL);
+    
+   function is__writable($path) {
+
+    if ($path{strlen($path)-1}=='/')
+        return is__writable($path.uniqid(mt_rand()).'.tmp');
+
+    if (file_exists($path)) {
+        if (!($f = @fopen($path, 'r+')))
+            return false;
+        fclose($f);
+        return true;
+    }
+
+    if (!($f = @fopen($path, 'w')))
+        return false;
+    fclose($f);
+    unlink($path);
+    return true;
+    }
 
     //set permissions
-    if(is_writable('../../../www/login/logs')) {
+    if(is__writable('../../../www/login/logs')) {
         echo "failed to get write permissions on logs";
         exit;
     }
-    if(is_writable('../../../admin/graphs_output')) {
+    if(is__writable('../../../admin/graphs_output')) {
         echo "failed to get write permissions on graphs_output";
         exit;
     }
-    if(is_writable('../../../admin/templates/default_c')) {
+    if(is__writable('../../../admin/templates/default_c')) {
         echo "failed to get write permissions on default_c";
         exit;
     }
-    if(is_writable('../../www')) {
+    if(is__writable('../../www')) {
         echo "failed to get write permissions on www";
         exit;
     }
-    if(is_writable('../../www/html/cache')) {
+    if(is__writable('../../www/html/cache')) {
         echo "failed to get write permissions on cache";
         exit;
     }
-    if(is_writable('../../www/html/templates_c')) {
+    if(is__writable('../../www/html/templates_c')) {
         echo "failed to get write permissions on templates_c";
         exit;
     }
