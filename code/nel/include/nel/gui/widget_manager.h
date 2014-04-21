@@ -532,6 +532,11 @@ namespace NLGUI
 
 		NLMISC::CRefPtr< CViewBase > _CapturedView;
 
+		NLMISC::CRefPtr< CInterfaceElement > draggedElement;
+
+		bool startDragging();
+		void stopDragging();
+
 		// What is under pointer
 		std::vector< CViewBase* > _ViewsUnderPointer;
 		std::vector< CCtrlBase* > _CtrlsUnderPointer;

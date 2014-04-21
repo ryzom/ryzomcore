@@ -2039,6 +2039,12 @@ namespace NLGUI
 						}
 					}
 
+					if( draggedElement != NULL )
+					{
+						CInterfaceElement *e = draggedElement;
+						static_cast< CViewBase* >( e )->draw();
+					}
+
 					if ( (nPriority == WIN_PRIORITY_WORLD_SPACE) && !camera.empty())
 					{
 						driver->setMatrixMode2D11();
@@ -2437,11 +2443,11 @@ namespace NLGUI
 					// consider clicking on a control implies handling of the event.
 					handled= true;
 
-					// handle the capture
 					if( getCapturePointerLeft() != NULL )
-						getCapturePointerLeft()->handleEvent(evnt);
-					else
-						_CapturedView->handleEvent( evnt );
+						_CapturedView = getCapturePointerLeft();
+
+					// handle the capture
+					_CapturedView->handleEvent( evnt );
 				}
 			}
 
@@ -2534,6 +2540,11 @@ namespace NLGUI
 					setCapturePointerLeft(NULL);
 					handled = true;
 				}
+
+				_CapturedView = NULL;
+				
+				if( CInterfaceElement::getEditorMode() )
+					stopDragging();
 			}
 
 
@@ -2602,7 +2613,51 @@ namespace NLGUI
 			ve.setY( getPointer()->getY() );
 		}
 
+		if( CInterfaceElement::getEditorMode() )
+		{
+			if( ( _CapturedView != NULL ) && ( draggedElement == NULL ) )
+			{
+				startDragging();
+			}
+			else
+			if( draggedElement != NULL )
+			{
+				draggedElement->setXReal( newX );
+				draggedElement->setYReal( newY );
+				draggedElement->invalidateCoords();
+			}
+		}
+
 		return true;
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	bool CWidgetManager::startDragging()
+	{
+		CInterfaceElement *e = NULL;
+
+		CInterfaceGroup *g = _CapturedView->getParent();
+		if( g != NULL )
+		{
+			e = g->takeElement( _CapturedView );
+			if( e == NULL )
+			{
+				nlinfo( "Something went horribly wrong :(" );
+				return false;
+			}
+		}
+		else
+			e = _CapturedView;
+
+		e->setParent( NULL );
+		draggedElement = e;
+
+		return true;
+	}
+
+	void CWidgetManager::stopDragging()
+	{
+		draggedElement = NULL;
 	}
 	
 	// ------------------------------------------------------------------------------------------------
