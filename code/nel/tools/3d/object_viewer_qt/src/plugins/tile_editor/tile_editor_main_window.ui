@@ -1,0 +1,795 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TileEditorMainWindow</class>
+ <widget class="QMainWindow" name="TileEditorMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tileViewTabWidget">
+      <property name="currentIndex">
+       <number>2</number>
+      </property>
+      <widget class="QWidget" name="tab128">
+       <attribute name="title">
+        <string>128x128</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_10">
+        <item row="0" column="0">
+         <widget class="QListView" name="listView128">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>128</width>
+            <height>128</height>
+           </size>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QGroupBox" name="editChannel128GB">
+          <property name="title">
+           <string>Edit Channel</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QRadioButton" name="radioButton_5">
+             <property name="text">
+              <string>Diffuse</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_6">
+             <property name="text">
+              <string>Additive</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab256">
+       <attribute name="title">
+        <string>256x256</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_11">
+        <item row="0" column="0">
+         <widget class="QListView" name="listView256">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>256</width>
+            <height>256</height>
+           </size>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QGroupBox" name="editChannel256GB">
+          <property name="title">
+           <string>Edit Channel</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QRadioButton" name="radioButton_10">
+             <property name="text">
+              <string>Diffuse</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_9">
+             <property name="text">
+              <string>Additive</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabTransition">
+       <attribute name="title">
+        <string>Transition</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_12">
+        <item row="0" column="0">
+         <widget class="QListView" name="listViewTransition">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>64</width>
+            <height>64</height>
+           </size>
+          </property>
+          <property name="movement">
+           <enum>QListView::Static</enum>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="resizeMode">
+           <enum>QListView::Adjust</enum>
+          </property>
+          <property name="layoutMode">
+           <enum>QListView::SinglePass</enum>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QGroupBox" name="editChannelTransitionGB">
+          <property name="title">
+           <string>Edit Channel</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QRadioButton" name="radioButton_13">
+             <property name="text">
+              <string>Diffuse</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_12">
+             <property name="text">
+              <string>Additive</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioButton_11">
+             <property name="text">
+              <string>Alpha</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabDisplacement">
+       <attribute name="title">
+        <string>Displacement</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_13">
+        <item row="0" column="0">
+         <widget class="QListView" name="listViewDisplacement">
+          <property name="contextMenuPolicy">
+           <enum>Qt::ActionsContextMenu</enum>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
+          <property name="movement">
+           <enum>QListView::Static</enum>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+          <property name="isWrapping" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="resizeMode">
+           <enum>QListView::Fixed</enum>
+          </property>
+          <property name="viewMode">
+           <enum>QListView::IconMode</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabTileSetDetails">
+       <attribute name="title">
+        <string>Tile Set Details</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="6" column="0">
+         <widget class="QCheckBox" name="orientedCheckBox">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="text">
+           <string>Oriented</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLineEdit" name="surfaceDataLineEdit"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Surface Data:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Vegetation Set:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="chooseVegetPushButton">
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="resetVegetPushButton">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../../tile_edit_qt/tile_edit_qt.qrc">
+            <normaloff>:/newPrefix/reset.png</normaloff>:/newPrefix/reset.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>Tile Editor Tool Bar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionOpenTileBank"/>
+   <addaction name="actionSaveTileBank"/>
+   <addaction name="actionSaveTileBankAs"/>
+   <addaction name="separator"/>
+  </widget>
+  <widget class="QDockWidget" name="tileBankDockWidget">
+   <property name="windowTitle">
+    <string>Tile Bank</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string>Lands</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QListWidget" name="listWidget"/>
+        </item>
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton_3">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/ic_nel_add_item.png</normaloff>:/movementIcons/images/ic_nel_add_item.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton_2">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/reset.png</normaloff>:/movementIcons/images/reset.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/ic_nel_open.png</normaloff>:/movementIcons/images/ic_nel_open.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QGroupBox" name="groupBox_3">
+       <property name="title">
+        <string>Tile Sets</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton_5">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/up.png</normaloff>:/movementIcons/images/up.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton_4">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/down.png</normaloff>:/movementIcons/images/down.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QToolButton" name="tileSetAddTB">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/ic_nel_add_item.png</normaloff>:/movementIcons/images/ic_nel_add_item.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton_7">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/reset.png</normaloff>:/movementIcons/images/reset.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="toolButton_6">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="icon">
+             <iconset resource="tile_editor.qrc">
+              <normaloff>:/movementIcons/images/ic_nel_open.png</normaloff>:/movementIcons/images/ic_nel_open.png</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QPushButton" name="tileBankTexturePathPB">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="tileBankTexturePathTB">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Tile Bank Texture Path</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QListView" name="tileSetLV"/>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionOpenTileBank">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/movementIcons/images/ic_nel_open.png</normaloff>:/movementIcons/images/ic_nel_open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Tile Bank</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Tile Bank</string>
+   </property>
+  </action>
+  <action name="actionRotateTile0">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileRotation/images/rotation0.png</normaloff>:/tileRotation/images/rotation0.png</iconset>
+   </property>
+   <property name="text">
+    <string>0</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotate Tile 0 Degrees</string>
+   </property>
+  </action>
+  <action name="actionSaveTileBank">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/movementIcons/images/ic_nel_save.png</normaloff>:/movementIcons/images/ic_nel_save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Tile Bank</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Tile Bank</string>
+   </property>
+  </action>
+  <action name="actionSaveTileBankAs">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/movementIcons/images/ic_nel_save_as.png</normaloff>:/movementIcons/images/ic_nel_save_as.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Tile Bank As...</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Tile Bank As...</string>
+   </property>
+  </action>
+  <action name="actionRotateTile90">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileRotation/images/rotation90.png</normaloff>:/tileRotation/images/rotation90.png</iconset>
+   </property>
+   <property name="text">
+    <string>90</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotate Tile 90 Degrees</string>
+   </property>
+  </action>
+  <action name="actionRotateTile180">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileRotation/images/rotation180.png</normaloff>:/tileRotation/images/rotation180.png</iconset>
+   </property>
+   <property name="text">
+    <string>180</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotate Tile180 Degrees</string>
+   </property>
+  </action>
+  <action name="actionRotateTile270">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileRotation/images/rotation270.png</normaloff>:/tileRotation/images/rotation270.png</iconset>
+   </property>
+   <property name="text">
+    <string>270</string>
+   </property>
+   <property name="toolTip">
+    <string>Rotate Tile 270 Degrees</string>
+   </property>
+  </action>
+  <action name="actionBatchLoad">
+   <property name="text">
+    <string>Batch Load</string>
+   </property>
+   <property name="toolTip">
+    <string>Batch Load</string>
+   </property>
+  </action>
+  <action name="actionImportBorder">
+   <property name="text">
+    <string>Import Border</string>
+   </property>
+   <property name="toolTip">
+    <string>Import Border</string>
+   </property>
+  </action>
+  <action name="actionExportBorder">
+   <property name="text">
+    <string>Export Border</string>
+   </property>
+   <property name="toolTip">
+    <string>Export Border</string>
+   </property>
+  </action>
+  <action name="actionTileDisplayIndex">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Index</string>
+   </property>
+   <property name="toolTip">
+    <string>Display Tile Index</string>
+   </property>
+  </action>
+  <action name="actionTileDisplayFilename">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Filename</string>
+   </property>
+   <property name="toolTip">
+    <string>Display Tile Filename</string>
+   </property>
+  </action>
+  <action name="actionAddTile">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileTools/images/add_tile.png</normaloff>:/tileTools/images/add_tile.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Tile</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Tile</string>
+   </property>
+  </action>
+  <action name="actionDeleteTile">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileTools/images/delete_tile.png</normaloff>:/tileTools/images/delete_tile.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Tile</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Tile</string>
+   </property>
+  </action>
+  <action name="actionReplaceImage">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileTools/images/replace_image.png</normaloff>:/tileTools/images/replace_image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Replace Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Replace Image</string>
+   </property>
+  </action>
+  <action name="actionDeleteImage">
+   <property name="icon">
+    <iconset resource="tile_editor.qrc">
+     <normaloff>:/tileTools/images/delete_image.png</normaloff>:/tileTools/images/delete_image.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Image</string>
+   </property>
+  </action>
+  <action name="actionZoom50">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoom 50%</string>
+   </property>
+  </action>
+  <action name="actionZoom100">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoom 100%</string>
+   </property>
+  </action>
+  <action name="actionZoom200">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Zoom 200%</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="tile_editor.qrc"/>
+  <include location="../../../../tile_edit_qt/tile_edit_qt.qrc"/>
+ </resources>
+ <connections/>
+</ui>
