@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.2 $" State="modified">
-  <ELEMENT Name="Target Slot" Type="Type" Filename="_localisation_slot.typ"/>
-  <LOG>Tue Nov 26 14:44:28 2002 (fleury) Dfn Structure = 
-Tue Nov 26 14:58:37 2002 (fleury) Dfn Structure = 
-Thu Dec 12 19:34:56 2002 (fleury) Dfn Structure = </LOG>
-</DFN>

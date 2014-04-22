@@ -23,7 +23,7 @@
 #include "../client_sheets/sbrick_sheet.h"
 #include "game_share/sabrina_com.h"
 #include "game_share/skills.h"
-#include "../cdb.h"
+#include "nel/misc/cdb.h"
 #include "brick_learned_callback.h"
 
 
@@ -83,7 +83,7 @@ public:
 	/**
 	 * \return the DB pointing on the BitField for this family.
 	 */
-	class CCDBNodeLeaf*	getKnownBrickBitFieldDB(uint family) const;
+	class NLMISC::CCDBNodeLeaf*	getKnownBrickBitFieldDB(uint family) const;
 
 	/**
 	 * \return true if the brick is learn by the player.
@@ -159,7 +159,7 @@ protected:
 	std::vector <std::vector<NLMISC::CSheetId> > _SheetsByFamilies;
 
 	///vector of bit fields describing the known bricks of each family
-	std::vector<CCDBNodeLeaf*>		_FamiliesBits;
+	std::vector<NLMISC::CCDBNodeLeaf*>		_FamiliesBits;
 
 	/// list of roots only
 	std::vector <NLMISC::CSheetId>	_Roots;
@@ -195,11 +195,11 @@ protected:
 	NLMISC::CSheetId	_InterfaceRemoveBrick;
 
 	// Observer when a brick is learned
-	struct CBrickFamilyObs : public ICDBNode::IPropertyObserver
+	struct CBrickFamilyObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 		CSBrickManager		*Owner;
 
-		virtual void update (ICDBNode *node);
+		virtual void update (NLMISC::ICDBNode *node);
 	};
 	friend struct CBrickFamilyObs;
 	CBrickFamilyObs			_BrickFamilyObs;

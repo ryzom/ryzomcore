@@ -21,7 +21,7 @@
 namespace EGSPD
 {
 	
-static const struct { char* Name; CFameTrend::TFameTrend Value; } TFameTrendConvert[] =
+static const struct { const char* Name; CFameTrend::TFameTrend Value; } TFameTrendConvert[] =
 {
 	{ "FameUpward", CFameTrend::FameUpward },
 	{ "FameDownward", CFameTrend::FameDownward },

@@ -323,6 +323,8 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 
 	for (uint32 i=packageIndex.fileCount();i--;)
 	{
+		bool deleteRefAfterDelta= true;
+		bool usingTemporaryFile = false;
 		// generate file name root
 		std::string bnpFileName= _BnpDirectory+packageIndex.getFile(i).getFileName();
 		std::string refNameRoot= _RefDirectory+NLMISC::CFile::getFilenameWithoutExtension(bnpFileName);
@@ -342,9 +344,11 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		std::string prevVersionFileName;
 		if (packageIndex.getFile(i).versionCount()==1)
 		{
-			prevVersionFileName= tmpnam(NULL);
+			prevVersionFileName= _RootDirectory + "empty";
 			NLMISC::COFile tmpFile(prevVersionFileName);
 			tmpFile.close();
+			usingTemporaryFile = true;
+			deleteRefAfterDelta= false;
 		}
 		else
 		{

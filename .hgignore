@@ -146,6 +146,10 @@ external_stlport
 .svn
 thumbs.db
 Thumbs.db
+*.tpl.php
+.SyncID
+.SyncIgnore
+.SyncArchive
 
 # build
 code/nel/build/*
@@ -156,6 +160,7 @@ code/build/*
 code/build-2010/*
 build/*
 install/*
+code/nel/tools/build_gamedata/configuration/buildsite.py
 
 # Linux nel compile
 code/nel/build/nel-config
@@ -198,6 +203,16 @@ code/nel/tools/pacs/build_rbank/build_rbank
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
 code/ryzom/tools/server/sql/ryzom_admin_default_data.sql
+code/ryzom/tools/server/ryzom_ams/drupal
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
+code/ryzom/tools/server/ryzom_ams/www/html/templates_c
 
 # Linux server compile
 code/ryzom/server/src/entities_game_service/entities_game_service
@@ -211,3 +226,22 @@ code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
 code/ryzom/server/src/tick_service/tick_service
 # WebTT temp dir
 code/ryzom/tools/server/www/webtt/app/tmp
+code\ryzom\tools\server\ryzom_ams\old
+
+# AMS ignore
+code/ryzom/tools/server/ryzom_ams/www/config.php
+code/ryzom/tools/server/ryzom_ams/www/is_installed
+
+#tools and external dir's
+external
+external_stlport
+nel_tools*
+ryzom_tools*
+
+#Dumps
+*.dmp
+
+code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
+code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
+code/nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
+code/nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg

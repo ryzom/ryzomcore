@@ -50,8 +50,8 @@ void CSchemeManager::getSchemes(const std::string &type, std::vector<TSchemeInfo
 void CSchemeManager::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 
-	f.serialCheck((uint32) '_GNM');
-	f.serialCheck((uint32) 'MHCS');
+	f.serialCheck(NELID("_GNM"));
+	f.serialCheck(NELID("MHCS"));
 	f.serialVersion(1);
 	if (!f.isReading())
 	{

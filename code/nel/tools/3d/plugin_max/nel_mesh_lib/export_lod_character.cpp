@@ -179,7 +179,7 @@ bool  CExportNel::buildLodCharacter (NL3D::CLodCharacterShapeBuild& lodBuild, IN
 
 				// Delete the triObject if we should...
 				if (deleteIt)
-					tri->MaybeAutoDelete();
+					tri->DeleteThis();
 			}
 		}
 	}

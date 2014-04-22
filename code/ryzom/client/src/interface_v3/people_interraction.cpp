@@ -20,26 +20,26 @@
 // client
 #include "../string_manager_client.h"
 #include "people_interraction.h"
-#include "interface_expr.h"
+#include "nel/gui/interface_expr.h"
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "action_handler_misc.h"
 #include "chat_window.h"
 #include "../entity_animation_manager.h"
-#include "group_editbox.h"
-#include "group_menu.h"
+#include "nel/gui/group_editbox.h"
+#include "nel/gui/group_menu.h"
 #include "../client_chat_manager.h"
 #include "../string_manager_client.h"
-#include "interface_expr.h"
-#include "ctrl_button.h"
-#include "ctrl_text_button.h"
+#include "nel/gui/interface_expr.h"
+#include "nel/gui/ctrl_button.h"
+#include "nel/gui/ctrl_text_button.h"
 #include "filtered_chat_summary.h"
 #include "input_handler_manager.h"
 #include "../user_entity.h"
 #include "../entities.h"
 #include "../net_manager.h"
 #include "../connection.h"
-#include "group_tab.h"
+#include "nel/gui/group_tab.h"
 #include "guild_manager.h"
 // Game share
 #include "game_share/entity_types.h"
@@ -49,6 +49,8 @@
 #include <nel/misc/i18n.h>
 
 #include <string>
+
+#include "../misc.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -556,7 +558,8 @@ void CPeopleInterraction::createTeamList()
 	{
 		CInterfaceLink *il = new CInterfaceLink;
 		vector<CInterfaceLink::CTargetInfo> targets;
-		il->init(targets, sExpr, sAction, sParams, sCond, TeamChat->getContainer());
+		vector<CInterfaceLink::CCDBTargetInfo> cdbTargets;
+		il->init(targets, cdbTargets, sExpr, sAction, sParams, sCond, TeamChat->getContainer());
 	}
 }
 
@@ -934,9 +937,9 @@ class CHandlerChatGroupFilter : public IActionHandler
 		}
 
 		// inform DB for write right.
-		pIM->getDbProp("UI:VARIABLES:MAIN_CHAT:WRITE_RIGHT")->setValue32(writeRight);
-		pIM->getDbProp("UI:VARIABLES:MAIN_CHAT:IS_DYN_CHAT")->setValue32(isDynChat);
-		pIM->getDbProp("UI:VARIABLES:MAIN_CHAT:INDEX_DYN_CHAT")->setValue32(dynChatDbIndex);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIN_CHAT:WRITE_RIGHT")->setValue32(writeRight);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIN_CHAT:IS_DYN_CHAT")->setValue32(isDynChat);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MAIN_CHAT:INDEX_DYN_CHAT")->setValue32(dynChatDbIndex);
 
 
 		// Update Chat Group Window from user chat button
@@ -968,7 +971,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					case CChatGroup::universe:	pUserBut->setHardText("uiFilterUniverse");	break;
 					case CChatGroup::dyn_chat:
 						uint32 index = PeopleInterraction.TheUserChat.Filter.getTargetDynamicChannelDbIndex();
-						uint32 textId = pIM->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
+						uint32 textId = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+toString(index)+":NAME")->getValue32();
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						if (title.empty())
@@ -1027,7 +1030,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 		CCtrlTabButton	*pTabButton= dynamic_cast<CCtrlTabButton*>(pCaller);
 		if(pTabButton)
 		{
-			CRGBA	stdColor= stringToRGBA(pIM->getDefine("chat_group_tab_color_normal").c_str());
+			CRGBA	stdColor= CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_group_tab_color_normal").c_str());
 			pTabButton->setTextColorNormal(stdColor);
 		}
 	}
@@ -1087,7 +1090,7 @@ bool CPeopleInterraction::getPeopleFromCurrentMenu(CPeopleList *&peopleList, uin
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// the group that launched the modal window (the menu) must be the header of the group container that represent a people entry
-	CInterfaceGroup *header = dynamic_cast<CInterfaceGroup *>(im->getCtrlLaunchingModal());
+	CInterfaceGroup *header = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 	if (!header) return false;
 	// get the parent container
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(header->getParent());
@@ -1100,7 +1103,7 @@ CPeopleList *CPeopleInterraction::getPeopleListFromCurrentMenu()
 {
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	// the group that launched the modal window (the menu) must be the header of the group container that represent a people entry
-	CInterfaceGroup *header = dynamic_cast<CInterfaceGroup *>(im->getCtrlLaunchingModal());
+	CInterfaceGroup *header = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 	if (!header) return NULL;
 	// get the parent container
 	CGroupContainer *gc = dynamic_cast<CGroupContainer *>(header->getParent());
@@ -1326,7 +1329,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, const ucstring &nam
 	}
 
 	CInterfaceManager* pIM= CInterfaceManager::getInstance();
-	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+	CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 	FriendList.sortEx(order);
 }
 
@@ -1351,7 +1354,7 @@ void CPeopleInterraction::addContactInList(uint32 contactId, uint32 nameID, TCha
 		WaitingContacts.push_back(w);
 
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
-		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 		FriendList.sortEx(order);
 	}
 }
@@ -1423,7 +1426,7 @@ void CPeopleInterraction::updateContactInList(uint32 contactId, TCharConnectionS
 			// Only do work if online status has changed
 			if (FriendList.getOnline(index) != online)
 			{
-				CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
+				CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
 				if (node && node->getValueBool())
 				{
 					// Only show the message if this player is not in my guild (because then the guild manager will show a message)
@@ -1692,14 +1695,14 @@ bool CPeopleInterraction::saveUserChatsInfos(NLMISC::IStream &f)
 	try
 	{
 		sint ver= f.serialVersion(USER_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		//saveFilteredChat(f, MainChat);
 		saveFilteredChat(f, ChatGroup);
 		for(uint k = 0; k < MaxNumUserChats; ++k)
 		{
 			saveFilteredChat(f, UserChat[k]);
 		}
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		if (ver>=1)
 		{
 			CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
@@ -1729,7 +1732,7 @@ bool CPeopleInterraction::saveUserDynChatsInfos(NLMISC::IStream &f)
 	try
 	{
 		sint ver = f.serialVersion(USER_DYN_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'OMGY');
+		f.serialCheck(NELID("OMGY"));
 		if (ver >= 1)
 		{
 			saveFilteredDynChat(f, TheUserChat);
@@ -1752,7 +1755,7 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 	{
 		bool present;
 		sint ver = f.serialVersion(USER_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		f.serial(present);
 		if (!present)
 		{
@@ -1774,7 +1777,7 @@ bool CPeopleInterraction::loadUserChatsInfos(NLMISC::IStream &f)
 				setupUserChatFromSummary(fcs, UserChat[k]);
 			}
 		}
-		f.serialCheck((uint32) 'TAHC');
+		f.serialCheck(NELID("TAHC"));
 		if (ver>=1)
 		{
 //			CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
@@ -1816,7 +1819,7 @@ bool CPeopleInterraction::loadUserDynChatsInfos(NLMISC::IStream &f)
 	{
 		bool present;
 		sint ver = f.serialVersion(USER_DYN_CHATS_INFO_VERSION);
-		f.serialCheck((uint32) 'OMGY');
+		f.serialCheck(NELID("OMGY"));
 		f.serial(present);
 		if (!present)
 		{
@@ -1979,7 +1982,7 @@ class CHandlerTeamTarget : public IActionHandler
 		{
 			// Get the team name id.
 			CLFECOMMON::TClientDataSetIndex	entityId= CLFECOMMON::INVALID_CLIENT_DATASET_INDEX;
-			CCDBNodeLeaf *prop = pIM->getDbProp(toString(TEAM_DB_PATH ":%d:UID", peopleIndex), false);
+			CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(toString(TEAM_DB_PATH ":%d:UID", peopleIndex), false);
 			if (prop)
 				entityId= prop->getValue32();
 
@@ -2082,7 +2085,7 @@ public:
 			{
 				if (ClientCfg.Local)
 				{
-					CInterfaceManager::getInstance()->getDbProp(TEAM_DB_PATH ":SUCCESSOR_INDEX")->setValue32(peopleIndex);
+					NLGUI::CDBManager::getInstance()->getDbProp(TEAM_DB_PATH ":SUCCESSOR_INDEX")->setValue32(peopleIndex);
 				}
 				else
 				{
@@ -2189,7 +2192,8 @@ class CHandlerTellContact : public IActionHandler
 		if (!pCaller) return;
 		CInterfaceGroup *ig = pCaller->getParent();
 		if (!ig) return;
-		CGroupContainer *gc = ig->getEnclosingContainer();
+		CGroupContainer *gc = static_cast< CGroupContainer* >( ig->getEnclosingContainer() );
+
 		if (!gc) return;
 		CPeopleList *list;
 		uint peopleIndex;
@@ -2230,13 +2234,13 @@ public:
 					{
 						CInterfaceManager *pIM = CInterfaceManager::getInstance();
 						string	groupName= getParam(sParams, "group");
-						CInterfaceGroup *gc = dynamic_cast<CInterfaceGroup *>(pIM->getElementFromId(groupName));
+						CInterfaceGroup *gc = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(groupName));
 						if (gc)
 						{
 							CGroupEditBox *geb = dynamic_cast<CGroupEditBox *>(gc->getGroup("add_contact_eb:eb"));
 							geb->setInputString(ucstring(""));
 						}
-						pIM->runActionHandler("enter_modal", pCaller, sParams);
+						CAHManager::getInstance()->runActionHandler("enter_modal", pCaller, sParams);
 					}
 				}
 			}
@@ -2300,7 +2304,7 @@ public:
 				}
 			}
 		}
-		pIM->runActionHandler("leave_modal", pCaller, "");
+		CAHManager::getInstance()->runActionHandler("leave_modal", pCaller, "");
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerAddContact, "add_contact");
@@ -2350,8 +2354,8 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
-		nlinfo("Load Order : %d", pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
-		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		nlinfo("Load Order : %d", NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
+		CPeopleList::TSortOrder order = (CPeopleList::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->getValue32());
 
 		order = (CPeopleList::TSortOrder)(order + 1);
 		if (order == CPeopleList::END_SORT_ORDER)
@@ -2360,7 +2364,7 @@ public:
 		}
 
 		nlinfo("Save Order : %d", order);
-		pIM->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->setValue32((sint32)order);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CONTACT_LIST:SORT_ORDER")->setValue32((sint32)order);
 		CPeopleList *pl = PeopleInterraction.getPeopleListFromCurrentMenu();
 		if (pl)
 			pl->sortEx(order);
@@ -2416,14 +2420,14 @@ public:
 		nlwarning("Deactivated for now!");
 		return;
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(NEW_PARTY_CHAT_WINDOW));
+		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(NEW_PARTY_CHAT_WINDOW));
 		if (!gc) return;
-		im->setTopWindow(gc);
+		CWidgetManager::getInstance()->setTopWindow(gc);
 		// Set the keyboard focus
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 		if (eb)
 		{
-			im->setCaptureKeyboard(eb);
+			CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 			eb->setInputString(ucstring(""));
 		}
 		//
@@ -2447,7 +2451,7 @@ class CHandlerValidatePartyChatName : public IActionHandler
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(im->getElementFromId(NEW_PARTY_CHAT_WINDOW));
+		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(NEW_PARTY_CHAT_WINDOW));
 		if (!gc) return;
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(gc->getGroup("eb"));
 		if (!eb) return;
@@ -2484,7 +2488,7 @@ class CHandlerRemovePartyChat : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (chat) PeopleInterraction.removePartyChat(chat);
 	}
 };
@@ -2523,7 +2527,7 @@ class CHandlerAddAllTeamMembersToPartyChat : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		// TODO GAMEDEV : add all team members
 	}
 };
@@ -2536,7 +2540,7 @@ class CHandlerRemoveAllTeamMembersToPartyChat : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		// TODO GAMEDEV : remove all team members
 	}
 };
@@ -2549,7 +2553,7 @@ class CHandlerAddAllGuildMembersToPartyChat : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		// TODO GAMEDEV : add all guild members
 	}
 };
@@ -2562,7 +2566,7 @@ class CHandlerRemoveAllGuildMembersToPartyChat : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CInterfaceManager::getInstance()->getCtrlLaunchingModal());
+//		CChatWindow *chat = getChatWndMgr().getChatWindowFromCaller(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		// TODO_GAMEDEV : remove all guild members
 	}
 };
@@ -2594,7 +2598,7 @@ public:
 			partyChats = nlstricmp("true", strPartyChats.c_str()) == 0;
 		}
 		// get the menu
-		CGroupMenu *menu = dynamic_cast<CGroupMenu *>(im->getElementFromId(menuName));
+		CGroupMenu *menu = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(menuName));
 		if (!menu) return;
 		// remove all party chat from the previous list
 		uint lastTargetSelectedIndex = 0;
@@ -2639,14 +2643,14 @@ public:
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			cw = PeopleInterraction.TheUserChat.Window;
 //			CChatStdInput &ci = PeopleInterraction.ChatInput;
-			CGroupMenu *pMenu = dynamic_cast<CGroupMenu*>(pIM->getElementFromId("ui:interface:user_chat_target_menu"));
+			CGroupMenu *pMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:user_chat_target_menu"));
 			CViewTextMenu *pMenuAround	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:around"));
 			CViewTextMenu *pMenuRegion	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:region"));
 			CViewTextMenu *pMenuUniverse	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:universe"));
 			CViewTextMenu *pMenuTeam	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:team"));
 			CViewTextMenu *pMenuGuild	= dynamic_cast<CViewTextMenu*>(pMenu->getElement("ui:interface:user_chat_target_menu:guild"));
-			const bool teamActive = pIM->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
-			const bool guildActive = pIM->getDbProp("SERVER:GUILD:NAME")->getValueBool();
+			const bool teamActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool();
+			const bool guildActive = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValueBool();
 			if (pMenuAround)	pMenuAround->setGrayed	(false);
 			if (pMenuRegion)	pMenuRegion->setGrayed	(false);
 			if (pMenuUniverse)	pMenuUniverse->setGrayed	(false);
@@ -2668,7 +2672,7 @@ public:
 				bool active = (textId != 0);
 				if (active)
 				{
-					uint32 canWrite = im->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
+					uint32 canWrite = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:DYN_CHAT:CHANNEL"+s+":WRITE_RIGHT")->getValue32();
 					if (canWrite != 0)
 					{
 						ucstring title;
@@ -2681,7 +2685,7 @@ public:
 		}
 
 		// activate the menu
-		CInterfaceManager::getInstance()->enableModalWindow(pCaller, menuName);
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, menuName);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSelectChatTarget, "select_chat_target");
@@ -2745,12 +2749,12 @@ class CHandlerChatTargetSelected : public IActionHandler
 		if (cw == PeopleInterraction.ChatGroup.Window)
 		{
 			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
-			CInterfaceManager::getInstance()->runActionHandler("chat_group_filter", NULL, "user");
+			CAHManager::getInstance()->runActionHandler("chat_group_filter", NULL, "user");
 		}
 		if (cw == PeopleInterraction.TheUserChat.Window)
 		{
 			PeopleInterraction.TheUserChat.Filter.setTargetGroup(cf.getTargetGroup(), cf.getTargetDynamicChannelDbIndex());
-			CInterfaceManager::getInstance()->runActionHandler("user_chat_active", NULL, "");
+			CAHManager::getInstance()->runActionHandler("user_chat_active", NULL, "");
 		}
 
 		// The target should be a party chat
@@ -2787,7 +2791,7 @@ class CHandlerLeaveTeamChat : public IActionHandler
 			CInterfaceManager *im = CInterfaceManager::getInstance();
 			if( im )
 			{
-				if( !im->getDbProp("UI:VARIABLES:IS_TEAM_PRESENT")->getValueBool() )
+				if( !NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:IS_TEAM_PRESENT")->getValueBool() )
 				{
 					ChatMngr.updateChatModeAndButton(CChatGroup::say);
 				}
@@ -2812,7 +2816,7 @@ static CInterfaceGroup *createMenuCheckBox(const std::string &onclickL, const st
 	params[1].second = paramsL;
 
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CInterfaceGroup *ig = im->createGroupInstance("menu_checkbox", "", params, sizeof(params) / sizeof(params[0]));
+	CInterfaceGroup *ig = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_checkbox", "", params, sizeof(params) / sizeof(params[0]));
 	if (!ig) return NULL;
 	CCtrlBaseButton *cb = dynamic_cast<CCtrlBaseButton *>(ig->getCtrl("b"));
 	if (!cb) return NULL;
@@ -2844,13 +2848,13 @@ class CHandlerSelectChatSource : public IActionHandler
 		if (cw == pi.ChatGroup.Window)
 		{
 			// select main chat menu
-			menu = dynamic_cast<CGroupMenu *>(im->getElementFromId(MAIN_CHAT_SOURCE_MENU));
+			menu = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(MAIN_CHAT_SOURCE_MENU));
 
 			// Remove all unused dynamic channels and set the names
 			for (uint i = 0; i < CChatGroup::MaxDynChanPerPlayer; i++)
 			{
 				string s = toString(i);
-				CViewTextMenu *pVTM = dynamic_cast<CViewTextMenu *>(im->getElementFromId(MAIN_CHAT_SOURCE_MENU+":tab:dyn"+s));
+				CViewTextMenu *pVTM = dynamic_cast<CViewTextMenu *>(CWidgetManager::getInstance()->getElementFromId(MAIN_CHAT_SOURCE_MENU+":tab:dyn"+s));
 				if (pVTM)
 				{
 					uint32 textId = ChatMngr.getDynamicChannelNameFromDbIndex(i);
@@ -2885,7 +2889,7 @@ class CHandlerSelectChatSource : public IActionHandler
 			if (cw == pi.TheUserChat.Window)
 			{
 				// select user chat menu
-				menu = dynamic_cast<CGroupMenu *>(im->getElementFromId(USER_CHAT_SOURCE_MENU));
+				menu = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(USER_CHAT_SOURCE_MENU));
 				addUserChatEntries= true;
 			}
 			// Simple menu
@@ -2893,9 +2897,9 @@ class CHandlerSelectChatSource : public IActionHandler
 			{
 				// This is neither the ChatGroup, nor the UserChat. Should not be here.
 				// Just open the STD chat menu, and quit
-				im->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
-				im->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
-				CInterfaceManager::getInstance()->enableModalWindow(pCaller, STD_CHAT_SOURCE_MENU);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
+				NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
+				CWidgetManager::getInstance()->enableModalWindow(pCaller, STD_CHAT_SOURCE_MENU);
 				return;
 			}
 		}
@@ -2995,9 +2999,9 @@ class CHandlerSelectChatSource : public IActionHandler
 
 
 		// *** active the menu
-		im->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
-		im->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
-		im->enableModalWindow(pCaller, menu);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_POPUP")->setValue64(cw->getContainer()->isPopuped() || cw->getContainer()->getLayerSetup() == 0 ? 1 : 0);
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:GC_HAS_HELP")->setValue64(!cw->getContainer()->getHelpPage().empty());
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, menu);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerSelectChatSource, "select_chat_source");
@@ -3116,7 +3120,7 @@ class CHandlerToggleChatEBVis : public IActionHandler
 {
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
-		CCtrlBase *clm = CInterfaceManager::getInstance()->getCtrlLaunchingModal();
+		CCtrlBase *clm = CWidgetManager::getInstance()->getCtrlLaunchingModal();
 		if (!clm) return;
 		CInterfaceGroup *ig = clm->getParent();
 		do
@@ -3313,7 +3317,7 @@ NLMISC_COMMAND(chatLog, "", "")
 	if (pIM->getLogState())
 		pIM->displaySystemInfo(CI18N::get("uiLogTurnedOn"));
 
-	CCDBNodeLeaf *node = pIM->getDbProp("UI:SAVE:CHATLOG_STATE", false);
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHATLOG_STATE", false);
 	if (node)
 	{
 		node->setValue32(pIM->getLogState() ? 1 : 0);

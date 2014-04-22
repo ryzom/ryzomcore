@@ -507,7 +507,7 @@ bool CObject::getShortestName(std::string &instanceId, std::string &attrName, si
 			return false;
 		}
 		instanceId = parent2->getAttr("InstanceId")->toString();
-		attrName == parent2->getKey(index2);
+		attrName = parent2->getKey(index2);
 		position = index;
 		return true;
 	}

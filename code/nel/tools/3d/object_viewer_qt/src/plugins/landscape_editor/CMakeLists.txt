@@ -11,9 +11,19 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_HDR	landscape_editor_plugin.h
 					landscape_editor_window.h
+					landscape_scene_base.h
+					landscape_scene.h
+					list_zones_model.h
+					list_zones_widget.h
+					landscape_view.h
+					project_settings_dialog.h
+					snapshot_dialog.h
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_UIS	landscape_editor_window.ui
+					list_zones_widget.ui
+					project_settings_dialog.ui
+					shapshot_dialog.ui
 )
 
 SET(OVQT_PLUGIN_LANDSCAPE_EDITOR_RCS landscape_editor.qrc)
@@ -31,13 +41,13 @@ SOURCE_GROUP(QtGeneratedMocQrcSrc FILES ${OVQT_PLUGIN_LANDSCAPE_EDITOR_MOC_SRC} 
 SOURCE_GROUP("Landscape Editor Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(ovqt_plugin_landscape_editor MODULE ${SRC}
+ADD_LIBRARY(ovqt_plugin_landscape_editor SHARED ${SRC}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_MOC_SRC} 
 						${OVQT_EXT_SYS_SRC}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_UI_HDRS}
 						${OVQT_PLUGIN_LANDSCAPE_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_landscape_editor ovqt_plugin_core nelmisc nel3d ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
+TARGET_LINK_LIBRARIES(ovqt_plugin_landscape_editor ovqt_plugin_core nelmisc nel3d nelgeorges nelligo ${QT_LIBRARIES} ${QT_QTOPENGL_LIBRARY})
 
 NL_DEFAULT_PROPS(ovqt_plugin_landscape_editor "NeL, Tools, 3D: Object Viewer Qt Plugin: Landscape Editor")
 NL_ADD_RUNTIME_FLAGS(ovqt_plugin_landscape_editor)
@@ -45,6 +55,20 @@ NL_ADD_LIB_SUFFIX(ovqt_plugin_landscape_editor)
 
 ADD_DEFINITIONS(-DLANDSCAPE_EDITOR_LIBRARY ${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
-INSTALL(TARGETS ovqt_plugin_landscape_editor LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${NL_BIN_PREFIX} ARCHIVE DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
-#INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ovqt_plugin_landscape_editor.xml DESTINATION ${OVQT_PLUGIN_SPECS_DIR} COMPONENT tools3d)
 
+
+IF(WIN32)
+  IF(WITH_INSTALL_LIBRARIES)
+    INSTALL(TARGETS ovqt_plugin_landscape_editor LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} ARCHIVE DESTINATION ${NL_LIB_PREFIX} RUNTIME DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
+  ELSE(WITH_INSTALL_LIBRARIES)
+    INSTALL(TARGETS ovqt_plugin_landscape_editor LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
+  ENDIF(WITH_INSTALL_LIBRARIES)
+ELSE(WIN32)
+  IF(WITH_INSTALL_LIBRARIES)
+    INSTALL(TARGETS ovqt_plugin_landscape_editor LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} ARCHIVE DESTINATION ${NL_LIB_PREFIX} RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)
+  ELSE(WITH_INSTALL_LIBRARIES)
+    INSTALL(TARGETS ovqt_plugin_landscape_editor LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)
+  ENDIF(WITH_INSTALL_LIBRARIES)
+ENDIF(WIN32)
+
+INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ovqt_plugin_landscape_editor.xml DESTINATION ${OVQT_PLUGIN_SPECS_DIR} COMPONENT tools3d)

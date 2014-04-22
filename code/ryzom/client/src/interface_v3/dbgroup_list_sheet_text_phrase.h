@@ -46,7 +46,7 @@ public:
 		virtual void update(CDBGroupListSheetText *pFather);
 		virtual void updateViewText(CDBGroupListSheetText *pFather);
 		virtual sint getSectionId() const;
-		CCDBNodeLeaf	*LevelDB;
+		NLMISC::CCDBNodeLeaf	*LevelDB;
 		uint			LevelCache;
 	};
 

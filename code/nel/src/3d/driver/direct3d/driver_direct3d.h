@@ -35,7 +35,6 @@
 #include "nel/3d/scissor.h"
 #include "nel/3d/driver.h"
 #include "nel/3d/material.h"
-#include "nel/3d/shader.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/ptr_set.h"
@@ -181,6 +180,75 @@ public:
 };
 
 
+using NLMISC::CRefCount;
+
+
+class	IDriver;
+class CDriverD3D;
+
+// List typedef.
+class	IShaderDrvInfos;
+typedef	std::list<IShaderDrvInfos*>		TShaderDrvInfoPtrList;
+typedef	TShaderDrvInfoPtrList::iterator	ItShaderDrvInfoPtrList;
+
+/**
+  * Interface for shader driver infos.
+  */
+class IShaderDrvInfos : public CRefCount
+{
+private:
+	CDriverD3D				*_Driver;
+	ItShaderDrvInfoPtrList		_DriverIterator;
+
+public:
+	IShaderDrvInfos(CDriverD3D	*drv, ItShaderDrvInfoPtrList it) {_Driver= drv; _DriverIterator= it;}
+	// The virtual dtor is important.
+	virtual ~IShaderDrvInfos();
+};
+
+
+/**
+ * Shader resource for the driver. It is just a container for a ".fx" text file.
+ */
+/* *** IMPORTANT ********************
+ * *** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
+ * **********************************
+ */
+// --------------------------------------------------
+class CD3DShaderFX
+{
+public:
+	CD3DShaderFX();
+	~CD3DShaderFX();
+
+	// Load a shader file
+	bool loadShaderFile (const char *filename);
+
+	// Set the shader text
+	void setText (const char *text);
+
+	// Get the shader text
+	const char *getText () const { return _Text.c_str(); }
+
+	// Set the shader name
+	void setName (const char *name);
+
+	// Get the shader name
+	const char *getName () const { return _Name.c_str(); }
+
+public:
+	// Private. For Driver only.
+	bool								_ShaderChanged;
+	NLMISC::CRefPtr<IShaderDrvInfos>	_DrvInfo;
+private:
+	// The shader
+	std::string					_Text;
+	// The shader name
+	std::string					_Name;
+};
+
+
+
 // ***************************************************************************
 class CTextureDrvInfosD3D : public ITextureDrvInfos
 {
@@ -229,16 +297,48 @@ public:
 };
 
 
+
 // ***************************************************************************
-class CVertexProgamDrvInfosD3D : public IVertexProgramDrvInfos
+class CVertexProgamDrvInfosD3D : public IProgramDrvInfos
 {
 public:
 
 	// The shader
 	IDirect3DVertexShader9	*Shader;
 
-	CVertexProgamDrvInfosD3D(IDriver *drv, ItVtxPrgDrvInfoPtrList it);
+	CVertexProgamDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
 	~CVertexProgamDrvInfosD3D();
+
+	virtual uint getUniformIndex(const char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
+};
+ 
+
+// ***************************************************************************
+class CPixelProgramDrvInfosD3D : public IProgramDrvInfos
+{
+public:
+ 
+	// The shader
+	IDirect3DPixelShader9	*Shader;
+
+	CPixelProgramDrvInfosD3D(IDriver *drv, ItGPUPrgDrvInfoPtrList it);
+	~CPixelProgramDrvInfosD3D();
+
+	virtual uint getUniformIndex(const char *name) const
+	{ 
+		std::map<std::string, uint>::const_iterator it = ParamIndices.find(name);
+		if (it != ParamIndices.end()) return it->second; 
+		return ~0;
+	};
+
+	std::map<std::string, uint> ParamIndices;
 };
 
 
@@ -333,7 +433,7 @@ public:
 	// Scalar handles
 	D3DXHANDLE				ScalarFloatHandle[MaxShaderTexture];
 
-	CShaderDrvInfosD3D(IDriver *drv, ItShaderDrvInfoPtrList it);
+	CShaderDrvInfosD3D(CDriverD3D *drv, ItShaderDrvInfoPtrList it);
 	virtual ~CShaderDrvInfosD3D();
 };
 
@@ -640,7 +740,7 @@ public:
 	void	*lock (uint size, uint stride, uint &offset);
 	void	unlock ();
 
-	// Runtime reset (called at the begining of the frame rendering), blocking lock here.
+	// Runtime reset (called at the beginning of the frame rendering), blocking lock here.
 	void	reset ();
 };
 
@@ -670,7 +770,7 @@ public:
 	void	*lock (uint size, uint &offset);
 	void	unlock ();
 
-	// Runtime reset (called at the begining of the frame rendering), blocking lock here.
+	// Runtime reset (called at the beginning of the frame rendering), blocking lock here.
 	void	reset ();
 };
 
@@ -773,13 +873,13 @@ public:
 
 	// Driver parameters
 	virtual void			disableHardwareVertexProgram();
+	virtual void			disableHardwarePixelProgram();
 	virtual void			disableHardwareIndexArrayAGP();
 	virtual void			disableHardwareVertexArrayAGP();
 	virtual void			disableHardwareTextureShader();
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
 	virtual void			forceTextureResize(uint divisor);
-	virtual void			forceNativeFragmentPrograms(bool /* nativeOnly */) {} // ignored
 
 	// Driver information
 	virtual uint			getNumAdapter() const;
@@ -841,6 +941,7 @@ public:
 	// todo hulud d3d buffers
 	virtual void			getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rect);
 	virtual bool			setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width, uint32 height, uint32 mipmapLevel, uint32 cubeFace);
+	virtual ITexture		*getRenderTarget() const;
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y, uint32 width,
 													uint32 height, uint32 mipmapLevel);
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
@@ -959,9 +1060,9 @@ public:
 	virtual bool			supportTextureShaders() const {return false;};
 	virtual	bool			supportMADOperator() const;
 	// todo hulud d3d adressing mode
-	virtual bool			isWaterShaderSupported() const;
+	virtual bool			supportWaterShader() const;
 	// todo hulud d3d adressing mode
-	virtual bool			isTextureAddrModeSupported(CMaterial::TTexAddressingMode /* mode */) const {return false;};
+	virtual bool			supportTextureAddrMode(CMaterial::TTexAddressingMode /* mode */) const {return false;};
 	// todo hulud d3d adressing mode
 	virtual void			setMatrix2DForTextureOffsetAddrMode(const uint /* stage */, const float /* mat */[4]) {}
 
@@ -991,18 +1092,133 @@ public:
 	virtual void			setupMaterialPass(uint pass);
 	virtual void			endMaterialMultiPass();
 
-	// Vertex program
-	virtual bool			isVertexProgramSupported () const;
-	virtual bool			isVertexProgramEmulated () const;
-	virtual bool			activeVertexProgram (CVertexProgram *program);
-	virtual void			setConstant (uint index, float, float, float, float);
-	virtual void			setConstant (uint index, double, double, double, double);
-	virtual void			setConstant (uint index, const NLMISC::CVector& value);
-	virtual void			setConstant (uint index, const NLMISC::CVectorD& value);
-	virtual void			setConstant (uint index, uint num, const float *src);
-	virtual void			setConstant (uint index, uint num, const double *src);
-	virtual void			setConstantMatrix (uint index, IDriver::TMatrix matrix, IDriver::TTransform transform);
-	virtual void			setConstantFog (uint index);
+
+
+	
+
+
+	/// \name Vertex Program
+	// @{
+
+	// Order of preference
+	// - activeVertexProgram
+	// - CMaterial pass[n] VP (uses activeVertexProgram, but does not override if one already set by code)
+	// - default generic VP that mimics fixed pipeline / no VP with fixed pipeline
+
+	/**
+	  * Does the driver supports vertex program, but emulated by CPU ?
+	  */
+	virtual bool			isVertexProgramEmulated() const;
+
+	/** Return true if the driver supports the specified vertex program profile.
+	  */
+	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile) const;
+
+	/** Compile the given vertex program, return if successful.
+	  * If a vertex program was set active before compilation, 
+	  * the state of the active vertex program is undefined behaviour afterwards.
+	  */
+	virtual bool			compileVertexProgram(CVertexProgram *program);
+
+	/** Set the active vertex program. This will override vertex programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getVertexProgram returns NULL.
+	  * The vertex program is activated immediately.
+	  */
+	virtual bool			activeVertexProgram(CVertexProgram *program);
+	// @}
+
+
+
+	/// \name Pixel Program
+	// @{
+
+	// Order of preference
+	// - activePixelProgram
+	// - CMaterial pass[n] PP (uses activePixelProgram, but does not override if one already set by code)
+	// - PP generated from CMaterial (uses activePixelProgram, but does not override if one already set by code)
+
+	/** Return true if the driver supports the specified pixel program profile.
+	  */
+	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile) const;
+
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
+	  */
+	virtual bool			compilePixelProgram(CPixelProgram *program);
+
+	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getPixelProgram returns NULL.
+	  * The pixel program is activated immediately.
+	  */
+	virtual bool			activePixelProgram(CPixelProgram *program);
+	// @}
+
+
+
+	/// \name Geometry Program
+	// @{
+
+	// Order of preference
+	// - activeGeometryProgram
+	// - CMaterial pass[n] PP (uses activeGeometryProgram, but does not override if one already set by code)
+	// - none
+
+	/** Return true if the driver supports the specified pixel program profile.
+	  */
+	virtual bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const { return false; }
+
+	/** Compile the given pixel program, return if successful.
+	  * If a pixel program was set active before compilation, 
+	  * the state of the active pixel program is undefined behaviour afterwards.
+	  */
+	virtual bool			compileGeometryProgram(CGeometryProgram *program) { return false; }
+
+	/** Set the active pixel program. This will override pixel programs specified in CMaterial render calls.
+	  * Also used internally by setupMaterial(CMaterial) when getGeometryProgram returns NULL.
+	  * The pixel program is activated immediately.
+	  */
+	virtual bool			activeGeometryProgram(CGeometryProgram *program) { return false; }
+	// @}
+
+
+
+	/// \name Program parameters
+	// @{
+	// Set parameters
+	virtual void			setUniform1f(TProgram program, uint index, float f0);
+	virtual void			setUniform2f(TProgram program, uint index, float f0, float f1);
+	virtual void			setUniform3f(TProgram program, uint index, float f0, float f1, float f2);
+	virtual void			setUniform4f(TProgram program, uint index, float f0, float f1, float f2, float f3);
+	virtual void			setUniform1i(TProgram program, uint index, sint32 i0);
+	virtual void			setUniform2i(TProgram program, uint index, sint32 i0, sint32 i1);
+	virtual void			setUniform3i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2);
+	virtual void			setUniform4i(TProgram program, uint index, sint32 i0, sint32 i1, sint32 i2, sint32 i3);
+	virtual void			setUniform1ui(TProgram program, uint index, uint32 ui0);
+	virtual void			setUniform2ui(TProgram program, uint index, uint32 ui0, uint32 ui1);
+	virtual void			setUniform3ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2);
+	virtual void			setUniform4ui(TProgram program, uint index, uint32 ui0, uint32 ui1, uint32 ui2, uint32 ui3);
+	virtual void			setUniform3f(TProgram program, uint index, const NLMISC::CVector& v);
+	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CVector& v, float f3);
+	virtual void			setUniform4f(TProgram program, uint index, const NLMISC::CRGBAF& rgba);
+	virtual void			setUniform4x4f(TProgram program, uint index, const NLMISC::CMatrix& m);
+	virtual void			setUniform4fv(TProgram program, uint index, size_t num, const float *src);
+	virtual void			setUniform4iv(TProgram program, uint index, size_t num, const sint32 *src);
+	virtual void			setUniform4uiv(TProgram program, uint index, size_t num, const uint32 *src);
+	// Set builtin parameters
+	virtual void			setUniformMatrix(TProgram program, uint index, TMatrix matrix, TTransform transform);
+	virtual void			setUniformFog(TProgram program, uint index);
+    // Set feature parameters
+	virtual bool			setUniformDriver(TProgram program); // set all driver-specific features params (based on program->features->DriverFlags)
+	virtual bool			setUniformMaterial(TProgram program, CMaterial &material); // set all material-specific feature params (based on program->features->MaterialFlags)
+	virtual void			setUniformParams(TProgram program, CGPUProgramParams &params); // set all user-provided params from the storage
+	virtual bool			isUniformProgramState() { return false; }
+	// @}
+
+
+
+
+
 	virtual void			enableVertexProgramDoubleSidedColor(bool doubleSided);
 	virtual bool		    supportVertexProgramDoubleSidedColor() const;
 
@@ -1021,7 +1237,7 @@ public:
 	  * ColorOp[n] = DISABLE;
 	  * AlphaOp[n] = DISABLE;
     */
-	virtual bool			activeShader(CShader *shd);
+	bool			activeShader(CD3DShaderFX *shd);
 
 	// Bench
 	virtual void startBench (bool wantStandardDeviation = false, bool quick = false, bool reset = true);
@@ -1039,8 +1255,6 @@ public:
 	virtual void			stencilMask(uint mask);
 
 	uint32					getMaxVertexIndex() const { return _MaxVertexIndex; }
-
-	bool					supportPixelShaders() const { return _PixelShader; }
 
 		// *** Inline info
 	uint					inlGetNumTextStages() const { return _NbNeLTextureStages; }
@@ -1892,12 +2106,21 @@ public:
 		return d3dtex;
 	}
 
+	// Get the d3dtext mirror of an existing setuped pixel program.
+	static	inline CPixelProgramDrvInfosD3D*	getPixelProgramD3D(CPixelProgram& pixelProgram)
+	{
+		H_AUTO_D3D(CDriverD3D_getPixelProgramD3D);
+		CPixelProgramDrvInfosD3D*	d3dPixelProgram;
+		d3dPixelProgram = (CPixelProgramDrvInfosD3D*)(IProgramDrvInfos*)(pixelProgram.m_DrvInfo);
+		return d3dPixelProgram;
+	}
+
 	// Get the d3dtext mirror of an existing setuped vertex program.
 	static	inline CVertexProgamDrvInfosD3D*	getVertexProgramD3D(CVertexProgram& vertexProgram)
 	{
 		H_AUTO_D3D(CDriverD3D_getVertexProgramD3D);
 		CVertexProgamDrvInfosD3D*	d3dVertexProgram;
-		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IVertexProgramDrvInfos*)(vertexProgram._DrvInfo);
+		d3dVertexProgram = (CVertexProgamDrvInfosD3D*)(IProgramDrvInfos*)(vertexProgram.m_DrvInfo);
 		return d3dVertexProgram;
 	}
 
@@ -1943,7 +2166,7 @@ public:
 	void releaseInternalShaders();
 	bool setShaderTexture (uint textureHandle, ITexture *texture, CFXCache *cache);
 
-	bool validateShader(CShader *shader);
+	bool validateShader(CD3DShaderFX *shader);
 
 	void activePass (uint pass)
 	{
@@ -2080,6 +2303,8 @@ private:
 
 	void findNearestFullscreenVideoMode();
 
+	TShaderDrvInfoPtrList	_ShaderDrvInfos;
+
 	// Windows
 	std::string				_WindowClass;
 	HWND					_HWnd;
@@ -2197,8 +2422,10 @@ private:
 	bool					_ForceDXTCCompression:1;
 	bool					_TextureCubeSupported;
 	bool					_VertexProgram;
-	bool					_PixelShader;
+	bool					_PixelProgram;
+	uint16					_PixelProgramVersion;
 	bool					_DisableHardwareVertexProgram;
+	bool					_DisableHardwarePixelProgram;
 	bool					_DisableHardwareVertexArrayAGP;
 	bool					_DisableHardwareIndexArrayAGP;
 	bool					_DisableHardwarePixelShader;
@@ -2316,6 +2543,9 @@ private:
 	// The last vertex buffer needs vertex color
 	bool					_FogEnabled;
 
+	NLMISC::CRefPtr<CVertexProgram> _VertexProgramUser;
+	NLMISC::CRefPtr<CPixelProgram> _PixelProgramUser;
+
 	// *** Internal resources
 
 	// Current render pass
@@ -2344,7 +2574,7 @@ private:
 	CIndexBuffer			_QuadIndexesAGP;
 
 	// The last setuped shader
-	CShader					*_CurrentShader;
+	CD3DShaderFX					*_CurrentShader;
 	UINT					_CurrentShaderPassCount;
 public:
 	struct CTextureRef
@@ -2369,29 +2599,29 @@ private:
 	CRenderVariable			*_ModifiedRenderState;
 
 	// Internal shaders
-	CShader					_ShaderLightmap0;
-	CShader					_ShaderLightmap1;
-	CShader					_ShaderLightmap2;
-	CShader					_ShaderLightmap3;
-	CShader					_ShaderLightmap4;
-	CShader					_ShaderLightmap0Blend;
-	CShader					_ShaderLightmap1Blend;
-	CShader					_ShaderLightmap2Blend;
-	CShader					_ShaderLightmap3Blend;
-	CShader					_ShaderLightmap4Blend;
-	CShader					_ShaderLightmap0X2;
-	CShader					_ShaderLightmap1X2;
-	CShader					_ShaderLightmap2X2;
-	CShader					_ShaderLightmap3X2;
-	CShader					_ShaderLightmap4X2;
-	CShader					_ShaderLightmap0BlendX2;
-	CShader					_ShaderLightmap1BlendX2;
-	CShader					_ShaderLightmap2BlendX2;
-	CShader					_ShaderLightmap3BlendX2;
-	CShader					_ShaderLightmap4BlendX2;
-	CShader					_ShaderCloud;
-	CShader					_ShaderWaterNoDiffuse;
-	CShader					_ShaderWaterDiffuse;
+	CD3DShaderFX					_ShaderLightmap0;
+	CD3DShaderFX					_ShaderLightmap1;
+	CD3DShaderFX					_ShaderLightmap2;
+	CD3DShaderFX					_ShaderLightmap3;
+	CD3DShaderFX					_ShaderLightmap4;
+	CD3DShaderFX					_ShaderLightmap0Blend;
+	CD3DShaderFX					_ShaderLightmap1Blend;
+	CD3DShaderFX					_ShaderLightmap2Blend;
+	CD3DShaderFX					_ShaderLightmap3Blend;
+	CD3DShaderFX					_ShaderLightmap4Blend;
+	CD3DShaderFX					_ShaderLightmap0X2;
+	CD3DShaderFX					_ShaderLightmap1X2;
+	CD3DShaderFX					_ShaderLightmap2X2;
+	CD3DShaderFX					_ShaderLightmap3X2;
+	CD3DShaderFX					_ShaderLightmap4X2;
+	CD3DShaderFX					_ShaderLightmap0BlendX2;
+	CD3DShaderFX					_ShaderLightmap1BlendX2;
+	CD3DShaderFX					_ShaderLightmap2BlendX2;
+	CD3DShaderFX					_ShaderLightmap3BlendX2;
+	CD3DShaderFX					_ShaderLightmap4BlendX2;
+	CD3DShaderFX					_ShaderCloud;
+	CD3DShaderFX					_ShaderWaterNoDiffuse;
+	CD3DShaderFX					_ShaderWaterDiffuse;
 
 
 	// Backup frame buffer
@@ -2526,6 +2756,10 @@ public:
 
 	// Clip the wanted rectangle with window. return true if rect is not NULL.
 	bool					clipRect(NLMISC::CRect &rect);
+
+	friend	class	IShaderDrvInfos;
+
+	void			removeShaderDrvInfoPtr(ItShaderDrvInfoPtrList shaderIt);
 
 };
 

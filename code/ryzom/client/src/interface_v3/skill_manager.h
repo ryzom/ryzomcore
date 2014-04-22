@@ -23,7 +23,7 @@
 #include "game_share/skills.h"
 //#include "game_share/jobs.h"
 #include "game_share/roles.h"
-#include "../cdb.h"
+#include "nel/misc/cdb.h"
 #include "brick_learned_callback.h"
 #include "skill_change_callback.h"
 
@@ -189,16 +189,16 @@ private:
 	uint32					_MinSkillValue[SKILLS::NUM_SKILLS];
 
 	/// Nodes on skill values and base values
-	CCDBNodeLeaf			*_SkillValues[SKILLS::NUM_SKILLS];
-	CCDBNodeLeaf			*_SkillBaseValues[SKILLS::NUM_SKILLS];
+	NLMISC::CCDBNodeLeaf			*_SkillValues[SKILLS::NUM_SKILLS];
+	NLMISC::CCDBNodeLeaf			*_SkillBaseValues[SKILLS::NUM_SKILLS];
 
 	// Max child baseskill value (used when checking requirements)
 	uint32					_MaxChildBaseSkillValue[SKILLS::NUM_SKILLS];
 
 	// CallBack set for skill changes
-	struct CSkillChangeObs : public ICDBNode::IPropertyObserver
+	struct CSkillChangeObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
-		virtual void update (ICDBNode * /* node */)
+		virtual void update (NLMISC::ICDBNode * /* node */)
 		{
 			CSkillManager	*pSM= CSkillManager::getInstance();
 			pSM->onSkillChange();
@@ -214,7 +214,7 @@ private:
 	sint32					_CacheSkillBaseValues[SKILLS::NUM_SKILLS];
 
 	// A node incremented at each change of skill (the number is not relevant)
-	CCDBNodeLeaf			*_TrackSkillChange;
+	NLMISC::CCDBNodeLeaf			*_TrackSkillChange;
 
 	// "Title of the player" Management
 	// -----------------------------------------------------------------------------

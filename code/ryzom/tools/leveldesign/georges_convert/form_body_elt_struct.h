@@ -26,8 +26,8 @@ namespace NLOLDGEORGES
 #define SXCOMMENT "Comment"
 #define SXPARENTS "Parents"
 
-// La classe CFormBodyEltStruct permet d'obtenir un ensemble de CFormBodyElt. 
-// Dans l'opérateur +=, les nouveaux élément remplacent les anciens, les anciens non-écrasés restent
+// CFormBodyEltStruct provides a set of CFormBodyElt. 
+// In operator +=, new items replace old ones, not overrided old ones are kept.
 class CFormBodyEltStruct : public CFormBodyElt  
 {
 public:

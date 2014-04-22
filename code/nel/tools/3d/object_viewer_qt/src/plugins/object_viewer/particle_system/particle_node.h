@@ -235,7 +235,7 @@ public:
 		virtual void nodeModifiedFlagChanged(CWorkspaceNode &node) = 0;
 		virtual void nodeSkelParentChanged(CWorkspaceNode &node) = 0; // called when fx has been linked / unlinked from a skeleton parent
 	};
-	/// Сonstructor
+	/// Constructor
 	CParticleWorkspace();
 	/// Destructor
 	~CParticleWorkspace();

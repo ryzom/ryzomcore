@@ -105,10 +105,10 @@ public:
 	uint32 LacustreMagicResistance;
 	uint32 JungleMagicResistance;
 	uint32 PrimaryRootMagicResistance;
-	sint32 HpBuff;	// hp buff / debuff gived when item is equiped
-	sint32 SapBuff; // sap buff / debuff gived when item is equiped
-	sint32 StaBuff; // sta buff / debuff gived when item is equiped
-	sint32 FocusBuff; // focus buff / debuff gived when item is equiped
+	sint32 HpBuff;	// hp buff / debuff gived when item is equipped
+	sint32 SapBuff; // sap buff / debuff gived when item is equipped
+	sint32 StaBuff; // sta buff / debuff gived when item is equipped
+	sint32 FocusBuff; // focus buff / debuff gived when item is equipped
 
 	SKILLS::ESkills	RequiredSkill; // required skill
 	uint16 RequiredSkillLevel; // required skill level

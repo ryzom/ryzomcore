@@ -66,7 +66,7 @@ const CIndexBuffer *getRdrPassPrimitiveBlock(const CMeshMRMSkinnedGeom *mesh, ui
 
 bool ProcessMeshMRMSkinned(const std::string &filename, IShape *shapeMesh);
 bool ProcessMeshMRM(const std::string &filename, IShape *shapeMesh);
-bool ProcessMesh(const std::string &filename, IShape *shapeMesh);
+//bool ProcessMesh(const std::string &filename, IShape *shapeMesh);
 
 int main(int argc, char* argv[])
 {
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 
 	if (ProcessMeshMRMSkinned(filename, shapeMesh)) return 0;
 	if (ProcessMeshMRM(filename, shapeMesh)) return 0;
-	if (ProcessMesh(filename, shapeMesh)) return 0;
+//	if (ProcessMesh(filename, shapeMesh)) return 0;
 
 	return 0;
 }
@@ -519,6 +519,10 @@ bool ProcessMeshMRM(const std::string &filename, IShape *shapeMesh)
 	return true;
 }
 
+/*
+
+TODO: implement this
+
 bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 {
 	CMesh *mesh = dynamic_cast<CMesh*>(shapeMesh);
@@ -666,3 +670,5 @@ bool ProcessMesh(const std::string &filename, IShape *shapeMesh)
 
 	return true;
 }
+
+*/

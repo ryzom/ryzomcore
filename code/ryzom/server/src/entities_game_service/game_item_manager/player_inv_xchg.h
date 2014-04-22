@@ -26,7 +26,7 @@
 /**
  * CExchangeView
  *
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Matthieu 'Trap' Besson
  * \author Nevrax France
  * \date February 2005

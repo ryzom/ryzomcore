@@ -1195,7 +1195,7 @@ CDatabase*	CDatabase::adapt(const string& description)
 		if (!buildReference())
 		{
 			PDS_WARNING("adapt(): failed to buildReference()");
-			return false;
+			return NULL;
 		}
 	}
 

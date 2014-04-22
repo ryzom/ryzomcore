@@ -855,7 +855,7 @@
     </message>
     <message>
         <location filename="../plugins/object_viewer/located_bindable_form.ui" line="374"/>
-        <source>Fake motion blur treshold:</source>
+        <source>Fake motion blur threshold:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -217,7 +217,7 @@ public:
 	bool CTestingTool::testSentence( const std::vector< NLMISC::CSheetId >& s1, const std::vector< NLMISC::CSheetId >& s2 );
 		
 private:
-	// Sheet informations
+	// Sheet information
 	std::string		_TestDescription;
 	uint16			_IterationCount;
 	uint16			_LevelMini;

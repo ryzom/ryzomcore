@@ -791,17 +791,20 @@ void	CMeshMultiLod::compileCoarseMeshes()
 				{
 					slotRef.CoarseTriangles.resize(slotRef.CoarseNumTris * 3);
 					TCoarseMeshIndexType	*dstPtr= &slotRef.CoarseTriangles[0];
+					uint totalTris = 0;
 					for(uint i=0;i<meshGeom->getNbRdrPass(0);i++)
 					{
 						const CIndexBuffer	&pb= meshGeom->getRdrPassPrimitiveBlock(0, i);
 						CIndexBufferRead ibaRead;
 						pb.lock (ibaRead);
 						uint	numTris= pb.getNumIndexes()/3;
+						totalTris += numTris;
 						if (pb.getFormat() == CIndexBuffer::Indices16)
 						{
 							if (sizeof(TCoarseMeshIndexType) == sizeof(uint16))
 							{
 								memcpy(dstPtr, (uint16 *) ibaRead.getPtr(), numTris*3*sizeof(uint16));
+								dstPtr+= numTris*3;
 							}
 							else
 							{
@@ -820,6 +823,7 @@ void	CMeshMultiLod::compileCoarseMeshes()
 							if (sizeof(TCoarseMeshIndexType) == sizeof(uint32))
 							{
 								memcpy(dstPtr, (uint32 *) ibaRead.getPtr(), numTris*3*sizeof(uint32));
+								dstPtr+= numTris*3;
 							}
 							else
 							{
@@ -836,8 +840,8 @@ void	CMeshMultiLod::compileCoarseMeshes()
 								}
 							}
 						}
-						dstPtr+= numTris*3;
 					}
+					nlassert(totalTris == slotRef.CoarseNumTris);
 				}
 			}
 		}

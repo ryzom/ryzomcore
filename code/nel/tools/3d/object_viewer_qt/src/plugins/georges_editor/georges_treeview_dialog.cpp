@@ -350,9 +350,9 @@ namespace GeorgesQt
 		//			((CForm*)(UForm*)Form)->Header.MinorVersion++;
 		//			}*/
 		//			//((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
-		            m_form->write(file, false);
-		            setWindowTitle(windowTitle().remove("*"));
-		            m_modified = false;
+                    m_form->write(file);
+                    setWindowTitle(windowTitle().remove("*"));
+                    m_modified = false;
 		//			//if (strcmp (xmlStream.getErrorString (), "") != 0)
 		//			//{
 		//			//	char message[512];

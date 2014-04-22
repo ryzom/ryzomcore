@@ -233,8 +233,8 @@ inline bool	CQuatT<T>::equal(const CQuatT<T>& a, float epsilon) const
 template <class T>
 inline CQuatT<T>	CQuatT<T>::operator*(const CQuatT<T>& o) const
 {
-	// wres= ww´ - v·v´
-	// vres= wv´ + w´v + v^v´ ]
+	// wres= ww' - v.v'
+	// vres= wv' + w'v + v^v' ]
 	return	CQuatT<T>(
 					(w*o.x) +(x*o.w) + (y*o.z)-(z*o.y),
 					(w*o.y) +(y*o.w) + (z*o.x)-(x*o.z),

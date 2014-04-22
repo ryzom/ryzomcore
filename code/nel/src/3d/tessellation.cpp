@@ -202,7 +202,7 @@ CTessFace::~CTessFace()
 // ***************************************************************************
 float			CTessFace::computeNearLimit()
 {
-	// General formula for Level, function of Size, treshold etc...:
+	// General formula for Level, function of Size, threshold etc...:
 	// WantedLevel= log2(BaseSize / sqrdist / RefineThreshold);
 	// <=> WantedLevel= log2( CurSize*2^Level / sqrdist / RefineThreshold).
 	// <=> WantedLevel= log2( ProjectedSize* 2^Level / RefineThreshold).
@@ -1774,7 +1774,7 @@ void		CTessFace::refineAll()
 
 	/*
 		if(ps<RefineThreshold), the face must be merged (ie have no leaves).
-		if(ps E [RefineThreshold, RefineTreshold*2]), the face must be splitted (ave leaves), and is geomorphed.
+		if(ps E [RefineThreshold, RefineThreshold*2]), the face must be splitted (ave leaves), and is geomorphed.
 		if(ps>RefineThreshold*2), the face is fully splitted/geomoprhed (tests reported on sons...).
 	*/
 
@@ -1831,7 +1831,7 @@ void		CTessFace::refineAll()
 // Split or merge, and meaning of errorMetric:
 /*
 	if(errorMetric<RefineThreshold), the face must be merged (ie have no leaves).
-	if(errorMetric E [RefineThreshold, RefineTreshold*2]), the face must be splitted (ave leaves), and is geomorphed.
+	if(errorMetric E [RefineThreshold, RefineThreshold*2]), the face must be splitted (ave leaves), and is geomorphed.
 	if(errorMetric>RefineThreshold*2), the face is fully splitted/geomoprhed.
 */
 

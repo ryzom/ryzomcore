@@ -19,7 +19,7 @@
 #include "stdpch.h"
 
 #include "music_player.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../input.h"
 #include "../sound_manager.h"
 #include "interface_manager.h"
@@ -81,7 +81,7 @@ void CMusicPlayer::play ()
 
 		/* Show the song title */
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CViewText *pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:mp3_player:screen:text"));
+		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
 		if (pVT)
 			pVT->setText (_Songs[_CurrentSong].Title);
 	}

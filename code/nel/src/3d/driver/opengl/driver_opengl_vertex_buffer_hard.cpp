@@ -551,7 +551,7 @@ void					CVertexArrayRangeATI::free()
 		_HeapMemory.reset();
 
 		// Free special memory.
-		nglDeleteObjectBufferATI(_VertexObjectId);
+		nglFreeObjectBufferATI(_VertexObjectId);
 
 		_Allocated= false;
 		_VertexArraySize= 0;
@@ -839,7 +839,7 @@ bool CVertexArrayRangeMapObjectATI::allocate(uint32 size, CVertexBuffer::TPrefer
 	if (vertexObjectId)
 	{
 		// free the object
-		nglDeleteObjectBufferATI(vertexObjectId);
+		nglFreeObjectBufferATI(vertexObjectId);
 		//
 		_SizeAllocated = size;
 		_VBType = vbType;
@@ -924,7 +924,7 @@ CVertexBufferHardGLMapObjectATI::CVertexBufferHardGLMapObjectATI(CDriverGL *drv,
 CVertexBufferHardGLMapObjectATI::~CVertexBufferHardGLMapObjectATI()
 {
 	H_AUTO_OGL(CVertexBufferHardGLMapObjectATI_CVertexBufferHardGLMapObjectATIDtor)
-	if (_VertexObjectId) nglDeleteObjectBufferATI(_VertexObjectId);
+	if (_VertexObjectId) nglFreeObjectBufferATI(_VertexObjectId);
 	#ifdef NL_DEBUG
 		if (_VertexPtr)
 		{
@@ -1114,7 +1114,7 @@ void CVertexArrayRangeMapObjectATI::updateLostBuffers()
 		{
 			nlassert((*it)->_VertexObjectId);
 			nlassert(nglIsObjectBufferATI((*it)->_VertexObjectId));
-			nglDeleteObjectBufferATI((*it)->_VertexObjectId);
+			nglFreeObjectBufferATI((*it)->_VertexObjectId);
 			(*it)->_VertexObjectId = 0;
 			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}

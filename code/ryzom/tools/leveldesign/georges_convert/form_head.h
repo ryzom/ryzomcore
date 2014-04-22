@@ -23,7 +23,7 @@
 namespace NLOLDGEORGES
 {
 
-// La classe CFormHead comprend trois strings: le nom de l'utilisateur, la date de dernière modif et la version.
+// CFormHead class provides three strings: user name, last modification date and version.
 class CFormHead  
 {
 protected:

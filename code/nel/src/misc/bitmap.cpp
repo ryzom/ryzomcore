@@ -19,6 +19,7 @@
 #include "nel/misc/bitmap.h"
 #include "nel/misc/stream.h"
 #include "nel/misc/file.h"
+#include "nel/misc/system_info.h"
 
 // Define this to force all bitmap white (debug)
 // #define NEL_ALL_BITMAP_WHITE

@@ -137,7 +137,7 @@ public:
 protected:
 	RYAI_MAP_CRUNCH::TAStarFlag _DenyFlags;
 	CSpawnBotFauna* _Bot;
-	double _magnetDist; ///< distance from bot to his magnet at last move
+	double _magnetDistSq; ///< square distance from bot to his magnet at last move
 	static CFaunaProfileFloodLogger _FloodLogger;
 };
 
@@ -166,7 +166,7 @@ private:
 	CAITimer			_CycleTimer;
 	uint			_CycleTimerBaseTime;
 	bool			_ArrivedInZone;	
-	double			_magnetDist; ///< distance from bot to his magnet at last move
+	double			_magnetDistSq; ///< square distance from bot to his magnet at last move
 	RYAI_MAP_CRUNCH::TAStarFlag	_DenyFlags;
 	static CFaunaProfileFloodLogger _FloodLogger;
 };
@@ -196,7 +196,7 @@ private:
 	CAITimer			_CycleTimer;
 	uint			_CycleTimerBaseTime;
 	bool			_ArrivedInZone;
-	double			_magnetDist;	// distance from bot to his magnet at last move
+	double			_magnetDistSq;	// square distance from bot to his magnet at last move
 	RYAI_MAP_CRUNCH::TAStarFlag	_DenyFlags;
 	static CFaunaProfileFloodLogger _FloodLogger;
 };

@@ -29,7 +29,7 @@
 // 3D Interface.
 #include "nel/3d/u_visual_collision_entity.h"
 // Client DB
-#include "cdb.h"
+#include "nel/misc/cdb.h"
 // Client
 #include "player_cl.h"
 #include "client_cfg.h"
@@ -163,7 +163,7 @@ public:
 	CEntityCL* getMountEntity();
 
 	/// Return the DB entry for the specified user's animal (NULL if not found)
-	CCDBNodeBranch *getBeastDBEntry( CLFECOMMON::TClientDataSetIndex uid );
+	NLMISC::CCDBNodeBranch *getBeastDBEntry( CLFECOMMON::TClientDataSetIndex uid );
 
 	/** To Inform about an entity removed (to remove from selection for example).
 	 * This will remove the entity from the target.
@@ -486,7 +486,7 @@ public:
 	}
 
 protected:
-	class CSpeedFactor : public ICDBNode::IPropertyObserver
+	class CSpeedFactor : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
 		/// Initialize
@@ -498,7 +498,7 @@ protected:
 		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream) {f.serial(_Value);}
 	protected:
 		/// Method called when the ping message is back.
-		virtual void update(ICDBNode* leaf);
+		virtual void update(NLMISC::ICDBNode* leaf);
 	private:
 		float _Value;
 	};
@@ -515,7 +515,7 @@ protected:
 		virtual void serial(class NLMISC::IStream &/* f */) throw(NLMISC::EStream) {}
 	};
 
-	class CMountSpeeds : public ICDBNode::IPropertyObserver
+	class CMountSpeeds : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
 		/// Initialize
@@ -528,7 +528,7 @@ protected:
 		float getRunSpeed() const { return _RunSpeed; }
 	protected:
 		/// Method called when the value is changed
-		virtual void update(ICDBNode* leaf);
+		virtual void update(NLMISC::ICDBNode* leaf);
 	private:
 		float _WalkSpeed;
 		float _RunSpeed;
@@ -587,31 +587,31 @@ protected:
 
 
 	/// CSkill points observer
-	class CSkillPointsObserver : public ICDBNode::IPropertyObserver
+	class CSkillPointsObserver : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public :
 		uint	SpType;
 
 		/// From ICDBNode::IPropertyObserver
-		virtual void update(ICDBNode* node );
+		virtual void update(NLMISC::ICDBNode* node );
 	};
 	CSkillPointsObserver		_SkillPointObs[EGSPD::CSPType::EndSPType];
 
-	class CInvisibleObserver : public ICDBNode::IPropertyObserver
+	class CInvisibleObserver : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public :
-		virtual void update(ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node);
 	};
 	CInvisibleObserver			_InvisibleObs;
 
 	/// Fame observer
-	class CFameObserver : public ICDBNode::IPropertyObserver
+	class CFameObserver : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public :
 		uint32	FactionIndex;
 
 		/// From ICDBNode::IPropertyObserver
-		virtual void update(ICDBNode* node );
+		virtual void update(NLMISC::ICDBNode* node );
 	};
 	std::vector<CFameObserver *>		_FamesObs;
 

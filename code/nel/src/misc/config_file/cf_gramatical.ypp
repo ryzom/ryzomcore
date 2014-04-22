@@ -225,7 +225,7 @@ inst:		VARIABLE ADD_ASSIGN expression SEMICOLON
 					}
 					else
 					{
-						// this var has been created in a parent Cfg, append at the begining of the array
+						// this var has been created in a parent Cfg, append at the beginning of the array
 						Var.add ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i]);
 						if (Var != (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] && Var.Callback != NULL)
 							(Var.Callback)(Var);

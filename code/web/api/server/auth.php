@@ -40,6 +40,13 @@ function ryzom_authenticate_ingame($shardid, $cid, $name, $authkey) {
 function ryzom_authenticate_with_char_and_password($character, $password, &$cid) {
 	$db = new ServerDatabase(RYAPI_NELDB_HOST, RYAPI_NELDB_LOGIN, RYAPI_NELDB_PASS, RYAPI_NELDB_RING);
 	$char = $db->escape_string($character);
+	$schar = explode('@', $char);
+	$_SESSION['dev_shard'] = 0;
+	if (count($schar) == 2 && $schar[1] == RYAPI_DEV_SHARD) {
+		$_SESSION['dev_shard'] = 1;
+		$char = $schar[0];
+		$db = new ServerDatabase(RYAPI_NELDB_HOST, RYAPI_NELDB_LOGIN, RYAPI_NELDB_PASS, RYAPI_NELDB_RING_DEV);
+	}
 	$sql = "SELECT char_id, char_name, user_id, home_mainland_session_id FROM characters WHERE char_name = '$char'";
 	$row = $db->query_single_row($sql);
 	$character = $row['char_name'];
@@ -59,6 +66,7 @@ function ryzom_authenticate_with_session(&$name, &$cid, &$error_message) {
 	if ($action == 'logout') {
 		unset($_SESSION['name']);
 		unset($_SESSION['cid']);
+		unset($_SESSION['dev_shard']);
 	}
 
 	if (isset($_SESSION['name']) && ($name == '' || $_SESSION['name'] == $name)) {
@@ -83,46 +91,6 @@ function ryzom_authenticate_with_session(&$name, &$cid, &$error_message) {
 		return NULL;
 
 	return false;
-}
-
-
-function ryzom_get_user_id($cid, $name, $creation_date) {
-	$name = strtolower($name);
-
-	$db = ryDB::getInstance('webig');
-
-	$charsWithSameName = $db->query('players', array('name' => $name, 'deleted' => 0));
-
-	foreach ($charsWithSameName as $charWithSameName) {
-		// Another char with same name => delete it
-		if (intval($cid) != intval($charWithSameName['cid'])) {
-			$db->update('players', array('deleted' => 1), array('id' => $charWithSameName['id']));
-		}
-	}
-
-	$charProps = $db->querySingle('players', array('cid' => intval($cid), 'deleted' => 0));
-	// new char => create record
-	if (!$charProps) {
-		$charProps = array('name' => $name, 'cid' => $cid, 'creation_date' => $creation_date, 'deleted' => 0);
-		$charProps['id'] = $db->insert('players', $charProps);
-		if (!$charProps['id'])
-			die('ryDb New Char Error');
-	} else {
-		// char deleted and recreated => change to deleted
-		if ($charProps['creation_date'] != $creation_date) {
-			if (!$db->update('players', array('deleted' => 1), array('id' => $charProps['id'])))
-				die('ryDb Delete char Error: '.$db->getErrors());
-			$charProps = array('name' => $name, 'cid' => $cid, 'creation_date' => $creation_date, 'deleted' => 0);
-			if (!$charProps['id'] = $db->insert('players', $charProps))
-				die('ryDb New Char in Slot Error');
-		} else {
-			// char renamed => update record
-			if ($charProps['name'] != $name)
-				if (!$db->update('players', array('name' => $name), array('id' => $charProps['id'])))
-					die('ryDb Rename Char Error');
-		}
-	}
-	return $charProps['id'];
 }
 
 ?>

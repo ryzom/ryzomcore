@@ -209,7 +209,7 @@ CAnimatedSceneObject::CAnimatedSceneObject( const CEntityId& Id, const list < st
 		current.identity ();
 		current.setRot (_Rotation);
 
-		// Rotation 90°
+		// Rotation 90 degrees
 		CMatrix rot90;
 		rot90.identity ();
 		rot90.rotateZ (-(float)Pi/2);
@@ -322,7 +322,7 @@ void CAnimatedSceneObject::resetInitialPos( void )
 	current.identity ();
 	current.setRot (_Rotation);
 
-	// Rotation 90°
+	// Rotation 90 degrees
 	CMatrix rot90;
 	rot90.identity ();
 	rot90.rotateZ (-(float)Pi/2);
@@ -741,7 +741,7 @@ void CAnimatedSceneObject::removeOffsetAnimation ()
 	// Remove the first frame animation
 	current *= firstFrame;
 
-	// Rotation 90°
+	// Rotation 90 degrees
 	CMatrix rot90;
 	rot90.identity ();
 	rot90.rotateZ (-(float)Pi/2);

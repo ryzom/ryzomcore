@@ -91,7 +91,10 @@ class CItemSheet;
 
 class CPhysicalDamage;
 
+namespace NLMISC{
 class CCDBNodeLeaf;
+class CCDBNodeBranch;
+}
 
 extern CLFECOMMON::TCLEntityId	SlotUnderCursor;
 
@@ -809,7 +812,7 @@ public:
 	virtual void setDiffuse(bool onOff, NLMISC::CRGBA diffuse);
 
 
-	static CCDBNodeLeaf *getOpacityDBNode();
+	static NLMISC::CCDBNodeLeaf *getOpacityDBNode();
 	static uint32 getOpacityMin();
 	static void setOpacityMin(uint32 value);
 
@@ -884,7 +887,7 @@ protected:
 	// Persistent NPC Alias of the entity
 	uint32							_NPCAlias;
 	// Local DB Branch for this entity
-	class CCDBNodeBranch			*_DBEntry;
+	class NLMISC::CCDBNodeBranch			*_DBEntry;
 	// Playlist
 	NL3D::UPlayList					*_PlayList;
 	NL3D::UPlayList					*_FacePlayList;
@@ -1108,7 +1111,8 @@ protected:
 	// for localSelectBox() computing
 	sint64										_LastLocalSelectBoxComputeTime;
 
-	static NLMISC::CRefPtr<CCDBNodeLeaf>		_OpacityMinNodeLeaf;
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _OpacityMinNodeLeaf;
+	static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _ShowReticleLeaf;
 
 protected:
 	/**

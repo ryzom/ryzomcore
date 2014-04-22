@@ -1029,7 +1029,7 @@ void CEntityBase::resetEntityModifier()
 		_Skills._Skills[ i ].Modifier = 0;
 	}
 
-	// Apply effect product by equiped items on local variables if race is homin
+	// Apply effect product by equipped items on local variables if race is homin
 	if( _Race < EGSPD::CPeople::EndHumanoid )
 	{
 		for( i = 0; i < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT; ++i )
@@ -1117,7 +1117,7 @@ void CEntityBase::resetEntityModifier()
 				}
 			}
 
-			// if current slot is equiped, get a pointer of form corresponding to item
+			// if current slot is equipped, get a pointer of form corresponding to item
 			if( id != CSheetId() )
 			{
 				const CStaticItem* itemForm = CSheets::getForm( id );

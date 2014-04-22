@@ -69,7 +69,8 @@ class sql_db
 		}
 		else
 		{
-			return false;
+			echo "Connection to mySQL failed!";
+			exit;
 		}
 	}
 
@@ -114,7 +115,7 @@ class sql_db
 		}
 		else
 		{
-			return ( $transaction == END_TRANSACTION ) ? true : false;
+			return ( $transaction == 'END_TRANSACTION' ) ? true : false;
 		}
 	}
 

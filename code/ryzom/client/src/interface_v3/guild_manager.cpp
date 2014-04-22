@@ -21,19 +21,19 @@
 
 #include "interface_manager.h"
 #include "../string_manager_client.h"
-#include "action_handler.h"
-#include "view_text.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/view_text.h"
 #include "dbctrl_sheet.h"
-#include "group_container.h"
-#include "group_menu.h"
-#include "group_html.h"
+#include "nel/gui/group_container.h"
+#include "nel/gui/group_menu.h"
+#include "nel/gui/group_html.h"
 #include "../init_main_loop.h"
 #include "inventory_manager.h"
 
 #include "../connection.h"
 #include "../entity_cl.h"
 #include "../user_entity.h" // UserEntity
-#include "view_bitmap.h"
+#include "nel/gui/view_bitmap.h"
 #include "../sheet_manager.h"
 #include "../net_manager.h"
 #include "../client_sheets/building_sheet.h"
@@ -43,6 +43,8 @@
 #include "../r2/editor.h"
 #include "chat_window.h"
 #include "people_interraction.h"
+
+#include "../misc.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -163,7 +165,7 @@ void CGuildManager::sortGuildMembers(TSortOrder order)
 bool CGuildManager::isProxy()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	return pIM->getDbProp("SERVER:GUILD:PROXY")->getValueBool();
+	return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:PROXY")->getValueBool();
 }
 
 
@@ -249,14 +251,14 @@ ucstring CGuildManager::getGuildName()
 uint64 CGuildManager::getMoney()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	return pIM->getDbProp("SERVER:GUILD:INVENTORY:MONEY")->getValue64();
+	return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:MONEY")->getValue64();
 }
 
 // ***************************************************************************
 uint64 CGuildManager::getXP()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	return pIM->getDbProp("SERVER:GUILD:XP")->getValue64();
+	return NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:XP")->getValue64();
 }
 
 // ***************************************************************************
@@ -275,12 +277,12 @@ void CGuildManager::update()
 
 		// Guild stuff
 		uint32 oldName = _Guild.NameID;
-		_Guild.NameID = pIM->getDbProp("SERVER:GUILD:NAME")->getValue32();
+		_Guild.NameID = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValue32();
 		_Guild.Name = "";
 		_InGuild = (_Guild.NameID != 0);
 		if (!_InGuild)
 			closeAllInterfaces();
-		_Guild.Icon = pIM->getDbProp("SERVER:GUILD:ICON")->getValue64();
+		_Guild.Icon = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:ICON")->getValue64();
 		_Guild.QuitGuildAvailable = true;
 
 		// Guild Members
@@ -292,15 +294,15 @@ void CGuildManager::update()
 			_GuildMembers.clear();
 			for (uint32 i = 0; i < MAX_GUILD_MEMBER; ++i)
 			{
-				sint32 name = pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":NAME")->getValue32();
+				sint32 name = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":NAME")->getValue32();
 				if (name != 0)
 				{
 					SGuildMember gm;
 					gm.NameID = name;
 					gm.Index = i;
-					gm.Grade = (EGSPD::CGuildGrade::TGuildGrade)(pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":GRADE")->getValue32());
-					gm.Online = (TCharConnectionState)(pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ONLINE")->getValue32());
-					gm.EnterDate = pIM->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ENTER_DATE")->getValue32();
+					gm.Grade = (EGSPD::CGuildGrade::TGuildGrade)(NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":GRADE")->getValue32());
+					gm.Online = (TCharConnectionState)(NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ONLINE")->getValue32());
+					gm.EnterDate = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:MEMBERS:"+toString(i)+":ENTER_DATE")->getValue32();
 					_GuildMembers.push_back(gm);
 				}
 			}
@@ -325,12 +327,12 @@ void CGuildManager::update()
 				// Open the guild info if we are not in the init phase
 				if (!IngameDbMngr.initInProgress())
 				{
-					pElt = pIM->getElementFromId(WIN_GUILD);
+					pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD);
 					if (pElt != NULL)
 						pElt->setActive(true);
 				}
 				// Browse the forum
-				pElt = pIM->getElementFromId(WIN_GUILD_FORUM":content:html");
+				pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM":content:html");
 				if (pElt != NULL)
 				{
 					CGroupHTML *html = dynamic_cast<CGroupHTML*>(pElt);
@@ -358,7 +360,7 @@ void CGuildManager::update()
 		// If all is valid no more need update and if guild is opened update the interface
 		if (bAllValid)
 		{
-			CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
+			CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_ONLINE_OFFLINE_NOTIFICATIONS_CB", false);
 			if (node && node->getValueBool())
 			{
 				// See if we need to show any online/offline messages
@@ -376,13 +378,13 @@ void CGuildManager::update()
 							// Online status not changed for this member
 							continue;
 						}
-
+						
 						if ( (*it).second.Online != ccs_offline && _GuildMembers[i].Online != ccs_offline)
 						{
 							// Not from offline, or to offline, so don't show anything
 							continue;
 						}
-
+						
 						ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
 						strFindReplace(msg, "%s", _GuildMembers[i].Name);
 						string cat = getStringCategory(msg, msg);
@@ -396,6 +398,7 @@ void CGuildManager::update()
 						bool dummy;
 						PeopleInterraction.ChatInput.Guild.displayMessage(msg, col, 2, &dummy);
 						break;
+
 					}
 				}
 
@@ -423,24 +426,24 @@ void CGuildManager::update()
 			}
 
 			// set this value in the database
-			pIM->getDbProp("UI:VARIABLES:USER:GUILD_GRADE")->setValue32(_Grade);
+			NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:USER:GUILD_GRADE")->setValue32(_Grade);
 
 			// update the guild display
-			CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD));
+			CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD));
 			if (pGuild != NULL)
 			{
 				// if the guild window is visible
 				if (pGuild->isOpen() && pGuild->getActive())
 				{
 					// Close the modal window if the member list will change
-					if(pIM->getModalWindow()!=NULL && _NeedUpdateMembers)
+					if(CWidgetManager::getInstance()->getModalWindow()!=NULL && _NeedUpdateMembers)
 					{
-						if (pIM->getModalWindow()->getId() == MENU_GUILD_MEMBER )
-							pIM->disableModalWindow();
+						if (CWidgetManager::getInstance()->getModalWindow()->getId() == MENU_GUILD_MEMBER )
+							CWidgetManager::getInstance()->disableModalWindow();
 					}
 
 					// Rebuild interface. Rebuild members only if needed
-					pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=%d", (uint)_NeedUpdateMembers) );
+					CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=%d", (uint)_NeedUpdateMembers) );
 				}
 			}
 
@@ -459,15 +462,15 @@ void CGuildManager::update()
 		if (bAllValid)
 		{
 			_JoinPropUpdate = false;
-			CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_JOIN_PROPOSAL));
+			CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_JOIN_PROPOSAL));
 			if (pJoinProp != NULL)
 			{
-				CViewText *pJoinPropPhraseView = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_JOIN_PROPOSAL_PHRASE));
+				CViewText *pJoinPropPhraseView = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_JOIN_PROPOSAL_PHRASE));
 				if (pJoinPropPhraseView != NULL)
 					pJoinPropPhraseView->setText(_JoinPropPhrase);
 
 				pJoinProp->setActive(true);
-				pIM->setTopWindow(pJoinProp);
+				CWidgetManager::getInstance()->setTopWindow(pJoinProp);
 				pJoinProp->updateCoords();
 				pJoinProp->center();
 				pJoinProp->enableBlink(2);
@@ -501,10 +504,10 @@ void CGuildManager::launchAscensor()
 
 	// Start Ascensor Interface
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_ASCENSOR));
+	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_ASCENSOR));
 	if (pAC == NULL) return;
 	pAC->setActive(true);
-	pIM->setTopWindow(pAC);
+	CWidgetManager::getInstance()->setTopWindow(pAC);
 }
 
 // TEMP TEMP TEMP
@@ -514,37 +517,37 @@ NLMISC_COMMAND(testAscensorPage, "Temp : Simulate the server that fills the data
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	uint64 prop;
 	//
-	im->getDbProp("LOCAL:ASCENSOR:0:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:0:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(1, 1, false, CRGBA(255, 255, 0), CRGBA(0, 255, 0));
-	im->getDbProp("LOCAL:ASCENSOR:0:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:0:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:1:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:1:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(1, 2, false, CRGBA(0, 255, 255), CRGBA(255, 0, 255));
-	im->getDbProp("LOCAL:ASCENSOR:1:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:1:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:2:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:2:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(2, 3, false, CRGBA(255, 0, 0), CRGBA(0, 255, 0));
-	im->getDbProp("LOCAL:ASCENSOR:2:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:2:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:3:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:3:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(2, 4, false, CRGBA(255, 255, 0), CRGBA(0, 255, 255));
-	im->getDbProp("LOCAL:ASCENSOR:3:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:3:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:4:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:4:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(3, 5, false, CRGBA(255, 255, 0), CRGBA(255, 0, 255));
-	im->getDbProp("LOCAL:ASCENSOR:4:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:4:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:5:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:5:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(3, 6, false, CRGBA(0, 255, 255), CRGBA(255, 255, 0));
-	im->getDbProp("LOCAL:ASCENSOR:5:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:5:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:6:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:6:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(4, 7, false, CRGBA(0, 255, 255), CRGBA(255, 0, 255));
-	im->getDbProp("SERVER:ASCENSOR:6:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("SERVER:ASCENSOR:6:ICON")->setValue64(prop);
 	//
-	im->getDbProp("LOCAL:ASCENSOR:7:NAME")->setValue32(12);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:7:NAME")->setValue32(12);
 	prop = CGuildManager::iconMake(4, 8, false, CRGBA(255, 0, 255), CRGBA(0, 255, 255));
-	im->getDbProp("LOCAL:ASCENSOR:7:ICON")->setValue64(prop);
+	NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:7:ICON")->setValue64(prop);
 
 	return true;
 }
@@ -553,7 +556,7 @@ NLMISC_COMMAND(testAscensorPage, "Temp : Simulate the server that fills the data
 void CGuildManager::quitAscensor()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_ASCENSOR));
+	CGroupContainer *pAC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_ASCENSOR));
 	if (pAC == NULL) return;
 	pAC->setActive(false);
 }
@@ -569,7 +572,7 @@ void CGuildManager::launchJoinProposal(uint32 phraseID)
 void CGuildManager::quitJoinProposal()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_JOIN_PROPOSAL));
+	CGroupContainer *pJoinProp = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_JOIN_PROPOSAL));
 	if (pJoinProp != NULL)
 		pJoinProp->setActive(false);
 }
@@ -578,13 +581,13 @@ void CGuildManager::quitJoinProposal()
 void CGuildManager::closeAllInterfaces()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD));
+	CGroupContainer *pGuild = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD));
 	if (pGuild != NULL)
 		pGuild->setActive(false);
-	CGroupContainer *pGuildForum = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD_FORUM));
+	CGroupContainer *pGuildForum = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM));
 	if (pGuildForum != NULL)
 		pGuildForum->setActive(false);
-	CGroupContainer *pGuildChat = dynamic_cast<CGroupContainer*>(pIM->getElementFromId(WIN_GUILD_CHAT));
+	CGroupContainer *pGuildChat = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_CHAT));
 	if (pGuildChat != NULL)
 		pGuildChat->setActive(false);
 }
@@ -596,18 +599,18 @@ void CGuildManager::openGuildWindow()
 //	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //	// Open the guild window
 //
-//	CCDBNodeLeaf	*node= pIM->getDbProp("CLIENT:GUILD:HAVE_JOINED", false);
+//	CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("CLIENT:GUILD:HAVE_JOINED", false);
 //	if(node)
 //		node->setValue64(1);
 //
 //	CInterfaceElement *pElt;
-//	pElt = pIM->getElementFromId(WIN_GUILD);
+//	pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD);
 //	if (pElt != NULL)
 //	{
 //		pElt->setActive(true);
 //	}
 //	// Browse the forum
-//	pElt = pIM->getElementFromId(WIN_GUILD_FORUM":content:html");
+//	pElt = CWidgetManager::getInstance()->getElementFromId(WIN_GUILD_FORUM":content:html");
 //	if (pElt != NULL)
 //	{
 //		CGroupHTML *html = dynamic_cast<CGroupHTML*>(pElt);
@@ -675,20 +678,14 @@ void CGuildManager::initDBObservers()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// add an observer on the whole guild
-	CCDBNodeBranch *pGuild = pIM->getDbBranch("SERVER:GUILD");
-	if (pGuild != NULL)
-		pGuild->addBranchObserver(&_DBObs);
+	NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:GUILD", &_DBObs );
 
 	// add an observer on members only => need to update all
-	CCDBNodeBranch *pGuildMembers = pIM->getDbBranch("SERVER:GUILD:MEMBERS");
-	if (pGuildMembers != NULL)
-		pGuildMembers->addBranchObserver(&_DBObsMembers);
+	NLGUI::CDBManager::getInstance()->addBranchObserver("SERVER:GUILD:MEMBERS", &_DBObsMembers);
 
 	// observer on ascencors
 	Ascensors.setListType(CHugeListObs::Ascensor);
-	CCDBNodeBranch *pAscensor = pIM->getDbBranch("SERVER:ASCENSOR");
-	if (pAscensor != NULL)
-		pAscensor->addBranchObserver(&Ascensors);
+	NLGUI::CDBManager::getInstance()->addBranchObserver("SERVER:ASCENSOR", &Ascensors);
 }
 
 // ***************************************************************************
@@ -720,13 +717,13 @@ bool CDBGroupListAscensor::CSheetChildAscensor::isInvalidated(CDBGroupListSheetT
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		STRING_MANAGER::CStringManagerClient *pSMC = STRING_MANAGER::CStringManagerClient::instance();
 
-		uint32 nameID = pIM->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":NAME")->getValue32();
+		uint32 nameID = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":NAME")->getValue32();
 		ucstring name;
 		if (nameID && pSMC->getDynString(nameID, name))
 		{
 			Text->setText(name);
 
-			uint64 icon = pIM->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":ICON")->getValue64();
+			uint64 icon = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:ASCENSOR:" + toString(Index) + ":ICON")->getValue64();
 
 			// Slot setup
 			if ((icon & UINT64_CONSTANT(0x8000000000000000)) != 0)
@@ -794,7 +791,7 @@ class CAHGuildSheetOpen : public IActionHandler
 		const SGuild &rGuild = pGM->getGuild();
 
 		// Freeze / unfreeze quit button
-		CCtrlBaseButton *control = dynamic_cast<CCtrlBaseButton*>(pIM->getElementFromId(VIEW_TEXT_GUILD_QUIT));
+		CCtrlBaseButton *control = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TEXT_GUILD_QUIT));
 		if (control)
 			control->setFrozen (!rGuild.QuitGuildAvailable || pGM->isProxy());
 
@@ -802,18 +799,18 @@ class CAHGuildSheetOpen : public IActionHandler
 		// *** Update Members, if necessary
 		if(updateMembers)
 		{
-			CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
+			CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
 			// Sort the members in Guild Manager
 			pGM->sortGuildMembers(order);
 
 			// update member count view
 			const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
-			CViewText	*pVT = dynamic_cast<CViewText*>(pIM->getElementFromId(VIEW_TEXT_GUILD_MEMBER_COUNT));
+			CViewText	*pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_TEXT_GUILD_MEMBER_COUNT));
 			if (pVT)
  				pVT->setText(toString(rGuildMembers.size()));
 
 			// rebuild guild member list
-			CGroupList *pParent = dynamic_cast<CGroupList*>(pIM->getElementFromId(LIST_GUILD_MEMBERS));
+			CGroupList *pParent = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_MEMBERS));
 			if (pParent == NULL) return;
 			pParent->clearGroups();
 			pParent->setDynamicDisplaySize(false);
@@ -824,7 +821,7 @@ class CAHGuildSheetOpen : public IActionHandler
 				vector< pair<string, string> > vParams;
 				vParams.push_back(vector< pair<string, string> >::value_type("id", templateId));
 				CInterfaceGroup *pLine = NULL;
-				pLine = pIM->createGroupInstance (TEMPLATE_GUILD_MEMBER, LIST_GUILD_MEMBERS, vParams);
+				pLine = CWidgetManager::getInstance()->getParser()->createGroupInstance (TEMPLATE_GUILD_MEMBER, LIST_GUILD_MEMBERS, vParams);
 				if (pLine == NULL) continue;
 
 				// Set name
@@ -901,19 +898,19 @@ static void setRights(bool lead, bool hioff, bool offi, bool recr, bool bear, bo
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewTextMenu *pVTM;
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":lead")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":lead")));
 	if (pVTM != NULL) pVTM->setGrayed(!lead);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":hiof")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":hiof")));
 	if (pVTM != NULL) pVTM->setGrayed(!hioff);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":offi")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":offi")));
 	if (pVTM != NULL) pVTM->setGrayed(!offi);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":recr")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":recr")));
 	if (pVTM != NULL) pVTM->setGrayed(!recr);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":bear")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":bear")));
 	if (pVTM != NULL) pVTM->setGrayed(!bear);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":memb")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":memb")));
 	if (pVTM != NULL) pVTM->setGrayed(!memb);
-	pVTM = dynamic_cast<CViewTextMenu*>(pIM->getElementFromId(string(MENU_GUILD_MEMBER":kick")));
+	pVTM = dynamic_cast<CViewTextMenu*>(CWidgetManager::getInstance()->getElementFromId(string(MENU_GUILD_MEMBER":kick")));
 	if (pVTM != NULL) pVTM->setGrayed(!kick);
 }
 
@@ -927,11 +924,11 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 		const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
 
 		// *** Check and retrieve the current member index (index in the member list)
-		CCtrlBase	*ctrlLaunchingModal= pIM->getCtrlLaunchingModal();
+		CCtrlBase	*ctrlLaunchingModal= CWidgetManager::getInstance()->getCtrlLaunchingModal();
 		if (pCaller == NULL || ctrlLaunchingModal == NULL)
 		{
 			// Error -> Close
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 			return;
 		}
 		string sId = ctrlLaunchingModal->getId();
@@ -941,7 +938,7 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 		if ((nLineNb < 0) || (nLineNb >= (sint32)rGuildMembers.size()))
 		{
 			// Error -> Close
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 			return;
 		}
 		MemberIndexSelected= nLineNb;
@@ -951,7 +948,7 @@ class CAHGuildSheetMenuOpen : public IActionHandler
 		if(MemberNameSelected.empty())
 		{
 			// Error -> Close
-			pIM->disableModalWindow();
+			CWidgetManager::getInstance()->disableModalWindow();
 			return;
 		}
 
@@ -1016,7 +1013,7 @@ static void sendMsgSetGrade(EGSPD::CGuildGrade::TGuildGrade Grade)
 		out.serial(u16MemberNb);
 		uint8 u8Grade = Grade;
 		out.serial(u8Grade);
-		uint8 u8Counter = (uint8)pIM->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
+		uint8 u8Counter = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
 		out.serial(u8Counter);
 		NetMngr.push(out);
 		//nlinfo("impulseCallBack : %s %d %d %d sent", message.c_str(), u16MemberNb, u8Grade, u8Counter);
@@ -1035,7 +1032,7 @@ public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
 	{
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
-		CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
+		CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
 
 		order = (CGuildManager::TSortOrder)(order + 1);
 		if (order == CGuildManager::END_SORT_ORDER)
@@ -1043,8 +1040,8 @@ public:
 			order = CGuildManager::START_SORT_ORDER;
 		}
 
-		pIM->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
-		pIM->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
+		NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->setValue32((sint32)order);
+		CAHManager::getInstance()->runActionHandler("guild_sheet_open", NULL, toString("update_members=1"));
 	}
 };
 REGISTER_ACTION_HANDLER(CAHGuildSheetSortGuildList, "sort_guild_list");
@@ -1061,7 +1058,7 @@ public:
 		CGuildManager *pGM = CGuildManager::getInstance();
 		const vector<SGuildMember> &rGuildMembers = pGM->getGuildMembers();
 		// *** Check and retrieve the current member index (index in the member list)
-		CCtrlBase	*ctrlLaunchingModal= pIM->getCtrlLaunchingModal();
+		CCtrlBase	*ctrlLaunchingModal= CWidgetManager::getInstance()->getCtrlLaunchingModal();
 		if (pCaller == NULL)
 		{
 			// Error -> Close
@@ -1190,7 +1187,7 @@ class CAHGuildSheetKick : public IActionHandler
 		{
 			uint16 u16MemberNb = (uint16)rGuildMembers[MemberNb].Index;
 			out.serial(u16MemberNb);
-			uint8 u8Counter = (uint8)pIM->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
+			uint8 u8Counter = (uint8)NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:COUNTER")->getValue8();
 			out.serial(u8Counter);
 			NetMngr.push(out);
 			//nlinfo("impulseCallBack : %s %d %d sent", message.c_str(), u16MemberNb, u8Counter);
@@ -1239,8 +1236,8 @@ class CHandlerInvGuildToBag : public IActionHandler
 		if (!pCSDst->isSheetValid()) return;
 		string sTmp = pCSDst->getSheet();
 
-		CCDBNodeLeaf *pNL = pIM->getDbProp(sTmp+":SHEET",false);
-		CCDBNodeLeaf *pNLquantity = pIM->getDbProp(sTmp+":QUANTITY",false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp+":SHEET",false);
+		CCDBNodeLeaf *pNLquantity = NLGUI::CDBManager::getInstance()->getDbProp(sTmp+":QUANTITY",false);
 		if (pNL == NULL) return;
 		if (pNLquantity == NULL) return;
 
@@ -1281,7 +1278,7 @@ class CHandlerInvGuildToBag : public IActionHandler
 
 		if (!bPlaceFound) return;
 
-		uint16 Session = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+		uint16 Session = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 
 		CBitMemStream out;
 		const string sMsg = "GUILD:GUILD_TO_BAG";
@@ -1316,7 +1313,7 @@ class CHandlerInvBagToGuild : public IActionHandler
 		uint8 BagIndex;
 		fromString(sTmp, BagIndex);
 
-		uint16 Session = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+		uint16 Session = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 
 		CBitMemStream out;
 		const string sMsg = "GUILD:BAG_TO_GUILD";
@@ -1341,8 +1338,8 @@ REGISTER_ACTION_HANDLER (CHandlerInvBagToGuild, "inv_bag_to_guild");
 static void sendMoneyServerMessage(const string &sMsg)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	uint64 nMoney = pIM->getDbProp("UI:VARIABLES:CHOOSE_MONEY")->getValue64();
-	uint16 Session = pIM->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
+	uint64 nMoney = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CHOOSE_MONEY")->getValue64();
+	uint16 Session = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:INVENTORY:SESSION")->getValue16();
 	CBitMemStream out;
 	if (!GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 	{
@@ -1364,7 +1361,7 @@ class CHandlerGuildInvGetMoney : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		sendMoneyServerMessage("GUILD:TAKE_MONEY");
-		CInterfaceManager::getInstance()->popModalWindow();
+		CWidgetManager::getInstance()->popModalWindow();
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGuildInvGetMoney, "guild_inv_get_money");
@@ -1376,7 +1373,7 @@ class CHandlerGuildInvPutMoney : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		sendMoneyServerMessage("GUILD:PUT_MONEY");
-		CInterfaceManager::getInstance()->popModalWindow();
+		CWidgetManager::getInstance()->popModalWindow();
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGuildInvPutMoney, "guild_inv_put_money");

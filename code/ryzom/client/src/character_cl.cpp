@@ -76,7 +76,7 @@
 #include "user_entity.h"
 #include "projectile_manager.h"
 #include "init_main_loop.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb_branch.h"
 #include "animation_fx_misc.h"
 #include "attack_list.h"
 #include "animation_fx_id_array.h"
@@ -452,7 +452,7 @@ void CCharacterCL::releaseInSceneInterfaces()
 {
 	if (_InSceneUserInterface)
 	{
-		CInterfaceManager::getInstance()->unMakeWindow(_InSceneUserInterface);
+		CWidgetManager::getInstance()->unMakeWindow(_InSceneUserInterface);
 		if (_InSceneUserInterface->getParent())
 		{
 			_InSceneUserInterface->getParent()->delGroup(_InSceneUserInterface);
@@ -488,7 +488,7 @@ void CCharacterCL::stopAttachedFXForCurrrentAnim(bool stopLoopingFX)
 			{
 				if(!(*tmpItAttached)->FX.empty())
 				{
-					if (!(*tmpItAttached)->FX.removeByID('STOP') && !(*tmpItAttached)->FX.removeByID('main'))
+					if (!(*tmpItAttached)->FX.removeByID(NELID("STOP")) && !(*tmpItAttached)->FX.removeByID(NELID("main")))
 					{
 						(*tmpItAttached)->FX.activateEmitters(false);
 					}
@@ -2291,6 +2291,21 @@ void CCharacterCL::endAnimTransition()
 	// If the next mode in the automaton != Current Mode
 	if(_CurrentState->NextMode != _Mode)
 	{
+		// Undo previous behaviour
+		switch(_Mode)
+		{
+		case MBEHAV::DEATH:
+			// Restore collisions.
+			if(_Primitive)
+			{
+				// TODO: Without this dynamic cast
+				if(dynamic_cast<CPlayerCL *>(this))
+					_Primitive->setOcclusionMask(MaskColPlayer);
+				else
+					_Primitive->setOcclusionMask(MaskColNpc);
+			}
+			break;
+		}
 		if(ClientCfg.UsePACSForAll && _Primitive)
 			_Primitive->setCollisionMask(MaskColNone);
 		//// AJOUT ////
@@ -3345,7 +3360,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 	{
 		// Right Hand
 		if(rHandInstIdx<_Instances.size())
-			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquiped ) )
+			if( !(_Items[rHandInstIdx].Sheet && _Items[rHandInstIdx].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[rHandInstIdx].Current.empty())
 				{
 					_Instances[rHandInstIdx].Current.hide();
@@ -3353,7 +3368,7 @@ void CCharacterCL::showOrHideBodyParts( bool objectsVisible )
 				}
 		// Left Hand
 		if(lHandInstIdx <_Instances.size())
-			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquiped ) )
+			if( !(_Items[lHandInstIdx].Sheet && _Items[lHandInstIdx].Sheet->NeverHideWhenEquipped ) )
 				if(!_Instances[lHandInstIdx].Current.empty())
 				{
 					_Instances[lHandInstIdx].Current.hide();
@@ -4522,7 +4537,7 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 	{
 		if(behaviour.DeltaHP != 0)
 		{
-			CRGBA deltaHPColor(0, 0, 0);
+			CRGBA deltaHPColor( 0, 0, 0 );
 			// if it's a hit
 			if( behaviour.DeltaHP < 0 )
 			{
@@ -8386,7 +8401,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	TextContext->printfAt(x, y, "Mount: %3u(Theoretical: %3u) Rider: %3u(Theoretical: %3u)", mount(), _TheoreticalMount, rider(), _TheoreticalRider);
 	y += lineStep;
 	// VPA
-	sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+	sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualA visualA = *(SPropVisualA *)(&prop);
@@ -8402,7 +8417,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "VPA: %"NL_I64"X", prop);
 	y += lineStep;
 	// VPB
-	prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
+	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualB visualB = *(SPropVisualB *)(&prop);
@@ -8414,7 +8429,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "VPB: %"NL_I64"X", prop);
 	y += lineStep;
 	// VPC
-	prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
+	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualC visualC = *(SPropVisualC *)(&prop);
@@ -8546,7 +8561,7 @@ void CCharacterCL::load()	// virtual
 		_LookRdy = false;
 		// Visual properties A
 		_HeadIdx = CEntityCL::BadIndex;
-		sint64 prop = IM->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
+		sint64 prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPA))->getValue64();
 		updateVisualPropertyVpa(0, prop);
 	}
 }// load //
@@ -9373,7 +9388,7 @@ void CCharacterCL::CWornItem::enableAdvantageFX(NL3D::UInstance parent)
 	if (!enabled)
 	{
 		// well, it is unlikely that player will loses its ability to master an item after he gained it, but manage the case anyway.
-		if (!AdvantageFX.removeByID('STOP') && !AdvantageFX.removeByID('main'))
+		if (!AdvantageFX.removeByID(NELID("STOP")) && !AdvantageFX.removeByID(NELID("main")))
 		{
 			AdvantageFX.activateEmitters(false);
 		}
@@ -9797,11 +9812,11 @@ NLMISC_COMMAND(weapon, "change the weapon in hand", "<slot> <hand> <weapon>")
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	uint slot;
 	fromString(args[0], slot);
-	CCDBNodeLeaf *propA = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *propA = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!propA) return false;
 	sint64 valueA = propA->getValue64();
 
-	CCDBNodeLeaf *propB = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
+	CCDBNodeLeaf *propB = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
 	if (!propB) return false;
 	sint64 valueB = propB->getValue64();
 
@@ -9868,7 +9883,7 @@ NLMISC_COMMAND(advantageFX, "turn on / off the advantage fx for an item in hand"
 	fromString(args[0], slot);
 
 	/*
-	CCDBNodeLeaf *prop = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *prop = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!prop) return false;
 	sint64 value = prop->getValue64();
 	uint hand;
@@ -9916,11 +9931,11 @@ NLMISC_COMMAND(trailLength, "set length of trail for one weapon in hand", "<slot
 	uint slot;
 	fromString(args[0], slot);
 
-	CCDBNodeLeaf *propA = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
+	CCDBNodeLeaf *propA = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPA), false);
 	if (!propA) return false;
 	sint64 valueA = propA->getValue64();
 
-	CCDBNodeLeaf *propB = im->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
+	CCDBNodeLeaf *propB = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:Entities:E%d:P%d", (int) slot, (int) PROPERTY_VPB), false);
 	if (!propB) return false;
 	sint64 valueB = propB->getValue64();
 

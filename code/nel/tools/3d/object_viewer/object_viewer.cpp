@@ -1271,7 +1271,8 @@ void CObjectViewer::go ()
 			// Calc FPS
 			static sint64 lastTime=NLMISC::CTime::getPerformanceTime ();
 			sint64 newTime=NLMISC::CTime::getPerformanceTime ();
-			float fps = (float)(1.0 / NLMISC::CTime::ticksToSecond (newTime-lastTime));
+			sint64 timeDiff = newTime - lastTime;
+			float fps = timeDiff > 0 ? (float)(1.0 / NLMISC::CTime::ticksToSecond (newTime-lastTime)) : 1000.0f;
 			lastTime=newTime;
 			char msgBar[1024];
 			uint nbPlayingSources, nbSources;
@@ -1710,8 +1711,8 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 {
 	// version 4: include particle workspace infos
 	// serial "OBJV_CFG"
-	f.serialCheck ((uint32)'VJBO');
-	f.serialCheck ((uint32)'GFC_');
+	f.serialCheck (NELID("VJBO"));
+	f.serialCheck (NELID("GFC_"));
 
 	// serial the version
 	int ver=f.serialVersion (4);

@@ -39,6 +39,8 @@
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
+#include "nel/3d/stereo_hmd.h"
+#include "nel/3d/stereo_ng_hmd.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -46,6 +48,7 @@
 
 // Std.
 #include <fstream>
+#include <sstream>
 // Game Share
 #include "game_share/ryzom_version.h"
 // Client
@@ -62,12 +65,14 @@
 #include "ingame_database_manager.h"
 #include "client_chat_manager.h"
 #include "interface_v3/input_handler_manager.h"
+#include "interface_v3/interface_manager.h"
 //#include "crtdbg.h"
 #include "sound_manager.h"
 #include "net_manager.h"
 #include "sheet_manager.h"
 
 #include "interface_v3/sbrick_manager.h"
+#include "nel/gui/widget_manager.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -533,31 +538,6 @@ void checkDriverVersion()
 		nlwarning ("Can't check video driver version");
 }
 
-void checkNoATIOpenGL()
-{
-	string deviceName;
-	uint64 driverVersion;
-	if (CSystemInfo::getVideoInfo (deviceName, driverVersion))
-	{
-		string lwr = deviceName;
-		strlwr(lwr);
-		if (lwr.find (ATI_RECOMMANDED_DRIVERS_STRING_TEST)!=string::npos && ClientCfg.Driver3D==CClientConfig::OpenGL)
-		{
-			// special case for radeon 7500 or less : doesn't issue message since doesn't work with Direct3D for now
-			if (!(strstr(lwr.c_str() , "radeon 7000") || strstr(lwr.c_str() , "radeon 7200") || strstr(lwr.c_str() , "radeon 7500")))
-			{
-				ucstring	message= CI18N::get("uiUseATID3D");
-				if (ClientQuestion (message))
-				{
-					ClientCfg.Driver3D= CClientConfig::DrvAuto;
-					ClientCfg.writeString("Driver3D", "Auto");
-					ClientCfg.ConfigFile.save();
-				}
-			}
-		}
-	}
-}
-
 void checkDriverDepth ()
 {
 	// Check desktop is in 32 bit else no window mode allowed.
@@ -594,6 +574,94 @@ static std::string replaceApplicationDirToken(const std::string &dir)
 //	preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
 
 	return dir;
+}
+
+void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
+{
+	bool cache = VRDeviceCache.empty();
+	nldebug("VR [C]: List devices");
+	if (cache)
+	{
+		VRDeviceCache.push_back(std::pair<std::string, std::string>("Auto", "0"));
+	}
+	IStereoDisplay::listDevices(devices);
+	for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+	{
+		std::stringstream name;
+		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
+		std::stringstream fullname;
+		fullname << std::string("[") << name << "] [" << it->Serial << "]";
+		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
+		if (cache)
+		{
+			VRDeviceCache.push_back(std::pair<std::string, std::string>(name.str(), it->Serial)); // VR_CONFIG
+		}
+	}
+}
+
+void cacheStereoDisplayDevices() // VR_CONFIG
+{
+	if (VRDeviceCache.empty())
+	{
+		std::vector<NL3D::CStereoDeviceInfo> devices;
+		listStereoDisplayDevices(devices);
+	}
+}
+
+void initStereoDisplayDevice()
+{
+	if (ClientCfg.VREnable)
+	{
+		// VR_CONFIG
+		nldebug("VR [C]: Enabled");
+		std::vector<NL3D::CStereoDeviceInfo> devices;
+		listStereoDisplayDevices(devices);
+		CStereoDeviceInfo *deviceInfo = NULL;
+		if (ClientCfg.VRDisplayDevice == std::string("Auto")
+			&& devices.begin() != devices.end())
+		{
+			deviceInfo = &devices[0];
+		}
+		else
+		{
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				std::stringstream name;
+				name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
+				if (name.str() == ClientCfg.VRDisplayDevice)
+					deviceInfo = &(*it);
+				if (ClientCfg.VRDisplayDeviceId == it->Serial)
+					break;
+			}
+		}
+		if (deviceInfo)
+		{
+			nlinfo("VR [C]: Create VR stereo display device");
+			StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
+			if (StereoDisplay)
+			{
+				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD
+					|| deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
+				{
+					nlinfo("VR [C]: Stereo display device is a HMD");
+					StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
+					if (deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
+					{
+						StereoNGHMD = static_cast<IStereoNGHMD *>(StereoDisplay);
+					}
+				}
+				if (Driver) // VR_DRIVER
+				{
+					StereoDisplay->setDriver(Driver);
+				}
+			}
+		}
+	}
+	else
+	{
+		nldebug("VR [C]: NOT Enabled");
+	}
+	IStereoDisplay::releaseUnusedLibraries();
 }
 
 void addSearchPaths(IProgressCallback &progress)
@@ -686,12 +754,12 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-
+		
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
 		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
 			setCPUMask();
-
+		
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -767,13 +835,6 @@ void prelogInit()
 
 		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
 
-		// tmp for patcher debug
-		extern void tmpFlagMainlandPatchCategories(NLMISC::CConfigFile &cf);
-		extern void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf);
-		tmpFlagMainlandPatchCategories(ClientCfg.ConfigFile);
-		tmpFlagRemovedPatchCategories(ClientCfg.ConfigFile);
-
-
 		// check "BuildName" in ClientCfg
 		//nlassert(!ClientCfg.BuildName.empty()); // TMP comment by nico do not commit
 
@@ -815,8 +876,11 @@ void prelogInit()
 		// Check driver version
 		checkDriverVersion();
 
-		// Check ATI not in OpenGL
-		 checkNoATIOpenGL();
+		// Initialize the VR devices (even more important than the most important part of the client)
+		nmsg = "Initializing VR devices...";
+		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
+		initStereoDisplayDevice(); // VR_CONFIG
+
 		// Create the driver (most important part of the client).
 		nmsg = "Creating 3d driver...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
@@ -831,21 +895,13 @@ void prelogInit()
 
 		switch(ClientCfg.Driver3D)
 		{
-			case  CClientConfig::DrvAuto:
 #ifdef NL_OS_WINDOWS
-			{
-				// Fallback to D3D for card other than nVidia
-				std::string deviceName;
-				uint64 drvVersion;
-				CSystemInfo::getVideoInfo(deviceName, drvVersion);
-				strlwr(deviceName);
-				driver = strstr(deviceName.c_str(), NVIDIA_RECOMMANDED_DRIVERS_STRING_TEST) == NULL ? UDriver::Direct3d:UDriver::OpenGl;
-			}
-			break;
+
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
 #endif // NL_OS_WINDOWS
+			case CClientConfig::DrvAuto:
 			case CClientConfig::OpenGL:
 				driver = UDriver::OpenGl;
 			break;
@@ -893,6 +949,11 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
+		
+		if (StereoDisplay) // VR_CONFIG  // VR_DRIVER
+		{
+			// override mode TODO
+		}
 
 		// Set the mode of the window.
 		if (!Driver->setDisplay (mode, false))
@@ -1044,7 +1105,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for (uint i=0; i<3; i++)
+		for ( uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;
@@ -1081,13 +1142,21 @@ void prelogInit()
 		if(GenericMat.empty())
 			nlerror("init: Cannot Create the generic material.");
 
-		// Yoyo: initialize NOW the InputHandler for Event filtering.
-		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
-		InputHandlerManager->addToServer (&Driver->EventServer);
 
 		// Create a text context. We need to put the full path because we not already add search path
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
+
+		
+		CInterfaceManager::getInstance();
+
+		// Yoyo: initialize NOW the InputHandler for Event filtering.
+		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
+		InputHandlerManager->addToServer (&Driver->EventServer);
+
+		std::string filename = CPath::lookup( ClientCfg.XMLInputFile, false );
+		if( !filename.empty() )
+			InputHandlerManager->readInputConfigFile( filename );
 
 		ProgressBar.setFontFactor(0.85f);
 
@@ -1127,6 +1196,12 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
+		
+		if (StereoDisplay) // VR_CONFIG
+		{
+			// Init stereo display resources
+			StereoDisplay->setDriver(Driver); // VR_DRIVER
+		}
 
 		nlinfo ("PROFILE: %d seconds for prelogInit", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 

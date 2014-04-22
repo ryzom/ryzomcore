@@ -17,7 +17,7 @@
  * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function ryzom_app_render($title, $content, $style='', $javascript=array(), $homeLink=false) {
+function ryzom_app_render($title, $content, $style='', $files=array(), $homeLink=false) {
 	$c = '';
 	
 	// get Lua code
@@ -51,12 +51,17 @@ function ryzom_app_render($title, $content, $style='', $javascript=array(), $hom
 
 	if (!RYZOM_IG) {
 		// Javascript
-		$js_code = '';
-		if (is_string($javascript))
-			$javascript = array($javascript);
-		foreach ($javascript as $js)
-			$js_code .= '		<script type="text/javascript" src="'.$js.'"></script>'."\n";
-		$c .= $js_code;
+		$extra_code = '';
+		if (is_string($files))
+			$files = array($files);
+		foreach ($files as $file) {
+			$sfile = explode('.', $file);
+			if ($sfile[count($sfile)-1] == 'js')
+				$extra_code .= '		<script type="text/javascript" src="'.$file.'"></script>'."\n";
+			else if ($sfile[count($sfile)-1] == 'css')
+				$extra_code .= '		<link rel="stylesheet" type="text/css" media="all" href="'.$file.'" />'."\n";
+		}
+		$c .= $extra_code;
 	}
 
 	$c .= '	</head>'."\n";
@@ -167,7 +172,7 @@ function ryzom_render_window_begin($title, $homeLink=false) {
 function ryzom_render_window_end() {
 	global $user;
 	return '</div>
-		<div>'.(isset( $user['groups'])?implode(':', $user['groups']):'').'</div>
+		<div>P_'.(isset($user['id'])?$user['id']:'GUEST').':'.(isset( $user['groups'])?implode(':', $user['groups']):'').'</div>
 		<div style="background-color: #000000">'.ryLogger::getInstance()->getLogs().'</div></div></div></div>
 		<div class="ryzom-ui-bl"><div class="ryzom-ui-br"><div class="ryzom-ui-b"></div></div></div><p class="ryzom-ui-notice">powered by <a class="ryzom-ui-notice" href="http://dev.ryzom.com/projects/ryzom-api/wiki">ryzom-api</a></p>
 		</div>
@@ -200,6 +205,7 @@ function ryzom_render_www_begin($url='') {
 					<a href="'.$url.'&lang=en"><img hspace="5" border="0" src="'.RYAPI_URL.'data/img/lang/en.png" alt="English" /></a>
 					<a href="'.$url.'&lang=fr"><img hspace="5" border="0" src="'.RYAPI_URL.'data/img/lang/fr.png" alt="French" /></a>
 					<a href="'.$url.'&lang=de"><img hspace="5" border="0" src="'.RYAPI_URL.'data/img/lang/de.png" alt="German" /></a>
+					<a href="'.$url.'&lang=es"><img hspace="5" border="0" src="'.RYAPI_URL.'data/img/lang/es.png" alt="Spanish" /></a>
 					<a href="'.$url.'&lang=ru"><img hspace="5" border="0" src="'.RYAPI_URL.'data/img/lang/ru.png" alt="Russian" /></a>
 					<div style="'.$style2.'">
 						<a href="http://www.ryzom.com/"><img border="0" src="'.RYAPI_URL.'data/img/logo.gif" alt=""/></a>
@@ -300,10 +306,10 @@ $ryzom_render_styles = array();
 $ryzom_render_tmpls = array();
 
 $ryzom_render_styles['main title'] = array('#222222'.$transparency, '#FFFFFF');
-$ryzom_render_tmpls['main title'] = '<table width="100%" cellpadding="0" cellspacing="0"><tr bgcolor="${p[\'color1\']}"><td height="42px" valign="middle"><h1><font '.($ig?'color="${p[\'color2\']}" size="14"':'style="color:${p[\'color2\']};font-size:16pt; font-weight: bold"').'>&nbsp;${p[0]}</font></h1></td></tr></table>'."\n";
+$ryzom_render_tmpls['main title'] = '<table width="100%" cellpadding="0" cellspacing="0"><tr bgcolor="${p[\'color1\']}"><td height="42px" valign="middle"><font '.($ig?'color="${p[\'color2\']}" size="14"':'style="color:${p[\'color2\']};font-size:16pt; font-weight: bold"').'>&nbsp;${p[0]}</font></td></tr></table>'."\n";
 
 $ryzom_render_styles['section'] = array('#555555'.$transparency, '#FFFFFF');
-$ryzom_render_tmpls['section'] = '<table width="100%" cellpadding="0" cellspacing="0"><tr bgcolor="${p[\'color1\']}"><td height="30px" align="left" valign="middle"><font '.($ig?'color="${p[\'color2\']}" size="12"':'style="color:${p[\'color2\']}; font-size:10pt; font-weight: bold"').'>&nbsp;${p[0]}</font></td></tr></table>'."\n";
+$ryzom_render_tmpls['section'] = '<table width="100%" cellpadding="0" cellspacing="0"><tr bgcolor="${p[\'color1\']}"><td height="40px" align="left" valign="middle"><font '.($ig?'color="${p[\'color2\']}" size="12"':'style="color:${p[\'color2\']}; font-size:10pt; font-weight: bold"').'>&nbsp;${p[0]}</font></td></tr></table>'."\n";
 
 $ryzom_render_styles['color'] = array('', '');
 $ryzom_render_tmpls['color'] = ($ig?'<font color="${p[0]}">':'<font style="color:${p[0]}">').'${p[0]}</font>';
@@ -347,8 +353,8 @@ $ryzom_render_tmpls['t element'] = '<font color="${p[\'color1\']}">${p[0]}</font
 $ryzom_render_styles['log'] = array('#001100'.$transparency, '');
 $ryzom_render_tmpls['log'] = '<div style="background-color: ${p[\'color1\']}"><pre style="width: auto">${p[0]}</pre></div>'."\n";
 
-$ryzom_render_styles['message'] = array('#445566'.$transparency, '');
-$ryzom_render_tmpls['message'] = '<table width="100%"><tr bgcolor="${p[\'color1\']}"><td align="center" valign="middle"><h3>&nbsp;${p[0]}</h3></td></tr></table>'."\n";
+$ryzom_render_styles['message'] = array('#445566'.$transparency, '#FFDDAA');
+$ryzom_render_tmpls['message'] = '<table width="100%" cellspacing="0" cellpadding="0"><tr bgcolor="${p[\'color1\']}"><td height="5px"></td></tr><tr bgcolor="${p[\'color1\']}"><td align="center" valign="middle"><font '.($ig?'color="${p[\'color2\']}" size="16"':'style="color:${p[\'color2\']};font-size:12pt; font-weight: bold"').'>${p[0]}</font></td></tr><tr bgcolor="${p[\'color1\']}"><td height="5px"></td></tr></table>'."\n";
 
 $ryzom_render_styles['message warning'] = array('#AA3300'.$transparency, '');
 $ryzom_render_tmpls['message warning'] = '<table width="100%"><tr bgcolor="${p[\'color1\']}"><td align="center" valign="middle"><h3>&nbsp;${p[0]}</h3></td></tr></table>'."\n";
@@ -358,7 +364,7 @@ $ryzom_render_tmpls['message window'] = '<table width="100%" cellspacing="0" cel
 					'<tr bgcolor="${p[\'color1\']}"><td bgcolor="${p[\'color2\']}" width="3px"></td><td height="3px" bgcolor="${p[\'color2\']}"></td><td bgcolor="${p[\'color2\']}" width="3px"></td><td bgcolor="${p[\'color2\']}"></td></tr></table>'."\n";
 
 $ryzom_render_styles['message ask'] = array('#333333'.$transparency, '');
-$ryzom_render_tmpls['message ask'] = '<table width="100%"><tr bgcolor="${p[\'color1\']}"><td height="35px" align="center" valign="middle">'.($ig?'<font color="#DDAA33" size="11">':'<font style="color:#DDAA33; font-size:11pt">').'${p[0]}</font></td></tr></table>'."\n";
+$ryzom_render_tmpls['message ask'] = '<table width="100%"><tr bgcolor="${p[\'color1\']}"><td valign="middle">'.($ig?'<font color="#DDAA33" size="11">':'<font style="color:#DDAA33; font-size:11pt">').'${p[0]}</font></td></tr></table>'."\n";
 
 $ryzom_render_styles['message error'] = array('#AA2222'.$transparency, '');
 $ryzom_render_tmpls['message error'] = '<table width="100%"><tr bgcolor="${p[\'color1\']}"><td height="30px" align="center" valign="middle"><h3>&nbsp;${p[0]}</h3></td></tr></table>'."\n";

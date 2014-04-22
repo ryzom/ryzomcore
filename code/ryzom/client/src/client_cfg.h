@@ -146,6 +146,11 @@ struct CClientConfig
 	/// Monitor Gamma [-1 ~ 1], default 0
 	float			Gamma;
 
+	// VR
+	bool			VREnable;
+	std::string		VRDisplayDevice;
+	std::string		VRDisplayDeviceId;
+
 	/// Client in Local mode or not.
 	bool			Local;
 	/// Host.
@@ -757,7 +762,7 @@ struct CClientConfig
 	// LUA //
 	/////////
 
-	/// Allow Lua commands (commands begining with Lua)
+	/// Allow Lua commands (commands beginning with Lua)
 	bool			AllowDebugLua;
 	bool			LoadLuaDebugger;
 

@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="f0" Type="Type" Filename="_sbrick_families.typ"/>
-  <ELEMENT Name="f1" Type="Type" Filename="_sbrick_families.typ"/>
-  <ELEMENT Name="f2" Type="Type" Filename="_sbrick_families.typ"/>
-  <ELEMENT Name="f3" Type="Type" Filename="_sbrick_families.typ"/>
-  <LOG>Wed Sep 03 17:38:08 2003 (berenguier) Dfn Structure = </LOG>
-</DFN>

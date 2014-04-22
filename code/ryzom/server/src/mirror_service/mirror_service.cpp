@@ -178,7 +178,19 @@ void	CMirrorService::init()
 
 	// Fill temporary sheet map, loading dataset information
 	TSDataSetSheets sDataSetSheets;
-	loadForm( "dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", sDataSetSheets );
+
+	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	{
+		loadForm( "dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", sDataSetSheets, false, false );
+	}
+
+	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
+	if ( sDataSetSheets.empty() )
+	{
+		loadForm( "dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", sDataSetSheets, true );
+	}
+
 	if ( sDataSetSheets.empty() )
 	{
 		nlwarning( "No dataset found, check if dataset.packed_sheets and the georges sheets are in the path" );

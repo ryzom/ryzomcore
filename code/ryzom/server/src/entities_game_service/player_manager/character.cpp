@@ -147,6 +147,8 @@
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
 
+#include "player_manager/character_achievements.h"
+
 ///////////
 // USING //
 ///////////
@@ -187,7 +189,7 @@ extern float						CarriedItemsDecayRate;
 extern uint8						TeamMembersStatusMaxValue;
 extern CCharacterBotChatBeginEnd	CharacterBotChatBeginEnd;
 //*** Removed by Sadge ***
-//extern CCreatureAskInformationMsg	CreatureNpcInformations;
+//extern CCreatureAskInformationMsg	CreatureNpcInformation;
 //*** ***
 extern float						MaxHarvestDistance;
 extern float						MaxMountDistance;
@@ -602,6 +604,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_CurrentParrySkill = BarehandCombatSkill;
 
 	_EncycloChar = new CCharacterEncyclopedia(*this);
+	_AchievementsChar = new CCharacterAchievements(*this);
 	_GameEvent = new CCharacterGameEvent(*this);
 	_RespawnPoints = new CCharacterRespawnPoints(*this);
 	_PlayerRoom = new CPlayerRoomInterface;
@@ -1532,6 +1535,8 @@ uint32 CCharacter::tickUpdate()
 	{
 		nextUpdate = 8;
 	}
+
+	//_AchievementsPlayer->tickUpdate();
 
 	return nextUpdate;
 } // tickUpdate //
@@ -2792,6 +2797,7 @@ CCharacter::~CCharacter()
 	_BarUpdateTimer.reset();
 
 	delete _EncycloChar;
+	delete _AchievementsChar;
 	delete _GameEvent;
 	delete _RespawnPoints;
 	delete _PlayerRoom;
@@ -2807,6 +2813,12 @@ CCharacter::~CCharacter()
 
 //	NLMEMORY::StatisticsReport( "egs_memory_report.csv", false );
 } // destructor //
+
+
+void CCharacter::mobKill(TDataSetRow creatureRowId)
+{
+	_AchievementsChar->mobKill(creatureRowId);
+}
 
 //---------------------------------------------------
 // prepareToLoad: method called before applying a pdr save record
@@ -3503,8 +3515,8 @@ void CCharacter::setTarget( const CEntityId &targetId, bool sendMessage )
 
 //*** Removed by Sadge ***
 //		// Ask information about target to AI service
-//		CreatureNpcInformations.Character.push_back( _EntityRowId );
-//		CreatureNpcInformations.Creature.push_back( target->getEntityRowId() );
+//		CreatureNpcInformation.Character.push_back( _EntityRowId );
+//		CreatureNpcInformation.Creature.push_back( target->getEntityRowId() );
 //*** ***
 	}
 	else // target == NULL
@@ -7811,9 +7823,9 @@ void CCharacter::endHarvest(bool sendCloseTempImpulsion)
 	_HarvestOpened = false;
 	_DepositSearchSkill = SKILLS::unknown;
 	_MpIndex = 0xff;
-	_DepositHarvestInformations.DepositIndex = 0xffffffff;
+	_DepositHarvestInformation.DepositIndex = 0xffffffff;
 
-	if ( _DepositHarvestInformations.Sheet != CSheetId::Unknown/*_DepositHarvestInformations.EndCherchingTime != 0xffffffff && _DepositHarvestInformations.EndCherchingTime > CTickEventHandler::getGameCycle()*/ )
+	if ( _DepositHarvestInformation.Sheet != CSheetId::Unknown/*_DepositHarvestInformation.EndCherchingTime != 0xffffffff && _DepositHarvestInformation.EndCherchingTime > CTickEventHandler::getGameCycle()*/ )
 	{
 		if ( sendCloseTempImpulsion )
 		{
@@ -9938,7 +9950,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 
 		if (item->getRefInventory() == _Inventory[INVENTORIES::equipment])
 		{
-			nlwarning("<CCharacter sellItem> character %s try to sell an equiped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
+			nlwarning("<CCharacter sellItem> character %s try to sell an equipped item %s, must not permited by client", _Id.toString().c_str(), sheet.toString().c_str() );
 			return;
 		}
 
@@ -13124,7 +13136,10 @@ void CCharacter::setPlaces(const std::vector<const CPlace*> & places)
 	const uint size = (uint)places.size();
 	_Places.resize(places.size());
 	for ( uint i = 0; i < size; i++ )
+	{
 		_Places[i] = places[i]->getId();
+		_AchievementsChar->inPlace(places[i]);
+	}
 }
 
 //-----------------------------------------------
@@ -14041,7 +14056,7 @@ bool CCharacter::pickUpRawMaterial( uint32 indexInTempInv, bool * lastMaterial )
 				}
 
 				clearHarvestDB();
-				//CZoneManager::getInstance().removeRmFromDeposit( this, _DepositHarvestInformations.DepositIndex, _DepositHarvestInformations.DepositIndexContent,_HarvestedQuantity);
+				//CZoneManager::getInstance().removeRmFromDeposit( this, _DepositHarvestInformation.DepositIndex, _DepositHarvestInformation.DepositIndexContent,_HarvestedQuantity);
 			}
 		}
 	}
@@ -14185,6 +14200,11 @@ void CCharacter::sendCloseTempInventoryImpulsion()
 //-----------------------------------------------
 void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint32 fameMax, uint16 fameTrend)
 {
+	if (playerFame != NO_FAME)
+	{
+		_AchievementsChar->fameValue(factionIndex, playerFame);
+	}
+
 	uint32 firstTribeFameIndex = CStaticFames::getInstance().getFirstTribeFameIndex();
 	uint32 firstTribeDbIndex = CStaticFames::getInstance().getDatabaseIndex( firstTribeFameIndex );
 	uint32 fameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex( factionIndex );

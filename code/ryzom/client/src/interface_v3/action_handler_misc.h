@@ -20,10 +20,13 @@
 #define NL_ACTION_HANDLER_MISC_H
 
 #include "nel/misc/types_nl.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "interface_manager.h"
 
-class CInterfaceGroup;
+namespace NLGUI
+{
+	class CInterfaceGroup;
+}
 
 
 // ***************************************************************************

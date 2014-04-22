@@ -208,7 +208,7 @@ namespace RSMGR
 	public:
 		CRingSessionManager() 
 			:	_DontUsePerm(false),
-				_CharSync(false)
+				_CharSync(NULL)
 		{
 			CRingSessionManagerSkel::init(this);
 			CWelcomeServiceClientSkel::init(this);
@@ -1736,7 +1736,7 @@ endOfWelcomeUserResult:
 				(session->getAccessType()==TAccessType::at_public), session->getLang(), session->getOrientation(), session->getDescription());
 		}
 
-		// Update the informations of a planned or running session
+		// Update the information of a planned or running session
 		// Return 'invokeResult' : 0 : ok, session updated
 		//                         1 : unknown character
 		//                         2 : unknown session

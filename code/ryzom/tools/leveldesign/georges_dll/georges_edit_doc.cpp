@@ -766,7 +766,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					Type->Header.MinorVersion++;
 					flushValueChange ();
 				}
-				Type->write (xmlStream.getDocument (), theApp.Georges4CVS);
+				Type->write (xmlStream.getDocument ());
 				modify (NULL, NULL, false);
 				flushValueChange ();
 				UpdateAllViews (NULL);
@@ -782,7 +782,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					Dfn->Header.MinorVersion++;
 					flushValueChange ();
 				}
-				Dfn->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
+				Dfn->write (xmlStream.getDocument (), lpszPathName);
 				modify (NULL, NULL, false);
 				UpdateAllViews (NULL);
 				return TRUE;
@@ -797,7 +797,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 					((CForm*)(UForm*)Form)->Header.MinorVersion++;				
 					flushValueChange ();
 				}
-				((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
+				((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName);
 				if (strcmp (xmlStream.getErrorString (), "") != 0)
 				{
 					char message[512];

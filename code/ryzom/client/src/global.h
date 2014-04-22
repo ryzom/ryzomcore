@@ -40,6 +40,9 @@ namespace NL3D
 	class UMaterial;
 	class UTextContext;
 	class UWaterEnvMap;
+	class IStereoDisplay;
+	class IStereoHMD;
+	class IStereoNGHMD;
 }
 
 class CEntityAnimationManager;
@@ -77,6 +80,9 @@ const float		ExtraZoneLoadingVision	= 100.f;
 // ***************************************************************************
 // Main System
 extern NL3D::UDriver				*Driver;		// The main 3D Driver
+extern NL3D::IStereoDisplay			*StereoDisplay; // Stereo display
+extern NL3D::IStereoHMD				*StereoHMD;		// Head mount display
+extern NL3D::IStereoNGHMD			*StereoNGHMD;		// HMD with player death support
 extern CSoundManager				*SoundMngr;		// the sound manager
 extern NL3D::UMaterial				GenericMat;	// Generic Material
 extern NL3D::UTextContext			*TextContext;	// Context for all the text in the client.
@@ -116,9 +122,15 @@ extern bool							ConnectionReadySent;
 extern bool							PermanentlyBanned;
 extern bool							IgnoreEntityDbUpdates;
 
+// VR
+extern std::vector<std::pair<
+	std::string, std::string> >		VRDeviceCache;
+
 extern std::string					Cookie, FSAddr;
 extern std::string					RingMainURL;
 extern bool							FreeTrial;
+
+extern bool							NoLogout;
 
 void resetTextContext (const char *font, bool resetInterfaceManager);
 

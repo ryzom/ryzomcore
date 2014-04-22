@@ -43,7 +43,10 @@ printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-printLog(log, ">>> Nothing to do! <<<")
+printLog(log, ">>> Install pacs_prim_list <<<")
+installPath = InstallDirectory + "/" + PacsPrimListInstallDirectory
+mkPath(log, installPath)
+copyFileIfNeeded(log, ExportBuildDirectory + "/" + PacsPrimListBuildDirectory + "/landscape_col_prim_pacs_list.txt", installPath + "/landscape_col_prim_pacs_list.txt")
 
 printLog(log, "")
 log.close()

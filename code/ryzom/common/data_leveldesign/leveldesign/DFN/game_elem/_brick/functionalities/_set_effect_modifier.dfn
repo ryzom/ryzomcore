@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="ModifierIndex" Type="Type" Filename="int.typ" Default="0"/>
-  <ELEMENT Name="Operation" Type="Type" Filename="_sentence_modifier_operator.typ" Default="SET"/>
-  <ELEMENT Name="Value" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="ApplyOnResist" Type="Type" Filename="boolean.typ" Default="false"/>
-  <LOG>Fri Jan 17 18:37:51 2003 (brigand) Dfn Structure = 
-Fri Jan 17 19:08:13 2003 (brigand) Dfn Structure = </LOG>
-</DFN>

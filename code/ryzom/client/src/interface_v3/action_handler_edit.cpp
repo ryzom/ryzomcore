@@ -22,8 +22,8 @@
 using namespace std;
 using namespace NLMISC;
 
-#include "action_handler.h"
-#include "group_editbox.h"
+#include "nel/gui/action_handler.h"
+#include "nel/gui/group_editbox.h"
 #include "interface_manager.h"
 #include "../client_chat_manager.h"
 #include "people_interraction.h"
@@ -115,7 +115,7 @@ protected:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (pIM)
 		{
-			CCtrlBase *basectrl = pIM->getCaptureKeyboard();
+			CCtrlBase *basectrl = CWidgetManager::getInstance()->getCaptureKeyboard();
 			if (basectrl)
 				_GroupEdit = dynamic_cast<CGroupEditBox*>(basectrl);
 		}
@@ -145,7 +145,7 @@ protected:
 		if (_GroupEdit)
 		{
 			// If selection active
-			CGroupEditBox *currSelection = CGroupEditBox::getCurrSelection();
+			CGroupEditBox *currSelection = dynamic_cast< CGroupEditBox* >( CGroupEditBox::getCurrSelection() );
 			if (currSelection != NULL)
 			{
 				if (currSelection != _GroupEdit)
@@ -511,7 +511,7 @@ protected:
 			if (!_GroupEdit->getAHOnChange().empty())
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				pIM->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
+				CAHManager::getInstance()->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
 			}
 		}
 		// else cut forwards
@@ -524,7 +524,7 @@ protected:
 			if (!_GroupEdit->getAHOnChange().empty())
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				pIM->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
+				CAHManager::getInstance()->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
 			}
 		}
 		// must stop selection in all case

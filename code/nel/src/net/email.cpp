@@ -56,7 +56,8 @@ static void uuencode (const char *s, const char *store, const int length)
 	unsigned char *us = (unsigned char *)s;
 
 	/* Transform the 3x8 bits to 4x6 bits, as required by base64.  */
-	for (i = 0; i < length; i += 3) {
+	for (i = 0; i < length; i += 3)
+	{
 		*p++ = tbl[us[0] >> 2];
 		*p++ = tbl[((us[0] & 3) << 4) + (us[1] >> 4)];
 		*p++ = tbl[((us[1] & 0xf) << 2) + (us[2] >> 6)];
@@ -64,10 +65,12 @@ static void uuencode (const char *s, const char *store, const int length)
 		us += 3;
 	}
 	/* Pad the result if necessary...  */
-	if (i == length + 1) {
+	if (i == length + 1)
+	{
 		*(p - 1) = tbl[64];
 	}
-	else if (i == length + 2) {
+	else if (i == length + 2)
+	{
 		*(p - 1) = *(p - 2) = tbl[64];
 	}
 	/* ...and zero-terminate it.  */

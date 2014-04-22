@@ -149,8 +149,10 @@ class ryDB {
 		if ($check)
 		{
 			$result = $this->db->query('SHOW FIELDS FROM '.$table);
-			if (!$result)
-				die("Table $table not found in database");
+			if (!$result) {
+				die("Table [$table] not found in database [$this->db_name]");
+			
+			}
 
 			$fields = array_keys($defs);
 			while ($row = $this->db->fetch_row($result)) {

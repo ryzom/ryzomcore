@@ -90,6 +90,7 @@
 #	if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack or later
 #		define NL_ISO_STDTR1_AVAILABLE
 #		define NL_ISO_STDTR1_HEADER(header) <header>
+#		define NL_ISO_STDTR1_NAMESPACE std::tr1
 #	endif
 #	ifdef _DEBUG
 #		define NL_DEBUG
@@ -104,6 +105,8 @@
 			// Windows 64bits platform SDK compilers doesn't support inline assembler
 #			define NL_NO_ASM
 #		endif
+#		undef _WIN32_WINNT
+#		define _WIN32_WINNT 0x0600 // force VISTA minimal version in 64 bits
 #	endif
 	// define NOMINMAX to be sure that windows includes will not define min max macros, but instead, use the stl template
 #	define NOMINMAX
@@ -151,8 +154,16 @@
 #ifdef NL_COMP_GCC
 #	define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #	if GCC_VERSION > 40100
-#		define NL_ISO_STDTR1_AVAILABLE
-#		define NL_ISO_STDTR1_HEADER(header) <tr1/header>
+		// new libc++ bundled with clang under Mac OS X 10.9+ doesn't define __GLIBCXX__
+#		ifdef __GLIBCXX__
+#			define NL_ISO_STDTR1_AVAILABLE
+#			define NL_ISO_STDTR1_HEADER(header) <tr1/header>
+#			define NL_ISO_STDTR1_NAMESPACE std::tr1
+#		else
+#			define NL_ISO_STDTR1_AVAILABLE
+#			define NL_ISO_STDTR1_HEADER(header) <header>
+#			define NL_ISO_STDTR1_NAMESPACE std
+#		endif
 #	endif
 #endif
 
@@ -329,9 +340,9 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #elif defined(NL_ISO_STDTR1_AVAILABLE) // use std::tr1 for CHash* classes, if available (gcc 4.1+ and VC9 with TR1 feature pack)
 #	include NL_ISO_STDTR1_HEADER(unordered_map)
 #	include NL_ISO_STDTR1_HEADER(unordered_set)
-#	define CHashMap std::tr1::unordered_map
-#	define CHashSet std::tr1::unordered_set
-#	define CHashMultiMap std::tr1::unordered_multimap
+#	define CHashMap NL_ISO_STDTR1_NAMESPACE::unordered_map
+#	define CHashSet NL_ISO_STDTR1_NAMESPACE::unordered_set
+#	define CHashMultiMap NL_ISO_STDTR1_NAMESPACE::unordered_multimap
 #elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 70 && NL_COMP_VC_VERSION <= 90) // VC7 through 9
 #	include <hash_map>
 #	include <hash_set>

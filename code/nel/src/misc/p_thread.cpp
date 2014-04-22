@@ -17,6 +17,9 @@
 
 #include "stdmisc.h"
 
+#include <nel/misc/types_nl.h>
+#include <nel/misc/debug.h>
+
 #ifdef NL_OS_UNIX
 
 #include "nel/misc/p_thread.h"

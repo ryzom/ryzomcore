@@ -22,7 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/stream.h"
 #include "dbctrl_sheet.h"
-#include "group_container.h"
+#include "nel/gui/group_container.h"
 
 // ***************************************************************************
 /*

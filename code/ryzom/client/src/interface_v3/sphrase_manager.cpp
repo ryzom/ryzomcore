@@ -35,7 +35,7 @@
 #include "macrocmd_manager.h"
 #include "game_share/rolemaster_flags.h"
 #include "game_share/people.h"
-#include "lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 #include "../time_client.h"
 
 
@@ -114,7 +114,7 @@ void			CSPhraseManager::initInGame()
 	_BookDbLeaves.resize(PHRASE_MAX_BOOK_SLOT, NULL);
 	for(i=0;i<PHRASE_MAX_BOOK_SLOT;i++)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(PHRASE_DB_BOOK + ":" + toString(i) + ":PHRASE");
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_BOOK + ":" + toString(i) + ":PHRASE");
 		node->setValue32(0);
 		_BookDbLeaves[i]= node;
 	}
@@ -123,10 +123,10 @@ void			CSPhraseManager::initInGame()
 
 	for(i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(PHRASE_DB_MEMORY + ":" + toString(i) + ":PHRASE");
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_MEMORY + ":" + toString(i) + ":PHRASE");
 		node->setValue32(0);
 		_MemoryDbLeaves[i]= node;
-		CCDBNodeLeaf	*node_alt= pIM->getDbProp(PHRASE_DB_MEMORY_ALT + ":" + toString(i) + ":PHRASE");
+		CCDBNodeLeaf	*node_alt= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_MEMORY_ALT + ":" + toString(i) + ":PHRASE");
 		node_alt->setValue32(0);
 		_MemoryAltDbLeaves[i]= node_alt;
 	}
@@ -144,15 +144,15 @@ void			CSPhraseManager::initInGame()
 		for(uint j=0;j<NumProgressType;j++)
 		{
 			// SHEET
-			CCDBNodeLeaf	*node= pIM->getDbProp(PHRASE_DB_PROGRESSION[j] + ":" + toString(i) + ":SHEET");
+			CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_PROGRESSION[j] + ":" + toString(i) + ":SHEET");
 			node->setValue32(0);
 			_ProgressionDbSheets[j][i]= node;
 			// LEVEL
-			node= pIM->getDbProp(PHRASE_DB_PROGRESSION[j] + ":" + toString(i) + ":LEVEL");
+			node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_PROGRESSION[j] + ":" + toString(i) + ":LEVEL");
 			node->setValue32(0);
 			_ProgressionDbLevels[j][i]= node;
 			// LOCKED
-			node= pIM->getDbProp(PHRASE_DB_PROGRESSION[j] + ":" + toString(i) + ":LOCKED");
+			node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_PROGRESSION[j] + ":" + toString(i) + ":LOCKED");
 			node->setValue32(0);
 			_ProgressionDbLocks[j][i]= node;
 		}
@@ -160,10 +160,10 @@ void			CSPhraseManager::initInGame()
 
 	// init the UI Next Execute slot
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp(PHRASE_DB_EXECUTE_NEXT);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_EXECUTE_NEXT);
 		node->setValue32(0);
 		_NextExecuteLeaf= node;
-		node= pIM->getDbProp(PHRASE_DB_EXECUTE_NEXT_IS_CYCLIC);
+		node= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_EXECUTE_NEXT_IS_CYCLIC);
 		node->setValue32(0);
 		_NextExecuteIsCyclicLeaf= node;
 	}
@@ -172,8 +172,8 @@ void			CSPhraseManager::initInGame()
 	_BotChatPhrasePriceLeaves.resize(PHRASE_MAX_BOTCHAT_SLOT, NULL);
 	for(i=0;i<PHRASE_MAX_BOTCHAT_SLOT;i++)
 	{
-		CCDBNodeLeaf	*nodeSheet= pIM->getDbProp(PHRASE_DB_BOTCHAT+ ":" + toString(i) + ":SHEET");
-		CCDBNodeLeaf	*nodePrice= pIM->getDbProp(PHRASE_DB_BOTCHAT+ ":" + toString(i) + ":PRICE");
+		CCDBNodeLeaf	*nodeSheet= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_BOTCHAT+ ":" + toString(i) + ":SHEET");
+		CCDBNodeLeaf	*nodePrice= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_BOTCHAT+ ":" + toString(i) + ":PRICE");
 		_BotChatPhraseSheetLeaves[i]= nodeSheet;
 		_BotChatPhrasePriceLeaves[i]= nodePrice;
 	}
@@ -474,15 +474,16 @@ void				CSPhraseManager::memorizePhrase(uint32 memoryLine, uint32 memorySlot, ui
 	}
 }
 
-// ***************************************************************************
-void				CSPhraseManager::selectMemoryLineDB(sint32 memoryLine)
+void CSPhraseManager::selectMemoryLineDBalt(sint32 memoryLine)
 {
 	if(memoryLine<0)
 		memoryLine= -1;
-	if(_SelectedMemoryDB!=memoryLine)
+	
+	if(_SelectedMemoryDBalt!=memoryLine)
 	{
-		_SelectedMemoryDB= memoryLine;
+		_SelectedMemoryDBalt= memoryLine;
 		// since memory selection changes then must update all the DB and the Ctrl states
+		
 		updateMemoryDBAll();
 		updateAllMemoryCtrlState();
 		updateAllMemoryCtrlRegenTickRange();
@@ -491,13 +492,14 @@ void				CSPhraseManager::selectMemoryLineDB(sint32 memoryLine)
 	}
 }
 
-void CSPhraseManager::selectMemoryLineDBalt(sint32 memoryLine)
+// ***************************************************************************
+void				CSPhraseManager::selectMemoryLineDB(sint32 memoryLine)
 {
 	if(memoryLine<0)
 		memoryLine= -1;
-	if(_SelectedMemoryDBalt!=memoryLine)
+	if(_SelectedMemoryDB!=memoryLine)
 	{
-		_SelectedMemoryDBalt= memoryLine;
+		_SelectedMemoryDB= memoryLine;
 		// since memory selection changes then must update all the DB and the Ctrl states
 		updateMemoryDBAll();
 		updateAllMemoryCtrlState();
@@ -571,8 +573,9 @@ void		CSPhraseManager::updateMemoryDBSlot(uint32 memorySlot)
 			_MemoryDbLeaves[memorySlot]->setValue32(0);
 		else
 			_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
-
+		
 		CMemorySlot		&slotAlt= _Memories[_SelectedMemoryDBalt].Slot[memorySlot];
+
 		if(!slotAlt.isPhrase())
 			_MemoryAltDbLeaves[memorySlot]->setValue32(0);
 		else
@@ -807,7 +810,7 @@ void				CSPhraseManager::buildPhraseFromSheet(CSPhraseCom &phrase, sint32 sheetI
 bool				CSPhraseManager::isPhraseNextExecuteCounterSync() const
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	sint32	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
+	sint32	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_NEXT)->getValue32();
 	return srvVal==(sint32)_PhraseNextExecuteCounter;
 }
 
@@ -815,7 +818,7 @@ bool				CSPhraseManager::isPhraseNextExecuteCounterSync() const
 bool				CSPhraseManager::isPhraseCycleExecuteCounterSync() const
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	sint32	srvVal= pIM->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
+	sint32	srvVal= NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_CYCLE)->getValue32();
 	return srvVal==(sint32)_PhraseCycleExecuteCounter;
 }
 
@@ -938,6 +941,8 @@ void				CSPhraseManager::reset()
 	CSkillManager	*pSM= CSkillManager::getInstance();
 	pBM->removeBrickLearnedCallback(&_ProgressionUpdate);
 	pSM->removeSkillChangeCallback(&_ProgressionUpdate);
+
+	_TotalMalusEquipLeaf = NULL;
 }
 
 // ***************************************************************************
@@ -1119,7 +1124,9 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 		// **** Compute Phrase Elements from phrase
 		// get the current action malus (0-100)
 		uint32	totalActionMalus= 0;
-		CCDBNodeLeaf	*actMalus= pIM->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false);
+		CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
+			: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
+		
 		// root brick must not be Power or aura, because Action malus don't apply to them
 		// (ie leave 0 ActionMalus for Aura or Powers
 		if(actMalus && !rootBrick->isSpecialPower())
@@ -1155,11 +1162,11 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 					uint32 rightHandSheet = inv->getRightHandItemSheet();
 					if( inv->isRangeWeaponItem(rightHandSheet) )
 					{
-						nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
+						nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
 					}
 					else
 					{
-						nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
+						nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
 					}
 				}
 			}
@@ -1167,19 +1174,19 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 			// phrase usable only in melee fight
 			if( usableWithMelee )
 			{
-				nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
+				nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MELEE", false);
 			}
 			else
 			// phrase usable only in range fight
 			if( usableWithRange )
 			{
-				nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
+				nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:RANGE", false);
 			}
 		}
 		else
 		if(rootBrick->isMagic())
 		{
-			nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MAGIC", false);
+			nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:MAGIC", false);
 		}
 		if(nodeSM)
 		{
@@ -1211,14 +1218,14 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 			// Replace forage success rate in any ecotype
 			successModifier = 0;
 			sint32 commonModifier = 0;
-			nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:0:FORAGE", false);
+			nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:0:FORAGE", false);
 			if(nodeSM)
 			{
 				commonModifier = nodeSM->getValue32();
 			}
 			//desert
 			success= getForageExtractionPhraseSuccessRate(phrase, SKILLS::SHFDAEM);
-			nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:1:FORAGE", false);
+			nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:1:FORAGE", false);
 			if(nodeSM) successModifier = nodeSM->getValue32();
 			if( successModifier == 0 )
 				successModifier = commonModifier;
@@ -1228,7 +1235,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 
 			//forest
 			success= getForageExtractionPhraseSuccessRate(phrase, SKILLS::SHFFAEM);
-			nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:2:FORAGE", false);
+			nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:2:FORAGE", false);
 			if(nodeSM) successModifier = nodeSM->getValue32();
 			if( successModifier == 0 )
 				successModifier = commonModifier;
@@ -1238,7 +1245,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 
 			// lake
 			success= getForageExtractionPhraseSuccessRate(phrase, SKILLS::SHFLAEM);
-			nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:3:FORAGE", false);
+			nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:3:FORAGE", false);
 			if(nodeSM) successModifier = nodeSM->getValue32();
 			if( successModifier == 0 )
 				successModifier = commonModifier;
@@ -1248,7 +1255,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 
 			// jungle
 			success= getForageExtractionPhraseSuccessRate(phrase, SKILLS::SHFJAEM);
-			nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:4:FORAGE", false);
+			nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:4:FORAGE", false);
 			if(nodeSM) successModifier = nodeSM->getValue32();
 			if( successModifier == 0 )
 				successModifier = commonModifier;
@@ -1258,7 +1265,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 
 			//prime roots
 			success= getForageExtractionPhraseSuccessRate(phrase, SKILLS::SHFPAEM);
-			nodeSM = pIM->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:6:FORAGE", false);
+			nodeSM = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:ECO:6:FORAGE", false);
 			if(nodeSM) successModifier = nodeSM->getValue32();
 			if( successModifier == 0 )
 				successModifier = commonModifier;
@@ -1649,8 +1656,9 @@ float				CSPhraseManager::getPhraseSumBrickProp(const CSPhraseCom &phrase, uint 
 				else if(propId==CSBrickManager::getInstance()->StaPropId && brick->Properties[j].PropId==CSBrickManager::getInstance()->StaWeightFactorId)
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					uint32 weight = (uint32) im->getDbProp("SERVER:USER:DEFAULT_WEIGHT_HANDS")->getValue32() / 10; // weight must be in dg here
-					CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(im->getElementFromId("ui:interface:gestionsets:hands:handr"));
+					if (!_ServerUserDefaultWeightHandsLeaf) _ServerUserDefaultWeightHandsLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:DEFAULT_WEIGHT_HANDS");
+					uint32 weight = (uint32)(&*_ServerUserDefaultWeightHandsLeaf)->getValue32() / 10; // weight must be in dg here
+					CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestionsets:hands:handr"));
 					if (ctrlSheet)
 					{
 						const CItemSheet *itemSheet = ctrlSheet->asItemSheet();
@@ -1659,7 +1667,7 @@ float				CSPhraseManager::getPhraseSumBrickProp(const CSPhraseCom &phrase, uint 
 							weight = (uint32) ctrlSheet->getItemWeight();
 						}
 					}
-					ctrlSheet = dynamic_cast<CDBCtrlSheet *>(im->getElementFromId("ui:interface:gestionsets:hands:handl"));
+					ctrlSheet = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestionsets:hands:handl"));
 					if (ctrlSheet)
 					{
 						const CItemSheet *itemSheet = ctrlSheet->asItemSheet();
@@ -1859,12 +1867,12 @@ void	CSPhraseManager::updateExecutionDisplay()
 		displayNext= false;
 
 	// DisplayCycleSelectionOnActionBar
-	CInterfaceElement	*viewCycle= pIM->getElementFromId(PhraseMemoryViewCycleAction);
+	CInterfaceElement	*viewCycle= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewCycleAction);
 	if(viewCycle)
 	{
 		CInterfaceElement	*ctrl= NULL;
 		if(displayCycle)
-			ctrl= pIM->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotCycle));
+			ctrl= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotCycle));
 		if(displayCycle && ctrl)
 		{
 			viewCycle->setParentPos(ctrl);
@@ -1878,12 +1886,12 @@ void	CSPhraseManager::updateExecutionDisplay()
 	}
 
 	// DisplayNextSelectionOnActionBar
-	CInterfaceElement	*viewNext= pIM->getElementFromId(PhraseMemoryViewNextAction);
+	CInterfaceElement	*viewNext= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewNextAction);
 	if(viewNext)
 	{
 		CInterfaceElement	*ctrl= NULL;
 		if(displayNext)
-			ctrl= pIM->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotNext));
+			ctrl= CWidgetManager::getInstance()->getElementFromId(PhraseMemoryViewSlotBase + toString(_CurrentExecuteSlotNext));
 		if(displayNext && ctrl)
 		{
 			viewNext->setParentPos(ctrl);
@@ -2372,18 +2380,18 @@ public:
 			if(T1>pPM->_PhraseDebugEndNextAction)
 			{
 				// copy counter
-				pIM->getDbProp(PHRASE_DB_COUNTER_NEXT)->setValue32(pPM->_PhraseNextExecuteCounter);
+				NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_NEXT)->setValue32(pPM->_PhraseNextExecuteCounter);
 			}
 			if(T1>pPM->_PhraseDebugEndCyclicAction)
 			{
 				// copy counter
-				pIM->getDbProp(PHRASE_DB_COUNTER_CYCLE)->setValue32(pPM->_PhraseCycleExecuteCounter);
+				NLGUI::CDBManager::getInstance()->getDbProp(PHRASE_DB_COUNTER_CYCLE)->setValue32(pPM->_PhraseCycleExecuteCounter);
 			}
 
-			sint64 st= pIM->getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK")->getValue64();
-			sint64 stEnd= pIM->getDbProp("SERVER:USER:ACT_TEND")->getValue64();
+			sint64 st= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CURRENT_SERVER_TICK")->getValue64();
+			sint64 stEnd= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TEND")->getValue64();
 			if(stEnd && st>stEnd+20)
-				pIM->getDbProp("SERVER:USER:ACT_TEND")->setValue64(0);
+				NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:ACT_TEND")->setValue64(0);
 		}
 	}
 };
@@ -2590,11 +2598,11 @@ CSheetId	getRightHandItem()
 
 	CSheetId	item;
 	// get the RightHand bag index
-	sint32	itemSlot= pIM->getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG")->getValue32();
+	sint32	itemSlot= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG")->getValue32();
 	// if something in hand
 	if(itemSlot>0)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp("LOCAL:INVENTORY:BAG:"+toString(itemSlot-1) +":SHEET", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:BAG:"+toString(itemSlot-1) +":SHEET", false);
 		if(node)
 			item= node->getValue32();
 	}
@@ -2658,11 +2666,11 @@ uint32	getRightHandEffectiveLevel()
 
 	// **** get the right hand item 'required skill'
 	// get the RightHand bag index
-	sint32	itemSlot= pIM->getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG")->getValue32();
+	sint32	itemSlot= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG")->getValue32();
 	// if something in hand
 	if(itemSlot>0)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp("LOCAL:INVENTORY:BAG:"+toString(itemSlot-1) +":QUALITY", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:BAG:"+toString(itemSlot-1) +":QUALITY", false);
 		if(node)
 			// if the right hand item quality is less than our skill value, take it....
 			effectiveLevel= min(effectiveLevel, (uint32)node->getValue32());
@@ -2679,11 +2687,11 @@ static sint	getRightHandEnchantValue()
 
 	sint ret= 0;
 	// get the RightHand bag index
-	sint32	itemSlot= pIM->getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG")->getValue32();
+	sint32	itemSlot= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG")->getValue32();
 	// if something in hand
 	if(itemSlot>0)
 	{
-		CCDBNodeLeaf	*node= pIM->getDbProp("LOCAL:INVENTORY:BAG:"+toString(itemSlot-1) +":ENCHANT", false);
+		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:BAG:"+toString(itemSlot-1) +":ENCHANT", false);
 		if(node)
 			ret= node->getValue32();
 	}
@@ -3058,13 +3066,13 @@ void	CSPhraseManager::updateAllMemoryCtrlState()
 	for(uint i=0;i<PHRASE_MAX_MEMORY_SLOT;i++)
 	{
 		// Get the ctrl
-		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryCtrlBase + toString(i)) );
+		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryCtrlBase + toString(i)) );
 		if(ctrl)
 		{
 			// update the valid state.
 			updateMemoryCtrlState(i, ctrl, itemSkill);
 		}
-		CDBCtrlSheet	*ctrlAlt= dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(i)) );
+		CDBCtrlSheet	*ctrlAlt= dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryAltCtrlBase + toString(i)) );
 		if(ctrlAlt)
 			updateMemoryCtrlState(i, ctrlAlt, itemSkill);
 	}
@@ -3090,7 +3098,7 @@ CDBCtrlSheet	*CSPhraseManager::getMemorySlotCtrl(uint memorySlot)
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	return dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryCtrlBase + toString(memorySlot)));	
+	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryCtrlBase + toString(memorySlot)));	
 }
 
 // ***************************************************************************
@@ -3101,7 +3109,7 @@ CDBCtrlSheet	*CSPhraseManager::getMemoryAltSlotCtrl(uint memorySlot)
 
 	// Get the ctrl
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	return dynamic_cast<CDBCtrlSheet*>(pIM->getElementFromId(PhraseMemoryAltCtrlBase + toString(memorySlot)));	
+	return dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(PhraseMemoryAltCtrlBase + toString(memorySlot)));	
 }
 
 // ***************************************************************************
@@ -4498,7 +4506,8 @@ uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
 	uint32	totalActionMalus= 0;
-	CCDBNodeLeaf	*actMalus= pIM->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false);
+	CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
+		: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
 	// root brick must not be Power or aura, because Action malus don't apply to them
 	// (ie leave 0 ActionMalus for Aura or Powers
 	if (!phrase.Bricks.empty())
@@ -4515,7 +4524,7 @@ uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 CCDBNodeLeaf	*CSPhraseManager::getRegenTickRangeDbLeaf(uint powerIndex) const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();	
-	CCDBNodeLeaf	*dbLeaf = pIM->getDbProp(toString("SERVER:FLAGS:BRICK_TICK_RANGE:%d:TICK_RANGE", (int) powerIndex), false);		
+	CCDBNodeLeaf	*dbLeaf = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FLAGS:BRICK_TICK_RANGE:%d:TICK_RANGE", (int) powerIndex), false);		
 	return dbLeaf;
 }
 

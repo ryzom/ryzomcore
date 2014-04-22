@@ -1222,18 +1222,18 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 		//nlfseek64 (Handle, 0, SEEK_END);
 		//uint32 nFileSize = ftell (Handle);
 		nlfseek64 (Handle, nFileSize-4, SEEK_SET);
-		uint32 nOffsetFromBegining;
-		if (fread (&nOffsetFromBegining, sizeof(uint32), 1, Handle) != 1)
+		uint32 nOffsetFromBeginning;
+		if (fread (&nOffsetFromBeginning, sizeof(uint32), 1, Handle) != 1)
 		{
 			fclose(Handle);
 			return;
 		}
 
 #ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(nOffsetFromBegining);
+		NLMISC_BSWAP32(nOffsetFromBeginning);
 #endif
 
-		nlfseek64 (Handle, nOffsetFromBegining, SEEK_SET);
+		nlfseek64 (Handle, nOffsetFromBeginning, SEEK_SET);
 		uint32 nNbFile;
 		if (fread (&nNbFile, sizeof(uint32), 1, Handle) != 1)
 		{

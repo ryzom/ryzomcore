@@ -635,7 +635,7 @@ function CharTracking:onDraw()
 			self.LastRefreshTime = nltime.getLocalTime() / 1000
 			--self:getWindow():find("refreshText").active = false
 		else	
-			local waitText = i18n.get("uiRAP_WaitChars" .. math.mod(os.time(), 3))
+			local waitText = i18n.get("uiRAP_WaitChars" .. math.fmod(os.time(), 3))
 			self:setInfoMessage(waitText)			
 			--local refreshText = self:getWindow():find("refreshText")
 			--if not self.ListReceived then

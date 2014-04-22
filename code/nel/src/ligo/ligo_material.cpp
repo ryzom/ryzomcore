@@ -80,7 +80,7 @@ void CMaterial::serial (NLMISC::IStream &s)
 	s.xmlPush ("LIGO_MATERIAL");
 
 		// Serial the header
-		s.serialCheck ((uint32)'TMOL');
+		s.serialCheck (NELID("TMOL"));
 
 		// Serial the version
 		/*sint ver =*/ s.serialVersion (0);

@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.2" State="modified">
-  <ELEMENT Name="IaName" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="Source" Type="Type" Filename="string.typ" Default="Basics.Scores"/>
-  <ELEMENT Name="VarName" Type="Type" Filename="character_characteristics.typ"/>
-  <LOG>Fri Jul 26 12:39:58 2002 (chafik) Dfn Structure = 
-Fri Jul 26 12:42:47 2002 (chafik) Dfn Structure = </LOG>
-</DFN>

@@ -24,6 +24,8 @@
 #include "group_compas.h"
 #include "game_share/animal_status.h"
 
+using NLMISC::CCDBNodeLeaf;
+
 // ***************************************************************************
 // CPositionState
 // ***************************************************************************
@@ -62,7 +64,7 @@ bool CPositionState::getPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 void CPositionState::serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode)
 {
-	f.serialCheck((uint32) 'NL__');
+	f.serialCheck(NELID("NL__"));
 	f.serialVersion(0);
 	std::string dbPath;
 	if (f.isReading())
@@ -72,7 +74,7 @@ void CPositionState::serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode)
 		if (!dbPath.empty())
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			dbNode = im->getDbProp(dbPath, false);
+			dbNode = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
 		}
 	}
 	else
@@ -83,18 +85,18 @@ void CPositionState::serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode)
 		}
 		f.serial(dbPath);
 	}
-	f.serialCheck((uint32) 'END_');
+	f.serialCheck(NELID("END_"));
 }
 
 
 // ***************************************************************************
 void CUIDEntityPositionState::serial(NLMISC::IStream &f)
 {
-	f.serialCheck((uint32) 'UIDE');
+	f.serialCheck(NELID("UIDE"));
 	f.serialVersion(0);
 	serialNodeLeaf(f, _DBPos);
 	serialNodeLeaf(f, _Uid);
-	f.serialCheck((uint32) '_END');
+	f.serialCheck(NELID("_END"));
 }
 
 // ***************************************************************************
@@ -154,8 +156,8 @@ void CUIDEntityPositionState::build(const std::string &baseDB)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
-	_DBPos= pIM->getDbProp(baseDB+":POS", false);
-	_Uid= pIM->getDbProp(baseDB+":UID", false);
+	_DBPos= NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":POS", false);
+	_Uid= NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":UID", false);
 	// reset
 	_EntitySlot= CLFECOMMON::INVALID_SLOT;
 }
@@ -175,7 +177,7 @@ CTeammatePositionState::CTeammatePositionState() : CUIDEntityPositionState()
 void CTeammatePositionState::build(const std::string &baseDB)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	_Present = pIM->getDbProp(baseDB+":NAME", false);
+	_Present = NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":NAME", false);
 
 	CUIDEntityPositionState::build(baseDB);
 }
@@ -215,7 +217,7 @@ CAnimalPositionState::CAnimalPositionState() : CUIDEntityPositionState()
 void			CAnimalPositionState::build(const std::string &baseDB)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	_Status= pIM->getDbProp(baseDB+":STATUS", false);
+	_Status= NLGUI::CDBManager::getInstance()->getDbProp(baseDB+":STATUS", false);
 
 	CUIDEntityPositionState::build(baseDB);
 }
@@ -239,11 +241,11 @@ bool		CAnimalPositionState::getPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 void CAnimalPositionState::serial(NLMISC::IStream &f)
 {
-	f.serialCheck((uint32) 'APS_');
+	f.serialCheck(NELID("APS_"));
 	f.serialVersion(0);
 	CUIDEntityPositionState::serial(f);
 	serialNodeLeaf(f, _Status);
-	f.serialCheck((uint32) 'END_');
+	f.serialCheck(NELID("END_"));
 }
 
 
@@ -297,11 +299,11 @@ bool		 CDialogEntityPositionState::getDbPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 void CNamedEntityPositionState::serial(NLMISC::IStream &f)
 {
-	f.serialCheck((uint32) 'NEPS');
+	f.serialCheck(NELID("NEPS"));
 	f.serialVersion(0);
 	serialNodeLeaf(f, _Name);
 	serialNodeLeaf(f, _X);
 	serialNodeLeaf(f, _Y);
-	f.serialCheck((uint32) 'END_');
+	f.serialCheck(NELID("END_"));
 }
 

@@ -320,7 +320,7 @@ rollout assets_png_rollout "Properties"
 	-- This script is a base script to include to add multiple functionality to your script
 
 	-- To use this script
-	--	Include it in your script into the rollout at the begining.
+	--	Include it in your script into the rollout at the beginning.
 	--	Implement a do_it function to do the job in your rollout.
 	--	The function should retun -1 if an arror occured, else the count of modification done
 	--	It the function returns <1, the project will not be overwritten

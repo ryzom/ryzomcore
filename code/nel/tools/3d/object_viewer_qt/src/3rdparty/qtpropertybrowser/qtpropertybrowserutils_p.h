@@ -110,6 +110,7 @@ QT_BEGIN_NAMESPACE
 
 class QMouseEvent;
 class QCheckBox;
+class QToolButton;
 class QLineEdit;
 
 class QtCursorDatabase
@@ -154,6 +155,7 @@ public:
 
     Qt::CheckState checkState() const;
     void setCheckState(Qt::CheckState state);
+    void setStateResetButton(bool enabled);
 
     bool isChecked() const;
     void setChecked(bool c);
@@ -162,12 +164,14 @@ public:
 
 Q_SIGNALS:
     void toggled(bool);
+    void resetProperty();
 
 protected:
     void mousePressEvent(QMouseEvent * event);
 
 private:
     QCheckBox *m_checkBox;
+    QToolButton *m_defaultButton;
     bool m_textVisible;
 };
 

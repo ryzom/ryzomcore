@@ -116,13 +116,13 @@ bool BNPFileHandle::readHeader(const std::string &filePath)
 	uint32 nFileSize = bnp.getFileSize();
 	bnp.seek(nFileSize-sizeof(uint32), IStream::begin);
 
-	uint32 nOffsetFromBegining;
+	uint32 nOffsetFromBeginning;
 
-	bnp.serial(nOffsetFromBegining);
+	bnp.serial(nOffsetFromBeginning);
 	
-	if ( !bnp.seek (nOffsetFromBegining, IStream::begin) )
+	if ( !bnp.seek (nOffsetFromBeginning, IStream::begin) )
 	{
-		nlwarning("Could not read offset from begining");
+		nlwarning("Could not read offset from beginning");
 		bnp.close();
 		return false;
 	}
@@ -206,7 +206,7 @@ void BNPFileHandle::fileNames(std::vector<std::string> &fileNames)
 // ***************************************************************************
 void BNPFileHandle::addFiles( const vector<string> &filePathes)
 {
-	uint32 OffsetFromBegining = 0;
+	uint32 OffsetFromBeginning = 0;
 
 	// create packed files and add them to the private vector
 	vector<string>::const_iterator it_vec = filePathes.begin();
@@ -233,13 +233,13 @@ void BNPFileHandle::addFiles( const vector<string> &filePathes)
 	{
 		append(m_openedBNPFile + ".tmp", *it_packed);
 		// Set now the new offset for the new header
-		it_packed->m_pos = OffsetFromBegining;
-		OffsetFromBegining += it_packed->m_size;
+		it_packed->m_pos = OffsetFromBeginning;
+		OffsetFromBeginning += it_packed->m_size;
 
 		it_packed++;
 	}
 
-	writeHeader(m_openedBNPFile + ".tmp", OffsetFromBegining);
+	writeHeader(m_openedBNPFile + ".tmp", OffsetFromBeginning);
 
 	// Delete any previous existing file
 	if (CFile::fileExists( m_openedBNPFile ))
@@ -252,7 +252,7 @@ void BNPFileHandle::deleteFiles( const vector<string>& fileNames)
 {
 	vector<string>::const_iterator it_vec;
 	TPackedFilesList::iterator it_packed;
-	uint32 OffsetFromBegining = 0;
+	uint32 OffsetFromBeginning = 0;
 	string tmpFile = m_openedBNPFile + ".tmp";
 
 	// create a new temporary bnp file with extension *.tmp
@@ -270,14 +270,14 @@ void BNPFileHandle::deleteFiles( const vector<string>& fileNames)
 		{
 			append(tmpFile, *it_packed);
 			// Set now the new offset for the new header
-			it_packed->m_pos = OffsetFromBegining;
-			OffsetFromBegining += it_packed->m_size;
+			it_packed->m_pos = OffsetFromBeginning;
+			OffsetFromBeginning += it_packed->m_size;
 
 			it_packed++;
 		}
 	}
 
-	writeHeader(tmpFile, OffsetFromBegining);
+	writeHeader(tmpFile, OffsetFromBeginning);
 	
 	CFile::deleteFile( m_openedBNPFile );
 	string src = m_openedBNPFile + ".tmp";

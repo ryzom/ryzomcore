@@ -135,7 +135,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 
 					// Delete the triObject if we should...
 					if (deleteIt)
-						tri->MaybeAutoDelete();
+						tri->DeleteThis();
 
 				}
 			}

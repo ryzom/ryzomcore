@@ -95,11 +95,11 @@ public:
 
 private:
 
-	// renderAll is called in main loop. It can called beginRenderLandscapePolyPart and renderLandscapePolyPart
+	// renderScene is called in main loop. It can called beginRenderLandscapePolyPart and renderLandscapePolyPart
 	// methods.
-	friend void renderAll(bool);
+	friend void renderScene();
 
-	// Enable stencil test and initialize function and operation of stencil at the beginning of renderAll method,
+	// Enable stencil test and initialize function and operation of stencil at the beginning of renderScene method,
 	// before opaque render of canopy and main scene parts.
 	// The eighth bit will be written with a 0 during next render to mark stencil buffer parts which will
 	// support Shadow Volume algorithm.

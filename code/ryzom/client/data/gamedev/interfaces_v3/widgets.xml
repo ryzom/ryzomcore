@@ -90,9 +90,9 @@
             inherit_gc_alpha="#inherit_gc_alpha" />
     </group>
   </template>
-  <!-- ************************************ -->
-  <!-- *  TEMPLATE FOR SCENE INFORMATIONS * -->
-  <!-- ************************************ -->
+  <!-- *********************************** -->
+  <!-- *  TEMPLATE FOR SCENE INFORMATION * -->
+  <!-- *********************************** -->
   <!-- * In scene user info with guild logo * -->
   <define id="in_scene_user_info_bar_h"
           value="4" />

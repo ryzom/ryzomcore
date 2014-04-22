@@ -79,7 +79,7 @@ public:
 	/// max number of bones supported in skeleton
 	enum	{ MaxNumBones = 256 };
 
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 public:

@@ -41,8 +41,10 @@ IShape* CExportNel::buildFlare(INode& node, TimeValue time)
 	CExportNel::getValueByNameUsingParamBlock2(node, "PersistenceParam", (ParamType2)TYPE_FLOAT, &persistence, 0);
 	fshape->setPersistence(persistence);
 	// retrieve spacing of the flare
-	CExportNel::getValueByNameUsingParamBlock2(node, "Spacing", (ParamType2)TYPE_FLOAT, &spacing, 0);
-	fshape->setFlareSpacing(spacing);
+	bool hasSpacing = CExportNel::getValueByNameUsingParamBlock2(node, "Spacing", (ParamType2)TYPE_FLOAT, &spacing, 0)
+		|| CExportNel::getValueByNameUsingParamBlock2(node, "spacing", (ParamType2)TYPE_FLOAT, &spacing, 0);
+	if (hasSpacing) fshape->setFlareSpacing(spacing);
+	else nlwarning("FAILED CFlareShape Spacing");
 	// retrieve use of radial attenuation
 	CExportNel::getValueByNameUsingParamBlock2(node, "Attenuable", (ParamType2) TYPE_BOOL, &attenuable, 0);			
 	if (attenuable)

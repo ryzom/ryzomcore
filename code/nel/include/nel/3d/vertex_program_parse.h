@@ -21,6 +21,40 @@
 
 #include <vector>
 
+/**
+ * This class is a vertex program.
+ *
+ * D3D / OPENGL compatibility notes:
+ * ---------------------------------
+ *
+ * To make your program compatible with D3D and OPENGL nel drivers, please follow thoses directives to write your vertex programs
+ *
+ * - Use only v[0], v[1] etc.. syntax for input registers. Don't use v0, v1 or v[OPOS] etc..
+ * - Use only c[0], c[1] etc.. syntax for constant registers. Don't use c0, c1 etc..
+ * - Use only o[HPOS], o[COL0] etc.. syntax for output registers. Don't use oPos, oD0 etc..
+ * - Use only uppercase for registers R1, R2 etc.. Don't use lowercase r1, r2 etc..
+ * - Use a semicolon to delineate instructions.
+ * - Use ARL instruction to load the adress register and not MOV.
+ * - Don't use the NOP instruction.
+ * - Don't use macros.
+ *
+ * -> Thoses programs work without any change under OpenGL.
+ * -> Direct3D driver implementation will have to modify the syntax on the fly before the setup like this:
+ *   - "v[0]" must be changed in "v0" etc..
+ *   - "o[HPOS]" must be changed in oPos etc..
+ *   - Semicolon must be changed in line return character.
+ *   - ARL instruction must be changed in MOV.
+ *
+ * Behaviour of LOG may change depending on implementation: You can only expect to have dest.z = log2(abs(src.w)).
+ * LIT may or may not clamp the specular exponent to [-128, 128] (not done when EXT_vertex_shader is used for example ..)
+ *
+ * Depending on the implementation, some optimizations can be achieved by masking the unused output values of instructions
+ * as LIT, EXPP ..
+ *
+ * \author Cyril 'Hulud' Corvazier
+ * \author Nevrax France
+ * \date 2001
+ */
 
 /// Swizzle of an operand in a vertex program
 struct CVPSwizzle
@@ -188,7 +222,7 @@ public:
 	  * \warning: Only syntax is checked. It doesn't check that a register has been initialised before use.
 	  * \param src The input text of a vertex program, in OpenGL format.
 	  * \param result The result program.
-	  * \param errorOuput If parsing failed, contains the reason
+	  * \param errorOutput If parsing failed, contains the reason
 	  * \result true if the parsing succeeded
 	  */
 	bool parse(const char *src, TProgram &result, std::string &errorOutput);

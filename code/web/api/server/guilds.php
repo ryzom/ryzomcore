@@ -40,6 +40,7 @@ function ryzom_guild_icon($icon, $size) {
 	$filename = RYAPI_PATH."data/cache/guild_icons/${icon}_$size.png";
 
 	if($size != 'b' && $size != 's') die('Bad size parameter');
+	if($icon == '') die('icon parameter cannot be empty');
 
 	if(!file_exists($filename)) {
 		$command = RYAPI_PATH."server/scripts/generate_guild_icon.sh $icon $size 2>&1";

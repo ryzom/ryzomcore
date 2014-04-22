@@ -937,7 +937,7 @@ void CCharacter::equipCharacter(INVENTORIES::TInventory dstInvId, uint32 dstSlot
 		return;
 	}
 
-	// if item is already referenced (maybe equiped), do not equip it
+	// if item is already referenced (maybe equipped), do not equip it
 	if (item->getRefInventory() != NULL)
 		return;
 
@@ -1097,7 +1097,7 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		CPhraseManager::getInstance().disengage( _EntityRowId, true );
 	}
 
-	// Remove enchant weapon effects as they are linked to equiped item
+	// Remove enchant weapon effects as they are linked to equipped item
 	if (invId==INVENTORIES::handling && slot==0)
 	{
 		CSEffectPtr const effect = lookForActiveEffect(EFFECT_FAMILIES::PowerEnchantWeapon);
@@ -1784,7 +1784,7 @@ CGameItemPtr CCharacter::removeItemFromInventory(INVENTORIES::TInventory invId, 
 		return NULL;
 	}
 
-	// if item is equiped, unequip
+	// if item is equipped, unequip
 	// TODO : still needed ?
 //	bool hand;
 //	uint16 slotImg;
@@ -2127,8 +2127,8 @@ void CCharacter::clearTempInventory()
 
 		case TEMP_INV_MODE::Quarter:
 		case TEMP_INV_MODE::Harvest:
-			_DepositHarvestInformations.Sheet = CSheetId::Unknown;
-			_DepositHarvestInformations.EndCherchingTime = 0xffffffff;
+			_DepositHarvestInformation.Sheet = CSheetId::Unknown;
+			_DepositHarvestInformation.EndCherchingTime = 0xffffffff;
 			endHarvest();
 		break;
 
