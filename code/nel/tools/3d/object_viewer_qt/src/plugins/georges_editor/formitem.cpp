@@ -14,27 +14,26 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdpch.h"
+// Project includes
 #include "formitem.h"
+#include "actions.h"
+#include "georges_editor_form.h"
 
 // Qt includes
+#include <QIcon>
 
 // NeL includes
 #include <nel/misc/o_xml.h>
+#include <nel/misc/debug.h>
 #include <nel/georges/u_type.h>
 #include <nel/georges/form.h>
 
+using namespace NLGEORGES;
+
 namespace GeorgesQt 
 {
-
-	CFormItem::CFormItem(NLGEORGES::UFormElm* elm, const QList<QVariant> &data, CFormItem *parent,
-		NLGEORGES::UFormElm::TWhereIsValue wV, NLGEORGES::UFormElm::TWhereIsNode wN) 
+	CFormItem::CFormItem()
 	{
-		parentItem = parent;
-		itemData = data;
-		formElm = elm;
-		whereV = wV;
-		whereN = wN;
 	}
 
 	CFormItem::~CFormItem() 
@@ -60,12 +59,14 @@ namespace GeorgesQt
 	int CFormItem::columnCount() const 
 	{
 		//nlinfo("columnCount %d",itemData.count());
-		return itemData.count();
+		//return itemData.count();
+		return 1;
 	}
 
 	QVariant CFormItem::data(int column) const 
 	{
-		return itemData.value(column);
+		//return itemData.value(column);
+		return QVariant(_Name.c_str());
 	}
 
 	CFormItem *CFormItem::parent()
@@ -83,81 +84,149 @@ namespace GeorgesQt
 
 	bool CFormItem::setData(int column, const QVariant &value) 
 	{
-		if (column < 0 || column >= itemData.size())
+		nlwarning("This should not be called anymore.");
+		return false;
+	}
+
+	bool CFormItem::isEditable(int column)
+	{
+		// Ensure only valid types can be edited.
+		if(_Type == Null)
 			return false;
 
-		// TODO: default values
-		if (!formElm)
+		// Make sure only the first column (name) can be editted.
+		if (column != 0)
 			return false;
 
-		itemData[column] = value;
-		if (formElm->isAtom()) 
+		if(isArrayMember())
+			return true;
+
+		return false;
+	}
+
+	bool CFormItem::isArray()
+	{
+		// If it wasn't a root node then lets check the node type.
+		const NLGEORGES::CFormDfn *parentDfn;
+		uint indexDfn;
+		const NLGEORGES::CFormDfn *nodeDfn;
+		const NLGEORGES::CType *nodeType;
+		NLGEORGES::CFormElm *node;
+		NLGEORGES::UFormDfn::TEntryType type;
+		bool array;
+		bool parentVDfnArray;
+		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
+		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
+		nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn,
+                   &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+		if(array && node)
+			return true;
+
+		return false;
+	}
+
+	bool CFormItem::isArrayMember()
+	{
+		CFormItem *parent = this->parent();
+
+		// If it wasn't a root node then lets check the node type.
+		const NLGEORGES::CFormDfn *parentDfn;
+		uint indexDfn;
+		const NLGEORGES::CFormDfn *nodeDfn;
+		const NLGEORGES::CType *nodeType;
+		NLGEORGES::CFormElm *parentNode;
+		NLGEORGES::UFormDfn::TEntryType type;
+		bool array;
+		bool parentVDfnArray;
+		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
+		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
+		nlverify ( elm->getNodeByName (parent->formName ().c_str (), &parentDfn, indexDfn,
+                   &nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+		if(array && parentNode)
+			return true;
+
+		return false;
+	}
+
+	QIcon CFormItem::getItemImage(CFormItem *rootItem)
+	{
+		if(_Type == CFormItem::Null)
 		{
-			const NLGEORGES::UType *type = formElm->getType();
-			if (type) 
-			{
-				switch (type->getType()) 
-				{
-				case NLGEORGES::UType::UnsignedInt:
-				case NLGEORGES::UType::SignedInt:
-				case NLGEORGES::UType::Double:
-				case NLGEORGES::UType::String:
-					if (parentItem->formElm->isArray())
-					{
-						//((NLGEORGES::CFormElm*)parentItem->formElm);//->arrayInsertNodeByName(
-						//if(parentItem->formElm->getArrayNode(elmName, num))
-						//{
-						//}
+				return QIcon(":/images/root.ico");
+		}
+		else if(_Type == CFormItem::Form)
+		{
+			// If the parent is the root item then this is the content.
+			if(parentItem == rootItem)
+				return QIcon(":/images/root.ico");
 
-						bool ok;
-						// TODO: the node can be renamed from eg "#0" to "foobar"
-						int arrayIndex = itemData[0].toString().remove("#").toInt(&ok);
-						if(ok)
-						{
-							NLGEORGES::UFormElm *elmt = 0;
-							if(parentItem->formElm->getArrayNode(&elmt, arrayIndex) && elmt)
-							{
-								if (elmt->isAtom()) 
-								{
-									((NLGEORGES::CFormElmAtom*)elmt)->setValue(value.toString().toUtf8().constData());
-									nldebug(QString("array element string %1 %2")
-									.arg(itemData[0].toString()).arg(value.toString())
-									.toUtf8().constData());
-								}
-							}
-						}
-					}
-					else
+			// If it wasn't a root node then lets check the node type.
+			const NLGEORGES::CFormDfn *parentDfn;
+			uint indexDfn;
+			const NLGEORGES::CFormDfn *nodeDfn;
+			const NLGEORGES::CType *nodeType;
+			NLGEORGES::CFormElm *node;
+			NLGEORGES::UFormDfn::TEntryType type;
+			bool array;
+			bool parentVDfnArray;
+			NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
+			NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
+			nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+
+			if(array)
+			{
+				return QIcon(":/images/array.ico");
+			}
+			else
+			{
+				if(type == NLGEORGES::UFormDfn::EntryType)
+				{
+					if(parentDfn)
 					{
-						if(parentItem->formElm->setValueByName(
-							value.toString().toUtf8().constData(),
-							itemData[0].toString().toUtf8().constData()))
-						{
-							nldebug(QString("string %1 %2")
-							.arg(itemData[0].toString()).arg(value.toString())
-							.toUtf8().constData());
-						}
-						else
-						{
-							nldebug(QString("FAILED string %1 %2")
-							.arg(itemData[0].toString()).arg(value.toString())
-							.toUtf8().constData());
-						}
+						// Not sure what the hell to do with this. Gets filename from parent dfn?
 					}
-					break;
-				case NLGEORGES::UType::Color:
-					nldebug("Color is TODO");
-					break;
-				default:
-					break;
+					return QIcon(":/images/zfee51.ico");
+				}
+				else if(type == NLGEORGES::UFormDfn::EntryDfn)
+				{
+					if(parentDfn)
+					{
+						// Not sure what the hell to do with this. Gets filename from parent dfn?
+					}
+					return QIcon(":/images/struct.ico");
+				}
+				else if(type == NLGEORGES::UFormDfn::EntryVirtualDfn)
+				{
+					if(node)
+					{
+						// Not sure what the hell to do with this. Gets filename from parent dfn?
+						std::string dfnName;
+						NLMISC::safe_cast<NLGEORGES::CFormElmVirtualStruct*>(node)->getDfnName(dfnName);
+						// return dfnName.c_str() ?
+					}
+					return QIcon(":/images/vstruct.ico");
 				}
 			}
+			//return QIcon(":/images/struct.ico");
 		}
-		else
-		{
-			nldebug("setting sth other than Atom");
-		}
-		//formElm->setValueByName();
-		return true;
+		return QIcon();
 	}
+
+	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr)
+    {
+		CFormItem *newNode = new CFormItem();
+        newNode->_Type = type;
+        newNode->_Name = name;
+        newNode->parentItem = this;
+        newNode->_StructId = structId;
+        newNode->_FormName = formName;
+        newNode->_Slot  = slot;		
+		newNode->m_form = formPtr;
+
+        appendChild(newNode);
+        return newNode;
+    }
+
 }

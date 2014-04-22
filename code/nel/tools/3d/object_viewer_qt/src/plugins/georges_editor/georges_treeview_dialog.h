@@ -57,14 +57,14 @@ namespace GeorgesQt
 		bool isModified() {return m_modified;}
 		void setModified(bool m) {m_modified = m;}
 
-        NLGEORGES::CForm* getFormByName(const QString formName);
-        NLGEORGES::CForm* getFormByDfnName(const QString dfnName);
+		NLGEORGES::CForm* getFormByName(const QString formName);
+		NLGEORGES::CForm* getFormByDfnName(const QString dfnName);
 
-        /// Retrieves the root element based on the slot (document or held elements.)
-        NLGEORGES::CFormElm *getRootNode(uint slot);
+		/// Retrieves the root element based on the slot (document or held elements.)
+		NLGEORGES::CFormElm *getRootNode(uint slot);
 
-        /// Returns the form as a CForm pointer.
-        NLGEORGES::CForm *getFormPtr();
+		/// Returns the form as a CForm pointer.
+		NLGEORGES::CForm *getFormPtr();
 
 		void addParentForm(QString parentFormNm);
 

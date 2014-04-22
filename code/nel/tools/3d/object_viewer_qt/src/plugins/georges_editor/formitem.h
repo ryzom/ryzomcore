@@ -18,6 +18,7 @@
 #define FORMITEM_H
 
 // NeL includes
+#include <nel/georges/u_form.h>
 #include <nel/georges/u_form_elm.h>
 
 // Qt includes
@@ -28,16 +29,24 @@ namespace GeorgesQt
 {
 
 	class CFormItem
-
 	{
 	public:
-		CFormItem(NLGEORGES::UFormElm *elm, const QList<QVariant> &data, 
-			CFormItem *parent = 0,
-			NLGEORGES::UFormElm::TWhereIsValue = NLGEORGES::UFormElm::ValueForm, 
-			NLGEORGES::UFormElm::TWhereIsNode = NLGEORGES::UFormElm::NodeForm);
+		// What is the sub object ?
+        enum TSub
+        {
+                Null,           // Nothing in this node (root ?)
+                Header,         // Header node
+                Type,           // This node is a type
+                Dfn,            // This node is a dfn
+                Form,           // This node is a form
+        };
+
+		CFormItem();
 		~CFormItem();
 
 		void appendChild(CFormItem *child);
+
+        CFormItem *add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr);
 
 		CFormItem *child(int row);
 		int childCount() const;
@@ -46,23 +55,36 @@ namespace GeorgesQt
 		int row() const;
 		CFormItem *parent();
 		bool setData(int column, const QVariant &value);
-		NLGEORGES::UFormElm* getFormElm() {return formElm;}
-		NLGEORGES::UFormElm::TWhereIsValue valueFrom() 
-		{
-			return whereV;
-		}
-		NLGEORGES::UFormElm::TWhereIsNode nodeFrom() 
-		{
-			return whereN;
-		}
 
-	private:
+		TSub nodeType() { return _Type; }
+		std::string formName() { return _FormName; }
+		
+		std::string name() { return _Name; }
+		void setName(std::string name) { _Name = name; }
+
+		uint structId() { return _StructId; }
+
+		NLGEORGES::UForm *form() { return m_form; }
+
+		bool isEditable(int column);
+		bool isArray();
+		bool isArrayMember();
+
+		QIcon getItemImage(CFormItem *rootItem);
+
+    private:
 		QList<CFormItem*> childItems;
 		QList<QVariant> itemData;
 		CFormItem *parentItem;
 		NLGEORGES::UFormElm* formElm;
-		NLGEORGES::UFormElm::TWhereIsValue whereV;
-		NLGEORGES::UFormElm::TWhereIsNode whereN;
+		NLGEORGES::UForm *m_form;
+
+		uint                                                            _StructId;
+        std::string                                                     _Name;
+        std::string                                                     _FormName;
+        TSub                                                            _Type;
+        uint                                                            _Slot;
+
 	}; // CFormItem
 
 }

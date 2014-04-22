@@ -19,6 +19,8 @@
 
 #include <QStyledItemDelegate>
 
+#if 0 
+
 namespace GeorgesQt 
 {
 
@@ -38,4 +40,6 @@ namespace GeorgesQt
 	};
 
 }
+#endif // 0
+
 #endif // FORMDELEGATE_H

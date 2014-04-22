@@ -38,6 +38,8 @@ public:
 
 	QUndoStack *undoStack() const;
 
+	static QUndoStack *UndoStack;
+
 public Q_SLOTS:
 	void open();
 	void loadFile(const QString fileName);
@@ -54,7 +56,6 @@ private:
 	void readSettings();
 	void writeSettings();
 
-	QUndoStack *m_undoStack;
 	Ui::GeorgesEditorForm m_ui;
 
 	CGeorgesDirTreeDialog *m_georgesDirTreeDialog;
