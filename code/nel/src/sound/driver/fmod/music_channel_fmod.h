@@ -17,7 +17,7 @@
 #ifndef NL_MUSIC_CHANNEL_FMOD_H
 #define NL_MUSIC_CHANNEL_FMOD_H
 
-#include <nel/sound/driver/music_channel.h>
+#include "nel/sound/driver/music_channel.h"
 
 struct FSOUND_STREAM;
 
@@ -86,6 +86,9 @@ public:
 
 	/// Stop the music previously loaded and played (the Memory is also freed)
 	virtual void stop();
+
+	/// Makes sure any resources are freed, but keeps available for next play call
+	virtual void reset();
 
 	/// Pause the music previously loaded and played (the Memory is not freed)
 	virtual void pause();

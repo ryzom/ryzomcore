@@ -833,7 +833,7 @@ void CPlugin::onIdle()
 			if (_Client && _Client->connected())
 			{
 				_ConnectionMsg.MsgType = CConnectionMsg::NoMsg;
-				// first, we receive the stack of messages, which is composed of players informations
+				// first, we receive the stack of messages, which is composed of players information
 				_Client->update();
 				// See if there's aconnection relarted msg
 				switch(_ConnectionMsg.MsgType)

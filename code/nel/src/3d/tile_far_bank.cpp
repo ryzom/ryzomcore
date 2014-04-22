@@ -104,8 +104,8 @@ const sint CTileFarBank::_Version=0x0;
 void CTileFarBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 {
 	// Write/Check "FAR_BANK" in header of the stream
-	f.serialCheck ((uint32)'_RAF');
-	f.serialCheck ((uint32)'KNAB');
+	f.serialCheck (NELID("_RAF"));
+	f.serialCheck (NELID("KNAB"));
 
 	// Serial version
 	(void)f.serialVersion(_Version);

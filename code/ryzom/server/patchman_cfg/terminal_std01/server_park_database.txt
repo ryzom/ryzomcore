@@ -1,0 +1,10 @@
+// ---------------------------------
+// common definitions
+
+include "../shard_ctrl_definitions.txt"
+
+
+// ---------------------------------
+// live domain
+
+include "../shard_ctrl_std01.txt"

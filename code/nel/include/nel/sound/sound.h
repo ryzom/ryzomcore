@@ -22,6 +22,7 @@
 #include "nel/misc/string_mapper.h"
 #include "nel/sound/u_source.h"
 #include "nel/georges/u_form_elm.h"
+#include "nel/misc/sheet_id.h"
 #include <string>
 
 namespace NLSOUND {
@@ -30,11 +31,12 @@ namespace NLSOUND {
 class ISoundDriver;
 class IBuffer;
 class CSound;
+class CGroupController;
 
 
 /// Sound names hash map
 //typedef std::hash_map<std::string, CSound*> TSoundMap;
-typedef CHashMap<NLMISC::TStringId, CSound*, NLMISC::CStringIdHashMapTraits> TSoundMap;
+typedef CHashMap<NLMISC::CSheetId, CSound*, NLMISC::CStringIdHashMapTraits> TSoundMap;
 
 /// Sound names set (for ambiant sounds)
 typedef std::set<CSound*> TSoundSet;
@@ -52,7 +54,7 @@ class CSound
 	friend class CAudioMixerUser;
 public:
 	/// Factory for specialized sound.
-	static CSound *createSound(const std::string &filename, NLGEORGES::UFormElm& formRoot);
+	static CSound *createSound(const std::string &name, NLGEORGES::UFormElm& formRoot);
 
 	enum TSOUND_TYPE
 	{
@@ -60,8 +62,9 @@ public:
 		SOUND_COMPLEX,
 		SOUND_BACKGROUND,
 		SOUND_CONTEXT,
-		SOUND_MUSIC,
-		SOUND_STREAM
+		SOUND_MUSIC, // soon to be deprecated hopefully
+		SOUND_STREAM,
+		SOUND_STREAM_FILE
 	};
 
 
@@ -97,12 +100,14 @@ public:
 	/// Return the length of the sound in ms
 	virtual uint32		getDuration() = 0;
 	/// Return the name (must be unique)
-	const NLMISC::TStringId&	getName() const						{ return _Name; }
+	const NLMISC::CSheetId&	getName() const						{ return _Name; }
 
 	/// Return the min distance (if detailed()) (default 1.0f if not implemented by sound type)
 	virtual float		getMinDistance() const				{ return _MinDist; }
 	/// Return the max distance (if detailed())
 	virtual float		getMaxDistance() const				{ return _MaxDist; }
+
+	inline CGroupController *getGroupController() const { return _GroupController; }
 
 	/// Set looping
 	void				setLooping( bool looping ) { _Looping = looping; }
@@ -117,7 +122,8 @@ public:
 
 	bool				operator<( const CSound& otherSound ) const
 	{
-		return NLMISC::CStringMapper::unmap(_Name) < NLMISC::CStringMapper::unmap(otherSound._Name);
+		//return NLMISC::CStringMapper::unmap(_Name) < NLMISC::CStringMapper::unmap(otherSound._Name);
+		return _Name.toString() < otherSound._Name.toString();
 	}
 
 protected:
@@ -138,9 +144,12 @@ protected:
 	float				_MaxDist;
 
 	// Sound name.
-	NLMISC::TStringId	_Name;
+	NLMISC::CSheetId	_Name;
 	/// An optional user var controler.
 	NLMISC::TStringId	_UserVarControler;
+
+	/// The group controller, always exists, owned by the audio mixer
+	CGroupController	*_GroupController;
 
 };
 

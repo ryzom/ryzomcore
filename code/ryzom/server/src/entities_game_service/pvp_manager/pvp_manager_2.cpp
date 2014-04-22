@@ -26,6 +26,7 @@
 #include "game_share/utils.h"
 #include "game_share/msg_client_server.h"
 #include "game_share/fame.h"
+#include "game_share/send_chat.h"
 
 #include "pvp_manager/pvp_manager_2.h"
 #include "pvp_manager/pvp_manager.h"
@@ -176,6 +177,21 @@ TChanID CPVPManager2::getUserDynChannel( const std::string& channelName)
 		return DYN_CHAT_INVALID_CHAN;
 }
 
+std::string CPVPManager2::getUserDynChannel(const TChanID& channelId)
+{
+	TMAPExtraFactionChannel::iterator it;
+	for (it = _UserChannel.begin(); it != _UserChannel.end(); ++it)
+	{
+		if ((*it).second == channelId)
+		{
+			return (*it).first;
+		}
+	}
+	// should not get here
+	nlassert(false);
+	return "";
+}
+
 const std::string & CPVPManager2::getPassUserChannel( TChanID channelId)
 {
 	// Search in user channels
@@ -193,6 +209,21 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 //	{
 	std::vector<TChanID> result;
 	result.clear();
+
+	// Add lang channel, should be first.
+	if (!user->getLangChannel().empty()) {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(user->getLangChannel());
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}
+	} else {
+		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
+		if (it != _ExtraFactionChannel.end())
+		{
+			result.push_back((*it).second);
+		}		
+	}
 
 	PVP_CLAN::TPVPClan faction = user->getAllegiance().first;
 	if( faction != PVP_CLAN::Neutral )
@@ -214,6 +245,7 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 		}
 	}
 
+	/*
 	bool matis = CFameInterface::getInstance().getFameIndexed(user->getId(), 0) >= PVPFameRequired*6000;
 	bool fyros = CFameInterface::getInstance().getFameIndexed(user->getId(), 1) >= PVPFameRequired*6000;
 	bool tryker = CFameInterface::getInstance().getFameIndexed(user->getId(), 2) >= PVPFameRequired*6000;
@@ -263,7 +295,7 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 			result.push_back((*it).second);
 		}
 	}
-//	}
+*/
 	return result;
 }
 
@@ -353,7 +385,7 @@ void CPVPManager2::broadcastMessage(TChanID channel, const ucstring& speakerName
 	sendMessageViaMirror("IOS", msgout);
 }
 
-void CPVPManager2::sendChannelUsers(TChanID channel, CCharacter * user)
+void CPVPManager2::sendChannelUsers(TChanID channel, CCharacter * user, bool outputToSys)
 {
 	std::vector<NLMISC::CEntityId> lst;
 
@@ -361,21 +393,41 @@ void CPVPManager2::sendChannelUsers(TChanID channel, CCharacter * user)
 	if(it != _UserChannelCharacters.end())
 	{
 		lst = (*it).second;
-		string players = "";
+		ucstring players;
+		uint32 shardId = CEntityIdTranslator::getInstance()->getEntityShardId(user->getId());
 		for (uint i = 0; i < lst.size(); i++)
 		{
-			players += "\n"+CEntityIdTranslator::getInstance()->getByEntity(lst[i]).toString();
+			ucstring name = CEntityIdTranslator::getInstance()->getByEntity(lst[i]);
+			if (shardId == CEntityIdTranslator::getInstance()->getEntityShardId(lst[i]))
+			{
+				// Same shard, remove shard from name
+				CEntityIdTranslator::removeShardFromName(name);
+			}
+			players += "\n" + name ;
 		}
 
-		CMessage msgout("DYN_CHAT:SERVICE_TELL");
-		msgout.serial(channel);
-		ucstring users = ucstring("<USERS>");
-		msgout.serial(const_cast<ucstring&>(users));	
 		TDataSetRow senderRow = TheDataset.getDataSetRow(user->getId());
-		msgout.serial(senderRow);
-		ucstring txt = ucstring(players);
-		msgout.serial(const_cast<ucstring&>(txt));
-		sendMessageViaMirror( "IOS", msgout);
+		if (outputToSys)
+		{
+			string channelName = DynChatEGS.getChanNameFromID(channel);
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal = channelName;
+			CCharacter::sendDynamicSystemMessage( user->getId(), "WHO_CHANNEL_INTRO" );
+			params[0].Literal = players;
+			CCharacter::sendDynamicSystemMessage( user->getId(), "LITERAL", params );
+		}
+		else
+		{
+			CMessage msgout("DYN_CHAT:SERVICE_TELL");
+			msgout.serial(channel);
+			ucstring users = ucstring("<USERS>");
+			msgout.serial(const_cast<ucstring&>(users));	
+			msgout.serial(senderRow);
+			ucstring txt = ucstring(players);
+			msgout.serial(const_cast<ucstring&>(txt));
+
+			sendMessageViaMirror("IOS", msgout);
+		}
 	}
 }
 
@@ -487,14 +539,14 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 					_CharacterUserChannels.insert(make_pair(user->getId(), currentChannels));
 				}
 			}
+		}
 
-			TChannelsCharacter::iterator cit = _UserChannelCharacters.find(channel);
-			if (cit != _UserChannelCharacters.end())
-			{
-				std::vector<NLMISC::CEntityId> lst = _UserChannelCharacters[channel];
-				lst.erase(find(lst.begin(), lst.end(), user->getId()));
-				_UserChannelCharacters[channel] = lst;
-			}
+		TChannelsCharacter::iterator cit = _UserChannelCharacters.find(channel);
+		if (cit != _UserChannelCharacters.end())
+		{
+			std::vector<NLMISC::CEntityId> lst = _UserChannelCharacters[channel];
+			lst.erase(find(lst.begin(), lst.end(), user->getId()));
+			_UserChannelCharacters[channel] = lst;
 		}
 	}
 }
@@ -559,10 +611,10 @@ void CPVPManager2::playerTeleports(CCharacter * user)
 void CPVPManager2::setPVPModeInMirror( const CCharacter * user ) const
 {
 	nlassert(user);
-	uint8 pvpMode = 0;
+	TYPE_PVP_MODE pvpMode = 0;
 	
 	// Full pvp
-	if ( user->getPriviledgePVP() )
+	if ( user->getFullPVP() )
 	{
 		pvpMode |= PVP_MODE::PvpChallenge;
 	}
@@ -588,6 +640,16 @@ void CPVPManager2::setPVPModeInMirror( const CCharacter * user ) const
 			pvpMode |= PVP_MODE::PvpDuel;
 		}
 	}
+	// in Safe zone
+	{
+		if (CPVPManager2::getInstance()->inSafeZone(user->getPosition()))
+		{
+			pvpMode |= PVP_MODE::PvpZoneSafe;
+			if (user->getSafeInPvPSafeZone())
+				pvpMode |= PVP_MODE::PvpSafe;
+		}
+	}
+
 	// pvp session (i.e everything else)
 	{
 		if ( user->getPVPInterface().isValid() )
@@ -596,9 +658,13 @@ void CPVPManager2::setPVPModeInMirror( const CCharacter * user ) const
 			pvpMode |= interf.getPVPSession()->getPVPMode();
 		}
 	}
-	
-	CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyPVP_MODE );
-	propPvpMode = pvpMode;
+
+	//CMirrorPropValue<TYPE_PVP_MODE> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyPVP_MODE );
+	CMirrorPropValue<TYPE_EVENT_FACTION_ID> propPvpMode( TheDataset, user->getEntityRowId(), DSPropertyEVENT_FACTION_ID );
+	if (propPvpMode.getValue() != pvpMode)
+	{
+		propPvpMode = pvpMode;
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -648,22 +714,16 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 	CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
 	if( pTarget )
 	{
-		// priviledgePVP is Full PVP, only ally of teammates anf guildmates
-		if (pTarget->priviledgePVP() || actor->priviledgePVP())
+		// Full PVP is ennemy of everybody
+		if (pTarget->getFullPVP() || actor->getFullPVP())
 		{
-			if ((pTarget->getTeamId() != CTEAM::InvalidTeamId) && (actor->getTeamId() != CTEAM::InvalidTeamId) && (actor->getTeamId() == pTarget->getTeamId()))
-				return PVP_RELATION::Ally;
-		
-			if ((pTarget->getGuildId() != 0) && (actor->getGuildId() != 0) && (actor->getGuildId() == pTarget->getGuildId()))
-				return PVP_RELATION::Ally;
-
 			return PVP_RELATION::Ennemy;
 		}
 
 		if( IsRingShard )
 			return relation; // disable PVP on Ring shards (only if target is a CCharacter, because we must let attack NPCs)
 
-		// //////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////
 		// temp : until new manager is finished we have to check the char pvp session too
 		IPVP * pvpSession = pTarget->getPVPInterface().getPVPSession();
 		if( pvpSession )
@@ -713,8 +773,8 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		if( relationTmp == PVP_RELATION::NeutralPVP )
 			relation = PVP_RELATION::NeutralPVP;
 
-		// Check if ally (neutralpvp has priority over ally)
-		if( relationTmp == PVP_RELATION::Ally && relation != PVP_RELATION::NeutralPVP )
+		// Check if ally (neutralpvp and active has priority over ally)
+		if (relationTmp == PVP_RELATION::Ally && relation != PVP_RELATION::NeutralPVP)
 			relation = PVP_RELATION::Ally;
 	}
 
@@ -757,11 +817,12 @@ bool CPVPManager2::isCurativeActionValid( CCharacter * actor, CEntityBase * targ
 	if( actionValid && !checkMode )
 	{
 		CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
-		if(pTarget)
-			actor->clearSafeInPvPSafeZone();
+	
+		//if(pTarget)
+		//	actor->clearSafeInPvPSafeZone();
 
 		// propagate faction pvp flag
-		if( pvpRelation == PVP_RELATION::Ally )
+		if( pvpRelation == PVP_RELATION::Ally)
 		{
 			if( _PVPFactionAllyReminder )
 			{
@@ -782,10 +843,6 @@ bool CPVPManager2::isCurativeActionValid( CCharacter * actor, CEntityBase * targ
 			{
 				actor->refreshOutpostLeavingTimer();
 			}
-		
-			// propagate full pvp
-			if( pTarget->priviledgePVP() )
-				actor->setPriviledgePVP(true);
 		}
 	}
 	return actionValid;
@@ -832,7 +889,13 @@ bool CPVPManager2::isOffensiveActionValid( CCharacter * actor, CEntityBase * tar
 	{
 		CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
 		if(pTarget)
-			actor->clearSafeInPvPSafeZone();
+		{
+			if (actor->getDuelOpponent() == pTarget) // No _PVPFactionEnemyReminder when in duel
+				CPVPManager2::getInstance()->setPVPFactionAllyReminder(false);
+			else
+				actor->clearSafeInPvPSafeZone();
+		}
+
 		if( _PVPFactionEnemyReminder )
 		{
 			actor->setPVPRecentActionFlag();
@@ -886,10 +949,20 @@ bool CPVPManager2::canApplyAreaEffect(CCharacter* actor, CEntityBase * areaTarge
 	
 	if( actionValid )
 	{
+		/*	if ((pTarget->getGuildId() != 0) && (actor->getGuildId() != 0) && (actor->getGuildId() != pTarget->getGuildId()))
+				return false;
+		*/
+
 		if( areaTarget->getId().getType() == RYZOMID::player )
 		{
 			CCharacter * pTarget = dynamic_cast<CCharacter*>(areaTarget);
-			if(pTarget)
+			if (!offensive)
+			{
+				if (actor->getTeamId() != pTarget->getTeamId() && actor->getLeagueId() != pTarget->getLeagueId() )
+					return false;
+			}
+
+			if(pTarget && offensive)
 				actor->clearSafeInPvPSafeZone();
 			// set faction flag
 			if( offensive && _PVPFactionEnemyReminder )
@@ -1031,10 +1104,19 @@ bool CPVPManager2::addFactionWar( PVP_CLAN::TPVPClan clan1, PVP_CLAN::TPVPClan c
 void CPVPManager2::onIOSMirrorUp()
 {
 	// create extra factions channels
+	/*
 	createExtraFactionChannel("hominists");
 	createExtraFactionChannel("urasies");
 	createExtraFactionChannel("marauders");
 	createExtraFactionChannel("agnos");
+	*/
+
+	// Community Channels
+	createExtraFactionChannel("en", true);
+	createExtraFactionChannel("fr", true);
+	createExtraFactionChannel("de", true);
+	createExtraFactionChannel("ru", true);
+	createExtraFactionChannel("es", true);
 
 	for (uint i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; i++)
 	{
@@ -1079,7 +1161,7 @@ void CPVPManager2::createFactionChannel(PVP_CLAN::TPVPClan clan)
 	}
 }
 
-void CPVPManager2::createExtraFactionChannel(const std::string & channelName)
+void CPVPManager2::createExtraFactionChannel(const std::string & channelName, bool universalChannel)
 {
 
 	TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(channelName);
@@ -1089,6 +1171,7 @@ void CPVPManager2::createExtraFactionChannel(const std::string & channelName)
 		TChanID factionChannelId = DynChatEGS.addLocalizedChan(name);
 		// set historic size of the newly created channel
 		DynChatEGS.setHistoricSize( factionChannelId, FactionChannelHistoricSize );
+		DynChatEGS.setUniversalChannel( factionChannelId, universalChannel );
 
 		_ExtraFactionChannel.insert( make_pair(channelName, factionChannelId) );
 	}
@@ -1096,6 +1179,11 @@ void CPVPManager2::createExtraFactionChannel(const std::string & channelName)
 
 TChanID CPVPManager2::createUserChannel(const std::string & channelName, const std::string & pass)
 {
+	// Don't allow channels called "GM" (to not clash with the /who gm command)
+	if (NLMISC::nlstricmp( channelName.c_str() , "GM" ) == 0)
+	{
+		return DYN_CHAT_INVALID_CHAN;
+	}
 
 	TMAPExtraFactionChannel::iterator it = _UserChannel.find(channelName);
 	if( it == _UserChannel.end() )
@@ -1241,6 +1329,14 @@ void CPVPManager2::askForDuel( const NLMISC::CEntityId & userId )
 	{	
 		params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
 		CCharacter::sendDynamicSystemMessage( userId, "DUEL_TARGET_ALREADY_INVITED",params);
+		return;
+	}
+
+	// If not a privileged player and in ignorelist, cannot duel
+	if ( !user->haveAnyPrivilege() && target->hasInIgnoreList( user->getId() ) )
+	{
+		params[0].setEIdAIAlias( target->getId(), CAIAliasTranslator::getInstance()->getAIAlias(target->getId()) );
+		CCharacter::sendDynamicSystemMessage(userId, "DUEL_REFUSE_INVITATION", params);
 		return;
 	}
 

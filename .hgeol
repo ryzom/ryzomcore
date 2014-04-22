@@ -1,0 +1,26 @@
+[patterns]
+**.h = native
+**.cpp = native
+ 
+**/database.xml = BIN
+**/msg.xml = BIN
+
+**.txt = native
+**.xml = native
+
+**.layout = native
+**.looknfeel = native
+**.imageset = native
+**.font = native
+**.scheme = native
+
+**.xsd = native
+**.dox = native
+
+**.py = native
+**.lua = native
+
+**.pkg = native
+
+[repository]
+native = LF

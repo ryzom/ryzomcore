@@ -17,7 +17,7 @@
 #ifndef NLSOUND_ADPCM_XAUDIO2_H
 #define NLSOUND_ADPCM_XAUDIO2_H
 
-#include <nel/sound/driver/buffer.h>
+#include "nel/sound/driver/buffer.h"
 
 namespace NLSOUND {
 	class CBufferXAudio2;

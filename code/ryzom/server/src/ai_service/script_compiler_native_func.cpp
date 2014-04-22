@@ -93,7 +93,7 @@ print("Ma position est ", x, ":", y);
 You can dynamically define function on the group.
 
 This function are called <em>script function</em> or <em>user function</em>
-(as opposed to the hard coded ‘native function’).
+(as opposed to the hard coded "native function").
 
 User functions don't have parameters.
 
@@ -120,7 +120,7 @@ E.g.:
 mavar =(5*mavar+1)/3;
 @endcode
 Note that the negative operator should be used with caution, YOU MUST add a
-space after the ‘-‘ symbol.
+space after the "-" symbol.
 
 You can do comparison with variables and or numbers (can be used for if and
 while statements). Note that you can't do mathematical computation inside the
@@ -221,10 +221,12 @@ arguments.
 - @ref moveToZone_ss_
 - @ref waitInZone_s_
 - @ref stopMoving__
+- @ref followPlayer_sf_
 - @ref wander__
 - @ref downScaleHP_f_
 - @ref upScaleHP_f_
 - @ref scaleHP_f_
+- @ref setMaxHP_ff_
 - @ref setHPLevel_f_
 - @ref addHP_f_
 - @ref aiAction_s_

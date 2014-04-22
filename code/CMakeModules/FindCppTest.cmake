@@ -21,7 +21,7 @@ FIND_PATH(CPPTEST_INCLUDE_DIR
   /opt/local/include
   /opt/csw/include
   /opt/include
-  PATH_SUFFIXES cppunit
+  PATH_SUFFIXES cppunit cpptest
 )
 
 SET(LIBRARY_NAME_RELEASE cpptest)

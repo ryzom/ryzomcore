@@ -28,7 +28,7 @@ class CFxEntity
 {
 public:
 	CFxEntity(CAIPos const& pos, NLMISC::CSheetId const& sheet);
-	~CFxEntity();
+	virtual ~CFxEntity();
 	NLMISC::CEntityId const& id() const;
 	bool spawn();
 	void despawn();

@@ -23,7 +23,11 @@
 #include "instance_map_deco.h"
 
 class CEntityCL;
-class CViewBitmap;
+
+namespace NLGUI
+{
+	class CViewBitmap;
+}
 
 namespace NL3D
 {

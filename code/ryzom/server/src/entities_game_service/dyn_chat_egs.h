@@ -68,14 +68,23 @@ public:
 	  * \return true if success	
 	  */
 	bool				setHideBubble(TChanID chan, bool hideBubble);
+
+	/** Change sessions in channel 'chan' so that chat is treated like universe channel
+	  * \return true if success	
+	  */
+	bool				setUniversalChannel(TChanID chan, bool universalChannel);
+
 	/** Stop session in channel 'chan' for the client 'client'.
-      * \return true if success
+	  * \return true if success
 	  */
 	bool				removeSession(TChanID chan, const TDataSetRow &client);
 	// Set 'write right' flag for a session.
 	bool				setWriteRight(TChanID chan, const TDataSetRow &client, bool writeRight);
 	// Set size of historic for a given channel
 	void				setHistoricSize(TChanID chan, uint32 size);
+	// Get list of players in channel
+	bool 				getPlayersInChan(TChanID chanID, std::vector<NLMISC::CEntityId> &players);
+
 	// Resend all channel / sessions to the IOS
 	void				iosConnection();	
 	// Get all channel names (for read only)
@@ -83,11 +92,14 @@ public:
 	const TChanIDToName	&getChanIDToNameMap() const { return _ChanNames.getAToBMap(); }
 	// Get pointer on all channels
 	void				getChans(std::vector<CDynChatChan *> &channels) { _DynChat.getChans(channels); }
+	const TChanID				getNextChanID() const { return _NextChanID; }
 
 	/// Message from a service that need to create a new dynamic channel
 	static void			cbServiceAddChan(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 	/// Message from a service that need to hide bubbble of player/npc speaking in that channel
 	static void			cbServiceSetHideBubble(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
+	/// Message from a service that need to set channel to be like universe channel
+	static void			cbServiceSetUniversalChannel(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 	/// Message from a service: remove a channel.
 	static void			cbServiceRemoveChan(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId);
 	/// Message from a service : set the channel history
@@ -112,7 +124,8 @@ private:
 private:
 	// ios msg
 	void			 iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerInputs, bool unify);
-	void			 iosSetHideBubble(TChanID chan, bool hiddeBubble);
+	void			 iosSetHideBubble(TChanID chan, bool hideBubble);
+	void			 iosSetUniversalChannel(TChanID chan, bool universalChannel);
 	void			 iosRemoveChan(TChanID chan);
 	void			 iosAddSession(TChanID chan, const TDataSetRow &client, bool readOnly);
 	void			 iosRemoveSession(TChanID chan, const TDataSetRow &client);

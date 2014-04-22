@@ -501,8 +501,8 @@ namespace STRING_MANAGER
 
 //						callback->onSwap(it - context.Reference.begin(), refCount, context);
 						callback->onSwap(index, refCount, context);
-//						swap(*it, context.Reference[refCount]);
-						swap(context.Reference[index], context.Reference[refCount]);
+//						std::swap(*it, context.Reference[refCount]);
+						std::swap(context.Reference[index], context.Reference[refCount]);
 					}
 				}
 				else if (getHashValue(context.Addition, addCount) != getHashValue(context.Reference, refCount))

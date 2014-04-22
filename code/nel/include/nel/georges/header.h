@@ -19,6 +19,9 @@
 
 #include "nel/misc/types_nl.h"
 
+// Include from libxml2
+#include <libxml/parser.h>
+
 namespace NLGEORGES
 {
 
@@ -51,9 +54,6 @@ public:
 	/// State of the form
 	TState				State;
 
-	/// CVS Revision string
-	std::string			Revision;
-
 	/// Comments of the form
 	std::string			Comments;
 
@@ -62,7 +62,7 @@ public:
 
 	/// ** IO functions
 	void				read (xmlNodePtr root);
-	void				write (xmlNodePtr node, bool georges4CVS) const;
+	void				write (xmlNodePtr node) const;
 
 	// Get state string
 	static const char	*getStateString (TState state);

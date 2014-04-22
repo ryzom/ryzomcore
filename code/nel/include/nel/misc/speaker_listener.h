@@ -118,7 +118,7 @@ namespace NLMISC
 			_Speaker->registerListener(this);
 		}
 
-		void unregisterListener(ISpeaker *speaker)
+		void unregisterListener(ISpeaker * /* speaker */)
 		{
 			nlassert(_Speaker != NULL);
 			_Speaker->unregisterListener(this);

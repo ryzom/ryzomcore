@@ -84,7 +84,7 @@ function bgdownloader:setPatchProgress(progress)
 
 	self:getPrioCB().active = true
 	local progressPercentText = string.format("%d%%", 100 * progress)
-	local progressPostfix = math.mod(os.time(), 3)	
+	local progressPostfix = math.fmod(os.time(), 3)	
 	local progressDate = nltime.getLocalTime() / 500
 	local colValue = math.floor(230 + 24 * math.sin(progressDate))
 	local color = string.format("%d %d 	%d %d", colValue, colValue, colValue, 255)

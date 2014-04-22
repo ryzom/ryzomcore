@@ -1528,34 +1528,40 @@ bool testOffensiveActionAllowed( const NLMISC::CEntityId &actorId, const NLMISC:
 		return false;
 	}
 
-	// test target isn't invulnerable
-	if (target->getContextualProperty().directAccessForStructMembers().invulnerable())
-	{
-		// check target Faction attackable flags
-		CCreature *creature = dynamic_cast<CCreature *> (target);
-		if (!creature || !creature->checkFactionAttackable(actorId))
-		{
-			errorCode = "BS_TARGET_NOT_ATTACKABLE";
-			return false;
-		}
-	}
-
 	// AI 
 	if (actorId.getType() != RYZOMID::player)
 	{
+		// test target isn't invulnerable
+		if (target->getContextualProperty().directAccessForStructMembers().invulnerable())
+		{
+			// check target Faction attackable flags
+			CCreature *creature = dynamic_cast<CCreature *> (target);
+			if (!creature || !creature->checkFactionAttackable(actorId))
+			{
+				errorCode = "BS_TARGET_NOT_ATTACKABLE";
+				return false;
+			}
+		}
+
 		if (mainTarget == true)
 			return true;
 		else
 		{
-			CEntityBase* actor = CreatureManager.getCreature( actorId );
+			CCreature* actor = CreatureManager.getCreature( actorId );
 			if (!actor)
 				return false;
 
 			if (!actor->getContextualProperty().directAccessForStructMembers().attackable())
 			{
-				// actor is a guard or similar so cannot harm a player or a non attackable creature
+				// actor is a guard or similar so cannot harm a player or a non attackable creature, unless faction attackable
 				if (targetId.getType() == RYZOMID::player || !target->getContextualProperty().directAccessForStructMembers().attackable())
+				{
+					if ( actor->checkFactionAttackable( targetId ) )
+					{
+						return true;
+					}
 					return false;
+				}
 				else
 					return true;
 			}
@@ -1570,7 +1576,9 @@ bool testOffensiveActionAllowed( const NLMISC::CEntityId &actorId, const NLMISC:
 		}
 	}
 
-	switch ( targetId.getType() )
+
+	RYZOMID::TTypeId targetType = (RYZOMID::TTypeId)targetId.getType();
+	switch ( targetType )
 	{
 	case RYZOMID::player:
 		{
@@ -1593,7 +1601,8 @@ bool testOffensiveActionAllowed( const NLMISC::CEntityId &actorId, const NLMISC:
 	case RYZOMID::mount:
 	case RYZOMID::npc:
 		{
-			if (actorId.getType() == RYZOMID::player)
+			RYZOMID::TTypeId type = (RYZOMID::TTypeId)actorId.getType();
+			if (type == RYZOMID::player)
 			{
 				CCharacter* actor = PlayerManager.getChar( actorId );
 				if ( ! actor )
@@ -1718,7 +1727,11 @@ bool validateSpellTarget( const TDataSetRow &actorRowId, const TDataSetRow &targ
 		// player can only heal other players
 		if ( getEntityIdFromRow(actorRowId).getType() == RYZOMID::player &&	target->getId().getType() != RYZOMID::player )
 		{
-			if (target->getContextualProperty().directAccessForStructMembers().attackable() )
+			CEntityBase * actor = CEntityBaseManager::getEntityBasePtr( actorRowId );
+			CCreature * creature = CreatureManager.getCreature( target->getId() );
+			bool bFactionAttackable = (actor && creature && creature->checkFactionAttackable( actor->getId()));
+
+			if (bFactionAttackable || target->getContextualProperty().directAccessForStructMembers().attackable() )
 			{
 				errorCode = "MAGIC_CANNOT_CAST_ON_ENEMY";
 //				nldebug("validateSpellTarget for entity %s returning false because %s MAGIC_CANNOT_CAST_ON_ENEMY",getEntityIdFromRow(actorRowId).toString().c_str(),TheDataset.getEntityId(targetRowId).toString().c_str());

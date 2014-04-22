@@ -170,6 +170,7 @@ public:
     void clear() const;
 
     QtProperty *addProperty(const QString &name = QString());
+    void emitResetProperty(QtProperty *property);
 Q_SIGNALS:
 
     void propertyInserted(QtProperty *property,
@@ -177,6 +178,7 @@ Q_SIGNALS:
     void propertyChanged(QtProperty *property);
     void propertyRemoved(QtProperty *property, QtProperty *parent);
     void propertyDestroyed(QtProperty *property);
+    void resetProperty(QtProperty *property);
 protected:
     virtual bool hasValue(const QtProperty *property) const;
     virtual QIcon valueIcon(const QtProperty *property) const;

@@ -19,7 +19,7 @@
 #include "stdpch.h"
 // client
 #include "chat_text_manager.h"
-#include "view_text.h"
+#include "nel/gui/view_text.h"
 #include "interface_manager.h"
 
 using namespace std;
@@ -31,7 +31,8 @@ CChatTextManager* CChatTextManager::_Instance = NULL;
 CChatTextManager::CChatTextManager() :
 	_TextFontSize(NULL),
 	_TextMultilineSpace(NULL),
-	_TextShadowed(NULL)
+	_TextShadowed(NULL),
+	_ShowTimestamps(NULL)
 {
 }
 
@@ -44,6 +45,9 @@ CChatTextManager::~CChatTextManager()
 	_TextMultilineSpace = NULL;
 	delete _TextShadowed;
 	_TextShadowed = NULL;
+	delete _ShowTimestamps;
+	_ShowTimestamps = NULL;
+
 }
 //=================================================================================
 uint CChatTextManager::getTextFontSize() const
@@ -51,7 +55,7 @@ uint CChatTextManager::getTextFontSize() const
 	if (!_TextFontSize)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		_TextFontSize = im->getDbProp("UI:SAVE:CHAT:FONT_SIZE", false);
+		_TextFontSize = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:FONT_SIZE", false);
 		if (!_TextFontSize) return 12;
 	}
 	return (uint) _TextFontSize->getValue32();
@@ -63,7 +67,7 @@ uint CChatTextManager::getTextMultiLineSpace() const
 	if (!_TextMultilineSpace)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		_TextMultilineSpace = im->getDbProp("UI:SAVE:CHAT:MULTI_LINE_SPACE", false);
+		_TextMultilineSpace = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:MULTI_LINE_SPACE", false);
 		if (!_TextMultilineSpace) return 1;
 	}
 	return (uint) _TextMultilineSpace->getValue32();
@@ -75,12 +79,23 @@ bool CChatTextManager::isTextShadowed() const
 	if (!_TextShadowed)
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
-		_TextShadowed = im->getDbProp("UI:SAVE:CHAT:SHADOWED_TEXT", false);
+		_TextShadowed = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHADOWED_TEXT", false);
 		if (!_TextShadowed) return false;
 	}
 	return _TextShadowed->getValueBool();
 }
 
+//=================================================================================
+bool CChatTextManager::showTimestamps() const
+{
+	if (!_ShowTimestamps)
+	{
+		CInterfaceManager *im = CInterfaceManager::getInstance();
+		_ShowTimestamps = CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
+		if (!_ShowTimestamps) return false;
+	}
+	return _ShowTimestamps->getValueBool();
+}
 //=================================================================================
 static CInterfaceGroup *parseCommandTag(ucstring &line)
 {
@@ -108,7 +123,7 @@ static CInterfaceGroup *parseCommandTag(ucstring &line)
 		make_pair(string("ah"), params[2]),
 		make_pair(string("ah_params"), params[3])
 	};
-	return CInterfaceManager::getInstance()->createGroupInstance(params[0], "", uiTemplateParams, 4);
+	return CWidgetManager::getInstance()->getParser()->createGroupInstance(params[0], "", uiTemplateParams, 4);
 }
 
 static CInterfaceGroup *buildLineWithCommand(CInterfaceGroup *commandGroup, CViewText *text)
@@ -149,13 +164,9 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 	vt->setModulateGlobalColor(false);
 
 	ucstring cur_time;
-	static CCDBNodeLeaf* node = CInterfaceManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB", false);
-	if (node)
+	if (showTimestamps())
 	{
-		if (node->getValueBool())
-		{
-			cur_time = CInterfaceManager::getTimestampHuman();
-		}
+		cur_time = CInterfaceManager::getTimestampHuman();
 	}
 
 	// if text contain any color code, set the text formated and white,

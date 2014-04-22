@@ -79,7 +79,7 @@ struct TMessageRecord
 			stream.serial( s_event );
 			uint32 sockId;
 			stream.serialHex( sockId );
-			SockId = (NLNET::TSockId)sockId;
+			SockId = (NLNET::TSockId)(size_t)sockId;
 			len = Message.length();
 			stream.serial( len );
 			stream.serialBuffer( const_cast<uint8*>(Message.buffer()), len ); // assumes the message contains plain text

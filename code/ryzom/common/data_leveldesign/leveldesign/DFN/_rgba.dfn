@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.0" State="modified">
-  <ELEMENT Name="R" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="G" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="B" Type="Type" Filename="int.typ"/>
-  <ELEMENT Name="A" Type="Type" Filename="int.typ"/>
-  <COMMENTS>Converted from old format</COMMENTS>
-  <LOG>Fri May 17 15:24:02 2002 (corvazier) File converted from old format</LOG>
-</DFN>

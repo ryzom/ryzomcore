@@ -15,9 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdmisc.h"
-#include "nel/misc/cpu_time_stat.h"
 
+#include "nel/misc/cpu_time_stat.h"
 #include "nel/misc/common.h"
+#include "nel/misc/debug.h"
 
 #ifdef NL_OS_UNIX
 #include <unistd.h>
@@ -26,6 +27,10 @@
 #endif
 
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {

@@ -19,7 +19,19 @@
 #pragma conform(forScope, push)
 #pragma conform(forScope, off)
 
+#ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
+#endif
+
+#include <string>
+
+#ifdef _STLPORT_VERSION
+namespace std
+{
+	float fabsf(float f);
+	double fabsl(double f);
+}
+#endif
 
 #include <assert.h>
 
@@ -33,7 +45,7 @@
 #	include <maxscript/foundation/mxstime.h>
 #	include <maxscript/maxwrapper/mxsobjects.h>
 #	include <maxscript/compiler/parser.h>
-#	include <maxscript/foundation/functions.h>
+#	include <maxscript/macros/define_instantiation_functions.h>
 #else
 #	include <MaxScrpt/maxscrpt.h>
 #	include <MaxScrpt/3dmath.h>
@@ -66,9 +78,9 @@
 #include "nel/misc/file.h"
 #include "nel/misc/common.h"
 
-#include "..\nel_patch_lib\rpo.h"
-#include "..\nel_mesh_lib\export_nel.h"
-#include "..\nel_mesh_lib\export_appdata.h"
+#include "../nel_patch_lib/rpo.h"
+#include "../nel_mesh_lib/export_nel.h"
+#include "../nel_mesh_lib/export_appdata.h"
 
 #include "nel/3d/zone.h"
 #include "nel/3d/zone_symmetrisation.h"
@@ -123,12 +135,12 @@ def_visible_primitive( set_tile_bank,			"NelSetTileBank");
 def_visible_primitive( export_zone,				"ExportRykolZone");
 def_visible_primitive( import_zone,				"NeLImportZone");
 
-/* permettre l'acces ÅEauto/manual intrior edges
-faire une methode pour interfacer la fonction compute interior edge
-donner un acces ÅEtiledmode/patchmode (on/off)
-faire un getselectedvertex
-faire un getselectedpatch
-faire un getselectedtile */
+/* allows access to auto/manual interior edges
+create a method to interface compute interior edge function
+give access to tiledmode/patchmode (on/off)
+use getselectedvertex
+use getselectedpatch
+use getselectedtile */
 
 /*def_visible_primitive( set_interior_mode,		"SetRykolInteriorMode");
 def_visible_primitive( set_vertex_count,		"GetRykolVertexCount");*/

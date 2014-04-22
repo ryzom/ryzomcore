@@ -218,7 +218,7 @@ protected:
 			date*= previous->OODeltaTime;
 			NLMISC::clamp(date, 0,1);
 
-			date = ease(previous, date);
+			date = this->ease(previous, date);
 
 			float hb[4];
 			this->computeHermiteBasis(date, hb);
@@ -242,7 +242,7 @@ protected:
 		ITrackKeyFramer<CKeyT>::compile();
 
 		// Ease Precompute.
-		compileTCBEase(this->_MapKey, this->getLoopMode());
+		this->compileTCBEase(this->_MapKey, this->getLoopMode());
 
 
 		// Tangents Precompute.
@@ -314,7 +314,7 @@ private:
 		float	ksm,ksp,kdm,kdp;
 
 		// compute tangents factors.
-		computeTCBFactors(key, timeBefore, time, timeAfter, rangeDelta, firstKey, endKey, isLoop, ksm,ksp,kdm,kdp);
+		this->computeTCBFactors(key, timeBefore, time, timeAfter, rangeDelta, firstKey, endKey, isLoop, ksm,ksp,kdm,kdp);
 
 		// Delta.
 		TKeyValueType	delm, delp;
@@ -413,7 +413,7 @@ public:
 		ITrackKeyFramer<CKeyTCBQuat>::compile();
 
 		// Ease Precompute.
-		compileTCBEase(_MapKey, getLoopMode());
+		this->compileTCBEase(_MapKey, getLoopMode());
 
 		TMapTimeCKey::iterator	it;
 		TMapTimeCKey::iterator	itNext;

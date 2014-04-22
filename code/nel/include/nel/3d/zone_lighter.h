@@ -466,6 +466,7 @@ private:
 	uint										_NumberOfPatchComputed;
 	uint										_ProcessCount;
 	uint64										_CPUMask;
+	NLMISC::CMutex								_ProcessExitedMutex;
 	volatile uint								_ProcessExited;
 
 	// *** Bitmap sharing

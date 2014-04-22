@@ -23,10 +23,10 @@ namespace PVP_RELATION
 {
 	enum TPVPRelation
 	{
-		Neutral,
-		NeutralPVP,
-		Ally,
-		Ennemy,
+		Neutral, // Only Heal, no propagation
+		NeutralPVP, // No Heal, No attack
+		Ally, // Only heal, propagation
+		Ennemy, // Only attack, propagation
 		Unknown
 	};
 

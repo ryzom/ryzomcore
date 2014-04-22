@@ -155,6 +155,11 @@ inline double	CAIVectorMirror::distTo(const CAIPos &dest) const
 	return (dest-CAIVector(*this)).norm(); 
 }
 
+inline double	CAIVectorMirror::distSqTo(const CAIPos &dest) const	
+{
+	return (dest-CAIVector(*this)).sqrnorm(); 
+}
+
 inline double	CAIVectorMirror::quickDistTo(const CAIPos &dest) const	
 {
 	double dx=fabs((dest.x()-x()).asDouble()), dy=fabs((dest.y()-y()).asDouble());
@@ -172,6 +177,11 @@ inline double	CAIVectorMirror::distTo(const CAIVector &dest) const
 	return (dest-CAIVector(*this)).norm(); 
 }
 
+inline double	CAIVectorMirror::distSqTo(const CAIVector &dest) const	
+{
+	return (dest-CAIVector(*this)).sqrnorm(); 
+}
+
 inline double	CAIVectorMirror::quickDistTo(const CAIVector &dest) const	
 {
 	double dx=fabs((dest.x()-x()).asDouble()), dy=fabs((dest.y()-y()).asDouble());
@@ -187,6 +197,11 @@ inline CAngle	CAIVectorMirror::angleTo(const CAIVectorMirror &dest) const
 inline double	CAIVectorMirror::distTo(const CAIVectorMirror &dest)  const	
 {
 	return (dest-*this).norm(); 
+}
+
+inline double	CAIVectorMirror::distSqTo(const CAIVectorMirror &dest)  const	
+{
+	return (dest-*this).sqrnorm(); 
 }
 
 inline double	CAIVectorMirror::quickDistTo(const CAIVectorMirror &dest) const 

@@ -74,7 +74,7 @@ public:
 	 * Append the header to a created bnp file
 	 * \param filename (consisting the whole path)
 	 */
-	void appendHeader (const std::string &filename) {};
+	void appendHeader (const std::string &filename) {}
 
 	/**
 	 * Create a vector of all packed files inside the bnp file
@@ -87,6 +87,12 @@ public:
 	 * \param reference to the vector, which has to be filled
 	 */
 	void fileNames( std::vector<std::string>& fileNames );
+
+	/**
+	 * Create a new bnp file
+	 * \param string file path
+	 */
+	void createFile( std::string filePath );
 
 	/**
 	 * Add files to the current aktive bnp file

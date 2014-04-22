@@ -22,6 +22,10 @@
 
 using namespace std;
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC {
 
 CI18N::StrMapContainer	CI18N::_StrMap;
@@ -33,6 +37,7 @@ string					CI18N::_SelectedLanguageCode;
 CI18N::ILoadProxy		*CI18N::_LoadProxy = 0;
 vector<string>			CI18N::_LanguageCodes;
 vector<ucstring>		CI18N::_LanguageNames;
+bool CI18N::noResolution = false;
 
 void CI18N::setLoadProxy(ILoadProxy *loadProxy)
 {
@@ -160,6 +165,13 @@ void CI18N::loadFromFilename(const string &filename, bool reload)
 
 const ucstring &CI18N::get (const string &label)
 {
+	if( noResolution )
+	{
+		static ucstring labelString;
+		labelString = label;
+		return labelString;
+	}
+
 	if (label.empty())
 	{
 		static ucstring	emptyString;
@@ -914,9 +926,9 @@ void CI18N::_readTextFile(const string &filename,
 
 void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forceUtf8)
 {
-	static uint8 utf16Header[] = {char(0xff), char(0xfe)};
-	static uint8 utf16RevHeader[] = {char(0xfe), char(0xff)};
-	static uint8 utf8Header[] = {char(0xef), char(0xbb), char(0xbf)};
+	static uint8 utf16Header[] = { 0xffu, 0xfeu };
+	static uint8 utf16RevHeader[] = { 0xfeu, 0xffu };
+	static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
 
 	if (forceUtf8)
 	{

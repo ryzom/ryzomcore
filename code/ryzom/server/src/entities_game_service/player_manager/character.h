@@ -21,6 +21,7 @@
 // Game Share
 #include "game_share/bot_chat_types.h"
 #include "game_share/brick_flags.h"
+#include "server_share/pet_interface_msg.h"
 #include "game_share/power_types.h"
 #include "game_share/roles.h"
 #include "game_share/temp_inventory_mode.h"
@@ -114,6 +115,7 @@ class CMissionEvent;
 class CMissionSolo;
 class CCharacterVersionAdapter;
 class CCharacterEncyclopedia;
+class CCharacterAchievements;
 class CCharacterGameEvent;
 class CCharacterRespawnPoints;
 class CCharacterShoppingList;
@@ -297,6 +299,7 @@ struct CPetAnimal
 	bool				IsMounted;
 	bool				IsTpAllowed;
 	bool				spawnFlag;
+	ucstring			CustomName;
 	
 	// ctor
 	CPetAnimal();
@@ -305,10 +308,12 @@ struct CPetAnimal
 	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 
 	// init found ticket item pointer with slot
-	uint32 initLinkAnimalToTicket( CCharacter * c );
+	uint32 initLinkAnimalToTicket( CCharacter * c, uint8 index);
 
 	// get the max bulk of the animal inventory
 	uint32 getAnimalMaxBulk();
+
+	void setCustomName(const ucstring& customName) { CustomName = customName; }
 };
 
 /**
@@ -391,6 +396,15 @@ struct CXpProgressInfos
 	}
 };
 
+enum TFriendVisibility
+{
+	VisibleToAll = 0,			// Visible to all people who have me on their friends list, even if I am ignoring them.
+	VisibleToGuildAndFriends,	// Visible to people in my guild and those that have me on their friends list.
+	VisibleToGuildOnly,			// Only visible to people in my guild.
+	NB_FRIEND_VISIBILITY
+
+};
+
 
 /**
  * CCharacter
@@ -416,6 +430,10 @@ private:
 		RemoveFriend,
 		RemoveIgnored,
 		
+		AddedAsLeague,
+		RemovedFromLeague,
+		RemoveLeague,
+
 		NB_CONTACT_LIST_ACTIONS,
 		UnknownContactListAction= NB_CONTACT_LIST_ACTIONS,
 	};
@@ -426,6 +444,8 @@ private:
 
 	NL_INSTANCE_COUNTER_DECL(CCharacter);
 public:
+
+	void mobKill(TDataSetRow creatureRowId);
 
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
@@ -737,6 +757,9 @@ public:
 
 	// return the season in which is the current character
 	uint8 getRingSeason() const { return _RingSeason;}
+
+	/// get the League id
+	TChanID getLeagueId() const { return _LeagueId;}
 	
 	
 		
@@ -746,10 +769,16 @@ public:
 	uint16 getTeamId() const;
 	/// set the team Id of this player
 	void setTeamId(uint16 id);
+	/// set the League id
+	void setLeagueId(TChanID id, bool removeIfEmpty=false);
 	/// get team invitor
 	const NLMISC::CEntityId & getTeamInvitor() const;
 	/// set team invitor
 	void setTeamInvitor(const NLMISC::CEntityId & invitorId);
+	/// get League invitor
+	const NLMISC::CEntityId & getLeagueInvitor() const;
+	/// set League invitor
+	void setLeagueInvitor(const NLMISC::CEntityId & invitorId);
 	//@}
 
 	/// Set fighting target
@@ -864,6 +893,9 @@ public:
 	// Set skill tree of character to max value of each skill
 	void setSkillsToMaxValue();
 
+	// Set skill tree of character to specified value
+	void setSkillsToValue(const sint32& value);
+
 	// for respawn management, need to modify _TimeDeath in cbTpAcknownledge callback
 	NLMISC::TGameTime& getTimeOfDeath();
 	void setTimeOfDeath( NLMISC::TGameTime t);
@@ -975,6 +1007,11 @@ public:
 	// return the index of a player pet, or -1 if not found
 	sint32 getPlayerPet( const TDataSetRow& petRowId ) const;
 
+	// Set the name of the animal
+	void setAnimalName( uint8 petIndex, ucstring customName );
+
+	void sendPetCustomNameToClient(uint8 petIndex);
+
 	// near character's pets are TP with player (continent tp)
 	void allowNearPetTp();
 	bool isNearPetTpIsAllowed() const;
@@ -1001,14 +1038,14 @@ public:
 	// Same but nearly empty
 	void setDummyStartCharacteristics();
 
-    /**
-     * Eval Specialization for return Characteristics value
-     *
-     * \param value is the value to parse.
-     * \param result is the result to fill if the value has been succesfully parsed.
-     * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError 
-     * if it has been parsed.
-     */
+	/**
+	 * Eval Specialization for return Characteristics value
+	 *
+	 * \param value is the value to parse.
+	 * \param result is the result to fill if the value has been succesfully parsed.
+	 * \return UnknownValue if the value is not known, ValueError is the value evaluation failed or NoError 
+	 * if it has been parsed.
+	 */
 	virtual TReturnState evalValue (const char *value, double &result, uint32 userData);
 
 	/// Add a pact
@@ -1151,6 +1188,12 @@ public:
 	/// get the number of faction point given a faction
 	uint32	getFactionPoint(PVP_CLAN::TPVPClan clan);
 
+	/// set the number of pvp point
+	void	setPvpPoint(uint32 nbPt);
+
+	/// get the number of pvp point given a faction
+	uint32	getPvpPoint();
+
 	/// set the SDB path where player wins HoF points in PvP (if not empty)
 	void	setSDBPvPPath(const std::string & sdbPvPPath);
 
@@ -1159,6 +1202,15 @@ public:
 
 	/// init faction point in client database
 	void	initFactionPointDb();
+
+	/// init pvp point in client database
+	void	initPvpPointDb();
+
+	void initOrganizationInfos();
+	void setOrganization(uint32 org);
+	void setOrganizationStatus(uint32 status);
+	void changeOrganizationStatus(sint32 status);
+	void changeOrganizationPoints(sint32 points);
 
 	/// send faction point gain phrase to the client
 	void	sendFactionPointGainMessage(PVP_CLAN::TPVPClan clan, uint32 fpGain);
@@ -1614,6 +1666,18 @@ public:
 	/// send custom url
 	void sendUrl(const std::string &url, const std::string &salt);
 
+	/// set custom mission param
+ 	void setCustomMissionParams(const std::string &missionName, const std::string &params);
+
+ 	/// add custom mission param
+ 	void addCustomMissionParam(const std::string &missionName, const std::string &param);
+
+ 	/// get custom mission params
+ 	std::vector<std::string> getCustomMissionParams(const std::string &missionName);
+
+ 	/// validate dynamic mission step sending url
+ 	void validateDynamicMissionStep(const std::string &url);
+
 	/// add web command validation check
 	void addWebCommandCheck(const std::string &url, const std::string &data, const std::string &salt);
 
@@ -1856,15 +1920,18 @@ public:
 		/// add a player to friend list by name
 		void addPlayerToFriendList(const ucstring &name);
 
-		/// add a player to friend list by id
-		void addPlayerToFriendList(const NLMISC::CEntityId &id);
-
 		/// add a player to ignore list by name
 		void addPlayerToIgnoreList(const ucstring &name);
 
 		/// add a player to ignore list by Id
 		void addPlayerToIgnoreList(const NLMISC::CEntityId &id);
 		
+		/// add a player to league list by id
+		void addPlayerToLeagueList(const NLMISC::CEntityId &id);
+
+		/// add a player to friend list by id
+		void addPlayerToFriendList(const NLMISC::CEntityId &id);
+
 		/// get a player from friend or ignore list, by contact id
 		const NLMISC::CEntityId	&getFriendByContactId(uint32 contactId);
 		const NLMISC::CEntityId	&getIgnoreByContactId(uint32 contactId);
@@ -1885,6 +1952,9 @@ public:
 		/// remove room acces to player
 		void removeRoomAccesToPlayer(const NLMISC::CEntityId &id, bool kick);
 
+		/// remove player from league list
+		void removePlayerFromLeagueListByContactId(uint32 contactId);
+		void removePlayerFromLeagueListByEntityId(const NLMISC::CEntityId &id);
 
 		/// remove player from ignore list
 		void removePlayerFromIgnoreListByContactId(uint32 contactId);
@@ -1922,6 +1992,9 @@ public:
 		
 		/// player is going online or offline
 		void online(bool onlineStatus);
+
+		/// player last connection date (from SU, exactly like on mysql db)
+		void setLastConnectionDate(uint32 date);
 
 		/// player is permanently erased, unreferenced it from all contact lists
 		void destroyCharacter();
@@ -2201,6 +2274,9 @@ public:
 	// return unclamped magic resistance of a character
 	uint32 getUnclampedMagicResistance( RESISTANCE_TYPE::TResistanceType magicResistanceType ) const;
 
+	// return clamped magic resistance of a character
+	uint32 getMagicResistance(RESISTANCE_TYPE::TResistanceType magicResistanceType) const;
+
 	/// return NbNonNullClassificationTypesSkillMod
 	uint8 getNbNonNullClassificationTypesSkillMod() const;
 	
@@ -2230,6 +2306,8 @@ public:
 	// priviledge PVP mode
 	void setPriviledgePVP( bool b );
 	bool priviledgePVP();
+	// full PVP mode
+	void setFullPVP( bool b );
 	/// set the current PVP zone where the player is
 	void setCurrentPVPZone(TAIAlias alias);
 	/// get the current PVP zone where the player is
@@ -2246,6 +2324,8 @@ public:
 	void openPVPVersusDialog() const;
 	/// get priviledgePvp
 	bool getPriviledgePVP() const {return _PriviledgePvp;};
+	/// get fullPvp
+	bool getFullPVP() const {return _FullPvp;};
 	/// get character pvp flag
 	bool getPVPFlag( bool updatePVPModeInMirror = true ) const;
 	/// change pvp flag
@@ -2274,7 +2354,7 @@ public:
 	/// Set an allegiance to neutral from indetermined status, used for process message from client want set it's allegiance to neutral when it's idetermined, over case are managed by missions. 
 	void setAllegianceFromIndeterminedStatus(PVP_CLAN::TPVPClan allegiance);
 	/// true if pvp safe zone active for character
-	bool getSafeInPvPSafeZone();
+	bool getSafeInPvPSafeZone() const;
 	/// set pvp safe zone to true
 	void setPvPSafeZoneActive();
 	/// clear pvp zone safe flag
@@ -2316,7 +2396,31 @@ public:
 	/// character log stats accessors
 	uint32 getFirstConnectedTime() const;
 	uint32 getLastConnectedTime() const;
+	uint32 getLastConnectedDate() const;
 	uint32 getPlayedTime() const;
+
+	const std::string& getLangChannel() const;
+	void setLangChannel(const std::string &lang);
+
+	const std::string& getNewTitle() const;
+	void setNewTitle(const std::string &title);
+
+	std::string getFullTitle() const;
+
+	std::string getTagA() const;
+	void setTagA(const std::string &tag);
+
+	std::string getTagB() const;
+	void setTagB(const std::string &tag);
+
+	std::string getTagPvPA() const;
+	void setTagPvPA(const std::string &tag);
+
+	std::string getTagPvPB() const;
+	void setTagPvPB(const std::string &tag);
+
+	uint32 getOrganization() const;
+	uint32 getOrganizationStatus() const;
 	const std::list<TCharacterLogTime>& getLastLogStats() const;
 	void updateConnexionStat();
 	void setDisconnexionTime();		
@@ -2327,9 +2431,9 @@ public:
 	void haveToUpdateItemsPrerequisit( bool b );
 
 	void channelAdded( bool b );
-	bool isChannelAdded();
+	bool isChannelAdded() const;
 
-	uint8 getNbUserChannels() { return _NbUserChannels; };
+	uint8 getNbUserChannels() const { return _NbUserChannels; };
 	void addUserChannel() { _NbUserChannels++; };
 	void removeUserChannel() { _NbUserChannels--; };
 
@@ -2628,6 +2732,10 @@ private:
 		
 	void contactListRefChange(const NLMISC::CEntityId &id, TConctactListAction actionType);
 	
+	/// return true if player is ignored by the given entity
+	bool isIgnoredBy(const NLMISC::CEntityId &id);
+	/// return true if given entity has player on friend list
+	bool isFriendOf(const NLMISC::CEntityId &id);
 	/// player is referenced as friend by the given entity
 	void referencedAsFriendBy( const NLMISC::CEntityId &id);
 	/// player is no longer referenced as friend by the given entity
@@ -2635,6 +2743,8 @@ private:
 
 	/// remove player from friend list
 	void removePlayerFromFriendListByIndex(uint16 index);
+	/// remove player from league list
+	void removePlayerFromLeagueListByIndex(uint16 index);
 	/// remove player from ignore list
 	void removePlayerFromIgnoreListByIndex(uint16 index);
 	
@@ -2701,7 +2811,7 @@ private:
 	void removeExchangeItems(std::vector<CGameItemPtr>& itemRemoved, std::vector< CPetAnimal >& PlayerPetsRemoved);
 
 	// add the items gained during an exchange
-	void addExchangeItems(CCharacter* trader,std::vector<CGameItemPtr>& itemToAdd, std::vector< CPetAnimal >& PlayerPetsAdd);
+	void addExchangeItems(CCharacter* trader,std::vector<CGameItemPtr>& itemToAdd, std::vector< CPetAnimal >& PlayerPetsAdded);
 
 	/// get creator name dynamic string Id
 	uint32 getCreatorNameId( const NLMISC::CEntityId &creatorId);
@@ -2829,6 +2939,9 @@ private:
 	 */
 	double addXpToSkillInternal( double XpGain, const std::string& ContSkill, TAddXpToSkillMode addXpMode, std::map<SKILLS::ESkills,CXpProgressInfos> &gainBySkill );
 
+	/// Initialize the specified pet inventory, if it is valid
+	bool initPetInventory(uint8 index);
+
 	///////////////////
 	// Public members
 	///////////////////
@@ -2882,6 +2995,12 @@ public:
 	void setFinalized(bool isFinalized) { _LoadingFinish = isFinalized; };
 	bool isFinalized() const { return _LoadingFinish; };
 
+	void setFriendVisibility(TFriendVisibility val) { _FriendVisibility = val; }
+	const TFriendVisibility& getFriendVisibility() const { return _FriendVisibility; }
+
+	void setFriendVisibilitySave(uint8 val) { if (val < NB_FRIEND_VISIBILITY) _FriendVisibility = (TFriendVisibility)val; }
+	uint8 getFriendVisibilitySave() const { return (uint8)_FriendVisibility; }
+
 	//////////////////
 	// Private members
 	//////////////////
@@ -2934,6 +3053,20 @@ private:
 
 	uint32								_FactionPoint[PVP_CLAN::EndClans-PVP_CLAN::BeginClans+1];
 
+	uint32								_PvpPoint;
+
+	uint32								_Organization;
+	uint32								_OrganizationStatus;
+	uint32								_OrganizationPoints;
+
+	std::string							_LangChannel;
+
+	std::string							_NewTitle;
+	std::string							_TagPvPA;
+	std::string							_TagPvPB;
+	std::string							_TagA;
+	std::string							_TagB;
+
 	/// SDB path where player wins HoF points in PvP (if not empty)
 	std::string							_SDBPvPPath;
 	
@@ -2944,9 +3077,14 @@ private:
 	/// if this player has an invitation for another team, keep the team here
 	NLMISC::CEntityId 					_TeamInvitor;
 
+	/// if this player has an invitation for League, keep the invitor here
+	NLMISC::CEntityId 					_LeagueInvitor;
+
 	// id of the current team
 	CMirrorPropValueAlice< uint16, CPropLocationPacked<2> >	_TeamId;
 	
+	TChanID								_LeagueId;
+
 	/// temp values used to test if team bars need an update or not
 	mutable uint8						_OldHpBarSentToTeam;
 	mutable uint8						_OldSapBarSentToTeam;
@@ -3066,7 +3204,7 @@ private:
 	/// if harvesting a deposit, the skill used
 	SKILLS::ESkills				_DepositSearchSkill;
 	/// Harvest deposit information
-	HARVEST_INFOS::CHarvestInfos _DepositHarvestInformations;		
+	HARVEST_INFOS::CHarvestInfos _DepositHarvestInformation;
 	//@}
 
 	/// the tick value of the nex decay of player items
@@ -3178,6 +3316,11 @@ private:
 	/// nb of users channels
 	uint8						_NbUserChannels;
 
+	/// last webcommand index
+	uint32						_LastWebCommandIndex;
+
+ 	std::map<std::string, std::string>	_CustomMissionsParams;
+
 	// for a power/combat event, stores start and end ticks
 	struct CFlagTickRange {
 
@@ -3243,6 +3386,8 @@ private:
 
 	// friends list
 	std::vector<CContactId>	_FriendsList;
+	// league list
+	std::vector<CContactId>	_LeagueList;
 	// ignore list
 	std::vector<CContactId>	_IgnoreList;
 	// list of players for whom this player is in the friendlist (to update online status and to remove from players list if this char is permanently deleted)
@@ -3323,6 +3468,8 @@ private:
 	// current resistance for each type of magic resistance
 	uint32							_MagicResistance[RESISTANCE_TYPE::NB_RESISTANCE_TYPE];
 
+	sint32							_BaseResistance;
+
 	/// currently consumed item slot
 	sint32							_ConsumedItemSlot;
 	/// currently consumed item inventory
@@ -3358,6 +3505,8 @@ private:
 
 	CCharacterEncyclopedia			*_EncycloChar;
 
+	CCharacterAchievements			*_AchievementsChar;
+
 	CCharacterGameEvent				*_GameEvent;
 
 	CCharacterRespawnPoints			*_RespawnPoints;
@@ -3380,8 +3529,14 @@ private:
 	CPVPInterface					*_PVPInterface;
 	// set pvp mode for priviledge player
 	bool							_PriviledgePvp;
+	// set full pvp mode for player
+	bool							_FullPvp;
 	// flag PVP, true for player involved in Faction PVP and other PVP
 	bool							_PVPFlag;
+	// time of last change in pvp safe
+	NLMISC::TGameCycle				_PVPSafeLastTimeChange;
+	bool							_PVPSafeLastTime;
+	bool							_PVPInSafeZoneLastTime;
 	// time of last change in pvp flag (for prevent change PVP flag exploits)
 	NLMISC::TGameCycle				_PVPFlagLastTimeChange;
 	// time of pvp flag are setted to on (for prevent change PVP flag exploits)
@@ -3425,6 +3580,8 @@ private:
 	CCharacter						* _DuelOpponent;
 
 	TAIAlias						_LastCreatedNpcGroup;
+
+	TFriendVisibility               _FriendVisibility;
 
 	// :KLUDGE: ICDBStructNode non-const 'coz getName and getParent are not
 	// const methods. See CCDBSynchronised::getICDBStructNodeFromName for more
@@ -3571,7 +3728,8 @@ private:
 	std::set<NLMISC::CEntityId>		_EntitiesToSaveWithMe;
 
 	uint32 _FirstConnectedTime;						//first connected time in second since midnight (00:00:00), January 1, 1970
-	uint32 _LastConnectedTime;						//last connected time in second since midnight (00:00:00), January 1, 1970
+	uint32 _LastConnectedTime;						//last connected time in second since midnight (00:00:00), January 1, 1970 (change each tick update)
+	uint32 _LastConnectedDate;						//last connected time in second since midnight (00:00:00), January 1, 1970 (never change after login, exactly like in mysql db)
 	uint32 _PlayedTime;								//cumulated played time in second
 	mutable std::list<TCharacterLogTime> _LastLogStats;		//keep n login/duration/logoff time
 
@@ -3625,6 +3783,11 @@ private:
 	/// General god flag for persistence
 	bool			_GodModeSave;
 public:
+
+	void			setWebCommandIndex(uint32 index) { _LastWebCommandIndex = index;}
+	uint32			getWebCommandIndex() const { return _LastWebCommandIndex;}
+
+
 	bool			getInvisibility() const	{ return _Invisibility;}
 	/// Set the invisibility flag, NB : just for persistence, do not change nothing.
 	void			setInvisibility(bool invisible)

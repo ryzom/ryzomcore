@@ -413,7 +413,7 @@ void CSoundPage::apply()
 
 		nlassert( _Tree );
 
-		if ( m_Filename != "" )
+		if ( !m_Filename.empty() )
 		{
 			CString s = ((CSource_sounds_builderDlg*)GetOwner())->SoundName( _HItem ) + " (" + m_Filename + ")";
 			_Tree->SetItemText( _HItem, s );

@@ -40,7 +40,7 @@ CREATE TABLE `shard` (
   `Version` varchar(64) collate latin1_general_ci NOT NULL default '',
   `DynPatchURL` varchar(255) collate latin1_general_ci NOT NULL default '',
   PRIMARY KEY  (`ShardId`)
-) ENGINE=MyISAM AUTO_INCREMENT=301 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci COMMENT='contains all shards informations for login system';
+) ENGINE=MyISAM AUTO_INCREMENT=301 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci COMMENT='contains all shards information for login system';
 
 
 
@@ -58,5 +58,5 @@ CREATE TABLE `user` (
   `ExtendedPrivilege` varchar(45) collate latin1_general_ci NOT NULL default '',
   `Cookie` varchar(255) collate latin1_general_ci NOT NULL default '',
   PRIMARY KEY  (`UId`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci COMMENT='contains all users informations for login system';
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci COMMENT='contains all users information for login system';
 

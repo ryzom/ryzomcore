@@ -26,7 +26,7 @@
 #include "brick_learned_callback.h"
 #include "skill_change_callback.h"
 #include "trade_common.h"
-#include "interface_element.h"
+#include "nel/gui/interface_element.h"
 #include "../time_client.h"
 
 
@@ -54,7 +54,9 @@ const	std::string		PHRASE_DB_COUNTER_CYCLE="SERVER:EXECUTE_PHRASE:CYCLE_COUNTER"
 // TODO_OPTIM: too big test for the list_sheet* each frame with 512 entries!!!
 
 class	CSuccessTableSheet;
+namespace NLMISC{
 class	CCDBNodeLeaf;
+}
 
 
 /** Special helper class for lua export : enclose a phrase into an object accessible to lua
@@ -235,9 +237,10 @@ public:
 
 	/// Only one memory line is displayed in the Memory DB. if -1, erased.
 	void				selectMemoryLineDB(sint32 memoryLine);
+	void				selectMemoryLineDBalt(sint32 memoryLine);
 	/// get the selected memory line.
 	sint32				getSelectedMemoryLineDB() const {return _SelectedMemoryDB;}
-
+	sint32				getSelectedMemoryAltLineDB() const {return _SelectedMemoryDBalt;}
 	/// Common Method to send the Memorize msg to server
 	void				sendMemorizeToServer(uint32 memoryLine, uint32 memorySlot, uint32 phraseId);
 	/// Common Method to send the Forget msg to server
@@ -457,11 +460,11 @@ private:
 	CTickRange								_BrickRegenRange[64];
 
 	// Shortcut To Phrases Leaves
-	std::vector<CCDBNodeLeaf*>				_BookDbLeaves;
-	std::vector<CCDBNodeLeaf*>				_MemoryDbLeaves;
-	std::vector<CCDBNodeLeaf*>				_MemoryAltDbLeaves;
-	CCDBNodeLeaf							*_NextExecuteLeaf;
-	CCDBNodeLeaf							*_NextExecuteIsCyclicLeaf;
+	std::vector<NLMISC::CCDBNodeLeaf*>				_BookDbLeaves;
+	std::vector<NLMISC::CCDBNodeLeaf*>				_MemoryDbLeaves;
+	std::vector<NLMISC::CCDBNodeLeaf*>				_MemoryAltDbLeaves;
+	NLMISC::CCDBNodeLeaf							*_NextExecuteLeaf;
+	NLMISC::CCDBNodeLeaf							*_NextExecuteIsCyclicLeaf;
 
 	// extra client data
 	struct	CPhraseClient
@@ -518,6 +521,7 @@ private:
 	};
 	std::vector<CMemoryLine>	_Memories;
 	sint32						_SelectedMemoryDB;
+	sint32						_SelectedMemoryDBalt;
 
 	void		updateMemoryDBAll();
 	void		updateMemoryDBSlot(uint32 memorySlot);
@@ -582,8 +586,8 @@ private:
 	void	updateMemoryCtrlState(uint memorySlot);
 
 	// Shortcut To PhraseSheets Leaves in BotChat
-	std::vector<CCDBNodeLeaf*>				_BotChatPhraseSheetLeaves;
-	std::vector<CCDBNodeLeaf*>				_BotChatPhrasePriceLeaves;
+	std::vector<NLMISC::CCDBNodeLeaf*>				_BotChatPhraseSheetLeaves;
+	std::vector<NLMISC::CCDBNodeLeaf*>				_BotChatPhrasePriceLeaves;
 
 	// For phrase compatibility with enchant weapon special power
 	NLMISC::CSheetId						_EnchantWeaponMainBrick;
@@ -597,9 +601,9 @@ private:
 
 		NumProgressType
 	};
-	std::vector<CCDBNodeLeaf*>				_ProgressionDbSheets[NumProgressType];
-	std::vector<CCDBNodeLeaf*>				_ProgressionDbLevels[NumProgressType];
-	std::vector<CCDBNodeLeaf*>				_ProgressionDbLocks[NumProgressType];
+	std::vector<NLMISC::CCDBNodeLeaf*>				_ProgressionDbSheets[NumProgressType];
+	std::vector<NLMISC::CCDBNodeLeaf*>				_ProgressionDbLevels[NumProgressType];
+	std::vector<NLMISC::CCDBNodeLeaf*>				_ProgressionDbLocks[NumProgressType];
 
 	// For each skill, which phrase are learned when the skill is gained
 	class CPhraseProgressInfo
@@ -646,6 +650,10 @@ private:
 	// called at initInGame
 	void				computePhraseProgression();
 	void				insertProgressionSkillRecurs(SKILLS::ESkills skill, uint32 value, sint *skillReqLevel, std::vector<SKILLS::ESkills>	&skillsToInsert);
+
+	mutable NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _TotalMalusEquipLeaf;
+
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> _ServerUserDefaultWeightHandsLeaf;
 
 	// @}
 
@@ -704,7 +712,7 @@ private:
 
 	CTickRange getRegenTickRange(const CSPhraseCom &phrase) const;
 
-	CCDBNodeLeaf	*getRegenTickRangeDbLeaf(uint powerIndex) const;
+	NLMISC::CCDBNodeLeaf	*getRegenTickRangeDbLeaf(uint powerIndex) const;
 	// get regen tick range for a specific power, from the database
 	CTickRange getRegenTickRange(uint powerIndex) const;
 public:

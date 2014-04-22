@@ -46,7 +46,7 @@ public:
 	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot);
 
 	/// Used by the george sound plugin to check sound recursion (ie sound 'toto' use sound 'titi' witch also use sound 'toto' ...).
-	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const { }
+	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &/* subsounds */) const { }
 
 	/// Serialize the sound data.
 	virtual void		serial(NLMISC::IStream &s);

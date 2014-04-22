@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(nl_sample_cegui WIN32 ${SRC})
 
-ADD_DEFINITIONS(-DCEGUI_DATA_DIR="\\"${NL_SHARE_PREFIX}/nl_sample_cegui/datafiles/\\"")
+ADD_DEFINITIONS(-DCEGUI_DATA_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_cegui/datafiles/\\"")
 
 INCLUDE_DIRECTORIES(${CEGUI_INCLUDE_DIRS})
 
@@ -10,9 +10,9 @@ TARGET_LINK_LIBRARIES(nl_sample_cegui ${CEGUI_LIBRARY} nelmisc nel3d)
 NL_DEFAULT_PROPS(nl_sample_cegui "NeL, Samples, 3D: NeL CEGUI Demo")
 NL_ADD_RUNTIME_FLAGS(nl_sample_cegui)
 
-INSTALL(TARGETS nl_sample_cegui RUNTIME DESTINATION bin COMPONENT samples3d)
+INSTALL(TARGETS nl_sample_cegui RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samples3d)
 INSTALL(DIRECTORY datafiles/ 
-	DESTINATION share/nel/nl_sample_cegui/datafiles
+	DESTINATION ${NL_SHARE_PREFIX}/nl_sample_cegui/datafiles
 	COMPONENT samples3d
 	PATTERN "CVS" EXCLUDE
 	PATTERN ".svn" EXCLUDE

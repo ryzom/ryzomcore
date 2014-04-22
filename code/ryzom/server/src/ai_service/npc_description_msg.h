@@ -36,7 +36,7 @@ public:
 	CNpcChatProfileImp(const CNpcChatProfileImp &other0,const CNpcChatProfileImp &other1);
 
 	// interface for setting up chat info 
-	void clear()					{ clearShopInfo(); clearMissions(); clearCellZones(); clearContextOption(); _OptionalProperties.clear(); }
+	void clear()					{ clearShopInfo(); clearMissions(); clearCellZones(); clearContextOption(); clearWeb(); _OptionalProperties.clear(); }
 	void clearShopInfo()			
 	{ 
 		_ShopTypes.clear(); 
@@ -56,6 +56,11 @@ public:
 	}
 	void clearCellZones()			{ _CellZones.clear(); }
 	void clearMissions()			{ _Missions.clear(); }
+	void clearWeb()
+	{
+		_WebPage.clear();
+		_WebPageName.clear();
+	}
 	bool add(CAIInstance	*aiInstance, const std::string &chatArgs)	{ return parseChatArgs(aiInstance, chatArgs); }
 	void addMission(uint32 mission)	{ _Missions.push_back(mission); }
 	void clearContextOption()		{ _ContextOptions.clear();  }

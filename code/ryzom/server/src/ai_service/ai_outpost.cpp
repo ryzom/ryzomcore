@@ -870,19 +870,8 @@ void COutpost::createSquad(CGroupDesc<COutpostSquadFamily> const* groupDesc, COu
 	}*/
 	
 	grp->setOutpostSide(side);
-	// Attack only the declared ennemies of the outpost
-	if (side==OUTPOSTENUMS::OutpostOwner)
-	{
-	//	grp->faction      ().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
-	//	grp->friendFaction().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
-		grp->ennemyFaction().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
-	}
-	if (side==OUTPOSTENUMS::OutpostAttacker)
-	{
-	//	grp->faction      ().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
-	//	grp->friendFaction().addProperty(NLMISC::toString("outpost:%s:attacker", getAliasString().c_str()));
-		grp->ennemyFaction().addProperty(NLMISC::toString("outpost:%s:defender", getAliasString().c_str()));
-	}
+	grp->setOutpostFactions(side);
+
 	grp->_AggroRange = 25;
 	grp->_UpdateNbTicks = 10;
 	grp->respawnTime() = respawTimeGC;

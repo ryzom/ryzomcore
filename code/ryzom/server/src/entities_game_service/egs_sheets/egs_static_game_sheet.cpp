@@ -2093,7 +2093,7 @@ void CStaticLootTable::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 	
 } // CStaticLootTable::readGeorges //
 
-
+#ifndef NO_EGS_VARS
 /// selectRandomLootSet
 CSheetId CStaticLootTable::selectRandomLootSet() const
 {
@@ -2173,6 +2173,7 @@ const CStaticLootSet *CStaticLootTable::selectRandomCustomLootSet() const
 	nlwarning("Can't find any lootset rand=%d probabilitySum=%d weightCount=%d",randWeight,probabilitySum,CustomLootSets.size());
 	return 0;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////// Static Race Statistics //////////////////////////////

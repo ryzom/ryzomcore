@@ -61,11 +61,11 @@ public:
 	virtual void removed();
 
 	/// get entity on which the attack is redirected
-	CEntityBase *getTargetForBounce() const;
+	CEntityBase *getTargetForBounce(CEntityBase *actor) const;
 
 private:
 	/// check entity is a valid target
-	bool isEntityValidTarget(CEntityBase *entity) const;
+	bool isEntityValidTarget(CEntityBase *entity, CEntityBase *actor) const;
 
 private:
 	/// affected entity

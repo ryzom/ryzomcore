@@ -23,7 +23,7 @@ class INode
 {
 	public:
 		INode();
-		~INode();
+		virtual ~INode();
 		virtual bool propagRecord(CRecord *) = 0;
 };
 

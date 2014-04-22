@@ -41,6 +41,10 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
 
+#ifdef HAVE_OVQT_CONFIG_H
+#include "ovqt_config.h"
+#endif
+
 static const char *appNameC = "ObjectViewerQt";
 
 // nel_qt log file name
@@ -100,7 +104,11 @@ static inline QString msgCoreLoadFailure(const QString &why)
 	return QCoreApplication::translate("Application", "Failed to load Core plugin: %1").arg(why);
 }
 
-sint main(int argc, char **argv)
+#ifdef NL_OS_WINDOWS
+int __stdcall WinMain(void *hInstance, void *hPrevInstance, void *lpCmdLine, int nShowCmd)
+#else // NL_OS_WINDOWS
+int main(int argc, char **argv)
+#endif // NL_OS_WINDOWS
 {
 	// go nel!
 	new NLMISC::CApplicationContext;
@@ -125,7 +133,11 @@ sint main(int argc, char **argv)
 		nlinfo("Welcome to NeL Object Viewer Qt!");
 	}
 	QApplication::setGraphicsSystem("raster");
+#ifdef NL_OS_WINDOWS
+	QApplication app(__argc, __argv);
+#else // NL_OS_WINDOWS
 	QApplication app(argc, argv);
+#endif // NL_OS_WINDOWS
 	QSplashScreen *splash = new QSplashScreen();
 	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
 	splash->show();
@@ -145,16 +157,16 @@ sint main(int argc, char **argv)
 
 #if defined(NL_OS_MAC)
 	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
-	NLMISC::CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toStdString());
+	NLMISC::CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toUtf8().constData());
 #endif
 
 	ExtensionSystem::PluginManager pluginManager;
 	pluginManager.setSettings(settings);
 	QStringList pluginPaths;
-#if !defined(NL_OS_MAC)
-	pluginPaths << settings->value("PluginPath", "./plugins").toString();
-#else
+#if defined(NL_OS_MAC)
 	pluginPaths << settings->value("PluginPath", qApp->applicationDirPath() + QString("/../PlugIns/ovqt")).toString();
+#else
+	pluginPaths << settings->value("PluginPath", QString("%1/plugins").arg(DATA_DIR)).toString();
 #endif
 
 	pluginManager.setPluginPaths(pluginPaths);

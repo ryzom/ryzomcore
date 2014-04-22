@@ -34,7 +34,7 @@ class CComplexSource : public CSourceCommon, public CAudioMixerUser::IMixerEvent
 {
 public:
 	/// Constructor
-	CComplexSource	(CComplexSound *soundPattern=NULL, bool spawn=false, TSpawnEndCallback cb=0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0);
+	CComplexSource	(CComplexSound *soundPattern=NULL, bool spawn=false, TSpawnEndCallback cb=0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
 	/// Destructor
 	~CComplexSource	();
 

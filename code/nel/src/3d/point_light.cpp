@@ -40,6 +40,7 @@ CPointLight::CPointLight() : _LightedModels(/*&_LightedModelListMemory*/)
 	_Diffuse= _Specular= CRGBA::White;
 
 	// Default setup. this is arbitrary
+	_Type= PointLight;
 	_AttenuationBegin= 10;
 	_AttenuationEnd= 30;
 

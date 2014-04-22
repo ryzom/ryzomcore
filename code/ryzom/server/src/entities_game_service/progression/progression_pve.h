@@ -64,7 +64,7 @@ public:
 	};
 
 	/// ctor
-	CSkillProgress() {};
+	CSkillProgress() {}
 
 	/// dtor
 	virtual ~CSkillProgress() { _SkillsProgress.clear(); }
@@ -97,7 +97,7 @@ public:
 	typedef std::map< TDataSetRow, CSkillProgress * > TSkillProgressPerOpponentContainer;
 	
 	/// ctor
-	CCharacterActions() {};
+	CCharacterActions() {}
 
 	/// dtor+
 	virtual ~CCharacterActions();

@@ -57,7 +57,6 @@
 #include "nel/sound/driver/listener.h"
 #include "nel/sound/driver/sound_driver.h"
 #include "nel/sound/driver/source.h"
-#include "nel/sound/driver/music_buffer.h"
 
 // Defines
 #define NLSOUND_XAUDIO2_NAME "NeLSound XAudio2 Driver"

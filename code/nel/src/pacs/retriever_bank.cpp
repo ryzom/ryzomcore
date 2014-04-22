@@ -20,7 +20,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/progress_callback.h"
 
-#include "retriever_bank.h"
+#include "nel/pacs/retriever_bank.h"
 
 using namespace std;
 using namespace NLMISC;

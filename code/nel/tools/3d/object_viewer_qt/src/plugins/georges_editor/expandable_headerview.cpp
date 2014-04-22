@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdpch.h"
 // Project includes
 #include "expandable_headerview.h"
 
@@ -22,7 +23,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 	ExpandableHeaderView::ExpandableHeaderView(Qt::Orientation orientation, QWidget * parent) 

@@ -103,7 +103,7 @@ void CTile_edit_dlg::on_addLandPushButton_clicked()
 		}
 		else
 		{
-			tileBank.addLand( text.toStdString() );
+			tileBank.addLand( text.toUtf8().constData() );
 
 			ui.landListWidget->addItem(text);
 			ui.landListWidget->setCurrentRow(ui.landListWidget->count() - 1);
@@ -138,7 +138,7 @@ void CTile_edit_dlg::on_editLandPushButton_clicked()
 			for (int i=0; i<items.count(); i++)
 			{
 				QString rString = items[i];
-				tileBank.getLand(nindex)->addTileSet( rString.toStdString().c_str() );
+				tileBank.getLand(nindex)->addTileSet( rString.toUtf8().constData() );
 			}
 		}
 	}
@@ -176,7 +176,7 @@ void CTile_edit_dlg::on_addTileSetPushButton_clicked()
 		}
 		else
 		{
-			tileBank.addTileSet( text.toStdString() );
+			tileBank.addTileSet( text.toUtf8().constData() );
 
 			ui.tileSetListWidget->addItem(text);
 			ui.tileSetListWidget->setCurrentRow(ui.tileSetListWidget->count() - 1);
@@ -239,7 +239,7 @@ void CTile_edit_dlg::on_chooseVegetPushButton_clicked()
 		if (!fileName.isEmpty())
 		{
 			QFileInfo fi(fileName);
-			tileBank.getTileSet (nindex)->setTileVegetableDescFileName (fi.fileName().toStdString());
+			tileBank.getTileSet (nindex)->setTileVegetableDescFileName (fi.fileName().toUtf8().constData());
 			ui.chooseVegetPushButton->setText(fi.fileName());
 		}
 	}
@@ -347,7 +347,7 @@ void CTile_edit_dlg::on_loadPushButton_clicked()
 	if (!fileName.isEmpty())
 	{
 		CIFile stream;
-		if ( stream.open( fileName.toStdString().c_str() ) )
+		if ( stream.open( fileName.toUtf8().constData() ) )
 		{
 			ui.landListWidget->clear();
 			ui.tileSetListWidget->clear();
@@ -383,7 +383,7 @@ void CTile_edit_dlg::on_loadPushButton_clicked()
 
 void CTile_edit_dlg::on_savePushButton_clicked()
 {
-	string fullPath = this->mainFile.absoluteFilePath().toStdString();
+	string fullPath = this->mainFile.absoluteFilePath().toUtf8().constData();
 	if ( !fullPath.empty() )
 	{
 		COFile stream;
@@ -411,7 +411,7 @@ void CTile_edit_dlg::on_saveAsPushButton_clicked()
 		ui.savePushButton->setEnabled(true);
 
 
-		string fullPath = this->mainFile.absoluteFilePath().toStdString();
+		string fullPath = this->mainFile.absoluteFilePath().toUtf8().constData();
 		if ( !fullPath.empty() )
 		{
 			COFile stream;
@@ -445,7 +445,7 @@ void CTile_edit_dlg::on_exportPushButton_clicked()
 		copy.cleanUnusedData ();
 
 		QFileInfo fileInfo(fileName);
-		string fullPath = fileInfo.absoluteFilePath().toStdString();
+		string fullPath = fileInfo.absoluteFilePath().toUtf8().constData();
 		if ( !fullPath.empty() )
 		{
 			COFile stream;
@@ -524,7 +524,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 							if (bitmapPath!="")
 							{
 								// Check the path
-								if ( CheckPath( bitmapPath, path.toStdString().c_str() ) == false )
+								if ( CheckPath( bitmapPath, path.toUtf8() ) == false )
 								{
 									// Bad path
 									goodPath=false;
@@ -552,7 +552,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 					if (strcmp (bitmapPath, "")!=0)
 					{
 						// Check the path
-						if (CheckPath( bitmapPath, path.toStdString().c_str() )==false)
+						if (CheckPath( bitmapPath, path.toUtf8() )==false)
 						{
 							// Bad path
 							goodPath=false;
@@ -593,7 +593,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 								if (bitmapPath!="")
 								{
 									// Remove the absolute path
-									bool res=RemovePath (bitmapPath, path.toStdString().c_str());
+									bool res=RemovePath (bitmapPath, path.toUtf8());
 									nlassert (res);
 
 									// Set the bitmap
@@ -613,7 +613,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 						if (bitmapPath!="")
 						{
 							// Remove the absolute path
-							bool res=RemovePath (bitmapPath, path.toStdString().c_str());
+							bool res=RemovePath (bitmapPath, path.toUtf8());
 							nlassert (res);
 
 							// Set the bitmap
@@ -633,7 +633,7 @@ void CTile_edit_dlg::on_absolutePathPushButton_clicked()
 			if (goodPath)
 			{
 				// Change the abs path of the bank
-				tileBank.setAbsPath (path.toStdString());
+				tileBank.setAbsPath (path.toUtf8().constData());
 
 				// Change the bouton text
 				ui.absolutePathPushButton->setText(path);

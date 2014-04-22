@@ -132,7 +132,7 @@ public :
 				entity->updateMissionTarget();
 
 			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId("ui:interface:compass"));
+			CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 			// if new target title is not NULL, then show the compass and make it blink to indicate new location
 			// please note that the first time the player login, a target has not been saved in his config file, so
 			// we permit the first (and only one) mission that is received to become the new compass direction (chiang the strong ...)
@@ -159,7 +159,7 @@ public :
 			if (leaf->getOldValue32() != 0)
 			{
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CGroupCompas *pGC = dynamic_cast<CGroupCompas*>(pIM->getElementFromId("ui:interface:compass"));
+				CGroupCompas *pGC = dynamic_cast<CGroupCompas*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 				if (pGC == NULL)
 				{
 					nlwarning("Can't retrieve compass group");
@@ -198,7 +198,7 @@ public :
 //					{
 //						_AlreadyReceived.insert(name);
 						CInterfaceManager *im = CInterfaceManager::getInstance();
-						CGroupCompas *gc = dynamic_cast<CGroupCompas *>(im->getElementFromId("ui:interface:compass"));
+						CGroupCompas *gc = dynamic_cast<CGroupCompas *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass"));
 						if (!gc)
 						{
 							nlwarning("Can't retrieve compass group");
@@ -223,7 +223,7 @@ public :
 									gc->setTarget(ct);
 									gc->blink();
 									gc->enableBlink(2);
-									im->setTopWindow(gc);
+									CWidgetManager::getInstance()->setTopWindow(gc);
 								}
 							}
 						}
@@ -426,6 +426,8 @@ void CEntityManager::initialize(uint nbMaxEntity)
 		_Entities.resize(_NbMaxEntity, 0);
 		_EntityGroundFXHandle.resize(_NbMaxEntity);
 	}
+	
+	ICDBNode::CTextId textId;
 
 	// Add an observer on the mission database
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -433,21 +435,47 @@ void CEntityManager::initialize(uint nbMaxEntity)
 	for (i=0; i<MAX_NUM_MISSIONS; i++)
 	for (j=0; j<MAX_NUM_MISSION_TARGETS; j++)
 	{
-		pIM->addDBObserver(&MissionTargetObserver, "SERVER:MISSIONS:"+toString(i)+":TARGET"+toString(j)+":TITLE");
+		std::string text = toString("SERVER:MISSIONS:%d:TARGET%d:TITLE", i, j);
+		textId = ICDBNode::CTextId(text);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&MissionTargetObserver, textId );
+		_MissionTargetTitleDB[i][j] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
+		nlassert(_MissionTargetTitleDB[i][j]);
 	}
 
 	// Add an Observer to the Team database
 	for (i=0; i<MaxNumPeopleInTeam; i++)
 	{
-		pIM->addDBObserver(&TeamUIDObserver, toString(TEAM_DB_PATH ":%d:UID", i));
-		pIM->addDBObserver(&TeamPresentObserver, toString(TEAM_DB_PATH ":%d:NAME", i));
+		std::string text = toString(TEAM_DB_PATH ":%d:UID", i);
+		textId = ICDBNode::CTextId(text);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamUIDObserver, textId );
+		_GroupMemberUidDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
+		nlassert(_GroupMemberUidDB[i]);
+		
+		text = toString(TEAM_DB_PATH ":%d:NAME", i);
+		textId = ICDBNode::CTextId(text);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&TeamPresentObserver, textId );
+		_GroupMemberNameDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
+		nlassert(_GroupMemberNameDB[i]);
 	}
 
 	// Add an Observer to the Animal database
 	for (i=0; i<MAX_INVENTORY_ANIMAL; i++)
 	{
-		pIM->addDBObserver(&AnimalUIDObserver, toString("SERVER:PACK_ANIMAL:BEAST%d:UID",i));
-		pIM->addDBObserver(&AnimalStatusObserver, toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS",i));
+		std::string text = toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i);
+		textId = ICDBNode::CTextId(text);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalUIDObserver, textId);
+		_BeastUidDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
+		nlassert(_BeastUidDB[i]);
+		
+		text = toString("SERVER:PACK_ANIMAL:BEAST%d:STATUS", i);
+		textId = ICDBNode::CTextId(text);
+		NLGUI::CDBManager::getInstance()->getDB()->addObserver(&AnimalStatusObserver, textId);
+		_BeastStatusDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
+		nlassert(_BeastStatusDB[i]);
+		
+		text = toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", i);
+		_BeastTypeDB[i] = NLGUI::CDBManager::getInstance()->getDbProp(text, false);
+		nlassert(_BeastTypeDB[i]);
 	}
 
 }// initialize //

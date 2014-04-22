@@ -37,14 +37,13 @@ namespace NLMISC
 			return token;
 		}
 
-		unsigned int i;
+		uint i, j;
 		CSString result;
 
 		// skip leading junk
 		for (i=0;i<size();++i)
 		{
 			// look for the next character in the 'separator' character list supplied
-			unsigned j;
 			for (j=0;separators[j] && (*this)[i]!=separators[j];++j)
 			{}
 			// if not found then we're at end of leading junk
@@ -56,7 +55,6 @@ namespace NLMISC
 		for (;i<size();++i)
 		{
 			// look for the next character in the 'separator' character list supplied
-			unsigned j;
 			for (j=0;separators[j] && (*this)[i]!=separators[j];++j)
 			{}
 			// if not found then we're at end of text chunk
@@ -69,7 +67,6 @@ namespace NLMISC
 		for (;i<size();++i)
 		{
 			// look for the next character in the 'separator' character list supplied
-			unsigned j;
 			for (j=0;separators[j] && (*this)[i]!=separators[j];++j)
 			{}
 			// if not found then we're at end of leading junk
@@ -684,7 +681,7 @@ namespace NLMISC
 
 	CSString CSString::splitTo(char c) const
 	{
-		unsigned i;
+		uint i;
 		CSString result;
 		for (i=0;i<size() && (*this)[i]!=c;++i)
 			result+=(*this)[i];
@@ -693,7 +690,7 @@ namespace NLMISC
 
 	CSString CSString::splitTo(char c,bool truncateThis,bool absorbSeparator)
 	{
-		unsigned i;
+		uint i;
 		CSString result;
 		for (i=0;i<size() && (*this)[i]!=c;++i)
 			result+=(*this)[i];
@@ -714,7 +711,7 @@ namespace NLMISC
 
 	CSString CSString::splitTo(const char *s,bool truncateThis)
 	{
-		unsigned i;
+		uint i;
 		CSString result;
 		for (i=0;i<size();++i)
 		{
@@ -762,12 +759,12 @@ namespace NLMISC
 
 	CSString CSString::splitFrom(const char *s) const
 	{
-		unsigned int i;
+		uint i;
 		CSString result;
 		for (i=0;i<size();++i)
 		{
 			// perform a quick string compare
-			unsigned int j;
+			uint j;
 			for (j=0;i+j<size() && s[j]!=0 && s[j]==(*this)[i+j];++j)
 			{
 			}
@@ -789,7 +786,7 @@ namespace NLMISC
 			return CSString();
 
 		CSString result;
-		unsigned i=0;
+		uint i=0;
 		// skip white space
 		for (i=0;i<size() && isWhiteSpace((*this)[i]);++i)
 		{}
@@ -847,7 +844,7 @@ namespace NLMISC
 		return count;
 	}
 
-	CSString CSString::word(unsigned idx) const
+	CSString CSString::word(uint32 idx) const
 	{
 		CSString hold=strip();
 
@@ -901,7 +898,7 @@ namespace NLMISC
 		return count;
 	}
 
-	CSString CSString::wordOrWords(unsigned idx,bool useSlashStringEscape,bool useRepeatQuoteStringEscape) const
+	CSString CSString::wordOrWords(uint32 idx,bool useSlashStringEscape,bool useRepeatQuoteStringEscape) const
 	{
 		CSString hold=strip();
 
@@ -941,7 +938,7 @@ namespace NLMISC
 		return count;
 	}
 
-	CSString CSString::line(unsigned idx) const
+	CSString CSString::line(uint32 idx) const
 	{
 		CSString hold=strip();
 

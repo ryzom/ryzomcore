@@ -25,43 +25,43 @@ typedef struct PIC_PICTURE
  */
 
 	
-extern unsigned long	Pic_JPG_Read(	unsigned char *FileName, 
+extern unsigned long	Pic_JPG_Read(	const char *FileName, 
 										unsigned char **ppPal, unsigned char **ppDatas, 
 										unsigned long *w, unsigned long *h);
 
-extern unsigned long	Pic_JPG_Write(	unsigned char *FileName, 
+extern unsigned long	Pic_JPG_Write(	const char *FileName, 
 										unsigned long Qual, 
 										unsigned char *pDatas, 
 										unsigned long w, unsigned long h);
 /*
  * TGA
  */
-extern unsigned long	Pic_TGA_Read(	unsigned char *FileName,
+extern unsigned long	Pic_TGA_Read(	const char *FileName,
 										unsigned char **ppPal, unsigned char **ppDatas,
 										unsigned long *pWidth, unsigned long *pHeight, 
 										unsigned long *pDepth);
-extern unsigned long	Pic_TGA_Write(	unsigned char *FileName, 
+extern unsigned long	Pic_TGA_Write(	const char *FileName, 
 										unsigned char *pPal,unsigned char *pDatas, 
 										unsigned long w, unsigned long h, unsigned long d);
 /*
  * BMP
  */
-extern unsigned long	Pic_BMP_Read(	unsigned char *FileName,
+extern unsigned long	Pic_BMP_Read(	const char *FileName,
 										unsigned char **ppPal, unsigned char **ppDatas,
 										unsigned long *pWidth, unsigned long *pHeight, 
 										unsigned long *pDepth);
 
-extern unsigned long	Pic_BMP_Write(	unsigned char *FileName, 
+extern unsigned long	Pic_BMP_Write(	const char *FileName, 
 										unsigned char *pPal,unsigned char *pDatas, 
 										unsigned long w, unsigned long h, unsigned long d);
 /*
  * System
  */
-extern void*			Pic_malloc(unsigned long size);
-extern void*			Pic_calloc(unsigned long count, unsigned long size);
+extern void*			Pic_malloc(size_t size);
+extern void*			Pic_calloc(size_t count, size_t size);
 extern void				Pic_free(void *memblock);
-extern unsigned long	Pic__msize(void *memblock);
-extern void				Pic_SetError(unsigned char *msg, ...);
+extern size_t			Pic__msize(void *memblock);
+extern void				Pic_SetError(const char *msg, ...);
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 

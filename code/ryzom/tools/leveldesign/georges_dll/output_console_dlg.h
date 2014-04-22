@@ -36,7 +36,7 @@ public:
 	void outputString (const char *message);
 
 	// From CDialog
-	void	OnOK () {};
+	void	OnOK () {}
 	void	OnCancel ();
 
 // Dialog Data

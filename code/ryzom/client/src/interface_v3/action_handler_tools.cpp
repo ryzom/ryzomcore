@@ -20,7 +20,7 @@
 
 // Interface includes
 #include "interface_manager.h"
-#include "action_handler.h"
+#include "nel/gui/action_handler.h"
 #include "../net_manager.h"
 
 

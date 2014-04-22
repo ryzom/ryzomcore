@@ -177,8 +177,8 @@ GenderExtractor::GenderExtractor(const std::string & literal, const std::string&
 
 	
 	static const char * es[] ={"e", "e1", "e2", "e3"};
-	static char * fs[] ={"f", "f1", "f2", "f3"};
-	static char * hs[] ={"h", "h1", "h2", "h3"};
+	static const char * fs[] ={"f", "f1", "f2", "f3"};
+	static const char * hs[] ={"h", "h1", "h2", "h3"};
 
 	const char * e = es[level];
 	const char * f = fs[level];
@@ -223,7 +223,7 @@ GenderExtractor::GenderExtractor(const std::string & literal, const std::string&
 	{
 		std::string goodMarkup = isMale ? std::string("") +"<" + h + "></" + h + ">" : std::string("")+"<"+f+"></"+f+">";
 		std::string badMarkup  = isFemale ? std::string("") +"<" + h + "></" + h + ">" : std::string("")+"<"+f+"></"+f+">";
-		std::string exceptionText = std::string("La phrase ") + identifier + " qui contient une balise " + goodMarkup + " nécessite aussi les balises " + badMarkup + " même vide.";		
+		std::string exceptionText = std::string("Expression ") + identifier + " that contains a tag " + goodMarkup + " needs also tags " + badMarkup + " even empty.";		
 		throw EParseException(0, exceptionText.c_str());
 	}
 
@@ -1835,11 +1835,11 @@ void CMissionData::parseMissionHeader(NLLIGO::IPrimitive *prim)
 //	_MissionTitle.init(*this, prim, vs); 
 	_MissionDescriptionRaw = getPropertyArray(prim, "mission_description", false, false);
 //	_MissionDescription.init(*this, prim, vs);
-	_MonoInstance = strlwr(getProperty(prim, "mono_instance", true, false)) == "true";
-	_RunOnce = strlwr(getProperty(prim, "run_only_once", true, false)) == "true";
-	_Replayable = strlwr(getProperty(prim, "replayable", true, false)) == "true";
+	_MonoInstance = toLower(getProperty(prim, "mono_instance", true, false)) == "true";
+	_RunOnce = toLower(getProperty(prim, "run_only_once", true, false)) == "true";
+	_Replayable = toLower(getProperty(prim, "replayable", true, false)) == "true";
 	
-	_NeedValidation = strlwr(getProperty(prim, "need_validation", true, false)) == "true";
+	_NeedValidation = toLower(getProperty(prim, "need_validation", true, false)) == "true";
 	
 	_MissionAutoMenuRaw = getPropertyArray(prim, "phrase_auto_menu", false, false);
 

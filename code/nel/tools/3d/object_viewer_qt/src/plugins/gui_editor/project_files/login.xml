@@ -1,0 +1,16 @@
+<project>
+    <header>
+        <name>login</name>
+        <mastergroup>ui:login</mastergroup>
+        <activegroup>ui:login:checkpass</activegroup>
+    </header>
+    <guifiles>
+        <file>login_config.xml</file>
+        <file>login_widgets.xml</file>
+        <file>login_main.xml</file>
+        <file>login_keys.xml</file>
+    </guifiles>
+    <mapfiles>
+        <file>texture_interfaces_v3_login.tga</file>
+    </mapfiles>
+</project>

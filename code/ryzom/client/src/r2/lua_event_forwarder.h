@@ -17,8 +17,13 @@
 #ifndef R2_LUA_EVENT_FORWARDER_H
 #define R2_LUA_EVENT_FORWARDER_H
 
-class CLuaState;
-class CLuaString;
+namespace NLGUI
+{
+	class CLuaState;
+	class CLuaString;
+}
+
+using namespace NLGUI;
 
 namespace R2
 {
@@ -53,7 +58,7 @@ public:
 													const std::string &targetAttrName, sint32 targetAttrIndex);
 protected:
 	// for derivers
-	virtual CLuaState *getLua() = 0;
+	virtual NLGUI::CLuaState *getLua() = 0;
 	virtual void executeHandler(const CLuaString &eventName, int numArgs) = 0;
 };
 

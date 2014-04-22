@@ -59,7 +59,7 @@ public:
 	/// exception thrown when entity is unknown
 	struct EEntity : public NLMISC::Exception
 	{
-		EEntity( const NLMISC::CEntityId& id ) : Exception ("The entity "+id.toString()+" doesn't exist") {};
+		EEntity( const NLMISC::CEntityId& id ) : Exception ("The entity "+id.toString()+" doesn't exist") {}
 	};
 
 /*	// Success table for calculation of success probability and associate xp-gains

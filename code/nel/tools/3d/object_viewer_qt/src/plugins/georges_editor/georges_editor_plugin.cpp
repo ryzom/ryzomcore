@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
+#include "stdpch.h"
 #include "georges_editor_plugin.h"
 #include "georges_editor_form.h"
 
@@ -22,12 +23,12 @@
 #include "../core/core_constants.h"
 
 // NeL includes
-#include "nel/misc/debug.h"
+#include <nel/misc/debug.h>
 
 // Qt includes
 #include <QtCore/QObject>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 GeorgesEditorPlugin::~GeorgesEditorPlugin()
@@ -97,4 +98,4 @@ QWidget *GeorgesEditorContext::widget()
 
 }
 
-Q_EXPORT_PLUGIN(Plugin::GeorgesEditorPlugin)
+Q_EXPORT_PLUGIN(GeorgesQt::GeorgesEditorPlugin)

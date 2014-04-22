@@ -15,4 +15,4 @@ NL_ADD_RUNTIME_FLAGS(welcome_service)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS welcome_service RUNTIME DESTINATION sbin COMPONENT ws)
-INSTALL(FILES welcome_service.cfg common.cfg DESTINATION etc/nel/nelns COMPONENT ws)
+INSTALL(FILES welcome_service.cfg common.cfg DESTINATION ${NL_ETC_PREFIX}/nelns COMPONENT ws)

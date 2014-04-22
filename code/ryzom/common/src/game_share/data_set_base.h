@@ -437,7 +437,7 @@ public:
     // PUBLIC because template friend classes are not supported
 	/// Return the pointer to the property value
 	template <class T>
-	void						getPropPointerForList( TSharedListRow **ppt, TPropertyIndex propIndex, const TDataSetRow& entityIndex, T* typeHint ) const
+	void						getPropPointerForList( TSharedListRow **ppt, TPropertyIndex propIndex, const TDataSetRow& entityIndex, T* /* typeHint */ ) const
 	{
 #ifndef FAST_MIRROR
 		nlassert( (propIndex != INVALID_PROPERTY_INDEX) && (propIndex < (TPropertyIndex)_PropertyContainer.PropertyValueArrays.size()) ); // Wrong property

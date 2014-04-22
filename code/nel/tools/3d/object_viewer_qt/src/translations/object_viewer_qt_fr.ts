@@ -6,17 +6,17 @@
     <message>
         <location filename="../main.cpp" line="98"/>
         <source>Failed to load Core plugin: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossible de charger le plugin principal: %1</translation>
     </message>
     <message>
         <location filename="../main.cpp" line="193"/>
         <source>Object Viewer Qt - Plugin loader messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Object Viewer Qt - Messages du chargeur de plugins</translation>
     </message>
     <message>
         <location filename="../main.cpp" line="177"/>
         <source>Could not find ovqt_plugin_core in %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossible de trouver ovqt_plugin_core dans %1</translation>
     </message>
 </context>
 <context>
@@ -24,42 +24,42 @@
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="41"/>
         <source>Animation control</source>
-        <translation type="unfinished"></translation>
+        <translation>Contrôle de l&apos;animation</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="135"/>
         <source>Loop</source>
-        <translation type="unfinished"></translation>
+        <translation>En boucle</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="145"/>
         <source>In place</source>
-        <translation type="unfinished"></translation>
+        <translation>En place</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="155"/>
         <source>Increment pos</source>
-        <translation type="unfinished"></translation>
+        <translation>Incrémenter la position</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="189"/>
         <source>Use the PlayList</source>
-        <translation type="unfinished"></translation>
+        <translation>Utiliser la liste de lecture</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="233"/>
         <source>Use the Mixer</source>
-        <translation type="unfinished"></translation>
+        <translation>Utilisateur le Mélangeur</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="341"/>
         <source>Play/Pause</source>
-        <translation type="unfinished"></translation>
+        <translation>Lecture/Pause</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_form.ui" line="380"/>
         <source>Stop</source>
-        <translation type="unfinished"></translation>
+        <translation>Stop</translation>
     </message>
 </context>
 <context>
@@ -67,57 +67,57 @@
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="30"/>
         <source>Animation set manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Gestionnaire d&apos;ensemble d&apos;animations</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="67"/>
         <source>Edited object:</source>
-        <translation type="unfinished"></translation>
+        <translation>Objet en cours d&apos;édition :</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="99"/>
         <source>Animations:</source>
-        <translation type="unfinished"></translation>
+        <translation>Animations :</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="163"/>
         <source>Add anim</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajouter animation</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="174"/>
         <source>Skeleton weight template:</source>
-        <translation type="unfinished"></translation>
+        <translation>Modèle de poids de squelette :</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="232"/>
         <source>Add swt</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajouter swt</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="245"/>
         <source>Animations playlist:</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste de lecture d&apos;animations :</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="305"/>
         <source>Unload all anim and swt files</source>
-        <translation type="unfinished"></translation>
+        <translation>Décharger toutes les animations et les fichiers swt</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="351"/>
         <source>Add anim in PlayList</source>
-        <translation type="unfinished"></translation>
+        <translation>Ajouter une animation dans la liste de lecture</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="377"/>
         <source>Delete anim from PlayList</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer une animation de la liste de lecture</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_form.ui" line="467"/>
         <source>Set duration of time in Animation control</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir la durée dans le contrôle de l&apos;animation</translation>
     </message>
 </context>
 <context>
@@ -130,7 +130,7 @@
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="30"/>
         <source>Constant</source>
-        <translation type="unfinished"></translation>
+        <translation>Constante</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="35"/>
@@ -160,12 +160,12 @@
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="162"/>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Date</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="167"/>
         <source>Position</source>
-        <translation type="unfinished"></translation>
+        <translation>Position</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="172"/>
@@ -175,12 +175,12 @@
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="177"/>
         <source>Speed</source>
-        <translation type="unfinished"></translation>
+        <translation>Vitesse</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="182"/>
         <source>Random</source>
-        <translation type="unfinished"></translation>
+        <translation>Aléatoire</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/attrib_form.ui" line="187"/>
@@ -855,7 +855,7 @@
     </message>
     <message>
         <location filename="../plugins/object_viewer/located_bindable_form.ui" line="374"/>
-        <source>Fake motion blur treshold:</source>
+        <source>Fake motion blur threshold:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2593,7 +2593,7 @@
     <message>
         <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="34"/>
         <source>Power:</source>
-        <translation type="unfinished"></translation>
+        <translation>Puissance :</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="84"/>
@@ -2603,17 +2603,17 @@
     <message>
         <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="137"/>
         <source>Frequency</source>
-        <translation type="unfinished"></translation>
+        <translation>Fréquence</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="204"/>
         <source>Ambient color</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleur ambiante</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="214"/>
         <source>Diffuse color</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleur diffuse</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/vegetable_landscape_form.ui" line="227"/>
@@ -3119,67 +3119,67 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="105"/>
         <source>OpenGL</source>
-        <translation type="unfinished"></translation>
+        <translation>OpenGL</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="110"/>
         <source>Direct3D</source>
-        <translation type="unfinished"></translation>
+        <translation>Direct3D</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="123"/>
         <source>Qt Style</source>
-        <translation type="unfinished"></translation>
+        <translation>Style Qt</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="131"/>
         <source>Style</source>
-        <translation type="unfinished"></translation>
+        <translation>Style</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="156"/>
         <source>Use style&apos;s standard palette</source>
-        <translation type="unfinished"></translation>
+        <translation>Utiliser la palette standard du style</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="169"/>
         <source>Font</source>
-        <translation type="unfinished"></translation>
+        <translation>Police</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="186"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="70"/>
         <source>Graphics settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Options graphiques</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="78"/>
         <source>Driver</source>
-        <translation type="unfinished"></translation>
+        <translation>Pilote</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="26"/>
         <source>Bloom effect</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloom</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="34"/>
         <source>Bloom density</source>
-        <translation type="unfinished"></translation>
+        <translation>Densité du bloom</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="53"/>
         <source>Square bloom</source>
-        <translation type="unfinished"></translation>
+        <translation>Bloom carré</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/graphics_settings_page.ui" line="60"/>
         <source>Enable bloom effect</source>
-        <translation type="unfinished"></translation>
+        <translation>Activer le bloom</translation>
     </message>
 </context>
 <context>
@@ -3188,17 +3188,17 @@ Reason: %3</source>
         <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="153"/>
         <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="179"/>
         <source>Open NeL anim file</source>
-        <translation type="unfinished"></translation>
+        <translation>Ouvrir une animation NeL</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="154"/>
         <source>NeL anim files (*.anim);;</source>
-        <translation type="unfinished"></translation>
+        <translation>Animations NeL (*.anim);;</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/animation_set_dialog.cpp" line="180"/>
         <source>NeL Skeleton Weight Template files (*.swt);;</source>
-        <translation type="unfinished"></translation>
+        <translation>NeL Skeleton Weight Template (*.swt);;</translation>
     </message>
 </context>
 <context>
@@ -3336,7 +3336,7 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/object_viewer/attrib_widget.cpp" line="157"/>
         <source>Set user param</source>
-        <translation type="unfinished"></translation>
+        <translation>Définir un paramètre utilisateur</translation>
     </message>
 </context>
 <context>
@@ -3344,7 +3344,7 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/object_viewer/bin_op_dialog.cpp" line="41"/>
         <source>Bin operator</source>
-        <translation type="unfinished"></translation>
+        <translation>Opérateur binaire</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/bin_op_dialog.cpp" line="44"/>
@@ -3556,7 +3556,7 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/object_viewer/value_gradient_dialog.cpp" line="126"/>
         <source>Num samples:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nombre d&apos;échantillons :</translation>
     </message>
 </context>
 <context>
@@ -3801,17 +3801,17 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/object_viewer/particle_control_dialog.cpp" line="112"/>
         <source>Num particles:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nombre de particules :</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/particle_control_dialog.cpp" line="113"/>
         <source>Num wanted faces:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nombre de faces souhaitées :</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/particle_control_dialog.cpp" line="114"/>
         <source>System time:</source>
-        <translation type="unfinished"></translation>
+        <translation>Temps système :</translation>
     </message>
 </context>
 <context>
@@ -3819,7 +3819,7 @@ Reason: %3</source>
     <message>
         <location filename="../plugins/object_viewer/particle_system_page.cpp" line="272"/>
         <source>Are you sure?</source>
-        <translation type="unfinished"></translation>
+        <translation>Etes-vous sûr ?</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/particle_system_page.cpp" line="273"/>
@@ -4077,7 +4077,7 @@ Reason: %3</source>
         <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="635"/>
         <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="680"/>
         <source>Skeleton scale editor</source>
-        <translation type="unfinished"></translation>
+        <translation>Editeur de l&apos;échelle du squelette</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="276"/>
@@ -4121,12 +4121,12 @@ Reason: %3</source>
         <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="589"/>
         <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="635"/>
         <source>Failed to save file!</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossible d&apos;enregistrer le fichier !</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/skeleton_scale_dialog.cpp" line="680"/>
         <source>Failed to load file!</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossible de charger le fichier !</translation>
     </message>
 </context>
 <context>
@@ -4142,7 +4142,7 @@ Reason: %3</source>
         <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="173"/>
         <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="201"/>
         <source>empty</source>
-        <translation type="unfinished"></translation>
+        <translation>vide</translation>
     </message>
     <message>
         <location filename="../plugins/object_viewer/slot_manager_dialog.cpp" line="178"/>

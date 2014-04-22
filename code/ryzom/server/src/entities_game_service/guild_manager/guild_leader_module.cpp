@@ -100,7 +100,7 @@ void CGuildLeaderModule::quitGuild()
 		CGuildMember * member = EGS_PD_CAST<CGuildMember*>( (*it).second );
 		EGS_PD_AST( member );
 		// ignore current leader
-		if ( member->getGrade() == EGSPD::CGuildGrade::Leader )
+		if ( _GuildMemberCore->getId() == member->getId() )
 			continue;
 
 		// check if the current member is the successor

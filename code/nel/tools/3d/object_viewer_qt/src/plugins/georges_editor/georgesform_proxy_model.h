@@ -20,7 +20,7 @@
 // Qt includes
 #include <QSortFilterProxyModel>
 
-namespace Plugin 
+namespace GeorgesQt 
 {
 
 	class CGeorgesFormProxyModel : public QSortFilterProxyModel 
@@ -40,6 +40,6 @@ namespace Plugin
 
 	};/* class CGeorgesFormProxyModel */
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */
 
 #endif // GEORGESFORM_PROXY_MODEL_H

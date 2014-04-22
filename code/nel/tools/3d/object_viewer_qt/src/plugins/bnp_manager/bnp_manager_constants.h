@@ -25,6 +25,7 @@ namespace Constants
 const char * const BNP_MANAGER_SECTION = "BNPManager";
 
 //resources
+const char *const ICON_NEW = ":/images/ic_nel_new.png";
 const char *const ICON_ADD = ":/images/ic_nel_add_item.png";
 const char *const ICON_DELETE = ":/images/ic_nel_delete_item.png";
 const char *const ICON_UNPACK = ":/images/ic_nel_export.png";

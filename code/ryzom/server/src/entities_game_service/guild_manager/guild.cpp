@@ -217,7 +217,7 @@ void CGuild::setBuilding(TAIAlias buildingAlias)
 	if (getBuilding() != CAIAliasTranslator::Invalid)
 	{
 		CBuildingManager::getInstance()->removeGuildBuilding( getId() );
-		_Inventory->clearInventory();
+		//_Inventory->clearInventory();
 	}
 
 	// set the new guild building
@@ -237,6 +237,16 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 			nlwarning("<CGuildMemberModule::setMOTD>%s invalid member id %s",eId.toString().c_str());
 			return;
 		}
+
+		if ( motd == "?" )
+		{
+			// Show the old MOTD
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal= _MessageOfTheDay;
+			CCharacter::sendDynamicMessageToChatGroup(user->getEntityRowId(), "GMOTD", CChatGroup::guild, params);
+			return;
+		}
+
 		EGSPD::CGuildGrade::TGuildGrade memberGrade = member->getGrade();
 		if( memberGrade >= EGSPD::CGuildGrade::Member)
 		{
@@ -255,9 +265,10 @@ void CGuild::setMOTD( const std::string& motd, const NLMISC::CEntityId& eId)
 
 		if(!_MessageOfTheDay.empty())
 		{
+			// Show new MOTD to all members
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 			params[0].Literal= _MessageOfTheDay;
-			CCharacter::sendDynamicMessageToChatGroup(user->getEntityRowId(), "GMOTD", CChatGroup::guild, params);
+			sendMessageToGuildChat("GMOTD", params);
 		}
 	}
 	else
@@ -953,6 +964,14 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 		return;
 	}
 
+	// You cannot exchange genesis named items
+	if (item->getPhraseId().find("genesis_") == 0)
+	{
+		nlwarning("Character %s tries to put in guild '%s'", user->getId().toString().c_str(), item->getPhraseId().c_str() );
+		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_CANT_BE_PUT" );
+		return;
+	}
+
 	// try to move the required quantity of the item
 	if ( CInventoryBase::moveItem(
 		user->getInventory(INVENTORIES::bag), slot,
@@ -1298,23 +1317,34 @@ uint16 CGuild::getMaxGradeCount(EGSPD::CGuildGrade::TGuildGrade grade)const
 	for ( uint i = 0; i < size; ++i )
 		count+=_GradeCounts[i];
 	
-	if ( grade == EGSPD::CGuildGrade::Leader )
-		return 1;
-	if ( grade == EGSPD::CGuildGrade::HighOfficer )
+	switch (grade)
 	{
-		count *= 5;
-		if ( count %100 == 0 )
-			return count/100;
-		else
-			return count/100 + 1;
-	}
-	if ( grade == EGSPD::CGuildGrade::Officer )
-	{
-		count *= 10;
-		if ( count %100 == 0 )
-			return count/100;
-		else
-			return count/100 + 1;
+		case EGSPD::CGuildGrade::Leader:
+			return 1;
+			break;
+		case EGSPD::CGuildGrade::HighOfficer:
+		{
+			return GuildMaxMemberCount;
+			/*
+			count *= 5;
+			if ( count %100 == 0 )
+				return count/100;
+			else
+				return count/100 + 1;
+			*/
+		}
+		break;
+		case EGSPD::CGuildGrade::Officer:
+		{
+			return GuildMaxMemberCount;
+			/*
+			count *= 10;
+			if ( count %100 == 0 )
+				return count/100;
+			else
+				return count/100 + 1;
+			*/
+		}
 	}
 	return 0xFFFF;
 }
@@ -1387,6 +1417,25 @@ void CGuild::sendMessageToGuildMembers( const std::string &  msg, const TVectorP
 
 	// send the message to peer guild unifiers
 	IGuildUnifier::getInstance()->sendMessageToGuildMembers(this, msg, params);
+}
+
+//----------------------------------------------------------------------------
+void CGuild::sendMessageToGuildChat( const std::string &  msg, const TVectorParamCheck & params )const
+{
+	for ( std::map< EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::const_iterator it = getMembersBegin(); it != getMembersEnd(); ++it )
+	{
+		CGuildMember * member = EGS_PD_CAST<CGuildMember*>( (*it).second );
+		EGS_PD_AST( member );
+
+		// continue if the player is offline
+		CGuildMemberModule * module = NULL;
+		if ( member->getReferencingModule(module) )
+		{
+			CGuildCharProxy proxy;
+			module->getProxy(proxy);
+			proxy.sendDynamicMessageToChatGroup(msg, CChatGroup::guild, params);
+		}
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -2238,7 +2287,7 @@ void	IGuild::updateMembersStringIds()
 //-----------------------------------------------------------------------------
 /**
  * This class is used to load old guild inventory, DO NOT BREAK IT!
- * \author Sébastien 'kxu' Guignot
+ * \author Sebastien 'kxu' Guignot
  * \author Nevrax France
  * \date 2005
  */

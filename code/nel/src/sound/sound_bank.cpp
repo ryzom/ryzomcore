@@ -23,6 +23,7 @@
 #include "nel/sound/background_sound.h"
 #include "nel/sound/music_sound.h"
 #include "nel/sound/stream_sound.h"
+#include "nel/sound/stream_file_sound.h"
 
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/u_form_elm.h"
@@ -122,14 +123,16 @@ CSoundBank::~CSoundBank()
 
 void CSoundBank::addSound(CSound *sound)
 {
-	std::pair<TSoundTable::iterator, bool> ret;
-	ret = _Sounds.insert(make_pair(sound->getName(), sound));
-	nlassert(ret.second);
+	// nlassert(_Sounds.size() > sound->getName().getShortId());
+	// nldebug("SOUNDBANK: Add %s", sound->getName().toString().c_str());
+	if (_Sounds.size() <= sound->getName().getShortId())
+		_Sounds.resize(sound->getName().getShortId() + 1);
+	_Sounds[sound->getName().getShortId()] = sound;
 }
 
-void CSoundBank::removeSound(const NLMISC::TStringId &name)
+void CSoundBank::removeSound(const NLMISC::CSheetId &sheetId)
 {
-	_Sounds.erase(name);
+	_Sounds[sheetId.getShortId()] = NULL;
 }
 
 
@@ -194,6 +197,9 @@ public:
 			case CSound::SOUND_STREAM:
 				Sound = new CStreamSound();
 				break;
+			case CSound::SOUND_STREAM_FILE:
+				Sound = new CStreamFileSound();
+				break;
 			default:
 				Sound = 0;
 			}
@@ -254,35 +260,59 @@ public:
 void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 {
 	// this structure is fill by the loadForm() function and will contain all you need
-	std::map<std::string, CSoundSerializer> Container;
+	std::map<std::string, CSoundSerializer> container; // load the old way for compatibility
 	nlassert(!_Loaded);
 	// Just call the GEORGE::loadFrom method to read all available sounds
-	::loadForm("sound", packedSheetDir + "sounds.packed_sheets", Container, packedSheetUpdate, false);
+	::loadForm("sound", packedSheetDir + "sounds.packed_sheets", container, packedSheetUpdate, false);
 	_Loaded = true;
 
-	// add all the loaded sound in the sound banks
-	std::map<std::string, CSoundSerializer>::iterator first(Container.begin()), last(Container.end());
-	for (; first != last; ++first)
+	// get the largest sheet id needed and init the sound bank
+	uint32 maxShortId = 0;
 	{
-		if (first->second.Sound != 0)
-			addSound(first->second.Sound);
+		std::map<std::string, CSoundSerializer>::iterator first(container.begin()), last(container.end());
+		for (; first != last; ++first)
+		{
+			if (first->second.Sound != 0)
+				if (first->second.Sound->getName().getShortId() > maxShortId)
+					maxShortId = first->second.Sound->getName().getShortId();
+		}
+		++maxShortId; // inc for size = last idx + 1
+		if (container.size() == 0)
+		{
+			nlwarning("NLSOUND: No sound sheets have been loaded, missing sound sheet directory or packed sound sheets file");
+		}
+		else
+		{
+			nlassert(maxShortId < (container.size() * 8)); // ensure no ridiculous sheet id values
+			if (maxShortId > _Sounds.size())
+				_Sounds.resize(maxShortId);
+		}
 	}
 
-	Container.clear();
+	// add all the loaded sound in the sound banks
+	{
+		std::map<std::string, CSoundSerializer>::iterator first(container.begin()), last(container.end());
+		for (; first != last; ++first)
+		{
+			if (first->second.Sound != 0)
+				addSound(first->second.Sound);
+		}
+	}
+
+	container.clear();
 }
 
 
 /*
  * Unload all the sound samples in this bank.
  */
-void				CSoundBank::unload()
+void CSoundBank::unload()
 {
 	nlassert(_Loaded);
 
-	TSoundTable::iterator first(_Sounds.begin()), last(_Sounds.end());
-	for (; first != last; ++first)
+	for (TSoundTable::size_type i = 0; i < _Sounds.size(); ++i)
 	{
-		delete first->second;
+		delete _Sounds[i];
 	}
 
 	_Sounds.clear();
@@ -316,7 +346,7 @@ void				CSoundBank::unload()
 /*
  * Returns true if the samples in this bank have been loaded.
  */
-bool				CSoundBank::isLoaded()
+bool CSoundBank::isLoaded()
 {
 	return _Loaded;
 }
@@ -324,37 +354,38 @@ bool				CSoundBank::isLoaded()
 /*
  * Return a sound sample corresponding to a name.
  */
-CSound*			CSoundBank::getSound(const NLMISC::TStringId &name)
+CSound* CSoundBank::getSound(const NLMISC::CSheetId &sheetId)
 {
-	// Find sound
-	TSoundTable::iterator iter = _Sounds.find(name);
-	if ( iter == _Sounds.end() )
+	if (sheetId == NLMISC::CSheetId::Unknown)
+		return NULL;
+
+	// nlassert(sheetId.getShortId() < _Sounds.size());
+	if (sheetId.getShortId() >= _Sounds.size())
 	{
-		return 0;
+		std::string sheetName = sheetId.toString();
+		nlwarning("NLSOUND: Sound sheet id '%s' exceeds loaded sound sheets", sheetName.c_str());
+		return NULL;
 	}
-	else
-	{
-		return (*iter).second;
-	}
+
+	return _Sounds[sheetId.getShortId()];
 }
 
 /**
  *  Return the names of the sounds
  */
-void				CSoundBank::getNames( std::vector<NLMISC::TStringId> &names )
+void CSoundBank::getNames( std::vector<NLMISC::CSheetId> &sheetIds )
 {
-	TSoundTable::const_iterator iter;
-	for (iter = _Sounds.begin(); iter != _Sounds.end(); ++iter)
+	for (TSoundTable::size_type i = 0; i < _Sounds.size(); ++i)
 	{
-		names.push_back((*iter).first);
-		//nlwarning("getting sound %s", (*iter).first);
+		if (_Sounds[i])
+			sheetIds.push_back(_Sounds[i]->getName());
 	}
 }
 
 /*
  * Return the number of buffers in this bank.
  */
-uint				CSoundBank::countSounds()
+uint CSoundBank::countSounds()
 {
 	return (uint)_Sounds.size();
 }

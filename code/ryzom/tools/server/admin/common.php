@@ -16,7 +16,7 @@
 	//assert_options(ASSERT_QUIET_EVAL, 1);
 	//assert_options(ASSERT_CALLBACK, 'nt_common_assert');
 
-	require_once(NELTOOL_SYSTEMBASE .'functions_mysql.php');
+	require_once(NELTOOL_SYSTEMBASE .'functions_mysqli.php');
 	require_once(NELTOOL_SYSTEMBASE .'smarty/Smarty.class.php');
 	require_once(NELTOOL_SYSTEMBASE. 'functions_tool_administration.php');
 	require_once(NELTOOL_SYSTEMBASE. 'nel/admin_modules_itf.php');
@@ -69,7 +69,7 @@
 		{
 			$nel_user = null;
 			nt_auth_stop_session();
-			nt_common_redirect('index.php');
+			nt_common_redirect('');
 			exit();
 		}
 		elseif (isset($NELTOOL['SESSION_VARS']['nelid']) && !empty($NELTOOL['SESSION_VARS']['nelid']))
@@ -138,9 +138,12 @@
 		if (isset($nel_user['new_login']))
 		{
 			$default_user_application_id	= 0;
-			if ($nel_user['user_default_application_id'] > 0)			$default_user_application_id	= $nel_user['user_default_application_id'];
-			elseif ($nel_user['group_default_application_id'] > 0)	$default_user_application_id	= $nel_user['group_default_application_id'];
-
+			if (isset( $nel_user['user_default_application_id']) &&($nel_user['user_default_application_id'] > 0)) {
+                $default_user_application_id	= $nel_user['user_default_application_id']; 
+			}elseif (isset( $nel_user['group_default_application_id']) &&($nel_user['group_default_application_id'] > 0)) {
+                $default_user_application_id	= $nel_user['group_default_application_id'];
+            }
+            
 			if ($default_user_application_id > 0)
 			{
 				nt_common_add_debug("default application : user:". $nel_user['user_default_application_id'] ." group:". $nel_user['group_default_application_id']);

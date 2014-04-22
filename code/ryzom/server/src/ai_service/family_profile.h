@@ -87,15 +87,15 @@ public:
 	virtual void update() =0;
 
 	/// Fill a vector of outpost id name assigned to tribe
-	virtual void fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames)	{};
+	virtual void fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames)	{}
 	/// Add an outpost for the tribe (nb : the family must be a tribe)
-	virtual void outpostAdd(NLMISC::TStringId outpostName) {};
+	virtual void outpostAdd(NLMISC::TStringId outpostName) {}
 	/// Remove an from the tribe
-	virtual void outpostRemove(NLMISC::TStringId outpostName) {};
+	virtual void outpostRemove(NLMISC::TStringId outpostName) {}
 
-	virtual	void outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState	state)	{};
+	virtual	void outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState	state)	{}
 
-	virtual	void spawnBoss(NLMISC::TStringId outpostName)	{};
+	virtual	void spawnBoss(NLMISC::TStringId outpostName)	{}
 
 	CGroupNpc	*createNpcGroup(const	CNpcZone	*const	zone, const	CGroupDesc<CGroupFamily>	*const	groupDesc);
 

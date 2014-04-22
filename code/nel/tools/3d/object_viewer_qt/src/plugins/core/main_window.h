@@ -52,6 +52,7 @@ public:
 	MenuManager *menuManager() const;
 	ContextManager *contextManager() const;
 	QSettings *settings() const;
+	QUndoGroup *undoGroup() const;
 
 	ExtensionSystem::IPluginManager *pluginManager() const;
 
@@ -62,6 +63,7 @@ public Q_SLOTS:
 	bool showOptionsDialog(const QString &group = QString(),
 						   const QString &page = QString(),
 						   QWidget *parent = 0);
+	void updateContext(Core::IContext *context);
 
 private Q_SLOTS:
 	void open();
@@ -69,6 +71,7 @@ private Q_SLOTS:
 	void save();
 	void saveAs();
 	void saveAll();
+	void closeDocument();
 	void cut();
 	void copy();
 	void paste();
@@ -77,7 +80,6 @@ private Q_SLOTS:
 	void gotoPos();
 	void setFullScreen(bool enabled);
 	void about();
-	void updateContext(Core::IContext *context);
 
 protected:
 	virtual void closeEvent(QCloseEvent *event);
@@ -123,6 +125,7 @@ private:
 	QAction *m_saveAction;
 	QAction *m_saveAsAction;
 	QAction *m_saveAllAction;
+	QAction *m_closeAction;
 	QAction *m_exitAction;
 	QAction *m_cutAction;
 	QAction *m_copyAction;

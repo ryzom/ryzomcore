@@ -27,9 +27,10 @@
 
 namespace NL3D {
 
+class CVertexProgramPerPixelLight;
 
 /**
- * This vertex program is used to perform perpixel lighting with meshs. Its ouputs are :
+ * This vertex program is used to perform perpixel lighting with meshs. Its outputs are :
  *
  * Coord Tex 0 : duplicate the tex Coord 0 set from the v.b.
  * Coord Tex 1 : The light vector in tangent space.
@@ -49,6 +50,8 @@ namespace NL3D {
 class CMeshVPPerPixelLight : public IMeshVertexProgram
 {
 public:
+	friend class CVertexProgramPerPixelLight;
+
 	/// true if want Specular Lighting.
 	bool		SpecularLighting;
 public:
@@ -84,7 +87,9 @@ private:
 	bool	_IsPointLight;
 	//
 	enum { NumVp = 8};
-	static	std::auto_ptr<CVertexProgram>	_VertexProgram[NumVp];
+	static	NLMISC::CSmartPtr<CVertexProgramPerPixelLight> _VertexProgram[NumVp];
+
+	NLMISC::CRefPtr<CVertexProgramPerPixelLight> _ActiveVertexProgram;
 };
 
 } // NL3D

@@ -124,6 +124,51 @@ void setFactionProp_ss_(CStateInstance* entity, CScriptStack& stack)
 	}
 }
 
+void setOupostMode_ss_(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string sideStr = stack.top(); stack.pop();
+	std::string aliasStr = stack.top();
+	CGroupNpc* const npcGroup = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if ( ! npcGroup)
+	{
+		nlwarning("setOutpostMode on a non Npc Group, doesnt work");
+		return;
+	}
+
+	OUTPOSTENUMS::TPVPSide side;
+	if (sideStr == "attacker")
+	{
+		side = OUTPOSTENUMS::OutpostAttacker;
+	}
+	else if (sideStr == "owner")
+	{
+		side = OUTPOSTENUMS::OutpostOwner;
+	}
+	else
+	{
+		nlwarning("setOutpostMode: invalid side");
+	}
+	
+	npcGroup->setOutpostSide(side);
+	npcGroup->setOutpostFactions(side);
+	FOREACH(botIt, CCont<CBot>, npcGroup->bots())
+	{
+		CBot* bot = *botIt;
+		CBotNpc* botNpc = NLMISC::safe_cast<CBotNpc*>(bot);
+		if (botNpc)
+		{
+			CSpawnBotNpc* spawnBotNpc = botNpc->getSpawn();
+			if (spawnBotNpc)
+			{
+				spawnBotNpc->setOutpostSide(side);
+				spawnBotNpc->setOutpostAlias(LigoConfig.aliasFromString(aliasStr));
+			}
+		}
+	}
+	if (npcGroup->isSpawned())
+		npcGroup->getSpawnObj()->sendInfoToEGS();
+}
+
 //----------------------------------------------------------------------------
 /** @page code
 
@@ -462,7 +507,7 @@ Arguments: f(Radius) ->
 @param[in] Radius dispersion of wander activity
 
 @code
-()startWander(100); // Gives a wander activity to the group with dispersion of 100
+()startMoving(100,-100,10); // Moves the group to 100,-100 with radius of 10
 @endcode
 
 */
@@ -501,6 +546,56 @@ void startMoving_fff_(CStateInstance* entity, CScriptStack& stack)
 	return;
 }
 
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection followPlayer_sf_
+Set activity to follow the given player
+
+Arguments: s(PlayerEid) f(Radius) ->
+@param[in] PlayerEid id of player to follow
+@param[in] Radius dispersion of wander activity
+
+@code
+()followPlayer("(0x0002015bb4:01:88:88)",10);
+@endcode
+
+*/
+// Spawned CGroupNpc not in a family behaviour
+void followPlayer_sf_(CStateInstance* entity, CScriptStack& stack)
+{
+	uint32 dispersionRadius = (uint32)(float&)stack.top(); stack.pop();
+	NLMISC::CEntityId playerId = NLMISC::CEntityId((std::string)stack.top());
+	
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+	
+	if (!entity) { nlwarning("followPlayer failed!"); return; }
+	
+	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (!group)
+	{	nlwarning("followPlayer failed: no NPC group");
+		return;
+	}
+	CSpawnGroupNpc* spawnGroup = group->getSpawnObj();
+	if (!spawnGroup)
+	{	nlwarning("followPlayer failed: no spawned group");
+		return;
+	}
+
+	if (playerId == CEntityId::Unknown)
+	{
+		nlwarning("followPlayer failed: unknown player");
+		DEBUG_STOP;
+		return;
+	}
+
+	spawnGroup->movingProfile().setAIProfile(new CGrpProfileFollowPlayer(spawnGroup, TheDataset.getDataSetRow(playerId), dispersionRadius));
+
+	return;
+}
 
 
 //----------------------------------------------------------------------------
@@ -1512,6 +1607,7 @@ Then user events are triggered on the group to inform it about what happens:
 - user_event_3: triggered after the player has given the mission items to the npc.
 
 Warning: this function can only be called after the event "player_target_npc".
+Warning: only works on an R2 shard for R2 plot items.
 
 Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 @param[in] missionItems is the list of mission items, the string format is "item1:qty1;item2:qty2;...".
@@ -1614,38 +1710,6 @@ void receiveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 			DEBUG_STOP;
 			return;
 		}
-		// if LD use this the function outside a ring shard 
-		if (IsRingShard)
-		{
-		
-			// Here we destroy the item: so we do not want that a user create a scenario where we destroy
-			// other players precious items
-			
-			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
-			// lazy intialisation
-			if (r2PlotItemSheetId.empty())
-			{
-				for (uint32 i = 0 ; i <= 184 ; ++i)
-				{
-					r2PlotItemSheetId.insert( CSheetId( NLMISC::toString("r2_plot_item_%d.sitem", i)));
-				}
-			}
-
-			// A npc give a mission to take an item given by another npc
-			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
-			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
-			{
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
-				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!!");
-				return ;
-			}
-
-		}
 
 		uint32 quantity;
 		NLMISC::fromString(itemAndQty[1], quantity);
@@ -1679,6 +1743,7 @@ Then user events are triggered on the group to inform it about what happens:
 - user_event_1: triggered after the player has received the mission items from the npc.
 
 Warning: this function can only be called after the event "player_target_npc".
+Warning: only works on an R2 shard for R2 plot items.
 
 Arguments: s(missionItems), s(missionText), c(groupToNotify) ->
 @param[in] missionItems is the list of mission items, the string format is "item1:qty1;item2:qty2;...".
@@ -1780,37 +1845,6 @@ void giveMissionItems_ssc_(CStateInstance* entity, CScriptStack& stack)
 			nlwarning("giveMissionItems failed: invalid mission item sheet '%s'", itemAndQty[0].c_str());
 			DEBUG_STOP;
 			return;
-		}
-
-
-				// if LD use this the function outside a ring shard 
-		if (IsRingShard)
-		{
-		
-			static std::set<CSheetId> r2PlotItemSheetId; // :TODO: use R2Share::CRingAccess
-			// lazy intialisation
-			if (r2PlotItemSheetId.empty())
-			{
-				for (uint32 i = 0 ; i <= 184 ; ++i)
-				{
-					r2PlotItemSheetId.insert( CSheetId( NLMISC::toString("r2_plot_item_%d.sitem", i)));
-				}
-			}
-
-			// A npc give a mission to give a item to another npc
-			// but the item instead of being a r2_plot_item is a normal item like system_mp or big armor
-			if ( r2PlotItemSheetId.find(sheetId) ==  r2PlotItemSheetId.end())
-			{
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!! Someone is trying to hack us");
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("ERROR/HACK : an npc is trying to give to a player a item that is not a plot item SheetId='%s' sheetIdAsInt=%u",sheetId.toString().c_str(), sheetId.asInt());								
-				nlwarning("His ai instanceId is %u, use log to know the sessionId and the user ", msg.InstanceId );
-				nlwarning("!!!!!!!!!!!!");
-				nlwarning("!!!!!!!!!!!!");
-				return ;
-			}
-
 		}
 
 		uint32 quantity;
@@ -2179,13 +2213,10 @@ void facing_cscs_(CStateInstance* entity, CScriptStack& stack)
 	//	bot1->setTheta(bot1->pos().angleTo(bot2->pos()));
 }
 
-
 //----------------------------------------------------------------------------
 /** @page code
 
 @subsection npcSay_css_
-
-A new entry of the npc contextual menu will propose to the targeter player to talk to the npc.
 
 Make a npc say a text
 
@@ -2201,9 +2232,9 @@ Arguments: c(group), s(botname), s(text),  ->
 
 @code
 (@group)group_name.context();
-()emote(@group, "bob", "DSS_1601 RtEntryText_6") ;// Send To dss
-()emote(@group, "bob", "RAW Ca farte?"); // phrase direcly send to IOS as raw (for debug)
-()emote(@group, "bob", "answer_group_no_m"); //phrase id
+()npcSay(@group, "bob", "DSS_1601 RtEntryText_6") ;// Send To dss
+()npcSay(@group, "bob", "RAW Ca farte?"); // phrase direcly send to IOS as raw (for debug)
+()npcSay(@group, "bob", "answer_group_no_m"); //phrase id
 
 @endcode
 
@@ -2213,6 +2244,34 @@ Arguments: c(group), s(botname), s(text),  ->
 
 #include "game_share/chat_group.h"
 #include "game_share/send_chat.h"
+
+void execSayHelper(CSpawnBot *spawnBot, NLMISC::CSString text, CChatGroup::TGroupType mode = CChatGroup::say)
+{
+	if (spawnBot)
+	{
+		NLMISC::CSString prefix = text.left(4);
+		if (prefix=="DSS_")
+		{
+			
+			NLMISC::CSString phrase = text.right(text.length() - 4);
+			NLMISC::CSString idStr = phrase.strtok(" ",false,false,false,false);
+			uint32 scenarioId = atoi(idStr.c_str());
+			forwardToDss(spawnBot->dataSetRow(), mode, phrase, scenarioId);
+			return;
+		}
+		
+		if (prefix=="RAW ")
+		{
+			std::string phrase = text.right(text.length()-4);
+			ucstring ucstr = phrase;
+			npcChatToChannelSentence(spawnBot->dataSetRow(), mode, ucstr);
+			return;
+		}
+
+		//Classic phrase ID
+		npcChatToChannel(spawnBot->dataSetRow(), mode, text);
+	}
+}
 
 void npcSay_css_(CStateInstance* entity, CScriptStack& stack)
 {
@@ -2224,29 +2283,58 @@ void npcSay_css_(CStateInstance* entity, CScriptStack& stack)
 
 	if (!spawnBot) { return; }
 
+	execSayHelper(spawnBot, text);
+}
 
-	std::string prefix =NLMISC::CSString (text).left(4);
-	if(prefix=="DSS_")
-	{
-		
-		NLMISC::CSString phrase = NLMISC::CSString (text).right((uint)text.length()-4);
-		NLMISC::CSString idStr = phrase.strtok(" ",false,false,false,false);
-		uint32 scenarioId;
-		NLMISC::fromString(idStr, scenarioId);
-		forwardToDss(spawnBot->dataSetRow(), CChatGroup::say, phrase, scenarioId);
-		return;
-	}
-	
-	if (prefix=="RAW ")
-	{
-		NLMISC::CSString phrase = NLMISC::CSString (text).right((uint)text.length()-4);
-		npcChatToChannelSentence(spawnBot->dataSetRow(),CChatGroup::say, phrase);
-		return;
-	}
+//----------------------------------------------------------------------------
+/** @page code
 
-	//Classic phrase ID
-	npcChatToChannel(spawnBot->dataSetRow(), CChatGroup::say, text);
-	return;
+@subsection npcSay_ss_
+
+Make a npc say a text
+
+Arguments: s(text), s(mode) ->
+@param[in] text is the text to say. prefix with ID: to use an id
+@param[in] mode is the mode to use (say, shout)
+
+@code
+()npcSay("Hello!","say"); // phrase direcly send to IOS as raw
+()npcSay("ID:answer_group_no_m","shout"); // phrase id
+@endcode
+
+*/
+
+void npcSay_ss_(CStateInstance* entity, CScriptStack& stack)
+{
+	std::string sMode = (std::string)stack.top(); stack.pop();
+	std::string text = (std::string)stack.top(); stack.pop();
+
+	CChatGroup::TGroupType mode = CChatGroup::say;
+	mode = CChatGroup::stringToGroupType(sMode);
+	CGroup* group = entity->getGroup();
+
+	if (group->isSpawned())
+	{
+		FOREACH(itBot, CCont<CBot>, group->bots())
+		{
+			CBot* bot = *itBot;
+			if (bot)
+			{
+				if (bot->isSpawned())
+				{
+					CSpawnBot *spawnBot = bot->getSpawnObj();
+					std::string prefix = NLMISC::CSString(text).left(3);
+					if (NLMISC::nlstricmp(prefix.c_str(), "id:") == 0) {
+						text = NLMISC::CSString(text).right(text.length()-3);
+						execSayHelper(spawnBot, text, mode);
+					}
+					else {
+						execSayHelper(spawnBot, "RAW " + text, mode);
+					}
+				}
+			}
+		}
+	}
 }
 
 
@@ -2514,6 +2602,7 @@ void rename_s_(CStateInstance* entity, CScriptStack& stack)
 						msgout.serial(row);
 						msgout.serial(name);
 						sendMessageViaMirror("IOS", msgout);
+						bot->setCustomName(name);
 					}
 				}
 			}
@@ -2644,12 +2733,14 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 #define REGISTER_NATIVE_FUNC(cont, func) cont.insert(std::make_pair(std::string(#func), &func))
 
 	REGISTER_NATIVE_FUNC(functions, setFactionProp_ss_);
+	REGISTER_NATIVE_FUNC(functions, setOupostMode_ss_);
 	REGISTER_NATIVE_FUNC(functions, moveToZone_ss_);
 	REGISTER_NATIVE_FUNC(functions, setActivity_s_);
 	REGISTER_NATIVE_FUNC(functions, startWander_f_);
 	REGISTER_NATIVE_FUNC(functions, startMoving_fff_);
 	REGISTER_NATIVE_FUNC(functions, waitInZone_s_);
 	REGISTER_NATIVE_FUNC(functions, stopMoving__);
+	REGISTER_NATIVE_FUNC(functions, followPlayer_sf_);
 	REGISTER_NATIVE_FUNC(functions, wander__);
 	REGISTER_NATIVE_FUNC(functions, setAttackable_f_);
 	REGISTER_NATIVE_FUNC(functions, setPlayerAttackable_f_);
@@ -2687,6 +2778,7 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, rename_s_);
 	REGISTER_NATIVE_FUNC(functions, vpx_s_);
 	REGISTER_NATIVE_FUNC(functions, npcSay_css_);
+	REGISTER_NATIVE_FUNC(functions, npcSay_ss_);
 	REGISTER_NATIVE_FUNC(functions, dssMessage_fsss_);
 	REGISTER_NATIVE_FUNC(functions, despawnBotByAlias_s_);	
 	REGISTER_NATIVE_FUNC(functions, giveReward_ssssc_);

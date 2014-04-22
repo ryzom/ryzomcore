@@ -157,7 +157,7 @@ public:
 		}
 
 		/// return true if an operation is supported. The default support all ops
-		bool supportOp(CPSBinOp::BinOp op) { return true; }
+		bool supportOp(CPSBinOp::BinOp /* op */) { return true; }
 
 		/// get the current operator
 		CPSBinOp::BinOp getOp(void) const { return _Op; }

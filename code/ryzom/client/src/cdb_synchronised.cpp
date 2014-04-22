@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 #include "stdpch.h"
 
 //#define TRACE_READ_DELTA
@@ -42,6 +41,8 @@
 
 #include <string>
 
+#include "../../common/src/game_share/ryzom_database_banks.h"
+
 
 ////////////////
 // Namespaces //
@@ -49,8 +50,6 @@
 using namespace NLMISC;
 using namespace std;
 
-
-bool VerboseDatabase = false;
 uint32 NbDatabaseChanges = 0;
 
 
@@ -58,11 +57,11 @@ uint32 NbDatabaseChanges = 0;
 //	CCDBSynchronised
 //
 //-----------------------------------------------
-CCDBSynchronised::CCDBSynchronised() : _Database(0), _InitInProgress(true), _InitDeltaReceived(0)
+CCDBSynchronised::CCDBSynchronised() : _InitInProgress(true), _InitDeltaReceived(0), CCDBManager( "SERVER", NB_CDB_BANKS )
 {
 }
 
-
+extern const char *CDBBankNames[INVALID_CDB_BANK+1];
 
 //-----------------------------------------------
 //	init
@@ -80,9 +79,11 @@ void CCDBSynchronised::init( const string &fileName, NLMISC::IProgressCallback &
 			read.init (file);
 
 			//Parse the parser output!!!
-			CCDBNodeBranch::resetNodeBankMapping(); // in case the game is restarted from start
-			_Database = new CCDBNodeBranch("SERVER");
-			_Database->init( read.getRootNode (), progressCallBack, true );
+			bankHandler.resetNodeBankMapping(); // in case the game is restarted from start
+			bankHandler.fillBankNames( CDBBankNames, INVALID_CDB_BANK + 1 );
+			if( _Database == NULL )
+				_Database = new CCDBNodeBranch( "SERVER" );
+			_Database->init( read.getRootNode (), progressCallBack, true, &bankHandler );
 		}
 	}
 	catch (const Exception &e)
@@ -175,7 +176,7 @@ void CCDBSynchronised::write( const string &fileName )
 //	readDelta
 //
 //-----------------------------------------------
-void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, TCDBBank bank )
+void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, uint bank )
 {
 	nldebug("Update DB");
 
@@ -189,13 +190,13 @@ void CCDBSynchronised::readDelta( NLMISC::TGameCycle gc, CBitMemStream& s, TCDBB
 	uint16 propertyCount = 0;
 	s.serial( propertyCount );
 
-	if ( VerboseDatabase )
+	if ( NLMISC::ICDBNode::isDatabaseVerbose() )
 		nlinfo( "CDB: Reading delta (%hu changes)", propertyCount );
 	NbDatabaseChanges += propertyCount;
 
 	for( uint i=0; i!=propertyCount; ++i )
 	{
-		_Database->readAndMapDelta( gc, s, bank );
+		_Database->readAndMapDelta( gc, s, bank, &bankHandler );
 	}
 
 	/*// Read "client only" property changes
@@ -304,11 +305,12 @@ void CCDBSynchronised::clear()
 	{
 		_Database->clear();
 		delete _Database;
-		_Database = 0;
+		_Database = NULL;
 	}
 
 	// clear CCDBNodeBranch static data
-	CCDBNodeBranch::reset();
+	branchObservingHandler.reset();
+	bankHandler.reset();
 }
 
 
@@ -316,11 +318,14 @@ void CCDBSynchronised::writeInitInProgressIntoUIDB()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if (pIM)
-		pIM->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS")->setValueBool(_InitInProgress);
+	{
+		NLMISC::CCDBNodeLeaf *node = m_CDBInitInProgressDB ? (&*m_CDBInitInProgressDB)
+			: &*(m_CDBInitInProgressDB = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS"));
+		node->setValueBool(_InitInProgress);
+	}
 	else
 		nlwarning("InterfaceManager not created");
 }
-
 
 
 #ifdef TRACE_READ_DELTA

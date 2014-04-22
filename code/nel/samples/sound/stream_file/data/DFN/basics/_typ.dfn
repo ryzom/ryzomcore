@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<DFN Version="0.0" State="modified">
+  <ELEMENT Name="Designation" Type="Type" Filename="string.typ"/>
+  <ELEMENT Name="Substitute" Type="Type" Filename="string.typ"/>
+  <COMMENTS></COMMENTS>
+</DFN>

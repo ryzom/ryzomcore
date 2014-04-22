@@ -140,7 +140,7 @@ public:
 			_ExceptionString = std::string("<CEntityBase> : Invalid stat name ") + var;
 			return _ExceptionString.c_str();
 		}
-		virtual ~EInvalidStat() throw() {};
+		virtual ~EInvalidStat() throw() {}
 	private:
 		mutable std::string _ExceptionString;
 	};
@@ -776,7 +776,7 @@ public:
 	/** 
 	 * remove an effect on this entity. The effect is not deleted.
 	 * \param effect the effect to remove
-	 * \param activateSpleepîngEffect activate or not sleeping effects of the same family, default = true, only false when clearing all effects
+	 * \param activateSpleepingEffect activate or not sleeping effects of the same family, default = true, only false when clearing all effects
 	 * \return true if no other effect of this family is active, false otherwise
 	 */
 	virtual bool removeSabrinaEffect( CSEffect *effect, bool activateSleepingEffect = true );
@@ -820,7 +820,7 @@ public:
 	/// Return the damage using current armor, done by an explosion (e.g. forage source explosion)
 	virtual float getActualDamageFromExplosionWithArmor( float dmg ) const =0;
 
-	inline virtual void clearCurrentAction() {};
+	inline virtual void clearCurrentAction() {}
 
 	inline virtual void setCurrentAction(CLIENT_ACTION_TYPE::TClientActionType,NLMISC::TGameCycle) {}
 

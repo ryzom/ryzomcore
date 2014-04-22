@@ -18,21 +18,44 @@
 
 namespace NL3D 
 {
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+namespace NLDRIVERGLES {
+#else
+namespace NLDRIVERGL {
+#endif
+#endif
+
 	class CDriverGL;
-	void viewDidResize(NSView*, CDriverGL*);
+
+#ifdef NL_STATIC
+} // NLDRIVERGL/ES
+#endif
+
 }
+
+#ifdef NL_STATIC
+#ifdef USE_OPENGLES
+using NL3D::NLDRIVERGLES::CDriverGL;
+#else
+using NL3D::NLDRIVERGL::CDriverGL;
+#endif
+#else
+using NL3D::CDriverGL;
+#endif
 
 @interface CocoaOpenGLView : NSOpenGLView<NSTextInputClient>
 {
 	NSMutableAttributedString* _characterStorage;
 	NSRange _markedRange;
-	NL3D::CDriverGL* _driver;
+	CDriverGL* _driver;
 }
 
 -(id)initWithFrame:(NSRect)frame;
 -(void)dealloc;
 -(void)keyDown:(NSEvent*)event;
--(void)setDriver:(NL3D::CDriverGL*)driver;
+-(void)setDriver:(CDriverGL*)driver;
 -(void)resizeWithOldSuperviewSize:(NSSize)oldBoundsSize;
 
 @end

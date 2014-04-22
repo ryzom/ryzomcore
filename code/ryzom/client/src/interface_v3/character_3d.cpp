@@ -475,7 +475,7 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 uint64 SCharacter3DSetup::getDB (const string &name)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNL = pIM->getDbProp(name);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(name);
 	if (pNL == NULL) return 0;
 	return pNL->getValue64();
 }
@@ -484,7 +484,7 @@ uint64 SCharacter3DSetup::getDB (const string &name)
 void SCharacter3DSetup::setDB (const string &name, uint64 val)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNL = pIM->getDbProp(name);
+	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(name);
 	if (pNL == NULL) return;
 	pNL->setValue64(val);
 }
@@ -564,7 +564,7 @@ CCharacter3D::CCharacter3D()
 	_CurrentSetup.ArmsWidth = _CurrentSetup.LegsWidth = _CurrentSetup.BreastSize = -20.0f;
 	_PelvisPos.set(0.f,0.f,-20.0f);
 	_CurPosX = _CurPosY = _CurPosZ = 0.0f;
-	_CurRotX, _CurRotY, _CurRotZ = 0.0f;
+	_CurRotX = _CurRotY = _CurRotZ = 0.0f;
 	_NextBlinkTime = 0;
 	_CopyAnim=false;
 }
@@ -630,7 +630,7 @@ bool CCharacter3D::init (UScene *pScene)
 
 	// ANIMATIONS
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	COptionsAnimationSet	*pOAS= dynamic_cast<COptionsAnimationSet*>(pIM->getOptions("character_animations"));
+	COptionsAnimationSet	*pOAS= dynamic_cast<COptionsAnimationSet*>(CWidgetManager::getInstance()->getOptions("character_animations"));
 	if(!pOAS || !pOAS->AnimationSet)
 	{
 		nlwarning("Not found <options> 'character_animations', or not of type 'animation_set'");

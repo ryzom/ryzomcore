@@ -76,10 +76,12 @@ public:
 	void onIOSMirrorUp();
 	/// callback called at each tick
 	void tickUpdate();
-	/// return dynamic channel TChanID attribued to a faction
+	/// return dynamic channel TChanID attributed to a faction
 	TChanID getFactionDynChannel( const std::string& channelName );
-	/// return dynamic channel TChanID attribued to an user
+	/// return user dynamic channel TChanID
 	TChanID getUserDynChannel( const std::string& channelName);
+	/// return user dynamic channel name
+	std::string getUserDynChannel(const TChanID& channelId);
 	/// return dynamic channel TChanID attribued to a faction
 	const std::string &getPassUserChannel( TChanID channelId);
 	/// return dynamic channel TChanID character must have, DYN_CHAT_INVALID_CHAN if he must don't have faction channel
@@ -91,7 +93,7 @@ public:
 	// brodcast message to channel
 	void broadcastMessage(TChanID channel, const ucstring& speakerName ,const ucstring& txt);
 	// send list of users to player
-	void sendChannelUsers(TChanID channel, CCharacter * user);
+	void sendChannelUsers(TChanID channel, CCharacter * user, bool outputToSys = false);
 	// add faction channel to character if needed
 	void addFactionChannelToCharacter(TChanID channel, CCharacter * user, bool writeRight = true, bool userChannel = false);
 	// remove faction channel for character
@@ -148,7 +150,7 @@ public:
 	// create a faction channel if not already exist
 	void createFactionChannel(PVP_CLAN::TPVPClan clan);
 	// create an extra faction channel if not already exist (for marauders, agnos, urasiens and hominits)
-	void createExtraFactionChannel(const std::string & channelName);
+	void createExtraFactionChannel(const std::string & channelName, bool universalChannel = false);
 	// create an user channel if not already exist
 	TChanID createUserChannel(const std::string & channelName, const std::string & pass);
 	// remove a user channel

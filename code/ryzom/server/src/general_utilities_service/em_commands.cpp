@@ -312,7 +312,8 @@ NLMISC_CATEGORISED_COMMAND(EventManager,emUpdateTools,"update tools installed on
 // Extra commands that open MFC windows
 //-----------------------------------------------------------------------------
 
-#ifdef _WINDOWS
+//#ifdef _WINDOWS
+#if 0
 
 #include "mfc/stdafx.h"
 #include "nel/misc/win_displayer.h"

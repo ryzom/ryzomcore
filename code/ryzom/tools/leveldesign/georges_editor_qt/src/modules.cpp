@@ -68,12 +68,12 @@ bool Modules::loadPlugin()
 	// if(!QFile::exists(pluginPath + pluginFilename))
 	// {
 	// 	nlwarning("Cannot find %s in %s, fallback to working dir", 
-	// 		pluginFilename.toStdString().c_str(), pluginPath.toStdString().c_str());
+	// 		pluginFilename.toUtf8().constData(), pluginPath.toUtf8().constData());
 	// 
 	// 	pluginPath = "";
 	// 
 	// 	Q_FOREACH (QString path, qApp->libraryPaths())
-	// 		nlwarning("libraryPaths %s", path.toStdString().c_str());
+	// 		nlwarning("libraryPaths %s", path.toUtf8().constData());
 	// }
 
 	QDir pluginsDir(pluginPath);
@@ -86,20 +86,20 @@ bool Modules::loadPlugin()
 		if (_objViewerInterface)
 		{
 			nlinfo("Loaded %s", 
-				pluginsDir.absoluteFilePath(pluginFilename).toStdString().c_str());
+				pluginsDir.absoluteFilePath(pluginFilename).toUtf8().constData());
 			return true;
 		}
 		else
 		{
 			nlwarning("Loaded %s, but cannot cast to NLQT::IObjectViewer*", 
-				pluginFilename.toStdString().c_str());
+				pluginFilename.toUtf8().constData());
 		}
 	}
 	else
 	{
 		nlwarning("Cannot get plugin instance for %s (searched in %s)", 
-			pluginFilename.toStdString().c_str(), 
-			(qApp->applicationDirPath() + pluginPath).toStdString().c_str());
+			pluginFilename.toUtf8().constData(), 
+			(qApp->applicationDirPath() + pluginPath).toUtf8().constData());
 	}
 
 	return false;

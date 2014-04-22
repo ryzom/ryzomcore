@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<DFN Revision="$Revision: 1.1 $" State="modified">
-  <ELEMENT Name="name" Type="Type" Filename="string.typ"/>
-  <ELEMENT Name="click zone name" Type="Type" Filename="string.typ"/>
-  <LOG>Tue Jun 15 14:42:11 2004 (besson) Dfn Structure = </LOG>
-</DFN>

@@ -157,11 +157,11 @@ public:
 	/// params as strings
 	std::vector<std::string>	StringParams;
 
-	//* Break when hit: Si une créature frappe le joueur, la consommation est immédiatement interrompue
-	//* Assis: le joueur peut consommer assis.
-	//* Debout: Le joueur peut consommer l'item debout, y compris en combat
-	//* Nage: le joueur peut consommer l'item lorsqu'il nage
-	//* Mektoub: le joueur peut consommer l'item lorsqu'il chevauche un mektoub
+	//* Break when hit: If a creature hits the player, consumption is immediatly aborted
+	//* Sit: player can consume item sit down
+	//* Stand Up: player can consume item stand up, including while fighting
+	//* Swim: player can consume item while swiming
+	//* Mektoub: player can consume item while riding a mektoub
 	union
 	{			
 		uint16 Data;
@@ -429,7 +429,7 @@ struct SShield : public SArmor
 	NL_INSTANCE_COUNTER_DECL(SShield);
 public:
 
-	inline SShield() : SArmor(),ShieldType(SHIELDTYPE::NONE),Unbreakable(false){};
+	inline SShield() : SArmor(),ShieldType(SHIELDTYPE::NONE),Unbreakable(false){}
 	
 	virtual void serial(class NLMISC::IStream &f)
 	{
@@ -838,11 +838,13 @@ public:
 	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticItem &o);
 
+#ifndef NO_EGS_VARS
 	/** Get the base weigth for an item.
 	 *	This weight must be multiplied by the craft parameter weight value
 	 *	to obtain the real item weight.
 	 */
 	float getBaseWeight() const;
+#endif
 	
 	std::vector<SItemSpecialEffect> lookForEffects(ITEM_SPECIAL_EFFECT::TItemSpecialEffect effectType) const;
 

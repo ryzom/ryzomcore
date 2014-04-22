@@ -336,7 +336,7 @@ void cbImpulsionFilter( CMessage& msgin, const string &serviceName, TServiceId s
 } // impulsionFilter //
 
 
-static char*DebugChatModeName[]	=
+static const char* DebugChatModeName[] =
 {
 	"say",
 	"shout",
@@ -709,8 +709,8 @@ static void cbCharacterEventFaction(CMessage& msgin, const string &serviceName, 
 		else
 			ci->UntranslatedEventFactionId = SM->storeString( eventFaction );
 
-		CMirrorPropValue<TYPE_EVENT_FACTION_ID> propEventFactionId( TheDataset, chId, DSPropertyEVENT_FACTION_ID );
-		propEventFactionId = SM->translateEventFaction( ci->UntranslatedEventFactionId );
+//		CMirrorPropValue<TYPE_EVENT_FACTION_ID> propEventFactionId( TheDataset, chId, DSPropertyEVENT_FACTION_ID );
+//		propEventFactionId = SM->translateEventFaction( ci->UntranslatedEventFactionId );
 	}
 	else
 	{
@@ -1513,12 +1513,14 @@ void cbEmoteCrowd( CMessage& msgin, const string &serviceName, TServiceId servic
 //-----------------------------------------------
 void cbEmoteSolePlayer( CMessage& msgin, const string &serviceName, TServiceId serviceId )
 {
+	TDataSetRow				sender;
 	TDataSetRow				target;
 	uint32					phraseId;
+	msgin.serial(sender);
 	msgin.serial(target);
 	msgin.serial(phraseId);
 	CChatManager &cm = IOS->getChatManager();
-	cm.sendEmoteTextToPlayer( target,phraseId );
+	cm.sendEmoteTextToPlayer(sender, target, phraseId );
 }
 
 
@@ -1567,6 +1569,10 @@ void cbSetPhrase( CMessage& msgin, const string &serviceName, TServiceId service
 	SM->setPhrase(msgin);
 }
 
+void cbSetPhraseLang( CMessage& msgin, const string& serviceName, TServiceId serviceId )
+{
+	SM->setPhraseLang(msgin);
+}
 
 //-----------------------------------------------
 //	Add a new channel in the dyn chat
@@ -2048,6 +2054,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 	{ "CUSTOM_EMOTE", cbCustomEmote },	// EGS wants IOS to dispatch an emote custom text to all users around
 	
 	{ "SET_PHRASE", cbSetPhrase },			// AIS wants IOS to change a phrase content
+	{ "SET_PHRASE_LANG", cbSetPhraseLang }, // AIS or EGS wants IOS to change a phrase content for a language
 
 	{ "UPDATE_AIALIAS", cbUpdateAIAlias},
 

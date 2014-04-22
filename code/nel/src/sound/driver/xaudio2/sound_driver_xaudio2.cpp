@@ -19,7 +19,6 @@
 // Project includes
 #include "listener_xaudio2.h"
 #include "source_xaudio2.h"
-#include "music_channel_xaudio2.h"
 #include "effect_xaudio2.h"
 #include "sound_driver_xaudio2.h"
 
@@ -132,8 +131,7 @@ CSoundDriverXAudio2::CSoundDriverXAudio2(ISoundDriver::IStringMapperProvider * /
 	: _XAudio2(NULL), _MasteringVoice(NULL), _Listener(NULL), 
 	_SoundDriverOk(false), _CoInitOk(false), _OperationSetCounter(65536), 
 	_PerformanceCommit3DCounter(0), _PerformanceADPCMBufferSize(0), 
-	_PerformancePCMBufferSize(0), _PerformanceMusicPlayCounter(0), 
-	_PerformanceSourcePlayCounter(0)
+	_PerformancePCMBufferSize(0), _PerformanceSourcePlayCounter(0)
 {
 	nlwarning(NLSOUND_XAUDIO2_PREFIX "Creating CSoundDriverXAudio2");
 
@@ -200,14 +198,6 @@ void CSoundDriverXAudio2::release()
 	// WARNING: Only internal resources are released here, 
 	// the created instances must still be released by the user!
 
-	// Release internal resources of all remaining IMusicChannel instances
-	if (_MusicChannels.size())
-	{
-		nlwarning(NLSOUND_XAUDIO2_PREFIX "_MusicChannels.size(): '%u'", (uint32)_MusicChannels.size());
-		set<CMusicChannelXAudio2 *>::iterator it(_MusicChannels.begin()), end(_MusicChannels.end());
-		for (; it != end; ++it) (*it)->release();
-		_MusicChannels.clear();
-	}
 	// Release internal resources of all remaining ISource instances
 	if (_Sources.size())
 	{
@@ -396,14 +386,6 @@ void CSoundDriverXAudio2::destroySourceVoice(IXAudio2SourceVoice *sourceVoice)
 	if (sourceVoice) sourceVoice->DestroyVoice();
 }
 
-/// Create a music channel
-IMusicChannel *CSoundDriverXAudio2::createMusicChannel()
-{
-	CMusicChannelXAudio2 *music_channel = new CMusicChannelXAudio2(this);
-	_MusicChannels.insert(music_channel);
-	return static_cast<IMusicChannel *>(music_channel);
-}
-
 /// Create the listener instance
 IListener *CSoundDriverXAudio2::createListener()
 {
@@ -481,7 +463,6 @@ void CSoundDriverXAudio2::writeProfile(std::string& out)
 		+ "\n\tPCMBufferSize: " + toString(_PerformancePCMBufferSize)
 		+ "\n\tADPCMBufferSize: " + toString(_PerformanceADPCMBufferSize)
 		+ "\n\tSourcePlayCounter: " + toString(_PerformanceSourcePlayCounter)
-		+ "\n\tMusicPlayCounter: " + toString(_PerformanceMusicPlayCounter)
 		+ "\n\tCommit3DCounter: " + toString(_PerformanceCommit3DCounter)
 		+ "\nXAUDIO2_PERFORMANCE_DATA"
 		+ "\n\tAudioCyclesSinceLastQuery: " + toString(performance.AudioCyclesSinceLastQuery)
@@ -519,17 +500,6 @@ void CSoundDriverXAudio2::displayBench(NLMISC::CLog *log)
 	NLMISC::CHTimer::display(log, CHTimer::TotalTime);
 }
 
-/** Get music info. Returns false if the song is not found or the function is not implemented.
- *  \param filepath path to file, CPath::lookup done by driver
- *  \param artist returns the song artist (empty if not available)
- *  \param title returns the title (empty if not available)
- */
-bool CSoundDriverXAudio2::getMusicInfo(const std::string &filepath, std::string &artist, std::string &title)
-{
-	// add support for additional non-standard music file types info here
-	return IMusicBuffer::getInfo(filepath, artist, title);
-}
-
 /// Remove a buffer (should be called by the friend destructor of the buffer class)
 void CSoundDriverXAudio2::removeBuffer(CBufferXAudio2 *buffer)
 {
@@ -542,13 +512,6 @@ void CSoundDriverXAudio2::removeSource(CSourceXAudio2 *source)
 {
 	if (_Sources.find(source) != _Sources.end()) _Sources.erase(source);
 	else nlwarning("removeSource already called");
-}
-	
-/// (Internal) Remove a source (should be called by the destructor of the source class).
-void CSoundDriverXAudio2::removeMusicChannel(CMusicChannelXAudio2 *musicChannel)
-{
-	if (_MusicChannels.find(musicChannel) != _MusicChannels.end()) _MusicChannels.erase(musicChannel);
-	else nlwarning("removeMusicChannel already called");
 }
 
 /// (Internal) Remove an effect (should be called by the destructor of the effect class)

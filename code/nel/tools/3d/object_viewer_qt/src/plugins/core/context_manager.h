@@ -26,6 +26,7 @@
 
 QT_BEGIN_NAMESPACE
 class QTabWidget;
+class QUndoStack;
 QT_END_NAMESPACE
 
 namespace Core
@@ -45,12 +46,17 @@ public:
 	Core::IContext *currentContext() const;
 	Core::IContext *context(const QString &id) const;
 
+	// temporary solution for multiple undo stacks per context
+	void registerUndoStack(QUndoStack *stack);
+	void unregisterUndoStack(QUndoStack *stack);
+
 Q_SIGNALS:
 	// the default argument '=0' is important for connects without the oldContext argument.
 	void currentContextChanged(Core::IContext *context, Core::IContext *oldContext = 0);
 
 public Q_SLOTS:
 	void activateContext(const QString &id);
+	void updateCurrentContext();
 
 private Q_SLOTS:
 	void objectAdded(QObject *obj);

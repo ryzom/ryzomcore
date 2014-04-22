@@ -6,7 +6,7 @@ includedir=${prefix}/include
 Name: nel-driverogl
 Version: 0.5.0
 Description: NeL 0.5.0
-Reqiures:
+Requires:
 Libs: -L${libdir}
 Libs.private: -ldl -lpthread  -lxml2  -lGL  -lXxf86vm -lXmu
 Cflags: -I${includedir}  -DXF86VIDMODE

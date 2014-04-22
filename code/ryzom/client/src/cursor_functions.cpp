@@ -28,7 +28,7 @@
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/interface_3d_scene.h"
-#include "interface_v3/group_container.h"
+#include "nel/gui/group_container.h"
 #include "sheet_manager.h"
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/guild_manager.h"
@@ -58,6 +58,7 @@ uint32 MissionRingId = 0;
 UInstance selectedInstance;
 const UInstance noSelectedInstance;
 string selectedInstanceURL;
+static NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> s_UserCharFade;
 
 
 ///////////////
@@ -149,7 +150,7 @@ static bool testMissionOption(sint32 priorityWanted)
 	for(uint k = 0; k < NUM_MISSION_OPTIONS; ++k)
 	{
 		std::string nodeName = toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:PRIORITY", (int) k);
-		CCDBNodeLeaf *pNL = pIM->getDbProp(nodeName, false);
+		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(nodeName, false);
 		if(pNL)
 		{
 			sint32 priority = pNL->getValue32();
@@ -159,7 +160,7 @@ static bool testMissionOption(sint32 priorityWanted)
 				if(priorityWanted != 2 || textID==0)
 				{
 					nodeName = toString("LOCAL:TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%d:TITLE", (int) k);
-					pNL = pIM->getDbProp(nodeName, false);
+					pNL = NLGUI::CDBManager::getInstance()->getDbProp(nodeName, false);
 					if(pNL && pNL->getValue32())
 					{
 						textID = pNL->getValue32();
@@ -206,7 +207,7 @@ static bool testMissionRing()
 	for(uint i=0;i<BOTCHATTYPE::MaxR2MissionEntryDatabase;i++)
 	{
 		// get the ring mission title textID
-		CCDBNodeLeaf	*pNL = pIM->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), false);
+		CCDBNodeLeaf	*pNL = NLGUI::CDBManager::getInstance()->getDbProp(toString("LOCAL:TARGET:CONTEXT_MENU:MISSION_RING:%d:TITLE", i), false);
 		if(pNL && pNL->getValue32())
 		{
 			uint32	textID = pNL->getValue32();
@@ -239,12 +240,12 @@ void checkUnderCursor()
 		return;
 
 	// Get the cursor instance
-	CViewPointer *cursor = IM->getPointer();
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	if(cursor == 0)
 		return;
 
 	// No Op if screen minimized
-	if(IM->getViewRenderer().isMinimized())
+	if(CViewRenderer::getInstance()->isMinimized())
 		return;
 
 	// Get the pointer position (in pixel)
@@ -252,13 +253,13 @@ void checkUnderCursor()
 	cursor->getPointerPos(x, y);
 
 	// Over the interface ?
-	if (IM->getWindowUnder(x, y) == NULL)
+	if (CWidgetManager::getInstance()->getWindowUnder(x, y) == NULL)
 	{
 		// Is the pointer in the window ?
 		if(x < 0 || y <0)
 			return;
 		uint32 w, h;
-		CViewRenderer &viewRender = IM->getViewRenderer();
+		CViewRenderer &viewRender = *CViewRenderer::getInstance();
 		viewRender.getScreenSize(w, h);
 		if(x>=(sint32)w || y>=(sint32)h)
 			return;
@@ -273,7 +274,8 @@ void checkUnderCursor()
 		entity= EntitiesMngr.getEntityUnderPos(cursX, cursY, ClientCfg.SelectionDist, isPlayerUnderCursor);
 
 		// If the mouse is over the player make the player transparent
-		CCDBNodeLeaf *pNL = IM->getDbProp("UI:SAVE:USER_CHAR_FADE", false);
+		CCDBNodeLeaf *pNL = s_UserCharFade ? &*s_UserCharFade
+			: &*(s_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
 		if ((pNL != NULL) && (pNL->getValue32() == 1) && UserEntity->selectable())
 		{
 			// If the nearest entity is the player, hide!
@@ -308,7 +310,7 @@ void checkUnderCursor()
 			float dist = (float)(entity->pos() - UserEntity->pos()).norm()-entity->box().getRadius();
 			// Entity Slot under the cursor.
 			SlotUnderCursor = entity->slot();
-			uint32 availablePrograms = (uint32)IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
+			uint32 availablePrograms = (uint32)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
 			bool entityAttackable = (availablePrograms&(1<<BOTCHATTYPE::Attackable)) || entity->properties().attackable();
 			if (ClientCfg.R2EDEnabled)
 			{
@@ -427,7 +429,7 @@ void checkUnderCursor()
 							else if(availablePrograms & (1 << BOTCHATTYPE::WebPageFlag))
 							{
 								// get the web page title textID
-								CCDBNodeLeaf	*pNL = IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
+								CCDBNodeLeaf	*pNL = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:WEB_PAGE_TITLE", false);
 								if(pNL && pNL->getValue32())
 								{
 									uint32	textID = pNL->getValue32();
@@ -446,7 +448,7 @@ void checkUnderCursor()
 							else if(availablePrograms & (1 << BOTCHATTYPE::OutpostFlag))
 							{
 								// get the outpost sheet
-								CCDBNodeLeaf	*pNL = IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST", false);
+								CCDBNodeLeaf	*pNL = NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:OUTPOST", false);
 								if(pNL && pNL->getValue32())
 								{
 									// get the outpost name
@@ -790,7 +792,7 @@ void contextTalk(bool rightClick, bool dblClick)
 	if(IM == 0)
 		return;
 	// Get Entity Program
-	uint32 availablePrograms = (uint32)IM->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
+	uint32 availablePrograms = (uint32)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
 	// Static Mission
 	if(availablePrograms & (1 << BOTCHATTYPE::ChooseMissionFlag))
 		UserEntity->moveTo(SlotUnderCursor, 2.0, CUserEntity::StaticMission);
@@ -874,8 +876,8 @@ void contextWebPage(bool rightClick, bool dblClick)
 void contextWebIG(bool rightClick, bool dblClick)
 {
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
-	CInterfaceElement *pGC = IM->getElementFromId("ui:interface:bot_chat_object");
-	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(IM->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
+	CInterfaceElement *pGC = CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object");
+	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
 	if (el != NULL)
 	{
 		el->setName(selectedInstance.getShapeName());
@@ -890,7 +892,7 @@ void contextWebIG(bool rightClick, bool dblClick)
 	{
 		if (pGC != NULL)
 			pGC->setActive(false);
-		IM->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
+		CAHManager::getInstance()->runActionHandler("browse", NULL, "name=ui:interface:webig:content:html|url="+selectedInstanceURL);
 	}
 }// contextWebIG //
 

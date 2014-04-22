@@ -60,7 +60,7 @@ class CPVPSafeZone;
 
 /**
  * Base class of PVP zones
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2004
  */
@@ -188,7 +188,7 @@ private:
 
 /**
  * A PVP versus zone : 2 clans fight there
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2004
  */
@@ -257,7 +257,7 @@ private:
 
 /**
  * A PVP guild zone : guilds fight there
- * \author Sébastien Guignot
+ * \author Sebastien Guignot
  * \author Nevrax France
  * \date 2004
  */

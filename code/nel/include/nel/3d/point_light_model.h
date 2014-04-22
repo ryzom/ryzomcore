@@ -55,7 +55,7 @@ const NLMISC::CClassId		PointLightModelId=NLMISC::CClassId(0x7e842eba, 0x140b6c6
 class CPointLightModel : public CTransform
 {
 public:
-	/// Call at the begining of the program, to register the model
+	/// Call at the beginning of the program, to register the model
 	static	void	registerBasic();
 
 

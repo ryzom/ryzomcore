@@ -89,10 +89,10 @@ class CEnvironmentalEffectManager : public CSimpleEntityManager<CEnvironmentalEf
 public:
 
 	/// Singleton access
-	static CEnvironmentalEffectManager *getInstance() { return (CEnvironmentalEffectManager*)_Instance; }
+	static CEnvironmentalEffectManager *getInstance();
 
 	/// Release
-	static void	release() { delete (CEnvironmentalEffectManager*)_Instance; }
+	static void release();
 };
 
 

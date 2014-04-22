@@ -69,7 +69,7 @@ namespace NLMISC
 		 *	return true and advance the it iterator if match is found.
 		 */
 		bool matchString(std::string::iterator &it, std::string::iterator end, const char *text);
-		/// Advance up to the begining of the next line, incrementing the in/out param lineCount
+		/// Advance up to the beginning of the next line, incrementing the in/out param lineCount
 		void skipLine(std::string::iterator &it, std::string::iterator end, uint32 &lineCount);
 		///@}
 

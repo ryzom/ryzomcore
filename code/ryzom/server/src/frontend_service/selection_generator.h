@@ -42,10 +42,10 @@ public:
 	typedef TSelectionLevel result_type;
 
 	/// Initialization of a selection cycle
-	virtual void					init( TSelectionLevel nblevels ) {};
+	virtual void					init( TSelectionLevel nblevels ) {}
 
 	/// Change the number of levels without restarting the cycle
-	virtual void					changeNbLevels( TSelectionLevel nblevels ) {};
+	virtual void					changeNbLevels( TSelectionLevel nblevels ) {}
 
 	/// Return the next level to select
 	virtual TSelectionLevel			getNext() = 0;

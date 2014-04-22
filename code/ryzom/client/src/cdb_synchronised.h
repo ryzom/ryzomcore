@@ -20,8 +20,9 @@
 #define CDB_SYNCHRONISED_H
 
 
-#include "cdb.h"
-#include "cdb_branch.h"
+#include "nel/misc/cdb.h"
+#include "nel/misc/cdb_branch.h"
+#include "nel/misc/cdb_manager.h"
 
 /**
  * Class to manage a database of properties
@@ -29,11 +30,8 @@
  * \author Nevrax France
  * \date 2002
  */
-class CCDBSynchronised
+class CCDBSynchronised : public NLMISC::CCDBManager
 {
-	/// database
-	NLMISC::CRefPtr<CCDBNodeBranch> _Database;
-
 	/// string associations
 	std::map<uint32,std::string> _Strings;
 
@@ -60,7 +58,7 @@ public:
 	 * Return a ptr on the node
 	 * \return ptr on the node
 	 */
-	CCDBNodeBranch * getNodePtr() { return _Database; }
+	NLMISC::CCDBNodeBranch * getNodePtr() { return _Database; }
 
 	/**
 	 *	Build the structure of the database from a file
@@ -84,7 +82,7 @@ public:
 	 * Update the database from a stream coming from the FE
 	 * \param f the stream
 	 */
-	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, TCDBBank bank );
+	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, uint bank );
 
 	/**
 	 * Return the value of a property (the update flag is set to false)
@@ -153,6 +151,8 @@ private:
 	bool allInitPacketReceived() const { return _InitDeltaReceived == 2; } // Classic database + inventory
 
 	void writeInitInProgressIntoUIDB();
+
+	NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> m_CDBInitInProgressDB;
 };
 
 

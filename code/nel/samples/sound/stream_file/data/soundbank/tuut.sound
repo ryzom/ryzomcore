@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<FORM Revision="$Revision: 1.1 $" State="modified">
+  <STRUCT>
+    <VSTRUCT DfnName="simple_sound.dfn" Name="SoundType">
+      <ATOM Name="Filename" Value="tuut.wav"/>
+      <ATOM Name="MinDistance" Value="5"/>
+      <ATOM Name="MaxDistance" Value="50"/>
+      <ATOM Name="Alpha" Value="0.5"/>
+    </VSTRUCT>
+  </STRUCT>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <STRUCT/>
+  <LOG>Fri Oct 15 15:24:54 2004 (boucher) .SoundType = simple_sound.dfn
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.Alpha = 0.5
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.Filename = tuut.wav
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.MaxDistance = 50
+Fri Oct 15 15:24:54 2004 (boucher) .SoundType.MinDistance = 5</LOG>
+</FORM>

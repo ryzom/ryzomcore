@@ -621,10 +621,10 @@ void CMagicActionBasicDamage::launch(
 	H_AUTO(CMagicActionBasicDamage_launch);
 	
 	///\todo nico:
-	//		- localisation
-	//		- armure + bouclier
-	//		- degâts sur perso + sur armure
-	//		- behaviour + messages de chat
+	//		- location
+	//		- armor + shield
+	//		- player damages + on armor
+	//		- behaviour + chat messages
 	//		- aggro
 
 	if ( successFactor <= 0.0f )
@@ -704,7 +704,7 @@ void CMagicActionBasicDamage::launch(
 			{
 				CBounceEffect *bounceEffect = safe_cast<CBounceEffect *> (& (*effect));
 				bool bounce = false;
-				CEntityBase *bounceTarget = bounceEffect->getTargetForBounce();
+				CEntityBase *bounceTarget = bounceEffect->getTargetForBounce(actor);
 				if (bounceTarget)
 				{
 					bounce = true;

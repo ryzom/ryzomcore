@@ -1980,6 +1980,8 @@ bool CCharacterActions::dispatchXpGain( TDataSetRow actor, TDataSetRow creatureR
 	// compute xp gain on creature, cap xp gain per player to MaxXPGainPerPlayer
 	const float xpGainPerOpponent = min( MaxXPGainPerPlayer.get(), float(xpFactor * maxXPGain / equivalentXpMembers) );
 
+	c->mobKill(creatureRowId);
+
 	TSkillProgressPerOpponentContainer::iterator it = _SkillProgressPerOpponent.find( creatureRowId );
 	if( it != _SkillProgressPerOpponent.end() )
 	{

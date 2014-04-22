@@ -25,8 +25,8 @@ namespace NLOLDGEORGES
 {
 
 
-// La classe CFormBodyEltAtom représente l'élément terminal de l'arbre. 
-// Il est composé de deux string: sxname et sxvalue
+// CFormBodyEltAtom class represents terminal item from the tree. 
+// It's composited from two strings: sxname and sxvalue
 class CFormBodyEltAtom : public CFormBodyElt  
 {
 public:

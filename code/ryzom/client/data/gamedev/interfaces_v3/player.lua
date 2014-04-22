@@ -8,6 +8,12 @@ function getDbPropU(dbEntry)
 	return value
 end
 
+if string.find(_VERSION, "Lua 5.0") then
+	function math.fmod(a, b)
+		return math.mod(a, b)
+	end
+end
+
 ------------------------------------------------------------------------------------------------------------
 -- create the game namespace without reseting if already created in an other file.
 if (game==nil) then
@@ -803,8 +809,8 @@ end
 
 
 function game:timeInSecondsToReadableTime(regenTime)			
-	local seconds = math.mod(regenTime, 60)	
-	local minutes = math.mod(math.floor(regenTime / 60), 60)	
+	local seconds = math.fmod(regenTime, 60)	
+	local minutes = math.fmod(math.floor(regenTime / 60), 60)	
 	local hours = math.floor(regenTime / 3600)	
 	local result = ""
 	if seconds > 0 then result = concatUCString(tostring(seconds), i18n.get("uittSecondsShort"))	end

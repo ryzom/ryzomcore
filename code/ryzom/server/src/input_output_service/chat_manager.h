@@ -58,13 +58,13 @@ public :
 	/// exception thrown when client is unknown
 	struct EChatClient : public NLMISC::Exception
 	{
-		EChatClient( const NLMISC::CEntityId& id ) : Exception ("Don't have chat infos for the char "+id.toString()) {};
+		EChatClient( const NLMISC::CEntityId& id ) : Exception ("Don't have chat infos for the char "+id.toString()) {}
 	};
 
 	/// exception thrown when group is unknown
 	struct EChatGroup : public NLMISC::Exception
 	{
-		EChatGroup( const TGroupId& gId ) : Exception ("Can't find the group "+gId.toString()) {};
+		EChatGroup( const TGroupId& gId ) : Exception ("Can't find the group "+gId.toString()) {}
 	};
 
 	/**
@@ -248,9 +248,9 @@ public :
 	 * \param target is the id of the target char
 	 * \param phraseId is the phrase id (uint32)
 	 */
-	void sendEmoteTextToPlayer(  const TDataSetRow& target,uint32 phraseId )
+	void sendEmoteTextToPlayer(  const TDataSetRow& sender, const TDataSetRow& target, uint32 phraseId )
 	{
-		sendChat2Ex( CChatGroup::say, target, phraseId );
+		sendChat2Ex( CChatGroup::say, target, phraseId, sender );
 	}
 
 	/**

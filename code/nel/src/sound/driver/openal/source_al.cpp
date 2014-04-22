@@ -15,55 +15,38 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdopenal.h"
-#include "source_al.h"
 #include "sound_driver_al.h"
 #include "listener_al.h"
 #include "effect_al.h"
 #include "buffer_al.h"
+#include "source_al.h"
 #include "ext_al.h"
+
+// #define NLSOUND_DEBUG_GAIN
 
 using namespace std;
 using namespace NLMISC;
 
-namespace NLSOUND
+namespace NLSOUND {
+
+CSourceAL::CSourceAL(CSoundDriverAL *soundDriver) :
+_SoundDriver(NULL), _Buffer(NULL), _Source(AL_NONE),
+_DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL), 
+_IsPlaying(false), _IsPaused(false), _StartTime(0), _IsStreaming(false), _RelativeMode(false), 
+_Pos(0.0f, 0.0f, 0.0f), _Gain(NLSOUND_DEFAULT_GAIN), _Alpha(1.0), 
+_MinDistance(1.0f), _MaxDistance(sqrt(numeric_limits<float>::max())), 
+_Effect(NULL), _Direct(true), 
+_DirectGain(NLSOUND_DEFAULT_DIRECT_GAIN), _EffectGain(NLSOUND_DEFAULT_EFFECT_GAIN), 
+_DirectFilterType(ISource::FilterLowPass), _EffectFilterType(ISource::FilterLowPass), 
+_DirectFilterEnabled(false), _EffectFilterEnabled(false), 
+_DirectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN), _EffectFilterPassGain(NLSOUND_DEFAULT_FILTER_PASS_GAIN)
 {
-
-CSourceAL::CSourceAL(CSoundDriverAL *soundDriver):ISource(), _SoundDriver(NULL), _Source(AL_NONE),
-	_DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL)
-{
-	_IsPlaying = false;
-	_IsPaused = false;
-	_StartTime = 0;
-
-	_Type = SourceSound;
-	_Buffer = NULL;
-	_BuffersMax = 0;
-	_BufferSize = 32768;
-
-	_PosRelative = false;
-	_Gain = NLSOUND_DEFAULT_GAIN;
-	_Alpha = 0.0;
-	_Pos = CVector::Null;
-	_MinDistance = 1.0f;
-	_MaxDistance = numeric_limits<float>::max();
-
-	_Effect = NULL;
-	_Direct = true;
-	_DirectGain = NLSOUND_DEFAULT_DIRECT_GAIN;
-	_EffectGain = NLSOUND_DEFAULT_EFFECT_GAIN;
-	_DirectFilterType = ISource::FilterLowPass;
-	_EffectFilterType = ISource::FilterLowPass;
-	_DirectFilterEnabled = false;
-	_EffectFilterEnabled = false;
-	_DirectFilterPassGain = NLSOUND_DEFAULT_FILTER_PASS_GAIN;
-	_EffectFilterPassGain = NLSOUND_DEFAULT_FILTER_PASS_GAIN;
-
 	// create the al source
 	alGenSources(1, &_Source);
 	alTestError();
-
+	
 	// configure rolloff
-	if (!soundDriver || soundDriver->getOption(ISoundDriver::OptionManualRolloff))
+	if (soundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
 		alSourcef(_Source, AL_ROLLOFF_FACTOR, 0);
 		alTestError();
@@ -73,16 +56,15 @@ CSourceAL::CSourceAL(CSoundDriverAL *soundDriver):ISource(), _SoundDriver(NULL),
 		alSourcef(_Source, AL_ROLLOFF_FACTOR, soundDriver->getRolloffFactor());
 		alTestError();
 	}
-
+	
 	// create filters
-	if (soundDriver && soundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
+	if (soundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
 	{
 		alGenFilters(1, &_DirectFilter);
 		alFilteri(_DirectFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
 		alFilterf(_DirectFilter, AL_LOWPASS_GAIN, NLSOUND_DEFAULT_DIRECT_GAIN);
 		alFilterf(_DirectFilter, AL_LOWPASS_GAINHF, NLSOUND_DEFAULT_FILTER_PASS_GAIN);
 		alTestError();
-
 		alGenFilters(1, &_EffectFilter);
 		alFilteri(_EffectFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
 		alFilterf(_EffectFilter, AL_LOWPASS_GAIN, NLSOUND_DEFAULT_EFFECT_GAIN);
@@ -103,8 +85,6 @@ CSourceAL::~CSourceAL()
 
 void CSourceAL::release()
 {
-	unqueueBuffers();
-	removeBuffers();
 	if (_Source != AL_NONE) { alDeleteSources(1, &_Source); _Source = AL_NONE; }
 	if (_DirectFilter != AL_FILTER_NULL) { alDeleteFilters(1, &_DirectFilter); _DirectFilter = AL_FILTER_NULL; }
 	if (_EffectFilter != AL_FILTER_NULL) { alDeleteFilters(1, &_EffectFilter); _EffectFilter = AL_FILTER_NULL; }
@@ -114,39 +94,21 @@ void CSourceAL::release()
 /// (Internal) Update the 3d changes.
 void CSourceAL::updateManualRolloff()
 {
-	CVector pos = getPos();
-
-	// make relative to listener (if not already!)
-	if (!_PosRelative)
-		pos -= CListenerAL::getInstance()->getPos();
-
-	float sqrdist = pos.sqrnorm();
-	float rolloff = ISource::computeManualRolloff(_Alpha, sqrdist, _MinDistance, _MaxDistance);
-	float volume = _Gain * rolloff;
-
-	// apply SFX volume
-	if (_SoundDriver && _Type == SourceSound)
-		volume *= _SoundDriver->getGain();
-
-	// set the attenuated volume
-	alSourcef(_Source, AL_GAIN, volume);
+	CVector distanceVector = _RelativeMode ? _Pos : (_Pos - CListenerAL::getInstance()->getPos());
+	float distanceSquare = distanceVector.sqrnorm();
+	float rolloff = ISource::computeManualRolloff(_Alpha, distanceSquare, _MinDistance, _MaxDistance);
+	alSourcef(_Source, AL_GAIN, _Gain * rolloff);
 	alTestError();
-}
-
-/// Set type of the source
-void CSourceAL::setType(TSourceType type)
-{
-	_Type = type;
-}
-
-/// Get type of the source
-TSourceType CSourceAL::getType() const
-{
-	return _Type;
+#ifdef NLSOUND_DEBUG_GAIN
+	ALfloat gain;
+	alGetSourcef(_Source, AL_GAIN, &gain);
+	nlwarning("Called updateManualRolloff(), physical gain is %f, configured gain is %f, distanceSquare is %f, rolloff is %f", gain, _Gain, distanceSquare, rolloff);
+	alTestError();
+#endif
 }
 
 /// Enable or disable streaming mode. Source must be stopped to call this.
-void CSourceAL::setStreaming(bool /* streaming */)
+void CSourceAL::setStreaming(bool streaming)
 {
 	nlassert(isStopped());
 
@@ -154,6 +116,7 @@ void CSourceAL::setStreaming(bool /* streaming */)
 	alSourcei(_Source, AL_BUFFER, AL_NONE);
 	alTestError();
 	_Buffer = NULL;
+	_IsStreaming = streaming;
 }
 
 /* Set the buffer that will be played (no streaming)
@@ -199,11 +162,17 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 	CBufferAL *bufferAL = static_cast<CBufferAL *>(buffer);
 	ALuint bufferName = bufferAL->bufferName();
 	nlassert(bufferName);
-
-	// queue the buffer
+	
+	if (!bufferAL->isBufferLoaded())
+	{
+		nlwarning("AL: MUSICBUG: Streaming buffer was not loaded, skipping buffer. This should not happen.");
+		return;
+	}
+	
 	alSourceQueueBuffers(_Source, 1, &bufferName);
 	alTestError();
-
+	_QueuedBuffers.push(bufferAL);
+	
 	// Resume playback if the internal OpenAL source stopped due to buffer underrun.
 	ALint srcstate;
 	alGetSourcei(_Source, AL_SOURCE_STATE, &srcstate);
@@ -218,11 +187,23 @@ void CSourceAL::submitStreamingBuffer(IBuffer *buffer)
 /// Return the amount of buffers in the queue (playing and waiting). 3 buffers is optimal.
 uint CSourceAL::countStreamingBuffers() const
 {
+	// a bit ugly here, but makes a much easier/simpler implementation on both drivers
+	ALint buffersProcessed;
+	alGetSourcei(_Source, AL_BUFFERS_PROCESSED, &buffersProcessed);
+	while (buffersProcessed)
+	{
+		ALuint bufferName = _QueuedBuffers.front()->bufferName();
+		alSourceUnqueueBuffers(_Source, 1, &bufferName);
+		alTestError();
+		const_cast<std::queue<CBufferAL *> &>(_QueuedBuffers).pop();
+		--buffersProcessed;
+	}
 	// return how many are left in the queue
-	ALint buffersQueued;
-	alGetSourcei(_Source, AL_BUFFERS_QUEUED, &buffersQueued);
-	alTestError();
-	return (uint)buffersQueued;
+	//ALint buffersQueued;
+	//alGetSourcei(_SourceName, AL_BUFFERS_QUEUED, &buffersQueued);
+	//alTestError();
+	//return (uint)buffersQueued;
+	return (uint)_QueuedBuffers.size();
 }
 
 /// Set looping on/off for future playbacks (default: off)
@@ -244,27 +225,63 @@ bool CSourceAL::getLooping() const
 /// Play the static buffer (or stream in and play)
 bool CSourceAL::play()
 {
-	if ( _Buffer != NULL )
+#ifdef NLSOUND_DEBUG_GAIN
+	if (_IsStreaming)
+	{
+		nlwarning("Called play on a streaming source");
+	}
+#endif
+
+	// Commit 3D changes before starting play
+	if (_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+		updateManualRolloff();
+
+	if (_Buffer)
 	{
 		// Static playing mode
 		_IsPaused = false;
 		alSourcePlay(_Source);
-		_IsPlaying = alGetError() == AL_NO_ERROR;
+		_IsPlaying = (alGetError() == AL_NO_ERROR);
 		if (_IsPlaying)
 			_StartTime = CTime::getLocalTime();
 		return _IsPlaying;
 	}
-	else
+	else if (_IsStreaming)
 	{
-		// TODO: Verify streaming mode?
 		_IsPaused = false;
-		alSourcePlay(_Source);
-		_IsPlaying = true;
-		_StartTime = CTime::getLocalTime();
+		/* NEW */
+		// called by user as well as by code to resume after buffer underrun
+		if (!_IsPlaying) // set start time if not playing yet
+			_StartTime = CTime::getLocalTime();
+		_IsPlaying = true; // this play always virtually succeed but may not actually be playing
+		if (_QueuedBuffers.size()) // ensure buffers have actually queued
+		{
+			alSourcePlay(_Source);
+			if (alGetError() != AL_NO_ERROR)
+			{
+				nlwarning("AL: MUSICBUG: Unknown error while trying to play streaming source.");
+			}
+		}
+		else
+		{
+			nlwarning("AL: MUSICBUG: Trying to play stream with no buffers queued.");
+		}
 		return true;
+		/* OLD
+		alSourcePlay(_Source);
+		_IsPlaying = (alGetError() == AL_NO_ERROR);
+		if (_IsPlaying)
+			_StartTime = CTime::getLocalTime(); // TODO: Played time should freeze when buffering fails, and be calculated based on the number of buffers played plus passed time. This is necessary for synchronizing animation with sound.
+		return _IsPlaying;
+		*/
 		// Streaming mode
 		//nlwarning("AL: Cannot play null buffer; streaming not implemented" );
 		//nlstop;
+	}
+	else
+	{
+		nlwarning("Invalid play call, not streaming and no static buffer assigned");
+		return false;
 	}
 }
 
@@ -288,8 +305,14 @@ void CSourceAL::stop()
 		_IsPaused = false;
 		alSourceStop(_Source);
 		alTestError();
-
-		unqueueBuffers();
+		// unqueue buffers
+		while (_QueuedBuffers.size())
+		{
+			ALuint bufferName = _QueuedBuffers.front()->bufferName();
+			alSourceUnqueueBuffers(_Source, 1, &bufferName);
+			_QueuedBuffers.pop();
+			alTestError();
+		}
 		// Streaming mode
 		//nlwarning("AL: Cannot stop null buffer; streaming not implemented" );
 		//nlstop;
@@ -379,7 +402,6 @@ bool CSourceAL::isPaused() const
 uint32 CSourceAL::getTime()
 {
 	if (!_StartTime) return 0;
-
 	return (uint32)(CTime::getLocalTime() - _StartTime);
 }
 
@@ -438,27 +460,28 @@ void CSourceAL::getDirection( NLMISC::CVector& dir ) const
 void CSourceAL::setGain(float gain)
 {
 	_Gain = std::min(std::max(gain, NLSOUND_MIN_GAIN), NLSOUND_MAX_GAIN);
-
-	if ((_SoundDriver == NULL) || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+	if (!_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
-		float gain = _Gain;
-
-		// apply SFX volume
-		if (_SoundDriver && _Type == SourceSound)
-			gain *= _SoundDriver->getGain();
-
-		alSourcef(_Source, AL_GAIN, gain);
+		alSourcef(_Source, AL_GAIN, _Gain);
 		alTestError();
 	}
+#ifdef NLSOUND_DEBUG_GAIN
+	else
+	{
+		nlwarning("Called setGain(), manual rolloff, commit deferred to play or update, physical gain is %f, configured gain is %f", gain, _Gain);
+	}
+#endif
 }
 
 /// Get the gain
 float CSourceAL::getGain() const
 {
-	//ALfloat gain;
-	//alGetSourcef(_Source, AL_GAIN, &gain);
-	//alTestError();
-	//return gain;
+#ifdef NLSOUND_DEBUG_GAIN
+	ALfloat gain;
+	alGetSourcef(_Source, AL_GAIN, &gain);
+	nlwarning("Called getGain(), physical gain is %f, configured gain is %f", gain, _Gain);
+	alTestError();
+#endif
 	return _Gain;
 }
 
@@ -481,7 +504,7 @@ float CSourceAL::getPitch() const
 /// Set the source relative mode. If true, positions are interpreted relative to the listener position.
 void CSourceAL::setSourceRelativeMode( bool mode )
 {
-	_PosRelative = mode;
+	_RelativeMode = mode;
 	alSourcei(_Source, AL_SOURCE_RELATIVE, mode?AL_TRUE:AL_FALSE );
 	alTestError();
 }
@@ -489,21 +512,28 @@ void CSourceAL::setSourceRelativeMode( bool mode )
 /// Get the source relative mode (3D mode only)
 bool CSourceAL::getSourceRelativeMode() const
 {
-	return _PosRelative;
-//	ALint b;
-//	alGetSourcei(_Source, AL_SOURCE_RELATIVE, &b );
-//	alTestError();
-//	return (b==AL_TRUE);
+	//ALint b;
+	//alGetSourcei(_Source, AL_SOURCE_RELATIVE, &b );
+	//alTestError();
+	//return (b==AL_TRUE);
+	return _RelativeMode;
 }
 
 /// Set the min and max distances (3D mode only)
 void CSourceAL::setMinMaxDistances( float mindist, float maxdist, bool /* deferred */)
 {
 	nlassert( (mindist >= 0.0f) && (maxdist >= 0.0f) );
+
+	static float maxSqrt = sqrt(std::numeric_limits<float>::max());
+ 	if (maxdist >= maxSqrt)
+ 	{
+ 	       nlwarning("SOUND_DEV (OpenAL): Ridiculously high max distance set on source");
+ 	       maxdist = maxSqrt;
+ 	}
+
 	_MinDistance = mindist;
 	_MaxDistance = maxdist;
-
-	if (!_SoundDriver || !_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
+	if (!_SoundDriver->getOption(ISoundDriver::OptionManualRolloff))
 	{
 		alSourcef(_Source, AL_REFERENCE_DISTANCE, mindist);
 		alSourcef(_Source, AL_MAX_DISTANCE, maxdist);
@@ -803,124 +833,6 @@ void CSourceAL::setEffectFilterPassGain(float passGain)
 float CSourceAL::getEffectFilterPassGain() const
 {
 	return _EffectFilterPassGain;
-}
-
-/// Get already processed buffers and unqueue them
-void CSourceAL::getProcessedStreamingBuffers(std::vector<CBufferAL*> &buffers)
-{
-	// get the number of processed buffers
-	ALint buffersProcessed;
-	alGetSourcei(_Source, AL_BUFFERS_PROCESSED, &buffersProcessed);
-	alTestError();
-
-	// exit if more processed buffer than allocated ones
-	if ((uint)buffersProcessed > _BuffersMax) return;
-
-	// unqueue all previously processed buffers and get their name
-	alSourceUnqueueBuffers(_Source, buffersProcessed, &(_BuffersName[0]));
-	alTestError();
-
-	// add each processed buffer to the array
-	for(uint i = 0; i < (uint)buffersProcessed; ++i)
-	{
-		// if buffer is found, return it
-		std::map<uint, CBufferAL*>::const_iterator it = _Buffers.find(_BuffersName[i]);
-		if (it != _Buffers.end())
-			buffers.push_back(it->second);
-	}
-}
-
-/// Get all existing buffers
-void CSourceAL::getStreamingBuffers(std::vector<CBufferAL*> &buffers)
-{
-	std::map<uint, CBufferAL*>::const_iterator it = _Buffers.begin(), iend = _Buffers.end();
-	while(it != iend)
-	{
-		buffers.push_back(it->second);
-		++it;
-	}
-}
-
-/// Unqueue all buffers
-void CSourceAL::unqueueBuffers()
-{
-	// get count of buffers in queue
-	uint count = countStreamingBuffers();
-
-	if (count > 0)
-	{
-		// unqueue all of them
-		alSourceUnqueueBuffers(_Source, count, &(_BuffersName[0]));
-		alTestError();
-	}
-}
-
-/// Delete all allocated buffers
-void CSourceAL::removeBuffers()
-{
-	// delete each buffer
-	std::map<uint, CBufferAL*>::const_iterator it = _Buffers.begin(), iend = _Buffers.end();
-	while(it != iend)
-	{
-		delete it->second;
-		++it;
-	}
-
-	_Buffers.clear();
-}
-
-/// Get available streaming buffers count
-uint CSourceAL::getStreamingBuffersMax() const
-{
-	return _BuffersMax;
-}
-
-/// Set available streaming buffers count and allocate them
-void CSourceAL::setStreamingBuffersMax(uint buffers)
-{
-	// remember previous value
-	uint oldBuffersMax = _BuffersMax;
-
-	_BuffersMax = buffers;
-
-	// resize the temporary buffer names array
-	_BuffersName.resize(buffers);
-
-	// remove all buffers
-	unqueueBuffers();
-	removeBuffers();
-
-	for(uint i = 0; i < _BuffersMax; ++i)
-	{
-		try
-		{
-			// create a new buffer
-			CBufferAL *buffer = static_cast<CBufferAL*>(_SoundDriver->createBuffer());
-			// use StorageSoftware because buffers will be reused
-			// deleting and recreating them is a waste of time
-			buffer->setStorageMode(IBuffer::StorageSoftware);
-			_Buffers[buffer->bufferName()] = buffer;
-		}
-		catch(const ESoundDriverGenBuf &e)
-		{
-			nlwarning("Cannot create %d buffers. openal fails after %d buffers", buffers, i);
-			_BuffersMax = i;
-			_BuffersName.resize(i);
-			break;
-		}
-	}
-}
-
-/// Set the default size for streaming buffers
-void CSourceAL::setStreamingBufferSize(uint size)
-{
-	_BufferSize = size;
-}
-
-/// Get the default size for streaming buffers
-uint CSourceAL::getStreamingBufferSize() const
-{
-	return _BufferSize;
 }
 
 } // NLSOUND

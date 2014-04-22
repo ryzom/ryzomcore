@@ -19,6 +19,7 @@
 
 #include <afxdlgs.h>
 #include <set>
+#include "resource.h"
 
 namespace  NLGEORGES
 {
@@ -62,7 +63,7 @@ public:
 	/// The master dialog call this method when the document is changed/updated
 	static void docChanged();
 	/// The docChanged static method call this method on each page.
-	virtual void onDocChanged() {};
+	virtual void onDocChanged() {}
 };
 
 

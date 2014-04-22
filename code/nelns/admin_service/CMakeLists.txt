@@ -17,4 +17,4 @@ NL_ADD_RUNTIME_FLAGS(admin_service)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS admin_service RUNTIME DESTINATION sbin COMPONENT as)
-INSTALL(FILES admin_service.cfg common.cfg DESTINATION etc/nel/nelns COMPONENT as)
+INSTALL(FILES admin_service.cfg common.cfg DESTINATION ${NL_ETC_PREFIX}/nelns COMPONENT as)

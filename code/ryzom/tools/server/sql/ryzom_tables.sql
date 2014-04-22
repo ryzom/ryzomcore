@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `shard` (
   `MOTD` text NOT NULL,
   `prim` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`prim`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all shards informations for login system';
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all shards information for login system';
 
 # Data exporting was unselected.
 
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   KEY `Community` (`Community`),
   KEY `Email` (`Email`),
   KEY `GMId` (`GMId`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users informations for login system';
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='contains all users information for login system';
 
 # Data exporting was unselected.
 # --------------------------------------------------------

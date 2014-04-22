@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: nel-driverogl
 Version: @VERSION@
 Description: NeL @VERSION@
-Reqiures:
+Requires:
 Libs: -L${libdir}
 Libs.private: @LIBS@ @OPENGL_LIBS@ @XF86VIDMODE_LIBS@ -lXmu
 Cflags: -I${includedir} @OPENGL_CFLAGS@ @XF86VIDMODE_CFLAGS@

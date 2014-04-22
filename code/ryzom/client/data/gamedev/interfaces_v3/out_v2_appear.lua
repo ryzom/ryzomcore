@@ -135,7 +135,7 @@ end
 --function outgame:setPatchProgress(progress)
 --	--debugInfo("*** 3 ***")
 --	local progressPercentText = string.format("%d%%", 100 * progress)
---	local progressPostfix = math.mod(os.time(), 3)	
+--	local progressPostfix = math.fmod(os.time(), 3)	
 --	--debugInfo("Patch in progress : " .. tostring(progress))		
 --	local progressDate = nltime.getLocalTime() / 500
 --	local colValue = math.floor(230 + 24 * math.sin(progressDate))

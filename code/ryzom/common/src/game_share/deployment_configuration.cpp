@@ -1,6 +1,18 @@
-/** \file deployment_configuration.cpp
- *
- */
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //-----------------------------------------------------------------------------
 // include
@@ -783,7 +795,7 @@ namespace DEPCFG
 		else
 		{
 			// put the number of info blocks to the stream
-			uint32 count= _InfoBlocks.size();
+			uint32 count= (uint32)_InfoBlocks.size();
 			stream.serial(count);
 			// put the info blocks to the stream one by one
 			for (TInfoBlocks::iterator it= _InfoBlocks.begin(); it!=_InfoBlocks.end(); ++it)
@@ -1191,7 +1203,7 @@ namespace DEPCFG
 		DROP_IF(exeRecord.CfgEntries.empty(),	"No 'cfg' entriesfound in: "+exeRecord.FullName,		++errors );
 
 		// add a refference from the domains' shard map to the exe...
-		_DomainExes[exeRecord.DomainName][exeRecord.ShardName].push_back(_ExeRecords.size());
+		_DomainExes[exeRecord.DomainName][exeRecord.ShardName].push_back((uint32)_ExeRecords.size());
 
 		// we may have hit errors but we go ahead anyway as in the case of errors the whole thing will be cleared out anyway
 		_ExeRecords.push_back(exeRecord);
@@ -1496,7 +1508,7 @@ NLMISC_CATEGORISED_COMMAND(depcfg,dumpDepCfgShards,"dump the shard set for the d
 					DEPCFG::SAppDescription app;
 					DEPCFG::CDeploymentConfiguration::getInstance().getApp(*dit,*ait,app);
 					uint32 cfgFileLines=app.CfgFile.countLines();
-					uint32 numDataPacks= app.DataPacks.size();
+					uint32 numDataPacks= (uint32)app.DataPacks.size();
 					log.displayNL("      -- App: %-20s: %s (cfg file length: %d lines, data packs used: %d)",app.AppName.c_str(),app.CmdLine.c_str(),cfgFileLines,numDataPacks);
 				}
 			}

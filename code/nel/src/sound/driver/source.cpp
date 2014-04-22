@@ -26,15 +26,12 @@ namespace NLSOUND
 // common method used only with OptionManualRolloff. return the volume in 1/100th DB ( = mB) modified
 sint32 ISource::computeManualRollOff(sint32 volumeMB, sint32 mbMin, sint32 mbMax, double alpha, float sqrdist, float distMin, float distMax)
 {
-	// root square of max float value
-	static float maxSqrt = sqrt(std::numeric_limits<float>::max());
-
 	if (sqrdist < distMin * distMin)
 	{
 		// no attenuation
 		return volumeMB;
 	}
-	else if ((distMax < maxSqrt) && (sqrdist > distMax * distMax))
+	else if (sqrdist > distMax * distMax)
 	{
 		// full attenuation
 		return mbMin;
@@ -68,12 +65,68 @@ sint32 ISource::computeManualRollOff(sint32 volumeMB, sint32 mbMin, sint32 mbMax
 // common method used only with OptionManualRolloff. return the rolloff in amplitude ratio (gain)
 float ISource::computeManualRolloff(double alpha, float sqrdist, float distMin, float distMax)
 {
-	static const sint32 mbMin = -10000;
-	static const sint32 mbMax = 0;
+	/*static const sint mbMin = -10000;
+	static const sint mbMax = 0;
 	sint32 rolloffMb = ISource::computeManualRollOff(mbMax, mbMin, mbMax, alpha, sqrdist, distMin, distMax);
 	float rolloffGain = (float)pow(10.0, (double)rolloffMb / 2000.0);
 	clamp(rolloffGain, 0.0f, 1.0f);
-	return rolloffGain;
+	return rolloffGain;*/
+	
+	static const double mbMin = -10000;
+	static const double mbMax = 0;
+	
+	if (sqrdist < distMin * distMin)
+	{
+		// no attenuation
+		return 1.0f;
+	}
+	else
+	{
+		if (alpha < 0.0f)
+		{
+			double dist = (double)sqrt(sqrdist);
+			// inverse distance rolloff
+			float rolloff = distMin / dist;
+			if (alpha <= -1.0f) return rolloff;
+
+			if (dist > distMax)
+			{
+				// full attenuation of mbrolloff
+				return (-alpha * rolloff);
+			}
+			else
+			{
+				double mb = mbMin * (dist - distMin) / (distMax - distMin);
+				float mbrolloff = (float)pow(10.0, (double)mb / 2000.0);
+				return ((1.0 + alpha) * mbrolloff - alpha * rolloff);
+			}
+		}
+		else
+		{
+			if (sqrdist > distMax * distMax)
+			{
+				// full attenuation
+				return 0.0f;
+			}
+			double dist = (double)sqrt(sqrdist);
+			if (alpha == 0.0f)
+			{
+				// linearly descending volume on a dB scale
+				double mb = mbMin * (dist - distMin) / (distMax - distMin);
+				return (float)pow(10.0, (double)mb / 2000.0);
+			}
+			else // if (alpha > 0.0f)
+			{
+				// linear distance rolloff
+				float rolloff = (distMax - dist) / (distMax - distMin);
+				if (alpha >= 1.0f) return rolloff;
+
+				double mb = mbMin * (dist - distMin) / (distMax - distMin);
+				float mbrolloff = (float)pow(10.0, (double)mb / 2000.0);
+				return ((1.0 - alpha) * mbrolloff + alpha * rolloff);
+			}
+		}
+	}
 }
 
 } // NLSOUND

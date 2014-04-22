@@ -25,6 +25,7 @@
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/algo.h"
 #include "misc.h"
+#include "entity_cl.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -727,6 +728,13 @@ restartLoop:
 										str.resize(start);
 								}
 							}
+						}
+
+						// If the string contains a title, then remove it
+						ucstring::size_type pos = str.find('$');
+						if ( ! str.empty() && pos != ucstring::npos)
+						{
+							str = CEntityCL::removeTitleFromName(str);
 						}
 
 						// append this string
@@ -1603,30 +1611,37 @@ const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CShee
 }
 
 // ***************************************************************************
-const ucchar *CStringManagerClient::getTitleLocalizedName(const std::string &titleId, bool women)
+const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleId, bool women)
 {
-	const ucchar * infos = getSpecialWord(titleId, women);
-	ucstring infosUC(infos);
+	vector<ucstring> listInfos = getTitleInfos(titleId, women);
 
-	vector<ucstring> listInfos;
-	splitUCString(infosUC, ucstring("#"), listInfos);
-	if (listInfos.empty())
-		return infos;
-
-	_TitleWords.push_back(listInfos[0]);
-	return _TitleWords.back().c_str();
+	if (listInfos.size() > 0)
+	{
+		_TitleWords.push_back(listInfos[0]);
+		return _TitleWords.back().c_str();
+	}
+	
+	return titleId.c_str();
 }
 
-vector<ucstring> CStringManagerClient::getTitleInfos(const std::string &titleId, bool women)
+// ***************************************************************************
+vector<ucstring> CStringManagerClient::getTitleInfos(const ucstring &titleId, bool women)
 {
-	const ucchar * infos = getSpecialWord(titleId, women);
-	ucstring infosUC(infos);
-
+	//ucstring infosUC;
+	//infosUC.fromUtf8(titleId);
 	vector<ucstring> listInfos;
-	splitUCString(infosUC, ucstring("#"), listInfos);
+	splitUCString(titleId, ucstring("#"), listInfos);
+
+	if (listInfos.size() > 0)
+	{
+		if (titleId[0] != '#')
+		{
+			listInfos[0] = getSpecialWord(listInfos[0].toUtf8(), women);
+		}
+	}
+
 	return listInfos;
 }
-
 
 // ***************************************************************************
 const ucchar *CStringManagerClient::getClassificationTypeLocalizedName(EGSPD::CClassificationType::TClassificationType type)

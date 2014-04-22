@@ -21,7 +21,7 @@
 #include "r2_config.h"
 //
 #include "../interface_v3/interface_manager.h"
-#include "../interface_v3/event_descriptor.h"
+#include "nel/gui/event_descriptor.h"
 #include "../motion/user_controls.h"
 #include "../global.h"
 #include "../entities.h"
@@ -30,7 +30,7 @@
 #include "../time_client.h"
 #include "displayer_visual.h"
 #include "../interface_v3/group_map.h"
-#include "../interface_v3/lua_ihm.h"
+#include "nel/gui/lua_ihm.h"
 //
 #include "nel/pacs/u_global_position.h"
 #include "nel/pacs/u_global_retriever.h"
@@ -55,6 +55,7 @@ const uint32 DEFAULT_ENTITY_MIN_OPACITY = 128;
 
 
 bool CTool::_MouseCaptured = false;
+NLMISC::CRefPtr<NLMISC::CCDBNodeLeaf> CTool::_UserCharFade;
 
 static const CVector cardinals[] =
 {
@@ -93,7 +94,7 @@ bool CTool::checkDoubleClick()
 {
 	//H_AUTO(R2_CTool_checkDoubleClick)
 	if (_DoubleClickStartTime == -1) return false;
-	if (T0 - _DoubleClickStartTime >= getUI().getUserDblClickDelay()) return false;
+	if (T0 - _DoubleClickStartTime >= CWidgetManager::getInstance()->getUserDblClickDelay()) return false;
 	sint32 mx, my;
 	getMousePos(mx, my);
 	const sint32 moveThrehsold = 2;
@@ -130,7 +131,7 @@ CInterfaceManager &CTool::getUI()
 void CTool::getScreenSize(uint32 &scrW, uint32 &scrH)
 {
 	//H_AUTO(R2_CTool_getScreenSize)
-	getUI().getViewRenderer().getScreenSize(scrW, scrH);
+	CViewRenderer::getInstance()->getScreenSize(scrW, scrH);
 }
 
 // ***************************************************************
@@ -138,7 +139,7 @@ uint32 CTool::getScreenWidth()
 {
 	//H_AUTO(R2_CTool_getScreenWidth)
 	uint32 scrW, scrH;
-	getUI().getViewRenderer().getScreenSize(scrW, scrH);
+	CViewRenderer::getInstance()->getScreenSize(scrW, scrH);
 	return scrW;
 }
 
@@ -147,7 +148,7 @@ uint32 CTool::getScreenHeight()
 {
 	//H_AUTO(R2_CTool_getScreenHeight)
 	uint32 scrW, scrH;
-	getUI().getViewRenderer().getScreenSize(scrW, scrH);
+	CViewRenderer::getInstance()->getScreenSize(scrW, scrH);
 	return scrH;
 }
 
@@ -155,7 +156,7 @@ uint32 CTool::getScreenHeight()
 void CTool::getMousePos(sint32 &x, sint32 &y)
 {
 	//H_AUTO(R2_CTool_getMousePos)
-	CViewPointer *cursor = getUI().getPointer();
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	if(cursor == NULL)
 	{
 		x = y = -1;
@@ -186,7 +187,7 @@ sint32 CTool::getMouseY()
 bool CTool::isMouseOnUI()
 {
 	//H_AUTO(R2_CTool_isMouseOnUI)
-	return getUI().getWindowUnder(getMouseX(), getMouseY()) != NULL;
+	return CWidgetManager::getInstance()->getWindowUnder(getMouseX(), getMouseY()) != NULL;
 }
 
 
@@ -198,7 +199,7 @@ CGroupMap *CTool::getWorldMap()
 	static volatile bool cacheTest = true;
 	if (!mapPtr || !cacheTest)
 	{
-		mapPtr = dynamic_cast<CGroupMap*>(getUI().getElementFromId("ui:interface:map:content:map_content:actual_map"));
+		mapPtr = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
 	}
 	return mapPtr;
 }
@@ -207,7 +208,7 @@ CGroupMap *CTool::getWorldMap()
 CGroupMap *CTool::isMouseOnWorldMap()
 {
 	//H_AUTO(R2_CTool_isMouseOnWorldMap)
-	const std::vector<CInterfaceGroup *> &groupsUnder = getUI().getGroupsUnderPointer();
+	const std::vector<CInterfaceGroup *> &groupsUnder = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	if (groupsUnder.empty()) return NULL;
 	for(uint k = 0; k < groupsUnder.size(); ++k)
 	{
@@ -221,12 +222,13 @@ CGroupMap *CTool::isMouseOnWorldMap()
 CGroupContainer *CTool::isMouseOnContainer()
 {
 	//H_AUTO(R2_CTool_isMouseOnContainer)
-	const std::vector<CInterfaceGroup *> &groupsUnder = getUI().getGroupsUnderPointer();
+	const std::vector<CInterfaceGroup *> &groupsUnder = CWidgetManager::getInstance()->getGroupsUnderPointer();
 	if (groupsUnder.empty()) return NULL;
 	for(uint k = 0; k < groupsUnder.size(); ++k)
 	{
-		CGroupContainer *gc = groupsUnder[k]->getParentContainer();
-		if (gc) return gc;
+		CInterfaceGroup* gc = groupsUnder[k]->getParentContainer();
+		if (gc)
+			return static_cast< CGroupContainer* >( gc );
 	}
 	return NULL;
 }
@@ -550,7 +552,8 @@ void CTool::handleMouseOverPlayer(bool over)
 {
 	//H_AUTO(R2_CTool_handleMouseOverPlayer)
 	// If the mouse is over the player make the player transparent
-	CCDBNodeLeaf *pNL = getUI().getDbProp("UI:SAVE:USER_CHAR_FADE", false);
+	CCDBNodeLeaf *pNL = _UserCharFade ? &*_UserCharFade
+		: &*(_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
 	if ((pNL != NULL) && (pNL->getValue32() == 1) && UserEntity->selectable())
 	{
 		// If the nearest entity is the player, hide!
@@ -589,7 +592,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 			IDisplayerUIHandle *bestCandidate = NULL;
 			sint8 bestCandidateLayer = -128;
 			// see if the element is under the mouse
-			const std::vector<CCtrlBase *> &ctrlsUnder = getUI().getCtrlsUnderPointer();
+			const std::vector<CCtrlBase *> &ctrlsUnder = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 			for(sint k = (sint)ctrlsUnder.size() - 1; k >= 0; --k)
 			{
 				IDisplayerUIHandle *handle = dynamic_cast<IDisplayerUIHandle *>(ctrlsUnder[k]);
@@ -637,7 +640,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 			}
 		}
 	}
-	else if (!IsMouseFreeLook() && !getUI().getCapturePointerLeft() && !getUI().getCapturePointerRight())
+	else if (!IsMouseFreeLook() && !CWidgetManager::getInstance()->getCapturePointerLeft() && !CWidgetManager::getInstance()->getCapturePointerRight())
 	{
 		// Over the screen ?
 		if (isInScreen(x, y))
@@ -719,14 +722,14 @@ void CTool::captureMouse()
 	CGroupMap *gm = isMouseOnWorldMap();
 	if (gm)
 	{
-		getUI().setCapturePointerLeft(gm);
+		CWidgetManager::getInstance()->setCapturePointerLeft(gm);
 	}
 	else
 	{
 		UserControls.captureMouse();
-		getUI().enableMouseHandling(false);
+		CWidgetManager::getInstance()->enableMouseHandling(false);
 	}
-	getUI().setContextHelpActive(false);
+	CWidgetManager::getInstance()->setContextHelpActive(false);
 	_MouseCaptured = true;
 }
 
@@ -734,10 +737,10 @@ void CTool::captureMouse()
 void CTool::releaseMouse()
 {
 	//H_AUTO(R2_CTool_releaseMouse)
-	getUI().setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
 	UserControls.releaseMouse();
-	getUI().enableMouseHandling(true);
-	getUI().setContextHelpActive(true);
+	CWidgetManager::getInstance()->enableMouseHandling(true);
+	CWidgetManager::getInstance()->setContextHelpActive(true);
 	_MouseCaptured = false;
 }
 
@@ -752,7 +755,7 @@ bool CTool::isMouseCaptured()
 void CTool::setMouseCursor(const char *cursorTexture)
 {
 	//H_AUTO(R2_CTool_setMouseCursor)
-	CViewPointer *cursor = getUI().getPointer();
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 	if(cursor)
 	{
 		cursor->setCursor(cursorTexture);
@@ -760,42 +763,42 @@ void CTool::setMouseCursor(const char *cursorTexture)
 }
 
 // ***************************************************************
-bool CTool::handleEvent(const CEventDescriptor &event)
+bool CTool::handleEvent(const NLGUI::CEventDescriptor &event)
 {
 	//H_AUTO(R2_CTool_handleEvent)
 	bool handled = false;
-	if (event.getType() == CEventDescriptor::mouse)
+	if (event.getType() == NLGUI::CEventDescriptor::mouse)
 	{
-		CEventDescriptorMouse &eventDesc = (CEventDescriptorMouse&)event;
+		NLGUI::CEventDescriptorMouse &eventDesc = (NLGUI::CEventDescriptorMouse&)event;
 		switch(eventDesc.getEventTypeExtended())
 		{
-			case CEventDescriptorMouse::mousemove:
+			case NLGUI::CEventDescriptorMouse::mousemove:
 				handled = onMouseMove();
 			break;
-			case CEventDescriptorMouse::mouseleftdown:
+			case NLGUI::CEventDescriptorMouse::mouseleftdown:
 				handled = onMouseLeftButtonDown();
 				//if (handled) nlwarning("onMouseLeftButtonDown handled");
 			break;
-			case CEventDescriptorMouse::mouserightdown:
+			case NLGUI::CEventDescriptorMouse::mouserightdown:
 				handled = onMouseRightButtonDown();
 				//if (handled) nlwarning("onMouseRightButtonDown handled");
 			break;
-			case CEventDescriptorMouse::mouseleftup:
+			case NLGUI::CEventDescriptorMouse::mouseleftup:
 				handled = onMouseLeftButtonUp();
 				//if (handled) nlwarning("onMouseLeftButtonUp handled");
 			break;
-			case CEventDescriptorMouse::mouserightup:
+			case NLGUI::CEventDescriptorMouse::mouserightup:
 				handled = onMouseRightButtonUp();
 				//if (handled) nlwarning("onMouseRightButtonUp handled");
 			break;
 		}
 	}
-	if (event.getType() == CEventDescriptor::system)
+	if (event.getType() == NLGUI::CEventDescriptor::system)
 	{
-		const CEventDescriptorSystem &eds = (const CEventDescriptorSystem &) event;
-		if (eds.getEventTypeExtended() == CEventDescriptorSystem::setfocus)
+		const NLGUI::CEventDescriptorSystem &eds = (const NLGUI::CEventDescriptorSystem &) event;
+		if (eds.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::setfocus)
 		{
-			const CEventDescriptorSetFocus &edsf = (const CEventDescriptorSetFocus &) eds;
+			const NLGUI::CEventDescriptorSetFocus &edsf = (const NLGUI::CEventDescriptorSetFocus &) eds;
 			if (edsf.hasFocus() == true)
 			{
 				onFocusGained();

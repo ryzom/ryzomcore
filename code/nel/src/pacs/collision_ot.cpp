@@ -16,8 +16,8 @@
 
 #include "stdpacs.h"
 
-#include "collision_ot.h"
-#include "move_primitive.h"
+#include "nel/pacs/collision_ot.h"
+#include "nel/pacs/move_primitive.h"
 
 
 namespace NLPACS

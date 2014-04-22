@@ -1357,7 +1357,6 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				returnValue = MISSION_DESC::PreReqFail;
 				logOnFail = false;*/
 			}
-
 		}
 		// check non replayable missions
 		if( !Tags.Replayable )
@@ -1387,7 +1386,6 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				logOnFail = false;*/
 			}
 		}
-		
 	}
 	else
 	{
@@ -1474,7 +1472,6 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 					}
 					if (guild->isMissionSuccessfull(templ->Alias))
 						break;
-						
 				}
 				else if ( templ->Type == MISSION_DESC::Solo )
 				{
@@ -1534,7 +1531,6 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 						break;
 					/*if (!guild || !guild->isMissionSuccessfull(templ->Alias))
 						break;*/
-						
 				}
 				else if ( templ->Type == MISSION_DESC::Solo )
 				{
@@ -1590,7 +1586,6 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 			{
 
 				/// todo guild mission
-				
 				CGuild* guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 				if ( !guild )
 				{
@@ -1606,7 +1601,6 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				}
 				if (k != guild->getMissions().size())
 					break;
-
 			}
 			else if ( templ->Type == MISSION_DESC::Solo )
 			{
@@ -1702,9 +1696,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 			if ( templ->Type == MISSION_DESC::Guild )
 			{
-
 				/// todo guild mission
-				
 				CGuild* guild = CGuildManager::getInstance()->getGuildFromId( user->getGuildId() );
 				if(!guild)
 					break;
@@ -1717,7 +1709,6 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 				}
 				if (k == guild->getMissions().size())
 					break;
-
 			}
 			else if ( templ->Type == MISSION_DESC::Solo )
 			{

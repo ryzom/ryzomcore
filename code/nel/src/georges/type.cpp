@@ -25,7 +25,6 @@
 #include "nel/georges/form.h"
 #include "nel/georges/form_elm.h"
 #include "nel/georges/form_loader.h"
-
 #include "nel/georges/type.h"
 
 using namespace NLMISC;
@@ -55,7 +54,7 @@ CType::~CType ()
 
 // ***************************************************************************
 
-void CType::write (xmlDocPtr doc, bool georges4CVS) const
+void CType::write (xmlDocPtr doc) const
 {
 	// Create the first node
 	xmlNodePtr node = xmlNewDocNode (doc, NULL, (const xmlChar*)"TYPE", NULL);
@@ -99,7 +98,7 @@ void CType::write (xmlDocPtr doc, bool georges4CVS) const
 	}
 
 	// Header
-	Header.write (node, georges4CVS);
+	Header.write (node);
 }
 
 // ***************************************************************************
@@ -351,7 +350,7 @@ public:
 				{
 					i++;
 					// Set the result
-					result = atof (filename.c_str () + i);
+					NLMISC::fromString(filename.substr(i), result);
 				}
 				else
 				{

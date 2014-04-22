@@ -470,7 +470,7 @@ protected:
 		/// display nodes
 		void	xmlDisplay()
 		{
-			std::string	ntype = (Name == "" ? "client_messages_description" : NbBits == 0 ? "leaf" : "branch");
+			std::string	ntype = (Name.empty() ? "client_messages_description" : NbBits == 0 ? "leaf" : "branch");
 
 			nlinfo("<%s name=\"%s\" description=\"%s\">", ntype.c_str(), Name.c_str(), Description.c_str());
 

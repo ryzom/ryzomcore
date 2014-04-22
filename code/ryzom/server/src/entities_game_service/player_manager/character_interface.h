@@ -22,13 +22,17 @@ class CEntityState;
 class COfflineEntityState;
 class CCharacterRespawnPoints;
 class CFarPosition;
-class NLNET::CMessage;
 class CModuleParent;
+
+namespace NLNET
+{
+	class CMessage;
+}
 
 namespace R2
 {
 	struct TUserRole; 
-};
+}
 
 class CRingRewardPoints;
 
@@ -125,6 +129,9 @@ public:
 	virtual void sendContactListInit()=0;
 
 	virtual void setContactOnlineStatus(const NLMISC::CEntityId &charEid, bool connection) =0;
+
+	virtual void setLastConnectionDate(uint32 date) =0;
+
 
 	virtual void syncContactListWithCharNameChanges(const std::vector<NLMISC::CEntityId> &charNameChanges)=0;
 

@@ -27,6 +27,14 @@
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef _STLPORT_VERSION
+namespace std
+{
+	float fabsf(float f) { return ::fabsf(f); }
+	double fabsl(double f) { return ::fabsl(f); }
+}
+#endif
+
 // ***************************************************************************
 
 // --------------------------------------------------
@@ -401,7 +409,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 				}
 				else
 				{
-					nldebug("Invalid type specified for pblock2 value with name '%s', given type '%u', found '%u'", 
+					nlwarning("Invalid type specified for pblock2 value with name '%s', given type '%u', found '%u'", 
 						sName, (uint32)type, (uint32)paramType);
 				}
 			}
@@ -440,7 +448,7 @@ bool CExportNel::getValueByNameUsingParamBlock2 (Animatable& node, const char* s
 	}
 	else
 	{
-		// nlwarning ("Can't found ParamBlock named %s", sName);
+		// nlwarning ("FAILED Can't find ParamBlock named '%s'", sName);
 		return false;
 	}
 }
@@ -1264,7 +1272,7 @@ void CExportNel::buildCamera(NL3D::CCameraInfo &cameraInfo, INode& node, TimeVal
 				cameraInfo.Fov = genCamera->GetFOV(time);
 
 				if (deleteIt)
-					genCamera->MaybeAutoDelete();
+					genCamera->DeleteThis();
 				genCamera = NULL;
 			}
 		}

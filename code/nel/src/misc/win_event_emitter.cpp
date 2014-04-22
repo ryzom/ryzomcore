@@ -32,6 +32,9 @@
   */
 #include <zmouse.h>
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC {
 
@@ -278,6 +281,9 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 	case WM_DESTROY:
 		server->postEvent (new CEventDestroyWindow (this));
 		break;
+	case WM_CLOSE:
+		server->postEvent (new CEventCloseWindow (this));
+		return true;
 	case WM_DISPLAYCHANGE:
 		server->postEvent (new CEventDisplayChange (LOWORD(lParam), HIWORD(lParam), (uint)wParam, this));
 		break;

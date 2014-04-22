@@ -27,8 +27,8 @@ using namespace NLMISC;
 
 #pragma warning (disable : 4786)
 
-BOOL CALLBACK EnumResLangProc(HINSTANCE hModule, LPCTSTR lpszType, LPCTSTR lpszName, WORD wIDLanguage, 
-							  LONG lParam)
+BOOL CALLBACK EnumResLangProc(HMODULE hModule, LPCSTR lpszType, LPCSTR lpszName, WORD wIDLanguage, 
+							  LONG_PTR lParam)
 {
 	set<HRSRC> *iconNames = (set<HRSRC>*)lParam;
 	

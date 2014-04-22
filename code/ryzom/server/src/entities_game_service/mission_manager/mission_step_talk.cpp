@@ -22,6 +22,7 @@
 #include "mission_manager/mission_parser.h"
 #include "mission_manager/ai_alias_translator.h"
 #include "player_manager/character.h"
+#include "player_manager/player_manager.h"
 #include "creature_manager/creature_manager.h"
 #include "mission_manager/mission_manager.h"
 #include "game_item_manager/player_inv_xchg.h"
@@ -49,52 +50,83 @@ class CMissionStepTalk : public IMissionStepTemplate
 	bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
 	{
 		_SourceLine = line;
-		if ( script.size() < 3 )
+		if ( script.size() < 2 )
 		{
 			MISLOGSYNTAXERROR("<npc_name> [: <phrase_id>*[;<param>]]");
 			return false;
 		}
 		bool ret = true;
-		// parse bot
-		if ( !CMissionParser::parseBotName(script[1], _Bot, missionData) )
+		//// Dynamic Mission Args : #dynamic#
+		if (trim(script[1]) == "#dynamic#")
 		{
-			MISLOGERROR1("invalid npc '%s'", script[1].c_str());
-			return false;
-		}
-		// parse phrase and params
-		if (script.size() > 2)
-		{
-			// parse a specific phrase
-			if (!CMissionParser::parseParamText(line, script[2], _PhraseId, _Params ))
-			{
-				MISLOGERROR1("invalid text '%s'", script[2].c_str());
-				return false;
-			}
+			_Dynamic = missionData.Name;
+			_PhraseId = _Dynamic+"_ACTION";
+			_IsDynamic = true;
 		}
 		else
 		{
-			// use the default phrase
-			_PhraseId = "MIS_TALK_TO_MENU";
+			_IsDynamic = false;
+			// parse bot
+			if ( !CMissionParser::parseBotName(script[1], _Bot, missionData) )
+			{
+				MISLOGERROR1("invalid npc '%s'", script[1].c_str());
+				return false;
+			}
+
+			// parse phrase and params
+			if (script.size() > 2)
+			{
+				// parse a specific phrase
+				if (!CMissionParser::parseParamText(line, script[2], _PhraseId, _Params ))
+				{
+					MISLOGERROR1("invalid text '%s'", script[2].c_str());
+					return false;
+				}
+			}
+			else
+			{
+				// use the default phrase
+				_PhraseId = "MIS_TALK_TO_MENU";
+			}
+
+			// add a first default param (the name of the bot we talk to)
+			_Params.insert(_Params.begin(), STRING_MANAGER::TParam());
+			_Params[0].Identifier = CMissionParser::getNoBlankString(script[1]);
 		}
-
-		// add a first default param (the name of the bot we talk to)
-		_Params.insert(_Params.begin(), STRING_MANAGER::TParam());
-		_Params[0].Identifier = CMissionParser::getNoBlankString(script[1]);
-
 		return true;
 	}
 
 	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
 	{
+		string webAppUrl;
+
+		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
+
+		if (_IsDynamic && _User != NULL)
+		{
+			vector<string> params = _User->getCustomMissionParams(_Dynamic);
+			if (params.size() < 2)
+			{
+				LOGMISSIONSTEPERROR("talk_to : invalid npc name");
+				return 0;
+			}
+			else
+			{
+				webAppUrl = params[0];
+			}
+		}
+		
 		// not check here : they are done befor. If a talk event comes here, the step is complete
 		if( event.Type == CMissionEvent::Talk )		
 		{
+			if (!webAppUrl.empty() && _User != NULL)
+				_User->validateDynamicMissionStep(webAppUrl);
 			LOGMISSIONSTEPSUCCESS("talk_to");
 			return 1;
 		}
 		return 0;
 	}
-	
+
 	void getInitState( std::vector<uint32>& ret )
 	{
 		ret.clear();
@@ -102,9 +134,50 @@ class CMissionStepTalk : public IMissionStepTemplate
 		ret[0] = 1;
 	}
 
+	bool getDynamicBot(TAIAlias & aliasRet)
+	{
+		if (_User != NULL)
+		{
+			vector<string> params = _User->getCustomMissionParams(_Dynamic);
+			if (params.size() < 2)
+			{
+				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+				return false;
+			}
+			else
+			{
+				vector<TAIAlias> aliases;
+				CAIAliasTranslator::getInstance()->getNPCAliasesFromName(params[1], aliases);
+				if ( aliases.empty() )
+				{
+					MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+					return false;
+				}
+
+				aliasRet = aliases[0];
+				return true;
+			}
+		}
+		return false;
+	}
+
 	virtual uint32 sendContextText(const TDataSetRow& user, const TDataSetRow& interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver )
 	{
+
+		if (_IsDynamic)
+		{
+			if (!getDynamicBot(_Bot) || _User == NULL)
+			{
+				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+				return 0;
+			}
+
+			TVectorParamCheck params;
+			return STRING_MANAGER::sendStringToClient( user, _PhraseId, params );
+		}
+
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
+
 		if ( bot )
 		{
 			if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
@@ -124,6 +197,12 @@ class CMissionStepTalk : public IMissionStepTemplate
 	
 	virtual bool hasBotChatOption(const TDataSetRow & interlocutor, CMission * instance, bool & gift)
 	{
+		if (_IsDynamic && !getDynamicBot(_Bot))
+		{
+			MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+			return 0;	
+		}
+
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( bot )
 		{
@@ -140,6 +219,27 @@ class CMissionStepTalk : public IMissionStepTemplate
 
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
+		if (_IsDynamic && !getDynamicBot(_Bot))
+		{
+			MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+			static const std::string stepText = "DEBUG_CRASH_P_SMG_CRASH2";
+			textPtr = &stepText;
+			return;	
+		}
+
+		if (_IsDynamic &&  _User != NULL)
+		{
+
+			vector<string> params = _User->getCustomMissionParams(_Dynamic);
+			if (params.size() < 2)
+			{
+				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+				return;
+			}
+			_Params.insert(_Params.begin(), STRING_MANAGER::TParam());
+			_Params[0].Identifier = params[1];
+		}
+
 		nbSubSteps = 1;
 		static const std::string stepText = "MIS_TALK_TO";
 		textPtr = &stepText;
@@ -151,16 +251,23 @@ class CMissionStepTalk : public IMissionStepTemplate
 		else
 			retParams[0].Identifier = "giver";		
 	}
+
 	bool solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  )
 	{
-		bool ret = IMissionStepTemplate::solveTextsParams(missionData,templ);
-		if ( !CMissionParser::solveTextsParams(_SourceLine, _Params,missionData ) )
-			ret = false;
-		return ret;
+		if (!_IsDynamic)
+		{
+			bool ret = IMissionStepTemplate::solveTextsParams(missionData,templ);
+			if ( !CMissionParser::solveTextsParams(_SourceLine, _Params,missionData ) )
+				ret = false;
+			return ret;
+		}
+		return true;
 	}
 
 	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const { invalidIsGiver=true; return _Bot; }
 
+	bool _IsDynamic;
+	std::string	_Dynamic;
 	std::string _PhraseId;
 	TVectorParamCheck _Params;
 	TAIAlias	_Bot;

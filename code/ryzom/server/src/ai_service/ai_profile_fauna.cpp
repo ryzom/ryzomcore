@@ -310,9 +310,9 @@ void CWanderFaunaProfile::updateProfile(uint ticksSinceLastUpdate)
 	CFollowPathContext fpcWanderFaunaProfileUpdate("WanderFaunaProfileUpdate");
 	
 	// calculate distance from bot position to magnet point (used in all the different processes)
-	_magnetDist=_Bot->pos().distTo(_Bot->spawnGrp().magnetPos());
-	
-	if (_magnetDist>_Bot->spawnGrp().magnetRadiusFar())
+	_magnetDistSq=_Bot->pos().distSqTo(_Bot->spawnGrp().magnetPos());
+	double grpMagnetRadiusFar=_Bot->spawnGrp().magnetRadiusFar();
+	if (_magnetDistSq>(grpMagnetRadiusFar*grpMagnetRadiusFar))
 	{
 		_Bot->setMode( MBEHAV::NORMAL );
 		
@@ -405,11 +405,12 @@ void CGrazeFaunaProfile::updateProfile(uint ticksSinceLastUpdate)
 	CFollowPathContext fpcGrazeFaunaProfileUpdate("GrazeFaunaProfileUpdate");
 
 	// calculate distance from bot position to magnet point (used in all the different processes)
-	_magnetDist=_Bot->pos().distTo(_Bot->spawnGrp().magnetPos());
+	_magnetDistSq=_Bot->pos().distSqTo(_Bot->spawnGrp().magnetPos());
 	
 	if	(!_ArrivedInZone)
 	{
-		if	(_magnetDist>_Bot->spawnGrp().magnetRadiusFar())
+		float grpMagnetRadiusFar=_Bot->spawnGrp().magnetRadiusFar();
+		if	(_magnetDistSq>(grpMagnetRadiusFar*grpMagnetRadiusFar))
 		{
 			_Bot->setMode( MBEHAV::NORMAL );
 			
@@ -501,7 +502,8 @@ void CGrazeFaunaProfile::updateProfile(uint ticksSinceLastUpdate)
 	}
 	
 	//	&&	_state==0	)	//	means wait in movementmagnet.
-	if	(	_magnetDist<=_Bot->spawnGrp().magnetRadiusNear()
+	const float grpMagnetRadiusNear=_Bot->spawnGrp().magnetRadiusNear();
+	if	(	_magnetDistSq<=(grpMagnetRadiusNear*grpMagnetRadiusNear)
 		&&	_MovementMagnet->getMovementType()==CMovementMagnet::Movement_Anim)
 	{
 		if	(_Bot->getPersistent().grp().getType()==AITYPES::FaunaTypePredator)
@@ -564,11 +566,12 @@ void CRestFaunaProfile::updateProfile(uint ticksSinceLastUpdate)
 	CFollowPathContext fpcRestFaunaProfileUpdate("RestFaunaProfileUpdate");
 
 	// calculate distance from bot position to magnet point (used in all the different processes)
-	_magnetDist=_Bot->pos().distTo(_Bot->spawnGrp().magnetPos());
+	_magnetDistSq=_Bot->pos().distSqTo(_Bot->spawnGrp().magnetPos());
 	
 	if (!_ArrivedInZone)
 	{
-		if	(_magnetDist>_Bot->spawnGrp().magnetRadiusFar())
+		float grpMagnetRadiusFar=_Bot->spawnGrp().magnetRadiusFar();
+		if	(_magnetDistSq>(grpMagnetRadiusFar*grpMagnetRadiusFar))
 		{
 			if (!_OutOfMagnet)
 			{
@@ -656,7 +659,8 @@ void CRestFaunaProfile::updateProfile(uint ticksSinceLastUpdate)
 		break;
 	}
 	
-	if (	_magnetDist<=_Bot->spawnGrp().magnetRadiusNear()
+	const float grpMagnetRadiusNear=_Bot->spawnGrp().magnetRadiusNear();
+	if (	_magnetDistSq<=(grpMagnetRadiusNear*grpMagnetRadiusNear)
 		&&	_MovementMagnet->getMovementType()==CMovementMagnet::Movement_Anim)
 	{
 		_Bot->setMode(MBEHAV::REST);

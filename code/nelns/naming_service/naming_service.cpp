@@ -1139,7 +1139,7 @@ NLMISC_COMMAND (kill, "kill a service and send an unregister broadcast to other 
 
 NLMISC_DYNVARIABLE(uint32, NbRegisteredServices, "display the number of service that are registered in naming service")
 {
-	if (get) *pointer = RegisteredServices.size();
+	if (get) *pointer = (uint32)RegisteredServices.size();
 }
 
 NLMISC_COMMAND( displayServiceInstances, "SIM: Display info on service instances", "" )

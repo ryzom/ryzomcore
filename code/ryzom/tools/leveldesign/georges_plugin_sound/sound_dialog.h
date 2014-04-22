@@ -21,6 +21,7 @@
 #include "std_sound_plugin.h"
 #include "listener_view.h"
 #include "nel/sound/u_audio_mixer.h"
+#include "resource.h"
 
 #include "../georges_dll/plugin_interface.h"
 
@@ -126,7 +127,7 @@ private:
 
 	// Generated message map functions
 	//{{AFX_MSG(CSoundDialog)
-	afx_msg void OnTimer(UINT id);
+	afx_msg void OnTimer(UINT_PTR id);
 	afx_msg void OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnControlPlayback();
 	afx_msg void OnZoom(NMHDR* pNMHDR, LRESULT* pResult);

@@ -31,6 +31,9 @@ public:
 	class IJob: public NLMISC::CRefCount
 	{
 	public:
+		// virtual dtor
+		virtual ~IJob() {}
+
 		// return true if the job is finished -> the job object can be deleted
 		virtual bool finished()=0;
 

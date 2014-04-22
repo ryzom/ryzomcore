@@ -20,7 +20,7 @@
 #include <QtGui/QFileSystemModel>
 #include <QSortFilterProxyModel>
 
-namespace Plugin
+namespace GeorgesQt
 {
 
 	class CGeorgesFileSystemModel : public QFileSystemModel
@@ -74,6 +74,6 @@ private Q_SLOTS:
 	//	bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const;
 	//};
 
-} /* namespace NLQT */
+} /* namespace GeorgesQt */
 
 #endif // GEORGES_FILESYSTEM_MODEL_H

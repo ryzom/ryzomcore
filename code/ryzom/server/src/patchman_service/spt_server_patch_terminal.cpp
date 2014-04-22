@@ -81,7 +81,9 @@ static void addSPTMessage(const CSString& moduleName, const CSString& msgText)
 	nldebug("SPTMSG_VERBOSE %d: %s: %s",count,moduleName.c_str(),msgText.c_str());
 
 	// look for a slot to stick the message in
-	CSString cleanModuleName= (moduleName.splitTo(':')+'/'+moduleName.splitFrom(':').splitFrom(':')).strip();
+	CSString cleanModuleName= (moduleName.splitTo(':')+'/'+moduleName.splitFrom(':').splitFrom(':'));
+	cleanModuleName = cleanModuleName.strip();
+
 	uint32 oldest=0;
 	uint32 oldestTime=~0u;
 	for (uint32 i=0;i<sizeof(SPTMessage)/sizeof(SPTMessage[0]) && i<NumSPTWatches.get();++i)

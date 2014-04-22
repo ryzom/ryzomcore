@@ -69,7 +69,7 @@ void	CVisualPropertiesInterface::release()
 }
 
 //	set different visual properties for a bot.
-void	CVisualPropertiesInterface::setName(const TDataSetRow&	dataSetRow,std::string name)
+void	CVisualPropertiesInterface::setName(const TDataSetRow&	dataSetRow, ucstring name)
 {
 	if (!IOSHasMirrorReady)
 		return;
@@ -77,8 +77,6 @@ void	CVisualPropertiesInterface::setName(const TDataSetRow&	dataSetRow,std::stri
 	NLNET::CMessage	msgout("CHARACTER_NAME");
 	CEntityId		eid=CMirrors::DataSet->getEntityId(dataSetRow);
 	msgout.serial	(const_cast<TDataSetRow&>(dataSetRow));
-	ucstring uname;
-	uname.fromUtf8(name);	
-	msgout.serial	(uname);	// Daniel: TODO update all name dependencies to ucstring in your service.	
+	msgout.serial	(name);
 	sendMessageViaMirror("IOS",msgout);
 }

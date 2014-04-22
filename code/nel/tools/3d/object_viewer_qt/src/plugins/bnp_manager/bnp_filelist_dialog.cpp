@@ -20,10 +20,6 @@
 
 // Qt includes
 #include <QtGui/QWidget>
-#include <QDragEnterEvent>
-#include <QMimeData>
-#include <QUrl>
-#include <QEvent>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -38,7 +34,6 @@ BnpFileListDialog::BnpFileListDialog(QString bnpPath, QWidget *parent)
 		m_DataPath(bnpPath)
 {
 	m_ui.setupUi(this);
-	setAcceptDrops(true);
 }
 // ***************************************************************************
 BnpFileListDialog::~BnpFileListDialog()
@@ -84,7 +79,7 @@ bool BnpFileListDialog::loadTable(const QString filePath)
 	int row = 0;
 
 	// read the header from the bnp file
-	if (!myBNPFileHandle.readHeader( filePath.toStdString()) )
+	if (!myBNPFileHandle.readHeader( filePath.toUtf8().constData()) )
 	{
 		return false;
 	}
@@ -111,6 +106,14 @@ bool BnpFileListDialog::loadTable(const QString filePath)
 	return true;
 }
 // ***************************************************************************
+void BnpFileListDialog::clearTable()
+{
+	// create emtpy table
+	setupTable(0);
+
+	setWindowTitle("BNP File List");
+}
+// ***************************************************************************
 void BnpFileListDialog::getSelections(TSelectionList& SelectionList)
 {
 	QModelIndex index;
@@ -122,24 +125,8 @@ void BnpFileListDialog::getSelections(TSelectionList& SelectionList)
 	{
 		QVariant data = model->data(index);
 		QString filename = data.toString();
-		SelectionList.push_back( filename.toStdString() );
+		SelectionList.push_back( filename.toUtf8().constData() );
 	}
 }
-// ***************************************************************************
-void BnpFileListDialog::dragEnterEvent(QDragEnterEvent *event)
-{
-	// Accept only one file
-	// In the future a tabbed FileListDialog would accept more
-	if ( event->mimeData()->hasUrls() && event->mimeData()->urls().count() == 1)
-		event->acceptProposedAction();
-}
-// ***************************************************************************
-void BnpFileListDialog::dropEvent(QDropEvent *event)
- {
-	// Excraft the local file url from the drop object and fill the table
-	const QMimeData *mimeData = event->mimeData();
-	QList<QUrl> urlList = mimeData->urls();
-	loadTable( urlList.first().toLocalFile() );
- }
 
 } // namespace BNPManager

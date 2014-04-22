@@ -121,7 +121,7 @@ NLMISC_COMMAND(outpostSimulateTimer0End, "", "<outpost_id> [<absolute end time> 
 	if (args.size()>1)
 	{
 		NLMISC::fromString(args[1], endTime);
-		if (args[1][0]=='+')
+		if (args[1].find('+')==0)
 			endTime += CTime::getSecondsSince1970();
 	}
 	if (endTime==0) endTime = 1;
@@ -144,7 +144,7 @@ NLMISC_COMMAND(outpostSimulateTimer1End, "", "<outpost_id> [<absolute end time> 
 	if (args.size()>1)
 	{
 		NLMISC::fromString(args[1], endTime);
-		if (args[1][0]=='+')
+		if (args[1].find('+')==0)
 			endTime += CTime::getSecondsSince1970();
 	}
 	if (endTime==0) endTime = 1;
@@ -167,7 +167,7 @@ NLMISC_COMMAND(outpostSimulateTimer2End, "", "<outpost_id> [<absolute end time> 
 	if (args.size()>1)
 	{
 		NLMISC::fromString(args[1], endTime);
-		if (args[1][0]=='+')
+		if (args[1].find('+')==0)
 			endTime += CTime::getSecondsSince1970();
 	}
 	if (endTime==0) endTime = 1;

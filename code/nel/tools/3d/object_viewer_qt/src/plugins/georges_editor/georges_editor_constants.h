@@ -17,7 +17,7 @@
 #ifndef GEORGES_EDITOR_CONSTANTS_H
 #define GEORGES_EDITOR_CONSTANTS_H
 
-namespace Plugin
+namespace GeorgesQt
 {
 namespace Constants
 {
@@ -26,6 +26,6 @@ const char * const GEORGES_EDITOR_SECTION = "GeorgesEditor";
 
 
 } // namespace Constants
-} // namespace Plugin
+} // namespace GeorgesQt
 
 #endif // GEORGES_EDITOR_CONSTANTS_H

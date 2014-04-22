@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<DFN Version="0.4" State="modified">
-  <ELEMENT Name="weight_max" Type="Type" Filename="float.typ" Default="100.0"/>
-  <ELEMENT Name="bulk_max" Type="Type" Filename="float.typ" Default="100.0"/>
-  <ELEMENT Name="slot_count" Type="Type" Filename="int.typ" Default="1"/>
-  <ELEMENT Name="slot_type" Type="Type" Filename="item_slot.typ" Array="true"/>
-</DFN>

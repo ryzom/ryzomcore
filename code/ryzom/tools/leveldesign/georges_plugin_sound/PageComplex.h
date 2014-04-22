@@ -24,6 +24,7 @@
 //
 #include "PageBase.h"
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CPageComplex dialog
 
@@ -35,7 +36,7 @@ class CPageComplex : public CPageBase
 
 // Construction
 public:
-	CPageComplex(){};
+	CPageComplex(){}
 	CPageComplex(NLGEORGES::CSoundDialog *soundDialog);
 	~CPageComplex();
 

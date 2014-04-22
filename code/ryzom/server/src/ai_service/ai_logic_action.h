@@ -46,7 +46,7 @@ public:
 
 	// note that actions are NOT responsible for deleting child actions
 	virtual	~IAILogicAction()
-	{};
+	{}
 
 	// this is the execute 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times

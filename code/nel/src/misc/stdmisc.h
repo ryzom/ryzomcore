@@ -17,8 +17,6 @@
 #ifndef NL_STDMISC_H
 #define NL_STDMISC_H
 
-#include "nel/misc/types_nl.h"
-
 #include <algorithm>
 #include <cmath>
 #include <csignal>
@@ -44,17 +42,9 @@
 #include <utility>
 #include <vector>
 
-#include "nel/misc/debug.h"
-#include "nel/misc/common.h"
-#include "nel/misc/fast_mem.h"
-#include "nel/misc/system_info.h"
-#include "nel/misc/mem_displayer.h"
-#include "nel/misc/stream.h"
-#include "nel/misc/path.h"
-#include "nel/misc/string_common.h"
-
-#ifdef NL_OS_WINDOWS
+#ifdef _WIN32
 	#define NOMINMAX
+	#include <WinSock2.h>
 	#include <windows.h>
 #endif
 

@@ -14,9 +14,9 @@
 class CTabsObserver
 {
 public:
-	CTabsObserver()	{};
+	CTabsObserver()	{}
 
-	virtual void OnTab(int iTab)	{};
+	virtual void OnTab(int iTab)	{}
 };
 
 class CBarTabsWnd : public CWnd

@@ -17,6 +17,7 @@
 #ifndef NL_CONTIGUOUS_BLOCK_ALLOCATOR_H
 #define NL_CONTIGUOUS_BLOCK_ALLOCATOR_H
 
+#include "types_nl.h"
 
 namespace NLMISC
 {

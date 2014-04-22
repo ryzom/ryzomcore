@@ -36,7 +36,7 @@ public:
 	CActionHistoric();
 	~CActionHistoric();
 	void setDMC(IDynamicMapClient *dmc) { _DMC = dmc; }
-	/** Signal the begining of a new action. Calling this twice in a row will not create
+	/** Signal the beginning of a new action. Calling this twice in a row will not create
 	  * an empty action.
 	  */
 	void newSingleAction(const ucstring &name);

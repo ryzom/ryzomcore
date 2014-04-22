@@ -791,6 +791,7 @@ void CGameItem::ctor( const CSheetId& sheetId, uint32 recommended, bool destroya
 //	SlotCount = slotCount;
 	_Recommended = recommended;
 	_TotalSaleCycle = 0;
+	_PetIndex = MAX_INVENTORY_ANIMAL;
 
 	_Form = CSheets::getForm( sheetId );
 	if (_Form)
@@ -1146,6 +1147,14 @@ uint32	CGameItem::getNonLockedStackSize()
 		return _StackSize - _LockCount;
 }
 
+void CGameItem::setLockedByOwner(bool value)
+{
+	if (value != _LockedByOwner)
+	{
+		_LockedByOwner = value;
+		callItemChanged(INVENTORIES::TItemChangeFlags(INVENTORIES::itc_lock_state));
+	}
+}
 
 //-----------------------------------------------
 // getCopy :
@@ -1361,6 +1370,8 @@ void CGameItem::clear()
 	_RequiredCharac = CHARACTERISTICS::Unknown;
 	_RequiredCharacLevel = 0;
 	_HasPrerequisit= false;
+
+	_LockedByOwner = false;
 
 	_TypeSkillMods.clear();
 	_PhraseId.clear();

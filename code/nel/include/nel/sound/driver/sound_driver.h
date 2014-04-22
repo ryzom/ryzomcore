@@ -39,9 +39,11 @@ namespace NLSOUND
 #endif
 
 /*
- * Sound sample format
+ * Deprecated sound sample format.
+ * For compatibility with old code.
+ * Do not modify.
  */
-enum TSampleFormat { SampleFormatUnknown, Mono8, Mono16ADPCM, Mono16, Stereo8, Stereo16 };
+enum TSampleFormat { Mono8, Mono16ADPCM, Mono16, Stereo8, Stereo16, SampleFormatUnknown = (~0) };
 
 /**
  * Abstract sound driver (implemented in sound driver dynamic library)

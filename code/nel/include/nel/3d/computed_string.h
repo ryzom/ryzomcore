@@ -27,12 +27,16 @@
 #include <vector>
 #include <limits>
 
+namespace NLMISC {
+
+class CMatrix;
+
+}
 
 
 namespace NL3D {
 
 class CTextureFont;
-class CMatrix;
 struct CComputedString;
 
 // ***************************************************************************

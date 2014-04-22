@@ -187,7 +187,7 @@ void CContextSound::init()
 				}
 				else
 				{
-					nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
+					nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
 					fromString(index, contextArgIndex[nbJoker++]);
 					parseArg = false;
 					index = "";
@@ -195,13 +195,13 @@ void CContextSound::init()
 			}
 			else if (*first == 'r')
 			{
-				nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
+				nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
 				useRandom = true;
 			}
 		}
 		else if (*first == '%')
 		{
-			nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
+			nlassertex(useRandom == false, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
 			parseArg = true;
 		}
 	}
@@ -215,7 +215,7 @@ void CContextSound::init()
 		}
 		else
 		{
-			nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", CStringMapper::unmap(_Name).c_str()));
+			nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
 			fromString(index, contextArgIndex[nbJoker++]);
 			parseArg = false;
 		}
@@ -247,7 +247,7 @@ void CContextSound::init()
 		LM_CASE_CONTAINER_CREATOR(9)
 		LM_CASE_CONTAINER_CREATOR(10)
 	default:
-		nlwarning("Unsuported number of context argument in context sound '%s'!", CStringMapper::unmap(_Name).c_str());
+		nlwarning("Unsuported number of context argument in context sound '%s'!", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/);
 		return;
 	}
 	// cleanup macro
@@ -257,14 +257,14 @@ void CContextSound::init()
 
 	// ok, we have the container, now fill it with the sound
 	{
-		std::vector<NLMISC::TStringId> allSounds;
+		std::vector<NLMISC::CSheetId> allSounds;
 //		CSoundBank::getSoundNames(allSounds);
 		CAudioMixerUser::instance()->getSoundNames(allSounds);
 
-		std::vector<NLMISC::TStringId>::iterator first(allSounds.begin()), last(allSounds.end());
+		std::vector<NLMISC::CSheetId>::iterator first(allSounds.begin()), last(allSounds.end());
 		for (; first != last; ++first)
 		{
-			const std::string &soundName = CStringMapper::unmap(*first);
+			const std::string &soundName = first->toString()/*CStringMapper::unmap(*first)*/;
 			if (soundName.size() > _BaseName.size())
 			{
 				uint i;
@@ -276,7 +276,7 @@ void CContextSound::init()
 				if (i == _BaseName.size())
 				{
 					// The base name is ok, check that the next char is a digit (avoid conflit if some
-					// sound have a longeur base name with same begining)
+					// sound have a longeur base name with same beginning)
 					if (soundName[i] >= '0' && soundName[i] <= '9')
 						_ContextSounds->addSound(CAudioMixerUser::instance()->getSoundId(*first), _BaseName);
 				}

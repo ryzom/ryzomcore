@@ -55,23 +55,23 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 	ligoIniPath = MaxUserDirectory + "/plugcfg/nelligo.ini"
 	mkPath(log, ExportBuildDirectory + "/" + SmallbankExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory)
-	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseExportDirectory)
-	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseIgExportDirectory)
-	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseZoneExportDirectory)
-	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseZoneLigoExportDirectory)
-	mkPath(log, DatabaseDirectory + "/" + LigoDatabaseCmbExportDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemExportDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemIgExportDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemZoneExportDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemZoneLigoExportDirectory)
+	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemCmbExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory[0])
-	mkPath(log, ExportBuildDirectory + "/" + LigoTagExportDirectory)
-	if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoTagExportDirectory, ".max.tag")):
+	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory)
+	if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory, ".max.tag")):
 		printLog(log, "WRITE " + ligoIniPath)
 		ligoIni = open(ligoIniPath, "w")
 		ligoIni.write("[LigoConfig]\n")
 		ligoIni.write("LigoPath=" + DatabaseDirectory + "/" + LigoMaxSourceDirectory + "/\n")
-		ligoIni.write("LigoExportPath=" + DatabaseDirectory + "/" + LigoDatabaseExportDirectory + "/\n")
+		ligoIni.write("LigoExportPath=" + ExportBuildDirectory + "/" + LigoEcosystemExportDirectory + "/\n")
 		ligoIni.write("LigoOldZonePath=" + DatabaseDirectory + "/" + ZoneSourceDirectory[0] + "/\n")
 		ligoIni.close()
 		
-		outDirTag = ExportBuildDirectory + "/" + LigoTagExportDirectory
+		outDirTag = ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory
 		logFile = ScriptDirectory + "/processes/ligo/log.log"
 		smallBank = ExportBuildDirectory + "/" + SmallbankExportDirectory + "/" + BankTileBankName + ".smallbank"
 		
@@ -93,7 +93,7 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 		sDst.close()
 		
 		printLog(log, "MAXSCRIPT " + scriptDst)
-		subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-vn" ])
+		subprocess.call([ Max, "-U", "MAXScript", "nel_ligo_export.ms", "-q", "-mi", "-mip" ])
 		
 		os.remove(scriptDst)
 	printLog(log, "")

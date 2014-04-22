@@ -529,6 +529,7 @@ class CLazyProcess
 : public NLMISC::CRefCount
 {
 public:
+	virtual ~CLazyProcess() {}
 	/// Used to update some dependencies for instance road connections when the first next update of CContinent is called.
 	virtual void update() const = 0;
 	/// Used to check if there's no need to add another lazyprocess.
@@ -1052,6 +1053,7 @@ class IGroupDesc
 : public NLMISC::CRefCount
 {
 public:
+	virtual ~IGroupDesc() {}
 	virtual uint32 groupEnergyValue() const = 0;
 	virtual float groupEnergyCoef() const = 0;
 	virtual bool getCountMultiplierFlag() const = 0;

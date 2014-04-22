@@ -227,7 +227,7 @@ void CCubeGrid<TCell>::compile()
 		// build the _StaticGrid
 		_StaticGrids[i].build(_Grids[i]);
 		// And reset the grid. contReset is necessary to clean the CBlockMemory.
-		contReset(_Grids[i]);
+		NLMISC::contReset(_Grids[i]);
 	}
 
 	// done

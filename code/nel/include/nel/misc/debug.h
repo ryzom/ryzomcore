@@ -17,14 +17,14 @@
 #ifndef NL_DEBUG_H
 #define NL_DEBUG_H
 
-#include <cstdio>
-
 #include "common.h"
 #include "log.h"
 #include "mutex.h"
 #include "mem_displayer.h"
 #include "displayer.h"
 #include "app_context.h"
+
+#include <cstdio>
 #include <set>
 
 namespace NLMISC
@@ -169,7 +169,7 @@ void	setCrashAlreadyReported(bool state);
  *\endcode
  */
 #ifdef NL_NO_DEBUG
-#	if defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
+#	if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
 #		define nldebug __noop
 #	else
 #		define nldebug 0&&
@@ -184,7 +184,7 @@ void	setCrashAlreadyReported(bool state);
  * Same as nldebug but it will be display in debug and in release mode.
  */
 #ifdef NL_NO_DEBUG
-#	if defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
+#	if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
 #		define nlinfo __noop
 #	else
 #		define nlinfo 0&&
@@ -212,7 +212,7 @@ void	setCrashAlreadyReported(bool state);
  */
 
 #ifdef NL_NO_DEBUG
-#	if defined(NL_COMP_VC71) || defined(NL_COMP_VC8) || defined(NL_COMP_VC9) || defined(NL_COMP_VC10)
+#	if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
 #		define nlwarning __noop
 #	else
 #		define nlwarning 0&&
@@ -478,7 +478,7 @@ do { \
 
 #endif // NL_NO_DEBUG
 
-#define nlunreferenced(identifier) (identifier)
+#define nlunreferenced(identifier) (void)identifier
 
 #define nlstop \
 do { \
@@ -586,7 +586,7 @@ template<class T, class U>	inline T	type_cast(U o)
 #ifdef NL_ISO_CPP0X_AVAILABLE
 #	define nlctassert(cond) static_assert(cond, "Compile time assert in "#cond)
 #else
-#	define nlctassert(cond) sizeof(uint[(cond) ? 1 : 0])
+#	define nlctassert(cond) (void)sizeof(uint[(cond) ? 1 : 0])
 #endif
 
 /**

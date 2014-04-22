@@ -17,8 +17,8 @@
 
 #include "stdpch.h"
 #include "session_browser_impl.h"
-#include "interface_v3/lua_object.h"
-#include "interface_v3/lua_ihm.h"
+#include "nel/gui/lua_object.h"
+#include "nel/gui/lua_ihm.h"
 #include "connection.h"
 #include "net_manager.h"
 #include "interface_v3/interface_manager.h"
@@ -51,7 +51,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 	{
 		nlassert(ls);
 		_Lua = ls;
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject game(*_Lua);
 		game = game["game"];
 		game.setValue("getRingSessionList", luaGetRingSessionList);
@@ -219,10 +219,10 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 
 	if(sessionBrowser._LastJoinSessionResult == 20)
 	{
-		CViewText* pVT = dynamic_cast<CViewText*>(pIM->getElementFromId("ui:interface:warning_free_trial:text"));
+		CViewText* pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:warning_free_trial:text"));
 		if (pVT != NULL)
 			pVT->setText(CI18N::get("uiRingWarningFreeTrial"));
-		pIM->runActionHandler("enter_modal", NULL, "group=ui:interface:warning_free_trial");
+		CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:warning_free_trial");
 	}
 
 	return 0;
@@ -326,7 +326,7 @@ void CSessionBrowserImpl::on_joinSessionResult(NLNET::TSockId /* from */, uint32
 	if (result == 0)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		pIM->runActionHandler("on_connect_to_shard", NULL, string("cookie=")+NetMngr.getLoginCookie().toString()+"|fsAddr="+shardAddr);
+		CAHManager::getInstance()->runActionHandler("on_connect_to_shard", NULL, string("cookie=")+NetMngr.getLoginCookie().toString()+"|fsAddr="+shardAddr);
 	}
 }
 
@@ -759,7 +759,7 @@ void CSessionBrowserImpl::callRingAccessPointMethod(const char *name, int numArg
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["RingAccessPoint"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);
@@ -774,7 +774,7 @@ void CSessionBrowserImpl::callRingCharTrackingMethod(const char *name, int numAr
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["CharTracking"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);
@@ -789,7 +789,7 @@ void CSessionBrowserImpl::callRingPlayerInfoMethod(const char *name, int numArg,
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["RingPlayerInfo"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);
@@ -804,7 +804,7 @@ void CSessionBrowserImpl::callScenarioScoresMethod(const char *name, int numArg,
 	nlassert(name);
 	{
 		CLuaStackRestorer lsr(_Lua, _Lua->getTop() + numResult);
-		_Lua->pushValue(LUA_GLOBALSINDEX);
+		_Lua->pushGlobalTable();
 		CLuaObject rap(*_Lua);
 		rap = rap["ScenarioScores"];
 		rap.callMethodByNameNoThrow(name, numArg, numResult);

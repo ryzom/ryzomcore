@@ -18,6 +18,10 @@
 #include "nel/misc/object_arena_allocator.h"
 #include "nel/misc/fixed_size_allocator.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 

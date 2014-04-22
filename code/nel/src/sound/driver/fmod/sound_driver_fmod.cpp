@@ -22,6 +22,10 @@
 #include "source_fmod.h"
 #include "buffer_fmod.h"
 
+#ifdef NL_OS_WINDOWS
+#include <Windows.h>
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

@@ -644,6 +644,7 @@ class IRaceStats
 : public NLMISC::CRefCount
 {
 public:
+	virtual ~IRaceStats() {}
 	virtual NLMISC::CSheetId SheetId() const = 0;
 	virtual std::string Race() const = 0;
 };
@@ -688,6 +689,7 @@ public:
 public:
 	// load the creature data from the george files
 	void init();
+	void packSheets(const std::string &writeFilesDirectoryName);
 	
 	// display the creature data for all known creature types
 	void display(NLMISC::CSmartPtr<CStringWriter> stringWriter, uint infoSelect = 0);

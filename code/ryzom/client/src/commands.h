@@ -37,12 +37,12 @@ public:
 	public:
 		uint					KeywordsCount;
 		std::string				Action;
-		std::vector<string>		Keywords;
+		std::vector<std::string>		Keywords;
 	};
 
-	CUserCommand (const string &commandName, const ucstring &help, const ucstring &argsHelp);
+	CUserCommand (const std::string &commandName, const ucstring &help, const ucstring &argsHelp);
 
-	void addMode (const string &action, uint numArg, bool infiniteAgr, const std::vector<string> &keywords);
+	void addMode (const std::string &action, uint numArg, bool infiniteAgr, const std::vector<std::string> &keywords);
 
 	// From ICommand
 	virtual bool execute(const std::string &rawCommandString, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human);

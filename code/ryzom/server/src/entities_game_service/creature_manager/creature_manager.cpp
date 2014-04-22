@@ -117,7 +117,7 @@ void CGenNpcDescMsgImp::callback (const std::string &serviceName, NLNET::TServic
 				
 				//if the creature has a user model and if the user model's script contains parse errors, change
 				//the creature's name to <usermodelId:ERROR> 
-				if (_UserModelId != "" && CDynamicSheetManager::getInstance()->scriptErrors(_PrimAlias, _UserModelId) == true)
+				if (!_UserModelId.empty() && CDynamicSheetManager::getInstance()->scriptErrors(_PrimAlias, _UserModelId) == true)
 				{
 					TDataSetRow row = creature->getEntityRowId();
 					ucstring name;
@@ -196,6 +196,28 @@ void CCreatureCompleteHealImp::callback(const string &, NLNET::TServiceId sid)
 }
 
 //--------------------------------------------------------------
+//				CChangeCreatureMaxHPImp ::callback()  
+//--------------------------------------------------------------
+void CChangeCreatureMaxHPImp::callback(const string &, NLNET::TServiceId sid)
+{
+	H_AUTO(CChangeCreatureMaxHPImp);
+	
+	// for each creature, restore full HP
+	for ( uint i = 0; i < Entities.size(); ++i )
+	{
+		CCreature * c = CreatureManager.getCreature( Entities[i] );
+		if ( c )
+		{
+			c->getScores()._PhysicalScores[SCORES::hit_points].Max = MaxHp[i];
+			if (SetFull[i] != 0)
+				c->changeCurrentHp( c->maxHp() - c->currentHp() );
+		}
+	}
+}
+
+
+
+//--------------------------------------------------------------
 //				CChangeCreatureHPImp ::callback()  
 //--------------------------------------------------------------
 void CChangeCreatureHPImp::callback(const string &, NLNET::TServiceId sid)
@@ -228,6 +250,50 @@ void CChangeCreatureHPImp::callback(const string &, NLNET::TServiceId sid)
 		}
 	}
 }
+
+
+//--------------------------------------------------------------
+//				CCreatureSetUrlImp ::callback()  
+//--------------------------------------------------------------
+void CCreatureSetUrlImp::callback(const string &, NLNET::TServiceId sid)
+{
+	H_AUTO(CCreatureSetUrlImp);
+
+	// for each creature set url
+	for ( uint i = 0; i < Entities.size(); ++i )
+	{
+		CCreature * c = CreatureManager.getCreature( Entities[i] );
+		if ( c )
+		{
+			uint32 program = c->getBotChatProgram();
+			if(!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+			{
+				if(program != 0)
+				{
+					return;
+				}
+				program |= 1 << BOTCHATTYPE::WebPageFlag;
+				c->setBotChatProgram(program);
+			}
+			
+			const string &wp = c->getWebPage();
+			if(Url == "*") {
+				(string &)wp = "";
+				program &= ~(1 << BOTCHATTYPE::WebPageFlag);
+				c->setBotChatProgram(program);
+				return;
+			}
+			else
+				(string &)wp = Url;
+
+			const string &wpn = c->getWebPageName();
+			(string &)wpn = ActionName;
+
+			return;
+		}
+	}
+}
+
 
 //---------------------------------------------------
 // Constructor
