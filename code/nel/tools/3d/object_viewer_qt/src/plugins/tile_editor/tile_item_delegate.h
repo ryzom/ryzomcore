@@ -20,8 +20,6 @@
 #include <QPixmap>
 #include <QStyledItemDelegate>
 
-#include "ui_tile_widget.h"
-
 #include <nel/misc/types_nl.h>
 
 class TileItemDelegate : public QStyledItemDelegate

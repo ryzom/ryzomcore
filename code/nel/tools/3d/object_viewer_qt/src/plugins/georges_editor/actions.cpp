@@ -83,7 +83,7 @@ namespace GeorgesQt
 				}
 				else
 				{
-					m_oldValue = QString::fromStdString(array->Elements[m_item->structId()].Name);
+					m_oldValue = QString(array->Elements[m_item->structId()].Name.c_str());
 				}
 			}
 
@@ -94,8 +94,8 @@ namespace GeorgesQt
 				value = m_oldValue;
 
 
-			array->Elements[m_item->structId()].Name = value.toStdString();
-			m_item->setName(value.toStdString());
+			array->Elements[m_item->structId()].Name = value.toAscii().data();
+			m_item->setName(value.toAscii().data());
 
 			m_model->emitDataChanged(m_model->index(m_item->row(), 0, m_item));
 		}
