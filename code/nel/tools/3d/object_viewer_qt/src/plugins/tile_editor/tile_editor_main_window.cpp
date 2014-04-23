@@ -147,8 +147,6 @@ TileEditorMainWindow::~TileEditorMainWindow()
 	delete m_ui;
 	delete m_undoStack;
 	delete m_rotationMenu;
-	delete m_zoomMenu;
-
 		
 	delete m_tileDisplayMenu;
 	delete m_tileEditorMenu;

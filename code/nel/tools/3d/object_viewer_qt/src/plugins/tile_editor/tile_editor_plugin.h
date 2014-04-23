@@ -68,7 +68,7 @@ public:
 
 	virtual ~TileEditorContext() 
 	{
-		delete m_tileEditorMainWindow;
+		m_tileEditorMainWindow = NULL;
 	}
 
 	virtual QString id() const
