@@ -2195,7 +2195,7 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 #elif defined(NL_OS_UNIX)
 	if (_win && _Extensions.GLXEXTSwapControl)
 	{
-		res = nglXSwapIntervalEXT(_dpy, _win, interval) == 0;
+		nglXSwapIntervalEXT(_dpy, _win, interval);
 	}
 	else if (_Extensions.GLXSGISwapControl)
 	{
