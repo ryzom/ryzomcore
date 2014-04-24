@@ -210,7 +210,7 @@ namespace NLGUI
 		}
 
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onchange" );
-		if (prop)	_AHOnChange = NLMISC::toLower(prop);
+		if (prop)	_AHOnChange = NLMISC::toLower((const char*)prop);
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onchange_params" );
 		if (prop)	_AHOnChangeParams = string((const char*)prop);
 
