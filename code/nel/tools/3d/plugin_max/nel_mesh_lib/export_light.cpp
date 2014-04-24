@@ -238,7 +238,7 @@ void CExportNel::getLights (std::vector<CLight>& vectLight, TimeValue time, INod
 
 			// Delete the GenLight if we should...
 			if (deleteIt)
-				maxLight->MaybeAutoDelete();
+				maxLight->DeleteThis();
 		}
 	}
 

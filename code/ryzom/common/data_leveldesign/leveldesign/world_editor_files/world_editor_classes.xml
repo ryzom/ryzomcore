@@ -98,7 +98,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/fauna_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//root"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
@@ -128,7 +128,7 @@
 		<!-- For now, fauna don't have AI profile-->
 		<!--		<PARAMETER NAME= "ai_movement"			TYPE="const_string"	VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
 												<COMBO_FILES CONTEXT_NAME="default"	
-												PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/> </PARAMETER>
+												PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_movement"/> </PARAMETER>
 -->
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="state_event_handler"/>
@@ -147,7 +147,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="event_handler_action"/>
@@ -159,7 +159,7 @@
 			<DEFAULT_VALUE VALUE="ACTION_ZONE"/>
 		</PARAMETER>
 		<PARAMETER NAME="params" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 	</PRIMITIVE>
 
@@ -175,7 +175,7 @@
 		</PARAMETER>
 		<PARAMETER NAME="parameters" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="500" SHOW_HS="true" FILE_EXTENSION="cs"/>
 		<PARAMETER NAME="action" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/action_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/action_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="event_handler_action"/>
 		<DYNAMIC_CHILD CLASS_NAME="action_zone"/>
@@ -2513,10 +2513,10 @@
 -->
 		<!--		<PARAMETER NAME= "keywords"				TYPE="string_array"	VISIBLE="true"/> -->
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -2720,10 +2720,10 @@
 -->
 		<PARAMETER NAME="keywords" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2761,10 +2761,10 @@
 -->
 		<PARAMETER NAME="keywords" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2802,10 +2802,10 @@
 -->
 		<PARAMETER NAME="keywords" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2828,10 +2828,10 @@
 		<PARAMETER NAME="grp_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="grps_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2869,7 +2869,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -2888,7 +2888,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -2907,7 +2907,7 @@
 		<PARAMETER NAME="state_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="states_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -2924,7 +2924,7 @@
 		</PARAMETER>
 		<PARAMETER NAME="parameters" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="500" SHOW_HS="true" FILE_EXTENSION="cs"/>
 		<PARAMETER NAME="action" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/action_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc/action_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
 		<DYNAMIC_CHILD CLASS_NAME="fauna_action_zone"/>
@@ -3662,7 +3662,7 @@
 			<DEFAULT_VALUE VALUE="OUTPOST"/>
 		</PARAMETER>
 		<PARAMETER NAME="owner_tribe" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -3751,7 +3751,7 @@
 			<DEFAULT_VALUE VALUE="OUTPOST_MANAGER_EVENT"/>
 		</PARAMETER>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/outpost/manager/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/outpost/manager/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -3765,7 +3765,7 @@
 			<DEFAULT_VALUE VALUE="OUTPOST_MANAGER_EVENT_ACTION"/>
 		</PARAMETER>
 		<PARAMETER NAME="action" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/outpost/manager/action_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/outpost/manager/action_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="outpost_manager_event_handler_action"/>
 	</PRIMITIVE>
@@ -3866,7 +3866,7 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="continent_name" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/continents"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/continents"/>
 		</PARAMETER>
 
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -3991,7 +3991,7 @@
 -->
 
 		<PARAMETER NAME="family" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<!-- Sample ..
@@ -4019,10 +4019,10 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="food" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 		<PARAMETER NAME="rest" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="energy_0_25" TYPE="string" VISIBLE="true" FILENAME="false">
@@ -4052,7 +4052,7 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="family" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="energy_0_25" TYPE="string" VISIBLE="true" FILENAME="false">
@@ -4098,7 +4098,7 @@
 		<DYNAMIC_CHILD CLASS_NAME="group_template_npc_ml"/>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<PARAMETER NAME="flags" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc_zone_properties"/>
 		</PARAMETER>
 	</PRIMITIVE>
 
@@ -4493,7 +4493,7 @@
 -->
 
 		<PARAMETER NAME="family" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="energy" TYPE="string" VISIBLE="true" FILENAME="false">
@@ -4635,7 +4635,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="vertical_pos" TYPE="const_string" VISIBLE="true">
@@ -4670,7 +4670,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
 		</PARAMETER>
 
@@ -4704,7 +4704,7 @@
 -->
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
 		</PARAMETER>
 
@@ -4738,7 +4738,7 @@
 -->
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="R:/code/ryzom/common/data_leveldesign/leveldesign/world_editor_files/npc_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
 		</PARAMETER>
 

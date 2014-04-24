@@ -131,6 +131,9 @@ namespace GUIEditor
 					if( key == "guiname" )
 						info.GUIName = value.toUtf8().constData();
 					else
+					if( key == "classname" )
+						info.className = value.toUtf8().constData();
+					else
 					if( key == "ancestor" )
 						info.ancestor = value.toUtf8().constData();
 					else

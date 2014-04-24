@@ -2,6 +2,7 @@
     <header>
         <name>ViewText</name>
         <guiname>CViewText</guiname>
+        <classname>text</classname>
         <ancestor>InterfaceElement</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -46,7 +47,7 @@
         <property>
             <name>line_maxw</name>
             <type>int</type>
-            <default>0</default>
+            <default>100</default>
         </property>
         <property>
             <name>multi_line_space</name>
@@ -101,7 +102,7 @@
         <property>
             <name>hardtext</name>
             <type>string</type>
-            <default></default>
+            <default>some text</default>
         </property>
         <property>
             <name>hardtext_format</name>

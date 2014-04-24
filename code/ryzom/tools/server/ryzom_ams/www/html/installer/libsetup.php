@@ -5,10 +5,57 @@
     * @author Daan Janssens, mentored by Matthew Lagoe
     */
     
+    ini_set('display_errors', 1); 
+    error_reporting(E_ALL);
+    
+   function is__writable($path) {
+
+    if ($path{strlen($path)-1}=='/')
+        return is__writable($path.uniqid(mt_rand()).'.tmp');
+
+    if (file_exists($path)) {
+        if (!($f = @fopen($path, 'r+')))
+            return false;
+        fclose($f);
+        return true;
+    }
+
+    if (!($f = @fopen($path, 'w')))
+        return false;
+    fclose($f);
+    unlink($path);
+    return true;
+    }
+
+    //set permissions
+    if(is__writable('../../../www/login/logs')) {
+        echo "failed to get write permissions on logs";
+        exit;
+    }
+    if(is__writable('../../../admin/graphs_output')) {
+        echo "failed to get write permissions on graphs_output";
+        exit;
+    }
+    if(is__writable('../../../admin/templates/default_c')) {
+        echo "failed to get write permissions on default_c";
+        exit;
+    }
+    if(is__writable('../../www')) {
+        echo "failed to get write permissions on www";
+        exit;
+    }
+    if(is__writable('../../www/html/cache')) {
+        echo "failed to get write permissions on cache";
+        exit;
+    }
+    if(is__writable('../../www/html/templates_c')) {
+        echo "failed to get write permissions on templates_c";
+        exit;
+    }
+    
     if (!isset($_POST['function'])) { 
         //require the pages that are being needed.
         require_once( '../config.default.php' );
-        require_once( '../../ams_lib/libinclude.php' );
         ini_set( "display_errors", true );
         error_reporting( E_ALL );
 
@@ -37,6 +84,8 @@
             }
         }
 
+        require_once( $AMS_LIB.'/libinclude.php' );
+        
         //var used to access the DB;
         global $cfg;
         
@@ -44,7 +93,7 @@
             //SETUP THE WWW DB
             $dbw = new DBLayer("install", "web");
             $sql = "
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['web']['name'] ."`;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['web']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `". $cfg['db']['web']['name'] . "`;
                 DROP TABLE IF EXISTS ams_user;
                 
@@ -70,7 +119,7 @@
             $dbl = new DBLayer("install", "lib");
 
             $sql = "
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `" . $cfg['db']['lib']['name'] ."`;
                 DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ams_querycache`;
                 
@@ -476,7 +525,7 @@
             //SETUP THE SHARD DB
             $dbs = new DBLayer("install", "shard");
             $sql = "
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['shard']['name'] ."`;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['shard']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
                 USE `". $cfg['db']['shard']['name'] . "`;
                                 
                 CREATE TABLE IF NOT EXISTS `domain` (
@@ -594,7 +643,7 @@
                 CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['tool']['name'] ."`;
                 USE `". $cfg['db']['tool']['name'] . "`;
                                 
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['tool']['name'] ."` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['tool']['name'] ."`  DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `" . $cfg['db']['tool']['name'] ."`;
 
                 CREATE TABLE IF NOT EXISTS `neltool_annotations` (
@@ -1374,7 +1423,7 @@
                         //SETUP THE OPEN_SHARD DB
             $dbw = new DBLayer("install", "ring");
             $sql = "
-                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['ring']['name'] ."`;
+                CREATE DATABASE IF NOT EXISTS `" . $cfg['db']['ring']['name'] ."` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
                 USE `" . $cfg['db']['ring']['name'] ."`;
 
                 CREATE TABLE IF NOT EXISTS `characters` (
@@ -1670,6 +1719,8 @@
 
                 INSERT INTO `shard` (`shard_id`, `WSOnline`, `MOTD`, `OldState`, `RequiredState`) VALUES
                 (302, 1, 'Shard up', 'ds_restricted', 'ds_open');
+                
+                INSERT INTO `sessions` (`session_id`, `session_type`, `title`, `owner`, `plan_date`, `start_date`, `description`, `orientation`, `level`, `rule_type`, `access_type`, `state`, `host_shard_id`, `subscription_slots`, `reserved_slots`, `free_slots`, `estimated_duration`, `final_duration`, `folder_id`, `lang`, `icone`, `anim_mode`, `race_filter`, `religion_filter`, `guild_filter`, `shard_filter`, `level_filter`, `subscription_closed`, `newcomer`) VALUES (302, 'st_mainland', 'open shard mainland', 0, '2005-09-21 12:41:33', '2005-08-31 00:00:00', '', 'so_other', 'sl_a', 'rt_strict', 'at_public', 'ss_planned', 0, 0, 0, 0, 'et_short', 0, 0, 'lang_en', '', 'am_dm', 'rf_fyros,rf_matis,rf_tryker,rf_zorai', 'rf_kami,rf_karavan,rf_neutral', 'gf_any_player', '', 'lf_a,lf_b,lf_c,lf_d,lf_e,lf_f', 0, 0);
 
             GRANT ALL ON `" . $cfg['db']['ring']['name'] ."`.* TO `" . $cfg['db']['ring']['user'] ."`@".$cfg['db']['ring']['host']." identified by '".$cfg['db']['ring']['pass']."';
             ";

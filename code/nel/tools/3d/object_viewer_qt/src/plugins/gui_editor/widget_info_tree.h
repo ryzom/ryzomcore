@@ -93,11 +93,11 @@ namespace GUIEditor
 		}
 
 		/// Get the node names and put them into the vector
-		void getNames( std::vector< std::string > &v ) const
+		void getNames( std::vector< std::string > &v, bool includeAbstract = true ) const
 		{
 			if( root == NULL )
 				return;
-			root->getNames( v );
+			root->getNames( v, includeAbstract );
 		}
 
 

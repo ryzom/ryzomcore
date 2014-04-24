@@ -36,6 +36,7 @@
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/stereo_ng_hmd.h"
 // Client
 #include "global.h"
 #include "release.h"
@@ -516,9 +517,13 @@ void releaseStereoDisplayDevice()
 {
 	if (StereoDisplay)
 	{
+		if (NoLogout && StereoNGHMD)
+			StereoNGHMD->killUser();
+
 		delete StereoDisplay;
 		StereoDisplay = NULL;
 		StereoHMD = NULL;
+		StereoNGHMD = NULL;
 	}
 	IStereoDisplay::releaseAllLibraries();
 }

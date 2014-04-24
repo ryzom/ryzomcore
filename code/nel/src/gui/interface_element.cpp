@@ -34,6 +34,7 @@ using namespace NLMISC;
 namespace NLGUI
 {
 	bool CInterfaceElement::editorMode = false;
+	std::vector< CInterfaceElement::IDeletionWatcher* > CInterfaceElement::deletionWatchers;
 
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement::~CInterfaceElement()
@@ -45,6 +46,13 @@ namespace NLGUI
 				(*it)->removeTarget(this);
 			}
 			delete _Links;
+		}
+		
+		if( editorMode )
+		{
+			notifyDeletionWatchers();
+			if( _Parent != NULL )
+				_Parent->onWidgetDeleted( this );
 		}
 	}
 
@@ -1295,6 +1303,11 @@ namespace NLGUI
 
 	}
 
+	void CInterfaceElement::drawHighlight()
+	{
+		CViewRenderer::getInstance()->drawWiredQuad( _XReal, _YReal, _WReal, _HReal );
+	}
+
 	// ***************************************************************************
 	void CInterfaceElement::invalidateContent()
 	{
@@ -1538,6 +1551,36 @@ namespace NLGUI
 				idParent = _Parent->getId();
 				CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent );
 			}
+		}
+	}
+
+	void CInterfaceElement::registerDeletionWatcher( IDeletionWatcher *watcher )
+	{
+		std::vector< IDeletionWatcher* >::iterator itr 
+			= std::find( deletionWatchers.begin(), deletionWatchers.end(), watcher );
+		// Already registered
+		if( itr != deletionWatchers.end() )
+			return;
+		deletionWatchers.push_back( watcher );
+	}
+
+	void CInterfaceElement::unregisterDeletionWatcher( IDeletionWatcher *watcher )
+	{
+		std::vector< IDeletionWatcher* >::iterator itr 
+			= std::find( deletionWatchers.begin(), deletionWatchers.end(), watcher );
+		// Not registered
+		if( itr == deletionWatchers.end() )
+			return;
+		deletionWatchers.erase( itr );
+	}
+
+	void CInterfaceElement::notifyDeletionWatchers()
+	{
+		std::vector< IDeletionWatcher* >::iterator itr = deletionWatchers.begin();
+		while( itr != deletionWatchers.end() )
+		{
+			(*itr)->onDeleted( _Id );
+			++itr;
 		}
 	}
 

@@ -47,6 +47,10 @@ try:
 	subprocess.call([ TranslationTools, "merge_words_diff" ])
 	subprocess.call([ TranslationTools, "make_string_diff" ])
 	subprocess.call([ TranslationTools, "merge_string_diff" ])
+	subprocess.call([ TranslationTools, "clean_string_diff" ])
+	subprocess.call([ TranslationTools, "clean_words_diff" ])
+	subprocess.call([ TranslationTools, "clean_clause_diff" ])
+	subprocess.call([ TranslationTools, "clean_phrase_diff" ])
 	subprocess.call([ TranslationTools, "make_worksheet_diff", "bot_names.txt" ])
 	subprocess.call([ TranslationTools, "merge_worksheet_diff", "bot_names.txt" ])
 except Exception, e:

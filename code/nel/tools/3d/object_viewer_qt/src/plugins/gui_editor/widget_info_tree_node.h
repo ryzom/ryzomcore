@@ -215,11 +215,13 @@ namespace GUIEditor
 		}
 
 		/// Get the node names and put them into the vector
-		void getNames( std::vector< std::string > &v ) const
+		void getNames( std::vector< std::string > &v, bool includeAbstract = true ) const
 		{
-			v.push_back( info.name );
+			if( !info.isAbstract || ( info.isAbstract && includeAbstract ) )
+				v.push_back( info.name );
+
 			for( std::vector< CWidgetInfoTreeNode* >::const_iterator itr = children.begin(); itr != children.end(); ++itr )
-				( *itr )->getNames( v );
+				( *itr )->getNames( v, includeAbstract );
 		}
 
 		/// Accepts a visitor to itself and to the children nodes
