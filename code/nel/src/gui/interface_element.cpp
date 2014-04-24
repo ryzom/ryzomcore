@@ -993,8 +993,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	bool			CInterfaceElement::convertBool (const char *ptr)
 	{
-		std::string str = ptr;
-		NLMISC::strlwr( str );
+		std::string str = toLower(ptr);
 		bool b = false;
 		fromString( str, b );
 		return b;
