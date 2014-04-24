@@ -1726,10 +1726,7 @@ void CClientConfig::setValues()
 	}
 
 	// Initialize the camera distance (after camera dist max)
-	if (!ClientCfg.FPV)
-	{
-		View.cameraDistance(ClientCfg.CameraDistance);
-	}
+	View.setCameraDistanceMaxForPlayer();
 
 	// draw in client light?
 	if(ClientCfg.Light)
