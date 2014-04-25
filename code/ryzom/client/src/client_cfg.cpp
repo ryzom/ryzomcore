@@ -327,13 +327,13 @@ CClientConfig::CClientConfig()
 	TexturesLoginInterface.push_back("texture_interfaces_v3_login");
 
 	DisplayAccountButtons = true;
-	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
+	CreateAccountURL	= "https://secure.ryzom.com/signup/from_client.php";
 	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
-	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
+	EditAccountURL		= "https://secure.ryzom.com/payment_profile/index.php";
 	BetaAccountURL		= "http://www.ryzom.com/profile";
-	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
+	ForgetPwdURL		= "https://secure.ryzom.com/payment_profile/lost_secure_password.php";
 	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
-	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
+	LoginSupportURL		= "http://www.ryzom.com/en/support.html";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -889,14 +889,6 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(FreeTrialURL)
 	READ_STRING_DEV(LoginSupportURL)
 
-	READ_STRING_FV(CreateAccountURL)
-	READ_STRING_FV(EditAccountURL)
-	READ_STRING_FV(ConditionsTermsURL)
-	READ_STRING_FV(BetaAccountURL)
-	READ_STRING_FV(ForgetPwdURL)
-	READ_STRING_FV(FreeTrialURL)
-	READ_STRING_FV(LoginSupportURL)
-
 #ifndef RZ_NO_CLIENT
 	// if cookie is not empty, it means that the client was launch
 	// by the nel_launcher, so it can't be local
@@ -1059,18 +1051,11 @@ void CClientConfig::setValues()
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
 	READ_BOOL_FV(PatchWanted)
-	READ_STRING_FV(PatchServer)
-	READ_STRING_FV(PatchUrl)
-	READ_STRING_FV(PatchVersion)
-	READ_STRING_FV(RingReleaseNotePath)
-	READ_STRING_FV(ReleaseNotePath)
-	READ_BOOL_DEV(PatchWanted)
-	READ_STRING_DEV(PatchServer)
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
-
+	READ_STRING_FV(PatchServer)
 
 	/////////////////////////
 	// NEW PATCHLET SYSTEM //
