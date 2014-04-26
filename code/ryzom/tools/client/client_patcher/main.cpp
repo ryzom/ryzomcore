@@ -28,9 +28,6 @@ string	VersionName;
 string LoginLogin, LoginPassword;
 uint32 LoginShardId = 0xFFFFFFFF;
 
-// stuff which is defined in other .cpp files
-extern void tmpFlagRemovedPatchCategories(NLMISC::CConfigFile &cf);
-
 bool useUtf8 = false;
 bool useEsc = false;
 
@@ -269,20 +266,6 @@ int main(int argc, char *argv[])
 	CI18N::load(lang);
 
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
-
-#ifdef NL_OS_UNIX
-	// don't use cfg, exe and dll from Windows version
-	CConfigFile::CVar var;
-	var.Type = CConfigFile::CVar::T_STRING;
-	std::vector<std::string> cats;
-	cats.push_back("main_exedll");
-	cats.push_back("main_cfg");
-	var.setAsString(cats);
-	ClientCfg.ConfigFile.insertVar("RemovePatchCategories", var);
-
-	// add categories to remove
-	tmpFlagRemovedPatchCategories(ClientCfg.ConfigFile);
-#endif
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
