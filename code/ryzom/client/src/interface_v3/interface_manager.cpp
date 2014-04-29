@@ -727,16 +727,6 @@ void CInterfaceManager::initOutGame()
 
 
 	//NLMEMORY::CheckHeap (true);
-	// Initialize the web browser
-	{
-		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>( CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
-		if (pGH)
-		{
-			pGH->setActive(true);
-			pGH->browse(ClientCfg.PatchletUrl.c_str());
-		}
-	}
-
 
 	if (ClientCfg.XMLOutGameInterfaceFiles.size()==0)
 	{
@@ -777,6 +767,17 @@ void CInterfaceManager::initOutGame()
 		initActions();
 	}
 	//NLMEMORY::CheckHeap (true);
+
+	// Initialize the web browser
+	{
+		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>( CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
+
+		if (pGH)
+		{
+			pGH->setActive(true);
+			pGH->browse(ClientCfg.PatchletUrl.c_str());
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
