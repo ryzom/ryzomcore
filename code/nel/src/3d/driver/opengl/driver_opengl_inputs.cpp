@@ -799,9 +799,7 @@ uint CDriverGL::getDoubleClickDelay(bool hardwareMouse)
 	}
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay"
-	nlwarning("OpenGL Driver: Missing Mac Implementation for getDoubleClickDelay");
-
+	// TODO: Missing Mac Implementation for getDoubleClickDelay
 #elif defined (NL_OS_UNIX)
 
 	// TODO for Linux

@@ -795,7 +795,10 @@ namespace NLGUI
 			return "radio_button";
 			break;
 
+		default:
+			break;
 		}
+
 		return "";
 	}
 

@@ -302,7 +302,7 @@ CClientConfig::CClientConfig()
 	Contrast			= 0.f;						// Default Monitor Contrast.
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
-	
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -846,6 +846,7 @@ void CClientConfig::setValues()
 		if (nlstricmp(varPtr->asString(), "Auto") == 0 || nlstricmp(varPtr->asString(), "0") == 0) ClientCfg.Driver3D = CClientConfig::DrvAuto;
 		else if (nlstricmp(varPtr->asString(), "OpenGL") == 0 || nlstricmp(varPtr->asString(), "1") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL;
 		else if (nlstricmp(varPtr->asString(), "Direct3D") == 0 || nlstricmp(varPtr->asString(), "2") == 0) ClientCfg.Driver3D = CClientConfig::Direct3D;
+		else if (nlstricmp(varPtr->asString(), "OpenGLES") == 0 || nlstricmp(varPtr->asString(), "3") == 0) ClientCfg.Driver3D = CClientConfig::OpenGLES;
 	}
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
@@ -887,7 +888,7 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ForgetPwdURL)
 	READ_STRING_DEV(FreeTrialURL)
 	READ_STRING_DEV(LoginSupportURL)
-	
+
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ConditionsTermsURL)
@@ -1072,10 +1073,10 @@ void CClientConfig::setValues()
 
 
 	/////////////////////////
-	// NEW PATCHLET SYSTEM //	
+	// NEW PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
 
-	////////////////////////
+	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
@@ -2210,28 +2211,24 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	std::string defaultConfigFileName = "client_default.cfg";
 	std::string defaultConfigPath;
 	
-	p_name = std::string();
+	p_name.clear();
 	
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
-	defaultConfigPath = 
-		CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
-
+	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
 #elif defined(RYZOM_ETC_PREFIX)
 	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
 	defaultConfigPath = CPath::standardizePath(RYZOM_ETC_PREFIX);
-
 #else
 	// some other prefix here :)
-
 #endif // RYZOM_ETC_PREFIX
 
 	// look in the current working directory first
-	if(CFile::isExists(defaultConfigFileName))
+	if (CFile::isExists(defaultConfigFileName))
 		p_name = defaultConfigFileName;
 
 	// if not in working directory, check using prefix path
-	else if(CFile::isExists(defaultConfigPath + defaultConfigFileName))
+	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 
 	// if some client_default.cfg was found return true
