@@ -697,8 +697,6 @@ SOURCE_GROUP(Stereo FILES
         ../../include/nel/3d/stereo_display.h
 		stereo_hmd.cpp
         ../../include/nel/3d/stereo_hmd.h
-		stereo_ng_hmd.cpp
-        ../../include/nel/3d/stereo_ng_hmd.h
 		stereo_ovr.cpp
 		stereo_ovr_fp.cpp
         ../../include/nel/3d/stereo_ovr.h

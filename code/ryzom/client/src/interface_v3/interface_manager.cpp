@@ -1089,7 +1089,6 @@ void CInterfaceManager::configureQuitDialogBox()
 		// Show Launch Editor if not in editor mode
 		CInterfaceElement *eltCancel = quitDlg->getElement(quitDialogStr+":cancel");
 		CInterfaceElement *eltEdit = quitDlg->getElement(quitDialogStr+":launch_editor");
-
 		if (eltEdit)
 		{
 			if (UserRoleInSession != R2::TUserRole::ur_editor && !sessionOwner)
@@ -1159,18 +1158,6 @@ void CInterfaceManager::configureQuitDialogBox()
 				eltQuitNow->setY(0);
 				eltQuitNow->setActive(false);
 			}
-		}
-
-		if (NoLogout)
-		{
-			eltEdit->setY(0);
-			eltEdit->setActive(false);
-			eltQuit->setY(0);
-			eltQuit->setActive(false);
-			eltQuitNow->setY(0);
-			eltQuitNow->setActive(false);
-			eltRet->setY(0);
-			eltRet->setActive(false);
 		}
 	}
 
