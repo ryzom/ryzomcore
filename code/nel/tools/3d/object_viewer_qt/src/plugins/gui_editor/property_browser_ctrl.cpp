@@ -78,7 +78,12 @@ namespace GUIEditor
 
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
 		if( e == NULL )
+		{
+			connect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
+				this, SLOT( onPropertyChanged( QtProperty* ) ) );
+
 			return;
+		}
 
 		currentElement = id;
 
@@ -106,6 +111,12 @@ namespace GUIEditor
 		if( e == NULL )
 			return;
 		e->setProperty( propName.toUtf8().constData(), propValue.toUtf8().constData() );
+		
+		
+		// Make sure the changes are applied
+		bool active = e->getActive();
+		e->setActive( !active );
+		e->setActive( active );
 	}
 
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )

@@ -47,6 +47,8 @@ namespace NLGUI
 	class CInterfaceOptions;
 	class CInterfaceAnim;
 	class CProcedure;
+	class IEditorSelectionWatcher;
+	class IWidgetAdditionWatcher;
 
 	/**
 	 GUI Widget Manager
@@ -341,6 +343,7 @@ namespace NLGUI
 		/**
 		 * Capture
 		 */
+		CViewBase *getCapturedView(){ return _CapturedView; }
 		CCtrlBase *getCapturePointerLeft() { return _CapturePointerLeft; }
 		CCtrlBase *getCapturePointerRight() { return _CapturePointerRight; }
 		CCtrlBase *getCaptureKeyboard() { return _CaptureKeyboard; }
@@ -484,7 +487,17 @@ namespace NLGUI
 
 		IParser* getParser() const{ return parser; }
 
+		std::string& getCurrentEditorSelection(){ return currentEditorSelection; }
 		void setCurrentEditorSelection( const std::string &name );
+		void notifySelectionWatchers();
+		void registerSelectionWatcher( IEditorSelectionWatcher *watcher );
+		void unregisterSelectionWatcher( IEditorSelectionWatcher *watcher );
+		
+		void notifyAdditionWatchers( const std::string &widgetName );
+		void registerAdditionWatcher( IWidgetAdditionWatcher *watcher );
+		void unregisterAdditionWatcher( IWidgetAdditionWatcher *watcher );
+
+		CInterfaceElement* addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName );
 				
 	private:
 		CWidgetManager();
@@ -510,6 +523,8 @@ namespace NLGUI
 		NLMISC::CRefPtr<CCtrlBase>	_DefaultCaptureKeyboard;
 		NLMISC::CRefPtr<CCtrlBase>	_CapturePointerLeft;
 		NLMISC::CRefPtr<CCtrlBase>	_CapturePointerRight;
+
+		NLMISC::CRefPtr< CViewBase > _CapturedView;
 
 		// What is under pointer
 		std::vector< CViewBase* > _ViewsUnderPointer;
@@ -567,6 +582,9 @@ namespace NLGUI
 
 		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
+		std::vector< IEditorSelectionWatcher* > selectionWatchers;
+		std::vector< IWidgetAdditionWatcher* > additionWatchers;
+		
 
 		std::string currentEditorSelection;
 	};

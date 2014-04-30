@@ -4,29 +4,51 @@
     * This script will install all databases related to the Ryzom AMS and it will generate an admin account..
     * @author Daan Janssens, mentored by Matthew Lagoe
     */
+    
+    ini_set('display_errors', 1); 
+    error_reporting(E_ALL);
+    
+   function is__writable($path) {
+
+    if ($path{strlen($path)-1}=='/')
+        return is__writable($path.uniqid(mt_rand()).'.tmp');
+
+    if (file_exists($path)) {
+        if (!($f = @fopen($path, 'r+')))
+            return false;
+        fclose($f);
+        return true;
+    }
+
+    if (!($f = @fopen($path, 'w')))
+        return false;
+    fclose($f);
+    unlink($path);
+    return true;
+    }
 
     //set permissions
-    if(is_writable('../../../www/login/logs')) {
+    if(is__writable('../../../www/login/logs')) {
         echo "failed to get write permissions on logs";
         exit;
     }
-    if(is_writable('../../../admin/graphs_output')) {
+    if(is__writable('../../../admin/graphs_output')) {
         echo "failed to get write permissions on graphs_output";
         exit;
     }
-    if(is_writable('../../../admin/templates/default_c')) {
+    if(is__writable('../../../admin/templates/default_c')) {
         echo "failed to get write permissions on default_c";
         exit;
     }
-    if(is_writable('../../www')) {
+    if(is__writable('../../www')) {
         echo "failed to get write permissions on www";
         exit;
     }
-    if(is_writable('../../www/html/cache')) {
+    if(is__writable('../../www/html/cache')) {
         echo "failed to get write permissions on cache";
         exit;
     }
-    if(is_writable('../../www/html/templates_c')) {
+    if(is__writable('../../www/html/templates_c')) {
         echo "failed to get write permissions on templates_c";
         exit;
     }
@@ -34,7 +56,6 @@
     if (!isset($_POST['function'])) { 
         //require the pages that are being needed.
         require_once( '../config.default.php' );
-        require_once( '../../ams_lib/libinclude.php' );
         ini_set( "display_errors", true );
         error_reporting( E_ALL );
 
@@ -63,6 +84,8 @@
             }
         }
 
+        require_once( $AMS_LIB.'/libinclude.php' );
+        
         //var used to access the DB;
         global $cfg;
         
