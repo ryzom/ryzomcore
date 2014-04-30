@@ -3555,13 +3555,6 @@ void impulseSetNpcIconTimer(NLMISC::CBitMemStream &impulse)
 	CNPCIconCache::getInstance().setMissionGiverTimer(delay);
 }
 
-void impulseEventDisableLogoutButton(NLMISC::CBitMemStream &impulse)
-{
-	NoLogout = true;
-	CInterfaceManager *im = CInterfaceManager::getInstance();
-	im->configureQuitDialogBox();
-}
-
 //-----------------------------------------------
 // initializeNetwork :
 //-----------------------------------------------
@@ -3711,8 +3704,6 @@ void initializeNetwork()
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_DESC",			impulseSetNpcIconDesc );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SVR_EVENT_MIS_AVL",	impulseServerEventForMissionAvailability );
 	GenericMsgHeaderMngr.setCallback( "NPC_ICON:SET_TIMER",			impulseSetNpcIconTimer );
-
-	GenericMsgHeaderMngr.setCallback( "EVENT:DISABLE_LOGOUT_BUTTON", impulseEventDisableLogoutButton );
 }
 
 

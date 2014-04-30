@@ -1111,8 +1111,8 @@
           sendto="EGS"
           format="u32 u32 uc"
           description="set the cursom of the item in inventory $inventory in slot $slot to $text" />
-    <leaf name="DISABLE_LOGOUT_BUTTON"
-          description="disables the logout button on the client" />
+    <leaf name="DUMMY"
+          description="stupid server....." />
   </branch>
   <branch name="TOTEM">
     <leaf name="BUILD"

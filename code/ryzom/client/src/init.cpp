@@ -40,7 +40,6 @@
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
-#include "nel/3d/stereo_ng_hmd.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -640,15 +639,10 @@ void initStereoDisplayDevice()
 			StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
 			if (StereoDisplay)
 			{
-				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD
-					|| deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
+				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
 				{
 					nlinfo("VR [C]: Stereo display device is a HMD");
 					StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
-					if (deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
-					{
-						StereoNGHMD = static_cast<IStereoNGHMD *>(StereoDisplay);
-					}
 				}
 				if (Driver) // VR_DRIVER
 				{
