@@ -15,7 +15,7 @@ SaveConfig = 1;
 
 Driver3D="Auto"; // Valid values are "Auto" or "0", "OpengGL" or "1"  & "Direct3D" or "2"
                  // "Auto" will choose the best suited driver depending on hardware
-FullScreen = 1;
+FullScreen = 0;
 Width      = 1024;
 Height     = 768;
 PositionX  = 0;
@@ -39,16 +39,15 @@ Gamma_max	= 1.0;
 // NETWORK //
 /////////////
 
-Application = { "ryzom_open", "./client_ryzom_r.exe", "./" };
+Application = { "ryzom_live", "./client_ryzom_r.exe", "./" };
 BackgroundDownloader = 0;
-PatchServer = "";
-PatchWanted = 0;
-SignUpURL = "";
-StartupHost = "open.ryzom.com:40916";
+PatchServer = "http://dl.ryzom.com/patch_live";
+SignUpURL = "http://www.ryzom.com/subscribe";
+StartupHost = "shard.ryzom.com:40916";
 StartupPage = "/login/r2_login.php";
-InstallStatsUrl = "http://open.ryzom.com:50000/stats/stats.php";
-CreateAccountURL = "";
-InstallWebPage = "";
+InstallStatsUrl = "http://shard.ryzom.com:50000/stats/stats.php";
+CreateAccountURL = "https://secure.ryzom.com/signup/from_client.php";
+InstallWebPage = "http://dl.ryzom.com/installer/";
 
 
 ////////////////
@@ -79,10 +78,6 @@ XMLOutGameInterfaceFiles = {
 	"out_v2_hierarchy.xml",
 	"out_v2_keys.xml",
 };
-
-TexturesInterface    = "texture_interfaces_v3";
-TexturesInterfaceDXTC = "texture_interfaces_dxtc";
-
 
 // The ligo primitive class file
 LigoPrimitiveClass = "world_editor_classes.xml";
@@ -477,7 +472,7 @@ XMLR2EDInterfaceFiles =
 {      
 	"r2ed.xml",
 	"r2_triggers.xml",
-    "r2_logic_entities.xml",
+	"r2_logic_entities.xml",
 	"r2ed_acts.xml",
 	"r2ed_scenario.xml",
 	"r2ed_connect.xml"
@@ -561,14 +556,11 @@ HelpPages =
 	"de=http://forums.ryzom.com/forum/showthread.php?t=29131"
 };
 
-WebIgMainDomain      = "atys.ryzom.com";
-
-WebIgTrustedDomains  =
-{
-	"atys.ryzom.com" 
+WebIgMainDomain      = "app.ryzom.com";
+WebIgTrustedDomains  = {
+	"api.ryzom.com", "app.ryzom.com" 
 };
-
-PatchletUrl          = "http://atys.ryzom.com/start/app_patchlet.php?patch=preload";
+PatchletUrl          = "http://app.ryzom.com/app_patchlet/index.php?patch=preload";
 
 SelectedSlot = 0;
 
