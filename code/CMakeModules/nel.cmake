@@ -229,6 +229,10 @@ Remove the CMakeCache.txt file and try again from another folder, e.g.:
 ENDMACRO(CHECK_OUT_OF_SOURCE)
 
 MACRO(NL_SETUP_DEFAULT_OPTIONS)
+  IF(WITH_QT)
+    OPTION(WITH_STUDIO              "Build Core Studio"                             OFF )
+  ENDIF(WITH_QT)
+  
   ###
   # Features
   ###
