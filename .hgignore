@@ -43,7 +43,7 @@ default_c
 *.so
 *.so.*
 *_debug
-core
+core.*
 *.pc
 *.gch
 
