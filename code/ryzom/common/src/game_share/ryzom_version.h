@@ -17,7 +17,7 @@
 #ifndef RYZOM_VERSION_H
 #define RYZOM_VERSION_H
 
-#define RYZOM_VERSION	"RYZOM CORE"
+#define RYZOM_VERSION	"2.1.0"
 
 #endif // RYZOM_VERSION_H
 
