@@ -40,7 +40,6 @@
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
-#include "nel/3d/stereo_ng_hmd.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -334,8 +333,8 @@ void ExitClientError (const char *format, ...)
 	// Exit
 	extern void quitCrashReport ();
 	quitCrashReport ();
-	NLMISC::NL3D_BlockMemoryAssertOnPurge = false; // at this point some object may remain allocated
-												   // so don't want to fire an assert here
+	NLMISC::NL3D_BlockMemoryAssertOnPurge = false;	// at this point some object may remain allocated
+													// so don't want to fire an assert here
 	exit (EXIT_FAILURE);
 }
 
@@ -559,11 +558,11 @@ static std::string replaceApplicationDirToken(const std::string &dir)
 {
 
 #ifdef NL_OS_MAC
-  // if client_default.cfg is not in current directory, and it's not an absolute path, use application default directory
-  if (!CFile::isExists("client_default.cfg") && dir.size()>0 && dir[0]!='/')
-    {
-	return  getAppBundlePath() + "/Contents/Resources/" + dir;
-    }
+	// if client_default.cfg is not in current directory, and it's not an absolute path, use application default directory
+	if (!CFile::isExists("client_default.cfg") && dir.size()>0 && dir[0]!='/')
+	{
+		return getAppBundlePath() + "/Contents/Resources/" + dir;
+	}
 #else
 	static const std::string token = "<ApplicationDir>";
 	std::string::size_type pos = dir.find(token);
@@ -640,15 +639,10 @@ void initStereoDisplayDevice()
 			StereoDisplay = IStereoDisplay::createDevice(*deviceInfo);
 			if (StereoDisplay)
 			{
-				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD
-					|| deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
+				if (deviceInfo->Class == CStereoDeviceInfo::StereoHMD)
 				{
 					nlinfo("VR [C]: Stereo display device is a HMD");
 					StereoHMD = static_cast<IStereoHMD *>(StereoDisplay);
-					if (deviceInfo->Class == CStereoDeviceInfo::StereoNGHMD)
-					{
-						StereoNGHMD = static_cast<IStereoNGHMD *>(StereoDisplay);
-					}
 				}
 				if (Driver) // VR_DRIVER
 				{
@@ -701,7 +695,7 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 {
 	NLMISC::TTime initPaths = ryzomGetLocalTime ();
 	H_AUTO(InitRZAddSearchPaths)
-	for (uint  i = 0; i < ClientCfg.PreDataPath.size(); i++)
+	for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
 	{
 		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
@@ -777,7 +771,7 @@ void prelogInit()
 		NLMISC_REGISTER_CLASS(CNamedEntityPositionState);
 		NLMISC_REGISTER_CLASS(CAnimalPositionState);
 
-	//	_CrtSetDbgFlag( _CRTDBG_CHECK_CRT_DF  );
+	//	_CrtSetDbgFlag( _CRTDBG_CHECK_CRT_DF );
 
 		// Init XML Lib allocator
 		// Due to Bug #906, we disable the stl xml allocation
@@ -930,9 +924,9 @@ void prelogInit()
 
 		// For login phase, MUST be in windowed
 		UDriver::CMode mode;
-		mode.Width    = 1024;
-		mode.Height   = 768;
-		mode.Windowed = true;
+		mode.Width		= 1024;
+		mode.Height		= 768;
+		mode.Windowed	= true;
 
 		// Disable Hardware Vertex Program.
 		if(ClientCfg.DisableVtxProgram)
@@ -950,7 +944,7 @@ void prelogInit()
 		else
 			Driver->setSwapVBLInterval(0);
 		
-		if (StereoDisplay) // VR_CONFIG  // VR_DRIVER
+		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
 			// override mode TODO
 		}
@@ -1006,7 +1000,7 @@ void prelogInit()
 
 		// check if an icon is present in registered paths
 		if(CPath::exists("ryzom.png"))
-		  filenames.push_back(CPath::lookup("ryzom.png"));
+			filenames.push_back(CPath::lookup("ryzom.png"));
 
 		vector<CBitmap> bitmaps;
 		

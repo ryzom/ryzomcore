@@ -2292,23 +2292,23 @@ void CCharacterCL::endAnimTransition()
 	if(_CurrentState->NextMode != _Mode)
 	{
 		// Undo previous behaviour
-		switch(_Mode)
+		if (_Mode == MBEHAV::DEATH)
 		{
-		case MBEHAV::DEATH:
 			// Restore collisions.
-			if(_Primitive)
+			if (_Primitive)
 			{
 				// TODO: Without this dynamic cast
-				if(dynamic_cast<CPlayerCL *>(this))
+				if (dynamic_cast<CPlayerCL *>(this))
 					_Primitive->setOcclusionMask(MaskColPlayer);
 				else
 					_Primitive->setOcclusionMask(MaskColNpc);
 			}
-			break;
 		}
-		if(ClientCfg.UsePACSForAll && _Primitive)
+
+		if (ClientCfg.UsePACSForAll && _Primitive)
 			_Primitive->setCollisionMask(MaskColNone);
-		//// AJOUT ////
+
+		//// ADDED ////
 		switch(_CurrentState->NextMode)
 		{
 		// Combat
