@@ -14,8 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// stdafx.cpp : source file that includes just the standard includes
-//	georges_edit.pch will be the pre-compiled header
-//	stdafx.obj will contain the pre-compiled type information
+#include <string>
 
-#include "stdafx.h"
+namespace NLGUI
+{
+	/// Watches the currently selected GUI widget
+	class IEditorSelectionWatcher
+	{
+	public:
+
+		/// Notifies the watcher about the change
+		virtual void selectionChanged( std::string &newSelection ) = 0;
+	};
+}
+

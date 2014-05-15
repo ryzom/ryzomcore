@@ -14,8 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// stdafx.cpp : source file that includes just the standard includes
-//	georges_edit.pch will be the pre-compiled header
-//	stdafx.obj will contain the pre-compiled type information
+#include "editor_selection_watcher.h"
 
-#include "stdafx.h"
+namespace GUIEditor
+{
+	void CEditorSelectionWatcher::selectionChanged( std::string &newSelection )
+	{
+		Q_EMIT sgnSelectionChanged( newSelection );
+	}
+}
+

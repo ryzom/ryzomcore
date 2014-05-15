@@ -2,6 +2,7 @@
     <header>
         <name>ViewTextFormated</name>
         <guiname>CViewTextFormated</guiname>
+        <classname>text_formated</classname>
         <ancestor>ViewText</ancestor>
         <description></description>
         <abstract>false</abstract>

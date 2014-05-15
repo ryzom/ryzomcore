@@ -14,46 +14,33 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef NELGUI_WIDGET_H
-#define NELGUI_WIDGET_H
-
-#include "nel3d_widget.h"
-#include "project_files.h"
+#include <QObject>
 
 namespace GUIEditor
 {
-	class CEditorSelectionWatcher;
+	class CWidgetInfoTree;
 
-	/// Qt viewport for the Nel GUI library
-	class NelGUIWidget : public Nel3DWidget
+	/// Processes the GUI Editor's editor messages like delete, new, etc...
+	class CEditorMessageProcessor : public QObject
 	{
 		Q_OBJECT
 	public:
-		NelGUIWidget( QWidget *parent = NULL );
-		~NelGUIWidget();
+		CEditorMessageProcessor( QObject *parent = NULL ) :
+		QObject( parent )
+		{
+			tree = NULL;
+		}
 
-		void init();
-		bool parse( SProjectFiles &files );
-		void draw();
-		void reset();
-		CEditorSelectionWatcher* getWatcher(){ return watcher; }
+		~CEditorMessageProcessor(){}
 
-Q_SIGNALS:
-		void guiLoadComplete();
-
-	protected:
-		void paintEvent( QPaintEvent *evnt );
-		void timerEvent( QTimerEvent *evnt );
-		void showEvent( QShowEvent *evnt );
-		void hideEvent( QHideEvent *evnt );
-
+		void setTree( CWidgetInfoTree *tree ){ this->tree = tree; }
+		
+	public Q_SLOTS:
+		void onDelete();
+		void onAdd( const QString &parentGroup, const QString &widgetType, const QString &name );
 
 	private:
-		int timerID;
-		bool guiLoaded;
-		CEditorSelectionWatcher *watcher;
+		CWidgetInfoTree *tree;
 	};
 }
 
-#endif

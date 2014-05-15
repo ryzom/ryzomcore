@@ -14,8 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-// stdafx.cpp : source file that includes just the standard includes
-//	georges_edit.pch will be the pre-compiled header
-//	stdafx.obj will contain the pre-compiled type information
+#ifndef WIDGET_ADD_WATCHER
+#define WIDGET_ADD_WATCHER
 
-#include "stdafx.h"
+#include <string>
+
+namespace NLGUI
+{
+	class IWidgetAdditionWatcher
+	{
+	public:
+		virtual void widgetAdded( const std::string &name ) = 0;
+	};
+}
+
+#endif
+

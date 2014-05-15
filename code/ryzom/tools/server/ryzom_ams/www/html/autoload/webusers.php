@@ -78,7 +78,7 @@ class WebUsers extends Users{
        public static function checkLoginMatch($value,$password){
   
           $dbw = new DBLayer("web");
-          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:value OR Email:value", array('value' => $value));
+          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:value OR Email=:value", array('value' => $value));
           $row = $statement->fetch();
           $salt = substr($row['Password'],0,2);
           $hashed_input_pass = crypt($password, $salt);
