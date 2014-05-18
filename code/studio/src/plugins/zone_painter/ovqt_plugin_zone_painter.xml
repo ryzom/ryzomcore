@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_zone_painter</library-name>
+    <library-name>studio_plugin_zone_painter</library-name>
     <name>ZonePainter</name>
     <version>0.0</version>
     <vendor>Ryzom Core</vendor>

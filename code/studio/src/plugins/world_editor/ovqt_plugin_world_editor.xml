@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_world_editor</library-name>
+    <library-name>studio_plugin_world_editor</library-name>
     <name>WorldEditor</name>
     <version>0.6</version>
     <vendor>GSoC2011_dnk-88</vendor>

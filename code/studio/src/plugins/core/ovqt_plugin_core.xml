@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_core</library-name>
+    <library-name>studio_plugin_core</library-name>
     <name>Core</name>
     <version>0.8</version>
     <vendor>Ryzom Core</vendor>

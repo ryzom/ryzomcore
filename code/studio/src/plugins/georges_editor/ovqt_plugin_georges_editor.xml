@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_georges_editor</library-name>
+    <library-name>studio_plugin_georges_editor</library-name>
     <name>GeorgesEditor</name>
     <version>0.4</version>
     <vendor>aquiles</vendor>

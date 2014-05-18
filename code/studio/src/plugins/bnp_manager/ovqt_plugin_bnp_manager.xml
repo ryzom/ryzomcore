@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_bnp_manager</library-name>
+    <library-name>studio_plugin_bnp_manager</library-name>
     <name>BNPManager</name>
     <version>0.1</version>
     <vendor>Krolock</vendor>

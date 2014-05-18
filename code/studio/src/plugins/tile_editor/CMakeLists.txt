@@ -30,18 +30,18 @@ SOURCE_GROUP(QtGeneratedMocSrc FILES ${OVQT_TILE_EDITOR_PLUGIN_MOC_SRC} ${OVQT_P
 SOURCE_GROUP("Tile Editor Plugin" FILES ${SRC})
 SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
-ADD_LIBRARY(ovqt_plugin_tile_editor MODULE ${SRC} ${OVQT_TILE_EDITOR_PLUGIN_MOC_SRC} ${OVQT_PLUG_TILE_EDITOR_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_TILE_EDITOR_PLUGIN_UI_HDRS})
+ADD_LIBRARY(studio_plugin_tile_editor MODULE ${SRC} ${OVQT_TILE_EDITOR_PLUGIN_MOC_SRC} ${OVQT_PLUG_TILE_EDITOR_RC_SRCS} ${OVQT_EXT_SYS_SRC} ${OVQT_TILE_EDITOR_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_tile_editor ovqt_plugin_core nelmisc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_tile_editor studio_plugin_core nelmisc ${QT_LIBRARIES})
 
 IF(WITH_STLPORT)
-  TARGET_LINK_LIBRARIES(ovqt_plugin_tile_editor ${CMAKE_THREAD_LIBS_INIT})
+  TARGET_LINK_LIBRARIES(studio_plugin_tile_editor ${CMAKE_THREAD_LIBS_INIT})
 ENDIF(WITH_STLPORT)
 
-NL_DEFAULT_PROPS(ovqt_plugin_tile_editor "NeL, Tools, 3D: Object Viewer Qt Plugin: Tile Editor")
-NL_ADD_RUNTIME_FLAGS(ovqt_plugin_tile_editor)
-NL_ADD_LIB_SUFFIX(ovqt_plugin_tile_editor)
+NL_DEFAULT_PROPS(studio_plugin_tile_editor "Tools: Studio Plugin: Tile Editor")
+NL_ADD_RUNTIME_FLAGS(studio_plugin_tile_editor)
+NL_ADD_LIB_SUFFIX(studio_plugin_tile_editor)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
-INSTALL(TARGETS ovqt_plugin_tile_editor LIBRARY DESTINATION lib RUNTIME DESTINATION bin ARCHIVE DESTINATION lib COMPONENT tools3d)
+INSTALL(TARGETS studio_plugin_tile_editor LIBRARY DESTINATION lib RUNTIME DESTINATION bin ARCHIVE DESTINATION lib COMPONENT tools3d)

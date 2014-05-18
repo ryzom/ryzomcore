@@ -165,7 +165,7 @@ SOURCE_GROUP("ovqt Plugin PS Src" FILES ${OVQT_PS_SRC})
 SOURCE_GROUP("ovqt Plugin Vegetable Src" FILES ${OVQT_VEGETABLE_SRC})
 SOURCE_GROUP("ovqt Plugin Widgets Src" FILES ${OVQT_WIDGETS_SRC})
 
-ADD_LIBRARY(ovqt_plugin_object_viewer MODULE ${SRC} 
+ADD_LIBRARY(studio_plugin_object_viewer MODULE ${SRC} 
                                              ${OVQT_SCENE_SRC}
                                              ${OVQT_PS_SRC}
                                              ${OVQT_VEGETABLE_SRC}
@@ -175,8 +175,8 @@ ADD_LIBRARY(ovqt_plugin_object_viewer MODULE ${SRC}
                                              ${OBJECT_VIEWER_PLUGIN_UI_HDRS}
                                              ${OBJECT_VIEWER_PLUGIN_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(ovqt_plugin_object_viewer 
-			ovqt_plugin_core 
+TARGET_LINK_LIBRARIES(studio_plugin_object_viewer 
+			studio_plugin_core 
 			nelmisc 
 			nel3d
 			nelsound
@@ -185,30 +185,30 @@ TARGET_LINK_LIBRARIES(ovqt_plugin_object_viewer
 			${QT_LIBRARIES}
 			${QT_QTOPENGL_LIBRARY})
 
-NL_DEFAULT_PROPS(ovqt_plugin_object_viewer "NeL, Tools, 3D: Object Viewer Qt Plugin: Object Viewer")
+NL_DEFAULT_PROPS(studio_plugin_object_viewer "Tools: Studio Plugin: Object Viewer")
 
-NL_ADD_RUNTIME_FLAGS(ovqt_plugin_object_viewer)
-NL_ADD_LIB_SUFFIX(ovqt_plugin_object_viewer)
+NL_ADD_RUNTIME_FLAGS(studio_plugin_object_viewer)
+NL_ADD_LIB_SUFFIX(studio_plugin_object_viewer)
 
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS ${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ovqt_plugin_object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  ADD_NATIVE_PRECOMPILED_HEADER(studio_plugin_object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
 ENDIF(WITH_PCH)
 
 
 
 IF(WIN32)
   IF(WITH_INSTALL_LIBRARIES)
-    INSTALL(TARGETS ovqt_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} ARCHIVE DESTINATION ${NL_LIB_PREFIX} RUNTIME DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
+    INSTALL(TARGETS studio_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} ARCHIVE DESTINATION ${NL_LIB_PREFIX} RUNTIME DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
   ELSE(WITH_INSTALL_LIBRARIES)
-    INSTALL(TARGETS ovqt_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
+    INSTALL(TARGETS studio_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${OVQT_PLUGIN_DIR} COMPONENT tools3d)
   ENDIF(WITH_INSTALL_LIBRARIES)
 ELSE(WIN32)
   IF(WITH_INSTALL_LIBRARIES)
-    INSTALL(TARGETS ovqt_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} ARCHIVE DESTINATION ${NL_LIB_PREFIX} RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)
+    INSTALL(TARGETS studio_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} ARCHIVE DESTINATION ${NL_LIB_PREFIX} RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)
   ELSE(WITH_INSTALL_LIBRARIES)
-    INSTALL(TARGETS ovqt_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)
+    INSTALL(TARGETS studio_plugin_object_viewer LIBRARY DESTINATION ${OVQT_PLUGIN_DIR} RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)
   ENDIF(WITH_INSTALL_LIBRARIES)
 ENDIF(WIN32)
 

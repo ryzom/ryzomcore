@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_disp_sheet_id</library-name>
+    <library-name>studio_plugin_disp_sheet_id</library-name>
     <name>DisplaySheetId</name>
     <version>1.0</version>
     <vendor>pemeon</vendor>

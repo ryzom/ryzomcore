@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_sheet_builder</library-name>
+    <library-name>studio_plugin_sheet_builder</library-name>
     <name>SheetBuilder</name>
     <version>1.0</version>
     <vendor>kharvd</vendor>

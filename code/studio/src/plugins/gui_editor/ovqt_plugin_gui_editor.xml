@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_gui_editor</library-name>
+    <library-name>studio_plugin_gui_editor</library-name>
     <name>GUI Editor</name>
     <version>0.0.1</version>
     <vendor>Ryzom Core</vendor>

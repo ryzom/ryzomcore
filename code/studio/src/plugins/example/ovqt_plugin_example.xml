@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_example</library-name>
+    <library-name>studio_plugin_example</library-name>
     <name>ExamplePlugin</name>
     <version>0.2</version>
     <vendor>dnk-88</vendor>

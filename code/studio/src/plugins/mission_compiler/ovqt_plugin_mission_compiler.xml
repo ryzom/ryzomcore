@@ -1,5 +1,5 @@
 <plugin-spec>
-    <library-name>ovqt_plugin_mission_compiler</library-name>
+    <library-name>studio_plugin_mission_compiler</library-name>
     <name>MissionCompiler</name>
     <version>0.1</version>
     <vendor>Ryzom Core</vendor>
