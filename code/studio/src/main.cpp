@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 	pluginManager.setSettings(settings);
 	QStringList pluginPaths;
 #if defined(NL_OS_MAC)
-	pluginPaths << settings->value("PluginPath", qApp->applicationDirPath() + QString("/../PlugIns/ovqt")).toString();
+	pluginPaths << settings->value("PluginPath", qApp->applicationDirPath() + QString("/../PlugIns/studio")).toString();
 #else
 	pluginPaths << settings->value("PluginPath", QString("%1/plugins").arg(DATA_DIR)).toString();
 #endif
@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 	{
 		QDir absolutePluginPaths(pluginPaths.join(QLatin1String(",")));
 		QString absolutePaths = absolutePluginPaths.absolutePath();
-		const QString reason = QCoreApplication::translate("Application", "Could not find ovqt_plugin_core in %1").arg(absolutePaths);
+		const QString reason = QCoreApplication::translate("Application", "Could not find studio_plugin_core in %1").arg(absolutePaths);
 		displayError(msgCoreLoadFailure(reason));
 
 		QString newPath = QFileDialog::getExistingDirectory(0, QCoreApplication::translate("Application", "Change the plugins path"), QDir::homePath());
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 		errors.append(spec->fileName() + " : " + spec->errorString());
 
 	if (!errors.isEmpty())
-		QMessageBox::warning(0, QCoreApplication::translate("Application", "Object Viewer Qt - Plugin loader messages"),
+		QMessageBox::warning(0, QCoreApplication::translate("Application", "Studio - Plugin loader messages"),
 		                     errors.join(QString::fromLatin1("\n\n")));
 
 	int result = app.exec();

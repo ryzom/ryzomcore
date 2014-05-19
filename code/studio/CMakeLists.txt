@@ -27,7 +27,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 IF(UNIX AND WITH_STATIC)
-	MESSAGE(FATAL_ERROR "OVQT does not work with static NeL builds on Unix atm.")
+	MESSAGE(FATAL_ERROR "Studio does not work with static NeL builds on Unix atm.")
 ENDIF()
 
 ADD_SUBDIRECTORY(src)

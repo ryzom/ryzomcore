@@ -46,13 +46,13 @@ MainWindow::MainWindow(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 	  m_undoGroup(0),
 	  m_settings(0)
 {
-	QCoreApplication::setApplicationName(QLatin1String("ObjectViewerQt"));
+	QCoreApplication::setApplicationName(QLatin1String("Studio"));
 	QCoreApplication::setApplicationVersion(QLatin1String(Core::Constants::OVQT_VERSION_LONG));
 	QCoreApplication::setOrganizationName(QLatin1String("RyzomCore"));
 
 	setObjectName(Constants::MAIN_WINDOW);
 	setWindowIcon(QIcon(Constants::ICON_PILL));
-	setWindowTitle(tr("Object Viewer Qt"));
+	setWindowTitle(tr("Ryzom Core Studio"));
 
 	m_pluginManager = pluginManager;
 	m_settings = m_pluginManager->settings();
@@ -232,8 +232,8 @@ bool MainWindow::showOptionsDialog(const QString &group,
 
 void MainWindow::about()
 {
-	QMessageBox::about(this, tr("About Object Viewer Qt"),
-					   tr("<h2>Object Viewer Qt</h2>"
+	QMessageBox::about(this, tr("About Ryzom Core Studio"),
+					   tr("<h2>Ryzom Core Studio</h2>"
 						  "<p> Ryzom Core team <p>Compiled on %1 %2").arg(__DATE__).arg(__TIME__));
 }
 
