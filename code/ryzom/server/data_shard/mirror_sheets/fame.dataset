@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<FORM Revision="$Revision: 1.4 $" State="modified">
+<FORM Revision="$Revision: 1.2 $" State="modified">
   <STRUCT>
     <ARRAY Name="properties">
       <STRUCT>
@@ -724,7 +724,7 @@
         <ATOM Name="weight" Value="5"/>
       </STRUCT>
     </ARRAY>
-    <ATOM Name="max number of rows or entities" Value="16000"/>
+    <ATOM Name="max number of rows or entities" Value="1000"/>
     <ARRAY Name="entity types">
       <ATOM Value="player"/>
       <ATOM Value="guild"/>

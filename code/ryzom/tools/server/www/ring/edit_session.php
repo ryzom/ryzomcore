@@ -16,9 +16,10 @@
 	
 	$domainInfo = getDomainInfo($domainId);
 	
-	global $DBHost, $DBUserName, $DBPassword, $DBName, $RingDBName;
-	$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Can't connect to database host:$DBHost user:$DBUserName");
-	mysql_select_db ($RingDBName) or die ("Can't access to the db dbname:$RingDBName");
+	global $DBHost, $RingDBUserName, $RingDBPassword, $RingDBName;
+
+	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
+	mysqli_select_db($link, $RingDBName) or die ("Can't access to the db dbname:$RingDBName");
 
 	// Find out if the character has an open editing session
 	$query = "SELECT session_id, state ";
@@ -26,8 +27,8 @@
 	$query .= " WHERE (owner = '".$charId."')";
 	$query .= " AND (session_type = 'st_edit')";
 	$query .= " AND (NOT (state IN ('ss_closed', 'ss_locked')))";
-	$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
-	$num = mysql_num_rows ($result);
+	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+	$num = mysqli_num_rows($result);
 	if ($num > 1)
 	{
 		echo "Error: more than one editing sessions for char".$charId;
@@ -39,11 +40,14 @@
 	{
 		// Not found => first, create an editing session for this character, start the session and invite himself
 		$query = "SELECT char_name FROM characters WHERE char_id = $charId";
-		$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
-		$num = mysql_num_rows ($result);
+		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+		$num = mysqli_num_rows($result);
 		$characterName = "";
 		if ($num > 0)
-			$characterName = mysql_result($result, 0, 0);
+		{
+			$row = mysqli_fetch_assoc($result);
+			$characterName = $row['char_name'];
+		}
 		global $SessionId, $SessionToolsResult;
 		planEditSession($charId, $domainId, "st_edit", $characterName, "");
 		if ($SessionToolsResult === false)
@@ -55,7 +59,7 @@
 	}
 	else
 	{
-		$row = mysql_fetch_array($result);
+		$row = mysqli_fetch_assoc($result);
 		$sessionId = $row['session_id'];
 		$state = $row['state'];
 		echo "Found your session: $sessionId ($state)<br>";
@@ -73,13 +77,12 @@
 	}
 	
 	// check that we character have a participation in the session and invite him if needed
-	mysql_select_db ($RingDBName) or die ("Can't access to the db dbname:$RingDBName");
 	$query = "SELECT count(*) FROM session_participant WHERE session_id = $sessionId AND char_id = $charId";
-	$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
-	$num = mysql_num_rows ($result);
+	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+	$num = mysqli_num_rows($result);
 	if ($num != 1)
 		die ("Invalid result whil checking participation for char $charId in session $sessionId<br>");
-	$value = mysql_fetch_array($result);
+	$value = mysqli_fetch_row($result);
 	if ($value[0] == 0)
 	{
 		// the character have not is own invitation !
@@ -91,4 +94,4 @@
 	
 	// Join the session
 	joinSessionFromId($userId, $domainId, $sessionId);
-?>
+

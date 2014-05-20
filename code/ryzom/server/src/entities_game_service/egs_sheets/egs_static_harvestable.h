@@ -34,7 +34,9 @@ enum TRMUsage { RMUTotalQuantity, RMUFixedQuantity, NbRMUsages };
 
 enum TRMQuantityVariable { RMQVHerbivore, RMQVCarnivore, RMQVBoss5, RMQVBossBegin=RMQVBoss5, RMQVBoss7, RMQVBossEnd=RMQVBoss7, RMQVInvasion5, RMQVInvasion7, RMQVForceBase, NBRMQuantityVariables=RMQVForceBase+6 };
 
+#ifndef NO_EGS_VARS
 extern const float *QuarteringQuantityByVariable [NBRMQuantityVariables];
+#endif
 
 
 /**

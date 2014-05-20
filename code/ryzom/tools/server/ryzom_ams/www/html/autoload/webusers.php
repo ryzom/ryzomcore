@@ -70,15 +70,15 @@ class WebUsers extends Users{
      
      
        /**
-       * check if the login username and password match the db.
-       * @param $username the inserted username
+       * check if the login username/email and password match the db.
+       * @param $value the inserted username or email
        * @param $password the inserted password (unhashed)
        * @return the logged in user's db row as array if login was a success, else "fail" will be returned.
        */
-       public static function checkLoginMatch($username,$password){
+       public static function checkLoginMatch($value,$password){
   
           $dbw = new DBLayer("web");
-          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:user", array('user' => $username));
+          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:value OR Email=:value", array('value' => $value));
           $row = $statement->fetch();
           $salt = substr($row['Password'],0,2);
           $hashed_input_pass = crypt($password, $salt);
@@ -89,9 +89,9 @@ class WebUsers extends Users{
           }	
        }
        
-       
+	   
        /**
-       * returns te id for a given username
+       * returns the id for a given username
        * @param $username the username
        * @return the user's id linked to the username
        */
@@ -104,7 +104,7 @@ class WebUsers extends Users{
     
     
        /**
-       * returns te id for a given emailaddress
+       * returns the id for a given emailaddress
        * @param $email the emailaddress
        * @return the user's id linked to the emailaddress
        */
@@ -118,7 +118,7 @@ class WebUsers extends Users{
               return "FALSE";
           }
        }
-    
+	   
     
        /**
        * get uId attribute of the object.

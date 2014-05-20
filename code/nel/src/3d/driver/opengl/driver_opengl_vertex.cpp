@@ -1809,7 +1809,7 @@ void				CDriverGL::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
 
 #ifndef USE_OPENGLES
 	// If old is not a VBHard, or if not a NVidia VBHard, no-op.
-	if( _CurrentVertexBufferHard==NULL || !_CurrentVertexBufferHard->VBType == IVertexBufferHardGL::NVidiaVB)
+	if( _CurrentVertexBufferHard==NULL || _CurrentVertexBufferHard->VBType != IVertexBufferHardGL::NVidiaVB)
 		return;
 
 	// if we do not activate the same (NB: newVBHard==NULL if not a VBHard).

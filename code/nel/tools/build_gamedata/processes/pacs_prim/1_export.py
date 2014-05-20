@@ -130,13 +130,6 @@ if MaxAvailable:
 
 
 
-# Remove bad file from previous script version
-listPath = ExportBuildDirectory + "/" + PacsPrimExportDirectory + "/landscape_col_prim_pacs_list.txt"
-if os.path.isfile(listPath):
-	os.remove(listPath)
-
-
-
 log.close()
 if os.path.isfile("log.log"):
 	os.remove("log.log")

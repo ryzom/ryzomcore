@@ -82,6 +82,13 @@ def copyFileList(log, dir_source, dir_target, files):
 				if needUpdateLogRemoveDest(log, dir_source + "/" + fileName, dir_target + "/" + fileName):
 					shutil.copy(dir_source + "/" + fileName, dir_target + "/" + fileName)
 
+def copyFileListLogless(log, dir_source, dir_target, files):
+	for fileName in files:
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			if (os.path.isfile(dir_source + "/" + fileName)):
+				if needUpdateRemoveDest(log, dir_source + "/" + fileName, dir_target + "/" + fileName):
+					shutil.copy(dir_source + "/" + fileName, dir_target + "/" + fileName)
+
 def copyFileListNoTree(log, dir_source, dir_target, files):
 	for fileName in files:
 		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
@@ -144,6 +151,9 @@ def copyFilesRecursive(log, dir_source, dir_target):
 
 def copyFiles(log, dir_source, dir_target):
 	copyFileList(log, dir_source, dir_target, os.listdir(dir_source))
+
+def copyFilesLogless(log, dir_source, dir_target):
+	copyFileListLogless(log, dir_source, dir_target, os.listdir(dir_source))
 
 def copyFilesExt(log, dir_source, dir_target, file_ext):
 	files = os.listdir(dir_source)
@@ -288,6 +298,31 @@ def findFile(log, dir_where, file_name):
 				printLog(log, "findFile: file not dir or file?! " + filePath)
 	return ""
 
+def needUpdateDirByLowercaseTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
+	updateCount = 0
+	skipCount = 0
+	lenSrcExt = len(ext_source)
+	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
+	for file in sourceFiles:
+		sourceFile = dir_source + "/" + file
+		tagFile = dir_dest + "/" + file[0:-lenSrcExt].lower() + ext_dest
+		if os.path.isfile(tagFile):
+			sourceTime = os.stat(sourceFile).st_mtime
+			tagTime = os.stat(tagFile).st_mtime
+			if (sourceTime > tagTime):
+				updateCount = updateCount + 1
+			else:
+				skipCount = skipCount + 1
+		else:
+			updateCount = updateCount + 1
+	if updateCount > 0:
+		printLog(log, "UPDATE " + str(updateCount) + " / " + str(len(sourceFiles)) + "; SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
+		return 1
+	else:
+		printLog(log, "SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
+		return 0
+
 def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
 	updateCount = 0
 	skipCount = 0
@@ -327,9 +362,69 @@ def needUpdateDirNoSubdirFile(log, dir_source, file_dest):
 	else:
 		return 0
 
+def needUpdateFileDirNoSubdir(log, file_source, dir_dest):
+	if not os.path.isfile(file_source):
+		printLog(log, "WARNING MISSING " + file_source)
+		return 0
+	sourceTime = os.stat(file_source).st_mtime
+	destFiles = os.listdir(dir_dest)
+	for file in destFiles:
+		filePath = dir_dest + "/" + file
+		if os.path.isfile(filePath):
+			fileTime = os.stat(filePath).st_mtime
+			if sourceTime > fileTime:
+				return 1
+	else:
+		return 0
+
+def needUpdateDirNoSubdirMultiFile(log, dir_source, root_file, files_dest):
+	for file_dest in files_dest:
+		if needUpdateDirNoSubdirFile(log, dir_source, root_file + "/" + file_dest):
+			return 1
+	return 0
+
+def needUpdateDirNoSubdirMultiFileExt(log, dir_source, root_file, files_dest, file_ext):
+	for file_dest in files_dest:
+		if needUpdateDirNoSubdirFile(log, dir_source, root_file + "/" + file_dest + file_ext):
+			return 1
+	return 0
+
 def needUpdateMultiDirNoSubdirFile(log, root_dir, dirs_source, file_dest):
 	for dir_source in dirs_source:
 		if needUpdateDirNoSubdirFile(log, root_dir + "/" + dir_source, file_dest):
+			return 1
+	return 0
+
+def needUpdateMultiDirNoSubdirMultiFileExt(log, root_dir, dirs_source, root_file, files_dest, file_ext):
+	for file_dest in files_dest:
+		if needUpdateMultiDirNoSubdirFile(log, root_dir, dirs_source, root_file + "/" + file_dest + file_ext):
+			return 1
+	return 0
+
+def needUpdateMultiDirNoSubdir(log, root_dir, dirs_source, dir_dest):
+	for dir_source in dirs_source:
+		if needUpdateDirNoSubdir(log, root_dir + "/" + dir_source, dir_dest):
+			return 1
+	return 0
+
+def needUpdateDirNoSubdirExtFile(log, dir_source, dir_ext, file_dest):
+	if not os.path.isfile(file_dest):
+		return 1
+	destTime = os.stat(file_dest).st_mtime
+	sourceFiles = os.listdir(dir_source)
+	for file in sourceFiles:
+		if file.endswith(dir_ext):
+			filePath = dir_source + "/" + file
+			if os.path.isfile(filePath):
+				fileTime = os.stat(filePath).st_mtime
+				if fileTime > destTime:
+					return 1
+	else:
+		return 0
+
+def needUpdateDirNoSubdirExtMultiFileExt(log, dir_source, dir_ext, root_file, files_dest, file_ext):
+	for file_dest in files_dest:
+		if needUpdateDirNoSubdirExtFile(log, dir_source, dir_ext, root_file + "/" + file_dest + file_ext):
 			return 1
 	return 0
 

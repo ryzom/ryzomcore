@@ -37,6 +37,15 @@ function add_user(){
 	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register_feedback', $pageElements);
           exit;
+     }elseif ($_POST['page']=="settings"){
+          // pass error and reload template accordingly
+          $result['prevUsername'] = $_POST["Username"];
+          $result['prevPassword'] = $_POST["Password"];
+          $result['prevConfirmPass'] = $_POST["ConfirmPass"];
+          $result['prevEmail'] = $_POST["Email"];
+          $result['no_visible_elements'] = 'TRUE';
+          helpers :: loadtemplate( 'settings', $result);
+          exit;
      }else{
           // pass error and reload template accordingly
           $result['prevUsername'] = $_POST["Username"];
@@ -44,7 +53,7 @@ function add_user(){
           $result['prevConfirmPass'] = $_POST["ConfirmPass"];
           $result['prevEmail'] = $_POST["Email"];
           $result['no_visible_elements'] = 'TRUE';
-	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
+          $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register', $result);
           exit;
      }

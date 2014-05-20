@@ -150,7 +150,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 				{
 					bool tempBRet = bRet;
 					bRet = false;
-					// delete pShape; // FIXME: there is a delete bug with CMeshMultiLod exported from max!!!
+					delete pShape;
 					bRet = tempBRet;
 				}
 				catch (...)

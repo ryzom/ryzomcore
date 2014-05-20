@@ -3149,5 +3149,10 @@ namespace NLGUI
 
 		return true;
 	}
+
+	CViewBase* CInterfaceParser::createClass( const std::string &name )
+	{
+		return NLMISC_GET_FACTORY( CViewBase, std::string ).createObject( std::string( name ) , CViewBase::TCtorParam() );
+	}
 }
 

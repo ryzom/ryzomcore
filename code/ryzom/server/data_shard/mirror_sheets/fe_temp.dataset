@@ -292,14 +292,14 @@
       </STRUCT>
       <STRUCT>
         <ATOM Name="name" Value="PvpMode"/>
-        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="type" Value="uint8"/>
         <ATOM Name="persistant" Value="true"/>
         <ATOM Name="mirror" Value="true"/>
         <ATOM Name="weight" Value="1"/>
       </STRUCT>
       <STRUCT>
         <ATOM Name="name" Value="PvpClan"/>
-        <ATOM Name="type" Value="uint32"/>
+        <ATOM Name="type" Value="uint8"/>
         <ATOM Name="persistant" Value="true"/>
         <ATOM Name="mirror" Value="true"/>
         <ATOM Name="weight" Value="1"/>
@@ -347,7 +347,7 @@
         <ATOM Name="weight" Value="1"/>
       </STRUCT>
     </ARRAY>
-    <ATOM Name="max number of rows or entities" Value="500000"/>
+    <ATOM Name="max number of rows or entities" Value="15000"/>
     <ARRAY Name="entity types">
       <ATOM Value="player"/>
       <ATOM Value="object"/>
@@ -361,14 +361,5 @@
   <STRUCT/>
   <STRUCT/>
   <STRUCT/>
-  <LOG>Fri Dec 12 14:33:57 2003 (saffray) .entity types[1] = 6
-Fri Dec 12 14:33:57 2003 (saffray) .entity types[2] = 1
-Fri Dec 12 14:33:57 2003 (saffray) .entity types[3] = 2
-Fri Dec 12 14:33:57 2003 (saffray) formName Resized = 4
-Fri Sep 09 15:08:36 2005 (coutelas) .properties[47].mirror = true
-Fri Sep 09 15:08:36 2005 (coutelas) .properties[47].name = OutpostInfos
-Fri Sep 09 15:08:36 2005 (coutelas) .properties[47].type = uint16
-Fri Sep 09 15:08:36 2005 (coutelas) .properties[47].weight = 16
-Fri Sep 09 15:08:36 2005 (coutelas) formName Resized = 48
-Tue Sep 13 16:26:47 2005 (coutelas) .properties[47].persistant = false</LOG>
+  <LOG></LOG>
 </FORM>

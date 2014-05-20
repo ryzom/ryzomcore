@@ -1864,14 +1864,19 @@ void CStringManager::init(NLMISC::CLog *log)
 	
 	if (_SheetInfo.empty())
 	{
-		std::map<std::string, TSheetInfo> container;
+		// std::map<std::string, TSheetInfo> container;
 		// Load the sheet
 		std::vector<std::string> exts;
 		exts.push_back("creature");
 		//exts.push_back("item");
 		//exts.push_back("sitem");	// not more needed !
 		exts.push_back("race_stats");
-		loadForm(exts, NLNET::IService::getInstance()->WriteFilesDirectory.toString() + "ios_sheets.packed_sheets", _SheetInfo, false, false);
+
+		// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
+		if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+		{
+			loadForm(exts, NLNET::IService::getInstance()->WriteFilesDirectory.toString() + "ios_sheets.packed_sheets", _SheetInfo, false, false);
+		}
 
 		if (_SheetInfo.empty())
 		{

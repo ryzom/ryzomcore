@@ -111,7 +111,7 @@ function game:configHideAll()
 	local	uiList = { 
 		'explanation', 'general', 'landscape', 'fx', 'char', 'hud', 'language', 'alpha_colors',
 		'chat_colors', 'entity_colors', 'in_scene_user', 'in_scene_friend', 'in_scene_enemy', 
-		'in_scene_chat_messages', 'win_colors', 'win_colors_r2', 'mouse', 'keyb', 'sound', 'landmark_colors', 'help' 
+		'in_scene_chat_messages', 'win_colors', 'win_colors_r2', 'mouse', 'keyb', 'vr', 'sound', 'landmark_colors', 'help' 
 	};
 
 	for k,v in pairs(uiList) do

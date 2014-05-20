@@ -145,18 +145,19 @@ VegetTagExportDirectory = CommonPath + "/veget_tag"
 VegetSetExportDirectory = CommonPath + "/veget_set"
 
 # Ligo directories
-LigoDatabaseExportDirectory = "landscape/ligo/" + EcosystemName
-LigoDatabaseIgExportDirectory = LigoDatabaseExportDirectory + "/igs"
-LigoDatabaseZoneExportDirectory = LigoDatabaseExportDirectory + "/zones"
-LigoDatabaseZoneLigoExportDirectory = LigoDatabaseExportDirectory + "/zoneligos"
-LigoDatabaseCmbExportDirectory = LigoDatabaseExportDirectory + "/cmb"
-LigoTagExportDirectory = CommonPath + "/ligo_tag"
+LigoEcosystemExportDirectory = CommonPath + "/ligo_es"
+LigoEcosystemIgExportDirectory = LigoEcosystemExportDirectory + "/igs"
+LigoEcosystemZoneExportDirectory = LigoEcosystemExportDirectory + "/zones"
+LigoEcosystemZoneLigoExportDirectory = LigoEcosystemExportDirectory + "/zoneligos"
+LigoEcosystemCmbExportDirectory = LigoEcosystemExportDirectory + "/cmb"
+LigoEcosystemTagExportDirectory = CommonPath + "/ligo_es_tag"
 
 # Zone directories
 ZoneExportDirectory = CommonPath + "/zone"
 
 # PACS primitives directories
 PacsPrimExportDirectory = CommonPath + "/pacs_prim"
+PacsPrimTagExportDirectory = CommonPath + "/pacs_prim_tag"
 
 
 # *** BUILD DIRECTORIES FOR THE BUILD PIPELINE ***

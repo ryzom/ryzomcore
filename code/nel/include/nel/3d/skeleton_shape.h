@@ -88,7 +88,7 @@ public:
 
 	/** return the bounding box of the shape. Default is to return Null bbox.
 	 */
-	virtual	void				getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual	void	getAABBox(NLMISC::CAABBox &bbox) const;
 
 	/// get an approximation of the number of triangles this instance will render for a fixed distance.
 	virtual float	getNumTriangles (float distance);
@@ -98,7 +98,7 @@ public:
 	NLMISC_DECLARE_CLASS(CSkeletonShape);
 
 	/// flush textures used by this shape.
-	virtual void				flushTextures (IDriver &/* driver */, uint /* selectedTexture */) {}
+	virtual void	flushTextures (IDriver &/* driver */, uint /* selectedTexture */) {}
 
 	// @}
 

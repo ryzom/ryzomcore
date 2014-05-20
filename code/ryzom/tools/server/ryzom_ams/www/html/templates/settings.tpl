@@ -76,6 +76,87 @@
 				</div>                   
 			</div>
 		</div><!--/span-->
+		
+		
+		<div class="box span4">
+			<div class="box-header well" data-original-title="">
+				<h2><i class="icon-th"></i> Add User</h2>
+				<div class="box-icon">
+					<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
+					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
+				</div>
+			</div>
+			<div class="box-content">
+				<div class="row-fluid">
+					<form id="addUser" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
+						<legend>Add User</legend>
+											
+						<div class="control-group">
+							<label class="control-label">Username</label>
+								<div class="controls">
+									<div class="input-prepend">
+									<span style="margin-left:5px;" class="add-on"><i class="icon-user"></i></span>
+										<input type="text" value="Username" placeholder="Username" name="Username" id="Username" class="input-xlarge">
+									</div>
+								</div>
+						</div>												
+						
+						<div class="control-group ">
+							<label class="control-label">Password</label>
+								<div class="controls">
+								    <div class="input-prepend">
+										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
+										<input type="password" placeholder="Password" name="Password" id="Password" class="input-xlarge">
+									 </div>
+								</div>
+						</div>
+																		
+						<div class="control-group ">
+							<label class="control-label">Confirm Password</label>
+								<div class="controls">
+								    <div class="input-prepend">
+										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
+										<input type="password" placeholder="Confirm Password" name="ConfirmPass" id="ConfirmPass" class="input-xlarge">
+									 </div>
+								</div>
+						</div>
+						
+						<div class="control-group ">
+						<label class="control-label">Email</label>
+							<div class="controls">
+							    <div class="input-prepend">
+								<span style="margin-left:5px;" class="add-on"><i class="icon-envelope"></i></span>
+									<input type="text" value="Email" placeholder="Email" name="Email" id="Email" class="input-xlarge">		
+							    </div>
+							</div>
+						</div>
+						
+											
+						{if isset($SUCCESS_PASS) and $SUCCESS_PASS eq "OK"}
+						<div class="alert alert-success">
+							The user is created!
+						</div>
+						{/if}
+						
+						{if isset($SUCCESS_PASS) and $SUCCESS_PASS eq "SHARDOFF"}
+						<div class="alert alert-warning">
+							The user can't be created.
+						</div>
+						{/if}
+						
+						<input type="hidden" name="function" value="add_user">
+						<input type="hidden" name="target_id" value="{$target_id}">
+						<div class="control-group">
+							<label class="control-label"></label>
+							<div class="controls">
+								<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Create User</button>
+							</div>
+						</div>
+					</form>		
+				</div>                   
+			</div>
+		</div><!--/span-->
+		
 				
 		<div class="box span4">
 			<div class="box-header well" data-original-title="">

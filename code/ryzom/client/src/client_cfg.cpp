@@ -302,7 +302,7 @@ CClientConfig::CClientConfig()
 	Contrast			= 0.f;						// Default Monitor Contrast.
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
-	
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -422,16 +422,16 @@ CClientConfig::CClientConfig()
 	MouseOverFX = "sfx_selection_mouseover.ps";
 	SelectionFXSize = 0.8f;
 
-	// only force patching under Windows by default
-#ifdef NL_OS_WINDOWS
+#if RZ_USE_PATCH
 	PatchWanted = true;
 #else
 	PatchWanted = false;
 #endif
-	PatchUrl = "";
-	PatchletUrl = "";
-	PatchVersion = "";
-	PatchServer = "";
+
+	PatchUrl.clear();
+	PatchletUrl.clear();
+	PatchVersion.clear();
+	PatchServer.clear();
 
 	WebIgMainDomain = "atys.ryzom.com";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
@@ -888,11 +888,13 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ForgetPwdURL)
 	READ_STRING_DEV(FreeTrialURL)
 	READ_STRING_DEV(LoginSupportURL)
-	
+
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ConditionsTermsURL)
+	READ_STRING_FV(BetaAccountURL)
 	READ_STRING_FV(ForgetPwdURL)
+	READ_STRING_FV(FreeTrialURL)
 	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
@@ -1057,17 +1059,24 @@ void CClientConfig::setValues()
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
 	READ_BOOL_FV(PatchWanted)
+	READ_STRING_FV(PatchServer)
+	READ_STRING_FV(PatchUrl)
+	READ_STRING_FV(PatchVersion)
+	READ_STRING_FV(RingReleaseNotePath)
+	READ_STRING_FV(ReleaseNotePath)
+	READ_BOOL_DEV(PatchWanted)
+	READ_STRING_DEV(PatchServer)
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
-	READ_STRING_FV(PatchServer)
+
 
 	/////////////////////////
-	// NEW PATCHLET SYSTEM //	
+	// NEW PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
 
-	////////////////////////
+	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
@@ -1718,10 +1727,7 @@ void CClientConfig::setValues()
 	}
 
 	// Initialize the camera distance (after camera dist max)
-	if (!ClientCfg.FPV)
-	{
-		View.cameraDistance(ClientCfg.CameraDistance);
-	}
+	View.setCameraDistanceMaxForPlayer();
 
 	// draw in client light?
 	if(ClientCfg.Light)
@@ -2205,28 +2211,24 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	std::string defaultConfigFileName = "client_default.cfg";
 	std::string defaultConfigPath;
 	
-	p_name = std::string();
+	p_name.clear();
 	
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
-	defaultConfigPath = 
-		CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
-
+	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
 #elif defined(RYZOM_ETC_PREFIX)
 	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
 	defaultConfigPath = CPath::standardizePath(RYZOM_ETC_PREFIX);
-
 #else
 	// some other prefix here :)
-
 #endif // RYZOM_ETC_PREFIX
 
 	// look in the current working directory first
-	if(CFile::isExists(defaultConfigFileName))
+	if (CFile::isExists(defaultConfigFileName))
 		p_name = defaultConfigFileName;
 
 	// if not in working directory, check using prefix path
-	else if(CFile::isExists(defaultConfigPath + defaultConfigFileName))
+	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 
 	// if some client_default.cfg was found return true

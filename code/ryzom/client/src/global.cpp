@@ -68,6 +68,9 @@ bool						PermanentlyBanned = false;
 bool						IgnoreEntityDbUpdates = false;
 bool						FreeTrial = false;
 
+std::vector<std::pair<
+	std::string, std::string> >		VRDeviceCache;
+
 /// Ring main page
 string						RingMainURL;
 
