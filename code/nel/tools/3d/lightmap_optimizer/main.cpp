@@ -33,12 +33,13 @@
 #include "nel/3d/register_3d.h"
 
 #ifdef NL_OS_WINDOWS
-	#include <windows.h>
+#	include <windows.h>
 #else
-	#include <dirent.h> /* for directories functions */
-	#include <sys/types.h>
-	#include <sys/stat.h>
-	#include <unistd.h> /* getcwd, chdir -- replacement for getCurDiretory & setCurDirectory on windows */
+#	define strnicmp NLMISC::strnicmp
+#	include <dirent.h> /* for directories functions */
+#	include <sys/types.h>
+#	include <sys/stat.h>
+#	include <unistd.h> /* getcwd, chdir -- replacement for getCurDiretory & setCurDirectory on windows */
 #endif
 
 
@@ -72,7 +73,8 @@ void dir (const std::string &sFilter, std::vector<std::string> &sAllFiles, bool 
 	char sCurDir[MAX_PATH];
 	sAllFiles.clear ();
 	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile ("*"+sFilter.c_str(), &findData);
+	std::string sFilterAsx = std::string("*") + sFilter;
+	hFind = FindFirstFile (sFilterAsx.c_str(), &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		DWORD res = GetFileAttributes(findData.cFileName);
@@ -626,7 +628,7 @@ int main(int nNbArg, char **ppArgs)
 				outString(string("ERROR: lightmaps ")+sTmp2+"*.tga not all the same size\n");
 				for (k = 0; k < (sint32)AllLightmapNames.size(); ++k)
 				{
-					if (NLMISC::strnicmp(AllLightmapNames[k].c_str(), sTmp2.c_str(), sTmp2.size()) == 0)
+					if (strnicmp(AllLightmapNames[k].c_str(), sTmp2.c_str(), sTmp2.size()) == 0)
 					{
 						for (j = k+1; j < (sint32)AllLightmapNames.size(); ++j)
 						{
