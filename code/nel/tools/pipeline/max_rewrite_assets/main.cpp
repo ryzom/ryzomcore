@@ -77,7 +77,7 @@ bool WriteDummy = false;
 bool HaltOnIssue = false;
 
 const char *DatabaseDirectory = "w:\\database\\";
-const char *LinuxDatabaseDirectory = "/srv/work/database/";
+const char *LinuxDatabaseDirectory = "/mnt/tsurugi/ryzom-assets/database/";
 bool RunningLinux = true;
 
 //const char *SrcDirectoryRecursive = "w:\\database\\interfaces\\";
@@ -85,7 +85,7 @@ bool RunningLinux = true;
 //const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
 const char *SrcDirectoryRecursiveInit = "w:\\database\\";
 //const char *SrcDirectoryRecursiveHandle = "w:\\database\\stuff\\generique\\agents\\accessories\\";
-const char *SrcDirectoryRecursiveHandle = "w:\\database\\";
+const char *SrcDirectoryRecursiveHandle = "w:\\database\\landscape\\ligo_replace\\";
 
 bool UseFallbackTga = false;
 const char *FallbackTga = "w:\\database\\stuff\\lod_actors\\texture_lod\\trame.png";
@@ -663,6 +663,11 @@ std::string cleanString(const std::string &str)
 		if (res.substr(res.size() - 1) == "0")
 			res = res.substr(0, res.size() - 1);
 	}
+	if (res.size() > 4 && res[res.size() - 1] == '.')
+	{
+		if (res.substr(res.size() - 4) == "max.") // fix a stupid typo
+			res = res.substr(0, res.size() - 1);
+	}
 	return res;
 }
 
@@ -786,6 +791,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 				ucstring str;
 				str.resize(asRaw->Value.size() / 2);
 				memcpy(&str[0], &asRaw->Value[0], asRaw->Value.size());
+				// nldebug("[%s]", str.toString().c_str());
 				nlassert(isImportantFilePath(str.toString()));
 				str.fromUtf8(rewritePathFinal(str.toString()));
 				asRaw->Value.resize(str.size() * 2);
@@ -805,7 +811,12 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 				// 52 5f 48 4f 46 5f 63 69 76 69
 				// 6c 30 31 5f 74 6f 72 73 6f 5f
 				// 43 31 2e 74 67 61 00
-				if (!(asRaw->Value[asRaw->Value.size() - 1] == 0))
+				bool overrideFF = false; // Patch for some ligo max files
+				if (overrideFF && asRaw->Value.size() > 4 && asRaw->Value[asRaw->Value.size() - 4] == 0xFF)
+				{
+					nlwarning("0xFFFFFFFF");
+				}
+				else if (!(asRaw->Value[asRaw->Value.size() - 1] == 0))
 				{
 					nlinfo("Id: %i, size: %i", (uint32)id, asRaw->Value.size());
 					asRaw->toString(std::cout);
@@ -824,7 +835,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 					nlinfo("Id: %i, size: %i", (uint32)id, asRaw->Value.size());
 					asRaw->toString(std::cout);
 					nldebug("x");
-					nlwarning("size does not match, use different algo :)");
+					nlwarning("size '%i' does not match '%i', use different algo :)", size, asRaw->Value.size() - 4 - 11);
 					uint8 nonsense[11];
 					uint32 counter;
 					std::vector<std::string> strings;
@@ -845,7 +856,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 							sint32 size;
 							mem.serial(size);
 							//nldebug("size %i", size);
-							if (size == -1)
+							if (!overrideFF && size == -1)
 							{
 								nldebug("size %i", size);
 								nlwarning("bad size");
@@ -857,8 +868,16 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 								return;
 							}
 							std::string v;
-							v.resize(size);
-							mem.serialBuffer((uint8 *)&v[0], size);
+							if (overrideFF && size == -1)
+							{
+								v.resize(1);
+								*(uint8 *)&v[0] = 0;
+							}
+							else
+							{
+								v.resize(size);
+								mem.serialBuffer((uint8 *)&v[0], size);
+							}
 							if (!(v[v.size() - 1] == 0))
 							{
 								nlinfo("Id: %i, size: %i", (uint32)id, asRaw->Value.size());
@@ -1460,6 +1479,9 @@ int main(int argc, char **argv)
 	//handleFile("/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max");
 	runInitialize();
 	runHandler();
+	//handleFile(nativeDatabasePath("w:\\database\\landscape\\ligo\\desert\\max\\zonematerial-converted-brandon.max")); // overrideFF
+	//handleFile(nativeDatabasePath("w:\\database\\landscape\\ligo\\desert\\max\\zonematerial-converted-154_dz.max")); // overrideFF
+	//handleFile(nativeDatabasePath("w:\\database\\landscape\\ligo\\lacustre\\max\\zonematerial-converted-village_a.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_mission_reward_karavan_bigshield.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_acc_pick_o.max"));
 	//handleFile(nativeDatabasePath("w:\\database\\stuff\\generique\\agents\\accessories\\ge_zo_wea_trib_masse1m.max"));

@@ -1,5 +1,4 @@
 SUBDIRS(
-		plugin_library
-		plugin_nel
-		plugin_max
-		service)
+		max
+		max_dump
+		max_rewrite_assets)
