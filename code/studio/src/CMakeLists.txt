@@ -12,7 +12,7 @@ FILE(GLOB STUDIO_SRC extension_system/*.h
 SET(STUDIO_HDR   extension_system/iplugin_manager.h 
 						extension_system/plugin_manager.h)
 
-SET(STUDIO_RCS object_viewer_qt.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+SET(STUDIO_RCS studio.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 
 SET(STUDIO_TS    translations/object_viewer_qt_en.ts
 						translations/object_viewer_qt_fr.ts
@@ -23,7 +23,7 @@ SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
 IF(WIN32)
-  SET(STUDIO object_viewer_qt.rc)
+  SET(STUDIO studio.rc)
 ENDIF(WIN32)
 
 QT4_ADD_TRANSLATION(STUDIO_QM ${STUDIO_TS})
