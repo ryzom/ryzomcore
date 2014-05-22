@@ -28,12 +28,12 @@ BEGIN
             VALUE "CompanyName", "Ryzom Core\0"
             VALUE "FileDescription", "\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "Object_Viewer_Qt\0"
+            VALUE "InternalName", "Ryzom Core Studio\0"
             VALUE "LegalCopyright", "Copyright (C) 2011\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "Object Viewer Qt\0"
+            VALUE "ProductName", "Ryzom Core Studio\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
             VALUE "SpecialBuild", "\0"
         END
@@ -51,4 +51,4 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON    DISCARDABLE     "ic_nel_pill.ico"
+IDR_MAINFRAME           ICON    DISCARDABLE     "studio.ico"
