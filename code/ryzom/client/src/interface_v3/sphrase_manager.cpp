@@ -4504,17 +4504,19 @@ sint32 CSPhraseManager::getSheetFromPhrase(const CSPhraseCom &phrase) const
 uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CSBrickManager	*pBM= CSBrickManager::getInstance();
-	uint32	totalActionMalus= 0;
+	CSBrickManager *pBM = CSBrickManager::getInstance();
+	uint32 totalActionMalus = 0;
 	CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
 		: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
 	// root brick must not be Power or aura, because Action malus don't apply to them
 	// (ie leave 0 ActionMalus for Aura or Powers
 	if (!phrase.Bricks.empty())
 	{
-		CSBrickSheet	*rootBrick= pBM->getBrick(phrase.Bricks[0]);
-		if(actMalus && !rootBrick->isSpecialPower())
-			totalActionMalus= actMalus->getValue32();	
+		CSBrickSheet *rootBrick = pBM->getBrick(phrase.Bricks[0]);
+		if (!rootBrick)
+			nlerror("Invalid root sbrick in sphrase_com '%s'", phrase.Name.toUtf8().c_str());
+		else if (actMalus && !rootBrick->isSpecialPower())
+			totalActionMalus = actMalus->getValue32();	
 	}
 	return totalActionMalus;
 }
