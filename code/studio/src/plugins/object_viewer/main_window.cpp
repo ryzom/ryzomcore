@@ -270,55 +270,51 @@ void CMainWindow::createMenus()
 	menuManager->registerAction(_reloadTexturesAction, "ObjectViewer.View.ReloadTextures");
 	menuManager->registerAction(_saveScreenshotAction, "ObjectViewer.View.SaveScreenshot");
 
-	// add actions in view menu
-	QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
-	viewMenu->addAction(_setBackColorAction);
-	viewMenu->addAction(_SetupFog->toggleViewAction());
-	viewMenu->addAction(_resetSceneAction);
-	viewMenu->addAction(_reloadTexturesAction);
-	viewMenu->addAction(_saveScreenshotAction);
-
-	// add actions in tools menu
-	QMenu *toolsMenu = menuManager->menu(Core::Constants::M_TOOLS);
-	QAction *settingsAction = menuManager->action(Core::Constants::SETTINGS);
-	QMenu *ovMenu = new QMenu("Object Viewer", this);
+	QMenu *ovMenu = menuManager->menuBar()->addMenu( "Object Viewer" );
 	menuManager->registerMenu(ovMenu, "ObjectViewerQt.ObjectViewer");
-	toolsMenu->insertMenu(settingsAction, ovMenu);
 
-	ovMenu->insertAction(settingsAction ,_AnimationDialog->toggleViewAction());
+	ovMenu->addAction(_setBackColorAction);
+	ovMenu->addAction(_SetupFog->toggleViewAction());
+	ovMenu->addAction(_resetSceneAction);
+	ovMenu->addAction(_reloadTexturesAction);
+	ovMenu->addAction(_saveScreenshotAction);
+
+	ovMenu->addSeparator();
+
+	ovMenu->addAction(_AnimationDialog->toggleViewAction() );
 	_AnimationDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_ANIM));
 
-	ovMenu->insertAction(settingsAction ,_AnimationSetDialog->toggleViewAction());
+	ovMenu->addAction(_AnimationSetDialog->toggleViewAction());
 	_AnimationSetDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_ANIMSET));
 
-	ovMenu->insertAction(settingsAction ,_SlotManagerDialog->toggleViewAction());
+	ovMenu->addAction(_SlotManagerDialog->toggleViewAction());
 	_SlotManagerDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_MIXER));
 
-	ovMenu->insertAction(settingsAction ,_ParticleControlDialog->toggleViewAction());
+	ovMenu->addAction(_ParticleControlDialog->toggleViewAction());
 	_ParticleControlDialog->toggleViewAction()->setIcon(QIcon(":/images/pqrticles.png"));
 
-	ovMenu->insertAction(settingsAction ,_DayNightDialog->toggleViewAction());
+	ovMenu->addAction(_DayNightDialog->toggleViewAction());
 	_DayNightDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_DAYNIGHT));
 
-	ovMenu->insertAction(settingsAction ,_WaterPoolDialog->toggleViewAction());
+	ovMenu->addAction(_WaterPoolDialog->toggleViewAction());
 	_WaterPoolDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_WATER));
 	_WaterPoolDialog->toggleViewAction()->setEnabled(false);
 
-	ovMenu->insertAction(settingsAction ,_VegetableDialog->toggleViewAction());
+	ovMenu->addAction(_VegetableDialog->toggleViewAction());
 	_VegetableDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_VEGET));
 
-	ovMenu->insertAction(settingsAction ,_GlobalWindDialog->toggleViewAction());
+	ovMenu->addAction(_GlobalWindDialog->toggleViewAction());
 	_GlobalWindDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_WIND));
 
-	ovMenu->insertAction(settingsAction ,_SkeletonScaleDialog->toggleViewAction());
+	ovMenu->addAction(_SkeletonScaleDialog->toggleViewAction());
 	_SkeletonScaleDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_SKELSCALE));
 
-	ovMenu->insertAction(settingsAction ,_TuneTimerDialog->toggleViewAction());
+	ovMenu->addAction(_TuneTimerDialog->toggleViewAction());
 	_TuneTimerDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_FRAMEDELAY));
 
-	ovMenu->insertAction(settingsAction ,_SunColorDialog->toggleViewAction());
+	ovMenu->addAction(_SunColorDialog->toggleViewAction());
 
-	ovMenu->insertAction(settingsAction ,_TuneMRMDialog->toggleViewAction());
+	ovMenu->addAction(_TuneMRMDialog->toggleViewAction());
 	_TuneMRMDialog->toggleViewAction()->setIcon(QIcon(Constants::ICON_MRM_MESH));
 
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
@@ -327,7 +323,6 @@ void CMainWindow::createMenus()
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog->_PropertyDialog, SLOT(setVisible(bool)));
 
-	toolsMenu->insertSeparator(settingsAction);
 }
 
 void CMainWindow::createToolBars()

@@ -438,9 +438,6 @@ void MainWindow::createMenus()
 	m_toolsMenu = m_menuBar->addMenu(tr("&Tools"));
 	menuManager()->registerMenu(m_toolsMenu, Constants::M_TOOLS);
 
-	m_sheetMenu = m_toolsMenu->addMenu(tr("&Sheet"));
-	menuManager()->registerMenu(m_sheetMenu, Constants::M_SHEET);
-
 //	m_toolsMenu->addSeparator();
 
 	m_toolsMenu->addAction(m_settingsAction);
@@ -452,6 +449,9 @@ void MainWindow::createMenus()
 	m_helpMenu->addAction(m_aboutAction);
 	m_helpMenu->addAction(m_aboutQtAction);
 	m_helpMenu->addAction(m_pluginViewAction);
+
+	m_sheetMenu = m_menuBar->addMenu(tr("&Sheet"));
+	menuManager()->registerMenu(m_sheetMenu, Constants::M_SHEET);
 }
 
 void MainWindow::createStatusBar()

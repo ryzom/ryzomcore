@@ -129,7 +129,12 @@ void CMainWindow::createToolbar()
 	// Windows menu
 	Core::ICore *core = Core::ICore::instance();
 	Core::MenuManager *menuManager = core->menuManager();
-	windowMenu = menuManager->menuBar()->addMenu("Window");
+	QMenu *m = menuManager->menuBar()->addMenu( "Translation Manager" );
+	if( m != NULL )
+	{
+		windowMenu = m->addMenu("Window");
+	}
+	
 	updateWindowsList();
 	connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));
 

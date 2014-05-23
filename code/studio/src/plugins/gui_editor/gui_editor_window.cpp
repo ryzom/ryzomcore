@@ -360,11 +360,9 @@ namespace GUIEditor
 			connect( delAction, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onDelete() ) );
 		}
 
-		QMenu *menu = mm->menu( Core::Constants::M_TOOLS );
-		if( menu != NULL )
+		QMenu *m = mm->menuBar()->addMenu( "GUI Editor" );
+		if( m != NULL )
 		{
-			QMenu *m = menu->addMenu( "GUI Editor" );
-
 			QAction *a = new QAction( "Widget Properties", this );
 			connect( a, SIGNAL( triggered( bool ) ), widgetProps, SLOT( show() ) );
 			m->addAction( a );
