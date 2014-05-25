@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	QApplication app(argc, argv);
 #endif // NL_OS_WINDOWS
 	QSplashScreen *splash = new QSplashScreen();
-	splash->setPixmap(QPixmap(":/images/nel_ide_load.png"));
+	splash->setPixmap(QPixmap(":/images/studio_splash.png"));
 	splash->show();
 
 	QSettings::setDefaultFormat(QSettings::IniFormat);

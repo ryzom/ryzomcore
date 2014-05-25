@@ -183,7 +183,7 @@ void PluginManager::readPluginPaths()
 	while (!searchPaths.isEmpty())
 	{
 		const QDir dir(searchPaths.takeFirst());
-		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("ovqt_plugin_*.%1").arg(m_extension), QDir::Files);
+		const QFileInfoList files = dir.entryInfoList(QStringList() << QString("studio_plugin_*.%1").arg(m_extension), QDir::Files);
 		Q_FOREACH (const QFileInfo &file, files)
 		pluginsList << file.absoluteFilePath();
 		const QFileInfoList dirs = dir.entryInfoList(QDir::Dirs|QDir::NoDotAndDotDot);
