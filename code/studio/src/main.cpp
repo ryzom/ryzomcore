@@ -41,11 +41,13 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
 
+#include "settings_dialog.h"
+
 #ifdef HAVE_OVQT_CONFIG_H
 #include "ovqt_config.h"
 #endif
 
-static const char *appNameC = "ObjectViewerQt";
+static const char *appNameC = "RyzomCoreStudio";
 
 // nel_qt log file name
 #define NLQT_LOG_FILE "nel_qt.log"
@@ -138,6 +140,7 @@ int main(int argc, char **argv)
 #else // NL_OS_WINDOWS
 	QApplication app(argc, argv);
 #endif // NL_OS_WINDOWS
+
 	QSplashScreen *splash = new QSplashScreen();
 	splash->setPixmap(QPixmap(":/images/studio_splash.png"));
 	splash->show();
@@ -145,6 +148,17 @@ int main(int argc, char **argv)
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
 	                                    QLatin1String("RyzomCore"), QLatin1String(appNameC));
+
+	bool firstRun = settings->value( "FirstRun", true ).toBool();
+	if( firstRun )
+	{
+		settings->setValue( "FirstRun", false );
+		
+		SettingsDialog sd;
+		sd.setSettings( settings );
+		sd.load();
+		sd.exec();
+	}
 
 	QTranslator translator;
 	QTranslator qtTranslator;

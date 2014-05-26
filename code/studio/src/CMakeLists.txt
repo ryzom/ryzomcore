@@ -10,7 +10,8 @@ FILE(GLOB STUDIO_SRC extension_system/*.h
 							*.h *.cpp)
 
 SET(STUDIO_HDR   extension_system/iplugin_manager.h 
-						extension_system/plugin_manager.h)
+						extension_system/plugin_manager.h
+						settings_dialog.h )
 
 SET(STUDIO_RCS studio.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 
@@ -18,6 +19,8 @@ SET(STUDIO_TS    translations/object_viewer_qt_en.ts
 						translations/object_viewer_qt_fr.ts
 						translations/object_viewer_qt_de.ts
 						translations/object_viewer_qt_ru.ts)
+						
+SET(STUDIO_PLUGIN_UIS settings_dialog.ui )
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
@@ -29,15 +32,17 @@ ENDIF(WIN32)
 QT4_ADD_TRANSLATION(STUDIO_QM ${STUDIO_TS})
 QT4_ADD_RESOURCES( STUDIO_RC_SRCS ${STUDIO_RCS})
 QT4_WRAP_CPP( STUDIO_MOC_SRCS ${STUDIO_HDR} )
+QT4_WRAP_UI( STUDIO_PLUGIN_UI_HDRS ${STUDIO_PLUGIN_UIS})
 
-SOURCE_GROUP(QtResources FILES ${STUDIO_RCS})
+SOURCE_GROUP(QtResources FILES ${STUDIO_RCS} ${STUDIO_PLUGIN_UIS} )
 SOURCE_GROUP(QtGeneratedMocQrcSrc FILES ${STUDIO_MOC_SRCS} ${STUDIO_RC_SRCS})
 
 ADD_EXECUTABLE(studio WIN32 MACOSX_BUNDLE
                ${STUDIO_SRC}
                ${STUDIO_MOC_SRCS}
                ${STUDIO_RC_SRCS}
-	       ${STUDIO_RC})
+	       ${STUDIO_RC}
+		   ${STUDIO_PLUGIN_UIS} )
 
 TARGET_LINK_LIBRARIES(studio
 		nelmisc 
