@@ -206,7 +206,7 @@ class Helpers{
                $dbr = new DBLayer("ring");
                if (isset($_GET['UserId']) && isset($_COOKIE['ryzomId'])){
                     $id = $_GET['UserId'];
-                    $statement = $dbr->execute("SELECT * FROM ring_users WHERE user_id=:id AND cookie =:cookie", array('id' => $id, 'cookie' => $_COOKIE['ryzomId']));
+                    $statement = $dbr->select("ring_users", array('id' => $id, 'cookie' => $_COOKIE['ryzomId']), "user_id=:id AND cookie =:cookie");
                     if ($statement->rowCount() ){
                          $entry = $statement->fetch();
 			//print_r($entry);

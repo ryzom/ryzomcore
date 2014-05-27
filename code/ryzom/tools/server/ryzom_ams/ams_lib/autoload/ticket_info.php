@@ -52,7 +52,7 @@ class Ticket_Info{
     public static function TicketHasInfo($ticket_id) {
         $dbl = new DBLayer("lib");
         //check if ticket is already assigned
-        if(  $dbl->execute(" SELECT * FROM `ticket_info` WHERE `Ticket` = :ticket_id", array('ticket_id' => $ticket_id) )->rowCount() ){
+        if(  $dbl->select("`ticket_info`", array('ticket_id' => $ticket_id), "`Ticket` = :ticket_id")->rowCount() ){
             return true;
         }else{
             return false;
@@ -102,7 +102,7 @@ class Ticket_Info{
     */
     public function load_With_TInfoId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_info WHERE TInfoId=:id", array('id' => $id));
+        $statement = $dbl->select("ticket_info", array('id' => $id), "TInfoId=:id");
         $row = $statement->fetch();
         $this->set($row);
     }
@@ -115,7 +115,7 @@ class Ticket_Info{
     */
     public function load_With_Ticket( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_info WHERE Ticket=:id", array('id' => $id));
+        $statement = $dbl->select("ticket_info",  array('id' => $id), "Ticket=:id");
         $row = $statement->fetch();
         $this->set($row);
     }
@@ -127,12 +127,10 @@ class Ticket_Info{
     */
     public function create() {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket_info ( Ticket, ShardId, UserPosition,ViewPosition, ClientVersion, PatchVersion,ServerTick, ConnectState, LocalAddress, Memory, OS, 
-Processor, CPUID, CpuMask, HT, NeL3D,  UserId) VALUES ( :ticket, :shardid, :userposition, :viewposition, :clientversion, :patchversion, :servertick, :connectstate, :localaddress, :memory, :os, :processor, :cpuid, :cpu_mask, :ht, :nel3d, :user_id )";
-        $values = Array('ticket' => $this->getTicket(), 'shardid' => $this->getShardId(), 'userposition' => $this->getUser_Position(), 'viewposition' => $this->getView_Position(), 'clientversion' => $this->getClient_Version(),
-'patchversion' => $this->getPatch_Version(), 'servertick' => $this->getServer_Tick(), 'connectstate' => $this->getConnect_State(), 'localaddress' => $this->getLocal_Address(), 'memory' => $this->getMemory(), 'os'=> $this->getOS(), 'processor' => $this->getProcessor(), 'cpuid' => $this->getCPUId(),
-'cpu_mask' => $this->getCpu_Mask(), 'ht' => $this->getHT(), 'nel3d' => $this->getNel3D(), 'user_id' => $this->getUser_Id());
-        $dbl->execute($query, $values);
+        $values = Array('Ticket' => $this->getTicket(), 'ShardId' => $this->getShardId(), 'UserPosition' => $this->getUser_Position(), 'ViewPosition' => $this->getView_Position(), 'ClientVersion' => $this->getClient_Version(),
+'PatchVersion' => $this->getPatch_Version(), 'ServerTick' => $this->getServer_Tick(), 'ConnectState' => $this->getConnect_State(), 'LocalAddress' => $this->getLocal_Address(), 'Memory' => $this->getMemory(), 'OS'=> $this->getOS(), 'Processor' => $this->getProcessor(), 'CPUID' => $this->getCPUId(),
+'CpuMask' => $this->getCpu_Mask(), 'HT' => $this->getHT(), 'NeL3D' => $this->getNel3D(), 'UserId' => $this->getUser_Id());
+        $dbl->insert("ticket_info",$values);
     }
 
     

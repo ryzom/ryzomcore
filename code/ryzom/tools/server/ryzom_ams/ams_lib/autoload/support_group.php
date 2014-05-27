@@ -24,7 +24,7 @@ class Support_Group{
     */
     public static function getGroup($id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM support_group WHERE SGroupId = :id", array('id' => $id));
+        $statement = $dbl->select("support_group", array('id' => $id), "SGroupId = :id");
         $row = $statement->fetch();
         $instanceGroup = new self();
         $instanceGroup->set($row);
@@ -102,10 +102,10 @@ class Support_Group{
     public static function supportGroup_EntryNotExists( $name, $tag) {
         $dbl = new DBLayer("lib");
         //check if name is already used
-        if(  $dbl->execute("SELECT * FROM support_group WHERE Name = :name",array('name' => $name))->rowCount() ){
+        if(  $dbl->select("support_group", array('name' => $name), "Name = :name")->rowCount() ){
             return "NAME_TAKEN";
         }
-        else if(  $dbl->execute("SELECT * FROM support_group WHERE Tag = :tag",array('tag' => $tag))->rowCount() ){
+        else if(  $dbl->select("support_group", array('tag' => $tag), "Tag = :tag")->rowCount() ){
             return "TAG_TAKEN";
         }else{
             return "SUCCESS";
@@ -121,7 +121,7 @@ class Support_Group{
     public static function supportGroup_Exists( $id) {
         $dbl = new DBLayer("lib");
         //check if supportgroup id exist
-        if(  $dbl->execute("SELECT * FROM support_group WHERE SGroupId = :id",array('id' => $id ))->rowCount() ){
+        if(  $dbl->select("support_group", array('id' => $id ), "SGroupId = :id")->rowCount() ){
             return true;
         }else{
             return false;
@@ -305,9 +305,7 @@ class Support_Group{
     */
     public function create() {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO support_group (Name, Tag, GroupEmail, IMAP_MailServer, IMAP_Username, IMAP_Password) VALUES (:name, :tag, :groupemail, :imap_mailserver, :imap_username, :imap_password)";
-        $values = Array('name' => $this->getName(), 'tag' => $this->getTag(), 'groupemail' => $this->getGroupEmail(), 'imap_mailserver' => $this->getIMAP_MailServer(), 'imap_username' => $this->getIMAP_Username(), 'imap_password' => $this->getIMAP_Password());
-        $dbl->execute($query, $values);
+	$dbl->insert("support_group", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_Password' => $this->getIMAP_Password());
     } 
 
     
@@ -318,7 +316,7 @@ class Support_Group{
     */
     public function load_With_SGroupId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM `support_group` WHERE `SGroupId` = :id", array('id' => $id));
+        $statement = $dbl->select("`support_group`", array('id' => $id), "`SGroupId` = :id");
         $row = $statement->fetch();
         $this->set($row);
     }
@@ -329,9 +327,7 @@ class Support_Group{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE `support_group` SET `Name` = :name, `Tag` = :tag, `GroupEmail` = :groupemail, `IMAP_MailServer` = :mailserver, `IMAP_Username` = :username, `IMAP_Password` = :password WHERE `SGroupId` = :id";
-        $values = Array('id' => $this->getSGroupId(), 'name' => $this->getName(), 'tag' => $this->getTag(), 'groupemail' => $this->getGroupEmail(), 'mailserver' => $this->getIMAP_MailServer(), 'username' => $this->getIMAP_Username(), 'password' => $this->getIMAP_Password() );
-        $statement = $dbl->execute($query, $values);
+        $dbl->update("`support_group`", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_password' => $this->getIMAP_Password(), "`SGroupId` = $this->getSGroupId()");
     }
     
     
@@ -341,9 +337,7 @@ class Support_Group{
     */
     public function delete(){
         $dbl = new DBLayer("lib");
-        $query = "DELETE FROM `support_group` WHERE `SGroupId` = :id";
-        $values = Array('id' => $this->getSGroupId());
-        $statement = $dbl->execute($query, $values);     
+        $dbl->delete("`support_group`", Array('id' => $this->getSGroupId(), "`SGroupId` = :id");
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

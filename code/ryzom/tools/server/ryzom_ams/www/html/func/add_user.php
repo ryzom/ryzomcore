@@ -66,15 +66,14 @@ function write_user($newUser){
      $hashpass = crypt($newUser["pass"], WebUsers::generateSALT());
      
      $params = array(
-          'name' => $newUser["name"],
-          'pass' => $hashpass,
-          'mail' => $newUser["mail"]      
+    	  'Login' => $newUser["name"],
+          'Password' => $hashpass,
+          'Email' => $newUser["mail"]      
      );
-  
      try{
           //make new webuser
-          $user_id = WebUsers::createWebuser($params['name'], $params['pass'], $params['mail']);
-          
+          $user_id = WebUsers::createWebuser($params['Login'], $params['Password'], $params['Email']);
+               
           //Create the user on the shard + in case shard is offline put copy of query in query db
           //returns: ok, shardoffline or liboffline
           $result = WebUsers::createUser($params, $user_id);
