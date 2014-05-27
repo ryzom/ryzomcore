@@ -67,34 +67,74 @@ class DBLayer{
         return $statement;
     }
     
-    /**
+   /**
     * execute a query (an insertion query) that has parameters and return the id of it's insertion
     * @param $query the mysql query
     * @param $params the parameters that are being used by the query
     * @return returns the id of the last inserted element.
     */
-    public function executeReturnId($query,$params){
-        $statement = $this->PDO->prepare($query);
-        $this->PDO->beginTransaction();
-        $statement->execute($params);
-        $lastId =$this->PDO->lastInsertId();
-        $this->PDO->commit();
-        return $lastId;
+    public function executeReturnId($tb_name,$data){		
+        $field_values =':'. implode(',:', array_keys($data));
+        $field_options = implode(',', array_keys($data));		
+        try{
+            $sth = $this->PDO->prepare("INSERT INTO $tb_name ($field_options) VALUE ($field_values)");
+            foreach ($data as $key => $value )
+            {       	
+                $sth->bindValue(":$key", $value);
+            }
+            $this->PDO->beginTransaction();
+            //execution
+            $sth->execute();
+            $lastId =$this->PDO->lastInsertId();
+            $this->PDO->commit();
+        }catch (Exception $e)
+        {
+            //for rolling back the changes during transaction
+            $this->PDO->rollBack();
+            throw new Exception("error in inseting");
+        }
+	return $lastId;
     }
-   /**
+     
+     
+    /**
      * 
      * Select function using prepared statement
      * @param string $tb_name Table Name to Select
      * @param array $data Associative array
      * @param string $where where to select
-     * @return array Array containing fetched data
+     * @return statement object
      */
-    public function select($query, $data)
-    {
+    public function selectWithParameter($param, $tb_name, $data, $where)
+    {	
         try{        	
-            $sth = $this->PDO->prepare($query);
+            $sth = $this->PDO->prepare("SELECT $param FROM $tb_name WHERE $where");
+            $this->PDO->beginTransaction();	
+            $sth->execute($data);            
+            $this->PDO->commit();	
+        }catch(Exception $e)
+        {
+           $this->PDO->rollBack();
+           throw new Exception("error selection");
+               return false;
+        }        
+        return $sth;
+    }
+       
+    /**
+     * 
+     * Select function using prepared statement
+     * @param string $tb_name Table Name to Select
+     * @param array $data Associative array
+     * @param string $where where to select
+     * @return statement object
+     */
+    public function select($tb_name, $data ,$where)
+    {	
+        try{        	
+            $sth = $this->PDO->prepare("SELECT * FROM $tb_name WHERE $where");
 			$this->PDO->beginTransaction();	
-            $sth->execute(array($data));            
+            $sth->execute($data);            
             $this->PDO->commit();	
         }catch(Exception $e)
         {
@@ -152,7 +192,6 @@ class DBLayer{
             $sth = $this->PDO->prepare("INSERT INTO $tb_name ($field_options) VALUE ($field_values)");
             foreach ($data as $key => $value )
             {
-            	
                 $sth->bindValue(":$key", $value);
             }
             $this->PDO->beginTransaction();
