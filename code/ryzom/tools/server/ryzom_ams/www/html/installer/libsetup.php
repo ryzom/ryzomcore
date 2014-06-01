@@ -155,6 +155,21 @@
             
             
             -- -----------------------------------------------------
+            -- Table `" . $cfg['db']['lib']['name'] ."`.`plugins`
+            -- -----------------------------------------------------
+            DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`plugins` ;
+    
+            CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`plugins` (
+              `PluginId` INT(10) NOT NULL AUTO_INCREMENT,
+  	      `PluginName` VARCHAR(11) NOT NULL,
+	      `PluginPermission` VARCHAR(5) NOT NULL,
+  	      `PluginVersion` INT(11) NOT NULL,
+  	      `IsActive` TINYINT(1) NOT NULL,
+              PRIMARY KEY (`PluginId`) )
+            ENGINE = InnoDB;
+            
+            
+            -- -----------------------------------------------------
             -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket`
             -- -----------------------------------------------------
             DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`ticket` ;
