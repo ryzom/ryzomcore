@@ -99,6 +99,7 @@ struct	CGlExtensions
 	bool	ARBTextureCompression;
 	bool	ARBFragmentProgram;
 	bool	ARBVertexBufferObject;
+	bool	ARBMapBufferRange;
 	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
@@ -262,6 +263,7 @@ public:
 		result += ATIVertexArrayObject ? "ATIVertexArrayObject " : "";
 		result += ATIVertexAttribArrayObject ? "ATIVertexAttribArrayObject " : "";
 		result += ARBVertexBufferObject ? "ARBVertexBufferObject " : "";
+		result += ARBMapBufferRange ? "ARBMapBufferRange " : "";
 		result += ATIMapObjectBuffer ? "ATIMapObjectBuffer " : "";
 
 		result += "\n  FBO:       ";
@@ -654,7 +656,10 @@ extern PFNGLUNMAPBUFFERARBPROC nglUnmapBufferARB;
 extern PFNGLGETBUFFERPARAMETERIVARBPROC nglGetBufferParameterivARB;
 extern PFNGLGETBUFFERPOINTERVARBPROC nglGetBufferPointervARB;
 
-
+// GL_ARB_map_buffer_range
+//==================================
+extern PFNGLMAPBUFFERRANGEPROC nglMapBufferRange;
+extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC nglFlushMappedBufferRange;
 
 // GL_ARB_vertex_program
 //==================================

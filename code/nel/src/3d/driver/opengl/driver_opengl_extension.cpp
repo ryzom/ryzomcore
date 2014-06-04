@@ -372,6 +372,10 @@ PFNGLUNMAPBUFFERARBPROC 						nglUnmapBufferARB;
 PFNGLGETBUFFERPARAMETERIVARBPROC 				nglGetBufferParameterivARB;
 PFNGLGETBUFFERPOINTERVARBPROC 					nglGetBufferPointervARB;
 
+// GL_ARB_map_buffer_range
+PFNGLMAPBUFFERRANGEPROC							nglMapBufferRange;
+PFNGLFLUSHMAPPEDBUFFERRANGEPROC					nglFlushMappedBufferRange;
+
 // GL_ARB_vertex_program
 PFNGLVERTEXATTRIB1SARBPROC						nglVertexAttrib1sARB;
 PFNGLVERTEXATTRIB1FARBPROC						nglVertexAttrib1fARB;
@@ -1260,6 +1264,21 @@ static bool	setupARBVertexBufferObject(const char	*glext)
 }
 
 // ***************************************************************************
+static bool	setupARBMapBufferRange(const char	*glext)
+{
+	H_AUTO_OGL(setupARBMapBufferRange);
+
+#ifndef USE_OPENGLES
+	CHECK_EXT("GL_ARB_map_buffer_range");
+
+	CHECK_ADDRESS(PFNGLMAPBUFFERRANGEPROC, glMapBufferRange);
+	CHECK_ADDRESS(PFNGLFLUSHMAPPEDBUFFERRANGEPROC, glFlushMappedBufferRange);
+#endif
+
+	return true;
+}
+
+// ***************************************************************************
 static bool	setupARBVertexProgram(const char	*glext)
 {
 	H_AUTO_OGL(setupARBVertexProgram);
@@ -1695,6 +1714,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	if(!ext.DisableHardwareVertexArrayAGP)
 	{
 		ext.ARBVertexBufferObject = setupARBVertexBufferObject(glext);
+		ext.ARBMapBufferRange = setupARBMapBufferRange(glext);
 	}
 
 	// fix for radeon 7200 -> disable agp
