@@ -19,164 +19,80 @@
 
 #include "nel/misc/types_nl.h"
 
-
 namespace NL3D {
 
 #ifdef NL_STATIC
 namespace NLDRIVERGL3 {
 #endif
 
-class	CDriverGL;
-class	IVertexBufferHardGL;
-class   CVertexBufferInfo;
-class	CVertexBufferHard;
+class CDriverGL;
+class IVertexBufferGL;
+class CVertexBufferInfo;
+class CVertexBufferGL;
 
-// ***************************************************************************
-/** Interface to a Big block of video memory
- */
-class IVertexArrayRange
+class IVertexBufferGL
 {
 public:
-	IVertexArrayRange(CDriverGL3 *drv);
-	virtual	~IVertexArrayRange();
-
-	/// create a IVertexBufferHardGL
-	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb) =0;
-	// Check & invalidate lost buffers. Default assume they can't be lost
-	virtual void updateLostBuffers() {}
-	// Get driver
-	CDriverGL3* getDriver() const { return _Driver; }
-	// tmp, for debug
-	#ifdef NL_DEBUG
-		virtual void		 dumpMappedBuffers() {}
-	#endif
-protected:
-	CDriverGL3	*_Driver;
-};
-
-
-
-class IVertexBufferHardGL
-{
-public:
-
-	IVertexBufferHardGL(CDriverGL3 *drv, CVertexBuffer *vb);
-	virtual	~IVertexBufferHardGL();
-	virtual	void		*lock() = 0;
-	virtual	void		unlock() = 0;
-	virtual void		unlock(uint start, uint end) = 0;
-	virtual void		*getPointer() = 0;
-	virtual	void			enable() =0;
-	virtual	void			disable() =0;
-	virtual void		setupVBInfos(CVertexBufferInfo &vb) = 0;
+	IVertexBufferGL(CDriverGL3 *drv, CVertexBuffer *vb);
+	virtual	~IVertexBufferGL();
+	virtual	void *lock() = 0;
+	virtual	void unlock() = 0;
+	virtual void unlock(uint start, uint end) = 0;
+	virtual void *getPointer() = 0;
+	virtual	void enable() = 0;
+	virtual	void disable() = 0;
+	virtual void setupVBInfos(CVertexBufferInfo &vb) = 0;
 
 	// test if buffer content is invalid. If so, no rendering should occurs (rendering should silently fail)
-	bool							isInvalid() { return _Invalid; }
+	inline bool isInvalid() { return m_Invalid; }
 
 public:
-
-	CVertexBuffer		*VB;
+	CVertexBuffer *VB;
 
 protected:
-	CDriverGL3			*_Driver;
-	bool		 _Invalid;
+	CDriverGL3 *m_Driver;
+	bool m_Invalid;
 };
 
-
-// ***************************************************************************
-// ***************************************************************************
-// ARB_vertex_buffer_object implementation
-// ***************************************************************************
-// ***************************************************************************
-class CVertexArrayRange : public IVertexArrayRange
+/* GL Core vertex buffer. */
+class CVertexBufferGL : public IVertexBufferGL
 {
 public:
-	CVertexArrayRange(CDriverGL3 *drv);
-
-	virtual	IVertexBufferHardGL		*createVBHardGL(uint size, CVertexBuffer *vb);
-
-	// Those methods read/write in _Driver->_CurrentVertexArrayRange.
-	/** active this VertexArrayRange as the current vertex array range used. no-op if already setup.
-	 *	NB: no-op for ARB, but ensure correct _Driver->_CurrentVertexArrayRange value.
-	 */
-	void			enable();
-	/** disable this VertexArrayRange. _Driver->_CurrentVertexArrayRange= NULL;
-	 *	NB: no-op for ARB, but ensure correct _Driver->_CurrentVertexArrayRange value.
-	 */
-	void			disable();
-	// check & invalidate lost buffers
-	void updateLostBuffers();
-	//
-	#ifdef NL_DEBUG
-		virtual void		 dumpMappedBuffers();
-	#endif
-// *************************
-private:
-	CVertexBuffer::TPreferredMemory _VBType;
-	// for use by CVertexBufferHardARB
-public:
-	std::list<CVertexBufferHard*> _LostVBList;
-	#ifdef NL_DEBUG
-		std::list<CVertexBufferHard*> _MappedVBList;
-	#endif
-};
-
-
-/** vb hard using the ARB_vertex_buffer_object extension. Buffer are kept separate rather than managed in a heap
-  */
-class CVertexBufferHard : public IVertexBufferHardGL
-{
-public:
-
-	CVertexBufferHard(CDriverGL3 *drv, CVertexBuffer *vb);
-	virtual	~CVertexBufferHard();
-
+	CVertexBufferGL(CDriverGL3 *drv, CVertexBuffer *vb);
+	virtual	~CVertexBufferGL();
 
 	/// \name Implementation
 	// @{
-	virtual	void		*lock();
-	virtual	void		unlock();
-	virtual void		unlock(uint startVert, uint endVert);
-	virtual void		*getPointer();
-	virtual	void		enable();
-	virtual	void		disable();
-	virtual void		lockHintStatic(bool staticLock);
-	virtual void		setupVBInfos(CVertexBufferInfo &vb);
+	virtual	void *lock();
+	virtual	void unlock();
+	virtual void unlock(uint startVert, uint endVert);
+	virtual void *getPointer();
+	virtual	void enable();
+	virtual	void disable();
+	virtual void lockHintStatic(bool staticLock);
+	virtual void setupVBInfos(CVertexBufferInfo &vb);
 	// @}
 
-   /**	setup ptrs allocated by createVBHard()
-	 */
-	void					initGL(uint vertexObjectID, CVertexArrayRange *var, CVertexBuffer::TPreferredMemory memType);
-
-
+	/// Setup ptrs allocated by createVBHard()
+	void initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemory memType);
 public:
+	/// Get Handle of the ARB buffer.
+	uint getARBVertexObjectId() const { return VertexObjectId;}
 
-	/// get Handle of the ARB buffer.
-	uint					getARBVertexObjectId() const { return _VertexObjectId;}
+	/// Invalidate the buffer (when it is lost, or when a lock fails)
+	void invalidate();
 
-	// Invalidate the buffer (when it is lost, or when a lock fails)
-	void							invalidate();
-
-	// tmp
-	void checkMappedVBList();
-
-// *************************
 private:
-	CVertexArrayRange *_VertexArrayRange;
-	CVertexBuffer::TPreferredMemory _MemType;
-	void							*_VertexPtr; // pointer on current datas. Null if not locked
+	CVertexBuffer::TPreferredMemory m_MemType;
+	void *m_VertexPtr; // pointer on current datas. Null if not locked
 
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
-	std::vector<uint8>				_DummyVB;
+	std::vector<uint8> m_DummyVB;
 	// for use by CVertexArrayRange
-	std::list<CVertexBufferHard*>::iterator _IteratorInLostVBList;
+	std::list<CVertexBufferGL*>::iterator m_IteratorInLostVBList;
+
 public:
-	uint							_VertexObjectId;
-	// tmp for debug
-	#ifdef NL_DEBUG
-		bool _Unmapping;
-		std::list<CVertexBufferHard*>::iterator _IteratorInMappedVBList;
-	#endif
+	uint VertexObjectId;
 };
 
 #ifdef NL_STATIC
@@ -184,7 +100,6 @@ public:
 #endif
 
 } // NL3D
-
 
 #endif // NL_DRIVER_OPENGL_VERTEX_BUFFER_H
 

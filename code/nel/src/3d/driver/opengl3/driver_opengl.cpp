@@ -234,13 +234,13 @@ CDriverGL3::CDriverGL3()
 
 	_ForceNormalize= false;
 
-	_AGPVertexArrayRange= NULL;
+	/*_AGPVertexArrayRange= NULL;
 	_VRAMVertexArrayRange= NULL;
-	_CurrentVertexArrayRange= NULL;
-	_CurrentVertexBufferHard= NULL;
-	_NVCurrentVARPtr= NULL;
-	_NVCurrentVARSize= 0;
-	_SlowUnlockVBHard= false;
+	_CurrentVertexArrayRange= NULL;*/
+	_CurrentVertexBufferGL= NULL;
+	/*_NVCurrentVARPtr= NULL;
+	_NVCurrentVARSize= 0;*/
+	_SlowUnlockVBHard= true;
 
 	_AllocatedTextureMemory= 0;
 
@@ -387,16 +387,14 @@ bool CDriverGL3::setupDisplay()
 	_PZBCameraPos = CVector::Null;
 
 	// Init VertexArrayRange according to supported extenstion.
-	_SlowUnlockVBHard = false;
-
-	_AGPVertexArrayRange = new CVertexArrayRange(this);
+	/*_AGPVertexArrayRange = new CVertexArrayRange(this);
 	_VRAMVertexArrayRange = new CVertexArrayRange(this);
 
 	// Reset VertexArrayRange.
 	_CurrentVertexArrayRange = NULL;
-	_CurrentVertexBufferHard = NULL;
+	_CurrentVertexBufferGL = NULL;
 	_NVCurrentVARPtr = NULL;
-	_NVCurrentVARSize = 0;
+	_NVCurrentVARSize = 0;*/
 
 	initVertexBufferHard(NL3D_DRV_VERTEXARRAY_AGP_INIT_SIZE, 0);
 
@@ -581,8 +579,7 @@ bool CDriverGL3::swapBuffers()
 
 	if (!_WndActive)
 	{
-		if (_AGPVertexArrayRange) _AGPVertexArrayRange->updateLostBuffers();
-		if (_VRAMVertexArrayRange) _VRAMVertexArrayRange->updateLostBuffers();
+		updateLostBuffers();
 	}
 
 #if defined(NL_OS_WINDOWS)
@@ -641,9 +638,10 @@ bool CDriverGL3::swapBuffers()
 		_CurVBHardLockCount= 0;
 		_NumVBHardProfileFrame++;
 	}
-	// on ati, if the window is inactive, check all vertex buffer to see which one are lost
-	if (_AGPVertexArrayRange) _AGPVertexArrayRange->updateLostBuffers();
-	if (_VRAMVertexArrayRange) _VRAMVertexArrayRange->updateLostBuffers();
+
+	// Check all vertex buffer to see which one are lost
+	updateLostBuffers();
+
 	return true;
 }
 
@@ -688,14 +686,8 @@ bool CDriverGL3::release()
 	// release caustic cube map
 //	_CauticCubeMap = NULL;
 
-	// Reset VertexArrayRange.
-	resetVertexArrayRange();
-
-	// delete containers
-	delete _AGPVertexArrayRange;
-	delete _VRAMVertexArrayRange;
-	_AGPVertexArrayRange= NULL;
-	_VRAMVertexArrayRange= NULL;
+	// Make sure vertex buffers are really all gone
+	// FIXME VERTEXBUFFER
 
 	// destroy window and associated ressources
 	destroyWindow();
@@ -1432,13 +1424,13 @@ void	CDriverGL3::profileVBHardAllocation(std::vector<std::string> &result)
 	result.reserve(1000);
 	result.push_back(toString("Memory Allocated: %4d Ko in AGP / %4d Ko in VRAM",
 		getAvailableVertexAGPMemory()/1000, getAvailableVertexVRAMMemory()/1000));
-	result.push_back(toString("Num VBHard: %d", _VertexBufferHardSet.Set.size()));
+	result.push_back(toString("Num VBHard: %d", _VertexBufferGLSet.Set.size()));
 
 	uint	totalMemUsed= 0;
-	set<IVertexBufferHardGL*>::iterator	it;
-	for (it= _VertexBufferHardSet.Set.begin(); it!=_VertexBufferHardSet.Set.end(); it++)
+	set<IVertexBufferGL*>::iterator	it;
+	for (it= _VertexBufferGLSet.Set.begin(); it!=_VertexBufferGLSet.Set.end(); it++)
 	{
-		IVertexBufferHardGL	*vbHard= *it;
+		IVertexBufferGL	*vbHard= *it;
 		if (vbHard)
 		{
 			uint	vSize= vbHard->VB->getVertexSize();
@@ -1448,9 +1440,9 @@ void	CDriverGL3::profileVBHardAllocation(std::vector<std::string> &result)
 	}
 	result.push_back(toString("Mem Used: %4d Ko", totalMemUsed/1000));
 
-	for (it= _VertexBufferHardSet.Set.begin(); it!=_VertexBufferHardSet.Set.end(); it++)
+	for (it= _VertexBufferGLSet.Set.begin(); it!=_VertexBufferGLSet.Set.end(); it++)
 	{
-		IVertexBufferHardGL	*vbHard= *it;
+		IVertexBufferGL	*vbHard= *it;
 		if (vbHard)
 		{
 			uint	vSize= vbHard->VB->getVertexSize();

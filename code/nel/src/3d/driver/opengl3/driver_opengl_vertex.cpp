@@ -76,7 +76,7 @@ CVBDrvInfosGL3::~CVBDrvInfosGL3()
 	if (_VBHard)
 	{
 		_VBHard->disable();
-		_DriverGL->_VertexBufferHardSet.erase(_VBHard);
+		_DriverGL->_VertexBufferGLSet.erase(_VBHard);
 	}
 
 	_VBHard = NULL;
@@ -131,7 +131,7 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			const uint size = VB.capacity()*VB.getVertexSize();
 			
 			// Vertex buffer hard
-			info->_VBHard = createVertexBufferHard(size, VB.capacity(), preferred, &VB);
+			info->_VBHard = createVertexBufferGL(size, VB.capacity(), preferred, &VB);
 
 			// Upload the data
 			VB.setLocation ((CVertexBuffer::TLocation)preferred);
@@ -173,8 +173,8 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	if (info->_VBHard == NULL)
 	{
 		// Disable the current vertexBufferHard if setuped.
-		if (_CurrentVertexBufferHard)
-			_CurrentVertexBufferHard->disable();
+		if (_CurrentVertexBufferGL)
+			_CurrentVertexBufferGL->disable();
 	}
 	else
 	{
@@ -209,7 +209,7 @@ bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 bool			CDriverGL3::supportVolatileVertexBuffer() const
 {
 	H_AUTO_OGL(CDriverGL3_supportVolatileVertexBuffer)
-		return false;
+	return false; // TODO VERTEXBUFFER PINNED
 }
 
 
@@ -231,50 +231,59 @@ uint			CDriverGL3::getMaxVerticesByVertexBufferHard() const
 
 
 // ***************************************************************************
-IVertexBufferHardGL	*CDriverGL3::createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb)
+IVertexBufferGL	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb)
 {
-	H_AUTO_OGL(CDriverGL3_createVertexBufferHard)
-	// choose the VertexArrayRange of good type
-	IVertexArrayRange	*vertexArrayRange= NULL;
-	switch(vbType)
+	H_AUTO_OGL(CDriverGL3_createVertexBufferGL)
+	
+	// Create a Vertex Buffer
+	GLuint vertexBufferID;
+	nglGenBuffers(1, &vertexBufferID);
+	_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
+	switch (vbType)
 	{
-	case CVertexBuffer::AGPPreferred:
-		vertexArrayRange= _AGPVertexArrayRange;
-		break;
-	case CVertexBuffer::StaticPreferred:
-		if (getStaticMemoryToVRAM())
-			vertexArrayRange= _VRAMVertexArrayRange;
-		else
-			vertexArrayRange= _AGPVertexArrayRange;
-		break;
-        default:
-            break;
+		case CVertexBuffer::AGPPreferred:
+			nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+			break;
+		case CVertexBuffer::StaticPreferred:
+			if (getStaticMemoryToVRAM())
+				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
+			else
+				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+			break;
+		default:
+			nlassert(0);
+			break;
 	}
+	CVertexBufferGL *newVbHard = new CVertexBufferGL(this, vb);
+	newVbHard->initGL(vertexBufferID, vbType);
+	_DriverGLStates.forceBindARBVertexBuffer(0);
+	return _VertexBufferGLSet.insert(newVbHard);
+}
 
-	// If this one at least created (an extension support it).
-	if (!vertexArrayRange)
-		return NULL;
-	else
+// ********************************************************************
+
+void CDriverGL3::updateLostBuffers()
+{
+	H_AUTO_OGL(CDriverGL3_updateLostBuffers)
+	// Put all vb that have been lost in the NotResident state so that they will be recomputed
+	// We do this only if the app is active, because if vb were lost, it is likely that there are no resources available.
+	if (isWndActive())
 	{
-		// Create a CVertexBufferHardGL
-		IVertexBufferHardGL		*vbHard = NULL;
-		// let the VAR create the vbhard.
-		vbHard= vertexArrayRange->createVBHardGL(size, vb);
-		// if fails
-		if (!vbHard)
+		for (std::list<CVertexBufferGL *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
-			return NULL;
+			nlassert((*it)->VertexObjectId);
+			GLuint id = (GLuint) (*it)->VertexObjectId;
+			nlassert(nglIsBuffer(id));
+			nglDeleteBuffers(1, &id);
+			(*it)->VertexObjectId = 0;
+			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}
-		else
-		{
-			// insert in list.
-			return _VertexBufferHardSet.insert(vbHard);
-		}
+		_LostVBList.clear();
 	}
 }
 
+// ********************************************************************
 
-// ***************************************************************************
 const uint		CDriverGL3::NumCoordinatesType[CVertexBuffer::NumType]=
 {
 	1,	// Double1
@@ -471,35 +480,12 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 	}
 }
 
-
-// ***************************************************************************
-void			CDriverGL3::resetVertexArrayRange()
-{
-	H_AUTO_OGL(CDriverGL3_resetVertexArrayRange)
-	if (_CurrentVertexBufferHard)
-	{
-		// Must ensure it has ended any drawing
-		_CurrentVertexBufferHard->lock();
-		_CurrentVertexBufferHard->unlock();
-		// disable it
-		_CurrentVertexBufferHard->disable();
-	}
-	// Clear any VertexBufferHard created.
-	_VertexBufferHardSet.clear();
-}
-
-
 // ***************************************************************************
 bool			CDriverGL3::initVertexBufferHard(uint agpMem, uint vramMem)
 {
 	H_AUTO_OGL(CDriverGL3_initVertexBufferHard)
 
-	// must be supported
-	if (!_AGPVertexArrayRange || !_VRAMVertexArrayRange)
-		return false;
-
-	// First, reset any VBHard created.
-	resetVertexArrayRange();
+	_SlowUnlockVBHard = true;
 
 	return true;
 }

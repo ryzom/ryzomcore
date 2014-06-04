@@ -88,7 +88,7 @@ namespace NLDRIVERGL3 {
 
 class	CDriverGL3;
 class	IVertexArrayRange;
-class	IVertexBufferHardGL;
+class	IVertexBufferGL;
 class   COcclusionQueryGL3;
 
 void displayGLError(GLenum error);
@@ -190,7 +190,7 @@ public:
 	CVBDrvInfosGL3(CDriverGL3 *drv, ItVBDrvInfoPtrList it, CVertexBuffer *vb);
 
 	// Verex buffer hard ?
-	IVertexBufferHardGL		*_VBHard;
+	IVertexBufferGL		*_VBHard;
 	CDriverGL3			*_DriverGL;
 
 	// From IVBDrvInfos
@@ -250,7 +250,7 @@ public:
 	}
 
 	void		setupVertexBuffer(CVertexBuffer &vb);
-	void		setupVertexBufferHard(IVertexBufferHardGL &vb);
+	void		setupVertexBufferHard(IVertexBufferGL &vb);
 };
 
 
@@ -690,7 +690,7 @@ public:
 #endif
 
 private:
-	virtual class IVertexBufferHardGL	*createVertexBufferHard(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
+	virtual class IVertexBufferGL	*createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL3;
 	friend class					CVertexProgamDrvInfosGL3;
 
@@ -1123,31 +1123,19 @@ private:
 	void			disableAllLights();
 
 
-	/// \name VertexBufferHard
+	/// \name Vertex Buffer
 	// @{
-	CPtrSet<IVertexBufferHardGL>	_VertexBufferHardSet;
-	friend class					CVertexArrayRange;
-	friend class					CVertexBufferHard;
+	CPtrSet<IVertexBufferGL>		_VertexBufferGLSet;
+	friend class					CVertexBufferGL;
 	friend class					CVBDrvInfosGL3;
 
-	// The VertexArrayRange activated.
-	IVertexArrayRange				*_CurrentVertexArrayRange;
 	// The VertexBufferHardGL activated.
-	IVertexBufferHardGL				*_CurrentVertexBufferHard;
-	// current setup passed to nglVertexArrayRangeNV()
-	void							*_NVCurrentVARPtr;
-	uint32							_NVCurrentVARSize;
-
+	IVertexBufferGL					*_CurrentVertexBufferGL;
 	bool							_SlowUnlockVBHard;
 
-	// The AGP VertexArrayRange.
-	IVertexArrayRange				*_AGPVertexArrayRange;
-	// The VRAM VertexArrayRange.
-	IVertexArrayRange				*_VRAMVertexArrayRange;
-
-
-	void							resetVertexArrayRange();
-
+	// Handle lost buffers
+	void							updateLostBuffers();
+	std::list<CVertexBufferGL *>	_LostVBList;
 	// @}
 
 
@@ -1341,7 +1329,7 @@ protected:
 public:
 	void incrementResetCounter() { ++_ResetCounter; }
 	bool isWndActive() const { return _WndActive; }
-	const IVertexBufferHardGL	*getCurrentVertexBufferHard() const { return _CurrentVertexBufferHard; }
+	const IVertexBufferGL	*getCurrentVertexBufferHard() const { return _CurrentVertexBufferGL; }
 	// For debug : dump list of mapped buffers
 	#ifdef NL_DEBUG
 		void dumpMappedBuffers();

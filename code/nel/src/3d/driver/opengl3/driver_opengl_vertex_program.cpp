@@ -379,7 +379,7 @@ void CDriverGL3::touchLightVP(int i)
 void CDriverGL3::touchVertexFormatVP()
 {
 	H_AUTO_OGL(CDriverGL3_touchLightVP)
-	uint16 format = _CurrentVertexBufferHard->VB->getVertexFormat();
+	uint16 format = _CurrentVertexBufferGL->VB->getVertexFormat();
 	if (m_VPBuiltinCurrent.VertexFormat != format)
 	{
 		m_VPBuiltinCurrent.VertexFormat = format;

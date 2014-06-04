@@ -353,8 +353,8 @@ bool CDriverGL3::setupMaterial(CMaterial& mat)
 	}*/
 
 	// NOTE: A vertex buffer MUST be enabled before calling setupMaterial!
-	nlassert(_CurrentVertexBufferHard);
-	uint16 vertexFormat = _CurrentVertexBufferHard->VB->getVertexFormat();
+	nlassert(_CurrentVertexBufferGL);
+	uint16 vertexFormat = _CurrentVertexBufferGL->VB->getVertexFormat();
 
 	// Activate the textures.
 	// Do not do it for Lightmap and per pixel lighting , because done in multipass in a very special fashion.

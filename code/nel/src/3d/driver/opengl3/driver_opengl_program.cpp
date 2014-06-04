@@ -576,7 +576,7 @@ void CDriverGL3::setUniformFog(TProgram program, uint index)
 void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 {
 	desc.setShaderType(mat.getShader());
-	uint16 vbFlags = _CurrentVertexBufferHard->VB->getVertexFormat();
+	uint16 vbFlags = _CurrentVertexBufferGL->VB->getVertexFormat();
 	for (sint i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
 	{
 		if (m_VPBuiltinCurrent.TexGenMode[i] >= 0)

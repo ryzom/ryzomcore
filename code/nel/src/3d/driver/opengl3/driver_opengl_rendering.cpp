@@ -36,7 +36,7 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	if (!setupMaterial(mat) || _LastIB._Values == NULL)
 		return false;
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
+	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 	// render primitives.
 	//==============================
 	// start multipass.
@@ -83,7 +83,7 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	if (!setupMaterial(mat) || _LastIB._Values == NULL)
 		return false;
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
+	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 
 	// render primitives.
 	//==============================
@@ -132,7 +132,7 @@ bool CDriverGL3::renderSimpleTriangles(uint32 firstTri, uint32 ntris)
 
 	nlassert(ntris>0);
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
+	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 	// Don't setup any material here.
 
 	// render primitives.
@@ -167,7 +167,7 @@ bool CDriverGL3::renderRawPoints(CMaterial& mat, uint32 startIndex, uint32 numPo
 	if (!setupMaterial(mat))
 		return false;
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
+	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 	// render primitives.
 	//==============================
 	// start multipass.
@@ -205,7 +205,7 @@ bool CDriverGL3::renderRawLines(CMaterial& mat, uint32 startIndex, uint32 numLin
 	if (!setupMaterial(mat))
 		return false;
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
+	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 	// render primitives.
 	//==============================
 	// start multipass.
@@ -243,7 +243,7 @@ bool CDriverGL3::renderRawTriangles(CMaterial& mat, uint32 startIndex, uint32 nu
 	if (!setupMaterial(mat))
 		return false;
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
+	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 	// render primitives.
 	//==============================
 	// start multipass.
@@ -284,7 +284,7 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	if (!setupMaterial(mat))
 		return false;
 
-	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
+	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
 
 	const uint32 QUAD_BATCH_SIZE = 2048;
 	static GLshort defaultIndices[QUAD_BATCH_SIZE * 6];
