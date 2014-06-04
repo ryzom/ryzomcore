@@ -37,11 +37,12 @@
 #include <QtCore/QSettings>
 #include <QtGui/QMessageBox>
 #include <QtGui/QApplication>
-#include <QtGui/QSplashScreen>
+//#include <QtGui/QSplashScreen>
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
 
 #include "settings_dialog.h"
+#include "splash_screen.h"
 
 #ifdef HAVE_OVQT_CONFIG_H
 #include "ovqt_config.h"
@@ -141,8 +142,11 @@ int main(int argc, char **argv)
 	QApplication app(argc, argv);
 #endif // NL_OS_WINDOWS
 
-	QSplashScreen *splash = new QSplashScreen();
+	SplashScreen *splash = new SplashScreen();
 	splash->setPixmap(QPixmap(":/images/studio_splash.png"));
+	splash->setProgressBarEnabled( true );
+	splash->setText( "Starting up..." );
+	splash->setProgress( 0 );
 	splash->show();
 
 	QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -184,6 +188,8 @@ int main(int argc, char **argv)
 #endif
 
 	pluginManager.setPluginPaths(pluginPaths);
+	splash->setText( "Loading plugins..." );
+	splash->setProgress( 20 );
 	pluginManager.loadPlugins();
 
 	splash->hide();
