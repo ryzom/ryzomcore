@@ -133,6 +133,10 @@ Q_SIGNALS:
 
 	/// Signal that the list of available plugins has changed.
 	void pluginsChanged();
+
+	void pluginLoading( const char *plugin );
+	void pluginInitializing( const char *plugin );
+	void pluginStarting( const char *plugin );
 };
 
 }; // namespace ExtensionSystem

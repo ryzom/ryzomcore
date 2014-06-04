@@ -12,7 +12,8 @@ FILE(GLOB STUDIO_SRC extension_system/*.h
 SET(STUDIO_HDR   extension_system/iplugin_manager.h 
 						extension_system/plugin_manager.h
 						settings_dialog.h
-						splash_screen.h )
+						splash_screen.h
+						pm_watcher.h )
 
 SET(STUDIO_RCS studio.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 

@@ -43,6 +43,7 @@
 
 #include "settings_dialog.h"
 #include "splash_screen.h"
+#include "pm_watcher.h"
 
 #ifdef HAVE_OVQT_CONFIG_H
 #include "ovqt_config.h"
@@ -106,6 +107,7 @@ static inline QString msgCoreLoadFailure(const QString &why)
 {
 	return QCoreApplication::translate("Application", "Failed to load Core plugin: %1").arg(why);
 }
+
 
 #ifdef NL_OS_WINDOWS
 int __stdcall WinMain(void *hInstance, void *hPrevInstance, void *lpCmdLine, int nShowCmd)
@@ -173,6 +175,9 @@ int main(int argc, char **argv)
 	app.installTranslator(&translator);
 	app.installTranslator(&qtTranslator);
 
+	splash->setText( "Loading plugins..." );
+	splash->setProgress( 20 );
+
 #if defined(NL_OS_MAC)
 	QDir::setCurrent(qApp->applicationDirPath() + QString("/../Resources"));
 	NLMISC::CLibrary::addLibPath((qApp->applicationDirPath() + QString("/../PlugIns/nel")).toUtf8().constData());
@@ -188,10 +193,15 @@ int main(int argc, char **argv)
 #endif
 
 	pluginManager.setPluginPaths(pluginPaths);
-	splash->setText( "Loading plugins..." );
-	splash->setProgress( 20 );
+
+	PluginManagerWatcher watcher;
+	watcher.setPluginManager( &pluginManager );
+	watcher.setSplashScreen( splash );
+	watcher.connect();
+
 	pluginManager.loadPlugins();
 
+	watcher.disconnect();
 	splash->hide();
 
 	ExtensionSystem::IPluginSpec *corePlugin = pluginManager.pluginByName("Core");

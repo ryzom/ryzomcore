@@ -218,6 +218,7 @@ void PluginManager::setPluginState(PluginSpec *spec, int destState)
 		spec->resolveDependencies(m_pluginSpecs);
 		return;
 	case State::Running:
+		Q_EMIT pluginStarting( spec->name().toUtf8().data() );
 		spec->initializeExtensions();
 		return;
 	case State::Deleted:
@@ -239,9 +240,11 @@ void PluginManager::setPluginState(PluginSpec *spec, int destState)
 	switch (destState)
 	{
 	case State::Loaded:
+		Q_EMIT pluginLoading( spec->name().toUtf8().data() );
 		spec->loadLibrary();
 		return;
 	case State::Initialized:
+		Q_EMIT pluginInitializing( spec->name().toUtf8().data() );
 		spec->initializePlugin();
 		break;
 	case State::Stopped:
