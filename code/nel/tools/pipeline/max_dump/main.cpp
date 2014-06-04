@@ -48,11 +48,12 @@ using namespace PIPELINE::MAX::UPDATE1;
 using namespace PIPELINE::MAX::EPOLY;
 
 //static const char *filename = "/srv/work/database/interfaces/anims_max/cp_fy_hof_species.max";
-static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
+//static const char *filename = "/home/kaetemi/source/minimax/GE_Acc_MikotoBaniere.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/test2008.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/teapot_test_scene.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/testplane.max";
 //static const char *filename = "/home/kaetemi/3dsMax/scenes/geomobjects.max";
+static const char *filename = "/mnt/tsurugi/ryzom-assets/database/landscape/ligo/desert/max/zonematerial-converted-165_eg.max";
 static const char *streamname = "Scene";
 
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
@@ -243,7 +244,7 @@ int main(int argc, char **argv)
 	nldebug("CLEAN");
 	//scene.clean(); // cleanup unused file structure, don't clean up if we want direct access to chunks as well
 	// <- TEST
-	//scene.toString(std::cout);//##
+	scene.toString(std::cout);//##
 	std::cout << "\n";
 	//classDirectory3.build(PIPELINE::MAX::VersionUnknown);
 	//classDirectory3.disown();
@@ -258,17 +259,17 @@ int main(int argc, char **argv)
 	//node->toString(std::cout);
 	//exportObj("tr_hof_civil01_gilet.obj", node->getReference(1)->getReference(1)); // => CDerivedObject::getBase(node->object())
 
-	INode *node = scene.container()->scene()->rootNode()->find(ucstring("GE_Acc_MikotoBaniere")); nlassert(node);
+	/*INode *node = scene.container()->scene()->rootNode()->find(ucstring("GE_Acc_MikotoBaniere")); nlassert(node);
 	//INode *node = scene.container()->scene()->rootNode()->find(ucstring("testplane")); nlassert(node);
 	CReferenceMaker *object = node->getReference(1);
 	object->toString(std::cout);
-	exportObj("ge_acc_mikotobaniere.obj", object);
+	exportObj("ge_acc_mikotobaniere.obj", object);*/
 
 
 	//GE_Acc_MikotoBaniere
 
-	// TEST APP DATA
-
+	// TEST APP DATA ->
+/*
 #define MAXSCRIPT_UTILITY_CLASS_ID (NLMISC::CClassId(0x04d64858, 0x16d1751d))
 #define UTILITY_CLASS_ID (4128)
 #define NEL3D_APPDATA_ENV_FX (84682543)
@@ -294,8 +295,10 @@ int main(int argc, char **argv)
 
 			}
 		}
-	}
-
+	}*/
+	// <- TEST APP DATA
+	
+	
 /*
 	scene.clean();
 	scene.build(PIPELINE::MAX::VersionUnknown);

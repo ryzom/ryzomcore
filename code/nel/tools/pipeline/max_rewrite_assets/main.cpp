@@ -85,7 +85,7 @@ bool RunningLinux = true;
 //const char *SrcDirectoryRecursive = "w:\\database\\stuff\\fyros\\city\\newpositionville\\";
 const char *SrcDirectoryRecursiveInit = "w:\\database\\";
 //const char *SrcDirectoryRecursiveHandle = "w:\\database\\stuff\\generique\\agents\\accessories\\";
-const char *SrcDirectoryRecursiveHandle = "w:\\database\\landscape\\ligo_replace\\";
+const char *SrcDirectoryRecursiveHandle = "w:\\database\\landscape\\ligo\\primes_racines\\max\\";
 
 bool UseFallbackTga = false;
 const char *FallbackTga = "w:\\database\\stuff\\lod_actors\\texture_lod\\trame.png";
@@ -811,7 +811,7 @@ void fixChunk(uint16 id, IStorageObject *chunk)
 				// 52 5f 48 4f 46 5f 63 69 76 69
 				// 6c 30 31 5f 74 6f 72 73 6f 5f
 				// 43 31 2e 74 67 61 00
-				bool overrideFF = false; // Patch for some ligo max files
+				bool overrideFF = true; // Patch for some ligo max files
 				if (overrideFF && asRaw->Value.size() > 4 && asRaw->Value[asRaw->Value.size() - 4] == 0xFF)
 				{
 					nlwarning("0xFFFFFFFF");
