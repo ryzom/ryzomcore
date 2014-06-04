@@ -212,6 +212,9 @@ extern PFNGLUNMAPBUFFERPROC								nglUnmapBuffer;
 extern PFNGLGETBUFFERPARAMETERIVPROC					nglGetBufferParameteriv;
 extern PFNGLGETBUFFERPOINTERVPROC						nglGetBufferPointerv;
 
+extern PFNGLMAPBUFFERRANGEPROC							nglMapBufferRange;
+extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC					nglFlushMappedBufferRange;
+
 extern PFNGLGENQUERIESPROC								nglGenQueries;
 extern PFNGLDELETEQUERIESPROC							nglDeleteQueries;
 extern PFNGLISQUERYPROC									nglIsQuery;

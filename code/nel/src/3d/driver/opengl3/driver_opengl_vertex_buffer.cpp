@@ -87,7 +87,10 @@ void *CVertexBufferGL::lock()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_lock);
 
-	if (m_VertexPtr) return m_VertexPtr; // already locked
+	if (m_VertexPtr) return m_VertexPtr; // already locked :|
+
+	const uint size = VB->getNumVertices() * VB->getVertexSize();
+
 	if (m_Invalid)
 	{
 		if (VB->getLocation() != CVertexBuffer::NotResident)
@@ -106,7 +109,6 @@ void *CVertexBufferGL::lock()
 			m_Driver->incrementResetCounter();
 			return &m_DummyVB[0];
 		}
-		const uint size = VB->getNumVertices() * VB->getVertexSize();
 		m_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
 		nglBufferData(GL_ARRAY_BUFFER, size, NULL, m_Driver->vertexBufferUsageGL3(m_MemType));
 		if (glGetError() != GL_NO_ERROR)
@@ -130,7 +132,27 @@ void *CVertexBufferGL::lock()
 	m_Driver->_DriverGLStates.bindARBVertexBuffer(VertexObjectId);
 
 
-	m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	// m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	
+	// PERFORMANCE: AMD: This brings framerate from 24fps to 38fps, glitches with volatile buffers such as animated models and gui, likely glitches with others
+	// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+
+	// PERFORMANCE: AMD: This brings framerate from 24fps to 38fps, glitches with landscape rendering
+	// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
+	// Invalidate when updating volatile buffers, framerate from 24fps to 38fps in reference test on AMD platform
+	// TODO: Find where we can optimize with GL_MAP_UNSYNCHRONIZED_BIT
+	switch (m_MemType)
+	{
+	case CVertexBuffer::AGPVolatile:
+	case CVertexBuffer::RAMVolatile:
+		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		break;
+	default:
+		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		break;
+	}
+
 	if (!m_VertexPtr)
 	{
 		nglUnmapBuffer(GL_ARRAY_BUFFER);
