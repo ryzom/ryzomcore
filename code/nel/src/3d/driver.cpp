@@ -38,7 +38,7 @@ const uint32 IDriver::InterfaceVersion = 0x6d; // gpu program interface
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
 {
 	_PolygonMode= Filled;
-	_StaticMemoryToVRAM=false;
+	_StaticMemoryToVRAM=true;
 	_ResetCounter=0;
 }
 

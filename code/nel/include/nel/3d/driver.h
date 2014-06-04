@@ -569,7 +569,7 @@ public:
 	bool					getStaticMemoryToVRAM() const { return _StaticMemoryToVRAM; }
 
 	/* Set to true if static vertex and index buffers must by allocated in VRAM, false in AGP.
-	 * Default is false.
+	 * Default is true.
 	 */
 	void					setStaticMemoryToVRAM(bool staticMemoryToVRAM);
 
