@@ -17,7 +17,7 @@
 #include "stdopengl.h"
 
 #include "driver_opengl.h"
-#include "driver_opengl_vertex_buffer_hard.h"
+#include "driver_opengl_vertex_buffer.h"
 
 #include "nel/3d/vertex_buffer.h"
 

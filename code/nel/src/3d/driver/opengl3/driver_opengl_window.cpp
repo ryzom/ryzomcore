@@ -17,7 +17,7 @@
 #include "stdopengl.h"
 #include "driver_opengl.h"
 #include "driver_opengl_extension.h"
-#include "driver_opengl_vertex_buffer_hard.h"
+#include "driver_opengl_vertex_buffer.h"
 
 // by default, we disable the windows menu keys (F10, ALT and ALT+SPACE key doesn't freeze or open the menu)
 #define NL_DISABLE_MENU
