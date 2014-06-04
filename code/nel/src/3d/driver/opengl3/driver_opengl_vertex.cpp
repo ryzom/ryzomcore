@@ -121,12 +121,24 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			CVBDrvInfosGL3 *info = new CVBDrvInfosGL3(this, it, &VB);
 			*it= VB.DrvInfos = info;
 
-			// Preferred memory
-			CVertexBuffer::TPreferredMemory preferred = VB.getPreferredMemory ();
-			if ((preferred == CVertexBuffer::RAMVolatile) ||
-				(preferred == CVertexBuffer::AGPVolatile) ||
-				(preferred == CVertexBuffer::RAMPreferred))
-				preferred = CVertexBuffer::AGPPreferred;
+			// Preferred memory, reduce choices
+			CVertexBuffer::TPreferredMemory preferred = VB.getPreferredMemory();
+			CVertexBuffer::TLocation location;
+			switch (preferred)
+			{
+			case CVertexBuffer::StaticPreferred:
+				if (getStaticMemoryToVRAM())
+					location = CVertexBuffer::VRAMResident;
+				else
+					location = CVertexBuffer::AGPResident;
+			case CVertexBuffer::RAMVolatile:
+			case CVertexBuffer::RAMPreferred:
+				location = CVertexBuffer::RAMResident;
+			case CVertexBuffer::AGPPreferred:
+			case CVertexBuffer::AGPVolatile:
+			default:
+				location = CVertexBuffer::AGPResident;
+			}
 
 			const uint size = VB.capacity()*VB.getVertexSize();
 			
@@ -134,7 +146,7 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			info->_VBHard = createVertexBufferGL(size, VB.capacity(), preferred, &VB);
 
 			// Upload the data
-			VB.setLocation ((CVertexBuffer::TLocation)preferred);
+			VB.setLocation(location);
 		}
 	}
 
@@ -209,7 +221,7 @@ bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 bool			CDriverGL3::supportVolatileVertexBuffer() const
 {
 	H_AUTO_OGL(CDriverGL3_supportVolatileVertexBuffer)
-	return false; // TODO VERTEXBUFFER PINNED
+	return true; // TODO VERTEXBUFFER PINNED
 }
 
 
@@ -229,6 +241,23 @@ uint			CDriverGL3::getMaxVerticesByVertexBufferHard() const
 	return std::numeric_limits<uint32>::max();
 }
 
+GLenum CDriverGL3::vertexBufferUsageGL3(CVertexBuffer::TPreferredMemory usage)
+{
+	switch (usage)
+	{
+	case CVertexBuffer::RAMPreferred:
+	case CVertexBuffer::AGPPreferred:
+		return GL_DYNAMIC_DRAW;
+	case CVertexBuffer::StaticPreferred:
+		return getStaticMemoryToVRAM() ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+	case CVertexBuffer::RAMVolatile:
+	case CVertexBuffer::AGPVolatile:
+		return GL_STREAM_DRAW;
+	default:
+		nlerror("Invalid preferred memory");
+		return GL_DYNAMIC_DRAW;
+	}
+}
 
 // ***************************************************************************
 IVertexBufferGL	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb)
@@ -239,21 +268,7 @@ IVertexBufferGL	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, C
 	GLuint vertexBufferID;
 	nglGenBuffers(1, &vertexBufferID);
 	_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
-	switch (vbType)
-	{
-		case CVertexBuffer::AGPPreferred:
-			nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-			break;
-		case CVertexBuffer::StaticPreferred:
-			if (getStaticMemoryToVRAM())
-				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
-			else
-				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-			break;
-		default:
-			nlassert(0);
-			break;
-	}
+	nglBufferData(GL_ARRAY_BUFFER, size, NULL, vertexBufferUsageGL3(vbType));
 	CVertexBufferGL *newVbHard = new CVertexBufferGL(this, vb);
 	newVbHard->initGL(vertexBufferID, vbType);
 	_DriverGLStates.forceBindARBVertexBuffer(0);

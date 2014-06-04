@@ -108,21 +108,7 @@ void *CVertexBufferGL::lock()
 		}
 		const uint size = VB->getNumVertices() * VB->getVertexSize();
 		m_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
-		switch(m_MemType)
-		{
-			case CVertexBuffer::AGPPreferred:
-				nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-			break;
-			case CVertexBuffer::StaticPreferred:
-				if (m_Driver->getStaticMemoryToVRAM())
-					nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
-				else
-					nglBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
-			break;
-			default:
-				nlassert(0);
-			break;
-		}
+		nglBufferData(GL_ARRAY_BUFFER, size, NULL, m_Driver->vertexBufferUsageGL3(m_MemType));
 		if (glGetError() != GL_NO_ERROR)
 		{
 			m_Driver->incrementResetCounter();
