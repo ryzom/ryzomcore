@@ -286,11 +286,11 @@ void CDriverGL3::updateLostBuffers()
 	{
 		for (std::list<CVertexBufferGL3 *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
-			nlassert((*it)->VertexObjectId);
-			GLuint id = (GLuint) (*it)->VertexObjectId;
+			nlassert((*it)->m_VertexObjectId);
+			GLuint id = (GLuint) (*it)->m_VertexObjectId;
 			nlassert(nglIsBuffer(id));
 			nglDeleteBuffers(1, &id);
-			(*it)->VertexObjectId = 0;
+			(*it)->m_VertexObjectId = 0;
 			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}
 		_LostVBList.clear();

@@ -47,7 +47,7 @@ IVertexBufferGL3::~IVertexBufferGL3()
 CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb) 
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::GL3),
 	m_VertexPtr(NULL),
-	VertexObjectId(0)
+	m_VertexObjectId(0)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARB)
 }
@@ -56,16 +56,16 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb)
 CVertexBufferGL3::~CVertexBufferGL3()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARBDtor)
-	if (m_Driver && VertexObjectId)
+	if (m_Driver && m_VertexObjectId)
 	{
-		if (m_Driver->_DriverGLStates.getCurrBoundARBVertexBuffer() == VertexObjectId)
+		if (m_Driver->_DriverGLStates.getCurrBoundARBVertexBuffer() == m_VertexObjectId)
 		{
 			m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 		}
 	}
-	if (VertexObjectId)
+	if (m_VertexObjectId)
 	{
-		GLuint id = (GLuint) VertexObjectId;
+		GLuint id = (GLuint)m_VertexObjectId;
 		nlassert(nglIsBuffer(id));
 		nglDeleteBuffers(1, &id);
 	}
@@ -117,9 +117,9 @@ void *CVertexBufferGL3::lock()
 			nglDeleteBuffers(1, &vertexBufferID);
 			return &m_DummyVB[0];;
 		}
-		VertexObjectId = vertexBufferID;
+		m_VertexObjectId = vertexBufferID;
 		NLMISC::contReset(m_DummyVB); // free vector memory for real
-		nlassert(VertexObjectId);
+		nlassert(m_VertexObjectId);
 		m_Invalid = false;
 		m_Driver->_LostVBList.erase(m_IteratorInLostVBList);
 		// continue to standard mapping code below ..
@@ -129,7 +129,7 @@ void *CVertexBufferGL3::lock()
 	{
 		beforeLock= CTime::getPerformanceTime();
 	}
-	m_Driver->_DriverGLStates.bindARBVertexBuffer(VertexObjectId);
+	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId);
 
 	// m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	
@@ -163,7 +163,7 @@ void *CVertexBufferGL3::lock()
 	if (!m_VertexPtr)
 	{
 		nglUnmapBuffer(GL_ARRAY_BUFFER);
-		nlassert(nglIsBuffer((GLuint) VertexObjectId));
+		nlassert(nglIsBuffer((GLuint)m_VertexObjectId));
 		invalidate();
 		return &m_DummyVB[0];
 	}
@@ -190,13 +190,13 @@ void CVertexBufferGL3::unlock()
 
 	m_VertexPtr = NULL;
 	if (m_Invalid) return;
-	if (!VertexObjectId) return;
+	if (!m_VertexObjectId) return;
 	TTicks	beforeLock = 0;
 	if (m_Driver->_VBHardProfiling)
 	{
 		beforeLock= CTime::getPerformanceTime();
 	}
-	m_Driver->_DriverGLStates.bindARBVertexBuffer(VertexObjectId);
+	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId);
 	// double start = CTime::ticksToSecond(CTime::getPerformanceTime());
 	#ifdef NL_DEBUG
 		_Unmapping = true;
@@ -269,7 +269,7 @@ void CVertexBufferGL3::disable()
 void CVertexBufferGL3::initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemory memType)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_initGL)
-	VertexObjectId = vertexObjectID;
+	m_VertexObjectId = vertexObjectID;
 	m_MemType = memType;
 }
 
@@ -277,7 +277,7 @@ void CVertexBufferGL3::initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemo
 void CVertexBufferGL3::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_setupVBInfos)
-	vb.VertexObjectId = VertexObjectId;
+	vb.VertexObjectId = m_VertexObjectId;
 }
 
 // ***************************************************************************

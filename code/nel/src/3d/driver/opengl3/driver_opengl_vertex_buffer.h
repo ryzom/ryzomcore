@@ -78,14 +78,13 @@ public:
 
 	/// Setup ptrs allocated by createVBHard()
 	void initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemory memType);
-public:
-	/// Get Handle of the ARB buffer.
-	uint getARBVertexObjectId() const { return VertexObjectId;}
 
 	/// Invalidate the buffer (when it is lost, or when a lock fails)
 	void invalidate();
 
 private:
+	friend class CDriverGL3;
+
 	CVertexBuffer::TPreferredMemory m_MemType;
 	void *m_VertexPtr; // pointer on current datas. Null if not locked
 
@@ -94,8 +93,7 @@ private:
 	// for use by CVertexArrayRange
 	std::list<CVertexBufferGL3*>::iterator m_IteratorInLostVBList;
 
-public:
-	uint VertexObjectId;
+	uint m_VertexObjectId;
 };
 
 #ifdef NL_STATIC
