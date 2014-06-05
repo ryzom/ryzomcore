@@ -409,7 +409,9 @@ void *CVertexBufferAMDPinned::lock()
 	}
 	m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
 	nlassert(m_VertexPtr);
-	nlassert(m_VertexPtr == m_VertexPtrAligned);
+
+	// May actually return a different virtual address on some systems
+	// nlassert(m_VertexPtr == m_VertexPtrAligned);
 
 	// Profiling
 	if (m_Driver->_VBHardProfiling)
