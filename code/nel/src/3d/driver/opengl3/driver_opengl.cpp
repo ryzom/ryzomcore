@@ -1080,7 +1080,7 @@ void			CDriverGL3::enableUsedTextureMemorySum (bool enable)
 	H_AUTO_OGL(CDriverGL3_enableUsedTextureMemorySum)
 
 	if (enable)
-		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL");
+		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL3");
 	_SumTextureMemoryUsed=enable;
 }
 
@@ -1426,10 +1426,10 @@ void	CDriverGL3::profileVBHardAllocation(std::vector<std::string> &result)
 	result.push_back(toString("Num VBHard: %d", _VertexBufferGLSet.Set.size()));
 
 	uint	totalMemUsed= 0;
-	set<IVertexBufferGL*>::iterator	it;
+	set<IVertexBufferGL3*>::iterator	it;
 	for (it= _VertexBufferGLSet.Set.begin(); it!=_VertexBufferGLSet.Set.end(); it++)
 	{
-		IVertexBufferGL	*vbHard= *it;
+		IVertexBufferGL3	*vbHard= *it;
 		if (vbHard)
 		{
 			uint	vSize= vbHard->VB->getVertexSize();
@@ -1441,7 +1441,7 @@ void	CDriverGL3::profileVBHardAllocation(std::vector<std::string> &result)
 
 	for (it= _VertexBufferGLSet.Set.begin(); it!=_VertexBufferGLSet.Set.end(); it++)
 	{
-		IVertexBufferGL	*vbHard= *it;
+		IVertexBufferGL3	*vbHard= *it;
 		if (vbHard)
 		{
 			uint	vSize= vbHard->VB->getVertexSize();

@@ -31,21 +31,21 @@ namespace NLDRIVERGL3 {
 #endif
 
 // ***************************************************************************
-IVertexBufferGL::IVertexBufferGL(CDriverGL3 *drv, CVertexBuffer *vb) : VB (vb)
+IVertexBufferGL3::IVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb, TVBType vbType) 
+	: VB(vb), VBType(vbType), m_Driver(drv), m_Invalid(false)
 {
 	H_AUTO_OGL(IVertexBufferGL_IVertexBufferGL)
-	m_Driver= drv;
-	m_Invalid = false;
 }
+
 // ***************************************************************************
-IVertexBufferGL::~IVertexBufferGL()
+IVertexBufferGL3::~IVertexBufferGL3()
 {
 	H_AUTO_OGL(IVertexBufferGL_IVertexBufferGLDtor)
 }
 
 // ***************************************************************************
-CVertexBufferGL::CVertexBufferGL(CDriverGL3 *drv, CVertexBuffer *vb) 
-	: IVertexBufferGL(drv, vb),
+CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb) 
+	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::GL3),
 	m_VertexPtr(NULL),
 	VertexObjectId(0)
 {
@@ -53,7 +53,7 @@ CVertexBufferGL::CVertexBufferGL(CDriverGL3 *drv, CVertexBuffer *vb)
 }
 
 // ***************************************************************************
-CVertexBufferGL::~CVertexBufferGL()
+CVertexBufferGL3::~CVertexBufferGL3()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARBDtor)
 	if (m_Driver && VertexObjectId)
@@ -83,7 +83,7 @@ CVertexBufferGL::~CVertexBufferGL()
 }
 
 // ***************************************************************************
-void *CVertexBufferGL::lock()
+void *CVertexBufferGL3::lock()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_lock);
 
@@ -184,7 +184,7 @@ void *CVertexBufferGL::lock()
 }
 
 // ***************************************************************************
-void CVertexBufferGL::unlock()
+void CVertexBufferGL3::unlock()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_unlock);
 
@@ -228,21 +228,21 @@ void CVertexBufferGL::unlock()
 }
 
 // ***************************************************************************
-void		*CVertexBufferGL::getPointer()
+void		*CVertexBufferGL3::getPointer()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_getPointer)
 	return m_VertexPtr;
 }
 
 // ***************************************************************************
-void CVertexBufferGL::unlock(uint /* startVert */,uint /* endVert */)
+void CVertexBufferGL3::unlock(uint /* startVert */,uint /* endVert */)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_unlock)
 	unlock(); // can't do a lock on a range of the vb..
 }
 
 // ***************************************************************************
-void CVertexBufferGL::enable()
+void CVertexBufferGL3::enable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_enable)
 	if (m_Driver->_CurrentVertexBufferGL != this)
@@ -254,7 +254,7 @@ void CVertexBufferGL::enable()
 }
 
 // ***************************************************************************
-void CVertexBufferGL::disable()
+void CVertexBufferGL3::disable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_disable)
 	if (m_Driver->_CurrentVertexBufferGL != NULL)
@@ -266,7 +266,7 @@ void CVertexBufferGL::disable()
 }
 
 // ***************************************************************************
-void CVertexBufferGL::initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemory memType)
+void CVertexBufferGL3::initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemory memType)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_initGL)
 	VertexObjectId = vertexObjectID;
@@ -274,14 +274,14 @@ void CVertexBufferGL::initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemor
 }
 
 // ***************************************************************************
-void CVertexBufferGL::setupVBInfos(CVertexBufferInfo &vb)
+void CVertexBufferGL3::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_setupVBInfos)
 	vb.VertexObjectId = VertexObjectId;
 }
 
 // ***************************************************************************
-void CVertexBufferGL::invalidate()
+void CVertexBufferGL3::invalidate()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_invalidate)
 	nlassert(!m_Invalid);

@@ -25,16 +25,19 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 #endif
 
-class CDriverGL;
-class IVertexBufferGL;
+class CDriverGL3;
+class IVertexBufferGL3;
 class CVertexBufferInfo;
-class CVertexBufferGL;
+class CVertexBufferGL3;
 
-class IVertexBufferGL
+class IVertexBufferGL3
 {
 public:
-	IVertexBufferGL(CDriverGL3 *drv, CVertexBuffer *vb);
-	virtual	~IVertexBufferGL();
+	enum TVBType { GL3 };
+
+	IVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb, TVBType vbType);
+	virtual	~IVertexBufferGL3();
+
 	virtual	void *lock() = 0;
 	virtual	void unlock() = 0;
 	virtual void unlock(uint start, uint end) = 0;
@@ -48,6 +51,7 @@ public:
 
 public:
 	CVertexBuffer *VB;
+	TVBType VBType;
 
 protected:
 	CDriverGL3 *m_Driver;
@@ -55,11 +59,11 @@ protected:
 };
 
 /* GL Core vertex buffer. */
-class CVertexBufferGL : public IVertexBufferGL
+class CVertexBufferGL3 : public IVertexBufferGL3
 {
 public:
-	CVertexBufferGL(CDriverGL3 *drv, CVertexBuffer *vb);
-	virtual	~CVertexBufferGL();
+	CVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb);
+	virtual	~CVertexBufferGL3();
 
 	/// \name Implementation
 	// @{
@@ -88,7 +92,7 @@ private:
 	// if buffer has been invalidated, returns a dummy memory block and silently fails rendering
 	std::vector<uint8> m_DummyVB;
 	// for use by CVertexArrayRange
-	std::list<CVertexBufferGL*>::iterator m_IteratorInLostVBList;
+	std::list<CVertexBufferGL3*>::iterator m_IteratorInLostVBList;
 
 public:
 	uint VertexObjectId;

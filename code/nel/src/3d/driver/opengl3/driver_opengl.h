@@ -87,8 +87,7 @@ namespace NLDRIVERGL3 {
 #endif
 
 class	CDriverGL3;
-class	IVertexArrayRange;
-class	IVertexBufferGL;
+class	IVertexBufferGL3;
 class   COcclusionQueryGL3;
 
 void displayGLError(GLenum error);
@@ -190,7 +189,7 @@ public:
 	CVBDrvInfosGL3(CDriverGL3 *drv, ItVBDrvInfoPtrList it, CVertexBuffer *vb);
 
 	// Verex buffer hard ?
-	IVertexBufferGL		*_VBHard;
+	IVertexBufferGL3		*_VBHard;
 	CDriverGL3			*_DriverGL;
 
 	// From IVBDrvInfos
@@ -250,7 +249,7 @@ public:
 	}
 
 	void		setupVertexBuffer(CVertexBuffer &vb);
-	void		setupVertexBufferHard(IVertexBufferGL &vb);
+	void		setupVertexBufferHard(IVertexBufferGL3 &vb);
 };
 
 
@@ -690,7 +689,7 @@ public:
 #endif
 
 private:
-	virtual class IVertexBufferGL	*createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
+	virtual class IVertexBufferGL3	*createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL3;
 	friend class					CVertexProgamDrvInfosGL3;
 
@@ -790,7 +789,7 @@ private:
 
 #elif defined(NL_OS_MAC)
 
-	friend bool							GlWndProc(CDriverGL*, const void*);
+	friend bool							GlWndProc(CDriverGL3*, const void*);
 
 	CocoaOpenGLView*           _glView;
 	NSAutoreleasePool*         _autoreleasePool;
@@ -1125,17 +1124,17 @@ private:
 
 	/// \name Vertex Buffer
 	// @{
-	CPtrSet<IVertexBufferGL>		_VertexBufferGLSet;
-	friend class					CVertexBufferGL;
+	CPtrSet<IVertexBufferGL3>		_VertexBufferGLSet;
+	friend class					CVertexBufferGL3;
 	friend class					CVBDrvInfosGL3;
 
 	// The VertexBufferHardGL activated.
-	IVertexBufferGL					*_CurrentVertexBufferGL;
+	IVertexBufferGL3					*_CurrentVertexBufferGL;
 	GLenum							vertexBufferUsageGL3(CVertexBuffer::TPreferredMemory usage);
 
 	// Handle lost buffers
 	void							updateLostBuffers();
-	std::list<CVertexBufferGL *>	_LostVBList;
+	std::list<CVertexBufferGL3 *>	_LostVBList;
 	// @}
 
 
@@ -1329,7 +1328,7 @@ protected:
 public:
 	void incrementResetCounter() { ++_ResetCounter; }
 	bool isWndActive() const { return _WndActive; }
-	const IVertexBufferGL	*getCurrentVertexBufferHard() const { return _CurrentVertexBufferGL; }
+	const IVertexBufferGL3	*getCurrentVertexBufferHard() const { return _CurrentVertexBufferGL; }
 	// For debug : dump list of mapped buffers
 	#ifdef NL_DEBUG
 		void dumpMappedBuffers();

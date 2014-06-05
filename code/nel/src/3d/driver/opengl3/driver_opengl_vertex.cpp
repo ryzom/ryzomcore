@@ -260,7 +260,7 @@ GLenum CDriverGL3::vertexBufferUsageGL3(CVertexBuffer::TPreferredMemory usage)
 }
 
 // ***************************************************************************
-IVertexBufferGL	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb)
+IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb)
 {
 	H_AUTO_OGL(CDriverGL3_createVertexBufferGL)
 	
@@ -269,7 +269,7 @@ IVertexBufferGL	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, C
 	nglGenBuffers(1, &vertexBufferID);
 	_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
 	nglBufferData(GL_ARRAY_BUFFER, size, NULL, vertexBufferUsageGL3(vbType));
-	CVertexBufferGL *newVbHard = new CVertexBufferGL(this, vb);
+	CVertexBufferGL3 *newVbHard = new CVertexBufferGL3(this, vb);
 	newVbHard->initGL(vertexBufferID, vbType);
 	_DriverGLStates.forceBindARBVertexBuffer(0);
 	return _VertexBufferGLSet.insert(newVbHard);
@@ -284,7 +284,7 @@ void CDriverGL3::updateLostBuffers()
 	// We do this only if the app is active, because if vb were lost, it is likely that there are no resources available.
 	if (isWndActive())
 	{
-		for (std::list<CVertexBufferGL *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
+		for (std::list<CVertexBufferGL3 *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
 			nlassert((*it)->VertexObjectId);
 			GLuint id = (GLuint) (*it)->VertexObjectId;
