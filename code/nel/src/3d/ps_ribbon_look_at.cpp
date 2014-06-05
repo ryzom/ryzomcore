@@ -582,6 +582,7 @@ CPSRibbonLookAt::CVBnPB &CPSRibbonLookAt::getVBnPB()
 		CIndexBuffer &pb = VBnPB.PB;
 		pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 		pb.setNumIndexes((_UsedNbSegs << 1) * numRibbonInVB * 3);
+		pb.setPreferredMemory(CIndexBuffer::AGPVolatile, false);
 		CIndexBufferReadWrite iba;
 		pb.lock (iba);
 		/// Setup the pb and vb parts. Not very fast but executed only once
