@@ -133,6 +133,8 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			CVertexBuffer::TLocation location;
 			if (info->_VBHard->VBType == IVertexBufferGL3::AMDPinned)
 			{
+				// FIXME: May actually be considered CVertexBuffer::AGPResident, however only RAMResident allows reading
+				// TODO: Verify how the vegetation vb allocator handles RAMResident/AGPResident
 				location = CVertexBuffer::RAMResident;
 			}
 			else
