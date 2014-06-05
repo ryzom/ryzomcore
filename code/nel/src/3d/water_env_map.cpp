@@ -312,7 +312,7 @@ void CWaterEnvMap::renderTestMesh(IDriver &driver)
 // *******************************************************************************
 void CWaterEnvMap::initFlattenVB()
 {
-	_FlattenVB.setPreferredMemory(CVertexBuffer::AGPPreferred, true);
+	_FlattenVB.setPreferredMemory(CVertexBuffer::StaticPreferred, true);
 	_FlattenVB.setName("Flatten VB");
 	_FlattenVB.clearValueEx();
 	_FlattenVB.addValueEx (CVertexBuffer::Position, CVertexBuffer::Float3);
@@ -395,7 +395,7 @@ void CWaterEnvMap::invalidate()
 // *******************************************************************************
 void CWaterEnvMap::initTestVB()
 {
-	_TestVB.setPreferredMemory(CVertexBuffer::AGPPreferred, true);
+	_TestVB.setPreferredMemory(CVertexBuffer::StaticPreferred, true);
 	_TestVB.setName("TestVB");
 	_TestVB.clearValueEx();
 	_TestVB.addValueEx (CVertexBuffer::Position, CVertexBuffer::Float3);
