@@ -1131,7 +1131,6 @@ private:
 
 	// The VertexBufferHardGL activated.
 	IVertexBufferGL					*_CurrentVertexBufferGL;
-	bool							_SlowUnlockVBHard;
 	GLenum							vertexBufferUsageGL3(CVertexBuffer::TPreferredMemory usage);
 
 	// Handle lost buffers

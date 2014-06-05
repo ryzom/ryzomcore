@@ -131,7 +131,6 @@ void *CVertexBufferGL::lock()
 	}
 	m_Driver->_DriverGLStates.bindARBVertexBuffer(VertexObjectId);
 
-
 	// m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	
 	// PERFORMANCE: AMD: This brings framerate from 24fps to 38fps, glitches with volatile buffers such as animated models and gui, likely glitches with others
@@ -146,10 +145,13 @@ void *CVertexBufferGL::lock()
 	{
 	case CVertexBuffer::AGPVolatile:
 	case CVertexBuffer::RAMVolatile:
+		// NOTE: GL_MAP_INVALIDATE_BUFFER_BIT removes the cost of waiting for synchronization (major performance impact), 
+		// but adds the cost of allocating a new buffer (which hast a much lower performance impact)
 		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 		break;
 	case CVertexBuffer::RAMPreferred:
-		// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_READ_BIT);
+		// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT | GL_MAP_COHERENT);
+		// NOTE: Persistent / Coherent is only available in OpenGL 4.4 (2013/2014 hardware with recent drivers)
 		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
 		break;
 	default:

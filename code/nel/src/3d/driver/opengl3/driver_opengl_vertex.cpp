@@ -230,7 +230,7 @@ bool			CDriverGL3::supportVolatileVertexBuffer() const
 bool			CDriverGL3::slowUnlockVertexBufferHard() const
 {
 	H_AUTO_OGL(CDriverGL3_slowUnlockVertexBufferHard)
-	return _SlowUnlockVBHard;
+	return false;
 }
 
 
@@ -499,8 +499,6 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 bool			CDriverGL3::initVertexBufferHard(uint agpMem, uint vramMem)
 {
 	H_AUTO_OGL(CDriverGL3_initVertexBufferHard)
-
-	_SlowUnlockVBHard = true;
 
 	return true;
 }

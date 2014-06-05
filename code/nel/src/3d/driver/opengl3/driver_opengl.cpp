@@ -240,7 +240,6 @@ CDriverGL3::CDriverGL3()
 	_CurrentVertexBufferGL= NULL;
 	/*_NVCurrentVARPtr= NULL;
 	_NVCurrentVARSize= 0;*/
-	_SlowUnlockVBHard= true;
 
 	_AllocatedTextureMemory= 0;
 
