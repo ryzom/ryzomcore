@@ -689,7 +689,7 @@ public:
 #endif
 
 private:
-	virtual class IVertexBufferGL3	*createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb);
+	virtual class IVertexBufferGL3	*createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb);
 	friend class					CTextureDrvInfosGL3;
 	friend class					CVertexProgamDrvInfosGL3;
 
@@ -1126,6 +1126,7 @@ private:
 	// @{
 	CPtrSet<IVertexBufferGL3>		_VertexBufferGLSet;
 	friend class					CVertexBufferGL3;
+	friend class					CVertexBufferAMDPinned;
 	friend class					CVBDrvInfosGL3;
 
 	// The VertexBufferHardGL activated.

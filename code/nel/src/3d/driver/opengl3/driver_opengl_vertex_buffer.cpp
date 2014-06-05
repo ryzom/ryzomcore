@@ -31,6 +31,9 @@ namespace NLDRIVERGL3 {
 #endif
 
 // ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
 IVertexBufferGL3::IVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb, TVBType vbType) 
 	: VB(vb), VBType(vbType), m_Driver(drv), m_Invalid(false)
 {
@@ -38,21 +41,39 @@ IVertexBufferGL3::IVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb, TVBType v
 }
 
 // ***************************************************************************
+
 IVertexBufferGL3::~IVertexBufferGL3()
 {
 	H_AUTO_OGL(IVertexBufferGL_IVertexBufferGLDtor)
 }
 
 // ***************************************************************************
-CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb) 
+// ***************************************************************************
+// ***************************************************************************
+
+CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb) 
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::GL3),
 	m_VertexPtr(NULL),
 	m_VertexObjectId(0)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARB)
+
+	// Create id and bind
+	GLuint vertexBufferID;
+	nglGenBuffers(1, &vertexBufferID);
+	drv->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
+
+	// Initialize
+	nglBufferData(GL_ARRAY_BUFFER, size, NULL, drv->vertexBufferUsageGL3(preferred));
+	m_VertexObjectId = vertexBufferID;
+	m_MemType = preferred;
+
+	// Unbind
+	drv->_DriverGLStates.forceBindARBVertexBuffer(0);
 }
 
 // ***************************************************************************
+
 CVertexBufferGL3::~CVertexBufferGL3()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARBDtor)
@@ -83,6 +104,7 @@ CVertexBufferGL3::~CVertexBufferGL3()
 }
 
 // ***************************************************************************
+
 void *CVertexBufferGL3::lock()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_lock);
@@ -184,6 +206,7 @@ void *CVertexBufferGL3::lock()
 }
 
 // ***************************************************************************
+
 void CVertexBufferGL3::unlock()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_unlock);
@@ -228,6 +251,7 @@ void CVertexBufferGL3::unlock()
 }
 
 // ***************************************************************************
+
 void		*CVertexBufferGL3::getPointer()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_getPointer)
@@ -235,6 +259,7 @@ void		*CVertexBufferGL3::getPointer()
 }
 
 // ***************************************************************************
+
 void CVertexBufferGL3::unlock(uint /* startVert */,uint /* endVert */)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_unlock)
@@ -242,38 +267,29 @@ void CVertexBufferGL3::unlock(uint /* startVert */,uint /* endVert */)
 }
 
 // ***************************************************************************
+
 void CVertexBufferGL3::enable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_enable)
 	if (m_Driver->_CurrentVertexBufferGL != this)
 	{
-		/* nlassert(_VertexArrayRange);
-		_VertexArrayRange->enable(); */
 		m_Driver->_CurrentVertexBufferGL= this;
 	}
 }
 
 // ***************************************************************************
+
 void CVertexBufferGL3::disable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_disable)
 	if (m_Driver->_CurrentVertexBufferGL != NULL)
 	{
-		/* nlassert(_VertexArrayRange);
-		_VertexArrayRange->disable(); */
 		m_Driver->_CurrentVertexBufferGL= NULL;
 	}
 }
 
 // ***************************************************************************
-void CVertexBufferGL3::initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemory memType)
-{
-	H_AUTO_OGL(CVertexBufferGLARB_initGL)
-	m_VertexObjectId = vertexObjectID;
-	m_MemType = memType;
-}
 
-// ***************************************************************************
 void CVertexBufferGL3::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_setupVBInfos)
@@ -281,6 +297,7 @@ void CVertexBufferGL3::setupVBInfos(CVertexBufferInfo &vb)
 }
 
 // ***************************************************************************
+
 void CVertexBufferGL3::invalidate()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_invalidate)
@@ -294,6 +311,201 @@ void CVertexBufferGL3::invalidate()
 	m_Driver->_LostVBList.push_front(this);
 	m_IteratorInLostVBList = m_Driver->_LostVBList.begin();
 }
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
+CVertexBufferAMDPinned::CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb) 
+	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::AMDPinned),
+	m_MemType(preferred),
+	m_VertexPtr(NULL),
+	m_VertexObjectId(0)
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_CVertexBufferAMDPinned)
+
+	// Create id and bind
+	GLuint vertexBufferID;
+	nglGenBuffers(1, &vertexBufferID);
+	nglBindBuffer(GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, vertexBufferID);
+
+	// Initialize
+	// Align allocated to page size, which is assumed to be 4K
+	m_VertexPtrAllocated = new char[size + 4096];
+	uintptr_t addr = (uintptr_t)m_VertexPtrAllocated;
+	addr = (addr + 4095) & (~0xfff);
+	m_VertexPtrAligned = (void *)addr;
+	nglBufferData(GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, size, m_VertexPtrAligned, drv->vertexBufferUsageGL3(preferred));
+	if (glGetError() == GL_INVALID_OPERATION)
+	{
+		nlerror("Failed to pin memory");
+		nglDeleteBuffers(1, &vertexBufferID);
+		vertexBufferID = 0;
+	}
+	m_VertexObjectId = vertexBufferID;
+
+	// Unbind
+	nglBindBuffer(GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, 0);
+}
+
+// ***************************************************************************
+
+CVertexBufferAMDPinned::~CVertexBufferAMDPinned()
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_CVertexBufferAMDPinnedDtor)
+	if (m_Driver && m_VertexObjectId)
+	{
+		if (m_Driver->_DriverGLStates.getCurrBoundARBVertexBuffer() == m_VertexObjectId)
+		{
+			m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+		}
+	}
+	if (m_VertexObjectId)
+	{
+		GLuint id = (GLuint)m_VertexObjectId;
+		nlassert(nglIsBuffer(id));
+		nglDeleteBuffers(1, &id);
+	}
+	delete m_VertexPtrAllocated;
+	m_VertexPtrAllocated = NULL;
+	m_VertexPtrAligned = NULL;
+	nlassert(m_VertexPtr == NULL);
+}
+
+// ***************************************************************************
+
+void *CVertexBufferAMDPinned::lock()
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_lock);
+
+	if (m_VertexPtr) // Already locked...
+		return m_VertexPtr;
+
+	if (!m_VertexObjectId) // Failed to pin
+		return m_VertexPtrAligned;
+
+	// Profiling
+	TTicks beforeLock = 0;
+	if (m_Driver->_VBHardProfiling)
+	{
+		beforeLock= CTime::getPerformanceTime();
+	}
+
+	// Lock
+	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId);
+	switch (m_MemType)
+	{
+	case CVertexBuffer::AGPVolatile:
+	case CVertexBuffer::RAMVolatile:
+		nlerror("Volatile currently not supported by pinned memory, this would require a re-allocating RAM, and thus require a fast allocation mechanism");
+		m_VertexPtr = NULL;
+		break;
+	case CVertexBuffer::RAMPreferred:
+		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
+		break;
+	default:
+		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		break;
+	}
+	m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+	nlassert(m_VertexPtr);
+	nlassert(m_VertexPtr == m_VertexPtrAligned);
+
+	// Profiling
+	if (m_Driver->_VBHardProfiling)
+	{
+		TTicks afterLock;
+		afterLock = CTime::getPerformanceTime();
+		m_Driver->appendVBHardLockProfile(afterLock - beforeLock, VB);
+	}
+
+	return m_VertexPtr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferAMDPinned::unlock()
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_unlock);
+
+	m_VertexPtr = NULL;
+
+	if (!m_VertexObjectId)
+		return;
+
+	// Profiling
+	TTicks beforeLock = 0;
+	if (m_Driver->_VBHardProfiling)
+	{
+		beforeLock = CTime::getPerformanceTime();
+	}
+
+	// Unlock
+	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId);
+	nglUnmapBuffer(GL_ARRAY_BUFFER);
+	m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+
+	// Profiling
+	if (m_Driver->_VBHardProfiling)
+	{
+		TTicks	afterLock;
+		afterLock= CTime::getPerformanceTime();
+		m_Driver->appendVBHardLockProfile(afterLock-beforeLock, VB);
+	}
+}
+
+// ***************************************************************************
+
+void *CVertexBufferAMDPinned::getPointer()
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_getPointer)
+
+	return m_VertexPtr;
+}
+
+// ***************************************************************************
+
+void CVertexBufferAMDPinned::unlock(uint /* startVert */,uint /* endVert */)
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_unlock)
+
+	unlock();
+}
+
+// ***************************************************************************
+
+void CVertexBufferAMDPinned::enable()
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_enable)
+	if (m_Driver->_CurrentVertexBufferGL != this)
+	{
+		m_Driver->_CurrentVertexBufferGL = this;
+	}
+}
+
+// ***************************************************************************
+
+void CVertexBufferAMDPinned::disable()
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_disable)
+	if (m_Driver->_CurrentVertexBufferGL != NULL)
+	{
+		m_Driver->_CurrentVertexBufferGL = NULL;
+	}
+}
+
+// ***************************************************************************
+
+void CVertexBufferAMDPinned::setupVBInfos(CVertexBufferInfo &vb)
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_setupVBInfos)
+
+	vb.VertexObjectId = m_VertexObjectId;
+}
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
 
 #ifdef NL_STATIC
 } // NLDRIVERGL3

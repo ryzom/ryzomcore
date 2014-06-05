@@ -44,6 +44,7 @@ struct	CGlExtensions
 	bool	EXTTextureCompressionS3TC;
 	bool	EXTTextureFilterAnisotropic;
 	float	EXTTextureFilterAnisotropicMaximum;
+	bool	AMDPinnedMemory;
 
 	// Required Extensions. (old)
 	bool	ARBMultiTexture;
@@ -70,6 +71,7 @@ public:
 		EXTTextureCompressionS3TC = false;
 		EXTTextureFilterAnisotropic = false;
 		EXTTextureFilterAnisotropicMaximum = 0.f;
+		AMDPinnedMemory = false;
 
 		ARBMultiTexture= false;
 
@@ -101,6 +103,9 @@ public:
 		result += EXTTextureFilterAnisotropic ? "EXTTextureFilterAnisotropic (Maximum = " + NLMISC::toString(EXTTextureFilterAnisotropicMaximum) + ") " : "";
 		result += "fragment texture units(*) = ";
 		result += NLMISC::toString(MaxFragmentTextureImageUnits);
+
+		result += "\n  Buffers: ";
+		result += AMDPinnedMemory ? "AMDPinnedMemory " : "";
 
 #ifdef NL_OS_WINDOWS
 		result += "\n  WindowsGL: ";

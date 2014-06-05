@@ -221,7 +221,7 @@ bool CDriverGL3::activeIndexBuffer(CIndexBuffer& IB)
 bool			CDriverGL3::supportVolatileVertexBuffer() const
 {
 	H_AUTO_OGL(CDriverGL3_supportVolatileVertexBuffer)
-	return true; // TODO VERTEXBUFFER PINNED
+	return true; // Supported by GL_MAP_INVALIDATE_BUFFER_BIT
 }
 
 
@@ -230,7 +230,7 @@ bool			CDriverGL3::supportVolatileVertexBuffer() const
 bool			CDriverGL3::slowUnlockVertexBufferHard() const
 {
 	H_AUTO_OGL(CDriverGL3_slowUnlockVertexBufferHard)
-	return false;
+	return false; // Always false gives slightly better performance on AMD. Might make difference with _Extensions.AMDPinnedMemory
 }
 
 
@@ -241,6 +241,7 @@ uint			CDriverGL3::getMaxVerticesByVertexBufferHard() const
 	return std::numeric_limits<uint32>::max();
 }
 
+// TODO: Move this to CVertexBufferGL3
 GLenum CDriverGL3::vertexBufferUsageGL3(CVertexBuffer::TPreferredMemory usage)
 {
 	switch (usage)
@@ -260,19 +261,25 @@ GLenum CDriverGL3::vertexBufferUsageGL3(CVertexBuffer::TPreferredMemory usage)
 }
 
 // ***************************************************************************
-IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory vbType, CVertexBuffer *vb)
+IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb)
 {
 	H_AUTO_OGL(CDriverGL3_createVertexBufferGL)
 	
-	// Create a Vertex Buffer
-	GLuint vertexBufferID;
-	nglGenBuffers(1, &vertexBufferID);
-	_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
-	nglBufferData(GL_ARRAY_BUFFER, size, NULL, vertexBufferUsageGL3(vbType));
-	CVertexBufferGL3 *newVbHard = new CVertexBufferGL3(this, vb);
-	newVbHard->initGL(vertexBufferID, vbType);
-	_DriverGLStates.forceBindARBVertexBuffer(0);
-	return _VertexBufferGLSet.insert(newVbHard);
+	IVertexBufferGL3 *result;
+
+	if (_Extensions.AMDPinnedMemory && (
+		preferred == CVertexBuffer::RAMPreferred
+		// || preferred == CVertexBuffer::AGPPreferred
+		))
+	{
+		result = new CVertexBufferAMDPinned(this, size, numVertices, preferred, vb);
+	}
+	else
+	{
+		result = new CVertexBufferGL3(this, size, numVertices, preferred, vb);
+	}
+
+	return _VertexBufferGLSet.insert(result);
 }
 
 // ********************************************************************

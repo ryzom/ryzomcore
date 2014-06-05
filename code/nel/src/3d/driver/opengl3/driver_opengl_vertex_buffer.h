@@ -33,7 +33,7 @@ class CVertexBufferGL3;
 class IVertexBufferGL3
 {
 public:
-	enum TVBType { GL3 };
+	enum TVBType { GL3, AMDPinned };
 
 	IVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb, TVBType vbType);
 	virtual	~IVertexBufferGL3();
@@ -62,7 +62,7 @@ protected:
 class CVertexBufferGL3 : public IVertexBufferGL3
 {
 public:
-	CVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb);
+	CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb);
 	virtual	~CVertexBufferGL3();
 
 	/// \name Implementation
@@ -75,9 +75,6 @@ public:
 	virtual	void disable();
 	virtual void setupVBInfos(CVertexBufferInfo &vb);
 	// @}
-
-	/// Setup ptrs allocated by createVBHard()
-	void initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemory memType);
 
 	/// Invalidate the buffer (when it is lost, or when a lock fails)
 	void invalidate();
@@ -93,6 +90,31 @@ private:
 	// for use by CVertexArrayRange
 	std::list<CVertexBufferGL3*>::iterator m_IteratorInLostVBList;
 
+	uint m_VertexObjectId;
+};
+
+class CVertexBufferAMDPinned : public IVertexBufferGL3
+{
+public:
+	CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb);
+	virtual	~CVertexBufferAMDPinned();
+
+	/// \name Implementation
+	// @{
+	virtual	void *lock();
+	virtual	void unlock();
+	virtual void unlock(uint startVert, uint endVert);
+	virtual void *getPointer();
+	virtual	void enable();
+	virtual	void disable();
+	virtual void setupVBInfos(CVertexBufferInfo &vb);
+	// @}
+
+private:
+	CVertexBuffer::TPreferredMemory m_MemType;
+	void *m_VertexPtrAllocated;
+	void *m_VertexPtrAligned;
+	void *m_VertexPtr;
 	uint m_VertexObjectId;
 };
 

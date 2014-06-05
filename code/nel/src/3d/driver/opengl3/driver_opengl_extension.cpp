@@ -539,6 +539,13 @@ static bool setupARBSeparateShaderObjects(std::vector<const char *> &glext)
 	return true;
 }
 
+static bool setupAMDPinnedMemory(std::vector<const char *> &glext)
+{
+	CHECK_EXT_2("GL_AMD_pinned_memory");
+
+	return true;
+}
+
 // ***************************************************************************
 // Extension Check.
 bool	registerGlExtensions(CGlExtensions &ext)
@@ -610,6 +617,9 @@ bool	registerGlExtensions(CGlExtensions &ext)
 		// get the maximum value
 		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ext.EXTTextureFilterAnisotropicMaximum);
 	}
+
+	// Check GL_AMD_pinned_memory
+	ext.AMDPinnedMemory = setupAMDPinnedMemory(glext);
 
 	// Get the maximum fragment texture unites
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &ext.MaxFragmentTextureImageUnits);
