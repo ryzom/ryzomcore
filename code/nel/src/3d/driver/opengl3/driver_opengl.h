@@ -1127,19 +1127,15 @@ private:
 	CPtrSet<IVertexBufferGL3>		_VertexBufferGLSet;
 	friend class					CVertexBufferGL3;
 	friend class					CVertexBufferAMDPinned;
-	friend class					CVertexBufferAMDPinnedAllocator;
-	friend class					CVertexBufferAMDPinnedVolatile;
 	friend class					CVBDrvInfosGL3;
 
 	// The VertexBufferHardGL activated.
-	IVertexBufferGL3				*_CurrentVertexBufferGL;
+	IVertexBufferGL3					*_CurrentVertexBufferGL;
 	GLenum							vertexBufferUsageGL3(CVertexBuffer::TPreferredMemory usage);
 
 	// Handle lost buffers
 	void							updateLostBuffers();
 	std::list<CVertexBufferGL3 *>	_LostVBList;
-
-	class CVertexBufferAMDPinnedAllocator				*_AMDPinnedAllocator;
 	// @}
 
 

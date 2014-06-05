@@ -262,14 +262,6 @@ extern PFNGLGETCOMPRESSEDTEXIMAGEPROC					nglGetCompressedTexImage;
 
 extern PFNGLBLENDCOLORPROC								nglBlendColor;
 
-extern PFNGLFENCESYNCPROC								nglFenceSync;
-extern PFNGLISSYNCPROC									nglIsSync;
-extern PFNGLDELETESYNCPROC								nglDeleteSync;
-extern PFNGLCLIENTWAITSYNCPROC							nglClientWaitSync;
-extern PFNGLWAITSYNCPROC								nglWaitSync;
-extern PFNGLGETINTEGER64VPROC							nglGetInteger64v;
-extern PFNGLGETSYNCIVPROC								nglGetSynciv;
-
 // GL_ARB_separate_shader_objects
 extern PFNGLUSEPROGRAMSTAGESPROC						nglUseProgramStages;
 extern PFNGLACTIVESHADERPROGRAMPROC						nglActiveShaderProgram;

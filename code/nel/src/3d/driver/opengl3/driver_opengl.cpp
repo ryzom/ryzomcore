@@ -262,8 +262,6 @@ CDriverGL3::CDriverGL3()
 
 	_UserTexMatEnabled = 0;
 
-	_AMDPinnedAllocator = NULL;
-
 	// reserve enough space to never reallocate, nor test for reallocation.
 	_LightMapLUT.resize(NL3D_DRV_MAX_LIGHTMAP);
 	// must set replace for alpha part.
@@ -689,8 +687,6 @@ bool CDriverGL3::release()
 
 	// Make sure vertex buffers are really all gone
 	// FIXME VERTEXBUFFER
-	delete _AMDPinnedAllocator;
-	_AMDPinnedAllocator = NULL;
 
 	// destroy window and associated ressources
 	destroyWindow();
