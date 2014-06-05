@@ -274,13 +274,6 @@ void CVertexBufferGL::initGL(uint vertexObjectID, CVertexBuffer::TPreferredMemor
 }
 
 // ***************************************************************************
-void			CVertexBufferGL::lockHintStatic(bool /* staticLock */)
-{
-	H_AUTO_OGL(CVertexBufferGLARB_lockHintStatic)
-	// no op.
-}
-
-// ***************************************************************************
 void CVertexBufferGL::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_setupVBInfos)

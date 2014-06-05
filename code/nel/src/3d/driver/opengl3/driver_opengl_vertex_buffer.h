@@ -69,7 +69,6 @@ public:
 	virtual void *getPointer();
 	virtual	void enable();
 	virtual	void disable();
-	virtual void lockHintStatic(bool staticLock);
 	virtual void setupVBInfos(CVertexBufferInfo &vb);
 	// @}
 
