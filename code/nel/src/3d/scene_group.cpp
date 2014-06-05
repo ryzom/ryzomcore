@@ -1307,6 +1307,7 @@ void			CInstanceGroup::displayDebugClusters(IDriver *drv, class CTextContext *tx
 	const uint	maxVertices= 10000;
 	vb.setVertexFormat(CVertexBuffer::PositionFlag);
 	vb.setNumVertices(maxVertices);
+	vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
 	CIndexBuffer		clusterTriangles;
 	CIndexBuffer		clusterLines;
 	CIndexBuffer		portalTriangles;
