@@ -123,22 +123,6 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 
 			// Preferred memory, reduce choices
 			CVertexBuffer::TPreferredMemory preferred = VB.getPreferredMemory();
-			CVertexBuffer::TLocation location;
-			switch (preferred)
-			{
-			case CVertexBuffer::StaticPreferred:
-				if (getStaticMemoryToVRAM())
-					location = CVertexBuffer::VRAMResident;
-				else
-					location = CVertexBuffer::AGPResident;
-			case CVertexBuffer::RAMVolatile:
-			case CVertexBuffer::RAMPreferred:
-				location = CVertexBuffer::RAMResident;
-			case CVertexBuffer::AGPPreferred:
-			case CVertexBuffer::AGPVolatile:
-			default:
-				location = CVertexBuffer::AGPResident;
-			}
 
 			const uint size = VB.capacity()*VB.getVertexSize();
 			
@@ -146,6 +130,29 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			info->_VBHard = createVertexBufferGL(size, VB.capacity(), preferred, &VB);
 
 			// Upload the data
+			CVertexBuffer::TLocation location;
+			if (info->_VBHard->VBType == IVertexBufferGL3::AMDPinned)
+			{
+				location = CVertexBuffer::RAMResident;
+			}
+			else
+			{
+				switch (preferred)
+				{
+				case CVertexBuffer::StaticPreferred:
+					if (getStaticMemoryToVRAM())
+						location = CVertexBuffer::VRAMResident;
+					else
+						location = CVertexBuffer::AGPResident;
+				case CVertexBuffer::RAMVolatile:
+				case CVertexBuffer::RAMPreferred:
+					location = CVertexBuffer::RAMResident;
+				case CVertexBuffer::AGPPreferred:
+				case CVertexBuffer::AGPVolatile:
+				default:
+					location = CVertexBuffer::AGPResident;
+				}
+			}
 			VB.setLocation(location);
 		}
 	}
@@ -269,7 +276,7 @@ IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, 
 
 	if (_Extensions.AMDPinnedMemory && (
 		preferred == CVertexBuffer::RAMPreferred
-		// || preferred == CVertexBuffer::AGPPreferred
+		|| preferred == CVertexBuffer::AGPPreferred
 		))
 	{
 		result = new CVertexBufferAMDPinned(this, size, numVertices, preferred, vb);
