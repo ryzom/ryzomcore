@@ -331,6 +331,7 @@ CVertexBufferAMDPinned::CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint 
 
 	// Initialize
 	// Align allocated to page size, which is assumed to be 4K
+	// nldebug("GL3: Allocate AMD Pinned Memory (%i bytes, %i vertices)", size, numVertices);
 	m_VertexPtrAllocated = new char[size + 4096];
 	uintptr_t addr = (uintptr_t)m_VertexPtrAllocated;
 	addr = (addr + 4095) & (~0xfff);
