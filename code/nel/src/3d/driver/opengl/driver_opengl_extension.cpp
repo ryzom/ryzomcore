@@ -1711,10 +1711,13 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// ARB extensions
 	// -------------
-	if(!ext.DisableHardwareVertexArrayAGP)
+	if (!ext.DisableHardwareVertexArrayAGP)
 	{
 		ext.ARBVertexBufferObject = setupARBVertexBufferObject(glext);
-		ext.ARBMapBufferRange = setupARBMapBufferRange(glext);
+		if (ext.ARBVertexBufferObject)
+		{
+			ext.ARBMapBufferRange = setupARBMapBufferRange(glext);
+		}
 	}
 
 	// fix for radeon 7200 -> disable agp

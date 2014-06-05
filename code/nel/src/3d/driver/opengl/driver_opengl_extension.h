@@ -168,6 +168,7 @@ public:
 		EXTVertexShader= false;
 		ARBFragmentProgram = false;
 		ARBVertexBufferObject = false;
+		ARBMapBufferRange = false;
 		ARBVertexProgram = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
