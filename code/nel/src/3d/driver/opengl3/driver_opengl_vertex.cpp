@@ -137,6 +137,10 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 				// TODO: Verify how the vegetation vb allocator handles RAMResident/AGPResident
 				location = CVertexBuffer::RAMResident;
 			}
+			else if (info->_VBHard->VBType == IVertexBufferGL3::AMDPinnedVolatile)
+			{
+				location = CVertexBuffer::RAMResident;
+			}
 			else
 			{
 				switch (preferred)
@@ -283,6 +287,14 @@ IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, 
 	{
 		result = new CVertexBufferAMDPinned(this, size, numVertices, preferred, vb);
 	}
+	/*else if (_Extensions.AMDPinnedMemory && (
+		preferred == CVertexBuffer::RAMVolatile
+		|| preferred == CVertexBuffer::AGPVolatile
+		))
+	{
+		// NOTE: Performance of this is lower...
+		result = new CVertexBufferAMDPinnedVolatile(this, size, numVertices, preferred, vb);
+	}*/
 	else
 	{
 		result = new CVertexBufferGL3(this, size, numVertices, preferred, vb);
@@ -515,6 +527,11 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 bool			CDriverGL3::initVertexBufferHard(uint agpMem, uint vramMem)
 {
 	H_AUTO_OGL(CDriverGL3_initVertexBufferHard)
+
+	if (_Extensions.AMDPinnedMemory)
+	{
+		_AMDPinnedAllocator = new CVertexBufferAMDPinnedAllocator(this);
+	}
 
 	return true;
 }

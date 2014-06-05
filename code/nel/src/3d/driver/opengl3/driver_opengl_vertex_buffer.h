@@ -19,6 +19,8 @@
 
 #include "nel/misc/types_nl.h"
 
+#include <queue>
+
 namespace NL3D {
 
 #ifdef NL_STATIC
@@ -30,10 +32,14 @@ class IVertexBufferGL3;
 class CVertexBufferInfo;
 class CVertexBufferGL3;
 
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
 class IVertexBufferGL3
 {
 public:
-	enum TVBType { GL3, AMDPinned };
+	enum TVBType { GL3, AMDPinned, AMDPinnedVolatile };
 
 	IVertexBufferGL3(CDriverGL3 *drv, CVertexBuffer *vb, TVBType vbType);
 	virtual	~IVertexBufferGL3();
@@ -45,6 +51,7 @@ public:
 	virtual	void enable() = 0;
 	virtual	void disable() = 0;
 	virtual void setupVBInfos(CVertexBufferInfo &vb) = 0;
+	virtual void setFence() = 0; // Called after rendering with this buffer
 
 	// test if buffer content is invalid. If so, no rendering should occurs (rendering should silently fail)
 	inline bool isInvalid() { return m_Invalid; }
@@ -57,6 +64,10 @@ protected:
 	CDriverGL3 *m_Driver;
 	bool m_Invalid;
 };
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
 
 /* GL Core vertex buffer. */
 class CVertexBufferGL3 : public IVertexBufferGL3
@@ -74,6 +85,7 @@ public:
 	virtual	void enable();
 	virtual	void disable();
 	virtual void setupVBInfos(CVertexBufferInfo &vb);
+	virtual void setFence();
 	// @}
 
 	/// Invalidate the buffer (when it is lost, or when a lock fails)
@@ -93,6 +105,10 @@ private:
 	uint m_VertexObjectId;
 };
 
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
 class CVertexBufferAMDPinned : public IVertexBufferGL3
 {
 public:
@@ -108,6 +124,7 @@ public:
 	virtual	void enable();
 	virtual	void disable();
 	virtual void setupVBInfos(CVertexBufferInfo &vb);
+	virtual void setFence();
 	// @}
 
 private:
@@ -116,6 +133,69 @@ private:
 	void *m_VertexPtrAligned;
 	void *m_VertexPtr;
 	uint m_VertexObjectId;
+};
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
+#define NLDRV_GL3_AMD_PINNED_VOLATILE_MAX (8388608 - 4096) // Works up to 8MB
+#define NLDRV_GL3_AMD_PINNED_VOLATILE_BINS (12)
+#define NLDRV_GL3_AMD_PINNED_VOLATILE_SHIFT (12) // Shift to start at 4096
+#define NLDRV_GL3_AMD_PINNED_VOLATILE_START (4096) // Start at 4096
+
+struct CVertexBufferAMDPinnedBlock
+{
+	CVertexBufferAMDPinnedBlock()
+		: FenceId(0), VertexObjectId(0), Allocated(NULL), Buffer(NULL) { }
+	GLsync FenceId;
+	GLuint VertexObjectId;
+	void *Allocated;
+	void *Buffer;
+	uint Bin;
+};
+
+class CVertexBufferAMDPinnedAllocator
+{
+public:
+	CVertexBufferAMDPinnedAllocator(CDriverGL3 *driver);
+	~CVertexBufferAMDPinnedAllocator();
+
+	CVertexBufferAMDPinnedBlock *allocate(uint size);
+	void free(CVertexBufferAMDPinnedBlock *block);
+
+private:
+	CDriverGL3 *m_Driver;
+	std::queue<CVertexBufferAMDPinnedBlock *> m_Pool[NLDRV_GL3_AMD_PINNED_VOLATILE_BINS];	
+
+};
+
+// ***************************************************************************
+// ***************************************************************************
+// ***************************************************************************
+
+class CVertexBufferAMDPinnedVolatile : public IVertexBufferGL3
+{
+public:
+	CVertexBufferAMDPinnedVolatile(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb);
+	virtual	~CVertexBufferAMDPinnedVolatile();
+
+	/// \name Implementation
+	// @{
+	virtual	void *lock();
+	virtual	void unlock();
+	virtual void unlock(uint startVert, uint endVert);
+	virtual void *getPointer();
+	virtual	void enable();
+	virtual	void disable();
+	virtual void setupVBInfos(CVertexBufferInfo &vb);
+	virtual void setFence();
+	// @}
+
+private:
+	CVertexBufferAMDPinnedBlock *m_Block;
+	void *m_VertexPtr;
+
 };
 
 #ifdef NL_STATIC
