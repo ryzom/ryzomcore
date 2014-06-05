@@ -103,8 +103,6 @@ private:
 	std::list<CVertexBufferGL3*>::iterator m_IteratorInLostVBList;
 
 	uint m_VertexObjectId;
-
-	GLsync m_FenceId;
 };
 
 // ***************************************************************************

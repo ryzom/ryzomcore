@@ -54,8 +54,7 @@ IVertexBufferGL3::~IVertexBufferGL3()
 CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb) 
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::GL3),
 	m_VertexPtr(NULL),
-	m_VertexObjectId(0),
-	m_FenceId(0)
+	m_VertexObjectId(0)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARB)
 
@@ -175,29 +174,11 @@ void *CVertexBufferGL3::lock()
 	case CVertexBuffer::RAMPreferred:
 		// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT | GL_MAP_COHERENT);
 		// NOTE: Persistent / Coherent is only available in OpenGL 4.4 (2013/2014 hardware with recent drivers)
-		// m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
-		if (m_FenceId)
-		{
-			GLenum result = nglClientWaitSync(m_FenceId, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
-			nlassert(result != GL_TIMEOUT_EXPIRED);
-			nlassert(result != GL_WAIT_FAILED);
-			nglDeleteSync(m_FenceId);
-			m_FenceId = NULL;
-		}
-		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
 		break;
 	default:
 		// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT);
-		// m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		if (m_FenceId)
-		{
-			GLenum result = nglClientWaitSync(m_FenceId, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
-			nlassert(result != GL_TIMEOUT_EXPIRED);
-			nlassert(result != GL_WAIT_FAILED);
-			nglDeleteSync(m_FenceId);
-			m_FenceId = NULL;
-		}
-		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		break;
 	}
 
@@ -321,22 +302,7 @@ void CVertexBufferGL3::setFence()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_setFence)
 
-	// Set the fence
-	switch (m_MemType)
-	{
-	case CVertexBuffer::AGPVolatile:
-	case CVertexBuffer::RAMVolatile:
-		break;
-	default:
-		if (m_FenceId)
-		{
-			nglDeleteSync(m_FenceId);
-			m_FenceId = 0;
-		}
-		m_FenceId = nglFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-		nlassert(m_FenceId);
-		break;
-	}
+	// no-op
 }
 
 // ***************************************************************************
