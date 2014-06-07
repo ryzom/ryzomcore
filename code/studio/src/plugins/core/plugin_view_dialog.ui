@@ -17,7 +17,7 @@
    <bool>true</bool>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="5">
+   <item row="0" column="0" colspan="7">
     <widget class="QTreeWidget" name="pluginTreeWidget">
      <property name="alternatingRowColors">
       <bool>true</bool>
@@ -79,7 +79,34 @@
      </property>
     </widget>
    </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="allObjectsPushButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>All objects list</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="3">
+    <widget class="QPushButton" name="unloadButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Unload plugin</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QPushButton" name="loadButton">
+     <property name="text">
+      <string>Load plugin</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="5">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -92,20 +119,10 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="4">
+   <item row="1" column="6">
     <widget class="QPushButton" name="closePushButton">
      <property name="text">
       <string>Close</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2">
-    <widget class="QPushButton" name="allObjectsPushButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>All objects list</string>
      </property>
     </widget>
    </item>

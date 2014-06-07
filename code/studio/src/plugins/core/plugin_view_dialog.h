@@ -44,6 +44,10 @@ private Q_SLOTS:
 	void updateList();
 	void updateSettings();
 
+	void onItemClicked();
+	void onUnloadClicked();
+	void onLoadClicked();
+
 private:
 
 	const int m_checkStateColumn;

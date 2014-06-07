@@ -25,6 +25,8 @@
 #include <QtGui/QIcon>
 #include <QtGui/QStyle>
 #include <QtGui/QTreeWidgetItem>
+#include <QMessageBox>
+#include <QFileDialog>
 
 // Project includes
 #include "../../extension_system/iplugin_spec.h"
@@ -42,6 +44,10 @@ PluginView::PluginView(ExtensionSystem::IPluginManager *pluginManager, QWidget *
 
 	connect(m_pluginManager, SIGNAL(pluginsChanged()), this, SLOT(updateList()));
 	connect(this, SIGNAL(accepted()), this, SLOT(updateSettings()));
+
+	connect( m_ui.pluginTreeWidget, SIGNAL( itemClicked( QTreeWidgetItem*, int ) ), this, SLOT( onItemClicked() ) );
+	connect( m_ui.unloadButton, SIGNAL( clicked( bool ) ), this, SLOT( onUnloadClicked() ) );
+	connect( m_ui.loadButton, SIGNAL( clicked( bool ) ), this, SLOT( onLoadClicked() ) );
 
 	// WhiteList is list of plugins which can not disable.
 	m_whiteList << Constants::OVQT_CORE_PLUGIN;
@@ -102,6 +108,38 @@ void PluginView::updateSettings()
 			else
 				spec->setEnabled(false);
 		}
+	}
+}
+
+void PluginView::onItemClicked()
+{
+	m_ui.unloadButton->setEnabled( true );
+}
+
+void PluginView::onUnloadClicked()
+{
+	QTreeWidgetItem *item = m_ui.pluginTreeWidget->currentItem();
+	if( item == NULL )
+	{
+		QMessageBox::warning( this,
+								tr( "Plugin unload" ),
+								tr( "No plugin selected!" ) );
+		return;
+	}
+
+	
+}
+
+void PluginView::onLoadClicked()
+{
+	QString f = QFileDialog::getOpenFileName( this,
+												tr( "Loading a plugin" ),
+												".",
+												"Plugin specifications ( *.xml )" );
+
+	if( f.isEmpty() )
+	{
+		return;
 	}
 }
 
