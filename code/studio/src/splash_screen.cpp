@@ -27,7 +27,7 @@ QSplashScreen()
 	progress = 0;
 	textX = 5;
 	textY = 20;
-	pbLeft = 0;
+	pbLeft = 2;
 	pbTop = 0;
 	pbWidth = 100;
 	pbHeight = 20;
@@ -42,14 +42,12 @@ void SplashScreen::setPixmap( const QPixmap &pixmap )
 	QSplashScreen::setPixmap( pixmap );
 
 	if( this->pixmap().width() > 0 )
-		pbWidth = this->pixmap().width();
+		pbWidth = this->pixmap().width() - 4;
 	
 	if( this->pixmap().height() > 0 )
-		pbTop = this->pixmap().height();
+		pbTop = this->pixmap().height() - pbHeight - 2;
 
 	textY = pbTop - pbHeight / 2;
-
-	resize( pbWidth, pbTop + pbHeight );
 }
 
 void SplashScreen::setText( const QString &text )
@@ -92,7 +90,7 @@ void SplashScreen::drawContents( QPainter *painter )
 		pbStyle.maximum = 100;
 		pbStyle.progress = progress;
 		pbStyle.invertedAppearance = false;
-		pbStyle.rect = QRect( 0, pbTop, pbWidth, pbHeight );
+		pbStyle.rect = QRect( pbLeft, pbTop, pbWidth, pbHeight );
 		
 		style()->drawControl( QStyle::CE_ProgressBar, &pbStyle, painter, this );
 	}
