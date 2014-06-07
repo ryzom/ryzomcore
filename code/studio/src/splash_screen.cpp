@@ -45,9 +45,11 @@ void SplashScreen::setPixmap( const QPixmap &pixmap )
 		pbWidth = this->pixmap().width();
 	
 	if( this->pixmap().height() > 0 )
-		pbTop = this->pixmap().height() - pbHeight;
+		pbTop = this->pixmap().height();
 
-	textY = pbTop - pbHeight;
+	textY = pbTop - pbHeight / 2;
+
+	resize( pbWidth, pbTop + pbHeight );
 }
 
 void SplashScreen::setText( const QString &text )
