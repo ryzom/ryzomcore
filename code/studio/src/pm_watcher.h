@@ -32,9 +32,11 @@ class PluginManagerWatcher : public QObject
 {
 	Q_OBJECT
 public:
+
 	PluginManagerWatcher(){
 		sp = NULL;
 		pm = NULL;
+		pluginCount = 0;
 	}
 
 	~PluginManagerWatcher(){
@@ -53,9 +55,16 @@ private Q_SLOTS:
 	void onPluginInitializing( const char *plugin );
 	void onPluginStarting( const char *plugin );
 
+	void onPluginsLoaded();
+	void onPluginsInitialized();
+	void onPluginsStarted();
+
+	void onPluginCount( int count );
+
 private:
 	SplashScreen *sp;
 	ExtensionSystem::IPluginManager *pm;
+	int pluginCount;
 };
 
 

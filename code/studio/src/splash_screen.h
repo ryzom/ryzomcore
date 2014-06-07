@@ -34,6 +34,7 @@ public:
 	void clearText();
 	void setTextXY( int x, int y ){ textX = x; textY = y; }
 	void setProgress( int percent );
+	void advanceProgress( int percent );
 
 	void setProgressBarEnabled( bool b ){ progressBarEnabled = b; }
 	void setProgressBarRect( int left, int top, int width, int height ){}

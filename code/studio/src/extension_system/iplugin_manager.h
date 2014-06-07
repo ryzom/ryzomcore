@@ -134,9 +134,15 @@ Q_SIGNALS:
 	/// Signal that the list of available plugins has changed.
 	void pluginsChanged();
 
+	void pluginCount( int count );
+
 	void pluginLoading( const char *plugin );
 	void pluginInitializing( const char *plugin );
 	void pluginStarting( const char *plugin );
+
+	void pluginsLoaded();
+	void pluginsInitialized();
+	void pluginsStarted();
 };
 
 }; // namespace ExtensionSystem

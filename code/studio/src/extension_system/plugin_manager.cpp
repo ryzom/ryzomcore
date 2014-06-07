@@ -92,17 +92,24 @@ void PluginManager::loadPlugins()
 	setPluginState(spec, State::Resolved);
 
 	QList<PluginSpec *> queue = loadQueue();
+	Q_EMIT pluginCount( queue.count() );
 
 	Q_FOREACH (PluginSpec *spec, queue)
 	setPluginState(spec, State::Loaded);
+	
+	Q_EMIT pluginsLoaded();
 
 	Q_FOREACH (PluginSpec *spec, queue)
 	setPluginState(spec, State::Initialized);
+	
+	Q_EMIT pluginsInitialized();
 
 	QListIterator<PluginSpec *> it(queue);
 	it.toBack();
 	while (it.hasPrevious())
 		setPluginState(it.previous(), State::Running);
+	
+	Q_EMIT pluginsStarted();
 
 	Q_EMIT pluginsChanged();
 }

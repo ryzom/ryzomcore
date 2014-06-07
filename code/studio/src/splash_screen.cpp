@@ -71,6 +71,13 @@ void SplashScreen::setProgress( int percent )
 	QCoreApplication::instance()->processEvents();
 }
 
+void SplashScreen::advanceProgress( int percent )
+{
+	progress += percent;
+	repaint();
+	QCoreApplication::instance()->processEvents();
+}
+
 void SplashScreen::drawContents( QPainter *painter )
 {
 	QSplashScreen::drawContents( painter );
