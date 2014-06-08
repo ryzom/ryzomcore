@@ -95,6 +95,7 @@ protected:
 private:
 	void createActions();
 	void createMenus();
+	void removeMenus();
 	void createToolBars();
 	void createDialogs();
 
@@ -144,6 +145,8 @@ private:
 	uint _numTri;
 	float _texMem;
 	sint _mouseMode;
+
+	QMenu *menu;
 };/* class CMainWindow */
 
 } /* namespace NLQT */

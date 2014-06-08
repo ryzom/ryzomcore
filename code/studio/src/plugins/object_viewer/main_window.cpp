@@ -71,6 +71,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	  _lastDir("."),
 	  _mouseMode(NL3D::U3dMouseListener::edit3d)
 {
+	menu = NULL;
 	nldebug("CMainWindow::CMainWindow:");
 	setObjectName("CMainWindow");
 
@@ -133,6 +134,8 @@ CMainWindow::~CMainWindow()
 	settings->setValue("TimerInterval", _mainTimer->interval());
 	settings->endGroup();
 	settings->sync();
+
+	removeMenus();
 
 	delete _AnimationDialog;
 	delete _AnimationSetDialog;
@@ -323,6 +326,14 @@ void CMainWindow::createMenus()
 	connect(_ParticleControlDialog->toggleViewAction(), SIGNAL(triggered(bool)),
 			_ParticleWorkspaceDialog->_PropertyDialog, SLOT(setVisible(bool)));
 
+	menu = ovMenu;
+
+}
+
+void CMainWindow::removeMenus()
+{
+	delete menu;
+	menu = NULL;
 }
 
 void CMainWindow::createToolBars()
