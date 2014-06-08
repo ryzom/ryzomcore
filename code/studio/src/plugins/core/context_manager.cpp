@@ -135,8 +135,8 @@ void ContextManager::removeContextObject(IContext *context)
 
 	const int index = indexOf(context->id());
 	QWidget *widget = d->m_tabWidget->widget(index);
-	d->m_tabWidget->removeTab(index);
 	d->m_contexts.remove(index);
+	d->m_tabWidget->removeTab(index);
 	delete widget;
 }
 
