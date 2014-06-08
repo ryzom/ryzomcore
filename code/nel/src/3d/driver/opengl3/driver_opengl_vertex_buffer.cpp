@@ -544,11 +544,7 @@ CVertexBufferAMDPinnedVolatile::~CVertexBufferAMDPinnedVolatile()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinnedVolatile_CVertexBufferAMDPinnedDtor)
 	
-	if (m_Block)
-	{
-		m_Driver->_AMDPinnedAllocator->free(m_Block);
-		m_Block = NULL;
-	}
+	// no-op
 }
 
 // ***************************************************************************
@@ -567,51 +563,9 @@ void *CVertexBufferAMDPinnedVolatile::lock()
 		beforeLock = CTime::getPerformanceTime();
 	}
 
-	// Allocate if necessary
+	// Allocate
 	const uint size = VB->getNumVertices() * VB->getVertexSize();
-	if (m_Block)
-	{
-		// Verify size
-		uint index = 0;
-		uint sizeShift = size >> (NLDRV_GL3_AMD_PINNED_VOLATILE_SHIFT);
-		while (sizeShift)
-		{
-			sizeShift >>= 1;
-			++index;
-		}
-		if (m_Block->Bin != index)
-		{
-			// nldebug("GL3: Size inconsistency"); // NOTE: May have to handle this for other buffers...
-			// Wrong size, want a different block size
-			m_Driver->_AMDPinnedAllocator->free(m_Block);
-			m_Block = NULL;
-		}
-	}
-	if (m_Block)
-	{
-		// Check fence
-		if (m_Block->FenceId)
-		{
-			GLint status = 0;
-			nglGetSynciv(m_Block->FenceId, GL_SYNC_STATUS, 1, NULL, &status);
-			if (status == GL_SIGNALED)
-			{
-				// Can use this
-				nglDeleteSync(m_Block->FenceId);
-				m_Block->FenceId = 0;
-			}
-			else
-			{
-				// Not ready, get a different block
-				m_Driver->_AMDPinnedAllocator->free(m_Block);
-				m_Block = NULL;
-			}
-		}
-	}
-	if (!m_Block)
-	{
-		m_Block = m_Driver->_AMDPinnedAllocator->allocate(size);
-	}
+	m_Block = m_Driver->_AMDPinnedAllocator->allocate(size);
 
 	// Lock
 	nlassert(m_Block);
@@ -636,29 +590,7 @@ void CVertexBufferAMDPinnedVolatile::unlock()
 	H_AUTO_OGL(CVertexBufferAMDPinnedVolatile_unlock);
 
 	m_VertexPtr = NULL;
-
-	if (!m_Block)
-		return;
-
-	// Profiling
-	/*TTicks beforeLock = 0;
-	if (m_Driver->_VBHardProfiling)
-	{
-		beforeLock = CTime::getPerformanceTime();
-	}
-
-	// Unlock
-	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_Block->VertexObjectId);
-	nglUnmapBuffer(GL_ARRAY_BUFFER);
-	m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
-
-	// Profiling
-	if (m_Driver->_VBHardProfiling)
-	{
-		TTicks	afterLock;
-		afterLock= CTime::getPerformanceTime();
-		m_Driver->appendVBHardLockProfile(afterLock-beforeLock, VB);
-	}*/
+	// m_Block = NULL;
 }
 
 // ***************************************************************************
@@ -707,6 +639,7 @@ void CVertexBufferAMDPinnedVolatile::setupVBInfos(CVertexBufferInfo &vb)
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_setupVBInfos)
 
+	nlassert(m_Block);
 	vb.VertexObjectId = m_Block->VertexObjectId;
 }
 
@@ -716,15 +649,7 @@ void CVertexBufferAMDPinnedVolatile::setFence()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinnedVolatile_setFence)
 
-	// Set the fence
-	nlassert(m_Block);
-	if (m_Block->FenceId)
-	{
-		nglDeleteSync(m_Block->FenceId);
-		m_Block->FenceId = 0;
-	}
-	m_Block->FenceId = nglFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-	nlassert(m_Block->FenceId);
+	// no-op
 }
 
 // ***************************************************************************
@@ -736,6 +661,7 @@ CVertexBufferAMDPinnedAllocator::CVertexBufferAMDPinnedAllocator(CDriverGL3 *dri
 	H_AUTO_OGL(CVertexBufferAMDPinnedAllocator_ctor)
 
 	m_Driver = driver;
+	swap();
 }
 
 // ***************************************************************************
@@ -747,10 +673,9 @@ CVertexBufferAMDPinnedAllocator::~CVertexBufferAMDPinnedAllocator()
 	// Release all pools
 	for (uint bin = 0; bin < NLDRV_GL3_AMD_PINNED_VOLATILE_BINS; ++bin)
 	{
-		while (!m_Pool[bin].empty())
+		for (uint idx = 0; idx < m_Pool[bin].size(); ++idx)
 		{
-			CVertexBufferAMDPinnedBlock *block = m_Pool[bin].front();
-			m_Pool[bin].pop();
+			CVertexBufferAMDPinnedBlock *block = m_Pool[bin][idx];
 
 			if (m_Driver && block->VertexObjectId)
 			{
@@ -769,6 +694,8 @@ CVertexBufferAMDPinnedAllocator::~CVertexBufferAMDPinnedAllocator()
 			delete block->Allocated;
 			delete block;
 		}
+
+		m_Pool[bin].clear();
 	}
 
 	m_Driver = NULL;
@@ -780,74 +707,57 @@ CVertexBufferAMDPinnedBlock *CVertexBufferAMDPinnedAllocator::allocate(uint size
 {
 	H_AUTO_OGL(CVertexBufferAMDPinnedAllocator_allocate)
 
-	uint index = 0;
+	uint bin = 0;
 	uint sizeShift = size >> (NLDRV_GL3_AMD_PINNED_VOLATILE_SHIFT);
 	while (sizeShift)
 	{
 		sizeShift >>= 1;
-		++index;
+		++bin;
 	}
-	nlassert(index < NLDRV_GL3_AMD_PINNED_VOLATILE_BINS); // Not implemented over 8MB
+	nlassert(bin < NLDRV_GL3_AMD_PINNED_VOLATILE_BINS); // Not implemented over 8MB
 
-	if (!m_Pool[index].empty())
+	uint idx = m_PoolIndex[bin];
+	++m_PoolIndex[bin];
+
+	if (idx < m_Pool[bin].size())
 	{
-		CVertexBufferAMDPinnedBlock *block = m_Pool[index].front();
-		if (block->FenceId == 0)
-		{
-			// No fence, don't check
-			m_Pool[index].pop();
-			return block;
-		}
-		GLint status = 0;
-		nlassert(nglIsSync(block->FenceId));
-		nglGetSynciv(block->FenceId, GL_SYNC_STATUS, 1, NULL, &status);
-		if (status == GL_SIGNALED)
-		{
-			// Ready, can use this block
-			// nldebug("GL3: APV Reuse (idx %i, glid %i)", index, block->VertexObjectId);
-			nglDeleteSync(block->FenceId);
-			block->FenceId = 0;
-			m_Pool[index].pop();
-			return block;
-		}
-		nlassert(status == GL_UNSIGNALED);
-	}
-	else
-	{
-		// nldebug("GL3: Empty container");
+		return m_Pool[bin][idx];
 	}
 
 	// Create new block
-	CVertexBufferAMDPinnedBlock *newblock = new CVertexBufferAMDPinnedBlock();
-	newblock->Bin = index;
+	CVertexBufferAMDPinnedBlock *block = new CVertexBufferAMDPinnedBlock();
+	block->Bin = bin;
 
 	// Allocate memory
-	uint allocSize = 1 << (NLDRV_GL3_AMD_PINNED_VOLATILE_SHIFT + index);
+	uint allocSize = 1 << (NLDRV_GL3_AMD_PINNED_VOLATILE_SHIFT + bin);
 	static int totalAlloc = 0;
 	totalAlloc += allocSize + 4096;
 	nldebug("GL3: APV Alloc (%i -> %i, total: %i)", size, allocSize, totalAlloc);
-	newblock->Allocated = new char[allocSize + 4096];
-	nlassert(newblock->Allocated);
-	uintptr_t addr = (uintptr_t)newblock->Allocated;
+	block->Allocated = new char[allocSize + 4096];
+	nlassert(block->Allocated);
+	uintptr_t addr = (uintptr_t)block->Allocated;
 	addr = (addr + 4095) & (~0xfff);
 	void *addrAligned = (void *)addr;
-	newblock->Buffer = addrAligned;
+	block->Buffer = addrAligned;
 
 	// Create id and bind
-	nglGenBuffers(1, &newblock->VertexObjectId);
-	nglBindBuffer(GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, newblock->VertexObjectId);
+	nglGenBuffers(1, &block->VertexObjectId);
+	nglBindBuffer(GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, block->VertexObjectId);
 	
 	// Set buffer
 	nglBufferData(GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, allocSize, addrAligned, GL_DYNAMIC_DRAW);
 	if (glGetError() == GL_INVALID_OPERATION)
 	{
 		nlerror("GL3: Failed to pin memory (volatile)");
-		nglDeleteBuffers(1, &newblock->VertexObjectId);
-		newblock->VertexObjectId = 0;
+		nglDeleteBuffers(1, &block->VertexObjectId);
+		block->VertexObjectId = 0;
 	}
 
 	// Unbind
 	nglBindBuffer(GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD, 0);
+
+	// Add to pool
+	m_Pool[bin].push_back(block);
 
 	// TEST LOCK
 	/*m_Driver->_DriverGLStates.bindARBVertexBuffer(newblock->VertexObjectId);
@@ -856,17 +766,19 @@ CVertexBufferAMDPinnedBlock *CVertexBufferAMDPinnedAllocator::allocate(uint size
 	nlassert(testptr);
 	m_Driver->_DriverGLStates.bindARBVertexBuffer(0);*/
 
-	return newblock;
+	return block;
 }
 
 // ***************************************************************************
 
-void CVertexBufferAMDPinnedAllocator::free(CVertexBufferAMDPinnedBlock *block)
+void CVertexBufferAMDPinnedAllocator::swap()
 {
-	H_AUTO_OGL(CVertexBufferAMDPinnedAllocator_free)
+	H_AUTO_OGL(CVertexBufferAMDPinnedAllocator_swap)
 
-	// nldebug("GL3: Free block (glid: %i)", block->VertexObjectId);
-	m_Pool[block->Bin].push(block);
+	for (uint bin = 0; bin < NLDRV_GL3_AMD_PINNED_VOLATILE_BINS; ++bin)
+	{
+		m_PoolIndex[bin] = 0;
+	}
 }
 
 // ***************************************************************************

@@ -162,11 +162,13 @@ public:
 	~CVertexBufferAMDPinnedAllocator();
 
 	CVertexBufferAMDPinnedBlock *allocate(uint size);
-	void free(CVertexBufferAMDPinnedBlock *block);
+	// void free(CVertexBufferAMDPinnedBlock *block);
+	void swap();
 
 private:
 	CDriverGL3 *m_Driver;
-	std::queue<CVertexBufferAMDPinnedBlock *> m_Pool[NLDRV_GL3_AMD_PINNED_VOLATILE_BINS];	
+	std::vector<CVertexBufferAMDPinnedBlock *> m_Pool[NLDRV_GL3_AMD_PINNED_VOLATILE_BINS];
+	uint m_PoolIndex[NLDRV_GL3_AMD_PINNED_VOLATILE_BINS];
 
 };
 

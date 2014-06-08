@@ -643,6 +643,10 @@ bool CDriverGL3::swapBuffers()
 	// Check all vertex buffer to see which one are lost
 	updateLostBuffers();
 
+	// Swap volatile pinned memory
+	if (_AMDPinnedAllocator)
+		_AMDPinnedAllocator->swap();
+
 	return true;
 }
 

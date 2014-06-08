@@ -287,14 +287,14 @@ IVertexBufferGL3	*CDriverGL3::createVertexBufferGL(uint size, uint numVertices, 
 	{
 		result = new CVertexBufferAMDPinned(this, size, numVertices, preferred, vb);
 	}
-	/*else if (_Extensions.AMDPinnedMemory && (
+	else if (_Extensions.AMDPinnedMemory && (
 		preferred == CVertexBuffer::RAMVolatile
 		|| preferred == CVertexBuffer::AGPVolatile
 		))
 	{
 		// NOTE: Performance of this is lower...
 		result = new CVertexBufferAMDPinnedVolatile(this, size, numVertices, preferred, vb);
-	}*/
+	}
 	else
 	{
 		result = new CVertexBufferGL3(this, size, numVertices, preferred, vb);
