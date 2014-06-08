@@ -55,6 +55,7 @@ namespace GUIEditor
 	GUIEditorWindow::GUIEditorWindow(QWidget *parent) :
 	QMainWindow(parent)
 	{
+		menu = NULL;
 		m_ui.setupUi(this);
 		messageProcessor = new CEditorMessageProcessor;
 		m_undoStack   = new QUndoStack(this);
@@ -111,6 +112,8 @@ namespace GUIEditor
 	GUIEditorWindow::~GUIEditorWindow()
 	{
 		writeSettings();
+
+		removeMenus();
 
 		delete messageProcessor;
 		messageProcessor = NULL;
@@ -382,7 +385,15 @@ namespace GUIEditor
 			a = new QAction( "Add Widget", this );
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
 			m->addAction( a );
+
+			menu = m;
 		}
+	}
+
+	void GUIEditorWindow::removeMenus()
+	{
+		delete menu;
+		menu = NULL;
 	}
 	
 	void GUIEditorWindow::readSettings()

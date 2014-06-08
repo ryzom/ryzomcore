@@ -26,6 +26,8 @@
 
 class QtTreePropertyBrowser;
 
+class QMenu;
+
 namespace GUIEditor
 {
 
@@ -66,6 +68,7 @@ private Q_SLOTS:
 
 private:
 		void createMenus();
+		void removeMenus();
 
 		void readSettings();
 
@@ -88,6 +91,8 @@ private:
 		CPropBrowserCtrl browserCtrl;
 		QString currentProject;
 		QString currentProjectFile;
+
+		QMenu *menu;
 	};
 
 }
