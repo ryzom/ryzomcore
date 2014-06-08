@@ -36,6 +36,8 @@ class SheetBuilderPlugin : public QObject, public ExtensionSystem::IPlugin
 	Q_OBJECT
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
+	SheetBuilderPlugin();
+	~SheetBuilderPlugin();
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
 	void setNelContext(NLMISC::INelContext *nelContext);

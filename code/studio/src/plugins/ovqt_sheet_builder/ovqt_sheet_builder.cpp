@@ -35,6 +35,18 @@
 
 using namespace Plugin;
 
+SheetBuilderPlugin::SheetBuilderPlugin()
+{
+}
+
+SheetBuilderPlugin::~SheetBuilderPlugin()
+{
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
+	QAction *a = menuManager->action( "SheetBuilder" );
+	menuManager->unregisterAction( "SheetBuilder" );
+	delete a;
+}
+
 bool SheetBuilderPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);
