@@ -114,6 +114,68 @@ void PluginManager::loadPlugins()
 	Q_EMIT pluginsChanged();
 }
 
+bool PluginManager::loadPlugin( const char *plugin )
+{
+	return true;
+}
+
+bool PluginManager::unloadPlugin( ExtensionSystem::IPluginSpec *plugin )
+{
+	ExtensionSystem::PluginSpec *spec = static_cast< ExtensionSystem::PluginSpec* >( plugin );
+
+	// Let's see if anything depends on this one
+	QListIterator< ExtensionSystem::PluginSpec* > itr( m_pluginSpecs );
+	while( itr.hasNext() )
+	{
+		ExtensionSystem::PluginSpec *sp = itr.next();
+		QList< ExtensionSystem::PluginSpec* > l = sp->dependencySpecs();
+		if( l.contains( spec ) )
+			return false;
+	}
+
+	// Stop, delete then remove plugin
+	spec->stop();
+	spec->kill();	
+	removePlugin( plugin );
+
+	return true;
+}
+
+void PluginManager::removePlugin( ExtensionSystem::IPluginSpec *plugin )
+{
+	QList< ExtensionSystem::IPluginSpec* >::iterator itr1;
+	QList< ExtensionSystem::PluginSpec* >::iterator itr2;
+
+	QList< ExtensionSystem::IPluginSpec* >::iterator i1 = m_ipluginSpecs.begin();
+	while( i1 != m_ipluginSpecs.end() )
+	{
+		if( *i1 == plugin )
+		{
+			itr1 = i1;
+			break;
+		}
+		i1++;
+	}
+
+	QList< ExtensionSystem::PluginSpec* >::iterator i2 = m_pluginSpecs.begin();
+	while( i2 != m_pluginSpecs.end() )
+	{
+		if( *i2 == static_cast< ExtensionSystem::PluginSpec* >( plugin ) )
+		{
+			itr2 = i2;
+			break;
+		}
+		i2++;
+	}
+
+	m_ipluginSpecs.erase( itr1 );
+	m_pluginSpecs.erase( itr2 );
+	delete plugin;
+
+	Q_EMIT pluginsChanged();
+
+}
+
 QStringList PluginManager::getPluginPaths() const
 {
 	return m_pluginPaths;

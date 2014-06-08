@@ -65,6 +65,7 @@ void PluginView::updateList()
 	static QIcon notLoadedIcon = QApplication::style()->standardIcon(QStyle::SP_DialogResetButton);
 
 	m_specToItem.clear();
+	m_itemToSpec.clear();
 
 	QList<QTreeWidgetItem *> items;
 	Q_FOREACH (ExtensionSystem::IPluginSpec *spec, m_pluginManager->plugins())
@@ -87,6 +88,7 @@ void PluginView::updateList()
 
 		items.append(item);
 		m_specToItem.insert(spec, item);
+		m_itemToSpec.insert(item, spec);
 	}
 
 	m_ui.pluginTreeWidget->clear();
@@ -127,7 +129,18 @@ void PluginView::onUnloadClicked()
 		return;
 	}
 
-	
+	QMap< QTreeWidgetItem*, ExtensionSystem::IPluginSpec* >::const_iterator itr
+		= m_itemToSpec.find( item );
+	if( itr == m_itemToSpec.end() )
+		return;
+
+	bool success = m_pluginManager->unloadPlugin( itr.value() );
+	if( !success )
+	{
+		QMessageBox::warning( this,
+								tr( "Plugin unload" ),
+								tr( "Failed to unload plugin." ) );
+	}
 }
 
 void PluginView::onLoadClicked()
@@ -141,6 +154,8 @@ void PluginView::onLoadClicked()
 	{
 		return;
 	}
+
+	this->m_pluginManager->loadPlugin( f.toAscii().data() );
 }
 
 } /* namespace Core */

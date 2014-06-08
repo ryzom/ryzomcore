@@ -52,6 +52,7 @@ private:
 
 	const int m_checkStateColumn;
 	QMap<ExtensionSystem::IPluginSpec *, QTreeWidgetItem *> m_specToItem;
+	QMap<QTreeWidgetItem*, ExtensionSystem::IPluginSpec*> m_itemToSpec;
 	QStringList m_whiteList;
 	ExtensionSystem::IPluginManager *m_pluginManager;
 	Ui::PluginView m_ui;
