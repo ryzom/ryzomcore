@@ -34,6 +34,18 @@
 
 using namespace SheetIdViewPlugin;
 
+DispSheetIdPlugin::DispSheetIdPlugin()
+{
+}
+
+DispSheetIdPlugin::~DispSheetIdPlugin()
+{
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
+	QAction *a = menuManager->action( "SheetIdView" );
+	menuManager->unregisterAction( "SheetIdView" );
+	delete a;
+}
+
 bool DispSheetIdPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
 {
 	Q_UNUSED(errorString);

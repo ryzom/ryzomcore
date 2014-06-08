@@ -37,6 +37,9 @@ class DispSheetIdPlugin : public QObject, public ExtensionSystem::IPlugin
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 
+	DispSheetIdPlugin();
+	~DispSheetIdPlugin();
+
 	bool initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString);
 	void extensionsInitialized();
 	void setNelContext(NLMISC::INelContext *nelContext);
