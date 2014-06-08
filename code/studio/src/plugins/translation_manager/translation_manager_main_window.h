@@ -58,7 +58,7 @@ class CMainWindow : public QMainWindow
 
 public:
 	CMainWindow(QWidget *parent = 0);
-	virtual ~CMainWindow() {}
+	~CMainWindow();
 	QUndoStack *m_undoStack;
 
 public:
@@ -96,6 +96,7 @@ private:
 	void updateToolbar(QMdiSubWindow *window);
 	bool verifySettings();
 	void readSettings();
+	void removeMenus();
 	void createMenus();
 	void createToolbar();
 	void initializeSettings(bool georges);
@@ -105,6 +106,9 @@ private:
 	CEditorWorksheet *getEditorByWorksheetType(const QString &type);
 	bool isWorksheetEditor(QString filename);
 	bool isPhraseEditor(QString filename);
+
+
+	QMenu *menu;
 };
 
 class CCoreListener : public Core::ICoreListener

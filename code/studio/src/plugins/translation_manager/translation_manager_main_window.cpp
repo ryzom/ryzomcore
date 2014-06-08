@@ -47,6 +47,7 @@ namespace TranslationManager
 CMainWindow::CMainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
+	menu = NULL;
 	_ui.setupUi(this);
 
 	_ui.mdiArea->closeAllSubWindows();
@@ -59,8 +60,35 @@ CMainWindow::CMainWindow(QWidget *parent)
 	connect(Core::ICore::instance(), SIGNAL(changeSettings()), this, SLOT(readSettings()));
 	readSettings();
 	createToolbar();
+	createMenus();
 	m_undoStack = new QUndoStack(this);
 
+}
+
+CMainWindow::~CMainWindow()
+{
+	removeMenus();
+}
+
+void CMainWindow::removeMenus()
+{
+	delete menu;
+	menu = NULL;
+}
+
+void CMainWindow::createMenus()
+{
+	// Windows menu
+	Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
+	QMenu *m = menuManager->menuBar()->addMenu( "Translation Manager" );
+	if( m != NULL )
+	{
+		windowMenu = m->addMenu("Window");
+		menu = m;
+	}
+	
+	updateWindowsList();
+	connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));
 }
 
 // Functions that will insert the plugin buttons
@@ -126,17 +154,8 @@ void CMainWindow::createToolbar()
 	mergeSingleFileAct->setStatusTip(tr("Merge worksheet file from local or remote directory"));
 	connect(mergeSingleFileAct, SIGNAL(triggered()), this, SLOT(mergeSingleFile()));
 
-	// Windows menu
 	Core::ICore *core = Core::ICore::instance();
 	Core::MenuManager *menuManager = core->menuManager();
-	QMenu *m = menuManager->menuBar()->addMenu( "Translation Manager" );
-	if( m != NULL )
-	{
-		windowMenu = m->addMenu("Window");
-	}
-	
-	updateWindowsList();
-	connect(windowMenu, SIGNAL(aboutToShow()), this, SLOT(updateWindowsList()));
 
 	// Undo, Redo actions
 	QAction *undoAction = menuManager->action(Core::Constants::UNDO);
