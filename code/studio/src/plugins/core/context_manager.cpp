@@ -36,13 +36,11 @@ struct ContextManagerPrivate
 	Core::MainWindow *m_mainWindow;
 	QTabWidget *m_tabWidget;
 	QVector<IContext *> m_contexts;
-	int m_oldCurrent;
 };
 
 ContextManagerPrivate::ContextManagerPrivate(Core::MainWindow *mainWindow, QTabWidget *tabWidget)
 	: m_mainWindow(mainWindow),
-	  m_tabWidget(tabWidget),
-	  m_oldCurrent(-1)
+	  m_tabWidget(tabWidget)
 {
 }
 
@@ -145,11 +143,7 @@ void ContextManager::currentTabChanged(int index)
 	if (index >= 0)
 	{
 		IContext *context = d->m_contexts.at(index);
-		IContext *oldContext = 0;
-		if (d->m_oldCurrent >= 0)
-			oldContext = d->m_contexts.at(d->m_oldCurrent);
-		d->m_oldCurrent = index;
-		Q_EMIT currentContextChanged(context, oldContext);
+		Q_EMIT currentContextChanged(context);
 	}
 }
 

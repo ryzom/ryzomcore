@@ -114,8 +114,62 @@ void PluginManager::loadPlugins()
 	Q_EMIT pluginsChanged();
 }
 
+bool PluginManager::loadPluginSpec( const char *plugin )
+{
+	nlinfo( "Loading plugin spec %s", plugin );
+
+	PluginSpec *spec = new PluginSpec;
+	spec->m_pluginManager = this;
+	if( !spec->setSpecFileName( plugin ) )
+	{
+		nlinfo( "Error loading plugin spec %s", plugin );
+		return false;
+	}
+
+	m_pluginSpecs.append( spec );
+	m_ipluginSpecs.append( spec );
+
+	return true;
+}
+
 bool PluginManager::loadPlugin( const char *plugin )
 {
+	if( !loadPluginSpec( plugin ) )
+		return false;
+
+	ExtensionSystem::PluginSpec *spec = m_pluginSpecs.last();
+
+	if( !spec->resolveDependencies( m_pluginSpecs ) )
+	{
+		nlinfo( "Error resolving dependencies for plugin spec %s", plugin );
+		return false;
+	}
+
+	if( !spec->loadLibrary() )
+	{
+		nlinfo( "Error loading plugin %s", spec->fileName().toUtf8().data() );
+		return false;
+	}
+
+	if( !spec->initializePlugin() )
+	{
+		nlinfo( "Error initializing plugin %s", spec->fileName().toUtf8().data() );
+		spec->kill();
+		return false;
+	}
+
+	if( !spec->initializeExtensions() )
+	{
+		nlinfo( "Error starting plugin %s", spec->fileName().toUtf8().data() );
+		spec->stop();
+		spec->kill();
+		return false;
+	}
+
+	nlinfo( "Loaded plugin %s ( %s )", spec->name().data(), spec->fileName().toUtf8().data() );
+
+	Q_EMIT pluginsChanged();
+
 	return true;
 }
 
@@ -262,11 +316,7 @@ void PluginManager::readPluginPaths()
 
 	Q_FOREACH (const QString &pluginFile, pluginsList)
 	{
-		PluginSpec *spec = new PluginSpec;
-		spec->m_pluginManager = this;
-		spec->setSpecFileName(pluginFile);
-		m_pluginSpecs.append(spec);
-		m_ipluginSpecs.append(spec);
+		loadPluginSpec( pluginFile.toUtf8().data() );
 	}
 
 	Q_EMIT pluginsChanged();

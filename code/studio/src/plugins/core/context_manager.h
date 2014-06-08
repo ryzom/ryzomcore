@@ -51,8 +51,7 @@ public:
 	void unregisterUndoStack(QUndoStack *stack);
 
 Q_SIGNALS:
-	// the default argument '=0' is important for connects without the oldContext argument.
-	void currentContextChanged(Core::IContext *context, Core::IContext *oldContext = 0);
+	void currentContextChanged(Core::IContext *context);
 
 public Q_SLOTS:
 	void activateContext(const QString &id);

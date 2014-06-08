@@ -155,7 +155,18 @@ void PluginView::onLoadClicked()
 		return;
 	}
 
-	this->m_pluginManager->loadPlugin( f.toAscii().data() );
+	QApplication::setOverrideCursor( Qt::WaitCursor );
+	bool success = m_pluginManager->loadPlugin( f.toAscii().data() );
+	QApplication::setOverrideCursor( Qt::ArrowCursor );
+
+	if( !success )
+	{
+		QMessageBox::warning( this,
+								tr( "Loading plugin" ),
+								tr( "Error loading plugin!" ) );
+	}
 }
 
+
 } /* namespace Core */
+
