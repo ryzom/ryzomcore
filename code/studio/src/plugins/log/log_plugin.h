@@ -85,6 +85,8 @@ namespace Plugin
 
 		NLQT::CQtDisplayer *m_displayer;
 
+		QMenu *logMenu;
+
 	};
 
 } // namespace Plugin

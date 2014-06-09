@@ -45,6 +45,7 @@ namespace Plugin
 	CLogPlugin::CLogPlugin(QWidget *parent): QDockWidget(parent)
 	{
 		m_ui.setupUi(this);
+		logMenu = NULL;
 	}
 
 	CLogPlugin::~CLogPlugin()
@@ -62,6 +63,9 @@ namespace Plugin
 		NLMISC::AssertLog->removeDisplayer(m_displayer);
 		NLMISC::InfoLog->removeDisplayer(m_displayer);
 		delete m_displayer;
+
+		delete logMenu;
+		logMenu = NULL;
 
 		delete m_libContext;
 		m_libContext = NULL;
@@ -82,13 +86,13 @@ namespace Plugin
 
 		Core::ICore *core = Core::ICore::instance();
 		Core::MenuManager *menuManager = core->menuManager();
-		QMenu *viewMenu = menuManager->menu(Core::Constants::M_VIEW);
 
 		QMainWindow *wnd = Core::ICore::instance()->mainWindow();
 		wnd->addDockWidget(Qt::RightDockWidgetArea, this);
 		hide();
 
-		viewMenu->addAction(this->toggleViewAction());
+		logMenu = menuManager->menuBar()->addMenu( "Log" );
+		logMenu->addAction(toggleViewAction());
 	}
 
 	void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
