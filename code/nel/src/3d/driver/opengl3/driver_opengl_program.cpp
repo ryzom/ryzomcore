@@ -755,6 +755,10 @@ void CDriverGL3::setupUniforms(TProgram program)
 	CProgramDrvInfosGL3 *drvInfo = static_cast<CProgramDrvInfosGL3 *>(di);
 	GLuint progId = drvInfo->getProgramId();
 
+	// FIXME
+	if (!progId)
+		return;
+
 	uint mvpIndex = p->getUniformIndex(CProgramIndex::ModelViewProjection);
 	if (mvpIndex != ~0)
 	{
