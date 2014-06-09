@@ -92,7 +92,9 @@ namespace Plugin
 		hide();
 
 		logMenu = menuManager->menuBar()->addMenu( "Log" );
-		logMenu->addAction(toggleViewAction());
+		QAction *a = toggleViewAction();
+		a->setText( tr( "View log" ) );
+		logMenu->addAction( a );
 	}
 
 	void CLogPlugin::setNelContext(NLMISC::INelContext *nelContext)
