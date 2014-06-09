@@ -52,7 +52,7 @@ struct TChangeTrackerHeader
 
 #ifdef USE_FAST_MUTEX
 	/// Fast mutex (TODO: use multi-processor version)
-  volatile NLMISC::CFastMutex	FastMutex;
+  NLMISC::CFastMutex	FastMutex;
 #endif
 	/*
 	 * Number of values set (used in COUNT_MIRROR_CHANGES mode only, always allocated for mode interoperability)
@@ -161,7 +161,7 @@ public:
 
 #ifdef USE_FAST_MUTEX
 	/// Return the mutex
-	volatile NLMISC::CFastMutex&	trackerMutex() { return _Header->FastMutex; }
+	NLMISC::CFastMutex&	trackerMutex() { return _Header->FastMutex; }
 #else
 	/// Return the mutex
 	NLMISC::CSharedMutex&	trackerMutex() { return _TrackerMutex; }

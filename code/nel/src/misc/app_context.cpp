@@ -19,6 +19,8 @@
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/command.h"
 
+#include <SDL.h>
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -114,6 +116,13 @@ CApplicationContext::CApplicationContext()
 	DebugNeedAssert = false;
 	NoAssert = false;
 	AlreadyCreateSharedAmongThreads = false;
+	SDL_Init(
+		SDL_INIT_TIMER
+		| SDL_INIT_JOYSTICK
+		| SDL_INIT_HAPTIC
+		| SDL_INIT_GAMECONTROLLER
+		| SDL_INIT_EVENTS);
+	atexit(SDL_Quit);
 
 	contextReady();
 }

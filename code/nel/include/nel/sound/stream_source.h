@@ -164,7 +164,7 @@ protected:
 	IBuffer							*m_Buffers[3]; // an array of two pointers
 
 	/// Mutex for buffer ops.
-	NLMISC::CMutex					m_BufferMutex;
+	NLMISC::CFastMutex				m_BufferMutex;
 
 	/// The bytes per second according to the buffer format
 	uint							m_BytesPerSecond;

@@ -99,7 +99,7 @@ void CStreamSource::releasePhysicalSource()
 
 uint32 CStreamSource::getTime()
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 	
 	if (hasPhysicalSource())
 		return getPhysicalSource()->getTime();
@@ -117,7 +117,7 @@ void CStreamSource::setLooping(bool l)
 {
 	CSourceCommon::setLooping(l);
 
-	//CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	//CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 	//
 	//CSourceCommon::setLooping(l);
 	//if (hasPhysicalSource())
@@ -150,7 +150,7 @@ void CStreamSource::play()
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	
 	{
-		CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+		CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 		
 		//if ((mixer->getListenPosVector() - _Position).sqrnorm() > m_StreamSound->getMaxDistance() * m_StreamSound->getMaxDistance())
 		if ((_RelativeMode ? getPos().sqrnorm() : (mixer->getListenPosVector() - getPos()).sqrnorm()) > m_StreamSound->getMaxDistance() * m_StreamSound->getMaxDistance())
@@ -277,7 +277,7 @@ void CStreamSource::play()
 
 void CStreamSource::stopInt()
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 	
 	// nldebug("CStreamSource %p : stop", (CAudioMixerUser::IMixerEvent*)this);
 	// nlassert(_Playing);
@@ -321,7 +321,7 @@ void CStreamSource::stop()
 
 void CStreamSource::setPos(const NLMISC::CVector& pos)
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 
 	CSourceCommon::setPos(pos);
 	if (hasPhysicalSource())
@@ -330,7 +330,7 @@ void CStreamSource::setPos(const NLMISC::CVector& pos)
 
 void CStreamSource::setVelocity(const NLMISC::CVector& vel)
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 
 	CSourceCommon::setVelocity(vel);
 	if (hasPhysicalSource())
@@ -342,7 +342,7 @@ void CStreamSource::setVelocity(const NLMISC::CVector& vel)
  */
 void CStreamSource::setDirection(const NLMISC::CVector& dir)
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 
 	CSourceCommon::setDirection(dir);
 
@@ -373,7 +373,7 @@ void CStreamSource::setDirection(const NLMISC::CVector& dir)
 
 void CStreamSource::updateFinalGain()
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 	
 	if (hasPhysicalSource())
 		getPhysicalSource()->setGain(getFinalGain());
@@ -381,7 +381,7 @@ void CStreamSource::updateFinalGain()
 
 void CStreamSource::setPitch(float pitch)
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 	m_PitchInv = 1.0f / pitch;
 	CSourceCommon::setPitch(pitch);
 	if (hasPhysicalSource())
@@ -390,7 +390,7 @@ void CStreamSource::setPitch(float pitch)
 
 void CStreamSource::setSourceRelativeMode(bool mode)
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 
 	CSourceCommon::setSourceRelativeMode(mode);
 	if (hasPhysicalSource())
@@ -428,7 +428,7 @@ void CStreamSource::updateAvailableBuffers()
 /// Get a writable pointer to the buffer of specified size. Use capacity to specify the required bytes. Returns NULL when all the buffer space is already filled. Call setFormat() first.
 uint8 *CStreamSource::lock(uint capacity)
 {
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 	updateAvailableBuffers();
 	if (m_FreeBuffers > 0)
 		return m_Buffers[m_NextBuffer]->lock(capacity);
@@ -440,7 +440,7 @@ bool CStreamSource::unlock(uint size)
 {
 	nlassert(m_FreeBuffers > 0);
 	
-	CAutoMutex<CMutex> autoMutex(m_BufferMutex);
+	CAutoMutex<CFastMutex> autoMutex(m_BufferMutex);
 	IBuffer *buffer = m_Buffers[m_NextBuffer];
 	bool result = buffer->unlock(size);
 
