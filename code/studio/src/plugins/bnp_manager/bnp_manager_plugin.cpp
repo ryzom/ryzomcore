@@ -44,6 +44,9 @@ namespace BNPManager
 		}
 		qDeleteAll(m_autoReleaseObjects);
 		m_autoReleaseObjects.clear();
+
+		delete m_libContext;
+		m_libContext = NULL;
 	}
 
 bool BNPManagerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

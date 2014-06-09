@@ -43,6 +43,9 @@ WorldEditorPlugin::~WorldEditorPlugin()
 	}
 	qDeleteAll(m_autoReleaseObjects);
 	m_autoReleaseObjects.clear();
+
+	delete m_libContext;
+	m_libContext = NULL;
 }
 
 bool WorldEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

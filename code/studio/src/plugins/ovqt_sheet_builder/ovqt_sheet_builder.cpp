@@ -45,6 +45,9 @@ SheetBuilderPlugin::~SheetBuilderPlugin()
 	QAction *a = menuManager->action( "SheetBuilder" );
 	menuManager->unregisterAction( "SheetBuilder" );
 	delete a;
+
+	delete m_LibContext;
+	m_LibContext = NULL;
 }
 
 bool SheetBuilderPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

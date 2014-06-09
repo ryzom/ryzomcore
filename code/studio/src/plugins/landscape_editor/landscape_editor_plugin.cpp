@@ -39,6 +39,9 @@ LandscapeEditorPlugin::~LandscapeEditorPlugin()
 	}
 	qDeleteAll(m_autoReleaseObjects);
 	m_autoReleaseObjects.clear();
+
+	delete m_libContext;
+	m_libContext = NULL;
 }
 
 bool LandscapeEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

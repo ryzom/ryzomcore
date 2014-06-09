@@ -30,6 +30,9 @@ MissionCompilerPlugin::~MissionCompilerPlugin()
 	}
 	qDeleteAll(m_autoReleaseObjects);
 	m_autoReleaseObjects.clear();
+
+	delete m_LibContext;
+	m_LibContext = NULL;
 }
 
 bool MissionCompilerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

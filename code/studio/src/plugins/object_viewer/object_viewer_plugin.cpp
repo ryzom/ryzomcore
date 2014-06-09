@@ -23,6 +23,9 @@ ObjectViewerPlugin::~ObjectViewerPlugin()
 	qDeleteAll(_autoReleaseObjects);
 	_autoReleaseObjects.clear();
 	Modules::release();
+
+	delete _LibContext;
+	_LibContext = NULL;
 }
 
 bool ObjectViewerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

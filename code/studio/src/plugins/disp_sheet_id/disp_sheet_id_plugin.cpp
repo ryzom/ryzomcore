@@ -44,6 +44,9 @@ DispSheetIdPlugin::~DispSheetIdPlugin()
 	QAction *a = menuManager->action( "SheetIdView" );
 	menuManager->unregisterAction( "SheetIdView" );
 	delete a;
+
+	delete m_LibContext;
+	m_LibContext = NULL;
 }
 
 bool DispSheetIdPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

@@ -62,6 +62,9 @@ namespace Plugin
 		NLMISC::AssertLog->removeDisplayer(m_displayer);
 		NLMISC::InfoLog->removeDisplayer(m_displayer);
 		delete m_displayer;
+
+		delete m_libContext;
+		m_libContext = NULL;
 	}
 
 	bool CLogPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)

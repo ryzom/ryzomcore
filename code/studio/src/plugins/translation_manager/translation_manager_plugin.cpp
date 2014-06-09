@@ -48,6 +48,9 @@ TranslationManagerPlugin::~TranslationManagerPlugin()
 	}
 	qDeleteAll(_autoReleaseObjects);
 	_autoReleaseObjects.clear();
+
+	delete _LibContext;
+	_LibContext = NULL;
 }
 
 bool TranslationManagerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManager, QString *errorString)
