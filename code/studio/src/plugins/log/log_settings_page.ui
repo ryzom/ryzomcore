@@ -89,7 +89,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../object_viewer_qt.qrc"/>
+  <include location="../../studio.qrc"/>
  </resources>
  <connections/>
 </ui>
