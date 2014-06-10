@@ -403,11 +403,6 @@ void setCPUMask ()
 	Debug_NewCPUMask= cpuMask;
 }
 
-void	displayCPUInfo()
-{
-	nlinfo("CPUInfo: CPUMask before change: %x, after change: %x, CPUID: %x, hasHyperThreading: %s", (uint32)Debug_OldCPUMask, (uint32)Debug_NewCPUMask, CSystemInfo::getCPUID(), (CSystemInfo::hasHyperThreading()?"YES":"NO"));
-}
-
 string getVersionString (uint64 version)
 {
 	return toString ("%u.%u.%u.%u", (unsigned int) (version >> 48), (unsigned int) ((version >> 32) & 0xffff), (unsigned int) ((version >> 16) & 0xffff), (unsigned int) (version & 0xffff));
@@ -421,10 +416,6 @@ string getSystemInformation()
 	s += "Process Virtual Memory: " + bytesToHumanReadable(CSystemInfo::virtualMemory()) + "\n";
 	s += "OS: " + CSystemInfo::getOS() + "\n";
 	s += "Processor: " + CSystemInfo::getProc() + "\n";
-	s += toString("CPUID: %x\n", CSystemInfo::getCPUID());
-	s += toString("HT: %s\n", CSystemInfo::hasHyperThreading()?"YES":"NO");
-	s += toString("CpuMask: %x\n", IProcess::getCurrentProcess ()->getCPUMask());
-
 
 	if(Driver)
 		s += "NeL3D: " + string(Driver->getVideocardInformation()) + "\n";
@@ -793,9 +784,6 @@ void prelogInit()
 		AssertLog->addDisplayer (ClientLogDisplayer);
 
 		setCrashCallback(crashCallback);
-
-		// Display Some Info On CPU
-		displayCPUInfo();
 
 		// Display the client version.
 #if FINAL_VERSION

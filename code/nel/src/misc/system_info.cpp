@@ -42,6 +42,8 @@
 #include "nel/misc/command.h"
 #include "nel/misc/variable.h"
 
+#include <SDL_cpuinfo.h>
+
 using namespace std;
 
 #ifdef DEBUG_NEW
@@ -901,188 +903,19 @@ uint64 CSystemInfo::getProcessorFrequency(bool quick)
 	return freq;
 }
 
-static bool DetectMMX()
+bool CSystemInfo::hasMMX()
 {
-	#ifdef NL_CPU_INTEL
-		if (!CSystemInfo::hasCPUID()) return false; // cpuid not supported ...
-
-		sint32 CPUInfo[4];
-		nlcpuid(CPUInfo, 1);
-		// check for bit 23 = MMX instruction set
-		if (CPUInfo[3] & 0x800000) return true;
-	#endif // NL_CPU_INTEL
-
-	return false;
+	return SDL_HasMMX();
 }
 
-
-static bool DetectSSE()
+bool CSystemInfo::hasSSE()
 {
-	#ifdef NL_CPU_INTEL
-		if (!CSystemInfo::hasCPUID()) return false; // cpuid not supported ...
-
-		sint32 CPUInfo[4];
-		nlcpuid(CPUInfo, 1);
-
-		if (CPUInfo[3]  & 0x2000000)
-		{
-			// check OS support for SSE
-			try
-			{
-				#ifdef NL_OS_WINDOWS
-				#ifdef NL_NO_ASM
-				unsigned int tmp = _mm_getcsr();
-				nlunreferenced(tmp);
-				#else
-				__asm
-				{
-					xorps xmm0, xmm0  // Streaming SIMD Extension
-				}
-				#endif // NL_NO_ASM
-				#elif NL_OS_UNIX
-					__asm__ __volatile__ ("xorps %xmm0, %xmm0;");
-				#endif // NL_OS_UNIX
-			}
-			catch(...)
-			{
-				return false;
-			}
-
-			// printf("sse detected\n");
-
-			return true;
-		}
-	#endif // NL_CPU_INTEL
-
-	return false;
+	return SDL_HasSSE();
 }
 
-bool CSystemInfo::_HaveMMX = DetectMMX ();
-bool CSystemInfo::_HaveSSE = DetectSSE ();
-
-bool CSystemInfo::hasCPUID ()
+bool CSystemInfo::hasSSE2()
 {
-	#ifdef NL_CPU_INTEL
-		 uint32 result = 0;
-		#ifdef NL_OS_WINDOWS
-		#ifdef NL_NO_ASM
-			sint32 CPUInfo[4] = {-1};
-			nlcpuid(CPUInfo, 0);
-			if (CPUInfo[3] != -1) result = 1;
-		#else
-		 __asm
-		 {
-			 pushad
-			 pushfd
-			 //	 If ID bit of EFLAGS can change, then cpuid is available
-			 pushfd
-			 pop  eax					// Get EFLAG
-			 mov  ecx,eax
-			 xor  eax,0x200000			// Flip ID bit
-			 push eax
-			 popfd						// Write EFLAGS
-			 pushfd
-			 pop  eax					// read back EFLAG
-			 xor  eax,ecx
-			 je   noCpuid				// no flip -> no CPUID instr.
-
-			 popfd						// restore state
-			 popad
-			 mov  result, 1
-			 jmp  CPUIDPresent
-
-			noCpuid:
-			 popfd					    // restore state
-			 popad
-			 mov result, 0
-			CPUIDPresent:
-		 }
-		#endif // NL_NO_ASM
-		#elif NL_OS_UNIX // NL_OS_WINDOWS
-			__asm__ __volatile__ (
-				/* Save Register */
-				"pushl  %%ebp;"
-				"pushl  %%ebx;"
-				"pushl  %%edx;"
-
-				/* Check if this CPU supports cpuid */
-				"pushf;"
-				"pushf;"
-				"popl   %%eax;"
-				"movl   %%eax, %%ebx;"
-				"xorl   $(1 << 21), %%eax;"	// CPUID bit
-				"pushl  %%eax;"
-				"popf;"
-				"pushf;"
-				"popl   %%eax;"
-				"popf;"                  	// Restore flags
-				"xorl   %%ebx, %%eax;"
-				"jz     NoCPUID;"
-				"movl   $1, %0;"
-				"jmp    CPUID;"
-
-			"NoCPUID:;"
-				"movl   $0, %0;"
-              		"CPUID:;"
-				"popl   %%edx;"
-				"popl   %%ebx;"
-				"popl   %%ebp;"
-
-				:"=a"(result)
-                	);
-		#endif // NL_OS_UNIX
-		return result == 1;
-	#else
-		return false;
-	#endif
-}
-
-
-uint32 CSystemInfo::getCPUID()
-{
-#ifdef NL_CPU_INTEL
-	if(hasCPUID())
-	{
-		uint32 result = 0;
-		sint32 CPUInfo[4];
-		nlcpuid(CPUInfo, 1);
-		return CPUInfo[3];
-	}
-#endif // NL_CPU_INTEL
-
-	return 0;
-}
-
-/*
- *	Note: Not used in NeL probably in Ryzom closed source. Not translated in AT&T asm, I don't understand the aim of this method
- *	      Returns true if the CPU has HT,  even if it is disabled. Maybe shoud count how many (virtual) core there is.
- */
-bool CSystemInfo::hasHyperThreading()
-{
-#ifdef NL_OS_WINDOWS
-	if(hasCPUID())
-	{
-		sint32 CPUInfo[4];
-
-		// get vendor string from cpuid
-		char vendor_id[32];
-		memset(vendor_id, 0, sizeof(vendor_id));
-		nlcpuid(CPUInfo, 0);
-		memcpy(vendor_id, &CPUInfo[1], sizeof(sint32));
-		memcpy(vendor_id+4, &CPUInfo[3], sizeof(sint32));
-		memcpy(vendor_id+8, &CPUInfo[2], sizeof(sint32));
-
-		// get cpuid flags
-		nlcpuid(CPUInfo, 1);
-
-		// pentium 4 or later processor?
-		if ((((CPUInfo[0] & 0xf00) == 0xf00) || (CPUInfo[0] & 0xf00000)) &&
-			strcmp(vendor_id, "GenuineIntel") == 0)
-			return (CPUInfo[3] & 0x10000000)!=0; // Intel Processor Hyper-Threading
-	}
-#endif
-
-	return false;
+	return SDL_HasSSE2();
 }
 
 bool CSystemInfo::isNT()

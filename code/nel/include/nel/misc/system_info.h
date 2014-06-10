@@ -43,30 +43,23 @@ public:
 	  */
 	static uint64 getProcessorFrequency (bool quick = false);
 
-	/** Tests whether the CPUID instruction is supported
-	  * (always false on non Intel architectures)
-	  */
-	static bool hasCPUID ();
-
 	/** Helps to know whether the processor features MMX instruction set
 	  * This is initialized at started, so its fast
 	  * (always false on non 0x86 architecture ...)
 	  */
-	static bool hasMMX () {return _HaveMMX;}
+	static bool hasMMX ();
 
 	/** Helps to know whether the processor has streaming SIMD instructions (the OS must supports it)
 	  * This is initialized at started, so its fast
 	  * (always false on non 0x86 architecture ...)
 	  */
-	static bool hasSSE () {return _HaveSSE;}
+	static bool hasSSE ();
 
-	/** Gets the CPUID (if available). Useful for debug info
+	/** Helps to know whether the processor has SSE2 (the OS must supports it)
+	  * This is initialized at started, so its fast
+	  * (always false on non 0x86 architecture ...)
 	  */
-	static uint32 getCPUID();
-
-	/** true if the Processor has HyperThreading
-	  */
-	static bool hasHyperThreading();
+	static bool hasSSE2 ();
 
 	/** true if running under NT
 	  */
@@ -95,10 +88,6 @@ public:
 	/** Returns the main video card name and the video driver version
 	  */
 	static bool getVideoInfo (std::string &deviceName, uint64 &driverVersion);
-
-private:
-	static bool _HaveMMX;
-	static bool _HaveSSE;
 };
 
 } // NLMISC
