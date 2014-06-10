@@ -52,8 +52,6 @@ public:
 	{
 		/// Returns if there is a high precision timer that can be used.
 		bool IsHighPrecisionAvailable;
-		/// If a CPU specific timer is used and the values are not consistent accross threads.
-		bool RequiresSingleCore;
 		/// The resolution of the high resolution timer.
 		TTicks HighPrecisionResolution;
 	};

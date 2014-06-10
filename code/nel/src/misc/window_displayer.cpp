@@ -109,7 +109,7 @@ void CWindowDisplayer::setLabel (uint label, const string &value)
 void CWindowDisplayer::create (string windowNameEx, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
 {
 	nlassert (_Thread == NULL);
-	_Thread = IThread::create (new CUpdateThread(this, windowNameEx, iconified, x, y, w, h, hs, fs, fn, ww, log));
+	_Thread = new CThread (new CUpdateThread(this, windowNameEx, iconified, x, y, w, h, hs, fs, fn, ww, log));
 
 	Log = log;
 

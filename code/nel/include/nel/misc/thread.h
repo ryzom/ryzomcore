@@ -19,10 +19,11 @@
 
 #include "types_nl.h"
 #include "common.h"
+#include "mutex.h"
 
+struct SDL_Thread;
 
 namespace NLMISC {
-
 
 /**
  * Thread callback interface.
@@ -41,7 +42,7 @@ namespace NLMISC {
 
 	};
 
-	IThread *thread = IThread::create (new HelloLoopThread);
+	CThread *thread = new CThread (new HelloLoopThread);
 	thread->start ();
 
  *\endcode
@@ -62,7 +63,7 @@ public:
 	{
 	}
 	// Return the runnable name
-	virtual void getName (std::string &result) const
+	virtual void getName(std::string &result) const
 	{
 		result = "NoName";
 	}
@@ -71,74 +72,48 @@ public:
 /// Thread priorities, numbering follows Win32 for now
 enum TThreadPriority
 {
-	ThreadPriorityLowest = -2,
-	ThreadPriorityLow = -1,
-	ThreadPriorityNormal = 0,
-	ThreadPriorityHigh = 1,
-	ThreadPriorityHighest = 2,
+	ThreadPriorityLow,
+	ThreadPriorityNormal,
+	ThreadPriorityHigh
 };
 
 /**
- * Thread base interface, must be implemented for all OS
- * \author Vianney Lecroart
- * \author Nevrax France
- * \date 2000
+ * Interface to SDL2 threads
+ * \date 2014
  */
-class IThread
+class CThread
 {
 public:
+	CThread(IRunnable *runnable);
 
-	/**
-	  * Create a new thread.
-	  * Implemented in the derived class.
-	  */
-	static IThread *create(IRunnable *runnable, uint32 stackSize = 0);
-
-	/**
-	  * Return a pointer on the current thread.
-	  * Implemented in the derived class.
-	  */
-	static IThread *getCurrentThread ();
-
-	virtual ~IThread () { }
+	// Thread will be detached immediately and remain running.
+	~CThread();
 
 	// Starts the thread.
-	virtual void start()=0;
+	void start();
 
 	// Check if the thread is still running
-	virtual bool isRunning() =0;
+	bool isRunning();
 
-	// Terminate the thread (risky method, use only in extreme cases)
-	virtual void terminate()=0;
-
-	// In the calling program, wait until the specified thread has exited. After wait() has returned, you can delete the thread object.
-	virtual void wait()=0;
+	/// In the calling program, wait until the specified thread has exited.
+	int wait();
 
 	/// Return a pointer to the runnable object
-	virtual IRunnable *getRunnable()=0;
+	IRunnable *getRunnable();
 
-	/**
-	  * Set the CPU mask of this thread. Thread must have been started before.
-	  * The mask must be a subset of the CPU mask returned by IProcess::getCPUMask() thread process.
-	  */
-	virtual bool setCPUMask(uint64 cpuMask)=0;
+	/// Set the priority for the current thread.
+	static void setPriority(TThreadPriority priority);
 
-	/**
-	  * Get the CPU mask of this thread. Thread must have been started before.
-	  * The mask should be a subset of the CPU mask returned by IProcess::getCPUMask() thread process.
-	  */
-	virtual uint64 getCPUMask()=0;
+private:
+	static int run(void *ptr);
 
-	/// Set the thread priority. Thread must have been started before.
-	virtual void setPriority(TThreadPriority priority) = 0;
+	volatile bool m_IsRunning;
+	SDL_Thread *m_SDLThread;
+	IRunnable *m_Runnable;
+	CMutex m_WaitMutex; // Mutex to allow multiple threads to wait for one thread
+	int m_ThreadResult; // Result from last thread run
 
-	/**
-	  * Get the thread user name.
-	  * Under Linux return thread owner, under windows return the name of the logon user.
-	  */
-	virtual std::string getUserName()=0;
 };
-
 
 /*
  * Thread exception
@@ -148,38 +123,7 @@ struct EThread : public Exception
 	EThread (const char* message) : Exception (message) {}
 };
 
-
-/**
- * Process base interface, must be implemented for all OS
- * \author Cyril 'Hulud' Corvazier
- * \author Nevrax France
- * \date 2000
- */
-class IProcess
-{
-public:
-	virtual ~IProcess() {}
-
-	/**
-	  * Return a pointer on the current process.
-	  * Implemented in the derived class.
-	  */
-	static IProcess *getCurrentProcess ();
-
-	/**
-	  * Return process CPU mask. Each bit stand for a CPU usable by the process threads.
-	  */
-	virtual uint64 getCPUMask()=0;
-
-	/**
-	  * Set the process CPU mask. Each bit stand for a CPU usable by the process threads.
-	  */
-	virtual bool setCPUMask(uint64 mask)=0;
-};
-
-
 } // NLMISC
-
 
 #endif // NL_THREAD_H
 

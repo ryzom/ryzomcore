@@ -95,7 +95,7 @@ private:
 private:
 	inline CStreamFileSound *getStreamFileSound() { return static_cast<CStreamFileSound *>(m_StreamSound); }
 
-	NLMISC::IThread *m_Thread;
+	NLMISC::CThread *m_Thread;
 
 	IAudioDecoder *m_AudioDecoder;
 	

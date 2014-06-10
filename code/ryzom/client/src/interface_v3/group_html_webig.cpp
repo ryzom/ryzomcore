@@ -274,7 +274,7 @@ void startWebigNotificationThread()
 		curl_global_init(CURL_GLOBAL_ALL);
 		//nlinfo("startStatThread");
 		CWebigNotificationThread *webigThread = new CWebigNotificationThread();
-		IThread	*thread = IThread::create (webigThread);
+		CThread	*thread = new CThread (webigThread);
 		nlassert (thread != NULL);
 		thread->start ();
 		startedWebigNotificationThread = true;

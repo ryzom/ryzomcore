@@ -299,7 +299,7 @@ void startStatThread()
 		curl_global_init(CURL_GLOBAL_ALL);
 		//nlinfo("startStatThread");
 		CStatThread *statThread = new CStatThread();
-		IThread	*thread = IThread::create (statThread);
+		CThread	*thread = new CThread (statThread);
 		nlassert (thread != NULL);
 		thread->start ();
 	}

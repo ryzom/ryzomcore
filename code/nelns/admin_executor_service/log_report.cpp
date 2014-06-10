@@ -127,7 +127,7 @@ void	CMakeLogTask::start()
 	}
 	_Stopping = false;
 	_Complete = false;
-	_Thread = NLMISC::IThread::create( this );
+	_Thread = new NLMISC::CThread( this );
 	_OutputLogReport = new CLogReport();
 	_Thread->start();
 }

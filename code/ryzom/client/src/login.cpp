@@ -467,7 +467,7 @@ void loginMainLoop()
 				if (isBGDownloadEnabled())
 				{
 					AvailablePatchs = bgDownloader.getAvailablePatchs();
-					#ifdef NL_OS_WINDOWS
+					#if 0
 					{
 						// Get the window
 						HWND hWnd = Driver->getDisplay();

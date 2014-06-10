@@ -69,7 +69,7 @@ public:
 	// Send the msg (wait until the message is send) return the answer string
 	std::string forceStep(const CLoginStep &ls);
 private:
-	NLMISC::IThread	  *_Thread;
+	NLMISC::CThread	  *_Thread;
 	NLMISC::IRunnable *_Task;
 };
 

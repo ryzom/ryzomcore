@@ -296,7 +296,7 @@ void CLoginProgressPostThread::init(const std::string &startupHost, const std::s
 	lpt->StartupHost = startupHost;
 	lpt->StartupPage = startupPage;
 	_Task = lpt;
-	_Thread = IThread::create(lpt);
+	_Thread = new CThread(lpt);
 	if (!_Thread)
 	{
 		release();

@@ -129,7 +129,7 @@ void CFeReceiveSub::init( uint16 firstAcceptableFrontendPort, uint16 lastAccepta
 	_CurrentReadQueue = &_Queue2;
 	_ReceiveTask->setWriteQueue( &_Queue1 );
 	nlassert( _ReceiveTask != NULL );
-	_ReceiveThread = IThread::create( _ReceiveTask );
+	_ReceiveThread = new CThread( _ReceiveTask );
 	nlassert( _ReceiveThread != NULL );
 	_ReceiveThread->start();
 

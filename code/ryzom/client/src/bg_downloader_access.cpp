@@ -21,15 +21,12 @@
 //
 #include "nel/misc/shared_memory.h"
 #include "nel/misc/i18n.h"
-#include "nel/misc/win_thread.h"
 #include "nel/misc/big_file.h"
 //
 #include "game_share/bg_downloader_msg.h"
 
 
-#ifdef NL_OS_WINDOWS
-
-#include "nel/misc/win_thread.h"
+#if 0
 
 using namespace BGDownloader;
 using namespace NLMISC;

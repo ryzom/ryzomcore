@@ -105,7 +105,7 @@ private:
 };
 
 
-typedef std::vector<NLMISC::IThread*> CThreadPool;
+typedef std::vector<NLMISC::CThread*> CThreadPool;
 
 
 // Mode: Small server
@@ -290,7 +290,7 @@ protected:
 	void				dispatchNewSocket( CServerBufSock *bufsock );
 
 	/// Returns the receive task corresponding to a particular thread
-	CServerReceiveTask	*receiveTask( std::vector<NLMISC::IThread*>::iterator ipt )
+	CServerReceiveTask	*receiveTask( std::vector<NLMISC::CThread*>::iterator ipt )
 	{
 		return ((CServerReceiveTask*)((*ipt)->getRunnable()));
 	}
@@ -346,7 +346,7 @@ private:
 	CListenTask						*_ListenTask;
 
 	/// Listen thread
-	NLMISC::IThread					*_ListenThread;
+	NLMISC::CThread					*_ListenThread;
 
 	/* Vector of receiving threads.
 	 * Thread: thread control

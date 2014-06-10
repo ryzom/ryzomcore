@@ -918,6 +918,11 @@ bool CSystemInfo::hasSSE2()
 	return SDL_HasSSE2();
 }
 
+uint CSystemInfo::getCPUCount()
+{
+	return SDL_GetCPUCount();
+}
+
 bool CSystemInfo::isNT()
 {
 #ifdef NL_OS_WINDOWS

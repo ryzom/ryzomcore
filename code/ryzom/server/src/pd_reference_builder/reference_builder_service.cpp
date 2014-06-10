@@ -338,7 +338,7 @@ void	CReferenceBuilderService::killTasks(TServiceId serviceId)
 
 void	IRefTask::start()
 {
-	_Thread = IThread::create(this);
+	_Thread = new CThread(this);
 	_Thread->start();
 }
 

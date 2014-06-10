@@ -105,7 +105,7 @@ private:
 
 	NLMISC::CMutex			_Mutex;
 
-	NLMISC::IThread*		_Thread;
+	NLMISC::CThread*		_Thread;
 
 	CQuery*					_Current;
 

@@ -107,7 +107,7 @@ CSessionBrowser::CSessionBrowser()
 		_WaitingForMessage(false)
 {
 	// start the comm thread
-	_CommThread = IThread::create(this);
+	_CommThread = new CThread(this);
 	_CommThread->start();
 }
 

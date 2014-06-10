@@ -85,7 +85,7 @@ void CFileHeader::addLog (const char *log)
 	Log += ctime(&t);
 	Log.resize (Log.size()-1);
 	Log += " (";
-	Log += IThread::getCurrentThread ()->getUserName ();
+	// Log += CThread::getCurrentThread ()->getUserName (); // FIXME: USERNAME
 	Log += ") ";
 	Log += log;
 }

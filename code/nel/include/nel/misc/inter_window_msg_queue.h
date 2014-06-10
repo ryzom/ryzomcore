@@ -177,7 +177,7 @@ private:
 	CProtagonist		_LocalWindow;
 	CProtagonist		_ForeignWindow;
 	CSendTask			*_SendTask;
-	IThread				*_SendThread;
+	CThread				*_SendThread;
 	static const uint   _CurrentVersion; // for messages serialisation
 
 

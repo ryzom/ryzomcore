@@ -103,7 +103,7 @@ protected:
 	sint _InputEditHeight;
 
 	// the thread used to update the display
-	NLMISC::IThread *_Thread;
+	NLMISC::CThread *_Thread;
 
 	CLog *Log;
 

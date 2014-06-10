@@ -28,7 +28,7 @@
 
   // in init
   CTimeoutAssertionThread *myTAT = new CTimeoutAssertionThread(1000);
-  IThread::create(myTAT)->start();
+  new CThread(myTAT)->start();
 
   ...
 

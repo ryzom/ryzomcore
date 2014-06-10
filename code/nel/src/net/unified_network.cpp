@@ -450,7 +450,7 @@ public:
 };
 
 CAliveCheck*	CAliveCheck::Thread = NULL;
-IThread*		AliveThread = NULL;
+CThread*		AliveThread = NULL;
 
 
 void	CAliveCheck::run()
@@ -631,7 +631,7 @@ bool	CUnifiedNetwork::init(const CInetAddress *addr, CCallbackNetBase::TRecordin
 		nlinfo ("HNETL5: Server '%s' added, registered and listen to port %hu", _Name.c_str (), _ServerPort);
 	}
 
-	AliveThread = IThread::create(new CAliveCheck(), 1024*4);
+	AliveThread = new CThread(new CAliveCheck());
 	AliveThread->start();
 
 	_Initialised = true;

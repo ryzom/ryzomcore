@@ -390,7 +390,7 @@ class CLoggerServiceMod
 
 	friend class CLoggerServiceMod::CQueryThread;
 	/// the query thread
-	IThread				*_QueryThread;
+	CThread				*_QueryThread;
 
 
 
@@ -430,7 +430,7 @@ public:
 		consolidatePreviousFiles();
 
 		// start the query thread
-		_QueryThread = IThread::create(new CQueryThread(this));
+		_QueryThread = new CThread(new CQueryThread(this));
 		_QueryThread->start();
 
 		return true;

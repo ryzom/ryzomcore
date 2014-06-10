@@ -133,7 +133,7 @@ public:
 
 private:
 	CStdinMonitorThread* _StdinMonitorThreadInstance;
-	NLMISC::IThread* _StdinMonitorThreadHandle;
+	NLMISC::CThread* _StdinMonitorThreadHandle;
 };
 
 CStdinMonitorSingleton StdinMonitorSingleton;
@@ -146,7 +146,7 @@ CStdinMonitorSingleton StdinMonitorSingleton;
 void CStdinMonitorSingleton::init()
 {
 	_StdinMonitorThreadInstance= new CStdinMonitorThread;
-	_StdinMonitorThreadHandle = NLMISC::IThread::create (_StdinMonitorThreadInstance);
+	_StdinMonitorThreadHandle = new NLMISC::CThread (_StdinMonitorThreadInstance);
 	_StdinMonitorThreadHandle->start();
 }
 
@@ -161,6 +161,6 @@ void CStdinMonitorSingleton::serviceUpdate()
 
 void CStdinMonitorSingleton::release()
 {
-	_StdinMonitorThreadHandle->terminate();
+	_StdinMonitorThreadHandle->wait(); // _StdinMonitorThreadHandle->terminate(); // FIXME: THREAD: Have a proper way to kill this thread
 }
 

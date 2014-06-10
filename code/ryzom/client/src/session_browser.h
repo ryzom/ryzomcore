@@ -47,7 +47,7 @@ class CSessionBrowser : public RSMGR::CSessionBrowserServerWebClientItf,
 	friend class CCallbackClientAdaptor;
 
 	// the comm thread object
-	NLMISC::IThread		*_CommThread;
+	NLMISC::CThread		*_CommThread;
 	// the thread termination flag
 	bool				_TerminateComm;
 

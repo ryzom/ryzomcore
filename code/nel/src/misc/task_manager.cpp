@@ -38,7 +38,7 @@ CTaskManager::CTaskManager() : _RunningTask (""), _TaskQueue (""), _DoneTaskQueu
 	_ThreadRunning = true;
 	CSynchronized<string>::CAccessor currentTask(&_RunningTask);
 	currentTask.value () = "";
-	_Thread = IThread::create(this);
+	_Thread = new CThread(this);
 	_Thread->start();
 	_ChangePriorityCallback = NULL;
 }

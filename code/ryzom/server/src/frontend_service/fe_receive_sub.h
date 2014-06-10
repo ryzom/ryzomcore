@@ -212,7 +212,7 @@ private:
 	CFEReceiveTask		*_ReceiveTask;
 
 	/// Receive thread
-	NLMISC::IThread		*_ReceiveThread;
+	NLMISC::CThread		*_ReceiveThread;
 
 	/// Client map by address
 	THostMap			_ClientMap;

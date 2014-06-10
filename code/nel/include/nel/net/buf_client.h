@@ -235,7 +235,7 @@ private:
 	CClientReceiveTask	*_RecvTask;
 
 	/// Receive thread
-	NLMISC::IThread		*_RecvThread;
+	NLMISC::CThread		*_RecvThread;
 
 };
 

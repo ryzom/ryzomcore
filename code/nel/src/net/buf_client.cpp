@@ -99,7 +99,7 @@ void CBufClient::connect( const CInetAddress& addr )
 		delete _RecvThread;
 	}
 
-	_RecvThread = IThread::create( _RecvTask, 1024*4*4 );
+	_RecvThread = new CThread( _RecvTask );
 	_RecvThread->start();
 }
 

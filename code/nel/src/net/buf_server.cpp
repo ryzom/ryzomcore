@@ -77,7 +77,7 @@ CBufServer::CBufServer( TThreadStategy strategy,
 	if ( ! _ReplayMode )
 	{
 		_ListenTask = new CListenTask( this );
-		_ListenThread = IThread::create( _ListenTask, 1024*4*4 );
+		_ListenThread = new CThread( _ListenTask );
 	}
 	/*{
 		CSynchronized<uint32>::CAccessor syncbpi ( &_BytesPushedIn );
@@ -949,7 +949,7 @@ void CBufServer::addNewThread( CThreadPool& threadpool, CServerBufSock *bufsock 
 	task->addNewSocket( bufsock );
 
 	// Add a new thread to the pool, with this task
-	IThread *thr = IThread::create( task, 1024*4*4 );
+	CThread *thr = new CThread( task );
 	{
 		threadpool.push_back( thr );
 		thr->start();

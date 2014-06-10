@@ -296,7 +296,7 @@ namespace NLMISC
 			//
 			messageQueueMap->value()[msgQueueIdent] = this;
 			_SendTask = new CSendTask(this);
-			_SendThread = IThread::create(_SendTask);
+			_SendThread = new CThread(_SendTask);
 			_SendThread->start();
 			// init the window handle in shared memory last,
 			// this way we are sure that the new win proc has been installed, and can start received messages

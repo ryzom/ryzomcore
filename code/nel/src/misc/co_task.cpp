@@ -84,7 +84,7 @@ namespace NLMISC
 //		TThreadId	*_ParentThreadId;
 
 		// the thread of the task
-		IThread				*_TaskThread;
+		CThread				*_TaskThread;
 		/// The mutex of the task task
 		CFastMutex			_TaskMutex;
 
@@ -300,7 +300,7 @@ namespace NLMISC
 #if defined(NL_USE_THREAD_COTASK)
 
 		// create the thread
-		_PImpl->_TaskThread = IThread::create(_PImpl);
+		_PImpl->_TaskThread = new CThread(_PImpl);
 
 		NL_CT_DEBUG("CoTask : start() task %p entering mutex", this);
 		// get the mutex

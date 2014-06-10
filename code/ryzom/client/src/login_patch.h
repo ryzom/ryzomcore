@@ -245,7 +245,7 @@ public:
 
 	CProductDescriptionForClient &getDescFile() { return DescFile; }
 
-	NLMISC::IThread *getCurrThread() const { return thread; }
+	NLMISC::CThread *getCurrThread() const { return thread; }
 	// set an external state listener (enable to log) infos
 	void setStateListener(IPatchManagerStateListener* stateListener);
 
@@ -422,7 +422,7 @@ private:
 	CCheckThread	*CheckThread;
 	CScanDataThread	*ScanDataThread;
 	CInstallThread	*InstallThread;
-	NLMISC::IThread	*thread;
+	NLMISC::CThread	*thread;
 
 	// State
 	struct CState

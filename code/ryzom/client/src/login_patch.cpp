@@ -404,7 +404,7 @@ void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 	CheckThread = new CCheckThread(includeBackgroundPatch);
 	nlassert (CheckThread != NULL);
 
-	thread = IThread::create (CheckThread);
+	thread = new CThread (CheckThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }
@@ -651,7 +651,7 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 	}
 
 	// Launch the thread
-	thread = IThread::create (PatchThread);
+	thread = new CThread (PatchThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }
@@ -1986,7 +1986,7 @@ void CPatchManager::startScanDataThread()
 	ScanDataThread = new CScanDataThread();
 	nlassert (ScanDataThread != NULL);
 
-	thread = IThread::create (ScanDataThread);
+	thread = new CThread (ScanDataThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }
@@ -3259,7 +3259,7 @@ IAsyncDownloader* CPatchManager::getAsyncDownloader() const
 void CPatchManager::startInstallThread(const std::vector<CInstallThreadEntry>& entries)
 {
 	CInstallThread* installThread = new CInstallThread(entries);
-	thread = IThread::create (installThread);
+	thread = new CThread (installThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }
@@ -3267,7 +3267,7 @@ void CPatchManager::startInstallThread(const std::vector<CInstallThreadEntry>& e
 void CPatchManager::startDownloadThread(const std::vector<CInstallThreadEntry>& entries)
 {
 	CDownloadThread* downloadThread = new CDownloadThread(entries);
-	thread = IThread::create (downloadThread);
+	thread = new CThread (downloadThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }

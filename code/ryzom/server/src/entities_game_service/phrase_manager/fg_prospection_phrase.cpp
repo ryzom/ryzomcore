@@ -1806,7 +1806,7 @@ public:
 			return;
 		_Stopping = false;
 		_Complete = false;
-		_Thread = NLMISC::IThread::create( this );
+		_Thread = new NLMISC::CThread( this );
 		_Thread->start();
 	}
 
@@ -1842,7 +1842,7 @@ private:
 	volatile bool	_Stopping;
 	volatile bool	_Complete;
 
-	NLMISC::IThread	*_Thread;
+	NLMISC::CThread	*_Thread;
 };
 
 

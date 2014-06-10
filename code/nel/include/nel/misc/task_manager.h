@@ -144,7 +144,7 @@ protected:
 	CSynchronized<std::deque<std::string> >	_DoneTaskQueue;
 
 	/// thread pointer
-	IThread *_Thread;
+	CThread *_Thread;
 
 	/// flag indicate thread loop, if false cause thread exit
 	volatile	bool _ThreadRunning;

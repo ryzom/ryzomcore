@@ -162,7 +162,7 @@ namespace NLNET
 	private:
 		// data for the singleton instance
 		CStdinMonitorThread* _StdinMonitorThreadInstance;
-		NLMISC::IThread* _StdinMonitorThreadHandle;
+		NLMISC::CThread* _StdinMonitorThreadHandle;
 	};
 
 
@@ -191,7 +191,7 @@ namespace NLNET
 	void CStdinMonitorSingleton::init()
 	{
 		_StdinMonitorThreadInstance= new CStdinMonitorThread;
-		_StdinMonitorThreadHandle = NLMISC::IThread::create (_StdinMonitorThreadInstance, 1024*4*4);
+		_StdinMonitorThreadHandle = new NLMISC::CThread (_StdinMonitorThreadInstance);
 		_StdinMonitorThreadHandle->start();
 	}
 
@@ -219,7 +219,7 @@ namespace NLNET
 			return;
 
 		// terminate the thread and wait for it to finish
-		_StdinMonitorThreadHandle->terminate();
+		// _StdinMonitorThreadHandle->terminate(); // FIXME: TERMINATE...
 		_StdinMonitorThreadHandle->wait();
 
 		// destroy the thread object instance and reset the pointer to NULL to mark as 'uninitialised'

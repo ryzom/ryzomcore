@@ -215,7 +215,7 @@ bool	CLogAnalyserService::update()
 
 		LogTask.Query = _Current;
 
-		_Thread = IThread::create(&LogTask);
+		_Thread = new CThread(&LogTask);
 		_Thread->start();
 	}
 	_Mutex.leave();

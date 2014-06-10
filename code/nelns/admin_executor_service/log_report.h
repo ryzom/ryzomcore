@@ -92,7 +92,7 @@ private:
 	std::string		_LogTarget;
 	std::vector<std::string>	_LogPaths;
 
-	NLMISC::IThread	*_Thread;
+	NLMISC::CThread	*_Thread;
 
 	CLogReport		*_OutputLogReport;
 };

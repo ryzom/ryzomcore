@@ -3027,7 +3027,7 @@ void audit(const CAdminCommand *cmd, const string &rawCommand, const CEntityId &
 	char params[1024];
 	sprintf(params, "action=audit&cmd=%s&raw=%s&name=(%s,%s)&target=%s", cmd->Name.c_str(), rawCommand.c_str(), eid.toString().c_str(), name.c_str(), targetName.c_str());
 
-	IThread *thread = IThread::create(new CHttpPostTask(host, page, params));
+	CThread *thread = new CThread(new CHttpPostTask(host, page, params));
 	thread->start();
 }
 

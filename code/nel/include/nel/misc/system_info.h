@@ -65,6 +65,10 @@ public:
 	  */
 	static bool isNT();
 
+	/** Return number of CPU cores
+	  */
+	static uint getCPUCount();
+
 	/** Returns the space left on the hard drive that contains the filename
 	  */
 	static std::string availableHDSpace (const std::string &filename);

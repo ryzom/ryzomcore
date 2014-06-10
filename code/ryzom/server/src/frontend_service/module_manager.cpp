@@ -59,7 +59,7 @@ CModuleManager::~CModuleManager()
 	if (_Thread != NULL)
 	{
 		nlwarning("FEMMAN: [%s] Execution is not finished yet. Brutal thread killing", _StackName.c_str());
-		_Thread->terminate();
+		_Thread->wait(); // _Thread->terminate(); // FIXME: THREAD: Have a proper way to kill this thread
 		delete _Thread;
 	}
 }
@@ -207,7 +207,7 @@ void	CModuleManager::addWait(uint id)
 
 void	CModuleManager::start()
 {
-	_Thread = IThread::create(this);
+	_Thread = new CThread(this);
 
 	_StopThread = false;
 	_ThreadStopped = false;
@@ -284,7 +284,7 @@ void	CModuleManager::stop(bool blockingMode, TTime timeout)
 		if (!_ThreadStopped)
 		{
 			nlwarning("FEMMAN: [%s] Can't stop. Brutal thread killing", _StackName.c_str());
-			_Thread->terminate();
+			_Thread->wait(); // _Thread->terminate(); // FIXME: THREAD: Have a proper way to kill this thread
 		}
 
 		delete _Thread;

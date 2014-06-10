@@ -47,7 +47,7 @@ namespace NLSOUND {
 CStreamFileSource::CStreamFileSource(CStreamFileSound *streamFileSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
 : CStreamSource(streamFileSound, spawn, cb, cbUserParam, cluster, groupController), m_AudioDecoder(NULL), m_Paused(false)
 {
-	m_Thread = NLMISC::IThread::create(this);
+	m_Thread = new NLMISC::CThread(this);
 }
 
 CStreamFileSource::~CStreamFileSource()
@@ -121,7 +121,7 @@ void CStreamFileSource::play()
 		// else load audiodecoder in thread
 		m_WaitingForPlay = true;
 		m_Thread->start();
-		m_Thread->setPriority(NLMISC::ThreadPriorityHighest);
+		m_Thread->setPriority(NLMISC::ThreadPriorityHigh);
 		if (!getStreamFileSound()->getAsync())
 		{
 			// wait until at least one buffer is ready
@@ -304,6 +304,8 @@ inline bool CStreamFileSource::bufferMore(uint bytes) // buffer from bytes (mini
 
 void CStreamFileSource::run()
 {
+	NLMISC::CThread::setPriority(NLMISC::ThreadPriorityHigh);
+
 #ifdef NLSOUND_STREAM_FILE_DEBUG
 	nldebug("run %s", getStreamFileSound()->getFilePath().c_str());
 	uint dumpI = 0;

@@ -75,7 +75,7 @@ public:
 
 private:
 
-	NLMISC::IThread	*_Thread;
+	NLMISC::CThread	*_Thread;
 
 };
 

@@ -378,36 +378,10 @@ void outOfMemory()
 	nlstopex (("OUT OF MEMORY"));
 }
 
-// For multi cpu, active only one CPU for the main thread
-uint64		Debug_OldCPUMask= 0;
-uint64		Debug_NewCPUMask= 0;
-void setCPUMask ()
-{
-	uint64 cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_OldCPUMask= cpuMask;
-
-	// get the processor to allow process
-	uint i = 0;
-	while ((i<64) && ((cpuMask&(SINT64_CONSTANT(1)<<i)) == 0))
-		i++;
-
-	// Set the CPU mask
-	if (i<64)
-	{
-		IProcess::getCurrentProcess ()->setCPUMask(1<<i);
-		//IThread::getCurrentThread ()->setCPUMask (1<<i);
-	}
-
-	// check
-	cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_NewCPUMask= cpuMask;
-}
-
 string getVersionString (uint64 version)
 {
 	return toString ("%u.%u.%u.%u", (unsigned int) (version >> 48), (unsigned int) ((version >> 32) & 0xffff), (unsigned int) ((version >> 16) & 0xffff), (unsigned int) (version & 0xffff));
 }
-
 
 string getSystemInformation()
 {
@@ -742,8 +716,6 @@ void prelogInit()
 		
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
-		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
-			setCPUMask();
 		
 		FPU_CHECKER_ONCE
 
@@ -963,9 +935,11 @@ void prelogInit()
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
 
-#ifdef NL_OS_WINDOWS
-
+#if 0
 		CBGDownloaderAccess::getInstance().init();
+#endif
+
+#ifdef NL_OS_WINDOWS
 
 		if (SlashScreen)
 			DestroyWindow (SlashScreen);

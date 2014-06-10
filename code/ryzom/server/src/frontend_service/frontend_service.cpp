@@ -257,7 +257,7 @@ public:
 };
 
 CSendRunnable	SendTask;
-IThread*		SendThread = NULL;
+CThread*		SendThread = NULL;
 
 /*
  * Receive task
@@ -1323,7 +1323,7 @@ void CFrontEndService::init()
 		{
 			// Init send thread
 			nlinfo("UseSendThread on, initialise send thread");
-			SendThread = IThread::create(&SendTask);
+			SendThread = new CThread(&SendTask);
 			SendThread->start();
 		}
 

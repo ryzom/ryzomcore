@@ -90,7 +90,7 @@ private:
 
 
 	/// The thread associated to this manager
-	NLMISC::IThread								*_Thread;
+	NLMISC::CThread								*_Thread;
 
 	/// @name The stop flags
 	//@{
