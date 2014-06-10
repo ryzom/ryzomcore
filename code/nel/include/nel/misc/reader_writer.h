@@ -33,8 +33,8 @@ class CReaderWriter
 {
 private:
 
-	volatile CAtomicLock	_Fairness;
-	volatile CAtomicLock	_ReadersMutex;
+	volatile CMutex			_Fairness;
+	volatile CMutex			_ReadersMutex;
 	volatile CMutex			_RWMutex;
 	volatile sint			_ReadersLevel;
 
@@ -45,29 +45,29 @@ public:
 
 	void			enterReader()
 	{
-		const_cast<CAtomicLock&>(_Fairness).enter();
-		const_cast<CAtomicLock&>(_ReadersMutex).enter();
+		const_cast<CMutex&>(_Fairness).enter();
+		const_cast<CMutex&>(_ReadersMutex).enter();
 		++_ReadersLevel;
 		if (_ReadersLevel == 1)
 			const_cast<CMutex&>(_RWMutex).enter();
-		const_cast<CAtomicLock&>(_ReadersMutex).leave();
-		const_cast<CAtomicLock&>(_Fairness).leave();
+		const_cast<CMutex&>(_ReadersMutex).leave();
+		const_cast<CMutex&>(_Fairness).leave();
 	}
 
 	void			leaveReader()
 	{
-		const_cast<CAtomicLock&>(_ReadersMutex).enter();
+		const_cast<CMutex&>(_ReadersMutex).enter();
 		--_ReadersLevel;
 		if (_ReadersLevel == 0)
 			const_cast<CMutex&>(_RWMutex).leave();
-		const_cast<CAtomicLock&>(_ReadersMutex).leave();
+		const_cast<CMutex&>(_ReadersMutex).leave();
 	}
 
 	void			enterWriter()
 	{
-		const_cast<CAtomicLock&>(_Fairness).enter();
+		const_cast<CMutex&>(_Fairness).enter();
 		const_cast<CMutex&>(_RWMutex).enter();
-		const_cast<CAtomicLock&>(_Fairness).leave();
+		const_cast<CMutex&>(_Fairness).leave();
 	}
 
 	void			leaveWriter()
