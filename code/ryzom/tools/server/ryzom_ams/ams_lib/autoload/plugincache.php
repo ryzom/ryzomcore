@@ -1,262 +1,150 @@
- 
 <?php
 
 /**
+ * API for loading and interacting with plugins
+ *   contains getters and setters
+ * 
+ * @author shubham meena mentored by Matthew Lagoe 
+ */
 
-* contains the getters and setters for plugins 
-
-* this file is for demo purpose
-
-**/
-
-
-
-
-
-class Plugincache{
-
+class Plugincache {
+    private $id;
+     private $plugin_name;
+     private $plugin_type;
+     private $plugin_permission;
+     private $plugin_status;
+     private $plugin_info = array();
     
-
-    private $id;   
-
-    private $plugin_name;   
-
-    private $plugin_version;   
-
-    private $plugin_permission;   
-
-    private $plugin_isactive;
-
-    
-
     /**
-
-    * A constructor.
-
-    * Empty constructor
-
-    */
-
-    public function __construct() {
-
-    }
-
+     * A constructor.
+     * Empty constructor
+     */
     
-
+     public function __construct() {
+        } 
     
-
-    public function set($values) {
-
-        $this->setId($values['PluginId']);
-
-        $this->setPluginName($values['PluginName']);
-
-        $this->setPluginVersion($values['PluginVersion']);
-
-        $this->setPluginPermission($values['PluginPermission']);
-
-	$this->setIsActive($values['IsActive']);
-
-    }
-
+    public function set( $values ) {
+        $this -> setId( $values['Id'] );
+         $this -> setPluginName( $values['Name'] );
+         $this -> setPluginType( $values['Type'] );
+         $this -> setPluginPermission( $values['Permission'] );
+         $this -> setPluginStatus( $values['Status'] );
+         $this -> setPluginInfo( $values['Info'] );
+         } 
     
-
-    
-
     /**
-
-    * loads the object's attributes.
-
-    */
-
-    public function load_With_SID( ) {
-
-        $dbl = new DBLayer("lib");
-
-        $statement = $dbl->executeWithoutParams("SELECT * FROM plugins");
-
-        $row = $statement->fetch();
-
-        $this->set($row);
-
-    } 
-
+     * loads the object's attributes.
+     */
+    public function load_With_SID() {
+        $dbl = new DBLayer( "lib" );
+         $statement = $dbl -> executeWithoutParams( "SELECT * FROM plugins" );
+         $row = $statement -> fetch();
+         $this -> set( $row );
+         } 
     
-
-    
-
     /**
-
-    * updates the entry.
-
-    */
-
-    public function update(){
-
-        $dbl = new DBLayer("lib");
-
-        $query = "UPDATE plugins SET PluginPermission= :t, PluginVersion = :q, IsActive = :d WHERE PluginName=:p_n";
-
-        $values = Array('p_n' => $this->getPluginName(), 't' => $this->getPluginPermission(), 'q' => $this->getPluginVersion(), 'd' => $this->getIsActive());
-
-        $statement = $dbl->execute($query, $values);
-
-    }
-
+     * get plugin id attribute of the object.
+     * 
+     * @return integer id
+     */
+    public function getId() {
+        return $this -> Id;
+         } 
     
-
+    /**
+     * get plugin permission attribute of the object.
+     */
+    public function getPluginPermission() {
+        return $this -> plugin_permission;
+         } 
     
-
-    public function getId(){
-
-        return $this->Id;
-
-    }
-
-   
-
     /**
-
-    * get plugin permission attribute of the object.
-
-    */
-
-    public function getPluginPermission(){
-
-        return $this->plugin_permission;
-
-    }
-
+     * get plugin Type attribute of the object.
+     */
+    public function getPluginType() {
+        return $this -> plugin_version;
+         } 
     
-
     /**
-
-    * get plugin version attribute of the object.
-
-    */
-
-    public function getPluginVersion(){
-
-        return $this->plugin_version;
-
-    }
-
+     * get plugin status attribute of the object.
+     */
+    public function getPluginStatus() {
+        return $this -> plugin_status;
+         } 
     
-
     /**
-
-    * get plugin is active attribute of the object.
-
-    */
-
-    public function getIsActive(){
-
-        return $this->plugin_isactive;
-
-    }
-
-
-
-    /**
-
-    * get plugin name attribute of the object.
-
-    */
-
-    public function getPluginName(){
-
-        return $this->plugin_name;
-
-    }
-
-    	
-
+     * get plugin name attribute of the object.
+     */
+    public function getPluginName() {
+        return $this -> plugin_name;
+         } 
     
-
+    /**
+     * get plugin info array attribute of the object.
+     */
+    public function getPluginInfo() {
+        return $this -> plugin_info;
+         } 
     
-
     /**
-
-    * set plugin id attribute of the object.
-
-    * @param $s integer id 
-
-    */
-
-    public function setId($s){
-
-        $this->Id = $s;
-
-    }
-
-   
-
-    /**
-
-    * set plugin permission attribute of the object.
-
-    * @param $t type of the query, set permission
-
-    */
-
-    public function setPluginPermission($t){
-
-
-
-        $this->plugin_permission = $t;
-
-    }
-
+     * set plugin id attribute of the object.
+     * 
+     * @param  $s integer id
+     */
+    public function setId( $s ) {
+        $this -> Id = $s;
+         } 
     
-
     /**
-
-    * set plugin version attribute of the object.
-
-    * @param $q  string to set plugin version
-
-    */
-
-    public function setPluginVersion($q){
-
-        $this->plugin_version= $q;
-
-    }
-
+     * set plugin permission attribute of the object.
+     * 
+     * @param  $t type of the query, set permission
+     */
+    public function setPluginPermission( $t ) {
+        $this -> plugin_permission = $t;
+         } 
     
-
     /**
-
-    * set plugin is active attribute of the object.
-
-    * @param $d tinyint to set plugin is active or not .
-
-    */
-
-    public function setIsActive($d){
-
-        $this->plugin_isactive= $d;
-
-    }
-
-
-
-    /**
-
-    * set plugin name attribute of the object.
-
-    * @param $p_n string to set plugin name.
-
-    */
-
-    public function setPluginName($p_n){
-
-        $this->plugin_name= $p_n;
-
-    }
-
+     * set plugin version attribute of the object.
+     * 
+     * @param  $q string to set plugin version
+     */
+    public function setPluginType( $q ) {
+        $this -> plugin_version = $q;
+         } 
     
-
-}
-
- 
+    /**
+     * set plugin status attribute of the object.
+     * 
+     * @param  $d status code type int
+     */
+    public function setPluginStatus( $d ) {
+        $this -> plugin_status = $d;
+         } 
+    
+    /**
+     * get plugin name attribute of the object.
+     */
+    public function getPluginName() {
+        return $this -> plugin_name;
+         } 
+    
+    /**
+     * set plugin name attribute of the object.
+     * 
+     * @param  $p_n string to set plugin name.
+     */
+    public function setPluginName( $p_n ) {
+        $this -> plugin_name = $p_n;
+         } 
+    
+    /**
+     * set plugin info attribute array of the object.
+     * 
+     * @param  $p_n array
+     */
+    public function setPluginInfo( $p_n ) {
+        $this -> plugin_info = $p_n;
+         } 
+    
+    }
