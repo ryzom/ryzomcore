@@ -160,15 +160,15 @@
             DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`plugins` ;
     
             CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`plugins` (
-			  `Id` INT(10) NOT NULL AUTO_INCREMENT,
-			  `FileName	VARCHAR(255) NOT NULL, 
+		  `Id` INT(10) NOT NULL AUTO_INCREMENT,
+                  `FileName VARCHAR(255) NOT NULL, 
   	          `Name` VARCHAR(11) NOT NULL,
   	          `Type` VARCHAR(12) NOT NULL,
   	          `Owner` VARCHAR(25) NOT NULL,
 	          `Permission` VARCHAR(5) NOT NULL,
   	          `Status` INT(11) NOT NULL DEFAULT 0,
   	          `Weight` INT(11) NOT NULL DEFAULT 0,
-			  `Info` BLOB NULL DEFAULT NULL,		
+		  `Info` TEXT NULL DEFAULT NULL,		
               PRIMARY KEY (`Id`) )
             ENGINE = InnoDB;
             

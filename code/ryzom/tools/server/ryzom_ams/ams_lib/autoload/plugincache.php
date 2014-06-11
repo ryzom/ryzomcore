@@ -2,7 +2,7 @@
 
 /**
  * API for loading and interacting with plugins
- *   contains getters and setters
+ *    contains getters and setters
  * 
  * @author shubham meena mentored by Matthew Lagoe 
  */
@@ -29,7 +29,7 @@ class Plugincache {
          $this -> setPluginType( $values['Type'] );
          $this -> setPluginPermission( $values['Permission'] );
          $this -> setPluginStatus( $values['Status'] );
-         $this -> setPluginInfo( $values['Info'] );
+         $this -> setPluginInfo( json_decode( $values['Info'] ) );
          } 
     
     /**
@@ -123,13 +123,6 @@ class Plugincache {
          } 
     
     /**
-     * get plugin name attribute of the object.
-     */
-    public function getPluginName() {
-        return $this -> plugin_name;
-         } 
-    
-    /**
      * set plugin name attribute of the object.
      * 
      * @param  $p_n string to set plugin name.
@@ -147,4 +140,4 @@ class Plugincache {
         $this -> plugin_info = $p_n;
          } 
     
-    }
+    } 
