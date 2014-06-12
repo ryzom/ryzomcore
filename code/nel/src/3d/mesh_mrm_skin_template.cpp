@@ -39,7 +39,7 @@ static void	applyArraySkinNormalT(uint numMatrixes, uint32 *infPtr, CMesh::CSkin
 {
 	/* Prefetch all vertex/normal before, it is to be faster.
 	*/
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#if 0// defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
 	{
 		uint	nInfTmp= nInf;
 		uint32	*infTmpPtr= infPtr;
@@ -176,7 +176,7 @@ static void	applyArraySkinTangentSpaceT(uint numMatrixes, uint32 *infPtr, CMesh:
 {
 	/* Prefetch all vertex/normal/tgSpace before, it is faster.
 	*/
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#if 0 // defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
 	{
 		uint	nInfTmp= nInf;
 		uint32	*infTmpPtr= infPtr;
