@@ -78,14 +78,18 @@ static void	applyArraySkinNormalT(uint numMatrixes, uint32 *infPtr, CMesh::CSkin
 			CVector				*srcVertex= srcVertexPtr + index;
 			CVector				*srcNormal= srcNormalPtr + index;
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVector				tempVertex;
+			CVector				tempNormal;
 
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, tempVertex);
+			*dstVertex = tempVertex;
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, tempNormal);
+			*dstNormal = tempNormal;
 		}
 		break;
 
@@ -99,16 +103,20 @@ static void	applyArraySkinNormalT(uint numMatrixes, uint32 *infPtr, CMesh::CSkin
 			CVector				*srcVertex= srcVertexPtr + index;
 			CVector				*srcNormal= srcNormalPtr + index;
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVector				tempVertex;
+			CVector				tempNormal;
 
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], tempVertex);
+			*dstVertex = tempVertex;
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], tempVertex);
+			*dstNormal = tempNormal;
 		}
 		break;
 
@@ -122,18 +130,22 @@ static void	applyArraySkinNormalT(uint numMatrixes, uint32 *infPtr, CMesh::CSkin
 			CVector				*srcVertex= srcVertexPtr + index;
 			CVector				*srcNormal= srcNormalPtr + index;
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVector				tempVertex;
+			CVector				tempNormal;
 
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], tempVertex);
+			*dstVertex = tempVertex;
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], tempNormal);
+			*dstNormal = tempNormal;
 		}
 		break;
 
@@ -147,20 +159,24 @@ static void	applyArraySkinNormalT(uint numMatrixes, uint32 *infPtr, CMesh::CSkin
 			CVector				*srcVertex= srcVertexPtr + index;
 			CVector				*srcNormal= srcNormalPtr + index;
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVector				tempVertex;
+			CVector				tempNormal;
 
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddPoint( *srcVertex, srcSkin->Weights[3], *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddPoint( *srcVertex, srcSkin->Weights[3], tempVertex);
+			*dstVertex = tempVertex;
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddVector( *srcNormal, srcSkin->Weights[3], *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddVector( *srcNormal, srcSkin->Weights[3], tempNormal);
+			*dstNormal = tempNormal;
 		}
 		break;
 
@@ -220,18 +236,24 @@ static void	applyArraySkinTangentSpaceT(uint numMatrixes, uint32 *infPtr, CMesh:
 			CVector				*srcTgSpace= tgSpacePtr + index;
 			//
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
-			CVector				*dstTgSpace= (CVector*)(dstVertexVB + tgSpaceOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstTgSpace= (CVectorPacked*)(dstVertexVB + tgSpaceOff);
+			CVector				tempVertex;
+			CVector				tempNormal;
+			CVector				tempTgSpace;
 
 
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, tempVertex);
+			*dstVertex = tempVertex;
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, tempNormal);
+			*dstNormal = tempNormal;
 			// Tg space
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, *dstTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, tempTgSpace);
+			*dstTgSpace = tempTgSpace;
 
 		}
 		break;
@@ -248,19 +270,25 @@ static void	applyArraySkinTangentSpaceT(uint numMatrixes, uint32 *infPtr, CMesh:
 			CVector				*srcTgSpace= tgSpacePtr + index;
 			//
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
-			CVector				*dstTgSpace= (CVector*)(dstVertexVB + tgSpaceOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstTgSpace= (CVectorPacked*)(dstVertexVB + tgSpaceOff);
+			CVector				tempVertex;
+			CVector				tempNormal;
+			CVector				tempTgSpace;
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], tempVertex);
+			*dstVertex = tempVertex;
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], tempNormal);
+			*dstNormal = tempNormal;
 			// Tg space
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, srcSkin->Weights[0], *dstTgSpace);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcTgSpace, srcSkin->Weights[1], *dstTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, srcSkin->Weights[0], tempTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcTgSpace, srcSkin->Weights[1], tempTgSpace);
+			*dstTgSpace = tempTgSpace;
 		}
 		break;
 
@@ -276,22 +304,28 @@ static void	applyArraySkinTangentSpaceT(uint numMatrixes, uint32 *infPtr, CMesh:
 			CVector				*srcTgSpace= tgSpacePtr + index;
 			//
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
-			CVector				*dstTgSpace= (CVector*)(dstVertexVB + tgSpaceOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstTgSpace= (CVectorPacked*)(dstVertexVB + tgSpaceOff);
+			CVector				tempVertex;
+			CVector				tempNormal;
+			CVector				tempTgSpace;
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], tempVertex);
+			*dstVertex = tempVertex;
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], tempNormal);
+			*dstNormal = tempNormal;
 			// Tg space
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, srcSkin->Weights[0], *dstTgSpace);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcTgSpace, srcSkin->Weights[1], *dstTgSpace);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcTgSpace, srcSkin->Weights[2], *dstTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, srcSkin->Weights[0], tempTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcTgSpace, srcSkin->Weights[1], tempTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcTgSpace, srcSkin->Weights[2], tempTgSpace);
+			*dstTgSpace = tempTgSpace;
 		}
 		break;
 
@@ -307,25 +341,33 @@ static void	applyArraySkinTangentSpaceT(uint numMatrixes, uint32 *infPtr, CMesh:
 			CVector				*srcTgSpace= tgSpacePtr + index;
 			//
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
-			CVector				*dstTgSpace= (CVector*)(dstVertexVB + tgSpaceOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstTgSpace= (CVectorPacked*)(dstVertexVB + tgSpaceOff);
+
+			CVector				tempVertex;
+			CVector				tempNormal;
+			CVector				tempTgSpace;
 
 			// Vertex.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], *dstVertex);
-			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddPoint( *srcVertex, srcSkin->Weights[3], *dstVertex);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], tempVertex);
+			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddPoint( *srcVertex, srcSkin->Weights[3], tempVertex);
 			// Normal.
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], *dstNormal);
-			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddVector( *srcNormal, srcSkin->Weights[3], *dstNormal);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcNormal, srcSkin->Weights[0], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcNormal, srcSkin->Weights[1], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcNormal, srcSkin->Weights[2], tempNormal);
+			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddVector( *srcNormal, srcSkin->Weights[3], tempNormal);
 			// Tg space
-			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, srcSkin->Weights[0], *dstTgSpace);
-			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcTgSpace, srcSkin->Weights[1], *dstTgSpace);
-			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcTgSpace, srcSkin->Weights[2], *dstTgSpace);
-			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddVector( *srcTgSpace, srcSkin->Weights[3], *dstTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[0] ].mulSetVector( *srcTgSpace, srcSkin->Weights[0], tempTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[1] ].mulAddVector( *srcTgSpace, srcSkin->Weights[1], tempTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[2] ].mulAddVector( *srcTgSpace, srcSkin->Weights[2], tempTgSpace);
+			boneMat3x4[ srcSkin->MatrixId[3] ].mulAddVector( *srcTgSpace, srcSkin->Weights[3], tempTgSpace);
+
+			*dstVertex = tempVertex;
+			*dstNormal = tempNormal;
+			*dstTgSpace = tempTgSpace;
 		}
 		break;
 
@@ -530,16 +572,19 @@ void		CMeshMRMGeom::applyArrayRawSkinNormal1(CRawVertexNormalSkin1 *src, uint8 *
 
 #ifndef NL3D_RAWSKIN_ASM
 		//  for all InfluencedVertices only.
+		CVector tmp;
 		for(;nBlockInf>0;nBlockInf--, src++, destVertexPtr+=NL3D_RAWSKIN_VERTEX_SIZE)
 		{
-			CVector				*dstVertex= (CVector*)(destVertexPtr);
-			CVector				*dstNormal= (CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF);
+			CVectorPacked				*dstVertex= (CVectorPacked*)(destVertexPtr);
+			CVectorPacked				*dstNormal= (CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF);
 
 			// For 1 matrix, can write directly to AGP (if destVertexPtr is AGP...)
 			// Vertex.
-			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex.Pos, *(CVector*)(destVertexPtr) );
+			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex.Pos, tmp );
+			*(CVectorPacked*)(destVertexPtr) = tmp;
 			// Normal.
-			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Vertex.Normal, *(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF) );
+			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Vertex.Normal, tmp );
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF) = tmp;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->Vertex.UV;
 		}
@@ -717,11 +762,11 @@ void		CMeshMRMGeom::applyArrayRawSkinNormal2(CRawVertexNormalSkin2 *src, uint8 *
 			// Vertex.
 			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex.Pos, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddPoint( src->Vertex.Pos, src->Weights[1], tmpVert);
-			*(CVector*)(destVertexPtr)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr)= tmpVert;
 			// Normal.
 			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Vertex.Normal, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddVector( src->Vertex.Normal, src->Weights[1], tmpVert);
-			*(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->Vertex.UV;
 		}
@@ -1021,12 +1066,12 @@ void		CMeshMRMGeom::applyArrayRawSkinNormal3(CRawVertexNormalSkin3 *src, uint8 *
 			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex.Pos, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddPoint( src->Vertex.Pos, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddPoint( src->Vertex.Pos, src->Weights[2], tmpVert);
-			*(CVector*)(destVertexPtr)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr)= tmpVert;
 			// Normal.
 			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Vertex.Normal, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddVector( src->Vertex.Normal, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddVector( src->Vertex.Normal, src->Weights[2], tmpVert);
-			*(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->Vertex.UV;
 		}
@@ -1414,13 +1459,13 @@ void		CMeshMRMGeom::applyArrayRawSkinNormal4(CRawVertexNormalSkin4 *src, uint8 *
 			boneMat3x4[ src->MatrixId[1] ].mulAddPoint( src->Vertex.Pos, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddPoint( src->Vertex.Pos, src->Weights[2], tmpVert);
 			boneMat3x4[ src->MatrixId[3] ].mulAddPoint( src->Vertex.Pos, src->Weights[3], tmpVert);
-			*(CVector*)(destVertexPtr)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr)= tmpVert;
 			// Normal.
 			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Vertex.Normal, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddVector( src->Vertex.Normal, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddVector( src->Vertex.Normal, src->Weights[2], tmpVert);
 			boneMat3x4[ src->MatrixId[3] ].mulAddVector( src->Vertex.Normal, src->Weights[3], tmpVert);
-			*(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->Vertex.UV;
 		}

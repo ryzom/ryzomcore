@@ -1155,19 +1155,19 @@ IVBDrvInfos::~IVBDrvInfos()
 // CVertexBufferReadWrite
 // --------------------------------------------------
 
-NLMISC::CVector* CVertexBufferReadWrite::getVertexCoordPointer(uint idx)
+NLMISC::CVectorPacked* CVertexBufferReadWrite::getVertexCoordPointer(uint idx)
 {
 	nlassert (_Parent->checkLockedBuffer());
 	uint8*	ptr;
 
 	ptr=_Parent->_LockedBuffer;
 	ptr+=(idx*_Parent->_VertexSize);
-	return((NLMISC::CVector*)ptr);
+	return((NLMISC::CVectorPacked*)ptr);
 }
 
 // --------------------------------------------------
 
-NLMISC::CVector* CVertexBufferReadWrite::getNormalCoordPointer(uint idx)
+NLMISC::CVectorPacked* CVertexBufferReadWrite::getNormalCoordPointer(uint idx)
 {
 	nlassert (_Parent->checkLockedBuffer());
 	uint8*	ptr;
@@ -1179,7 +1179,7 @@ NLMISC::CVector* CVertexBufferReadWrite::getNormalCoordPointer(uint idx)
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::Normal];
 	ptr+=idx*_Parent->_VertexSize;
-	return((NLMISC::CVector*)ptr);
+	return((NLMISC::CVectorPacked*)ptr);
 }
 
 // --------------------------------------------------
@@ -1280,19 +1280,19 @@ void CVertexBufferReadWrite::touchVertices (uint first, uint last)
 // CVertexBufferRead
 // --------------------------------------------------
 
-const NLMISC::CVector* CVertexBufferRead::getVertexCoordPointer(uint idx) const
+const NLMISC::CVectorPacked* CVertexBufferRead::getVertexCoordPointer(uint idx) const
 {
 	nlassert (_Parent->checkLockedBuffer());
 	const uint8*	ptr;
 
 	ptr=_Parent->_LockedBuffer;
 	ptr+=(idx*_Parent->_VertexSize);
-	return((const NLMISC::CVector*)ptr);
+	return((const NLMISC::CVectorPacked*)ptr);
 }
 
 // --------------------------------------------------
 
-const NLMISC::CVector* CVertexBufferRead::getNormalCoordPointer(uint idx) const
+const NLMISC::CVectorPacked* CVertexBufferRead::getNormalCoordPointer(uint idx) const
 {
 	nlassert (_Parent->checkLockedBuffer());
 	const uint8*	ptr;
@@ -1304,7 +1304,7 @@ const NLMISC::CVector* CVertexBufferRead::getNormalCoordPointer(uint idx) const
 	ptr=_Parent->_LockedBuffer;
 	ptr+=_Parent->_Offset[CVertexBuffer::Normal];
 	ptr+=idx*_Parent->_VertexSize;
-	return((const NLMISC::CVector*)ptr);
+	return((const NLMISC::CVectorPacked*)ptr);
 }
 
 // --------------------------------------------------

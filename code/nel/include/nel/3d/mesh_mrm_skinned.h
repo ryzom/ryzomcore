@@ -43,6 +43,7 @@ namespace NL3D
 
 
 using	NLMISC::CVector;
+using	NLMISC::CVectorPacked;
 using	NLMISC::CPlane;
 using	NLMISC::CMatrix;
 class	CMRMBuilder;
@@ -405,11 +406,23 @@ public:
 			uint8	Weights[NL3D_MESH_MRM_SKINNED_MAX_MATRIX];
 
 			// Decompact it
+			inline void getPos (CVectorPacked &dest, float factor) const
+			{
+				dest.x = (float)X * factor;
+				dest.y = (float)Y * factor;
+				dest.z = (float)Z * factor;
+			}
 			inline void getPos (CVector &dest, float factor) const
 			{
 				dest.x = (float)X * factor;
 				dest.y = (float)Y * factor;
 				dest.z = (float)Z * factor;
+			}
+			inline void getNormal (CVectorPacked &dest) const
+			{
+				dest.x = (float)Nx * (1.f/NL3D_MESH_MRM_SKINNED_NORMAL_FACTOR);
+				dest.y = (float)Ny * (1.f/NL3D_MESH_MRM_SKINNED_NORMAL_FACTOR);
+				dest.z = (float)Nz * (1.f/NL3D_MESH_MRM_SKINNED_NORMAL_FACTOR);
 			}
 			inline void getNormal (CVector &dest) const
 			{
@@ -480,6 +493,10 @@ public:
 		}
 
 		// Decompact position
+		inline void getPos (CVectorPacked &dest, const CPackedVertex &src) const
+		{
+			src.getPos (dest, _DecompactScale);
+		}
 		inline void getPos (CVector &dest, const CPackedVertex &src) const
 		{
 			src.getPos (dest, _DecompactScale);

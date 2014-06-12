@@ -128,15 +128,15 @@ void		CVegetableShape::build(CVegetableShapeBuild &vbuild)
 	for(i=0;i<nbVerts;i++)
 	{
 		// Position.
-		const CVector		*srcPos= vba.getVertexCoordPointer(i);
-		CVector		*dstPos= vbaOut.getVertexCoordPointer(i);
+		const CVectorPacked		*srcPos= vba.getVertexCoordPointer(i);
+		CVectorPacked		*dstPos= vbaOut.getVertexCoordPointer(i);
 		*dstPos= *srcPos;
 
 		// Normal
 		if(Lighted)
 		{
-			const CVector *srcNormal= vba.getNormalCoordPointer(i);
-			CVector		*dstNormal= vbaOut.getNormalCoordPointer(i);
+			const CVectorPacked *srcNormal= vba.getNormalCoordPointer(i);
+			CVectorPacked		*dstNormal= vbaOut.getNormalCoordPointer(i);
 			*dstNormal= *srcNormal;
 		}
 

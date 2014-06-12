@@ -141,6 +141,43 @@ public:		// Methods.
 	friend	CVector	operator*(float f, const CVector &v0);
 };
 
+class CVectorPacked
+{
+public: // Attributes.
+	float	x,y,z;
+
+public:
+	/// @name Object.
+	//@{
+	/// Constructor which does nothing.
+	CVectorPacked() { }
+	/// Constructor .
+	CVectorPacked(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	/// Copy Constructor.
+	CVectorPacked(const CVector &v) : x(v.x), y(v.y), z(v.z) {}
+	//@}
+
+	void set(float _x, float _y, float _z)
+	{
+		x = _x;
+		y = _y;
+		z = _z;
+	}
+
+	CVectorPacked &operator += (const CVector &v)
+	{
+		x += v.x;
+		y += v.y;
+		z += v.z;
+		return *this;
+	}
+
+	operator CVector () const
+	{
+		return CVector(x, y, z);
+	}
+};
+
 // blend (faster version than the generic version found in algo.h)
 inline CVector blend(const CVector &v0, const CVector &v1, float lambda)
 {

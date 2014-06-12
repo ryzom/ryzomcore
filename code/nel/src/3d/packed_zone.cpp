@@ -576,6 +576,22 @@ void CPackedZone32::unpackTri(const CPackedTri &src, CVector dest[3]) const
 
 }
 
+// ***************************************************************************************
+void CPackedZone32::unpackTri(const CPackedTri &src, CVectorPacked dest[3]) const
+{
+	// TODO: add 'multiply-add' operator
+	dest[0].set(Verts[src.V0].X * _PackedLocalToWorld.x + _Origin.x,
+		        Verts[src.V0].Y * _PackedLocalToWorld.y + _Origin.y,
+				Verts[src.V0].Z * _PackedLocalToWorld.z + _Origin.z);
+	dest[1].set(Verts[src.V1].X * _PackedLocalToWorld.x + _Origin.x,
+		        Verts[src.V1].Y * _PackedLocalToWorld.y + _Origin.y,
+				Verts[src.V1].Z * _PackedLocalToWorld.z + _Origin.z);
+	dest[2].set(Verts[src.V2].X * _PackedLocalToWorld.x + _Origin.x,
+		        Verts[src.V2].Y * _PackedLocalToWorld.y + _Origin.y,
+				Verts[src.V2].Z * _PackedLocalToWorld.z + _Origin.z);
+
+}
+
 uint32 CPackedZone32::UndefIndex = 0xffffffff;
 
 // ***************************************************************************************
@@ -973,8 +989,8 @@ void CPackedZone32::render(CVertexBuffer &vb, IDriver &drv, CMaterial &material,
 		CVertexBufferReadWrite vba;
 		vb.setNumVertices(batchSize * 3);
 		vb.lock(vba);
-		CVector *dest = vba.getVertexCoordPointer(0);
-		const CVector *endDest = dest + batchSize * 3;
+		CVectorPacked *dest = vba.getVertexCoordPointer(0);
+		const CVectorPacked *endDest = dest + batchSize * 3;
 		for(sint y = 0; y < (sint) silhouette.size(); ++y)
 		{
 			sint gridY = y + minY;
@@ -1196,8 +1212,8 @@ void CPackedZone16::render(CVertexBuffer &vb, IDriver &drv, CMaterial &material,
 		CVertexBufferReadWrite vba;
 		vb.setNumVertices(batchSize * 3);
 		vb.lock(vba);
-		CVector *dest = vba.getVertexCoordPointer(0);
-		const CVector *endDest = dest + batchSize * 3;
+		CVectorPacked *dest = vba.getVertexCoordPointer(0);
+		const CVectorPacked *endDest = dest + batchSize * 3;
 		for(sint y = 0; y < (sint) silhouette.size(); ++y)
 		{
 			sint gridY = y + minY;
@@ -1253,6 +1269,23 @@ void CPackedZone16::render(CVertexBuffer &vb, IDriver &drv, CMaterial &material,
 
 
 
+
+// ***************************************************************************************
+void CPackedZone16::unpackTri(const CPackedTri16 &src, CVectorPacked dest[3]) const
+{
+	// yes this is ugly code duplication of CPackedZone16::unpackTri but this code is temporary anyway...
+	// TODO: add 'multiply-add' operator
+	dest[0].set(Verts[src.V0].X * _PackedLocalToWorld.x + _Origin.x,
+		        Verts[src.V0].Y * _PackedLocalToWorld.y + _Origin.y,
+				Verts[src.V0].Z * _PackedLocalToWorld.z + _Origin.z);
+	dest[1].set(Verts[src.V1].X * _PackedLocalToWorld.x + _Origin.x,
+		        Verts[src.V1].Y * _PackedLocalToWorld.y + _Origin.y,
+				Verts[src.V1].Z * _PackedLocalToWorld.z + _Origin.z);
+	dest[2].set(Verts[src.V2].X * _PackedLocalToWorld.x + _Origin.x,
+		        Verts[src.V2].Y * _PackedLocalToWorld.y + _Origin.y,
+				Verts[src.V2].Z * _PackedLocalToWorld.z + _Origin.z);
+
+}
 
 // ***************************************************************************************
 void CPackedZone16::unpackTri(const CPackedTri16 &src, CVector dest[3]) const

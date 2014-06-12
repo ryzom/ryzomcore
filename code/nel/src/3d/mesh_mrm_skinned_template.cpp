@@ -79,16 +79,19 @@ void		CMeshMRMSkinnedGeom::applyArrayRawSkinNormal1(CRawVertexNormalSkinned1 *sr
 
 #ifndef NL3D_RAWSKIN_ASM
 		//  for all InfluencedVertices only.
+		CVector tmp;
 		for(;nBlockInf>0;nBlockInf--, src++, destVertexPtr+=NL3D_RAWSKIN_VERTEX_SIZE)
 		{
-			CVector				*dstVertex= (CVector*)(destVertexPtr);
-			CVector				*dstNormal= (CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF);
+			CVectorPacked				*dstVertex= (CVectorPacked*)(destVertexPtr);
+			CVectorPacked				*dstNormal= (CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF);
 
 			// For 1 matrix, can write directly to AGP (if destVertexPtr is AGP...)
 			// Vertex.
-			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex, *(CVector*)(destVertexPtr) );
+			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex, tmp );
+			*(CVectorPacked*)(destVertexPtr) = tmp;
 			// Normal.
-			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Normal, *(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF) );
+			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Normal, tmp );
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF) = tmp;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->UV;
 		}
@@ -266,11 +269,11 @@ void		CMeshMRMSkinnedGeom::applyArrayRawSkinNormal2(CRawVertexNormalSkinned2 *sr
 			// Vertex.
 			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddPoint( src->Vertex, src->Weights[1], tmpVert);
-			*(CVector*)(destVertexPtr)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr)= tmpVert;
 			// Normal.
 			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Normal, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddVector( src->Normal, src->Weights[1], tmpVert);
-			*(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->UV;
 		}
@@ -570,12 +573,12 @@ void		CMeshMRMSkinnedGeom::applyArrayRawSkinNormal3(CRawVertexNormalSkinned3 *sr
 			boneMat3x4[ src->MatrixId[0] ].mulSetPoint( src->Vertex, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddPoint( src->Vertex, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddPoint( src->Vertex, src->Weights[2], tmpVert);
-			*(CVector*)(destVertexPtr)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr)= tmpVert;
 			// Normal.
 			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Normal, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddVector( src->Normal, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddVector( src->Normal, src->Weights[2], tmpVert);
-			*(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->UV;
 		}
@@ -963,13 +966,13 @@ void		CMeshMRMSkinnedGeom::applyArrayRawSkinNormal4(CRawVertexNormalSkinned4 *sr
 			boneMat3x4[ src->MatrixId[1] ].mulAddPoint( src->Vertex, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddPoint( src->Vertex, src->Weights[2], tmpVert);
 			boneMat3x4[ src->MatrixId[3] ].mulAddPoint( src->Vertex, src->Weights[3], tmpVert);
-			*(CVector*)(destVertexPtr)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr)= tmpVert;
 			// Normal.
 			boneMat3x4[ src->MatrixId[0] ].mulSetVector( src->Normal, src->Weights[0], tmpVert);
 			boneMat3x4[ src->MatrixId[1] ].mulAddVector( src->Normal, src->Weights[1], tmpVert);
 			boneMat3x4[ src->MatrixId[2] ].mulAddVector( src->Normal, src->Weights[2], tmpVert);
 			boneMat3x4[ src->MatrixId[3] ].mulAddVector( src->Normal, src->Weights[3], tmpVert);
-			*(CVector*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
+			*(CVectorPacked*)(destVertexPtr + NL3D_RAWSKIN_NORMAL_OFF)= tmpVert;
 			// UV copy.
 			*(CUV*)(destVertexPtr + NL3D_RAWSKIN_UV_OFF)= src->UV;
 		}
