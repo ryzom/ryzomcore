@@ -83,7 +83,7 @@ public:
 									  );
 
 	// a vertex
-	struct CRGBAVertex
+	struct CRGBAVertex // FIXME_SSE2
 	{
 #if USE_SSE2
 		float X, Y, Z;

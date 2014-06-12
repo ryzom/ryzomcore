@@ -494,7 +494,7 @@ void	CMeshMRMGeom::applySkinWithTangentSpace(CLod &lod, const CSkeletonModel *sk
 	On a P4-2.4Ghz, for 40000 vertices skinned, both no precaching and asm
 	saves 27% of execution time in the applyRawSkinNormal*() loop (ie 1 ms)
 */
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM) &&!defined(USE_SSE2)
+#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM) &&!defined(USE_SSE2) // FIXME_SSE2
 //#define	NL3D_RAWSKIN_PRECACHE
 #define	NL3D_RAWSKIN_ASM
 #endif

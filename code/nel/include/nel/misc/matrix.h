@@ -53,6 +53,7 @@ class	CPlane;
  * \author Nevrax France
  * \date 2000
  */
+NL_ALIGN(16)
 class CMatrix
 {
 public:
@@ -362,6 +363,10 @@ private:
 	float	M[16];
 	float	Scale33;
 	uint32	StateBit;	// BitVector. 0<=>identity.
+
+#if USE_SSE2
+	void setMulMatrixSSE2(const CMatrix &m1, const CMatrix &m2);
+#endif
 
 	// Methods For inversion.
 	bool	fastInvert33(CMatrix &ret) const;
