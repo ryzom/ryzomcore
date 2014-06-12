@@ -1379,21 +1379,21 @@ void			CVegetableManager::addInstance(CVegetableInstanceGroup *ig,
 		// Pos.
 		//-------
 		// Separate Center and relative pos.
-		CVector	relPos= mat.mulVector(*(CVector*)srcPtr);	// mulVector, because translation in v[center]
+		CVector	relPos= mat.mulVector(*(CVectorPacked*)srcPtr);	// mulVector, because translation in v[center]
 		// compute bendCenterPos
 		CVector	bendCenterPos;
 		if(shape->BendCenterMode == CVegetableShapeBuild::BendCenterNull)
 			bendCenterPos= CVector::Null;
 		else
 		{
-			CVector	v= *(CVector*)srcPtr;
+			CVector	v= *(CVectorPacked*)srcPtr;
 			v.z= 0;
 			bendCenterPos= mat.mulVector(v);				// mulVector, because translation in v[center]
 		}
 		// copy
 		deltaPos= relPos-bendCenterPos;
-		*(CVector*)dstPtr= deltaPos;
-		*(CVector*)(dstPtr + dstCenterOff)= instancePos + bendCenterPos;
+		*(CVectorPacked*)dstPtr= deltaPos;
+		*(CVectorPacked*)(dstPtr + dstCenterOff)= instancePos + bendCenterPos;
 		// if !destLighted, then VP is different
 		if(!destLighted)
 		{
@@ -1426,7 +1426,7 @@ void			CVegetableManager::addInstance(CVegetableInstanceGroup *ig,
 			if(destLighted)
 			{
 				// normal
-				*(CVector*)(dstPtr + dstNormalOff)= normalMat.mulVector( *(CVector*)(srcPtr + srcNormalOff) );
+				*(CVectorPacked*)(dstPtr + dstNormalOff)= normalMat.mulVector( *(CVectorPacked*)(srcPtr + srcNormalOff) );
 			}
 			// If destLighted, secondaryRGBA is the ambient
 			// else secondaryRGBA is used only for Alpha (DLM uv.v).
@@ -1437,7 +1437,7 @@ void			CVegetableManager::addInstance(CVegetableInstanceGroup *ig,
 			nlassert(!destLighted);
 
 			// compute normal.
-			CVector		rotNormal= normalMat.mulVector( *(CVector*)(srcPtr + srcNormalOff) );
+			CVector		rotNormal= normalMat.mulVector( *(CVectorPacked*)(srcPtr + srcNormalOff) );
 			// must normalize() because scale is possible.
 			rotNormal.normalize();
 
@@ -1466,7 +1466,7 @@ void			CVegetableManager::addInstance(CVegetableInstanceGroup *ig,
 
 		// Bend.
 		//-------
-		CVector		*dstBendPtr= (CVector*)(dstPtr + dstBendOff);
+		CVectorPacked		*dstBendPtr= (CVectorPacked*)(dstPtr + dstBendOff);
 		// setup bend Phase.
 		dstBendPtr->y= bendPhase;
 		// setup bend Weight.
@@ -2704,7 +2704,7 @@ uint		CVegetableManager::updateInstanceLighting(CVegetableInstanceGroup *ig, uin
 			nlassert(!destLighted);
 
 			// compute normal.
-			CVector		rotNormal= normalMat.mulVector( *(CVector*)(srcPtr + srcNormalOff) );
+			CVector		rotNormal= normalMat.mulVector( *(CVectorPacked*)(srcPtr + srcNormalOff) );
 			// must normalize() because scale is possible.
 			rotNormal.normalize();
 

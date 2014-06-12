@@ -302,7 +302,7 @@ void		CMeshMultiLodInstance::setPosCoarseMesh( CMeshGeom &geom, const CMatrix &m
 	for (uint i=0; i<_LastCoarseMeshNumVertices; i++)
 	{
 		// Transform position
-		*(CVector*)vDest = matrix.mulPoint (*(const CVector*)vSrc);
+		*(CVectorPacked*)vDest = matrix.mulPoint (CVector(*(const CVectorPacked*)vSrc));
 
 		// Next point
 		vSrc+=vtSrcSize;

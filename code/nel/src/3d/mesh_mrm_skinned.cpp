@@ -1962,7 +1962,7 @@ sint			CMeshMRMSkinnedGeom::renderShadowSkinGeom(CMeshMRMSkinnedInstance	*mi, ui
 	CLod	&lod= _Lods[_Lods.size()-1];
 	computeBoneMatrixes3x4(boneMat3x4, lod.MatrixInfluences, skeleton);
 
-	_ShadowSkin.applySkin((CVector*)vbDest, boneMat3x4);
+	_ShadowSkin.applySkin((CVectorPacked*)vbDest, boneMat3x4);
 
 
 	// How many vertices are added to the VBuffer ???

@@ -222,11 +222,13 @@ void	CMeshMRMGeom::applySkin(CLod &lod, const CSkeletonModel *skeleton)
 				CMesh::CSkinWeight	*srcSkin= srcSkinPtr + index;
 				CVector				*srcVertex= srcVertexPtr + index;
 				uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-				CVector				*dstVertex= (CVector*)(dstVertexVB);
+				CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
 
 
 				// Vertex.
-				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, *dstVertex);
+				CVector temp;
+				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, temp);
+				*dstVertex = temp;
 			}
 			break;
 
@@ -239,12 +241,14 @@ void	CMeshMRMGeom::applySkin(CLod &lod, const CSkeletonModel *skeleton)
 				CMesh::CSkinWeight	*srcSkin= srcSkinPtr + index;
 				CVector				*srcVertex= srcVertexPtr + index;
 				uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-				CVector				*dstVertex= (CVector*)(dstVertexVB);
+				CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
 
 
 				// Vertex.
-				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-				boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
+				CVector temp;
+				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], temp);
+				boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], temp);
+				*dstVertex = temp;
 			}
 			break;
 
@@ -257,13 +261,15 @@ void	CMeshMRMGeom::applySkin(CLod &lod, const CSkeletonModel *skeleton)
 				CMesh::CSkinWeight	*srcSkin= srcSkinPtr + index;
 				CVector				*srcVertex= srcVertexPtr + index;
 				uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-				CVector				*dstVertex= (CVector*)(dstVertexVB);
+				CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
 
 
 				// Vertex.
-				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-				boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
-				boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], *dstVertex);
+				CVector temp;
+				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], temp);
+				boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], temp);
+				boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], temp);
+				*dstVertex = temp;
 			}
 			break;
 
@@ -276,14 +282,16 @@ void	CMeshMRMGeom::applySkin(CLod &lod, const CSkeletonModel *skeleton)
 				CMesh::CSkinWeight	*srcSkin= srcSkinPtr + index;
 				CVector				*srcVertex= srcVertexPtr + index;
 				uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-				CVector				*dstVertex= (CVector*)(dstVertexVB);
+				CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
 
 
 				// Vertex.
-				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], *dstVertex);
-				boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], *dstVertex);
-				boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], *dstVertex);
-				boneMat3x4[ srcSkin->MatrixId[3] ].mulAddPoint( *srcVertex, srcSkin->Weights[3], *dstVertex);
+				CVector temp;
+				boneMat3x4[ srcSkin->MatrixId[0] ].mulSetPoint( *srcVertex, srcSkin->Weights[0], temp);
+				boneMat3x4[ srcSkin->MatrixId[1] ].mulAddPoint( *srcVertex, srcSkin->Weights[1], temp);
+				boneMat3x4[ srcSkin->MatrixId[2] ].mulAddPoint( *srcVertex, srcSkin->Weights[2], temp);
+				boneMat3x4[ srcSkin->MatrixId[3] ].mulAddPoint( *srcVertex, srcSkin->Weights[3], temp);
+				*dstVertex = temp;
 			}
 			break;
 

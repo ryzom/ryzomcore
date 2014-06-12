@@ -1056,7 +1056,7 @@ inline void		CPatch::fillFar0VertexVB(CTessFarVertex *pVert)
 
 		// v[11]== EndPos - StartPos
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar0VBInfo.DeltaPosOff, sizeof(CVector))
-		*(CVector*)(CurVBPtr + CLandscapeGlobals::CurrentFar0VBInfo.DeltaPosOff)=
+		*(CVectorPacked*)(CurVBPtr + CLandscapeGlobals::CurrentFar0VBInfo.DeltaPosOff)=
 			pVert->Src->EndPos - pVert->Src->StartPos;
 	}
 }
@@ -1144,7 +1144,7 @@ inline void		CPatch::fillFar1VertexVB(CTessFarVertex *pVert)
 
 		// v[11]== EndPos - StartPos
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.DeltaPosOff, sizeof(CVector))
-		*(CVector*)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.DeltaPosOff)=
+		*(CVectorPacked*)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.DeltaPosOff)=
 			pVert->Src->EndPos - pVert->Src->StartPos;
 
 		// v[12]== Alpha information
@@ -1214,7 +1214,7 @@ inline void		CPatch::fillTileVertexVB(CTessNearVertex *pVert)
 
 		// v[11]== EndPos - StartPos
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentTileVBInfo.DeltaPosOff, sizeof(CVector))
-		*(CVector*)(CurVBPtr + CLandscapeGlobals::CurrentTileVBInfo.DeltaPosOff)=
+		*(CVectorPacked*)(CurVBPtr + CLandscapeGlobals::CurrentTileVBInfo.DeltaPosOff)=
 			pVert->Src->EndPos - pVert->Src->StartPos;
 	}
 }

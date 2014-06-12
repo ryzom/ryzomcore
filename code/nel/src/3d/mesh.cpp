@@ -1049,7 +1049,7 @@ bool	CMeshGeom::retrieveVertices(std::vector<NLMISC::CVector> &vertices) const
 		uint		vSize= vb.getVertexSize();
 		for(i=0;i<vertices.size();i++)
 		{
-			vertices[i]= *(const CVector*)pVert;
+			vertices[i]= *(const CVectorPacked*)pVert;
 			pVert+= vSize;
 		}
 	}
@@ -1718,7 +1718,7 @@ void	CMeshGeom::bkupOriginalSkinVertices()
 		_OriginalTGSpace.resize(numVertices);
 		for(uint i=0; i<numVertices;i++)
 		{
-			_OriginalTGSpace[i]= *(CVector*)vba.getTexCoordPointer(i, tgSpaceStage);
+			_OriginalTGSpace[i]= *(CVectorPacked*)vba.getTexCoordPointer(i, tgSpaceStage);
 		}
 	}
 }
@@ -1760,7 +1760,7 @@ void	CMeshGeom::restoreOriginalSkinVertices()
 		// copy tangent space vectors
 		for(uint i = 0; i < numVertices; ++i)
 		{
-			*(CVector*)vba.getTexCoordPointer(i, numTexCoords - 1)= _OriginalTGSpace[i];
+			*(CVectorPacked*)vba.getTexCoordPointer(i, numTexCoords - 1)= _OriginalTGSpace[i];
 		}
 	}
 
@@ -2117,7 +2117,7 @@ void	CMeshGeom::buildShadowSkin()
 		for(uint i=0; i<numVertices;i++)
 		{
 			// Copy Vertex
-			_ShadowSkin.Vertices[i].Vertex= *((CVector*)srcVert);
+			_ShadowSkin.Vertices[i].Vertex= *((CVectorPacked*)srcVert);
 			// Suppose the 0 matrix inf is the highest (we are at least sure it is not 0)
 			// And SkinWeight Export show the 0th is the highest one...
 			_ShadowSkin.Vertices[i].MatrixId= ((CPaletteSkin*)srcPal)->MatrixId[0];

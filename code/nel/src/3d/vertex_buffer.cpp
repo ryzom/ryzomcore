@@ -674,13 +674,13 @@ void		CVertexBuffer::serialOldV1Minus(NLMISC::IStream &f, sint ver)
 		// XYZ.
 		if(_Flags & PositionFlag)
 		{
-			CVector		&vert= *(CVector*)(pointer + stridedId + _Offset[Position]);
+			CVectorPacked		&vert= *(CVectorPacked*)(pointer + stridedId + _Offset[Position]);
 			f.serial(vert);
 		}
 		// Normal
 		if(_Flags & NormalFlag)
 		{
-			CVector		&norm= *(CVector*)(pointer + stridedId + _Offset[Normal]);
+			CVectorPacked		&norm= *(CVectorPacked*)(pointer + stridedId + _Offset[Normal]);
 			f.serial(norm);
 		}
 		// Uvs.
