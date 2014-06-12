@@ -600,9 +600,9 @@ void CPSGravity::integrate(float date, CPSLocated *src, uint32 startIndex, uint3
 
 void CPSGravity::integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
-								 NLMISC::CVector *destPos,
+								 NLMISC::CVectorPacked *destPos,
 								 bool accumulate /*= false*/,
-								 uint stride/* = sizeof(NLMISC::CVector)*/) const
+								 uint stride/* = sizeof(NLMISC::CVectorPacked)*/) const
 {
 	NL_PS_FUNC(CPSGravity_CVector )
 	nlassert(src->isParametricMotionEnabled());
@@ -633,7 +633,7 @@ void CPSGravity::integrateSingle(float startDate, float deltaT, uint numStep,
 					destPos->y = startPos.y + currDate * startSpeed.y;
 					destPos->z = startPos.z + currDate * startSpeed.z - _K * halfTimeSquare;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}
@@ -653,7 +653,7 @@ void CPSGravity::integrateSingle(float startDate, float deltaT, uint numStep,
 					float halfTimeSquare  = 0.5f * currDate * currDate;
 					destPos->z -=  _K * halfTimeSquare;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}
@@ -860,8 +860,8 @@ void CPSCylindricVortex::computeForces(CPSLocated &target)
 					p *= 1.f / d;
 					// compute the speed vect that we should have (normalized)
 					realTangentialSpeed = n ^ p;
-					tangentialSpeed = (*speedIt * realTangentialSpeed) * realTangentialSpeed;
-					radialSpeed =  (p * *speedIt) * p;
+					tangentialSpeed = (CVector(*speedIt) * realTangentialSpeed) * realTangentialSpeed;
+					radialSpeed =  (p * CVector(*speedIt)) * p;
 					// update radial speed;
 					*speedIt -= _RadialViscosity * CParticleSystem::EllapsedTime * radialSpeed;
 					// update tangential speed
@@ -979,7 +979,7 @@ void CPSMagneticForce::computeForces(CPSLocated &target)
 			TPSAttribFloat::const_iterator invMassIt = target.getInvMass().begin();
 			for (; it != itend; ++it, ++invMassIt)
 			{
-				(*it) += intensity * *invMassIt * (*it ^ toAdd);
+				(*it) += intensity * *invMassIt * (CVector(*it) ^ toAdd);
 			}
 		}
 		else
@@ -987,7 +987,7 @@ void CPSMagneticForce::computeForces(CPSLocated &target)
 			float i = intensity / target.getInitialMass();
 			for (; it != itend; ++it)
 			{
-				(*it) += i * (*it ^ toAdd);
+				(*it) += i * (CVector(*it) ^ toAdd);
 			}
 		}
 	}
@@ -1144,7 +1144,7 @@ void CPSBrownianForce::integrate(float date, CPSLocated *src,
 ///==========================================================
 void CPSBrownianForce::integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
-								 NLMISC::CVector *destPos,
+								 NLMISC::CVectorPacked *destPos,
 								 bool accumulate,
 								 uint stride) const
 {
@@ -1179,7 +1179,7 @@ void CPSBrownianForce::integrateSingle(float startDate, float deltaT, uint numSt
 					destPos->y = startPos.y + currDate * startSpeed.y + _K * PrecomputedPos[index].y;
 					destPos->z = startPos.z + currDate * startSpeed.z + _K * PrecomputedPos[index].z;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}
@@ -1201,7 +1201,7 @@ void CPSBrownianForce::integrateSingle(float startDate, float deltaT, uint numSt
 					destPos->y += _K * PrecomputedPos[index].y;
 					destPos->z += _K * PrecomputedPos[index].z;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}

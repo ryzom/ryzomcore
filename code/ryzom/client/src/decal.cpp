@@ -434,7 +434,7 @@ void CDecal::renderTriCache(NL3D::IDriver &drv,   NL3D::CShadowPolyReceiver &/* 
 			do
 			{
 				dest->V = srcVert->V;
-				float dist = (camPos - srcVert->V).norm();
+				float dist = (camPos - srcVert->asVector()).norm();
 				float intensity = scale * dist + bias;
 				float bottomBlend = srcVert->V.z * bottomBlendScale + bottomBlendBias;
 				clamp(bottomBlend, 0.f, 1.f);

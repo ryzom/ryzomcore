@@ -48,7 +48,7 @@ namespace NL3D
 	template <class TBaseIter>
 	struct CVectNormIterator : CPSBaseIterator<TBaseIter>
 	{
-		GET_INLINE float get() const { return this->Iter.get().norm(); }
+		GET_INLINE float get() const { return CVector(this->Iter.get()).norm(); }
 		CVectNormIterator(const TBaseIter &it) : CPSBaseIterator<TBaseIter>(it) {}
 	};
 
@@ -76,7 +76,7 @@ namespace NL3D
 	template <class TBaseIter>
 	struct CDistIterator : CPSBaseIterator<TBaseIter>
 	{
-		NLMISC::CVector V;
+		NLMISC::CVectorPacked V;
 		float Offset;
 		CDistIterator(const TBaseIter &it) : CPSBaseIterator<TBaseIter>(it) {}
 	};
@@ -89,7 +89,7 @@ namespace NL3D
 		GET_INLINE
 		float get() const
 		{
-			const float r = fabsf(this->Iter.get() * this->V + this->Offset);
+			const float r = fabsf(CVector(this->Iter.get()) * this->V + this->Offset);
 			return r > MaxInputValue ? MaxInputValue : r;
 		}
 		CFDot3AddIterator(const TBaseIter &it) : CDistIterator<TBaseIter>(it) {}
@@ -101,7 +101,7 @@ namespace NL3D
 	{
 		float get() const
 		{
-			float r = this->Iter.get() * this->V + this->Offset;
+			float r = CVector(this->Iter.get()) * this->V + this->Offset;
 			r *= r;
 			return r > MaxInputValue ? MaxInputValue : r;
 		}
@@ -115,7 +115,7 @@ namespace NL3D
 		GET_INLINE
 		float get() const
 		{
-			const float r = this->Iter.get() * this->V + this->Offset;
+			const float r = CVector(this->Iter.get()) * this->V + this->Offset;
 			if (r < 0.f) return MaxInputValue;
 			return r > MaxInputValue ? MaxInputValue : r;
 		}
@@ -130,7 +130,7 @@ namespace NL3D
 		GET_INLINE
 		float get() const
 		{
-			float r = this->Iter.get() * this->V + this->Offset;
+			float r = CVector(this->Iter.get()) * this->V + this->Offset;
 			if (r < 0) return MaxInputValue;
 			r *= r;
 			return r > MaxInputValue ? MaxInputValue : r;

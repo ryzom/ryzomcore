@@ -68,7 +68,7 @@ template <typename T> struct CPSValueBlendFuncBase
 {
 	virtual ~CPSValueBlendFuncBase() {}
 	virtual void getValues(T &startValue, T &endValue) const = 0;
-	virtual void setValues(T startValue, T endValue) = 0;
+	virtual void setValues(const T &startValue, const T &endValue) = 0;
 };
 
 
@@ -122,7 +122,7 @@ public:
 		}
 
 		/// Set the Values between which to blend.
-		virtual void setValues(T startValue, T endValue)
+		virtual void setValues(const T &startValue, const T &endValue)
 		{
 			_StartValue = startValue;
 			_EndValue = endValue;
@@ -210,7 +210,7 @@ public:
 
 	/// set the Values
 
-	virtual void setValues(T startValue, T endValue)
+	virtual void setValues(const T &startValue, const T &endValue)
 	{
 		float step = 1.f / n;
 		float alpha = 0.0f;

@@ -24,6 +24,7 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/index_buffer.h"
 
+using NLMISC::CVectorPacked;
 
 namespace NL3D {
 
@@ -85,10 +86,26 @@ public:
 	// a vertex
 	struct CRGBAVertex
 	{
+#if NL_HAS_SSE2
+		CVectorPacked V;
+#else
 		CVector V;
+#endif
 		CRGBA Color;
 		CRGBAVertex() {}
 		CRGBAVertex(const CVector &v, CRGBA c) : V(v), Color(c) {}
+#if NL_HAS_SSE2
+		const CVector &asVector() const
+		{
+			nlctassert(sizeof(CVector) == sizeof(CRGBAVertex));
+			*reinterpret_cast<const CVector *>(this);
+		}
+#else
+		const CVector &asVector() const
+		{
+			return V;
+		}
+#endif
 	};
 
 	/** Compute list of clipped tri under the shadow mat

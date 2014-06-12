@@ -163,21 +163,21 @@ void CMeshMorpher::update (std::vector<CAnimatedMorph> *pBSFactor)
 			if (_VBDst->getVertexFormat() & CVertexBuffer::PositionFlag)
 			if (rBS.deltaPos.size() > 0)
 			{
-				CVector *pV = dstvba.getVertexCoordPointer (vp);
+				CVectorPacked *pV = dstvba.getVertexCoordPointer (vp);
 				*pV += rBS.deltaPos[j] * rFactor;
 			}
 
 			if (_VBDst->getVertexFormat() & CVertexBuffer::NormalFlag)
 			if (rBS.deltaNorm.size() > 0)
 			{
-				CVector *pV = dstvba.getNormalCoordPointer (vp);
+				CVectorPacked *pV = dstvba.getNormalCoordPointer (vp);
 				*pV += rBS.deltaNorm[j] * rFactor;
 			}
 
 			if (_UseTgSpace)
 			if (rBS.deltaTgSpace.size() > 0)
 			{
-				CVector *pV = (CVector*)dstvba.getTexCoordPointer (vp, tgSpaceStage);
+				CVectorPacked *pV = (CVectorPacked*)dstvba.getTexCoordPointer (vp, tgSpaceStage);
 				*pV += rBS.deltaTgSpace[j] * rFactor;
 			}
 
@@ -264,13 +264,13 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 			pDst[j+i*VBVertexSize] = pOri[j+i*VBVertexSize];
 
 		if (_Vertices != NULL)
-			_Vertices->operator[](i) = ((CVector*)(pOri+i*VBVertexSize))[0];
+			_Vertices->operator[](i) = ((CVectorPacked*)(pOri+i*VBVertexSize))[0];
 
 		if (_Normals != NULL)
-			_Normals->operator[](i) = ((CVector*)(pOri+i*VBVertexSize))[1];
+			_Normals->operator[](i) = ((CVectorPacked*)(pOri+i*VBVertexSize))[1];
 
 		if (_TgSpace != NULL)
-			(*_TgSpace)[i] = * (CVector*)(pOri + i * VBVertexSize + tgSpaceOff);
+			(*_TgSpace)[i] = * (CVectorPacked*)(pOri + i * VBVertexSize + tgSpaceOff);
 
 		_Flags[i] = OriginalVBDst;
 	}
@@ -388,8 +388,8 @@ void CMeshMorpher::updateRawSkin (CVertexBuffer *vbOri,
 	{
 		if(*vRemap)
 		{
-			(*vRemap)->Pos= *(CVector*)(pOri);
-			(*vRemap)->Normal= *(CVector*)(pOri + NL3D_RAWSKIN_NORMAL_OFF);
+			(*vRemap)->Pos= *(CVectorPacked*)(pOri);
+			(*vRemap)->Normal= *(CVectorPacked*)(pOri + NL3D_RAWSKIN_NORMAL_OFF);
 			(*vRemap)->UV= *(CUV*)(pOri + NL3D_RAWSKIN_UV_OFF);
 		}
 		pOri+= NL3D_RAWSKIN_VERTEX_SIZE;
@@ -420,9 +420,9 @@ void CMeshMorpher::updateRawSkin (CVertexBuffer *vbOri,
 				// If exist in this Lod RawSkin, apply
 				if(rsVert)
 				{
-					if(hasPos)
+					if(hasPos) // FIXME_SSE2: +=
 						rsVert->Pos+= rBS.deltaPos[j] * rFactor;
-					if(hasNorm)
+					if(hasNorm) // FIXME_SSE2: +=
 						rsVert->Normal+= rBS.deltaNorm[j] * rFactor;
 					if(hasUV)
 						rsVert->UV+= rBS.deltaUV[j] * rFactor;

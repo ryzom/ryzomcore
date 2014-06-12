@@ -2066,7 +2066,7 @@ void	CMeshMRMGeom::bkupOriginalSkinVerticesSubset(uint wedgeStart, uint wedgeEnd
 		_OriginalTGSpace.resize(_VBufferFinal.getNumVertices());
 		for(uint i=wedgeStart; i<wedgeEnd;i++)
 		{
-			_OriginalTGSpace[i]= *(CVector*)vba.getTexCoordPointer(i, tgSpaceStage);
+			_OriginalTGSpace[i]= *(CVectorPacked*)vba.getTexCoordPointer(i, tgSpaceStage);
 		}
 	}
 }
@@ -2105,7 +2105,7 @@ void	CMeshMRMGeom::restoreOriginalSkinVertices()
 		// copy tangent space vectors
 		for(uint i = 0; i < _VBufferFinal.getNumVertices(); ++i)
 		{
-			*(CVector*)vba.getTexCoordPointer(i, numTexCoords - 1)= _OriginalTGSpace[i];
+			*(CVectorPacked*)vba.getTexCoordPointer(i, numTexCoords - 1)= _OriginalTGSpace[i];
 		}
 	}
 }
@@ -2164,8 +2164,8 @@ void	CMeshMRMGeom::restoreOriginalSkinPart(CLod &lod)
 			CVector				*srcVertex= srcVertexPtr + index;
 			CVector				*srcNormal= srcNormalPtr + index;
 			uint8				*dstVertexVB= destVertexPtr + index * vertexSize;
-			CVector				*dstVertex= (CVector*)(dstVertexVB);
-			CVector				*dstNormal= (CVector*)(dstVertexVB + normalOff);
+			CVectorPacked		*dstVertex= (CVectorPacked*)(dstVertexVB);
+			CVectorPacked		*dstNormal= (CVectorPacked*)(dstVertexVB + normalOff);
 
 
 			// Vertex.
@@ -2621,7 +2621,7 @@ bool	CMeshMRMGeom::buildGeometryForLod(uint lodId, std::vector<CVector> &vertice
 				// Final remaping of vertex to final index
 				vertexRemap[i]= dstIndex;
 				// copy to dest
-				*pDstVert= *(CVector*)pSrcVert;
+				*pDstVert= *(CVectorPacked*)pSrcVert;
 
 				// next dest
 				pDstVert++;
@@ -3467,7 +3467,7 @@ sint			CMeshMRMGeom::renderShadowSkinGeom(CMeshMRMInstance	*mi, uint remainingVe
 	CLod	&lod= _Lods[_Lods.size()-1];
 	computeBoneMatrixes3x4(boneMat3x4, lod.MatrixInfluences, skeleton);
 
-	_ShadowSkin.applySkin((CVector*)vbDest, boneMat3x4);
+	_ShadowSkin.applySkin((CVectorPacked*)vbDest, boneMat3x4);
 
 
 	// How many vertices are added to the VBuffer ???

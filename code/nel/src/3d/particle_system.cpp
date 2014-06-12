@@ -64,7 +64,7 @@ float CParticleSystem::RealEllapsedTimeRatio = 1.f;
 bool CParticleSystem::InsideSimLoop = false;
 bool CParticleSystem::InsideRemoveLoop = false;
 bool CParticleSystem::InsideNewElementsLoop = false;;
-std::vector<NLMISC::CVector> CParticleSystem::_SpawnPos;
+std::vector<NLMISC::CVectorPacked> CParticleSystem::_SpawnPos;
 
 
 

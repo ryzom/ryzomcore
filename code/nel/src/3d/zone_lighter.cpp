@@ -3111,7 +3111,7 @@ void CZoneLighter::addWaterShape(CWaterShape *shape, const NLMISC::CMatrix &MT)
 }
 
 // ***********************************************************
-void CZoneLighter::makeQuadGridFromWaterShapes(NLMISC::CAABBox zoneBBox)
+void CZoneLighter::makeQuadGridFromWaterShapes(const NLMISC::CAABBox &zoneBBox)
 {
 	if (!_WaterShapes.size()) return;
 

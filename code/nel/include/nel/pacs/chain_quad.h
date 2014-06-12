@@ -81,7 +81,7 @@ public:
 	 * \param cst the array of CEdgeChainEntry to fill. contain also OChainLUT, an array for internal use. In: must be filled with 0xFFFF. Out: still filled with 0xFFFF.
 	 * \return number of edgechain found. stored in cst.EdgeChainEntries (array cleared first).
 	 */
-	sint			selectEdges(CVector start, CVector end, CCollisionSurfaceTemp &cst) const;
+	sint			selectEdges(const CVector &start, const CVector &end, CCollisionSurfaceTemp &cst) const;
 
 
 	/// serial.

@@ -33,7 +33,7 @@ static inline void BuildHermiteVector(const NLMISC::CVector &P0,
 							   const NLMISC::CVector &P1,
 							   const NLMISC::CVector &T0,
 							   const NLMISC::CVector &T1,
-									 NLMISC::CVector &dest,
+									 NLMISC::CVectorPacked &dest,
 							   float lambda
 							   )
 {
@@ -54,7 +54,7 @@ static inline void BuildHermiteVector(const NLMISC::CVector &P0,
 /// for test
 static inline void BuildLinearVector(const NLMISC::CVector &P0,
 									 const NLMISC::CVector &P1,
-									 NLMISC::CVector &dest,
+									 NLMISC::CVectorPacked &dest,
 									 float lambda,
 									 float oneMinusLambda
 							        )
@@ -204,7 +204,7 @@ void	CPSRibbonBase::updateGlobals()
 
 
 //=======================================================
-void	CPSRibbonBase::computeHermitteRibbon(uint index, NLMISC::CVector *dest, uint stride /* = sizeof(NLMISC::CVector)*/)
+void	CPSRibbonBase::computeHermitteRibbon(uint index, NLMISC::CVectorPacked *dest, uint stride /* = sizeof(NLMISC::CVectorPacked)*/)
 {
 	NL_PS_FUNC(CPSRibbonBase_CVector )
 	nlassert(!_Parametric);
@@ -242,7 +242,7 @@ void	CPSRibbonBase::computeHermitteRibbon(uint index, NLMISC::CVector *dest, uin
 					nlassert(NLMISC::isValidDouble(dest->y));
 					nlassert(NLMISC::isValidDouble(dest->z));
 				#endif
-				dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+				dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 			}
 			while (--leftToDo);
 			return;
@@ -262,7 +262,7 @@ void	CPSRibbonBase::computeHermitteRibbon(uint index, NLMISC::CVector *dest, uin
 				nlassert(NLMISC::isValidDouble(dest->y));
 				nlassert(NLMISC::isValidDouble(dest->z));
 			#endif
-			dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+			dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 			-- leftToDo;
 			if (!leftToDo) return;
 			lambda += lambdaStep;
@@ -289,7 +289,7 @@ void	CPSRibbonBase::computeHermitteRibbon(uint index, NLMISC::CVector *dest, uin
 }
 
 //=======================================================
-void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVector *dest, uint stride)
+void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVectorPacked *dest, uint stride)
 {
 	NL_PS_FUNC(CPSRibbonBase_computeLinearRibbon)
 	nlassert(!_Parametric);
@@ -321,7 +321,7 @@ void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVector *dest, uint 
 					nlassert(NLMISC::isValidDouble(dest->y));
 					nlassert(NLMISC::isValidDouble(dest->z));
 				#endif
-				dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+				dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 
 			}
 			while (--leftToDo);
@@ -345,7 +345,7 @@ void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVector *dest, uint 
 				nlassert(NLMISC::isValidDouble(dest->y));
 				nlassert(NLMISC::isValidDouble(dest->z));
 			#endif
-			dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+			dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 			-- leftToDo;
 			if (!leftToDo) return;
 			lambda += lambdaStep;
@@ -387,14 +387,14 @@ void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVector *dest, uint 
 		do
 		{
 			*dest = *currIt;
-			dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+			dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 		}
 		while (--leftToDo);
 		return;
 	}
 	float lambdaStep = _UsedSegDuration / dt;
 	BuildLinearVector(*currIt, *nextIt, *dest, 0.f, 1.f);
-	dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+	dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 	-- leftToDo;
 	// snap lambda to nearest time step
 	lambda = lambdaStep * fmodf(date[0], _UsedSegDuration) / _UsedSegDuration;
@@ -406,7 +406,7 @@ void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVector *dest, uint 
 			if (lambda >= 1.f) break;
 			/// compute a location
 			BuildLinearVector(*currIt, *nextIt, *dest, lambda, oneMinusLambda);
-			dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+			dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 			-- leftToDo;
 			if (!leftToDo) return;
 			lambda += lambdaStep;
@@ -426,7 +426,7 @@ void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVector *dest, uint 
 			do
 			{
 				*dest = *currIt;
-				dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+				dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 			}
 			while (--leftToDo);
 			return;
@@ -442,7 +442,7 @@ void CPSRibbonBase::computeLinearRibbon(uint index, NLMISC::CVector *dest, uint 
 
 
 //=======================================================
-void CPSRibbonBase::computeLinearCstSizeRibbon(uint index, NLMISC::CVector *dest, uint stride /* = sizeof(NLMISC::CVector)*/)
+void CPSRibbonBase::computeLinearCstSizeRibbon(uint index, NLMISC::CVectorPacked *dest, uint stride /* = sizeof(NLMISC::CVectorPacked)*/)
 {
 	NL_PS_FUNC(CPSRibbonBase_CVector )
 	nlassert(!_Parametric);
@@ -485,7 +485,7 @@ void CPSRibbonBase::computeLinearCstSizeRibbon(uint index, NLMISC::CVector *dest
 					nlassert(NLMISC::isValidDouble(dest->y));
 					nlassert(NLMISC::isValidDouble(dest->z));
 				#endif
-				dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+				dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 				-- leftToDo;
 				if (!leftToDo) return;
 				lambda += lambdaStep;
@@ -512,7 +512,7 @@ void CPSRibbonBase::computeLinearCstSizeRibbon(uint index, NLMISC::CVector *dest
 					nlassert(NLMISC::isValidDouble(dest->y));
 					nlassert(NLMISC::isValidDouble(dest->z));
 				#endif
-				dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+				dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 			}
 			return;
 		}
@@ -520,7 +520,7 @@ void CPSRibbonBase::computeLinearCstSizeRibbon(uint index, NLMISC::CVector *dest
 }
 
 //=======================================================
-void CPSRibbonBase::computeHermitteCstSizeRibbon(uint index, NLMISC::CVector *dest, uint stride /* = sizeof(NLMISC::CVector)*/)
+void CPSRibbonBase::computeHermitteCstSizeRibbon(uint index, NLMISC::CVectorPacked *dest, uint stride /* = sizeof(NLMISC::CVectorPacked)*/)
 {
 	NL_PS_FUNC(CPSRibbonBase_CVector )
 	nlassert(!_Parametric);
@@ -567,7 +567,7 @@ void CPSRibbonBase::computeHermitteCstSizeRibbon(uint index, NLMISC::CVector *de
 					nlassert(NLMISC::isValidDouble(dest->z));
 				#endif
 
-				dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+				dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 				-- leftToDo;
 				if (!leftToDo) return;
 				lambda += lambdaStep;
@@ -593,7 +593,7 @@ void CPSRibbonBase::computeHermitteCstSizeRibbon(uint index, NLMISC::CVector *de
 					nlassert(NLMISC::isValidDouble(dest->y));
 					nlassert(NLMISC::isValidDouble(dest->z));
 				#endif
-				dest  = (NLMISC::CVector *) ((uint8 *) dest + stride);
+				dest  = (NLMISC::CVectorPacked *) ((uint8 *) dest + stride);
 			}
 			return;
 		}
@@ -605,7 +605,7 @@ void CPSRibbonBase::computeHermitteCstSizeRibbon(uint index, NLMISC::CVector *de
 
 
 //=======================================================
-void CPSRibbonBase::computeRibbon(uint index, NLMISC::CVector *dest, uint stride /* = sizeof(NLMISC::CVector)*/)
+void CPSRibbonBase::computeRibbon(uint index, NLMISC::CVectorPacked *dest, uint stride /* = sizeof(NLMISC::CVectorPacked)*/)
 {
 	NL_PS_FUNC(CPSRibbonBase_CVector )
 	switch (_InterpolationMode)

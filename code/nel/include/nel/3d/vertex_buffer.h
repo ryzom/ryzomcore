@@ -790,8 +790,8 @@ public:
 	 *	A call to IDriver::activeVertexBuffer() will change this format to the format returned by IDriver::getVertexColorFormat().
 	 *	So, before each write of vertex color in the vertex buffer, the vertex color format must be checked with CVertexBuffer::getVertexColorFormat().
 	 */
-	NLMISC::CVector*		getVertexCoordPointer(uint idx=0);
-	NLMISC::CVector*		getNormalCoordPointer(uint idx=0);
+	NLMISC::CVectorPacked*		getVertexCoordPointer(uint idx=0);
+	NLMISC::CVectorPacked*		getNormalCoordPointer(uint idx=0);
 	NLMISC::CUV*			getTexCoordPointer(uint idx=0, uint8 stage=0);
 	void*					getColorPointer(uint idx=0);
 	void*					getSpecularPointer(uint idx=0);
@@ -854,8 +854,8 @@ public:
 	 *	A call to IDriver::activeVertexBuffer() will change this format to the format returned by IDriver::getVertexColorFormat().
 	 *	So, before each write of vertex color in the vertex buffer, the vertex color format must be checked with CVertexBuffer::getVertexColorFormat().
 	 */
-	const NLMISC::CVector*	getVertexCoordPointer(uint idx=0) const;
-	const NLMISC::CVector*	getNormalCoordPointer(uint idx=0) const;
+	const NLMISC::CVectorPacked*	getVertexCoordPointer(uint idx=0) const;
+	const NLMISC::CVectorPacked*	getNormalCoordPointer(uint idx=0) const;
 	const NLMISC::CUV*		getTexCoordPointer(uint idx=0, uint8 stage=0) const;
 	const void*				getColorPointer(uint idx=0) const;
 	const void*				getSpecularPointer(uint idx=0) const;

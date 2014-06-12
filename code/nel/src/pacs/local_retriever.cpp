@@ -1052,7 +1052,7 @@ bool	NLPACS::CLocalRetriever::testPosition(NLPACS::ULocalPosition &local, CColli
 }
 
 
-void	NLPACS::CLocalRetriever::retrievePosition(CVector estimated, CCollisionSurfaceTemp &cst) const
+void	NLPACS::CLocalRetriever::retrievePosition(const CVector &estimated, CCollisionSurfaceTemp &cst) const
 {
 	if (!_Loaded)
 		return;
@@ -2200,7 +2200,7 @@ void	NLPACS::CLocalRetriever::replaceChain(uint32 chainId, const std::vector<NLP
 /*
  * Check surface integrity
  */
-bool	NLPACS::CLocalRetriever::checkSurfacesIntegrity(NLMISC::CVector translation, bool verbose) const
+bool	NLPACS::CLocalRetriever::checkSurfacesIntegrity(const NLMISC::CVector &translation, bool verbose) const
 {
 	bool	success = true;
 	uint	surf;
@@ -2225,7 +2225,7 @@ bool	NLPACS::CLocalRetriever::checkSurfacesIntegrity(NLMISC::CVector translation
 /**
  * Check surface integrity
  */
-bool	NLPACS::CLocalRetriever::checkSurfaceIntegrity(uint surf, NLMISC::CVector translation, bool verbose) const
+bool	NLPACS::CLocalRetriever::checkSurfaceIntegrity(uint surf, const NLMISC::CVector &translation, bool verbose) const
 {
 	if (surf >= _Surfaces.size())
 		return false;

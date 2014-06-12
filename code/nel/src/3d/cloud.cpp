@@ -120,10 +120,10 @@ void CCloud::generate (CNoise3d &noise)
 	{
 		CVertexBufferReadWrite vba;
 		rVB.lock (vba);
-		CVector *pVertices = vba.getVertexCoordPointer (0);
-		*pVertices = CVector(0.0f,				0.0f,				0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)_NbW*_Width,0.0f,				0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)_NbW*_Width,(float)_NbH*_Height,0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+		CVectorPacked *pVertices = vba.getVertexCoordPointer (0);
+		*pVertices = CVector(0.0f,				0.0f,				0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector((float)_NbW*_Width,0.0f,				0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector((float)_NbW*_Width,(float)_NbH*_Height,0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 		*pVertices = CVector(0.0f,				(float)_NbH*_Height,0.0f);
 		_CloudScape->_MatClear.setColor (CRGBA(0,0,0,0));
 	}
@@ -197,10 +197,10 @@ void CCloud::light ()
 	{
 		CVertexBufferReadWrite vba;
 		rVB.lock (vba);
-		CVector *pVertices = vba.getVertexCoordPointer (0);
-		*pVertices = CVector((float)0.0f,	(float)0.0f,	0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)1.f,	(float)0.0f,	0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)1.f,	(float)1.f,		0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+		CVectorPacked *pVertices = vba.getVertexCoordPointer (0);
+		*pVertices = CVector((float)0.0f,	(float)0.0f,	0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector((float)1.f,	(float)0.0f,	0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector((float)1.f,	(float)1.f,		0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 		*pVertices = CVector((float)0.0f,	(float)1.f,		0.0f);
 	}
 
@@ -340,10 +340,10 @@ void CCloud::reset (NL3D::CCamera *pViewer)
 		CVertexBufferReadWrite vba;
 		rVB.lock (vba);
 		uint32 nVSize = rVB.getVertexSize ();
-		CVector *pVertices = vba.getVertexCoordPointer (0);
-		*pVertices = CVector(0.0f, 0.0f, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector(5.0f, 0.0f, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector(5.0f, 5.0f, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+		CVectorPacked *pVertices = vba.getVertexCoordPointer (0);
+		*pVertices = CVector(0.0f, 0.0f, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector(5.0f, 0.0f, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector(5.0f, 5.0f, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 		*pVertices = CVector(0.0f, 5.0f, 0.0f);
 		_CloudScape->_MatClear.setColor (CRGBA(0,0,0,0));
 	}
@@ -469,7 +469,7 @@ void CCloud::dispXYZ (CMaterial *pMat)
 	float oneOverNbWNbH = 1.0f / (_NbW*_NbH);
 	CVertexBuffer &rVB = _CloudScape->_VertexBuffer;
 	uint32 nVSize = rVB.getVertexSize ();
-	CVector *pVertices;
+	CVectorPacked *pVertices;
 	CUV *pUV;
 	_Driver->activeVertexBuffer (rVB);
 
@@ -487,9 +487,9 @@ void CCloud::dispXYZ (CMaterial *pMat)
 				rVB.lock (vba);
 
 				pVertices = vba.getVertexCoordPointer (0);
-				*pVertices = CVector(_Pos.x,			_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-				*pVertices = CVector(_Pos.x+_Size.x,	_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-				*pVertices = CVector(_Pos.x+_Size.x,	_Pos.y+_Size.y,	_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+				*pVertices = CVector(_Pos.x,			_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+				*pVertices = CVector(_Pos.x+_Size.x,	_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+				*pVertices = CVector(_Pos.x+_Size.x,	_Pos.y+_Size.y,	_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 				*pVertices = CVector(_Pos.x,			_Pos.y+_Size.y,	_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH);
 
 				pUV = vba.getTexCoordPointer (0, 0);
@@ -512,10 +512,10 @@ void CCloud::dispXYZ (CMaterial *pMat)
 	{
 		CVertexBufferReadWrite vba;
 		rVB.lock (vba);
-		CVector *pVertices = vba.getVertexCoordPointer (0);
-		*pVertices = CVector((float)0.25f,	0, (float)0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)0.75f,	0, (float)0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)0.75f,	0, (float)0.75f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+		CVectorPacked *pVertices = vba.getVertexCoordPointer (0);
+		*pVertices = CVector((float)0.25f,	0, (float)0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector((float)0.75f,	0, (float)0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVector((float)0.75f,	0, (float)0.75f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 		*pVertices = CVector((float)0.25f,	0, (float)0.75f);
 	}
 }
@@ -664,10 +664,10 @@ void CCloud::genBill (CCamera *pCam, uint32 nBillSize)
 		CVertexBufferReadWrite vba;
 		rVB.lock (vba);
 		{
-			CVector *pVertices = vba.getVertexCoordPointer (0);
-			*pVertices = CVector(0.0f,	0.0f,	0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector(1.0f,	0.0f,	0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector(1.0f,	0.0f,	1.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+			CVectorPacked *pVertices = vba.getVertexCoordPointer (0);
+			*pVertices = CVector(0.0f,	0.0f,	0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector(1.0f,	0.0f,	0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector(1.0f,	0.0f,	1.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 			*pVertices = CVector(0.0f,	0.0f,	1.0f);
 		}
 	}
@@ -782,10 +782,10 @@ void CCloud::dispBill (CCamera *pCam)
 		rVB.lock (vba);
 
 		uint32 nVSize = rVB.getVertexSize ();
-		CVector *pVertices = vba.getVertexCoordPointer (0);
-		*pVertices = qc.V0; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = qc.V1; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = qc.V2; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+		CVectorPacked *pVertices = vba.getVertexCoordPointer (0);
+		*pVertices = qc.V0; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = qc.V1; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = qc.V2; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 		*pVertices = qc.V3;
 
 		CUV *pUV = vba.getTexCoordPointer (0, 0);

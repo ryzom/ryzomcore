@@ -25,6 +25,8 @@
 
 #include <memory>
 
+using NLMISC::CVectorPacked;
+
 namespace NL3D
 {
 static NLMISC::CRGBA GradientB2W[] = {NLMISC::CRGBA(0, 0, 0, 0), NLMISC::CRGBA(255, 255, 255, 255) };
@@ -330,7 +332,7 @@ void CPSTailDot::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 				do
 				{
 					// the parent class has a method to get the ribbons positions
-					computeRibbon((uint) (fpRibbonIndex >> 16), (CVector *) currVert, vertexSize);
+					computeRibbon((uint) (fpRibbonIndex >> 16), (CVectorPacked *) currVert, vertexSize);
 					currVert += vertexSize * (_UsedNbSegs + 1);
 					fpRibbonIndex += srcStep;
 				}
@@ -345,7 +347,7 @@ void CPSTailDot::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 				{
 					// we compute each pos thanks to the parametric curve
 					_Owner->integrateSingle(date - _UsedSegDuration * (_UsedNbSegs + 1), _UsedSegDuration, _UsedNbSegs + 1, (uint) (fpRibbonIndex >> 16),
-											(NLMISC::CVector *) currVert, vertexSize);
+											(NLMISC::CVectorPacked *) currVert, vertexSize);
 					currVert += vertexSize * (_UsedNbSegs + 1);
 					fpRibbonIndex += srcStep;
 				}

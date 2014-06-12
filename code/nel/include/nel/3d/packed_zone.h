@@ -164,6 +164,7 @@ private:
 	void    addInstance(const CShapeInfo &si, const NLMISC::CMatrix &matrix, TVertexGrid &vertexGrid, TTriListGrid &triListGrid);
 public:
 	// PRIVATE : unpack a packed tri
+	void	unpackTri(const CPackedTri &src, NLMISC::CVectorPacked dest[3]) const;
 	void	unpackTri(const CPackedTri &src, NLMISC::CVector dest[3]) const;
 };
 
@@ -197,6 +198,7 @@ private:
 	NLMISC::CVector			_PackedLocalToWorld;
 public:
 	// PRIVATE : unpack a packed tri
+	void	unpackTri(const CPackedTri16 &src, NLMISC::CVectorPacked dest[3]) const;
 	void	unpackTri(const CPackedTri16 &src, NLMISC::CVector dest[3]) const;
 };
 

@@ -1475,7 +1475,7 @@ void CAudioMixerUser::freeTrack(CTrack *track)
 
 // ******************************************************************
 
-void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos)
+void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<CPlayingSoundPos> &pos)
 {
 	int nbplay = 0;
 	int	nbmute = 0;
@@ -1493,9 +1493,9 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 			if (source->isPlaying())
 			{
 				if (virtualPos)
-					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0,
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0,
 						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));
@@ -1517,9 +1517,9 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 			if (source->isPlaying())
 			{
 				if (virtualPos)
-					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0,
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0,
 						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));
@@ -1705,7 +1705,7 @@ void				CAudioMixerUser::update()
 						{
 							// there is some data here, update the virtual position of the sound.
 							float dist = (css->Position - source->getPos()).norm();
-							CVector vpos(_ListenPosition + css->Direction * (css->Dist + dist));
+							CVector vpos(_ListenPosition + CVector(css->Direction) * (css->Dist + dist));
 //							_Tracks[i]->DrvSource->setPos(source->getPos() * (1-css->PosAlpha) + css->Position*(css->PosAlpha));
 							_Tracks[i]->getPhysicalSource()->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
 							// update the relative gain

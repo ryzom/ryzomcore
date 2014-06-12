@@ -523,7 +523,7 @@ public:
 
 	std::vector<CPrimVector>	VPoints;
 
-	static float getSegmentDist(const NLMISC::CVector v, const NLMISC::CVector &p1, const NLMISC::CVector &p2, NLMISC::CVector &nearPos);
+	static float getSegmentDist(const NLMISC::CVector &v, const NLMISC::CVector &p1, const NLMISC::CVector &p2, NLMISC::CVector &nearPos);
 
 public:
 

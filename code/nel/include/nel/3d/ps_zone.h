@@ -106,7 +106,7 @@ public:
 	/** Compute collisions for the given target. This will update the collisions infos.
 	  * The caller must provide pointer to arrays positions before and after time step.
 	  */
-	virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter) = 0;
+	virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter) = 0;
 
 protected:
 
@@ -141,7 +141,7 @@ protected:
 class CPSZonePlane : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter);
 		virtual void show();
 
 
@@ -153,7 +153,7 @@ class CPSZonePlane : public CPSZone, public IPSMover
 		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
 		virtual bool onlyStoreNormal(void) const { return true; }
 		virtual NLMISC::CVector getNormal(uint32 index);
-		virtual void setNormal(uint32 index, NLMISC::CVector n);
+		virtual void setNormal(uint32 index, const NLMISC::CVector &n);
 
 		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 
@@ -192,7 +192,7 @@ typedef CPSAttrib<CRadiusPair> TPSAttribRadiusPair;
 class CPSZoneSphere : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter);
 		virtual void show();
 
 
@@ -236,7 +236,7 @@ class CPSZoneSphere : public CPSZone, public IPSMover
 class CPSZoneDisc : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter);
 		virtual void show();
 
 		CPSZoneDisc()
@@ -255,7 +255,7 @@ class CPSZoneDisc : public CPSZone, public IPSMover
 		virtual NLMISC::CVector getScale(uint32 k) const;
 		virtual bool onlyStoreNormal(void) const { return true; }
 		virtual NLMISC::CVector getNormal(uint32 index);
-		virtual void setNormal(uint32 index, NLMISC::CVector n);
+		virtual void setNormal(uint32 index, const NLMISC::CVector &n);
 
 		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 
@@ -283,7 +283,7 @@ class CPSZoneDisc : public CPSZone, public IPSMover
 class CPSZoneCylinder : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter);
 		virtual void show();
 
 		CPSZoneCylinder()
@@ -335,7 +335,7 @@ class CPSZoneCylinder : public CPSZone, public IPSMover
 class CPSZoneRectangle : public CPSZone, public IPSMover
 {
 	public:
-		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
+		virtual	void computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter);
 		virtual void show();
 
 		CPSZoneRectangle()

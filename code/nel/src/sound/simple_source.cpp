@@ -109,7 +109,7 @@ CVector CSimpleSource::getVirtualPos() const
 		{
 			// there is some data here, update the virtual position of the sound.
 			float dist = (css->Position - getPos()).norm();
-			CVector vpos(CAudioMixerUser::instance()->getListenPosVector() + css->Direction * (css->Dist + dist));
+			CVector vpos(CAudioMixerUser::instance()->getListenPosVector() + CVector(css->Direction) * (css->Dist + dist));
 			vpos = _Position * (1-css->PosAlpha) + vpos*(css->PosAlpha);
 			return vpos;
 		}

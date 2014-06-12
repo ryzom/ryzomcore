@@ -263,7 +263,7 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 				{
 					// this one is better !
 					cs.Distance = css.Dist;
-					cs.Source->setPos(listenerPos + css.Direction * css.Dist + CVector(0,0,2));
+					cs.Source->setPos(listenerPos + CVector(css.Direction) * css.Dist + CVector(0,0,2));
 					if (css.DistFactor < 1.0f)
 						cs.Source->setRelativeGain(css.Gain * (1.0f - (css.DistFactor*css.DistFactor*css.DistFactor*css.DistFactor)));
 					else
@@ -289,7 +289,7 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 					cs.Source = CAudioMixerUser::instance()->createSource(soundName, false, NULL, NULL, cluster);
 					if (cs.Source != 0)
 					{
-						cs.Source->setPos(listenerPos + css.Direction * css.Dist + CVector(0,0,2));
+						cs.Source->setPos(listenerPos + CVector(css.Direction) * css.Dist + CVector(0,0,2));
 						if (css.DistFactor < 1.0f)
 							cs.Source->setRelativeGain(css.Gain * (1.0f - (css.DistFactor*css.DistFactor/**css.DistFactor*css.DistFactor*/)));
 						else
@@ -769,7 +769,7 @@ void CClusteredSound::soundTraverse(const std::vector<CCluster *> &clusters, CSo
 								stc.Alpha = alpha;
 								stc.PreviousVector = (nearPos - travContext.ListenerPos).normed();
 								addNextTraverse(c, stc);
-								_AudioPath.push_back(make_pair(travContext.ListenerPos, nearPos));
+								_AudioPath.push_back(make_pair(CVectorPacked(travContext.ListenerPos), CVectorPacked(nearPos)));
 							}
 						}
 					}
@@ -867,7 +867,7 @@ bool CClusteredSound::addAudibleCluster(CCluster *cluster, CClusterSoundStatus &
 {
 	TClusterStatusMap::iterator it(_AudibleClusters.find(cluster));
 	nlassert(soundStatus.Dist < _MaxEarDistance);
-	nlassert(soundStatus.Direction.norm() <= 1.01f);
+	nlassert(CVector(soundStatus.Direction).norm() <= 1.01f);
 
 	if (it != _AudibleClusters.end())
 	{

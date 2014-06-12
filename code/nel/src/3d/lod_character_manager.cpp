@@ -676,7 +676,7 @@ bool			CLodCharacterManager::addRenderCharacterKey(CLodCharacterInstance &instan
 		{
 			// NB: order is important for AGP filling optimisation
 			// transform vertex, and store.
-			CVector		*dstVector= (CVector*)dstPtr;
+			CVectorPacked		*dstVector= (CVectorPacked*)dstPtr;
 			fVect.x= vertPtr->x; fVect.y= vertPtr->y; fVect.z= vertPtr->z;
 			++vertPtr;
 			dstVector->x= a00 * fVect.x + a01 * fVect.y + a02 * fVect.z + matPos.x;

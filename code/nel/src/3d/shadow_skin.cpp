@@ -38,6 +38,33 @@ uint	CShadowSkin::NumCacheVertexShadow= NL_BlockByteL1 / sizeof(CShadowVertex);
 
 
 // ***************************************************************************
+void		CShadowSkin::applySkin(CVectorPacked *dst, std::vector<CMatrix3x4> &boneMat3x4)
+{
+	if(Vertices.empty())
+		return;
+	uint	numVerts= (uint)Vertices.size();
+	CShadowVertex	*src= &Vertices[0];
+
+	// Then do the skin
+	for(;numVerts>0;)
+	{
+		// number of vertices to process for this block.
+		uint	nBlockInf= min(NumCacheVertexShadow, numVerts);
+		// next block.
+		numVerts-= nBlockInf;
+
+		// cache the data in L1 cache.
+		CFastMem::precache(src, nBlockInf * sizeof(CShadowVertex));
+
+		CVector temp;
+		//  for all InfluencedVertices only.
+		for(;nBlockInf>0;nBlockInf--, src++, dst++)
+		{
+			boneMat3x4[ src->MatrixId ].mulSetPoint( src->Vertex, temp );
+			*dst = temp;
+		}
+	}
+}
 void		CShadowSkin::applySkin(CVector *dst, std::vector<CMatrix3x4> &boneMat3x4)
 {
 	if(Vertices.empty())
@@ -56,6 +83,7 @@ void		CShadowSkin::applySkin(CVector *dst, std::vector<CMatrix3x4> &boneMat3x4)
 		// cache the data in L1 cache.
 		CFastMem::precache(src, nBlockInf * sizeof(CShadowVertex));
 
+		CVector temp;
 		//  for all InfluencedVertices only.
 		for(;nBlockInf>0;nBlockInf--, src++, dst++)
 		{

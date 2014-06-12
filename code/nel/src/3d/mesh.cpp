@@ -1049,7 +1049,7 @@ bool	CMeshGeom::retrieveVertices(std::vector<NLMISC::CVector> &vertices) const
 		uint		vSize= vb.getVertexSize();
 		for(i=0;i<vertices.size();i++)
 		{
-			vertices[i]= *(const CVector*)pVert;
+			vertices[i]= *(const CVectorPacked*)pVert;
 			pVert+= vSize;
 		}
 	}
@@ -1718,7 +1718,7 @@ void	CMeshGeom::bkupOriginalSkinVertices()
 		_OriginalTGSpace.resize(numVertices);
 		for(uint i=0; i<numVertices;i++)
 		{
-			_OriginalTGSpace[i]= *(CVector*)vba.getTexCoordPointer(i, tgSpaceStage);
+			_OriginalTGSpace[i]= *(CVectorPacked*)vba.getTexCoordPointer(i, tgSpaceStage);
 		}
 	}
 }
@@ -1760,7 +1760,7 @@ void	CMeshGeom::restoreOriginalSkinVertices()
 		// copy tangent space vectors
 		for(uint i = 0; i < numVertices; ++i)
 		{
-			*(CVector*)vba.getTexCoordPointer(i, numTexCoords - 1)= _OriginalTGSpace[i];
+			*(CVectorPacked*)vba.getTexCoordPointer(i, numTexCoords - 1)= _OriginalTGSpace[i];
 		}
 	}
 
@@ -1870,15 +1870,15 @@ void	CMeshGeom::applySkin(CSkeletonModel *skeleton)
 				nlassert(psPal->MatrixId[3]<IDriver::MaxModelMatrix);
 
 				// compute vertex part.
-				computeSoftwarePointSkinning(matrixes, srcVector, psPal, (float*)srcWgt, (CVector*)dstVector);
+				computeSoftwarePointSkinning(matrixes, srcVector, psPal, (float*)srcWgt, (CVectorPacked*)dstVector);
 
 				// compute normal part.
 				if(skinType>=SkinWithNormal)
-					computeSoftwareVectorSkinning(matrixes, srcNormal, psPal, (float*)srcWgt, (CVector*)dstNormal);
+					computeSoftwareVectorSkinning(matrixes, srcNormal, psPal, (float*)srcWgt, (CVectorPacked*)dstNormal);
 
 				// compute tg part.
 				if(skinType>=SkinWithTgSpace)
-					computeSoftwareVectorSkinning(matrixes, srcTgSpace, psPal, (float*)srcWgt, (CVector*)dstTgSpace);
+					computeSoftwareVectorSkinning(matrixes, srcTgSpace, psPal, (float*)srcWgt, (CVectorPacked*)dstTgSpace);
 			}
 
 			// inc flags.
@@ -1938,42 +1938,48 @@ void	CMeshGeom::flagSkinVerticesForMatrixBlock(uint8 *skinFlags, CMatrixBlock &m
 
 
 // ***************************************************************************
-void	CMeshGeom::computeSoftwarePointSkinning(CMatrix3x4 *matrixes, CVector *srcVec, CPaletteSkin *srcPal, float *srcWgt, CVector *pDst)
+void	CMeshGeom::computeSoftwarePointSkinning(CMatrix3x4 *matrixes, CVector *srcVec, CPaletteSkin *srcPal, float *srcWgt, CVectorPacked *pDst)
 {
 	CMatrix3x4		*pMat;
+	CVector			temp;
 
 	// 0th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[0];
-	pMat->mulSetPoint(*srcVec, srcWgt[0], *pDst);
+	pMat->mulSetPoint(*srcVec, srcWgt[0], temp);
 	// 1th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[1];
-	pMat->mulAddPoint(*srcVec, srcWgt[1], *pDst);
+	pMat->mulAddPoint(*srcVec, srcWgt[1], temp);
 	// 2th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[2];
-	pMat->mulAddPoint(*srcVec, srcWgt[2], *pDst);
+	pMat->mulAddPoint(*srcVec, srcWgt[2], temp);
 	// 3th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[3];
-	pMat->mulAddPoint(*srcVec, srcWgt[3], *pDst);
+	pMat->mulAddPoint(*srcVec, srcWgt[3], temp);
+
+	*pDst = temp;
 }
 
 
 // ***************************************************************************
-void	CMeshGeom::computeSoftwareVectorSkinning(CMatrix3x4 *matrixes, CVector *srcVec, CPaletteSkin *srcPal, float *srcWgt, CVector *pDst)
+void	CMeshGeom::computeSoftwareVectorSkinning(CMatrix3x4 *matrixes, CVector *srcVec, CPaletteSkin *srcPal, float *srcWgt, CVectorPacked *pDst)
 {
 	CMatrix3x4		*pMat;
+	CVector			temp;
 
 	// 0th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[0];
-	pMat->mulSetVector(*srcVec, srcWgt[0], *pDst);
+	pMat->mulSetVector(*srcVec, srcWgt[0], temp);
 	// 1th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[1];
-	pMat->mulAddVector(*srcVec, srcWgt[1], *pDst);
+	pMat->mulAddVector(*srcVec, srcWgt[1], temp);
 	// 2th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[2];
-	pMat->mulAddVector(*srcVec, srcWgt[2], *pDst);
+	pMat->mulAddVector(*srcVec, srcWgt[2], temp);
 	// 3th matrix influence.
 	pMat= matrixes + srcPal->MatrixId[3];
-	pMat->mulAddVector(*srcVec, srcWgt[3], *pDst);
+	pMat->mulAddVector(*srcVec, srcWgt[3], temp);
+
+	*pDst = temp;
 }
 
 
@@ -2111,7 +2117,7 @@ void	CMeshGeom::buildShadowSkin()
 		for(uint i=0; i<numVertices;i++)
 		{
 			// Copy Vertex
-			_ShadowSkin.Vertices[i].Vertex= *((CVector*)srcVert);
+			_ShadowSkin.Vertices[i].Vertex= *((CVectorPacked*)srcVert);
 			// Suppose the 0 matrix inf is the highest (we are at least sure it is not 0)
 			// And SkinWeight Export show the 0th is the highest one...
 			_ShadowSkin.Vertices[i].MatrixId= ((CPaletteSkin*)srcPal)->MatrixId[0];

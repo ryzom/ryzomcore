@@ -258,19 +258,19 @@ private:
 	struct TSoundStatus
 	{
 		/// The data of the sound.
-		TSoundData			&SoundData;
+		TSoundData				&SoundData;
 		/// The position of the source.
-		NLMISC::CVector		Position;
+		NLMISC::CVectorPacked	Position;
 		/** The relative gain of the source. This is used for patatoid competition.when
 		  * a smaller patatoid mute bigger one.
 		  */
-		float				Gain;
+		float					Gain;
 		/// The distance beween listener and source.
-		float				Distance;
+		float					Distance;
 		/// flag if inside a sound zone
-		bool				Inside;
+		bool					Inside;
 		/// Constructor.
-		TSoundStatus(TSoundData &sd, NLMISC::CVector position, float gain, float distance, bool inside)
+		TSoundStatus(TSoundData &sd, const NLMISC::CVector &position, float gain, float distance, bool inside)
 			: SoundData(sd), Position(position), Gain(gain), Distance(distance), Inside(inside)
 		{}
 	};

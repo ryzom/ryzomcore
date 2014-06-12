@@ -1244,7 +1244,7 @@ public:
 	static std::vector<uint>						   _ParticleToRemove;			// used during the update step, contains the indices of the particles to remove
 	static std::vector<sint>						   _ParticleRemoveListIndex; 	// for each particle, -1 if it hasn't been removed, or else give the insertion number in _ParticleToRemove
 	static std::vector<uint>						   _CollidingParticles; // index of particle that collided
-	static std::vector<NLMISC::CVector>				   _SpawnPos;			// spawn position of newly created particles
+	static std::vector<NLMISC::CVectorPacked>		   _SpawnPos;			// spawn position of newly created particles
 public:
 	// current sim steps infos
 	static TAnimationTime								EllapsedTime;

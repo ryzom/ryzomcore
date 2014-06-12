@@ -23,6 +23,8 @@
 #include "nel/3d/particle_system.h"
 #include "nel/misc/fast_mem.h"
 
+using NLMISC::CVectorPacked;
+
 namespace NL3D
 {
 
@@ -84,7 +86,7 @@ inline void DrawDot(T it,
 				do
 				{
 					CHECK_VERTEX_BUFFER(vb, currPos);
-					*((CVector *) currPos) =  *it;
+					*((CVectorPacked *) currPos) =  *it;
 					++it ;
 					currPos += stride;
 				}
@@ -93,7 +95,7 @@ inline void DrawDot(T it,
 			else if (srcStep == (1 << 16)) // make sure we haven't got auto-lod and that the step is 1.0
 			{
 				// there's no color information in the buffer, so we can copy it directly
-				NLMISC::CFastMem::memcpy(vba.getVertexCoordPointer(), &(*it), sizeof(NLMISC::CVector) * toProcess);
+				NLMISC::CFastMem::memcpy(vba.getVertexCoordPointer(), &(*it), sizeof(NLMISC::CVectorPacked) * toProcess);
 				it += toProcess;
 			}
 			else
@@ -103,7 +105,7 @@ inline void DrawDot(T it,
 				do
 				{
 					CHECK_VERTEX_BUFFER(vb, currPos);
-					*((CVector *) currPos) =  *it;
+					*((CVectorPacked *) currPos) =  *it;
 					++it ;
 					currPos += sizeof(float[3]);
 				}

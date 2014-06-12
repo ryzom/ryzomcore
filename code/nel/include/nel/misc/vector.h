@@ -28,6 +28,7 @@ namespace	NLMISC
 {
 
 class IStream;
+class CVectorPacked;
 
 // ======================================================================================================
 /**
@@ -36,7 +37,7 @@ class IStream;
  * \author Nevrax France
  * \date 2000
  */
-class CVector
+class NL_ALIGN_SSE2 CVector
 {
 public:		// Attributes.
 	float	x,y,z;
@@ -55,11 +56,11 @@ public:		// Methods.
 	/// @name Object.
 	//@{
 	/// Constructor which does nothing.
-	CVector() {}
+	CVector() { /* if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); */ }
 	/// Constructor .
-	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) { /* if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); */ }
 	/// Copy Constructor.
-	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) {}
+	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) { /* if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); */ }
 	//@}
 
 	/// @name Base Maths.
@@ -134,6 +135,99 @@ public:		// Methods.
 
 	// friends.
 	friend	CVector	operator*(float f, const CVector &v0);
+
+	operator const CVectorPacked &() const
+	{
+		return reinterpret_cast<const CVectorPacked &>(*this);
+	}
+};
+
+class CVectorPacked
+{
+public: // Attributes.
+	float	x,y,z;
+
+public:
+	/// @name Object.
+	//@{
+	/// Constructor which does nothing.
+	CVectorPacked() { }
+	/// Constructor .
+	CVectorPacked(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	/// Copy Constructor.
+	CVectorPacked(const CVectorPacked &v) : x(v.x), y(v.y), z(v.z) {}
+	//@}
+
+	void set(float _x, float _y, float _z)
+	{
+		x = _x;
+		y = _y;
+		z = _z;
+	}
+
+	CVectorPacked &operator += (const CVectorPacked &v)
+	{
+		x += v.x;
+		y += v.y;
+		z += v.z;
+		return *this;
+	}
+
+	CVectorPacked &operator -= (const CVectorPacked &v)
+	{
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
+		return *this;
+	}
+
+	operator CVector () const
+	{
+		return CVector(x, y, z);
+	}
+
+	CVector	operator+(const CVector &v) const
+	{
+		return CVector(*this) + v;
+	}
+
+	CVector	operator-(const CVector &v) const
+	{
+		return CVector(*this) - v;
+	}
+
+	bool operator==(const CVectorPacked &v) const
+	{
+		return x==v.x && y==v.y && z==v.z;
+	}
+
+	bool operator!=(const CVectorPacked &v) const
+	{
+		return !(*this==v);
+	}
+
+	bool operator<(const CVectorPacked &v) const
+	{
+		if(x!=v.x)
+			return x<v.x;
+		if(y!=v.y)
+			return y<v.y;
+		return z<v.z;
+	}
+	
+	CVector	operator^(const CVector &v) const
+	{
+		CVector	ret;
+		ret.x= y*v.z - z*v.y;
+		ret.y= z*v.x - x*v.z;
+		ret.z= x*v.y - y*v.x;
+		return ret;
+	}
+
+	void serial(IStream &f)
+	{
+		f.serial(x, y, z);
+	}
 };
 
 // blend (faster version than the generic version found in algo.h)
@@ -145,12 +239,24 @@ inline CVector blend(const CVector &v0, const CVector &v1, float lambda)
 				   invLambda * v0.z + lambda * v1.z);
 }
 
-
 }
 
+namespace std {
+	inline void swap(NLMISC::CVectorPacked &v1, NLMISC::CVector &v2)
+	{
+		NLMISC::CVectorPacked temp = v2;
+		v2 = NLMISC::CVector(v1);
+		v1 = temp;
+	}
+	inline void swap(NLMISC::CVector &v1,  NLMISC::CVectorPacked &v2)
+	{
+		NLMISC::CVectorPacked temp = v1;
+		v1 = NLMISC::CVector(v2);
+		v2 = temp;
+	}
+}
 
 #include "vector_inline.h"
-
 
 #endif // NL_VECTOR_H
 

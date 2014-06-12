@@ -151,14 +151,14 @@ void CNoise3d::render2passes (CQuadUV &qc, float wpos, float alpha)
 	_VertexBuffer.lock (vba);
 
 	uint32 nVSize = _VertexBuffer.getVertexSize ();
-	CVector *pVertices = vba.getVertexCoordPointer(_NbVertices);
-	*pVertices = qc.V0; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V1; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V2; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V3; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V0; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V1; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V2; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+	CVectorPacked *pVertices = vba.getVertexCoordPointer(_NbVertices);
+	*pVertices = qc.V0; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V1; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V2; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V3; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V0; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V1; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V2; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 	*pVertices = qc.V3;
 
 	CUV *pUV = vba.getTexCoordPointer (_NbVertices, 0);
@@ -232,10 +232,10 @@ void CNoise3d::render (CQuadUV &qc, float wpos, float intensity)
 	CVertexBufferReadWrite vba;
 	_VertexBuffer.lock (vba);
 
-	CVector *pVertices = vba.getVertexCoordPointer(_NbVertices);
-	*pVertices = qc.V0; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V1; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-	*pVertices = qc.V2; pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+	CVectorPacked *pVertices = vba.getVertexCoordPointer(_NbVertices);
+	*pVertices = qc.V0; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V1; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+	*pVertices = qc.V2; pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 	*pVertices = qc.V3;
 
 	CUV *pUV = vba.getTexCoordPointer (_NbVertices, 0);
@@ -281,7 +281,7 @@ void CNoise3d::renderGrid (uint32 nbw, uint32 nbh, uint32 w, uint32 h,
 
 	uint32 i, j, nSlice1, nSlice2;
 	float wpos, oneOverNbWNbH = 1.0f / (nbw*nbh);
-	CVector *pVertices;
+	CVectorPacked *pVertices;
 	CUV *pUV0, *pUV1;
 	uint8 *pColA, nAlphaPos;
 	uint32 nVSize = _VertexBuffer.getVertexSize ();
@@ -319,10 +319,10 @@ void CNoise3d::renderGrid (uint32 nbw, uint32 nbh, uint32 w, uint32 h,
 			// If wpos is just on slice1 alpha must be one
 			nAlphaPos = (uint8)( 255*(1.0f - _Depth*(wpos - (((float)nSlice1) / _Depth))) );
 
-			*pVertices = CVector((float)i*w,	 (float)j*h,	 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)(i+1)*w, (float)j*h,	 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)(i+1)*w, (float)(j+1)*h, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)i*w,	 (float)(j+1)*h, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)i*w,	 (float)j*h,	 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)(i+1)*w, (float)j*h,	 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)(i+1)*w, (float)(j+1)*h, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)i*w,	 (float)(j+1)*h, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 
 			pUV0->U = UStart+_OffS[nSlice1].U;	pUV0->V = VStart+_OffS[nSlice1].V;	pUV0 = (CUV*)( ((uint8*)pUV0) + nVSize );
 			pUV0->U = dU+_OffS[nSlice1].U;		pUV0->V = VStart+_OffS[nSlice1].V;	pUV0 = (CUV*)( ((uint8*)pUV0) + nVSize );
@@ -350,7 +350,7 @@ void CNoise3d::renderGrid2passes (uint32 nbw, uint32 nbh, uint32 w, uint32 h,
 {
 	uint32 i, j, nSlice1, nSlice2;
 	float wpos, oneOverNbWNbH = 1.0f / (nbw*nbh);
-	CVector *pVertices;
+	CVectorPacked *pVertices;
 	CUV *pUV0;
 	uint8 *pColA, nFinalAlpha;
 	uint32 nVSize = _VertexBuffer.getVertexSize ();
@@ -387,14 +387,14 @@ void CNoise3d::renderGrid2passes (uint32 nbw, uint32 nbh, uint32 w, uint32 h,
 			// If wpos is just on slice1 alpha must be one
 			float alphaPos = 1.0f - _Depth*(wpos - (((float)nSlice1) / _Depth));
 
-			*pVertices = CVector((float)i*w,	 (float)j*h,	 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)(i+1)*w, (float)j*h,	 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)(i+1)*w, (float)(j+1)*h, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)i*w,	 (float)(j+1)*h, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)i*w,	 (float)j*h,	 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)(i+1)*w, (float)j*h,	 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)(i+1)*w, (float)(j+1)*h, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
-			*pVertices = CVector((float)i*w,	 (float)(j+1)*h, 0.0f); pVertices = (CVector*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)i*w,	 (float)j*h,	 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)(i+1)*w, (float)j*h,	 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)(i+1)*w, (float)(j+1)*h, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)i*w,	 (float)(j+1)*h, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)i*w,	 (float)j*h,	 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)(i+1)*w, (float)j*h,	 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)(i+1)*w, (float)(j+1)*h, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+			*pVertices = CVector((float)i*w,	 (float)(j+1)*h, 0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
 
 			pUV0->U = UStart+_OffS[nSlice1].U;	pUV0->V = VStart+_OffS[nSlice1].V;	pUV0 = (CUV*)( ((uint8*)pUV0) + nVSize );
 			pUV0->U = dU+_OffS[nSlice1].U;		pUV0->V = VStart+_OffS[nSlice1].V;	pUV0 = (CUV*)( ((uint8*)pUV0) + nVSize );

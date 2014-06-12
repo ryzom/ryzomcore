@@ -62,7 +62,7 @@ public:
 		endValue = convertVBColor(endValue, _ColorType);
 
 	}
-	virtual void setValues(NLMISC::CRGBA startValue, NLMISC::CRGBA endValue)
+	virtual void setValues(const NLMISC::CRGBA &startValue, const NLMISC::CRGBA &endValue)
 	{
 		CPSValueBlendFunc<NLMISC::CRGBA>::setValues(convertVBColor(startValue, _ColorType), convertVBColor(endValue, _ColorType));
 	}
@@ -96,7 +96,7 @@ public:
 		endValue = convertVBColor(endValue, _ColorType);
 
 	}
-	virtual void setValues(NLMISC::CRGBA startValue, NLMISC::CRGBA endValue)
+	virtual void setValues(const NLMISC::CRGBA &startValue, const NLMISC::CRGBA &endValue)
 	{
 		CPSValueBlendSampleFunc<NLMISC::CRGBA, RGBA_BLENDER_NUM_VALUES>::setValues(convertVBColor(startValue, _ColorType), convertVBColor(endValue, _ColorType));
 	}

@@ -34,7 +34,7 @@ const float NormEpsilon = 10E-8f;
 
 struct CVectInfo
 {
-	NLMISC::CVector Interp;
+	NLMISC::CVectorPacked Interp;
 	NLMISC::CVector Proj;
 };
 typedef std::vector<CVectInfo> TRibbonVect; // a vector used for intermediate computations
@@ -247,8 +247,8 @@ static inline void BuildSlice(const NLMISC::CMatrix &mat, CVertexBuffer &vb, uin
 			invTgNorm = 1.f;
 		}
 		// build orthogonals vectors to tangent
-		*(NLMISC::CVector *) currVert = pos->Interp + ribSize * invTgNorm * (tangent.x * K - tangent.z * I);
-		*(NLMISC::CVector *) (currVert + vertexSize) = pos->Interp + ribSize * invTgNorm * (- tangent.x * K + tangent.z * I);
+		*(NLMISC::CVectorPacked *) currVert = NLMISC::CVector(pos->Interp) + ribSize * invTgNorm * (tangent.x * K - tangent.z * I);
+		*(NLMISC::CVectorPacked *) (currVert + vertexSize) = NLMISC::CVector(pos->Interp) + ribSize * invTgNorm * (- tangent.x * K + tangent.z * I);
 	}
 	else if (prev->Proj.y > ZEpsilon) // second point cross the near plane
 	{
@@ -263,8 +263,8 @@ static inline void BuildSlice(const NLMISC::CMatrix &mat, CVertexBuffer &vb, uin
 		}
 		else //
 		{
-			*(NLMISC::CVector *) currVert = pos->Interp;
-			*(NLMISC::CVector *) (currVert + vertexSize) = pos->Interp;
+			*(NLMISC::CVectorPacked *) currVert = pos->Interp;
+			*(NLMISC::CVectorPacked *) (currVert + vertexSize) = pos->Interp;
 			return;
 		}
 
@@ -282,8 +282,8 @@ static inline void BuildSlice(const NLMISC::CMatrix &mat, CVertexBuffer &vb, uin
 		}
 		// build orthogonals vectors to tangent
 
-		*(NLMISC::CVector *) currVert = inter + ribSize *  invTgNorm * (tangent.x * K - tangent.z * I);
-		*(NLMISC::CVector *) (currVert + vertexSize) = inter + ribSize * invTgNorm * (- tangent.x * K + tangent.z * I);
+		*(NLMISC::CVectorPacked *) currVert = inter + ribSize *  invTgNorm * (tangent.x * K - tangent.z * I);
+		*(NLMISC::CVectorPacked *) (currVert + vertexSize) = inter + ribSize * invTgNorm * (- tangent.x * K + tangent.z * I);
 	}
 	else if (next->Proj.y > ZEpsilon) // first point cross the near plane
 	{
@@ -298,8 +298,8 @@ static inline void BuildSlice(const NLMISC::CMatrix &mat, CVertexBuffer &vb, uin
 		}
 		else //
 		{
-			*(NLMISC::CVector *) currVert = pos->Interp;
-			*(NLMISC::CVector *) (currVert + vertexSize) = pos->Interp;
+			*(NLMISC::CVectorPacked *) currVert = pos->Interp;
+			*(NLMISC::CVectorPacked *) (currVert + vertexSize) = pos->Interp;
 			return;
 		}
 
@@ -316,14 +316,14 @@ static inline void BuildSlice(const NLMISC::CMatrix &mat, CVertexBuffer &vb, uin
 		}
 		// build orthogonals vectors to tangent
 
-		*(NLMISC::CVector *) currVert = inter + ribSize * invTgNorm * (tangent.x * K - tangent.z * I);
-		*(NLMISC::CVector *) (currVert + vertexSize) = inter + ribSize * invTgNorm * (- tangent.x * K + tangent.z * I);
+		*(NLMISC::CVectorPacked *) currVert = inter + ribSize * invTgNorm * (tangent.x * K - tangent.z * I);
+		*(NLMISC::CVectorPacked *) (currVert + vertexSize) = inter + ribSize * invTgNorm * (- tangent.x * K + tangent.z * I);
 
 	}
 	else // two points are not visible
 	{
-		*(NLMISC::CVector *) currVert = pos->Interp;
-		*(NLMISC::CVector *) (currVert + vertexSize) = pos->Interp;
+		*(NLMISC::CVectorPacked *) currVert = pos->Interp;
+		*(NLMISC::CVectorPacked *) (currVert + vertexSize) = pos->Interp;
 	}
 
 }

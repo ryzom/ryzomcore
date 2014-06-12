@@ -82,7 +82,7 @@ struct IPSMover
 	virtual NLMISC::CVector			getNormal(uint32 /* index */) { NL_PS_FUNC(getNormal); return NLMISC::CVector::Null ; }
 
 	/// if the object only stores a normal, this set the normal of the object. Otherwise it has no effect
-	virtual void					setNormal(uint32 /* index */, NLMISC::CVector /* n */) { NL_PS_FUNC(setNormal); }
+	virtual void					setNormal(uint32 /* index */, const NLMISC::CVector &/* n */) { NL_PS_FUNC(setNormal); }
 
 	// set a new orthogonal matrix for the object
 	virtual void					setMatrix(uint32 index, const NLMISC::CMatrix &m) = 0 ;
