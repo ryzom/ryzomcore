@@ -71,33 +71,7 @@ extern "C" long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 #endif // NL_OS_WINDOWS
 
 
-#ifdef HAS_SSE2
-
-#	ifdef NL_COMP_VC
-
-inline void *aligned_malloc(size_t size, size_t alignment)
-{
-	return _aligned_malloc(size, alignment);
-}
-
-inline void aligned_free(void *p)
-{
-	_aligned_free(ptr);
-}
-
-#	else
-
-inline void *aligned_malloc(size_t size, size_t alignment)
-{
-	return memalign(alignment, size);
-}
-
-inline void aligned_free(void *ptr)
-{
-	free(ptr);
-}
-
-#	endif /* NL_COMP_ */
+#ifdef USE_SSE2
 
 void *operator new(size_t size) throw(std::bad_alloc)
 {

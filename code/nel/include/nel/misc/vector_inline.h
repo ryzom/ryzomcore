@@ -31,23 +31,35 @@ namespace	NLMISC
 // Base Maths.
 inline	CVector	&CVector::operator+=(const CVector &v)
 {
+#ifdef USE_SSE2
+	mm = _mm_add_ps(mm, v.mm);
+#else
 	x+=v.x;
 	y+=v.y;
 	z+=v.z;
+#endif
 	return *this;
 }
 inline	CVector	&CVector::operator-=(const CVector &v)
 {
+#ifdef USE_SSE2
+	mm = _mm_sub_ps(mm, v.mm);
+#else
 	x-=v.x;
 	y-=v.y;
 	z-=v.z;
+#endif
 	return *this;
 }
 inline	CVector	&CVector::operator*=(float f)
 {
+#ifdef USE_SSE2
+	mm = _mm_mul_ps(mm, _mm_set1_ps(f));
+#else
 	x*=f;
 	y*=f;
 	z*=f;
+#endif
 	return *this;
 }
 inline	CVector	&CVector::operator/=(float f)
@@ -56,18 +68,36 @@ inline	CVector	&CVector::operator/=(float f)
 }
 inline	CVector	CVector::operator+(const CVector &v) const
 {
+#ifdef USE_SSE2
+	CVector res;
+	res.mm = _mm_add_ps(mm, v.mm);
+	return res;
+#else
 	CVector	ret(x+v.x, y+v.y, z+v.z);
 	return ret;
+#endif
 }
 inline	CVector	CVector::operator-(const CVector &v) const
 {
+#ifdef USE_SSE2
+	CVector res;
+	res.mm = _mm_sub_ps(mm, v.mm);
+	return res;
+#else
 	CVector	ret(x-v.x, y-v.y, z-v.z);
 	return ret;
+#endif
 }
 inline	CVector	CVector::operator*(float f) const
 {
+#ifdef USE_SSE2
+	CVector res;
+	res.mm = _mm_mul_ps(mm, _mm_set1_ps(f));
+	return res;
+#else
 	CVector	ret(x*f, y*f, z*f);
 	return ret;
+#endif
 }
 inline	CVector	CVector::operator/(float f) const
 {
@@ -75,12 +105,24 @@ inline	CVector	CVector::operator/(float f) const
 }
 inline	CVector	CVector::operator-() const
 {
+#ifdef USE_SSE2
+	CVector res;
+	res.mm = _mm_mul_ps(mm, _mm_set1_ps(-1.0f));
+	return res;
+#else
 	return CVector(-x,-y,-z);
+#endif
 }
 inline CVector	operator*(float f, const CVector &v)
 {
+#ifdef USE_SSE2
+	CVector res;
+	res.mm = _mm_mul_ps(v.mm, _mm_set1_ps(f));
+	return res;
+#else
 	CVector	ret(v.x*f, v.y*f, v.z*f);
 	return ret;
+#endif
 }
 
 

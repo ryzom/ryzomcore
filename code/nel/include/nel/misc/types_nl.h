@@ -336,14 +336,82 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #endif
 
 #ifdef USE_SSE2
+
 extern void *operator new(size_t size) throw(std::bad_alloc);
 extern void *operator new[](size_t size) throw(std::bad_alloc);
 extern void operator delete(void *p) throw();
 extern void operator delete[](void *p) throw();
+
 #define NL_ALIGN_SSE2(nb) NL_ALIGN(nb)
+
+#	ifdef NL_COMP_VC
+
+inline void *aligned_malloc(size_t size, size_t alignment)
+{
+	return _aligned_malloc(size, alignment);
+}
+
+inline void aligned_free(void *ptr)
+{
+	_aligned_free(ptr);
+}
+
+#	else
+
+inline void *aligned_malloc(size_t size, size_t alignment)
+{
+	return memalign(alignment, size);
+}
+
+inline void aligned_free(void *ptr)
+{
+	free(ptr);
+}
+
+#	endif /* NL_COMP_ */
+
+template<class T>
+class aligned_allocator : public std::allocator<T>
+{
+public:
+	typedef size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+	typedef T* pointer;
+	typedef const T* const_pointer;
+	typedef T& reference;
+	typedef const T& const_reference;
+	typedef T value_type;
+
+	template<class U>
+	struct rebind
+	{
+		typedef aligned_allocator<U> other;
+	};
+
+	aligned_allocator() : std::allocator<T>() {}
+
+	aligned_allocator(const aligned_allocator& other) : std::allocator<T>(other) {}
+
+	template<class U>
+	aligned_allocator(const aligned_allocator<U>& other) : std::allocator<T>(other) {}
+
+	~aligned_allocator() {}
+
+	pointer allocate(size_type num, const void* /*hint*/ = 0)
+	{
+		return static_cast<pointer>(aligned_malloc(NL_DEFAULT_MEMORY_ALIGNMENT, num * sizeof(T)));
+	}
+
+	void deallocate(pointer p, size_type /*num*/)
+	{
+		aligned_free(p);
+	}
+};
+
 #else
 #define NL_ALIGN_SSE2(nb) 
-#endif
+#endif /* USE_SSE2 */
+
 
 // CHashMap, CHashSet and CHashMultiMap definitions
 #if defined(_STLPORT_VERSION) // STLport detected

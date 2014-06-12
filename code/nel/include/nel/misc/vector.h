@@ -35,15 +35,24 @@ class IStream;
  * \author Lionel Berenguier
  * \author Nevrax France
  * \date 2000
+ * \author Jan Boon
+ * \date 2014
  */
 NL_ALIGN_SSE2(16)
 class CVector
 {
 public:		// Attributes.
-	float	x,y,z;
-
 #ifdef USE_SSE2
-	float	w; // Padding
+	union
+	{
+		struct
+		{
+			float x, y, z, P;
+		};
+		__m128 mm;
+	};
+#else
+	float	x,y,z;
 #endif
 
 public:		// const.
@@ -187,9 +196,21 @@ public:
 inline CVector blend(const CVector &v0, const CVector &v1, float lambda)
 {
 	float invLambda = 1.f - lambda;
+#ifdef USE_SSE2
+	CVector res;
+	__m128 mLambda = _mm_set1_ps(lambda);
+	__m128 mInvLambda = _mm_set1_ps(invLambda);
+	__m128 mv0 = v0.mm;
+	__m128 mv1 = v1.mm;
+	mv0 = _mm_mul_ps(mv0, mInvLambda);
+	mv1 = _mm_mul_ps(mv1, mLambda);
+	res.mm = _mm_add_ps(mv0, mv1);
+	return res;
+#else
 	return CVector(invLambda * v0.x + lambda * v1.x,
 		           invLambda * v0.y + lambda * v1.y,
 				   invLambda * v0.z + lambda * v1.z);
+#endif
 }
 
 
