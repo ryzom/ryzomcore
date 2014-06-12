@@ -116,7 +116,7 @@ public:
 
 
 // ***************************************************************************
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM) && !defined(USE_SSE2)
 
 
 /** For fast vector/point multiplication. Special usage for Skinning.
@@ -372,6 +372,205 @@ public:
 			movhlps	xmm0, xmm0
 			movss	[edi]vout.z, xmm0
 		}
+	}
+
+};
+
+#elif 0
+
+NL_ALIGN(16)
+class CVectorSSEAligned
+{
+	float f[4];
+};
+
+/** For fast vector/point multiplication. Special usage for Skinning.
+ */
+NL_ALIGN(16)
+class	CMatrix3x4SSE
+{
+public:
+	__m128 c1, c2, c3, c4;
+
+	// Copy from a matrix.
+	inline void set(const CMatrix &mat)
+	{
+		const float	*m = mat.get();
+		register __m128 xmm0 = _mm_loadu_ps(&m[0]);
+		register __m128 xmm1 = _mm_loadu_ps(&m[4]);
+		register __m128 xmm2 = _mm_loadu_ps(&m[8]);
+		register __m128 xmm3 = _mm_loadu_ps(&m[12]);
+		c1 = xmm0;
+		c2 = xmm1;
+		c3 = xmm2;
+		c4 = xmm3;
+	}
+
+	// mulSetvector. NB: in should be different as v!! (else don't work).
+	inline void mulSetVector(const CVector &vin, CVector &vout)
+	{
+		CVectorSSEAligned outf; // FIXME_SSE2
+
+		register __m128 xmm0 = _mm_loadu_ps(&vout.x); // WARNING: Reads beyond CVector size! // FIXME_SSE2: Align CVector
+
+		register __m128 xmm1 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(1, 1, 1, 1));
+		register __m128 xmm2 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(2, 2, 2, 2));
+		xmm0 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(0, 0, 0, 0));
+
+		xmm0 = _mm_mul_ps(xmm0, c1);
+		xmm1 = _mm_mul_ps(xmm1, c2);
+		xmm2 = _mm_mul_ps(xmm2, c3);
+
+		xmm0 = _mm_add_ps(xmm0, xmm1);
+		xmm0 = _mm_add_ps(xmm0, xmm2);
+
+		_mm_store_ps(&outf.f[0], xmm0);		
+		vout.x = outf[0]; // FIXME_SSE2
+		vout.y = outf[1];
+		vout.z = outf[2];
+	}
+
+	// mulSetpoint. NB: in should be different as v!! (else don't work).
+	inline void	mulSetPoint(const CVector &vin, CVector &vout)
+	{
+		CVectorSSEAligned outf; // FIXME_SSE2
+
+		register __m128 xmm0 = _mm_loadu_ps(&vout.x); // WARNING: Reads beyond CVector size! // FIXME_SSE2: Align CVector
+
+		register __m128 xmm1 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(1, 1, 1, 1));
+		register __m128 xmm2 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(2, 2, 2, 2));
+		xmm0 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(0, 0, 0, 0));
+
+		xmm0 = _mm_mul_ps(xmm0, c1);
+		xmm1 = _mm_mul_ps(xmm1, c2);
+		xmm2 = _mm_mul_ps(xmm2, c3);
+
+		xmm0 = _mm_add_ps(xmm0, xmm1);
+		xmm0 = _mm_add_ps(xmm0, xmm2);
+
+		xmm0 = _mm_add_ps(xmm0, c4);
+
+		_mm_store_ps(&outf.f[0], xmm0);		
+		vout.x = outf[0]; // FIXME_SSE2
+		vout.y = outf[1];
+		vout.z = outf[2];
+	}
+
+
+	// mulSetvector. NB: vin should be different as v!! (else don't work).
+	inline void	mulSetVector(const CVector &vin, float scale, CVector &vout)
+	{
+		CVectorSSEAligned outf; // FIXME_SSE2
+
+		register __m128 xmm0 = _mm_loadu_ps(&vout.x); // WARNING: Reads beyond CVector size! // FIXME_SSE2: Align CVector
+
+		register __m128 xmm1 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(1, 1, 1, 1));
+		register __m128 xmm2 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(2, 2, 2, 2));
+		xmm0 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(0, 0, 0, 0));
+
+		register __m128 xmm3 = _mm_set1_ps(scale);
+
+		xmm0 = _mm_mul_ps(xmm0, c1);
+		xmm1 = _mm_mul_ps(xmm1, c2);
+		xmm2 = _mm_mul_ps(xmm2, c3);
+
+		xmm0 = _mm_add_ps(xmm0, xmm1);
+		xmm0 = _mm_add_ps(xmm0, xmm2);
+
+		xmm0 = _mm_mul_ps(xmm0, xmm3);
+
+		_mm_store_ps(&outf.f[0], xmm0);		
+		vout.x = outf[0]; // FIXME_SSE2
+		vout.y = outf[1];
+		vout.z = outf[2];
+	}
+	// mulSetpoint. NB: vin should be different as v!! (else don't work).
+	inline void	mulSetPoint(const CVector &vin, float scale, CVector &vout)
+	{
+		CVectorSSEAligned outf; // FIXME_SSE2
+
+		register __m128 xmm0 = _mm_loadu_ps(&vout.x); // WARNING: Reads beyond CVector size! // FIXME_SSE2: Align CVector
+
+		register __m128 xmm1 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(1, 1, 1, 1));
+		register __m128 xmm2 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(2, 2, 2, 2));
+		xmm0 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(0, 0, 0, 0));
+
+		register __m128 xmm3 = _mm_set1_ps(scale);
+
+		xmm0 = _mm_mul_ps(xmm0, c1);
+		xmm1 = _mm_mul_ps(xmm1, c2);
+		xmm2 = _mm_mul_ps(xmm2, c3);
+
+		xmm0 = _mm_add_ps(xmm0, xmm1);
+		xmm0 = _mm_add_ps(xmm0, xmm2);
+
+		xmm0 = _mm_add_ps(xmm0, c4);
+
+		xmm0 = _mm_mul_ps(xmm0, xmm3);
+
+		_mm_store_ps(&outf.f[0], xmm0);		
+		vout.x = outf[0]; // FIXME_SSE2
+		vout.y = outf[1];
+		vout.z = outf[2];
+	}
+
+
+	// mulAddvector. NB: vin should be different as v!! (else don't work).
+	inline void	mulAddVector(const CVector &vin, float scale, CVector &vout)
+	{
+		CVectorSSEAligned outf; // FIXME_SSE2
+
+		register __m128 xmm0 = _mm_loadu_ps(&vout.x); // WARNING: Reads beyond CVector size! // FIXME_SSE2: Align CVector
+
+		register __m128 xmm1 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(1, 1, 1, 1));
+		register __m128 xmm2 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(2, 2, 2, 2));
+		xmm0 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(0, 0, 0, 0));
+
+		register __m128 xmm3 = _mm_set1_ps(scale);
+
+		xmm0 = _mm_mul_ps(xmm0, c1);
+		xmm1 = _mm_mul_ps(xmm1, c2);
+		xmm2 = _mm_mul_ps(xmm2, c3);
+
+		xmm0 = _mm_add_ps(xmm0, xmm1);
+		xmm0 = _mm_add_ps(xmm0, xmm2);
+
+		xmm0 = _mm_mul_ps(xmm0, xmm3);
+
+		_mm_store_ps(&outf.f[0], xmm0);		
+		vout.x += outf[0]; // FIXME_SSE2
+		vout.y += outf[1];
+		vout.z += outf[2];
+	}
+
+	// mulAddpoint. NB: vin should be different as v!! (else don't work).
+	inline void	mulAddPoint(const CVector &vin, float scale, CVector &vout)
+	{
+		CVectorSSEAligned outf; // FIXME_SSE2
+
+		register __m128 xmm0 = _mm_loadu_ps(&vout.x); // WARNING: Reads beyond CVector size! // FIXME_SSE2: Align CVector
+
+		register __m128 xmm1 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(1, 1, 1, 1));
+		register __m128 xmm2 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(2, 2, 2, 2));
+		xmm0 = _mm_shuffle_ps(xmm0, xmm0, _MM_SHUFFLE(0, 0, 0, 0));
+
+		register __m128 xmm3 = _mm_set1_ps(scale);
+
+		xmm0 = _mm_mul_ps(xmm0, c1);
+		xmm1 = _mm_mul_ps(xmm1, c2);
+		xmm2 = _mm_mul_ps(xmm2, c3);
+
+		xmm0 = _mm_add_ps(xmm0, xmm1);
+		xmm0 = _mm_add_ps(xmm0, xmm2);
+
+		xmm0 = _mm_add_ps(xmm0, c4);
+
+		xmm0 = _mm_mul_ps(xmm0, xmm3);
+
+		_mm_store_ps(&outf.f[0], xmm0);		
+		vout.x += outf[0]; // FIXME_SSE2
+		vout.y += outf[1];
+		vout.z += outf[2];
 	}
 
 };
