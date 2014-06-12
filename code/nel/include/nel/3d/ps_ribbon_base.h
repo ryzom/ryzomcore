@@ -120,8 +120,8 @@ protected:
 	  * The dest tab must have at least nbSegs + 1 entries.
 	  */
 	void							computeRibbon( uint index,
-												   NLMISC::CVector *dest,
-												   uint stride = sizeof(NLMISC::CVector)
+												   NLMISC::CVectorPacked *dest,
+												   uint stride = sizeof(NLMISC::CVectorPacked)
 												  );
 
 	/// Called each time the time of the system change in order to update the ribbons positions
@@ -168,26 +168,26 @@ private:
 
 	/// Compute the ribbon points using linear interpolation between each sampling point.
 	void					computeLinearRibbon( uint index,
-											     NLMISC::CVector *dest,
-										         uint stride = sizeof(NLMISC::CVector)
+											     NLMISC::CVectorPacked *dest,
+										         uint stride = sizeof(NLMISC::CVectorPacked)
 										       );
 	/// The same as compute linear ribbon but try to make its length constant
 	void					computeLinearCstSizeRibbon( uint index,
-											     NLMISC::CVector *dest,
-										         uint stride = sizeof(NLMISC::CVector)
+											     NLMISC::CVectorPacked *dest,
+										         uint stride = sizeof(NLMISC::CVectorPacked)
 										       );
 	/// Compute the ribbon points using hermitte splines between each sampling point.
 	void					computeHermitteRibbon( uint index,
-											     NLMISC::CVector *dest,
-										         uint stride = sizeof(NLMISC::CVector)
+											     NLMISC::CVectorPacked *dest,
+										         uint stride = sizeof(NLMISC::CVectorPacked)
 										       );
 
 	/** Compute the ribbon points using hermitte splines between each sampling point,
 	  * and make a rough approximation to get a constant length
 	  */
 	void					computeHermitteCstSizeRibbon( uint index,
-											     NLMISC::CVector *dest,
-										         uint stride = sizeof(NLMISC::CVector)
+											     NLMISC::CVectorPacked *dest,
+										         uint stride = sizeof(NLMISC::CVectorPacked)
 										       );
 	// called by the system when its date has been manually changed
 	virtual void			systemDateChanged();

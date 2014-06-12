@@ -53,7 +53,7 @@ class	CPlane;
  * \author Nevrax France
  * \date 2000
  */
-NL_ALIGN(16)
+NL_ALIGN_SSE2(16)
 class CMatrix
 {
 public:

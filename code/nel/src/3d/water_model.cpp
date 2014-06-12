@@ -33,6 +33,7 @@
 #include "nel/3d/texture_bump.h"
 #include "nel/3d/water_env_map.h"
 
+using NLMISC::CVectorPacked;
 
 using NLMISC::CVector2f;
 
@@ -1450,15 +1451,15 @@ uint CWaterModel::fillVBSoft(void *datas, uint startTri)
 			}
 			for(uint l = 0; l < numVerts - 2; ++l)
 			{
-				*(CVector *) dest = unprojectedTriSoft[0];
+				*(CVectorPacked *) dest = unprojectedTriSoft[0];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[0];
 				dest += sizeof(float[2]);
-				*(CVector *) dest = unprojectedTriSoft[l + 1];
+				*(CVectorPacked *) dest = unprojectedTriSoft[l + 1];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[l + 1];
 				dest += sizeof(float[2]);
-				*(CVector *) dest = unprojectedTriSoft[l + 2];
+				*(CVectorPacked *) dest = unprojectedTriSoft[l + 2];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[l + 2];
 				dest += sizeof(float[2]);
@@ -1481,27 +1482,27 @@ uint CWaterModel::fillVBSoft(void *datas, uint startTri)
 				computeWaterVertexSoft((float) (x + 1), (float) (y + 1), proj[2], envMap[2], camI, camJ, camK, denom, date, camMat.getPos());
 				computeWaterVertexSoft((float) x, (float) (y + 1), proj[3], envMap[3], camI, camJ, camK, denom, date, camMat.getPos());
 				//
-				*(CVector *) dest = proj[0];
+				*(CVectorPacked *) dest = proj[0];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[0];
 				dest += sizeof(float[2]);
-				*(CVector *) dest = proj[2];
+				*(CVectorPacked *) dest = proj[2];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[2];
 				dest += sizeof(float[2]);
-				*(CVector *) dest = proj[1];
+				*(CVectorPacked *) dest = proj[1];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[1];
 				dest += sizeof(float[2]);
-				*(CVector *) dest = proj[0];
+				*(CVectorPacked *) dest = proj[0];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[0];
 				dest += sizeof(float[2]);
-				*(CVector *) dest = proj[3];
+				*(CVectorPacked *) dest = proj[3];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[3];
 				dest += sizeof(float[2]);
-				*(CVector *) dest = proj[2];
+				*(CVectorPacked *) dest = proj[2];
 				dest += sizeof(float[3]);
 				*(CVector2f *) dest = envMap[2];
 				dest += sizeof(float[2]);
@@ -1557,11 +1558,11 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 			}
 			for(uint l = 0; l < numVerts - 2; ++l)
 			{
-				*(CVector *) dest = unprojectedTri[0];
+				*(CVectorPacked *) dest = unprojectedTri[0];
 				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = unprojectedTri[l + 1];
+				*(CVectorPacked *) dest = unprojectedTri[l + 1];
 				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = unprojectedTri[l + 2];
+				*(CVectorPacked *) dest = unprojectedTri[l + 2];
 				dest += WATER_VERTEX_HARD_SIZE;
 			}
 		}
@@ -1581,17 +1582,17 @@ uint CWaterModel::fillVBHard(void *datas, uint startTri)
 				computeWaterVertexHard((float) (x + 1), (float) (y + 1), proj[2], camI, camJ, camK, denom);
 				computeWaterVertexHard((float) x, (float) (y + 1), proj[3], camI, camJ, camK, denom);
 				//
-				*(CVector *) dest = proj[0];
+				*(CVectorPacked *) dest = proj[0];
 				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[2];
+				*(CVectorPacked *) dest = proj[2];
 				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[1];
+				*(CVectorPacked *) dest = proj[1];
 				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[0];
+				*(CVectorPacked *) dest = proj[0];
 				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[3];
+				*(CVectorPacked *) dest = proj[3];
 				dest += WATER_VERTEX_HARD_SIZE;
-				*(CVector *) dest = proj[2];
+				*(CVectorPacked *) dest = proj[2];
 				dest += WATER_VERTEX_HARD_SIZE;
 			}
 		}

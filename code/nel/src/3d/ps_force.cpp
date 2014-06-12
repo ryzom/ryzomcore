@@ -602,9 +602,9 @@ void CPSGravity::integrate(float date, CPSLocated *src, uint32 startIndex, uint3
 
 void CPSGravity::integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
-								 NLMISC::CVector *destPos,
+								 NLMISC::CVectorPacked *destPos,
 								 bool accumulate /*= false*/,
-								 uint stride/* = sizeof(NLMISC::CVector)*/) const
+								 uint stride/* = sizeof(NLMISC::CVectorPacked)*/) const
 {
 	NL_PS_FUNC(CPSGravity_CVector )
 	nlassert(src->isParametricMotionEnabled());
@@ -635,7 +635,7 @@ void CPSGravity::integrateSingle(float startDate, float deltaT, uint numStep,
 					destPos->y = startPos.y + currDate * startSpeed.y;
 					destPos->z = startPos.z + currDate * startSpeed.z - _K * halfTimeSquare;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}
@@ -655,7 +655,7 @@ void CPSGravity::integrateSingle(float startDate, float deltaT, uint numStep,
 					float halfTimeSquare  = 0.5f * currDate * currDate;
 					destPos->z -=  _K * halfTimeSquare;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}
@@ -1146,7 +1146,7 @@ void CPSBrownianForce::integrate(float date, CPSLocated *src,
 ///==========================================================
 void CPSBrownianForce::integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
-								 NLMISC::CVector *destPos,
+								 NLMISC::CVectorPacked *destPos,
 								 bool accumulate,
 								 uint stride) const
 {
@@ -1181,7 +1181,7 @@ void CPSBrownianForce::integrateSingle(float startDate, float deltaT, uint numSt
 					destPos->y = startPos.y + currDate * startSpeed.y + _K * PrecomputedPos[index].y;
 					destPos->z = startPos.z + currDate * startSpeed.z + _K * PrecomputedPos[index].z;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}
@@ -1203,7 +1203,7 @@ void CPSBrownianForce::integrateSingle(float startDate, float deltaT, uint numSt
 					destPos->y += _K * PrecomputedPos[index].y;
 					destPos->z += _K * PrecomputedPos[index].z;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}

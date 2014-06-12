@@ -920,29 +920,29 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV *quads, uint32 nbQuads,
 			for (uint32 i = 0; i < nbQuads; ++i)
 			{
 				const NLMISC::CQuadColorUV &qcuv = quads[i];
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V0;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv0;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= qcuv.Color0;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V1;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv1;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= qcuv.Color1;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V2;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv2;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= qcuv.Color2;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V3;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V3;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv3;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
@@ -955,29 +955,29 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV *quads, uint32 nbQuads,
 			for (uint32 i = 0; i < nbQuads; ++i)
 			{
 				const NLMISC::CQuadColorUV &qcuv = quads[i];
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V0;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv0;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CBGRA*)(dstPtr+colorOfs)= qcuv.Color0;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V1;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv1;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CBGRA*)(dstPtr+colorOfs)= qcuv.Color1;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V2;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv2;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CBGRA))
 				*(CBGRA*)(dstPtr+colorOfs)= qcuv.Color2;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V3;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V3;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs)= qcuv.Uv3;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
@@ -1014,8 +1014,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 			for (uint32 i = 0; i < nbQuads; ++i)
 			{
 				const NLMISC::CQuadColorUV2 &qcuv = quads[i];
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V0;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1023,8 +1023,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= qcuv.Color0;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V1;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1032,8 +1032,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= qcuv.Color1;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V2;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1041,8 +1041,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= qcuv.Color2;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V3;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V3;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv3;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1057,8 +1057,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 			for (uint32 i = 0; i < nbQuads; ++i)
 			{
 				const NLMISC::CQuadColorUV2 &qcuv = quads[i];
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V0;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1066,8 +1066,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CBGRA*)(dstPtr+colorOfs)= qcuv.Color0;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V1;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1075,8 +1075,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CBGRA*)(dstPtr+colorOfs)= qcuv.Color1;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V2;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1084,8 +1084,8 @@ void			CDriverUser::drawQuads(const NLMISC::CQuadColorUV2 *quads, uint32 nbQuads
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CBGRA*)(dstPtr+colorOfs)= qcuv.Color2;
 				dstPtr+= vSize;
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= qcuv.V3;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= qcuv.V3;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= qcuv.Uv3;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs1, sizeof(CUV))
@@ -1127,24 +1127,24 @@ void CDriverUser::drawTriangles(const NLMISC::CTriangleColorUV *tris, uint32 nbT
 			do
 			{
 				//
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= tris->V0;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= tris->V0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= tris->Uv0;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= tris->Color0;
 				dstPtr+= vSize;
 				//
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= tris->V1;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= tris->V1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= tris->Uv1;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CRGBA*)(dstPtr+colorOfs)= tris->Color1;
 				dstPtr+= vSize;
 				//
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= tris->V2;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= tris->V2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= tris->Uv2;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
@@ -1159,24 +1159,24 @@ void CDriverUser::drawTriangles(const NLMISC::CTriangleColorUV *tris, uint32 nbT
 			do
 			{
 				//
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= tris->V0;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= tris->V0;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= tris->Uv0;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CBGRA*)(dstPtr+colorOfs)= tris->Color0;
 				dstPtr+= vSize;
 				//
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= tris->V1;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= tris->V1;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= tris->Uv1;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))
 				*(CBGRA*)(dstPtr+colorOfs)= tris->Color1;
 				dstPtr+= vSize;
 				//
-				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVector))
-				*(CVector*)(dstPtr+0)= tris->V2;
+				CHECK_VBA_RANGE(vba, dstPtr+0, sizeof(CVectorPacked))
+				*(CVectorPacked*)(dstPtr+0)= tris->V2;
 				CHECK_VBA_RANGE(vba, dstPtr+uvOfs0, sizeof(CUV))
 				*(CUV*)(dstPtr+uvOfs0)= tris->Uv2;
 				CHECK_VBA_RANGE(vba, dstPtr+colorOfs, sizeof(CRGBA))

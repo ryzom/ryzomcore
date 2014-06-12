@@ -23,6 +23,7 @@
 #include "nel/3d/particle_system.h"
 #include "nel/misc/fast_floor.h"
 
+using NLMISC::CVectorPacked;
 
 namespace NL3D
 {
@@ -147,27 +148,27 @@ public:
 						v1 = rotTable[tabIndex] * currAlign->I + rotTable[tabIndex + 1] * currAlign->K;
 						v2 = rotTable[tabIndex + 2] * currAlign->I + rotTable[tabIndex + 3] * currAlign->K;
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v2.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v2.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v2.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v2.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v2.z;
 						ptPos += stride;
 
 						++it;
@@ -199,27 +200,27 @@ public:
 						v1 = CPSUtil::getCos((sint32) la._Angle2D) * currAlign->I  + CPSUtil::getSin((sint32) la._Angle2D) * currAlign->K;
 						v2 = - CPSUtil::getSin((sint32) la._Angle2D) * currAlign->I + CPSUtil::getCos((sint32) la._Angle2D) * currAlign->K;
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
 						ptPos += stride;
 						++it;
 						++currAlign;
@@ -283,24 +284,24 @@ public:
 						CHECK_VERTEX_BUFFER(vb, ptPos + stride2);
 						CHECK_VERTEX_BUFFER(vb, ptPos + stride3);
 
-						((CVector *) ptPos)->x  = (*it).x  + v1.x;
-						((CVector *) ptPos)->y  = (*it).y  + v1.y;
-						((CVector *) ptPos)->z = (*it).z  + v1.z;
+						((CVectorPacked *) ptPos)->x  = (*it).x  + v1.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  + v1.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + v1.z;
 						ptPos += stride;
 
-						((CVector *) ptPos)->x  = (*it).x  + v2.x;
-						((CVector *) ptPos)->y  = (*it).y  + v2.y;
-						((CVector *) ptPos)->z = (*it).z  + v2.z;
+						((CVectorPacked *) ptPos)->x  = (*it).x  + v2.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  + v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + v2.z;
 						ptPos += stride;
 
-						((CVector *) ptPos)->x  = (*it).x  - v1.x;
-						((CVector *) ptPos)->y  = (*it).y  - v1.y;
-						((CVector *) ptPos)->z = (*it).z  - v1.z;
+						((CVectorPacked *) ptPos)->x  = (*it).x  - v1.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  - v1.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - v1.z;
 						ptPos += stride;
 
-						((CVector *) ptPos)->x  = (*it).x  - v2.x;
-						((CVector *) ptPos)->y  = (*it).y  - v2.y;
-						((CVector *) ptPos)->z = (*it).z  - v2.z;
+						((CVectorPacked *) ptPos)->x  = (*it).x  - v2.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  - v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - v2.z;
 						ptPos += stride;
 
 						++it;
@@ -336,27 +337,27 @@ public:
 						v2 = - sinAngle * currAlign->I + cosAngle * currAlign->K;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
 						ptPos += stride;
 						++it;
 						++currentAngle;
@@ -462,27 +463,27 @@ public:
 							while (it != endIt)
 							{
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x;
-								((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y;
-								((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z;
 								ptPos += stride;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  + *currentSize * v2.x;
-								((CVector *) ptPos)->y = (*it).y  + *currentSize * v2.y;
-								((CVector *) ptPos)->z = (*it).z  + *currentSize * v2.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v2.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v2.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v2.z;
 								ptPos += stride;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x;
-								((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y;
-								((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z;
 								ptPos += stride;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  - *currentSize * v2.x;
-								((CVector *) ptPos)->y = (*it).y  - *currentSize * v2.y;
-								((CVector *) ptPos)->z = (*it).z  - *currentSize * v2.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v2.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v2.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v2.z;
 								ptPos += stride;
 
 								++it;
@@ -498,27 +499,27 @@ public:
 							while (it != endIt)
 							{
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  + myV1.x;
-								((CVector *) ptPos)->y = (*it).y  + myV1.y;
-								((CVector *) ptPos)->z = (*it).z  + myV1.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  + myV1.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  + myV1.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  + myV1.z;
 								ptPos += stride;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  + myV2.x;
-								((CVector *) ptPos)->y = (*it).y  + myV2.y;
-								((CVector *) ptPos)->z = (*it).z  + myV2.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  + myV2.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  + myV2.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  + myV2.z;
 								ptPos += stride;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  - myV1.x;
-								((CVector *) ptPos)->y = (*it).y  - myV1.y;
-								((CVector *) ptPos)->z = (*it).z  - myV1.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  - myV1.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  - myV1.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  - myV1.z;
 								ptPos += stride;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  - myV2.x;
-								((CVector *) ptPos)->y = (*it).y  - myV2.y;
-								((CVector *) ptPos)->z = (*it).z  - myV2.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  - myV2.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  - myV2.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  - myV2.z;
 								ptPos += stride;
 								++it;
 							}
@@ -548,27 +549,27 @@ public:
 						while (it != endIt)
 						{
 							CHECK_VERTEX_BUFFER(vb, ptPos);
-							((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
-							((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
-							((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
+							((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
+							((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
+							((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
 							ptPos += stride;
 
 							CHECK_VERTEX_BUFFER(vb, ptPos);
-							((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
-							((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
-							((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
+							((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
+							((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
+							((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
 							ptPos += stride;
 
 							CHECK_VERTEX_BUFFER(vb, ptPos);
-							((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
-							((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
-							((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
+							((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
+							((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
+							((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
 							ptPos += stride;
 
 							CHECK_VERTEX_BUFFER(vb, ptPos);
-							((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
-							((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
-							((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
+							((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
+							((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
+							((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
 							ptPos += stride;
 							++it;
 							currentSize += currentSizeStep;
@@ -637,81 +638,81 @@ public:
 								mbv12 = -*currentSize * mbv1n;
 								mbv1 *= *currentSize * (1 + la._MotionBlurCoeff * n * n) / n;
 
-								*(CVector *) ptPos = *it - mbv2;
-								*(CVector *) (ptPos + stride) = *it  + mbv1;
-								*(CVector *) (ptPos + stride2) = *it + mbv2;
-								*(CVector *) (ptPos + stride3) = *it + mbv12;
+								*(CVectorPacked *) ptPos = *it - mbv2;
+								*(CVectorPacked *) (ptPos + stride) = *it  + mbv1;
+								*(CVectorPacked *) (ptPos + stride2) = *it + mbv2;
+								*(CVectorPacked *) (ptPos + stride3) = *it + mbv12;
 
 
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  - mbv2.x;
-								((CVector *) ptPos)->y = (*it).y  - mbv2.y;
-								((CVector *) ptPos)->z = (*it).z  - mbv2.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  - mbv2.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  - mbv2.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  - mbv2.z;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos + stride);
-								((CVector *) (ptPos + stride))->x = (*it).x  + mbv1.x;
-								((CVector *) (ptPos + stride))->y = (*it).y  + mbv1.y;
-								((CVector *) (ptPos + stride))->z = (*it).z  + mbv1.z;
+								((CVectorPacked *) (ptPos + stride))->x = (*it).x  + mbv1.x;
+								((CVectorPacked *) (ptPos + stride))->y = (*it).y  + mbv1.y;
+								((CVectorPacked *) (ptPos + stride))->z = (*it).z  + mbv1.z;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos + stride2);
-								((CVector *) (ptPos + stride2))->x = (*it).x  + mbv2.x;
-								((CVector *) (ptPos + stride2))->y = (*it).y  + mbv2.y;
-								((CVector *) (ptPos + stride2))->z = (*it).z  + mbv2.z;
+								((CVectorPacked *) (ptPos + stride2))->x = (*it).x  + mbv2.x;
+								((CVectorPacked *) (ptPos + stride2))->y = (*it).y  + mbv2.y;
+								((CVectorPacked *) (ptPos + stride2))->z = (*it).z  + mbv2.z;
 
 
 								CHECK_VERTEX_BUFFER(vb, ptPos + stride3);
-								((CVector *) (ptPos + stride3))->x = (*it).x  + mbv12.x;
-								((CVector *) (ptPos + stride3))->y = (*it).y  + mbv12.y;
-								((CVector *) (ptPos + stride3))->z = (*it).z  + mbv12.z;
+								((CVectorPacked *) (ptPos + stride3))->x = (*it).x  + mbv12.x;
+								((CVectorPacked *) (ptPos + stride3))->y = (*it).y  + mbv12.y;
+								((CVectorPacked *) (ptPos + stride3))->z = (*it).z  + mbv12.z;
 
 							}
 							else // speed too small, we must avoid imprecision
 							{
 								CHECK_VERTEX_BUFFER(vb, ptPos);
-								((CVector *) ptPos)->x = (*it).x  - *currentSize * v2.x;
-								((CVector *) ptPos)->y = (*it).y  - *currentSize * v2.y;
-								((CVector *) ptPos)->z = (*it).z  - *currentSize * v2.z;
+								((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v2.x;
+								((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v2.y;
+								((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v2.z;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos + stride);
-								((CVector *) (ptPos + stride))->x = (*it).x  + *currentSize * v1.x;
-								((CVector *) (ptPos + stride))->y = (*it).y  + *currentSize * v1.y;
-								((CVector *) (ptPos + stride))->z = (*it).z  + *currentSize * v1.z;
+								((CVectorPacked *) (ptPos + stride))->x = (*it).x  + *currentSize * v1.x;
+								((CVectorPacked *) (ptPos + stride))->y = (*it).y  + *currentSize * v1.y;
+								((CVectorPacked *) (ptPos + stride))->z = (*it).z  + *currentSize * v1.z;
 
 								CHECK_VERTEX_BUFFER(vb, ptPos + stride2);
-								((CVector *) (ptPos + stride2))->x = (*it).x  + *currentSize * v2.x;
-								((CVector *) (ptPos + stride2))->y = (*it).y  + *currentSize * v2.y;
-								((CVector *) (ptPos + stride2))->z = (*it).z  + *currentSize * v2.z;
+								((CVectorPacked *) (ptPos + stride2))->x = (*it).x  + *currentSize * v2.x;
+								((CVectorPacked *) (ptPos + stride2))->y = (*it).y  + *currentSize * v2.y;
+								((CVectorPacked *) (ptPos + stride2))->z = (*it).z  + *currentSize * v2.z;
 
 
 								CHECK_VERTEX_BUFFER(vb, ptPos + stride3);
-								((CVector *) (ptPos + stride3))->x = (*it).x  - *currentSize * v1.x;
-								((CVector *) (ptPos + stride3))->y = (*it).y  - *currentSize * v1.y;
-								((CVector *) (ptPos + stride3))->z = (*it).z  - *currentSize * v1.z;
+								((CVectorPacked *) (ptPos + stride3))->x = (*it).x  - *currentSize * v1.x;
+								((CVectorPacked *) (ptPos + stride3))->y = (*it).y  - *currentSize * v1.y;
+								((CVectorPacked *) (ptPos + stride3))->z = (*it).z  - *currentSize * v1.z;
 							}
 						}
 						else
 						{
 
 							CHECK_VERTEX_BUFFER(vb, ptPos);
-							((CVector *) ptPos)->x = (*it).x  - *currentSize * v2.x;
-							((CVector *) ptPos)->y = (*it).y  - *currentSize * v2.y;
-							((CVector *) ptPos)->z = (*it).z  - *currentSize * v2.z;
+							((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v2.x;
+							((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v2.y;
+							((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v2.z;
 
 							CHECK_VERTEX_BUFFER(vb, ptPos + stride);
-							((CVector *) (ptPos + stride))->x = (*it).x  + *currentSize * v1.x;
-							((CVector *) (ptPos + stride))->y = (*it).y  + *currentSize * v1.y;
-							((CVector *) (ptPos + stride))->z = (*it).z  + *currentSize * v1.z;
+							((CVectorPacked *) (ptPos + stride))->x = (*it).x  + *currentSize * v1.x;
+							((CVectorPacked *) (ptPos + stride))->y = (*it).y  + *currentSize * v1.y;
+							((CVectorPacked *) (ptPos + stride))->z = (*it).z  + *currentSize * v1.z;
 
 							CHECK_VERTEX_BUFFER(vb, ptPos + stride2);
-							((CVector *) (ptPos + stride2))->x = (*it).x  + *currentSize * v2.x;
-							((CVector *) (ptPos + stride2))->y = (*it).y  + *currentSize * v2.y;
-							((CVector *) (ptPos + stride2))->z = (*it).z  + *currentSize * v2.z;
+							((CVectorPacked *) (ptPos + stride2))->x = (*it).x  + *currentSize * v2.x;
+							((CVectorPacked *) (ptPos + stride2))->y = (*it).y  + *currentSize * v2.y;
+							((CVectorPacked *) (ptPos + stride2))->z = (*it).z  + *currentSize * v2.z;
 
 
 							CHECK_VERTEX_BUFFER(vb, ptPos + stride3);
-							((CVector *) (ptPos + stride3))->x = (*it).x  - *currentSize * v1.x;
-							((CVector *) (ptPos + stride3))->y = (*it).y  - *currentSize * v1.y;
-							((CVector *) (ptPos + stride3))->z = (*it).z  - *currentSize * v1.z;
+							((CVectorPacked *) (ptPos + stride3))->x = (*it).x  - *currentSize * v1.x;
+							((CVectorPacked *) (ptPos + stride3))->y = (*it).y  - *currentSize * v1.y;
+							((CVectorPacked *) (ptPos + stride3))->z = (*it).z  - *currentSize * v1.z;
 						}
 
 						ptPos += stride4;
@@ -793,30 +794,30 @@ public:
 						CHECK_VERTEX_BUFFER(vb, ptPos + stride2);
 						CHECK_VERTEX_BUFFER(vb, ptPos + stride3);
 
-						((CVector *) ptPos)->x  = (*it).x  + v1.x;
-						((CVector *) ptPos)->y  = (*it).y  + v1.y;
-						((CVector *) ptPos)->z = (*it).z  + v1.z;
-						//nlinfo("** %f, %f, %f", ((CVector *) ptPos)->x, ((CVector *) ptPos)->y, ((CVector *) ptPos)->z);
+						((CVectorPacked *) ptPos)->x  = (*it).x  + v1.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  + v1.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + v1.z;
+						//nlinfo("** %f, %f, %f", ((CVectorPacked *) ptPos)->x, ((CVectorPacked *) ptPos)->y, ((CVectorPacked *) ptPos)->z);
 						ptPos += stride;
 
 
 
-						((CVector *) ptPos)->x  = (*it).x  + v2.x;
-						((CVector *) ptPos)->y  = (*it).y  + v2.y;
-						((CVector *) ptPos)->z = (*it).z  + v2.z;
-						//nlinfo("%f, %f, %f", ((CVector *) ptPos)->x, ((CVector *) ptPos)->y, ((CVector *) ptPos)->z);
+						((CVectorPacked *) ptPos)->x  = (*it).x  + v2.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  + v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + v2.z;
+						//nlinfo("%f, %f, %f", ((CVectorPacked *) ptPos)->x, ((CVectorPacked *) ptPos)->y, ((CVectorPacked *) ptPos)->z);
 						ptPos += stride;
 
-						((CVector *) ptPos)->x  = (*it).x  - v1.x;
-						((CVector *) ptPos)->y  = (*it).y  - v1.y;
-						((CVector *) ptPos)->z = (*it).z  - v1.z;
-						//nlinfo("%f, %f, %f", ((CVector *) ptPos)->x, ((CVector *) ptPos)->y, ((CVector *) ptPos)->z);
+						((CVectorPacked *) ptPos)->x  = (*it).x  - v1.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  - v1.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - v1.z;
+						//nlinfo("%f, %f, %f", ((CVectorPacked *) ptPos)->x, ((CVectorPacked *) ptPos)->y, ((CVectorPacked *) ptPos)->z);
 						ptPos += stride;
 
-						((CVector *) ptPos)->x  = (*it).x  - v2.x;
-						((CVector *) ptPos)->y  = (*it).y  - v2.y;
-						((CVector *) ptPos)->z = (*it).z  - v2.z;
-						//nlinfo("%f, %f, %f", ((CVector *) ptPos)->x, ((CVector *) ptPos)->y, ((CVector *) ptPos)->z);
+						((CVectorPacked *) ptPos)->x  = (*it).x  - v2.x;
+						((CVectorPacked *) ptPos)->y  = (*it).y  - v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - v2.z;
+						//nlinfo("%f, %f, %f", ((CVectorPacked *) ptPos)->x, ((CVectorPacked *) ptPos)->y, ((CVectorPacked *) ptPos)->z);
 						ptPos += stride;
 
 						++it;
@@ -851,27 +852,27 @@ public:
 						v2 = - sinAngle * I + cosAngle * K;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x + *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y + *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z + *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x + *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y + *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z + *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  + *currentSize * v1.x - *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  + *currentSize * v1.y - *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  + *currentSize * v1.z - *currentSize2 * v2.z;
 						ptPos += stride;
 
 						CHECK_VERTEX_BUFFER(vb, ptPos);
-						((CVector *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
-						((CVector *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
-						((CVector *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
+						((CVectorPacked *) ptPos)->x = (*it).x  - *currentSize * v1.x - *currentSize2 * v2.x;
+						((CVectorPacked *) ptPos)->y = (*it).y  - *currentSize * v1.y - *currentSize2 * v2.y;
+						((CVectorPacked *) ptPos)->z = (*it).z  - *currentSize * v1.z - *currentSize2 * v2.z;
 						ptPos += stride;
 						++it;
 						++currentAngle;

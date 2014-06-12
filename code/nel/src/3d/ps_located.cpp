@@ -257,7 +257,7 @@ void CPSLocated::notifyMotionTypeChanged(void)
 /// ***************************************************************************************
 void CPSLocated::integrateSingle(float startDate, float deltaT, uint numStep,
 								uint32 indexInLocated,
-								NLMISC::CVector *destPos,
+								NLMISC::CVectorPacked *destPos,
 								uint stride) const
 {
 	NL_PS_FUNC(CPSLocated_integrateSingle)
@@ -293,7 +293,7 @@ void CPSLocated::integrateSingle(float startDate, float deltaT, uint numStep,
 					destPos->y = pi.Pos.y + currDate * pi.Speed.y;
 					destPos->z = pi.Pos.z + currDate * pi.Speed.z;
 					currDate += deltaT;
-					destPos = (NLMISC::CVector *) ( (uint8 *) destPos + stride);
+					destPos = (NLMISC::CVectorPacked *) ( (uint8 *) destPos + stride);
 				}
 				while (--numStep);
 			}

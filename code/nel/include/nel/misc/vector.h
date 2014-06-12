@@ -36,15 +36,15 @@ class IStream;
  * \author Nevrax France
  * \date 2000
  */
-// NL_ALIGN(16) // FIXME_SSE2
+NL_ALIGN_SSE2(16)
 class CVector
 {
 public:		// Attributes.
 	float	x,y,z;
 
-/*#ifdef USE_SSE2 // FIXME_SSE2
+#ifdef USE_SSE2
 	float	w; // Padding
-#endif*/
+#endif
 
 public:		// const.
 	/// Null vector (0,0,0).
@@ -175,6 +175,11 @@ public:
 	operator CVector () const
 	{
 		return CVector(x, y, z);
+	}
+
+	void serial(IStream &f)
+	{
+		f.serial(x,y,z);
 	}
 };
 

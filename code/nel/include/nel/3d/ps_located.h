@@ -508,11 +508,12 @@ public:
 	  */
 	void integrateSingle(float startDate, float deltaT, uint numStep,
 						 uint32 indexInLocated,
-						 NLMISC::CVector *destPos,
-						 uint posStride = sizeof(NLMISC::CVector)) const;
+						 NLMISC::CVectorPacked *destPos,
+						 uint posStride = sizeof(NLMISC::CVectorPacked)) const;
 
 	// compute position for a single element at the given date
 	// NB : only works with object that have parametric trajectories
+	inline void computeParametricPos(float date, uint indexInLocated, NLMISC::CVectorPacked &dest) const;
 	inline void computeParametricPos(float date, uint indexInLocated, NLMISC::CVector &dest) const;
 
 
@@ -1052,6 +1053,12 @@ inline TAnimationTime	CPSLocated::getAgeInSeconds(uint elementIndex) const
 
 // *****************************************************************************************************
 inline void	CPSLocated::computeParametricPos(float date, uint indexInLocated, NLMISC::CVector &dest) const
+{
+	NLMISC::CVectorPacked temp;
+	integrateSingle(date, 1.f, 1, indexInLocated, &temp);
+	dest = temp;
+}
+inline void	CPSLocated::computeParametricPos(float date, uint indexInLocated, NLMISC::CVectorPacked &dest) const
 {
 	integrateSingle(date, 1.f, 1, indexInLocated, &dest);
 }

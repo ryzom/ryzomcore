@@ -23,7 +23,7 @@
 #include "nel/3d/particle_system.h"
 #include "nel/misc/quat.h"
 
-
+using NLMISC::CVectorPacked;
 
 namespace NL3D
 {
@@ -96,27 +96,27 @@ public:
 					{
 						const CPlaneBasis &currBasis = f._PrecompBasis[*indexIt].Basis;
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  + *ptSize * currBasis.X.x;
-						((CVector *) currVertex)->y = (*posIt).y  + *ptSize * currBasis.X.y;
-						((CVector *) currVertex)->z = (*posIt).z  + *ptSize * currBasis.X.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  + *ptSize * currBasis.X.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  + *ptSize * currBasis.X.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  + *ptSize * currBasis.X.z;
 						currVertex += stride;
 
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  + *ptSize * currBasis.Y.x;
-						((CVector *) currVertex)->y = (*posIt).y  + *ptSize * currBasis.Y.y;
-						((CVector *) currVertex)->z = (*posIt).z  + *ptSize * currBasis.Y.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  + *ptSize * currBasis.Y.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  + *ptSize * currBasis.Y.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  + *ptSize * currBasis.Y.z;
 						currVertex += stride;
 
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  - *ptSize * currBasis.X.x;
-						((CVector *) currVertex)->y = (*posIt).y  - *ptSize * currBasis.X.y;
-						((CVector *) currVertex)->z = (*posIt).z  - *ptSize * currBasis.X.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  - *ptSize * currBasis.X.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  - *ptSize * currBasis.X.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  - *ptSize * currBasis.X.z;
 						currVertex += stride;
 
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  - *ptSize * currBasis.Y.x;
-						((CVector *) currVertex)->y = (*posIt).y  - *ptSize * currBasis.Y.y;
-						((CVector *) currVertex)->z = (*posIt).z  - *ptSize * currBasis.Y.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  - *ptSize * currBasis.Y.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  - *ptSize * currBasis.Y.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  - *ptSize * currBasis.Y.z;
 						currVertex += stride;
 						ptSize += ptSizeIncrement;
 						++indexIt;
@@ -168,27 +168,27 @@ public:
 					{
 						// we use this instead of the + operator, because we avoid 4 constructor calls this way
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  + *ptSize * currBasis->X.x;
-						((CVector *) currVertex)->y = (*posIt).y  + *ptSize * currBasis->X.y;
-						((CVector *) currVertex)->z = (*posIt).z  + *ptSize * currBasis->X.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  + *ptSize * currBasis->X.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  + *ptSize * currBasis->X.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  + *ptSize * currBasis->X.z;
 						currVertex += vSize;
 
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  + *ptSize * currBasis->Y.x;
-						((CVector *) currVertex)->y = (*posIt).y  + *ptSize * currBasis->Y.y;
-						((CVector *) currVertex)->z = (*posIt).z  + *ptSize * currBasis->Y.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  + *ptSize * currBasis->Y.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  + *ptSize * currBasis->Y.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  + *ptSize * currBasis->Y.z;
 						currVertex += vSize;
 
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  - *ptSize * currBasis->X.x;
-						((CVector *) currVertex)->y = (*posIt).y  - *ptSize * currBasis->X.y;
-						((CVector *) currVertex)->z = (*posIt).z  - *ptSize * currBasis->X.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  - *ptSize * currBasis->X.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  - *ptSize * currBasis->X.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  - *ptSize * currBasis->X.z;
 						currVertex += vSize;
 
 						CHECK_VERTEX_BUFFER(vb, currVertex);
-						((CVector *) currVertex)->x = (*posIt).x  - *ptSize * currBasis->Y.x;
-						((CVector *) currVertex)->y = (*posIt).y  - *ptSize * currBasis->Y.y;
-						((CVector *) currVertex)->z = (*posIt).z  - *ptSize * currBasis->Y.z;
+						((CVectorPacked *) currVertex)->x = (*posIt).x  - *ptSize * currBasis->Y.x;
+						((CVectorPacked *) currVertex)->y = (*posIt).y  - *ptSize * currBasis->Y.y;
+						((CVectorPacked *) currVertex)->z = (*posIt).z  - *ptSize * currBasis->Y.z;
 						currVertex += vSize;
 						ptSize += ptSizeIncrement;
 						++posIt;

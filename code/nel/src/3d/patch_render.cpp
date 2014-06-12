@@ -1026,8 +1026,8 @@ inline void		CPatch::fillFar0VertexVB(CTessFarVertex *pVert)
 	if( !CLandscapeGlobals::VertexProgramEnabled )
 	{
 		// Set Pos. Set it local to the current center of landscape
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr, sizeof(CVector));
-		*(CVector*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked));
+		*(CVectorPacked*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
 		// Set Uvs.
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar0VBInfo.TexCoordOff0, sizeof(CUV));
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentFar0VBInfo.TexCoordOff0)= uv;
@@ -1038,8 +1038,8 @@ inline void		CPatch::fillFar0VertexVB(CTessFarVertex *pVert)
 	{
 		// Else must setup Vertex program inputs
 		// v[0]== StartPos.
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr, sizeof(CVector));
-		*(CVector*)CurVBPtr= pVert->Src->StartPos;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked));
+		*(CVectorPacked*)CurVBPtr= pVert->Src->StartPos;
 		// v[8]== Tex0
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar0VBInfo.TexCoordOff0, sizeof(CUV));
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentFar0VBInfo.TexCoordOff0)= uv;
@@ -1110,8 +1110,8 @@ inline void		CPatch::fillFar1VertexVB(CTessFarVertex *pVert)
 	if( !CLandscapeGlobals::VertexProgramEnabled )
 	{
 		// Set Pos. Set it local to the current center of landscape
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr, sizeof(CVector));
-		*(CVector*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked));
+		*(CVectorPacked*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
 		// Set Uvs.
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.TexCoordOff0, sizeof(CUV));
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.TexCoordOff0)= uv;
@@ -1126,8 +1126,8 @@ inline void		CPatch::fillFar1VertexVB(CTessFarVertex *pVert)
 	{
 		// Else must setup Vertex program inputs
 		// v[0]== StartPos.
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr, sizeof(CVector));
-		*(CVector*)CurVBPtr= pVert->Src->StartPos;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked));
+		*(CVectorPacked*)CurVBPtr= pVert->Src->StartPos;
 		// v[8]== Tex0
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.TexCoordOff0, sizeof(CUV));
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentFar1VBInfo.TexCoordOff0)= uv;
@@ -1179,8 +1179,8 @@ inline void		CPatch::fillTileVertexVB(CTessNearVertex *pVert)
 	if( !CLandscapeGlobals::VertexProgramEnabled )
 	{
 		// Set Pos. Set it local to the current center of landscape
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr, sizeof(CVector))
-		*(CVector*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked))
+		*(CVectorPacked*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
 		// Set Uvs.
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentTileVBInfo.TexCoordOff0, sizeof(CUV))
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentTileVBInfo.TexCoordOff0)= pVert->PUv0;
@@ -1193,8 +1193,8 @@ inline void		CPatch::fillTileVertexVB(CTessNearVertex *pVert)
 	{
 		// Else must setup Vertex program inputs
 		// v[0]== StartPos.
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr, sizeof(CVector))
-		*(CVector*)CurVBPtr= pVert->Src->StartPos;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked))
+		*(CVectorPacked*)CurVBPtr= pVert->Src->StartPos;
 		// v[8]== Tex0
 		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr + CLandscapeGlobals::CurrentTileVBInfo.TexCoordOff0, sizeof(CUV))
 		*(CUV*)(CurVBPtr + CLandscapeGlobals::CurrentTileVBInfo.TexCoordOff0)= pVert->PUv0;
@@ -1383,8 +1383,8 @@ void		CPatch::computeGeomorphFar0VertexListVB(CTessList<CTessFarVertex>  &vertLi
 		CurVBPtr+= pVert->Index0 * CLandscapeGlobals::CurrentFar0VBInfo.VertexSize;
 
 		// Set Geomorphed Position. Set it local to the current center of landscape
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr, sizeof(CVector))
-		*(CVector*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar0VBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked))
+		*(CVectorPacked*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
 	}
 }
 
@@ -1404,8 +1404,8 @@ void		CPatch::computeGeomorphAlphaFar1VertexListVB(CTessList<CTessFarVertex>  &v
 		// NB: the filling order of data is important, for AGP write combiners.
 
 		// Set Geomorphed Position. Set it local to the current center of landscape
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr, sizeof(CVector))
-		*(CVector*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentFar1VBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked))
+		*(CVectorPacked*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
 
 		// Set Alpha color.
 		static CRGBA	col(255,255,255,255);
@@ -1434,8 +1434,8 @@ void		CPatch::computeGeomorphTileVertexListVB(CTessList<CTessNearVertex>  &vertL
 		CurVBPtr+= pVert->Index * CLandscapeGlobals::CurrentTileVBInfo.VertexSize;
 
 		// Set Geomorphed Position. Set it local to the current center of landscape
-		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr, sizeof(CVector))
-		*(CVector*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
+		CHECK_VBA_RANGE(CLandscapeGlobals::CurrentTileVBInfo.Accessor, CurVBPtr, sizeof(CVectorPacked))
+		*(CVectorPacked*)CurVBPtr= pVert->Src->Pos - CLandscapeGlobals::PZBModelPosition;
 	}
 }
 

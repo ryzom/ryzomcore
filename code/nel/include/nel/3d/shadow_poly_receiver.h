@@ -83,6 +83,7 @@ public:
 									  );
 
 	// a vertex
+	NL_ALIGN_SSE2(16)
 	struct CRGBAVertex // FIXME_SSE2
 	{
 #if USE_SSE2
@@ -96,8 +97,7 @@ public:
 		CRGBAVertex(const CVector &v, CRGBA c) : X(v.x), Y(v.y), Z(v.z), Color(c) {}
 		const CVector &asVector() const
 		{
-			//nlctassert(sizeof(CVector) == sizeof(CRGBAVertex));
-			nlctassert(sizeof(CVector) + 4 == sizeof(CRGBAVertex));
+			nlctassert(sizeof(CVector) == sizeof(CRGBAVertex));
 			*reinterpret_cast<const CVector *>(this);
 		}
 #else

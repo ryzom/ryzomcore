@@ -44,6 +44,7 @@ namespace NL3D {
 
 
 using NLMISC::CVector;
+using NLMISC::CVectorPacked;
 
 
 //#ifdef NL_DEBUG

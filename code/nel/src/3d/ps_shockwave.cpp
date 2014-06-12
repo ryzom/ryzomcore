@@ -23,6 +23,7 @@
 #include "nel/3d/ps_iterator.h"
 #include "nel/3d/particle_system.h"
 
+using NLMISC::CVectorPacked;
 
 namespace NL3D
 {
@@ -159,10 +160,10 @@ public:
 						radVect = *ptCurrSize * (CPSUtil::getCos((sint32) currAngle) * ptCurrBasis->X + CPSUtil::getSin((sint32) currAngle) * ptCurrBasis->Y);
 						innerVect = radiusRatio * radVect;
 						CHECK_VERTEX_BUFFER(*vb, currVertex);
-						* (CVector *) currVertex = *posIt + radVect;
+						* (CVectorPacked *) currVertex = *posIt + radVect;
 						currVertex += vSize;
 						CHECK_VERTEX_BUFFER(*vb, currVertex);
-						* (CVector *) currVertex = *posIt + innerVect;
+						* (CVectorPacked *) currVertex = *posIt + innerVect;
 						currVertex += vSize;
 						currAngle += angleStep;
 					}

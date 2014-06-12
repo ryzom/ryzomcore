@@ -177,7 +177,7 @@ void CMeshMorpher::update (std::vector<CAnimatedMorph> *pBSFactor)
 			if (_UseTgSpace)
 			if (rBS.deltaTgSpace.size() > 0)
 			{
-				CVector *pV = (CVector*)dstvba.getTexCoordPointer (vp, tgSpaceStage);
+				CVectorPacked *pV = (CVectorPacked*)dstvba.getTexCoordPointer (vp, tgSpaceStage);
 				*pV += rBS.deltaTgSpace[j] * rFactor;
 			}
 

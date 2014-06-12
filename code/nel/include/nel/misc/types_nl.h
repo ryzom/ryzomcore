@@ -340,6 +340,9 @@ extern void *operator new(size_t size) throw(std::bad_alloc);
 extern void *operator new[](size_t size) throw(std::bad_alloc);
 extern void operator delete(void *p) throw();
 extern void operator delete[](void *p) throw();
+#define NL_ALIGN_SSE2(nb) NL_ALIGN(nb)
+#else
+#define NL_ALIGN_SSE2(nb) 
 #endif
 
 // CHashMap, CHashSet and CHashMultiMap definitions

@@ -102,9 +102,9 @@ public:
 	  */
 	virtual void integrateSingle(float /* startDate */, float /* deltaT */, uint /* numStep */,
 								 const CPSLocated * /* src */, uint32 /* indexInLocated */,
-								 NLMISC::CVector * /* destPos */,
+								 NLMISC::CVectorPacked * /* destPos */,
 								 bool /* accumulate */ = false,
-								 uint /* posStride */ = sizeof(NLMISC::CVector)) const
+								 uint /* posStride */ = sizeof(NLMISC::CVectorPacked)) const
 	{
 		 nlassert(0); // not an integrable force
 	}
@@ -412,9 +412,9 @@ public:
 
 	virtual void integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
-								 NLMISC::CVector *destPos,
+								 NLMISC::CVectorPacked *destPos,
 								 bool accumulate = false,
-								 uint posStride = sizeof(NLMISC::CVector)) const;
+								 uint posStride = sizeof(NLMISC::CVectorPacked)) const;
 
 protected:
 	/// inherited from CPSForceIntensityHelper
@@ -583,9 +583,9 @@ public:
 
 	virtual void integrateSingle(float startDate, float deltaT, uint numStep,
 								 const CPSLocated *src, uint32 indexInLocated,
-								 NLMISC::CVector *destPos,
+								 NLMISC::CVectorPacked *destPos,
 								 bool accumulate = false,
-								 uint posStride = sizeof(NLMISC::CVector)) const;
+								 uint posStride = sizeof(NLMISC::CVectorPacked)) const;
 
 	/// perform initialisations
 	static void initPrecalc();

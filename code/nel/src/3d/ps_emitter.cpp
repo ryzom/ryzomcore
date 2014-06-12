@@ -914,7 +914,7 @@ uint GenEmitterPositions(CPSLocated *emitter,
 									   uint numStep,
 									   TAnimationTime deltaT, /* fraction of time needed to reach the first emission */
 									   TAnimationTime step,
-									   std::vector<NLMISC::CVector> &dest
+									   std::vector<NLMISC::CVectorPacked> &dest
 									  )
 {
 	NL_PS_FUNC(GenEmitterPositions)
@@ -930,8 +930,8 @@ uint GenEmitterPositions(CPSLocated *emitter,
 		}
 		else
 		{
-			std::vector<NLMISC::CVector>::iterator outIt = dest.end();
-			std::vector<NLMISC::CVector>::iterator endIt = dest.begin();
+			std::vector<NLMISC::CVectorPacked>::iterator outIt = dest.end();
+			std::vector<NLMISC::CVectorPacked>::iterator endIt = dest.begin();
 			NLMISC::CVector pos = emitter->getPos()[emitterIndex] - deltaT * emitter->getSpeed()[emitterIndex];
 			NLMISC::CVector speed = step * emitter->getSpeed()[emitterIndex];
 			do
@@ -966,7 +966,7 @@ static inline uint GenEmitterPositionsWithLOD(CPSLocated *emitter,
 									   TAnimationTime deltaT, /* fraction of time needed to reach the first emission */
 									   TAnimationTime step,
 									   float invLODRatio,
-									   std::vector<NLMISC::CVector> &dest
+									   std::vector<NLMISC::CVectorPacked> &dest
 									  )
 {
 	NL_PS_FUNC(GenEmitterPositionsWithLOD)
@@ -982,8 +982,8 @@ static inline uint GenEmitterPositionsWithLOD(CPSLocated *emitter,
 		}
 		else
 		{
-			std::vector<NLMISC::CVector>::iterator outIt = dest.end();
-			std::vector<NLMISC::CVector>::iterator endIt = dest.begin();
+			std::vector<NLMISC::CVectorPacked>::iterator outIt = dest.end();
+			std::vector<NLMISC::CVectorPacked>::iterator endIt = dest.begin();
 			NLMISC::CVector pos = emitter->getPos()[emitterIndex] - deltaT * emitter->getSpeed()[emitterIndex];
 			NLMISC::CVector speed = step * invLODRatio * emitter->getSpeed()[emitterIndex];
 			do
@@ -1021,7 +1021,7 @@ void CPSEmitter::processRegularEmissionConsistent(uint firstInstanceIndex, float
 	//
 
 
-	static std::vector<NLMISC::CVector> emitterPositions;
+	static std::vector<NLMISC::CVectorPacked> emitterPositions;
 	// Positions for the emitter. They are computed by using a parametric trajectory or by using integration
 
 	const uint size = _Owner->getSize();
@@ -1454,7 +1454,7 @@ void CPSEmitter::processRegularEmissionConsistentWithNoLOD(uint firstInstanceInd
 	//
 
 
-	static std::vector<NLMISC::CVector> emitterPositions;
+	static std::vector<NLMISC::CVectorPacked> emitterPositions;
 	// Positions for the emitter. They are computed by using a parametric trajectory or by using integration
 
 	const uint size = _Owner->getSize();

@@ -27,6 +27,7 @@
 #include "nel/3d/dru.h"
 
 
+using NLMISC::CVectorPacked;
 
 
 
@@ -162,8 +163,8 @@ void CSegRemanence::registerBasic()
 // helper functions to fill vb
 static inline void vbPush(uint8 *&dest, const CVector &v)
 {
-	*(CVector *) dest = v;
-	dest +=sizeof(CVector);
+	*(CVectorPacked *) dest = v;
+	dest +=sizeof(CVectorPacked);
 }
 
 static inline void vbPush(uint8 *&dest, float f)

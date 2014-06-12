@@ -397,7 +397,7 @@ static inline uint8 *BuildRibbonFirstSlice(const NLMISC::CVector &pos,
 	NL_PS_FUNC(BuildRibbonFirstSlice)
 	do
 	{
-		* (NLMISC::CVector *) dest = pos;
+		* (NLMISC::CVectorPacked *) dest = pos;
 		dest += vertexSize;
 	}
 	while (--numVerts);
@@ -409,7 +409,7 @@ static inline uint8 *BuildRibbonFirstSlice(const NLMISC::CVector &pos,
 // This compute one slice of a ribbon, and return the next vertex to be filled
 static inline uint8 *ComputeRibbonSliceFollowPath(const NLMISC::CVector &prev,
 									    const NLMISC::CVector &next,
-									    const NLMISC::CVector *shape,
+									    const NLMISC::CVectorPacked *shape,
 									    uint  numVerts,
 									    uint8 *dest,
 									    uint  vertexSize,
@@ -430,10 +430,10 @@ static inline uint8 *ComputeRibbonSliceFollowPath(const NLMISC::CVector &prev,
 	}
 	basis.setPos(next);
 
-	const NLMISC::CVector *shapeEnd = shape + numVerts;
+	const NLMISC::CVectorPacked *shapeEnd = shape + numVerts;
 	do
 	{
-		*(NLMISC::CVector *) dest = basis * (size * (*shape));
+		*(NLMISC::CVectorPacked *) dest = basis * (size * CVector(*shape));
 		++shape;
 		dest += vertexSize;
 	}
@@ -445,7 +445,7 @@ static inline uint8 *ComputeRibbonSliceFollowPath(const NLMISC::CVector &prev,
 // This compute one slice of a ribbon, and return the next vertex to be filled
 static inline uint8 *ComputeRibbonSliceIdentity(const NLMISC::CVector &prev,
 											   const NLMISC::CVector &next,
-											   const NLMISC::CVector *shape,
+											   const NLMISC::CVectorPacked *shape,
 											   uint  numVerts,
 											   uint8 *dest,
 											   uint  vertexSize,
@@ -453,10 +453,10 @@ static inline uint8 *ComputeRibbonSliceIdentity(const NLMISC::CVector &prev,
 											  )
 {
 	NL_PS_FUNC(ComputeRibbonSliceIdentity)
-	const NLMISC::CVector *shapeEnd = shape + numVerts;
+	const NLMISC::CVectorPacked *shapeEnd = shape + numVerts;
 	do
 	{
-		((NLMISC::CVector *) dest)->set(size * shape->x + next.x,
+		((NLMISC::CVectorPacked *) dest)->set(size * shape->x + next.x,
 			                            size * shape->y + next.y,
 										size * shape->z + next.z);
 		++shape;
@@ -469,7 +469,7 @@ static inline uint8 *ComputeRibbonSliceIdentity(const NLMISC::CVector &prev,
 ///=========================================================================
 static inline uint8 *ComputeRibbonSliceFollowPathXY(const NLMISC::CVector &prev,
 												  const NLMISC::CVector &next,
-												  const NLMISC::CVector *shape,
+												  const NLMISC::CVectorPacked *shape,
 												  uint  numVerts,
 												  uint8 *dest,
 												  uint  vertexSize,
@@ -492,10 +492,10 @@ static inline uint8 *ComputeRibbonSliceFollowPathXY(const NLMISC::CVector &prev,
 		basis.setRot(I, CVector::K, J, true);
 	}
 	basis.setPos(next);
-	const NLMISC::CVector *shapeEnd = shape + numVerts;
+	const NLMISC::CVectorPacked *shapeEnd = shape + numVerts;
 	do
 	{
-		*(NLMISC::CVector *) dest = basis * (size * (*shape));
+		*(NLMISC::CVectorPacked *) dest = basis * (size * CVector(*shape));
 		++shape;
 		dest += vertexSize;
 	}
@@ -511,8 +511,8 @@ static inline uint8 *ComputeRibbonSliceFollowPathXY(const NLMISC::CVector &prev,
 // This is for untextured versions (no need to duplicate the last vertex of each slice)
 static inline uint8 *ComputeUntexturedRibbonMesh(uint8 *destVb,
 											     uint  vertexSize,
-											     const NLMISC::CVector *curve,
-											     const NLMISC::CVector *shape,
+											     const NLMISC::CVectorPacked *curve,
+											     const NLMISC::CVectorPacked *shape,
 											     uint  numSegs,
 												 uint  numVerticesInShape,
 												 float sizeIncrement,
@@ -585,8 +585,8 @@ static inline uint8 *ComputeUntexturedRibbonMesh(uint8 *destVb,
 // (Textured Version)
 static inline uint8 *ComputeTexturedRibbonMesh(uint8 *destVb,
 											   uint  vertexSize,
-											   const NLMISC::CVector *curve,
-											   const NLMISC::CVector *shape,
+											   const NLMISC::CVectorPacked *curve,
+											   const NLMISC::CVectorPacked *shape,
 											   uint  numSegs,
 											   uint  numVerticesInShape,
 											   float sizeIncrement,
@@ -612,7 +612,7 @@ static inline uint8 *ComputeTexturedRibbonMesh(uint8 *destVb,
 													   basis
 													  );
 				// duplicate last vertex ( equal first)
-				* (NLMISC::CVector *) nextDestVb = * (NLMISC::CVector *) destVb;
+				* (NLMISC::CVectorPacked *) nextDestVb = * (NLMISC::CVectorPacked *) destVb;
 				destVb = nextDestVb + vertexSize;
 				//
 				++ curve;
@@ -633,7 +633,7 @@ static inline uint8 *ComputeTexturedRibbonMesh(uint8 *destVb,
 					basis
 					);
 				// duplicate last vertex ( equal first)
-				* (NLMISC::CVector *) nextDestVb = * (NLMISC::CVector *) destVb;
+				* (NLMISC::CVectorPacked *) nextDestVb = * (NLMISC::CVectorPacked *) destVb;
 				destVb = nextDestVb + vertexSize;
 				//
 				++ curve;
@@ -653,7 +653,7 @@ static inline uint8 *ComputeTexturedRibbonMesh(uint8 *destVb,
 					size
 					);
 				// duplicate last vertex ( equal first)
-				* (NLMISC::CVector *) nextDestVb = * (NLMISC::CVector *) destVb;
+				* (NLMISC::CVectorPacked *) nextDestVb = * (NLMISC::CVectorPacked *) destVb;
 				destVb = nextDestVb + vertexSize;
 				//
 				++ curve;
@@ -727,7 +727,7 @@ void CPSRibbon::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 		const uint numVerticesInShape = (uint)_Shape.size();
 		//
 		static std::vector<float> sizes;
-		static std::vector<NLMISC::CVector> ribbonPos;  // this is where the position of each ribbon slice center i stored
+		static std::vector<NLMISC::CVectorPacked> ribbonPos;  // this is where the position of each ribbon slice center i stored
 		ribbonPos.resize(_UsedNbSegs + 1); // make sure we have enough room
 		sizes.resize(numRibbonBatch);
 
@@ -782,7 +782,7 @@ void CPSRibbon::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 							const float ribbonSizeIncrement = *ptCurrSize / (float) _UsedNbSegs;
 							ptCurrSize += ptCurrSizeIncrement;
 							// the parent class has a method to get the ribbons positions
-							computeRibbon((uint) (fpRibbonIndex >> 16), &ribbonPos[0], sizeof(NLMISC::CVector));
+							computeRibbon((uint) (fpRibbonIndex >> 16), &ribbonPos[0], sizeof(NLMISC::CVectorPacked));
 							currVert = ComputeTexturedRibbonMesh(currVert,
 																 vertexSize,
 																 &ribbonPos[0],
@@ -804,7 +804,7 @@ void CPSRibbon::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 							const float ribbonSizeIncrement = *ptCurrSize / (float) _UsedNbSegs;
 							ptCurrSize += ptCurrSizeIncrement;
 							// the parent class has a method to get the ribbons positions
-							computeRibbon((uint) (fpRibbonIndex >> 16), &ribbonPos[0], sizeof(NLMISC::CVector));
+							computeRibbon((uint) (fpRibbonIndex >> 16), &ribbonPos[0], sizeof(NLMISC::CVectorPacked));
 							currVert = ComputeUntexturedRibbonMesh(currVert,
 																   vertexSize,
 																   &ribbonPos[0],
