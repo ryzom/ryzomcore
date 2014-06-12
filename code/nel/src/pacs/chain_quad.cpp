@@ -344,8 +344,11 @@ sint			CChainQuad::selectEdges(const NLMISC::CAABBox &bbox, CCollisionSurfaceTem
 	return nRes;
 }
 
-sint		CChainQuad::selectEdges(CVector start, CVector end, CCollisionSurfaceTemp &cst) const
+sint		CChainQuad::selectEdges(const CVector &startp, const CVector &endp, CCollisionSurfaceTemp &cst) const
 {
+	CVector start = startp;
+	CVector end = endp;
+
 	sint	nRes=0;
 	sint	i;
 	uint16	*ochainLUT= cst.OChainLUT;

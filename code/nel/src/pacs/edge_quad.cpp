@@ -453,8 +453,11 @@ sint			CEdgeQuad::selectEdges(const NLMISC::CAABBox &bbox, CCollisionSurfaceTemp
 	return nRes;
 }
 
-sint		CEdgeQuad::selectEdges(CVector start, CVector end, CCollisionSurfaceTemp &cst) const
+sint		CEdgeQuad::selectEdges(const CVector &startp, const CVector &endp, CCollisionSurfaceTemp &cst) const
 {
+	CVector start = startp;
+	CVector end = endp;
+
 	sint	nRes=0;
 	sint	i;
 	uint16	*indexLUT= cst.OChainLUT;

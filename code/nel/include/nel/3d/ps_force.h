@@ -741,7 +741,7 @@ public:
 	virtual NLMISC::CVector getScale(uint32 k) const { return NLMISC::CVector(_Radius[k], _Radius[k], _Radius[k]); }
 	virtual bool onlyStoreNormal(void) const { return true; }
 	virtual NLMISC::CVector getNormal(uint32 index) { return _Normal[index]; }
-	virtual void setNormal(uint32 index, NLMISC::CVector n) { _Normal[index] = n; }
+	virtual void setNormal(uint32 index, const NLMISC::CVector &n) { _Normal[index] = n; }
 
 	virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
 	virtual NLMISC::CMatrix getMatrix(uint32 index) const;

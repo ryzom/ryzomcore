@@ -33,14 +33,14 @@ namespace NL3D {
   */
 
 template <class T>
-inline T PSBinOpModulate(T arg1, T arg2) { return arg1 * arg2; }
+inline T PSBinOpModulate(const T &arg1, const T &arg2) { return arg1 * arg2; }
 template <class T>
-inline T PSBinOpAdd(T arg1, T arg2) { return arg1 + arg2; }
+inline T PSBinOpAdd(const T &arg1, const T &arg2) { return arg1 + arg2; }
 template <class T>
-inline T PSBinOpSubtract(T arg1, T arg2) { return arg1 - arg2; }
+inline T PSBinOpSubtract(const T &arg1, const T &arg2) { return arg1 - arg2; }
 
 template <>
-inline CPlaneBasis PSBinOpModulate(CPlaneBasis p1, CPlaneBasis p2)
+inline CPlaneBasis PSBinOpModulate(const CPlaneBasis &p1, const CPlaneBasis &p2)
 {
 	// we compute p1 * p2
 	NLMISC::CVector z = p1.X ^ p1.Y;
@@ -57,13 +57,13 @@ inline CPlaneBasis PSBinOpModulate(CPlaneBasis p1, CPlaneBasis p2)
 
 }
 template <>
-inline CPlaneBasis PSBinOpAdd(CPlaneBasis /* p1 */, CPlaneBasis /* p2 */)
+inline CPlaneBasis PSBinOpAdd(const CPlaneBasis &/* p1 */, const CPlaneBasis &/* p2 */)
 {
 	nlassert(0); // not allowed for now
 	return CPlaneBasis(NLMISC::CVector::Null);
 }
 template <>
-inline CPlaneBasis PSBinOpSubtract(CPlaneBasis /* p1 */, CPlaneBasis /* p2 */)
+inline CPlaneBasis PSBinOpSubtract(const CPlaneBasis &/* p1 */, const CPlaneBasis &/* p2 */)
 {
 	nlassert(0); // not allowed for now
 	return CPlaneBasis(NLMISC::CVector::Null);
@@ -71,21 +71,21 @@ inline CPlaneBasis PSBinOpSubtract(CPlaneBasis /* p1 */, CPlaneBasis /* p2 */)
 
 
 template <>
-inline uint32 PSBinOpSubtract(uint32 lhs, uint32 rhs)
+inline uint32 PSBinOpSubtract(const uint32 &lhs, const uint32 &rhs)
 {
 	return rhs > lhs ? 0 : lhs - rhs; // avoid overflow
 }
 
 
 template <>
-inline NLMISC::CRGBA PSBinOpModulate(NLMISC::CRGBA t1, NLMISC::CRGBA t2)
+inline NLMISC::CRGBA PSBinOpModulate(const NLMISC::CRGBA &t1, const NLMISC::CRGBA &t2)
 {
 	NLMISC::CRGBA result;
 	result.modulateFromColor(t1, t2);
 	return result;
 }
 template <>
-inline NLMISC::CRGBA PSBinOpAdd(NLMISC::CRGBA t1, NLMISC::CRGBA t2)
+inline NLMISC::CRGBA PSBinOpAdd(const NLMISC::CRGBA &t1, const NLMISC::CRGBA &t2)
 {
 	NLMISC::CRGBA r;
 	uint S = t1.R + t2.R; if (S > 255) S = 255; r.R = (uint8) S;
@@ -94,7 +94,7 @@ inline NLMISC::CRGBA PSBinOpAdd(NLMISC::CRGBA t1, NLMISC::CRGBA t2)
 	return r;
 }
 template <>
-inline NLMISC::CRGBA PSBinOpSubtract(NLMISC::CRGBA t1, NLMISC::CRGBA t2)
+inline NLMISC::CRGBA PSBinOpSubtract(const NLMISC::CRGBA &t1, const NLMISC::CRGBA &t2)
 {
 	NLMISC::CRGBA r;
 	sint S = t1.R - t2.R; if (S < 0) S = 0; r.R = (uint8) S;

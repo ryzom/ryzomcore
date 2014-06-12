@@ -875,7 +875,7 @@ bool CPrimZone::contains (const NLMISC::CVector &v, const std::vector<CVector> &
 
 // ***************************************************************************
 
-float CPrimZone::getSegmentDist(const NLMISC::CVector v, const NLMISC::CVector &p1, const NLMISC::CVector &p2, NLMISC::CVector &nearPos)
+float CPrimZone::getSegmentDist(const NLMISC::CVector &v, const NLMISC::CVector &p1, const NLMISC::CVector &p2, NLMISC::CVector &nearPos)
 {
 	// two points, compute distance to the segment.
 	CVector V = (p2-p1).normed();

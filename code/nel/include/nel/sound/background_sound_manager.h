@@ -270,7 +270,7 @@ private:
 		/// flag if inside a sound zone
 		bool				Inside;
 		/// Constructor.
-		TSoundStatus(TSoundData &sd, NLMISC::CVector position, float gain, float distance, bool inside)
+		TSoundStatus(TSoundData &sd, const NLMISC::CVector &position, float gain, float distance, bool inside)
 			: SoundData(sd), Position(position), Gain(gain), Distance(distance), Inside(inside)
 		{}
 	};

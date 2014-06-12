@@ -102,8 +102,10 @@ private:// Atttributes.
 
 
 	// return the coordinates on the grid of what include the bbox.
-	void		selectPoint(CVector point, sint &x0, sint &y0)
+	void		selectPoint(const CVector &pointp, sint &x0, sint &y0)
 	{
+		CVector point = pointp;
+
 		point/= _EltSize;
 		x0= (sint)(floor(point.x));
 		y0= (sint)(floor(point.y));

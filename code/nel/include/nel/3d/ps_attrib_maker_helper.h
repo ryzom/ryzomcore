@@ -1432,7 +1432,7 @@ public:
 	  *
 	  */
 
-    virtual void setDefaultValue(T defaultValue) { _DefaultValue = defaultValue;}
+    virtual void setDefaultValue(const T &defaultValue) { _DefaultValue = defaultValue;}
 
 	/// get the default value :
 	virtual T getDefaultValue(void) const { return _DefaultValue; }

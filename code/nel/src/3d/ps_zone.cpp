@@ -267,7 +267,7 @@ CVector CPSZonePlane::getNormal(uint32 index)
 	NL_PS_FUNC(CPSZonePlane_getNormal)
 	return _Normal[index];
 }
-void CPSZonePlane::setNormal(uint32 index, CVector n)
+void CPSZonePlane::setNormal(uint32 index, const CVector &n)
 {
 	NL_PS_FUNC(CPSZonePlane_setNormal)
 	_Normal[index] = n;
@@ -576,7 +576,7 @@ CVector CPSZoneDisc::getNormal(uint32 index)
 	NL_PS_FUNC(CPSZoneDisc_getNormal)
 	return _Normal[index];
 }
-void CPSZoneDisc::setNormal(uint32 index, CVector n)
+void CPSZoneDisc::setNormal(uint32 index, const CVector &n)
 {
 	NL_PS_FUNC(CPSZoneDisc_setNormal)
 	_Normal[index] = n;

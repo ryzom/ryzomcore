@@ -613,7 +613,7 @@ public:
 	struct CParametricInfo
 	{
 		CParametricInfo() {}
-		CParametricInfo(NLMISC::CVector pos, NLMISC::CVector speed, float date)
+		CParametricInfo(const NLMISC::CVector &pos, const NLMISC::CVector &speed, float date)
 			: Pos(pos), Speed(speed), Date(date)
 		{
 		}

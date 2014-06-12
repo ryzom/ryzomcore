@@ -328,6 +328,20 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
 #endif // NL_OS_UNIX
 
+#define NL_DEFAULT_MEMORY_ALIGNMENT 16
+#ifdef NL_COMP_VC
+#define NL_ALIGN(nb) __declspec(align(nb))
+#else
+#define NL_ALIGN(nb) __attribute__((aligned(nb)))
+#endif
+
+#ifdef USE_SSE2
+extern void *operator new(size_t size) throw(std::bad_alloc);
+extern void *operator new[](size_t size) throw(std::bad_alloc);
+extern void operator delete(void *p) throw();
+extern void operator delete[](void *p) throw();
+#endif
+
 // CHashMap, CHashSet and CHashMultiMap definitions
 #if defined(_STLPORT_VERSION) // STLport detected
 #	include <hash_map>

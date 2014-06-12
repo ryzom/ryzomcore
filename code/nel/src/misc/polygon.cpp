@@ -249,7 +249,7 @@ public:
 		Back = NULL;
 		Front = NULL;
 	}
-	CBSPNode2v ( const CPlane &plane, CVector p0, CVector p1, uint v0, uint v1 ) : Plane (plane), P0 (p0), P1 (p1)
+	CBSPNode2v ( const CPlane &plane, const CVector &p0, const CVector &p1, uint v0, uint v1 ) : Plane (plane), P0 (p0), P1 (p1)
 	{
 		Back = NULL;
 		Front = NULL;

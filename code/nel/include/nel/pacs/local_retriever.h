@@ -548,12 +548,12 @@ public:
 	/**
 	 * Check all surfaces integrity
 	 */
-	bool								checkSurfacesIntegrity(NLMISC::CVector translation = NLMISC::CVector::Null, bool verbose = false) const;
+	bool								checkSurfacesIntegrity(const NLMISC::CVector &translation = NLMISC::CVector::Null, bool verbose = false) const;
 
 	/**
 	 * Check surface integrity
 	 */
-	bool								checkSurfaceIntegrity(uint surf, NLMISC::CVector translation = NLMISC::CVector::Null, bool verbose = false) const;
+	bool								checkSurfaceIntegrity(uint surf, const NLMISC::CVector &translation = NLMISC::CVector::Null, bool verbose = false) const;
 
 	// @}
 
@@ -565,7 +565,7 @@ protected:
 	bool								insurePosition(ULocalPosition &local) const;
 
 	/// Retrieves a position inside the retriever (from the local position), returns true if the position is close to a border
-	void								retrievePosition(NLMISC::CVector estimated, CCollisionSurfaceTemp &cst) const;
+	void								retrievePosition(const NLMISC::CVector &estimated, CCollisionSurfaceTemp &cst) const;
 
 	/// Retrieves a position inside the retriever (from the local position), returns true if the position is close to a border
 	void								retrieveAccuratePosition(CVector2s estimated, CCollisionSurfaceTemp &cst, bool &onBorder) const;

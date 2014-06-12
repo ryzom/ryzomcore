@@ -187,11 +187,11 @@ private:// Atttributes.
 private:// Methods.
 
 	// return the coordinates on the grid of what include the bbox.
-	void		selectQuads(CVector bmin, CVector bmax, sint &x0, sint &x1, sint &y0, sint &y1)
+	void		selectQuads(const CVector &bminp, const CVector &bmaxp, sint &x0, sint &x1, sint &y0, sint &y1)
 	{
-		CVector		bminp, bmaxp;
-		bminp= bmin;
-		bmaxp= bmax;
+		CVector		bmin, bmax;
+		bmin= bminp;
+		bmax= bmaxp;
 		bmin.minof(bminp, bmaxp);
 		bmax.maxof(bminp, bmaxp);
 		bmin/= _EltSize;

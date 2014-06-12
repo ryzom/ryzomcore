@@ -153,7 +153,7 @@ class CPSZonePlane : public CPSZone, public IPSMover
 		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
 		virtual bool onlyStoreNormal(void) const { return true; }
 		virtual NLMISC::CVector getNormal(uint32 index);
-		virtual void setNormal(uint32 index, NLMISC::CVector n);
+		virtual void setNormal(uint32 index, const NLMISC::CVector &n);
 
 		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 
@@ -255,7 +255,7 @@ class CPSZoneDisc : public CPSZone, public IPSMover
 		virtual NLMISC::CVector getScale(uint32 k) const;
 		virtual bool onlyStoreNormal(void) const { return true; }
 		virtual NLMISC::CVector getNormal(uint32 index);
-		virtual void setNormal(uint32 index, NLMISC::CVector n);
+		virtual void setNormal(uint32 index, const NLMISC::CVector &n);
 
 		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 
