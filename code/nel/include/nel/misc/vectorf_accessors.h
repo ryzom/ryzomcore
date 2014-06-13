@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // NLMISC includes
 
 // Project includes
+#include "vector.h"
 
 namespace NLMISC {
 
@@ -684,6 +685,36 @@ NL_FORCE_INLINE void swapW(CVector4F &left, CVector4F &right)
 	left = setW(left, getW(right));
 	right = setW(right, w);
 #endif
+}
+
+
+NL_FORCE_INLINE CVector toVector(const CVector3F &v)
+{
+#ifdef NL_HAS_SSE2
+	union { __m128 mm; float arr[4]; } temp;
+	temp.mm = v.mm;
+	CVector res;
+	res.x = temp.arr[0];
+	res.y = temp.arr[1];
+	res.z = temp.arr[2];
+	return res;
+#else
+	CVector res;
+	res.x = v.x;
+	res.y = v.y;
+	res.z = v.z;
+	return res;
+#endif
+}
+
+NL_FORCE_INLINE CVector3F set3F(const CVector &v)
+{
+	return set3F(v.x, v.y, v.z);
+}
+
+NL_FORCE_INLINE CVector4F set4F(const CVector &v, float w)
+{
+	return set4F(v.x, v.y, v.z, w);
 }
 
 
