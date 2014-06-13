@@ -1705,7 +1705,7 @@ void				CAudioMixerUser::update()
 						{
 							// there is some data here, update the virtual position of the sound.
 							float dist = (css->Position - source->getPos()).norm();
-							CVector vpos(_ListenPosition + css->Direction * (css->Dist + dist));
+							CVector vpos(_ListenPosition + CVector(css->Direction) * (css->Dist + dist));
 //							_Tracks[i]->DrvSource->setPos(source->getPos() * (1-css->PosAlpha) + css->Position*(css->PosAlpha));
 							_Tracks[i]->getPhysicalSource()->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
 							// update the relative gain

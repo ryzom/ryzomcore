@@ -50,7 +50,6 @@ class CClusteredSound
 {
 public:
 	/// This structure contain data about sound status in a cluster
-	NL_ALIGN_SSE2(16)
 	struct CClusterSoundStatus
 	{
 		/// The relative gain of sound in the cluster
@@ -60,11 +59,11 @@ public:
 		/// The ratio distance/max earing distance
 		float			DistFactor;
 		/// The sound virtual position (in fact Dist * Direction)
-		NLMISC::CVector	Position;
+		NLMISC::CVectorPacked	Position;
 		/// The blending factor between real sound pos and virtual pos (1 mean virtual pos, 0 mean real pos).
 		float			PosAlpha;
 		/// The direction vector for the virtual sound source.
-		NLMISC::CVector	Direction;
+		NLMISC::CVectorPacked	Direction;
 		/// The occlusion att.
 		sint32			Occlusion;
 		/// The occlusion LF factor (see EAX spec)
@@ -79,7 +78,6 @@ public:
 	typedef std::map<NL3D::CCluster*, CClusterSoundStatus>	TClusterStatusMap;
 
 	/// This structure is used when we traverse the cluster/portal graph.
-	NL_ALIGN_SSE2(16)
 	struct CSoundTravContext
 	{
 		/// The current gain.
@@ -99,18 +97,18 @@ public:
 		/// A blending factor to compute virtual source position.
 		float			Alpha;
 		/// The direction vector from listener to the first portal/cluster
-		NLMISC::CVector	Direction1;
+		NLMISC::CVectorPacked	Direction1;
 		/// The direction vector from the first portal/cluster to the second one.
-		NLMISC::CVector	Direction2;
+		NLMISC::CVectorPacked	Direction2;
 		/// The current blended direction used to place vitual source.
-		NLMISC::CVector	Direction;
+		NLMISC::CVectorPacked	Direction;
 		/// The previously traversed cluster. Used to stop back traversal.
 		NL3D::CCluster	*PreviousCluster;
 		/// The previous sound propagation vector
-		NLMISC::CVector	PreviousVector;
+		NLMISC::CVectorPacked	PreviousVector;
 
 		/// The last pseudo listener position
-		NLMISC::CVector	ListenerPos;
+		NLMISC::CVectorPacked	ListenerPos;
 
 		/// Constructor. Init all default value.
 		CSoundTravContext(const NLMISC::CVector &listenerPos,

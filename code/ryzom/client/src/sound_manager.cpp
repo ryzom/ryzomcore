@@ -343,7 +343,7 @@ void CSoundManager::drawSounds(float camHeight)
 			const CClusteredSound::CClusterSoundStatus &css = first->second;
 			if (css.Direction != CVector::Null)
 			{
-				CVector dest = pos+css.Direction*css.Dist;
+				CVector dest = pos+CVector(css.Direction)*css.Dist;
 
 				NL3D::CDRU::drawLine(pos, dest, CRGBA(0,255,255,255), *idriver);
 				NL3D::CDRU::drawLine(dest+CVector(0.5f,0.5f,0), dest+CVector(-0.5f,-0.5f,0), CRGBA(0, 255,255,255), *idriver);
