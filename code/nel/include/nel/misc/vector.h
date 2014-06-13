@@ -73,10 +73,10 @@ public:		// Methods.
 	/// Constructor .
 	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
 	/// Copy Constructor.
-#ifdef USE_SSE2
+#if 0
 	CVector(const CVector &v) : mm(v.mm) { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
 #else
-	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) { }
+	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) { if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); }
 #endif
 	//@}
 
