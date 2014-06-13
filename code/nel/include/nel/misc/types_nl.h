@@ -329,6 +329,19 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #endif // NL_OS_UNIX
 
 
+// #ifdef NL_ENABLE_FORCE_INLINE
+#	ifdef NL_COMP_VC
+#		define NL_FORCE_INLINE __forceinline
+#	elif NL_COMP_GCC
+#		define NL_FORCE_INLINE inline __attribute__((always_inline))
+#	else
+#		define NL_FORCE_INLINE inline
+#	endif
+// #else
+// #	define NL_FORCE_INLINE inline
+// #endif
+
+
 #ifdef NL_COMP_VC
 #define NL_ALIGN(nb) __declspec(align(nb))
 #else
