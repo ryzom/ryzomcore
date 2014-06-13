@@ -69,11 +69,15 @@ public:		// Methods.
 	/// @name Object.
 	//@{
 	/// Constructor which does nothing.
-	CVector() { if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); }
+	CVector() { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
 	/// Constructor .
-	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) { if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); }
+	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
 	/// Copy Constructor.
-	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) { if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); }
+#ifdef USE_SSE2
+	CVector(const CVector &v) : mm(v.mm) { /*if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error");*/ }
+#else
+	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) { }
+#endif
 	//@}
 
 	/// @name Base Maths.

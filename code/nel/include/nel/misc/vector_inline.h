@@ -125,15 +125,43 @@ inline CVector	operator*(float f, const CVector &v)
 #endif
 }
 
+#ifdef USE_SSE2
+inline __m128 dotsplat(const __m128 &l, const __m128 &r)
+{
+	// TODO: _mm_hadd_ps SSE3
+
+	__m128 mult = _mm_mul_ps(l, r);
+	__m128 vx = _mm_shuffle_ps(mult, mult, _MM_SHUFFLE(0, 0, 0, 0));
+	__m128 vy = _mm_shuffle_ps(mult, mult, _MM_SHUFFLE(1, 1, 1, 1));
+	__m128 vz = _mm_shuffle_ps(mult, mult, _MM_SHUFFLE(2, 2, 2, 2));
+	__m128 result = _mm_add_ps(_mm_add_ps(vx, vy), vz);
+	return result;
+}
+#endif
 
 // ============================================================================================
 // Advanced Maths.
 inline	float	CVector::operator*(const CVector &v) const
 {
+#ifdef USE_SSE2
+	return _mm_cvtss_f32(dotsplat(mm, v.mm));
+#else
 	return x*v.x + y*v.y + z*v.z;
+#endif
 }
 inline	CVector	CVector::operator^(const CVector &v) const
 {
+#ifdef USE_SSE2
+	CVector res;
+	__m128 l = _mm_shuffle_ps(mm, mm, _MM_SHUFFLE(3, 0, 2, 1));
+	__m128 r = _mm_shuffle_ps(v.mm, v.mm, _MM_SHUFFLE(3, 1, 0, 2));
+	__m128 mul1 = _mm_mul_ps(l, r);
+	l = _mm_shuffle_ps(mm, mm, _MM_SHUFFLE(3, 1, 0, 2));
+	r = _mm_shuffle_ps(v.mm, v.mm, _MM_SHUFFLE(3, 0, 2, 1));
+	__m128 mul2 = _mm_mul_ps(l, r);
+	res.mm = _mm_sub_ps(mul1, mul2);
+	return res;
+#else
 	CVector	ret;
 
 	ret.x= y*v.z - z*v.y;
@@ -141,27 +169,48 @@ inline	CVector	CVector::operator^(const CVector &v) const
 	ret.z= x*v.y - y*v.x;
 
 	return ret;
+#endif
 }
 inline	float	CVector::sqrnorm() const
 {
+#ifdef USE_SSE2
+	return _mm_cvtss_f32(dotsplat(mm, mm));
+#else
 	return (float)(x*x + y*y + z*z);
+#endif
 }
 inline	float	CVector::norm() const
 {
+#ifdef USE_SSE2
+	return sqrt(_mm_cvtss_f32(dotsplat(mm, mm)));
+#else
 	return (float)sqrt(x*x + y*y + z*z);
+#endif
 }
 inline	void	CVector::normalize()
 {
+#ifdef USE_SSE2
+	__m128 normsplat = _mm_sqrt_ps(dotsplat(mm, mm));
+	mm = _mm_div_ps(mm, normsplat);
+#else
 	float	n=norm();
 	if(n)
 		*this/=n;
+#endif
 }
 inline	CVector	CVector::normed() const
 {
+#ifdef USE_SSE2
+	CVector res;
+	__m128 normsplat = _mm_sqrt_ps(dotsplat(mm, mm));
+	res.mm = _mm_div_ps(mm, normsplat);
+	return res;
+#else
 	CVector	ret;
 	ret= *this;
 	ret.normalize();
 	return ret;
+#endif
 }
 
 
@@ -219,15 +268,23 @@ inline	void	CVector::sphericToCartesian(float r, float theta,float phi)
 }
 inline	void	CVector::minof(const CVector &a, const CVector &b)
 {
+#ifdef USE_SSE2
+	mm = _mm_min_ps(a.mm, b.mm);
+#else
 	x= std::min(a.x, b.x);
 	y= std::min(a.y, b.y);
 	z= std::min(a.z, b.z);
+#endif
 }
 inline	void	CVector::maxof(const CVector &a, const CVector &b)
 {
+#ifdef USE_SSE2
+	mm = _mm_max_ps(a.mm, b.mm);
+#else
 	x= std::max(a.x, b.x);
 	y= std::max(a.y, b.y);
 	z= std::max(a.z, b.z);
+#endif
 }
 inline	void	CVector::serial(IStream &f)
 {
