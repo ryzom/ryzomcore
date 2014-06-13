@@ -20,7 +20,11 @@
 #include "vector.h"
 #include "vector_h.h"
 #include "quat.h"
+#include "vectorf.h"
 
+#ifdef NL_HAS_SSE2
+#	include "matrixf.h"
+#endif
 
 namespace	NLMISC
 {
@@ -358,9 +362,24 @@ public:
 	/// Plane (line vector) multiplication.
 	friend CPlane		operator*(const CPlane &p, const CMatrix &m);
 
+#ifdef NL_HAS_SSE2
+	inline CMatrix44F &getMatrix() { testExpandRot(); testExpandProj(); return MF; }
+	inline const CMatrix44F &getMatrix() const  { testExpandRot(); testExpandProj(); return MF; }
+#else
+	inline CMatrix44F &getMatrix() { return reinterpret_cast<CMatrix44F &>(*this); }
+	inline const CMatrix44F &getMatrix() const  { return reinterpret_cast<const CMatrix44F &>(*this); }
+#endif
 
 private:
+#ifdef NL_HAS_SSE2
+	union
+	{
+		float M[16];
+		CMatrix44F MF;
+	};
+#else
 	float	M[16];
+#endif
 	float	Scale33;
 	uint32	StateBit;	// BitVector. 0<=>identity.
 

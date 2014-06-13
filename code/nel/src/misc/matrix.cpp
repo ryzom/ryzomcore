@@ -27,6 +27,11 @@ using namespace std;
 	#define new DEBUG_NEW
 #endif
 
+#ifdef NL_HAS_SSE2
+// #define NL_MATRIX_MUL_SSE2
+#define NL_MATRIX_COPY_SSE2
+#endif
+
 namespace	NLMISC
 {
 
@@ -161,6 +166,20 @@ CMatrix::CMatrix(const CMatrix &m)
 // ======================================================================================================
 CMatrix		&CMatrix::operator=(const CMatrix &m)
 {
+#ifdef NL_MATRIX_COPY_SSE2
+	if (m.StateBit & ((~MAT_VALIDALL) & (~MAT_TRANS)))
+	{
+		MF = m.MF;
+		StateBit = m.StateBit;
+		Scale33 = m.Scale33;
+	}
+	else
+	{
+		// Must always copy Trans part.
+		MF.d = m.MF.d;
+		StateBit = m.StateBit & MAT_TRANS;
+	}
+#else
 	StateBit= m.StateBit & ~MAT_VALIDALL;
 	if(hasAll())
 	{
@@ -186,6 +205,7 @@ CMatrix		&CMatrix::operator=(const CMatrix &m)
 		// Must always copy Trans part.
 		memcpy(&a14, &m.a14, 3*sizeof(float));
 	}
+#endif
 	return *this;
 }
 
@@ -694,6 +714,13 @@ void		CMatrix::scale(const CVector &v)
 // ***************************************************************************
 void		CMatrix::setMulMatrixNoProj(const CMatrix &m1, const CMatrix &m2)
 {
+#ifdef NL_MATRIX_MUL_SSE2
+	m1.testExpandRot();
+	m1.testExpandProj();
+	m2.testExpandRot();
+	m2.testExpandProj();
+	MF = mul(m1.MF, m2.MF);
+#else
 	/*
 	For a fast MulMatrix, it appears to be better to not take State bits into account (no test/if() overhead)
 	Just do heavy mul all the time (common case, and not so slow)
@@ -720,6 +747,7 @@ void		CMatrix::setMulMatrixNoProj(const CMatrix &m1, const CMatrix &m2)
 	a14= m1.a11*m2.a14 + m1.a12*m2.a24 + m1.a13*m2.a34 + m1.a14;
 	a24= m1.a21*m2.a14 + m1.a22*m2.a24 + m1.a23*m2.a34 + m1.a24;
 	a34= m1.a31*m2.a14 + m1.a32*m2.a24 + m1.a33*m2.a34 + m1.a34;
+#endif
 
 	// Setup no proj at all, and force valid rot (still may be identity, but 0/1 are filled)
 	StateBit= (m1.StateBit | m2.StateBit | MAT_VALIDROT) & ~(MAT_PROJ|MAT_VALIDPROJ);
@@ -736,6 +764,17 @@ void		CMatrix::setMulMatrixNoProj(const CMatrix &m1, const CMatrix &m2)
 // ***************************************************************************
 void		CMatrix::setMulMatrix(const CMatrix &m1, const CMatrix &m2)
 {
+#ifdef NL_MATRIX_MUL_SSE2
+	m1.testExpandRot();
+	m1.testExpandProj();
+	m2.testExpandRot();
+	m2.testExpandProj();
+	MF = mul(m1.MF, m2.MF);
+	StateBit = m1.StateBit | m2.StateBit;
+	StateBit |= MAT_VALIDALL;
+	if (m1.hasTrans() && m2.hasProj())
+		StateBit |= MAT_ROT | MAT_SCALEANY;
+#else
 	// Do *this= m1*m2
 	identity();
 	StateBit= m1.StateBit | m2.StateBit;
@@ -824,18 +863,22 @@ void		CMatrix::setMulMatrix(const CMatrix &m1, const CMatrix &m2)
 		a32+= m1.a34*m2.a42;
 		a33+= m1.a34*m2.a43;
 	}
+#endif
 
 	// Modify Scale.
 	if( (StateBit & MAT_SCALEUNI) && !(StateBit & MAT_SCALEANY) )
 	{
 		// Must have correct Scale33
+#ifndef NL_MATRIX_MUL_SSE2
 		m1.testExpandRot();
 		m2.testExpandRot();
+#endif
 		Scale33= m1.Scale33*m2.Scale33;
 	}
 	else
 		Scale33=1;
 
+#ifndef NL_MATRIX_MUL_SSE2
 	// In every case, I am valid now!
 	StateBit|=MAT_VALIDROT;
 
@@ -902,6 +945,7 @@ void		CMatrix::setMulMatrix(const CMatrix &m1, const CMatrix &m2)
 	{
 		// Don't copy proj part, and leave MAT_VALIDPROJ not set
 	}
+#endif
 }
 // ======================================================================================================
 void		CMatrix::invert()
