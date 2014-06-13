@@ -1325,6 +1325,34 @@ CVector		CMatrix::mulPoint(const CVector &v) const
 	return ret;
 }
 
+// ======================================================================================================
+CVector3F	CMatrix::mulPoint(const CVector3F &v) const
+{
+#ifdef NL_HAS_SSE2
+	CVector3F ret;
+	if (hasRot())
+	{
+		ret = add(
+			mul(xyz(MF.a), xxx(v)),
+			mul(xyz(MF.b), yyy(v)),
+			mul(xyz(MF.c), zzz(v)));
+	}
+	else
+	{
+		ret = v;
+	}
+	if (hasTrans())
+	{
+		ret = add(
+			ret,
+			xyz(MF.d));
+	}
+	return ret;
+#else
+	return set3F(mulPoint(toVector(v)));
+#endif
+}
+
 
 /*
  * Multiply

@@ -687,6 +687,7 @@ NL_FORCE_INLINE CVector4F accumulateSplat(const CVector4F &v)
 }
 */
 
+NL_ASSIMILATE_BI_FUNCTION(CVector3F, add, const CVector3F &)
 
 NL_ASSIMILATE_BI_FUNCTION(CVector2F, minF, const CVector2F &)
 NL_ASSIMILATE_BI_FUNCTION(CVector2F, maxF, const CVector2F &)
