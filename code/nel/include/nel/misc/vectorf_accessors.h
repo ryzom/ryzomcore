@@ -688,23 +688,9 @@ NL_FORCE_INLINE void swapW(CVector4F &left, CVector4F &right)
 }
 
 
-NL_FORCE_INLINE CVector toVector(const CVector3F &v)
+NL_FORCE_INLINE const CVector &toVector(const CVector3F &v)
 {
-#ifdef NL_HAS_SSE2
-	union { __m128 mm; float arr[4]; } temp;
-	temp.mm = v.mm;
-	CVector res;
-	res.x = temp.arr[0];
-	res.y = temp.arr[1];
-	res.z = temp.arr[2];
-	return res;
-#else
-	CVector res;
-	res.x = v.x;
-	res.y = v.y;
-	res.z = v.z;
-	return res;
-#endif
+	return reinterpret_cast<const CVector &>(v);
 }
 
 NL_FORCE_INLINE CVector3F set3F(const CVector &v)
