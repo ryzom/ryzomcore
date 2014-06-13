@@ -328,6 +328,40 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
 #endif // NL_OS_UNIX
 
+
+#ifdef NL_COMP_VC
+#define NL_ALIGN(nb) __declspec(align(nb))
+#else
+#define NL_ALIGN(nb) __attribute__((aligned(nb)))
+#endif
+
+#ifdef NL_COMP_VC
+inline void *aligned_malloc(size_t size, size_t alignment) { return _aligned_malloc(size, alignment); }
+inline void aligned_free(void *ptr) { _aligned_free(ptr); }
+#else
+inline void *aligned_malloc(size_t size, size_t alignment) { return memalign(alignment, size); }
+inline void aligned_free(void *ptr) { free(ptr); }
+#endif /* NL_COMP_ */
+
+
+#ifdef NL_HAS_SSE2
+
+#define NL_DEFAULT_MEMORY_ALIGNMENT 16
+#define NL_ALIGN_SSE2 NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT)
+
+extern void *operator new(size_t size) throw(std::bad_alloc);
+extern void *operator new[](size_t size) throw(std::bad_alloc);
+extern void operator delete(void *p) throw();
+extern void operator delete[](void *p) throw();
+
+#else /* NL_HAS_SSE2 */
+
+#define NL_DEFAULT_MEMORY_ALIGNMENT 4
+#define NL_ALIGN_SSE2(nb) 
+
+#endif /* NL_HAS_SSE2 */
+
+
 // CHashMap, CHashSet and CHashMultiMap definitions
 #if defined(_STLPORT_VERSION) // STLport detected
 #	include <hash_map>
