@@ -881,7 +881,8 @@ bool CClusteredSound::addAudibleCluster(CCluster *cluster, CClusterSoundStatus &
 	}
 	else
 	{
-		_AudibleClusters.insert(make_pair(cluster, soundStatus));
+		//_AudibleClusters.insert(make_pair(cluster, soundStatus));
+		_AudibleClusters[cluster] = soundStatus;
 		return true;
 	}
 

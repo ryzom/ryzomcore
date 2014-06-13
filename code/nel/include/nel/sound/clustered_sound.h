@@ -50,6 +50,7 @@ class CClusteredSound
 {
 public:
 	/// This structure contain data about sound status in a cluster
+	NL_ALIGN_SSE2(16)
 	struct CClusterSoundStatus
 	{
 		/// The relative gain of sound in the cluster
@@ -78,6 +79,7 @@ public:
 	typedef std::map<NL3D::CCluster*, CClusterSoundStatus>	TClusterStatusMap;
 
 	/// This structure is used when we traverse the cluster/portal graph.
+	NL_ALIGN_SSE2(16)
 	struct CSoundTravContext
 	{
 		/// The current gain.
