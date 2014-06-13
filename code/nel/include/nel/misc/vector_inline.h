@@ -64,7 +64,12 @@ inline	CVector	&CVector::operator*=(float f)
 }
 inline	CVector	&CVector::operator/=(float f)
 {
+#ifdef USE_SSE2
+	mm = _mm_div_ps(mm, _mm_set1_ps(f));
+	return *this;
+#else
 	return *this*= (1.0f/f);
+#endif
 }
 inline	CVector	CVector::operator+(const CVector &v) const
 {
@@ -101,7 +106,13 @@ inline	CVector	CVector::operator*(float f) const
 }
 inline	CVector	CVector::operator/(float f) const
 {
+#ifdef USE_SSE2
+	CVector res;
+	res.mm = _mm_div_ps(mm, _mm_set1_ps(f));
+	return res;
+#else
 	return *this*(1.0f/f);
+#endif
 }
 inline	CVector	CVector::operator-() const
 {
@@ -220,19 +231,35 @@ inline	CVector	CVector::normed() const
 // Misc.
 inline	void	CVector::set(float _x, float _y, float _z)
 {
+#ifdef USE_SSE2
+	mm = _mm_setr_ps(_x, _y, _z, 0.0f);
+#else
 	x=_x; y=_y; z=_z;
+#endif
 }
 inline	bool	CVector::operator==(const CVector &v) const
 {
+#ifdef USE_SSE2
+	return (_mm_movemask_ps(_mm_cmpeq_ps(mm, v.mm)) & 0x07) == 0x07;
+#else
 	return x==v.x && y==v.y && z==v.z;
+#endif
 }
 inline	bool	CVector::operator!=(const CVector &v) const
 {
+#ifdef USE_SSE2
+	return (_mm_movemask_ps(_mm_cmpneq_ps(mm, v.mm)) & 0x07) != 0;
+#else
 	return !(*this==v);
+#endif
 }
 inline	bool	CVector::isNull() const
 {
+#ifdef USE_SSE2
+	return (_mm_movemask_ps(_mm_cmpeq_ps(mm, _mm_setzero_ps())) & 0x07) == 0x07;
+#else
 	return *this==CVector::Null;
+#endif
 }
 inline	bool	CVector::operator<(const CVector &v) const
 {
