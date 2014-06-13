@@ -15,12 +15,15 @@
 				<center>
 				<p>{$ip_support}</p>
 				<div class="alert alert-error">
-				<form enctype="multipart/form-data" method="post" action="index.php?page=plugin&action=install_plugin"  >
+				<form enctype="multipart/form-data" method="post" action="index.php?page=plugin&action=install_plugin" id="upload_plugin"  >
 				<label for="file">Filename:</label>&nbsp;&nbsp;
 				<input type="file" name="file" id="file"></br>
-				 {if isset($smarty.get.result) and $smarty.get.result eq "1"}<p>{$ip_error}</p>{/if}
+				<progress id="progressBar" value="0" max="100" style="width:300px;"></progress></br>
+				<input type="button" value="Upload" onclick="uploadPlugin()"></br>
+				<h3 id="status"></h3>
+				 {if isset($smarty.get.result) and $smarty.get.result eq "0"}<p>{$ip_file_nfnd}</p>{/if}
 				 {if isset($smarty.get.result) and $smarty.get.result eq "2"}<p>{$ip_info_nfound}</p>{/if}
-				<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Install Plugin</button></br>
+				<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;" name="install_plugin">Install Plugin</button></br>
 				</div>
 				{$ip_message}
 				</center>
