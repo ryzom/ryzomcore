@@ -33,8 +33,8 @@ namespace NL3D
   */
 struct CLookAtAlign
 {
-	CVector I;
-	CVector K;
+	CVectorPacked I;
+	CVectorPacked K;
 };
 
 
