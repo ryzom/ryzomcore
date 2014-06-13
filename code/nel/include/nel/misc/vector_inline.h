@@ -182,7 +182,7 @@ inline	float	CVector::sqrnorm() const
 inline	float	CVector::norm() const
 {
 #ifdef USE_SSE2
-	return sqrt(_mm_cvtss_f32(dotsplat(mm, mm)));
+	return sqrt(sqrnorm());
 #else
 	return (float)sqrt(x*x + y*y + z*z);
 #endif
@@ -191,7 +191,8 @@ inline	void	CVector::normalize()
 {
 #ifdef USE_SSE2
 	__m128 normsplat = _mm_sqrt_ps(dotsplat(mm, mm));
-	mm = _mm_div_ps(mm, normsplat);
+	if (_mm_cvtss_f32(normsplat))
+		mm = _mm_div_ps(mm, normsplat);
 #else
 	float	n=norm();
 	if(n)
@@ -203,7 +204,8 @@ inline	CVector	CVector::normed() const
 #ifdef USE_SSE2
 	CVector res;
 	__m128 normsplat = _mm_sqrt_ps(dotsplat(mm, mm));
-	res.mm = _mm_div_ps(mm, normsplat);
+	if (_mm_cvtss_f32(normsplat))
+		res.mm = _mm_div_ps(mm, normsplat);
 	return res;
 #else
 	CVector	ret;
