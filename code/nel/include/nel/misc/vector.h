@@ -212,6 +212,34 @@ public:
 	{
 		return CVector(*this) - v;
 	}
+
+	bool	operator==(const CVectorPacked &v) const
+	{
+		return x==v.x && y==v.y && z==v.z;
+	}
+	bool	operator!=(const CVectorPacked &v) const
+	{
+		return !(*this==v);
+	}
+	bool	operator<(const CVectorPacked &v) const
+	{
+		if(x!=v.x)
+			return x<v.x;
+		if(y!=v.y)
+			return y<v.y;
+		return z<v.z;
+	}
+	
+	CVector	operator^(const CVector &v) const
+	{
+		CVector	ret;
+
+		ret.x= y*v.z - z*v.y;
+		ret.y= z*v.x - x*v.z;
+		ret.z= x*v.y - y*v.x;
+
+		return ret;
+	}
 };
 
 // blend (faster version than the generic version found in algo.h)

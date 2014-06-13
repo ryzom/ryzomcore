@@ -404,8 +404,8 @@ void CPSMesh::updatePos()
 
 
 
-			mat.setRot( ptBasis->X * CPSUtil::getCos((sint32) *ptCurrAngle) + ptBasis->Y * CPSUtil::getSin((sint32) *ptCurrAngle)
-						, ptBasis->X * CPSUtil::getCos((sint32) *ptCurrAngle + 64) + ptBasis->Y * CPSUtil::getSin((sint32) *ptCurrAngle + 64)
+			mat.setRot( CVector(ptBasis->X) * CPSUtil::getCos((sint32) *ptCurrAngle) + CVector(ptBasis->Y) * CPSUtil::getSin((sint32) *ptCurrAngle)
+						, CVector(ptBasis->X) * CPSUtil::getCos((sint32) *ptCurrAngle + 64) + CVector(ptBasis->Y) * CPSUtil::getSin((sint32) *ptCurrAngle + 64)
 						, ptBasis->X ^ ptBasis->Y
 					  );
 

@@ -43,7 +43,7 @@ template <>
 inline CPlaneBasis PSBinOpModulate(const CPlaneBasis &p1, const CPlaneBasis &p2)
 {
 	// we compute p1 * p2
-	NLMISC::CVector z = p1.X ^ p1.Y;
+	NLMISC::CVector z = CVector(p1.X) ^ CVector(p1.Y);
 	CPlaneBasis r;
 	r.X.x = p2.X.x * p1.X.x + p2.X.y * p1.Y.x + p2.X.z * z.x;
 	r.X.y = p2.X.x * p1.X.y + p2.X.y * p1.Y.y + p2.X.z * z.y;
