@@ -136,6 +136,18 @@ inline CVector	operator*(float f, const CVector &v)
 #endif
 }
 
+inline CVector	operator/(float f, const CVector &v)
+{
+#ifdef USE_SSE2
+	CVector res;
+	res.mm = _mm_div_ps(_mm_set1_ps(f), v.mm);
+	return res;
+#else
+	CVector	ret(f/v.x, f/v.y, f/v.z);
+	return ret;
+#endif
+}
+
 #ifdef USE_SSE2
 inline __m128 dotsplat(const __m128 &l, const __m128 &r)
 {
@@ -149,6 +161,19 @@ inline __m128 dotsplat(const __m128 &l, const __m128 &r)
 	return result;
 }
 #endif
+
+inline CVector mul(const CVector &l, const CVector &r)
+{
+	CVector res;
+#ifdef USE_SSE2
+	res.mm = _mm_mul_ps(l.mm, r.mm);
+#else
+	res.x = l.x * r.x;
+	res.y = l.y * r.y;
+	res.z = l.z * r.z;
+#endif
+	return res;
+}
 
 // ============================================================================================
 // Advanced Maths.

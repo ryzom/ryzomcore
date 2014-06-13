@@ -152,6 +152,7 @@ public:		// Methods.
 
 	// friends.
 	friend	CVector	operator*(float f, const CVector &v0);
+	friend	CVector	operator/(float f, const CVector &v0);
 };
 
 class CVectorPacked

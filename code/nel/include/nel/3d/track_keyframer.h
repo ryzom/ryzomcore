@@ -403,10 +403,10 @@ template<class T, class TKeyVal> inline void	copyToValue(T &value, const TKeyVal
 inline void	copyToValue(NLMISC::CRGBA &col, const CVector &v)
 {
 	sint	i;
-
-	i= (sint)(v.x*255); NLMISC::clamp(i,0,255); col.R= (uint8) i;
-	i= (sint)(v.y*255); NLMISC::clamp(i,0,255); col.G= (uint8) i;
-	i= (sint)(v.z*255); NLMISC::clamp(i,0,255); col.B= (uint8) i;
+	CVector mul255 = v * 255;
+	i= (sint)(mul255.x); NLMISC::clamp(i,0,255); col.R= (uint8) i;
+	i= (sint)(mul255.y); NLMISC::clamp(i,0,255); col.G= (uint8) i;
+	i= (sint)(mul255.z); NLMISC::clamp(i,0,255); col.B= (uint8) i;
 	col.A=255;
 }
 

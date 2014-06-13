@@ -487,10 +487,10 @@ void CCloud::dispXYZ (CMaterial *pMat)
 				rVB.lock (vba);
 
 				pVertices = vba.getVertexCoordPointer (0);
-				*pVertices = CVector(_Pos.x,			_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
-				*pVertices = CVector(_Pos.x+_Size.x,	_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
-				*pVertices = CVector(_Pos.x+_Size.x,	_Pos.y+_Size.y,	_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
-				*pVertices = CVector(_Pos.x,			_Pos.y+_Size.y,	_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH);
+				*pVertices = CVectorPacked(_Pos.x,			_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+				*pVertices = CVectorPacked(_Pos.x+_Size.x,	_Pos.y,			_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+				*pVertices = CVectorPacked(_Pos.x+_Size.x,	_Pos.y+_Size.y,	_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+				*pVertices = CVectorPacked(_Pos.x,			_Pos.y+_Size.y,	_Pos.z+_Size.z*(_NbW*_NbH-d)*oneOverNbWNbH);
 
 				pUV = vba.getTexCoordPointer (0, 0);
 				pUV->U = i*oneOverNbW;		pUV->V = j*oneOverNbH;		pUV = (CUV*)( ((uint8*)pUV) + nVSize );
@@ -513,10 +513,10 @@ void CCloud::dispXYZ (CMaterial *pMat)
 		CVertexBufferReadWrite vba;
 		rVB.lock (vba);
 		CVectorPacked *pVertices = vba.getVertexCoordPointer (0);
-		*pVertices = CVector((float)0.25f,	0, (float)0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)0.75f,	0, (float)0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)0.75f,	0, (float)0.75f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
-		*pVertices = CVector((float)0.25f,	0, (float)0.75f);
+		*pVertices = CVectorPacked((float)0.25f,	0, (float)0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVectorPacked((float)0.75f,	0, (float)0.0f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVectorPacked((float)0.75f,	0, (float)0.75f); pVertices = (CVectorPacked*)( ((uint8*)pVertices) + nVSize );
+		*pVertices = CVectorPacked((float)0.25f,	0, (float)0.75f);
 	}
 }
 
@@ -640,7 +640,7 @@ void CCloud::genBill (CCamera *pCam, uint32 nBillSize)
 	//CMatrix CamMat = pCam->getMatrix();
 	//CVector Viewer = CamMat.getPos();
 	CVector Viewer = CVector (0,0,0);
-	CVector Center = CVector (_Pos.x+_Size.x/2, _Pos.y+_Size.y/2, _Pos.z+_Size.z/2);
+	CVector Center = _Pos + (_Size / 2); //CVector (_Pos.x+_Size.x/2, _Pos.y+_Size.y/2, _Pos.z+_Size.z/2);
 	CVector Size = _Size;
 	CVector I, J, K;
 	float Left, Right, Top, Bottom, Near, Far;
@@ -650,7 +650,7 @@ void CCloud::genBill (CCamera *pCam, uint32 nBillSize)
 	CMatrix mat;
 	mat.identity();
 	mat.setRot(I,J,K, true);
-	mat.setPos(CVector(Viewer.x, Viewer.y, Viewer.z));
+	mat.setPos(Viewer);
 	mat.invert();
 
 	// Clear background for cloud creation
@@ -708,7 +708,7 @@ void CCloud::dispBill (CCamera *pCam)
 //	CMatrix CamMat = pCam->getMatrix();
 //	CVector Viewer = CamMat.getPos();
 	CVector Viewer = CVector (0,0,0);
-	CVector Center = CVector (_Pos.x+_Size.x/2, _Pos.y+_Size.y/2, _Pos.z+_Size.z/2);
+	CVector Center = _Pos + (_Size / 2); //CVector (_Pos.x+_Size.x/2, _Pos.y+_Size.y/2, _Pos.z+_Size.z/2);
 	CVector Size = _Size;
 
 	// Prepare vertices.
