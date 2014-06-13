@@ -1475,7 +1475,7 @@ void CAudioMixerUser::freeTrack(CTrack *track)
 
 // ******************************************************************
 
-void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos)
+void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<CPlayingSoundPos> &pos)
 {
 	int nbplay = 0;
 	int	nbmute = 0;
@@ -1493,9 +1493,9 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 			if (source->isPlaying())
 			{
 				if (virtualPos)
-					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0,
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0,
 						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));
@@ -1517,9 +1517,9 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 			if (source->isPlaying())
 			{
 				if (virtualPos)
-					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0,
+					pos.push_back(CPlayingSoundPos(source->getTrack() == 0,
 						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));

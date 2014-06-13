@@ -471,7 +471,7 @@ protected:
 	/// Returns nb available tracks (or NULL)
 	void						getFreeTracks( uint nb, CTrack **tracks );
 	/// Fill a vector of position and mute flag for all playing sound source.
-	virtual void				getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos);
+	virtual void				getPlayingSoundsPos(bool virtualPos, std::vector<CPlayingSoundPos> &pos);
 
 	typedef CHashMap<NLMISC::TStringId, CControledSources, NLMISC::CStringIdHashMapTraits>	TUserVarControlsContainer;
 	/// Container for all user controler and currently controled playing source

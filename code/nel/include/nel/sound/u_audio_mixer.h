@@ -336,7 +336,13 @@ public:
 	virtual uint		getMutedPlayingSourcesCount() const = 0;
 	/// Return a string showing the playing sources
 	virtual std::string	getSourcesStats() const = 0;
-	virtual void		getPlayingSoundsPos(bool virtualPos, std::vector<std::pair<bool, NLMISC::CVector> > &pos) =0;
+	struct CPlayingSoundPos
+	{
+		CPlayingSoundPos(bool first_, const NLMISC::CVector &second_) : first(first_), second(second_) { }
+		bool first;
+		NLMISC::CVector second;
+	};
+	virtual void		getPlayingSoundsPos(bool virtualPos, std::vector<CPlayingSoundPos> &pos) =0;
 	/** Write profiling information about the mixer to the output stream.
 	 *  \param out The output stream to which to write the information
 	 */

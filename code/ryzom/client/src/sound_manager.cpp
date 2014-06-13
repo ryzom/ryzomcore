@@ -363,10 +363,10 @@ void CSoundManager::drawSounds(float camHeight)
 	}
 	// draw the sound source position
 	{
-		std::vector<std::pair<bool, CVector> > soundPos;
+		std::vector<UAudioMixer::CPlayingSoundPos> soundPos;
 		_AudioMixer->getPlayingSoundsPos(true, soundPos);
 
-		std::vector<std::pair<bool, CVector> >::iterator first(soundPos.begin()), last(soundPos.end());
+		std::vector<UAudioMixer::CPlayingSoundPos>::iterator first(soundPos.begin()), last(soundPos.end());
 		for (; first != last; ++first)
 		{
 			NL3D::CDRU::drawLine(first->second + CVector(0.5f,0.5f,0), first->second + CVector(-0.5f,-0.5f,0), CRGBA(255,0,255,255), *idriver);
