@@ -563,12 +563,12 @@ void CPSAttrib<T>::swap(CPSAttrib<T> &other)
 
 // here we give some definition for common types
 
-typedef CPSAttrib<NLMISC::CVector> TPSAttribVector;
-typedef CPSAttrib<NLMISC::CRGBA>   TPSAttribRGBA;
-typedef CPSAttrib<float>		   TPSAttribFloat;
-typedef CPSAttrib<uint32>		   TPSAttribUInt;
-typedef CPSAttrib<uint8>		   TPSAttribUInt8;
-typedef CPSAttrib<TAnimationTime>  TPSAttribTime;
+typedef CPSAttrib<NLMISC::CVectorPacked>	TPSAttribVector;
+typedef CPSAttrib<NLMISC::CRGBA>			TPSAttribRGBA;
+typedef CPSAttrib<float>					TPSAttribFloat;
+typedef CPSAttrib<uint32>					TPSAttribUInt;
+typedef CPSAttrib<uint8>					TPSAttribUInt8;
+typedef CPSAttrib<TAnimationTime>			TPSAttribTime;
 
 } // NL3D
 

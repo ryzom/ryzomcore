@@ -220,6 +220,7 @@ public:
 	CScene *getScene(void);
 
 	/// shortcut to the same method of the owning particle system
+	void getLODVect(NLMISC::CVectorPacked &v, float &offset, TPSMatrixMode matrixMode);
 	void getLODVect(NLMISC::CVector &v, float &offset, TPSMatrixMode matrixMode);
 
 
@@ -411,7 +412,7 @@ public:
 	void computeForces();
 
 	// compute collisions
-	void computeCollisions(uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter);
+	void computeCollisions(uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter);
 
 	// get a conversion matrix between 2 matrix modes
 	static const NLMISC::CMatrix &getConversionMatrix(const CParticleSystem &ps, TPSMatrixMode to, TPSMatrixMode from);

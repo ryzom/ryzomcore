@@ -2790,7 +2790,7 @@ void CPSEmitter::doEmitOnce(uint firstInstanceIndex)
 				CVector startPos;
 				if (!_Owner->isParametricMotionEnabled())
 				{
-					startPos = _Owner->getPos()[k] - _Owner->getSpeed()[k] * CParticleSystem::EllapsedTime;
+					startPos = CVector(_Owner->getPos()[k]) - CVector(_Owner->getSpeed()[k]) * CParticleSystem::EllapsedTime;
 				}
 				else
 				{
@@ -2823,7 +2823,7 @@ void CPSEmitter::doEmitOnce(uint firstInstanceIndex)
 			CVector startPos;
 			if (!_Owner->isParametricMotionEnabled())
 			{
-				startPos = _Owner->getPos()[k] - _Owner->getSpeed()[k] * CParticleSystem::EllapsedTime;
+				startPos = CVector(_Owner->getPos()[k]) - CVector(_Owner->getSpeed()[k]) * CParticleSystem::EllapsedTime;
 			}
 			else
 			{

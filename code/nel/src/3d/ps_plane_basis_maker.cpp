@@ -130,7 +130,7 @@ void *CPSPlaneBasisFollowSpeed::make(CPSLocated *loc,
 			case XY:
 				while (numAttrib --)
 				{
-					const CVector *speedVect = &(*(speedIt + (fpIndex >> 16)));
+					const NLMISC::CVectorPacked *speedVect = &(*(speedIt + (fpIndex >> 16)));
 					float norm = sqrtf(speedVect->x * speedVect->x + speedVect->y * speedVect->y);
 					float invNorm = (norm != 0.f) ? 1.f / norm : 0.f;
 					CPlaneBasis &pb = *(CPlaneBasis *) ptDat;
@@ -143,7 +143,7 @@ void *CPSPlaneBasisFollowSpeed::make(CPSLocated *loc,
 			case XZ:
 				while (numAttrib --)
 				{
-					const CVector *speedVect = &(*(speedIt + (fpIndex >> 16)));
+					const NLMISC::CVectorPacked *speedVect = &(*(speedIt + (fpIndex >> 16)));
 					float norm = sqrtf(speedVect->x * speedVect->x + speedVect->z * speedVect->z);
 					float invNorm = (norm != 0.f) ? 1.f / norm : 0.f;
 					CPlaneBasis &pb = *(CPlaneBasis *) ptDat;
@@ -156,7 +156,7 @@ void *CPSPlaneBasisFollowSpeed::make(CPSLocated *loc,
 			case YZ:
 				while (numAttrib --)
 				{
-					const CVector *speedVect = &(*(speedIt + (fpIndex >> 16)));
+					const NLMISC::CVectorPacked *speedVect = &(*(speedIt + (fpIndex >> 16)));
 					float norm = sqrtf(speedVect->y * speedVect->y + speedVect->z * speedVect->z);
 					float invNorm = (norm != 0.f) ? 1.f / norm : 0.f;
 					CPlaneBasis &pb = *(CPlaneBasis *) ptDat;

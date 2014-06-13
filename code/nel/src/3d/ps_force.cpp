@@ -862,8 +862,8 @@ void CPSCylindricVortex::computeForces(CPSLocated &target)
 					p *= 1.f / d;
 					// compute the speed vect that we should have (normalized)
 					realTangentialSpeed = n ^ p;
-					tangentialSpeed = (*speedIt * realTangentialSpeed) * realTangentialSpeed;
-					radialSpeed =  (p * *speedIt) * p;
+					tangentialSpeed = (CVector(*speedIt) * realTangentialSpeed) * realTangentialSpeed;
+					radialSpeed =  (p * CVector(*speedIt)) * p;
 					// update radial speed;
 					*speedIt -= _RadialViscosity * CParticleSystem::EllapsedTime * radialSpeed;
 					// update tangential speed
@@ -981,7 +981,7 @@ void CPSMagneticForce::computeForces(CPSLocated &target)
 			TPSAttribFloat::const_iterator invMassIt = target.getInvMass().begin();
 			for (; it != itend; ++it, ++invMassIt)
 			{
-				(*it) += intensity * *invMassIt * (*it ^ toAdd);
+				(*it) += intensity * *invMassIt * (CVector(*it) ^ toAdd);
 			}
 		}
 		else
@@ -989,7 +989,7 @@ void CPSMagneticForce::computeForces(CPSLocated &target)
 			float i = intensity / target.getInitialMass();
 			for (; it != itend; ++it)
 			{
-				(*it) += i * (*it ^ toAdd);
+				(*it) += i * (CVector(*it) ^ toAdd);
 			}
 		}
 	}

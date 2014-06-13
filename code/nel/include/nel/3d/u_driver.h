@@ -47,6 +47,7 @@ namespace NL3D
 
 
 using NLMISC::CVector;
+using NLMISC::CVectorPacked;
 using NLMISC::CMatrix;
 using NLMISC::CRGBA;
 using NLMISC::CBitmap;

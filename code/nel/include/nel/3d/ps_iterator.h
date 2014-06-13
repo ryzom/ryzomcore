@@ -134,10 +134,10 @@ namespace NL3D
 	/// Some typedefs
 	typedef CAdvance1Iterator<TPSAttribFloat::const_iterator, float> TIteratorFloatStep1;
 	typedef CAdvance1Iterator<TPSAttribFloat::const_iterator, TAnimationTime> TIteratorFloatStep1;
-	typedef CAdvance1Iterator<TPSAttribVector::const_iterator, NLMISC::CVector> TIteratorVectStep1;
+	typedef CAdvance1Iterator<TPSAttribVector::const_iterator, NLMISC::CVectorPacked> TIteratorVectStep1;
 	typedef CAdvance1616Iterator<TPSAttribFloat::const_iterator, float> TIteratorFloatStep1616;
 	typedef CAdvance1616Iterator<TPSAttribFloat::const_iterator, TAnimationTime> TIteratorTimeStep1616;
-	typedef CAdvance1616Iterator<TPSAttribVector::const_iterator, NLMISC::CVector> TIteratorVectStep1616;
+	typedef CAdvance1616Iterator<TPSAttribVector::const_iterator, NLMISC::CVectorPacked> TIteratorVectStep1616;
 
 } // NL3D
 

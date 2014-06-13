@@ -69,11 +69,11 @@ public:		// Methods.
 	/// @name Object.
 	//@{
 	/// Constructor which does nothing.
-	CVector() {}
+	CVector() { if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); }
 	/// Constructor .
-	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+	CVector(float	_x, float _y, float _z) : x(_x), y(_y), z(_z) { if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); }
 	/// Copy Constructor.
-	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) {}
+	CVector(const CVector &v) : x(v.x), y(v.y), z(v.z) { if (((uintptr_t)(void *)(this) & 0xF) != 0) nlerror("Vector alignment error"); }
 	//@}
 
 	/// @name Base Maths.
@@ -181,6 +181,14 @@ public:
 		return *this;
 	}
 
+	CVectorPacked &operator -= (const CVector &v)
+	{
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
+		return *this;
+	}
+
 	operator CVector () const
 	{
 		return CVector(x, y, z);
@@ -189,6 +197,16 @@ public:
 	void serial(IStream &f)
 	{
 		f.serial(x,y,z);
+	}
+
+	CVector	operator+(const CVector &v) const
+	{
+		return CVector(*this) + v;
+	}
+
+	CVector	operator-(const CVector &v) const
+	{
+		return CVector(*this) - v;
 	}
 };
 
@@ -214,8 +232,24 @@ inline CVector blend(const CVector &v0, const CVector &v1, float lambda)
 }
 
 
+
 }
 
+
+namespace std {
+	inline void swap(NLMISC::CVectorPacked &v1, NLMISC::CVector &v2)
+	{
+		NLMISC::CVectorPacked temp = v2;
+		v2 = NLMISC::CVector(v1);
+		v1 = temp;
+	}
+	inline void swap(NLMISC::CVector &v1,  NLMISC::CVectorPacked &v2)
+	{
+		NLMISC::CVectorPacked temp = v1;
+		v1 = NLMISC::CVector(v2);
+		v2 = temp;
+	}
+}
 
 #include "vector_inline.h"
 

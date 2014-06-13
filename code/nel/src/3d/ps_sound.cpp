@@ -148,8 +148,8 @@ void			CPSSound::step(TPSProcessPass pass)
 
 	CPSAttrib<UPSSoundInstance *>::iterator it = _Sounds.begin(),
 												 endIt;
-	CPSAttrib<NLMISC::CVector>::const_iterator posIt = _Owner->getPos().begin();
-	CPSAttrib<NLMISC::CVector>::const_iterator speedIt = _Owner->getSpeed().begin();
+	CPSAttrib<NLMISC::CVectorPacked>::const_iterator posIt = _Owner->getPos().begin();
+	CPSAttrib<NLMISC::CVectorPacked>::const_iterator speedIt = _Owner->getSpeed().begin();
 
 	do
 	{

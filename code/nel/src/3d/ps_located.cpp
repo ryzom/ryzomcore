@@ -503,6 +503,18 @@ bool CPSLocated::hasEmitters(void) const
 }
 
 /// ***************************************************************************************
+void CPSLocated::getLODVect(NLMISC::CVectorPacked &v, float &offset, TPSMatrixMode matrixMode)
+{
+	NL_PS_FUNC(CPSLocated_getLODVect)
+	nlassert(_Owner);
+	CHECK_PS_INTEGRITY
+	CVector temp;
+	_Owner->getLODVect(temp, offset, matrixMode);
+	v = temp;
+	CHECK_PS_INTEGRITY
+}
+
+/// ***************************************************************************************
 void CPSLocated::getLODVect(NLMISC::CVector &v, float &offset, TPSMatrixMode matrixMode)
 {
 	NL_PS_FUNC(CPSLocated_getLODVect)
@@ -1866,7 +1878,7 @@ void CPSLocated::updateCollisions()
 			if (_Time[currCollision->Index] >= 1.f)
 			{
 				// check whether particles died before the collision. If so, just continue (particle has already been inserted in the remove list), and cancel the collision
-				float timeToCollision = currCollision->Dist / _Speed[currCollision->Index].norm();
+				float timeToCollision = currCollision->Dist / CVector(_Speed[currCollision->Index]).norm();
 				if (_Time[currCollision->Index] / _TimeIncrement[currCollision->Index] - timeToCollision * CParticleSystem::RealEllapsedTimeRatio >= 1.f)
 				{
 					// says that collision did not occurs
@@ -2196,12 +2208,12 @@ void CPSLocated::removeOldParticles()
 
 					if (_LifeScheme)
 					{
-						_Pos[*it] -= _Speed[*it] * ((_Time[*it] - 1.f) / _TimeIncrement[*it]) * ellapsedTimeRatio;
+						_Pos[*it] -= CVector(_Speed[*it]) * ((_Time[*it] - 1.f) / _TimeIncrement[*it]) * ellapsedTimeRatio;
 						timeUntilNextSimStep = (_Time[*it] - 1.f) / _TimeIncrement[*it];
 					}
 					else
 					{
-						_Pos[*it] -= _Speed[*it] * ((_Time[*it] - 1.f) * _InitialLife) * ellapsedTimeRatio;
+						_Pos[*it] -= CVector(_Speed[*it]) * ((_Time[*it] - 1.f) * _InitialLife) * ellapsedTimeRatio;
 						timeUntilNextSimStep = (_Time[*it] - 1.f) * _InitialLife;
 					}
 					_Time[*it] = 0.9999f;
@@ -2255,7 +2267,7 @@ void CPSLocated::removeOldParticles()
 					{
 						// move position backward (compute its position at death)
 						timeUntilNextSimStep = ((_Time[*it] - 1.f) / _TimeIncrement[*it]) * ellapsedTimeRatio;
-						_Pos[*it] -= _Speed[*it] * timeUntilNextSimStep;
+						_Pos[*it] -= CVector(_Speed[*it]) * timeUntilNextSimStep;
 
 						// force time to 1 because emitter 'on death' may rely on the date of emitter to compute its attributes
 						_Time[*it] = 0.9999f;
@@ -2283,7 +2295,7 @@ void CPSLocated::removeOldParticles()
 					{
 						// move position backward
 						timeUntilNextSimStep = (_Time[*it] - 1.f) * _InitialLife * ellapsedTimeRatio;
-						_Pos[*it] -= _Speed[*it] * timeUntilNextSimStep;
+						_Pos[*it] -= CVector(_Speed[*it]) * timeUntilNextSimStep;
 						// force time to 1 because emitter 'on death' may rely on the date of emitter to compute its attributes
 						_Time[*it] = 0.9999f;
 					}
@@ -3038,7 +3050,7 @@ void CPSLocated::setZBias(float value)
 }
 
 /// ***************************************************************************************
-void CPSLocated::computeCollisions(uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter)
+void CPSLocated::computeCollisions(uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter)
 {
 	NL_PS_FUNC(CPSLocated_computeCollisions)
 	for(TDtorObserversVect::iterator it = _DtorObserversVect.begin(); it != _DtorObserversVect.end(); ++it)

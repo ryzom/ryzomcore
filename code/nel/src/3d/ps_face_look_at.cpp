@@ -65,7 +65,7 @@ public:
 		do
 		{
 			// tmp unoptimized slow version
-			CVector normedSpeed = (*speedIt).normed();
+			CVector normedSpeed = CVector(*speedIt).normed();
 			float iProj = normedSpeed * I;
 			float kProj = normedSpeed * K;
 			dest->I = iProj * I + kProj * K;

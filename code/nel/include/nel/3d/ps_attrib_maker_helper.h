@@ -1190,10 +1190,10 @@ T  CPSAttribMakerT<T, F>::get(CPSLocated *loc, uint32 index)
 			result=  getInternal(loc->getInvMass()[index]);
 		break;
 		case CPSInputType::attrSpeed:
-			result = getInternal(loc->getSpeed()[index].norm());
+			result = getInternal(NLMISC::CVector(loc->getSpeed()[index]).norm());
 		break;
 		case CPSInputType::attrPosition:
-			result = getInternal(loc->getPos()[index].norm());
+			result = getInternal(NLMISC::CVector(loc->getPos()[index]).norm());
 		break;
 		case CPSInputType::attrUniformRandom:
 		{
@@ -1210,7 +1210,7 @@ T  CPSAttribMakerT<T, F>::get(CPSLocated *loc, uint32 index)
 			static NLMISC::CVector lodVect;
 			float lodOffset;
 			loc->getLODVect(lodVect, lodOffset, loc->getMatrixMode());
-			float r = fabsf(loc->getPos()[index] * lodVect + lodOffset);
+			float r = fabsf(NLMISC::CVector(loc->getPos()[index]) * lodVect + lodOffset);
 			r = this->_NbCycles * r > MaxInputValue ? MaxInputValue : r;
 			if (_Clamp)
 			{
@@ -1224,7 +1224,7 @@ T  CPSAttribMakerT<T, F>::get(CPSLocated *loc, uint32 index)
 			static NLMISC::CVector lodVect;
 			float lodOffset;
 			loc->getLODVect(lodVect, lodOffset, loc->getMatrixMode());
-			float r = loc->getPos()[index] * lodVect + lodOffset;
+			float r = NLMISC::CVector(loc->getPos()[index]) * lodVect + lodOffset;
 			r = this->_NbCycles * (r > MaxInputValue ? MaxInputValue : r * r);
 
 			if (_Clamp)
@@ -1240,7 +1240,7 @@ T  CPSAttribMakerT<T, F>::get(CPSLocated *loc, uint32 index)
 			float lodOffset;
 			loc->getLODVect(lodVect, lodOffset, loc->getMatrixMode());
 
-			float r = loc->getPos()[index] * lodVect + lodOffset;
+			float r = NLMISC::CVector(loc->getPos()[index]) * lodVect + lodOffset;
 			if (r < 0)
 			{
 				result = _F(MaxInputValue);
@@ -1260,7 +1260,7 @@ T  CPSAttribMakerT<T, F>::get(CPSLocated *loc, uint32 index)
 			float lodOffset;
 			loc->getLODVect(lodVect, lodOffset, loc->getMatrixMode());
 
-			float r = loc->getPos()[index] * lodVect + lodOffset;
+			float r = NLMISC::CVector(loc->getPos()[index]) * lodVect + lodOffset;
 			if (r < 0)
 			{
 				result = _F(MaxInputValue);

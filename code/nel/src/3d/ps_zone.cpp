@@ -194,7 +194,7 @@ void CPSZonePlane::deleteElement(uint32 index)
 }
 
 
-void CPSZonePlane::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter)
+void CPSZonePlane::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter)
 {
 	NL_PS_FUNC(CPSZonePlane_computeCollisions)
 	MINI_TIMER(PSStatsZonePlane)
@@ -213,9 +213,9 @@ void CPSZonePlane::computeCollisions(CPSLocated &target, uint firstInstanceIndex
 		NLMISC::CPlane p;
 		p.make(m.mulVector(*normalIt), m * (*planePosIt));
 		// deals with each particle
-		const NLMISC::CVector *itPosBefore = posBefore + firstInstanceIndex;
-		const NLMISC::CVector *itPosBeforeEnd = posBefore + target.getSize();
-		const NLMISC::CVector *itPosAfter = posAfter + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBefore = posBefore + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBeforeEnd = posBefore + target.getSize();
+		const NLMISC::CVectorPacked *itPosAfter = posAfter + firstInstanceIndex;
 		while (itPosBefore != itPosBeforeEnd)
 		{
 			float posSide = p * *itPosBefore;
@@ -235,7 +235,7 @@ void CPSZonePlane::computeCollisions(CPSLocated &target, uint firstInstanceIndex
 				ci.Dist = startEnd.norm();
 				// we translate the particle from an epsilon so that it won't get hooked to the plane
 				ci.NewPos = *itPosBefore  + startEnd + PSCollideEpsilon * p.getNormal();
-				const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
+				const CVector speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 				ci.NewSpeed = _BounceFactor * (speed - 2.0f * (speed * p.getNormal()) * p.getNormal());
 				ci.CollisionZone = this;
 				CPSLocated::_Collisions[itPosBefore - posBefore].update(ci);
@@ -290,7 +290,7 @@ void CPSZonePlane::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 // sphere implementation //
 ///////////////////////////
 
-void CPSZoneSphere::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter)
+void CPSZoneSphere::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter)
 {
 	NL_PS_FUNC(CPSZoneSphere_computeCollisions)
 	MINI_TIMER(PSStatsZoneSphere)
@@ -308,9 +308,9 @@ void CPSZoneSphere::computeCollisions(CPSLocated &target, uint firstInstanceInde
 		const CMatrix &m = CPSLocated::getConversionMatrix(&target, this->_Owner);
 		CVector center = m * *spherePosIt;
 		// deals with each particle
-		const NLMISC::CVector *itPosBefore = posBefore + firstInstanceIndex;
-		const NLMISC::CVector *itPosBeforeEnd = posBefore + target.getSize();
-		const NLMISC::CVector *itPosAfter = posAfter + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBefore = posBefore + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBeforeEnd = posBefore + target.getSize();
+		const NLMISC::CVectorPacked *itPosAfter = posAfter + firstInstanceIndex;
 		while (itPosBefore != itPosBeforeEnd)
 		{
 			// check whether the located is going through the sphere
@@ -346,7 +346,7 @@ void CPSZoneSphere::computeCollisions(CPSLocated &target, uint firstInstanceInde
 						ci.Dist = startEnd.norm();
 						// we translate the particle from an epsilon so that it won't get hooked to the sphere
 						ci.NewPos = pos  + startEnd + PSCollideEpsilon * normal;
-						const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
+						const CVector speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 						ci.NewSpeed = _BounceFactor * (speed - 2.0f * (speed * normal) * normal);
 						ci.CollisionZone = this;
 						CPSLocated::_Collisions[itPosBefore - posBefore].update(ci);
@@ -450,7 +450,7 @@ void CPSZoneSphere::deleteElement(uint32 index)
 ////////////////////////////////
 // CPSZoneDisc implementation //
 ////////////////////////////////
-void CPSZoneDisc::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter)
+void CPSZoneDisc::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter)
 {
 	NL_PS_FUNC(CPSZoneDisc_computeCollisions)
 	MINI_TIMER(PSStatsZoneDisc)
@@ -477,9 +477,9 @@ void CPSZoneDisc::computeCollisions(CPSLocated &target, uint firstInstanceIndex,
 		const float epsilon = 0.5f * PSCollideEpsilon;
 
 		// deals with each particle
-		const NLMISC::CVector *itPosBefore = posBefore + firstInstanceIndex;
-		const NLMISC::CVector *itPosBeforeEnd = posBefore + target.getSize();
-		const NLMISC::CVector *itPosAfter = posAfter + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBefore = posBefore + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBeforeEnd = posBefore + target.getSize();
+		const NLMISC::CVectorPacked *itPosAfter = posAfter + firstInstanceIndex;
 		while (itPosBefore != itPosBeforeEnd)
 		{
 			float posSide = p * *itPosBefore;
@@ -503,7 +503,7 @@ void CPSZoneDisc::computeCollisions(CPSLocated &target, uint firstInstanceIndex,
 				hitRadius2 = (ci.NewPos - center) * (ci.NewPos - center);
 				if (hitRadius2 < radiusIt->R2) // check collision against disc
 				{
-					const CVector &speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
+					const CVector speed = target.getSpeed()[(uint32)(itPosBefore - posBefore)];
 					ci.NewSpeed = _BounceFactor * (speed - 2.0f * (speed * p.getNormal()) * p.getNormal());
 					ci.CollisionZone = this;
 					CPSLocated::_Collisions[itPosBefore - posBefore].update(ci);
@@ -847,7 +847,7 @@ void CPSZoneCylinder::performMotion(TAnimationTime ellapsedTime)
 */
 
 
-void CPSZoneCylinder::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter)
+void CPSZoneCylinder::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter)
 {
 	NL_PS_FUNC(CPSZoneCylinder_computeCollisions)
 	MINI_TIMER(PSStatsZoneCylinder)
@@ -873,9 +873,9 @@ void CPSZoneCylinder::computeCollisions(CPSLocated &target, uint firstInstanceIn
 		CVector destProjectedPos, destTPos;
 		// deals with each particle
 		// deals with each particle
-		const NLMISC::CVector *itPosBefore = posBefore + firstInstanceIndex;
-		const NLMISC::CVector *itPosBeforeEnd = posBefore + target.getSize();
-		const NLMISC::CVector *itPosAfter = posAfter + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBefore = posBefore + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBeforeEnd = posBefore + target.getSize();
+		const NLMISC::CVectorPacked *itPosAfter = posAfter + firstInstanceIndex;
 		while (itPosBefore != itPosBeforeEnd)
 		{
 			const CVector &pos = *itPosBefore;
@@ -1123,7 +1123,7 @@ void CPSZoneCylinder::deleteElement(uint32 index)
 //	implementation of CPSZoneRectangle      //
 //////////////////////////////////////////////
 
-void CPSZoneRectangle::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVector *posBefore, const NLMISC::CVector *posAfter)
+void CPSZoneRectangle::computeCollisions(CPSLocated &target, uint firstInstanceIndex, const NLMISC::CVectorPacked *posBefore, const NLMISC::CVectorPacked *posAfter)
 {
 	NL_PS_FUNC(CPSZoneRectangle_computeCollisions)
 	MINI_TIMER(PSStatsZoneRectangle)
@@ -1149,9 +1149,9 @@ void CPSZoneRectangle::computeCollisions(CPSLocated &target, uint firstInstanceI
 		p.make(X ^ Y, center);
 		// deals with each particle
 		const float epsilon = 0.5f * PSCollideEpsilon;
-		const NLMISC::CVector *itPosBefore = posBefore + firstInstanceIndex;
-		const NLMISC::CVector *itPosBeforeEnd = posBefore + target.getSize();
-		const NLMISC::CVector *itPosAfter = posAfter + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBefore = posBefore + firstInstanceIndex;
+		const NLMISC::CVectorPacked *itPosBeforeEnd = posBefore + target.getSize();
+		const NLMISC::CVectorPacked *itPosAfter = posAfter + firstInstanceIndex;
 		while (itPosBefore != itPosBeforeEnd)
 		{
 			float posSide = p * *itPosBefore;

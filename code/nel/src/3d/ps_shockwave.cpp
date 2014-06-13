@@ -160,10 +160,10 @@ public:
 						radVect = *ptCurrSize * (CPSUtil::getCos((sint32) currAngle) * ptCurrBasis->X + CPSUtil::getSin((sint32) currAngle) * ptCurrBasis->Y);
 						innerVect = radiusRatio * radVect;
 						CHECK_VERTEX_BUFFER(*vb, currVertex);
-						* (CVectorPacked *) currVertex = *posIt + radVect;
+						* (CVectorPacked *) currVertex = CVector(*posIt) + radVect;
 						currVertex += vSize;
 						CHECK_VERTEX_BUFFER(*vb, currVertex);
-						* (CVectorPacked *) currVertex = *posIt + innerVect;
+						* (CVectorPacked *) currVertex = CVector(*posIt) + innerVect;
 						currVertex += vSize;
 						currAngle += angleStep;
 					}

@@ -87,9 +87,9 @@ public:
 	  * 'accumulate' set to false.
 	  * NB : works only with integrable forces
 	  */
-	 virtual void integrate(float /* date */, CPSLocated * /* src */, uint32 /* startIndex */, uint32 /* numObjects */, NLMISC::CVector * /* destPos */ = NULL, NLMISC::CVector * /* destSpeed */ = NULL,
+	 virtual void integrate(float /* date */, CPSLocated * /* src */, uint32 /* startIndex */, uint32 /* numObjects */, NLMISC::CVectorPacked * /* destPos */ = NULL, NLMISC::CVectorPacked * /* destSpeed */ = NULL,
 							bool /* accumulate */ = false,
-							uint /* posStride */ = sizeof(NLMISC::CVector), uint /* speedStride */ = sizeof(NLMISC::CVector)
+							uint /* posStride */ = sizeof(NLMISC::CVectorPacked), uint /* speedStride */ = sizeof(NLMISC::CVectorPacked)
 							) const
 	 {
 		 nlassert(0); // not an integrable force
@@ -325,7 +325,10 @@ template <class T> void CIsotropicForceT<T>::computeForces(CPSLocated &target)
 
 		for (; speedIt != endSpeedIt; ++speedIt, ++posIt, ++invMassIt)
 		{
-			_F(*posIt, *speedIt, *invMassIt);
+			const CVector posv = *posIt;
+			CVector speedv = *speedIt;
+			_F(posv, speedv, *invMassIt);
+			*speedIt = speedv;
 		}
 	}
 }
@@ -770,7 +773,7 @@ protected:
 	virtual CPSLocated *getForceIntensityOwner(void) { return _Owner; }
 
 	// the normal of the vortex
-	CPSAttrib<NLMISC::CVector> _Normal;
+	CPSAttrib<NLMISC::CVectorPacked> _Normal;
 	// radius of the vortex
 	TPSAttribFloat _Radius;
 
