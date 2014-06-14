@@ -168,7 +168,10 @@ namespace GUIEditor
 	void NelGUIWidget::hide()
 	{
 		if( timerID != 0 )
+		{
 			killTimer( timerID );
+			timerID = 0;
+		}
 	}
 
 	QWidget* NelGUIWidget::getViewPort()
