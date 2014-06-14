@@ -18,21 +18,23 @@
 #ifndef NELGUI_WIDGET_H
 #define NELGUI_WIDGET_H
 
-#include <QWidget>
+#include <QObject>
 #include "project_files.h"
+
+class QWidget;
 
 namespace GUIEditor
 {
 	class CEditorSelectionWatcher;
 	class Nel3DWidget;
 
-	/// Qt viewport for the Nel GUI library
-	class NelGUIWidget : public QWidget
+	/// Qt viewport controller for the Nel GUI library
+	class NelGUICtrl : public QObject
 	{
 		Q_OBJECT
 	public:
-		NelGUIWidget( QWidget *parent = NULL );
-		~NelGUIWidget();
+		NelGUICtrl( QObject *parent = NULL );
+		~NelGUICtrl();
 
 		void init();
 		bool parse( SProjectFiles &files );
@@ -49,7 +51,6 @@ Q_SIGNALS:
 		void guiLoadComplete();
 
 	protected:
-		void paintEvent( QPaintEvent *evnt );
 		void timerEvent( QTimerEvent *evnt );
 
 	private:

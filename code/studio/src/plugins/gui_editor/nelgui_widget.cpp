@@ -35,8 +35,8 @@ namespace GUIEditor
 {
 	std::set< std::string > hwCursors;
 
-	NelGUIWidget::NelGUIWidget( QWidget *parent ) :
-	QWidget( parent )
+	NelGUICtrl::NelGUICtrl( QObject *parent ) :
+	QObject( parent )
 	{
 		timerID = 0;
 		guiLoaded = false;
@@ -44,7 +44,7 @@ namespace GUIEditor
 		w = new Nel3DWidget();
 	}
 
-	NelGUIWidget::~NelGUIWidget()
+	NelGUICtrl::~NelGUICtrl()
 	{
 		guiLoaded = false;
 		if( timerID != 0 )
@@ -57,7 +57,7 @@ namespace GUIEditor
 		w = NULL;
 	}
 
-	void NelGUIWidget::init()
+	void NelGUICtrl::init()
 	{
 		NLMISC::CI18N::setNoResolution( true );
 		NLMISC::CPath::remapExtension( "dds", "tga", true );
@@ -81,7 +81,7 @@ namespace GUIEditor
 		watcher = new CEditorSelectionWatcher();
 	}
 
-	bool NelGUIWidget::parse( SProjectFiles &files )
+	bool NelGUICtrl::parse( SProjectFiles &files )
 	{
 		reset();
 		IParser *parser = CWidgetManager::getInstance()->getParser();
@@ -120,7 +120,7 @@ namespace GUIEditor
 		return true;
 	}
 
-	void NelGUIWidget::reset()
+	void NelGUICtrl::reset()
 	{
 		guiLoaded = false;
 		if( timerID != 0 )
@@ -133,7 +133,7 @@ namespace GUIEditor
 		w->clear();
 	}
 
-	void NelGUIWidget::draw()
+	void NelGUICtrl::draw()
 	{
 		w->getDriver()->clearBuffers( NLMISC::CRGBA::Black );
 		CWidgetManager::getInstance()->checkCoords();
@@ -141,13 +141,7 @@ namespace GUIEditor
 		w->getDriver()->swapBuffers();
 	}
 
-	void NelGUIWidget::paintEvent( QPaintEvent *evnt )
-	{
-		if( !guiLoaded )
-			w->clear();
-	}
-
-	void NelGUIWidget::timerEvent( QTimerEvent *evnt )
+	void NelGUICtrl::timerEvent( QTimerEvent *evnt )
 	{
 		if( evnt->timerId() == timerID )
 		{
@@ -159,13 +153,13 @@ namespace GUIEditor
 		}
 	}
 
-	void NelGUIWidget::show()
+	void NelGUICtrl::show()
 	{
 		if( timerID == 0 )
 			timerID = startTimer( 200 );
 	}
 
-	void NelGUIWidget::hide()
+	void NelGUICtrl::hide()
 	{
 		if( timerID != 0 )
 		{
@@ -174,7 +168,7 @@ namespace GUIEditor
 		}
 	}
 
-	QWidget* NelGUIWidget::getViewPort()
+	QWidget* NelGUICtrl::getViewPort()
 	{
 		return w;
 	}

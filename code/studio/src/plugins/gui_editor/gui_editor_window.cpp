@@ -65,8 +65,8 @@ namespace GUIEditor
 		projectWindow = new ProjectWindow;
 		addWidgetWidget = new AddWidgetWidget;
 		connect( projectWindow, SIGNAL( projectFilesChanged() ), this, SLOT( onProjectFilesChanged() ) );
-		viewPort      = new NelGUIWidget;
-		setCentralWidget( viewPort->getViewPort() );
+		GUICtrl      = new NelGUICtrl();
+		setCentralWidget( GUICtrl->getViewPort() );
 
 		widgetInfoTree = new CWidgetInfoTree;
 
@@ -97,9 +97,9 @@ namespace GUIEditor
 		dock->setWidget( propBrowser );
 		addDockWidget( Qt::RightDockWidgetArea, dock );
 
-		viewPort->init();
+		GUICtrl->init();
 
-		connect( viewPort, SIGNAL( guiLoadComplete() ), this, SLOT( onGUILoaded() ) );
+		connect( GUICtrl, SIGNAL( guiLoadComplete() ), this, SLOT( onGUILoaded() ) );
 		connect( widgetProps, SIGNAL( treeChanged() ), this, SLOT( onTreeChanged() ) );
 		connect(
 			addWidgetWidget,
@@ -130,8 +130,8 @@ namespace GUIEditor
 		delete projectWindow;
 		projectWindow = NULL;
 
-		delete viewPort;
-		viewPort = NULL;
+		delete GUICtrl;
+		GUICtrl = NULL;
 
 		delete addWidgetWidget;
 		addWidgetWidget = NULL;
@@ -181,7 +181,7 @@ namespace GUIEditor
 		currentProject = projectFiles.projectName.c_str();
 		currentProjectFile = fileName;
 		projectWindow->setupFiles( projectFiles );
-		if( viewPort->parse( projectFiles ) )
+		if( GUICtrl->parse( projectFiles ) )
 		{
 			hierarchyView->buildHierarchy( projectFiles.masterGroup );
 		}
@@ -282,14 +282,14 @@ namespace GUIEditor
 			return false;
 
 
-		CEditorSelectionWatcher *w = viewPort->getWatcher();
+		CEditorSelectionWatcher *w = GUICtrl->getWatcher();
 		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
 		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
 
 		projectFiles.clearAll();
 		projectWindow->clear();
 		hierarchyView->clearHierarchy();
-		viewPort->reset();
+		GUICtrl->reset();
 		browserCtrl.clear();
 		linkList->clear();
 		procList->clear();
@@ -305,7 +305,7 @@ namespace GUIEditor
 		setCursor( Qt::WaitCursor );
 
 		projectWindow->updateFiles( projectFiles );
-		if( !viewPort->parse( projectFiles ) )
+		if( !GUICtrl->parse( projectFiles ) )
 		{
 			QMessageBox::critical( this,
 				tr( "Error parsing GUI XML files" ),
@@ -321,7 +321,7 @@ namespace GUIEditor
 		procList->onGUILoaded();
 		linkList->onGUILoaded();
 
-		CEditorSelectionWatcher *w = viewPort->getWatcher();
+		CEditorSelectionWatcher *w = GUICtrl->getWatcher();
 		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
 		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
 	}
@@ -345,13 +345,13 @@ namespace GUIEditor
 	void GUIEditorWindow::hideEvent( QHideEvent *evnt )
 	{
 		QWidget::hideEvent( evnt );
-		viewPort->hide();
+		GUICtrl->hide();
 	}
 
 	void GUIEditorWindow::showEvent( QShowEvent *evnt )
 	{
 		QWidget::showEvent( evnt );
-		viewPort->show();
+		GUICtrl->show();
 	}
 
 	void GUIEditorWindow::createMenus()

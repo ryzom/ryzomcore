@@ -36,7 +36,7 @@ namespace GUIEditor
 	class LinkList;
 	class ProcList;
 	class ProjectWindow;
-	class NelGUIWidget;
+	class NelGUICtrl;
 	class CWidgetInfoTree;
 	class CEditorMessageProcessor;
 	class AddWidgetWidget;
@@ -87,7 +87,7 @@ private:
 		LinkList *linkList;
 		ProcList *procList;
 		ProjectWindow *projectWindow;
-		NelGUIWidget *viewPort;
+		NelGUICtrl *GUICtrl;
 		CWidgetInfoTree *widgetInfoTree;
 		CEditorMessageProcessor *messageProcessor;
 		AddWidgetWidget *addWidgetWidget;
