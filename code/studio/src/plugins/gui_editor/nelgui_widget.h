@@ -42,15 +42,15 @@ namespace GUIEditor
 
 		QWidget* getViewPort();
 
+		void show();
+		void hide();
+
 Q_SIGNALS:
 		void guiLoadComplete();
 
 	protected:
 		void paintEvent( QPaintEvent *evnt );
 		void timerEvent( QTimerEvent *evnt );
-		void showEvent( QShowEvent *evnt );
-		void hideEvent( QHideEvent *evnt );
-
 
 	private:
 		int timerID;

@@ -340,6 +340,20 @@ namespace GUIEditor
 		addWidgetWidget->setupWidgetInfo( widgetInfoTree );
 	}
 
+
+
+	void GUIEditorWindow::hideEvent( QHideEvent *evnt )
+	{
+		QWidget::hideEvent( evnt );
+		viewPort->hide();
+	}
+
+	void GUIEditorWindow::showEvent( QShowEvent *evnt )
+	{
+		QWidget::showEvent( evnt );
+		viewPort->show();
+	}
+
 	void GUIEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();

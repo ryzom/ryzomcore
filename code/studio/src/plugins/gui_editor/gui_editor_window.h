@@ -66,6 +66,10 @@ private Q_SLOTS:
 		void onAddWidgetClicked();
 		void onTreeChanged();
 
+protected:
+		void hideEvent( QHideEvent *evnt );
+		void showEvent( QShowEvent *evnt );
+
 private:
 		void createMenus();
 		void removeMenus();

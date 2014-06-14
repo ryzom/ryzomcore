@@ -159,13 +159,13 @@ namespace GUIEditor
 		}
 	}
 
-	void NelGUIWidget::showEvent( QShowEvent *evnt )
+	void NelGUIWidget::show()
 	{
 		if( timerID == 0 )
 			timerID = startTimer( 200 );
 	}
 
-	void NelGUIWidget::hideEvent( QHideEvent *evnt )
+	void NelGUIWidget::hide()
 	{
 		if( timerID != 0 )
 			killTimer( timerID );
