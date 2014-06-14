@@ -25,7 +25,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	property_browser_ctrl.h
 	project_window.h
 	nel3d_widget.h
-	nelgui_widget.h
+	nelgui_ctrl.h
 	new_property_widget.h
 	new_widget_widget.h
 	add_widget_widget.h

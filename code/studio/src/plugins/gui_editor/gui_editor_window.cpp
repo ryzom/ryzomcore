@@ -40,7 +40,7 @@
 #include "project_file_parser.h"
 #include "project_file_serializer.h"
 #include "project_window.h"
-#include "nelgui_widget.h"
+#include "nelgui_ctrl.h"
 #include "editor_selection_watcher.h"
 #include "editor_message_processor.h"
 #include "add_widget_widget.h"

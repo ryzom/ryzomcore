@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "nelgui_widget.h"
+#include "nelgui_ctrl.h"
 #include "nel/misc/path.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/interface_group.h"
