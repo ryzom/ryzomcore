@@ -18,15 +18,16 @@
 #ifndef NELGUI_WIDGET_H
 #define NELGUI_WIDGET_H
 
-#include "nel3d_widget.h"
+#include <QWidget>
 #include "project_files.h"
 
 namespace GUIEditor
 {
 	class CEditorSelectionWatcher;
+	class Nel3DWidget;
 
 	/// Qt viewport for the Nel GUI library
-	class NelGUIWidget : public Nel3DWidget
+	class NelGUIWidget : public QWidget
 	{
 		Q_OBJECT
 	public:
@@ -38,6 +39,8 @@ namespace GUIEditor
 		void draw();
 		void reset();
 		CEditorSelectionWatcher* getWatcher(){ return watcher; }
+
+		QWidget* getViewPort();
 
 Q_SIGNALS:
 		void guiLoadComplete();
@@ -53,6 +56,9 @@ Q_SIGNALS:
 		int timerID;
 		bool guiLoaded;
 		CEditorSelectionWatcher *watcher;
+
+
+		Nel3DWidget *w;		
 	};
 }
 

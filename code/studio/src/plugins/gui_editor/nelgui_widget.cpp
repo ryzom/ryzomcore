@@ -29,16 +29,19 @@
 #include <QTimerEvent>
 #include "editor_selection_watcher.h"
 
+#include "nel3d_widget.h"
+
 namespace GUIEditor
 {
 	std::set< std::string > hwCursors;
 
 	NelGUIWidget::NelGUIWidget( QWidget *parent ) :
-	Nel3DWidget( parent )
+	QWidget( parent )
 	{
 		timerID = 0;
 		guiLoaded = false;
 		watcher = NULL;
+		w = new Nel3DWidget();
 	}
 
 	NelGUIWidget::~NelGUIWidget()
@@ -49,7 +52,9 @@ namespace GUIEditor
 
 		NLGUI::CViewRenderer::release();
 		NLMISC::CI18N::setNoResolution( false );
-		
+
+		delete w;
+		w = NULL;
 	}
 
 	void NelGUIWidget::init()
@@ -59,15 +64,15 @@ namespace GUIEditor
 		NLMISC::CPath::remapExtension( "dds", "png", true );
 		NLMISC::CPath::remapExtension( "png", "tga", true );
 
-		Nel3DWidget::init();
-		createTextContext( "Ryzom.ttf" );
+		w->init();
+		w->createTextContext( "Ryzom.ttf" );
 
 		NLGUI::CAHManager::setEditorMode( true );
 		NLGUI::CLuaManager::setEditorMode( true );
 		NLGUI::CInterfaceElement::setEditorMode( true );
 
-		NLGUI::CViewRenderer::setDriver( getDriver() );
-		NLGUI::CViewRenderer::setTextContext( getTextContext() );
+		NLGUI::CViewRenderer::setDriver( w->getDriver() );
+		NLGUI::CViewRenderer::setTextContext( w->getTextContext() );
 		NLGUI::CViewRenderer::hwCursors = &hwCursors;
 		NLGUI::CViewRenderer::getInstance()->init();
 
@@ -125,21 +130,21 @@ namespace GUIEditor
 		CWidgetManager::getInstance()->reset();
 		CWidgetManager::getInstance()->getParser()->removeAll();
 		CViewRenderer::getInstance()->reset();
-		clear();
+		w->clear();
 	}
 
 	void NelGUIWidget::draw()
 	{
-		getDriver()->clearBuffers( NLMISC::CRGBA::Black );
+		w->getDriver()->clearBuffers( NLMISC::CRGBA::Black );
 		CWidgetManager::getInstance()->checkCoords();
 		CWidgetManager::getInstance()->drawViews( 0 );
-		getDriver()->swapBuffers();
+		w->getDriver()->swapBuffers();
 	}
 
 	void NelGUIWidget::paintEvent( QPaintEvent *evnt )
 	{
 		if( !guiLoaded )
-			clear();
+			w->clear();
 	}
 
 	void NelGUIWidget::timerEvent( QTimerEvent *evnt )
@@ -148,7 +153,7 @@ namespace GUIEditor
 		{
 			if( guiLoaded )
 			{
-				getDriver()->EventServer.pump();
+				w->getDriver()->EventServer.pump();
 				draw();
 			}
 		}
@@ -164,6 +169,11 @@ namespace GUIEditor
 	{
 		if( timerID != 0 )
 			killTimer( timerID );
+	}
+
+	QWidget* NelGUIWidget::getViewPort()
+	{
+		return w;
 	}
 }
 

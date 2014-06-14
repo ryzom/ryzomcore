@@ -66,7 +66,7 @@ namespace GUIEditor
 		addWidgetWidget = new AddWidgetWidget;
 		connect( projectWindow, SIGNAL( projectFilesChanged() ), this, SLOT( onProjectFilesChanged() ) );
 		viewPort      = new NelGUIWidget;
-		setCentralWidget( viewPort );
+		setCentralWidget( viewPort->getViewPort() );
 
 		widgetInfoTree = new CWidgetInfoTree;
 
