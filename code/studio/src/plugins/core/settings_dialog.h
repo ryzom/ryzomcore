@@ -19,7 +19,7 @@
 #ifndef SETTINGS_DIALOG_H
 #define SETTINGS_DIALOG_H
 
-#include "ui_settings_dialog.h"
+#include "../core/ui_settings_dialog.h"
 
 // Qt includes
 #include <QtCore/QList>

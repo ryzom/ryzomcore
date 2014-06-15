@@ -17,7 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
-#include "settings_dialog.h"
+#include "../core/settings_dialog.h"
 #include "ioptions_page.h"
 
 // Qt includes
