@@ -41,6 +41,8 @@ namespace GUIEditor
 		// so that we can render the widget normally ourselves, without the image
 		// disappearing when a widget is resized or shown on top of us
 		setAttribute( Qt::WA_PaintOnScreen, true );
+		setAttribute( Qt::WA_OpaquePaintEvent, true );
+		setAttribute( Qt::WA_NoSystemBackground, true );
 	}
 
 	Nel3DWidget::~Nel3DWidget()
