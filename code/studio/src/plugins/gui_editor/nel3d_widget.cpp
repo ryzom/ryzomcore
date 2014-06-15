@@ -27,152 +27,145 @@
 #include <Windows.h>
 #endif
 
-
-
-namespace GUIEditor
+Nel3DWidget::Nel3DWidget( QWidget *parent ) :
+QWidget( parent )
 {
-	Nel3DWidget::Nel3DWidget( QWidget *parent ) :
-	QWidget( parent )
+	driver = NULL;
+	textContext = NULL;
+
+	// Need to set this attribute with a NULL paintengine returned to Qt
+	// so that we can render the widget normally ourselves, without the image
+	// disappearing when a widget is resized or shown on top of us
+	setAttribute( Qt::WA_PaintOnScreen, true );
+	setAttribute( Qt::WA_OpaquePaintEvent, true );
+	setAttribute( Qt::WA_NoSystemBackground, true );
+}
+
+Nel3DWidget::~Nel3DWidget()
+{
+	if( driver != NULL )
 	{
-		driver = NULL;
-		textContext = NULL;
-
-		// Need to set this attribute with a NULL paintengine returned to Qt
-		// so that we can render the widget normally ourselves, without the image
-		// disappearing when a widget is resized or shown on top of us
-		setAttribute( Qt::WA_PaintOnScreen, true );
-		setAttribute( Qt::WA_OpaquePaintEvent, true );
-		setAttribute( Qt::WA_NoSystemBackground, true );
-	}
-
-	Nel3DWidget::~Nel3DWidget()
-	{
-		if( driver != NULL )
-		{
-			if( textContext != NULL )
-			{
-				driver->deleteTextContext( textContext );
-				textContext = NULL;
-			}
-
-			driver->release();
-			delete driver;
-			driver = NULL;
-		}
-	}
-
-	void Nel3DWidget::init()
-	{
-		nlassert( driver == NULL );
-
-		driver = NL3D::UDriver::createDriver( 0, false, 0 );
-		driver->setMatrixMode2D11();
-		driver->setDisplay( winId(), NL3D::UDriver::CMode( width(), height(), 32, true ) );
-	}
-
-	void Nel3DWidget::createTextContext( std::string fontFile )
-	{
-		if( driver == NULL )
-			return;
-		
-		std::string font;
-
-		try
-		{
-			font = NLMISC::CPath::lookup( fontFile );
-		}
-		catch( ... )
-		{
-			nlinfo( "Font %s cannot be found, cannot create textcontext!", fontFile.c_str() );
-			exit( EXIT_FAILURE );
-		}
-
 		if( textContext != NULL )
 		{
 			driver->deleteTextContext( textContext );
 			textContext = NULL;
 		}
 
-		textContext = driver->createTextContext( font );
+		driver->release();
+		delete driver;
+		driver = NULL;
 	}
+}
 
-	void Nel3DWidget::clear()
+void Nel3DWidget::init()
+{
+	nlassert( driver == NULL );
+
+	driver = NL3D::UDriver::createDriver( 0, false, 0 );
+	driver->setMatrixMode2D11();
+	driver->setDisplay( winId(), NL3D::UDriver::CMode( width(), height(), 32, true ) );
+}
+
+void Nel3DWidget::createTextContext( std::string fontFile )
+{
+	if( driver == NULL )
+		return;
+		
+	std::string font;
+
+	try
 	{
-		if( driver == NULL )
-			return;
-		driver->clearBuffers( NLMISC::CRGBA::Black );
-		driver->swapBuffers();
+		font = NLMISC::CPath::lookup( fontFile );
 	}
-
-	void Nel3DWidget::showEvent( QShowEvent *evnt )
+	catch( ... )
 	{
-		QWidget::showEvent( evnt );
-
-		if( driver != NULL )
-			driver->activate();
+		nlinfo( "Font %s cannot be found, cannot create textcontext!", fontFile.c_str() );
+		exit( EXIT_FAILURE );
 	}
+
+	if( textContext != NULL )
+	{
+		driver->deleteTextContext( textContext );
+		textContext = NULL;
+	}
+
+	textContext = driver->createTextContext( font );
+}
+
+void Nel3DWidget::clear()
+{
+	if( driver == NULL )
+		return;
+	driver->clearBuffers( NLMISC::CRGBA::Black );
+	driver->swapBuffers();
+}
+
+void Nel3DWidget::showEvent( QShowEvent *evnt )
+{
+	QWidget::showEvent( evnt );
+
+	if( driver != NULL )
+		driver->activate();
+}
 
 #if defined ( NL_OS_WINDOWS )
 
-	typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
+typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 
-	bool Nel3DWidget::winEvent( MSG *message, long *result )
+bool Nel3DWidget::winEvent( MSG *message, long *result )
+{
+	if( driver != NULL ) 
 	{
-		if( driver != NULL ) 
+		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
+		if( iDriver != NULL )
 		{
-			NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-			if( iDriver != NULL )
-			{
-				winProc proc = (winProc)iDriver->getWindowProc();
-				return proc( iDriver, message->hwnd, message->message, message->wParam, message->lParam );
-			}
+			winProc proc = (winProc)iDriver->getWindowProc();
+			return proc( iDriver, message->hwnd, message->message, message->wParam, message->lParam );
 		}
-
-		return false;
 	}
+
+	return false;
+}
 
 #elif defined( NL_OS_MAC )
 
-	typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
+typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
 
-	bool Nel3DWidget::macEvent( EventHandlerCallRef caller, EventRef event )
+bool Nel3DWidget::macEvent( EventHandlerCallRef caller, EventRef event )
+{
+	if( caller )
+		nlerror( "You are using QtCarbon! Only QtCocoa supported, please upgrade Qt" );
+
+	if( driver != NULL )
 	{
-		if( caller )
-			nlerror( "You are using QtCarbon! Only QtCocoa supported, please upgrade Qt" );
-
-		if( driver != NULL )
+		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
+		if( iDriver != NULL )
 		{
-			NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-			if( iDriver != NULL )
-			{
-				cocoaProc proc = ( cocoaProc )iDriver->getWindowProc();
-				return proc( iDriver, event );
-			}
+			cocoaProc proc = ( cocoaProc )iDriver->getWindowProc();
+			return proc( iDriver, event );
 		}
-
-		return false;
 	}
+
+	return false;
+}
 
 #elif defined( NL_OS_UNIX )
 
-	typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
+typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
 
-	bool Nel3DWidget::x11Event( XEvent *event )
+bool Nel3DWidget::x11Event( XEvent *event )
+{
+	if( driver != NULL )
 	{
+		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
 		if( driver != NULL )
 		{
-			NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-			if( driver != NULL )
-			{
-				x11Proc proc = ( x11Proc )iDriver->getWindowProc();
-				return proc( iDriver, event );
-			}
+			x11Proc proc = ( x11Proc )iDriver->getWindowProc();
+			return proc( iDriver, event );
 		}
-
-		return false;
 	}
-#endif 
 
+	return false;
 }
-
+#endif 
 

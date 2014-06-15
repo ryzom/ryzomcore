@@ -22,6 +22,7 @@
 #include "project_files.h"
 
 class QWidget;
+class Nel3DWidget;
 
 namespace NLGUI
 {
@@ -31,7 +32,6 @@ namespace NLGUI
 namespace GUIEditor
 {
 	class CEditorSelectionWatcher;
-	class Nel3DWidget;
 
 	/// Qt viewport controller for the Nel GUI library
 	class NelGUICtrl : public QObject

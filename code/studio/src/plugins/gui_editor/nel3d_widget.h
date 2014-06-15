@@ -28,48 +28,46 @@ namespace NL3D
 	class UTextContext;
 }
 
-namespace GUIEditor
+/// Nel 3D interface to Qt
+class Nel3DWidget : public QWidget
 {
-	/// Nel 3D interface to Qt
-	class Nel3DWidget : public QWidget
-	{
-		Q_OBJECT
-	public:
-		Nel3DWidget( QWidget *parent = NULL );
-		virtual ~Nel3DWidget();
+	Q_OBJECT
+public:
+	Nel3DWidget( QWidget *parent = NULL );
+	virtual ~Nel3DWidget();
 
-		virtual void init();
-		void createTextContext( std::string fontFile );
+	void init();
+	void createTextContext( std::string fontFile );
 
-		NL3D::UDriver* getDriver() const{ return driver; }
-		NL3D::UTextContext* getTextContext() const{ return textContext; }
+	NL3D::UDriver* getDriver() const{ return driver; }
+	NL3D::UTextContext* getTextContext() const{ return textContext; }
 
 
-		// Need to return NULL paintengine to Qt so that we can
-		// render the widget normally ourselves, without the image
-		// disappearing when a widget is resized or shown on top of us
-		QPaintEngine* paintEngine() const{ return NULL; }
+	// Need to return NULL paintengine to Qt so that we can
+	// render the widget normally ourselves, without the image
+	// disappearing when a widget is resized or shown on top of us
+	QPaintEngine* paintEngine() const{ return NULL; }
 
-	public Q_SLOTS:
-		void clear();
+public Q_SLOTS:
+	void clear();
 
-	protected:
+protected:
 
-		void showEvent( QShowEvent *evnt );
+	void showEvent( QShowEvent *evnt );
 
 #if defined(NL_OS_WINDOWS)
-	virtual bool winEvent( MSG *message, long *result );
+	bool winEvent( MSG *message, long *result );
 #elif defined(NL_OS_MAC)
-	virtual bool macEvent( EventHandlerCallRef caller, EventRef event );
+	bool macEvent( EventHandlerCallRef caller, EventRef event );
 #elif defined(NL_OS_UNIX)
-	virtual bool x11Event( XEvent *event );
+	bool x11Event( XEvent *event );
 #endif
 
-	private:
-		NL3D::UDriver *driver;
-		NL3D::UTextContext *textContext;
-	};
-}
+private:
+	NL3D::UDriver *driver;
+	NL3D::UTextContext *textContext;
+
+};
 
 #endif
 
