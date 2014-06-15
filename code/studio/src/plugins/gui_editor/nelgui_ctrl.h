@@ -23,6 +23,11 @@
 
 class QWidget;
 
+namespace NLGUI
+{
+	class CEventListener;
+}
+
 namespace GUIEditor
 {
 	class CEditorSelectionWatcher;
@@ -58,8 +63,11 @@ Q_SIGNALS:
 		bool guiLoaded;
 		CEditorSelectionWatcher *watcher;
 
+		NLGUI::CEventListener *eventListener;
 
-		Nel3DWidget *w;		
+		Nel3DWidget *w;
+
+		bool listening;
 	};
 }
 

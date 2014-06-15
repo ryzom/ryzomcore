@@ -22,6 +22,7 @@
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/action_handler.h"
 #include "nel/gui/lua_manager.h"
+#include "nel/gui/event_listener.h"
 #include "nel/misc/path.h"
 #include "nel/misc/i18n.h"
 #include <set>
@@ -42,6 +43,8 @@ namespace GUIEditor
 		guiLoaded = false;
 		watcher = NULL;
 		w = new Nel3DWidget();
+		eventListener = new NLGUI::CEventListener();
+		listening = false;
 	}
 
 	NelGUICtrl::~NelGUICtrl()
@@ -157,6 +160,12 @@ namespace GUIEditor
 	{
 		if( timerID == 0 )
 			timerID = startTimer( 200 );
+
+		if( !listening )
+		{
+			eventListener->addToServer( &w->getDriver()->EventServer );
+			listening = true;
+		}
 	}
 
 	void NelGUICtrl::hide()
@@ -165,6 +174,12 @@ namespace GUIEditor
 		{
 			killTimer( timerID );
 			timerID = 0;
+		}
+
+		if( listening )
+		{
+			eventListener->removeFromServer();
+			listening = false;
 		}
 	}
 

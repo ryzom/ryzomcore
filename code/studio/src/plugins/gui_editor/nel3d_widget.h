@@ -22,11 +22,6 @@
 #include "nel/misc/types_nl.h"
 #include <string>
 
-namespace NLGUI
-{
-	class CEventListener;
-}
-
 namespace NL3D
 {
 	class UDriver;
@@ -71,7 +66,6 @@ namespace GUIEditor
 	private:
 		NL3D::UDriver *driver;
 		NL3D::UTextContext *textContext;
-		NLGUI::CEventListener *eventListener;
 	};
 }
 
