@@ -24,7 +24,6 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	action_editor.h
 	property_browser_ctrl.h
 	project_window.h
-	nel3d_widget.h
 	nelgui_ctrl.h
 	new_property_widget.h
 	new_widget_widget.h
@@ -78,6 +77,7 @@ TARGET_LINK_LIBRARIES(
 						${QT_QTOPENGL_LIBRARY}
 						${LIBXML2_LIBRARIES}
 						qt_property_browser
+						nel3dwidget
 						)
 
 NL_DEFAULT_PROPS(studio_plugin_gui_editor "Tools: Studio Plugin: GUI Editor")

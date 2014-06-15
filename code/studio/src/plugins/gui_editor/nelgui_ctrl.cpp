@@ -30,7 +30,7 @@
 #include <QTimerEvent>
 #include "editor_selection_watcher.h"
 
-#include "nel3d_widget.h"
+#include "../../Nel3DWidget/nel3d_widget.h"
 
 namespace GUIEditor
 {
