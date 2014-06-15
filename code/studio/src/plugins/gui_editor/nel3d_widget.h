@@ -55,6 +55,8 @@ namespace GUIEditor
 
 	protected:
 
+		void showEvent( QShowEvent *evnt );
+
 #if defined(NL_OS_WINDOWS)
 	virtual bool winEvent( MSG *message, long *result );
 #elif defined(NL_OS_MAC)

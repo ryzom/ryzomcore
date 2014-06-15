@@ -102,6 +102,13 @@ namespace GUIEditor
 		driver->swapBuffers();
 	}
 
+	void Nel3DWidget::showEvent( QShowEvent *evnt )
+	{
+		QWidget::showEvent( evnt );
+
+		if( driver != NULL )
+			driver->activate();
+	}
 
 #if defined ( NL_OS_WINDOWS )
 

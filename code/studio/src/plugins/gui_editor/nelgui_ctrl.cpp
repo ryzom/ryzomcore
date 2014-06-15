@@ -153,6 +153,10 @@ namespace GUIEditor
 				w->getDriver()->EventServer.pump();
 				draw();
 			}
+			else
+			{
+				w->clear();
+			}
 		}
 	}
 
