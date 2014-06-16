@@ -4,6 +4,11 @@ INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 			${QT_INCLUDES})
 
 FILE(GLOB SRC *.cpp *.h)
+SET( SRC ${SRC}
+			${CMAKE_CURRENT_SOURCE_DIR}/Nel3DWidget/nel3d_widget.h
+			${CMAKE_CURRENT_SOURCE_DIR}/Nel3DWidget/nel3d_widget.cpp
+			)
+			
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
@@ -22,6 +27,7 @@ SET(OVQT_CORE_PLUGIN_HDR
 				search_paths_settings_page.h
 				general_settings_page.h
 				plugin_view_dialog.h
+				${CMAKE_CURRENT_SOURCE_DIR}/Nel3DWidget/nel3d_widget.h
 )
 
 SET(OVQT_CORE_PLUGIN_UIS	settings_dialog.ui
@@ -47,7 +53,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_core SHARED ${SRC} ${OVQT_CORE_PLUGIN_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_CORE_PLUGIN_RC_SRCS} ${OVQT_CORE_PLUGIN_UI_HDRS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_core nelmisc ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_core nelmisc nel3d ${QT_LIBRARIES})
 
 NL_DEFAULT_PROPS(studio_plugin_core "Tools: Studio Plugin: Core")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_core)

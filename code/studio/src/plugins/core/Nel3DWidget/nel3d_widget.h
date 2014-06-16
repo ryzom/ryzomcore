@@ -22,11 +22,7 @@
 #include "nel/misc/types_nl.h"
 #include <string>
 
-#if defined( N3DW_LIB )
-#define N3DW_EXPORT Q_DECL_EXPORT
-#else
-#define N3DW_EXPORT Q_DECL_IMPORT
-#endif
+#include "../core_global.h"
 
 namespace NL3D
 {
@@ -35,7 +31,7 @@ namespace NL3D
 }
 
 /// Nel 3D interface to Qt
-class N3DW_EXPORT Nel3DWidget : public QWidget
+class CORE_EXPORT Nel3DWidget : public QWidget
 {
 	Q_OBJECT
 public:

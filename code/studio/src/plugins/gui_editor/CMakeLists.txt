@@ -77,7 +77,6 @@ TARGET_LINK_LIBRARIES(
 						${QT_QTOPENGL_LIBRARY}
 						${LIBXML2_LIBRARIES}
 						qt_property_browser
-						nel3dwidget
 						)
 
 NL_DEFAULT_PROPS(studio_plugin_gui_editor "Tools: Studio Plugin: GUI Editor")
