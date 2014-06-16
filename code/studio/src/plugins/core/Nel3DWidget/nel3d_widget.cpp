@@ -1,4 +1,4 @@
-// Object Viewer Qt GUI Editor plugin <http://dev.ryzom.com/projects/ryzom/>
+// Ryzom Core MMORPG framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,11 +21,12 @@
 #include "nel/3d/driver_user.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/path.h"
-//#include "nel/misc/event_listener.h"
 
 #ifdef NL_OS_WINDOWS
 #include <Windows.h>
 #endif
+
+#include <QResizeEvent>
 
 Nel3DWidget::Nel3DWidget( QWidget *parent ) :
 QWidget( parent )
@@ -62,7 +63,6 @@ void Nel3DWidget::init()
 	nlassert( driver == NULL );
 
 	driver = NL3D::UDriver::createDriver( 0, false, 0 );
-	driver->setMatrixMode2D11();
 	driver->setDisplay( winId(), NL3D::UDriver::CMode( width(), height(), 32, true ) );
 }
 
@@ -106,6 +106,13 @@ void Nel3DWidget::showEvent( QShowEvent *evnt )
 
 	if( driver != NULL )
 		driver->activate();
+}
+
+void Nel3DWidget::resizeEvent( QResizeEvent *evnt )
+{
+	QWidget::resizeEvent( evnt );
+
+	Q_EMIT( evnt->size().width(), evnt->size().height() );
 }
 
 #if defined ( NL_OS_WINDOWS )

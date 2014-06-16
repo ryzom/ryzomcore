@@ -78,7 +78,7 @@ public:
 	/// @param wnd - handle window.
 	/// @param w - width window.
 	/// @param h - height window.
-	void init(nlWindow wnd, uint16 w, uint16 h);
+	void init( NL3D::UDriver *driver );
 
 	/// Release class.
 	void release();

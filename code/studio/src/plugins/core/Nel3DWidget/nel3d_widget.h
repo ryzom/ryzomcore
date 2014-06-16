@@ -1,4 +1,4 @@
-// Object Viewer Qt GUI Editor plugin <http://dev.ryzom.com/projects/ryzom/>
+// Ryzom Core MMORPG framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -50,12 +50,16 @@ public:
 	// disappearing when a widget is resized or shown on top of us
 	QPaintEngine* paintEngine() const{ return NULL; }
 
+Q_SIGNALS:
+	void resize( int width, int height );
+
 public Q_SLOTS:
 	void clear();
 
 protected:
 
 	void showEvent( QShowEvent *evnt );
+	void resizeEvent( QResizeEvent *evnt );
 
 #if defined(NL_OS_WINDOWS)
 	bool winEvent( MSG *message, long *result );

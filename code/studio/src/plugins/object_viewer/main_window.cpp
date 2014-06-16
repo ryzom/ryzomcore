@@ -77,7 +77,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 	// create NeL viewport
 	_GraphicsViewport = new CGraphicsViewport(this);
-	setCentralWidget(_GraphicsViewport);
+	setCentralWidget(_GraphicsViewport->widget());
 
 	setDockNestingEnabled(true);
 

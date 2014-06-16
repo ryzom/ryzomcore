@@ -19,6 +19,7 @@
 
 #include "stdpch.h"
 #include "graphics_viewport.h"
+#include "../core/Nel3DWidget/nel3d_widget.h"
 
 // STL includes
 
@@ -46,17 +47,18 @@ using namespace NL3D;
 namespace NLQT
 {
 
-CGraphicsViewport::CGraphicsViewport(QWidget *parent)
-	: QNLWidget(parent)
+CGraphicsViewport::CGraphicsViewport(QObject *parent)
+	: QObject(parent)
 {
-	setAttribute(Qt::WA_OpaquePaintEvent);
-	setAttribute(Qt::WA_NoSystemBackground);
-	setAttribute(Qt::WA_PaintOnScreen);
+	w = new Nel3DWidget();
+	connect( w, SIGNAL( resize( int, int ) ), this, SLOT( onResize( int, int ) ) );
 }
 
 CGraphicsViewport::~CGraphicsViewport()
 {
-
+	disconnect( w, SIGNAL( resize( int, int ) ), this, SLOT( onResize( int, int ) ) );
+	delete w;
+	w = NULL;
 }
 
 void CGraphicsViewport::init()
@@ -68,12 +70,13 @@ void CGraphicsViewport::init()
 	makeCurrent();
 #endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
-	Modules::objView().init((nlWindow)winId(), width(), height());
+	w->init();
+	Modules::objView().init( w->getDriver() );
 	Modules::psEdit().init();
 	Modules::veget().init();
 
-	setMouseTracking(true);
-	setFocusPolicy(Qt::StrongFocus);
+	w->setMouseTracking(true);
+	w->setFocusPolicy(Qt::StrongFocus);
 }
 
 void CGraphicsViewport::release()
@@ -101,6 +104,11 @@ QAction *CGraphicsViewport::createSetBackgroundColor(QObject *parent)
 	return action;
 }
 
+QWidget* CGraphicsViewport::widget()
+{
+	return w;
+}
+
 void CGraphicsViewport::saveScreenshot()
 {
 	Modules::objView().saveScreenshot("screenshot", false, true, false);
@@ -115,81 +123,11 @@ void CGraphicsViewport::setBackgroundColor()
 		Modules::objView().setBackgroundColor(NLMISC::CRGBA(color.red(), color.green(), color.blue()));
 }
 
-void CGraphicsViewport::resizeEvent(QResizeEvent *resizeEvent)
+void CGraphicsViewport::onResize( int width, int height )
 {
-	QWidget::resizeEvent(resizeEvent);
 	if (Modules::objView().getDriver())
-		Modules::objView().setSizeViewport(resizeEvent->size().width(), resizeEvent->size().height());
+		Modules::objView().setSizeViewport( width, height );
 }
-
-#if defined(NL_OS_WINDOWS)
-
-typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-bool CGraphicsViewport::winEvent(MSG *message, long *result)
-{
-	if (Modules::objView().getDriver() && Modules::objView().getDriver()->isActive())
-	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver())->getDriver();
-		if (driver)
-		{
-			winProc proc = (winProc)driver->getWindowProc();
-
-			// TODO: shouldn't it return false like the others?
-			// see macEvent() and x11Event() below
-			return proc(driver, message->hwnd, message->message, message->wParam, message->lParam);
-		}
-	}
-
-	return false;
-}
-
-#elif defined(NL_OS_MAC)
-
-typedef bool (*cocoaProc)(NL3D::IDriver *, const void *e);
-
-bool CGraphicsViewport::macEvent(EventHandlerCallRef caller, EventRef event)
-{
-	if(caller)
-		nlerror("You are using QtCarbon! Only QtCocoa supported, please upgrade Qt");
-
-	if (Modules::objView().getDriver() && Modules::objView().getDriver()->isActive())
-	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver())->getDriver();
-		if (driver)
-		{
-			cocoaProc proc = (cocoaProc)driver->getWindowProc();
-			proc(driver, event);
-		}
-	}
-
-	// return false to let Qt handle the event as well,
-	// else the widget would never get focus
-	return false;
-}
-
-#elif defined(NL_OS_UNIX)
-
-typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
-
-bool CGraphicsViewport::x11Event(XEvent *event)
-{
-	if (Modules::objView().getDriver() && Modules::objView().getDriver()->isActive())
-	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver())->getDriver();
-		if (driver)
-		{
-			x11Proc proc = (x11Proc)driver->getWindowProc();
-			proc(driver, event);
-		}
-	}
-
-	// return false to let Qt handle the event as well,
-	// else the widget would never get focus
-	// TODO: test me please, i have no linux at hand (rti)
-	return false;
-}
-#endif
 
 } /* namespace NLQT */
 

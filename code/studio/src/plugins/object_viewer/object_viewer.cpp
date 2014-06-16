@@ -70,19 +70,15 @@ CObjectViewer::~CObjectViewer()
 	saveConfig();
 }
 
-void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
+void CObjectViewer::init( NL3D::UDriver *driver )
 {
 	//H_AUTO2
 	nldebug("CObjectViewert::init");
 
 	// create the driver
 	nlassert(!_Driver);
-
-	_Driver = NL3D::UDriver::createDriver(0, _Direct3D, 0);
+	_Driver = driver;
 	nlassert(_Driver);
-
-	// initialize the window with config file values
-	_Driver->setDisplay(wnd, NL3D::UDriver::CMode(w, h, 32));
 
 	// Create a scene
 	_Scene = _Driver->createScene(false);
@@ -128,8 +124,8 @@ void CObjectViewer::init(nlWindow wnd, uint16 w, uint16 h)
 	NL3D::CBloomEffect::instance().setDensityBloom(uint8(_BloomDensity));
 	NL3D::CBloomEffect::instance().setSquareBloom(_BloomSquare);
 
-	NL3D::CDriverUser *driver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver());
-	_IDriver = driver->getDriver();
+	NL3D::CDriverUser *udriver = dynamic_cast<NL3D::CDriverUser *>(Modules::objView().getDriver());
+	_IDriver = udriver->getDriver();
 
 	NL3D::CSceneUser *scene = dynamic_cast<NL3D::CSceneUser *>(Modules::objView().getScene());
 	_CScene = &scene->getScene();
@@ -158,11 +154,8 @@ void CObjectViewer::release()
 	// delete the light
 	delete _Light;
 
-	// release driver
-	nlassert(_Driver);
-	_Driver->release();
-	delete _Driver;
 	_Driver = 0;
+	_IDriver = NULL;
 }
 
 void CObjectViewer::updateInput()
