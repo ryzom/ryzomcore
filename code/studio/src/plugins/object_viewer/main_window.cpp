@@ -117,7 +117,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 	_statusBarTimer = new QTimer(this);
 	connect(_statusBarTimer, SIGNAL(timeout()), this, SLOT(updateStatusBar()));
 
-	_statusInfo = new QLabel(this);
+	_statusInfo = new QLabel();
 	_statusInfo->hide();
 	Core::ICore::instance()->mainWindow()->statusBar()->addPermanentWidget(_statusInfo);
 }
@@ -136,6 +136,12 @@ CMainWindow::~CMainWindow()
 	settings->sync();
 
 	removeMenus();
+
+	// If the status info widget isn't removed it miraclously crashes the application on shutdown...
+	// Somehow it's deleted while being owned by the status bar, then the status bar also tries to delete is...
+	Core::ICore::instance()->mainWindow()->statusBar()->removeWidget( _statusInfo );
+	delete _statusInfo;
+	_statusInfo = NULL;
 
 	delete _AnimationDialog;
 	delete _AnimationSetDialog;
