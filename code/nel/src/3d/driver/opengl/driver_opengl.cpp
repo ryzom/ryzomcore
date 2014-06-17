@@ -108,7 +108,10 @@ IDriver* createGlDriverInstance ()
 #else
 
 #ifdef NL_OS_WINDOWS
-
+#ifdef NL_COMP_MINGW
+extern "C"
+{
+#endif
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
 	return new CDriverGL;
@@ -118,7 +121,9 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 {
 	return IDriver::InterfaceVersion;
 }
-
+#ifdef NL_COMP_MINGW
+}
+#endif
 #elif defined (NL_OS_UNIX)
 
 extern "C"

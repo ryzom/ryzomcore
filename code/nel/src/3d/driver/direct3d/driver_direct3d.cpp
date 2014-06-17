@@ -1231,7 +1231,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 // ***************************************************************************
 
-bool CDriverD3D::init (uint windowIcon, emptyProc exitFunc)
+bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 {
 	H_AUTO_D3D(CDriver3D_init );
 

@@ -182,7 +182,7 @@ public:
 							IDriver();
 	virtual					~IDriver();
 
-	virtual bool			init(uint windowIcon = 0, emptyProc exitFunc = 0) = 0;
+	virtual bool			init(uintptr_t windowIcon = 0, emptyProc exitFunc = 0) = 0;
 
 	/// Deriver should calls IDriver::release() first, to destroy all driver components (textures, shaders, VBuffers).
 	virtual bool			release();

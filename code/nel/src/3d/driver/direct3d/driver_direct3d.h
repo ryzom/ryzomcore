@@ -839,7 +839,7 @@ public:
 	// ***************************************************************************
 
 	// Mode initialisation, requests
-	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
+	virtual bool			init (uintptr_t windowIcon = 0, emptyProc exitFunc = 0);
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
 	virtual bool			release();
 	virtual bool			setMode(const GfxMode& mode);
