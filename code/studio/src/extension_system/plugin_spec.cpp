@@ -84,6 +84,13 @@ PluginSpec::PluginSpec()
 #else
 #	error "You must define the lib suffix for your platform"
 #endif
+	loader = NULL;
+}
+
+PluginSpec::~PluginSpec()
+{
+	delete loader;
+	loader = NULL;
 }
 
 QString PluginSpec::name() const
@@ -292,6 +299,8 @@ bool PluginSpec::isEnabled() const
 
 bool PluginSpec::loadLibrary()
 {
+	nlassert( loader == NULL );
+
 	if (m_hasError)
 		return false;
 	if (m_state != State::Resolved)
@@ -301,14 +310,16 @@ bool PluginSpec::loadLibrary()
 		return reportError(QCoreApplication::translate("PluginSpec", "Loading the library failed because state != Resolved"));
 	}
 
-	QPluginLoader loader(m_filePath);
-	if (!loader.load())
-		return reportError(loader.errorString());
+	loader = new QPluginLoader( m_filePath );
+	if (!loader->load())
+		return reportError(loader->errorString());
 
-	IPlugin *pluginObject = qobject_cast<IPlugin *>(loader.instance());
+	IPlugin *pluginObject = qobject_cast<IPlugin *>(loader->instance());
 	if (!pluginObject)
 	{
-		loader.unload();
+		loader->unload();
+		delete loader;
+		loader = NULL;
 		return reportError(QCoreApplication::translate("PluginSpec", "Plugin is not valid (does not derive from IPlugin)"));
 	}
 
@@ -412,8 +423,17 @@ void PluginSpec::kill()
 {
 	if (!m_plugin)
 		return;
-	delete m_plugin;
-	m_plugin = 0;
+
+	bool b = loader->unload();
+	if( !b )
+	{
+		nlinfo( "Plugin %s couldn't be unloaded.", this->m_name.toAscii().data() );
+	}
+
+	//delete m_plugin;
+	m_plugin = NULL;
+	delete loader;
+	loader = NULL;
 	m_state = State::Deleted;
 }
 

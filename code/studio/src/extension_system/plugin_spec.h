@@ -25,12 +25,15 @@
 #include <QtCore/QStringList>
 #include <QtCore/QXmlStreamReader>
 
+class QPluginLoader;
+
 namespace ExtensionSystem
 {
 
 class PluginSpec: public IPluginSpec
 {
 public:
+	~PluginSpec();
 	virtual QString name() const;
 	virtual QString version() const;
 	virtual QString vendor() const;
@@ -54,7 +57,7 @@ public:
 
 private:
 	PluginSpec();
-
+	
 	bool setFileName(const QString &fileName);
 	bool setSpecFileName(const QString &specFileName);
 	bool readSpec();
@@ -95,6 +98,8 @@ private:
 	IPlugin *m_plugin;
 	IPluginManager *m_pluginManager;
 	QList<PluginSpec *> m_dependencySpecs;
+
+	QPluginLoader *loader;
 
 	friend class PluginManager;
 };
