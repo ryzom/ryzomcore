@@ -37,7 +37,9 @@
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	include <winbase.h>
 #endif // NL_OS_WINDOWS
