@@ -20,7 +20,9 @@
 #include "nel/misc/common.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	include <io.h>
 #	include <tchar.h>
@@ -37,6 +39,7 @@
 
 using namespace std;
 
+#ifndef NL_COMP_MINGW
 #ifdef NL_OS_WINDOWS
 #	pragma message( " " )
 
@@ -69,6 +72,7 @@ extern "C" long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 
 
 #endif // NL_OS_WINDOWS
+#endif // !NL_COMP_MINGW
 
 
 #ifdef DEBUG_NEW
@@ -1040,7 +1044,7 @@ bool openDoc (const char *document)
     HINSTANCE result = ShellExecuteA(NULL, "open", document, NULL,NULL, SW_SHOWDEFAULT);
 
     // If it failed, get the .htm regkey and lookup the program
-    if ((UINT)result <= HINSTANCE_ERROR)
+    if ((uintptr_t)result <= HINSTANCE_ERROR)
 	{
         if (GetRegKey(HKEY_CLASSES_ROOT, ext.c_str(), key) == ERROR_SUCCESS)
 		{

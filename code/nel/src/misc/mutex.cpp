@@ -44,8 +44,10 @@ using namespace std;
 // these defines are for IsDebuggerPresent(). It'll not compile on windows 95
 // just comment this and the IsDebuggerPresent to compile on windows 95
 #define _WIN32_WINDOWS	0x0410
-#define WINVER			0x0400
-#define NOMINMAX
+#ifndef NL_COMP_MINGW
+#	define WINVER			0x0400
+#	define NOMINMAX
+#endif
 #include <windows.h>
 
 #ifdef DEBUG_NEW

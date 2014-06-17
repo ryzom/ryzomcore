@@ -24,7 +24,9 @@
 #include "nel/misc/debug.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	include <imagehlp.h>
 #	pragma comment(lib, "imagehlp.lib")
@@ -148,7 +150,7 @@ static string getSourceInfo (DWORD_TYPE addr)
 	return str;
 }
 
-static DWORD_TYPE __stdcall GetModuleBase(HANDLE hProcess, DWORD_TYPE dwReturnAddress)
+static uintptr_t __stdcall GetModuleBase(HANDLE hProcess, uintptr_t dwReturnAddress)
 {
 	IMAGEHLP_MODULE moduleInfo;
 
@@ -169,9 +171,15 @@ static DWORD_TYPE __stdcall GetModuleBase(HANDLE hProcess, DWORD_TYPE dwReturnAd
 
 		if (cch && (lstrcmp(szFile, "DBFN")== 0))
 		{
-			 if (!SymLoadModule(hProcess,
-				   NULL, "MN",
-				   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
+			char mn[] = { 'M', 'N', 0x00 };
+#ifdef NL_OS_WIN64
+			if (!SymLoadModule64(
+#else
+			if (!SymLoadModule(
+#endif
+					hProcess,
+					NULL, mn,
+					NULL, (uintptr_t)memoryBasicInfo.AllocationBase, 0))
 				{
 //					DWORD dwError = GetLastError();
 //					nlinfo("Error: %d", dwError);
@@ -179,17 +187,23 @@ static DWORD_TYPE __stdcall GetModuleBase(HANDLE hProcess, DWORD_TYPE dwReturnAd
 		}
 		else
 		{
-		 if (!SymLoadModule(hProcess,
-			   NULL, ((cch) ? szFile : NULL),
-			   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
+#ifdef NL_OS_WIN64
+			if (!SymLoadModule64(
+#else
+			if (!SymLoadModule(
+#endif
+				hProcess,
+				NULL, ((cch) ? szFile : NULL),
+				NULL, (uintptr_t)memoryBasicInfo.AllocationBase, 0))
 			{
 //				DWORD dwError = GetLastError();
 //				nlinfo("Error: %d", dwError);
 			 }
 
+
 		}
 
-		 return (DWORD) memoryBasicInfo.AllocationBase;
+		 return (uintptr_t)memoryBasicInfo.AllocationBase;
 	  }
 //		else
 //			nlinfo("Error is %d", GetLastError());
@@ -250,19 +264,13 @@ static void displayCallStack (CLog *log)
 		return;
 	}
 
-#ifdef NL_OS_WIN64
-	WOW64_CONTEXT context;
-#else
+	// FIXME: Implement this for MinGW
+#ifndef NL_COMP_MINGW
 	CONTEXT context;
-#endif
 	::ZeroMemory (&context, sizeof(context));
 	context.ContextFlags = CONTEXT_FULL;
 
-#ifdef NL_OS_WIN64
-	if (Wow64GetThreadContext (GetCurrentThread(), &context) == FALSE)
-#else
 	if (GetThreadContext (GetCurrentThread(), &context) == FALSE)
-#endif
 	{
 		nlwarning ("DISP: GetThreadContext(%p) failed", GetCurrentThread());
 		return;
@@ -309,6 +317,7 @@ static void displayCallStack (CLog *log)
 
 		log->displayNL ("   %s : %s", srcInfo.c_str(), symInfo.c_str());
 	}
+#endif
 }
 
 #else // NL_OS_WINDOWS

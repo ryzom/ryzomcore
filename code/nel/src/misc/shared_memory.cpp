@@ -20,7 +20,9 @@
 #include "nel/misc/debug.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #else
 #	include <sys/types.h>
