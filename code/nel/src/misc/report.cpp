@@ -159,8 +159,10 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				// if the dtor call order is not good.
 				//exit(EXIT_SUCCESS);
 #ifdef NL_OS_WINDOWS
+#ifndef NL_COMP_MINGW
 				// disable the Windows popup telling that the application aborted and disable the dr watson report.
 				_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
 #endif
 				// quit without calling atexit or static object dtors.
 				abort();
