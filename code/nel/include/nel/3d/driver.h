@@ -1341,7 +1341,7 @@ public:
 	 *	NB: if implementation does not support it, 0 may be returned. OpenGL ones return the Texture ID.
 	 *	NB: unlike isTextureExist(), this method is not thread safe.
 	 */
-	virtual	uint			getTextureHandle(const ITexture&tex) = 0;
+	virtual	uintptr_t		getTextureHandle(const ITexture&tex) = 0;
 
 	// see if the Multiply-Add Tex Env operator is supported (see CMaterial::Mad)
 	virtual	bool			supportMADOperator() const = 0;

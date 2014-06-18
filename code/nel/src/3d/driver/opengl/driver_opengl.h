@@ -632,7 +632,7 @@ public:
 
 	virtual void			swapTextureHandle(ITexture &tex0, ITexture &tex1);
 
-	virtual	uint			getTextureHandle(const ITexture&tex);
+	virtual	uintptr_t		getTextureHandle(const ITexture&tex);
 
 	/// \name Material multipass.
 	/**	NB: setupMaterial() must be called before thoses methods.

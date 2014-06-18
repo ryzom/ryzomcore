@@ -110,6 +110,10 @@ IDriver* createD3DDriverInstance ()
 
 #else
 
+#ifdef NL_COMP_MINGW
+extern "C"
+{
+#endif
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
 	return new CDriverD3D;
@@ -119,7 +123,9 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 {
 	return IDriver::InterfaceVersion;
 }
-
+#ifdef NL_COMP_MINGW
+}
+#endif
 #endif
 
 /*static*/ bool CDriverD3D::_CacheTest[CacheTest_Count] =
@@ -379,7 +385,7 @@ void CDriverD3D::resetRenderVariables()
 	}
 	for (i=0; i<MaxTexture; i++)
 	{
-		if ((uint32)(_TexturePtrStateCache[i].Texture) != 0xcccccccc)
+		if ((uintptr_t)(_TexturePtrStateCache[i].Texture) != 0xcccccccc)
 		{
 			touchRenderVariable (&(_TexturePtrStateCache[i]));
 			// reset texture because it may reference an old render target
@@ -419,7 +425,7 @@ void CDriverD3D::resetRenderVariables()
 
 	for (i=0; i<MaxLight; i++)
 	{
-		if (*(uint32*)(&(_LightCache[i].Light)) != 0xcccccccc)
+		if (*(uintptr_t*)(&(_LightCache[i].Light)) != 0xcccccccc)
 		{
 			_LightCache[i].EnabledTouched = true;
 			touchRenderVariable (&(_LightCache[i]));
@@ -514,7 +520,7 @@ void CDriverD3D::initRenderVariables()
 	for (i=0; i<MaxTexture; i++)
 	{
 		_TexturePtrStateCache[i].StageID = i;
-		*(uint32*)&(_TexturePtrStateCache[i].Texture) = 0xcccccccc;
+		*(uintptr_t*)&(_TexturePtrStateCache[i].Texture) = 0xcccccccc;
 		_TexturePtrStateCache[i].Modified = false;
 	}
 	for (i=0; i<MaxSampler; i++)
@@ -543,7 +549,7 @@ void CDriverD3D::initRenderVariables()
 	for (i=0; i<MaxLight; ++i)
 	{
 		_LightCache[i].LightIndex = uint8(i);
-		*(uint32*)&(_LightCache[i].Light) = 0xcccccccc;
+		*(uintptr_t*)&(_LightCache[i].Light) = 0xcccccccc;
 		_LightCache[i].Modified = false;
 	}
 	_VertexProgramCache.Modified = false;
@@ -1063,7 +1069,7 @@ void CDriverD3D::updateRenderVariablesInternal()
 
 // ***************************************************************************
 
-static void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_D3D(D3DWndProc);
 
@@ -1481,7 +1487,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 				break;
 			}
 		}
-	#endif WITH_PERFHUD
+	#endif /* WITH_PERFHUD */
 	// Create the D3D device
 	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
 	if (result != D3D_OK)
