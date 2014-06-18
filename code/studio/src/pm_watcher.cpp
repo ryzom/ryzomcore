@@ -16,7 +16,7 @@
 
 
 #include "pm_watcher.h"
-#include "extension_system\iplugin_manager.h"
+#include "extension_system/iplugin_manager.h"
 #include "splash_screen.h"
 
 namespace
