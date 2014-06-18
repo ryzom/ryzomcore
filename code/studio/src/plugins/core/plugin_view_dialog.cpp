@@ -156,7 +156,7 @@ void PluginView::onLoadClicked()
 	}
 
 	QApplication::setOverrideCursor( Qt::WaitCursor );
-	bool success = m_pluginManager->loadPlugin( f.toAscii().data() );
+	bool success = m_pluginManager->loadPlugin( f );
 	QApplication::setOverrideCursor( Qt::ArrowCursor );
 
 	if( !success )

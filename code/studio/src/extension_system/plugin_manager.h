@@ -51,8 +51,8 @@ public:
 	virtual QList<IPluginSpec *> plugins() const;
 	QList<PluginSpec *> loadQueue();
 
-	bool loadPluginSpec( const char *plugin );
-	bool loadPlugin( const char *plugin );
+	bool loadPluginSpec( const QString &plugin );
+	bool loadPlugin( const QString &plugin );
 	bool unloadPlugin( ExtensionSystem::IPluginSpec *plugin );
 	void removePlugin( ExtensionSystem::IPluginSpec *plugin );
 

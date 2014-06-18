@@ -114,15 +114,15 @@ void PluginManager::loadPlugins()
 	Q_EMIT pluginsChanged();
 }
 
-bool PluginManager::loadPluginSpec( const char *plugin )
+bool PluginManager::loadPluginSpec( const QString &plugin )
 {
-	nlinfo( "Loading plugin spec %s", plugin );
+	nlinfo( "Loading plugin spec %s", plugin.toUtf8().data() );
 
 	PluginSpec *spec = new PluginSpec;
 	spec->m_pluginManager = this;
 	if( !spec->setSpecFileName( plugin ) )
 	{
-		nlinfo( "Error loading plugin spec %s", plugin );
+		nlinfo( "Error loading plugin spec %s", plugin.toUtf8().data() );
 		return false;
 	}
 
@@ -132,7 +132,7 @@ bool PluginManager::loadPluginSpec( const char *plugin )
 	return true;
 }
 
-bool PluginManager::loadPlugin( const char *plugin )
+bool PluginManager::loadPlugin( const QString &plugin )
 {
 	if( !loadPluginSpec( plugin ) )
 		return false;
@@ -141,7 +141,7 @@ bool PluginManager::loadPlugin( const char *plugin )
 
 	if( !spec->resolveDependencies( m_pluginSpecs ) )
 	{
-		nlinfo( "Error resolving dependencies for plugin spec %s", plugin );
+		nlinfo( "Error resolving dependencies for plugin spec %s", plugin.toUtf8().data() );
 		return false;
 	}
 

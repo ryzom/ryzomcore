@@ -55,7 +55,7 @@ public:
 	virtual void setPluginPaths(const QStringList &paths) = 0;
 	virtual QList<ExtensionSystem::IPluginSpec *> plugins() const = 0;
 
-	virtual bool loadPlugin( const char *plugin ) = 0;
+	virtual bool loadPlugin( const QString &plugin ) = 0;
 	virtual bool unloadPlugin( ExtensionSystem::IPluginSpec *plugin ) = 0;
 
 	// Settings
