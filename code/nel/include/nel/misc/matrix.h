@@ -53,8 +53,8 @@ class	CPlane;
  * \author Nevrax France
  * \date 2000
  */
-NL_ALIGN_SSE2
-class CMatrix
+
+class NL_ALIGN_SSE2 CMatrix
 {
 public:
 	/// Rotation Order.

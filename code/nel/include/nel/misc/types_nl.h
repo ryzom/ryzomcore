@@ -342,7 +342,7 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 // #ifdef NL_ENABLE_FORCE_INLINE
 #	ifdef NL_COMP_VC
 #		define NL_FORCE_INLINE __forceinline
-#	elif NL_COMP_GCC
+#	elif defined(NL_COMP_GCC)
 #		define NL_FORCE_INLINE inline __attribute__((always_inline))
 #	else
 #		define NL_FORCE_INLINE inline
@@ -358,7 +358,10 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #define NL_ALIGN(nb) __attribute__((aligned(nb)))
 #endif
 
-#ifdef NL_COMP_VC
+#ifdef NL_OS_WINDOWS
+#include <stdlib.h>
+#include <intrin.h>
+#include <malloc.h>
 inline void *aligned_malloc(size_t size, size_t alignment) { return _aligned_malloc(size, alignment); }
 inline void aligned_free(void *ptr) { _aligned_free(ptr); }
 #else

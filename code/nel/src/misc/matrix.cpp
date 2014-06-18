@@ -140,6 +140,11 @@ inline void CMatrix::testExpandRot() const
 		self->Scale33= 1;
 	}
 }
+void CMatrix::testExpandRotEx() const
+{
+	testExpandRot();
+}
+
 inline void CMatrix::testExpandProj() const
 {
 	if(hasProj())
@@ -150,6 +155,10 @@ inline void CMatrix::testExpandProj() const
 		self->StateBit|=MAT_VALIDPROJ;
 		self->a41=0; self->a42=0; self->a43=0; self->a44=1;
 	}
+}
+void CMatrix::testExpandProjEx() const
+{
+	testExpandProj();
 }
 
 
