@@ -57,8 +57,8 @@ class	CPlane;
  * \author Nevrax France
  * \date 2000
  */
-NL_ALIGN_SSE2
-class CMatrix
+
+class NL_ALIGN_SSE2 CMatrix
 {
 public:
 	/// Rotation Order.
@@ -362,8 +362,8 @@ public:
 	friend CPlane		operator*(const CPlane &p, const CMatrix &m);
 
 #ifdef NL_HAS_SSE2
-	inline CMatrix44F &getMatrix44F() { testExpandRot(); testExpandProj(); return MF; }
-	inline const CMatrix44F &getMatrix44F() const  { testExpandRot(); testExpandProj(); return MF; }
+	inline CMatrix44F &getMatrix44F() { testExpandRotEx(); testExpandProjEx(); return MF; }
+	inline const CMatrix44F &getMatrix44F() const  { testExpandRotEx(); testExpandProjEx(); return MF; }
 #else
 	inline CMatrix44F &getMatrix44F() { return reinterpret_cast<CMatrix44F &>(*this); }
 	inline const CMatrix44F &getMatrix44F() const  { return reinterpret_cast<const CMatrix44F &>(*this); }
@@ -425,6 +425,9 @@ private:
 
 	void	testExpandRot() const;
 	void	testExpandProj() const;
+
+	void	testExpandRotEx() const;
+	void	testExpandProjEx() const;
 
 	// inline
 	void	setScaleUni(float scale);
