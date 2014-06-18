@@ -51,10 +51,9 @@ public:
 	virtual QList<IPluginSpec *> plugins() const;
 	QList<PluginSpec *> loadQueue();
 
-	bool loadPluginSpec( const QString &plugin );
 	bool loadPlugin( const QString &plugin );
 	bool unloadPlugin( ExtensionSystem::IPluginSpec *plugin );
-	void removePlugin( ExtensionSystem::IPluginSpec *plugin );
+
 
 	// Settings
 	virtual void setSettings(QSettings *settings);
@@ -63,6 +62,8 @@ public:
 	void writeSettings();
 
 private:
+	bool loadPluginSpec( const QString &plugin );
+	void removePlugin( ExtensionSystem::IPluginSpec *plugin );
 	void setPluginState(PluginSpec *spec, int destState);
 	void readPluginPaths();
 	bool loadQueue(PluginSpec *spec, QList<PluginSpec *> &queue, QList<PluginSpec *> &circularityCheckQueue);
