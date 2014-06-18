@@ -26,6 +26,7 @@
 class QtTreePropertyBrowser;
 class QtVariantPropertyManager;
 class QtProperty;
+class QVariant;
 
 namespace NLGUI
 {
@@ -53,7 +54,7 @@ namespace GUIEditor
 		void onSelectionChanged( std::string &id );
 
 	private Q_SLOTS:
-		void onPropertyChanged( QtProperty *prop );
+		void onPropertyChanged( QtProperty *prop, const QVariant &v );
 
 	private:
 		void setupProperties( const std::string &type, const NLGUI::CInterfaceElement *element );

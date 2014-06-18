@@ -22,6 +22,7 @@
 #include "nel/gui/widget_manager.h"
 #include <typeinfo>
 #include "widget_info_tree.h"
+#include <QList>
 
 namespace GUIEditor
 {
@@ -62,8 +63,8 @@ namespace GUIEditor
 	void CPropBrowserCtrl::clear()
 	{
 		browser->clear();
-		disconnect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
-			this, SLOT( onPropertyChanged( QtProperty* ) ) );
+		disconnect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
+			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
 	}
 
 	void CPropBrowserCtrl::onSelectionChanged( std::string &id )
@@ -71,16 +72,16 @@ namespace GUIEditor
 		if( browser == NULL )
 			return;
 
-		disconnect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
-			this, SLOT( onPropertyChanged( QtProperty* ) ) );
+		disconnect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
+			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
 
 		browser->clear();
 
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
 		if( e == NULL )
 		{
-			connect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
-				this, SLOT( onPropertyChanged( QtProperty* ) ) );
+			connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
+				this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
 
 			return;
 		}
@@ -90,11 +91,11 @@ namespace GUIEditor
         std::string n = e->getClassName();
 
         setupProperties( n, e );
-		connect( propertyMgr, SIGNAL( propertyChanged( QtProperty* ) ),
-			this, SLOT( onPropertyChanged( QtProperty* ) ) );
+		connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
+			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
 	}
 
-	void CPropBrowserCtrl::onPropertyChanged( QtProperty *prop )
+	void CPropBrowserCtrl::onPropertyChanged( QtProperty *prop, const QVariant &v )
 	{
 		QString propName = prop->propertyName();
 		QString propValue = prop->valueText();
@@ -105,6 +106,14 @@ namespace GUIEditor
 			QtVariantProperty *p = propertyMgr->variantProperty( prop );
 			if( p != NULL )
 				propValue = p->value().toString();
+		}
+
+		if( v.type() == QVariant::Color )
+		{
+			QColor c = v.value< QColor >();
+			QString val = "%1 %2 %3 %4";
+			val = val.arg( c.red() ).arg( c.green() ).arg( c.blue() ).arg( c.alpha() );
+			propValue = val;
 		}
 
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
@@ -162,6 +171,38 @@ namespace GUIEditor
 			sint32 value = 0;
 			NLMISC::fromString( element->getProperty( prop.propName ), value );
 			v = value;
+		}
+		else
+		if( prop.propType == "color" )
+		{
+			p = propertyMgr->addProperty( QVariant::Color, prop.propName.c_str() );
+
+			std::string s = element->getProperty( prop.propName );
+			// Parse string into a QColor
+			QString qs = s.c_str();
+			QStringList l = qs.split( " " );
+			int r = l[ 0 ].toInt();
+			int g = l[ 1 ].toInt();
+			int b = l[ 2 ].toInt();
+			int a = l[ 3 ].toInt();
+
+			QColor value;
+			value.setRed( r );
+			value.setGreen( g );
+			value.setBlue( b );
+			value.setAlpha( a );
+			v = value;
+			
+
+			// Remove the subproperties
+			QList< QtProperty* > pl = p->subProperties();
+			QListIterator< QtProperty* > itr( pl );
+			while( itr.hasNext() )
+			{
+				delete itr.next();
+			}
+			pl.clear();
+
 		}
 
 		if( p == NULL )

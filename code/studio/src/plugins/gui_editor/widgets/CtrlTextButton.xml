@@ -2,7 +2,6 @@
     <header>
         <name>CtrlTextButton</name>
         <guiname>CCtrlTextButton</guiname>
-        <classname>text_button</classname>
         <ancestor>CtrlBaseButton</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -12,27 +11,27 @@
         <property>
             <name>tx_normal</name>
             <type>string</type>
-            <default>but</default>
+            <default></default>
         </property>
         <property>
             <name>tx_pushed</name>
             <type>string</type>
-            <default>but</default>
+            <default></default>
         </property>
         <property>
             <name>tx_over</name>
             <type>string</type>
-            <default>but_over</default>
+            <default></default>
         </property>
         <property>
             <name>hardtext</name>
             <type>string</type>
-            <default>text</default>
+            <default></default>
         </property>
         <property>
             <name>wmargin</name>
             <type>int</type>
-            <default>20</default>
+            <default>0</default>
         </property>
         <property>
             <name>wmin</name>
@@ -61,32 +60,32 @@
         </property>
         <property>
             <name>text_color_normal</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>text_color_pushed</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>text_color_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>text_shadow_color_normal</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
             <name>text_shadow_color_pushed</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
             <name>text_shadow_color_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
@@ -116,7 +115,7 @@
         </property>
         <property>
             <name>color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
@@ -136,7 +135,7 @@
         </property>
         <property>
             <name>shadow_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
@@ -152,7 +151,7 @@
         <property>
             <name>line_maxw</name>
             <type>int</type>
-            <default>200</default>
+            <default>0</default>
         </property>
         <property>
             <name>multi_line_space</name>
