@@ -22,8 +22,7 @@
 				<input type="button" value="Upload" onclick="uploadPlugin()"></br>
 				<h3 id="status"></h3>
 				 {if isset($smarty.get.result) and $smarty.get.result eq "0"}<p>{$ip_file_nfnd}</p>{/if}
-				 {if isset($smarty.get.result) and $smarty.get.result eq "2"}<p>{$ip_info_nfound}</p>{/if}
-				<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;" name="install_plugin">Install Plugin</button></br>
+				 {if isset($smarty.get.result) and $smarty.get.result eq "2"}<p>{$ip_info_nfound}</p>{/if}	
 				</div>
 				{$ip_message}
 				</center>

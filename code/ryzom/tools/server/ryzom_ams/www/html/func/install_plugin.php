@@ -8,7 +8,9 @@
  */
 function install_plugin() {
     
-    // if logged in
+    $result = array();
+    
+     // if logged in
     if ( WebUsers :: isLoggedIn() ) {
         
         // path of temporary folder for storing files
@@ -30,13 +32,32 @@ function install_plugin() {
              $target_path = "../../ams_lib/plugins/$dir"; //path in which the zip extraction is to be done
              $destination = "../../ams_lib/plugins/";
             
-             // checking for the command to install plugin is given or not
+             // scanning plugin folder if plugin with same name is already exists or not
+            $x = checkForUpdate( $dir, $destination, $fileTmpLoc, $temp_path );
+             if ( $x == '1' )
+             {
+                echo "update found";
+                 exit();
+                 } 
+            else if ( $x == '2' )
+             {
+                echo "Plugin already exists with same name .";
+                 exit();
+                 } 
+            else if ( $x == '3' )
+             {
+                echo "Update info is not present in the update";
+                 exit();
+                 } 
+            
+            
+            // checking for the command to install plugin is given or not
             if ( !isset( $_POST['install_plugin'] ) )
                  {
                 if ( ( $_FILES["file"]["type"] == 'application/zip' ) )
                      {
                     if ( move_uploaded_file( $fileTmpLoc, $temp_path . "/" . $fileName ) ) {
-                        echo "$fileName upload is complete.";
+                        echo "$fileName upload is complete.</br>" . "<button type='submit' class='btn btn-primary' style='margin-left:5px; margin-top:10px;' name='install_plugin'>Install Plugin</button></br>";
                          exit();
                          } 
                     else
@@ -59,15 +80,14 @@ function install_plugin() {
                      {
                     if ( file_exists( $target_path . "/.info" ) )
                          {
-                        $result = array();
-                         $result = readPluginFile( ".info", $target_path );
+                        $result = readPluginFile( ".info", $target_path );
                         
                          // sending all info to the database
                         $install_result = array();
                          $install_result['FileName'] = $target_path;
                          $install_result['Name'] = $result['PluginName'];
-                         // $install_result['Type'] = $result['type'];
-                        if ( Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) )
+                         $install_result['Type'] = $result['Type'];
+                         if ( Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) )
                              {
                             $install_result['Permission'] = 'admin';
                              } 
@@ -165,4 +185,86 @@ function readPluginFile( $fileName, $target_path )
          } 
     fclose( $file_handle );
      return $result;
-     }
+     } 
+
+/**
+ * function to check for updates or 
+ * if the same plugin already exists
+ * also, if the update founds ,check for the update info in the .info file. 
+ * Update is saved in the temp direcotry with pluginName_version.zip
+ * 
+ * @param  $fileName file which is uploaded in .zip extension
+ * @param  $findPath where we have to look for the installed plugins
+ * @param  $tempFile path for the temporary file
+ * @param  $tempPath path where we have to store the update
+ * @return 2 if plugin already exists and update not found
+ * @return 3 if update info tag not found in .info file
+ */
+function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
+ {
+    // check for plugin if exists
+    $file = scandir( $findPath );
+     foreach( $file as $key => $value )
+     {
+        if ( strcmp( $value, $fileName ) == 0 )
+             {
+            if ( !file_exists( $tempPath . "/test" ) )
+                 {
+                mkdir( $tempPath . "/test" );
+                 } 
+            if ( zipExtraction( $tempFile, $tempPath . "/test/" ) )
+                 {
+                $result = readPluginFile( ".info", $tempPath . "/test/" . $fileName );
+                
+                 // check for the version for the plugin
+                $db = new DBLayer( "lib" );
+                 $sth = $db -> select( "plugins", array( ':name' => $result['PluginName'] ), "Name = :name" );
+                 $info = $sth -> fetch();
+                 $info['Info'] = json_decode( $info['Info'] );
+                
+                 // the two versions from main plugin and the updated part
+                $new_version = explode( '.', $result['Version'] );
+                 $pre_version = explode( '.', $info['Info'] -> Version );
+                
+                 // For all plugins we have used semantic versioning
+                // Format: X.Y.Z ,X->Major, Y->Minor, Z->Patch
+                // change in the X Y & Z values refer the type of change in the plugin.
+                // for initial development only Minor an Patch MUST be 0.
+                // if there is bug fix then there MUST be an increment in the Z value.
+                // if there is change in the functionality or addition of new functionality
+                // then there MUST be an increment in the Y value.
+                // When there is increment in the X value , Y and Z MUST be 0.
+                // comparing if there is some change
+                if ( !array_intersect( $new_version , $pre_version ) )
+                     {
+                    // removing the uploaded file
+                    Plugincache :: rrmdir( $tempPath . "/test/" . $fileName );
+                     return '2';
+                     } 
+                else
+                     {
+                    // check for update info if exists
+                    if ( !array_key_exists( 'UpdateInfo', $result ) )
+                         {
+                        return '3'; //update info tag not found
+                         } 
+                    else
+                         {
+                        // storing update in the temp directory
+                        // format of update save
+                        if ( move_uploaded_file( $tempFile, $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip" ) ) {
+                            // setting update information in the database
+                            $dbr = new DBLayer( "lib" );
+                             $update['PluginId'] = $info['Id'];
+                             $update['UpdatePath'] = $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip";
+                             $update['UpdateInfo'] = json_encode( $result );
+                             $dbr -> insert( "updates", $update );
+                             header( "Location: index.php?page=plugins&result=7" );
+                             exit;      
+                             } 
+                        } 
+                    } 
+                } 
+            } 
+        } 
+    }

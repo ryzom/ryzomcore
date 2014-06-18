@@ -26,10 +26,10 @@ class Plugincache {
     public function set( $values ) {
         $this -> setId( $values['Id'] );
          $this -> setPluginName( $values['Name'] );
-         $this -> setPluginType( $values['Type'] );
-         $this -> setPluginPermission( $values['Permission'] );
-         $this -> setPluginStatus( $values['Status'] );
-         $this -> setPluginInfo( json_decode( $values['Info'] ) );
+         $this -> setPluginType( $values['Type'] );                                                                                                                                             
+         $this -> setPluginPermission( $values['Permission'] );                                                                                                                                 
+         $this -> setPluginStatus( $values['Status'] );                                                                                                                                         
+         $this -> setPluginInfo( json_decode( $values['Info'] ) );                                                                                                                              
          } 
     
     /**
@@ -140,4 +140,30 @@ class Plugincache {
         $this -> plugin_info = $p_n;
          } 
     
+    
+    /**
+     * some more plugin function that requires during plugin operations
+     * 
+     * /
+     * 
+     * 
+     * /**
+     * function to remove  a non empty directory
+     * 
+     * @param  $dir directory address
+     * @return boolean 
+     */
+    public static function rrmdir( $dir ) {
+        if ( is_dir( $dir ) ) {
+            $objects = scandir( $dir );
+             foreach ( $objects as $object ) {
+                if ( $object != "." && $object != ".." ) {
+                    if ( filetype( $dir . "/" . $object ) == "dir" ) rmdir( $dir . "/" . $object );
+                     else unlink( $dir . "/" . $object );
+                     } 
+                } 
+            reset( $objects );
+             return rmdir( $dir );
+             } 
+        } 
     } 
