@@ -86,6 +86,10 @@
 #			define NL_COMP_VC_VERSION 60
 #			define NL_COMP_NEED_PARAM_ON_METHOD
 #		endif
+#	elif defined(__MINGW32__)
+#		define NL_COMP_MINGW
+#		define NL_COMP_GCC
+#		define NL_NO_ASM
 #	endif
 #	if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack or later
 #		define NL_ISO_STDTR1_AVAILABLE
@@ -93,9 +97,13 @@
 #		define NL_ISO_STDTR1_NAMESPACE std::tr1
 #	endif
 #	ifdef _DEBUG
-#		define NL_DEBUG
+#		ifndef NL_DEBUG
+#			define NL_DEBUG
+#		endif
 #	elif defined (NDEBUG)
-#		define NL_RELEASE
+#		ifndef NL_RELEASE
+#			define NL_RELEASE
+#		endif
 #	else
 #		error "Don't know the compilation mode"
 #	endif
@@ -109,7 +117,9 @@
 #		define _WIN32_WINNT 0x0600 // force VISTA minimal version in 64 bits
 #	endif
 	// define NOMINMAX to be sure that windows includes will not define min max macros, but instead, use the stl template
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #else
 #	ifdef __APPLE__
 #		define NL_OS_MAC

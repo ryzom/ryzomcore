@@ -34,8 +34,10 @@
 
 #ifdef NL_OS_WINDOWS
 #	define _WIN32_WINDOWS	0x0410
+#	ifndef NL_COMP_MINGW
 #	define WINVER			0x0400
-#	define NOMINMAX
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	include <direct.h>
 #	include <tchar.h>
@@ -445,7 +447,7 @@ public:
 
 	EDebug() { _Reason = "Nothing about EDebug"; }
 
-	~EDebug () { }
+	virtual ~EDebug() throw() {}
 
 	EDebug(EXCEPTION_POINTERS * pexp) : m_pexp(pexp) { nlassert(pexp != 0); createWhat(); }
 	EDebug(const EDebug& se) : m_pexp(se.m_pexp) { createWhat(); }
@@ -755,7 +757,7 @@ public:
 
 	HANDLE getProcessHandle()
 	{
-		return CSystemInfo::isNT()?GetCurrentProcess():(HANDLE)GetCurrentProcessId();
+		return CSystemInfo::isNT()?GetCurrentProcess():(HANDLE)(uintptr_t)GetCurrentProcessId();
 	}
 
 	// return true if found
@@ -797,7 +799,7 @@ public:
 		while (findAndErase(rawType, "classvector<char,class char_traits<char>,class allocator<char> >", "string")) ;
 	}
 
-	string getFuncInfo (DWORD funcAddr, DWORD stackAddr)
+	string getFuncInfo (uintptr_t funcAddr, uintptr_t stackAddr)
 	{
 		string str ("NoSymbol");
 
@@ -853,7 +855,7 @@ public:
 
 				if (stop==0 && (parse[i] == ',' || parse[i] == ')'))
 				{
-					ULONG *addr = (ULONG*)(stackAddr) + 2 + pos2++;
+					uintptr_t *addr = (uintptr_t*)(stackAddr) + 2 + pos2++;
 
 					string displayType = type;
 					cleanType (type, displayType);
@@ -882,7 +884,7 @@ public:
 					}
 					else if (type == "char*")
 					{
-						if (!IsBadReadPtr(addr,sizeof(char*)) && *addr != NULL)
+						if (!IsBadReadPtr(addr,sizeof(char*)) && *addr != 0)
 						{
 							if (!IsBadStringPtrA((char*)*addr,32))
 							{
@@ -920,7 +922,7 @@ public:
 					{
 						if (!IsBadReadPtr(addr,sizeof(string*)))
 						{
-							if (*addr != NULL)
+							if (*addr != 0)
 							{
 								if (!IsBadReadPtr((void*)*addr,sizeof(string)))
 									sprintf (tmp, "\"%s\"", ((string*)*addr)->c_str());
@@ -929,9 +931,9 @@ public:
 					}
 					else
 					{
-						if (!IsBadReadPtr(addr,sizeof(ULONG*)))
+						if (!IsBadReadPtr(addr,sizeof(uintptr_t*)))
 						{
-							if(*addr == NULL)
+							if(*addr == 0)
 								sprintf (tmp, "<NULL>");
 							else
 								sprintf (tmp, "0x%p", *addr);
@@ -956,7 +958,7 @@ public:
 			if (disp != 0)
 			{
 				str += " + ";
-				str += toString ((uint32)disp);
+				str += toString ((uintptr_t)disp);
 				str += " bytes";
 			}
 		}
@@ -1166,7 +1168,8 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		initAcquireTimeMap();
 #endif
 
-#ifdef NL_OS_WINDOWS
+#ifndef NL_COMP_MINGW
+#	ifdef NL_OS_WINDOWS
 //		if (!IsDebuggerPresent ())
 		{
 			// Use an environment variable to share the value among the EXE and its child DLLs
@@ -1180,7 +1183,8 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 				SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, _T("1") );
 			}
 		}
-#endif // NL_OS_WINDOWS
+#	endif // NL_OS_WINDOWS
+#endif //!NL_COMP_MINGW
 
 		INelContext::getInstance().setErrorLog(new CLog (CLog::LOG_ERROR));
 		INelContext::getInstance().setWarningLog(new CLog (CLog::LOG_WARNING));

@@ -92,7 +92,12 @@ NLMISC_DECL_PURE_LIB(CSoundDriverALNelLibrary)
  * Sound driver instance creation
  */
 #ifdef NL_OS_WINDOWS
-
+#ifdef NL_COMP_MINGW
+#ifndef NL_STATIC
+extern "C"
+{
+#endif
+#endif
 // ******************************************************************
 
 #ifdef NL_STATIC
@@ -140,7 +145,11 @@ __declspec(dllexport) ISoundDriver::TDriver NLSOUND_getDriverType()
 }
 
 // ******************************************************************
-
+#ifdef NL_COMP_MINGW
+#ifndef NL_STATIC
+}
+#endif
+#endif
 #elif defined (NL_OS_UNIX)
 
 #ifndef NL_STATIC
