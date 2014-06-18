@@ -41,8 +41,10 @@
 #include <nel/3d/height_map.h>
 
 #ifdef NL_OS_WINDOWS
-	#define NOMINMAX
-	#include <windows.h>
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
 #endif // NL_OS_WINDOWS
 
 using namespace std;
