@@ -212,6 +212,8 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
                  {
                 mkdir( $tempPath . "/test" );
                  } 
+            
+            // extracting the update
             if ( zipExtraction( $tempFile, $tempPath . "/test/" ) )
                  {
                 $result = readPluginFile( ".info", $tempPath . "/test/" . $fileName );
@@ -246,25 +248,59 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
                     // check for update info if exists
                     if ( !array_key_exists( 'UpdateInfo', $result ) )
                          {
-                        return '3'; //update info tag not found
+                        return '3'; //update info tag not found            
                          } 
                     else
                          {
-                        // storing update in the temp directory
-                        // format of update save
-                        if ( move_uploaded_file( $tempFile, $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip" ) ) {
-                            // setting update information in the database
-                            $dbr = new DBLayer( "lib" );
-                             $update['PluginId'] = $info['Id'];
-                             $update['UpdatePath'] = $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip";
-                             $update['UpdateInfo'] = json_encode( $result );
-                             $dbr -> insert( "updates", $update );
-                             header( "Location: index.php?page=plugins&result=7" );
-                             exit;      
+                        // check if update already exists
+                        if ( pluginUpdateExists( $info['Id'], $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip" ) )
+                             {
+                            echo "Update already exists";
+                             exit;
                              } 
+                        else {
+                            // removing the preivous update
+                            $dbr = new DBLayer( "lib" );
+                             $dbr -> delete( "updates", array( 'id' => $info['Id'] ), "PluginId=:id" );
+                             // storing update in the temp directory
+                            // format of update save
+                            if ( move_uploaded_file( $tempFile, $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip" ) ) {
+                                // setting update information in the database
+                                $update['PluginId'] = $info['Id'];
+                                 $update['UpdatePath'] = $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip";
+                                 $update['UpdateInfo'] = json_encode( $result );
+                                 $dbr -> insert( "updates", $update );
+                                 header( "Location: index.php?page=plugins&result=7" );
+                                 exit;
+                                 } 
+                            } 
                         } 
                     } 
                 } 
             } 
         } 
+    } 
+
+/**
+ * Function to check for the update of a plugin already exists
+ * 
+ * @param  $pluginId id of the plugin for which update is available
+ * @param  $updatePath path of the new update
+ * @return boolean if update for a plugin already exists or 
+ *                                      if update of same version is uploading
+ */
+function PluginUpdateExists( $pluginId, $updatePath )
+ {
+    $db = new DBLayer( 'lib' );
+     $sth = $db -> selectWithParameter( "UpdatePath", "updates", array( 'pluginid' => $pluginId ), "PluginId=:pluginid" );
+     $row = $sth -> fetch();
+     if ( $updatePath == $row['UpdatePath'] )
+     {
+        return true;
+         } 
+    else
+         {
+        rmdir( $row['UpdatePath'] );
+         return false;
+         } 
     }
