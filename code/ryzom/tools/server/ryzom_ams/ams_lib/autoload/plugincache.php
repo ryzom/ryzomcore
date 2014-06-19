@@ -14,7 +14,7 @@ class Plugincache {
      private $plugin_permission;
      private $plugin_status;
      private $plugin_info = array();
-    
+     private $update_info = array();
     /**
      * A constructor.
      * Empty constructor
@@ -26,15 +26,17 @@ class Plugincache {
     public function set( $values ) {
         $this -> setId( $values['Id'] );
          $this -> setPluginName( $values['Name'] );
-         $this -> setPluginType( $values['Type'] );                                                                                                                                             
-         $this -> setPluginPermission( $values['Permission'] );                                                                                                                                 
-         $this -> setPluginStatus( $values['Status'] );                                                                                                                                         
-         $this -> setPluginInfo( json_decode( $values['Info'] ) );                                                                                                                              
+         $this -> setPluginType( $values['Type'] );
+         $this -> setPluginPermission( $values['Permission'] );
+         $this -> setPluginStatus( $values['Status'] );
+         $this -> setPluginInfo( json_decode( $values['Info'] ) );
+         @$this -> setUpdateInfo( json_decode( $values['UpdateInfo'] ) );
          } 
     
     /**
      * loads the object's attributes.
      */
+    
     public function load_With_SID() {
         $dbl = new DBLayer( "lib" );
          $statement = $dbl -> executeWithoutParams( "SELECT * FROM plugins" );
@@ -140,14 +142,33 @@ class Plugincache {
         $this -> plugin_info = $p_n;
          } 
     
+    /**
+     * functionalities for plugin updates
+     */
+    
+    /**
+     * set update info attribute array of the object.
+     * 
+     * @param  $p_n array
+     */
+    public function setUpdateInfo( $p_n ) {
+        $this -> update_info = $p_n;
+         } 
+    
+    /**
+     * get update info array attribute of the object.
+     */
+    public function getUpdateInfo() {
+        return $this -> update_info;
+         } 
+    
     
     /**
      * some more plugin function that requires during plugin operations
      * 
-     * /
-     * 
-     * 
-     * /**
+     */
+ 
+    /**
      * function to remove  a non empty directory
      * 
      * @param  $dir directory address
@@ -166,4 +187,4 @@ class Plugincache {
              return rmdir( $dir );
              } 
         } 
-    } 
+    }
