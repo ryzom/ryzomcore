@@ -1591,6 +1591,7 @@ private:
 	// @}
 	// misc
 public:
+	friend class COcclusionQueryGL;
 	static GLenum NLCubeFaceToGLCubeFace[6];
 	static CMaterial::CTexEnv	_TexEnvReplace;
 	// occlusion query
