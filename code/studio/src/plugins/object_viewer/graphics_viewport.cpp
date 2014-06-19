@@ -66,10 +66,6 @@ void CGraphicsViewport::init()
 	//H_AUTO2
 	nldebug("CGraphicsViewport::init");
 
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-	makeCurrent();
-#endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-
 	w->init();
 	Modules::objView().init( w->getDriver() );
 	Modules::psEdit().init();
