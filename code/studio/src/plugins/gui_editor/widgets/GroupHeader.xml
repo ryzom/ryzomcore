@@ -2,7 +2,6 @@
     <header>
         <name>GroupHeader</name>
         <guiname>CGroupHeader</guiname>
-        <classname>header</classname>
         <ancestor>GroupList</ancestor>
         <description></description>
         <abstract>false</abstract>

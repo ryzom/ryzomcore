@@ -2,7 +2,6 @@
     <header>
         <name>DBViewBar3</name>
         <guiname>CDBViewBar3</guiname>
-        <classname>bar3</classname>
         <ancestor>ViewBitmap</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -41,32 +40,32 @@
         </property>
         <property>
             <name>color1</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>color2</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>color3</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>color1_negative</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 0</default>
         </property>
         <property>
             <name>color2_negative</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 0</default>
         </property>
         <property>
             <name>color3_negative</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 0</default>
         </property>
         <property>

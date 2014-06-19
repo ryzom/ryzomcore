@@ -11,7 +11,7 @@
         <property>
             <name>button_type</name>
             <type>string</type>
-            <default>push_button</default>
+            <default>toggle_button</default>
         </property>
         <property>
             <name>pushed</name>
@@ -30,17 +30,17 @@
         </property>
         <property>
             <name>color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>col_pushed</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>col_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>

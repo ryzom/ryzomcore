@@ -2,7 +2,6 @@
     <header>
         <name>ViewBitmap</name>
         <guiname>CViewBitmap</guiname>
-        <classname>bitmap</classname>
         <ancestor>CtrlBase</ancestor>
         <description></description>
         <abstract>false</abstract>

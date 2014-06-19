@@ -2,7 +2,6 @@
     <header>
         <name>GroupContainer</name>
         <guiname>CGroupContainer</guiname>
-        <classname>container</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -46,7 +45,7 @@
         </property>
         <property>
             <name>header_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>

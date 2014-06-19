@@ -2,7 +2,6 @@
     <header>
         <name>GroupMenu</name>
         <guiname>CGroupMenu</guiname>
-        <classname>menu</classname>
         <ancestor>GroupModal</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -16,7 +15,7 @@
         </property>
         <property>
             <name>color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
@@ -26,32 +25,32 @@
         </property>
         <property>
             <name>shadow_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
             <name>color_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>shadow_color_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
             <name>highlight_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>128 0 0 255</default>
         </property>
         <property>
             <name>color_grayed</name>
-            <type>string</type>
+            <type>color</type>
             <default>128 128 128 255</default>
         </property>
         <property>
             <name>shadow_color_grayed</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>

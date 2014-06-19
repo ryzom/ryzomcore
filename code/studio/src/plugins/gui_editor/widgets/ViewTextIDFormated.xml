@@ -2,7 +2,6 @@
     <header>
         <name>ViewTextIDFormated</name>
         <guiname>CViewTextIDFormated</guiname>
-        <classname>text_id_formated</classname>
         <ancestor>ViewTextID</ancestor>
         <description></description>
         <abstract>false</abstract>

@@ -2,7 +2,6 @@
     <header>
         <name>GroupTree</name>
         <guiname>CGroupTree</guiname>
-        <classname>tree</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -11,17 +10,17 @@
     <properties>
         <property>
             <name>col_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 128</default>
         </property>
         <property>
             <name>col_select</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 128 128 128</default>
         </property>
         <property>
             <name>col_over_back</name>
-            <type>string</type>
+            <type>color</type>
             <default>64 64 64 255</default>
         </property>
         <property>

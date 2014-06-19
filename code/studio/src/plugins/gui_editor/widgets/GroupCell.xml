@@ -30,7 +30,7 @@
         </property>
         <property>
             <name>bgcolor</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 0</default>
         </property>
         <property>

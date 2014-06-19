@@ -2,7 +2,6 @@
     <header>
         <name>CtrlButton</name>
         <guiname>CCtrlButton</guiname>
-        <classname>button</classname>
         <ancestor>CtrlBaseButton</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -12,17 +11,17 @@
         <property>
             <name>tx_normal</name>
             <type>string</type>
-            <default>log_but_r.tga</default>
+            <default></default>
         </property>
         <property>
             <name>tx_pushed</name>
             <type>string</type>
-            <default>log_but_r.tga</default>
+            <default></default>
         </property>
         <property>
             <name>tx_over</name>
             <type>string</type>
-            <default>log_but_over_r.tga</default>
+            <default></default>
         </property>
         <property>
             <name>scale</name>

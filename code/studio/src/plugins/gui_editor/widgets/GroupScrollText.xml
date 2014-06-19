@@ -2,7 +2,6 @@
     <header>
         <name>GroupScrollText</name>
         <guiname>CGroupScrollText</guiname>
-        <classname>scroll_text</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>

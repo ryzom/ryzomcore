@@ -2,7 +2,6 @@
     <header>
         <name>GroupHTML</name>
         <guiname>CGroupHTML</guiname>
-        <classname>html</classname>
         <ancestor>GroupScrollText</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -21,47 +20,47 @@
         </property>
         <property>
             <name>background_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
             <name>error_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 0 0 255</default>
         </property>
         <property>
             <name>link_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 255 255</default>
         </property>
         <property>
             <name>h1_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>h2_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>h3_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>h4_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>h5_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>
             <name>h6_color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>

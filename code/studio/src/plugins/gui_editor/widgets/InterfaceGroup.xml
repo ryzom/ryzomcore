@@ -2,7 +2,6 @@
     <header>
         <name>InterfaceGroup</name>
         <guiname>CInterfaceGroup</guiname>
-        <classname>interface_group</classname>
         <ancestor>CtrlBase</ancestor>
         <description></description>
         <abstract>false</abstract>

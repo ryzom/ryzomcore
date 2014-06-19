@@ -2,7 +2,6 @@
     <header>
         <name>GroupList</name>
         <guiname>CGroupList</guiname>
-        <classname>list</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -41,7 +40,7 @@
         </property>
         <property>
             <name>col_over</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 32</default>
         </property>
         <property>

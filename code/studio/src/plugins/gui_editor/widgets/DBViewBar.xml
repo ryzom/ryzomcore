@@ -2,7 +2,6 @@
     <header>
         <name>DBViewBar</name>
         <guiname>CDBViewBar</guiname>
-        <classname>bar</classname>
         <ancestor>ViewBitmap</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -26,7 +25,7 @@
         </property>
         <property>
             <name>color_negative</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 0</default>
         </property>
         <property>

@@ -2,7 +2,6 @@
     <header>
         <name>GroupTable</name>
         <guiname>CGroupTable</guiname>
-        <classname>table</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -26,7 +25,7 @@
         </property>
         <property>
             <name>bgcolor</name>
-            <type>string</type>
+            <type>color</type>
             <default>0 0 0 255</default>
         </property>
         <property>
