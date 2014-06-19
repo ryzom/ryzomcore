@@ -59,7 +59,7 @@ CSpawnGroupNpc::CSpawnGroupNpc(CPersistent<CSpawnGroup>& owner)
 	_LastUpdate = (randomVal>=0)?randomVal:CTimeInterface::gameCycle();
 	_LastBotUpdate = CTimeInterface::gameCycle();
 	activityProfile().setAIProfile(new CGrpProfileNormal(this));
-	_BotUpdateTimer.set((CAIS::rand32(40)+((long)this>>2))%20); // start with a random value.
+	_BotUpdateTimer.set((CAIS::rand32(40)+((intptr_t)this>>2))%20); // start with a random value.
 	resetSlowUpdateCycle();
 	_DespawnBotsWhenNoMoreHandleTimerActive = false;
 }

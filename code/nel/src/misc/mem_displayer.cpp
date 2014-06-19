@@ -150,7 +150,11 @@ static string getSourceInfo (DWORD_TYPE addr)
 	return str;
 }
 
-static uintptr_t __stdcall GetModuleBase(HANDLE hProcess, uintptr_t dwReturnAddress)
+#ifdef NL_OS_WIN64
+static DWORD64 __stdcall GetModuleBase(HANDLE hProcess, DWORD64 dwReturnAddress)
+#else
+static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
+#endif
 {
 	IMAGEHLP_MODULE moduleInfo;
 
@@ -291,12 +295,13 @@ static void displayCallStack (CLog *log)
 
 #ifdef NL_OS_WIN64
 		MachineType = IMAGE_FILE_MACHINE_AMD64;
+		BOOL res = StackWalk64(MachineType, GetCurrentProcess(), GetCurrentThread(), &callStack,
+			NULL, NULL, SymFunctionTableAccess, GetModuleBase, NULL);
 #else
 		MachineType = IMAGE_FILE_MACHINE_I386;
-#endif
-
-		BOOL res = StackWalk (MachineType, GetCurrentProcess(), GetCurrentThread(), &callStack,
+		BOOL res = StackWalk(MachineType, GetCurrentProcess(), GetCurrentThread(), &callStack,
 			NULL, NULL, SymFunctionTableAccess, GetModuleBase, NULL);
+#endif
 
 /*		if (res == FALSE)
 		{

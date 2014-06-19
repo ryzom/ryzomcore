@@ -152,7 +152,7 @@
 //
 // NL_ISO_TEMPLATE_SPEC can be used in front of an instanciated class-template member data definition,
 // because sometimes MSVC++ 6 produces an error C2908 with a definition with template <>.
-#if defined(NL_OS_WINDOWS) || (defined(__GNUC__) && ((__GNUC__ < 3) || (__GNUC__ == 3 && __GNUC_MINOR__ <= 3)))
+#if defined(NL_COMP_VC) || (defined(__GNUC__) && ((__GNUC__ < 3) || (__GNUC__ == 3 && __GNUC_MINOR__ <= 3)))
 #	define NL_ISO_SYNTAX 0
 #	define NL_ISO_TEMPLATE_SPEC
 #else
@@ -398,8 +398,8 @@ typedef	uint16	ucchar;
 
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
-#ifdef NL_OS_WINDOWS
-#	if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 80)
+#ifdef NL_COMP_VC
+#	if (NL_COMP_VC_VERSION >= 80)
 #		define INT64_CONSTANT(c)	(c##LL)
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##LL)
