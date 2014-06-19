@@ -103,7 +103,6 @@ void CDeform2d::doDeform(const TPoint2DVect &surf, IDriver *drv, IPerturbUV *uvp
 	static CVertexBuffer  vb;
 	vb.setName("CDeform2d");
 	vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
-	vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
 
 
 
