@@ -383,7 +383,7 @@ extern void operator delete[](void *p) throw();
 #else /* NL_HAS_SSE2 */
 
 #define NL_DEFAULT_MEMORY_ALIGNMENT 4
-#define NL_ALIGN_SSE2(nb) 
+#define NL_ALIGN_SSE2 
 
 #endif /* NL_HAS_SSE2 */
 
