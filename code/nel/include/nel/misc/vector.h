@@ -40,7 +40,11 @@ class CVectorPacked;
 class NL_ALIGN_SSE2 CVector
 {
 public:		// Attributes.
+#ifdef NL_HAS_SSE2
+	union { struct { float x, y, z; }; __m128 mm; };
+#else
 	float	x,y,z;
+#endif
 
 public:		// const.
 	/// Null vector (0,0,0).
