@@ -365,6 +365,7 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 inline void *aligned_malloc(size_t size, size_t alignment) { return _aligned_malloc(size, alignment); }
 inline void aligned_free(void *ptr) { _aligned_free(ptr); }
 #else
+#include <malloc.h>
 inline void *aligned_malloc(size_t size, size_t alignment) { return memalign(alignment, size); }
 inline void aligned_free(void *ptr) { free(ptr); }
 #endif /* NL_COMP_ */
@@ -383,7 +384,7 @@ extern void operator delete[](void *p) throw();
 #else /* NL_HAS_SSE2 */
 
 #define NL_DEFAULT_MEMORY_ALIGNMENT 4
-#define NL_ALIGN_SSE2 
+#define NL_ALIGN_SSE2
 
 #endif /* NL_HAS_SSE2 */
 
