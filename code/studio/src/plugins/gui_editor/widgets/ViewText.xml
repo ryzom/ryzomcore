@@ -40,7 +40,7 @@
         </property>
         <property>
             <name>justification</name>
-            <type>string</type>
+            <type>text_justification</type>
             <default>dont_clip_word</default>
         </property>
         <property>

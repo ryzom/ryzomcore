@@ -35,6 +35,13 @@ namespace GUIEditor
 		BUTTON_TYPE_RADIO = 2
 	};
 
+	enum NELTxtJustification
+	{
+		TEXT_CLIPWORD,
+		TEXT_DONTCLIPWORD,
+		TEXT_JUSTIFIED
+	};
+
 	CPropBrowserCtrl::CPropBrowserCtrl()
 	{
 		browser = NULL;
@@ -145,7 +152,7 @@ namespace GUIEditor
 			if( e == NULL )
 				return;
 
-			if( ( value < 0 ) || ( value > 2 ) )
+			if( ( value < BUTTON_TYPE_PUSH ) || ( value > BUTTON_TYPE_RADIO ) )
 				return;
 
 			std::string v;
@@ -155,6 +162,26 @@ namespace GUIEditor
 			case BUTTON_TYPE_PUSH: v = "push_button"; break;
 			case BUTTON_TYPE_TOGGLE: v = "toggle_button"; break;
 			case BUTTON_TYPE_RADIO: v = "radio_button"; break;
+			}
+
+			e->setProperty( propName.toUtf8().constData(), v );
+		}
+		else
+		if( propName == "justification" )
+		{
+			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+			if( e == NULL )
+				return;
+
+			if( ( value < TEXT_CLIPWORD ) || ( value > TEXT_JUSTIFIED ) )
+				return;
+
+			std::string v;
+			switch( value )
+			{
+			case TEXT_CLIPWORD: v = "clip_word"; break;
+			case TEXT_DONTCLIPWORD: v = "dont_clip_word"; break;
+			case TEXT_JUSTIFIED: v = "justified"; break;
 			}
 
 			e->setProperty( propName.toUtf8().constData(), v );
@@ -209,11 +236,6 @@ namespace GUIEditor
 			if( btype.empty() )
 				return;
 
-			QStringList enums;
-			enums.push_back( "push_button" );
-			enums.push_back( "toggle_button" );
-			enums.push_back( "radio_button" );
-
 			int e = -1;
 			if( btype == "push_button" )
 				e = BUTTON_TYPE_PUSH;
@@ -231,9 +253,49 @@ namespace GUIEditor
 			if( pp == NULL )
 				return;
 
+			QStringList enums;
+			enums.push_back( "push_button" );
+			enums.push_back( "toggle_button" );
+			enums.push_back( "radio_button" );
+
 			enumMgr->setEnumNames( pp, enums );
 			enumMgr->setValue( pp, e );
 			browser->addProperty( pp );
+			return;
+		}
+		else
+		if( prop.propType == "text_justification" )
+		{
+			std::string j = element->getProperty( prop.propName );
+			if( j.empty() )
+				return;
+
+			int e = -1;
+			if( j == "clip_word" )
+				e = TEXT_CLIPWORD;
+			else
+			if( j == "dont_clip_word" )
+				e = TEXT_DONTCLIPWORD;
+			else
+			if( j == "justified" )
+				e = TEXT_JUSTIFIED;
+
+			if( e == -1 )
+				return;
+
+			QtProperty *pp = enumMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			QStringList enums;
+			enums.push_back( "clip_word" );
+			enums.push_back( "dont_clip_word" );
+			enums.push_back( "justified" );
+
+			enumMgr->setEnumNames( pp, enums );
+			enumMgr->setValue( pp, e );
+			browser->addProperty( pp );
+
 			return;
 		}
 		else
