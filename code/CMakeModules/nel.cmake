@@ -324,6 +324,9 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
   OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
+  
+  OPTION(WITH_SSE2                "With SSE2"                                     ON )
+  OPTION(WITH_SSE3                "With SSE3"                                     ON )
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)

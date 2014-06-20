@@ -290,7 +290,7 @@ public:
 	 * \param matrix transformation matrix
 	 * \param hotspot position of string origine
 	 */
-	void render3D (IDriver& driver,CMatrix matrix,THotSpot hotspot = MiddleMiddle);
+	void render3D (IDriver& driver, const CMatrix &matrix, THotSpot hotspot = MiddleMiddle);
 
 };
 
