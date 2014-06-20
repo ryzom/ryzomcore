@@ -38,13 +38,20 @@ namespace NL3D
  * \author Nevrax France
  * \date 2002
  */
-class	CMatrix3x4
+class NL_ALIGN_SSE2 CMatrix3x4
 {
 public:
+#ifdef NL_HAS_SSE2
+	union { struct { float a11, a21, a31; }; __m128 mm1; };
+	union { struct { float a12, a22, a32; }; __m128 mm2; };
+	union { struct { float a13, a23, a33; }; __m128 mm3; };
+	union { struct { float a14, a24, a34; }; __m128 mm4; };
+#else
 	// Order them in memory line first, for faster memory access.
 	float	a11, a12, a13, a14;
 	float	a21, a22, a23, a24;
 	float	a31, a32, a33, a34;
+#endif
 
 	// Copy from a matrix.
 	void	set(const CMatrix &mat)
