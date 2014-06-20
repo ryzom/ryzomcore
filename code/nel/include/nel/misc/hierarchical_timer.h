@@ -74,7 +74,7 @@
 namespace NLMISC
 {
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 // Visual C++ warning : ebp maybe modified
 #	pragma warning(disable:4731)
 #endif

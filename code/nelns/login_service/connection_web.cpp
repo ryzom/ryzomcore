@@ -117,7 +117,7 @@ static void cbWSShardChooseShard/* (CMessage &msgin, TSockId from, CCallbackNetB
 		*/
 	}
 
-	WebServer->send (msgout, (TSockId)cookie.getUserAddr ());
+	WebServer->send (msgout, (TSockId)cookie.getUserAddr ());  // FIXME: 64-bit
 }
 
 static const TUnifiedCallbackItem WSCallbackArray[] =

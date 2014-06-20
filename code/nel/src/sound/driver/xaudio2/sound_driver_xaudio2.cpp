@@ -53,6 +53,14 @@ BOOL WINAPI DllMain(HANDLE hModule, DWORD /* ul_reason_for_call */, LPVOID /* lp
 
 // ***************************************************************************
 
+#ifndef NL_STATIC
+#ifdef NL_COMP_MINGW
+extern "C" {
+#endif
+#endif
+
+// ***************************************************************************
+
 #ifdef NL_STATIC
 ISoundDriver* createISoundDriverInstanceXAudio2
 #else
@@ -96,6 +104,14 @@ __declspec(dllexport) ISoundDriver::TDriver NLSOUND_getDriverType()
 {
 	return ISoundDriver::DriverXAudio2;
 }
+
+// ******************************************************************
+
+#ifndef NL_STATIC
+#ifdef NL_COMP_MINGW
+}
+#endif
+#endif
 
 // ******************************************************************
 

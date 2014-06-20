@@ -1091,7 +1091,7 @@ void CDriverD3D::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 
 // ***************************************************************************
 
-uint CDriverD3D::getTextureHandle(const ITexture &tex)
+uintptr_t CDriverD3D::getTextureHandle(const ITexture &tex)
 {
 	H_AUTO_D3D(CDriverD3D_getTextureHandle)
 	// If DrvShare not setuped
@@ -1104,7 +1104,7 @@ uint CDriverD3D::getTextureHandle(const ITexture &tex)
 	if(!d3dtext)
 		return 0;
 
-	return (uint)(d3dtext->Texture);
+	return (uintptr_t)(d3dtext->Texture);
 }
 
 // ***************************************************************************

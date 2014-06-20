@@ -530,7 +530,6 @@ void CPSShockWave::getVBnPB(CVertexBuffer *&retVb, CIndexBuffer *&retPb)
 		vb.lock (vba);
 		pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 		pb.setNumIndexes(2 * 3 * size * _NbSeg);
-		pb.setPreferredMemory(CIndexBuffer::AGPVolatile, false);
 		CIndexBufferReadWrite ibaWrite;
 		pb.lock (ibaWrite);
 		uint finalIndex = 0;

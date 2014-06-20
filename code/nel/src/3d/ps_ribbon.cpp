@@ -971,7 +971,6 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 						  );
 		vb.setNumVertices((_UsedNbSegs + 1) * numRibbonInVB * numVerticesInSlice); // 1 seg = 1 line + terminal vertices
 		pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
-		pb.setPreferredMemory(CIndexBuffer::AGPVolatile, false);
 		// set the primitive block size
 		if (_BraceMode)
 		{

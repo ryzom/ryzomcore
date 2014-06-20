@@ -34,7 +34,9 @@
 #endif // HAVE_CONFIG_H
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
@@ -151,7 +153,9 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	switch(driverType)
 	{
 	case DriverFMod:
-#if defined (NL_OS_WINDOWS)
+#if defined (NL_COMP_MINGW)
+		dllName = "libnel_drv_fmod_win";
+#elif defined (NL_OS_WINDOWS)
 		dllName = "nel_drv_fmod_win";
 #elif defined (NL_OS_UNIX)
 		dllName = "nel_drv_fmod";
@@ -160,7 +164,9 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #endif // NL_OS_UNIX / NL_OS_WINDOWS
 		break;
 	case DriverOpenAl:
-#ifdef NL_OS_WINDOWS
+#if defined (NL_COMP_MINGW)
+		dllName = "libnel_drv_openal_win";
+#elif defined (NL_OS_WINDOWS)
 		dllName = "nel_drv_openal_win";
 #elif defined (NL_OS_UNIX)
 		dllName = "nel_drv_openal";
@@ -169,7 +175,9 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #endif
 		break;
 	case DriverDSound:
-#ifdef NL_OS_WINDOWS
+#if defined (NL_COMP_MINGW)
+		dllName = "libnel_drv_dsound_win";
+#elif defined (NL_OS_WINDOWS)
 		dllName = "nel_drv_dsound_win";
 #elif defined (NL_OS_UNIX)
 		nlerror("DriverDSound doesn't exist on Unix because it requires DirectX");
@@ -178,7 +186,9 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #endif
 		break;
 	case DriverXAudio2:
-#ifdef NL_OS_WINDOWS
+#if defined (NL_COMP_MINGW)
+		dllName = "libnel_drv_xaudio2_win";
+#elif defined (NL_OS_WINDOWS)
 		dllName = "nel_drv_xaudio2_win";
 #elif defined (NL_OS_UNIX)
 		nlerror("DriverXAudio2 doesn't exist on Unix because it requires DirectX");
@@ -187,7 +197,9 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #endif
 		break;
 	default:
-#ifdef NL_OS_WINDOWS
+#if defined (NL_COMP_MINGW)
+		dllName = "libnel_drv_xaudio2_win";
+#elif defined (NL_OS_WINDOWS)
 		dllName = "nel_drv_xaudio2_win";
 #elif defined (NL_OS_UNIX)
 		dllName = "nel_drv_openal";

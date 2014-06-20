@@ -86,6 +86,10 @@
 #			define NL_COMP_VC_VERSION 60
 #			define NL_COMP_NEED_PARAM_ON_METHOD
 #		endif
+#	elif defined(__MINGW32__)
+#		define NL_COMP_MINGW
+#		define NL_COMP_GCC
+#		define NL_NO_ASM
 #	endif
 #	if defined(_HAS_TR1) && (_HAS_TR1 + 0) // VC9 TR1 feature pack or later
 #		define NL_ISO_STDTR1_AVAILABLE
@@ -93,9 +97,13 @@
 #		define NL_ISO_STDTR1_NAMESPACE std::tr1
 #	endif
 #	ifdef _DEBUG
-#		define NL_DEBUG
+#		ifndef NL_DEBUG
+#			define NL_DEBUG
+#		endif
 #	elif defined (NDEBUG)
-#		define NL_RELEASE
+#		ifndef NL_RELEASE
+#			define NL_RELEASE
+#		endif
 #	else
 #		error "Don't know the compilation mode"
 #	endif
@@ -109,7 +117,9 @@
 #		define _WIN32_WINNT 0x0600 // force VISTA minimal version in 64 bits
 #	endif
 	// define NOMINMAX to be sure that windows includes will not define min max macros, but instead, use the stl template
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #else
 #	ifdef __APPLE__
 #		define NL_OS_MAC
@@ -142,7 +152,7 @@
 //
 // NL_ISO_TEMPLATE_SPEC can be used in front of an instanciated class-template member data definition,
 // because sometimes MSVC++ 6 produces an error C2908 with a definition with template <>.
-#if defined(NL_OS_WINDOWS) || (defined(__GNUC__) && ((__GNUC__ < 3) || (__GNUC__ == 3 && __GNUC_MINOR__ <= 3)))
+#if defined(NL_COMP_VC) || (defined(__GNUC__) && ((__GNUC__ < 3) || (__GNUC__ == 3 && __GNUC_MINOR__ <= 3)))
 #	define NL_ISO_SYNTAX 0
 #	define NL_ISO_TEMPLATE_SPEC
 #else
@@ -435,8 +445,8 @@ typedef	uint16	ucchar;
 
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
-#ifdef NL_OS_WINDOWS
-#	if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 80)
+#ifdef NL_COMP_VC
+#	if (NL_COMP_VC_VERSION >= 80)
 #		define INT64_CONSTANT(c)	(c##LL)
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##LL)

@@ -123,7 +123,7 @@ public:
 
 	/// \name Object
 	// @{
-	CDriverUser (uint windowIcon, UDriver::TDriver driver, emptyProc exitFunc = 0);
+	CDriverUser (uintptr_t windowIcon, UDriver::TDriver driver, emptyProc exitFunc = 0);
 	virtual	~CDriverUser();
 	// @}
 

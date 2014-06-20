@@ -191,7 +191,9 @@ namespace MULTI_LINE_FORMATER {
 #include "ai_share/world_map.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 

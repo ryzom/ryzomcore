@@ -21,7 +21,9 @@
 
 #ifdef NL_OS_WINDOWS
 #	include <winsock2.h>
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()
