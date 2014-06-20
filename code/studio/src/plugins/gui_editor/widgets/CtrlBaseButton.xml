@@ -10,7 +10,7 @@
     <properties>
         <property>
             <name>button_type</name>
-            <type>string</type>
+            <type>button_type</type>
             <default>toggle_button</default>
         </property>
         <property>

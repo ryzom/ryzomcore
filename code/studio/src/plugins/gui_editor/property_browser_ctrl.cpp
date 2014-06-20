@@ -17,7 +17,9 @@
 
 #include "property_browser_ctrl.h"
 #include "../../3rdparty/qtpropertybrowser/QtVariantPropertyManager"
+#include "../../3rdparty/qtpropertybrowser/QtEnumPropertyManager"
 #include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"
+#include "../../3rdparty/qtpropertybrowser/QtEnumEditorFactory"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
 #include <typeinfo>
@@ -26,16 +28,27 @@
 
 namespace GUIEditor
 {
+	enum NELButtonTypes
+	{
+		BUTTON_TYPE_PUSH = 0,
+		BUTTON_TYPE_TOGGLE = 1,
+		BUTTON_TYPE_RADIO = 2
+	};
+
 	CPropBrowserCtrl::CPropBrowserCtrl()
 	{
 		browser = NULL;
 		propertyMgr = new QtVariantPropertyManager;
+		enumMgr = new QtEnumPropertyManager;
 	}
 
 	CPropBrowserCtrl::~CPropBrowserCtrl()
 	{
+		delete enumMgr;
+		enumMgr = NULL;
 		delete propertyMgr;
 		propertyMgr = NULL;
+
 		browser = NULL;
 	}
 
@@ -65,6 +78,9 @@ namespace GUIEditor
 		browser->clear();
 		disconnect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
 			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
+
+		disconnect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
+			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
 	}
 
 	void CPropBrowserCtrl::onSelectionChanged( std::string &id )
@@ -74,6 +90,8 @@ namespace GUIEditor
 
 		disconnect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
 			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
+		disconnect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
+			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
 
 		browser->clear();
 
@@ -82,6 +100,8 @@ namespace GUIEditor
 		{
 			connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
 				this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
+			connect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
+				this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
 
 			return;
 		}
@@ -93,6 +113,8 @@ namespace GUIEditor
         setupProperties( n, e );
 		connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
 			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
+		connect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
+			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
 	}
 
 	void CPropBrowserCtrl::onPropertyChanged( QtProperty *prop, const QVariant &v )
@@ -107,7 +129,7 @@ namespace GUIEditor
 			if( p != NULL )
 				propValue = p->value().toString();
 		}
-
+		
 		if( v.type() == QVariant::Color )
 		{
 			QColor c = v.value< QColor >();
@@ -128,6 +150,32 @@ namespace GUIEditor
 		e->setActive( active );
 	}
 
+	void CPropBrowserCtrl::onEnumPropertyChanged( QtProperty *prop, int value )
+	{
+		QString propName = prop->propertyName();
+
+		if( propName == "button_type" )
+		{
+			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+			if( e == NULL )
+				return;
+
+			if( ( value < 0 ) || ( value > 2 ) )
+				return;
+
+			std::string v;
+
+			switch( value )
+			{
+			case BUTTON_TYPE_PUSH: v = "push_button"; break;
+			case BUTTON_TYPE_TOGGLE: v = "toggle_button"; break;
+			case BUTTON_TYPE_RADIO: v = "radio_button"; break;
+			}
+
+			e->setProperty( propName.toUtf8().constData(), v );
+		}
+	}
+
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )
 	{
 		std::map< std::string, SWidgetInfo >::iterator itr = widgetInfo.find( type );
@@ -144,6 +192,9 @@ namespace GUIEditor
 
 		QtVariantEditorFactory *factory = new QtVariantEditorFactory;
 		browser->setFactoryForManager( propertyMgr, factory );
+
+		QtEnumEditorFactory *efactory = new QtEnumEditorFactory;
+		browser->setFactoryForManager( enumMgr, efactory );
 	}
 
 	void CPropBrowserCtrl::setupProperty( const SPropEntry &prop, const CInterfaceElement *element )
@@ -151,6 +202,40 @@ namespace GUIEditor
 		QtVariantProperty *p = NULL;
 		QVariant v;
 		
+		if( prop.propType == "button_type" )
+		{
+			std::string btype = element->getProperty( prop.propName );
+			if( btype.empty() )
+				return;
+
+			QStringList enums;
+			enums.push_back( "push_button" );
+			enums.push_back( "toggle_button" );
+			enums.push_back( "radio_button" );
+
+			int e = -1;
+			if( btype == "push_button" )
+				e = BUTTON_TYPE_PUSH;
+			else
+			if( btype == "toggle_button" )
+				e = BUTTON_TYPE_TOGGLE;
+			else
+			if( btype == "radio_button" )
+				e = BUTTON_TYPE_RADIO;
+
+			if( e == -1 )
+				return;
+
+			QtProperty *pp = enumMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			enumMgr->setEnumNames( pp, enums );
+			enumMgr->setValue( pp, e );
+			browser->addProperty( pp );
+			return;
+		}
+		else
 		if( prop.propType == "string" )
 		{
 			p = propertyMgr->addProperty( QVariant::String, prop.propName.c_str() );
