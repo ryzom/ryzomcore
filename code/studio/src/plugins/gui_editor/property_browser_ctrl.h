@@ -59,6 +59,9 @@ namespace GUIEditor
 		void onEnumPropertyChanged( QtProperty *prop, int value );
 
 	private:
+		void enablePropertyWatchers();
+		void disablePropertyWatchers();
+
 		void setupProperties( const std::string &type, const NLGUI::CInterfaceElement *element );
 		void setupProperty( const SPropEntry &prop, const NLGUI::CInterfaceElement *element );
 

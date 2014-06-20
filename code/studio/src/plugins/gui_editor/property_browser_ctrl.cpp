@@ -75,12 +75,8 @@ namespace GUIEditor
 
 	void CPropBrowserCtrl::clear()
 	{
+		disablePropertyWatchers();
 		browser->clear();
-		disconnect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
-			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
-
-		disconnect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
-			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
 	}
 
 	void CPropBrowserCtrl::onSelectionChanged( std::string &id )
@@ -88,21 +84,13 @@ namespace GUIEditor
 		if( browser == NULL )
 			return;
 
-		disconnect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
-			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
-		disconnect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
-			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
-
+		disablePropertyWatchers();
 		browser->clear();
 
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
 		if( e == NULL )
 		{
-			connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
-				this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
-			connect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
-				this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
-
+			enablePropertyWatchers();
 			return;
 		}
 
@@ -111,10 +99,7 @@ namespace GUIEditor
         std::string n = e->getClassName();
 
         setupProperties( n, e );
-		connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
-			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
-		connect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
-			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
+		enablePropertyWatchers();
 	}
 
 	void CPropBrowserCtrl::onPropertyChanged( QtProperty *prop, const QVariant &v )
@@ -174,6 +159,22 @@ namespace GUIEditor
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
+	}
+
+	void CPropBrowserCtrl::enablePropertyWatchers()
+	{
+		connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
+			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
+		connect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
+			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
+	}
+
+	void CPropBrowserCtrl::disablePropertyWatchers()
+	{
+		disconnect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
+			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
+		disconnect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
+			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
 	}
 
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )
