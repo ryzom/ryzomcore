@@ -68,7 +68,7 @@ void *CObjectArenaAllocator::alloc(uint size)
 	if (size >= _MaxAllocSize)
 	{
 		// use standard allocator
-		nlctassert(NL_DEFAULT_MEMORY_ALIGNMENT > sizeof(uint));
+		nlctassert(NL_DEFAULT_MEMORY_ALIGNMENT >= sizeof(uint));
 		uint8 *block = (uint8 *)aligned_malloc(NL_DEFAULT_MEMORY_ALIGNMENT + size, NL_DEFAULT_MEMORY_ALIGNMENT); //new uint8[size + sizeof(uint)]; // an additionnal uint is needed to store size of block
 		if (!block) return NULL;
 		#ifdef NL_DEBUG
