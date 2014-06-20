@@ -327,6 +327,10 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   
   OPTION(WITH_SSE2                "With SSE2"                                     ON )
   OPTION(WITH_SSE3                "With SSE3"                                     ON )
+  
+  IF(NOT MSVC)
+    OPTION(WITH_GCC_FPMATH_BOTH   "With GCC -mfpmath=both"                        OFF)
+  ENDIF(NOT MSVC)
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)
@@ -620,6 +624,10 @@ MACRO(NL_SETUP_BUILD)
     IF(WITH_SSE3)
       ADD_PLATFORM_FLAGS("-msse3")
     ENDIF(WITH_SSE3)
+
+    IF(WITH_GCC_FPMATH_BOTH)
+      ADD_PLATFORM_FLAGS("-mfpmath=both")
+    ENDIF(WITH_GCC_FPMATH_BOTH)
 
     IF(APPLE)
       IF(NOT XCODE)
