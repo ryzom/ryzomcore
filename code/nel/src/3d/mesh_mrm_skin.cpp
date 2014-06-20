@@ -16,6 +16,10 @@
 
 #include "std3d.h"
 
+#ifdef NL_HAS_SSE2
+#	include <xmmintrin.h>
+#endif
+
 #include "nel/misc/bsphere.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/misc/system_info.h"
