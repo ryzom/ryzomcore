@@ -101,23 +101,97 @@ namespace
 		}
 	};
 
+
+	class NelButtonType
+	{
+	public:
+		
+		enum NELButtonTypes
+		{
+			BUTTON_TYPE_PUSH = 0,
+			BUTTON_TYPE_TOGGLE = 1,
+			BUTTON_TYPE_RADIO = 2
+		};
+
+		static int fromString( const std::string &s )
+		{
+			int r = -1;
+
+			if( s == "push_button" )
+				r = BUTTON_TYPE_PUSH;
+			else
+			if( s == "toggle_button" )
+				r = BUTTON_TYPE_TOGGLE;
+			else
+			if( s == "radio_button" )
+				r = BUTTON_TYPE_RADIO;
+
+			return r;
+		}
+
+		static std::string toString( int value )
+		{
+			std::string v;
+
+			switch( value )
+			{
+			case BUTTON_TYPE_PUSH: v = "push_button"; break;
+			case BUTTON_TYPE_TOGGLE: v = "toggle_button"; break;
+			case BUTTON_TYPE_RADIO: v = "radio_button"; break;
+			}
+
+			return v;
+		}
+
+	};
+
+	class NelTxtJustification
+	{
+	public:
+		
+		enum NELTxtJustification
+		{
+			TEXT_CLIPWORD,
+			TEXT_DONTCLIPWORD,
+			TEXT_JUSTIFIED
+		};
+
+		static int fromString( const std::string &s )
+		{
+			int r = -1;
+
+			if( s == "clip_word" )
+				r = TEXT_CLIPWORD;
+			else
+			if( s == "dont_clip_word" )
+				r = TEXT_DONTCLIPWORD;
+			else
+			if( s == "justified" )
+				r = TEXT_JUSTIFIED;
+
+			return r;
+		}
+
+		static std::string toString( int value )
+		{
+			std::string v;
+
+			switch( value )
+			{
+			case TEXT_CLIPWORD: v = "clip_word"; break;
+			case TEXT_DONTCLIPWORD: v = "dont_clip_word"; break;
+			case TEXT_JUSTIFIED: v = "justified"; break;
+			}
+
+			return v;
+		}
+
+	};
+
 }
 
 namespace GUIEditor
 {
-	enum NELButtonTypes
-	{
-		BUTTON_TYPE_PUSH = 0,
-		BUTTON_TYPE_TOGGLE = 1,
-		BUTTON_TYPE_RADIO = 2
-	};
-
-	enum NELTxtJustification
-	{
-		TEXT_CLIPWORD,
-		TEXT_DONTCLIPWORD,
-		TEXT_JUSTIFIED
-	};
 
 	CPropBrowserCtrl::CPropBrowserCtrl()
 	{
@@ -229,17 +303,10 @@ namespace GUIEditor
 			if( e == NULL )
 				return;
 
-			if( ( value < BUTTON_TYPE_PUSH ) || ( value > BUTTON_TYPE_RADIO ) )
-				return;
-
 			std::string v;
-
-			switch( value )
-			{
-			case BUTTON_TYPE_PUSH: v = "push_button"; break;
-			case BUTTON_TYPE_TOGGLE: v = "toggle_button"; break;
-			case BUTTON_TYPE_RADIO: v = "radio_button"; break;
-			}
+			v = NelButtonType::toString( value );
+			if( v.empty() )
+				return;
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
@@ -250,16 +317,10 @@ namespace GUIEditor
 			if( e == NULL )
 				return;
 
-			if( ( value < TEXT_CLIPWORD ) || ( value > TEXT_JUSTIFIED ) )
-				return;
-
 			std::string v;
-			switch( value )
-			{
-			case TEXT_CLIPWORD: v = "clip_word"; break;
-			case TEXT_DONTCLIPWORD: v = "dont_clip_word"; break;
-			case TEXT_JUSTIFIED: v = "justified"; break;
-			}
+			v = NelTxtJustification::toString( value );
+			if( v.empty() )
+				return;
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
@@ -327,15 +388,7 @@ namespace GUIEditor
 				return;
 
 			int e = -1;
-			if( btype == "push_button" )
-				e = BUTTON_TYPE_PUSH;
-			else
-			if( btype == "toggle_button" )
-				e = BUTTON_TYPE_TOGGLE;
-			else
-			if( btype == "radio_button" )
-				e = BUTTON_TYPE_RADIO;
-
+			e = NelButtonType::fromString( btype );
 			if( e == -1 )
 				return;
 
@@ -361,15 +414,7 @@ namespace GUIEditor
 				return;
 
 			int e = -1;
-			if( j == "clip_word" )
-				e = TEXT_CLIPWORD;
-			else
-			if( j == "dont_clip_word" )
-				e = TEXT_DONTCLIPWORD;
-			else
-			if( j == "justified" )
-				e = TEXT_JUSTIFIED;
-
+			e = NelTxtJustification::fromString( j );
 			if( e == -1 )
 				return;
 
