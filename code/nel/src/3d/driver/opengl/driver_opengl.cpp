@@ -483,6 +483,11 @@ bool CDriverGL::setupDisplay()
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
 	}
+	
+	if (_Extensions.ARBFragmentShader)
+	{
+		_ForceNativeFragmentPrograms = false;
+	}
 
 	_VertexProgramEnabled= false;
 	_PixelProgramEnabled= false;

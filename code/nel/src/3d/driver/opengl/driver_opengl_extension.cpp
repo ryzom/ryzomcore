@@ -1249,6 +1249,15 @@ static bool	setupNVFragmentProgram2(const char *glext)
 	return true;
 }
 
+// *********************************
+static bool	setupARBFragmentShader(const char *glext)
+{
+	H_AUTO_OGL(setupNVFragmentProgram2);
+	CHECK_EXT("GL_ARB_fragment_shader");
+	
+	return true;
+}
+
 // ***************************************************************************
 static bool	setupARBVertexBufferObject(const char	*glext)
 {
@@ -1627,7 +1636,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{
 		ext.NVVertexProgram = setupNVVertexProgram(glext);
 		ext.EXTVertexShader = setupEXTVertexShader(glext);
-		ext.ARBVertexProgram= setupARBVertexProgram(glext);
+		ext.ARBVertexProgram = setupARBVertexProgram(glext);
 	}
 	else
 	{
@@ -1642,6 +1651,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{		
 		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
 		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
+		ext.ARBFragmentShader = setupARBFragmentShader(glext);
 	}
 	else
 	{

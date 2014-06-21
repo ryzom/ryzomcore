@@ -104,6 +104,7 @@ struct	CGlExtensions
 	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
+	bool	ARBFragmentShader;
 
 	// NV Pixel Programs
 	bool	NVFragmentProgram2;
@@ -178,6 +179,7 @@ public:
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
+		ARBFragmentShader = false;
 		NVOcclusionQuery = false;
 		ARBOcclusionQuery = false;
 		FrameBufferObject = false;
