@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/misc/types_nl.h>
+#include "stdpch.h"
 #include "ping.h"
 
 #include "interface_v3/interface_manager.h"
