@@ -130,10 +130,15 @@ namespace NLGUI
 		if( name == "posref" )
 		{
 			std::string posref;
-			posref = HotSpotToString( getParentPosRef() );
-			posref += " ";
 			posref += HotSpotToString( getPosRef() );
 			return posref;
+		}
+		else
+		if( name == "parentposref" )
+		{
+			std::string parentPosRef;
+			parentPosRef = HotSpotToString( getParentPosRef() );
+			return parentPosRef;
 		}
 		else
 		if( name == "sizeref" )
@@ -221,8 +226,13 @@ namespace NLGUI
 		else
 		if( name == "posref" )
 		{
-			convertHotSpotCouple( value.c_str(), _ParentPosRef, _PosRef );
+			convertHotSpot( value.c_str() );
 			return;
+		}
+		else
+		if( name == "parentposref" )
+		{
+			convertHotSpot( value.c_str() );
 		}
 		else
 		if( name == "sizeref" )

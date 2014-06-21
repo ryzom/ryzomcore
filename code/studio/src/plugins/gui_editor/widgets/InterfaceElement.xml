@@ -36,12 +36,17 @@
             <name>h</name>
             <type>int</type>
             <default>0</default>
-        </property>
+        </property>		
         <property>
             <name>posref</name>
-            <type>string</type>
-            <default>BL BL</default>
-        </property>
+            <type>posref</type>
+            <default>BL</default>
+        </property>		
+        <property>
+            <name>parentposref</name>
+            <type>posref</type>
+            <default>BL</default>
+        </property>		
         <property>
             <name>sizeref</name>
             <type>string</type>

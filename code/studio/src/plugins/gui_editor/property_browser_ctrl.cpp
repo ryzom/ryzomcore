@@ -26,6 +26,83 @@
 #include "widget_info_tree.h"
 #include <QList>
 
+namespace
+{
+
+	class NelPosRef
+	{
+	public:
+
+		enum NELPosRef
+		{
+			POSREF_BL   = 0,
+			POSREF_BM   = 1,
+			POSREF_BR   = 2,
+			POSREF_ML   = 3,
+			POSREF_MM   = 4,
+			POSREF_MR   = 5,
+			POSREF_TL   = 6,
+			POSREF_TM   = 7,
+			POSREF_TR   = 8
+		};
+
+		static int fromString( const std::string &s )
+		{
+			int r = -1;
+		
+			if( s == "BL" )
+				r = POSREF_BL;
+			else
+			if( s == "BM" )
+				r = POSREF_BM;
+			else
+			if( s == "BR" )
+				r = POSREF_BR;
+			else
+			if( s == "ML" )
+				r = POSREF_ML;
+			else
+			if( s == "MM" )
+				r = POSREF_MM;
+			else
+			if( s == "MR" )
+				r = POSREF_MR;
+			else
+			if( s == "TL" )
+				r = POSREF_TL;
+			else
+			if( s == "TM" )
+				r = POSREF_TM;
+			else
+			if( s == "TR" )
+				r = POSREF_TR;
+
+			return r;
+		}
+
+		static std::string toString( int value )
+		{
+			std::string v;
+		
+			switch( value )
+			{
+			case POSREF_BL: v = "BL"; break;
+			case POSREF_BM: v = "BM"; break;
+			case POSREF_BR: v = "BR"; break;
+			case POSREF_ML: v = "ML"; break;
+			case POSREF_MM: v = "MM"; break;
+			case POSREF_MR: v = "MR"; break;
+			case POSREF_TL: v = "TL"; break;
+			case POSREF_TM: v = "TM"; break;
+			case POSREF_TR: v = "TR"; break;
+			}
+
+			return v;
+		}
+	};
+
+}
+
 namespace GUIEditor
 {
 	enum NELButtonTypes
@@ -186,6 +263,19 @@ namespace GUIEditor
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
+		else
+		if( ( propName == "posref" ) || ( propName == "parentposref" ) )
+		{
+			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+			if( e == NULL )
+				return;
+
+			std::string v = NelPosRef::toString( value );
+			if( v.empty() )
+				return;
+
+			e->setProperty( propName.toUtf8().constData(), v );
+		}
 	}
 
 	void CPropBrowserCtrl::enablePropertyWatchers()
@@ -291,6 +381,39 @@ namespace GUIEditor
 			enums.push_back( "clip_word" );
 			enums.push_back( "dont_clip_word" );
 			enums.push_back( "justified" );
+
+			enumMgr->setEnumNames( pp, enums );
+			enumMgr->setValue( pp, e );
+			browser->addProperty( pp );
+
+			return;
+		}
+		else
+		if( prop.propType == "posref" )
+		{
+			std::string j = element->getProperty( prop.propName );
+			if( j.empty() )
+				return;
+
+			int e = -1;
+			e = NelPosRef::fromString( j );
+			if( e == -1 )
+				return;
+
+			QtProperty *pp = enumMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			QStringList enums;
+			enums.push_back( "BL" );
+			enums.push_back( "BM" );
+			enums.push_back( "BR" );
+			enums.push_back( "ML" );
+			enums.push_back( "MM" );
+			enums.push_back( "MR" );
+			enums.push_back( "TL" );
+			enums.push_back( "TM" );
+			enums.push_back( "TR" );
 
 			enumMgr->setEnumNames( pp, enums );
 			enumMgr->setValue( pp, e );
