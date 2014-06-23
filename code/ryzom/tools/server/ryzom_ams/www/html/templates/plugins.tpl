@@ -17,6 +17,7 @@
 					{if isset($smarty.get.result) and $smarty.get.result eq "5"}<div class="alert alert-error"><p>{$dc_success}</p></div>{/if}
 					{if isset($smarty.get.result) and $smarty.get.result eq "6"}<div class="alert alert-error"><p>{$dc_error}</p></div>{/if}
 					{if isset($smarty.get.result) and $smarty.get.result eq "7"}<div class="alert alert-error"><p>{$up_success}</p></div>{/if}
+					{if isset($smarty.get.result) and $smarty.get.result eq "8"}<div class="alert alert-error"><p>{$up_install_success}</p></div>{/if}
 					<div class="box-content">
 						<center><p>{$plugin_info}</p></center>
 						<center>
