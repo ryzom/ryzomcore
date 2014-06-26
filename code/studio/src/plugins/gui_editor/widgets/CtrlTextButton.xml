@@ -52,12 +52,17 @@
             <name>text_underlined</name>
             <type>bool</type>
             <default>false</default>
-        </property>
-        <property>
+        </property>        
+		<property>
             <name>text_posref</name>
-            <type>string</type>
-            <default>MM MM</default>
-        </property>
+            <type>posref</type>
+            <default>MM</default>
+        </property>		
+		<property>
+            <name>text_parent_posref</name>
+            <type>posref</type>
+            <default>MM</default>
+        </property>		
         <property>
             <name>text_color_normal</name>
             <type>color</type>
