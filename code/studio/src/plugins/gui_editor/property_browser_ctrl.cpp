@@ -325,7 +325,11 @@ namespace GUIEditor
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
 		else
-		if( ( propName == "posref" ) || ( propName == "parentposref" ) )
+		if( ( propName == "posref" ) ||
+			( propName == "parentposref" ) ||
+			( propName == "text_posref" ) ||
+			( propName == "text_parent_posref" )
+			)
 		{
 			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
 			if( e == NULL )
