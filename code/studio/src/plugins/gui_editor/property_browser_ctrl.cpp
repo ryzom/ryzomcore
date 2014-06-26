@@ -198,6 +198,9 @@ namespace GUIEditor
 		browser = NULL;
 		propertyMgr = new QtVariantPropertyManager;
 		enumMgr = new QtEnumPropertyManager;
+
+		variantFactory = new QtVariantEditorFactory;
+		enumFactory = new QtEnumEditorFactory;
 	}
 
 	CPropBrowserCtrl::~CPropBrowserCtrl()
@@ -206,6 +209,11 @@ namespace GUIEditor
 		enumMgr = NULL;
 		delete propertyMgr;
 		propertyMgr = NULL;
+
+		delete variantFactory;
+		variantFactory = NULL;
+		delete enumFactory;
+		enumFactory = NULL;
 
 		browser = NULL;
 	}
@@ -257,6 +265,14 @@ namespace GUIEditor
         std::string n = e->getClassName();
 
         setupProperties( n, e );
+
+
+		// Need to set these up every time, otherwise the editors won't work
+		// probably the clear() method clears them too...
+		browser->setFactoryForManager( propertyMgr, variantFactory );		
+		browser->setFactoryForManager( enumMgr, enumFactory );
+
+
 		enablePropertyWatchers();
 	}
 
@@ -381,12 +397,6 @@ namespace GUIEditor
 			nameToType[ prop.propName ] = prop.propType;
 			setupProperty( prop, element );
 		}
-
-		QtVariantEditorFactory *factory = new QtVariantEditorFactory;
-		browser->setFactoryForManager( propertyMgr, factory );
-
-		QtEnumEditorFactory *efactory = new QtEnumEditorFactory;
-		browser->setFactoryForManager( enumMgr, efactory );
 	}
 
 	void CPropBrowserCtrl::setupProperty( const SPropEntry &prop, const CInterfaceElement *element )

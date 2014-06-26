@@ -26,6 +26,8 @@
 class QtTreePropertyBrowser;
 class QtVariantPropertyManager;
 class QtEnumPropertyManager;
+class QtVariantEditorFactory;
+class QtEnumEditorFactory;
 class QtProperty;
 class QVariant;
 
@@ -68,6 +70,9 @@ namespace GUIEditor
 		QtTreePropertyBrowser *browser;
 		QtVariantPropertyManager *propertyMgr;
 		QtEnumPropertyManager *enumMgr;
+
+		QtVariantEditorFactory *variantFactory;
+		QtEnumEditorFactory *enumFactory;
 
 		std::string currentElement;
 		std::map< std::string, SWidgetInfo > widgetInfo;
