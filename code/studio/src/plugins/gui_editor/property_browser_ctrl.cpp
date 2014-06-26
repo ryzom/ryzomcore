@@ -296,8 +296,18 @@ namespace GUIEditor
 	void CPropBrowserCtrl::onEnumPropertyChanged( QtProperty *prop, int value )
 	{
 		QString propName = prop->propertyName();
+		std::string n = propName.toUtf8().constData();
 
-		if( propName == "button_type" )
+		// Try to find the type for this property
+		std::map< std::string, std::string >::const_iterator itr =
+			nameToType.find( n );
+		// Not found :(
+		if( itr == nameToType.end() )
+			return;
+		std::string type = itr->second;
+
+
+		if( type == "button_type" )
 		{
 			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
 			if( e == NULL )
@@ -311,7 +321,7 @@ namespace GUIEditor
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
 		else
-		if( propName == "justification" )
+		if( type == "text_justification" )
 		{
 			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
 			if( e == NULL )
@@ -325,11 +335,7 @@ namespace GUIEditor
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
 		else
-		if( ( propName == "posref" ) ||
-			( propName == "parentposref" ) ||
-			( propName == "text_posref" ) ||
-			( propName == "text_parent_posref" )
-			)
+		if( type == "posref" )
 		{
 			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
 			if( e == NULL )
@@ -366,10 +372,13 @@ namespace GUIEditor
 			return;
 		SWidgetInfo &w = itr->second;
 
+		nameToType.clear();
+
 		std::vector< SPropEntry >::const_iterator pItr;
 		for( pItr = w.props.begin(); pItr != w.props.end(); ++pItr )
 		{
 			const SPropEntry &prop = *pItr;
+			nameToType[ prop.propName ] = prop.propType;
 			setupProperty( prop, element );
 		}
 

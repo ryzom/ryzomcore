@@ -71,6 +71,7 @@ namespace GUIEditor
 
 		std::string currentElement;
 		std::map< std::string, SWidgetInfo > widgetInfo;
+		std::map< std::string, std::string > nameToType;
 	};
 
 }
