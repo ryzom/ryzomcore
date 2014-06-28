@@ -102,6 +102,83 @@ namespace
 	};
 
 
+	class NelPosRefTT
+	{
+	public:
+
+		enum NELPosRef
+		{
+			TTPOSREF_BL   = 0,
+			TTPOSREF_BM   = 1,
+			TTPOSREF_BR   = 2,
+			TTPOSREF_ML   = 3,
+			TTPOSREF_MM   = 4,
+			TTPOSREF_MR   = 5,
+			TTPOSREF_TL   = 6,
+			TTPOSREF_TM   = 7,
+			TTPOSREF_TR   = 8,
+			TTPOSREF_AUTO = 9
+		};
+
+		static int fromString( const std::string &s )
+		{
+			int r = -1;
+		
+			if( s == "BL" )
+				r = TTPOSREF_BL;
+			else
+			if( s == "BM" )
+				r = TTPOSREF_BM;
+			else
+			if( s == "BR" )
+				r = TTPOSREF_BR;
+			else
+			if( s == "ML" )
+				r = TTPOSREF_ML;
+			else
+			if( s == "MM" )
+				r = TTPOSREF_MM;
+			else
+			if( s == "MR" )
+				r = TTPOSREF_MR;
+			else
+			if( s == "TL" )
+				r = TTPOSREF_TL;
+			else
+			if( s == "TM" )
+				r = TTPOSREF_TM;
+			else
+			if( s == "TR" )
+				r = TTPOSREF_TR;
+			else
+				r = TTPOSREF_AUTO;
+
+			return r;
+		}
+
+		static std::string toString( int value )
+		{
+			std::string v;
+		
+			switch( value )
+			{
+			case TTPOSREF_BL: v = "BL"; break;
+			case TTPOSREF_BM: v = "BM"; break;
+			case TTPOSREF_BR: v = "BR"; break;
+			case TTPOSREF_ML: v = "ML"; break;
+			case TTPOSREF_MM: v = "MM"; break;
+			case TTPOSREF_MR: v = "MR"; break;
+			case TTPOSREF_TL: v = "TL"; break;
+			case TTPOSREF_TM: v = "TM"; break;
+			case TTPOSREF_TR: v = "TR"; break;
+			case TTPOSREF_AUTO: v = "auto"; break;
+			}
+
+			return v;
+		}
+	};
+
+
 	class NelButtonType
 	{
 	public:
@@ -201,6 +278,12 @@ namespace GUIEditor
 
 		variantFactory = new QtVariantEditorFactory;
 		enumFactory = new QtEnumEditorFactory;
+
+		ttPairs[ "tooltip_posref" ] = "tooltip_parent_posref";
+		ttPairs[ "tooltip_parent_posref" ] = "tooltip_posref";
+		ttPairs[ "tooltip_posref_alt" ] = "tooltip_parent_posref_alt";
+		ttPairs[ "tooltip_parent_posref_alt" ] = "tooltip_posref_alt";
+		
 	}
 
 	CPropBrowserCtrl::~CPropBrowserCtrl()
@@ -363,6 +446,56 @@ namespace GUIEditor
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
+		else
+		if( type == "posreftt" )
+		{
+			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+			if( e == NULL )
+				return;
+
+			std::string v = NelPosRefTT::toString( value );
+			if( v.empty() )
+				return;
+
+			e->setProperty( propName.toUtf8().constData(), v );
+
+			// When auto is set as posref for a  tooltip, it's pair MUST be auto as well
+			// When we set anything other than auto, the pair MUST not be auto either
+			// Only need to set the widget here, since the actual property is changed in the GUI library automatically
+			{
+				// Find the pair
+				std::map< std::string, std::string >::const_iterator ttItr =
+					ttPairs.find( n );
+				
+				// Found!
+				if( ttItr != ttPairs.end() )
+				{
+
+					// Find the QtProperty that belongs to the pair
+					std::map< std::string, QtProperty* >::const_iterator pItr =
+						ttPosRefProps.find( ttItr->second );
+
+					// Found!
+					if( pItr != ttPosRefProps.end() )
+					{
+						disablePropertyWatchers();
+
+						if( value == NelPosRefTT::TTPOSREF_AUTO )
+							enumMgr->setValue( pItr->second, NelPosRefTT::TTPOSREF_AUTO );
+						else
+						{
+							int v = NelPosRefTT::fromString( pItr->second->valueText().toUtf8().constData() );
+							if( v == NelPosRefTT::TTPOSREF_AUTO )
+							{
+								enumMgr->setValue( pItr->second, value );
+							}
+						}
+
+						enablePropertyWatchers();
+					}
+				}
+			}
+		}
 	}
 
 	void CPropBrowserCtrl::enablePropertyWatchers()
@@ -389,6 +522,7 @@ namespace GUIEditor
 		SWidgetInfo &w = itr->second;
 
 		nameToType.clear();
+		ttPosRefProps.clear();
 
 		std::vector< SPropEntry >::const_iterator pItr;
 		for( pItr = w.props.begin(); pItr != w.props.end(); ++pItr )
@@ -486,6 +620,42 @@ namespace GUIEditor
 			enumMgr->setEnumNames( pp, enums );
 			enumMgr->setValue( pp, e );
 			browser->addProperty( pp );
+
+			return;
+		}
+		else
+		if( prop.propType == "posreftt" )
+		{
+			std::string j = element->getProperty( prop.propName );
+			if( j.empty() )
+				return;
+
+			int e = -1;
+			e = NelPosRefTT::fromString( j );
+			if( e == -1 )
+				return;
+
+			QtProperty *pp = enumMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			QStringList enums;
+			enums.push_back( "BL" );
+			enums.push_back( "BM" );
+			enums.push_back( "BR" );
+			enums.push_back( "ML" );
+			enums.push_back( "MM" );
+			enums.push_back( "MR" );
+			enums.push_back( "TL" );
+			enums.push_back( "TM" );
+			enums.push_back( "TR" );
+			enums.push_back( "auto" );
+
+			enumMgr->setEnumNames( pp, enums );
+			enumMgr->setValue( pp, e );
+			browser->addProperty( pp );
+
+			ttPosRefProps[ prop.propName ] = pp;
 
 			return;
 		}

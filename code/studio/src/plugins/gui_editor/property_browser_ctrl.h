@@ -77,6 +77,8 @@ namespace GUIEditor
 		std::string currentElement;
 		std::map< std::string, SWidgetInfo > widgetInfo;
 		std::map< std::string, std::string > nameToType;
+		std::map< std::string, QtProperty * > ttPosRefProps; // Tooltip posref properties
+		std::map< std::string, std::string > ttPairs;
 	};
 
 }

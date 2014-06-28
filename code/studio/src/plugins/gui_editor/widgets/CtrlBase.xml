@@ -37,17 +37,27 @@
             <name>tooltip_special_parent</name>
             <type>string</type>
             <default></default>
-        </property>
+        </property>		
         <property>
             <name>tooltip_posref</name>
-            <type>string</type>
+            <type>posreftt</type>
             <default>auto</default>
-        </property>
+        </property>		
+        <property>
+            <name>tooltip_parent_posref</name>
+            <type>posreftt</type>
+            <default>auto</default>
+        </property>		
         <property>
             <name>tooltip_posref_alt</name>
-            <type>string</type>
+            <type>posreftt</type>
             <default>auto</default>
-        </property>
+        </property>		
+        <property>
+            <name>tooltip_parent_posref_alt</name>
+            <type>posreftt</type>
+            <default>auto</default>
+        </property>		
         <property>
             <name>instant_help</name>
             <type>bool</type>

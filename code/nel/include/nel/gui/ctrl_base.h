@@ -171,7 +171,9 @@ namespace NLGUI
 		THotSpot			_ToolTipPosRefAlt       : 6;
 	protected:
 		void convertTooltipHotSpot(const char *prop, THotSpot &parentHS, THotSpot &childHS);
+		void convertTooltipHotSpot(const char *prop, THotSpot &HS );
 		static std::string TooltipHotSpotToString( THotSpot parent, THotSpot child );
+		static std::string TooltipHotSpotToString( THotSpot HS );
 
 		void mapAHString( const std::string &key, const std::string &value );
 		std::string getAHString( const std::string &key ) const;
