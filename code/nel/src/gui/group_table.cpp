@@ -89,6 +89,8 @@ namespace NLGUI
 			}
 
 			nlassert(false);
+
+			return "";
 		}
 		else
 		if( name == "valign" )
@@ -106,6 +108,8 @@ namespace NLGUI
 			}
 
 			nlassert(false);
+
+			return "";
 		}
 		else
 		if( name == "left_margin" )

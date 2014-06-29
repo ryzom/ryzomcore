@@ -209,6 +209,8 @@ namespace NLGUI
 			}
 
 			nlassert(false);
+
+			return "";
 		}
 		else
 		if( name == "align" )
@@ -229,6 +231,8 @@ namespace NLGUI
 			}
 
 			nlassert(false);
+
+			return "";
 		}
 		else
 		if( name == "space" )
