@@ -28,6 +28,52 @@
 
 namespace
 {
+	class NelTTParent
+	{
+	public:
+
+		enum NELTTParent
+		{
+			TTPARENT_MOUSE = 0,
+			TTPARENT_CONTROL = 1,
+			TTPARENT_WINDOW = 2,
+			TTPARENT_SPECIAL_WINDOW = 3
+		};
+
+		static int fromString( const std::string &s )
+		{
+			int r = -1;
+
+			if( s == "mouse" )
+				r = TTPARENT_MOUSE;
+			else
+			if( s == "control" )
+				r = TTPARENT_CONTROL;
+			else
+			if( s == "window" )
+				r = TTPARENT_WINDOW;
+			else
+			if( s == "special" )
+				r = TTPARENT_SPECIAL_WINDOW;
+
+			return r;
+		}
+
+		static std::string toString( int value )
+		{
+			std::string s;
+
+			switch( value )
+			{
+			case TTPARENT_MOUSE: s = "mouse"; break;
+			case TTPARENT_CONTROL: s = "control"; break;
+			case TTPARENT_WINDOW: s = "window"; break;
+			case TTPARENT_SPECIAL_WINDOW: s = "special"; break;
+			}
+
+			return s;
+		}
+	};
 
 	class NelPosRef
 	{
@@ -496,6 +542,19 @@ namespace GUIEditor
 				}
 			}
 		}
+		else
+		if( type == "tooltip_parent" )
+		{
+			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+			if( e == NULL )
+				return;
+
+			std::string v = NelTTParent::toString( value );
+			if( v.empty() )
+				return;
+
+			e->setProperty( propName.toUtf8().constData(), v );
+		}
 	}
 
 	void CPropBrowserCtrl::enablePropertyWatchers()
@@ -538,6 +597,34 @@ namespace GUIEditor
 		QtVariantProperty *p = NULL;
 		QVariant v;
 		
+		if( prop.propType == "tooltip_parent" )
+		{
+			std::string j = element->getProperty( prop.propName );
+
+			if( j.empty() )
+				return;
+
+			int e = -1;
+			e = NelTTParent::fromString( j );
+			if( e == -1 )
+				return;
+			
+			QtProperty *pp = enumMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			QStringList enums;
+			enums.push_back( "mouse" );
+			enums.push_back( "control" );
+			enums.push_back( "window" );
+			enums.push_back( "special window" );
+
+			enumMgr->setEnumNames( pp, enums );
+			enumMgr->setValue( pp, e );
+			browser->addProperty( pp );
+
+		}
+		else
 		if( prop.propType == "button_type" )
 		{
 			std::string btype = element->getProperty( prop.propName );

@@ -30,7 +30,7 @@
         </property>
         <property>
             <name>tooltip_parent</name>
-            <type>string</type>
+            <type>tooltip_parent</type>
             <default></default>
         </property>
         <property>

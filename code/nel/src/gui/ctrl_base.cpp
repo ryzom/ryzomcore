@@ -86,7 +86,7 @@ namespace NLGUI
 			break;
 		}
 
-		return "";
+		return "control";
 	}
 
 	CCtrlBase::TToolTipParentType CCtrlBase::stringToToolTipParent( const std::string &str )
