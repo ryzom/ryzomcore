@@ -28,6 +28,53 @@
 
 namespace
 {
+	class NelBMAlign
+	{
+	public:
+
+		enum NELBMAlign
+		{
+			LB = 0,
+			RB = 1,
+			LT = 2,
+			RT = 3
+		};
+
+		static int fromString( const std::string &s )
+		{
+			int r = -1;
+
+			if( s == "LB" )
+				r = 0;
+			else
+			if( s == "RB" )
+				r = 1;
+			else
+			if( s == "LT" )
+				r = 2;
+			else
+			if( s == "RT" )
+				r = 3;
+
+			return r;
+		}
+
+		static std::string toString( int value )
+		{
+			std::string s;
+
+			switch( value )
+			{
+			case LB: s = "LB"; break;
+			case RB: s = "RB"; break;
+			case LT: s = "LT"; break;
+			case RT: s = "RT"; break;
+			}
+
+			return s;
+		}
+	};
+
 	class NelTTParent
 	{
 	public:
@@ -555,6 +602,19 @@ namespace GUIEditor
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
+		else
+		if( type == "bitmap_align" )
+		{
+			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+			if( e == NULL )
+				return;
+
+			std::string v = NelBMAlign::toString( value );
+			if( v.empty() )
+				return;
+
+			e->setProperty( propName.toUtf8().constData(), v );
+		}
 	}
 
 	void CPropBrowserCtrl::enablePropertyWatchers()
@@ -597,6 +657,33 @@ namespace GUIEditor
 		QtVariantProperty *p = NULL;
 		QVariant v;
 		
+		if( prop.propType == "bitmap_align" )
+		{
+			std::string j = element->getProperty( prop.propName );
+
+			if( j.empty() )
+				return;
+
+			int e = -1;
+			e = NelBMAlign::fromString( j );
+			if( e == -1 )
+				return;
+
+			QtProperty *pp = enumMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			QStringList enums;
+			enums.push_back( "LB" );
+			enums.push_back( "RB" );
+			enums.push_back( "LT" );
+			enums.push_back( "RT" );
+
+			enumMgr->setEnumNames( pp, enums );
+			enumMgr->setValue( pp, e );
+			browser->addProperty( pp );
+		}
+		else
 		if( prop.propType == "tooltip_parent" )
 		{
 			std::string j = element->getProperty( prop.propName );

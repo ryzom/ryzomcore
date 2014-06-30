@@ -60,7 +60,7 @@
         </property>
         <property>
             <name>align</name>
-            <type>string</type>
+            <type>bitmap_align</type>
             <default></default>
         </property>
         <property>
