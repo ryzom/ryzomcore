@@ -10,7 +10,7 @@
     <properties>
         <property>
             <name>color</name>
-            <type>string</type>
+            <type>color</type>
             <default>255 255 255 255</default>
         </property>
         <property>

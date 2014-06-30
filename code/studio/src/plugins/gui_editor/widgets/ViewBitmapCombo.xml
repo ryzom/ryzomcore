@@ -25,17 +25,17 @@
         </property>
         <property>
             <name>col_normal</name>
-            <type>string</type>
+            <type>color</type>
             <default></default>
         </property>
         <property>
             <name>col_over</name>
-            <type>string</type>
+            <type>color</type>
             <default></default>
         </property>
         <property>
             <name>col_pushed</name>
-            <type>string</type>
+            <type>color</type>
             <default></default>
         </property>
     </properties>
