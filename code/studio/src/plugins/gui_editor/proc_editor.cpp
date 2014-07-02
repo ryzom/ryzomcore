@@ -17,6 +17,7 @@
 
 #include "proc_editor.h"
 #include "action_editor.h"
+#include "action_list.h"
 #include <QMessageBox>
 #include <QInputDialog>
 #include "nel/gui/interface_group.h"
@@ -35,10 +36,15 @@ namespace GUIEditor
 		connect( removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveButtonClicked() ) );
 		connect( upButton, SIGNAL( clicked( bool ) ), this, SLOT( onUpButtonClicked() ) );
 		connect( downButton, SIGNAL( clicked( bool ) ), this, SLOT( onDownButtonClicked() ) );
+
+		alist = new ActionList();
 	}
 
 	ProcEditor::~ProcEditor()
 	{
+		delete alist;
+		alist = NULL;
+
 		delete actionEditor;
 		actionEditor = NULL;
 	}
@@ -84,17 +90,13 @@ namespace GUIEditor
 
 	void ProcEditor::onAddButtonClicked()
 	{
-		bool ok;
-		QString name =
-			QInputDialog::getText( this,
-							tr( "Adding new Action" ),
-							tr( "Please specify the name of the new action handler" ),
-							QLineEdit::Normal,
-							QString(),
-							&ok );
-
-		if( ok )
+		alist->load();
+		int result = alist->exec();
+		
+		if( result == QDialog::Accepted )
 		{
+			QString name = alist->getSelectedAction();
+
 			CProcedure *proc =
 				CWidgetManager::getInstance()->getParser()->getProc( currentProc.toUtf8().constData() );
 			if( proc != NULL )

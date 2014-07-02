@@ -20,6 +20,8 @@
 
 #include "ui_proc_editor.h"
 
+class ActionList;
+
 namespace GUIEditor
 {
 	class ActionEditor;
@@ -46,6 +48,8 @@ namespace GUIEditor
 
 		ActionEditor *actionEditor;
 		QString currentProc;
+
+		ActionList *alist;
 	};
 }
 

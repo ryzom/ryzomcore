@@ -29,3 +29,21 @@ void ActionList::load()
 	}
 }
 
+void ActionList::accept()
+{
+	QListWidgetItem *item = actionList->currentItem();
+	if( item == NULL )
+		return;
+	
+	selectedAction = item->text();
+
+	QDialog::accept();
+}
+
+void ActionList::reject()
+{
+	selectedAction = "";
+
+	QDialog::reject();
+}
+

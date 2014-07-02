@@ -27,7 +27,6 @@
 class QtTreePropertyBrowser;
 
 class QMenu;
-class ActionList;
 
 namespace GUIEditor
 {
@@ -67,7 +66,6 @@ private Q_SLOTS:
 		void onAddWidgetClicked();
 		void onTreeChanged();
 
-		void test_actionList();
 
 protected:
 		void hideEvent( QHideEvent *evnt );
@@ -94,7 +92,6 @@ private:
 		CWidgetInfoTree *widgetInfoTree;
 		CEditorMessageProcessor *messageProcessor;
 		AddWidgetWidget *addWidgetWidget;
-		ActionList *actionList;
 
 		CPropBrowserCtrl browserCtrl;
 		QString currentProject;

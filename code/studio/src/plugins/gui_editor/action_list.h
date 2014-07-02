@@ -3,6 +3,7 @@
 
 
 #include "ui_action_list.h"
+#include <QString>
 
 
 class ActionList : public QDialog, public Ui::ActionListDialog
@@ -13,6 +14,16 @@ public:
 	ActionList( QDialog *parent = NULL );
 	~ActionList();
 	void load();
+
+	QString getSelectedAction(){ return selectedAction; }
+
+
+public Q_SLOTS:
+	void accept();
+	void reject();
+
+private:
+	QString selectedAction;
 };
 
 #endif
