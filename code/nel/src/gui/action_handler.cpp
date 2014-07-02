@@ -111,6 +111,18 @@ namespace NLGUI
 		}
 	}
 
+	void CAHManager::getActionHandlers( std::vector< std::string > &handlers )
+	{
+		handlers.clear();
+
+		std::map< string, IActionHandler* >::iterator itr = FactoryMap.begin();
+		while( itr != FactoryMap.end() )
+		{
+			handlers.push_back( itr->first );
+			++itr;
+		}
+	}
+
 	// ------------------------------------------------------------------------------------------------
 	IActionHandler* CAHManager::getAH(const std::string &name, std::string &params)
 	{

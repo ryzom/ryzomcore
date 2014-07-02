@@ -68,6 +68,8 @@ namespace NLGUI
 			return _GlobalInstance;
 		}
 
+		void getActionHandlers( std::vector< std::string > &handlers );
+
 		/// return pointer to action handler or null if it doesn't exist
 		IActionHandler *getActionHandler(const std::string &name) const
 		{

@@ -44,6 +44,7 @@
 #include "editor_selection_watcher.h"
 #include "editor_message_processor.h"
 #include "add_widget_widget.h"
+#include "action_list.h"
 
 namespace GUIEditor
 {
@@ -69,6 +70,8 @@ namespace GUIEditor
 		setCentralWidget( GUICtrl->getViewPort() );
 
 		widgetInfoTree = new CWidgetInfoTree;
+
+		actionList = new ActionList();
 
 		createMenus();
 		readSettings();
@@ -114,6 +117,9 @@ namespace GUIEditor
 		writeSettings();
 
 		removeMenus();
+
+		delete actionList;
+		actionList = NULL;
 
 		delete messageProcessor;
 		messageProcessor = NULL;
@@ -341,6 +347,11 @@ namespace GUIEditor
 	}
 
 
+	void GUIEditorWindow::test_actionList()
+	{
+		actionList->load();
+		actionList->show();
+	}
 
 	void GUIEditorWindow::hideEvent( QHideEvent *evnt )
 	{
@@ -398,6 +409,10 @@ namespace GUIEditor
 
 			a = new QAction( "Add Widget", this );
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
+			m->addAction( a );
+
+			a = new QAction( "Test actionlist", this );
+			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( test_actionList() ) );
 			m->addAction( a );
 
 			menu = m;
