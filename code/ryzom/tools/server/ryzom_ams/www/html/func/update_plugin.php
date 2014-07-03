@@ -16,7 +16,6 @@ function update_plugin() {
              $db = new DBLayer( 'lib' );
              $sth = $db -> executeWithoutParams( "SELECT * FROM plugins INNER JOIN updates ON plugins.Id=updates.PluginId Where plugins.Id=$id" );
              $row = $sth -> fetch();
-             print_r( $row );
             
              // replacing update in the  database
             Plugincache :: rrmdir( $row['FileName'] );

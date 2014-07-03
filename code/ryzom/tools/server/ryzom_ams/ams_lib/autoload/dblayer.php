@@ -237,7 +237,7 @@ class DBLayer {
              } 
         catch ( Exception $e )
          {
-            $this -> rollBack();
+            $this -> PDO -> rollBack();
              throw new Exception( "error in deleting" );
              } 
         
