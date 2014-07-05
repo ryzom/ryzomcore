@@ -12,13 +12,10 @@ QDialog( parent )
 {
 	setupUi( this );
 	setupConnections();
-	data = NULL;
 }
 
 TextureChooser::~TextureChooser()
 {
-	delete data;
-	data = NULL;
 }
 
 
@@ -61,10 +58,7 @@ void TextureChooser::onCurrentRowChanged( int row )
 
 	uint32 size = bm.getSize() * ( 32 / 8 );  // should be depth, but CBitmap always uses 32 bit to store the image
 
-	if( data != NULL )
-		delete data;
-
-	data = new uint8[ size ];
+	uint8 *data = new uint8[ size ];
 	bm.getData( data );
 
 	/// Convert from ABGR to ARGB
@@ -85,6 +79,9 @@ void TextureChooser::onCurrentRowChanged( int row )
 
 	QImage img( data, bm.getWidth(), bm.getHeight(), QImage::Format_ARGB32 );
 	label->setPixmap( QPixmap::fromImage( img ) );
+
+	delete data;
+	data = NULL;
 
 }
 

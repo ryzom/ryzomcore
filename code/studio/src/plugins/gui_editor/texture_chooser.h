@@ -18,8 +18,6 @@ private Q_SLOTS:
 
 private:
 	void setupConnections();
-
-	unsigned char *data;
 };
 
 #endif
