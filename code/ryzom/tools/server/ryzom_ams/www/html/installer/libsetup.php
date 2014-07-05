@@ -172,6 +172,26 @@
               PRIMARY KEY (`Id`) )
             ENGINE = InnoDB;
             
+            -- -----------------------------------------------------
+            -- Table `" . $cfg['db']['lib']['name'] ."`.`updates`
+            -- -----------------------------------------------------
+            DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`updates` ;
+    
+            CREATE TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`updates` (
+	      `s.no` int(10) NOT NULL AUTO_INCREMENT,
+	      `PluginId` int(10) DEFAULT NULL,
+	      `UpdatePath` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+	      `UpdateInfo` text COLLATE utf8_unicode_ci,
+	    PRIMARY KEY (`s.no`),
+	    KEY `PluginId` (`PluginId`)) 
+	    ENGINE=InnoDB;
+
+	    -- -----------------------------------------
+	    -- Constraints for table `updates`
+	    -- -----------------------------------------
+	    ALTER TABLE `" . $cfg['db']['lib']['name'] ."`.`updates`
+	    ADD CONSTRAINT `updates_ibfk_1` FOREIGN KEY (`PluginId`) REFERENCES `plugins` (`Id`);
+
             
             -- -----------------------------------------------------
             -- Table `" . $cfg['db']['lib']['name'] ."`.`ticket`
