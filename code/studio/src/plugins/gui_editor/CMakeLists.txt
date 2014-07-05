@@ -31,6 +31,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	editor_selection_watcher.h
 	editor_message_processor.h
 	action_list.h
+	texture_chooser.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
@@ -47,6 +48,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	new_widget_widget.ui
 	add_widget_widget.ui
 	action_list.ui
+	texture_chooser.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)
