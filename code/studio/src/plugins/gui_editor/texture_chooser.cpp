@@ -55,6 +55,11 @@ void TextureChooser::onCurrentRowChanged( int row )
 	NLMISC::CBitmap bm;
 	uint8 depth = bm.load( f );
 	f.close();
+	b = bm.convertToType( NLMISC::CBitmap::RGBA );
+	if( !b )
+	{
+		return;
+	}
 
 	uint32 size = bm.getSize() * ( 32 / 8 );  // should be depth, but CBitmap always uses 32 bit to store the image
 
