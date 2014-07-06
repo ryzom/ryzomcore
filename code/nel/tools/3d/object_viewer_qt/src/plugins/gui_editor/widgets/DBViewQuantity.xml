@@ -2,6 +2,7 @@
     <header>
         <name>DBViewQuantity</name>
         <guiname>CDBViewQuantity</guiname>
+        <classname>text_quantity</classname>
         <ancestor>ViewText</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -11,17 +12,17 @@
         <property>
             <name>value</name>
             <type>string</type>
-            <default></default>
+            <default>0</default>
         </property>
         <property>
             <name>valuemax</name>
             <type>string</type>
-            <default></default>
+            <default>100</default>
         </property>
         <property>
             <name>emptytext</name>
             <type>string</type>
-            <default></default>
+            <default>empty text</default>
         </property>
 
 

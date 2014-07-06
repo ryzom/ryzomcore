@@ -117,6 +117,7 @@ void CPSUtil::displayBBox(NL3D::IDriver *driver, const NLMISC::CAABBox &box, NLM
 	CVertexBuffer vb;
 	vb.setVertexFormat(CVertexBuffer::PositionFlag);
 	vb.setNumVertices(8);
+	vb.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
 
 	{
 		CVertexBufferReadWrite vba;
@@ -145,6 +146,7 @@ void CPSUtil::displayBBox(NL3D::IDriver *driver, const NLMISC::CAABBox &box, NLM
 	CIndexBuffer pb;
 	pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	pb.setNumIndexes(2*12);
+	pb.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
 	{
 		CIndexBufferReadWrite ibaWrite;
 		pb.lock (ibaWrite);
@@ -206,6 +208,7 @@ void CPSUtil::displayArrow(IDriver *driver, const CVector &start, const CVector 
 	CVertexBuffer vb;
 	vb.setVertexFormat(CVertexBuffer::PositionFlag);
 	vb.setNumVertices(5);
+	vb.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
 
 
 	{

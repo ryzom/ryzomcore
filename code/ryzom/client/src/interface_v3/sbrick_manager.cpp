@@ -50,55 +50,69 @@ CSBrickManager::CSBrickManager() : _NbFamily(0), _SabrinaCom(&_BrickContainer)
 // ***************************************************************************
 void CSBrickManager::init()
 {
-
 	// Read the Bricks from the SheetMngr.
-	const CSheetManager::TEntitySheetMap &sheetMap=  SheetMngr.getSheets();
-	for(CSheetManager::TEntitySheetMap::const_iterator it= sheetMap.begin(); it!=sheetMap.end(); it++)
+	const CSheetManager::TEntitySheetMap &sheetMap = SheetMngr.getSheets();
+	_BrickVector.clear();
+	_BrickVector.reserve(16 * 1024);
+	uint32 shtype = CSheetId::typeFromFileExtension("sbrick");
+	for (CSheetManager::TEntitySheetMap::const_iterator it(sheetMap.begin()), end(sheetMap.end()); it != end; ++it)
 	{
 		// it's a brick?
-		CSBrickSheet	*br= dynamic_cast<CSBrickSheet*>(it->second.EntitySheet);
-		if(br)
+		CSBrickSheet *br = dynamic_cast<CSBrickSheet *>(it->second.EntitySheet); // TODO: Avoid dynamic_cast, depend on getSheetType
+		if (br)
 		{
 			// ok, add it
-			_Bricks[it->first]= br;
+			uint32 shid = it->first.getShortId();
+			nlassert(shtype == it->first.getSheetType());
+			if (shid >= _BrickVector.size())
+				_BrickVector.resize(shid + 1);
+			_BrickVector[shid] = br;
 		}
 	}
 
 	// Process Bricks
-	if (_Bricks.empty()) return;
+	if (_BrickVector.empty()) return;
 
-	map<CSheetId,CSBrickSheet*>::iterator itb;
-
-	//build the vector of family bit fields, and the vector of existing bricks
-	for (itb = _Bricks.begin();itb != _Bricks.end();itb++)
+	// Build the vector of family bit fields, and the vector of existing bricks
+	for (std::vector<CSBrickSheet *>::iterator itb(_BrickVector.begin()), endb(_BrickVector.end()); itb != endb; ++itb)
 	{
-		//resize our vectors if necessary
-		if ( itb->second->BrickFamily >= (sint32)_NbFamily )
-		{
-			_SheetsByFamilies.resize(itb->second->BrickFamily+1);
-			_FamiliesBits.resize(itb->second->BrickFamily+1, 0);
-			_NbBricksPerFamily.resize(itb->second->BrickFamily+1, 0);
+		CSBrickSheet *brickSheet = *itb;
+		if (!brickSheet)
+			continue;
 
-			_NbFamily = itb->second->BrickFamily+1;
+		// Resize our vectors if necessary
+		if (brickSheet->BrickFamily >= (sint32)_NbFamily)
+		{
+			_SheetsByFamilies.resize(brickSheet->BrickFamily + 1);
+			_FamiliesBits.resize(brickSheet->BrickFamily + 1, 0);
+			_NbBricksPerFamily.resize(brickSheet->BrickFamily + 1, 0);
+
+			_NbFamily = brickSheet->BrickFamily + 1;
 		}
 	}
 
 	// Since _SheetsByFamilies is a vector of vector, avoid long reallocation by building it in 2 pass
-	for (itb = _Bricks.begin();itb != _Bricks.end();itb++)
+	sint32 shidc = -1;
+	for (std::vector<CSBrickSheet *>::iterator itb(_BrickVector.begin()), endb(_BrickVector.end()); itb != endb; ++itb)
 	{
-		//resize our vectors if necessary
-		//the index in familly must be decremented because the values start at 1 in the sheets
-		if (itb->second->IndexInFamily<1)
+		++shidc;
+		CSBrickSheet *brickSheet = *itb;
+		if (!brickSheet)
+			continue;
+
+		// Resize our vectors if necessary
+		// The index in familly must be decremented because the values start at 1 in the sheets
+		if (brickSheet->IndexInFamily < 1)
 		{
-			nlwarning("CSBrickManager::CSBrickManager(): Reading file: %s: IndexInFamily==0 but should be >=1 - entry ignored",itb->first.toString().c_str());
+			nlwarning("CSBrickManager::CSBrickManager(): Reading file: %s: IndexInFamily==0 but should be >=1 - entry ignored", brickSheet->Id.toString().c_str());
 			continue;
 		}
-		if (_NbBricksPerFamily[itb->second->BrickFamily] < (uint)(itb->second->IndexInFamily) )
+		if (_NbBricksPerFamily[brickSheet->BrickFamily] < (uint)(brickSheet->IndexInFamily))
 		{
-			_SheetsByFamilies[itb->second->BrickFamily].resize(itb->second->IndexInFamily);
-			_NbBricksPerFamily[itb->second->BrickFamily]=itb->second->IndexInFamily;
+			_SheetsByFamilies[brickSheet->BrickFamily].resize(brickSheet->IndexInFamily);
+			_NbBricksPerFamily[brickSheet->BrickFamily] = brickSheet->IndexInFamily;
 		}
-		_SheetsByFamilies[itb->second->BrickFamily][itb->second->IndexInFamily-1] = itb->first;
+		_SheetsByFamilies[brickSheet->BrickFamily][brickSheet->IndexInFamily - 1] = brickSheet->Id;
 	}
 
 	// check brick content for client.
@@ -192,20 +206,17 @@ void			CSBrickManager::makeRoots()
 {
 	_Roots.clear();
 
-	map<CSheetId,CSBrickSheet*>::iterator it = _Bricks.begin();
-
-	while (it != _Bricks.end())
+	for (std::vector<CSBrickSheet *>::size_type ib = 0; ib < _BrickVector.size(); ++ib)
 	{
-		const CSheetId &rSheet = it->first;
-		const CSBrickSheet &rBR = *it->second;
+		const CSBrickSheet *brickSheet = _BrickVector[ib];
+		if (!brickSheet)
+			continue;
 
 		// List only the Roots
-		if ( !rBR.isRoot() )
-		{ it++; continue; }
+		if (!brickSheet->isRoot())
+			continue;
 
-		_Roots.push_back(rSheet);
-
-		it++;
+		_Roots.push_back(brickSheet->Id);
 	}
 
 }
@@ -223,22 +234,20 @@ const std::vector<NLMISC::CSheetId>		&CSBrickManager::getFamilyBricks(uint famil
 // ***************************************************************************
 void			CSBrickManager::checkBricks()
 {
-	map<CSheetId,CSBrickSheet*>::iterator it = _Bricks.begin();
-
-	while (it != _Bricks.end())
+	for (std::vector<CSBrickSheet *>::size_type ib = 0; ib < _BrickVector.size(); ++ib)
 	{
-		CSBrickSheet &rBR = *it->second;
+		CSBrickSheet *brickSheet = _BrickVector[ib];
+		if (!brickSheet)
+			continue;
 
-		if(rBR.ParameterFamilies.size()>CDBGroupBuildPhrase::MaxParam)
+		if (brickSheet->ParameterFamilies.size() > CDBGroupBuildPhrase::MaxParam)
 		{
 			nlwarning("The Sheet %s has too many parameters for Client Composition: %d/%d",
-				rBR.Id.toString().c_str(), rBR.ParameterFamilies.size(), CDBGroupBuildPhrase::MaxParam);
+				brickSheet->Id.toString().c_str(), brickSheet->ParameterFamilies.size(), CDBGroupBuildPhrase::MaxParam);
 
 			// reset them... don't crahs client, but won't work.
-			rBR.ParameterFamilies.clear();
+			brickSheet->ParameterFamilies.clear();
 		}
-
-		it++;
 	}
 }
 
@@ -340,28 +349,27 @@ TOOL_TYPE::TCraftingToolType	CSBrickManager::CBrickContainer::getFaberPlanToolTy
 // ***************************************************************************
 void			CSBrickManager::makeVisualBrickForSkill()
 {
-	map<CSheetId,CSBrickSheet*>::iterator it = _Bricks.begin();
-
 	// clear
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for (uint i = 0; i < SKILLS::NUM_SKILLS; ++i)
 	{
-		_VisualBrickForSkill[i]= CSheetId();
+		_VisualBrickForSkill[i] = CSheetId();
 	}
 
 	// fill with interface bricks
-	while (it != _Bricks.end())
+	for (std::vector<CSBrickSheet *>::size_type ib = 0; ib < _BrickVector.size(); ++ib)
 	{
-		const CSheetId &rSheet = it->first;
-		const CSBrickSheet &rBR = *it->second;
+		const CSBrickSheet *brickSheet = _BrickVector[ib];
+		if (!brickSheet)
+			continue;
 
 		// List only bricks with family == BIF
-		if ( rBR.BrickFamily == BRICK_FAMILIES::BIF )
+		if (brickSheet->BrickFamily == BRICK_FAMILIES::BIF)
 		{
-			if(rBR.getSkill()<SKILLS::NUM_SKILLS)
-				_VisualBrickForSkill[rBR.getSkill()]= rSheet;
+			if (brickSheet->getSkill() < SKILLS::NUM_SKILLS)
+			{
+				_VisualBrickForSkill[brickSheet->getSkill()] = brickSheet->Id;
+			}
 		}
-
-		it++;
 	}
 }
 
@@ -378,43 +386,40 @@ CSheetId		CSBrickManager::getVisualBrickForSkill(SKILLS::ESkills s)
 // ***************************************************************************
 void			CSBrickManager::compileBrickProperties()
 {
-	map<CSheetId,CSBrickSheet*>::iterator it = _Bricks.begin();
-
 	// clear
 	_BrickPropIdMap.clear();
 	uint	NumIds= 0;
 
 	// **** for all bricks, compile props
-	while (it != _Bricks.end())
+	for (std::vector<CSBrickSheet *>::size_type ib = 0; ib < _BrickVector.size(); ++ib)
 	{
-//		const CSheetId &rSheet = it->first;
-		CSBrickSheet &rBR = *it->second;
+		CSBrickSheet *brickSheet = _BrickVector[ib];
+		if (!brickSheet)
+			continue;
 
 		// For all properties of this brick, compile
-		for(uint i=0;i<rBR.Properties.size();i++)
+		for (uint i = 0; i < brickSheet->Properties.size(); ++i)
 		{
-			CSBrickSheet::CProperty	&prop= rBR.Properties[i];
+			CSBrickSheet::CProperty	&prop = brickSheet->Properties[i];
 			string::size_type pos = prop.Text.find(':');
-			if(pos!=string::npos)
+			if (pos != string::npos)
 			{
-				string	key= prop.Text.substr(0, pos);
+				string key = prop.Text.substr(0, pos);
 				strlwr(key);
-				string	value= prop.Text.substr(pos+1);
+				string value = prop.Text.substr(pos + 1);
 				// get key id.
-				if(_BrickPropIdMap.find(key)==_BrickPropIdMap.end())
+				if (_BrickPropIdMap.find(key) == _BrickPropIdMap.end())
 				{
 					// Inc before to leave 0 as "undefined"
-					_BrickPropIdMap[key]= ++NumIds;
+					_BrickPropIdMap[key] = ++NumIds;
 				}
-				prop.PropId= _BrickPropIdMap[key];
+				prop.PropId = _BrickPropIdMap[key];
 				fromString(value, prop.Value);
-				pos= value.find(':');
-				if(pos!=string::npos)
-					fromString(value.substr(pos+1), prop.Value2);
+				pos = value.find(':');
+				if (pos != string::npos)
+					fromString(value.substr(pos + 1), prop.Value2);
 			}
 		}
-
-		it++;
 	}
 
 	// Get usual PropIds
@@ -428,19 +433,19 @@ void			CSBrickManager::compileBrickProperties()
 
 
 	// **** for all bricks, recompute localized text with formated version
-	it= _Bricks.begin();
 	ucstring	textTemp;
 	textTemp.reserve(1000);
-	while (it != _Bricks.end())
+	for (std::vector<CSBrickSheet *>::size_type ib = 0; ib < _BrickVector.size(); ++ib)
 	{
-		const CSheetId &rSheet = it->first;
-		const CSBrickSheet &rBR = *it->second;
+		CSBrickSheet *brickSheet = _BrickVector[ib];
+		if (!brickSheet)
+			continue;
 
 		// Get the Brick texts
 		ucstring	texts[3];
-		texts[0]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(rSheet);
-		texts[1]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedDescription(rSheet);
-		texts[2]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(rSheet);
+		texts[0]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedName(brickSheet->Id);
+		texts[1]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedDescription(brickSheet->Id);
+		texts[2]= STRING_MANAGER::CStringManagerClient::getSBrickLocalizedCompositionDescription(brickSheet->Id);
 
 		// For alls texts, parse format
 		for(uint i=0;i<3;i++)
@@ -506,13 +511,13 @@ void			CSBrickManager::compileBrickProperties()
 							// if propid exist
 							if(propId)
 							{
-								for(uint p=0;p<rBR.Properties.size();p++)
+								for(uint p=0;p<brickSheet->Properties.size();p++)
 								{
-									const CSBrickSheet::CProperty	&prop= rBR.Properties[p];
+									const CSBrickSheet::CProperty	&prop= brickSheet->Properties[p];
 									if(prop.PropId==propId)
 									{
 										if(paramId==0)
-											value= rBR.Properties[p].Value;
+											value= brickSheet->Properties[p].Value;
 										else
 										{
 											// must parse the initial text/ skip the identifier
@@ -562,9 +567,7 @@ void			CSBrickManager::compileBrickProperties()
 		}
 
 		// reset
-		STRING_MANAGER::CStringManagerClient::replaceSBrickName(rSheet, texts[0], texts[1], texts[2]);
-
-		it++;
+		STRING_MANAGER::CStringManagerClient::replaceSBrickName(brickSheet->Id, texts[0], texts[1], texts[2]);
 	}
 }
 

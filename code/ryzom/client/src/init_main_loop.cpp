@@ -148,7 +148,7 @@ bool						UseEscapeDuringLoading = USE_ESCAPE_DURING_LOADING;
 #define	ENTITY_TEXTURE_COARSE_LEVEL		3
 #define	ENTITY_TEXTURE_NORMAL_LEVEL		1
 #define	ENTITY_TEXTURE_HIGH_LEVEL		0
-// Size in Mo of the cache for entity texturing.
+// Size in MB of the cache for entity texturing.
 #define	ENTITY_TEXTURE_NORMAL_MEMORY	10
 #define	ENTITY_TEXTURE_HIGH_MEMORY		40
 

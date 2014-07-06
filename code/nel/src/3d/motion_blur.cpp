@@ -59,6 +59,7 @@ void CMotionBlur::performMotionBlur(IDriver *driver, float motionBlurAmount)
 	static CVertexBuffer  vb ;
 	vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag ) ;
 	vb.setNumVertices(4) ;
+	vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
 
 	uint32 width, height ;
 	driver->getWindowSize(width, height) ;

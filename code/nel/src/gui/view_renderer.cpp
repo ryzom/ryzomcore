@@ -894,11 +894,11 @@ namespace NLGUI
 	{
 		if (sGlobalTextureName.empty()) return -1;
 		// Look if already existing
-		string sLwrGTName = strlwr(sGlobalTextureName);
+		string sLwrGTName = toLower(sGlobalTextureName);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			std::string sText = strlwr(ite->Name);
+			std::string sText = toLower(ite->Name);
 			if (sText == sLwrGTName)
 				break;
 			ite++;

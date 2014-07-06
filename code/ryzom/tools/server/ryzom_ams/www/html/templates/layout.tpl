@@ -12,7 +12,7 @@
 		http://twitter.com/halalit_usman
 	-->
 	<meta charset="utf-8">
-	<title>Ryzom Account Management System</title>
+	<title>{$ams_title}</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="ryzom,ams">
 	<meta name="author" content="Daan Janssens & Matthew Lagoe">

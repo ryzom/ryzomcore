@@ -70,6 +70,14 @@ namespace NLGUI
 	{
 	public:
 
+		/// Watches CInterfaceElement deletions
+		class IDeletionWatcher
+		{
+		public:
+			IDeletionWatcher(){}
+			virtual ~IDeletionWatcher(){}
+			virtual void onDeleted( const std::string &name ){}
+		};
 
 		enum EStrech
 		{
@@ -424,6 +432,8 @@ namespace NLGUI
 
 		void drawHotSpot(THotSpot hs, NLMISC::CRGBA col);
 
+		void drawHighlight();
+
 		// Returns 'true' if that element can be downcasted to a view
 		virtual bool isView() const { return false; }
 
@@ -473,6 +483,7 @@ namespace NLGUI
 		bool isInGroup( CInterfaceGroup *group );
 
 		static void setEditorMode( bool b ){ editorMode = b; }
+		static bool getEditorMode(){ return editorMode; }
 
 		void setEditorSelected( bool b ){ editorSelected = b; }
 		bool isEditorSelected() const{ return editorSelected; }
@@ -482,6 +493,19 @@ namespace NLGUI
 		
 		void setSerializable( bool b ){ serializable = b; }
 		bool IsSerializable() const{ return serializable; }
+
+		/// Called when the widget is removed from it's parent group
+		virtual void onRemoved(){}
+
+		/// Registers a deletion watcher
+		static void registerDeletionWatcher( IDeletionWatcher *watcher );
+
+		/// Unregisters a deletion watcher
+		static void unregisterDeletionWatcher( IDeletionWatcher *watcher );
+
+		/// Called when the widget is deleted,
+		/// so other widgets in the group can check if it belongs to them
+		virtual void onWidgetDeleted( CInterfaceElement *e ){}
 
 	protected:
 
@@ -543,6 +567,11 @@ namespace NLGUI
 		void parseSizeRef(const char *sizeRefStr, sint32 &sizeref, sint32 &sizeDivW, sint32 &sizeDivH);
 
 	private:
+		/// Notifies the deletion watchers that this interface element is being deleted
+		void notifyDeletionWatchers();
+		
+		static std::vector< IDeletionWatcher* > deletionWatchers;
+
 		//void	snapSize();
 		bool serializable;
 

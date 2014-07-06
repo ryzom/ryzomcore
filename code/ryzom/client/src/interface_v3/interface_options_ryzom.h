@@ -16,7 +16,7 @@
 
 
 #ifndef IF_OPTIONS_RZ
-#define IP_OPTIONS_RZ
+#define IF_OPTIONS_RZ
 
 #include "nel/gui/interface_options.h"
 

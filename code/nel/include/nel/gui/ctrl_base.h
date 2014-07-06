@@ -68,9 +68,7 @@ namespace NLGUI
 		// special parse
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
-
-		/// Handle all events (implemented by derived classes) (return true to signal event handled)
-		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
+		bool handleEvent (const NLGUI::CEventDescriptor &event);
 
 		virtual CCtrlBase	*getSubCtrl (sint32 /* x */, sint32 /* y */) { return this; }
 

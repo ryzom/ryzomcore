@@ -2,6 +2,7 @@
     <header>
         <name>GroupList</name>
         <guiname>CGroupList</guiname>
+        <classname>list</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>
