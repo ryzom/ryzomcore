@@ -219,6 +219,67 @@ void CFileContainer::getFileListByName(const std::string &extension, const std::
 	}
 }
 
+void CPath::getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames)
+{
+	getInstance()->_FileContainer.getFileListByPath(extension, path, filenames);
+}
+
+void CFileContainer::getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames)
+{
+	if (!_MemoryCompressed)
+	{
+		TFiles::iterator first(_Files.begin()), last(_Files.end());
+
+		if( !path.empty() )
+		{
+			for (; first != last; ++ first)
+			{
+				string ext = SSMext.get(first->second.idExt);
+				string p = SSMpath.get(first->second.idPath);
+				if (p.find(path) != string::npos && (ext == extension || extension.empty()))
+				{
+					filenames.push_back(first->first);
+				}
+			}
+		}
+		// if extension is empty we keep all files
+		else
+		{
+			for (; first != last; ++ first)
+			{
+				filenames.push_back(first->first);
+			}
+		}
+	}
+	else
+	{
+		// compressed memory version
+		std::vector<CFileContainer::CMCFileEntry>::iterator first(_MCFiles.begin()), last(_MCFiles.end());
+
+		if( !path.empty() )
+		{
+			for (; first != last; ++ first)
+			{
+				string ext = SSMext.get(first->idExt);
+				string p = SSMpath.get(first->idPath);
+				
+				if (strstr(p.c_str(), path.c_str()) != NULL && (ext == extension || extension.empty()))
+				{
+					filenames.push_back(first->Name);
+				}
+			}
+		}
+		// if extension is empty we keep all files
+		else
+		{
+			for (; first != last; ++ first)
+		{
+				filenames.push_back(first->Name);
+			}
+		}
+	}
+}
+
 void CPath::clearMap ()
 {
 	getInstance()->_FileContainer.clearMap();

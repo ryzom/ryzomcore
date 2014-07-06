@@ -24,7 +24,8 @@ void TextureChooser::load()
 	listWidget->clear();
 
 	std::vector< std::string > textures;
-	NLMISC::CPath::getFileList( "tga", textures );
+	//NLMISC::CPath::getFileList( "tga", textures );
+	NLMISC::CPath::getFileListByPath( "tga", "interfaces", textures );
 
 	std::vector< std::string >::const_iterator itr = textures.begin();
 	while( itr != textures.end() )

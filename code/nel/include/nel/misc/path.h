@@ -200,6 +200,10 @@ public:
 	 */
 	void getFileListByName(const std::string &extension, const std::string &name, std::vector<std::string> &filenames);
 
+	/** Create a list of file having the requested string in the path and the requested extension.
+	*/
+	void getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames);
+
 	/** Make a path relative to another if possible, else doesn't change it.
 	 * \param basePath is the base path to be relative to.
 	 * \param relativePath is the path to make relative to basePath.
@@ -491,6 +495,10 @@ public:
 	/** Create a list of file having the requested string in the filename and the requested extension.
 	 */
 	static void getFileListByName(const std::string &extension, const std::string &name, std::vector<std::string> &filenames);
+
+	/** Create a list of file having the requested string in the path and the requested extension
+	*/
+	static void getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames);
 
 	/** Make a path relative to another if possible, else doesn't change it.
 	 * \param basePath is the base path to be relative to.
