@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 /**
  * API for loading and interacting with plugins
