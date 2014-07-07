@@ -12,12 +12,19 @@ public:
 	~TextureChooser();
 
 	void load();
+	QString getSelection(){ return selection; }
+
+public Q_SLOTS:
+	void accept();
+	void reject();
 
 private Q_SLOTS:
 	void onCurrentRowChanged( int row );
 
 private:
 	void setupConnections();
+
+	QString selection;
 };
 
 #endif

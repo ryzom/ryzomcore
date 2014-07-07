@@ -33,6 +33,25 @@ void TextureChooser::load()
 		listWidget->addItem( itr->c_str() );
 		++itr;
 	}
+
+	listWidget->setCurrentRow( 0 );
+}
+
+void TextureChooser::accept()
+{
+	QListWidgetItem *item = listWidget->currentItem();
+	if( item == NULL )
+		return;
+
+	selection = item->text();
+	QDialog::accept();
+}
+
+void TextureChooser::reject()
+{
+	selection = "";
+
+	QDialog::reject();
 }
 
 void TextureChooser::onCurrentRowChanged( int row )
