@@ -184,17 +184,18 @@
             DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`plugins` ;
     
             CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`plugins` (
-		  `Id` INT(10) NOT NULL AUTO_INCREMENT,
-                  `FileName VARCHAR(255) NOT NULL, 
+			  `Id` INT(10) NOT NULL AUTO_INCREMENT,
+              `FileName` VARCHAR(255) NOT NULL, 
   	          `Name` VARCHAR(11) NOT NULL,
   	          `Type` VARCHAR(12) NOT NULL,
   	          `Owner` VARCHAR(25) NOT NULL,
 	          `Permission` VARCHAR(5) NOT NULL,
   	          `Status` INT(11) NOT NULL DEFAULT 0,
   	          `Weight` INT(11) NOT NULL DEFAULT 0,
-		  `Info` TEXT NULL DEFAULT NULL,		
+		      `Info` TEXT NULL DEFAULT NULL,		
               PRIMARY KEY (`Id`) )
             ENGINE = InnoDB;
+            
             
             -- -----------------------------------------------------
             -- Table `" . $cfg['db']['lib']['name'] ."`.`updates`
@@ -202,19 +203,19 @@
             DROP TABLE IF EXISTS `" . $cfg['db']['lib']['name'] ."`.`updates` ;
     
             CREATE TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`updates` (
-	      `s.no` int(10) NOT NULL AUTO_INCREMENT,
-	      `PluginId` int(10) DEFAULT NULL,
-	      `UpdatePath` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-	      `UpdateInfo` text COLLATE utf8_unicode_ci,
-	    PRIMARY KEY (`s.no`),
-	    KEY `PluginId` (`PluginId`)) 
-	    ENGINE=InnoDB;
+	          `s.no` int(10) NOT NULL AUTO_INCREMENT,
+	          `PluginId` int(10) DEFAULT NULL,
+	          `UpdatePath` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+	          `UpdateInfo` text COLLATE utf8_unicode_ci,
+	         PRIMARY KEY (`s.no`),
+	         KEY `PluginId` (`PluginId`)) 
+	       ENGINE=InnoDB;
 
-	    -- -----------------------------------------
-	    -- Constraints for table `updates`
-	    -- -----------------------------------------
-	    ALTER TABLE `" . $cfg['db']['lib']['name'] ."`.`updates`
-	    ADD CONSTRAINT `updates_ibfk_1` FOREIGN KEY (`PluginId`) REFERENCES `plugins` (`Id`);
+	        -- -----------------------------------------
+	        -- Constraints for table `updates`
+	        -- -----------------------------------------
+	        ALTER TABLE `" . $cfg['db']['lib']['name'] ."`.`updates`
+	        ADD CONSTRAINT `updates_ibfk_1` FOREIGN KEY (`PluginId`) REFERENCES `plugins` (`Id`);
 
             
             -- -----------------------------------------------------
@@ -1772,14 +1773,14 @@
             //Now create an admin account!
             $hashpass = crypt("admin", Users::generateSALT());
             $params = array(
-              'name' => "admin",
-              'pass' => $hashpass,
-              'mail' => "admin@admin.com",
+              'Login' => "admin",
+              'Password' => $hashpass,
+              'Email' => "admin@admin.com",
             );
             try{
-                $user_id = WebUsers::createWebuser($params['name'], $params['pass'],$params['mail']);
+                $user_id = WebUsers::createWebuser($params['Login'], $params['Password'],$params['Email']);
                 $result = Webusers::createUser($params, $user_id);
-                Users::createPermissions(array($params['name']));
+                Users::createPermissions(array($params['Login']));
                 $dbl = new DBLayer("lib");
                 $dbl->execute("UPDATE ticket_user SET Permission = 3 WHERE TUserId = :user_id",array('user_id' => $user_id));
                 print "The admin account is created, you can login with id: admin, pass: admin!";
@@ -1802,5 +1803,5 @@
             print "There was an error while installing";
             print_r($e);
         }
-    }
-        
+    }        
+

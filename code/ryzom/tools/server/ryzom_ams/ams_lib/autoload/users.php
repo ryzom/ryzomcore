@@ -289,12 +289,13 @@ class Users{
      public static function createUser($values, $user_id){     
           try {
                //make connection with and put into shard db
-               $values['user_id']= $user_id;
                $dbs = new DBLayer("shard");
                $dbs->insert("user", $values);
                $dbr = new DBLayer("ring");
-               $values['user_type'] = 'ut_pioneer';
-               $dbr->insert("ring_users", $values);	
+               $valuesRing['user_id'] =$user_id;
+               $valuesRing['user_name'] = $values['Login'];
+               $valuesRing['user_type'] = 'ut_pioneer';
+               $dbr->insert("ring_users", $valuesRing);	
                ticket_user::createTicketUser( $user_id, 1);
                return "ok";
           }
@@ -303,7 +304,7 @@ class Users{
                try {
                     $dbl = new DBLayer("lib");  
                     $dbl->insert("ams_querycache", array("type" => "createUser",
-                    "query" => json_encode(array($values["name"],$values["pass"],$values["mail"])), "db" => "shard"));
+                    "query" => json_encode(array($values["Login"],$values["Password"],$values["Email"])), "db" => "shard"));
                     ticket_user::createTicketUser( $user_id , 1 );
                     return "shardoffline";
                }catch (PDOException $e) {
@@ -472,6 +473,3 @@ class Users{
           } 
      }
 }
-
-
-     

@@ -173,17 +173,13 @@ class Plugincache {
      * @return boolean 
      */
     public static function rrmdir( $dir ) {
-        if ( is_dir( $dir ) ) {
-            $objects = scandir( $dir );
-             foreach ( $objects as $object ) {
-                if ( $object != "." && $object != ".." ) {
-                    if ( filetype( $dir . "/" . $object ) == "dir" ) rmdir( $dir . "/" . $object );
-                     else unlink( $dir . "/" . $object );
-                     } 
-                } 
-            reset( $objects );
-             return rmdir( $dir );
-             } 
+        $result=array_diff(scandir($dir),array('.','..'));
+        foreach($result as $item)
+        {
+			if(!@unlink($dir.'/'.$item))
+			Plugincache::rrmdir($dir.'/'.$item);
+        }
+        return rmdir($dir); 
         } 
     
     /**
