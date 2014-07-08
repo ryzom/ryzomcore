@@ -20,8 +20,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"

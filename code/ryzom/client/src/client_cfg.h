@@ -78,7 +78,7 @@ struct CClientConfig
 	sint				SelectCharacter;
 	/// Selected slot in select char interface
 	uint8				SelectedSlot;
-	
+
 	/// Textures for interface login
 	std::vector<string> TexturesLoginInterface;
 	std::vector<string> TexturesLoginInterfaceDXTC;
@@ -190,8 +190,6 @@ struct CClientConfig
 	/// \name Inputs
 
 	/// Use a hardware cursor
-	bool			DisableDirectInput;
-	bool			DisableDirectInputKeyboard;
 	bool			HardwareCursor;
 	float			HardwareCursorScale; // scale for hardware cursor bitmap (in ]0, 1])
 	float			CursorSpeed;

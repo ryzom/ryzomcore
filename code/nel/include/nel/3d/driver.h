@@ -42,9 +42,6 @@
 namespace NLMISC
 {
 class IEventEmitter;
-struct IMouseDevice;
-struct IKeyboardDevice;
-struct IInputDeviceManager;
 class CRect;
 class CLog;
 }
@@ -259,7 +256,7 @@ public:
 	virtual emptyProc		getWindowProc() = 0;
 
 	virtual NLMISC::IEventEmitter *getEventEmitter() = 0;
-		
+
 	/// Copy a string to system clipboard.
 	virtual bool			copyTextToClipboard(const ucstring &text) = 0;
 
@@ -362,7 +359,7 @@ public:
 	virtual	void			getDepthRange(float &znear, float &zfar) const = 0;
 	// @}
 
-	
+
 
 	/// \name Textures
 	// @{
@@ -434,7 +431,7 @@ public:
 	  * Under OpenGL this simply returns the maximum number of texture stages (getNbTextureStages) in both return values.
 	  */
 	virtual void			getNumPerStageConstant(uint &lightedMaterial, uint &unlightedMaterial) const = 0;
-	
+
 	// [DEPRECATED] Return if this texture is a rectangle texture that requires RECT sampler (OpenGL specific pre-NPOT functionality)
 	virtual bool			isTextureRectangle(ITexture *tex) const = 0;
 
@@ -442,7 +439,7 @@ public:
 	virtual	bool			supportNonPowerOfTwoTextures() const = 0;
 	// @}
 
-	
+
 
 	/// \name Texture operations
 	// @{
@@ -536,7 +533,7 @@ public:
 	virtual	bool			isForceNormalize() const = 0;
 	// @}
 
-	
+
 
 	/// \name Vertex Buffer Hard: Features
 	// @{
@@ -737,7 +734,7 @@ public:
 	virtual uint			getSwapVBLInterval() = 0;
 	// @}
 
-	
+
 
 
 
@@ -869,25 +866,6 @@ public:
 	/// x and y must be between 0.0 and 1.0
 	virtual void			setMousePos(float x, float y) = 0;
 
-	/** Enable / disable  low level mouse. This allow to take advantage of some options (speed of the mouse, automatic wrapping)
-	  * It returns a interface to these parameters when it is supported, or NULL otherwise
-	  * The interface pointer is valid as long as the low level mouse is enabled.
-	  * A call to disable the mouse returns NULL, and restore the default mouse behavior
-	  * NB : - In this mode the mouse cursor isn't drawn.
-      *      - Calls to showCursor have no effects
-	  *      - Calls to setCapture have no effects
-	  */
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive) = 0;
-
-	/** Enable / disable  a low level keyboard.
-	  * Such a keyboard can only send KeyDown and KeyUp event. It just consider the keyboard as a
-	  * gamepad with lots of buttons...
-	  * This returns a interface to some parameters when it is supported, or NULL otherwise.
-	  * The interface pointer is valid as long as the low level keyboard is enabled.
-	  * A call to disable the keyboard returns NULL, and restore the default keyboard behavior
-	  */
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable) = 0;
-
 	/** Get the delay in ms for mouse double clicks.
 	  */
 	virtual uint			getDoubleClickDelay(bool hardwareMouse) = 0;
@@ -908,11 +886,6 @@ public:
 
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale) = 0;
-
-	/** Check whether there is a low level device manager available, and get its interface. Return NULL if not available
-	  * From this interface you can deal with mouse and keyboard as above, but you can also manage game device (joysticks, joypads ...)
-	  */
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
 	// @}
 
 
@@ -1106,7 +1079,7 @@ public:
 	virtual bool			supportVertexProgram(CVertexProgram::TProfile profile) const = 0;
 
 	/** Compile the given vertex program, return if successful.
-	  * If a vertex program was set active before compilation, 
+	  * If a vertex program was set active before compilation,
 	  * the state of the active vertex program is undefined behaviour afterwards.
 	  */
 	virtual bool			compileVertexProgram(CVertexProgram *program) = 0;
@@ -1133,7 +1106,7 @@ public:
 	virtual bool			supportPixelProgram(CPixelProgram::TProfile profile) const = 0;
 
 	/** Compile the given pixel program, return if successful.
-	  * If a pixel program was set active before compilation, 
+	  * If a pixel program was set active before compilation,
 	  * the state of the active pixel program is undefined behaviour afterwards.
 	  */
 	virtual bool			compilePixelProgram(CPixelProgram *program) = 0;
@@ -1160,7 +1133,7 @@ public:
 	virtual bool			supportGeometryProgram(CGeometryProgram::TProfile profile) const = 0;
 
 	/** Compile the given pixel program, return if successful.
-	  * If a pixel program was set active before compilation, 
+	  * If a pixel program was set active before compilation,
 	  * the state of the active pixel program is undefined behaviour afterwards.
 	  */
 	virtual bool			compileGeometryProgram(CGeometryProgram *program) = 0;

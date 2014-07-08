@@ -20,7 +20,6 @@
 
 #include "nel/misc/i_xml.h"
 #include "nel/misc/file.h"
-#include "nel/misc/game_device_events.h"
 
 #include "nel/misc/xml_auto_ptr.h"
 
@@ -92,7 +91,6 @@ void CInputHandlerManager::addToServer(NLMISC::CEventServer * server)
 	_EventServer = server;
 
 	// System
-	server->addListener(EventGDMouseMove,	this);
 	server->addListener(EventDestroyWindowId,	this);
 	server->addListener(EventCloseWindowId,	this);
 	server->addListener(EventSetFocusId,	this);
@@ -117,7 +115,6 @@ void CInputHandlerManager::addToServer(NLMISC::CEventServer * server)
 void CInputHandlerManager::release()
 {
 	// System
-	_EventServer->removeListener(EventGDMouseMove,	this);
 	_EventServer->removeListener(EventDestroyWindowId,	this);
 	_EventServer->removeListener(EventCloseWindowId,	this);
 	_EventServer->removeListener(EventSetFocusId,	this);
@@ -304,7 +301,7 @@ void CInputHandlerManager::operator ()(const NLMISC::CEvent &event)
 						handled |= R2::getEditor().handleEvent(eventDesc);
 					}
 				}
-				handled |= inputHandler.handleMouseButtonDownEvent( event );				
+				handled |= inputHandler.handleMouseButtonDownEvent( event );
 			}
 			// button up ?
 			else if (event==EventMouseUpId)

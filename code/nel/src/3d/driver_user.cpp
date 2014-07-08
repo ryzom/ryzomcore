@@ -1609,36 +1609,6 @@ bool			CDriverUser::fillBuffer (CBitmap &bitmap)
 // ***************************************************************************
 // ***************************************************************************
 
-NLMISC::IMouseDevice			*CDriverUser::enableLowLevelMouse(bool enable, bool exclusive)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelMouse(enable, exclusive);
-}
-NLMISC::IKeyboardDevice			*CDriverUser::enableLowLevelKeyboard(bool enable)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelKeyboard(enable);
-}
-
-void CDriverUser::emulateMouseRawMode(bool enable)
-{
-	_Driver->getEventEmitter()->emulateMouseRawMode(enable);
-}
-
-uint CDriverUser::getDoubleClickDelay(bool hardwareMouse)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	return _Driver->getDoubleClickDelay(hardwareMouse);
-}
-
-NLMISC::IInputDeviceManager		*CDriverUser::getLowLevelInputDeviceManager()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->getLowLevelInputDeviceManager();
-}
 void			CDriverUser::showCursor (bool b)
 {
 	NL3D_HAUTO_UI_DRIVER;

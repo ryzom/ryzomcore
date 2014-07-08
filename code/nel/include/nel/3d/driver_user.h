@@ -410,21 +410,6 @@ public:
 	virtual bool			fillBuffer (CBitmap &bitmap);
 	// @}
 
-
-	/// \name Mouse / Keyboards / Game devices
-	// @{
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	//
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	/**
-	 * wrapper for IEventEmitter::emulateMouseRawMode()
-	 */
-	virtual void emulateMouseRawMode(bool enable);
-
-	virtual uint	getDoubleClickDelay(bool hardwareMouse);
-
 	/// show cursor if b is true, or hide it if b is false
 	virtual void			showCursor (bool b);
 	/// x and y must be between 0.0 and 1.0

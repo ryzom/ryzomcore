@@ -58,14 +58,6 @@ void CWinEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 }
 
 /*------------------------------------------------------------------*\
-							emulateMouseRawMode()
-\*------------------------------------------------------------------*/
-void CWinEventEmitter::emulateMouseRawMode(bool enable)
-{
-	nlerror("no raw mode emulation on windows, the CDIMouse has a real raw mode");
-}
-
-/*------------------------------------------------------------------*\
 							processMessage()
 \*------------------------------------------------------------------*/
 
@@ -320,7 +312,7 @@ bool CWinEventEmitter::processMessage (HWND hWnd, uint32 msg, WPARAM wParam, LPA
 	case WM_INPUTLANGCHANGE:
 		if ( _IMEEventsEnabled )
 		{
-			// wParam = Specifies the character set of the new locale. 
+			// wParam = Specifies the character set of the new locale.
 			// lParam = Input locale identifier.
 			server->postEvent( new CEventIME( msg, (uint32)wParam, (uint32)lParam, this ) );
 			return true; // trap message

@@ -116,6 +116,8 @@ extern void saveMovieShooting();
 extern void	displaySpecialTextProgress(const char *text);
 extern bool InitMouseWithCursor(bool hardware);
 
+extern bool SetMousePosFirstTime;
+
 /////////////
 // Globals // initialization occurs in the function : connection
 /////////////
@@ -544,6 +546,7 @@ bool reconnection()
 	if (ClientCfg.SelectCharacter == -1)
 	{
 		// Re-initialise the mouse (will be now in hardware mode, if required)
+		SetMousePosFirstTime = true;
 		InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
 
 		// no ui init if character selection is automatic
