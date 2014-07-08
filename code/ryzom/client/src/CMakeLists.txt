@@ -78,6 +78,7 @@ IF(APPLE)
 ENDIF(APPLE)
 
 INCLUDE_DIRECTORIES(
+			${SDL2_INCLUDE_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}
 			${LIBXML2_INCLUDE_DIR}
 			${LUA_INCLUDE_DIR}
@@ -97,6 +98,7 @@ TARGET_LINK_LIBRARIES(ryzom_client
 						ryzom_clientsheets
 						ryzom_gameshare
 						nelpacs
+						${SDL2_LIBRARY}
 						${LIBXML2_LIBRARIES}
 						${LUA_LIBRARIES}
 						${LUABIND_LIBRARIES}

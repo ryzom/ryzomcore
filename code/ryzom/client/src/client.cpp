@@ -32,6 +32,8 @@
 #include <csignal>
 #endif
 
+#include <SDL.h>
+
 #ifdef NL_OS_MAC
 #include <stdio.h>
 #include <sys/resource.h>
@@ -118,6 +120,41 @@ static void sigHandler(int Sig)
 	nlwarning("Ignoring signal SIGPIPE");
 }
 #endif
+
+extern const unsigned char splash_screen[];
+extern const unsigned int splash_screenSize;
+SDL_Window *s_SplashScreen = NULL;
+SDL_Renderer *s_SplashRenderer = NULL;
+
+void createSplashScreen()
+{
+	SDL_RWops *rw = SDL_RWFromMem(const_cast<void *>((const void *)splash_screen), splash_screenSize);
+	SDL_Surface *surf = SDL_LoadBMP_RW(rw, 1); // 1 releases rw stream on surface free
+	s_SplashScreen = SDL_CreateWindow("Ryzom Core", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 435, 362, SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+	s_SplashRenderer = SDL_CreateRenderer(s_SplashScreen, -1, SDL_RENDERER_SOFTWARE);
+	SDL_Texture *tex = SDL_CreateTextureFromSurface(s_SplashRenderer, surf);
+    SDL_FreeSurface(surf);
+	SDL_RenderCopy(s_SplashRenderer, tex, NULL, NULL);
+	SDL_RenderPresent(s_SplashRenderer);
+    SDL_DestroyTexture(tex);
+}
+
+void pumpSplashScreen()
+{
+	SDL_PumpEvents();
+	SDL_RenderPresent(s_SplashRenderer);
+}
+
+void destroySplashScreen()
+{
+	if (s_SplashScreen)
+	{
+		SDL_DestroyRenderer(s_SplashRenderer);
+		s_SplashRenderer = NULL;
+		SDL_DestroyWindow(s_SplashScreen);
+		s_SplashScreen = NULL;
+	}
+}
 
 //---------------------------------------------------
 // MAIN :
@@ -361,6 +398,11 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cm
 int main(int argc, char **argv)
 #endif
 {
+	// TODO: Test new splash screen on Windows
+#ifndef NL_OS_WINDOW
+	createSplashScreen();
+#endif
+
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
@@ -519,7 +561,7 @@ int main(int argc, char **argv)
 
 #else
 
-	// TODO for Linux : splashscreen
+	pumpSplashScreen();
 
 	if (argc >= 4)
 	{

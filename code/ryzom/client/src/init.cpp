@@ -105,6 +105,8 @@
 #include <windows.h>
 extern HINSTANCE HInstance;
 extern HWND SlashScreen;
+#else
+void destroySplashScreen();
 #endif // NL_OS_WINDOWS
 
 #include "app_bundle_utils.h"
@@ -713,10 +715,10 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-		
+
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
-		
+
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -903,7 +905,7 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
-		
+
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
 			// override mode TODO
@@ -944,6 +946,10 @@ void prelogInit()
 		if (SlashScreen)
 			DestroyWindow (SlashScreen);
 
+#else
+
+		destroySplashScreen();
+
 #endif // NL_OS_WINDOW
 
 		// Set the title
@@ -965,7 +971,7 @@ void prelogInit()
 			filenames.push_back(CPath::lookup("ryzom.png"));
 
 		vector<CBitmap> bitmaps;
-		
+
 		for(size_t i = 0; i < filenames.size(); ++i)
 		{
 			CIFile file;
@@ -1103,7 +1109,7 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		
+
 		CInterfaceManager::getInstance();
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
@@ -1152,7 +1158,7 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
-		
+
 		if (StereoDisplay) // VR_CONFIG
 		{
 			// Init stereo display resources
