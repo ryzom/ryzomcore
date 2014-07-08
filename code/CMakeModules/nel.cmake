@@ -315,6 +315,7 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   ###
   # Optional support
   ###
+  OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
   OPTION(WITH_NEL_CEGUI           "Build CEGUI Renderer"                          OFF)
   OPTION(WITH_NEL_TOOLS           "Build NeL Tools"                               ON )
   OPTION(WITH_NEL_MAXPLUGIN       "Build NeL 3dsMax Plugin"                       OFF)
@@ -324,10 +325,10 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
   OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
-  
+
   OPTION(WITH_SSE2                "With SSE2"                                     ON )
   OPTION(WITH_SSE3                "With SSE3"                                     ON )
-  
+
   IF(NOT MSVC)
     OPTION(WITH_GCC_FPMATH_BOTH   "With GCC -mfpmath=both"                        OFF)
   ENDIF(NOT MSVC)
@@ -401,7 +402,7 @@ MACRO(NL_SETUP_BUILD)
   ELSEIF(HOST_CPU MATCHES "i.86")
     SET(HOST_CPU "x86")
   ENDIF(HOST_CPU MATCHES "(amd|AMD)64")
-  
+
   # Determine target CPU
 
   # If not specified, use the same CPU as host
@@ -1111,7 +1112,7 @@ MACRO(SETUP_EXTERNAL)
     ENDIF(APPLE)
   ENDIF(WIN32)
 
-  # Android and iOS have pthread  
+  # Android and iOS have pthread
   IF(ANDROID OR IOS)
     SET(CMAKE_USE_PTHREADS_INIT 1)
     SET(Threads_FOUND TRUE)
