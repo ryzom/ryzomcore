@@ -27,6 +27,7 @@
 #include <QList>
 
 #include "action_property_manager.h"
+#include "texture_property_manager.h"
 
 namespace
 {
@@ -371,10 +372,12 @@ namespace GUIEditor
 		propertyMgr = new QtVariantPropertyManager;
 		enumMgr = new QtEnumPropertyManager;
 		actionMgr = new ActionPropertyManager;
+		textureMgr = new TexturePropertyManager;
 
 		variantFactory = new QtVariantEditorFactory;
 		enumFactory = new QtEnumEditorFactory;
 		actionFactory = new ActionEditorFactory;
+		textureFactory = new TextureEditorFactory;
 
 		ttPairs[ "tooltip_posref" ] = "tooltip_parent_posref";
 		ttPairs[ "tooltip_parent_posref" ] = "tooltip_posref";
@@ -385,6 +388,8 @@ namespace GUIEditor
 
 	CPropBrowserCtrl::~CPropBrowserCtrl()
 	{
+		delete textureMgr;
+		textureMgr = NULL;
 		delete actionMgr;
 		actionMgr = NULL;
 		delete enumMgr;
@@ -392,6 +397,8 @@ namespace GUIEditor
 		delete propertyMgr;
 		propertyMgr = NULL;
 
+		delete textureFactory;
+		textureFactory = NULL;
 		delete actionFactory;
 		actionFactory = NULL;
 		delete variantFactory;
@@ -456,6 +463,7 @@ namespace GUIEditor
 		browser->setFactoryForManager( propertyMgr, variantFactory );		
 		browser->setFactoryForManager( enumMgr, enumFactory );
 		browser->setFactoryForManager( actionMgr, actionFactory );
+		browser->setFactoryForManager( textureMgr, textureFactory );
 
 		enablePropertyWatchers();
 	}
@@ -637,6 +645,17 @@ namespace GUIEditor
 		e->setProperty( propName.toUtf8().constData(), v.toUtf8().constData() );
 	}
 
+	void CPropBrowserCtrl::onTexturePropertyChanged( QtProperty *p, const QString &v )
+	{
+		QString propName = p->propertyName();
+		
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+		if( e == NULL )
+			return;
+		
+		e->setProperty( propName.toUtf8().constData(), v.toUtf8().constData() );
+	}
+
 	void CPropBrowserCtrl::enablePropertyWatchers()
 	{
 		connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
@@ -646,6 +665,8 @@ namespace GUIEditor
 		
 		connect( actionMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
 			this, SLOT( onActionPropertyChanged( QtProperty*, const QString& ) ) );
+		connect( textureMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onTexturePropertyChanged( QtProperty*, const QString& ) ) );
 	}
 
 	void CPropBrowserCtrl::disablePropertyWatchers()
@@ -657,6 +678,8 @@ namespace GUIEditor
 
 		disconnect( actionMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
 			this, SLOT( onActionPropertyChanged( QtProperty*, const QString& ) ) );
+		disconnect( textureMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onTexturePropertyChanged( QtProperty*, const QString& ) ) );
 	}
 
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )
@@ -683,6 +706,21 @@ namespace GUIEditor
 		QtVariantProperty *p = NULL;
 		QVariant v;
 
+		if( prop.propType == "texture" )
+		{
+			std::string j = element->getProperty( prop.propName );
+
+			if( j.empty() )
+				return;
+
+			QtProperty *pp = textureMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			textureMgr->setValue( pp, j.c_str() );
+			browser->addProperty( pp );
+		}
+		else
 		if( prop.propType == "action" )
 		{
 			std::string j = element->getProperty( prop.propName );

@@ -35,7 +35,7 @@
         </property>
         <property>
             <name>texture</name>
-            <type>string</type>
+            <type>texture</type>
             <default></default>
         </property>
         <property>

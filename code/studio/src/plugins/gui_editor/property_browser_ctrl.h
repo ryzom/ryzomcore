@@ -33,6 +33,8 @@ class QVariant;
 
 class ActionPropertyManager;
 class ActionEditorFactory;
+class TexturePropertyManager;
+class TextureEditorFactory;
 
 namespace NLGUI
 {
@@ -63,6 +65,7 @@ namespace GUIEditor
 		void onPropertyChanged( QtProperty *prop, const QVariant &v );
 		void onEnumPropertyChanged( QtProperty *prop, int value );
 		void onActionPropertyChanged( QtProperty *p, const QString &v );
+		void onTexturePropertyChanged( QtProperty *p, const QString &v );
 
 	private:
 		void enablePropertyWatchers();
@@ -75,10 +78,12 @@ namespace GUIEditor
 		QtVariantPropertyManager *propertyMgr;
 		QtEnumPropertyManager *enumMgr;
 		ActionPropertyManager *actionMgr;
+		TexturePropertyManager *textureMgr;
 
 		QtVariantEditorFactory *variantFactory;
 		QtEnumEditorFactory *enumFactory;
 		ActionEditorFactory *actionFactory;
+		TextureEditorFactory *textureFactory;
 
 		std::string currentElement;
 		std::map< std::string, SWidgetInfo > widgetInfo;
