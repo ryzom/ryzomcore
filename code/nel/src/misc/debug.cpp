@@ -32,6 +32,8 @@
 #include "nel/misc/variable.h"
 #include "nel/misc/system_info.h"
 
+#include <SDL_log.h>
+
 #ifdef NL_OS_WINDOWS
 #	define _WIN32_WINDOWS	0x0410
 #	ifndef NL_COMP_MINGW
@@ -1131,6 +1133,61 @@ std::string getLogDirectory()
 	return LogPath;
 }
 
+// Pass SDL log system into NeL log system
+static void sdlLogOutputFunction(void *userdata, int category, SDL_LogPriority priority, const char *message)
+{
+	INelContext *context = (INelContext *)userdata;
+	CLog *log;
+	switch (priority)
+	{
+	case SDL_LOG_PRIORITY_VERBOSE:
+	case SDL_LOG_PRIORITY_DEBUG:
+		log = context->getDebugLog();
+		break;
+	case SDL_LOG_PRIORITY_INFO:
+		log = context->getInfoLog();
+		break;
+	case SDL_LOG_PRIORITY_WARN:
+		log = context->getWarningLog();
+		break;
+	case SDL_LOG_PRIORITY_ERROR:
+	case SDL_LOG_PRIORITY_CRITICAL:
+		log = context->getErrorLog();
+		break;
+	default: // Unreachable
+		log = context->getAssertLog();
+		break;
+	}
+	switch (category)
+	{
+	case SDL_LOG_CATEGORY_APPLICATION:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_APPLICATION");
+		break;
+	case SDL_LOG_CATEGORY_ERROR:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_ERROR");
+		break;
+	case SDL_LOG_CATEGORY_SYSTEM:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_SYSTEM");
+		break;
+	case SDL_LOG_CATEGORY_AUDIO:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_AUDIO");
+		break;
+	case SDL_LOG_CATEGORY_VIDEO:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_VIDEO");
+		break;
+	case SDL_LOG_CATEGORY_RENDER:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_RENDER");
+		break;
+	case SDL_LOG_CATEGORY_INPUT:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_INPUT");
+		break;
+	default:
+		log->setPosition(-1, "SDL_LOG_CATEGORY_CUSTOM");
+		break;
+	}
+	log->displayNL("%s", message);
+}
+
 // You should not call this, unless you know what you're trying to do (it kills debug/log)!
 // Destroys debug environment, to clear up the memleak log.
 // NeL context must be deleted immediately after debug destroyed,
@@ -1228,6 +1285,8 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		DefaultMemDisplayer = new CMemDisplayer ("DEFAULT_MD");
 
 		initDebug2(logInFile);
+
+		SDL_LogSetOutputFunction(sdlLogOutputFunction, &INelContext::getInstance());
 
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(true);
 //		alreadyCreateSharedAmongThreads = true;
