@@ -53,7 +53,9 @@
 #  define _WIN32_WINNT 0x0400
 # endif
 
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #elif defined (NL_OS_UNIX)
 #	define NL_WIN_CALLBACK

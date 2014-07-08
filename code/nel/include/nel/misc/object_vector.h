@@ -29,6 +29,12 @@
 # endif // NLMISC_HEAP_ALLOCATION_NDEBUG
 #endif // NL_USE_DEFAULT_MEMORY_MANAGER
 
+#ifndef NL_OV_USE_NEW_ALLOCATOR
+# ifdef NL_HAS_SSE2
+#  define NL_OV_USE_NEW_ALLOCATOR
+# endif // NL_HAS_SSE2
+#endif // NL_OV_USE_NEW_ALLOCATOR
+
 namespace NLMISC {
 
 

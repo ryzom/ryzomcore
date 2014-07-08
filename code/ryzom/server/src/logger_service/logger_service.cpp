@@ -36,7 +36,9 @@
 #include "log_storage.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 

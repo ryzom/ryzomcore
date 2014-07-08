@@ -143,10 +143,12 @@ void CComputedString::render2D (IDriver& driver,
 /*------------------------------------------------------------------*\
 							render3D()
 \*------------------------------------------------------------------*/
-void CComputedString::render3D (IDriver& driver,CMatrix matrix,THotSpot hotspot)
+void CComputedString::render3D (IDriver& driver, const CMatrix &matrixp, THotSpot hotspot)
 {
 	if (Vertices.getNumVertices() == 0)
 		return;
+
+	CMatrix matrix = matrixp;
 
 	// get window size
 	uint32	wndWidth, wndHeight;

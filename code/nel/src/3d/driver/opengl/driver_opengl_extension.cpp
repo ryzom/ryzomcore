@@ -449,6 +449,16 @@ PFNGLENDOCCLUSIONQUERYNVPROC				nglEndOcclusionQueryNV;
 PFNGLGETOCCLUSIONQUERYIVNVPROC				nglGetOcclusionQueryivNV;
 PFNGLGETOCCLUSIONQUERYUIVNVPROC				nglGetOcclusionQueryuivNV;
 
+// ARB_occlusion_query
+PFNGLGENQUERIESPROC							nglGenQueriesARB;
+PFNGLDELETEQUERIESPROC						nglDeleteQueriesARB;
+PFNGLISQUERYPROC							nglIsQueryARB;
+PFNGLBEGINQUERYPROC							nglBeginQueryARB;
+PFNGLENDQUERYPROC							nglEndQueryARB;
+PFNGLGETQUERYIVPROC							nglGetQueryivARB;
+PFNGLGETQUERYOBJECTIVPROC					nglGetQueryObjectivARB;
+PFNGLGETQUERYOBJECTUIVPROC					nglGetQueryObjectuivARB;
+
 // GL_EXT_framebuffer_object
 PFNGLISRENDERBUFFEREXTPROC					nglIsRenderbufferEXT;
 PFNGLISFRAMEBUFFEREXTPROC					nglIsFramebufferEXT;
@@ -1239,6 +1249,15 @@ static bool	setupNVFragmentProgram2(const char *glext)
 	return true;
 }
 
+// *********************************
+static bool	setupARBFragmentShader(const char *glext)
+{
+	H_AUTO_OGL(setupNVFragmentProgram2);
+	CHECK_EXT("GL_ARB_fragment_shader");
+	
+	return true;
+}
+
 // ***************************************************************************
 static bool	setupARBVertexBufferObject(const char	*glext)
 {
@@ -1366,6 +1385,26 @@ static bool	setupNVOcclusionQuery(const char	*glext)
 	CHECK_ADDRESS(PFNGLENDOCCLUSIONQUERYNVPROC, glEndOcclusionQueryNV);
 	CHECK_ADDRESS(PFNGLGETOCCLUSIONQUERYIVNVPROC, glGetOcclusionQueryivNV);
 	CHECK_ADDRESS(PFNGLGETOCCLUSIONQUERYUIVNVPROC, glGetOcclusionQueryuivNV);
+#endif
+
+	return true;
+}
+
+// ***************************************************************************
+static bool	setupARBOcclusionQuery(const char	*glext)
+{
+	H_AUTO_OGL(setupARBOcclusionQuery);
+	CHECK_EXT("ARB_occlusion_query");
+
+#ifndef USE_OPENGLES
+	CHECK_ADDRESS(PFNGLGENQUERIESPROC, glGenQueriesARB);
+	CHECK_ADDRESS(PFNGLDELETEQUERIESPROC, glDeleteQueriesARB);
+	CHECK_ADDRESS(PFNGLISQUERYPROC, glIsQueryARB);
+	CHECK_ADDRESS(PFNGLBEGINQUERYPROC, glBeginQueryARB);
+	CHECK_ADDRESS(PFNGLENDQUERYPROC, glEndQueryARB);
+	CHECK_ADDRESS(PFNGLGETQUERYIVPROC, glGetQueryivARB);
+	CHECK_ADDRESS(PFNGLGETQUERYOBJECTIVPROC, glGetQueryObjectivARB);
+	CHECK_ADDRESS(PFNGLGETQUERYOBJECTUIVPROC, glGetQueryObjectuivARB);
 #endif
 
 	return true;
@@ -1597,7 +1636,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{
 		ext.NVVertexProgram = setupNVVertexProgram(glext);
 		ext.EXTVertexShader = setupEXTVertexShader(glext);
-		ext.ARBVertexProgram= setupARBVertexProgram(glext);
+		ext.ARBVertexProgram = setupARBVertexProgram(glext);
 	}
 	else
 	{
@@ -1612,6 +1651,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{		
 		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
 		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
+		ext.ARBFragmentShader = setupARBFragmentShader(glext);
 	}
 	else
 	{
@@ -1662,6 +1702,9 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	// Check NV_occlusion_query
 	ext.NVOcclusionQuery = setupNVOcclusionQuery(glext);
+
+	// Check ARB_occlusion_query
+	ext.ARBOcclusionQuery = setupARBOcclusionQuery(glext);
 
 	// Check GL_NV_texture_rectangle
 	ext.NVTextureRectangle = setupNVTextureRectangle(glext);

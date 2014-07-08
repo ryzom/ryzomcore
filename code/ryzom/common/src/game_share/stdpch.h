@@ -67,7 +67,9 @@
 #include <nel/georges/load_form.h>
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <WinSock2.h>
 #	include <Windows.h>
 #endif

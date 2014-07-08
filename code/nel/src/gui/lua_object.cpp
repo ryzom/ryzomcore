@@ -362,7 +362,7 @@ namespace NLGUI
 	{
 		nlassert(key);
 		nlassert(isValid());
-		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a function value '%p' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a function value '%p' at key %s on object '%s' of type %s (not a table).", (void *)value, key, getId().c_str(), getTypename()));
 		CLuaStackChecker lsc(_LuaState);
 		push();
 		_LuaState->push(key);

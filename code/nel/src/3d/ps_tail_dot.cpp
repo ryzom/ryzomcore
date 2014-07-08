@@ -422,7 +422,6 @@ CPSTailDot::CVBnPB &CPSTailDot::getVBnPB()
 		CIndexBuffer &pb = VBnPB.PB;
 		pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 		pb.setNumIndexes(2 * _UsedNbSegs * numRibbonInVB);
-		pb.setPreferredMemory(CIndexBuffer::AGPVolatile, false);
 		/// Setup the pb and vb parts. Not very fast but executed only once
 		uint vbIndex = 0;
 		uint pbIndex = 0;

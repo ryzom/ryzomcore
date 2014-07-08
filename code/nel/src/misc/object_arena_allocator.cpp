@@ -68,21 +68,23 @@ void *CObjectArenaAllocator::alloc(uint size)
 	if (size >= _MaxAllocSize)
 	{
 		// use standard allocator
-		uint8 *block = new uint8[size + sizeof(uint)]; // an additionnal uint is needed to store size of block
+		nlctassert(NL_DEFAULT_MEMORY_ALIGNMENT >= sizeof(uint));
+		uint8 *block = (uint8 *)aligned_malloc(NL_DEFAULT_MEMORY_ALIGNMENT + size, NL_DEFAULT_MEMORY_ALIGNMENT); //new uint8[size + sizeof(uint)]; // an additionnal uint is needed to store size of block
 		if (!block) return NULL;
 		#ifdef NL_DEBUG
 			_MemBlockToAllocID[block] = _AllocID;
 		#endif
 		*(uint *) block = size;
-		return block + sizeof(uint);
+		return block + NL_DEFAULT_MEMORY_ALIGNMENT;
 	}
 	uint entry = ((size + (_Granularity - 1)) / _Granularity) ;
 	nlassert(entry < _ObjectSizeToAllocator.size());
 	if (!_ObjectSizeToAllocator[entry])
 	{
-		_ObjectSizeToAllocator[entry] = new CFixedSizeAllocator(entry * _Granularity + sizeof(uint), _MaxAllocSize / size); // an additionnal uint is needed to store size of block
+		_ObjectSizeToAllocator[entry] = new CFixedSizeAllocator(entry * _Granularity + NL_DEFAULT_MEMORY_ALIGNMENT, _MaxAllocSize / size); // an additionnal uint is needed to store size of block
 	}
 	void *block = _ObjectSizeToAllocator[entry]->alloc();
+	nlassert(((uintptr_t)block % NL_DEFAULT_MEMORY_ALIGNMENT) == 0);
 	#ifdef NL_DEBUG
 		if (block)
 		{
@@ -91,14 +93,14 @@ void *CObjectArenaAllocator::alloc(uint size)
 		++_AllocID;
 	#endif
 	*(uint *) block = size;
-	return (void *) ((uint8 *) block + sizeof(uint));
+	return (void *) ((uint8 *) block + NL_DEFAULT_MEMORY_ALIGNMENT);
 }
 
 // *****************************************************************************************************************
 void CObjectArenaAllocator::free(void *block)
 {
 	if (!block) return;
-	uint8 *realBlock = (uint8 *) block - sizeof(uint); // a uint is used at start of block to give its size
+	uint8 *realBlock = (uint8 *) block - NL_DEFAULT_MEMORY_ALIGNMENT; // sizeof(uint); // a uint is used at start of block to give its size
 	uint size = *(uint *) realBlock;
 	if (size >= _MaxAllocSize)
 	{
@@ -107,7 +109,7 @@ void CObjectArenaAllocator::free(void *block)
 				nlassert(it != _MemBlockToAllocID.end());
 				_MemBlockToAllocID.erase(it);
 		#endif
-		delete realBlock;
+		aligned_free(realBlock);
 		return;
 	}
 	uint entry = ((size + (_Granularity - 1)) / _Granularity);

@@ -55,7 +55,9 @@ template <class T>
 class CTargetable
 {
 #ifdef NL_OS_WINDOWS
-	friend	class	CTargetable<T>;
+#	ifndef NL_COMP_MINGW
+	friend class CTargetable<T>;
+#	endif
 #endif
 public:
 	typedef NLMISC::CDbgPtr<T> TPtr;

@@ -39,7 +39,23 @@ static void	applyArraySkinNormalT(uint numMatrixes, uint32 *infPtr, CMesh::CSkin
 {
 	/* Prefetch all vertex/normal before, it is to be faster.
 	*/
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#ifdef NL_HAS_SSE2
+	{
+		uint	nInfTmp= nInf;
+		uint32	*infTmpPtr= infPtr;
+		for(;nInfTmp>0;nInfTmp--, infTmpPtr++)
+		{
+			uint	index= *infTmpPtr;
+			CMesh::CSkinWeight	*srcSkin= srcSkinPtr + index;
+			CVector				*srcVertex= srcVertexPtr + index;
+			CVector				*srcNormal= srcNormalPtr + index;
+
+			_mm_prefetch((const char *)(void *)srcSkin, _MM_HINT_T1);
+			_mm_prefetch((const char *)(void *)srcVertex, _MM_HINT_T1);
+			_mm_prefetch((const char *)(void *)srcNormal, _MM_HINT_T1);
+		}
+	}
+#elif defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
 	{
 		uint	nInfTmp= nInf;
 		uint32	*infTmpPtr= infPtr;
@@ -176,7 +192,25 @@ static void	applyArraySkinTangentSpaceT(uint numMatrixes, uint32 *infPtr, CMesh:
 {
 	/* Prefetch all vertex/normal/tgSpace before, it is faster.
 	*/
-#if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
+#ifdef NL_HAS_SSE2
+	{
+		uint	nInfTmp= nInf;
+		uint32	*infTmpPtr= infPtr;
+		for(;nInfTmp>0;nInfTmp--, infTmpPtr++)
+		{
+			uint	index= *infTmpPtr;
+			CMesh::CSkinWeight	*srcSkin= srcSkinPtr + index;
+			CVector				*srcVertex= srcVertexPtr + index;
+			CVector				*srcNormal= srcNormalPtr + index;
+			CVector				*srcTgSpace= tgSpacePtr + index;
+
+			_mm_prefetch((const char *)(void *)srcSkin, _MM_HINT_T1);
+			_mm_prefetch((const char *)(void *)srcVertex, _MM_HINT_T1);
+			_mm_prefetch((const char *)(void *)srcNormal, _MM_HINT_T1);
+			_mm_prefetch((const char *)(void *)srcTgSpace, _MM_HINT_T1);
+		}
+	}
+#elif defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
 	{
 		uint	nInfTmp= nInf;
 		uint32	*infTmpPtr= infPtr;

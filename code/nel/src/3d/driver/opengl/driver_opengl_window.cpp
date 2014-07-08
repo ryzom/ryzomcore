@@ -296,7 +296,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 #endif // NL_OS_UNIX
 
 // ***************************************************************************
-bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
+bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 {
 	H_AUTO_OGL(CDriverGL_init)
 

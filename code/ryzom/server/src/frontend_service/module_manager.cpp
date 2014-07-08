@@ -178,7 +178,7 @@ void	CModuleManager::addModule(uint id, TModuleExecCallback cb)
 {
 	nlassert(id < _MaxModules);
 	nlassert(cb != NULL);
-	nldebug("FEMMAN: [%s] Added module %d (Cb=%p) to stack", _StackName.c_str(), id, cb);
+	nldebug("FEMMAN: [%s] Added module %d (Cb=%p) to stack", _StackName.c_str(), id, (void *)cb);
 
 	_ExecutionStack.push_back(CExecutionItem());
 
@@ -372,7 +372,7 @@ void	CModuleManager::executeStack()
 			nlwarning("FEMMAN: Unexpected ExecutionItem type (%d) at item %d of the execution stack %s", item.Type, i, _StackName.c_str());
 			uint	j;
 			for (j=0; j<_ExecutionStack.size(); ++j)
-				nlwarning("FEMMAN: > %d [%s] Id=%d Cb=%p", j, (item.Type == Module) ? "MOD" : (item.Type == Wait) ? "WAIT" : "ERR", item.Id, item.Cb);
+				nlwarning("FEMMAN: > %d [%s] Id=%d Cb=%p", j, (item.Type == Module) ? "MOD" : (item.Type == Wait) ? "WAIT" : "ERR", item.Id, (void *)item.Cb);
 			nlerror("FEMMAN: Error in execution stack %s", _StackName.c_str());
 		}
 	}

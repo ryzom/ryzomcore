@@ -53,7 +53,8 @@ public:
 	uint getNumAllocatedBlocks() const { return _NumAlloc; }
 private:
 	class CChunk;
-	class CNode
+	
+	class NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT) CNode
 	{
 	public:
 		CChunk *Chunk; // the Chunk this node belongs to.

@@ -220,7 +220,7 @@ private:
 
 	static TOldWinProcMap _OldWinProcMap;
 
-	bool initInternal(HINSTANCE hInstance, HWND ownerWindow, uint32 localId, uint32 foreignId = NULL);
+	bool initInternal(HINSTANCE hInstance, HWND ownerWindow, uint32 localId, uint32 foreignId = 0);
 
 private:
 	static	LRESULT CALLBACK listenerProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

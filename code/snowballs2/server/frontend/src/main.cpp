@@ -229,7 +229,7 @@ void cbAddClient ( CMessage& msgin, TSockId from, CCallbackNetBase& clientcb )
 
         if(from->appId() != 0)
 	{
-        	CPlayer *p = (CPlayer *)(uint)from->appId();
+        	CPlayer *p = (CPlayer *)(void *)from->appId();
 		if(id == p->id)
 			p->State = CPlayer::ONLINE;
 	}
@@ -590,12 +590,12 @@ void onDisconnectClient ( TSockId from, void *arg )
 {
 	uint32 id;
 
-	uint64 i = from->appId();
+	uintptr_t i = from->appId();
 
 	if(i == 0)
 		return;
 
-	CPlayer *p = (CPlayer *)(uint)i;
+	CPlayer *p = (CPlayer *)(void *)i;
 	id = p->id;
 
 	nlinfo( "A client with unique Id %u has disconnected", id );
