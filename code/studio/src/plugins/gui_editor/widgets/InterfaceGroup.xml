@@ -40,7 +40,7 @@
         </property>
         <property>
             <name>on_active</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -50,7 +50,7 @@
         </property>
         <property>
             <name>on_deactive</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -80,7 +80,7 @@
         </property>
         <property>
             <name>group_onclick_r</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -90,7 +90,7 @@
         </property>
         <property>
             <name>group_onclick_l</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -100,7 +100,7 @@
         </property>
         <property>
             <name>on_enter</name>
-            <type>string</type>
+            <type>action</type>
             <default>handler</default>
         </property>
         <property>

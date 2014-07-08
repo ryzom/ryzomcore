@@ -26,6 +26,8 @@
 #include "widget_info_tree.h"
 #include <QList>
 
+#include "action_property_manager.h"
+
 namespace
 {
 	class NelBMAlign
@@ -368,9 +370,11 @@ namespace GUIEditor
 		browser = NULL;
 		propertyMgr = new QtVariantPropertyManager;
 		enumMgr = new QtEnumPropertyManager;
+		actionMgr = new ActionPropertyManager;
 
 		variantFactory = new QtVariantEditorFactory;
 		enumFactory = new QtEnumEditorFactory;
+		actionFactory = new ActionEditorFactory;
 
 		ttPairs[ "tooltip_posref" ] = "tooltip_parent_posref";
 		ttPairs[ "tooltip_parent_posref" ] = "tooltip_posref";
@@ -381,11 +385,15 @@ namespace GUIEditor
 
 	CPropBrowserCtrl::~CPropBrowserCtrl()
 	{
+		delete actionMgr;
+		actionMgr = NULL;
 		delete enumMgr;
 		enumMgr = NULL;
 		delete propertyMgr;
 		propertyMgr = NULL;
 
+		delete actionFactory;
+		actionFactory = NULL;
 		delete variantFactory;
 		variantFactory = NULL;
 		delete enumFactory;
@@ -447,7 +455,7 @@ namespace GUIEditor
 		// probably the clear() method clears them too...
 		browser->setFactoryForManager( propertyMgr, variantFactory );		
 		browser->setFactoryForManager( enumMgr, enumFactory );
-
+		browser->setFactoryForManager( actionMgr, actionFactory );
 
 		enablePropertyWatchers();
 	}
@@ -617,12 +625,27 @@ namespace GUIEditor
 		}
 	}
 
+
+	void CPropBrowserCtrl::onActionPropertyChanged( QtProperty *p, const QString &v )
+	{
+		QString propName = p->propertyName();
+		
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+		if( e == NULL )
+			return;
+		
+		e->setProperty( propName.toUtf8().constData(), v.toUtf8().constData() );
+	}
+
 	void CPropBrowserCtrl::enablePropertyWatchers()
 	{
 		connect( propertyMgr, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ),
 			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
 		connect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
 			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
+		
+		connect( actionMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onActionPropertyChanged( QtProperty*, const QString& ) ) );
 	}
 
 	void CPropBrowserCtrl::disablePropertyWatchers()
@@ -631,6 +654,9 @@ namespace GUIEditor
 			this, SLOT( onPropertyChanged( QtProperty*, const QVariant& ) ) );
 		disconnect( enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ),
 			this, SLOT( onEnumPropertyChanged( QtProperty*, int ) ) );
+
+		disconnect( actionMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onActionPropertyChanged( QtProperty*, const QString& ) ) );
 	}
 
 	void CPropBrowserCtrl::setupProperties( const std::string &type, const CInterfaceElement *element )
@@ -656,7 +682,22 @@ namespace GUIEditor
 	{
 		QtVariantProperty *p = NULL;
 		QVariant v;
-		
+
+		if( prop.propType == "action" )
+		{
+			std::string j = element->getProperty( prop.propName );
+
+			if( j.empty() )
+				return;
+
+			QtProperty *pp = actionMgr->addProperty( prop.propName.c_str() );
+			if( pp == NULL )
+				return;
+
+			actionMgr->setValue( pp, j.c_str() );
+			browser->addProperty( pp );
+		}
+		else		
 		if( prop.propType == "bitmap_align" )
 		{
 			std::string j = element->getProperty( prop.propName );

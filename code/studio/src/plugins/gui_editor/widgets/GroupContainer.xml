@@ -110,7 +110,7 @@
         </property>
         <property>
             <name>on_open</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -120,7 +120,7 @@
         </property>
         <property>
             <name>on_close</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -130,7 +130,7 @@
         </property>
         <property>
             <name>on_close_button</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -140,7 +140,7 @@
         </property>
         <property>
             <name>on_move</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -150,7 +150,7 @@
         </property>
         <property>
             <name>on_deactive_check</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -160,7 +160,7 @@
         </property>
         <property>
             <name>on_resize</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -170,7 +170,7 @@
         </property>
         <property>
             <name>on_alpha_settings_changed</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -180,7 +180,7 @@
         </property>
         <property>
             <name>on_begin_move</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>

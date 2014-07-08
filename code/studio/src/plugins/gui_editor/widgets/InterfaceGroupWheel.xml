@@ -10,7 +10,7 @@
     <properties>
         <property>
             <name>on_wheel_up</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -20,7 +20,7 @@
         </property>
         <property>
             <name>on_wheel_down</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>

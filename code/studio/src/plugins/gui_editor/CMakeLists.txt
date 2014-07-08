@@ -32,6 +32,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	editor_message_processor.h
 	action_list.h
 	texture_chooser.h
+	action_property_manager.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS

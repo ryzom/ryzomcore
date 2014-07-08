@@ -60,7 +60,7 @@
         </property>
         <property>
             <name>onover</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -70,7 +70,7 @@
         </property>
         <property>
             <name>onclick_l</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -80,7 +80,7 @@
         </property>
         <property>
             <name>ondblclick_l</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -90,7 +90,7 @@
         </property>
         <property>
             <name>onclick_r</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -100,7 +100,7 @@
         </property>
         <property>
             <name>onlongclick_l</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>
@@ -110,7 +110,7 @@
         </property>
         <property>
             <name>onclock_tick</name>
-            <type>string</type>
+            <type>action</type>
             <default></default>
         </property>
         <property>

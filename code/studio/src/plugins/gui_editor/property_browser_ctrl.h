@@ -31,6 +31,9 @@ class QtEnumEditorFactory;
 class QtProperty;
 class QVariant;
 
+class ActionPropertyManager;
+class ActionEditorFactory;
+
 namespace NLGUI
 {
 	class CInterfaceElement;
@@ -59,6 +62,7 @@ namespace GUIEditor
 	private Q_SLOTS:
 		void onPropertyChanged( QtProperty *prop, const QVariant &v );
 		void onEnumPropertyChanged( QtProperty *prop, int value );
+		void onActionPropertyChanged( QtProperty *p, const QString &v );
 
 	private:
 		void enablePropertyWatchers();
@@ -70,9 +74,11 @@ namespace GUIEditor
 		QtTreePropertyBrowser *browser;
 		QtVariantPropertyManager *propertyMgr;
 		QtEnumPropertyManager *enumMgr;
+		ActionPropertyManager *actionMgr;
 
 		QtVariantEditorFactory *variantFactory;
 		QtEnumEditorFactory *enumFactory;
+		ActionEditorFactory *actionFactory;
 
 		std::string currentElement;
 		std::map< std::string, SWidgetInfo > widgetInfo;
