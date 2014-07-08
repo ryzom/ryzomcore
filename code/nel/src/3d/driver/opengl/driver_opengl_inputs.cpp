@@ -27,8 +27,6 @@
 # endif // HAVE_XCURSOR
 #endif // defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 
-#include "nel/misc/mouse_device.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/3d/u_driver.h"
 #include "nel/misc/file.h"
 

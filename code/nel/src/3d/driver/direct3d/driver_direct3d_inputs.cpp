@@ -17,9 +17,6 @@
 #include "stddirect3d.h"
 #include "driver_direct3d.h"
 
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
-
 using namespace std;
 using namespace NLMISC;
 

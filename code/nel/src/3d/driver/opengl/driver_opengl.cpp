@@ -28,8 +28,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/dynloadlib.h"
 #include "driver_opengl_vertex_buffer_hard.h"
@@ -483,7 +481,7 @@ bool CDriverGL::setupDisplay()
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
 	}
-	
+
 	if (_Extensions.ARBFragmentShader)
 	{
 		_ForceNativeFragmentPrograms = false;
@@ -1509,7 +1507,7 @@ void			CDriverGL::enableUsedTextureMemorySum (bool enable)
 	H_AUTO_OGL(CDriverGL_enableUsedTextureMemorySum )
 
 	if (enable)
-	{	
+	{
 		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL");
 		_TextureUsed.reserve(512);
 	}

@@ -25,8 +25,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
@@ -1478,7 +1476,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 			D3DADAPTER_IDENTIFIER9 Identifier;
 			HRESULT Res;
 			Res = _D3D->GetAdapterIdentifier(gAdapter,0,&Identifier);
-			
+
 			if (strstr(Identifier.Description,"PerfHUD") != 0)
 			{
 				nlinfo ("Setting up with PerfHUD");
@@ -1512,7 +1510,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	}
 
 
-	
+
 //	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 
 	// Check some caps

@@ -556,36 +556,6 @@ public:
 
 	/// \name Mouse / Keyboard / Gamedevices
 	// @{
-		/** Enable / disable  low level mouse. This allow to take advantage of some options (speed of the mouse, automatic wrapping)
-		  * It returns a interface to these parameters when it is supported, or NULL otherwise
-		  * The interface pointer is valid as long as the low level mouse is enabled.
-		  * A call to disable the mouse returns NULL, and restore the default mouse behaviour
-		  * NB : - In this mode the mouse cursor isn't drawn.
-		  *      - Calls to showCursor have no effects
-		  *      - Calls to setCapture have no effects
-		  */
-		virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool hardware) = 0;
-
-		/** Enable / disable  a low level keyboard.
-		  * This returns a interface to some parameters when it is supported, or NULL otherwise.
-		  * The interface pointer is valid as long as the low level keyboard is enabled.
-		  * A call to disable the keyboard returns NULL, and restore the default keyboard behaviour.
-		  */
-		virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable) = 0;
-
-		/** Check whether there is a low level device manager available, and get its interface. Return NULL if not available.
-		  * From this interface you can deal with mouse and keyboard as above, but you can also manage game devices (joysticks, joypads ...)
-		  */
-		virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
-
-		/**
-		 * wrapper for IEventEmitter::emulateMouseRawMode()
-		 */
-		virtual void emulateMouseRawMode(bool enable) = 0;
-
-		// get delay used for mouse double click
-		virtual uint	getDoubleClickDelay(bool hardwareMouse) = 0;
-
 		/** show cursor if b is true, or hide it if b is false
 		  * NB: This has no effects if a low level mouse is used.
 		  */

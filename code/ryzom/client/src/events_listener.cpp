@@ -21,7 +21,6 @@
 
 #include "events_listener.h"
 #include "nel/misc/events.h"
-#include "nel/misc/game_device_events.h"
 #include "nel/misc/event_server.h"
 #include "release.h"
 #include "actions.h"
@@ -29,11 +28,13 @@
 #include "time_client.h"
 #include "input.h"
 #include "interface_v3/interface_manager.h"
+#include "global.h"
 
 
 using namespace NLMISC;
 
 extern CActionsManager Actions;	// Actions Manager.
+extern bool MouseFreeLook;
 
 //---------------------------------------------------
 // CEventsListener :
@@ -82,7 +83,6 @@ CEventsListener::~CEventsListener()
 //---------------------------------------------------
 void CEventsListener::addToServer(CEventServer& server)
 {
-	server.addListener(EventGDMouseMove,	this);
 	server.addListener(EventMouseMoveId,	this);
 	server.addListener(EventMouseDownId,	this);
 	server.addListener(EventMouseUpId,		this);
@@ -101,7 +101,6 @@ void CEventsListener::addToServer(CEventServer& server)
 //---------------------------------------------------
 void CEventsListener::removeFromServer (CEventServer& server)
 {
-	server.removeListener(EventGDMouseMove,	this);
 	server.removeListener(EventMouseMoveId,	this);
 	server.removeListener(EventMouseDownId,	this);
 	server.removeListener(EventMouseUpId,	this);
@@ -113,6 +112,12 @@ void CEventsListener::removeFromServer (CEventServer& server)
 	server.removeListener(EventSetFocusId,		this);
 }// removeFromServer //
 
+static bool s_MouseFreeLookReady = false;
+static sint s_MouseFreeLookLastX;
+static sint s_MouseFreeLookLastY;
+static sint s_MouseFreeLookFrameX = 0;
+static sint s_MouseFreeLookFrameY = 0;
+static bool s_MouseFreeLookWaitCenter;
 
 //---------------------------------------------------
 // operator() :
@@ -148,20 +153,61 @@ void CEventsListener::operator()(const CEvent& event)
 	{
 		CAHManager::getInstance()->runActionHandler("enter_modal", NULL, "group=ui:interface:quit_dialog");
 	}
-	// Event from the Mouse (ANGLE)
-	if(event == EventGDMouseMove)
-	{
-		CGDMouseMove* mouseEvent=(CGDMouseMove*)&event;
-		// Mouse acceleration
-		sint dX = mouseEvent->X;
-		sint dY = ClientCfg.FreeLookInverted ? -mouseEvent->Y : mouseEvent->Y;
-		updateFreeLookPos((float) dX, (float) dY);
-	}
 	// Event from the Mouse (MOVE)
 	else if(event == EventMouseMoveId)
 	{
 		CEventMouseMove* mouseEvent=(CEventMouseMove*)&event;
-		updateCursorPos(mouseEvent->X, mouseEvent->Y);
+		if (!MouseFreeLook)
+		{
+			updateCursorPos(mouseEvent->X, mouseEvent->Y);
+			s_MouseFreeLookReady = false;
+		}
+		else
+		{
+			// Get in pixel space, centered
+			uint32 drW, drH;
+			Driver->getWindowSize(drW, drH);
+			float fX = mouseEvent->X; // from 0 to 1.0
+			float fY = (ClientCfg.FreeLookInverted ? -mouseEvent->Y : mouseEvent->Y);
+			sint scX = (sint32)(fX * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
+			sint scY = (sint32)(fY * (float)drH) - ((sint32)drH >> 1);
+			if (!s_MouseFreeLookReady)
+			{
+				float pfX = _MouseX;
+				float pfY = (ClientCfg.FreeLookInverted ? -_MouseY : _MouseY);
+				sint pscX = (sint32)(pfX * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
+				sint pscY = (sint32)(pfY * (float)drH) - ((sint32)drH >> 1);
+				s_MouseFreeLookReady = true;
+				s_MouseFreeLookLastX = pscX;
+				s_MouseFreeLookLastY = pscY;
+				s_MouseFreeLookWaitCenter = false;
+			}
+			if (s_MouseFreeLookWaitCenter && scX == 0 && scY == 0)
+			{
+				// Centered, ignore
+				s_MouseFreeLookLastX = 0;
+				s_MouseFreeLookLastY = 0;
+			}
+			else
+			{
+				// Get delta since last center
+				sint scXd = scX - s_MouseFreeLookLastX;
+				sint scYd = scY - s_MouseFreeLookLastY;
+				s_MouseFreeLookLastX = scX;
+				s_MouseFreeLookLastY = scY;
+
+				s_MouseFreeLookFrameX += scXd;
+				s_MouseFreeLookFrameY += scYd;
+				// updateFreeLookPos is called in updateMouseSmoothing per frame
+
+				// Center cursor
+				if (abs(scX) > (drW >> 3) || abs(scY) > (drH >> 3))
+				{
+					s_MouseFreeLookWaitCenter = true;
+					Driver->setMousePos(0.5f, 0.5f);
+				}
+			}
+		}
 	}
 	// Event from the Mouse (DOWN BUTTONS)
 	else if(event == EventMouseDownId)
@@ -233,16 +279,9 @@ void CEventsListener::updateMouseSmoothing()
 {
 	if (_LastFreeLookUpdateDate != TimeInSec)
 	{
-		if (ClientCfg.FreeLookSmoothingPeriod != 0.f && _MouseSmoothingOn)
-		{
-			// free look hasn't been updated that frame because there was no
-			// mouse  move msg.
-			// mouse pos must be updated however because of smoothing
-			updateFreeLookPos(0, 0);
-
-
-
-		}
+		updateFreeLookPos((float)s_MouseFreeLookFrameX, (float)s_MouseFreeLookFrameY);
+		s_MouseFreeLookFrameX = 0;
+		s_MouseFreeLookFrameY = 0;
 	}
 }
 
@@ -267,7 +306,6 @@ void CEventsListener::enableMouseSmoothing(bool on)
 // ***************************************************************
 void CEventsListener::updateFreeLookPos(float x, float y)
 {
-
 	if (ClientCfg.FreeLookSmoothingPeriod == 0 || !_MouseSmoothingOn)
 	{
 		_MouseDeltaAX = x * ClientCfg.FreeLookSpeed;

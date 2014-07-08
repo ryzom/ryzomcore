@@ -83,7 +83,6 @@
 #include "nel/misc/event_emitter_multi.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/file.h"
 
