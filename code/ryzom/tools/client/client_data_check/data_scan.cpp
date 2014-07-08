@@ -159,7 +159,7 @@ int CPatchManager::getTotalFilesToGet()
 {
 	if (ScanDataThread != NULL)
 		return ScanDataThread->TotalFileToScan;
-	
+
 	return 1;
 }
 
@@ -168,7 +168,7 @@ int CPatchManager::getCurrentFilesToGet()
 {
 	if (ScanDataThread != NULL)
 		return ScanDataThread->CurrentFileScanned;
-	
+
 	return 1;
 }
 
@@ -226,7 +226,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 		ftpOut.FileName = rFilename;
 		ftpOut.LocalFileToDelete = false;
 		ftpOut.LocalFileExists = false;
-		// It happens some time (maybe a bug) that the versionCount is 0... => 
+		// It happens some time (maybe a bug) that the versionCount is 0... =>
 		// it happens if the BNP file is empty (8 bytes)
 		ftpOut.FinalFileSize = EmptyBnpFileSize;
 		// BNP does not exists : get all the patches version
@@ -261,7 +261,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 				}
 			}
 		}
-		
+
 		// If the version cannot be found with size and time try with sha1
 		if (nVersionFound == 0xFFFFFFFF)
 		{
@@ -280,7 +280,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 				}
 			}
 		}
-		
+
 		// No version available found
 		if (nVersionFound == 0xFFFFFFFF)
 		{
@@ -290,7 +290,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 			ftpOut.FileName = rFilename;
 			ftpOut.LocalFileToDelete = true;
 			ftpOut.LocalFileExists = true;
-			// It happens some time (maybe a bug) that the versionCount is 0... => 
+			// It happens some time (maybe a bug) that the versionCount is 0... =>
 			// it happens if the BNP file is empty (8 bytes)
 			ftpOut.FinalFileSize = EmptyBnpFileSize;
 			// Get all the patches version
@@ -314,7 +314,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 			for (j = 0; j < rFile.versionCount(); ++j)
 				if (rFile.getVersion(j).getVersionNumber() == nVersionFound)
 					break;
-			
+
 			nlassert(j != rFile.versionCount()); // Not normal if we cant find the version we found previously
 
 			// Point on the next version
@@ -335,7 +335,7 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 			// For info, get its final file size
 			ftpOut.FinalFileSize= rFile.getVersion(rFile.versionCount()-1).getFileSize();
 		}
-	} // end of else local BNP file exists 
+	} // end of else local BNP file exists
 }
 
 
@@ -352,7 +352,7 @@ void CPatchManager::startScanDataThread()
 		nlwarning ("a thread is already running");
 		return;
 	}
-	
+
 	// Reset result
 	clearDataScanLog();
 
@@ -362,8 +362,8 @@ void CPatchManager::startScanDataThread()
 	// start thread
 	ScanDataThread = new CScanDataThread();
 	nlassert (ScanDataThread != NULL);
-	
-	thread = IThread::create (ScanDataThread);
+
+	thread = CThread::create (ScanDataThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }
@@ -376,14 +376,14 @@ bool CPatchManager::isScanDataThreadEnded(bool &ok)
 		ok = false;
 		return true;
 	}
-	
+
 	bool end = ScanDataThread->Ended;
 	if (end)
 	{
 		ok = ScanDataThread->CheckOk;
 		stopScanDataThread();
 	}
-	
+
 	return end;
 }
 
@@ -430,7 +430,7 @@ bool CPatchManager::getDataScanLog(ucstring &text)
 		}
 		// then reset
 		val.Changed= false;
-	}		
+	}
 
 	return changed;
 }
@@ -443,7 +443,7 @@ void CPatchManager::addDataScanLogCorruptedFile(const SFileToPatch &ftp)
 		CDataScanState	&val= ac.value();
 		val.FilesWithScanDataError.push_back(ftp);
 		val.Changed= true;
-	}		
+	}
 }
 
 // ***************************************************************************
@@ -454,7 +454,7 @@ void CPatchManager::clearDataScanLog()
 		CDataScanState	&val= ac.value();
 		val.FilesWithScanDataError.clear();
 		val.Changed= true;
-	}		
+	}
 }
 
 // ***************************************************************************
@@ -494,8 +494,8 @@ void CScanDataThread::run ()
 		string sClientVersion = pPM->getClientVersion();
 		ucstring sTranslate = dummyI18N("Client Version") + " (" + sClientVersion + ") ";
 		pPM->setState(true, sTranslate);
-		
-		// For all bnp in the description file get all patches to apply 
+
+		// For all bnp in the description file get all patches to apply
 		// depending on the version of the client bnp files
 		const CBNPFileSet &rDescFiles = pPM->DescFile.getFiles();
 		TotalFileToScan = rDescFiles.fileCount();

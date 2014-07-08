@@ -144,7 +144,7 @@ private:
 private:
 	// data for the singleton instance
 	CStdinMonitorThread* _StdinMonitorThreadInstance;
-	NLMISC::IThread* _StdinMonitorThreadHandle;
+	NLMISC::CThread* _StdinMonitorThreadHandle;
 };
 
 CStdinMonitorSingleton StdinMonitorSingleton;
@@ -165,7 +165,7 @@ static CStdinMonitorSingleton& getInstance()
 void CStdinMonitorSingleton::init()
 {
 	_StdinMonitorThreadInstance= new CStdinMonitorThread;
-	_StdinMonitorThreadHandle = NLMISC::IThread::create (_StdinMonitorThreadInstance);
+	_StdinMonitorThreadHandle = NLMISC::CThread::create (_StdinMonitorThreadInstance);
 	_StdinMonitorThreadHandle->start();
 }
 

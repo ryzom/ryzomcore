@@ -151,7 +151,7 @@ public:
 
 	void tasksAndThreads()
 	{
-		// test running task in two separate thread (this stress the 
+		// test running task in two separate thread (this stress the
 		// multithreading support of task). CoTask API ;ake use of
 		// thread local storage API to store by thread current task info.
 
@@ -159,7 +159,7 @@ public:
 		result2.clear();
 
 		CTaskThread	tt;
-		NLMISC::IThread *th = NLMISC::IThread::create(&tt);
+		NLMISC::CThread *th = NLMISC::CThread::create(&tt);
 
 		CTask2	t2;
 
@@ -196,7 +196,7 @@ public:
 			TEST_ASSERT(referenceResultThread2[i] == result[i]);
 		}
 	}
-	
+
 	void runTasks()
 	{
 		/// Run two main task and two working task at once and check that the result

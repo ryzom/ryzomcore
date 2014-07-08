@@ -63,7 +63,7 @@ string deleteFile (const string &filename, bool throwException=true)
 void setVersion(const std::string &version)
 {
 	string fn = "VERSION";
-	
+
 	setRWAccess(fn);
 	FILE *fp = fopen (fn.c_str(), "wb");
 	if (fp == NULL)
@@ -105,16 +105,16 @@ string getVersion()
 class CPatchThread : public IRunnable
 {
 public:
-	
+
 	CPatchThread(const string &sp, const string &sv, const std::string &urlOk, const std::string &urlFailed, const std::string &logSeparator) :
 	  ServerPath (sp), ServerVersion(sv), UrlOk(urlOk), UrlFailed(urlFailed), Ended(false), StateChanged(true), LogSeparator(logSeparator)
 	{
 	}
-	
+
 	bool Ended;	// true if the thread have ended the patch
 	bool PatchOk; // true if the patch was good
 	string Url;	// url to display after the patch
-	
+
 	string State;
 	string StateLog;
 	bool StateChanged;
@@ -136,7 +136,7 @@ private:
 			string ClientPatchPath = "./patch/";
 			string ServerRootPath = CPath::standardizePath (ServerPath);
 			string DisplayedServerRootPath;		// contains the serverpath without login and password
-			
+
 			uint pos = ServerRootPath.find ("@");
 			if (pos != string::npos)
 			{
@@ -198,7 +198,7 @@ private:
 					const char *gzerr = gzerror (gz, &gzerrno);
 					throw Exception ("Can't read '%s' : code=%d %s", DirFilename.c_str(), gzerrno, gzerr);
 				}
-				
+
 				string b = buffer;
 				uint pos1 = b.find ("/");
 				uint pos2 = b.find ("/", pos1+1);
@@ -238,9 +238,9 @@ private:
 					string path = ClientPatchPath + needToGetFilesList[i].Filename;
 
 					nlinfo ("Get the file from '%s' to '%s'", string(DisplayedServerRootPath+needToGetFilesList[i].Filename).c_str(), path.c_str());
-					
+
 					// get the new file
-					
+
 					downloadFile (ServerRootPath+needToGetFilesList[i].Filename+".ngz", path+".ngz");
 					// decompress it
 					decompressFile (path+".ngz", needToGetFilesList[i].Date);
@@ -280,7 +280,7 @@ private:
 				// special case for nel_launcher.exe
 				if (needToGetFilesList[i].Filename == "nel_launcher.exe")
 					continue;
-					
+
 				string path = ClientRootPath+needToGetFilesList[i].Filename;
 				if (!NLMISC::CFile::fileExists (path))
 				{
@@ -308,7 +308,7 @@ private:
 			}
 
 			// now, we have to delete files that are not in the server list
-	
+
 			setState(true, "Scanning patch directory");
 			vector<string> res;
 			CPath::getPathContent(ClientPatchPath, false, false, true, res);
@@ -337,11 +337,11 @@ private:
 			setState (true, "Deleting %s", DirFilename.c_str());
 			string err = deleteFile (DirFilename, false);
 			if (!err.empty()) setState(true, err.c_str());
-			
+
 			// now that all is ok, we set the new client version
 			setState (true, "set client version to %s", ServerVersion.c_str ());
 			setVersion (ServerVersion);
-			
+
 			if (needToExecuteAPatch)
 			{
 				setState (true, "Launching patch_execute.bat");
@@ -358,7 +358,7 @@ private:
 
 			nlinfo ("Patching completed");
 			setState (true, "Patching completed");
-		
+
 			Url = UrlOk;
 			PatchOk = true;
 			Ended = true;
@@ -401,12 +401,12 @@ private:
 		if (fp == NULL)
 		{
 			string err = toString("Can't open file '%s' : code=%d %s", dest.c_str(), errno, strerror(errno));
-			
+
 			gzclose(gz);
 			deleteFile (filename);
 			throw Exception (err);
 		}
-		
+
 		uint8 buffer[10000];
 		while (!gzeof(gz))
 		{
@@ -473,7 +473,7 @@ private:
 					errorstr = (LPCTSTR)lpMsgBuf;
 				}
 				LocalFree(lpMsgBuf);
-				
+
 				throw Exception ("InternetOpen() failed: %s (ec %d)", errorstr.c_str(), errcode);
 			}
 		}
@@ -523,7 +523,7 @@ private:
 					errorstr = (LPCTSTR)lpMsgBuf;
 				}
 				LocalFree(lpMsgBuf);
-				
+
 				throw Exception ("InternetOpenUrl() failed on file '%s': %s (ec %d)", source.c_str (), errorstr.c_str(), errcode);
 			}
 			else
@@ -543,7 +543,7 @@ private:
 					deleteFile (dest);
 					throw Exception (err);
 				}
-				
+
 				CurrentBytesToGet += realSize;
 
 				if (TotalBytesToGet == 0 && TotalFilesToGet == 0)
@@ -568,7 +568,7 @@ private:
 				errorstr = (LPCTSTR)lpMsgBuf;
 			}
 			LocalFree(lpMsgBuf);
-			
+
 			throw Exception ("InternetCloseHandle() failed on file '%s': %s (ec %d)", source.c_str (), errorstr.c_str(), errcode);
 		}
 	}
@@ -611,11 +611,11 @@ void startPatchThread (const std::string &serverPath, const std::string &serverV
 		nlwarning ("patch thread already running");
 		return;
 	}
-	
+
 	PatchThread = new CPatchThread (serverPath, serverVersion, urlOk, urlFailed, logSeparator);
 	nlassert (PatchThread != NULL);
 
-	IThread *thread = IThread::create (PatchThread);
+	CThread *thread = CThread::create (PatchThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }

@@ -61,7 +61,7 @@ public:
 			_Instance = new CPatchManager();
 		return _Instance;
 	}
-	
+
 	// init
 	void init();
 
@@ -69,31 +69,31 @@ public:
 	std::string getClientVersion ();
 
 	bool isVerboseLog() { return VerboseLog; }
-	
+
 	void setVerboseLog(bool b) { VerboseLog = b; }
 
-	// Get the string information about what the threads are doing 
+	// Get the string information about what the threads are doing
 	// Return true if the state has changed
 	bool getThreadState (ucstring &state, std::vector<ucstring> &stateLog);
 
 	// TODO : Revoir ca pour la seconde partie ...
 	// On a peut etre pas les informations de taille des patches ... voir avec daniel
 	// pour l'instant c'est un fake qui retourne 1 !
-	
+
 	int getTotalFilesToGet();
 	int getCurrentFilesToGet();
 
 	// ----------------------------------------------
 	// ScanData Part : optional task wich verify all data
 	// ----------------------------------------------
-	
+
 	// start the full check of BNP
 	void startScanDataThread();
 
 	// if the scan data thread has ended
 	bool isScanDataThreadEnded(bool &ok);
 
-	// ask to stop the Scan Data thread. NB: for security, the thread will continue to the current scanned file, 
+	// ask to stop the Scan Data thread. NB: for security, the thread will continue to the current scanned file,
 	// then stop. Hence, you must still wait isScanDataThreadEnded() return true
 	void askForStopScanDataThread();
 
@@ -109,7 +109,7 @@ private:
 
 	// Set the thread state (called by threads to let us know what they are doing)
 	void setState (bool bOutputToLog, const ucstring &ucsState);
-	
+
 	/// Read the description file (throw exception if it doesn't exists)
 	void				readDescFile(sint32 nVersion);
 
@@ -126,7 +126,7 @@ private:
 	void addDataScanLogCorruptedFile(const SFileToPatch &ftp);
 	void clearDataScanLog();
 	static void getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate);
-	
+
 private:
 
 	/// Constructor
@@ -143,7 +143,7 @@ private:
 
 	// Threads
 	CScanDataThread	*ScanDataThread;
-	NLMISC::IThread	*thread;
+	NLMISC::CThread	*thread;
 
 	// State
 	struct CState
@@ -197,7 +197,7 @@ public:
 public:
 
 	// Written by MainThread, read by thread
-	bool		AskForCancel;			// true if the main thread ask to cancel the task 
+	bool		AskForCancel;			// true if the main thread ask to cancel the task
 
 	// Written by thread, read by Main Thread
 	bool		Ended;					// true if the thread have ended

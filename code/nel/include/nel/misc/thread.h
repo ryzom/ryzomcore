@@ -69,7 +69,7 @@ public:
 	}
 };
 
-/// Thread priorities, numbering follows Win32 for now
+/// Thread priorities
 enum TThreadPriority
 {
 	ThreadPriorityLow,

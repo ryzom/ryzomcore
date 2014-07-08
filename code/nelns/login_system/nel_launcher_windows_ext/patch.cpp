@@ -96,7 +96,7 @@ string deleteFile (const string &filename, bool throwException=true)
 void setVersion(const std::string &version)
 {
 	string fn = "VERSION";
-	
+
 	setRWAccess(fn);
 	FILE *fp = fopen (fn.c_str(), "wb");
 	if (fp == NULL)
@@ -138,16 +138,16 @@ string getVersion()
 class CPatchThread : public IRunnable
 {
 public:
-	
+
 	CPatchThread(const string &sp, const string &sv, const std::string &urlOk, const std::string &urlFailed, const std::string &logSeparator) :
 	  ServerPath (sp), ServerVersion(sv), UrlOk(urlOk), UrlFailed(urlFailed), Ended(false), StateChanged(true), LogSeparator(logSeparator)
 	{
 	}
-	
+
 	bool Ended;			// true if the thread have ended the patch
 	bool PatchOk;		// true if the patch was good
 	string Url;			// url to display after the patch
-	
+
 	string State;
 	string StateLog;
 	bool StateChanged;
@@ -158,7 +158,7 @@ private:
 	string ClientPatchPath;		// the patch path (c:\ryzom\patch)
 	string ServerRootPath;		// the root server path (http://www.toto.com)
 	string DisplayedServerRootPath;		// contains the serverpath without login and password
-	
+
 	// get a file and decompress it in the patch directory
 	void getFile (const CEntry &e)
 	{
@@ -186,7 +186,7 @@ private:
 			ClientPatchPath = "./patch/";
 			ServerRootPath = CPath::standardizePath (ServerPath);
 			DisplayedServerRootPath;		// contains the serverpath without login and password
-			
+
 			uint pos = ServerRootPath.find ("@");
 			if (pos != string::npos)
 			{
@@ -248,7 +248,7 @@ private:
 					const char *gzerr = gzerror (gz, &gzerrno);
 					throw Exception ("Can't read '%s' : code=%d %s", DirFilename.c_str(), gzerrno, gzerr);
 				}
-				
+
 				string b = buffer;
 				uint pos1 = b.find ("/");
 				uint pos2 = b.find ("/", pos1+1);
@@ -280,7 +280,7 @@ private:
 			// nel_launcher.exe and relaunch it now
 
 			bool patchExe = false, patchCfg = false, patchBat = false;
-	
+
 			uint i;
 
 			for (i = 0; i < needToGetFilesList.size(); i++)
@@ -307,42 +307,42 @@ private:
 			if (patchBat)
 			{
 				setState (true, true, "Launching %s", RelaunchNelLauncherBatchFilename.c_str());
-				
+
 				//if (_execlp ("update_nel_launcher.bat", "update_nel_launcher.bat", NULL) == -1)
 				STARTUPINFO si;
 				PROCESS_INFORMATION pi;
-				
+
 				ZeroMemory( &si, sizeof(si) );
 				// Flag permettant de prendre en compte wShowWindow
 				si.dwFlags = STARTF_USESHOWWINDOW;
 				si.wShowWindow = SW_HIDE;
-				
+
 				si.cb = sizeof(si);
-				
+
 				ZeroMemory( &pi, sizeof(pi) );
-				
-				// Start the child process. 
-				if( !CreateProcess( NULL, // No module name (use command line). 
-					(char*)RelaunchNelLauncherBatchFilename.c_str(), // Command line. 
-					NULL,             // Process handle not inheritable. 
-					NULL,             // Thread handle not inheritable. 
-					FALSE,            // Set handle inheritance to FALSE. 
-					0,                // No creation flags. 
-					NULL,             // Use parent's environment block. 
-					NULL,             // Use parent's starting directory. 
+
+				// Start the child process.
+				if( !CreateProcess( NULL, // No module name (use command line).
+					(char*)RelaunchNelLauncherBatchFilename.c_str(), // Command line.
+					NULL,             // Process handle not inheritable.
+					NULL,             // Thread handle not inheritable.
+					FALSE,            // Set handle inheritance to FALSE.
+					0,                // No creation flags.
+					NULL,             // Use parent's environment block.
+					NULL,             // Use parent's starting directory.
 					&si,              // Pointer to STARTUPINFO structure.
 					&pi )             // Pointer to PROCESS_INFORMATION structure.
-					) 
+					)
 				{
 					// error occurs during the launch
 					string str = toString("Can't execute '%s': code=%d %s", RelaunchNelLauncherBatchFilename.c_str(), errno, strerror(errno));
 					throw Exception (str);
 				}
-				
-				// Close process and thread handles. 
+
+				// Close process and thread handles.
 				CloseHandle( pi.hProcess );
 				CloseHandle( pi.hThread );
-				
+
 				exit(0);
 			}
 			else if (patchExe || patchCfg)
@@ -355,7 +355,7 @@ private:
 				}
 
 				fprintf(fp, "@echo off\n");
-				
+
 				if (patchExe)
 				{
 					nlinfo ("Need to special patch '%s'",NelLauncherFilename.c_str());
@@ -379,52 +379,52 @@ private:
 				}
 
 				fprintf(fp, "start %s\n", NelLauncherFilename.c_str());
-				
+
 				fclose (fp);
 
 				// remove the files list file
 				setState (true, true, "Deleting %s", DirFilename.c_str());
 				string err = deleteFile (DirFilename, false);
 				if (!err.empty()) setState(true, true, err.c_str());
-				
+
 				// launching the .bat
 				setState (true, true, "Launching %s", UpdateNelLauncherBatchFilename.c_str());
-				
+
 				//if (_execlp ("update_nel_launcher.bat", "update_nel_launcher.bat", NULL) == -1)
 				STARTUPINFO si;
 				PROCESS_INFORMATION pi;
-				
+
 				ZeroMemory( &si, sizeof(si) );
 				// Flag permettant de prendre en compte wShowWindow
 				si.dwFlags = STARTF_USESHOWWINDOW;
 				si.wShowWindow = SW_HIDE;
-				
+
 				si.cb = sizeof(si);
-				
+
 				ZeroMemory( &pi, sizeof(pi) );
-				
-				// Start the child process. 
-				if( !CreateProcess( NULL, // No module name (use command line). 
-					(char*)UpdateNelLauncherBatchFilename.c_str(), // Command line. 
-					NULL,             // Process handle not inheritable. 
-					NULL,             // Thread handle not inheritable. 
-					FALSE,            // Set handle inheritance to FALSE. 
-					0,                // No creation flags. 
-					NULL,             // Use parent's environment block. 
-					NULL,             // Use parent's starting directory. 
+
+				// Start the child process.
+				if( !CreateProcess( NULL, // No module name (use command line).
+					(char*)UpdateNelLauncherBatchFilename.c_str(), // Command line.
+					NULL,             // Process handle not inheritable.
+					NULL,             // Thread handle not inheritable.
+					FALSE,            // Set handle inheritance to FALSE.
+					0,                // No creation flags.
+					NULL,             // Use parent's environment block.
+					NULL,             // Use parent's starting directory.
 					&si,              // Pointer to STARTUPINFO structure.
 					&pi )             // Pointer to PROCESS_INFORMATION structure.
-					) 
+					)
 				{
 					// error occurs during the launch
 					string str = toString("Can't execute '%s': code=%d %s", UpdateNelLauncherBatchFilename.c_str(), errno, strerror(errno));
 					throw Exception (str);
 				}
-				
-				// Close process and thread handles. 
+
+				// Close process and thread handles.
 				CloseHandle( pi.hProcess );
 				CloseHandle( pi.hThread );
-				
+
 				exit(0);
 			}
 
@@ -442,12 +442,12 @@ private:
 				{
 					executeFinalizeBat = true;
 				}
-				
+
 				// put the file in the ryzom patch directory
 				string path = ClientPatchPath + needToGetFilesList[i].Filename;
 
 				//nldebug ("path '%s' -> %d %s", path.c_str(), NLMISC::CFile::fileExists (ClientRootPath + needToGetFilesList[i].Filename), strlwr(NLMISC::CFile::getExtension(needToGetFilesList[i].Filename)).c_str());
-				
+
 				// move dll exe and already existing file in the root directory
 				if (NLMISC::CFile::fileExists (ClientRootPath + needToGetFilesList[i].Filename) ||
 					strlwr(NLMISC::CFile::getExtension(needToGetFilesList[i].Filename)) == "dll" ||
@@ -471,7 +471,7 @@ private:
 			}
 
 			// now, we have to delete files that are not in the server list
-	
+
 			setState(true, true, "Scanning patch directory");
 			vector<string> res;
 			CPath::getPathContent(ClientPatchPath, false, false, true, res);
@@ -512,10 +512,10 @@ private:
 				setState (true, true, "Launching %s", fn.c_str());
 				system(fn.c_str());
 			}
-			
+
 			// it s the end of the patch process
 			setState (true, true, "Patching completed");
-		
+
 			Url = UrlOk;
 			PatchOk = true;
 			Ended = true;
@@ -558,12 +558,12 @@ private:
 		if (fp == NULL)
 		{
 			string err = toString("Can't open file '%s' : code=%d %s", dest.c_str(), errno, strerror(errno));
-			
+
 			gzclose(gz);
 			deleteFile (filename);
 			throw Exception (err);
 		}
-		
+
 		uint32 currentSize = 0;
 		uint8 buffer[10000];
 		while (!gzeof(gz))
@@ -633,7 +633,7 @@ private:
 					errorstr = (LPCTSTR)lpMsgBuf;
 				}
 				LocalFree(lpMsgBuf);
-				
+
 				throw Exception ("InternetOpen() failed: %s (ec %d)", errorstr.c_str(), errcode);
 			}
 		}
@@ -683,7 +683,7 @@ private:
 					errorstr = (LPCTSTR)lpMsgBuf;
 				}
 				LocalFree(lpMsgBuf);
-				
+
 				throw Exception ("InternetOpenUrl() failed on file '%s': %s (ec %d)", source.c_str (), errorstr.c_str(), errcode);
 			}
 			else
@@ -703,7 +703,7 @@ private:
 					deleteFile (dest);
 					throw Exception (err);
 				}
-				
+
 				CurrentBytesToGet += realSize;
 
 				if (TotalBytesToGet == 0 && TotalFilesToGet == 0)
@@ -728,7 +728,7 @@ private:
 				errorstr = (LPCTSTR)lpMsgBuf;
 			}
 			LocalFree(lpMsgBuf);
-			
+
 			throw Exception ("InternetCloseHandle() failed on file '%s': %s (ec %d)", source.c_str (), errorstr.c_str(), errcode);
 		}
 	}
@@ -742,7 +742,7 @@ private:
 			nlinfo (str);
 		State = str;
 		if(log)
-		{ 
+		{
 			StateLog += str;
 			StateLog += LogSeparator;
 		}
@@ -773,11 +773,11 @@ void startPatchThread (const std::string &serverPath, const std::string &serverV
 		nlwarning ("patch thread already running");
 		return;
 	}
-	
+
 	PatchThread = new CPatchThread (serverPath, serverVersion, urlOk, urlFailed, logSeparator);
 	nlassert (PatchThread != NULL);
 
-	IThread *thread = IThread::create (PatchThread);
+	CThread *thread = CThread::create (PatchThread);
 	nlassert (thread != NULL);
 	thread->start ();
 }

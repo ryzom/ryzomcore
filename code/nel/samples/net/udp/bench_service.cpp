@@ -140,7 +140,7 @@ CBufFIFO			*CurrentReadQueue = NULL;
 
 TReceivedMessage	*CurrentInMsg = NULL;
 
-IThread				*ReceiveThread = NULL;
+CThread				*ReceiveThread = NULL;
 CReceiveTask		*ReceiveTask = NULL;
 
 list<CClient>		Clients;	// contains all clients
@@ -259,7 +259,7 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 		// increase only for new pong
 		NbPong++;
 		MeanPongTime += (uint32)(pongTime-pingTime);
-	
+
 		FullNbPong++;
 		FullMeanPongTime += (uint32)(pongTime-pingTime);
 
@@ -276,7 +276,7 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 		ha = Address.ipAddress();
 	}
 	string fn = StatPathName + ConnectionName + "_" + ha + "_" + getDate() + ".pong";
-	
+
 	FILE *fp = fopen (fn.c_str(), "rt");
 	if (fp == NULL)
 	{
@@ -318,7 +318,7 @@ void CClient::updateFullStat ()
 	for (uint i = 0; i < LastPongReceived; i++)
 	{
 		if (PongReceived[i].first == 0) NbLost++;
-		else 
+		else
 		{
 			NbPong++;
 			NbDup += PongReceived[i].first - 1;
@@ -333,7 +333,7 @@ void CClient::updateFullStat ()
 			ha = Address.ipAddress();
 		}
 		string fn = StatPathName + ConnectionName + "_" + ha + "_" + getDate() + ".stat";
-		
+
 		string line = "Full Summary: ";
 		line += "NbPing " + toString(LastPongReceived) + " ";
 		line += "NbPong " + toString(NbPong) + " ";
@@ -375,7 +375,7 @@ void CClient::updateFullStat ()
 			ha = Address.ipAddress();
 		}
 		string fn = StatPathName + ConnectionName + "_" + ha + "_" + getDate() + ".ping";
-		
+
 		FILE *fp = fopen (fn.c_str(), "rt");
 		if (fp == NULL)
 		{
@@ -432,7 +432,7 @@ void CClient::updateStat ()
 		ha = Address.ipAddress();
 	}
 	string fn = StatPathName + ConnectionName + "_" + ha + "_" + getDate() + ".stat";
-	
+
 	string line;
 	line += "NbPing " + toString(NbPing) + " ";
 	line += "NbPong " + toString(NbPong) + " ";
@@ -455,7 +455,7 @@ void CClient::updateStat ()
 			fprintf (fp, "HostAddress: %s\n", Address.asString().c_str());
 			FirstWrite = false;
 		}
-		
+
 		fprintf (fp, "%s\n", line.c_str());
 		fclose (fp);
 	}
@@ -535,7 +535,7 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 			uint32 session = 0;
 			msgin.serial (session);
 
-			// Find a new udp connection, find the linked 
+			// Find a new udp connection, find the linked
 			list<CClient>::iterator it;
 			for (it = Clients.begin(); it != Clients.end(); it++)
 			{
@@ -630,7 +630,7 @@ void sendPing ()
 class CBenchService : public IService
 {
 public:
-	
+
 	void init()
 	{
 		nlassert( ReceiveTask==NULL && ReceiveThread==NULL );
@@ -649,7 +649,7 @@ public:
 		CurrentReadQueue = &Queue2;
 		ReceiveTask->setWriteQueue( &Queue1 );
 		nlassert( ReceiveTask != NULL );
-		ReceiveThread = IThread::create( ReceiveTask );
+		ReceiveThread = CThread::create( ReceiveTask );
 		nlassert( ReceiveThread != NULL );
 		ReceiveThread->start();
 
@@ -704,7 +704,7 @@ public:
 
 				// Handle the UDP message
 
-				// Retrieve client info or add one		
+				// Retrieve client info or add one
 				TClientMap::iterator ihm = ClientMap.find( CurrentInMsg->AddrFrom );
 				if ( ihm == ClientMap.end() )
 				{
@@ -757,7 +757,7 @@ public:
 			delete ReceiveThread;
 			ReceiveThread = NULL;
 		}
-	
+
 		if (ReceiveTask != NULL)
 		{
 			delete ReceiveTask;
@@ -779,5 +779,5 @@ public:
 	}
 };
 
- 
+
 NLNET_SERVICE_MAIN (CBenchService, "BS", "bench_service", 45459, EmptyCallbackArray, UDP_DIR, "")

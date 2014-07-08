@@ -180,7 +180,7 @@ public:
 		for (i=0; i<NumThreads; ++i)
 		{
 			IRunnable	*runnable = (IRunnable *)(new CPinger());
-			IThread		*thread = IThread::create(runnable);
+			CThread		*thread = CThread::create(runnable);
 			thread->start();
 		}
 	}
