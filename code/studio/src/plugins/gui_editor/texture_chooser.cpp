@@ -6,40 +6,81 @@
 #include <string>
 #include <QPixMap>
 #include <QImage>
+#include <QListWidget>
+
+#include "nel/gui/view_renderer.h"
+
+struct TextureChooserPrivate
+{
+	QListWidget *fileTextures;
+	QListWidget *atlasTextures;
+
+	TextureChooserPrivate()
+	{
+		fileTextures = new QListWidget();
+		atlasTextures = new QListWidget();
+	}
+};
 
 TextureChooser::TextureChooser( QDialog *parent ) : 
 QDialog( parent )
 {
 	setupUi( this );
+
+	d_ptr = new TextureChooserPrivate;
+	this->tabWidget->clear();
+	this->tabWidget->addTab( d_ptr->fileTextures, tr( "File textures" ) );
+	this->tabWidget->addTab( d_ptr->atlasTextures, tr( "Atlas texture" ) );
+
 	setupConnections();
 }
 
 TextureChooser::~TextureChooser()
 {
+	delete d_ptr;
+	d_ptr = NULL;
 }
 
 
 void TextureChooser::load()
 {
-	listWidget->clear();
+	// Load the file textures
+	d_ptr->fileTextures->clear();
 
 	std::vector< std::string > textures;
 	//NLMISC::CPath::getFileList( "tga", textures );
-	NLMISC::CPath::getFileListByPath( "tga", "interfaces", textures );
+	NLMISC::CPath::getFileListByPath( "dds", "interfaces", textures );
+	NLMISC::CPath::getFileListByPath( "dds", "gamedev", textures );
+
+	std::sort( textures.begin(), textures.end() );
 
 	std::vector< std::string >::const_iterator itr = textures.begin();
 	while( itr != textures.end() )
 	{
-		listWidget->addItem( itr->c_str() );
+		d_ptr->fileTextures->addItem( itr->c_str() );
 		++itr;
 	}
 
-	listWidget->setCurrentRow( 0 );
+	// Now load the atlas textures
+	d_ptr->atlasTextures->clear();
+	textures.clear();
+
+	NLGUI::CViewRenderer::getInstance()->getTextureNames( textures );
+	itr = textures.begin();
+	while( itr != textures.end() )
+	{
+		d_ptr->atlasTextures->addItem( itr->c_str() );
+		++itr;
+	}
+
+	// set the file textures row after the atlas, because they are shown first
+	d_ptr->atlasTextures->setCurrentRow( 0 );
+	d_ptr->fileTextures->setCurrentRow( 0 );
 }
 
 void TextureChooser::accept()
 {
-	QListWidgetItem *item = listWidget->currentItem();
+	QListWidgetItem *item = d_ptr->fileTextures->currentItem();
 	if( item == NULL )
 		return;
 
@@ -54,12 +95,12 @@ void TextureChooser::reject()
 	QDialog::reject();
 }
 
-void TextureChooser::onCurrentRowChanged( int row )
+void TextureChooser::onFileTxtRowChanged( int row )
 {
 	if( row < 0 )
 		return;
 
-	QListWidgetItem *item = listWidget->item( row );
+	QListWidgetItem *item = d_ptr->fileTextures->item( row );
 	QString fn = item->text();
 
 	std::string rfn = fn.toUtf8().constData();
@@ -81,11 +122,42 @@ void TextureChooser::onCurrentRowChanged( int row )
 		return;
 	}
 
-	uint32 size = bm.getSize() * ( 32 / 8 );  // should be depth, but CBitmap always uses 32 bit to store the image
+	setPreviewImage( bm );
+}
 
+void TextureChooser::onAtlasTxtRowChanged( int row )
+{
+	if( row < 0 )
+		return;
+
+	QListWidgetItem *item = d_ptr->atlasTextures->item( row );
+	QString fn = item->text();
+
+	std::string rfn = fn.toUtf8().constData();
+
+	NLMISC::CBitmap bm;
+
+	bool b = NLGUI::CViewRenderer::getInstance()->getTexture( bm, rfn );
+	if( !b )
+		return;
+	
+	setPreviewImage( bm );
+}
+
+
+void TextureChooser::setupConnections()
+{
+	connect( d_ptr->fileTextures, SIGNAL( currentRowChanged( int ) ), this, SLOT( onFileTxtRowChanged( int ) ) );
+	connect( d_ptr->atlasTextures, SIGNAL( currentRowChanged( int ) ), this, SLOT( onAtlasTxtRowChanged( int ) ) );
+}
+
+void TextureChooser::setPreviewImage( NLMISC::CBitmap &bm )
+{
+	// should be depth, but CBitmap always uses 32 bit to store the image
+	uint32 size = bm.getSize() * ( 32 / 8 );
 	uint8 *data = new uint8[ size ];
 	bm.getData( data );
-
+	
 	/// Convert from ABGR to ARGB
 	{
 		int i = 0;
@@ -107,13 +179,6 @@ void TextureChooser::onCurrentRowChanged( int row )
 
 	delete data;
 	data = NULL;
-
-}
-
-
-void TextureChooser::setupConnections()
-{
-	connect( listWidget, SIGNAL( currentRowChanged( int ) ), this, SLOT( onCurrentRowChanged( int ) ) );
 }
 
 
