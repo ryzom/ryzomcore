@@ -284,13 +284,13 @@ static void displayCallStack (CLog *log)
 	::ZeroMemory (&callStack, sizeof(callStack));
 
 #ifdef NL_OS_WIN64
-    callStack.AddrPC.Offset    = context.Rip;
-    callStack.AddrStack.Offset = context.Rsp;
-    callStack.AddrFrame.Offset = context.Rbp;
+	callStack.AddrPC.Offset    = context.Rip;
+	callStack.AddrStack.Offset = context.Rsp;
+	callStack.AddrFrame.Offset = context.Rbp;
 #else
-    callStack.AddrPC.Offset    = context.Eip;
-    callStack.AddrStack.Offset = context.Esp;
-    callStack.AddrFrame.Offset = context.Ebp;
+	callStack.AddrPC.Offset    = context.Eip;
+	callStack.AddrStack.Offset = context.Esp;
+	callStack.AddrFrame.Offset = context.Ebp;
 #endif
 
 	callStack.AddrPC.Mode      = AddrModeFlat;
