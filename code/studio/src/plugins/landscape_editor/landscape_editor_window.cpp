@@ -104,6 +104,10 @@ LandscapeEditorWindow::~LandscapeEditorWindow()
 {
 	writeSettings();
 	delete m_zoneBuilder;
+
+	Core::ICore::instance()->mainWindow()->statusBar()->removeWidget( m_statusInfo );
+	delete m_statusInfo;
+	m_statusInfo = NULL;
 }
 
 QUndoStack *LandscapeEditorWindow::undoStack() const

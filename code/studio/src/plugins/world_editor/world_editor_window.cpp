@@ -121,6 +121,10 @@ WorldEditorWindow::~WorldEditorWindow()
 	writeSettings();
 
 	delete m_zoneBuilderBase;
+
+	Core::ICore::instance()->mainWindow()->statusBar()->removeWidget( m_statusInfo );
+	delete m_statusInfo;
+	m_statusInfo = NULL;
 }
 
 QUndoStack *WorldEditorWindow::undoStack() const
