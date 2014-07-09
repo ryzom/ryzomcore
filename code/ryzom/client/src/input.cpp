@@ -169,8 +169,6 @@ bool IsMouseFreeLook()
 	return MouseFreeLook;
 }
 
-bool MouseCursorNoZero = true;
-
 // *********************************************************************************
 // Use this method to toggle the mouse (freelook -> cursor)
 void	SetMouseCursor (bool updatePos)
@@ -194,7 +192,7 @@ void	SetMouseCursor (bool updatePos)
 			{
 				sint32 ix, iy;
 				cursor->getPointerPos (ix, iy);
-				if (!MouseCursorNoZero || (ix != 0 || iy != 0))
+				if (ix != CViewPointer::InvalidCoord && iy != CViewPointer::InvalidCoord)
 				{
 					x = (float)ix / (float)width;
 					y = (float)iy / (float)height;

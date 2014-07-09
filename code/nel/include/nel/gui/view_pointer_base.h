@@ -53,11 +53,13 @@ namespace NLGUI
 		bool show() const {return _PointerVisible;}
 
 		void draw(){}
-		
+
 		/// set button state
 		void setButtonState(NLMISC::TMouseButton state) { _Buttons = state; }
 		/// get buttons state
 		NLMISC::TMouseButton getButtonState() const { return _Buttons; }
+
+		static const sint32 InvalidCoord = 0x80000000;
 
 	protected:
 		// (x,y) is from the TopLeft corner of the window
