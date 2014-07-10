@@ -17,6 +17,9 @@
 #include "stdmisc.h"
 #include "nel/misc/system_utils.h"
 
+#include <SDL_clipboard.h>
+#include <SDL_video.h>
+
 #ifdef NL_OS_WINDOWS
 	#ifndef NL_COMP_MINGW
 		#define NOMINMAX
@@ -108,87 +111,16 @@ bool CSystemUtils::updateProgressBar(uint value, uint total)
 bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 {
 	if (!text.size()) return false;
-
-	bool res = false;
-
-#ifdef NL_OS_WINDOWS
-	if (OpenClipboard(NULL))
-	{
-		// check if unicode format is supported by clipboard
-		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
-
-		// allocates a buffer to copy text in global memory
-		HGLOBAL mem = GlobalAlloc(GHND|GMEM_DDESHARE, (text.size()+1) * (isUnicode ? 2:1));
-
-		if (mem)
-		{
-			// create a lock on this buffer
-			void *hLock = GlobalLock(mem);
-
-			// copy text to this buffer
-			if (isUnicode)
-				wcscpy((wchar_t*)hLock, (const wchar_t*)text.c_str());
-			else
-				strcpy((char*)hLock, text.toString().c_str());
-
-			// unlock buffer
-			GlobalUnlock(mem);
-
-			// empty clipboard
-			EmptyClipboard();
-
-			// set new data to clipboard in the right format
-			SetClipboardData(isUnicode ? CF_UNICODETEXT:CF_TEXT, mem);
-
-			res = true;
-		}
-
-		CloseClipboard();
-	}
-#endif
-
-	return res;
+	std::string textUtf8 = text.toUtf8();
+	return (SDL_SetClipboardText(textUtf8.c_str()) == 0);
 }
 
 bool CSystemUtils::pasteTextFromClipboard(ucstring &text)
 {
-	bool res = false;
-
-#ifdef NL_OS_WINDOWS
-	if (OpenClipboard(NULL))
-	{
-		// check if unicode format is supported by clipboard
-		bool isUnicode = (IsClipboardFormatAvailable(CF_UNICODETEXT) == TRUE);
-
-		// get data from clipboard (if not of this type, they are converted)
-		// warning, this code can't be debuggued in VC++ IDE, hObj will be always NULL
-		HANDLE hObj = GetClipboardData(isUnicode ? CF_UNICODETEXT:CF_TEXT);
-
-		if (hObj)
-		{
-			// create a lock on clipboard data
-			void *hLock = GlobalLock(hObj);
-
-			if (hLock != NULL)
-			{
-				// retrieve clipboard data
-				if (isUnicode)
-					text = (const ucchar*)hLock;
-				else
-					text = (const char*)hLock;
-
-				// unlock data
-				GlobalUnlock(hObj);
-
-				res = true;
-			}
-		}
-
-		CloseClipboard();
-	}
-#endif
-
-	return res;
+	char *textUtf8 = SDL_GetClipboardText();
+	if (!textUtf8) return false;
+	text.fromUtf8(textUtf8);
+	return true;
 }
 
 bool CSystemUtils::supportUnicode()
@@ -234,37 +166,14 @@ bool CSystemUtils::isAzertyKeyboard()
 
 bool CSystemUtils::isScreensaverEnabled()
 {
-	bool res = false;
-#ifdef NL_OS_WINDOWS
-//	old code, is not working anymore
-//	BOOL bRetValue;
-//	SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &bRetValue, 0);
-//	res = (bRetValue == TRUE);
-	HKEY hKeyScreenSaver = NULL;
-	LSTATUS lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
-	if (lReturn == ERROR_SUCCESS)
-	{
-		DWORD dwType = 0L;
-		DWORD dwSize = KeyMaxLength;
-		unsigned char Buffer[KeyMaxLength] = {0};
-
-		lReturn = RegQueryValueExA(hKeyScreenSaver, TEXT("SCRNSAVE.EXE"), NULL, &dwType, NULL, &dwSize);
-		// if SCRNSAVE.EXE is present, check also if it's empty
-		if (lReturn == ERROR_SUCCESS)
-			res = (Buffer[0] != '\0');
-	}
-	RegCloseKey(hKeyScreenSaver);
-#endif
-	return res;
+	return SDL_IsScreenSaverEnabled();
 }
 
 bool CSystemUtils::enableScreensaver(bool screensaver)
 {
-	bool res = false;
-#ifdef NL_OS_WINDOWS
-	res = (SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, screensaver ? TRUE:FALSE, NULL, 0) == TRUE);
-#endif
-	return res;
+	if (screensaver) SDL_EnableScreenSaver();
+	else SDL_DisableScreenSaver();
+	return true;
 }
 
 std::string CSystemUtils::getRootKey()
