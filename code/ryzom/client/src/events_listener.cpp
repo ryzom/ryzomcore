@@ -117,6 +117,7 @@ static sint s_MouseFreeLookLastX;
 static sint s_MouseFreeLookLastY;
 static sint s_MouseFreeLookFrameX = 0;
 static sint s_MouseFreeLookFrameY = 0;
+static bool s_MouseFreeLookWaitCenter;
 
 //---------------------------------------------------
 // operator() :
@@ -168,45 +169,42 @@ void CEventsListener::operator()(const CEvent& event)
 			Driver->getWindowSize(drW, drH);
 			float fX = mouseEvent->X; // from 0 to 1.0
 			float fY = (ClientCfg.FreeLookInverted ? -mouseEvent->Y : mouseEvent->Y);
-			sint scX = (fX * (sint32)drW) - ((sint32)drW >> 1); // in pixels, centered
-			sint scY = (fY * (sint32)drH) - ((sint32)drH >> 1);
+			sint scX = (sint32)(fX * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
+			sint scY = (sint32)(fY * (float)drH) - ((sint32)drH >> 1);
 			if (!s_MouseFreeLookReady)
 			{
-				if (scX == 0 && scY == 0)
-				{
-					s_MouseFreeLookReady = true;
-					s_MouseFreeLookLastX = 0;
-					s_MouseFreeLookLastY = 0;
-				}
-				else
-				{
-					// Center cursor
-					Driver->setMousePos(0.5f, 0.5f);
-				}
+				float pfX = _MouseX;
+				float pfY = (ClientCfg.FreeLookInverted ? -_MouseY : _MouseY);
+				sint pscX = (sint32)(pfX * (float)drW) - ((sint32)drW >> 1); // in pixels, centered
+				sint pscY = (sint32)(pfY * (float)drH) - ((sint32)drH >> 1);
+				s_MouseFreeLookReady = true;
+				s_MouseFreeLookLastX = pscX;
+				s_MouseFreeLookLastY = pscY;
+				s_MouseFreeLookWaitCenter = false;
+			}
+			if (s_MouseFreeLookWaitCenter && scX == 0 && scY == 0)
+			{
+				// Centered, ignore
+				s_MouseFreeLookLastX = 0;
+				s_MouseFreeLookLastY = 0;
 			}
 			else
 			{
-				if (scX == 0 && scY == 0)
-				{
-					// Centered, ignore
-					s_MouseFreeLookLastX = 0;
-					s_MouseFreeLookLastY = 0;
-				}
-				else
-				{
-					// Get delta since last center
-					sint scXd = scX - s_MouseFreeLookLastX;
-					sint scYd = scY - s_MouseFreeLookLastY;
-					s_MouseFreeLookLastX = scX;
-					s_MouseFreeLookLastY = scY;
+				// Get delta since last center
+				sint scXd = scX - s_MouseFreeLookLastX;
+				sint scYd = scY - s_MouseFreeLookLastY;
+				s_MouseFreeLookLastX = scX;
+				s_MouseFreeLookLastY = scY;
 
-					//updateFreeLookPos((float)scXd, (float)scYd);
-					s_MouseFreeLookFrameX += scXd;
-					s_MouseFreeLookFrameY += scYd;
+				s_MouseFreeLookFrameX += scXd;
+				s_MouseFreeLookFrameY += scYd;
+				// updateFreeLookPos is called in updateMouseSmoothing per frame
 
-					// Center cursor
-					if (abs(scX) > (drW >> 3) || abs(scY) > (drH >> 3))
-						Driver->setMousePos(0.5f, 0.5f);
+				// Center cursor
+				if (abs(scX) > (drW >> 3) || abs(scY) > (drH >> 3))
+				{
+					s_MouseFreeLookWaitCenter = true;
+					Driver->setMousePos(0.5f, 0.5f);
 				}
 			}
 		}
