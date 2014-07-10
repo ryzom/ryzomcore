@@ -20,19 +20,14 @@
 #include "nel/misc/sstring.h"
 #include "nel/misc/thread.h"
 
+#include <SDL_timer.h>
+#include <SDL_atomic.h>
+
 #ifdef NL_OS_WINDOWS
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX
 #	endif
 #	include <windows.h>
-#elif defined (NL_OS_UNIX)
-#	include <sys/time.h>
-#	include <unistd.h>
-#endif
-
-#ifdef NL_OS_MAC
-#include <mach/mach.h>
-#include <mach/mach_time.h>
 #endif
 
 #ifdef DEBUG_NEW
@@ -42,131 +37,22 @@
 namespace NLMISC
 {
 
-namespace {
-#ifdef NL_OS_WINDOWS
-bool a_HaveQueryPerformance = false;
-LARGE_INTEGER a_QueryPerformanceFrequency;
-#endif
-#ifdef NL_OS_UNIX
-#	if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0)
-#	if defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK >= 0)
-#		define NL_MONOTONIC_CLOCK
-#	endif
-#	endif
-#	ifdef NL_MONOTONIC_CLOCK
-bool a_CheckedMonotonicClock = false;
-bool a_HasMonotonicClock = false;
-uint64 a_MonotonicClockFrequency = 0;
-uint64 a_MonotonicClockResolutionNs = 0;
-bool hasMonotonicClock()
-{
-	if (!a_CheckedMonotonicClock)
-	{
-		/* Initialize the local time engine.
-		* On Unix, this method will find out if the Monotonic Clock is supported
-		* (seems supported by kernel 2.6, not by kernel 2.4). See getLocalTime().
-		*/
-		struct timespec tv;
-		if ((clock_gettime( CLOCK_MONOTONIC, &tv ) == 0) &&
-			 (clock_getres( CLOCK_MONOTONIC, &tv ) == 0))
-		{
-//			nldebug( "Monotonic local time supported (resolution %.6f ms)", ((float)tv.tv_sec)*1000.0f + ((float)tv.tv_nsec)/1000000.0f );
-
-			if (tv.tv_sec > 0)
-			{
-				nlwarning("Monotonic clock not ok, resolution > 1s");
-				a_HasMonotonicClock = false;
-			}
-			else
-			{
-				uint64 nsPerTick = tv.tv_nsec;
-				uint64 nsPerSec = 1000000000L;
-				uint64 tickPerSec = nsPerSec / nsPerTick;
-				a_MonotonicClockFrequency = tickPerSec;
-				a_MonotonicClockResolutionNs = nsPerTick;
-				a_HasMonotonicClock = true;
-			}
-		}
-		else
-		{
-			a_HasMonotonicClock = false;
-		}
-		a_CheckedMonotonicClock = true;
-	}
-	return a_HasMonotonicClock;
-}
-#	endif
-#endif
-}
-
 void CTime::probeTimerInfo(CTime::CTimerInfo &result)
 {
-	breakable
+	result.HighPrecisionResolution = SDL_GetPerformanceFrequency();
+	result.IsHighPrecisionAvailable = (result.HighPrecisionResolution > 1000);
+
+	if (result.HighPrecisionResolution == 14318180)
 	{
-#ifdef NL_OS_WINDOWS
-		LARGE_INTEGER winPerfFreq;
-		LARGE_INTEGER winPerfCount;
-		DWORD lowResTime;
-		if (!QueryPerformanceFrequency(&winPerfFreq))
-		{
-			nldebug("Cannot query performance frequency");
-			result.IsHighPrecisionAvailable = false;
-		}
-		else
-		{
-			result.HighPrecisionResolution = winPerfFreq.QuadPart;
-		}
-		if (winPerfFreq.QuadPart == 1000)
-		{
-			nldebug("Higher precision timer not available, OS defaulted to GetTickCount");
-			result.IsHighPrecisionAvailable = false;
-		}
-		if (!QueryPerformanceCounter(&winPerfCount))
-		{
-			nldebug("Cannot query performance counter");
-			result.IsHighPrecisionAvailable = false;
-			result.HighPrecisionResolution = 1000;
-		}
-		a_HaveQueryPerformance = result.IsHighPrecisionAvailable;
-		a_QueryPerformanceFrequency.QuadPart = winPerfFreq.QuadPart;
-		if (!result.IsHighPrecisionAvailable)
-		{
-			lowResTime = timeGetTime();
-		}
-#else
-
-		// Other platforms are awesome. Generic implementation for now.
-		TTime localTime = getLocalTime();
-		result.IsHighPrecisionAvailable = true;
-		result.HighPrecisionResolution = 0;
-
-#	ifdef NL_MONOTONIC_CLOCK
-		timespec monoClock;
-		if (hasMonotonicClock())
-		{
-			clock_gettime(CLOCK_MONOTONIC, &monoClock);
-			result.HighPrecisionResolution = a_MonotonicClockFrequency;
-		}
-		else
-		{
-			nldebug("Monotonic clock not available");
-		}
-#	endif
-
-#endif
-
-		if (result.HighPrecisionResolution == 14318180)
-		{
-			nldebug("Detected known HPET era timer frequency");
-		}
-		if (result.HighPrecisionResolution == 3579545)
-		{
-			nldebug("Detected known AHCI era timer frequency");
-		}
-		if (result.HighPrecisionResolution == 1193182)
-		{
-			nldebug("Detected known i8253/i8254 era timer frequency");
-		}
+		nldebug("Detected known HPET era timer frequency");
+	}
+	if (result.HighPrecisionResolution == 3579545)
+	{
+		nldebug("Detected known AHCI era timer frequency");
+	}
+	if (result.HighPrecisionResolution == 1193182)
+	{
+		nldebug("Detected known i8253/i8254 era timer frequency");
 	}
 }
 
@@ -174,7 +60,7 @@ void CTime::probeTimerInfo(CTime::CTimerInfo &result)
  * coordinated universal time, according to the system clock.
  * This values is the same on all computer if computers are synchronized (with NTP for example).
  */
-uint32 CTime::getSecondsSince1970 ()
+uint32 CTime::getSecondsSince1970()
 {
 	return uint32(time(NULL));
 }
@@ -195,192 +81,60 @@ uint32 CTime::getSecondsSince1970 ()
 //	return nl_mktime(timeinfo);
 //}
 
+static uint32 s_LastTicks = 0;
+static sint64 s_LocalTime = 0;
+SDL_SpinLock s_TimeLock = 0;
+
 /* Return the local time in milliseconds.
  * Use it only to measure time difference, the absolute value does not mean anything.
- * On Unix, getLocalTime() will try to use the Monotonic Clock if available, otherwise
- * the value can jump backwards if the system time is changed by a user or a NTP time sync process.
  * The value is different on 2 different computers; use the CUniTime class to get a universal
  * time that is the same on all computers.
- * \warning On Win32, the value is on 32 bits only. It wraps around to 0 every about 49.71 days.
  */
-TTime CTime::getLocalTime ()
+TTime CTime::getLocalTime()
 {
-
-#ifdef NL_OS_WINDOWS
-
-	//static bool initdone = false;
-	//static bool byperfcounter;
-	// Initialization
-	//if ( ! initdone )
-	//{
-		//byperfcounter = (getPerformanceTime() != 0);
-		//initdone = true;
-	//}
-
-	/* Retrieve time is ms
-     * Why do we prefer getPerformanceTime() to timeGetTime() ? Because on one dual-processor Win2k
-	 * PC, we have noticed that timeGetTime() slows down when the client is running !!!
-	 */
-	/* Now we have noticed that on all WinNT4 PC the getPerformanceTime can give us value that
-	 * are less than previous
-	 */
-
-	//if ( byperfcounter )
-	//{
-	//	return (TTime)(ticksToSecond(getPerformanceTime()) * 1000.0f);
-	//}
-	//else
-	//{
-		// This is not affected by system time changes. But it cycles every 49 days.
-		// return timeGetTime(); // Only this was left active before it was commented.
-	//}
-
-	/*
-	 * The above is no longer relevant.
-	 */
-
-	if (a_HaveQueryPerformance)
+	// NOTE: This function is managed to wrap at the TTime boundary
+	sint64 localTime;
+	if (SDL_AtomicTryLock(&s_TimeLock))
 	{
-		// On a (fast) 15MHz timer this rolls over after 7000 days.
-		// If my calculations are right.
-		LARGE_INTEGER counter;
-		QueryPerformanceCounter(&counter);
-		counter.QuadPart *= (LONGLONG)1000L;
-		counter.QuadPart /= a_QueryPerformanceFrequency.QuadPart;
-		return counter.QuadPart;
+		// Only one thread can check the clock at once. Please cache results of getLocalTime where possible
+		uint32 ticks = SDL_GetTicks();
+		uint32 delta = ticks - s_LastTicks;
+		localTime = s_LocalTime;
+		if (delta)
+		{
+			s_LastTicks = ticks;
+			if (delta < (15 * 60 * 1000)) // Time difference since last call must be less than 15 minutes
+			{
+				localTime += (sint64)delta;
+				s_LocalTime = localTime;
+			}
+		}
+		SDL_AtomicUnlock(&s_TimeLock);
 	}
 	else
 	{
-		// Use default reliable low resolution timer.
-		return timeGetTime();
+		// If another thread is checking the clock simultaneously, return it's result
+		SDL_AtomicLock(&s_TimeLock);
+		localTime = s_LocalTime;
+		SDL_AtomicUnlock(&s_TimeLock);
 	}
-
-#elif defined (NL_OS_UNIX)
-
-#ifdef NL_MONOTONIC_CLOCK
-
-	if (hasMonotonicClock())
-	{
-		timespec tv;
-		// This is not affected by system time changes.
-		if ( clock_gettime( CLOCK_MONOTONIC, &tv ) != 0 )
-			nlerror ("Can't get clock time again");
-	    return (TTime)tv.tv_sec * (TTime)1000 + (TTime)((tv.tv_nsec/*+500*/) / 1000000);
-	}
-
-#endif
-
-	// This is affected by system time changes.
-	struct timeval tv;
-	if ( gettimeofday( &tv, NULL) != 0 )
-		nlerror ("Can't get time of day");
-	return (TTime)tv.tv_sec * (TTime)1000 + (TTime)tv.tv_usec / (TTime)1000;
-
-#endif
+	return localTime;
 }
 
 /* Return the time in processor ticks. Use it for profile purpose.
- * If the performance time is not supported on this hardware, it returns 0.
- * \warning On a multiprocessor system, the value returned by each processor may
- * be different. The only way to workaround this is to set a processor affinity
- * to the measured thread.
- * \warning The speed of tick increase can vary (especially on laptops or CPUs with
- * power management), so profiling several times and computing the average could be
- * a wise choice.
+ * If the performance time is not supported on this hardware, it returns getLocalTime().
  */
-TTicks CTime::getPerformanceTime ()
+TTicks CTime::getPerformanceTime()
 {
-#ifdef NL_OS_WINDOWS
-	LARGE_INTEGER ret;
-	if (QueryPerformanceCounter (&ret))
-		return ret.QuadPart;
-	else
-		return 0;
-#elif defined(NL_OS_MAC)
-	return mach_absolute_time();
-#else
-#if defined(HAVE_X86_64)
-	uint64 hi, lo;
-	__asm__ volatile (".byte 0x0f, 0x31" : "=a" (lo), "=d" (hi));
-	return (hi << 32) | (lo & 0xffffffff);
-#elif defined(HAVE_X86) and !defined(NL_OS_MAC)
-	uint64 x;
-	// RDTSC - Read time-stamp counter into EDX:EAX.
-	__asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
-	return x;
-#else // HAVE_X86
-	static bool firstWarn = true;
-	if (firstWarn)
-	{
-		nlwarning ("TTicks CTime::getPerformanceTime () is not implemented for your processor, returning 0");
-		firstWarn = false;
-	}
-	return 0;
-#endif // HAVE_X86
-
-#endif // NL_OS_WINDOWS
+	return SDL_GetPerformanceCounter();
 }
-/*
-#define GETTICKS(t) asm volatile ("push %%esi\n\t" "mov %0, %%esi" : : "r" (t)); \
-                      asm volatile ("push %eax\n\t" "push %edx"); \
-                      asm volatile ("rdtsc"); \
-                      asm volatile ("movl %eax, (%esi)\n\t" "movl %edx, 4(%esi)"); \
-                      asm volatile ("pop %edx\n\t" "pop %eax\n\t" "pop %esi");
-*/
-
 
 /* Convert a ticks count into second. If the performance time is not supported on this
  * hardware, it returns 0.0.
  */
-double CTime::ticksToSecond (TTicks ticks)
+double CTime::ticksToSecond(TTicks ticks)
 {
-#ifdef NL_OS_WINDOWS
-	LARGE_INTEGER ret;
-	if (QueryPerformanceFrequency(&ret))
-	{
-		return (double)(sint64)ticks/(double)ret.QuadPart;
-	}
-	else
-#elif defined(NL_OS_MAC)
-	{
-		static double factor = 0.0;
-		if (factor == 0.0)
-		{
-			mach_timebase_info_data_t tbInfo;
-			mach_timebase_info(&tbInfo);
-			factor = 1000000000.0 * (double)tbInfo.numer / (double)tbInfo.denom;
-		}
-		return double(ticks / factor);
-	}
-#endif // NL_OS_WINDOWS
-	{
-		static bool benchFrequency = true;
-		static sint64 freq = 0;
-		if (benchFrequency)
-		{
-			// try to have an estimation of the cpu frequency
-
-			TTicks tickBefore = getPerformanceTime ();
-			TTicks tickAfter = tickBefore;
-			TTime timeBefore = getLocalTime ();
-			TTime timeAfter = timeBefore;
-			for(;;)
-			{
-				if (timeAfter - timeBefore > 1000)
-					break;
-				timeAfter = getLocalTime ();
-				tickAfter = getPerformanceTime ();
-			}
-
-			TTime timeDelta = timeAfter - timeBefore;
-			TTicks tickDelta = tickAfter - tickBefore;
-
-			freq = 1000 * tickDelta / timeDelta;
-			benchFrequency = false;
-		}
-
-		return (double)(sint64)ticks/(double)freq;
-	}
+	return (double)(sint64)ticks / (double)(sint64)SDL_GetPerformanceFrequency();
 }
 
 

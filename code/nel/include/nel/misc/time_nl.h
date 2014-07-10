@@ -78,22 +78,13 @@ public:
 
 	/** Return the local time in milliseconds.
 	 * Use it only to measure time difference, the absolute value does not mean anything.
-	 * On Unix, getLocalTime() will try to use the Monotonic Clock if available, otherwise
-	 * the value can jump backwards if the system time is changed by a user or a NTP time sync process.
 	 * The value is different on 2 different computers; use the CUniTime class to get a universal
 	 * time that is the same on all computers.
-	 * \warning On Win32, the value is on 32 bits only, and uses the low-res timer unless probeTimerInfo was called and a high resolution timer can be used. It wraps around to 0 every about 49.71 days.
 	 */
 	static TTime	getLocalTime();
 
 	/** Return the time in processor ticks. Use it for profile purpose.
-	 * If the performance time is not supported on this hardware, it returns 0.
-	 * \warning On a multiprocessor system, the value returned by each processor may
-	 * be different. The only way to workaround this is to set a processor affinity
-	 * to the measured thread.
-	 * \warning The speed of tick increase can vary (especially on laptops or CPUs with
-	 * power management), so profiling several times and computing the average could be
-	 * a wise choice.
+	 * If the performance time is not supported on this hardware, it returns getLocalTime().
 	 */
 	static TTicks	getPerformanceTime ();
 
