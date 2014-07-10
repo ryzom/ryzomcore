@@ -16,6 +16,8 @@
 
 #include "stdmisc.h"
 
+#include <SDL_loadso.h>
+
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/path.h"
 
@@ -30,40 +32,20 @@ namespace NLMISC
 
 NL_LIB_HANDLE nlLoadLibrary(const std::string &libName)
 {
-	NL_LIB_HANDLE res = 0;
-#ifdef NL_OS_WINDOWS
-	res = LoadLibrary(libName.c_str());
-#elif defined(NL_OS_UNIX)
-	res = dlopen(libName.c_str(), RTLD_NOW);
-#else
-#	error "You must code nlLoadLibrary() for your platform"
-#endif
-	if(res == 0) nlwarning("Load library '%s' failed: %s", libName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
+	NL_LIB_HANDLE res = SDL_LoadObject(libName.c_str());
+	if(res == NULL) nlwarning("Load library '%s' failed: %s", libName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
 	return res;
 }
 
 bool nlFreeLibrary(NL_LIB_HANDLE libHandle)
 {
-#ifdef NL_OS_WINDOWS
-	return FreeLibrary(libHandle) > 0;
-#elif defined(NL_OS_UNIX)
-	return dlclose(libHandle) == 0;
-#else
-#	error "You must code nlFreeLibrary() for your platform"
-#endif
+	SDL_UnloadObject(libHandle);
 }
 
 void *nlGetSymbolAddress(NL_LIB_HANDLE libHandle, const std::string &procName)
 {
-	void *res = 0;
-#ifdef NL_OS_WINDOWS
-	res = (void *)GetProcAddress(libHandle, procName.c_str());
-#elif defined(NL_OS_UNIX)
-	res = dlsym(libHandle, procName.c_str());
-#else
-#	error "You must code nlGetProcAddress() for your platform"
-#endif
-	if(res == 0) nlwarning("Getting symbol address of '%s' failed: %s", procName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
+	void *res = SDL_LoadFunction(libHandle, procName.c_str());
+	if(res == NULL) nlwarning("Getting symbol address of '%s' failed: %s", procName.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
 	return res;
 }
 

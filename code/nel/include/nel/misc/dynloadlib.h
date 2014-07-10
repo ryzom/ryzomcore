@@ -33,13 +33,7 @@ namespace NLMISC
 {
 
 /// Define the os specific type for dynamic library module handler
-#if defined (NL_OS_WINDOWS)
-typedef HMODULE		NL_LIB_HANDLE;
-#elif defined (NL_OS_UNIX)
-typedef void*		NL_LIB_HANDLE;
-#else
-# error "You must define the module type on this platform"
-#endif
+typedef void *NL_LIB_HANDLE;
 
 #ifdef NL_OS_WINDOWS
 // MSCV need explicit tag to export or import symbol for a code module
