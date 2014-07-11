@@ -241,18 +241,113 @@ void PropertyEditorWidget::updateSelection(Node *node)
 void PropertyEditorWidget::propertyChanged(QtProperty *p)
 {
 	nlinfo(QString("property %1 changed").arg(p->propertyName()).toUtf8().constData());
-	
-	NLLIGO::IPrimitive *prim = d_ptr->getPrimitive( p );
-	if( prim != NULL )
-	{
-
-	}
 }
 
 void PropertyEditorWidget::resetProperty(QtProperty *property)
 {
 	nlinfo(QString("property %1 reset").arg(property->propertyName()).toUtf8().constData());
 }
+
+NLLIGO::IProperty* PropertyEditorWidget::getLigoProperty( QtProperty *p )
+{
+	NLLIGO::IPrimitive *prim = d_ptr->getPrimitive( p );
+	if( prim == NULL )
+	{
+		return NULL;
+	}
+
+	NLLIGO::IProperty *prop = NULL;
+	prim->getPropertyByName( p->propertyName().toUtf8().constData(), prop );
+	if( prop == NULL )
+	{
+		return NULL;
+	}
+
+	return prop;
+}
+
+void PropertyEditorWidget::onBoolValueChanged( QtProperty *p, bool v )
+{
+	NLLIGO::IProperty *prop = getLigoProperty( p );
+	if( prop == NULL )
+		return;
+
+	NLLIGO::CPropertyString *pp = dynamic_cast< NLLIGO::CPropertyString* >( prop );
+	if( pp == NULL )
+		return;
+
+	if( v )
+		pp->String = "true";
+	else
+		pp->String = "false";
+}
+
+void PropertyEditorWidget::onStringValueChanged( QtProperty *p, const QString &v )
+{
+	NLLIGO::IProperty *prop = getLigoProperty( p );
+	if( prop == NULL )
+		return;
+
+	NLLIGO::CPropertyString *pp = dynamic_cast< NLLIGO::CPropertyString* >( prop );
+	if( pp == NULL )
+		return;
+
+	pp->String = v.toUtf8().constData();
+}
+
+void PropertyEditorWidget::onEnumValueChanged( QtProperty *p, int v )
+{
+	NLLIGO::IProperty *prop = getLigoProperty( p );
+	if( prop == NULL )
+		return;
+
+	NLLIGO::CPropertyString *pp = dynamic_cast< NLLIGO::CPropertyString* >( prop );
+	if( pp == NULL )
+		return;
+
+	pp->String = p->valueText().toUtf8().constData();
+}
+
+void PropertyEditorWidget::onStrArrValueChanged( QtProperty *p, const QString &v )
+{
+	NLLIGO::IProperty *prop = getLigoProperty( p );
+	if( prop == NULL )
+		return;
+
+	NLLIGO::CPropertyStringArray *pp = dynamic_cast< NLLIGO::CPropertyStringArray* >( prop );
+	if( pp == NULL )
+		return;
+
+	pp->StringArray.clear();
+
+	QStringList l = v.split( '\n' );
+	QStringListIterator itr( l );
+	while( itr.hasNext() )
+	{
+		pp->StringArray.push_back( itr.next().toUtf8().constData() );
+	}
+}
+
+void PropertyEditorWidget::onConstStrArrValueChanged( QtProperty *p, const QString &v )
+{
+	NLLIGO::IProperty *prop = getLigoProperty( p );
+	if( prop == NULL )
+		return;
+
+	NLLIGO::CPropertyStringArray *pp = dynamic_cast< NLLIGO::CPropertyStringArray* >( prop );
+	if( pp == NULL )
+		return;
+
+	pp->StringArray.clear();
+
+	QStringList l = v.split( '\n' );
+	QStringListIterator itr( l );
+	while( itr.hasNext() )
+	{
+		pp->StringArray.push_back( itr.next().toUtf8().constData() );
+	}
+}
+
 
 QtProperty *PropertyEditorWidget::addBoolProperty(const NLLIGO::IProperty *property,
 		const NLLIGO::CPrimitiveClass::CParameter &parameter,
@@ -475,10 +570,40 @@ void PropertyEditorWidget::blockSignalsOfProperties(bool block)
 	if( block )
 	{
 		disconnect(m_constStrArrPropMgr, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+
+		disconnect(m_boolManager, SIGNAL( valueChanged( QtProperty*, bool ) ),
+			this, SLOT( onBoolValueChanged( QtProperty*, bool ) ) );
+		
+		disconnect(m_stringManager, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onStringValueChanged( QtProperty*, const QString& ) ) );
+
+		disconnect(m_enumManager, SIGNAL( valueChanged( QtProperty*, int ) ),
+			this, SLOT( onEnumValueChanged( QtProperty*, int ) ) );
+
+		disconnect(m_stringArrayManager, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onStrArrValueChanged( QtProperty*, const QString& ) ) );
+
+		disconnect(m_constStrArrPropMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onConstStrArrValueChanged( QtProperty*, const QString& ) ) );
 	}
 	else
 	{
 		connect(m_constStrArrPropMgr, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+
+		connect(m_boolManager, SIGNAL( valueChanged( QtProperty*, bool ) ),
+			this, SLOT( onBoolValueChanged( QtProperty*, bool ) ) );
+
+		connect(m_stringManager, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onStringValueChanged( QtProperty*, const QString& ) ) );
+
+		connect(m_enumManager, SIGNAL( valueChanged( QtProperty*, int ) ),
+			this, SLOT( onEnumValueChanged( QtProperty*, int ) ) );
+
+		connect(m_stringArrayManager, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onStrArrValueChanged( QtProperty*, const QString& ) ) );
+
+		connect(m_constStrArrPropMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ),
+			this, SLOT( onConstStrArrValueChanged( QtProperty*, const QString& ) ) );
 	}
 }
 } /* namespace WorldEditor */

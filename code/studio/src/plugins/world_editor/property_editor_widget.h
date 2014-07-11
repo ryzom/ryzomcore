@@ -63,6 +63,15 @@ public Q_SLOTS:
 	void propertyChanged(QtProperty *p);
 	void resetProperty(QtProperty *property);
 
+	NLLIGO::IProperty* getLigoProperty( QtProperty *p );
+
+	void onBoolValueChanged( QtProperty *p, bool v );
+	void onStringValueChanged( QtProperty *p, const QString &v );
+	void onEnumValueChanged( QtProperty *p, int v );
+	void onStrArrValueChanged( QtProperty *p, const QString &v );
+	void onConstStrArrValueChanged( QtProperty *p, const QString &v );
+
+
 private:
 	QtProperty *addBoolProperty(const NLLIGO::IProperty *property,
 								const NLLIGO::CPrimitiveClass::CParameter &parameter,
