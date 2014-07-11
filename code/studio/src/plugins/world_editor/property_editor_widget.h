@@ -38,6 +38,9 @@ class ConstStrArrEditorFactory;
 
 namespace WorldEditor
 {
+
+struct PropertyEditorWidgetPrivate;
+
 /**
 @class PropertyEditorWidget
 @brief PropertyEditorWidget
@@ -91,6 +94,8 @@ private:
 	ConstStrArrEditorFactory *m_constStrArrEditorFactory;
 
 	Ui::PropertyEditorWidget m_ui;
+
+	PropertyEditorWidgetPrivate *d_ptr;
 }; /* PropertyEditorWidget */
 
 } /* namespace WorldEditor */

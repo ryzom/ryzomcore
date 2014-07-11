@@ -28,11 +28,47 @@
 
 // Qt includes
 #include <QtCore/QModelIndex>
+#include <QMap>
 
 #include "const_string_array_property.h"
 
 namespace WorldEditor
 {
+
+struct PropertyEditorWidgetPrivate
+{
+	QMap< QtProperty*, NLLIGO::IPrimitive* > propToPrim;
+
+	void clearPrimitives()
+	{
+		propToPrim.clear();
+	}
+
+	void addPrimitive( QtProperty *p, NLLIGO::IPrimitive *prim )
+	{
+		QMap< QtProperty*, NLLIGO::IPrimitive* >::const_iterator itr 
+			= propToPrim.find( p );
+		if( itr != propToPrim.end() )
+			return;
+
+		propToPrim[ p ] = prim;
+	}
+
+	NLLIGO::IPrimitive* getPrimitive( QtProperty *p )
+	{
+		NLLIGO::IPrimitive *prim = NULL;
+
+		QMap< QtProperty*, NLLIGO::IPrimitive* >::const_iterator itr 
+			= propToPrim.find( p );
+
+		if( itr != propToPrim.end() )
+		{
+			prim = itr.value();
+		}
+
+		return prim;
+	}
+};
 
 PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 	: QWidget(parent)
@@ -60,6 +96,8 @@ PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 
 	m_groupManager = new QtGroupPropertyManager(this);
 
+	d_ptr = new PropertyEditorWidgetPrivate();
+
 	connect(m_stringManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
 	connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
 	connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
@@ -74,10 +112,13 @@ PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 
 PropertyEditorWidget::~PropertyEditorWidget()
 {
+	delete d_ptr;
+	d_ptr = NULL;
 }
 
 void PropertyEditorWidget::clearProperties()
 {
+	d_ptr->clearPrimitives();
 	m_ui.treePropertyBrowser->clear();
 }
 
@@ -170,6 +211,8 @@ void PropertyEditorWidget::updateSelection(Node *node)
 		else
 			prop = addBoolProperty(ligoProperty, parameter, primitive);
 
+		d_ptr->addPrimitive( prop, const_cast< NLLIGO::IPrimitive* >( primitive ) );
+
 		// Default value ?
 		if	((ligoProperty == NULL)	|| (ligoProperty->Default))
 			prop->setModified(false);
@@ -198,6 +241,12 @@ void PropertyEditorWidget::updateSelection(Node *node)
 void PropertyEditorWidget::propertyChanged(QtProperty *p)
 {
 	nlinfo(QString("property %1 changed").arg(p->propertyName()).toUtf8().constData());
+	
+	NLLIGO::IPrimitive *prim = d_ptr->getPrimitive( p );
+	if( prim != NULL )
+	{
+
+	}
 }
 
 void PropertyEditorWidget::resetProperty(QtProperty *property)
@@ -422,5 +471,6 @@ void PropertyEditorWidget::blockSignalsOfProperties(bool block)
 	m_boolManager->blockSignals(block);
 	m_enumManager->blockSignals(block);
 	m_stringArrayManager->blockSignals(block);
+	m_constStrArrPropMgr->blockSignals(block);
 }
 } /* namespace WorldEditor */
