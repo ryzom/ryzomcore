@@ -471,6 +471,14 @@ void PropertyEditorWidget::blockSignalsOfProperties(bool block)
 	m_boolManager->blockSignals(block);
 	m_enumManager->blockSignals(block);
 	m_stringArrayManager->blockSignals(block);
-	m_constStrArrPropMgr->blockSignals(block);
+	
+	if( block )
+	{
+		disconnect(m_constStrArrPropMgr, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+	}
+	else
+	{
+		connect(m_constStrArrPropMgr, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+	}
 }
 } /* namespace WorldEditor */
