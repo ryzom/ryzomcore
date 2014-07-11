@@ -58,8 +58,12 @@ protected:
 // Key events
 const CClassId EventKeyDownId (0x3c2643da, 0x43f802a1);
 const CClassId EventKeyUpId (0x1e62e85, 0x68a35d46);
-const CClassId EventCharId (0x552255fe, 0x75a2373f);
-const CClassId EventStringId (0x49b5af8f, 0x7f52cd26);
+// const CClassId EventCharId (0x552255fe, 0x75a2373f);
+// const CClassId EventStringId (0x49b5af8f, 0x7f52cd26);
+
+// Text events
+const CClassId TextEditing (0x592aa5fe, 0x15e6a7af);
+const CClassId TextInput (0xa4fa5b19, 0x81ef9e04);
 
 // Window events
 const CClassId EventActivateId (0x7da66b0a, 0x1ef74519);
@@ -78,7 +82,7 @@ const CClassId EventMouseWheelId (0x73ac4321, 0x4c273150);
 const CClassId EventDisplayChangeId(0x1751559, 0x25b52b3c);
 
 // Input Mehod Editor (IME) events
-const CClassId EventIME (0x261f1ede, 0x1b0a6c3a);
+// const CClassId EventIME (0x261f1ede, 0x1b0a6c3a);
 
 
 enum TKey
@@ -310,8 +314,42 @@ public:
 };
 
 /**
- * CEventChar
+ * CEventTextEditing
  */
+class CEventTextEditing : public CEvent
+{
+public:
+	CEventTextEditing (char *text, size_t sz, sint32 start, sint32 length, IEventEmitter* emitter) : CEvent (emitter, EventTextEditingId)
+	{
+		memcpy(Text, text, sz); // NOTE: sz must include NULL-termination byte
+		Start=start;
+		Length=length;
+	}
+	char Text[32];
+	sint32 Start;
+	sint32 Length;
+
+	virtual	CEvent			*clone() const {return new CEventTextEditing(*this);}
+};
+
+/**
+ * CEventTextInput
+ */
+class CEventTextInput : public CEvent
+{
+public:
+	CEventTextInput (char *text, size_t sz, IEventEmitter* emitter) : CEvent (emitter, EventTextInputId)
+	{
+		memcpy(Text, text, sz); // NOTE: sz must include NULL-termination byte
+	}
+	char Text[32];
+
+	virtual	CEvent			*clone() const {return new CEventTextInput(*this);}
+};
+
+/**
+ * CEventChar
+ *//*
 class CEventChar : public CEventKey
 {
 public:
@@ -328,11 +366,11 @@ public:
 private:
 	bool	_Raw; // true if raw, false if composed by an IME
 
-};
+};*/
 
 /**
  * CEventString
- */
+ *//*
 class CEventString : public CEventKey
 {
 public:
@@ -343,7 +381,7 @@ public:
 	ucstring String;
 
 	virtual	CEvent			*clone() const {return new CEventString(*this);}
-};
+};*/
 
 /**
  * CEventMouse.
@@ -520,7 +558,7 @@ public:
 
 /**
  * CEventIME
- */
+ *//*
 class CEventIME : public CEvent
 {
 public:
@@ -531,7 +569,7 @@ public:
 	uint32	WParam, LParam;
 
 	virtual CEvent			*clone() const {return new CEventIME(*this);}
-};
+};*/
 
 /**
  * CEventDisplayChange : Called user has changed the desktop resolution
