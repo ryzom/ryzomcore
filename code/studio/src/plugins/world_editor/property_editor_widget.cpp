@@ -346,33 +346,33 @@ QtProperty *PropertyEditorWidget::addConstStringArrayProperty(const NLLIGO::IPro
 		// Fill qt property
 		m_constStrArrPropMgr->setStrings(prop, listEnums);
 
-	const NLLIGO::IProperty	*ligoProperty;
-	std::vector<std::string> vectString;
+		const NLLIGO::IProperty	*ligoProperty;
+		std::vector<std::string> vectString;
 
-	if	(primitive->getPropertyByName (parameter.Name.c_str(), ligoProperty))
-	{
-		const NLLIGO::CPropertyStringArray *const propStringArray = dynamic_cast<const NLLIGO::CPropertyStringArray *> (ligoProperty);
-		if (propStringArray)
+		if	(primitive->getPropertyByName (parameter.Name.c_str(), ligoProperty))
 		{
-			const std::vector<std::string> &vectString = propStringArray->StringArray;
-			if (!vectString.empty())
+			const NLLIGO::CPropertyStringArray *const propStringArray = dynamic_cast<const NLLIGO::CPropertyStringArray *> (ligoProperty);
+			if (propStringArray)
 			{
-				std::string temp;
-				for (size_t i = 0; i < vectString.size(); i++)
+				const std::vector<std::string> &vectString = propStringArray->StringArray;
+				if (!vectString.empty())
 				{
-					temp += vectString[i];
-					if (i != (vectString.size() - 1))
-						temp += '\n';
+					std::string temp;
+					for (size_t i = 0; i < vectString.size(); i++)
+					{
+						temp += vectString[i];
+						if (i != (vectString.size() - 1))
+							temp += '\n';
+					}
+					m_constStrArrPropMgr->setValue(prop, temp.c_str());
+					prop->setToolTip(temp.c_str());
 				}
-				m_constStrArrPropMgr->setValue(prop, temp.c_str());
-				prop->setToolTip(temp.c_str());
+			}
+			else
+			{
+				m_constStrArrPropMgr->setValue(prop, "StringArray :(");
 			}
 		}
-		else
-		{
-			m_constStrArrPropMgr->setValue(prop, "StringArray :(");
-		}
-	}
 
 	}
 
