@@ -29,6 +29,8 @@
 // Qt includes
 #include <QtCore/QModelIndex>
 
+#include "const_string_array_property.h"
+
 namespace WorldEditor
 {
 
@@ -42,6 +44,9 @@ PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 	m_enumManager = new QtEnumPropertyManager(this);
 	m_stringArrayManager = new QtTextPropertyManager(this);
 
+	m_constStrArrPropMgr = new ConstStrArrPropMgr(this);
+	m_constStrArrEditorFactory = new ConstStrArrEditorFactory(this);
+
 	QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
 	QtCheckBoxFactory *boolFactory = new QtCheckBoxFactory(this);
 	QtEnumEditorFactory *enumFactory = new QtEnumEditorFactory(this);
@@ -51,6 +56,7 @@ PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 	m_ui.treePropertyBrowser->setFactoryForManager(m_boolManager, boolFactory);
 	m_ui.treePropertyBrowser->setFactoryForManager(m_enumManager, enumFactory);
 	m_ui.treePropertyBrowser->setFactoryForManager(m_stringArrayManager, textFactory);
+	m_ui.treePropertyBrowser->setFactoryForManager(m_constStrArrPropMgr, m_constStrArrEditorFactory);
 
 	m_groupManager = new QtGroupPropertyManager(this);
 
@@ -58,6 +64,7 @@ PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 	connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
 	connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
 	connect(m_stringArrayManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
+	connect(m_constStrArrPropMgr, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(propertyChanged(QtProperty *)));
 
 	connect(m_boolManager, SIGNAL(resetProperty(QtProperty *)), this, SLOT(resetProperty(QtProperty *)));
 	connect(m_stringManager, SIGNAL(resetProperty(QtProperty *)), this, SLOT(resetProperty(QtProperty *)));
@@ -326,32 +333,18 @@ QtProperty *PropertyEditorWidget::addConstStringArrayProperty(const NLLIGO::IPro
 	primitive->getPropertyByName(name.c_str(), value);
 
 	// Create qt property
-//	QtProperty *prop = m_enumManager->addProperty(parameter.Name.c_str());
-	QtProperty *prop = m_stringArrayManager->addProperty(parameter.Name.c_str());
+	QtProperty *prop = m_constStrArrPropMgr->addProperty(parameter.Name.c_str());
 
 	QStringList listEnums = getComboValues(parameter);
 
 	if (listEnums.isEmpty())
 	{
-//		listEnums << QString(value.c_str()) + tr(" (WRN: Check leveldesign!)");
-//		m_enumManager->setEnumNames(prop, listEnums);
-//		m_enumManager->setValue(prop, 0);
 		prop->setEnabled(false);
 	}
 	else
 	{
 		// Fill qt property
-		m_enumManager->setEnumNames(prop, listEnums);
-
-		// Find index of current value
-		//for (int i = 0; i < listEnums.size(); i++)
-		//{
-		//	if (value == std::string(listEnums[i].toUtf8().constData()))
-		//	{
-		//		m_enumManager->setValue(prop, i);
-		//		break;
-		//	}
-		//}
+		m_constStrArrPropMgr->setStrings(prop, listEnums);
 
 	const NLLIGO::IProperty	*ligoProperty;
 	std::vector<std::string> vectString;
@@ -371,17 +364,16 @@ QtProperty *PropertyEditorWidget::addConstStringArrayProperty(const NLLIGO::IPro
 					if (i != (vectString.size() - 1))
 						temp += '\n';
 				}
-				m_stringArrayManager->setValue(prop, temp.c_str());
+				m_constStrArrPropMgr->setValue(prop, temp.c_str());
 				prop->setToolTip(temp.c_str());
 			}
 		}
 		else
 		{
-			m_stringArrayManager->setValue(prop, "StringArray :(");
+			m_constStrArrPropMgr->setValue(prop, "StringArray :(");
 		}
 	}
 
-		m_enumManager->setValue(prop, 0);
 	}
 
 	return prop;

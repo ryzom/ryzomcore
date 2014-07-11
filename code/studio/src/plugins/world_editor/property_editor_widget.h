@@ -33,6 +33,9 @@
 
 // Qt includes
 
+class ConstStrArrPropMgr;
+class ConstStrArrEditorFactory;
+
 namespace WorldEditor
 {
 /**
@@ -83,6 +86,9 @@ private:
 	QtEnumPropertyManager *m_enumManager;
 	QtGroupPropertyManager *m_groupManager;
 	QtTextPropertyManager *m_stringArrayManager;
+
+	ConstStrArrPropMgr *m_constStrArrPropMgr;
+	ConstStrArrEditorFactory *m_constStrArrEditorFactory;
 
 	Ui::PropertyEditorWidget m_ui;
 }; /* PropertyEditorWidget */

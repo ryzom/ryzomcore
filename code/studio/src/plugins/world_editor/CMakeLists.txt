@@ -20,12 +20,15 @@ SET(OVQT_PLUGIN_WORLD_EDITOR_HDR	world_editor_plugin.h
 					project_settings_dialog.h
 					property_editor_widget.h
 					world_editor_settings_page.h
+					const_string_array_property.h
+					const_string_array_editor.h
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_UIS	world_editor_window.ui
 					project_settings_dialog.ui
 					property_editor_widget.ui
 					world_editor_settings_page.ui
+					const_string_array_editor.ui
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_RCS world_editor.qrc)
