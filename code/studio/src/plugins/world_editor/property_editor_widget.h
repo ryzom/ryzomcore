@@ -57,7 +57,7 @@ public Q_SLOTS:
 	/// Update of selections
 	void updateSelection(Node *node);
 
-	void propertyChanged(QtProperty *property);
+	void propertyChanged(QtProperty *p);
 	void resetProperty(QtProperty *property);
 
 private:

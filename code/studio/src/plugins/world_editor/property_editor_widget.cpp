@@ -195,9 +195,9 @@ void PropertyEditorWidget::updateSelection(Node *node)
 	blockSignalsOfProperties(false);
 }
 
-void PropertyEditorWidget::propertyChanged(QtProperty *property)
+void PropertyEditorWidget::propertyChanged(QtProperty *p)
 {
-	nlinfo(QString("property %1 changed").arg(property->propertyName()).toUtf8().constData());
+	nlinfo(QString("property %1 changed").arg(p->propertyName()).toUtf8().constData());
 }
 
 void PropertyEditorWidget::resetProperty(QtProperty *property)
