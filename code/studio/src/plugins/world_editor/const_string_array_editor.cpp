@@ -48,7 +48,7 @@ void ConstStrArrEditDialog::setValue( const QString &value )
 	if( value.isEmpty() )
 		return;
 
-	QStringList l = value.split( ';' );
+	QStringList l = value.split( '\n' );
 	
 	QStringListIterator itr( l );
 	while( itr.hasNext() )
@@ -67,7 +67,7 @@ QString ConstStrArrEditDialog::getValue() const
 		value += item->text();
 
 		if( i < ( listWidget->count() - 1 ) )
-			value += ';';
+			value += '\n';
 	}
 
 	return value;
