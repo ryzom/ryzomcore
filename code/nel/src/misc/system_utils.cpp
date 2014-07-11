@@ -17,6 +17,8 @@
 #include "stdmisc.h"
 #include "nel/misc/system_utils.h"
 
+#include <SDL_video.h>
+
 #ifdef NL_OS_WINDOWS
 	#ifndef NL_COMP_MINGW
 		#define NOMINMAX
@@ -234,37 +236,14 @@ bool CSystemUtils::isAzertyKeyboard()
 
 bool CSystemUtils::isScreensaverEnabled()
 {
-	bool res = false;
-#ifdef NL_OS_WINDOWS
-//	old code, is not working anymore
-//	BOOL bRetValue;
-//	SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &bRetValue, 0);
-//	res = (bRetValue == TRUE);
-	HKEY hKeyScreenSaver = NULL;
-	LSTATUS lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
-	if (lReturn == ERROR_SUCCESS)
-	{
-		DWORD dwType = 0L;
-		DWORD dwSize = KeyMaxLength;
-		unsigned char Buffer[KeyMaxLength] = {0};
-
-		lReturn = RegQueryValueExA(hKeyScreenSaver, TEXT("SCRNSAVE.EXE"), NULL, &dwType, NULL, &dwSize);
-		// if SCRNSAVE.EXE is present, check also if it's empty
-		if (lReturn == ERROR_SUCCESS)
-			res = (Buffer[0] != '\0');
-	}
-	RegCloseKey(hKeyScreenSaver);
-#endif
-	return res;
+	return SDL_IsScreenSaverEnabled();
 }
 
 bool CSystemUtils::enableScreensaver(bool screensaver)
 {
-	bool res = false;
-#ifdef NL_OS_WINDOWS
-	res = (SystemParametersInfoA(SPI_SETSCREENSAVEACTIVE, screensaver ? TRUE:FALSE, NULL, 0) == TRUE);
-#endif
-	return res;
+	if (screensaver) SDL_EnableScreenSaver();
+	else SDL_DisableScreenSaver();
+	return true;
 }
 
 std::string CSystemUtils::getRootKey()
