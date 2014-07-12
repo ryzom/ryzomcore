@@ -938,20 +938,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// setup the event emitter, and try to retrieve a direct input interface
 	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
 
-	/// try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _win, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
-
 #elif defined(NL_OS_MAC)
 
 	if (wnd == EmptyWindow)

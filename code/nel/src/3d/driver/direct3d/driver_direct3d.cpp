@@ -1637,20 +1637,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 	// Setup the event emitter, and try to retrieve a direct input interface
 	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
 
-	// Try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _HWnd, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
-
 	// Init some variables
 	_ForceDXTCCompression = false;
 	_AnisotropicFilter = 0;
@@ -2009,13 +1995,6 @@ bool CDriverD3D::swapBuffers()
 
 	// todo hulud volatile
 	//_DeviceInterface->SetStreamSource(0, _VolatileVertexBufferRAM[1]->VertexBuffer, 0, 12);
-
-	// Is direct input running ?
-	if (_EventEmitter.getNumEmitters() > 1)
-	{
-		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
 
 	// End now
 	if (!endScene())

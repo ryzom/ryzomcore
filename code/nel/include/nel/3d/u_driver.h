@@ -35,9 +35,6 @@
 
 namespace NLMISC
 {
-	struct IMouseDevice;
-	struct IKeyboardDevice;
-	struct IInputDeviceManager;
 	class CLog;
 }
 

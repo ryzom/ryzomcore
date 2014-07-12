@@ -165,7 +165,6 @@ using namespace std;
 // EXTERN //
 ////////////
 extern UDriver					*Driver;
-extern IMouseDevice				*MouseDevice;
 extern UScene					*Scene;
 extern UScene					*SceneRoot;
 extern ULandscape				*Landscape;

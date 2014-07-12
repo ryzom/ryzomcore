@@ -527,14 +527,6 @@ public:
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale);
 
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
-
 	virtual void			getWindowSize (uint32 &width, uint32 &height);
 
 	virtual void			getWindowPos (sint32 &x, sint32 &y);

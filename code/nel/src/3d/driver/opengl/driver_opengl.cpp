@@ -934,14 +934,6 @@ bool CDriverGL::swapBuffers()
 	}
 #endif
 
-#ifdef NL_OS_WINDOWS
-	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
-	{
-		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
-#endif
-
 	if (!_WndActive)
 	{
 		if (_AGPVertexArrayRange) _AGPVertexArrayRange->updateLostBuffers();

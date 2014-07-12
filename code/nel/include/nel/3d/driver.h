@@ -866,10 +866,6 @@ public:
 	/// x and y must be between 0.0 and 1.0
 	virtual void			setMousePos(float x, float y) = 0;
 
-	/** Get the delay in ms for mouse double clicks.
-	  */
-	virtual uint			getDoubleClickDelay(bool hardwareMouse) = 0;
-
 	/** If true, capture the mouse to force it to stay under the window.
 	  * NB : this has no effects if a low level mouse is used
 	  */
