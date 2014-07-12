@@ -182,30 +182,33 @@ void CEventsListener::operator()(const CEvent& event)
 				s_MouseFreeLookLastY = pscY;
 				s_MouseFreeLookWaitCenter = false;
 			}
-			if (s_MouseFreeLookWaitCenter && scX == 0 && scY == 0)
+
+			// NOTE: No 0, 0 center mouse message in Windows (lower mouse message rate), but safe to assume any movement messages are requeued relative to our new position
+			// In case free look bugs on other platform, we may need to push in our own message on setMousePos for Windows
+			if (s_MouseFreeLookWaitCenter) // scX == 0 && scY == 0)
 			{
-				// Centered, ignore
+				// Centered, set last to 0
 				s_MouseFreeLookLastX = 0;
 				s_MouseFreeLookLastY = 0;
+				s_MouseFreeLookWaitCenter = false;
 			}
-			else
+
+			// Get delta since last center
+			sint scXd = scX - s_MouseFreeLookLastX;
+			sint scYd = scY - s_MouseFreeLookLastY;
+			s_MouseFreeLookLastX = scX;
+			s_MouseFreeLookLastY = scY;
+
+			s_MouseFreeLookFrameX += scXd;
+			s_MouseFreeLookFrameY += scYd;
+			// updateFreeLookPos is called in updateMouseSmoothing per frame
+
+			// Center cursor
+			bool outsideBounds = ((abs(scX) > (drW >> 3)) || (abs(scY) > (drH >> 3)));
+			if (outsideBounds)
 			{
-				// Get delta since last center
-				sint scXd = scX - s_MouseFreeLookLastX;
-				sint scYd = scY - s_MouseFreeLookLastY;
-				s_MouseFreeLookLastX = scX;
-				s_MouseFreeLookLastY = scY;
-
-				s_MouseFreeLookFrameX += scXd;
-				s_MouseFreeLookFrameY += scYd;
-				// updateFreeLookPos is called in updateMouseSmoothing per frame
-
-				// Center cursor
-				if (abs(scX) > (drW >> 3) || abs(scY) > (drH >> 3))
-				{
-					s_MouseFreeLookWaitCenter = true;
-					Driver->setMousePos(0.5f, 0.5f);
-				}
+				s_MouseFreeLookWaitCenter = true;
+				Driver->setMousePos(0.5f, 0.5f);
 			}
 		}
 	}
