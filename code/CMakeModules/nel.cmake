@@ -294,12 +294,13 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_NET                 "Build NLNET"                                   ON )
   OPTION(WITH_3D                  "Build NL3D"                                    ON )
-  OPTION(WITH_GUI                 "Build GUI"                                     ON )
+  OPTION(WITH_GUI                 "Build NLGUI"                                   ON )
   OPTION(WITH_PACS                "Build NLPACS"                                  ON )
   OPTION(WITH_GEORGES             "Build NLGEORGES"                               ON )
   OPTION(WITH_LIGO                "Build NLLIGO"                                  ON )
   OPTION(WITH_LOGIC               "Build NLLOGIC"                                 ON )
   OPTION(WITH_SOUND               "Build NLSOUND"                                 ON )
+  OPTION(WITH_HID                 "Build NLHID"                                   ON )
 
   ###
   # Drivers Support
