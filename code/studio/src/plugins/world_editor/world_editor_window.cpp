@@ -174,7 +174,12 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 	Utils::WorldEditList worldEditList;
 	if (!Utils::loadWorldEditFile(fileName.toUtf8().constData(), worldEditList))
 	{
-		// TODO: add the message box
+		std::string error = Utils::getLastError();
+
+		QMessageBox::critical( this,
+								tr( "Error opening world editor file" ),
+								tr( error.c_str() ) );
+
 		return;
 	}
 

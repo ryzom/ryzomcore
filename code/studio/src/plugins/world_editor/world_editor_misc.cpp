@@ -34,35 +34,11 @@ namespace WorldEditor
 namespace Utils
 {
 
-void syntaxError(const char *filename, xmlNodePtr xmlNode, const char *format, ...)
+std::string lastError;
+
+std::string getLastError()
 {
-	char buffer[1024];
-
-	if (format)
-	{
-		va_list args;
-		va_start( args, format );
-		sint ret = vsnprintf( buffer, 1024, format, args );
-		va_end( args );
-	}
-	else
-	{
-		strcpy(buffer, "Unknown error");
-	}
-
-	nlerror("(%s), node (%s), line (%s) :\n%s", filename, xmlNode->name, xmlNode->content, buffer);
-}
-
-bool getPropertyString(std::string &result, const char *filename, xmlNodePtr xmlNode, const char *propName)
-{
-	// Call the CIXml version
-	if (!NLMISC::CIXml::getPropertyString(result, xmlNode, propName))
-	{
-		// Output a formated error
-		syntaxError(filename, xmlNode, "Missing XML node property (%s)", propName);
-		return false;
-	}
-	return true;
+	return lastError;
 }
 
 uint32 getUniqueId()
@@ -80,6 +56,8 @@ uint32 getUniqueId()
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList)
 {
 	bool result = false;
+
+	lastError = "";
 
 	// Load the document
 	NLMISC::CIFile file;
@@ -110,20 +88,31 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 					}
 
 					if (version == -1)
-						syntaxError(fileName.c_str(), rootNode, "No version node");
+					{
+						std::string error = "No version node in file " + fileName;
+						lastError = error;
+						nlinfo( "%s", error.c_str() );
+						return false;
+					}
 					else
 					{
 						// Old format,
 						if (version <= 1)
 						{
-							syntaxError(fileName.c_str(), rootNode, "Old version node");
+							std::string error = "Old version node in file " + fileName;
+							lastError = error;
+							nlinfo( "%s", error.c_str() );
+							return false;
 						}
 						else
 						{
 							// Read it
 							if (version > WORLD_EDITOR_FILE_VERSION)
 							{
-								syntaxError(fileName.c_str(), node, "Unknown file version");
+								std::string error = "Unknown file version in file " + fileName;
+								lastError = error;
+								nlinfo( "%s", error.c_str() );
+								return false;
 							}
 							else
 							{
@@ -153,11 +142,12 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 									{
 										// Get the type
 										std::string type;
-										if (getPropertyString(type, fileName.c_str(), node, "TYPE"))
+
+										if ( NLMISC::CIXml::getPropertyString(type, node, "TYPE"))
 										{
 											// Read the filename
 											std::string filenameChild;
-											if (getPropertyString(filenameChild, fileName.c_str(), node, "FILENAME"))
+											if ( NLMISC::CIXml::getPropertyString(filenameChild, node, "FILENAME"))
 											{
 												// Is it a landscape ?
 												if (type == "landscape")
@@ -179,11 +169,34 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 													}
 												}
 												else
+												if ( type == "primitive" )
 												{
 													worldEditList.push_back(WorldEditItem(PrimitiveType, filenameChild));
 												}
+												else
+												if( type.empty() )
+												{
+													std::string error = "Empty type node property in file " + fileName;
+													lastError = error;
+													nlinfo( "%s", error.c_str() );
+													return false;
+												}
 
 											}
+											else
+											{
+												std::string error = "Missing filename node property in file " + fileName;
+												lastError = error;
+												nlinfo( "%s", error.c_str() );
+												return false;
+											}
+										}
+										else
+										{
+											std::string error = "Missing type node property in file " + fileName;
+											lastError = error;
+											nlinfo( "%s", error.c_str() );
+											return false;
 										}
 									}
 									while (node = NLMISC::CIXml::getNextChildNode(node, "DATABASE_ELEMENT"));
@@ -197,18 +210,26 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 				}
 				else
 				{
-					// Error
-					syntaxError(fileName.c_str(), rootNode, "Unknown file header : %s", rootNode->name);
+					std::string error = "Unknown file header in file " + fileName;
+					lastError = error;
+					nlinfo( "%s", error.c_str() );
+					return false;
 				}
 			}
 		}
 		catch (NLMISC::Exception &e)
 		{
-			nlerror("Error reading file %s : %s", fileName.c_str(), e.what());
+			std::string error = "Error reading file " + fileName + " : " + std::string( e.what() );
+			lastError = error;
+			nlinfo( "%s", error.c_str() );
 		}
 	}
 	else
-		nlerror("Can't open the file %s for reading.", fileName.c_str());
+	{
+		std::string error = "Can't open the file " + fileName + " for reading.";
+		lastError = error;
+		nlinfo( "%s", error.c_str() );
+	}
 
 	return result;
 }

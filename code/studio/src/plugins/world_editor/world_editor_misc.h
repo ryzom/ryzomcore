@@ -49,6 +49,8 @@ typedef std::vector<WorldEditItem> WorldEditList;
 // Generate unique identificator
 uint32 getUniqueId();
 
+std::string getLastError();
+
 // Load *.worldedit file and return list primitives and landscapes.
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList);
 
