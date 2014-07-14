@@ -194,8 +194,10 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 		{
 		case Utils::DataDirectoryType:
 			m_zoneBuilderBase->init(QString(worldEditList[i].second.c_str()), true);
+			m_dataDir = worldEditList[i].second.c_str();
 			break;
 		case Utils::ContextType:
+			m_context = worldEditList[i].second.c_str();
 			break;
 		case Utils::LandscapeType:
 			m_undoStack->push(new LoadLandscapeCommand(QString(worldEditList[i].second.c_str()), m_primitivesModel, m_zoneBuilderBase));
@@ -221,6 +223,16 @@ void WorldEditorWindow::newWorldEditFile()
 
 void WorldEditorWindow::saveWorldEditFile()
 {
+	WorldSaver saver( m_primitivesModel, m_zoneBuilderBase, m_dataDir.toUtf8().constData(), m_context.toUtf8().constData() );
+	bool ok = saver.save();
+	QString error = saver.getLastError().c_str();
+
+	if( !ok )
+	{
+		QMessageBox::critical( this,
+								tr( "Failed to save world editor files" ),
+								tr( "Failed to save world editor files.\nError:\n " ) + error  );
+	}
 }
 
 void WorldEditorWindow::openProjectSettings()

@@ -72,6 +72,31 @@ private:
 	PrimitivesTreeModel *const m_model;
 };
 
+
+class WorldSaver
+{
+public:
+	WorldSaver( PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context );
+	bool save();
+
+	std::string getLastError() const{ return lastError; }
+
+private:
+	bool saveLandscapeNode( Node *node );
+	bool savePrimitiveNode( Node *node );
+	bool saveWorldEditFile();
+	bool writeWorldEditFile( const std::string &fn );
+
+	std::string m_dataDir;
+	std::string m_context;
+	PrimitivesTreeModel *m_model;
+	LandscapeEditor::ZoneBuilderBase *m_zoneBuilder;
+
+	std::vector< std::pair< std::string, std::string > > m_data;
+
+	std::string lastError;
+};
+
 /**
 @class LoadLandscapeCommand
 @brief

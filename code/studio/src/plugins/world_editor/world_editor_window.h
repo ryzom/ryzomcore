@@ -76,6 +76,9 @@ private:
 	void loadWorldEditFile(const QString &fileName);
 	void checkCurrentWorld();
 
+	QString m_context;
+	QString m_dataDir;
+
 	QString m_lastDir;
 
 	QLabel *m_statusInfo;

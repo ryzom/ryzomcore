@@ -209,6 +209,178 @@ void CreateWorldCommand::redo()
 	m_model->createWorldEditNode(m_fileName);
 }
 
+
+WorldSaver::WorldSaver( PrimitivesTreeModel *model, LandscapeEditor::ZoneBuilderBase *zoneBuilder, const std::string &dataDir, const std::string &context )
+{
+	m_model = model;
+	m_zoneBuilder = zoneBuilder;
+	m_dataDir = dataDir;
+	m_context = context;
+}
+
+bool WorldSaver::save()
+{
+	QModelIndex pidx = m_model->index( 0, 0 );
+	if( !pidx.isValid() )
+	{
+		lastError = "No root node.";
+		return false;
+	}
+
+	int rows = m_model->rowCount( pidx );
+	bool ok = false;
+
+	for( int i = 0; i < rows; i++ )
+	{
+		QModelIndex idx = m_model->index( i, 0, pidx );
+		
+		Node *node = reinterpret_cast< Node* >( idx.internalPointer() );
+		Node::NodeType t = node->type();
+
+		switch( t )
+		{
+		case Node::LandscapeNodeType: ok = saveLandscapeNode( node ); break;
+		case Node::RootPrimitiveNodeType: ok = savePrimitiveNode( node ); break;
+		}
+
+		if( !ok )
+			return false;
+	}
+	
+	ok = saveWorldEditFile();
+	return ok;
+}
+
+bool WorldSaver::saveLandscapeNode( Node *node )
+{
+	LandscapeNode *n = dynamic_cast< LandscapeNode* >( node );
+	if( n == NULL )
+	{
+		lastError = "Trying to save a non-landscape node as landscape.";
+		return false;
+	}
+
+	LandscapeEditor::ZoneRegionObject *z = m_zoneBuilder->zoneRegion( n->id() );
+	if( z == NULL )
+	{
+		lastError = "The specified zoneregion doesn't exist.";
+		return false;
+	}
+
+	z->setFileName( n->fileName().toUtf8().constData() );
+	bool ok = z->save();
+
+	if( ok )
+	{
+		std::pair< std::string, std::string > p;
+		p.first = "landscape";
+		p.second = n->fileName().toUtf8().constData();
+		
+		m_data.push_back( p );
+	}
+	else
+	{
+		lastError = "Couldn't save landscape file " + std::string( n->fileName().toUtf8().constData() );
+	}
+
+	return ok;
+}
+
+bool WorldSaver::savePrimitiveNode( Node *node )
+{
+	RootPrimitiveNode *n = dynamic_cast< RootPrimitiveNode* >( node );
+	if( n == NULL )
+	{
+		lastError = "Trying to save a non-primitive node as primitive.";
+		return false;
+	}
+
+	bool ok = NLLIGO::saveXmlPrimitiveFile( *(n->primitives()), n->fileName().toUtf8().constData() );
+
+	if( ok )
+	{
+		std::pair< std::string, std::string > p;
+		p.first = "primitive";
+		p.second = n->fileName().toUtf8().constData();
+		
+		m_data.push_back( p );
+	}
+	else
+	{
+		lastError = "Couldn't save primitive file " + std::string( n->fileName().toUtf8().constData() );
+	}
+
+	return ok;
+}
+
+bool WorldSaver::saveWorldEditFile()
+{
+	QModelIndex idx = m_model->index( 0, 0 );
+	Node *node = reinterpret_cast< Node* >( idx.internalPointer() );
+	Node::NodeType t = node->type();
+
+	WorldEditNode *n = dynamic_cast< WorldEditNode* >( node );
+	if( n == NULL )
+	{
+		lastError = "Not a worldedit node.";
+		return false;
+	}
+
+	std::string fn = n->data( 0 ).toString().toUtf8().constData();
+	bool ok = writeWorldEditFile( fn );
+
+	return ok;
+}
+
+bool WorldSaver::writeWorldEditFile( const std::string &fn )
+{
+	if( fn.empty() )
+		return false;
+
+	NLMISC::COFile of;
+	if( !of.open( fn, false, true, false ) )
+	{
+		lastError = "Couldn't open file " + fn + " for writing.";
+		return false;
+	}
+
+	NLMISC::COXml xml;
+	xml.init( &of );
+
+	xmlNodePtr rootNode = xmlNewDocNode (xml.getDocument (), NULL, (const xmlChar*)"NEL_WORLD_EDITOR_PROJECT", NULL);
+	xmlDocSetRootElement (xml.getDocument (), rootNode);
+	xmlNodePtr node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"VERSION", NULL);
+	xmlNodePtr text = xmlNewText ((const xmlChar *) NLMISC::toString( WORLD_EDITOR_FILE_VERSION ).c_str ());
+	xmlAddChild( node, text );
+	node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"DATA_DIRECTORY", NULL); 
+	xmlSetProp (node, (const xmlChar*)"VALUE", (const xmlChar*)m_dataDir.c_str ());
+	node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"CONTEXT", NULL);
+	xmlSetProp (node, (const xmlChar*)"VALUE", (const xmlChar*)m_context.c_str ()); 
+
+	std::vector< std::pair< std::string, std::string > >::const_iterator itr = m_data.begin();
+	while( itr != m_data.end() )
+	{
+		const std::pair< std::string, std::string > &p = *itr;
+		
+		node = xmlNewChild ( rootNode, NULL, (const xmlChar*)"DATABASE_ELEMENT", NULL);
+		xmlSetProp (node, (const xmlChar*)"FILENAME", (const xmlChar*)p.second.c_str ());
+
+		if( p.first == "landscape" )
+			xmlSetProp (node, (const xmlChar*)"TYPE", (const xmlChar*)("landscape"));
+		else
+			xmlSetProp (node, (const xmlChar*)"TYPE", (const xmlChar*)("primitive"));
+
+		++itr;
+	}
+
+	xml.flush();
+
+	of.close();
+
+
+	return true;
+}
+
 LoadLandscapeCommand::LoadLandscapeCommand(const QString &fileName, PrimitivesTreeModel *model,
 		LandscapeEditor::ZoneBuilderBase *zoneBuilder, QUndoCommand *parent)
 	: QUndoCommand(parent),
