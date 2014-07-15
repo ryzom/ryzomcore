@@ -90,7 +90,14 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 
 	NLLIGO::Register();
 	// TODO try/catch exception. Crashes if path invalid.
-	m_ligoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
+	try{
+		m_ligoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
+	}
+	catch( NLMISC::Exception &e )
+	{
+		nlinfo( "Exception occured during Mission Compiler LIGO startup: %s", e.what() );
+	}
+
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
 }
 
