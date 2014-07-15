@@ -32,8 +32,8 @@ class CEditor : public QMdiSubWindow
 	Q_OBJECT
 
 public:
-	CEditor(QMdiArea *parent) : QMdiSubWindow(parent) {}
-	CEditor() : QMdiSubWindow() {}
+	CEditor(QMdiArea *parent) : QMdiSubWindow(parent) { current_stack = NULL; }
+	CEditor() : QMdiSubWindow() { current_stack = NULL; }
 	virtual void open(QString filename) =0;
 	virtual void save() =0;
 	virtual void saveAs(QString filename) =0;
