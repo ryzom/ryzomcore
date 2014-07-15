@@ -280,6 +280,8 @@ void PropertyEditorWidget::onBoolValueChanged( QtProperty *p, bool v )
 		pp->String = "true";
 	else
 		pp->String = "false";
+
+	pp->Default = false;
 }
 
 void PropertyEditorWidget::onStringValueChanged( QtProperty *p, const QString &v )
@@ -293,6 +295,7 @@ void PropertyEditorWidget::onStringValueChanged( QtProperty *p, const QString &v
 		return;
 
 	pp->String = v.toUtf8().constData();
+	pp->Default = false;
 }
 
 void PropertyEditorWidget::onEnumValueChanged( QtProperty *p, int v )
@@ -306,6 +309,7 @@ void PropertyEditorWidget::onEnumValueChanged( QtProperty *p, int v )
 		return;
 
 	pp->String = p->valueText().toUtf8().constData();
+	pp->Default = false;
 }
 
 void PropertyEditorWidget::onStrArrValueChanged( QtProperty *p, const QString &v )
@@ -326,6 +330,8 @@ void PropertyEditorWidget::onStrArrValueChanged( QtProperty *p, const QString &v
 	{
 		pp->StringArray.push_back( itr.next().toUtf8().constData() );
 	}
+
+	pp->Default = false;
 }
 
 void PropertyEditorWidget::onConstStrArrValueChanged( QtProperty *p, const QString &v )
@@ -346,6 +352,8 @@ void PropertyEditorWidget::onConstStrArrValueChanged( QtProperty *p, const QStri
 	{
 		pp->StringArray.push_back( itr.next().toUtf8().constData() );
 	}
+
+	pp->Default = false;
 }
 
 
