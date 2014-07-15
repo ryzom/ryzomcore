@@ -191,7 +191,9 @@ void MissionCompilerSettingsPage::writeSettings()
 	{
 		for(int column = 0; column < m_ui.serversTableWidget->columnCount(); column++)
 		{
-			items << m_ui.serversTableWidget->item(row, column)->text();
+			QTableWidgetItem *item = m_ui.serversTableWidget->item(row, column);
+			if( item != NULL )
+				items << item->text();
 		}
 	}
 
