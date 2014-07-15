@@ -280,6 +280,7 @@ void CMainWindow::openWorkFile(QString file)
 		if(isWorksheetEditor(file_path->filePath()))
 		{
 			CEditorWorksheet *new_window = new CEditorWorksheet(_ui.mdiArea);
+			new_window->setUndoStack( m_undoStack );
 			new_window->open(file_path->filePath());
 			new_window->activateWindow();
 		}
