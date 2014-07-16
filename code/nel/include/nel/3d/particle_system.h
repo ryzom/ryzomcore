@@ -1178,9 +1178,6 @@ private:
 		CPSMultiMap<uint32, CPSLocatedBindable *>::M TLBMap;
 	TLBMap											_LBMap;
 
-	float										_AutoLODStartDistPercent;
-	uint8										_AutoLODDegradationExponent;
-
 	CPSAttribMaker<NLMISC::CRGBA>				*_ColorAttenuationScheme;
 	NLMISC::CRGBA								_GlobalColor;
 	NLMISC::CRGBA								_GlobalColorLighted;
@@ -1205,6 +1202,11 @@ private:
 	bool										_AutoCount							 : 1;
 	bool										_HiddenAtCurrentFrame				 : 1;
 	bool										_HiddenAtPreviousFrame				 : 1;
+
+	// The two following members have been moved after the bitfield to workaround a MSVC 64-bit compiler bug (fixed in VS2013)
+	// For more info, see: http://connect.microsoft.com/VisualStudio/feedback/details/777184/c-compiler-bug-vtable-pointer-put-at-wrong-offset-in-64-bit-mode
+	float										_AutoLODStartDistPercent;
+	uint8										_AutoLODDegradationExponent;
 
 	static bool									_SerialIdentifiers;
 	static bool									_ForceDisplayBBox;
