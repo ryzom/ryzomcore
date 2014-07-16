@@ -558,7 +558,7 @@ void CMainWindow::readSettings()
 	// core settings
 	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
 	level_design_path = settings->value(Core::Constants::LEVELDESIGN_PATH).toString();
-	primitives_path = QString(Core::Constants::PRIMITIVES_PATH); //TODO
+	primitives_path = settings->value( Core::Constants::PRIMITIVES_PATH ).toString();
 	settings->endGroup();
 }
 
