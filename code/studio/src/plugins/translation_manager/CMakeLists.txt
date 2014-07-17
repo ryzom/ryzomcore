@@ -17,6 +17,7 @@ SET(OVQT_PLUG_TRANSLATION_MANAGER_HDR 	translation_manager_plugin.h
 										ftp_selection.h
 										editor_worksheet.h
 										editor_phrase.h
+										uxt_editor.h
 )
 
 SET(OVQT_PLUG_TRANSLATION_MANAGER_UIS	translation_manager_settings_page.ui

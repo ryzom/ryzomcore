@@ -41,6 +41,8 @@
 #include <QtGui/QMenuBar>
 #include <QtGui/QCloseEvent>
 
+#include "uxt_editor.h"
+
 namespace TranslationManager
 {
 
@@ -84,6 +86,10 @@ void CMainWindow::createMenus()
 	if( m != NULL )
 	{
 		windowMenu = m->addMenu("Window");
+		
+		QAction *a = m->addAction( "Uxt" );
+		connect( a, SIGNAL( triggered() ), this, SLOT( onUxtClicked() ) );
+		
 		menu = m;
 	}
 	
@@ -542,6 +548,14 @@ void CMainWindow::mergeSingleFile()
 		}
 		*/
 	}
+}
+
+void CMainWindow::onUxtClicked()
+{
+	UXTEditor *e = new UXTEditor();	
+	e->open( work_path + "/" + QString( Constants::WK_UXT ) );
+	_ui.mdiArea->addSubWindow( e );
+	e->activateWindow();
 }
 
 // Read the settings from QSettings

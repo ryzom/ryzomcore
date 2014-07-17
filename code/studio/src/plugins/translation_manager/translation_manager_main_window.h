@@ -90,6 +90,7 @@ private Q_SLOTS:
 	void setActiveSubWindow(QWidget *window);
 	void updateWindowsList();
 	void mergeSingleFile();
+	void onUxtClicked();
 
 private:
 	void openWorkFile(QString file);

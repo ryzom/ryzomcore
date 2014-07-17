@@ -21,8 +21,9 @@ namespace TranslationManager
 {
 namespace Constants
 {
-const int ED_SHEET = 1;
+const int ED_SHEET  = 1;
 const int ED_PHRASE = 2;
+const int ED_UXT    = 3;
 
 const char *const WK_BOTNAMES = "bot_names_wk.txt";
 const char *const WK_ITEM = "item_words_wk.txt";
@@ -32,6 +33,7 @@ const char *const WK_SPHRASE = "sphrase_words_wk.txt";
 const char *const WK_PLACE = "place_words_wk.txt";
 const char *const WK_CONTINENT = "place_words_wk.txt";
 const char *const WK_STABLE = "place_words_wk.txt";
+const char *const WK_UXT = "wk.uxt";
 }
 }
 
