@@ -24,6 +24,8 @@ protected:
 	void closeEvent( QCloseEvent *e );
 
 private:
+	void setHeaderText( const QString &id, const QString &text );
+
 	UXTEditorPvt *d_ptr;
 };
 

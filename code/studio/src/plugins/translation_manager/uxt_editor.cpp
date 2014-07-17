@@ -50,6 +50,8 @@ void UXTEditor::open( QString filename )
 	d_ptr->t->setColumnCount( 2 );
 	d_ptr->t->setRowCount( infos.size() );
 
+	setHeaderText( "Id", "Text" );
+
 	int i = 0;
 
 	std::vector< STRING_MANAGER::TStringInfo >::const_iterator itr = infos.begin();
@@ -91,6 +93,16 @@ void UXTEditor::closeEvent( QCloseEvent *e )
 {
 	e->accept();
 	close();
+}
+
+void UXTEditor::setHeaderText( const QString &id, const QString &text )
+{
+	QTableWidgetItem *h1 = new QTableWidgetItem( id );
+	QTableWidgetItem *h2 = new QTableWidgetItem( text );
+	h1->setTextAlignment( Qt::AlignLeft );
+	h2->setTextAlignment( Qt::AlignLeft );
+	d_ptr->t->setHorizontalHeaderItem( 0, h1 );
+	d_ptr->t->setHorizontalHeaderItem( 1, h2 );
 }
 
 }
