@@ -23,8 +23,12 @@ public:
 protected:
 	void closeEvent( QCloseEvent *e );
 
+private Q_SLOTS:
+	void onCellChanged( int row, int column );
+
 private:
 	void setHeaderText( const QString &id, const QString &text );
+	void blockTableSignals( bool block = false );
 
 	UXTEditorPvt *d_ptr;
 };
