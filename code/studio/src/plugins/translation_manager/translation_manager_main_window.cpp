@@ -552,8 +552,13 @@ void CMainWindow::mergeSingleFile()
 
 void CMainWindow::onUxtClicked()
 {
-	UXTEditor *e = new UXTEditor();	
 	QString path = work_path + "/" + QString( Constants::WK_UXT );
+	path.replace( "\\", "/" );
+
+	if( getEditorByWindowFilePath( path ) != NULL )
+		return;
+
+	UXTEditor *e = new UXTEditor();	
 	e->open( path );
 	e->setCurrentFile( path );
 	_ui.mdiArea->addSubWindow( e );
