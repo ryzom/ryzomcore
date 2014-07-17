@@ -148,6 +148,30 @@ void UXTEditor::activateWindow()
 }
 
 
+void UXTEditor::insertRow()
+{
+	d_ptr->infos.push_back( STRING_MANAGER::TStringInfo() );
+	d_ptr->t->setRowCount( d_ptr->t->rowCount() + 1 );
+
+	setWindowModified( true );
+}
+
+
+void UXTEditor::deleteRow()
+{
+	int r = d_ptr->t->currentRow();
+	if( r < 0 )
+		return;
+
+	std::vector< STRING_MANAGER::TStringInfo >::iterator itr = d_ptr->infos.begin();
+	itr += r;
+	d_ptr->infos.erase( itr );
+
+	d_ptr->t->removeRow( r );
+
+	setWindowModified( true );
+}
+
 void UXTEditor::closeEvent( QCloseEvent *e )
 {
 	if( isWindowModified() )

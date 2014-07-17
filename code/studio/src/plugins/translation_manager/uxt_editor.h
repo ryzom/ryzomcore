@@ -37,6 +37,10 @@ public:
 	void saveAs( QString filename );
 	void activateWindow();
 
+public Q_SLOTS:
+	void insertRow();
+	void deleteRow();
+
 protected:
 	void closeEvent( QCloseEvent *e );
 
