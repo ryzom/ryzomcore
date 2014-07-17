@@ -6,6 +6,9 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 
+#include <QFile>
+#include <QTextStream>
+
 #include "nel/misc/diff_tool.h"
 
 namespace TranslationManager
@@ -89,10 +92,39 @@ void UXTEditor::open( QString filename )
 
 void UXTEditor::save()
 {
+	saveAs( current_file );
 }
 
 void UXTEditor::saveAs( QString filename )
 {
+	QFile f( filename );
+	if( !f.open( QIODevice::WriteOnly ) )
+		return;
+
+	QTextStream out( &f );
+
+	std::vector< STRING_MANAGER::TStringInfo >::const_iterator itr = d_ptr->infos.begin();
+	while( itr != d_ptr->infos.end() )
+	{
+		QString line = "";
+		
+		line += itr->Identifier.c_str();
+		line += "\t";
+		
+		line += "[";
+		line += itr->Text.toUtf8().c_str();
+		line += "]";
+
+		line += "\r\n";
+
+		out << line;
+
+		++itr;
+	}
+
+	f.close();
+
+	d_ptr->changed = false;
 }
 
 void UXTEditor::activateWindow()
