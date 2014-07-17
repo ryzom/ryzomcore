@@ -38,12 +38,10 @@ public:
 	UXTEditorPvt()
 	{
 		t = new QTableWidget();
-		changed = false;
 	}
 
 	QTableWidget *t;
 	std::vector< STRING_MANAGER::TStringInfo > infos;
-	bool changed;
 };
 
 
@@ -141,7 +139,7 @@ void UXTEditor::saveAs( QString filename )
 
 	f.close();
 
-	d_ptr->changed = false;
+	setWindowModified( false );
 }
 
 void UXTEditor::activateWindow()
@@ -152,7 +150,7 @@ void UXTEditor::activateWindow()
 
 void UXTEditor::closeEvent( QCloseEvent *e )
 {
-	if( d_ptr->changed )
+	if( isWindowModified() )
 	{
 		int reply = QMessageBox::question( this,
 										tr( "Table changed" ),
@@ -181,7 +179,7 @@ void UXTEditor::onCellChanged( int row, int column )
 	if( column == 1 )
 		info.Text = item->text().toUtf8().constData();
 
-	d_ptr->changed = true;
+	setWindowModified( true );
 }
 
 void UXTEditor::setHeaderText( const QString &id, const QString &text )
