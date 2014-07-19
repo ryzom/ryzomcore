@@ -983,7 +983,7 @@ int main(int /* argc */, char ** /* argv */)
 		ViewerCfg.FontManager.setMaxMemory(2000000);
 
 		displayZones();
-			
+
 		// release nelu
 		NL3D::CNELU::release();
 	}
