@@ -61,6 +61,10 @@ uint8 getType(const std::string &sFileNameDest)
 		return NOT_DEFINED;
 	}
 
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(dds);
+#endif
+
 	if (fread(&h,sizeof(CS3TCCompressor::DDS_HEADER),1,f) != 1)
 	{
 		fclose(f);

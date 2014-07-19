@@ -94,7 +94,15 @@ struct BNPHeader
 		if (f == NULL) return false;
 
 		uint32 nNbFile = (uint32)Files.size();
-		if (fwrite (&nNbFile, sizeof(uint32), 1, f) != 1)
+
+		// value to be serialized
+		uint32 nNbFile2 = nNbFile;
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nNbFile2);
+#endif
+
+		if (fwrite (&nNbFile2, sizeof(uint32), 1, f) != 1)
 		{
 			fclose(f);
 			return false;
@@ -115,20 +123,38 @@ struct BNPHeader
 				return false;
 			}
 
-			if (fwrite (&Files[i].Size, sizeof(uint32), 1, f) != 1)
+			uint32 nFileSize = Files[i].Size;
+
+#ifdef NL_BIG_ENDIAN
+			NLMISC_BSWAP32(nFileSize);
+#endif
+
+			if (fwrite (&nFileSize, sizeof(uint32), 1, f) != 1)
 			{
 				fclose(f);
 				return false;
 			}
 
-			if (fwrite (&Files[i].Pos, sizeof(uint32), 1, f) != 1)
+			uint32 nFilePos = Files[i].Pos;
+
+#ifdef NL_BIG_ENDIAN
+			NLMISC_BSWAP32(nFilePos);
+#endif
+
+			if (fwrite (&nFilePos, sizeof(uint32), 1, f) != 1)
 			{
 				fclose(f);
 				return false;
 			}
 		}
 
-		if (fwrite (&OffsetFromBeginning, sizeof(uint32), 1, f) != 1)
+		uint32 nOffsetFromBeginning = OffsetFromBeginning;
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nOffsetFromBeginning);
+#endif
+
+		if (fwrite (&nOffsetFromBeginning, sizeof(uint32), 1, f) != 1)
 		{
 			fclose(f);
 			return false;
