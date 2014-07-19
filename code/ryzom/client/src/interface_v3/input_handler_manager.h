@@ -44,7 +44,7 @@
 class CInputHandlerManager : public NLMISC::IEventListener, public CGroupEditBox::IComboKeyHandler
 {
 public:
-	/// The EventServer Filled with Filtered Messages the InterfaceManager didn't cactch
+	/// The EventServer Filled with Filtered Messages the InterfaceManager didn't catch
 	NLMISC::CEventServer	FilteredEventServer;
 
 public:
