@@ -165,6 +165,14 @@ void UXTEditor::deleteRow()
 	if( r < 0 )
 		return;
 
+	int answer = QMessageBox::question( this,
+										tr( "Deleting a row" ),
+										tr( "Are you sure you want to delete this row?" ),
+										QMessageBox::Yes,
+										QMessageBox::Cancel );
+	if( QMessageBox::Yes != answer )
+		return;							
+
 	std::vector< STRING_MANAGER::TStringInfo >::iterator itr = d_ptr->infos.begin();
 	itr += r;
 	d_ptr->infos.erase( itr );
