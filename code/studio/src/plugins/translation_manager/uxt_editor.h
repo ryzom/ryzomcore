@@ -43,6 +43,7 @@ public Q_SLOTS:
 
 protected:
 	void closeEvent( QCloseEvent *e );
+	void contextMenuEvent( QContextMenuEvent *e );
 
 private Q_SLOTS:
 	void onCellChanged( int row, int column );

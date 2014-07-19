@@ -21,7 +21,9 @@
 #include <QTableWidget>
 #include <QFormLayout>
 #include <QCloseEvent>
+#include <QContextMenuEvent>
 #include <QMessageBox>
+#include <QMenu>
 
 #include <QFile>
 #include <QTextStream>
@@ -190,6 +192,20 @@ void UXTEditor::closeEvent( QCloseEvent *e )
 
 	e->accept();
 	close();
+}
+
+void UXTEditor::contextMenuEvent( QContextMenuEvent *e )
+{
+	QMenu *menu = new QMenu( this );
+	QAction *insertAction = new QAction( "Insert row", menu );
+	QAction *deleteAction = new QAction( "Delete row", menu );
+
+	connect( insertAction, SIGNAL( triggered( bool ) ), this, SLOT( insertRow() ) );
+	connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( deleteRow() ) );	
+
+	menu->addAction( insertAction );
+	menu->addAction( deleteAction );
+	menu->exec( e->globalPos() );
 }
 
 void UXTEditor::onCellChanged( int row, int column )
