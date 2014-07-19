@@ -362,7 +362,7 @@ int main()
 					}
 					++itAcc;
 				}
-				if ((vCluster.size() == 0) && (DispCS[0].pIG == pCurIG))
+				if (vCluster.empty() && (DispCS[0].pIG == pCurIG))
 				{
 					vCluster.push_back (pClipTrav->RootCluster);
 				}
