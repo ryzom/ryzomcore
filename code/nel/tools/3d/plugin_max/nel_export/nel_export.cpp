@@ -173,7 +173,7 @@ INT_PTR CALLBACK OptionsDialogCallback (
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIORADIOSITYEXPORTLIGHTING), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nExportLighting = 1;
 					SendMessage( GetDlgItem(hwndDlg,IDC_EDITLUMELSIZE), WM_GETTEXT, 1024, (long)tmp );
-					theExportSceneStruct.rLumelSize = (float)atof( tmp );
+					NLMISC::fromString(tmp, theExportSceneStruct.rLumelSize);
 
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS1), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nOverSampling = 1;
@@ -192,9 +192,9 @@ INT_PTR CALLBACK OptionsDialogCallback (
 					// SurfaceLighting
 					theExportSceneStruct.bTestSurfaceLighting= (SendMessage( GetDlgItem(hwndDlg,IDC_TEST_SURFACE_LIGHT), BM_GETCHECK, 0, 0 ) == BST_CHECKED);
 					SendMessage( GetDlgItem(hwndDlg,IDC_EDITCELLSIZE), WM_GETTEXT, 1024, (long)tmp );
-					theExportSceneStruct.SurfaceLightingCellSize= (float)atof( tmp );
+					NLMISC::fromString(tmp, theExportSceneStruct.SurfaceLightingCellSize);
 					SendMessage( GetDlgItem(hwndDlg,IDC_EDITCELLDELTAZ), WM_GETTEXT, 1024, (long)tmp );
-					theExportSceneStruct.SurfaceLightingDeltaZ= (float)atof( tmp );
+					NLMISC::fromString(tmp, theExportSceneStruct.SurfaceLightingDeltaZ);
 
 					// End the dialog
 					EndDialog(hwndDlg, TRUE);
