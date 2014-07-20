@@ -31,6 +31,27 @@
 #include "nel/misc/diff_tool.h"
 #include "nel/misc/i18n.h"
 
+namespace
+{
+
+QString getLang( const QString &fn )
+{
+	QString lang = fn;
+	int idx = lang.lastIndexOf( '/' );
+	if( idx == -1 )
+		return "";
+
+	lang = lang.mid( idx + 1 );
+	idx = lang.lastIndexOf( '.' );
+	if( idx == -1 )
+		return "";
+
+	lang = lang.left( idx );
+	return lang;
+}
+
+}
+
 namespace TranslationManager
 {
 
@@ -68,12 +89,30 @@ UXTEditor::~UXTEditor()
 void UXTEditor::open( QString filename )
 {
 	std::vector< STRING_MANAGER::TStringInfo > &infos = d_ptr->infos;
+	QString lang = getLang( filename );
 	
 	infos.clear();
 	STRING_MANAGER::loadStringFile( filename.toUtf8().constData(), infos, true );
 
 	if( d_ptr->infos.size() == 0 )
-		return;
+	{
+		// The work file cannot be found, cannot proceed
+		if( filename.endsWith( "wk.uxt" ) )
+		{
+			return;
+		}
+
+		int l = filename.lastIndexOf( "/" );
+		if( l == -1 )
+			return;
+		filename = filename.left( l );
+		filename += "/wk.uxt";
+		
+		// The work file cannot be found, cannot proceed
+		STRING_MANAGER::loadStringFile( filename.toUtf8().constData(), infos, true );
+		if( d_ptr->infos.size() == 0 )
+			return;
+	}
 
 	blockTableSignals( true );
 
@@ -81,7 +120,7 @@ void UXTEditor::open( QString filename )
 	d_ptr->t->setColumnCount( 2 );
 	d_ptr->t->setRowCount( infos.size() );
 
-	setHeaderText( "Id", "Text" );
+	setHeaderText( "Id", lang.toUpper() + " Text" );
 
 	int i = 0;
 
