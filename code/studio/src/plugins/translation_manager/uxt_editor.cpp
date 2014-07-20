@@ -29,6 +29,7 @@
 #include <QTextStream>
 
 #include "nel/misc/diff_tool.h"
+#include "nel/misc/i18n.h"
 
 namespace TranslationManager
 {
@@ -120,23 +121,36 @@ void UXTEditor::saveAs( QString filename )
 
 	QTextStream out( &f );
 
+	int idx = 0;
 	std::vector< STRING_MANAGER::TStringInfo >::const_iterator itr = d_ptr->infos.begin();
 	while( itr != d_ptr->infos.end() )
 	{
-		QString line = "";
+		QString hashLine = "// HASH_VALUE ";
+		hashLine += QString( NLMISC::CI18N::hashToString( itr->HashValue ).c_str() ).toUpper();
+		hashLine += "\r\n";
 		
-		line += itr->Identifier.c_str();
-		line += "\t";
+		QString idxLine = "// INDEX ";
+		idxLine += QString::number( idx );
+		idxLine += "\r\n";
 		
-		line += "[";
-		line += itr->Text.toUtf8().c_str();
-		line += "]";
+		
+		QString trLine = "";		
+		trLine += itr->Identifier.c_str();
+		trLine += "\t";		
+		trLine += "[";
+		trLine += itr->Text.toUtf8().c_str();
+		trLine += "]";
+		trLine += "\r\n";
 
-		line += "\r\n";
+		QString newLine = "\r\n";
 
-		out << line;
+		out << hashLine;
+		out << idxLine;
+		out << trLine;
+		out << newLine;
 
 		++itr;
+		idx++;
 	}
 
 	f.close();

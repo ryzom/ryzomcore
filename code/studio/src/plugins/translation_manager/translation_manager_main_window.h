@@ -71,6 +71,7 @@ private:
 	QAction *saveAsAct;
 	QMenu *windowMenu;
 	QSignalMapper *windowMapper;
+	QSignalMapper *m_UXTMapper;
 	// config
 	QMap<string,bool> initialize_settings;
 	QList<QString> filters;
@@ -90,7 +91,7 @@ private Q_SLOTS:
 	void setActiveSubWindow(QWidget *window);
 	void updateWindowsList();
 	void mergeSingleFile();
-	void onUxtClicked();
+	void onUxtMapped( QString lang );
 
 private:
 	void openWorkFile(QString file);

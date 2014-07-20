@@ -54,6 +54,7 @@ CMainWindow::CMainWindow(QWidget *parent)
 
 	_ui.mdiArea->closeAllSubWindows();
 	windowMapper = new QSignalMapper(this);
+	m_UXTMapper = new QSignalMapper(this);
 	connect(windowMapper, SIGNAL(mapped(QWidget *)), this, SLOT(setActiveSubWindow(QWidget *)));
 
 	initialize_settings["georges"] = false;
@@ -87,8 +88,20 @@ void CMainWindow::createMenus()
 	{
 		windowMenu = m->addMenu("Window");
 		
-		QAction *a = m->addAction( "Uxt" );
-		connect( a, SIGNAL( triggered() ), this, SLOT( onUxtClicked() ) );
+		QMenu *mm = m->addMenu( "UI translation" );
+		if( mm != NULL )
+		{
+			QStringListIterator itr( languages );
+			while( itr.hasNext() )
+			{
+				QString lang = itr.next();
+				QAction *a = mm->addAction( lang );
+				connect( a, SIGNAL( triggered() ), m_UXTMapper, SLOT( map() ) );
+				m_UXTMapper->setMapping( a, lang );
+			}
+
+			connect( m_UXTMapper, SIGNAL( mapped( QString ) ), this, SLOT( onUxtMapped( QString ) ) );
+		}
 		
 		menu = m;
 	}
@@ -550,14 +563,14 @@ void CMainWindow::mergeSingleFile()
 	}
 }
 
-void CMainWindow::onUxtClicked()
+void CMainWindow::onUxtMapped( QString lang )
 {
-	QString path = work_path + "/" + QString( Constants::WK_UXT );
+	QString path = translation_path + "/" + lang + ".uxt";
 	path.replace( "\\", "/" );
-
+	
 	if( getEditorByWindowFilePath( path ) != NULL )
 		return;
-
+	
 	UXTEditor *e = new UXTEditor();	
 	e->open( path );
 	e->setCurrentFile( path );
