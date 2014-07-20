@@ -573,7 +573,6 @@ void CMainWindow::onUxtMapped( QString lang )
 	
 	UXTEditor *e = new UXTEditor();	
 	e->open( path );
-	e->setCurrentFile( path );
 	_ui.mdiArea->addSubWindow( e );
 	e->activateWindow();
 }

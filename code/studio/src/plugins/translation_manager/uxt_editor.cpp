@@ -105,11 +105,12 @@ void UXTEditor::open( QString filename )
 		int l = filename.lastIndexOf( "/" );
 		if( l == -1 )
 			return;
-		filename = filename.left( l );
-		filename += "/wk.uxt";
+
+		QString fn = filename.left( l );		
+		fn += "/wk.uxt";
 		
 		// The work file cannot be found, cannot proceed
-		STRING_MANAGER::loadStringFile( filename.toUtf8().constData(), infos, true );
+		STRING_MANAGER::loadStringFile( fn.toUtf8().constData(), infos, true );
 		if( d_ptr->infos.size() == 0 )
 			return;
 	}
@@ -144,7 +145,10 @@ void UXTEditor::open( QString filename )
 	blockTableSignals( false );
 
 	setWidget( d_ptr->t );
-	setCurrentFile( filename );
+
+	current_file = filename;
+	setWindowTitle( filename + "[*]" );
+	setWindowFilePath( filename );
 }
 
 void UXTEditor::save()
