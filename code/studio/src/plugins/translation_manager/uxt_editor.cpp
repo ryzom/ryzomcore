@@ -55,6 +55,16 @@ QString getLang( const QString &fn )
 namespace TranslationManager
 {
 
+void markItemTranslated( QTableWidgetItem *item )
+{
+	item->setBackground( QColor::fromRgb( 126, 247, 134 ) );
+}
+
+void markItemUntranslated( QTableWidgetItem *item )
+{
+	item->setBackground( QColor::fromRgb( 247, 126, 126 ) );
+}
+
 class UXTEditorPvt
 {
 public:
@@ -139,6 +149,17 @@ void UXTEditor::open( QString filename )
 		
 		d_ptr->t->setItem( i, 0, name );
 		d_ptr->t->setItem( i, 1, text1 );
+
+		if( ( info.HashValue != 0 ) && !d_ptr->loadedFromWK )
+		{
+			markItemTranslated( name );
+			markItemTranslated( text1 );
+		}
+		else
+		{
+			markItemUntranslated( name );
+			markItemUntranslated( text1 );
+		}
 		
 		++itr;
 		i++;
@@ -317,6 +338,8 @@ void UXTEditor::onCellChanged( int row, int column )
 		info.Text2 = item->text().toUtf8().constData();
 
 	setWindowModified( true );
+
+	markRowTranslated( row );
 }
 
 void UXTEditor::markTranslated()
@@ -332,6 +355,8 @@ void UXTEditor::markTranslated()
 	info.Text2 = info.Text;
 
 	setWindowModified( true );
+
+	markRowTranslated( r );
 }
 
 void UXTEditor::markUntranslated()
@@ -346,6 +371,8 @@ void UXTEditor::markUntranslated()
 	info.HashValue = 0;
 
 	setWindowModified( true );
+
+	markRowUntranslated( r );
 }
 
 void UXTEditor::setHeaderText( const QString &id, const QString &text )
@@ -364,6 +391,30 @@ void UXTEditor::blockTableSignals( bool block )
 		disconnect( d_ptr->t, SIGNAL( cellChanged( int, int ) ), this, SLOT( onCellChanged( int, int ) ) );
 	else
 		connect( d_ptr->t, SIGNAL( cellChanged( int, int ) ), this, SLOT( onCellChanged( int, int ) ) );
+}
+
+void UXTEditor::markRowTranslated( int row )
+{
+	blockTableSignals( true );
+
+	QTableWidgetItem *item1 = d_ptr->t->item( row, 0 );
+	QTableWidgetItem *item2 = d_ptr->t->item( row, 1 );
+	markItemTranslated( item1 );
+	markItemTranslated( item2 );
+
+	blockTableSignals( false );
+}
+
+void UXTEditor::markRowUntranslated( int row )
+{
+	blockTableSignals( true );
+
+	QTableWidgetItem *item1 = d_ptr->t->item( row, 0 );
+	QTableWidgetItem *item2 = d_ptr->t->item( row, 1 );
+	markItemUntranslated( item1 );
+	markItemUntranslated( item2 );
+
+	blockTableSignals( false );
 }
 
 }

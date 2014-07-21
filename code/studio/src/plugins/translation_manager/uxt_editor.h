@@ -53,6 +53,8 @@ private Q_SLOTS:
 private:
 	void setHeaderText( const QString &id, const QString &text );
 	void blockTableSignals( bool block = false );
+	void markRowTranslated( int row );
+	void markRowUntranslated( int row );
 
 	UXTEditorPvt *d_ptr;
 };
