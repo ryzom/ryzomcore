@@ -290,12 +290,18 @@ void UXTEditor::contextMenuEvent( QContextMenuEvent *e )
 	QMenu *menu = new QMenu( this );
 	QAction *insertAction = new QAction( "Insert row", menu );
 	QAction *deleteAction = new QAction( "Delete row", menu );
+	QAction *markAction = new QAction( "Mark translated", menu );
+	QAction *unmarkAction = new QAction( "Mark not-translated", menu );
 
 	connect( insertAction, SIGNAL( triggered( bool ) ), this, SLOT( insertRow() ) );
-	connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( deleteRow() ) );	
+	connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( deleteRow() ) );
+	connect( markAction, SIGNAL( triggered( bool ) ), this, SLOT( markTranslated() ) );
+	connect( unmarkAction, SIGNAL( triggered( bool ) ), this, SLOT( markUntranslated() ) );
 
 	menu->addAction( insertAction );
 	menu->addAction( deleteAction );
+	menu->addAction( markAction );
+	menu->addAction( unmarkAction );
 	menu->exec( e->globalPos() );
 }
 
@@ -309,6 +315,35 @@ void UXTEditor::onCellChanged( int row, int column )
 	else
 	if( column == 1 )
 		info.Text2 = item->text().toUtf8().constData();
+
+	setWindowModified( true );
+}
+
+void UXTEditor::markTranslated()
+{
+	int r = d_ptr->t->currentRow();
+	if( r < 0 )
+		return;
+
+	STRING_MANAGER::TStringInfo &info = d_ptr->infos[ r ];
+	if( !info.Text2.empty() )
+		return;
+
+	info.Text2 = info.Text;
+
+	setWindowModified( true );
+}
+
+void UXTEditor::markUntranslated()
+{
+	int r = d_ptr->t->currentRow();
+	if( r < 0 )
+		return;
+
+	STRING_MANAGER::TStringInfo &info = d_ptr->infos[ r ];
+
+	info.Text2.clear();
+	info.HashValue = 0;
 
 	setWindowModified( true );
 }
