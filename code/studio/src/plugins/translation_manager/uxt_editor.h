@@ -49,6 +49,8 @@ private Q_SLOTS:
 	void onCellChanged( int row, int column );
 	void markTranslated();
 	void markUntranslated();
+	void onSaveClicked();
+	void onSaveAsClicked();
 
 private:
 	void setHeaderText( const QString &id, const QString &text );

@@ -24,6 +24,7 @@
 #include <QContextMenuEvent>
 #include <QMessageBox>
 #include <QMenu>
+#include <QFileDialog>
 
 #include <QFile>
 #include <QTextStream>
@@ -325,16 +326,22 @@ void UXTEditor::contextMenuEvent( QContextMenuEvent *e )
 	QAction *deleteAction = new QAction( "Delete row", menu );
 	QAction *markAction = new QAction( "Mark translated", menu );
 	QAction *unmarkAction = new QAction( "Mark not-translated", menu );
+	QAction *saveAction = new QAction( "Save", menu );
+	QAction *saveAsAction = new QAction( "Save as..", menu );
 
 	connect( insertAction, SIGNAL( triggered( bool ) ), this, SLOT( insertRow() ) );
 	connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( deleteRow() ) );
 	connect( markAction, SIGNAL( triggered( bool ) ), this, SLOT( markTranslated() ) );
 	connect( unmarkAction, SIGNAL( triggered( bool ) ), this, SLOT( markUntranslated() ) );
+	connect( saveAction, SIGNAL( triggered( bool ) ), this, SLOT( onSaveClicked() ) );
+	connect( saveAsAction, SIGNAL( triggered( bool ) ), this, SLOT( onSaveAsClicked() ) );
 
 	menu->addAction( insertAction );
 	menu->addAction( deleteAction );
 	menu->addAction( markAction );
 	menu->addAction( unmarkAction );
+	menu->addAction( saveAction );
+	menu->addAction( saveAsAction );
 	menu->exec( e->globalPos() );
 }
 
@@ -385,6 +392,31 @@ void UXTEditor::markUntranslated()
 	setWindowModified( true );
 
 	markRowUntranslated( r );
+}
+
+void UXTEditor::onSaveClicked()
+{
+	save();
+}
+
+void UXTEditor::onSaveAsClicked()
+{
+	QString path = current_file;
+	int idx = path.lastIndexOf( '/' );
+	if( idx < 0 )
+		path = "";
+	else
+		path = path.left( idx + 1 );
+
+	QString file = QFileDialog::getSaveFileName( this,
+												tr( "Save Uxt as.." ),
+												path,
+												tr( "Uxt files ( *.uxt)" ) );
+
+	if( file.isEmpty() )
+		return;
+
+	saveAs( file );
 }
 
 void UXTEditor::setHeaderText( const QString &id, const QString &text )
