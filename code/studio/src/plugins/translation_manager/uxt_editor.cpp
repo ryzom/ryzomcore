@@ -256,10 +256,22 @@ void UXTEditor::activateWindow()
 
 void UXTEditor::insertRow()
 {
+	blockTableSignals( true );
+
 	d_ptr->infos.push_back( STRING_MANAGER::TStringInfo() );
 	d_ptr->t->setRowCount( d_ptr->t->rowCount() + 1 );
+	int row = d_ptr->t->rowCount() - 1;
+
+	QTableWidgetItem *item1 = new QTableWidgetItem();
+	QTableWidgetItem *item2 = new QTableWidgetItem();
+	d_ptr->t->setItem( row, 0, item1 );
+	d_ptr->t->setItem( row, 1, item2 );
+
+	markRowUntranslated( row );
 
 	setWindowModified( true );
+
+	blockTableSignals( false );
 }
 
 
