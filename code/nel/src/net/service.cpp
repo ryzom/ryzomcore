@@ -24,8 +24,10 @@
 // these defines is for IsDebuggerPresent(). it'll not compile on windows 95
 // just comment this and the IsDebuggerPresent to compile on windows 95
 #	define _WIN32_WINDOWS	0x0410
-#	define WINVER			0x0400
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define WINVER			0x0400
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	include <direct.h>
 #elif defined NL_OS_UNIX

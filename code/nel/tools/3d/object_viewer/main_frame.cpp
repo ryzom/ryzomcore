@@ -1392,9 +1392,9 @@ void CMainFrame::OnViewSetSceneRotation()
 	if (sceneRotDlg.DoModal() == IDOK)
 	{
 		// read value.
-		_LastSceneRotX= (float)atof(sceneRotDlg.RotX);
-		_LastSceneRotY= (float)atof(sceneRotDlg.RotY);
-		_LastSceneRotZ= (float)atof(sceneRotDlg.RotZ);
+		NLMISC::fromString(sceneRotDlg.RotX, _LastSceneRotX);
+		NLMISC::fromString(sceneRotDlg.RotY, _LastSceneRotY);
+		NLMISC::fromString(sceneRotDlg.RotZ, _LastSceneRotZ);
 		float	rotx= degToRad(_LastSceneRotX);
 		float	roty= degToRad(_LastSceneRotY);
 		float	rotz= degToRad(_LastSceneRotZ);

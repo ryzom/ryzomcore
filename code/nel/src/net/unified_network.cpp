@@ -36,7 +36,7 @@ namespace NLNET {
 
 static size_t ThreadCreator = 0;
 
-static const uint64 AppIdDeadConnection = 0xDEAD;
+static const uintptr_t AppIdDeadConnection = 0xDEAD;
 
 uint32 TotalCallbackCalled = 0;
 

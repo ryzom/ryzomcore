@@ -53,7 +53,7 @@ CCallbackClient::~CCallbackClient()
  * Recorded : YES
  * Replayed : MAYBE
  */
-void CCallbackClient::send (const CMessage &buffer, TSockId hostid, bool log)
+void CCallbackClient::send (const CMessage &buffer, TSockId hostid, bool /* log */)
 {
 	nlassert (hostid == InvalidSockId);	// should always be InvalidSockId on client
 	nlassert (connected ());

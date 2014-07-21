@@ -647,8 +647,7 @@ namespace NLGUI
 			{
 				if(!parseLUAScript(root))
 				{
-					nlwarning ("could not parse 'lua'");
-					exit( EXIT_FAILURE );
+					nlerror ("could not parse 'lua'");
 				}
 			}
 			else

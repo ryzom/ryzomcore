@@ -300,9 +300,9 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 
 	// Get Soft Shadow information
 	string sTmp = CExportNel::getScriptAppData (node, NEL3D_APPDATA_SOFTSHADOW_RADIUS, toString(NEL3D_APPDATA_SOFTSHADOW_RADIUS_DEFAULT));
-	this->rSoftShadowRadius = (float)atof(sTmp.c_str());
+	NLMISC::fromString(sTmp, this->rSoftShadowRadius);
 	sTmp = CExportNel::getScriptAppData (node, NEL3D_APPDATA_SOFTSHADOW_CONELENGTH, toString(NEL3D_APPDATA_SOFTSHADOW_CONELENGTH_DEFAULT));
-	this->rSoftShadowConeLength = (float)atof(sTmp.c_str());
+	NLMISC::fromString(sTmp, this->rSoftShadowConeLength);
 
 	if( deleteIt )
 		maxLight->DeleteThis();
@@ -2147,7 +2147,8 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 
 	// **** Retrieve Shape Node properties
 	string sLumelSizeMul = CExportNel::getScriptAppData (&ZeNode, NEL3D_APPDATA_LUMELSIZEMUL, "1.0");
-	float rLumelSizeMul = (float)atof(sLumelSizeMul.c_str());
+	float rLumelSizeMul;
+	NLMISC::fromString(sLumelSizeMul, rLumelSizeMul);
 	// 8Bits LightMap Compression
 	bool	lmcEnabled= CExportNel::getScriptAppData (&ZeNode, NEL3D_APPDATA_EXPORT_LMC_ENABLED, BST_UNCHECKED)==BST_CHECKED;
 	enum	{NumLightGroup= 3};

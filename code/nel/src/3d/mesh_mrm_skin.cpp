@@ -16,6 +16,10 @@
 
 #include "std3d.h"
 
+#ifdef NL_HAS_SSE2
+#	include <xmmintrin.h>
+#endif
+
 #include "nel/misc/bsphere.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/misc/system_info.h"
@@ -37,124 +41,6 @@ using namespace std;
 
 namespace NL3D
 {
-
-
-// ***************************************************************************
-// ***************************************************************************
-// CMatrix3x4SSE array correctly aligned
-// ***************************************************************************
-// ***************************************************************************
-
-
-
-// ***************************************************************************
-#define	NL3D_SSE_ALIGNEMENT		16
-/**
- *	A CMatrix3x4SSE array correctly aligned
- *	NB: SSE is no more used (no speed gain, some memory problem), but keep it for possible future usage.
- */
-class	CMatrix3x4SSEArray
-{
-private:
-	void	*_AllocData;
-	void	*_Data;
-	uint	_Size;
-	uint	_Capacity;
-
-public:
-	CMatrix3x4SSEArray()
-	{
-		_AllocData= NULL;
-		_Data= NULL;
-		_Size= 0;
-		_Capacity= 0;
-	}
-	~CMatrix3x4SSEArray()
-	{
-		clear();
-	}
-	CMatrix3x4SSEArray(const CMatrix3x4SSEArray &other)
-	{
-		_AllocData= NULL;
-		_Data= NULL;
-		_Size= 0;
-		_Capacity= 0;
-		*this= other;
-	}
-	CMatrix3x4SSEArray &operator=(const CMatrix3x4SSEArray &other)
-	{
-		if( this == &other)
-			return *this;
-		resize(other.size());
-		// copy data from aligned pointers to aligned pointers.
-		memcpy(_Data, other._Data, size() * sizeof(CMatrix3x4SSE) );
-
-		return *this;
-	}
-
-
-	CMatrix3x4SSE	*getPtr()
-	{
-		return (CMatrix3x4SSE*)_Data;
-	}
-
-	void	clear()
-	{
-		delete [] ((uint8 *)_AllocData);
-		_AllocData= NULL;
-		_Data= NULL;
-		_Size= 0;
-		_Capacity= 0;
-	}
-
-	void	resize(uint n)
-	{
-		// reserve ??
-		if(n>_Capacity)
-			reserve( max(2*_Capacity, n));
-		_Size= n;
-	}
-
-	void	reserve(uint n)
-	{
-		if(n==0)
-			clear();
-		else if(n>_Capacity)
-		{
-			// Alloc new data.
-			void	*newAllocData;
-			void	*newData;
-
-			// Alloc for alignement.
-			newAllocData= new uint8 [n * sizeof(CMatrix3x4SSE) + NL3D_SSE_ALIGNEMENT-1];
-			if(newAllocData==NULL)
-				throw Exception("SSE Allocation Failed");
-
-			// Align ptr
-			newData= (void*) ( ((ptrdiff_t)newAllocData+NL3D_SSE_ALIGNEMENT-1) & (~(NL3D_SSE_ALIGNEMENT-1)) );
-
-			// copy valid data from old to new.
-			memcpy(newData, _Data, size() * sizeof(CMatrix3x4SSE) );
-
-			// release old.
-			if(_AllocData)
-				delete [] ((uint8*)_AllocData);
-
-			// change ptrs and capacity.
-			_Data= newData;
-			_AllocData= newAllocData;
-			_Capacity= n;
-
-			// TestYoyo
-			//nlwarning("YOYO Tst SSE P4: %X, %d", _Data, n);
-		}
-	}
-
-	uint	size() const {return _Size;}
-
-
-	CMatrix3x4SSE	&operator[](uint i) {return ((CMatrix3x4SSE*)_Data)[i];}
-};
 
 
 

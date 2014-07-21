@@ -882,9 +882,9 @@ void prelogInit()
 		UDriver::TDriver driver = UDriver::OpenGl;
 
 #ifdef NL_OS_WINDOWS
-		uint icon = (uint)LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+		uintptr_t icon = (uintptr_t)LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
 #else
-		uint icon = 0;
+		uintptr_t icon = 0;
 #endif // NL_OS_WINDOWS
 
 		switch(ClientCfg.Driver3D)

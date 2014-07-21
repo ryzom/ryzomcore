@@ -10,7 +10,7 @@ NL_DEFAULT_PROPS(nel_drv_direct3d_win "NeL, Driver, Video: Direct3D")
 NL_ADD_RUNTIME_FLAGS(nel_drv_direct3d_win)
 NL_ADD_LIB_SUFFIX(nel_drv_direct3d_win)
 
-ADD_DEFINITIONS(/Ddriver_direct3d_EXPORTS)
+ADD_DEFINITIONS(-DRIVER_DIRECT3D_EXPORTS)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_direct3d_win ${CMAKE_CURRENT_SOURCE_DIR}/stddirect3d.h ${CMAKE_CURRENT_SOURCE_DIR}/stddirect3d.cpp)

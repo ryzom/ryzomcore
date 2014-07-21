@@ -82,13 +82,13 @@ void					UDriver::setMatrixMode2D43()
 }
 
 // ***************************************************************************
-UDriver					*UDriver::createDriver(uint windowIcon, bool direct3d, emptyProc exitFunc)
+UDriver					*UDriver::createDriver(uintptr_t windowIcon, bool direct3d, emptyProc exitFunc)
 {
 	return new CDriverUser (windowIcon, direct3d ? CDriverUser::Direct3d:CDriverUser::OpenGl, exitFunc);
 }
 
 // ***************************************************************************
-UDriver					*UDriver::createDriver(uint windowIcon, TDriver driver, emptyProc exitFunc)
+UDriver					*UDriver::createDriver(uintptr_t windowIcon, TDriver driver, emptyProc exitFunc)
 {
 	return new CDriverUser (windowIcon, (CDriverUser::TDriver)driver, exitFunc);
 }
@@ -114,7 +114,7 @@ bool	CDriverUser::_StaticInit= false;
 
 
 // ***************************************************************************
-CDriverUser::CDriverUser (uint windowIcon, TDriver driver, emptyProc exitFunc)
+CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFunc)
 {
 	// The enum of IDriver and UDriver MUST be the same!!!
 	nlassert((uint)IDriver::idCount == (uint)UDriver::idCount);

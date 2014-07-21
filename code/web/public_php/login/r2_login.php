@@ -337,7 +337,9 @@
 			}
 			else
 			{
+				$reason = errorMsg(2001, $login, 'checkUserValidity');
 				// Check if this is not an unconfirmed account
+				/*
 				$query = "SELECT GamePassword, Email, Language FROM signup_data WHERE login='$login'";
 				$result = mysqli_query($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
@@ -369,6 +371,7 @@
 						$reason = errorMsg(2004, 'db signup_data');
 					$res = false;
 				}
+				*/
 			}
 		}
 		else
@@ -496,8 +499,9 @@
 			}
 			else
 			{
+				die (errorMsgBlock(2001, $login, 'askSalt'));
 				// Check if this is not an unconfirmed account
-				$query = "SELECT GamePassword, Language FROM signup_data WHERE login='$login'";
+				/*$query = "SELECT GamePassword, Language FROM signup_data WHERE login='$login'";
 				$result = mysqli_query($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 				if (mysqli_num_rows($result) == 0)
@@ -524,7 +528,7 @@
 						setMsgLanguage(array_keys($languages));
 					}
 					die (errorMsgBlock(2003));
-				}
+				}*/
 			}
 		}
 		else

@@ -271,7 +271,7 @@ void	CFlareModel::traverseRender()
 		float depthRangeNear, depthRangeFar;
 		drv->getDepthRange(depthRangeNear, depthRangeFar);
 		z = (depthRangeFar - depthRangeNear) * z + depthRangeNear;
-		if (!v.size() || z > v[0]) // test against z-buffer
+		if (v.empty() || z > v[0]) // test against z-buffer
 		{
 			visibilityRatio = 0.f;
 		}

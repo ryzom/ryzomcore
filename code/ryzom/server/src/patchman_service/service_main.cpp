@@ -36,8 +36,10 @@
 #include "patchman_tester.h"
 
 #ifdef NL_OS_WINDOWS
-#       define NOMINMAX
-#       include <windows.h>
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
 #endif // NL_OS_WINDOWS
 
 

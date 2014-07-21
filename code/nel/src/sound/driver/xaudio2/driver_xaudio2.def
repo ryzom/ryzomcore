@@ -1,4 +1,6 @@
-EXPORTS NLSOUND_createISoundDriverInstance
-EXPORTS NLSOUND_interfaceVersion
-EXPORTS NLSOUND_outputProfile
-EXPORTS NLSOUND_getDriverType
+LIBRARY nel_drv_xaudio2_win_r
+EXPORTS
+	NLSOUND_createISoundDriverInstance
+	NLSOUND_interfaceVersion
+	NLSOUND_outputProfile
+	NLSOUND_getDriverType
