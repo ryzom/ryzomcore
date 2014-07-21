@@ -62,10 +62,12 @@ public:
 	UXTEditorPvt()
 	{
 		t = new QTableWidget();
+		loadedFromWK = false;
 	}
 
 	QTableWidget *t;
 	std::vector< STRING_MANAGER::TStringInfo > infos;
+	bool loadedFromWK;
 };
 
 
@@ -92,7 +94,7 @@ void UXTEditor::open( QString filename )
 	QString lang = getLang( filename );
 	
 	infos.clear();
-	STRING_MANAGER::loadStringFile( filename.toUtf8().constData(), infos, true );
+	STRING_MANAGER::loadStringFile( filename.toUtf8().constData(), infos, false );
 
 	if( d_ptr->infos.size() == 0 )
 	{
@@ -113,6 +115,8 @@ void UXTEditor::open( QString filename )
 		STRING_MANAGER::loadStringFile( fn.toUtf8().constData(), infos, true );
 		if( d_ptr->infos.size() == 0 )
 			return;
+
+		d_ptr->loadedFromWK = true;
 	}
 
 	blockTableSignals( true );
@@ -168,8 +172,25 @@ void UXTEditor::saveAs( QString filename )
 	std::vector< STRING_MANAGER::TStringInfo >::const_iterator itr = d_ptr->infos.begin();
 	while( itr != d_ptr->infos.end() )
 	{
+		uint64 hash = 0;
+
+		// If text2 is not empty we can assume the string was translated, so we store with the correct hash
+		// If text2 is empty, it wasn't translated so we can just use the old hash.
+		// Additionally, if the strings were loaded from the wk.uxt file, we use a hash of 0 so we know it was not translated
+		if( itr->Text2.empty() )
+		{
+			if( d_ptr->loadedFromWK )
+				hash = 0;
+			else
+				hash = itr->HashValue;
+		}
+		else	
+		{
+			hash = NLMISC::CI18N::makeHash( itr->Text2 );		
+		}
+
 		QString hashLine = "// HASH_VALUE ";
-		hashLine += QString( NLMISC::CI18N::hashToString( itr->HashValue ).c_str() ).toUpper();
+		hashLine += QString( NLMISC::CI18N::hashToString( hash ).c_str() ).toUpper();
 		hashLine += "\r\n";
 		
 		QString idxLine = "// INDEX ";
@@ -181,7 +202,12 @@ void UXTEditor::saveAs( QString filename )
 		trLine += itr->Identifier.c_str();
 		trLine += "\t";		
 		trLine += "[";
-		trLine += itr->Text.toUtf8().c_str();
+		
+		if( itr->Text2.empty() )
+			trLine += itr->Text.toUtf8().c_str();
+		else
+			trLine += itr->Text2.toUtf8().c_str();
+
 		trLine += "]";
 		trLine += "\r\n";
 
@@ -282,7 +308,7 @@ void UXTEditor::onCellChanged( int row, int column )
 		info.Identifier = item->text().toUtf8().constData();
 	else
 	if( column == 1 )
-		info.Text = item->text().toUtf8().constData();
+		info.Text2 = item->text().toUtf8().constData();
 
 	setWindowModified( true );
 }
