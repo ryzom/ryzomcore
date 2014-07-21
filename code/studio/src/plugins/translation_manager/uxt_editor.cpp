@@ -112,6 +112,9 @@ void UXTEditor::open( QString filename )
 		// The work file cannot be found, cannot proceed
 		if( filename.endsWith( "wk.uxt" ) )
 		{
+			QMessageBox::critical( this,
+									tr( "Error opening file.." ),
+									tr( "There was an error opening wk.uxt" ) );
 			return;
 		}
 
@@ -125,7 +128,12 @@ void UXTEditor::open( QString filename )
 		// The work file cannot be found, cannot proceed
 		STRING_MANAGER::loadStringFile( fn.toUtf8().constData(), infos, true );
 		if( d_ptr->infos.size() == 0 )
+		{
+			QMessageBox::critical( this,
+									tr( "Error opening Uxt file" ),
+									tr( "Neither the specified file nor wk.uxt could be opened." ) );
 			return;
+		}
 
 		d_ptr->loadedFromWK = true;
 	}
