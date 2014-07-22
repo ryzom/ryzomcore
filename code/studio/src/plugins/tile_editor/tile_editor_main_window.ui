@@ -309,7 +309,7 @@
            <string/>
           </property>
           <property name="icon">
-           <iconset resource="../../../../tile_edit_qt/tile_edit_qt.qrc">
+           <iconset>
             <normaloff>:/newPrefix/reset.png</normaloff>:/newPrefix/reset.png</iconset>
           </property>
          </widget>
@@ -789,7 +789,7 @@
  </widget>
  <resources>
   <include location="tile_editor.qrc"/>
-  <include location="../../../../tile_edit_qt/tile_edit_qt.qrc"/>
+  <include location="tile_editor.qrc"/>
  </resources>
  <connections/>
 </ui>
