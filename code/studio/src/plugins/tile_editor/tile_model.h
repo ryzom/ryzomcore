@@ -87,6 +87,8 @@ public:
 
 	static TTileZoomFactor CurrentZoomFactor;
 
+	bool hasTileSet( const QString &name );
+
 public Q_SLOTS:
 	void selectFilenameDisplay(bool selected);
 	void selectIndexDisplay(bool selected);	

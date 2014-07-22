@@ -67,7 +67,7 @@ public:
 	QVariant data(int column, int role) const;
 	int columnCount() const;
 
-	const QString &getTileSetName();
+	const QString &getTileSetName(){ return m_tileSetName; }
 private:
 	QString m_tileSetName;
 };

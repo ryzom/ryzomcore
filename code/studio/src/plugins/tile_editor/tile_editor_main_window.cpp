@@ -226,15 +226,13 @@ void TileEditorMainWindow::onTileSetAdd()
     QString text = QInputDialog::getText(this, tr("Add Tile Set"), tr("Enter Tile Set name:"), QLineEdit::Normal, "", &ok);
     if (ok && !text.isEmpty())
 	{
-		//if (ui.tileSetListWidget->findItems(text, Qt::MatchExactly).count() > 0)
-		//{
-		//	QMessageBox::information( this, tr("Error Adding Tile Set"), tr("This name already exists") );
-		//}
-		//else
-		//{
-
-		//QModelIndex index = m_ui->tileSetLV->selectionModel()->currentIndex();
 		TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
+		
+		if( model->hasTileSet( text ) )
+		{
+			QMessageBox::information( this, tr("Error Adding Tile Set"), tr("This name already exists") );
+			return;
+		}
 
 		//if(index.isValid())
 		//{

@@ -219,6 +219,24 @@ uint32 TileModel::getTileTypeSize(TileModel::TNodeTileType type)
 	return 0;
 }
 
+bool TileModel::hasTileSet( const QString &name )
+{
+	for( int i = 0; i < rowCount(); i++ )
+	{
+		QModelIndex idx = index( i, 0 );
+		if( !idx.isValid() )
+		{
+			continue;
+		}
+
+		TileSetNode *n = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
+		if( n->getTileSetName() == name )
+			return true;
+	}
+
+	return false;
+}
+
 void TileModel::selectFilenameDisplay(bool selected)
 {
 	m_fileDisplay = selected;
