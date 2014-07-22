@@ -35,6 +35,7 @@ Node::Node(const QVector<QVariant> &data, Node *parent)
 Node::~Node()
 {
 	qDeleteAll(m_childItems);
+	m_childItems.clear();
 }
 
 void Node::appendChild(Node *item)
@@ -164,6 +165,7 @@ TileSetNode::TileSetNode(QString tileSetName, Node *parent) : m_tileSetName(tile
 TileSetNode::~TileSetNode()
 {
 	qDeleteAll(m_childItems);
+	m_childItems.clear();
 }
 
 QVariant TileSetNode::data(int column, int role) const
@@ -191,6 +193,7 @@ TileTypeNode::TileTypeNode(TileModel::TNodeTileType type, Node *parent) : m_node
 TileTypeNode::~TileTypeNode()
 {
 	qDeleteAll(m_childItems);
+	m_childItems.clear();
 }
 
 QVariant TileTypeNode::data(int column, int role) const
