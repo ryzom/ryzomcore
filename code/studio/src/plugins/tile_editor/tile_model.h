@@ -80,6 +80,8 @@ public:
 	void appendRow(const QList<Node*> &items);
 	void appendRow(Node *item);
 
+	bool removeRows( int row, int count, const QModelIndex &parent = QModelIndex() );
+
 	TileSetNode *createTileSetNode(QString tileSetName);
 
 	static const char *getTileTypeName(TNodeTileType type);

@@ -88,6 +88,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	m_ui->tileSetLV->setModel(m_model);
 	//m_ui->tileSetLV->setRootIndex(m_model->index(0,0));
 	connect(m_ui->tileSetAddTB, SIGNAL(clicked()), this, SLOT(onTileSetAdd()));
+	connect(m_ui->tileSetDeleteTB, SIGNAL(clicked()), this, SLOT(onTileSetDelete()));
 	connect(m_ui->tileSetLV->selectionModel(),
              SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
              this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
@@ -259,6 +260,18 @@ void TileEditorMainWindow::onTileSetAdd()
 		uint32 rows = model->rowCount();
 		m_ui->tileSetLV->setCurrentIndex(model->index(rows-1, 0));
 	}
+}
+
+void TileEditorMainWindow::onTileSetDelete()
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+		return;
+
+	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
+	bool ok = model->removeRow( idx.row() );
+	
+	//m_ui->tileSetLV->reset();
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)

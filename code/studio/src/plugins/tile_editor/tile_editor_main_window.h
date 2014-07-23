@@ -48,6 +48,7 @@ public Q_SLOTS:
 	void onActionReplaceImage(bool triggered);
 	void onActionDeleteImage(bool triggered);
 	void onTileSetAdd();
+	void onTileSetDelete();
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 

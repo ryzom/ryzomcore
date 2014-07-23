@@ -140,6 +140,21 @@ void TileModel::appendRow(Node *item)
 	rootItem->appendRow(item);
 }
 
+bool TileModel::removeRows( int row, int count, const QModelIndex &parent )
+{
+	int c = rootItem->childCount();
+	if( row + count > c )
+		return false;
+
+	beginRemoveRows( QModelIndex(), row, row + count - 1 );
+
+	bool ok = rootItem->removeChildren( row, count );
+	
+	endRemoveRows();
+
+	return ok;
+}
+
 TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 {
 	// Create the new tile set.
