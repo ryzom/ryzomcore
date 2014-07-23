@@ -516,7 +516,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QToolButton" name="toolButton_6">
+           <widget class="QToolButton" name="tileSetEditTB">
             <property name="text">
              <string>...</string>
             </property>

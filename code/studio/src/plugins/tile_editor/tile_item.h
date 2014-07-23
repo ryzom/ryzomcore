@@ -68,6 +68,8 @@ public:
 	int columnCount() const;
 
 	const QString &getTileSetName(){ return m_tileSetName; }
+	void setTileSetName( const QString &name ){ m_tileSetName = name; }
+
 private:
 	QString m_tileSetName;
 };

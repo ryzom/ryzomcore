@@ -89,6 +89,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	//m_ui->tileSetLV->setRootIndex(m_model->index(0,0));
 	connect(m_ui->tileSetAddTB, SIGNAL(clicked()), this, SLOT(onTileSetAdd()));
 	connect(m_ui->tileSetDeleteTB, SIGNAL(clicked()), this, SLOT(onTileSetDelete()));
+	connect(m_ui->tileSetEditTB, SIGNAL(clicked()), this, SLOT(onTileSetEdit()));
 	connect(m_ui->tileSetLV->selectionModel(),
              SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
              this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
@@ -272,6 +273,40 @@ void TileEditorMainWindow::onTileSetDelete()
 	bool ok = model->removeRow( idx.row() );
 	
 	//m_ui->tileSetLV->reset();
+}
+
+void TileEditorMainWindow::onTileSetEdit()
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+		return;
+
+	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
+	QString name = node->getTileSetName();
+
+	bool ok = false;
+
+	QString newName = QInputDialog::getText( this,
+										tr( "Edit tileset" ),
+										tr( "Enter tileset name" ),
+										QLineEdit::Normal,
+										name,
+										&ok );
+
+	if( !ok )
+		return;
+
+	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
+	if( model->hasTileSet( newName ) )
+	{
+		QMessageBox::information( this,
+									tr("Tileset already exists"),
+									tr("A tileset with that name already exists!") );
+		return;
+	}
+
+	node->setTileSetName( newName );
+	m_ui->tileSetLV->reset();
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
