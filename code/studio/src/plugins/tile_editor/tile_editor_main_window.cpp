@@ -96,6 +96,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	connect(m_ui->landAddTB, SIGNAL(clicked()), this, SLOT(onLandAdd()));
 	connect(m_ui->landRemoveTB, SIGNAL(clicked()), this, SLOT(onLandRemove()));
+	connect(m_ui->landEditTB, SIGNAL(clicked()), this, SLOT(onLandEdit()));
 
 	connect(m_ui->tileSetLV->selectionModel(),
              SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
@@ -367,6 +368,27 @@ void TileEditorMainWindow::onLandRemove()
 		return;
 
 	delete item;
+}
+
+void TileEditorMainWindow::onLandEdit()
+{
+	QListWidgetItem *item = m_ui->landLW->currentItem();
+	if( item == NULL )
+		return;
+
+	QString name = item->text();
+
+	QString newName = QInputDialog::getText( this,
+												tr( "Editing land" ),
+												tr( "Please specify the new name of the selected land" ),
+												QLineEdit::Normal,
+												name );
+
+	if( newName.isEmpty() )
+		return;
+	if( newName == name )
+		return;
+	item->setText( newName );
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
