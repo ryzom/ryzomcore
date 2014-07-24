@@ -96,6 +96,9 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->landEditTB, SIGNAL(clicked()), this, SLOT(onLandEdit()));
 	connect(m_ui->landLW, SIGNAL(currentRowChanged(int)), this, SLOT(onLandRowChanged(int)));
 
+	connect(m_ui->chooseVegetPushButton, SIGNAL(clicked()), this, SLOT(onChooseVegetation()));
+	connect(m_ui->resetVegetPushButton, SIGNAL(clicked()), this, SLOT(onResetVegetation()));
+
 	// 128x128 List View
 	//m_ui->listView128->setItemDelegate(m_tileItemDelegate);
 	m_ui->listView128->addAction(m_ui->actionAddTile);
@@ -421,6 +424,8 @@ void TileEditorMainWindow::onLandEdit()
 
 void TileEditorMainWindow::onLandRowChanged( int row )
 {
+	m_ui->chooseVegetPushButton->setText( "..." );
+
 	if( row == -1 )
 	{
 		disconnect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
@@ -454,6 +459,47 @@ void TileEditorMainWindow::onLandRowChanged( int row )
 	}
 
 	m_ui->tileSetLV->reset();
+}
+
+void TileEditorMainWindow::onChooseVegetation()
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+	{
+		QMessageBox::information( this,
+									tr("Choosing a vegetation set"),
+									tr("You need to select a tileset before choosing a vegetation set!") );
+		return;
+	}
+
+	QString vegetSet = QFileDialog::getOpenFileName( this,
+														tr( "Choose vegetation set" ),
+														"",
+														tr( "Nel vegetset files (*.vegetset)" ) );
+
+	if( vegetSet.isEmpty() )
+		return;
+
+	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
+	node->setVegetSet( vegetSet );
+
+	m_ui->chooseVegetPushButton->setText( vegetSet );
+}
+
+void TileEditorMainWindow::onResetVegetation()
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+	{
+		QMessageBox::information( this,
+									tr("Resetting a vegetation set"),
+									tr("You need to select a tileset before resetting a vegetation set!") );
+		return;
+	}
+	m_ui->chooseVegetPushButton->setText( "..." );
+
+	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
+	node->setVegetSet( "" );
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
@@ -492,6 +538,28 @@ void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, cons
 	m_ui->listViewTransition->setCurrentIndex(m_ui->listViewTransition->model()->index(0, 0, m_ui->listViewTransition->rootIndex()));
 	m_ui->listViewDisplacement->setRootIndex(tileDispIdx);
 	m_ui->listViewDisplacement->setCurrentIndex(m_ui->listViewDisplacement->model()->index(0, 0, m_ui->listViewDisplacement->rootIndex()));
+
+	TileSetNode *oldNode = NULL;
+	TileSetNode *newNode = NULL;
+
+	if( oldIndex.isValid() )
+		oldNode = reinterpret_cast< TileSetNode* >( oldIndex.internalPointer() );
+	if( newIndex.isValid() )
+		newNode = reinterpret_cast< TileSetNode* >( newIndex.internalPointer() );
+
+	if( newNode != NULL )
+	{
+		QString vegetSet = newNode->vegetSet();
+		
+		if( !vegetSet.isEmpty() )
+			m_ui->chooseVegetPushButton->setText( vegetSet );
+		else
+			m_ui->chooseVegetPushButton->setText( "..." );
+	}
+	else
+	{
+		m_ui->chooseVegetPushButton->setText( "..." );
+	}
 
 	//nlinfo("number of rows in displacement: %d", tileDispIdx.model()->rowCount(tileDispIdx));
 

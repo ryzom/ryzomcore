@@ -59,6 +59,9 @@ public Q_SLOTS:
 	void onLandEdit();
 	void onLandRowChanged( int row );
 
+	void onResetVegetation();
+	void onChooseVegetation();
+
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 

@@ -72,8 +72,12 @@ public:
 	const QString &getTileSetName(){ return m_tileSetName; }
 	void setTileSetName( const QString &name ){ m_tileSetName = name; }
 
+	void setVegetSet( const QString &s ){ m_vegetSet = s; }
+	QString vegetSet() const{ return m_vegetSet; }
+
 private:
 	QString m_tileSetName;
+	QString m_vegetSet;
 };
 
 class TileTypeNode : public Node
