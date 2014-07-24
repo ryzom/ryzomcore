@@ -94,6 +94,8 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->tileSetUpTB, SIGNAL(clicked()), this, SLOT(onTileSetUp()));
 	connect(m_ui->tileSetDownTB, SIGNAL(clicked()), this, SLOT(onTileSetDown()));
 
+	connect(m_ui->landAddTB, SIGNAL(clicked()), this, SLOT(onLandAdd()));
+
 	connect(m_ui->tileSetLV->selectionModel(),
              SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
              this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
@@ -331,6 +333,30 @@ void TileEditorMainWindow::onTileSetDown()
 
 	m_ui->tileSetLV->reset();
 	m_ui->tileSetLV->setCurrentIndex( model->index( r + 1, 0 ) );
+}
+
+void TileEditorMainWindow::onLandAdd()
+{
+	QString name = QInputDialog::getText( this,
+											tr("Adding new land"),
+											tr("Please specify the new land's name") );
+
+	if( name.isEmpty() )
+		return;
+
+	for( int i = 0; i < m_ui->landLW->count(); i++ )
+	{
+		QListWidgetItem *item = m_ui->landLW->item( i );
+		if( item->text() == name )
+		{
+			QMessageBox::information( this,
+										tr( "Error adding new land" ),
+										tr( "A land with that name already exists." ) );
+			return;
+		}
+	}
+
+	m_ui->landLW->addItem( name );
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)

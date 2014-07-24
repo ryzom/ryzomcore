@@ -47,11 +47,15 @@ public Q_SLOTS:
 	void onActionDeleteTile(bool triggered);
 	void onActionReplaceImage(bool triggered);
 	void onActionDeleteImage(bool triggered);
+	
 	void onTileSetAdd();
 	void onTileSetDelete();
 	void onTileSetEdit();
 	void onTileSetUp();
 	void onTileSetDown();
+	
+	void onLandAdd();
+
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 
