@@ -445,6 +445,12 @@ void TileEditorMainWindow::onLandRowChanged( int row )
 
 		connect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
 			this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
+
+		if( m_ui->tileSetLV->model()->rowCount() != 0 )
+		{
+			QModelIndex idx = m_ui->tileSetLV->model()->index( 0, 0 );
+			m_ui->tileSetLV->setCurrentIndex( idx );
+		}
 	}
 
 	m_ui->tileSetLV->reset();
