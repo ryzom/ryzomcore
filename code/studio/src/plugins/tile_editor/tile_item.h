@@ -53,6 +53,8 @@ public:
 	void appendRow(const QList<Node*> &items);
 	void appendRow(Node *item);
 
+	void swapRows( int a, int b );
+
 protected:
 	QList<Node*> m_childItems;
 	QVector<QVariant> m_itemData;

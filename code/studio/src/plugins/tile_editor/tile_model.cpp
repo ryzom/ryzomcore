@@ -155,6 +155,11 @@ bool TileModel::removeRows( int row, int count, const QModelIndex &parent )
 	return ok;
 }
 
+void TileModel::swapRows( int a, int b )
+{
+	rootItem->swapRows( a, b );
+}
+
 TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 {
 	// Create the new tile set.

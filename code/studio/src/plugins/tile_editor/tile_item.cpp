@@ -155,6 +155,13 @@ void Node::appendRow(Node *item)
 	m_childItems.append(item);
 }
 
+void Node::swapRows( int a, int b )
+{
+	Node *temp = m_childItems[ a ];
+	m_childItems[ a ] = m_childItems[ b ];
+	m_childItems[ b ] = temp;
+}
+
 ///////////////////////////////////////////////////
 
 TileSetNode::TileSetNode(QString tileSetName, Node *parent) : m_tileSetName(tileSetName)

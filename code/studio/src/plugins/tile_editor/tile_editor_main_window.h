@@ -50,6 +50,8 @@ public Q_SLOTS:
 	void onTileSetAdd();
 	void onTileSetDelete();
 	void onTileSetEdit();
+	void onTileSetUp();
+	void onTileSetDown();
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 

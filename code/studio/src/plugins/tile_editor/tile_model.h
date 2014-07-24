@@ -82,6 +82,8 @@ public:
 
 	bool removeRows( int row, int count, const QModelIndex &parent = QModelIndex() );
 
+	void swapRows( int a, int b );
+
 	TileSetNode *createTileSetNode(QString tileSetName);
 
 	static const char *getTileTypeName(TNodeTileType type);

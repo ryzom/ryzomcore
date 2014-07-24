@@ -87,9 +87,13 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	// Set up the tile set list view.
 	m_ui->tileSetLV->setModel(m_model);
 	//m_ui->tileSetLV->setRootIndex(m_model->index(0,0));
+
 	connect(m_ui->tileSetAddTB, SIGNAL(clicked()), this, SLOT(onTileSetAdd()));
 	connect(m_ui->tileSetDeleteTB, SIGNAL(clicked()), this, SLOT(onTileSetDelete()));
 	connect(m_ui->tileSetEditTB, SIGNAL(clicked()), this, SLOT(onTileSetEdit()));
+	connect(m_ui->tileSetUpTB, SIGNAL(clicked()), this, SLOT(onTileSetUp()));
+	connect(m_ui->tileSetDownTB, SIGNAL(clicked()), this, SLOT(onTileSetDown()));
+
 	connect(m_ui->tileSetLV->selectionModel(),
              SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
              this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
@@ -236,23 +240,6 @@ void TileEditorMainWindow::onTileSetAdd()
 			return;
 		}
 
-		//if(index.isValid())
-		//{
-		//	if(!model->insertRow(index.row()+1, index.parent()))
-		//		return;
-
-		//	//updateActions()
-
-		//	for(int column=0; column<model->columnCount(index.parent()); column++)
-		//	{
-		//		QModelIndex child = model->index(index.row()+1, column, index.parent());
-		//		model->setData(child, QVariant(text), Qt::EditRole);
-		//	}
-		//}
-		//else
-		//{
-		
-		
 		// Create and append the new tile set to the model.
 		TileSetNode *tileSet = model->createTileSetNode(text);
 		
@@ -271,8 +258,6 @@ void TileEditorMainWindow::onTileSetDelete()
 
 	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
 	bool ok = model->removeRow( idx.row() );
-	
-	//m_ui->tileSetLV->reset();
 }
 
 void TileEditorMainWindow::onTileSetEdit()
@@ -307,6 +292,45 @@ void TileEditorMainWindow::onTileSetEdit()
 
 	node->setTileSetName( newName );
 	m_ui->tileSetLV->reset();
+}
+
+void TileEditorMainWindow::onTileSetUp()
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+		return;
+
+	if( idx.row() == 0 )
+		return;
+
+	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
+	if( model->rowCount() < 2 )
+		return;
+
+	int r = idx.row();
+	model->swapRows( r, r - 1 );
+
+	m_ui->tileSetLV->reset();
+	m_ui->tileSetLV->setCurrentIndex( model->index( r - 1, 0 ) );
+}
+
+void TileEditorMainWindow::onTileSetDown()
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+		return;
+
+	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
+	if( model->rowCount() < idx.row() )
+		return;
+	if( model->rowCount() < 2 )
+		return;
+	
+	int r = idx.row();
+	model->swapRows( r, r + 1 );
+
+	m_ui->tileSetLV->reset();
+	m_ui->tileSetLV->setCurrentIndex( model->index( r + 1, 0 ) );
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
