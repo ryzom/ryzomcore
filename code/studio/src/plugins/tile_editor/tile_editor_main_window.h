@@ -62,6 +62,8 @@ public Q_SLOTS:
 	void onResetVegetation();
 	void onChooseVegetation();
 
+	void onChooseTexturePath();
+
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 
@@ -84,6 +86,8 @@ private:
 	TileItemDelegate *m_tileItemDelegate;
 
 	QList< TileModel* > m_tileModels;
+
+	QString m_texturePath;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H

@@ -541,24 +541,6 @@
           </item>
          </layout>
         </item>
-        <item row="3" column="0" colspan="2">
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QPushButton" name="tileBankTexturePathPB">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="tileBankTexturePathTB">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
         <item row="2" column="0" colspan="2">
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -568,6 +550,17 @@
         </item>
         <item row="0" column="0">
          <widget class="QListView" name="tileSetLV"/>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QPushButton" name="tileBankTexturePathPB">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>

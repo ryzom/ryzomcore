@@ -99,6 +99,8 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->chooseVegetPushButton, SIGNAL(clicked()), this, SLOT(onChooseVegetation()));
 	connect(m_ui->resetVegetPushButton, SIGNAL(clicked()), this, SLOT(onResetVegetation()));
 
+	connect(m_ui->tileBankTexturePathPB, SIGNAL(clicked()), this, SLOT(onChooseTexturePath()));
+
 	// 128x128 List View
 	//m_ui->listView128->setItemDelegate(m_tileItemDelegate);
 	m_ui->listView128->addAction(m_ui->actionAddTile);
@@ -500,6 +502,27 @@ void TileEditorMainWindow::onResetVegetation()
 
 	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
 	node->setVegetSet( "" );
+}
+
+void TileEditorMainWindow::onChooseTexturePath()
+{
+	QString path = QFileDialog::getExistingDirectory( this,
+														tr("Choose tilebank absolute texture path "),
+														"" );
+
+	if( path.isEmpty() )
+		return;
+
+	int reply = QMessageBox::question( this,
+										tr("tilebank texture path"),
+										tr("Are you sure you want to make '%1' the tilebank absolute texture path?").arg( path ),
+										QMessageBox::Yes | QMessageBox::Cancel );
+
+	if( reply != QMessageBox::Yes )
+		return;
+
+	m_texturePath = path;
+	m_ui->tileBankTexturePathPB->setText( path );
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
