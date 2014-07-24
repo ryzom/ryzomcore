@@ -96,10 +96,6 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->landEditTB, SIGNAL(clicked()), this, SLOT(onLandEdit()));
 	connect(m_ui->landLW, SIGNAL(currentRowChanged(int)), this, SLOT(onLandRowChanged(int)));
 
-	connect(m_ui->tileSetLV->selectionModel(),
-             SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
-             this, SLOT(changeActiveTileSet(const QModelIndex &, const QModelIndex &)));
-
 	// 128x128 List View
 	//m_ui->listView128->setItemDelegate(m_tileItemDelegate);
 	m_ui->listView128->addAction(m_ui->actionAddTile);
@@ -427,6 +423,9 @@ void TileEditorMainWindow::onLandRowChanged( int row )
 {
 	if( row == -1 )
 	{
+		disconnect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
+			this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
+
 		m_ui->tileSetLV->setModel( NULL );
 		m_ui->listView128->setModel( NULL );
 		m_ui->listView256->setModel( NULL );
@@ -435,11 +434,17 @@ void TileEditorMainWindow::onLandRowChanged( int row )
 	}
 	else
 	{
+		//disconnect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
+		//	this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
+
 		m_ui->tileSetLV->setModel( m_tileModels[ row ] );
 		m_ui->listView128->setModel( m_tileModels[ row ] );
 		m_ui->listView256->setModel( m_tileModels[ row ] );
 		m_ui->listViewTransition->setModel( m_tileModels[ row ] );
 		m_ui->listViewDisplacement->setModel( m_tileModels[ row ] );
+
+		connect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
+			this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
 	}
 
 	m_ui->tileSetLV->reset();
