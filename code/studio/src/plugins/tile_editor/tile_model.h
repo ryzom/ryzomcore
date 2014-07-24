@@ -64,8 +64,7 @@ public:
 	static const int TILE_128_BASE_SIZE = 128;
 	static const int TILE_256_BASE_SIZE = 256;
 
-
-	TileModel(const QStringList &headers, QObject *parent);
+	TileModel(const QStringList &headers, QObject *parent = NULL);
 	~TileModel();
 
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;

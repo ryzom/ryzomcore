@@ -57,12 +57,15 @@ public Q_SLOTS:
 	void onLandAdd();
 	void onLandRemove();
 	void onLandEdit();
+	void onLandRowChanged( int row );
 
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 
 private:
 	void onActionAddTile(int tabId);
+
+	TileModel* createTileModel();
 
 	Ui::TileEditorMainWindow *m_ui;
 	QUndoStack *m_undoStack;
@@ -75,8 +78,9 @@ private:
 	QActionGroup *m_zoomActionGroup;
 	QSignalMapper *m_zoomSignalMapper;
 
-	TileModel *m_model;
 	TileItemDelegate *m_tileItemDelegate;
+
+	QList< TileModel* > m_tileModels;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H

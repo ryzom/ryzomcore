@@ -79,13 +79,10 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	core->menuManager()->menuBar()->addMenu(m_tileEditorMenu);
 
 	// Set up the list views.
-	QStringList headers;
-	headers << "Tile Set";
-	m_model = new TileModel(headers, this);
 	m_tileItemDelegate = new TileItemDelegate();
 
 	// Set up the tile set list view.
-	m_ui->tileSetLV->setModel(m_model);
+	//m_ui->tileSetLV->setModel(m_model);
 	//m_ui->tileSetLV->setRootIndex(m_model->index(0,0));
 
 	connect(m_ui->tileSetAddTB, SIGNAL(clicked()), this, SLOT(onTileSetAdd()));
@@ -97,6 +94,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->landAddTB, SIGNAL(clicked()), this, SLOT(onLandAdd()));
 	connect(m_ui->landRemoveTB, SIGNAL(clicked()), this, SLOT(onLandRemove()));
 	connect(m_ui->landEditTB, SIGNAL(clicked()), this, SLOT(onLandEdit()));
+	connect(m_ui->landLW, SIGNAL(currentRowChanged(int)), this, SLOT(onLandRowChanged(int)));
 
 	connect(m_ui->tileSetLV->selectionModel(),
              SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
@@ -104,7 +102,6 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// 128x128 List View
 	//m_ui->listView128->setItemDelegate(m_tileItemDelegate);
-	m_ui->listView128->setModel(m_model);
 	m_ui->listView128->addAction(m_ui->actionAddTile);
 	m_ui->listView128->addAction(m_ui->actionDeleteTile);
 	m_ui->listView128->addAction(m_ui->actionReplaceImage);
@@ -112,7 +109,6 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// 256x256 List View
 	//m_ui->listView256->setItemDelegate(m_tileItemDelegate);
-	m_ui->listView256->setModel(m_model);
 	m_ui->listView256->addAction(m_ui->actionAddTile);
 	m_ui->listView256->addAction(m_ui->actionDeleteTile);
 	m_ui->listView256->addAction(m_ui->actionReplaceImage);
@@ -120,13 +116,11 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// Transition List View
 	//m_ui->listViewTransition->setItemDelegate(m_tileItemDelegate);
-	m_ui->listViewTransition->setModel(m_model);
 	m_ui->listViewTransition->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewTransition->addAction(m_ui->actionDeleteImage);
 
 	// Displacement List View
 	//m_ui->listViewDisplacement->setItemDelegate(m_tileItemDelegate);
-	m_ui->listViewDisplacement->setModel(m_model);
 	m_ui->listViewDisplacement->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewDisplacement->addAction(m_ui->actionDeleteImage);
 
@@ -136,9 +130,6 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->actionDeleteTile, SIGNAL(triggered(bool)), this, SLOT(onActionDeleteTile(bool)));
 	connect(m_ui->actionReplaceImage, SIGNAL(triggered(bool)), this, SLOT(onActionReplaceImage(bool)));
 	connect(m_ui->actionDeleteImage, SIGNAL(triggered(bool)), this, SLOT(onActioneleteImage(bool)));
-
-	connect(m_ui->actionTileDisplayFilename, SIGNAL(toggled(bool)), m_model, SLOT(selectFilenameDisplay(bool)));
-	connect(m_ui->actionTileDisplayIndex, SIGNAL(toggled(bool)), m_model, SLOT(selectIndexDisplay(bool)));
 
 	//connect(m_ui->tileViewTabWidget, SIGNAL(currentChanged(int)), m_tileItemDelegate, SLOT(currentTab(int)));
 
@@ -164,6 +155,9 @@ TileEditorMainWindow::~TileEditorMainWindow()
 	delete m_zoomMenu;
 	delete m_zoomActionGroup;
 	delete m_zoomSignalMapper;
+
+	qDeleteAll( m_tileModels );
+	m_tileModels.clear();
 }
 
 void TileEditorMainWindow::onZoomFactor(int level)
@@ -232,6 +226,14 @@ void TileEditorMainWindow::onActionDeleteImage(bool triggered)
 
 void TileEditorMainWindow::onTileSetAdd()
 {
+	if( m_ui->landLW->count() == 0 )
+	{
+		QMessageBox::information( this,
+									tr( "Error adding tile set" ),
+									tr( "You need to add a land before adding a tileset!" ) );
+		return;
+	}
+
 	bool ok;
     QString text = QInputDialog::getText(this, tr("Add Tile Set"), tr("Enter Tile Set name:"), QLineEdit::Normal, "", &ok);
     if (ok && !text.isEmpty())
@@ -258,6 +260,14 @@ void TileEditorMainWindow::onTileSetDelete()
 {
 	QModelIndex idx = m_ui->tileSetLV->currentIndex();
 	if( !idx.isValid() )
+		return;
+
+	int reply = QMessageBox::question( this,
+										tr( "Removing tile set" ),
+										tr( "Are you sure you want to remove this tile set?" ),
+										QMessageBox::Yes | QMessageBox::Cancel );
+
+	if( reply != QMessageBox::Yes )
 		return;
 
 	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
@@ -359,6 +369,13 @@ void TileEditorMainWindow::onLandAdd()
 	}
 
 	m_ui->landLW->addItem( name );
+
+	TileModel *m = createTileModel();
+
+	m_tileModels.push_back( m );
+
+	if( m_tileModels.count() == 1 )
+		m_ui->landLW->setCurrentRow( 0 );
 }
 
 void TileEditorMainWindow::onLandRemove()
@@ -366,6 +383,21 @@ void TileEditorMainWindow::onLandRemove()
 	QListWidgetItem *item = m_ui->landLW->currentItem();
 	if( item == NULL )
 		return;
+
+	int idx = m_ui->landLW->currentRow();
+
+	int reply = QMessageBox::question( this,
+										tr( "Removing land" ),
+										tr( "Are you sure you want to remove this land?" ),
+										QMessageBox::Yes | QMessageBox::Cancel );
+
+	if( reply != QMessageBox::Yes )
+		return;
+
+	QList< TileModel* >::iterator itr = m_tileModels.begin() + idx;
+	delete m_tileModels[ idx ];
+	m_tileModels[ idx ] = NULL;
+	m_tileModels.erase( itr );
 
 	delete item;
 }
@@ -391,11 +423,45 @@ void TileEditorMainWindow::onLandEdit()
 	item->setText( newName );
 }
 
+void TileEditorMainWindow::onLandRowChanged( int row )
+{
+	if( row == -1 )
+	{
+		m_ui->tileSetLV->setModel( NULL );
+		m_ui->listView128->setModel( NULL );
+		m_ui->listView256->setModel( NULL );
+		m_ui->listViewTransition->setModel( NULL );
+		m_ui->listViewDisplacement->setModel( NULL );
+	}
+	else
+	{
+		m_ui->tileSetLV->setModel( m_tileModels[ row ] );
+		m_ui->listView128->setModel( m_tileModels[ row ] );
+		m_ui->listView256->setModel( m_tileModels[ row ] );
+		m_ui->listViewTransition->setModel( m_tileModels[ row ] );
+		m_ui->listViewDisplacement->setModel( m_tileModels[ row ] );
+	}
+
+	m_ui->tileSetLV->reset();
+}
+
 void TileEditorMainWindow::onActionAddTile(int tabId)
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", "." , "Images (*.png);;All Files (*.*)", &selectedFilter, options);
+}
+
+TileModel* TileEditorMainWindow::createTileModel()
+{
+	QStringList headers;
+	headers << "Tile Set";
+	TileModel *m = new TileModel( headers );
+
+	connect( m_ui->actionTileDisplayFilename, SIGNAL( toggled( bool )), m, SLOT( selectFilenameDisplay( bool ) ) );
+	connect( m_ui->actionTileDisplayIndex, SIGNAL( toggled( bool )), m, SLOT( selectIndexDisplay( bool ) ) );
+
+	return m;
 }
 
 void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex)
