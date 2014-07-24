@@ -95,6 +95,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->tileSetDownTB, SIGNAL(clicked()), this, SLOT(onTileSetDown()));
 
 	connect(m_ui->landAddTB, SIGNAL(clicked()), this, SLOT(onLandAdd()));
+	connect(m_ui->landRemoveTB, SIGNAL(clicked()), this, SLOT(onLandRemove()));
 
 	connect(m_ui->tileSetLV->selectionModel(),
              SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
@@ -357,6 +358,15 @@ void TileEditorMainWindow::onLandAdd()
 	}
 
 	m_ui->landLW->addItem( name );
+}
+
+void TileEditorMainWindow::onLandRemove()
+{
+	QListWidgetItem *item = m_ui->landLW->currentItem();
+	if( item == NULL )
+		return;
+
+	delete item;
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)

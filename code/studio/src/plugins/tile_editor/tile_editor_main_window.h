@@ -55,6 +55,7 @@ public Q_SLOTS:
 	void onTileSetDown();
 	
 	void onLandAdd();
+	void onLandRemove();
 
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
