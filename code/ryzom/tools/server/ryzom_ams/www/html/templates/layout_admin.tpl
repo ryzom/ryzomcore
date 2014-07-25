@@ -10,7 +10,7 @@
         <li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=sgroup_list"><i class="icon-briefcase"></i><span class="hidden-tablet"> Support Groups</span></a></li>
         <li class="nav-header hidden-tablet">Actions</li>
 	<li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=plugins"><i class="icon-th-list"></i><span class="hidden-tablet"> Plugins</span></a></li>  
-       {if isset($hook_info)} {foreach from=$hook_info item=element}<li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=layout_plugin&&name={$element.menu_display}"><i class="icon-th-list"></i><span class="hidden-tablet"> {$element.menu_display}</span></a></li>{/foreach}{/if}
+       {if isset($hook_info)} {foreach from=$hook_info key=arrkey item=element}<li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=layout_plugin&&name={$arrkey}"><i class="icon-th-list"></i><span class="hidden-tablet"> {$element.menu_display}</span></a></li>{/foreach}{/if}
         <li style="margin-left: -2px;"><a class="ajax-link" href="index.php?page=syncing"><i class="icon-th-list"></i><span class="hidden-tablet"> Syncing</span></a></li>
         <li style="margin-left: -2px;"><a href="?page=logout"><i class="icon-off"></i><span class="hidden-tablet"> Logout </span></a></li>
 {/block}

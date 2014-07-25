@@ -1,8 +1,8 @@
- <?php
+<?php
 
 /**
  * API for loading and interacting with plugins
- *    contains getters and setters
+ *     contains getters and setters
  * 
  * @author shubham meena mentored by Matthew Lagoe 
  */
@@ -163,9 +163,8 @@ class Plugincache {
     
     /**
      * some more plugin function that requires during plugin operations
-     * 
      */
-      
+    
     /**
      * function to remove  a non empty directory
      * 
@@ -173,14 +172,14 @@ class Plugincache {
      * @return boolean 
      */
     public static function rrmdir( $dir ) {
-        $result=array_diff(scandir($dir),array('.','..'));
-        foreach($result as $item)
-        {
-			if(!@unlink($dir.'/'.$item))
-			Plugincache::rrmdir($dir.'/'.$item);
-        }
-        return rmdir($dir); 
-        } 
+        $result = array_diff( scandir( $dir ), array( '.', '..' ) );
+         foreach( $result as $item )
+         {
+            if ( !@unlink( $dir . '/' . $item ) )
+                 Plugincache :: rrmdir( $dir . '/' . $item );
+             } 
+        return rmdir( $dir );
+         } 
     
     /**
      * function to unzip the zipped files
@@ -247,20 +246,24 @@ class Plugincache {
          foreach( $ac_arr as $key => $value )
          {
             $plugin_path = Plugincache :: pluginInfoUsingId( $value['Id'], 'FileName' );
-             $pluginName = Plugincache :: pluginInfoUsingId( $value['Id'], 'Name' );
+             $template_path = json_decode( Plugincache :: pluginInfoUsingId( $value['Id'], 'Info' ) ) -> TemplatePath;
+             $plugin_name = explode( '/', $plugin_path )[4];
             
              // calling hooks in the $pluginName.php
-            include $plugin_path . '/' . strtolower( $pluginName ) . '.php';
+            include $plugin_path . '/' . $plugin_name . '.php';
              $arr = get_defined_functions();
             
              foreach( $arr['user'] as $key => $value )
              {
-                if ( stristr( $value, strtolower( $pluginName ) ) == true )
+                if ( stristr( $value, $plugin_name ) == true )
                      {
-                    $content['hook_info'][$pluginName] = call_user_func( $value );
+                    $content['hook_info'][$plugin_name] = call_user_func( $value );
                      } 
                 } 
-            } 
+            // path for the template
+            $content['hook_info'][$plugin_name]['TemplatePath'] = $template_path;
+             } 
+        
         return $content;
          } 
-    } 
+    }
