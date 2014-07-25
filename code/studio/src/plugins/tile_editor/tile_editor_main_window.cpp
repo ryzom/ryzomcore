@@ -554,8 +554,7 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 	TileSetNode *tsn = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
 
-	int tabIdx = m_ui->tileViewTabWidget->currentIndex();
-	Node *n = tsn->child( tabIdx );
+	Node *n = tsn->child( tabId );
 
 	QFileDialog::Options options;
 	QString selectedFilter;
@@ -571,11 +570,11 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 		c++;
 	}
 
-	QModelIndex rootIdx = model->index( tabIdx, 0, m_ui->tileSetLV->currentIndex());
+	QModelIndex rootIdx = model->index( tabId, 0, m_ui->tileSetLV->currentIndex());
 
 	QListView *lv = NULL;
 
-	switch( tabIdx )
+	switch( tabId )
 	{
 	case TAB_128: lv = m_ui->listView128; break;
 	case TAB_256: lv = m_ui->listView256; break;
