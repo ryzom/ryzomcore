@@ -69,6 +69,7 @@ private Q_SLOTS:
 
 private:
 	void onActionAddTile(int tabId);
+	void onActionDeleteTile(int tabId);
 	TileModel* createTileModel();
 
 	Ui::TileEditorMainWindow *m_ui;

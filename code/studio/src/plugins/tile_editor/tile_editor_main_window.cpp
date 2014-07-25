@@ -215,6 +215,7 @@ void TileEditorMainWindow::onActionAddTile(bool triggered)
 
 void TileEditorMainWindow::onActionDeleteTile(bool triggered)
 {
+	onActionDeleteTile(m_ui->tileViewTabWidget->currentIndex());
 }
 
 void TileEditorMainWindow::onActionReplaceImage(bool triggered)
@@ -583,6 +584,32 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 	lv->reset();
 	lv->setRootIndex( rootIdx );
 	lv->setCurrentIndex( lv->model()->index( 0, 0, rootIdx ) );
+}
+
+void TileEditorMainWindow::onActionDeleteTile( int tabId )
+{
+	QListView *lv = NULL;
+	switch( tabId )
+	{
+	case TAB_128: lv = m_ui->listView128; break;
+	case TAB_256: lv = m_ui->listView256; break;
+	}
+
+	QModelIndex idx = lv->currentIndex();
+	if( !idx.isValid() )
+	{
+		QMessageBox::information( this,
+									tr( "Deleting a tile" ),
+									tr( "You need to select a tile to delete is!" ) );
+		return;
+	}
+
+	int row = idx.row();
+
+	QModelIndex parent = idx.parent();
+	lv->model()->removeRow( row, parent );
+
+	//lv->reset();
 }
 
 TileModel* TileEditorMainWindow::createTileModel()

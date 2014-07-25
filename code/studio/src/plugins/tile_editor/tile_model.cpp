@@ -142,13 +142,23 @@ void TileModel::appendRow(Node *item)
 
 bool TileModel::removeRows( int row, int count, const QModelIndex &parent )
 {
-	int c = rootItem->childCount();
+	Node *parentNode = NULL;
+
+	if( !parent.isValid() )
+		parentNode = rootItem;
+	else
+		parentNode = getItem( parent );
+
+	if( parentNode == NULL )
+		return false;
+
+	int c = parentNode->childCount();
 	if( row + count > c )
 		return false;
 
-	beginRemoveRows( QModelIndex(), row, row + count - 1 );
+	beginRemoveRows( parent, row, row + count - 1 );
 
-	bool ok = rootItem->removeChildren( row, count );
+	bool ok = parentNode->removeChildren( row, count );
 	
 	endRemoveRows();
 

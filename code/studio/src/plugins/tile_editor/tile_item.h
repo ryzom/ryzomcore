@@ -43,7 +43,7 @@ public:
 	virtual QVariant data(int column, int role) const;
 
 	bool insertChildren(int position, int count, int columns);
-	bool removeChildren(int position, int count);
+	virtual bool removeChildren(int position, int count);
 	bool insertColumns(int position, int columns);
 
 	int row() const;
