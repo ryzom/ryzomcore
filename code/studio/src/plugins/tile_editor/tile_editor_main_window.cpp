@@ -527,9 +527,63 @@ void TileEditorMainWindow::onChooseTexturePath()
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
 {
+	int land = m_ui->landLW->currentRow();
+	if( land == -1 )
+	{
+		QMessageBox::information( this,
+									tr( "Adding new tile" ),
+									tr( "You need to have a land and a tileset selected before you can add tiles!" ) );
+		return;
+	}
+
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+	{
+		QMessageBox::information( this,
+									tr( "Adding new tiles" ),
+									tr( "You need to have a tileset selected before you can add tiles!" ) );
+		return;
+	}
+
+	int tileSet = idx.row();
+	
+	TileModel *model = static_cast< TileModel* >( m_tileModels[ land ] );
+	idx = model->index( tileSet, 0 );
+	if( !idx.isValid() )
+		return;
+
+	TileSetNode *tsn = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
+
+	int tabIdx = m_ui->tileViewTabWidget->currentIndex();
+	Node *n = tsn->child( tabIdx );
+
 	QFileDialog::Options options;
 	QString selectedFilter;
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", "." , "Images (*.png);;All Files (*.*)", &selectedFilter, options);
+
+	int c = n->childCount();
+
+	QStringListIterator itr( fileNames );
+	while( itr.hasNext() )
+	{
+		Node *newNode = TileModel::createItemNode( c, TileModel::TileDiffuse, itr.next() );
+		n->appendRow( newNode );
+		c++;
+	}
+
+	QModelIndex rootIdx = model->index( tabIdx, 0, m_ui->tileSetLV->currentIndex());
+
+	QListView *lv = NULL;
+
+	switch( tabIdx )
+	{
+	case TAB_128: lv = m_ui->listView128; break;
+	case TAB_256: lv = m_ui->listView256; break;
+	}
+
+	lv->reset();
+	lv->setRootIndex( rootIdx );
+	lv->setCurrentIndex( lv->model()->index( 0, 0, rootIdx ) );
 }
 
 TileModel* TileEditorMainWindow::createTileModel()

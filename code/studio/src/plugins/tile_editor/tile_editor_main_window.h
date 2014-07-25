@@ -42,7 +42,7 @@ public:
 
 	QUndoStack *getUndoStack() { return m_undoStack; }	
 
-public Q_SLOTS:
+private Q_SLOTS:
 	void onActionAddTile(bool triggered);
 	void onActionDeleteTile(bool triggered);
 	void onActionReplaceImage(bool triggered);
@@ -69,7 +69,6 @@ public Q_SLOTS:
 
 private:
 	void onActionAddTile(int tabId);
-
 	TileModel* createTileModel();
 
 	Ui::TileEditorMainWindow *m_ui;
@@ -88,6 +87,15 @@ private:
 	QList< TileModel* > m_tileModels;
 
 	QString m_texturePath;
+
+	enum Tabs
+	{
+		TAB_128 = 0,
+		TAB_256 = 1,
+		TAB_TRANSITION = 2,
+		TAB_DISPLACEMENT = 3,
+		TAB_DETAILS = 4
+	};
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H

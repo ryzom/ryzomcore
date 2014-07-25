@@ -203,6 +203,11 @@ TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 	return tileSet;
 }
 
+Node *TileModel::createItemNode( int id, TTileChannel channel, const QString &fileName )
+{
+	return new TileItemNode( id, channel, fileName );
+}
+
 const char *TileModel::getTileTypeName(TileModel::TNodeTileType type)
 {
 	switch(type)
