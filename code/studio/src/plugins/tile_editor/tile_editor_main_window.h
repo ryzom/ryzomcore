@@ -70,6 +70,9 @@ private Q_SLOTS:
 private:
 	void onActionAddTile(int tabId);
 	void onActionDeleteTile(int tabId);
+	void onActionDeleteImage(int tabId);
+
+
 	TileModel* createTileModel();
 	QListView* getListViewByTab( int tab ) const;
 

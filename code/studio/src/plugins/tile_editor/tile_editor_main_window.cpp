@@ -130,7 +130,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->actionAddTile, SIGNAL(triggered(bool)), this, SLOT(onActionAddTile(bool)));
 	connect(m_ui->actionDeleteTile, SIGNAL(triggered(bool)), this, SLOT(onActionDeleteTile(bool)));
 	connect(m_ui->actionReplaceImage, SIGNAL(triggered(bool)), this, SLOT(onActionReplaceImage(bool)));
-	connect(m_ui->actionDeleteImage, SIGNAL(triggered(bool)), this, SLOT(onActioneleteImage(bool)));
+	connect(m_ui->actionDeleteImage, SIGNAL(triggered(bool)), this, SLOT(onActionDeleteImage(bool)));
 
 	//connect(m_ui->tileViewTabWidget, SIGNAL(currentChanged(int)), m_tileItemDelegate, SLOT(currentTab(int)));
 
@@ -224,6 +224,7 @@ void TileEditorMainWindow::onActionReplaceImage(bool triggered)
 
 void TileEditorMainWindow::onActionDeleteImage(bool triggered)
 {
+	onActionDeleteImage(m_ui->tileViewTabWidget->currentIndex());
 }
 
 void TileEditorMainWindow::onTileSetAdd()
@@ -599,6 +600,23 @@ void TileEditorMainWindow::onActionDeleteTile( int tabId )
 	lv->model()->removeRow( row, parent );
 
 	//lv->reset();
+}
+
+void TileEditorMainWindow::onActionDeleteImage( int tabId )
+{
+	QListView *lv = getListViewByTab( tabId );
+	
+	QModelIndex idx = lv->currentIndex();
+	if( !idx.isValid() )
+	{
+		QMessageBox::information( this,
+									tr( "Deleting tile image" ),
+									tr( "No tile selected!" ) );
+		return;
+	}
+
+	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
+	n->setTileFilename( TileModel::TileDiffuse, "" );
 }
 
 TileModel* TileEditorMainWindow::createTileModel()
