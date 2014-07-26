@@ -224,7 +224,33 @@ TileModel::TNodeTileType TileTypeNode::getTileType()
 	return m_nodeTileType;
 }
 
+bool TileTypeNode::removeChildren( int position, int count )
+{
+	bool ok = Node::removeChildren( position, count );
+	if( !ok )
+		return false;
 
+	reindex();
+
+	return true;
+}
+
+void TileTypeNode::reindex()
+{
+	int i = 0;
+
+	QListIterator< Node* > itr( m_childItems );
+	while( itr.hasNext() )
+	{
+		TileItemNode *n = dynamic_cast< TileItemNode* >( itr.next() );
+		if( n == NULL )
+			continue;
+
+		n->setId( i );
+
+		i++;
+	}
+}
 
 
 ///////////////////////////////////////////////////

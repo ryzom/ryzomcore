@@ -90,7 +90,11 @@ public:
 	int columnCount() const;
 
 	TileModel::TNodeTileType getTileType();
+
+	bool removeChildren( int position, int count );
+
 private:
+	void reindex();
 	TileModel::TNodeTileType m_nodeTileType;
 };
 
@@ -102,6 +106,8 @@ public:
 	QVariant data(int column, int role) const;
 	int columnCount() const;
 	void setTileFilename(TileModel::TTileChannel channel, QString filename);
+	void setId( int id ){ m_tileId = id; }
+	int id() const{ return m_tileId; }
 private:
 	int m_tileId;
 	QMap<TileModel::TTileChannel, QString> m_tileFilename;
