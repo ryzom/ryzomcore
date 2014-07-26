@@ -71,6 +71,7 @@ private:
 	void onActionAddTile(int tabId);
 	void onActionDeleteTile(int tabId);
 	TileModel* createTileModel();
+	QListView* getListViewByTab( int tab ) const;
 
 	Ui::TileEditorMainWindow *m_ui;
 	QUndoStack *m_undoStack;

@@ -573,13 +573,7 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 	QModelIndex rootIdx = model->index( tabId, 0, m_ui->tileSetLV->currentIndex());
 
-	QListView *lv = NULL;
-
-	switch( tabId )
-	{
-	case TAB_128: lv = m_ui->listView128; break;
-	case TAB_256: lv = m_ui->listView256; break;
-	}
+	QListView *lv = getListViewByTab( tabId );
 
 	lv->reset();
 	lv->setRootIndex( rootIdx );
@@ -588,12 +582,7 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 void TileEditorMainWindow::onActionDeleteTile( int tabId )
 {
-	QListView *lv = NULL;
-	switch( tabId )
-	{
-	case TAB_128: lv = m_ui->listView128; break;
-	case TAB_256: lv = m_ui->listView256; break;
-	}
+	QListView *lv = getListViewByTab( tabId );
 
 	QModelIndex idx = lv->currentIndex();
 	if( !idx.isValid() )
@@ -671,3 +660,21 @@ void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, cons
 	//m_ui->listViewTransition->reset();
 	//m_ui->listViewDisplacement->reset();
 }
+
+
+QListView* TileEditorMainWindow::getListViewByTab( int tab ) const
+{
+	QListView *lv = NULL;
+
+	switch( tab )
+	{
+	case TAB_128: lv = m_ui->listView128; break;
+	case TAB_256: lv = m_ui->listView256; break;
+	case TAB_TRANSITION: lv = m_ui->listViewTransition; break;
+	case TAB_DISPLACEMENT: lv = m_ui->listViewDisplacement; break;
+	}
+
+	return lv;
+}
+
+
