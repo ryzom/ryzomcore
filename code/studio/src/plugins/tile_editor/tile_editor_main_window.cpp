@@ -220,6 +220,7 @@ void TileEditorMainWindow::onActionDeleteTile(bool triggered)
 
 void TileEditorMainWindow::onActionReplaceImage(bool triggered)
 {
+	onActionReplaceImage(m_ui->tileViewTabWidget->currentIndex());
 }
 
 void TileEditorMainWindow::onActionDeleteImage(bool triggered)
@@ -617,6 +618,30 @@ void TileEditorMainWindow::onActionDeleteImage( int tabId )
 
 	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
 	n->setTileFilename( TileModel::TileDiffuse, "" );
+}
+
+void TileEditorMainWindow::onActionReplaceImage( int tabId )
+{
+	QListView *lv = getListViewByTab( tabId );
+	
+	QModelIndex idx = lv->currentIndex();
+	if( !idx.isValid() )
+	{
+		QMessageBox::information( this,
+									tr( "Replacing tile image" ),
+									tr( "No tile selected!" ) );
+		return;
+	}
+
+	QString fileName = QFileDialog::getOpenFileName( this,
+														tr( "Select tile image" ),
+														"",
+														tr( "PNG files (*.png)" ) );
+	if( fileName.isEmpty() )
+		return;
+	
+	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
+	n->setTileFilename( TileModel::TileDiffuse, fileName );
 }
 
 TileModel* TileEditorMainWindow::createTileModel()

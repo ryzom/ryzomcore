@@ -71,6 +71,7 @@ private:
 	void onActionAddTile(int tabId);
 	void onActionDeleteTile(int tabId);
 	void onActionDeleteImage(int tabId);
+	void onActionReplaceImage(int tabId);
 
 
 	TileModel* createTileModel();
