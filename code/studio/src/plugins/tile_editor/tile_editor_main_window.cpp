@@ -32,6 +32,8 @@
 #include "tile_item.h"
 #include "tile_item_delegate.h"
 
+#include "tilebank_saver.h"
+
 TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	: QMainWindow(parent),
 	m_ui(new Ui::TileEditorMainWindow)
@@ -142,6 +144,14 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->actionZoom200, SIGNAL(triggered()), m_zoomSignalMapper, SLOT(map()));
 	m_zoomSignalMapper->setMapping(m_ui->actionZoom200, 2);
 	connect(m_zoomSignalMapper, SIGNAL(mapped(int)), this, SLOT(onZoomFactor(int)));
+
+	QAction *saveAction = Core::ICore::instance()->menuManager()->action( Core::Constants::SAVE );
+	saveAction->setEnabled( true );
+	QAction *saveAsAction = Core::ICore::instance()->menuManager()->action( Core::Constants::SAVE_AS );
+	saveAsAction->setEnabled( true );
+
+	connect( m_ui->actionSaveTileBank, SIGNAL( triggered() ), this, SLOT( save() ) );
+	connect( m_ui->actionSaveTileBankAs, SIGNAL( triggered() ), this, SLOT( saveAs() ) );
 }
 
 TileEditorMainWindow::~TileEditorMainWindow()
@@ -159,6 +169,45 @@ TileEditorMainWindow::~TileEditorMainWindow()
 
 	qDeleteAll( m_tileModels );
 	m_tileModels.clear();
+}
+
+void TileEditorMainWindow::save()
+{
+	saveAs();
+}
+
+void TileEditorMainWindow::saveAs()
+{
+	if( m_fileName.isEmpty() )
+	{
+		m_fileName = QFileDialog::getSaveFileName( this,
+													tr( "Save TileBank as..." ),
+													"",
+													tr( "TileBank files (*.tilebank)" ) );
+
+		if( m_fileName.isEmpty() )
+			return;
+
+	}
+
+	QList< QString > landNames;
+
+	int c = m_ui->landLW->count();
+	for( int i = 0; i < c; i++ )
+	{
+		QListWidgetItem *item = m_ui->landLW->item( i );
+		landNames.push_back( item->text() );
+	}
+
+	TileBankSaver saver;
+	bool ok = saver.save( m_fileName.toUtf8().constData(), m_tileModels, landNames );
+
+	if( !ok )
+	{
+		QMessageBox::critical( this,
+								tr( "Saving tilebank" ),
+								tr( "Failed to save tilebank :(" ) );
+	}
 }
 
 void TileEditorMainWindow::onZoomFactor(int level)

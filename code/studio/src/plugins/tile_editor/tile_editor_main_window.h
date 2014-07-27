@@ -42,6 +42,10 @@ public:
 
 	QUndoStack *getUndoStack() { return m_undoStack; }	
 
+public Q_SLOTS:
+	void save();
+	void saveAs();
+
 private Q_SLOTS:
 	void onActionAddTile(bool triggered);
 	void onActionDeleteTile(bool triggered);
@@ -102,6 +106,8 @@ private:
 		TAB_DISPLACEMENT = 3,
 		TAB_DETAILS = 4
 	};
+
+	QString m_fileName;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H

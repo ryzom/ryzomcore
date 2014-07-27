@@ -95,6 +95,16 @@ public:
 	{
 	}
 
+	void save()
+	{
+		m_tileEditorMainWindow->save();
+	}
+
+	void saveAs()
+	{
+		m_tileEditorMainWindow->saveAs();
+	}
+
 	virtual QWidget *widget()
 	{
 		return m_tileEditorMainWindow;
