@@ -689,6 +689,7 @@ void updateWeather()
 	#endif
 	
 	// Update new sky
+	s_SkyMode = NoSky;
 	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
 	{
 		if(Driver->getPolygonMode() == UDriver::Filled)
