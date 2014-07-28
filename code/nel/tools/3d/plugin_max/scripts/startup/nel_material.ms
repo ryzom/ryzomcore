@@ -595,7 +595,7 @@ plugin material NelMaterial
 					cpSelfIllumColor.visible = bUseSelfIllumColor
 				)
 				else
-				(					
+				(
 					bTwoSided = cbTwoSided.checked
 					cAmbient = cpAmbient.color
 					cDiffuse = cpDiffuse.color
@@ -606,6 +606,9 @@ plugin material NelMaterial
 					cSelfIllumColor = cpSelfIllumColor.color
 					pSelfIllumAmount = spSelfIllumAmount.value
 					bUseSelfIllumColor = cbUseSelfIllumColor.checked
+					
+					spSelfIllumAmount.visible = not cbUseSelfIllumColor.checked
+					cpSelfIllumColor.visible = cbUseSelfIllumColor.checked
 					
 					delegate.twoSided = bTwoSided
 					delegate.ambient = cAmbient
