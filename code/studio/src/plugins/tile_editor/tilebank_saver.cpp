@@ -28,7 +28,7 @@ TileBankSaver::~TileBankSaver()
 {
 }
 
-bool TileBankSaver::save( const char *fileName, const QList< TileModel* > &models, const QList< QString > &lands )
+bool TileBankSaver::save( const char *fileName, const TileModel* model, const QList< QString > &lands )
 {
 	NL3D::CTileBank bank;
 

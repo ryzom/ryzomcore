@@ -29,7 +29,7 @@ public:
 	TileBankSaver();
 	~TileBankSaver();
 
-	bool save( const char *filename, const QList< TileModel* > &models, const QList< QString > &lands );
+	bool save( const char *filename, const TileModel* model, const QList< QString > &lands );
 
 private:
 };

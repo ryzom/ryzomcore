@@ -34,6 +34,8 @@
 
 #include "tilebank_saver.h"
 
+#include "land_edit_dialog.h"
+
 TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	: QMainWindow(parent),
 	m_ui(new Ui::TileEditorMainWindow)
@@ -96,15 +98,18 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->landAddTB, SIGNAL(clicked()), this, SLOT(onLandAdd()));
 	connect(m_ui->landRemoveTB, SIGNAL(clicked()), this, SLOT(onLandRemove()));
 	connect(m_ui->landEditTB, SIGNAL(clicked()), this, SLOT(onLandEdit()));
-	connect(m_ui->landLW, SIGNAL(currentRowChanged(int)), this, SLOT(onLandRowChanged(int)));
 
 	connect(m_ui->chooseVegetPushButton, SIGNAL(clicked()), this, SLOT(onChooseVegetation()));
 	connect(m_ui->resetVegetPushButton, SIGNAL(clicked()), this, SLOT(onResetVegetation()));
 
 	connect(m_ui->tileBankTexturePathPB, SIGNAL(clicked()), this, SLOT(onChooseTexturePath()));
 
+	m_tileModel = createTileModel();
+	m_ui->tileSetLV->setModel( m_tileModel );
+
 	// 128x128 List View
 	//m_ui->listView128->setItemDelegate(m_tileItemDelegate);
+	m_ui->listView128->setModel( m_tileModel );
 	m_ui->listView128->addAction(m_ui->actionAddTile);
 	m_ui->listView128->addAction(m_ui->actionDeleteTile);
 	m_ui->listView128->addAction(m_ui->actionReplaceImage);
@@ -112,6 +117,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// 256x256 List View
 	//m_ui->listView256->setItemDelegate(m_tileItemDelegate);
+	m_ui->listView256->setModel( m_tileModel );
 	m_ui->listView256->addAction(m_ui->actionAddTile);
 	m_ui->listView256->addAction(m_ui->actionDeleteTile);
 	m_ui->listView256->addAction(m_ui->actionReplaceImage);
@@ -119,11 +125,13 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	// Transition List View
 	//m_ui->listViewTransition->setItemDelegate(m_tileItemDelegate);
+	m_ui->listViewTransition->setModel( m_tileModel );
 	m_ui->listViewTransition->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewTransition->addAction(m_ui->actionDeleteImage);
 
 	// Displacement List View
 	//m_ui->listViewDisplacement->setItemDelegate(m_tileItemDelegate);
+	m_ui->listViewDisplacement->setModel( m_tileModel );
 	m_ui->listViewDisplacement->addAction(m_ui->actionReplaceImage);
 	m_ui->listViewDisplacement->addAction(m_ui->actionDeleteImage);
 
@@ -135,6 +143,8 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->actionDeleteImage, SIGNAL(triggered(bool)), this, SLOT(onActionDeleteImage(bool)));
 
 	//connect(m_ui->tileViewTabWidget, SIGNAL(currentChanged(int)), m_tileItemDelegate, SLOT(currentTab(int)));
+	connect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
+		this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
 
 	// Connect the zoom buttons.
 	connect(m_ui->actionZoom50, SIGNAL(triggered()), m_zoomSignalMapper, SLOT(map()));
@@ -167,8 +177,8 @@ TileEditorMainWindow::~TileEditorMainWindow()
 	delete m_zoomActionGroup;
 	delete m_zoomSignalMapper;
 
-	qDeleteAll( m_tileModels );
-	m_tileModels.clear();
+	delete m_tileModel;
+	m_tileModel = NULL;
 }
 
 void TileEditorMainWindow::save()
@@ -200,7 +210,7 @@ void TileEditorMainWindow::saveAs()
 	}
 
 	TileBankSaver saver;
-	bool ok = saver.save( m_fileName.toUtf8().constData(), m_tileModels, landNames );
+	bool ok = saver.save( m_fileName.toUtf8().constData(), m_tileModel, landNames );
 
 	if( !ok )
 	{
@@ -279,14 +289,6 @@ void TileEditorMainWindow::onActionDeleteImage(bool triggered)
 
 void TileEditorMainWindow::onTileSetAdd()
 {
-	if( m_ui->landLW->count() == 0 )
-	{
-		QMessageBox::information( this,
-									tr( "Error adding tile set" ),
-									tr( "You need to add a land before adding a tileset!" ) );
-		return;
-	}
-
 	bool ok;
     QString text = QInputDialog::getText(this, tr("Add Tile Set"), tr("Enter Tile Set name:"), QLineEdit::Normal, "", &ok);
     if (ok && !text.isEmpty())
@@ -323,8 +325,12 @@ void TileEditorMainWindow::onTileSetDelete()
 	if( reply != QMessageBox::Yes )
 		return;
 
+	QString set = reinterpret_cast< TileSetNode* >( idx.internalPointer() )->getTileSetName();
+
 	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
 	bool ok = model->removeRow( idx.row() );
+
+	onTileSetRemoved( set );
 }
 
 void TileEditorMainWindow::onTileSetEdit()
@@ -357,8 +363,11 @@ void TileEditorMainWindow::onTileSetEdit()
 		return;
 	}
 
+	QString oldName = node->getTileSetName();
 	node->setTileSetName( newName );
 	m_ui->tileSetLV->reset();
+
+	onTileSetRenamed( oldName, newName );
 }
 
 void TileEditorMainWindow::onTileSetUp()
@@ -422,13 +431,10 @@ void TileEditorMainWindow::onLandAdd()
 	}
 
 	m_ui->landLW->addItem( name );
-
-	TileModel *m = createTileModel();
-
-	m_tileModels.push_back( m );
-
-	if( m_tileModels.count() == 1 )
-		m_ui->landLW->setCurrentRow( 0 );
+	
+	Land l;
+	l.name = name;
+	m_lands.push_back( l );
 }
 
 void TileEditorMainWindow::onLandRemove()
@@ -447,12 +453,10 @@ void TileEditorMainWindow::onLandRemove()
 	if( reply != QMessageBox::Yes )
 		return;
 
-	QList< TileModel* >::iterator itr = m_tileModels.begin() + idx;
-	delete m_tileModels[ idx ];
-	m_tileModels[ idx ] = NULL;
-	m_tileModels.erase( itr );
-
 	delete item;
+
+	QList< Land >::iterator itr = m_lands.begin() + idx;
+	m_lands.erase( itr );
 }
 
 void TileEditorMainWindow::onLandEdit()
@@ -461,58 +465,33 @@ void TileEditorMainWindow::onLandEdit()
 	if( item == NULL )
 		return;
 
-	QString name = item->text();
-
-	QString newName = QInputDialog::getText( this,
-												tr( "Editing land" ),
-												tr( "Please specify the new name of the selected land" ),
-												QLineEdit::Normal,
-												name );
-
-	if( newName.isEmpty() )
-		return;
-	if( newName == name )
-		return;
-	item->setText( newName );
-}
-
-void TileEditorMainWindow::onLandRowChanged( int row )
-{
-	m_ui->chooseVegetPushButton->setText( "..." );
-
-	if( row == -1 )
+	QStringList ts;
+	int c = m_tileModel->rowCount();
+	for( int i = 0; i < c; i++ )
 	{
-		disconnect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
-			this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
+		QModelIndex idx = m_tileModel->index( i, 0 );
+		if( !idx.isValid() )
+			continue;
 
-		m_ui->tileSetLV->setModel( NULL );
-		m_ui->listView128->setModel( NULL );
-		m_ui->listView256->setModel( NULL );
-		m_ui->listViewTransition->setModel( NULL );
-		m_ui->listViewDisplacement->setModel( NULL );
+		TileSetNode *n = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
+		ts.push_back( n->getTileSetName() );
 	}
-	else
-	{
-		//disconnect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
-		//	this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
+	
+	int r = m_ui->landLW->currentRow();
+	Land &l = m_lands[ r ];
 
-		m_ui->tileSetLV->setModel( m_tileModels[ row ] );
-		m_ui->listView128->setModel( m_tileModels[ row ] );
-		m_ui->listView256->setModel( m_tileModels[ row ] );
-		m_ui->listViewTransition->setModel( m_tileModels[ row ] );
-		m_ui->listViewDisplacement->setModel( m_tileModels[ row ] );
+	LandEditDialog d;
+	d.setTileSets( ts );
+	int result = d.exec();
 
-		connect( m_ui->tileSetLV->selectionModel(), SIGNAL( currentChanged( const QModelIndex &, const QModelIndex & ) ),
-			this, SLOT( changeActiveTileSet( const QModelIndex &, const QModelIndex & ) ) );
+	if( result != QDialog::Accepted )
+		return;
 
-		if( m_ui->tileSetLV->model()->rowCount() != 0 )
-		{
-			QModelIndex idx = m_ui->tileSetLV->model()->index( 0, 0 );
-			m_ui->tileSetLV->setCurrentIndex( idx );
-		}
-	}
-
-	m_ui->tileSetLV->reset();
+	// Update the tileset of the land
+	ts.clear();
+	d.getSelectedTileSets( ts );
+	l.tilesets.clear();
+	l.tilesets = ts;
 }
 
 void TileEditorMainWindow::onChooseVegetation()
@@ -579,15 +558,6 @@ void TileEditorMainWindow::onChooseTexturePath()
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
 {
-	int land = m_ui->landLW->currentRow();
-	if( land == -1 )
-	{
-		QMessageBox::information( this,
-									tr( "Adding new tile" ),
-									tr( "You need to have a land and a tileset selected before you can add tiles!" ) );
-		return;
-	}
-
 	QModelIndex idx = m_ui->tileSetLV->currentIndex();
 	if( !idx.isValid() )
 	{
@@ -599,8 +569,7 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 	int tileSet = idx.row();
 	
-	TileModel *model = static_cast< TileModel* >( m_tileModels[ land ] );
-	idx = model->index( tileSet, 0 );
+	idx = m_tileModel->index( tileSet, 0 );
 	if( !idx.isValid() )
 		return;
 
@@ -622,7 +591,7 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 		c++;
 	}
 
-	QModelIndex rootIdx = model->index( tabId, 0, m_ui->tileSetLV->currentIndex());
+	QModelIndex rootIdx = m_tileModel->index( tabId, 0, m_ui->tileSetLV->currentIndex());
 
 	QListView *lv = getListViewByTab( tabId );
 
@@ -691,6 +660,30 @@ void TileEditorMainWindow::onActionReplaceImage( int tabId )
 	
 	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
 	n->setTileFilename( TileModel::TileDiffuse, fileName );
+}
+
+void TileEditorMainWindow::onTileSetRemoved( const QString &set )
+{
+	int c = m_lands.count();
+	for( int i = 0; i < c; i++ )
+	{
+		Land &land = m_lands[ i ];
+		land.tilesets.removeAll( set );
+	}
+}
+
+void TileEditorMainWindow::onTileSetRenamed( const QString &oldname, const QString &newname )
+{
+	int c = m_lands.count();
+	for( int i = 0; i < c; i++ )
+	{
+		Land &land = m_lands[ i ];
+		int idx = land.tilesets.indexOf( oldname );
+		if( idx < 0 )
+			continue;
+
+		land.tilesets[ idx ] = newname;
+	}
 }
 
 TileModel* TileEditorMainWindow::createTileModel()

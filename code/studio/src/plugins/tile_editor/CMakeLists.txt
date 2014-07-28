@@ -11,10 +11,12 @@ SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.
 SET(OVQT_TILE_EDITOR_PLUGIN_HDR
 			tile_model.h
 			tile_editor_main_window.h
-			tile_editor_plugin.h)
+			tile_editor_plugin.h
+			land_edit_dialog.h)
 
 SET(OVQT_TILE_EDITOR_PLUGIN_UIS
-				tile_editor_main_window.ui)
+				tile_editor_main_window.ui
+				land_edit_dialog.ui)
 
 SET(OVQT_PLUG_TILE_EDITOR_RCS tile_editor.qrc)
 

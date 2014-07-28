@@ -61,7 +61,6 @@ private Q_SLOTS:
 	void onLandAdd();
 	void onLandRemove();
 	void onLandEdit();
-	void onLandRowChanged( int row );
 
 	void onResetVegetation();
 	void onChooseVegetation();
@@ -77,6 +76,8 @@ private:
 	void onActionDeleteImage(int tabId);
 	void onActionReplaceImage(int tabId);
 
+	void onTileSetRemoved( const QString &set );
+	void onTileSetRenamed( const QString &oldname, const QString &newname );
 
 	TileModel* createTileModel();
 	QListView* getListViewByTab( int tab ) const;
@@ -94,7 +95,7 @@ private:
 
 	TileItemDelegate *m_tileItemDelegate;
 
-	QList< TileModel* > m_tileModels;
+	TileModel *m_tileModel;
 
 	QString m_texturePath;
 
@@ -107,7 +108,14 @@ private:
 		TAB_DETAILS = 4
 	};
 
+	struct Land
+	{
+		QString name;
+		QStringList tilesets;
+	};
+
 	QString m_fileName;
+	QList< Land > m_lands;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H
