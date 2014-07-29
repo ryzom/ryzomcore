@@ -961,39 +961,42 @@ INode* CExportNel::getSkeletonRootBone (INode& node)
 						// Get a vertex interface
 						IPhyVertexExport *vertexInterface=localData->GetVertexInterface (vtx);
 
-						// Check if it is a rigid vertex or a blended vertex
-						int type=vertexInterface->GetVertexType ();
-						if (type==RIGID_TYPE)
+						if (vertexInterface)
 						{
-							// this is a rigid vertex
-							IPhyRigidVertex			*rigidInterface=(IPhyRigidVertex*)vertexInterface;
-
-							// Get the bone
-							INode *newBone=rigidInterface->GetNode();
-
-							// Get the root of the hierarchy
-							ret=getRoot (newBone);
-							found=true;
-							break;
-						}
-						else
-						{
-							// It must be a blendable vertex
-							nlassert (type==RIGID_BLENDED_TYPE);
-							IPhyBlendedRigidVertex	*blendedInterface=(IPhyBlendedRigidVertex*)vertexInterface;
-
-							// For each bones
-							uint bone;
-							uint count=(uint)blendedInterface->GetNumberNodes ();
-							for (bone=0; bone<count; bone++)
+							// Check if it is a rigid vertex or a blended vertex
+							int type=vertexInterface->GetVertexType ();
+							if (type==RIGID_TYPE)
 							{
-								// Get the bone pointer
-								INode *newBone=blendedInterface->GetNode(bone);
+								// this is a rigid vertex
+								IPhyRigidVertex			*rigidInterface=(IPhyRigidVertex*)vertexInterface;
+
+								// Get the bone
+								INode *newBone=rigidInterface->GetNode();
 
 								// Get the root of the hierarchy
 								ret=getRoot (newBone);
 								found=true;
 								break;
+							}
+							else
+							{
+								// It must be a blendable vertex
+								nlassert (type==RIGID_BLENDED_TYPE);
+								IPhyBlendedRigidVertex	*blendedInterface=(IPhyBlendedRigidVertex*)vertexInterface;
+
+								// For each bones
+								uint bone;
+								uint count=(uint)blendedInterface->GetNumberNodes ();
+								for (bone=0; bone<count; bone++)
+								{
+									// Get the bone pointer
+									INode *newBone=blendedInterface->GetNode(bone);
+
+									// Get the root of the hierarchy
+									ret=getRoot (newBone);
+									found=true;
+									break;
+								}
 							}
 						}
 
