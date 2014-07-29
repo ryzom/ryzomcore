@@ -508,13 +508,12 @@ std::string	CExportNel::getName (MtlBase& mtl)
 // --------------------------------------------------
 
 // Get the node name
-std::string	CExportNel::getName (INode& mtl)
+std::string	CExportNel::getName(INode& node)
 {
 	// Return its name
-	TCHAR* name=mtl.GetName();
-	return std::string (name);
+	MCHAR* name = node.GetName();
+	return std::string(name);
 }
-
 
 // --------------------------------------------------
 

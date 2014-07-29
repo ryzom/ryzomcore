@@ -363,7 +363,8 @@ void CExportNel::buildSkeleton (std::vector<CBoneBase>& bonesArray, INode& node,
 	bonesArray.push_back (bone);
 
 	// **** Call on child
-	for (int children=0; children<node.NumberOfChildren(); children++)
+	const int numChildren = node.NumberOfChildren();
+	for (int children=0; children<numChildren; children++)
 		buildSkeleton (bonesArray, *node.GetChildNode(children), mapBindPos, mapId, nameSet, time, ++idCount, id);
 }
 
