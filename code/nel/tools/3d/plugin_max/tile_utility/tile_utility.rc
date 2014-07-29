@@ -124,8 +124,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0, 9, 0, 0
- PRODUCTVERSION 0, 9, 0, 0
+ FILEVERSION 0, 9, 1, 0
+ PRODUCTVERSION 0, 9, 1, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -142,12 +142,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "Based on Kinetix 3D Studio Max 3.0 plugin sample\0"
             VALUE "CompanyName", "Ryzom Core\0"
-            VALUE "FileVersion", "0.9.0\0"
+            VALUE "FileVersion", "0.9.1\0"
             VALUE "InternalName", "Tile_utility\0"
             VALUE "LegalCopyright", "\0"
             VALUE "OriginalFilename", "Tile_utility.dlu\0"
             VALUE "ProductName", "Ryzom Core\0"
-            VALUE "ProductVersion", "0.9.0\0"
+            VALUE "ProductVersion", "0.9.1\0"
             VALUE "FileDescription", "Create material for tiles\0"
             VALUE "Comments", "TECH: \0"
             VALUE "LegalTrademarks", "\0"
