@@ -18,61 +18,14 @@
 #include "export_nel.h"
 #include "export_appdata.h"
 #include "nel/3d/skeleton_shape.h"
+#include "iskin.h"
 
 using namespace NLMISC;
 using namespace NL3D;
 
 // ***************************************************************************
 
-#define SKIN_INTERFACE 0x00010000
-
-// ***************************************************************************
-
-#define SKIN_CLASS_ID Class_ID(9815843,87654)
 #define PHYSIQUE_CLASS_ID Class_ID(PHYSIQUE_CLASS_ID_A, PHYSIQUE_CLASS_ID_B)
-
-// ***************************************************************************
-
-class ISkinContextData
-{
-public:
-	virtual int GetNumPoints()=0;
-	virtual int GetNumAssignedBones(int vertexIdx)=0;
-	virtual int GetAssignedBone(int vertexIdx, int boneIdx)=0;
-	virtual float GetBoneWeight(int vertexIdx, int boneIdx)=0;
-	
-	virtual int GetSubCurveIndex(int vertexIdx, int boneIdx)=0;
-	virtual int GetSubSegmentIndex(int vertexIdx, int boneIdx)=0;
-	virtual float GetSubSegmentDistance(int vertexIdx, int boneIdx)=0;
-	virtual Point3 GetTangent(int vertexIdx, int boneIdx)=0;
-	virtual Point3 GetOPoint(int vertexIdx, int boneIdx)=0;
-
-	virtual void SetWeight(int vertexIdx, int boneIdx, float weight)=0;
-	virtual void SetWeight(int vertexIdx, INode* bone, float weight)=0;
-	virtual void SetWeights(int vertexIdx, Tab<int> boneIdx, Tab<float> weights)=0;
-	virtual void SetWeights(int vertexIdx, INodeTab boneIdx, Tab<float> weights)=0;
-
-};
-
-// ***************************************************************************
-
-class ISkin 
-{
-public:
-	ISkin() {}
-	~ISkin() {}
-	virtual int GetBoneInitTM(INode *pNode, Matrix3 &InitTM, bool bObjOffset = false)=0;
-	virtual int GetSkinInitTM(INode *pNode, Matrix3 &InitTM, bool bObjOffset = false)=0;
-	virtual int GetNumBones()=0;
-	virtual INode *GetBone(int idx)=0;
-	virtual DWORD GetBoneProperty(int idx)=0;
-	virtual ISkinContextData *GetContextInterface(INode *pNode)=0;
-
-	virtual BOOL AddBone(INode *bone)=0;
-	virtual BOOL AddBones(INodeTab *bones)=0;
-	virtual BOOL RemoveBone(INode *bone)=0;
-	virtual void Invalidate()=0;
-};
 
 // ***************************************************************************
 
@@ -422,7 +375,7 @@ bool CExportNel::isSkin (INode& node)
 	bool ok=false;
 
 	// Get the skin modifier
-	Modifier* skin=getModifier (&node, SKIN_CLASS_ID);
+	Modifier* skin=getModifier (&node, SKIN_CLASSID);
 
 	// Found it ?
 	if (skin)
@@ -431,7 +384,7 @@ bool CExportNel::isSkin (INode& node)
 		//if (skin->IsEnabled())
 		{
 			// Get a com_skin2 interface
-			ISkin *comSkinInterface=(ISkin*)skin->GetInterface (SKIN_INTERFACE);
+			ISkin *comSkinInterface=(ISkin*)skin->GetInterface (I_SKIN);
 
 			// Found com_skin2 ?
 			if (comSkinInterface)
@@ -446,7 +399,7 @@ bool CExportNel::isSkin (INode& node)
 					ok=true;
 
 					// Release the interface
-					skin->ReleaseInterface (SKIN_INTERFACE, comSkinInterface);
+					skin->ReleaseInterface (I_SKIN, comSkinInterface);
 				}
 			}
 		}
@@ -490,7 +443,7 @@ uint CExportNel::buildSkinning (CMesh::CMeshBuild& buildMesh, const TInodePtrInt
 	uint ok=NoError;
 
 	// Get the skin modifier
-	Modifier* skin=getModifier (&node, SKIN_CLASS_ID);
+	Modifier* skin=getModifier (&node, SKIN_CLASSID);
 
 	// Build a the name array
 	buildMesh.BonesNames.resize (skeletonShape.size());
@@ -513,7 +466,7 @@ uint CExportNel::buildSkinning (CMesh::CMeshBuild& buildMesh, const TInodePtrInt
 		// **********    COMSKIN EXPORT    **********
 
 		// Get a com_skin2 interface
-		ISkin *comSkinInterface=(ISkin*)skin->GetInterface (SKIN_INTERFACE);
+		ISkin *comSkinInterface=(ISkin*)skin->GetInterface (I_SKIN);
 
 		// Should been controled with isSkin before.
 		nlassert (comSkinInterface);
@@ -645,7 +598,7 @@ uint CExportNel::buildSkinning (CMesh::CMeshBuild& buildMesh, const TInodePtrInt
 		}
 
 		// Release the interface
-		skin->ReleaseInterface (SKIN_INTERFACE, comSkinInterface);
+		skin->ReleaseInterface (I_SKIN, comSkinInterface);
 	}
 	else
 	{
@@ -881,13 +834,13 @@ INode* CExportNel::getSkeletonRootBone (INode& node)
 	INode* ret=NULL;
 
 	// Get the skin modifier
-	Modifier* skin=getModifier (&node, SKIN_CLASS_ID);
+	Modifier* skin=getModifier (&node, SKIN_CLASSID);
 
 	// Found it ?
 	if (skin)
 	{
 		// Get a com_skin2 interface
-		ISkin *comSkinInterface=(ISkin*)skin->GetInterface (SKIN_INTERFACE);
+		ISkin *comSkinInterface=(ISkin*)skin->GetInterface (I_SKIN);
 
 		// Found com_skin2 ?
 		if (comSkinInterface)
@@ -921,7 +874,7 @@ INode* CExportNel::getSkeletonRootBone (INode& node)
 			}
 
 			// Release the interface
-			skin->ReleaseInterface (SKIN_INTERFACE, comSkinInterface);
+			skin->ReleaseInterface (I_SKIN, comSkinInterface);
 		}
 	}
 	else
@@ -1037,13 +990,13 @@ void CExportNel::addSkeletonBindPos (INode& skinedNode, mapBoneBindPos& boneBind
 	uint ok=NoError;
 
 	// Get the skin modifier
-	Modifier* skin=getModifier (&skinedNode, SKIN_CLASS_ID);
+	Modifier* skin=getModifier (&skinedNode, SKIN_CLASSID);
 
 	// Found it ?
 	if (skin)
 	{
 		// Get a com_skin2 interface
-		ISkin *comSkinInterface=(ISkin*)skin->GetInterface (SKIN_INTERFACE);
+		ISkin *comSkinInterface=(ISkin*)skin->GetInterface (I_SKIN);
 
 		// Should been controled with isSkin before.
 		nlassert (comSkinInterface);
@@ -1089,7 +1042,7 @@ void CExportNel::addSkeletonBindPos (INode& skinedNode, mapBoneBindPos& boneBind
 			}
 
 			// Release the interface
-			skin->ReleaseInterface (SKIN_INTERFACE, comSkinInterface);
+			skin->ReleaseInterface (I_SKIN, comSkinInterface);
 		}
 	}
 	else
@@ -1274,7 +1227,7 @@ void CExportNel::addSkeletonBindPos (INode& skinedNode, mapBoneBindPos& boneBind
 				}
 
 				// Release the interface
-				skin->ReleaseInterface (SKIN_INTERFACE, physiqueInterface);
+				skin->ReleaseInterface (I_SKIN, physiqueInterface);
 			}
 		}
 	}
@@ -1286,7 +1239,7 @@ void CExportNel::addSkeletonBindPos (INode& skinedNode, mapBoneBindPos& boneBind
 void CExportNel::enableSkinModifier (INode& node, bool enable)
 {
 	// Get the skin modifier
-	Modifier* skin=getModifier (&node, SKIN_CLASS_ID);
+	Modifier* skin=getModifier (&node, SKIN_CLASSID);
 
 	// Found it ?
 	if (skin)
