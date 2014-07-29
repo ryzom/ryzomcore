@@ -598,7 +598,11 @@ bool CObjectViewer::initUI (HWND parent)
 
 	// initialize NeL context if needed
 	if (!NLMISC::INelContext::isContextInitialised())
-		new NLMISC::CApplicationContext;
+	{
+		new NLMISC::CApplicationContext();
+		nldebug("NeL Object Viewer: initUI");
+		NLMISC::CSheetId::initWithoutSheet();
+	}
 
 	// The fonts manager
 	_FontManager.setMaxMemory(2000000);

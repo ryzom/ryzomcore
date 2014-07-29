@@ -1,6 +1,7 @@
 #include "vertex_tree_paint.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 #include <maxversion.h>
+#include "nel/misc/sheet_id.h"
 
 HINSTANCE hInstance;
 
@@ -12,6 +13,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 	{
 		new NLMISC::CLibraryContext(GetSharedNelContext());
 		nldebug("NeL Vertex Tree Paint: DllMain");
+		NLMISC::CSheetId::initWithoutSheet();
 	}
 
 	hInstance = hinstDLL;				// Hang on to this DLL's instance handle.

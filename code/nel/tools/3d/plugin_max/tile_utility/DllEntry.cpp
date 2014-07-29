@@ -21,6 +21,7 @@
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 #include <vector>
 #include <maxversion.h>
+#include "nel/misc/sheet_id.h"
 
 extern ClassDesc2* GetTile_utilityDesc();
 extern ClassDesc* GetRGBAddDesc();
@@ -41,6 +42,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 	{
 		new NLMISC::CLibraryContext(GetSharedNelContext());
 		nldebug("NeL Tile Utility: DllMain");
+		NLMISC::CSheetId::initWithoutSheet();
 	}
 			
 	hInstance = hinstDLL;				// Hang on to this DLL's instance handle.
