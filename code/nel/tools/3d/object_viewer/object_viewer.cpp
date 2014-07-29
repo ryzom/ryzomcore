@@ -676,9 +676,12 @@ bool CObjectViewer::initUI (HWND parent)
 	view->MainFrame = _MainFrame;
 
 	_MainFrame->ShowWindow (SW_SHOW);
+
+	RECT viewportRect;
+	GetClientRect(view->m_hWnd, &viewportRect);
 	
 	// Init NELU
-	if (!CNELU::init (640, 480, viewport, 32, true, view->m_hWnd, false, _Direct3d))
+	if (!CNELU::init (viewportRect.right, viewportRect.bottom, viewport, 32, true, view->m_hWnd, false, _Direct3d))
 	{
 		return false;
 	}	
