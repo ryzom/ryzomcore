@@ -69,6 +69,8 @@ private Q_SLOTS:
 
 	void onChooseTexturePath();
 
+	void onOrientedStateChanged( int state );
+
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 

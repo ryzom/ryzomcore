@@ -187,6 +187,8 @@ public:
 			addTilesToSet( set, n );
 			setupTransitionTiles( set, n );
 			setupDisplacementTiles( set, n );
+
+			set->setOriented( n->isOriented() );
 		}
 
 		// Add tilesets to lands

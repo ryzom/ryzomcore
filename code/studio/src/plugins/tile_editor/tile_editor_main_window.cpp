@@ -162,6 +162,8 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 
 	connect( m_ui->actionSaveTileBank, SIGNAL( triggered() ), this, SLOT( save() ) );
 	connect( m_ui->actionSaveTileBankAs, SIGNAL( triggered() ), this, SLOT( saveAs() ) );
+
+	connect( m_ui->orientedCheckBox, SIGNAL( stateChanged( int ) ), this, SLOT( onOrientedStateChanged( int ) ) );
 }
 
 TileEditorMainWindow::~TileEditorMainWindow()
@@ -554,6 +556,20 @@ void TileEditorMainWindow::onChooseTexturePath()
 
 	m_texturePath = path;
 	m_ui->tileBankTexturePathPB->setText( path );
+}
+
+void TileEditorMainWindow::onOrientedStateChanged( int state )
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+		return;
+
+	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
+	
+	if( state == Qt::Checked )
+		node->setOriented( true );
+	else
+		node->setOriented( false );
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)

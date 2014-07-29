@@ -75,9 +75,13 @@ public:
 	void setVegetSet( const QString &s ){ m_vegetSet = s; }
 	QString vegetSet() const{ return m_vegetSet; }
 
+	bool isOriented() const{ return m_oriented; }
+	void setOriented( bool b ){ m_oriented = b; }
+
 private:
 	QString m_tileSetName;
 	QString m_vegetSet;
+	bool m_oriented;
 };
 
 class TileTypeNode : public Node
