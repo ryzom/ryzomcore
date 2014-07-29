@@ -106,6 +106,7 @@ public:
 	QVariant data(int column, int role) const;
 	int columnCount() const;
 	void setTileFilename(TileModel::TTileChannel channel, QString filename);
+	QString getTileFilename(TileModel::TTileChannel channel);
 	void setId( int id ){ m_tileId = id; }
 	int id() const{ return m_tileId; }
 private:

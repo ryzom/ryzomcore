@@ -272,6 +272,16 @@ void TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString file
 	m_tileFilename[channel] = filename;
 }
 
+QString TileItemNode::getTileFilename(TileModel::TTileChannel channel)
+{
+	QMap< TileModel::TTileChannel, QString >::const_iterator itr
+		= m_tileFilename.find( channel );
+	if( itr == m_tileFilename.end() )
+		return "";
+
+	return itr.value();
+}
+
 QVariant TileItemNode::data(int column, int role) const
 {	
 	// find some way to know which file/bitmap to display

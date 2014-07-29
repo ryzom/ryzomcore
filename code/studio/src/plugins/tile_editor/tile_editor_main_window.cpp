@@ -210,7 +210,7 @@ void TileEditorMainWindow::saveAs()
 	}
 
 	TileBankSaver saver;
-	bool ok = saver.save( m_fileName.toUtf8().constData(), m_tileModel, landNames );
+	bool ok = saver.save( m_fileName.toUtf8().constData(), m_tileModel, m_lands );
 
 	if( !ok )
 	{

@@ -25,6 +25,8 @@
 #include <QtGui/QUndoStack>
 #include <QSignalMapper>
 
+#include "land.h"
+
 namespace Ui {
     class TileEditorMainWindow;
 }
@@ -106,12 +108,6 @@ private:
 		TAB_TRANSITION = 2,
 		TAB_DISPLACEMENT = 3,
 		TAB_DETAILS = 4
-	};
-
-	struct Land
-	{
-		QString name;
-		QStringList tilesets;
 	};
 
 	QString m_fileName;
