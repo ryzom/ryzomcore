@@ -999,6 +999,10 @@ INode* CExportNel::getSkeletonRootBone (INode& node)
 								}
 							}
 						}
+						else
+						{
+							nlwarning("Physique vertex interface NULL");
+						}
 
 						// Release vertex interfaces
 						localData->ReleaseVertexInterface (vertexInterface);
