@@ -200,23 +200,28 @@ TileEditorMainWindow::~TileEditorMainWindow()
 
 void TileEditorMainWindow::save()
 {
-	saveAs();
+	if( m_fileName.isEmpty() )
+		saveAs();
+	else
+		saveAs( m_fileName );
 }
 
 void TileEditorMainWindow::saveAs()
 {
-	if( m_fileName.isEmpty() )
-	{
-		m_fileName = QFileDialog::getSaveFileName( this,
+	QString fn = QFileDialog::getSaveFileName( this,
 													tr( "Save TileBank as..." ),
 													"",
 													tr( "TileBank files (*.tilebank)" ) );
 
-		if( m_fileName.isEmpty() )
-			return;
+	if( fn.isEmpty() )
+		return;
 
-	}
+	saveAs( fn );
 
+}
+
+void TileEditorMainWindow::saveAs( const QString &fn )
+{
 	QList< QString > landNames;
 
 	int c = m_ui->landLW->count();
@@ -227,7 +232,7 @@ void TileEditorMainWindow::saveAs()
 	}
 
 	TileBankSaver saver;
-	bool ok = saver.save( m_fileName.toUtf8().constData(), m_tileModel, m_lands );
+	bool ok = saver.save( fn.toUtf8().constData(), m_tileModel, m_lands );
 
 	if( !ok )
 	{

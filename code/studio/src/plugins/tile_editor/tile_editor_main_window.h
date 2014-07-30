@@ -47,6 +47,7 @@ public:
 public Q_SLOTS:
 	void save();
 	void saveAs();
+	void saveAs( const QString &fn );
 	void open();
 
 private Q_SLOTS:
